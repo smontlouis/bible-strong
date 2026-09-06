@@ -15,7 +15,6 @@ import { useComputedPlanItems } from '~features/plans/plan.hooks'
 import { NewTab, TabItem, tabTypes } from '../../../../state/tabs'
 import NewTabItem from './NewTabItem'
 import { SelectBibleReferenceModalProvider } from './SelectBibleReferenceModalProvider'
-
 export interface NewTabScreenProps {
   newAtom: PrimitiveAtom<NewTab>
 }
@@ -31,7 +30,7 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
       <Container>
         <Header title={t('tabs.new')} />
         <ScrollView backgroundColor="lightGrey">
-          <Box px={20} pt={20} pb={40} gap={12}>
+          <Box className="overflow-hidden border-continuous px-[20px] pt-[20px] pb-[40px] gap-[12px]">
             {tabTypes.map(type => (
               <NewTabItem
                 key={type}
@@ -45,7 +44,7 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
         <Sheet ref={planSelectorRef} snapPoints={[1]} header={<SheetHeader title={t('Plans')} />}>
           <SheetScrollView>
             {plans.length ? (
-              <Box px={20} py={20}>
+              <Box className="overflow-hidden border-continuous px-[20px] py-[20px]">
                 {plans.map((plan, index) => (
                   <React.Fragment key={plan.id}>
                     <PlanItem

@@ -1,7 +1,9 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-
 import FiltersHeader, { type FiltersHeaderItem } from '../FiltersHeader'
+jest.mock('~themes/ThemeProvider', () => ({
+  useTheme: () => jest.requireActual('../../../test/themeFixture').themeFixture,
+}))
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -161,7 +163,9 @@ describe('FiltersHeader', () => {
           node.props.size === 20
       ).props.color
     ).toBe('primary')
-    expect(renderer.root.findByProps({ children: 'order' }).props.color).toBe('primary')
+    expect(renderer.root.findByProps({ children: 'order' }).props.className).toContain(
+      'text-primary'
+    )
 
     expect(
       renderer.root.find(
@@ -169,7 +173,9 @@ describe('FiltersHeader', () => {
           String(node.type) === 'FeatherIcon' && node.props.name === 'tag' && node.props.size === 20
       ).props.color
     ).toBe('tertiary')
-    expect(renderer.root.findByProps({ children: 'tags' }).props.color).toBeUndefined()
+    expect(renderer.root.findByProps({ children: 'tags' }).props.className).toContain(
+      'text-default'
+    )
   })
 
   it('uses the same active state to expose and run reset', () => {

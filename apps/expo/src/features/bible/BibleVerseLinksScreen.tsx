@@ -3,7 +3,6 @@ import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useLocalSearchParams } from 'expo-router'
 import { useAtom, useSetAtom } from 'jotai/react'
-
 import BibleLinkItem from './BibleLinkItem'
 import BibleLinksSettingsModal from './BibleLinksSettingsModal'
 import Box from '~common/ui/Box'
@@ -11,7 +10,6 @@ import FlatList from '~common/ui/FlatList'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Header from '~common/Header'
 import Empty from '~common/Empty'
-
 import FiltersHeader from '~common/FiltersHeader'
 import { useSheet } from '~helpers/useSheet'
 import { unifiedTagsModalAtom } from '~state/app'
@@ -39,7 +37,6 @@ import {
   shouldClearPersistedReferenceFilter,
 } from '~state/entityListFilters'
 import { linkTypeConfig } from '~helpers/fetchOpenGraphData'
-
 type TLink = {
   linkId: string
   reference: string
@@ -239,7 +236,7 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         {verse ? (
           <Header hasBackButton={hasBackButton} title={title || t('Chargement...')} />
         ) : (

@@ -1,7 +1,7 @@
 import { loadWebFonts } from '~helpers/loadWebFonts'
 import { webFontFamily } from '~helpers/webFontFamily'
 import { appLogger } from '~helpers/agentObservability'
-import { ThemeProvider } from '@emotion/react'
+import { ThemeProvider } from '~themes/ThemeProvider'
 import * as Sentry from '@sentry/react-native'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { setAutoFreeze } from 'immer'
@@ -11,7 +11,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { Provider as ReduxProvider, useSelector } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
-
 import ErrorBoundary from '~common/ErrorBoundary'
 import FullAppRuntime from '~features/app/FullAppRuntime'
 import { ResourceAccessProvider } from '~features/resources/resourceAccess'
@@ -22,7 +21,6 @@ import type { RootState } from '~redux/modules/reducer'
 import { persistor, startPersistence, store } from '~redux/store'
 import getTheme, { baseTheme } from '~themes/index'
 import { setI18n } from '../../../i18n'
-
 setAutoFreeze(false)
 
 const Loading = () => (

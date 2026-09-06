@@ -1,21 +1,24 @@
-import styled from '@emotion/native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Alert } from 'react-native'
-import { useTheme } from '@emotion/react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
 import {
-  SheetFooter,
   Sheet,
+  SheetFooter,
   SheetHeader,
   SheetTextInput,
-  type SheetRef,
   SheetView,
+  type SheetRef,
 } from '~common/sheet'
 import { deleteCurrentAuthUser, getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme } from '~themes/ThemeProvider'
 
 import Box, { VStack } from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import Button from '~common/ui/Button'
+import Text from '~common/ui/Text'
 import FireAuth from '~helpers/FireAuth'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 
@@ -71,13 +74,22 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
       onDismiss={resetForm}
       header={<SheetHeader title={t('app.deleteAccount')} />}
       footer={props => (
-        <SheetFooter gap={10} justifyContent="flex-end" row {...props}>
-          <Box h={MODAL_FOOTER_HEIGHT}>
+        <SheetFooter
+          {...props}
+          className={twMerge('gap-[10px] justify-end flex-row', props.className)}
+        >
+          <Box
+            className="overflow-hidden border-continuous"
+            style={{ height: MODAL_FOOTER_HEIGHT }}
+          >
             <Button reverse onPress={handleClose} disabled={isLoading}>
               {t('Annuler')}
             </Button>
           </Box>
-          <Box h={MODAL_FOOTER_HEIGHT}>
+          <Box
+            className="overflow-hidden border-continuous"
+            style={{ height: MODAL_FOOTER_HEIGHT }}
+          >
             <Button
               color={theme.colors.quart}
               onPress={handleDelete}
@@ -94,9 +106,9 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
       )}
     >
       <SheetView>
-        <VStack gap={15} paddingHorizontal={20} py={20}>
-          <Text fontSize={15}>{t('app.deleteAccountBody')}</Text>
-          <Text fontSize={14} color="grey">
+        <VStack className="overflow-hidden border-continuous gap-[15px] px-[20px] py-[20px]">
+          <Text className="text-[15px]">{t('app.deleteAccountBody')}</Text>
+          <Text className="text-[14px] text-grey">
             {t('app.deleteAccountTypeConfirm', { text: confirmationText })}
           </Text>
           <StyledInput
@@ -113,13 +125,23 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
   )
 }
 
-const StyledInput = styled(SheetTextInput)(({ theme }) => ({
-  backgroundColor: theme.colors.lightGrey,
-  borderRadius: 10,
-  paddingHorizontal: 15,
-  paddingVertical: 14,
-  fontSize: 16,
-  color: theme.colors.default,
-}))
+const StyledInput = (
+  componentProps: Omit<UIComponentProps<typeof SheetTextInput>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('bg-light-grey rounded-[10px] px-[15px] py-[14px] text-[16px] text-default', className)
+  )
+  return (
+    <SheetTextInput
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof SheetTextInput>['style']}
+    />
+  )
+}
 
 export default DeleteAccountModal

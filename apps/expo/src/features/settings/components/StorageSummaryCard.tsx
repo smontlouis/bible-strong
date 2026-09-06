@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import * as FileSystem from 'expo-file-system/legacy'
 import { useTranslation } from 'react-i18next'
-
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -9,7 +8,6 @@ import { localQueryOptions } from '~helpers/queryOptions'
 import { MOBILE_RESOURCE_CATALOG } from '~helpers/mobileResourceCatalog'
 import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 import { getOfflineCopyCatalogId } from '~helpers/offlineCopyId'
-
 const formatBytes = (
   bytes: number,
   t: (key: string, opts?: Record<string, unknown>) => string
@@ -52,38 +50,31 @@ const StorageSummaryCard = () => {
   const otherUsedRatio = totalBytes > 0 ? Math.min(otherUsedBytes / totalBytes, 1) : 0
 
   return (
-    <Box
-      mx={16}
-      mt={16}
-      mb={16}
-      p={16}
-      borderRadius={16}
-      borderWidth={1}
-      borderColor="border"
-      bg="lightGrey"
-      row
-      alignItems="center"
-      gap={14}
-    >
-      <Box size={44} borderRadius={12} bg="lightPrimary" center>
+    <Box className="border-continuous overflow-hidden mx-[16px] mt-[16px] mb-[16px] p-[16px] rounded-[16px] border-[1px] border-border bg-light-grey flex-row items-center gap-[14px]">
+      <Box
+        className="overflow-hidden border-continuous rounded-[12px] bg-light-primary items-center justify-center"
+        style={{ width: 44, height: 44 }}
+      >
         <FeatherIcon name="hard-drive" size={21} color="primary" />
       </Box>
-      <Box flex>
-        <Text fontSize={15} bold color="default">
+      <Box className="overflow-hidden border-continuous flex-[1]">
+        <Text className="text-[15px] font-bold text-default">
           {t('downloads.offlineResourcesSize', { size: formatBytes(usedBytes, t) })}
         </Text>
-        <Text fontSize={12} color="tertiary" mt={2}>
+        <Text className="text-[12px] text-tertiary mt-[2px]">
           {t('downloads.storageFree', {
             free: formatBytes(deviceStorage.freeBytes, t),
             total: formatBytes(totalBytes, t),
           })}
         </Text>
-        <Box mt={10} height={6} borderRadius={3} bg="reverse" overflow="hidden" row>
-          <Box height={6} bg="tertiary" opacity={0.45} width={`${otherUsedRatio * 100}%`} />
+        <Box className="border-continuous overflow-visible mt-[10px] h-[6px] rounded-[3px] bg-reverse flex-row">
           <Box
-            height={6}
-            bg="primary"
-            width={`${Math.max(offlineRatio * 100, usedBytes > 0 ? 0.75 : 0)}%`}
+            className="overflow-hidden border-continuous h-[6px] bg-tertiary opacity-[0.45]"
+            style={{ width: `${otherUsedRatio * 100}%` }}
+          />
+          <Box
+            className="overflow-hidden border-continuous h-[6px] bg-primary"
+            style={{ width: `${Math.max(offlineRatio * 100, usedBytes > 0 ? 0.75 : 0)}%` }}
           />
         </Box>
       </Box>

@@ -1,11 +1,17 @@
-import PageContent from '~common/ui/PageContent'
-import styled from '@emotion/native'
-import { useAtom } from 'jotai/react'
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme, useTheme as useAppTheme } from '~themes/ThemeProvider'
 import type { JSONValue } from 'expo/build/dom/dom.types'
+import { useAtom } from 'jotai/react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useState } from 'react'
 import { TouchableOpacity, type TouchableOpacityProps } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import PageContent from '~common/ui/PageContent'
+import type { Theme as AppTheme } from '~themes'
 
 import { useTranslation } from 'react-i18next'
+import { FadeInDown, FadeOutDown } from 'react-native-reanimated'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
 import BackgroundIcon from '~assets/images/BackgroundIcon'
 import ColorIcon from '~assets/images/ColorIcon'
@@ -18,7 +24,6 @@ import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { recentColorsAtom } from './atom'
-import { FadeInDown, FadeOutDown } from 'react-native-reanimated'
 
 type DispatchToWebView = (type: string, payload?: JSONValue) => void
 
@@ -50,19 +55,21 @@ const StudyFooterPopover = ({
   width: number
 }) => (
   <AnimatedBox
-    position="absolute"
-    bottom={bottom}
-    left={left}
-    right={right}
-    width={width}
-    bg="reverse"
-    borderRadius={12}
-    borderWidth={1}
-    borderColor="border"
-    overflow="hidden"
-    lightShadow
+    className="border-continuous overflow-visible absolute bg-reverse rounded-[12px] border-[1px] border-border"
     entering={FadeInDown}
     exiting={FadeOutDown}
+    style={{
+      width: width,
+      bottom: bottom,
+      left: left,
+      right: right,
+      shadowColor: 'rgb(89,131,240)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 7,
+      elevation: 1,
+      overflow: 'visible',
+    }}
   >
     {children}
   </AnimatedBox>
@@ -78,16 +85,25 @@ const PopoverItem = ({
   label: string
   color?: string
   onPress: () => void
-}) => (
-  <TouchableBox row alignItems="center" px={14} py={10} onPress={onPress}>
-    <Box width={20} center>
-      <FeatherIcon name={icon} size={16} color={color} />
-    </Box>
-    <Text marginLeft={10} color={color} fontSize={14}>
-      {label}
-    </Text>
-  </TouchableBox>
-)
+}) => {
+  const stylingTheme = useStylingTheme()
+  return (
+    <TouchableBox
+      className="overflow-hidden border-continuous flex-row items-center px-[14px] py-[10px]"
+      onPress={onPress}
+    >
+      <Box className="overflow-hidden border-continuous w-[20px] items-center justify-center">
+        <FeatherIcon name={icon} size={16} color={color} />
+      </Box>
+      <Text
+        className="ml-[10px] text-[14px]"
+        style={{ color: resolveThemeColor(stylingTheme, color) || stylingTheme.colors.default }}
+      >
+        {label}
+      </Text>
+    </TouchableBox>
+  )
+}
 
 const SelectHeading = ({
   dispatchToWebView,
@@ -123,20 +139,14 @@ const SelectHeading = ({
   }
 
   return (
-    <Box position="relative" overflow="visible" zIndex={isOpen ? 20 : 0}>
-      <TouchableBox onPress={onToggle}>
-        <Box
-          row
-          center
-          borderRadius={20}
-          backgroundColor="lightPrimary"
-          paddingVertical={4}
-          paddingHorizontal={7}
-        >
-          <Text fontSize={15} bold color="primary">
-            {t(getHeaderTitle())}
-          </Text>
-          <Box marginLeft={5} rounded backgroundColor="primary" width={18} height={18} center>
+    <Box
+      className="border-continuous overflow-visible relative"
+      style={{ zIndex: isOpen ? 20 : 0 }}
+    >
+      <TouchableBox className="overflow-hidden border-continuous" onPress={onToggle}>
+        <Box className="overflow-hidden border-continuous flex-row items-center justify-center rounded-[20px] bg-light-primary py-[4px] px-[7px]">
+          <Text className="text-[15px] font-bold text-primary">{t(getHeaderTitle())}</Text>
+          <Box className="overflow-hidden border-continuous ml-[5px] rounded-[20px] bg-primary w-[18px] h-[18px] items-center justify-center">
             <FeatherIcon name="chevron-up" color="reverse" size={18} />
           </Box>
         </Box>
@@ -232,27 +242,32 @@ const SelectMore = ({
   }
 
   return (
-    <Box position="relative" overflow="visible" zIndex={isOpen ? 20 : 0}>
+    <Box
+      className="border-continuous overflow-visible relative"
+      style={{ zIndex: isOpen ? 20 : 0 }}
+    >
       <TouchableBox
+        className="overflow-hidden border-continuous"
         onPress={() => {
           onToggle()
           setOpenColorModal(undefined)
         }}
       >
-        <Box center width={44} height={50}>
+        <Box className="overflow-hidden border-continuous items-center justify-center w-[44px] h-[50px]">
           <FeatherIcon name="more-horizontal" size={18} color="primary" />
         </Box>
       </TouchableBox>
       {isOpen && (
         <StudyFooterPopover bottom={40} left={-112} width={250}>
           {colorModal ? (
-            <Box p={20}>
-              <TouchableBox onPress={handleResetColor} bg="lightGrey" px={10} py={5} rounded>
-                <Text textAlign="center" fontSize={12}>
-                  {t('reset')}
-                </Text>
+            <Box className="overflow-hidden border-continuous p-[20px]">
+              <TouchableBox
+                className="overflow-hidden border-continuous bg-light-grey px-[10px] py-[5px] rounded-[20px]"
+                onPress={handleResetColor}
+              >
+                <Text className="text-center text-[12px]">{t('reset')}</Text>
               </TouchableBox>
-              <Box height={180}>
+              <Box className="overflow-hidden border-continuous h-[180px]">
                 <ColorPicker
                   value={selectedColor}
                   onChangeJS={handleColorChange}
@@ -265,8 +280,8 @@ const SelectMore = ({
               </Button>
             </Box>
           ) : (
-            <Box p={10}>
-              <Box row center>
+            <Box className="overflow-hidden border-continuous p-[10px]">
+              <Box className="overflow-hidden border-continuous flex-row items-center justify-center">
                 <FormatIcon
                   isSelected={Boolean(activeFormats.background)}
                   style={{ marginHorizontal: 10 }}
@@ -289,8 +304,8 @@ const SelectMore = ({
                   <QuoteIcon color="primary" />
                 </FormatIcon>
               </Box>
-              <Border marginTop={16} />
-              <Box row center marginTop={16}>
+              <Border className="mt-[16px]" />
+              <Box className="overflow-hidden border-continuous flex-row items-center justify-center mt-[16px]">
                 <FormatIcon
                   isSelected={activeFormats.list === 'bullet'}
                   style={{ marginHorizontal: 10 }}
@@ -316,18 +331,16 @@ const SelectMore = ({
                   <FeatherIcon size={20} name="minus" color="primary" />
                 </FormatIcon>
               </Box>
-              <Border marginTop={16} />
-              <Box row center marginTop={16}>
+              <Border className="mt-[16px]" />
+              <Box className="overflow-hidden border-continuous flex-row items-center justify-center mt-[16px]">
                 <TouchableBox
-                  px={10}
-                  py={5}
+                  className="overflow-hidden border-continuous px-[10px] py-[5px]"
                   onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })}
                 >
                   <MaterialIcon name="undo" size={20} color="primary" />
                 </TouchableBox>
                 <TouchableBox
-                  px={10}
-                  py={5}
+                  className="overflow-hidden border-continuous px-[10px] py-[5px]"
                   onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })}
                 >
                   <MaterialIcon name="redo" size={20} color="primary" />
@@ -360,8 +373,11 @@ const SelectBlock = ({
   }
 
   return (
-    <Box position="relative" overflow="visible" zIndex={isOpen ? 20 : 0}>
-      <TouchableBox onPress={onToggle}>
+    <Box
+      className="border-continuous overflow-visible relative"
+      style={{ zIndex: isOpen ? 20 : 0 }}
+    >
+      <TouchableBox className="overflow-hidden border-continuous" onPress={onToggle}>
         <MaterialIcon name="add-box" size={22} color="primary" style={{ marginLeft: 'auto' }} />
       </TouchableBox>
       {isOpen && (
@@ -382,15 +398,36 @@ const SelectBlock = ({
   )
 }
 
-const FormatIcon = styled(TouchableOpacity)<TouchableOpacityProps & { isSelected?: boolean }>(
-  ({ theme, isSelected }) => ({
-    width: 25,
-    height: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: isSelected ? theme.colors.lightPrimary : 'transparent',
-  })
-)
+const FormatIcon = (
+  componentProps: Omit<
+    UIComponentProps<typeof TouchableOpacity>,
+    keyof (TouchableOpacityProps & { isSelected?: boolean }) | 'theme'
+  > &
+    Omit<TouchableOpacityProps & { isSelected?: boolean }, 'theme'> & {
+      theme?: AppTheme
+      className?: string
+    }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { isSelected } = props
+  const classStyles = useResolveClassNames(
+    twMerge('w-[25px] h-[25px] items-center justify-center', className)
+  )
+  return (
+    <TouchableOpacity
+      {...props}
+      style={
+        [
+          classStyles,
+          { backgroundColor: isSelected ? theme.colors.lightPrimary : 'transparent' },
+          props.style,
+        ] as UIComponentProps<typeof TouchableOpacity>['style']
+      }
+    />
+  )
+}
 
 type StudyFooterProps = {
   dispatchToWebView: DispatchToWebView
@@ -406,20 +443,15 @@ const StudyFooter = ({ dispatchToWebView, onInsertEntity, activeFormats }: Study
   const closeMenu = () => setOpenMenu(null)
 
   return (
-    <Box height={50} backgroundColor="reverse" overflow="visible">
-      <PageContent row flex={1} alignItems="center" overflow="visible">
+    <Box className="border-continuous overflow-visible h-[50px] bg-reverse">
+      <PageContent className="flex-[1] items-center flex-row overflow-visible">
         {openMenu && (
           <TouchableBox
-            position="absolute"
-            left={-1000}
-            right={-1000}
-            bottom={0}
-            top={-1000}
-            zIndex={1}
+            className="overflow-hidden border-continuous absolute left-[-1000px] right-[-1000px] bottom-[0px] top-[-1000px] z-[1]"
             onPress={closeMenu}
           />
         )}
-        <Box row flex center paddingLeft={10} overflow="visible">
+        <Box className="border-continuous overflow-visible flex-row flex-[1] items-center justify-center pl-[10px]">
           <SelectHeading
             dispatchToWebView={dispatchToWebView}
             activeFormats={activeFormats}
@@ -470,7 +502,7 @@ const StudyFooter = ({ dispatchToWebView, onInsertEntity, activeFormats }: Study
             onToggle={() => toggleMenu('more')}
             onClose={closeMenu}
           />
-          <Box marginLeft="auto" />
+          <Box className="overflow-hidden border-continuous ml-auto" />
           <SelectBlock
             onInsertEntity={onInsertEntity}
             isOpen={openMenu === 'block'}

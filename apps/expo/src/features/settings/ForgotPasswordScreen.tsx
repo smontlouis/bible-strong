@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-import { withTheme } from '@emotion/react'
+import { withTheme } from '~themes/ThemeProvider'
 import * as Icon from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
-
 import FireAuth from '~helpers/FireAuth'
 import Button from '~common/ui/Button'
 import ScrollView from '~common/ui/ScrollView'
@@ -15,7 +14,6 @@ import Header from '~common/Header'
 import { toast } from '~helpers/toast'
 import { useTranslation } from 'react-i18next'
 import { Theme } from '~themes'
-
 const ForgotPasswordScreen = ({ theme }: { theme: Theme }) => {
   const router = useRouter()
   const [email, setEmail] = useState('')
@@ -36,8 +34,8 @@ const ForgotPasswordScreen = ({ theme }: { theme: Theme }) => {
     <Container>
       <Header hasBackButton title={t('forgotPassword.title')} />
       <ScrollView>
-        <Box padding={20}>
-          <Text color="grey">{t('forgotPassword.description')}</Text>
+        <Box className="overflow-hidden border-continuous p-[20px]">
+          <Text className="text-grey">{t('forgotPassword.description')}</Text>
           <Spacer size={2} />
           <TextInput
             placeholder="Email"

@@ -3,7 +3,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
-
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
@@ -26,7 +25,6 @@ import {
 import { commentaryHrefToOsis, parseCommentaryResourceParams } from './commentaryResourceParams'
 import CommentaryEntryNavigation from './CommentaryEntryNavigation'
 import { groupCommentarySectionsForVerse } from './commentaryResourceNavigation'
-
 const CommentaryEntryScreen = () => {
   const params = useLocalSearchParams<{
     projectionId?: string
@@ -98,14 +96,14 @@ const CommentaryEntryScreen = () => {
 
   return (
     <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
-      <Box flex bg="lightGrey">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
         <Header
           background
           hasBackButton={IS_FORM_SHEET ? canGoBackInStack : true}
           title={entry.author}
           subTitle={passage}
           rightComponent={
-            <Box mr={4}>
+            <Box className="overflow-hidden border-continuous mr-[4px]">
               <CommentaryResourceHeaderActions
                 entry={entry}
                 projectionId={projection.projectionId}
@@ -119,7 +117,7 @@ const CommentaryEntryScreen = () => {
           }
         />
         {query.isPending ? (
-          <Box flex center>
+          <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
             <Loading />
           </Box>
         ) : query.isError ? (
@@ -151,7 +149,17 @@ const CommentaryEntryScreen = () => {
                 })
               }
             />
-            <Box bg="reverse" rounded lightShadow px={18} py={18}>
+            <Box
+              className="overflow-hidden border-continuous bg-reverse rounded-[20px] px-[18px] py-[18px]"
+              style={{
+                shadowColor: 'rgb(89,131,240)',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 7,
+                elevation: 1,
+                overflow: 'visible',
+              }}
+            >
               <CommentaryEntryNavigation
                 hasPrevious={Boolean(previousSection)}
                 hasNext={Boolean(nextSection)}
@@ -181,7 +189,7 @@ const CommentaryEntryScreen = () => {
                   scrollRef.current?.scrollTo({ y: 0, animated: true })
                 }}
               />
-              <Box mt={14}>
+              <Box className="overflow-hidden border-continuous mt-[14px]">
                 <StylizedHTMLView
                   value={section.content}
                   onLinkPress={href => {

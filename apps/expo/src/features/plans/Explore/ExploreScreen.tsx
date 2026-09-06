@@ -1,3 +1,5 @@
+import { twMerge } from '~common/ui/classNames'
+
 import { pageContentStyle } from '~common/ui/PageContent'
 import React, { useState } from 'react'
 import { ScrollView, RefreshControl } from 'react-native'
@@ -14,7 +16,6 @@ import Box from '~common/ui/Box'
 import { LinkBox } from '~common/Link'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
-
 const LangButton = ({
   children,
   onPress,
@@ -23,23 +24,33 @@ const LangButton = ({
   children: React.ReactNode
   onPress: () => void
   isSelected: boolean
-}) => (
-  <LinkBox onPress={onPress}>
-    <Box
-      bg={isSelected ? 'primary' : 'reverse'}
-      px={15}
-      py={7}
-      lightShadow
-      borderRadius={20}
-      my={10}
-      mr={10}
-    >
-      <Text color={isSelected ? 'reverse' : 'grey'} textAlign="center">
-        {children}
-      </Text>
-    </Box>
-  </LinkBox>
-)
+}) => {
+  return (
+    <LinkBox onPress={onPress}>
+      <Box
+        className={twMerge(
+          'overflow-hidden border-continuous',
+          twMerge(
+            isSelected ? 'bg-primary' : 'bg-reverse',
+            'overflow-hidden border-continuous px-[15px] py-[7px] rounded-[20px] my-[10px] mr-[10px]'
+          )
+        )}
+        style={{
+          shadowColor: 'rgb(89,131,240)',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 7,
+          elevation: 1,
+          overflow: 'visible',
+        }}
+      >
+        <Text className={twMerge(isSelected ? 'text-reverse' : 'text-grey', 'text-center')}>
+          {children}
+        </Text>
+      </Box>
+    </LinkBox>
+  )
+}
 
 const ExploreScreen = () => {
   const { t } = useTranslation()
@@ -88,7 +99,7 @@ const ExploreScreen = () => {
         },
       ]}
     >
-      <Box row width="100%" p={10}>
+      <Box className="overflow-hidden border-continuous flex-row w-[100%] p-[10px]">
         <LangButton isSelected={lang === 'fr'} onPress={() => setLang('fr')}>
           Français
         </LangButton>

@@ -1,5 +1,5 @@
 import { webFontFamily } from '~helpers/webFontFamily'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
 import produce from 'immer'
@@ -144,7 +144,6 @@ import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import useConnection from '~helpers/useConnection'
 import { getWordAnnotationText } from '~redux/modules/user/wordAnnotationRanges'
 import type { UnifiedTagsModalProps } from '~state/app'
-
 export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
 export type ParallelVerse = {
@@ -1016,6 +1015,7 @@ export const BibleDOMWrapper = ({
 
   return (
     <Box
+      className="overflow-hidden border-continuous"
       style={{
         backgroundColor: theme.colors.reverse,
         zIndex: nativeLayerZIndex,

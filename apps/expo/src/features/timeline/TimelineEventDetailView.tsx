@@ -1,7 +1,6 @@
 import React from 'react'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useTranslation } from 'react-i18next'
-
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Box from '~common/ui/Box'
@@ -13,7 +12,6 @@ import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { EventDetailsContent, EventDetailsProps } from './EventDetails'
 import { TimelineEvent } from './types'
-
 interface Props {
   event?: TimelineEvent | (EventDetailsProps & { sectionIndex?: number })
   onOpenEvent: (event: TimelineEvent) => void
@@ -79,7 +77,7 @@ const TimelineEventDetailContent = ({
                 menuItems.find(item => item.label === nativeEvent.event)?.onSelect()
               }}
             >
-              <Box row center height={60} width={60}>
+              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
                 <FeatherIcon name="more-vertical" size={18} />
               </Box>
             </MenuView>

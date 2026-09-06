@@ -1,9 +1,11 @@
-import styled from '@emotion/native'
 import { Feather } from '@expo/vector-icons'
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ComponentPropsWithRef as UIComponentProps } from 'react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import Box from '~common/ui/Box'
+import type { Theme as AppTheme } from '~themes'
 
 interface SectionHeaderProps {
   icon: ComponentProps<typeof Feather>['name']
@@ -17,21 +19,45 @@ const SectionHeader = ({ icon, title }: SectionHeaderProps) => (
   </Container>
 )
 
-const Container = styled(Box)(() => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingHorizontal: 20,
-  paddingTop: 20,
-  paddingBottom: 8,
-  gap: 8,
-}))
+const Container = (
+  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const Title = styled(Text)(({ theme }) => ({
-  fontSize: 12,
-  fontWeight: '600',
-  color: theme.colors.grey,
-  textTransform: 'uppercase',
-  letterSpacing: 0.5,
-}))
+  const classStyles = useResolveClassNames(
+    twMerge('flex-row items-center px-[20px] pt-[20px] pb-[8px] gap-[8px]', className)
+  )
+  return (
+    <Box
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
+
+const Title = (
+  componentProps: Omit<UIComponentProps<typeof Text>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('text-[12px] font-semibold text-grey uppercase', className)
+  )
+  return (
+    <Text
+      {...props}
+      style={
+        [classStyles, { letterSpacing: 0.5 }, props.style] as UIComponentProps<typeof Text>['style']
+      }
+    />
+  )
+}
 
 export default SectionHeader

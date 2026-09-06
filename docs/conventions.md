@@ -41,8 +41,8 @@ Use component state for truly local ephemeral state.
 ## Styling
 
 - Prefer existing shared UI primitives in `~common/ui`, especially `Box`, `HStack`, and `VStack`.
-- Do not introduce `styled` or new Emotion/native wrappers in feature code when shared primitives can express the layout or typography.
-- Keep `styled` inside shared primitive implementations under `src/common/ui/`. A rare feature-level exception must document the missing primitive and why adding or extending a shared primitive is not appropriate.
+- Use Uniwind `className` for static layout and typography, and `style` for calculated values. Do not introduce Emotion or new `styled` wrappers.
+- Keep theme palettes in `apps/expo/src/themes/`; `themes:generate` derives Uniwind CSS from them. Read JavaScript values with `useTheme` from `~themes/ThemeProvider`. The Bible DOM keeps receiving the same palette through its settings bridge (ADR-0040).
 - Run `yarn agents:styles:check` before finishing UI changes. The check rejects new `styled` usage while allowing the brownfield baseline to be migrated progressively.
 - Follow the theme system in `src/themes/`; do not hard-code new palettes unless the feature already does.
 - For Reanimated 4 state-driven transitions, prefer CSS transition properties when appropriate.

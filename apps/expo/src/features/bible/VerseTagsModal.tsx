@@ -1,11 +1,14 @@
-import styled from '@emotion/native'
-import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import * as NativeUI from 'react-native'
 import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
 import EntityChipList from '~common/EntityChipList'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
+import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Chip } from '~common/ui/NewChip'
@@ -14,24 +17,48 @@ import { EMPTY_ARRAY } from '~helpers/emptyReferences'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { makeTaggedItemsForVerseSelector, TaggedItem } from '~redux/selectors/bible'
+import type { Theme as AppTheme } from '~themes'
 
-const ItemRow = styled.View(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  padding: 15,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
+const ItemRow = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const IconContainer = styled.View(({ theme }) => ({
-  width: 36,
-  height: 36,
-  borderRadius: 12,
-  backgroundColor: theme.colors.lightGrey,
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginRight: 12,
-}))
+  const classStyles = useResolveClassNames(
+    twMerge('flex-row items-center p-[15px] border-b-[1px] border-b-border', className)
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
+
+const IconContainer = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'w-[36px] h-[36px] rounded-[12px] bg-light-grey items-center justify-center mr-[12px]',
+      className
+    )
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
 interface VerseTagsModalProps {
   verseKey: string | null
@@ -92,15 +119,13 @@ const TaggedItemRow = ({ item, onEditTags }: { item: TaggedItem; onEditTags: () 
             color={item.type === 'annotation' ? 'secondary' : 'primary'}
           />
         </IconContainer>
-        <Box flex>
-          <HStack gap={6} alignItems="center">
-            <Text bold fontSize={14}>
-              {label}
-            </Text>
+        <Box className="overflow-hidden border-continuous flex-[1]">
+          <HStack className="overflow-hidden border-continuous gap-[6px] items-center">
+            <Text className="font-bold text-[14px]">{label}</Text>
             {item.type === 'annotation' ? <Chip>{item.data.version}</Chip> : null}
           </HStack>
           {subtitle ? (
-            <Text fontSize={12} color="grey" numberOfLines={1}>
+            <Text className="text-[12px] text-grey" numberOfLines={1}>
               {subtitle}
             </Text>
           ) : null}
@@ -169,10 +194,10 @@ const VerseTagsModal = forwardRef<SheetRef, VerseTagsModalProps>(({ verseKey, ve
       snapPoints={[0.5]}
       header={<SheetHeader title={t('Étiquettes')} subTitle={reference} />}
     >
-      <Box>
+      <Box className="overflow-hidden border-continuous">
         {taggedItems.length === 0 ? (
-          <Box center py={40}>
-            <Text color="grey">{t('Aucun élément avec des étiquettes')}</Text>
+          <Box className="overflow-hidden border-continuous items-center justify-center py-[40px]">
+            <Text className="text-grey">{t('Aucun élément avec des étiquettes')}</Text>
           </Box>
         ) : (
           taggedItems.map(item => (

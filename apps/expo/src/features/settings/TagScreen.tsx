@@ -5,7 +5,6 @@ import { Alert } from 'react-native'
 import { useDispatch } from 'react-redux'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-
 import Header from '~common/Header'
 import RenameModal from '~common/RenameModal'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
@@ -18,7 +17,6 @@ import StudyItem from '~features/studies/StudyItem'
 import { removeTag, updateTag } from '~redux/modules/user'
 import useLanguage from '~helpers/useLanguage'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
-
 import { useTagData } from './useTagData'
 import { TagData, useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
 import {
@@ -34,7 +32,6 @@ import TagNaveItem from './TagNaveItem'
 import TagDictionaryItem from './TagDictionaryItem'
 import AnnotationItem from './AnnotationItem'
 import { IS_FORM_SHEET } from '~helpers/constants'
-
 const TagScreen = () => {
   const router = useRouter()
   const params = useLocalSearchParams<{ tagId?: string }>()
@@ -169,7 +166,7 @@ const TagScreen = () => {
 
   return (
     <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
-      <Box>
+      <Box className="overflow-hidden border-continuous">
         <Header
           hasBackButton={hasBackButton}
           title={tag.name}
@@ -204,7 +201,7 @@ const TagScreen = () => {
                 }
               }}
             >
-              <Box row center height={60} width={60}>
+              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
                 <FeatherIcon name="more-vertical" size={18} />
               </Box>
             </MenuView>
@@ -223,7 +220,7 @@ const TagScreen = () => {
         />
       </Box>
       {isEmpty ? (
-        <Box flex pt={40} px={20}>
+        <Box className="overflow-hidden border-continuous flex-[1] pt-[40px] px-[20px]">
           <Empty
             icon={require('~assets/images/empty-state-icons/tag.svg')}
             message={t("Vous n'avez rien enregistré avec cette étiquette...")}

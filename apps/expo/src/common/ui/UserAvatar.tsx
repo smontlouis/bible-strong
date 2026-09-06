@@ -1,8 +1,11 @@
-import styled from '@emotion/native'
-import { useTheme } from '@emotion/react'
-import React from 'react'
-import Avatar from 'react-native-boring-avatars'
 import Color from 'color'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import * as NativeUI from 'react-native'
+import Avatar from 'react-native-boring-avatars'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme } from '~themes/ThemeProvider'
 
 interface UserAvatarProps {
   size?: number
@@ -31,11 +34,26 @@ const UserAvatar = ({ size = 60, photoURL, displayName, email }: UserAvatarProps
   return <Avatar size={size} name={displayName || email || 'user'} variant="beam" colors={colors} />
 }
 
-const AvatarImage = styled.Image<{ size: number }>(({ theme, size }) => ({
-  width: size,
-  height: size,
-  borderRadius: size / 2,
-  backgroundColor: theme.colors.lightGrey,
-}))
+const AvatarImage = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.Image>, keyof { size: number } | 'theme'> &
+    Omit<{ size: number }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const { size } = props
+  const classStyles = useResolveClassNames(twMerge('bg-light-grey', className))
+  return (
+    <NativeUI.Image
+      {...props}
+      style={
+        [
+          classStyles,
+          { width: size, height: size, borderRadius: size / 2 },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.Image>['style']
+      }
+    />
+  )
+}
 
 export default UserAvatar

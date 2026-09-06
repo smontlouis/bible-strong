@@ -1,6 +1,7 @@
+import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-
 import { AnimatedTouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Progress from '~common/ui/Progress'
@@ -19,7 +20,6 @@ import {
 import { getResourceFailurePresentation } from '~features/resources/resourceFailure'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { WidgetContainer, itemHeight, itemWidth } from './widget'
-
 type Props = {
   identity: OfflineCopyIdentity
   title: string
@@ -28,6 +28,8 @@ type Props = {
 }
 
 const ResourceDownloadWidget = ({ identity, title, fileSize, onRetry }: Props) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const isConnected = useConnection()
@@ -85,6 +87,7 @@ const ResourceDownloadWidget = ({ identity, title, fileSize, onRetry }: Props) =
 
   return (
     <AnimatedTouchableBox
+      className="overflow-hidden border-continuous items-center justify-center rounded-[20px] mr-[16px] px-[16px] border-[1.5px] border-dashed border-border"
       accessibilityRole="button"
       accessibilityLabel={
         isActive ? `${title}. ${t('Téléchargement en cours')}` : `${title}. ${fileSize} Mo`
@@ -95,49 +98,43 @@ const ResourceDownloadWidget = ({ identity, title, fileSize, onRetry }: Props) =
       onPress={startDownload}
       onPressIn={() => setIsPressed(true)}
       onPressOut={() => setIsPressed(false)}
-      center
-      rounded
-      height={itemHeight}
-      width={itemWidth}
-      marginRight={16}
-      paddingHorizontal={16}
-      bg="border"
-      bgOpacity="030"
-      borderWidth={1.5}
-      borderStyle="dashed"
-      borderColor="border"
-      style={{
-        transform: [{ scale: isPressed ? 0.96 : 1 }],
-        transitionProperty: 'transform',
-        transitionDuration: 140,
-      }}
+      style={[
+        { opacity: isActive || connectionRequired ? 0.6 : 1 },
+        [
+          {
+            width: itemWidth,
+            height: itemHeight,
+            backgroundColor: colorWithOpacity(resolveThemeColor(stylingTheme, 'border'), 0.3),
+            opacity: isActive || connectionRequired ? 0.6 : 1,
+          },
+          {
+            transform: [{ scale: isPressed ? 0.96 : 1 }],
+            transitionProperty: 'transform',
+            transitionDuration: 140,
+          },
+        ],
+      ]}
     >
       {isActive ? (
         <>
           <Progress progress={progress} size={30} thickness={2} />
-          <Text color="tertiary" marginTop={12} fontSize={12} textAlign="center">
+          <Text className="text-tertiary mt-[12px] text-[12px] text-center">
             {t('Téléchargement en cours')}
           </Text>
         </>
       ) : connectionRequired ? (
         <>
           <FeatherIcon name={failurePresentation.icon} size={24} color="tertiary" />
-          <Text color="tertiary" bold marginTop={10} textAlign="center" fontSize={12}>
-            {title}
-          </Text>
-          <Text color="tertiary" fontSize={11} marginTop={4} textAlign="center">
+          <Text className="text-tertiary font-bold mt-[10px] text-center text-[12px]">{title}</Text>
+          <Text className="text-tertiary text-[11px] mt-[4px] text-center">
             {t('resource.action.connectionRequired')}
           </Text>
         </>
       ) : (
         <>
           <FeatherIcon name={failurePresentation.icon} size={24} color="tertiary" />
-          <Text color="tertiary" bold marginTop={10} textAlign="center" fontSize={12}>
-            {title}
-          </Text>
-          <Text color="tertiary" fontSize={11} marginTop={4}>
-            {fileSize} Mo
-          </Text>
+          <Text className="text-tertiary font-bold mt-[10px] text-center text-[12px]">{title}</Text>
+          <Text className="text-tertiary text-[11px] mt-[4px]">{fileSize} Mo</Text>
         </>
       )}
     </AnimatedTouchableBox>

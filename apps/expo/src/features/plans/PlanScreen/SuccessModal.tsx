@@ -1,12 +1,10 @@
 import Lottie from 'lottie-react-native'
 import React from 'react'
-
 import { Sheet, SheetView, type SheetRef } from '~common/sheet'
 import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
-
 interface Props {
   modalRef: React.RefObject<SheetRef | null>
   isPlanCompleted: boolean
@@ -23,8 +21,8 @@ const SuccessModal = ({ modalRef, isPlanCompleted, onClose }: Props) => {
 
   return (
     <Sheet ref={modalRef} onDismiss={onClose} dismissible={false}>
-      <SheetView pt={40} pb={10} paddingHorizontal={20}>
-        <Box center>
+      <SheetView className="pt-[40px] pb-[10px] px-[20px]">
+        <Box className="overflow-hidden border-continuous items-center justify-center">
           <Lottie
             autoPlay
             style={{
@@ -38,22 +36,32 @@ const SuccessModal = ({ modalRef, isPlanCompleted, onClose }: Props) => {
             }
           />
         </Box>
-        <Box backgroundColor="reverse" lightShadow borderRadius={30} marginBottom={30} padding={20}>
+        <Box
+          className="overflow-hidden border-continuous bg-reverse rounded-[30px] mb-[30px] p-[20px]"
+          style={{
+            shadowColor: 'rgb(89,131,240)',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 7,
+            elevation: 1,
+            overflow: 'visible',
+          }}
+        >
           {isPlanCompleted ? (
             <>
-              <Paragraph fontFamily="text" textAlign="center" bold>
+              <Paragraph className="text-center font-bold" fontFamily="text">
                 {t('Félicitations')} !!
               </Paragraph>
-              <Paragraph scale={-1} fontFamily="text" textAlign="center">
+              <Paragraph className="text-center" scale={-1} fontFamily="text">
                 {t('Vous avez complété ce plan')} !
               </Paragraph>
             </>
           ) : (
             <>
-              <Paragraph fontFamily="text" textAlign="center" bold>
+              <Paragraph className="text-center font-bold" fontFamily="text">
                 {t('Félicitations')} !
               </Paragraph>
-              <Paragraph scale={-1} fontFamily="text" textAlign="center">
+              <Paragraph className="text-center" scale={-1} fontFamily="text">
                 {t('Vous venez de finir votre lecture.')}
               </Paragraph>
             </>

@@ -1,30 +1,59 @@
-import styled from '@emotion/native'
-import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
-import React, { forwardRef } from 'react'
-import { TouchableOpacity } from 'react-native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import * as NativeUI from 'react-native'
+import { TouchableOpacity } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
+import type { Theme as AppTheme } from '~themes'
 
 import Checkbox from '~common/ui/Checkbox'
-import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { useAllColors } from '~helpers/useColorName'
 
-const ColorCircle = styled.View<{ color: string }>(({ color }) => ({
-  width: 24,
-  height: 24,
-  borderRadius: 6,
-  backgroundColor: color,
-  marginRight: 12,
-}))
+const ColorCircle = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, keyof { color: string } | 'theme'> &
+    Omit<{ color: string }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const ColorRow = styled(TouchableOpacity)(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  padding: 16,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
+  const { color } = props
+  const classStyles = useResolveClassNames(
+    twMerge('w-[24px] h-[24px] rounded-[6px] mr-[12px]', className)
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={
+        [classStyles, { backgroundColor: color }, props.style] as UIComponentProps<
+          typeof NativeUI.View
+        >['style']
+      }
+    />
+  )
+}
+
+const ColorRow = (
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('flex-row items-center p-[16px] border-b-[1px] border-b-border', className)
+  )
+  return (
+    <TouchableOpacity
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
+    />
+  )
+}
 
 type Props = {
   selectedColorId?: string
@@ -45,10 +74,8 @@ const ColorFilterModal = forwardRef<SheetRef, Props>(({ selectedColorId, onSelec
       >
         {/* Option "Toutes les couleurs" */}
         <ColorRow onPress={() => onSelect(undefined)}>
-          <Checkbox checked={!selectedColorId} marginRight={12} />
-          <Text flex={1} fontSize={16}>
-            {t('Toutes les couleurs')}
-          </Text>
+          <Checkbox className="mr-[12px]" checked={!selectedColorId} />
+          <Text className="flex-[1] text-[16px]">{t('Toutes les couleurs')}</Text>
           {!selectedColorId && <FeatherIcon name="check" size={20} color="primary" />}
         </ColorRow>
 
@@ -56,9 +83,7 @@ const ColorFilterModal = forwardRef<SheetRef, Props>(({ selectedColorId, onSelec
         {allColors.map(color => (
           <ColorRow key={color.id} onPress={() => onSelect(color.id)}>
             <ColorCircle color={color.hex} />
-            <Text flex={1} fontSize={16}>
-              {color.name}
-            </Text>
+            <Text className="flex-[1] text-[16px]">{color.name}</Text>
             {selectedColorId === color.id && <FeatherIcon name="check" size={20} color="primary" />}
           </ColorRow>
         ))}

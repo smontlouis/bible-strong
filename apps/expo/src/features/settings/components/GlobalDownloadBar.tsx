@@ -1,15 +1,13 @@
 import React from 'react'
 import { TouchableOpacity } from 'react-native'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Animated from 'react-native-reanimated'
 import { EaseView } from 'react-native-ease'
-
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useDownloadQueue } from '~helpers/useDownloadQueue'
-
 const GlobalDownloadBar = () => {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -34,23 +32,26 @@ const GlobalDownloadBar = () => {
       }}
     >
       <Box
-        bg="reverse"
-        borderTopLeftRadius={16}
-        borderTopRightRadius={16}
-        px={20}
-        pt={16}
-        pb={insets.bottom > 0 ? insets.bottom : 16}
-        lightShadow
+        className="overflow-hidden border-continuous bg-reverse rounded-tl-[16px] rounded-tr-[16px] px-[20px] pt-[16px]"
+        style={{
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 16,
+          shadowColor: 'rgb(89,131,240)',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 7,
+          elevation: 1,
+          overflow: 'visible',
+        }}
       >
-        <Box row alignItems="center" gap={12}>
-          <Box flex>
-            <Text fontSize={14} bold numberOfLines={1}>
+        <Box className="overflow-hidden border-continuous flex-row items-center gap-[12px]">
+          <Box className="overflow-hidden border-continuous flex-[1]">
+            <Text className="text-[14px] font-bold" numberOfLines={1}>
               {t('downloads.progress', {
                 current: overallProgress.completed + 1,
                 total: overallProgress.total,
               })}
             </Text>
-            <Box mt={8} height={4} borderRadius={2} bg="border" overflow="hidden">
+            <Box className="border-continuous overflow-visible mt-[8px] h-[4px] rounded-[2px] bg-border">
               <Animated.View
                 style={{
                   height: 4,
@@ -64,7 +65,7 @@ const GlobalDownloadBar = () => {
             </Box>
           </Box>
 
-          <Text fontSize={13} color="tertiary" bold>
+          <Text className="text-[13px] text-tertiary font-bold">
             {Math.round(overallProgress.progress * 100)}%
           </Text>
 
@@ -73,9 +74,7 @@ const GlobalDownloadBar = () => {
             onPress={cancelAll}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Text fontSize={13} color="quart" bold>
-              {t('Annuler')}
-            </Text>
+            <Text className="text-[13px] text-quart font-bold">{t('Annuler')}</Text>
           </TouchableOpacity>
         </Box>
       </Box>

@@ -1,3 +1,4 @@
+import { twMerge } from '~common/ui/classNames'
 import React from 'react'
 import Animated, {
   Extrapolation,
@@ -6,7 +7,6 @@ import Animated, {
   useAnimatedStyle,
   useDerivedValue,
 } from 'react-native-reanimated'
-
 import { Image } from 'expo-image'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
@@ -16,9 +16,17 @@ import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { calculateLabel, offset, rowToPx } from './constants'
 import { TimelineEvent as TimelineEventProps } from './types'
-
 const AnimatedBox = Animated.createAnimatedComponent(Box)
-const LinkBox = Box.withComponent(Link)
+const LinkBox = (props: React.ComponentProps<typeof Box> & React.ComponentProps<typeof Link>) => (
+  <Box
+    as={Link}
+    {...props}
+    className={twMerge(
+      'overflow-hidden border-continuous',
+      twMerge('overflow-hidden border-continuous', props.className)
+    )}
+  />
+)
 
 interface Props extends TimelineEventProps {
   x: SharedValue<number>
@@ -79,31 +87,33 @@ const TimelineEvent = ({
   if (type === 'minor') {
     return (
       <LinkBox
+        className="h-[25px] absolute bg-reverse flex-row rounded-[20px]"
         onPress={onOpenEvent}
         disabled={!hasDetails}
-        opacity={hasDetails ? 1 : 0.6}
-        pos="absolute"
-        h={25}
-        left={left + offset}
-        top={top}
-        rounded
-        bg="reverse"
-        lightShadow
-        row
+        style={[
+          { opacity: !hasDetails ? 0.6 : 1 },
+          [
+            {
+              top: top,
+              left: left + offset,
+              opacity: !hasDetails ? 0.6 : hasDetails ? 1 : 0.6,
+              shadowColor: 'rgb(89,131,240)',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 7,
+              elevation: 1,
+              overflow: 'visible',
+            },
+          ],
+        ]}
       >
-        <Box
-          borderTopLeftRadius={10}
-          borderBottomLeftRadius={10}
-          bg="tertiary"
-          px={10}
-          justifyContent="center"
-        >
-          <Text color="white" fontSize={10} numberOfLines={1}>
+        <Box className="overflow-hidden border-continuous rounded-tl-[10px] rounded-bl-[10px] bg-tertiary px-[10px] justify-center">
+          <Text className="text-[white] text-[10px]" numberOfLines={1}>
             {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
           </Text>
         </Box>
-        <Box px={10} justifyContent="center">
-          <Text fontSize={8}>{label}</Text>
+        <Box className="overflow-hidden border-continuous px-[10px] justify-center">
+          <Text className="text-[8px]">{label}</Text>
         </Box>
       </LinkBox>
     )
@@ -111,37 +121,41 @@ const TimelineEvent = ({
 
   return (
     <LinkBox
+      className="h-[60px] absolute bg-reverse flex-row rounded-[20px]"
       onPress={onOpenEvent}
       disabled={!hasDetails}
-      opacity={hasDetails ? 1 : 0.6}
-      pos="absolute"
-      h={60}
-      w={width}
-      left={left + offset}
-      top={top}
-      rounded
-      bg="reverse"
-      lightShadow
-      row
+      style={[
+        { opacity: !hasDetails ? 0.6 : 1 },
+        [
+          {
+            width: width,
+            top: top,
+            left: left + offset,
+            opacity: !hasDetails ? 0.6 : hasDetails ? 1 : 0.6,
+            shadowColor: 'rgb(89,131,240)',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 7,
+            elevation: 1,
+            overflow: 'visible',
+          },
+        ],
+      ]}
     >
       <AnimatedBox
-        width={descSize}
-        pos="relative"
-        px={10}
-        py={6}
-        center
-        justifyContent="space-around"
-        style={styles}
+        className="px-[10px] py-[6px] relative items-center justify-center"
+        style={[{ width: descSize }, styles]}
       >
-        <Text fontSize={12} numberOfLines={2}>
+        <Text className="text-[12px]" numberOfLines={2}>
           {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
         </Text>
-        <Box borderBottomWidth={1} borderColor="border" />
-        <Text fontSize={10} textAlign="center">
-          {label}
-        </Text>
+        <Box className="border-continuous overflow-hidden border-b-[1px] border-border" />
+        <Text className="text-[10px] text-center">{label}</Text>
       </AnimatedBox>
-      <Box ml="auto" width={imageSize} borderTopRightRadius={10} borderBottomRightRadius={10}>
+      <Box
+        className="overflow-hidden border-continuous ml-auto rounded-tr-[10px] rounded-br-[10px]"
+        style={{ width: imageSize }}
+      >
         <Image
           style={{ width: imageSize, height: '100%' }}
           source={{

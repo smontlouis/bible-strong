@@ -1,5 +1,5 @@
 import { SheetFlashList, Sheet, SheetHeader, type SheetRef } from '~common/sheet'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
 import { Ref, useDeferredValue, useState } from 'react'
@@ -55,7 +55,6 @@ import type { OfflineCopyIdentity } from '~helpers/offlineCopyId'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import { useBookAndVersionSelector } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
 import type { BibleTab, VersionCode } from '~state/tabs'
-
 const VERSION_SELECTOR_BOOK = { Numero: 1, Nom: 'Genèse', Chapitres: 50 } as const
 const EMPTY_VERSIONS: VersionCode[] = []
 const EMPTY_SELECTED_VERSES = {}
@@ -248,7 +247,7 @@ const VerseTargetDescription = ({
   if (!description) return null
 
   return (
-    <Text fontSize={13} color="tertiary" numberOfLines={1}>
+    <Text className="text-[13px] text-tertiary" numberOfLines={1}>
       {removeBreakLines(description)}
     </Text>
   )
@@ -277,7 +276,7 @@ const RelationTargetRow = ({
 const LoadingIndicator = () => {
   const theme = useTheme()
   return (
-    <Box flex minHeight={180} justifyContent="center" alignItems="center">
+    <Box className="overflow-hidden border-continuous flex-[1] min-h-[180px] justify-center items-center">
       <ActivityIndicator color={theme.colors.grey} />
     </Box>
   )
@@ -727,7 +726,7 @@ const CreateEntityRelationModal = ({
     : require('~assets/images/empty-state-icons/search.svg')
 
   const renderEmptyState = (message = emptyMessage) => (
-    <Box flex minHeight={260} justifyContent="center" px={20}>
+    <Box className="overflow-hidden border-continuous flex-[1] min-h-[260px] justify-center px-[20px]">
       <Empty icon={emptyIcon} message={message} />
     </Box>
   )
@@ -735,6 +734,7 @@ const CreateEntityRelationModal = ({
 
   const passageVersionSelector = (
     <TouchableBox
+      className="overflow-hidden border-continuous flex-row items-center justify-center gap-[5px] px-[8px] py-[6px] rounded-[8px] bg-light-grey"
       accessibilityRole="button"
       accessibilityLabel={t('accessibility.chooseVersion', { version: passageVersion })}
       onPress={() =>
@@ -762,24 +762,15 @@ const CreateEntityRelationModal = ({
           } satisfies BibleTab['data'],
         })
       }
-      row
-      center
-      gap={5}
-      px={8}
-      py={6}
-      borderRadius={8}
-      bg="lightGrey"
     >
       <FeatherIcon name="book-open" size={14} color="primary" />
-      <Text color="primary" fontSize={13} fontWeight="bold">
-        {passageVersion}
-      </Text>
+      <Text className="text-primary text-[13px] font-bold">{passageVersion}</Text>
       <FeatherIcon name="chevron-down" size={13} color="primary" />
     </TouchableBox>
   )
 
   const searchHeader = (
-    <Box px={20} pt={8} pb={12}>
+    <Box className="overflow-hidden border-continuous px-[20px] pt-[8px] pb-[12px]">
       <SheetSearchInput
         value={searchValue}
         onChangeText={handleSearch}
@@ -814,7 +805,7 @@ const CreateEntityRelationModal = ({
         </SheetHeader>
       }
     >
-      <VStack flex={1}>
+      <VStack className="overflow-hidden border-continuous flex-[1]">
         {resourceFailure ? (
           <ResourceUnavailableView
             identity={resourceFailure.identity}

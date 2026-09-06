@@ -1,8 +1,9 @@
+import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import { useTranslation } from 'react-i18next'
 import { Pressable } from 'react-native'
 import { FadeIn, FadeOut } from 'react-native-reanimated'
-
 import Box, { AnimatedBox, FadingBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
@@ -15,7 +16,6 @@ import { createDownloadItemFromOnboardingSelection } from '../onboardingResource
 import { OFFLINE_SETUP_MOTION } from '../offlineSetupMotion'
 import type { OfflineSetupOption } from '../offlineSetupPresets'
 import type { OfflineSetupPalette } from '../offlineSetupPalette'
-
 type OfflineSetupResourceOptionProps = {
   lang: ResourceLanguage
   locked: boolean
@@ -52,6 +52,8 @@ const OfflineSetupResourceOption = ({
   selected,
   sizeManifest,
 }: OfflineSetupResourceOptionProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   let label = option.label
   if (option.labelKey) {
@@ -87,39 +89,54 @@ const OfflineSetupResourceOption = ({
               : pressMotion.pressOutDuration,
             transitionTimingFunction: 'ease-out',
           }}
+          className="overflow-hidden border-continuous"
         >
           <HStack
-            minHeight={68}
-            px={14}
-            py={11}
-            borderRadius={17}
-            bg={palette.itemSurface}
-            borderWidth={1.5}
-            borderColor={selectedBorderColor}
-            alignItems="center"
-            gap={12}
+            className="overflow-hidden border-continuous min-h-[68px] px-[14px] py-[11px] rounded-[17px] border-[1.5px] items-center gap-[12px]"
+            style={{
+              backgroundColor: resolveThemeColor(stylingTheme, palette.itemSurface),
+              borderColor: resolveThemeColor(stylingTheme, selectedBorderColor),
+            }}
           >
-            <Box flex>
-              <HStack alignItems="center" gap={7} wrap>
+            <Box className="overflow-hidden border-continuous flex-[1]">
+              <HStack className="overflow-hidden border-continuous items-center gap-[7px] flex-wrap">
                 <Text
-                  color={palette.title}
-                  title
-                  fontSize={14}
-                  lineHeight={18}
-                  style={{ flexShrink: 1 }}
+                  className="text-[14px] leading-[18px]"
+                  style={[
+                    {
+                      color:
+                        resolveThemeColor(stylingTheme, palette.title) ||
+                        stylingTheme.colors.default,
+                      fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+                    },
+                    { flexShrink: 1 },
+                  ]}
                 >
                   {label}
                 </Text>
                 {locked ? (
                   <FadingBox
+                    className="overflow-hidden border-continuous"
                     keyProp="included"
                     entering={FadeIn.duration(140)}
                     exiting={FadeOut.duration(140)}
                     skipEntering={false}
                     skipExiting={false}
                   >
-                    <Box px={7} py={3} borderRadius={9} bg={palette.itemAccentSoft}>
-                      <Text color={palette.itemAccentText} fontSize={9} bold>
+                    <Box
+                      className="overflow-hidden border-continuous px-[7px] py-[3px] rounded-[9px]"
+                      style={{
+                        backgroundColor: resolveThemeColor(stylingTheme, palette.itemAccentSoft),
+                      }}
+                    >
+                      <Text
+                        className="text-[9px] font-bold"
+                        style={{
+                          color:
+                            resolveThemeColor(stylingTheme, palette.itemAccentText) ||
+                            stylingTheme.colors.default,
+                        }}
+                      >
                         {t('offlineSetup.includedBadge')}
                       </Text>
                     </Box>
@@ -128,31 +145,41 @@ const OfflineSetupResourceOption = ({
               </HStack>
               {description ? (
                 <Text
-                  color={palette.description}
-                  fontSize={11}
-                  lineHeight={15}
-                  mt={3}
+                  className="text-[11px] leading-[15px] mt-[3px]"
                   numberOfLines={1}
+                  style={{
+                    color:
+                      resolveThemeColor(stylingTheme, palette.description) ||
+                      stylingTheme.colors.default,
+                  }}
                 >
                   {description}
                 </Text>
               ) : null}
-              <Text color={palette.description} fontSize={10} mt={4}>
+              <Text
+                className="text-[10px] mt-[4px]"
+                style={{
+                  color:
+                    resolveThemeColor(stylingTheme, palette.description) ||
+                    stylingTheme.colors.default,
+                }}
+              >
                 {formatResourceSize(getOptionBytes(option, sizeManifest), lang)}
               </Text>
             </Box>
             <FadingBox
+              className="overflow-hidden border-continuous rounded-[11px] border-[1.5px] items-center justify-center"
               keyProp={selected ? 'selected' : 'unselected'}
               entering={FadeIn.duration(140)}
               exiting={FadeOut.duration(140)}
               skipEntering={false}
               skipExiting={false}
-              size={22}
-              borderRadius={11}
-              borderWidth={1.5}
-              borderColor={checkboxBorderColor}
-              bg={checkboxBackground}
-              center
+              style={{
+                backgroundColor: resolveThemeColor(stylingTheme, checkboxBackground),
+                borderColor: resolveThemeColor(stylingTheme, checkboxBorderColor),
+                width: 22,
+                height: 22,
+              }}
             >
               {selected ? <Feather name="check" size={13} color={palette.onAccent} /> : null}
             </FadingBox>

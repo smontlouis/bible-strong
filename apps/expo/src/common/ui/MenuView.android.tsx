@@ -1,3 +1,5 @@
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { ComponentProps, forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import type {
   MenuAction,
@@ -5,12 +7,10 @@ import type {
   MenuComponentRef,
   NativeActionEvent,
 } from '@expo/ui/community/menu'
-
 import { Sheet, SheetHeader, SheetRef } from '~common/sheet'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-
 export type { MenuAction, MenuComponentRef }
 export type AccessibleMenuComponentProps = MenuComponentProps & {
   accessibilityLabel?: string
@@ -95,6 +95,8 @@ export const MenuView = forwardRef<MenuComponentRef, AccessibleMenuComponentProp
     },
     ref
   ) => {
+    const stylingTheme = useStylingTheme()
+
     const sheetRef = useRef<SheetRef>(null)
     const [levels, setLevels] = useState<MenuLevel[]>([])
 
@@ -133,6 +135,7 @@ export const MenuView = forwardRef<MenuComponentRef, AccessibleMenuComponentProp
     return (
       <>
         <TouchableBox
+          className="overflow-hidden border-continuous"
           testID={testID}
           style={style}
           activeOpacity={0.7}
@@ -164,6 +167,7 @@ export const MenuView = forwardRef<MenuComponentRef, AccessibleMenuComponentProp
 
             return (
               <TouchableBox
+                className="border-continuous overflow-visible flex-row items-center justify-between p-[20px] border-b-[1px] border-border"
                 key={getActionId(action)}
                 disabled={disabled}
                 onPress={() => handleActionPress(action)}
@@ -174,19 +178,18 @@ export const MenuView = forwardRef<MenuComponentRef, AccessibleMenuComponentProp
                   selected: action.state === 'on',
                   expanded: action.subactions?.length ? false : undefined,
                 }}
-                row
-                alignItems="center"
-                justifyContent="space-between"
-                padding={20}
-                borderBottomWidth={1}
-                borderColor="border"
-                overflow="hidden"
+                style={[{ opacity: disabled ? 0.6 : 1 }, [{ opacity: disabled ? 0.6 : 1 }]]}
               >
-                <Box row alignItems="center" flex={1}>
-                  <Box width={20} alignItems="center">
+                <Box className="overflow-hidden border-continuous flex-row items-center flex-[1]">
+                  <Box className="overflow-hidden border-continuous w-[20px] items-center">
                     <FeatherIcon name={getActionIcon(action)} size={15} color={color} />
                   </Box>
-                  <Text marginLeft={10} color={color}>
+                  <Text
+                    className="ml-[10px]"
+                    style={{
+                      color: resolveThemeColor(stylingTheme, color) || stylingTheme.colors.default,
+                    }}
+                  >
                     {action.title}
                   </Text>
                 </Box>

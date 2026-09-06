@@ -1,19 +1,47 @@
-import styled from '@emotion/native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
 import Box from '~common/ui/Box'
+import type { Theme as AppTheme } from '~themes'
 
-const SectionCard = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.colors.reverse,
-  borderRadius: 16,
-  marginHorizontal: 20,
-  marginBottom: 16,
-}))
+const SectionCard = (
+  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-export const SectionCardHeader = styled(Box)(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingHorizontal: 16,
-  paddingVertical: 12,
-  backgroundColor: theme.colors.opacity5,
-}))
+  const classStyles = useResolveClassNames(
+    twMerge('bg-reverse rounded-[16px] mx-[20px] mb-[16px]', className)
+  )
+  return (
+    <Box
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
+
+export const SectionCardHeader = (
+  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('flex-row items-center px-[16px] py-[12px] bg-opacity5', className)
+  )
+  return (
+    <Box
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
 export default SectionCard

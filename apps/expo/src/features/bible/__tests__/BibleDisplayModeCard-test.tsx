@@ -1,6 +1,8 @@
 import React from 'react'
-
 import BibleDisplayModeCard from '../BibleDisplayModeCard'
+jest.mock('~themes/ThemeProvider', () => ({
+  useTheme: () => jest.requireActual('../../../../test/themeFixture').themeFixture,
+}))
 
 jest.mock('react-native', () => {
   const ReactModule = jest.requireActual<typeof import('react')>('react')

@@ -1,8 +1,9 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
-
 import SectionList from '~common/ui/SectionList'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -16,7 +17,6 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList'
 import SectionTitle from '~common/SectionTitle'
-
 import NaveItem from './NaveItem'
 import { useSearchValue, useInfiniteResultsByLetterOrSearch } from '../lexique/useUtilities'
 import { useTranslation } from 'react-i18next'
@@ -34,7 +34,6 @@ import {
   resourceFailureFromAccessError,
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
-
 type NaveRow = NaveTopicSummary
 type NaveSection = {
   title: string
@@ -77,6 +76,8 @@ const NaveListScreen = ({
   newTabId,
   onNaveSelect,
 }: NaveListScreenProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const isConnected = useConnection()
@@ -184,12 +185,12 @@ const NaveListScreen = ({
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <Header
           hasBackButton={showBackButton}
           title={t('Thématique Nave')}
           rightComponent={
-            <Box row alignItems="center">
+            <Box className="overflow-hidden border-continuous flex-row items-center">
               <MenuView
                 actions={[
                   {
@@ -204,14 +205,14 @@ const NaveListScreen = ({
                   if (nativeEvent.event === 'language') toggleNaveLanguage()
                 }}
               >
-                <Box row center height={60} width={60}>
+                <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
                   <FeatherIcon name="more-vertical" size={18} />
                 </Box>
               </MenuView>
             </Box>
           }
         >
-          <Box pb={10} px={20}>
+          <Box className="overflow-hidden border-continuous pb-[10px] px-[20px]">
             <SearchInput
               placeholder={t('Recherche par mot')}
               onChangeText={setSearchValue}
@@ -220,7 +221,7 @@ const NaveListScreen = ({
             />
           </Box>
         </Header>
-        <Box flex paddingTop={20}>
+        <Box className="overflow-hidden border-continuous flex-[1] pt-[20px]">
           {isLoading ? (
             <Loading message={t('Chargement...')} />
           ) : sectionResults.length ? (
@@ -241,7 +242,13 @@ const NaveListScreen = ({
               }
               renderSectionHeader={({ section: { title } }) => (
                 <SectionTitle color="quint">
-                  <Text title fontWeight="bold" fontSize={16} style={{ color: 'white' }}>
+                  <Text
+                    className="font-bold text-[16px]"
+                    style={[
+                      { fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) },
+                      { color: 'white' },
+                    ]}
+                  >
                     {title.toUpperCase()}
                   </Text>
                 </SectionTitle>

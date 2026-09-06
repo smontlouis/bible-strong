@@ -1,28 +1,33 @@
-import styled from '@emotion/native'
-import {
-  SheetFooter,
-  Sheet,
-  SheetHeader,
-  SheetTextInput,
-  type SheetRef,
-  SheetView,
-} from '~common/sheet'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import * as NativeUI from 'react-native'
 import { Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import {
+  Sheet,
+  SheetFooter,
+  SheetHeader,
+  SheetTextInput,
+  SheetView,
+  type SheetRef,
+} from '~common/sheet'
 import generateUUID from '~helpers/generateUUID'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
 import books from '~assets/bible_versions/books-desc'
 import ColorPicker from '~common/ColorPicker'
-import { toast } from '~helpers/toast'
 import type { Bookmark } from '~common/types'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { IonIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
+import { toast } from '~helpers/toast'
 import {
   addBookmark,
   MAX_BOOKMARKS,
@@ -34,29 +39,66 @@ import { selectBookmarksCount, selectSortedBookmarks } from '~redux/selectors/bo
 
 const DEFAULT_BOOKMARK_COLOR = '#cc0000'
 
-const BookmarkListItem = styled.TouchableOpacity<{ isSelected?: boolean }>(
-  ({ theme, isSelected }) => ({
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    marginBottom: 8,
-    borderRadius: 8,
-    backgroundColor: isSelected ? theme.colors.lightPrimary : theme.colors.lightGrey,
-    borderWidth: isSelected ? 2 : 0,
-    borderColor: theme.colors.primary,
-  })
-)
+const BookmarkListItem = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.TouchableOpacity>,
+    keyof { isSelected?: boolean } | 'theme'
+  > &
+    Omit<{ isSelected?: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { isSelected } = props
+  const classStyles = useResolveClassNames(
+    twMerge('flex-row items-center p-[12px] mb-[8px] rounded-[8px] border-primary', className)
+  )
+  return (
+    <NativeUI.TouchableOpacity
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            backgroundColor: isSelected ? theme.colors.lightPrimary : theme.colors.lightGrey,
+            borderWidth: isSelected ? 2 : 0,
+          },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']
+      }
+    />
+  )
+}
 
-const StyledTextInput = styled(SheetTextInput)(({ theme }) => ({
-  color: theme.colors.default,
-  height: 48,
-  borderColor: theme.colors.border,
-  borderWidth: 2,
-  borderRadius: 10,
-  paddingHorizontal: 15,
-  fontSize: 16,
-  placeholderTextColor: theme.colors.border,
-}))
+const StyledTextInput = (
+  componentProps: Omit<UIComponentProps<typeof SheetTextInput>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'text-default h-[48px] border-border border-[2px] rounded-[10px] px-[15px] text-[16px]',
+      className
+    )
+  )
+  return (
+    <SheetTextInput
+      {...props}
+      style={
+        [
+          classStyles,
+          { placeholderTextColor: theme.colors.border },
+          props.style,
+        ] as UIComponentProps<typeof SheetTextInput>['style']
+      }
+    />
+  )
+}
 
 interface BookmarkModalProps {
   sheetRef: React.RefObject<SheetRef | null>
@@ -221,43 +263,44 @@ const BookmarkModal = ({
       header={<SheetHeader title={t('Marque-page')} subTitle={reference} />}
       footer={props =>
         mode === 'select' ? null : (
-          <SheetFooter justifyContent="flex-end" row gap={10} {...props}>
+          <SheetFooter
+            {...props}
+            className={twMerge('justify-end gap-[10px] flex-row', props.className)}
+          >
             {isEditing && (
-              <Box>
+              <Box className="overflow-hidden border-continuous">
                 <Button reverse onPress={handleDelete}>
                   {t('Supprimer')}
                 </Button>
               </Box>
             )}
-            <Box>
+            <Box className="overflow-hidden border-continuous">
               <Button onPress={handleSave}>{t('Sauvegarder')}</Button>
             </Box>
           </SheetFooter>
         )
       }
     >
-      <SheetView paddingHorizontal={20} paddingTop={20}>
+      <SheetView className="pt-[20px] px-[20px]">
         {mode === 'select' ? (
           // Selection mode - show list of existing bookmarks
-          <Box>
-            <Text bold marginBottom={10}>
-              {t('Déplacer un marque-page existant')}
-            </Text>
+          <Box className="overflow-hidden border-continuous">
+            <Text className="font-bold mb-[10px]">{t('Déplacer un marque-page existant')}</Text>
             {existingBookmarks.map(bm => (
               <BookmarkListItem key={bm.id} onPress={() => handleSelectExistingBookmark(bm)}>
                 <IonIcon name="bookmark" size={18} color={bm.color} />
-                <Box flex ml={10}>
-                  <Text bold numberOfLines={1}>
+                <Box className="overflow-hidden border-continuous flex-[1] ml-[10px]">
+                  <Text className="font-bold" numberOfLines={1}>
                     {bm.name}
                   </Text>
-                  <Text fontSize={12} color="grey">
+                  <Text className="text-[12px] text-grey">
                     {formatReference(bm.book, bm.chapter, bm.verse)}
                   </Text>
                 </Box>
               </BookmarkListItem>
             ))}
 
-            <Box marginTop={10}>
+            <Box className="overflow-hidden border-continuous mt-[10px]">
               <Button
                 onPress={() => {
                   setMode('create')
@@ -269,16 +312,16 @@ const BookmarkModal = ({
               </Button>
             </Box>
 
-            <Box marginTop={10}>
-              <Text fontSize={12} color="grey" textAlign="center">
+            <Box className="overflow-hidden border-continuous mt-[10px]">
+              <Text className="text-[12px] text-grey text-center">
                 {t('Marque-pages')}: {bookmarksCount}/{MAX_BOOKMARKS}
               </Text>
             </Box>
           </Box>
         ) : (
           // Create/Edit mode - show the form
-          <Box gap={10}>
-            <HStack alignItems="center">
+          <Box className="overflow-hidden border-continuous gap-[10px]">
+            <HStack className="items-center">
               <IonIcon name="bookmark" size={24} color={selectedColor} />
               <StyledTextInput
                 placeholder={getDefaultBookmarkName()}
@@ -287,7 +330,7 @@ const BookmarkModal = ({
                 style={{ flex: 1 }}
               />
             </HStack>
-            <Box h={200}>
+            <Box className="overflow-hidden border-continuous h-[200px]">
               <ColorPicker
                 value={selectedColor}
                 onChangeJS={(color: ColorFormatsObject) => setSelectedColor(color.hex)}
@@ -295,8 +338,8 @@ const BookmarkModal = ({
             </Box>
 
             {!isEditing && (
-              <Box marginTop={20}>
-                <Text fontSize={12} color="grey">
+              <Box className="overflow-hidden border-continuous mt-[20px]">
+                <Text className="text-[12px] text-grey">
                   {t('Marque-pages')}: {bookmarksCount}/{MAX_BOOKMARKS}
                 </Text>
               </Box>

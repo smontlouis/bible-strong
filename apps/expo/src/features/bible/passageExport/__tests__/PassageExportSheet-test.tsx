@@ -1,13 +1,11 @@
 import React, { createRef } from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-
 import type { SheetRef } from '~common/sheet'
 import PassageExportSheet from '../PassageExportSheet'
 import { createPassageExport } from '../createPassageExport'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as Sharing from 'expo-sharing'
 import { toast } from '~helpers/toast'
-
 const mockReduxState = {
   user: {
     id: null,
@@ -44,7 +42,7 @@ jest.mock('expo-sharing', () => ({
   shareAsync: jest.fn(),
 }))
 
-jest.mock('@emotion/react', () => ({
+jest.mock('~themes/ThemeProvider', () => ({
   useTheme: () => ({ colors: { reverse: '#fff' } }),
 }))
 

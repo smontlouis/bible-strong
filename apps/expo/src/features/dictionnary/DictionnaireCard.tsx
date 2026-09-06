@@ -1,8 +1,12 @@
-import React from 'react'
-import styled from '@emotion/native'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, Theme, useTheme } from '~themes/ThemeProvider'
 import * as Icon from '@expo/vector-icons'
-import { useTheme, Theme } from '@emotion/react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import * as NativeUI from 'react-native'
+import { twMerge } from '~common/ui/classNames'
 import truncHTML from 'trunc-html'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
@@ -10,48 +14,117 @@ import Text from '~common/ui/Text'
 
 import StylizedHTMLView from '~common/StylizedHTMLView'
 
-import { cleanParams, wp } from '~helpers/utils'
-import truncate from '~helpers/truncate'
 import { useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import { SheetScrollView } from '~common/sheet'
-import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
 import { StudyNavigateBibleType } from '~common/types'
+import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
+import truncate from '~helpers/truncate'
+import { cleanParams, wp } from '~helpers/utils'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
 const itemWidth = slideWidth
 
-const Container = styled(Box)({
-  width: itemWidth,
-  flex: 1,
-  paddingHorizontal: itemHorizontalMargin,
-  paddingBottom: 18,
-})
+const Container = (
+  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const TitleBorder = styled.View(({ theme }) => ({
-  marginTop: 10,
-  width: 35,
-  height: 3,
-  backgroundColor: theme.colors.secondary,
-}))
+  const classStyles = useResolveClassNames(twMerge('flex-[1] pb-[18px]', className))
+  return (
+    <Box
+      {...props}
+      style={
+        [
+          classStyles,
+          { width: itemWidth, paddingHorizontal: itemHorizontalMargin },
+          props.style,
+        ] as UIComponentProps<typeof Box>['style']
+      }
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
-const ViewItem = styled.View(() => ({
-  marginTop: 15,
-}))
+const TitleBorder = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const OpenStrongIcon = styled.TouchableOpacity(() => ({
-  paddingTop: 5,
-  flexDirection: 'row',
-  alignItems: 'center',
-}))
+  const classStyles = useResolveClassNames(
+    twMerge('mt-[10px] w-[35px] h-[3px] bg-secondary', className)
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
-const IconFeather = styled(Icon.Feather)(({ theme }) => ({
-  paddingTop: 5,
-  color: theme.colors.default,
-}))
+const ViewItem = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('mt-[15px]', className))
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
+
+const OpenStrongIcon = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('pt-[5px] flex-row items-center', className))
+  return (
+    <NativeUI.TouchableOpacity
+      {...props}
+      style={
+        [classStyles, {}, props.style] as UIComponentProps<
+          typeof NativeUI.TouchableOpacity
+        >['style']
+      }
+    />
+  )
+}
+
+const IconFeather = (
+  componentProps: Omit<UIComponentProps<typeof Icon.Feather>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('pt-[5px] text-default', className))
+  return (
+    <Icon.Feather
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.Feather>['style']}
+    />
+  )
+}
 
 const smallTextStyle = (theme: Theme) => ({
   lineHeight: 18,
@@ -85,6 +158,8 @@ const DictionnaireCard = ({
   sourceLabel,
   routeParams,
 }: Props) => {
+  const stylingTheme = useStylingTheme()
+
   const theme = useTheme()
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
@@ -127,10 +202,13 @@ const DictionnaireCard = ({
 
   return (
     <Container>
-      <Box paddingTop={10}>
-        <Box>
+      <Box className="overflow-hidden border-continuous pt-[10px]">
+        <Box className="overflow-hidden border-continuous">
           <OpenStrongIcon onPress={openDictionnaire}>
-            <Text title fontSize={22} flex>
+            <Text
+              className="text-[22px] flex-[1]"
+              style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+            >
               {truncate(word, 7)}
             </Text>
             {isSelectionMode ? (
@@ -139,11 +217,7 @@ const DictionnaireCard = ({
               <IconFeather name="maximize-2" size={20} />
             )}
           </OpenStrongIcon>
-          {sourceLabel ? (
-            <Text fontSize={11} color="tertiary">
-              {sourceLabel}
-            </Text>
-          ) : null}
+          {sourceLabel ? <Text className="text-[11px] text-tertiary">{sourceLabel}</Text> : null}
           <TitleBorder />
         </Box>
       </Box>

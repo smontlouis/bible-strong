@@ -1,14 +1,12 @@
-import defaultTheme from './default'
-import colors from './colors'
-import sepiaColors from './sepiaColors'
-import darkColors from './darkColors'
 import blackColors from './blackColors'
-import natureColors from './natureColors'
-import sunsetColors from './sunsetColors'
+import colors from './colors'
+import darkColors from './darkColors'
+import defaultTheme from './default'
 import mauveColors from './mauveColors'
+import natureColors from './natureColors'
 import nightColors from './nightColors'
-
-import '@emotion/react'
+import sepiaColors from './sepiaColors'
+import sunsetColors from './sunsetColors'
 
 interface GetTheme {
   [theme: string]: Theme
@@ -54,9 +52,14 @@ const getTheme: GetTheme = {
 export default getTheme
 
 export type Theme = typeof baseTheme
-type BaseTheme = typeof baseTheme
 
-declare module '@emotion/react' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  export interface Theme extends BaseTheme {}
-}
+export const themeNames = [
+  'default',
+  'sepia',
+  'nature',
+  'sunset',
+  'black',
+  'dark',
+  'mauve',
+  'night',
+] as const

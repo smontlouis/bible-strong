@@ -1,9 +1,8 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { getDefaultStore } from 'jotai/vanilla'
 import React from 'react'
 import { Alert, Platform, Switch } from 'react-native'
 import { useTranslation } from 'react-i18next'
-
 import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -35,7 +34,6 @@ import { bibleDataRefreshSignalAtom } from '~state/app'
 import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
 import useConnection from '~helpers/useConnection'
 import { getLanguage } from '~i18n'
-
 const megabyteFormatters = new Map<string, Intl.NumberFormat>()
 
 const formatMegabyteValue = (bytes: number, language: string) => {
@@ -219,15 +217,11 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
       <SheetScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 22, paddingBottom: 32 }}
       >
-        <Box row alignItems="center" gap={16}>
-          <Box width={78} height={94} center bg="lightGrey" borderRadius={14}>
-            <Box position="absolute" left={0} top={0} bottom={0} width={6} bg="primary" />
+        <Box className="overflow-hidden border-continuous flex-row items-center gap-[16px]">
+          <Box className="overflow-hidden border-continuous w-[78px] h-[94px] items-center justify-center bg-light-grey rounded-[14px]">
+            <Box className="overflow-hidden border-continuous absolute left-[0px] top-[0px] bottom-[0px] w-[6px] bg-primary" />
             <Text
-              width={66}
-              pl={6}
-              fontSize={22}
-              bold
-              textAlign="center"
+              className="w-[66px] pl-[6px] text-[22px] font-bold text-center"
               numberOfLines={1}
               adjustsFontSizeToFit
               minimumFontScale={0.55}
@@ -235,79 +229,78 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
               {version.id}
             </Text>
           </Box>
-          <Box flex gap={6}>
-            <Box row alignItems="center">
-              <Text flex fontSize={22} bold numberOfLines={2}>
+          <Box className="overflow-hidden border-continuous flex-[1] gap-[6px]">
+            <Box className="overflow-hidden border-continuous flex-row items-center">
+              <Text className="flex-[1] text-[22px] font-bold" numberOfLines={2}>
                 {version.displayName || version.name}
               </Text>
               {indexMark && (
-                <Text ml={8} fontSize={22} bold style={{ fontFamily: serifFontFamily }}>
+                <Text
+                  className="ml-[8px] text-[22px] font-bold"
+                  style={{ fontFamily: serifFontFamily }}
+                >
                   {indexMark}
                 </Text>
               )}
             </Box>
             {!!version.c && (
-              <Text color="tertiary" fontSize={13} numberOfLines={2}>
+              <Text className="text-tertiary text-[13px]" numberOfLines={2}>
                 {version.c}
               </Text>
             )}
           </Box>
         </Box>
 
-        <Box row mt={22} py={14} borderTopWidth={1} borderBottomWidth={1} borderColor="border">
-          <Box flex alignItems="center" gap={4}>
-            <Text color="tertiary" fontSize={9} bold>
+        <Box className="border-continuous overflow-hidden flex-row mt-[22px] py-[14px] border-t-[1px] border-b-[1px] border-border">
+          <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
+            <Text className="text-tertiary text-[9px] font-bold">
               {t('bibleOfflineDetails.language').toUpperCase()}
             </Text>
-            <Text fontSize={13} bold>
-              {languageLabel}
-            </Text>
+            <Text className="text-[13px] font-bold">{languageLabel}</Text>
           </Box>
-          <Box width={1} bg="border" />
-          <Box flex alignItems="center" gap={4}>
-            <Text color="tertiary" fontSize={9} bold>
+          <Box className="overflow-hidden border-continuous w-[1px] bg-border" />
+          <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
+            <Text className="text-tertiary text-[9px] font-bold">
               {t('bibleOfflineDetails.books').toUpperCase()}
             </Text>
-            <Text fontSize={13} bold>
-              {bookCount}
-            </Text>
+            <Text className="text-[13px] font-bold">{bookCount}</Text>
           </Box>
-          <Box width={1} bg="border" />
-          <Box flex alignItems="center" gap={4}>
-            <Text color="tertiary" fontSize={9} bold>
+          <Box className="overflow-hidden border-continuous w-[1px] bg-border" />
+          <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
+            <Text className="text-tertiary text-[9px] font-bold">
               {t('bibleOfflineDetails.installedSize').toUpperCase()}
             </Text>
-            <Text fontSize={13} bold>
+            <Text className="text-[13px] font-bold">
               {formatSize(bibleArtifact.installedBytes)}
             </Text>
           </Box>
         </Box>
 
         {activeQueue && (
-          <Box mt={20} p={14} borderWidth={1} borderColor="border" borderRadius={14}>
-            <Box row alignItems="center">
+          <Box className="border-continuous overflow-hidden mt-[20px] p-[14px] border-[1px] border-border rounded-[14px]">
+            <Box className="overflow-hidden border-continuous flex-row items-center">
               <Progress progress={Math.max(progress, 0.04)} size={30} thickness={3} />
-              <Box ml={12} flex>
-                <Text bold>{t('bibleOfflineDetails.downloading')}</Text>
-                <Text color="tertiary" fontSize={12} mt={2}>
+              <Box className="overflow-hidden border-continuous ml-[12px] flex-[1]">
+                <Text className="font-bold">{t('bibleOfflineDetails.downloading')}</Text>
+                <Text className="text-tertiary text-[12px] mt-[2px]">
                   {Math.round(progress * 100)} %
                 </Text>
               </Box>
-              <TouchableBox onPress={cancelDownload} px={8} py={6}>
-                <Text color="quart" bold>
-                  {t('bibleOfflineDetails.cancel')}
-                </Text>
+              <TouchableBox
+                className="overflow-hidden border-continuous px-[8px] py-[6px]"
+                onPress={cancelDownload}
+              >
+                <Text className="text-quart font-bold">{t('bibleOfflineDetails.cancel')}</Text>
               </TouchableBox>
             </Box>
           </Box>
         )}
 
         {!activeQueue && failedQueue && (
-          <Box mt={20} p={14} borderWidth={1} borderColor="quart" borderRadius={14}>
-            <Text color="quart" bold>
-              {t('bibleOfflineDetails.downloadFailed')}
-            </Text>
+          <Box className="border-continuous overflow-hidden mt-[20px] p-[14px] border-[1px] border-quart rounded-[14px]">
+            <Text className="text-quart font-bold">{t('bibleOfflineDetails.downloadFailed')}</Text>
             <TouchableBox
+              className="overflow-hidden border-continuous pt-[10px]"
               onPress={() => {
                 if (failedQueue.item.id === indexId && bibleInstalled === false) {
                   downloadBibleAndIndex()
@@ -315,42 +308,40 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
                 }
                 downloadManager.retry(failedQueue.item.id)
               }}
-              pt={10}
             >
-              <Text color="primary" bold>
-                {t('Réessayer')}
-              </Text>
+              <Text className="text-primary font-bold">{t('Réessayer')}</Text>
             </TouchableBox>
           </Box>
         )}
 
         {!activeQueue && !failedQueue && !availabilityReady && (
-          <Box row alignItems="center" justifyContent="center" py={32}>
+          <Box className="overflow-hidden border-continuous flex-row items-center justify-center py-[32px]">
             <FeatherIcon name="clock" size={17} color="tertiary" />
-            <Text ml={9} color="tertiary">
-              {t('bibleOfflineDetails.checking')}
-            </Text>
+            <Text className="ml-[9px] text-tertiary">{t('bibleOfflineDetails.checking')}</Text>
           </Box>
         )}
 
         {!activeQueue && !failedQueue && availabilityReady && (
-          <Box mt={22} p={16} bg="lightGrey" borderRadius={22} gap={14}>
+          <Box className="overflow-hidden border-continuous mt-[22px] p-[16px] bg-light-grey rounded-[22px] gap-[14px]">
             {indexMark && indexArtifact && !indexInstalled && (
-              <Box row alignItems="center" p={14} bg="reverse" borderRadius={17}>
-                <Box size={42} center bg="lightGrey" borderRadius={13}>
-                  <Text fontSize={20} bold style={{ fontFamily: serifFontFamily }}>
+              <Box className="overflow-hidden border-continuous flex-row items-center p-[14px] bg-reverse rounded-[17px]">
+                <Box
+                  className="overflow-hidden border-continuous items-center justify-center bg-light-grey rounded-[13px]"
+                  style={{ width: 42, height: 42 }}
+                >
+                  <Text className="text-[20px] font-bold" style={{ fontFamily: serifFontFamily }}>
                     {indexMark}
                   </Text>
                 </Box>
-                <Box ml={12} flex gap={3}>
-                  <Text fontSize={14} bold>
+                <Box className="overflow-hidden border-continuous ml-[12px] flex-[1] gap-[3px]">
+                  <Text className="text-[14px] font-bold">
                     {t(
                       strongVersionId
                         ? 'bibleOfflineDetails.includeStrong'
                         : 'bibleOfflineDetails.includeInterlinear'
                     )}
                   </Text>
-                  <Text color="tertiary" fontSize={11}>
+                  <Text className="text-tertiary text-[11px]">
                     {t('bibleOfflineDetails.indexOptionSubtitle', {
                       size: formatSize(indexArtifact.installedBytes),
                     })}
@@ -366,8 +357,8 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
               </Box>
             )}
 
-            <Box row alignItems="center" gap={10}>
-              <Box flex>
+            <Box className="overflow-hidden border-continuous flex-row items-center gap-[10px]">
+              <Box className="overflow-hidden border-continuous flex-[1]">
                 <Button
                   onPress={
                     bibleInstalled
@@ -379,7 +370,7 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
                   disabled={!isConnected || (bibleInstalled === true && !shouldDownloadIndex)}
                   leftIcon={
                     bibleInstalled === false ? (
-                      <Box mr={9}>
+                      <Box className="overflow-hidden border-continuous mr-[9px]">
                         <FeatherIcon name="download" size={18} color="white" />
                       </Box>
                     ) : undefined
@@ -396,15 +387,11 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
               </Box>
               {bibleInstalled && (
                 <TouchableBox
+                  className="border-continuous overflow-hidden items-center justify-center bg-reverse rounded-[24px] border-[1px] border-border"
                   accessibilityRole="button"
                   accessibilityLabel={t('bibleOfflineDetails.removeBible')}
                   onPress={removeBible}
-                  size={48}
-                  center
-                  bg="reverse"
-                  borderRadius={24}
-                  borderWidth={1}
-                  borderColor="border"
+                  style={{ width: 48, height: 48 }}
                 >
                   <FeatherIcon name="trash-2" size={20} color="quart" />
                 </TouchableBox>

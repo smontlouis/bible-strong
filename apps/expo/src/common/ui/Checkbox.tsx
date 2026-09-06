@@ -1,3 +1,6 @@
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { twMerge } from '~common/ui/classNames'
 import Box, { BoxProps } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 
@@ -25,9 +28,21 @@ const Checkbox = ({
   fillChecked = false,
   ...boxProps
 }: CheckboxProps) => {
+  const stylingTheme = useStylingTheme()
+
   if (variant === 'icon') {
     return (
-      <Box center width={size} height={size} {...boxProps}>
+      <Box
+        {...boxProps}
+        style={[{ width: size, height: size }, boxProps.style]}
+        className={twMerge(
+          'overflow-hidden border-continuous',
+          twMerge(
+            'overflow-hidden border-continuous items-center justify-center',
+            boxProps.className
+          )
+        )}
+      >
         <FeatherIcon
           name={checked ? 'check-square' : 'square'}
           size={iconSize ?? size}
@@ -39,14 +54,26 @@ const Checkbox = ({
 
   return (
     <Box
-      width={size}
-      height={size}
-      borderRadius={6}
-      borderWidth={2}
-      borderColor={checked ? checkedColor : uncheckedColor}
-      bg={checked && fillChecked ? checkedColor : undefined}
-      center
       {...boxProps}
+      style={[
+        {
+          width: size,
+          height: size,
+          backgroundColor: resolveThemeColor(
+            stylingTheme,
+            checked && fillChecked ? checkedColor : undefined
+          ),
+          borderColor: resolveThemeColor(stylingTheme, checked ? checkedColor : uncheckedColor),
+        },
+        boxProps.style,
+      ]}
+      className={twMerge(
+        'overflow-hidden border-continuous',
+        twMerge(
+          'overflow-hidden border-continuous rounded-[6px] border-[2px] items-center justify-center',
+          boxProps.className
+        )
+      )}
     >
       {checked && (
         <FeatherIcon

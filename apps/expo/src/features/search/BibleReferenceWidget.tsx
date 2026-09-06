@@ -1,5 +1,6 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { TouchableOpacity } from 'react-native'
-
 import { getBook } from '~helpers/bibleBookCatalog'
 import Box, { HStack } from '~common/ui/Box'
 import { Chip } from '~common/ui/NewChip'
@@ -13,7 +14,6 @@ import i18n from '~i18n'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { getBibleViewParamsForReferenceSegment } from './searchNavigation'
-
 export interface ParsedSegment {
   book: number
   chapter: number
@@ -80,6 +80,8 @@ const BibleReferenceWidget = ({ searchValue }: Props) => {
 }
 
 const ReferenceItem = ({ segment }: { segment: ParsedSegment }) => {
+  const stylingTheme = useStylingTheme()
+
   const pushRouteOnce = usePushRouteOnce()
   const version = useDefaultBibleVersion()
 
@@ -110,9 +112,12 @@ const ReferenceItem = ({ segment }: { segment: ParsedSegment }) => {
         })
       }
     >
-      <Box pt={15} pb={20} borderBottomWidth={1} borderColor="border" px={20}>
-        <HStack alignItems="center" gap={4} mb={4}>
-          <Text title fontSize={14}>
+      <Box className="border-continuous overflow-hidden pt-[15px] pb-[20px] border-b-[1px] border-border px-[20px]">
+        <HStack className="overflow-hidden border-continuous items-center gap-[4px] mb-[4px]">
+          <Text
+            className="text-[14px]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {title}
           </Text>
           <Chip>{version}</Chip>

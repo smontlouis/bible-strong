@@ -16,14 +16,10 @@ const Fab = ({
 }) => {
   return (
     <TouchableBox
+      className="overflow-hidden border-continuous w-[50px] h-[50px] rounded-[30px] bg-primary items-center justify-center"
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
       onPress={onPress}
-      w={50}
-      h={50}
-      borderRadius={30}
-      bg="primary"
-      center
     >
       <FeatherIcon name={icon} size={18} color="white" />
     </TouchableBox>

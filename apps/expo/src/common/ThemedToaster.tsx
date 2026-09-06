@@ -1,6 +1,5 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { Toaster } from 'sonner-native'
-
 const ThemedToaster = () => {
   const theme = useTheme()
 

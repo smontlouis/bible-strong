@@ -1,4 +1,4 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import type { GestureType } from 'react-native-gesture-handler'
 import { GestureDetector } from 'react-native-gesture-handler'
@@ -8,7 +8,6 @@ import type { SheetFooterProps } from '~common/sheet'
 import { AnimatedBox } from '~common/ui/Box'
 import { TAB_CONTAINER_PADDING } from '../constants'
 import TabButton from './TabButton'
-
 interface VersesModalFooterProps {
   sheetFooterProps?: SheetFooterProps
   panGesture: GestureType
@@ -30,12 +29,7 @@ const VersesModalFooter = ({
 
   return (
     <AnimatedBox
-      bg="lightGrey"
-      borderRadius={18}
-      p={3}
-      mx={16}
-      mb={5}
-      position="relative"
+      className="bg-light-grey rounded-[18px] p-[3px] mx-[16px] mb-[5px] relative"
       style={{
         transitionProperty: 'margin',
         transitionDuration: 300,

@@ -12,7 +12,6 @@ import EventDetailVerse from './EventDetailVerse'
 import { getEvents } from './events'
 import { TimelineEvent, TimelineEventDetail } from './types'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-
 const imageWidth = wp(80, true)
 const sliderWidth = wp(100, true)
 
@@ -38,22 +37,22 @@ const Media = ({
   }, [])
 
   return (
-    <Box py={20}>
+    <Box className="overflow-hidden border-continuous py-[20px]">
       {!!scriptures?.length && (
-        <Box px={20} mt={20}>
-          <Paragraph fontFamily="title" mb={10}>
+        <Box className="overflow-hidden border-continuous px-[20px] mt-[20px]">
+          <Paragraph className="mb-[10px]" fontFamily="title">
             {t('Versets')}
           </Paragraph>
           {scriptures.map(scripture => (
-            <Box key={scripture}>
+            <Box className="overflow-hidden border-continuous" key={scripture}>
               <EventDetailVerse verses={scripture} />
             </Box>
           ))}
         </Box>
       )}
       {!!images?.length && (
-        <Box py={20} bg="rgb(18,45,66)" height={400}>
-          <Paragraph fontFamily="title" mb={20} px={20} color="white">
+        <Box className="overflow-hidden border-continuous py-[20px] bg-[rgb(18,45,66)] h-[400px]">
+          <Paragraph className="mb-[20px] px-[20px] text-[white]" fontFamily="title">
             {t('Images')}
           </Paragraph>
           <Carousel
@@ -65,7 +64,7 @@ const Media = ({
               justifyContent: 'center',
             }}
             renderItem={({ item }: { item: TimelineEventDetail['images'][0] }) => (
-              <Box>
+              <Box className="overflow-hidden border-continuous">
                 <Image
                   style={{ width: imageWidth, height: imageWidth }}
                   source={{
@@ -73,7 +72,7 @@ const Media = ({
                   }}
                   contentFit="contain"
                 />
-                <Paragraph mt={15} scale={-3} textAlign="center" color="white">
+                <Paragraph className="mt-[15px] text-center text-[white]" scale={-3}>
                   {item.caption}
                 </Paragraph>
               </Box>
@@ -92,8 +91,8 @@ const Media = ({
         </Box>
       )}
       {!!related?.length && (
-        <Box p={20}>
-          <Paragraph fontFamily="title" mb={20}>
+        <Box className="overflow-hidden border-continuous p-[20px]">
+          <Paragraph className="mb-[20px]" fontFamily="title">
             {t('Évenements associés')}
           </Paragraph>
           {related.map(r => (
@@ -113,11 +112,21 @@ const Media = ({
                 }
               }}
             >
-              <Box lightShadow bg="reverse" p={20} rounded mb={20} row>
-                <Paragraph flex key={r.slug}>
+              <Box
+                className="overflow-hidden border-continuous bg-reverse p-[20px] rounded-[20px] mb-[20px] flex-row"
+                style={{
+                  shadowColor: 'rgb(89,131,240)',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 7,
+                  elevation: 1,
+                  overflow: 'visible',
+                }}
+              >
+                <Paragraph className="flex-[1]" key={r.slug}>
                   {r.title}
                 </Paragraph>
-                <Box alignItems="center" row>
+                <Box className="overflow-hidden border-continuous items-center flex-row">
                   <FeatherIcon name="chevron-right" size={22} color="primary" />
                 </Box>
               </Box>

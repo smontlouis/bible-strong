@@ -3,7 +3,6 @@ import React, { useEffect, useMemo } from 'react'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useSelector } from 'react-redux'
 import { useAtom } from 'jotai/react'
-
 import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
@@ -12,9 +11,7 @@ import natureColors from '~themes/natureColors'
 import nightColors from '~themes/nightColors'
 import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
-
 import BibleViewer from './BibleViewer'
-
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { RootState } from '~redux/modules/reducer'
 import { BibleTab, VersionCode } from '../../state/tabs'
@@ -220,7 +217,7 @@ const BibleTabScreen = ({
   )
   const content =
     entityReference && entityResolutionStatus === 'partial' ? (
-      <Box flex>
+      <Box className="overflow-hidden border-continuous flex-[1]">
         <BiblePartialReferenceNotice verseKeys={missingVerseKeys} />
         {bibleContent}
       </Box>

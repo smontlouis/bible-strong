@@ -1,53 +1,110 @@
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useState } from 'react'
-import { TouchableOpacity } from 'react-native'
-import styled from '@emotion/native'
-import { useTheme } from '@emotion/react'
-import type { ColorFormatsObject } from 'reanimated-color-picker'
 import { useTranslation } from 'react-i18next'
+import * as NativeUI from 'react-native'
+import { TouchableOpacity } from 'react-native'
+import type { ColorFormatsObject } from 'reanimated-color-picker'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
 import { SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme as useAppTheme, useTheme } from '~themes/ThemeProvider'
 
-import Box, { HStack, TouchableBox } from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Button from '~common/ui/Button'
 import ColorPicker from '~common/ColorPicker'
 import { Sheet } from '~common/sheet'
-import type { HighlightType } from '~redux/modules/user'
-import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import Box, { HStack, TouchableBox } from '~common/ui/Box'
+import Button from '~common/ui/Button'
+import Text from '~common/ui/Text'
 import { HIGHLIGHT_BACKGROUND_OPACITY_HEX, getContrastTextColor } from '~helpers/highlightUtils'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import type { HighlightType } from '~redux/modules/user'
 import { FeatherIcon } from './ui/Icon'
 
-const StyledTextInput = styled(SheetTextInput)(({ theme }) => ({
-  flex: 1,
-  fontSize: 16,
-  paddingVertical: 10,
-  paddingHorizontal: 12,
-  backgroundColor: theme.colors.opacity5,
-  borderRadius: 8,
-  color: theme.colors.default,
-}))
+const StyledTextInput = (
+  componentProps: Omit<UIComponentProps<typeof SheetTextInput>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const TypeSelectorContainer = styled.View({
-  flexDirection: 'row',
-  marginTop: 10,
-})
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'flex-[1] text-[16px] py-[10px] px-[12px] bg-opacity5 rounded-[8px] text-default',
+      className
+    )
+  )
+  return (
+    <SheetTextInput
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof SheetTextInput>['style']}
+    />
+  )
+}
 
-const TypeButton = styled(TouchableOpacity)<{ isSelected: boolean }>(({ theme, isSelected }) => ({
-  flex: 1,
-  paddingVertical: 10,
-  paddingHorizontal: 8,
-  borderRadius: 8,
-  backgroundColor: isSelected ? theme.colors.primary : theme.colors.opacity5,
-  alignItems: 'center',
-}))
+const TypeSelectorContainer = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const PreviewContainer = styled.View(({ theme }) => ({
-  padding: 15,
-  borderRadius: 8,
-  backgroundColor: theme.colors.opacity5,
-  marginTop: 10,
-  marginBottom: 15,
-  height: 80,
-}))
+  const classStyles = useResolveClassNames(twMerge('flex-row mt-[10px]', className))
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
+
+const TypeButton = (
+  componentProps: Omit<
+    UIComponentProps<typeof TouchableOpacity>,
+    keyof { isSelected: boolean } | 'theme'
+  > &
+    Omit<{ isSelected: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { isSelected } = props
+  const classStyles = useResolveClassNames(
+    twMerge('flex-[1] py-[10px] px-[8px] rounded-[8px] items-center', className)
+  )
+  return (
+    <TouchableOpacity
+      {...props}
+      style={
+        [
+          classStyles,
+          { backgroundColor: isSelected ? theme.colors.primary : theme.colors.opacity5 },
+          props.style,
+        ] as UIComponentProps<typeof TouchableOpacity>['style']
+      }
+    />
+  )
+}
+
+const PreviewContainer = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('p-[15px] rounded-[8px] bg-opacity5 mt-[10px] mb-[15px] h-[80px]', className)
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
 export type ColorEditModalProps = {
   modalRef: React.RefObject<SheetRef | null>
@@ -111,13 +168,10 @@ const ColorEditModal = ({
           rightComponent={
             onDelete ? (
               <TouchableBox
+                className="overflow-hidden border-continuous w-[48px] h-[48px] items-center justify-center mr-[10px]"
                 accessibilityLabel={t('Supprimer')}
                 accessibilityRole="button"
                 onPress={onDelete}
-                width={48}
-                height={48}
-                center
-                marginRight={10}
               >
                 <FeatherIcon name="trash-2" size={16} color="quart" />
               </TouchableBox>
@@ -126,11 +180,11 @@ const ColorEditModal = ({
         />
       }
     >
-      <Box paddingHorizontal={20} pb={20}>
-        <Box height={250}>
+      <Box className="overflow-hidden border-continuous px-[20px] pb-[20px]">
+        <Box className="overflow-hidden border-continuous h-[250px]">
           <ColorPicker value={chosenHex} onChangeJS={handleColorChange} />
         </Box>
-        <Box row alignItems="center">
+        <Box className="overflow-hidden border-continuous flex-row items-center">
           <StyledTextInput
             placeholder={t('Nom de la couleur (optionnel)')}
             placeholderTextColor={theme.colors.grey}
@@ -140,10 +194,8 @@ const ColorEditModal = ({
           />
         </Box>
 
-        <Box my={40}>
-          <Text fontSize={12} color="tertiary">
-            {t('Type de surlignage')}
-          </Text>
+        <Box className="overflow-hidden border-continuous my-[40px]">
+          <Text className="text-[12px] text-tertiary">{t('Type de surlignage')}</Text>
           <TypeSelectorContainer>
             <TypeButton
               accessibilityLabel={t('Fond')}
@@ -153,7 +205,12 @@ const ColorEditModal = ({
               onPress={() => setChosenType('background')}
               style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
             >
-              <Text fontSize={12} bold color={chosenType === 'background' ? 'reverse' : 'default'}>
+              <Text
+                className={twMerge(
+                  chosenType === 'background' ? 'text-reverse' : 'text-default',
+                  'text-[12px] font-bold'
+                )}
+              >
                 {t('Fond')}
               </Text>
             </TypeButton>
@@ -165,7 +222,12 @@ const ColorEditModal = ({
               onPress={() => setChosenType('textColor')}
               style={{ borderRadius: 0 }}
             >
-              <Text fontSize={12} bold color={chosenType === 'textColor' ? 'reverse' : 'default'}>
+              <Text
+                className={twMerge(
+                  chosenType === 'textColor' ? 'text-reverse' : 'text-default',
+                  'text-[12px] font-bold'
+                )}
+              >
                 {t('Texte')}
               </Text>
             </TypeButton>
@@ -177,23 +239,24 @@ const ColorEditModal = ({
               onPress={() => setChosenType('underline')}
               style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
             >
-              <Text fontSize={12} bold color={chosenType === 'underline' ? 'reverse' : 'default'}>
+              <Text
+                className={twMerge(
+                  chosenType === 'underline' ? 'text-reverse' : 'text-default',
+                  'text-[12px] font-bold'
+                )}
+              >
                 {t('Soulignement')}
               </Text>
             </TypeButton>
           </TypeSelectorContainer>
 
           <PreviewContainer>
-            <HStack gap={10}>
-              <Text fontSize={12} color="tertiary" marginBottom={8}>
-                {t('Aperçu')}
-              </Text>
-              <Text fontSize={12} color="default">
-                {chosenHex}
-              </Text>
+            <HStack className="overflow-hidden border-continuous gap-[10px]">
+              <Text className="text-[12px] text-tertiary mb-[8px]">{t('Aperçu')}</Text>
+              <Text className="text-[12px] text-default">{chosenHex}</Text>
             </HStack>
             <Text
-              fontSize={18}
+              className="text-[18px]"
               style={
                 chosenType === 'background'
                   ? {

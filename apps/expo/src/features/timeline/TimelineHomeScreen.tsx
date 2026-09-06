@@ -1,6 +1,5 @@
 import React from 'react'
 import { MenuView } from '~common/ui/MenuView'
-
 import { type SheetRef } from '~common/sheet'
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
@@ -17,7 +16,6 @@ import { useResourceLanguage } from 'src/state/resourcesLanguage'
 import TimelineHomeDetailModal from './TimelineHomeDetailModal'
 import TimelineItem from './TimelineItem'
 import { getEvents } from './events'
-
 interface Props {
   hasBackButton?: boolean
   isFormSheet?: boolean
@@ -55,7 +53,7 @@ const TimelineHomeScreen = ({ hasBackButton, isFormSheet = false, onSectionPress
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <Header
           hasBackButton={showBackButton}
           title={t('La Chronologie biblique')}
@@ -90,7 +88,7 @@ const TimelineHomeScreen = ({ hasBackButton, isFormSheet = false, onSectionPress
                 }
               }}
             >
-              <Box row center height={60} width={60}>
+              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
                 <FeatherIcon name="more-vertical" size={18} />
               </Box>
             </MenuView>

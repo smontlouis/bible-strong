@@ -1,33 +1,38 @@
-import React from 'react'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import distanceInWords from 'date-fns/formatDistance'
-import styled from '@emotion/native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import React from 'react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
 import DictionnaryIcon from '~common/DictionnaryIcon'
+import EntityChipList from '~common/EntityChipList'
 import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
-import EntityChipList from '~common/EntityChipList'
+import type { TagsObj } from '~common/types'
 import Border from '~common/ui/Border'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import formatVerseContent from '~helpers/formatVerseContent'
-import { linkTypeConfig } from '~helpers/fetchOpenGraphData'
-import { getDateLocale, type ActiveLanguage } from '~helpers/languageUtils'
-import truncate from '~helpers/truncate'
-import { getNoteTitle } from '~helpers/getNoteTitle'
-import type { TagsObj } from '~common/types'
-import { LinkType, Link as LinkModel, Note, Study } from '~redux/modules/user'
-import { GroupedWordAnnotation } from '~redux/selectors/bible'
-import type { TagStrongItemData } from './TagStrongItem'
-import { useMountTime } from '~helpers/useMountTime'
-import type { TagNaveItemData } from './TagNaveItem'
-import type { TagDictionaryItemData } from './TagDictionaryItem'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
 import { createExternalLinkEndpointFromLink } from '~features/studyRelations/endpoints'
-import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import { linkTypeConfig } from '~helpers/fetchOpenGraphData'
+import formatVerseContent from '~helpers/formatVerseContent'
+import { getNoteTitle } from '~helpers/getNoteTitle'
+import { getDateLocale, type ActiveLanguage } from '~helpers/languageUtils'
+import truncate from '~helpers/truncate'
+import { useMountTime } from '~helpers/useMountTime'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { Link as LinkModel, LinkType, Note, Study } from '~redux/modules/user'
+import { GroupedWordAnnotation } from '~redux/selectors/bible'
+import type { TagDictionaryItemData } from './TagDictionaryItem'
+import type { TagNaveItemData } from './TagNaveItem'
+import type { TagStrongItemData } from './TagStrongItem'
 
 export type HighlightData = {
   date: number
@@ -72,23 +77,48 @@ export type TagSection = {
 }
 
 // Styled components
-const LinkTypeIcon = styled(Box)<{ bgColor: string }>(({ bgColor }) => ({
-  width: 24,
-  height: 24,
-  borderRadius: 4,
-  backgroundColor: bgColor,
-  marginRight: 10,
-  alignItems: 'center',
-  justifyContent: 'center',
-}))
+const LinkTypeIcon = (
+  componentProps: Omit<UIComponentProps<typeof Box>, keyof { bgColor: string } | 'theme'> &
+    Omit<{ bgColor: string }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-export const CountChip = styled(Box)(({ theme }) => ({
-  borderRadius: 12,
-  backgroundColor: theme.colors.border,
-  paddingVertical: 2,
-  paddingHorizontal: 8,
-  marginLeft: 8,
-}))
+  const { bgColor } = props
+  const classStyles = useResolveClassNames(
+    twMerge('w-[24px] h-[24px] rounded-[4px] mr-[10px] items-center justify-center', className)
+  )
+  return (
+    <Box
+      {...props}
+      style={
+        [classStyles, { backgroundColor: bgColor }, props.style] as UIComponentProps<
+          typeof Box
+        >['style']
+      }
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
+
+export const CountChip = (
+  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('rounded-[12px] bg-border py-[2px] px-[8px] ml-[8px]', className)
+  )
+  return (
+    <Box
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
 // Components
 export const NoteItem = ({
@@ -100,6 +130,8 @@ export const NoteItem = ({
   t: Translate
   lang: ActiveLanguage
 }) => {
+  const stylingTheme = useStylingTheme()
+
   const pushRouteOnce = usePushRouteOnce()
   const mountTime = useMountTime()
   const location = getFirstVerseLocation(item.verseKeys)
@@ -114,14 +146,15 @@ export const NoteItem = ({
   const noteTitle = getNoteTitle(item, '')
 
   const content = (
-    <Box padding={20}>
-      <Box row justifyContent="space-between">
-        <Text color="darkGrey" bold fontSize={11}>
-          {metadataLabel}
-        </Text>
+    <Box className="overflow-hidden border-continuous p-[20px]">
+      <Box className="overflow-hidden border-continuous flex-row justify-between">
+        <Text className="text-dark-grey font-bold text-[11px]">{metadataLabel}</Text>
       </Box>
       {!!noteTitle && (
-        <Text title fontSize={16}>
+        <Text
+          className="text-[16px]"
+          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+        >
           {noteTitle}
         </Text>
       )}
@@ -145,7 +178,7 @@ export const NoteItem = ({
   }
 
   return (
-    <TouchableBox onPress={openNote}>
+    <TouchableBox className="overflow-hidden border-continuous" onPress={openNote}>
       {content}
       <Border />
     </TouchableBox>
@@ -161,6 +194,8 @@ export const LinkItem = ({
   t: Translate
   lang: ActiveLanguage
 }) => {
+  const stylingTheme = useStylingTheme()
+
   const pushRouteOnce = usePushRouteOnce()
   const mountTime = useMountTime()
   const location = getFirstVerseLocation(item.verseKeys)
@@ -185,24 +220,23 @@ export const LinkItem = ({
 
   const content = (
     <>
-      <Box padding={20} row>
+      <Box className="overflow-hidden border-continuous p-[20px] flex-row">
         <LinkTypeIcon bgColor={config.color}>
           {config.textIcon ? (
-            <Text bold fontSize={12} color="white">
-              {config.textIcon}
-            </Text>
+            <Text className="font-bold text-[12px] text-[white]">{config.textIcon}</Text>
           ) : (
             <FeatherIcon name={iconName} size={14} color="white" />
           )}
         </LinkTypeIcon>
-        <Box flex>
-          <Text color="darkGrey" bold fontSize={11}>
-            {metadataLabel}
-          </Text>
-          <Text title fontSize={16}>
+        <Box className="overflow-hidden border-continuous flex-[1]">
+          <Text className="text-dark-grey font-bold text-[11px]">{metadataLabel}</Text>
+          <Text
+            className="text-[16px]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {truncate(displayTitle, 50)}
           </Text>
-          <Paragraph scale={-3} scaleLineHeight={-1} color="tertiary" numberOfLines={1}>
+          <Paragraph className="text-tertiary" scale={-3} scaleLineHeight={-1} numberOfLines={1}>
             {item.url}
           </Paragraph>
           <EntityChipList
@@ -226,7 +260,7 @@ export const LinkItem = ({
   }
 
   return (
-    <TouchableBox onPress={openLink}>
+    <TouchableBox className="overflow-hidden border-continuous" onPress={openLink}>
       {content}
       <Border />
     </TouchableBox>
@@ -268,30 +302,20 @@ export const TagSectionHeader = ({
   toggle: (sectionId: string) => void
 }) => (
   <TouchableBox
-    row
+    className="border-continuous overflow-hidden flex-row items-center py-[20px] px-[20px] bg-reverse border-b-[1px] border-border"
     onPress={() => toggle(sectionId)}
-    alignItems="center"
-    py={20}
-    px={20}
-    backgroundColor="reverse"
-    borderBottomWidth={1}
-    borderColor="border"
   >
-    <Box flex row alignItems="center">
-      <Box mr={12}>
+    <Box className="overflow-hidden border-continuous flex-[1] flex-row items-center">
+      <Box className="overflow-hidden border-continuous mr-[12px]">
         <SectionIcon sectionId={sectionId} />
       </Box>
       <Text>{title}</Text>
       <CountChip>
-        <Text fontSize={12} color="default" bold>
-          {count}
-        </Text>
+        <Text className="text-[12px] text-default font-bold">{count}</Text>
       </CountChip>
     </Box>
     <AnimatedBox
-      width={17}
-      height={17}
-      center
+      className="overflow-hidden border-continuous w-[17px] h-[17px] items-center justify-center"
       style={{
         transform: [{ rotate: isExpanded ? '180deg' : '0deg' }],
         transitionProperty: 'transform',

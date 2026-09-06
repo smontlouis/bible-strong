@@ -1,8 +1,9 @@
+import { twMerge } from '~common/ui/classNames'
+
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, ScrollView, View } from 'react-native'
 import type { TFunction } from 'i18next'
-
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
@@ -22,7 +23,6 @@ import type {
   MigrationSnapshot,
   MigrationSnapshotListener,
 } from '../../migrations/appMigrationOrchestrator'
-
 type ActiveMigrationSnapshot = Exclude<MigrationSnapshot, { status: 'idle' }>
 
 type GateState =
@@ -272,31 +272,36 @@ const LocalMigrationGate = ({
 
   if (state.kind === 'checking') {
     return (
-      <Container flex={1} center bg="reverse" testID="migration-checking">
+      <Container
+        className="flex-[1] bg-reverse items-center justify-center"
+        testID="migration-checking"
+      >
         <ActivityIndicator accessibilityLabel={t('Chargement...')} />
-        <Text color="grey" mt={12} textAlign="center">
-          {t('Chargement...')}
-        </Text>
+        <Text className="text-grey mt-[12px] text-center">{t('Chargement...')}</Text>
       </Container>
     )
   }
 
   if (state.kind === 'inspection-error') {
     return (
-      <Container flex={1} center bg="reverse" px={28} testID="migration-inspection-error">
-        <Box size={64} borderRadius={32} bg="lightSecondary" center mb={24}>
+      <Container
+        className="px-[28px] flex-[1] bg-reverse items-center justify-center"
+        testID="migration-inspection-error"
+      >
+        <Box
+          className="overflow-hidden border-continuous rounded-[32px] bg-light-secondary items-center justify-center mb-[24px]"
+          style={{ width: 64, height: 64 }}
+        >
           <FeatherIcon name="alert-triangle" size={28} color="secondary" />
         </Box>
-        <Text bold fontSize={24} textAlign="center" mb={12}>
+        <Text className="font-bold text-[24px] text-center mb-[12px]">
           {t('migration.checkFailedTitle')}
         </Text>
-        <Text color="grey" textAlign="center" mb={8}>
+        <Text className="text-grey text-center mb-[8px]">
           {t('migration.checkFailedDescription')}
         </Text>
-        <Text color="darkGrey" fontSize={12} textAlign="center" mb={28}>
-          {state.errorCode}
-        </Text>
-        <Box width="100%" maxWidth={420}>
+        <Text className="text-dark-grey text-[12px] text-center mb-[28px]">{state.errorCode}</Text>
+        <Box className="overflow-hidden border-continuous w-[100%] max-w-[420px]">
           <Button
             testID="migration-check-retry"
             isLoading={actionPending}
@@ -324,23 +329,27 @@ const LocalMigrationGate = ({
   const currentStep = getCurrentStepLabel(snapshot)
 
   return (
-    <Container flex={1} bg="reverse" isPadding={false} testID="migration-gate">
+    <Container className="flex-[1] bg-reverse" isPadding={false} testID="migration-gate">
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingVertical: 32 }}
         bounces={false}
       >
-        <VStack flex={1} width="100%" maxWidth={560} alignSelf="center" justifyContent="center">
-          <Box alignSelf="center" px={12} py={6} borderRadius={16} bg="lightPrimary" mb={22}>
-            <Text color="primary" bold fontSize={12}>
+        <VStack className="overflow-hidden border-continuous flex-[1] w-[100%] max-w-[560px] self-center justify-center">
+          <Box className="overflow-hidden border-continuous self-center px-[12px] py-[6px] rounded-[16px] bg-light-primary mb-[22px]">
+            <Text className="text-primary font-bold text-[12px]">
               {t('migration.requiredBadge')}
             </Text>
           </Box>
 
           <Box
-            size={72}
-            borderRadius={24}
-            bg={hasFailure ? 'lightSecondary' : 'lightPrimary'}
-            center
+            className={twMerge(
+              'overflow-hidden border-continuous',
+              twMerge(
+                hasFailure ? 'bg-light-secondary' : 'bg-light-primary',
+                'overflow-hidden border-continuous rounded-[24px] items-center justify-center'
+              )
+            )}
+            style={{ width: 72, height: 72 }}
           >
             <FeatherIcon
               name={hasFailure ? 'wifi-off' : isWorking ? 'download-cloud' : 'refresh-cw'}
@@ -349,14 +358,14 @@ const LocalMigrationGate = ({
             />
           </Box>
 
-          <Text bold fontSize={28} mt={22} lineHeight={34}>
+          <Text className="font-bold text-[28px] mt-[22px] leading-[34px]">
             {hasFailure
               ? t('migration.failedTitle')
               : isWorking
                 ? t('migration.runningTitle')
                 : t('migration.legacyResourcesTitle')}
           </Text>
-          <Text color="grey" mt={10} lineHeight={23}>
+          <Text className="text-grey mt-[10px] leading-[23px]">
             {hasFailure
               ? t('migration.failedDescription')
               : isWorking
@@ -366,42 +375,44 @@ const LocalMigrationGate = ({
 
           {isConfirmation && (
             <>
-              <HStack mt={24} gap={12}>
-                <Box flex={1} p={16} borderRadius={16} bg="lightGrey">
-                  <Text color="darkGrey" fontSize={12}>
-                    {t('migration.downloadSize')}
-                  </Text>
-                  <Text bold mt={4}>
+              <HStack className="overflow-hidden border-continuous mt-[24px] gap-[12px]">
+                <Box className="overflow-hidden border-continuous flex-[1] p-[16px] rounded-[16px] bg-light-grey">
+                  <Text className="text-dark-grey text-[12px]">{t('migration.downloadSize')}</Text>
+                  <Text className="font-bold mt-[4px]">
                     {formatBytes(downloadBytes, i18n.language)}
                   </Text>
                 </Box>
-                <Box flex={1} p={16} borderRadius={16} bg="lightGrey">
-                  <Text color="darkGrey" fontSize={12}>
+                <Box className="overflow-hidden border-continuous flex-[1] p-[16px] rounded-[16px] bg-light-grey">
+                  <Text className="text-dark-grey text-[12px]">
                     {t('migration.reclaimedSpace')}
                   </Text>
-                  <Text bold mt={4}>
+                  <Text className="font-bold mt-[4px]">
                     {formatBytes(reclaimedBytes, i18n.language)}
                   </Text>
                 </Box>
               </HStack>
 
               {resources.length > 0 && (
-                <VStack mt={24} gap={10}>
-                  <Text bold fontSize={14}>
-                    {t('migration.resourcesToInstall')}
-                  </Text>
+                <VStack className="overflow-hidden border-continuous mt-[24px] gap-[10px]">
+                  <Text className="font-bold text-[14px]">{t('migration.resourcesToInstall')}</Text>
                   {resources.map(resource => (
-                    <HStack key={resource.id} alignItems="center" gap={10}>
-                      <Box size={24} borderRadius={12} bg="lightPrimary" center>
+                    <HStack
+                      className="overflow-hidden border-continuous items-center gap-[10px]"
+                      key={resource.id}
+                    >
+                      <Box
+                        className="overflow-hidden border-continuous rounded-[12px] bg-light-primary items-center justify-center"
+                        style={{ width: 24, height: 24 }}
+                      >
                         <FeatherIcon name="download" size={13} color="primary" />
                       </Box>
-                      <Text flex={1} fontSize={14}>
+                      <Text className="flex-[1] text-[14px]">
                         {getLocalizedResourceLabel(resource.resourceId, resource.label, t)}
                       </Text>
                     </HStack>
                   ))}
-                  <Box mt={8} p={16} borderRadius={16} bg="lightGrey">
-                    <Text color="grey" fontSize={13} lineHeight={19}>
+                  <Box className="overflow-hidden border-continuous mt-[8px] p-[16px] rounded-[16px] bg-light-grey">
+                    <Text className="text-grey text-[13px] leading-[19px]">
                       {t('migration.useOnlineDescription')}
                     </Text>
                   </Box>
@@ -411,14 +422,10 @@ const LocalMigrationGate = ({
           )}
 
           {isWorking && (
-            <VStack mt={28} gap={10}>
-              <HStack alignItems="center" justifyContent="space-between">
-                <Text bold fontSize={14}>
-                  {t('migration.progress')}
-                </Text>
-                <Text color="primary" bold>
-                  {Math.round(progress * 100)}%
-                </Text>
+            <VStack className="overflow-hidden border-continuous mt-[28px] gap-[10px]">
+              <HStack className="overflow-hidden border-continuous items-center justify-between">
+                <Text className="font-bold text-[14px]">{t('migration.progress')}</Text>
+                <Text className="text-primary font-bold">{Math.round(progress * 100)}%</Text>
               </HStack>
               <View
                 accessible
@@ -429,7 +436,7 @@ const LocalMigrationGate = ({
                 <ProgressBar progress={progress} />
               </View>
               {currentStep !== undefined && (
-                <Text color="darkGrey" fontSize={12}>
+                <Text className="text-dark-grey text-[12px]">
                   {t(currentStep)}
                   {snapshot.message ? ` · ${t(snapshot.message)}` : ''}
                 </Text>
@@ -438,19 +445,17 @@ const LocalMigrationGate = ({
           )}
 
           {hasFailure && (
-            <Box mt={24} p={16} bg="lightGrey" borderRadius={16}>
-              <Text color="grey" fontSize={13} lineHeight={19}>
+            <Box className="overflow-hidden border-continuous mt-[24px] p-[16px] bg-light-grey rounded-[16px]">
+              <Text className="text-grey text-[13px] leading-[19px]">
                 {t('migration.continueWithoutWarning')}
               </Text>
               {snapshot.errorCode && (
-                <Text color="darkGrey" fontSize={11} mt={8}>
-                  {snapshot.errorCode}
-                </Text>
+                <Text className="text-dark-grey text-[11px] mt-[8px]">{snapshot.errorCode}</Text>
               )}
             </Box>
           )}
 
-          <VStack mt={32} gap={12}>
+          <VStack className="overflow-hidden border-continuous mt-[32px] gap-[12px]">
             {isConfirmation && (
               <>
                 <Button

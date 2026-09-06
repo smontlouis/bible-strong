@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Alert } from 'react-native'
 import { useTranslation } from 'react-i18next'
-
 import FiltersHeader from '~common/FiltersHeader'
 import Loading from '~common/Loading'
 import MultipleChoiceFilterModal from '~common/MultipleChoiceFilterModal'
@@ -11,7 +10,6 @@ import { type SheetRef } from '~common/sheet'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import SectionList from '~common/ui/SectionList'
-
 import DownloadableItem from './components/DownloadableItem'
 import StorageSummaryCard from './components/StorageSummaryCard'
 import type { StatusFilter, LangFilter } from './components/FilterChipRow'
@@ -19,7 +17,6 @@ import DownloadSectionHeader from './components/DownloadSectionHeader'
 import DownloadSubsectionHeader from './components/DownloadSubsectionHeader'
 import DownloadManagementFooter from './components/DownloadManagementFooter'
 import { AvailableUpdatesSheet, AvailableUpdatesWidget } from './components/AvailableUpdatesWidget'
-
 import { versions, type Version } from '~helpers/bibleVersions'
 import { databases } from '~helpers/databases'
 import {
@@ -64,7 +61,6 @@ import {
   type DisplayDownloadItem,
   type DownloadResourceSection,
 } from './downloadResourceSections'
-
 // ---------------------------------------------------------------------------
 // Unified section item type
 // ---------------------------------------------------------------------------
@@ -773,7 +769,7 @@ const DownloadsScreen = () => {
       />
 
       {isAvailabilityPending ? (
-        <Box flex center>
+        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
           <Loading />
         </Box>
       ) : isAvailabilityError ? (

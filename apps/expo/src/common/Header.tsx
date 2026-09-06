@@ -1,11 +1,11 @@
-import React from 'react'
+import { twMerge } from '~common/ui/classNames'
 
+import React from 'react'
 import PageContent from '~common/ui/PageContent'
 import Back from '~common/Back'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from './ui/Icon'
-
 interface Props {
   background?: boolean
   hasBackButton?: boolean
@@ -36,44 +36,58 @@ const Header = ({
 }: Props) => {
   return (
     <Box
-      bg={background ? 'reverse' : undefined}
-      borderColor="border"
-      borderBottomWidth={1}
       {...props}
+      className={twMerge(
+        'overflow-hidden border-continuous border-border',
+        twMerge(
+          background ? 'bg-reverse' : '',
+          'border-border',
+          'overflow-hidden border-continuous border-b-[1px]'
+        )
+      )}
     >
       <PageContent>
-        <Box minH={children ? 40 : 54} row alignItems="center">
+        <Box
+          className="overflow-hidden border-continuous flex-row items-center"
+          style={{ minHeight: children ? 40 : 54 }}
+        >
           {hasBackButton && (
             <Back onCustomPress={onCustomBackPress} padding>
               <FeatherIcon name={isModal ? 'x' : 'arrow-left'} size={20} />
             </Back>
           )}
-          <VStack flex pl={hasBackButton ? 0 : 20}>
-            <HStack>
+          <VStack
+            className="overflow-hidden border-continuous flex-[1]"
+            style={{ paddingLeft: hasBackButton ? 0 : 20 }}
+          >
+            <HStack className="overflow-hidden border-continuous">
               <Text
+                className="font-bold"
                 accessibilityRole={onTitlePress ? 'button' : 'header'}
                 numberOfLines={1}
-                bold
-                fontSize={fontSize}
                 onPress={onTitlePress}
-                shrink={1}
+                style={{ fontSize: fontSize || 16, flexShrink: 1 }}
               >
                 {title}
               </Text>
               {!!detail && (
-                <Text numberOfLines={1} bold fontSize={fontSize} color="grey" shrink={1}>
+                <Text
+                  className="font-bold text-grey"
+                  numberOfLines={1}
+                  style={{ fontSize: fontSize || 16, flexShrink: 1 }}
+                >
                   {` ${detail}`}
                 </Text>
               )}
             </HStack>
             {!!subTitle && (
-              <Text numberOfLines={1} fontSize={13} color="grey">
+              <Text className="text-[13px] text-grey" numberOfLines={1}>
                 {subTitle}
               </Text>
             )}
           </VStack>
           {rightComponent && (
-            <Box justifyContent="center" alignItems="flex-end" overflow="visible">
+            <Box className="border-continuous overflow-visible justify-center items-end">
               {rightComponent}
             </Box>
           )}

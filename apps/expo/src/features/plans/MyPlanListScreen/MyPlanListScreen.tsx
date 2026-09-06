@@ -1,5 +1,4 @@
 import React from 'react'
-
 import FlatList from '~common/ui/FlatList'
 import { useComputedPlanItems, useDownloadPlans } from '../plan.hooks'
 import { ComputedPlanItem } from 'src/common/types'
@@ -10,7 +9,6 @@ import Loading from '~common/Loading'
 import Empty from '~common/Empty'
 import { useTranslation } from 'react-i18next'
 import i18n from '~i18n'
-
 const MyPlanListScreen = () => {
   const plans = useComputedPlanItems()
   const { isLoading } = useDownloadPlans()
@@ -30,7 +28,7 @@ const MyPlanListScreen = () => {
       ListHeaderComponent={
         <>
           {isLoading && (
-            <Box height={50}>
+            <Box className="overflow-hidden border-continuous h-[50px]">
               <Loading />
             </Box>
           )}

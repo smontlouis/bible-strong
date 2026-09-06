@@ -1,13 +1,13 @@
-import { useTheme } from '@emotion/react'
+import { twMerge } from '~common/ui/classNames'
+import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import { useTranslation } from 'react-i18next'
 import { Pressable } from 'react-native'
-
 import type { CurrentTheme } from '~common/types'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import themes from '~themes'
-
 type PlaygroundThemeOption = {
   id: CurrentTheme
   labelKey: string
@@ -30,40 +30,50 @@ type PlaygroundPreferencesProps = {
 }
 
 const PlaygroundPreferences = ({ selectedTheme, onSelectTheme }: PlaygroundPreferencesProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { i18n, t } = useTranslation()
   const theme = useTheme()
   const currentLanguage = i18n.language === 'en' ? 'en' : 'fr'
 
   return (
     <VStack
-      bg="reverse"
-      borderColor="border"
-      borderWidth={1}
-      borderRadius={22}
-      p={18}
-      gap={18}
-      lightShadow
+      className="border-continuous overflow-hidden bg-reverse border-border border-[1px] rounded-[22px] p-[18px] gap-[18px]"
       testID="playground-preferences"
+      style={{
+        shadowColor: 'rgb(89,131,240)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 7,
+        elevation: 1,
+        overflow: 'visible',
+      }}
     >
-      <HStack alignItems="center" gap={10}>
-        <Box size={34} borderRadius={11} bg="lightGrey" center>
+      <HStack className="overflow-hidden border-continuous items-center gap-[10px]">
+        <Box
+          className="overflow-hidden border-continuous rounded-[11px] bg-light-grey items-center justify-center"
+          style={{ width: 34, height: 34 }}
+        >
           <Feather name="sliders" size={16} color={theme.colors.primary} />
         </Box>
-        <VStack>
-          <Text title fontSize={17} lineHeight={21}>
+        <VStack className="overflow-hidden border-continuous">
+          <Text
+            className="text-[17px] leading-[21px]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {t('playground.previewSettings')}
           </Text>
-          <Text color="grey" fontSize={12} lineHeight={17}>
+          <Text className="text-grey text-[12px] leading-[17px]">
             {t('playground.previewSettingsDescription')}
           </Text>
         </VStack>
       </HStack>
 
-      <VStack gap={9}>
-        <Text color="darkGrey" fontSize={10} bold textTransform="uppercase">
+      <VStack className="overflow-hidden border-continuous gap-[9px]">
+        <Text className="text-dark-grey text-[10px] font-bold uppercase">
           {t('language.appLanguage')}
         </Text>
-        <HStack gap={8}>
+        <HStack className="overflow-hidden border-continuous gap-[8px]">
           {(['fr', 'en'] as const).map(language => {
             const isSelected = currentLanguage === language
             return (
@@ -76,15 +86,21 @@ const PlaygroundPreferences = ({ selectedTheme, onSelectTheme }: PlaygroundPrefe
                 testID={`playground-language-${language}`}
               >
                 <Box
-                  py={10}
-                  px={12}
-                  borderRadius={12}
-                  borderColor={isSelected ? 'primary' : 'border'}
-                  borderWidth={1}
-                  bg={isSelected ? 'primary' : 'lightGrey'}
-                  center
+                  className={twMerge(
+                    'overflow-hidden border-continuous',
+                    twMerge(
+                      isSelected ? 'bg-primary' : 'bg-light-grey',
+                      isSelected ? 'border-primary' : 'border-border',
+                      'overflow-hidden border-continuous py-[10px] px-[12px] rounded-[12px] border-[1px] items-center justify-center'
+                    )
+                  )}
                 >
-                  <Text color={isSelected ? 'reverse' : 'default'} fontSize={13} bold>
+                  <Text
+                    className={twMerge(
+                      isSelected ? 'text-reverse' : 'text-default',
+                      'text-[13px] font-bold'
+                    )}
+                  >
                     {t(`offlineSetup.language.${language}`)}
                   </Text>
                 </Box>
@@ -94,11 +110,11 @@ const PlaygroundPreferences = ({ selectedTheme, onSelectTheme }: PlaygroundPrefe
         </HStack>
       </VStack>
 
-      <VStack gap={9}>
-        <Text color="darkGrey" fontSize={10} bold textTransform="uppercase">
+      <VStack className="overflow-hidden border-continuous gap-[9px]">
+        <Text className="text-dark-grey text-[10px] font-bold uppercase">
           {t('settings.theme')}
         </Text>
-        <HStack gap={8} wrap>
+        <HStack className="overflow-hidden border-continuous gap-[8px] flex-wrap">
           {PLAYGROUND_THEME_OPTIONS.map(option => {
             const isSelected = selectedTheme === option.id
             const optionTheme = themes[option.id]
@@ -113,26 +129,38 @@ const PlaygroundPreferences = ({ selectedTheme, onSelectTheme }: PlaygroundPrefe
                 testID={`playground-theme-${option.id}`}
               >
                 <HStack
-                  alignItems="center"
-                  gap={9}
-                  px={11}
-                  py={10}
-                  borderRadius={12}
-                  borderColor={isSelected ? 'primary' : 'border'}
-                  borderWidth={1}
-                  bg="lightGrey"
+                  className={twMerge(
+                    'overflow-hidden border-continuous',
+                    twMerge(
+                      isSelected ? 'border-primary' : 'border-border',
+                      'overflow-hidden border-continuous items-center gap-[9px] px-[11px] py-[10px] rounded-[12px] border-[1px] bg-light-grey'
+                    )
+                  )}
                 >
                   <Box
-                    size={22}
-                    borderRadius={7}
-                    borderWidth={1}
-                    borderColor="border"
-                    backgroundColor={optionTheme.colors.lightGrey}
-                    center
+                    className="border-continuous overflow-hidden rounded-[7px] border-[1px] border-border items-center justify-center"
+                    style={{
+                      backgroundColor: resolveThemeColor(
+                        stylingTheme,
+                        optionTheme.colors.lightGrey
+                      ),
+                      width: 22,
+                      height: 22,
+                    }}
                   >
-                    <Box size={8} borderRadius={4} backgroundColor={optionTheme.colors.primary} />
+                    <Box
+                      className="overflow-hidden border-continuous rounded-[4px]"
+                      style={{
+                        backgroundColor: resolveThemeColor(
+                          stylingTheme,
+                          optionTheme.colors.primary
+                        ),
+                        width: 8,
+                        height: 8,
+                      }}
+                    />
                   </Box>
-                  <Text flex fontSize={12} bold numberOfLines={1}>
+                  <Text className="flex-[1] text-[12px] font-bold" numberOfLines={1}>
                     {t(option.labelKey)}
                   </Text>
                   {isSelected ? (

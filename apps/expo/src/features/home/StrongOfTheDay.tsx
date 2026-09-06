@@ -1,7 +1,8 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
-
 import { useTranslation } from 'react-i18next'
 import LexiqueIcon from '~common/LexiqueIcon'
 import Link from '~common/Link'
@@ -24,7 +25,6 @@ import {
   resourceFailureFromStrongModuleAvailability,
 } from '~features/resources/resourceFailure'
 import ResourceDownloadWidget from './ResourceDownloadWidget'
-
 type StrongOfTheDayProps = {
   type: 'grec' | 'hebreu'
   color1?: string
@@ -36,6 +36,8 @@ const StrongOfTheDay = ({
   color1 = 'rgb(69,150,220)',
   color2 = 'rgb(89,131,240)',
 }: StrongOfTheDayProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const resourceLanguage = useAtomValue(resourcesLanguageAtom).STRONG
@@ -142,6 +144,7 @@ const StrongOfTheDay = ({
     <Link route="Strong" params={{ book, reference: stepCode }}>
       <WidgetContainer>
         <Box
+          className="overflow-hidden border-continuous"
           style={{
             position: 'absolute',
             left: 0,
@@ -154,30 +157,34 @@ const StrongOfTheDay = ({
           <LinearGradient start={[0.1, 0.2]} style={{ height: 130 }} colors={[color1, color2]} />
         </Box>
         <RandomButton onPress={() => setRandomSeed(seed => seed + 1)} />
-        <Box flex={1} center mt={20}>
-          <Box backgroundColor="rgba(0,0,0,0.1)" paddingHorizontal={5} paddingVertical={3} rounded>
-            <Text fontSize={10} style={{ color: 'white' }}>
+        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center mt-[20px]">
+          <Box className="overflow-hidden border-continuous bg-[rgba(0,0,0,0.1)] px-[5px] py-[3px] rounded-[20px]">
+            <Text className="text-[10px]" style={{ color: 'white' }}>
               {type === 'grec' ? t('Grec') : t('Hébreu')}
             </Text>
           </Box>
-          <Paragraph title scale={-2} style={{ color: 'white' }}>
+          <Paragraph
+            scale={-2}
+            style={[
+              { fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) },
+              { color: 'white' },
+            ]}
+          >
             {truncate(gloss, 10)}
           </Paragraph>
           <Paragraph
+            className="mb-[3px]"
             style={{ color: 'white', opacity: 0.5 }}
             scale={-3}
             scaleLineHeight={-2}
-            marginBottom={3}
           >
             {truncate(original, 10)}
           </Paragraph>
         </Box>
         <Link route="Lexique" style={{ width: '100%' }}>
-          <Box row center backgroundColor="rgba(0,0,0,0.04)" paddingVertical={10}>
+          <Box className="overflow-hidden border-continuous flex-row items-center justify-center bg-[rgba(0,0,0,0.04)] py-[10px]">
             <LexiqueIcon style={{ marginRight: 10 }} size={20} color="white" />
-            <Text color="white" bold fontSize={12}>
-              {t('Lexique')}
-            </Text>
+            <Text className="text-[white] font-bold text-[12px]">{t('Lexique')}</Text>
           </Box>
         </Link>
       </WidgetContainer>

@@ -1,14 +1,14 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import { Image, Pressable, useWindowDimensions } from 'react-native'
 import type { ImageSourcePropType } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
 import Box, { VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useConnection from '~helpers/useConnection'
 import { OFFLINE_SETUP_HEADER_TOP_OFFSET } from './offlineSetupPresentation'
-
 type Props = {
   onContinueOnline: () => void
   onPrepareOffline: () => void
@@ -31,19 +31,20 @@ const SetupChoice = ({
     onPress={onPress}
   >
     {({ pressed }) => (
-      <Box gap={4} minHeight={142} py={16} opacity={pressed ? 0.76 : 1} alignItems="center">
+      <Box
+        className="overflow-hidden border-continuous gap-[4px] min-h-[142px] py-[16px] items-center"
+        style={{ opacity: pressed ? 0.76 : 1 }}
+      >
         <Image source={illustration} style={{ width: 140, height: 140 }} resizeMode="contain" />
-        <Box row alignItems="center" gap={10}>
-          <Box gap={4} alignItems="center" justifyContent="center">
+        <Box className="overflow-hidden border-continuous flex-row items-center gap-[10px]">
+          <Box className="overflow-hidden border-continuous gap-[4px] items-center justify-center">
             <Text
-              fontSize={22}
-              lineHeight={28}
-              textAlign="center"
+              className="text-[22px] leading-[28px] text-center"
               style={{ fontFamily: 'Literata Book' }}
             >
               {title}
             </Text>
-            <Text color="tertiary" textAlign="center" fontSize={14} lineHeight={20}>
+            <Text className="text-tertiary text-center text-[14px] leading-[20px]">
               {description}
             </Text>
           </Box>
@@ -54,6 +55,8 @@ const SetupChoice = ({
 )
 
 const ResourceSetupChoice = ({ onContinueOnline, onPrepareOffline }: Props) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const viewport = useWindowDimensions()
@@ -61,18 +64,22 @@ const ResourceSetupChoice = ({ onContinueOnline, onPrepareOffline }: Props) => {
   const contentWidth = Math.min(350, viewport.width - 40)
 
   return (
-    <VStack flex bg="lightGrey" paddingBottom={Math.max(insets.bottom, 18)}>
+    <VStack
+      className="overflow-hidden border-continuous flex-[1] bg-light-grey"
+      style={{ paddingBottom: Math.max(insets.bottom, 18) }}
+    >
       <Box
-        flex
-        width={contentWidth}
-        alignSelf="center"
-        paddingTop={insets.top + OFFLINE_SETUP_HEADER_TOP_OFFSET}
+        className="overflow-hidden border-continuous flex-[1] self-center"
+        style={{ paddingTop: insets.top + OFFLINE_SETUP_HEADER_TOP_OFFSET, width: contentWidth }}
       >
-        <Text title fontSize={40} lineHeight={42}>
+        <Text
+          className="text-[40px] leading-[42px]"
+          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+        >
           {t('offlineSetup.choice.title')}
         </Text>
 
-        <VStack mt={72}>
+        <VStack className="overflow-hidden border-continuous mt-[72px]">
           <SetupChoice
             title={t('offlineSetup.choice.startNow')}
             description={t('offlineSetup.choice.startNowDescription')}
@@ -88,9 +95,9 @@ const ResourceSetupChoice = ({ onContinueOnline, onPrepareOffline }: Props) => {
         </VStack>
 
         {!isConnected && (
-          <Box row center gap={8} mt={22}>
+          <Box className="overflow-hidden border-continuous flex-row items-center justify-center gap-[8px] mt-[22px]">
             <FeatherIcon name="wifi-off" size={16} color="tertiary" />
-            <Text color="tertiary" fontSize={12} textAlign="center">
+            <Text className="text-tertiary text-[12px] text-center">
               {t('offlineSetup.choice.offlineNotice')}
             </Text>
           </Box>

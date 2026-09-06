@@ -1,8 +1,6 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-
 import BibleOfflineDetailsSheet from '../VersionSelectorSheet/BibleOfflineDetailsSheet'
-
 const mockLocalAvailability = jest.fn()
 const mockHybridStrongAvailability = jest.fn()
 
@@ -27,7 +25,7 @@ jest.mock('@tanstack/react-query', () => {
   }
 })
 
-jest.mock('@emotion/react', () => ({
+jest.mock('~themes/ThemeProvider', () => ({
   useTheme: () => ({
     colors: { reverse: 'white', border: 'grey', primary: 'blue' },
   }),

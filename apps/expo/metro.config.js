@@ -1,4 +1,7 @@
+require('./scripts/generate-theme-css.cjs')
 const { getSentryExpoConfig } = require('@sentry/react-native/metro')
+
+const { withUniwindConfig } = require('uniwind/metro')
 
 const config = getSentryExpoConfig(__dirname)
 
@@ -30,4 +33,8 @@ config.transformer = {
   }),
 }
 
-module.exports = config
+module.exports = withUniwindConfig(config, {
+  cssEntryFile: './global.css',
+  dtsFile: './src/uniwind-types.d.ts',
+  extraThemes: ['default', 'sepia', 'nature', 'sunset', 'black', 'mauve', 'night'],
+})

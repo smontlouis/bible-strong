@@ -15,7 +15,6 @@ import { parseRelationEndpointParam } from './routeParams'
 import { useOpenRelationEndpoint } from './useOpenRelationEndpoint'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { IS_FORM_SHEET } from '~helpers/constants'
-
 const EntityRelationsScreen = () => {
   const { t } = useTranslation()
   const params = useLocalSearchParams<{ endpoint?: string }>()
@@ -37,14 +36,8 @@ const EntityRelationsScreen = () => {
         rightComponent={
           endpoint ? (
             <TouchableBox
+              className="overflow-hidden border-continuous mr-[15px] rounded-[18px] bg-primary w-[28px] h-[28px] items-center justify-center"
               onPress={() => createRelationModal.open()}
-              mr={15}
-              borderRadius={18}
-              bg="primary"
-              width={28}
-              height={28}
-              alignItems="center"
-              justifyContent="center"
             >
               <FeatherIcon name="plus" size={16} color="reverse" />
             </TouchableBox>
@@ -60,7 +53,7 @@ const EntityRelationsScreen = () => {
             includeStartingVerseRelations={isSingleVerseEndpoint}
           />
         ) : (
-          <Box flex justifyContent="center" px={20}>
+          <Box className="overflow-hidden border-continuous flex-[1] justify-center px-[20px]">
             <Empty
               icon={require('~assets/images/empty-state-icons/link.svg')}
               message={t('Aucune relation')}

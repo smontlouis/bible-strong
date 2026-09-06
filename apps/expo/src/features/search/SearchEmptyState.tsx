@@ -1,12 +1,10 @@
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { Image } from 'expo-image'
-
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { hp } from '~helpers/utils'
-
 type Props = {
   isOnline: boolean
   onExamplePress: (value: string) => void
@@ -14,10 +12,8 @@ type Props = {
 
 const ExampleChip = ({ label, onPress }: { label: string; onPress: () => void }) => (
   <TouchableOpacity accessibilityRole="button" onPress={onPress} activeOpacity={0.7}>
-    <Box px={12} py={4} borderRadius={20} bg="lightGrey" borderWidth={1} borderColor="border">
-      <Text fontSize={14} color="default">
-        {label}
-      </Text>
+    <Box className="border-continuous overflow-hidden px-[12px] py-[4px] rounded-[20px] bg-light-grey border-[1px] border-border">
+      <Text className="text-[14px] text-default">{label}</Text>
     </Box>
   </TouchableOpacity>
 )
@@ -37,9 +33,12 @@ const SearchEmptyState = ({ isOnline, onExamplePress }: Props) => {
   ]
 
   return (
-    <Box h={hp(60)} justifyContent="center" alignItems="center">
-      <Box alignItems="center" mt={30} mb={24}>
-        <Box mb={16}>
+    <Box
+      className="overflow-hidden border-continuous justify-center items-center"
+      style={{ height: hp(60) }}
+    >
+      <Box className="overflow-hidden border-continuous items-center mt-[30px] mb-[24px]">
+        <Box className="overflow-hidden border-continuous mb-[16px]">
           <Image
             source={require('~assets/images/empty-state-icons/search.svg')}
             style={{ width: 80, height: 80, opacity: 0.6 }}
@@ -47,12 +46,10 @@ const SearchEmptyState = ({ isOnline, onExamplePress }: Props) => {
             contentFit="contain"
           />
         </Box>
-        <Text textAlign="center" color="tertiary" fontSize={16}>
-          {t('search.empty.title')}
-        </Text>
+        <Text className="text-center text-tertiary text-[16px]">{t('search.empty.title')}</Text>
       </Box>
 
-      <HStack maxWidth={320} alignSelf="center" justifyContent="center" gap={8} wrap>
+      <HStack className="overflow-hidden border-continuous max-w-[320px] self-center justify-center gap-[8px] flex-wrap">
         {examples.map(example => (
           <ExampleChip key={example} label={example} onPress={() => onExamplePress(example)} />
         ))}

@@ -3,7 +3,6 @@ import { Platform, SectionList, TouchableOpacity, type SectionListRenderItem } f
 import { useNavigation } from 'expo-router'
 import { useAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-
 import ChoiceFilterModal from '~common/ChoiceFilterModal'
 import FiltersHeader from '~common/FiltersHeader'
 import SearchFilterModal from '~common/SearchFilterModal'
@@ -26,7 +25,6 @@ import {
 } from './versionCatalog'
 import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-
 const STYLE_INFO_KEYS: Record<TranslationReadingProfile, string> = {
   'word-for-word': 'versionCatalog.style.wordForWord.description',
   balanced: 'versionCatalog.style.balanced.description',
@@ -219,9 +217,9 @@ export const useVersionCatalog = (
           />
         }
       >
-        <SheetView px={20} pt={8} pb={24}>
+        <SheetView className="pt-[8px] pb-[24px] px-[20px]">
           {activeStyleInfo && (
-            <Text fontSize={16} lineHeight={24}>
+            <Text className="text-[16px] leading-[24px]">
               {t(STYLE_INFO_KEYS[activeStyleInfo])}
             </Text>
           )}
@@ -410,19 +408,8 @@ export const VersionCatalogList = ({
       renderSectionHeader={({ section }) => {
         if (grouping === 'alphabetical') return null
         return (
-          <Box
-            minHeight={48}
-            paddingLeft={20}
-            paddingRight={8}
-            row
-            alignItems="center"
-            bg="lightGrey"
-            borderBottomWidth={1}
-            borderColor="border"
-          >
-            <Text flex fontSize={16} opacity={0.8}>
-              {section.title}
-            </Text>
+          <Box className="overflow-hidden border-continuous min-h-[48px] pl-[20px] pr-[8px] flex-row items-center bg-light-grey border-b-[1px] border-border">
+            <Text className="flex-[1] text-[16px] opacity-[0.8]">{section.title}</Text>
             {grouping === 'style' && section.readingProfile && (
               <TouchableOpacity
                 accessibilityRole="button"
@@ -439,9 +426,9 @@ export const VersionCatalogList = ({
       }}
       renderItem={renderItem}
       ListEmptyComponent={
-        <Box flex center px={32}>
+        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center px-[32px]">
           <FeatherIcon name="search" size={28} color="tertiary" />
-          <Text mt={12} fontSize={16} color="tertiary" textAlign="center">
+          <Text className="mt-[12px] text-[16px] text-tertiary text-center">
             {query.trim()
               ? t('Aucun résultat trouvé pour "{{query}}"', { query: query.trim() })
               : t('Aucun résultat')}

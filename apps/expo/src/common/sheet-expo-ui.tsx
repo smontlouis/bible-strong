@@ -1,5 +1,4 @@
-import PageContent from '~common/ui/PageContent'
-import { Global, useTheme } from '@emotion/react'
+import { twMerge } from '~common/ui/classNames'
 import {
   BottomSheetFlatList,
   BottomSheetModal,
@@ -23,11 +22,10 @@ import {
   type ViewProps,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import PageContent from '~common/ui/PageContent'
+import { useTheme } from '~themes/ThemeProvider'
 
 import Back from '~common/Back'
-import Box, { FadingText, TouchableBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
 import type {
   SheetFooterProps,
   SheetHeaderProps,
@@ -37,6 +35,9 @@ import type {
   SheetSnapPoint,
   SheetViewProps,
 } from '~common/sheet'
+import Box, { FadingText, TouchableBox } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
 
 type SheetContextValue = {
   footerHeight: number
@@ -220,16 +221,12 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
       >
         {!backdrop && (
           <>
-            <Global
-              styles={`body:has([data-testid="expo-sheet-interactive-background"]) {
-                pointer-events: auto !important;
-              }`}
-            />
+            <style>{`body:has([data-testid="expo-sheet-interactive-background"]) {
+              pointer-events: auto !important;
+            }`}</style>
             <Box
+              className="overflow-hidden border-continuous absolute w-[0px] h-[0px]"
               testID="expo-sheet-interactive-background"
-              position="absolute"
-              width={0}
-              height={0}
             />
           </>
         )}
@@ -255,7 +252,15 @@ const SheetFooter = ({ children, onLayout, style, ...props }: SheetFooterProps) 
   }
 
   return (
-    <Box px={20} pt={8} pb={8} mb={insets.bottom} onLayout={handleLayout} style={style} {...props}>
+    <Box
+      onLayout={handleLayout}
+      style={[{ marginBottom: insets.bottom }, style]}
+      {...props}
+      className={twMerge(
+        'overflow-hidden border-continuous',
+        twMerge('overflow-hidden border-continuous pt-[8px] pb-[8px] px-[20px]', props.className)
+      )}
+    >
       {children}
     </Box>
   )
@@ -271,10 +276,10 @@ const SheetHeader = ({
   onBackPress,
   rightComponent,
 }: SheetHeaderProps) => (
-  <Box borderColor="border" borderBottomWidth={1}>
+  <Box className="border-continuous overflow-hidden border-border border-b-[1px]">
     <PageContent>
       {(title || subTitle || hasBackButton || leftComponent || rightComponent) && (
-        <Box minH={54} row alignItems="center">
+        <Box className="overflow-hidden border-continuous min-h-[54px] flex-row items-center">
           {hasBackButton ? (
             <Back
               onCustomPress={onBackPress}
@@ -286,25 +291,28 @@ const SheetHeader = ({
             leftComponent
           )}
           <Box
-            flex
-            paddingLeft={hasBackButton || leftComponent ? 0 : 20}
-            paddingRight={rightComponent ? 0 : 20}
-            justifyContent="center"
-            alignItems={centerTitle ? 'center' : undefined}
+            className="overflow-hidden border-continuous flex-[1] justify-center"
+            style={{
+              paddingLeft: hasBackButton || leftComponent ? 0 : 20,
+              paddingRight: rightComponent ? 0 : 20,
+              alignItems: centerTitle ? 'center' : undefined,
+            }}
           >
             {!!title && (
               <FadingText
+                className="overflow-hidden border-continuous font-bold text-[16px]"
                 accessibilityRole="header"
                 numberOfLines={1}
-                bold
-                fontSize={16}
-                textAlign={centerTitle ? 'center' : 'left'}
+                style={{ textAlign: centerTitle ? 'center' : 'left' }}
               >
                 {title}
               </FadingText>
             )}
             {!!subTitle && (
-              <Text fontSize={13} color="grey" textAlign={centerTitle ? 'center' : 'left'}>
+              <Text
+                className="text-[13px] text-grey"
+                style={{ textAlign: centerTitle ? 'center' : 'left' }}
+              >
                 {subTitle}
               </Text>
             )}
@@ -319,22 +327,12 @@ const SheetHeader = ({
 
 const SheetItem = ({ children, tag, onPress, ...props }: SheetItemProps) => (
   <TouchableBox
+    className="border-continuous overflow-visible flex-row items-center justify-between p-[20px] border-border border-b-[1px]"
     accessibilityRole="button"
     onPress={onPress}
-    row
-    alignItems="center"
-    justifyContent="space-between"
-    p={20}
-    borderColor="border"
-    borderBottomWidth={1}
-    overflow="hidden"
   >
     <Text {...props}>{children}</Text>
-    {Boolean(tag) && (
-      <Text color="grey" fontSize={12}>
-        {tag}
-      </Text>
-    )}
+    {Boolean(tag) && <Text className="text-grey text-[12px]">{tag}</Text>}
   </TouchableBox>
 )
 
@@ -343,7 +341,14 @@ const SheetView = forwardRef<View, SheetViewProps>(({ style, ...props }, ref) =>
 
   return (
     <BottomSheetView style={withFooterMargin(style, footerHeight)}>
-      <Box ref={ref} {...props} />
+      <Box
+        ref={ref}
+        {...props}
+        className={twMerge(
+          'overflow-hidden border-continuous',
+          twMerge('overflow-hidden border-continuous', props.className)
+        )}
+      />
     </BottomSheetView>
   )
 })
@@ -413,18 +418,18 @@ const useSheetInternal = () => ({
 export default Sheet
 
 export {
-  useSheetFooterInset,
   Sheet,
-  BottomSheetModalProvider as SheetProvider,
-  SheetView,
-  SheetScrollView,
-  SheetFlatList,
   SheetFlashList,
-  SheetSectionList,
-  SheetTextInput,
+  SheetFlatList,
   SheetFooter,
   SheetHeader,
   SheetItem,
+  BottomSheetModalProvider as SheetProvider,
+  SheetScrollView,
+  SheetSectionList,
+  SheetTextInput,
+  SheetView,
+  useSheetFooterInset,
   useSheetInternal,
 }
 
@@ -440,8 +445,8 @@ export type {
 } from '~common/sheet'
 
 export type {
-  FlatListProps as SheetFlatListProps,
   FlashListProps as SheetFlashListProps,
+  FlatListProps as SheetFlatListProps,
   ScrollViewProps as SheetScrollViewProps,
   SectionListProps as SheetSectionListProps,
   TextInputProps as SheetTextInputProps,

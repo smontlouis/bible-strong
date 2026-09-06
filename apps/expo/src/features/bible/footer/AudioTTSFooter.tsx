@@ -36,7 +36,6 @@ import {
   ttsVoiceAtom,
 } from './atom'
 import { createTtsChapterData } from './ttsChapterData'
-
 type UseLoadSoundProps = {
   book: Book
   chapter: number
@@ -365,27 +364,24 @@ const AudioTTSFooter = ({
 
   return (
     <AudioContainer onReduce={onReduce} audioMode="tts" onChangeMode={onChangeMode}>
-      <Text color="grey" textAlign="center" fontSize={12} bold>
-        {audioTitle}
-      </Text>
-      <Box flex row overflow="visible" center mt={10}>
+      <Text className="text-grey text-center text-[12px] font-bold">{audioTitle}</Text>
+      <Box className="border-continuous overflow-visible flex-[1] flex-row items-center justify-center mt-[10px]">
         <ChapterButton
           disabled={disabled}
           hasNextChapter={hasPreviousChapter}
           direction="left"
           onPress={onPrevChapter}
         />
-        <Box flex center overflow="visible" row>
+        <Box className="border-continuous overflow-visible flex-[1] items-center justify-center flex-row">
           <TouchableBox
+            className="overflow-hidden border-continuous w-[40px] h-[40px] items-center justify-center"
             disabled={disabled}
             activeOpacity={0.5}
             onPress={goToPrevVerse}
             accessibilityRole="button"
             accessibilityLabel={t('accessibility.previousVerse')}
             accessibilityState={{ disabled }}
-            width={40}
-            height={40}
-            center
+            style={[{ opacity: disabled ? 0.6 : 1 }, [{ opacity: disabled ? 0.6 : 1 }]]}
           >
             <FeatherIcon name="chevron-left" size={18} color="tertiary" />
           </TouchableBox>
@@ -396,15 +392,14 @@ const AudioTTSFooter = ({
             onToggle={isPlaying ? onStop : onPlay}
           />
           <TouchableBox
+            className="overflow-hidden border-continuous w-[40px] h-[40px] items-center justify-center"
             disabled={disabled}
             activeOpacity={0.5}
             onPress={goToNextVerse}
             accessibilityRole="button"
             accessibilityLabel={t('accessibility.nextVerse')}
             accessibilityState={{ disabled }}
-            width={40}
-            height={40}
-            center
+            style={[{ opacity: disabled ? 0.6 : 1 }, [{ opacity: disabled ? 0.6 : 1 }]]}
           >
             <FeatherIcon name="chevron-right" size={18} color="tertiary" />
           </TouchableBox>
@@ -416,7 +411,7 @@ const AudioTTSFooter = ({
           onPress={onNextChapter}
         />
       </Box>
-      <HStack alignItems="center" justifyContent="center" mt={10}>
+      <HStack className="mt-[10px] items-center justify-center">
         <TTSVoiceButton currentVersion={version} />
         <TTSSpeedButton />
         <TTSPitchButton />

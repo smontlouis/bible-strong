@@ -1,7 +1,6 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-
 import { PrimitiveAtom } from 'jotai/vanilla'
 import TrackPlayer, {
   AppKilledPlaybackBehavior,
@@ -35,7 +34,6 @@ import BasicFooter from './BasicFooter'
 import ChapterButton from './ChapterButton'
 import PlayButton from './PlayButton'
 import { audioSleepMinutesAtom, audioSleepTimeAtom, playingBibleTabIdAtom } from './atom'
-
 type UseLoadSoundProps = {
   audioUrl?: string
   canPlayAudio?: boolean
@@ -344,24 +342,26 @@ const AudioUrlFooter = ({
   return (
     <AudioContainer onReduce={onReduce} audioMode="url" onChangeMode={onChangeMode}>
       <AudioBar duration={progress.duration} position={progress.position} />
-      <Box flex row overflow="visible" center mt={10}>
+      <Box className="border-continuous overflow-visible flex-[1] flex-row items-center justify-center mt-[10px]">
         <ChapterButton
           disabled={disabled}
           hasNextChapter={hasPreviousChapter}
           direction="left"
           onPress={onPrevChapter}
         />
-        <Box flex center overflow="visible" row>
+        <Box className="border-continuous overflow-visible flex-[1] items-center justify-center flex-row">
           <TouchableBox
+            className="overflow-hidden border-continuous w-[40px] h-[40px] items-center justify-center"
             disabled={disabled || isLoading || !isSetup}
             activeOpacity={0.5}
             onPress={() => TrackPlayer.seekTo(progress.position - 10)}
             accessibilityRole="button"
             accessibilityLabel={t('accessibility.rewindTenSeconds')}
             accessibilityState={{ disabled: disabled || isLoading || !isSetup }}
-            width={40}
-            height={40}
-            center
+            style={[
+              { opacity: disabled || isLoading || !isSetup ? 0.6 : 1 },
+              [{ opacity: disabled || isLoading || !isSetup ? 0.6 : 1 }],
+            ]}
           >
             <FeatherIcon name="rotate-ccw" size={20} color="tertiary" />
           </TouchableBox>
@@ -373,15 +373,17 @@ const AudioUrlFooter = ({
             onToggle={isPlaying ? onPause : onPlay}
           />
           <TouchableBox
+            className="overflow-hidden border-continuous w-[40px] h-[40px] items-center justify-center"
             disabled={disabled || isLoading}
             activeOpacity={0.5}
             onPress={() => TrackPlayer.seekTo(progress.position + 10)}
             accessibilityRole="button"
             accessibilityLabel={t('accessibility.forwardTenSeconds')}
             accessibilityState={{ disabled: disabled || isLoading }}
-            width={40}
-            height={40}
-            center
+            style={[
+              { opacity: disabled || isLoading ? 0.6 : 1 },
+              [{ opacity: disabled || isLoading ? 0.6 : 1 }],
+            ]}
           >
             <FeatherIcon name="rotate-cw" size={20} color="tertiary" />
           </TouchableBox>
@@ -393,7 +395,7 @@ const AudioUrlFooter = ({
           onPress={onNextChapter}
         />
       </Box>
-      <HStack alignItems="center" justifyContent="center" mt={10}>
+      <HStack className="mt-[10px] items-center justify-center">
         <AudioSpeedButton />
         <AudioRepeatButton />
         <AudioSleepButton />

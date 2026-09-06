@@ -1,32 +1,61 @@
-import PageContent from '~common/ui/PageContent'
-import styled from '@emotion/native'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import * as Icon from '@expo/vector-icons'
-import { MenuView } from '~common/ui/MenuView'
-import React from 'react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import { MenuView } from '~common/ui/MenuView'
+import PageContent from '~common/ui/PageContent'
+import type { Theme as AppTheme } from '~themes'
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Back from '~common/Back'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
+import useLanguage from '~helpers/useLanguage'
 
-const HeaderBox = styled(Box)<{ topInset: number }>(({ theme, topInset }) => ({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  height: 60,
-  marginTop: topInset,
-  borderBottomColor: theme.colors.border,
-  alignItems: 'stretch',
-  zIndex: 1,
-}))
+const HeaderBox = (
+  componentProps: Omit<UIComponentProps<typeof Box>, keyof { topInset: number } | 'theme'> &
+    Omit<{ topInset: number }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
-}))
+  const { topInset } = props
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'absolute top-[0px] left-[0px] right-[0px] h-[60px] border-b-border items-stretch z-[1]',
+      className
+    )
+  )
+  return (
+    <Box
+      {...props}
+      style={
+        [classStyles, { marginTop: topInset }, props.style] as UIComponentProps<typeof Box>['style']
+      }
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
+
+const FeatherIcon = (
+  componentProps: Omit<UIComponentProps<typeof Icon.Feather>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('text-default', className))
+  return (
+    <Icon.Feather
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.Feather>['style']}
+    />
+  )
+}
 
 interface Props {
   title: string
@@ -51,6 +80,8 @@ const TimelineHeader = ({
   onOpenInNewTab,
   onSearchPress,
 }: Props) => {
+  const stylingTheme = useStylingTheme()
+
   const lang = useLanguage()
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
@@ -58,24 +89,27 @@ const TimelineHeader = ({
 
   return (
     <HeaderBox topInset={topInset}>
-      <PageContent row flex={1}>
-        <Box center>
+      <PageContent className="flex-[1] flex-row">
+        <Box className="overflow-hidden border-continuous items-center justify-center">
           {hasBackButton && (
             <Back padding onCustomPress={onBackPress}>
               <FeatherIcon name="arrow-left" size={20} />
             </Back>
           )}
         </Box>
-        <Box flex center>
-          <Text title fontSize={fontSize}>
+        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
+          <Text
+            style={{
+              fontSize: fontSize || 16,
+              fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+            }}
+          >
             {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
           </Text>
         </Box>
-        <Box center row>
+        <Box className="overflow-hidden border-continuous items-center justify-center flex-row">
           <TouchableBox
-            center
-            height={60}
-            width={44}
+            className="overflow-hidden border-continuous items-center justify-center h-[60px] w-[44px]"
             onPress={onSearchPress}
             accessibilityRole="button"
             accessibilityLabel={t('Recherche')}
@@ -102,7 +136,7 @@ const TimelineHeader = ({
               }
             }}
           >
-            <Box row center height={60} width={44}>
+            <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[44px]">
               <Icon.Feather name="more-vertical" size={18} />
             </Box>
           </MenuView>

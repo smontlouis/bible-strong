@@ -1,11 +1,9 @@
 import { Feather } from '@expo/vector-icons'
 import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg'
-
 import Box from '~common/ui/Box'
 import type { OfflineSetupFolderVisual } from '../offlineSetupPresentation'
 import OfflineResourceFolderBounce from './OfflineResourceFolderBounce'
 import OfflineResourceFolderItems from './OfflineResourceFolderItems'
-
 type OfflineResourceFolderBadgeProps = {
   itemCount: number
   visual: OfflineSetupFolderVisual
@@ -22,7 +20,7 @@ const OfflineResourceFolderBadge = ({
   const height = width * (40 / 44)
 
   return (
-    <Box width={width} height={height} overflow="visible">
+    <Box className="border-continuous overflow-visible" style={{ width: width, height: height }}>
       <OfflineResourceFolderBounce itemCount={itemCount} width={width}>
         <Svg
           width="100%"
@@ -59,14 +57,13 @@ const OfflineResourceFolderBadge = ({
           />
         </Svg>
         <Box
-          position="absolute"
-          left={5 * scale}
-          top={14 * scale}
-          size={17 * scale}
-          borderRadius={6 * scale}
-          bg="rgba(255,255,255,0.84)"
-          zIndex={20}
-          center
+          className="overflow-hidden border-continuous absolute bg-[rgba(255,255,255,0.84)] z-[20] items-center justify-center"
+          style={{
+            top: 14 * scale,
+            left: 5 * scale,
+            borderRadius: 6 * scale,
+            ...(17 * scale ? { width: 17 * scale, height: 17 * scale } : {}),
+          }}
         >
           <Feather name={visual.icon} size={10 * scale} color={visual.colors.icon} />
         </Box>

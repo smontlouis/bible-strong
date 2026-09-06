@@ -1,6 +1,11 @@
-import React, { memo, useCallback } from 'react'
-import styled from '@emotion/native'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { memo, useCallback } from 'react'
 import { Pressable } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
@@ -13,18 +18,32 @@ interface NaveItemProps {
   onSelect?: (name_lower: string, name: string) => void
 }
 
-const SectionItem = styled(Box)(({ theme }) => ({
-  height: 60,
-  marginLeft: 20,
-  marginRight: 20,
-  backgroundColor: theme.colors.reverse,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1,
-  alignItems: 'flex-start',
-  justifyContent: 'center',
-}))
+const SectionItem = (
+  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'h-[60px] ml-[20px] mr-[20px] bg-reverse border-b-border border-b-[1px] items-start justify-center',
+      className
+    )
+  )
+  return (
+    <Box
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
 const NaveItem = memo(({ name_lower, name, onSelect }: NaveItemProps) => {
+  const stylingTheme = useStylingTheme()
+
   const pushRouteOnce = usePushRouteOnce()
 
   const handlePress = useCallback(() => {
@@ -40,8 +59,11 @@ const NaveItem = memo(({ name_lower, name, onSelect }: NaveItemProps) => {
 
   const content = (
     <SectionItem>
-      <Box row>
-        <Text title fontSize={18} color="default" flex paddingRight={20}>
+      <Box className="overflow-hidden border-continuous flex-row">
+        <Text
+          className="text-[18px] text-default flex-[1] pr-[20px]"
+          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+        >
           {name}
         </Text>
       </Box>

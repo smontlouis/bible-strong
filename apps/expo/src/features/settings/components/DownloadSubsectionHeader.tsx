@@ -1,14 +1,12 @@
 import React from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
-
 import Box from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { EaseView } from 'react-native-ease'
 import { DOWNLOAD_LIST_LAYOUT } from './downloadListLayout'
-
 interface DownloadSubsectionHeaderProps {
   title: string
   isCollapsed: boolean
@@ -32,14 +30,11 @@ const DownloadSubsectionHeader = ({
 
   return (
     <Box
-      minHeight={48}
-      pl={DOWNLOAD_LIST_LAYOUT.subsectionPaddingLeft}
-      pr={DOWNLOAD_LIST_LAYOUT.subsectionPaddingRight}
-      row
-      alignItems="center"
-      bg="lightGrey"
-      borderBottomWidth={1}
-      borderColor="border"
+      className="border-continuous overflow-hidden min-h-[48px] flex-row items-center bg-light-grey border-b-[1px] border-border"
+      style={{
+        paddingLeft: DOWNLOAD_LIST_LAYOUT.subsectionPaddingLeft,
+        paddingRight: DOWNLOAD_LIST_LAYOUT.subsectionPaddingRight,
+      }}
     >
       <TouchableOpacity
         accessibilityLabel={t('accessibility.selectAllInSection', { section: title })}
@@ -65,8 +60,8 @@ const DownloadSubsectionHeader = ({
         activeOpacity={0.7}
         style={{ flex: 1 }}
       >
-        <Box row alignItems="center">
-          <Text fontSize={16}>{title}</Text>
+        <Box className="overflow-hidden border-continuous flex-row items-center">
+          <Text className="text-[16px]">{title}</Text>
           <EaseView
             animate={{ rotate: isCollapsed ? 0 : 90 }}
             transition={{
@@ -78,8 +73,8 @@ const DownloadSubsectionHeader = ({
           >
             <FeatherIcon name="chevron-right" size={18} color="tertiary" />
           </EaseView>
-          <Box flex />
-          <Text fontSize={12} color="tertiary">
+          <Box className="overflow-hidden border-continuous flex-[1]" />
+          <Text className="text-[12px] text-tertiary">
             {downloadedCount}/{totalCount}
           </Text>
         </Box>

@@ -1,3 +1,5 @@
+import { twMerge } from '~common/ui/classNames'
+
 import * as Speech from 'expo-speech'
 import { useAtom } from 'jotai/react'
 import React, { useEffect } from 'react'
@@ -11,7 +13,6 @@ import { versions } from '~helpers/bibleVersions'
 import { timeout } from '~helpers/timeout'
 import { ttsVoiceAtom } from './atom'
 import AudioChip from './AudioChip'
-
 export interface TTSVoiceButtonProps extends BoxProps {
   currentVersion: VersionCode
 }
@@ -74,10 +75,10 @@ const TTSVoiceButton = ({ currentVersion, ...props }: TTSVoiceButtonProps) => {
         <AudioChip isActive={isActive} {...props}>
           <FeatherIcon name="mic" size={14} color={isActive ? 'primary' : 'default'} />
           <Text
-            ml={5}
-            bold
-            fontSize={10}
-            color={isActive ? 'primary' : 'default'}
+            className={twMerge(
+              isActive ? 'text-primary' : 'text-default',
+              'ml-[5px] font-bold text-[10px]'
+            )}
             numberOfLines={1}
           >
             {voice?.name || t('audio.voice')}

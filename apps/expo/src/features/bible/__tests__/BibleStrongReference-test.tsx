@@ -1,27 +1,14 @@
 import React from 'react'
-
 import BibleStrongReference from '../BibleStrongReference'
 import type { StrongResourceScrollValue } from '../StrongResourceScrollContext'
-
-jest.mock('@emotion/native', () => {
-  const ReactModule = jest.requireActual<typeof React>('react')
-  const createStyledComponent = (type: React.ElementType | string) => () =>
-    function StyledComponent({
-      children,
-      ...props
-    }: React.PropsWithChildren<Record<string, unknown>>) {
-      return ReactModule.createElement(type as React.ElementType, props, children)
-    }
-  const styled = Object.assign((type: React.ElementType) => createStyledComponent(type), {
-    TouchableOpacity: createStyledComponent('TouchableOpacity'),
-    View: createStyledComponent('View'),
-  })
-
-  return {
-    __esModule: true,
-    default: styled,
-  }
-})
+jest.mock('react-native', () => ({
+  Text: 'Text',
+  View: 'View',
+  TouchableOpacity: 'TouchableOpacity',
+}))
+jest.mock('~themes/ThemeProvider', () => ({ useTheme: () => ({ colors: {} }) }))
+// Behavioral tests do not run Metro's generated Uniwind stylesheet.
+jest.mock('uniwind', () => ({ useResolveClassNames: () => ({}) }))
 
 jest.mock('~common/ui/Paragraph', () => ({
   __esModule: true,

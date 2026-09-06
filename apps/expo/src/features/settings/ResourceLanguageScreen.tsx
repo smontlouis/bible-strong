@@ -4,8 +4,7 @@ import { useDispatch } from 'react-redux'
 import { useAtom } from 'jotai'
 import { Pressable } from 'react-native'
 import Animated, { type AnimatedStyle } from 'react-native-reanimated'
-import { useTheme } from '@emotion/react'
-
+import { useTheme } from '~themes/ThemeProvider'
 import { Image } from 'expo-image'
 import Header from '~common/Header'
 import Container from '~common/ui/Container'
@@ -21,7 +20,6 @@ import {
 } from 'src/state/resourcesLanguage'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
-
 // Icons mapping using SVG files
 const icons = {
   strong: require('~assets/images/tab-icons/lexique.svg'),
@@ -119,13 +117,8 @@ const SegmentedLanguageToggle = ({
 
   return (
     <Box
-      w={containerWidth}
-      h={height}
-      bg="lightGrey"
-      borderRadius={height / 2}
-      row
-      p={3}
-      position="relative"
+      className="overflow-hidden border-continuous bg-light-grey flex-row p-[3px] relative"
+      style={{ width: containerWidth, height: height, borderRadius: height / 2 }}
     >
       {/* Animated sliding indicator */}
       <Animated.View style={indicatorStyle} />
@@ -166,24 +159,28 @@ const AppLanguageSection = ({ currentLang, onLanguageChange }: AppLanguageSectio
   const theme = useTheme()
 
   return (
-    <Box mx={16} mt={16} mb={24} p={24} bg="reverse" borderRadius={20} lightShadow center>
+    <Box
+      className="overflow-hidden border-continuous mx-[16px] mt-[16px] mb-[24px] p-[24px] bg-reverse rounded-[20px] items-center justify-center"
+      style={{
+        shadowColor: 'rgb(89,131,240)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 7,
+        elevation: 1,
+        overflow: 'visible',
+      }}
+    >
       {/* Globe icon */}
       <Box
-        size={64}
-        borderRadius={32}
-        bg="lightGrey"
-        center
-        mb={16}
-        style={{ backgroundColor: 'rgba(89, 131, 240, 0.1)' }}
+        className="overflow-hidden border-continuous rounded-[32px] bg-light-grey items-center justify-center mb-[16px]"
+        style={[{ width: 64, height: 64 }, { backgroundColor: 'rgba(89, 131, 240, 0.1)' }]}
       >
         <FeatherIcon name="globe" size={28} color={theme.colors.primary} />
       </Box>
 
-      <Text bold fontSize={20} mb={8}>
-        {t('language.appLanguage')}
-      </Text>
+      <Text className="font-bold text-[20px] mb-[8px]">{t('language.appLanguage')}</Text>
 
-      <Text fontSize={14} color="grey" textAlign="center" mb={20} px={20}>
+      <Text className="text-[14px] text-grey text-center mb-[20px] px-[20px]">
         {t('language.appLanguageDesc')}
       </Text>
 
@@ -215,10 +212,13 @@ const ResourceRow = ({
   const theme = useTheme()
 
   return (
-    <Box>
-      <HStack px={20} py={16} alignItems="center">
+    <Box className="overflow-hidden border-continuous">
+      <HStack className="overflow-hidden border-continuous px-[20px] py-[16px] items-center">
         {/* Resource icon */}
-        <Box size={40} borderRadius={12} bg="lightGrey" center mr={14}>
+        <Box
+          className="overflow-hidden border-continuous rounded-[12px] bg-light-grey items-center justify-center mr-[14px]"
+          style={{ width: 40, height: 40 }}
+        >
           {resource.iconType === 'svg' ? (
             <Image
               source={icons[resource.icon]}
@@ -232,11 +232,9 @@ const ResourceRow = ({
         </Box>
 
         {/* Text content */}
-        <VStack flex mr={12}>
-          <Text bold fontSize={15} mb={2}>
-            {t(label)}
-          </Text>
-          <Text fontSize={12} color="grey" numberOfLines={2}>
+        <VStack className="overflow-hidden border-continuous flex-[1] mr-[12px]">
+          <Text className="font-bold text-[15px] mb-[2px]">{t(label)}</Text>
+          <Text className="text-[12px] text-grey" numberOfLines={2}>
             {t(description)}
           </Text>
         </VStack>
@@ -246,7 +244,9 @@ const ResourceRow = ({
       </HStack>
 
       {/* Separator - inset aligned with text */}
-      {!isLast && <Box h={1} bg="lightGrey" mx={20} ml={74} />}
+      {!isLast && (
+        <Box className="overflow-hidden border-continuous h-[1px] bg-light-grey mx-[20px] ml-[74px]" />
+      )}
     </Box>
   )
 }
@@ -291,17 +291,28 @@ const ResourceLanguageScreen = () => {
         />
 
         {/* Per-Resource Section Header */}
-        <Box mx={16} mb={8}>
-          <Text bold fontSize={13} color="grey" style={{ textTransform: 'uppercase' }} mb={8}>
+        <Box className="overflow-hidden border-continuous mx-[16px] mb-[8px]">
+          <Text
+            className="font-bold text-[13px] text-grey mb-[8px]"
+            style={{ textTransform: 'uppercase' }}
+          >
             {t('resourceLanguage.perResource')}
           </Text>
-          <Text fontSize={13} color="grey">
-            {t('resourceLanguage.description')}
-          </Text>
+          <Text className="text-[13px] text-grey">{t('resourceLanguage.description')}</Text>
         </Box>
 
         {/* Resources Card */}
-        <Box mx={16} bg="reverse" borderRadius={16} overflow="hidden" lightShadow>
+        <Box
+          className="border-continuous overflow-visible mx-[16px] bg-reverse rounded-[16px]"
+          style={{
+            shadowColor: 'rgb(89,131,240)',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 7,
+            elevation: 1,
+            overflow: 'visible',
+          }}
+        >
           {RESOURCES_CONFIG.map((resource, index) => (
             <ResourceRow
               key={resource.id}
@@ -316,10 +327,8 @@ const ResourceLanguageScreen = () => {
         </Box>
 
         {/* Footer note */}
-        <Box px={20} pt={20}>
-          <Text fontSize={12} color="grey" textAlign="center">
-            {t('resourceLanguage.note')}
-          </Text>
+        <Box className="overflow-hidden border-continuous px-[20px] pt-[20px]">
+          <Text className="text-[12px] text-grey text-center">{t('resourceLanguage.note')}</Text>
         </Box>
       </ScrollView>
     </Container>

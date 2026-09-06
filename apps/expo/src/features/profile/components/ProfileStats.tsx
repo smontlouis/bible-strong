@@ -1,16 +1,19 @@
-import styled from '@emotion/native'
-import { useTheme } from '@emotion/react'
 import * as Icon from '@expo/vector-icons'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
 import { useSelector } from 'react-redux'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme } from '~themes/ThemeProvider'
 
 import Link from '~common/Link'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import useLogin from '~helpers/useLogin'
 import { toast } from '~helpers/toast'
+import useLogin from '~helpers/useLogin'
 import { RootState } from '~redux/modules/reducer'
 
 const ProfileStats = () => {
@@ -35,24 +38,22 @@ const ProfileStats = () => {
     Boolean(sync?.isLoading) && collections.some(collection => !sync?.loaded?.[collection])
 
   return (
-    <Box bg="lightGrey" borderRadius={30} paddingVertical={20} marginHorizontal={20}>
-      <VStack gap={10} paddingHorizontal={20}>
+    <Box className="overflow-hidden border-continuous bg-light-grey rounded-[30px] py-[20px] mx-[20px]">
+      <VStack className="overflow-hidden border-continuous gap-[10px] px-[20px]">
         {sync?.isLoading && (
-          <HStack alignItems="center" gap={8}>
+          <HStack className="overflow-hidden border-continuous items-center gap-[8px]">
             <ActivityIndicator size="small" color={theme.colors.primary} />
-            <Text fontSize={12} color="grey">
-              {t('profileStats.syncingData')}
-            </Text>
+            <Text className="text-[12px] text-grey">{t('profileStats.syncingData')}</Text>
           </HStack>
         )}
-        <HStack gap={10}>
+        <HStack className="overflow-hidden border-continuous gap-[10px]">
           <StatCard route="Highlights">
             <StatValue
               icon="edit-3"
               count={highlights}
               isLoading={isSyncing(['highlights', 'wordAnnotations'])}
             />
-            <Text fontSize={11} color="grey" numberOfLines={1}>
+            <Text className="text-[11px] text-grey" numberOfLines={1}>
               {isSyncing(['highlights', 'wordAnnotations']) && highlights === 0
                 ? t('profileStats.syncing')
                 : t('surbrillance', { count: highlights })}
@@ -61,7 +62,7 @@ const ProfileStats = () => {
 
           <StatCard route="Bookmarks">
             <StatValue icon="bookmark" count={bookmarks} isLoading={isSyncing(['bookmarks'])} />
-            <Text fontSize={11} color="grey" numberOfLines={1}>
+            <Text className="text-[11px] text-grey" numberOfLines={1}>
               {isSyncing(['bookmarks']) && bookmarks === 0
                 ? t('profileStats.syncing')
                 : t('marque-page', { count: bookmarks })}
@@ -70,7 +71,7 @@ const ProfileStats = () => {
 
           <StatCard route="BibleVerseNotes">
             <StatValue icon="file-text" count={notes} isLoading={isSyncing(['notes'])} />
-            <Text fontSize={11} color="grey" numberOfLines={1}>
+            <Text className="text-[11px] text-grey" numberOfLines={1}>
               {isSyncing(['notes']) && notes === 0
                 ? t('profileStats.syncing')
                 : t('note', { count: notes })}
@@ -78,19 +79,22 @@ const ProfileStats = () => {
           </StatCard>
         </HStack>
 
-        <HStack gap={10}>
+        <HStack className="overflow-hidden border-continuous gap-[10px]">
           <StatCard
             {...(isLogged
               ? { route: 'Studies' as const }
               : { onPress: () => toast.info(t('study.loginRequired')) })}
           >
             {!isLogged && (
-              <Box pos="absolute" top={8} right={8} pointerEvents="none">
+              <Box
+                className="overflow-hidden border-continuous absolute top-[8px] right-[8px]"
+                pointerEvents="none"
+              >
                 <Icon.Feather name="lock" size={12} color={theme.colors.grey} />
               </Box>
             )}
             <StatValue icon="feather" count={studies} isLoading={isSyncing(['studies'])} />
-            <Text fontSize={11} color="grey" numberOfLines={1}>
+            <Text className="text-[11px] text-grey" numberOfLines={1}>
               {isSyncing(['studies']) && studies === 0
                 ? t('profileStats.syncing')
                 : t('étude', { count: studies })}
@@ -99,7 +103,7 @@ const ProfileStats = () => {
 
           <StatCard route="BibleVerseLinks">
             <StatValue icon="link" count={links} isLoading={isSyncing(['links'])} />
-            <Text fontSize={11} color="grey" numberOfLines={1}>
+            <Text className="text-[11px] text-grey" numberOfLines={1}>
               {isSyncing(['links']) && links === 0
                 ? t('profileStats.syncing')
                 : t('lien', { count: links })}
@@ -108,7 +112,7 @@ const ProfileStats = () => {
 
           <StatCard route="Tags">
             <StatValue icon="tag" count={tags} isLoading={isSyncing(['tags'])} />
-            <Text fontSize={11} color="grey" numberOfLines={1}>
+            <Text className="text-[11px] text-grey" numberOfLines={1}>
               {isSyncing(['tags']) && tags === 0
                 ? t('profileStats.syncing')
                 : t('étiquette', { count: tags })}
@@ -133,33 +137,62 @@ const StatValue = ({
   const showLoader = isLoading && count === 0
 
   return (
-    <HStack alignItems="center" gap={8}>
+    <HStack className="overflow-hidden border-continuous items-center gap-[8px]">
       <ChipIcon name={icon} size={18} />
       {showLoader ? (
         <ActivityIndicator size="small" color={theme.colors.primary} />
       ) : (
-        <Text bold fontSize={18}>
-          {count}
-        </Text>
+        <Text className="font-bold text-[18px]">{count}</Text>
       )}
     </HStack>
   )
 }
 
-const StatCard = styled(Link)(({ theme }) => ({
-  flex: 1,
-  backgroundColor: theme.colors.reverse,
-  borderRadius: 12,
-  padding: 12,
-  shadowColor: 'rgb(89,131,240)',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.08,
-  shadowRadius: 6,
-  elevation: 1,
-}))
+const StatCard = (
+  componentProps: Omit<UIComponentProps<typeof Link>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const ChipIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.grey,
-}))
+  const classStyles = useResolveClassNames(
+    twMerge('flex-[1] bg-reverse rounded-[12px] p-[12px] elevation-[1]', className)
+  )
+  return (
+    <Link
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            shadowColor: 'rgb(89,131,240)',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 6,
+          },
+          props.style,
+        ] as UIComponentProps<typeof Link>['style']
+      }
+    />
+  )
+}
+
+const ChipIcon = (
+  componentProps: Omit<UIComponentProps<typeof Icon.Feather>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('text-grey', className))
+  return (
+    <Icon.Feather
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.Feather>['style']}
+    />
+  )
+}
 
 export default ProfileStats

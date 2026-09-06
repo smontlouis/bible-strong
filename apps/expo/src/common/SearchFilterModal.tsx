@@ -27,7 +27,7 @@ const SearchFilterModal = forwardRef<SheetRef, Props>(
 
     return (
       <Sheet ref={ref} header={<SheetHeader title={title} />}>
-        <SheetView px={16} pt={8} pb={16}>
+        <SheetView className="pt-[8px] pb-[16px] px-[16px]">
           <SearchInput
             autoFocus
             placeholder={placeholder}

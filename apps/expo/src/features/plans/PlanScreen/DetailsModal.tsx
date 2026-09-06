@@ -1,5 +1,4 @@
 import React from 'react'
-
 import { Sheet, SheetScrollView, type SheetFooterProps, type SheetRef } from '~common/sheet'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
@@ -8,7 +7,6 @@ import { ComputedPlanItem } from '~common/types'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import { wp } from '~helpers/utils'
-
 const width = wp(100) - 20 > 600 ? 600 : wp(100) - 20
 
 interface Props extends Omit<ComputedPlanItem, 'status' | 'progress' | 'type' | 'lang'> {
@@ -46,9 +44,9 @@ const DetailsModal = ({
     <Sheet ref={modalRefDetails} snapPoints={[1]} footer={footer} header={header}>
       <SheetScrollView>
         {/** TODO: fix */}
-        <Box paddingHorizontal={20} paddingTop={20} paddingBottom={200}>
+        <Box className="overflow-hidden border-continuous px-[20px] pt-[20px] pb-[200px]">
           {!!image && (
-            <Box marginBottom={20} rounded>
+            <Box className="overflow-hidden border-continuous mb-[20px] rounded-[20px]">
               <Image
                 style={{ width: '100%', height: height || 200 }}
                 source={{
@@ -61,17 +59,17 @@ const DetailsModal = ({
             {title}
           </Paragraph>
           {!!downloads && (
-            <Paragraph fontFamily="text" scale={-2} color="grey">
+            <Paragraph className="text-grey" fontFamily="text" scale={-2}>
               {t('Téléchargé {{downloads}} fois', { downloads })}
             </Paragraph>
           )}
-          <Paragraph marginTop={20} fontFamily="text" scale={-2}>
+          <Paragraph className="mt-[20px]" fontFamily="text" scale={-2}>
             {description}
           </Paragraph>
           {!!author.displayName && (
-            <Box marginTop={40} row center>
+            <Box className="overflow-hidden border-continuous mt-[40px] flex-row items-center justify-center">
               {author.photoUrl && (
-                <Box borderRadius={10}>
+                <Box className="overflow-hidden border-continuous rounded-[10px]">
                   <Image
                     style={{ width: 50, height: 50 }}
                     source={{
@@ -80,7 +78,7 @@ const DetailsModal = ({
                   />
                 </Box>
               )}
-              <Paragraph marginLeft={10} flex={1} fontFamily="text" scale={-3}>
+              <Paragraph className="ml-[10px] flex-[1]" fontFamily="text" scale={-3}>
                 {t('Créé par {{displayName}}', {
                   displayName: author.displayName,
                 })}

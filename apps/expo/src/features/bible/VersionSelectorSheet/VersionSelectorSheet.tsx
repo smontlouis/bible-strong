@@ -3,17 +3,15 @@ import { useAtomValue, useSetAtom } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
 import { versions } from '~helpers/bibleVersions'
 import { VersionCode } from '~state/tabs'
 import VersionSelectorItem from '../VersionSelectorItem'
 import { bookSelectorDataAtom } from '../BookSelectorSheet/BookSelectorSheet'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { useVersionCatalog, VersionCatalogHeader, VersionCatalogList } from '../VersionCatalogView'
 import { versionSelectorDataAtom } from './state'
 import type { Version } from '~helpers/bibleVersions'
 import BibleOfflineDetailsSheet from './BibleOfflineDetailsSheet'
-
 interface VersionSelectorSheetProps {
   sheetRef: React.RefObject<SheetRef | null>
 }

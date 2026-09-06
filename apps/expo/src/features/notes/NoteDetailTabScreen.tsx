@@ -1,6 +1,6 @@
 import { pageContentStyle } from '~common/ui/PageContent'
 import * as Sentry from '@sentry/react-native'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useRouter } from 'expo-router'
 import { produce } from 'immer'
@@ -34,8 +34,6 @@ import verseToReference from '~helpers/verseToReference'
 import { getNoteTitle } from '~helpers/getNoteTitle'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-
-const IPAD_FORM_SHEET_KEYBOARD_OFFSET = -54
 import { RootState } from '~redux/modules/reducer'
 import type { RelationEndpoint } from '~redux/modules/user'
 import { addNote, deleteNote } from '~redux/modules/user'
@@ -48,6 +46,7 @@ import {
 } from '~redux/selectors/bible'
 import { isFullScreenBibleAtom, unifiedTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
+const IPAD_FORM_SHEET_KEYBOARD_OFFSET = -54
 
 const NOTE_EDITOR_MIN_HEIGHT = 240
 
@@ -358,8 +357,8 @@ ${currentNote.description}
   if (noteId && !currentNote && !isCreatingAnnotationNote) {
     const content = (
       <>
-        <Box flex center px={20}>
-          <Text fontSize={18} color="grey" textAlign="center" mb={20}>
+        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center px-[20px]">
+          <Text className="text-[18px] text-grey text-center mb-[20px]">
             {t("Cette note n'existe plus")}
           </Text>
           <Button onPress={goBack}>{t('Retour aux notes')}</Button>
@@ -378,8 +377,8 @@ ${currentNote.description}
           hasBackButton={hasBackButton}
           onCustomBackPress={goBack}
         />
-        <Box flex center px={20}>
-          <Text fontSize={18} color="grey" textAlign="center" mb={20}>
+        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center px-[20px]">
+          <Text className="text-[18px] text-grey text-center mb-[20px]">
             {t("Cette annotation n'existe plus")}
           </Text>
           <Button onPress={goBack}>{t('Retour aux notes')}</Button>
@@ -391,7 +390,7 @@ ${currentNote.description}
   }
 
   const content = (
-    <Box flex>
+    <Box className="overflow-hidden border-continuous flex-[1]">
       <Header
         title={isAnnotationNote ? t("Note d'annotation") : t('Note')}
         subTitle={reference}
@@ -448,7 +447,7 @@ ${currentNote.description}
                 }
               }}
             >
-              <Box row center height={54} width={54}>
+              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
                 <FeatherIcon name="more-vertical" size={18} />
               </Box>
             </MenuView>
@@ -483,18 +482,16 @@ ${currentNote.description}
             },
           ]}
         >
-          <Box gap={20}>
+          <Box className="overflow-hidden border-continuous gap-[20px]">
             <EntityChipList
               tags={currentNote?.tags}
               relationCount={relationCount}
               onRelationPress={() => noteEndpoint && openEntityRelations(noteEndpoint)}
             />
             {isAnnotationNote && annotation ? (
-              <Box bg="opacity5" borderRadius={8} py={12} px={16}>
-                <Text fontSize={14} color="grey" mb={4}>
-                  {t('Texte annoté')}
-                </Text>
-                <Text fontSize={16} fontWeight="600">
+              <Box className="overflow-hidden border-continuous bg-opacity5 rounded-[8px] py-[12px] px-[16px]">
+                <Text className="text-[14px] text-grey mb-[4px]">{t('Texte annoté')}</Text>
+                <Text className="text-[16px] font-semibold">
                   {annotation.ranges.map(r => r.text).join(' ')}
                 </Text>
               </Box>
@@ -515,6 +512,7 @@ ${currentNote.description}
               )
             ) : null}
             <Box
+              className="overflow-hidden border-continuous"
               onLayout={event => {
                 editorLayoutYRef.current = event.nativeEvent.layout.y
               }}
@@ -553,15 +551,7 @@ ${currentNote.description}
           </Box>
         </ScrollView>
         {isEditing && (
-          <HStack
-            py={10}
-            px={20}
-            justifyContent="flex-end"
-            bg="reverse"
-            borderTopWidth={1}
-            borderColor="border"
-            gap={10}
-          >
+          <HStack className="border-border px-[20px] py-[10px] justify-end border-t-[1px] gap-[10px] bg-reverse">
             <Button reverse onPress={cancelEditing}>
               {t('Annuler')}
             </Button>
@@ -573,9 +563,8 @@ ${currentNote.description}
       </KeyboardAvoidingView>
       {!isEditing && (
         <Box
-          position="absolute"
-          bottom={(isFormSheet ? insets.bottom : bottomBarHeight) + 20}
-          right={20}
+          className="overflow-hidden border-continuous absolute right-[20px]"
+          style={{ bottom: (isFormSheet ? insets.bottom : bottomBarHeight) + 20 }}
         >
           <Fab
             accessibilityLabel={t('accessibility.editNote')}

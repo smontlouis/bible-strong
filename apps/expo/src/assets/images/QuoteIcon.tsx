@@ -1,8 +1,7 @@
 import React from 'react'
 import Svg, { SvgProps, Path } from 'react-native-svg'
-import { withTheme } from '@emotion/react'
+import { withTheme } from '~themes/ThemeProvider'
 import { Theme } from '~themes'
-
 interface QuoteIconProps extends SvgProps {
   color?: string
   theme?: Theme

@@ -1,3 +1,5 @@
+import { twMerge } from '~common/ui/classNames'
+
 import { useAtom } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -9,7 +11,6 @@ import { secondsToMinutes } from '~helpers/secondsToMinutes'
 import { audioSleepMinutesAtom, audioSleepTimeAtom } from './atom'
 import AudioChip from './AudioChip'
 import { useMountTime } from '~helpers/useMountTime'
-
 export type AudioSleepButtonProps = BoxProps
 
 const choices = [
@@ -55,7 +56,12 @@ const AudioSleepButton = (props: AudioSleepButtonProps) => {
       customRender={
         <AudioChip isActive={isActive} {...props}>
           <IonIcon name="timer-outline" size={18} color={isActive ? 'primary' : 'grey'} />
-          <Text ml={5} bold fontSize={10} color={isActive ? 'primary' : 'grey'}>
+          <Text
+            className={twMerge(
+              isActive ? 'text-primary' : 'text-grey',
+              'ml-[5px] font-bold text-[10px]'
+            )}
+          >
             {isActive ? secondsToMinutes(elapsed / 1000) : t('audio.timer')}
           </Text>
         </AudioChip>

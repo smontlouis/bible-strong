@@ -1,17 +1,19 @@
-import styled from '@emotion/native'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
-import { useSetAtom } from 'jotai/react'
 import { Image } from 'expo-image'
 import * as Updates from 'expo-updates'
-import React, { memo, useRef, useState } from 'react'
+import { useSetAtom } from 'jotai/react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { memo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Alert, Platform } from 'react-native'
-import { type SheetRef } from '~common/sheet'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
 import Link, { LinkProps } from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
+import { type SheetRef } from '~common/sheet'
 import Box, { SafeAreaBox } from '~common/ui/Box'
 import CardLinkItem from '~common/ui/CardLinkItem'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
@@ -20,25 +22,39 @@ import ScrollView from '~common/ui/ScrollView'
 import SectionCard, { SectionCardHeader } from '~common/ui/SectionCard'
 import Text from '~common/ui/Text'
 import UserAvatar from '~common/ui/UserAvatar'
+import DeleteAccountModal from '~features/profile/components/DeleteAccountModal'
 import extractFirstName from '~helpers/extractFirstName'
 import { nukeApp } from '~helpers/nukeApp'
 import { toast } from '~helpers/toast'
 import useLanguage from '~helpers/useLanguage'
 import useLogin from '~helpers/useLogin'
-import DeleteAccountModal from '~features/profile/components/DeleteAccountModal'
 import { changelogModalAtom } from '~state/app'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme } from '~themes/ThemeProvider'
 import app from '../../../package.json'
 
 import { useRouter } from 'expo-router'
-import { useTheme } from '@emotion/react'
 import { MainStackProps } from '~navigation/type'
 
-export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(() => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingHorizontal: 20,
-  paddingVertical: 15,
-}))
+export const LinkItem = (
+  componentProps: Omit<
+    UIComponentProps<typeof Link>,
+    keyof LinkProps<keyof MainStackProps> | 'theme'
+  > &
+    Omit<LinkProps<keyof MainStackProps>, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('flex-row items-center px-[20px] py-[15px]', className)
+  )
+  return (
+    <Link
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Link>['style']}
+    />
+  )
+}
 
 const shareMessage = () => {
   const appUrl =
@@ -50,8 +66,8 @@ const shareMessage = () => {
 
 const Infos = memo(() => {
   return (
-    <Box row justifyContent="flex-end" px={16} py={8}>
-      <Text color="grey" fontSize={9}>
+    <Box className="overflow-hidden border-continuous flex-row justify-end px-[16px] py-[8px]">
+      <Text className="text-grey text-[9px]">
         Version: {app.version} {Platform.Version}
       </Text>
     </Box>
@@ -115,7 +131,7 @@ export const More = ({ closeMenu }: MoreProps) => {
   }
 
   return (
-    <SafeAreaBox borderLeftWidth={1} borderColor="border" bg="lightGrey">
+    <SafeAreaBox className="border-continuous overflow-hidden border-l-[1px] border-border bg-light-grey">
       <Header title={t('Plus')} onCustomBackPress={closeMenu} hasBackButton />
       <ScrollView
         style={{ flex: 1 }}
@@ -124,10 +140,13 @@ export const More = ({ closeMenu }: MoreProps) => {
           backgroundColor: theme.colors.lightGrey,
         }}
       >
-        <SectionCard mt={8}>
+        <SectionCard className="mt-[8px]">
           <SectionCardHeader>
             <FeatherIcon name="user" size={16} color="grey" />
-            <Text ml={8} fontSize={12} color="grey" bold style={{ textTransform: 'uppercase' }}>
+            <Text
+              className="ml-[8px] text-[12px] text-grey font-bold"
+              style={{ textTransform: 'uppercase' }}
+            >
               {t('settings.account')}
             </Text>
           </SectionCardHeader>
@@ -141,9 +160,7 @@ export const More = ({ closeMenu }: MoreProps) => {
                   displayName={user.displayName}
                   email={user.email}
                 />
-                <Text flex fontSize={15}>
-                  {extractFirstName(user.displayName)}
-                </Text>
+                <Text className="flex-[1] text-[15px]">{extractFirstName(user.displayName)}</Text>
                 <FeatherIcon name="chevron-right" size={20} color="grey" />
               </CardLinkItem>
 
@@ -151,9 +168,7 @@ export const More = ({ closeMenu }: MoreProps) => {
                 <IconCircle bg="rgba(239, 68, 68, 0.1)">
                   <FeatherIcon name="log-out" size={20} color="quart" />
                 </IconCircle>
-                <Text color="quart" fontSize={15}>
-                  {t('Se déconnecter')}
-                </Text>
+                <Text className="text-quart text-[15px]">{t('Se déconnecter')}</Text>
               </CardLinkItem>
             </>
           ) : (
@@ -161,9 +176,7 @@ export const More = ({ closeMenu }: MoreProps) => {
               <IconCircle bg="lightPrimary">
                 <FeatherIcon name="log-in" size={20} color="primary" />
               </IconCircle>
-              <Text color="primary" fontSize={15}>
-                {t('Se connecter')}
-              </Text>
+              <Text className="text-primary text-[15px]">{t('Se connecter')}</Text>
             </CardLinkItem>
           )}
         </SectionCard>
@@ -171,7 +184,7 @@ export const More = ({ closeMenu }: MoreProps) => {
         <SectionCard>
           <SectionCardHeader>
             <FeatherIcon name="book" size={16} color="grey" />
-            <Text ml={8} fontSize={12} color="grey" style={{ textTransform: 'uppercase' }}>
+            <Text className="ml-[8px] text-[12px] text-grey" style={{ textTransform: 'uppercase' }}>
               {t('settings.resources')}
             </Text>
           </SectionCardHeader>
@@ -179,36 +192,28 @@ export const More = ({ closeMenu }: MoreProps) => {
             <IconCircle bg="rgba(107, 114, 128, 0.1)">
               <FeatherIcon name="clock" size={20} color="grey" />
             </IconCircle>
-            <Text flex fontSize={15}>
-              {t('history.title')}
-            </Text>
+            <Text className="flex-[1] text-[15px]">{t('history.title')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="Lexique">
             <IconCircle bg="rgba(59, 130, 246, 0.1)">
               <LexiqueIcon size={20} color="primary" />
             </IconCircle>
-            <Text flex color="primary" fontSize={15}>
-              {t('Lexique')}
-            </Text>
+            <Text className="flex-[1] text-primary text-[15px]">{t('Lexique')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="Dictionnaire">
             <IconCircle bg="rgba(251, 191, 36, 0.1)">
               <DictionnaryIcon size={20} color="secondary" />
             </IconCircle>
-            <Text flex color="secondary" fontSize={15}>
-              {t('Dictionnaire')}
-            </Text>
+            <Text className="flex-[1] text-secondary text-[15px]">{t('Dictionnaire')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="Nave">
             <IconCircle bg="rgba(147, 51, 234, 0.1)">
               <NaveIcon size={20} color="quint" />
             </IconCircle>
-            <Text flex color="quint" fontSize={15}>
-              {t('Bible Thématique Nave')}
-            </Text>
+            <Text className="flex-[1] text-quint text-[15px]">{t('Bible Thématique Nave')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="CommentaryLibrary">
@@ -220,18 +225,14 @@ export const More = ({ closeMenu }: MoreProps) => {
                 contentFit="contain"
               />
             </IconCircle>
-            <Text flex color="#26A69A" fontSize={15}>
-              {t('Commentaires')}
-            </Text>
+            <Text className="flex-[1] text-[#26A69A] text-[15px]">{t('Commentaires')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="Plans" isLast>
             <IconCircle bg="rgba(107, 114, 128, 0.1)">
               <MaterialIcon name="playlist-add-check" size={20} color="grey" />
             </IconCircle>
-            <Text flex fontSize={15}>
-              {t('Plans')}
-            </Text>
+            <Text className="flex-[1] text-[15px]">{t('Plans')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
         </SectionCard>
@@ -239,7 +240,10 @@ export const More = ({ closeMenu }: MoreProps) => {
         <SectionCard>
           <SectionCardHeader>
             <FeatherIcon name="settings" size={16} color="grey" />
-            <Text ml={8} fontSize={12} color="grey" bold style={{ textTransform: 'uppercase' }}>
+            <Text
+              className="ml-[8px] text-[12px] text-grey font-bold"
+              style={{ textTransform: 'uppercase' }}
+            >
               {t('settings.settings')}
             </Text>
           </SectionCardHeader>
@@ -247,40 +251,32 @@ export const More = ({ closeMenu }: MoreProps) => {
             <IconCircle bg="rgba(107, 114, 128, 0.1)">
               <MaterialIcon name="language" size={20} color="grey" />
             </IconCircle>
-            <Text flex fontSize={15}>
-              {t('Changer la langue')}
-            </Text>
+            <Text className="flex-[1] text-[15px]">{t('Changer la langue')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="Theme">
             <IconCircle bg="rgba(107, 114, 128, 0.1)">
               <FeatherIcon name="sun" size={20} color="grey" />
             </IconCircle>
-            <Text flex fontSize={15}>
-              {t('settings.theme')}
-            </Text>
+            <Text className="flex-[1] text-[15px]">{t('settings.theme')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="BibleDefaults">
             <IconCircle bg="rgba(107, 114, 128, 0.1)">
               <FeatherIcon name="book-open" size={20} color="grey" />
             </IconCircle>
-            <Text flex fontSize={15}>
-              {t('bibleDefaults.title')}
-            </Text>
+            <Text className="flex-[1] text-[15px]">{t('bibleDefaults.title')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           {Platform.OS !== 'web' && (
             <>
               <CardLinkItem route="Downloads">
                 <IconCircle bg="rgba(107, 114, 128, 0.1)">
-                  <Box>
+                  <Box className="overflow-hidden border-continuous">
                     <FeatherIcon name="download" size={20} color="grey" />
                   </Box>
                 </IconCircle>
-                <Text flex fontSize={15}>
-                  {t('Gestion des téléchargements')}
-                </Text>
+                <Text className="flex-[1] text-[15px]">{t('Gestion des téléchargements')}</Text>
                 <FeatherIcon name="chevron-right" size={20} color="grey" />
               </CardLinkItem>
               <CardLinkItem onPress={checkForUpdate} isLast>
@@ -291,9 +287,7 @@ export const More = ({ closeMenu }: MoreProps) => {
                     <FeatherIcon name="refresh-cw" size={20} color="grey" />
                   )}
                 </IconCircle>
-                <Text flex fontSize={15}>
-                  {t('app.checkForUpdates')}
-                </Text>
+                <Text className="flex-[1] text-[15px]">{t('app.checkForUpdates')}</Text>
               </CardLinkItem>
             </>
           )}
@@ -302,7 +296,10 @@ export const More = ({ closeMenu }: MoreProps) => {
         <SectionCard>
           <SectionCardHeader>
             <FeatherIcon name="help-circle" size={16} color="grey" />
-            <Text ml={8} fontSize={12} color="grey" bold style={{ textTransform: 'uppercase' }}>
+            <Text
+              className="ml-[8px] text-[12px] text-grey font-bold"
+              style={{ textTransform: 'uppercase' }}
+            >
               {t('settings.help')}
             </Text>
           </SectionCardHeader>
@@ -310,27 +307,21 @@ export const More = ({ closeMenu }: MoreProps) => {
             <IconCircle bg="rgba(147, 51, 234, 0.1)">
               <FeatherIcon name="terminal" size={20} color="quint" />
             </IconCircle>
-            <Text flex fontSize={15}>
-              {t('Changelog')}
-            </Text>
+            <Text className="flex-[1] text-[15px]">{t('Changelog')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="FAQ">
             <IconCircle bg="rgba(147, 51, 234, 0.1)">
               <FeatherIcon name="help-circle" size={20} color="quint" />
             </IconCircle>
-            <Text flex fontSize={15}>
-              {t('Foire aux questions')}
-            </Text>
+            <Text className="flex-[1] text-[15px]">{t('Foire aux questions')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem href="mailto:stephane@lestudio316.com" isLast>
             <IconCircle bg="rgba(147, 51, 234, 0.1)">
               <FeatherIcon name="send" size={20} color="quint" />
             </IconCircle>
-            <Text flex fontSize={15}>
-              {t('Contacter le développeur')}
-            </Text>
+            <Text className="flex-[1] text-[15px]">{t('Contacter le développeur')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
         </SectionCard>
@@ -338,7 +329,10 @@ export const More = ({ closeMenu }: MoreProps) => {
         <SectionCard>
           <SectionCardHeader>
             <FeatherIcon name="globe" size={16} color="grey" />
-            <Text ml={8} fontSize={12} color="grey" bold style={{ textTransform: 'uppercase' }}>
+            <Text
+              className="ml-[8px] text-[12px] text-grey font-bold"
+              style={{ textTransform: 'uppercase' }}
+            >
               {t('settings.community')}
             </Text>
           </SectionCardHeader>
@@ -346,9 +340,7 @@ export const More = ({ closeMenu }: MoreProps) => {
             <IconCircle bg="rgba(59, 89, 152, 0.1)">
               <FeatherIcon name="facebook" size={20} color="primary" />
             </IconCircle>
-            <Text flex fontSize={15}>
-              {t('Nous suivre sur facebook')}
-            </Text>
+            <Text className="flex-[1] text-[15px]">{t('Nous suivre sur facebook')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem
@@ -361,18 +353,14 @@ export const More = ({ closeMenu }: MoreProps) => {
             <IconCircle bg="rgba(251, 191, 36, 0.1)">
               <FeatherIcon name="star" size={20} color="secondary" />
             </IconCircle>
-            <Text flex fontSize={15}>
-              {t("Noter l'application")}
-            </Text>
+            <Text className="flex-[1] text-[15px]">{t("Noter l'application")}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem share={shareMessage()}>
             <IconCircle bg="rgba(16, 185, 129, 0.1)">
               <FeatherIcon name="share-2" size={20} color="success" />
             </IconCircle>
-            <Text flex fontSize={15}>
-              {t("Partager l'application")}
-            </Text>
+            <Text className="flex-[1] text-[15px]">{t("Partager l'application")}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           {!appleIsReviewing && (
@@ -384,9 +372,7 @@ export const More = ({ closeMenu }: MoreProps) => {
               <IconCircle bg="rgba(236, 72, 153, 0.1)">
                 <FeatherIcon name="heart" size={20} color="color2" />
               </IconCircle>
-              <Text flex fontSize={15}>
-                {t('Contribuer')}
-              </Text>
+              <Text className="flex-[1] text-[15px]">{t('Contribuer')}</Text>
               <FeatherIcon name="chevron-right" size={20} color="grey" />
             </CardLinkItem>
           )}
@@ -394,14 +380,12 @@ export const More = ({ closeMenu }: MoreProps) => {
             <IconCircle bg="rgba(107, 114, 128, 0.1)">
               <FeatherIcon name="github" size={20} color="grey" />
             </IconCircle>
-            <Text flex fontSize={15}>
-              Github
-            </Text>
+            <Text className="flex-[1] text-[15px]">Github</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
         </SectionCard>
 
-        <Box px={20} py={8}>
+        <Box className="overflow-hidden border-continuous px-[20px] py-[8px]">
           <LinkItem
             style={{ paddingVertical: 10, paddingHorizontal: 0 }}
             href={
@@ -410,9 +394,7 @@ export const More = ({ closeMenu }: MoreProps) => {
                 : 'https://bible-strong.app/privacy-policy'
             }
           >
-            <Text fontSize={14} color="grey">
-              {t('Politique de confidentialité')}
-            </Text>
+            <Text className="text-[14px] text-grey">{t('Politique de confidentialité')}</Text>
           </LinkItem>
           <LinkItem
             style={{ paddingVertical: 10, paddingHorizontal: 0 }}
@@ -420,18 +402,14 @@ export const More = ({ closeMenu }: MoreProps) => {
               lang === 'fr' ? 'https://bible-strong.app/eula' : 'https://bible-strong.app/eula-en'
             }
           >
-            <Text fontSize={14} color="grey">
-              {t("Conditions d'utilisation")}
-            </Text>
+            <Text className="text-[14px] text-grey">{t("Conditions d'utilisation")}</Text>
           </LinkItem>
           {isLogged && (
             <LinkItem
               style={{ paddingVertical: 10, paddingHorizontal: 0 }}
               onPress={() => deleteAccountModalRef.current?.present()}
             >
-              <Text fontSize={14} color="grey">
-                {t('app.deleteAccount')}
-              </Text>
+              <Text className="text-[14px] text-grey">{t('app.deleteAccount')}</Text>
             </LinkItem>
           )}
         </Box>
@@ -440,7 +418,10 @@ export const More = ({ closeMenu }: MoreProps) => {
           <SectionCard>
             <SectionCardHeader>
               <FeatherIcon name="alert-triangle" size={16} color="quart" />
-              <Text ml={8} fontSize={12} color="quart" bold style={{ textTransform: 'uppercase' }}>
+              <Text
+                className="ml-[8px] text-[12px] text-quart font-bold"
+                style={{ textTransform: 'uppercase' }}
+              >
                 Dev
               </Text>
             </SectionCardHeader>
@@ -452,18 +433,14 @@ export const More = ({ closeMenu }: MoreProps) => {
               <IconCircle bg="rgba(89, 131, 240, 0.12)">
                 <FeatherIcon name="smile" size={20} color="primary" />
               </IconCircle>
-              <Text flex color="primary" fontSize={15}>
-                Playground · Avatar
-              </Text>
+              <Text className="flex-[1] text-primary text-[15px]">Playground · Avatar</Text>
               <FeatherIcon name="chevron-right" size={20} color="grey" />
             </CardLinkItem>
             <CardLinkItem onPress={promptNuke} isLast>
               <IconCircle bg="rgba(239, 68, 68, 0.1)">
                 <FeatherIcon name="trash-2" size={20} color="quart" />
               </IconCircle>
-              <Text color="quart" fontSize={15}>
-                Nuke app (reset total)
-              </Text>
+              <Text className="text-quart text-[15px]">Nuke app (reset total)</Text>
             </CardLinkItem>
           </SectionCard>
         )}

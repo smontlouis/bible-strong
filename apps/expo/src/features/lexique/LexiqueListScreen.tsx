@@ -1,8 +1,9 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
-
 import AlphabetList from '~common/AlphabetList'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
@@ -14,9 +15,7 @@ import FormSheetScreen from '~common/ui/FormSheetScreen'
 import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import { getFirstLetterFrom } from '~helpers/alphabet'
-
 import { useInfiniteResultsByLetterOrSearch, useSearchValue } from './useUtilities'
-
 import { useTranslation } from 'react-i18next'
 import LexiqueItem from './LexiqueItem'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -33,7 +32,6 @@ import {
   resourceFailureFromAccessError,
   resourceFailureFromStrongModuleAvailability,
 } from '~features/resources/resourceFailure'
-
 interface LexiqueSection {
   title: string
   data: StrongLexiconSearchResult[]
@@ -75,6 +73,8 @@ const LexiqueListScreen = ({
   newTabId,
   onStrongSelect,
 }: LexiqueListScreenProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const isOnline = useConnection()
   const resources = useResourceAccess()
@@ -205,7 +205,7 @@ const LexiqueListScreen = ({
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <Header
           hasBackButton={showBackButton}
           title={t('Lexique')}
@@ -222,13 +222,13 @@ const LexiqueListScreen = ({
                 if (nativeEvent.event === 'language') toggleStrongLanguage()
               }}
             >
-              <Box row center height={60} width={60}>
+              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
                 <FeatherIcon name="more-vertical" size={18} />
               </Box>
             </MenuView>
           }
         >
-          <Box pb={10} px={20}>
+          <Box className="overflow-hidden border-continuous pb-[10px] px-[20px]">
             <SearchInput
               placeholder={t('Recherche par code ou par mot')}
               onChangeText={setSearchValue}
@@ -237,7 +237,7 @@ const LexiqueListScreen = ({
             />
           </Box>
         </Header>
-        <Box flex paddingTop={20}>
+        <Box className="overflow-hidden border-continuous flex-[1] pt-[20px]">
           {isLoading ? (
             <Loading message={t('Chargement...')} />
           ) : sectionResults.length ? (
@@ -257,7 +257,10 @@ const LexiqueListScreen = ({
               }
               renderSectionHeader={({ section: { title } }) => (
                 <SectionTitle color="primary">
-                  <Text title fontWeight="bold" fontSize={16} color="reverse">
+                  <Text
+                    className="font-bold text-[16px] text-reverse"
+                    style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+                  >
                     {title}
                   </Text>
                 </SectionTitle>

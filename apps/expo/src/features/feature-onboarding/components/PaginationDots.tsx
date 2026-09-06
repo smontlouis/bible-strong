@@ -1,7 +1,6 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import Animated, { LinearTransition } from 'react-native-reanimated'
 import { AnimatedBox } from '~common/ui/Box'
-
 interface PaginationDotsProps {
   currentStep: number
   totalSteps: number
@@ -11,7 +10,11 @@ const PaginationDots = ({ currentStep, totalSteps }: PaginationDotsProps) => {
   const theme = useTheme()
 
   return (
-    <AnimatedBox row center style={{ gap: 8 }} layout={LinearTransition}>
+    <AnimatedBox
+      className="flex-row items-center justify-center"
+      style={{ gap: 8 }}
+      layout={LinearTransition}
+    >
       {Array.from({ length: totalSteps }).map((_, index) => {
         const isActive = index === currentStep
         return (

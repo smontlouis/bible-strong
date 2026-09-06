@@ -1,3 +1,5 @@
+import { twMerge } from '~common/ui/classNames'
+
 import { useAtom } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -6,7 +8,6 @@ import { BoxProps } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { ttsSpeedAtom } from './atom'
 import AudioChip from './AudioChip'
-
 export type TTSSpeedButtonProps = BoxProps
 
 const choices = [
@@ -32,7 +33,9 @@ const TTSSpeedButton = (props: TTSSpeedButtonProps) => {
       choices={choices}
       customRender={
         <AudioChip isActive={isActive} {...props}>
-          <Text bold color={isActive ? 'primary' : 'grey'} fontSize={10}>
+          <Text
+            className={twMerge(isActive ? 'text-primary' : 'text-grey', 'font-bold text-[10px]')}
+          >
             {t('audio.speed')} {choice?.label}
           </Text>
         </AudioChip>

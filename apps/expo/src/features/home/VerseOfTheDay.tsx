@@ -20,7 +20,6 @@ import { setNotificationVOD } from '~redux/modules/user'
 import VerseImageModal from './VerseImageModal'
 import { useImageUrls } from './useImageUrls'
 import { useVerseOfTheDay } from './useVerseOfTheDay'
-
 export const VERSE_CARD_HEIGHT = 240
 
 interface Props {
@@ -129,11 +128,12 @@ const VerseOfTheDay = ({ addDay }: Props) => {
 
   if (!verseOfTheDay) {
     return (
-      <Box paddingHorizontal={20} borderRadius={30} bg="reverse" py={20} height={VERSE_CARD_HEIGHT}>
-        <Text color="grey" fontWeight="bold" fontSize={14}>
-          {ago}
-        </Text>
-        <Box marginTop={10}>
+      <Box
+        className="overflow-hidden border-continuous px-[20px] rounded-[30px] bg-reverse py-[20px]"
+        style={{ height: VERSE_CARD_HEIGHT }}
+      >
+        <Text className="text-grey font-bold text-[14px]">{ago}</Text>
+        <Box className="overflow-hidden border-continuous mt-[10px]">
           <SkeletonLines />
         </Box>
       </Box>
@@ -142,7 +142,10 @@ const VerseOfTheDay = ({ addDay }: Props) => {
 
   if (verseOfTheDay && 'error' in verseOfTheDay) {
     return (
-      <Box paddingHorizontal={20} borderRadius={30} bg="reverse" py={20} height={VERSE_CARD_HEIGHT}>
+      <Box
+        className="overflow-hidden border-continuous px-[20px] rounded-[30px] bg-reverse py-[20px]"
+        style={{ height: VERSE_CARD_HEIGHT }}
+      >
         <Empty
           source={require('~assets/images/empty.json')}
           message="Impossible de charger le verset du jour..."
@@ -157,10 +160,11 @@ const VerseOfTheDay = ({ addDay }: Props) => {
   }
 
   return (
-    <Box paddingHorizontal={20} borderRadius={30} bg="reverse" py={20} height={VERSE_CARD_HEIGHT}>
-      <Text color="grey" fontWeight="bold" fontSize={14}>
-        {ago}
-      </Text>
+    <Box
+      className="overflow-hidden border-continuous px-[20px] rounded-[30px] bg-reverse py-[20px]"
+      style={{ height: VERSE_CARD_HEIGHT }}
+    >
+      <Text className="text-grey font-bold text-[14px]">{ago}</Text>
       <Link
         route="BibleView"
         params={{
@@ -173,15 +177,15 @@ const VerseOfTheDay = ({ addDay }: Props) => {
         }}
         style={{ marginTop: 10 }}
       >
-        <Paragraph numberOfLines={3} fontWeight="bold" scaleLineHeight={-1}>
+        <Paragraph className="font-bold" numberOfLines={3} scaleLineHeight={-1}>
           {removeBreakLines(content)}
         </Paragraph>
-        <Text color="grey" fontSize={12} mt={5} numberOfLines={2}>
+        <Text className="text-grey text-[12px] mt-[5px]" numberOfLines={2}>
           {title} - {version}
         </Text>
       </Link>
-      <Box row alignItems="center" mt="auto">
-        <Box row center opacity={0.5}>
+      <Box className="overflow-hidden border-continuous flex-row items-center mt-auto">
+        <Box className="overflow-hidden border-continuous flex-row items-center justify-center opacity-[0.5]">
           {!addDay && (
             <Link
               accessibilityLabel={t('Recevoir une notification quotidienne')}
@@ -209,11 +213,9 @@ const VerseOfTheDay = ({ addDay }: Props) => {
         verseOfTheDay={verseOfTheDay}
       />
       <Sheet ref={notificationModalRef} snapPoints={[0.3]}>
-        <SheetView py={30} px={20}>
-          <Box row alignItems="center">
-            <Text bold flex>
-              {t('Recevoir une notification quotidienne')}
-            </Text>
+        <SheetView className="px-[20px] py-[30px]">
+          <Box className="overflow-hidden border-continuous flex-row items-center">
+            <Text className="font-bold flex-[1]">{t('Recevoir une notification quotidienne')}</Text>
             <Switch
               accessibilityLabel={t('Recevoir une notification quotidienne')}
               accessibilityState={{ checked: Boolean(verseOfTheDayTime) }}
@@ -228,7 +230,7 @@ const VerseOfTheDay = ({ addDay }: Props) => {
             />
           </Box>
           {!!verseOfTheDayTime && Platform.OS === 'ios' && (
-            <Box mt={10}>
+            <Box className="overflow-hidden border-continuous mt-[10px]">
               <DateTimePicker
                 value={initialDate}
                 mode="time"
@@ -241,10 +243,10 @@ const VerseOfTheDay = ({ addDay }: Props) => {
             </Box>
           )}
           {!!verseOfTheDayTime && Platform.OS === 'android' && (
-            <LinkBox row alignItems="center" mt={10} onPress={openTimePicker}>
+            <LinkBox className="mt-[10px] items-center flex-row" onPress={openTimePicker}>
               <Text>{t("Choisir l'heure")}:</Text>
-              <Text bold> {verseOfTheDayTime}</Text>
-              <Box ml={5}>
+              <Text className="font-bold"> {verseOfTheDayTime}</Text>
+              <Box className="overflow-hidden border-continuous ml-[5px]">
                 <FeatherIcon name="chevron-down" />
               </Box>
             </LinkBox>

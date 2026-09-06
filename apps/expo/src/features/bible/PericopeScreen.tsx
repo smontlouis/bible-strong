@@ -1,40 +1,43 @@
+import * as Icon from '@expo/vector-icons'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { Fragment, useState } from 'react'
 import { TouchableOpacity } from 'react-native'
-import styled from '@emotion/native'
-import * as Icon from '@expo/vector-icons'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
-import type { Book } from '~assets/bible_versions/books-desc'
-import ScrollView from '~common/ui/ScrollView'
-import PericopeHeader from './PericopeHeader'
-import Box from '~common/ui/Box'
-import FormSheetScreen from '~common/ui/FormSheetScreen'
-import Text from '~common/ui/Text'
-import Paragraph from '~common/ui/Paragraph'
-import Link from '~common/Link'
-import Empty from '~common/Empty'
-import Loading from '~common/Loading'
-import { useResourceAccess } from '~features/resources/resourceAccess'
-import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
-import type { BibleReadingAvailability } from '~features/resources/bibleReadingResourceAccess'
-import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
-import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
-import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
-import type { VersionCode } from '~state/tabs'
-import { getBook, getBooksForCanon } from '~helpers/bibleBookCatalog'
-import { getBibleVersionCanonId } from '~helpers/bibleVersions'
-import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import {
-  getOfflineResourceQuerySignal,
-  useOfflineResourceRegistry,
-} from '~features/resources/useOfflineResourceRegistry'
-import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
+import { useTranslation } from 'react-i18next'
+import type { Book } from '~assets/bible_versions/books-desc'
+import Empty from '~common/Empty'
+import Link from '~common/Link'
+import Loading from '~common/Loading'
+import Box from '~common/ui/Box'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
+import Paragraph from '~common/ui/Paragraph'
+import ScrollView from '~common/ui/ScrollView'
+import Text from '~common/ui/Text'
+import type { BibleReadingAvailability } from '~features/resources/bibleReadingResourceAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import {
   resourceFailureFromAccessError,
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  getOfflineResourceQuerySignal,
+  useOfflineResourceRegistry,
+} from '~features/resources/useOfflineResourceRegistry'
+import { getBook, getBooksForCanon } from '~helpers/bibleBookCatalog'
+import { getBibleVersionCanonId } from '~helpers/bibleVersions'
+import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import type { VersionCode } from '~state/tabs'
+import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
+import PericopeHeader from './PericopeHeader'
 
 type PericopeVerse = {
   h1?: string
@@ -46,16 +49,42 @@ type PericopeVerse = {
 type PericopeChapter = Record<string, PericopeVerse>
 type PericopeBook = Record<string, PericopeChapter>
 
-const PericopeHeading = styled(Paragraph)<{ size: number }>(({ size }) => ({
-  fontSize: size,
-  marginLeft: 20,
-  marginBottom: 20,
-  fontWeight: 'bold',
-}))
+const PericopeHeading = (
+  componentProps: Omit<UIComponentProps<typeof Paragraph>, keyof { size: number } | 'theme'> &
+    Omit<{ size: number }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
-}))
+  const { size } = props
+  const classStyles = useResolveClassNames(twMerge('ml-[20px] mb-[20px] font-bold', className))
+  return (
+    <Paragraph
+      {...props}
+      style={
+        [classStyles, { fontSize: size }, props.style] as UIComponentProps<
+          typeof Paragraph
+        >['style']
+      }
+    />
+  )
+}
+
+const StyledIcon = (
+  componentProps: Omit<UIComponentProps<typeof Icon.Feather>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('text-default', className))
+  return (
+    <Icon.Feather
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.Feather>['style']}
+    />
+  )
+}
 
 /**
  * Recursively removes empty object branches from pericope data.
@@ -134,10 +163,10 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <PericopeHeader hasBackButton={hasBackButton} title={`${t('Péricopes')} ${version}`} />
         {availabilityQuery.isPending ? (
-          <Box flex center>
+          <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
             <Loading message={t('Chargement...')} />
           </Box>
         ) : availabilityQuery.isError || pericopeQuery.isError ? (
@@ -171,10 +200,8 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
           />
         ) : (
           <ScrollView>
-            <Box padding={20}>
-              <Text fontSize={30} fontWeight="bold" marginBottom={40}>
-                {t(book.Nom)}
-              </Text>
+            <Box className="overflow-hidden border-continuous p-[20px]">
+              <Text className="text-[30px] font-bold mb-[40px]">{t(book.Nom)}</Text>
               {!Object.keys(pericopeBook).length ? (
                 <Empty
                   source={require('~assets/images/empty.json')}
@@ -184,7 +211,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
                 Object.entries(pericopeBook).map(([chapterKey, chapterObject]) => (
                   <Fragment key={chapterKey}>
                     {!!Object.keys(chapterObject).length && (
-                      <Text color="tertiary" fontSize={12} marginBottom={10}>
+                      <Text className="text-tertiary text-[12px] mb-[10px]">
                         {t('CHAPITRE')} {chapterKey}
                       </Text>
                     )}
@@ -220,13 +247,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
             </Box>
           </ScrollView>
         )}
-        <Box
-          bg="reverse"
-          row
-          paddingHorizontal={20}
-          paddingVertical={10}
-          justifyContent="space-between"
-        >
+        <Box className="overflow-hidden border-continuous bg-reverse flex-row px-[20px] py-[10px] justify-between">
           {previousBook && (
             <Link onPress={() => setBook(previousBook)}>
               <StyledIcon name="arrow-left" size={30} />

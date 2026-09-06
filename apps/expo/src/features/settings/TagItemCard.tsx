@@ -1,12 +1,12 @@
+import { twMerge } from '~common/ui/classNames'
+
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import type { ReactNode } from 'react'
-
 import type { TagsObj } from '~common/types'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-
 export type TagItemData = {
   id: string | number
   title: string
@@ -56,11 +56,9 @@ const TagItemCard = ({ item, variant, badge }: Props) => {
       activeOpacity={0.7}
       onPress={() => pushRouteOnce(navigationConfig)}
     >
-      <VStack gap={6} mx={20} paddingVertical={15} borderBottomWidth={1} borderColor="border">
-        <HStack gap={10} alignItems="center">
-          <Text fontSize={14} bold>
-            {item.title}
-          </Text>
+      <VStack className="border-continuous overflow-hidden gap-[6px] mx-[20px] py-[15px] border-b-[1px] border-border">
+        <HStack className="overflow-hidden border-continuous gap-[10px] items-center">
+          <Text className="text-[14px] font-bold">{item.title}</Text>
           {badge}
         </HStack>
       </VStack>
@@ -85,12 +83,15 @@ export const StrongItemCard = ({
       variant={isGrec ? 'strong-grec' : 'strong-hebreu'}
       badge={
         <Box
-          backgroundColor={isGrec ? 'primary' : 'quart'}
-          paddingHorizontal={8}
-          paddingVertical={3}
-          rounded
+          className={twMerge(
+            'overflow-hidden border-continuous',
+            twMerge(
+              isGrec ? 'bg-primary' : 'bg-quart',
+              'overflow-hidden border-continuous px-[8px] py-[3px] rounded-[20px]'
+            )
+          )}
         >
-          <Text fontSize={10} color="reverse" bold>
+          <Text className="text-[10px] text-reverse font-bold">
             {item.id} - {isGrec ? t('Grec') : t('Hébreu')}
           </Text>
         </Box>

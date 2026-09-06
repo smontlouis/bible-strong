@@ -1,3 +1,4 @@
+import { twMerge } from '~common/ui/classNames'
 import PageContent from '~common/ui/PageContent'
 import React, { forwardRef } from 'react'
 import * as Sentry from '@sentry/react-native'
@@ -22,8 +23,7 @@ import Back from '~common/Back'
 import Box, { FadingText, type BoxProps, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text, { type TextProps } from '~common/ui/Text'
-import { useTheme } from '@emotion/react'
-
+import { useTheme } from '~themes/ThemeProvider'
 export type SheetSnapPoint = NonNullable<TrueSheetProps['detents']>[number]
 export type SheetScrollableOptions = NonNullable<TrueSheetProps['scrollableOptions']>
 
@@ -187,20 +187,14 @@ const runSheetCommand = (
 
 const SheetItem = ({ children, tag, onPress, ...props }: SheetItemProps) => (
   <TouchableBox
+    className="border-continuous overflow-visible flex-row items-center justify-between p-[20px] border-border border-b-[1px]"
     accessibilityRole="button"
     onPress={onPress}
-    row
-    alignItems="center"
-    justifyContent="space-between"
-    p={20}
-    borderColor="border"
-    borderBottomWidth={1}
-    overflow="hidden"
   >
     <Text {...props}>{children}</Text>
     {Boolean(tag) && (
-      <Box ml={10} p={3} bg="lightGrey" borderRadius={3}>
-        <Text fontSize={12} color="grey" reverse>
+      <Box className="overflow-hidden border-continuous ml-[10px] p-[3px] bg-light-grey rounded-[3px]">
+        <Text className="text-[12px] text-grey" style={{ flexDirection: 'column-reverse' }}>
           {tag}
         </Text>
       </Box>
@@ -359,7 +353,15 @@ const SheetFooter = ({ children, onLayout, style, ...props }: SheetFooterProps) 
   }
 
   return (
-    <Box px={20} pt={8} pb={8} mb={insets.bottom} onLayout={handleLayout} style={style} {...props}>
+    <Box
+      onLayout={handleLayout}
+      style={[{ marginBottom: insets.bottom }, style]}
+      {...props}
+      className={twMerge(
+        'overflow-hidden border-continuous',
+        twMerge('overflow-hidden border-continuous pt-[8px] pb-[8px] px-[20px]', props.className)
+      )}
+    >
       {children}
     </Box>
   )
@@ -375,10 +377,10 @@ const SheetHeader = ({
   onBackPress,
   rightComponent,
 }: SheetHeaderProps) => (
-  <Box borderColor="border" borderBottomWidth={1}>
+  <Box className="border-continuous overflow-hidden border-border border-b-[1px]">
     <PageContent>
       {(title || subTitle || hasBackButton || leftComponent || rightComponent) && (
-        <Box minH={54} row alignItems="center">
+        <Box className="overflow-hidden border-continuous min-h-[54px] flex-row items-center">
           {hasBackButton ? (
             <Back
               onCustomPress={onBackPress}
@@ -390,25 +392,28 @@ const SheetHeader = ({
             leftComponent
           )}
           <Box
-            flex
-            paddingLeft={hasBackButton || leftComponent ? 0 : 20}
-            paddingRight={rightComponent ? 0 : 20}
-            justifyContent="center"
-            alignItems={centerTitle ? 'center' : undefined}
+            className="overflow-hidden border-continuous flex-[1] justify-center"
+            style={{
+              paddingLeft: hasBackButton || leftComponent ? 0 : 20,
+              paddingRight: rightComponent ? 0 : 20,
+              alignItems: centerTitle ? 'center' : undefined,
+            }}
           >
             {!!title && (
               <FadingText
+                className="overflow-hidden border-continuous font-bold text-[16px]"
                 accessibilityRole="header"
                 numberOfLines={1}
-                bold
-                fontSize={16}
-                textAlign={centerTitle ? 'center' : 'left'}
+                style={{ textAlign: centerTitle ? 'center' : 'left' }}
               >
                 {title}
               </FadingText>
             )}
             {!!subTitle && (
-              <Text fontSize={13} color="grey" textAlign={centerTitle ? 'center' : 'left'}>
+              <Text
+                className="text-[13px] text-grey"
+                style={{ textAlign: centerTitle ? 'center' : 'left' }}
+              >
                 {subTitle}
               </Text>
             )}
@@ -424,7 +429,17 @@ const SheetHeader = ({
 const SheetView = forwardRef<View, SheetViewProps>(({ style, ...props }, ref) => {
   const { footerHeight } = React.useContext(SheetContext)
 
-  return <Box ref={ref} style={withFooterMargin(style, footerHeight)} {...props} />
+  return (
+    <Box
+      ref={ref}
+      style={withFooterMargin(style, footerHeight)}
+      {...props}
+      className={twMerge(
+        'overflow-hidden border-continuous',
+        twMerge('overflow-hidden border-continuous', props.className)
+      )}
+    />
+  )
 })
 SheetView.displayName = 'SheetView'
 
@@ -492,23 +507,23 @@ export default Sheet
 
 export {
   Sheet,
-  TrueSheetProvider as SheetProvider,
-  SheetView,
-  SheetScrollView,
-  SheetFlatList,
   SheetFlashList,
-  SheetSectionList,
-  SheetTextInput,
+  SheetFlatList,
   SheetFooter,
   SheetHeader,
   SheetItem,
+  TrueSheetProvider as SheetProvider,
+  SheetScrollView,
+  SheetSectionList,
+  SheetTextInput,
+  SheetView,
   useSheetFooterInset,
   useSheetInternal,
 }
 
 export type {
-  FlatListProps as SheetFlatListProps,
   FlashListProps as SheetFlashListProps,
+  FlatListProps as SheetFlatListProps,
   ScrollViewProps as SheetScrollViewProps,
   SectionListProps as SheetSectionListProps,
   TextInputProps as SheetTextInputProps,

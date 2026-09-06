@@ -1,4 +1,6 @@
-import { useTheme } from '@emotion/react'
+import { twMerge } from '~common/ui/classNames'
+import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import MaskedView from '@react-native-masked-view/masked-view'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -13,7 +15,6 @@ import {
 } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import truncHTML from 'trunc-html'
-
 import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import Box, { FadingBox, HStack, VStack } from '~common/ui/Box'
@@ -40,7 +41,6 @@ import {
   prioritizeStrongSelectionPreview,
 } from './strongSelectionPreviewCarousel'
 import { getStrongSelectionPreviewHtmlStyles } from './strongSelectionPreviewHtmlStyles'
-
 type StrongSelectionSheetProps = {
   sheetRef: React.RefObject<SheetRef | null>
   version?: string
@@ -62,15 +62,8 @@ const StrongDownloadPromptCard = ({
   gap?: number
 }) => (
   <VStack
-    bg="reverse"
-    borderRadius={14}
-    px={14}
-    py={14}
-    gap={gap}
-    opacity={0.5}
-    borderWidth={1}
-    borderColor="default"
-    style={{ borderStyle: 'dashed' }}
+    className="border-continuous overflow-hidden bg-reverse rounded-[14px] px-[14px] py-[14px] opacity-[0.5] border-[1px] border-default"
+    style={[{ gap: gap }, { borderStyle: 'dashed' }]}
   >
     {children}
   </VStack>
@@ -88,6 +81,8 @@ const StrongSelectionSheet = ({
   onDismissStart,
   onClose,
 }: StrongSelectionSheetProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const theme = useTheme()
   const { width: windowWidth } = useWindowDimensions()
@@ -222,9 +217,12 @@ const StrongSelectionSheet = ({
       onDismissStart={onDismissStart}
       onDismiss={onClose}
     >
-      <SheetView pt={12} pb={24} gap={14}>
+      <SheetView className="pt-[12px] pb-[24px] gap-[14px]">
         {!coreAvailable && !downloading && availabilityQuery.isSuccess && (
-          <Box px={carouselHorizontalPadding}>
+          <Box
+            className="overflow-hidden border-continuous"
+            style={{ paddingHorizontal: carouselHorizontalPadding }}
+          >
             <ResourceUnavailableView
               identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
               title={t('resource.strong.offlineCopyNeeded')}
@@ -252,70 +250,170 @@ const StrongSelectionSheet = ({
         )}
 
         {downloading && (
-          <Box px={carouselHorizontalPadding}>
+          <Box
+            className="overflow-hidden border-continuous"
+            style={{ paddingHorizontal: carouselHorizontalPadding }}
+          >
             <StrongDownloadPromptCard gap={10}>
-              <HStack gap={12} alignItems="center">
+              <HStack className="overflow-hidden border-continuous gap-[12px] items-center">
                 <FeatherIcon name="loader" size={19} color="default" />
-                <Text bold fontSize={14} flex>
+                <Text className="font-bold text-[14px] flex-[1]">
                   {t('Téléchargement du lexique Strong')}
                 </Text>
-                <Text color="default" fontSize={12}>
-                  {Math.round(progress * 100)}%
-                </Text>
+                <Text className="text-default text-[12px]">{Math.round(progress * 100)}%</Text>
               </HStack>
-              <Box height={4} borderRadius={2} bg="border" overflow="hidden">
-                <Box height={4} borderRadius={2} bg="primary" width={`${progress * 100}%`} />
+              <Box className="border-continuous overflow-visible h-[4px] rounded-[2px] bg-border">
+                <Box
+                  className="overflow-hidden border-continuous h-[4px] rounded-[2px] bg-primary"
+                  style={{ width: `${progress * 100}%` }}
+                />
               </Box>
             </StrongDownloadPromptCard>
           </Box>
         )}
 
         {(availabilityQuery.isPending || (coreAvailable && previewQuery.isPending)) && (
-          <VStack gap={12}>
-            <HStack gap={8} px={carouselHorizontalPadding}>
-              <Box width={68} height={34} bg="lightGrey" bgOpacity="050" borderRadius={12} />
-              <Box width={62} height={34} bg="lightGrey" bgOpacity="050" borderRadius={12} />
+          <VStack className="overflow-hidden border-continuous gap-[12px]">
+            <HStack
+              className="overflow-hidden border-continuous gap-[8px]"
+              style={{ paddingHorizontal: carouselHorizontalPadding }}
+            >
+              <Box
+                className="overflow-hidden border-continuous w-[68px] h-[34px] rounded-[12px]"
+                style={{
+                  backgroundColor: colorWithOpacity(
+                    resolveThemeColor(stylingTheme, 'lightGrey'),
+                    0.5
+                  ),
+                }}
+              />
+              <Box
+                className="overflow-hidden border-continuous w-[62px] h-[34px] rounded-[12px]"
+                style={{
+                  backgroundColor: colorWithOpacity(
+                    resolveThemeColor(stylingTheme, 'lightGrey'),
+                    0.5
+                  ),
+                }}
+              />
             </HStack>
 
-            <HStack gap={carouselGap} pl={carouselHorizontalPadding}>
+            <HStack
+              className="overflow-hidden border-continuous"
+              style={{ paddingLeft: carouselHorizontalPadding, gap: carouselGap }}
+            >
               <VStack
-                width={windowWidth - carouselHorizontalPadding * 2 - 24}
-                height={previewSkeletonHeight}
-                bg="lightGrey"
-                bgOpacity="050"
-                borderRadius={14}
-                px={15}
-                py={14}
-                gap={10}
+                className="overflow-hidden border-continuous rounded-[14px] px-[15px] py-[14px] gap-[10px]"
+                style={{
+                  width: windowWidth - carouselHorizontalPadding * 2 - 24,
+                  height: previewSkeletonHeight,
+                  backgroundColor: colorWithOpacity(
+                    resolveThemeColor(stylingTheme, 'lightGrey'),
+                    0.5
+                  ),
+                }}
               >
-                <HStack justifyContent="space-between" alignItems="center">
-                  <Box width="55%" height={20} bg="border" bgOpacity="050" borderRadius={6} />
-                  <Box width={18} height={18} bg="border" bgOpacity="050" borderRadius={9} />
+                <HStack className="overflow-hidden border-continuous justify-between items-center">
+                  <Box
+                    className="overflow-hidden border-continuous w-[55%] h-[20px] rounded-[6px]"
+                    style={{
+                      backgroundColor: colorWithOpacity(
+                        resolveThemeColor(stylingTheme, 'border'),
+                        0.5
+                      ),
+                    }}
+                  />
+                  <Box
+                    className="overflow-hidden border-continuous w-[18px] h-[18px] rounded-[9px]"
+                    style={{
+                      backgroundColor: colorWithOpacity(
+                        resolveThemeColor(stylingTheme, 'border'),
+                        0.5
+                      ),
+                    }}
+                  />
                 </HStack>
-                <HStack gap={8} alignItems="center">
-                  <Box width={52} height={22} bg="border" bgOpacity="050" borderRadius={6} />
-                  <Box width={76} height={14} bg="border" bgOpacity="050" borderRadius={5} />
+                <HStack className="overflow-hidden border-continuous gap-[8px] items-center">
+                  <Box
+                    className="overflow-hidden border-continuous w-[52px] h-[22px] rounded-[6px]"
+                    style={{
+                      backgroundColor: colorWithOpacity(
+                        resolveThemeColor(stylingTheme, 'border'),
+                        0.5
+                      ),
+                    }}
+                  />
+                  <Box
+                    className="overflow-hidden border-continuous w-[76px] h-[14px] rounded-[5px]"
+                    style={{
+                      backgroundColor: colorWithOpacity(
+                        resolveThemeColor(stylingTheme, 'border'),
+                        0.5
+                      ),
+                    }}
+                  />
                 </HStack>
-                <Box width={94} height={12} bg="border" bgOpacity="050" borderRadius={4} />
-                <VStack gap={7} mt={2}>
-                  <Box width="100%" height={12} bg="border" bgOpacity="050" borderRadius={4} />
-                  <Box width="88%" height={12} bg="border" bgOpacity="050" borderRadius={4} />
-                  <Box width="68%" height={12} bg="border" bgOpacity="050" borderRadius={4} />
+                <Box
+                  className="overflow-hidden border-continuous w-[94px] h-[12px] rounded-[4px]"
+                  style={{
+                    backgroundColor: colorWithOpacity(
+                      resolveThemeColor(stylingTheme, 'border'),
+                      0.5
+                    ),
+                  }}
+                />
+                <VStack className="overflow-hidden border-continuous gap-[7px] mt-[2px]">
+                  <Box
+                    className="overflow-hidden border-continuous w-[100%] h-[12px] rounded-[4px]"
+                    style={{
+                      backgroundColor: colorWithOpacity(
+                        resolveThemeColor(stylingTheme, 'border'),
+                        0.5
+                      ),
+                    }}
+                  />
+                  <Box
+                    className="overflow-hidden border-continuous w-[88%] h-[12px] rounded-[4px]"
+                    style={{
+                      backgroundColor: colorWithOpacity(
+                        resolveThemeColor(stylingTheme, 'border'),
+                        0.5
+                      ),
+                    }}
+                  />
+                  <Box
+                    className="overflow-hidden border-continuous w-[68%] h-[12px] rounded-[4px]"
+                    style={{
+                      backgroundColor: colorWithOpacity(
+                        resolveThemeColor(stylingTheme, 'border'),
+                        0.5
+                      ),
+                    }}
+                  />
                 </VStack>
               </VStack>
               <Box
-                width={windowWidth - carouselHorizontalPadding * 2 - 24}
-                height={previewSkeletonHeight}
-                bg="lightGrey"
-                bgOpacity="050"
-                borderRadius={14}
+                className="overflow-hidden border-continuous rounded-[14px]"
+                style={{
+                  width: windowWidth - carouselHorizontalPadding * 2 - 24,
+                  height: previewSkeletonHeight,
+                  backgroundColor: colorWithOpacity(
+                    resolveThemeColor(stylingTheme, 'lightGrey'),
+                    0.5
+                  ),
+                }}
               />
             </HStack>
           </VStack>
         )}
 
         {coreAvailable && !!displayedPreviews?.length && (
-          <FadingBox keyProp={previewContentKey} gap={12} skipEntering={false} skipExiting={false}>
+          <FadingBox
+            className="overflow-hidden border-continuous gap-[12px]"
+            keyProp={previewContentKey}
+            skipEntering={false}
+            skipExiting={false}
+          >
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -334,13 +432,20 @@ const StrongSelectionSheet = ({
                     activeOpacity={0.7}
                   >
                     <Box
-                      bg={selected ? 'primary' : 'lightGrey'}
-                      bgOpacity={selected ? undefined : '050'}
-                      borderRadius={12}
-                      px={13}
-                      py={8}
+                      className="overflow-hidden border-continuous rounded-[12px] px-[13px] py-[8px]"
+                      style={{
+                        backgroundColor: colorWithOpacity(
+                          resolveThemeColor(stylingTheme, selected ? 'primary' : 'lightGrey'),
+                          selected ? undefined : 0.5
+                        ),
+                      }}
                     >
-                      <Text color={selected ? 'reverse' : 'default'} bold fontSize={13}>
+                      <Text
+                        className={twMerge(
+                          selected ? 'text-reverse' : 'text-default',
+                          'font-bold text-[13px]'
+                        )}
+                      >
                         {preview.stepCode}
                       </Text>
                     </Box>
@@ -381,8 +486,9 @@ const StrongSelectionSheet = ({
 
                 return (
                   <Box
+                    className="overflow-hidden border-continuous"
                     key={`${preview.selectedIdentity.kind}:${preview.selectedIdentity.code}`}
-                    width={previewWidth}
+                    style={{ width: previewWidth }}
                   >
                     <TouchableOpacity
                       accessibilityRole="button"
@@ -390,28 +496,30 @@ const StrongSelectionSheet = ({
                       activeOpacity={0.7}
                     >
                       <VStack
-                        bg="reverse"
-                        bgOpacity="050"
-                        borderRadius={14}
-                        px={15}
-                        py={14}
-                        gap={9}
+                        className="overflow-hidden border-continuous rounded-[14px] px-[15px] py-[14px] gap-[9px]"
+                        style={{
+                          backgroundColor: colorWithOpacity(
+                            resolveThemeColor(stylingTheme, 'reverse'),
+                            0.5
+                          ),
+                        }}
                       >
-                        <HStack justifyContent="space-between" alignItems="flex-start" gap={12}>
-                          <VStack flex gap={4}>
-                            <Text bold fontSize={16}>
-                              {card.gloss}
-                            </Text>
-                            <HStack alignItems="baseline" gap={8} wrap>
-                              <Text fontSize={17}>{card.original}</Text>
+                        <HStack className="overflow-hidden border-continuous justify-between items-start gap-[12px]">
+                          <VStack className="overflow-hidden border-continuous flex-[1] gap-[4px]">
+                            <Text className="font-bold text-[16px]">{card.gloss}</Text>
+                            <HStack className="overflow-hidden border-continuous items-baseline gap-[8px] flex-wrap">
+                              <Text className="text-[17px]">{card.original}</Text>
                               {!!card.transliteration && (
-                                <Text color="tertiary" fontSize={12}>
+                                <Text className="text-tertiary text-[12px]">
                                   {card.transliteration}
                                 </Text>
                               )}
                             </HStack>
                             {!!card.morphology && (
-                              <Text color="tertiary" fontSize={11} style={{ fontFamily: 'Arial' }}>
+                              <Text
+                                className="text-tertiary text-[11px]"
+                                style={{ fontFamily: 'Arial' }}
+                              >
                                 {card.morphology}
                               </Text>
                             )}
@@ -438,7 +546,7 @@ const StrongSelectionSheet = ({
                             />
                           </MaskedView>
                         ) : (
-                          <Text color="tertiary" fontSize={13} numberOfLines={3}>
+                          <Text className="text-tertiary text-[13px]" numberOfLines={3}>
                             {t('strongLexicon.definitionUnavailable', {
                               language: resourceLanguage.toUpperCase(),
                             })}
@@ -454,8 +562,8 @@ const StrongSelectionSheet = ({
         )}
 
         {coreAvailable && displayedPreviews?.length === 0 && (
-          <Box minHeight={100} center>
-            <Text color="tertiary">{t('Aucune entrée lexicale trouvée')}</Text>
+          <Box className="overflow-hidden border-continuous min-h-[100px] items-center justify-center">
+            <Text className="text-tertiary">{t('Aucune entrée lexicale trouvée')}</Text>
           </Box>
         )}
       </SheetView>

@@ -1,5 +1,9 @@
-import styled from '@emotion/native'
-import { useTheme } from '@emotion/react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TextInput as RNTextInput } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
 import {
   Sheet,
   SheetFooter,
@@ -8,20 +12,31 @@ import {
   SheetView,
   type SheetRef,
 } from '~common/sheet'
-import React, { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import type { TextInput as RNTextInput } from 'react-native'
 import Button from '~common/ui/Button'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme } from '~themes/ThemeProvider'
 
-const StyledTextInput = styled(SheetTextInput)(({ theme }) => ({
-  color: theme.colors.default,
-  height: 48,
-  borderColor: theme.colors.border,
-  borderWidth: 2,
-  borderRadius: 10,
-  paddingHorizontal: 15,
-  fontSize: 16,
-}))
+const StyledTextInput = (
+  componentProps: Omit<UIComponentProps<typeof SheetTextInput>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'text-default h-[48px] border-border border-[2px] rounded-[10px] px-[15px] text-[16px]',
+      className
+    )
+  )
+  return (
+    <SheetTextInput
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof SheetTextInput>['style']}
+    />
+  )
+}
 
 interface RenameModalProps {
   sheetRef: React.RefObject<SheetRef | null>
@@ -84,7 +99,7 @@ const RenameModal = ({
         </SheetFooter>
       )}
     >
-      <SheetView px={20} py={20}>
+      <SheetView className="px-[20px] py-[20px]">
         <StyledTextInput
           ref={inputRef}
           placeholder={placeholder}

@@ -1,20 +1,36 @@
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
+import * as NativeUI from 'react-native'
 import { ActivityIndicator, StyleProp, ViewStyle } from 'react-native'
-import { useTheme } from '@emotion/react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme } from '~themes/ThemeProvider'
 
+import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useTimeout from '~helpers/useTimeout'
-import styled from '@emotion/native'
 import { Theme } from '~themes'
-import { useTranslation } from 'react-i18next'
 
-const Container = styled.View(({ theme }) => ({
-  flex: 1,
-  alignItems: 'center',
-  justifyContent: 'center',
-  minHeight: 300,
-}))
+const Container = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('flex-[1] items-center justify-center min-h-[300px]', className)
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
 interface Props {
   message?: string
@@ -38,21 +54,19 @@ const Loading = ({ message, subMessage, style, children }: Props) => {
         />
       )}
       {message && (
-        <Box>
-          <Text accessibilityLiveRegion="polite" marginTop={20}>
+        <Box className="overflow-hidden border-continuous">
+          <Text className="mt-[20px]" accessibilityLiveRegion="polite">
             {message}
           </Text>
         </Box>
       )}
       {subMessage && isReady() && (
-        <Box paddingLeft={30} paddingRight={30}>
-          <Text textAlign="center" marginTop={5} fontSize={12}>
-            {subMessage}
-          </Text>
+        <Box className="overflow-hidden border-continuous pl-[30px] pr-[30px]">
+          <Text className="text-center mt-[5px] text-[12px]">{subMessage}</Text>
         </Box>
       )}
       {children && (
-        <Box marginTop={20} width={200} marginLeft="auto" marginRight="auto" center>
+        <Box className="overflow-hidden border-continuous mt-[20px] w-[200px] ml-auto mr-auto items-center justify-center">
           {children}
         </Box>
       )}

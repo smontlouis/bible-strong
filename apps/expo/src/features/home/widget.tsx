@@ -1,26 +1,27 @@
+import { twMerge } from '~common/ui/classNames'
 import React from 'react'
 import { AnimatedProgressCircle } from '@convective/react-native-reanimated-progress'
-import { useTheme } from '@emotion/react'
-
+import { useTheme } from '~themes/ThemeProvider'
 import Loading from '~common/Loading'
 import Box, { BoxProps } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { wp } from '~helpers/utils'
 import { Theme } from '~themes'
 import { useTranslation } from 'react-i18next'
-
 export const itemWidth = wp(50) > 300 ? 300 : wp(50)
 export const itemHeight = 120
 
 export const WidgetContainer = (props: BoxProps) => (
   <Box
-    center
-    rounded
-    height={itemHeight}
-    width={itemWidth}
-    backgroundColor="reverse"
-    marginRight={16}
     {...props}
+    style={[{ width: itemWidth, height: itemHeight }, props.style]}
+    className={twMerge(
+      'overflow-hidden border-continuous',
+      twMerge(
+        'overflow-hidden border-continuous mr-[16px] bg-reverse items-center justify-center rounded-[20px]',
+        props.className
+      )
+    )}
   />
 )
 
@@ -45,9 +46,7 @@ export const DownloadingWidget = ({ progress }: { progress?: number }) => {
         unfilledColor={theme.colors.lightGrey}
         animationDuration={300}
       />
-      <Text color="grey" marginTop={20} fontSize={12}>
-        {t('Téléchargement en cours')}
-      </Text>
+      <Text className="text-grey mt-[20px] text-[12px]">{t('Téléchargement en cours')}</Text>
     </WidgetContainer>
   )
 }

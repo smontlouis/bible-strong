@@ -1,8 +1,6 @@
 import { forwardRef, useImperativeHandle } from 'react'
 import type { DimensionValue, StyleProp, ViewStyle } from 'react-native'
-
 import Box from '~common/ui/Box'
-
 type YoutubeIframeProps = {
   height?: number
   width?: DimensionValue
@@ -60,7 +58,10 @@ const YoutubeIframe = forwardRef<YoutubeIframeRef, YoutubeIframeProps>(
     )}?${params}`
 
     return (
-      <Box width={width} height={height} overflow="hidden" bg="lightGrey">
+      <Box
+        className="border-continuous overflow-visible bg-light-grey"
+        style={{ width: width, height: height }}
+      >
         <iframe
           src={source}
           title="YouTube video player"

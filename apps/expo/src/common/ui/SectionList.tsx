@@ -1,6 +1,6 @@
-import { pageContentStyle } from './PageContent'
-import styled from '@emotion/native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
+import * as NativeUI from 'react-native'
 import {
   SectionList as RNSectionList,
   SectionListProps,
@@ -10,27 +10,52 @@ import {
   ViewStyle,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
 import useDeviceOrientation, { Orientation } from '~helpers/useDeviceOrientation'
+import type { Theme as AppTheme } from '~themes'
 import { Theme } from '~themes'
+import { useTheme as useAppTheme } from '~themes/ThemeProvider'
+import { pageContentStyle } from './PageContent'
 
-const SectionList = styled.SectionList(
-  ({ theme, orientation }: { theme?: Theme; orientation: Orientation }) => ({
-    paddingBottom: 30,
-    backgroundColor: theme?.colors.reverse,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    width: '100%',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-
-    ...(orientation.tablet && {
-      marginTop: 20,
-      marginBottom: 50,
-      borderBottomLeftRadius: 30,
-      borderBottomRightRadius: 30,
-    }),
-  })
-)
+const SectionList = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.SectionList>,
+    keyof { theme?: Theme; orientation: Orientation } | 'theme'
+  > &
+    Omit<{ theme?: Theme; orientation: Orientation }, 'theme'> & {
+      theme?: AppTheme
+      className?: string
+    }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { orientation } = props
+  const classStyles = useResolveClassNames(
+    twMerge('pb-[30px] rounded-tl-[30px] rounded-tr-[30px] w-[100%] ml-auto mr-auto', className)
+  )
+  return (
+    <NativeUI.SectionList
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            backgroundColor: theme?.colors.reverse,
+            ...(orientation.tablet && {
+              marginTop: 20,
+              marginBottom: 50,
+              borderBottomLeftRadius: 30,
+              borderBottomRightRadius: 30,
+            }),
+          },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.SectionList>['style']
+      }
+    />
+  )
+}
 
 const AnimatedSectionList = <T, S = unknown>({
   contentContainerStyle,

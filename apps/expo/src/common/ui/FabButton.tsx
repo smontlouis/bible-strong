@@ -1,28 +1,54 @@
+import * as Icon from '@expo/vector-icons'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import React from 'react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 import Box from './Box'
 import PageContent from './PageContent'
-import React from 'react'
-import styled from '@emotion/native'
-import * as Icon from '@expo/vector-icons'
 
 import Link from '~common/Link'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { MainStackProps } from '~navigation/type'
 
-const StyledLink = styled(Link)(({ theme }) => ({
-  backgroundColor: theme.colors.primary,
-  width: 50,
-  height: 50,
-  borderRadius: 30,
-  justifyContent: 'center',
-  alignItems: 'center',
-  flexDirection: 'row',
-  position: 'absolute',
-  right: 30,
-}))
+const StyledLink = (
+  componentProps: Omit<UIComponentProps<typeof Link>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const StyledIcon = styled(Icon.Feather)(() => ({
-  color: 'white',
-}))
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'bg-primary w-[50px] h-[50px] rounded-[30px] justify-center items-center flex-row absolute right-[30px]',
+      className
+    )
+  )
+  return (
+    <Link
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Link>['style']}
+    />
+  )
+}
+
+const StyledIcon = (
+  componentProps: Omit<UIComponentProps<typeof Icon.Feather>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('text-[white]', className))
+  return (
+    <Icon.Feather
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.Feather>['style']}
+    />
+  )
+}
 
 interface FabProps {
   accessibilityLabel: string
@@ -44,13 +70,11 @@ const Fab = ({
   const { bottomBarHeight } = useBottomBarHeightInTab()
   return (
     <Box
-      position="absolute"
-      left={0}
-      right={0}
-      bottom={bottomBarHeight + 30}
+      className="overflow-hidden border-continuous absolute left-[0px] right-[0px]"
       pointerEvents="box-none"
+      style={{ bottom: bottomBarHeight + 30 }}
     >
-      <PageContent height={50} pointerEvents="box-none">
+      <PageContent className="h-[50px]" pointerEvents="box-none">
         <StyledLink
           route={route}
           params={params}

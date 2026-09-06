@@ -1,4 +1,6 @@
-import { useTheme } from '@emotion/react'
+import { twMerge } from '~common/ui/classNames'
+
+import { useTheme } from '~themes/ThemeProvider'
 import { AnimatePresence } from '@alloc/moti'
 import React, { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -20,7 +22,6 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated'
-
 import Box, { AnimatedBox, HStack, MotiBox, VStack } from '~common/ui/Box'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -38,7 +39,6 @@ import {
 import { getStrongEntityAvatarSource } from './strongEntityAvatars'
 import { getGraphScenePositionIndexes, GRAPH_POSITION_INDEXES } from './strongEntityGraphLayout'
 import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
-
 const GRAPH_HEIGHT = 410
 const CENTER_Y = 188
 const CENTER_NODE_SIZE = 82
@@ -546,14 +546,27 @@ const EntityGraphNode = ({
 
   return (
     <AnimatedBox
-      size={center ? CENTER_NODE_SIZE : SATELLITE_NODE_SIZE}
-      borderRadius={center ? CENTER_NODE_SIZE / 2 : SATELLITE_NODE_SIZE / 2}
-      bg={center ? 'lightPrimary' : 'lightGrey'}
-      borderWidth={center ? 2 : 1}
-      borderColor={center ? 'primary' : 'border'}
-      overflow="visible"
-      center
-      style={avatarStyle}
+      className={twMerge(
+        'overflow-hidden border-continuous',
+        twMerge(
+          center ? 'bg-light-primary' : 'bg-light-grey',
+          center ? 'border-primary' : 'border-border',
+          'overflow-visible items-center justify-center'
+        )
+      )}
+      style={[
+        {
+          borderRadius: center ? CENTER_NODE_SIZE / 2 : SATELLITE_NODE_SIZE / 2,
+          borderWidth: center ? 2 : 1,
+          ...((center ? CENTER_NODE_SIZE : SATELLITE_NODE_SIZE)
+            ? {
+                width: center ? CENTER_NODE_SIZE : SATELLITE_NODE_SIZE,
+                height: center ? CENTER_NODE_SIZE : SATELLITE_NODE_SIZE,
+              }
+            : {}),
+        },
+        avatarStyle,
+      ]}
     >
       <Image
         source={getStrongEntityAvatarSource(category ?? 'other', type ?? 'Other')}
@@ -604,7 +617,14 @@ const GraphSatelliteContent = ({
         ...pressedOpacityStyle({ pressed }),
       })}
     >
-      <Box size={SATELLITE_NODE_SIZE} position="relative" overflow="visible">
+      <Box
+        className="border-continuous overflow-visible relative"
+        style={{
+          ...(SATELLITE_NODE_SIZE
+            ? { width: SATELLITE_NODE_SIZE, height: SATELLITE_NODE_SIZE }
+            : {}),
+        }}
+      >
         <EntityGraphNode
           category={category}
           type={type}
@@ -612,34 +632,24 @@ const GraphSatelliteContent = ({
           avatarRole={avatarRole}
         />
         <VStack
-          position="absolute"
-          top={SATELLITE_NODE_SIZE + 4}
-          left={(SATELLITE_NODE_SIZE - SATELLITE_WIDTH) / 2}
-          width={SATELLITE_WIDTH}
-          alignItems="center"
-          overflow="visible"
+          className="border-continuous overflow-visible absolute items-center"
+          style={{
+            width: SATELLITE_WIDTH,
+            top: SATELLITE_NODE_SIZE + 4,
+            left: (SATELLITE_NODE_SIZE - SATELLITE_WIDTH) / 2,
+          }}
         >
-          <Text bold fontSize={12} textAlign="center" numberOfLines={1}>
+          <Text className="font-bold text-[12px] text-center" numberOfLines={1}>
             {displayName}
           </Text>
           <HStack
-            bg="lightGrey"
-            borderRadius={12}
-            px={7}
-            py={3}
-            mt={3}
-            maxWidth={SATELLITE_WIDTH}
-            alignItems="center"
-            gap={3}
+            className="overflow-hidden border-continuous bg-light-grey rounded-[12px] px-[7px] py-[3px] mt-[3px] items-center gap-[3px]"
+            style={{ maxWidth: SATELLITE_WIDTH }}
           >
             <IonIcon name={visual.icon} color={visual.color} size={10} />
             <Text
-              color="default"
-              fontSize={9}
-              bold
+              className="text-default text-[9px] font-bold capitalize opacity-[0.5]"
               numberOfLines={1}
-              textTransform="capitalize"
-              opacity={0.5}
             >
               {label}
             </Text>
@@ -647,13 +657,8 @@ const GraphSatelliteContent = ({
         </VStack>
         {back && (
           <Box
-            position="absolute"
-            {...getBackIndicatorPosition(positionIndex ?? 0)}
-            width={20}
-            height={20}
-            borderRadius={20}
-            center
-            bg="lightGrey"
+            className="overflow-hidden border-continuous w-[20px] h-[20px] absolute rounded-[20px] bg-light-grey items-center justify-center"
+            style={getBackIndicatorPosition(positionIndex ?? 0)}
           >
             <FeatherIcon name="chevron-left" color="primary" size={14} />
           </Box>
@@ -733,7 +738,7 @@ const LayerNodeMotion = ({
   })
 
   return (
-    <AnimatedBox overflow="visible" style={animatedStyle}>
+    <AnimatedBox className="border-continuous overflow-visible" style={animatedStyle}>
       {children}
     </AnimatedBox>
   )
@@ -894,7 +899,10 @@ const GraphPageButton = ({
     accessibilityState={{ disabled }}
     style={pressedOpacityStyle}
   >
-    <Box size={32} borderRadius={16} bg="lightGrey" center opacity={disabled ? 0.4 : 1}>
+    <Box
+      className="overflow-hidden border-continuous rounded-[16px] bg-light-grey items-center justify-center"
+      style={{ opacity: disabled ? 0.4 : 1, width: 32, height: 32 }}
+    >
       <FeatherIcon name={icon} color="primary" size={18} />
     </Box>
   </Pressable>
@@ -914,13 +922,12 @@ const GraphHistoryButton = ({
   onPress: () => void
 }) => (
   <MotiBox
-    position="absolute"
     {...{ [side]: 8 }}
-    top={6}
     from={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
     transition={{ type: 'timing', duration: 180 }}
+    className="overflow-hidden border-continuous absolute top-[6px]"
   >
     <Pressable
       onPress={onPress}
@@ -929,7 +936,10 @@ const GraphHistoryButton = ({
       accessibilityState={{ busy: loading }}
       style={pressedOpacityStyle}
     >
-      <Box size={32} borderRadius={16} bg="lightGrey" center>
+      <Box
+        className="overflow-hidden border-continuous rounded-[16px] bg-light-grey items-center justify-center"
+        style={{ width: 32, height: 32 }}
+      >
         {loading ? (
           <ActivityIndicator size="small" />
         ) : (
@@ -961,12 +971,7 @@ const GraphFooter = ({
 
   return (
     <HStack
-      center
-      py={6}
-      gap={12}
-      position="relative"
-      borderTopWidth={1}
-      borderColor="border"
+      className="border-continuous overflow-hidden items-center justify-center py-[6px] gap-[12px] relative border-t-[1px] border-border"
       accessibilityLabel={t('strongDetail.entity.graphPage', {
         current: pageIndex + 1,
         count: pageCount,
@@ -1001,7 +1006,7 @@ const GraphFooter = ({
         accessibilityLabel={t('strongDetail.entity.graphPreviousPage')}
       />
 
-      <Text bold color="tertiary" fontSize={12}>
+      <Text className="font-bold text-tertiary text-[12px]">
         {pageIndex + 1} / {pageCount}
       </Text>
 
@@ -1039,14 +1044,20 @@ const GraphCenterNode = ({
 
   return (
     <Box
-      position="absolute"
-      left={center.x - CENTER_NODE_SIZE / 2}
-      top={center.y - CENTER_NODE_SIZE / 2}
-      size={CENTER_NODE_SIZE}
-      overflow="visible"
+      className="border-continuous overflow-visible absolute"
+      style={{
+        top: center.y - CENTER_NODE_SIZE / 2,
+        left: center.x - CENTER_NODE_SIZE / 2,
+        ...(CENTER_NODE_SIZE ? { width: CENTER_NODE_SIZE, height: CENTER_NODE_SIZE } : {}),
+      }}
     >
       <LayerNodeMotion entry={entry} exit={exit} entryRole={entryRole} exitRole={exitRole}>
-        <Box size={CENTER_NODE_SIZE} position="relative" overflow="visible">
+        <Box
+          className="border-continuous overflow-visible relative"
+          style={{
+            ...(CENTER_NODE_SIZE ? { width: CENTER_NODE_SIZE, height: CENTER_NODE_SIZE } : {}),
+          }}
+        >
           <Pressable
             disabled={!canOpenProfile}
             onPress={openProfile}
@@ -1067,14 +1078,14 @@ const GraphCenterNode = ({
             />
           </Pressable>
           <VStack
-            position="absolute"
-            top={CENTER_NODE_SIZE + 4}
-            left={(CENTER_NODE_SIZE - CENTER_LABEL_WIDTH) / 2}
-            width={CENTER_LABEL_WIDTH}
-            alignItems="center"
-            overflow="visible"
+            className="border-continuous overflow-visible absolute items-center"
+            style={{
+              width: CENTER_LABEL_WIDTH,
+              top: CENTER_NODE_SIZE + 4,
+              left: (CENTER_NODE_SIZE - CENTER_LABEL_WIDTH) / 2,
+            }}
           >
-            <Text bold fontSize={15} textAlign="center" numberOfLines={1}>
+            <Text className="font-bold text-[15px] text-center" numberOfLines={1}>
               {formatStrongEntityDisplayName(entity.name)}
             </Text>
             {showsProfileAction && (
@@ -1085,16 +1096,8 @@ const GraphCenterNode = ({
                 accessibilityLabel={t('strongDetail.entity.viewProfile')}
                 style={pressedOpacityStyle}
               >
-                <HStack
-                  bg="lightGrey"
-                  borderRadius={12}
-                  px={7}
-                  py={3}
-                  mt={3}
-                  alignItems="center"
-                  gap={2}
-                >
-                  <Text color="tertiary" fontSize={9} bold>
+                <HStack className="overflow-hidden border-continuous bg-light-grey rounded-[12px] px-[7px] py-[3px] mt-[3px] items-center gap-[2px]">
+                  <Text className="text-tertiary text-[9px] font-bold">
                     {t('strongDetail.entity.viewProfile')}
                   </Text>
                   <IonIcon name="chevron-forward" color="tertiary" size={10} />
@@ -1133,11 +1136,12 @@ const GraphRelationNodeView = ({
 
   return (
     <Box
-      position="absolute"
-      left={position.x - SATELLITE_NODE_SIZE / 2}
-      top={position.y - SATELLITE_NODE_SIZE / 2}
-      size={SATELLITE_NODE_SIZE}
-      overflow="visible"
+      className="border-continuous overflow-visible absolute"
+      style={{
+        top: position.y - SATELLITE_NODE_SIZE / 2,
+        left: position.x - SATELLITE_NODE_SIZE / 2,
+        ...(SATELLITE_NODE_SIZE ? { width: SATELLITE_NODE_SIZE, height: SATELLITE_NODE_SIZE } : {}),
+      }}
     >
       <LayerNodeMotion
         entry={entry}
@@ -1194,11 +1198,12 @@ const GraphPreviousNode = ({
 
   return (
     <Box
-      position="absolute"
-      left={position.x - SATELLITE_NODE_SIZE / 2}
-      top={position.y - SATELLITE_NODE_SIZE / 2}
-      size={SATELLITE_NODE_SIZE}
-      overflow="visible"
+      className="border-continuous overflow-visible absolute"
+      style={{
+        top: position.y - SATELLITE_NODE_SIZE / 2,
+        left: position.x - SATELLITE_NODE_SIZE / 2,
+        ...(SATELLITE_NODE_SIZE ? { width: SATELLITE_NODE_SIZE, height: SATELLITE_NODE_SIZE } : {}),
+      }}
     >
       <LayerNodeMotion
         entry={entry}
@@ -1403,9 +1408,7 @@ const GraphSceneLayer = ({
 
   return (
     <AnimatedBox
-      position="absolute"
-      inset={0}
-      overflow="visible"
+      className="border-continuous overflow-visible absolute inset-[0px]"
       pointerEvents={interactive && layerIsVisible ? 'auto' : 'none'}
       accessibilityElementsHidden={!layerIsVisible}
       importantForAccessibility={layerIsVisible ? 'auto' : 'no-hide-descendants'}
@@ -1650,19 +1653,16 @@ export const StrongEntityRelationGraph = ({
 
   return (
     <VStack
-      borderWidth={1}
-      borderColor="border"
-      borderRadius={20}
-      bg="reverse"
-      overflow="hidden"
+      className="border-continuous overflow-visible border-[1px] border-border rounded-[20px] bg-reverse"
       pointerEvents={isResetting ? 'none' : 'auto'}
     >
       <Box
-        height={GRAPH_HEIGHT}
+        className="overflow-hidden border-continuous"
         onLayout={event => setWidth(event.nativeEvent.layout.width)}
         accessibilityLabel={t('strongDetail.entity.graphCurrent', {
           name: navigation.activeEntity.name,
         })}
+        style={{ height: GRAPH_HEIGHT }}
       >
         {motions.map(motion => (
           <GraphMotionDriver key={motion.id} motion={motion} onFinished={finishMotion} />
@@ -1685,13 +1685,11 @@ export const StrongEntityRelationGraph = ({
           />
         ))}
         <Box
-          position="absolute"
-          inset={0}
-          zIndex={1000}
-          opacity={hasCameraMotion ? 0 : 1}
+          className="overflow-hidden border-continuous absolute inset-[0px] z-[1000]"
           pointerEvents={hasCameraMotion ? 'none' : 'box-none'}
           accessibilityElementsHidden={hasCameraMotion}
           importantForAccessibility={hasCameraMotion ? 'no-hide-descendants' : 'auto'}
+          style={{ opacity: hasCameraMotion ? 0 : 1 }}
         >
           <GraphCenterNode
             entity={navigation.activeEntity}

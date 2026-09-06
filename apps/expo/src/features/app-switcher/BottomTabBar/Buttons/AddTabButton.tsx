@@ -6,7 +6,6 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { useExpandNewTab } from '~features/app-switcher/utils/useExpandNewTab'
 import { tabsAtomsAtom } from '../../../../state/tabs'
-
 export type AddTabButtonProps = Record<string, never>
 
 const AddTabButton = (_props: AddTabButtonProps) => {
@@ -31,11 +30,11 @@ const AddTabButton = (_props: AddTabButtonProps) => {
 
   return (
     <TouchableBox
-      center
-      size={TAB_ICON_SIZE}
+      className="overflow-hidden border-continuous items-center justify-center"
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={t('accessibility.addTab')}
+      style={{ ...(TAB_ICON_SIZE ? { width: TAB_ICON_SIZE, height: TAB_ICON_SIZE } : {}) }}
     >
       <FeatherIcon name="plus" size={23} color="tertiary" />
     </TouchableBox>

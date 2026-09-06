@@ -1,7 +1,10 @@
-import PageContent from '~common/ui/PageContent'
-import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { memo, useCallback } from 'react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import PageContent from '~common/ui/PageContent'
+import type { Theme as AppTheme } from '~themes'
 
 import { useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
@@ -22,17 +25,42 @@ import type { AppDispatch } from '~redux/store'
 import { unifiedTagsModalAtom } from '../../state/app'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
 
-const HeaderBox = styled(Box)(({ theme }) => ({
-  alignItems: 'center',
-  paddingLeft: 15,
-  paddingRight: 15,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
+const HeaderBox = (
+  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const ValidateIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.success,
-}))
+  const classStyles = useResolveClassNames(
+    twMerge('items-center pl-[15px] pr-[15px] border-b-[1px] border-b-border', className)
+  )
+  return (
+    <Box
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
+
+const ValidateIcon = (
+  componentProps: Omit<UIComponentProps<typeof Icon.Feather>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('text-success', className))
+  return (
+    <Icon.Feather
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.Feather>['style']}
+    />
+  )
+}
 
 type EditHeaderProps = {
   isReadOnly: boolean
@@ -150,8 +178,8 @@ const EditHeader = ({
 
   return (
     <HeaderBox>
-      <PageContent row height={54} center>
-        <Box flex justifyContent="center">
+      <PageContent className="h-[54px] items-center justify-center flex-row">
+        <Box className="overflow-hidden border-continuous flex-[1] justify-center">
           <Link onPress={setReadOnly} style={{ marginRight: 15 }}>
             <ValidateIcon name="check" size={25} />
           </Link>

@@ -1,24 +1,59 @@
-import React from 'react'
-import styled from '@emotion/native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import * as NativeUI from 'react-native'
 import { TouchableOpacityProps, ViewProps } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
-const Touchable = styled.TouchableOpacity(() => ({
-  flex: 1,
-  alignItems: 'center',
-  justifyContent: 'center',
-}))
+const Touchable = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('flex-[1] items-center justify-center', className)
+  )
+  return (
+    <NativeUI.TouchableOpacity
+      {...props}
+      style={
+        [classStyles, {}, props.style] as UIComponentProps<
+          typeof NativeUI.TouchableOpacity
+        >['style']
+      }
+    />
+  )
+}
 
 type CircleStyleProps = {
   color: string
   size: number
 }
 
-const Container = styled.View<CircleStyleProps>(({ color, size }) => ({
-  width: size,
-  height: size,
-  borderRadius: size / 3,
-  backgroundColor: color,
-}))
+const Container = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, keyof CircleStyleProps | 'theme'> &
+    Omit<CircleStyleProps, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const { color, size } = props
+  const classStyles = useResolveClassNames(twMerge('', className))
+  return (
+    <NativeUI.View
+      {...props}
+      style={
+        [
+          classStyles,
+          { width: size, height: size, borderRadius: size / 3, backgroundColor: color },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.View>['style']
+      }
+    />
+  )
+}
 
 type TouchableCircleProps = ViewProps & {
   color: string

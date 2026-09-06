@@ -1,8 +1,6 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-
 import { Sheet, useSheetFooterInset, type SheetRef } from '../sheet.web'
-
 jest.mock('react-native', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return {
@@ -18,7 +16,7 @@ jest.mock('react-native', () => {
   }
 })
 
-jest.mock('@emotion/react', () => ({
+jest.mock('~themes/ThemeProvider', () => ({
   Global: () => null,
   useTheme: () => ({ colors: { reverse: '#fff', border: '#ddd' } }),
 }))

@@ -1,3 +1,4 @@
+import { twMerge } from '~common/ui/classNames'
 import React, { createContext, useContext, useEffect, useRef } from 'react'
 import {
   EntryAnimationsValues,
@@ -115,6 +116,11 @@ export const Slide = ({ slideIndex, ...props }: BoxProps & SlideProps) => {
   }
 
   return (
-    <AnimatedBox entering={ifEnabled(SlideIn)} exiting={ifEnabled(SlideOut)} flex={1} {...props} />
+    <AnimatedBox
+      entering={ifEnabled(SlideIn)}
+      exiting={ifEnabled(SlideOut)}
+      {...props}
+      className={twMerge('overflow-hidden border-continuous', twMerge('flex-[1]', props.className))}
+    />
   )
 }

@@ -1,7 +1,6 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { Stack } from 'expo-router'
 import ModalRouteFrame from '~navigation/ModalRouteFrame'
-
 const ExploreLayout = () => {
   const theme = useTheme()
 

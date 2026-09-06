@@ -1,11 +1,14 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import { downloadManager } from '~helpers/downloadManager'
-
 import NaveOfTheDay from '../NaveOfTheDay'
 import StrongOfTheDay from '../StrongOfTheDay'
 import WordOfTheDay from '../WordOfTheDay'
 import { getRandomDictionaryEntryId } from '../dictionaryWidgetEntry'
+jest.mock('react-native', () => ({ Platform: { OS: 'web' } }))
+jest.mock('~themes/ThemeProvider', () => ({
+  useTheme: () => jest.requireActual('../../../../test/themeFixture').themeFixture,
+}))
 
 let mockIsConnected = true
 let mockAvailabilityReason: 'offline-copy-required' | 'invalid-offline-copy' =
@@ -174,7 +177,7 @@ describe('Home resource download widgets', () => {
     const recovery = renderer.root.find(node => String(node.type) === 'AnimatedTouchableBox')
     expect(recovery.props).toMatchObject({
       accessibilityRole: 'button',
-      borderStyle: 'dashed',
+      className: expect.stringContaining('border-dashed'),
     })
     expect(
       renderer.root.findAll(
@@ -183,7 +186,7 @@ describe('Home resource download widgets', () => {
       )
     ).toHaveLength(1)
     expect(JSON.stringify(renderer.toJSON())).toContain('Thématique Nave')
-    expect(JSON.stringify(renderer.toJSON())).toContain('"color":"tertiary"')
+    expect(JSON.stringify(renderer.toJSON())).toContain('text-tertiary')
     expect(JSON.stringify(renderer.toJSON())).not.toContain('Télécharger')
 
     act(() => recovery.props.onPress())
@@ -204,7 +207,7 @@ describe('Home resource download widgets', () => {
     const recovery = renderer.root.find(node => String(node.type) === 'AnimatedTouchableBox')
     expect(recovery.props).toMatchObject({
       accessibilityRole: 'button',
-      borderStyle: 'dashed',
+      className: expect.stringContaining('border-dashed'),
     })
     expect(
       renderer.root.findAll(
@@ -213,7 +216,7 @@ describe('Home resource download widgets', () => {
       )
     ).toHaveLength(1)
     expect(JSON.stringify(renderer.toJSON())).toContain('Dictionnaire encyclopédique de la Bible')
-    expect(JSON.stringify(renderer.toJSON())).toContain('"color":"tertiary"')
+    expect(JSON.stringify(renderer.toJSON())).toContain('text-tertiary')
     expect(JSON.stringify(renderer.toJSON())).not.toContain('Télécharger')
 
     act(() => recovery.props.onPress())

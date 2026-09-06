@@ -21,7 +21,6 @@ import useVerseActiveStates from './hooks/useVerseActiveStates'
 import type { SelectedVersesModalProps } from './types'
 import PassageExportSheet from '../passageExport/PassageExportSheet'
 import type { SheetRef } from '~common/sheet'
-
 // Persist the selected tab index
 const selectedVersesTabIndexAtom = atomWithAsyncStorage('selectedVersesTabIndex', 0)
 
@@ -96,14 +95,10 @@ const SelectedVersesModal = ({
         <SheetView style={{ flex: 0, paddingTop: 10 }}>
           {typeof isSelectionMode === 'string' && isSelectionMode.includes('verse') ? (
             <HStack
-              gap={10}
-              width="100%"
-              alignItems="center"
-              justifyContent="center"
-              pt={10}
-              pb={BOTTOM_INSET}
+              className="overflow-hidden border-continuous gap-[10px] w-[100%] items-center justify-center pt-[10px]"
+              style={{ paddingBottom: BOTTOM_INSET }}
             >
-              <Text bold fontSize={18} textAlign="center">
+              <Text className="font-bold text-[18px] text-center">
                 {selectedVersesTitle.toUpperCase()}
               </Text>
               <TouchableIcon
@@ -118,6 +113,7 @@ const SelectedVersesModal = ({
             <></>
           ) : (
             <Box
+              className="overflow-hidden border-continuous"
               style={{
                 overflow: 'hidden',
               }}

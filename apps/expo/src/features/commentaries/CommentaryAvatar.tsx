@@ -1,9 +1,9 @@
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { Platform } from 'react-native'
-
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-
 const AVATAR_COLORS = ['#2F6FDB', '#147D82', '#7652A7', '#A45D79', '#A56532'] as const
 
 const hash = (value: string) =>
@@ -43,25 +43,41 @@ const CommentaryAvatar = ({
   muted = false,
   outlined = false,
 }: Props) => {
+  const stylingTheme = useStylingTheme()
+
   const backgroundColor = AVATAR_COLORS[hash(resourceCode) % AVATAR_COLORS.length]
   const displayedBackgroundColor = muted ? '#B8BDC7' : backgroundColor
   const initials = getCommentaryInitials(author, fallback)
 
   return (
     <Box
-      size={size}
-      borderRadius={size / 2}
-      center
-      borderWidth={outlined ? 2 : 0}
-      borderColor={outlined ? displayedBackgroundColor : undefined}
-      backgroundColor={outlined ? 'transparent' : displayedBackgroundColor}
-      opacity={muted ? 0.6 : 1}
+      className="overflow-hidden border-continuous items-center justify-center"
+      style={{
+        borderRadius: size / 2,
+        borderWidth: outlined ? 2 : 0,
+        backgroundColor: resolveThemeColor(
+          stylingTheme,
+          outlined ? 'transparent' : displayedBackgroundColor
+        ),
+        borderColor: resolveThemeColor(
+          stylingTheme,
+          outlined ? displayedBackgroundColor : undefined
+        ),
+        opacity: muted ? 0.6 : 1,
+        ...(size ? { width: size, height: size } : {}),
+      }}
     >
       <Text
-        fontSize={size * (initials.length > 2 ? 0.31 : 0.39)}
-        lineHeight={size * 0.48}
-        color={outlined ? displayedBackgroundColor : '#FFFFFF'}
-        style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}
+        style={[
+          {
+            fontSize: size * (initials.length > 2 ? 0.31 : 0.39) || 16,
+            lineHeight: size * 0.48,
+            color:
+              resolveThemeColor(stylingTheme, outlined ? displayedBackgroundColor : '#FFFFFF') ||
+              stylingTheme.colors.default,
+          },
+          { fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+        ]}
       >
         {initials}
       </Text>

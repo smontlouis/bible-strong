@@ -15,7 +15,6 @@ import TabButton from './Buttons/TabButton'
 import GroupTitleButton from './GroupTitleButton'
 import useBottomTabBar from './useBottomTabBar'
 import useTabBarSwipeGesture from './useTabBarSwipeGesture'
-
 type BottomTabBarProps = {
   openMenu: () => void
   openHome: () => void
@@ -31,30 +30,20 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
 
   return (
     <AnimatedBox
-      pb={insets.bottom}
-      bg="reverse"
-      position="absolute"
-      bottom={0}
-      left={0}
-      right={0}
-      borderTopWidth={1}
-      borderColor="border"
-      height={bottomBarHeight}
-      style={{
-        transform: [{ translateY: isFullScreenBible ? bottomBarHeight : 0 }],
-        transitionProperty: 'transform',
-        transitionDuration: 300,
-      }}
+      className="overflow-hidden border-continuous bg-reverse absolute bottom-[0px] left-[0px] right-[0px] border-t-[1px] border-border"
+      style={[
+        { paddingBottom: insets.bottom, height: bottomBarHeight },
+        {
+          transform: [{ translateY: isFullScreenBible ? bottomBarHeight : 0 }],
+          transitionProperty: 'transform',
+          transitionDuration: 300,
+        },
+      ]}
     >
       <GestureDetector gesture={panGesture}>
         <AnimatedBox
-          row
-          alignItems="center"
-          justifyContent="space-around"
-          px={20}
-          absoluteFill
-          paddingBottom={insets.bottom}
-          style={viewStyles}
+          className="overflow-hidden border-continuous flex-row items-center justify-around px-[20px] absolute left-[0px] top-[0px] right-[0px] bottom-[0px]"
+          style={[{ paddingBottom: insets.bottom }, viewStyles]}
           accessibilityElementsHidden={!isViewMode}
           importantForAccessibility={isViewMode ? 'auto' : 'no-hide-descendants'}
           key="view"
@@ -67,13 +56,8 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
         </AnimatedBox>
       </GestureDetector>
       <AnimatedBox
-        row
-        alignItems="center"
-        justifyContent="space-around"
-        px={20}
-        absoluteFill
-        paddingBottom={insets.bottom}
-        style={listStyles}
+        className="overflow-hidden border-continuous flex-row items-center justify-around px-[20px] absolute left-[0px] top-[0px] right-[0px] bottom-[0px]"
+        style={[{ paddingBottom: insets.bottom }, listStyles]}
         accessibilityElementsHidden={isViewMode}
         importantForAccessibility={isViewMode ? 'no-hide-descendants' : 'auto'}
         key="list"
@@ -81,13 +65,13 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
         <AddTabButton />
         <GroupTitleButton />
         <TouchableBox
-          center
-          size={TAB_ICON_SIZE}
+          className="overflow-hidden border-continuous items-center justify-center"
           onPress={onPress}
           accessibilityRole="button"
           accessibilityLabel={t('accessibility.openSelectedTab')}
+          style={{ ...(TAB_ICON_SIZE ? { width: TAB_ICON_SIZE, height: TAB_ICON_SIZE } : {}) }}
         >
-          <Text bold>OK</Text>
+          <Text className="font-bold">OK</Text>
         </TouchableBox>
       </AnimatedBox>
     </AnimatedBox>

@@ -1,29 +1,15 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-
 import MultipleChoiceFilterModal from '../MultipleChoiceFilterModal'
+jest.mock('~themes/ThemeProvider', () => ({ useTheme: () => ({ colors: {} }) }))
+// Behavioral tests do not run Metro's generated Uniwind stylesheet.
+jest.mock('uniwind', () => ({ useResolveClassNames: () => ({}) }))
 
 jest.mock('react-native', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return {
     TouchableOpacity: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
       ReactModule.createElement('TouchableOpacity', props, children),
-  }
-})
-
-jest.mock('@emotion/native', () => {
-  const ReactModule = jest.requireActual<typeof React>('react')
-  const createStyledComponent = (type: React.ElementType) => () =>
-    function StyledComponent({
-      children,
-      ...props
-    }: React.PropsWithChildren<Record<string, unknown>>) {
-      return ReactModule.createElement(type, props, children)
-    }
-
-  return {
-    __esModule: true,
-    default: (type: React.ElementType) => createStyledComponent(type),
   }
 })
 

@@ -3,7 +3,6 @@ import { SharedValue, useAnimatedStyle, useDerivedValue } from 'react-native-rea
 import { AnimatedBox } from '~common/ui/Box'
 import SectionImage from './SectionImage'
 import { ShallowTimelineSection } from './types'
-
 interface Props {
   isReady: SharedValue<number>
   currentEvent: ShallowTimelineSection
@@ -17,7 +16,7 @@ const CurrentSectionImage = ({ isReady, currentEvent }: Props) => {
   })
 
   return (
-    <AnimatedBox absoluteFill style={style}>
+    <AnimatedBox className="absolute left-[0px] top-[0px] right-[0px] bottom-[0px]" style={style}>
       <SectionImage {...currentEvent} />
     </AnimatedBox>
   )

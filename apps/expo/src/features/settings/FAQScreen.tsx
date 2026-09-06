@@ -1,5 +1,6 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
-
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
 import Accordion from '~common/ui/Accordion'
@@ -8,39 +9,49 @@ import Container from '~common/ui/Container'
 import Paragraph from '~common/ui/Paragraph'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
-
 const FAQScreen = () => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   return (
     <Container>
       <Header hasBackButton title="FAQ" />
       <ScrollView>
-        <Box padding={20}>
-          <Text title fontSize={30} marginBottom={30}>
+        <Box className="overflow-hidden border-continuous p-[20px]">
+          <Text
+            className="text-[30px] mb-[30px]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {t('Bienvenue')},
           </Text>
-          <Paragraph scaleLineHeight={-1} marginBottom={20}>
+          <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
             {t("J'ai regroupé ici la plupart des questions qui me sont régulièrement posées.")}
           </Paragraph>
           <Accordion
             title={
-              <Text title fontSize={18}>
+              <Text
+                className="text-[18px]"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
                 {t('faq.whiteScreenQuestion')}
               </Text>
             }
           >
-            <Paragraph marginLeft={20} scale={-1}>
+            <Paragraph className="ml-[20px]" scale={-1}>
               {t('faq.whiteScreenAnswer')}
             </Paragraph>
           </Accordion>
           <Accordion
             title={
-              <Text title fontSize={18}>
+              <Text
+                className="text-[18px]"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
                 {t("L'application est lente")}
               </Text>
             }
           >
-            <Paragraph marginLeft={20} scale={-1}>
+            <Paragraph className="ml-[20px]" scale={-1}>
               {t(
                 "Si l'application est lente sur votre téléphone, j'en suis navré. Bible Strong utilise des bases de données lexique et dictionnaire qui contiennent des milliers d'entrées. Généralement les téléphones récents ont de bonnes performances sur l'application.\n\nPetit à petit je vais optimiser certaines parties de l'app comme le lexique et le dictionnaire."
               )}
@@ -48,12 +59,15 @@ const FAQScreen = () => {
           </Accordion>
           <Accordion
             title={
-              <Text title fontSize={18}>
+              <Text
+                className="text-[18px]"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
                 {t("L'application prend beaucoup de place")}
               </Text>
             }
           >
-            <Paragraph marginLeft={20} scale={-1}>
+            <Paragraph className="ml-[20px]" scale={-1}>
               {t(
                 "J'ai fait le choix de vous fournir le lexique, les bibles et le dictionnaire hors-ligne pour faciliter la rapidité d'accès.\n\nL'avantage est biensur l'accès rapide et hors-ligne de toutes vos informations, l'inconvénient est la taille de l'application.\n\n~20Mo pour l'index, ~25Mo pour le dictionnaire, ~30Mo pour le lexique Hébreu. Chaque bible pèse environ ~5Mo. \n\nEn tout l'application peut arriver jusqu'à 200Mo, donc assurez-vous d'avoir de la place."
               )}
@@ -61,23 +75,29 @@ const FAQScreen = () => {
           </Accordion>
           <Accordion
             title={
-              <Text title fontSize={18}>
+              <Text
+                className="text-[18px]"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
                 {t("J'ai constaté un bug")}
               </Text>
             }
           >
-            <Paragraph marginLeft={20} scale={-1}>
+            <Paragraph className="ml-[20px]" scale={-1}>
               {t('faq.bugNoticedAnswer')}
             </Paragraph>
           </Accordion>
           <Accordion
             title={
-              <Text title fontSize={18}>
+              <Text
+                className="text-[18px]"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
                 {t("J'ai une idée de fonctionnalité")}
               </Text>
             }
           >
-            <Paragraph marginLeft={20} scale={-1}>
+            <Paragraph className="ml-[20px]" scale={-1}>
               {t('faq.ideaAnswer')}
             </Paragraph>
           </Accordion>
@@ -98,12 +118,15 @@ const FAQScreen = () => {
           </Accordion> */}
           <Accordion
             title={
-              <Text title fontSize={18}>
+              <Text
+                className="text-[18px]"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
                 {t('Qui êtes-vous ?')}
               </Text>
             }
           >
-            <Paragraph marginLeft={20} scale={-1}>
+            <Paragraph className="ml-[20px]" scale={-1}>
               {t('who-are-you')}
             </Paragraph>
           </Accordion>

@@ -4,7 +4,6 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-
 import { Tag } from '~common/types'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
@@ -20,23 +19,17 @@ import { sortedTagsSelector } from '~redux/selectors/tags'
 import { unifiedTagsModalAtom, type UnifiedTagsModalProps } from '~state/app'
 import SheetSearchInput from './SheetSearchInput'
 import { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated'
-
 const RemovableChip = ({ label, onRemove }: { label: string; onRemove: () => void }) => {
   const { t } = useTranslation()
 
   return (
     <AnimatedBox
+      className="overflow-hidden border-continuous flex-row bg-primary rounded-[20px] px-[12px] py-[5px] items-center"
       entering={FadeIn}
       exiting={FadeOut}
       layout={LinearTransition}
-      row
-      bg="primary"
-      borderRadius={20}
-      px={12}
-      py={5}
-      alignItems="center"
     >
-      <Text color="reverse" fontSize={14} numberOfLines={1} maxWidth={200}>
+      <Text className="text-reverse text-[14px] max-w-[200px]" numberOfLines={1}>
         {label}
       </Text>
       <TouchableOpacity
@@ -179,7 +172,7 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
       header={
         <>
           <SheetHeader title={getTitle()}>
-            <Box px={20} pb={10}>
+            <Box className="overflow-hidden border-continuous px-[20px] pb-[10px]">
               <SheetSearchInput
                 placeholder={t('Chercher ou creer une etiquette')}
                 onChangeText={search}
@@ -192,16 +185,16 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
           </SheetHeader>
           {hasSelectedTags && (
             <AnimatedBox
+              className="overflow-hidden border-continuous px-[16px] py-[8px] border-b-[1px] border-border"
               layout={LinearTransition}
-              px={16}
-              py={8}
-              borderBottomWidth={1}
-              borderColor="border"
             >
-              <Text fontSize={12} color="grey" mb={6}>
+              <Text className="text-[12px] text-grey mb-[6px]">
                 {t('tagsSelected', { count: selectedTagsList.length })}
               </Text>
-              <Box row wrap style={{ gap: 8 }}>
+              <Box
+                className="overflow-hidden border-continuous flex-row flex-wrap"
+                style={{ gap: 8 }}
+              >
                 {selectedTagsList.map(tag => (
                   <RemovableChip
                     key={tag.id}
@@ -225,17 +218,11 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
             {/* "Tout" option (filter mode only) */}
             {isFilterMode && (
               <TouchableBox
-                row
-                alignItems="center"
-                p={16}
-                borderBottomWidth={1}
-                borderColor="border"
+                className="border-continuous overflow-hidden flex-row items-center p-[16px] border-b-[1px] border-border"
                 onPress={handleAllPress}
               >
-                <Checkbox checked={!filterModeSelectedTag} mr={12} />
-                <Text flex={1} fontSize={16}>
-                  {t('Tout')}
-                </Text>
+                <Checkbox className="mr-[12px]" checked={!filterModeSelectedTag} />
+                <Text className="flex-[1] text-[16px]">{t('Tout')}</Text>
                 {!filterModeSelectedTag && <FeatherIcon name="check" size={20} color="primary" />}
               </TouchableBox>
             )}
@@ -245,26 +232,25 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
               const isSelected = isTagSelected(tag)
               return (
                 <TouchableBox
+                  className="border-continuous overflow-hidden flex-row items-center p-[16px] border-b-[1px] border-border"
                   key={tag.id}
-                  row
-                  alignItems="center"
-                  p={16}
-                  borderBottomWidth={1}
-                  borderColor="border"
                   onPress={() => handleTagPress(tag)}
                 >
-                  <Checkbox checked={isSelected} fillChecked checkColor="white" mr={12} />
-                  <Text flex={1} fontSize={16}>
-                    {tag.name}
-                  </Text>
+                  <Checkbox
+                    className="mr-[12px]"
+                    checked={isSelected}
+                    fillChecked
+                    checkColor="white"
+                  />
+                  <Text className="flex-[1] text-[16px]">{tag.name}</Text>
                 </TouchableBox>
               )
             })}
 
             {/* Empty state for select mode with no tags */}
             {isSelectMode && result.length === 0 && !keyword && (
-              <Box flex center py={20}>
-                <Text textAlign="center" width={200} bold color="lightPrimary">
+              <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center py-[20px]">
+                <Text className="text-center w-[200px] font-bold text-light-primary">
                   {t('Creez votre premier tag puis selectionnez-le !')}
                 </Text>
               </Box>
@@ -272,17 +258,11 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
           </>
         ) : (
           <TouchableBox
-            row
-            alignItems="center"
-            p={16}
-            borderBottomWidth={1}
-            borderColor="border"
+            className="border-continuous overflow-hidden flex-row items-center p-[16px] border-b-[1px] border-border"
             onPress={saveTag}
           >
             <FeatherIcon size={20} color="primary" name="tag" />
-            <Text ml={10} bold color="primary">
-              {`${t('Creer')} "${keyword}"`}
-            </Text>
+            <Text className="ml-[10px] font-bold text-primary">{`${t('Creer')} "${keyword}"`}</Text>
           </TouchableBox>
         )}
       </SheetScrollView>

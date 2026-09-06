@@ -18,7 +18,6 @@ import {
 } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
-
 type BackToAudioFooterProps = {
   book: Book
   chapter: number
@@ -58,85 +57,65 @@ const BackToAudioFooter = ({
   return (
     <>
       <AnimatedTouchableBox
+        className="border-continuous overflow-visible w-[40px] h-[40px] border-[2px] rounded-[20px] border-light-grey bg-reverse items-center justify-center absolute left-[10px]"
         disabled={disabled || !hasPreviousChapter}
-        width={40}
-        height={40}
-        overflow="visible"
         onPress={hasPreviousChapter ? goToPrevChapter : undefined}
         accessibilityRole="button"
         accessibilityLabel={t('accessibility.previousChapter')}
         accessibilityState={{ disabled: disabled || !hasPreviousChapter }}
-        borderWidth={2}
-        borderRadius={20}
-        borderColor="lightGrey"
-        bg="reverse"
-        center
-        position="absolute"
-        bottom={10 + bottomBarHeight}
-        left={10}
-        style={{
-          transform: [{ translateY: fullScreenTranslateY }],
-          transitionProperty: 'transform',
-          transitionDuration: 300,
-        }}
+        style={[
+          { opacity: disabled || !hasPreviousChapter ? 0.6 : 1 },
+          [
+            { bottom: 10 + bottomBarHeight, opacity: disabled || !hasPreviousChapter ? 0.6 : 1 },
+            {
+              transform: [{ translateY: fullScreenTranslateY }],
+              transitionProperty: 'transform',
+              transitionDuration: 300,
+            },
+          ],
+        ]}
       >
         <FeatherIcon name="arrow-left" size={20} color="tertiary" />
       </AnimatedTouchableBox>
       <AnimatedHStack
-        position="absolute"
-        alignSelf="center"
-        bottom={10 + bottomBarHeight}
-        row
-        bg="lightGrey"
-        padding={2}
-        borderRadius={50}
-        overflow="visible"
-        style={{
-          transform: [{ translateY: centerTranslateY }],
-          transitionProperty: 'transform',
-          transitionDuration: 300,
-        }}
+        className="border-continuous overflow-visible absolute self-center flex-row bg-light-grey p-[2px] rounded-[50px]"
+        style={[
+          { bottom: 10 + bottomBarHeight },
+          {
+            transform: [{ translateY: centerTranslateY }],
+            transitionProperty: 'transform',
+            transitionDuration: 300,
+          },
+        ]}
       >
         <TouchableBox
-          center
-          paddingHorizontal={15}
-          paddingVertical={10}
+          className="border-continuous overflow-visible items-center justify-center px-[15px] py-[10px] bg-primary rounded-[12px] border-light-grey relative flex-row"
           onPress={() => slideToIndex(playingBibleTabIndex)}
           accessibilityRole="button"
           accessibilityLabel={t('audio.goBack')}
-          bg={'primary'}
-          borderRadius={12}
-          borderColor="lightGrey"
-          position="relative"
-          overflow="visible"
-          row
         >
-          <Text color="reverse">{t('audio.goBack')}</Text>
+          <Text className="text-reverse">{t('audio.goBack')}</Text>
           <FeatherIcon name="volume-2" style={{ marginLeft: 10 }} size={20} color="reverse" />
         </TouchableBox>
       </AnimatedHStack>
       <AnimatedTouchableBox
+        className="border-continuous overflow-visible w-[40px] h-[40px] items-center justify-center border-[2px] rounded-[20px] border-light-grey bg-reverse absolute right-[10px]"
         disabled={disabled || !hasNextChapter}
-        width={40}
-        height={40}
-        center
-        overflow="visible"
         onPress={hasNextChapter ? goToNextChapter : undefined}
         accessibilityRole="button"
         accessibilityLabel={t('accessibility.nextChapter')}
         accessibilityState={{ disabled: disabled || !hasNextChapter }}
-        borderWidth={2}
-        borderRadius={20}
-        borderColor="lightGrey"
-        bg="reverse"
-        position="absolute"
-        bottom={10 + bottomBarHeight}
-        right={10}
-        style={{
-          transform: [{ translateY: fullScreenTranslateY }],
-          transitionProperty: 'transform',
-          transitionDuration: 300,
-        }}
+        style={[
+          { opacity: disabled || !hasNextChapter ? 0.6 : 1 },
+          [
+            { bottom: 10 + bottomBarHeight, opacity: disabled || !hasNextChapter ? 0.6 : 1 },
+            {
+              transform: [{ translateY: fullScreenTranslateY }],
+              transitionProperty: 'transform',
+              transitionDuration: 300,
+            },
+          ],
+        ]}
       >
         <FeatherIcon name="arrow-right" size={20} color="tertiary" />
       </AnimatedTouchableBox>

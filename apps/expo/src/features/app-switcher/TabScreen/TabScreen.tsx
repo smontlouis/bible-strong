@@ -4,7 +4,6 @@ import React, { memo, Ref } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { useAnimatedReaction, useAnimatedStyle } from 'react-native-reanimated'
 import { runOnJS } from 'react-native-worklets'
-
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import BibleTabScreen from '~features/bible/BibleTabScreen'
@@ -43,10 +42,8 @@ import { useAppSwitcherContext } from '../AppSwitcherContext'
 import NewTabScreen from './NewTab/NewTabScreen'
 import { useResponsiveWorkspace } from '../utils/useResponsiveWorkspace'
 import useScrollToActiveTab from '../utils/useScrollToActiveTab'
-
 import TabScreenWrapper from './TabScreenWrapper'
 import { useSafeAreaFrame } from 'react-native-safe-area-context'
-
 const renderTabComponent = (tab: TabItem, tabAtom: PrimitiveAtom<TabItem>) => {
   switch (tab.type) {
     case 'bible':
@@ -154,7 +151,10 @@ const TabScreen = ({ tabAtom, ref }: TabScreenProps) => {
       accessibilityElementsHidden={!isAccessibilityVisible}
       importantForAccessibility={isAccessibilityVisible ? 'auto' : 'no-hide-descendants'}
     >
-      <Box flex={1} bg="reverse" style={StyleSheet.absoluteFill} center>
+      <Box
+        className="overflow-hidden border-continuous flex-[1] bg-reverse items-center justify-center"
+        style={StyleSheet.absoluteFill}
+      >
         <Text>{tab.title} - need component</Text>
       </Box>
     </TabScreenWrapper>

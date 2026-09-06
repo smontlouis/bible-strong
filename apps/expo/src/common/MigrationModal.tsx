@@ -1,49 +1,92 @@
-import React from 'react'
-import { Linking, ActivityIndicator, Modal } from 'react-native'
-import styled from '@emotion/native'
 import { useAtomValue } from 'jotai'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
+import * as NativeUI from 'react-native'
+import { ActivityIndicator, Linking, Modal } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Button from '~common/ui/Button'
-import { ProgressBar } from '~common/ui/ProgressBar'
-import { FeatherIcon } from '~common/ui/Icon'
-import { Theme } from '~themes'
 import { migrationProgressAtom } from 'src/state/migration'
+import Box from '~common/ui/Box'
+import Button from '~common/ui/Button'
+import { FeatherIcon } from '~common/ui/Icon'
+import { ProgressBar } from '~common/ui/ProgressBar'
+import Text from '~common/ui/Text'
 import { getCollectionLabel } from '~helpers/firestoreMigration'
 import type { SubcollectionName } from '~helpers/firestoreSubcollections'
+import { Theme } from '~themes'
 
-const ModalContent = styled.View(({ theme }: { theme: Theme }) => ({
-  flex: 1,
-  backgroundColor: theme.colors.reverse,
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: 30,
-}))
+const ModalContent = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, keyof { theme: Theme } | 'theme'> &
+    Omit<{ theme: Theme }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const IconContainer = styled.View(({ theme }: { theme: Theme }) => ({
-  width: 100,
-  height: 100,
-  borderRadius: 50,
-  backgroundColor: theme.colors.lightPrimary,
-  justifyContent: 'center',
-  alignItems: 'center',
-  marginBottom: 30,
-}))
+  const classStyles = useResolveClassNames(
+    twMerge('flex-[1] bg-reverse justify-center items-center p-[30px]', className)
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
-const ErrorBox = styled.View(({ theme }: { theme: Theme }) => ({
-  backgroundColor: theme.colors.lightGrey,
-  padding: 15,
-  borderRadius: 10,
-  marginBottom: 20,
-  width: '100%',
-}))
+const IconContainer = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, keyof { theme: Theme } | 'theme'> &
+    Omit<{ theme: Theme }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const Backdrop = styled.View({
-  flex: 1,
-  backgroundColor: 'rgba(0, 0, 0, 0.9)',
-})
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'w-[100px] h-[100px] rounded-[50px] bg-light-primary justify-center items-center mb-[30px]',
+      className
+    )
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
+
+const ErrorBox = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, keyof { theme: Theme } | 'theme'> &
+    Omit<{ theme: Theme }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('bg-light-grey p-[15px] rounded-[10px] mb-[20px] w-[100%]', className)
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
+
+const Backdrop = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('flex-[1] bg-[rgba(0,0,0,0.9)]', className))
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
 const SUPPORT_EMAIL = 'smontlouis.music@gmail.com'
 
@@ -80,7 +123,7 @@ const MigrationModal = () => {
             <FeatherIcon name={hasError ? 'alert-circle' : 'database'} size={50} color="primary" />
           </IconContainer>
 
-          <Text bold fontSize={24} textAlign="center" marginBottom={10}>
+          <Text className="font-bold text-[24px] text-center mb-[10px]">
             {hasError
               ? progress.hasPartialFailure
                 ? t('migration.partiallyFailed')
@@ -92,7 +135,7 @@ const MigrationModal = () => {
                   : t('migration.inProgress')}
           </Text>
 
-          <Text textAlign="center" color="grey" marginBottom={20}>
+          <Text className="text-center text-grey mb-[20px]">
             {hasError
               ? t('migration.errorDescription')
               : isBibleMigration
@@ -101,17 +144,18 @@ const MigrationModal = () => {
           </Text>
 
           {!hasError && !isBibleMigration && (
-            <Box row center marginBottom={25}>
+            <Box className="overflow-hidden border-continuous flex-row items-center justify-center mb-[25px]">
               <FeatherIcon name="wifi" size={16} color="grey" />
-              <Text marginLeft={8} fontSize={12} color="grey">
+              <Text className="ml-[8px] text-[12px] text-grey">
                 {t('migration.internetRequired')}
               </Text>
             </Box>
           )}
 
           {!hasError && (
-            <Box width="100%" marginBottom={30}>
+            <Box className="overflow-hidden border-continuous w-[100%] mb-[30px]">
               <Box
+                className="overflow-hidden border-continuous mb-[10px]"
                 accessible
                 accessibilityLabel={t('migration.progress')}
                 accessibilityRole="progressbar"
@@ -120,20 +164,16 @@ const MigrationModal = () => {
                   max: 100,
                   now: Math.round(progress.overallProgress * 100),
                 }}
-                marginBottom={10}
               >
                 <ProgressBar progress={progress.overallProgress} />
               </Box>
-              <Text textAlign="center" fontSize={16} bold>
+              <Text className="text-center text-[16px] font-bold">
                 {Math.round(progress.overallProgress * 100)}%
               </Text>
               {progress.message && (
                 <Text
+                  className="text-center text-[12px] text-grey mt-[8px]"
                   accessibilityLiveRegion="polite"
-                  textAlign="center"
-                  fontSize={12}
-                  color="grey"
-                  marginTop={8}
                 >
                   {progress.message}
                 </Text>
@@ -142,9 +182,9 @@ const MigrationModal = () => {
           )}
 
           {hasError && (
-            <Box width="100%">
+            <Box className="overflow-hidden border-continuous w-[100%]">
               <ErrorBox>
-                <Text fontSize={12} color="grey">
+                <Text className="text-[12px] text-grey">
                   {progress.hasPartialFailure
                     ? t('migration.partialError') +
                       (isBibleMigration
@@ -156,7 +196,7 @@ const MigrationModal = () => {
                 </Text>
               </ErrorBox>
 
-              <Text textAlign="center" fontSize={14} color="grey" marginBottom={20}>
+              <Text className="text-center text-[14px] text-grey mb-[20px]">
                 {t('migration.contactSupport')}
               </Text>
 
@@ -167,7 +207,7 @@ const MigrationModal = () => {
           )}
 
           {!hasError && (
-            <Box marginTop={10}>
+            <Box className="overflow-hidden border-continuous mt-[10px]">
               <ActivityIndicator size="large" color="#3498db" />
             </Box>
           )}

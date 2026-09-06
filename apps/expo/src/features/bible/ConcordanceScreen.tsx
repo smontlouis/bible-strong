@@ -1,45 +1,86 @@
-import { pageContentStyle } from '~common/ui/PageContent'
-import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React from 'react'
 import { useQuery } from '@tanstack/react-query'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import * as NativeUI from 'react-native'
 import { FlatList, TouchableOpacity } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import { pageContentStyle } from '~common/ui/PageContent'
+import type { Theme as AppTheme } from '~themes'
 
 import { useLocalSearchParams } from 'expo-router'
-import { getBook } from '~helpers/bibleBookCatalog'
+import { useSelector } from 'react-redux'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import { getBook } from '~helpers/bibleBookCatalog'
+import { IS_FORM_SHEET } from '~helpers/constants'
+import { localQueryOptions } from '~helpers/queryOptions'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { IS_FORM_SHEET } from '~helpers/constants'
-import { useSelector } from 'react-redux'
 import type { RootState } from '~redux/modules/reducer'
-import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
-import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import { localQueryOptions } from '~helpers/queryOptions'
 
-const OccurencesNumber = styled.View(({ theme }) => ({
-  marginLeft: 10,
-  paddingRight: 4,
-  paddingLeft: 4,
-  paddingTop: 2,
-  paddingBottom: 2,
-  borderRadius: 3,
-  backgroundColor: theme.colors.lightPrimary,
-}))
+const OccurencesNumber = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const ListItem = styled(Box)(({ theme }) => ({
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'ml-[10px] pr-[4px] pl-[4px] pt-[2px] pb-[2px] rounded-[3px] bg-light-primary',
+      className
+    )
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
-const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
-}))
+const ListItem = (
+  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('border-b-[1px] border-b-border', className))
+  return (
+    <Box
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
+
+const StyledIcon = (
+  componentProps: Omit<UIComponentProps<typeof Icon.Feather>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('text-default', className))
+  return (
+    <Icon.Feather
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.Feather>['style']}
+    />
+  )
+}
 
 const ConcordanceScreen = () => {
   const pushRouteOnce = usePushRouteOnce()
@@ -113,12 +154,14 @@ const ConcordanceScreen = () => {
                 })
               }}
             >
-              <ListItem row alignItems="center" height={50}>
-                <Text fontSize={16}>{getBook(item.Livre)?.Nom || `Livre ${item.Livre}`}</Text>
+              <ListItem className="h-[50px] items-center flex-row">
+                <Text className="text-[16px]">
+                  {getBook(item.Livre)?.Nom || `Livre ${item.Livre}`}
+                </Text>
                 <OccurencesNumber>
                   <Text>{item.versesCountByBook}</Text>
                 </OccurencesNumber>
-                <Box flex />
+                <Box className="overflow-hidden border-continuous flex-[1]" />
                 <StyledIcon name="chevron-right" size={20} />
               </ListItem>
             </TouchableOpacity>

@@ -1,7 +1,6 @@
 import { Feather } from '@expo/vector-icons'
 import type { TFunction } from 'i18next'
 import { ZoomIn } from 'react-native-reanimated'
-
 import LexiqueIcon from '~common/LexiqueIcon'
 import { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -10,7 +9,6 @@ import SceneBackgroundShape from '../SceneBackgroundShape'
 import SceneDecorativePluses from '../SceneDecorativePluses'
 import { Scene } from '../SceneGraph'
 import VerseCard, { type HighlightColor } from '../VerseCard'
-
 export const SCENE_SEVEN_REVEAL = {
   verseDelay: 1200,
   verseDuration: 1350,
@@ -47,21 +45,28 @@ type FinalChipProps = {
 
 const FinalChip = ({ color, icon, label, metrics }: FinalChipProps) => (
   <HStack
-    flex
-    px={metrics.s(9)}
-    borderRadius={metrics.s(18)}
-    alignItems="center"
-    justifyContent="center"
-    gap={metrics.s(5)}
-    lightShadow
-    style={{ backgroundColor: 'rgba(255,255,255,0.94)' }}
+    className="overflow-hidden border-continuous flex-[1] items-center justify-center"
+    style={[
+      {
+        paddingHorizontal: metrics.s(9),
+        borderRadius: metrics.s(18),
+        gap: metrics.s(5),
+        shadowColor: 'rgb(89,131,240)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 7,
+        elevation: 1,
+        overflow: 'visible',
+      },
+      { backgroundColor: 'rgba(255,255,255,0.94)' },
+    ]}
   >
     {icon === 'lexique' ? (
       <LexiqueIcon size={metrics.s(14)} color={color} />
     ) : (
       <Feather name={icon} size={metrics.s(14)} color={color} />
     )}
-    <Text bold fontSize={metrics.s(10)} numberOfLines={1}>
+    <Text className="font-bold" numberOfLines={1} style={{ fontSize: metrics.s(10) || 16 }}>
       {label}
     </Text>
   </HStack>

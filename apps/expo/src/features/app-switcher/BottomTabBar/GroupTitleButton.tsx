@@ -1,3 +1,5 @@
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { type SheetRef } from '~common/sheet'
@@ -14,8 +16,9 @@ import { LinearTransition } from 'react-native-reanimated'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { getContrastTextColor } from '~helpers/highlightUtils'
 import { wp } from '~helpers/utils'
-
 const GroupTitleButton = () => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const activeGroup = useActiveGroup()
   const tabsCount = useAtomValue(tabsCountAtom)
@@ -53,7 +56,7 @@ const GroupTitleButton = () => {
   }
 
   return (
-    <Box flex={1}>
+    <Box className="overflow-hidden border-continuous flex-[1]">
       <GroupActionsPopover
         accessibilityLabel={displayName}
         group={activeGroup}
@@ -61,15 +64,10 @@ const GroupTitleButton = () => {
         onEditGroup={handleOpenEdit}
         onViewGroups={handleOpenViewGroups}
       >
-        <Box row center>
+        <Box className="overflow-hidden border-continuous flex-row items-center justify-center">
           <AnimatedBox
-            row
-            py={6}
-            px={12}
-            borderRadius={20}
+            className="overflow-hidden border-continuous flex-row py-[6px] px-[12px] rounded-[20px] items-center justify-center"
             layout={LinearTransition}
-            alignItems="center"
-            justifyContent="center"
             style={{
               backgroundColor: activeGroup.color || 'transparent',
               transitionProperty: 'backgroundColor',
@@ -77,16 +75,25 @@ const GroupTitleButton = () => {
             }}
           >
             <FadingText
-              color={textColor || 'default'}
-              fontSize={14}
+              className="overflow-hidden border-continuous text-[14px]"
               numberOfLines={1}
-              style={{
-                maxWidth: wp(50),
-              }}
+              style={[
+                {
+                  color:
+                    resolveThemeColor(stylingTheme, textColor || 'default') ||
+                    stylingTheme.colors.default,
+                },
+                {
+                  maxWidth: wp(50),
+                },
+              ]}
             >
               {displayName}
             </FadingText>
-            <AnimatedBox layout={LinearTransition} center>
+            <AnimatedBox
+              className="overflow-hidden border-continuous items-center justify-center"
+              layout={LinearTransition}
+            >
               <FeatherIcon
                 name="chevron-down"
                 size={16}

@@ -15,7 +15,6 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import generateUUID from '~helpers/generateUUID'
 import { useQuery } from '@tanstack/react-query'
 import { bibleChapterQueryOptions } from '~features/resources/resourceQueries'
-
 interface VerseSheetProps {
   sheetRef: React.RefObject<SheetRef | null>
   bookSelectorRef: React.RefObject<SheetRef | null>
@@ -119,6 +118,7 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
       >
         {verses?.map(verse => (
           <TouchableBox
+            className="overflow-hidden border-continuous bg-opacity5 rounded-[3px] h-[48px] items-center justify-center"
             key={String(verse.Verset)}
             accessibilityActions={[
               {
@@ -128,12 +128,6 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
             ]}
             accessibilityLabel={`${t('Verset')} ${verse.Verset}`}
             accessibilityRole="button"
-            backgroundColor="opacity5"
-            borderRadius={3}
-            w={Math.max(ITEM_WIDTH, 48)}
-            h={48}
-            alignItems="center"
-            justifyContent="center"
             onPress={() => handleSelect(verse)}
             onLongPress={() => handleLongPress(verse)}
             onAccessibilityAction={event => {
@@ -141,8 +135,10 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
                 handleLongPress(verse)
               }
             }}
+            style={{ width: Math.max(ITEM_WIDTH, 48) }}
           >
             <Box
+              className="overflow-hidden border-continuous"
               style={{
                 position: 'absolute',
                 inset: 0,
@@ -151,7 +147,7 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
                 display: 'flex',
               }}
             >
-              <Text textAlign="center">{verse.Verset}</Text>
+              <Text className="text-center">{verse.Verset}</Text>
             </Box>
           </TouchableBox>
         ))}

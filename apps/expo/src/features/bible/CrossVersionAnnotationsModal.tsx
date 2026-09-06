@@ -1,41 +1,82 @@
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { SheetHeader, type SheetRef } from '~common/sheet'
-import { MenuView, type MenuAction } from '~common/ui/MenuView'
-import styled from '@emotion/native'
-import { Sheet } from '~common/sheet'
+import * as NativeUI from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { MenuView, type MenuAction } from '~common/ui/MenuView'
+import { Chip } from '~common/ui/NewChip'
 import Text from '~common/ui/Text'
 import { getBook } from '~helpers/bibleBookCatalog'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import { VersionCode } from '~state/tabs'
-import { Chip } from '~common/ui/NewChip'
-import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import type { Theme as AppTheme } from '~themes'
 
-const ItemRow = styled.View(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  padding: 15,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
+const ItemRow = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const ItemButton = styled.TouchableOpacity({
-  flex: 1,
-  flexDirection: 'row',
-  alignItems: 'center',
-})
+  const classStyles = useResolveClassNames(
+    twMerge('flex-row items-center p-[15px] border-b-[1px] border-b-border', className)
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
-const IconContainer = styled.View(({ theme }) => ({
-  width: 36,
-  height: 36,
-  borderRadius: 12,
-  backgroundColor: theme.colors.lightGrey,
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginRight: 12,
-}))
+const ItemButton = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('flex-[1] flex-row items-center', className))
+  return (
+    <NativeUI.TouchableOpacity
+      {...props}
+      style={
+        [classStyles, {}, props.style] as UIComponentProps<
+          typeof NativeUI.TouchableOpacity
+        >['style']
+      }
+    />
+  )
+}
+
+const IconContainer = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'w-[36px] h-[36px] rounded-[12px] bg-light-grey items-center justify-center mr-[12px]',
+      className
+    )
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
 interface CrossVersionAnnotationsModalProps {
   sheetRef: React.RefObject<SheetRef | null>
@@ -135,9 +176,9 @@ const CrossVersionAnnotationsModal = ({
             <IconContainer>
               <FeatherIcon name="edit-3" size={18} color="secondary" />
             </IconContainer>
-            <Box flex>
-              <HStack gap={10} alignItems="center">
-                <Text fontSize={14} fontWeight="600">
+            <Box className="overflow-hidden border-continuous flex-[1]">
+              <HStack className="overflow-hidden border-continuous gap-[10px] items-center">
+                <Text className="text-[14px] font-semibold">
                   {t('bible.crossVersionAnnotations.annotationCount', {
                     count: versionData.count,
                   })}
@@ -159,7 +200,7 @@ const CrossVersionAnnotationsModal = ({
               }
             }}
           >
-            <Box center width={40} height={40} marginLeft={8}>
+            <Box className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px] ml-[8px]">
               <FeatherIcon name="more-vertical" size={18} color="tertiary" />
             </Box>
           </MenuView>

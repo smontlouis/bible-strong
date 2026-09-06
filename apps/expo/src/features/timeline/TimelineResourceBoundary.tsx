@@ -2,7 +2,6 @@ import { createContext, useContext, type ReactNode } from 'react'
 import { useAtomValue } from 'jotai/react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-
 import Loading from '~common/Loading'
 import Header from '~common/Header'
 import Box from '~common/ui/Box'
@@ -20,7 +19,6 @@ import {
   resourceFailureFromAccessError,
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
-
 const TimelineDetailsContext = createContext<TimelineEventSummary[]>([])
 
 export const useTimelineDetails = () => useContext(TimelineDetailsContext)
@@ -53,7 +51,7 @@ const TimelineResourceBoundary = ({
 
   if (query.isPending) {
     return (
-      <Box flex center>
+      <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
         <Loading message={t('Chargement...')} />
       </Box>
     )
@@ -61,7 +59,7 @@ const TimelineResourceBoundary = ({
 
   if (query.isError || !query.data || query.data.status === 'unavailable') {
     return (
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <Header
           hasBackButton={hasBackButton}
           title={t('La Chronologie biblique')}

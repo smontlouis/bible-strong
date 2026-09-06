@@ -16,7 +16,6 @@ import DetailsModal from '../PlanScreen/DetailsModal'
 import { useFireStorage } from '../plan.hooks'
 import type { OnlinePlan } from '~common/types'
 import type { AppDispatch } from '~redux/store'
-
 type ExplorePlanItemProps = OnlinePlan & {
   featured?: boolean
 }
@@ -45,21 +44,23 @@ const ExplorePlanItem = ({
   const featuredHeight = r([150, 150, 250, 250])
 
   return (
-    <Box width={featured ? '100%' : '50%'}>
+    <Box className="overflow-hidden border-continuous" style={{ width: featured ? '100%' : '50%' }}>
       <Link onPress={() => modalRef?.current?.present()}>
         <Box
-          bg="reverse"
-          lightShadow
-          borderRadius={20}
-          margin={10}
-          opacity={hasAlreadyStarted ? 0.5 : 1}
+          className="overflow-hidden border-continuous bg-reverse rounded-[20px] m-[10px]"
+          style={{
+            opacity: hasAlreadyStarted ? 0.5 : 1,
+            shadowColor: 'rgb(89,131,240)',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 7,
+            elevation: 1,
+            overflow: 'visible',
+          }}
         >
           <Box
-            margin={10}
-            marginBottom={0}
-            height={featured ? featuredHeight : height}
-            backgroundColor="lightGrey"
-            borderRadius={15}
+            className="overflow-hidden border-continuous m-[10px] mb-[0px] bg-light-grey rounded-[15px]"
+            style={{ height: featured ? featuredHeight : height }}
           >
             <Image
               style={{
@@ -71,16 +72,15 @@ const ExplorePlanItem = ({
               }}
             />
           </Box>
-          <Box paddingHorizontal={15} paddingTop={7} paddingBottom={10}>
+          <Box className="overflow-hidden border-continuous px-[15px] pt-[7px] pb-[10px]">
             <Paragraph scale={-2} fontFamily="title" scaleLineHeight={-2}>
               {title}
             </Paragraph>
 
             {type && (
               <Paragraph
-                marginTop={5}
+                className="mt-[5px] text-grey"
                 scale={-4}
-                color="grey"
                 fontFamily="text"
                 scaleLineHeight={-2}
               >

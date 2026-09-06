@@ -3,7 +3,6 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
 import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-
 import Box from '~common/ui/Box'
 import FlatList from '~common/ui/FlatList'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
@@ -12,7 +11,6 @@ import Loading from '~common/Loading'
 import Text from '~common/ui/Text'
 import ConcordanceVerse from './ConcordanceVerse'
 import { FeatherIcon } from '~common/ui/Icon'
-
 import { getBook } from '~helpers/bibleBookCatalog'
 import truncate from '~helpers/truncate'
 import { toast } from '~helpers/toast'
@@ -27,7 +25,6 @@ import type { RootState } from '~redux/modules/reducer'
 import type { StrongBibleProvenance } from '~features/resources/strongBibleResourceAccess'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-
 const PAGE_SIZE = 50
 
 const ConcordanceByBook = () => {
@@ -118,14 +115,14 @@ const ConcordanceByBook = () => {
               if (nativeEvent.event === 'language') toggleStrongLanguage()
             }}
           >
-            <Box row center height={60} width={60}>
+            <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
               <FeatherIcon name="more-vertical" size={18} />
             </Box>
           </MenuView>
         }
       />
       {!verses.length && isLoading && (
-        <Box flex>
+        <Box className="overflow-hidden border-continuous flex-[1]">
           <Loading />
         </Box>
       )}
@@ -141,13 +138,13 @@ const ConcordanceByBook = () => {
           }}
           onEndReachedThreshold={0.5}
           ListEmptyComponent={
-            <Box py={40} px={20} center>
-              <Text color="grey">{t('Aucune occurrence disponible.')}</Text>
+            <Box className="overflow-hidden border-continuous py-[40px] px-[20px] items-center justify-center">
+              <Text className="text-grey">{t('Aucune occurrence disponible.')}</Text>
             </Box>
           }
           ListFooterComponent={
             isLoading && verses.length ? (
-              <Box height={72}>
+              <Box className="overflow-hidden border-continuous h-[72px]">
                 <Loading />
               </Box>
             ) : null

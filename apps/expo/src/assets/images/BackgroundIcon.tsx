@@ -1,8 +1,7 @@
 import React from 'react'
 import Svg, { SvgProps, G, Polygon, Rect, Path, Polyline, Line } from 'react-native-svg'
-import { withTheme } from '@emotion/react'
+import { withTheme } from '~themes/ThemeProvider'
 import { Theme } from '~themes'
-
 interface BackgroundIconProps extends SvgProps {
   color?: string
   theme?: Theme

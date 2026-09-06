@@ -3,7 +3,6 @@ import React, { useState, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { type SheetRef } from '~common/sheet'
-
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
@@ -19,7 +18,6 @@ import BookmarkModal from './BookmarkModal'
 import books from '~assets/bible_versions/books-desc'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-
 const getBookName = (bookNumber: number): string => {
   const bookData = books.find(b => b.Numero === bookNumber)
   return bookData?.Nom || `Livre ${bookNumber}`
@@ -45,16 +43,16 @@ const BookmarkItem = ({ item, onEdit, onNavigate }: BookmarkItemProps) => {
   const reference = formatReference(item)
 
   return (
-    <Box>
-      <Box row py={10} pl={20} pr={0} alignItems="center">
+    <Box className="overflow-hidden border-continuous">
+      <Box className="overflow-hidden border-continuous flex-row py-[10px] pl-[20px] pr-[0px] items-center">
         <Link onPress={() => onNavigate(item)} style={{ flex: 1 }}>
-          <Box row alignItems="center">
+          <Box className="overflow-hidden border-continuous flex-row items-center">
             <IonIcon name="bookmark" size={20} color={item.color} />
-            <VStack gap={4} flex ml={10}>
-              <Text bold numberOfLines={1}>
+            <VStack className="overflow-hidden border-continuous gap-[4px] flex-[1] ml-[10px]">
+              <Text className="font-bold" numberOfLines={1}>
                 {item.name}
               </Text>
-              <Text fontSize={14}>{reference}</Text>
+              <Text className="text-[14px]">{reference}</Text>
             </VStack>
           </Box>
         </Link>
@@ -62,7 +60,7 @@ const BookmarkItem = ({ item, onEdit, onNavigate }: BookmarkItemProps) => {
           <FeatherIcon name="more-vertical" size={20} />
         </Link>
       </Box>
-      <Border marginHorizontal={20} />
+      <Border className="mx-[20px]" />
     </Box>
   )
 }
@@ -105,7 +103,7 @@ const BookmarksScreen = ({ isFormSheet = false }: BookmarksScreenProps) => {
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <Header hasBackButton={hasBackButton} title={t('Marque-pages')} />
         {bookmarks.length > 0 ? (
           <FlatList

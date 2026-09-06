@@ -1,20 +1,53 @@
-import React from 'react'
-import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import * as NativeUI from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
+import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { useTranslation } from 'react-i18next'
 
-const IconButton = styled.TouchableOpacity({
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexDirection: 'row',
-})
+const IconButton = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
-}))
+  const classStyles = useResolveClassNames(
+    twMerge('items-center justify-center flex-row', className)
+  )
+  return (
+    <NativeUI.TouchableOpacity
+      {...props}
+      style={
+        [classStyles, {}, props.style] as UIComponentProps<
+          typeof NativeUI.TouchableOpacity
+        >['style']
+      }
+    />
+  )
+}
+
+const FeatherIcon = (
+  componentProps: Omit<UIComponentProps<typeof Icon.Feather>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('text-default', className))
+  return (
+    <Icon.Feather
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.Feather>['style']}
+    />
+  )
+}
 
 type BibleVerseDetailFooterProps = {
   verseNumber: number | string
@@ -35,21 +68,17 @@ const BibleVerseDetailFooter = ({
   const currentVerseNumber = Number(verseNumber)
 
   return (
-    <Box row paddingLeft={20} paddingRight={20} mb={20}>
+    <Box className="overflow-hidden border-continuous flex-row pl-[20px] pr-[20px] mb-[20px]">
       {currentVerseNumber !== 1 && (
         <IconButton activeOpacity={0.5} onPress={() => goToPrevVerse(versesInCurrentChapter)}>
           <FeatherIcon name="arrow-left-circle" size={16} />
-          <Text fontSize={12} paddingLeft={10} color="darkGrey">
-            {t('Verset précédent')}
-          </Text>
+          <Text className="text-[12px] pl-[10px] text-dark-grey">{t('Verset précédent')}</Text>
         </IconButton>
       )}
-      <Box flex />
+      <Box className="overflow-hidden border-continuous flex-[1]" />
       {currentVerseNumber !== versesInCurrentChapter && (
         <IconButton activeOpacity={0.5} onPress={() => goToNextVerse(versesInCurrentChapter)}>
-          <Text fontSize={12} paddingRight={10} color="darkGrey">
-            {t('Verset suivant')}
-          </Text>
+          <Text className="text-[12px] pr-[10px] text-dark-grey">{t('Verset suivant')}</Text>
           <FeatherIcon name="arrow-right-circle" size={16} />
         </IconButton>
       )}

@@ -1,4 +1,5 @@
-import { useTheme } from '@emotion/react'
+import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import type { TFunction } from 'i18next'
 import { type ComponentProps, useEffect } from 'react'
@@ -16,7 +17,6 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated'
-
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../OnboardingStage'
@@ -27,7 +27,6 @@ import { Scene } from '../SceneGraph'
 import VerseCard, { type HighlightColor } from '../VerseCard'
 import { AbelSourceCard, HevelSourceCard } from './GenesisSourceCard'
 import NoteCard from './NoteCard'
-
 const SOURCE_ENTER_START = 220
 const SOURCE_STAGGER = 120
 const NOTE_TYPING_DELAY = SOURCE_ENTER_START + SOURCE_STAGGER * 2 + 240
@@ -123,27 +122,31 @@ type RelationChipProps = {
   onPress: () => void
 }
 
-const RelationChip = ({ label, metrics, onPress }: RelationChipProps) => (
-  <Pressable
-    accessibilityRole="button"
-    accessibilityLabel={label}
-    onPress={onPress}
-    style={({ pressed }) => ({ opacity: pressed ? 0.68 : 1 })}
-  >
-    <Box
-      height={metrics.s(20)}
-      borderRadius={metrics.s(10)}
-      px={metrics.s(11)}
-      center
-      bg="lightPrimary"
-      bgOpacity="050"
+const RelationChip = ({ label, metrics, onPress }: RelationChipProps) => {
+  const stylingTheme = useStylingTheme()
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={({ pressed }) => ({ opacity: pressed ? 0.68 : 1 })}
     >
-      <Text color="primary" bold fontSize={metrics.s(8.5)}>
-        {label}
-      </Text>
-    </Box>
-  </Pressable>
-)
+      <Box
+        className="overflow-hidden border-continuous items-center justify-center"
+        style={{
+          paddingHorizontal: metrics.s(11),
+          height: metrics.s(20),
+          borderRadius: metrics.s(10),
+          backgroundColor: colorWithOpacity(resolveThemeColor(stylingTheme, 'lightPrimary'), 0.5),
+        }}
+      >
+        <Text className="text-primary font-bold" style={{ fontSize: metrics.s(8.5) || 16 }}>
+          {label}
+        </Text>
+      </Box>
+    </Pressable>
+  )
+}
 
 type QuestionNoteProps = SceneFiveElementProps & {
   onAbelPress: () => void
@@ -170,14 +173,23 @@ const QuestionNoteContent = ({
         reduceMotion={reduceMotion}
         text={t('onboarding.abel.sceneFive.noteQuestion')}
       />
-      <Box width={s(32)} height={s(2)} borderRadius={s(1)} bg="#FF6B6B" mt={s(13)} />
-      <HStack mt={s(10)} alignItems="center" gap={s(5)}>
+      <Box
+        className="overflow-hidden border-continuous bg-[#FF6B6B]"
+        style={{ marginTop: s(13), width: s(32), height: s(2), borderRadius: s(1) }}
+      />
+      <HStack
+        className="overflow-hidden border-continuous items-center"
+        style={{ marginTop: s(10), gap: s(5) }}
+      >
         <Feather name="git-merge" size={s(10)} color={theme.colors.tertiary} />
-        <Text color="tertiary" bold fontSize={s(8)} style={{ letterSpacing: s(0.7) }}>
+        <Text
+          className="text-tertiary font-bold"
+          style={[{ fontSize: s(8) || 16 }, { letterSpacing: s(0.7) }]}
+        >
           {t('onboarding.abel.sceneFive.relations')}
         </Text>
       </HStack>
-      <HStack mt={s(7)} gap={s(6)}>
+      <HStack className="overflow-hidden border-continuous" style={{ marginTop: s(7), gap: s(6) }}>
         <RelationChip
           label={t('onboarding.abel.sceneFive.genesisChip')}
           metrics={metrics}

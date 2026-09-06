@@ -16,7 +16,6 @@ import { publishStudy, Study } from '~redux/modules/user'
 import type { AppDispatch } from '~redux/store'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { remoteQueryOptions } from '~helpers/queryOptions'
-
 interface Props {
   study: Study
   onClosed: () => void
@@ -153,62 +152,54 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
     <>
       {study.published ? (
         <>
-          <Box p={20}>
+          <Box className="overflow-hidden border-continuous p-[20px]">
             {status === 'Pending' && (
-              <Box row alignItems="center" py={10}>
+              <Box className="overflow-hidden border-continuous flex-row items-center py-[10px]">
                 <ActivityIndicator size={20} />
-                <Text ml={20}>{t('Chargement')}</Text>
+                <Text className="ml-[20px]">{t('Chargement')}</Text>
               </Box>
             )}
             {status === 'Resolved' && (
               <>
                 {data === 200 ? (
                   <LinkBox
-                    row
-                    alignItems="center"
-                    py={10}
+                    className="py-[10px] items-center flex-row"
                     onPress={() => dispatch(publishStudy(study.id, false))}
                   >
                     <FeatherIcon name="link-2" color="success" size={20} />
-                    <Text ml={20}>{t("Dépublier l'étude")}</Text>
+                    <Text className="ml-[20px]">{t("Dépublier l'étude")}</Text>
                   </LinkBox>
                 ) : (
-                  <Box row alignItems="center" py={10}>
+                  <Box className="overflow-hidden border-continuous flex-row items-center py-[10px]">
                     <FeatherIcon name="link-2" color="secondary" size={20} />
-                    <Text color="grey" ml={20}>
-                      {t('Publication en cours...')}
-                    </Text>
+                    <Text className="text-grey ml-[20px]">{t('Publication en cours...')}</Text>
                   </Box>
                 )}
               </>
             )}
             {status === 'Rejected' && (
-              <Box row alignItems="center" py={10}>
+              <Box className="overflow-hidden border-continuous flex-row items-center py-[10px]">
                 <FeatherIcon name="link-2" color="quart" size={20} />
-                <Text ml={20}>{t('Impossible de vérifier le lien')}</Text>
+                <Text className="ml-[20px]">{t('Impossible de vérifier le lien')}</Text>
               </Box>
             )}
 
-            <LinkBox row alignItems="center" py={10} href={url}>
+            <LinkBox className="py-[10px] items-center flex-row" href={url}>
               <FeatherIcon name="external-link" size={20} />
-              <Text ml={20}>{t('Ouvrir le lien')}</Text>
+              <Text className="ml-[20px]">{t('Ouvrir le lien')}</Text>
             </LinkBox>
             <LinkBox
-              row
-              alignItems="center"
-              py={10}
+              className="py-[10px] items-center flex-row"
               onPress={() => {
                 copyToClipboard(url)
                 onClosed()
               }}
             >
               <FeatherIcon name="copy" size={20} />
-              <Text ml={20}>{t('Copier le lien')}</Text>
+              <Text className="ml-[20px]">{t('Copier le lien')}</Text>
             </LinkBox>
             <LinkBox
-              row
-              alignItems="center"
-              py={10}
+              className="py-[10px] items-center flex-row"
               onPress={async () => {
                 const result = await shareVerse(study.title, study.user.displayName, url)
                 if (result.action === Share.sharedAction) {
@@ -217,30 +208,33 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
               }}
             >
               <FeatherIcon name="share-2" size={20} />
-              <Text ml={20}>{t('Partager')}</Text>
+              <Text className="ml-[20px]">{t('Partager')}</Text>
             </LinkBox>
             {Platform.OS !== 'web' && (pdfStatus === 'Idle' || pdfStatus === 'Rejected') && (
-              <LinkBox row alignItems="center" py={10} onPress={() => exportPDF()}>
+              <LinkBox className="py-[10px] items-center flex-row" onPress={() => exportPDF()}>
                 <MaterialIcon name="picture-as-pdf" size={20} />
                 {pdfStatus === 'Idle' ? (
-                  <Text ml={20}>{t('Exporter en pdf')}</Text>
+                  <Text className="ml-[20px]">{t('Exporter en pdf')}</Text>
                 ) : (
-                  <Text color="quart" ml={20}>
+                  <Text className="text-quart ml-[20px]">
                     {t("Une erreur s'est produite. Réessayer ?")}
                   </Text>
                 )}
               </LinkBox>
             )}
             {pdfStatus === 'Pending' && (
-              <Box disabled row alignItems="center" py={10}>
+              <Box
+                className="overflow-hidden border-continuous flex-row items-center py-[10px]"
+                style={{ opacity: 0.6 }}
+              >
                 <ActivityIndicator size={20} />
-                <Text ml={20}>{t('Génération du pdf...')}</Text>
+                <Text className="ml-[20px]">{t('Génération du pdf...')}</Text>
               </Box>
             )}
             {pdfStatus === 'Resolved' && (
-              <Box row alignItems="center" py={10}>
+              <Box className="overflow-hidden border-continuous flex-row items-center py-[10px]">
                 <MaterialIcon name="picture-as-pdf" size={20} />
-                <Text ml={20}>{t('Ouverture du fichier...')}</Text>
+                <Text className="ml-[20px]">{t('Ouverture du fichier...')}</Text>
               </Box>
             )}
           </Box>
@@ -248,8 +242,13 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
         </>
       ) : (
         <>
-          <Box p={20}>
-            <LinkBox row alignItems="center" onPress={onPublishStudy} disabled={!isConnected}>
+          <Box className="overflow-hidden border-continuous p-[20px]">
+            <LinkBox
+              className="items-center flex-row"
+              onPress={onPublishStudy}
+              disabled={!isConnected}
+              style={[{ opacity: !isConnected ? 0.6 : 1 }, [{ opacity: !isConnected ? 0.6 : 1 }]]}
+            >
               <Text>{t("Publier l'étude")}</Text>
             </LinkBox>
           </Box>

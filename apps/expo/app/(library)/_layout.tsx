@@ -1,6 +1,5 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { Stack } from 'expo-router'
-
 const LibraryLayout = () => {
   const theme = useTheme()
 

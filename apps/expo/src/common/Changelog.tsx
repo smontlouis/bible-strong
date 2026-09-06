@@ -1,24 +1,28 @@
-import React, { useRef, useEffect } from 'react'
-import { Platform } from 'react-native'
-import { Sheet, SheetScrollView, type SheetRef, SheetHeader } from '~common/sheet'
 import distanceInWords from 'date-fns/formatDistance'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { useEffect, useRef } from 'react'
+import * as NativeUI from 'react-native'
+import { Platform } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
+import type { Theme as AppTheme } from '~themes'
 
-import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { useAtom, useAtomValue } from 'jotai/react'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 
+import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { logTypes } from '~helpers/changelog'
-import { saveAllLogsAsSeen } from '~redux/modules/user'
-import { useTranslation } from 'react-i18next'
-import useLanguage from '~helpers/useLanguage'
-import { getDateLocale } from '~helpers/languageUtils'
-import styled from '@emotion/native'
-import { RootState } from '~redux/modules/reducer'
-import { ChangelogItem, LogType } from './types'
-import { changelogModalAtom } from '~state/app'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
+import { logTypes } from '~helpers/changelog'
+import { getDateLocale } from '~helpers/languageUtils'
+import useLanguage from '~helpers/useLanguage'
 import { useMountTime } from '~helpers/useMountTime'
+import { RootState } from '~redux/modules/reducer'
+import { saveAllLogsAsSeen } from '~redux/modules/user'
+import { changelogModalAtom } from '~state/app'
+import { ChangelogItem, LogType } from './types'
 
 const getTagColor = (type: LogType) => {
   switch (type) {
@@ -39,12 +43,25 @@ const getTagColor = (type: LogType) => {
   }
 }
 
-export const ChangelogTag = styled.View(({ type }: { type: LogType }) => ({
-  marginLeft: 10,
-  padding: 3,
-  backgroundColor: getTagColor(type),
-  borderRadius: 3,
-}))
+export const ChangelogTag = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, keyof { type: LogType } | 'theme'> &
+    Omit<{ type: LogType }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const { type } = props
+  const classStyles = useResolveClassNames(twMerge('ml-[10px] p-[3px] rounded-[3px]', className))
+  return (
+    <NativeUI.View
+      {...props}
+      style={
+        [classStyles, { backgroundColor: getTagColor(type) }, props.style] as UIComponentProps<
+          typeof NativeUI.View
+        >['style']
+      }
+    />
+  )
+}
 
 const hasNewLogs = (seenLogs: string[], changelog: ChangelogItem[]) => {
   if (!changelog.length) {
@@ -122,27 +139,25 @@ const Changelog = () => {
       onDismiss={handleDismiss}
     >
       <SheetScrollView>
-        <Box px={20}>
+        <Box className="overflow-hidden border-continuous px-[20px]">
           {visibleLogs.map(log => {
             const formattedDate = distanceInWords(Number(log.date), mountTime, {
               locale: getDateLocale(lang),
             })
             return (
-              <Box key={log.date} marginTop={10} marginBottom={10}>
-                <Box row alignItems="flex-start">
-                  <Text fontSize={16} bold flex>
+              <Box className="overflow-hidden border-continuous mt-[10px] mb-[10px]" key={log.date}>
+                <Box className="overflow-hidden border-continuous flex-row items-start">
+                  <Text className="text-[16px] font-bold flex-[1]">
                     {getAttribute(log, 'title')}
                   </Text>
                   <ChangelogTag type={log.type}>
-                    <Text fontSize={11} bold color="reverse">
-                      {log.type}
-                    </Text>
+                    <Text className="text-[11px] font-bold text-reverse">{log.type}</Text>
                   </ChangelogTag>
                 </Box>
-                <Text fontSize={10} color="grey">
+                <Text className="text-[10px] text-grey">
                   {t('Il y a {{formattedDate}}', { formattedDate })}
                 </Text>
-                <Text marginTop={10}>{getAttribute(log, 'description')}</Text>
+                <Text className="mt-[10px]">{getAttribute(log, 'description')}</Text>
               </Box>
             )
           })}

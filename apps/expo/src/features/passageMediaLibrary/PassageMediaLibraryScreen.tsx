@@ -1,8 +1,9 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { pageContentStyle } from '~common/ui/PageContent'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { SectionList, useWindowDimensions } from 'react-native'
-
 import Header from '~common/Header'
 import Box, { SafeAreaBox, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -12,7 +13,6 @@ import {
 } from '~features/bible/passageMedia'
 import useLanguage from '~helpers/useLanguage'
 import PassageMediaLibraryCard from './PassageMediaLibraryCard'
-
 // Editorial order of the 19 episodes published in BibleProject's
 // "How to Read the Bible" collection.
 const HOW_TO_READ_THE_BIBLE_WORK_IDS = [
@@ -56,6 +56,8 @@ const getHowToReadTheBibleEpisodes = (items: ResolvedPassageMediaLibraryItem[]) 
     )
 
 const PassageMediaLibraryScreen = () => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const router = useRouter()
   const language = useLanguage()
@@ -80,7 +82,7 @@ const PassageMediaLibraryScreen = () => {
   }
 
   return (
-    <SafeAreaBox bg="reverse">
+    <SafeAreaBox className="overflow-hidden border-continuous bg-reverse">
       <Header hasBackButton background title={t('passageMediaLibrary.title')} />
       <SectionList
         sections={sections}
@@ -100,18 +102,27 @@ const PassageMediaLibraryScreen = () => {
           },
         ]}
         ListHeaderComponent={
-          <VStack mb={22} gap={5}>
-            <Text title fontSize={25} lineHeight={31}>
+          <VStack className="overflow-hidden border-continuous mb-[22px] gap-[5px]">
+            <Text
+              className="text-[25px] leading-[31px]"
+              style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+            >
               {t('passageMediaLibrary.heading')}
             </Text>
-            <Text text color="grey" fontSize={15} lineHeight={21}>
+            <Text
+              className="text-grey text-[15px] leading-[21px]"
+              style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.text) }}
+            >
               {t('passageMediaLibrary.subtitle')}
             </Text>
           </VStack>
         }
         renderSectionHeader={({ section }) => (
-          <Box bg="reverse" pt={30} pb={20}>
-            <Text title fontSize={19}>
+          <Box className="overflow-hidden border-continuous bg-reverse pt-[30px] pb-[20px]">
+            <Text
+              className="text-[19px]"
+              style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+            >
               {section.title}
             </Text>
           </Box>
@@ -125,10 +136,8 @@ const PassageMediaLibraryScreen = () => {
           />
         )}
         ListEmptyComponent={
-          <Box py={60} center>
-            <Text color="grey" textAlign="center">
-              {t('passageMediaLibrary.empty')}
-            </Text>
+          <Box className="overflow-hidden border-continuous py-[60px] items-center justify-center">
+            <Text className="text-grey text-center">{t('passageMediaLibrary.empty')}</Text>
           </Box>
         }
       />

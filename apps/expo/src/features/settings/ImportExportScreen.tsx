@@ -21,7 +21,6 @@ import type { RootState } from '~redux/modules/reducer'
 import type { AppDispatch } from '~redux/store'
 import { tabGroupsAtom, TabGroup } from '~state/tabs'
 import { localQueryOptions } from '~helpers/queryOptions'
-
 type ExistingFileInfo = Extract<FileSystem.FileInfo, { exists: true }>
 type BackupBibleData = Omit<RootState['user']['bible'], 'changelog' | 'studies'>
 
@@ -42,22 +41,14 @@ const ImportExport = () => {
     <Container>
       <Header hasBackButton title={t('app.importexport')} />
       <ScrollView style={{ flex: 1 }}>
-        <Box mt={20} paddingHorizontal={20}>
-          <Text fontSize={20} bold>
-            {t('app.export')}
-          </Text>
-          <Text mt={10} fontSize={12}>
-            {t('app.exportDesc')}
-          </Text>
+        <Box className="overflow-hidden border-continuous mt-[20px] px-[20px]">
+          <Text className="text-[20px] font-bold">{t('app.export')}</Text>
+          <Text className="mt-[10px] text-[12px]">{t('app.exportDesc')}</Text>
           <LastSave />
         </Box>
-        <Box mt={40} paddingHorizontal={20}>
-          <Text fontSize={20} bold>
-            {t('app.import')}
-          </Text>
-          <Text mt={10} color="quart" fontSize={12}>
-            {t('app.importDesc')}
-          </Text>
+        <Box className="overflow-hidden border-continuous mt-[40px] px-[20px]">
+          <Text className="text-[20px] font-bold">{t('app.import')}</Text>
+          <Text className="mt-[10px] text-quart text-[12px]">{t('app.importDesc')}</Text>
           <ImportSave />
         </Box>
       </ScrollView>
@@ -80,14 +71,14 @@ const LastSave = () => {
   })
 
   return (
-    <Box marginTop={20}>
-      <Text bold>{t('app.lastSave')}</Text>
+    <Box className="overflow-hidden border-continuous mt-[20px]">
+      <Text className="font-bold">{t('app.lastSave')}</Text>
       {lastSave ? (
-        <Text marginTop={5} color="grey">
+        <Text className="mt-[5px] text-grey">
           {format((lastSave.modificationTime || 0) * 1000, 'dd/MM/yyyy HH:mm')}
         </Text>
       ) : (
-        <Text color="grey">{t('app.noSave')}</Text>
+        <Text className="text-grey">{t('app.noSave')}</Text>
       )}
       <ExportButton
         onSaved={file => {
@@ -176,7 +167,7 @@ const ExportButton = ({ onSaved }: { onSaved: (file: ExistingFileInfo) => void }
 
   return (
     <Button style={{ width: 130, marginTop: 20 }} reverse small onPress={sync} disabled={isSyncing}>
-      <Text fontSize={15}>{isSyncing ? 'Export...' : t('app.export')}</Text>
+      <Text className="text-[15px]">{isSyncing ? 'Export...' : t('app.export')}</Text>
     </Button>
   )
 }
@@ -211,7 +202,7 @@ const ImportSave = () => {
 
   return (
     <Button style={{ width: 130, marginTop: 20 }} reverse small onPress={importSave}>
-      <Text fontSize={15}>{t('app.import')}</Text>
+      <Text className="text-[15px]">{t('app.import')}</Text>
     </Button>
   )
 }

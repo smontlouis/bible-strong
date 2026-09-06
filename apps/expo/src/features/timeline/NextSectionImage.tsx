@@ -9,7 +9,6 @@ import { AnimatedBox } from '~common/ui/Box'
 import { wpUI } from '~helpers/utils'
 import SectionImage from './SectionImage'
 import { ShallowTimelineSection } from './types'
-
 interface Props {
   x: SharedValue<number>
   width: number
@@ -28,7 +27,7 @@ const NextSectionImage = ({ x, width, nextEvent }: Props) => {
   })
 
   return (
-    <AnimatedBox absoluteFill style={style}>
+    <AnimatedBox className="absolute left-[0px] top-[0px] right-[0px] bottom-[0px]" style={style}>
       <SectionImage direction="next" {...nextEvent} />
     </AnimatedBox>
   )

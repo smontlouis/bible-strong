@@ -1,6 +1,11 @@
-import styled from '@emotion/native'
-import React from 'react'
+import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
+import { useTheme as useStylingTheme, Theme } from '~themes/ThemeProvider'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import * as NativeUI from 'react-native'
 import { ScrollView } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
@@ -8,32 +13,56 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import ListenToStrong, { hasStrongAudio } from './ListenStrong'
 
-import { cleanParams } from '~helpers/utils'
+import { useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
-import { useRouter } from 'expo-router'
-import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
 import { StudyNavigateBibleType } from '~common/types'
-import { Theme } from '@emotion/react'
-import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
 import type {
   StrongLexiconEntry,
   StrongLexiconEntryCard,
 } from '~features/resources/strongLexiconAccess'
-import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
+import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
 import { createStrongIdentity } from '~helpers/strongIdentities'
+import { cleanParams } from '~helpers/utils'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { StrongVerseContext } from './strongResourceCardContext'
 
-const TitleBorder = styled.View(({ theme }) => ({
-  marginTop: 10,
-  width: 35,
-  height: 3,
-  backgroundColor: theme.colors.primary,
-}))
+const TitleBorder = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const ViewItem = styled.View(() => ({
-  marginTop: 15,
-}))
+  const classStyles = useResolveClassNames(
+    twMerge('mt-[10px] w-[35px] h-[3px] bg-primary', className)
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
+
+const ViewItem = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('mt-[15px]', className))
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
 const smallTextStyle = (theme: Theme) => ({
   lineHeight: 20,
@@ -58,6 +87,8 @@ type Props = {
 }
 
 const StrongCard = (props: Props) => {
+  const stylingTheme = useStylingTheme()
+
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
   const openedFromTab = useAtomValue(openedFromTabAtom)
@@ -141,48 +172,66 @@ const StrongCard = (props: Props) => {
     : strongEntry.morphology?.code
 
   return (
-    <Box flex={1}>
-      <Box mt={20} px={15} py={14} flex={1} bg="reverse" borderRadius={14} overflow="hidden">
-        <Box>
-          <HStack alignItems="flex-start" gap={10}>
+    <Box className="overflow-hidden border-continuous flex-[1]">
+      <Box className="border-continuous overflow-visible mt-[20px] px-[15px] py-[14px] flex-[1] bg-reverse rounded-[14px]">
+        <Box className="overflow-hidden border-continuous">
+          <HStack className="overflow-hidden border-continuous items-start gap-[10px]">
             <TouchableBox
-              flex
+              className="overflow-hidden border-continuous flex-[1]"
               onPress={openStrong}
               activeOpacity={0.7}
               accessibilityRole="link"
               accessibilityLabel={`${stepStrongCode} · ${Mot}`}
             >
-              <VStack gap={4}>
-                <Text color="primary" bold fontSize={12} textTransform="uppercase">
+              <VStack className="overflow-hidden border-continuous gap-[4px]">
+                <Text className="text-primary font-bold text-[12px] uppercase">
                   {stepStrongCode}
                 </Text>
 
-                <Text fontWeight="500" fontSize={16}>
-                  {Mot}
-                </Text>
+                <Text className="font-medium text-[16px]">{Mot}</Text>
 
                 {!!(Phonetique || Pronunciation || original) && (
-                  <Text color="tertiary" fontSize={12}>
+                  <Text className="text-tertiary text-[12px]">
                     {[Phonetique, Pronunciation, original].filter(Boolean).join(' · ')}
                   </Text>
                 )}
 
                 {!!morphology && (
-                  <Text color="tertiary" fontSize={11} style={{ fontFamily: 'Arial' }}>
+                  <Text className="text-tertiary text-[11px]" style={{ fontFamily: 'Arial' }}>
                     {morphology}
                   </Text>
                 )}
               </VStack>
             </TouchableBox>
             {isSelectionMode ? (
-              <Box bg="primary" bgOpacity="010" borderRadius={16} size={32} center>
+              <Box
+                className="overflow-hidden border-continuous rounded-[16px] items-center justify-center"
+                style={{
+                  backgroundColor: colorWithOpacity(
+                    resolveThemeColor(stylingTheme, 'primary'),
+                    0.1
+                  ),
+                  width: 32,
+                  height: 32,
+                }}
+              >
                 <FeatherIcon name="share" size={17} color="primary" />
               </Box>
             ) : hasStrongAudio(
                 strongEntry.language === 'hebrew' ? 'hebreu' : 'grec',
                 strongEntry.baseCode
               ) ? (
-              <Box bg="primary" bgOpacity="010" borderRadius={16} size={32} center>
+              <Box
+                className="overflow-hidden border-continuous rounded-[16px] items-center justify-center"
+                style={{
+                  backgroundColor: colorWithOpacity(
+                    resolveThemeColor(stylingTheme, 'primary'),
+                    0.1
+                  ),
+                  width: 32,
+                  height: 32,
+                }}
+              >
                 <ListenToStrong
                   type={strongEntry.language === 'hebrew' ? 'hebreu' : 'grec'}
                   code={strongEntry.baseCode}

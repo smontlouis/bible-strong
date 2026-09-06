@@ -1,12 +1,12 @@
-import { TouchableOpacity } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
 
+import { TouchableOpacity } from 'react-native'
 import Box from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { Props } from './VersionSelectorItem'
-
 const VersionSelectorItem = ({
   version,
   isSelected,
@@ -32,36 +32,33 @@ const VersionSelectorItem = ({
       onPress={() => onChange?.(version.id)}
     >
       <Box
-        minHeight={72}
-        row
-        alignItems="center"
-        px={20}
-        py={12}
-        opacity={available ? 1 : 0.42}
-        borderBottomWidth={1}
-        borderColor="border"
-        borderLeftWidth={isSelected ? 3 : 0}
-        borderLeftColor="primary"
+        className="border-continuous overflow-hidden min-h-[72px] flex-row items-center px-[20px] py-[12px] border-b-[1px] border-border"
+        style={{ borderLeftWidth: isSelected ? 3 : 0, opacity: available ? 1 : 0.42 }}
       >
         {showSelectionCheckbox && (
-          <Box width={42} center>
+          <Box className="overflow-hidden border-continuous w-[42px] items-center justify-center">
             <Checkbox checked={Boolean(isSelected)} variant="icon" size={22} />
           </Box>
         )}
-        <Box flex>
-          <Text color={isSelected ? 'primary' : 'default'} fontSize={12} opacity={0.5} bold>
+        <Box className="overflow-hidden border-continuous flex-[1]">
+          <Text
+            className={twMerge(
+              isSelected ? 'text-primary' : 'text-default',
+              'text-[12px] opacity-[0.5] font-bold'
+            )}
+          >
             {version.id}
           </Text>
-          <Text color={isSelected ? 'primary' : 'default'} fontSize={16}>
+          <Text className={twMerge(isSelected ? 'text-primary' : 'text-default', 'text-[16px]')}>
             {version.displayName || version.name}
           </Text>
           {version.c ? (
-            <Text color="tertiary" fontSize={10} numberOfLines={1}>
+            <Text className="text-tertiary text-[10px]" numberOfLines={1}>
               {version.c}
             </Text>
           ) : null}
         </Box>
-        <Box width={42} center>
+        <Box className="overflow-hidden border-continuous w-[42px] items-center justify-center">
           <FeatherIcon name={available ? (isSelected ? 'check' : 'cloud') : 'slash'} size={18} />
         </Box>
       </Box>

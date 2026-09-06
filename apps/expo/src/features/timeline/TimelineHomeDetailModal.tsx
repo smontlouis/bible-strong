@@ -1,5 +1,6 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
-
 import { Sheet, type SheetRef, SheetScrollView } from '~common/sheet'
 import { Trans, useTranslation } from 'react-i18next'
 import InlineLink from '~common/InlineLink'
@@ -7,7 +8,6 @@ import Accordion from '~common/ui/Accordion'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-
 interface Props {
   modalRef: React.RefObject<SheetRef | null>
   HeaderComponent?: React.ReactNode
@@ -15,12 +15,14 @@ interface Props {
 }
 
 const TimelineHomeDetailModal = ({ modalRef }: Props) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
 
   return (
     <Sheet ref={modalRef} snapPoints={[1]}>
       <SheetScrollView>
-        <Box mt={20} p={20}>
+        <Box className="overflow-hidden border-continuous mt-[20px] p-[20px]">
           <Paragraph>
             <Trans>
               Traduction de la Chronologie biblique{' '}
@@ -33,19 +35,25 @@ const TimelineHomeDetailModal = ({ modalRef }: Props) => {
               </InlineLink>
             </Trans>
           </Paragraph>
-          <Text mt={20} fontSize={24} title>
+          <Text
+            className="mt-[20px] text-[24px]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {t('Questions fréquentes')}
           </Text>
         </Box>
-        <Box px={20}>
+        <Box className="overflow-hidden border-continuous px-[20px]">
           <Accordion
             title={
-              <Text title fontSize={18}>
+              <Text
+                className="text-[18px]"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
                 {t("Qu'est-ce que la chronologie biblique ?")}
               </Text>
             }
           >
-            <Paragraph m={20} scale={-1}>
+            <Paragraph className="m-[20px]" scale={-1}>
               {`Avec plus de 850 entrées interconnectées, la chronologie des prophéties de la Bible est un outil d'étude complet qui vous permet d'explorer chaque personnage et événement majeur de la Bible, de la création du monde aux prophéties des derniers jours. Chaque entrée de la Chronologie contient un article bref mais perspicace avec des faits intéressants sur la personne ou l'événement, ainsi que des illustrations et des références bibliques complètes et des passages pour vous aider à le trouver dans la Bible.
 
 Dans la mesure du possible, les entrées comprennent également des liens vers des personnages et des événements connexes et une présentation vidéo pour vous aider à approfondir votre compréhension de leur place dans l'histoire de la Bible.
@@ -68,12 +76,15 @@ Chacune de ces sections est divisée en périodes plus spécifiques pour facilit
           </Accordion>
           <Accordion
             title={
-              <Text title fontSize={18}>
+              <Text
+                className="text-[18px]"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
                 {t('Comment avez-vous déterminé les dates, en particulier la date de création ?')}
               </Text>
             }
           >
-            <Paragraph m={20} scale={-1}>
+            <Paragraph className="m-[20px]" scale={-1}>
               {`Nous croyons que la Bible est la Parole inspirée de Dieu, et que notre principale source pour la datation des événements et des personnes dans la chronologie de la prophétie biblique sont les généalogies de la Bible et les comparaisons d'événement à événement que l'on trouve dans d'autres sources non bibliques traditionnellement acceptées, telles que les archives historiques anciennes de Josèphe et les études modernes des théologiens et des éducateurs professionnels. Pour cette chronologie, nous nous sommes appuyés sur le texte masorétique, sur lequel sont basées les Bibles anglaises.
 
 Nous pensons que la chronologie de la prophétie biblique fournit la datation la plus précise disponible, mais de nombreuses dates sont encore sujettes à interprétation et à quelques suppositions éclairées en raison de quelques zones vagues dans l'histoire de la Bible. Comme pour tout arbre généalogique, plus on remonte dans le temps, plus les choses peuvent devenir floues.
@@ -106,12 +117,15 @@ Il y a des preuves que c'est ainsi que les Juifs ont compris ce passage. Josèph
           </Accordion>
           <Accordion
             title={
-              <Text title fontSize={18}>
+              <Text
+                className="text-[18px]"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
                 {t('Quelles sont vos principales sources pour la chronologie ?')}
               </Text>
             }
           >
-            <Paragraph m={20} scale={-1}>
+            <Paragraph className="m-[20px]" scale={-1}>
               {`${t(
                 'Voici une liste des sources utilisées, entre autres, pour créer la chronologie'
               )} :
@@ -144,12 +158,15 @@ Il y a des preuves que c'est ainsi que les Juifs ont compris ce passage. Josèph
           </Accordion>
           <Accordion
             title={
-              <Text title fontSize={18}>
+              <Text
+                className="text-[18px]"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
                 {t('Prévoyez-vous la date du retour du Christ ?')}
               </Text>
             }
           >
-            <Paragraph m={20} scale={-1}>
+            <Paragraph className="m-[20px]" scale={-1}>
               {t(
                 "Non. La Bible dit que quant au jour et à l'heure du retour du Christ, personne ne le sait. Voir Matthieu 24;50. De plus, le retour du Christ ne viendra qu'après que d'autres accomplissements prophétiques se soient produits - et nous ne savons pas non plus quand ils se produiront. L'objectif de la ligne du temps n'est pas de prédire quand exactement les événements futurs se produiront, mais plutôt de montrer la fiabilité de la Bible en tant que document historique, sa fiabilité en matière de prophétie et en tant qu'outil d'étude approfondie de la Bible."
               )}

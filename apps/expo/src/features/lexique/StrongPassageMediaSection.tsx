@@ -1,10 +1,8 @@
 import { useWindowDimensions, type LayoutChangeEvent } from 'react-native'
 import YoutubePlayer from '~helpers/react-native-youtube-iframe'
-
 import Box, { VStack } from '~common/ui/Box'
 import { type ResolvedPassageMedia } from '~features/bible/passageMedia'
 import { StrongEditorialSection } from './StrongDetailUI'
-
 type Props = {
   media: ResolvedPassageMedia[]
   title: string
@@ -18,16 +16,10 @@ const StrongPassageMediaSection = ({ media, title, onLayout }: Props) => {
 
   return (
     <StrongEditorialSection title={title} onLayout={onLayout}>
-      <VStack gap={22}>
+      <VStack className="overflow-hidden border-continuous gap-[22px]">
         {media.map(item => (
-          <VStack key={item.editionId} gap={9}>
-            <Box
-              borderRadius={12}
-              borderWidth={1}
-              borderColor="border"
-              overflow="hidden"
-              bg="lightGrey"
-            >
+          <VStack className="overflow-hidden border-continuous gap-[9px]" key={item.editionId}>
+            <Box className="border-continuous overflow-visible rounded-[12px] border-[1px] border-border bg-light-grey">
               <YoutubePlayer
                 height={playerHeight}
                 width={playerWidth}

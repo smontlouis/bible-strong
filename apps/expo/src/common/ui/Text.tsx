@@ -1,200 +1,36 @@
-import { webFontFamily } from '~helpers/webFontFamily'
-import { bindStyles } from '~helpers/styledProps'
-import styled from '@emotion/native'
-import { Theme } from '~themes'
-import { Platform, TextProps as BaseTextProps, TextStyle, ViewStyle } from 'react-native'
+import { Text as NativeText, type TextProps as NativeTextProps } from 'react-native'
 import Animated from 'react-native-reanimated'
+import { useResolveClassNames } from 'uniwind'
+import { useTheme } from '~themes/ThemeProvider'
 
-export interface TextProps extends BaseTextProps {
-  children?: React.ReactNode
-  color?: string
-  lineHeight?: number
-  fontSize?: number
-  bold?: boolean
-  textAlign?: string
-  fontWeight?: TextStyle['fontWeight']
-  position?: 'absolute' | 'relative'
-  pos?: 'absolute' | 'relative'
-  top?: number
-  t?: number
-  left?: number
-  l?: number
-  right?: number
-  r?: number
-  bottom?: number
-  b?: number
-
-  padding?: number
-  p?: number
-  paddingTop?: number
-  pt?: number
-  paddingLeft?: number
-  pl?: number
-  paddingRight?: number
-  pr?: number
-  paddingBottom?: number
-  pb?: number
-  paddingVertical?: number
-  py?: number
-  paddingHorizontal?: number
-  px?: number
-
-  margin?: number
-  m?: number
-  marginTop?: number
-  mt?: number
-  marginLeft?: number
-  ml?: number
-  marginRight?: number
-  mr?: number
-  marginBottom?: number
-  mb?: number
-  marginVertical?: number
-  my?: number
-  marginHorizontal?: number
-  mx?: number
-
-  absoluteFill?: boolean
-
-  borderWidth?: number
-  borderColor?: string
-  transform?: TextStyle['transform']
-  borderRadius?: number
-  borderTopLeftRadius?: number
-  borderTopRightRadius?: number
-  borderBottomLeftRadius?: number
-  borderBottomRightRadius?: number
-
-  overflow?: 'visible' | 'hidden'
-  width?: number
-  w?: number
-  maxWidth?: number
-  maxW?: number
-  minWidth?: number
-  minW?: number
-  minHeight?: number
-  minH?: number
-  height?: number
-  h?: number
-
-  grow?: boolean
-  shrink?: number
-  basis?: number
-  flex?: boolean | number
-  justifyContent?: string
-  center?: boolean
-  alignItems?: string
-  alignContent?: string
-  alignSelf?: string
-  wrap?: boolean
-  wrapReverse?: boolean
-  row?: boolean
-  reverse?: boolean
-  disabled?: boolean
-  opacity?: number
-
-  backgroundColor?: string
-  bg?: string
-
-  grey?: boolean
-  background?: boolean
-  rounded?: boolean
-  shadow?: boolean
-  lightShadow?: boolean
-  size?: string
-
-  theme?: Theme
-
-  title?: boolean
-  titleItalic?: boolean
-  text?: boolean
-  textTransform?: string
-  underline?: boolean
+export type TextProps = NativeTextProps & {
+  className?: string
+  ref?: React.Ref<NativeText>
 }
 
-const Text = styled.Text<TextProps>((props): TextStyle => {
-  const theme = props.theme as Theme
-  const s = bindStyles(theme)
-  const selectedFont = s.fontFamily(props as unknown as Record<string, unknown>) as
-    | string
-    | undefined
-  const backgroundColor = props.backgroundColor ?? props.bg
-
-  return {
-    fontFamily: Platform.OS === 'web' ? webFontFamily(selectedFont) : selectedFont,
-
-    color:
-      theme.colors[props.color as keyof typeof theme.colors] || props.color || theme.colors.default,
-    lineHeight: props.lineHeight,
-    fontSize: props.fontSize || 16,
-    fontWeight: props.fontWeight ?? (props.bold ? 'bold' : undefined),
-    textAlign: props.textAlign as TextStyle['textAlign'],
-
-    textTransform: props.textTransform as TextStyle['textTransform'],
-    padding: props.padding ?? props.p,
-    paddingTop: props.paddingTop ?? props.pt,
-    paddingLeft: props.paddingLeft ?? props.pl,
-    paddingRight: props.paddingRight ?? props.pr,
-    paddingBottom: props.paddingBottom ?? props.pb,
-    paddingVertical: props.paddingVertical ?? props.py,
-    paddingHorizontal: props.paddingHorizontal ?? props.px,
-
-    margin: props.margin ?? props.m,
-    marginTop: props.marginTop ?? props.mt,
-    marginLeft: props.marginLeft ?? props.ml,
-    marginBottom: props.marginBottom ?? props.mb,
-    marginRight: props.marginRight ?? props.mr,
-    marginVertical: props.marginVertical ?? props.my,
-    marginHorizontal: props.marginHorizontal ?? props.mx,
-
-    // container
-    position: props.position ?? props.pos,
-    top: props.top ?? props.t,
-    left: props.left ?? props.l,
-    right: props.right ?? props.r,
-    bottom: props.bottom ?? props.b,
-    borderWidth: props.borderWidth,
-    borderColor: theme.colors[props.borderColor as keyof typeof theme.colors] ?? props.borderColor,
-    borderRadius: props.borderRadius,
-    borderTopLeftRadius: props.borderTopLeftRadius,
-    borderTopRightRadius: props.borderTopRightRadius,
-    borderBottomLeftRadius: props.borderBottomLeftRadius,
-    borderBottomRightRadius: props.borderBottomRightRadius,
-    transform: props.transform,
-
-    overflow: props.overflow,
-    width: props.width ?? props.w,
-    maxWidth: props.maxWidth ?? props.maxW,
-    minWidth: props.minWidth ?? props.minW,
-    minHeight: props.minHeight ?? props.minH,
-    height: props.height ?? props.h,
-    // flex props
-    flexGrow: props.grow ? 1 : undefined,
-    flexShrink: props.shrink ?? 0,
-    flexBasis: props.basis ?? 'auto',
-    flex: props.flex === true ? 1 : props.flex || undefined,
-    justifyContent: props.justifyContent as ViewStyle['justifyContent'],
-    alignItems: props.alignItems as ViewStyle['alignItems'],
-    alignContent: (props.alignContent ?? 'flex-start') as ViewStyle['alignContent'],
-    alignSelf: props.alignSelf as ViewStyle['alignSelf'],
-    // shorthands
-    flexWrap: props.wrap ? 'wrap' : props.wrapReverse ? 'wrap-reverse' : 'nowrap',
-    flexDirection: `${props.row ? 'row' : 'column'}${
-      props.reverse ? '-reverse' : ''
-    }` as ViewStyle['flexDirection'],
-
-    opacity: props.disabled ? 0.3 : (props.opacity ?? 1),
-
-    backgroundColor: theme.colors[backgroundColor as keyof typeof theme.colors] || backgroundColor,
-
-    ...(props.underline && {
-      textDecorationLine: 'underline',
-      textDecorationStyle: 'solid',
-      textDecorationColor: theme.colors.default,
-    }),
-  }
-})
+/** App typography defaults; all caller styling uses className or native style. */
+const Text = ({ className, style, ...props }: TextProps) => {
+  const theme = useTheme()
+  const classStyles = useResolveClassNames(className ?? '')
+  return (
+    <NativeText
+      {...props}
+      style={[
+        {
+          color: theme.colors.default,
+          fontSize: 16,
+          flexShrink: 0,
+          flexBasis: 'auto',
+          alignContent: 'flex-start',
+          flexWrap: 'nowrap',
+          flexDirection: 'column',
+        },
+        className ? classStyles : undefined,
+        style,
+      ]}
+    />
+  )
+}
 
 export const AnimatedText = Animated.createAnimatedComponent(Text)
-
 export default Text

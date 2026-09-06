@@ -1,10 +1,8 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { FadeInUp } from 'react-native-reanimated'
-
 import Box, { AnimatedBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from './OnboardingStage'
-
 export type DecorativePlusScene = 'one' | 'two' | 'three' | 'four' | 'five' | 'six' | 'seven'
 
 type DecorativePlusTone = 'blue' | 'yellow' | 'quart'
@@ -77,20 +75,23 @@ const SceneDecorativePluses = ({ metrics, reduceMotion, scene }: SceneDecorative
   }
 
   return (
-    <Box absoluteFill pointerEvents="none" overflow="visible">
+    <Box
+      className="border-continuous overflow-visible absolute left-[0px] top-[0px] right-[0px] bottom-[0px]"
+      pointerEvents="none"
+    >
       {SCENE_DECORATIVE_PLUSES[scene].map((plus, index) => (
         <AnimatedBox
+          className="overflow-hidden border-continuous absolute"
           key={`${scene}-${index}`}
-          position="absolute"
-          left={metrics.s(plus.x)}
-          top={metrics.s(plus.y)}
           entering={reduceMotion ? undefined : FadeInUp.springify().delay(plus.delay)}
+          style={{ top: metrics.s(plus.y), left: metrics.s(plus.x) }}
         >
           <Text
-            bold
-            fontSize={metrics.s(plus.size)}
-            lineHeight={metrics.s(plus.size)}
-            style={{ color: colors[plus.tone] }}
+            className="font-bold"
+            style={[
+              { fontSize: metrics.s(plus.size) || 16, lineHeight: metrics.s(plus.size) },
+              { color: colors[plus.tone] },
+            ]}
           >
             +
           </Text>

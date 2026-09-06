@@ -1,31 +1,46 @@
-import styled from '@emotion/native'
-import { useTheme } from '@emotion/react'
-import {
-  SheetFooter,
-  Sheet,
-  SheetHeader,
-  SheetTextInput,
-  type SheetRef,
-  SheetView,
-} from '~common/sheet'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TextInput as RNTextInput } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import {
+  Sheet,
+  SheetFooter,
+  SheetHeader,
+  SheetTextInput,
+  SheetView,
+  type SheetRef,
+} from '~common/sheet'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme } from '~themes/ThemeProvider'
 import { GROUP_COLORS } from '../../../state/tabs'
 
-const StyledTextInput = styled(SheetTextInput)(({ theme }) => ({
-  color: theme.colors.default,
-  height: 48,
-  borderColor: theme.colors.border,
-  borderWidth: 2,
-  borderRadius: 10,
-  paddingHorizontal: 15,
-  fontSize: 16,
-}))
+const StyledTextInput = (
+  componentProps: Omit<UIComponentProps<typeof SheetTextInput>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'text-default h-[48px] border-border border-[2px] rounded-[10px] px-[15px] text-[16px]',
+      className
+    )
+  )
+  return (
+    <SheetTextInput
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof SheetTextInput>['style']}
+    />
+  )
+}
 
 interface EditGroupModalProps {
   sheetRef: React.RefObject<SheetRef | null>
@@ -84,8 +99,8 @@ const EditGroupModal = ({
       header={<SheetHeader title={title ?? t('tabs.editGroup')} />}
       footer={props => (
         <SheetFooter {...props}>
-          <HStack justifyContent="flex-end">
-            <Box>
+          <HStack className="justify-end">
+            <Box className="overflow-hidden border-continuous">
               <Button disabled={isDisabled} onPress={handleSave}>
                 {t('Sauvegarder')}
               </Button>
@@ -94,11 +109,9 @@ const EditGroupModal = ({
         </SheetFooter>
       )}
     >
-      <SheetView paddingHorizontal={20} py={20} gap={20}>
-        <Box gap={8}>
-          <Text color="tertiary" fontSize={13}>
-            {t('Nom')}
-          </Text>
+      <SheetView className="px-[20px] py-[20px] gap-[20px]">
+        <Box className="overflow-hidden border-continuous gap-[8px]">
+          <Text className="text-tertiary text-[13px]">{t('Nom')}</Text>
           <StyledTextInput
             ref={inputRef}
             placeholder={t('tabs.groupNamePlaceholder')}
@@ -111,26 +124,21 @@ const EditGroupModal = ({
           />
         </Box>
 
-        <Box gap={8}>
-          <Text color="tertiary" fontSize={13}>
-            {t('Couleur')}
-          </Text>
-          <HStack gap={12} alignItems="center" justifyContent="space-between">
+        <Box className="overflow-hidden border-continuous gap-[8px]">
+          <Text className="text-tertiary text-[13px]">{t('Couleur')}</Text>
+          <HStack className="gap-[12px] items-center justify-between">
             {GROUP_COLORS.map((color, index) => (
               <TouchableBox
+                className="overflow-hidden border-continuous w-[32px] h-[32px] rounded-[16px] items-center justify-center"
                 key={color}
                 onPress={() => setSelectedColor(color)}
                 accessibilityRole="radio"
                 accessibilityLabel={t('accessibility.colorOption', { index: index + 1 })}
                 accessibilityState={{ checked: selectedColor === color }}
-                width={32}
-                height={32}
-                borderRadius={16}
-                center
                 style={{ backgroundColor: color }}
               >
                 {selectedColor === color && (
-                  <Box width={12} height={12} borderRadius={6} bg="black" opacity={0.5} />
+                  <Box className="overflow-hidden border-continuous w-[12px] h-[12px] rounded-[6px] bg-[black] opacity-[0.5]" />
                 )}
               </TouchableBox>
             ))}

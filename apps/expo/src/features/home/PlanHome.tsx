@@ -1,4 +1,6 @@
-import { useTheme } from '@emotion/react'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
+import { twMerge } from '~common/ui/classNames'
 import { Asset } from 'expo-asset'
 import { Image } from 'expo-image'
 import React, { useEffect } from 'react'
@@ -19,8 +21,16 @@ import { addPlan } from '~redux/modules/plan'
 import { RootState } from '~redux/modules/reducer'
 import { Theme } from '~themes'
 import PlanProgressCircle from './PlanProgressCircle'
-
-const LinkBox = Box.withComponent(Link)
+const LinkBox = (props: React.ComponentProps<typeof Box> & React.ComponentProps<typeof Link>) => (
+  <Box
+    as={Link}
+    {...props}
+    className={twMerge(
+      'overflow-hidden border-continuous',
+      twMerge('overflow-hidden border-continuous', props.className)
+    )}
+  />
+)
 
 const readResponseText = async (response: Response): Promise<string> => {
   if (!response.ok) {
@@ -75,6 +85,8 @@ const useGetFirstPlans = () => {
   }, [])
 }
 const PlanHome = () => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const plans = useComputedPlanItems()
   const currentPlan = plans.find(p => p.status === 'Progress') || plans[0]
@@ -86,39 +98,51 @@ const PlanHome = () => {
   useGetFirstPlans()
 
   return (
-    <Box bg="lightGrey" px={20} pt={20}>
+    <Box className="overflow-hidden border-continuous bg-light-grey px-[20px] pt-[20px]">
       <LinkBox
+        className="p-[20px] pl-[20px] h-[80px] relative items-center bg-reverse flex-row rounded-[20px] overflow-visible"
         route="Plans"
-        rounded
-        lightShadow
-        bg="reverse"
-        row
-        p={20}
-        pl={20}
-        height={80}
-        position="relative"
-        overflow="hidden"
-        alignItems="center"
+        style={{
+          shadowColor: 'rgb(89,131,240)',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 7,
+          elevation: 1,
+          overflow: 'visible',
+        }}
       >
-        <Box center size={50} bg="lightPrimary" borderRadius={10}>
+        <Box
+          className="overflow-hidden border-continuous items-center justify-center bg-light-primary rounded-[10px]"
+          style={{ width: 50, height: 50 }}
+        >
           <PlanIcon style={{ marginTop: 5 }} color="primary" size={32} />
         </Box>
-        <Text flex title fontSize={18} color="default" ml={20}>
+        <Text
+          className="flex-[1] text-[18px] text-default ml-[20px]"
+          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+        >
           {t('Plans & Méditations')}
         </Text>
-        <Box>
+        <Box className="overflow-hidden border-continuous">
           <FeatherIcon color="default" name="chevron-right" size={20} />
         </Box>
       </LinkBox>
-      <Box rounded height={60} bg="reverse" lightShadow mt={10}>
+      <Box
+        className="overflow-hidden border-continuous rounded-[20px] h-[60px] bg-reverse mt-[10px]"
+        style={{
+          shadowColor: 'rgb(89,131,240)',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 7,
+          elevation: 1,
+          overflow: 'visible',
+        }}
+      >
         {id ? (
           <LinkBox
-            flex
-            row
-            center
+            className="px-[20px] items-center justify-center flex-row flex-[1]"
             route="Plan"
             params={{ planId: id!, plan: currentPlan! }}
-            px={20}
           >
             <PlanProgressCircle
               size={40}
@@ -127,8 +151,11 @@ const PlanHome = () => {
               unfilledColor={theme.colors.lightGrey}
               thickness={2}
             >
-              <Box style={StyleSheet.absoluteFill} center>
-                <CircleImage size={35} center>
+              <Box
+                className="overflow-hidden border-continuous items-center justify-center"
+                style={StyleSheet.absoluteFill}
+              >
+                <CircleImage className="items-center justify-center" size={35}>
                   {cacheImage && (
                     <Image
                       style={{ width: 35, height: 35 }}
@@ -140,21 +167,21 @@ const PlanHome = () => {
                 </CircleImage>
               </Box>
             </PlanProgressCircle>
-            <Box flex justifyContent="center" ml={15}>
+            <Box className="overflow-hidden border-continuous flex-[1] justify-center ml-[15px]">
               <Paragraph fontFamily="title" scale={-2} scaleLineHeight={-2}>
                 {title}
               </Paragraph>
-              <Paragraph scale={-3} scaleLineHeight={-1} fontFamily="text" color="grey">
+              <Paragraph className="text-grey" scale={-3} scaleLineHeight={-1} fontFamily="text">
                 {t('Continuer ce plan')}
               </Paragraph>
             </Box>
-            <Box>
+            <Box className="overflow-hidden border-continuous">
               <FeatherIcon color="default" name="chevron-right" size={20} />
             </Box>
           </LinkBox>
         ) : (
-          <Box flex center>
-            <Text color="grey">{t("Vous n'avez aucun plan")}</Text>
+          <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
+            <Text className="text-grey">{t("Vous n'avez aucun plan")}</Text>
           </Box>
         )}
       </Box>

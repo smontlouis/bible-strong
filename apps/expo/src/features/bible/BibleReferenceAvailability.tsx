@@ -5,19 +5,18 @@ import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Text from '~common/ui/Text'
 import verseToReference from '~helpers/verseToReference'
-
 export const BibleReferenceUnavailable = ({ verseKeys }: { verseKeys: string[] }) => {
   const router = useRouter()
   const { t } = useTranslation()
   const reference = verseToReference(verseKeys)
 
   return (
-    <Box flex>
+    <Box className="overflow-hidden border-continuous flex-[1]">
       <Empty
         source={require('~assets/images/empty.json')}
         message={`${reference}\n${t('bibleVerse.textUnavailableInstalled')}`}
       >
-        <Box mt={20}>
+        <Box className="overflow-hidden border-continuous mt-[20px]">
           <Button onPress={() => router.push('/downloads')}>
             {t('bible.error.goToDownloads')}
           </Button>
@@ -31,8 +30,8 @@ export const BiblePartialReferenceNotice = ({ verseKeys }: { verseKeys: string[]
   const { t } = useTranslation()
 
   return (
-    <Box px={16} py={10} bg="lightGrey">
-      <Text color="tertiary" fontSize={12} textAlign="center">
+    <Box className="overflow-hidden border-continuous px-[16px] py-[10px] bg-light-grey">
+      <Text className="text-tertiary text-[12px] text-center">
         {`${verseToReference(verseKeys)} — ${t('bibleVerse.textUnavailableInstalled')}`}
       </Text>
     </Box>

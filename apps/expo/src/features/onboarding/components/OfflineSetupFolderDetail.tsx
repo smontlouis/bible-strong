@@ -1,9 +1,10 @@
+import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import { useState } from 'react'
 import { Pressable, ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
@@ -17,7 +18,6 @@ import { OFFLINE_SETUP_MOTION } from '../offlineSetupMotion'
 import type { OfflineSetupPalette } from '../offlineSetupPalette'
 import { OFFLINE_SETUP_HEADER_TOP_OFFSET } from '../offlineSetupPresentation'
 import OfflineSetupResourceOption from './OfflineSetupResourceOption'
-
 type OfflineSetupFolderDetailProps = {
   contentVisible: boolean
   folderId: OfflineSetupFolderId
@@ -45,12 +45,20 @@ const OfflineSetupSectionTitle = ({
   palette: OfflineSetupPalette
   titleKey?: string
 }) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   if (!titleKey) return null
 
   if (!collapsible) {
     return (
-      <Text color={palette.description} fontSize={11} bold textTransform="uppercase" px={4}>
+      <Text
+        className="text-[11px] font-bold uppercase px-[4px]"
+        style={{
+          color:
+            resolveThemeColor(stylingTheme, palette.description) || stylingTheme.colors.default,
+        }}
+      >
         {t(titleKey)}
       </Text>
     )
@@ -65,8 +73,14 @@ const OfflineSetupSectionTitle = ({
       onPress={onToggle}
       hitSlop={8}
     >
-      <HStack alignItems="center" justifyContent="space-between" px={4} py={4}>
-        <Text color={palette.description} fontSize={11} bold textTransform="uppercase">
+      <HStack className="overflow-hidden border-continuous items-center justify-between px-[4px] py-[4px]">
+        <Text
+          className="text-[11px] font-bold uppercase"
+          style={{
+            color:
+              resolveThemeColor(stylingTheme, palette.description) || stylingTheme.colors.default,
+          }}
+        >
           {t(titleKey)}
         </Text>
         <Feather name={chevronIcon} size={17} color={palette.description} />
@@ -86,6 +100,8 @@ const OfflineSetupFolderDetail = ({
   selectedOptionIds,
   sizeManifest,
 }: OfflineSetupFolderDetailProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const selectedIds = new Set(selectedOptionIds)
@@ -102,7 +118,7 @@ const OfflineSetupFolderDetail = ({
   }
 
   return (
-    <Box flex>
+    <Box className="overflow-hidden border-continuous flex-[1]">
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 20,
@@ -124,11 +140,24 @@ const OfflineSetupFolderDetail = ({
             transitionDelay: 0,
             transitionTimingFunction: 'ease-out',
           }}
+          className="overflow-hidden border-continuous"
         >
-          <Text color={palette.title} title fontSize={34} lineHeight={38} maxWidth={280}>
+          <Text
+            className="text-[34px] leading-[38px] max-w-[280px]"
+            style={{
+              color: resolveThemeColor(stylingTheme, palette.title) || stylingTheme.colors.default,
+              fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+            }}
+          >
             {t('offlineSetup.chooseResources')}
           </Text>
-          <Text color={palette.description} fontSize={15} lineHeight={22} mt={10}>
+          <Text
+            className="text-[15px] leading-[22px] mt-[10px]"
+            style={{
+              color:
+                resolveThemeColor(stylingTheme, palette.description) || stylingTheme.colors.default,
+            }}
+          >
             {t(`offlineSetup.presets.${folderId}.description`)}
           </Text>
         </AnimatedBox>
@@ -146,8 +175,9 @@ const OfflineSetupFolderDetail = ({
               : 0,
             transitionTimingFunction: 'ease-out',
           }}
+          className="overflow-hidden border-continuous"
         >
-          <VStack gap={22} mt={28}>
+          <VStack className="overflow-hidden border-continuous gap-[22px] mt-[28px]">
             {sections.map(section => {
               const collapsed = Boolean(
                 section.collapsedByDefault && !expandedSectionIds.has(section.id)
@@ -159,7 +189,11 @@ const OfflineSetupFolderDetail = ({
                 ...(section.groups ?? []),
               ]
               return (
-                <VStack key={section.id} gap={section.groups?.length ? 16 : 8}>
+                <VStack
+                  className="overflow-hidden border-continuous"
+                  key={section.id}
+                  style={{ gap: section.groups?.length ? 16 : 8 }}
+                >
                   <OfflineSetupSectionTitle
                     collapsed={collapsed}
                     collapsible={Boolean(section.collapsedByDefault)}
@@ -168,9 +202,12 @@ const OfflineSetupFolderDetail = ({
                     titleKey={section.titleKey}
                   />
                   {!collapsed ? (
-                    <VStack gap={18}>
+                    <VStack className="overflow-hidden border-continuous gap-[18px]">
                       {optionGroups.map(group => (
-                        <VStack key={group.id} gap={8}>
+                        <VStack
+                          className="overflow-hidden border-continuous gap-[8px]"
+                          key={group.id}
+                        >
                           <OfflineSetupSectionTitle
                             collapsed={false}
                             collapsible={false}

@@ -11,7 +11,6 @@ import Text from '~common/ui/Text'
 import { wp } from '~helpers/utils'
 import { toast } from '~helpers/toast'
 import { useTranslation } from 'react-i18next'
-
 interface ImageUrls {
   small?: string
   large?: string
@@ -69,7 +68,7 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
   const renderContent = () => {
     if (!imageUrls) {
       return (
-        <Box height={100} center>
+        <Box className="overflow-hidden border-continuous h-[100px] items-center justify-center">
           <Loading />
         </Box>
       )
@@ -77,14 +76,14 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
 
     if (imageUrls.error) {
       return (
-        <Box height={100} center>
+        <Box className="overflow-hidden border-continuous h-[100px] items-center justify-center">
           <Empty message="Impossible de charger l'image..." />
         </Box>
       )
     }
 
     return (
-      <Box position="relative">
+      <Box className="overflow-hidden border-continuous relative">
         <Image
           accessibilityLabel={t('accessibility.verseImage', { reference: verseOfTheDay.v })}
           accessible
@@ -99,19 +98,12 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
           transition={300}
         />
         <LinkBox
+          className="w-[44px] h-[44px] absolute bottom-[10px] left-[10px] bg-reverse items-center justify-center rounded-[20px]"
           accessibilityLabel={t('accessibility.shareVerseImage')}
           accessibilityState={{ busy: shareIsLoading, disabled: shareIsLoading }}
           disabled={shareIsLoading}
-          position="absolute"
-          bottom={10}
-          left={10}
-          width={44}
-          height={44}
           onPress={shareImage}
-          bg="reverse"
-          center
-          rounded
-          opacity={0.6}
+          style={[{ opacity: shareIsLoading ? 0.6 : 1 }, [{ opacity: shareIsLoading ? 0.6 : 0.6 }]]}
         >
           {shareIsLoading ? (
             <ActivityIndicator accessible={false} size={14} />
@@ -119,17 +111,8 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
             <FeatherIcon name="share-2" size={16} />
           )}
         </LinkBox>
-        <Box
-          position="absolute"
-          bottom={0}
-          right={0}
-          bg="rgba(255,255,255,0.3)"
-          p={4}
-          borderRadius={4}
-        >
-          <Text fontSize={8} color="default">
-            copyright bible.com
-          </Text>
+        <Box className="overflow-hidden border-continuous absolute bottom-[0px] right-[0px] bg-[rgba(255,255,255,0.3)] p-[4px] rounded-[4px]">
+          <Text className="text-[8px] text-default">copyright bible.com</Text>
         </Box>
       </Box>
     )
@@ -138,7 +121,7 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
   return (
     <Sheet ref={modalRef}>
       <SheetView>
-        <Box center p={20}>
+        <Box className="overflow-hidden border-continuous items-center justify-center p-[20px]">
           {renderContent()}
         </Box>
       </SheetView>

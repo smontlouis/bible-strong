@@ -1,3 +1,4 @@
+import { twMerge } from '~common/ui/classNames'
 import React from 'react'
 import { Linking, TouchableOpacityProps } from 'react-native'
 import { useAtomValue } from 'jotai/react'
@@ -8,7 +9,6 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
-
 export interface AudioContainerProps {
   children: React.ReactNode
   onReduce: () => void
@@ -21,21 +21,28 @@ type ChipProps = {
   isActive?: boolean
 }
 
-const Chip = ({ children, isActive, ...props }: ChipProps & BoxProps & TouchableOpacityProps) => (
-  <TouchableBox
-    py={3}
-    px={6}
-    borderRadius={8}
-    borderWidth={1}
-    borderColor={isActive ? 'primary' : 'border'}
-    row
-    {...props}
-  >
-    <Text fontSize={10} color={isActive ? 'primary' : 'default'}>
-      {children}
-    </Text>
-  </TouchableBox>
-)
+const Chip = ({ children, isActive, ...props }: ChipProps & BoxProps & TouchableOpacityProps) => {
+  return (
+    <TouchableBox
+      {...props}
+      style={props.style}
+      className={twMerge(
+        'overflow-hidden border-continuous',
+        twMerge(
+          isActive ? 'border-primary' : 'border-border',
+          twMerge(
+            'overflow-hidden border-continuous px-[6px] py-[3px] rounded-[8px] border-[1px] flex-row',
+            props.className
+          )
+        )
+      )}
+    >
+      <Text className={twMerge(isActive ? 'text-primary' : 'text-default', 'text-[10px]')}>
+        {children}
+      </Text>
+    </TouchableBox>
+  )
+}
 
 const AudioContainer = ({ children, onReduce, audioMode, onChangeMode }: AudioContainerProps) => {
   const { t } = useTranslation()
@@ -47,24 +54,17 @@ const AudioContainer = ({ children, onReduce, audioMode, onChangeMode }: AudioCo
 
   return (
     <AnimatedBox
-      height="auto"
-      backgroundColor="reverse"
-      borderColor="border"
-      borderWidth={1}
-      paddingHorizontal={20}
-      pb={20}
-      bottom={20 + bottomBarHeight}
-      left={20}
-      right={20}
-      position="absolute"
-      borderRadius={30}
-      style={{
-        transform: [{ translateY: isFullScreenBible ? HEADER_HEIGHT : 0 }],
-        transitionProperty: 'transform',
-        transitionDuration: 300,
-      }}
+      className="overflow-hidden border-continuous h-auto bg-reverse border-border border-[1px] px-[20px] pb-[20px] left-[20px] right-[20px] absolute rounded-[30px]"
+      style={[
+        { bottom: 20 + bottomBarHeight },
+        {
+          transform: [{ translateY: isFullScreenBible ? HEADER_HEIGHT : 0 }],
+          transitionProperty: 'transform',
+          transitionDuration: 300,
+        },
+      ]}
     >
-      <HStack row pos="absolute" top={8} right={20} zIndex={10} gap={3}>
+      <HStack className="overflow-hidden border-continuous flex-row absolute top-[8px] right-[20px] z-[10] gap-[3px]">
         {!!onChangeMode && (
           <>
             <Chip
@@ -95,10 +95,10 @@ const AudioContainer = ({ children, onReduce, audioMode, onChangeMode }: AudioCo
           Audibible
         </Chip>
       </HStack>
-      <Box center mb={10}>
+      <Box className="overflow-hidden border-continuous items-center justify-center mb-[10px]">
         <TouchableBox
+          className="overflow-hidden border-continuous p-[5px]"
           onPress={onReduce}
-          padding={5}
           accessibilityRole="button"
           accessibilityLabel={t('accessibility.reduceAudioPlayer')}
         >

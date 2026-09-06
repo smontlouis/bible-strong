@@ -1,3 +1,5 @@
+import { twMerge } from '~common/ui/classNames'
+
 import type {
   CommentaryCatalogEntry,
   CommentaryLanguage,
@@ -21,7 +23,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
-
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -31,7 +32,6 @@ import {
   type CommentaryProjectionId,
 } from './commentarySelection'
 import { getAddedCommentaryProjectionIds } from './selectedCommentaryAnimations'
-
 const SLOT_WIDTH = 56
 const SLOT_GAP = 6
 const SLOT_HEIGHT = 58
@@ -136,16 +136,17 @@ const SortableCommentary = ({
             dragFeedbackStyle,
           ]}
         >
-          <Box position="relative" overflow="visible">
+          <Box className="border-continuous overflow-visible relative">
             <Box
+              className={twMerge(
+                'overflow-hidden border-continuous',
+                twMerge(
+                  isDragging ? 'border-primary' : 'border-[transparent]',
+                  'overflow-hidden border-continuous absolute top-[-3px] left-[-3px] rounded-[22px] border-[2px]'
+                )
+              )}
               pointerEvents="none"
-              position="absolute"
-              top={-3}
-              left={-3}
-              size={44}
-              borderRadius={22}
-              borderWidth={2}
-              borderColor={isDragging ? 'primary' : 'transparent'}
+              style={{ width: 44, height: 44 }}
             />
             <CommentaryAvatar
               resourceCode={`${item.entry.publicationId}:${item.language}`}
@@ -170,18 +171,18 @@ const SortableCommentary = ({
               })}
             >
               <Box
-                size={18}
-                borderRadius={10}
-                center
-                bg="reverse"
-                borderWidth={1}
-                borderColor="border"
+                className="border-continuous overflow-hidden rounded-[10px] items-center justify-center bg-reverse border-[1px] border-border"
+                style={{ width: 18, height: 18 }}
               >
                 <FeatherIcon name="x" size={12} color="tertiary" />
               </Box>
             </Pressable>
           </Box>
-          <Text mt={5} fontSize={10} numberOfLines={1} textAlign="center" width={SLOT_WIDTH}>
+          <Text
+            className="mt-[5px] text-[10px] text-center"
+            numberOfLines={1}
+            style={{ width: SLOT_WIDTH }}
+          >
             {item.entry.shortName}
           </Text>
         </Animated.View>
@@ -269,17 +270,16 @@ const SelectedCommentariesHeader = ({ items, max, onRemove, onMove, onReorder }:
   )
 
   return (
-    <Box
-      position="relative"
-      py={10}
-      px={16}
-      bg="reverse"
-      borderBottomWidth={1}
-      borderColor="border"
-    >
-      <Box row gap={SLOT_GAP} alignItems="flex-start" minHeight={SLOT_HEIGHT}>
+    <Box className="border-continuous overflow-hidden relative py-[10px] px-[16px] bg-reverse border-b-[1px] border-border">
+      <Box
+        className="overflow-hidden border-continuous flex-row items-start"
+        style={{ minHeight: SLOT_HEIGHT, gap: SLOT_GAP }}
+      >
         {sortableItems.length > 0 ? (
-          <Box width={selectedWidth} height={SLOT_HEIGHT} overflow="visible">
+          <Box
+            className="border-continuous overflow-visible"
+            style={{ width: selectedWidth, height: SLOT_HEIGHT }}
+          >
             <Sortable
               data={sortableItems}
               renderItem={renderItem}
@@ -300,14 +300,10 @@ const SelectedCommentariesHeader = ({ items, max, onRemove, onMove, onReorder }:
             layout={reduceMotion ? undefined : LinearTransition.duration(160)}
             style={{ width: SLOT_WIDTH, alignItems: 'center', paddingTop: 4 }}
           >
-            <Box opacity={0.5}>
+            <Box className="overflow-hidden border-continuous opacity-[0.5]">
               <Box
-                size={38}
-                borderRadius={19}
-                center
-                borderWidth={1}
-                borderStyle="dashed"
-                borderColor="tertiary"
+                className="border-continuous overflow-hidden rounded-[19px] items-center justify-center border-[1px] border-dashed border-tertiary"
+                style={{ width: 38, height: 38 }}
               >
                 <FeatherIcon name="plus" size={18} color="tertiary" />
               </Box>
@@ -315,7 +311,7 @@ const SelectedCommentariesHeader = ({ items, max, onRemove, onMove, onReorder }:
           </Animated.View>
         ))}
       </Box>
-      <Text position="absolute" right={16} bottom={8} color="tertiary" fontSize={12}>
+      <Text className="absolute right-[16px] bottom-[8px] text-tertiary text-[12px]">
         {items.length}/{max}
       </Text>
     </Box>

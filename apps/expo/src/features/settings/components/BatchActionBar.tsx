@@ -1,12 +1,10 @@
 import React from 'react'
 import { ActivityIndicator, TouchableOpacity } from 'react-native'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-
 interface BatchActionBarProps {
   selectedCount: number
   hasDownloadable: boolean
@@ -41,20 +39,22 @@ const BatchActionBar = ({
 
   return (
     <Box
-      pos="absolute"
-      l={0}
-      r={0}
-      b={0}
-      bg="reverse"
-      borderTopLeftRadius={16}
-      borderTopRightRadius={16}
-      px={20}
-      pt={16}
-      pb={insets.bottom > 0 ? insets.bottom : 16}
-      lightShadow
+      className="overflow-hidden border-continuous absolute left-[0px] right-[0px] bottom-[0px] bg-reverse rounded-tl-[16px] rounded-tr-[16px] px-[20px] pt-[16px]"
+      style={{
+        paddingBottom: insets.bottom > 0 ? insets.bottom : 16,
+        shadowColor: 'rgb(89,131,240)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 7,
+        elevation: 1,
+        overflow: 'visible',
+      }}
     >
-      <Box row alignItems="center" gap={12}>
-        <Text fontSize={14} bold flex accessibilityLiveRegion={isDeleting ? 'polite' : undefined}>
+      <Box className="overflow-hidden border-continuous flex-row items-center gap-[12px]">
+        <Text
+          className="text-[14px] font-bold flex-[1]"
+          accessibilityLiveRegion={isDeleting ? 'polite' : undefined}
+        >
           {deletionProgress
             ? t('downloads.deletingProgress', deletionProgress)
             : t('downloads.selectedCount', { count: selectedCount })}
@@ -74,7 +74,7 @@ const BatchActionBar = ({
               borderRadius: 8,
             }}
           >
-            <Text fontSize={14} bold style={{ color: '#fff' }}>
+            <Text className="text-[14px] font-bold" style={{ color: '#fff' }}>
               {downloadsDisabled
                 ? t('resource.action.connectionRequired')
                 : t('downloads.download')}
@@ -99,7 +99,7 @@ const BatchActionBar = ({
             }}
           >
             {isDeleting && <ActivityIndicator size="small" color="#fff" />}
-            <Text fontSize={14} bold style={{ color: '#fff' }}>
+            <Text className="text-[14px] font-bold" style={{ color: '#fff' }}>
               {isDeleting ? t('downloads.deleting') : t('Supprimer')}
             </Text>
           </TouchableOpacity>
@@ -107,8 +107,11 @@ const BatchActionBar = ({
       </Box>
 
       {deletionProgress !== null && (
-        <Box mt={12} h={3} bg="border" borderRadius={2} overflow="hidden">
-          <Box h={3} width={`${progressPercent}%`} bg="primary" />
+        <Box className="border-continuous overflow-visible mt-[12px] h-[3px] bg-border rounded-[2px]">
+          <Box
+            className="overflow-hidden border-continuous h-[3px] bg-primary"
+            style={{ width: `${progressPercent}%` }}
+          />
         </Box>
       )}
     </Box>

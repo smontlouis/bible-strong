@@ -1,7 +1,5 @@
 import React from 'react'
-
 import CanonicalStrongVerseText from '../CanonicalStrongVerseText'
-
 jest.mock('~common/ui/Paragraph', () => {
   const mockReact = jest.requireActual<typeof import('react')>('react')
   return {
@@ -45,7 +43,7 @@ describe('CanonicalStrongVerseText', () => {
       word?: string
       textStyle?: { fontSize: number; lineHeight: number }
       occurrenceIndex: number
-      selectionTargets?: Array<{ reference: string; occurrenceIndex: number }>
+      selectionTargets?: { reference: string; occurrenceIndex: number }[]
     }>[]
 
     expect(rendered).toHaveLength(1)

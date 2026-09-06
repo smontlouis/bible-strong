@@ -1,6 +1,10 @@
-import styled from '@emotion/native'
-import { useTheme, withTheme } from '@emotion/react'
-import React, { ComponentType } from 'react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { ComponentType } from 'react'
+import * as NativeUI from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme } from '~themes/ThemeProvider'
 
 import Text from '~common/ui/Text'
 
@@ -12,12 +16,29 @@ type SvgIconComponentProps = {
   fill?: string
 }
 
-const Touchable = styled.TouchableOpacity(({ disabled }) => ({
-  flex: 1,
-  alignItems: 'center',
-  justifyContent: 'center',
-  opacity: disabled ? 0.3 : 1,
-}))
+const Touchable = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const { disabled } = props
+  const classStyles = useResolveClassNames(
+    twMerge('flex-[1] items-center justify-center', className)
+  )
+  return (
+    <NativeUI.TouchableOpacity
+      {...props}
+      style={
+        [classStyles, { opacity: disabled ? 0.3 : 1 }, props.style] as UIComponentProps<
+          typeof NativeUI.TouchableOpacity
+        >['style']
+      }
+    />
+  )
+}
 
 const TouchableSvgIcon = ({
   onPress,
@@ -48,13 +69,9 @@ const TouchableSvgIcon = ({
         }
         fill={isSelected ? theme.colors.primary : theme.colors.grey}
       />
-      {label && (
-        <Text marginTop={5} fontSize={9} color="grey">
-          {label}
-        </Text>
-      )}
+      {label && <Text className="mt-[5px] text-[9px] text-grey">{label}</Text>}
     </Touchable>
   )
 }
 
-export default withTheme(TouchableSvgIcon)
+export default TouchableSvgIcon

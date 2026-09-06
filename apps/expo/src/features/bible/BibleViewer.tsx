@@ -7,7 +7,6 @@ import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import { BibleError, BibleLoadingError } from '~helpers/bibleErrors'
 import { usePrevious } from '~helpers/usePrevious'
 import BibleHeader from './BibleHeader'
-
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -143,7 +142,6 @@ import {
   requiresSelectionAnnotationDeletionConfirmation,
 } from './annotationDeletionImpact'
 import { useChapterAccessibilityAnnouncement } from './useChapterAccessibilityAnnouncement'
-
 const EMPTY_PASSAGE_MEDIA = {
   introduction: [],
   isIntroductionStartChapter: false,
@@ -1341,7 +1339,7 @@ const BibleViewer = ({
   }
 
   return (
-    <Box flex={1} bg="reverse">
+    <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
       <BibleHeader
         bibleAtom={bibleAtom}
         onBibleParamsClick={bibleParamsModal.open}
@@ -1354,7 +1352,7 @@ const BibleViewer = ({
         coverage={coverageData}
       />
       {settings.redWordsDisplay && redWordsFailureIsTemporary && (
-        <Box bg="reverse" borderBottomWidth={1} borderColor="border">
+        <Box className="border-continuous overflow-hidden bg-reverse border-b-[1px] border-border">
           <ResourceUnavailableView
             identity={{ kind: 'bible', versionId: version }}
             title={t('resource.redWords.temporarilyUnavailable')}
@@ -1377,7 +1375,7 @@ const BibleViewer = ({
         </Box>
       )}
       {settings.redWordsDisplay && redWordsUnavailable && (
-        <Box bg="reverse" borderBottomWidth={1} borderColor="border">
+        <Box className="border-continuous overflow-hidden bg-reverse border-b-[1px] border-border">
           <ResourceUnavailableView
             identity={redWordsUnavailable.recoveryIdentity}
             title={t('resource.redWords.offlineCopyNeeded')}
@@ -1404,17 +1402,23 @@ const BibleViewer = ({
           />
         </Box>
       )}
-      <Box flex={1} zIndex={domLayerZIndex}>
+      <Box
+        className="overflow-hidden border-continuous flex-[1]"
+        style={{ zIndex: domLayerZIndex }}
+      >
         {useSharedDOM ? (
           // Keep every host mounted so Android only retargets between
           // stable native parents instead of unmounting/remounting hosts.
-          <Box flex={1} onLayout={handleBibleDOMHostLayout}>
+          <Box
+            className="overflow-hidden border-continuous flex-[1]"
+            onLayout={handleBibleDOMHostLayout}
+          >
             <BibleDOMPortalHost
               name={getBibleDOMDestination(bible.id)}
               style={{ flex: 1, zIndex: domLayerZIndex }}
             />
             {!isActiveBibleTab && (
-              <Box position="absolute" top={0} left={0} right={0} bottom={0}>
+              <Box className="overflow-hidden border-continuous absolute top-[0px] left-[0px] right-[0px] bottom-[0px]">
                 <SnapshotPlaceholder base64={bible.base64Preview} />
               </Box>
             )}

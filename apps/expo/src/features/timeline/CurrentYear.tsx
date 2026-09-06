@@ -1,3 +1,6 @@
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { twMerge } from '~common/ui/classNames'
 import React from 'react'
 import { Platform, TextInput } from 'react-native'
 import Animated, {
@@ -15,13 +18,21 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { wpUI } from '~helpers/utils'
 import { offset } from './constants'
-
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput)
 type AnimatedTextInputAnimatedProps = React.ComponentProps<
   typeof AnimatedTextInput
 >['animatedProps']
 
-const LinkBox = Box.withComponent(Link)
+const LinkBox = (props: React.ComponentProps<typeof Box> & React.ComponentProps<typeof Link>) => (
+  <Box
+    as={Link}
+    {...props}
+    className={twMerge(
+      'overflow-hidden border-continuous',
+      twMerge('overflow-hidden border-continuous', props.className)
+    )}
+  />
+)
 
 const CurrentYear = ({
   year,
@@ -44,6 +55,8 @@ const CurrentYear = ({
   prevColor?: string
   nextColor?: string
 }) => {
+  const stylingTheme = useStylingTheme()
+
   const r = useMediaQueriesArray()
   const progressInSection = useDerivedValue(() => {
     const progress = interpolate(
@@ -57,61 +70,54 @@ const CurrentYear = ({
 
   return (
     <AnimatedBox
-      style={useAnimatedStyle(() => ({
-        transform: [{ translateX: lineX.get() }],
-      }))}
-      pos="absolute"
-      bottom={useSafeAreaInsets().bottom}
-      left={0}
-      right={0}
-      height={r([30, 40, 60, 60])}
+      className="overflow-hidden border-continuous absolute left-[0px] right-[0px]"
+      style={[
+        { height: r([30, 40, 60, 60]), bottom: useSafeAreaInsets().bottom },
+        useAnimatedStyle(() => ({
+          transform: [{ translateX: lineX.get() }],
+        })),
+      ]}
     >
       {prevColor && (
         <LinkBox
+          className="absolute bottom-[0px] left-[0px] rounded-tr-[5px] rounded-tl-[5px] bg-reverse items-center justify-center"
           onPress={onPrev}
-          height={r([30, 40, 60, 60])}
-          width={r([30, 40, 60, 60])}
-          borderTopRightRadius={5}
-          borderTopLeftRadius={5}
-          pos="absolute"
-          left={0}
-          bottom={0}
-          center
-          bg="reverse"
-          lightShadow
+          style={{
+            width: r([30, 40, 60, 60]),
+            height: r([30, 40, 60, 60]),
+            shadowColor: 'rgb(89,131,240)',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 7,
+            elevation: 1,
+            overflow: 'visible',
+          }}
         >
           <FeatherIcon name="chevrons-left" size={20} color={prevColor} />
         </LinkBox>
       )}
       {nextColor && (
         <LinkBox
-          ml="auto"
+          className="ml-auto absolute bottom-[0px] right-[0px] rounded-tr-[5px] rounded-tl-[5px] bg-reverse items-center justify-center"
           onPress={onNext}
-          height={r([30, 40, 60, 60])}
-          width={r([30, 40, 60, 60])}
-          borderTopRightRadius={5}
-          borderTopLeftRadius={5}
-          pos="absolute"
-          right={0}
-          bottom={0}
-          center
-          bg="reverse"
-          lightShadow
+          style={{
+            width: r([30, 40, 60, 60]),
+            height: r([30, 40, 60, 60]),
+            shadowColor: 'rgb(89,131,240)',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 7,
+            elevation: 1,
+            overflow: 'visible',
+          }}
         >
           <FeatherIcon name="chevrons-right" size={20} color={nextColor} />
         </LinkBox>
       )}
       <Box
+        className="overflow-hidden border-continuous absolute bottom-[0px] w-[100px] h-[30px] items-center justify-center rounded-tl-[5px] rounded-tr-[5px]"
         pointerEvents="none"
-        pos="absolute"
-        l={offset - 50}
-        b={0}
-        bg={color}
-        width={100}
-        height={30}
-        center
-        borderTopLeftRadius={5}
-        borderTopRightRadius={5}
+        style={{ left: offset - 50, backgroundColor: resolveThemeColor(stylingTheme, color) }}
       >
         <AnimatedTextInput
           underlineColorAndroid="transparent"
@@ -138,15 +144,21 @@ const CurrentYear = ({
         />
       </Box>
       <AnimatedBox
-        lightShadow
-        position="absolute"
-        left={0}
-        b={0}
-        bg={color}
-        height={3}
-        style={useAnimatedStyle(() => ({
-          width: `${progressInSection.value}%`,
-        }))}
+        className="overflow-hidden border-continuous absolute left-[0px] bottom-[0px] h-[3px]"
+        style={[
+          {
+            backgroundColor: resolveThemeColor(stylingTheme, color),
+            shadowColor: 'rgb(89,131,240)',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 7,
+            elevation: 1,
+            overflow: 'visible',
+          },
+          useAnimatedStyle(() => ({
+            width: `${progressInSection.value}%`,
+          })),
+        ]}
       />
     </AnimatedBox>
   )

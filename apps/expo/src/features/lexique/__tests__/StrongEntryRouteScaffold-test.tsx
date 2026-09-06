@@ -1,9 +1,7 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-
 import StrongEntryRouteScaffold from '../StrongEntryRouteScaffold'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
-
 const mockOpenEntityRelations = jest.fn()
 const tags = { tag1: { id: 'tag1', name: 'À revoir' } }
 
@@ -299,7 +297,9 @@ describe('StrongEntryRouteScaffold', () => {
     expect(unavailable.props.fileSize).toBe(35)
     expect(unavailable.props.offlineTitle).toBe('resource.strong.temporarilyUnavailable')
     expect(
-      renderer.root.findAll(node => String(node.type) === 'Box' && node.props.flex === true)
+      renderer.root.findAll(
+        node => String(node.type) === 'Box' && node.props.className?.split(' ').includes('flex-[1]')
+      )
     ).not.toHaveLength(0)
     expect(unavailable.props.failure).toEqual({
       cause: 'integrity-failure',

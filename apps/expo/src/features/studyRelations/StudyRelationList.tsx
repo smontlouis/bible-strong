@@ -1,24 +1,30 @@
-import styled from '@emotion/native'
 import {
-  SheetFooter,
-  Sheet,
-  SheetHeader,
-  SheetTextInput,
-  type SheetRef,
-  SheetView,
-} from '~common/sheet'
-import { MenuView, type MenuAction } from '~common/ui/MenuView'
-import { type ComponentProps, useRef, useState } from 'react'
+  type ComponentPropsWithRef as UIComponentProps,
+  type ComponentProps,
+  useRef,
+  useState,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Empty from '~common/Empty'
 import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
+import {
+  Sheet,
+  SheetFooter,
+  SheetHeader,
+  type SheetRef,
+  SheetTextInput,
+  SheetView,
+} from '~common/sheet'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
+import { type MenuAction, MenuView } from '~common/ui/MenuView'
 import Text from '~common/ui/Text'
 import { toast } from '~helpers/toast'
 import type { RootState } from '~redux/modules/reducer'
@@ -33,6 +39,7 @@ import {
   makeStudyRelationDisplayModelsSelector,
   makeStudyRelationDisplaySectionsForStartingVerseKeySelector,
 } from '~redux/selectors/bible'
+import type { Theme as AppTheme } from '~themes'
 import { getEndpointFallbackLabel, getRelationText, type RelationDisplayModel } from './domain'
 
 type Props = {
@@ -82,15 +89,27 @@ const targetIconConfig: Record<
   word: { name: 'type', color: 'tertiary' },
 }
 
-const LabelInput = styled(SheetTextInput)(({ theme }) => ({
-  minHeight: 44,
-  borderWidth: 1,
-  borderColor: theme.colors.border,
-  borderRadius: 12,
-  paddingHorizontal: 12,
-  color: theme.colors.default,
-  backgroundColor: theme.colors.lightGrey,
-}))
+const LabelInput = (
+  componentProps: Omit<UIComponentProps<typeof SheetTextInput>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'min-h-[44px] border-[1px] border-border rounded-[12px] px-[12px] text-default bg-light-grey',
+      className
+    )
+  )
+  return (
+    <SheetTextInput
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof SheetTextInput>['style']}
+    />
+  )
+}
 
 const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
   const config = targetIconConfig[type]
@@ -110,17 +129,7 @@ const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
 }
 
 const MissingTargetWarningIcon = () => (
-  <Box
-    alignItems="center"
-    justifyContent="center"
-    mr={6}
-    position="absolute"
-    top={20}
-    left={35}
-    bg="reverse"
-    borderRadius={100}
-    p={4}
-  >
+  <Box className="overflow-hidden border-continuous items-center justify-center mr-[6px] absolute top-[20px] left-[35px] bg-reverse rounded-[100px] p-[4px]">
     <FeatherIcon name="alert-triangle" size={12} color="secondary" />
   </Box>
 )
@@ -347,67 +356,40 @@ const StudyRelationList = ({
     ]
 
     return (
-      <Box key={model.relation.id}>
-        <Box
-          pos="absolute"
-          top={0}
-          left={20}
-          borderLeftWidth={4}
-          borderBottomWidth={4}
-          borderBottomLeftRadius={50}
-          height={35}
-          width={25}
-          borderColor="border"
-        />
+      <Box className="overflow-hidden border-continuous" key={model.relation.id}>
+        <Box className="border-continuous overflow-hidden absolute top-[0px] left-[20px] border-l-[4px] border-b-[4px] rounded-bl-[50px] h-[35px] w-[25px] border-border" />
         {index !== sectionLength - 1 && (
-          <Box
-            pos="absolute"
-            top={0}
-            bottom={0}
-            left={20}
-            borderLeftWidth={4}
-            width={25}
-            borderColor="border"
-          />
+          <Box className="border-continuous overflow-hidden absolute top-[0px] bottom-[0px] left-[20px] border-l-[4px] w-[25px] border-border" />
         )}
         {!model.isTargetAvailable ? <MissingTargetWarningIcon /> : null}
 
         <Box
-          flex
-          row
-          alignItems="center"
-          ml={60}
-          pl={0}
-          borderBottomWidth={1}
-          borderColor="border"
-          opacity={!model.isTargetAvailable ? 0.5 : 1}
+          className="border-continuous overflow-hidden flex-[1] flex-row items-center ml-[60px] pl-[0px] border-b-[1px] border-border"
+          style={{ opacity: !model.isTargetAvailable ? 0.5 : 1 }}
         >
           <TouchableBox
-            flex
-            row
-            alignItems="center"
-            paddingVertical={10}
+            className="overflow-hidden border-continuous flex-[1] flex-row items-center py-[10px]"
             onPress={() => openRelationTarget(model)}
           >
-            <Box flex>
-              <HStack alignItems="center">
-                <Text bold numberOfLines={1} fontSize={14}>
+            <Box className="overflow-hidden border-continuous flex-[1]">
+              <HStack className="overflow-hidden border-continuous items-center">
+                <Text className="font-bold text-[14px]" numberOfLines={1}>
                   {relationTitle.prefix}
                 </Text>
-                <Box mx={6}>
+                <Box className="overflow-hidden border-continuous mx-[6px]">
                   <TargetIcon type={model.targetEndpoint.type} />
                 </Box>
-                <Text bold numberOfLines={1} shrink={1} fontSize={14}>
+                <Text className="font-bold text-[14px]" numberOfLines={1} style={{ flexShrink: 1 }}>
                   {relationTitle.target}
                 </Text>
               </HStack>
               {relationSubtitle ? (
-                <Text fontSize={12} color="tertiary" numberOfLines={1}>
+                <Text className="text-[12px] text-tertiary" numberOfLines={1}>
                   {relationSubtitle}
                 </Text>
               ) : null}
               {model.relation.label ? (
-                <Text fontSize={12} color="tertiary" numberOfLines={1}>
+                <Text className="text-[12px] text-tertiary" numberOfLines={1}>
                   {model.relation.label}
                 </Text>
               ) : null}
@@ -420,7 +402,7 @@ const StudyRelationList = ({
               if (nativeEvent.event === 'delete') confirmDelete(model)
             }}
           >
-            <Box width={42} height={42} center>
+            <Box className="overflow-hidden border-continuous w-[42px] h-[42px] items-center justify-center">
               <FeatherIcon name="more-vertical" size={18} />
             </Box>
           </MenuView>
@@ -432,9 +414,9 @@ const StudyRelationList = ({
   const hasDirectionalType = isDirectionalType(draft.type)
 
   return (
-    <VStack flex={1}>
+    <VStack className="overflow-hidden border-continuous flex-[1]">
       {relations.length === 0 ? (
-        <Box minHeight={220}>
+        <Box className="overflow-hidden border-continuous min-h-[220px]">
           <Empty
             iconElement={<FeatherIcon name="git-merge" size={64} color="primary" />}
             message={t('Aucune relation')}
@@ -442,13 +424,11 @@ const StudyRelationList = ({
         </Box>
       ) : (
         sections.map(section => (
-          <VStack key={section.id} mb={12}>
+          <VStack className="overflow-hidden border-continuous mb-[12px]" key={section.id}>
             {section.title ? (
-              <HStack alignItems="center" ml={20} py={20}>
+              <HStack className="overflow-hidden border-continuous items-center ml-[20px] py-[20px]">
                 <TargetIcon type="verse" />
-                <Text bold color="tertiary" ml={8}>
-                  {section.title}
-                </Text>
+                <Text className="font-bold text-tertiary ml-[8px]">{section.title}</Text>
               </HStack>
             ) : null}
             {section.data.map((model, index) => renderRelation(model, index, section.data.length))}
@@ -476,7 +456,7 @@ const StudyRelationList = ({
                     if (nativeEvent.event === 'delete') confirmDelete()
                   }}
                 >
-                  <Box row center height={54} width={54}>
+                  <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
                     <FeatherIcon name="more-vertical" size={18} />
                   </Box>
                 </MenuView>
@@ -485,70 +465,60 @@ const StudyRelationList = ({
           />
         }
         footer={props => (
-          <SheetFooter row gap={10} justifyContent="flex-end" {...props}>
-            <Box h={54}>
+          <SheetFooter
+            {...props}
+            className={twMerge('gap-[10px] justify-end flex-row', props.className)}
+          >
+            <Box className="overflow-hidden border-continuous h-[54px]">
               <Button reverse onPress={closeEditModal}>
                 {t('Annuler')}
               </Button>
             </Box>
-            <Box h={54}>
+            <Box className="overflow-hidden border-continuous h-[54px]">
               <Button onPress={saveEdit}>{t('Enregistrer')}</Button>
             </Box>
           </SheetFooter>
         )}
       >
         {editingModel ? (
-          <SheetView p={20} gap={22}>
-            <VStack gap={10}>
-              <HStack alignItems="center" wrap>
-                <Text bold numberOfLines={1} shrink={1} fontSize={14}>
+          <SheetView className="p-[20px] gap-[22px]">
+            <VStack className="overflow-hidden border-continuous gap-[10px]">
+              <HStack className="overflow-hidden border-continuous items-center flex-wrap">
+                <Text className="font-bold text-[14px]" numberOfLines={1} style={{ flexShrink: 1 }}>
                   {getEndpointLabel(editingModel.activeEndpoint)}
                 </Text>
                 <TouchableBox
-                  ml={6}
-                  mr={hasDirectionalType ? 0 : 6}
-                  pl={10}
-                  pr={hasDirectionalType ? 6 : 10}
-                  py={6}
-                  borderTopLeftRadius={16}
-                  borderBottomLeftRadius={16}
-                  borderBottomRightRadius={hasDirectionalType ? 0 : 16}
-                  borderTopRightRadius={hasDirectionalType ? 0 : 16}
-                  bg="lightGrey"
+                  className="overflow-hidden border-continuous ml-[6px] pl-[10px] py-[6px] rounded-tl-[16px] rounded-bl-[16px] bg-light-grey"
                   onPress={cycleDraftType}
+                  style={{
+                    paddingRight: hasDirectionalType ? 6 : 10,
+                    marginRight: hasDirectionalType ? 0 : 6,
+                    borderBottomRightRadius: hasDirectionalType ? 0 : 16,
+                    borderTopRightRadius: hasDirectionalType ? 0 : 16,
+                  }}
                 >
-                  <Text bold fontSize={12} color="primary">
+                  <Text className="font-bold text-[12px] text-primary">
                     {getDraftRelationText(editingModel)}
                   </Text>
                 </TouchableBox>
                 {hasDirectionalType ? (
                   <TouchableBox
-                    mr={6}
-                    pl={4}
-                    pr={6}
-                    height={28}
-                    borderTopRightRadius={16}
-                    borderBottomRightRadius={16}
-                    borderLeftWidth={1}
-                    borderColor="reverse"
-                    bg="lightGrey"
-                    alignItems="center"
-                    justifyContent="center"
+                    className="border-continuous overflow-hidden mr-[6px] pl-[4px] pr-[6px] h-[28px] rounded-tr-[16px] rounded-br-[16px] border-l-[1px] border-reverse bg-light-grey items-center justify-center"
                     onPress={toggleDirection}
                   >
                     <MaterialIcon name="swap-horiz" size={16} color="primary" />
                   </TouchableBox>
                 ) : null}
-                <Text bold fontSize={14}>
+                <Text className="font-bold text-[14px]">
                   {editingModel.targetEndpoint.type === 'note' ||
                   editingModel.targetEndpoint.type === 'study'
                     ? `${t('une')} `
                     : ''}
                 </Text>
-                <Box mx={4}>
+                <Box className="overflow-hidden border-continuous mx-[4px]">
                   <TargetIcon type={editingModel.targetEndpoint.type} />
                 </Box>
-                <Text bold numberOfLines={1} shrink={1} fontSize={14}>
+                <Text className="font-bold text-[14px]" numberOfLines={1} style={{ flexShrink: 1 }}>
                   {editingModel.targetEndpoint.type === 'note'
                     ? t('note')
                     : editingModel.targetEndpoint.type === 'study'
@@ -557,18 +527,16 @@ const StudyRelationList = ({
                 </Text>
               </HStack>
               {getRelationSubtitle(editingModel) ? (
-                <Text fontSize={13} color="tertiary" numberOfLines={1}>
+                <Text className="text-[13px] text-tertiary" numberOfLines={1}>
                   {getRelationSubtitle(editingModel)}
                 </Text>
               ) : null}
             </VStack>
 
-            <VStack gap={8} mt="auto" alignItems="flex-end">
+            <VStack className="overflow-hidden border-continuous gap-[8px] mt-auto items-end">
               {isLabelExpanded ? (
-                <VStack gap={8} alignSelf="stretch">
-                  <Text fontSize={13} color="tertiary">
-                    {t('Libellé')}
-                  </Text>
+                <VStack className="overflow-hidden border-continuous gap-[8px] self-stretch">
+                  <Text className="text-[13px] text-tertiary">{t('Libellé')}</Text>
                   <LabelInput
                     value={draft.label}
                     onChangeText={label => setDraft(current => ({ ...current, label }))}
@@ -579,15 +547,10 @@ const StudyRelationList = ({
                 </VStack>
               ) : (
                 <TouchableBox
-                  row
-                  alignItems="center"
-                  justifyContent="flex-end"
-                  py={6}
+                  className="overflow-hidden border-continuous flex-row items-center justify-end py-[6px]"
                   onPress={() => setIsLabelExpanded(true)}
                 >
-                  <Text fontSize={12} color="tertiary">
-                    {t('Ajouter un libellé')}
-                  </Text>
+                  <Text className="text-[12px] text-tertiary">{t('Ajouter un libellé')}</Text>
                   <FeatherIcon
                     name="chevron-down"
                     size={14}

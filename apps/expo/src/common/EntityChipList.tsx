@@ -1,25 +1,39 @@
-import styled from '@emotion/native'
-import React, { useState } from 'react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { useState } from 'react'
 import type { GestureResponderEvent } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { Tag } from './types'
 import { getEntityChipListState } from './entityChips'
+import { Tag } from './types'
 
-const StyledChip = styled(Box)(({ theme }) => ({
-  borderRadius: 20,
-  backgroundColor: theme.colors.lightPrimary,
-  paddingTop: 3,
-  paddingBottom: 3,
-  paddingLeft: 7,
-  paddingRight: 7,
-  marginRight: 5,
-  marginBottom: 2,
-  marginTop: 5,
-}))
+const StyledChip = (
+  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'rounded-[20px] bg-light-primary pt-[3px] pb-[3px] pl-[7px] pr-[7px] mr-[5px] mb-[2px] mt-[5px]',
+      className
+    )
+  )
+  return (
+    <Box
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
 const EntityChipList = ({
   tags,
@@ -60,20 +74,21 @@ const EntityChipList = ({
   }
 
   return (
-    <Box wrap row>
+    <Box className="overflow-hidden border-continuous flex-wrap flex-row">
       {items.map(item => (
         <TouchableBox
+          className="overflow-hidden border-continuous"
           key={`${item.type}-${item.id}`}
           onPress={event => handleChipPress(item, event)}
         >
           <StyledChip>
-            <Box row alignItems="center">
+            <Box className="overflow-hidden border-continuous flex-row items-center">
               <FeatherIcon
                 name={item.type === 'tag' ? 'tag' : 'git-merge'}
                 size={10}
                 color="primary"
               />
-              <Text fontSize={12} color="primary" numberOfLines={1} maxWidth={100} ml={4}>
+              <Text className="text-[12px] text-primary max-w-[100px] ml-[4px]" numberOfLines={1}>
                 {item.label}
               </Text>
             </Box>
@@ -82,14 +97,14 @@ const EntityChipList = ({
       ))}
       {hasMoreTags && (
         <TouchableBox
+          className="overflow-hidden border-continuous"
           onPress={event => {
             event.stopPropagation()
             setIsExpanded(!isExpanded)
           }}
         >
           <Text
-            fontSize={10}
-            color="primary"
+            className="text-[10px] text-primary"
             style={{
               paddingTop: 3,
               paddingBottom: 3,

@@ -1,32 +1,57 @@
-import React from 'react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
-import styled from '@emotion/native'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Border from '~common/ui/Border'
-import { FeatherIcon } from '~common/ui/Icon'
-import { ComputedReadingSlice, Plan } from '~common/types'
 import Link from '~common/Link'
+import { ComputedReadingSlice, Plan } from '~common/types'
+import Border from '~common/ui/Border'
+import Box from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
 import EntitySlice from './EntitySlice'
 
-const FineLine = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  top: 0,
-  bottom: 0,
-  left: 36,
-  width: 2,
-  backgroundColor: theme.colors.lightPrimary,
-}))
+const FineLine = (
+  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const NextButton = styled(Text)(({ theme }) => ({
-  padding: 4,
-  borderRadius: 3,
-  backgroundColor: theme.colors.primary,
-  color: 'white',
-  fontSize: 11,
-  fontWeight: 'bold',
-  marginRight: 10,
-}))
+  const classStyles = useResolveClassNames(
+    twMerge('absolute top-[0px] bottom-[0px] left-[36px] w-[2px] bg-light-primary', className)
+  )
+  return (
+    <Box
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
+
+const NextButton = (
+  componentProps: Omit<UIComponentProps<typeof Text>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'p-[4px] rounded-[3px] bg-primary text-[white] text-[11px] font-bold mr-[10px]',
+      className
+    )
+  )
+  return (
+    <Text
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Text>['style']}
+    />
+  )
+}
 
 interface Props {
   isLast?: boolean
@@ -66,10 +91,10 @@ const ReadingSlice = ({
       params={onPress ? undefined : { readingSlice }}
       onPress={onPress ? () => onPress(readingSlice) : undefined}
     >
-      <Box paddingLeft={28} paddingTop={15} backgroundColor="reverse" position="relative">
+      <Box className="overflow-hidden border-continuous pl-[28px] pt-[15px] bg-reverse relative">
         <FineLine />
-        <Box row marginBottom={15}>
-          <Box flex>
+        <Box className="overflow-hidden border-continuous flex-row mb-[15px]">
+          <Box className="overflow-hidden border-continuous flex-[1]">
             {title && (
               <EntitySlice
                 id={title}
@@ -90,12 +115,12 @@ const ReadingSlice = ({
               />
             ))}
           </Box>
-          <Box paddingHorizontal={10} alignItems="center" row>
+          <Box className="overflow-hidden border-continuous px-[10px] items-center flex-row">
             {isNext && <NextButton>LIRE</NextButton>}
             <FeatherIcon name="chevron-right" size={14} color="primary" />
           </Box>
         </Box>
-        {!isLast && <Border marginLeft={40} />}
+        {!isLast && <Border className="ml-[40px]" />}
       </Box>
       {isLast && <Border />}
     </Link>

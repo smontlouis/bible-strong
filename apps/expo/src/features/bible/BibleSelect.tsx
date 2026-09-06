@@ -12,7 +12,6 @@ import BibleSelectTabBar from './BibleSelectTabBar'
 import BookSelector from './BookSelector'
 import ChapterSelector from './ChapterSelector'
 import VerseSelector from './VerseSelector'
-
 export interface BibleSelectProps {
   bibleAtom: PrimitiveAtom<BibleTab>
   onComplete: () => void
@@ -32,16 +31,16 @@ const BibleSelect = ({ bibleAtom, onComplete, onLongPressComplete }: BibleSelect
   })
 
   return (
-    <Box flex pt={20}>
+    <Box className="overflow-hidden border-continuous flex-[1] pt-[20px]">
       <BibleSelectTabBar index={index} onChange={setIndex} />
       <Slides index={index}>
-        <Slide key="book" flex>
+        <Slide className="flex-[1]" key="book">
           <BookSelector bibleAtom={bibleAtom} onNavigate={setIndex} coverage={coverageData} />
         </Slide>
-        <Slide key="chapter" flex>
+        <Slide className="flex-[1]" key="chapter">
           <ChapterSelector bibleAtom={bibleAtom} onNavigate={setIndex} coverage={coverageData} />
         </Slide>
-        <Slide key="verse" flex>
+        <Slide className="flex-[1]" key="verse">
           <VerseSelector
             bibleAtom={bibleAtom}
             onComplete={onComplete}

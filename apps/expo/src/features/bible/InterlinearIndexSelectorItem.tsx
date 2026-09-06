@@ -1,7 +1,6 @@
 import React from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
-
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Progress from '~common/ui/Progress'
@@ -15,7 +14,6 @@ import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { getDownloadItemProgress } from '~state/downloadQueue'
 import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
 import useConnection from '~helpers/useConnection'
-
 interface Props {
   locale: ResourceLanguage
   expanded: boolean
@@ -59,38 +57,23 @@ const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }
   if (!expanded) return null
 
   return (
-    <Box
-      minHeight={52}
-      pl={56}
-      pr={4}
-      py={6}
-      justifyContent="center"
-      borderBottomWidth={1}
-      borderColor="border"
-    >
+    <Box className="border-continuous overflow-hidden min-h-[52px] pl-[56px] pr-[4px] py-[6px] justify-center border-b-[1px] border-border">
+      <Box className="border-continuous overflow-hidden absolute top-[-10px] left-[32px] w-[16px] h-[36px] border-l-[2px] border-b-[2px] rounded-bl-[10px] border-border" />
       <Box
-        pos="absolute"
-        top={-10}
-        left={32}
-        width={16}
-        height={36}
-        borderLeftWidth={2}
-        borderBottomWidth={2}
-        borderBottomLeftRadius={10}
-        borderColor="border"
-      />
-      <Box row alignItems="center" opacity={isAvailable ? 1 : 0.5}>
-        <Box disabled flex>
-          <Text fontSize={14} numberOfLines={1}>
+        className="overflow-hidden border-continuous flex-row items-center"
+        style={{ opacity: isAvailable ? 1 : 0.5 }}
+      >
+        <Box className="overflow-hidden border-continuous flex-[1]" style={{ opacity: 0.6 }}>
+          <Text className="text-[14px]" numberOfLines={1}>
             {`${t('versionSelector.interlinearIndex')} · ${t(`versionCatalog.language.${locale}`)}`}
           </Text>
-          <Text fontSize={10} color="tertiary" mt={2} numberOfLines={2}>
+          <Text className="text-[10px] text-tertiary mt-[2px]" numberOfLines={2}>
             {t('versionSelector.interlinearAttribution')}
           </Text>
         </Box>
 
         {isAvailable ? (
-          <Box width={48} minHeight={40} center>
+          <Box className="overflow-hidden border-continuous w-[48px] min-h-[40px] items-center justify-center">
             <FeatherIcon name="check" size={18} color="primary" />
           </Box>
         ) : (
@@ -104,7 +87,7 @@ const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }
             disabled={!isConnected || Boolean(activeDownload)}
             onPress={handlePress}
           >
-            <Box width={48} minHeight={40} center>
+            <Box className="overflow-hidden border-continuous w-[48px] min-h-[40px] items-center justify-center">
               {activeDownload?.status === 'queued' ? (
                 <FeatherIcon name="clock" size={18} color="tertiary" />
               ) : activeDownload ? (

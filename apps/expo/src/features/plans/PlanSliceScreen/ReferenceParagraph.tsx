@@ -1,9 +1,13 @@
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
-import styled from '@emotion/native'
+import * as NativeUI from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
-import { getBook } from '~helpers/bibleBookCatalog'
 import Paragraph from '~common/ui/Paragraph'
 import { BcvLanguage, BibleReferenceTarget, parseInlineBibleReferences } from '~helpers/bcvParser'
+import { getBook } from '~helpers/bibleBookCatalog'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 type ParagraphProps = React.ComponentProps<typeof Paragraph>
@@ -21,10 +25,26 @@ const getBibleViewParams = (target: BibleReferenceTarget) => ({
   ...(target.focusVerses ? { focusVerses: JSON.stringify(target.focusVerses) } : {}),
 })
 
-const ReferenceText = styled.Text(({ theme }) => ({
-  color: theme.colors.primary,
-  textDecorationLine: 'underline',
-}))
+const ReferenceText = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.Text>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('text-primary', className))
+  return (
+    <NativeUI.Text
+      {...props}
+      style={
+        [classStyles, { textDecorationLine: 'underline' }, props.style] as UIComponentProps<
+          typeof NativeUI.Text
+        >['style']
+      }
+    />
+  )
+}
 
 const ReferenceParagraph = ({ children, planLanguage, ...props }: ReferenceParagraphProps) => {
   const pushRouteOnce = usePushRouteOnce()

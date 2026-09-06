@@ -1,23 +1,20 @@
 import React from 'react'
-
 import { ChapterSlice as ChapterSliceProps } from 'src/common/types'
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
-
 import { useChapterToContent } from '../plan.hooks'
 import PauseText from './PauseText'
 import Loading from '~common/Loading'
 import { useTranslation } from 'react-i18next'
-
 const ChapterSlice = ({ id, chapters, subType }: ChapterSliceProps) => {
   const { t } = useTranslation()
   const { status, content } = useChapterToContent(chapters)
 
   if (status === 'Pending') {
     return (
-      <Box height={200}>
+      <Box className="overflow-hidden border-continuous h-[200px]">
         <Loading />
       </Box>
     )
@@ -25,7 +22,7 @@ const ChapterSlice = ({ id, chapters, subType }: ChapterSliceProps) => {
 
   if (status === 'Rejected') {
     return (
-      <Box center padding={20}>
+      <Box className="overflow-hidden border-continuous items-center justify-center p-[20px]">
         <Paragraph scaleLineHeight={1}>
           {t("Il semblerait que ce chapitre n'existe pas dans cette version.")}
         </Paragraph>
@@ -35,19 +32,19 @@ const ChapterSlice = ({ id, chapters, subType }: ChapterSliceProps) => {
 
   if (content) {
     return (
-      <Box padding={20}>
+      <Box className="overflow-hidden border-continuous p-[20px]">
         {subType === 'pray' && (
           <PauseText>
             {t('Entrez dans un temps de prière\n et méditez sur le psaume\nsuivant')}
           </PauseText>
         )}
-        <Box>
+        <Box className="overflow-hidden border-continuous">
           <Paragraph scale={5}>{content.bookName}</Paragraph>
         </Box>
         {content.chapters.map(chapter => (
-          <Box key={chapter.title}>
-            <Box marginTop={20} marginBottom={5}>
-              <Paragraph scale={-2} color="grey" fontFamily="text">
+          <Box className="overflow-hidden border-continuous" key={chapter.title}>
+            <Box className="overflow-hidden border-continuous mt-[20px] mb-[5px]">
+              <Paragraph className="text-grey" scale={-2} fontFamily="text">
                 {chapter.title.toUpperCase()}
               </Paragraph>
             </Box>
@@ -92,7 +89,7 @@ const ChapterSlice = ({ id, chapters, subType }: ChapterSliceProps) => {
                   })}
                 </Paragraph>
                 <Link {...chapter.viewMore} style={{ marginBottom: 50 }}>
-                  <Box row center justifyContent="flex-end">
+                  <Box className="overflow-hidden border-continuous flex-row items-center justify-end">
                     <FeatherIcon
                       name="book-open"
                       size={15}

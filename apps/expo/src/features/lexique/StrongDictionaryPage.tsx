@@ -2,13 +2,11 @@ import { pageContentStyle } from '~common/ui/PageContent'
 import React from 'react'
 import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
-
 import Empty from '~common/Empty'
 import { VStack } from '~common/ui/Box'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
 import { StrongEditorialHtml, StrongEyebrow } from './StrongDetailUI'
 import type { StrongReadingTypography } from './strongEditorialHtmlStyles'
-
 type Props = {
   entry: StrongLexiconEntry
   readingTypography: StrongReadingTypography
@@ -41,7 +39,7 @@ const StrongDictionaryPage = ({
         { paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
       ]}
     >
-      <VStack gap={14}>
+      <VStack className="overflow-hidden border-continuous gap-[14px]">
         <StrongEyebrow>{resource.source}</StrongEyebrow>
         <StrongEditorialHtml
           value={resource.contentHtml}

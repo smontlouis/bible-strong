@@ -15,7 +15,7 @@ Bible Strong is a React Native application for Bible study, primarily targeting 
 - **Timeline**: Biblical history visualization
 - **Offline support**: Core functionality works without internet
 
-**Tech Stack**: Expo SDK 54, React Native 0.81, TypeScript, Redux Toolkit, Jotai, Emotion, SQLite
+**Tech Stack**: Expo SDK 54, React Native 0.81, TypeScript, Redux Toolkit, Jotai, Uniwind, SQLite
 
 ## Documentation Reference
 
@@ -158,7 +158,7 @@ const MyScreen = () => {
   const userData = useSelector(state => state.user)
 
   return (
-    <Box flex={1} bg="lightGrey">
+    <Box className="flex-1 bg-light-grey">
       <Text>{userData.displayName}</Text>
       {/* content */}
     </Box>
@@ -275,37 +275,30 @@ const MyComponent = () => { /* ... */ }
 
 ## Layout Components (Box, HStack, VStack)
 
-Prefer layout components over `StyleSheet` or new `styled` wrappers:
+Keep these names for React Native layout. Use Uniwind `className` for static styles
+and `style` for calculated values. `HStack` defaults to `flex-row`; `VStack` defaults
+to `flex-col`. Caller classes may override those defaults. Native props and refs
+are forwarded, including through the animated variants. Merge class lists with
+`twMerge` from `~common/ui/classNames`, which understands Uniwind border-curve
+utilities without confusing them with border colors.
 
-```typescript
-// ❌ Avoid StyleSheet
-import { StyleSheet } from 'react-native'
-
-const styles = StyleSheet.create({
-  container: { flex: 1, flexDirection: 'row', padding: 16 },
-  item: { marginRight: 8 }
-})
-
-<View style={styles.container}>
-  <View style={styles.item}><Text>Item 1</Text></View>
-  <View style={styles.item}><Text>Item 2</Text></View>
-</View>
-
-// ✅ Use Box, HStack, VStack
-import Box, { HStack, VStack } from '~common/ui/Box'
-
-<HStack flex={1} p={16}>
-  <Box mr={8}><Text>Item 1</Text></Box>
-  <Box mr={8}><Text>Item 2</Text></Box>
-</HStack>
+```tsx
+<Box className="flex-1 bg-reverse p-4">
+  <HStack className="items-center gap-3">
+    <Text className="text-primary font-bold">Example</Text>
+  </HStack>
+</Box>
 ```
 
-**Available components:**
-- **Box**: Base container with style props (p, m, flex, bg, etc.)
-- **HStack**: Horizontal layout (flexDirection: 'row')
-- **VStack**: Vertical layout (flexDirection: 'column')
+Legacy shorthand props (`p`, `bg`, `row`, `fontSize`, etc.) are no longer accepted
+by `Box` or `Text`. Use `className` or native `style`. For computed theme colors,
+use the value helpers in `~themes/colorValues`. Do not add Emotion or `styled` wrappers. Run `yarn agents:styles:check` for UI changes.
 
-Do not introduce `styled` in feature code when these primitives can express the design. Extend or add a shared primitive under `src/common/ui/` for reusable gaps. Rare feature-level exceptions must explain the missing primitive with `// harness-allow-styled: <reason>`. Run `yarn agents:styles:check` for UI changes.
+Theme palettes live in `src/themes/`. `global.css` is generated from them: run
+`yarn workspace @bible-strong/expo themes:generate` after palette edits and
+`yarn workspace @bible-strong/expo themes:check` before finishing. Do not manually
+edit generated palette values. Use `useTheme` from `~themes/ThemeProvider` when a
+consumer needs JavaScript values. See ADR-0040 for the Bible DOM boundary.
 
 ## Reanimated 4 Best Practices
 

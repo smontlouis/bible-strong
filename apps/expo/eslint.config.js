@@ -33,6 +33,7 @@ module.exports = [
   {
     ignores: [
       'node_modules/**',
+      'src/uniwind-types.d.ts',
       '.expo/**',
       'android/**',
       'ios/**',

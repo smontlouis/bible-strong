@@ -1,12 +1,11 @@
 import { Feather } from '@expo/vector-icons'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { useSetAtom } from 'jotai/react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, useWindowDimensions } from 'react-native'
 import { FadeIn, FadeInUp, useReducedMotion } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
 import { AnimatedBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
@@ -25,7 +24,6 @@ import type { OfflineSetupReviewFolderContext } from './offlineSetupReview'
 import { OFFLINE_SETUP_FOLDER_PRESENTATIONS } from './offlineSetupPresentation'
 import useOfflineSetupScene from './useOfflineSetupScene'
 import useOfflineSetupSelection from './useOfflineSetupSelection'
-
 type SelectResourcesProps =
   | { mode?: 'onboarding'; onComplete: () => void }
   | { mode: 'preview'; onClose: () => void }
@@ -89,7 +87,7 @@ const SelectResources = (props: SelectResourcesProps) => {
 
   return (
     <AnimatedBox
-      flex
+      className="overflow-hidden border-continuous flex-[1]"
       style={{
         backgroundColor: sceneBackground,
         transitionProperty: 'backgroundColor',
@@ -100,7 +98,10 @@ const SelectResources = (props: SelectResourcesProps) => {
       }}
     >
       {state.downloadSceneActive ? (
-        <AnimatedBox absoluteFill zIndex={state.downloadSceneSettled ? 30 : 15}>
+        <AnimatedBox
+          className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px]"
+          style={{ zIndex: state.downloadSceneSettled ? 30 : 15 }}
+        >
           {props.mode === 'preview' ? (
             <DownloadResources
               canvasVisible={state.downloadSceneSettled}
@@ -134,8 +135,7 @@ const SelectResources = (props: SelectResourcesProps) => {
 
       {!state.downloadSceneSettled && (!activeFolder || state.openingFolder || isClosingFolder) ? (
         <AnimatedBox
-          absoluteFill
-          zIndex={10}
+          className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px] z-[10]"
           entering={reduceMotion || !isClosingFolder ? undefined : FadeIn.duration(100)}
         >
           <OfflineSetupOverview
@@ -158,8 +158,7 @@ const SelectResources = (props: SelectResourcesProps) => {
 
       {!state.downloadSceneSettled ? (
         <AnimatedBox
-          absoluteFill
-          zIndex={20}
+          className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px] z-[20]"
           pointerEvents={downloading ? 'none' : 'box-none'}
           entering={reduceMotion ? undefined : FadeInUp.duration(400).delay(450)}
           style={{
@@ -202,16 +201,16 @@ const SelectResources = (props: SelectResourcesProps) => {
 
       {props.mode === 'preview' || props.mode === undefined ? (
         <AnimatedBox
-          position="absolute"
-          top={insets.top + 10}
-          right={16}
-          zIndex={100}
+          className="overflow-hidden border-continuous absolute right-[16px] z-[100]"
           pointerEvents={reviewOpen ? 'none' : 'auto'}
-          style={{
-            opacity: reviewOpen ? 0 : 1,
-            transitionProperty: 'opacity',
-            transitionDuration: 160,
-          }}
+          style={[
+            { top: insets.top + 10 },
+            {
+              opacity: reviewOpen ? 0 : 1,
+              transitionProperty: 'opacity',
+              transitionDuration: 160,
+            },
+          ]}
         >
           <Pressable
             accessibilityRole="button"
@@ -226,25 +225,23 @@ const SelectResources = (props: SelectResourcesProps) => {
             {({ pressed }) =>
               props.mode === 'preview' ? (
                 <HStack
-                  px={11}
-                  height={32}
-                  borderRadius={16}
-                  bg="rgba(255,255,255,0.92)"
-                  alignItems="center"
-                  gap={6}
+                  className="overflow-hidden border-continuous px-[11px] h-[32px] rounded-[16px] bg-[rgba(255,255,255,0.92)] items-center gap-[6px]"
                   style={{
                     opacity: pressed ? 0.72 : 1,
                     boxShadow: '0 4px 14px rgba(28,51,88,0.10)',
                   }}
                 >
-                  <Text color="#68758C" fontSize={10} bold>
+                  <Text className="text-[#68758C] text-[10px] font-bold">
                     {t('offlineSetup.closePreview')}
                   </Text>
                   <Feather name="x" size={14} color="#68758C" />
                 </HStack>
               ) : (
-                <HStack px={8} minHeight={40} center style={{ opacity: pressed ? 0.62 : 1 }}>
-                  <Text color="tertiary" fontSize={13}>
+                <HStack
+                  className="overflow-hidden border-continuous px-[8px] min-h-[40px] items-center justify-center"
+                  style={{ opacity: pressed ? 0.62 : 1 }}
+                >
+                  <Text className="text-tertiary text-[13px]">
                     {t('offlineSetup.continueWithoutDownloads')}
                   </Text>
                 </HStack>

@@ -5,7 +5,6 @@ import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-
 interface VerseFormatSheetProps {
   sheetRef: React.RefObject<SheetRef | null>
   onSelectFormat: (format: 'inline' | 'block') => void
@@ -27,23 +26,14 @@ const VerseFormatSheet = ({
       onDismiss={onClose}
       header={<SheetHeader title={t('study.formatChoice')} subTitle={reference} />}
     >
-      <SheetView p={20}>
+      <SheetView className="p-[20px]">
         {/* Inline format option */}
         <TouchableOpacity accessibilityRole="radio" onPress={() => onSelectFormat('inline')}>
-          <HStack
-            paddingVertical={16}
-            paddingHorizontal={16}
-            borderRadius={12}
-            bg="lightGrey"
-            marginBottom={12}
-            alignItems="center"
-          >
+          <HStack className="overflow-hidden border-continuous py-[16px] px-[16px] rounded-[12px] bg-light-grey mb-[12px] items-center">
             <FeatherIcon name="link-2" size={24} />
-            <Box flex marginLeft={16}>
-              <Text fontSize={16} bold>
-                {t('study.asLink')}
-              </Text>
-              <Text fontSize={13} color="tertiary" marginTop={4}>
+            <Box className="overflow-hidden border-continuous flex-[1] ml-[16px]">
+              <Text className="text-[16px] font-bold">{t('study.asLink')}</Text>
+              <Text className="text-[13px] text-tertiary mt-[4px]">
                 {t('study.asLinkDescription')}
               </Text>
             </Box>
@@ -53,19 +43,11 @@ const VerseFormatSheet = ({
 
         {/* Block format option */}
         <TouchableOpacity accessibilityRole="radio" onPress={() => onSelectFormat('block')}>
-          <HStack
-            paddingVertical={16}
-            paddingHorizontal={16}
-            borderRadius={12}
-            bg="lightGrey"
-            alignItems="center"
-          >
+          <HStack className="overflow-hidden border-continuous py-[16px] px-[16px] rounded-[12px] bg-light-grey items-center">
             <MaterialIcon name="short-text" size={24} />
-            <Box flex marginLeft={16}>
-              <Text fontSize={16} bold>
-                {t('study.asBlock')}
-              </Text>
-              <Text fontSize={13} color="tertiary" marginTop={4}>
+            <Box className="overflow-hidden border-continuous flex-[1] ml-[16px]">
+              <Text className="text-[16px] font-bold">{t('study.asBlock')}</Text>
+              <Text className="text-[13px] text-tertiary mt-[4px]">
                 {t('study.asBlockDescription')}
               </Text>
             </Box>

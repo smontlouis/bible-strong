@@ -11,11 +11,10 @@ interface InlineLinkProps {
 const InlineLink = ({ href, children, ...props }: InlineLinkProps) => {
   return (
     <Paragraph
-      color="primary"
       onPress={() => Linking.openURL(href)}
-      bold
       fontFamily="text"
       {...props}
+      className="text-primary font-bold"
     >
       {children}
     </Paragraph>

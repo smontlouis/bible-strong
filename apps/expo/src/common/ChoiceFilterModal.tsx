@@ -1,6 +1,9 @@
-import styled from '@emotion/native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { forwardRef } from 'react'
 import { Pressable } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
 import {
   Sheet,
@@ -12,13 +15,24 @@ import {
 import Radio from '~common/ui/Radio'
 import Text from '~common/ui/Text'
 
-const ChoiceRow = styled(Pressable)(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  padding: 16,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
+const ChoiceRow = (
+  componentProps: Omit<UIComponentProps<typeof Pressable>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('flex-row items-center p-[16px] border-b-[1px] border-b-border', className)
+  )
+  return (
+    <Pressable
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Pressable>['style']}
+    />
+  )
+}
 
 const FULL_HEIGHT_SNAP_POINTS: SheetSnapPoint[] = [1]
 const LONG_CHOICE_LIST_THRESHOLD = 10
@@ -57,10 +71,8 @@ const ChoiceFilterModalInner = <T extends string>(
               accessibilityState={{ checked: isSelected }}
               onPress={() => onSelect(option.value)}
             >
-              <Radio selected={isSelected} marginRight={12} />
-              <Text flex={1} fontSize={16}>
-                {option.label}
-              </Text>
+              <Radio className="mr-[12px]" selected={isSelected} />
+              <Text className="flex-[1] text-[16px]">{option.label}</Text>
             </ChoiceRow>
           )
         }}

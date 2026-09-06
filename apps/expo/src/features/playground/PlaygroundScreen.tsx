@@ -1,4 +1,4 @@
-import { ThemeProvider } from '@emotion/react'
+import { ThemeProvider } from '~themes/ThemeProvider'
 import { useEffect, useState } from 'react'
 import { SystemBars } from 'react-native-edge-to-edge'
 import { ThemeSelectionOverrideContext } from '~common/ThemeSelectionOverrideContext'
@@ -8,7 +8,6 @@ import AbelOnboarding from '~features/onboarding/AbelOnboarding'
 import SelectResources from '~features/onboarding/SelectResources'
 import themes from '~themes'
 import PlaygroundHome from './PlaygroundHome'
-
 type PlaygroundView = 'home' | 'abel-onboarding' | 'offline-setup'
 
 const PlaygroundScreen = () => {
@@ -43,7 +42,7 @@ const PlaygroundScreen = () => {
   return (
     <ThemeSelectionOverrideContext.Provider value={{ colorScheme, theme: selectedTheme }}>
       <ThemeProvider theme={themes[selectedTheme]}>
-        <Box flex>{renderView()}</Box>
+        <Box className="overflow-hidden border-continuous flex-[1]">{renderView()}</Box>
       </ThemeProvider>
     </ThemeSelectionOverrideContext.Provider>
   )

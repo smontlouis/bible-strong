@@ -1,3 +1,6 @@
+import { twMerge } from '~common/ui/classNames'
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { TouchableOpacity } from 'react-native'
 import type { FuseResultMatch } from 'fuse.js'
 import { HStack, VStack } from '~common/ui/Box'
@@ -9,7 +12,6 @@ import { searchTypeIconConfig } from './SearchTypeIcon'
 import { mergeRanges, normalizeDisplayedText, normalizeSearchText } from './searchFuzzy'
 import type { MatchRange, SearchEntityResult } from './searchResultTypes'
 import { getPassageSearchExcerpt } from './searchPassageExcerpt'
-
 const getMatchForKey = (item: SearchEntityResult, key: string) =>
   item.matches?.find(match => match.key === key)
 
@@ -78,6 +80,8 @@ export const HighlightedText = ({
   color?: string
   useExcerpt?: boolean
 }) => {
+  const stylingTheme = useStylingTheme()
+
   const sourceText = normalizeDisplayedText(value)
   const mergedRanges = ranges
     ? filterUsefulRanges(ranges)
@@ -90,10 +94,14 @@ export const HighlightedText = ({
   if (!mergedRanges.length) {
     return (
       <Text
-        bold={bold}
-        fontSize={bold ? 15 : 13}
-        color={bold ? undefined : color}
         numberOfLines={1}
+        style={{
+          fontSize: bold ? 15 : 13,
+          color:
+            resolveThemeColor(stylingTheme, bold ? undefined : color) ||
+            stylingTheme.colors.default,
+          fontWeight: bold ? 'bold' : undefined,
+        }}
       >
         {sourceText}
       </Text>
@@ -119,14 +127,28 @@ export const HighlightedText = ({
   }
 
   return (
-    <Text bold={bold} fontSize={bold ? 15 : 13} color={bold ? undefined : color} numberOfLines={1}>
+    <Text
+      numberOfLines={1}
+      style={{
+        fontSize: bold ? 15 : 13,
+        color:
+          resolveThemeColor(stylingTheme, bold ? undefined : color) || stylingTheme.colors.default,
+        fontWeight: bold ? 'bold' : undefined,
+      }}
+    >
       {chunks.map((chunk, index) => (
         <Text
           key={`${chunk.text}-${index}`}
-          bold={chunk.highlighted || bold}
-          fontSize={bold ? 15 : 13}
-          color={chunk.highlighted ? 'primary' : bold ? undefined : color}
-          bg={chunk.highlighted ? 'lightPrimary' : undefined}
+          style={{
+            fontSize: bold ? 15 : 13,
+            color:
+              resolveThemeColor(
+                stylingTheme,
+                chunk.highlighted ? 'primary' : bold ? undefined : color
+              ) || stylingTheme.colors.default,
+            fontWeight: chunk.highlighted || bold ? 'bold' : undefined,
+          }}
+          className={twMerge(chunk.highlighted ? 'bg-light-primary' : '')}
         >
           {chunk.text}
         </Text>
@@ -143,7 +165,7 @@ const PassageDescription = ({ highlighted }: { highlighted?: string }) => {
       {parts.map((part, i) => {
         if (part.startsWith('{{') && part.endsWith('}}')) {
           return (
-            <Paragraph small bold color="primary" key={i}>
+            <Paragraph className="font-bold text-primary" small key={i}>
               {part.slice(2, -2)}
             </Paragraph>
           )
@@ -166,51 +188,60 @@ export const SearchEntityResultRow = ({
   showArrow?: boolean
   description?: React.ReactNode
   descriptionColor?: string
-}) => (
-  <TouchableOpacity accessibilityRole="button" onPress={onPress} activeOpacity={0.7}>
-    <HStack
-      px={20}
-      py={12}
-      borderBottomWidth={1}
-      borderLeftWidth={3}
-      borderLeftColor={searchTypeIconConfig[item.iconType].color}
-      borderColor="border"
-      alignItems="center"
-      gap={12}
-    >
-      <VStack flex={1}>
-        <HStack alignItems="center" gap={6} mb={2}>
-          <HighlightedText value={item.title} match={getMatchForKey(item, 'title')} bold />
-          {item.chip ? <Chip>{item.chip}</Chip> : null}
-          {item.subtitle && item.type === 'passages' ? <Chip>{item.subtitle}</Chip> : null}
-        </HStack>
-        {description ? (
-          description
-        ) : item.passage ? (
-          <VStack gap={3}>
-            <PassageDescription highlighted={item.description} />
-            {item.passageReason ? (
-              <Text fontSize={11} color="grey" numberOfLines={1}>
-                {item.passageReason}
-              </Text>
-            ) : null}
-          </VStack>
-        ) : item.description ? (
-          <HighlightedText
-            value={item.description}
-            match={getMatchForKey(item, 'description')}
-            color={descriptionColor}
-            useExcerpt
-          />
-        ) : item.subtitle ? (
-          <Text fontSize={13} color={descriptionColor} numberOfLines={1}>
-            {item.subtitle}
-          </Text>
-        ) : null}
-      </VStack>
-      {showArrow ? <FeatherIcon name="arrow-right" size={20} color="grey" /> : null}
-    </HStack>
-  </TouchableOpacity>
-)
+}) => {
+  const stylingTheme = useStylingTheme()
+  return (
+    <TouchableOpacity accessibilityRole="button" onPress={onPress} activeOpacity={0.7}>
+      <HStack
+        className="border-continuous overflow-hidden px-[20px] py-[12px] border-b-[1px] border-l-[3px] border-border items-center gap-[12px]"
+        style={{
+          borderLeftColor: resolveThemeColor(
+            stylingTheme,
+            searchTypeIconConfig[item.iconType].color
+          ),
+        }}
+      >
+        <VStack className="overflow-hidden border-continuous flex-[1]">
+          <HStack className="overflow-hidden border-continuous items-center gap-[6px] mb-[2px]">
+            <HighlightedText value={item.title} match={getMatchForKey(item, 'title')} bold />
+            {item.chip ? <Chip>{item.chip}</Chip> : null}
+            {item.subtitle && item.type === 'passages' ? <Chip>{item.subtitle}</Chip> : null}
+          </HStack>
+          {description ? (
+            description
+          ) : item.passage ? (
+            <VStack className="overflow-hidden border-continuous gap-[3px]">
+              <PassageDescription highlighted={item.description} />
+              {item.passageReason ? (
+                <Text className="text-[11px] text-grey" numberOfLines={1}>
+                  {item.passageReason}
+                </Text>
+              ) : null}
+            </VStack>
+          ) : item.description ? (
+            <HighlightedText
+              value={item.description}
+              match={getMatchForKey(item, 'description')}
+              color={descriptionColor}
+              useExcerpt
+            />
+          ) : item.subtitle ? (
+            <Text
+              className="text-[13px]"
+              numberOfLines={1}
+              style={{
+                color:
+                  resolveThemeColor(stylingTheme, descriptionColor) || stylingTheme.colors.default,
+              }}
+            >
+              {item.subtitle}
+            </Text>
+          ) : null}
+        </VStack>
+        {showArrow ? <FeatherIcon name="arrow-right" size={20} color="grey" /> : null}
+      </HStack>
+    </TouchableOpacity>
+  )
+}
 
 export default SearchEntityResultRow

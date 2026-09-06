@@ -1,11 +1,15 @@
-import { pageContentStyle } from '~common/ui/PageContent'
-import styled from '@emotion/native'
-import { Sheet, type SheetRef } from '~common/sheet'
-import React, { useEffect, useRef, useState } from 'react'
+import { useAtom } from 'jotai/react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { useDispatch, useSelector, useStore } from 'react-redux'
-import { useAtom } from 'jotai/react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import { Sheet, type SheetRef } from '~common/sheet'
+import { pageContentStyle } from '~common/ui/PageContent'
+import type { Theme as AppTheme } from '~themes'
 
+import { LegendList } from '@legendapp/list'
 import { useTranslation } from 'react-i18next'
 import { ActionSheetItem } from '~common/ActionMenu'
 import ChoiceFilterModal, { type ChoiceFilterOption } from '~common/ChoiceFilterModal'
@@ -14,39 +18,49 @@ import FiltersHeader from '~common/FiltersHeader'
 import Link from '~common/Link'
 import RenameModal from '~common/RenameModal'
 import SearchFilterModal from '~common/SearchFilterModal'
+import { Tag } from '~common/types'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import FabButton from '~common/ui/FabButton'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import { LegendList } from '@legendapp/list'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { useSheet } from '~helpers/useSheet'
-import { addTag, removeTag, updateTag } from '~redux/modules/user'
-import { selectTagListRows } from '~redux/selectors/tags'
-import { makeTagDataSelector } from '~redux/selectors/bible'
-import { Tag } from '~common/types'
-import { RootState } from '~redux/modules/reducer'
-import { useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
-import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { queryTagList, type TagListRow } from '~features/entityListQuery/tagListQuery'
+import { useSheet } from '~helpers/useSheet'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { RootState } from '~redux/modules/reducer'
+import { addTag, removeTag, updateTag } from '~redux/modules/user'
+import { makeTagDataSelector } from '~redux/selectors/bible'
+import { selectTagListRows } from '~redux/selectors/tags'
 import {
   defaultTagListQueryState,
   tagListQueryAtom,
   type TagListSort,
 } from '~state/entityListFilters'
+import { useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
 
-const Chip = styled(Box)(({ theme }) => ({
-  borderRadius: 20,
-  backgroundColor: theme.colors.border,
-  paddingTop: 3,
-  paddingBottom: 3,
-  paddingLeft: 7,
-  paddingRight: 7,
-  marginRight: 5,
-  marginBottom: 5,
-  marginTop: 5,
-}))
+const Chip = (
+  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'rounded-[20px] bg-border pt-[3px] pb-[3px] pl-[7px] pr-[7px] mr-[5px] mb-[5px] mt-[5px]',
+      className
+    )
+  )
+  return (
+    <Box
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
 type TagItemProps = {
   item: TagListRow
@@ -64,57 +78,57 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
   const navesNumber = item.counts.naves
 
   return (
-    <Box>
+    <Box className="overflow-hidden border-continuous">
       <Link route="Tag" params={{ tagId: item.id }}>
-        <Box padding={20} row pr={0} py={10}>
-          <Box flex justifyContent="center">
-            <Text bold>{item.title}</Text>
-            <Box row>
+        <Box className="overflow-hidden border-continuous p-[20px] flex-row pr-[0px] py-[10px]">
+          <Box className="overflow-hidden border-continuous flex-[1] justify-center">
+            <Text className="font-bold">{item.title}</Text>
+            <Box className="overflow-hidden border-continuous flex-row">
               {!!strongsNumber && (
                 <Chip>
-                  <Text fontSize={10} color="default">
+                  <Text className="text-[10px] text-default">
                     {strongsNumber} {t('strong', { count: strongsNumber })}
                   </Text>
                 </Chip>
               )}
               {!!wordsNumber && (
                 <Chip>
-                  <Text fontSize={10} color="default">
+                  <Text className="text-[10px] text-default">
                     {wordsNumber} {t('dictionnaire', { count: wordsNumber })}
                   </Text>
                 </Chip>
               )}
               {!!navesNumber && (
                 <Chip>
-                  <Text fontSize={10} color="default">
+                  <Text className="text-[10px] text-default">
                     {navesNumber} {t('nave', { count: navesNumber })}
                   </Text>
                 </Chip>
               )}
               {!!highlightsNumber && (
                 <Chip>
-                  <Text fontSize={10} color="default">
+                  <Text className="text-[10px] text-default">
                     {highlightsNumber} {t('surbrillance', { count: highlightsNumber })}
                   </Text>
                 </Chip>
               )}
               {!!notesNumber && (
                 <Chip>
-                  <Text fontSize={10} color="default">
+                  <Text className="text-[10px] text-default">
                     {notesNumber} {t('note', { count: notesNumber })}
                   </Text>
                 </Chip>
               )}
               {!!studiesNumber && (
                 <Chip>
-                  <Text fontSize={10} color="default">
+                  <Text className="text-[10px] text-default">
                     {studiesNumber} {t('étude', { count: studiesNumber })}
                   </Text>
                 </Chip>
               )}
               {!!linksNumber && (
                 <Chip>
-                  <Text fontSize={10} color="default">
+                  <Text className="text-[10px] text-default">
                     {linksNumber} {t('lien', { count: linksNumber })}
                   </Text>
                 </Chip>
@@ -130,7 +144,7 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
           </Link>
         </Box>
       </Link>
-      <Border marginHorizontal={10} />
+      <Border className="mx-[10px]" />
     </Box>
   )
 }
@@ -196,7 +210,7 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <FiltersHeader
           hasBackButton={hasBackButton}
           title={t('Étiquettes')}

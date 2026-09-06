@@ -8,7 +8,6 @@ import {
   type CanonicalBibleNote,
   type CanonicalBibleNoteMarkupNode,
 } from '~helpers/canonicalBibleNotes'
-
 type CanonicalBibleNoteSheetProps = {
   sheetRef: React.RefObject<SheetRef | null>
   note: CanonicalBibleNote | null
@@ -30,7 +29,7 @@ const CanonicalBibleNoteSheet = ({
       header={<SheetHeader title={label ? t('Note {{label}}', { label }) : t('Note')} />}
     >
       <SheetScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 18 }}>
-        <Text fontSize={18} lineHeight={29} selectable>
+        <Text className="text-[18px] leading-[29px]" selectable>
           {renderNoteNodes(nodes, onReferencePress)}
         </Text>
       </SheetScrollView>
@@ -42,8 +41,8 @@ const renderNoteNodes = (
   nodes: CanonicalBibleNoteMarkupNode[],
   onReferencePress: (osis: string) => void,
   keyPrefix = 'note'
-): React.ReactNode[] =>
-  nodes.map((node, index) => {
+): React.ReactNode[] => {
+  return nodes.map((node, index) => {
     const key = `${keyPrefix}-${index}`
     if (node.kind === 'text') return node.text
 
@@ -64,7 +63,7 @@ const renderNoteNodes = (
         )
       case 'sup':
         return (
-          <Text key={key} fontSize={11} style={{ transform: [{ translateY: -4 }] }}>
+          <Text className="text-[11px]" key={key} style={{ transform: [{ translateY: -4 }] }}>
             {children}
           </Text>
         )
@@ -72,9 +71,8 @@ const renderNoteNodes = (
         const osis = node.attributes.id
         return (
           <Text
+            className="text-primary underline decoration-solid decoration-default"
             key={key}
-            color="primary"
-            underline
             accessibilityRole={osis ? 'link' : undefined}
             onPress={osis ? () => onReferencePress(osis) : undefined}
           >
@@ -87,5 +85,6 @@ const renderNoteNodes = (
         return <React.Fragment key={key}>{children}</React.Fragment>
     }
   })
+}
 
 export default CanonicalBibleNoteSheet

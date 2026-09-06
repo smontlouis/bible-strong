@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { ScrollView } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
 import Box from '~common/ui/Box'
@@ -22,7 +21,6 @@ import {
 import { localQueryOptions } from '~helpers/queryOptions'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { loadBibleVerseTexts } from '~features/resources/resourceQueries'
-
 export const useShareOptions = () => {
   const hasVerseNumbers = useSelector(
     (state: RootState) => state.user.bible.settings.shareVerses.hasVerseNumbers
@@ -75,8 +73,8 @@ const BibleShareOptionsScreen = () => {
     <Container>
       <Header hasBackButton title={t('bible.settings.shareOptions')} />
       <ScrollView contentContainerStyle={pageContentStyle}>
-        <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
-          <Text flex>{t('bible.settings.hasVerseNumbers')}</Text>
+        <Box className="overflow-hidden border-continuous px-[20px] py-[10px] flex-row items-center">
+          <Text className="flex-[1]">{t('bible.settings.hasVerseNumbers')}</Text>
           <Switch
             accessibilityLabel={t('bible.settings.hasVerseNumbers')}
             accessibilityState={{ checked: hasVerseNumbers }}
@@ -86,8 +84,8 @@ const BibleShareOptionsScreen = () => {
             }}
           />
         </Box>
-        <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
-          <Text flex>{t('bible.settings.hasInlineVerses')}</Text>
+        <Box className="overflow-hidden border-continuous px-[20px] py-[10px] flex-row items-center">
+          <Text className="flex-[1]">{t('bible.settings.hasInlineVerses')}</Text>
           <Switch
             accessibilityLabel={t('bible.settings.hasInlineVerses')}
             accessibilityState={{ checked: hasInlineVerses }}
@@ -97,8 +95,8 @@ const BibleShareOptionsScreen = () => {
             }}
           />
         </Box>
-        <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
-          <Text flex>{t('bible.settings.hasQuotes')}</Text>
+        <Box className="overflow-hidden border-continuous px-[20px] py-[10px] flex-row items-center">
+          <Text className="flex-[1]">{t('bible.settings.hasQuotes')}</Text>
           <Switch
             accessibilityLabel={t('bible.settings.hasQuotes')}
             accessibilityState={{ checked: hasQuotes }}
@@ -108,8 +106,8 @@ const BibleShareOptionsScreen = () => {
             }}
           />
         </Box>
-        <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
-          <Box flex>
+        <Box className="overflow-hidden border-continuous px-[20px] py-[10px] flex-row items-center">
+          <Box className="overflow-hidden border-continuous flex-[1]">
             <Text>{t('bible.settings.hasAppName')}</Text>
           </Box>
           <Switch
@@ -121,7 +119,7 @@ const BibleShareOptionsScreen = () => {
             }}
           />
         </Box>
-        <Box p={20} m={20} borderRadius={20} bg="reverse">
+        <Box className="overflow-hidden border-continuous p-[20px] m-[20px] rounded-[20px] bg-reverse">
           <Text>{message}</Text>
         </Box>
       </ScrollView>

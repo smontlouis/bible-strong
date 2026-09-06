@@ -1,21 +1,18 @@
 import React from 'react'
-
 import { VerseSlice as VerseSliceProps } from 'src/common/types'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
-
 import { useVersesToContent } from '~features/plans/plan.hooks'
 import Loading from '~common/Loading'
 import Link from '~common/Link'
 import { useTranslation } from 'react-i18next'
-
 const EventDetailVerse = ({ verses }: VerseSliceProps) => {
   const { status, content } = useVersesToContent(verses)
   const { t } = useTranslation()
 
   if (status === 'Pending') {
     return (
-      <Box height={200}>
+      <Box className="overflow-hidden border-continuous h-[200px]">
         <Loading />
       </Box>
     )
@@ -23,7 +20,7 @@ const EventDetailVerse = ({ verses }: VerseSliceProps) => {
 
   if (status === 'Rejected') {
     return (
-      <Box center padding={20}>
+      <Box className="overflow-hidden border-continuous items-center justify-center p-[20px]">
         <Paragraph scaleLineHeight={1}>
           {t("Il semblerait que ce chapitre n'existe pas dans cette version.")}
         </Paragraph>
@@ -34,9 +31,9 @@ const EventDetailVerse = ({ verses }: VerseSliceProps) => {
   if (status === 'Resolved' && content) {
     return (
       <Link {...content.viewMore}>
-        <Box pb={20}>
-          <Box>
-            <Paragraph fontFamily="title" scale={-1} color="grey">
+        <Box className="overflow-hidden border-continuous pb-[20px]">
+          <Box className="overflow-hidden border-continuous">
+            <Paragraph className="text-grey" fontFamily="title" scale={-1}>
               {content.bookName}
             </Paragraph>
           </Box>

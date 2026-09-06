@@ -1,11 +1,9 @@
 import React from 'react'
 import { ScrollView, TouchableOpacity } from 'react-native'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import { EaseView } from 'react-native-ease'
-
 import Text from '~common/ui/Text'
-
 export type StatusFilter = 'downloaded' | 'notDownloaded'
 export type LangFilter = 'fr' | 'en' | 'other'
 
@@ -96,8 +94,7 @@ const FilterChipRow = ({
             }}
           >
             <Text
-              fontSize={13}
-              bold
+              className="text-[13px] font-bold"
               style={{
                 color: chip.isActive ? '#fff' : theme.colors.default,
               }}

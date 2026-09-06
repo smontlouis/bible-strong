@@ -1,5 +1,7 @@
+import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { twMerge } from '~common/ui/classNames'
 import React from 'react'
-
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
@@ -8,8 +10,16 @@ import { Image } from 'expo-image'
 import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { getTimelinePeriodImageSource } from './timelinePeriodImages'
-
-const LinkBox = Box.withComponent(Link)
+const LinkBox = (props: React.ComponentProps<typeof Box> & React.ComponentProps<typeof Link>) => (
+  <Box
+    as={Link}
+    {...props}
+    className={twMerge(
+      'overflow-hidden border-continuous',
+      twMerge('overflow-hidden border-continuous', props.className)
+    )}
+  />
+)
 
 const TimelineItem = ({
   image,
@@ -23,48 +33,58 @@ const TimelineItem = ({
   goTo,
   onPress,
 }: TimelineSection & { goTo: number; onPress?: (goTo: number) => void }) => {
+  const stylingTheme = useStylingTheme()
+
   const lang = useLanguage()
   return (
     <LinkBox
-      row
-      px={20}
-      center
-      mb={30}
+      className="px-[20px] mb-[30px] items-center justify-center flex-row"
       route={onPress ? undefined : 'Timeline'}
       params={onPress ? undefined : { goTo }}
       onPress={onPress ? () => onPress(goTo) : undefined}
     >
       <Box
-        position="relative"
-        zIndex={2}
-        width="45%"
-        maxWidth={180}
-        lightShadow
-        borderRadius={10}
-        height={180}
-        bg="reverse"
-        transform={[{ translateX: 20 }]}
-        p={20}
-        justifyContent="space-between"
+        className="overflow-hidden border-continuous relative z-[2] w-[45%] max-w-[180px] rounded-[10px] h-[180px] bg-reverse p-[20px] justify-between"
+        style={{
+          transform: [{ translateX: 20 }],
+          shadowColor: 'rgb(89,131,240)',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 7,
+          elevation: 1,
+          overflow: 'visible',
+        }}
       >
-        <Text title fontSize={12}>
+        <Text
+          className="text-[12px]"
+          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+        >
           {getLegacyLocalizedField(lang, { fr: sectionTitle, en: sectionTitleEn })}
         </Text>
-        <Text title fontSize={18}>
+        <Text
+          className="text-[18px]"
+          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+        >
           {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
         </Text>
 
-        <Box>
-          <Box height={2} bg="default" />
+        <Box className="overflow-hidden border-continuous">
+          <Box className="overflow-hidden border-continuous h-[2px] bg-default" />
 
-          <Text py={3} textAlign="center" fontSize={10} title>
+          <Text
+            className="py-[3px] text-center text-[10px]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {getLegacyLocalizedField(lang, { fr: subTitle, en: subTitleEn })}
           </Text>
-          <Box height={2} bg="default" />
+          <Box className="overflow-hidden border-continuous h-[2px] bg-default" />
         </Box>
-        <Box mx={40} height={10} bg={color} borderRadius={10} />
+        <Box
+          className="overflow-hidden border-continuous mx-[40px] h-[10px] rounded-[10px]"
+          style={{ backgroundColor: resolveThemeColor(stylingTheme, color) }}
+        />
       </Box>
-      <Box width="55%" height={250} borderRadius={10}>
+      <Box className="overflow-hidden border-continuous w-[55%] h-[250px] rounded-[10px]">
         <Image
           source={getTimelinePeriodImageSource(image)}
           contentFit="cover"

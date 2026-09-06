@@ -1,9 +1,13 @@
-import { pageContentStyle } from './PageContent'
-import styled from '@emotion/native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
+import * as NativeUI from 'react-native'
 import { ScrollViewProps, StyleProp, StyleSheet, ViewStyle } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme as useAppTheme, useTheme } from '~themes/ThemeProvider'
+import { pageContentStyle } from './PageContent'
 
-import { useTheme } from '@emotion/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import useDeviceOrientation, { Orientation } from '~helpers/useDeviceOrientation'
 
@@ -12,23 +16,41 @@ type StyledScrollViewProps = {
   backgroundColor?: string
 }
 
-const ScrollView = styled.ScrollView<StyledScrollViewProps>(
-  ({ theme, orientation, backgroundColor }) => ({
-    backgroundColor: backgroundColor
-      ? theme.colors[backgroundColor as keyof typeof theme.colors] || backgroundColor
-      : theme.colors.reverse,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    width: '100%',
-
-    ...(orientation.tablet && {
-      marginTop: 20,
-      marginBottom: 50,
-      borderBottomLeftRadius: 30,
-      borderBottomRightRadius: 30,
-    }),
-  })
-)
+const ScrollView = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.ScrollView>,
+    keyof StyledScrollViewProps | 'theme'
+  > &
+    Omit<StyledScrollViewProps, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { orientation, backgroundColor } = props
+  const classStyles = useResolveClassNames(twMerge('ml-auto mr-auto w-[100%]', className))
+  return (
+    <NativeUI.ScrollView
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            backgroundColor: backgroundColor
+              ? theme.colors[backgroundColor as keyof typeof theme.colors] || backgroundColor
+              : theme.colors.reverse,
+            ...(orientation.tablet && {
+              marginTop: 20,
+              marginBottom: 50,
+              borderBottomLeftRadius: 30,
+              borderBottomRightRadius: 30,
+            }),
+          },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.ScrollView>['style']
+      }
+    />
+  )
+}
 
 type HomeScrollViewProps = ScrollViewProps & {
   children: React.ReactNode

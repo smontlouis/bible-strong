@@ -1,8 +1,6 @@
 import { useEffect } from 'react'
 import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
-
 import { AnimatedBox } from '~common/ui/Box'
-
 type SceneBackgroundShapeProps = {
   borderRadius: number
   reduceMotion: boolean
@@ -19,7 +17,7 @@ const SceneBackgroundShape = ({ borderRadius, reduceMotion }: SceneBackgroundSha
     borderRadius: animatedBorderRadius.get(),
   }))
 
-  return <AnimatedBox flex bg="lightPrimary" style={animatedStyle} />
+  return <AnimatedBox className="flex-[1] bg-light-primary" style={animatedStyle} />
 }
 
 export default SceneBackgroundShape

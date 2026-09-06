@@ -1,4 +1,5 @@
-import { useTheme } from '@emotion/react'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Image } from 'expo-image'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -12,13 +13,11 @@ import {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated'
-
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import { AnimatedText } from '~common/ui/Text'
 import { getContrastTextColor } from '~helpers/highlightUtils'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import type { OnboardingStageMetrics } from './OnboardingStage'
-
 export const HIGHLIGHT_COLORS = ['color1', 'color2', 'color3', 'color4', 'color5'] as const
 export type HighlightColor = (typeof HIGHLIGHT_COLORS)[number]
 
@@ -95,6 +94,8 @@ const VerseCard = ({
   highlightOverrideColor,
   resourceIllustration,
 }: VerseCardProps) => {
+  const stylingTheme = useStylingTheme()
+
   const theme = useTheme()
   const { colorScheme } = useCurrentThemeSelector()
   const { i18n, t } = useTranslation()
@@ -134,75 +135,112 @@ const VerseCard = ({
   }))
 
   return (
-    <AnimatedBox flex style={shakeStyle}>
-      <Box flex={1} bg="reverse" borderRadius={s(28)} p={s(24)} lightShadow overflow="visible">
-        <HStack alignItems="center">
-          <AnimatedBox entering={lineEntering(120, reduceMotion)}>
+    <AnimatedBox className="overflow-hidden border-continuous flex-[1]" style={shakeStyle}>
+      <Box
+        className="border-continuous overflow-visible flex-[1] bg-reverse"
+        style={{
+          padding: s(24),
+          borderRadius: s(28),
+          shadowColor: 'rgb(89,131,240)',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 7,
+          elevation: 1,
+          overflow: 'visible',
+        }}
+      >
+        <HStack className="overflow-hidden border-continuous items-center">
+          <AnimatedBox
+            entering={lineEntering(120, reduceMotion)}
+            className="overflow-hidden border-continuous"
+          >
             <AnimatedText
-              title
-              color="primary"
-              fontSize={s(31)}
-              lineHeight={s(38)}
-              style={[{ fontFamily: 'Literata Book' }, dimmedTextStyle]}
+              className="text-primary"
+              style={[
+                {
+                  fontSize: s(31) || 16,
+                  lineHeight: s(38),
+                  fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+                },
+                [{ fontFamily: 'Literata Book' }, dimmedTextStyle],
+              ]}
             >
               {t('onboarding.abel.sceneOne.chapter')}
             </AnimatedText>
           </AnimatedBox>
         </HStack>
 
-        <VStack mt={s(22)} gap={s(3)}>
-          <AnimatedBox entering={lineEntering(220, reduceMotion)}>
+        <VStack
+          className="overflow-hidden border-continuous"
+          style={{ marginTop: s(22), gap: s(3) }}
+        >
+          <AnimatedBox
+            entering={lineEntering(220, reduceMotion)}
+            className="overflow-hidden border-continuous"
+          >
             <AnimatedText
-              fontSize={verseFontSize}
-              lineHeight={verseLineHeight}
-              style={dimmedTextStyle}
+              style={[
+                { fontSize: verseFontSize || 16, lineHeight: verseLineHeight },
+                dimmedTextStyle,
+              ]}
             >
               {t('onboarding.abel.sceneOne.lineOne')}
             </AnimatedText>
           </AnimatedBox>
-          <AnimatedBox entering={lineEntering(300, reduceMotion)}>
-            <HStack alignItems="center">
+          <AnimatedBox
+            entering={lineEntering(300, reduceMotion)}
+            className="overflow-hidden border-continuous"
+          >
+            <HStack className="overflow-hidden border-continuous items-center">
               <AnimatedText
-                fontSize={verseFontSize}
-                lineHeight={verseLineHeight}
                 style={[
-                  {
-                    paddingHorizontal: s(4),
-                    borderRadius: s(9),
-                    backgroundColor: highlightBackgroundColor,
-                    color: highlightTextColor,
-                  },
-                  highlightStyle,
+                  { fontSize: verseFontSize || 16, lineHeight: verseLineHeight },
+                  [
+                    {
+                      paddingHorizontal: s(4),
+                      borderRadius: s(9),
+                      backgroundColor: highlightBackgroundColor,
+                      color: highlightTextColor,
+                    },
+                    highlightStyle,
+                  ],
                 ]}
               >
                 {t('onboarding.abel.sceneOne.highlightWord')}
               </AnimatedText>
               <AnimatedText
-                fontSize={verseFontSize}
-                lineHeight={verseLineHeight}
-                style={dimmedTextStyle}
+                style={[
+                  { fontSize: verseFontSize || 16, lineHeight: verseLineHeight },
+                  dimmedTextStyle,
+                ]}
               >
                 {t('onboarding.abel.sceneOne.lineTwo')}
               </AnimatedText>
             </HStack>
           </AnimatedBox>
-          <AnimatedBox entering={lineEntering(360, reduceMotion)}>
+          <AnimatedBox
+            entering={lineEntering(360, reduceMotion)}
+            className="overflow-hidden border-continuous"
+          >
             <AnimatedText
-              fontSize={verseFontSize}
-              lineHeight={verseLineHeight}
-              style={dimmedTextStyle}
+              style={[
+                { fontSize: verseFontSize || 16, lineHeight: verseLineHeight },
+                dimmedTextStyle,
+              ]}
             >
               {t('onboarding.abel.sceneOne.lineThree')}
             </AnimatedText>
           </AnimatedBox>
         </VStack>
 
-        <AnimatedBox mt={s(26)} entering={lineEntering(450, reduceMotion)}>
+        <AnimatedBox
+          entering={lineEntering(450, reduceMotion)}
+          style={{ marginTop: s(26) }}
+          className="overflow-hidden border-continuous"
+        >
           <AnimatedText
-            color="tertiary"
-            fontSize={s(12)}
-            bold
-            style={[{ letterSpacing: s(2.4) }, dimmedTextStyle]}
+            className="text-tertiary font-bold"
+            style={[{ fontSize: s(12) || 16 }, [{ letterSpacing: s(2.4) }, dimmedTextStyle]]}
           >
             {t('onboarding.abel.sceneOne.translation')}
           </AnimatedText>
@@ -210,16 +248,24 @@ const VerseCard = ({
 
         {resourceIllustration && resourceIllustrationLayout ? (
           <AnimatedBox
+            className="border-continuous overflow-visible absolute"
             key={resourceIllustration}
             pointerEvents="none"
-            position="absolute"
-            left={s(resourceIllustrationLayout.x)}
-            top={s(resourceIllustrationLayout.y)}
-            size={s(resourceIllustrationLayout.size)}
-            overflow="hidden"
             entering={reduceMotion ? undefined : commentsIllustrationEntering}
             exiting={reduceMotion ? undefined : commentsIllustrationExiting}
-            style={{ zIndex: 5 }}
+            style={[
+              {
+                top: s(resourceIllustrationLayout.y),
+                left: s(resourceIllustrationLayout.x),
+                ...(s(resourceIllustrationLayout.size)
+                  ? {
+                      width: s(resourceIllustrationLayout.size),
+                      height: s(resourceIllustrationLayout.size),
+                    }
+                  : {}),
+              },
+              { zIndex: 5 },
+            ]}
           >
             <Image
               source={

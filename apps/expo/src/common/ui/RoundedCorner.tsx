@@ -1,22 +1,44 @@
-import styled from '@emotion/native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 import Box from './Box'
 
 interface RoundedCornerProps {
   reverse?: boolean
 }
 
-const RoundedCorner = styled(Box)<RoundedCornerProps>(({ theme, reverse }) => ({
-  height: 30,
-  backgroundColor: theme.colors.reverse,
-  ...(reverse
-    ? {
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
+const RoundedCorner = (
+  componentProps: Omit<UIComponentProps<typeof Box>, keyof RoundedCornerProps | 'theme'> &
+    Omit<RoundedCornerProps, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const { reverse } = props
+  const classStyles = useResolveClassNames(twMerge('h-[30px] bg-reverse', className))
+  return (
+    <Box
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            ...(reverse
+              ? {
+                  borderTopLeftRadius: 30,
+                  borderTopRightRadius: 30,
+                }
+              : {
+                  borderBottomLeftRadius: 30,
+                  borderBottomRightRadius: 30,
+                }),
+          },
+          props.style,
+        ] as UIComponentProps<typeof Box>['style']
       }
-    : {
-        borderBottomLeftRadius: 30,
-        borderBottomRightRadius: 30,
-      }),
-}))
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
 export default RoundedCorner

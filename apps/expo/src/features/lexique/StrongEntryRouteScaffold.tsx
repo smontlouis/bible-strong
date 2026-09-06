@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
-
 import Empty from '~common/Empty'
 import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
@@ -22,7 +21,6 @@ import {
   resourceFailureFromAccessError,
   resourceFailureFromStrongModuleAvailability,
 } from '~features/resources/resourceFailure'
-
 type StrongEntryLoadState = Pick<
   ReturnType<typeof useStrongEntryRoute>,
   'identity' | 'coreAvailability' | 'entryQuery' | 'entry'
@@ -87,7 +85,7 @@ const StrongEntryRouteScaffold = ({
       }
     >
       {entryState.entry && (tags || relationCount > 0) && (
-        <Box px={20} mt={-8} pb={10}>
+        <Box className="overflow-hidden border-continuous px-[20px] mt-[-8px] pb-[10px]">
           <EntityChipList
             tags={tags}
             relationCount={relationCount}
@@ -123,7 +121,7 @@ const StrongEntryRouteScaffold = ({
   if (requireEntry && entryState.coreAvailability.isError) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
-        <Box flex>
+        <Box className="overflow-hidden border-continuous flex-[1]">
           {header}
           <ResourceUnavailableView
             title={t('resource.strong.temporarilyUnavailable')}
@@ -142,7 +140,7 @@ const StrongEntryRouteScaffold = ({
   ) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
-        <Box flex>
+        <Box className="overflow-hidden border-continuous flex-[1]">
           {header}
           <ResourceUnavailableView
             identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
@@ -160,7 +158,7 @@ const StrongEntryRouteScaffold = ({
   if (requireEntry && entryState.entryQuery.isError) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
-        <Box flex>
+        <Box className="overflow-hidden border-continuous flex-[1]">
           {header}
           <ResourceUnavailableView
             title={t("Cette entrée Strong n'a pas pu être chargée.")}

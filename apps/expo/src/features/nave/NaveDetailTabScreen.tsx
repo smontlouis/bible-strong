@@ -4,7 +4,6 @@ import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
-
 import { useRouter } from 'expo-router'
 import { produce } from 'immer'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
@@ -44,7 +43,6 @@ import {
   resourceFailureFromAccessError,
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
-
 interface NaveDetailScreenProps {
   naveAtom: PrimitiveAtom<NaveTab>
   isFormSheet?: boolean
@@ -308,7 +306,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
               }
             }}
           >
-            <Box row center height={60} width={60}>
+            <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
               <FeatherIcon name="more-vertical" size={18} />
             </Box>
           </MenuView>
@@ -316,7 +314,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
       />
       <ScrollView>
         {(tags || relationCount > 0) && (
-          <Box mt={0} px={20}>
+          <Box className="overflow-hidden border-continuous mt-[0px] px-[20px]">
             <EntityChipList
               tags={tags}
               relationCount={relationCount}

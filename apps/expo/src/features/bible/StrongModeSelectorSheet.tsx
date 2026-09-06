@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query'
 import { type RefObject } from 'react'
 import { Platform } from 'react-native'
 import { useTranslation } from 'react-i18next'
-
 import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -19,7 +18,6 @@ import useLanguage from '~helpers/useLanguage'
 import { downloadItemStatesAtom } from '~state/downloadQueue'
 import { useBibleTabActions, type BibleTab } from '~state/tabs'
 import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisition'
-
 import BibleDisplayModeCard from './BibleDisplayModeCard'
 import { toast } from '~helpers/toast'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -33,7 +31,6 @@ import {
   getOfflineResourceQuerySignal,
   useOfflineResourceRegistry,
 } from '~features/resources/useOfflineResourceRegistry'
-
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
   sheetRef: RefObject<SheetRef | null>
@@ -180,7 +177,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
 
   return (
     <Sheet ref={sheetRef} header={<SheetHeader title={t('Affichage du texte')} />}>
-      <SheetView p={16} gap={10}>
+      <SheetView className="p-[16px] gap-[10px]">
         <BibleDisplayModeCard
           layout="list"
           label={t('Texte')}
@@ -188,9 +185,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
           selected={selectedMode === 'hidden'}
           onPress={() => selectMode('hidden')}
         >
-          <Text fontSize={16} lineHeight={21} textAlign="right">
-            {translationPreview}
-          </Text>
+          <Text className="text-[16px] leading-[21px] text-right">{translationPreview}</Text>
         </BibleDisplayModeCard>
         <BibleDisplayModeCard
           layout="list"
@@ -206,9 +201,9 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
           downloadAccessibilityLabel={downloadLabel(t('Strong'))}
           onDownloadPress={() => requestDownload('visible')}
         >
-          <Box row center gap={4}>
-            <Text fontSize={16}>{translationPreview}</Text>
-            <Text fontSize={10} color="tertiary" style={{ fontFamily: serifFontFamily }}>
+          <Box className="overflow-hidden border-continuous flex-row items-center justify-center gap-[4px]">
+            <Text className="text-[16px]">{translationPreview}</Text>
+            <Text className="text-[10px] text-tertiary" style={{ fontFamily: serifFontFamily }}>
               {strongPreview}
             </Text>
           </Box>
@@ -227,14 +222,12 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
           downloadAccessibilityLabel={downloadLabel(t('Interlinéaire inversé'))}
           onDownloadPress={() => requestDownload('reverse-interlinear')}
         >
-          <Box alignItems="flex-end">
-            <Text bold fontSize={14} lineHeight={18}>
-              {translationPreview}
-            </Text>
-            <Text fontSize={16} lineHeight={20} style={{ fontFamily: serifFontFamily }}>
+          <Box className="overflow-hidden border-continuous items-end">
+            <Text className="font-bold text-[14px] leading-[18px]">{translationPreview}</Text>
+            <Text className="text-[16px] leading-[20px]" style={{ fontFamily: serifFontFamily }}>
               {originalPreview}
             </Text>
-            <Text fontSize={8} color="tertiary">
+            <Text className="text-[8px] text-tertiary">
               {`${transliterationPreview} · ${morphologyPreview} · ${strongPreview}`}
             </Text>
           </Box>

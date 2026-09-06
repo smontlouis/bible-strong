@@ -1,31 +1,44 @@
-import styled from '@emotion/native'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, Theme, useTheme } from '~themes/ThemeProvider'
 import distanceInWords from 'date-fns/formatDistance'
-import React from 'react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
 import * as Icon from '@expo/vector-icons'
 
-import Link from '~common/Link'
 import EntityChipList from '~common/EntityChipList'
+import Link from '~common/Link'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
-import { Theme, useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
 import Paragraph from '~common/ui/Paragraph'
+import type { NoteListRow } from '~features/entityListQuery/noteListRows'
+import { getNoteTitle } from '~helpers/getNoteTitle'
+import { getDateLocale } from '~helpers/languageUtils'
 import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
-import { getDateLocale } from '~helpers/languageUtils'
-import { getNoteTitle } from '~helpers/getNoteTitle'
-import type { NoteListRow } from '~features/entityListQuery/noteListRows'
 import { useMountTime } from '~helpers/useMountTime'
 
-const NoteLink = styled(Link)(({ theme }: { theme: Theme }) => ({
-  paddingVertical: 20,
-  padding: 20,
-  paddingRight: 0,
-  flexDirection: 'row',
-}))
+const NoteLink = (
+  componentProps: Omit<UIComponentProps<typeof Link>, keyof { theme: Theme } | 'theme'> &
+    Omit<{ theme: Theme }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('py-[20px] p-[20px] pr-[0px] flex-row', className)
+  )
+  return (
+    <Link
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Link>['style']}
+    />
+  )
+}
 
 type Props = {
   item: NoteListRow
@@ -36,6 +49,8 @@ type Props = {
 }
 
 const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPress }: Props) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const theme = useTheme()
   const lang = useLanguage()
@@ -51,19 +66,20 @@ const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
   const hasChips = Boolean(Object.keys(item.note.tags || {}).length || relationCount)
 
   return (
-    <Box>
-      <Box row alignItems="center">
-        <Box flex>
+    <Box className="overflow-hidden border-continuous">
+      <Box className="overflow-hidden border-continuous flex-row items-center">
+        <Box className="overflow-hidden border-continuous flex-[1]">
           <NoteLink
             onPress={() => onPress(item.noteId)}
             style={{ paddingBottom: hasChips ? 8 : 20 }}
           >
-            <Box flex>
-              <Text color="darkGrey" bold fontSize={11}>
-                {metadataLabel}
-              </Text>
+            <Box className="overflow-hidden border-continuous flex-[1]">
+              <Text className="text-dark-grey font-bold text-[11px]">{metadataLabel}</Text>
               {!!noteTitle && (
-                <Text title fontSize={16}>
+                <Text
+                  className="text-[16px]"
+                  style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+                >
                   {noteTitle}
                 </Text>
               )}
@@ -75,7 +91,7 @@ const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
             </Box>
           </NoteLink>
           {hasChips && (
-            <Box px={20} pb={20}>
+            <Box className="overflow-hidden border-continuous px-[20px] pb-[20px]">
               <EntityChipList
                 tags={item.note.tags}
                 relationCount={relationCount}
@@ -92,7 +108,7 @@ const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
           <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />
         </Link>
       </Box>
-      <Border marginHorizontal={20} />
+      <Border className="mx-[20px]" />
     </Box>
   )
 }

@@ -24,7 +24,7 @@ const TabScreenWrapper = ({
 }: TabScreenWrapperProps) => {
   return (
     <RefableAnimatedBox
-      bg="reverse"
+      className="bg-reverse overflow-hidden border-continuous"
       style={style}
       ref={ref}
       accessibilityElementsHidden={accessibilityElementsHidden}

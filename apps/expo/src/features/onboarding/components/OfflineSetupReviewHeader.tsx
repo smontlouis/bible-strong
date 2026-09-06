@@ -1,8 +1,9 @@
+import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import type { RefObject } from 'react'
 import { View } from 'react-native'
 import { useTranslation } from 'react-i18next'
-
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
@@ -10,7 +11,6 @@ import type { OfflineSetupReviewFolderContext } from '../offlineSetupReview'
 import type { OfflineSetupPalette } from '../offlineSetupPalette'
 import formatResourceSize from '../formatResourceSize'
 import OfflineResourceFolderBadge from './OfflineResourceFolderBadge'
-
 type OfflineSetupReviewHeaderProps = {
   downloadBytes: number
   folderBadgeRef: RefObject<View | null>
@@ -39,10 +39,15 @@ const OfflineSetupFolderReviewHeader = ({
   palette: OfflineSetupPalette
   onFolderBadgeLayout: () => void
 }) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
 
   return (
-    <HStack height={height} alignItems="center" px={12} gap={13} style={{ overflow: 'visible' }}>
+    <HStack
+      className="overflow-hidden border-continuous items-center px-[12px] gap-[13px]"
+      style={[{ height: height }, { overflow: 'visible' }]}
+    >
       <View
         ref={folderBadgeRef}
         collapsable={false}
@@ -51,11 +56,25 @@ const OfflineSetupFolderReviewHeader = ({
       >
         <OfflineResourceFolderBadge itemCount={context.selectedCount} visual={context.visual} />
       </View>
-      <Box flex>
-        <Text color={palette.onSheet} title fontSize={14} lineHeight={17} numberOfLines={1}>
+      <Box className="overflow-hidden border-continuous flex-[1]">
+        <Text
+          className="text-[14px] leading-[17px]"
+          numberOfLines={1}
+          style={{
+            color: resolveThemeColor(stylingTheme, palette.onSheet) || stylingTheme.colors.default,
+            fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+          }}
+        >
           {context.title}
         </Text>
-        <Text color={palette.onSheetMuted} fontSize={10} lineHeight={14} numberOfLines={1}>
+        <Text
+          className="text-[10px] leading-[14px]"
+          numberOfLines={1}
+          style={{
+            color:
+              resolveThemeColor(stylingTheme, palette.onSheetMuted) || stylingTheme.colors.default,
+          }}
+        >
           {t('offlineSetup.folderReviewSummary', {
             count: context.selectedCount,
             size: formatResourceSize(installedBytes, lang),
@@ -79,27 +98,72 @@ const OfflineSetupGlobalReviewHeader = ({
   lang: ResourceLanguage
   palette: OfflineSetupPalette
 }) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
 
   return (
-    <HStack height={height} alignItems="center" px={12} gap={14}>
-      <Box size={36} borderRadius={18} bg={palette.accent} center>
+    <HStack
+      className="overflow-hidden border-continuous items-center px-[12px] gap-[14px]"
+      style={{ height: height }}
+    >
+      <Box
+        className="overflow-hidden border-continuous rounded-[18px] items-center justify-center"
+        style={{
+          backgroundColor: resolveThemeColor(stylingTheme, palette.accent),
+          width: 36,
+          height: 36,
+        }}
+      >
         <Feather name="archive" size={20} color={palette.onAccent} />
       </Box>
-      <Box flex>
-        <Text color={palette.onSheetMuted} fontSize={11}>
+      <Box className="overflow-hidden border-continuous flex-[1]">
+        <Text
+          className="text-[11px]"
+          style={{
+            color:
+              resolveThemeColor(stylingTheme, palette.onSheetMuted) || stylingTheme.colors.default,
+          }}
+        >
           {t('offlineSetup.toDownload')}
         </Text>
-        <Text color={palette.onSheet} fontSize={18} style={{ fontFamily: 'FiraCode' }}>
+        <Text
+          className="text-[18px]"
+          style={[
+            {
+              color:
+                resolveThemeColor(stylingTheme, palette.onSheet) || stylingTheme.colors.default,
+            },
+            { fontFamily: 'FiraCode' },
+          ]}
+        >
           {formatResourceSize(downloadBytes, lang)}
         </Text>
       </Box>
-      <Box height={34} width={1} bg={palette.divider} />
-      <Box flex>
-        <Text color={palette.onSheetMuted} fontSize={11}>
+      <Box
+        className="overflow-hidden border-continuous h-[34px] w-[1px]"
+        style={{ backgroundColor: resolveThemeColor(stylingTheme, palette.divider) }}
+      />
+      <Box className="overflow-hidden border-continuous flex-[1]">
+        <Text
+          className="text-[11px]"
+          style={{
+            color:
+              resolveThemeColor(stylingTheme, palette.onSheetMuted) || stylingTheme.colors.default,
+          }}
+        >
           {t('offlineSetup.onDevice')}
         </Text>
-        <Text color={palette.onSheet} fontSize={18} style={{ fontFamily: 'FiraCode' }}>
+        <Text
+          className="text-[18px]"
+          style={[
+            {
+              color:
+                resolveThemeColor(stylingTheme, palette.onSheet) || stylingTheme.colors.default,
+            },
+            { fontFamily: 'FiraCode' },
+          ]}
+        >
           {formatResourceSize(installedBytes, lang)}
         </Text>
       </Box>

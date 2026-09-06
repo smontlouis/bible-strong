@@ -1,9 +1,10 @@
-import { useTheme } from '@emotion/react'
+import { twMerge } from '~common/ui/classNames'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import type { TFunction } from 'i18next'
 import { FadeOut } from 'react-native-reanimated'
 import Color from 'color'
-
 import CommentIcon from '~common/CommentIcon'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -17,7 +18,6 @@ import SceneBackgroundShape from '../SceneBackgroundShape'
 import SceneDecorativePluses from '../SceneDecorativePluses'
 import { Scene } from '../SceneGraph'
 import VerseCard, { type HighlightColor, type ResourceIllustration } from '../VerseCard'
-
 const SCENE_TWO_ENTRANCE_TIMING = {
   start: 200,
   stagger: 80,
@@ -101,6 +101,8 @@ export const SceneTwoNodeCard = ({
   iconSize,
   fontSize,
 }: SceneTwoNodeCardProps) => {
+  const stylingTheme = useStylingTheme()
+
   const theme = useTheme()
   const s = metrics.s
   const resolvedIconSize = iconSize ?? (active ? 20 : 14)
@@ -116,26 +118,35 @@ export const SceneTwoNodeCard = ({
 
   return (
     <AnimatedBox
-      h="100%"
-      borderRadius={active ? s(20) : s(12)}
-      overflow="visible"
-      style={{
-        backgroundColor,
-        boxShadow: `0 ${s(3)}px ${s(active ? 10 : 7)}px 0 ${shadowColor}`,
-        transitionProperty: ['backgroundColor', 'boxShadow'],
-        transitionDuration: reduceMotion ? 0 : 280,
-        transitionTimingFunction: 'ease-in-out',
-      }}
-      justifyContent="center"
+      className="border-continuous overflow-visible h-[100%] justify-center"
+      style={[
+        { borderRadius: active ? s(20) : s(12) },
+        {
+          backgroundColor,
+          boxShadow: `0 ${s(3)}px ${s(active ? 10 : 7)}px 0 ${shadowColor}`,
+          transitionProperty: ['backgroundColor', 'boxShadow'],
+          transitionDuration: reduceMotion ? 0 : 280,
+          transitionTimingFunction: 'ease-in-out',
+        },
+      ]}
     >
-      <HStack alignItems="center" gap={s(active ? 9 : 6)} px={s(active ? 16 : 10)}>
+      <HStack
+        className="overflow-hidden border-continuous items-center"
+        style={{ paddingHorizontal: s(active ? 16 : 10), gap: s(active ? 9 : 6) }}
+      >
         <Box
-          size={s(active ? 38 : 28)}
-          borderRadius={s(active ? 13 : 9)}
-          center
-          style={{
-            backgroundColor: active ? 'rgba(255,255,255,0.18)' : iconColor,
-          }}
+          className="overflow-hidden border-continuous items-center justify-center"
+          style={[
+            {
+              borderRadius: s(active ? 13 : 9),
+              ...(s(active ? 38 : 28)
+                ? { width: s(active ? 38 : 28), height: s(active ? 38 : 28) }
+                : {}),
+            },
+            {
+              backgroundColor: active ? 'rgba(255,255,255,0.18)' : iconColor,
+            },
+          ]}
         >
           <SceneTwoFeatureIcon
             icon={icon}
@@ -144,11 +155,13 @@ export const SceneTwoNodeCard = ({
           />
         </Box>
         <Text
-          title={active}
-          bold={!active}
-          color={active ? 'reverse' : undefined}
-          fontSize={s(resolvedFontSize)}
           numberOfLines={1}
+          style={{
+            fontSize: s(resolvedFontSize) || 16,
+            fontWeight: !active ? 'bold' : undefined,
+            fontFamily: resolveFontFamily(active ? stylingTheme.fontFamily.title : undefined),
+          }}
+          className={twMerge(active ? 'text-reverse' : 'text-default')}
         >
           {label}
         </Text>

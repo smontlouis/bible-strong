@@ -1,43 +1,77 @@
-import React from 'react'
-import styled from '@emotion/native'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme as useAppTheme } from '~themes/ThemeProvider'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { Pressable } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
+import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { useTranslation } from 'react-i18next'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 
-const SectionItem = styled(Box)(({ theme }) => ({
-  height: 80,
-  marginLeft: 20,
-  marginRight: 20,
-  backgroundColor: theme.colors.reverse,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1,
-  alignItems: 'flex-start',
-  justifyContent: 'center',
-}))
+const SectionItem = (
+  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'h-[80px] ml-[20px] mr-[20px] bg-reverse border-b-border border-b-[1px] items-start justify-center',
+      className
+    )
+  )
+  return (
+    <Box
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
 interface ChipProps {
   isHebreu?: boolean
 }
 
-const Chip = styled(Box)<ChipProps>(({ theme, isHebreu }) => ({
-  borderRadius: 10,
-  backgroundColor: isHebreu ? theme.colors.lightPrimary : theme.colors.border,
-  paddingTop: 2,
-  paddingBottom: 2,
-  paddingLeft: 5,
-  paddingRight: 5,
-  marginBottom: 3,
-}))
+const Chip = (
+  componentProps: Omit<UIComponentProps<typeof Box>, keyof ChipProps | 'theme'> &
+    Omit<ChipProps, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { isHebreu } = props
+  const classStyles = useResolveClassNames(
+    twMerge('rounded-[10px] pt-[2px] pb-[2px] pl-[5px] pr-[5px] mb-[3px]', className)
+  )
+  return (
+    <Box
+      {...props}
+      style={
+        [
+          classStyles,
+          { backgroundColor: isHebreu ? theme.colors.lightPrimary : theme.colors.border },
+          props.style,
+        ] as UIComponentProps<typeof Box>['style']
+      }
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
 interface LexiqueItemProps extends StrongLexiconSearchResult {
   onSelect?: (book: number, reference: string, title?: string) => void
 }
 
 const LexiqueItem = ({ stepCode, language, original, gloss, onSelect }: LexiqueItemProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const book = language === 'hebrew' ? 1 : 40
   const lexiqueType = language === 'hebrew' ? 'Hébreu' : 'Grec'
@@ -48,22 +82,24 @@ const LexiqueItem = ({ stepCode, language, original, gloss, onSelect }: LexiqueI
 
   const content = (
     <SectionItem>
-      <Box row>
+      <Box className="overflow-hidden border-continuous flex-row">
         <Chip isHebreu={language === 'hebrew'}>
-          <Text fontSize={10}>{t(lexiqueType)}</Text>
+          <Text className="text-[10px]">{t(lexiqueType)}</Text>
         </Chip>
-        <Chip marginLeft={5}>
-          <Text fontSize={10}>{stepCode}</Text>
+        <Chip className="ml-[5px]">
+          <Text className="text-[10px]">{stepCode}</Text>
         </Chip>
       </Box>
-      <Box row>
-        <Text title fontSize={18} color="default" flex paddingRight={20}>
+      <Box className="overflow-hidden border-continuous flex-row">
+        <Text
+          className="text-[18px] text-default flex-[1] pr-[20px]"
+          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+        >
           {gloss}
         </Text>
         <Text
+          className="text-[18px] text-default"
           accessibilityLanguage={language === 'hebrew' ? 'he-IL' : 'el-GR'}
-          fontSize={18}
-          color="default"
         >
           {original}
         </Text>

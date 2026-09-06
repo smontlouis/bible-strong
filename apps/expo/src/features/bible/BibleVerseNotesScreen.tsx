@@ -2,14 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { useAtom, useSetAtom } from 'jotai/react'
-
 import Empty from '~common/Empty'
 import FiltersHeader from '~common/FiltersHeader'
 import Box from '~common/ui/Box'
 import FlatList from '~common/ui/FlatList'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import BibleNoteItem from './BibleNoteItem'
-
 import { Tag } from '~common/types'
 import { useSheet } from '~helpers/useSheet'
 import { unifiedTagsModalAtom } from '~state/app'
@@ -32,7 +30,6 @@ import {
   notesListQueryAtom,
   shouldClearPersistedReferenceFilter,
 } from '~state/entityListFilters'
-
 type BibleVerseNotesProps = {
   isFormSheet?: boolean
   isNewTabSelection?: boolean
@@ -143,7 +140,7 @@ const BibleVerseNotes = ({
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <FiltersHeader
           title={t('Notes')}
           hasBackButton={hasBackButton}

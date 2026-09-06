@@ -100,7 +100,7 @@ const Timeline = ({
   }
 
   return (
-    <Box flex pos="absolute" left={0} bottom={0} right={0} top={0}>
+    <Box className="overflow-hidden border-continuous flex-[1] absolute left-[0px] bottom-[0px] right-[0px] top-[0px]">
       <TimelineHeader
         hasBackButton={hasBackButton}
         isFormSheet={isFormSheet}
@@ -145,8 +145,23 @@ const Timeline = ({
         isReady={isReady}
         entrance={entrance}
       >
-        <Box width={width} height={height} lightShadow>
-          <Box pos="relative" width={width} height={height} bg="lightGrey">
+        <Box
+          className="overflow-hidden border-continuous"
+          style={{
+            width: width,
+            height: height,
+            shadowColor: 'rgb(89,131,240)',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 7,
+            elevation: 1,
+            overflow: 'visible',
+          }}
+        >
+          <Box
+            className="overflow-hidden border-continuous relative bg-light-grey"
+            style={{ width: width, height: height }}
+          >
             {events.map(event => (
               <TimelineEvent
                 x={x}

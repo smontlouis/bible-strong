@@ -1,4 +1,5 @@
-import { useTheme } from '@emotion/react'
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Sheet, type SheetRef } from '~common/sheet'
 import distanceInWords from 'date-fns/formatDistance'
 import { useAtomValue } from 'jotai/react'
@@ -12,7 +13,6 @@ import { activeGroupIdAtom, TabGroup, tabGroupsAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherContext'
 import TabIcon from '../utils/getIconByTabType'
 import { useMountTime } from '~helpers/useMountTime'
-
 interface TabPreviewGridProps {
   group: TabGroup
   size?: number
@@ -42,14 +42,11 @@ const TabPreviewGrid = ({ group, size: gridSize = 50 }: TabPreviewGridProps) => 
     if (showCount) {
       return (
         <Box
+          className="overflow-hidden border-continuous bg-reverse items-center justify-center"
           key="remaining-tabs"
-          width={cellSize}
-          height={cellSize}
-          borderRadius={cellBorderRadius}
-          bg="reverse"
-          center
+          style={{ width: cellSize, height: cellSize, borderRadius: cellBorderRadius }}
         >
-          <Text fontSize={badgeFontSize} color="default">
+          <Text className="text-default" style={{ fontSize: badgeFontSize || 16 }}>
             +{remainingCount}
           </Text>
         </Box>
@@ -62,12 +59,9 @@ const TabPreviewGrid = ({ group, size: gridSize = 50 }: TabPreviewGridProps) => 
 
     return (
       <Box
+        className="overflow-hidden border-continuous bg-reverse items-center justify-center"
         key={tab.id}
-        width={cellSize}
-        height={cellSize}
-        borderRadius={cellBorderRadius}
-        bg="reverse"
-        center
+        style={{ width: cellSize, height: cellSize, borderRadius: cellBorderRadius }}
       >
         <TabIcon type={tab.type} size={iconSize} color={theme.colors.default} />
       </Box>
@@ -76,18 +70,26 @@ const TabPreviewGrid = ({ group, size: gridSize = 50 }: TabPreviewGridProps) => 
 
   return (
     <Box
-      width={gridSize}
-      height={gridSize}
-      borderRadius={gridBorderRadius}
-      bg="grey"
-      padding={padding}
+      className="overflow-hidden border-continuous bg-grey"
+      style={{
+        padding: padding,
+        width: gridSize,
+        height: gridSize,
+        borderRadius: gridBorderRadius,
+      }}
     >
-      <HStack flex={1} gap={gap}>
-        <VStack flex={1} gap={gap} opacity={0.7}>
+      <HStack className="overflow-hidden border-continuous flex-[1]" style={{ gap: gap }}>
+        <VStack
+          className="overflow-hidden border-continuous flex-[1] opacity-[0.7]"
+          style={{ gap: gap }}
+        >
           {renderCell(0)}
           {renderCell(2)}
         </VStack>
-        <VStack flex={1} gap={gap} opacity={0.7}>
+        <VStack
+          className="overflow-hidden border-continuous flex-[1] opacity-[0.7]"
+          style={{ gap: gap }}
+        >
           {renderCell(1)}
           {renderCell(3)}
         </VStack>
@@ -103,6 +105,8 @@ interface GroupCardProps {
 }
 
 const GroupCard = ({ group, isActive, onPress }: GroupCardProps) => {
+  const stylingTheme = useStylingTheme()
+
   const mountTime = useMountTime()
   const { t } = useTranslation()
   const theme = useTheme()
@@ -126,12 +130,7 @@ const GroupCard = ({ group, isActive, onPress }: GroupCardProps) => {
 
   return (
     <TouchableBox
-      row
-      padding={16}
-      marginBottom={12}
-      borderRadius={16}
-      bg="lightGrey"
-      alignItems="center"
+      className="overflow-hidden border-continuous flex-row p-[16px] mb-[12px] rounded-[16px] bg-light-grey items-center"
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`${displayName}. ${getCreatedText()}`}
@@ -146,16 +145,17 @@ const GroupCard = ({ group, isActive, onPress }: GroupCardProps) => {
       }
     >
       <TabPreviewGrid group={group} />
-      <VStack flex={1} marginLeft={12} gap={4}>
-        <HStack alignItems="center" gap={4}>
-          <Box width={10} height={10} borderRadius={5} bg={group.color || 'grey'} />
-          <Text fontSize={16} bold numberOfLines={1} style={{ flex: 1 }}>
+      <VStack className="overflow-hidden border-continuous flex-[1] ml-[12px] gap-[4px]">
+        <HStack className="overflow-hidden border-continuous items-center gap-[4px]">
+          <Box
+            className="overflow-hidden border-continuous w-[10px] h-[10px] rounded-[5px]"
+            style={{ backgroundColor: resolveThemeColor(stylingTheme, group.color || 'grey') }}
+          />
+          <Text className="text-[16px] font-bold" numberOfLines={1} style={{ flex: 1 }}>
             {displayName}
           </Text>
         </HStack>
-        <Text fontSize={13} color="grey">
-          {getCreatedText()}
-        </Text>
+        <Text className="text-[13px] text-grey">{getCreatedText()}</Text>
       </VStack>
     </TouchableBox>
   )
@@ -189,7 +189,7 @@ const ViewGroupsModal = ({ sheetRef, onClose }: ViewGroupsModalProps) => {
       onDismiss={onClose}
       // header={<SheetHeader title={t('tabs.viewMyGroups')} />}
     >
-      <Box paddingHorizontal={20} paddingTop={16}>
+      <Box className="overflow-hidden border-continuous px-[20px] pt-[16px]">
         {groups.map(group => (
           <GroupCard
             key={group.id}

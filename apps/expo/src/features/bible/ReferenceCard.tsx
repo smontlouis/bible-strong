@@ -1,9 +1,7 @@
-// TODO - SPLIT THIS :(
-
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { ActivityIndicator, ScrollView } from 'react-native'
-
-import { useTheme } from '@emotion/react'
 import { useQuery } from '@tanstack/react-query'
 import Empty from '~common/Empty'
 import Link from '~common/Link'
@@ -24,8 +22,11 @@ import {
   resourceFailureFromAccessError,
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
+// TODO - SPLIT THIS :(
 
 const ReferenceItem = ({ reference, version }: { reference: string; version: VersionCode }) => {
+  const stylingTheme = useStylingTheme()
+
   const resources = useResourceAccess()
   const { data: Verse } = useQuery<VerseRefContent>({
     queryKey: resourceQueryKeys.bibleVerseSelection(version, [reference]),
@@ -57,8 +58,11 @@ const ReferenceItem = ({ reference, version }: { reference: string; version: Ver
         focusVerses: [verse],
       }}
     >
-      <Box marginBottom={30}>
-        <Text title fontSize={14}>
+      <Box className="overflow-hidden border-continuous mb-[30px]">
+        <Text
+          className="text-[14px]"
+          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+        >
           {Verse.title}
         </Text>
         <Paragraph scale={-2} scaleLineHeight={-1}>
@@ -132,7 +136,7 @@ export const ReferenceCard = ({
 
   if (isLoading) {
     return (
-      <Box flex center minH={200}>
+      <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center min-h-[200px]">
         <ActivityIndicator color={theme.colors.grey} />
       </Box>
     )
@@ -152,7 +156,7 @@ export const ReferenceCard = ({
   }
 
   return (
-    <Box flex padding={20}>
+    <Box className="overflow-hidden border-continuous flex-[1] p-[20px]">
       <References references={data} version={version} />
     </Box>
   )
@@ -165,6 +169,8 @@ const References = ({
   references: TresorReferences
   version: VersionCode
 }) => {
+  const stylingTheme = useStylingTheme()
+
   if (!references.length) {
     return (
       <Empty
@@ -183,7 +189,11 @@ const References = ({
         }
 
         return (
-          <Text title key={ref} fontSize={20} marginBottom={5} color="lightPrimary">
+          <Text
+            className="text-[20px] mb-[5px] text-light-primary"
+            key={ref}
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {splittedRef}
           </Text>
         )

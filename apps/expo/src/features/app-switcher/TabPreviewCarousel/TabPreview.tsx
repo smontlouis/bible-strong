@@ -2,7 +2,6 @@ import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { useDeferredValue } from 'react'
 import { Image, StyleSheet } from 'react-native'
-
 import { selectAtom } from 'jotai/vanilla/utils'
 import Box, { AnimatedBox, BoxProps } from '~common/ui/Box'
 import Spacer from '~common/ui/Spacer'
@@ -10,7 +9,6 @@ import Text from '~common/ui/Text'
 import { TabItem } from '../../../state/tabs'
 import TabIcon from '../utils/getIconByTabType'
 import useTabConstants from '../utils/useTabConstants'
-
 const styles = StyleSheet.create({
   previewImage: {
     width: '100%',
@@ -46,12 +44,8 @@ const TabPreview = ({ tabAtom }: TabPreviewProps & BoxProps) => {
 
   return (
     <AnimatedBox
-      bg="reverse"
-      center
-      overflow="visible"
-      width={WIDTH}
-      height={HEIGHT}
-      marginRight={GAP}
+      className="border-continuous overflow-visible bg-reverse items-center justify-center"
+      style={{ marginRight: GAP, width: WIDTH, height: HEIGHT }}
     >
       {deferredBase64 && (
         <Image
@@ -59,16 +53,14 @@ const TabPreview = ({ tabAtom }: TabPreviewProps & BoxProps) => {
           source={{ uri: `data:image/jpeg;base64,${deferredBase64}` }}
         />
       )}
-      <Box center>
-        <Box center width={80} height={80} borderRadius={40} backgroundColor="lightGrey">
-          <Box opacity={0.6}>
+      <Box className="overflow-hidden border-continuous items-center justify-center">
+        <Box className="overflow-hidden border-continuous items-center justify-center w-[80px] h-[80px] rounded-[40px] bg-light-grey">
+          <Box className="overflow-hidden border-continuous opacity-[0.6]">
             <TabIcon type={type} size={30} />
           </Box>
         </Box>
         <Spacer />
-        <Text opacity={0.5} fontSize={14} color="grey" bold>
-          {title}
-        </Text>
+        <Text className="opacity-[0.5] text-[14px] text-grey font-bold">{title}</Text>
       </Box>
     </AnimatedBox>
   )

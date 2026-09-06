@@ -1,8 +1,6 @@
 import { useTranslation } from 'react-i18next'
-
 import { TouchableBox } from '~common/ui/Box'
 import StrongMark from './StrongMark'
-
 type CompareStrongModeButtonProps = {
   enabled: boolean
   onPress: () => void
@@ -18,13 +16,12 @@ const CompareStrongModeButton = ({
 
   return (
     <TouchableBox
-      width={44}
-      height={height}
-      center
+      className="overflow-hidden border-continuous w-[44px] items-center justify-center"
       onPress={onPress}
       accessibilityRole="switch"
       accessibilityLabel={t('Mode Strong')}
       accessibilityState={{ checked: enabled }}
+      style={{ height: height }}
     >
       <StrongMark highlighted={enabled} />
     </TouchableBox>

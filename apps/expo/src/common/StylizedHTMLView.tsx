@@ -1,9 +1,8 @@
 import RenderHtml, { defaultSystemFonts, type MixedStyleDeclaration } from '@native-html/render'
-import { withTheme } from '@emotion/react'
+import { withTheme } from '~themes/ThemeProvider'
 import { DomUtils } from 'htmlparser2'
 import { useEffect, useRef, useState } from 'react'
 import { Platform, useWindowDimensions } from 'react-native'
-
 import Box from '~common/ui/Box'
 import { Theme } from '~themes'
 import {
@@ -13,7 +12,6 @@ import {
   linkifyStrongReferences,
   normalizeExternalContextLinks,
 } from './stylizedHtmlUtils'
-
 export { linkifyStrongReferences } from './stylizedHtmlUtils'
 
 export const textStyle = {
@@ -155,7 +153,7 @@ const StylizedHTMLView = ({
 
   return (
     <Box
-      alignSelf="stretch"
+      className="overflow-hidden border-continuous self-stretch"
       onLayout={({ nativeEvent }) => {
         const measuredWidth = nativeEvent.layout.width
         lastLayoutWidth.current = measuredWidth

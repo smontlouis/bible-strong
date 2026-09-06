@@ -1,21 +1,18 @@
 import React from 'react'
-
 import { VerseSlice as VerseSliceProps } from 'src/common/types'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
-
 import { useVersesToContent } from '../plan.hooks'
 import PauseText from './PauseText'
 import Loading from '~common/Loading'
 import { useTranslation } from 'react-i18next'
-
 const VerseSlice = ({ id, verses, subType }: VerseSliceProps) => {
   const { t } = useTranslation()
   const { status, content } = useVersesToContent(verses)
 
   if (status === 'Pending') {
     return (
-      <Box height={200}>
+      <Box className="overflow-hidden border-continuous h-[200px]">
         <Loading />
       </Box>
     )
@@ -23,7 +20,7 @@ const VerseSlice = ({ id, verses, subType }: VerseSliceProps) => {
 
   if (status === 'Rejected') {
     return (
-      <Box center padding={20}>
+      <Box className="overflow-hidden border-continuous items-center justify-center p-[20px]">
         <Paragraph scaleLineHeight={1}>
           {t("Il semblerait que ce chapitre n'existe pas dans cette version.")}
         </Paragraph>
@@ -33,13 +30,13 @@ const VerseSlice = ({ id, verses, subType }: VerseSliceProps) => {
 
   if (status === 'Resolved' && content) {
     return (
-      <Box padding={20}>
+      <Box className="overflow-hidden border-continuous p-[20px]">
         {subType === 'pray' && (
           <PauseText>
             {t('Entrez dans un temps de prière\n et méditez sur le psaume\nsuivant')}
           </PauseText>
         )}
-        <Box>
+        <Box className="overflow-hidden border-continuous">
           <Paragraph scale={5}>{content.bookName}</Paragraph>
         </Box>
         <Paragraph>

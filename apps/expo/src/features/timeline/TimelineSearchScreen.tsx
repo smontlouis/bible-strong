@@ -1,3 +1,5 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { pageContentStyle } from '~common/ui/PageContent'
 import { useQuery } from '@tanstack/react-query'
 import { Image } from 'expo-image'
@@ -6,7 +8,6 @@ import React, { useState } from 'react'
 import { ActivityIndicator, FlatList, Keyboard } from 'react-native'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import { useTranslation } from 'react-i18next'
-
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import { LinkBox } from '~common/Link'
@@ -24,7 +25,6 @@ import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import { getTimelineImageUri } from './timelineImage'
-
 const TimelineSearchResultItem = ({
   item,
   onPress,
@@ -35,9 +35,9 @@ const TimelineSearchResultItem = ({
   const imageUri = getTimelineImageUri(item.images?.[0]?.file)
 
   return (
-    <LinkBox px={16} py={14} onPress={() => onPress(item)} row>
+    <LinkBox className="px-[16px] py-[14px] flex-row" onPress={() => onPress(item)}>
       {!!imageUri && (
-        <Box mr={20} width={70} height={70} borderRadius={10} bg="lightGrey" overflow="hidden">
+        <Box className="border-continuous overflow-visible mr-[20px] w-[70px] h-[70px] rounded-[10px] bg-light-grey">
           <Image
             contentFit="cover"
             style={{ width: 70, height: 70, borderRadius: 10 }}
@@ -45,7 +45,7 @@ const TimelineSearchResultItem = ({
           />
         </Box>
       )}
-      <Box flex>
+      <Box className="overflow-hidden border-continuous flex-[1]">
         <Paragraph small fontFamily="title">
           {item.title}
           {item.dates ? ` (${item.dates})` : ''}
@@ -61,6 +61,8 @@ const TimelineSearchResultItem = ({
 }
 
 const TimelineSearchScreen = () => {
+  const stylingTheme = useStylingTheme()
+
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const resources = useResourceAccess()
@@ -88,7 +90,7 @@ const TimelineSearchScreen = () => {
   const renderEmptyState = () => {
     if (searchQuery.isFetching) {
       return (
-        <Box flex center py={60}>
+        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center py-[60px]">
           <ActivityIndicator />
         </Box>
       )
@@ -107,9 +109,9 @@ const TimelineSearchScreen = () => {
   }
 
   return (
-    <FormSheetScreen isFormSheet={IS_FORM_SHEET} flex={1} bg="reverse">
+    <FormSheetScreen className="flex-[1] bg-reverse" isFormSheet={IS_FORM_SHEET}>
       <Header title={t('Recherche')} hasBackButton isModal={IS_FORM_SHEET} background>
-        <Box px={16} pb={12}>
+        <Box className="overflow-hidden border-continuous px-[16px] pb-[12px]">
           <SearchInput
             autoFocus
             value={searchValue}
@@ -136,8 +138,11 @@ const TimelineSearchScreen = () => {
           ItemSeparatorComponent={() => <Border />}
           ListHeaderComponent={
             results.length > 0 ? (
-              <Box px={16} py={10}>
-                <Text title fontSize={16} color="grey">
+              <Box className="overflow-hidden border-continuous px-[16px] py-[10px]">
+                <Text
+                  className="text-[16px] text-grey"
+                  style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+                >
                   {t('{{nbHits}} occurences trouvées dans la bible', {
                     nbHits: results.length,
                   })}

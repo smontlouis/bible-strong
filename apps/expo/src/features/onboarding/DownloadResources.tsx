@@ -1,5 +1,6 @@
+import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
-import { useTheme } from '@emotion/react'
 import { useEffect, useState } from 'react'
 import { Pressable } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -19,7 +20,6 @@ import Animated, {
   ZoomIn,
 } from 'react-native-reanimated'
 import Svg, { Circle, G, type CircleProps } from 'react-native-svg'
-
 import Box, { AnimatedBox, FadingBox, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
@@ -31,7 +31,6 @@ import useOfflineSetupDownload, {
   type OfflineSetupDownloadPhase,
   type OfflineSetupSuccessMessage,
 } from './useOfflineSetupDownload'
-
 type DownloadResourcesProps = {
   canvasVisible?: boolean
   transitioning?: boolean
@@ -155,6 +154,8 @@ const DownloadProgressContent = ({
   reduceMotion: boolean
   transitioning: boolean
 }) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const visible = !transitioning
   const bibleFactKey = useRotatingBibleFact(visible)
@@ -180,13 +181,16 @@ const DownloadProgressContent = ({
   })
 
   return (
-    <Box alignItems="center" overflow="visible">
+    <Box className="border-continuous overflow-visible items-center">
       <AnimatedBox
-        size={RING_SIZE}
-        borderRadius={RING_SIZE / 2}
-        center
-        overflow="visible"
-        style={[{ boxShadow: `0 22px 55px ${palette.accentShadow}` }, progressRevealStyle]}
+        className="border-continuous overflow-visible items-center justify-center"
+        style={[
+          {
+            borderRadius: RING_SIZE / 2,
+            ...(RING_SIZE ? { width: RING_SIZE, height: RING_SIZE } : {}),
+          },
+          [{ boxShadow: `0 22px 55px ${palette.accentShadow}` }, progressRevealStyle],
+        ]}
       >
         <Svg width={RING_SIZE} height={RING_SIZE} style={{ position: 'absolute' }}>
           <G rotation="-90" origin={`${RING_SIZE / 2}, ${RING_SIZE / 2}`}>
@@ -211,33 +215,52 @@ const DownloadProgressContent = ({
             />
           </G>
         </Svg>
-        <Text color={palette.title} title fontSize={31} style={{ fontFamily: 'FiraCode' }}>
+        <Text
+          className="text-[31px]"
+          style={[
+            {
+              color: resolveThemeColor(stylingTheme, palette.title) || stylingTheme.colors.default,
+              fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+            },
+            { fontFamily: 'FiraCode' },
+          ]}
+        >
           {Math.round(displayProgress * 100)}%
         </Text>
       </AnimatedBox>
 
-      <AnimatedBox alignItems="center" style={titleRevealStyle}>
-        <Text color={palette.title} title fontSize={25} lineHeight={30} textAlign="center" mt={30}>
+      <AnimatedBox
+        className="overflow-hidden border-continuous items-center"
+        style={titleRevealStyle}
+      >
+        <Text
+          className="text-[25px] leading-[30px] text-center mt-[30px]"
+          style={{
+            color: resolveThemeColor(stylingTheme, palette.title) || stylingTheme.colors.default,
+            fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+          }}
+        >
           {t('offlineSetup.didYouKnow')}
         </Text>
       </AnimatedBox>
-      <AnimatedBox width="100%" height={92} alignItems="center" style={subtitleRevealStyle}>
+      <AnimatedBox
+        className="overflow-hidden border-continuous w-[100%] h-[92px] items-center"
+        style={subtitleRevealStyle}
+      >
         <FadingBox
+          className="overflow-hidden border-continuous w-[100%] items-center"
           keyProp={bibleFactKey}
-          width="100%"
-          alignItems="center"
           entering={reduceMotion ? undefined : FadeIn.duration(280)}
           exiting={reduceMotion ? undefined : FadeOut.duration(180)}
           skipEntering={false}
           skipExiting={false}
         >
           <Text
-            color={palette.description}
-            fontSize={14}
-            lineHeight={20}
-            textAlign="center"
-            mt={10}
-            maxWidth={320}
+            className="text-[14px] leading-[20px] text-center mt-[10px] max-w-[320px]"
+            style={{
+              color:
+                resolveThemeColor(stylingTheme, palette.description) || stylingTheme.colors.default,
+            }}
           >
             {t(bibleFactKey)}
           </Text>
@@ -256,17 +279,21 @@ const DownloadSuccessContent = ({
   successMessage: OfflineSetupSuccessMessage
   palette: OfflineSetupPalette
 }) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
 
   const message = () => {
     if (successMessage === 'ready') {
       return (
         <Text
-          color={palette.title}
-          fontSize={31}
-          lineHeight={38}
-          textAlign="center"
-          style={{ fontFamily: 'Literata Book' }}
+          className="text-[31px] leading-[38px] text-center"
+          style={[
+            {
+              color: resolveThemeColor(stylingTheme, palette.title) || stylingTheme.colors.default,
+            },
+            { fontFamily: 'Literata Book' },
+          ]}
         >
           {t('offlineSetup.downloadReady')}
         </Text>
@@ -274,22 +301,27 @@ const DownloadSuccessContent = ({
     }
 
     return (
-      <VStack alignItems="center">
+      <VStack className="overflow-hidden border-continuous items-center">
         <Text
-          color={palette.description}
-          fontSize={18}
-          lineHeight={24}
-          textAlign="center"
-          style={{ fontFamily: 'Literata Book' }}
+          className="text-[18px] leading-[24px] text-center"
+          style={[
+            {
+              color:
+                resolveThemeColor(stylingTheme, palette.description) || stylingTheme.colors.default,
+            },
+            { fontFamily: 'Literata Book' },
+          ]}
         >
           {t('offlineSetup.downloadWelcomePrefix')}
         </Text>
         <Text
-          color={palette.title}
-          fontSize={31}
-          lineHeight={38}
-          textAlign="center"
-          style={{ fontFamily: 'Literata Book' }}
+          className="text-[31px] leading-[38px] text-center"
+          style={[
+            {
+              color: resolveThemeColor(stylingTheme, palette.title) || stylingTheme.colors.default,
+            },
+            { fontFamily: 'Literata Book' },
+          ]}
         >
           Bible Strong
         </Text>
@@ -298,27 +330,31 @@ const DownloadSuccessContent = ({
   }
 
   return (
-    <VStack width="100%" alignItems="center" overflow="visible">
-      <Box size={164} center overflow="visible">
+    <VStack className="border-continuous overflow-visible w-[100%] items-center">
+      <Box
+        className="border-continuous overflow-visible items-center justify-center"
+        style={{ width: 164, height: 164 }}
+      >
         <AnimatedBox
-          size={132}
-          borderRadius={66}
-          bg={palette.accent}
-          center
-          overflow="visible"
+          className="border-continuous overflow-visible rounded-[66px] items-center justify-center"
           entering={reduceMotion ? undefined : ZoomIn.springify().damping(15).stiffness(165)}
-          style={{ boxShadow: `0 22px 55px ${palette.accentShadow}` }}
+          style={[
+            {
+              backgroundColor: resolveThemeColor(stylingTheme, palette.accent),
+              width: 132,
+              height: 132,
+            },
+            { boxShadow: `0 22px 55px ${palette.accentShadow}` },
+          ]}
         >
           <Feather name="check" size={56} color={palette.onAccent} />
         </AnimatedBox>
       </Box>
-      <Box width="100%" height={84} mt={16} center overflow="visible">
+      <Box className="border-continuous overflow-visible w-[100%] h-[84px] mt-[16px] items-center justify-center">
         {successMessage ? (
           <FadingBox
+            className="border-continuous overflow-visible absolute left-[0px] top-[0px] right-[0px] bottom-[0px] items-center justify-center"
             keyProp={successMessage}
-            absoluteFill
-            center
-            overflow="visible"
             entering={reduceMotion ? undefined : successMessageEntering}
             exiting={reduceMotion ? undefined : successMessageExiting}
             skipEntering={false}
@@ -341,32 +377,52 @@ const DownloadErrorContent = ({
   onRetry: () => void
   palette: OfflineSetupPalette
 }) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
 
   return (
-    <VStack alignItems="center" px={16}>
-      <Box size={88} borderRadius={44} bg="#FCE4E8" center>
+    <VStack className="overflow-hidden border-continuous items-center px-[16px]">
+      <Box
+        className="overflow-hidden border-continuous rounded-[44px] bg-[#FCE4E8] items-center justify-center"
+        style={{ width: 88, height: 88 }}
+      >
         <Feather name="alert-circle" size={38} color="#D84D6D" />
       </Box>
-      <Text color={palette.title} title fontSize={24} textAlign="center" mt={24}>
+      <Text
+        className="text-[24px] text-center mt-[24px]"
+        style={{
+          color: resolveThemeColor(stylingTheme, palette.title) || stylingTheme.colors.default,
+          fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+        }}
+      >
         {t('offlineSetup.downloadError')}
       </Text>
-      <Text color={palette.description} fontSize={13} lineHeight={19} textAlign="center" mt={9}>
+      <Text
+        className="text-[13px] leading-[19px] text-center mt-[9px]"
+        style={{
+          color:
+            resolveThemeColor(stylingTheme, palette.description) || stylingTheme.colors.default,
+        }}
+      >
         {error?.message}
       </Text>
       <Pressable accessibilityRole="button" onPress={onRetry}>
         {({ pressed }) => (
           <Box
-            mt={24}
-            minWidth={150}
-            height={48}
-            px={24}
-            borderRadius={24}
-            bg={palette.accent}
-            center
-            opacity={pressed ? 0.76 : 1}
+            className="overflow-hidden border-continuous mt-[24px] min-w-[150px] h-[48px] px-[24px] rounded-[24px] items-center justify-center"
+            style={{
+              backgroundColor: resolveThemeColor(stylingTheme, palette.accent),
+              opacity: pressed ? 0.76 : 1,
+            }}
           >
-            <Text color={palette.onAccent} bold fontSize={15}>
+            <Text
+              className="font-bold text-[15px]"
+              style={{
+                color:
+                  resolveThemeColor(stylingTheme, palette.onAccent) || stylingTheme.colors.default,
+              }}
+            >
               {t('downloads.retry')}
             </Text>
           </Box>
@@ -423,6 +479,8 @@ const DownloadPhaseContent = ({
 }
 
 const DownloadResources = (props: DownloadResourcesProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const theme = useTheme()
   const { colorScheme } = useCurrentThemeSelector()
@@ -456,35 +514,41 @@ const DownloadResources = (props: DownloadResourcesProps) => {
 
   return (
     <AnimatedBox
-      flex
-      bg={canvasVisible ? palette.canvas : 'transparent'}
-      center
-      px={32}
-      overflow="hidden"
-      style={{
-        opacity: closing ? 0 : 1,
-        transitionProperty: 'opacity',
-        transitionDuration: reduceMotion ? 0 : DOWNLOAD_SUCCESS.fadeOutDuration,
-        transitionTimingFunction: 'ease-out',
-      }}
+      className="border-continuous overflow-visible flex-[1] items-center justify-center px-[32px]"
+      style={[
+        {
+          backgroundColor: resolveThemeColor(
+            stylingTheme,
+            canvasVisible ? palette.canvas : 'transparent'
+          ),
+        },
+        {
+          opacity: closing ? 0 : 1,
+          transitionProperty: 'opacity',
+          transitionDuration: reduceMotion ? 0 : DOWNLOAD_SUCCESS.fadeOutDuration,
+          transitionTimingFunction: 'ease-out',
+        },
+      ]}
     >
       <AnimatedBox
-        position="absolute"
-        size={330}
-        borderRadius={165}
-        bg={palette.ambientAccentSoft}
-        style={backgroundRevealStyle}
+        className="overflow-hidden border-continuous absolute rounded-[165px]"
+        style={[
+          {
+            backgroundColor: resolveThemeColor(stylingTheme, palette.ambientAccentSoft),
+            width: 330,
+            height: 330,
+          },
+          backgroundRevealStyle,
+        ]}
       />
 
       <FadingBox
+        className="border-continuous overflow-visible w-[100%] items-center"
         keyProp={phase}
         entering={reduceMotion || phase === 'downloading' ? undefined : FadeIn.duration(340)}
         exiting={reduceMotion ? undefined : FadeOut.duration(220)}
         skipEntering={false}
         skipExiting={false}
-        width="100%"
-        alignItems="center"
-        overflow="visible"
       >
         <DownloadPhaseContent
           animatedProps={ringAnimatedProps}
@@ -507,14 +571,10 @@ const DownloadResources = (props: DownloadResourcesProps) => {
         >
           {({ pressed }) => (
             <Box
-              px={13}
-              height={36}
-              borderRadius={18}
-              bg="reverse"
-              center
-              opacity={pressed ? 0.7 : 0.92}
+              className="overflow-hidden border-continuous px-[13px] h-[36px] rounded-[18px] bg-reverse items-center justify-center"
+              style={{ opacity: pressed ? 0.7 : 0.92 }}
             >
-              <Text color="tertiary" bold fontSize={12}>
+              <Text className="text-tertiary font-bold text-[12px]">
                 {t('offlineSetup.continueInApp')}
               </Text>
             </Box>

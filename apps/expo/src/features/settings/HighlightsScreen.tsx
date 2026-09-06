@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { Alert, FlatList } from 'react-native'
-
 import { ActionSheetItem } from '~common/ActionMenu'
 import Empty from '~common/Empty'
 import FiltersHeader from '~common/FiltersHeader'
@@ -43,7 +42,6 @@ import {
   buildGroupedHighlights,
   type GroupedHighlightData,
 } from '~features/entityListQuery/highlightsQuery'
-
 type UnifiedHighlightItem =
   | { type: 'highlight'; data: GroupedHighlightData }
   | { type: 'annotation'; data: GroupedWordAnnotation }
@@ -254,7 +252,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         {/* Header with filter button */}
         <FiltersHeader
           title={t('Surbrillances')}

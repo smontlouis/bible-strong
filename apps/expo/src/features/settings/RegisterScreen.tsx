@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import * as Icon from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
-
 import FireAuth from '~helpers/FireAuth'
 import useLogin from '~helpers/useLogin'
 import Button from '~common/ui/Button'
@@ -14,7 +13,6 @@ import Box from '~common/ui/Box'
 import Header from '~common/Header'
 import { toast } from '~helpers/toast'
 import { useTranslation } from 'react-i18next'
-
 const RegisterScreen = () => {
   const theme = useTheme()
   const router = useRouter()
@@ -46,7 +44,7 @@ const RegisterScreen = () => {
     <Container>
       <Header hasBackButton title={t('Créer un compte')} />
       <ScrollView>
-        <Box padding={20}>
+        <Box className="overflow-hidden border-continuous p-[20px]">
           <TextInput
             placeholder={t('Nom')}
             leftIcon={<Icon.Feather name="user" size={20} color={theme.colors.darkGrey} />}

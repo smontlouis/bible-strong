@@ -1,7 +1,11 @@
-import styled from '@emotion/native'
-import { useTheme } from '@emotion/react'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useEffect, useRef, useState } from 'react'
+import * as NativeUI from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme } from '~themes/ThemeProvider'
 
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
@@ -27,6 +31,11 @@ import type {
   LexiconBibleVerseResult,
 } from '~features/resources/lexiconBibleResourceAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromStrongModuleAvailability,
+} from '~features/resources/resourceFailure'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import type { StrongLexiconEntryCard } from '~features/resources/strongLexiconAccess'
 import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
@@ -49,11 +58,6 @@ import {
   type StrongWordOccurrence,
 } from './strongResourceCardContext'
 import { StrongResourceScrollProvider } from './StrongResourceScrollContext'
-import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
-import {
-  resourceFailureFromAccessError,
-  resourceFailureFromStrongModuleAvailability,
-} from '~features/resources/resourceFailure'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -61,27 +65,62 @@ const itemWidth = slideWidth + itemHorizontalMargin * 2
 const itemGap = 10
 const carouselStep = itemWidth + itemGap
 
-const VersetWrapper = styled.View(() => ({
-  width: 25,
-  marginRight: 5,
-  borderRightWidth: 3,
-  borderRightColor: 'transparent',
-  alignItems: 'flex-end',
-}))
+const VersetWrapper = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const NumberText = styled(Paragraph)({
-  marginTop: 0,
-  fontSize: 9,
-  justifyContent: 'flex-end',
-  marginRight: 3,
-})
+  const classStyles = useResolveClassNames(
+    twMerge('w-[25px] mr-[5px] border-r-[3px] border-r-[transparent] items-end', className)
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
-const StyledVerse = styled.View(() => ({
-  paddingLeft: 0,
-  paddingRight: 10,
-  marginBottom: 5,
-  flexDirection: 'row',
-}))
+const NumberText = (
+  componentProps: Omit<UIComponentProps<typeof Paragraph>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('mt-[0px] text-[9px] justify-end mr-[3px]', className)
+  )
+  return (
+    <Paragraph
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Paragraph>['style']}
+    />
+  )
+}
+
+const StyledVerse = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('pl-[0px] pr-[10px] mb-[5px] flex-row', className)
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
 interface Verse {
   Livre: number
@@ -445,7 +484,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
             iconElement={<FeatherIcon name="book-open" size={36} color="tertiary" />}
             message={t('strongSource.unavailableMessage')}
           >
-            <Box mt={24} width={260}>
+            <Box className="overflow-hidden border-continuous mt-[24px] w-[260px]">
               <Button onPress={onOpenStrongBibleSourceSheet}>
                 {t('strongSource.chooseAction')}
               </Button>
@@ -485,11 +524,11 @@ const BibleVerseDetailCard: React.FC<Props> = ({
 
   return (
     <Box
-      flex={1}
+      className="overflow-hidden border-continuous flex-[1]"
       testID="resource-modal-content"
       onLayout={event => setModalContentHeight(event.nativeEvent.layout.height)}
     >
-      <Box position="relative" zIndex={1}>
+      <Box className="overflow-hidden border-continuous relative z-[1]">
         <ScrollView
           ref={verseScrollRef}
           testID="resource-verse-scroll"
@@ -517,7 +556,10 @@ const BibleVerseDetailCard: React.FC<Props> = ({
                 scrollToStrongCard,
               }}
             >
-              <Box flex={1} row wrap alignItems="flex-start" testID="resource-verse-text">
+              <Box
+                className="overflow-hidden border-continuous flex-[1] flex-row flex-wrap items-start"
+                testID="resource-verse-text"
+              >
                 {React.cloneElement(formattedTexte, { textStyle: verseTextStyle })}
               </Box>
             </StrongResourceScrollProvider>
@@ -530,10 +572,10 @@ const BibleVerseDetailCard: React.FC<Props> = ({
           versesInCurrentChapter={versesInCurrentChapter}
         />
       </Box>
-      <Box bg="lightGrey" mt={-30} position="relative" zIndex={0}>
+      <Box className="overflow-hidden border-continuous bg-light-grey mt-[-30px] relative z-[0]">
         <RoundedCorner />
       </Box>
-      <Box bg="lightGrey" flex={1}>
+      <Box className="overflow-hidden border-continuous bg-light-grey flex-[1]">
         {strongCardsQuery.isError ? (
           <ResourceUnavailableView
             identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
@@ -565,9 +607,13 @@ const BibleVerseDetailCard: React.FC<Props> = ({
               offset: carouselStep * index,
               index,
             })}
-            ItemSeparatorComponent={() => <Box width={itemGap} />}
+            ItemSeparatorComponent={() => (
+              <Box className="overflow-hidden border-continuous" style={{ width: itemGap }} />
+            )}
             renderItem={({ item, index }) => (
-              <Box width={itemWidth}>{renderStrongCard({ item, index })}</Box>
+              <Box className="overflow-hidden border-continuous" style={{ width: itemWidth }}>
+                {renderStrongCard({ item, index })}
+              </Box>
             )}
             onScrollBeginDrag={() => {
               isProgrammaticCardsScrollRef.current = false

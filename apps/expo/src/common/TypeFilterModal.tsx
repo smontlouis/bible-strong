@@ -1,27 +1,53 @@
-import styled from '@emotion/native'
-import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
-import React, { forwardRef } from 'react'
-import { TouchableOpacity } from 'react-native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import * as NativeUI from 'react-native'
+import { TouchableOpacity } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
+import type { Theme as AppTheme } from '~themes'
 
 import Checkbox from '~common/ui/Checkbox'
-import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 
-const TypeRow = styled(TouchableOpacity)(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  padding: 16,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
+const TypeRow = (
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const SectionHeader = styled.View(({ theme }) => ({
-  padding: 16,
-  paddingBottom: 8,
-  backgroundColor: theme.colors.lightGrey,
-}))
+  const classStyles = useResolveClassNames(
+    twMerge('flex-row items-center p-[16px] border-b-[1px] border-b-border', className)
+  )
+  return (
+    <TouchableOpacity
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
+    />
+  )
+}
+
+const SectionHeader = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('p-[16px] pb-[8px] bg-light-grey', className))
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
 type Props = {
   selectedType?: string // 'all' | 'annotations' | VersionCode
@@ -47,27 +73,21 @@ const TypeFilterModal = forwardRef<SheetRef, Props>(
         >
           {/* Option "Tout" */}
           <TypeRow onPress={() => onSelect(undefined)}>
-            <Checkbox checked={isAllSelected} marginRight={12} />
-            <Text flex={1} fontSize={16}>
-              {t('Tout')}
-            </Text>
+            <Checkbox className="mr-[12px]" checked={isAllSelected} />
+            <Text className="flex-[1] text-[16px]">{t('Tout')}</Text>
             {isAllSelected && <FeatherIcon name="check" size={20} color="primary" />}
           </TypeRow>
 
           <TypeRow onPress={() => onSelect('highlights')}>
-            <Checkbox checked={isHighlightsSelected} marginRight={12} />
-            <Text flex={1} fontSize={16}>
-              {t('Surbrillances')}
-            </Text>
+            <Checkbox className="mr-[12px]" checked={isHighlightsSelected} />
+            <Text className="flex-[1] text-[16px]">{t('Surbrillances')}</Text>
             {isHighlightsSelected && <FeatherIcon name="check" size={20} color="primary" />}
           </TypeRow>
 
           {/* Option "Annotations" (toutes) */}
           <TypeRow onPress={() => onSelect('annotations')}>
-            <Checkbox checked={isAnnotationsSelected} marginRight={12} />
-            <Text flex={1} fontSize={16}>
-              {t('Annotations')}
-            </Text>
+            <Checkbox className="mr-[12px]" checked={isAnnotationsSelected} />
+            <Text className="flex-[1] text-[16px]">{t('Annotations')}</Text>
             {isAnnotationsSelected && <FeatherIcon name="check" size={20} color="primary" />}
           </TypeRow>
 
@@ -75,19 +95,15 @@ const TypeFilterModal = forwardRef<SheetRef, Props>(
           {availableVersions.length > 0 && (
             <>
               <SectionHeader>
-                <Text color="tertiary" fontSize={13} bold>
-                  {t('Par version')}
-                </Text>
+                <Text className="text-tertiary text-[13px] font-bold">{t('Par version')}</Text>
               </SectionHeader>
 
               {availableVersions.map(version => {
                 const isSelected = selectedType === version
                 return (
                   <TypeRow key={version} onPress={() => onSelect(version)}>
-                    <Checkbox checked={isSelected} marginRight={12} />
-                    <Text flex={1} fontSize={16}>
-                      {version}
-                    </Text>
+                    <Checkbox className="mr-[12px]" checked={isSelected} />
+                    <Text className="flex-[1] text-[16px]">{version}</Text>
                     {isSelected && <FeatherIcon name="check" size={20} color="primary" />}
                   </TypeRow>
                 )

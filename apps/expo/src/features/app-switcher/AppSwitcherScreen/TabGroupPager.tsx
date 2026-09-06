@@ -6,7 +6,6 @@ import { useWindowDimensions } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import { runOnJS } from 'react-native-worklets'
-
 import { AnimatedBox } from '~common/ui/Box'
 import {
   activeGroupIdAtom,
@@ -18,7 +17,6 @@ import { useAppSwitcherContext } from '../AppSwitcherContext'
 import { rubberBand } from '../utils/tabHelpers'
 import CreateGroupPage from './CreateGroupPage'
 import TabGroupPage from './TabGroupPage'
-
 const VELOCITY_THRESHOLD = 500
 
 const TabGroupPager = () => {
@@ -142,12 +140,14 @@ const TabGroupPager = () => {
     <>
       <GestureDetector gesture={panGesture}>
         <AnimatedBox
-          flex={1}
-          bg="lightGrey"
+          className="flex-[1] bg-light-grey"
           accessibilityElementsHidden={appSwitcherMode === 'view'}
           importantForAccessibility={appSwitcherMode === 'view' ? 'no-hide-descendants' : 'auto'}
         >
-          <AnimatedBox row style={[{ width: totalPages * width, height: '100%' }, containerStyle]}>
+          <AnimatedBox
+            className="flex-row"
+            style={[{ width: totalPages * width, height: '100%' }, containerStyle]}
+          >
             {groups.map((group, index) => (
               <TabGroupPage
                 key={group.id}

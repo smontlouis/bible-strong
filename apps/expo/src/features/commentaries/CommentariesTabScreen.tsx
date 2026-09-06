@@ -10,8 +10,7 @@ import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { verseStringToObject } from '~features/resources/useBibleVerses'
-
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { produce } from 'immer'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -40,7 +39,6 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import ResourceVerseContext, {
   useResourceVerseContext,
 } from '~features/bible/resources/ResourceVerseContext'
-
 const useComments = (verse: string) => {
   const resources = useResourceAccess()
   const selectedProjectionIds = useSelector(
@@ -179,7 +177,10 @@ const CommentariesTabScreen = ({
     <>
       {hasHeader && (
         <>
-          <Box background paddingTop={insets.top} />
+          <Box
+            className="overflow-hidden border-continuous bg-reverse"
+            style={{ paddingTop: insets.top }}
+          />
           <Header
             background
             hasBackButton={hasBackButton}
@@ -215,7 +216,7 @@ const CommentariesTabScreen = ({
                   }
                 }}
               >
-                <Box row center height={60} width={60}>
+                <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
                   <FeatherIcon name="more-vertical" size={18} />
                 </Box>
               </MenuView>
@@ -242,7 +243,7 @@ const CommentariesTabScreen = ({
             updateVerse={updateVerse}
           />
           {displayedContent.isPending ? (
-            <Box height={100} center>
+            <Box className="overflow-hidden border-continuous h-[100px] items-center justify-center">
               <Loading />
             </Box>
           ) : displayedContent.isError ? (

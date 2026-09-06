@@ -1,7 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient'
 import { useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
-
 import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
@@ -21,7 +20,6 @@ import {
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
 import ResourceDownloadWidget from './ResourceDownloadWidget'
-
 const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)' }) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
@@ -114,6 +112,7 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
     <Link route="NaveDetail" params={{ name, name_lower: normalizedName }}>
       <WidgetContainer>
         <Box
+          className="overflow-hidden border-continuous"
           style={{
             position: 'absolute',
             left: 0,
@@ -130,17 +129,15 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
           />
         </Box>
         <RandomButton onPress={() => setRandomSeed(seed => seed + 1)} />
-        <Box flex={1} center mt={20}>
+        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center mt-[20px]">
           <Paragraph style={{ color: 'white' }} scale={-2} scaleLineHeight={-2}>
             {name}
           </Paragraph>
         </Box>
         <Link route="Nave" style={{ width: '100%' }}>
-          <Box row center backgroundColor="rgba(0,0,0,0.1)" paddingVertical={10}>
+          <Box className="overflow-hidden border-continuous flex-row items-center justify-center bg-[rgba(0,0,0,0.1)] py-[10px]">
             <NaveIcon style={{ marginRight: 10 }} size={20} color="white" />
-            <Text color="white" bold fontSize={12}>
-              {t('Thèmes Nave')}
-            </Text>
+            <Text className="text-[white] font-bold text-[12px]">{t('Thèmes Nave')}</Text>
           </Box>
         </Link>
       </WidgetContainer>

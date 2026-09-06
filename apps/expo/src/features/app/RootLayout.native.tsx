@@ -1,8 +1,5 @@
-// installReduxDevToolsPolyfill()
-
-import { ThemeProvider } from '@emotion/react'
+import { ThemeProvider } from '~themes/ThemeProvider'
 import * as Sentry from '@sentry/react-native'
-
 import * as SplashScreen from 'expo-splash-screen'
 import * as Font from 'expo-font'
 import * as Icon from '@expo/vector-icons'
@@ -15,7 +12,6 @@ import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { configureReanimatedLogger } from 'react-native-reanimated'
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context'
 import { Provider as ReduxProvider, useSelector } from 'react-redux'
-
 import { PersistGate } from 'redux-persist/integration/react'
 import ErrorBoundary from '~common/ErrorBoundary'
 import { CurrentTheme } from '~common/types'
@@ -33,6 +29,7 @@ import { applyPreferredColorScheme } from '~redux/themeAppearanceMiddleware'
 import getTheme, { baseTheme, Theme } from '~themes/index'
 import { isPlaygroundEnabled } from '~helpers/runtimeConfig'
 import i18n, { setI18n } from '../../../i18n'
+// installReduxDevToolsPolyfill()
 
 const loadFullAppRuntime = () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports

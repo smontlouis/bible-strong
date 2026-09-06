@@ -2,7 +2,6 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { IonIcon } from '~common/ui/Icon'
-
 export interface ChapterButtonProps {
   hasNextChapter: boolean
   disabled?: boolean
@@ -17,19 +16,18 @@ const ChapterButton = ({ direction, hasNextChapter, disabled, onPress }: Chapter
   )
 
   return (
-    <Box width={40} height={40} overflow="visible">
+    <Box className="border-continuous overflow-visible w-[40px] h-[40px]">
       {hasNextChapter && (
         <>
           <TouchableBox
+            className="overflow-hidden border-continuous w-[40px] h-[40px] items-center justify-center"
             disabled={disabled}
             activeOpacity={0.5}
             onPress={onPress}
             accessibilityRole="button"
             accessibilityLabel={accessibilityLabel}
             accessibilityState={{ disabled }}
-            width={40}
-            height={40}
-            center
+            style={[{ opacity: disabled ? 0.6 : 1 }, [{ opacity: disabled ? 0.6 : 1 }]]}
           >
             <IonIcon
               name={`play-skip-${direction === 'left' ? 'back' : 'forward'}`}

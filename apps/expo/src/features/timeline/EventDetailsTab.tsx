@@ -1,9 +1,14 @@
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
-import styled from '@emotion/native'
+import * as NativeUI from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
+import { NavigationState, SceneRendererProps } from 'react-native-tab-view'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { SceneRendererProps, NavigationState } from 'react-native-tab-view'
 
 interface TabItemProps {
   isRouteActive: boolean
@@ -11,32 +16,50 @@ interface TabItemProps {
   isLast: boolean
 }
 
-const TabItem = styled.TouchableOpacity<TabItemProps>(
-  ({ theme, isRouteActive, isFirst, isLast }) => ({
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 35,
-    marginVertical: 5,
-    marginHorizontal: 10,
-    ...(isFirst && {
-      marginRight: 0,
-    }),
-    ...(isLast && {
-      marginLeft: 0,
-    }),
-    ...(isRouteActive && {
-      borderRadius: 8,
-      backgroundColor: theme.colors.reverse,
-      shadowColor: 'rgb(89,131,240)',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 7,
-      elevation: 1,
-      overflow: 'visible',
-    }),
-  })
-)
+const TabItem = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.TouchableOpacity>,
+    keyof TabItemProps | 'theme'
+  > &
+    Omit<TabItemProps, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { isRouteActive, isFirst, isLast } = props
+  const classStyles = useResolveClassNames(
+    twMerge('flex-[1] items-center justify-center h-[35px] my-[5px] mx-[10px]', className)
+  )
+  return (
+    <NativeUI.TouchableOpacity
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            ...(isFirst && {
+              marginRight: 0,
+            }),
+            ...(isLast && {
+              marginLeft: 0,
+            }),
+            ...(isRouteActive && {
+              borderRadius: 8,
+              backgroundColor: theme.colors.reverse,
+              shadowColor: 'rgb(89,131,240)',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 7,
+              elevation: 1,
+              overflow: 'visible',
+            }),
+          },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']
+      }
+    />
+  )
+}
 
 const EventDetailsTab = ({
   setIndex,
@@ -51,7 +74,7 @@ const EventDetailsTab = ({
   const { routes, index: activeRouteIndex } = navigationState
 
   return (
-    <Box row>
+    <Box className="overflow-hidden border-continuous flex-row">
       {routes.map((route, routeIndex) => {
         const isRouteActive = routeIndex === activeRouteIndex
 
@@ -68,7 +91,7 @@ const EventDetailsTab = ({
               setIndex(routeIndex)
             }}
           >
-            <Text color={isRouteActive ? 'primary' : 'grey'} bold>
+            <Text className={twMerge(isRouteActive ? 'text-primary' : 'text-grey', 'font-bold')}>
               {route.title}
             </Text>
           </TabItem>

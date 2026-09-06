@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { bookSelectorSelectionModeAtom, bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
-
 export const BookSelectorParams = () => {
   const { t } = useTranslation()
 
@@ -64,7 +63,7 @@ export const BookSelectorParams = () => {
         }
       }}
     >
-      <Box row center height={54} width={60}>
+      <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[60px]">
         <FeatherIcon name="more-vertical" size={18} />
       </Box>
     </MenuView>

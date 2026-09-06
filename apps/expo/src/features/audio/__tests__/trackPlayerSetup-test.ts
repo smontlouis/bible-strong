@@ -1,3 +1,4 @@
+import { createTrackPlayerSetupGuard } from '../trackPlayerSetup'
 jest.mock('react-native-track-player', () => ({
   __esModule: true,
   default: {
@@ -5,8 +6,6 @@ jest.mock('react-native-track-player', () => ({
     setupPlayer: jest.fn(),
   },
 }))
-
-import { createTrackPlayerSetupGuard } from '../trackPlayerSetup'
 
 describe('createTrackPlayerSetupGuard', () => {
   it('shares one setup call across concurrent consumers', async () => {

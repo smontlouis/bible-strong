@@ -1,10 +1,12 @@
+import { twMerge } from '~common/ui/classNames'
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { ScrollView, Share } from 'react-native'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
-
 import books from '~assets/bible_versions/books-desc'
 import HTMLViewContent from '~common/HTMLViewContent'
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -15,7 +17,6 @@ import Header from '~common/Header'
 import Loading from '~common/Loading'
 import Empty from '~common/Empty'
 import { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
-
 import { useRouter } from 'expo-router'
 import { produce } from 'immer'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
@@ -51,7 +52,6 @@ import { getCommentaryBibleViewRoute } from '~features/commentaries/commentaryRe
 import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
 import { findDirectoryItemForArticle } from './dictionaryExperience'
 import { createDictionaryInternalLinkRoute } from './dictionaryInternalNavigation'
-
 interface DictionaryDetailScreenProps {
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
   isFormSheet?: boolean
@@ -61,6 +61,8 @@ const DictionnaryDetailScreen = ({
   dictionaryAtom,
   isFormSheet = false,
 }: DictionaryDetailScreenProps) => {
+  const stylingTheme = useStylingTheme()
+
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
   const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
@@ -421,7 +423,7 @@ const DictionnaryDetailScreen = ({
               }
             }}
           >
-            <Box row center height={60} width={60}>
+            <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
               <FeatherIcon name="more-vertical" size={18} />
             </Box>
           </MenuView>
@@ -429,8 +431,8 @@ const DictionnaryDetailScreen = ({
       />
       <AppScrollView>
         {correspondenceSources.length > 1 && (
-          <Box px={20} pb={12}>
-            <Text fontSize={12} fontWeight="bold" color="tertiary" mb={7}>
+          <Box className="overflow-hidden border-continuous px-[20px] pb-[12px]">
+            <Text className="text-[12px] font-bold text-tertiary mb-[7px]">
               {t('Aussi dans {{count}} dictionnaires', {
                 count: correspondenceSources.length,
               })}
@@ -440,6 +442,7 @@ const DictionnaryDetailScreen = ({
                 const selected = isCurrentSource(source)
                 return (
                   <TouchableBox
+                    className="overflow-hidden border-continuous border-[1px] rounded-[14px] px-[8px] py-[4px] mr-[6px]"
                     key={`${source.resource.work}:${source.resource.language}:${source.id}`}
                     disabled={selected}
                     onPress={() =>
@@ -459,18 +462,29 @@ const DictionnaryDetailScreen = ({
                         },
                       }))
                     }
-                    borderWidth={1}
-                    borderColor={selected ? 'secondary' : 'border'}
-                    bg={selected ? 'lightGrey' : undefined}
-                    borderRadius={14}
-                    px={8}
-                    py={4}
-                    mr={6}
+                    style={[
+                      { opacity: selected ? 0.6 : 1 },
+                      [
+                        {
+                          backgroundColor: resolveThemeColor(
+                            stylingTheme,
+                            selected ? 'lightGrey' : undefined
+                          ),
+                          borderColor: resolveThemeColor(
+                            stylingTheme,
+                            selected ? 'secondary' : 'border'
+                          ),
+                          opacity: selected ? 0.6 : 1,
+                        },
+                      ],
+                    ]}
                   >
                     <Text
-                      fontSize={12}
-                      color={selected ? 'secondary' : 'primary'}
-                      fontWeight={selected ? 'bold' : undefined}
+                      className={twMerge(
+                        selected ? 'text-secondary' : 'text-primary',
+                        'text-[12px]'
+                      )}
+                      style={{ fontWeight: selected ? 'bold' : undefined }}
                     >
                       {source.abbreviation}
                     </Text>
@@ -481,7 +495,7 @@ const DictionnaryDetailScreen = ({
           </Box>
         )}
         {(tags || relationCount > 0) && (
-          <Box px={20}>
+          <Box className="overflow-hidden border-continuous px-[20px]">
             <EntityChipList
               tags={tags}
               relationCount={relationCount}

@@ -6,7 +6,6 @@ import { useRouter } from 'expo-router'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
-
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
@@ -37,7 +36,6 @@ import {
   formatCommentaryResourceTabTitle,
   parseCommentaryResourceParams,
 } from './commentaryResourceParams'
-
 const formatRange = (start: number, end: number) => (start === end ? `${start}` : `${start}–${end}`)
 
 const CommentaryResourceTabScreen = ({
@@ -161,7 +159,7 @@ const CommentaryResourceTabScreen = ({
   if (!parsed) {
     return (
       <FormSheetScreen isFormSheet={false}>
-        <Box flex bg="lightGrey">
+        <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
           <Header background title={t('Commentaires')} />
           <ResourceUnavailableView
             title={t('commentaries.resource.invalid')}
@@ -193,7 +191,7 @@ const CommentaryResourceTabScreen = ({
     : undefined
   return (
     <FormSheetScreen isFormSheet={false}>
-      <Box flex bg="lightGrey">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
         <Header
           background
           hasBackButton={Boolean(tab.data.sectionId)}
@@ -210,7 +208,7 @@ const CommentaryResourceTabScreen = ({
 
         {tab.data.sectionId ? (
           query.isPending ? (
-            <Box flex center>
+            <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
               <Loading />
             </Box>
           ) : query.isError ? (
@@ -241,7 +239,17 @@ const CommentaryResourceTabScreen = ({
                   )
                 }
               />
-              <Box bg="reverse" rounded lightShadow px={18} py={18}>
+              <Box
+                className="overflow-hidden border-continuous bg-reverse rounded-[20px] px-[18px] py-[18px]"
+                style={{
+                  shadowColor: 'rgb(89,131,240)',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 7,
+                  elevation: 1,
+                  overflow: 'visible',
+                }}
+              >
                 <CommentaryEntryNavigation
                   hasPrevious={Boolean(previousSection)}
                   hasNext={Boolean(nextSection)}
@@ -279,7 +287,7 @@ const CommentaryResourceTabScreen = ({
                     detailScrollRef.current?.scrollTo({ y: 0, animated: true })
                   }}
                 />
-                <Box mt={14}>
+                <Box className="overflow-hidden border-continuous mt-[14px]">
                   <StylizedHTMLView
                     value={section.content}
                     onLinkPress={href => {
@@ -300,23 +308,9 @@ const CommentaryResourceTabScreen = ({
           >
             <CommentaryRoomIntro entry={entry} language={projection.language} />
 
-            <Box
-              row
-              alignItems="center"
-              justifyContent="space-between"
-              mx={-18}
-              px={18}
-              py={8}
-              bg="lightGrey"
-              zIndex={10}
-            >
+            <Box className="overflow-hidden border-continuous flex-row items-center justify-between mx-[-18px] px-[18px] py-[8px] bg-light-grey z-[10]">
               <TouchableBox
-                bg="lightGrey"
-                borderRadius={20}
-                height={32}
-                px={12}
-                row
-                alignItems="center"
+                className="overflow-hidden border-continuous bg-light-grey rounded-[20px] h-[32px] px-[12px] flex-row items-center"
                 onPress={() => {
                   openCommentaryBookSelector({
                     openBookSelector,
@@ -328,13 +322,13 @@ const CommentaryResourceTabScreen = ({
                 accessibilityRole="button"
                 accessibilityLabel={t('commentaries.resource.chooseChapter')}
               >
-                <Text bold fontSize={14}>
+                <Text className="font-bold text-[14px]">
                   {bookLabel} {chapter}
                 </Text>
                 <FeatherIcon name="chevron-down" size={14} color="grey" style={{ marginLeft: 6 }} />
               </TouchableBox>
               {query.data ? (
-                <Text color="grey" fontSize={13}>
+                <Text className="text-grey text-[13px]">
                   {t('commentaries.resource.sectionCount', {
                     count: query.data.sections.length,
                   })}
@@ -343,7 +337,7 @@ const CommentaryResourceTabScreen = ({
             </Box>
 
             {query.isPending ? (
-              <Box py={40} center>
+              <Box className="overflow-hidden border-continuous py-[40px] items-center justify-center">
                 <Loading />
               </Box>
             ) : query.isError ? (
@@ -358,16 +352,12 @@ const CommentaryResourceTabScreen = ({
                 message={t('commentaries.resource.emptyChapter')}
               />
             ) : (
-              <Box mt={16} gap={12}>
+              <Box className="overflow-hidden border-continuous mt-[16px] gap-[12px]">
                 {query.data.sections.map(candidate => {
                   return (
                     <TouchableBox
+                      className="overflow-hidden border-continuous bg-reverse rounded-[20px] px-[17px] py-[14px]"
                       key={candidate.id}
-                      bg="reverse"
-                      rounded
-                      lightShadow
-                      px={17}
-                      py={14}
                       activeOpacity={0.62}
                       onPress={() =>
                         setTab(
@@ -377,19 +367,23 @@ const CommentaryResourceTabScreen = ({
                         )
                       }
                       accessibilityRole="button"
+                      style={{
+                        shadowColor: 'rgb(89,131,240)',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 7,
+                        elevation: 1,
+                        overflow: 'visible',
+                      }}
                     >
-                      <Box row alignItems="flex-start">
-                        <Box px={10} py={5} borderRadius={12} bg="lightPrimary">
-                          <Text color="primary" bold fontSize={12}>
+                      <Box className="overflow-hidden border-continuous flex-row items-start">
+                        <Box className="overflow-hidden border-continuous px-[10px] py-[5px] rounded-[12px] bg-light-primary">
+                          <Text className="text-primary font-bold text-[12px]">
                             {formatRange(candidate.rangeStartVerse, candidate.rangeEndVerse)}
                           </Text>
                         </Box>
                         <Text
-                          ml={13}
-                          flex
-                          color="grey"
-                          fontSize={14}
-                          lineHeight={20}
+                          className="ml-[13px] flex-[1] text-grey text-[14px] leading-[20px]"
                           numberOfLines={2}
                         >
                           {candidate.preview}

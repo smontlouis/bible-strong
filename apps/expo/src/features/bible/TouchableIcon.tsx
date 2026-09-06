@@ -1,32 +1,93 @@
-import React from 'react'
 import * as Icon from '@expo/vector-icons'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import * as NativeUI from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
-import Text from '~common/ui/Text'
-import styled from '@emotion/native'
 import { TouchableOpacityProps } from 'react-native'
+import Text from '~common/ui/Text'
 
-const Touchable = styled.TouchableOpacity<{
-  noFlex?: boolean
-  disabled?: boolean
-}>(({ noFlex, disabled }) => ({
-  alignItems: 'center',
-  justifyContent: 'center',
-  opacity: disabled ? 0.3 : 1,
-  ...(!noFlex && { flex: 1 }),
-}))
+const Touchable = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.TouchableOpacity>,
+    | keyof {
+        noFlex?: boolean
+        disabled?: boolean
+      }
+    | 'theme'
+  > &
+    Omit<
+      {
+        noFlex?: boolean
+        disabled?: boolean
+      },
+      'theme'
+    > & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const StyledIcon = styled(Icon.Feather)<{
-  color?: string
-  isSelected?: boolean
-  disabled?: boolean
-}>(({ color, isSelected, theme, disabled }) => ({
-  color: disabled
-    ? theme.colors.grey
-    : theme.colors[color as keyof typeof theme.colors] || theme.colors.tertiary,
-  ...(isSelected && {
-    color: theme.colors.primary,
-  }),
-}))
+  const { noFlex, disabled } = props
+  const classStyles = useResolveClassNames(twMerge('items-center justify-center', className))
+  return (
+    <NativeUI.TouchableOpacity
+      {...props}
+      style={
+        [
+          classStyles,
+          { opacity: disabled ? 0.3 : 1, ...(!noFlex && { flex: 1 }) },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']
+      }
+    />
+  )
+}
+
+const StyledIcon = (
+  componentProps: Omit<
+    UIComponentProps<typeof Icon.Feather>,
+    | keyof {
+        color?: string
+        isSelected?: boolean
+        disabled?: boolean
+      }
+    | 'theme'
+  > &
+    Omit<
+      {
+        color?: string
+        isSelected?: boolean
+        disabled?: boolean
+      },
+      'theme'
+    > & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { color, isSelected, disabled } = props
+  const classStyles = useResolveClassNames(twMerge('', className))
+  return (
+    <Icon.Feather
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            color: disabled
+              ? theme.colors.grey
+              : theme.colors[color as keyof typeof theme.colors] || theme.colors.tertiary,
+            ...(isSelected && {
+              color: theme.colors.primary,
+            }),
+          },
+          props.style,
+        ] as UIComponentProps<typeof Icon.Feather>['style']
+      }
+    />
+  )
+}
 
 export default ({
   onPress,
@@ -68,11 +129,7 @@ export default ({
         isSelected={isSelected}
         disabled={disabled}
       />
-      {label && (
-        <Text marginTop={5} fontSize={9} color="grey">
-          {label}
-        </Text>
-      )}
+      {label && <Text className="mt-[5px] text-[9px] text-grey">{label}</Text>}
     </Touchable>
   )
 }

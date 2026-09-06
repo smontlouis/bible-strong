@@ -1,9 +1,8 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { Image } from 'expo-image'
 import React from 'react'
 import { TabItem } from '../../../state/tabs'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
-
 const icons = {
   bible: require('~assets/images/tab-icons/book-open.svg'),
   strong: require('~assets/images/tab-icons/lexique.svg'),

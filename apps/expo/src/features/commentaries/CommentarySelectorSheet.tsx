@@ -1,15 +1,16 @@
+import { twMerge } from '~common/ui/classNames'
+
 import {
   COMMENTARY_CATALOG,
   type CommentaryCatalogEntry,
   type CommentaryLanguage,
 } from '@bible-strong/resource-catalog/commentaries'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { SectionList, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
 import FiltersHeader from '~common/FiltersHeader'
 import MultipleChoiceFilterModal from '~common/MultipleChoiceFilterModal'
 import SearchFilterModal from '~common/SearchFilterModal'
@@ -42,7 +43,6 @@ import {
   reorderSettingsCommentarySelection,
   setSettingsCommentarySelection,
 } from '~redux/modules/user'
-
 type Props = {
   sheetRef: React.RefObject<SheetRef | null>
 }
@@ -78,16 +78,16 @@ const CommentarySelectorItem = ({
 
   return (
     <Box
-      minHeight={76}
-      pl={20}
-      pr={4}
-      py={12}
-      borderBottomWidth={1}
-      borderColor="border"
-      borderLeftWidth={selected ? 3 : 0}
-      borderLeftColor={selected ? 'primary' : undefined}
+      className={twMerge(
+        'overflow-hidden border-continuous',
+        twMerge(
+          selected ? 'border-l-primary' : '',
+          'overflow-hidden min-h-[76px] pl-[20px] pr-[4px] py-[12px] border-b-[1px] border-border'
+        )
+      )}
+      style={{ borderLeftWidth: selected ? 3 : 0 }}
     >
-      <Box flex row alignItems="center">
+      <Box className="overflow-hidden border-continuous flex-[1] flex-row items-center">
         <TouchableOpacity
           style={{ flex: 1 }}
           disabled={selectionDisabled}
@@ -96,20 +96,27 @@ const CommentarySelectorItem = ({
           accessibilityLabel={`${t('commentaries.selector.title')}: ${entry.title}`}
           accessibilityState={{ checked: selected, disabled: selectionDisabled }}
         >
-          <Box flex row alignItems="center" opacity={selectionDisabled ? 0.45 : 1}>
-            <Box width={48} minHeight={48} center>
+          <Box
+            className="overflow-hidden border-continuous flex-[1] flex-row items-center"
+            style={{ opacity: selectionDisabled ? 0.45 : 1 }}
+          >
+            <Box className="overflow-hidden border-continuous w-[48px] min-h-[48px] items-center justify-center">
               <Checkbox checked={selected} variant="icon" size={22} />
             </Box>
-            <Box flex>
-              <Text fontSize={16} bold={selected} numberOfLines={2}>
+            <Box className="overflow-hidden border-continuous flex-[1]">
+              <Text
+                className="text-[16px]"
+                numberOfLines={2}
+                style={{ fontWeight: selected ? 'bold' : undefined }}
+              >
                 {entry.title}
               </Text>
-              <Text color="tertiary" fontSize={11} mt={3} numberOfLines={1}>
+              <Text className="text-tertiary text-[11px] mt-[3px]" numberOfLines={1}>
                 {entry.author}
               </Text>
             </Box>
             {installed && (
-              <Box width={30} height={28} center>
+              <Box className="overflow-hidden border-continuous w-[30px] h-[28px] items-center justify-center">
                 <FeatherIcon name="cloud" size={18} color="primary" />
               </Box>
             )}
@@ -123,7 +130,7 @@ const CommentarySelectorItem = ({
             onOpenDetails()
           }}
         >
-          <Box width={48} minHeight={48} center>
+          <Box className="overflow-hidden border-continuous w-[48px] min-h-[48px] items-center justify-center">
             <FeatherIcon name="more-horizontal" size={20} color="default" />
           </Box>
         </TouchableOpacity>
@@ -322,26 +329,16 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
           }}
           ListHeaderComponent={
             limitReached ? (
-              <Box px={20} py={10} bg="lightGrey" borderBottomWidth={1} borderColor="border">
-                <Text color="quart" fontSize={12}>
+              <Box className="overflow-hidden border-continuous px-[20px] py-[10px] bg-light-grey border-b-[1px] border-border">
+                <Text className="text-quart text-[12px]">
                   {t('commentaries.selector.limit', { max: MAX_SELECTED_COMMENTARIES })}
                 </Text>
               </Box>
             ) : null
           }
           renderSectionHeader={({ section }) => (
-            <Box
-              minHeight={48}
-              px={20}
-              row
-              alignItems="center"
-              bg="lightGrey"
-              borderBottomWidth={1}
-              borderColor="border"
-            >
-              <Text flex fontSize={16} opacity={0.8}>
-                {section.title}
-              </Text>
+            <Box className="overflow-hidden border-continuous min-h-[48px] px-[20px] flex-row items-center bg-light-grey border-b-[1px] border-border">
+              <Text className="flex-[1] text-[16px] opacity-[0.8]">{section.title}</Text>
             </Box>
           )}
           renderItem={({ item }) => {
@@ -358,9 +355,9 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
             )
           }}
           ListEmptyComponent={
-            <Box flex center px={32}>
+            <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center px-[32px]">
               <FeatherIcon name="search" size={28} color="tertiary" />
-              <Text mt={12} fontSize={16} color="tertiary" textAlign="center">
+              <Text className="mt-[12px] text-[16px] text-tertiary text-center">
                 {t('Aucun résultat trouvé pour "{{query}}"', { query: query.trim() })}
               </Text>
             </Box>

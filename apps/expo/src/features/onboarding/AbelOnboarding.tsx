@@ -1,4 +1,5 @@
-import { useTheme } from '@emotion/react'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Alert, Pressable, useWindowDimensions } from 'react-native'
@@ -20,7 +21,6 @@ import Animated, {
   withDelay,
   withSpring,
 } from 'react-native-reanimated'
-
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { OnboardingStage } from './abel/OnboardingStage'
@@ -41,7 +41,6 @@ import {
 } from './abel/scenes/SceneSevenReturnToVerse'
 import { createSceneThreeStrong, type StrongCardIndex } from './abel/scenes/SceneThreeStrong'
 import { createSceneTwoLexique, getSceneTwoNodeColor } from './abel/scenes/SceneTwoLexique'
-
 type AbelOnboardingProps = {
   completionMode?: 'confirmation' | 'handoff'
   onComplete: () => void
@@ -112,6 +111,8 @@ const StrongCarouselPrompt = ({
   entering,
   exiting,
 }: StrongCarouselPromptProps) => {
+  const stylingTheme = useStylingTheme()
+
   const properPromptStyle = useAnimatedStyle(() => {
     const rawPhase = carouselProgress.get() % 2
     const phase = rawPhase < 0 ? rawPhase + 2 : rawPhase
@@ -150,22 +151,32 @@ const StrongCarouselPrompt = ({
 
   const renderPrompt = (prompt: string) => (
     <Text
-      title
-      fontSize={25}
-      lineHeight={32}
-      textAlign="center"
-      style={{ fontFamily: 'Literata Book' }}
+      className="text-[25px] leading-[32px] text-center"
+      style={[
+        { fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) },
+        { fontFamily: 'Literata Book' },
+      ]}
     >
       {prompt}
     </Text>
   )
 
   return (
-    <AnimatedBox flex width="100%" position="relative" entering={entering} exiting={exiting}>
-      <AnimatedBox absoluteFill center style={properPromptStyle}>
+    <AnimatedBox
+      className="overflow-hidden border-continuous flex-[1] w-[100%] relative"
+      entering={entering}
+      exiting={exiting}
+    >
+      <AnimatedBox
+        className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px] items-center justify-center"
+        style={properPromptStyle}
+      >
         {renderPrompt(properPrompt)}
       </AnimatedBox>
-      <AnimatedBox absoluteFill center style={commonPromptStyle}>
+      <AnimatedBox
+        className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px] items-center justify-center"
+        style={commonPromptStyle}
+      >
         {renderPrompt(commonPrompt)}
       </AnimatedBox>
     </AnimatedBox>
@@ -175,6 +186,8 @@ const StrongCarouselPrompt = ({
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
 const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardingProps) => {
+  const stylingTheme = useStylingTheme()
+
   const theme = useTheme()
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
@@ -323,16 +336,17 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
 
   return (
     <AnimatedBox
-      flex
-      bg="lightGrey"
-      pt={insets.top}
+      className="overflow-hidden border-continuous flex-[1] bg-light-grey"
       pointerEvents={isFinishing ? 'none' : 'auto'}
-      style={{
-        opacity: isFinishing && completionMode === 'handoff' ? 0 : 1,
-        transitionProperty: 'opacity',
-        transitionDuration: reduceMotion ? 0 : 240,
-        transitionTimingFunction: 'ease-out',
-      }}
+      style={[
+        { paddingTop: insets.top },
+        {
+          opacity: isFinishing && completionMode === 'handoff' ? 0 : 1,
+          transitionProperty: 'opacity',
+          transitionDuration: reduceMotion ? 0 : 240,
+          transitionTimingFunction: 'ease-out',
+        },
+      ]}
     >
       <AnimatedPressable
         pointerEvents={canGoBack ? 'auto' : 'none'}
@@ -363,12 +377,8 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
       </AnimatedPressable>
 
       <Box
-        width={contentWidth}
-        height={28}
-        mt={19}
-        alignSelf="center"
-        position="relative"
-        style={{ zIndex: 1000 }}
+        className="overflow-hidden border-continuous h-[28px] mt-[19px] self-center relative"
+        style={[{ width: contentWidth }, { zIndex: 1000 }]}
       >
         <Pressable
           accessibilityRole="button"
@@ -383,16 +393,12 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
             opacity: pressed ? 0.62 : 1,
           })}
         >
-          <Text color="tertiary" fontSize={13}>
-            {t('onboarding.abel.skip')}
-          </Text>
+          <Text className="text-tertiary text-[13px]">{t('onboarding.abel.skip')}</Text>
         </Pressable>
       </Box>
 
       <Box
-        flex
-        px={12}
-        overflow="visible"
+        className="border-continuous overflow-visible flex-[1] px-[12px]"
         onLayout={({ nativeEvent }) => {
           const nextHeight = nativeEvent.layout.height
           setSceneViewportHeight(currentHeight =>
@@ -401,25 +407,25 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
         }}
       >
         <AnimatedBox
+          className="border-continuous overflow-visible flex-[1]"
           key={isFinishing && completionMode === 'confirmation' ? 'confirmation' : 'scenes'}
           collapsable={false}
-          flex={1}
-          overflow="visible"
           entering={reduceMotion ? undefined : FadeIn.springify()}
           exiting={reduceMotion ? undefined : FadeOut.springify()}
         >
           {isFinishing && completionMode === 'confirmation' ? (
-            <VStack flex={1} alignItems="center" justifyContent="center" gap={12}>
+            <VStack className="overflow-hidden border-continuous flex-[1] items-center justify-center gap-[12px]">
               <AnimatedBox
-                size={72}
-                borderRadius={36}
-                bg="lightPrimary"
-                center
+                className="overflow-hidden border-continuous rounded-[36px] bg-light-primary items-center justify-center"
                 entering={reduceMotion ? undefined : FadeInDown.springify()}
+                style={{ width: 72, height: 72 }}
               >
                 <Feather name="check" size={30} color={theme.colors.primary} />
               </AnimatedBox>
-              <Text title fontSize={27} textAlign="center">
+              <Text
+                className="text-[27px] text-center"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
                 {t('onboarding.abel.complete')}
               </Text>
             </VStack>
@@ -504,6 +510,7 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
                     t,
                   })}
                   {createSceneSixRelations({
+                    theme,
                     highlightColor: activeColor,
                     metrics,
                     navigationDirection,
@@ -528,8 +535,11 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
         </AnimatedBox>
       </Box>
 
-      <VStack width={contentWidth} alignSelf="center" pb={Math.max(insets.bottom, 24)} gap={20}>
-        <Box height={76} center>
+      <VStack
+        className="overflow-hidden border-continuous self-center gap-[20px]"
+        style={{ paddingBottom: Math.max(insets.bottom, 24), width: contentWidth }}
+      >
+        <Box className="overflow-hidden border-continuous h-[76px] items-center justify-center">
           {currentScene.id === 'scene-three' ? (
             <StrongCarouselPrompt
               carouselProgress={strongCarouselProgress}
@@ -547,20 +557,25 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
                 reduceMotion ? undefined : isFinalScene ? finalPromptEntering : promptEntering
               }
               exiting={reduceMotion ? undefined : promptExiting}
+              className="overflow-hidden border-continuous"
             >
               <Text
-                title
-                fontSize={currentScene.id === 'scene-one' ? 32 : isFinalScene ? 22 : 25}
-                lineHeight={currentScene.id === 'scene-one' ? 38 : isFinalScene ? 26 : 32}
-                textAlign="center"
-                style={{ fontFamily: 'Literata Book' }}
+                className="text-center"
+                style={[
+                  {
+                    fontSize: currentScene.id === 'scene-one' ? 32 : isFinalScene ? 22 : 25,
+                    lineHeight: currentScene.id === 'scene-one' ? 38 : isFinalScene ? 26 : 32,
+                    fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+                  },
+                  { fontFamily: 'Literata Book' },
+                ]}
               >
                 {t(promptKey)}
               </Text>
             </AnimatedBox>
           )}
         </Box>
-        <Box height={58} center>
+        <Box className="overflow-hidden border-continuous h-[58px] items-center justify-center">
           <Animated.View
             style={{
               width: contentWidth,
@@ -634,13 +649,12 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
               </Animated.View>
               {showFinalAction ? (
                 <AnimatedBox
-                  absoluteFill
-                  center
+                  className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px] items-center justify-center"
                   entering={reduceMotion ? undefined : finalActionLabelEntering}
                   exiting={FadeOut}
                 >
-                  <HStack alignItems="center" gap={12}>
-                    <Text color="reverse" fontSize={17} bold>
+                  <HStack className="overflow-hidden border-continuous items-center gap-[12px]">
+                    <Text className="text-reverse text-[17px] font-bold">
                       {t('onboarding.abel.start')}
                     </Text>
                     <Feather name="arrow-right" size={23} color={theme.colors.reverse} />

@@ -1,3 +1,5 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import type { ReactNode } from 'react'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -7,7 +9,6 @@ import SharedSearchEntityResultRow from './SearchEntityResultRow'
 import SearchTypeIcon from './SearchTypeIcon'
 import type { SearchEntityResult } from './searchResultTypes'
 import type { SearchItemType } from '~state/searchFilters'
-
 export const SEARCH_SECTION_PREVIEW_LIMIT = 5
 export const SEARCH_SECTION_LOAD_MORE_COUNT = 10
 
@@ -46,35 +47,33 @@ const SearchSectionBlock = <SectionId extends string = string>({
   headerAction,
   renderItems = true,
 }: Props<SectionId>) => {
+  const stylingTheme = useStylingTheme()
+
   const visibleItems = renderItems ? section.items.slice(0, visibleCount) : []
   const remaining = Math.max(0, section.items.length - visibleCount)
 
   return (
-    <Box pt={10}>
-      <HStack px={20} py={8} alignItems="center" gap={8}>
+    <Box className="overflow-hidden border-continuous pt-[10px]">
+      <HStack className="overflow-hidden border-continuous px-[20px] py-[8px] items-center gap-[8px]">
         {section.iconType ? (
-          <Box
-            width={36}
-            height={36}
-            borderRadius={10}
-            bg="lightGrey"
-            alignItems="center"
-            justifyContent="center"
-          >
+          <Box className="overflow-hidden border-continuous w-[36px] h-[36px] rounded-[10px] bg-light-grey items-center justify-center">
             <SearchTypeIcon type={section.iconType} />
           </Box>
         ) : null}
-        <Text title fontSize={16} opacity={0.6}>
+        <Text
+          className="text-[16px] opacity-[0.6]"
+          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+        >
           {section.title}
         </Text>
         <Chip variant="bold">{section.count}</Chip>
-        <Box flex />
+        <Box className="overflow-hidden border-continuous flex-[1]" />
         {headerAction}
       </HStack>
       {statusMessage}
       {isLoading && !visibleItems.length ? (
-        <Box px={20} py={16}>
-          <Text color="grey">{String(i18n.t('Recherche en cours...'))}</Text>
+        <Box className="overflow-hidden border-continuous px-[20px] py-[16px]">
+          <Text className="text-grey">{String(i18n.t('Recherche en cours...'))}</Text>
         </Box>
       ) : null}
       {visibleItems.map(item =>
@@ -89,9 +88,12 @@ const SearchSectionBlock = <SectionId extends string = string>({
         )
       )}
       {showLoadMoreButton && (remaining > 0 || hasMore) ? (
-        <TouchableBox onPress={onLoadMore} py={10} px={20} alignItems="flex-start">
-          <Box px={10} py={6} bg="lightGrey" borderRadius={6}>
-            <Text color="primary" fontSize={13} bold>
+        <TouchableBox
+          className="overflow-hidden border-continuous py-[10px] px-[20px] items-start"
+          onPress={onLoadMore}
+        >
+          <Box className="overflow-hidden border-continuous px-[10px] py-[6px] bg-light-grey rounded-[6px]">
+            <Text className="text-primary text-[13px] font-bold">
               {String(i18n.t('Voir plus'))}
             </Text>
           </Box>

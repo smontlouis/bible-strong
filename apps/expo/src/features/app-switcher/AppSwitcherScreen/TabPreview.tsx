@@ -1,10 +1,11 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
+import { twMerge } from '~common/ui/classNames'
 import Color from 'color'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { Image, StyleSheet } from 'react-native'
-
-import { useTheme } from '@emotion/react'
 import { LinearGradient } from 'expo-linear-gradient'
 import Box, { AnimatedBox, AnimatedTouchableBox, BoxProps } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -14,7 +15,6 @@ import TabIcon from '../utils/getIconByTabType'
 import useTabConstants from '../utils/useTabConstants'
 import useTabPreview from './useTabPreview'
 import { LinearTransition, ZoomOut } from 'react-native-reanimated'
-
 // Styles statiques hors du composant pour éviter les re-créations
 const styles = StyleSheet.create({
   previewImage: {
@@ -62,28 +62,28 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
 
   return (
     <AnimatedBox
-      marginBottom={GAP}
-      overflow="visible"
-      style={boxStyles}
-      width={TAB_PREVIEW_WIDTH}
-      height={TAB_PREVIEW_HEIGHT}
+      className="border-continuous overflow-visible"
+      style={[
+        { marginBottom: GAP, width: TAB_PREVIEW_WIDTH, height: TAB_PREVIEW_HEIGHT },
+        boxStyles,
+      ]}
       layout={LinearTransition}
       // entering={ZoomIn}
       exiting={ZoomOut}
     >
       <AnimatedTouchableBox
-        overflow="visible"
-        width={TAB_PREVIEW_WIDTH}
-        height={TAB_PREVIEW_HEIGHT}
         onPress={onOpen}
         activeOpacity={1}
         {...props}
+        style={[{ width: TAB_PREVIEW_WIDTH, height: TAB_PREVIEW_HEIGHT }, props.style]}
+        className={twMerge(
+          'overflow-hidden border-continuous',
+          twMerge('overflow-visible', props.className)
+        )}
       >
         <AnimatedBox
+          className="border-continuous overflow-visible bg-reverse items-center justify-center"
           ref={ref}
-          bg="reverse"
-          center
-          overflow="visible"
           style={[
             previewImageStyles,
             {
@@ -102,8 +102,8 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
                 source={{ uri: `data:image/jpeg;base64,${base64Preview}` }}
               />
             )}
-            <Box center width={80} height={80} borderRadius={40} backgroundColor="reverse">
-              <Box>
+            <Box className="overflow-hidden border-continuous items-center justify-center w-[80px] h-[80px] rounded-[40px] bg-reverse">
+              <Box className="overflow-hidden border-continuous">
                 <TabIcon type={type} size={30} />
               </Box>
             </Box>
@@ -119,17 +119,8 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
           </>
 
           <AnimatedBox
+            className="border-continuous overflow-visible flex-row items-center absolute top-[0px] left-[0px] right-[40px] h-[40px] pl-[14px] pr-[5px]"
             style={textStyles}
-            row
-            alignItems="center"
-            overflow="visible"
-            position="absolute"
-            top={0}
-            left={0}
-            right={40}
-            height={40}
-            pl={14}
-            pr={5}
           >
             <TabIcon type={type} size={16} />
             <Title tabAtom={tabAtom} />
@@ -139,16 +130,21 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
 
       {isRemovable && (
         <AnimatedTouchableBox
-          position="absolute"
-          top={0}
-          right={0}
-          width={40}
-          height={40}
-          center
+          className="overflow-hidden border-continuous absolute top-[0px] right-[0px] w-[40px] h-[40px] items-center justify-center"
           style={xStyles}
           onPress={onClose}
         >
-          <Box bg="reverse" width={24} height={24} borderRadius={12} center lightShadow>
+          <Box
+            className="overflow-hidden border-continuous bg-reverse w-[24px] h-[24px] rounded-[12px] items-center justify-center"
+            style={{
+              shadowColor: 'rgb(89,131,240)',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 7,
+              elevation: 1,
+              overflow: 'visible',
+            }}
+          >
             <FeatherIcon name="x" size={16} />
           </Box>
         </AnimatedTouchableBox>
@@ -158,9 +154,16 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
 }
 
 const Title = ({ tabAtom }: { tabAtom: PrimitiveAtom<TabItem> }) => {
+  const stylingTheme = useStylingTheme()
+
   const tab = useAtomValue(tabAtom)
   return (
-    <Text ml={8} fontSize={12} title numberOfLines={1} ellipsizeMode="middle">
+    <Text
+      className="ml-[8px] text-[12px]"
+      numberOfLines={1}
+      ellipsizeMode="middle"
+      style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+    >
       {tab.title}
     </Text>
   )

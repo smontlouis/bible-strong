@@ -1,3 +1,5 @@
+import { twMerge } from '~common/ui/classNames'
+
 import { MotiView } from '@alloc/moti'
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -9,7 +11,6 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import AccordionItem from './AccordionItem'
 import { BOOK_SELECTION_EVENT } from './constants'
-
 interface BookItemProps {
   book: Book
   chapters?: number[]
@@ -69,7 +70,7 @@ const BookItem = memo(
     }
 
     return (
-      <Box>
+      <Box className="overflow-hidden border-continuous">
         <TouchableOpacity
           accessibilityLabel={t(book.Nom)}
           accessibilityRole="button"
@@ -78,12 +79,22 @@ const BookItem = memo(
           onPress={() => onBookSelect(book)}
         >
           <HStack
-            px={20}
-            backgroundColor={isSelected ? 'lightGrey' : 'transparent'}
-            height={itemHeight}
-            alignItems="center"
+            className={twMerge(
+              'overflow-hidden border-continuous',
+              twMerge(
+                isSelected ? 'bg-light-grey' : 'bg-[transparent]',
+                'overflow-hidden border-continuous px-[20px] items-center'
+              )
+            )}
+            style={{ height: itemHeight }}
           >
-            <Text fontSize={16} color={isSelected ? 'primary' : 'default'} bold={isSelected} flex>
+            <Text
+              className={twMerge(
+                isSelected ? 'text-primary' : 'text-default',
+                'text-[16px] flex-[1]'
+              )}
+              style={{ fontWeight: isSelected ? 'bold' : undefined }}
+            >
               {t(book.Nom)}
             </Text>
             <MotiView
@@ -100,14 +111,17 @@ const BookItem = memo(
         {shouldRenderChapters && (
           <AccordionItem isExpanded={isExpanded} viewKey={book.Nom}>
             <HStack
-              gap={ITEM_GAP}
-              style={{
-                flexWrap: 'wrap',
-                paddingVertical: 10,
-                paddingHorizontal: horizontalMargin,
-                maxWidth: MAX_WIDTH,
-                alignSelf: 'center',
-              }}
+              className="overflow-hidden border-continuous"
+              style={[
+                { gap: ITEM_GAP },
+                {
+                  flexWrap: 'wrap',
+                  paddingVertical: 10,
+                  paddingHorizontal: horizontalMargin,
+                  maxWidth: MAX_WIDTH,
+                  alignSelf: 'center',
+                },
+              ]}
             >
               {chapters.map(chapter => (
                 <TouchableOpacity
@@ -118,14 +132,11 @@ const BookItem = memo(
                   onLongPress={() => handleLongPressChapterSelect(chapter)}
                 >
                   <Box
-                    backgroundColor="opacity5"
-                    borderRadius={6}
-                    width={ITEM_WIDTH}
-                    height={60}
-                    alignItems="center"
-                    justifyContent="center"
+                    className="overflow-hidden border-continuous bg-opacity5 rounded-[6px] h-[60px] items-center justify-center"
+                    style={{ width: ITEM_WIDTH }}
                   >
                     <Box
+                      className="overflow-hidden border-continuous"
                       style={{
                         position: 'absolute',
                         inset: 0,
@@ -134,7 +145,7 @@ const BookItem = memo(
                         alignItems: 'center',
                       }}
                     >
-                      <Text width={ITEM_WIDTH} textAlign="center">
+                      <Text className="text-center" style={{ width: ITEM_WIDTH }}>
                         {chapter}
                       </Text>
                     </Box>

@@ -1,7 +1,6 @@
 import React from 'react'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { AnimatedProgressCircle } from '@convective/react-native-reanimated-progress'
-
 type Props = {
   progress: number
   size?: number

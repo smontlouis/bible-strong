@@ -1,7 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient'
 import { useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
-
 import { useTranslation } from 'react-i18next'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import Link from '~common/Link'
@@ -22,7 +21,6 @@ import {
 } from '~features/resources/resourceFailure'
 import ResourceDownloadWidget from './ResourceDownloadWidget'
 import { getRandomDictionaryEntryId } from './dictionaryWidgetEntry'
-
 const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47,128,237,1)' }) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
@@ -144,6 +142,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
     >
       <WidgetContainer>
         <Box
+          className="overflow-hidden border-continuous"
           style={{
             position: 'absolute',
             left: 0,
@@ -160,15 +159,15 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
           />
         </Box>
         <RandomButton onPress={() => setRandomSeed(seed => seed + 1)} />
-        <Box flex={1} center>
-          <Paragraph mt={20} scale={-2} color="white" scaleLineHeight={-2}>
+        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
+          <Paragraph className="mt-[20px] text-[white]" scale={-2} scaleLineHeight={-2}>
             {word}
           </Paragraph>
         </Box>
         <Link route="Dictionnaire" style={{ width: '100%' }}>
-          <Box row center backgroundColor="rgba(0,0,0,0.04)" paddingVertical={10}>
+          <Box className="overflow-hidden border-continuous flex-row items-center justify-center bg-[rgba(0,0,0,0.04)] py-[10px]">
             <DictionnaireIcon style={{ marginRight: 10 }} size={20} color="white" />
-            <Text color="white" bold fontSize={12}>
+            <Text className="text-[white] font-bold text-[12px]">
               {t('Explorer les dictionnaires')}
             </Text>
           </Box>

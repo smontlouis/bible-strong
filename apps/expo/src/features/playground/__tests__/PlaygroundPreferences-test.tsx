@@ -1,14 +1,12 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-
 import PlaygroundPreferences, { PLAYGROUND_THEME_OPTIONS } from '../PlaygroundPreferences'
-
 const mockChangeLanguage = jest.fn()
 const mockSelectTheme = jest.fn()
 let mockLanguage = 'fr'
 
-jest.mock('@emotion/react', () => ({
-  useTheme: () => ({ colors: { primary: '#5983f0' } }),
+jest.mock('~themes/ThemeProvider', () => ({
+  useTheme: () => jest.requireActual('../../../../test/themeFixture').themeFixture,
 }))
 
 jest.mock('@expo/vector-icons', () => {

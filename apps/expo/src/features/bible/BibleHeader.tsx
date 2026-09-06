@@ -1,6 +1,5 @@
 import { PAGE_CONTENT_MAX_WIDTH } from '~common/ui/PageContent'
 import { useEffect, useRef } from 'react'
-
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
@@ -67,7 +66,6 @@ import InterlinearModeSelectorSheet from './InterlinearModeSelectorSheet'
 import StrongModeSelectorSheet from './StrongModeSelectorSheet'
 import { useBibleModeAcquisitionCompletion } from './useBibleModeAcquisitionCompletion'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
-
 interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
   isFormSheet?: boolean
@@ -372,11 +370,9 @@ const Header = ({
 
   const strongModeButton = isStrongCapableBibleVersion(version) ? (
     <AnimatedTouchableBox
+      className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
       onPress={() => strongModeSheetRef.current?.present()}
       disabled={isStrongDownloadVisible}
-      center
-      width={40}
-      height={40}
       accessibilityRole="button"
       accessibilityLabel={
         isStrongDownloadVisible
@@ -387,11 +383,17 @@ const Header = ({
         disabled: isStrongDownloadVisible,
         selected: strongMode !== 'hidden',
       }}
-      style={{
-        opacity: fullScreenOpacity,
-        transitionProperty: 'opacity',
-        transitionDuration: 300,
-      }}
+      style={[
+        { opacity: isStrongDownloadVisible ? 0.6 : 1 },
+        [
+          { opacity: isStrongDownloadVisible ? 0.6 : 1 },
+          {
+            opacity: fullScreenOpacity,
+            transitionProperty: 'opacity',
+            transitionDuration: 300,
+          },
+        ],
+      ]}
     >
       {isStrongDownloadVisible ? (
         <Progress
@@ -407,11 +409,9 @@ const Header = ({
 
   const interlinearModeButton = isInterlinearCapableBibleVersion(version) ? (
     <AnimatedTouchableBox
+      className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
       onPress={() => interlinearModeSheetRef.current?.present()}
       disabled={isInterlinearDownloadVisible}
-      center
-      width={40}
-      height={40}
       accessibilityRole="button"
       accessibilityLabel={
         isInterlinearDownloadVisible ? t('Téléchargement en cours') : t('Options du texte original')
@@ -420,7 +420,10 @@ const Header = ({
         disabled: isInterlinearDownloadVisible,
         selected: isInterlinearModeEnabled(interlinearMode),
       }}
-      style={opacityTransitionStyle}
+      style={[
+        { opacity: isInterlinearDownloadVisible ? 0.6 : 1 },
+        [{ opacity: isInterlinearDownloadVisible ? 0.6 : 1 }, opacityTransitionStyle],
+      ]}
     >
       {isInterlinearDownloadVisible ? (
         <Progress
@@ -437,64 +440,51 @@ const Header = ({
   if (annotationModeEnabled) {
     return (
       <AnimatedVStack
-        justifyContent="center"
-        width="100%"
-        bg="primary"
-        px={15}
-        paddingTop={TOP_INSET}
-        height={headerHeight + TOP_INSET}
-        borderBottomWidth={1}
-        borderColor="border"
-        position="absolute"
-        top={0}
-        left={0}
-        zIndex={nativeHeaderZIndex}
-        overflow="visible"
+        className="border-continuous overflow-visible justify-center w-[100%] bg-primary px-[15px] border-b-[1px] border-border absolute top-[0px] left-[0px]"
         entering={FadeIn}
         exiting={FadeOut}
         key="annotation-mode-header"
+        style={{
+          paddingTop: TOP_INSET,
+          height: headerHeight + TOP_INSET,
+          zIndex: nativeHeaderZIndex,
+        }}
       >
         {isFormSheet && <FormSheetHandle />}
 
         <HStack
-          maxWidth={PAGE_CONTENT_MAX_WIDTH}
-          mx="auto"
-          alignItems="center"
-          width="100%"
-          overflow="visible"
+          className="border-continuous overflow-visible mx-auto items-center w-[100%]"
+          style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}
         >
           {hasBackButton && (
-            <Box position="absolute" left={0} top={5} zIndex={2}>
+            <Box className="overflow-hidden border-continuous absolute left-[0px] top-[5px] z-[2]">
               <Back
                 onGoBack={() => {
                   setIsFullScreenBible(false)
                   console.log('[Bible] onGoBack')
                 }}
               >
-                <Box alignItems="center" justifyContent="center" width={50} height={32}>
+                <Box className="overflow-hidden border-continuous items-center justify-center w-[50px] h-[32px]">
                   <FeatherIcon name="arrow-left" size={20} color="white" />
                 </Box>
               </Back>
             </Box>
           )}
-          <Box flex={1} center>
-            <Text fontWeight="bold" color="reverse" fontSize={14}>
+          <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
+            <Text className="font-bold text-reverse text-[14px]">
               {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })} - ${version}`}
             </Text>
           </Box>
 
           <AnimatedTouchableBox
+            className="overflow-hidden border-continuous absolute right-[0px]"
             onPress={onExitAnnotationMode}
             accessibilityRole="button"
             accessibilityLabel={t('accessibility.exitAnnotationMode')}
-            position="absolute"
-            right={0}
-            bottom={isFormSheet ? -10 : 0}
+            style={{ bottom: isFormSheet ? -10 : 0 }}
           >
-            <Box bg="reverse" borderRadius={8} height={28} px={12} center>
-              <Text color="primary" bold fontSize={12}>
-                {t('Terminé')}
-              </Text>
+            <Box className="overflow-hidden border-continuous bg-reverse rounded-[8px] h-[28px] px-[12px] items-center justify-center">
+              <Text className="text-primary font-bold text-[12px]">{t('Terminé')}</Text>
             </Box>
           </AnimatedTouchableBox>
         </HStack>
@@ -505,26 +495,22 @@ const Header = ({
   if (hasSelectedVerses) {
     return (
       <AnimatedVStack
-        width="100%"
-        bg="reverse"
-        justifyContent="center"
-        px={15}
-        paddingTop={TOP_INSET}
-        height={headerHeight + TOP_INSET}
-        borderBottomWidth={1}
-        borderColor="border"
-        position="absolute"
-        top={0}
-        left={0}
-        zIndex={nativeHeaderZIndex}
-        overflow="visible"
+        className="border-continuous overflow-visible w-[100%] bg-reverse justify-center px-[15px] border-b-[1px] border-border absolute top-[0px] left-[0px]"
         entering={FadeIn}
         exiting={FadeOut}
         key="selected-verses-header"
+        style={{
+          paddingTop: TOP_INSET,
+          height: headerHeight + TOP_INSET,
+          zIndex: nativeHeaderZIndex,
+        }}
       >
         {isFormSheet && <FormSheetHandle />}
 
-        <HStack maxWidth={PAGE_CONTENT_MAX_WIDTH} mx="auto" alignItems="center" width="100%">
+        <HStack
+          className="overflow-hidden border-continuous mx-auto items-center w-[100%]"
+          style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}
+        >
           {hasBackButton && (
             <Back
               onGoBack={() => {
@@ -532,15 +518,13 @@ const Header = ({
                 console.log('[Bible] onGoBack')
               }}
             >
-              <Box alignItems="center" justifyContent="center" width={50} height={32}>
+              <Box className="overflow-hidden border-continuous items-center justify-center w-[50px] h-[32px]">
                 <FeatherIcon name="arrow-left" size={20} />
               </Box>
             </Back>
           )}
-          <Box flex={1} center>
-            <Text fontWeight="bold" fontSize={14}>
-              {selectedVersesReference}
-            </Text>
+          <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
+            <Text className="font-bold text-[14px]">{selectedVersesReference}</Text>
           </Box>
         </HStack>
       </AnimatedVStack>
@@ -549,30 +533,26 @@ const Header = ({
 
   return (
     <AnimatedVStack
-      justifyContent="center"
-      width="100%"
-      bg="reverse"
-      paddingTop={TOP_INSET}
-      borderBottomWidth={1}
-      borderColor="border"
-      position="absolute"
-      top={0}
-      left={0}
-      zIndex={nativeHeaderZIndex}
-      overflow="visible"
-      style={{
-        height: isHeaderCollapsed ? 20 + TOP_INSET : undefined,
-        minHeight: isHeaderCollapsed ? 20 + TOP_INSET : focusedHeaderMinHeight + TOP_INSET,
-        transitionProperty: 'height',
-        transitionDuration: 300,
-      }}
+      className="border-continuous overflow-visible justify-center w-[100%] bg-reverse border-b-[1px] border-border absolute top-[0px] left-[0px]"
+      style={[
+        { paddingTop: TOP_INSET, zIndex: nativeHeaderZIndex },
+        {
+          height: isHeaderCollapsed ? 20 + TOP_INSET : undefined,
+          minHeight: isHeaderCollapsed ? 20 + TOP_INSET : focusedHeaderMinHeight + TOP_INSET,
+          transitionProperty: 'height',
+          transitionDuration: 300,
+        },
+      ]}
       key="default-header"
       entering={FadeIn}
       exiting={FadeOut}
     >
       {isFormSheet && <FormSheetHandle />}
 
-      <HStack maxWidth={PAGE_CONTENT_MAX_WIDTH} mx="auto" alignItems="center" width="100%">
+      <HStack
+        className="overflow-hidden border-continuous mx-auto items-center w-[100%]"
+        style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}
+      >
         {hasBackButton ? (
           <Back
             onGoBack={() => {
@@ -581,10 +561,7 @@ const Header = ({
             }}
           >
             <AnimatedBox
-              alignItems="center"
-              justifyContent="center"
-              width={50}
-              height={32}
+              className="overflow-hidden border-continuous items-center justify-center w-[50px] h-[32px]"
               style={translateYTransitionStyle}
             >
               <FeatherIcon name="arrow-left" size={20} />
@@ -593,10 +570,17 @@ const Header = ({
         ) : null}
         {hasFocusVerses ? (
           <>
-            <AnimatedBox flex={1} style={translateYTransitionStyle}>
-              <HStack px={15} alignItems="center" justifyContent="space-between" gap={8}>
-                <Box flex={1}>
-                  <Text fontWeight="bold" fontSize={14} numberOfLines={1} shrink={1}>
+            <AnimatedBox
+              className="overflow-hidden border-continuous flex-[1]"
+              style={translateYTransitionStyle}
+            >
+              <HStack className="overflow-hidden border-continuous px-[15px] items-center justify-between gap-[8px]">
+                <Box className="overflow-hidden border-continuous flex-[1]">
+                  <Text
+                    className="font-bold text-[14px]"
+                    numberOfLines={1}
+                    style={{ flexShrink: 1 }}
+                  >
                     {`${focusedReference} - ${version}`}
                   </Text>
                   <EntityChipList
@@ -635,33 +619,21 @@ const Header = ({
                   }}
                 >
                   <AnimatedBox
-                    row
-                    center
-                    width={76}
-                    height={28}
-                    bg="lightPrimary"
-                    borderRadius={12}
-                    gap={3}
+                    className="overflow-hidden border-continuous flex-row items-center justify-center w-[76px] h-[28px] bg-light-primary rounded-[12px] gap-[3px]"
                     style={opacityTransitionStyle}
                   >
-                    <Text color="primary" fontSize={11} fontWeight="bold">
-                      Focus
-                    </Text>
+                    <Text className="text-primary text-[11px] font-bold">Focus</Text>
                     <FeatherIcon name="chevron-down" size={12} color="primary" />
                   </AnimatedBox>
                 </MenuView>
                 <TouchableBox
+                  className="overflow-hidden border-continuous items-center justify-center w-[28px] h-[28px] bg-light-primary rounded-[12px]"
                   onPress={toggleFocusContext}
                   accessibilityRole="button"
                   accessibilityLabel={
                     isContextFocused ? t('tab.readWholeChapter') : t('tab.closeContext')
                   }
                   accessibilityState={{ expanded: !isContextFocused }}
-                  center
-                  width={28}
-                  height={28}
-                  bg="lightPrimary"
-                  borderRadius={12}
                   style={opacityTransitionStyle}
                 >
                   <FeatherIcon
@@ -671,14 +643,10 @@ const Header = ({
                   />
                 </TouchableBox>
                 <TouchableBox
+                  className="overflow-hidden border-continuous items-center justify-center w-[28px] h-[28px] bg-light-primary rounded-[12px]"
                   onPress={() => actions.clearFocusVerses()}
                   accessibilityRole="button"
                   accessibilityLabel={t('accessibility.clearFocus')}
-                  center
-                  width={28}
-                  height={28}
-                  bg="lightPrimary"
-                  borderRadius={12}
                   style={opacityTransitionStyle}
                 >
                   <FeatherIcon name="x" size={15} color="primary" />
@@ -688,9 +656,10 @@ const Header = ({
           </>
         ) : (
           <>
-            <HStack alignItems="center" gap={3} pl={10}>
-              <HStack>
+            <HStack className="overflow-hidden border-continuous items-center gap-[3px] pl-[10px]">
+              <HStack className="overflow-hidden border-continuous">
                 <TouchableBox
+                  className="overflow-hidden border-continuous items-center justify-center pl-[12px] pr-[7px] h-[32px]"
                   onPress={() => {
                     openBookSelector({
                       actions,
@@ -701,23 +670,12 @@ const Header = ({
                   accessibilityLabel={t('accessibility.chooseBookAndChapter', {
                     reference: `${t(bookName)} ${chapter}`,
                   })}
-                  center
-                  pl={12}
-                  pr={7}
-                  height={32}
                 >
                   <AnimatedBox
-                    bg="lightGrey"
-                    borderTopLeftRadius={20}
-                    borderBottomLeftRadius={20}
-                    position="absolute"
-                    left={0}
-                    bottom={0}
-                    right={0}
-                    top={0}
+                    className="overflow-hidden border-continuous bg-light-grey rounded-tl-[20px] rounded-bl-[20px] absolute left-[0px] bottom-[0px] right-[0px] top-[0px]"
                     style={opacityTransitionStyle}
                   />
-                  <AnimatedText fontWeight="bold" fontSize={14} style={translateYTransitionStyle}>
+                  <AnimatedText className="font-bold text-[14px]" style={translateYTransitionStyle}>
                     {isSmall
                       ? truncate(`${t(bookName)} ${chapter}`, 10)
                       : `${t(bookName)} ${chapter}`}
@@ -725,6 +683,7 @@ const Header = ({
                 </TouchableBox>
               </HStack>
               <TouchableBox
+                className="overflow-hidden border-continuous items-center justify-center pl-[7px] pr-[12px] h-[32px]"
                 onPress={() =>
                   openVersionSelector({
                     actions,
@@ -733,35 +692,27 @@ const Header = ({
                 }
                 accessibilityRole="button"
                 accessibilityLabel={t('accessibility.chooseVersion', { version })}
-                center
-                pl={7}
-                pr={12}
-                height={32}
               >
                 <AnimatedBox
-                  bg="lightGrey"
-                  borderTopRightRadius={20}
-                  borderBottomRightRadius={20}
-                  position="absolute"
-                  left={0}
-                  bottom={0}
-                  right={0}
-                  top={0}
+                  className="overflow-hidden border-continuous bg-light-grey rounded-tr-[20px] rounded-br-[20px] absolute left-[0px] bottom-[0px] right-[0px] top-[0px]"
                   style={opacityTransitionStyle}
                 />
-                <AnimatedText fontWeight="bold" fontSize={14} style={translateYTransitionStyle}>
+                <AnimatedText className="font-bold text-[14px]" style={translateYTransitionStyle}>
                   {version}
                 </AnimatedText>
               </TouchableBox>
             </HStack>
 
             <VerseSelectorPopup bibleAtom={bibleAtom} coverage={coverage} preferCoverage>
-              <AnimatedBox center width={40} height="100%" style={opacityTransitionStyle}>
+              <AnimatedBox
+                className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[100%]"
+                style={opacityTransitionStyle}
+              >
                 <FeatherIcon name="chevrons-down" size={20} style={{ opacity: 0.3 }} />
               </AnimatedBox>
             </VerseSelectorPopup>
             {!isSelectionMode && (
-              <HStack marginLeft="auto" alignItems="center">
+              <HStack className="overflow-hidden border-continuous ml-auto items-center">
                 {isParallel && (
                   <MenuView
                     accessibilityLabel={t('accessibility.parallelOptions')}
@@ -790,28 +741,17 @@ const Header = ({
                     }}
                   >
                     <AnimatedBox
-                      center
-                      width={40}
-                      height={40}
+                      className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
                       style={{
                         opacity: fullScreenOpacity,
                         transitionProperty: 'opacity',
                         transitionDuration: 300,
                       }}
                     >
-                      <Box position="relative" overflow="visible">
+                      <Box className="border-continuous overflow-visible relative">
                         <ParallelIcon color="primary" />
-                        <Box
-                          position="absolute"
-                          bottom={-2}
-                          right={-4}
-                          bg="grey"
-                          borderRadius={99}
-                          width={12}
-                          height={12}
-                          center
-                        >
-                          <Text fontSize={9} color="reverse" fontWeight="bold">
+                        <Box className="overflow-hidden border-continuous absolute bottom-[-2px] right-[-4px] bg-grey rounded-[99px] w-[12px] h-[12px] items-center justify-center">
+                          <Text className="text-[9px] text-reverse font-bold">
                             {parallelVersions.length + 1}
                           </Text>
                         </Box>
@@ -852,9 +792,7 @@ const Header = ({
                   }}
                 >
                   <AnimatedBox
-                    center
-                    width={40}
-                    height={40}
+                    className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
                     style={{
                       opacity: fullScreenOpacity,
                       transitionProperty: 'opacity',
@@ -866,12 +804,10 @@ const Header = ({
                 </MenuView>
                 {focusVerses && focusVerses.length > 0 && (
                   <TouchableBox
+                    className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[32px]"
                     onPress={() => actions.clearFocusVerses()}
                     accessibilityRole="button"
                     accessibilityLabel={t('accessibility.clearFocus')}
-                    center
-                    width={40}
-                    height={32}
                   >
                     <FeatherIcon name="x" size={20} />
                   </TouchableBox>
@@ -902,10 +838,9 @@ const Header = ({
         <StrongModeSelectorSheet bibleAtom={bibleAtom} sheetRef={strongModeSheetRef} />
       )}
       {currentChapterBookmark && (
-        <Box position="absolute" right={24} bottom={-18}>
+        <Box className="overflow-hidden border-continuous absolute right-[24px] bottom-[-18px]">
           <TouchableBox
-            center
-            height="100%"
+            className="overflow-hidden border-continuous items-center justify-center h-[100%]"
             onPress={() => bookmarkModalRef.current?.present()}
             accessibilityRole="button"
             accessibilityLabel={t('Modifier le marque-page')}

@@ -1,3 +1,4 @@
+import { twMerge } from '~common/ui/classNames'
 import React from 'react'
 import Box, { BoxProps } from '~common/ui/Box'
 
@@ -9,15 +10,18 @@ const AudioChip = ({
 }) => {
   return (
     <Box
-      px={8}
-      height={26}
-      maxW={90}
-      row
-      borderColor={isActive ? 'primary' : 'border'}
-      borderWidth={1}
-      borderRadius={10}
-      center
       {...props}
+      style={props.style}
+      className={twMerge(
+        'overflow-hidden border-continuous',
+        twMerge(
+          isActive ? 'border-primary' : 'border-border',
+          twMerge(
+            'overflow-hidden border-continuous px-[8px] h-[26px] max-w-[90px] border-[1px] rounded-[10px] items-center justify-center flex-row',
+            props.className
+          )
+        )
+      )}
     />
   )
 }

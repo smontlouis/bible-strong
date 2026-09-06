@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -21,7 +20,6 @@ import {
   getResourceFailurePresentation,
   resourceFailureFromBibleError,
 } from '~features/resources/resourceFailure'
-
 const BibleErrorView = ({ error }: { error: BibleError }) => {
   const { t } = useTranslation()
   const router = useRouter()
@@ -80,19 +78,19 @@ const BibleErrorView = ({ error }: { error: BibleError }) => {
     queryClient.invalidateQueries({ queryKey: resourceQueryKeys.bibleContent() })
 
   return (
-    <Box flex={1}>
+    <Box className="overflow-hidden border-continuous flex-[1]">
       <Empty
         source={require('~assets/images/empty.json')}
         message={t(failurePresentation.detailKey)}
       >
         {showActions && (
-          <Box mt={20} gap={10} alignItems="center">
+          <Box className="overflow-hidden border-continuous mt-[20px] gap-[10px] items-center">
             {canRetry && <Button onPress={handleRetry}>{t('bible.error.retry')}</Button>}
             {(canAcquire || canRepair) &&
               (downloadInProgress ? (
-                <Box alignItems="center" gap={12}>
+                <Box className="overflow-hidden border-continuous items-center gap-[12px]">
                   <Progress progress={progress} />
-                  <Text fontSize={14}>
+                  <Text className="text-[14px]">
                     {isInserting ? t('bible.error.inserting') : t('bible.error.downloading')}
                   </Text>
                 </Box>

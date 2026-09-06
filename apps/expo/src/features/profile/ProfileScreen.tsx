@@ -6,11 +6,9 @@ import Header from '~common/Header'
 import ScrollView from '~common/ui/ScrollView'
 import Box from '~common/ui/Box'
 import useLogin from '~helpers/useLogin'
-
 import ProfileHeader from './components/ProfileHeader'
 import ProfileStats from './components/ProfileStats'
 import ProfileActions from './components/ProfileActions'
-
 const ProfileScreen = () => {
   const { t } = useTranslation()
   const router = useRouter()
@@ -30,11 +28,11 @@ const ProfileScreen = () => {
     <Container>
       <Header hasBackButton title={t('profile.title')} />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 40 }}>
-        <Box padding={20}>
+        <Box className="overflow-hidden border-continuous p-[20px]">
           <ProfileHeader />
         </Box>
         <ProfileStats />
-        <Box pt={20}>
+        <Box className="overflow-hidden border-continuous pt-[20px]">
           <ProfileActions />
         </Box>
       </ScrollView>

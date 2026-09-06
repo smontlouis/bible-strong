@@ -1,0 +1,229 @@
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'uniwind';
+
+/* Preserve React Native Web defaults: intentionally omit Tailwind Preflight. */
+@theme {
+  --spacing: 4px;
+}
+
+@layer theme {
+  :root {
+    @variant light {
+      --color-default: rgb(0,0,0);
+      --color-opacity5: rgba(0,0,0,0.05);
+      --color-reverse: rgb(255,255,255);
+      --color-border: rgb(230,230,230);
+      --color-light-grey: #F4F7FF;
+      --color-grey: rgb(78,79,79);
+      --color-dark-grey: rgba(0,0,0,0.5);
+      --color-primary: rgb(89,131,240);
+      --color-light-primary: rgb(233, 243, 252);
+      --color-secondary: rgb(255,188,0);
+      --color-light-secondary: rgb(255, 238, 198);
+      --color-tertiary: rgb(98,113,122);
+      --color-quart: rgb(194,40,57);
+      --color-quint: rgb(48, 51, 107);
+      --color-success: #2ecc71;
+      --color-color1: #81ecec;
+      --color-color2: #ff7675;
+      --color-color3: #fdcb6e;
+      --color-color4: #74b9ff;
+      --color-color5: #95afc0;
+      --color-background: rgb(255,255,255);
+      --color-foreground: rgb(0,0,0);
+    }
+    @variant default {
+      --color-default: rgb(0,0,0);
+      --color-opacity5: rgba(0,0,0,0.05);
+      --color-reverse: rgb(255,255,255);
+      --color-border: rgb(230,230,230);
+      --color-light-grey: #F4F7FF;
+      --color-grey: rgb(78,79,79);
+      --color-dark-grey: rgba(0,0,0,0.5);
+      --color-primary: rgb(89,131,240);
+      --color-light-primary: rgb(233, 243, 252);
+      --color-secondary: rgb(255,188,0);
+      --color-light-secondary: rgb(255, 238, 198);
+      --color-tertiary: rgb(98,113,122);
+      --color-quart: rgb(194,40,57);
+      --color-quint: rgb(48, 51, 107);
+      --color-success: #2ecc71;
+      --color-color1: #81ecec;
+      --color-color2: #ff7675;
+      --color-color3: #fdcb6e;
+      --color-color4: #74b9ff;
+      --color-color5: #95afc0;
+      --color-background: rgb(255,255,255);
+      --color-foreground: rgb(0,0,0);
+    }
+    @variant dark {
+      --color-default: rgb(200,200,200);
+      --color-opacity5: rgba(200,200,200,0.05);
+      --color-reverse: rgb(18,45,66);
+      --color-border: #253e51;
+      --color-light-grey: rgb(30, 61, 82);
+      --color-grey: rgb(150,150,150);
+      --color-dark-grey: rgba(255, 255, 255, 0.5);
+      --color-primary: rgb(14,211,185);
+      --color-light-primary: rgba(14, 211, 185, 0.5);
+      --color-secondary: rgb(255,188,0);
+      --color-light-secondary: rgba(255,188,0, 0.15);
+      --color-tertiary: rgb(166,190,204);
+      --color-quart: rgb(194,40,57);
+      --color-quint: rgb(253, 121, 168);
+      --color-success: #2ecc71;
+      --color-color1: #81ecec;
+      --color-color2: #ff7675;
+      --color-color3: #fdcb6e;
+      --color-color4: #74b9ff;
+      --color-color5: #9b59b6;
+      --color-background: rgb(18,45,66);
+      --color-foreground: rgb(200,200,200);
+    }
+    @variant sepia {
+      --color-default: rgb(72,54,35);
+      --color-opacity5: rgba(72,54,35,0.05);
+      --color-reverse: rgb(245,242,227);
+      --color-border: #E1DDCA;
+      --color-light-grey: #ebded1;
+      --color-grey: rgb(171, 138, 106);
+      --color-dark-grey: rgba(72,54,35,0.5);
+      --color-primary: rgb(125,123,168);
+      --color-light-primary: rgb(228, 228, 245);
+      --color-secondary: rgb(255,188,0);
+      --color-light-secondary: rgb(255, 238, 198);
+      --color-tertiary: rgb(98,113,122);
+      --color-quart: rgb(194,40,57);
+      --color-quint: rgb(48, 51, 107);
+      --color-success: #2ecc71;
+      --color-color1: #81ecec;
+      --color-color2: #ff7675;
+      --color-color3: #fdcb6e;
+      --color-color4: #74b9ff;
+      --color-color5: #95afc0;
+      --color-background: rgb(245,242,227);
+      --color-foreground: rgb(72,54,35);
+    }
+    @variant nature {
+      --color-default: rgb(27, 108, 50);
+      --color-opacity5: rgba(27, 108, 50, 0.05);
+      --color-reverse: rgb(253,255,253);
+      --color-border: #DEEFDE;
+      --color-light-grey: #EAF9EC;
+      --color-grey: rgb(41,70,50);
+      --color-dark-grey: rgba(0,0,0,0.5);
+      --color-primary: rgb(211,78,110);
+      --color-light-primary: rgb(255, 194, 209);
+      --color-secondary: rgb(255,188,0);
+      --color-light-secondary: rgb(255, 238, 198);
+      --color-tertiary: rgb(98,113,122);
+      --color-quart: rgb(194,40,57);
+      --color-quint: rgb(48, 51, 107);
+      --color-success: #2ecc71;
+      --color-color1: #81ecec;
+      --color-color2: #ff7675;
+      --color-color3: #fdcb6e;
+      --color-color4: #74b9ff;
+      --color-color5: #95afc0;
+      --color-background: rgb(253,255,253);
+      --color-foreground: rgb(27, 108, 50);
+    }
+    @variant sunset {
+      --color-default: rgb(103, 87, 124);
+      --color-opacity5: rgba(27, 108, 50, 0.05);
+      --color-reverse: #FFFAF8;
+      --color-border: #F5E8E2;
+      --color-light-grey: #FAE7DF;
+      --color-grey: rgb(68,60,80);
+      --color-dark-grey: rgba(0,0,0,0.5);
+      --color-primary: rgb(200,148,186);
+      --color-light-primary: rgb(246, 202, 216);
+      --color-secondary: rgb(255,188,0);
+      --color-light-secondary: rgb(255, 238, 198);
+      --color-tertiary: rgb(98,113,122);
+      --color-quart: rgb(194,40,57);
+      --color-quint: rgb(48, 51, 107);
+      --color-success: #2ecc71;
+      --color-color1: #81ecec;
+      --color-color2: #ff7675;
+      --color-color3: #fdcb6e;
+      --color-color4: #74b9ff;
+      --color-color5: #95afc0;
+      --color-background: #FFFAF8;
+      --color-foreground: rgb(103, 87, 124);
+    }
+    @variant black {
+      --color-default: rgb(200,200,200);
+      --color-opacity5: rgba(200,200,200,0.05);
+      --color-reverse: rgb(0,0,0);
+      --color-border: #272727;
+      --color-light-grey: rgb(20, 20, 20);
+      --color-grey: rgb(150,150,150);
+      --color-dark-grey: rgba(255, 255, 255, 0.5);
+      --color-primary: rgb(89,131,240);
+      --color-light-primary: rgba(89,131,240, 0.3);
+      --color-secondary: rgb(255,188,0);
+      --color-light-secondary: rgba(255,188,0, 0.15);
+      --color-tertiary: rgb(166,190,204);
+      --color-quart: rgb(194,40,57);
+      --color-quint: rgb(253, 121, 168);
+      --color-success: #2ecc71;
+      --color-color1: #81ecec;
+      --color-color2: #ff7675;
+      --color-color3: #fdcb6e;
+      --color-color4: #74b9ff;
+      --color-color5: #9b59b6;
+      --color-background: rgb(0,0,0);
+      --color-foreground: rgb(200,200,200);
+    }
+    @variant mauve {
+      --color-default: rgb(228,194,225);
+      --color-opacity5: rgba(200,200,200,0.05);
+      --color-reverse: rgb(51,4,46);
+      --color-border: rgb(72, 19, 66);
+      --color-light-grey: rgb(66, 14, 60);
+      --color-grey: rgb(150,150,150);
+      --color-dark-grey: rgba(255, 255, 255, 0.5);
+      --color-primary: rgb(14,211,185);
+      --color-light-primary: rgba(14,211,185, 0.5);
+      --color-secondary: rgb(255,188,0);
+      --color-light-secondary: rgba(255,188,0, 0.15);
+      --color-tertiary: rgb(166,190,204);
+      --color-quart: rgb(194,40,57);
+      --color-quint: rgb(253, 121, 168);
+      --color-success: #2ecc71;
+      --color-color1: #81ecec;
+      --color-color2: #ff7675;
+      --color-color3: #fdcb6e;
+      --color-color4: #74b9ff;
+      --color-color5: #9b59b6;
+      --color-background: rgb(51,4,46);
+      --color-foreground: rgb(228,194,225);
+    }
+    @variant night {
+      --color-default: rgb(198,225,255);
+      --color-opacity5: rgba(200,200,200,0.05);
+      --color-reverse: rgb(0,50,100);
+      --color-border: #164778;
+      --color-light-grey: rgb(17, 69, 120);
+      --color-grey: rgb(150,170,187);
+      --color-dark-grey: rgba(255, 255, 255, 0.5);
+      --color-primary: rgb(14,211,185);
+      --color-light-primary: rgba(14, 211, 185, 0.5);
+      --color-secondary: rgb(255,240,187);
+      --color-light-secondary: rgba(255,240,187, 0.3);
+      --color-tertiary: rgb(160,220,255);
+      --color-quart: rgb(224,128,138);
+      --color-quint: rgb(253, 121, 168);
+      --color-success: #2ecc71;
+      --color-color1: #81ecec;
+      --color-color2: #ff7675;
+      --color-color3: #fdcb6e;
+      --color-color4: #74b9ff;
+      --color-color5: #9b59b6;
+      --color-background: rgb(0,50,100);
+      --color-foreground: rgb(198,225,255);
+    }
+  }
+}

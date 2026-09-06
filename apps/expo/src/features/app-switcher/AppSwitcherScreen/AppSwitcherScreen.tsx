@@ -1,9 +1,7 @@
 import { useAtomValue } from 'jotai/react'
 import React, { useEffect, useRef, useState } from 'react'
-
 import { useTranslation } from 'react-i18next'
 import { useWindowDimensions } from 'react-native'
-
 import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -21,7 +19,6 @@ import CachedTabScreens from '../CachedTabScreens'
 import { TabContextProvider } from '../context/TabContext'
 import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
 import TabGroupPager from './TabGroupPager'
-
 type AppSwitcherScreenFuncs = {
   openMenu: () => void
   openHome: () => void
@@ -41,7 +38,7 @@ const AppSwitcherScreen = ({ openHome, openMenu }: AppSwitcherScreenFuncs) => {
 
   return (
     <TabContextProvider>
-      <Box row flex={1} bg="lightGrey">
+      <Box className="overflow-hidden border-continuous flex-row flex-[1] bg-light-grey">
         {isWide && !sidebarHidden && (
           <WorkspaceSidebar
             onCollapse={() => setSidebarHidden(true)}
@@ -49,39 +46,33 @@ const AppSwitcherScreen = ({ openHome, openMenu }: AppSwitcherScreenFuncs) => {
             openMenu={openMenu}
           />
         )}
-        <Box flex={1} minWidth={0} overflow="hidden">
+        <Box className="border-continuous overflow-visible flex-[1] min-w-[0px]">
           {isWide && sidebarHidden && (
-            <Box row bg="reverse" alignItems="center" px={8}>
+            <Box className="overflow-hidden border-continuous flex-row bg-reverse items-center px-[8px]">
               <TouchableBox
-                size={44}
-                center
+                className="overflow-hidden border-continuous items-center justify-center"
                 onPress={() => setSidebarHidden(false)}
                 accessibilityRole="button"
                 accessibilityLabel={t('workspace.showSidebar')}
+                style={{ width: 44, height: 44 }}
               >
                 <FeatherIcon name="sidebar" size={19} color="grey" />
               </TouchableBox>
-              <Text fontSize={13} color="grey">
-                Bible Strong
-              </Text>
+              <Text className="text-[13px] text-grey">Bible Strong</Text>
             </Box>
           )}
-          <Box flex={1} overflow="hidden">
+          <Box className="border-continuous overflow-visible flex-[1]">
             {!isWide && <TabGroupPager />}
             {isWide && tabsCount === 0 && (
-              <Box flex={1} center bg="reverse" gap={16}>
+              <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center bg-reverse gap-[16px]">
                 <FeatherIcon name="layers" size={32} color="grey" />
-                <Text color="grey">{t('tabs.noTabs')}</Text>
+                <Text className="text-grey">{t('tabs.noTabs')}</Text>
                 <TouchableBox
-                  px={20}
-                  minHeight={44}
-                  center
-                  bg="primary"
-                  borderRadius={10}
+                  className="overflow-hidden border-continuous px-[20px] min-h-[44px] items-center justify-center bg-primary rounded-[10px]"
                   onPress={() => openInNewTab(undefined, { autoRedirect: true })}
                   accessibilityRole="button"
                 >
-                  <Text color="white">{t('tabs.create')}</Text>
+                  <Text className="text-[white]">{t('tabs.create')}</Text>
                 </TouchableBox>
               </Box>
             )}
@@ -161,19 +152,22 @@ const AppSwitcherScreenWrapper = () => {
   }))
 
   return (
-    <Box flex={1} bg="lightGrey" overflow="hidden">
+    <Box className="border-continuous overflow-visible flex-[1] bg-light-grey">
       <AnimatedBox
-        row
-        flex={1}
+        className="overflow-hidden border-continuous flex-row flex-[1]"
         style={[{ width: drawerWidth * 2 + screenWidth, marginLeft: -drawerWidth }, containerStyle]}
       >
-        <Box width={drawerWidth}>{hasOpenedHome && <Home closeHome={closeHome} />}</Box>
+        <Box className="overflow-hidden border-continuous" style={{ width: drawerWidth }}>
+          {hasOpenedHome && <Home closeHome={closeHome} />}
+        </Box>
 
-        <Box width={screenWidth}>
+        <Box className="overflow-hidden border-continuous" style={{ width: screenWidth }}>
           <AppSwitcherScreen openHome={openHome} openMenu={openMenu} />
         </Box>
 
-        <Box width={drawerWidth}>{hasOpenedMenu && <More closeMenu={closeMenu} />}</Box>
+        <Box className="overflow-hidden border-continuous" style={{ width: drawerWidth }}>
+          {hasOpenedMenu && <More closeMenu={closeMenu} />}
+        </Box>
       </AnimatedBox>
     </Box>
   )

@@ -15,7 +15,6 @@ import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import { autoBackupManager, BackupInfo } from '~helpers/AutoBackupManager'
 import { importData } from '~redux/modules/user'
-
 const AutomaticBackupsScreen = () => {
   const { t } = useTranslation()
 
@@ -23,10 +22,8 @@ const AutomaticBackupsScreen = () => {
     <Container>
       <Header hasBackButton title={t('backups.title')} />
       <ScrollView style={{ flex: 1 }}>
-        <Box paddingHorizontal={20} mt={20}>
-          <Text color="quart" fontSize={12}>
-            {t('backups.description')}
-          </Text>
+        <Box className="overflow-hidden border-continuous px-[20px] mt-[20px]">
+          <Text className="text-quart text-[12px]">{t('backups.description')}</Text>
           <AutoBackupsList />
         </Box>
       </ScrollView>
@@ -141,21 +138,17 @@ const AutoBackupsList = () => {
   }
 
   if (isLoading) {
-    return <Text mt={10}>{t('backups.loading')}</Text>
+    return <Text className="mt-[10px]">{t('backups.loading')}</Text>
   }
 
   if (backups.length === 0) {
-    return (
-      <Text mt={10} color="grey" textAlign="center">
-        {t('backups.none')}
-      </Text>
-    )
+    return <Text className="mt-[10px] text-grey text-center">{t('backups.none')}</Text>
   }
 
   return (
-    <Box mt={10}>
-      <Box row justifyContent="space-between" alignItems="center" mb={10}>
-        <Text fontSize={12} color="grey">
+    <Box className="overflow-hidden border-continuous mt-[10px]">
+      <Box className="overflow-hidden border-continuous flex-row justify-between items-center mb-[10px]">
+        <Text className="text-[12px] text-grey">
           {t('backups.count', { count: backups.length })} -{' '}
           {(backups.reduce((acc, b) => acc + b.size, 0) / 1024).toFixed(0)} KB
         </Text>
@@ -165,25 +158,22 @@ const AutoBackupsList = () => {
           disabled={isFetching}
           style={{ paddingHorizontal: 10 }}
         >
-          <Text fontSize={11}>{isFetching ? '...' : t('backups.refresh')}</Text>
+          <Text className="text-[11px]">{isFetching ? '...' : t('backups.refresh')}</Text>
         </Button>
       </Box>
       {backups.map(backup => (
         <Box
+          className="overflow-hidden border-continuous mb-[10px] p-[10px] bg-[rgba(0,0,0,0.05)] rounded-[5px]"
           key={backup.filename}
-          mb={10}
-          padding={10}
-          backgroundColor="rgba(0,0,0,0.05)"
-          borderRadius={5}
         >
-          <Text fontSize={14} bold>
+          <Text className="text-[14px] font-bold">
             {format(backup.timestamp, 'dd/MM/yyyy à HH:mm:ss')}
           </Text>
-          <Text fontSize={12} color="grey" mt={5}>
+          <Text className="text-[12px] text-grey mt-[5px]">
             {t('backups.size')}: {(backup.size / 1024).toFixed(1)} KB
           </Text>
           {backup.stats && (
-            <Text fontSize={11} color="grey" mt={3}>
+            <Text className="text-[11px] text-grey mt-[3px]">
               {backup.stats.highlightsCount > 0 &&
                 `${t('backups.highlights', { count: backup.stats.highlightsCount })} • `}
               {backup.stats.notesCount > 0 &&
@@ -200,14 +190,17 @@ const AutoBackupsList = () => {
                 `${t('backups.tabs', { count: backup.stats.tabsCount })}`}
             </Text>
           )}
-          <Box row mt={10}>
+          <Box className="overflow-hidden border-continuous flex-row mt-[10px]">
             <Button
               style={{ width: 100, marginRight: 10 }}
               small
               onPress={() => handleRestore(backup)}
               disabled={restoreMutation.isPending}
             >
-              <Text fontSize={12} opacity={restoreMutation.isPending ? 0.4 : 1}>
+              <Text
+                className="text-[12px]"
+                style={{ opacity: restoreMutation.isPending ? 0.4 : 1 }}
+              >
                 {t('backups.restore')}
               </Text>
             </Button>
@@ -219,12 +212,14 @@ const AutoBackupsList = () => {
               disabled={exportMutation.isPending}
             >
               <Text
-                fontSize={12}
-                opacity={
-                  exportMutation.isPending && exportMutation.variables?.filename === backup.filename
-                    ? 0.4
-                    : 1
-                }
+                className="text-[12px]"
+                style={{
+                  opacity:
+                    exportMutation.isPending &&
+                    exportMutation.variables?.filename === backup.filename
+                      ? 0.4
+                      : 1,
+                }}
               >
                 {exportMutation.isPending && exportMutation.variables?.filename === backup.filename
                   ? '...'

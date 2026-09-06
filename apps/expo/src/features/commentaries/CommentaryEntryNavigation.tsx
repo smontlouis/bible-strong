@@ -1,10 +1,8 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-
 const CommentaryEntryNavigation = ({
   hasPrevious,
   hasNext,
@@ -25,53 +23,51 @@ const CommentaryEntryNavigation = ({
   const { t } = useTranslation()
 
   return (
-    <Box row alignItems="center" justifyContent="space-between">
+    <Box className="overflow-hidden border-continuous flex-row items-center justify-between">
       <TouchableBox
-        size={36}
-        borderRadius={18}
-        bg="lightGrey"
-        center
+        className="overflow-hidden border-continuous rounded-[18px] bg-light-grey items-center justify-center"
         disabled={!hasPrevious}
-        opacity={hasPrevious ? 1 : 0.35}
         activeOpacity={0.62}
         onPress={onPrevious}
         accessibilityRole="button"
         accessibilityLabel={t('commentaries.resource.previousCommentary')}
         accessibilityState={{ disabled: !hasPrevious }}
+        style={[
+          { opacity: !hasPrevious ? 0.6 : 1 },
+          [{ opacity: !hasPrevious ? 0.6 : hasPrevious ? 1 : 0.35, width: 36, height: 36 }],
+        ]}
       >
         <FeatherIcon name="chevron-left" size={20} color="primary" />
       </TouchableBox>
 
       <TouchableBox
-        flex
-        mx={12}
-        px={11}
-        py={7}
-        borderRadius={14}
-        bg="lightPrimary"
-        center
+        className="overflow-hidden border-continuous flex-[1] mx-[12px] px-[11px] py-[7px] rounded-[14px] bg-light-primary items-center justify-center"
         activeOpacity={0.62}
         disabled={referenceDisabled}
         accessibilityRole={referenceDisabled ? undefined : 'link'}
         onPress={onReferencePress}
+        style={[
+          { opacity: referenceDisabled ? 0.6 : 1 },
+          [{ opacity: referenceDisabled ? 0.6 : 1 }],
+        ]}
       >
-        <Text color="primary" bold numberOfLines={1}>
+        <Text className="text-primary font-bold" numberOfLines={1}>
           {reference}
         </Text>
       </TouchableBox>
 
       <TouchableBox
-        size={36}
-        borderRadius={18}
-        bg="lightGrey"
-        center
+        className="overflow-hidden border-continuous rounded-[18px] bg-light-grey items-center justify-center"
         disabled={!hasNext}
-        opacity={hasNext ? 1 : 0.35}
         activeOpacity={0.62}
         onPress={onNext}
         accessibilityRole="button"
         accessibilityLabel={t('commentaries.resource.nextCommentary')}
         accessibilityState={{ disabled: !hasNext }}
+        style={[
+          { opacity: !hasNext ? 0.6 : 1 },
+          [{ opacity: !hasNext ? 0.6 : hasNext ? 1 : 0.35, width: 36, height: 36 }],
+        ]}
       >
         <FeatherIcon name="chevron-right" size={20} color="primary" />
       </TouchableBox>

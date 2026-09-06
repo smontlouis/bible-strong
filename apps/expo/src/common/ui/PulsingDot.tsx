@@ -1,7 +1,6 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import Animated from 'react-native-reanimated'
 import { ViewStyle } from 'react-native'
-
 type PulsingDotProps = {
   size?: number
   color?: string

@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
-
 type PlayButtonProps = {
   disabled?: boolean
   isPlaying: boolean
@@ -18,11 +17,7 @@ const PlayButton = ({ disabled, isPlaying, onToggle, error, isLoading }: PlayBut
   if (error) {
     return (
       <Box
-        width={50}
-        height={50}
-        bg="reverse"
-        mx={10}
-        center
+        className="overflow-hidden border-continuous w-[50px] h-[50px] bg-reverse mx-[10px] items-center justify-center"
         accessible
         accessibilityRole="text"
         accessibilityLabel={t('accessibility.audioUnavailable')}
@@ -35,12 +30,7 @@ const PlayButton = ({ disabled, isPlaying, onToggle, error, isLoading }: PlayBut
   if (isLoading) {
     return (
       <Box
-        width={50}
-        height={50}
-        bg="primary"
-        borderRadius={25}
-        center
-        mx={10}
+        className="overflow-hidden border-continuous w-[50px] h-[50px] bg-primary rounded-[25px] items-center justify-center mx-[10px]"
         accessible
         accessibilityRole="progressbar"
         accessibilityLabel={t('accessibility.audioLoading')}
@@ -53,18 +43,14 @@ const PlayButton = ({ disabled, isPlaying, onToggle, error, isLoading }: PlayBut
 
   return (
     <TouchableBox
+      className="overflow-hidden border-continuous items-center justify-center w-[50px] h-[50px] bg-primary rounded-[25px] mx-[10px]"
       disabled={disabled}
       activeOpacity={0.5}
       onPress={onToggle}
       accessibilityRole="button"
       accessibilityLabel={isPlaying ? t('accessibility.pauseAudio') : t('accessibility.playAudio')}
       accessibilityState={{ disabled }}
-      center
-      width={50}
-      height={50}
-      bg="primary"
-      borderRadius={25}
-      mx={10}
+      style={[{ opacity: disabled ? 0.6 : 1 }, [{ opacity: disabled ? 0.6 : 1 }]]}
     >
       <IonIcon
         name={isPlaying ? 'pause' : 'play'}

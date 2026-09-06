@@ -1,6 +1,7 @@
+import { twMerge } from '~common/ui/classNames'
+
 import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
-
 import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
@@ -9,7 +10,6 @@ import Text from '~common/ui/Text'
 import type { SearchItemFilters, SearchItemType } from '~state/searchFilters'
 import { searchItemFilterConfig, searchItemFilterOrder } from './shared/SearchItemFilterBar'
 import SearchTypeIcon from './shared/SearchTypeIcon'
-
 type Props = {
   itemFilters: SearchItemFilters
   passageFilterCount: number
@@ -31,11 +31,12 @@ const SearchSourceFiltersSheet = forwardRef<SheetRef, Props>(
             title={t('search.sourceFilters.title')}
             rightComponent={
               !allSelected ? (
-                <Box mr={12}>
-                  <TouchableBox onPress={onReset} px={8} py={8}>
-                    <Text color="primary" fontSize={14}>
-                      {t('Réinitialiser')}
-                    </Text>
+                <Box className="overflow-hidden border-continuous mr-[12px]">
+                  <TouchableBox
+                    className="overflow-hidden border-continuous px-[8px] py-[8px]"
+                    onPress={onReset}
+                  >
+                    <Text className="text-primary text-[14px]">{t('Réinitialiser')}</Text>
                   </TouchableBox>
                 </Box>
               ) : undefined
@@ -50,50 +51,42 @@ const SearchSourceFiltersSheet = forwardRef<SheetRef, Props>(
 
             return (
               <HStack
+                className="border-continuous overflow-hidden min-h-[56px] items-stretch border-b-[1px] border-border"
                 key={type}
-                minHeight={56}
-                alignItems="stretch"
-                borderBottomWidth={1}
-                borderColor="border"
               >
                 <TouchableBox
-                  flex={1}
-                  row
-                  alignItems="center"
-                  px={16}
-                  py={12}
+                  className="overflow-hidden border-continuous flex-[1] flex-row items-center px-[16px] py-[12px]"
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked }}
                   onPress={() => onToggle(type)}
                 >
-                  <Checkbox checked={checked} fillChecked checkColor="reverse" mr={12} />
+                  <Checkbox
+                    className="mr-[12px]"
+                    checked={checked}
+                    fillChecked
+                    checkColor="reverse"
+                  />
                   <SearchTypeIcon type={type} color={checked ? config.color : 'tertiary'} />
-                  <Text ml={12} fontSize={16} color={checked ? undefined : 'tertiary'}>
+                  <Text
+                    className={twMerge(
+                      checked ? 'text-default' : 'text-tertiary',
+                      'ml-[12px] text-[16px]'
+                    )}
+                  >
                     {t(config.labelKey)}
                   </Text>
                 </TouchableBox>
 
                 {type === 'passages' ? (
                   <TouchableBox
-                    minWidth={64}
-                    center
+                    className="overflow-hidden border-continuous min-w-[64px] items-center justify-center"
                     accessibilityLabel={t('search.passageFilters.title')}
                     onPress={onOpenPassageFilters}
                   >
                     {passageFilterCount ? (
-                      <HStack
-                        bg="primary"
-                        minWidth={42}
-                        height={24}
-                        borderRadius={12}
-                        center
-                        gap={3}
-                        px={7}
-                      >
+                      <HStack className="overflow-hidden border-continuous bg-primary min-w-[42px] h-[24px] rounded-[12px] items-center justify-center gap-[3px] px-[7px]">
                         <Text
-                          color="reverse"
-                          fontSize={13}
-                          bold
+                          className="text-reverse text-[13px] font-bold"
                           style={{ fontVariant: ['tabular-nums'] }}
                         >
                           {passageFilterCount}

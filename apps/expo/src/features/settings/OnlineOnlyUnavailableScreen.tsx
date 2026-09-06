@@ -1,28 +1,26 @@
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-
 import Header from '~common/Header'
 import Box, { SafeAreaBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-
 const OnlineOnlyUnavailableScreen = ({ titleKey }: { titleKey: string }) => {
   const router = useRouter()
   const { t } = useTranslation()
 
   return (
-    <SafeAreaBox flex bg="lightGrey">
+    <SafeAreaBox className="overflow-hidden border-continuous flex-[1] bg-light-grey">
       <Header title={t(titleKey)} hasBackButton />
-      <Box flex center px={28}>
+      <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center px-[28px]">
         <FeatherIcon name="cloud" size={56} color="primary" />
-        <Text mt={20} fontSize={22} bold textAlign="center">
+        <Text className="mt-[20px] text-[22px] font-bold text-center">
           {t('resource.web.onlineOnlyTitle')}
         </Text>
-        <Text mt={10} color="tertiary" textAlign="center" lineHeight={22}>
+        <Text className="mt-[10px] text-tertiary text-center leading-[22px]">
           {t('resource.web.onlineOnlyDescription')}
         </Text>
-        <Box mt={24}>
+        <Box className="overflow-hidden border-continuous mt-[24px]">
           <Button onPress={() => router.replace('/')}>{t('resource.web.backToBible')}</Button>
         </Box>
       </Box>

@@ -1,5 +1,6 @@
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
-import styled from '@emotion/native'
+import * as NativeUI from 'react-native'
 import {
   AccessibilityState,
   ActivityIndicator,
@@ -7,7 +8,11 @@ import {
   TouchableOpacityProps,
   ViewStyle,
 } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
 import Link, { LinkProps } from '~common/Link'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -84,7 +89,29 @@ const buttonStyles = ({
   }),
 })
 
-const WrapperButton = styled.TouchableOpacity<Partial<Props>>(buttonStyles)
+const WrapperButton = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.TouchableOpacity>,
+    keyof Partial<Props> | 'theme'
+  > &
+    Omit<Partial<Props>, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+
+  const classStyles = useResolveClassNames(twMerge('', className))
+  return (
+    <NativeUI.TouchableOpacity
+      {...props}
+      style={
+        [classStyles, buttonStyles({ ...props, theme }), props.style] as UIComponentProps<
+          typeof NativeUI.TouchableOpacity
+        >['style']
+      }
+    />
+  )
+}
 
 type ButtonLinkProps = LinkProps<keyof MainStackProps> &
   TouchableOpacityProps &
@@ -94,19 +121,60 @@ type ButtonLinkProps = LinkProps<keyof MainStackProps> &
 
 const ButtonLink = Link as React.ComponentType<ButtonLinkProps>
 
-const WrapperLink = styled(ButtonLink)<Partial<Props>>(buttonStyles)
+const WrapperLink = (
+  componentProps: Omit<UIComponentProps<typeof ButtonLink>, keyof Partial<Props> | 'theme'> &
+    Omit<Partial<Props>, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
 
-const TextButton = styled.Text(
-  ({ theme, small, reverse }: { theme?: Theme; small?: boolean; reverse?: boolean }) => ({
-    color: reverse ? theme?.colors.default : 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
+  const classStyles = useResolveClassNames(twMerge('', className))
+  return (
+    <ButtonLink
+      {...props}
+      style={
+        [classStyles, buttonStyles({ ...props, theme }), props.style] as UIComponentProps<
+          typeof ButtonLink
+        >['style']
+      }
+    />
+  )
+}
 
-    ...(small && {
-      fontSize: 14,
-    }),
-  })
-)
+const TextButton = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.Text>,
+    keyof { theme?: Theme; small?: boolean; reverse?: boolean } | 'theme'
+  > &
+    Omit<{ theme?: Theme; small?: boolean; reverse?: boolean }, 'theme'> & {
+      theme?: AppTheme
+      className?: string
+    }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { small, reverse } = props
+  const classStyles = useResolveClassNames(twMerge('font-bold text-[16px]', className))
+  return (
+    <NativeUI.Text
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            color: reverse ? theme?.colors.default : 'white',
+            ...(small && {
+              fontSize: 14,
+            }),
+          },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.Text>['style']
+      }
+    />
+  )
+}
 
 const Button = ({
   children,
@@ -154,7 +222,7 @@ const Button = ({
   }
 
   return (
-    <Box>
+    <Box className="overflow-hidden border-continuous">
       {onPress ? (
         <WrapperButton {...sharedProps}>
           {isLoading ? (
@@ -185,8 +253,8 @@ const Button = ({
         </WrapperLink>
       )}
       {subTitle && (
-        <Box center marginTop={5}>
-          <Text fontSize={10}>{subTitle}</Text>
+        <Box className="overflow-hidden border-continuous items-center justify-center mt-[5px]">
+          <Text className="text-[10px]">{subTitle}</Text>
         </Box>
       )}
     </Box>

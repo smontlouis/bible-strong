@@ -1,10 +1,11 @@
+import { twMerge } from '~common/ui/classNames'
+
 import { pageContentStyle } from '~common/ui/PageContent'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { LegendList } from '@legendapp/list'
 import React, { useState } from 'react'
 import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
-
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import ConcordanceVerse from '~features/bible/ConcordanceVerse'
@@ -19,7 +20,6 @@ import type {
   LexiconBibleCountsResult,
   LexiconBibleLemmaStatsResult,
 } from '~features/resources/lexiconBibleResourceAccess'
-
 const PAGE_SIZE = 60
 const PLACEHOLDER_COUNT = 6
 
@@ -36,11 +36,11 @@ const getMatchingAvailableResult = <
 }
 
 const ConcordancePlaceholder = () => (
-  <VStack minHeight={104} py={10} gap={7} borderBottomWidth={1} borderColor="border">
-    <Box height={14} width="28%" borderRadius={4} bg="lightGrey" />
-    <Box height={14} width="92%" borderRadius={4} bg="lightGrey" />
-    <Box height={14} width="78%" borderRadius={4} bg="lightGrey" />
-    <Box height={14} width="58%" borderRadius={4} bg="lightGrey" />
+  <VStack className="border-continuous overflow-hidden min-h-[104px] py-[10px] gap-[7px] border-b-[1px] border-border">
+    <Box className="overflow-hidden border-continuous h-[14px] w-[28%] rounded-[4px] bg-light-grey" />
+    <Box className="overflow-hidden border-continuous h-[14px] w-[92%] rounded-[4px] bg-light-grey" />
+    <Box className="overflow-hidden border-continuous h-[14px] w-[78%] rounded-[4px] bg-light-grey" />
+    <Box className="overflow-hidden border-continuous h-[14px] w-[58%] rounded-[4px] bg-light-grey" />
   </VStack>
 )
 
@@ -125,7 +125,7 @@ const StrongConcordancePage = ({
         verses.length)
 
   const placeholders = (
-    <VStack>
+    <VStack className="overflow-hidden border-continuous">
       {Array.from({ length: PLACEHOLDER_COUNT }, (_, index) => (
         <ConcordancePlaceholder key={index} />
       ))}
@@ -151,11 +151,9 @@ const StrongConcordancePage = ({
       onEndReachedThreshold={0.75}
       ListHeaderComponent={
         <>
-          <HStack alignItems="baseline" gap={8}>
-            <Text bold fontSize={32}>
-              {count}
-            </Text>
-            <Text color="tertiary" fontSize={12}>
+          <HStack className="overflow-hidden border-continuous items-baseline gap-[8px]">
+            <Text className="font-bold text-[32px]">{count}</Text>
+            <Text className="text-tertiary text-[12px]">
               {t('strongDetail.concordance.usesIn', { version })}
             </Text>
           </HStack>
@@ -167,14 +165,25 @@ const StrongConcordancePage = ({
               style={{ marginHorizontal: -20, marginTop: 16 }}
               contentContainerStyle={{ paddingHorizontal: 20, gap: 7 }}
             >
-              <TouchableBox onPress={() => setSelectedLemmaId(undefined)}>
+              <TouchableBox
+                className="overflow-hidden border-continuous"
+                onPress={() => setSelectedLemmaId(undefined)}
+              >
                 <Box
-                  bg={selectedLemmaId == null ? 'primary' : 'lightGrey'}
-                  borderRadius={16}
-                  px={10}
-                  py={7}
+                  className={twMerge(
+                    'overflow-hidden border-continuous',
+                    twMerge(
+                      selectedLemmaId == null ? 'bg-primary' : 'bg-light-grey',
+                      'overflow-hidden border-continuous rounded-[16px] px-[10px] py-[7px]'
+                    )
+                  )}
                 >
-                  <Text color={selectedLemmaId == null ? 'reverse' : 'default'} fontSize={12}>
+                  <Text
+                    className={twMerge(
+                      selectedLemmaId == null ? 'text-reverse' : 'text-default',
+                      'text-[12px]'
+                    )}
+                  >
                     {t('Tous')} ·{' '}
                     {counts
                       ? counts.counts.reduce(
@@ -186,16 +195,25 @@ const StrongConcordancePage = ({
                 </Box>
               </TouchableBox>
               {lemmaStats.lemmas.map(lemma => (
-                <TouchableBox key={lemma.id} onPress={() => setSelectedLemmaId(lemma.id)}>
+                <TouchableBox
+                  className="overflow-hidden border-continuous"
+                  key={lemma.id}
+                  onPress={() => setSelectedLemmaId(lemma.id)}
+                >
                   <Box
-                    bg={selectedLemmaId === lemma.id ? 'primary' : 'lightGrey'}
-                    borderRadius={16}
-                    px={10}
-                    py={7}
+                    className={twMerge(
+                      'overflow-hidden border-continuous',
+                      twMerge(
+                        selectedLemmaId === lemma.id ? 'bg-primary' : 'bg-light-grey',
+                        'overflow-hidden border-continuous rounded-[16px] px-[10px] py-[7px]'
+                      )
+                    )}
                   >
                     <Text
-                      color={selectedLemmaId === lemma.id ? 'reverse' : 'default'}
-                      fontSize={12}
+                      className={twMerge(
+                        selectedLemmaId === lemma.id ? 'text-reverse' : 'text-default',
+                        'text-[12px]'
+                      )}
                     >
                       {lemma.lemma}{' '}
                       {formatStrongLemmaPartOfSpeech(lemma.partOfSpeech, i18n.language)} ·{' '}

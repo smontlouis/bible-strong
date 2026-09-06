@@ -31,10 +31,8 @@ import {
 } from 'react-native-reanimated'
 import Svg, { Path, type PathProps } from 'react-native-svg'
 import { runOnJS } from 'react-native-worklets'
-
 import Box, { AnimatedBox } from '~common/ui/Box'
 import type { OnboardingStageMetrics } from './OnboardingStage'
-
 export type SceneLayoutMode = 'auto' | 'position' | 'resize' | 'scale'
 
 export type SceneNodeAnchor = {
@@ -762,10 +760,7 @@ const NodeRenderer = ({
 
   const visualNode = (
     <AnimatedBox
-      position="absolute"
-      left={0}
-      top={0}
-      overflow="visible"
+      className="border-continuous overflow-visible absolute left-[0px] top-[0px]"
       style={animatedStyle}
       accessible={Boolean(onPress)}
       accessibilityRole={onPress ? 'button' : undefined}
@@ -774,11 +769,11 @@ const NodeRenderer = ({
       pointerEvents={descriptor.pointerEvents}
     >
       <AnimatedBox
+        className="border-continuous overflow-visible"
         key={descriptor.contentIdentity}
         collapsable={false}
         style={{ position: 'absolute', inset: 0 }}
         pointerEvents={descriptor.pointerEvents}
-        overflow="visible"
         entering={
           reduceMotion || descriptor.contentEntering === false
             ? undefined
@@ -803,15 +798,18 @@ const NodeRenderer = ({
 
   return (
     <AnimatedBox
+      className="border-continuous overflow-visible absolute"
       collapsable={false}
-      position="absolute"
-      left={initialFrame.x * metrics.scale}
-      top={initialFrame.y * metrics.scale}
-      width={initialFrame.width * metrics.scale}
-      height={initialFrame.height * metrics.scale}
-      overflow="visible"
-      zIndex={descriptor.frame.zIndex ?? 4}
-      style={orbitLayerStyle}
+      style={[
+        {
+          width: initialFrame.width * metrics.scale,
+          height: initialFrame.height * metrics.scale,
+          top: initialFrame.y * metrics.scale,
+          left: initialFrame.x * metrics.scale,
+          zIndex: descriptor.frame.zIndex ?? 4,
+        },
+        orbitLayerStyle,
+      ]}
       entering={reduceMotion ? undefined : resolvedEntering}
       exiting={reduceMotion ? undefined : resolvedExiting}
       pointerEvents={descriptor.pointerEvents === 'none' ? 'none' : 'box-none'}
@@ -925,17 +923,18 @@ const ConnectionRenderer = ({
 
   return (
     <AnimatedBox
+      className="overflow-hidden border-continuous absolute left-[0px] top-[0px]"
       collapsable={false}
-      position="absolute"
-      left={0}
-      top={0}
-      width={metrics.width}
-      height={metrics.height}
       entering={reduceMotion ? undefined : FadeIn.springify().delay(connection.enterDelay ?? 0)}
       exiting={reduceMotion ? undefined : resolvedExiting}
       pointerEvents="none"
+      style={{ width: metrics.width, height: metrics.height }}
     >
-      <AnimatedBox absoluteFill style={transitionStyle} pointerEvents="none">
+      <AnimatedBox
+        className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px]"
+        style={transitionStyle}
+        pointerEvents="none"
+      >
         <Svg width={metrics.width} height={metrics.height}>
           <AnimatedPath
             animatedProps={animatedProps}
@@ -999,34 +998,25 @@ export const SceneGraph = ({
   }, [activeSceneId, orbitDuration, orbitProgress, orbitStartDelay, reduceMotion])
 
   return (
-    <Box flex={1} overflow="visible" collapsable={false}>
+    <Box className="border-continuous overflow-visible flex-[1]" collapsable={false}>
       {activeScene.layers.map(layer => (
         <AnimatedBox
+          className="border-continuous overflow-visible absolute left-[0px] top-[0px]"
           key={`${activeScene.id}:${layer.key}`}
           collapsable={false}
-          position="absolute"
-          left={0}
-          top={0}
-          width={metrics.width}
-          height={metrics.height}
-          zIndex={layer.zIndex}
-          overflow="visible"
           entering={reduceMotion ? undefined : FadeIn.springify()}
           exiting={reduceMotion ? undefined : FadeOut.springify()}
           pointerEvents="box-none"
+          style={{ width: metrics.width, height: metrics.height, zIndex: layer.zIndex }}
         >
           {layer.children}
         </AnimatedBox>
       ))}
 
       <Box
-        position="absolute"
-        left={0}
-        top={0}
-        width={metrics.width}
-        height={metrics.height}
-        zIndex={2}
+        className="overflow-hidden border-continuous absolute left-[0px] top-[0px] z-[2]"
         pointerEvents="none"
+        style={{ width: metrics.width, height: metrics.height }}
       >
         {activeScene.connections.map(connection => (
           <ConnectionRenderer

@@ -1,3 +1,5 @@
+import { twMerge } from '~common/ui/classNames'
+
 import { useAtom } from 'jotai/react'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -7,7 +9,6 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { audioRepeatAtom } from './atom'
 import AudioChip from './AudioChip'
-
 export type AudioRepeatButtonProps = BoxProps
 
 const AudioRepeatButton = (props: AudioRepeatButtonProps) => {
@@ -31,6 +32,7 @@ const AudioRepeatButton = (props: AudioRepeatButtonProps) => {
 
   return (
     <TouchableBox
+      className="overflow-hidden border-continuous"
       onPress={onToggle}
       accessibilityRole="switch"
       accessibilityLabel={t('audio.repeat')}
@@ -38,7 +40,12 @@ const AudioRepeatButton = (props: AudioRepeatButtonProps) => {
     >
       <AudioChip {...props} isActive={isActive}>
         <FeatherIcon name="repeat" size={14} color={isActive ? 'primary' : 'grey'} />
-        <Text ml={5} bold fontSize={10} color={isActive ? 'primary' : 'grey'}>
+        <Text
+          className={twMerge(
+            isActive ? 'text-primary' : 'text-grey',
+            'ml-[5px] font-bold text-[10px]'
+          )}
+        >
           {t('audio.repeat')}
         </Text>
       </AudioChip>

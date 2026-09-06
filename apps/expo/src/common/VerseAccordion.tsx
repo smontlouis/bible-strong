@@ -1,10 +1,9 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
 import { EaseView } from 'react-native-ease'
 import { useSharedValue } from 'react-native-reanimated'
 import { useTranslation } from 'react-i18next'
-
 import { VerseIds } from '~common/types'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -14,7 +13,6 @@ import Text from '~common/ui/Text'
 import AccordionItem from '~features/bible/BookSelectorSheet/AccordionItem'
 import { useResolvedBibleVerses, verseStringToObject } from '~features/resources/useBibleVerses'
 import verseToReference from '~helpers/verseToReference'
-
 interface VerseAccordionProps {
   noteVerses: VerseIds
   version?: string
@@ -51,22 +49,17 @@ const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
   }
 
   return (
-    <Box bg="opacity5" borderRadius={14} overflow="hidden">
+    <Box className="border-continuous overflow-visible bg-opacity5 rounded-[14px]">
       <TouchableBox
+        className="overflow-hidden border-continuous flex-row items-center py-[12px] px-[16px]"
         accessibilityLabel={reference}
         accessibilityRole="button"
         accessibilityState={{ expanded: isExpanded }}
-        row
-        alignItems="center"
-        py={12}
-        px={16}
         onPress={toggleExpand}
       >
-        <HStack flex alignItems="center" gap={8}>
+        <HStack className="items-center gap-[8px] flex-[1]">
           <FeatherIcon name="book-open" size={16} color={theme.colors.primary} />
-          <Text fontSize={14} color="primary" bold>
-            {reference}
-          </Text>
+          <Text className="text-[14px] text-primary font-bold">{reference}</Text>
         </HStack>
         <EaseView
           animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -85,9 +78,9 @@ const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
       </TouchableBox>
 
       <AccordionItem isExpanded={isExpandedShared} viewKey="verse-content">
-        <Box px={16}>
+        <Box className="overflow-hidden border-continuous px-[16px]">
           {isLoading ? (
-            <Box center py={10}>
+            <Box className="overflow-hidden border-continuous items-center justify-center py-[10px]">
               <ActivityIndicator
                 accessibilityLabel={t('Chargement...')}
                 accessibilityRole="progressbar"
@@ -99,7 +92,7 @@ const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
               {verseContent.content}
             </Paragraph>
           ) : (
-            <Text fontSize={12} color="grey">
+            <Text className="text-[12px] text-grey">
               {t('bibleVerse.textUnavailableInstalled')}
             </Text>
           )}

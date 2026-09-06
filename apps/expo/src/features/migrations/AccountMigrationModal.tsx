@@ -1,13 +1,13 @@
+import { twMerge } from '~common/ui/classNames'
+
 import { Modal, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
-
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import { ProgressBar } from '~common/ui/ProgressBar'
 import Text from '~common/ui/Text'
 import type { AccountMigrationPresentation } from '~helpers/useAccountMigrations'
-
 interface AccountMigrationModalProps {
   presentation: AccountMigrationPresentation
   isActionPending: boolean
@@ -69,21 +69,20 @@ const AccountMigrationModal = ({
       onRequestClose={() => undefined}
     >
       <Box
+        className="overflow-hidden border-continuous flex-[1] items-center justify-center bg-reverse px-[30px] py-[40px]"
         accessibilityViewIsModal
-        flex={1}
-        center
-        bg="reverse"
-        px={30}
-        py={40}
         testID="account-migration-modal"
       >
-        <VStack width="100%" maxWidth={520} alignItems="center">
+        <VStack className="overflow-hidden border-continuous w-[100%] max-w-[520px] items-center">
           <Box
-            size={88}
-            borderRadius={44}
-            bg={isFailure ? 'lightSecondary' : 'lightPrimary'}
-            center
-            mb={28}
+            className={twMerge(
+              'overflow-hidden border-continuous',
+              twMerge(
+                isFailure ? 'bg-light-secondary' : 'bg-light-primary',
+                'overflow-hidden border-continuous rounded-[44px] items-center justify-center mb-[28px]'
+              )
+            )}
+            style={{ width: 88, height: 88 }}
           >
             <FeatherIcon
               name={isFailure ? 'cloud-off' : 'cloud'}
@@ -92,24 +91,20 @@ const AccountMigrationModal = ({
             />
           </Box>
 
-          <Text bold fontSize={26} textAlign="center" mb={10}>
+          <Text className="font-bold text-[26px] text-center mb-[10px]">
             {isFailure ? t('migration.account.failedTitle') : t('migration.account.title')}
           </Text>
-          <Text color="grey" textAlign="center" lineHeight={22} mb={26}>
+          <Text className="text-grey text-center leading-[22px] mb-[26px]">
             {isFailure
               ? t('migration.account.failedDescription')
               : t('migration.account.description')}
           </Text>
 
           {!isFailure && presentation.kind === 'active' && (
-            <VStack width="100%" gap={10}>
-              <HStack justifyContent="space-between" alignItems="center">
-                <Text bold fontSize={14}>
-                  {t('migration.progress')}
-                </Text>
-                <Text color="primary" bold>
-                  {Math.round(progress * 100)}%
-                </Text>
+            <VStack className="overflow-hidden border-continuous w-[100%] gap-[10px]">
+              <HStack className="overflow-hidden border-continuous justify-between items-center">
+                <Text className="font-bold text-[14px]">{t('migration.progress')}</Text>
+                <Text className="text-primary font-bold">{Math.round(progress * 100)}%</Text>
               </HStack>
               <View
                 accessible
@@ -120,7 +115,7 @@ const AccountMigrationModal = ({
                 <ProgressBar progress={progress} />
               </View>
               {currentStepLabel && (
-                <Text color="darkGrey" fontSize={12} textAlign="center">
+                <Text className="text-dark-grey text-[12px] text-center">
                   {t(currentStepLabel)}
                 </Text>
               )}
@@ -137,13 +132,11 @@ const AccountMigrationModal = ({
           )}
 
           {isFailure && (
-            <VStack width="100%" gap={12}>
-              <Box p={14} borderRadius={12} bg="lightGrey">
+            <VStack className="overflow-hidden border-continuous w-[100%] gap-[12px]">
+              <Box className="overflow-hidden border-continuous p-[14px] rounded-[12px] bg-light-grey">
                 <Text
+                  className="text-dark-grey text-[12px] text-center"
                   testID="account-migration-error-code"
-                  color="darkGrey"
-                  fontSize={12}
-                  textAlign="center"
                 >
                   {presentation.errorCode}
                 </Text>

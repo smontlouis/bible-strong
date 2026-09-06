@@ -1,35 +1,48 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { twMerge } from '~common/ui/classNames'
 import Lottie from 'lottie-react-native'
 import React from 'react'
-
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
-
-const LinkBox = Box.withComponent(Link)
+const LinkBox = (props: React.ComponentProps<typeof Box> & React.ComponentProps<typeof Link>) => (
+  <Box
+    as={Link}
+    {...props}
+    className={twMerge(
+      'overflow-hidden border-continuous',
+      twMerge('overflow-hidden border-continuous', props.className)
+    )}
+  />
+)
 
 const color1 = '#E0EAFC'
 const color2 = '#CFDEF3'
 
 const DonationWidget = () => {
+  const stylingTheme = useStylingTheme()
+
   const lang = useLanguage()
   const { t } = useTranslation()
   return (
-    <Box bg="lightGrey" px={20} pt={20} pb={20}>
+    <Box className="overflow-hidden border-continuous bg-light-grey px-[20px] pt-[20px] pb-[20px]">
       <LinkBox
+        className="p-[20px] h-[130px] relative rounded-[30px] bg-primary items-center justify-center overflow-visible"
         href={`https://bible-strong.app/${lang === 'fr' ? 'fr/' : ''}give`}
-        backgroundColor="primary"
-        borderRadius={30}
-        lightShadow
-        p={20}
-        height={130}
-        position="relative"
-        overflow="hidden"
-        center
+        style={{
+          shadowColor: 'rgb(89,131,240)',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 7,
+          elevation: 1,
+          overflow: 'visible',
+        }}
       >
-        <Box pos="absolute" left={0} right={0} top={0} height={130} borderRadius={30}>
+        <Box className="overflow-hidden border-continuous absolute left-[0px] right-[0px] top-[0px] h-[130px] rounded-[30px]">
           <LinearGradient start={[0.1, 0.2]} style={{ height: 130 }} colors={[color1, color2]} />
         </Box>
         <Lottie
@@ -43,13 +56,14 @@ const DonationWidget = () => {
           }}
           source={require('../../assets/images/donation.json')}
         />
-        <Box pl={60}>
-          <Text title fontSize={20} color="black">
+        <Box className="overflow-hidden border-continuous pl-[60px]">
+          <Text
+            className="text-[20px] text-[black]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {t('donation.title')}
           </Text>
-          <Text marginTop={5} fontSize={16} color="black">
-            {t('donation.description')}
-          </Text>
+          <Text className="mt-[5px] text-[16px] text-[black]">{t('donation.description')}</Text>
         </Box>
       </LinkBox>
     </Box>

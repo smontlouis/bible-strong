@@ -1,40 +1,71 @@
-import { TouchableOpacity } from 'react-native'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import distanceInWords from 'date-fns/formatDistance'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import * as NativeUI from 'react-native'
+import { TouchableOpacity } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
-import styled from '@emotion/native'
 import { useTranslation } from 'react-i18next'
 
 import EntityChipList from '~common/EntityChipList'
-import { FeatherIcon } from '~common/ui/Icon'
-import { LinkBox } from '~common/Link'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Paragraph from '~common/ui/Paragraph'
 import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
-import truncate from '~helpers/truncate'
-import formatVerseContent from '~helpers/formatVerseContent'
-import { getBook } from '~helpers/bibleBookCatalog'
-import { useResolvedBibleVerses } from '~features/resources/useBibleVerses'
-import { removeBreakLines } from '~helpers/utils'
-import useLanguage from '~helpers/useLanguage'
-import { getDateLocale } from '~helpers/languageUtils'
-import { useHighlightColors, useResolvedColor } from '~helpers/useHighlightColors'
-import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { useMountTime } from '~helpers/useMountTime'
-import type { CustomColor, HighlightType } from '~redux/modules/user'
+import { LinkBox } from '~common/Link'
 import type { TagsObj, Verse, VerseIds } from '~common/types'
+import Box from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
+import { useResolvedBibleVerses } from '~features/resources/useBibleVerses'
+import { getBook } from '~helpers/bibleBookCatalog'
+import formatVerseContent from '~helpers/formatVerseContent'
+import { getDateLocale } from '~helpers/languageUtils'
+import truncate from '~helpers/truncate'
+import { useHighlightColors, useResolvedColor } from '~helpers/useHighlightColors'
+import useLanguage from '~helpers/useLanguage'
+import { useMountTime } from '~helpers/useMountTime'
+import { removeBreakLines } from '~helpers/utils'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import type { CustomColor, HighlightType } from '~redux/modules/user'
 
-const DateText = styled.Text(({ theme }) => ({
-  color: theme.colors.tertiary,
-}))
+const DateText = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.Text>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const Container = styled(Box)(({ theme }) => ({
-  margin: 20,
-  paddingBottom: 20,
-  marginBottom: 0,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1,
-}))
+  const classStyles = useResolveClassNames(twMerge('text-tertiary', className))
+  return (
+    <NativeUI.Text
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.Text>['style']}
+    />
+  )
+}
+
+const Container = (
+  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('m-[20px] pb-[20px] mb-[0px] border-b-border border-b-[1px]', className)
+  )
+  return (
+    <Box
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
 export type HighlightSettingsData = {
   stringIds: VerseIds
@@ -59,6 +90,8 @@ const VerseComponent = ({
   version: sourceVersion,
   setSettings,
 }: VerseComponentProps) => {
+  const stylingTheme = useStylingTheme()
+
   const pushRouteOnce = usePushRouteOnce()
   const { verses, version } = useResolvedBibleVerses(verseIds, sourceVersion)
   const { t } = useTranslation()
@@ -105,10 +138,16 @@ const VerseComponent = ({
   return (
     <Container>
       <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} onPress={openBibleView}>
-        <Box row style={{ marginBottom: 10 }} pr={32} alignItems="center">
-          <Box flex row alignItems="center">
+        <Box
+          className="overflow-hidden border-continuous flex-row pr-[32px] items-center"
+          style={{ marginBottom: 10 }}
+        >
+          <Box className="overflow-hidden border-continuous flex-[1] flex-row items-center">
             <HighlightTypeIndicator color={resolvedColor} type={highlightType} size={15} />
-            <Text fontSize={14} marginLeft={10} title>
+            <Text
+              className="text-[14px] ml-[10px]"
+              style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+            >
               {title}
             </Text>
           </Box>
@@ -116,7 +155,7 @@ const VerseComponent = ({
             {t('Il y a {{formattedDate}}', { formattedDate })}
           </DateText>
         </Box>
-        <Paragraph scale={-2} medium marginBottom={15}>
+        <Paragraph className="mb-[15px]" scale={-2}>
           {content
             ? truncate(removeBreakLines(content), 200)
             : t('bibleVerse.textUnavailableInstalled')}
@@ -125,12 +164,8 @@ const VerseComponent = ({
       <EntityChipList tags={tags} />
       {setSettings && stringIds && (
         <LinkBox
+          className="p-[4px] ml-[10px] absolute top-[0px] right-[0px]"
           accessibilityLabel={t('accessibility.options')}
-          position="absolute"
-          top={0}
-          right={0}
-          p={4}
-          ml={10}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           onPress={() =>
             setSettings({

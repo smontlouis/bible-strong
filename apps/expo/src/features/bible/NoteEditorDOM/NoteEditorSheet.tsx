@@ -1,12 +1,11 @@
 import { Platform } from 'react-native'
 import { useSheetInternal } from '~common/sheet'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { RootState } from '~redux/modules/reducer'
 import NoteEditorDOMComponent from './NoteEditorDOMComponent'
-
 interface Props {
   defaultTitle: string
   defaultDescription: string

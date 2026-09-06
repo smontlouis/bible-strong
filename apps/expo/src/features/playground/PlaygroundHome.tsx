@@ -1,14 +1,13 @@
-import { useTheme } from '@emotion/react'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import { useTranslation } from 'react-i18next'
 import { Pressable, ScrollView, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { CurrentTheme } from '~common/types'
 import PlaygroundPreferences from './PlaygroundPreferences'
-
 type PlaygroundLinkProps = {
   description: string
   eyebrow: string
@@ -18,6 +17,8 @@ type PlaygroundLinkProps = {
 }
 
 const PlaygroundLink = ({ description, eyebrow, icon, onPress, title }: PlaygroundLinkProps) => {
+  const stylingTheme = useStylingTheme()
+
   const theme = useTheme()
 
   return (
@@ -30,24 +31,36 @@ const PlaygroundLink = ({ description, eyebrow, icon, onPress, title }: Playgrou
         transform: [{ scale: pressed ? 0.985 : 1 }],
       })}
     >
-      <Box bg="reverse" borderColor="border" borderWidth={1} borderRadius={22} p={18} lightShadow>
-        <HStack alignItems="center" gap={14}>
-          <Box size={46} borderRadius={15} bg="primary" center>
+      <Box
+        className="border-continuous overflow-hidden bg-reverse border-border border-[1px] rounded-[22px] p-[18px]"
+        style={{
+          shadowColor: 'rgb(89,131,240)',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 7,
+          elevation: 1,
+          overflow: 'visible',
+        }}
+      >
+        <HStack className="overflow-hidden border-continuous items-center gap-[14px]">
+          <Box
+            className="overflow-hidden border-continuous rounded-[15px] bg-primary items-center justify-center"
+            style={{ width: 46, height: 46 }}
+          >
             <Feather name={icon} size={21} color={theme.colors.reverse} />
           </Box>
-          <VStack flex={1} gap={3}>
-            <Text color="primary" fontSize={10} bold textTransform="uppercase">
-              {eyebrow}
-            </Text>
-            <Text title fontSize={19} lineHeight={24}>
+          <VStack className="overflow-hidden border-continuous flex-[1] gap-[3px]">
+            <Text className="text-primary text-[10px] font-bold uppercase">{eyebrow}</Text>
+            <Text
+              className="text-[19px] leading-[24px]"
+              style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+            >
               {title}
             </Text>
           </VStack>
           <Feather name="chevron-right" size={21} color={theme.colors.tertiary} />
         </HStack>
-        <Text color="grey" fontSize={14} lineHeight={21} mt={14}>
-          {description}
-        </Text>
+        <Text className="text-grey text-[14px] leading-[21px] mt-[14px]">{description}</Text>
       </Box>
     </Pressable>
   )
@@ -66,13 +79,15 @@ const PlaygroundHome = ({
   onOpenAbelOnboarding,
   onOpenOfflineSetup,
 }: PlaygroundHomeProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const { width } = useWindowDimensions()
   const contentWidth = Math.min(Math.max(width - 40, 1), 720)
 
   return (
-    <Box flex bg="lightGrey">
+    <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{
@@ -83,19 +98,28 @@ const PlaygroundHome = ({
         }}
         showsVerticalScrollIndicator={false}
       >
-        <VStack width={contentWidth} maxWidth="100%" gap={32}>
-          <VStack gap={16}>
-            <HStack alignItems="center" gap={9}>
-              <Box size={9} borderRadius={5} bg="secondary" />
-              <Text color="darkGrey" fontSize={11} bold textTransform="uppercase">
+        <VStack
+          className="overflow-hidden border-continuous max-w-[100%] gap-[32px]"
+          style={{ width: contentWidth }}
+        >
+          <VStack className="overflow-hidden border-continuous gap-[16px]">
+            <HStack className="overflow-hidden border-continuous items-center gap-[9px]">
+              <Box
+                className="overflow-hidden border-continuous rounded-[5px] bg-secondary"
+                style={{ width: 9, height: 9 }}
+              />
+              <Text className="text-dark-grey text-[11px] font-bold uppercase">
                 {t('playground.badge')}
               </Text>
             </HStack>
-            <VStack gap={10}>
-              <Text title fontSize={36} lineHeight={42}>
+            <VStack className="overflow-hidden border-continuous gap-[10px]">
+              <Text
+                className="text-[36px] leading-[42px]"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
                 {t('playground.title')}
               </Text>
-              <Text color="grey" fontSize={16} lineHeight={24}>
+              <Text className="text-grey text-[16px] leading-[24px]">
                 {t('playground.description')}
               </Text>
             </VStack>
@@ -103,8 +127,8 @@ const PlaygroundHome = ({
 
           <PlaygroundPreferences selectedTheme={selectedTheme} onSelectTheme={onSelectTheme} />
 
-          <VStack gap={12}>
-            <Text color="darkGrey" fontSize={11} bold textTransform="uppercase">
+          <VStack className="overflow-hidden border-continuous gap-[12px]">
+            <Text className="text-dark-grey text-[11px] font-bold uppercase">
               {t('playground.experiences')}
             </Text>
             <PlaygroundLink

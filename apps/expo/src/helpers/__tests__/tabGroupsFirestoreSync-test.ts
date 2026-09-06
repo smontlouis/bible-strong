@@ -1,3 +1,13 @@
+import {
+  hydrateTabGroup,
+  prepareTabGroupForSync,
+  reconcileTabGroupsSnapshot,
+  subscribeToTabGroupsFirestore,
+  createTabGroupsSyncIntent,
+  type FirestoreTabGroup,
+} from '../tabGroupsFirestoreSync'
+import { subscribeToSubcollection } from '../firestoreSubcollections'
+import type { BibleTab, TabGroup, TabItem } from '~state/tabs'
 jest.mock('../firestoreSubcollections', () => ({
   writeToSubcollection: jest.fn(),
   deleteFromSubcollection: jest.fn(),
@@ -12,17 +22,6 @@ jest.mock('../storage', () => ({
     remove: jest.fn(),
   },
 }))
-
-import {
-  hydrateTabGroup,
-  prepareTabGroupForSync,
-  reconcileTabGroupsSnapshot,
-  subscribeToTabGroupsFirestore,
-  createTabGroupsSyncIntent,
-  type FirestoreTabGroup,
-} from '../tabGroupsFirestoreSync'
-import { subscribeToSubcollection } from '../firestoreSubcollections'
-import type { BibleTab, TabGroup, TabItem } from '~state/tabs'
 
 const makeTab = (id: string, base64Preview?: string): TabItem => ({
   id,

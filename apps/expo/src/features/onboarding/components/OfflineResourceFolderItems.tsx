@@ -1,9 +1,9 @@
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { LinearGradient } from 'expo-linear-gradient'
 import Animated, { FadeInDown, FadeOutDown, useReducedMotion } from 'react-native-reanimated'
-
 import Box from '~common/ui/Box'
 import type { OfflineSetupFolderVisual } from '../offlineSetupPresentation'
-
 type OfflineResourceFolderItemsProps = {
   colors: OfflineSetupFolderVisual['colors']
   itemCount: number
@@ -15,6 +15,8 @@ const OfflineResourceFolderItems = ({
   itemCount,
   width,
 }: OfflineResourceFolderItemsProps) => {
+  const stylingTheme = useStylingTheme()
+
   const scale = width / 170
   const scaled = (value: number) => value * scale
   const visibleItemCount = Math.max(0, Math.floor(itemCount))
@@ -72,19 +74,23 @@ const OfflineResourceFolderItems = ({
             style={{ flex: 1, padding: scaled(7) }}
           >
             <Box
-              width={scaled(14)}
-              height={scaled(2.5)}
-              borderRadius={scaled(1.25)}
-              bg={colors.frontEnd}
-              opacity={0.72}
+              className="overflow-hidden border-continuous opacity-[0.72]"
+              style={{
+                width: scaled(14),
+                height: scaled(2.5),
+                borderRadius: scaled(1.25),
+                backgroundColor: resolveThemeColor(stylingTheme, colors.frontEnd),
+              }}
             />
             <Box
-              width={scaled(9)}
-              height={scaled(2.5)}
-              borderRadius={scaled(1.25)}
-              bg={colors.frontEnd}
-              opacity={0.38}
-              mt={scaled(3)}
+              className="overflow-hidden border-continuous opacity-[0.38]"
+              style={{
+                marginTop: scaled(3),
+                width: scaled(9),
+                height: scaled(2.5),
+                borderRadius: scaled(1.25),
+                backgroundColor: resolveThemeColor(stylingTheme, colors.frontEnd),
+              }}
             />
           </LinearGradient>
         </Animated.View>

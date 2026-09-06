@@ -1,27 +1,50 @@
-import React from 'react'
-import styled from '@emotion/native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import * as NativeUI from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
-const TabItem = styled.TouchableOpacity<{ isRouteActive?: boolean }>(
-  ({ theme, isRouteActive }) => ({
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 35,
-    marginVertical: 5,
-    marginHorizontal: 10,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    ...(isRouteActive && {
-      borderRadius: 8,
-      backgroundColor: theme.colors.reverse,
-      borderColor: theme.colors.lightPrimary,
-      overflow: 'visible',
-    }),
-  })
-)
+const TabItem = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.TouchableOpacity>,
+    keyof { isRouteActive?: boolean } | 'theme'
+  > &
+    Omit<{ isRouteActive?: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { isRouteActive } = props
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'flex-[1] items-center justify-center h-[35px] my-[5px] mx-[10px] border-[2px] border-[transparent]',
+      className
+    )
+  )
+  return (
+    <NativeUI.TouchableOpacity
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            ...(isRouteActive && {
+              borderRadius: 8,
+              backgroundColor: theme.colors.reverse,
+              borderColor: theme.colors.lightPrimary,
+              overflow: 'visible',
+            }),
+          },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']
+      }
+    />
+  )
+}
 
 const routes = ['Plans', 'Explorer']
 
@@ -32,7 +55,7 @@ type Props = {
 
 const BibleSelectTabBar = ({ index, onChange }: Props) => {
   return (
-    <Box row>
+    <Box className="overflow-hidden border-continuous flex-row">
       {routes.map((route, routeIndex) => {
         const isRouteActive = routeIndex === index
 
@@ -44,7 +67,7 @@ const BibleSelectTabBar = ({ index, onChange }: Props) => {
               onChange(routeIndex)
             }}
           >
-            <Text color={isRouteActive ? 'primary' : 'grey'} bold>
+            <Text className={twMerge(isRouteActive ? 'text-primary' : 'text-grey', 'font-bold')}>
               {route}
             </Text>
           </TabItem>

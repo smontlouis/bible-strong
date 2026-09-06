@@ -1,4 +1,4 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { Image } from 'expo-image'
 import Animated from 'react-native-reanimated'
 import { TouchableBox } from '~common/ui/Box'
@@ -6,7 +6,6 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { ACTION_ITEM_WIDTH, ICON_BOX_SIZE, ICON_SIZE } from '../constants'
 import type { ActionItemProps } from '../types'
-
 const ActionItem = ({
   name,
   Icon,
@@ -23,9 +22,16 @@ const ActionItem = ({
 
   return (
     <TouchableBox
+      className="overflow-hidden border-continuous"
       onPress={onPress}
       disabled={disabled}
-      style={{ alignItems: 'center', paddingVertical: 8, width: ACTION_ITEM_WIDTH, gap: 8 }}
+      style={[
+        { opacity: disabled ? 0.6 : 1 },
+        [
+          { opacity: disabled ? 0.6 : 1 },
+          { alignItems: 'center', paddingVertical: 8, width: ACTION_ITEM_WIDTH, gap: 8 },
+        ],
+      ]}
     >
       <Animated.View
         style={{
@@ -73,7 +79,7 @@ const ActionItem = ({
             />
           ) : null}
         </Animated.View>
-        <Text fontSize={10} numberOfLines={1} textAlign="center" color="default">
+        <Text className="text-[10px] text-center text-default" numberOfLines={1}>
           {label}
         </Text>
       </Animated.View>

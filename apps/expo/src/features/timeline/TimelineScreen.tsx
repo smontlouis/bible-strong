@@ -1,16 +1,13 @@
 import React, { useCallback } from 'react'
 import { View } from 'react-native'
-
 import TimelineSection from './TimelineSection'
 import { TimelineSection as TimelineSectionProps, ShallowTimelineSection } from './types'
-
 import { useLocalSearchParams } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { getEvents } from './events'
 import Box from '~common/ui/Box'
 import TimelineResourceBoundary from './TimelineResourceBoundary'
-
 const omitEvents = ({ events, ...rest }: TimelineSectionProps): ShallowTimelineSection => rest
 
 interface Props {
@@ -57,7 +54,7 @@ const Timeline = ({
 
   return (
     <TimelineResourceBoundary hasBackButton={hasBackButton} onBackPress={onBackPress}>
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <View style={{ flex: 1, position: 'relative' }}>
           {events?.map((ev, i) => {
             const prevEvent = events[i - 1] && omitEvents(events[i - 1])

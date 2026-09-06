@@ -1,7 +1,6 @@
 import { useSetAtom } from 'jotai/react'
 import { Share } from 'react-native'
 import { useTranslation } from 'react-i18next'
-
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
@@ -14,7 +13,6 @@ import { createStrongIdentity } from '~helpers/strongIdentities'
 import { unifiedTagsModalAtom } from '~state/app'
 import type { StrongDetailRouteContext } from './strongDetailRoutes'
 import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
-
 type Props = {
   context: StrongDetailRouteContext
   entry: StrongLexiconEntry
@@ -104,7 +102,7 @@ const StrongEntryMenu = ({ context, entry }: Props) => {
         if (nativeEvent.event === 'open-tab') openStrongInNewTab()
       }}
     >
-      <Box row center height={60} width={60}>
+      <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
         <FeatherIcon name="more-vertical" size={18} />
       </Box>
     </MenuView>

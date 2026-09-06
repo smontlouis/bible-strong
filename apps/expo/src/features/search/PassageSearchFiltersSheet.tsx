@@ -1,6 +1,7 @@
+import { twMerge } from '~common/ui/classNames'
+
 import { forwardRef, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-
 import ChoiceFilterModal from '~common/ChoiceFilterModal'
 import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
@@ -8,7 +9,6 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import type { SearchSortOrder } from '~features/resources/bibleSearchAccess'
 import type { SearchCanon, SearchSection } from '~state/searchFilters'
-
 type Choice<T> = {
   value: T
   label: string
@@ -42,20 +42,30 @@ type FilterRowProps = {
   onPress: () => void
 }
 
-const FilterRow = ({ icon, label, value, active, onPress }: FilterRowProps) => (
-  <TouchableBox onPress={onPress} minHeight={54} px={16} py={14}>
-    <HStack alignItems="center">
-      <FeatherIcon name={icon} size={20} color={active ? 'primary' : 'tertiary'} />
-      <Text flex={1} ml={12} fontSize={16} color={active ? 'primary' : undefined}>
-        {label}
-      </Text>
-      <Text color="tertiary" fontSize={14} mr={8} numberOfLines={1} maxWidth={210}>
-        {value}
-      </Text>
-      <FeatherIcon name="chevron-right" size={20} color="tertiary" />
-    </HStack>
-  </TouchableBox>
-)
+const FilterRow = ({ icon, label, value, active, onPress }: FilterRowProps) => {
+  return (
+    <TouchableBox
+      className="overflow-hidden border-continuous min-h-[54px] px-[16px] py-[14px]"
+      onPress={onPress}
+    >
+      <HStack className="overflow-hidden border-continuous items-center">
+        <FeatherIcon name={icon} size={20} color={active ? 'primary' : 'tertiary'} />
+        <Text
+          className={twMerge(
+            active ? 'text-primary' : 'text-default',
+            'flex-[1] ml-[12px] text-[16px]'
+          )}
+        >
+          {label}
+        </Text>
+        <Text className="text-tertiary text-[14px] mr-[8px] max-w-[210px]" numberOfLines={1}>
+          {value}
+        </Text>
+        <FeatherIcon name="chevron-right" size={20} color="tertiary" />
+      </HStack>
+    </TouchableBox>
+  )
+}
 
 const PassageSearchFiltersSheet = forwardRef<SheetRef, Props>(
   (
@@ -105,11 +115,12 @@ const PassageSearchFiltersSheet = forwardRef<SheetRef, Props>(
               title={t('search.passageFilters.title')}
               rightComponent={
                 activeFilterCount ? (
-                  <Box mr={12}>
-                    <TouchableBox onPress={onReset} px={8} py={8}>
-                      <Text color="primary" fontSize={14}>
-                        {t('Réinitialiser')}
-                      </Text>
+                  <Box className="overflow-hidden border-continuous mr-[12px]">
+                    <TouchableBox
+                      className="overflow-hidden border-continuous px-[8px] py-[8px]"
+                      onPress={onReset}
+                    >
+                      <Text className="text-primary text-[14px]">{t('Réinitialiser')}</Text>
                     </TouchableBox>
                   </Box>
                 ) : undefined

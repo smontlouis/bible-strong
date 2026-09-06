@@ -1,3 +1,5 @@
+import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useState } from 'react'
@@ -16,7 +18,6 @@ import {
 import { scheduleOnRN } from 'react-native-worklets'
 import { useTranslation } from 'react-i18next'
 import useConnection from '~helpers/useConnection'
-
 import Box, { AnimatedBox, FadingBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
@@ -34,7 +35,6 @@ import {
 import formatResourceSize from '../formatResourceSize'
 import useOfflineSetupFolderHeroHandoff from '../useOfflineSetupFolderHeroHandoff'
 import OfflineSetupReviewHeader from './OfflineSetupReviewHeader'
-
 type OfflineSetupReviewSheetProps = {
   availabilityReady: boolean
   bottomInset: number
@@ -162,6 +162,8 @@ const OfflineSetupReviewSheet = ({
   safeAreaTop,
   summary,
 }: OfflineSetupReviewSheetProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const isConnected = useConnection()
   const viewport = useWindowDimensions()
@@ -393,9 +395,8 @@ const OfflineSetupReviewSheet = ({
 
     return (
       <FadingBox
+        className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px] items-center justify-center"
         keyProp={contextKey}
-        absoluteFill
-        center
         animateLayout={false}
         entering={reviewButtonLabelEntering}
         exiting={reviewButtonLabelExiting}
@@ -403,18 +404,47 @@ const OfflineSetupReviewSheet = ({
         skipExiting={false}
       >
         {folderContext || !canReview ? (
-          <Text color={palette.onAccent} title fontSize={16}>
+          <Text
+            className="text-[16px]"
+            style={{
+              color:
+                resolveThemeColor(stylingTheme, palette.onAccent) || stylingTheme.colors.default,
+              fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+            }}
+          >
             {buttonLabel}
           </Text>
         ) : (
           <>
-            <AnimatedBox absoluteFill center style={closedButtonLabelStyle}>
-              <Text color={palette.onAccent} title fontSize={16}>
+            <AnimatedBox
+              className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px] items-center justify-center"
+              style={closedButtonLabelStyle}
+            >
+              <Text
+                className="text-[16px]"
+                style={{
+                  color:
+                    resolveThemeColor(stylingTheme, palette.onAccent) ||
+                    stylingTheme.colors.default,
+                  fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+                }}
+              >
                 {closedButtonLabel}
               </Text>
             </AnimatedBox>
-            <AnimatedBox absoluteFill center style={openButtonLabelStyle}>
-              <Text color={palette.onAccent} title fontSize={16}>
+            <AnimatedBox
+              className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px] items-center justify-center"
+              style={openButtonLabelStyle}
+            >
+              <Text
+                className="text-[16px]"
+                style={{
+                  color:
+                    resolveThemeColor(stylingTheme, palette.onAccent) ||
+                    stylingTheme.colors.default,
+                  fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+                }}
+              >
                 {openButtonLabel}
               </Text>
             </AnimatedBox>
@@ -444,11 +474,12 @@ const OfflineSetupReviewSheet = ({
   return (
     <>
       <AnimatedBox
-        absoluteFill
-        zIndex={20}
+        className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px] z-[20]"
         pointerEvents={overlayActive ? 'auto' : 'none'}
-        bg={palette.overlay}
-        style={overlayStyle}
+        style={[
+          { backgroundColor: resolveThemeColor(stylingTheme, palette.overlay) },
+          overlayStyle,
+        ]}
       >
         <Pressable
           accessibilityRole="button"
@@ -459,8 +490,7 @@ const OfflineSetupReviewSheet = ({
       </AnimatedBox>
 
       <AnimatedBox
-        position="absolute"
-        zIndex={21}
+        className="overflow-hidden border-continuous absolute z-[21]"
         style={[
           sheetStyle,
           {
@@ -470,7 +500,7 @@ const OfflineSetupReviewSheet = ({
         ]}
       >
         <AnimatedBox
-          absoluteFill
+          className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px]"
           style={[
             clippingStyle,
             {
@@ -483,7 +513,7 @@ const OfflineSetupReviewSheet = ({
           ]}
         >
           <GestureDetector gesture={panGesture}>
-            <AnimatedBox position="absolute" top={0} left={0} right={0} height={72} zIndex={4}>
+            <AnimatedBox className="overflow-hidden border-continuous absolute top-[0px] left-[0px] right-[0px] h-[72px] z-[4]">
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t(
@@ -493,29 +523,28 @@ const OfflineSetupReviewSheet = ({
                 onPress={() => settle(!reviewOpen)}
                 style={{ flex: 1, alignItems: 'center' }}
               >
-                <Box width={42} height={4} mt={9} borderRadius={2} bg={palette.handle} />
+                <Box
+                  className="overflow-hidden border-continuous w-[42px] h-[4px] mt-[9px] rounded-[2px]"
+                  style={{ backgroundColor: resolveThemeColor(stylingTheme, palette.handle) }}
+                />
               </Pressable>
             </AnimatedBox>
           </GestureDetector>
 
           <AnimatedBox
-            position="absolute"
-            top={layout.headerTop}
-            left={14}
-            right={14}
-            zIndex={3}
+            className="border-continuous overflow-visible absolute left-[14px] right-[14px] z-[3]"
             pointerEvents="none"
-            overflow="visible"
+            style={{ top: layout.headerTop }}
           >
             <FadingBox
+              className="border-continuous overflow-visible"
               keyProp={folderContext?.folderId ?? 'overview'}
               animateLayout={false}
               entering={reviewHeaderEntering}
               exiting={reviewHeaderExiting}
               skipEntering={false}
               skipExiting={false}
-              height={layout.summaryHeight}
-              overflow="visible"
+              style={{ height: layout.summaryHeight }}
             >
               <OfflineSetupReviewHeader
                 downloadBytes={displayedDownloadBytes}
@@ -531,11 +560,7 @@ const OfflineSetupReviewSheet = ({
           </AnimatedBox>
 
           <AnimatedBox
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            bottom={0}
+            className="overflow-hidden border-continuous absolute top-[0px] left-[0px] right-[0px] bottom-[0px]"
             pointerEvents={reviewOpen ? 'auto' : 'none'}
             style={reviewContentStyle}
           >
@@ -554,23 +579,44 @@ const OfflineSetupReviewSheet = ({
             >
               {displayedItems.map(item => (
                 <HStack
+                  className="overflow-hidden border-continuous px-[13px] py-[10px] rounded-[17px] items-center gap-[11px]"
                   key={item.id}
-                  minHeight={layout.resourceRowHeight}
-                  px={13}
-                  py={10}
-                  borderRadius={17}
-                  bg={palette.sheetRaised}
-                  alignItems="center"
-                  gap={11}
+                  style={{
+                    minHeight: layout.resourceRowHeight,
+                    backgroundColor: resolveThemeColor(stylingTheme, palette.sheetRaised),
+                  }}
                 >
-                  <Box size={34} borderRadius={12} bg={palette.sheetAccentSoft} center>
+                  <Box
+                    className="overflow-hidden border-continuous rounded-[12px] items-center justify-center"
+                    style={{
+                      backgroundColor: resolveThemeColor(stylingTheme, palette.sheetAccentSoft),
+                      width: 34,
+                      height: 34,
+                    }}
+                  >
                     <Feather name="file-text" size={17} color={palette.accentLight} />
                   </Box>
-                  <Box flex>
-                    <Text color={palette.onSheet} fontSize={13} bold numberOfLines={1}>
+                  <Box className="overflow-hidden border-continuous flex-[1]">
+                    <Text
+                      className="text-[13px] font-bold"
+                      numberOfLines={1}
+                      style={{
+                        color:
+                          resolveThemeColor(stylingTheme, palette.onSheet) ||
+                          stylingTheme.colors.default,
+                      }}
+                    >
                       {item.name}
                     </Text>
-                    <Text color={palette.onSheetMuted} fontSize={10} mt={3} numberOfLines={1}>
+                    <Text
+                      className="text-[10px] mt-[3px]"
+                      numberOfLines={1}
+                      style={{
+                        color:
+                          resolveThemeColor(stylingTheme, palette.onSheetMuted) ||
+                          stylingTheme.colors.default,
+                      }}
+                    >
                       {t('offlineSetup.reviewItemSize', {
                         download: formatResourceSize(item.downloadBytes, lang),
                         installed: formatResourceSize(item.installedBytes, lang),
@@ -598,14 +644,19 @@ const OfflineSetupReviewSheet = ({
 
             {!folderContext ? (
               <Box
-                position="absolute"
-                top={layout.headerTop + layout.summaryHeight + layout.subtitleMarginTop}
-                left={26}
-                right={26}
-                zIndex={3}
+                className="overflow-hidden border-continuous absolute left-[26px] right-[26px] z-[3]"
                 pointerEvents="none"
+                style={{ top: layout.headerTop + layout.summaryHeight + layout.subtitleMarginTop }}
               >
-                <Text color={palette.onSheetMuted} fontSize={13} lineHeight={layout.subtitleHeight}>
+                <Text
+                  className="text-[13px]"
+                  style={{
+                    lineHeight: layout.subtitleHeight,
+                    color:
+                      resolveThemeColor(stylingTheme, palette.onSheetMuted) ||
+                      stylingTheme.colors.default,
+                  }}
+                >
                   {t('offlineSetup.reviewSubtitle', { count: displayedItems.length })}
                 </Text>
               </Box>
@@ -613,14 +664,12 @@ const OfflineSetupReviewSheet = ({
           </AnimatedBox>
 
           <AnimatedBox
-            position="absolute"
-            right={0}
-            bottom={0}
-            left={0}
-            zIndex={2}
+            className="overflow-hidden border-continuous absolute right-[0px] bottom-[0px] left-[0px] z-[2]"
             pointerEvents="none"
-            height={listBottomInset + layout.buttonGradientFeather}
-            style={reviewGradientStyle}
+            style={[
+              { height: listBottomInset + layout.buttonGradientFeather },
+              reviewGradientStyle,
+            ]}
           >
             <LinearGradient
               colors={[palette.sheetSurfaceTransparent, palette.sheetSurface]}
@@ -630,12 +679,8 @@ const OfflineSetupReviewSheet = ({
           </AnimatedBox>
 
           <AnimatedBox
-            position="absolute"
-            zIndex={3}
-            top={CLOSED_BUTTON_TOP}
-            left={14}
-            right={14}
-            style={buttonStyle}
+            className="overflow-hidden border-continuous absolute z-[3] left-[14px] right-[14px]"
+            style={[{ top: CLOSED_BUTTON_TOP }, buttonStyle]}
           >
             <Pressable
               accessibilityRole="button"
@@ -644,7 +689,13 @@ const OfflineSetupReviewSheet = ({
               onPress={handleButtonPress}
               style={({ pressed }) => ({ opacity: getButtonOpacity(disabled, pressed) })}
             >
-              <Box height={layout.buttonHeight} borderRadius={28} bg={palette.accent} center>
+              <Box
+                className="overflow-hidden border-continuous rounded-[28px] items-center justify-center"
+                style={{
+                  height: layout.buttonHeight,
+                  backgroundColor: resolveThemeColor(stylingTheme, palette.accent),
+                }}
+              >
                 {renderButtonLabel()}
               </Box>
             </Pressable>

@@ -1,3 +1,5 @@
+import { twMerge } from '~common/ui/classNames'
+
 import { produce } from 'immer'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
@@ -6,7 +8,6 @@ import { useEffect, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Platform, Pressable } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
 import { Sheet, SheetFlatList, SheetHeader, type SheetRef } from '~common/sheet'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -41,7 +42,6 @@ import {
   getOfflineResourceQuerySignal,
   useOfflineResourceRegistry,
 } from '~features/resources/useOfflineResourceRegistry'
-
 type SharedProps = {
   bibleAtom: PrimitiveAtom<BibleTab>
   resolvedProvenance: LexiconBibleProvenance | null
@@ -133,12 +133,15 @@ export const StrongBibleSourceButton = ({
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
       testID="strong-bible-source-selector"
     >
-      <Box key={layoutKey} center minHeight={44} px={4}>
-        <Box row center height={32} px={10} borderRadius={16} bg="lightGrey" maxWidth={100}>
-          <Text numberOfLines={1} fontSize={12} bold>
+      <Box
+        className="overflow-hidden border-continuous items-center justify-center min-h-[44px] px-[4px]"
+        key={layoutKey}
+      >
+        <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[32px] px-[10px] rounded-[16px] bg-light-grey max-w-[100px]">
+          <Text className="text-[12px] font-bold" numberOfLines={1}>
             {label}
           </Text>
-          <Box ml={4}>
+          <Box className="overflow-hidden border-continuous ml-[4px]">
             <FeatherIcon name="chevron-down" size={13} />
           </Box>
         </Box>
@@ -181,15 +184,7 @@ const StrongSourceRow = ({
   if (Platform.OS === 'web' && !isAvailable) return null
 
   return (
-    <Box
-      row
-      alignItems="center"
-      minHeight={76}
-      px={16}
-      py={10}
-      borderBottomWidth={1}
-      borderColor="border"
-    >
+    <Box className="border-continuous overflow-hidden flex-row items-center min-h-[76px] px-[16px] py-[10px] border-b-[1px] border-border">
       <Pressable
         accessibilityRole="radio"
         accessibilityState={{ checked: selected, disabled: !isAvailable }}
@@ -202,13 +197,16 @@ const StrongSourceRow = ({
           opacity: pressed && isAvailable ? 0.7 : 1,
         })}
       >
-        <Box row alignItems="center">
-          <Radio selected={selected} size={22} marginRight={12} opacity={isAvailable ? 1 : 0.4} />
-          <Box flex>
-            <Text fontSize={15} bold>
-              {sourceId}
-            </Text>
-            <Text fontSize={12} color="tertiary" mt={2} numberOfLines={1}>
+        <Box className="overflow-hidden border-continuous flex-row items-center">
+          <Radio
+            className="mr-[12px]"
+            selected={selected}
+            style={{ opacity: isAvailable ? 1 : 0.4 }}
+            size={22}
+          />
+          <Box className="overflow-hidden border-continuous flex-[1]">
+            <Text className="text-[15px] font-bold">{sourceId}</Text>
+            <Text className="text-[12px] text-tertiary mt-[2px]" numberOfLines={1}>
               {name}
             </Text>
           </Box>
@@ -216,14 +214,13 @@ const StrongSourceRow = ({
       </Pressable>
 
       {isChecking ? (
-        <Box width={40} ml={12} center>
+        <Box className="overflow-hidden border-continuous w-[40px] ml-[12px] items-center justify-center">
           <ActivityIndicator size="small" />
         </Box>
       ) : activeDownload ? (
-        <Box width={88} ml={12} alignItems="flex-end">
+        <Box className="overflow-hidden border-continuous w-[88px] ml-[12px] items-end">
           <Text
-            fontSize={11}
-            color="tertiary"
+            className="text-[11px] text-tertiary"
             style={{ fontVariant: ['tabular-nums'] }}
             numberOfLines={1}
           >
@@ -233,12 +230,16 @@ const StrongSourceRow = ({
                 ? t('downloads.inserting')
                 : `${Math.round(progress * 100)} %`}
           </Text>
-          <Box mt={6} width={88} height={4} borderRadius={2} bg="border" overflow="hidden">
+          <Box className="border-continuous overflow-visible mt-[6px] w-[88px] h-[4px] rounded-[2px] bg-border">
             <Box
-              height={4}
-              borderRadius={2}
-              bg={activeDownload.status === 'inserting' ? 'success' : 'primary'}
-              width={`${Math.round(progress * 100)}%`}
+              className={twMerge(
+                'overflow-hidden border-continuous',
+                twMerge(
+                  activeDownload.status === 'inserting' ? 'bg-success' : 'bg-primary',
+                  'overflow-hidden border-continuous h-[4px] rounded-[2px]'
+                )
+              )}
+              style={{ width: `${Math.round(progress * 100)}%` }}
             />
           </Box>
         </Box>
@@ -561,27 +562,15 @@ export const StrongBibleSourceSheet = ({
             onPress={() => selectSource()}
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
-            <Box
-              row
-              alignItems="center"
-              minHeight={76}
-              px={16}
-              py={10}
-              borderBottomWidth={1}
-              borderColor="border"
-            >
+            <Box className="border-continuous overflow-hidden flex-row items-center min-h-[76px] px-[16px] py-[10px] border-b-[1px] border-border">
               <Radio
+                className="mr-[12px]"
                 selected={!strongBibleSourceVersionId && resolvedProvenance?.versionId !== 'BHG'}
                 size={22}
-                marginRight={12}
               />
-              <Box flex>
-                <Text fontSize={15} bold>
-                  {t('Automatique')}
-                </Text>
-                <Text fontSize={12} color="tertiary" mt={3}>
-                  {automaticDescription}
-                </Text>
+              <Box className="overflow-hidden border-continuous flex-[1]">
+                <Text className="text-[15px] font-bold">{t('Automatique')}</Text>
+                <Text className="text-[12px] text-tertiary mt-[3px]">{automaticDescription}</Text>
               </Box>
             </Box>
           </Pressable>
@@ -600,20 +589,9 @@ export const StrongBibleSourceSheet = ({
               }
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
-              <Box
-                minHeight={48}
-                paddingLeft={20}
-                paddingRight={8}
-                row
-                alignItems="center"
-                bg="lightGrey"
-                borderBottomWidth={1}
-                borderColor="border"
-              >
-                <Text flex fontSize={16} opacity={0.8}>
-                  {t(item.titleKey)}
-                </Text>
-                <Box width={40} height={40} center>
+              <Box className="border-continuous overflow-hidden min-h-[48px] pl-[20px] pr-[8px] flex-row items-center bg-light-grey border-b-[1px] border-border">
+                <Text className="flex-[1] text-[16px] opacity-[0.8]">{t(item.titleKey)}</Text>
+                <Box className="overflow-hidden border-continuous w-[40px] h-[40px] items-center justify-center">
                   <FeatherIcon
                     name={item.expanded ? 'chevron-down' : 'chevron-right'}
                     size={20}

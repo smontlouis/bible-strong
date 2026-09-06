@@ -11,19 +11,18 @@ type Props = {
 const Accordion = ({ title, children, defaultExpanded = false, accessibilityLabel }: Props) => {
   const [expanded, setExpanded] = React.useState(defaultExpanded)
   return (
-    <Box py={20}>
+    <Box className="overflow-hidden border-continuous py-[20px]">
       <TouchableBox
+        className="overflow-hidden border-continuous items-center flex-row"
         accessibilityLabel={accessibilityLabel ?? (typeof title === 'string' ? title : undefined)}
         accessibilityRole="button"
         accessibilityState={{ expanded }}
-        row
         onPress={() => setExpanded(s => !s)}
-        alignItems="center"
       >
-        <Box flex>{title}</Box>
+        <Box className="overflow-hidden border-continuous flex-[1]">{title}</Box>
         <FeatherIcon name={expanded ? 'chevron-up' : 'chevron-down'} size={24} />
       </TouchableBox>
-      {expanded && <Box py={20}>{children}</Box>}
+      {expanded && <Box className="overflow-hidden border-continuous py-[20px]">{children}</Box>}
     </Box>
   )
 }

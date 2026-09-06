@@ -1,21 +1,27 @@
-import { useEffect, useRef, useState } from 'react'
-import { Alert, TouchableOpacity } from 'react-native'
-import styled from '@emotion/native'
-import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import * as NativeUI from 'react-native'
+import { Alert, TouchableOpacity } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
+import type { Theme as AppTheme } from '~themes'
 
-import Box, { TouchableBox } from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import { FeatherIcon } from '~common/ui/Icon'
-import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
 import ColorEditModal from '~common/ColorEditModal'
-import { useSheet } from '~helpers/useSheet'
-import { useHighlightColors } from '~helpers/useHighlightColors'
+import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
+import Box, { TouchableBox } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
+import { MAX_CUSTOM_COLORS } from '~helpers/constants'
+import { EMPTY_OBJECT } from '~helpers/emptyReferences'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
-import { colorPickerModalAtom } from '~state/app'
+import { useHighlightColors } from '~helpers/useHighlightColors'
+import { useSheet } from '~helpers/useSheet'
+import type { RootState } from '~redux/modules/reducer'
 import {
   addCustomColor,
   changeColor,
@@ -28,35 +34,66 @@ import {
   updateCustomColor,
 } from '~redux/modules/user'
 import { removeWordAnnotation } from '~redux/modules/user/wordAnnotations'
-import type { RootState } from '~redux/modules/reducer'
-import getTheme from '~themes/index'
+import { colorPickerModalAtom } from '~state/app'
 import defaultColors from '~themes/colors'
-import { EMPTY_OBJECT } from '~helpers/emptyReferences'
-import { MAX_CUSTOM_COLORS } from '~helpers/constants'
+import getTheme from '~themes/index'
 
 type ColorKey = keyof typeof defaultColors
 
-const ColorRow = styled.View(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingVertical: 12,
-  paddingHorizontal: 15,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
+const ColorRow = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const SectionTitle = styled(Text)(({ theme }) => ({
-  fontSize: 12,
-  color: theme.colors.tertiary,
-  marginTop: 15,
-  marginBottom: 10,
-  marginLeft: 15,
-  textTransform: 'uppercase',
-}))
+  const classStyles = useResolveClassNames(
+    twMerge('flex-row items-center py-[12px] px-[15px] border-b-[1px] border-b-border', className)
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
-const IconButton = styled(TouchableOpacity)({
-  padding: 8,
-})
+const SectionTitle = (
+  componentProps: Omit<UIComponentProps<typeof Text>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('text-[12px] text-tertiary mt-[15px] mb-[10px] ml-[15px] uppercase', className)
+  )
+  return (
+    <Text
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Text>['style']}
+    />
+  )
+}
+
+const IconButton = (
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('p-[8px]', className))
+  return (
+    <TouchableOpacity
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
+    />
+  )
+}
 
 type ModalState = {
   mode: 'add' | 'edit-default' | 'edit-custom'
@@ -274,6 +311,7 @@ const ColorPickerModal = () => {
             return (
               <ColorRow key={i}>
                 <TouchableBox
+                  className="border-continuous overflow-visible"
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -282,9 +320,8 @@ const ColorPickerModal = () => {
                   }}
                   onPress={isSelectionMode ? () => handleColorSelect(colorKey) : undefined}
                   activeOpacity={isSelectionMode ? 0.7 : 1}
-                  overflow="visible"
                 >
-                  <Box marginRight={10} overflow="visible">
+                  <Box className="border-continuous overflow-visible mr-[10px]">
                     <HighlightTypeIndicator
                       color={currentHex}
                       type={currentType}
@@ -292,11 +329,11 @@ const ColorPickerModal = () => {
                       isSelected={isSelected}
                     />
                   </Box>
-                  <Text bold fontSize={14} flex={1}>
+                  <Text className="font-bold text-[14px] flex-[1]">
                     {colorName || `${t('Couleur')} ${i}`}
                   </Text>
                 </TouchableBox>
-                <Text color="tertiary" fontSize={12} marginRight={10}>
+                <Text className="text-tertiary text-[12px] mr-[10px]">
                   {getTotalUsageCount(`color${i}`)} {t('surbrillance(s)')}
                 </Text>
                 {isModified && (
@@ -319,10 +356,8 @@ const ColorPickerModal = () => {
 
           <SectionTitle>{t('Mes couleurs')}</SectionTitle>
           {customHighlightColors.length === 0 && (
-            <Box paddingHorizontal={15} paddingVertical={10}>
-              <Text color="tertiary" fontSize={13}>
-                {t('Aucune couleur personnalisée')}
-              </Text>
+            <Box className="overflow-hidden border-continuous px-[15px] py-[10px]">
+              <Text className="text-tertiary text-[13px]">{t('Aucune couleur personnalisée')}</Text>
             </Box>
           )}
           {customHighlightColors.map((color: CustomColor, index: number) => {
@@ -331,6 +366,7 @@ const ColorPickerModal = () => {
             return (
               <ColorRow key={color.id}>
                 <TouchableBox
+                  className="border-continuous overflow-visible"
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -339,9 +375,8 @@ const ColorPickerModal = () => {
                   }}
                   onPress={isSelectionMode ? () => handleColorSelect(color.id) : undefined}
                   activeOpacity={isSelectionMode ? 0.7 : 1}
-                  overflow="visible"
                 >
-                  <Box marginRight={10} overflow="visible">
+                  <Box className="border-continuous overflow-visible mr-[10px]">
                     <HighlightTypeIndicator
                       color={color.hex}
                       type={color.type || 'background'}
@@ -349,11 +384,11 @@ const ColorPickerModal = () => {
                       isSelected={isSelected}
                     />
                   </Box>
-                  <Text bold fontSize={14} flex={1}>
+                  <Text className="font-bold text-[14px] flex-[1]">
                     {color.name || `${t('Couleur personnalisée')} ${index + 1}`}
                   </Text>
                 </TouchableBox>
-                <Text color="tertiary" fontSize={12} marginRight={10}>
+                <Text className="text-tertiary text-[12px] mr-[10px]">
                   {getTotalUsageCount(color.id)} {t('surbrillance(s)')}
                 </Text>
 
@@ -369,18 +404,11 @@ const ColorPickerModal = () => {
 
           {customHighlightColors.length < MAX_CUSTOM_COLORS && (
             <TouchableOpacity accessibilityRole="button" onPress={openAddModal}>
-              <Box row alignItems="center" padding={15}>
-                <Box
-                  width={30}
-                  height={30}
-                  borderRadius={10}
-                  backgroundColor="lightPrimary"
-                  marginRight={10}
-                  center
-                >
+              <Box className="overflow-hidden border-continuous flex-row items-center p-[15px]">
+                <Box className="overflow-hidden border-continuous w-[30px] h-[30px] rounded-[10px] bg-light-primary mr-[10px] items-center justify-center">
                   <FeatherIcon name="plus" size={20} color="primary" />
                 </Box>
-                <Text bold color="primary" fontSize={14}>
+                <Text className="font-bold text-primary text-[14px]">
                   {t('Ajouter une couleur')}
                 </Text>
               </Box>
@@ -388,8 +416,8 @@ const ColorPickerModal = () => {
           )}
 
           {customHighlightColors.length >= MAX_CUSTOM_COLORS && (
-            <Box padding={15}>
-              <Text color="tertiary" fontSize={12}>
+            <Box className="overflow-hidden border-continuous p-[15px]">
+              <Text className="text-tertiary text-[12px]">
                 {t('Limite de 20 couleurs personnalisées atteinte')}
               </Text>
             </Box>

@@ -1,8 +1,10 @@
+import { twMerge } from '~common/ui/classNames'
+import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import PageContent, { PAGE_CONTENT_MAX_WIDTH } from '~common/ui/PageContent'
 import React, { useRef, useState } from 'react'
 import { ScrollView, type ScrollView as ScrollViewType } from 'react-native'
 import { useTranslation } from 'react-i18next'
-
 import Loading from '~common/Loading'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -39,7 +41,6 @@ import { getScaledStrongTextStyle, type StrongReadingTypography } from './strong
 import { formatStrongLemmaPartOfSpeech } from './strongLemmaPartOfSpeech'
 import { isStrongOriginalUnnamed } from './strongOriginalPresentation'
 import StrongPassageMediaSection from './StrongPassageMediaSection'
-
 type Anchor = 'context' | 'definition' | 'media' | 'entity' | 'related' | 'concordance'
 
 type Props = {
@@ -82,7 +83,10 @@ const HighlightedVerse = ({
     return (
       <Text style={getScaledStrongTextStyle(20, 30, readingTypography)}>
         {text.slice(0, untranslatedOffset)}
-        <Text color="primary" bold style={getScaledStrongTextStyle(26, 30, readingTypography)}>
+        <Text
+          className="text-primary font-bold"
+          style={getScaledStrongTextStyle(26, 30, readingTypography)}
+        >
           {' ●'}
         </Text>
         {text.slice(untranslatedOffset)}
@@ -97,11 +101,7 @@ const HighlightedVerse = ({
     <Text style={getScaledStrongTextStyle(20, 30, readingTypography)}>
       {text.slice(0, index)}
       <Text
-        bg="lightPrimary"
-        color="primary"
-        bold
-        borderRadius={5}
-        px={3}
+        className="bg-light-primary text-primary font-bold rounded-[5px] px-[3px]"
         style={getScaledStrongTextStyle(20, 30, readingTypography)}
       >
         {text.slice(index, index + word.length)}
@@ -126,11 +126,14 @@ const JumpNavigationContent = ({
     {anchors
       .filter(anchor => anchor.visible)
       .map(anchor => (
-        <TouchableBox key={anchor.id} onPress={() => onPress(anchor.id)} activeOpacity={0.7}>
-          <Box bg="lightGrey" borderRadius={16} px={10} py={7}>
-            <Text fontSize={12} bold>
-              {anchor.label}
-            </Text>
+        <TouchableBox
+          className="overflow-hidden border-continuous"
+          key={anchor.id}
+          onPress={() => onPress(anchor.id)}
+          activeOpacity={0.7}
+        >
+          <Box className="overflow-hidden border-continuous bg-light-grey rounded-[16px] px-[10px] py-[7px]">
+            <Text className="text-[12px] font-bold">{anchor.label}</Text>
           </Box>
         </TouchableBox>
       ))}
@@ -161,6 +164,8 @@ const StrongDetailMainPage = ({
   onOpenEntityProfile,
   onOpenEntityRelation,
 }: Props) => {
+  const stylingTheme = useStylingTheme()
+
   const { t, i18n } = useTranslation()
   const scrollRef = useRef<ScrollViewType>(null)
   const [anchorOffsets, setAnchorOffsets] = useState<Partial<Record<Anchor, number>>>({})
@@ -208,45 +213,48 @@ const StrongDetailMainPage = ({
       contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 0, paddingBottom: 90 }}
     >
       <VStack
-        mx={-20}
-        px={20}
-        pt={28}
-        pb={24}
-        gap={11}
-        bg="primary"
-        bgOpacity="010"
-        borderBottomWidth={1}
-        borderColor="border"
+        className="border-continuous overflow-hidden mx-[-20px] px-[20px] pt-[28px] pb-[24px] gap-[11px] border-b-[1px] border-border"
+        style={{
+          backgroundColor: colorWithOpacity(resolveThemeColor(stylingTheme, 'primary'), 0.1),
+        }}
       >
-        <PageContent maxWidth={PAGE_CONTENT_MAX_WIDTH - 40} gap={11}>
-          <Text color="primary" bold fontSize={12} textTransform="uppercase">
-            {entry.stepCode}
-          </Text>
-          <HStack alignItems="flex-end" gap={16}>
-            <VStack flex gap={5}>
+        <PageContent className="gap-[11px]" style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH - 40 }}>
+          <Text className="text-primary font-bold text-[12px] uppercase">{entry.stepCode}</Text>
+          <HStack className="overflow-hidden border-continuous items-end gap-[16px]">
+            <VStack className="overflow-hidden border-continuous flex-[1] gap-[5px]">
               <Text
                 accessibilityLanguage={entry.language === 'hebrew' ? 'he-IL' : 'el-GR'}
-                fontWeight="400"
-                style={getScaledStrongTextStyle(
-                  isOriginalUnnamed ? 32 : 40,
-                  isOriginalUnnamed ? 38 : 45,
-                  readingTypography
-                )}
+                style={[
+                  { fontWeight: '400' },
+                  getScaledStrongTextStyle(
+                    isOriginalUnnamed ? 32 : 40,
+                    isOriginalUnnamed ? 38 : 45,
+                    readingTypography
+                  ),
+                ]}
               >
                 {originalLabel}
               </Text>
-              <Text fontWeight="500" fontSize={25}>
-                {entry.gloss}
-              </Text>
+              <Text className="font-medium text-[25px]">{entry.gloss}</Text>
               {!isOriginalUnnamed && (entry.transliteration || entry.pronunciation) && (
-                <Text color="tertiary" fontSize={14}>
+                <Text className="text-tertiary text-[14px]">
                   {[entry.transliteration, entry.pronunciation].filter(Boolean).join(' · ')}
                 </Text>
               )}
             </VStack>
             {!isOriginalUnnamed &&
               hasStrongAudio(entry.language === 'hebrew' ? 'hebreu' : 'grec', entry.baseCode) && (
-                <Box bg="primary" bgOpacity="010" borderRadius={24} size={48} center>
+                <Box
+                  className="overflow-hidden border-continuous rounded-[24px] items-center justify-center"
+                  style={{
+                    backgroundColor: colorWithOpacity(
+                      resolveThemeColor(stylingTheme, 'primary'),
+                      0.1
+                    ),
+                    width: 48,
+                    height: 48,
+                  }}
+                >
                   <ListenToStrong
                     type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}
                     code={entry.baseCode}
@@ -257,7 +265,7 @@ const StrongDetailMainPage = ({
         </PageContent>
       </VStack>
 
-      <Box mx={-20} py={10} bg="reverse" borderBottomWidth={1} borderColor="border" zIndex={10}>
+      <Box className="border-continuous overflow-hidden mx-[-20px] py-[10px] bg-reverse border-b-[1px] border-border z-[10]">
         <PageContent>
           <JumpNavigationContent
             anchors={[
@@ -294,24 +302,24 @@ const StrongDetailMainPage = ({
           title={t('strongDetail.context.title')}
           onLayout={event => setAnchor('context', event.nativeEvent.layout.y)}
         >
-          <VStack borderLeftWidth={3} borderLeftColor="primary" pl={17} py={5} gap={10}>
+          <VStack className="overflow-hidden border-continuous border-l-[3px] pl-[17px] py-[5px] gap-[10px]">
             <HighlightedVerse
               text={contextText ?? ''}
               word={clickedWord || entry.gloss}
               untranslatedOffset={untranslatedContextOffset}
               readingTypography={readingTypography}
             />
-            <VStack gap={4}>
-              <Text color="tertiary" fontSize={12}>
+            <VStack className="overflow-hidden border-continuous gap-[4px]">
+              <Text className="text-tertiary text-[12px]">
                 {[contextReference, contextVersion].filter(Boolean).join(' · ')}
               </Text>
               {contextMorphologies.map(morphology => (
-                <Text key={morphology.code} color="tertiary" fontSize={12}>
+                <Text className="text-tertiary text-[12px]" key={morphology.code}>
                   {formatStrongContextMorphology(morphology)}
                 </Text>
               ))}
               {!contextMorphologies.length && entry.morphology && (
-                <Text color="tertiary" fontSize={12}>
+                <Text className="text-tertiary text-[12px]">
                   {formatStrongContextMorphology(entry.morphology)}
                 </Text>
               )}
@@ -321,8 +329,8 @@ const StrongDetailMainPage = ({
       )}
 
       {!!contextVerse && (
-        <PageContent maxWidth={PAGE_CONTENT_MAX_WIDTH - 40}>
-          <Box width={42} height={3} bg="default" mt={34} mb={2} />
+        <PageContent style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH - 40 }}>
+          <Box className="overflow-hidden border-continuous w-[42px] h-[3px] bg-default mt-[34px] mb-[2px]" />
         </PageContent>
       )}
 
@@ -331,7 +339,10 @@ const StrongDetailMainPage = ({
         onLayout={event => setAnchor('definition', event.nativeEvent.layout.y)}
       >
         {entry.nameMeaningHtml && (
-          <VStack mb={entry.definitionHtml ? 18 : 0} gap={8}>
+          <VStack
+            className="overflow-hidden border-continuous gap-[8px]"
+            style={{ marginBottom: entry.definitionHtml ? 18 : 0 }}
+          >
             <StrongEditorialHtml
               value={entry.nameMeaningHtml}
               readingTypography={readingTypography}
@@ -348,14 +359,14 @@ const StrongDetailMainPage = ({
             onOpenStrong={onOpenStrong}
           />
         ) : !entry.nameMeaningHtml ? (
-          <Text color="tertiary">
+          <Text className="text-tertiary">
             {t('strongLexicon.definitionUnavailable', {
               language: entry.language,
             })}
           </Text>
         ) : null}
         {lexicalRelations.alternateSenses.length > 0 && (
-          <VStack mt={10} pt={18} borderTopWidth={1} borderColor="border" gap={9}>
+          <VStack className="border-continuous overflow-hidden mt-[10px] pt-[18px] border-t-[1px] border-border gap-[9px]">
             <StrongEyebrow>{t('strongLexicon.otherMeanings')}</StrongEyebrow>
             {lexicalRelations.alternateSenses.map(relation => (
               <StrongLexicalRelationCard
@@ -372,7 +383,7 @@ const StrongDetailMainPage = ({
       {!isOriginalUnnamed &&
         (dictionaryResource ? (
           <StrongEditorialSection title={t('strongDetail.dictionary.light')}>
-            <Text color="tertiary" fontSize={12}>
+            <Text className="text-tertiary text-[12px]">
               {dictionaryResource.source} · {dictionaryResource.title}
             </Text>
             <StrongEditorialPreview
@@ -409,19 +420,10 @@ const StrongDetailMainPage = ({
 
       {!!entry.entity ? (
         <VStack
-          mx={-20}
-          mt={30}
-          px={20}
-          pt={22}
-          pb={26}
-          bg="lightGrey"
-          borderTopWidth={1}
-          borderBottomWidth={1}
-          borderColor="border"
-          gap={14}
+          className="border-continuous overflow-hidden mx-[-20px] mt-[30px] px-[20px] pt-[22px] pb-[26px] bg-light-grey border-t-[1px] border-b-[1px] border-border gap-[14px]"
           onLayout={event => setAnchor('entity', event.nativeEvent.layout.y)}
         >
-          <PageContent maxWidth={PAGE_CONTENT_MAX_WIDTH - 40} gap={14}>
+          <PageContent className="gap-[14px]" style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH - 40 }}>
             <StrongEntitySummaryCard
               entity={entry.entity}
               plain
@@ -434,8 +436,8 @@ const StrongDetailMainPage = ({
               onPress={() => onOpenPage('entity')}
             />
             {!!entityRelations?.graph.length && (
-              <VStack mt={7} gap={10}>
-                <Text bold fontSize={17}>
+              <VStack className="overflow-hidden border-continuous mt-[7px] gap-[10px]">
+                <Text className="font-bold text-[17px]">
                   {t(
                     entry.entity.category === 'person'
                       ? 'strongDetail.entity.personalRelationships'
@@ -464,7 +466,7 @@ const StrongDetailMainPage = ({
           title={t('strongDetail.related.title')}
           onLayout={event => setAnchor('related', event.nativeEvent.layout.y)}
         >
-          <VStack gap={9}>
+          <VStack className="overflow-hidden border-continuous gap-[9px]">
             {lexicalRelations.relatedWords.slice(0, displayedRelationCount).map(relation => (
               <StrongLexicalRelationCard
                 key={relation.stepCode}
@@ -491,11 +493,9 @@ const StrongDetailMainPage = ({
           title={t('Concordance')}
           onLayout={event => setAnchor('concordance', event.nativeEvent.layout.y)}
         >
-          <HStack alignItems="baseline" gap={8}>
-            <Text bold fontSize={26}>
-              {concordanceCount}
-            </Text>
-            <Text color="tertiary" fontSize={14}>
+          <HStack className="overflow-hidden border-continuous items-baseline gap-[8px]">
+            <Text className="font-bold text-[26px]">{concordanceCount}</Text>
+            <Text className="text-tertiary text-[14px]">
               {t('strongDetail.concordance.usesIn', { version: concordanceVersion })}
             </Text>
           </HStack>
@@ -506,29 +506,49 @@ const StrongDetailMainPage = ({
               style={{ marginHorizontal: -20 }}
               contentContainerStyle={{ paddingHorizontal: 20, gap: 7 }}
             >
-              <TouchableBox onPress={() => onSelectLemma(undefined)}>
+              <TouchableBox
+                className="overflow-hidden border-continuous"
+                onPress={() => onSelectLemma(undefined)}
+              >
                 <Box
-                  bg={selectedLemmaId == null ? 'primary' : 'lightGrey'}
-                  borderRadius={16}
-                  px={10}
-                  py={7}
+                  className={twMerge(
+                    'overflow-hidden border-continuous',
+                    twMerge(
+                      selectedLemmaId == null ? 'bg-primary' : 'bg-light-grey',
+                      'overflow-hidden border-continuous rounded-[16px] px-[10px] py-[7px]'
+                    )
+                  )}
                 >
-                  <Text color={selectedLemmaId == null ? 'reverse' : 'default'} fontSize={12}>
+                  <Text
+                    className={twMerge(
+                      selectedLemmaId == null ? 'text-reverse' : 'text-default',
+                      'text-[12px]'
+                    )}
+                  >
                     {t('Tous')} · {concordanceTotalCount}
                   </Text>
                 </Box>
               </TouchableBox>
               {lemmaStats.map(lemma => (
-                <TouchableBox key={lemma.id} onPress={() => onSelectLemma(lemma.id)}>
+                <TouchableBox
+                  className="overflow-hidden border-continuous"
+                  key={lemma.id}
+                  onPress={() => onSelectLemma(lemma.id)}
+                >
                   <Box
-                    bg={selectedLemmaId === lemma.id ? 'primary' : 'lightGrey'}
-                    borderRadius={16}
-                    px={10}
-                    py={7}
+                    className={twMerge(
+                      'overflow-hidden border-continuous',
+                      twMerge(
+                        selectedLemmaId === lemma.id ? 'bg-primary' : 'bg-light-grey',
+                        'overflow-hidden border-continuous rounded-[16px] px-[10px] py-[7px]'
+                      )
+                    )}
                   >
                     <Text
-                      color={selectedLemmaId === lemma.id ? 'reverse' : 'default'}
-                      fontSize={12}
+                      className={twMerge(
+                        selectedLemmaId === lemma.id ? 'text-reverse' : 'text-default',
+                        'text-[12px]'
+                      )}
                     >
                       {lemma.lemma}{' '}
                       {formatStrongLemmaPartOfSpeech(lemma.partOfSpeech, i18n.language)} ·{' '}
@@ -542,7 +562,7 @@ const StrongDetailMainPage = ({
           {concordanceLoading ? (
             <Loading />
           ) : (
-            <VStack>
+            <VStack className="overflow-hidden border-continuous">
               {concordanceVerses.slice(0, displayedConcordanceCount).map(verse => (
                 <ConcordanceVerse
                   key={`${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}

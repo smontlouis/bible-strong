@@ -1,9 +1,12 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-
 import DictionaryListScreen from '~features/dictionnary/DictionaryListScreen'
 import LexiqueListScreen from '~features/lexique/LexiqueListScreen'
 import NaveListScreen from '~features/nave/NaveListScreen'
+jest.mock('react-native', () => ({ Platform: { OS: 'web' } }))
+jest.mock('~themes/ThemeProvider', () => ({
+  useTheme: () => jest.requireActual('../../../../test/themeFixture').themeFixture,
+}))
 
 let mockIsOnline = true
 let mockStrongAvailability: { status: 'available' | 'missing'; moduleId?: 'core' } = {

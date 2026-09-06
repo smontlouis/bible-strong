@@ -16,11 +16,11 @@ const ImageSlice = ({ alt, src }: ImageSliceProps) => {
 
   return (
     <Box
-      width={imageWidth}
-      height={imageWidth}
       {...(colorScheme === 'dark' && {
         borderRadius: 20,
       })}
+      style={{ width: imageWidth, height: imageWidth }}
+      className="overflow-hidden border-continuous"
     >
       {imageUrl ? (
         <Image

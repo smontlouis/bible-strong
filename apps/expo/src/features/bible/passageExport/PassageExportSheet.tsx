@@ -1,4 +1,4 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as Sharing from 'expo-sharing'
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
@@ -32,7 +32,6 @@ import {
   type PassageExportResult,
   type PassageExportScope,
 } from './createPassageExport'
-
 type PassageExportSource =
   | {
       sourceType: 'selection'
@@ -65,21 +64,16 @@ type ExportFilterButtonProps = {
 
 const ExportFilterButton = ({ label, value, onPress }: ExportFilterButtonProps) => (
   <TouchableBox
+    className="border-continuous overflow-hidden flex-[1] min-w-[0px] p-[13px] border-[1px] border-border rounded-[14px]"
     accessibilityRole="button"
     accessibilityLabel={`${label}, ${value}`}
     onPress={onPress}
-    flex={1}
-    minWidth={0}
-    p={13}
-    borderWidth={1}
-    borderColor="border"
-    borderRadius={14}
   >
-    <Text bold fontSize={11} color="grey" numberOfLines={1}>
+    <Text className="font-bold text-[11px] text-grey" numberOfLines={1}>
       {label.toUpperCase()}
     </Text>
-    <Box row alignItems="center" mt={5} gap={6}>
-      <Text flex bold fontSize={14} numberOfLines={1}>
+    <Box className="overflow-hidden border-continuous flex-row items-center mt-[5px] gap-[6px]">
+      <Text className="flex-[1] font-bold text-[14px]" numberOfLines={1}>
         {value}
       </Text>
       <FeatherIcon name="chevron-down" size={16} color="grey" />
@@ -369,8 +363,8 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
           <SheetScrollView
             contentContainerStyle={{ padding: 20, paddingBottom: 20 + insets.bottom, gap: 20 }}
           >
-            <Box>
-              <Box row gap={10}>
+            <Box className="overflow-hidden border-continuous">
+              <Box className="overflow-hidden border-continuous flex-row gap-[10px]">
                 <ExportFilterButton
                   label={t('passageExport.scope')}
                   value={scopeLabels[scope]}
@@ -384,25 +378,31 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
               </Box>
             </Box>
 
-            <Box gap={8}>
-              <Text bold fontSize={13} color="grey">
+            <Box className="overflow-hidden border-continuous gap-[8px]">
+              <Text className="font-bold text-[13px] text-grey">
                 {t('passageExport.preview').toUpperCase()}
               </Text>
               {result && (
-                <Text color="grey" fontSize={12}>
+                <Text className="text-grey text-[12px]">
                   {t('passageExport.summary', result.counts)}
                 </Text>
               )}
               {hasIncompleteSync && (
-                <Box p={12} borderRadius={12} bg="lightGrey">
-                  <Text color="grey" fontSize={12} reverse>
+                <Box className="overflow-hidden border-continuous p-[12px] rounded-[12px] bg-light-grey">
+                  <Text
+                    className="text-grey text-[12px]"
+                    style={{ flexDirection: 'column-reverse' }}
+                  >
                     {t('passageExport.syncWarning')}
                   </Text>
                 </Box>
               )}
               {result?.missingVerseTextKeys.length ? (
-                <Box p={12} borderRadius={12} bg="lightGrey">
-                  <Text color="grey" fontSize={12} reverse>
+                <Box className="overflow-hidden border-continuous p-[12px] rounded-[12px] bg-light-grey">
+                  <Text
+                    className="text-grey text-[12px]"
+                    style={{ flexDirection: 'column-reverse' }}
+                  >
                     {t('passageExport.missingBibleText', {
                       count: result.missingVerseTextKeys.length,
                     })}
@@ -410,14 +410,21 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
                 </Box>
               ) : null}
               {result?.hasSkippedInvalidData ? (
-                <Box p={12} borderRadius={12} bg="lightGrey">
-                  <Text color="grey" fontSize={12} reverse>
+                <Box className="overflow-hidden border-continuous p-[12px] rounded-[12px] bg-light-grey">
+                  <Text
+                    className="text-grey text-[12px]"
+                    style={{ flexDirection: 'column-reverse' }}
+                  >
                     {t('passageExport.invalidDataSkipped')}
                   </Text>
                 </Box>
               ) : null}
-              <Box p={16} borderRadius={14} bg="lightGrey">
-                <Text selectable fontSize={13} lineHeight={20} reverse>
+              <Box className="overflow-hidden border-continuous p-[16px] rounded-[14px] bg-light-grey">
+                <Text
+                  className="text-[13px] leading-[20px]"
+                  selectable
+                  style={{ flexDirection: 'column-reverse' }}
+                >
                   {isPreparing
                     ? t('passageExport.preparing')
                     : hasContent

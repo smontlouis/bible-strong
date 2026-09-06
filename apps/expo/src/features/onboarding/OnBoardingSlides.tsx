@@ -1,30 +1,29 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
-
 import { Image } from 'react-native'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
-
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
-
 import Box, { SafeAreaBox, TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-
 import { useTranslation } from 'react-i18next'
 import { VStack } from '~common/ui/Stack'
 import { getSlides, Slide } from './slides'
-
 const slideWidth = wp(100)
 const sliderWidth = wp(100)
 
 const itemWidth = slideWidth
 
 const Item = ({ item }: { item: Slide; index: number }) => {
+  const stylingTheme = useStylingTheme()
+
   const r = useMediaQueriesArray()
   return (
-    <VStack overflow="visible" px={20} spacing={2} flex justifyContent="center" bg="reverse">
+    <VStack className="px-[20px] justify-center bg-reverse overflow-visible flex-[1]" spacing={2}>
       {item.image && (
         <Image
           source={item.image}
@@ -34,7 +33,10 @@ const Item = ({ item }: { item: Slide; index: number }) => {
           }}
         />
       )}
-      <Text title fontSize={38}>
+      <Text
+        className="text-[38px]"
+        style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+      >
         {item.title}
       </Text>
       <Paragraph fontFamily="text" scale={2}>
@@ -60,8 +62,12 @@ const OnBoardingSlides = ({
   } = useLayoutSize()
 
   return (
-    <SafeAreaBox>
-      <Box ref={carouselContainerRef} center flex onLayout={onCarouselContainerLayout}>
+    <SafeAreaBox className="overflow-hidden border-continuous">
+      <Box
+        className="overflow-hidden border-continuous items-center justify-center flex-[1]"
+        ref={carouselContainerRef}
+        onLayout={onCarouselContainerLayout}
+      >
         <Carousel
           ref={carousel}
           mode="horizontal-stack"
@@ -88,14 +94,17 @@ const OnBoardingSlides = ({
           onScrollEnd={setActiveSlide}
         />
       </Box>
-      <Box marginTop={20} mx={20}>
+      <Box className="overflow-hidden border-continuous mt-[20px] mx-[20px]">
         {activeSlide === 3 ? (
           <Button onPress={() => setStep(1)}>{t('Commencer')}</Button>
         ) : (
           <Button onPress={() => carousel.current?.next()}>{t('Suivant')}</Button>
         )}
-        <TouchableBox onPress={() => setStep(1)} marginTop={20} center>
-          <Text fontSize={12}>{t('Passer').toUpperCase()}</Text>
+        <TouchableBox
+          className="overflow-hidden border-continuous mt-[20px] items-center justify-center"
+          onPress={() => setStep(1)}
+        >
+          <Text className="text-[12px]">{t('Passer').toUpperCase()}</Text>
         </TouchableBox>
       </Box>
     </SafeAreaBox>

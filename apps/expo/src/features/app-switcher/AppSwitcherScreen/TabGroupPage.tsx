@@ -1,3 +1,5 @@
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { FlashList, FlashListRef, ListRenderItemInfo, ViewToken } from '@shopify/flash-list'
 import { useAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
@@ -6,8 +8,6 @@ import { useTranslation } from 'react-i18next'
 import { TouchableOpacity, useWindowDimensions, ViewStyle } from 'react-native'
 import { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
-import { useTheme } from '@emotion/react'
 import { Image } from 'expo-image'
 import Box, { AnimatedBox, FadingBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -25,7 +25,6 @@ import TabPreview from './TabPreview'
 import useAppSwitcher from './useAppSwitcher'
 import { useAutoFontSize } from '~helpers/useAutoFontSize'
 import { wp } from '~helpers/utils'
-
 interface TabGroupPageProps {
   group: TabGroup
   index: number
@@ -44,6 +43,8 @@ const GroupHeader = ({
   skipEntering?: boolean
   skipExiting?: boolean
 }) => {
+  const stylingTheme = useStylingTheme()
+
   const insets = useSafeAreaInsets()
   const { SCREEN_MARGIN } = useTabConstants()
   const { colorScheme } = useCurrentThemeSelector()
@@ -57,27 +58,26 @@ const GroupHeader = ({
 
   return (
     <FadingBox
+      className="overflow-hidden border-continuous pb-[20px] flex-row items-center gap-[12px]"
       keyProp={group.id}
       direction="bottom"
-      pt={SCREEN_MARGIN + insets.top}
-      pb={20}
       skipEntering={skipEntering}
       skipExiting={skipExiting}
-      row
-      alignItems="center"
-      gap={12}
+      style={{ paddingTop: SCREEN_MARGIN + insets.top }}
     >
-      <Box bg={group.color} width={24} height={24} borderRadius={6} center>
-        <Text fontSize={12} style={{ color: textColor }} bold>
+      <Box
+        className="overflow-hidden border-continuous w-[24px] h-[24px] rounded-[6px] items-center justify-center"
+        style={{ backgroundColor: resolveThemeColor(stylingTheme, group.color) }}
+      >
+        <Text className="text-[12px] font-bold" style={{ color: textColor }}>
           {group.tabs?.length ?? 0}
         </Text>
       </Box>
       <Text
-        fontSize={fontSize}
-        color="default"
+        className="text-default flex-[1]"
         numberOfLines={1}
-        flex={1}
         onTextLayout={onTextLayout}
+        style={{ fontSize: fontSize || 16 }}
       >
         {group.name}
       </Text>
@@ -166,12 +166,16 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
       index={i}
       tabAtom={tabAtom}
       groupId={group.id}
-      marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0}
+      style={{ marginRight: (i + 1) % TABS_PER_ROW ? GAP : 0 }}
     />
   )
 
   const renderStaticItem = ({ item: tab, index: i }: ListRenderItemInfo<TabItem>) => (
-    <StaticTabPreview tab={tab} index={i} marginRight={(i + 1) % TABS_PER_ROW ? GAP : 0} />
+    <StaticTabPreview
+      tab={tab}
+      index={i}
+      style={{ marginRight: (i + 1) % TABS_PER_ROW ? GAP : 0 }}
+    />
   )
 
   // Use stable tab.id instead of atom.toString()
@@ -186,27 +190,26 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
   // Empty state for non-default groups with no tabs
   if (group.tabs?.length === 0) {
     return (
-      <AnimatedBox style={[{ width }, opacityStyle]} flex={1} bg="lightGrey" zIndex={2}>
-        <FadingBox keyProp={group.id} direction="bottom" flex={1} skipEntering={false}>
-          <Box flex={1} center>
+      <AnimatedBox
+        className="overflow-hidden border-continuous flex-[1] bg-light-grey z-[2]"
+        style={[{ width }, opacityStyle]}
+      >
+        <FadingBox
+          className="overflow-hidden border-continuous flex-[1]"
+          keyProp={group.id}
+          direction="bottom"
+          skipEntering={false}
+        >
+          <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
             <Image
               source={require('~assets/images/tabs.svg')}
               style={{ width: 150, height: 150, opacity: 0.3 }}
               tintColor={theme.colors.tertiary}
             />
             <TouchableOpacity accessibilityRole="button" onPress={handleCreateTab}>
-              <Box
-                bg="primary"
-                paddingVertical={12}
-                paddingHorizontal={20}
-                borderRadius={24}
-                row
-                center
-              >
+              <Box className="overflow-hidden border-continuous bg-primary py-[12px] px-[20px] rounded-[24px] flex-row items-center justify-center">
                 <FeatherIcon name="plus" color="white" size={20} />
-                <Text color="white" ml={8} bold>
-                  {t('tabs.create')}
-                </Text>
+                <Text className="text-[white] ml-[8px] font-bold">{t('tabs.create')}</Text>
               </Box>
             </TouchableOpacity>
           </Box>
@@ -219,7 +222,10 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
   // (groupes bufferises = actif + adjacents gauche/droite)
   if (!isBuffered) {
     return (
-      <AnimatedBox style={[{ width }, opacityStyle]} flex={1} bg="lightGrey">
+      <AnimatedBox
+        className="overflow-hidden border-continuous flex-[1] bg-light-grey"
+        style={[{ width }, opacityStyle]}
+      >
         <FlashList
           data={group.tabs}
           numColumns={TABS_PER_ROW}
@@ -235,7 +241,10 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
 
   // Pour les groupes bufferises: rendu avec atoms (actif + adjacents)
   return (
-    <AnimatedBox style={[{ width }, opacityStyle]} flex={1} bg="lightGrey">
+    <AnimatedBox
+      className="overflow-hidden border-continuous flex-[1] bg-light-grey"
+      style={[{ width }, opacityStyle]}
+    >
       <FlashList
         ref={flashListRef}
         data={tabsAtoms}

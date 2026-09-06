@@ -1,9 +1,8 @@
 import type { CommentaryCatalogEntry } from '@bible-strong/resource-catalog/commentaries'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { Alert } from 'react-native'
 import { useTranslation } from 'react-i18next'
-
 import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -28,7 +27,6 @@ import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { useResourcePublicationStatus } from '~helpers/useResourcePublicationStatus'
 import { getDownloadItemProgress } from '~state/downloadQueue'
 import CommentaryAvatar from './CommentaryAvatar'
-
 type CommentaryProjection = {
   entry: CommentaryCatalogEntry
   language: ResourceLanguage
@@ -99,87 +97,82 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
       <SheetScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 22, paddingBottom: 32 }}
       >
-        <Box row alignItems="center" gap={16}>
+        <Box className="overflow-hidden border-continuous flex-row items-center gap-[16px]">
           <CommentaryAvatar
             resourceCode={`${entry.publicationId}:${language}`}
             author={entry.author}
             fallback={entry.shortName}
             size={68}
           />
-          <Box flex gap={6}>
-            <Text fontSize={22} bold numberOfLines={3}>
+          <Box className="overflow-hidden border-continuous flex-[1] gap-[6px]">
+            <Text className="text-[22px] font-bold" numberOfLines={3}>
               {entry.title}
             </Text>
-            <Text color="tertiary" fontSize={13} numberOfLines={2}>
+            <Text className="text-tertiary text-[13px]" numberOfLines={2}>
               {entry.author}
             </Text>
           </Box>
         </Box>
 
-        <Box row mt={22} py={14} borderTopWidth={1} borderBottomWidth={1} borderColor="border">
-          <Box flex alignItems="center" gap={4}>
-            <Text color="tertiary" fontSize={9} bold>
+        <Box className="border-continuous overflow-hidden flex-row mt-[22px] py-[14px] border-t-[1px] border-b-[1px] border-border">
+          <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
+            <Text className="text-tertiary text-[9px] font-bold">
               {t('bibleOfflineDetails.language').toUpperCase()}
             </Text>
-            <Text fontSize={13} bold>
-              {languageLabel}
-            </Text>
+            <Text className="text-[13px] font-bold">{languageLabel}</Text>
           </Box>
-          <Box width={1} bg="border" />
-          <Box flex alignItems="center" gap={4}>
-            <Text color="tertiary" fontSize={9} bold>
+          <Box className="overflow-hidden border-continuous w-[1px] bg-border" />
+          <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
+            <Text className="text-tertiary text-[9px] font-bold">
               {t('commentaries.details.tradition').toUpperCase()}
             </Text>
-            <Text fontSize={13} bold textAlign="center">
-              {entry.tradition}
-            </Text>
+            <Text className="text-[13px] font-bold text-center">{entry.tradition}</Text>
           </Box>
-          <Box width={1} bg="border" />
-          <Box flex alignItems="center" gap={4}>
-            <Text color="tertiary" fontSize={9} bold>
+          <Box className="overflow-hidden border-continuous w-[1px] bg-border" />
+          <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
+            <Text className="text-tertiary text-[9px] font-bold">
               {t('bibleOfflineDetails.installedSize').toUpperCase()}
             </Text>
-            <Text fontSize={13} bold>
-              {size}
-            </Text>
+            <Text className="text-[13px] font-bold">{size}</Text>
           </Box>
         </Box>
 
         {!!description && (
-          <Text mt={22} fontSize={15} lineHeight={22}>
-            {description}
-          </Text>
+          <Text className="mt-[22px] text-[15px] leading-[22px]">{description}</Text>
         )}
 
-        <Box row mt={18} gap={8} style={{ flexWrap: 'wrap' }}>
+        <Box
+          className="overflow-hidden border-continuous flex-row mt-[18px] gap-[8px]"
+          style={{ flexWrap: 'wrap' }}
+        >
           {entry.tags.map(tag => (
-            <Box key={tag} px={10} py={6} bg="lightGrey" borderRadius={14}>
-              <Text fontSize={12}>{tag}</Text>
+            <Box
+              className="overflow-hidden border-continuous px-[10px] py-[6px] bg-light-grey rounded-[14px]"
+              key={tag}
+            >
+              <Text className="text-[12px]">{tag}</Text>
             </Box>
           ))}
         </Box>
 
-        <Box mt={20} pt={16} borderTopWidth={1} borderColor="border">
-          <Text color="tertiary" fontSize={12}>
-            {entry.rights}
-          </Text>
+        <Box className="border-continuous overflow-hidden mt-[20px] pt-[16px] border-t-[1px] border-border">
+          <Text className="text-tertiary text-[12px]">{entry.rights}</Text>
         </Box>
 
         {downloading ? (
-          <Box mt={22} p={16} bg="lightGrey" borderRadius={22} row alignItems="center">
+          <Box className="overflow-hidden border-continuous mt-[22px] p-[16px] bg-light-grey rounded-[22px] flex-row items-center">
             <Progress progress={Math.max(progress, 0.04)} size={30} thickness={3} />
-            <Text ml={12} flex bold>
-              {Math.round(progress * 100)} %
-            </Text>
-            <TouchableBox onPress={() => downloadManager.cancel(itemId)} px={8} py={6}>
-              <Text color="quart" bold>
-                {t('bibleOfflineDetails.cancel')}
-              </Text>
+            <Text className="ml-[12px] flex-[1] font-bold">{Math.round(progress * 100)} %</Text>
+            <TouchableBox
+              className="overflow-hidden border-continuous px-[8px] py-[6px]"
+              onPress={() => downloadManager.cancel(itemId)}
+            >
+              <Text className="text-quart font-bold">{t('bibleOfflineDetails.cancel')}</Text>
             </TouchableBox>
           </Box>
         ) : (
-          <Box mt={22} p={16} bg="lightGrey" borderRadius={22} row alignItems="center" gap={10}>
-            <Box flex>
+          <Box className="overflow-hidden border-continuous mt-[22px] p-[16px] bg-light-grey rounded-[22px] flex-row items-center gap-[10px]">
+            <Box className="overflow-hidden border-continuous flex-[1]">
               <Button
                 onPress={download}
                 disabled={
@@ -187,7 +180,7 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
                 }
                 leftIcon={
                   !installed || corrupt || publicationStatus.status === 'update-available' ? (
-                    <Box mr={9}>
+                    <Box className="overflow-hidden border-continuous mr-[9px]">
                       <FeatherIcon name="download" size={18} color="white" />
                     </Box>
                   ) : undefined
@@ -208,15 +201,11 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
             </Box>
             {installed && (
               <TouchableBox
+                className="border-continuous overflow-hidden items-center justify-center bg-reverse rounded-[24px] border-[1px] border-border"
                 accessibilityRole="button"
                 accessibilityLabel={t('commentaries.selector.removeOffline')}
                 onPress={remove}
-                size={48}
-                center
-                bg="reverse"
-                borderRadius={24}
-                borderWidth={1}
-                borderColor="border"
+                style={{ width: 48, height: 48 }}
               >
                 <FeatherIcon name="trash-2" size={20} color="quart" />
               </TouchableBox>

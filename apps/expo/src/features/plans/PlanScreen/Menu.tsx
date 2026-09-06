@@ -10,7 +10,6 @@ import generateUUID from '~helpers/generateUUID'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { removePlan, resetPlan } from '~redux/modules/plan'
-
 interface Props {
   modalRefDetails: React.RefObject<SheetRef | null>
   planId: string
@@ -111,7 +110,7 @@ const Menu = ({ modalRefDetails, planId, title, onRemove }: Props) => {
         }
       }}
     >
-      <Box row center height={60} width={60}>
+      <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
         <FeatherIcon name="more-vertical" size={18} />
       </Box>
     </MenuView>

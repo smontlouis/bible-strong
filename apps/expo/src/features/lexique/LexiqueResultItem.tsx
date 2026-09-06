@@ -1,9 +1,10 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { LinearGradient } from 'expo-linear-gradient'
-
 const height = 40
 
 interface Props {
@@ -13,6 +14,8 @@ interface Props {
   title: string
 }
 const LexiqueResultItem = ({ variant, displayCode, reference, title }: Props) => {
+  const stylingTheme = useStylingTheme()
+
   const isGrec = variant === 'grec'
 
   const color1 = isGrec ? 'rgb(69,150,220)' : 'rgba(248,131,121,1)'
@@ -21,14 +24,11 @@ const LexiqueResultItem = ({ variant, displayCode, reference, title }: Props) =>
   return (
     <Link key={reference + title} route="Strong" params={{ book: isGrec ? 40 : 1, reference }}>
       <Box
-        center
-        borderRadius={8}
-        marginRight={10}
-        marginBottom={10}
-        height={height}
-        paddingHorizontal={20}
+        className="overflow-hidden border-continuous items-center justify-center rounded-[8px] mr-[10px] mb-[10px] px-[20px]"
+        style={{ height: height }}
       >
         <Box
+          className="overflow-hidden border-continuous"
           style={{
             position: 'absolute',
             left: 0,
@@ -40,12 +40,18 @@ const LexiqueResultItem = ({ variant, displayCode, reference, title }: Props) =>
         >
           <LinearGradient start={[0.1, 0.2]} style={{ height }} colors={[color1, color2]} />
         </Box>
-        <Box backgroundColor="rgba(0,0,0,0.1)" paddingHorizontal={3} paddingVertical={2} rounded>
-          <Text fontSize={7} style={{ color: 'white' }}>
+        <Box className="overflow-hidden border-continuous bg-[rgba(0,0,0,0.1)] px-[3px] py-[2px] rounded-[20px]">
+          <Text className="text-[7px]" style={{ color: 'white' }}>
             {displayCode} {isGrec ? 'Grec' : 'Hébreu'}
           </Text>
         </Box>
-        <Text title fontSize={14} style={{ color: 'white' }}>
+        <Text
+          className="text-[14px]"
+          style={[
+            { fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) },
+            { color: 'white' },
+          ]}
+        >
           {title}
         </Text>
       </Box>

@@ -1,3 +1,5 @@
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -7,7 +9,6 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import AudioButton from './AudioButton'
-
 export interface BasicFooterProps {
   onPlay: () => void
   isPlaying: boolean
@@ -43,27 +44,23 @@ const BasicFooter = ({
   return (
     <>
       <AnimatedTouchableBox
+        className="border-continuous overflow-visible w-[40px] h-[40px] border-[2px] rounded-[20px] border-light-grey bg-reverse items-center justify-center absolute left-[10px]"
         disabled={isDisabled || !onPrevChapter}
-        width={40}
-        height={40}
-        overflow="visible"
         onPress={onPrevChapter}
         accessibilityRole="button"
         accessibilityLabel={t('accessibility.previousChapter')}
         accessibilityState={{ disabled: isDisabled || !onPrevChapter }}
-        borderWidth={2}
-        borderRadius={20}
-        borderColor="lightGrey"
-        bg="reverse"
-        center
-        position="absolute"
-        bottom={10 + bottomBarHeight}
-        left={10}
-        style={{
-          transform: [{ translateY: fullScreenTranslateY }],
-          transitionProperty: 'transform',
-          transitionDuration: 300,
-        }}
+        style={[
+          { opacity: isDisabled || !onPrevChapter ? 0.6 : 1 },
+          [
+            { bottom: 10 + bottomBarHeight, opacity: isDisabled || !onPrevChapter ? 0.6 : 1 },
+            {
+              transform: [{ translateY: fullScreenTranslateY }],
+              transitionProperty: 'transform',
+              transitionDuration: 300,
+            },
+          ],
+        ]}
       >
         <FeatherIcon name="arrow-left" size={20} color="tertiary" />
       </AnimatedTouchableBox>
@@ -77,27 +74,23 @@ const BasicFooter = ({
         centerTranslateY={centerTranslateY}
       />
       <AnimatedTouchableBox
+        className="border-continuous overflow-visible w-[40px] h-[40px] items-center justify-center border-[2px] rounded-[20px] border-light-grey bg-reverse absolute right-[10px]"
         disabled={isDisabled || !onNextChapter}
-        width={40}
-        height={40}
-        center
-        overflow="visible"
         onPress={onNextChapter}
         accessibilityRole="button"
         accessibilityLabel={t('accessibility.nextChapter')}
         accessibilityState={{ disabled: isDisabled || !onNextChapter }}
-        borderWidth={2}
-        borderRadius={20}
-        borderColor="lightGrey"
-        bg="reverse"
-        position="absolute"
-        bottom={10 + bottomBarHeight}
-        right={10}
-        style={{
-          transform: [{ translateY: fullScreenTranslateY }],
-          transitionProperty: 'transform',
-          transitionDuration: 300,
-        }}
+        style={[
+          { opacity: isDisabled || !onNextChapter ? 0.6 : 1 },
+          [
+            { bottom: 10 + bottomBarHeight, opacity: isDisabled || !onNextChapter ? 0.6 : 1 },
+            {
+              transform: [{ translateY: fullScreenTranslateY }],
+              transitionProperty: 'transform',
+              transitionDuration: 300,
+            },
+          ],
+        ]}
       >
         <FeatherIcon name="arrow-right" size={20} color="tertiary" />
       </AnimatedTouchableBox>
@@ -121,6 +114,8 @@ const PlayableButtons = ({
   type,
   centerTranslateY,
 }: PlayableButtonsProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const accessibilityLabel = hasError
@@ -133,36 +128,33 @@ const PlayableButtons = ({
 
   return (
     <AnimatedHStack
-      position="absolute"
-      alignSelf="center"
-      bottom={10 + bottomBarHeight}
-      row
-      bg="lightGrey"
-      padding={2}
-      borderRadius={50}
-      overflow="visible"
-      style={{
-        transform: [{ translateY: centerTranslateY }],
-        transitionProperty: 'transform',
-        transitionDuration: 300,
-      }}
+      className="border-continuous overflow-visible absolute self-center flex-row bg-light-grey p-[2px] rounded-[50px]"
+      style={[
+        { bottom: 10 + bottomBarHeight },
+        {
+          transform: [{ translateY: centerTranslateY }],
+          transitionProperty: 'transform',
+          transitionDuration: 300,
+        },
+      ]}
     >
       <TouchableBox
-        center
-        width={50}
-        height={50}
+        className="border-continuous overflow-visible items-center justify-center w-[50px] h-[50px] border-[2px] rounded-[25px] border-light-grey relative"
         disabled={isDisabled}
         activeOpacity={0.5}
         onPress={onPlay}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
         accessibilityState={{ disabled: isDisabled, busy: isLoading }}
-        bg={isPlaying ? 'primary' : 'reverse'}
-        borderWidth={2}
-        borderRadius={25}
-        borderColor="lightGrey"
-        position="relative"
-        overflow="visible"
+        style={[
+          { opacity: isDisabled ? 0.6 : 1 },
+          [
+            {
+              backgroundColor: resolveThemeColor(stylingTheme, isPlaying ? 'primary' : 'reverse'),
+              opacity: isDisabled ? 0.6 : 1,
+            },
+          ],
+        ]}
       >
         <AudioButton isPlaying={isPlaying} isLoading={isLoading} error={hasError} type={type} />
       </TouchableBox>

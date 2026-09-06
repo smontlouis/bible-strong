@@ -1,11 +1,15 @@
-import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
-import React, { useEffect, useState } from 'react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { useEffect, useState } from 'react'
+import * as NativeUI from 'react-native'
 import { Alert } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { Trans, useTranslation } from 'react-i18next'
-import { getBook } from '~helpers/bibleBookCatalog'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
@@ -15,27 +19,48 @@ import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { getBook } from '~helpers/bibleBookCatalog'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { getHistoryStrongReference } from '~helpers/historyStrongReference'
-import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
+import useLanguage from '~helpers/useLanguage'
+import { VersionCode } from '~state/tabs'
 import {
   deleteHistoryAtom,
   historyAtom,
   type HistoryItem as HistoryItemType,
 } from '../../state/app'
-import { VersionCode } from '~state/tabs'
 
-const Chip = styled.View<{ color: string }>(({ theme, color }) => ({
-  height: 15,
-  alignSelf: 'flex-end',
-  borderRadius: 7,
-  backgroundColor: theme.colors[color as keyof typeof theme.colors] || color || theme.colors.border,
-  justifyContent: 'center',
-  alignItems: 'center',
-  paddingHorizontal: 5,
-  marginBottom: 5,
-}))
+const Chip = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, keyof { color: string } | 'theme'> &
+    Omit<{ color: string }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { color } = props
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'h-[15px] self-end rounded-[7px] justify-center items-center px-[5px] mb-[5px]',
+      className
+    )
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            backgroundColor:
+              theme.colors[color as keyof typeof theme.colors] || color || theme.colors.border,
+          },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.View>['style']
+      }
+    />
+  )
+}
 
 const HistoryItem = ({ item, currentTime }: { item: HistoryItemType; currentTime: number }) => {
   const { t } = useTranslation()
@@ -49,25 +74,21 @@ const HistoryItem = ({ item, currentTime }: { item: HistoryItemType; currentTime
     })
     return (
       <Link route="Strong" params={{ book, reference: persistedReference ?? '' }}>
-        <Box padding={20} row alignItems="center">
-          <Box>
-            <Text bold>{Mot}</Text>
-            <Text marginTop={5} color="grey" fontSize={12}>
-              {Grec || Hebreu}
-            </Text>
+        <Box className="overflow-hidden border-continuous p-[20px] flex-row items-center">
+          <Box className="overflow-hidden border-continuous">
+            <Text className="font-bold">{Mot}</Text>
+            <Text className="mt-[5px] text-grey text-[12px]">{Grec || Hebreu}</Text>
           </Box>
-          <Box marginLeft="auto">
+          <Box className="overflow-hidden border-continuous ml-auto">
             <Chip color="primary">
-              <Text bold fontSize={8} color="reverse">
-                Strong
-              </Text>
+              <Text className="font-bold text-[8px] text-reverse">Strong</Text>
             </Chip>
-            <Text fontSize={10} color="grey">
+            <Text className="text-[10px] text-grey">
               <Trans>Il y a {{ ago }}</Trans>
             </Text>
           </Box>
         </Box>
-        <Border marginHorizontal={20} />
+        <Border className="mx-[20px]" />
       </Link>
     )
   }
@@ -96,22 +117,20 @@ const HistoryItem = ({ item, currentTime }: { item: HistoryItemType; currentTime
           version: version as VersionCode,
         }}
       >
-        <Box padding={20} row alignItems="center">
-          <Text bold>
+        <Box className="overflow-hidden border-continuous p-[20px] flex-row items-center">
+          <Text className="font-bold">
             {title} {version}
           </Text>
-          <Box marginLeft="auto">
+          <Box className="overflow-hidden border-continuous ml-auto">
             <Chip color="border">
-              <Text bold fontSize={8}>
-                {t('Verset')}
-              </Text>
+              <Text className="font-bold text-[8px]">{t('Verset')}</Text>
             </Chip>
-            <Text fontSize={10} color="grey">
+            <Text className="text-[10px] text-grey">
               <Trans>Il y a {{ ago }}</Trans>
             </Text>
           </Box>
         </Box>
-        <Border marginHorizontal={20} />
+        <Border className="mx-[20px]" />
       </Link>
     )
   }
@@ -133,27 +152,25 @@ const HistoryItem = ({ item, currentTime }: { item: HistoryItemType; currentTime
           language: item.language,
         }}
       >
-        <Box padding={20} row alignItems="center">
-          <Box flex>
-            <Text bold>{word}</Text>
+        <Box className="overflow-hidden border-continuous p-[20px] flex-row items-center">
+          <Box className="overflow-hidden border-continuous flex-[1]">
+            <Text className="font-bold">{word}</Text>
             {item.dictionaryTitle ? (
-              <Text marginTop={5} color="grey" fontSize={12} numberOfLines={1}>
+              <Text className="mt-[5px] text-grey text-[12px]" numberOfLines={1}>
                 {item.dictionaryTitle}
               </Text>
             ) : null}
           </Box>
-          <Box marginLeft="auto">
+          <Box className="overflow-hidden border-continuous ml-auto">
             <Chip color="secondary">
-              <Text bold fontSize={8}>
-                {t('Mot')}
-              </Text>
+              <Text className="font-bold text-[8px]">{t('Mot')}</Text>
             </Chip>
-            <Text fontSize={10} color="grey">
+            <Text className="text-[10px] text-grey">
               <Trans>Il y a {{ ago }}</Trans>
             </Text>
           </Box>
         </Box>
-        <Border marginHorizontal={20} />
+        <Border className="mx-[20px]" />
       </Link>
     )
   }
@@ -165,20 +182,18 @@ const HistoryItem = ({ item, currentTime }: { item: HistoryItemType; currentTime
     })
     return (
       <Link route="NaveDetail" params={{ name, name_lower }}>
-        <Box padding={20} row alignItems="center">
-          <Text bold>{name}</Text>
-          <Box marginLeft="auto">
+        <Box className="overflow-hidden border-continuous p-[20px] flex-row items-center">
+          <Text className="font-bold">{name}</Text>
+          <Box className="overflow-hidden border-continuous ml-auto">
             <Chip color="quint">
-              <Text bold fontSize={8} color="white">
-                {t('Nave')}
-              </Text>
+              <Text className="font-bold text-[8px] text-[white]">{t('Nave')}</Text>
             </Chip>
-            <Text fontSize={10} color="grey">
+            <Text className="text-[10px] text-grey">
               <Trans>Il y a {{ ago }}</Trans>
             </Text>
           </Box>
         </Box>
-        <Border marginHorizontal={20} />
+        <Border className="mx-[20px]" />
       </Link>
     )
   }
@@ -220,7 +235,7 @@ const History = () => {
           ) : undefined
         }
       />
-      <Box flex>
+      <Box className="overflow-hidden border-continuous flex-[1]">
         {history.length ? (
           <FlatList
             removeClippedSubviews

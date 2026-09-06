@@ -1,3 +1,5 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import { HStack, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -15,7 +17,6 @@ import MaskedView from '@react-native-masked-view/masked-view'
 import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
 import useLanguage from '~helpers/useLanguage'
-
 type Event = {
   title: string
   description: string
@@ -64,7 +65,7 @@ const EventPeriod = ({ event }: { event: Event }) => {
 
   if (startDate && endDate) {
     return (
-      <Text bold color="white" fontSize={12}>
+      <Text className="font-bold text-[white] text-[12px]">
         {format(startDate, 'dd MMM yy', { locale })} - {format(endDate, 'dd MMM yy', { locale })}
       </Text>
     )
@@ -72,7 +73,7 @@ const EventPeriod = ({ event }: { event: Event }) => {
 
   if (startDate) {
     return (
-      <Text bold color="white" fontSize={12}>
+      <Text className="font-bold text-[white] text-[12px]">
         {format(startDate, 'dd MMM yy', { locale })}
       </Text>
     )
@@ -80,7 +81,7 @@ const EventPeriod = ({ event }: { event: Event }) => {
 
   if (endDate) {
     return (
-      <Text bold color="white" fontSize={12}>
+      <Text className="font-bold text-[white] text-[12px]">
         {format(endDate, 'dd MMM yy', { locale })}
       </Text>
     )
@@ -90,6 +91,8 @@ const EventPeriod = ({ event }: { event: Event }) => {
 }
 
 export const Events = () => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const language = useLanguage()
 
@@ -112,16 +115,7 @@ export const Events = () => {
 
   return (
     <TouchableOpacity accessibilityRole="button" onPress={handlePress} activeOpacity={0.8}>
-      <VStack
-        paddingHorizontal={20}
-        borderRadius={30}
-        borderWidth={3}
-        borderColor="lightPrimary"
-        marginHorizontal={20}
-        bg="black"
-        py={20}
-        gap={8}
-      >
+      <VStack className="border-continuous overflow-hidden px-[20px] rounded-[30px] border-[3px] border-light-primary mx-[20px] bg-[black] py-[20px] gap-[8px]">
         {imageUri && (
           <MaskedView
             style={StyleSheet.absoluteFill}
@@ -141,20 +135,19 @@ export const Events = () => {
             />
           </MaskedView>
         )}
-        <HStack gap={8} alignItems="center">
-          <HStack bg="lightPrimary" borderRadius={10} center height={22} gap={4} px={8}>
-            <Text bold fontSize={12}>
-              {t('event')}
-            </Text>
+        <HStack className="overflow-hidden border-continuous gap-[8px] items-center">
+          <HStack className="overflow-hidden border-continuous bg-light-primary rounded-[10px] items-center justify-center h-[22px] gap-[4px] px-[8px]">
+            <Text className="font-bold text-[12px]">{t('event')}</Text>
           </HStack>
         </HStack>
-        <Text title fontSize={22} color="white">
+        <Text
+          className="text-[22px] text-[white]"
+          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+        >
           {event?.title}
         </Text>
-        <Text bold color="white">
-          {event?.description}
-        </Text>
-        <HStack gap={4} alignItems="center">
+        <Text className="font-bold text-[white]">{event?.description}</Text>
+        <HStack className="overflow-hidden border-continuous gap-[4px] items-center">
           <FeatherIcon name="calendar" size={16} color="white" />
           {event && <EventPeriod event={event} />}
         </HStack>

@@ -1,11 +1,10 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import * as Icon from '@expo/vector-icons'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { TextInput, TextInputProps } from 'react-native'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from './ui/Icon'
-
 interface Props {
   onChangeText: (text: string) => void
   value: string
@@ -25,25 +24,15 @@ const SearchInput = ({
   const theme = useTheme()
   const { t } = useTranslation()
   return (
-    <Box>
-      <Box
-        row
-        center
-        paddingHorizontal={14}
-        borderRadius={10}
-        backgroundColor="rgba(0,0,0,0.1)"
-        marginTop={0}
-        marginBottom={5}
-        height={36}
-        overflow="visible"
-      >
+    <Box className="overflow-hidden border-continuous">
+      <Box className="border-continuous overflow-visible flex-row items-center justify-center px-[14px] rounded-[10px] bg-[rgba(0,0,0,0.1)] mt-[0px] mb-[5px] h-[36px]">
         <Icon.Feather
           color={theme.colors.default}
           name="search"
           size={20}
           style={{ marginRight: 8 }}
         />
-        <Box flex>
+        <Box className="overflow-hidden border-continuous flex-[1]">
           <TextInput
             ref={inputRef}
             accessibilityLabel={props.accessibilityLabel ?? placeholder}
@@ -63,11 +52,9 @@ const SearchInput = ({
         </Box>
         {!!value && (
           <TouchableBox
+            className="overflow-hidden border-continuous min-w-[44px] min-h-[44px] items-center justify-center"
             accessibilityLabel={t('accessibility.clearSearch')}
             accessibilityRole="button"
-            minWidth={44}
-            minHeight={44}
-            center
             onPress={onDelete}
           >
             <FeatherIcon name="x" size={20} />

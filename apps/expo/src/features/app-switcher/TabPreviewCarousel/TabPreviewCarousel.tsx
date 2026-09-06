@@ -6,7 +6,6 @@ import { tabsAtomsAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherContext'
 import useTabConstants from '../utils/useTabConstants'
 import TabPreview from './TabPreview'
-
 const TabPreviewCarousel = () => {
   const tabsAtoms = useAtomValue(tabsAtomsAtom)
   // Basse priorité : React peut différer ce render
@@ -32,17 +31,15 @@ const TabPreviewCarousel = () => {
 
   return (
     <AnimatedBox
-      row
-      position="absolute"
-      top={0}
-      left={0}
-      bg="lightGrey"
+      className="border-continuous overflow-visible flex-row absolute top-[0px] left-[0px] bg-light-grey"
       style={styles}
-      overflow="visible"
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
-      <Box position="absolute" inset={-300} bg="lightGrey" pointerEvents="none" />
+      <Box
+        className="overflow-hidden border-continuous absolute inset-[-300px] bg-light-grey"
+        pointerEvents="none"
+      />
       {deferredTabsAtoms.map((tabAtom, i) => (
         <TabPreview key={`${tabAtom}`} index={i} tabAtom={tabAtom} />
       ))}

@@ -13,7 +13,6 @@ import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import TouchableSvgIcon from '~features/bible/TouchableSvgIcon'
 import { wp } from '~helpers/utils'
-
 type Props = {
   resourceType: BibleResource | null
   onChangeResourceType: (resourceType: BibleResource) => void
@@ -29,14 +28,17 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
   const iconWidth = wp(18)
 
   return (
-    <Box mx={20} bg="reverse" py={10} borderRadius={20} borderWidth={1} borderColor="border">
+    <Box className="border-continuous overflow-hidden mx-[20px] bg-reverse py-[10px] rounded-[20px] border-[1px] border-border">
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ flexGrow: 1 }}
       >
-        <HStack spacing={0} flex={1}>
-          <Box w={iconWidth} opacity={resourceType === 'strong' ? 1 : 0.3}>
+        <HStack className="flex-[1]" spacing={0}>
+          <Box
+            className="overflow-hidden border-continuous"
+            style={{ width: iconWidth, opacity: resourceType === 'strong' ? 1 : 0.3 }}
+          >
             <TouchableSvgIcon
               icon={LexiqueIcon}
               color={resourceType === 'strong' ? 'primary' : 'grey'}
@@ -44,7 +46,10 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
               label={t('Lexique')}
             />
           </Box>
-          <Box w={iconWidth} opacity={resourceType === 'dictionary' ? 1 : 0.3}>
+          <Box
+            className="overflow-hidden border-continuous"
+            style={{ width: iconWidth, opacity: resourceType === 'dictionary' ? 1 : 0.3 }}
+          >
             <TouchableSvgIcon
               icon={DictionnaireIcon}
               color={resourceType === 'dictionary' ? 'secondary' : 'grey'}
@@ -52,7 +57,10 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
               label={t('Dictionnaire')}
             />
           </Box>
-          <Box w={iconWidth} opacity={resourceType === 'nave' ? 1 : 0.3}>
+          <Box
+            className="overflow-hidden border-continuous"
+            style={{ width: iconWidth, opacity: resourceType === 'nave' ? 1 : 0.3 }}
+          >
             <TouchableSvgIcon
               icon={NaveIcon}
               color={resourceType === 'nave' ? 'quint' : 'grey'}
@@ -60,7 +68,10 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
               label={t('Thèmes')}
             />
           </Box>
-          <Box w={iconWidth} opacity={resourceType === 'reference' ? 1 : 0.3}>
+          <Box
+            className="overflow-hidden border-continuous"
+            style={{ width: iconWidth, opacity: resourceType === 'reference' ? 1 : 0.3 }}
+          >
             <TouchableSvgIcon
               icon={RefIcon}
               color={resourceType === 'reference' ? 'quart' : 'grey'}
@@ -68,7 +79,10 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
               label={t('Références')}
             />
           </Box>
-          <Box w={iconWidth} opacity={resourceType === 'commentary' ? 1 : 0.3}>
+          <Box
+            className="overflow-hidden border-continuous"
+            style={{ width: iconWidth, opacity: resourceType === 'commentary' ? 1 : 0.3 }}
+          >
             <TouchableSvgIcon
               icon={CommentIcon}
               color={resourceType === 'commentary' ? '#26A69A' : 'grey'}
@@ -76,7 +90,10 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
               label={t('Comment.')}
             />
           </Box>
-          <Box w={iconWidth} opacity={resourceType === 'compare' ? 1 : 0.3}>
+          <Box
+            className="overflow-hidden border-continuous"
+            style={{ width: iconWidth, opacity: resourceType === 'compare' ? 1 : 0.3 }}
+          >
             <TouchableOpacity
               accessibilityRole="button"
               onPress={() => onPress('compare')}
@@ -87,9 +104,7 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
                 size={20}
                 color={resourceType === 'compare' ? '#00897B' : 'grey'}
               />
-              <Text marginTop={5} fontSize={9} color="grey">
-                {t('Comparer')}
-              </Text>
+              <Text className="mt-[5px] text-[9px] text-grey">{t('Comparer')}</Text>
             </TouchableOpacity>
           </Box>
         </HStack>

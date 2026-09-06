@@ -1,20 +1,20 @@
+import { twMerge } from '~common/ui/classNames'
 import React, { PropsWithChildren } from 'react'
 import {
   Linking,
   Share,
   GestureResponderEvent,
   StyleProp,
+  StyleSheet,
   TouchableOpacity,
   TouchableOpacityProps,
   ViewStyle,
 } from 'react-native'
-
 import { useRouter } from 'expo-router'
 import Box, { BoxProps } from '~common/ui/Box'
 import { MainStackProps } from '~navigation/type'
 import { routeMapping } from '~navigation/routeMapping'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-
 export interface LinkProps<R extends keyof MainStackProps> extends Pick<
   TouchableOpacityProps,
   | 'accessibilityActions'
@@ -138,13 +138,24 @@ const Link = <R extends keyof MainStackProps>({
           alignItems: 'center',
           justifyContent: 'center',
         }),
-        ...(Array.isArray(style) ? Object.assign({}, ...style) : style),
+        ...StyleSheet.flatten(style),
       }}
     />
   )
 }
 
 type LinkBoxProps = React.FC<BoxProps & LinkProps<keyof MainStackProps>>
-export const LinkBox = Box.withComponent(Link) as unknown as LinkBoxProps
+export const LinkBox = ((
+  props: React.ComponentProps<typeof Box> & React.ComponentProps<typeof Link>
+) => (
+  <Box
+    as={Link}
+    {...props}
+    className={twMerge(
+      'overflow-hidden border-continuous',
+      twMerge('overflow-hidden border-continuous', props.className)
+    )}
+  />
+)) as unknown as LinkBoxProps
 
 export default Link

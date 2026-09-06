@@ -1,8 +1,8 @@
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import * as Icon from '@expo/vector-icons'
-import { useTheme } from '@emotion/react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -11,8 +11,9 @@ import Text from '~common/ui/Text'
 import TextInput from '~common/ui/TextInput'
 import FireAuth from '~helpers/FireAuth'
 import { toast } from '~helpers/toast'
-
 const Login = () => {
+  const stylingTheme = useStylingTheme()
+
   const theme = useTheme()
   const { t } = useTranslation()
   const [isLoading, setLoading] = useState(false)
@@ -33,7 +34,7 @@ const Login = () => {
   }
 
   return (
-    <Box>
+    <Box className="overflow-hidden border-continuous">
       <TextInput
         placeholder="Email"
         leftIcon={<Icon.Feather name="mail" size={20} color={theme.colors.darkGrey} />}
@@ -48,9 +49,17 @@ const Login = () => {
         onChangeText={setPassword}
         value={password}
       />
-      <Box alignItems="flex-end" mt={10}>
+      <Box className="overflow-hidden border-continuous items-end mt-[10px]">
         <Link route="ForgotPassword">
-          <Text underline>{t('Mot de passe oublié ?')}</Text>
+          <Text
+            style={{
+              textDecorationLine: 'underline',
+              textDecorationStyle: 'solid',
+              textDecorationColor: resolveThemeColor(stylingTheme, 'default'),
+            }}
+          >
+            {t('Mot de passe oublié ?')}
+          </Text>
         </Link>
       </Box>
       <Spacer size={2} />
@@ -58,8 +67,8 @@ const Login = () => {
         {t('Connexion')}
       </Button>
       <Spacer />
-      <Box row gap={10}>
-        <Box flex>
+      <Box className="overflow-hidden border-continuous flex-row gap-[10px]">
+        <Box className="overflow-hidden border-continuous flex-[1]">
           <Button
             disabled={isLoading}
             onPress={() => void run(() => FireAuth.googleLogin())}
@@ -68,7 +77,7 @@ const Login = () => {
             Google
           </Button>
         </Box>
-        <Box flex>
+        <Box className="overflow-hidden border-continuous flex-[1]">
           <Button
             disabled={isLoading}
             onPress={() => void run(() => FireAuth.appleLogin())}
@@ -79,9 +88,17 @@ const Login = () => {
         </Box>
       </Box>
       <Spacer size={2} />
-      <Box center pb={20}>
+      <Box className="overflow-hidden border-continuous items-center justify-center pb-[20px]">
         <Link route="Register">
-          <Text underline>{t('Pas de compte ? Inscrivez-vous.')}</Text>
+          <Text
+            style={{
+              textDecorationLine: 'underline',
+              textDecorationStyle: 'solid',
+              textDecorationColor: resolveThemeColor(stylingTheme, 'default'),
+            }}
+          >
+            {t('Pas de compte ? Inscrivez-vous.')}
+          </Text>
         </Link>
       </Box>
     </Box>

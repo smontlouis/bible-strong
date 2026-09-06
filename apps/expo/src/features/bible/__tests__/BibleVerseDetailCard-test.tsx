@@ -1,8 +1,9 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
+// Behavioral tests do not run Metro's generated Uniwind stylesheet.
+jest.mock('uniwind', () => ({ useResolveClassNames: () => ({}) }))
 
 const mockLoadVerse = jest.fn()
 const mockEnrichVerse = jest.fn(async (_request: unknown, result: unknown) => result)
@@ -28,24 +29,7 @@ const mockResourceAccess = {
 }
 let queryClient: QueryClient
 
-jest.mock('@emotion/native', () => {
-  const ReactModule = jest.requireActual<typeof React>('react')
-  const createStyledComponent = (type: React.ElementType | string) => () =>
-    function StyledComponent({
-      children,
-      ...props
-    }: React.PropsWithChildren<Record<string, unknown>>) {
-      return ReactModule.createElement(type as React.ElementType, props, children)
-    }
-  const styled = Object.assign((type: React.ElementType) => createStyledComponent(type), {
-    View: createStyledComponent('View'),
-    TouchableOpacity: createStyledComponent('TouchableOpacity'),
-  })
-
-  return { __esModule: true, default: styled }
-})
-
-jest.mock('@emotion/react', () => ({
+jest.mock('~themes/ThemeProvider', () => ({
   useTheme: () => ({ colors: { default: '#000' } }),
 }))
 
@@ -113,6 +97,8 @@ jest.mock('react-native', () => {
     }
   )
   return {
+    Text: 'Text',
+    View: 'View',
     FlatList,
     ScrollView,
   }
@@ -472,7 +458,7 @@ describe('BibleVerseDetailCard', () => {
     expect(verseScroll.props.showsVerticalScrollIndicator).toBe(false)
     expect(verseScroll.props.style).toEqual({ maxHeight: 320 })
     expect(renderer.root.findByProps({ testID: 'resource-verse-text' }).props).toEqual(
-      expect.objectContaining({ flex: 1, row: true, wrap: true })
+      expect.objectContaining({ className: expect.stringContaining('flex-[1] flex-row flex-wrap') })
     )
     const renderedVerse = renderer.root.find(
       node => String(node.type) === 'CanonicalStrongVerseText'

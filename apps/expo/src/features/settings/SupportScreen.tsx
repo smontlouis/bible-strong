@@ -1,94 +1,127 @@
-import React from 'react'
-import { Linking } from 'react-native'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme as useAppTheme } from '~themes/ThemeProvider'
 import * as Icon from '@expo/vector-icons'
-import styled from '@emotion/native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { Linking } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
-import Text from '~common/ui/Text'
-import ScrollView from '~common/ui/ScrollView'
-import Paragraph from '~common/ui/Paragraph'
-import Link from '~common/Link'
-import Container from '~common/ui/Container'
-import Box from '~common/ui/Box'
 import Header from '~common/Header'
+import Link from '~common/Link'
+import Box from '~common/ui/Box'
+import Container from '~common/ui/Container'
+import Paragraph from '~common/ui/Paragraph'
+import ScrollView from '~common/ui/ScrollView'
+import Text from '~common/ui/Text'
 import { Theme } from '~themes'
 
-const LinkItem = styled(Link)(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingHorizontal: 20,
-  paddingVertical: 15,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
+const LinkItem = (
+  componentProps: Omit<UIComponentProps<typeof Link>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const StyledIcon = styled(Icon.Feather)<{ color?: keyof Theme['colors'] }>(({ theme, color }) => ({
-  color: color ? theme.colors[color] : theme.colors.grey,
-  marginLeft: 'auto',
-  marginRight: 15,
-}))
+  const classStyles = useResolveClassNames(
+    twMerge('flex-row items-center px-[20px] py-[15px] border-b-[1px] border-b-border', className)
+  )
+  return (
+    <Link
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Link>['style']}
+    />
+  )
+}
+
+const StyledIcon = (
+  componentProps: Omit<
+    UIComponentProps<typeof Icon.Feather>,
+    keyof { color?: keyof Theme['colors'] } | 'theme'
+  > &
+    Omit<{ color?: keyof Theme['colors'] }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { color } = props
+  const classStyles = useResolveClassNames(twMerge('ml-auto mr-[15px]', className))
+  return (
+    <Icon.Feather
+      {...props}
+      style={
+        [
+          classStyles,
+          { color: color ? theme.colors[color] : theme.colors.grey },
+          props.style,
+        ] as UIComponentProps<typeof Icon.Feather>['style']
+      }
+    />
+  )
+}
 
 const LoginScreen = () => {
+  const stylingTheme = useStylingTheme()
+
   return (
     <Container>
       <Header hasBackButton title="Soutenir le développeur" />
       <ScrollView>
-        <Box padding={20}>
-          <Text title fontSize={30} marginBottom={30}>
+        <Box className="overflow-hidden border-continuous p-[20px]">
+          <Text
+            className="text-[30px] mb-[30px]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             Hello !
           </Text>
-          <Paragraph scaleLineHeight={-1} marginBottom={20}>
+          <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
             Avant toute chose, merci d'envisager de m'aider.
           </Paragraph>
-          <Paragraph scaleLineHeight={-1} marginBottom={20}>
+          <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
             Plus vous êtes nombreux, plus le coût des serveurs augmente. L'application est
             développée sur mon temps libre et est totalement gratuite. Dieu m'a donné un don, et
             c'est un plaisir pour moi de l'utiliser à sa gloire.
           </Paragraph>
-          <Paragraph scaleLineHeight={-1} marginBottom={20}>
+          <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
             Si vous souhaitez me soutenir, vous pouvez le faire de deux façons. Soit par{' '}
             <Paragraph
-              color="primary"
+              className="text-primary font-bold"
               onPress={() => Linking.openURL('https://fr.tipeee.com/smontlouis')}
-              bold
             >
               Tipeee,
             </Paragraph>{' '}
             ou par{' '}
             <Paragraph
-              color="primary"
+              className="text-primary font-bold"
               onPress={() => Linking.openURL('https://www.paypal.me/smontlouis')}
-              bold
             >
               Paypal
             </Paragraph>
             .
           </Paragraph>
-          <Paragraph scaleLineHeight={-1} marginBottom={20}>
+          <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
             Tipeee vous permet de soutenir en une fois ou mensuellement. Lorsque vous soutenez
             quelqu'un mensuellement, vous pouvez donner 1€ par mois par exemple.
           </Paragraph>
-          <Paragraph scaleLineHeight={-1} marginBottom={20}>
+          <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
             Juste 1€ par mois ! Et comme dit le proverbe martiniquais :{' '}
-            <Paragraph color="quart">"Sé grèn diri ka fè sak diri."</Paragraph>, "Ce sont les grains
-            de riz qui font les sacs de riz.", autrement dit, l’accumulation de petites choses font
-            de grandes choses.
+            <Paragraph className="text-quart">"Sé grèn diri ka fè sak diri."</Paragraph>, "Ce sont
+            les grains de riz qui font les sacs de riz.", autrement dit, l’accumulation de petites
+            choses font de grandes choses.
           </Paragraph>
-          <Paragraph scaleLineHeight={-1} marginBottom={20}>
+          <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
             Vous trouverez plus d'informations sur mon parcours et ma motivation sur ma page Tipeee.
           </Paragraph>
-          <Paragraph scaleLineHeight={-1} marginBottom={20}>
+          <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
             Merci de m'avoir lu et bonne étude !
           </Paragraph>
           <LinkItem href="https://fr.tipeee.com/smontlouis">
-            <Text bold fontSize={16}>
-              Lien Tipeee
-            </Text>
+            <Text className="font-bold text-[16px]">Lien Tipeee</Text>
             <StyledIcon name="arrow-right" size={25} />
           </LinkItem>
           <LinkItem href="https://www.paypal.me/smontlouis">
-            <Text bold fontSize={16}>
-              Lien paypal
-            </Text>
+            <Text className="font-bold text-[16px]">Lien paypal</Text>
             <StyledIcon name="arrow-right" size={25} />
           </LinkItem>
         </Box>

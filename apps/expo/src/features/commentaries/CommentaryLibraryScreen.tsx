@@ -10,7 +10,6 @@ import { SectionList, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
 import ChoiceFilterModal from '~common/ChoiceFilterModal'
 import FiltersHeader from '~common/FiltersHeader'
 import MultipleChoiceFilterModal from '~common/MultipleChoiceFilterModal'
@@ -32,7 +31,6 @@ import {
 } from './commentaryCatalogFilters'
 import { createCommentaryProjectionId } from './commentarySelection'
 import type { RootState } from '~redux/modules/reducer'
-
 type CommentarySelectionFilter = 'all' | 'selected'
 
 type Projection = {
@@ -59,34 +57,25 @@ const CommentaryLibraryItem = ({
   const installed = useIsOfflineResourceInstalled(identity)
 
   return (
-    <Box
-      minHeight={78}
-      px={18}
-      py={11}
-      bg="reverse"
-      row
-      alignItems="center"
-      borderBottomWidth={1}
-      borderColor="border"
-    >
+    <Box className="border-continuous overflow-hidden min-h-[78px] px-[18px] py-[11px] bg-reverse flex-row items-center border-b-[1px] border-border">
       <TouchableOpacity style={{ flex: 1 }} onPress={onOpen} accessibilityRole="button">
-        <Box row alignItems="center">
+        <Box className="overflow-hidden border-continuous flex-row items-center">
           <CommentaryAvatar
             resourceCode={`${entry.publicationId}:${language}`}
             author={entry.author}
             fallback={entry.shortName}
             size={48}
           />
-          <Box ml={13} flex>
-            <Text bold fontSize={16} numberOfLines={2}>
+          <Box className="overflow-hidden border-continuous ml-[13px] flex-[1]">
+            <Text className="font-bold text-[16px]" numberOfLines={2}>
               {entry.title}
             </Text>
-            <Text mt={3} color="grey" fontSize={12} numberOfLines={1}>
+            <Text className="mt-[3px] text-grey text-[12px]" numberOfLines={1}>
               {entry.author}
             </Text>
           </Box>
           {installed && (
-            <Box width={30} height={28} center>
+            <Box className="overflow-hidden border-continuous w-[30px] h-[28px] items-center justify-center">
               <FeatherIcon name="cloud" size={18} color="primary" />
             </Box>
           )}
@@ -99,7 +88,7 @@ const CommentaryLibraryItem = ({
           commentary: entry.title,
         })}
       >
-        <Box width={46} height={48} center>
+        <Box className="overflow-hidden border-continuous w-[46px] h-[48px] items-center justify-center">
           <FeatherIcon name="more-horizontal" size={20} />
         </Box>
       </TouchableOpacity>
@@ -163,7 +152,7 @@ const CommentaryLibraryScreen = () => {
 
   return (
     <FormSheetScreen isFormSheet={false}>
-      <Box flex bg="lightGrey">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
         <FiltersHeader
           title={t('Commentaires')}
           hasBackButton
@@ -219,10 +208,8 @@ const CommentaryLibraryScreen = () => {
           keyExtractor={item => createCommentaryProjectionId(item.entry.id, item.language)}
           contentContainerStyle={[pageContentStyle, { paddingBottom: insets.bottom + 20 }]}
           renderSectionHeader={({ section }) => (
-            <Box px={20} py={11} bg="lightGrey" borderBottomWidth={1} borderColor="border">
-              <Text bold color="grey" fontSize={13}>
-                {section.title}
-              </Text>
+            <Box className="overflow-hidden border-continuous px-[20px] py-[11px] bg-light-grey border-b-[1px] border-border">
+              <Text className="font-bold text-grey text-[13px]">{section.title}</Text>
             </Box>
           )}
           renderItem={({ item }) => {

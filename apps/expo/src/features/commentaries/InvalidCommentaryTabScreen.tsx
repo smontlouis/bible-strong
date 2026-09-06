@@ -2,13 +2,11 @@ import { useAtomValue, useSetAtom } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-
 import Header from '~common/Header'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { cachedTabIdsAtom, tabsAtomsAtom, type TabItem } from '~state/tabs'
-
 const InvalidCommentaryTabScreen = ({ tabAtom }: { tabAtom: PrimitiveAtom<TabItem> }) => {
   const { t } = useTranslation()
   const tab = useAtomValue(tabAtom)
@@ -22,28 +20,22 @@ const InvalidCommentaryTabScreen = ({ tabAtom }: { tabAtom: PrimitiveAtom<TabIte
   }
 
   return (
-    <Box flex bg="lightGrey">
+    <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
       <Header background title={t('Commentaires')} />
-      <Box flex center px={32}>
+      <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center px-[32px]">
         <FeatherIcon name="alert-circle" size={42} color="grey" />
-        <Text mt={18} bold fontSize={20} textAlign="center">
+        <Text className="mt-[18px] font-bold text-[20px] text-center">
           {t('commentaries.tabs.invalidTitle')}
         </Text>
-        <Text mt={8} color="grey" fontSize={15} lineHeight={22} textAlign="center">
+        <Text className="mt-[8px] text-grey text-[15px] leading-[22px] text-center">
           {t('commentaries.tabs.invalidBody')}
         </Text>
         <TouchableBox
-          mt={24}
-          px={20}
-          py={13}
-          borderRadius={22}
-          bg="primary"
+          className="overflow-hidden border-continuous mt-[24px] px-[20px] py-[13px] rounded-[22px] bg-primary"
           onPress={closeTab}
           accessibilityRole="button"
         >
-          <Text color="white" bold>
-            {t('commentaries.tabs.close')}
-          </Text>
+          <Text className="text-[white] font-bold">{t('commentaries.tabs.close')}</Text>
         </TouchableBox>
       </Box>
     </Box>

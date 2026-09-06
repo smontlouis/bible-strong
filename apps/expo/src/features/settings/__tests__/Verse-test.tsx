@@ -1,31 +1,23 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import VerseComponent from '../Verse'
+jest.mock('~themes/ThemeProvider', () => ({
+  useTheme: () => jest.requireActual('../../../../test/themeFixture').themeFixture,
+}))
+// Behavioral tests do not run Metro's generated Uniwind stylesheet.
+jest.mock('uniwind', () => ({ useResolveClassNames: () => ({}) }))
 
 const mockPushRouteOnce = jest.fn()
 
 jest.mock('react-native', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return {
+    Platform: { OS: 'web' },
+    Text: 'Text',
+    View: 'View',
     TouchableOpacity: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
       ReactModule.createElement('TouchableOpacity', props, children),
   }
-})
-
-jest.mock('@emotion/native', () => {
-  const ReactModule = jest.requireActual<typeof React>('react')
-  const createStyledComponent = (type: React.ElementType | string) => () =>
-    function StyledComponent({
-      children,
-      ...props
-    }: React.PropsWithChildren<Record<string, unknown>>) {
-      return ReactModule.createElement(type as React.ElementType, props, children)
-    }
-  const styled = Object.assign((type: React.ElementType) => createStyledComponent(type), {
-    Text: createStyledComponent('Text'),
-    View: createStyledComponent('View'),
-  })
-  return { __esModule: true, default: styled }
 })
 
 jest.mock('react-i18next', () => ({

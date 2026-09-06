@@ -29,3 +29,7 @@ src/helpers/lunr.*.min.js
 
 # Generated research projections
 docs/research/data/bible-project/presentation-data.js
+
+# Generated Expo styling artifacts
+apps/expo/src/uniwind-types.d.ts
+apps/expo/global.css

@@ -1,37 +1,63 @@
-import { pageContentStyle } from './PageContent'
-import styled from '@emotion/native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
+import * as NativeUI from 'react-native'
 import {
-  FlatList as RNFlatList,
   FlatListProps,
+  FlatList as RNFlatList,
   StyleProp,
   StyleSheet,
   ViewStyle,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
 import useDeviceOrientation, { Orientation } from '~helpers/useDeviceOrientation'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme as useAppTheme } from '~themes/ThemeProvider'
+import { pageContentStyle } from './PageContent'
 
 type StyledFlatListProps = {
   orientation: Orientation
   bg?: string
 }
 
-const FlatList = styled.FlatList<StyledFlatListProps>(({ theme, orientation, bg }) => ({
-  paddingBottom: 30,
-  backgroundColor: bg ? theme.colors[bg as keyof typeof theme.colors] || bg : theme.colors.reverse,
-  borderTopLeftRadius: 30,
-  borderTopRightRadius: 30,
-  width: '100%',
-  marginLeft: 'auto',
-  marginRight: 'auto',
-
-  ...(orientation.tablet && {
-    marginTop: 20,
-    marginBottom: 50,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-  }),
-}))
+const FlatList = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.FlatList>,
+    keyof StyledFlatListProps | 'theme'
+  > &
+    Omit<StyledFlatListProps, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { orientation, bg } = props
+  const classStyles = useResolveClassNames(
+    twMerge('pb-[30px] rounded-tl-[30px] rounded-tr-[30px] w-[100%] ml-auto mr-auto', className)
+  )
+  return (
+    <NativeUI.FlatList
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            backgroundColor: bg
+              ? theme.colors[bg as keyof typeof theme.colors] || bg
+              : theme.colors.reverse,
+            ...(orientation.tablet && {
+              marginTop: 20,
+              marginBottom: 50,
+              borderBottomLeftRadius: 30,
+              borderBottomRightRadius: 30,
+            }),
+          },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.FlatList>['style']
+      }
+    />
+  )
+}
 
 type AnimatedFlatListProps<T> = FlatListProps<T> & {
   bg?: string

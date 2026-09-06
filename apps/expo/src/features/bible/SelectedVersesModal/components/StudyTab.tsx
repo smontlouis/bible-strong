@@ -1,8 +1,7 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
 import ActionItem from './ActionItem'
-
 interface StudyTabProps {
   screenWidth: number
   showStrongDetail: () => void

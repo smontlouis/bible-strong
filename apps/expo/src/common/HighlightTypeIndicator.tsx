@@ -1,46 +1,109 @@
-import React from 'react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { useTranslation } from 'react-i18next'
+import * as NativeUI from 'react-native'
 import { View } from 'react-native'
-import styled from '@emotion/native'
-import { useTheme } from '@emotion/react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
 import Text from '~common/ui/Text'
 import type { HighlightType } from '~redux/modules/user'
-import { useTranslation } from 'react-i18next'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme as useAppTheme, useTheme } from '~themes/ThemeProvider'
 
-const Touchable = styled.TouchableOpacity({
-  alignItems: 'center',
-  justifyContent: 'center',
-})
+const Touchable = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const CircleContainer = styled.View<{ color: string; size: number; isSelected?: boolean }>(
-  ({ color, size, isSelected, theme }) => ({
-    width: size,
-    height: size,
-    borderRadius: size / 3,
-    backgroundColor: color,
-    transitionProperty: 'boxShadow',
-    transitionDuration: 300,
-    overflow: 'visible',
-    ...(isSelected && {
-      boxShadow: `0 0 0 3px ${theme.colors.reverse}, 0 0 0 5px ${theme.colors.primary}`,
-    }),
-  })
-)
+  const classStyles = useResolveClassNames(twMerge('items-center justify-center', className))
+  return (
+    <NativeUI.TouchableOpacity
+      {...props}
+      style={
+        [classStyles, {}, props.style] as UIComponentProps<
+          typeof NativeUI.TouchableOpacity
+        >['style']
+      }
+    />
+  )
+}
 
-const TextContainer = styled.View<{ size: number; isSelected?: boolean }>(
-  ({ size, isSelected, theme }) => ({
-    width: size,
-    height: size,
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: 'inset 0 0 2px 0 rgba(0, 0, 0, 0.15)',
-    transitionProperty: 'boxShadow',
-    transitionDuration: 300,
-    borderRadius: size / 3,
-    ...(isSelected && {
-      boxShadow: `inset 0 0 2px 0 rgba(0, 0, 0, 0.15), 0 0 0 2px ${theme.colors.reverse}, 0 0 0 4px ${theme.colors.primary}`,
-    }),
-  })
-)
+const CircleContainer = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.View>,
+    keyof { color: string; size: number; isSelected?: boolean } | 'theme'
+  > &
+    Omit<{ color: string; size: number; isSelected?: boolean }, 'theme'> & {
+      theme?: AppTheme
+      className?: string
+    }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { color, size, isSelected } = props
+  const classStyles = useResolveClassNames(twMerge('overflow-visible', className))
+  return (
+    <NativeUI.View
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            width: size,
+            height: size,
+            borderRadius: size / 3,
+            backgroundColor: color,
+            transitionProperty: 'boxShadow',
+            transitionDuration: 300,
+            ...(isSelected && {
+              boxShadow: `0 0 0 3px ${theme.colors.reverse}, 0 0 0 5px ${theme.colors.primary}`,
+            }),
+          },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.View>['style']
+      }
+    />
+  )
+}
+
+const TextContainer = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.View>,
+    keyof { size: number; isSelected?: boolean } | 'theme'
+  > &
+    Omit<{ size: number; isSelected?: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { size, isSelected } = props
+  const classStyles = useResolveClassNames(twMerge('items-center justify-center', className))
+  return (
+    <NativeUI.View
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            width: size,
+            height: size,
+            boxShadow: 'inset 0 0 2px 0 rgba(0, 0, 0, 0.15)',
+            transitionProperty: 'boxShadow',
+            transitionDuration: 300,
+            borderRadius: size / 3,
+            ...(isSelected && {
+              boxShadow: `inset 0 0 2px 0 rgba(0, 0, 0, 0.15), 0 0 0 2px ${theme.colors.reverse}, 0 0 0 4px ${theme.colors.primary}`,
+            }),
+          },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.View>['style']
+      }
+    />
+  )
+}
 
 type Props = {
   accessibilityLabel?: string

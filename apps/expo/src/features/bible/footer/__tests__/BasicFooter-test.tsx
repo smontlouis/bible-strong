@@ -1,7 +1,9 @@
 import React from 'react'
 import { act, create } from 'react-test-renderer'
-
 import BasicFooter from '../BasicFooter'
+jest.mock('~themes/ThemeProvider', () => ({
+  useTheme: () => jest.requireActual('../../../../../test/themeFixture').themeFixture,
+}))
 
 jest.mock('jotai/react', () => ({ useAtomValue: () => false }))
 jest.mock('react-native', () => ({ Platform: { OS: 'ios' } }))

@@ -5,7 +5,6 @@ import { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
 import { IonIcon } from '~common/ui/Icon'
 import { useStrongAudio } from './StrongAudioProvider'
-
 interface Props {
   type: 'hebreu' | 'grec'
   code: string | number
@@ -53,18 +52,24 @@ const ListenToStrong = ({ type, code, iconSize = 20, touchSize }: Props) => {
       accessibilityState={{ busy: isLoading, disabled: isLoading || isPlaying }}
       disabled={isLoading || isPlaying}
       onPress={playAudio}
-      style={{
-        width: Math.max(touchSize ?? 44, 44),
-        height: Math.max(touchSize ?? 44, 44),
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
+      style={[
+        { opacity: isLoading || isPlaying ? 0.6 : 1 },
+        [
+          { opacity: isLoading || isPlaying ? 0.6 : 1 },
+          {
+            width: Math.max(touchSize ?? 44, 44),
+            height: Math.max(touchSize ?? 44, 44),
+            alignItems: 'center',
+            justifyContent: 'center',
+          },
+        ],
+      ]}
     >
       {audioStatus === 'Idle' && (
         <IonIcon name="play" size={iconSize} color="primary" style={{ marginLeft: 2 }} />
       )}
       {audioStatus === 'Loading' && (
-        <Box width={20} height={20} center>
+        <Box className="overflow-hidden border-continuous w-[20px] h-[20px] items-center justify-center">
           <ActivityIndicator />
         </Box>
       )}

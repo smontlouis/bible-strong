@@ -1,13 +1,11 @@
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
-
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
 import type { HighlightType } from '~redux/modules/user'
 import { wp } from '~helpers/utils'
 import { COLOR_CIRCLE_MIN_WIDTH } from '~helpers/constants'
-
 export interface ColorItem {
   key: string
   hex: string
@@ -55,7 +53,7 @@ const ColorCircleGrid = ({
 
   if (layout === 'grid') {
     return (
-      <HStack gap={8} wrap overflow="visible" justifyContent="flex-end">
+      <HStack className="border-continuous overflow-visible gap-[8px] flex-wrap justify-end">
         {colors.map((color, index) => (
           <HighlightTypeIndicator
             key={color.key}
@@ -98,7 +96,11 @@ const ColorCircleGrid = ({
       }}
     >
       {colors.map((color, index) => (
-        <Box key={color.key} width={itemWidth} height={itemHeight} center>
+        <Box
+          className="overflow-hidden border-continuous items-center justify-center"
+          key={color.key}
+          style={{ width: itemWidth, height: itemHeight }}
+        >
           <HighlightTypeIndicator
             accessibilityLabel={color.name || t('accessibility.colorOption', { index: index + 1 })}
             color={color.hex}
@@ -111,7 +113,10 @@ const ColorCircleGrid = ({
         </Box>
       ))}
       {showAddButton && onAddPress && (
-        <Box width={itemWidth} height={itemHeight} center>
+        <Box
+          className="overflow-hidden border-continuous items-center justify-center"
+          style={{ width: itemWidth, height: itemHeight }}
+        >
           <TouchableOpacity
             accessibilityLabel={t('Ajouter une couleur')}
             accessibilityRole="button"

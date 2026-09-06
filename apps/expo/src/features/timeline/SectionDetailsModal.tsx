@@ -1,5 +1,6 @@
+import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
-
 import { Sheet, type SheetRef, SheetScrollView } from '~common/sheet'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
@@ -11,7 +12,6 @@ import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { wp } from '~helpers/utils'
 import { ShallowTimelineSection } from './types'
-
 interface Props extends ShallowTimelineSection {
   modalRef: React.RefObject<SheetRef | null>
 }
@@ -34,30 +34,52 @@ const SectionDetailsModal = ({
   endYear,
   interval,
 }: Props) => {
+  const stylingTheme = useStylingTheme()
+
   const lang = useLanguage()
   const { t } = useTranslation()
 
   return (
     <Sheet ref={modalRef} snapPoints={[1]}>
       <SheetScrollView>
-        <Box flex center px={50} py={60}>
-          <Text title fontSize={20}>
+        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center px-[50px] py-[60px]">
+          <Text
+            className="text-[20px]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {getLegacyLocalizedField(lang, { fr: sectionTitle, en: sectionTitleEn })}
           </Text>
 
-          <Text py={30} fontSize={35} title textAlign="center">
+          <Text
+            className="py-[30px] text-[35px] text-center"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {getLegacyLocalizedField(lang, { fr: title, en: titleEn }).toUpperCase()}
           </Text>
 
-          <Box>
-            <Box height={2} bg="default" />
+          <Box className="overflow-hidden border-continuous">
+            <Box className="overflow-hidden border-continuous h-[2px] bg-default" />
 
-            <Text py={3} textAlign="center" title>
+            <Text
+              className="py-[3px] text-center"
+              style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+            >
               {getLegacyLocalizedField(lang, { fr: subTitle, en: subTitleEn })}
             </Text>
-            <Box height={2} bg="default" />
+            <Box className="overflow-hidden border-continuous h-[2px] bg-default" />
           </Box>
-          <Box row width={width} mt={50} lightShadow borderRadius={10}>
+          <Box
+            className="overflow-hidden border-continuous flex-row mt-[50px] rounded-[10px]"
+            style={{
+              width: width,
+              shadowColor: 'rgb(89,131,240)',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 7,
+              elevation: 1,
+              overflow: 'visible',
+            }}
+          >
             <Image
               style={{ width, height: width, borderRadius: 10 }}
               source={{
@@ -65,11 +87,22 @@ const SectionDetailsModal = ({
               }}
             />
           </Box>
-          <Box lightShadow bg={color} width={50} height={10} borderRadius={10} my={50} />
+          <Box
+            className="overflow-hidden border-continuous w-[50px] h-[10px] rounded-[10px] my-[50px]"
+            style={{
+              backgroundColor: resolveThemeColor(stylingTheme, color),
+              shadowColor: 'rgb(89,131,240)',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 7,
+              elevation: 1,
+              overflow: 'visible',
+            }}
+          />
           <Paragraph>
             {getLegacyLocalizedField(lang, { fr: description, en: descriptionEn })}
           </Paragraph>
-          <Paragraph scale={-2} mt={80} textAlign="center">
+          <Paragraph className="mt-[80px] text-center" scale={-2}>
             {`${t('Vous souhaitez aller plus loin ?')}\n`}
             <InlineLink
               scale={-2}

@@ -1,7 +1,8 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, View } from 'react-native'
 import { Easing, FadeInDown, FadeInUp } from 'react-native-reanimated'
-
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OfflineSetupFolderId, OfflineSetupFolderOptionIds } from '../offlineSetupPresets'
@@ -14,7 +15,6 @@ import {
 import type { OfflineSetupHeroTransition } from '../offlineSetupScene'
 import OfflineResourceFolder from './OfflineResourceFolder'
 import OfflineSetupMergingFolder from './OfflineSetupMergingFolder'
-
 type OfflineSetupOverviewProps = {
   bottomInset: number
   contentWidth: number
@@ -112,11 +112,13 @@ const OfflineSetupOverview = ({
   returningFolder,
   safeAreaTop,
 }: OfflineSetupOverviewProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const returning = hero?.direction === 'closing' || Boolean(returningFolder)
 
   return (
-    <Box flex>
+    <Box className="overflow-hidden border-continuous flex-[1]">
       <ScrollView
         style={{ overflow: 'visible' }}
         contentContainerStyle={{
@@ -129,7 +131,10 @@ const OfflineSetupOverview = ({
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={false}
       >
-        <AnimatedBox entering={getHeaderEnteringAnimation(reduceMotion)}>
+        <AnimatedBox
+          entering={getHeaderEnteringAnimation(reduceMotion)}
+          className="overflow-hidden border-continuous"
+        >
           <AnimatedBox
             style={{
               opacity: openingFolder || downloading ? 0 : 1,
@@ -140,19 +145,26 @@ const OfflineSetupOverview = ({
                 : OFFLINE_SETUP_MOTION.overview.exitDuration,
               transitionTimingFunction: 'ease-out',
             }}
+            className="overflow-hidden border-continuous"
           >
-            <Text title fontSize={40} lineHeight={42}>
+            <Text
+              className="text-[40px] leading-[42px]"
+              style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+            >
               {t('offlineSetup.title')}
             </Text>
-            <Text color="tertiary" fontSize={15} lineHeight={21} mt={10} mb={28}>
+            <Text className="text-tertiary text-[15px] leading-[21px] mt-[10px] mb-[28px]">
               {t('offlineSetup.subtitle')}
             </Text>
           </AnimatedBox>
         </AnimatedBox>
 
-        <VStack gap={20} overflow="visible">
+        <VStack className="border-continuous overflow-visible gap-[20px]">
           {[0, 2].map(startIndex => (
-            <HStack key={startIndex} gap={20} px={10} overflow="visible">
+            <HStack
+              className="border-continuous overflow-visible gap-[20px] px-[10px]"
+              key={startIndex}
+            >
               {OFFLINE_SETUP_FOLDER_PRESENTATIONS.slice(startIndex, startIndex + 2).map(
                 (folder, index) => {
                   const count = folderOptionIds[folder.id].length
@@ -181,7 +193,11 @@ const OfflineSetupOverview = ({
                     returning,
                   })
                   return (
-                    <AnimatedBox key={folder.id} overflow="visible" entering={enteringAnimation}>
+                    <AnimatedBox
+                      className="border-continuous overflow-visible"
+                      key={folder.id}
+                      entering={enteringAnimation}
+                    >
                       <OfflineSetupMergingFolder
                         active={downloading}
                         index={startIndex + index}
@@ -196,6 +212,7 @@ const OfflineSetupOverview = ({
                             transitionDuration,
                             transitionTimingFunction: 'ease-out',
                           }}
+                          className="overflow-hidden border-continuous"
                         >
                           <View ref={node => registerFolder(folder.id, node)} collapsable={false}>
                             <OfflineResourceFolder

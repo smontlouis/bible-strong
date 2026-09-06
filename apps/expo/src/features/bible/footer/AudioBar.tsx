@@ -2,7 +2,6 @@ import React from 'react'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { secondsToMinutes } from '~helpers/secondsToMinutes'
-
 type AudioBarProps = {
   position?: number
   duration?: number
@@ -11,22 +10,17 @@ type AudioBarProps = {
 const AudioBar = ({ position, duration }: AudioBarProps) => {
   const progress = position && duration ? (position * 100) / duration : 0
   return (
-    <Box position="relative">
-      <Box height={4} position="relative" backgroundColor="rgba(0,0,0,0.2)" borderRadius={5}>
+    <Box className="overflow-hidden border-continuous relative">
+      <Box className="overflow-hidden border-continuous h-[4px] relative bg-[rgba(0,0,0,0.2)] rounded-[5px]">
         <Box
-          width={`${progress}%`}
-          pos="absolute"
-          top={0}
-          height={4}
-          left={0}
-          bg="primary"
-          borderRadius={5}
+          className="overflow-hidden border-continuous absolute top-[0px] h-[4px] left-[0px] bg-primary rounded-[5px]"
+          style={{ width: `${progress}%` }}
         />
       </Box>
-      <Box row marginTop={3}>
-        <Text fontSize={10}>{position ? secondsToMinutes(position) : '--:--'}</Text>
-        <Box flex />
-        <Text fontSize={10}>{duration ? secondsToMinutes(duration) : '--:--'}</Text>
+      <Box className="overflow-hidden border-continuous flex-row mt-[3px]">
+        <Text className="text-[10px]">{position ? secondsToMinutes(position) : '--:--'}</Text>
+        <Box className="overflow-hidden border-continuous flex-[1]" />
+        <Text className="text-[10px]">{duration ? secondsToMinutes(duration) : '--:--'}</Text>
       </Box>
     </Box>
   )

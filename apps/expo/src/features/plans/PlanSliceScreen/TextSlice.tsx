@@ -1,3 +1,5 @@
+import { twMerge } from '~common/ui/classNames'
+
 import React from 'react'
 
 import Box from '~common/ui/Box'
@@ -16,22 +18,22 @@ const TextSlice = ({ description, subType, planLanguage }: Props) => {
     : description.replace(/^\n/, '')
   return (
     <Box
-      paddingHorizontal={20}
       {...(isDevotional && {
         center: true,
         backgroundColor: 'lightGrey',
         paddingVertical: 20,
         marginBottom: 40,
       })}
+      className="overflow-hidden border-continuous px-[20px]"
     >
       {isDevotional && (
         <FeatherIcon color="primary" name="minus" style={{ marginBottom: 20 }} size={30} />
       )}
       <ReferenceParagraph
         scaleLineHeight={1}
-        color={isDevotional ? 'primary' : 'default'}
-        textAlign={isDevotional ? 'center' : 'left'}
         planLanguage={planLanguage}
+        style={{ textAlign: isDevotional ? 'center' : 'left' }}
+        className={twMerge(isDevotional ? 'text-primary' : 'text-default')}
       >
         {content}
       </ReferenceParagraph>

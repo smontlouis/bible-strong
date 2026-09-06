@@ -3,7 +3,6 @@ import React from 'react'
 import { useWindowDimensions } from 'react-native'
 import { shallowEqual, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
@@ -19,7 +18,6 @@ import { localQueryOptions } from '~helpers/queryOptions'
 import { useSheet } from '~helpers/useSheet'
 import type { StrongSelection } from '~helpers/strongSelection'
 import StrongSelectionSheet from '../StrongSelectionSheet'
-
 interface CompareCardProps {
   selectedVerses: VerseIds
   onChangeVerse: (verse: string) => void
@@ -71,19 +69,22 @@ const CompareCard = ({
     return (
       <Empty
         iconElement={
-          <Box size={64} borderRadius={32} bg="lightGrey" center>
+          <Box
+            className="overflow-hidden border-continuous rounded-[32px] bg-light-grey items-center justify-center"
+            style={{ width: 64, height: 64 }}
+          >
             <FeatherIcon name="columns" size={28} color="primary" />
           </Box>
         }
         message={t('Aucune version à comparer...')}
       >
         {onChooseVersions && (
-          <Box mt={20} minWidth={260}>
+          <Box className="overflow-hidden border-continuous mt-[20px] min-w-[260px]">
             <Button
               onPress={onChooseVersions}
               testID="compare-empty-choose-versions"
               rightIcon={
-                <Box ml={10}>
+                <Box className="overflow-hidden border-continuous ml-[10px]">
                   <FeatherIcon name="arrow-right" size={18} color="white" />
                 </Box>
               }
@@ -98,7 +99,7 @@ const CompareCard = ({
 
   return (
     <>
-      <Box>
+      <Box className="overflow-hidden border-continuous">
         {filteredVersions.map(([versionId, obj], position) => (
           <BibleCompareVerseItem
             key={`${versionId}-${Object.keys(selectedVerses).join('-')}`}
@@ -119,7 +120,10 @@ const CompareCard = ({
             versesInCurrentChapter={prevNextItems.versesInCurrentChapter}
           />
         )}
-        <Box height={viewportHeight * 0.55} />
+        <Box
+          className="overflow-hidden border-continuous"
+          style={{ height: viewportHeight * 0.55 }}
+        />
       </Box>
       <StrongSelectionSheet
         sheetRef={strongSelectionSheet.getRef()}

@@ -1,8 +1,6 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-
 import { Sheet, type SheetRef } from '../sheet'
-
 const mockNativeDismiss = jest.fn(() => Promise.resolve())
 const mockNativePresent = jest.fn(() => Promise.resolve())
 let mockNativeSheetProps: Record<string, (...args: never[]) => void> = {}
@@ -16,7 +14,7 @@ jest.mock('react-native', () => ({
   TextInput: 'TextInput',
   useWindowDimensions: () => ({ width: 390, height: 844 }),
 }))
-jest.mock('@emotion/react', () => ({
+jest.mock('~themes/ThemeProvider', () => ({
   useTheme: () => ({ colors: { reverse: '#fff', default: '#000' } }),
 }))
 jest.mock('react-native-safe-area-context', () => ({

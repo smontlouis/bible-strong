@@ -4,7 +4,6 @@ import { atom } from 'jotai/vanilla'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
@@ -33,7 +32,6 @@ import {
   groupCommentarySectionsForVerse,
 } from './commentaryResourceNavigation'
 import { parseCommentaryResourceParams } from './commentaryResourceParams'
-
 const formatRange = (start: number, end: number, introductionLabel: string) => {
   if (start === 0 && end === 0) return introductionLabel
   return start === end ? `${start}` : `${start}–${end}`
@@ -56,23 +54,27 @@ const CommentarySectionCard = ({
   onPress,
 }: CommentarySectionCardProps) => (
   <TouchableBox
-    bg="reverse"
-    rounded
-    lightShadow
-    px={17}
-    py={14}
+    className="overflow-hidden border-continuous bg-reverse rounded-[20px] px-[17px] py-[14px]"
     activeOpacity={0.62}
     onPress={onPress}
     accessibilityRole="button"
+    style={{
+      shadowColor: 'rgb(89,131,240)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 7,
+      elevation: 1,
+      overflow: 'visible',
+    }}
   >
-    <Box row alignItems="flex-start">
-      <Box px={10} py={5} borderRadius={12} bg="lightPrimary">
-        <Text color="primary" bold fontSize={12}>
+    <Box className="overflow-hidden border-continuous flex-row items-start">
+      <Box className="overflow-hidden border-continuous px-[10px] py-[5px] rounded-[12px] bg-light-primary">
+        <Text className="text-primary font-bold text-[12px]">
           {formatRange(section.rangeStartVerse, section.rangeEndVerse, introductionLabel)}
         </Text>
       </Box>
-      <Box ml={13} flex>
-        <Text color="grey" fontSize={14} lineHeight={20} numberOfLines={2}>
+      <Box className="overflow-hidden border-continuous ml-[13px] flex-[1]">
+        <Text className="text-grey text-[14px] leading-[20px]" numberOfLines={2}>
           {section.preview}
         </Text>
       </Box>
@@ -212,13 +214,13 @@ const CommentaryChapterScreen = () => {
 
   return (
     <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
-      <Box flex bg="lightGrey">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
         <Header
           background
           hasBackButton={IS_FORM_SHEET ? canGoBackInStack : true}
           title={entry.author}
           rightComponent={
-            <Box mr={4}>
+            <Box className="overflow-hidden border-continuous mr-[4px]">
               <CommentaryResourceHeaderActions
                 entry={entry}
                 projectionId={projection.projectionId}
@@ -233,15 +235,10 @@ const CommentaryChapterScreen = () => {
         <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 40 }}>
           <CommentaryRoomIntro entry={entry} language={projection.language} />
 
-          <Box row alignItems="center" justifyContent="space-between">
-            <Box row alignItems="center" gap={7}>
+          <Box className="overflow-hidden border-continuous flex-row items-center justify-between">
+            <Box className="overflow-hidden border-continuous flex-row items-center gap-[7px]">
               <TouchableBox
-                bg="lightGrey"
-                borderRadius={20}
-                height={32}
-                px={12}
-                row
-                alignItems="center"
+                className="overflow-hidden border-continuous bg-light-grey rounded-[20px] h-[32px] px-[12px] flex-row items-center"
                 disabled={focusVerse !== undefined}
                 onPress={
                   focusVerse === undefined
@@ -257,8 +254,12 @@ const CommentaryChapterScreen = () => {
                 }
                 accessibilityRole="button"
                 accessibilityLabel={t('commentaries.resource.chooseChapter')}
+                style={[
+                  { opacity: focusVerse !== undefined ? 0.6 : 1 },
+                  [{ opacity: focusVerse !== undefined ? 0.6 : 1 }],
+                ]}
               >
-                <Text bold fontSize={14}>
+                <Text className="font-bold text-[14px]">
                   {bookLabel} {chapter}
                   {focusVerse === undefined ? '' : `:${focusVerse}`}
                 </Text>
@@ -273,21 +274,19 @@ const CommentaryChapterScreen = () => {
               </TouchableBox>
               {focusVerse !== undefined ? (
                 <TouchableBox
-                  size={28}
-                  borderRadius={16}
-                  bg="lightGrey"
-                  center
+                  className="overflow-hidden border-continuous rounded-[16px] bg-light-grey items-center justify-center"
                   activeOpacity={0.62}
                   onPress={() => router.setParams({ focusVerse: undefined })}
                   accessibilityRole="button"
                   accessibilityLabel={t('commentaries.resource.exitVerseFilter')}
+                  style={{ width: 28, height: 28 }}
                 >
                   <FeatherIcon name="x" size={14} />
                 </TouchableBox>
               ) : null}
             </Box>
             {query.data ? (
-              <Text color="grey" fontSize={13}>
+              <Text className="text-grey text-[13px]">
                 {t('commentaries.resource.sectionCount', {
                   count: visibleSections.length,
                 })}
@@ -296,7 +295,7 @@ const CommentaryChapterScreen = () => {
           </Box>
 
           {query.isPending ? (
-            <Box minHeight={180} center>
+            <Box className="overflow-hidden border-continuous min-h-[180px] items-center justify-center">
               <Loading />
             </Box>
           ) : query.isError ? (
@@ -311,7 +310,7 @@ const CommentaryChapterScreen = () => {
               message={t('commentaries.resource.emptyChapter')}
             />
           ) : (
-            <Box mt={16} gap={12}>
+            <Box className="overflow-hidden border-continuous mt-[16px] gap-[12px]">
               {groupedSections.directSections.map(section => (
                 <CommentarySectionCard
                   key={section.id}
@@ -324,11 +323,7 @@ const CommentaryChapterScreen = () => {
               {focusVerse !== undefined && groupedSections.chapterContextSections.length > 0 ? (
                 <>
                   <TouchableBox
-                    bg="reverse"
-                    rounded
-                    lightShadow
-                    px={17}
-                    py={14}
+                    className="overflow-hidden border-continuous bg-reverse rounded-[20px] px-[17px] py-[14px]"
                     activeOpacity={0.62}
                     onPress={() =>
                       setExpandedChapterContextKey(currentKey =>
@@ -337,13 +332,21 @@ const CommentaryChapterScreen = () => {
                     }
                     accessibilityRole="button"
                     accessibilityState={{ expanded: chapterContextExpanded }}
+                    style={{
+                      shadowColor: 'rgb(89,131,240)',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 7,
+                      elevation: 1,
+                      overflow: 'visible',
+                    }}
                   >
-                    <Box row alignItems="center" justifyContent="space-between">
-                      <Box flex>
-                        <Text bold fontSize={14}>
+                    <Box className="overflow-hidden border-continuous flex-row items-center justify-between">
+                      <Box className="overflow-hidden border-continuous flex-[1]">
+                        <Text className="font-bold text-[14px]">
                           {t('commentaries.resource.chapterContext')}
                         </Text>
-                        <Text mt={3} color="grey" fontSize={12}>
+                        <Text className="mt-[3px] text-grey text-[12px]">
                           {t('commentaries.resource.sectionCount', {
                             count: groupedSections.chapterContextSections.length,
                           })}

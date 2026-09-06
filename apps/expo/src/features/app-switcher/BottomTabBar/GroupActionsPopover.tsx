@@ -8,7 +8,6 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { useDeleteGroup } from '../../../state/tabGroups'
 import { TabGroup, closeAllTabsAtom, tabGroupsAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherContext'
-
 interface GroupActionsPopoverProps {
   triggerStyle?: StyleProp<ViewStyle>
   onOpen?: () => void
@@ -87,6 +86,7 @@ const GroupActionsPopover = memo(
     return (
       <>
         <TouchableBox
+          className="overflow-hidden border-continuous"
           style={triggerStyle}
           onPress={() => {
             onOpen?.()
@@ -99,7 +99,7 @@ const GroupActionsPopover = memo(
         </TouchableBox>
         <Sheet ref={sheetRef} detached>
           <SheetView>
-            <Box minWidth={200}>
+            <Box className="overflow-hidden border-continuous min-w-[200px]">
               <ActionSheetItem
                 icon="x-circle"
                 label={t('tabs.closeAll')}
@@ -116,7 +116,7 @@ const GroupActionsPopover = memo(
                   />
                 </>
               )}
-              <Box height={1} bg="border" />
+              <Box className="overflow-hidden border-continuous h-[1px] bg-border" />
               <ActionSheetItem icon="plus" label={t('tabs.newGroup')} onPress={handleCreateGroup} />
               <ActionSheetItem
                 icon="layers"

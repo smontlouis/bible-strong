@@ -1,10 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
-
 import { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-
 type Props = {
   activeFilterCount: number
   activeFilterIcon?: React.ComponentProps<typeof FeatherIcon>['name']
@@ -26,25 +24,28 @@ const FilterHeaderButton = ({ activeFilterCount, activeFilterIcon, onPress }: Pr
       accessibilityRole="button"
       onPress={onPress}
     >
-      <HStack alignItems="center" justifyContent="flex-end" px={15} py={15} minHeight={48}>
+      <HStack className="overflow-hidden border-continuous items-center justify-end px-[15px] py-[15px] min-h-[48px]">
         {activeFilterCount ? (
-          <HStack bg="primary" minWidth={50} height={22} borderRadius={13} alignItems="stretch">
-            <HStack minWidth={28} pl={8} pr={6} center>
+          <HStack className="overflow-hidden border-continuous bg-primary min-w-[50px] h-[22px] rounded-[13px] items-stretch">
+            <HStack className="overflow-hidden border-continuous min-w-[28px] pl-[8px] pr-[6px] items-center justify-center">
               {activeFilterCount === 1 && activeFilterIcon ? (
                 <FeatherIcon name={activeFilterIcon} size={14} color="reverse" />
               ) : (
-                <Text color="reverse" fontSize={14} bold style={{ fontVariant: ['tabular-nums'] }}>
+                <Text
+                  className="text-reverse text-[14px] font-bold"
+                  style={{ fontVariant: ['tabular-nums'] }}
+                >
                   {activeFilterCount}
                 </Text>
               )}
             </HStack>
-            <HStack pl={4} pr={6} borderLeftWidth={2} borderLeftColor="reverse" center>
+            <HStack className="overflow-hidden border-continuous pl-[4px] pr-[6px] border-l-[2px] items-center justify-center">
               <FeatherIcon name="chevron-down" size={13} color="reverse" />
             </HStack>
           </HStack>
         ) : (
           <>
-            <Text fontSize={14} mr={5} numberOfLines={1}>
+            <Text className="text-[14px] mr-[5px]" numberOfLines={1}>
               {t('Filtrer')}
             </Text>
             <FeatherIcon name="chevron-down" size={15} />

@@ -1,7 +1,6 @@
 import React from 'react'
 import { MenuView } from '~common/ui/MenuView'
 import { useDispatch, useSelector } from 'react-redux'
-
 import { useTranslation } from 'react-i18next'
 import { Share } from 'react-native'
 import Header from '~common/Header'
@@ -31,7 +30,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useBookAndVersionSelector } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
-
 const extractTitle = (slice: EntitySlice) => {
   switch (slice.type) {
     case 'Verse':
@@ -240,7 +238,7 @@ const PlanSliceScreen = ({
               }
             }}
           >
-            <Box row center height={60} width={60}>
+            <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
               <FeatherIcon name="more-vertical" size={18} />
             </Box>
           </MenuView>
@@ -248,17 +246,9 @@ const PlanSliceScreen = ({
       />
       <ScrollView>
         {isRead && (
-          <Box
-            opacity={0.6}
-            backgroundColor="success"
-            borderRadius={30}
-            padding={20}
-            marginHorizontal={20}
-            center
-            row
-          >
+          <Box className="overflow-hidden border-continuous opacity-[0.6] bg-success rounded-[30px] p-[20px] mx-[20px] items-center justify-center flex-row">
             <FeatherIcon name="check" size={20} color="reverse" />
-            <Paragraph marginLeft={5} color="reverse" scale={-2} fontFamily="text" bold>
+            <Paragraph className="ml-[5px] text-reverse font-bold" scale={-2} fontFamily="text">
               {t('Vous avez déjà terminé cette lecture.')}
             </Paragraph>
           </Box>
@@ -269,7 +259,7 @@ const PlanSliceScreen = ({
           )}
         </PauseText>
         {title && (
-          <Box paddingHorizontal={20} marginBottom={50}>
+          <Box className="overflow-hidden border-continuous px-[20px] mb-[50px]">
             <ReferenceParagraph scale={3} planLanguage={planLanguage}>
               {title}
             </ReferenceParagraph>
@@ -278,7 +268,7 @@ const PlanSliceScreen = ({
         {slices?.map(slice => (
           <Slice key={slice.id} {...slice} planLanguage={planLanguage} />
         ))}
-        <Box height={80} center marginTop={30}>
+        <Box className="overflow-hidden border-continuous h-[80px] items-center justify-center mt-[30px]">
           <ReadButton isRead={isRead} readingSliceId={id!} planId={planId!} onRead={onRead} />
         </Box>
       </ScrollView>

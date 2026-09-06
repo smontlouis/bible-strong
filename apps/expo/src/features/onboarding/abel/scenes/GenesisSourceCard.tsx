@@ -1,10 +1,10 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import type { TFunction } from 'i18next'
 import { type SharedValue, useAnimatedStyle } from 'react-native-reanimated'
-
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../OnboardingStage'
-
 type SourceCardProps = {
   label: string
   markerColor: string
@@ -26,42 +26,58 @@ export const SourceCard = ({
   titleItalic = false,
   variant = 'large',
 }: SourceCardProps) => {
+  const stylingTheme = useStylingTheme()
+
   const s = metrics.s
   const shakeStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${shakeRotation?.get() ?? 0}deg` }],
   }))
 
   return (
-    <AnimatedBox flex overflow="visible" style={shakeStyle}>
+    <AnimatedBox className="border-continuous overflow-visible flex-[1]" style={shakeStyle}>
       <VStack
-        flex
-        bg="reverse"
-        borderRadius={s(16)}
-        px={s(11)}
-        py={s(10)}
-        gap={s(5)}
-        style={{ boxShadow: '0 4px 12px rgba(59,92,204,0.13)' }}
+        className="overflow-hidden border-continuous flex-[1] bg-reverse"
+        style={[
+          { paddingHorizontal: s(11), paddingVertical: s(10), borderRadius: s(16), gap: s(5) },
+          { boxShadow: '0 4px 12px rgba(59,92,204,0.13)' },
+        ]}
       >
-        <HStack justifyContent="space-between" alignItems="center">
-          <Text color="primary" bold fontSize={s(8)} style={{ letterSpacing: s(0.6) }}>
+        <HStack className="overflow-hidden border-continuous justify-between items-center">
+          <Text
+            className="text-primary font-bold"
+            style={[{ fontSize: s(8) || 16 }, { letterSpacing: s(0.6) }]}
+          >
             {label}
           </Text>
-          <Box size={s(7)} borderRadius={s(3.5)} style={{ backgroundColor: markerColor }} />
+          <Box
+            className="overflow-hidden border-continuous"
+            style={[
+              { borderRadius: s(3.5), ...(s(7) ? { width: s(7), height: s(7) } : {}) },
+              { backgroundColor: markerColor },
+            ]}
+          />
         </HStack>
         <Text
-          title
-          fontSize={variant === 'small' ? s(12) : s(16)}
-          lineHeight={variant === 'small' ? s(18) : s(21)}
-          bold={!titleItalic}
-          style={{
-            fontFamily: 'Literata Book',
-            fontStyle: titleItalic ? 'italic' : 'normal',
-          }}
+          style={[
+            {
+              fontSize: (variant === 'small' ? s(12) : s(16)) || 16,
+              lineHeight: variant === 'small' ? s(18) : s(21),
+              fontWeight: !titleItalic ? 'bold' : undefined,
+              fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+            },
+            {
+              fontFamily: 'Literata Book',
+              fontStyle: titleItalic ? 'italic' : 'normal',
+            },
+          ]}
         >
           {title}
         </Text>
         {meta ? (
-          <Text color="tertiary" bold fontSize={s(9.5)} lineHeight={s(12)}>
+          <Text
+            className="text-tertiary font-bold"
+            style={{ fontSize: s(9.5) || 16, lineHeight: s(12) }}
+          >
             {meta}
           </Text>
         ) : null}

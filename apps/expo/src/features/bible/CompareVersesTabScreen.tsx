@@ -1,13 +1,10 @@
 import React, { useEffect } from 'react'
 import { MenuView } from '~common/ui/MenuView'
-
 import verseToReference from '~helpers/verseToReference'
-
 import Header from '~common/Header'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import ScrollView from '~common/ui/ScrollView'
-
 import { produce } from 'immer'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -20,7 +17,6 @@ import CompareVersionSelectorSheet from './CompareVersionSelectorSheet'
 import type { SheetRef } from '~common/sheet'
 import CompareCard from './resources/CompareCard'
 import CompareStrongModeButton from './CompareStrongModeButton'
-
 interface CompareVersesTabScreenProps {
   compareAtom: PrimitiveAtom<CompareTab>
 }
@@ -68,7 +64,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
         fontSize={16}
         title={title}
         rightComponent={
-          <Box row alignItems="center">
+          <Box className="overflow-hidden border-continuous flex-row items-center">
             <CompareStrongModeButton enabled={strongMode} onPress={toggleStrongMode} height={60} />
             <MenuView
               actions={[
@@ -103,7 +99,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
                 }
               }}
             >
-              <Box row center height={60} width={60}>
+              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
                 <FeatherIcon name="more-vertical" size={18} />
               </Box>
             </MenuView>

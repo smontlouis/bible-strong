@@ -1,7 +1,6 @@
 import { type SheetRef } from '~common/sheet'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router'
 import { produce } from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
@@ -25,7 +24,6 @@ import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { createStudyEndpoint } from '~features/studyRelations/endpoints'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
-
 type EditStudyScreenProps = {
   studyAtom?: PrimitiveAtom<StudyTab>
   // Props passed directly (when called from StudiesTabScreen)
@@ -132,8 +130,8 @@ const EditStudyScreen = ({
   if (studyId === '' || !currentStudy) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
-        <Box flex center px={20}>
-          <Text fontSize={18} color="grey" textAlign="center" mb={20}>
+        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center px-[20px]">
+          <Text className="text-[18px] text-grey text-center mb-[20px]">
             {t("Cette étude n'existe plus")}
           </Text>
           <Button onPress={onGoBack ?? (() => router.navigate('/'))}>
@@ -159,7 +157,7 @@ const EditStudyScreen = ({
         study={currentStudy}
       >
         {isReadOnly && hasTagOrRelationChips && (
-          <Box px={20} mt={-10} pb={10}>
+          <Box className="overflow-hidden border-continuous px-[20px] mt-[-10px] pb-[10px]">
             <EntityChipList
               tags={currentStudy.tags}
               relationCount={relationCount}

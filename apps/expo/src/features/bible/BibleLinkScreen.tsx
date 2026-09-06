@@ -1,10 +1,10 @@
-import { pageContentStyle } from '~common/ui/PageContent'
-import styled from '@emotion/native'
-import { useTheme } from '@emotion/react'
-import { MenuView } from '~common/ui/MenuView'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useEffect, useState } from 'react'
+import * as NativeUI from 'react-native'
 import { ActivityIndicator, Alert, Dimensions, Image, Linking, ScrollView } from 'react-native'
 import {
   KeyboardAvoidingView,
@@ -12,9 +12,15 @@ import {
   useKeyboardState,
 } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import YoutubePlayer from '~helpers/react-native-youtube-iframe'
 import { useDispatch, useSelector } from 'react-redux'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import { MenuView } from '~common/ui/MenuView'
+import { pageContentStyle } from '~common/ui/PageContent'
+import YoutubePlayer from '~helpers/react-native-youtube-iframe'
+import type { Theme as AppTheme } from '~themes'
 
+import { useTranslation } from 'react-i18next'
 import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
 import { VerseIds } from '~common/types'
@@ -30,6 +36,7 @@ import type { RelationEndpoint } from '~features/studyRelations/domain'
 import { createExternalLinkEndpointFromLink } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import { IS_FORM_SHEET } from '~helpers/constants'
 import {
   detectLinkType,
   extractVideoId,
@@ -45,20 +52,30 @@ import { RootState } from '~redux/modules/reducer'
 import { addLink, deleteLink, Link } from '~redux/modules/user'
 import { makeLinkByIdSelector, makeVerseKeysForLinkSelector } from '~redux/selectors/bible'
 import { unifiedTagsModalAtom } from '~state/app'
-import { useTranslation } from 'react-i18next'
-import { IS_FORM_SHEET } from '~helpers/constants'
 
 const FOOTER_HEIGHT = 64
 
-const StyledTextInput = styled.TextInput(({ theme }) => ({
-  color: theme.colors.default,
-  height: 48,
-  borderColor: theme.colors.border,
-  borderWidth: 2,
-  borderRadius: 10,
-  paddingHorizontal: 15,
-  fontSize: 16,
-}))
+const StyledTextInput = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.TextInput>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'text-default h-[48px] border-border border-[2px] rounded-[10px] px-[15px] text-[16px]',
+      className
+    )
+  )
+  return (
+    <NativeUI.TextInput
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.TextInput>['style']}
+    />
+  )
+}
 
 const useCurrentLink = ({ linkId }: { linkId?: string | null }) => {
   const selectLinkById = makeLinkByIdSelector()
@@ -84,6 +101,8 @@ const parseVerseKeys = (verseKeys?: string): VerseIds | undefined => {
 }
 
 const BibleLinkScreen = () => {
+  const stylingTheme = useStylingTheme()
+
   const params = useLocalSearchParams<{ linkId?: string; verseKeys?: string; version?: string }>()
   const [savedLinkId, setSavedLinkId] = useState<string | null>(null)
   const linkId = savedLinkId || params.linkId || null
@@ -241,7 +260,7 @@ const BibleLinkScreen = () => {
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box flex>
+      <Box className="overflow-hidden border-continuous flex-[1]">
         <Header
           hasBackButton={hasBackButton}
           title={t('Lien')}
@@ -291,7 +310,7 @@ const BibleLinkScreen = () => {
                   }
                 }}
               >
-                <Box row center height={54} width={54}>
+                <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
                   <FeatherIcon name="more-vertical" size={18} />
                 </Box>
               </MenuView>
@@ -310,10 +329,10 @@ const BibleLinkScreen = () => {
               },
             ]}
           >
-            <VStack gap={10} paddingHorizontal={20}>
+            <VStack className="overflow-hidden border-continuous gap-[10px] px-[20px]">
               {isEditing && (
-                <VStack py={20} gap={20}>
-                  <VStack gap={5}>
+                <VStack className="overflow-hidden border-continuous py-[20px] gap-[20px]">
+                  <VStack className="overflow-hidden border-continuous gap-[5px]">
                     <Text>{t('URL du lien')}</Text>
                     <StyledTextInput
                       placeholder={t('URL du lien')}
@@ -325,7 +344,7 @@ const BibleLinkScreen = () => {
                       keyboardType="url"
                     />
                   </VStack>
-                  <VStack gap={5}>
+                  <VStack className="overflow-hidden border-continuous gap-[5px]">
                     <Text>{t('Titre personnalisé (optionnel)')}</Text>
                     <StyledTextInput
                       placeholder={t('Titre personnalisé (optionnel)')}
@@ -338,7 +357,7 @@ const BibleLinkScreen = () => {
               )}
 
               {!isEditing && currentLink && (
-                <Box py={20}>
+                <Box className="overflow-hidden border-continuous py-[20px]">
                   <EntityChipList
                     tags={currentLink?.tags}
                     relationCount={relationCount}
@@ -346,7 +365,7 @@ const BibleLinkScreen = () => {
                   />
 
                   {isYoutubeLink && currentLink.videoId && (
-                    <Box mb={20} borderRadius={10} overflow="hidden" bg="lightGrey">
+                    <Box className="border-continuous overflow-visible mb-[20px] rounded-[10px] bg-light-grey">
                       <YoutubePlayer
                         height={playerHeight}
                         width={playerWidth}
@@ -373,34 +392,37 @@ const BibleLinkScreen = () => {
                     />
                   )}
 
-                  <HStack alignItems="center" mb={10}>
+                  <HStack className="mb-[10px] items-center">
                     {linkIcon.textIcon ? (
-                      <Text bold fontSize={16} color="default">
+                      <Text className="font-bold text-[16px] text-default">
                         {linkIcon.textIcon}
                       </Text>
                     ) : (
                       <FeatherIcon name={linkIconName} size={18} color={linkIcon.color} />
                     )}
-                    <Text marginLeft={8} color="grey" fontSize={13}>
+                    <Text className="ml-[8px] text-grey text-[13px]">
                       {currentLink.ogData?.siteName || getHostname(currentLink.url)}
                     </Text>
                   </HStack>
 
-                  <Text title fontSize={20} marginBottom={10}>
+                  <Text
+                    className="text-[20px] mb-[10px]"
+                    style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+                  >
                     {displayTitle}
                   </Text>
 
                   {currentLink.ogData?.description && (
-                    <Paragraph small marginBottom={15}>
+                    <Paragraph className="mb-[15px]" small>
                       {currentLink.ogData.description}
                     </Paragraph>
                   )}
 
                   {!isYoutubeLink && (
                     <Button reverse onPress={openInBrowser}>
-                      <HStack alignItems="center">
+                      <HStack className="items-center">
                         <FeatherIcon name="external-link" size={16} />
-                        <Text marginLeft={8}>{t('Ouvrir dans le navigateur')}</Text>
+                        <Text className="ml-[8px]">{t('Ouvrir dans le navigateur')}</Text>
                       </HStack>
                     </Button>
                   )}
@@ -411,22 +433,15 @@ const BibleLinkScreen = () => {
 
           {isEditing && (
             <KeyboardStickyView style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
-              <HStack
-                py={10}
-                px={20}
-                justifyContent="flex-end"
-                bg="reverse"
-                borderTopWidth={1}
-                borderColor="border"
-              >
+              <HStack className="border-border px-[20px] py-[10px] justify-end border-t-[1px] bg-reverse">
                 {currentLink && (
-                  <Box>
+                  <Box className="overflow-hidden border-continuous">
                     <Button reverse onPress={cancelEditing}>
                       {t('Annuler')}
                     </Button>
                   </Box>
                 )}
-                <Box>
+                <Box className="overflow-hidden border-continuous">
                   <Button disabled={submitIsDisabled} onPress={saveLink}>
                     {isSaving ? <ActivityIndicator size="small" color="white" /> : t('Sauvegarder')}
                   </Button>
@@ -436,7 +451,10 @@ const BibleLinkScreen = () => {
           )}
         </KeyboardAvoidingView>
         {!isEditing && (
-          <Box position="absolute" bottom={insets.bottom + 20} right={20}>
+          <Box
+            className="overflow-hidden border-continuous absolute right-[20px]"
+            style={{ bottom: insets.bottom + 20 }}
+          >
             <Fab
               accessibilityLabel={t('accessibility.editLink')}
               icon="edit-2"

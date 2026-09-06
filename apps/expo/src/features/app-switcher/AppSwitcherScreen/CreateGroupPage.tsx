@@ -1,4 +1,4 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import React, { memo, useRef, useState } from 'react'
 import { TextInput, useWindowDimensions, ScrollView } from 'react-native'
 import { KeyboardController } from 'react-native-keyboard-controller'
@@ -13,7 +13,6 @@ import {
 } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { useTranslation } from 'react-i18next'
-
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
@@ -21,7 +20,6 @@ import { useAppSwitcherContext } from '../AppSwitcherContext'
 import { useCreateGroup, getTabGroups } from '../../../state/tabGroups'
 import { GROUP_COLORS } from '../../../state/tabs'
 import { Image } from 'expo-image'
-
 interface CreateGroupPageProps {
   scrollX: SharedValue<number>
   groupCount: number
@@ -158,27 +156,16 @@ const CreateGroupPage = memo(
 
     return (
       <AnimatedBox
-        style={[{ width }, animatedStyle]}
-        flex={1}
-        bg="reverse"
-        borderRadius={24}
-        paddingTop={insets.top}
+        className="overflow-hidden border-continuous flex-[1] bg-reverse rounded-[24px]"
+        style={[{ paddingTop: insets.top }, [{ width }, animatedStyle]]}
       >
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="always"
           scrollEnabled={false}
         >
-          <Box
-            alignItems="center"
-            justifyContent="center"
-            position="absolute"
-            top={0}
-            right={0}
-            left={0}
-            bottom={0}
-          >
-            <Box center bg="reverse" p={20} borderRadius={24}>
+          <Box className="overflow-hidden border-continuous items-center justify-center absolute top-[0px] right-[0px] left-[0px] bottom-[0px]">
+            <Box className="overflow-hidden border-continuous items-center justify-center bg-reverse p-[20px] rounded-[24px]">
               <Image
                 source={require('~assets/images/new-group-tab.svg')}
                 style={{ width: 120, height: 120, opacity: 0.3 }}
@@ -188,39 +175,39 @@ const CreateGroupPage = memo(
             </Box>
           </Box>
           <Box
-            row
-            justifyContent="space-between"
-            alignItems="center"
-            paddingHorizontal={20}
-            py={8}
-            lightShadow
+            className="overflow-hidden border-continuous flex-row justify-between items-center px-[20px] py-[8px]"
+            style={{
+              shadowColor: 'rgb(89,131,240)',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 7,
+              elevation: 1,
+              overflow: 'visible',
+            }}
           >
             <TouchableBox
+              className="overflow-hidden border-continuous p-[8px] rounded-[24px] bg-reverse"
               accessibilityLabel={t('Annuler')}
               accessibilityRole="button"
               onPress={handleCancel}
-              padding={8}
-              borderRadius={24}
-              bg="reverse"
             >
               <FeatherIcon name="x" size={24} color="tertiary" />
             </TouchableBox>
 
             <TouchableBox
+              className="overflow-hidden border-continuous p-[8px] rounded-[24px] bg-primary"
               accessibilityLabel={t('accessibility.createGroup')}
               accessibilityRole="button"
               accessibilityState={{ disabled: isDisabled }}
               onPress={handleCreate}
-              padding={8}
-              borderRadius={24}
-              bg="primary"
               disabled={isDisabled}
+              style={[{ opacity: isDisabled ? 0.6 : 1 }, [{ opacity: isDisabled ? 0.6 : 1 }]]}
             >
               <FeatherIcon name="check" size={24} color={isDisabled ? 'border' : 'reverse'} />
             </TouchableBox>
           </Box>
 
-          <Box flex={1} paddingHorizontal={20} gap={12}>
+          <Box className="overflow-hidden border-continuous flex-[1] px-[20px] gap-[12px]">
             <TextInput
               ref={inputRef}
               value={name}
@@ -237,24 +224,21 @@ const CreateGroupPage = memo(
                 color: theme.colors.default,
               }}
             />
-            <HStack gap={8} overflow="visible">
+            <HStack className="gap-[8px] overflow-visible">
               {GROUP_COLORS.map((color, index) => (
                 <TouchableBox
+                  className="overflow-hidden border-continuous w-[32px] h-[32px] rounded-[16px] items-center justify-center"
                   key={color}
                   accessibilityLabel={t('accessibility.colorOption', { index: index + 1 })}
                   accessibilityRole="radio"
                   accessibilityState={{ checked: selectedColor === color }}
                   onPress={() => setSelectedColor(color)}
-                  width={32}
-                  height={32}
-                  borderRadius={16}
-                  center
                   style={{
                     backgroundColor: color,
                   }}
                 >
                   {selectedColor === color && (
-                    <Box width={12} height={12} borderRadius={6} bg="black" opacity={0.5} />
+                    <Box className="overflow-hidden border-continuous w-[12px] h-[12px] rounded-[6px] bg-[black] opacity-[0.5]" />
                   )}
                 </TouchableBox>
               ))}

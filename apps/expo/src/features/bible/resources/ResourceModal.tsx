@@ -1,4 +1,5 @@
-import { useTheme } from '@emotion/react'
+import { twMerge } from '~common/ui/classNames'
+import { useTheme } from '~themes/ThemeProvider'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -39,7 +40,6 @@ import ResourcesModalFooter from './ResourcesModalFooter'
 import { StrongBibleSourceButton, StrongBibleSourceSheet } from './StrongBibleSourceSelector'
 import { getLanguage } from '~i18n'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-
 type ResourceVerse = {
   Livre: number
   Chapitre: number
@@ -248,7 +248,7 @@ const ResourcesModal = ({
     const menuActions = getMenuActionsByResourceType()
 
     return (
-      <Box row alignItems="center">
+      <Box className="overflow-hidden border-continuous flex-row items-center">
         {resourceType === 'compare' ? (
           <CompareStrongModeButton
             enabled={compareStrongMode}
@@ -267,7 +267,7 @@ const ResourcesModal = ({
             actions={menuActions}
             onPressAction={({ nativeEvent }) => handleMenuAction(nativeEvent.event)}
           >
-            <Box row center height={54} width={44}>
+            <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[44px]">
               <FeatherIcon name="more-vertical" size={18} />
             </Box>
           </MenuView>
@@ -278,7 +278,7 @@ const ResourcesModal = ({
 
   const footerRenderer = (props: SheetFooterProps) => {
     return (
-      <SheetFooter px={0} py={0} {...props}>
+      <SheetFooter {...props} className={twMerge('px-[0px] py-[0px]', props.className)}>
         <ResourcesModalFooter
           resourceType={resourceType}
           onChangeResourceType={onChangeResourceType}

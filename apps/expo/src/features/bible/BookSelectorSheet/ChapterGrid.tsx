@@ -1,3 +1,5 @@
+import { twMerge } from '~common/ui/classNames'
+
 import { SheetScrollView } from '~common/sheet'
 import { useTranslation } from 'react-i18next'
 import { DeviceEventEmitter, useWindowDimensions } from 'react-native'
@@ -6,7 +8,6 @@ import { Book } from '~assets/bible_versions/books-desc'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { BOOK_SELECTION_EVENT } from './constants'
-
 interface ChapterGridProps {
   book: Book
   chapters?: number[]
@@ -59,23 +60,28 @@ const ChapterGrid = ({ book, chapters: availableChapters, selectedChapter }: Cha
 
         return (
           <TouchableBox
+            className={twMerge(
+              'overflow-hidden border-continuous',
+              twMerge(
+                isSelected ? 'bg-light-grey' : 'bg-opacity5',
+                'overflow-hidden border-continuous items-center rounded-[6px] justify-center'
+              )
+            )}
             key={chapter}
             testID={`book-selector-chapter-${book.Numero}-${chapter}`}
             accessibilityLabel={`${t('Chapitre')} ${chapter}`}
             accessibilityRole="button"
             accessibilityState={{ selected: isSelected }}
             activeOpacity={0.7}
-            alignItems="center"
-            backgroundColor={isSelected ? 'lightGrey' : 'opacity5'}
-            borderRadius={6}
-            height={ITEM_SIZE}
-            justifyContent="center"
             onLongPress={() => emitSelection('longPress', chapter)}
             onPress={() => emitSelection('select', chapter)}
-            width={ITEM_SIZE}
+            style={{ width: ITEM_SIZE, height: ITEM_SIZE }}
           >
-            <Box absoluteFill alignItems="center" justifyContent="center">
-              <Text bold={isSelected} color={isSelected ? 'primary' : 'default'} textAlign="center">
+            <Box className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px] items-center justify-center">
+              <Text
+                className={twMerge(isSelected ? 'text-primary' : 'text-default', 'text-center')}
+                style={{ fontWeight: isSelected ? 'bold' : undefined }}
+              >
                 {chapter}
               </Text>
             </Box>

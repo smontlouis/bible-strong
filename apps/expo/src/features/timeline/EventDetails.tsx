@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
 import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
-
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import { calculateLabel } from './constants'
@@ -18,7 +17,6 @@ import {
   getOfflineResourceQuerySignal,
   useOfflineResourceRegistry,
 } from '~features/resources/useOfflineResourceRegistry'
-
 export type EventDetailsProps = Pick<
   TimelineEventProps,
   'slug' | 'image' | 'title' | 'titleEn' | 'start' | 'end'
@@ -26,14 +24,14 @@ export type EventDetailsProps = Pick<
 
 const Description = ({ description, article }: Partial<TimelineEventDetail>) => {
   return (
-    <Box px={20}>
-      <Paragraph fontFamily="title" mb={10}>
+    <Box className="overflow-hidden border-continuous px-[20px]">
+      <Paragraph className="mb-[10px]" fontFamily="title">
         Description
       </Paragraph>
-      <Paragraph fontWeight="bold" scale={-1}>
+      <Paragraph className="font-bold" scale={-1}>
         {description}
       </Paragraph>
-      <Paragraph marginTop={20} scale={-1}>
+      <Paragraph className="mt-[20px]" scale={-1}>
         {article}
       </Paragraph>
     </Box>
@@ -74,7 +72,7 @@ export const EventDetailsContent = ({
 
   if (eventQuery.isPending) {
     return (
-      <Box py={40} center>
+      <Box className="overflow-hidden border-continuous py-[40px] items-center justify-center">
         <Loading />
       </Box>
     )
@@ -85,9 +83,9 @@ export const EventDetailsContent = ({
   }
 
   return (
-    <Box py={10}>
+    <Box className="overflow-hidden border-continuous py-[10px]">
       {image && (
-        <Box center my={30}>
+        <Box className="overflow-hidden border-continuous items-center justify-center my-[30px]">
           <Image
             style={{ width: 150, height: 150, borderRadius: 10 }}
             source={{
@@ -96,11 +94,11 @@ export const EventDetailsContent = ({
           />
         </Box>
       )}
-      <Box mb={30} px={20}>
-        <Paragraph textAlign="center" fontFamily="title" scale={3} flex>
+      <Box className="overflow-hidden border-continuous mb-[30px] px-[20px]">
+        <Paragraph className="text-center flex-[1]" fontFamily="title" scale={3}>
           {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
         </Paragraph>
-        <Paragraph color="grey" scale={-2} textAlign="center" fontFamily="text">
+        <Paragraph className="text-grey text-center" scale={-2} fontFamily="text">
           {date}
         </Paragraph>
       </Box>

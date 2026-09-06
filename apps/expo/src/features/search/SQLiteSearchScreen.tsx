@@ -1,3 +1,5 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import PageContent, { pageContentStyle } from '~common/ui/PageContent'
 import type { ReactNode } from 'react'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
@@ -5,7 +7,6 @@ import { useTranslation } from 'react-i18next'
 import { FlatList, Keyboard, TextInput, TouchableOpacity } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from '~common/KeyboardAwareScrollView'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useTheme } from '@emotion/react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Image } from 'expo-image'
 import { useAtomValue, useSetAtom } from 'jotai/react'
@@ -97,7 +98,6 @@ import {
   getSearchAnalyticsInputKind,
 } from './searchAnalyticsModel'
 import { createSearchExperienceController } from './searchExperience'
-
 type Props = {
   searchValue: string
   setSearchValue: (value: string) => void
@@ -1149,9 +1149,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
 
       const passageFilterAction = (
         <TouchableBox
-          center
-          minHeight={40}
-          px={8}
+          className="overflow-hidden border-continuous items-center justify-center min-h-[40px] px-[8px]"
           accessibilityLabel={t('Filtrer')}
           onPress={() => passageFiltersRef.current?.present()}
         >
@@ -1180,7 +1178,14 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
               flex: 1,
               backgroundColor: theme.colors.reverse,
             }}
-            ListFooterComponent={listBottomInset ? <Box height={listBottomInset} /> : null}
+            ListFooterComponent={
+              listBottomInset ? (
+                <Box
+                  className="overflow-hidden border-continuous"
+                  style={{ height: listBottomInset }}
+                />
+              ) : null
+            }
             removeClippedSubviews
             data={soloPaginatedSection.items}
             keyExtractor={item => item.id}
@@ -1223,7 +1228,14 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             flex: 1,
             backgroundColor: theme.colors.reverse,
           }}
-          ListFooterComponent={listBottomInset ? <Box height={listBottomInset} /> : null}
+          ListFooterComponent={
+            listBottomInset ? (
+              <Box
+                className="overflow-hidden border-continuous"
+                style={{ height: listBottomInset }}
+              />
+            ) : null
+          }
           removeClippedSubviews
           data={visibleSearchSections}
           onEndReachedThreshold={0.4}
@@ -1233,8 +1245,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           keyExtractor={(section: SQLiteSearchResultSection) => section.id}
           ListEmptyComponent={
             searchModel.isLoading ? (
-              <Box px={20} py={16}>
-                <Text color="grey">{String(t('Recherche en cours...'))}</Text>
+              <Box className="overflow-hidden border-continuous px-[20px] py-[16px]">
+                <Text className="text-grey">{String(t('Recherche en cours...'))}</Text>
               </Box>
             ) : searchModel.showNoResults ? (
               browseItemType ? (
@@ -1310,7 +1322,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   }
 
   return (
-    <Box flex={1}>
+    <Box className="overflow-hidden border-continuous flex-[1]">
       <Header
         title=""
         rightComponent={
@@ -1320,8 +1332,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           />
         }
       >
-        <Box pb={5}>
-          <Box px={20}>
+        <Box className="overflow-hidden border-continuous pb-[5px]">
+          <Box className="overflow-hidden border-continuous px-[20px]">
             <SearchInput
               inputRef={searchInputRef}
               placeholder={t('search.placeholder')}
@@ -1330,8 +1342,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
               onDelete={() => updateSearchValue('')}
             />
           </Box>
-          <Box>
-            <VStack>
+          <Box className="overflow-hidden border-continuous">
+            <VStack className="overflow-hidden border-continuous">
               {shouldShowFacets ? (
                 <SearchFacetBar
                   facets={searchFacets}
@@ -1377,11 +1389,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       {renderContent()}
       {browseAlphabet ? (
         <Box
-          position="absolute"
-          bottom={keyboardFooterBottom}
-          left={0}
-          right={0}
-          backgroundColor="reverse"
+          className="overflow-hidden border-continuous absolute left-[0px] right-[0px] bg-reverse"
+          style={{ bottom: keyboardFooterBottom }}
         >
           {browseAlphabet}
         </Box>
@@ -1391,12 +1400,14 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
 }
 
 const SearchNoResultsState = ({ query }: { query: string }) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const theme = useTheme()
 
   return (
-    <PageContent flex={1} alignItems="center" justifyContent="center" px={20} py={60}>
-      <Box mb={18}>
+    <PageContent className="px-[20px] py-[60px] flex-[1] items-center justify-center">
+      <Box className="overflow-hidden border-continuous mb-[18px]">
         <Image
           source={require('~assets/images/empty-state-icons/search.svg')}
           style={{ width: 80, height: 80, opacity: 0.6 }}
@@ -1404,10 +1415,13 @@ const SearchNoResultsState = ({ query }: { query: string }) => {
           contentFit="contain"
         />
       </Box>
-      <Text title fontSize={18} textAlign="center" mb={8}>
+      <Text
+        className="text-[18px] text-center mb-[8px]"
+        style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+      >
         {t('Aucun résultat')}
       </Text>
-      <Text color="tertiary" textAlign="center">
+      <Text className="text-tertiary text-center">
         {t('Aucun résultat trouvé pour "{{query}}"', { query })}
       </Text>
     </PageContent>
@@ -1446,10 +1460,10 @@ const ReferenceSearchResultRow = ({
         })
       }}
     >
-      <Box px={20} py={12} borderBottomWidth={1} borderColor="border">
-        <VStack>
-          <HStack alignItems="center" gap={6} mb={2}>
-            <Text bold fontSize={15} numberOfLines={1}>
+      <Box className="border-continuous overflow-hidden px-[20px] py-[12px] border-b-[1px] border-border">
+        <VStack className="overflow-hidden border-continuous">
+          <HStack className="overflow-hidden border-continuous items-center gap-[6px] mb-[2px]">
+            <Text className="font-bold text-[15px]" numberOfLines={1}>
               {item.title}
             </Text>
             <Chip>{version}</Chip>

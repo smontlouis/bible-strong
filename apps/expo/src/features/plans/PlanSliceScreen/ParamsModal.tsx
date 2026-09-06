@@ -1,10 +1,5 @@
-/**
- * @TODO - Merge this with BibleParamsModal
- */
-
 import React from 'react'
 import { FlatList } from 'react-native'
-
 import { Sheet, type SheetRef } from '~common/sheet'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
@@ -24,6 +19,9 @@ import {
   setSettingsPreferredDarkTheme,
   setSettingsPreferredLightTheme,
 } from '~redux/modules/user'
+/**
+ * @TODO - Merge this with BibleParamsModal
+ */
 
 // Extracted constant to avoid recreation on each render
 const FONTS_DATA = ['Literata Book', ...fonts]
@@ -51,10 +49,10 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
 
   return (
     <Sheet ref={paramsModalRef} backdrop={false}>
-      <Box padding={20}>
+      <Box className="overflow-hidden border-continuous p-[20px]">
         <HalfContainer border>
-          <Text flex={5}>{t('Taille du texte')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>{`${100 + fontSizeScale * 10}%`}</Text>
+          <Text className="flex-[5]">{t('Taille du texte')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold">{`${100 + fontSizeScale * 10}%`}</Text>
           <TouchableIcon
             accessibilityLabel={t('accessibility.decreaseTextSize')}
             name="type"
@@ -68,8 +66,8 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>{t('Thème')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>
+          <Text className="flex-[5]">{t('Thème')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold">
             {preferredColorSchemeToString[preferredColorScheme]}
           </Text>
           <TouchableIcon
@@ -92,16 +90,16 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>{t('Couleur Jour')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>
+          <Text className="flex-[5]">{t('Couleur Jour')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold">
             {preferredLightThemeToString[preferredLightTheme]}
           </Text>
           <LinkBox
             accessibilityLabel={preferredLightThemeToString.default}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredLightTheme === 'default' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle
               isSelected={preferredLightTheme === 'default'}
@@ -113,8 +111,8 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             accessibilityLabel={preferredLightThemeToString.sepia}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredLightTheme === 'sepia' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle
               isSelected={preferredLightTheme === 'sepia'}
@@ -126,8 +124,8 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             accessibilityLabel={preferredLightThemeToString.nature}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredLightTheme === 'nature' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle isSelected={preferredLightTheme === 'nature'} size={20} color="#EAF9EC" />
           </LinkBox>
@@ -135,23 +133,23 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             accessibilityLabel={preferredLightThemeToString.sunset}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredLightTheme === 'sunset' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle isSelected={preferredLightTheme === 'sunset'} size={20} color="#FAE0D5" />
           </LinkBox>
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>{t('Couleur Nuit')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>
+          <Text className="flex-[5]">{t('Couleur Nuit')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold">
             {preferredDarkThemeToString[preferredDarkTheme]}
           </Text>
           <LinkBox
             accessibilityLabel={preferredDarkThemeToString.dark}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredDarkTheme === 'dark' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle isSelected={preferredDarkTheme === 'dark'} size={20} color="rgb(18,45,66)" />
           </LinkBox>
@@ -159,8 +157,8 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             accessibilityLabel={preferredDarkThemeToString.black}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredDarkTheme === 'black' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle isSelected={preferredDarkTheme === 'black'} size={20} color="black" />
           </LinkBox>
@@ -168,8 +166,8 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             accessibilityLabel={preferredDarkThemeToString.mauve}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredDarkTheme === 'mauve' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle isSelected={preferredDarkTheme === 'mauve'} size={20} color="rgb(51,4,46)" />
           </LinkBox>
@@ -177,13 +175,13 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             accessibilityLabel={preferredDarkThemeToString.night}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredDarkTheme === 'night' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle isSelected={preferredDarkTheme === 'night'} size={20} color="rgb(0,50,100)" />
           </LinkBox>
         </HalfContainer>
-        <Box>
+        <Box className="overflow-hidden border-continuous">
           <FlatList
             ref={fontsViewRef}
             horizontal

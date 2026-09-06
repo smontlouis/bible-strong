@@ -1,11 +1,9 @@
 import { produce } from 'immer'
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-
 import { Book } from '~assets/bible_versions/books-desc'
 import { getBook } from '~helpers/bibleBookCatalog'
 import generateUUID from '~helpers/generateUUID'
-
 import { useLocalSearchParams } from 'expo-router'
 import { atom } from 'jotai/vanilla'
 import {
@@ -31,7 +29,6 @@ import {
   BiblePartialReferenceNotice,
   BibleReferenceUnavailable,
 } from './BibleReferenceAvailability'
-
 type BibleScreenContentProps = {
   focusVerses?: number[]
   isSelectionMode?: string
@@ -179,7 +176,7 @@ const BibleScreen = () => {
 
   if (resolutionStatus === 'partial') {
     return (
-      <Box flex>
+      <Box className="overflow-hidden border-continuous flex-[1]">
         <BiblePartialReferenceNotice verseKeys={missingVerseKeys} />
         {content}
       </Box>

@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Modal } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { useDispatch } from 'react-redux'
-
 import Box from '~common/ui/Box'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingForced } from '~helpers/runtimeConfig'
@@ -13,7 +12,6 @@ import { isOnboardingCompletedAtom } from './atom'
 import AbelOnboarding from './AbelOnboarding'
 import SelectResources from './SelectResources'
 import ResourceSetupChoice from './ResourceSetupChoice'
-
 const useOptionalOnboarding = () => {
   const lang = useLanguage()
   const dispatch = useDispatch()
@@ -69,7 +67,11 @@ const OnBoarding = () => {
       onRequestClose={completeOnboarding}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Box accessibilityViewIsModal onAccessibilityEscape={completeOnboarding} flex bg="reverse">
+        <Box
+          className="overflow-hidden border-continuous flex-[1] bg-reverse"
+          accessibilityViewIsModal
+          onAccessibilityEscape={completeOnboarding}
+        >
           {step === 'abel' ? (
             <AbelOnboarding onComplete={() => setStep('choice')} />
           ) : step === 'choice' ? (

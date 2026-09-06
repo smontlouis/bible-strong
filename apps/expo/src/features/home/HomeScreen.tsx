@@ -1,3 +1,5 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import Color from 'color'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
 import React from 'react'
@@ -15,8 +17,6 @@ import TheBibleProject from './TheBibleProjectPlan'
 import TimelineWidget from './TimelineWidget'
 import UserWidget, { LoginPrompt } from './UserWidget'
 import WordOfTheDay from './WordOfTheDay'
-
-import { useTheme } from '@emotion/react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
 import TryAudibibleWidget from './TryAudibibleWidget'
@@ -25,13 +25,14 @@ import { useRouter } from 'expo-router'
 import { Events } from './Events'
 import ProfileStats from '~features/profile/components/ProfileStats'
 import PassageMediaLibraryWidget from './PassageMediaLibraryWidget'
-
 // local react props
 type HomeProps = {
   closeHome: () => void
 }
 
 export const Home = ({ closeHome }: HomeProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
@@ -39,28 +40,34 @@ export const Home = ({ closeHome }: HomeProps) => {
     Platform.OS === 'web' ? false : getValue(getRemoteConfig(), 'apple_reviewing').asBoolean()
 
   return (
-    <Box bg="lightGrey" flex={1}>
+    <Box className="overflow-hidden border-continuous bg-light-grey flex-[1]">
       <HomeScrollView showsVerticalScrollIndicator={false}>
         <Events />
         <UserWidget />
         <ProfileStats />
         <LoginPrompt />
-        <Box pt={40} px={20}>
-          <Text title fontSize={23} flex>
+        <Box className="overflow-hidden border-continuous pt-[40px] px-[20px]">
+          <Text
+            className="text-[23px] flex-[1]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {t('Apprendre')}
           </Text>
           <PassageMediaLibraryWidget />
-          <HStack mt={12} height={174} gap={12} alignItems="stretch">
+          <HStack className="overflow-hidden border-continuous mt-[12px] h-[174px] gap-[12px] items-stretch">
             <TheBibleProject />
             <TimelineWidget />
           </HStack>
         </Box>
-        <Box bg="lightGrey" pt={40} px={20}>
-          <Text title fontSize={23} flex>
+        <Box className="overflow-hidden border-continuous bg-light-grey pt-[40px] px-[20px]">
+          <Text
+            className="text-[23px] flex-[1]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {t('Étudier')}
           </Text>
         </Box>
-        <Box bg="lightGrey" paddingTop={20}>
+        <Box className="overflow-hidden border-continuous bg-light-grey pt-[20px]">
           <RNScrollView
             horizontal
             style={{ overflow: 'visible' }}
@@ -77,32 +84,37 @@ export const Home = ({ closeHome }: HomeProps) => {
             <WordOfTheDay color1="#ffd255" color2="#ffbc00" />
           </RNScrollView>
         </Box>
-        <Box bg="lightGrey" pt={40} px={20}>
-          <Text title fontSize={23} flex>
+        <Box className="overflow-hidden border-continuous bg-light-grey pt-[40px] px-[20px]">
+          <Text
+            className="text-[23px] flex-[1]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {t('Méditer')}
           </Text>
         </Box>
-        <VStack gap={10}>
+        <VStack className="overflow-hidden border-continuous gap-[10px]">
           <PlanHome />
           <TryAudibibleWidget />
         </VStack>
 
-        <Box bg="lightGrey" px={20}>
-          <Text title fontSize={23} flex>
+        <Box className="overflow-hidden border-continuous bg-light-grey px-[20px]">
+          <Text
+            className="text-[23px] flex-[1]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {t('Aller plus loin')}
           </Text>
         </Box>
         {!appleIsReviewing && <DonationWidget />}
-        <Box bg="lightGrey">
+        <Box className="overflow-hidden border-continuous bg-light-grey">
           <Box
-            bg="reverse"
-            row
-            paddingHorizontal={20}
-            paddingTop={20}
-            paddingBottom={insets.bottom + 100}
-            style={{ borderTopLeftRadius: 30, borderTopRightRadius: 30 }}
+            className="overflow-hidden border-continuous bg-reverse flex-row px-[20px] pt-[20px]"
+            style={[
+              { paddingBottom: insets.bottom + 100 },
+              { borderTopLeftRadius: 30, borderTopRightRadius: 30 },
+            ]}
           >
-            <Box flex>
+            <Box className="overflow-hidden border-continuous flex-[1]">
               <Button
                 color="#3b5998"
                 onPress={() => Linking.openURL('https://www.facebook.com/fr.bible.strong')}
@@ -118,8 +130,8 @@ export const Home = ({ closeHome }: HomeProps) => {
                 {t('Suivre')}
               </Button>
             </Box>
-            <Box width={20} />
-            <Box flex>
+            <Box className="overflow-hidden border-continuous w-[20px]" />
+            <Box className="overflow-hidden border-continuous flex-[1]">
               <Button
                 color="#2ecc71"
                 route="FAQ"
@@ -139,15 +151,10 @@ export const Home = ({ closeHome }: HomeProps) => {
         </Box>
       </HomeScrollView>
       <Box
-        pos="absolute"
-        left={0}
-        right={0}
-        bottom={0}
-        height={100}
-        paddingBottom={insets.bottom}
-        center
+        className="overflow-hidden border-continuous absolute left-[0px] right-[0px] bottom-[0px] h-[100px] items-center justify-center"
+        style={{ paddingBottom: insets.bottom }}
       >
-        <Box pos="absolute" top={0} bottom={0} left={0} right={0}>
+        <Box className="overflow-hidden border-continuous absolute top-[0px] bottom-[0px] left-[0px] right-[0px]">
           <LinearGradient
             start={[0.5, 0]}
             end={[0.5, 0.9]}
@@ -159,16 +166,19 @@ export const Home = ({ closeHome }: HomeProps) => {
           />
         </Box>
         <TouchableBox
+          className="overflow-hidden border-continuous items-center justify-center w-[50px] h-[50px] rounded-[30px] bg-reverse"
           accessibilityLabel={t('Fermer')}
           accessibilityRole="button"
-          center
-          width={50}
-          height={50}
-          borderRadius={30}
-          bg="reverse"
-          lightShadow
           activeOpacity={0.8}
           onPress={closeHome}
+          style={{
+            shadowColor: 'rgb(89,131,240)',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 7,
+            elevation: 1,
+            overflow: 'visible',
+          }}
         >
           <FeatherIcon name="x" size={24} color="grey" />
         </TouchableBox>

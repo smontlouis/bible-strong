@@ -1,31 +1,53 @@
-import React from 'react'
-import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import React from 'react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
+import { Theme, withTheme } from '~themes/ThemeProvider'
 
-import { Theme, withTheme } from '@emotion/react'
-
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Paragraph from '~common/ui/Paragraph'
-import Link from '~common/Link'
-import EntityChipList from '~common/EntityChipList'
-import { deltaToPlainText } from '~helpers/deltaToPlainText'
-import truncate from '~helpers/truncate'
-import { FeatherIcon } from '~common/ui/Icon'
-import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { useTranslation } from 'react-i18next'
-import useLanguage from '~helpers/useLanguage'
+import EntityChipList from '~common/EntityChipList'
+import Link from '~common/Link'
+import Box from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
+import { deltaToPlainText } from '~helpers/deltaToPlainText'
 import { getDateLocale } from '~helpers/languageUtils'
-import { Study } from '~redux/modules/user'
+import truncate from '~helpers/truncate'
+import useLanguage from '~helpers/useLanguage'
+import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { useMountTime } from '~helpers/useMountTime'
+import { Study } from '~redux/modules/user'
 
-export const LinkBox = Box.withComponent(Link)
+export const LinkBox = (
+  props: React.ComponentProps<typeof Box> & React.ComponentProps<typeof Link>
+) => (
+  <Box
+    as={Link}
+    {...props}
+    className={twMerge(
+      'overflow-hidden border-continuous',
+      twMerge('overflow-hidden border-continuous', props.className)
+    )}
+  />
+)
 
-const StudyLink = styled(Link)(({ theme }: { theme: Theme }) => ({
-  position: 'relative',
-  flexDirection: 'column',
-  flex: 1,
-}))
+const StudyLink = (
+  componentProps: Omit<UIComponentProps<typeof Link>, keyof { theme: Theme } | 'theme'> &
+    Omit<{ theme: Theme }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(twMerge('relative flex-col flex-[1]', className))
+  return (
+    <Link
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Link>['style']}
+    />
+  )
+}
 
 export type StudyItemProps = {
   study: Study
@@ -54,15 +76,20 @@ const StudyItem = ({
   const r = useMediaQueriesArray()
 
   return (
-    <Box width={r(['50%', '50%', '33%', '33%'])}>
+    <Box
+      className="overflow-hidden border-continuous"
+      style={{ width: r(['50%', '50%', '33%', '33%']) }}
+    >
       <Box
-        m={10}
-        backgroundColor="reverse"
-        lightShadow
-        padding={10}
-        height={230}
-        borderRadius={8}
-        position="relative"
+        className="overflow-hidden border-continuous m-[10px] bg-reverse p-[10px] h-[230px] rounded-[8px] relative"
+        style={{
+          shadowColor: 'rgb(89,131,240)',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 7,
+          elevation: 1,
+          overflow: 'visible',
+        }}
       >
         <StudyLink
           {...(onPress
@@ -72,16 +99,14 @@ const StudyItem = ({
                 params: { studyId: study.id },
               })}
         >
-          <Text color="darkGrey" fontSize={10} marginTop={10}>
+          <Text className="text-dark-grey text-[10px] mt-[10px]">
             {t('Il y a {{formattedDate}}', { formattedDate })}
           </Text>
           {study.content ? (
             <>
-              <Text bold fontSize={16} marginTop={4}>
-                {study.title}
-              </Text>
+              <Text className="font-bold text-[16px] mt-[4px]">{study.title}</Text>
 
-              <Paragraph marginTop={10} scale={-3}>
+              <Paragraph className="mt-[10px]" scale={-3}>
                 {truncate(
                   deltaToPlainText(
                     study.content.ops as unknown as Parameters<typeof deltaToPlainText>[0]
@@ -92,13 +117,11 @@ const StudyItem = ({
             </>
           ) : (
             <>
-              <Text bold fontSize={16} marginTop={4} color="border">
-                {t('Étude vide')}
-              </Text>
+              <Text className="font-bold text-[16px] mt-[4px] text-border">{t('Étude vide')}</Text>
             </>
           )}
         </StudyLink>
-        <Box marginTop="auto">
+        <Box className="overflow-hidden border-continuous mt-auto">
           <EntityChipList
             limit={1}
             tags={study.tags}
@@ -108,10 +131,7 @@ const StudyItem = ({
         </Box>
         {!!setStudySettings && (
           <LinkBox
-            position="absolute"
-            right={0}
-            top={0}
-            p={10}
+            className="p-[10px] absolute top-[0px] right-[0px]"
             onPress={() => setStudySettings(study.id)}
           >
             <FeatherIcon color="tertiary" name="more-vertical" size={20} />

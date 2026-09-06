@@ -1,8 +1,7 @@
 import * as React from 'react'
-import { withTheme } from '@emotion/react'
+import { withTheme } from '~themes/ThemeProvider'
 import Svg, { Path, SvgProps } from 'react-native-svg'
 import { Theme } from '~themes'
-
 function SvgComponent({ color, theme, ...props }: { color?: string; theme: Theme } & SvgProps) {
   const iconColor =
     (color ? theme.colors[color as keyof typeof theme.colors] : undefined) || theme.colors.primary

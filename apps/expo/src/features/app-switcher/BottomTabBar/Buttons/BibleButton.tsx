@@ -9,7 +9,6 @@ import { RootState } from '~redux/modules/reducer'
 import { activeTabIndexAtom, getDefaultBibleTab, tabsAtom } from '../../../../state/tabs'
 import { getDefaultBibleVersionFromState } from '../../../../state/useDefaultBibleVersion'
 import { TAB_ICON_SIZE } from '../../utils/constants'
-
 export type BibleButtonProps = Record<string, never>
 
 const BibleButton = (_props: BibleButtonProps) => {
@@ -39,11 +38,11 @@ const BibleButton = (_props: BibleButtonProps) => {
 
   return (
     <TouchableBox
-      center
-      size={TAB_ICON_SIZE}
+      className="overflow-hidden border-continuous items-center justify-center"
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={t('tabs.bible')}
+      style={{ ...(TAB_ICON_SIZE ? { width: TAB_ICON_SIZE, height: TAB_ICON_SIZE } : {}) }}
     >
       <FeatherIcon name="book-open" size={23} color={'tertiary'} />
     </TouchableBox>

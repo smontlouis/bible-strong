@@ -1,5 +1,6 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useEffect } from 'react'
-
 import Text from '~common/ui/Text'
 import ScrollView from '~common/ui/ScrollView'
 import Paragraph from '~common/ui/Paragraph'
@@ -10,8 +11,9 @@ import Login from '~common/Login'
 import useLogin from '~helpers/useLogin'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
-
 const LoginScreen = () => {
+  const stylingTheme = useStylingTheme()
+
   const router = useRouter()
   const { isLogged } = useLogin()
   const { t } = useTranslation()
@@ -26,11 +28,14 @@ const LoginScreen = () => {
     <Container>
       <Header hasBackButton title={t('Se connecter')} />
       <ScrollView>
-        <Box padding={20}>
-          <Text title fontSize={30} marginBottom={30}>
+        <Box className="overflow-hidden border-continuous p-[20px]">
+          <Text
+            className="text-[30px] mb-[30px]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {t('Bienvenue !')}
           </Text>
-          <Paragraph scaleLineHeight={-2} marginBottom={10}>
+          <Paragraph className="mb-[10px]" scaleLineHeight={-2}>
             {t('Connectez-vous pour sauvegarder toutes vos données sur le cloud !')}
           </Paragraph>
           <Login />

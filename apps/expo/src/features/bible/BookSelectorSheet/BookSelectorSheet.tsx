@@ -1,6 +1,5 @@
 import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -19,7 +18,7 @@ import { BookSelectorParams } from './BookSelectorParams'
 import { BOOK_SELECTION_EVENT, SelectionEvent } from './constants'
 import VerseSheet, { tempSelectedBookAtom, tempSelectedChapterAtom } from './VerseSheet'
 import { useQuery } from '@tanstack/react-query'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { applyBookChapterSelection } from './bookSelectorSelection'
 import { getBooksForCanon, isBibleCanonId } from '~helpers/bibleBookCatalog'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
@@ -216,9 +215,19 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
               subTitle={isGridChapterPicker ? t('Chapitres') : undefined}
               centerTitle
               hasBackButton={isGridChapterPicker}
-              leftComponent={isGridChapterPicker ? undefined : <Box width={60} />}
+              leftComponent={
+                isGridChapterPicker ? undefined : (
+                  <Box className="overflow-hidden border-continuous w-[60px]" />
+                )
+              }
               onBackPress={isGridChapterPicker ? () => setGridBook(null) : undefined}
-              rightComponent={isGridChapterPicker ? <Box width={54} /> : <BookSelectorParams />}
+              rightComponent={
+                isGridChapterPicker ? (
+                  <Box className="overflow-hidden border-continuous w-[54px]" />
+                ) : (
+                  <BookSelectorParams />
+                )
+              }
             />
             {!isGridChapterPicker && (
               <HelpTip id="chapter-selector" description={t('tips.chapterSelector')} />

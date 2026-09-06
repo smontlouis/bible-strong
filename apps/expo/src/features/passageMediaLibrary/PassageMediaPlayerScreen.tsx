@@ -1,10 +1,11 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useWindowDimensions } from 'react-native'
 import YoutubePlayer from '~helpers/react-native-youtube-iframe'
 import type { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes'
-
 import Header from '~common/Header'
 import Box, { VStack } from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
@@ -13,11 +14,12 @@ import Text from '~common/ui/Text'
 import { formatPassageMediaDuration, getPassageMediaLibrary } from '~features/bible/passageMedia'
 import { IS_FORM_SHEET } from '~helpers/constants'
 import useLanguage from '~helpers/useLanguage'
-
 const YOUTUBE_PLAYER_BASE_URL =
   'https://lonelycpp.github.io/react-native-youtube-iframe/iframe_v2.html'
 
 const PassageMediaPlayerScreen = () => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const { workId } = useLocalSearchParams<{ workId?: string }>()
   const language = useLanguage()
@@ -29,7 +31,7 @@ const PassageMediaPlayerScreen = () => {
 
   return (
     <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <Header background title={item?.title ?? t('passageMediaLibrary.playerTitle')} />
         <ScrollView
           backgroundColor="lightGrey"
@@ -37,15 +39,22 @@ const PassageMediaPlayerScreen = () => {
           contentContainerStyle={{ alignItems: 'center', paddingHorizontal: 16, paddingTop: 24 }}
         >
           {item ? (
-            <VStack width={playerWidth} gap={18}>
+            <VStack
+              className="overflow-hidden border-continuous gap-[18px]"
+              style={{ width: playerWidth }}
+            >
               <Box
-                width={playerWidth}
-                height={playerHeight}
-                borderRadius={14}
-                borderWidth={1}
-                borderColor="border"
-                bg="lightGrey"
-                lightShadow
+                className="border-continuous overflow-hidden rounded-[14px] border-[1px] border-border bg-light-grey"
+                style={{
+                  width: playerWidth,
+                  height: playerHeight,
+                  shadowColor: 'rgb(89,131,240)',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 7,
+                  elevation: 1,
+                  overflow: 'visible',
+                }}
               >
                 <YoutubePlayer
                   height={playerHeight}
@@ -65,25 +74,32 @@ const PassageMediaPlayerScreen = () => {
                   webViewStyle={{ borderRadius: 14, overflow: 'hidden' }}
                 />
               </Box>
-              <VStack gap={7} px={2}>
-                <Text title fontSize={22} lineHeight={28}>
+              <VStack className="overflow-hidden border-continuous gap-[7px] px-[2px]">
+                <Text
+                  className="text-[22px] leading-[28px]"
+                  style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+                >
                   {item.title}
                 </Text>
-                <Text text color="grey" fontSize={14}>
+                <Text
+                  className="text-grey text-[14px]"
+                  style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.text) }}
+                >
                   {formatPassageMediaDuration(item.durationSeconds)} · {item.attributionLabel}
                 </Text>
                 {!!playerError && (
-                  <Text text color="quart" fontSize={14}>
+                  <Text
+                    className="text-quart text-[14px]"
+                    style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.text) }}
+                  >
                     {t('passageMediaLibrary.playbackError')}
                   </Text>
                 )}
               </VStack>
             </VStack>
           ) : (
-            <Box py={60} px={20} center>
-              <Text color="grey" textAlign="center">
-                {t('passageMediaLibrary.notFound')}
-              </Text>
+            <Box className="overflow-hidden border-continuous py-[60px] px-[20px] items-center justify-center">
+              <Text className="text-grey text-center">{t('passageMediaLibrary.notFound')}</Text>
             </Box>
           )}
         </ScrollView>

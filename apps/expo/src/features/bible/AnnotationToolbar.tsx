@@ -1,10 +1,10 @@
-import { useTheme } from '@emotion/react'
+import { twMerge } from '~common/ui/classNames'
+import { useTheme } from '~themes/ThemeProvider'
 import { type SheetRef, Sheet, SheetView } from '~common/sheet'
 import { TouchableOpacity, type ViewStyle } from 'react-native'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-
 import BackgroundIcon from '~assets/images/BackgroundIcon'
 import CircleSketchIcon from '~assets/images/CircleSketchIcon'
 import Box, {
@@ -20,10 +20,8 @@ import Text from '~common/ui/Text'
 import verseToReference from '~helpers/verseToReference'
 import { colorPickerModalAtom } from 'src/state/app'
 import type { AnnotationType, SelectionRange } from './hooks/useAnnotationMode'
-
 import { LinearTransition } from 'react-native-reanimated'
 import { useColorItems, useResolvedColor } from '~helpers/useHighlightColors'
-
 interface SelectedAnnotation {
   id: string
   verseKey: string
@@ -84,32 +82,44 @@ interface IconButtonProps extends BoxProps {
   label?: string
 }
 
-const IconButton = ({ disabled, children, isSelected, label, ...props }: IconButtonProps) => (
-  <Box
-    px={20}
-    py={10}
-    borderRadius={18}
-    center
-    gap={10}
-    borderColor={isSelected ? 'primary' : 'border'}
-    borderWidth={isSelected ? 2 : 1}
-    opacity={isSelected ? 1 : disabled ? 0.5 : 0.85}
-    style={
-      {
-        transitionProperty: ['backgroundColor', 'borderColor', 'opacity'],
-        transitionDuration: 300,
-      } as unknown as ViewStyle
-    }
-    {...props}
-  >
-    {children}
-    {label && (
-      <Text fontSize={12} bold color={isSelected ? 'primary' : 'tertiary'} numberOfLines={1}>
-        {label}
-      </Text>
-    )}
-  </Box>
-)
+const IconButton = ({ disabled, children, isSelected, label, ...props }: IconButtonProps) => {
+  return (
+    <Box
+      style={[
+        { borderWidth: isSelected ? 2 : 1, opacity: isSelected ? 1 : disabled ? 0.5 : 0.85 },
+        props.style,
+        {
+          transitionProperty: ['backgroundColor', 'borderColor', 'opacity'],
+          transitionDuration: 300,
+        } as unknown as ViewStyle,
+      ]}
+      {...props}
+      className={twMerge(
+        'overflow-hidden border-continuous',
+        twMerge(
+          isSelected ? 'border-primary' : 'border-border',
+          twMerge(
+            'overflow-hidden border-continuous px-[20px] py-[10px] rounded-[18px] gap-[10px] items-center justify-center',
+            props.className
+          )
+        )
+      )}
+    >
+      {children}
+      {label && (
+        <Text
+          className={twMerge(
+            isSelected ? 'text-primary' : 'text-tertiary',
+            'text-[12px] font-bold'
+          )}
+          numberOfLines={1}
+        >
+          {label}
+        </Text>
+      )}
+    </Box>
+  )
+}
 
 type AnnotationTypeButtonProps = {
   disabled: boolean
@@ -128,7 +138,12 @@ const AnnotationTypeButton = ({
   children,
   label,
 }: AnnotationTypeButtonProps) => (
-  <TouchableBox disabled={disabled} onPress={() => onPress(type)}>
+  <TouchableBox
+    className="overflow-hidden border-continuous"
+    disabled={disabled}
+    onPress={() => onPress(type)}
+    style={[{ opacity: disabled ? 0.6 : 1 }, [{ opacity: disabled ? 0.6 : 1 }]]}
+  >
     <IconButton disabled={disabled} isSelected={!disabled && activeType === type} label={label}>
       {children}
     </IconButton>
@@ -148,11 +163,17 @@ type AnnotationTargetLabelProps = {
 }
 
 const AnnotationTargetLabel = ({ label, reference }: AnnotationTargetLabelProps) => (
-  <HStack maxWidth={220} center>
-    <FadingText fontSize={15} color="grey" numberOfLines={1}>
+  <HStack className="overflow-hidden border-continuous max-w-[220px] items-center justify-center">
+    <FadingText
+      className="overflow-hidden border-continuous text-[15px] text-grey"
+      numberOfLines={1}
+    >
       {`${label} `}
     </FadingText>
-    <FadingText fontSize={15} color="grey" numberOfLines={1} bold>
+    <FadingText
+      className="overflow-hidden border-continuous text-[15px] text-grey font-bold"
+      numberOfLines={1}
+    >
       {reference}
     </FadingText>
   </HStack>
@@ -168,36 +189,35 @@ const AnnotationColorPalette = ({
   const setColorPickerModal = useSetAtom(colorPickerModalAtom)
 
   return (
-    <HStack center gap={10} pb={16} px={20}>
+    <HStack className="overflow-hidden border-continuous items-center justify-center gap-[10px] pb-[16px] px-[20px]">
       {colorItems.map(color => (
         <TouchableBox
+          className="border-continuous overflow-hidden rounded-[12px] items-center justify-center bg-reverse border-primary"
           key={color.key}
-          size={30}
-          borderRadius={12}
-          center
-          bg="reverse"
-          borderWidth={selectedColor === color.key ? 2 : 0}
-          borderColor="primary"
           onPress={() => onSelectColor(color.key, type)}
+          style={{ borderWidth: selectedColor === color.key ? 2 : 0, width: 30, height: 30 }}
         >
           <Box
-            size={selectedColor === color.key ? 20 : 24}
-            borderRadius={8}
-            style={{ backgroundColor: color.hex }}
+            className="overflow-hidden border-continuous rounded-[8px]"
+            style={[
+              {
+                width: selectedColor === color.key ? 20 : 24,
+                height: selectedColor === color.key ? 20 : 24,
+              },
+              { backgroundColor: color.hex },
+            ]}
           />
         </TouchableBox>
       ))}
       <TouchableBox
-        size={30}
-        borderRadius={15}
-        center
-        bg="opacity5"
+        className="overflow-hidden border-continuous rounded-[15px] items-center justify-center bg-opacity5"
         onPress={() => {
           setColorPickerModal({
             selectedColor,
             onSelectColor: colorKey => onSelectColor(colorKey, type),
           })
         }}
+        style={{ width: 30, height: 30 }}
       >
         <FeatherIcon name="plus" size={16} color="primary" />
       </TouchableBox>
@@ -263,14 +283,15 @@ const AnnotationToolbar = ({
 
   return (
     <Sheet ref={ref} backdrop={false} onClose={onClose}>
-      <SheetView pt={14}>
-        <Box px={20} minH={92} justifyContent="center" position="relative">
-          <Text bold fontSize={18} textAlign="center" px={76}>
-            {t('Mode libre')}
-          </Text>
+      <SheetView className="pt-[14px]">
+        <Box className="overflow-hidden border-continuous px-[20px] min-h-[92px] justify-center relative">
+          <Text className="font-bold text-[18px] text-center px-[76px]">{t('Mode libre')}</Text>
 
           {(selectedAnnotation || hasSelection) && (
-            <AnimatedBox layout={LinearTransition} position="absolute" right={20} top={0}>
+            <AnimatedBox
+              className="overflow-hidden border-continuous absolute right-[20px] top-[0px]"
+              layout={LinearTransition}
+            >
               <TouchableOpacity
                 accessibilityLabel={t('Supprimer')}
                 accessibilityRole="button"
@@ -278,14 +299,7 @@ const AnnotationToolbar = ({
                 onPress={selectedAnnotation ? onDeleteAnnotation : onEraseAnnotations}
                 disabled={disabled}
               >
-                <Box
-                  width={32}
-                  height={32}
-                  borderRadius={10}
-                  center
-                  borderColor="quart"
-                  borderWidth={1}
-                >
+                <Box className="border-continuous overflow-hidden w-[32px] h-[32px] rounded-[10px] items-center justify-center border-quart border-[1px]">
                   <FeatherIcon name="trash-2" size={17} color="quart" />
                 </Box>
               </TouchableOpacity>
@@ -294,13 +308,8 @@ const AnnotationToolbar = ({
 
           {selectedAnnotation && (
             <AnimatedBox
+              className="border-continuous overflow-visible flex-row gap-[6px] absolute left-[20px] top-[0px]"
               layout={LinearTransition}
-              row
-              gap={6}
-              position="absolute"
-              left={20}
-              top={0}
-              overflow="visible"
             >
               <TouchableOpacity
                 accessibilityLabel={t('Note')}
@@ -309,14 +318,7 @@ const AnnotationToolbar = ({
                 onPress={onNotePress}
                 disabled={disabled}
               >
-                <Box
-                  width={32}
-                  height={32}
-                  borderRadius={10}
-                  center
-                  borderColor="border"
-                  borderWidth={1}
-                >
+                <Box className="border-continuous overflow-hidden w-[32px] h-[32px] rounded-[10px] items-center justify-center border-border border-[1px]">
                   <FeatherIcon
                     name={selectedAnnotation.noteId ? 'file-text' : 'file-plus'}
                     size={17}
@@ -331,31 +333,13 @@ const AnnotationToolbar = ({
                 onPress={onTagsPress}
                 disabled={disabled}
               >
-                <Box position="relative" overflow="visible">
-                  <Box
-                    width={32}
-                    height={32}
-                    borderRadius={10}
-                    center
-                    borderColor="border"
-                    borderWidth={1}
-                  >
+                <Box className="border-continuous overflow-visible relative">
+                  <Box className="border-continuous overflow-hidden w-[32px] h-[32px] rounded-[10px] items-center justify-center border-border border-[1px]">
                     <FeatherIcon name="tag" size={18} color={tagsCount > 0 ? 'primary' : 'grey'} />
                   </Box>
                   {tagsCount > 0 && (
-                    <Box
-                      position="absolute"
-                      bottom={-1}
-                      right={-4}
-                      bg="primary"
-                      borderRadius={8}
-                      width={14}
-                      height={14}
-                      center
-                    >
-                      <Text fontSize={8} color="reverse" bold>
-                        {tagsCount}
-                      </Text>
+                    <Box className="overflow-hidden border-continuous absolute bottom-[-1px] right-[-4px] bg-primary rounded-[8px] w-[14px] h-[14px] items-center justify-center">
+                      <Text className="text-[8px] text-reverse font-bold">{tagsCount}</Text>
                     </Box>
                   )}
                 </Box>
@@ -367,15 +351,8 @@ const AnnotationToolbar = ({
                 onPress={onRelationsPress}
                 disabled={disabled}
               >
-                <Box position="relative" overflow="visible">
-                  <Box
-                    width={32}
-                    height={32}
-                    borderRadius={10}
-                    center
-                    borderColor="border"
-                    borderWidth={1}
-                  >
+                <Box className="border-continuous overflow-visible relative">
+                  <Box className="border-continuous overflow-hidden w-[32px] h-[32px] rounded-[10px] items-center justify-center border-border border-[1px]">
                     <FeatherIcon
                       name="git-merge"
                       size={18}
@@ -383,19 +360,8 @@ const AnnotationToolbar = ({
                     />
                   </Box>
                   {relationsCount > 0 && (
-                    <Box
-                      position="absolute"
-                      bottom={-1}
-                      right={-4}
-                      bg="primary"
-                      borderRadius={8}
-                      width={14}
-                      height={14}
-                      center
-                    >
-                      <Text fontSize={8} color="reverse" bold>
-                        {relationsCount}
-                      </Text>
+                    <Box className="overflow-hidden border-continuous absolute bottom-[-1px] right-[-4px] bg-primary rounded-[8px] w-[14px] h-[14px] items-center justify-center">
+                      <Text className="text-[8px] text-reverse font-bold">{relationsCount}</Text>
                     </Box>
                   )}
                 </Box>
@@ -404,18 +370,20 @@ const AnnotationToolbar = ({
           )}
 
           <FadingBox
+            className="overflow-hidden border-continuous"
             keyProp={
               selectedAnnotation ? 'selectedAnnotation' : hasSelection ? 'hasSelection' : 'empty'
             }
           >
             {selectedAnnotation ? (
               <AnimatedBox
-                alignItems="center"
-                justifyContent="center"
+                className="overflow-hidden border-continuous items-center justify-center mt-[6px]"
                 layout={LinearTransition}
-                mt={6}
               >
-                <AnimatedBox layout={LinearTransition}>
+                <AnimatedBox
+                  layout={LinearTransition}
+                  className="overflow-hidden border-continuous"
+                >
                   <AnnotationTargetLabel
                     label={t('Appliquer à')}
                     reference={verseToReference([selectedAnnotation.verseKey])}
@@ -424,12 +392,13 @@ const AnnotationToolbar = ({
               </AnimatedBox>
             ) : hasSelection && selection?.start && selection?.end ? (
               <AnimatedBox
-                alignItems="center"
-                justifyContent="center"
+                className="overflow-hidden border-continuous items-center justify-center mt-[8px]"
                 layout={LinearTransition}
-                mt={8}
               >
-                <AnimatedBox layout={LinearTransition}>
+                <AnimatedBox
+                  layout={LinearTransition}
+                  className="overflow-hidden border-continuous"
+                >
                   <AnnotationTargetLabel
                     label={t('Appliquer à')}
                     reference={formatSelectionRange(selection)}
@@ -437,8 +406,8 @@ const AnnotationToolbar = ({
                 </AnimatedBox>
               </AnimatedBox>
             ) : (
-              <Box center mt={8}>
-                <FadingText fontSize={13} color="grey" textAlign="center">
+              <Box className="overflow-hidden border-continuous items-center justify-center mt-[8px]">
+                <FadingText className="overflow-hidden border-continuous text-[13px] text-grey text-center">
                   {t('Sélectionnez du texte dans la Bible')}
                 </FadingText>
               </Box>
@@ -446,8 +415,8 @@ const AnnotationToolbar = ({
           </FadingBox>
         </Box>
 
-        <AnimatedBox layout={LinearTransition}>
-          <HStack px={20} pb={20} gap={10} center>
+        <AnimatedBox layout={LinearTransition} className="overflow-hidden border-continuous">
+          <HStack className="overflow-hidden border-continuous px-[20px] pb-[20px] gap-[10px] items-center justify-center">
             <AnnotationTypeButton
               disabled={disabled}
               type="background"
@@ -478,7 +447,7 @@ const AnnotationToolbar = ({
               <CircleSketchIcon width={28} height={28} color={getColor('circle')} />
             </AnnotationTypeButton>
           </HStack>
-          <Box borderTopWidth={1} borderColor="border" pt={12}>
+          <Box className="border-continuous overflow-hidden border-t-[1px] border-border pt-[12px]">
             <AnnotationColorPalette
               disabled={disabled}
               type={activeAnnotationType}

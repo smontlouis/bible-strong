@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import { FlatList } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useAtom, useSetAtom } from 'jotai/react'
-
 import Empty from '~common/Empty'
 import FiltersHeader from '~common/FiltersHeader'
 import RenameModal from '~common/RenameModal'
@@ -15,7 +14,6 @@ import { useSheet } from '~helpers/useSheet'
 import useLogin from '~helpers/useLogin'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { updateStudy } from '~redux/modules/user'
-
 import { useTranslation } from 'react-i18next'
 import { Tag } from '~common/types'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
@@ -41,7 +39,6 @@ import {
   type StudiesListQueryState,
 } from '~state/entityListFilters'
 import { selectStudyListRows } from '~redux/selectors/studies'
-
 type StudiesScreenProps = {
   hasBackButton?: boolean
   isFormSheet?: boolean
@@ -191,7 +188,7 @@ const StudiesScreen = ({
   )
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <FiltersHeader
           title={t('Études')}
           hasBackButton={showBackButton}

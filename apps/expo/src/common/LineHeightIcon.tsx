@@ -1,14 +1,41 @@
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import Box, { VStack } from './ui/Box'
-
 export const LineHeightIcon = ({ isSelected, gap }: { isSelected: boolean; gap: number }) => {
+  const stylingTheme = useStylingTheme()
+
   const color = isSelected ? 'primary' : 'grey'
   const width = 18
   const height = 2
   return (
-    <VStack alignItems="center" justifyContent="center" gap={gap} width={55} height={18}>
-      <Box borderRadius={10} width={width} height={height} backgroundColor={color} />
-      <Box borderRadius={10} width={width} height={height} backgroundColor={color} />
-      <Box borderRadius={10} width={width} height={height} backgroundColor={color} />
+    <VStack
+      className="overflow-hidden border-continuous items-center justify-center w-[55px] h-[18px]"
+      style={{ gap: gap }}
+    >
+      <Box
+        className="overflow-hidden border-continuous rounded-[10px]"
+        style={{
+          width: width,
+          height: height,
+          backgroundColor: resolveThemeColor(stylingTheme, color),
+        }}
+      />
+      <Box
+        className="overflow-hidden border-continuous rounded-[10px]"
+        style={{
+          width: width,
+          height: height,
+          backgroundColor: resolveThemeColor(stylingTheme, color),
+        }}
+      />
+      <Box
+        className="overflow-hidden border-continuous rounded-[10px]"
+        style={{
+          width: width,
+          height: height,
+          backgroundColor: resolveThemeColor(stylingTheme, color),
+        }}
+      />
     </VStack>
   )
 }

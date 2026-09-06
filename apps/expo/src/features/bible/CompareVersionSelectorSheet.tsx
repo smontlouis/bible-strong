@@ -3,8 +3,7 @@ import React from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useTheme } from '@emotion/react'
-
+import { useTheme } from '~themes/ThemeProvider'
 import VersionSelectorItem from '~features/bible/VersionSelectorItem'
 import { versions } from '~helpers/bibleVersions'
 import { toggleCompareVersion } from '~redux/modules/user'
@@ -14,7 +13,6 @@ import type { VersionCode } from 'src/state/tabs'
 import { useVersionCatalog, VersionCatalogHeader, VersionCatalogList } from './VersionCatalogView'
 import BibleOfflineDetailsSheet from './VersionSelectorSheet/BibleOfflineDetailsSheet'
 import { useBibleOfflineDetails } from './VersionSelectorSheet/useBibleOfflineDetails'
-
 type CompareVersionSelectorSheetProps = {
   sheetRef: React.RefObject<SheetRef | null>
 }

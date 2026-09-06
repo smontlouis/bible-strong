@@ -1,3 +1,6 @@
+import { twMerge } from '~common/ui/classNames'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import type { TFunction } from 'i18next'
 import { useEffect, useState } from 'react'
 import { Pressable } from 'react-native'
@@ -9,7 +12,6 @@ import {
   withSpring,
 } from 'react-native-reanimated'
 import { runOnJS } from 'react-native-worklets'
-
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../OnboardingStage'
@@ -18,7 +20,6 @@ import SceneActionButton from '../SceneActionButton'
 import SceneDecorativePluses from '../SceneDecorativePluses'
 import { Scene } from '../SceneGraph'
 import VerseCard, { type HighlightColor } from '../VerseCard'
-
 const OCCURRENCE_ENTER_START = 520
 const OCCURRENCE_STAGGER = 120
 
@@ -109,25 +110,33 @@ type StrongLemmaCardProps = {
 }
 
 const OccurrenceCounter = ({ metrics, t }: StrongLemmaCardProps) => {
+  const stylingTheme = useStylingTheme()
+
   const s = metrics.s
 
   return (
     <HStack
-      position="absolute"
-      left={s(47)}
-      bottom={s(-11)}
-      width={s(110)}
-      height={s(21)}
-      bg="lightPrimary"
-      borderRadius={s(11)}
-      justifyContent="center"
-      alignItems="center"
-      gap={s(3)}
+      className="overflow-hidden border-continuous absolute bg-light-primary justify-center items-center"
+      style={{
+        width: s(110),
+        height: s(21),
+        bottom: s(-11),
+        left: s(47),
+        borderRadius: s(11),
+        gap: s(3),
+      }}
     >
-      <Text title bold fontSize={s(9)} lineHeight={s(16)}>
+      <Text
+        className="font-bold"
+        style={{
+          fontSize: s(9) || 16,
+          lineHeight: s(16),
+          fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+        }}
+      >
         {t('onboarding.abel.sceneFour.occurrenceCount')}
       </Text>
-      <Text color="tertiary" bold fontSize={s(7)}>
+      <Text className="text-tertiary font-bold" style={{ fontSize: s(7) || 16 }}>
         {t('onboarding.abel.sceneFour.usageCount')}
       </Text>
     </HStack>
@@ -135,43 +144,44 @@ const OccurrenceCounter = ({ metrics, t }: StrongLemmaCardProps) => {
 }
 
 const StrongLemmaCard = ({ metrics, t }: StrongLemmaCardProps) => {
+  const stylingTheme = useStylingTheme()
+
   const s = metrics.s
 
   return (
     <VStack
-      flex
-      bg="reverse"
-      borderRadius={s(26)}
-      px={s(14)}
-      py={s(10)}
-      justifyContent="center"
-      alignItems="center"
-      gap={s(2)}
-      style={{ boxShadow: '0 5px 16px rgba(59,92,204,0.13)' }}
-      overflow="visible"
+      className="border-continuous overflow-visible flex-[1] bg-reverse justify-center items-center"
+      style={[
+        { paddingHorizontal: s(14), paddingVertical: s(10), borderRadius: s(26), gap: s(2) },
+        { boxShadow: '0 5px 16px rgba(59,92,204,0.13)' },
+      ]}
     >
-      <Text color="primary" bold fontSize={s(9)} style={{ letterSpacing: s(1.1) }}>
+      <Text
+        className="text-primary font-bold"
+        style={[{ fontSize: s(9) || 16 }, { letterSpacing: s(1.1) }]}
+      >
         {t('onboarding.abel.sceneFour.hebrew')}
       </Text>
       <Text
-        fontSize={s(30)}
-        lineHeight={s(36)}
-        bold
-        textAlign="center"
-        style={{ writingDirection: 'rtl' }}
+        className="font-bold text-center"
+        style={[{ fontSize: s(30) || 16, lineHeight: s(36) }, { writingDirection: 'rtl' }]}
       >
         הֶבֶל
       </Text>
       <Text
-        title
-        color="primary"
-        fontSize={s(21)}
-        lineHeight={s(24)}
-        style={{ fontFamily: 'Literata Book', fontStyle: 'italic' }}
+        className="text-primary"
+        style={[
+          {
+            fontSize: s(21) || 16,
+            lineHeight: s(24),
+            fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+          },
+          { fontFamily: 'Literata Book', fontStyle: 'italic' },
+        ]}
       >
         {t('onboarding.abel.sceneThree.commonTransliteration')}
       </Text>
-      <Text color="tertiary" fontSize={s(9.5)} textAlign="center">
+      <Text className="text-tertiary text-center" style={{ fontSize: s(9.5) || 16 }}>
         {t('onboarding.abel.sceneFour.lemmaDetails')}
       </Text>
       <OccurrenceCounter metrics={metrics} t={t} />
@@ -193,33 +203,44 @@ const OccurrenceFilter = ({
   label,
   metrics,
   onPress,
-}: OccurrenceFilterProps) => (
-  <Pressable
-    accessibilityRole="button"
-    accessibilityState={{ selected: active }}
-    onPress={() => onPress(id)}
-    hitSlop={metrics.s(4)}
-    style={({ pressed }) => ({ opacity: pressed ? 0.72 : 1 })}
-  >
-    <AnimatedBox
-      bg={active ? 'lightPrimary' : 'reverse'}
-      borderRadius={metrics.s(14)}
-      px={metrics.s(10)}
-      py={metrics.s(6)}
-      center
-      style={{
-        transitionProperty: 'backgroundColor',
-        transitionDuration: 280,
-        transitionDelay: 800,
-        transitionTimingFunction: 'ease-in-out',
-      }}
+}: OccurrenceFilterProps) => {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      onPress={() => onPress(id)}
+      hitSlop={metrics.s(4)}
+      style={({ pressed }) => ({ opacity: pressed ? 0.72 : 1 })}
     >
-      <Text color={active ? 'primary' : 'tertiary'} bold fontSize={metrics.s(8.5)}>
-        {label}
-      </Text>
-    </AnimatedBox>
-  </Pressable>
-)
+      <AnimatedBox
+        className={twMerge(
+          'overflow-hidden border-continuous',
+          twMerge(active ? 'bg-light-primary' : 'bg-reverse', 'items-center justify-center')
+        )}
+        style={[
+          {
+            paddingHorizontal: metrics.s(10),
+            paddingVertical: metrics.s(6),
+            borderRadius: metrics.s(14),
+          },
+          {
+            transitionProperty: 'backgroundColor',
+            transitionDuration: 280,
+            transitionDelay: 800,
+            transitionTimingFunction: 'ease-in-out',
+          },
+        ]}
+      >
+        <Text
+          className={twMerge(active ? 'text-primary' : 'text-tertiary', 'font-bold')}
+          style={{ fontSize: metrics.s(8.5) || 16 }}
+        >
+          {label}
+        </Text>
+      </AnimatedBox>
+    </Pressable>
+  )
+}
 
 type OccurrenceFiltersProps = StrongLemmaCardProps & {
   activeFilter: OccurrenceFilterId
@@ -233,15 +254,16 @@ const OccurrenceFilters = ({
   t,
 }: OccurrenceFiltersProps) => (
   <HStack
-    flex
-    alignItems="center"
-    justifyContent="center"
-    gap={metrics.s(6)}
-    bg="reverse"
-    px={3}
-    borderRadius={30}
-    alignSelf="center"
-    lightShadow
+    className="overflow-hidden border-continuous flex-[1] items-center justify-center bg-reverse px-[3px] rounded-[30px] self-center"
+    style={{
+      gap: metrics.s(6),
+      shadowColor: 'rgb(89,131,240)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 7,
+      elevation: 1,
+      overflow: 'visible',
+    }}
   >
     <OccurrenceFilter
       active={activeFilter === 'vanity'}
@@ -360,10 +382,19 @@ const OccurrenceVerseCard = ({
 
   const renderContent = (content: OccurrenceContent) => (
     <>
-      <Text color="primary" bold fontSize={s(9)} style={{ letterSpacing: s(1.2) }}>
+      <Text
+        className="text-primary font-bold"
+        style={[{ fontSize: s(9) || 16 }, { letterSpacing: s(1.2) }]}
+      >
         {content.reference}
       </Text>
-      <Text fontSize={s(featured ? 12.3 : 10.6)} lineHeight={s(featured ? 15.5 : 13.5)} mt={s(8)}>
+      <Text
+        style={{
+          marginTop: s(8),
+          fontSize: s(featured ? 12.3 : 10.6) || 16,
+          lineHeight: s(featured ? 15.5 : 13.5),
+        }}
+      >
         {content.children}
       </Text>
     </>
@@ -371,35 +402,51 @@ const OccurrenceVerseCard = ({
 
   return (
     <Box
-      flex
-      bg="reverse"
-      borderRadius={s(featured ? 22 : 18)}
-      borderWidth={featured ? s(1.5) : 0}
-      borderColor={featured ? 'primary' : undefined}
-      style={{ boxShadow: '0 7px 18px rgba(59,92,204,0.11)', overflow: 'hidden' }}
+      className={twMerge(
+        'overflow-hidden border-continuous',
+        twMerge(
+          featured ? 'border-primary' : '',
+          'overflow-hidden border-continuous flex-[1] bg-reverse'
+        )
+      )}
+      style={[
+        { borderRadius: s(featured ? 22 : 18), borderWidth: featured ? s(1.5) : 0 },
+        { boxShadow: '0 7px 18px rgba(59,92,204,0.11)', overflow: 'hidden' },
+      ]}
     >
-      <Box absoluteFill style={{ overflow: 'hidden' }}>
+      <Box
+        className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px]"
+        style={{ overflow: 'hidden' }}
+      >
         {previousContent ? (
           <AnimatedBox
-            position="absolute"
-            left={s(featured ? 14 : 10)}
-            right={s(featured ? 14 : 10)}
-            top={s(featured ? 12 : 10)}
-            bottom={s(featured ? 12 : 10)}
+            className="overflow-hidden border-continuous absolute"
             pointerEvents="none"
-            style={previousContentStyle}
+            style={[
+              {
+                top: s(featured ? 12 : 10),
+                bottom: s(featured ? 12 : 10),
+                left: s(featured ? 14 : 10),
+                right: s(featured ? 14 : 10),
+              },
+              previousContentStyle,
+            ]}
           >
             {renderContent(previousContent)}
           </AnimatedBox>
         ) : null}
         <AnimatedBox
-          position="absolute"
-          left={s(featured ? 14 : 10)}
-          right={s(featured ? 14 : 10)}
-          top={s(featured ? 12 : 10)}
-          bottom={s(featured ? 12 : 10)}
+          className="overflow-hidden border-continuous absolute"
           pointerEvents="none"
-          style={currentContentStyle}
+          style={[
+            {
+              top: s(featured ? 12 : 10),
+              bottom: s(featured ? 12 : 10),
+              left: s(featured ? 14 : 10),
+              right: s(featured ? 14 : 10),
+            },
+            currentContentStyle,
+          ]}
         >
           {renderContent(currentContent)}
         </AnimatedBox>
@@ -433,7 +480,7 @@ export const createSceneFourOccurrences = ({
   const renderVerse = (verse: OccurrenceVerse, fontSize: number) => (
     <>
       {verse.before}
-      <Text color="primary" bold fontSize={metrics.s(fontSize)}>
+      <Text className="text-primary font-bold" style={{ fontSize: metrics.s(fontSize) || 16 }}>
         {verse.highlight}
       </Text>
       {verse.after}
@@ -601,11 +648,11 @@ export const createSceneFourOccurrences = ({
         >
           {activeFilter === 'vanity' ? (
             <>
-              <Text color="primary" bold fontSize={metrics.s(12.3)}>
+              <Text className="text-primary font-bold" style={{ fontSize: metrics.s(12.3) || 16 }}>
                 {t('onboarding.abel.sceneFour.ecclesiastesHighlightOne')}
               </Text>
               {t('onboarding.abel.sceneFour.ecclesiastesMiddle')}
-              <Text color="primary" bold fontSize={metrics.s(12.3)}>
+              <Text className="text-primary font-bold" style={{ fontSize: metrics.s(12.3) || 16 }}>
                 {verses[2].highlight}
               </Text>
               {verses[2].after}

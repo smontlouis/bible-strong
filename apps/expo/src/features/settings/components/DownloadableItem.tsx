@@ -1,9 +1,10 @@
+import { twMerge } from '~common/ui/classNames'
+
 import React from 'react'
 import { TouchableOpacity } from 'react-native'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import Animated from 'react-native-reanimated'
-
 import Box from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
 import Text from '~common/ui/Text'
@@ -13,7 +14,6 @@ import type { DownloadItemState } from '~state/downloadQueue'
 import { downloadManager } from '~helpers/downloadManager'
 import { useResourcePublicationStatus } from '~helpers/useResourcePublicationStatus'
 import { DOWNLOAD_LIST_LAYOUT } from './downloadListLayout'
-
 interface DownloadableItemProps {
   itemId: string
   name: string
@@ -159,18 +159,11 @@ const DownloadableItem = ({
     >
       {isDependency ? (
         <Box
-          pos="absolute"
-          top={-10}
-          left={DOWNLOAD_LIST_LAYOUT.dependencyConnectorLeft}
-          width={16}
-          height={36}
-          borderLeftWidth={2}
-          borderBottomWidth={2}
-          borderBottomLeftRadius={10}
-          borderColor="border"
+          className="border-continuous overflow-hidden absolute top-[-10px] w-[16px] h-[36px] border-l-[2px] border-b-[2px] rounded-bl-[10px] border-border"
+          style={{ left: DOWNLOAD_LIST_LAYOUT.dependencyConnectorLeft }}
         />
       ) : null}
-      <Box row flex alignItems="center">
+      <Box className="overflow-hidden border-continuous flex-row flex-[1] items-center">
         <TouchableOpacity
           accessibilityLabel={name}
           accessibilityRole={isSelectMode ? 'checkbox' : isMainInteractive ? 'button' : 'text'}
@@ -213,18 +206,17 @@ const DownloadableItem = ({
           )}
 
           {/* Content */}
-          <Box flex>
-            <Box row alignItems="center">
+          <Box className="overflow-hidden border-continuous flex-[1]">
+            <Box className="overflow-hidden border-continuous flex-row items-center">
               <Text
-                fontSize={isDependency ? 14 : 16}
-                color={isDownloaded ? 'primary' : 'default'}
                 numberOfLines={1}
-                style={{ flexShrink: 1 }}
+                style={[{ fontSize: isDependency ? 14 : 16 }, { flexShrink: 1 }]}
+                className={twMerge(isDownloaded ? 'text-primary' : 'text-default')}
               >
                 {name}
               </Text>
               {isDownloaded && (
-                <Box ml={5}>
+                <Box className="overflow-hidden border-continuous ml-[5px]">
                   <FeatherIcon name="cloud" size={14} color="primary" />
                 </Box>
               )}
@@ -232,28 +224,27 @@ const DownloadableItem = ({
 
             {/* Subtitle / status text */}
             {visualState === 'queued' && (
-              <Text fontSize={12} color="tertiary" mt={2}>
-                {t('downloads.queue')}
-              </Text>
+              <Text className="text-[12px] text-tertiary mt-[2px]">{t('downloads.queue')}</Text>
             )}
             {visualState === 'failed' && queueState?.error && (
-              <Text fontSize={12} color="quart" mt={2} numberOfLines={1}>
+              <Text className="text-[12px] text-quart mt-[2px]" numberOfLines={1}>
                 {queueState.error}
               </Text>
             )}
             {visualState === 'invalid' && (
-              <Text fontSize={12} color="quart" mt={2}>
-                {t('downloads.invalidCopy')}
-              </Text>
+              <Text className="text-[12px] text-quart mt-[2px]">{t('downloads.invalidCopy')}</Text>
             )}
             {subtitle && visualState !== 'queued' && visualState !== 'failed' && (
-              <Text fontSize={10} color="tertiary" mt={2} numberOfLines={isDependency ? 3 : 2}>
+              <Text
+                className="text-[10px] text-tertiary mt-[2px]"
+                numberOfLines={isDependency ? 3 : 2}
+              >
                 {subtitle}
               </Text>
             )}
             {/* Progress bar */}
             {(visualState === 'downloading' || visualState === 'inserting') && queueState && (
-              <Box mt={6} height={4} borderRadius={2} bg="border" overflow="hidden">
+              <Box className="border-continuous overflow-visible mt-[6px] h-[4px] rounded-[2px] bg-border">
                 <Animated.View
                   style={{
                     height: 4,
@@ -275,7 +266,7 @@ const DownloadableItem = ({
         </TouchableOpacity>
 
         {/* Right side action */}
-        <Box ml={12} alignItems="flex-end" justifyContent="center">
+        <Box className="overflow-hidden border-continuous ml-[12px] items-end justify-center">
           {visualState === 'not-downloaded' && !isSelectMode && (
             <TouchableOpacity
               accessibilityLabel={t('accessibility.downloadItem', { item: name })}
@@ -293,7 +284,7 @@ const DownloadableItem = ({
                 color={downloadsDisabled ? 'tertiary' : 'primary'}
               />
               {estimatedSize != null && estimatedSize > 0 && (
-                <Text fontSize={10} color="tertiary" mt={2}>
+                <Text className="text-[10px] text-tertiary mt-[2px]">
                   {formatSize(estimatedSize, t)}
                 </Text>
               )}
@@ -301,16 +292,14 @@ const DownloadableItem = ({
           )}
 
           {visualState === 'selected' && estimatedSize != null && estimatedSize > 0 && (
-            <Text fontSize={10} color="tertiary">
-              {formatSize(estimatedSize, t)}
-            </Text>
+            <Text className="text-[10px] text-tertiary">{formatSize(estimatedSize, t)}</Text>
           )}
 
           {visualState === 'queued' && <FeatherIcon name="clock" size={18} color="tertiary" />}
 
           {visualState === 'downloading' && queueState && (
-            <Box row alignItems="center" gap={8}>
-              <Text fontSize={12} color="tertiary">
+            <Box className="overflow-hidden border-continuous flex-row items-center gap-[8px]">
+              <Text className="text-[12px] text-tertiary">
                 {Math.round(queueState.downloadProgress * 100)}%
               </Text>
               <TouchableOpacity
@@ -325,9 +314,7 @@ const DownloadableItem = ({
           )}
 
           {visualState === 'inserting' && (
-            <Text fontSize={12} color="success">
-              {t('downloads.inserting')}
-            </Text>
+            <Text className="text-[12px] text-success">{t('downloads.inserting')}</Text>
           )}
 
           {visualState === 'downloaded' && !isSelectMode && isDefault && (
@@ -397,7 +384,7 @@ const DownloadableItem = ({
           )}
 
           {visualState === 'failed' && !isSelectMode && (
-            <Box row gap={8} alignItems="center">
+            <Box className="overflow-hidden border-continuous flex-row gap-[8px] items-center">
               <TouchableOpacity
                 accessibilityRole="button"
                 accessibilityState={{ disabled: downloadsDisabled }}
@@ -405,7 +392,12 @@ const DownloadableItem = ({
                 onPress={() => downloadManager.retry(itemId)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Text fontSize={12} color={downloadsDisabled ? 'tertiary' : 'primary'} bold>
+                <Text
+                  className={twMerge(
+                    downloadsDisabled ? 'text-tertiary' : 'text-primary',
+                    'text-[12px] font-bold'
+                  )}
+                >
                   {downloadsDisabled
                     ? t('resource.action.connectionRequired')
                     : t('downloads.retry')}

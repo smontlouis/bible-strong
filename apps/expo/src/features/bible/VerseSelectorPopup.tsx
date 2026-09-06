@@ -12,7 +12,6 @@ import { useQuery } from '@tanstack/react-query'
 import { bibleChapterQueryOptions } from '~features/resources/resourceQueries'
 import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
-
 type VerseSelectorPopupProps = {
   bibleAtom: PrimitiveAtom<BibleTab>
   children: React.ReactNode
@@ -65,8 +64,7 @@ export const VerseSelectorPopup = ({
   return (
     <>
       <TouchableBox
-        center
-        height="100%"
+        className="overflow-hidden border-continuous items-center justify-center h-[100%]"
         onPress={() => sheetRef.current?.present()}
         accessibilityRole="button"
         accessibilityLabel={t('accessibility.chooseVerse')}
@@ -89,19 +87,16 @@ export const VerseSelectorPopup = ({
           {verseNumbers.length ? (
             verseNumbers.map(verse => (
               <TouchableBox
+                className="overflow-hidden border-continuous bg-opacity5 rounded-[3px] h-[40px] items-center justify-center"
                 key={String(verse)}
-                backgroundColor="opacity5"
-                borderRadius={3}
-                w={ITEM_WIDTH}
-                h={40}
-                alignItems="center"
-                justifyContent="center"
                 onPress={() => handleSelect(verse)}
                 accessibilityRole="button"
                 accessibilityLabel={`${t('Verset')} ${verse}`}
                 accessibilityState={{ selected: verse === bible.data.selectedVerse }}
+                style={{ width: ITEM_WIDTH }}
               >
                 <Box
+                  className="overflow-hidden border-continuous"
                   style={{
                     position: 'absolute',
                     inset: 0,
@@ -110,13 +105,13 @@ export const VerseSelectorPopup = ({
                     display: 'flex',
                   }}
                 >
-                  <Text textAlign="center">{verse}</Text>
+                  <Text className="text-center">{verse}</Text>
                 </Box>
               </TouchableBox>
             ))
           ) : (
-            <Box py={20} width="100%" center>
-              <Text color="grey">{t('Chargement...')}</Text>
+            <Box className="overflow-hidden border-continuous py-[20px] w-[100%] items-center justify-center">
+              <Text className="text-grey">{t('Chargement...')}</Text>
             </Box>
           )}
         </SheetScrollView>

@@ -1,8 +1,6 @@
 import { useWindowDimensions } from 'react-native'
 import type { ReactNode } from 'react'
-
 import Box from '~common/ui/Box'
-
 export const DESIGN_CONTENT_WIDTH = 350
 export const DESIGN_STAGE_HEIGHT = 480
 
@@ -39,8 +37,11 @@ export const OnboardingStage = ({ availableHeight, children }: OnboardingStagePr
   }
 
   return (
-    <Box flex width="100%" alignItems="center" justifyContent="center" overflow="visible">
-      <Box width={metrics.width} height={metrics.height} position="relative" overflow="visible">
+    <Box className="border-continuous overflow-visible flex-[1] w-[100%] items-center justify-center">
+      <Box
+        className="border-continuous overflow-visible relative"
+        style={{ width: metrics.width, height: metrics.height }}
+      >
         {children(metrics)}
       </Box>
     </Box>

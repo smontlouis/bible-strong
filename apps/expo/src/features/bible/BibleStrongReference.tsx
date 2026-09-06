@@ -1,6 +1,10 @@
-import styled from '@emotion/native'
-import React from 'react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import type { LayoutChangeEvent, TextStyle } from 'react-native'
+import * as NativeUI from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
 import Paragraph from '~common/ui/Paragraph'
 import { StrongResourceScrollConsumer } from './StrongResourceScrollContext'
@@ -11,63 +15,167 @@ type SelectableProps = {
 
 export type StrongVerseTextStyle = Pick<TextStyle, 'fontSize' | 'lineHeight'>
 
-const StyledView = styled.TouchableOpacity<SelectableProps>(({ isSelected, theme }) => ({
-  backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary,
-  borderRadius: 5,
-  paddingLeft: 3,
-  paddingRight: 3,
-  marginBottom: 5,
-  overflow: 'hidden',
-}))
+const StyledView = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.TouchableOpacity>,
+    keyof SelectableProps | 'theme'
+  > &
+    Omit<SelectableProps, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { isSelected } = props
+  const classStyles = useResolveClassNames(
+    twMerge('rounded-[5px] pl-[3px] pr-[3px] mb-[5px] overflow-hidden', className)
+  )
+  return (
+    <NativeUI.TouchableOpacity
+      {...props}
+      style={
+        [
+          classStyles,
+          { backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']
+      }
+    />
+  )
+}
 
-const StyledCircle = styled.TouchableOpacity<SelectableProps>(({ theme }) => ({
-  width: 25,
-  height: 25,
-  borderRadius: 25 / 2,
-  backgroundColor: theme.colors.lightPrimary,
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginHorizontal: 3,
-}))
+const StyledCircle = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.TouchableOpacity>,
+    keyof SelectableProps | 'theme'
+  > &
+    Omit<SelectableProps, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const StyledInsideCircle = styled.View<SelectableProps & { isConcordance?: boolean }>(
-  ({ theme, isSelected, isConcordance }) => ({
-    width: isConcordance ? 12 : 15,
-    height: isConcordance ? 12 : 15,
-    borderRadius: isConcordance ? 15 : 15 / 2,
-    marginHorizontal: isConcordance ? 4 : 0,
-    marginTop: isConcordance ? 0 : 0,
-    backgroundColor: isSelected || isConcordance ? theme.colors.primary : theme.colors.lightPrimary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  })
-)
+  const classStyles = useResolveClassNames(
+    twMerge('w-[25px] h-[25px] bg-light-primary items-center justify-center mx-[3px]', className)
+  )
+  return (
+    <NativeUI.TouchableOpacity
+      {...props}
+      style={
+        [classStyles, { borderRadius: 25 / 2 }, props.style] as UIComponentProps<
+          typeof NativeUI.TouchableOpacity
+        >['style']
+      }
+    />
+  )
+}
 
-const StyledText = styled(Paragraph)<SelectableProps & { isFromConcordance?: boolean }>(
-  ({ isFromConcordance, isSelected, theme }) => ({
-    color: isSelected ? theme.colors.reverse : theme.colors.default,
-    ...(isFromConcordance
-      ? {
-          color: 'red',
-          fontWeight: 'bold',
-          fontSize: 12,
-        }
-      : {}),
-  })
-)
+const StyledInsideCircle = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.View>,
+    keyof (SelectableProps & { isConcordance?: boolean }) | 'theme'
+  > &
+    Omit<SelectableProps & { isConcordance?: boolean }, 'theme'> & {
+      theme?: AppTheme
+      className?: string
+    }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { isSelected, isConcordance } = props
+  const classStyles = useResolveClassNames(twMerge('items-center justify-center', className))
+  return (
+    <NativeUI.View
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            width: isConcordance ? 12 : 15,
+            height: isConcordance ? 12 : 15,
+            borderRadius: isConcordance ? 15 : 15 / 2,
+            marginHorizontal: isConcordance ? 4 : 0,
+            marginTop: isConcordance ? 0 : 0,
+            backgroundColor:
+              isSelected || isConcordance ? theme.colors.primary : theme.colors.lightPrimary,
+          },
+          props.style,
+        ] as UIComponentProps<typeof NativeUI.View>['style']
+      }
+    />
+  )
+}
 
-const ConcordanceText = styled(Paragraph)<{ isConcordance?: boolean }>(
-  ({ isConcordance, theme }) => ({
-    ...(isConcordance
-      ? {
-          color: theme.colors.primary,
-          textDecorationLine: 'underline',
-          textDecorationStyle: 'solid',
-          textDecorationColor: theme.colors.primary,
-        }
-      : {}),
-  })
-)
+const StyledText = (
+  componentProps: Omit<
+    UIComponentProps<typeof Paragraph>,
+    keyof (SelectableProps & { isFromConcordance?: boolean }) | 'theme'
+  > &
+    Omit<SelectableProps & { isFromConcordance?: boolean }, 'theme'> & {
+      theme?: AppTheme
+      className?: string
+    }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { isFromConcordance, isSelected } = props
+  const classStyles = useResolveClassNames(twMerge('', className))
+  return (
+    <Paragraph
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            color: isSelected ? theme.colors.reverse : theme.colors.default,
+            ...(isFromConcordance
+              ? {
+                  color: 'red',
+                  fontWeight: 'bold',
+                  fontSize: 12,
+                }
+              : {}),
+          },
+          props.style,
+        ] as UIComponentProps<typeof Paragraph>['style']
+      }
+    />
+  )
+}
+
+const ConcordanceText = (
+  componentProps: Omit<
+    UIComponentProps<typeof Paragraph>,
+    keyof { isConcordance?: boolean } | 'theme'
+  > &
+    Omit<{ isConcordance?: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { isConcordance } = props
+  const classStyles = useResolveClassNames(twMerge('', className))
+  return (
+    <Paragraph
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            ...(isConcordance
+              ? {
+                  color: theme.colors.primary,
+                  textDecorationLine: 'underline',
+                  textDecorationStyle: 'solid',
+                  textDecorationColor: theme.colors.primary,
+                }
+              : {}),
+          },
+          props.style,
+        ] as UIComponentProps<typeof Paragraph>['style']
+      }
+    />
+  )
+}
 
 type BibleStrongRefProps = {
   small?: boolean
@@ -77,7 +185,7 @@ type BibleStrongRefProps = {
   concordanceFor?: string | number
   textStyle?: StrongVerseTextStyle
   occurrenceIndex: number
-  selectionTargets?: Array<{ reference: string; occurrenceIndex: number }>
+  selectionTargets?: { reference: string; occurrenceIndex: number }[]
 }
 
 const BibleStrongRef = ({

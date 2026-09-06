@@ -3,7 +3,6 @@ import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
-
 import Header from '~common/Header'
 import type { SheetRef } from '~common/sheet'
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -27,7 +26,6 @@ import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { localQueryOptions } from '~helpers/queryOptions'
-
 type DefaultVersionCardProps = {
   title: string
   description: string
@@ -46,43 +44,33 @@ const DefaultVersionCard = ({
   onPress,
 }: DefaultVersionCardProps) => (
   <TouchableBox
+    className="border-continuous overflow-hidden p-[18px] border-[1px] border-border rounded-[14px] bg-reverse"
     accessibilityRole="button"
     accessibilityLabel={`${title}, ${displayName}`}
     onPress={onPress}
-    p={18}
-    borderWidth={1}
-    borderColor="border"
-    borderRadius={14}
-    bg="reverse"
   >
-    <Box row alignItems="flex-start">
-      <Box flex pr={12}>
-        <Text fontSize={16} bold>
-          {title}
-        </Text>
-        <Text mt={4} fontSize={12} color="grey" lineHeight={17}>
-          {description}
-        </Text>
+    <Box className="overflow-hidden border-continuous flex-row items-start">
+      <Box className="overflow-hidden border-continuous flex-[1] pr-[12px]">
+        <Text className="text-[16px] font-bold">{title}</Text>
+        <Text className="mt-[4px] text-[12px] text-grey leading-[17px]">{description}</Text>
       </Box>
-      <Box width={32} height={32} center>
+      <Box className="overflow-hidden border-continuous w-[32px] h-[32px] items-center justify-center">
         <FeatherIcon name="chevron-right" size={20} color="tertiary" />
       </Box>
     </Box>
 
-    <Box mt={18} row alignItems="center">
-      <Box flex>
-        <Text fontSize={12} color="grey" bold>
-          {version.id}
-        </Text>
-        <Box mt={2} row alignItems="center">
-          <Text fontSize={18}>{displayName}</Text>
+    <Box className="overflow-hidden border-continuous mt-[18px] flex-row items-center">
+      <Box className="overflow-hidden border-continuous flex-[1]">
+        <Text className="text-[12px] text-grey font-bold">{version.id}</Text>
+        <Box className="overflow-hidden border-continuous mt-[2px] flex-row items-center">
+          <Text className="text-[18px]">{displayName}</Text>
           {typeof strongAvailable === 'boolean' && (
-            <Box ml={6}>
+            <Box className="overflow-hidden border-continuous ml-[6px]">
               <StrongMark highlighted={strongAvailable} />
             </Box>
           )}
         </Box>
-        <Text mt={3} fontSize={10} color="grey" numberOfLines={2}>
+        <Text className="mt-[3px] text-[10px] text-grey" numberOfLines={2}>
           {version.c}
         </Text>
       </Box>
@@ -136,10 +124,10 @@ const BibleDefaultsScreen = () => {
   }
 
   return (
-    <Container flex>
+    <Container className="flex-[1]">
       <Header hasBackButton title={t('bibleDefaults.title')} />
 
-      <PageContent flex px={20} pt={24} gap={16}>
+      <PageContent className="pt-[24px] px-[20px] gap-[16px] flex-[1]">
         <DefaultVersionCard
           title={t('bibleDefaults.defaultReadingTitle')}
           description={t('bibleDefaults.defaultVersionDescription')}

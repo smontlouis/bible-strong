@@ -1,7 +1,6 @@
 import { Image } from 'react-native'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import Box from '~common/ui/Box'
-
 interface SnapshotPlaceholderProps {
   base64?: string
 }
@@ -14,7 +13,7 @@ const SnapshotPlaceholder = ({ base64 }: SnapshotPlaceholderProps) => {
   const theme = useTheme()
 
   if (!base64) {
-    return <Box flex={1} bg="reverse" />
+    return <Box className="overflow-hidden border-continuous flex-[1] bg-reverse" />
   }
 
   return (

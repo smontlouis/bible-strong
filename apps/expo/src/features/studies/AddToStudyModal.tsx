@@ -16,7 +16,6 @@ import { getDateLocale } from '~helpers/languageUtils'
 import type { RootState } from '~redux/modules/reducer'
 import type { Study } from '~redux/modules/user'
 import { useMountTime } from '~helpers/useMountTime'
-
 interface AddToStudyModalProps {
   sheetRef: React.RefObject<SheetRef | null>
   onSelectStudy: (studyId: string) => void
@@ -52,18 +51,10 @@ const AddToStudyModal = ({ sheetRef, onSelectStudy, reference, onClose }: AddToS
 
   const renderNewStudyButton = () => (
     <TouchableOpacity accessibilityRole="button" onPress={handleCreateNewStudy}>
-      <HStack
-        paddingVertical={16}
-        paddingHorizontal={20}
-        borderBottomWidth={2}
-        borderColor="lightGrey"
-        alignItems="center"
-      >
+      <HStack className="border-continuous overflow-hidden py-[16px] px-[20px] border-b-[2px] border-light-grey items-center">
         <FeatherIcon name="plus-circle" size={24} color="primary" />
-        <Box flex marginLeft={16}>
-          <Text fontSize={16} bold color="primary">
-            {t('study.newStudy')}
-          </Text>
+        <Box className="overflow-hidden border-continuous flex-[1] ml-[16px]">
+          <Text className="text-[16px] font-bold text-primary">{t('study.newStudy')}</Text>
         </Box>
         <FeatherIcon name="arrow-right" size={20} color="primary" />
       </HStack>
@@ -77,18 +68,12 @@ const AddToStudyModal = ({ sheetRef, onSelectStudy, reference, onClose }: AddToS
 
     return (
       <TouchableOpacity accessibilityRole="button" onPress={() => handleSelectStudy(item.id)}>
-        <HStack
-          paddingVertical={16}
-          paddingHorizontal={20}
-          borderBottomWidth={1}
-          borderColor="lightGrey"
-          alignItems="center"
-        >
-          <Box flex>
-            <Text fontSize={16} bold numberOfLines={1}>
+        <HStack className="border-continuous overflow-hidden py-[16px] px-[20px] border-b-[1px] border-light-grey items-center">
+          <Box className="overflow-hidden border-continuous flex-[1]">
+            <Text className="text-[16px] font-bold" numberOfLines={1}>
               {item.title}
             </Text>
-            <Text fontSize={13} color="tertiary" marginTop={4}>
+            <Text className="text-[13px] text-tertiary mt-[4px]">
               {t('Il y a {{formattedDate}}', { formattedDate })}
             </Text>
           </Box>
@@ -104,7 +89,7 @@ const AddToStudyModal = ({ sheetRef, onSelectStudy, reference, onClose }: AddToS
       snapPoints={[1]}
       header={
         <SheetHeader title={t('study.selectStudy')} subTitle={reference}>
-          <Box px={20} pb={10}>
+          <Box className="overflow-hidden border-continuous px-[20px] pb-[10px]">
             <SheetSearchInput
               placeholder={t('study.searchStudy')}
               onChangeText={search}
@@ -124,7 +109,7 @@ const AddToStudyModal = ({ sheetRef, onSelectStudy, reference, onClose }: AddToS
         estimatedItemSize={72}
         contentContainerStyle={{ paddingBottom: 20 }}
         ListEmptyComponent={
-          <Box flex justifyContent="center" alignItems="center" padding={40}>
+          <Box className="overflow-hidden border-continuous flex-[1] justify-center items-center p-[40px]">
             <Empty
               icon={require('~assets/images/empty-state-icons/study.svg')}
               message={t('study.noStudies')}

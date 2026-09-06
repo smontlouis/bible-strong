@@ -1,33 +1,50 @@
-import styled from '@emotion/native'
 import { useQuery } from '@tanstack/react-query'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import * as NativeUI from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
-import getVersesContent from '~helpers/getVersesContent'
-import Paragraph from '~common/ui/Paragraph'
-import Box from '~common/ui/Box'
 import Link from '~common/Link'
-import Text from '~common/ui/Text'
-import { removeBreakLines } from '~helpers/utils'
-import { getBook } from '~helpers/bibleBookCatalog'
 import type { VerseIds } from '~common/types'
-import type { VersionCode } from '~state/tabs'
+import Box from '~common/ui/Box'
+import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import { loadBibleVerseTexts } from '~features/resources/resourceQueries'
+import { getBook } from '~helpers/bibleBookCatalog'
+import getVersesContent from '~helpers/getVersesContent'
+import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
+import { localQueryOptions } from '~helpers/queryOptions'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import {
   isStrongCapableBibleVersion,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
-import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
 import type { StrongSelection } from '~helpers/strongSelection'
+import { removeBreakLines } from '~helpers/utils'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
-import { localQueryOptions } from '~helpers/queryOptions'
+import type { VersionCode } from '~state/tabs'
 import CompareStrongVerseText from './CompareStrongVerseText'
-import { loadBibleVerseTexts } from '~features/resources/resourceQueries'
-import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 
-const Container = styled.View(({ theme }) => ({
-  padding: 20,
-  borderTopColor: theme.colors.border,
-  borderTopWidth: 1,
-}))
+const Container = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('p-[20px] border-t-border border-t-[1px]', className)
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+    />
+  )
+}
 
 type CompareVerseItemProps = {
   versionId: VersionCode
@@ -82,8 +99,8 @@ const PlainCompareVerseItem = ({
       }}
     >
       <Container>
-        <Box row>
-          <Text color="darkGrey" bold fontSize={14} marginBottom={5}>
+        <Box className="overflow-hidden border-continuous flex-row">
+          <Text className="text-dark-grey font-bold text-[14px] mb-[5px]">
             {versionId} - {name}
           </Text>
         </Box>
@@ -149,8 +166,8 @@ const StrongCompareVerseItem = ({
 
   return (
     <Container>
-      <Box row>
-        <Text color="darkGrey" bold fontSize={14} marginBottom={5}>
+      <Box className="overflow-hidden border-continuous flex-row">
+        <Text className="text-dark-grey font-bold text-[14px] mb-[5px]">
           {versionId} - {name}
         </Text>
       </Box>

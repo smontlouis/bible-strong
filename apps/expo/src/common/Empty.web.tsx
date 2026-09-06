@@ -1,10 +1,8 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { Image, type ImageSource } from 'expo-image'
 import type { ReactNode } from 'react'
-
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-
 type Props = {
   message: string
   source?: unknown
@@ -17,10 +15,10 @@ const Empty = ({ message, icon, iconElement, children }: Props) => {
   const theme = useTheme()
 
   return (
-    <Box flex alignItems="center">
-      <Box alignItems="center" justifyContent="center" flex px={20}>
+    <Box className="overflow-hidden border-continuous flex-[1] items-center">
+      <Box className="overflow-hidden border-continuous items-center justify-center flex-[1] px-[20px]">
         {icon && (
-          <Box mb={20}>
+          <Box className="overflow-hidden border-continuous mb-[20px]">
             <Image
               source={icon}
               style={{ width: 80, height: 80, opacity: 0.6 }}
@@ -29,12 +27,10 @@ const Empty = ({ message, icon, iconElement, children }: Props) => {
             />
           </Box>
         )}
-        {iconElement && !icon && <Box mb={20}>{iconElement}</Box>}
-        {message && (
-          <Text textAlign="center" color="tertiary">
-            {message}
-          </Text>
+        {iconElement && !icon && (
+          <Box className="overflow-hidden border-continuous mb-[20px]">{iconElement}</Box>
         )}
+        {message && <Text className="text-center text-tertiary">{message}</Text>}
         {children}
       </Box>
     </Box>

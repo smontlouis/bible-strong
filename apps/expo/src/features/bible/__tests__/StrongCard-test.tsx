@@ -1,31 +1,19 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
 import StrongCard from '../StrongCard'
+jest.mock('~themes/ThemeProvider', () => ({ useTheme: () => ({ colors: {} }) }))
+// Behavioral tests do not run Metro's generated Uniwind stylesheet.
+jest.mock('uniwind', () => ({ useResolveClassNames: () => ({}) }))
 
 const mockPushRouteOnce = jest.fn()
 const mockDismissTo = jest.fn()
 
-jest.mock('@emotion/native', () => {
-  const ReactModule = jest.requireActual<typeof React>('react')
-  const createStyledComponent = (type: React.ElementType | string) => () =>
-    function StyledComponent({
-      children,
-      ...props
-    }: React.PropsWithChildren<Record<string, unknown>>) {
-      return ReactModule.createElement(type as React.ElementType, props, children)
-    }
-  const styled = Object.assign((type: React.ElementType) => createStyledComponent(type), {
-    View: createStyledComponent('View'),
-  })
-
-  return { __esModule: true, default: styled }
-})
-
 jest.mock('react-native', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return {
+    Text: 'Text',
+    View: 'View',
     ScrollView: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
       ReactModule.createElement('ScrollView', props, children),
   }

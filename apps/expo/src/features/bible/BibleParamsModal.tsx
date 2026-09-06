@@ -1,8 +1,12 @@
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
+import * as NativeUI from 'react-native'
 import { FlatList } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
-import styled from '@emotion/native'
-import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
 import { useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
@@ -12,6 +16,7 @@ import IconLongPress from '~assets/images/IconLongPress'
 import IconShortPress from '~assets/images/IconShortPress'
 import { LineHeightIcon } from '~common/LineHeightIcon'
 import Link, { LinkBox } from '~common/Link'
+import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
 import Border from '~common/ui/Border'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Circle from '~common/ui/Circle'
@@ -28,12 +33,12 @@ import {
   setSettingsAlignContent,
   setSettingsContextualInformationDisplay,
   setSettingsLineHeight,
-  setSettingsRelationsDisplay,
   setSettingsPreferredColorScheme,
   setSettingsPreferredDarkTheme,
   setSettingsPreferredLightTheme,
   setSettingsPress,
   setSettingsRedWordsDisplay,
+  setSettingsRelationsDisplay,
   setSettingsTagsDisplay,
   setSettingsTextDisplay,
 } from '~redux/modules/user'
@@ -41,22 +46,56 @@ import { colorPickerModalAtom } from '~state/app'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
 
-export const HalfContainer = styled.View<{ border?: boolean }>(({ border, theme }) => ({
-  paddingHorizontal: 20,
-  paddingRight: 10,
-  paddingVertical: 15,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: border ? 1 : 0,
-  flexDirection: 'row',
-  alignItems: 'center',
-}))
+export const HalfContainer = (
+  componentProps: Omit<
+    UIComponentProps<typeof NativeUI.View>,
+    keyof { border?: boolean } | 'theme'
+  > &
+    Omit<{ border?: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-export const FontText = styled(Paragraph)<{ isSelected: boolean }>(({ isSelected, theme }) => ({
-  fontSize: 16,
-  paddingLeft: 15,
-  paddingRight: 15,
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-}))
+  const { border } = props
+  const classStyles = useResolveClassNames(
+    twMerge('px-[20px] pr-[10px] py-[15px] border-b-border flex-row items-center', className)
+  )
+  return (
+    <NativeUI.View
+      {...props}
+      style={
+        [classStyles, { borderBottomWidth: border ? 1 : 0 }, props.style] as UIComponentProps<
+          typeof NativeUI.View
+        >['style']
+      }
+    />
+  )
+}
+
+export const FontText = (
+  componentProps: Omit<
+    UIComponentProps<typeof Paragraph>,
+    keyof { isSelected: boolean } | 'theme'
+  > &
+    Omit<{ isSelected: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { isSelected } = props
+  const classStyles = useResolveClassNames(twMerge('text-[16px] pl-[15px] pr-[15px]', className))
+  return (
+    <Paragraph
+      {...props}
+      style={
+        [
+          classStyles,
+          { color: isSelected ? theme.colors.primary : theme.colors.default },
+          props.style,
+        ] as UIComponentProps<typeof Paragraph>['style']
+      }
+    />
+  )
+}
 
 export const useParamsModalLabels = () => {
   const { t } = useTranslation()
@@ -194,8 +233,8 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
         }}
       >
         <HalfContainer border>
-          <Text flex={5}>{t('Thème')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>
+          <Text className="flex-[5]">{t('Thème')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold">
             {preferredColorSchemeToString[preferredColorScheme]}
           </Text>
           <TouchableIcon
@@ -218,16 +257,16 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>{t('Couleur Jour')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>
+          <Text className="flex-[5]">{t('Couleur Jour')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold">
             {preferredLightThemeToString[preferredLightTheme]}
           </Text>
           <LinkBox
             accessibilityLabel={preferredLightThemeToString.default}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredLightTheme === 'default' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle
               isSelected={preferredLightTheme === 'default'}
@@ -239,8 +278,8 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             accessibilityLabel={preferredLightThemeToString.sepia}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredLightTheme === 'sepia' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle
               isSelected={preferredLightTheme === 'sepia'}
@@ -252,8 +291,8 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             accessibilityLabel={preferredLightThemeToString.nature}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredLightTheme === 'nature' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle isSelected={preferredLightTheme === 'nature'} size={20} color="#EAF9EC" />
           </LinkBox>
@@ -261,23 +300,23 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             accessibilityLabel={preferredLightThemeToString.sunset}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredLightTheme === 'sunset' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle isSelected={preferredLightTheme === 'sunset'} size={20} color="#FAE0D5" />
           </LinkBox>
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>{t('Couleur Nuit')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>
+          <Text className="flex-[5]">{t('Couleur Nuit')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold">
             {preferredDarkThemeToString[preferredDarkTheme]}
           </Text>
           <LinkBox
             accessibilityLabel={preferredDarkThemeToString.dark}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredDarkTheme === 'dark' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle isSelected={preferredDarkTheme === 'dark'} size={20} color="rgb(18,45,66)" />
           </LinkBox>
@@ -285,8 +324,8 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             accessibilityLabel={preferredDarkThemeToString.black}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredDarkTheme === 'black' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle isSelected={preferredDarkTheme === 'black'} size={20} color="black" />
           </LinkBox>
@@ -294,8 +333,8 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             accessibilityLabel={preferredDarkThemeToString.mauve}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredDarkTheme === 'mauve' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle isSelected={preferredDarkTheme === 'mauve'} size={20} color="rgb(51,4,46)" />
           </LinkBox>
@@ -303,15 +342,15 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             accessibilityLabel={preferredDarkThemeToString.night}
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredDarkTheme === 'night' }}
-            size={40}
             onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}
+            style={{ width: 40, height: 40 }}
           >
             <Circle isSelected={preferredDarkTheme === 'night'} size={20} color="rgb(0,50,100)" />
           </LinkBox>
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>{t('Taille du texte')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>{`${100 + fontSizeScale * 10}%`}</Text>
+          <Text className="flex-[5]">{t('Taille du texte')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold">{`${100 + fontSizeScale * 10}%`}</Text>
           <TouchableIcon
             accessibilityLabel={t('accessibility.decreaseTextSize')}
             name="type"
@@ -325,8 +364,8 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>{t('Alignement du texte')}</Text>
-          <Text marginLeft={5} fontSize={12} bold marginRight={10}>
+          <Text className="flex-[5]">{t('Alignement du texte')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold mr-[10px]">
             {alignContentToString[alignContent]}
           </Text>
           <TouchableIcon
@@ -340,11 +379,12 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>{t('Hauteur de ligne')}</Text>
-          <Text marginLeft={5} fontSize={12} bold marginRight={10}>
+          <Text className="flex-[5]">{t('Hauteur de ligne')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold mr-[10px]">
             {lineHeightToString[lineHeight]}
           </Text>
           <TouchableBox
+            className="overflow-hidden border-continuous"
             accessibilityLabel={`${t('Hauteur de ligne')}: ${lineHeightToString[lineHeight]}`}
             accessibilityRole="button"
             onPress={() => {
@@ -364,10 +404,8 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
         </HalfContainer>
 
         <HalfContainer border>
-          <Text flex={5}>{t('Mode des versets')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>
-            {textDisplayToString[textDisplay]}
-          </Text>
+          <Text className="flex-[5]">{t('Mode des versets')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold">{textDisplayToString[textDisplay]}</Text>
           <TouchableIcon
             accessibilityLabel={`${t('Mode des versets')}: ${textDisplayToString[textDisplay]}`}
             isSelected
@@ -380,8 +418,8 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
         </HalfContainer>
 
         <HalfContainer border>
-          <Text flex={5}>{t('Affichage des relations')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>
+          <Text className="flex-[5]">{t('Affichage des relations')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold">
             {relationsDisplayToString[relationsDisplay]}
           </Text>
           <TouchableIcon
@@ -395,10 +433,8 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>{t('Affichage des tags')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>
-            {tagsDisplayToString[tagsDisplay]}
-          </Text>
+          <Text className="flex-[5]">{t('Affichage des tags')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold">{tagsDisplayToString[tagsDisplay]}</Text>
           <TouchableIcon
             accessibilityLabel={`${t('Affichage des tags')}: ${tagsDisplayToString[tagsDisplay]}`}
             isSelected
@@ -410,8 +446,8 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>{t('Contexte et médias')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>
+          <Text className="flex-[5]">{t('Contexte et médias')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold">
             {contextualInformationDisplay ? t('Activé') : t('Désactivé')}
           </Text>
           <TouchableIcon
@@ -424,8 +460,8 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>{t('Paroles de Jésus en rouge')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>
+          <Text className="flex-[5]">{t('Paroles de Jésus en rouge')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold">
             {redWordsDisplay ? t('Activé') : t('Désactivé')}
           </Text>
           <TouchableIcon
@@ -436,10 +472,8 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>{t('Affichage des strongs')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>
-            {pressToString[press]}
-          </Text>
+          <Text className="flex-[5]">{t('Affichage des strongs')}</Text>
+          <Text className="ml-[5px] text-[12px] font-bold">{pressToString[press]}</Text>
           <TouchableSvgIcon
             icon={press === 'shortPress' ? IconShortPress : IconLongPress}
             isSelected
@@ -450,14 +484,10 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             size={25}
           />
         </HalfContainer>
-        <Box height={60}>
+        <Box className="overflow-hidden border-continuous h-[60px]">
           <FlatList
             ref={fontsViewRef}
-            ListHeaderComponent={
-              <Text marginLeft={20} marginRight={50}>
-                {t('Polices')}
-              </Text>
-            }
+            ListHeaderComponent={<Text className="ml-[20px] mr-[50px]">{t('Polices')}</Text>}
             horizontal
             getItemLayout={(data, index) => ({
               length: 100,
@@ -482,30 +512,24 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           <Border />
         </Box>
         <TouchableBox
-          px={20}
-          py={15}
-          alignItems="center"
-          row
+          className="overflow-hidden border-continuous px-[20px] py-[15px] items-center flex-row"
           onPress={() => {
             modalRef.current?.close()
             setColorPickerModal({})
           }}
         >
-          <Text flex>{t('Palette de couleurs')}</Text>
+          <Text className="flex-[1]">{t('Palette de couleurs')}</Text>
           <FeatherIcon name="chevron-right" size={20} color="grey" />
         </TouchableBox>
         <Border />
         <TouchableBox
-          px={20}
-          py={15}
-          alignItems="center"
-          row
+          className="overflow-hidden border-continuous px-[20px] py-[15px] items-center flex-row"
           onPress={() => {
             router.push('/bible-share-options')
             modalRef.current?.close()
           }}
         >
-          <Text flex>{t('bible.settings.shareOptions')}</Text>
+          <Text className="flex-[1]">{t('bible.settings.shareOptions')}</Text>
           <FeatherIcon name="chevron-right" size={20} color="grey" />
         </TouchableBox>
       </SheetScrollView>

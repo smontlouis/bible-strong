@@ -8,14 +8,12 @@ import { toast } from '~helpers/toast'
 import * as Updates from 'expo-updates'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { remoteQueryOptions } from '~helpers/queryOptions'
-
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
 import useLogin from '~helpers/useLogin'
 import { appLogger } from '~helpers/agentObservability'
-
 type ErrorBoundaryState = {
   hasError: boolean
   error: Error | null
@@ -137,32 +135,18 @@ Date: ${new Date().toISOString()}
   return (
     <Container>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <Box flex center px={20} py={40}>
+        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center px-[20px] py-[40px]">
           <Icon.Feather name="alert-triangle" size={80} color="#DC2626" />
 
-          <Text bold fontSize={32} mt={20} color="quart">
-            {t('app.errorTitle')}
-          </Text>
+          <Text className="font-bold text-[32px] mt-[20px] text-quart">{t('app.errorTitle')}</Text>
 
-          <Text textAlign="center" fontSize={15} mt={10} color="grey">
-            {t('app.error')}
-          </Text>
+          <Text className="text-center text-[15px] mt-[10px] text-grey">{t('app.error')}</Text>
 
           {/* Update status */}
           {(isLoading || updateReady) && (
-            <Box
-              mt={20}
-              p={16}
-              bg="rgba(59, 130, 246, 0.1)"
-              borderRadius={8}
-              borderWidth={1}
-              borderColor="rgba(59, 130, 246, 0.2)"
-              width="100%"
-              row
-              alignItems="center"
-            >
+            <Box className="border-continuous overflow-hidden mt-[20px] p-[16px] bg-[rgba(59,130,246,0.1)] rounded-[8px] border-[1px] border-[rgba(59,130,246,0.2)] w-[100%] flex-row items-center">
               <ActivityIndicator size="small" color="#3B82F6" />
-              <Text fontSize={14} color="primary" ml={12}>
+              <Text className="text-[14px] text-primary ml-[12px]">
                 {isLoading && t('app.updateChecking')}
                 {updateReady && t('app.updateReady')}
               </Text>
@@ -170,26 +154,9 @@ Date: ${new Date().toISOString()}
           )}
 
           {/* Error details box */}
-          <Box
-            mt={20}
-            width="100%"
-            bg="rgba(220, 38, 38, 0.05)"
-            borderRadius={8}
-            borderWidth={1}
-            borderColor="rgba(220, 38, 38, 0.2)"
-            overflow="hidden"
-          >
-            <Box
-              row
-              justifyContent="space-between"
-              alignItems="center"
-              px={12}
-              py={8}
-              bg="rgba(220, 38, 38, 0.1)"
-            >
-              <Text fontSize={12} bold color="quart">
-                {t('app.errorDetails')}
-              </Text>
+          <Box className="border-continuous overflow-visible mt-[20px] w-[100%] bg-[rgba(220,38,38,0.05)] rounded-[8px] border-[1px] border-[rgba(220,38,38,0.2)]">
+            <Box className="overflow-hidden border-continuous flex-row justify-between items-center px-[12px] py-[8px] bg-[rgba(220,38,38,0.1)]">
+              <Text className="text-[12px] font-bold text-quart">{t('app.errorDetails')}</Text>
               <Button small reverse onPress={handleCopyError}>
                 {t('Copier')}
               </Button>
@@ -209,26 +176,19 @@ Date: ${new Date().toISOString()}
           </Box>
 
           {/* Reset button */}
-          <Box mt={30} width="100%">
+          <Box className="overflow-hidden border-continuous mt-[30px] w-[100%]">
             <Button onPress={handleReset}>{t('app.errorReset')}</Button>
           </Box>
 
           {/* Info message */}
-          <Box
-            mt={20}
-            p={16}
-            bg="rgba(16, 185, 129, 0.1)"
-            borderRadius={8}
-            borderWidth={1}
-            borderColor="rgba(16, 185, 129, 0.2)"
-          >
-            <Box row alignItems="center" mb={8}>
+          <Box className="border-continuous overflow-hidden mt-[20px] p-[16px] bg-[rgba(16,185,129,0.1)] rounded-[8px] border-[1px] border-[rgba(16,185,129,0.2)]">
+            <Box className="overflow-hidden border-continuous flex-row items-center mb-[8px]">
               <Icon.Feather name="info" size={16} color="#10B981" />
-              <Text fontSize={13} bold color="success" ml={8}>
+              <Text className="text-[13px] font-bold text-success ml-[8px]">
                 {t('app.errorDataSafeTitle')}
               </Text>
             </Box>
-            <Text fontSize={12} color="grey" lineHeight={18}>
+            <Text className="text-[12px] text-grey leading-[18px]">
               {t('app.errorDataSafeMessage')}
             </Text>
           </Box>

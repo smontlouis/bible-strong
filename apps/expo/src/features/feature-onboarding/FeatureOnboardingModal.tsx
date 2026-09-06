@@ -13,7 +13,6 @@ import {
 import OnboardingFooter from './components/OnboardingFooter'
 import OnboardingStep from './components/OnboardingStep'
 import { getOnboardingConfig, type OnboardingId } from './onboardingConfig'
-
 const FeatureOnboardingModal = () => {
   const { t } = useTranslation()
 
@@ -66,22 +65,14 @@ const FeatureOnboardingModal = () => {
     <Sheet ref={ref} dismissible={false} onDismiss={handleClose}>
       <SheetView>
         <TouchableBox
+          className="border-continuous overflow-hidden items-center justify-center rounded-[20px] bg-reverse border-[1px] border-border absolute top-[10px] right-[10px] z-[1000]"
           accessibilityLabel={t('Fermer')}
           accessibilityRole="button"
           onPress={() => {
             ref?.current?.close()
             handleClose()
           }}
-          center
-          size={30}
-          borderRadius={20}
-          bg="reverse"
-          borderWidth={1}
-          borderColor="border"
-          position="absolute"
-          top={10}
-          right={10}
-          zIndex={1000}
+          style={{ width: 30, height: 30 }}
         >
           <FeatherIcon name="x" size={14} color="default" />
         </TouchableBox>

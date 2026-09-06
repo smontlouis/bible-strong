@@ -1,11 +1,9 @@
 import React from 'react'
-
 import { Sheet, SheetHeader, SheetItem, SheetScrollView } from '~common/sheet'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useSheet } from '~helpers/useSheet'
-
 interface DropdownMenuProps<T extends string | number = string> {
   currentValue?: T
   setValue: (value: T) => void
@@ -31,19 +29,16 @@ const DropdownMenu = <T extends string | number = string>({
   return (
     <>
       <TouchableBox
+        className="overflow-hidden border-continuous"
         onPress={() => open()}
         accessibilityRole="button"
         accessibilityLabel={choice ? `${title}: ${choice.label}` : title}
       >
         {customRender || (
-          <Box padding={10}>
-            <Text color="grey" fontSize={12}>
-              {title}
-            </Text>
-            <Box row pr={5} alignItems="center">
-              <Text bold fontSize={12} mr={3}>
-                {choice?.label}
-              </Text>
+          <Box className="overflow-hidden border-continuous p-[10px]">
+            <Text className="text-grey text-[12px]">{title}</Text>
+            <Box className="overflow-hidden border-continuous flex-row pr-[5px] items-center">
+              <Text className="font-bold text-[12px] mr-[3px]">{choice?.label}</Text>
               <FeatherIcon name="chevron-down" size={15} color="default" />
             </Box>
           </Box>

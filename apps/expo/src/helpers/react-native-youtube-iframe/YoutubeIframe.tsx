@@ -10,11 +10,9 @@ import { DimensionValue, Platform, StyleProp, StyleSheet, ViewStyle } from 'reac
 import WebView, { WebViewMessageEvent, WebViewProps } from 'react-native-webview'
 import { PLAYER_STATES, PLAYER_ERROR, CUSTOM_USER_AGENT } from './constants'
 import { EventEmitter } from 'events'
-
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { MAIN_SCRIPT, PLAYER_FUNCTIONS } from './PlayerScripts'
-
 interface YoutubeIframeProps {
   height?: number
   width?: DimensionValue
@@ -197,11 +195,15 @@ const YoutubeIframe = (
   )
 
   return (
-    <Box height={height} width={width} backgroundColor="border">
-      <Box style={StyleSheet.absoluteFill} center>
-        <Text fontSize={20} color="grey">
-          {placeholder}
-        </Text>
+    <Box
+      className="overflow-hidden border-continuous bg-border"
+      style={{ width: width, height: height }}
+    >
+      <Box
+        className="overflow-hidden border-continuous items-center justify-center"
+        style={StyleSheet.absoluteFill}
+      >
+        <Text className="text-[20px] text-grey">{placeholder}</Text>
       </Box>
       <WebView
         ref={webViewRef}

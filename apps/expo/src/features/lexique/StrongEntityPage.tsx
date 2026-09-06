@@ -2,7 +2,6 @@ import { pageContentStyle } from '~common/ui/PageContent'
 import React from 'react'
 import { Linking, ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
-
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
@@ -20,7 +19,6 @@ import {
 import { StrongEntityRelationGraph } from './StrongEntityRelationGraph'
 import { splitStrongEntityRelations } from './strongEntityPresentation'
 import type { StrongReadingTypography } from './strongEditorialHtmlStyles'
-
 type Props = {
   entity?: StrongLexiconEntity
   loading: boolean
@@ -74,36 +72,41 @@ const StrongEntityPage = ({
 
       {ENTITY_LOCATION_VISIBLE && !!place && (
         <StrongEditorialSection title={t('strongDetail.entity.location')} separated>
-          <VStack bg="lightGrey" borderRadius={18} p={16} gap={8}>
-            <HStack alignItems="center" gap={10}>
-              <Box size={42} borderRadius={21} bg="lightPrimary" center>
+          <VStack className="overflow-hidden border-continuous bg-light-grey rounded-[18px] p-[16px] gap-[8px]">
+            <HStack className="overflow-hidden border-continuous items-center gap-[10px]">
+              <Box
+                className="overflow-hidden border-continuous rounded-[21px] bg-light-primary items-center justify-center"
+                style={{ width: 42, height: 42 }}
+              >
                 <FeatherIcon name="map-pin" color="primary" size={20} />
               </Box>
-              <VStack flex gap={2}>
-                <Text bold fontSize={17}>
-                  {place.name || entity.name}
-                </Text>
-                {!!place.area && <Text color="tertiary">{place.area}</Text>}
+              <VStack className="overflow-hidden border-continuous flex-[1] gap-[2px]">
+                <Text className="font-bold text-[17px]">{place.name || entity.name}</Text>
+                {!!place.area && <Text className="text-tertiary">{place.area}</Text>}
               </VStack>
             </HStack>
             {place.latitude != null && place.longitude != null && (
-              <Text color="tertiary" fontSize={12}>
+              <Text className="text-tertiary text-[12px]">
                 {place.latitude}, {place.longitude}
               </Text>
             )}
-            <HStack gap={10} wrap>
+            <HStack className="overflow-hidden border-continuous gap-[10px] flex-wrap">
               {!!place.palopenmapsUrl && (
-                <TouchableBox onPress={() => Linking.openURL(place.palopenmapsUrl!)}>
-                  <Text color="primary" bold fontSize={13}>
+                <TouchableBox
+                  className="overflow-hidden border-continuous"
+                  onPress={() => Linking.openURL(place.palopenmapsUrl!)}
+                >
+                  <Text className="text-primary font-bold text-[13px]">
                     {t('strongDetail.entity.bibleMap')}
                   </Text>
                 </TouchableBox>
               )}
               {!!place.googleMapUrl && (
-                <TouchableBox onPress={() => Linking.openURL(place.googleMapUrl!)}>
-                  <Text color="primary" bold fontSize={13}>
-                    Google Maps
-                  </Text>
+                <TouchableBox
+                  className="overflow-hidden border-continuous"
+                  onPress={() => Linking.openURL(place.googleMapUrl!)}
+                >
+                  <Text className="text-primary font-bold text-[13px]">Google Maps</Text>
                 </TouchableBox>
               )}
             </HStack>

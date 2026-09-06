@@ -1,3 +1,5 @@
+import { twMerge } from '~common/ui/classNames'
+
 import { useAtom } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -6,7 +8,6 @@ import { BoxProps } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { ttsPitchAtom } from './atom'
 import AudioChip from './AudioChip'
-
 export type TTSPitchButtonProps = BoxProps
 
 const choices = [
@@ -31,7 +32,9 @@ const TTSPitchButton = (props: TTSPitchButtonProps) => {
       choices={choices}
       customRender={
         <AudioChip isActive={isActive} {...props}>
-          <Text bold color={isActive ? 'primary' : 'grey'} fontSize={10}>
+          <Text
+            className={twMerge(isActive ? 'text-primary' : 'text-grey', 'font-bold text-[10px]')}
+          >
             {t('audio.pitch')} {pitch}x
           </Text>
         </AudioChip>

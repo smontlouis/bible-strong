@@ -1,4 +1,6 @@
-import { useTheme } from '@emotion/react'
+import { twMerge } from '~common/ui/classNames'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio'
 import type { TFunction } from 'i18next'
@@ -6,7 +8,6 @@ import { useState } from 'react'
 import { ActivityIndicator, Pressable } from 'react-native'
 import Carousel, { Pagination, type TAnimationStyle } from 'react-native-reanimated-carousel'
 import { Extrapolation, interpolate, type SharedValue } from 'react-native-reanimated'
-
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../OnboardingStage'
@@ -14,7 +15,6 @@ import SceneBackgroundShape from '../SceneBackgroundShape'
 import SceneDecorativePluses from '../SceneDecorativePluses'
 import { Scene } from '../SceneGraph'
 import VerseCard, { type HighlightColor } from '../VerseCard'
-
 type StrongCardIndex = 0 | 1
 
 type StrongDefinition = {
@@ -58,6 +58,8 @@ const StrongDefinitionCard = ({
   onActionPress,
   t,
 }: StrongDefinitionCardProps) => {
+  const stylingTheme = useStylingTheme()
+
   const theme = useTheme()
   const s = metrics.s
   const isAction = definition.code === '1892'
@@ -80,18 +82,21 @@ const StrongDefinitionCard = ({
 
   return (
     <Box
-      flex={1}
-      bg="reverse"
-      borderRadius={s(26)}
-      px={s(22)}
-      pt={s(22)}
-      pb={s(18)}
-      overflow="visible"
-      style={{ boxShadow: '0 10px 26px rgba(40,67,128,0.16)' }}
+      className="border-continuous overflow-visible flex-[1] bg-reverse"
+      style={[
+        { paddingTop: s(22), paddingBottom: s(18), paddingHorizontal: s(22), borderRadius: s(26) },
+        { boxShadow: '0 10px 26px rgba(40,67,128,0.16)' },
+      ]}
     >
-      <HStack justifyContent="space-between" alignItems="center" overflow="visible">
-        <Box bg="lightPrimary" borderRadius={s(11)} px={s(10)} py={s(8)}>
-          <Text color="primary" bold fontSize={s(10)} style={{ letterSpacing: s(1.8) }}>
+      <HStack className="border-continuous overflow-visible justify-between items-center">
+        <Box
+          className="overflow-hidden border-continuous bg-light-primary"
+          style={{ paddingHorizontal: s(10), paddingVertical: s(8), borderRadius: s(11) }}
+        >
+          <Text
+            className="text-primary font-bold"
+            style={[{ fontSize: s(10) || 16 }, { letterSpacing: s(1.8) }]}
+          >
             {t('onboarding.abel.sceneThree.strongLabel')}
           </Text>
         </Box>
@@ -105,12 +110,11 @@ const StrongDefinitionCard = ({
           })}
         >
           <Box
-            size={s(48)}
-            borderRadius={s(24)}
-            bg="reverse"
-            center
-            overflow="visible"
-            style={{ boxShadow: '0 5px 14px rgba(89,131,240,0.16)' }}
+            className="border-continuous overflow-visible bg-reverse items-center justify-center"
+            style={[
+              { borderRadius: s(24), ...(s(48) ? { width: s(48), height: s(48) } : {}) },
+              { boxShadow: '0 5px 14px rgba(89,131,240,0.16)' },
+            ]}
           >
             {hasRequestedAudio && audioStatus.isBuffering ? (
               <ActivityIndicator size="small" color={theme.colors.primary} />
@@ -126,27 +130,38 @@ const StrongDefinitionCard = ({
         </Pressable>
       </HStack>
 
-      <VStack alignItems="center" mt={s(8)}>
+      <VStack
+        className="overflow-hidden border-continuous items-center"
+        style={{ marginTop: s(8) }}
+      >
         <Text
-          fontSize={s(65)}
-          lineHeight={s(76)}
-          style={{ writingDirection: 'rtl', fontWeight: '600' }}
+          style={[
+            { fontSize: s(65) || 16, lineHeight: s(76) },
+            { writingDirection: 'rtl', fontWeight: '600' },
+          ]}
         >
           הֶבֶל
         </Text>
         <Text
-          title
-          fontSize={s(28)}
-          lineHeight={s(34)}
-          style={{ fontFamily: 'Literata Book', fontStyle: 'italic' }}
+          style={[
+            {
+              fontSize: s(28) || 16,
+              lineHeight: s(34),
+              fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+            },
+            { fontFamily: 'Literata Book', fontStyle: 'italic' },
+          ]}
         >
           {t(definition.transliterationKey)}
         </Text>
       </VStack>
 
-      <Box height={1} bg="border" mt={s(18)} mb={s(18)} />
+      <Box
+        className="overflow-hidden border-continuous h-[1px] bg-border"
+        style={{ marginTop: s(18), marginBottom: s(18) }}
+      />
 
-      <HStack alignItems="center" gap={s(14)} overflow="visible">
+      <HStack className="border-continuous overflow-visible items-center" style={{ gap: s(14) }}>
         <Pressable
           accessibilityRole={isAction ? 'button' : undefined}
           accessibilityLabel={isAction ? t('onboarding.abel.sceneThree.openStrong') : undefined}
@@ -159,28 +174,54 @@ const StrongDefinitionCard = ({
           })}
         >
           <HStack
-            minHeight={s(34)}
-            borderRadius={s(12)}
-            px={s(10)}
-            alignItems="center"
-            bg={isAction ? 'primary' : 'lightPrimary'}
-            lightShadow
-            overflow="visible"
+            className={twMerge(
+              'overflow-hidden border-continuous',
+              twMerge(
+                isAction ? 'bg-primary' : 'bg-light-primary',
+                'border-continuous overflow-visible items-center'
+              )
+            )}
+            style={{
+              paddingHorizontal: s(10),
+              minHeight: s(34),
+              borderRadius: s(12),
+              shadowColor: 'rgb(89,131,240)',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 7,
+              elevation: 1,
+              overflow: 'visible',
+            }}
           >
-            <Text color={isAction ? 'reverse' : 'primary'} bold fontSize={s(14)}>
+            <Text
+              className={twMerge(isAction ? 'text-reverse' : 'text-primary', 'font-bold')}
+              style={{ fontSize: s(14) || 16 }}
+            >
               H{definition.code}
             </Text>
           </HStack>
         </Pressable>
-        <Text title fontSize={s(28)} lineHeight={s(32)}>
+        <Text
+          style={{
+            fontSize: s(28) || 16,
+            lineHeight: s(32),
+            fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+          }}
+        >
           {t(definition.titleKey)}
         </Text>
       </HStack>
-      <Text color="tertiary" fontSize={s(15)} lineHeight={s(20)} mt={s(10)} bold>
+      <Text
+        className="text-tertiary font-bold"
+        style={{ marginTop: s(10), fontSize: s(15) || 16, lineHeight: s(20) }}
+      >
         {t(definition.definitionKey)}
       </Text>
-      <Box mt="auto">
-        <Text color="tertiary" fontSize={s(9)} bold style={{ letterSpacing: s(2.2) }}>
+      <Box className="overflow-hidden border-continuous mt-auto">
+        <Text
+          className="text-tertiary font-bold"
+          style={[{ fontSize: s(9) || 16 }, { letterSpacing: s(2.2) }]}
+        >
           {t(definition.typeKey)}
         </Text>
       </Box>

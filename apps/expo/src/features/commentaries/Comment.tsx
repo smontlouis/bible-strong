@@ -1,43 +1,51 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { FadeIn, FadeOut, LinearTransition, useReducedMotion } from 'react-native-reanimated'
-
 import Box, { AnimatedBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { Comment as CommentProps, EGWComment } from './types'
 import CommentaryAvatar from './CommentaryAvatar'
-
 interface Props {
   comment: CommentProps | EGWComment
   passageLabel: string
 }
 
 const Comment = ({ comment, passageLabel }: Props) => {
+  const stylingTheme = useStylingTheme()
+
   const { resource, content } = comment
   const reduceMotion = useReducedMotion()
 
   return (
     <AnimatedBox
-      m={20}
-      marginBottom={0}
-      p={20}
-      rounded
-      lightShadow
-      bg="reverse"
+      className="overflow-hidden border-continuous m-[20px] mb-[0px] p-[20px] rounded-[20px] bg-reverse"
       layout={reduceMotion ? undefined : LinearTransition.duration(220)}
       entering={reduceMotion ? undefined : FadeIn.duration(160)}
       exiting={reduceMotion ? undefined : FadeOut.duration(130)}
+      style={{
+        shadowColor: 'rgb(89,131,240)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 7,
+        elevation: 1,
+        overflow: 'visible',
+      }}
     >
-      <Box row>
+      <Box className="overflow-hidden border-continuous flex-row">
         <CommentaryAvatar
           resourceCode={resource.code}
           author={resource.author}
           fallback={resource.shortName ?? resource.name}
           size={44}
         />
-        <Box ml={10} flex>
-          <Text title fontSize={20}>
+        <Box className="overflow-hidden border-continuous ml-[10px] flex-[1]">
+          <Text
+            className="text-[20px]"
+            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          >
             {resource.name}
           </Text>
-          <Text color="grey" fontSize={14}>
+          <Text className="text-grey text-[14px]">
             {resource.author === 'Ellen G. White' ? 'EGW' : resource.author}
           </Text>
         </Box>
@@ -47,14 +55,17 @@ const Comment = ({ comment, passageLabel }: Props) => {
         layout={reduceMotion ? undefined : LinearTransition.duration(180)}
         entering={reduceMotion ? undefined : FadeIn.duration(160)}
         exiting={reduceMotion ? undefined : FadeOut.duration(110)}
+        className="overflow-hidden border-continuous"
       >
-        <Text mt={14} fontSize={19} lineHeight={29} numberOfLines={5} ellipsizeMode="tail">
+        <Text
+          className="mt-[14px] text-[19px] leading-[29px]"
+          numberOfLines={5}
+          ellipsizeMode="tail"
+        >
           {content}
         </Text>
-        <Box mt={14} px={10} py={5} borderRadius={12} bg="lightPrimary" alignSelf="flex-start">
-          <Text color="primary" fontSize={12}>
-            {passageLabel}
-          </Text>
+        <Box className="overflow-hidden border-continuous mt-[14px] px-[10px] py-[5px] rounded-[12px] bg-light-primary self-start">
+          <Text className="text-primary text-[12px]">{passageLabel}</Text>
         </Box>
       </AnimatedBox>
     </AnimatedBox>

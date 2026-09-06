@@ -1,10 +1,12 @@
+import { twMerge } from '~common/ui/classNames'
+import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useAtomValue } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
 import { useQuery } from '@tanstack/react-query'
 import { type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform, Pressable } from 'react-native'
-
 import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -36,7 +38,6 @@ import {
   getOfflineResourceQuerySignal,
   useOfflineResourceRegistry,
 } from '~features/resources/useOfflineResourceRegistry'
-
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
   sheetRef: RefObject<SheetRef | null>
@@ -49,6 +50,8 @@ const isActiveDownload = (status?: string) =>
   status === 'queued' || status === 'downloading' || status === 'inserting'
 
 const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const appLanguage = useLanguage()
   const bible = useAtomValue(bibleAtom)
@@ -203,14 +206,21 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
         style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.72 : 1 })}
       >
         <Box
-          flex
-          row
-          center
-          gap={7}
-          bg={selected && available ? 'primary' : undefined}
-          opacity={available || downloading ? 1 : 0.65}
+          className={twMerge(
+            'overflow-hidden border-continuous',
+            twMerge(
+              selected && available ? 'bg-primary' : '',
+              'overflow-hidden border-continuous flex-[1] flex-row items-center justify-center gap-[7px]'
+            )
+          )}
+          style={{ opacity: available || downloading ? 1 : 0.65 }}
         >
-          <Text bold fontSize={14} color={selected && available ? 'reverse' : 'default'}>
+          <Text
+            className={twMerge(
+              selected && available ? 'text-reverse' : 'text-default',
+              'font-bold text-[14px]'
+            )}
+          >
             {label}
           </Text>
           {!available &&
@@ -258,8 +268,8 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
 
   return (
     <Sheet ref={sheetRef} header={<SheetHeader title={t('Affichage du texte')} />}>
-      <SheetView p={16} gap={10}>
-        <Box row gap={10}>
+      <SheetView className="p-[16px] gap-[10px]">
+        <Box className="overflow-hidden border-continuous flex-row gap-[10px]">
           <BibleDisplayModeCard
             label={t('Original')}
             description={t('Hébreu ou grec')}
@@ -267,9 +277,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
             onPress={() => selectMode('hidden')}
           >
             <Text
-              fontSize={29}
-              lineHeight={38}
-              textAlign="center"
+              className="text-[29px] leading-[38px] text-center"
               style={{ fontFamily: serifFontFamily }}
             >
               {originalPreview}
@@ -295,21 +303,22 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
               )
             }
           >
-            <Box alignSelf="center" alignItems={isHebrew ? 'flex-end' : 'flex-start'}>
-              <Text fontSize={25} lineHeight={30} style={{ fontFamily: serifFontFamily }}>
+            <Box
+              className="overflow-hidden border-continuous self-center"
+              style={{ alignItems: isHebrew ? 'flex-end' : 'flex-start' }}
+            >
+              <Text className="text-[25px] leading-[30px]" style={{ fontFamily: serifFontFamily }}>
                 {originalPreview}
               </Text>
-              <Text fontSize={14} lineHeight={19} style={{ fontFamily: serifFontFamily }}>
+              <Text className="text-[14px] leading-[19px]" style={{ fontFamily: serifFontFamily }}>
                 {isHebrew ? 'Elohim' : 'logos'}
               </Text>
-              <Text fontSize={11} color="tertiary">
-                {glossPreview}
-              </Text>
+              <Text className="text-[11px] text-tertiary">{glossPreview}</Text>
             </Box>
           </BibleDisplayModeCard>
         </Box>
 
-        <Box row gap={10}>
+        <Box className="overflow-hidden border-continuous flex-row gap-[10px]">
           <BibleDisplayModeCard
             label={t('Strong')}
             description={t('Texte + numéros')}
@@ -325,11 +334,11 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
               requestDownload(selectedLocale, t('Strong'), 'strong', availability[selectedLocale])
             }
           >
-            <Box row center gap={7}>
-              <Text fontSize={25} style={{ fontFamily: serifFontFamily }}>
+            <Box className="overflow-hidden border-continuous flex-row items-center justify-center gap-[7px]">
+              <Text className="text-[25px]" style={{ fontFamily: serifFontFamily }}>
                 {originalPreview}
               </Text>
-              <Text fontSize={12} color="tertiary" style={{ fontFamily: serifFontFamily }}>
+              <Text className="text-[12px] text-tertiary" style={{ fontFamily: serifFontFamily }}>
                 {isHebrew ? 'H0430' : 'G3056'}
               </Text>
             </Box>
@@ -355,9 +364,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
             }
           >
             <Text
-              fontSize={20}
-              lineHeight={26}
-              textAlign="center"
+              className="text-[20px] leading-[26px] text-center"
               style={{ fontFamily: serifFontFamily }}
             >
               {transliterationPreview}
@@ -367,22 +374,15 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
 
         {selectedMode === 'interlinear' && (
           <Box
-            bg="reverse"
-            bgOpacity="020"
-            row
-            alignItems="center"
-            gap={12}
-            borderWidth={1}
-            borderColor="border"
-            borderRadius={16}
-            p={12}
+            className="border-continuous overflow-hidden flex-row items-center gap-[12px] border-[1px] border-border rounded-[16px] p-[12px]"
+            style={{
+              backgroundColor: colorWithOpacity(resolveThemeColor(stylingTheme, 'reverse'), 0.2),
+            }}
           >
-            <Text flex bold fontSize={14}>
-              {t('Langue des gloses')}
-            </Text>
-            <Box row width={132} height={38} borderWidth={1} borderColor="border" borderRadius={10}>
+            <Text className="flex-[1] font-bold text-[14px]">{t('Langue des gloses')}</Text>
+            <Box className="border-continuous overflow-hidden flex-row w-[132px] h-[38px] border-[1px] border-border rounded-[10px]">
               {renderLocaleOption('fr', 'FR')}
-              <Box width={1} bg="border" />
+              <Box className="overflow-hidden border-continuous w-[1px] bg-border" />
               {renderLocaleOption('en', 'EN')}
             </Box>
           </Box>

@@ -1,4 +1,5 @@
-import { useTheme } from '@emotion/react'
+import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
+import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import Color from 'color'
 import { Pressable } from 'react-native'
@@ -14,7 +15,6 @@ import Animated, {
   withDelay,
   withSpring,
 } from 'react-native-reanimated'
-
 import Box, { AnimatedBox, HStack } from '~common/ui/Box'
 import {
   DESIGN_CONTENT_WIDTH,
@@ -26,7 +26,6 @@ import SceneActionButton from '../SceneActionButton'
 import SceneDecorativePluses from '../SceneDecorativePluses'
 import { Scene } from '../SceneGraph'
 import VerseCard, { HIGHLIGHT_COLORS, type HighlightColor } from '../VerseCard'
-
 type SceneOneVerseHighlightProps = {
   reduceMotion: boolean
   metrics: OnboardingStageMetrics
@@ -157,21 +156,23 @@ const ColorSwatch = ({
 }
 
 export const SceneOneVerseHighlightBackground = ({ reduceMotion, metrics }: SceneOneLayerProps) => {
+  const stylingTheme = useStylingTheme()
+
   const s = metrics.s
 
   return (
-    <Box flex width="100%" overflow="visible">
+    <Box className="border-continuous overflow-visible flex-[1] w-[100%]">
       <AnimatedBox
-        position="absolute"
-        width={s(105)}
-        height={s(105)}
-        borderRadius={s(52.5)}
-        bg="color2"
-        bgOpacity="010"
-        opacity={0.72}
-        top={s(278)}
-        left={s(252)}
+        className="overflow-hidden border-continuous absolute opacity-[0.72]"
         entering={reduceMotion ? undefined : FadeIn.springify().delay(220)}
+        style={{
+          width: s(105),
+          height: s(105),
+          top: s(278),
+          left: s(252),
+          borderRadius: s(52.5),
+          backgroundColor: colorWithOpacity(resolveThemeColor(stylingTheme, 'color2'), 0.1),
+        }}
       />
       <SceneDecorativePluses metrics={metrics} reduceMotion={reduceMotion} scene="one" />
     </Box>
@@ -206,7 +207,7 @@ export const SceneOneVerseHighlightControls = ({
   const paletteTranslateY = s(-30)
 
   return (
-    <Box flex width="100%" overflow="visible">
+    <Box className="border-continuous overflow-visible flex-[1] w-[100%]">
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t(
@@ -225,16 +226,19 @@ export const SceneOneVerseHighlightControls = ({
           zIndex: 3,
         }}
       >
-        <AnimatedBox style={fabStyle} zIndex={3} overflow="visible">
+        <AnimatedBox className="border-continuous overflow-visible z-[3]" style={fabStyle}>
           <Box
-            size={s(48)}
-            borderRadius={s(24)}
-            bg="reverse"
-            center
-            transform={[{ rotate: '5deg' }]}
-            style={{
-              boxShadow: '0 5px 14px rgba(40,67,128,0.18)',
-            }}
+            className="overflow-hidden border-continuous bg-reverse items-center justify-center"
+            style={[
+              {
+                borderRadius: s(24),
+                transform: [{ rotate: '5deg' }],
+                ...(s(48) ? { width: s(48), height: s(48) } : {}),
+              },
+              {
+                boxShadow: '0 5px 14px rgba(40,67,128,0.18)',
+              },
+            ]}
           >
             <Feather name="edit-3" size={s(22)} color={theme.colors.primary} />
           </Box>
@@ -243,23 +247,28 @@ export const SceneOneVerseHighlightControls = ({
 
       {isPaletteOpen ? (
         <AnimatedBox
+          className="overflow-hidden border-continuous absolute bg-reverse z-[2]"
           key="scene-one-palette"
-          position="absolute"
-          top={s(326)}
-          left={s(137)}
-          height={s(58)}
-          bg="reverse"
-          borderRadius={s(18)}
-          px={s(12)}
-          py={s(10)}
-          lightShadow
-          zIndex={2}
           entering={
             reduceMotion ? undefined : paletteEntering(paletteTranslateX, paletteTranslateY)
           }
           exiting={reduceMotion ? undefined : paletteExiting(paletteTranslateX, paletteTranslateY)}
+          style={{
+            paddingHorizontal: s(12),
+            paddingVertical: s(10),
+            height: s(58),
+            top: s(326),
+            left: s(137),
+            borderRadius: s(18),
+            shadowColor: 'rgb(89,131,240)',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 7,
+            elevation: 1,
+            overflow: 'visible',
+          }}
         >
-          <HStack alignItems="center" gap={s(6)}>
+          <HStack className="overflow-hidden border-continuous items-center" style={{ gap: s(6) }}>
             {HIGHLIGHT_COLORS.map(colorKey => (
               <ColorSwatch
                 key={colorKey}

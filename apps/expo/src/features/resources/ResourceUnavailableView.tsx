@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
-
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -8,7 +7,6 @@ import type { OfflineCopyIdentity } from '~helpers/offlineCopyId'
 import useConnection from '~helpers/useConnection'
 import OfflineResourceRecovery from './OfflineResourceRecovery'
 import { getResourceFailurePresentation, type ResourceFailure } from './resourceFailure'
-
 type Props = {
   identity?: OfflineCopyIdentity
   title: string
@@ -73,47 +71,51 @@ const ResourceUnavailableView = ({
         secondaryActions={secondaryActions}
       />
     )
-    return mt == null ? recovery : <Box mt={mt}>{recovery}</Box>
+    return mt == null ? (
+      recovery
+    ) : (
+      <Box className="overflow-hidden border-continuous" style={{ marginTop: mt }}>
+        {recovery}
+      </Box>
+    )
   }
 
   const padding = size === 'small' ? 7 : 30
   return (
-    <Box flex={size === 'large' ? 1 : undefined} center padding={padding} mt={mt}>
-      <Box center maxWidth={320}>
+    <Box
+      className="overflow-hidden border-continuous items-center justify-center"
+      style={{ padding: padding, marginTop: mt, flex: size === 'large' ? 1 : undefined }}
+    >
+      <Box className="overflow-hidden border-continuous items-center justify-center max-w-[320px]">
         <FeatherIcon name={presentation.icon} size={size === 'small' ? 20 : 72} color="tertiary" />
-        <Text textAlign="center" bold marginTop={padding}>
+        <Text className="text-center font-bold" style={{ marginTop: padding }}>
           {displayedTitle}
         </Text>
         <Text
-          textAlign="center"
-          color="tertiary"
-          fontSize={size === 'small' ? 12 : 16}
-          marginTop={8}
+          className="text-center text-tertiary mt-[8px]"
+          style={{ fontSize: size === 'small' ? 12 : 16 }}
         >
           {t(presentation.detailKey)}
         </Text>
         {presentation.connectionRequired && (
-          <Text textAlign="center" color="tertiary" marginTop={8}>
+          <Text className="text-center text-tertiary mt-[8px]">
             {t('resource.action.connectionRequired')}
           </Text>
         )}
         {presentation.actions.includes('retry') && onRetry && (
           <Text
-            bold
-            color="primary"
-            fontSize={size === 'small' ? 12 : 16}
-            marginTop={padding}
+            className="font-bold text-primary"
             onPress={onRetry}
+            style={{ marginTop: padding, fontSize: size === 'small' ? 12 : 16 }}
           >
             {t('bible.error.retry')}
           </Text>
         )}
         {presentation.actions.includes('manage') && (
           <Text
-            bold
-            color="primary"
-            marginTop={padding}
+            className="font-bold text-primary"
             onPress={onManage ?? (() => router.push('/downloads'))}
+            style={{ marginTop: padding }}
           >
             {t('bible.error.goToDownloads')}
           </Text>

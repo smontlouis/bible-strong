@@ -1,7 +1,6 @@
 import type { CommentaryCatalogEntry } from '@bible-strong/resource-catalog/commentaries'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { MenuView } from '~common/ui/MenuView'
@@ -9,7 +8,6 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import type { CommentaryProjectionId } from './commentarySelection'
 import CommentaryAvatar from './CommentaryAvatar'
-
 const CommentaryResourceHeaderActions = ({
   entry,
   projectionId,
@@ -31,7 +29,7 @@ const CommentaryResourceHeaderActions = ({
   const openInNewTab = useOpenInNewTab()
 
   return (
-    <Box row alignItems="center">
+    <Box className="overflow-hidden border-continuous flex-row items-center">
       {showAvatar ? (
         <CommentaryAvatar
           resourceCode={`${entry.publicationId}:${language}`}
@@ -59,7 +57,7 @@ const CommentaryResourceHeaderActions = ({
           })
         }}
       >
-        <Box width={50} height={54} center>
+        <Box className="overflow-hidden border-continuous w-[50px] h-[54px] items-center justify-center">
           <FeatherIcon name="more-vertical" size={18} />
         </Box>
       </MenuView>

@@ -1,14 +1,17 @@
-import React from 'react'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
+import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
-import styled from '@emotion/native'
-import verseToReference from '~helpers/verseToReference'
-import { chapterToReference } from '~helpers/chapterToReference'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import { EntitySlice as EntitySliceProps, PlanStatus } from '~common/types'
-import { Theme } from '~themes'
+import Box from '~common/ui/Box'
+import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
+import { chapterToReference } from '~helpers/chapterToReference'
 import truncate from '~helpers/truncate'
+import verseToReference from '~helpers/verseToReference'
+import { Theme } from '~themes'
 
 const extractTitle = (props: EntitySliceProps) => {
   switch (props.type) {
@@ -50,15 +53,26 @@ const renderIcon = (props: EntitySliceProps, isComplete: boolean, isNext: boolea
   }
 }
 
-const SmallCircle = styled(Box)(({ theme }: { theme: Theme }) => ({
-  width: 6,
-  height: 6,
-  opacity: 0.5,
-  backgroundColor: theme.colors.primary,
-  borderRadius: 3,
-  alignItems: 'center',
-  justifyContent: 'center',
-}))
+const SmallCircle = (
+  componentProps: Omit<UIComponentProps<typeof Box>, keyof { theme: Theme } | 'theme'> &
+    Omit<{ theme: Theme }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'w-[6px] h-[6px] opacity-[0.5] bg-primary rounded-[3px] items-center justify-center',
+      className
+    )
+  )
+  return (
+    <Box
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
 interface CircleProps {
   isComplete: boolean
@@ -66,32 +80,72 @@ interface CircleProps {
   isSectionCompleted: boolean
 }
 
-const Circle = styled(Box)<CircleProps>(({ theme, isComplete, isNext, isSectionCompleted }) => ({
-  width: 18,
-  height: 18,
-  backgroundColor: isSectionCompleted
-    ? theme.colors.success
-    : isComplete
-      ? theme.colors.primary
-      : theme.colors.lightPrimary,
-  borderRadius: 9,
-  alignItems: 'center',
-  justifyContent: 'center',
-  ...(isNext && {
-    borderWidth: 2,
-    borderColor: theme.colors.primary,
-  }),
-}))
+const Circle = (
+  componentProps: Omit<UIComponentProps<typeof Box>, keyof CircleProps | 'theme'> &
+    Omit<CircleProps, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { isComplete, isNext, isSectionCompleted } = props
+  const classStyles = useResolveClassNames(
+    twMerge('w-[18px] h-[18px] rounded-[9px] items-center justify-center', className)
+  )
+  return (
+    <Box
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            backgroundColor: isSectionCompleted
+              ? theme.colors.success
+              : isComplete
+                ? theme.colors.primary
+                : theme.colors.lightPrimary,
+            ...(isNext && {
+              borderWidth: 2,
+              borderColor: theme.colors.primary,
+            }),
+          },
+          props.style,
+        ] as UIComponentProps<typeof Box>['style']
+      }
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
-const Line = styled(Box)<CircleProps>(({ theme, isComplete, isNext, isSectionCompleted }) => ({
-  height: 10,
-  width: isComplete || isNext ? 3 : 2,
-  backgroundColor: isSectionCompleted
-    ? theme.colors.success
-    : isComplete || isNext
-      ? theme.colors.primary
-      : theme.colors.lightPrimary,
-}))
+const Line = (
+  componentProps: Omit<UIComponentProps<typeof Box>, keyof CircleProps | 'theme'> &
+    Omit<CircleProps, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { isComplete, isNext, isSectionCompleted } = props
+  const classStyles = useResolveClassNames(twMerge('h-[10px]', className))
+  return (
+    <Box
+      {...props}
+      style={
+        [
+          classStyles,
+          {
+            width: isComplete || isNext ? 3 : 2,
+            backgroundColor: isSectionCompleted
+              ? theme.colors.success
+              : isComplete || isNext
+                ? theme.colors.primary
+                : theme.colors.lightPrimary,
+          },
+          props.style,
+        ] as UIComponentProps<typeof Box>['style']
+      }
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
 interface Props {
   isLast?: boolean
@@ -110,8 +164,8 @@ const EntitySlice = (props: EntitySliceProps & Props) => {
   }
 
   return (
-    <Box row>
-      <Box marginRight={25} center>
+    <Box className="overflow-hidden border-continuous flex-row">
+      <Box className="overflow-hidden border-continuous mr-[25px] items-center justify-center">
         <Circle isSectionCompleted={isSectionCompleted} isComplete={isComplete} isNext={isNext}>
           {renderIcon(props, isComplete, isNext)}
         </Circle>
@@ -119,7 +173,7 @@ const EntitySlice = (props: EntitySliceProps & Props) => {
           <Line isComplete={isComplete} isNext={isNext} isSectionCompleted={isSectionCompleted} />
         )}
       </Box>
-      <Text style={{ flex: 1 }} numberOfLines={1} opacity={isComplete || isNext ? 1 : 0.6}>
+      <Text style={[{ opacity: isComplete || isNext ? 1 : 0.6 }, { flex: 1 }]} numberOfLines={1}>
         {title}
       </Text>
     </Box>

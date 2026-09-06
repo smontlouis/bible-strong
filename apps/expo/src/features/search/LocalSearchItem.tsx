@@ -1,14 +1,36 @@
-import styled from '@emotion/native'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
+import * as NativeUI from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
+import type { Theme as AppTheme } from '~themes'
 
-const Container = styled.TouchableOpacity(({ theme }) => ({
-  paddingTop: 15,
-  paddingBottom: 20,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
+const Container = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('pt-[15px] pb-[20px] border-b-[1px] border-b-border', className)
+  )
+  return (
+    <NativeUI.TouchableOpacity
+      {...props}
+      style={
+        [classStyles, {}, props.style] as UIComponentProps<
+          typeof NativeUI.TouchableOpacity
+        >['style']
+      }
+    />
+  )
+}
 
 type SearchPosition = [position: number, range: number]
 
@@ -17,7 +39,7 @@ const formatText = (sentence: string, array: SearchPosition[]) => {
     ({ offset, result, phrase }, [position, range], i) => {
       const before = phrase.substr(0, position - offset)
       const highlighted = (
-        <Text bold color="primary" key={i}>
+        <Text className="font-bold text-primary" key={i}>
           {phrase.substr(position - offset, range)}
         </Text>
       )
@@ -45,10 +67,15 @@ type LocalSearchItemProps = {
 }
 
 const LocalSearchItem = ({ reference, text, positions, onPress }: LocalSearchItemProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { result } = positions.length ? formatText(text, positions) : { result: text }
   return (
     <Container onPress={onPress}>
-      <Text title fontSize={16} marginBottom={5}>
+      <Text
+        className="text-[16px] mb-[5px]"
+        style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+      >
         {reference}
       </Text>
       <Paragraph small>{result}</Paragraph>

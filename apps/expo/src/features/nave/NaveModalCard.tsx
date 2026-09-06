@@ -1,4 +1,4 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
@@ -20,7 +20,6 @@ import useConnection from '~helpers/useConnection'
 import ResourceVerseContext, {
   useResourceVerseContext,
 } from '~features/bible/resources/ResourceVerseContext'
-
 type Props = {
   selectedVerse: string
   selectedVersion: string
@@ -86,7 +85,7 @@ const NaveModalCard = ({ selectedVerse, selectedVersion, updateVerse }: Props) =
         }}
       />
     ) : isLoading ? (
-      <Box flex center height={150}>
+      <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center h-[150px]">
         <ActivityIndicator color={theme.colors.grey} />
       </Box>
     ) : null
@@ -99,7 +98,7 @@ const NaveModalCard = ({ selectedVerse, selectedVersion, updateVerse }: Props) =
   const hasTopics = Boolean(naveItemsForVerse?.length || naveItemsForChapter?.length)
 
   return (
-    <Box flex={1} bg="lightGrey">
+    <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
       <ResourceVerseContext
         verse={selectedVerse}
         {...verseContext}
@@ -108,7 +107,7 @@ const NaveModalCard = ({ selectedVerse, selectedVersion, updateVerse }: Props) =
       />
       {content ?? (
         <SheetScrollView>
-          <Box px={20} pt={20} pb={32} gap={20}>
+          <Box className="overflow-hidden border-continuous px-[20px] pt-[20px] pb-[32px] gap-[20px]">
             {hasTopics ? (
               <>
                 <NaveForVerse items={naveItemsForVerse} label={t('Concernant le verset')} />

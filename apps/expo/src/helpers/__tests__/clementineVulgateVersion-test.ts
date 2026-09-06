@@ -1,11 +1,3 @@
-jest.mock('~i18n', () => ({
-  getLanguage: () => 'fr',
-}))
-
-jest.mock('~features/resources/resourceAvailability', () => ({
-  getIfLocalResourceNeedsDownload: jest.fn(),
-}))
-
 import {
   getBibleVersionCanonId,
   getBibleVersionVersificationId,
@@ -13,6 +5,13 @@ import {
   versionsBySections,
   versionsBySections_en,
 } from '../bibleVersions'
+jest.mock('~i18n', () => ({
+  getLanguage: () => 'fr',
+}))
+
+jest.mock('~features/resources/resourceAvailability', () => ({
+  getIfLocalResourceNeedsDownload: jest.fn(),
+}))
 
 describe('Clementine Vulgate version', () => {
   it('registers VUL with its canon, versification, source, and foreign-language sections', () => {

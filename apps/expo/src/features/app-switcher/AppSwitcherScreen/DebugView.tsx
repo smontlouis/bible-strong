@@ -3,7 +3,6 @@ import { getDefaultBibleTab, tabsAtom } from 'src/state/tabs'
 import generateUUID from '~helpers/generateUUID'
 import { HStack, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-
 export const DebugView = () => {
   const setTabs = useSetAtom(tabsAtom)
   const addTabs = () => {
@@ -21,11 +20,11 @@ export const DebugView = () => {
     setTabs([getDefaultBibleTab()])
   }
   return (
-    <HStack gap={10}>
-      <TouchableBox onPress={addTabs}>
+    <HStack className="overflow-hidden border-continuous gap-[10px]">
+      <TouchableBox className="overflow-hidden border-continuous" onPress={addTabs}>
         <Text>Add 100 tabs</Text>
       </TouchableBox>
-      <TouchableBox onPress={removeTabs}>
+      <TouchableBox className="overflow-hidden border-continuous" onPress={removeTabs}>
         <Text>Remove all tabs</Text>
       </TouchableBox>
     </HStack>

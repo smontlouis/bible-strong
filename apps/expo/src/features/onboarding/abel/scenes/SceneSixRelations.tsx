@@ -1,3 +1,5 @@
+import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
+import type { Theme } from '~themes'
 import { Feather } from '@expo/vector-icons'
 import type { TFunction } from 'i18next'
 import {
@@ -9,7 +11,6 @@ import {
   withSpring,
   withTiming,
 } from 'react-native-reanimated'
-
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../OnboardingStage'
@@ -20,7 +21,6 @@ import { Scene } from '../SceneGraph'
 import VerseCard, { type HighlightColor } from '../VerseCard'
 import { AbelSourceCard, HevelSourceCard, SourceCard } from './GenesisSourceCard'
 import NoteCard from './NoteCard'
-
 const RELATION_ENTER_START = 420
 const RELATION_STAGGER = 90
 export const SCENE_SIX_DEPTH_EXIT = {
@@ -69,12 +69,14 @@ const DepthMapNode = ({ depth, metrics }: DepthMapNodeProps) => {
 
   return (
     <Box
-      flex
-      borderRadius={metrics.s(12)}
-      style={{
-        backgroundColor: SCENE_SIX_DEPTH_DEBUG.itemColor,
-        opacity,
-      }}
+      className="overflow-hidden border-continuous flex-[1]"
+      style={[
+        { borderRadius: metrics.s(12) },
+        {
+          backgroundColor: SCENE_SIX_DEPTH_DEBUG.itemColor,
+          opacity,
+        },
+      ]}
     />
   )
 }
@@ -175,16 +177,24 @@ type SceneSixElementProps = {
 
 const AbelTag = ({ metrics }: { metrics: OnboardingStageMetrics }) => (
   <HStack
-    flex
-    bg="reverse"
-    borderRadius={metrics.s(8)}
-    px={metrics.s(10)}
-    alignItems="center"
-    gap={metrics.s(5)}
-    lightShadow
+    className="overflow-hidden border-continuous flex-[1] bg-reverse items-center"
+    style={{
+      paddingHorizontal: metrics.s(10),
+      borderRadius: metrics.s(8),
+      gap: metrics.s(5),
+      shadowColor: 'rgb(89,131,240)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 7,
+      elevation: 1,
+      overflow: 'visible',
+    }}
   >
     <Feather name="tag" size={metrics.s(12)} color="#F2B94B" />
-    <Text bold fontSize={metrics.s(10)} style={{ fontFamily: 'Courier' }}>
+    <Text
+      className="font-bold"
+      style={[{ fontSize: metrics.s(10) || 16 }, { fontFamily: 'Courier' }]}
+    >
       Abel
     </Text>
   </HStack>
@@ -198,18 +208,21 @@ type RelationLabelProps = {
 
 const RelationLabel = ({ color, label, metrics }: RelationLabelProps) => (
   <Box
-    flex
-    borderRadius={metrics.s(8)}
-    center
-    style={{ backgroundColor: 'rgba(255,255,255,0.92)' }}
+    className="overflow-hidden border-continuous flex-[1] items-center justify-center"
+    style={[{ borderRadius: metrics.s(8) }, { backgroundColor: 'rgba(255,255,255,0.92)' }]}
   >
-    <Text bold fontSize={metrics.s(9)} style={{ color, fontFamily: 'Courier' }} numberOfLines={1}>
+    <Text
+      className="font-bold"
+      style={[{ fontSize: metrics.s(9) || 16 }, { color, fontFamily: 'Courier' }]}
+      numberOfLines={1}
+    >
       {label}
     </Text>
   </Box>
 )
 
 type CreateSceneSixRelationsProps = SceneSixElementProps & {
+  theme: Theme
   depthDebug?: boolean
   highlightColor: HighlightColor
   navigationDirection: SharedValue<1 | -1>
@@ -222,6 +235,7 @@ type CreateSceneSixRelationsProps = SceneSixElementProps & {
 }
 
 export const createSceneSixRelations = ({
+  theme: stylingTheme,
   depthDebug = SCENE_SIX_DEPTH_DEBUG.enabled,
   highlightColor,
   metrics,
@@ -266,10 +280,17 @@ export const createSceneSixRelations = ({
     <Scene id="scene-six">
       <Scene.Layer zIndex={0}>
         <Box
-          absoluteFill
-          borderRadius={metrics.s(22)}
-          bg={depthDebug ? SCENE_SIX_DEPTH_DEBUG.backgroundColor : 'lightPrimary'}
-          bgOpacity={depthDebug ? undefined : '020'}
+          className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px]"
+          style={{
+            borderRadius: metrics.s(22),
+            backgroundColor: colorWithOpacity(
+              resolveThemeColor(
+                stylingTheme,
+                depthDebug ? SCENE_SIX_DEPTH_DEBUG.backgroundColor : 'lightPrimary'
+              ),
+              depthDebug ? undefined : 0.2
+            ),
+          }}
         />
       </Scene.Layer>
 
@@ -411,10 +432,14 @@ export const createSceneSixRelations = ({
         ) : (
           <NoteCard metrics={metrics} t={t} variant="small">
             <Text
-              fontSize={metrics.s(14)}
-              lineHeight={metrics.s(18)}
-              mt={metrics.s(9)}
-              style={{ fontFamily: 'Courier' }}
+              style={[
+                {
+                  marginTop: metrics.s(9),
+                  fontSize: metrics.s(14) || 16,
+                  lineHeight: metrics.s(18),
+                },
+                { fontFamily: 'Courier' },
+              ]}
             >
               Abel
             </Text>

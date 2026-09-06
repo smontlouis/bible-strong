@@ -1,18 +1,39 @@
-import styled from '@emotion/native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
 import Box from '~common/ui/Box'
+import type { Theme as AppTheme } from '~themes'
 import { Theme } from '~themes'
+import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
-const SectionTitle = styled(Box)<{ color: keyof Theme['colors'] }>(({ theme, color }) => ({
-  fontSize: 20,
-  marginLeft: 20,
-  marginTop: 10,
-  height: 30,
-  width: 30,
-  borderRadius: 15,
-  backgroundColor: theme.colors[color],
-  justifyContent: 'center',
-  alignItems: 'center',
-  overflow: 'visible',
-}))
+const SectionTitle = (
+  componentProps: Omit<
+    UIComponentProps<typeof Box>,
+    keyof { color: keyof Theme['colors'] } | 'theme'
+  > &
+    Omit<{ color: keyof Theme['colors'] }, 'theme'> & { theme?: AppTheme; className?: string }
+) => {
+  const contextTheme = useAppTheme()
+  const { theme: themeOverride, className, ...props } = componentProps
+  const theme = themeOverride ?? contextTheme
+  const { color } = props
+  const classStyles = useResolveClassNames(
+    twMerge(
+      'text-[20px] ml-[20px] mt-[10px] h-[30px] w-[30px] rounded-[15px] justify-center items-center overflow-visible',
+      className
+    )
+  )
+  return (
+    <Box
+      {...props}
+      style={
+        [classStyles, { backgroundColor: theme.colors[color] }, props.style] as UIComponentProps<
+          typeof Box
+        >['style']
+      }
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
 export default SectionTitle

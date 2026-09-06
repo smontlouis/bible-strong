@@ -1,36 +1,67 @@
-import { TouchableOpacity } from 'react-native'
-import { useTranslation } from 'react-i18next'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import distanceInWords from 'date-fns/formatDistance'
-import styled from '@emotion/native'
+import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { useTranslation } from 'react-i18next'
+import * as NativeUI from 'react-native'
+import { TouchableOpacity } from 'react-native'
+import { twMerge } from '~common/ui/classNames'
+import { useResolveClassNames } from 'uniwind'
+import type { Theme as AppTheme } from '~themes'
 
-import Box, { HStack } from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import { FeatherIcon } from '~common/ui/Icon'
-import { LinkBox } from '~common/Link'
-import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
 import EntityChipList from '~common/EntityChipList'
-import useLanguage from '~helpers/useLanguage'
-import { getDateLocale } from '~helpers/languageUtils'
-import formatVerseContent from '~helpers/formatVerseContent'
-import { useResolvedColor } from '~helpers/useHighlightColors'
-import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { getBook } from '~helpers/bibleBookCatalog'
-import type { GroupedWordAnnotation } from '~redux/selectors/bible'
+import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
+import { LinkBox } from '~common/Link'
 import type { TagsObj } from '~common/types'
+import Box, { HStack } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
 import { Chip } from '~common/ui/NewChip'
+import Text from '~common/ui/Text'
+import { getBook } from '~helpers/bibleBookCatalog'
+import formatVerseContent from '~helpers/formatVerseContent'
+import { getDateLocale } from '~helpers/languageUtils'
+import { useResolvedColor } from '~helpers/useHighlightColors'
+import useLanguage from '~helpers/useLanguage'
 import { useMountTime } from '~helpers/useMountTime'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import type { GroupedWordAnnotation } from '~redux/selectors/bible'
 
-const DateText = styled.Text(({ theme }) => ({
-  color: theme.colors.tertiary,
-}))
+const DateText = (
+  componentProps: Omit<UIComponentProps<typeof NativeUI.Text>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
 
-const AnnotationContainer = styled(Box)(({ theme }) => ({
-  margin: 20,
-  paddingBottom: 20,
-  marginBottom: 0,
-  borderBottomColor: theme.colors.border,
-  borderBottomWidth: 1,
-}))
+  const classStyles = useResolveClassNames(twMerge('text-tertiary', className))
+  return (
+    <NativeUI.Text
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.Text>['style']}
+    />
+  )
+}
+
+const AnnotationContainer = (
+  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
+    theme?: AppTheme
+    className?: string
+  }
+) => {
+  const { theme: _themeOverride, className, ...props } = componentProps
+
+  const classStyles = useResolveClassNames(
+    twMerge('m-[20px] pb-[20px] mb-[0px] border-b-border border-b-[1px]', className)
+  )
+  return (
+    <Box
+      {...props}
+      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
+      className="overflow-hidden border-continuous"
+    />
+  )
+}
 
 export type AnnotationItemProps = {
   item: GroupedWordAnnotation
@@ -38,6 +69,8 @@ export type AnnotationItemProps = {
 }
 
 const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
+  const stylingTheme = useStylingTheme()
+
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const lang = useLanguage()
@@ -68,15 +101,21 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
   return (
     <AnnotationContainer>
       <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} onPress={openBibleView}>
-        <Box row style={{ marginBottom: 10 }} pr={32} alignItems="center">
-          <HStack flex row alignItems="center" gap={10}>
-            <HStack>
+        <Box
+          className="overflow-hidden border-continuous flex-row pr-[32px] items-center"
+          style={{ marginBottom: 10 }}
+        >
+          <HStack className="overflow-hidden border-continuous flex-[1] flex-row items-center gap-[10px]">
+            <HStack className="overflow-hidden border-continuous">
               <HighlightTypeIndicator
                 color={resolvedColor}
                 type={item.type as 'background' | 'underline'}
                 size={15}
               />
-              <Text fontSize={14} marginLeft={10} title>
+              <Text
+                className="text-[14px] ml-[10px]"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
                 {title}
               </Text>
             </HStack>
@@ -87,21 +126,15 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
             {t('Il y a {{formattedDate}}', { formattedDate })}
           </DateText>
         </Box>
-        <Text fontSize={14} marginBottom={15}>
-          {`...${item.text}...`}
-        </Text>
+        <Text className="text-[14px] mb-[15px]">{`...${item.text}...`}</Text>
       </TouchableOpacity>
       {item.tags && Object.keys(item.tags).length > 0 && (
         <EntityChipList tags={item.tags as TagsObj} />
       )}
       {onSettingsPress && (
         <LinkBox
+          className="p-[4px] ml-[10px] absolute top-[0px] right-[0px]"
           accessibilityLabel={t('accessibility.options')}
-          position="absolute"
-          top={0}
-          right={0}
-          p={4}
-          ml={10}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           onPress={() => onSettingsPress(item)}
         >

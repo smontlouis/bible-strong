@@ -1,7 +1,9 @@
+import { twMerge } from '~common/ui/classNames'
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { Alert, Linking, Platform, TouchableOpacity } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
-
 import { getDefaultStore } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
@@ -41,7 +43,6 @@ import {
 import useConnection from '~helpers/useConnection'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { localQueryOptions } from '~helpers/queryOptions'
-
 const VersionItemContainer = ({
   children,
   needsUpdate,
@@ -56,14 +57,17 @@ const VersionItemContainer = ({
 }>) => {
   const content = (
     <Box
-      minHeight={76}
-      pl={20}
-      pr={4}
-      py={12}
-      borderBottomWidth={hasDependency ? 0 : 1}
-      borderColor="border"
-      borderLeftWidth={selected ? 3 : needsUpdate ? 5 : 0}
-      borderLeftColor={selected ? 'primary' : needsUpdate ? 'success' : undefined}
+      className={twMerge(
+        'overflow-hidden border-continuous',
+        twMerge(
+          selected ? 'border-l-primary' : needsUpdate ? 'border-l-success' : '',
+          'overflow-hidden min-h-[76px] pl-[20px] pr-[4px] py-[12px] border-border'
+        )
+      )}
+      style={{
+        borderBottomWidth: hasDependency ? 0 : 1,
+        borderLeftWidth: selected ? 3 : needsUpdate ? 5 : 0,
+      }}
     >
       {children}
     </Box>
@@ -83,7 +87,10 @@ const VersionItemContainer = ({
 }
 
 const ActionColumn = ({ children, opacity }: React.PropsWithChildren<{ opacity?: number }>) => (
-  <Box width={48} minHeight={48} center opacity={opacity}>
+  <Box
+    className="overflow-hidden border-continuous w-[48px] min-h-[48px] items-center justify-center"
+    style={{ opacity: opacity }}
+  >
     {children}
   </Box>
 )
@@ -156,113 +163,132 @@ const VersionIdentity = ({
   interlinearToggleLabel?: string
   interlinearAttribution?: string
   passiveCapabilities?: boolean
-}) => (
-  <Box flex>
-    <Text color={color} fontSize={12} opacity={0.5} bold>
-      {version.id}
-    </Text>
-    <HStack alignItems="center">
-      <Text color={color} fontSize={16}>
-        {version.displayName || version.name}
-      </Text>
-      {showCapabilities && version.hasAudio && (
-        <Box ml={4}>
-          <FeatherIcon name="volume-2" size={16} color="primary" />
-        </Box>
-      )}
-      {showCapabilities &&
-        showStrongCapability &&
-        (onToggleStrongIndex ? (
-          <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityLabel={strongToggleLabel}
-            accessibilityState={{ expanded: isStrongIndexExpanded }}
-            onPress={event => {
-              event.stopPropagation()
-              onToggleStrongIndex()
-            }}
-          >
-            <Box width={38} height={28} center ml={5} overflow="visible">
-              <Box position="relative" width={22} height={24} center overflow="visible">
-                <StrongMark highlighted={isStrongIndexAvailable} />
-                <Box position="absolute" width={16} height={16} center right={-10} bottom={0}>
-                  <FeatherIcon
-                    name={isStrongIndexExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={12}
-                    color="tertiary"
-                  />
-                </Box>
-              </Box>
-            </Box>
-          </TouchableOpacity>
-        ) : (
-          <Box ml={5}>
-            <StrongMark highlighted={isStrongIndexAvailable} passive={passiveCapabilities} />
-          </Box>
-        ))}
-      {showCapabilities &&
-        showInterlinearCapability &&
-        (onToggleInterlinearIndex ? (
-          <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityLabel={interlinearToggleLabel}
-            accessibilityState={{ expanded: isInterlinearIndexExpanded }}
-            onPress={event => {
-              event.stopPropagation()
-              onToggleInterlinearIndex()
-            }}
-          >
-            <Box width={38} height={28} center ml={5} overflow="visible">
-              <Box position="relative" width={22} height={24} center overflow="visible">
-                <InterlinearMark highlighted={isInterlinearIndexAvailable} />
-                <Box position="absolute" width={16} height={16} center right={-10} bottom={0}>
-                  <FeatherIcon
-                    name={isInterlinearIndexExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={12}
-                    color="tertiary"
-                  />
-                </Box>
-              </Box>
-            </Box>
-          </TouchableOpacity>
-        ) : (
-          <Box ml={5}>
-            <InterlinearMark
-              highlighted={isInterlinearIndexAvailable}
-              passive={passiveCapabilities}
-            />
-          </Box>
-        ))}
-    </HStack>
-    {showPublicationDetails && (
+}) => {
+  const stylingTheme = useStylingTheme()
+  return (
+    <Box className="overflow-hidden border-continuous flex-[1]">
       <Text
-        color={copyrightColor}
-        fontSize={10}
-        opacity={copyrightOpacity}
-        onPress={onCopyrightPress}
-        style={copyrightStyle}
+        className="text-[12px] opacity-[0.5] font-bold"
+        style={{ color: resolveThemeColor(stylingTheme, color) || stylingTheme.colors.default }}
       >
-        {version.c}
+        {version.id}
       </Text>
-    )}
-    {showPublicationDetails &&
-      isStrongIndexAvailable &&
-      !isStrongIndexExpanded &&
-      strongAttribution && (
-        <Text color={color} fontSize={10} opacity={0.5}>
-          {strongAttribution}
+      <HStack className="items-center">
+        <Text
+          className="text-[16px]"
+          style={{ color: resolveThemeColor(stylingTheme, color) || stylingTheme.colors.default }}
+        >
+          {version.displayName || version.name}
+        </Text>
+        {showCapabilities && version.hasAudio && (
+          <Box className="overflow-hidden border-continuous ml-[4px]">
+            <FeatherIcon name="volume-2" size={16} color="primary" />
+          </Box>
+        )}
+        {showCapabilities &&
+          showStrongCapability &&
+          (onToggleStrongIndex ? (
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel={strongToggleLabel}
+              accessibilityState={{ expanded: isStrongIndexExpanded }}
+              onPress={event => {
+                event.stopPropagation()
+                onToggleStrongIndex()
+              }}
+            >
+              <Box className="border-continuous overflow-visible w-[38px] h-[28px] items-center justify-center ml-[5px]">
+                <Box className="border-continuous overflow-visible relative w-[22px] h-[24px] items-center justify-center">
+                  <StrongMark highlighted={isStrongIndexAvailable} />
+                  <Box className="overflow-hidden border-continuous absolute w-[16px] h-[16px] items-center justify-center right-[-10px] bottom-[0px]">
+                    <FeatherIcon
+                      name={isStrongIndexExpanded ? 'chevron-up' : 'chevron-down'}
+                      size={12}
+                      color="tertiary"
+                    />
+                  </Box>
+                </Box>
+              </Box>
+            </TouchableOpacity>
+          ) : (
+            <Box className="overflow-hidden border-continuous ml-[5px]">
+              <StrongMark highlighted={isStrongIndexAvailable} passive={passiveCapabilities} />
+            </Box>
+          ))}
+        {showCapabilities &&
+          showInterlinearCapability &&
+          (onToggleInterlinearIndex ? (
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel={interlinearToggleLabel}
+              accessibilityState={{ expanded: isInterlinearIndexExpanded }}
+              onPress={event => {
+                event.stopPropagation()
+                onToggleInterlinearIndex()
+              }}
+            >
+              <Box className="border-continuous overflow-visible w-[38px] h-[28px] items-center justify-center ml-[5px]">
+                <Box className="border-continuous overflow-visible relative w-[22px] h-[24px] items-center justify-center">
+                  <InterlinearMark highlighted={isInterlinearIndexAvailable} />
+                  <Box className="overflow-hidden border-continuous absolute w-[16px] h-[16px] items-center justify-center right-[-10px] bottom-[0px]">
+                    <FeatherIcon
+                      name={isInterlinearIndexExpanded ? 'chevron-up' : 'chevron-down'}
+                      size={12}
+                      color="tertiary"
+                    />
+                  </Box>
+                </Box>
+              </Box>
+            </TouchableOpacity>
+          ) : (
+            <Box className="overflow-hidden border-continuous ml-[5px]">
+              <InterlinearMark
+                highlighted={isInterlinearIndexAvailable}
+                passive={passiveCapabilities}
+              />
+            </Box>
+          ))}
+      </HStack>
+      {showPublicationDetails && (
+        <Text
+          className="text-[10px]"
+          onPress={onCopyrightPress}
+          style={[
+            {
+              color: resolveThemeColor(stylingTheme, copyrightColor) || stylingTheme.colors.default,
+              opacity: copyrightOpacity,
+            },
+            copyrightStyle,
+          ]}
+        >
+          {version.c}
         </Text>
       )}
-    {showPublicationDetails &&
-      isInterlinearIndexAvailable &&
-      !isInterlinearIndexExpanded &&
-      interlinearAttribution && (
-        <Text color={color} fontSize={10} opacity={0.5}>
-          {interlinearAttribution}
-        </Text>
-      )}
-  </Box>
-)
+      {showPublicationDetails &&
+        isStrongIndexAvailable &&
+        !isStrongIndexExpanded &&
+        strongAttribution && (
+          <Text
+            className="text-[10px] opacity-[0.5]"
+            style={{ color: resolveThemeColor(stylingTheme, color) || stylingTheme.colors.default }}
+          >
+            {strongAttribution}
+          </Text>
+        )}
+      {showPublicationDetails &&
+        isInterlinearIndexAvailable &&
+        !isInterlinearIndexExpanded &&
+        interlinearAttribution && (
+          <Text
+            className="text-[10px] opacity-[0.5]"
+            style={{ color: resolveThemeColor(stylingTheme, color) || stylingTheme.colors.default }}
+          >
+            {interlinearAttribution}
+          </Text>
+        )}
+    </Box>
+  )
+}
 
 export interface Props {
   version: Version & { displayName?: string }
@@ -483,7 +509,7 @@ const VersionSelectorItem = ({
   const renderSelectedIndicator = () => (
     <ActionColumn>
       {isSelected && (
-        <Box width={22} height={22} borderRadius={11} bg="primary" center>
+        <Box className="overflow-hidden border-continuous w-[22px] h-[22px] rounded-[11px] bg-primary items-center justify-center">
           <FeatherIcon name="check" size={14} color="white" />
         </Box>
       )}
@@ -515,7 +541,7 @@ const VersionSelectorItem = ({
   if (onOpenOfflineDetails) {
     return (
       <VersionItemContainer needsUpdate={needsUpdate} selected={isSelected}>
-        <Box flex row alignItems="center">
+        <Box className="overflow-hidden border-continuous flex-[1] flex-row items-center">
           <TouchableOpacity
             style={{ flex: 1 }}
             disabled={isUnavailableOffline}
@@ -528,7 +554,10 @@ const VersionSelectorItem = ({
                 : { disabled: isUnavailableOffline }
             }
           >
-            <Box flex row alignItems="center" opacity={isUnavailableOffline ? 0.45 : 1}>
+            <Box
+              className="overflow-hidden border-continuous flex-[1] flex-row items-center"
+              style={{ opacity: isUnavailableOffline ? 0.45 : 1 }}
+            >
               {renderSelectionCheckbox()}
               <VersionIdentity
                 version={version}
@@ -542,26 +571,19 @@ const VersionSelectorItem = ({
                 showInterlinearCapability={showInterlinearCapability}
               />
               {isLoading ? (
-                <Box width={30} center>
+                <Box className="overflow-hidden border-continuous w-[30px] items-center justify-center">
                   <Progress progress={Math.max(downloadProgress, 0.04)} size={22} thickness={2.5} />
                 </Box>
               ) : versionNeedsDownload === false ? (
-                <Box width={30} height={28} center position="relative" overflow="visible">
+                <Box className="border-continuous overflow-visible w-[30px] h-[28px] items-center justify-center relative">
                   <FeatherIcon name="cloud" size={18} color="primary" />
                   {strongPresent && (
                     <Box
-                      position="absolute"
-                      right={-1}
-                      bottom={-2}
-                      size={14}
-                      borderRadius={7}
-                      bg="primary"
-                      center
+                      className="overflow-hidden border-continuous absolute right-[-1px] bottom-[-2px] rounded-[7px] bg-primary items-center justify-center"
+                      style={{ width: 14, height: 14 }}
                     >
                       <Text
-                        color="reverse"
-                        fontSize={9}
-                        bold
+                        className="text-reverse text-[9px] font-bold"
                         style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}
                       >
                         S
@@ -570,7 +592,7 @@ const VersionSelectorItem = ({
                   )}
                 </Box>
               ) : isUnavailableOffline ? (
-                <Box width={30} height={28} center>
+                <Box className="overflow-hidden border-continuous w-[30px] h-[28px] items-center justify-center">
                   <FeatherIcon name="wifi-off" size={18} color="tertiary" />
                 </Box>
               ) : null}
@@ -591,7 +613,7 @@ const VersionSelectorItem = ({
 
   if (selectionNeedsDownload !== false) {
     return (
-      <Box>
+      <Box className="overflow-hidden border-continuous">
         <VersionItemContainer
           onPress={isUnavailableOffline ? undefined : () => onChange?.(version.id)}
           hasDependency={
@@ -599,8 +621,11 @@ const VersionSelectorItem = ({
             (showInterlinearCapability && isInterlinearIndexExpanded)
           }
         >
-          <Box flex row alignItems="center" opacity={isUnavailableOffline ? 0.45 : 1}>
-            <Box flex>
+          <Box
+            className="overflow-hidden border-continuous flex-[1] flex-row items-center"
+            style={{ opacity: isUnavailableOffline ? 0.45 : 1 }}
+          >
+            <Box className="overflow-hidden border-continuous flex-[1]">
               <VersionIdentity
                 version={version}
                 color="default"
@@ -676,7 +701,7 @@ const VersionSelectorItem = ({
   if (isParameters) {
     return (
       <VersionItemContainer needsUpdate={needsUpdate}>
-        <Box flex row center>
+        <Box className="overflow-hidden border-continuous flex-[1] flex-row items-center justify-center">
           <VersionIdentity version={version} color="default" />
           {needsUpdate ? (
             <TouchableOpacity
@@ -713,7 +738,7 @@ const VersionSelectorItem = ({
   }
 
   return (
-    <Box>
+    <Box className="overflow-hidden border-continuous">
       <VersionItemContainer
         needsUpdate={needsUpdate}
         hasDependency={
@@ -722,7 +747,7 @@ const VersionSelectorItem = ({
         }
         onPress={() => onChange && onChange(version.id)}
       >
-        <Box flex row alignItems="center">
+        <Box className="overflow-hidden border-continuous flex-[1] flex-row items-center">
           <VersionIdentity
             version={version}
             color={versionColor}

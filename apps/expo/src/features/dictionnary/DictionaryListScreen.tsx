@@ -1,7 +1,8 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
-
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import AlphabetList from '~common/AlphabetList'
@@ -40,7 +41,6 @@ import {
 } from '~features/resources/resourceFailure'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { toast } from '~helpers/toast'
-
 type DictionaryRow = DictionarySummary | DictionaryDirectoryItem
 
 interface DictionarySection {
@@ -97,6 +97,8 @@ const DictionaryListScreen = ({
   newTabId,
   onWordSelect,
 }: DictionaryListScreenProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const pushRouteOnce = usePushRouteOnce()
@@ -386,7 +388,7 @@ const DictionaryListScreen = ({
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <Header
           hasBackButton={showBackButton}
           fontSize={18}
@@ -445,13 +447,13 @@ const DictionaryListScreen = ({
               }}
               accessibilityLabel={t('Options du dictionnaire')}
             >
-              <Box row center height={60} width={60}>
+              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
                 <FeatherIcon name="more-vertical" size={18} />
               </Box>
             </MenuView>
           }
         >
-          <Box pb={10} px={20}>
+          <Box className="overflow-hidden border-continuous pb-[10px] px-[20px]">
             <SearchInput
               placeholder={t('Recherche par mot')}
               onChangeText={setSearchValue}
@@ -460,7 +462,7 @@ const DictionaryListScreen = ({
             />
           </Box>
         </Header>
-        <Box flex paddingTop={20}>
+        <Box className="overflow-hidden border-continuous flex-[1] pt-[20px]">
           {isLoading ? (
             <Loading message={t('Chargement...')} />
           ) : sectionResults.length ? (
@@ -509,7 +511,10 @@ const DictionaryListScreen = ({
               }
               renderSectionHeader={({ section: { title } }) => (
                 <SectionTitle color="secondary">
-                  <Text title fontWeight="bold" fontSize={16} color="reverse">
+                  <Text
+                    className="font-bold text-[16px] text-reverse"
+                    style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+                  >
                     {title}
                   </Text>
                 </SectionTitle>

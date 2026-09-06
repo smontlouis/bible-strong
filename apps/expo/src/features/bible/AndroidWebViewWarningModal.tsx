@@ -1,13 +1,11 @@
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { Modal, TouchableOpacity, View } from 'react-native'
-
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { dismissTipAtom, useTip } from '~features/tips/atom'
-
 const TIP_ID = 'bible-dom-wrapper-android'
 
 const AndroidWebViewWarningModal = ({ top }: { top: number }) => {
@@ -28,14 +26,9 @@ const AndroidWebViewWarningModal = ({ top }: { top: number }) => {
         style={{ flex: 1 }}
       >
         <Box
-          position="absolute"
-          left={20}
-          right={20}
-          top={Math.max(16, top - 12)}
-          bg="reverse"
-          borderRadius={12}
-          p={18}
-          shadow={{
+          className="overflow-hidden border-continuous absolute left-[20px] right-[20px] bg-reverse rounded-[12px] p-[18px]"
+          style={{
+            top: Math.max(16, top - 12),
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 10 },
             shadowOpacity: 0.22,
@@ -43,15 +36,16 @@ const AndroidWebViewWarningModal = ({ top }: { top: number }) => {
             elevation: 24,
           }}
         >
-          <Box row alignItems="flex-start" gap={12}>
-            <Box size={36} rounded center bg="quart" flexShrink={0} style={{ borderRadius: 18 }}>
+          <Box className="overflow-hidden border-continuous flex-row items-start gap-[12px]">
+            <Box
+              className="overflow-hidden border-continuous rounded-[20px] items-center justify-center bg-quart shrink-[0]"
+              style={[{ width: 36, height: 36 }, { borderRadius: 18 }]}
+            >
               <FeatherIcon name="alert-triangle" size={19} color="reverse" />
             </Box>
-            <Box flex={1} gap={6}>
-              <Text fontSize={17} bold>
-                {t('tips.androidWebView.title')}
-              </Text>
-              <Text fontSize={14} lineHeight={20} color="tertiary">
+            <Box className="overflow-hidden border-continuous flex-[1] gap-[6px]">
+              <Text className="text-[17px] font-bold">{t('tips.androidWebView.title')}</Text>
+              <Text className="text-[14px] leading-[20px] text-tertiary">
                 {t('tips.bible-dom-wrapper-android')}
               </Text>
             </Box>
@@ -64,7 +58,7 @@ const AndroidWebViewWarningModal = ({ top }: { top: number }) => {
               <FeatherIcon name="x" size={22} color="tertiary" />
             </TouchableOpacity>
           </Box>
-          <Box mt={18} alignItems="flex-end">
+          <Box className="overflow-hidden border-continuous mt-[18px] items-end">
             <Button small onPress={dismiss}>
               {t('tips.androidWebView.understand')}
             </Button>

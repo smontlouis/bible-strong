@@ -8,7 +8,6 @@ import Animated, {
   type EntryAnimationsValues,
   type ExitAnimationsValues,
 } from 'react-native-reanimated'
-
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import type { Verse } from '~common/types'
 import Box from '~common/ui/Box'
@@ -19,12 +18,10 @@ import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
 import { localQueryOptions, staticResourceQueryOptions } from '~helpers/queryOptions'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
-
 import BibleVerseDetailFooter from '../BibleVerseDetailFooter'
 import ResourceUnavailableView from '../../resources/ResourceUnavailableView'
 import { useResourceAccess } from '../../resources/resourceAccess'
 import { useResolvedBibleVerses, verseStringToObject } from '../../resources/useBibleVerses'
-
 const CONTENT_TRANSITION_DURATION = 180
 const CONTENT_LAYOUT_TRANSITION = LinearTransition.duration(220)
 
@@ -118,15 +115,13 @@ export const useResourceVerseContext = (
 
 const VerseTextSkeleton = ({ accessibilityLabel }: { accessibilityLabel: string }) => (
   <Box
-    minHeight={72}
-    pt={3}
-    gap={10}
+    className="overflow-hidden border-continuous min-h-[72px] pt-[3px] gap-[10px]"
     accessibilityRole="progressbar"
     accessibilityLabel={accessibilityLabel}
   >
-    <Box height={13} width="92%" borderRadius={5} bg="lightGrey" />
-    <Box height={13} width="78%" borderRadius={5} bg="lightGrey" />
-    <Box height={13} width="56%" borderRadius={5} bg="lightGrey" />
+    <Box className="overflow-hidden border-continuous h-[13px] w-[92%] rounded-[5px] bg-light-grey" />
+    <Box className="overflow-hidden border-continuous h-[13px] w-[78%] rounded-[5px] bg-light-grey" />
+    <Box className="overflow-hidden border-continuous h-[13px] w-[56%] rounded-[5px] bg-light-grey" />
   </Box>
 )
 
@@ -152,7 +147,7 @@ const ResourceVerseContext = ({
   const verseNumber = verseText?.Verset ?? verse.split('-')[2]
 
   return (
-    <Box background paddingTop={10} borderBottomLeftRadius={30} borderBottomRightRadius={30}>
+    <Box className="overflow-hidden border-continuous bg-reverse pt-[10px] rounded-bl-[30px] rounded-br-[30px]">
       <Animated.View layout={reduceMotion ? undefined : CONTENT_LAYOUT_TRANSITION}>
         <Animated.View
           key={verse}
@@ -167,13 +162,11 @@ const ResourceVerseContext = ({
             reduceMotion ? undefined : navigationDirection === 1 ? exitNextVerse : exitPreviousVerse
           }
         >
-          <Box row pr={10} pb={10}>
-            <Box width={25} mr={5} mt={10} alignItems="flex-end">
-              <Text mt={0} fontSize={9} mr={3}>
-                {verseNumber}
-              </Text>
+          <Box className="overflow-hidden border-continuous flex-row pr-[10px] pb-[10px]">
+            <Box className="overflow-hidden border-continuous w-[25px] mr-[5px] mt-[10px] items-end">
+              <Text className="mt-[0px] text-[9px] mr-[3px]">{verseNumber}</Text>
             </Box>
-            <Box flex>
+            <Box className="overflow-hidden border-continuous flex-[1]">
               {unavailableBibleVersion ? (
                 <ResourceUnavailableView
                   identity={{ kind: 'bible', versionId: unavailableBibleVersion }}

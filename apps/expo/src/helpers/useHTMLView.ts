@@ -1,4 +1,4 @@
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { useRef, useState } from 'react'
 import { StyleProp, ViewStyle } from 'react-native'
 import literata from '~assets/fonts/literata'
@@ -10,7 +10,6 @@ import {
   WebViewRenderProcessGoneEvent,
   WebViewTerminatedEvent,
 } from 'react-native-webview/lib/WebViewTypes'
-
 const fontRule = `@font-face { font-family: 'Literata Book'; src: local('Literata Book'), url('${literata}') format('woff');}`
 
 export type HTMLViewLinkPayload = {

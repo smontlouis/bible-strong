@@ -1,8 +1,9 @@
+import { resolveThemeColor } from '~themes/colorValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { ActivityIndicator } from 'react-native'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-
 type AudioButtonProps = {
   error: boolean
   isPlaying: boolean
@@ -18,6 +19,8 @@ const AudioButton = ({
   isLoading,
   type = 'url',
 }: AudioButtonProps) => {
+  const stylingTheme = useStylingTheme()
+
   if (error) {
     return <FeatherIcon name="x" size={20} color={isPlaying || isBuffering ? 'reverse' : ''} />
   }
@@ -28,7 +31,14 @@ const AudioButton = ({
 
   if (type === 'tts') {
     return (
-      <Text fontSize={12} bold color={isPlaying || isBuffering ? 'reverse' : ''}>
+      <Text
+        className="text-[12px] font-bold"
+        style={{
+          color:
+            resolveThemeColor(stylingTheme, isPlaying || isBuffering ? 'reverse' : '') ||
+            stylingTheme.colors.default,
+        }}
+      >
         TTS
       </Text>
     )

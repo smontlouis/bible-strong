@@ -1,3 +1,4 @@
+import verseToReference from '../verseToReference'
 jest.mock('~assets/bible_versions/books-desc', () => {
   const books = Array.from({ length: 73 }, (_, index) => ({
     Numero: index + 1,
@@ -17,8 +18,6 @@ jest.mock('~i18n', () => ({
       options?.bookNumber ? `Livre ${options.bookNumber}` : key,
   },
 }))
-
-import verseToReference from '../verseToReference'
 
 describe('verseToReference', () => {
   it('keeps same-chapter references compact', () => {

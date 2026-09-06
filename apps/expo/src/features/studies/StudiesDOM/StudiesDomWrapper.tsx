@@ -4,10 +4,9 @@ import { useEffect, useRef, useState } from 'react'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import { Platform } from 'react-native'
 import { WebViewMessageEvent } from 'react-native-webview'
-import { useTheme } from '@emotion/react'
+import { useTheme } from '~themes/ThemeProvider'
 import { useAtomValue } from 'jotai/react'
 import { useSelector } from 'react-redux'
-
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { StudyTab, TabItem, useIsCurrentTab } from 'src/state/tabs'
 import { StudyNavigateBibleType } from '~common/types'
@@ -35,7 +34,6 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import type { RootState } from '~redux/modules/reducer'
-
 const IPAD_FORM_SHEET_KEYBOARD_OFFSET = -54
 
 type Props = {
@@ -306,7 +304,7 @@ export default function StudiesDomWrapper({
         backgroundColor: theme.colors.reverse,
       }}
     >
-      <Box flex bg="reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         {editor}
         {footer}
         <CreateEntityRelationModal

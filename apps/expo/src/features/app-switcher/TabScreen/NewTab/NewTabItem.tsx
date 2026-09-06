@@ -1,3 +1,5 @@
+import { resolveFontFamily } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useRouter } from 'expo-router'
@@ -9,7 +11,6 @@ import TabIcon from '~features/app-switcher/utils/getIconByTabType'
 import { BibleTab, getDefaultBibleTab, getDefaultData, TabItem } from '../../../../state/tabs'
 import { useDefaultBibleVersion } from '../../../../state/useDefaultBibleVersion'
 import { useSelectBibleReference } from './SelectBibleReferenceModalProvider'
-
 interface NewTabItemProps {
   type: TabItem['type']
   newAtom: PrimitiveAtom<TabItem>
@@ -103,21 +104,21 @@ const useOpenTabByType = ({ type, newAtom, onPlanPress }: NewTabItemProps) => {
 }
 
 const NewTabItem = ({ type, newAtom, onPlanPress }: NewTabItemProps) => {
+  const stylingTheme = useStylingTheme()
+
   const { t } = useTranslation()
   const { onPress } = useOpenTabByType({ type, newAtom, onPlanPress })
 
   return (
     <TouchableBox
-      height={72}
-      px={18}
-      row
-      alignItems="center"
-      bg="reverse"
-      rounded
+      className="overflow-hidden border-continuous h-[72px] px-[18px] flex-row items-center bg-reverse rounded-[20px]"
       onPress={onPress}
     >
       <TabIcon type={type} size={26} />
-      <Text title ml={16} fontSize={16} lightShadow>
+      <Text
+        className="ml-[16px] text-[16px]"
+        style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+      >
         {t(`tabs.${type}`)}
       </Text>
     </TouchableBox>

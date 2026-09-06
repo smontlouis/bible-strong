@@ -1,8 +1,9 @@
+import { resolveThemeColor, resolveFontFamily, colorWithOpacity } from '~themes/styleValues'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
 import type { Verse } from '~common/types'
@@ -22,12 +23,10 @@ import { resourceFailureFromAccessError } from '~features/resources/resourceFail
 import { localQueryOptions } from '~helpers/queryOptions'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-
 import {
   groupDictionaryPassageEntries,
   pickPreferredDictionarySource,
 } from './dictionaryExperience'
-
 const DictionnaireVerseDetailScreen = ({
   verse,
   updateVerse,
@@ -37,6 +36,8 @@ const DictionnaireVerseDetailScreen = ({
   updateVerse: (value: number) => void
   selectedVersion: string
 }) => {
+  const stylingTheme = useStylingTheme()
+
   const resources = useResourceAccess()
   const { t } = useTranslation()
   const pushRouteOnce = usePushRouteOnce()
@@ -83,7 +84,7 @@ const DictionnaireVerseDetailScreen = ({
     t(count === 1 ? '{{count}} article' : '{{count}} articles', { count })
 
   return (
-    <Box flex={1} bg="lightGrey">
+    <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
       <ResourceVerseContext
         verse={verseKey}
         {...verseContext}
@@ -91,7 +92,7 @@ const DictionnaireVerseDetailScreen = ({
         updateVerse={navigateVerse}
       />
       {anchorsQuery.isPending ? (
-        <Box height={120} center>
+        <Box className="overflow-hidden border-continuous h-[120px] items-center justify-center">
           <Loading />
         </Box>
       ) : anchorsQuery.isError ? (
@@ -106,7 +107,7 @@ const DictionnaireVerseDetailScreen = ({
         />
       ) : presentConcepts.length > 0 || citationConcepts.length > 0 ? (
         <SheetScrollView>
-          <Box px={20} pt={20} pb={32} gap={20}>
+          <Box className="overflow-hidden border-continuous px-[20px] pt-[20px] pb-[32px] gap-[20px]">
             {[
               {
                 key: 'presence',
@@ -120,16 +121,31 @@ const DictionnaireVerseDetailScreen = ({
               },
             ].map(section =>
               section.concepts.length > 0 ? (
-                <Box key={section.key} px={14} py={13} rounded bg="reverse" lightShadow>
-                  <Text title fontSize={14} color="grey">
+                <Box
+                  className="overflow-hidden border-continuous px-[14px] py-[13px] rounded-[20px] bg-reverse"
+                  key={section.key}
+                  style={{
+                    shadowColor: 'rgb(89,131,240)',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 7,
+                    elevation: 1,
+                    overflow: 'visible',
+                  }}
+                >
+                  <Text
+                    className="text-[14px] text-grey"
+                    style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+                  >
                     {section.title}
                   </Text>
-                  <Box row wrap gap={5} mt={5}>
+                  <Box className="overflow-hidden border-continuous flex-row flex-wrap gap-[5px] mt-[5px]">
                     {section.concepts.map(concept => {
                       const source = pickPreferredDictionarySource(concept.sources, resourceLang)
                       if (!source) return null
                       return (
                         <TouchableBox
+                          className="overflow-hidden border-continuous rounded-[5px] px-[12px] py-[5px]"
                           key={concept.key}
                           accessibilityRole="button"
                           accessibilityLabel={`${concept.label}, ${articleCountLabel(
@@ -150,13 +166,17 @@ const DictionnaireVerseDetailScreen = ({
                             })
                           }
                           activeOpacity={0.55}
-                          bg="secondary"
-                          bgOpacity="010"
-                          borderRadius={5}
-                          px={12}
-                          py={5}
+                          style={{
+                            backgroundColor: colorWithOpacity(
+                              resolveThemeColor(stylingTheme, 'secondary'),
+                              0.1
+                            ),
+                          }}
                         >
-                          <Text title fontSize={14} color="secondary">
+                          <Text
+                            className="text-[14px] text-secondary"
+                            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+                          >
                             {concept.label}
                           </Text>
                         </TouchableBox>
