@@ -1,3 +1,4 @@
+import '../../../global.web.css'
 import { loadWebFonts } from '~helpers/loadWebFonts'
 import { webFontFamily } from '~helpers/webFontFamily'
 import { appLogger } from '~helpers/agentObservability'

@@ -59,11 +59,19 @@ const SelectedVersesModal = ({
     focusVerses,
   })
 
-  const { panGesture, animatedStyle, indicatorAnimatedStyle, goToTab, tabWidth, screenWidth } =
-    useTabSwipeGesture({
-      activeTabIndex,
-      setActiveTabIndex,
-    })
+  const {
+    panGesture,
+    animatedStyle,
+    indicatorAnimatedStyle,
+    goToTab,
+    tabWidth,
+    screenWidth,
+    setContentWidth,
+    setTabContainerWidth,
+  } = useTabSwipeGesture({
+    activeTabIndex,
+    setActiveTabIndex,
+  })
 
   const {
     shareVerse,
@@ -113,6 +121,7 @@ const SelectedVersesModal = ({
             <></>
           ) : (
             <Box
+              onLayout={event => setContentWidth(event.nativeEvent.layout.width)}
               className="overflow-hidden border-continuous"
               style={{
                 overflow: 'hidden',
@@ -166,6 +175,7 @@ const SelectedVersesModal = ({
                 />
               </Animated.View>
               <VersesModalFooter
+                onContainerWidthChange={setTabContainerWidth}
                 panGesture={panGesture}
                 indicatorAnimatedStyle={indicatorAnimatedStyle}
                 tabWidth={tabWidth}

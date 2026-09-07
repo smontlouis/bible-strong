@@ -36,6 +36,9 @@ const RelationTag = styled('span')<RootStyles & { isParallel?: boolean }>(
     color: colors[theme].default,
     backgroundColor: colors[theme].lightGrey,
     fontSize: scaleFontSize(isParallel ? 10 : 16, fontSizeScale),
+    '@media (min-width: 768px)': {
+      fontSize: scaleFontSize(16, fontSizeScale),
+    },
     marginRight: '5px',
     cursor: 'pointer',
     display: 'inline-flex',

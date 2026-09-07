@@ -34,6 +34,10 @@ const StyledReference = styled('span')<
     backgroundColor: isSelected ? colors[theme].primary : 'inherit',
     fontSize: scaleFontSize(isParallel ? 14 : 16, fontSizeScale),
     lineHeight: scaleLineHeight(isParallel ? 24 : 30, lineHeight, fontSizeScale),
+    '@media (min-width: 768px)': {
+      fontSize: scaleFontSize(16, fontSizeScale),
+      lineHeight: scaleLineHeight(30, lineHeight, fontSizeScale),
+    },
     boxShadow: isDarkTheme(theme)
       ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
       : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,

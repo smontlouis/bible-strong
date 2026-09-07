@@ -13,6 +13,10 @@ const Div = styled('span')<RootStyles & { isParallel?: boolean }>(
     ...noSelect,
     fontSize: scaleFontSize(isParallel ? 10 : 14, fontSizeScale),
     lineHeight: scaleFontSize(isParallel ? 18 : 26, fontSizeScale),
+    '@media (min-width: 768px)': {
+      fontSize: scaleFontSize(14, fontSizeScale),
+      lineHeight: scaleFontSize(26, fontSizeScale),
+    },
     backgroundColor: colors[theme].reverse,
     boxShadow: `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
     borderRadius: '8px',

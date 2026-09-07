@@ -62,6 +62,7 @@ const BibleFooter = ({
   if (playingBibleTabId && !isTabPlaying) {
     return (
       <BackToAudioFooter
+        isParallel={Boolean(bibleTab.data.parallelVersions?.length)}
         book={book}
         chapter={chapter}
         goToNextChapter={goToNextChapter}
@@ -76,6 +77,7 @@ const BibleFooter = ({
   if (audioMode === 'url') {
     return (
       <AudioUrlFooter
+        isParallel={Boolean(bibleTab.data.parallelVersions?.length)}
         book={book}
         chapter={chapter}
         goToNextChapter={goToNextChapter}
@@ -93,6 +95,7 @@ const BibleFooter = ({
   if (audioMode === 'tts') {
     return (
       <AudioTTSFooter
+        isParallel={Boolean(bibleTab.data.parallelVersions?.length)}
         book={book}
         chapter={chapter}
         chapterVerses={chapterVerses}

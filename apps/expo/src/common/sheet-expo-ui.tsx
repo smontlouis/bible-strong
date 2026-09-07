@@ -120,7 +120,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
     footer,
     header,
     initialSnapPoint,
-    maxWidth = 720,
+    maxWidth = 550,
     onClose,
     onDismiss,
     onDismissStart,
@@ -213,9 +213,12 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
           borderTopLeftRadius: cornerRadius,
           borderTopRightRadius: cornerRadius,
           maxWidth,
+          boxSizing: 'border-box',
+          paddingLeft: 0,
+          paddingRight: 0,
           marginLeft: 'auto',
           marginRight: 'auto',
-          ...(backdrop ? undefined : { boxShadow: 'none' }),
+          boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.10), 0 -1px 4px rgba(0, 0, 0, 0.04)',
         }}
         onClose={handleClose}
       >

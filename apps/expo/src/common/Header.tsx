@@ -27,7 +27,7 @@ const Header = ({
   title,
   detail,
   subTitle,
-  fontSize = 16,
+  fontSize = 14,
   onTitlePress,
   rightComponent,
   onCustomBackPress,
@@ -49,7 +49,7 @@ const Header = ({
       <PageContent>
         <Box
           className="overflow-hidden border-continuous flex-row items-center"
-          style={{ minHeight: children ? 40 : 54 }}
+          style={{ minHeight: 54 }}
         >
           {hasBackButton && (
             <Back onCustomPress={onCustomBackPress} padding>
@@ -66,7 +66,7 @@ const Header = ({
                 accessibilityRole={onTitlePress ? 'button' : 'header'}
                 numberOfLines={1}
                 onPress={onTitlePress}
-                style={{ fontSize: fontSize || 16, flexShrink: 1 }}
+                style={{ fontSize: fontSize || 14, flexShrink: 1 }}
               >
                 {title}
               </Text>
@@ -74,14 +74,14 @@ const Header = ({
                 <Text
                   className="font-bold text-grey"
                   numberOfLines={1}
-                  style={{ fontSize: fontSize || 16, flexShrink: 1 }}
+                  style={{ fontSize: fontSize || 14, flexShrink: 1 }}
                 >
                   {` ${detail}`}
                 </Text>
               )}
             </HStack>
             {!!subTitle && (
-              <Text className="text-[13px] text-grey" numberOfLines={1}>
+              <Text className="text-[12px] text-grey" numberOfLines={1}>
                 {subTitle}
               </Text>
             )}

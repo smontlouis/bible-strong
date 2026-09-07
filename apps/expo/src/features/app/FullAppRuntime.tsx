@@ -1,3 +1,4 @@
+import WorkspaceLayout from '~features/app-switcher/WorkspaceLayout'
 import { SheetProvider } from '~common/sheet'
 import { getAnalytics, logScreenView } from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
@@ -155,43 +156,45 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                   <StrongAudioProvider>
                     <InitHooks />
                     <NavigationTracking />
-                    <Stack screenOptions={{ headerShown: false }}>
-                      <Stack.Screen name="index" />
-                      <Stack.Screen
-                        name="(timeline-search)"
-                        options={createFormSheetOptions(theme, {
-                          contentStyle: { bottom: 0 },
-                          sheetAllowedDetents: [1],
-                          sheetExpandsWhenScrolledToEdge: true,
-                        })}
-                      />
-                      <Stack.Screen
-                        name="(explore)"
-                        options={createFormSheetOptions(theme, {
-                          contentStyle: { bottom: 0 },
-                          sheetAllowedDetents:
-                            Platform.OS === 'ios' && Platform.isPad ? [1] : [0.45, 1],
-                          sheetLargestUndimmedDetentIndex: 0,
-                        })}
-                      />
-                      <Stack.Screen
-                        name="(commentary)"
-                        options={createFormSheetOptions(theme, {
-                          contentStyle: { bottom: 0 },
-                          sheetAllowedDetents: [1],
-                          sheetLargestUndimmedDetentIndex: 0,
-                        })}
-                      />
-                      <Stack.Screen name="(library)" options={{ contentStyle: { bottom: 0 } }} />
-                      <Stack.Screen
-                        name="strong"
-                        options={createFormSheetOptions(theme, {
-                          contentStyle: { bottom: 0 },
-                          sheetAllowedDetents: [1],
-                          sheetExpandsWhenScrolledToEdge: true,
-                        })}
-                      />
-                    </Stack>
+                    <WorkspaceLayout>
+                      <Stack screenOptions={{ headerShown: false }}>
+                        <Stack.Screen name="index" />
+                        <Stack.Screen
+                          name="(timeline-search)"
+                          options={createFormSheetOptions(theme, {
+                            contentStyle: { bottom: 0 },
+                            sheetAllowedDetents: [1],
+                            sheetExpandsWhenScrolledToEdge: true,
+                          })}
+                        />
+                        <Stack.Screen
+                          name="(explore)"
+                          options={createFormSheetOptions(theme, {
+                            contentStyle: { bottom: 0 },
+                            sheetAllowedDetents:
+                              Platform.OS === 'ios' && Platform.isPad ? [1] : [0.45, 1],
+                            sheetLargestUndimmedDetentIndex: 0,
+                          })}
+                        />
+                        <Stack.Screen
+                          name="(commentary)"
+                          options={createFormSheetOptions(theme, {
+                            contentStyle: { bottom: 0 },
+                            sheetAllowedDetents: [1],
+                            sheetLargestUndimmedDetentIndex: 0,
+                          })}
+                        />
+                        <Stack.Screen name="(library)" options={{ contentStyle: { bottom: 0 } }} />
+                        <Stack.Screen
+                          name="strong"
+                          options={createFormSheetOptions(theme, {
+                            contentStyle: { bottom: 0 },
+                            sheetAllowedDetents: [1],
+                            sheetExpandsWhenScrolledToEdge: true,
+                          })}
+                        />
+                      </Stack>
+                    </WorkspaceLayout>
                     <ThemedToaster />
                     <AutomaticUpdates />
                     <DeferredModals />

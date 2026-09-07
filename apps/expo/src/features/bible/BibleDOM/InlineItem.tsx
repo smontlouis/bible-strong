@@ -18,6 +18,10 @@ export const InlineItemContainer = styled('span')<
     color: colors[theme].default,
     fontSize: scaleFontSize(isParallel ? 10 : 16, fontSizeScale),
     lineHeight: scaleFontSize(isParallel ? 18 : 26, fontSizeScale),
+    '@media (min-width: 768px)': {
+      fontSize: scaleFontSize(16, fontSizeScale),
+      lineHeight: scaleFontSize(26, fontSizeScale),
+    },
 
     backgroundColor: colors[theme].reverse,
     boxShadow: isDarkTheme(theme)

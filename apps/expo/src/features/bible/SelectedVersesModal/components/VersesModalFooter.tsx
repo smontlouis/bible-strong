@@ -12,12 +12,14 @@ interface VersesModalFooterProps {
   sheetFooterProps?: SheetFooterProps
   panGesture: GestureType
   indicatorAnimatedStyle: AnimatedStyle<StyleProps>
+  onContainerWidthChange: (width: number) => void
   tabWidth: number
   activeTabIndex: number
   goToTab: (index: number) => void
 }
 
 const VersesModalFooter = ({
+  onContainerWidthChange,
   panGesture,
   indicatorAnimatedStyle,
   tabWidth,
@@ -29,6 +31,7 @@ const VersesModalFooter = ({
 
   return (
     <AnimatedBox
+      onLayout={event => onContainerWidthChange(event.nativeEvent.layout.width)}
       className="bg-light-grey rounded-[18px] p-[3px] mx-[16px] mb-[5px] relative"
       style={{
         transitionProperty: 'margin',

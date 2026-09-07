@@ -5,6 +5,10 @@ jest.mock('~themes/ThemeProvider', () => ({
   useTheme: () => jest.requireActual('../../../../../test/themeFixture').themeFixture,
 }))
 
+jest.mock('~features/app-switcher/utils/useResponsiveWorkspace', () => ({
+  useResponsiveWorkspace: () => false,
+}))
+
 jest.mock('jotai/react', () => ({ useAtomValue: () => false }))
 jest.mock('react-native', () => ({ Platform: { OS: 'ios' } }))
 jest.mock('react-native-safe-area-context', () => ({
@@ -29,6 +33,8 @@ jest.mock('~common/ui/Box', () => {
     }
 
   return {
+    __esModule: true,
+    default: host('Box'),
     AnimatedHStack: host('AnimatedHStack'),
     AnimatedTouchableBox: host('AnimatedTouchableBox'),
     TouchableBox: host('TouchableBox'),

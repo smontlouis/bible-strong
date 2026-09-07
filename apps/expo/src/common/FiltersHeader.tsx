@@ -52,7 +52,7 @@ const FiltersHeader = ({ title, hasBackButton, filters, onReset }: Props) => {
             <Box className="overflow-hidden border-continuous w-[15px]" />
           )}
           <Box className="overflow-hidden border-continuous flex-[1] justify-center">
-            <Text className="text-[16px] font-bold" numberOfLines={1}>
+            <Text className="text-[14px] font-bold" numberOfLines={1}>
               {title}
             </Text>
           </Box>

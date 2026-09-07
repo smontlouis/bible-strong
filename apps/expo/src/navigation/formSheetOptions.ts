@@ -30,9 +30,9 @@ export const createFormSheetOptions = (
   if (Platform.OS === 'web') {
     return {
       ...restOverrides,
-      presentation: 'transparentModal',
+      presentation: 'card',
       animation: 'none',
-      contentStyle: { backgroundColor: 'transparent' },
+      contentStyle: contentStyle ? [defaultContentStyle, contentStyle] : defaultContentStyle,
     }
   }
 

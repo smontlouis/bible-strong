@@ -61,11 +61,15 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
     <Container>
       <Header
         hasBackButton={hasBackButton}
-        fontSize={16}
         title={title}
         rightComponent={
           <Box className="overflow-hidden border-continuous flex-row items-center">
-            <CompareStrongModeButton enabled={strongMode} onPress={toggleStrongMode} height={60} />
+            <CompareStrongModeButton
+              enabled={strongMode}
+              onPress={toggleStrongMode}
+              height={40}
+              width={40}
+            />
             <MenuView
               actions={[
                 {
@@ -99,7 +103,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
                 }
               }}
             >
-              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
+              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[40px] w-[40px]">
                 <FeatherIcon name="more-vertical" size={18} />
               </Box>
             </MenuView>

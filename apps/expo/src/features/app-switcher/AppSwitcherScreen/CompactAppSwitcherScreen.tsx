@@ -1,0 +1,124 @@
+import { useAtomValue } from 'jotai/react'
+import React, { useEffect, useRef, useState } from 'react'
+import { useWindowDimensions } from 'react-native'
+import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
+import Box, { AnimatedBox } from '~common/ui/Box'
+import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
+import { Home } from '~features/home/HomeScreen'
+import { More } from '~features/settings/MoreScreen'
+import { subscribeToHardwareBackPress } from '~helpers/hardwareBackPress'
+import { tabsCountAtom } from '../../../state/tabs'
+import SharedBibleDOM from '~features/bible/SharedBibleDOM'
+import CachedTabScreens from '../CachedTabScreens'
+import { TabContextProvider } from '../context/TabContext'
+import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
+import TabGroupPager from './TabGroupPager'
+type AppSwitcherScreenFuncs = {
+  openMenu: () => void
+  openHome: () => void
+}
+
+export const TAB_PREVIEW_SCALE = 0.6
+
+const DRAWER_WIDTH_PERCENT = 0.95
+const MAX_DRAWER_WIDTH = 450
+
+const AppSwitcherScreen = ({ openHome, openMenu }: AppSwitcherScreenFuncs) => (
+  <TabContextProvider>
+    <Box nativeID="compact-workspace" className="flex-1 bg-light-grey overflow-hidden">
+      <TabGroupPager />
+      <CachedTabScreens />
+      <SharedBibleDOM />
+      <TabPreviewCarousel />
+      <BottomTabBar openMenu={openMenu} openHome={openHome} />
+    </Box>
+  </TabContextProvider>
+)
+
+const AppSwitcherScreenWrapper = () => {
+  const { width: screenWidth } = useWindowDimensions()
+  const drawerWidth = Math.min(screenWidth * DRAWER_WIDTH_PERCENT, MAX_DRAWER_WIDTH)
+
+  const tabsCount = useAtomValue(tabsCountAtom)
+  const isMenuOpen = useRef(false)
+  const isHomeOpen = useRef(false)
+  const [hasOpenedMenu, setHasOpenedMenu] = useState(false)
+  const [hasOpenedHome, setHasOpenedHome] = useState(false)
+
+  // SharedValue pour la position: -1 (menu), 0 (centre), 1 (home)
+  const position = useSharedValue(0)
+
+  const openMenu = () => {
+    setHasOpenedMenu(true)
+    position.set(withSpring(-1))
+    isMenuOpen.current = true
+  }
+
+  const closeMenu = () => {
+    position.set(withSpring(0))
+    isMenuOpen.current = false
+  }
+
+  const openHome = () => {
+    setHasOpenedHome(true)
+    position.set(withSpring(1))
+    isHomeOpen.current = true
+  }
+
+  const closeHome = () => {
+    position.set(withSpring(0))
+    isHomeOpen.current = false
+  }
+
+  // Not the best, but when adding a new tab, close home drawer
+  useEffect(() => {
+    closeHome()
+    closeMenu()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabsCount])
+
+  useEffect(() => {
+    return subscribeToHardwareBackPress(() => {
+      if (isMenuOpen.current) {
+        closeMenu()
+        return true
+      }
+
+      if (isHomeOpen.current) {
+        closeHome()
+        return true
+      }
+
+      return false
+    })
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const containerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: position.get() * drawerWidth }],
+  }))
+
+  return (
+    <Box className="border-continuous overflow-visible flex-[1] bg-light-grey">
+      <AnimatedBox
+        className="overflow-hidden border-continuous flex-row flex-[1]"
+        style={[{ width: drawerWidth * 2 + screenWidth, marginLeft: -drawerWidth }, containerStyle]}
+      >
+        <Box className="overflow-hidden border-continuous" style={{ width: drawerWidth }}>
+          {hasOpenedHome && <Home closeHome={closeHome} />}
+        </Box>
+
+        <Box className="overflow-hidden border-continuous" style={{ width: screenWidth }}>
+          <AppSwitcherScreen openHome={openHome} openMenu={openMenu} />
+        </Box>
+
+        <Box className="overflow-hidden border-continuous" style={{ width: drawerWidth }}>
+          {hasOpenedMenu && <More closeMenu={closeMenu} />}
+        </Box>
+      </AnimatedBox>
+    </Box>
+  )
+}
+
+export default AppSwitcherScreenWrapper

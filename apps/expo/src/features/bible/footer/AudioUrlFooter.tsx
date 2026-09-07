@@ -272,6 +272,7 @@ const useLoadSound = ({
 }
 
 type AudioUrlFooterProps = {
+  isParallel?: boolean
   book: Book
   chapter: number
   goToNextChapter: () => void
@@ -285,6 +286,7 @@ type AudioUrlFooterProps = {
 }
 
 const AudioUrlFooter = ({
+  isParallel = false,
   book,
   chapter,
   goToNextChapter,
@@ -328,6 +330,7 @@ const AudioUrlFooter = ({
   if (!isExpanded) {
     return (
       <BasicFooter
+        isParallel={isParallel}
         onPlay={onPlay}
         onPrevChapter={hasPreviousChapter ? onPrevChapter : undefined}
         onNextChapter={hasNextChapter ? onNextChapter : undefined}

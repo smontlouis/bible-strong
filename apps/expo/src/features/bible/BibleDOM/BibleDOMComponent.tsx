@@ -211,6 +211,7 @@ type Props = Pick<
   // Safe area inset from native side (CSS env vars don't work in Expo DOM WebView)
   safeAreaTop?: number
   isFormSheet?: boolean
+  keepControlsVisible?: boolean
   error?: BibleError | null
   errorDownloadState?: BibleDOMDownloadState
   isResettingDatabase?: boolean
@@ -238,7 +239,10 @@ const Container = styled('div')<
   RootStyles & { rtl: boolean; isParallelVerse: boolean; headerHeight: number }
 >(({ settings: { alignContent, theme, colors }, rtl, isParallelVerse, headerHeight }) => ({
   position: 'relative', // For highlight layer positioning
-  maxWidth: isParallelVerse ? 'none' : '800px',
+  width: '100%',
+  minWidth: 0,
+  maxWidth: isParallelVerse ? 'none' : '610px', // 580 px of text + 15 px padding on each side
+  boxSizing: 'border-box',
   margin: '0 auto',
   padding: '10px 15px',
   paddingBottom: '300px',
@@ -433,6 +437,11 @@ const HorizontalScrollWrapper = styled('div')<{ columnCount: number }>(({ column
   WebkitOverflowScrolling: 'touch',
   scrollbarWidth: 'none',
   '&::-webkit-scrollbar': { display: 'none' },
+  '@media (min-width: 768px)': {
+    scrollbarWidth: 'thin',
+    scrollbarColor: 'rgba(0, 0, 0, 0.3) transparent',
+    '&::-webkit-scrollbar': { display: 'block', height: '6px' },
+  },
 }))
 
 // Wrapper pour le header avec scroll synchronisé (pas de scrollbar visible)
@@ -539,7 +548,7 @@ function isClickInsideSelection(
 const LoadedBibleContent = ({
   verses,
   parallelVerses,
-  parallelColumnWidth = 75,
+  parallelColumnWidth: preferredColumnWidth = 75,
   parallelDisplayMode = 'horizontal',
   focusVerses,
   selectedVerses,
@@ -581,9 +590,24 @@ const LoadedBibleContent = ({
   relationItemsText,
   annotationRelationItems,
   isFormSheet,
+  keepControlsVisible = false,
 }: Props) => {
   // Ref for highlight layer
   const containerRef = useRef<HTMLDivElement>(null)
+  const [parallelViewportWidth, setParallelViewportWidth] = useState(0)
+  useEffect(() => {
+    if (!keepControlsVisible) return
+    const update = () => setParallelViewportWidth(window.innerWidth)
+    window.addEventListener('resize', update)
+    update()
+    return () => window.removeEventListener('resize', update)
+  }, [keepControlsVisible])
+  // Desktop percentages apply to the reading width; mobile percentages remain viewport-based.
+  // Include the existing column spacing so 100% allows 580 px of text.
+  const parallelColumnWidth =
+    keepControlsVisible && parallelViewportWidth > 0
+      ? (((580 * preferredColumnWidth) / 100 + 15) / parallelViewportWidth) * 100
+      : preferredColumnWidth
 
   // Refs for horizontal scroll sync between header and content
   const headerScrollRef = useRef<HTMLDivElement>(null)
@@ -934,6 +958,7 @@ const LoadedBibleContent = ({
     if (!hasParallelVersions) return
 
     const headerEl = headerScrollRef.current
+    const contentEl = contentScrollRef.current
     if (!headerEl) return
 
     const columnWidthPx = window.innerWidth * (parallelColumnWidth / 100) // columnWidth vw in pixels
@@ -941,7 +966,7 @@ const LoadedBibleContent = ({
     let rafId: number | null = null
 
     const handleScroll = () => {
-      const scrollLeft = document.documentElement.scrollLeft
+      const scrollLeft = contentEl?.scrollLeft || document.documentElement.scrollLeft
       headerEl.scrollLeft = scrollLeft
 
       const titleRefs = headerEl.querySelectorAll('[data-version-title]')
@@ -968,17 +993,23 @@ const LoadedBibleContent = ({
     // Initial call
     handleScroll()
 
-    // Listen to scroll on document (HorizontalScrollWrapper doesn't fire scroll events)
+    // Web scrolls inside the reader; retain document scroll support for native WebViews.
+    contentEl?.addEventListener('scroll', handleScroll, { passive: true })
     document.addEventListener('scroll', handleScroll, { passive: true })
 
     return () => {
+      contentEl?.removeEventListener('scroll', handleScroll)
       document.removeEventListener('scroll', handleScroll)
       if (rafId) cancelAnimationFrame(rafId)
     }
-  }, [parallelVerses?.length, parallelColumnWidth])
+  }, [parallelVerses?.length, parallelColumnWidth, parallelDisplayMode])
 
   useEffect(() => {
     if (isFormSheet) return
+    if (keepControlsVisible) {
+      document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT}px`)
+      return
+    }
 
     const scrollTarget = getDOMScrollTarget(containerRef.current)
 
@@ -1040,7 +1071,7 @@ const LoadedBibleContent = ({
     }
 
     return addDOMScrollListener(scrollTarget, handleScroll)
-  }, [dispatch, isFormSheet])
+  }, [dispatch, isFormSheet, keepControlsVisible])
 
   const hasVerses = verses.length > 0
   const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
@@ -1197,7 +1228,9 @@ const LoadedBibleContent = ({
           ref={containerRef}
           rtl={isHebreu}
           settings={settings}
-          isParallelVerse={isParallelVerse}
+          isParallelVerse={
+            isParallelVerse && (!keepControlsVisible || parallelDisplayMode === 'horizontal')
+          }
           headerHeight={headerHeight}
         >
           {/* Highlight layer for word annotations and selection (disabled in parallel mode) */}
@@ -1296,7 +1329,9 @@ const LoadedBibleContent = ({
                 isSelectionMode={isSelectionMode}
                 selectedCode={selectedCode}
                 isHebreu={isHebreu}
-                isParallelVerse={isParallelVerse}
+                isParallelVerse={
+                  isParallelVerse && (!keepControlsVisible || parallelDisplayMode === 'horizontal')
+                }
                 wordAnnotations={wordAnnotations}
                 wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
                 taggedVerses={taggedVerses}

@@ -391,7 +391,6 @@ const DictionaryListScreen = ({
       <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <Header
           hasBackButton={showBackButton}
-          fontSize={18}
           title={t('Dictionnaire')}
           rightComponent={
             <MenuView
@@ -447,7 +446,7 @@ const DictionaryListScreen = ({
               }}
               accessibilityLabel={t('Options du dictionnaire')}
             >
-              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
+              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
                 <FeatherIcon name="more-vertical" size={18} />
               </Box>
             </MenuView>

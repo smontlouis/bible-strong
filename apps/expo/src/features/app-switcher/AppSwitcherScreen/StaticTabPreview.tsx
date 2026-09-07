@@ -53,7 +53,7 @@ const StaticTabPreview = ({ tab, index, ...props }: StaticTabPreviewProps & BoxP
           },
         ]}
       >
-        {tab.base64Preview && (
+        {Boolean(tab.base64Preview) && (
           <Image
             style={{
               width: '100%',

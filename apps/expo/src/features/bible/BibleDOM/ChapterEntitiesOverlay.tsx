@@ -111,6 +111,9 @@ const ChapterEntitiesOverlay = ({
         >
           <div
             style={{
+              width: '100%',
+              maxWidth: 500,
+              margin: '0 auto',
               display: 'grid',
               minHeight: '100%',
               gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',

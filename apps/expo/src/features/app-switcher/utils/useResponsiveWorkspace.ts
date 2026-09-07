@@ -1,7 +1,7 @@
 import { useWindowDimensions } from 'react-native'
 
-// Keep at least 740 px for the study surface when the navigation is expanded.
-export const WORKSPACE_SIDEBAR_BREAKPOINT = 1000
+// Share the tablet layout across platforms; narrower windows use mobile navigation.
+export const WORKSPACE_SIDEBAR_BREAKPOINT = 768
 export const WORKSPACE_SIDEBAR_WIDTH = 260
 
 export const useResponsiveWorkspace = () =>

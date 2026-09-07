@@ -222,7 +222,8 @@ export const appLogger = {
     area: AgentLogArea,
     event: string,
     callback: () => Promise<T>,
-    payload?: AgentLogPayload
+    payload?: AgentLogPayload,
+    signal?: AbortSignal
   ): Promise<T> => {
     const startedAt = Date.now()
     appLogger.debug(area, `${event}.started`, payload)
@@ -235,6 +236,13 @@ export const appLogger = {
       })
       return result
     } catch (error) {
+      if (signal?.aborted) {
+        appLogger.debug(area, `${event}.cancelled`, {
+          ...payload,
+          durationMs: Date.now() - startedAt,
+        })
+        throw error
+      }
       appLogger.captureError(area, `${event}.failed`, error, {
         ...payload,
         durationMs: Date.now() - startedAt,

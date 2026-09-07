@@ -1,3 +1,4 @@
+import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import Color from 'color'
@@ -28,9 +29,10 @@ import PassageMediaLibraryWidget from './PassageMediaLibraryWidget'
 // local react props
 type HomeProps = {
   closeHome: () => void
+  inWorkspace?: boolean
 }
 
-export const Home = ({ closeHome }: HomeProps) => {
+export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
   const stylingTheme = useStylingTheme()
 
   const { t } = useTranslation()
@@ -150,39 +152,41 @@ export const Home = ({ closeHome }: HomeProps) => {
           </Box>
         </Box>
       </HomeScrollView>
-      <Box
-        className="overflow-hidden border-continuous absolute left-[0px] right-[0px] bottom-[0px] h-[100px] items-center justify-center"
-        style={{ paddingBottom: insets.bottom }}
-      >
-        <Box className="overflow-hidden border-continuous absolute top-[0px] bottom-[0px] left-[0px] right-[0px]">
-          <LinearGradient
-            start={[0.5, 0]}
-            end={[0.5, 0.9]}
-            style={{ height: 100 }}
-            colors={[
-              `${Color(theme.colors.lightGrey).alpha(0).string()}`,
-              `${theme.colors.lightGrey}`,
-            ]}
-          />
-        </Box>
-        <TouchableBox
-          className="overflow-hidden border-continuous items-center justify-center w-[50px] h-[50px] rounded-[30px] bg-reverse"
-          accessibilityLabel={t('Fermer')}
-          accessibilityRole="button"
-          activeOpacity={0.8}
-          onPress={closeHome}
-          style={{
-            shadowColor: 'rgb(89,131,240)',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 7,
-            elevation: 1,
-            overflow: 'visible',
-          }}
+      {!inWorkspace && (
+        <Box
+          className="overflow-hidden border-continuous absolute left-[0px] right-[0px] bottom-[0px] h-[100px] items-center justify-center"
+          style={{ paddingBottom: insets.bottom }}
         >
-          <FeatherIcon name="x" size={24} color="grey" />
-        </TouchableBox>
-      </Box>
+          <Box className="overflow-hidden border-continuous absolute top-[0px] bottom-[0px] left-[0px] right-[0px]">
+            <LinearGradient
+              start={[0.5, 0]}
+              end={[0.5, 0.9]}
+              style={{ height: 100 }}
+              colors={[
+                `${Color(theme.colors.lightGrey).alpha(0).string()}`,
+                `${theme.colors.lightGrey}`,
+              ]}
+            />
+          </Box>
+          <TouchableBox
+            className="overflow-hidden border-continuous items-center justify-center w-[50px] h-[50px] rounded-[30px] bg-reverse"
+            accessibilityLabel={t('Fermer')}
+            accessibilityRole="button"
+            activeOpacity={0.8}
+            onPress={closeHome}
+            style={{
+              shadowColor: 'rgb(89,131,240)',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 7,
+              elevation: 1,
+              overflow: 'visible',
+            }}
+          >
+            <FeatherIcon name="x" size={24} color="grey" />
+          </TouchableBox>
+        </Box>
+      )}
     </Box>
   )
 }
@@ -191,6 +195,7 @@ const HomeScreen = () => {
   const router = useRouter()
   const closeHome = () => router.back()
 
-  return <Home closeHome={closeHome} />
+  const isWide = useResponsiveWorkspace()
+  return <Home closeHome={closeHome} inWorkspace={isWide} />
 }
 export default HomeScreen

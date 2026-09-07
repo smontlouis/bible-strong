@@ -1,9 +1,10 @@
+import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
 import { Book } from '~assets/bible_versions/books-desc'
-import { AnimatedHStack, AnimatedTouchableBox, TouchableBox } from '~common/ui/Box'
+import Box, { AnimatedHStack, AnimatedTouchableBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -19,6 +20,7 @@ import {
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 type BackToAudioFooterProps = {
+  isParallel?: boolean
   book: Book
   chapter: number
   goToNextChapter: () => void
@@ -29,6 +31,7 @@ type BackToAudioFooterProps = {
 }
 
 const BackToAudioFooter = ({
+  isParallel = false,
   book,
   chapter,
   goToNextChapter,
@@ -43,6 +46,7 @@ const BackToAudioFooter = ({
   const { slideToIndex } = useTabAnimations()
   const playingBibleTabId = useAtomValue(playingBibleTabIdAtom)
   const playingBibleTabIndex = useFindTabIndex(playingBibleTabId)
+  const isWide = useResponsiveWorkspace()
   const { t } = useTranslation()
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const insets = useSafeAreaInsets()
@@ -55,7 +59,11 @@ const BackToAudioFooter = ({
   if (isBibleOverlayOpen) return null
 
   return (
-    <>
+    <Box
+      pointerEvents="box-none"
+      className="absolute top-0 w-full h-full self-center"
+      style={{ maxWidth: isWide && !isParallel ? 710 : undefined }}
+    >
       <AnimatedTouchableBox
         className="border-continuous overflow-visible w-[40px] h-[40px] border-[2px] rounded-[20px] border-light-grey bg-reverse items-center justify-center absolute left-[10px]"
         disabled={disabled || !hasPreviousChapter}
@@ -66,7 +74,10 @@ const BackToAudioFooter = ({
         style={[
           { opacity: disabled || !hasPreviousChapter ? 0.6 : 1 },
           [
-            { bottom: 10 + bottomBarHeight, opacity: disabled || !hasPreviousChapter ? 0.6 : 1 },
+            {
+              bottom: isWide ? '25%' : 10 + bottomBarHeight,
+              opacity: disabled || !hasPreviousChapter ? 0.6 : 1,
+            },
             {
               transform: [{ translateY: fullScreenTranslateY }],
               transitionProperty: 'transform',
@@ -108,7 +119,10 @@ const BackToAudioFooter = ({
         style={[
           { opacity: disabled || !hasNextChapter ? 0.6 : 1 },
           [
-            { bottom: 10 + bottomBarHeight, opacity: disabled || !hasNextChapter ? 0.6 : 1 },
+            {
+              bottom: isWide ? '25%' : 10 + bottomBarHeight,
+              opacity: disabled || !hasNextChapter ? 0.6 : 1,
+            },
             {
               transform: [{ translateY: fullScreenTranslateY }],
               transitionProperty: 'transform',
@@ -119,7 +133,7 @@ const BackToAudioFooter = ({
       >
         <FeatherIcon name="arrow-right" size={20} color="tertiary" />
       </AnimatedTouchableBox>
-    </>
+    </Box>
   )
 }
 

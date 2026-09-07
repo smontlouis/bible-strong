@@ -1,15 +1,17 @@
+import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { resolveThemeColor } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
-import { AnimatedHStack, AnimatedTouchableBox, TouchableBox } from '~common/ui/Box'
+import Box, { AnimatedHStack, AnimatedTouchableBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import AudioButton from './AudioButton'
 export interface BasicFooterProps {
+  isParallel?: boolean
   onPlay: () => void
   isPlaying: boolean
   isDisabled?: boolean
@@ -21,6 +23,7 @@ export interface BasicFooterProps {
 }
 
 const BasicFooter = ({
+  isParallel = false,
   onPlay,
   isPlaying,
   isDisabled,
@@ -30,8 +33,9 @@ const BasicFooter = ({
   onNextChapter,
   type,
 }: BasicFooterProps) => {
-  const { t } = useTranslation()
   const { bottomBarHeight } = useBottomBarHeightInTab()
+  const isWide = useResponsiveWorkspace()
+  const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
   const isBibleOverlayOpen = useAtomValue(isBibleOverlayOpenAtom)
@@ -42,7 +46,11 @@ const BasicFooter = ({
   if (isBibleOverlayOpen) return null
 
   return (
-    <>
+    <Box
+      pointerEvents="box-none"
+      className="absolute top-0 w-full h-full self-center"
+      style={{ maxWidth: isWide && !isParallel ? 710 : undefined }}
+    >
       <AnimatedTouchableBox
         className="border-continuous overflow-visible w-[40px] h-[40px] border-[2px] rounded-[20px] border-light-grey bg-reverse items-center justify-center absolute left-[10px]"
         disabled={isDisabled || !onPrevChapter}
@@ -53,7 +61,10 @@ const BasicFooter = ({
         style={[
           { opacity: isDisabled || !onPrevChapter ? 0.6 : 1 },
           [
-            { bottom: 10 + bottomBarHeight, opacity: isDisabled || !onPrevChapter ? 0.6 : 1 },
+            {
+              bottom: isWide ? '25%' : 10 + bottomBarHeight,
+              opacity: isDisabled || !onPrevChapter ? 0.6 : 1,
+            },
             {
               transform: [{ translateY: fullScreenTranslateY }],
               transitionProperty: 'transform',
@@ -83,7 +94,10 @@ const BasicFooter = ({
         style={[
           { opacity: isDisabled || !onNextChapter ? 0.6 : 1 },
           [
-            { bottom: 10 + bottomBarHeight, opacity: isDisabled || !onNextChapter ? 0.6 : 1 },
+            {
+              bottom: isWide ? '25%' : 10 + bottomBarHeight,
+              opacity: isDisabled || !onNextChapter ? 0.6 : 1,
+            },
             {
               transform: [{ translateY: fullScreenTranslateY }],
               transitionProperty: 'transform',
@@ -94,7 +108,7 @@ const BasicFooter = ({
       >
         <FeatherIcon name="arrow-right" size={20} color="tertiary" />
       </AnimatedTouchableBox>
-    </>
+    </Box>
   )
 }
 

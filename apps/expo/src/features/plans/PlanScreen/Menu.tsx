@@ -110,7 +110,7 @@ const Menu = ({ modalRefDetails, planId, title, onRemove }: Props) => {
         }
       }}
     >
-      <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[60px]">
+      <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
         <FeatherIcon name="more-vertical" size={18} />
       </Box>
     </MenuView>

@@ -1,3 +1,4 @@
+import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
 import { Image } from 'expo-image'
 import * as Updates from 'expo-updates'
@@ -76,9 +77,10 @@ const Infos = memo(() => {
 
 type MoreProps = {
   closeMenu: () => void
+  inWorkspace?: boolean
 }
 
-export const More = ({ closeMenu }: MoreProps) => {
+export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
   const router = useRouter()
   const { isLogged, user, logout } = useLogin()
   const theme = useTheme()
@@ -132,8 +134,13 @@ export const More = ({ closeMenu }: MoreProps) => {
 
   return (
     <SafeAreaBox className="border-continuous overflow-hidden border-l-[1px] border-border bg-light-grey">
-      <Header title={t('Plus')} onCustomBackPress={closeMenu} hasBackButton />
+      <Header
+        title={t(inWorkspace ? 'settings.settings' : 'Plus')}
+        onCustomBackPress={closeMenu}
+        hasBackButton={!inWorkspace}
+      />
       <ScrollView
+        backgroundColor="lightGrey"
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingBottom: 20,
@@ -456,7 +463,8 @@ const MoreScreen = () => {
   const router = useRouter()
   const closeMenu = () => router.back()
 
-  return <More closeMenu={closeMenu} />
+  const isWide = useResponsiveWorkspace()
+  return <More closeMenu={closeMenu} inWorkspace={isWide} />
 }
 
 export default memo(MoreScreen)

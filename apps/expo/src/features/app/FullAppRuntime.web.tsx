@@ -1,3 +1,4 @@
+import WorkspaceLayout from '~features/app-switcher/WorkspaceLayout'
 import * as Sentry from '@sentry/react-native'
 import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-router'
 import { useEffect, useRef } from 'react'
@@ -53,26 +54,28 @@ const FullAppRuntime = ({ theme }: { theme: Theme }) => {
             <StrongAudioProvider>
               <InitHooks />
               <NavigationTracking />
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="index" />
-                <Stack.Screen
-                  name="(timeline-search)"
-                  options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
-                />
-                <Stack.Screen
-                  name="(explore)"
-                  options={createFormSheetOptions(theme, { sheetAllowedDetents: [0.45, 1] })}
-                />
-                <Stack.Screen
-                  name="(commentary)"
-                  options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
-                />
-                <Stack.Screen name="(library)" />
-                <Stack.Screen
-                  name="strong"
-                  options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
-                />
-              </Stack>
+              <WorkspaceLayout>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="index" />
+                  <Stack.Screen
+                    name="(timeline-search)"
+                    options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
+                  />
+                  <Stack.Screen
+                    name="(explore)"
+                    options={createFormSheetOptions(theme, { sheetAllowedDetents: [0.45, 1] })}
+                  />
+                  <Stack.Screen
+                    name="(commentary)"
+                    options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
+                  />
+                  <Stack.Screen name="(library)" />
+                  <Stack.Screen
+                    name="strong"
+                    options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
+                  />
+                </Stack>
+              </WorkspaceLayout>
               <ThemedToaster />
               <ChangelogModal />
               <UnifiedTagsModal />

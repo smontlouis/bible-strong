@@ -25,7 +25,7 @@ const HeaderBox = (
   const { topInset } = props
   const classStyles = useResolveClassNames(
     twMerge(
-      'absolute top-[0px] left-[0px] right-[0px] h-[60px] border-b-border items-stretch z-[1]',
+      'absolute top-[0px] left-[0px] right-[0px] h-[54px] border-b-border items-stretch z-[1]',
       className
     )
   )
@@ -72,7 +72,7 @@ interface Props {
 const TimelineHeader = ({
   title,
   titleEn,
-  fontSize = 20,
+  fontSize = 14,
   hasBackButton,
   isFormSheet = false,
   onPress,
@@ -100,7 +100,7 @@ const TimelineHeader = ({
         <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
           <Text
             style={{
-              fontSize: fontSize || 16,
+              fontSize: fontSize || 14,
               fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
             }}
           >
@@ -109,7 +109,7 @@ const TimelineHeader = ({
         </Box>
         <Box className="overflow-hidden border-continuous items-center justify-center flex-row">
           <TouchableBox
-            className="overflow-hidden border-continuous items-center justify-center h-[60px] w-[44px]"
+            className="overflow-hidden border-continuous items-center justify-center h-[54px] w-[44px]"
             onPress={onSearchPress}
             accessibilityRole="button"
             accessibilityLabel={t('Recherche')}
@@ -136,7 +136,7 @@ const TimelineHeader = ({
               }
             }}
           >
-            <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[60px] w-[44px]">
+            <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[44px]">
               <Icon.Feather name="more-vertical" size={18} />
             </Box>
           </MenuView>

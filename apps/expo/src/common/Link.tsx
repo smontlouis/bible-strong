@@ -121,8 +121,8 @@ const Link = <R extends keyof MainStackProps>({
       onPress={handlePress}
       style={{
         ...(padding && {
-          width: 60,
-          height: 60,
+          width: 54,
+          height: 54,
           alignItems: 'center',
           justifyContent: 'center',
         }),

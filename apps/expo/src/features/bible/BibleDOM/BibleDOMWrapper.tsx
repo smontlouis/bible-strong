@@ -8,7 +8,7 @@ import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { Alert, Linking, Platform, type ViewStyle } from 'react-native'
+import { Alert, Linking, Platform, useWindowDimensions, type ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
@@ -398,11 +398,16 @@ export const BibleDOMWrapper = ({
   personalBibleDataEnabled = true,
   error,
 }: WebViewProps) => {
+  const keepControlsVisible = useWindowDimensions().width >= 768
   const isConnected = useConnection()
   const { openVersionSelector } = useBookAndVersionSelector()
   const openRelationEndpoint = useOpenRelationEndpoint()
   const isContextFocused = contextDisplayMode === 'focused'
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
+  useEffect(() => {
+    if (keepControlsVisible) setIsFullScreenBible(false)
+  }, [keepControlsVisible, setIsFullScreenBible])
+
   const setIsBibleOverlayOpen = useSetAtom(isBibleOverlayOpenAtom)
   const isBibleOverlayOpenRef = useRef(false)
   const wasFullScreenBeforeOverlayRef = useRef(false)
@@ -774,7 +779,7 @@ export const BibleDOMWrapper = ({
         break
       }
       case SWIPE_DOWN: {
-        if (isFormSheet) break
+        if (isFormSheet || keepControlsVisible) break
         setIsFullScreenBible(true)
         break
       }
@@ -1094,6 +1099,7 @@ export const BibleDOMWrapper = ({
         relationItemsText={relationMetadata.items}
         annotationRelationItems={relationMetadata.annotationItems}
         isFormSheet={isFormSheet}
+        keepControlsVisible={keepControlsVisible}
         isConnected={isConnected}
       />
       {Platform.OS === 'android' && Number(Platform.Version) < 30 && (

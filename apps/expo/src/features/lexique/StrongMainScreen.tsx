@@ -228,7 +228,6 @@ const StrongMainScreen = ({
     <StrongEntryRouteScaffold
       context={activeContext}
       entryState={entryState}
-      fontSize={19}
       hasBackButton={hasBackButton}
       isFormSheet={isFormSheet}
       onBack={onBack}

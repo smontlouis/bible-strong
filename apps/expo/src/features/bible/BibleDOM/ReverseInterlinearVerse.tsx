@@ -1,3 +1,4 @@
+import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import type { SelectedCode, Verse } from '~common/types'
 import type { RootState } from '~redux/modules/reducer'
 import { buildTokenizedVerseLayout } from '~helpers/interlinearVerseLayout'
@@ -28,6 +29,7 @@ interface Props {
 }
 
 const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isParallel }: Props) => {
+  const isWide = useResponsiveWorkspace()
   const dispatch = useDispatch()
   const colors = settings.colors[settings.theme]
   const isHebrew = Number(verse.Livre) <= 39
@@ -115,7 +117,7 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
                 padding: '5px 6px',
                 verticalAlign: 'baseline',
                 fontFamily: settings.fontFamily,
-                fontSize: scaleFontSize(isParallel ? 16 : 17, settings.fontSizeScale),
+                fontSize: scaleFontSize(isParallel && !isWide ? 16 : 17, settings.fontSizeScale),
                 textAlign: 'left',
               }}
             >

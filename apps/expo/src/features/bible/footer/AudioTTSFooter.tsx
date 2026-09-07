@@ -297,6 +297,7 @@ const useLoadSound = ({
 }
 
 type AudioTTSFooterProps = {
+  isParallel?: boolean
   book: Book
   chapter: number
   chapterVerses?: Verse[]
@@ -310,6 +311,7 @@ type AudioTTSFooterProps = {
 }
 
 const AudioTTSFooter = ({
+  isParallel = false,
   book,
   chapter,
   chapterVerses,
@@ -351,6 +353,7 @@ const AudioTTSFooter = ({
   if (!isExpanded) {
     return (
       <BasicFooter
+        isParallel={isParallel}
         onPlay={onPlay}
         onPrevChapter={hasPreviousChapter ? onPrevChapter : undefined}
         onNextChapter={hasNextChapter ? onNextChapter : undefined}

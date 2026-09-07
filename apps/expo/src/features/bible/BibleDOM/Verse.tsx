@@ -57,6 +57,10 @@ const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
     fontSize: getBibleTextFontSize(Boolean(isParallel), fontSizeScale),
     lineHeight: scaleLineHeight(isParallel ? 26 : 32, lineHeight, fontSizeScale),
+    '@media (min-width: 768px)': {
+      fontSize: getBibleTextFontSize(false, fontSizeScale),
+      lineHeight: scaleLineHeight(32, lineHeight, fontSizeScale),
+    },
     whiteSpace: 'pre-line',
   })
 )

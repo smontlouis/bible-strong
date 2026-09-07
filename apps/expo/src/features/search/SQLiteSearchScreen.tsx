@@ -456,37 +456,33 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       isConnected,
     ],
     queryFn: async ({ pageParam, signal }) => {
-      try {
-        const sectionMap: Record<string, 'ot' | 'nt'> = { at: 'ot', nt: 'nt' }
-        const options: SearchOptions = {
-          signal,
-          limit: PASSAGE_SEARCH_PAGE_SIZE,
-          offset: pageParam,
-          sortOrder,
-          version: resolvedSelectedVersion,
-          canon: canon || getBibleVersionCanonId(resolvedSelectedVersion),
-          searchLanguage: resourcesLanguage.NAVE,
-          ...(book && { book }),
-          ...(sectionMap[section] && { section: sectionMap[section] }),
-        }
-
-        return await appLogger.measure(
-          'database',
-          'search.sqlite',
-          () => resources.bibleSearch.searchPage(debouncedSearchValue, options),
-          {
-            queryLength: debouncedSearchValue.length,
-            version: resolvedSelectedVersion,
-            book,
-            section,
-            canon,
-            sortOrder,
-          }
-        )
-      } catch (error) {
-        console.error('[Search] Bible search error:', error)
-        throw error
+      const sectionMap: Record<string, 'ot' | 'nt'> = { at: 'ot', nt: 'nt' }
+      const options: SearchOptions = {
+        signal,
+        limit: PASSAGE_SEARCH_PAGE_SIZE,
+        offset: pageParam,
+        sortOrder,
+        version: resolvedSelectedVersion,
+        canon: canon || getBibleVersionCanonId(resolvedSelectedVersion),
+        searchLanguage: resourcesLanguage.NAVE,
+        ...(book && { book }),
+        ...(sectionMap[section] && { section: sectionMap[section] }),
       }
+
+      return await appLogger.measure(
+        'database',
+        'search.sqlite',
+        () => resources.bibleSearch.searchPage(debouncedSearchValue, options),
+        {
+          queryLength: debouncedSearchValue.length,
+          version: resolvedSelectedVersion,
+          book,
+          section,
+          canon,
+          sortOrder,
+        },
+        signal
+      )
     },
     initialPageParam: 0,
     getNextPageParam: (_lastPage, pages) => {

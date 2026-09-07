@@ -1,0 +1,14 @@
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
+
+/* Offscreen tab previews must not scroll the whole workspace when focused. */
+#compact-workspace {
+  overflow: clip !important;
+}
+
+/* Bottom sheets use a body portal; center them inside the main workspace. */
+[data-vaul-drawer][data-vaul-drawer-direction='bottom'] {
+  left: var(--workspace-content-left, 0px) !important;
+}

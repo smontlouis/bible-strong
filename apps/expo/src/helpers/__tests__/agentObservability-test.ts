@@ -26,6 +26,43 @@ describe('agent observability', () => {
     jest.clearAllMocks()
   })
 
+  it('propagates cancelled requests without reporting an exception', async () => {
+    const controller = new AbortController()
+    const error = new Error('RESOURCE_REQUEST_ABORTED')
+    const request = appLogger.measure(
+      'database',
+      'search.sqlite',
+      () =>
+        new Promise<never>((_resolve, reject) => {
+          controller.signal.addEventListener('abort', () => reject(error), { once: true })
+        }),
+      { queryLength: 4 },
+      controller.signal
+    )
+    controller.abort()
+    await expect(request).rejects.toBe(error)
+    expect(mockCaptureException).not.toHaveBeenCalled()
+  })
+
+  it.each(['RESOURCE_REQUEST_TIMEOUT', 'HTTP 500'])(
+    'still reports %s for an active request',
+    async message => {
+      const error = new Error(message)
+      await expect(
+        appLogger.measure(
+          'database',
+          'search.sqlite',
+          async () => {
+            throw error
+          },
+          undefined,
+          new AbortController().signal
+        )
+      ).rejects.toBe(error)
+      expect(mockCaptureException).toHaveBeenCalledTimes(1)
+    }
+  )
+
   it('keeps useful technical context while redacting private values', () => {
     const circular: Record<string, unknown> = {}
     circular.self = circular

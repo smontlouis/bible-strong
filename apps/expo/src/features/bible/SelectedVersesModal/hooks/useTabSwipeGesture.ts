@@ -1,8 +1,8 @@
-import { useWindowDimensions } from 'react-native'
+import { useEffect, useState } from 'react'
 import { Gesture } from 'react-native-gesture-handler'
 import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
-import { TABS, TAB_CONTAINER_MARGIN, TAB_CONTAINER_PADDING } from '../constants'
+import { TABS, TAB_CONTAINER_PADDING } from '../constants'
 
 interface UseTabSwipeGestureParams {
   activeTabIndex: number
@@ -10,13 +10,17 @@ interface UseTabSwipeGestureParams {
 }
 
 const useTabSwipeGesture = ({ activeTabIndex, setActiveTabIndex }: UseTabSwipeGestureParams) => {
-  const { width: screenWidth } = useWindowDimensions()
+  const [screenWidth, setContentWidth] = useState(1)
+  const [containerWidth, setTabContainerWidth] = useState(1)
   const translateX = useSharedValue(-activeTabIndex * screenWidth)
   const startX = useSharedValue(0)
 
   // Tab indicator dimensions
-  const containerWidth = screenWidth - TAB_CONTAINER_MARGIN
-  const tabWidth = (containerWidth - TAB_CONTAINER_PADDING * 2) / TABS.length
+  const tabWidth = Math.max(1, containerWidth - TAB_CONTAINER_PADDING * 2) / TABS.length
+
+  useEffect(() => {
+    translateX.set(withSpring(-activeTabIndex * screenWidth))
+  }, [activeTabIndex, screenWidth, translateX])
 
   const goToTab = (index: number) => {
     setActiveTabIndex(index)
@@ -95,6 +99,8 @@ const useTabSwipeGesture = ({ activeTabIndex, setActiveTabIndex }: UseTabSwipeGe
     goToTab,
     tabWidth,
     screenWidth,
+    setContentWidth,
+    setTabContainerWidth,
   }
 }
 

@@ -362,20 +362,29 @@ const PassageMediaOverlay = ({
             overflowY: 'scroll',
             WebkitOverflowScrolling: 'touch',
             touchAction: 'pan-y',
-            display: 'grid',
-            gridTemplateColumns:
-              items.length === 1 ? 'minmax(0, calc(50% - 7px))' : 'repeat(2, minmax(0, 1fr))',
-            justifyContent: 'center',
-            alignItems: 'start',
-            alignContent: items.length <= 4 ? 'center' : 'start',
-            gap: 14,
             padding:
               'max(30px, calc(var(--safe-area-top, 0px) + 14px)) 16px max(280px, calc(var(--safe-area-bottom, 0px) + 220px))',
             boxSizing: 'border-box',
             overscrollBehavior: 'contain',
           }}
         >
-          {items.map((item, index) => renderGalleryCard(item, getItemReference(item), index))}
+          <div
+            style={{
+              width: '100%',
+              maxWidth: 500,
+              margin: '0 auto',
+              minHeight: '100%',
+              display: 'grid',
+              gridTemplateColumns:
+                items.length === 1 ? 'minmax(0, calc(50% - 7px))' : 'repeat(2, minmax(0, 1fr))',
+              justifyContent: 'center',
+              alignItems: 'start',
+              alignContent: items.length <= 4 ? 'center' : 'start',
+              gap: 14,
+            }}
+          >
+            {items.map((item, index) => renderGalleryCard(item, getItemReference(item), index))}
+          </div>
         </m.div>
       )}
 
@@ -398,6 +407,9 @@ const PassageMediaOverlay = ({
         >
           <div
             style={{
+              width: '100%',
+              maxWidth: 500,
+              margin: '0 auto',
               display: 'flex',
               minHeight: '100%',
               flexDirection: 'column',

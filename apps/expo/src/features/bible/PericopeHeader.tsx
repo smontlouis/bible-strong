@@ -20,7 +20,7 @@ const HeaderBox = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const classStyles = useResolveClassNames(
-    twMerge('h-[60px] items-center border-b-border', className)
+    twMerge('h-[54px] items-center border-b-border', className)
   )
   return (
     <Box
