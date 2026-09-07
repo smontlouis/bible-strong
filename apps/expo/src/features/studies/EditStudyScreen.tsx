@@ -155,6 +155,7 @@ const EditStudyScreen = ({
         }}
         title={currentStudy.title}
         study={currentStudy}
+        studyId={studyId}
       >
         {isReadOnly && hasTagOrRelationChips && (
           <Box className="overflow-hidden border-continuous px-[20px] mt-[-10px] pb-[10px]">

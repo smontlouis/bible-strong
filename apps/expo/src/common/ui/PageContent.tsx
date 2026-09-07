@@ -2,7 +2,7 @@ import { twMerge } from '~common/ui/classNames'
 import type { ViewProps, ViewStyle } from 'react-native'
 import Box, { type BoxProps } from './Box'
 
-/** Shared reading width, including each screen's own horizontal padding. */
+/** General page and header width; paragraph reading uses common/readingLayout. */
 export const PAGE_CONTENT_MAX_WIDTH = 830
 
 export const pageContentStyle = {

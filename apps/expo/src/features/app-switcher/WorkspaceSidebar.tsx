@@ -4,7 +4,7 @@ import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Platform, ScrollView } from 'react-native'
+import { Image, Platform, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { SheetRef } from '~common/sheet'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
@@ -87,7 +87,7 @@ const WorkspaceSidebar = ({
 
   return (
     <Box
-      className="border-continuous overflow-hidden bg-light-grey border-r-[1px] border-border"
+      className="flex-1 min-h-0 border-continuous overflow-hidden bg-light-grey border-r-[1px] border-border"
       style={{
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
@@ -95,7 +95,11 @@ const WorkspaceSidebar = ({
       }}
     >
       <HStack className="overflow-hidden border-continuous items-center pl-[20px] pr-[8px] py-[10px]">
-        <FeatherIcon name="book-open" size={19} color="primary" />
+        <Image
+          source={require('~assets/images/icon.png')}
+          style={{ width: 24, height: 24, borderRadius: 12 }}
+          accessibilityLabel="Bible Strong"
+        />
         <Text className="flex-[1] ml-[10px] font-bold text-[15px]">Bible Strong</Text>
         <TouchableBox
           className="overflow-hidden border-continuous items-center justify-center"

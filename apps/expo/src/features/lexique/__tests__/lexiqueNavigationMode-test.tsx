@@ -75,7 +75,7 @@ describe('lexicon navigation mode', () => {
     })
   })
 
-  it('only mutates Strong tab state from the lexicon list', () => {
+  it('opens list selections through navigation without changing the tab', () => {
     const strongAtom = atom<StrongTab>({
       id: 'strong-tab',
       title: 'après',
@@ -108,9 +108,12 @@ describe('lexicon navigation mode', () => {
 
     act(() => list.props.onStrongSelect(40, 'G0002'))
 
-    expect(getDefaultStore().get(strongAtom).data).toEqual({
-      book: 40,
-      reference: 'G0002',
-    })
+    expect(getDefaultStore().get(strongAtom).data).toEqual({})
+    expect(mockPushRouteOnce).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pathname: '/strong',
+        params: expect.objectContaining({ book: '40', reference: 'G0002' }),
+      })
+    )
   })
 })

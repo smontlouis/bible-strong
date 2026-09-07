@@ -74,7 +74,7 @@ const StudySettingsModal = ({ ref, studyId, onClosed, openRenameModal }: Props) 
         icon="external-link"
         label={t('tab.openInNewTab')}
         onPress={() => {
-          if (!study) return
+          if (!study || !studyId) return
 
           close()
           openInNewTab(
@@ -84,7 +84,7 @@ const StudySettingsModal = ({ ref, studyId, onClosed, openRenameModal }: Props) 
               isRemovable: true,
               type: 'study',
               data: {
-                studyId: study.id,
+                studyId,
               },
             },
             { autoRedirect: true }

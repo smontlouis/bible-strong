@@ -70,6 +70,7 @@ type EditHeaderProps = {
   openRelationsModal: () => void
   hasBackButton?: boolean
   study: Study
+  studyId: string
   children?: React.ReactNode
 }
 
@@ -81,6 +82,7 @@ const EditHeader = ({
   openRelationsModal,
   hasBackButton = true,
   study,
+  studyId,
   children,
 }: EditHeaderProps) => {
   const router = useRouter()
@@ -158,7 +160,7 @@ const EditHeader = ({
                   isRemovable: true,
                   type: 'study',
                   data: {
-                    studyId: study.id,
+                    studyId,
                   },
                 },
                 { autoRedirect: true }

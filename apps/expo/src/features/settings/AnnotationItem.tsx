@@ -5,6 +5,8 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
 import * as NativeUI from 'react-native'
 import { TouchableOpacity } from 'react-native'
+import { Platform } from 'react-native'
+import HighlightOptions from '~common/HighlightOptions'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
 import type { Theme as AppTheme } from '~themes'
@@ -131,7 +133,10 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
       {item.tags && Object.keys(item.tags).length > 0 && (
         <EntityChipList tags={item.tags as TagsObj} />
       )}
-      {onSettingsPress && (
+      {onSettingsPress && Platform.OS === 'web' && (
+        <HighlightOptions annotationId={item.id} color={item.color} />
+      )}
+      {onSettingsPress && Platform.OS !== 'web' && (
         <LinkBox
           className="p-[4px] ml-[10px] absolute top-[0px] right-[0px]"
           accessibilityLabel={t('accessibility.options')}

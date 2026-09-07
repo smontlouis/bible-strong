@@ -360,11 +360,15 @@ const CommentaryResourceTabScreen = ({
                       key={candidate.id}
                       activeOpacity={0.62}
                       onPress={() =>
-                        setTab(
-                          produce(draft => {
-                            draft.data.sectionId = candidate.id
-                          })
-                        )
+                        router.push({
+                          pathname: '/commentary-entry',
+                          params: {
+                            projectionId: tab.data.projectionId,
+                            book: String(tab.data.book),
+                            chapter: String(tab.data.chapter),
+                            sectionId: candidate.id,
+                          },
+                        })
                       }
                       accessibilityRole="button"
                       style={{

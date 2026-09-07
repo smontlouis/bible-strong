@@ -12,3 +12,151 @@
 [data-vaul-drawer][data-vaul-drawer-direction='bottom'] {
   left: var(--workspace-content-left, 0px) !important;
 }
+
+/* Reserve only header space for the floating navigation control. */
+[data-testid='workspace-page-header'] {
+  padding-left: var(--workspace-restore-inset, 0px);
+}
+[data-testid='workspace-route-panel'] {
+  --workspace-restore-inset: 0px;
+}
+
+/* Keep the sidebar mounted while it slides fully out of the workspace. */
+[data-testid='workspace-sidebar-motion'] {
+  transition:
+    width 240ms cubic-bezier(0.2, 0, 0, 1),
+    transform 240ms cubic-bezier(0.2, 0, 0, 1);
+}
+[data-testid='workspace-sidebar-inner'] {
+  transition: transform 240ms cubic-bezier(0.2, 0, 0, 1);
+}
+[data-testid='workspace-sidebar-motion'][aria-hidden='true'] {
+  visibility: hidden;
+  transition:
+    width 240ms cubic-bezier(0.2, 0, 0, 1),
+    transform 240ms cubic-bezier(0.2, 0, 0, 1),
+    visibility 0s 240ms;
+}
+[data-testid='workspace-sidebar-backdrop'] {
+  transition: opacity 200ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-testid='workspace-sidebar-motion'],
+  [data-testid='workspace-sidebar-inner'],
+  [data-testid='workspace-sidebar-backdrop'] {
+    transition: none;
+  }
+}
+[data-testid='workspace-sidebar-backdrop'][aria-hidden='true'] {
+  pointer-events: none !important;
+  visibility: hidden;
+  transition:
+    opacity 200ms ease,
+    visibility 0s 200ms;
+}
+
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  [data-testid='workspace-reader-motion'] {
+    transition: right 240ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  [data-testid='workspace-route-panel'],
+  [data-testid='workspace-panel-slot'] {
+    transition: width 240ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  @starting-style {
+    [data-testid='workspace-route-panel'],
+    [data-testid='workspace-panel-slot'] {
+      width: 0 !important;
+    }
+  }
+}
+
+/* Transparent route screens must not intercept the visible page beside them. */
+@media (min-width: 768px) {
+  div:has(> [data-testid='workspace-route-frame']),
+  div:has(> div > [data-testid='workspace-route-frame']),
+  div:has(> div > div > [data-testid='workspace-route-frame']) {
+    pointer-events: none !important;
+  }
+  [data-testid='workspace-route-panel'] {
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  div[style*='transition-property: margin-right'] {
+    transition: none !important;
+  }
+}
+
+/* Page navigation snapshots exclude the workspace sidebar. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+::view-transition-group(workspace-page) {
+  animation-duration: 220ms;
+}
+
+::view-transition-image-pair(workspace-page) {
+  overflow: clip;
+}
+::view-transition-old(workspace-page) {
+  animation: workspace-page-out 220ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+::view-transition-new(workspace-page) {
+  animation: workspace-page-in 220ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+html[data-page-transition-direction='back']::view-transition-old(workspace-page) {
+  animation-name: workspace-page-back-out;
+}
+html[data-page-transition-direction='back']::view-transition-new(workspace-page) {
+  animation-name: workspace-page-back-in;
+}
+@keyframes workspace-page-out {
+  to {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+}
+@keyframes workspace-page-in {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+}
+@keyframes workspace-page-back-out {
+  to {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+}
+@keyframes workspace-page-back-in {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-testid='workspace-panel-close'] {
+    transition: right 240ms cubic-bezier(0.2, 0, 0, 1);
+  }
+}
+
+[data-testid='workspace-panel-close'] {
+  position: fixed;
+}
+
+/* Only the focused panel participates, including when its route group changes. */
+html[data-panel-view-transition='true'] [data-testid='workspace-route-panel'] {
+  view-transition-name: workspace-page;
+}
+html[data-panel-view-transition='true'] [aria-hidden='true'] [data-testid='workspace-route-panel'] {
+  view-transition-name: none;
+}
+
+/* Text links do not need a border; keyboard focus remains visible. */
+a {
+  border: none !important;
+}

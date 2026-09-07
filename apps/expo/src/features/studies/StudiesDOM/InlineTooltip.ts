@@ -47,11 +47,11 @@ class InlineTooltip extends Tooltip {
       this.quill.setSelection(...this.linkRange)
 
       if (this.type === 'inline-verse') {
-        dispatch('SELECT_BIBLE_VERSE')
+        dispatch('SELECT_BIBLE_VERSE', undefined, this.quill.container)
       } else if (this.type === 'inline-strong') {
-        dispatch('SELECT_BIBLE_STRONG')
+        dispatch('SELECT_BIBLE_STRONG', undefined, this.quill.container)
       } else {
-        dispatch('SELECT_STUDY_ENTITY_LINK')
+        dispatch('SELECT_STUDY_ENTITY_LINK', undefined, this.quill.container)
       }
     })
 

@@ -1,3 +1,4 @@
+import { useAllColors } from '~helpers/useColorName'
 import { pageContentStyle } from '~common/ui/PageContent'
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -61,6 +62,8 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const setColorChangeModal = useSetAtom(colorChangeModalAtom)
   const [persistedFilters, setPersistedFilters] = useAtom(highlightsListQueryAtom)
+  const allColors = useAllColors()
+  const allTags = useSelector((state: RootState) => state.user.bible.tags)
   const testamentModalRef = useRef<SheetRef>(null)
   const bookModalRef = useRef<SheetRef>(null)
   const sortModalRef = useRef<SheetRef>(null)
@@ -102,6 +105,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
     filters,
     setColorFilter,
     setTypeFilter,
+    setTagFilter,
     resetFilters,
     colorInfo,
     selectedTag,
@@ -261,6 +265,23 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
           filters={[
             {
               key: 'type',
+              options: [
+                {
+                  key: 'all',
+                  label: t('Tout'),
+                  selected: !filters.typeFilter || filters.typeFilter === 'all',
+                  onSelect: () => setTypeFilter(undefined),
+                },
+                ...[
+                  { key: 'highlights', label: t('Surbrillances') },
+                  { key: 'annotations', label: t('Annotations') },
+                  ...availableAnnotationVersions.map(version => ({ key: version, label: version })),
+                ].map(option => ({
+                  ...option,
+                  selected: filters.typeFilter === option.key,
+                  onSelect: () => setTypeFilter(option.key),
+                })),
+              ],
               icon: 'layers',
               label: t('Type'),
               value: typeFilterLabel || t('Tout'),
@@ -269,6 +290,21 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
             },
             {
               key: 'color',
+              options: [
+                {
+                  key: 'all',
+                  label: t('Toutes'),
+                  selected: !filters.colorId,
+                  onSelect: () => setColorFilter(undefined),
+                },
+                ...allColors.map(color => ({
+                  key: color.id,
+                  label: color.name,
+                  color: color.hex,
+                  selected: filters.colorId === color.id,
+                  onSelect: () => setColorFilter(color.id),
+                })),
+              ],
               icon: 'droplet',
               label: t('Couleur'),
               value: colorInfo?.name || t('Toutes'),
@@ -278,6 +314,22 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
             },
             {
               key: 'tags',
+              options: [
+                {
+                  key: 'all',
+                  label: t('Tous'),
+                  selected: !filters.tagId,
+                  onSelect: () => setTagFilter(undefined),
+                },
+                ...Object.values(allTags ?? {})
+                  .filter(tag => tag && typeof tag.name === 'string' && typeof tag.id === 'string')
+                  .map(tag => ({
+                    key: tag.id,
+                    label: tag.name,
+                    selected: filters.tagId === tag.id,
+                    onSelect: () => setTagFilter(tag),
+                  })),
+              ],
               icon: 'tag',
               label: t('Tags'),
               value: selectedTag?.name || t('Tous'),
@@ -286,6 +338,27 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
             },
             {
               key: 'testament',
+              options: (
+                [
+                  { key: 'all', label: t('Toute la Bible') },
+                  { key: 'old', label: t('Ancien Testament') },
+                  { key: 'new', label: t('Nouveau Testament') },
+                ] as const
+              ).map(option => ({
+                ...option,
+                selected: (filters.testament || 'all') === option.key,
+                onSelect: () =>
+                  setPersistedFilters(state => ({
+                    ...state,
+                    testament: option.key,
+                    book:
+                      state.book &&
+                      option.key !== 'all' &&
+                      !isBookInTestament(state.book, option.key)
+                        ? undefined
+                        : state.book,
+                  })),
+              })),
               icon: 'book',
               label: t('Testament'),
               value:
@@ -299,6 +372,27 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
             },
             {
               key: 'book',
+              options: [
+                {
+                  key: 'all',
+                  label: t('Tous'),
+                  selected: !filters.book,
+                  onSelect: () => setPersistedFilters(state => ({ ...state, book: undefined })),
+                },
+                ...books
+                  .filter(
+                    book =>
+                      !filters.testament ||
+                      filters.testament === 'all' ||
+                      isBookInTestament(book.Numero, filters.testament)
+                  )
+                  .map(book => ({
+                    key: String(book.Numero),
+                    label: book.Nom,
+                    selected: filters.book === book.Numero,
+                    onSelect: () => setPersistedFilters(state => ({ ...state, book: book.Numero })),
+                  })),
+              ],
               icon: 'bookmark',
               label: t('Livre'),
               value: books.find(book => book.Numero === filters.book)?.Nom || t('Tous'),
@@ -307,6 +401,17 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
             },
             {
               key: 'sort',
+              options: (
+                [
+                  { key: 'newest', label: t('entityList.sort.newest') },
+                  { key: 'oldest', label: t('entityList.sort.oldest') },
+                  { key: 'bible', label: t('Ordre biblique') },
+                ] as const
+              ).map(option => ({
+                ...option,
+                selected: (filters.sort || 'newest') === option.key,
+                onSelect: () => setPersistedFilters(state => ({ ...state, sort: option.key })),
+              })),
               icon: 'list',
               label: t('Ordre'),
               value:

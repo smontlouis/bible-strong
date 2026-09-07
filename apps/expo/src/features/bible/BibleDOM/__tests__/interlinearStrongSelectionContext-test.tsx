@@ -7,6 +7,10 @@ import { OPEN_STRONG_SELECTION } from '../dispatch'
 import ReverseInterlinearVerse from '../ReverseInterlinearVerse'
 import StructuredInterlinearVerse from '../StructuredInterlinearVerse'
 
+jest.mock('~features/app-switcher/utils/useResponsiveWorkspace', () => ({
+  useResponsiveWorkspace: () => false,
+}))
+
 const settings = {
   theme: 'default',
   colors: {

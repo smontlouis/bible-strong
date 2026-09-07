@@ -22,8 +22,8 @@ class EntityBlock extends Embed {
     node.setAttribute('contenteditable', 'false')
 
     node.addEventListener('click', () => {
-      const isReadOnly = document.querySelector('#editor')?.classList.contains('ql-disabled')
-      if (isReadOnly) dispatch('VIEW_STUDY_ENTITY', { endpoint: data.endpoint })
+      const isReadOnly = node.closest('.ql-container')?.classList.contains('ql-disabled')
+      if (isReadOnly) dispatch('VIEW_STUDY_ENTITY', { endpoint: data.endpoint }, node)
     })
 
     node.querySelector('.block-delete')?.addEventListener('click', event => {

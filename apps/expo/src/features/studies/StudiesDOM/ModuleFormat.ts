@@ -30,7 +30,7 @@ class ModuleFormat extends Module {
   update(range: QuillRange | null) {
     // Get what format are applied on given range
     const formats = range == null ? {} : this.quill.getFormat(range)
-    dispatch('ACTIVE_FORMATS', JSON.stringify(formats))
+    dispatch('ACTIVE_FORMATS', JSON.stringify(formats), this.quill.container)
   }
 
   format(name: string, value: unknown = true) {

@@ -1,4 +1,5 @@
-import { useRouter } from 'expo-router'
+import { navigateWithPageTransition } from '~navigation/pageTransition'
+import { useNavigation, useRouter } from 'expo-router'
 import React, { FC, PropsWithChildren } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleProp, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native'
@@ -19,9 +20,21 @@ const Back: FC<PropsWithChildren<BackProps>> = ({
 }: BackProps) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const navigation = useNavigation()
 
   const handlePress = () => {
-    router.back()
+    let currentNavigation: typeof navigation | undefined = navigation
+    let previousPath = ''
+    while (currentNavigation) {
+      const state = currentNavigation.getState()
+      const previous = state?.routes[(state.index ?? 0) - 1]
+      if (previous) {
+        previousPath = '/' + previous.name
+        break
+      }
+      currentNavigation = currentNavigation.getParent()
+    }
+    navigateWithPageTransition(previousPath, () => router.back(), 'back')
     onGoBack?.()
   }
 

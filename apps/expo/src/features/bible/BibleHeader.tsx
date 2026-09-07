@@ -543,6 +543,7 @@ const Header = ({
           transitionDuration: 300,
         },
       ]}
+      testID="workspace-page-header"
       key="default-header"
       entering={FadeIn}
       exiting={FadeOut}

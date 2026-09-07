@@ -34,6 +34,7 @@ import './ModuleEntity'
 import { installStudyBlockSelection } from './studyBlockSelection'
 
 interface Props {
+  onEditorMessage: (message: string) => Promise<void>
   dom: import('expo/dom').DOMProps
   fontFamily: string
   language: string
@@ -118,6 +119,7 @@ function normalizeReloadContent(content: JSONValue): DeltaStatic | null {
 }
 
 export default function StudiesDOMComponent({
+  onEditorMessage,
   fontFamily,
   language,
   contentToDisplay,
@@ -131,17 +133,30 @@ export default function StudiesDOMComponent({
   })
 
   const quillRef = useRef<QuillInstance | null>(null)
+  const editorRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const element = editorRef.current
+    const receive = (event: Event) => {
+      void onEditorMessage((event as CustomEvent<string>).detail)
+    }
+    element?.addEventListener('study-message', receive)
+    return () => element?.removeEventListener('study-message', receive)
+  }, [onEditorMessage])
   const blockSelectionCleanupRef = useRef<() => void>(() => undefined)
   const initialContent = decodeDeltaContent(encodedContentToDisplay, contentToDisplay)
 
   function onChangeText(delta: unknown, oldDelta: unknown, source: unknown): void {
-    dispatch('TEXT_CHANGED', {
-      type: 'success',
-      delta: quillRef.current!.getContents(),
-      deltaChange: isDeltaStatic(delta) ? delta : { ops: [] },
-      deltaOld: isDeltaStatic(oldDelta) ? oldDelta : { ops: [] },
-      changeSource: String(source),
-    })
+    dispatch(
+      'TEXT_CHANGED',
+      {
+        type: 'success',
+        delta: quillRef.current!.getContents(),
+        deltaChange: isDeltaStatic(delta) ? delta : { ops: [] },
+        deltaOld: isDeltaStatic(oldDelta) ? oldDelta : { ops: [] },
+        changeSource: String(source),
+      },
+      editorRef.current
+    )
   }
 
   function addTextChangeEventToEditor(): void {
@@ -153,7 +168,8 @@ export default function StudiesDOMComponent({
   function loadEditor(options: { fontFamily: string; language: string }): void {
     document.getElementById('editor')!.style.fontFamily = options.fontFamily
 
-    quillRef.current = new Quill('#editor', {
+    if (!editorRef.current) return
+    quillRef.current = new Quill(editorRef.current, {
       theme: 'snow',
       modules: {
         toolbar: false,
@@ -307,6 +323,7 @@ export default function StudiesDOMComponent({
       `}</style>
       <div
         id="editor"
+        ref={editorRef}
         style={{
           filter: colorScheme === 'dark' ? 'invert(1) hue-rotate(180deg)' : 'none',
           animation: 'fade 300ms ease-out',

@@ -31,7 +31,7 @@ class ModuleBlockVerse extends Module {
   }
 
   openVerseBlock = () => {
-    dispatch('SELECT_BIBLE_VERSE_BLOCK')
+    dispatch('SELECT_BIBLE_VERSE_BLOCK', undefined, this.quill.container)
   }
 
   getInsertionRange = () => {
@@ -62,7 +62,7 @@ class ModuleBlockVerse extends Module {
   }
 
   openStrongBlock = (_value?: unknown) => {
-    dispatch('SELECT_BIBLE_STRONG_BLOCK')
+    dispatch('SELECT_BIBLE_STRONG_BLOCK', undefined, this.quill.container)
   }
 
   receiveStrongBlock = (data: StrongBlockPayload) => {

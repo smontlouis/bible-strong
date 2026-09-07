@@ -41,14 +41,18 @@ class StrongBlock extends Embed {
     node.setAttribute('autocapitalize', 'off')
 
     node.addEventListener('click', () => {
-      const isReadOnly = document.querySelector('#editor')?.classList.contains('ql-disabled')
+      const isReadOnly = node.closest('.ql-container')?.classList.contains('ql-disabled')
       if (isReadOnly) {
         console.log(`[Studies] ${codeStrong} ${book}`)
         if (codeStrong) {
-          dispatch('VIEW_BIBLE_STRONG', {
-            reference: codeStrong,
-            book,
-          })
+          dispatch(
+            'VIEW_BIBLE_STRONG',
+            {
+              reference: codeStrong,
+              book,
+            },
+            node
+          )
         }
       }
     })

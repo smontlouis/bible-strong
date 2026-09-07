@@ -11,7 +11,16 @@ declare global {
   }
 }
 
-export const dispatch = (type: string, payload?: JSONValue) => {
+export const dispatch = (type: string, payload?: JSONValue, source?: Element | null) => {
+  if (source) {
+    source.dispatchEvent(
+      new CustomEvent('study-message', {
+        bubbles: true,
+        detail: JSON.stringify({ type, payload }),
+      })
+    )
+    return
+  }
   if (!window.ReactNativeWebView) {
     window.ReactNativeWebView = window.ReactABI33_0_0NativeWebView || {
       postMessage() {},

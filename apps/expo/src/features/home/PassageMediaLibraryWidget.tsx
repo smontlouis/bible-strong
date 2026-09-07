@@ -1,7 +1,7 @@
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useTranslation } from 'react-i18next'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -10,7 +10,7 @@ const PassageMediaLibraryWidget = () => {
   const stylingTheme = useStylingTheme()
 
   const { t } = useTranslation()
-  const router = useRouter()
+  const pushRoute = usePushRouteOnce()
 
   return (
     <Box className="overflow-hidden border-continuous bg-light-grey pt-[20px]">
@@ -19,7 +19,7 @@ const PassageMediaLibraryWidget = () => {
         accessibilityRole="button"
         accessibilityLabel={t('passageMediaLibrary.open')}
         activeOpacity={0.84}
-        onPress={() => router.push('/(library)/passage-media')}
+        onPress={() => pushRoute({ pathname: '/(library)/passage-media' })}
         style={{
           shadowColor: 'rgb(89,131,240)',
           shadowOffset: { width: 0, height: 2 },

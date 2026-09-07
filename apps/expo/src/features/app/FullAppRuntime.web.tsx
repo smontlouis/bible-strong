@@ -1,3 +1,4 @@
+import { useWorkspaceRoutePanel } from '~navigation/useWorkspaceRoutePanel'
 import WorkspaceLayout from '~features/app-switcher/WorkspaceLayout'
 import * as Sentry from '@sentry/react-native'
 import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-router'
@@ -42,6 +43,7 @@ const NavigationTracking = () => {
 }
 
 const FullAppRuntime = ({ theme }: { theme: Theme }) => {
+  const panel = useWorkspaceRoutePanel()
   useEffect(() => {
     void TrackPlayer.registerPlaybackService(() => PlaybackService)
   }, [])
@@ -55,7 +57,19 @@ const FullAppRuntime = ({ theme }: { theme: Theme }) => {
               <InitHooks />
               <NavigationTracking />
               <WorkspaceLayout>
-                <Stack screenOptions={{ headerShown: false }}>
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: {
+                      marginRight: panel.open ? panel.reservedWidth : 0,
+                      ...{
+                        transitionProperty: 'margin-right',
+                        transitionDuration: '240ms',
+                        transitionTimingFunction: 'cubic-bezier(0.2, 0, 0, 1)',
+                      },
+                    },
+                  }}
+                >
                   <Stack.Screen name="index" />
                   <Stack.Screen
                     name="(timeline-search)"

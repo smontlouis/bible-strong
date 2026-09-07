@@ -61,9 +61,6 @@ export const styles = (theme: Theme): Record<string, MixedStyleDeclaration> => (
   },
   a: {
     color: theme.colors.default,
-    borderStyle: 'solid',
-    borderWidth: 2,
-    borderColor: theme.colors.primary,
     textDecorationLine: 'underline',
     textDecorationStyle: 'solid',
     textDecorationColor: theme.colors.primary,

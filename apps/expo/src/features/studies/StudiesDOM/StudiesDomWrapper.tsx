@@ -2,7 +2,7 @@ import { webFontFamily } from '~helpers/webFontFamily'
 import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useEffect, useRef, useState } from 'react'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
-import { Platform } from 'react-native'
+import { Platform, ScrollView } from 'react-native'
 import { WebViewMessageEvent } from 'react-native-webview'
 import { useTheme } from '~themes/ThemeProvider'
 import { useAtomValue } from 'jotai/react'
@@ -273,6 +273,9 @@ export default function StudiesDomWrapper({
 
   const editor = (
     <StudiesDOMComponent
+      onEditorMessage={async message =>
+        handleMessage({ nativeEvent: { data: message } } as WebViewMessageEvent)
+      }
       ref={ref}
       fontFamily={Platform.OS === 'web' ? webFontFamily(fontFamily) : fontFamily}
       language={i18n.language}
@@ -301,12 +304,20 @@ export default function StudiesDomWrapper({
       keyboardVerticalOffset={isIPadFormSheet ? IPAD_FORM_SHEET_KEYBOARD_OFFSET : 0}
       style={{
         flex: 1,
+        minHeight: 0,
         backgroundColor: theme.colors.reverse,
       }}
     >
-      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
-        {editor}
-        {footer}
+      <Box className="min-h-0 border-continuous flex-[1] bg-reverse">
+        {Platform.OS === 'web' && <Box className="shrink-0 overflow-visible z-20">{footer}</Box>}
+        {Platform.OS === 'web' ? (
+          <ScrollView style={{ flex: 1, minHeight: 0 }} contentContainerStyle={{ flexGrow: 1 }}>
+            {editor}
+          </ScrollView>
+        ) : (
+          editor
+        )}
+        {Platform.OS !== 'web' && footer}
         <CreateEntityRelationModal
           ref={entityPicker.getRef()}
           title={

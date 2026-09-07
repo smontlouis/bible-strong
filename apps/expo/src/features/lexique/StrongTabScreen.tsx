@@ -7,6 +7,9 @@ import { useTranslation } from 'react-i18next'
 import { StrongTab } from '../../state/tabs'
 import LexiqueListScreen from './LexiqueListScreen'
 import StrongMainScreen from './StrongMainScreen'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { createStrongIdentityForBook } from '~helpers/strongIdentities'
+import { createStrongDetailRoute } from './strongDetailRoutes'
 
 interface StrongTabScreenProps {
   strongAtom: PrimitiveAtom<StrongTab>
@@ -14,6 +17,18 @@ interface StrongTabScreenProps {
 
 const StrongTabScreen = ({ strongAtom }: StrongTabScreenProps) => {
   const { t } = useTranslation()
+  const pushRouteOnce = usePushRouteOnce()
+  const onStrongSelect = (book: number, reference: string) => {
+    const identity = createStrongIdentityForBook(reference, book)
+    pushRouteOnce(
+      createStrongDetailRoute('index', {
+        book,
+        reference: identity.code,
+        identityKind: identity.kind,
+        identityCode: identity.code,
+      })
+    )
+  }
   const [strongTab, setStrongTab] = useAtom(strongAtom)
 
   const {
@@ -23,20 +38,6 @@ const StrongTabScreen = ({ strongAtom }: StrongTabScreenProps) => {
 
   // Determine if we're in list or detail view
   const hasDetail = reference || strongReference
-
-  const onStrongSelect = (book: number, ref: string) => {
-    setStrongTab(
-      produce(draft => {
-        const { bibleVersion, strongBibleVersionId } = draft.data
-        draft.data = {
-          book,
-          reference: ref,
-          ...(bibleVersion ? { bibleVersion } : {}),
-          ...(strongBibleVersionId ? { strongBibleVersionId } : {}),
-        }
-      })
-    )
-  }
 
   const returnToLexicon = () => {
     setStrongTab(

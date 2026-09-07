@@ -4,7 +4,7 @@ import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useAtom } from 'jotai/react'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useState } from 'react'
-import { TouchableOpacity, type TouchableOpacityProps } from 'react-native'
+import { Platform, TouchableOpacity, type TouchableOpacityProps } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
 import PageContent from '~common/ui/PageContent'
@@ -60,7 +60,8 @@ const StudyFooterPopover = ({
     exiting={FadeOutDown}
     style={{
       width: width,
-      bottom: bottom,
+      bottom: Platform.OS === 'web' ? undefined : bottom,
+      top: Platform.OS === 'web' ? bottom : undefined,
       left: left,
       right: right,
       shadowColor: 'rgb(89,131,240)',
@@ -443,7 +444,7 @@ const StudyFooter = ({ dispatchToWebView, onInsertEntity, activeFormats }: Study
   const closeMenu = () => setOpenMenu(null)
 
   return (
-    <Box className="border-continuous overflow-visible h-[50px] bg-reverse">
+    <Box className="border-continuous overflow-visible shrink-0 h-[50px] bg-reverse">
       <PageContent className="flex-[1] items-center flex-row overflow-visible">
         {openMenu && (
           <TouchableBox
@@ -510,9 +511,11 @@ const StudyFooter = ({ dispatchToWebView, onInsertEntity, activeFormats }: Study
             onClose={closeMenu}
           />
         </Box>
-        <Link paddingSmall onPress={() => dispatchToWebView('BLUR_EDITOR')}>
-          <MaterialIcon name="keyboard-hide" size={20} color="primary" />
-        </Link>
+        {Platform.OS !== 'web' && (
+          <Link paddingSmall onPress={() => dispatchToWebView('BLUR_EDITOR')}>
+            <MaterialIcon name="keyboard-hide" size={20} color="primary" />
+          </Link>
+        )}
       </PageContent>
     </Box>
   )

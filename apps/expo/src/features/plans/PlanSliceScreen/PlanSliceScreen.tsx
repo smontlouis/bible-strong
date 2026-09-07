@@ -1,4 +1,5 @@
 import React from 'react'
+import { READING_TEXT_MAX_WIDTH, PLAN_READING_HORIZONTAL_PADDING } from '~common/readingLayout'
 import { MenuView } from '~common/ui/MenuView'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
@@ -244,7 +245,13 @@ const PlanSliceScreen = ({
           </MenuView>
         }
       />
-      <ScrollView>
+      <ScrollView
+        contentContainerStyle={{
+          width: '100%',
+          alignSelf: 'center',
+          maxWidth: READING_TEXT_MAX_WIDTH + PLAN_READING_HORIZONTAL_PADDING * 2,
+        }}
+      >
         {isRead && (
           <Box className="overflow-hidden border-continuous opacity-[0.6] bg-success rounded-[30px] p-[20px] mx-[20px] items-center justify-center flex-row">
             <FeatherIcon name="check" size={20} color="reverse" />

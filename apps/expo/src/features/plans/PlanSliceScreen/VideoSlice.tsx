@@ -1,20 +1,23 @@
-import React from 'react'
+import React, { useState } from 'react'
 import YoutubePlayer from '~helpers/react-native-youtube-iframe'
 import Box from '~common/ui/Box'
-import { wp } from '~helpers/utils'
+
 import { Plan, VideoSlice as VideoSliceProps } from 'src/common/types'
 import ReferenceParagraph from './ReferenceParagraph'
-const iframeWidth = wp(100) > 600 ? 600 : wp(100)
-const iframeHeight = (iframeWidth * 9) / 16
 
 type Props = VideoSliceProps & {
   planLanguage?: Plan['lang']
 }
 
 const VideoSlice = ({ title, description, url, planLanguage }: Props) => {
+  const [iframeWidth, setIframeWidth] = useState(0)
+  const iframeHeight = (iframeWidth * 9) / 16
   const videoId = url.replace('https://www.youtube.com/watch?v=', '')
   return (
-    <Box className="overflow-hidden border-continuous mb-[40px]">
+    <Box
+      onLayout={event => setIframeWidth(event.nativeEvent.layout.width)}
+      className="overflow-hidden border-continuous mb-[40px]"
+    >
       {description && (
         <Box className="overflow-hidden border-continuous p-[20px]">
           <ReferenceParagraph planLanguage={planLanguage}>{description}</ReferenceParagraph>

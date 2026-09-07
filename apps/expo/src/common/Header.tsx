@@ -37,6 +37,7 @@ const Header = ({
   return (
     <Box
       {...props}
+      testID="workspace-page-header"
       className={twMerge(
         'overflow-hidden border-continuous border-border',
         twMerge(

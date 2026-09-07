@@ -30,9 +30,11 @@ export const createFormSheetOptions = (
   if (Platform.OS === 'web') {
     return {
       ...restOverrides,
-      presentation: 'card',
+      // Keep the navigator presentation stable across responsive breakpoints.
+      // ModalRouteFrame owns the panel/full-content geometry on Web.
+      presentation: 'transparentModal',
       animation: 'none',
-      contentStyle: contentStyle ? [defaultContentStyle, contentStyle] : defaultContentStyle,
+      contentStyle: { backgroundColor: 'transparent' },
     }
   }
 

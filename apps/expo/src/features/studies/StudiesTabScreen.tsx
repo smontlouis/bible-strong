@@ -31,21 +31,9 @@ const StudiesTabScreen = ({
     hasBackButton,
   } = studyTab
 
-  const onStudySelect = useCallback(
-    (id: string) => {
-      if (isFormSheet) {
-        pushRouteOnce({ pathname: '/edit-study', params: { studyId: id } })
-        return
-      }
-
-      setStudyTab(
-        produce(draft => {
-          draft.data.studyId = id
-        })
-      )
-    },
-    [isFormSheet, pushRouteOnce, setStudyTab]
-  )
+  const onStudySelect = (id: string) => {
+    pushRouteOnce({ pathname: '/edit-study', params: { studyId: id } })
+  }
 
   const onGoBack = useCallback(() => {
     setStudyTab(

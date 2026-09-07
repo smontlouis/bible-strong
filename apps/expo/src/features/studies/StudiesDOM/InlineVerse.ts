@@ -18,12 +18,16 @@ class InlineVerse extends Inline {
     if (version) node.setAttribute('data-version', version)
 
     node.addEventListener('click', () => {
-      const isReadOnly = document.querySelector('#editor')?.classList.contains('ql-disabled')
+      const isReadOnly = node.closest('.ql-container')?.classList.contains('ql-disabled')
       if (isReadOnly) {
-        dispatch('VIEW_BIBLE_VERSE', {
-          arrayVerses: verses,
-          version,
-        })
+        dispatch(
+          'VIEW_BIBLE_VERSE',
+          {
+            arrayVerses: verses,
+            version,
+          },
+          node
+        )
       }
     })
 

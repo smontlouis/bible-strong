@@ -4,6 +4,8 @@ import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import * as NativeUI from 'react-native'
 import { TouchableOpacity } from 'react-native'
+import { Platform } from 'react-native'
+import HighlightOptions from '~common/HighlightOptions'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
 import type { Theme as AppTheme } from '~themes'
@@ -162,7 +164,10 @@ const VerseComponent = ({
         </Paragraph>
       </TouchableOpacity>
       <EntityChipList tags={tags} />
-      {setSettings && stringIds && (
+      {setSettings && stringIds && Platform.OS === 'web' && (
+        <HighlightOptions verseIds={stringIds} color={color} />
+      )}
+      {setSettings && stringIds && Platform.OS !== 'web' && (
         <LinkBox
           className="p-[4px] ml-[10px] absolute top-[0px] right-[0px]"
           accessibilityLabel={t('accessibility.options')}

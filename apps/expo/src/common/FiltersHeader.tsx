@@ -1,136 +1,143 @@
-import { twMerge } from '~common/ui/classNames'
-import { resolveThemeColor } from '~themes/colorValues'
-import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
-import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
-import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TouchableOpacity } from 'react-native'
-import PageContent from '~common/ui/PageContent'
-import Back from '~common/Back'
-import FilterHeaderButton from '~common/FilterHeaderButton'
-import Box, { HStack } from '~common/ui/Box'
+import type { ComponentProps } from 'react'
+import { useTheme } from '~themes/ThemeProvider'
+import { resolveThemeColor } from '~themes/colorValues'
 import { FeatherIcon } from '~common/ui/Icon'
+import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import PageContent from '~common/ui/PageContent'
+import Back from './Back'
+import ContextualPanel from './ContextualPanel'
+import type { PanelScreen } from './ContextualPanel/types'
 export type FiltersHeaderItem = {
   key: string
-  icon: React.ComponentProps<typeof FeatherIcon>['name']
+  icon: ComponentProps<typeof FeatherIcon>['name']
   label: string
   value?: string
   color?: string
   active?: boolean
   onPress: () => void
+  options?: {
+    key: string
+    label: string
+    selected: boolean
+    color?: string
+    onSelect: () => void
+  }[]
 }
-
-type Props = {
+export default function FiltersHeader({
+  title,
+  hasBackButton,
+  filters,
+  onReset,
+}: {
   title: string
   hasBackButton?: boolean
   filters: FiltersHeaderItem[]
   onReset?: () => void
-}
-
-const FiltersHeader = ({ title, hasBackButton, filters, onReset }: Props) => {
-  const stylingTheme = useStylingTheme()
-
+}) {
   const { t } = useTranslation()
-  const filtersRef = useRef<SheetRef>(null)
-  const activeFilters = filters.filter(filter => filter.active)
-  const activeFilterCount = activeFilters.length
-  const activeFilterIcon = activeFilters[0]?.icon
-  const openFilters = () => {
-    filtersRef.current?.present()
-  }
-
-  return (
-    <>
-      <Box className="border-continuous overflow-hidden bg-reverse border-b-[1px] border-border">
-        <PageContent className="min-h-[54px] items-center flex-row">
-          {hasBackButton ? (
-            <Back padding>
-              <FeatherIcon name="arrow-left" size={20} />
-            </Back>
-          ) : (
-            <Box className="overflow-hidden border-continuous w-[15px]" />
-          )}
-          <Box className="overflow-hidden border-continuous flex-[1] justify-center">
-            <Text className="text-[14px] font-bold" numberOfLines={1}>
-              {title}
-            </Text>
-          </Box>
-          <Box className="overflow-hidden border-continuous items-end">
-            <FilterHeaderButton
-              activeFilterCount={activeFilterCount}
-              activeFilterIcon={activeFilterIcon}
-              onPress={openFilters}
-            />
-          </Box>
-        </PageContent>
-      </Box>
-      <Sheet
-        ref={filtersRef}
-        header={
-          <SheetHeader
-            title={t('Filtres')}
-            rightComponent={
-              activeFilterCount > 0 && onReset ? (
-                <Box className="overflow-hidden border-continuous mr-[12px]">
-                  <TouchableOpacity accessibilityRole="button" onPress={onReset}>
-                    <Box className="overflow-hidden border-continuous py-[4px] px-[8px]">
-                      <Text className="text-primary text-[14px]">{t('Réinitialiser')}</Text>
-                    </Box>
-                  </TouchableOpacity>
-                </Box>
-              ) : undefined
-            }
-          />
-        }
-      >
-        <SheetView>
+  const theme = useTheme()
+  const activeCount = filters.filter(filter => filter.active).length
+  const reset =
+    activeCount > 0 && onReset ? (
+      <TouchableBox onPress={onReset} accessibilityRole="button" className="p-2">
+        <Text className="text-primary text-[12px]">{t('Réinitialiser')}</Text>
+      </TouchableBox>
+    ) : undefined
+  const screens: Record<string, PanelScreen> = {
+    filters: {
+      title: t('Filtres'),
+      headerRight: reset,
+      content: navigation => (
+        <>
           {filters.map(filter => (
-            <TouchableOpacity accessibilityRole="button" key={filter.key} onPress={filter.onPress}>
-              <HStack className="border-continuous overflow-hidden items-center p-[16px] border-b-[1px] border-border">
-                <Box className="overflow-hidden border-continuous flex-row flex-[1]">
-                  <FeatherIcon
-                    name={filter.icon}
-                    size={20}
-                    color={filter.active ? 'primary' : 'tertiary'}
-                  />
-                  <Text
-                    className={twMerge(
-                      filter.active ? 'text-primary' : 'text-default',
-                      'ml-[12px] text-[16px]'
-                    )}
-                  >
-                    {filter.label}
-                  </Text>
-                </Box>
-                <Box className="overflow-hidden border-continuous flex-row items-center justify-center">
-                  {!!filter.color && (
-                    <Box
-                      className="overflow-hidden border-continuous rounded-[10px] mr-[8px]"
-                      style={{
-                        backgroundColor: resolveThemeColor(stylingTheme, filter.color),
-                        width: 20,
-                        height: 20,
-                      }}
-                    />
-                  )}
-                  {!!filter.value && (
-                    <Text
-                      className="text-tertiary text-[14px] mr-[8px] max-w-[200px]"
-                      numberOfLines={1}
-                    >
-                      {filter.value}
-                    </Text>
-                  )}
-                  <FeatherIcon name="chevron-right" size={20} color="tertiary" />
-                </Box>
-              </HStack>
-            </TouchableOpacity>
+            <TouchableBox
+              key={filter.key}
+              accessibilityRole="button"
+              className="w-full flex-row items-center gap-3 p-3 rounded-lg"
+              onPress={() => {
+                if (filter.options) navigation.open(filter.key)
+                else {
+                  navigation.close()
+                  filter.onPress()
+                }
+              }}
+            >
+              <FeatherIcon
+                name={filter.icon}
+                size={17}
+                color={filter.active ? 'primary' : 'tertiary'}
+              />
+              <Text className="flex-1 text-[14px]">{filter.label}</Text>
+              {!!filter.color && (
+                <Box
+                  className="w-5 h-5 rounded-md"
+                  style={{ backgroundColor: resolveThemeColor(theme, filter.color) }}
+                />
+              )}
+              <Text className="text-[12px] text-tertiary max-w-[130px]" numberOfLines={1}>
+                {filter.value}
+              </Text>
+              <FeatherIcon name="chevron-right" size={15} />
+            </TouchableBox>
           ))}
-        </SheetView>
-      </Sheet>
-    </>
+        </>
+      ),
+    },
+  }
+  for (const filter of filters) {
+    if (!filter.options) continue
+    screens[filter.key] = {
+      title: filter.label,
+      headerRight: reset,
+      content: () => (
+        <>
+          {filter.options!.map(option => (
+            <TouchableBox
+              key={option.key}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: option.selected }}
+              className="w-full flex-row items-center gap-3 p-3 rounded-lg"
+              onPress={option.onSelect}
+            >
+              {!!option.color && (
+                <Box className="w-5 h-5 rounded-md" style={{ backgroundColor: option.color }} />
+              )}
+              <Text className="flex-1 text-[14px]">{option.label}</Text>
+              {option.selected && <FeatherIcon name="check" size={17} color="primary" />}
+            </TouchableBox>
+          ))}
+        </>
+      ),
+    }
+  }
+  return (
+    <Box className="bg-reverse border-b border-border" testID="workspace-page-header">
+      <PageContent className="min-h-[54px] items-center flex-row">
+        {hasBackButton ? (
+          <Back padding>
+            <FeatherIcon name="arrow-left" size={20} />
+          </Back>
+        ) : (
+          <Box className="w-[15px]" />
+        )}
+        <Text className="flex-1 text-[14px] font-bold">{title}</Text>
+        <ContextualPanel
+          accessibilityLabel={t('Filtrer')}
+          initialScreen="filters"
+          screens={screens}
+          trigger={
+            <HStack className="items-center gap-1 p-2">
+              <Text className="text-[14px]">
+                {t('Filtrer')}
+                {activeCount ? ` · ${activeCount}` : ''}
+              </Text>
+              <FeatherIcon name="chevron-down" size={14} />
+            </HStack>
+          }
+        />
+      </PageContent>
+    </Box>
   )
 }
-
-export default FiltersHeader

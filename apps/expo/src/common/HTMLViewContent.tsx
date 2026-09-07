@@ -1,6 +1,7 @@
 import React from 'react'
-import WebView from 'react-native-webview'
-import useHTMLView, { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
+import { type HTMLViewLinkPayload } from './htmlContentTypes'
+import { useTheme } from '~themes/ThemeProvider'
+import HTMLContentDOM from './HTMLContentDOM'
 
 type Props = {
   html: string
@@ -8,9 +9,27 @@ type Props = {
 }
 
 const HTMLViewContent = ({ html, onLinkClicked }: Props) => {
-  const { webviewProps } = useHTMLView({ onLinkClicked, autoHeight: true })
-
-  return <WebView {...webviewProps(html)} />
+  const theme = useTheme()
+  return (
+    <HTMLContentDOM
+      html={html}
+      colors={{
+        background: theme.colors.reverse,
+        text: theme.colors.default,
+        link: theme.colors.primary,
+        emphasis: theme.colors.quart,
+      }}
+      onLinkClicked={async payload => {
+        onLinkClicked(payload)
+      }}
+      dom={{
+        matchContents: true,
+        scrollEnabled: false,
+        style: { width: '100%', backgroundColor: 'transparent' },
+        contentInsetAdjustmentBehavior: 'never',
+      }}
+    />
+  )
 }
 
 export default HTMLViewContent

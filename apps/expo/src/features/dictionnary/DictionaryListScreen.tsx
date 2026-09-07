@@ -311,20 +311,6 @@ const DictionaryListScreen = ({
     entryId?: number,
     correspondenceId?: string
   ) => {
-    setDictionaryTab(current => ({
-      ...current,
-      data: {
-        ...current.data,
-        word,
-        work: dictionary.resource.work,
-        resourceId: dictionary.resourceId,
-        dictionaryTitle: dictionary.title,
-        language: dictionary.resource.language,
-        directory: directoryMode,
-        entryId,
-        correspondenceId,
-      },
-    }))
     if (isNewTabSelection) {
       resolveNewTabSelection({
         id: newTabId || 'new',

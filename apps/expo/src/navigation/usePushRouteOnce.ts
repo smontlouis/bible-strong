@@ -1,3 +1,4 @@
+import { navigateWithPageTransition } from './pageTransition'
 import { useRouter } from 'expo-router'
 import type { HrefObject } from 'expo-router'
 import { store } from 'expo-router/build/global-state/router-store'
@@ -46,6 +47,6 @@ export const usePushRouteOnce = () => {
       return
     }
 
-    router.push(route as HrefObject)
+    navigateWithPageTransition(route.pathname, () => router.push(route as HrefObject))
   }
 }

@@ -1,5 +1,6 @@
 'use dom'
 
+import { READING_TEXT_MAX_WIDTH, BIBLE_READING_HORIZONTAL_PADDING } from '~common/readingLayout'
 import { setup, styled, keyframes } from 'goober'
 import { createGlobalStyles } from 'goober/global'
 import { m } from 'motion/react'
@@ -241,7 +242,9 @@ const Container = styled('div')<
   position: 'relative', // For highlight layer positioning
   width: '100%',
   minWidth: 0,
-  maxWidth: isParallelVerse ? 'none' : '610px', // 580 px of text + 15 px padding on each side
+  maxWidth: isParallelVerse
+    ? 'none'
+    : `${READING_TEXT_MAX_WIDTH + BIBLE_READING_HORIZONTAL_PADDING * 2}px`,
   boxSizing: 'border-box',
   margin: '0 auto',
   padding: '10px 15px',
@@ -606,7 +609,7 @@ const LoadedBibleContent = ({
   // Include the existing column spacing so 100% allows 580 px of text.
   const parallelColumnWidth =
     keepControlsVisible && parallelViewportWidth > 0
-      ? (((580 * preferredColumnWidth) / 100 + 15) / parallelViewportWidth) * 100
+      ? (((READING_TEXT_MAX_WIDTH * preferredColumnWidth) / 100 + 15) / parallelViewportWidth) * 100
       : preferredColumnWidth
 
   // Refs for horizontal scroll sync between header and content

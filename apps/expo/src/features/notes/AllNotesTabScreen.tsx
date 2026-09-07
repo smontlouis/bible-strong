@@ -1,4 +1,4 @@
-import { produce } from 'immer'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -37,7 +37,7 @@ type AllNotesTabScreenProps = {
 
 const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps) => {
   const { t } = useTranslation()
-  const [, setNotesTab] = useAtom(notesAtom)
+  const pushRouteOnce = usePushRouteOnce()
 
   const [queryState, setQueryState] = useAtom(notesListQueryAtom)
   const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
@@ -76,11 +76,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
     noteSettingsModal.open()
   }
   const openNoteDetail = (noteId: string) => {
-    setNotesTab(
-      produce(draft => {
-        draft.data.noteId = noteId
-      })
-    )
+    pushRouteOnce({ pathname: '/note', params: { noteId } })
   }
 
   const renderNote = ({ item }: { item: NoteListRow }) => {
