@@ -40,6 +40,7 @@ const SelectedVersesModal = ({
   selectAllVerses,
   version,
   onAddToStudy,
+  onSelectStudy,
   onAddBookmark,
   onPinVerses,
   onEnterAnnotationMode,
@@ -144,6 +145,7 @@ const SelectedVersesModal = ({
                 ]}
               >
                 <AnnotateTab
+                  selectedVerses={selectedVerses}
                   screenWidth={screenWidth}
                   onCreateNoteClick={onCreateNoteClick}
                   addTag={addTag}
@@ -151,6 +153,8 @@ const SelectedVersesModal = ({
                   onCreateStudyRelationClick={onCreateStudyRelationClick}
                   onAddBookmark={onAddBookmark}
                   onAddToStudy={onAddToStudy}
+                  onSelectStudy={onSelectStudy}
+                  reference={selectedVersesTitle}
                   onPinVerses={onPinVerses}
                   onEnterAnnotationMode={onEnterAnnotationMode}
                   moreThanOneVerseSelected={moreThanOneVerseSelected}

@@ -10,13 +10,20 @@ import Checkbox from '~common/ui/Checkbox'
 import PanelSearch from './PanelSearch'
 import PanelAction from './PanelAction'
 import type { PanelScreen } from './types'
+import type { VerseIds } from '~common/types'
 
-export function useEntityTagsScreen(entity: 'studies' | 'links', id: string) {
+export function useEntityTagsScreen(
+  entity: 'studies' | 'links' | 'highlights',
+  id: string | VerseIds
+) {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const [query, setQuery] = useState('')
   const tags = useSelector((state: RootState) => state.user.bible.tags)
-  const selected = useSelector((state: RootState) => state.user.bible[entity][id]?.tags)
+  const entities = useSelector((state: RootState) => state.user.bible[entity])
+  const ids = typeof id === 'string' ? [id] : Object.keys(id)
+  const selected = Object.assign({}, ...ids.map(key => entities?.[key]?.tags ?? {}))
+  const target = typeof id === 'string' ? { entity, id } : { entity, ids: id }
   const valid = Object.values(tags ?? {}).filter(
     tag => tag && typeof tag.name === 'string' && typeof tag.id === 'string'
   )
@@ -33,7 +40,7 @@ export function useEntityTagsScreen(entity: 'studies' | 'links', id: string) {
             key={tag.id}
             accessibilityRole="checkbox"
             accessibilityState={{ checked: !!selected?.[tag.id] }}
-            onPress={() => dispatch(toggleTagEntity({ item: { entity, id }, tagId: tag.id }))}
+            onPress={() => dispatch(toggleTagEntity({ item: target, tagId: tag.id }))}
             className={
               Platform.OS === 'web'
                 ? 'w-full flex-row gap-3 items-center p-3 rounded-lg'
@@ -54,7 +61,7 @@ export function useEntityTagsScreen(entity: 'studies' | 'links', id: string) {
               onPress={() => {
                 const action = addTag(query.trim())
                 dispatch(action)
-                dispatch(toggleTagEntity({ item: { entity, id }, tagId: action.payload.id }))
+                dispatch(toggleTagEntity({ item: target, tagId: action.payload.id }))
                 setQuery('')
               }}
             />

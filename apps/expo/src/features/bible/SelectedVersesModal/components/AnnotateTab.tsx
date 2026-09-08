@@ -1,9 +1,13 @@
+import AddToStudyAction from '~features/studies/AddToStudyAction'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
 import ActionItem from './ActionItem'
+import VerseTagsAction from './VerseTagsAction'
+import type { VerseIds } from '~common/types'
 import type { VerseActiveStates } from '../types'
 
 interface AnnotateTabProps {
+  selectedVerses: VerseIds
   screenWidth: number
   onCreateNoteClick: () => void
   addTag: () => void
@@ -11,6 +15,8 @@ interface AnnotateTabProps {
   onCreateStudyRelationClick: () => void
   onAddBookmark: () => void
   onAddToStudy: () => void
+  onSelectStudy?: (studyId: string, format: 'inline' | 'block') => Promise<void>
+  reference?: string
   onPinVerses: () => void
   onEnterAnnotationMode?: () => void
   moreThanOneVerseSelected: boolean
@@ -18,6 +24,7 @@ interface AnnotateTabProps {
 }
 
 const AnnotateTab = ({
+  selectedVerses,
   screenWidth,
   onCreateNoteClick,
   addTag,
@@ -25,6 +32,8 @@ const AnnotateTab = ({
   onCreateStudyRelationClick,
   onAddBookmark,
   onAddToStudy,
+  onSelectStudy,
+  reference,
   onPinVerses,
   onEnterAnnotationMode,
   moreThanOneVerseSelected,
@@ -41,7 +50,7 @@ const AnnotateTab = ({
       style={{ width: screenWidth }}
     >
       <ActionItem name="file-plus" label={t('Note')} onPress={onCreateNoteClick} />
-      <ActionItem name="tag" label={t('Tag')} onPress={addTag} />
+      <VerseTagsAction selectedVerses={selectedVerses} reference={reference} onPress={addTag} />
       <ActionItem name="link" label={t('Lien')} onPress={onCreateLinkClick} />
       <ActionItem name="git-merge" label={t('Relation')} onPress={onCreateStudyRelationClick} />
       <ActionItem
@@ -51,7 +60,7 @@ const AnnotateTab = ({
         disabled={moreThanOneVerseSelected}
         isActive={hasBookmark}
       />
-      <ActionItem name="feather" label={t('study.addToStudy')} onPress={onAddToStudy} />
+      <AddToStudyAction onPress={onAddToStudy} onSelect={onSelectStudy} reference={reference} />
       <ActionItem name="crosshair" label={t('Focus')} onPress={onPinVerses} isActive={hasFocus} />
       {onEnterAnnotationMode && (
         <ActionItem

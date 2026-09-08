@@ -963,7 +963,7 @@ const BibleViewer = ({
   }
 
   const handleSelectStudy = useCallback(
-    async (studyId: string) => {
+    async (studyId: string, format?: 'inline' | 'block') => {
       // Capture verse data immediately when study is selected
       const { title, content } = await getVersesContent({
         verses: selectedVerses,
@@ -979,10 +979,15 @@ const BibleViewer = ({
         verses: getSelectedVersesStudyPayload(selectedVerses),
       }
 
+      if (format) {
+        addVerseToStudy(studyId, verseData, format)
+        actions.clearSelectedVerses()
+        return
+      }
       setPendingVerseData({ studyId, verseData })
       verseFormatModal.open()
     },
-    [resources, selectedVerses, version, verseFormatModal]
+    [resources, selectedVerses, version, verseFormatModal, addVerseToStudy, actions]
   )
 
   const handleSelectFormat = useCallback(
@@ -1468,6 +1473,7 @@ const BibleViewer = ({
           selectAllVerses={selectAllVerses}
           version={version}
           onAddToStudy={handleOpenAddToStudy}
+          onSelectStudy={handleSelectStudy}
           onAddBookmark={handleAddBookmark}
           onPinVerses={handlePinVerses}
           onEnterAnnotationMode={

@@ -45,6 +45,7 @@ export interface SelectedVersesModalProps {
   selectAllVerses: () => void
   version: VersionCode
   onAddToStudy: () => void
+  onSelectStudy?: (studyId: string, format: 'inline' | 'block') => Promise<void>
   onAddBookmark: () => void
   onPinVerses: () => void
   onEnterAnnotationMode?: () => void
