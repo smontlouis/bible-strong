@@ -4,12 +4,13 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useSheet } from '~helpers/useSheet'
-interface DropdownMenuProps<T extends string | number = string> {
+export interface DropdownMenuProps<T extends string | number = string> {
   currentValue?: T
   setValue: (value: T) => void
   choices: { value: T; label: string; subLabel?: string }[]
   title: string
   customRender?: React.ReactNode
+  searchable?: boolean
 }
 
 const DropdownMenu = <T extends string | number = string>({

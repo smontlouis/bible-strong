@@ -67,6 +67,7 @@ const TTSVoiceButton = ({ currentVersion, ...props }: TTSVoiceButtonProps) => {
   const voice = voices?.find(v => v.identifier === selectedVoice)
   return (
     <DropdownMenu
+      searchable
       title={t('audio.voice')}
       currentValue={selectedVoice}
       setValue={setSelectedVoice}

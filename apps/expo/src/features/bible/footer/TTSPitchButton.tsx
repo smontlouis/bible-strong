@@ -26,7 +26,7 @@ const TTSPitchButton = (props: TTSPitchButtonProps) => {
 
   return (
     <DropdownMenu
-      title={t('audio.speed')}
+      title={t('audio.pitch')}
       currentValue={pitch.toString()}
       setValue={v => setPitch(Number(v))}
       choices={choices}
