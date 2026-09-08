@@ -1,3 +1,5 @@
+import HeaderAction from '~common/ContextualPanel/HeaderAction'
+import PanelSearch from '~common/ContextualPanel/PanelSearch'
 import { twMerge } from '~common/ui/classNames'
 
 import {
@@ -7,7 +9,7 @@ import {
 } from '@bible-strong/resource-catalog/commentaries'
 import { useTheme } from '~themes/ThemeProvider'
 import React from 'react'
-import { SectionList, TouchableOpacity } from 'react-native'
+import { Platform, SectionList, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -44,10 +46,12 @@ import {
   setSettingsCommentarySelection,
 } from '~redux/modules/user'
 type Props = {
-  sheetRef: React.RefObject<SheetRef | null>
+  sheetRef?: React.RefObject<SheetRef | null>
+  inline?: boolean
+  onOpenDetails?: (projection: CommentaryProjection) => void
 }
 
-type CommentaryProjection = {
+export type CommentaryProjection = {
   entry: CommentaryCatalogEntry
   language: CommentaryLanguage
   projectionId: CommentaryProjectionId
@@ -115,7 +119,7 @@ const CommentarySelectorItem = ({
                 {entry.author}
               </Text>
             </Box>
-            {installed && (
+            {installed && Platform.OS !== 'web' && (
               <Box className="overflow-hidden border-continuous w-[30px] h-[28px] items-center justify-center">
                 <FeatherIcon name="cloud" size={18} color="primary" />
               </Box>
@@ -139,7 +143,7 @@ const CommentarySelectorItem = ({
   )
 }
 
-const CommentarySelectorSheet = ({ sheetRef }: Props) => {
+const CommentarySelectorSheet = ({ sheetRef, inline = false, onOpenDetails }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
@@ -247,6 +251,10 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
   )
 
   const openDetails = (projection: CommentaryProjection) => {
+    if (onOpenDetails) {
+      onOpenDetails(projection)
+      return
+    }
     setDetailsProjection(projection)
     requestAnimationFrame(() => detailsRef.current?.present())
   }
@@ -258,9 +266,11 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
     return t('commentaries.filters.selectedCount', { count: values.length })
   }
 
+  const Container = inline ? InlineCommentaryContainer : Sheet
+  const FilterPlacement = inline ? HeaderAction : React.Fragment
   return (
     <>
-      <Sheet
+      <Container
         ref={sheetRef}
         snapPoints={[1]}
         backgroundColor={theme.colors.reverse}
@@ -271,40 +281,70 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
         }}
         header={
           <>
-            <FiltersHeader
-              title={t('commentaries.selector.title')}
-              onReset={() => {
-                setQuery('')
-                setTraditions([])
-                setCurrents([])
-              }}
-              filters={[
-                {
-                  key: 'search',
-                  icon: 'search',
-                  label: t('Rechercher'),
-                  value: query.trim() || undefined,
-                  active: Boolean(query.trim()),
-                  onPress: () => searchRef.current?.present(),
-                },
-                {
-                  key: 'traditions',
-                  icon: 'book-open',
-                  label: t('commentaries.filters.traditions'),
-                  value: selectionSummary(traditions, t('Toutes')),
-                  active: traditions.length > 0,
-                  onPress: () => traditionsRef.current?.present(),
-                },
-                {
-                  key: 'currents',
-                  icon: 'tag',
-                  label: t('commentaries.filters.currents'),
-                  value: selectionSummary(currents, t('Tous')),
-                  active: currents.length > 0,
-                  onPress: () => currentsRef.current?.present(),
-                },
-              ]}
-            />
+            <FilterPlacement>
+              <FiltersHeader
+                buttonOnly={inline}
+                title={inline ? '' : t('commentaries.selector.title')}
+                onReset={() => {
+                  setQuery('')
+                  setTraditions([])
+                  setCurrents([])
+                }}
+                filters={[
+                  {
+                    key: 'search',
+                    icon: 'search',
+                    label: t('Rechercher'),
+                    value: query.trim() || undefined,
+                    active: Boolean(query.trim()),
+                    onPress: () => searchRef.current?.present(),
+                    content: inline
+                      ? () => <PanelSearch value={query} onChange={setQuery} />
+                      : undefined,
+                  },
+                  {
+                    key: 'traditions',
+                    options: inline
+                      ? COMMENTARY_TRADITIONS.map(value => ({
+                          key: value,
+                          label: taxonomyLabel(value),
+                          selected: traditions.includes(value),
+                          onSelect: () =>
+                            setTraditions(selected =>
+                              toggleCommentaryTaxonomyFilter(selected, value)
+                            ),
+                        }))
+                      : undefined,
+                    showCheckbox: true,
+                    icon: 'book-open',
+                    label: t('commentaries.filters.traditions'),
+                    value: selectionSummary(traditions, t('Toutes')),
+                    active: traditions.length > 0,
+                    onPress: () => traditionsRef.current?.present(),
+                  },
+                  {
+                    key: 'currents',
+                    options: inline
+                      ? COMMENTARY_CURRENTS.map(value => ({
+                          key: value,
+                          label: taxonomyLabel(value),
+                          selected: currents.includes(value),
+                          onSelect: () =>
+                            setCurrents(selected =>
+                              toggleCommentaryTaxonomyFilter(selected, value)
+                            ),
+                        }))
+                      : undefined,
+                    showCheckbox: true,
+                    icon: 'tag',
+                    label: t('commentaries.filters.currents'),
+                    value: selectionSummary(currents, t('Tous')),
+                    active: currents.length > 0,
+                    onPress: () => currentsRef.current?.present(),
+                  },
+                ]}
+              />
+            </FilterPlacement>
             <SelectedCommentariesHeader
               items={selectedProjections}
               max={MAX_SELECTED_COMMENTARIES}
@@ -363,7 +403,7 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
             </Box>
           }
         />
-      </Sheet>
+      </Container>
       <SearchFilterModal
         ref={searchRef}
         title={t('Rechercher')}
@@ -391,5 +431,15 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
     </>
   )
 }
+
+const InlineCommentaryContainer = ({
+  children,
+  header,
+}: import('~common/sheet').SheetProps & { ref?: React.Ref<SheetRef> }) => (
+  <Box>
+    {header as React.ReactNode}
+    {children}
+  </Box>
+)
 
 export default CommentarySelectorSheet

@@ -1,3 +1,5 @@
+import CommentaryDetailsTrigger from './CommentaryDetailsTrigger'
+import PanelSearch from '~common/ContextualPanel/PanelSearch'
 import { pageContentStyle } from '~common/ui/PageContent'
 import {
   COMMENTARY_CATALOG,
@@ -6,14 +8,11 @@ import {
 } from '@bible-strong/resource-catalog/commentaries'
 import { useRouter } from 'expo-router'
 import React from 'react'
-import { SectionList, TouchableOpacity } from 'react-native'
+import { Platform, SectionList, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import ChoiceFilterModal from '~common/ChoiceFilterModal'
 import FiltersHeader from '~common/FiltersHeader'
-import MultipleChoiceFilterModal from '~common/MultipleChoiceFilterModal'
-import SearchFilterModal from '~common/SearchFilterModal'
 import { type SheetRef } from '~common/sheet'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
@@ -47,7 +46,6 @@ const CommentaryLibraryItem = ({
   onOpen: () => void
   onOpenDetails: () => void
 }) => {
-  const { t } = useTranslation()
   const { entry, language } = projection
   const identity = {
     kind: 'commentary' as const,
@@ -74,24 +72,14 @@ const CommentaryLibraryItem = ({
               {entry.author}
             </Text>
           </Box>
-          {installed && (
+          {installed && Platform.OS !== 'web' && (
             <Box className="overflow-hidden border-continuous w-[30px] h-[28px] items-center justify-center">
               <FeatherIcon name="cloud" size={18} color="primary" />
             </Box>
           )}
         </Box>
       </TouchableOpacity>
-      <TouchableOpacity
-        onPress={onOpenDetails}
-        accessibilityRole="button"
-        accessibilityLabel={t('commentaries.details.manage', {
-          commentary: entry.title,
-        })}
-      >
-        <Box className="overflow-hidden border-continuous w-[46px] h-[48px] items-center justify-center">
-          <FeatherIcon name="more-horizontal" size={20} />
-        </Box>
-      </TouchableOpacity>
+      <CommentaryDetailsTrigger projection={projection} onPress={onOpenDetails} />
     </Box>
   )
 }
@@ -101,10 +89,6 @@ const CommentaryLibraryScreen = () => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const detailsRef = React.useRef<SheetRef>(null)
-  const searchRef = React.useRef<SheetRef>(null)
-  const traditionsRef = React.useRef<SheetRef>(null)
-  const currentsRef = React.useRef<SheetRef>(null)
-  const selectionRef = React.useRef<SheetRef>(null)
   const selectedCommentaries = useSelector(
     (state: RootState) => state.user.bible.settings.commentarySelection
   )
@@ -169,7 +153,8 @@ const CommentaryLibraryScreen = () => {
               label: t('Rechercher'),
               value: query.trim() || undefined,
               active: Boolean(query.trim()),
-              onPress: () => searchRef.current?.present(),
+              onPress: () => {},
+              content: () => <PanelSearch value={query} onChange={setQuery} />,
             },
             {
               key: 'selection',
@@ -182,7 +167,13 @@ const CommentaryLibraryScreen = () => {
                     })
                   : t('Tous'),
               active: selectionFilter === 'selected',
-              onPress: () => selectionRef.current?.present(),
+              onPress: () => {},
+              options: (['all', 'selected'] as const).map(value => ({
+                key: value,
+                label: value === 'all' ? t('Tous') : t('commentaries.filters.selected'),
+                selected: selectionFilter === value,
+                onSelect: () => setSelectionFilter(value),
+              })),
             },
             {
               key: 'traditions',
@@ -190,7 +181,15 @@ const CommentaryLibraryScreen = () => {
               label: t('commentaries.filters.traditions'),
               value: selectionSummary(traditions, t('Toutes')),
               active: traditions.length > 0,
-              onPress: () => traditionsRef.current?.present(),
+              onPress: () => {},
+              showCheckbox: true,
+              options: COMMENTARY_TRADITIONS.map(value => ({
+                key: value,
+                label: taxonomyLabel(value),
+                selected: traditions.includes(value),
+                onSelect: () =>
+                  setTraditions(selected => toggleCommentaryTaxonomyFilter(selected, value)),
+              })),
             },
             {
               key: 'currents',
@@ -198,7 +197,15 @@ const CommentaryLibraryScreen = () => {
               label: t('commentaries.filters.currents'),
               value: selectionSummary(currents, t('Tous')),
               active: currents.length > 0,
-              onPress: () => currentsRef.current?.present(),
+              onPress: () => {},
+              showCheckbox: true,
+              options: COMMENTARY_CURRENTS.map(value => ({
+                key: value,
+                label: taxonomyLabel(value),
+                selected: currents.includes(value),
+                onSelect: () =>
+                  setCurrents(selected => toggleCommentaryTaxonomyFilter(selected, value)),
+              })),
             },
           ]}
         />
@@ -227,44 +234,6 @@ const CommentaryLibraryScreen = () => {
               />
             )
           }}
-        />
-        <SearchFilterModal
-          ref={searchRef}
-          title={t('Rechercher')}
-          placeholder={t('commentaries.selector.search')}
-          value={query}
-          onChange={setQuery}
-        />
-        <ChoiceFilterModal
-          ref={selectionRef}
-          title={t('commentaries.filters.selection')}
-          selectedValue={selectionFilter}
-          options={[
-            { value: 'all', label: t('Tous') },
-            { value: 'selected', label: t('commentaries.filters.selected') },
-          ]}
-          onSelect={value => {
-            setSelectionFilter(value)
-            selectionRef.current?.dismiss()
-          }}
-        />
-        <MultipleChoiceFilterModal
-          ref={traditionsRef}
-          title={t('commentaries.filters.traditions')}
-          selectedValues={traditions}
-          options={COMMENTARY_TRADITIONS.map(value => ({ value, label: taxonomyLabel(value) }))}
-          onToggle={value =>
-            setTraditions(selected => toggleCommentaryTaxonomyFilter(selected, value))
-          }
-        />
-        <MultipleChoiceFilterModal
-          ref={currentsRef}
-          title={t('commentaries.filters.currents')}
-          selectedValues={currents}
-          options={COMMENTARY_CURRENTS.map(value => ({ value, label: taxonomyLabel(value) }))}
-          onToggle={value =>
-            setCurrents(selected => toggleCommentaryTaxonomyFilter(selected, value))
-          }
         />
         <CommentaryOfflineDetailsSheet sheetRef={detailsRef} projection={detailsProjection} />
       </Box>

@@ -14,7 +14,7 @@ type Choice<T> = {
   label: string
 }
 
-type Props = {
+export type PassageSearchFiltersProps = {
   defaultVersionValue: string
   section: SearchSection
   canon: SearchCanon
@@ -67,7 +67,7 @@ const FilterRow = ({ icon, label, value, active, onPress }: FilterRowProps) => {
   )
 }
 
-const PassageSearchFiltersSheet = forwardRef<SheetRef, Props>(
+const PassageSearchFiltersSheet = forwardRef<SheetRef, PassageSearchFiltersProps>(
   (
     {
       defaultVersionValue,

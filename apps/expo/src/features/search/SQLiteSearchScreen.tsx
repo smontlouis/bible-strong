@@ -85,6 +85,7 @@ import {
 import PassageSearchFiltersSheet from './PassageSearchFiltersSheet'
 import type { SheetRef } from '~common/sheet'
 import SearchSourceFiltersSheet from './SearchSourceFiltersSheet'
+import SearchFiltersTrigger from './SearchFiltersTrigger'
 import { parseStrongReference } from '~helpers/bibleSearchInput'
 import { getBooksForCanon } from '~helpers/bibleBookCatalog'
 import { getBibleVersionCanonId, versions } from '~helpers/bibleVersions'
@@ -1076,6 +1077,33 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     }
   }
 
+  const passageFilterProps = {
+    defaultVersionValue: DEFAULT_BIBLE_VERSION_FILTER,
+    section,
+    canon,
+    book,
+    selectedVersion,
+    sortOrder,
+    sectionChoices: sectionValues,
+    canonChoices: canonValues,
+    bookChoices: books,
+    versionChoices: versionValues,
+    sortOrderChoices: sortOrderValues,
+    onSectionChange: setSection,
+    onCanonChange: setCanon,
+    onBookChange: setBook,
+    onVersionChange: setSelectedVersion,
+    onSortOrderChange: setSortOrder,
+    onReset: resetPassageFilters,
+  }
+  const sourceFilterProps = {
+    itemFilters,
+    passageFilterCount: activePassageFilterCount,
+    onToggle: toggleItemFilter,
+    onReset: resetItemFilters,
+    onOpenPassageFilters: () => passageFiltersRef.current?.present(),
+  }
+
   function renderContent(): ReactNode {
     const browseDatabaseState = renderBrowseDatabaseState()
 
@@ -1144,17 +1172,24 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
         (sectionId === 'nave' && naveQuery.hasNextPage)
 
       const passageFilterAction = (
-        <TouchableBox
-          className="overflow-hidden border-continuous items-center justify-center min-h-[40px] px-[8px]"
-          accessibilityLabel={t('Filtrer')}
-          onPress={() => passageFiltersRef.current?.present()}
+        <SearchFiltersTrigger
+          initialScreen="passages"
+          activeCount={activePassageFilterCount}
+          passages={passageFilterProps}
+          sources={sourceFilterProps}
         >
-          <FeatherIcon
-            name="sliders"
-            size={15}
-            color={activePassageFilterCount ? 'primary' : 'tertiary'}
-          />
-        </TouchableBox>
+          <TouchableBox
+            className="overflow-hidden border-continuous items-center justify-center min-h-[40px] px-[8px]"
+            accessibilityLabel={t('Filtrer')}
+            onPress={() => passageFiltersRef.current?.present()}
+          >
+            <FeatherIcon
+              name="sliders"
+              size={15}
+              color={activePassageFilterCount ? 'primary' : 'tertiary'}
+            />
+          </TouchableBox>
+        </SearchFiltersTrigger>
       )
 
       if (soloPaginatedSection) {
@@ -1322,10 +1357,17 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       <Header
         title=""
         rightComponent={
-          <FilterHeaderButton
-            activeFilterCount={sourceFilterCount}
-            onPress={() => sourceFiltersRef.current?.present()}
-          />
+          <SearchFiltersTrigger
+            initialScreen="sources"
+            activeCount={sourceFilterCount}
+            passages={passageFilterProps}
+            sources={sourceFilterProps}
+          >
+            <FilterHeaderButton
+              activeFilterCount={sourceFilterCount}
+              onPress={() => sourceFiltersRef.current?.present()}
+            />
+          </SearchFiltersTrigger>
         }
       >
         <Box className="overflow-hidden border-continuous pb-[5px]">
@@ -1352,35 +1394,9 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
         </Box>
       </Header>
 
-      <SearchSourceFiltersSheet
-        ref={sourceFiltersRef}
-        itemFilters={itemFilters}
-        passageFilterCount={activePassageFilterCount}
-        onToggle={toggleItemFilter}
-        onReset={resetItemFilters}
-        onOpenPassageFilters={() => passageFiltersRef.current?.present()}
-      />
+      <SearchSourceFiltersSheet ref={sourceFiltersRef} {...sourceFilterProps} />
 
-      <PassageSearchFiltersSheet
-        ref={passageFiltersRef}
-        defaultVersionValue={DEFAULT_BIBLE_VERSION_FILTER}
-        section={section}
-        canon={canon}
-        book={book}
-        selectedVersion={selectedVersion}
-        sortOrder={sortOrder}
-        sectionChoices={sectionValues}
-        canonChoices={canonValues}
-        bookChoices={books}
-        versionChoices={versionValues}
-        sortOrderChoices={sortOrderValues}
-        onSectionChange={setSection}
-        onCanonChange={setCanon}
-        onBookChange={setBook}
-        onVersionChange={setSelectedVersion}
-        onSortOrderChange={setSortOrder}
-        onReset={resetPassageFilters}
-      />
+      <PassageSearchFiltersSheet ref={passageFiltersRef} {...passageFilterProps} />
 
       {renderContent()}
       {browseAlphabet ? (

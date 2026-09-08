@@ -10,7 +10,7 @@ import Text from '~common/ui/Text'
 import type { SearchItemFilters, SearchItemType } from '~state/searchFilters'
 import { searchItemFilterConfig, searchItemFilterOrder } from './shared/SearchItemFilterBar'
 import SearchTypeIcon from './shared/SearchTypeIcon'
-type Props = {
+export type SearchSourceFiltersProps = {
   itemFilters: SearchItemFilters
   passageFilterCount: number
   onToggle: (type: SearchItemType) => void
@@ -18,7 +18,7 @@ type Props = {
   onOpenPassageFilters: () => void
 }
 
-const SearchSourceFiltersSheet = forwardRef<SheetRef, Props>(
+const SearchSourceFiltersSheet = forwardRef<SheetRef, SearchSourceFiltersProps>(
   ({ itemFilters, passageFilterCount, onToggle, onReset, onOpenPassageFilters }, ref) => {
     const { t } = useTranslation()
     const allSelected = searchItemFilterOrder.every(type => itemFilters[type])

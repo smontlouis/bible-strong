@@ -1,4 +1,6 @@
 import { Popover } from '@heroui/react/popover'
+import { useState } from 'react'
+import { HeaderActionContext } from './HeaderActionContext'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '~themes/ThemeProvider'
 import { webFontFamily } from '~helpers/webFontFamily'
@@ -11,6 +13,7 @@ export default function ContextualPanel(props: ContextualPanelProps) {
   const { t } = useTranslation()
   const theme = useTheme()
   const panel = usePanelNavigation(props)
+  const [headerActionTarget, setHeaderActionTarget] = useState<HTMLDivElement | null>(null)
   return (
     <Popover
       isOpen={panel.isOpen}
@@ -44,25 +47,28 @@ export default function ContextualPanel(props: ContextualPanelProps) {
         }}
       >
         <Popover.Dialog>
-          <PanelTransition key={panel.screenKey} direction={panel.direction}>
-            <div className="bs-filter-heading">
-              {panel.canGoBack && (
-                <button
-                  className="bs-panel-back"
-                  aria-label={t('Retour')}
-                  onClick={panel.navigation.back}
-                >
-                  <FeatherIcon name="arrow-left" size={17} />
-                </button>
-              )}
-              <Popover.Heading style={{ fontFamily: webFontFamily(theme.fontFamily.title) }}>
-                {panel.screen.title}
-              </Popover.Heading>
-              {panel.screen.headerRight}
-            </div>
-            {panel.screen.headerContent}
-            <div className="bs-filter-options">{panel.screen.content(panel.navigation)}</div>
-          </PanelTransition>
+          <HeaderActionContext.Provider value={headerActionTarget}>
+            <PanelTransition key={panel.screenKey} direction={panel.direction}>
+              <div className="bs-filter-heading">
+                {panel.canGoBack && (
+                  <button
+                    className="bs-panel-back"
+                    aria-label={t('Retour')}
+                    onClick={panel.navigation.back}
+                  >
+                    <FeatherIcon name="arrow-left" size={17} />
+                  </button>
+                )}
+                <Popover.Heading style={{ fontFamily: webFontFamily(theme.fontFamily.title) }}>
+                  {panel.screen.title}
+                </Popover.Heading>
+                {panel.screen.headerRight}
+                <div ref={setHeaderActionTarget} style={{ display: 'contents' }} />
+              </div>
+              {panel.screen.headerContent}
+              <div className="bs-filter-options">{panel.screen.content(panel.navigation)}</div>
+            </PanelTransition>
+          </HeaderActionContext.Provider>
         </Popover.Dialog>
       </Popover.Content>
     </Popover>

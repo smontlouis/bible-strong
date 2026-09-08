@@ -1,9 +1,9 @@
+import CommentaryManageButton from './CommentaryManageButton'
 import { resolveThemeColor } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { FadeIn, FadeOut, LinearTransition, useReducedMotion } from 'react-native-reanimated'
-import { LinkBox } from '~common/Link'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import CommentaryAvatar from './CommentaryAvatar'
@@ -38,11 +38,7 @@ const CommentaryAvailabilityList = ({ items, headerTitle, onManage, onOpen }: Pr
       layout={reduceMotion ? undefined : LinearTransition.duration(220)}
     >
       <Box className="overflow-hidden border-continuous flex-row justify-end px-[20px]">
-        <LinkBox className="px-[6px] min-h-[44px] items-center justify-center" onPress={onManage}>
-          <Text className="text-primary text-[14px] font-bold">
-            {t('commentaries.availability.manage')}
-          </Text>
-        </LinkBox>
+        <CommentaryManageButton onPress={onManage} />
       </Box>
 
       {items.map(item => {

@@ -1,12 +1,13 @@
+import StrongSelectionContainer from './StrongSelectionContainer'
 import { twMerge } from '~common/ui/classNames'
 import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
-import MaskedView from '@react-native-masked-view/masked-view'
+import StrongPreviewFade from './StrongPreviewFade'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { LinearGradient } from 'expo-linear-gradient'
 import { useAtomValue } from 'jotai/react'
 import React, { useEffect, useRef, useState } from 'react'
 import {
+  Platform,
   ScrollView,
   TouchableOpacity,
   useWindowDimensions,
@@ -15,7 +16,7 @@ import {
 } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import truncHTML from 'trunc-html'
-import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
+import { SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import Box, { FadingBox, HStack, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -85,7 +86,8 @@ const StrongSelectionSheet = ({
 
   const { t } = useTranslation()
   const theme = useTheme()
-  const { width: windowWidth } = useWindowDimensions()
+  const { width: viewportWidth } = useWindowDimensions()
+  const windowWidth = Platform.OS === 'web' ? Math.min(440, viewportWidth - 32) : viewportWidth
   const pushRouteOnce = usePushRouteOnce()
   const resources = useResourceAccess()
   const previewPagerRef = useRef<ScrollView>(null)
@@ -210,7 +212,7 @@ const StrongSelectionSheet = ({
       : t('Strong')
 
   return (
-    <Sheet
+    <StrongSelectionContainer
       backdrop={false}
       ref={sheetRef}
       header={<SheetHeader title={sheetTitle} />}
@@ -528,23 +530,12 @@ const StrongSelectionSheet = ({
                         </HStack>
 
                         {descriptionHtml ? (
-                          <MaskedView
-                            style={{ height: 72 }}
-                            maskElement={
-                              <LinearGradient
-                                colors={['black', 'black', 'transparent']}
-                                locations={[0, 0.65, 1]}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 0, y: 1 }}
-                                style={{ flex: 1 }}
-                              />
-                            }
-                          >
+                          <StrongPreviewFade>
                             <StylizedHTMLView
                               value={descriptionHtml}
                               htmlStyle={getStrongSelectionPreviewHtmlStyles(theme)}
                             />
-                          </MaskedView>
+                          </StrongPreviewFade>
                         ) : (
                           <Text className="text-tertiary text-[13px]" numberOfLines={3}>
                             {t('strongLexicon.definitionUnavailable', {
@@ -567,7 +558,7 @@ const StrongSelectionSheet = ({
           </Box>
         )}
       </SheetView>
-    </Sheet>
+    </StrongSelectionContainer>
   )
 }
 

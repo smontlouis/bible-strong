@@ -1,6 +1,6 @@
 import { pageContentStyle } from '~common/ui/PageContent'
 import { useQuery } from '@tanstack/react-query'
-import { MenuView } from '~common/ui/MenuView'
+import MenuView from '~features/commentaries/CommentaryMenu'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
