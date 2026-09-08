@@ -3,18 +3,13 @@ import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import * as NativeUI from 'react-native'
 import { Alert } from 'react-native'
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useDispatch, useSelector } from 'react-redux'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
-import {
-  Sheet,
-  SheetFooter,
-  SheetHeader,
-  SheetTextInput,
-  SheetView,
-  type SheetRef,
-} from '~common/sheet'
+import { SheetFooter, SheetHeader, SheetTextInput, SheetView, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import generateUUID from '~helpers/generateUUID'
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
@@ -135,6 +130,7 @@ const BookmarkModal = ({
   existingBookmark,
 }: BookmarkModalProps) => {
   const dispatch = useDispatch()
+  const confirm = useConfirmDialog()
   const { t } = useTranslation()
 
   const bookmarksCount = useSelector(selectBookmarksCount)
@@ -238,21 +234,22 @@ const BookmarkModal = ({
     handleClose()
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!existingBookmark) return
-
-    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer ce marque-page?'), [
-      { text: t('Non'), style: 'cancel' },
-      {
-        text: t('Oui'),
-        style: 'destructive',
-        onPress: () => {
-          dispatch(removeBookmark(existingBookmark.id))
-          toast(t('Marque-page supprimé'))
-          handleClose()
-        },
-      },
-    ])
+    if (NativeUI.Platform.OS === 'web') handleClose()
+    if (
+      await confirm({
+        title: t('Attention'),
+        message: t('Voulez-vous vraiment supprimer ce marque-page?'),
+        cancelLabel: t('Non'),
+        confirmLabel: t('Oui'),
+        destructive: true,
+      })
+    ) {
+      dispatch(removeBookmark(existingBookmark.id))
+      toast(t('Marque-page supprimé'))
+      handleClose()
+    }
   }
 
   return (

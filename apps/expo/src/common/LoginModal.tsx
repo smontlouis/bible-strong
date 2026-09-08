@@ -4,7 +4,8 @@ import React, { useEffect, useRef } from 'react'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Login from './Login'
-import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
+import { SheetScrollView, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ModalSheet'
 import { useTranslation } from 'react-i18next'
 import Text from '~common/ui/Text'
 import Back from './Back'
@@ -26,7 +27,7 @@ const LoginModal = ({ isVisible }: { isVisible: boolean }) => {
   }, [isVisible])
 
   return (
-    <Sheet ref={ref} snapPoints={[1]} dismissible={false}>
+    <Sheet modalTitle={t('Études bibliques')} ref={ref} snapPoints={[1]} dismissible={false}>
       <SheetScrollView contentContainerStyle={{ padding: 20 }}>
         <Box className="overflow-hidden border-continuous flex-row items-center mb-[30px]">
           <Back style={{ marginRight: 15 }}>

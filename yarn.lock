@@ -30380,7 +30380,7 @@ multer@emadalam/multer:
   languageName: node
   linkType: hard
 
-"vaul@npm:^1.1.2":
+"vaul@npm:1.1.2":
   version: 1.1.2
   resolution: "vaul@npm:1.1.2"
   dependencies:
@@ -30389,6 +30389,18 @@ multer@emadalam/multer:
     react: ^16.8 || ^17.0 || ^18.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0.0 || ^19.0.0-rc
   checksum: 10c0/a6da539eb5576c0004a6b17e3673ea1db2c34e80355860131183abf53279ce025bbd016d542c345d1cc8464ad12f9dc9860949c751055d8a84961e8472a53707
+  languageName: node
+  linkType: hard
+
+"vaul@patch:vaul@npm%3A1.1.2#~/.yarn/patches/vaul-npm-1.1.2-7a571c1ad6.patch":
+  version: 1.1.2
+  resolution: "vaul@patch:vaul@npm%3A1.1.2#~/.yarn/patches/vaul-npm-1.1.2-7a571c1ad6.patch::version=1.1.2&hash=a8c8e5"
+  dependencies:
+    "@radix-ui/react-dialog": "npm:^1.1.1"
+  peerDependencies:
+    react: ^16.8 || ^17.0 || ^18.0 || ^19.0.0 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0.0 || ^19.0.0-rc
+  checksum: 10c0/59abb5a677480a82ddd8502f9c4b118061290f04913eaf005ce3085eac264e0a56cd66c65e5516b6801f129123f5804a8e63df35a4187377d5f7eff6a1c8db61
   languageName: node
   linkType: hard
 

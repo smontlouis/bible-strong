@@ -1,4 +1,5 @@
 import React from 'react'
+import { Platform } from 'react-native'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
@@ -97,6 +98,7 @@ jest.mock('react-native', () => {
     }
   )
   return {
+    Platform: { OS: 'ios' },
     Text: 'Text',
     View: 'View',
     FlatList,
@@ -467,6 +469,49 @@ describe('BibleVerseDetailCard', () => {
       fontSize: 20.9,
       lineHeight: 37,
     })
+  })
+
+  it('sizes and snaps web cards using the reader width, including after resizing', async () => {
+    const platform = jest.replaceProperty(Platform, 'OS', 'web')
+    const previousRequest = globalThis.requestAnimationFrame
+    const previousCancel = globalThis.cancelAnimationFrame
+    Object.assign(globalThis, {
+      requestAnimationFrame: jest.fn(() => 1),
+      cancelAnimationFrame: jest.fn(),
+    })
+    try {
+      mockLoadVerse.mockResolvedValueOnce(makeAvailableVerse('Verset'))
+      await act(async () => {
+        renderer = create(renderCard(1))
+        await flushQueryUpdates()
+      })
+      await act(async () => {
+        renderer.update(renderCard(1))
+        await flushQueryUpdates()
+      })
+      const content = renderer.root.findByProps({ testID: 'resource-modal-content' })
+      const carousel = () => renderer.root.find(node => String(node.type) === 'FlatList')
+      act(() => content.props.onLayout({ nativeEvent: { layout: { width: 500, height: 800 } } }))
+      expect(carousel().props.getItemLayout(undefined, 2)).toEqual({
+        length: 360,
+        offset: 720,
+        index: 2,
+      })
+      expect(carousel().props.contentContainerStyle.paddingBottom).toBe(20)
+      act(() => content.props.onLayout({ nativeEvent: { layout: { width: 220, height: 800 } } }))
+      expect(carousel().props.getItemLayout(undefined, 2)).toEqual({
+        length: 190,
+        offset: 380,
+        index: 2,
+      })
+      act(() => renderer.unmount())
+    } finally {
+      platform.restore()
+      Object.assign(globalThis, {
+        requestAnimationFrame: previousRequest,
+        cancelAnimationFrame: previousCancel,
+      })
+    }
   })
 
   it('passes the contextual word and morphology to the ResourceModal Strong card', async () => {

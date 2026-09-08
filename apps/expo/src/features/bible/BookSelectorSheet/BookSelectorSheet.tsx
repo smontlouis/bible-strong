@@ -1,11 +1,9 @@
 import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai/react'
-import { atom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { DeviceEventEmitter, FlatList } from 'react-native'
 import { useSharedValue } from 'react-native-reanimated'
-import { BibleTab, BibleTabActions } from 'src/state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'
 import Box from '~common/ui/Box'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
@@ -25,17 +23,13 @@ import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { staticResourceQueryOptions } from '~helpers/queryOptions'
-import type { BibleVersionCoverage } from '~helpers/biblesDb'
+
+import { bookSelectorDataAtom } from './state'
 interface BookSelectorSheetProps {
   selectedBookNum?: number
   sheetRef: React.RefObject<SheetRef | null>
 }
-
-export const bookSelectorDataAtom = atom<{
-  actions?: BibleTabActions
-  data?: BibleTab['data']
-  coverage?: BibleVersionCoverage
-}>({})
+export { bookSelectorDataAtom } from './state'
 
 const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const expandedBook = useSharedValue<number | null>(null)

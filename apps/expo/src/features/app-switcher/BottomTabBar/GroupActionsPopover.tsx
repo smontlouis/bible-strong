@@ -17,6 +17,7 @@ export interface GroupActionsPopoverProps {
   onCreateGroup: () => void
   onEditGroup: () => void
   onViewGroups: () => void
+  onGroupCreated?: () => void
 }
 
 const GroupActionsPopover = memo(

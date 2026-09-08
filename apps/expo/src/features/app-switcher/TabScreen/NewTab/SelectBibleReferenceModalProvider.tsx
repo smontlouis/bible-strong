@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from 'react'
 import { useSetAtom } from 'jotai/react'
 import { BibleTab } from '../../../../state/tabs'
-import SelectBibleReferenceModal from './SelectBibleReferenceModal'
+import SelectBibleReferenceModal from '~features/app-switcher/TabScreen/NewTab/SelectBibleReferenceModal'
 import { selectBibleReferenceDataAtom } from './atoms'
 
 interface SelectBibleReferenceContextType {

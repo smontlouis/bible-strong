@@ -1,4 +1,5 @@
-import { Sheet, SheetView } from '~common/sheet'
+import { SheetView } from '~common/sheet'
+import Sheet from './SelectionSheet'
 import { useAtom } from 'jotai/react'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -145,6 +146,7 @@ const SelectedVersesModal = ({
                 ]}
               >
                 <AnnotateTab
+                  version={version}
                   selectedVerses={selectedVerses}
                   screenWidth={screenWidth}
                   onCreateNoteClick={onCreateNoteClick}

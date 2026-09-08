@@ -1,4 +1,5 @@
-import { Sheet, SheetHeader, SheetScrollView } from '~common/sheet'
+import { SheetHeader, SheetScrollView } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import { useAtom } from 'jotai/react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'

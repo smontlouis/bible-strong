@@ -1,4 +1,5 @@
-import { Sheet, type SheetRef } from '~common/sheet'
+import { type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'

@@ -1,4 +1,5 @@
-import { Sheet, SheetFlashList, SheetHeader, type SheetRef } from '~common/sheet'
+import { SheetFlashList, SheetHeader, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import distanceInWords from 'date-fns/formatDistance'
 import React, { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'

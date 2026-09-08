@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
 import ActionItem from './ActionItem'
 import VerseTagsAction from './VerseTagsAction'
+import VerseBookmarkAction from './VerseBookmarkAction'
 import type { VerseIds } from '~common/types'
 import type { VerseActiveStates } from '../types'
 
 interface AnnotateTabProps {
   selectedVerses: VerseIds
+  version: string
   screenWidth: number
   onCreateNoteClick: () => void
   addTag: () => void
@@ -25,6 +27,7 @@ interface AnnotateTabProps {
 
 const AnnotateTab = ({
   selectedVerses,
+  version,
   screenWidth,
   onCreateNoteClick,
   addTag,
@@ -53,9 +56,9 @@ const AnnotateTab = ({
       <VerseTagsAction selectedVerses={selectedVerses} reference={reference} onPress={addTag} />
       <ActionItem name="link" label={t('Lien')} onPress={onCreateLinkClick} />
       <ActionItem name="git-merge" label={t('Relation')} onPress={onCreateStudyRelationClick} />
-      <ActionItem
-        name="bookmark"
-        label={t('Marque-page')}
+      <VerseBookmarkAction
+        selectedVerses={selectedVerses}
+        version={version}
         onPress={onAddBookmark}
         disabled={moreThanOneVerseSelected}
         isActive={hasBookmark}

@@ -11,7 +11,7 @@ import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme, useTheme } from '~themes/ThemeProvider'
 
 import ColorPicker from '~common/ColorPicker'
-import { Sheet } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Text from '~common/ui/Text'

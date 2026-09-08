@@ -1,5 +1,5 @@
-import { isValidElement, useEffect, useImperativeHandle, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import { useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { readSheetHeader } from '../readSheetHeader'
 import ContextualPanel from './index'
 import type { ContextualSheetProps } from './ContextualSheet'
 import type { SheetFooterProps } from '~common/sheet'
@@ -15,6 +15,8 @@ export default function ContextualSheet({
   panelHeaderContent,
   maxWidth,
   panelWidth,
+  panelScreens,
+  panelInitialScreen,
   onPresent,
   onDismissStart,
   onDismiss,
@@ -71,9 +73,7 @@ export default function ContextualSheet({
       forceClose: dismiss,
     }
   })
-  const heading = isValidElement<{ title?: string; rightComponent?: ReactNode }>(header)
-    ? header.props
-    : undefined
+  const heading = readSheetHeader(header)
   return (
     <>
       <span
@@ -86,7 +86,7 @@ export default function ContextualSheet({
         anchorRef={anchorRef}
         trigger={null}
         accessibilityLabel={panelTitle ?? heading?.title ?? ''}
-        initialScreen="content"
+        initialScreen={panelInitialScreen ?? 'content'}
         width={panelWidth ?? maxWidth ?? 440}
         onOpen={() => {
           onPresent?.()
@@ -99,10 +99,20 @@ export default function ContextualSheet({
           onOpenChange?.(false)
         }}
         screens={{
+          ...panelScreens,
           content: {
             title: panelTitle ?? heading?.title ?? '',
             headerRight: panelHeaderRight ?? heading?.rightComponent,
-            headerContent: panelHeaderContent,
+            headerContent: panelHeaderContent ?? (
+              <>
+                {heading?.subTitle && (
+                  <div style={{ padding: '0 8px 8px', fontSize: 12, opacity: 0.7 }}>
+                    {heading.subTitle}
+                  </div>
+                )}
+                {heading?.children}
+              </>
+            ),
             content: () => children,
             footer: Footer ? <Footer {...({} satisfies SheetFooterProps)} /> : undefined,
           },

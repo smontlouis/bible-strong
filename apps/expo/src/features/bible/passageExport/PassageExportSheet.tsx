@@ -1,20 +1,23 @@
 import { useTheme } from '~themes/ThemeProvider'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as Sharing from 'expo-sharing'
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { PanelNavigationContext } from '~common/ContextualPanel/NavigationContext'
+import type { PanelScreen } from '~common/ContextualPanel/types'
+import FilterChoices from '~common/FilterChoices'
 import ChoiceFilterModal from '~common/ChoiceFilterModal'
 import MultipleChoiceFilterModal from '~common/MultipleChoiceFilterModal'
 import {
-  Sheet,
   SheetFooter,
   SheetHeader,
   SheetScrollView,
   type SheetFooterProps,
   type SheetRef,
 } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import type { VerseIds } from '~common/types'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -58,29 +61,33 @@ const PREPARE_TIMEOUT_MS = 15_000
 const PREVIEW_MAX_CHARACTERS = 1600
 
 type ExportFilterButtonProps = {
+  screen?: PanelScreen
   label: string
   value: string
   onPress: () => void
 }
 
-const ExportFilterButton = ({ label, value, onPress }: ExportFilterButtonProps) => (
-  <TouchableBox
-    className="border-continuous overflow-hidden flex-[1] min-w-[0px] p-[13px] border-[1px] border-border rounded-[14px]"
-    accessibilityRole="button"
-    accessibilityLabel={`${label}, ${value}`}
-    onPress={onPress}
-  >
-    <Text className="font-bold text-[11px] text-grey" numberOfLines={1}>
-      {label.toUpperCase()}
-    </Text>
-    <Box className="overflow-hidden border-continuous flex-row items-center mt-[5px] gap-[6px]">
-      <Text className="flex-[1] font-bold text-[14px]" numberOfLines={1}>
-        {value}
+const ExportFilterButton = ({ label, value, onPress, screen }: ExportFilterButtonProps) => {
+  const navigation = useContext(PanelNavigationContext)
+  return (
+    <TouchableBox
+      className="border-continuous overflow-hidden flex-[1] min-w-[0px] p-[13px] border-[1px] border-border rounded-[14px]"
+      accessibilityRole="button"
+      accessibilityLabel={`${label}, ${value}`}
+      onPress={() => (screen && navigation?.openScreen ? navigation.openScreen(screen) : onPress())}
+    >
+      <Text className="font-bold text-[11px] text-grey" numberOfLines={1}>
+        {label.toUpperCase()}
       </Text>
-      <FeatherIcon name="chevron-down" size={16} color="grey" />
-    </Box>
-  </TouchableBox>
-)
+      <Box className="overflow-hidden border-continuous flex-row items-center mt-[5px] gap-[6px]">
+        <Text className="flex-[1] font-bold text-[14px]" numberOfLines={1}>
+          {value}
+        </Text>
+        <FeatherIcon name="chevron-down" size={16} color="grey" />
+      </Box>
+    </TouchableBox>
+  )
+}
 
 const safeFilename = (reference: string) =>
   reference
@@ -410,6 +417,24 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
               <Box className="overflow-hidden border-continuous flex-row gap-[10px]">
                 <ExportFilterButton
                   label={t('passageExport.scope')}
+                  screen={{
+                    title: t('passageExport.scope'),
+                    content: navigation => (
+                      <FilterChoices
+                        options={scopeOptions.map(option => ({
+                          key: option.value,
+                          label: option.label,
+                          selected: scope === option.value,
+                          onSelect: () => {
+                            setResult(null)
+                            setIsPreparing(true)
+                            setScope(option.value)
+                            navigation.back()
+                          },
+                        }))}
+                      />
+                    ),
+                  }}
                   value={scopeLabels[scope]}
                   onPress={() =>
                     inline ? setInlineView('scope') : scopeSheetRef.current?.present()
@@ -417,6 +442,16 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
                 />
                 <ExportFilterButton
                   label={t('passageExport.content')}
+                  screen={{
+                    title: t('passageExport.content'),
+                    content: () => (
+                      <ExportContentChoices
+                        choices={contentOptions}
+                        initial={options}
+                        onToggle={toggleOption}
+                      />
+                    ),
+                  }}
                   value={contentSummary}
                   onPress={() =>
                     inline ? setInlineView('content') : contentSheetRef.current?.present()
@@ -524,3 +559,29 @@ const InlineExportContainer = ({
 )
 
 export default PassageExportSheet
+
+function ExportContentChoices({
+  choices,
+  initial,
+  onToggle,
+}: {
+  choices: { key: keyof PassageExportOptions; label: string }[]
+  initial: PassageExportOptions
+  onToggle: (key: keyof PassageExportOptions) => void
+}) {
+  const [selected, setSelected] = useState(initial)
+  return (
+    <FilterChoices
+      showCheckbox
+      options={choices.map(choice => ({
+        key: choice.key,
+        label: choice.label,
+        selected: selected[choice.key],
+        onSelect: () => {
+          setSelected(current => ({ ...current, [choice.key]: !current[choice.key] }))
+          onToggle(choice.key)
+        },
+      }))}
+    />
+  )
+}

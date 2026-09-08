@@ -5,21 +5,18 @@ import { useTranslation } from 'react-i18next'
 import { useTheme } from '~themes/ThemeProvider'
 import { webFontFamily } from '~helpers/webFontFamily'
 import { FeatherIcon } from '~common/ui/Icon'
-import type { ContextualPanelProps } from './types'
+import type { ContextualPanelProps, PanelScreen, PanelNavigation } from './types'
 import { usePanelNavigation } from './usePanelNavigation'
 import PanelTransition from './PanelTransition'
 import { PanelNavigationContext } from './NavigationContext'
 import '../FiltersHeader.web.css'
 export default function ContextualPanel(props: ContextualPanelProps) {
-  const { t } = useTranslation()
   const theme = useTheme()
   const panel = usePanelNavigation(props)
   useImperativeHandle(props.controllerRef, () => ({
     present: () => (panel.isOpen ? panel.navigation.close() : panel.present()),
     dismiss: panel.navigation.close,
   }))
-  const [headerActionTarget, setHeaderActionTarget] = useState<HTMLDivElement | null>(null)
-  const [headerContentTarget, setHeaderContentTarget] = useState<HTMLDivElement | null>(null)
   return (
     <Popover
       isOpen={panel.isOpen}
@@ -43,7 +40,7 @@ export default function ContextualPanel(props: ContextualPanelProps) {
       <Popover.Content
         triggerRef={props.anchorRef}
         shouldCloseOnInteractOutside={element => !props.anchorRef?.current?.contains(element)}
-        placement="bottom end"
+        placement="bottom"
         offset={8}
         className="bs-filter-popover"
         style={{
@@ -57,36 +54,73 @@ export default function ContextualPanel(props: ContextualPanelProps) {
         }}
       >
         <Popover.Dialog>
-          <PanelNavigationContext.Provider value={panel.navigation}>
-            <HeaderActionContext.Provider value={headerActionTarget}>
-              <HeaderContentContext.Provider value={headerContentTarget}>
-                <PanelTransition key={panel.screenKey} direction={panel.direction}>
-                  <div className="bs-filter-heading">
-                    {panel.canGoBack && (
-                      <button
-                        className="bs-panel-back"
-                        aria-label={t('Retour')}
-                        onClick={panel.navigation.back}
-                      >
-                        <FeatherIcon name="arrow-left" size={17} />
-                      </button>
-                    )}
-                    <Popover.Heading style={{ fontFamily: webFontFamily(theme.fontFamily.title) }}>
-                      {panel.screen.title}
-                    </Popover.Heading>
-                    {panel.screen.headerRight}
-                    <div ref={setHeaderActionTarget} style={{ display: 'contents' }} />
-                  </div>
-                  {panel.screen.headerContent}
-                  <div ref={setHeaderContentTarget} />
-                  <div className="bs-filter-options">{panel.screen.content(panel.navigation)}</div>
-                  {panel.screen.footer}
-                </PanelTransition>
-              </HeaderContentContext.Provider>
-            </HeaderActionContext.Provider>
-          </PanelNavigationContext.Provider>
+          {panel.frames.map((frame, index) => (
+            <PanelFrame
+              key={frame.key}
+              screen={frame.screen}
+              navigation={panel.navigation}
+              active={index === panel.frames.length - 1}
+              canGoBack={index > 0}
+              direction={panel.direction}
+            />
+          ))}
         </Popover.Dialog>
       </Popover.Content>
     </Popover>
+  )
+}
+
+function PanelFrame({
+  screen,
+  navigation,
+  active,
+  canGoBack,
+  direction,
+}: {
+  screen: PanelScreen
+  navigation: PanelNavigation
+  active: boolean
+  canGoBack: boolean
+  direction: 'forward' | 'backward'
+}) {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const [actionTarget, setActionTarget] = useState<HTMLDivElement | null>(null)
+  const [contentTarget, setContentTarget] = useState<HTMLDivElement | null>(null)
+  return (
+    <div hidden={!active}>
+      <PanelNavigationContext.Provider value={navigation}>
+        <HeaderActionContext.Provider value={active ? actionTarget : null}>
+          <HeaderContentContext.Provider value={active ? contentTarget : null}>
+            <PanelTransition direction={direction}>
+              <div className="bs-filter-heading">
+                {canGoBack && (
+                  <button
+                    className="bs-panel-back"
+                    aria-label={t('Retour')}
+                    onClick={navigation.back}
+                  >
+                    <FeatherIcon name="arrow-left" size={17} />
+                  </button>
+                )}
+                {active ? (
+                  <Popover.Heading style={{ fontFamily: webFontFamily(theme.fontFamily.title) }}>
+                    {screen.title}
+                  </Popover.Heading>
+                ) : (
+                  <h2>{screen.title}</h2>
+                )}
+                {screen.headerRight}
+                <div ref={setActionTarget} style={{ display: 'contents' }} />
+              </div>
+              {screen.headerContent}
+              <div ref={setContentTarget} />
+              <div className="bs-filter-options">{screen.content(navigation)}</div>
+              {screen.footer}
+            </PanelTransition>
+          </HeaderContentContext.Provider>
+        </HeaderActionContext.Provider>
+      </PanelNavigationContext.Provider>
+    </div>
   )
 }

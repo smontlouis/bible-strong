@@ -255,7 +255,7 @@ export const MenuView = forwardRef<MenuComponentRef, AccessibleMenuComponentProp
           <Dropdown.Popover
             className="bs-menu-popover"
             style={menuStyle}
-            placement="bottom end"
+            placement="bottom"
             offset={6}
           >
             <Dropdown.Menu className="bs-menu-list" aria-label={title || label}>

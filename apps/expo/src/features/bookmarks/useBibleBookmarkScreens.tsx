@@ -21,17 +21,22 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import { getBookmarkVerse } from './bookmarkVerse'
 
-export function useBibleBookmarkScreens(book: number, chapter: number, version: string) {
+export function useBibleBookmarkScreens(
+  book: number,
+  chapter: number,
+  version: string,
+  verse?: number
+) {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const confirmDelete = useConfirmDelete()
   const bookmarks = useSelector(selectSortedBookmarks)
   const existing = bookmarks.find(
-    item => item.book === book && item.chapter === chapter && item.verse === undefined
+    item => item.book === book && item.chapter === chapter && getBookmarkVerse(item.verse) === verse
   )
   const [name, setName] = useState('')
   const [color, setColor] = useState('#cc0000')
-  const destination = `${books.find(item => item.Numero === book)?.Nom ?? book} ${chapter}`
+  const destination = `${books.find(item => item.Numero === book)?.Nom ?? book} ${chapter}${verse ? `:${verse}` : ''}`
   const passageHeader = (
     <Box className="flex-row items-center gap-2 px-3 pt-1 pb-3">
       <IonIcon name="bookmark-outline" size={16} color="primary" />
@@ -116,7 +121,7 @@ export function useBibleBookmarkScreens(book: number, chapter: number, version: 
                   accessibilityRole="button"
                   accessibilityHint={`${t('Déplacer un marque-page existant')} · ${destination}`}
                   onPress={() => {
-                    dispatch(moveBookmark(item.id, { book, chapter, version }))
+                    dispatch(moveBookmark(item.id, { book, chapter, version, verse }))
                     toast(t('Marque-page déplacé'))
                     nav.close()
                   }}
@@ -159,6 +164,7 @@ export function useBibleBookmarkScreens(book: number, chapter: number, version: 
                 book,
                 chapter,
                 version,
+                verse,
                 date: Date.now(),
               })
             )

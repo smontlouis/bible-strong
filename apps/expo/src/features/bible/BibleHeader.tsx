@@ -464,8 +464,8 @@ const Header = ({
           className="border-continuous overflow-visible mx-auto items-center w-[100%]"
           style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}
         >
-          {hasBackButton && (
-            <Box className="overflow-hidden border-continuous absolute left-[0px] top-[5px] z-[2]">
+          <Box className="w-[80px] h-[40px] justify-center items-start">
+            {hasBackButton && (
               <Back
                 onGoBack={() => {
                   setIsFullScreenBible(false)
@@ -473,28 +473,29 @@ const Header = ({
                 }}
               >
                 <Box className="overflow-hidden border-continuous items-center justify-center w-[50px] h-[32px]">
-                  <FeatherIcon name="arrow-left" size={20} color="white" />
+                  <FeatherIcon name="arrow-left" size={20} color="reverse" />
                 </Box>
               </Back>
-            </Box>
-          )}
-          <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
-            <Text className="font-bold text-reverse text-[14px]">
+            )}
+          </Box>
+          <Box className="overflow-hidden border-continuous flex-[1] min-w-0 items-center justify-center">
+            <Text className="font-bold text-reverse text-[14px]" numberOfLines={1}>
               {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })} - ${version}`}
             </Text>
           </Box>
 
-          <AnimatedTouchableBox
-            className="overflow-hidden border-continuous absolute right-[0px]"
-            onPress={onExitAnnotationMode}
-            accessibilityRole="button"
-            accessibilityLabel={t('accessibility.exitAnnotationMode')}
-            style={{ bottom: isFormSheet ? -10 : 0 }}
-          >
-            <Box className="overflow-hidden border-continuous bg-reverse rounded-[8px] h-[28px] px-[12px] items-center justify-center">
-              <Text className="text-primary font-bold text-[12px]">{t('Terminé')}</Text>
-            </Box>
-          </AnimatedTouchableBox>
+          <Box className="w-[80px] h-[40px] justify-center items-end">
+            <AnimatedTouchableBox
+              className="overflow-hidden border-continuous min-h-[40px] justify-center"
+              onPress={onExitAnnotationMode}
+              accessibilityRole="button"
+              accessibilityLabel={t('accessibility.exitAnnotationMode')}
+            >
+              <Box className="overflow-hidden border-continuous bg-reverse rounded-[8px] h-[28px] px-[12px] items-center justify-center">
+                <Text className="text-primary font-bold text-[12px]">{t('Terminé')}</Text>
+              </Box>
+            </AnimatedTouchableBox>
+          </Box>
         </HStack>
       </AnimatedVStack>
     )

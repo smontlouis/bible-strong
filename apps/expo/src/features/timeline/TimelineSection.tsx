@@ -107,6 +107,28 @@ const Timeline = ({
         title={title}
         titleEn={titleEn}
         onPress={onTimelineDetailsOpen}
+        details={
+          <SectionDetailsModal
+            inline
+            modalRef={modalRef}
+            {...{
+              id,
+              image,
+              color,
+              description,
+              descriptionEn,
+              title,
+              titleEn,
+              sectionTitle,
+              sectionTitleEn,
+              subTitle,
+              subTitleEn,
+              startYear,
+              endYear,
+              interval,
+            }}
+          />
+        }
         onBackPress={onBackPress}
         onOpenInNewTab={openSectionInNewTab}
         onSearchPress={() => pushRouteOnce({ pathname: '/timeline-search' })}

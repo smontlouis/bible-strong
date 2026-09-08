@@ -1,7 +1,10 @@
 import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
-import { Sheet, type SheetRef, SheetScrollView } from '~common/sheet'
+import { type SheetRef, SheetScrollView } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
+import InlineSheetContent from '~common/ContextualPanel/InlineSheetContent'
+import { Platform } from 'react-native'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
 import InlineLink from '~common/InlineLink'
@@ -13,6 +16,7 @@ import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { wp } from '~helpers/utils'
 import { ShallowTimelineSection } from './types'
 interface Props extends ShallowTimelineSection {
+  inline?: boolean
   modalRef: React.RefObject<SheetRef | null>
 }
 
@@ -33,16 +37,31 @@ const SectionDetailsModal = ({
   startYear,
   endYear,
   interval,
+  inline = false,
 }: Props) => {
   const stylingTheme = useStylingTheme()
 
   const lang = useLanguage()
   const { t } = useTranslation()
+  const isWeb = Platform.OS === 'web'
+  const imageWidth = isWeb ? ('100%' as const) : width
 
+  const Container = inline ? InlineSheetContent : Sheet
   return (
-    <Sheet ref={modalRef} snapPoints={[1]}>
+    <Container
+      ref={modalRef}
+      snapPoints={[1]}
+      panelWidth={500}
+      panelTitle={getLegacyLocalizedField(lang, { fr: sectionTitle, en: sectionTitleEn })}
+    >
       <SheetScrollView>
-        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center px-[50px] py-[60px]">
+        <Box
+          className={
+            isWeb
+              ? 'items-center p-[20px]'
+              : 'overflow-hidden border-continuous flex-[1] items-center justify-center px-[50px] py-[60px]'
+          }
+        >
           <Text
             className="text-[20px]"
             style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
@@ -71,7 +90,7 @@ const SectionDetailsModal = ({
           <Box
             className="overflow-hidden border-continuous flex-row mt-[50px] rounded-[10px]"
             style={{
-              width: width,
+              width: imageWidth,
               shadowColor: 'rgb(89,131,240)',
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.1,
@@ -81,7 +100,11 @@ const SectionDetailsModal = ({
             }}
           >
             <Image
-              style={{ width, height: width, borderRadius: 10 }}
+              style={{
+                width: imageWidth,
+                ...(isWeb ? { aspectRatio: 1 } : { height: width }),
+                borderRadius: 10,
+              }}
               source={{
                 uri: image,
               }}
@@ -113,7 +136,7 @@ const SectionDetailsModal = ({
           </Paragraph>
         </Box>
       </SheetScrollView>
-    </Sheet>
+    </Container>
   )
 }
 

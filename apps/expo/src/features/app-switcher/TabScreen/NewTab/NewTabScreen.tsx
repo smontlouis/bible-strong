@@ -1,5 +1,6 @@
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
+import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import { useAtom } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'

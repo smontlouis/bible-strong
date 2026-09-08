@@ -1,4 +1,5 @@
-import { Sheet, type SheetRef } from '~common/sheet'
+import { type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import { produce } from 'immer'
 import { PrimitiveAtom, useAtom } from 'jotai'
 import React, { useCallback } from 'react'

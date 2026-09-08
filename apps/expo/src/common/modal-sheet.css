@@ -1,0 +1,73 @@
+.bs-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1600;
+  background: #0005;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+.bs-modal-container {
+  width: 100%;
+  min-width: 0;
+}
+.bs-modal-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 48px);
+  overflow: hidden;
+  border: 1px solid;
+  border-radius: 18px;
+  box-shadow: 0 16px 56px #0003;
+  outline: none;
+}
+.bs-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  flex-shrink: 0;
+}
+.bs-modal-header h2 {
+  font-size: 16px;
+  line-height: 22px;
+  margin: 0;
+  flex: 1;
+}
+.bs-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.bs-modal-close:hover {
+  background: #80808015;
+}
+.bs-modal-close:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+.bs-modal-subtitle {
+  padding: 0 20px 12px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+.bs-modal-body {
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+.bs-modal-footer {
+  flex-shrink: 0;
+  padding: 4px 0 8px;
+}

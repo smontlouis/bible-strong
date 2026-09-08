@@ -1,7 +1,9 @@
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
-import { Sheet, type SheetRef, SheetScrollView } from '~common/sheet'
+import { type SheetRef, SheetScrollView } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
+import InlineSheetContent from '~common/ContextualPanel/InlineSheetContent'
 import { Trans, useTranslation } from 'react-i18next'
 import InlineLink from '~common/InlineLink'
 import Accordion from '~common/ui/Accordion'
@@ -9,18 +11,25 @@ import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 interface Props {
+  inline?: boolean
   modalRef: React.RefObject<SheetRef | null>
   HeaderComponent?: React.ReactNode
   FooterComponent?: React.ReactNode
 }
 
-const TimelineHomeDetailModal = ({ modalRef }: Props) => {
+const TimelineHomeDetailModal = ({ modalRef, inline = false }: Props) => {
   const stylingTheme = useStylingTheme()
 
   const { t } = useTranslation()
 
+  const Container = inline ? InlineSheetContent : Sheet
   return (
-    <Sheet ref={modalRef} snapPoints={[1]}>
+    <Container
+      ref={modalRef}
+      snapPoints={[1]}
+      panelTitle={t('Questions fréquentes')}
+      panelWidth={500}
+    >
       <SheetScrollView>
         <Box className="overflow-hidden border-continuous mt-[20px] p-[20px]">
           <Paragraph>
@@ -174,7 +183,7 @@ Il y a des preuves que c'est ainsi que les Juifs ont compris ce passage. Josèph
           </Accordion>
         </Box>
       </SheetScrollView>
-    </Sheet>
+    </Container>
   )
 }
 

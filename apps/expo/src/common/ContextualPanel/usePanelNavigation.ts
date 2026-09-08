@@ -25,6 +25,10 @@ export function usePanelNavigation({
     onClose?.()
   }
   return {
+    frames: history.map((name, index) => ({
+      key: history.slice(0, index + 1).join('/'),
+      screen: screens[name] ?? inlineScreens[name] ?? screens[initialScreen],
+    })),
     isOpen,
     screen,
     screenKey: history.join('/'),

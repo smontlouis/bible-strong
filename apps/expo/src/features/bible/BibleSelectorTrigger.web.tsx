@@ -21,6 +21,7 @@ import { useVersionCatalog, VersionCatalogList } from './VersionCatalogView'
 import VersionSelectorItem from './VersionSelectorItem'
 import BibleOfflineDetailsSheet from './VersionSelectorSheet/BibleOfflineDetailsSheet'
 import type { BibleSelectorTriggerProps } from './BibleSelectorTrigger'
+import type { PanelScreen } from '~common/ContextualPanel/types'
 import type { Version } from '~helpers/bibleVersions'
 
 function VersionPanel({
@@ -89,19 +90,26 @@ function VersionPanel({
     </>
   )
 }
-function BookPanel({
-  children,
-  className,
-  accessibilityLabel,
+export function useBookPanelScreens({
   data,
   actions,
   coverage,
-}: BibleSelectorTriggerProps) {
+  forceVerses,
+  onLongSelect,
+}: Pick<BibleSelectorTriggerProps, 'data' | 'coverage'> & {
+  actions?: BibleSelectorTriggerProps['actions']
+  forceVerses?: boolean
+  onLongSelect?: (
+    book: BibleSelectorTriggerProps['data']['selectedBook'],
+    chapter: number,
+    verse: number
+  ) => void
+}) {
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const openTab = useOpenInNewTab()
   const verseMode = useAtomValue(bookSelectorVersesAtom)
-  const withVerses = verseMode === 'with-verses'
+  const withVerses = forceVerses ?? verseMode === 'with-verses'
   const sort = useAtomValue(bookSelectorSortAtom)
   const [query, setQuery] = useState('')
   const [book, setBook] = useState(data.selectedBook)
@@ -121,13 +129,15 @@ function BookPanel({
     actualCoverage?.chaptersByBook[book.Numero] ??
     Array.from({ length: book.Chapitres }, (_, i) => i + 1)
   const select = (chapterNumber: number, verse: number) => {
+    if (!actions) return
     actions.setTempSelectedBook(book)
     actions.setTempSelectedChapter(chapterNumber)
     actions.setTempSelectedVerse(verse)
     actions.validateTempSelected()
   }
-  const longSelect = (chapterNumber: number, verse: number) =>
-    openTab(
+  const longSelect = (chapterNumber: number, verse: number) => {
+    if (onLongSelect) return onLongSelect(book, chapterNumber, verse)
+    return openTab(
       {
         id: 'bible-' + generateUUID(),
         title: t('Bible'),
@@ -137,108 +147,129 @@ function BookPanel({
       },
       { autoRedirect: true }
     )
+  }
+  return {
+    reset: () => {
+      setQuery('')
+      setBook(data.selectedBook)
+      setChapter(data.selectedChapter)
+    },
+    screens: {
+      books: {
+        title: t('Livres'),
+        headerRight: (
+          <BookSelectorParams includeLayout={false} includeVerses={forceVerses === undefined} />
+        ),
+        headerContent: <PanelSearch value={query} onChange={setQuery} />,
+        content: nav => (
+          <>
+            {[...books]
+              .sort((a, b) => (sort === 'alphabetical' ? a.Nom.localeCompare(b.Nom) : 0))
+              .filter(item => item.Nom.toLocaleLowerCase().includes(query.toLocaleLowerCase()))
+              .map(item => (
+                <PanelAction
+                  key={item.Numero}
+                  label={item.Nom}
+                  nested
+                  onPress={() => {
+                    setBook(item)
+                    nav.open('chapters')
+                  }}
+                />
+              ))}
+          </>
+        ),
+      },
+      chapters: {
+        title: book.Nom,
+        content: nav => (
+          <Box
+            testID="bible-selector-number-grid"
+            className="flex-row flex-wrap gap-[10px] p-[10px]"
+          >
+            {chapters.map(value => (
+              <TouchableBox
+                key={value}
+                className="w-[48px] h-[48px] rounded-md bg-opacity5 items-center justify-center"
+                accessibilityRole="button"
+                accessibilityLabel={t('Chapitre') + ' ' + value}
+                onPress={() => {
+                  if (withVerses) {
+                    setChapter(value)
+                    nav.open('verses')
+                  } else {
+                    select(value, 1)
+                    nav.close()
+                  }
+                }}
+                onLongPress={() => {
+                  longSelect(value, 1)
+                  nav.close()
+                }}
+              >
+                <Text>{value}</Text>
+              </TouchableBox>
+            ))}
+          </Box>
+        ),
+      },
+      verses: {
+        title: book.Nom + ' ' + chapter,
+        content: nav => (
+          <Box
+            testID="bible-selector-number-grid"
+            className="flex-row flex-wrap gap-[10px] p-[10px]"
+          >
+            {Array.from(
+              {
+                length: getChapterVerseCountFromCoverage(actualCoverage, book.Numero, chapter) ?? 0,
+              },
+              (_, i) => i + 1
+            ).map(verse => (
+              <TouchableBox
+                key={verse}
+                className="w-[40px] h-[40px] rounded-md bg-opacity5 items-center justify-center"
+                accessibilityRole="button"
+                accessibilityLabel={t('Verset') + ' ' + verse}
+                onPress={() => {
+                  select(chapter, verse)
+                  nav.close()
+                }}
+                onLongPress={() => {
+                  longSelect(chapter, verse)
+                  nav.close()
+                }}
+              >
+                <Text>{verse}</Text>
+              </TouchableBox>
+            ))}
+          </Box>
+        ),
+      },
+    } satisfies Record<string, PanelScreen>,
+  }
+}
+
+function BookPanel({
+  children,
+  className,
+  accessibilityLabel,
+  ...props
+}: BibleSelectorTriggerProps) {
+  const { t } = useTranslation()
+  const panel = useBookPanelScreens(props)
   return (
     <ContextualPanel
       width={400}
       initialScreen="books"
       accessibilityLabel={accessibilityLabel || t('Livres')}
-      onClose={() => setQuery('')}
+      onClose={panel.reset}
       trigger={<Box className={className}>{children}</Box>}
-      screens={{
-        books: {
-          title: t('Livres'),
-          headerRight: <BookSelectorParams includeLayout={false} />,
-          headerContent: <PanelSearch value={query} onChange={setQuery} />,
-          content: nav => (
-            <>
-              {[...books]
-                .sort((a, b) => (sort === 'alphabetical' ? a.Nom.localeCompare(b.Nom) : 0))
-                .filter(item => item.Nom.toLocaleLowerCase().includes(query.toLocaleLowerCase()))
-                .map(item => (
-                  <PanelAction
-                    key={item.Numero}
-                    label={item.Nom}
-                    nested
-                    onPress={() => {
-                      setBook(item)
-                      nav.open('chapters')
-                    }}
-                  />
-                ))}
-            </>
-          ),
-        },
-        chapters: {
-          title: book.Nom,
-          content: nav => (
-            <Box
-              testID="bible-selector-number-grid"
-              className="flex-row flex-wrap gap-[10px] p-[10px]"
-            >
-              {chapters.map(value => (
-                <TouchableBox
-                  key={value}
-                  className="w-[48px] h-[48px] rounded-md bg-opacity5 items-center justify-center"
-                  accessibilityRole="button"
-                  accessibilityLabel={t('Chapitre') + ' ' + value}
-                  onPress={() => {
-                    if (withVerses) {
-                      setChapter(value)
-                      nav.open('verses')
-                    } else {
-                      select(value, 1)
-                      nav.close()
-                    }
-                  }}
-                  onLongPress={() => {
-                    longSelect(value, 1)
-                    nav.close()
-                  }}
-                >
-                  <Text>{value}</Text>
-                </TouchableBox>
-              ))}
-            </Box>
-          ),
-        },
-        verses: {
-          title: book.Nom + ' ' + chapter,
-          content: nav => (
-            <Box
-              testID="bible-selector-number-grid"
-              className="flex-row flex-wrap gap-[10px] p-[10px]"
-            >
-              {Array.from(
-                {
-                  length:
-                    getChapterVerseCountFromCoverage(actualCoverage, book.Numero, chapter) ?? 0,
-                },
-                (_, i) => i + 1
-              ).map(verse => (
-                <TouchableBox
-                  key={verse}
-                  className="w-[40px] h-[40px] rounded-md bg-opacity5 items-center justify-center"
-                  accessibilityRole="button"
-                  accessibilityLabel={t('Verset') + ' ' + verse}
-                  onPress={() => {
-                    select(chapter, verse)
-                    nav.close()
-                  }}
-                  onLongPress={() => {
-                    longSelect(chapter, verse)
-                    nav.close()
-                  }}
-                >
-                  <Text>{verse}</Text>
-                </TouchableBox>
-              ))}
-            </Box>
-          ),
-        },
-      }}
+      screens={panel.screens}
     />
   )
 }
+
 export default function BibleSelectorTrigger(props: BibleSelectorTriggerProps) {
   return props.kind === 'version' ? <VersionPanel {...props} /> : <BookPanel {...props} />
 }

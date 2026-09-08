@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
-import { Sheet, SheetView } from '~common/sheet'
+import { useTranslation } from 'react-i18next'
+import { SheetView } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -9,6 +11,7 @@ import { useColorItems } from '~helpers/useHighlightColors'
 import { colorChangeModalAtom, colorPickerModalAtom } from '~state/app'
 
 const ColorChangeModal = () => {
+  const { t } = useTranslation()
   const item = useAtomValue(colorChangeModalAtom)
   const setColorChangeModal = useSetAtom(colorChangeModalAtom)
   const setColorPickerModal = useSetAtom(colorPickerModalAtom)
@@ -48,7 +51,7 @@ const ColorChangeModal = () => {
   }
 
   return (
-    <Sheet ref={ref} onDismiss={handleModalClose}>
+    <Sheet panelTitle={t('Changer la couleur')} ref={ref} onDismiss={handleModalClose}>
       <SheetView>
         <ColorCircleGrid
           colors={colorItems}

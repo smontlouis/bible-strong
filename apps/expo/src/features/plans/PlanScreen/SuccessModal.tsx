@@ -1,6 +1,7 @@
 import Lottie from 'lottie-react-native'
 import React from 'react'
-import { Sheet, SheetView, type SheetRef } from '~common/sheet'
+import { SheetView, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ModalSheet'
 import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -20,7 +21,7 @@ const SuccessModal = ({ modalRef, isPlanCompleted, onClose }: Props) => {
   }
 
   return (
-    <Sheet ref={modalRef} onDismiss={onClose} dismissible={false}>
+    <Sheet modalTitle={t('Félicitations')} ref={modalRef} onDismiss={onClose} dismissible={false}>
       <SheetView className="pt-[40px] pb-[10px] px-[20px]">
         <Box className="overflow-hidden border-continuous items-center justify-center">
           <Lottie

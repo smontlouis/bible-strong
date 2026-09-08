@@ -1,6 +1,8 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
+import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
+import { Platform } from 'react-native'
 import Text from '~common/ui/Text'
 import {
   getCanonicalBibleNoteLabel,
@@ -26,11 +28,15 @@ const CanonicalBibleNoteSheet = ({
   return (
     <Sheet
       ref={sheetRef}
+      panelWidth={440}
       header={<SheetHeader title={label ? t('Note {{label}}', { label }) : t('Note')} />}
     >
       <SheetScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 18 }}>
         <Text className="text-[18px] leading-[29px]" selectable>
-          {renderNoteNodes(nodes, onReferencePress)}
+          {renderNoteNodes(nodes, osis => {
+            if (Platform.OS === 'web') sheetRef.current?.dismiss()
+            onReferencePress(osis)
+          })}
         </Text>
       </SheetScrollView>
     </Sheet>

@@ -10,7 +10,7 @@
 
 /* Bottom sheets use a body portal; center them inside the main workspace. */
 [data-vaul-drawer][data-vaul-drawer-direction='bottom'] {
-  left: var(--workspace-content-left, 0px) !important;
+  left: var(--bible-selection-left, var(--workspace-content-left, 0px)) !important;
 }
 
 /* Reserve only header space for the floating navigation control. */

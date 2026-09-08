@@ -1,7 +1,9 @@
 import { type SheetRef } from '~common/sheet'
 import React, { createContext, useContext, useRef } from 'react'
 import type { BibleTab, BibleTabActions } from '~state/tabs'
-import BookSelectorSheet, { bookSelectorDataAtom } from './BookSelectorSheet'
+import BookSelectorSheet, {
+  bookSelectorDataAtom,
+} from '~features/bible/BookSelectorSheet/BookSelectorSheet'
 import VersionSelectorSheet from '../VersionSelectorSheet/VersionSelectorSheet'
 import { versionSelectorDataAtom } from '../VersionSelectorSheet/state'
 import { useSetAtom } from 'jotai/react'

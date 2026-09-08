@@ -20,6 +20,7 @@ import {
   type TextInputProps,
   type View,
   type ViewProps,
+  type ViewStyle,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import PageContent from '~common/ui/PageContent'
@@ -127,6 +128,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
     onOpenChange,
     onPresent,
     snapPoints,
+    webContainerBounds,
   } = props
   const theme = useTheme()
   const sheetRef = React.useRef<BottomSheetMethods>(null)
@@ -208,18 +210,34 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
         enablePanDownToClose={dismissible}
         handleComponent={draggable ? undefined : null}
         backdropComponent={backdrop ? undefined : null}
-        backgroundStyle={{
-          backgroundColor: backgroundColor || theme.colors.reverse,
-          borderTopLeftRadius: cornerRadius,
-          borderTopRightRadius: cornerRadius,
-          maxWidth,
-          boxSizing: 'border-box',
-          paddingLeft: 0,
-          paddingRight: 0,
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.10), 0 -1px 4px rgba(0, 0, 0, 0.04)',
-        }}
+        backgroundStyle={
+          {
+            backgroundColor: backgroundColor || theme.colors.reverse,
+            borderTopLeftRadius: cornerRadius,
+            borderTopRightRadius: cornerRadius,
+            maxWidth,
+            boxSizing: 'border-box',
+            paddingLeft: 0,
+            paddingRight: 0,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.10), 0 -1px 4px rgba(0, 0, 0, 0.04)',
+            ...(webContainerBounds
+              ? {
+                  '--bible-selection-left': `${webContainerBounds.left}px`,
+                  right: webContainerBounds.right,
+                  bottom: webContainerBounds.bottom,
+                  maxWidth: Math.min(maxWidth, webContainerBounds.width),
+                  maxHeight: webContainerBounds.height,
+                  overflow: 'auto' as const,
+                  visibility:
+                    webContainerBounds.width > 0 && webContainerBounds.height > 0
+                      ? ('visible' as const)
+                      : ('hidden' as const),
+                }
+              : {}),
+          } as ViewStyle
+        }
         onClose={handleClose}
       >
         {!backdrop && (

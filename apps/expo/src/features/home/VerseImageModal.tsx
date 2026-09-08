@@ -1,7 +1,8 @@
-import { Sheet, SheetView, type SheetRef } from '~common/sheet'
+import { SheetView, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ModalSheet'
 import { Image } from 'expo-image'
 import React, { useState } from 'react'
-import { ActivityIndicator, Platform } from 'react-native'
+import { ActivityIndicator, Platform, useWindowDimensions } from 'react-native'
 import Empty from '~common/Empty'
 import { LinkBox } from '~common/Link'
 import Loading from '~common/Loading'
@@ -30,7 +31,9 @@ interface Props {
 const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
   const [shareIsLoading, setShareIsLoading] = useState(false)
   const { t } = useTranslation()
-  const imageSize = wp(100, true) - 80
+  const { width } = useWindowDimensions()
+  const imageSize =
+    Platform.OS === 'web' ? Math.max(0, Math.min(440, width - 88)) : wp(100, true) - 80
 
   const shareImage = async () => {
     if (shareIsLoading || !imageUrls?.large) return
@@ -119,7 +122,7 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
   }
 
   return (
-    <Sheet ref={modalRef}>
+    <Sheet modalTitle={t('accessibility.createVerseImage')} ref={modalRef}>
       <SheetView>
         <Box className="overflow-hidden border-continuous items-center justify-center p-[20px]">
           {renderContent()}

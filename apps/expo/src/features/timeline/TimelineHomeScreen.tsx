@@ -1,5 +1,5 @@
 import React from 'react'
-import { MenuView } from '~common/ui/MenuView'
+import ContextualMenu from '~common/ContextualPanel/ContextualMenu'
 import { type SheetRef } from '~common/sheet'
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
@@ -58,7 +58,16 @@ const TimelineHomeScreen = ({ hasBackButton, isFormSheet = false, onSectionPress
           hasBackButton={showBackButton}
           title={t('La Chronologie biblique')}
           rightComponent={
-            <MenuView
+            <ContextualMenu
+              panelTitle={t('La Chronologie biblique')}
+              icons={{ language: 'globe', details: 'info', 'open-tab': 'external-link' }}
+              screens={{
+                details: {
+                  title: t('Détails'),
+                  width: 500,
+                  content: () => <TimelineHomeDetailModal inline modalRef={modalRef} />,
+                },
+              }}
               actions={[
                 {
                   id: 'language',
@@ -91,7 +100,7 @@ const TimelineHomeScreen = ({ hasBackButton, isFormSheet = false, onSectionPress
               <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
                 <FeatherIcon name="more-vertical" size={18} />
               </Box>
-            </MenuView>
+            </ContextualMenu>
           }
         />
         <ScrollView backgroundColor="lightGrey">

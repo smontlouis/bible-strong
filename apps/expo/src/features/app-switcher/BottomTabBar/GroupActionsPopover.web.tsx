@@ -6,10 +6,16 @@ import PanelAction from '~common/ContextualPanel/PanelAction'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import type { SheetRef } from '~common/sheet'
 import Box from '~common/ui/Box'
-import { useDeleteGroup, useUpdateGroup } from '~state/tabGroups'
-import { closeAllTabsAtom, tabGroupsAtom } from '~state/tabs'
+import { useCreateGroup, useSwitchGroup, useDeleteGroup, useUpdateGroup } from '~state/tabGroups'
+import {
+  activeTabIndexAtom,
+  appSwitcherModeAtom,
+  closeAllTabsAtom,
+  tabGroupsAtom,
+} from '~state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherContext'
 import EditGroupModal from './EditGroupModal'
+import ViewGroupsModal from './ViewGroupsModal'
 import type { GroupActionsPopoverProps } from './GroupActionsPopover'
 
 export default function GroupActionsPopover(props: GroupActionsPopoverProps) {
@@ -17,6 +23,10 @@ export default function GroupActionsPopover(props: GroupActionsPopoverProps) {
   const ref = useRef<SheetRef>(null)
   const closeTabs = useSetAtom(closeAllTabsAtom)
   const update = useUpdateGroup()
+  const create = useCreateGroup()
+  const switchGroup = useSwitchGroup()
+  const setIndex = useSetAtom(activeTabIndexAtom)
+  const setMode = useSetAtom(appSwitcherModeAtom)
   const remove = useDeleteGroup()
   const groups = useAtomValue(tabGroupsAtom)
   const { groupPager } = useAppSwitcherContext()
@@ -75,19 +85,19 @@ export default function GroupActionsPopover(props: GroupActionsPopoverProps) {
                 </>
               )}
               <PanelAction
+                nested
                 icon="plus"
                 label={t('tabs.newGroup')}
                 onPress={() => {
-                  navigation.close()
-                  props.onCreateGroup()
+                  navigation.open('create')
                 }}
               />
               <PanelAction
+                nested
                 icon="layers"
                 label={t('tabs.viewMyGroups')}
                 onPress={() => {
-                  navigation.close()
-                  props.onViewGroups()
+                  navigation.open('groups')
                 }}
               />
             </>
@@ -105,6 +115,33 @@ export default function GroupActionsPopover(props: GroupActionsPopoverProps) {
               onSave={data => update({ groupId: props.group.id, ...data })}
               onClose={navigation.back}
             />
+          ),
+        },
+        create: {
+          title: t('tabs.newGroupTitle'),
+          width: 400,
+          content: navigation => (
+            <EditGroupModal
+              inline
+              sheetRef={ref}
+              onSave={data => {
+                const id = create(data)
+                if (id) {
+                  switchGroup(id)
+                  setIndex(0)
+                  setMode('view')
+                  props.onGroupCreated?.()
+                }
+              }}
+              onClose={navigation.close}
+            />
+          ),
+        },
+        groups: {
+          title: t('tabs.viewMyGroups'),
+          width: 440,
+          content: navigation => (
+            <ViewGroupsModal inline sheetRef={ref} onClose={navigation.close} />
           ),
         },
       }}

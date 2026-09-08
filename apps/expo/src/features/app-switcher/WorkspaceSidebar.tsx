@@ -167,6 +167,7 @@ const WorkspaceSidebar = ({
                         triggerStyle={{ opacity: showActions ? 1 : 0 }}
                         accessibilityLabel={t('workspace.groupActions', { name: group.name })}
                         onCreateGroup={() => createRef.current?.present()}
+                        onGroupCreated={onSelectContent}
                         onEditGroup={() => setEditingGroup(group)}
                         onViewGroups={() => viewGroupsRef.current?.present()}
                         onOpen={() => switchGroup(group.id)}

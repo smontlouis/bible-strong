@@ -5,13 +5,8 @@ import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
 import type { Theme as AppTheme } from '~themes'
 
-import {
-  Sheet,
-  SheetFlatList,
-  SheetHeader,
-  type SheetRef,
-  type SheetSnapPoint,
-} from '~common/sheet'
+import { SheetFlatList, SheetHeader, type SheetRef, type SheetSnapPoint } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Checkbox from '~common/ui/Checkbox'
 import Text from '~common/ui/Text'
 

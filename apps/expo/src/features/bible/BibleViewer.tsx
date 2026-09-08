@@ -3,6 +3,7 @@ import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useSta
 import { Alert, Platform, type LayoutChangeEvent } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
+import BibleViewport from './BibleViewport'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import { BibleError, BibleLoadingError } from '~helpers/bibleErrors'
 import { usePrevious } from '~helpers/usePrevious'
@@ -107,7 +108,7 @@ import {
   getDisplayedChapterEntityStrongCodes,
 } from './chapterEntityQueryPlan'
 import { useAnnotationMode, type AnnotationType } from './hooks'
-import ResourcesModal from './resources/ResourceModal'
+import ResourcesModal from '~features/bible/resources/ResourceModal'
 import {
   getSelectedVerseKeys,
   getSelectedVersesBookmarkLocation,
@@ -1344,7 +1345,7 @@ const BibleViewer = ({
   }
 
   return (
-    <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
+    <BibleViewport className="overflow-hidden border-continuous flex-[1] bg-reverse">
       <BibleHeader
         bibleAtom={bibleAtom}
         onBibleParamsClick={bibleParamsModal.open}
@@ -1570,7 +1571,7 @@ const BibleViewer = ({
         onDismissStart={startClosingStrongSelection}
         onClose={closeStrongSelection}
       />
-    </Box>
+    </BibleViewport>
   )
 }
 

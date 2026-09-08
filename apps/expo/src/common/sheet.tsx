@@ -82,6 +82,14 @@ export type SheetItemProps = TextProps & {
 }
 
 export type SheetProps = {
+  /** Web-only viewport constraint for a reader-owned selection sheet. */
+  webContainerBounds?: {
+    left: number
+    right: number
+    bottom: number
+    width: number
+    height: number
+  }
   children?: React.ReactNode
   accessibilityLabel?: string
   accessibilityDescription?: string

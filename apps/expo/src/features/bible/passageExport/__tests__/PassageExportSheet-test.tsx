@@ -6,6 +6,7 @@ import { createPassageExport } from '../createPassageExport'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as Sharing from 'expo-sharing'
 import { toast } from '~helpers/toast'
+jest.mock('~common/FilterChoices', () => ({ __esModule: true, default: 'FilterChoices' }))
 const mockReduxState = {
   user: {
     id: null,

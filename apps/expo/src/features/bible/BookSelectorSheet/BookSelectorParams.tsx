@@ -3,7 +3,10 @@ import { useTranslation } from 'react-i18next'
 import FiltersHeader, { type FiltersHeaderItem } from '~common/FiltersHeader'
 import { bookSelectorSelectionModeAtom, bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
 
-export function useBookSelectorFilters({ includeLayout = true }: { includeLayout?: boolean } = {}) {
+export function useBookSelectorFilters({
+  includeLayout = true,
+  includeVerses = true,
+}: { includeLayout?: boolean; includeVerses?: boolean } = {}) {
   const { t } = useTranslation()
   const [sort, setSort] = useAtom(bookSelectorSortAtom)
   const [selectionMode, setSelectionMode] = useAtom(bookSelectorSelectionModeAtom)
@@ -56,16 +59,22 @@ export function useBookSelectorFilters({ includeLayout = true }: { includeLayout
       })),
     })
   return {
-    filters,
+    filters: includeVerses ? filters : filters.filter(filter => filter.key !== 'verses'),
     onReset: () => {
       setSort('classical')
-      setVerses('without-verses')
+      if (includeVerses) setVerses('without-verses')
       if (includeLayout) setSelectionMode('list')
     },
   }
 }
 
-export const BookSelectorParams = ({ includeLayout = true }: { includeLayout?: boolean }) => {
-  const filters = useBookSelectorFilters({ includeLayout })
+export const BookSelectorParams = ({
+  includeLayout = true,
+  includeVerses = true,
+}: {
+  includeLayout?: boolean
+  includeVerses?: boolean
+}) => {
+  const filters = useBookSelectorFilters({ includeLayout, includeVerses })
   return <FiltersHeader buttonOnly title="" {...filters} />
 }

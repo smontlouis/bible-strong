@@ -1,7 +1,8 @@
 import { useAtom, useSetAtom } from 'jotai/react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Sheet, SheetView } from '~common/sheet'
+import { SheetView } from '~common/sheet'
+import Sheet from '~common/ModalSheet'
 import { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useSheet } from '~helpers/useSheet'
@@ -62,7 +63,7 @@ const FeatureOnboardingModal = () => {
   if (!config) return null
 
   return (
-    <Sheet ref={ref} dismissible={false} onDismiss={handleClose}>
+    <Sheet modalTitle={step?.title} ref={ref} dismissible={false} onDismiss={handleClose}>
       <SheetView>
         <TouchableBox
           className="border-continuous overflow-hidden items-center justify-center rounded-[20px] bg-reverse border-[1px] border-border absolute top-[10px] right-[10px] z-[1000]"

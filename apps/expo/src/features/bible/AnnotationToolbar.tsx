@@ -1,6 +1,7 @@
 import { twMerge } from '~common/ui/classNames'
 import { useTheme } from '~themes/ThemeProvider'
-import { type SheetRef, Sheet, SheetView } from '~common/sheet'
+import { type SheetRef, SheetView } from '~common/sheet'
+import Sheet from './SelectedVersesModal/SelectionSheet'
 import { TouchableOpacity, type ViewStyle } from 'react-native'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'

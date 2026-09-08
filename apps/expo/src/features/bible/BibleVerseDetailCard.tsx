@@ -61,9 +61,10 @@ import { StrongResourceScrollProvider } from './StrongResourceScrollContext'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
-const itemWidth = slideWidth + itemHorizontalMargin * 2
+const nativeItemWidth = slideWidth + itemHorizontalMargin * 2
 const itemGap = 10
-const carouselStep = itemWidth + itemGap
+const WEB_STRONG_CARD_MAX_WIDTH = 350
+const WEB_STRONG_CARD_MAX_HEIGHT = 600
 
 const VersetWrapper = (
   componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
@@ -207,6 +208,24 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const insets = useSafeAreaInsets()
   const [currentStrongCardIndex, setCurrentStrongCardIndex] = useState(0)
   const [modalContentHeight, setModalContentHeight] = useState(0)
+  const [modalContentWidth, setModalContentWidth] = useState(0)
+  const isWeb = NativeUI.Platform.OS === 'web'
+  const itemWidth = isWeb
+    ? Math.max(1, Math.min(WEB_STRONG_CARD_MAX_WIDTH, modalContentWidth - 40))
+    : nativeItemWidth
+  const carouselStep = itemWidth + itemGap
+  useEffect(() => {
+    if (!isWeb || !modalContentWidth) return
+    isProgrammaticCardsScrollRef.current = true
+    strongCardsScrollRef.current?.scrollToOffset({
+      offset: currentStrongCardIndexRef.current * carouselStep,
+      animated: false,
+    })
+    const frame = requestAnimationFrame(() => {
+      isProgrammaticCardsScrollRef.current = false
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [isWeb, modalContentWidth, carouselStep])
   const coreAvailabilityQuery = useQuery({
     queryKey: resourceQueryKeys.strongLexiconAvailability('core'),
     queryFn: async () => ({
@@ -526,7 +545,10 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     <Box
       className="overflow-hidden border-continuous flex-[1]"
       testID="resource-modal-content"
-      onLayout={event => setModalContentHeight(event.nativeEvent.layout.height)}
+      onLayout={event => {
+        setModalContentHeight(event.nativeEvent.layout.height)
+        setModalContentWidth(event.nativeEvent.layout.width)
+      }}
     >
       <Box className="overflow-hidden border-continuous relative z-[1]">
         <ScrollView
@@ -611,7 +633,14 @@ const BibleVerseDetailCard: React.FC<Props> = ({
               <Box className="overflow-hidden border-continuous" style={{ width: itemGap }} />
             )}
             renderItem={({ item, index }) => (
-              <Box className="overflow-hidden border-continuous" style={{ width: itemWidth }}>
+              <Box
+                testID="resource-strong-carousel-card"
+                className="overflow-hidden border-continuous"
+                style={{
+                  width: itemWidth,
+                  ...(isWeb ? { maxHeight: WEB_STRONG_CARD_MAX_HEIGHT } : {}),
+                }}
+              >
                 {renderStrongCard({ item, index })}
               </Box>
             )}
@@ -626,7 +655,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
             contentContainerStyle={{
               paddingLeft: 20,
               paddingRight: 20,
-              paddingBottom: insets.bottom + 180,
+              paddingBottom: isWeb ? 20 : insets.bottom + 180,
             }}
           />
         )}

@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ScrollView, TouchableOpacity } from 'react-native'
+import { Platform, ScrollView, TouchableOpacity } from 'react-native'
 import CommentIcon from '~common/CommentIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -25,7 +25,7 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
     onChangeResourceType(newResourceType)
   }
 
-  const iconWidth = wp(18)
+  const iconWidth = Platform.OS === 'web' ? 74 : wp(18)
 
   return (
     <Box className="border-continuous overflow-hidden mx-[20px] bg-reverse py-[10px] rounded-[20px] border-[1px] border-border">

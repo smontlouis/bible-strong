@@ -15,6 +15,7 @@ const panelPaths = new Set([
   'event',
   'pericope',
   'passage-media-player',
+  'passage-resources',
   'strong',
   'commentary-chapter',
   'commentary-entry',

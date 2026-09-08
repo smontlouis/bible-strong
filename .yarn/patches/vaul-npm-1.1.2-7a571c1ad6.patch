@@ -1,0 +1,24 @@
+diff --git a/dist/index.js b/dist/index.js
+index 7f343be1fafe1cf302ee6afc7268c29490895e34..cb1ae2a2f724a4de2d2e0a76931e746d7bdad346 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -1361,6 +1361,7 @@ function Root({ open: openProp, onOpenChange, children, onDrag: onDragProp, onRe
+         modal
+     ]);
+     return /*#__PURE__*/ React__namespace.default.createElement(DialogPrimitive__namespace.Root, {
++        modal: modal,
+         defaultOpen: defaultOpen,
+         onOpenChange: (open)=>{
+             if (!dismissible && !open) return;
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 0dbbce5526681925a81804ced237a045a53c0355..d664d4bf30a3366642d72b984f1c6c2940a95c0e 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -1339,6 +1339,7 @@ function Root({ open: openProp, onOpenChange, children, onDrag: onDragProp, onRe
+         modal
+     ]);
+     return /*#__PURE__*/ React__default.createElement(DialogPrimitive.Root, {
++        modal: modal,
+         defaultOpen: defaultOpen,
+         onOpenChange: (open)=>{
+             if (!dismissible && !open) return;

@@ -4,14 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Alert } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
-import {
-  Sheet,
-  SheetFooter,
-  SheetHeader,
-  SheetTextInput,
-  SheetView,
-  type SheetRef,
-} from '~common/sheet'
+import { SheetFooter, SheetHeader, SheetTextInput, SheetView, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ModalSheet'
 import { deleteCurrentAuthUser, getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'

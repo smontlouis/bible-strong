@@ -6,7 +6,8 @@ import { EaseView } from 'react-native-ease'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
 import Link, { LinkBox } from '~common/Link'
-import { Sheet, SheetView, type SheetRef } from '~common/sheet'
+import { SheetView, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ModalSheet'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
@@ -212,7 +213,11 @@ const VerseOfTheDay = ({ addDay }: Props) => {
         imageUrls={imageUrls}
         verseOfTheDay={verseOfTheDay}
       />
-      <Sheet ref={notificationModalRef} snapPoints={[0.3]}>
+      <Sheet
+        modalTitle={t('Recevoir une notification quotidienne')}
+        ref={notificationModalRef}
+        snapPoints={[0.3]}
+      >
         <SheetView className="px-[20px] py-[30px]">
           <Box className="overflow-hidden border-continuous flex-row items-center">
             <Text className="font-bold flex-[1]">{t('Recevoir une notification quotidienne')}</Text>

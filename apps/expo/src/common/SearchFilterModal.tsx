@@ -1,7 +1,8 @@
 import React, { forwardRef, useEffect, useState } from 'react'
 
 import SearchInput from '~common/SearchInput'
-import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
+import { SheetHeader, SheetView, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 
 type Props = {
   title: string

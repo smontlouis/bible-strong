@@ -27,6 +27,7 @@ const ExploreLayout = () => {
         <Stack.Screen name="event" />
         <Stack.Screen name="pericope" />
         <Stack.Screen name="passage-media-player" />
+        <Stack.Screen name="passage-resources" />
       </Stack>
     </ModalRouteFrame>
   )

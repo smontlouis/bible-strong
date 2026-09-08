@@ -1,6 +1,8 @@
 import { resolveThemeColor } from '~themes/colorValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
-import { Sheet, type SheetRef } from '~common/sheet'
+import { type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
+import InlineSheetContent from '~common/ContextualPanel/InlineSheetContent'
 import distanceInWords from 'date-fns/formatDistance'
 import { useAtomValue } from 'jotai/react'
 import React from 'react'
@@ -164,15 +166,18 @@ const GroupCard = ({ group, isActive, onPress }: GroupCardProps) => {
 interface ViewGroupsModalProps {
   sheetRef: React.RefObject<SheetRef | null>
   onClose?: () => void
+  inline?: boolean
 }
 
-const ViewGroupsModal = ({ sheetRef, onClose }: ViewGroupsModalProps) => {
+const ViewGroupsModal = ({ sheetRef, onClose, inline = false }: ViewGroupsModalProps) => {
+  const { t } = useTranslation()
   const groups = useAtomValue(tabGroupsAtom)
   const activeGroupId = useAtomValue(activeGroupIdAtom)
   const { groupPager } = useAppSwitcherContext()
 
   const handleClose = () => {
-    sheetRef.current?.dismiss()
+    if (inline) onClose?.()
+    else sheetRef.current?.dismiss()
   }
 
   const handleSelectGroup = (groupId: string) => {
@@ -183,9 +188,12 @@ const ViewGroupsModal = ({ sheetRef, onClose }: ViewGroupsModalProps) => {
     handleClose()
   }
 
+  const Container = inline ? InlineSheetContent : Sheet
   return (
-    <Sheet
+    <Container
       ref={sheetRef}
+      panelTitle={t('tabs.viewMyGroups')}
+      panelWidth={440}
       onDismiss={onClose}
       // header={<SheetHeader title={t('tabs.viewMyGroups')} />}
     >
@@ -199,7 +207,7 @@ const ViewGroupsModal = ({ sheetRef, onClose }: ViewGroupsModalProps) => {
           />
         ))}
       </Box>
-    </Sheet>
+    </Container>
   )
 }
 

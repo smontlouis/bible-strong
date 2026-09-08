@@ -1,4 +1,6 @@
-import { SheetFlashList, Sheet, SheetHeader, type SheetRef } from '~common/sheet'
+import { SheetFlashList, SheetHeader, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
+import RelationVersionButton from './RelationVersionButton'
 import InlineSheetContent from '~common/ContextualPanel/InlineSheetContent'
 import HeaderContent from '~common/ContextualPanel/HeaderContent'
 import HeaderReplacement from '~common/ContextualPanel/HeaderReplacement'
@@ -6,13 +8,13 @@ import { useTheme } from '~themes/ThemeProvider'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
 import { Ref, useDeferredValue, useState } from 'react'
-import { ActivityIndicator } from 'react-native'
+import { ActivityIndicator, Platform } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import AlphabetList from '~common/AlphabetList'
 import SheetSearchInput from '~common/SheetSearchInput'
 import Empty from '~common/Empty'
-import Box, { TouchableBox, VStack } from '~common/ui/Box'
+import Box, { VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useBibleVerses from '~features/resources/useBibleVerses'
@@ -738,7 +740,9 @@ const CreateEntityRelationModal = ({
   const renderLoadingState = () => <LoadingIndicator />
 
   const passageVersionSelector = (
-    <TouchableBox
+    <RelationVersionButton
+      version={passageVersion}
+      onVersionChange={setPassageVersion}
       className="overflow-hidden border-continuous flex-row items-center justify-center gap-[5px] px-[8px] py-[6px] rounded-[8px] bg-light-grey"
       accessibilityRole="button"
       accessibilityLabel={t('accessibility.chooseVersion', { version: passageVersion })}
@@ -771,7 +775,7 @@ const CreateEntityRelationModal = ({
       <FeatherIcon name="book-open" size={14} color="primary" />
       <Text className="text-primary text-[13px] font-bold">{passageVersion}</Text>
       <FeatherIcon name="chevron-down" size={13} color="primary" />
-    </TouchableBox>
+    </RelationVersionButton>
   )
 
   const searchHeader = (
@@ -799,6 +803,8 @@ const CreateEntityRelationModal = ({
   return (
     <Container
       ref={ref}
+      panelWidth={500}
+      panelHeaderContent={searchHeader}
       snapPoints={[0.75]}
       header={
         <SheetHeader
@@ -811,13 +817,17 @@ const CreateEntityRelationModal = ({
         </SheetHeader>
       }
     >
-      {inline && (
+      {Platform.OS === 'web' && (
         <>
           {browseMode && <HeaderReplacement title={modalTitle} onBack={exitBrowseMode} />}
-          <HeaderContent>{searchHeader}</HeaderContent>
+          {inline && <HeaderContent>{searchHeader}</HeaderContent>}
         </>
       )}
-      <VStack className={inline ? 'h-[360px]' : 'overflow-hidden border-continuous flex-[1]'}>
+      <VStack
+        className={
+          Platform.OS === 'web' ? 'h-[360px]' : 'overflow-hidden border-continuous flex-[1]'
+        }
+      >
         {resourceFailure ? (
           <ResourceUnavailableView
             identity={resourceFailure.identity}

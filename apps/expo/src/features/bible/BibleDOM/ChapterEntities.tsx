@@ -106,11 +106,6 @@ const ChapterEntities = ({
           }}
         />
       </h2>
-      {viewMode === 'empty' && (
-        <p style={{ margin: '16px 0 0', color: colors.tertiary, fontSize: 14 }}>
-          {translations.empty}
-        </p>
-      )}
       {(viewMode === 'download' || viewMode === 'entities' || chapterResources) && (
         <div
           style={{

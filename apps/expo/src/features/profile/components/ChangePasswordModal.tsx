@@ -5,14 +5,8 @@ import * as NativeUI from 'react-native'
 import { ActivityIndicator } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
-import {
-  Sheet,
-  SheetFooter,
-  SheetHeader,
-  SheetTextInput,
-  SheetView,
-  type SheetRef,
-} from '~common/sheet'
+import { SheetFooter, SheetHeader, SheetTextInput, SheetView, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ModalSheet'
 import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
 

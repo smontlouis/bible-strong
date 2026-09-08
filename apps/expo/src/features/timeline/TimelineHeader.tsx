@@ -5,7 +5,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
-import { MenuView } from '~common/ui/MenuView'
+import ContextualMenu from '~common/ContextualPanel/ContextualMenu'
 import PageContent from '~common/ui/PageContent'
 import type { Theme as AppTheme } from '~themes'
 
@@ -58,6 +58,7 @@ const FeatherIcon = (
 }
 
 interface Props {
+  details?: React.ReactNode
   title: string
   titleEn: string
   fontSize?: number
@@ -79,6 +80,7 @@ const TimelineHeader = ({
   onBackPress,
   onOpenInNewTab,
   onSearchPress,
+  details,
 }: Props) => {
   const stylingTheme = useStylingTheme()
 
@@ -116,7 +118,14 @@ const TimelineHeader = ({
           >
             <FeatherIcon name="search" size={19} />
           </TouchableBox>
-          <MenuView
+          <ContextualMenu
+            panelTitle={getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
+            icons={{ details: 'info', 'open-tab': 'external-link' }}
+            screens={
+              details
+                ? { details: { title: t('Détails'), width: 500, content: () => details } }
+                : {}
+            }
             actions={[
               { id: 'details', title: t('Détails'), image: 'info.circle' },
               {
@@ -139,7 +148,7 @@ const TimelineHeader = ({
             <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[44px]">
               <Icon.Feather name="more-vertical" size={18} />
             </Box>
-          </MenuView>
+          </ContextualMenu>
         </Box>
       </PageContent>
     </HeaderBox>

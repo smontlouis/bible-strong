@@ -1,6 +1,7 @@
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { Sheet, SheetView, type SheetRef } from '~common/sheet'
+import { SheetView, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ModalSheet'
 import Lottie from 'lottie-react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box from '~common/ui/Box'
@@ -36,6 +37,7 @@ const RatingPrompt = ({ modalRef, onClose }: Props) => {
 
   return (
     <Sheet
+      modalTitle={t('rating.title')}
       ref={modalRef}
       detachedOffset={insets.bottom + 50}
       dismissible={false}
