@@ -58,9 +58,11 @@ const VersionSelectorItem = ({
             </Text>
           ) : null}
         </Box>
-        <Box className="overflow-hidden border-continuous w-[42px] items-center justify-center">
-          <FeatherIcon name={available ? (isSelected ? 'check' : 'cloud') : 'slash'} size={18} />
-        </Box>
+        {(isSelected || !available) && (
+          <Box className="overflow-hidden border-continuous w-[42px] items-center justify-center">
+            <FeatherIcon name={available ? 'check' : 'slash'} size={18} />
+          </Box>
+        )}
       </Box>
     </TouchableOpacity>
   )

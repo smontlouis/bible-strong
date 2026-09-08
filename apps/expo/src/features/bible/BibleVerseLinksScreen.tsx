@@ -248,6 +248,16 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
               ...queryFilters.filters,
               {
                 key: 'type',
+                options: typeOptions.map(option => ({
+                  key: option.value,
+                  label: option.label,
+                  selected: (queryState.linkType || 'all') === option.value,
+                  onSelect: () =>
+                    setQueryState(state => ({
+                      ...state,
+                      linkType: option.value === 'all' ? null : option.value,
+                    })),
+                })),
                 icon: 'link',
                 label: t('Type'),
                 value: typeLabel,
@@ -256,6 +266,26 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
               },
               {
                 key: 'tags',
+                searchable: true,
+                showCheckbox: true,
+                options: [
+                  {
+                    key: 'all',
+                    label: t('Tous'),
+                    selected: !queryState.tagId,
+                    onSelect: () => setQueryState(state => ({ ...state, tagId: null })),
+                  },
+                  ...Object.values(tags ?? {})
+                    .filter(
+                      tag => tag && typeof tag.name === 'string' && typeof tag.id === 'string'
+                    )
+                    .map(tag => ({
+                      key: tag.id,
+                      label: tag.name,
+                      selected: queryState.tagId === tag.id,
+                      onSelect: () => setQueryState(state => ({ ...state, tagId: tag.id })),
+                    })),
+                ],
                 icon: 'tag',
                 label: t('Tags'),
                 value: selectedChip?.name || t('Tous') || 'Tous',

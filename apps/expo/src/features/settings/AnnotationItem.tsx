@@ -5,7 +5,6 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
 import * as NativeUI from 'react-native'
 import { TouchableOpacity } from 'react-native'
-import { Platform } from 'react-native'
 import HighlightOptions from '~common/HighlightOptions'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
@@ -13,10 +12,8 @@ import type { Theme as AppTheme } from '~themes'
 
 import EntityChipList from '~common/EntityChipList'
 import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
-import { LinkBox } from '~common/Link'
 import type { TagsObj } from '~common/types'
 import Box, { HStack } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
 import { Chip } from '~common/ui/NewChip'
 import Text from '~common/ui/Text'
 import { getBook } from '~helpers/bibleBookCatalog'
@@ -133,19 +130,7 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
       {item.tags && Object.keys(item.tags).length > 0 && (
         <EntityChipList tags={item.tags as TagsObj} />
       )}
-      {onSettingsPress && Platform.OS === 'web' && (
-        <HighlightOptions annotationId={item.id} color={item.color} />
-      )}
-      {onSettingsPress && Platform.OS !== 'web' && (
-        <LinkBox
-          className="p-[4px] ml-[10px] absolute top-[0px] right-[0px]"
-          accessibilityLabel={t('accessibility.options')}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          onPress={() => onSettingsPress(item)}
-        >
-          <FeatherIcon name="more-vertical" size={20} />
-        </LinkBox>
-      )}
+      {onSettingsPress && <HighlightOptions annotationId={item.id} color={item.color} />}
     </AnnotationContainer>
   )
 }

@@ -57,6 +57,7 @@ jest.mock('~common/ui/Icon', () => ({
 
 jest.mock('~common/ChoiceFilterModal', () => () => null)
 jest.mock('~common/FiltersHeader', () => () => null)
+jest.mock('~common/ContextualPanel/PanelSearch', () => () => null)
 jest.mock('~common/SearchFilterModal', () => () => null)
 jest.mock('~common/sheet', () => ({
   Sheet: ({ children }: React.PropsWithChildren) => children,

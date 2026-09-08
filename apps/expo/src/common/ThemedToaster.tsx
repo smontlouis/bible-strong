@@ -1,7 +1,9 @@
 import { useTheme } from '~themes/ThemeProvider'
 import { Toaster } from 'sonner-native'
+import { Platform, useWindowDimensions } from 'react-native'
 const ThemedToaster = () => {
   const theme = useTheme()
+  const { width } = useWindowDimensions()
 
   return (
     <Toaster
@@ -10,6 +12,13 @@ const ThemedToaster = () => {
       icons={{ info: <></> }}
       toastOptions={{
         style: {
+          ...(Platform.OS === 'web'
+            ? {
+                width: Math.max(0, Math.min(420, width - 32)),
+                maxWidth: 420,
+                alignSelf: 'center' as const,
+              }
+            : {}),
           backgroundColor: theme.colors.reverse,
           borderColor: theme.colors.border,
           borderWidth: 1,

@@ -1,13 +1,12 @@
+import LinkOptionsPanel from './LinkOptionsPanel'
 import { resolveFontFamily } from '~themes/styleValues'
-import { useTheme as useStylingTheme, Theme, useTheme } from '~themes/ThemeProvider'
+import { useTheme as useStylingTheme, Theme } from '~themes/ThemeProvider'
 import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
 import type { Theme as AppTheme } from '~themes'
-
-import * as Icon from '@expo/vector-icons'
 
 import EntityChipList from '~common/EntityChipList'
 import Link from '~common/Link'
@@ -79,11 +78,10 @@ type Props = {
   onRelationPress?: () => void
 }
 
-const BibleLinkItem = ({ item, onPress, onMenuPress, relationCount, onRelationPress }: Props) => {
+const BibleLinkItem = ({ item, onPress, relationCount, onRelationPress }: Props) => {
   const stylingTheme = useStylingTheme()
 
   const { t } = useTranslation()
-  const theme = useTheme()
   const lang = useLanguage()
   const mountTime = useMountTime()
 
@@ -126,13 +124,7 @@ const BibleLinkItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
             onRelationPress={onRelationPress}
           />
         </Box>
-        <Link
-          accessibilityLabel={t('accessibility.options')}
-          padding
-          onPress={() => onMenuPress(item.linkId)}
-        >
-          <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />
-        </Link>
+        <LinkOptionsPanel linkId={item.linkId} onRelations={onRelationPress} />
       </LinkItemContainer>
       <Border className="mx-[20px]" />
     </Box>

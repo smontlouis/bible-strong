@@ -43,7 +43,7 @@ export const useShareOptions = () => {
   }
 }
 
-const BibleShareOptionsScreen = () => {
+const BibleShareOptionsScreen = ({ inline = false }: { inline?: boolean }) => {
   const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
   const resources = useResourceAccess()
@@ -69,9 +69,10 @@ const BibleShareOptionsScreen = () => {
     ...localQueryOptions,
   })
 
+  const Wrapper = inline ? Box : Container
   return (
-    <Container>
-      <Header hasBackButton title={t('bible.settings.shareOptions')} />
+    <Wrapper>
+      {!inline && <Header hasBackButton title={t('bible.settings.shareOptions')} />}
       <ScrollView contentContainerStyle={pageContentStyle}>
         <Box className="overflow-hidden border-continuous px-[20px] py-[10px] flex-row items-center">
           <Text className="flex-[1]">{t('bible.settings.hasVerseNumbers')}</Text>
@@ -123,7 +124,7 @@ const BibleShareOptionsScreen = () => {
           <Text>{message}</Text>
         </Box>
       </ScrollView>
-    </Container>
+    </Wrapper>
   )
 }
 export default BibleShareOptionsScreen

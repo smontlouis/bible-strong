@@ -7,7 +7,7 @@ import { useResolveClassNames } from 'uniwind'
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
-import { useRouter } from 'expo-router'
+import BibleShareOptionsScreen from '~features/settings/BibleShareOptionsScreen'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -16,7 +16,7 @@ import IconLongPress from '~assets/images/IconLongPress'
 import IconShortPress from '~assets/images/IconShortPress'
 import { LineHeightIcon } from '~common/LineHeightIcon'
 import Link, { LinkBox } from '~common/Link'
-import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
+import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import Border from '~common/ui/Border'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Circle from '~common/ui/Circle'
@@ -57,11 +57,15 @@ export const HalfContainer = (
 
   const { border } = props
   const classStyles = useResolveClassNames(
-    twMerge('px-[20px] pr-[10px] py-[15px] border-b-border flex-row items-center', className)
+    twMerge(
+      'min-h-[60px] px-[20px] pr-[10px] py-[8px] border-b-border flex-row items-center',
+      className
+    )
   )
   return (
     <NativeUI.View
       {...props}
+      testID="bible-params-row"
       style={
         [classStyles, { borderBottomWidth: border ? 1 : 0 }, props.style] as UIComponentProps<
           typeof NativeUI.View
@@ -165,12 +169,22 @@ export const useParamsModalLabels = () => {
 }
 
 interface BibleParamsModalprops {
-  modalRef: React.RefObject<SheetRef | null>
+  modalRef?: React.RefObject<SheetRef | null>
+  inline?: boolean
+  onClose?: () => void
+  onPalette?: () => void
+  onShareOptions?: () => void
 }
 
-const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
+const BibleParamsModal = ({
+  modalRef,
+  inline = false,
+  onClose,
+  onPalette,
+  onShareOptions,
+}: BibleParamsModalprops) => {
   const { t } = useTranslation()
-  const router = useRouter()
+  const shareRef = React.useRef<SheetRef>(null)
   const setColorPickerModal = useSetAtom(colorPickerModalAtom)
 
   const {
@@ -222,319 +236,383 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
 
   const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
   const insets = useSafeAreaInsets()
+  const Container = inline ? InlineParamsContainer : Sheet
   return (
-    <Sheet ref={modalRef} snapPoints={[0.4, 1]}>
-      <SheetScrollView
-        contentContainerStyle={{
-          alignItems: 'stretch',
-          justifyContent: 'space-between',
-          paddingTop: 10,
-          paddingBottom: insets.bottom,
-        }}
-      >
-        <HalfContainer border>
-          <Text className="flex-[5]">{t('Thème')}</Text>
-          <Text className="ml-[5px] text-[12px] font-bold">
-            {preferredColorSchemeToString[preferredColorScheme]}
-          </Text>
-          <TouchableIcon
-            accessibilityLabel={preferredColorSchemeToString.light}
-            isSelected={preferredColorScheme === 'light'}
-            name="sun"
-            onPress={() => dispatch(setSettingsPreferredColorScheme('light'))}
-          />
-          <TouchableIcon
-            accessibilityLabel={preferredColorSchemeToString.dark}
-            isSelected={preferredColorScheme === 'dark'}
-            name="moon"
-            onPress={() => dispatch(setSettingsPreferredColorScheme('dark'))}
-          />
-          <TouchableIcon
-            accessibilityLabel={preferredColorSchemeToString.auto}
-            isSelected={preferredColorScheme === 'auto'}
-            name="sunrise"
-            onPress={() => dispatch(setSettingsPreferredColorScheme('auto'))}
-          />
-        </HalfContainer>
-        <HalfContainer border>
-          <Text className="flex-[5]">{t('Couleur Jour')}</Text>
-          <Text className="ml-[5px] text-[12px] font-bold">
-            {preferredLightThemeToString[preferredLightTheme]}
-          </Text>
-          <LinkBox
-            accessibilityLabel={preferredLightThemeToString.default}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: preferredLightTheme === 'default' }}
-            onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}
-            style={{ width: 40, height: 40 }}
-          >
-            <Circle
-              isSelected={preferredLightTheme === 'default'}
-              size={20}
-              color="rgb(255,255,255)"
+    <>
+      <Container ref={modalRef} snapPoints={[0.4, 1]}>
+        <SheetScrollView
+          contentContainerStyle={{
+            alignItems: 'stretch',
+            justifyContent: 'space-between',
+            paddingTop: 10,
+            paddingBottom: insets.bottom,
+          }}
+        >
+          <HalfContainer border>
+            <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>{t('Thème')}</Text>
+            <Text className="ml-[5px] text-[12px] font-bold">
+              {preferredColorSchemeToString[preferredColorScheme]}
+            </Text>
+            <TouchableIcon
+              accessibilityLabel={preferredColorSchemeToString.light}
+              isSelected={preferredColorScheme === 'light'}
+              name="sun"
+              onPress={() => dispatch(setSettingsPreferredColorScheme('light'))}
             />
-          </LinkBox>
-          <LinkBox
-            accessibilityLabel={preferredLightThemeToString.sepia}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: preferredLightTheme === 'sepia' }}
-            onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}
-            style={{ width: 40, height: 40 }}
-          >
-            <Circle
-              isSelected={preferredLightTheme === 'sepia'}
-              size={20}
-              color="rgb(245,242,227)"
+            <TouchableIcon
+              accessibilityLabel={preferredColorSchemeToString.dark}
+              isSelected={preferredColorScheme === 'dark'}
+              name="moon"
+              onPress={() => dispatch(setSettingsPreferredColorScheme('dark'))}
             />
-          </LinkBox>
-          <LinkBox
-            accessibilityLabel={preferredLightThemeToString.nature}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: preferredLightTheme === 'nature' }}
-            onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
-            style={{ width: 40, height: 40 }}
-          >
-            <Circle isSelected={preferredLightTheme === 'nature'} size={20} color="#EAF9EC" />
-          </LinkBox>
-          <LinkBox
-            accessibilityLabel={preferredLightThemeToString.sunset}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: preferredLightTheme === 'sunset' }}
-            onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
-            style={{ width: 40, height: 40 }}
-          >
-            <Circle isSelected={preferredLightTheme === 'sunset'} size={20} color="#FAE0D5" />
-          </LinkBox>
-        </HalfContainer>
-        <HalfContainer border>
-          <Text className="flex-[5]">{t('Couleur Nuit')}</Text>
-          <Text className="ml-[5px] text-[12px] font-bold">
-            {preferredDarkThemeToString[preferredDarkTheme]}
-          </Text>
-          <LinkBox
-            accessibilityLabel={preferredDarkThemeToString.dark}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: preferredDarkTheme === 'dark' }}
-            onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
-            style={{ width: 40, height: 40 }}
-          >
-            <Circle isSelected={preferredDarkTheme === 'dark'} size={20} color="rgb(18,45,66)" />
-          </LinkBox>
-          <LinkBox
-            accessibilityLabel={preferredDarkThemeToString.black}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: preferredDarkTheme === 'black' }}
-            onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
-            style={{ width: 40, height: 40 }}
-          >
-            <Circle isSelected={preferredDarkTheme === 'black'} size={20} color="black" />
-          </LinkBox>
-          <LinkBox
-            accessibilityLabel={preferredDarkThemeToString.mauve}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: preferredDarkTheme === 'mauve' }}
-            onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}
-            style={{ width: 40, height: 40 }}
-          >
-            <Circle isSelected={preferredDarkTheme === 'mauve'} size={20} color="rgb(51,4,46)" />
-          </LinkBox>
-          <LinkBox
-            accessibilityLabel={preferredDarkThemeToString.night}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: preferredDarkTheme === 'night' }}
-            onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}
-            style={{ width: 40, height: 40 }}
-          >
-            <Circle isSelected={preferredDarkTheme === 'night'} size={20} color="rgb(0,50,100)" />
-          </LinkBox>
-        </HalfContainer>
-        <HalfContainer border>
-          <Text className="flex-[5]">{t('Taille du texte')}</Text>
-          <Text className="ml-[5px] text-[12px] font-bold">{`${100 + fontSizeScale * 10}%`}</Text>
-          <TouchableIcon
-            accessibilityLabel={t('accessibility.decreaseTextSize')}
-            name="type"
-            size={15}
-            onPress={() => dispatch(decreaseSettingsFontSizeScale())}
-          />
-          <TouchableIcon
-            accessibilityLabel={t('accessibility.increaseTextSize')}
-            name="type"
-            onPress={() => dispatch(increaseSettingsFontSizeScale())}
-          />
-        </HalfContainer>
-        <HalfContainer border>
-          <Text className="flex-[5]">{t('Alignement du texte')}</Text>
-          <Text className="ml-[5px] text-[12px] font-bold mr-[10px]">
-            {alignContentToString[alignContent]}
-          </Text>
-          <TouchableIcon
-            accessibilityLabel={`${t('Alignement du texte')}: ${alignContentToString[alignContent]}`}
-            isSelected
-            name={alignContent === 'left' ? 'align-left' : 'align-justify'}
-            onPress={() => {
-              const nextAlign = alignContent === 'left' ? 'justify' : 'left'
-              dispatch(setSettingsAlignContent(nextAlign))
-            }}
-          />
-        </HalfContainer>
-        <HalfContainer border>
-          <Text className="flex-[5]">{t('Hauteur de ligne')}</Text>
-          <Text className="ml-[5px] text-[12px] font-bold mr-[10px]">
-            {lineHeightToString[lineHeight]}
-          </Text>
-          <TouchableBox
-            className="overflow-hidden border-continuous"
-            accessibilityLabel={`${t('Hauteur de ligne')}: ${lineHeightToString[lineHeight]}`}
-            accessibilityRole="button"
-            onPress={() => {
-              const nextLineHeight = {
-                small: 'normal',
-                normal: 'large',
-                large: 'small',
-              } as const
-              dispatch(setSettingsLineHeight(nextLineHeight[lineHeight]))
-            }}
-          >
-            <LineHeightIcon
+            <TouchableIcon
+              accessibilityLabel={preferredColorSchemeToString.auto}
+              isSelected={preferredColorScheme === 'auto'}
+              name="sunrise"
+              onPress={() => dispatch(setSettingsPreferredColorScheme('auto'))}
+            />
+          </HalfContainer>
+          <HalfContainer border>
+            <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
+              {t('Couleur Jour')}
+            </Text>
+            <Text className="ml-[5px] text-[12px] font-bold">
+              {preferredLightThemeToString[preferredLightTheme]}
+            </Text>
+            <LinkBox
+              accessibilityLabel={preferredLightThemeToString.default}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredLightTheme === 'default' }}
+              onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}
+              style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Circle
+                isSelected={preferredLightTheme === 'default'}
+                size={20}
+                color="rgb(255,255,255)"
+              />
+            </LinkBox>
+            <LinkBox
+              accessibilityLabel={preferredLightThemeToString.sepia}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredLightTheme === 'sepia' }}
+              onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}
+              style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Circle
+                isSelected={preferredLightTheme === 'sepia'}
+                size={20}
+                color="rgb(245,242,227)"
+              />
+            </LinkBox>
+            <LinkBox
+              accessibilityLabel={preferredLightThemeToString.nature}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredLightTheme === 'nature' }}
+              onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
+              style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Circle isSelected={preferredLightTheme === 'nature'} size={20} color="#EAF9EC" />
+            </LinkBox>
+            <LinkBox
+              accessibilityLabel={preferredLightThemeToString.sunset}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredLightTheme === 'sunset' }}
+              onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
+              style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Circle isSelected={preferredLightTheme === 'sunset'} size={20} color="#FAE0D5" />
+            </LinkBox>
+          </HalfContainer>
+          <HalfContainer border>
+            <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
+              {t('Couleur Nuit')}
+            </Text>
+            <Text className="ml-[5px] text-[12px] font-bold">
+              {preferredDarkThemeToString[preferredDarkTheme]}
+            </Text>
+            <LinkBox
+              accessibilityLabel={preferredDarkThemeToString.dark}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredDarkTheme === 'dark' }}
+              onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
+              style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Circle isSelected={preferredDarkTheme === 'dark'} size={20} color="rgb(18,45,66)" />
+            </LinkBox>
+            <LinkBox
+              accessibilityLabel={preferredDarkThemeToString.black}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredDarkTheme === 'black' }}
+              onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
+              style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Circle isSelected={preferredDarkTheme === 'black'} size={20} color="black" />
+            </LinkBox>
+            <LinkBox
+              accessibilityLabel={preferredDarkThemeToString.mauve}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredDarkTheme === 'mauve' }}
+              onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}
+              style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Circle isSelected={preferredDarkTheme === 'mauve'} size={20} color="rgb(51,4,46)" />
+            </LinkBox>
+            <LinkBox
+              accessibilityLabel={preferredDarkThemeToString.night}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredDarkTheme === 'night' }}
+              onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}
+              style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Circle isSelected={preferredDarkTheme === 'night'} size={20} color="rgb(0,50,100)" />
+            </LinkBox>
+          </HalfContainer>
+          <HalfContainer border>
+            <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
+              {t('Taille du texte')}
+            </Text>
+            <Text className="ml-[5px] text-[12px] font-bold">{`${100 + fontSizeScale * 10}%`}</Text>
+            <TouchableIcon
+              accessibilityLabel={t('accessibility.decreaseTextSize')}
+              name="type"
+              size={15}
+              onPress={() => dispatch(decreaseSettingsFontSizeScale())}
+            />
+            <TouchableIcon
+              accessibilityLabel={t('accessibility.increaseTextSize')}
+              name="type"
+              onPress={() => dispatch(increaseSettingsFontSizeScale())}
+            />
+          </HalfContainer>
+          <HalfContainer border>
+            <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
+              {t('Alignement du texte')}
+            </Text>
+            <Text className="ml-[5px] text-[12px] font-bold mr-[10px]">
+              {alignContentToString[alignContent]}
+            </Text>
+            <TouchableIcon
+              accessibilityLabel={`${t('Alignement du texte')}: ${alignContentToString[alignContent]}`}
               isSelected
-              gap={lineHeight === 'small' ? 1 : lineHeight === 'normal' ? 2 : 4}
+              name={alignContent === 'left' ? 'align-left' : 'align-justify'}
+              onPress={() => {
+                const nextAlign = alignContent === 'left' ? 'justify' : 'left'
+                dispatch(setSettingsAlignContent(nextAlign))
+              }}
             />
+          </HalfContainer>
+          <HalfContainer border>
+            <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
+              {t('Hauteur de ligne')}
+            </Text>
+            <Text className="ml-[5px] text-[12px] font-bold mr-[10px]">
+              {lineHeightToString[lineHeight]}
+            </Text>
+            <TouchableBox
+              className="overflow-hidden border-continuous"
+              accessibilityLabel={`${t('Hauteur de ligne')}: ${lineHeightToString[lineHeight]}`}
+              accessibilityRole="button"
+              onPress={() => {
+                const nextLineHeight = {
+                  small: 'normal',
+                  normal: 'large',
+                  large: 'small',
+                } as const
+                dispatch(setSettingsLineHeight(nextLineHeight[lineHeight]))
+              }}
+            >
+              <LineHeightIcon
+                isSelected
+                gap={lineHeight === 'small' ? 1 : lineHeight === 'normal' ? 2 : 4}
+              />
+            </TouchableBox>
+          </HalfContainer>
+
+          <HalfContainer border>
+            <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
+              {t('Mode des versets')}
+            </Text>
+            <Text className="ml-[5px] text-[12px] font-bold">
+              {textDisplayToString[textDisplay]}
+            </Text>
+            <TouchableIcon
+              accessibilityLabel={`${t('Mode des versets')}: ${textDisplayToString[textDisplay]}`}
+              isSelected
+              name={textDisplay === 'inline' ? 'arrow-right' : 'corner-down-right'}
+              onPress={() => {
+                const nextDisplay = textDisplay === 'inline' ? 'block' : 'inline'
+                dispatch(setSettingsTextDisplay(nextDisplay))
+              }}
+            />
+          </HalfContainer>
+
+          <HalfContainer border>
+            <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
+              {t('Affichage des relations')}
+            </Text>
+            <Text className="ml-[5px] text-[12px] font-bold">
+              {relationsDisplayToString[relationsDisplay]}
+            </Text>
+            <TouchableIcon
+              accessibilityLabel={`${t('Affichage des relations')}: ${relationsDisplayToString[relationsDisplay]}`}
+              isSelected
+              name={relationsDisplay === 'inline' ? 'align-left' : 'git-merge'}
+              onPress={() => {
+                const nextDisplay = relationsDisplay === 'inline' ? 'block' : 'inline'
+                dispatch(setSettingsRelationsDisplay(nextDisplay))
+              }}
+            />
+          </HalfContainer>
+          <HalfContainer border>
+            <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
+              {t('Affichage des tags')}
+            </Text>
+            <Text className="ml-[5px] text-[12px] font-bold">
+              {tagsDisplayToString[tagsDisplay]}
+            </Text>
+            <TouchableIcon
+              accessibilityLabel={`${t('Affichage des tags')}: ${tagsDisplayToString[tagsDisplay]}`}
+              isSelected
+              name={tagsDisplay === 'inline' ? 'align-left' : 'tag'}
+              onPress={() => {
+                const nextDisplay = tagsDisplay === 'inline' ? 'block' : 'inline'
+                dispatch(setSettingsTagsDisplay(nextDisplay))
+              }}
+            />
+          </HalfContainer>
+          <HalfContainer border>
+            <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
+              {t('Contexte et médias')}
+            </Text>
+            <Text className="ml-[5px] text-[12px] font-bold">
+              {contextualInformationDisplay ? t('Activé') : t('Désactivé')}
+            </Text>
+            <TouchableIcon
+              accessibilityLabel={t('Contexte et médias')}
+              isSelected={contextualInformationDisplay}
+              name="film"
+              onPress={() =>
+                dispatch(setSettingsContextualInformationDisplay(!contextualInformationDisplay))
+              }
+            />
+          </HalfContainer>
+          <HalfContainer border>
+            <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
+              {t('Paroles de Jésus en rouge')}
+            </Text>
+            <Text className="ml-[5px] text-[12px] font-bold">
+              {redWordsDisplay ? t('Activé') : t('Désactivé')}
+            </Text>
+            <TouchableIcon
+              accessibilityLabel={t('Paroles de Jésus en rouge')}
+              isSelected={redWordsDisplay}
+              name="type"
+              onPress={() => dispatch(setSettingsRedWordsDisplay(!redWordsDisplay))}
+            />
+          </HalfContainer>
+          <HalfContainer border>
+            <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
+              {t('Affichage des strongs')}
+            </Text>
+            <Text className="ml-[5px] text-[12px] font-bold">{pressToString[press]}</Text>
+            <TouchableSvgIcon
+              icon={press === 'shortPress' ? IconShortPress : IconLongPress}
+              isSelected
+              onPress={() => {
+                const nextPress = press === 'shortPress' ? 'longPress' : 'shortPress'
+                dispatch(setSettingsPress(nextPress))
+              }}
+              size={25}
+            />
+          </HalfContainer>
+          <Box className="overflow-hidden border-continuous h-[60px]">
+            <FlatList
+              ref={fontsViewRef}
+              ListHeaderComponent={
+                <Text
+                  className={inline ? 'ml-[20px] mr-[50px] text-[14px]' : 'ml-[20px] mr-[50px]'}
+                >
+                  {t('Polices')}
+                </Text>
+              }
+              horizontal
+              getItemLayout={(data, index) => ({
+                length: 100,
+                offset: 100 * index,
+                index,
+              })}
+              initialScrollIndex={initialScrollIndex === -1 ? 0 : initialScrollIndex}
+              style={{ paddingVertical: 15 }}
+              data={['Literata Book', ...fonts]}
+              keyExtractor={item => item}
+              renderItem={({ item }) => {
+                const isSelected = fontFamily === item
+                return (
+                  <Link onPress={() => dispatch(setFontFamily(item))}>
+                    <FontText isSelected={isSelected} style={{ fontFamily: item }}>
+                      {item}
+                    </FontText>
+                  </Link>
+                )
+              }}
+            />
+            <Border testID="bible-params-separator" />
+          </Box>
+          <TouchableBox
+            testID="bible-params-link"
+            accessibilityRole="button"
+            className="overflow-hidden border-continuous min-h-[60px] px-[20px] py-[8px] items-center flex-row"
+            onPress={() => {
+              if (onPalette) {
+                onPalette()
+                return
+              }
+              modalRef?.current?.close()
+              onClose?.()
+              setColorPickerModal({})
+            }}
+          >
+            <Text className={inline ? 'flex-[1] text-[14px]' : 'flex-[1]'}>
+              {t('Palette de couleurs')}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
           </TouchableBox>
-        </HalfContainer>
-
-        <HalfContainer border>
-          <Text className="flex-[5]">{t('Mode des versets')}</Text>
-          <Text className="ml-[5px] text-[12px] font-bold">{textDisplayToString[textDisplay]}</Text>
-          <TouchableIcon
-            accessibilityLabel={`${t('Mode des versets')}: ${textDisplayToString[textDisplay]}`}
-            isSelected
-            name={textDisplay === 'inline' ? 'arrow-right' : 'corner-down-right'}
+          <Border testID="bible-params-separator" />
+          <TouchableBox
+            testID="bible-params-link"
+            accessibilityRole="button"
+            className="overflow-hidden border-continuous min-h-[60px] px-[20px] py-[8px] items-center flex-row"
             onPress={() => {
-              const nextDisplay = textDisplay === 'inline' ? 'block' : 'inline'
-              dispatch(setSettingsTextDisplay(nextDisplay))
+              if (onShareOptions) {
+                onShareOptions()
+                return
+              }
+              shareRef.current?.present()
             }}
-          />
-        </HalfContainer>
-
-        <HalfContainer border>
-          <Text className="flex-[5]">{t('Affichage des relations')}</Text>
-          <Text className="ml-[5px] text-[12px] font-bold">
-            {relationsDisplayToString[relationsDisplay]}
-          </Text>
-          <TouchableIcon
-            accessibilityLabel={`${t('Affichage des relations')}: ${relationsDisplayToString[relationsDisplay]}`}
-            isSelected
-            name={relationsDisplay === 'inline' ? 'align-left' : 'git-merge'}
-            onPress={() => {
-              const nextDisplay = relationsDisplay === 'inline' ? 'block' : 'inline'
-              dispatch(setSettingsRelationsDisplay(nextDisplay))
-            }}
-          />
-        </HalfContainer>
-        <HalfContainer border>
-          <Text className="flex-[5]">{t('Affichage des tags')}</Text>
-          <Text className="ml-[5px] text-[12px] font-bold">{tagsDisplayToString[tagsDisplay]}</Text>
-          <TouchableIcon
-            accessibilityLabel={`${t('Affichage des tags')}: ${tagsDisplayToString[tagsDisplay]}`}
-            isSelected
-            name={tagsDisplay === 'inline' ? 'align-left' : 'tag'}
-            onPress={() => {
-              const nextDisplay = tagsDisplay === 'inline' ? 'block' : 'inline'
-              dispatch(setSettingsTagsDisplay(nextDisplay))
-            }}
-          />
-        </HalfContainer>
-        <HalfContainer border>
-          <Text className="flex-[5]">{t('Contexte et médias')}</Text>
-          <Text className="ml-[5px] text-[12px] font-bold">
-            {contextualInformationDisplay ? t('Activé') : t('Désactivé')}
-          </Text>
-          <TouchableIcon
-            accessibilityLabel={t('Contexte et médias')}
-            isSelected={contextualInformationDisplay}
-            name="film"
-            onPress={() =>
-              dispatch(setSettingsContextualInformationDisplay(!contextualInformationDisplay))
-            }
-          />
-        </HalfContainer>
-        <HalfContainer border>
-          <Text className="flex-[5]">{t('Paroles de Jésus en rouge')}</Text>
-          <Text className="ml-[5px] text-[12px] font-bold">
-            {redWordsDisplay ? t('Activé') : t('Désactivé')}
-          </Text>
-          <TouchableIcon
-            accessibilityLabel={t('Paroles de Jésus en rouge')}
-            isSelected={redWordsDisplay}
-            name="type"
-            onPress={() => dispatch(setSettingsRedWordsDisplay(!redWordsDisplay))}
-          />
-        </HalfContainer>
-        <HalfContainer border>
-          <Text className="flex-[5]">{t('Affichage des strongs')}</Text>
-          <Text className="ml-[5px] text-[12px] font-bold">{pressToString[press]}</Text>
-          <TouchableSvgIcon
-            icon={press === 'shortPress' ? IconShortPress : IconLongPress}
-            isSelected
-            onPress={() => {
-              const nextPress = press === 'shortPress' ? 'longPress' : 'shortPress'
-              dispatch(setSettingsPress(nextPress))
-            }}
-            size={25}
-          />
-        </HalfContainer>
-        <Box className="overflow-hidden border-continuous h-[60px]">
-          <FlatList
-            ref={fontsViewRef}
-            ListHeaderComponent={<Text className="ml-[20px] mr-[50px]">{t('Polices')}</Text>}
-            horizontal
-            getItemLayout={(data, index) => ({
-              length: 100,
-              offset: 100 * index,
-              index,
-            })}
-            initialScrollIndex={initialScrollIndex === -1 ? 0 : initialScrollIndex}
-            style={{ paddingVertical: 15 }}
-            data={['Literata Book', ...fonts]}
-            keyExtractor={item => item}
-            renderItem={({ item }) => {
-              const isSelected = fontFamily === item
-              return (
-                <Link onPress={() => dispatch(setFontFamily(item))}>
-                  <FontText isSelected={isSelected} style={{ fontFamily: item }}>
-                    {item}
-                  </FontText>
-                </Link>
-              )
-            }}
-          />
-          <Border />
-        </Box>
-        <TouchableBox
-          className="overflow-hidden border-continuous px-[20px] py-[15px] items-center flex-row"
-          onPress={() => {
-            modalRef.current?.close()
-            setColorPickerModal({})
-          }}
-        >
-          <Text className="flex-[1]">{t('Palette de couleurs')}</Text>
-          <FeatherIcon name="chevron-right" size={20} color="grey" />
-        </TouchableBox>
-        <Border />
-        <TouchableBox
-          className="overflow-hidden border-continuous px-[20px] py-[15px] items-center flex-row"
-          onPress={() => {
-            router.push('/bible-share-options')
-            modalRef.current?.close()
-          }}
-        >
-          <Text className="flex-[1]">{t('bible.settings.shareOptions')}</Text>
-          <FeatherIcon name="chevron-right" size={20} color="grey" />
-        </TouchableBox>
-      </SheetScrollView>
-    </Sheet>
+          >
+            <Text className={inline ? 'flex-[1] text-[14px]' : 'flex-[1]'}>
+              {t('bible.settings.shareOptions')}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </TouchableBox>
+        </SheetScrollView>
+      </Container>
+      {!inline && (
+        <Sheet ref={shareRef} header={<SheetHeader title={t('bible.settings.shareOptions')} />}>
+          <BibleShareOptionsScreen inline />
+        </Sheet>
+      )}
+    </>
   )
 }
+
+const InlineParamsContainer = ({
+  children,
+}: {
+  children?: React.ReactNode
+  ref?: React.Ref<SheetRef>
+  snapPoints?: number[]
+}) => <Box testID="bible-params-inline">{children}</Box>
 
 export default BibleParamsModal

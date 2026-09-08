@@ -1,9 +1,10 @@
+import ContextualPanel from '~common/ContextualPanel'
 import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useWindowDimensions } from 'react-native'
+import { Platform, useWindowDimensions } from 'react-native'
 import { BibleTab, useBibleTabActions } from 'src/state/tabs'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -61,6 +62,43 @@ export const VerseSelectorPopup = ({
     sheetRef.current?.dismiss()
   }
 
+  if (Platform.OS === 'web')
+    return (
+      <ContextualPanel
+        width={400}
+        initialScreen="verses"
+        accessibilityLabel={t('accessibility.chooseVerse')}
+        trigger={children}
+        screens={{
+          verses: {
+            title: t('goToVerse'),
+            content: nav => (
+              <Box
+                testID="bible-selector-number-grid"
+                className="flex-row flex-wrap gap-[10px] p-[10px]"
+              >
+                {verseNumbers.map(verse => (
+                  <TouchableBox
+                    key={verse}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('Verset') + ' ' + verse}
+                    accessibilityState={{ selected: verse === bible.data.selectedVerse }}
+                    className="w-[40px] h-[40px] bg-opacity5 rounded-[3px] items-center justify-center"
+                    onPress={() => {
+                      actions.setSelectedVerse(verse)
+                      nav.close()
+                    }}
+                  >
+                    <Text>{verse}</Text>
+                  </TouchableBox>
+                ))}
+                {!verseNumbers.length && <Text>{t('Chargement...')}</Text>}
+              </Box>
+            ),
+          },
+        }}
+      />
+    )
   return (
     <>
       <TouchableBox

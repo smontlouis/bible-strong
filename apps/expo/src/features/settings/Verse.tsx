@@ -4,7 +4,6 @@ import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import * as NativeUI from 'react-native'
 import { TouchableOpacity } from 'react-native'
-import { Platform } from 'react-native'
 import HighlightOptions from '~common/HighlightOptions'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
@@ -14,10 +13,8 @@ import { useTranslation } from 'react-i18next'
 
 import EntityChipList from '~common/EntityChipList'
 import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
-import { LinkBox } from '~common/Link'
 import type { TagsObj, Verse, VerseIds } from '~common/types'
 import Box from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import { useResolvedBibleVerses } from '~features/resources/useBibleVerses'
@@ -164,28 +161,7 @@ const VerseComponent = ({
         </Paragraph>
       </TouchableOpacity>
       <EntityChipList tags={tags} />
-      {setSettings && stringIds && Platform.OS === 'web' && (
-        <HighlightOptions verseIds={stringIds} color={color} />
-      )}
-      {setSettings && stringIds && Platform.OS !== 'web' && (
-        <LinkBox
-          className="p-[4px] ml-[10px] absolute top-[0px] right-[0px]"
-          accessibilityLabel={t('accessibility.options')}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          onPress={() =>
-            setSettings({
-              stringIds,
-              verseIds,
-              color,
-              date,
-              tags,
-              version: sourceVersion,
-            })
-          }
-        >
-          <FeatherIcon name="more-vertical" size={20} />
-        </LinkBox>
-      )}
+      {setSettings && stringIds && <HighlightOptions verseIds={stringIds} color={color} />}
     </Container>
   )
 }

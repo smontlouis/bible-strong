@@ -12,5 +12,8 @@ not another interactive button: the host supplies its accessible button.
 
 FiltersHeader is the first shared consumer. Existing callbacks without screen
 content remain supported by closing the panel before invoking the callback.
-HighlightOptions remains a separate prototype to migrate next; no automatic
-interception of arbitrary sheet refs is introduced.
+HighlightOptions, NoteOptionsPanel and BookmarkOptionsPanel also use the shared
+host. PanelAction reuses ActionSheetItem on native to preserve the original
+transparent rows, spacing, typography and separators. No automatic interception
+of arbitrary sheet refs is introduced. Advanced color management still opens
+the existing dedicated editor after closing this panel.

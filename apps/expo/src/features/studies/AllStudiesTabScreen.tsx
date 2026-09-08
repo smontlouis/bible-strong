@@ -197,6 +197,24 @@ const StudiesScreen = ({
             ...queryFilters.filters,
             {
               key: 'tags',
+              searchable: true,
+              showCheckbox: true,
+              options: [
+                {
+                  key: 'all',
+                  label: t('Tous'),
+                  selected: !queryState.tagId,
+                  onSelect: () => setQueryState(state => ({ ...state, tagId: null })),
+                },
+                ...Object.values(tags ?? {})
+                  .filter(tag => tag && typeof tag.name === 'string' && typeof tag.id === 'string')
+                  .map(tag => ({
+                    key: tag.id,
+                    label: tag.name,
+                    selected: queryState.tagId === tag.id,
+                    onSelect: () => setQueryState(state => ({ ...state, tagId: tag.id })),
+                  })),
+              ],
               icon: 'tag',
               label: t('Tags'),
               value: selectedChip?.name || t('Tous'),
@@ -205,6 +223,16 @@ const StudiesScreen = ({
             },
             {
               key: 'publication',
+              options: Object.entries(publicationLabels).map(([value, label]) => ({
+                key: value,
+                label,
+                selected: queryState.publication === value,
+                onSelect: () =>
+                  setQueryState(state => ({
+                    ...state,
+                    publication: value as StudiesListQueryState['publication'],
+                  })),
+              })),
               icon: 'send',
               label: t('Publication'),
               value: publicationLabels[queryState.publication],

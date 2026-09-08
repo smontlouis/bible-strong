@@ -65,7 +65,7 @@ const PassageMediaPlayer = ({
         style={{
           position: 'relative',
           width: 'min(calc(100vw - 20px), calc(177.7778vh - 153px))',
-          maxWidth: '100vw',
+          maxWidth: '800px',
           maxHeight: 'calc(100vh - 86px)',
           aspectRatio: '16 / 9',
           boxSizing: 'border-box',

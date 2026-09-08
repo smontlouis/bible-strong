@@ -3,6 +3,7 @@ import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/shee
 import { TouchableBox } from '~common/ui/Box'
 import type { ContextualPanelProps } from './types'
 import { usePanelNavigation } from './usePanelNavigation'
+import PanelTransition from './PanelTransition'
 export default function ContextualPanel(props: ContextualPanelProps) {
   const panel = usePanelNavigation(props)
   const ref = useRef<SheetRef>(null)
@@ -16,6 +17,16 @@ export default function ContextualPanel(props: ContextualPanelProps) {
         accessibilityRole="button"
         accessibilityLabel={props.accessibilityLabel}
         onPress={panel.present}
+        style={
+          props.triggerSize
+            ? {
+                width: props.triggerSize,
+                height: props.triggerSize,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }
+            : undefined
+        }
       >
         {props.trigger}
       </TouchableBox>
@@ -23,15 +34,23 @@ export default function ContextualPanel(props: ContextualPanelProps) {
         ref={ref}
         onDismiss={panel.navigation.close}
         header={
-          <SheetHeader
-            title={panel.screen.title}
-            hasBackButton={panel.canGoBack}
-            onBackPress={panel.navigation.back}
-            rightComponent={panel.screen.headerRight}
-          />
+          <PanelTransition key={panel.screenKey} direction={panel.direction}>
+            <SheetHeader
+              title={panel.screen.title}
+              hasBackButton={panel.canGoBack}
+              onBackPress={panel.navigation.back}
+              rightComponent={panel.screen.headerRight}
+            >
+              {panel.screen.headerContent}
+            </SheetHeader>
+          </PanelTransition>
         }
       >
-        <SheetScrollView>{panel.screen.content(panel.navigation)}</SheetScrollView>
+        <SheetScrollView key={panel.screenKey}>
+          <PanelTransition direction={panel.direction}>
+            {panel.screen.content(panel.navigation)}
+          </PanelTransition>
+        </SheetScrollView>
       </Sheet>
     </>
   )

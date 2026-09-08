@@ -1,5 +1,6 @@
 import { m, useReducedMotion } from 'motion/react'
 import { createPortal } from 'react-dom'
+import { IS_DOM } from 'expo/dom'
 
 import type {
   StrongLexiconChapterEntity,
@@ -152,6 +153,7 @@ const ChapterEntitiesOverlay = ({
                   }}
                   onClick={event => {
                     event.stopPropagation()
+                    if (!IS_DOM) onClose()
                     onSelect(entity.uniqueName)
                   }}
                   style={{

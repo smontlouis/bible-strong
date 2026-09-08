@@ -1,12 +1,12 @@
+import NoteOptionsPanel from '~features/notes/NoteOptionsPanel'
 import { resolveFontFamily } from '~themes/styleValues'
-import { useTheme as useStylingTheme, Theme, useTheme } from '~themes/ThemeProvider'
+import { useTheme as useStylingTheme, Theme } from '~themes/ThemeProvider'
 import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
 import type { Theme as AppTheme } from '~themes'
 
-import * as Icon from '@expo/vector-icons'
 
 import EntityChipList from '~common/EntityChipList'
 import Link from '~common/Link'
@@ -48,11 +48,10 @@ type Props = {
   onRelationPress?: () => void
 }
 
-const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPress }: Props) => {
+const BibleNoteItem = ({ item, onPress, relationCount, onRelationPress }: Props) => {
   const stylingTheme = useStylingTheme()
 
   const { t } = useTranslation()
-  const theme = useTheme()
   const lang = useLanguage()
   const mountTime = useMountTime()
 
@@ -100,13 +99,7 @@ const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
             </Box>
           )}
         </Box>
-        <Link
-          accessibilityLabel={t('accessibility.options')}
-          padding
-          onPress={() => onMenuPress(item.noteId)}
-        >
-          <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />
-        </Link>
+        <NoteOptionsPanel noteId={item.noteId} title={item.title} />
       </Box>
       <Border className="mx-[20px]" />
     </Box>

@@ -47,6 +47,7 @@ type PassageExportSource =
     }
 
 type PassageExportSheetProps = PassageExportSource & {
+  inline?: boolean
   version: VersionCode
 }
 
@@ -90,7 +91,8 @@ const safeFilename = (reference: string) =>
     .toLowerCase()
 
 const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
-  ({ selectedVerses, bookNumber, chapterNumber, sourceType, version }, ref) => {
+  ({ selectedVerses, bookNumber, chapterNumber, sourceType, version, inline = false }, ref) => {
+    const [inlineView, setInlineView] = useState<'scope' | 'content' | null>(null)
     const sheetRef = useRef<SheetRef>(null)
     const scopeSheetRef = useRef<SheetRef>(null)
     const contentSheetRef = useRef<SheetRef>(null)
@@ -122,7 +124,7 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
       tags: true,
     })
     const [result, setResult] = useState<PassageExportResult | null>(null)
-    const [isPresented, setIsPresented] = useState(false)
+    const [isPresented, setIsPresented] = useState(inline)
     const [isPreparing, setIsPreparing] = useState(false)
     const [isExporting, setIsExporting] = useState(false)
     const versionName = versions[version]?.name || version
@@ -342,9 +344,50 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
         ? `${previewCharacters.slice(0, PREVIEW_MAX_CHARACTERS).join('').trim()}\n…`
         : previewCharacters.join('')
 
+    if (inline && inlineView)
+      return (
+        <Box>
+          <TouchableBox className="p-3 flex-row items-center" onPress={() => setInlineView(null)}>
+            <Text>{t('Retour')}</Text>
+          </TouchableBox>
+          {inlineView === 'scope'
+            ? scopeOptions.map(option => (
+                <TouchableBox
+                  key={option.value}
+                  className="p-3 flex-row items-center"
+                  onPress={() => {
+                    setResult(null)
+                    setIsPreparing(true)
+                    setScope(option.value)
+                    setInlineView(null)
+                  }}
+                >
+                  <Text>
+                    {scope === option.value ? '✓ ' : ''}
+                    {option.label}
+                  </Text>
+                </TouchableBox>
+              ))
+            : contentOptions.map(option => (
+                <TouchableBox
+                  key={option.key}
+                  className="p-3 flex-row items-center"
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: options[option.key] }}
+                  onPress={() => toggleOption(option.key)}
+                >
+                  <Text>
+                    {options[option.key] ? '☑ ' : '☐ '}
+                    {option.label}
+                  </Text>
+                </TouchableBox>
+              ))}
+        </Box>
+      )
+    const Container = inline ? InlineExportContainer : Sheet
     return (
       <>
-        <Sheet
+        <Container
           ref={sheetRef}
           snapPoints={[1]}
           backgroundColor={theme.colors.reverse}
@@ -368,12 +411,16 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
                 <ExportFilterButton
                   label={t('passageExport.scope')}
                   value={scopeLabels[scope]}
-                  onPress={() => scopeSheetRef.current?.present()}
+                  onPress={() =>
+                    inline ? setInlineView('scope') : scopeSheetRef.current?.present()
+                  }
                 />
                 <ExportFilterButton
                   label={t('passageExport.content')}
                   value={contentSummary}
-                  onPress={() => contentSheetRef.current?.present()}
+                  onPress={() =>
+                    inline ? setInlineView('content') : contentSheetRef.current?.present()
+                  }
                 />
               </Box>
             </Box>
@@ -434,7 +481,7 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
               </Box>
             </Box>
           </SheetScrollView>
-        </Sheet>
+        </Container>
 
         <ChoiceFilterModal
           ref={scopeSheetRef}
@@ -465,5 +512,15 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
 )
 
 PassageExportSheet.displayName = 'PassageExportSheet'
+
+const InlineExportContainer = ({
+  children,
+  footer: Footer,
+}: import('~common/sheet').SheetProps & { ref?: React.Ref<SheetRef> }) => (
+  <Box>
+    {children}
+    {Footer && <Footer />}
+  </Box>
+)
 
 export default PassageExportSheet

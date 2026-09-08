@@ -1,11 +1,10 @@
+import PanelSearch from '~common/ContextualPanel/PanelSearch'
 import React from 'react'
 import { Platform, SectionList, TouchableOpacity, type SectionListRenderItem } from 'react-native'
 import { useNavigation } from 'expo-router'
 import { useAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import ChoiceFilterModal from '~common/ChoiceFilterModal'
 import FiltersHeader from '~common/FiltersHeader'
-import SearchFilterModal from '~common/SearchFilterModal'
 import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -58,9 +57,6 @@ export const useVersionCatalog = (
     null
   )
   const [focusKey, setFocusKey] = React.useState(0)
-  const searchRef = React.useRef<SheetRef>(null)
-  const groupingRef = React.useRef<SheetRef>(null)
-  const availabilityRef = React.useRef<SheetRef>(null)
   const styleInfoRef = React.useRef<SheetRef>(null)
 
   const labels: VersionCatalogLabels = {
@@ -146,7 +142,8 @@ export const useVersionCatalog = (
         label: t('Rechercher'),
         value: query.trim() || undefined,
         active: Boolean(query.trim()),
-        onPress: () => searchRef.current?.present(),
+        onPress: () => {},
+        content: () => <PanelSearch value={query} onChange={setQuery} />,
       },
       {
         key: 'grouping',
@@ -154,7 +151,13 @@ export const useVersionCatalog = (
         label: t('versionCatalog.groupBy'),
         value: groupingLabels[grouping],
         active: grouping !== 'language',
-        onPress: () => groupingRef.current?.present(),
+        onPress: () => {},
+        options: (['language', 'alphabetical', 'style'] as const).map(value => ({
+          key: value,
+          label: groupingLabels[value],
+          selected: grouping === value,
+          onSelect: () => setGrouping(value),
+        })),
       },
       ...(Platform.OS === 'web'
         ? []
@@ -165,7 +168,13 @@ export const useVersionCatalog = (
               label: t('versionCatalog.availability.label'),
               value: availabilityLabels[availability],
               active: availability !== 'all',
-              onPress: () => availabilityRef.current?.present(),
+              onPress: () => {},
+              options: (['all', 'downloaded'] as const).map(value => ({
+                key: value,
+                label: availabilityLabels[value],
+                selected: availability === value,
+                onSelect: () => setAvailability(value),
+              })),
             },
           ]),
     ],
@@ -173,41 +182,6 @@ export const useVersionCatalog = (
 
   const modals = (
     <>
-      <SearchFilterModal
-        ref={searchRef}
-        title={t('Rechercher')}
-        placeholder={t('versionCatalog.searchPlaceholder')}
-        value={query}
-        onChange={setQuery}
-      />
-      <ChoiceFilterModal
-        ref={groupingRef}
-        title={t('versionCatalog.groupBy')}
-        selectedValue={grouping}
-        options={(['language', 'alphabetical', 'style'] as const).map(value => ({
-          value,
-          label: groupingLabels[value],
-        }))}
-        onSelect={value => {
-          setGrouping(value)
-          groupingRef.current?.dismiss()
-        }}
-      />
-      {Platform.OS !== 'web' && (
-        <ChoiceFilterModal
-          ref={availabilityRef}
-          title={t('versionCatalog.availability.label')}
-          selectedValue={availability}
-          options={(['all', 'downloaded'] as const).map(value => ({
-            value,
-            label: availabilityLabels[value],
-          }))}
-          onSelect={value => {
-            setAvailability(value)
-            availabilityRef.current?.dismiss()
-          }}
-        />
-      )}
       <Sheet
         ref={styleInfoRef}
         header={
@@ -239,6 +213,7 @@ export const useVersionCatalog = (
     query,
     resetSearch,
     sections,
+    setQuery,
   }
 }
 

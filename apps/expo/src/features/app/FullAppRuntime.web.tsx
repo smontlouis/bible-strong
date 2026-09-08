@@ -1,3 +1,4 @@
+import ConfirmDialogHost from '~common/ConfirmDialog/ConfirmDialogHost.web'
 import { useWorkspaceRoutePanel } from '~navigation/useWorkspaceRoutePanel'
 import WorkspaceLayout from '~features/app-switcher/WorkspaceLayout'
 import * as Sentry from '@sentry/react-native'
@@ -90,6 +91,7 @@ const FullAppRuntime = ({ theme }: { theme: Theme }) => {
                   />
                 </Stack>
               </WorkspaceLayout>
+              <ConfirmDialogHost />
               <ThemedToaster />
               <ChangelogModal />
               <UnifiedTagsModal />

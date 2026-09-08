@@ -105,7 +105,7 @@ type ModalState = {
   onDelete?: () => void
 }
 
-const ColorPickerModal = () => {
+const ColorPickerModal = ({ inline = false }: { inline?: boolean }) => {
   const item = useAtomValue(colorPickerModalAtom)
   const setColorPickerModal = useSetAtom(colorPickerModalAtom)
   const { ref, open, close } = useSheet()
@@ -139,10 +139,10 @@ const ColorPickerModal = () => {
 
   // Auto-open when atom changes
   useEffect(() => {
-    if (item) {
+    if (item && !inline) {
       open()
     }
-  }, [item, open])
+  }, [item, open, inline])
 
   const isSelectionMode = item && item.onSelectColor
 
@@ -290,9 +290,10 @@ const ColorPickerModal = () => {
     setColorPickerModal(false)
   }
 
+  const Container = inline ? InlinePaletteContainer : Sheet
   return (
     <>
-      <Sheet
+      <Container
         ref={ref}
         onDismiss={handleModalClose}
         header={<SheetHeader title={t('Palette de couleurs')} />}
@@ -423,7 +424,7 @@ const ColorPickerModal = () => {
             </Box>
           )}
         </SheetScrollView>
-      </Sheet>
+      </Container>
 
       <ColorEditModal
         modalRef={editModalRef}
@@ -437,5 +438,9 @@ const ColorPickerModal = () => {
     </>
   )
 }
+
+const InlinePaletteContainer = ({
+  children,
+}: import('~common/sheet').SheetProps & { ref?: React.Ref<SheetRef> }) => <Box>{children}</Box>
 
 export default ColorPickerModal

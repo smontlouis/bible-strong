@@ -314,6 +314,8 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
             },
             {
               key: 'tags',
+              searchable: true,
+              showCheckbox: true,
               options: [
                 {
                   key: 'all',

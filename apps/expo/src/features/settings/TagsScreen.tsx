@@ -1,3 +1,5 @@
+import TagOptionsPanel from './TagOptionsPanel'
+import PanelSearch from '~common/ContextualPanel/PanelSearch'
 import { useAtom } from 'jotai/react'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -23,7 +25,6 @@ import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import FabButton from '~common/ui/FabButton'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { queryTagList, type TagListRow } from '~features/entityListQuery/tagListQuery'
 import { useSheet } from '~helpers/useSheet'
@@ -135,13 +136,7 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
               )}
             </Box>
           </Box>
-          <Link
-            accessibilityLabel={t('accessibility.options')}
-            onPress={() => setOpen(item.tag)}
-            padding
-          >
-            <FeatherIcon name="more-vertical" size={20} />
-          </Link>
+          <TagOptionsPanel tag={item.tag} />
         </Box>
       </Link>
       <Border className="mx-[10px]" />
@@ -218,6 +213,12 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
           filters={[
             {
               key: 'search',
+              content: () => (
+                <PanelSearch
+                  value={queryState.query}
+                  onChange={query => setQueryState(state => ({ ...state, query }))}
+                />
+              ),
               icon: 'search',
               label: t('Rechercher'),
               value: queryState.query.trim() || undefined,
@@ -226,6 +227,12 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
             },
             {
               key: 'sort',
+              options: sortOptions.map(option => ({
+                key: option.value,
+                label: option.label,
+                selected: queryState.sort === option.value,
+                onSelect: () => setQueryState(state => ({ ...state, sort: option.value })),
+              })),
               icon: 'list',
               label: t('Ordre'),
               value: sortLabel,

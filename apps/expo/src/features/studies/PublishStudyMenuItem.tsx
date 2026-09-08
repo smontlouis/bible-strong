@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, PermissionsAndroid, Platform, Share } from 'react-native'
+import { ActivityIndicator, Linking, PermissionsAndroid, Platform, Share } from 'react-native'
+import PanelAction from '~common/ContextualPanel/PanelAction'
 import { useDispatch } from 'react-redux'
 import slugify from 'slugify'
 import { LinkBox } from '~common/Link'
@@ -148,6 +149,75 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
     }
   }
 
+  if (Platform.OS === 'web') {
+    return (
+      <Box className="pb-1 mb-1 border-b border-border">
+        {!study.published ? (
+          <PanelAction
+            icon="upload-cloud"
+            label={t("Publier l'étude")}
+            disabled={!isConnected}
+            onPress={onPublishStudy}
+          />
+        ) : (
+          <>
+            {status === 'Resolved' && data === 200 ? (
+              <PanelAction
+                icon="link-2"
+                label={t("Dépublier l'étude")}
+                onPress={() => dispatch(publishStudy(study.id, false))}
+              />
+            ) : (
+              <Box className="flex-row items-center gap-3 p-3">
+                {status === 'Pending' ? (
+                  <ActivityIndicator size={17} />
+                ) : (
+                  <FeatherIcon
+                    name="link-2"
+                    size={17}
+                    color={status === 'Rejected' ? 'quart' : 'tertiary'}
+                  />
+                )}
+                <Text className="flex-1 text-[14px] text-tertiary">
+                  {t(
+                    status === 'Pending'
+                      ? 'Chargement'
+                      : status === 'Rejected'
+                        ? 'Impossible de vérifier le lien'
+                        : 'Publication en cours...'
+                  )}
+                </Text>
+              </Box>
+            )}
+            <PanelAction
+              icon="external-link"
+              label={t('Ouvrir le lien')}
+              onPress={() => {
+                void Linking.openURL(url)
+              }}
+            />
+            <PanelAction
+              icon="copy"
+              label={t('Copier le lien')}
+              onPress={() => {
+                void copyToClipboard(url)
+                onClosed()
+              }}
+            />
+            <PanelAction
+              icon="share-2"
+              label={t('Partager')}
+              onPress={async () => {
+                const result = await shareVerse(study.title, study.user.displayName, url)
+                if (result.action === Share.sharedAction) onClosed()
+              }}
+            />
+          </>
+        )}
+      </Box>
+    )
+  }
+
   return (
     <>
       {study.published ? (
@@ -210,7 +280,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
               <FeatherIcon name="share-2" size={20} />
               <Text className="ml-[20px]">{t('Partager')}</Text>
             </LinkBox>
-            {Platform.OS !== 'web' && (pdfStatus === 'Idle' || pdfStatus === 'Rejected') && (
+            {(pdfStatus === 'Idle' || pdfStatus === 'Rejected') && (
               <LinkBox className="py-[10px] items-center flex-row" onPress={() => exportPDF()}>
                 <MaterialIcon name="picture-as-pdf" size={20} />
                 {pdfStatus === 'Idle' ? (

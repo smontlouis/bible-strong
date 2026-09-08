@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { TextInput } from 'react-native'
+import { useTheme } from '~themes/ThemeProvider'
 
 import ChoiceFilterModal, { type ChoiceFilterOption } from './ChoiceFilterModal'
 import SearchFilterModal from './SearchFilterModal'
@@ -22,6 +24,7 @@ export const useEntityListQueryFilters = ({
   onSortChange,
 }: Props) => {
   const { t } = useTranslation()
+  const theme = useTheme()
   const searchRef = useRef<SheetRef>(null)
   const sortRef = useRef<SheetRef>(null)
   const sortLabel = sortOptions.find(option => option.value === sort)?.label || sort
@@ -36,6 +39,22 @@ export const useEntityListQueryFilters = ({
         value: query.trim() || undefined,
         active: Boolean(query.trim()),
         onPress: () => searchRef.current?.present(),
+        content: () => (
+          <TextInput
+            accessibilityLabel={t('Rechercher')}
+            placeholder={t('Rechercher')}
+            value={query}
+            onChangeText={onQueryChange}
+            style={{
+              color: theme.colors.default,
+              borderColor: theme.colors.border,
+              borderWidth: 1,
+              borderRadius: 8,
+              padding: 12,
+              margin: 8,
+            }}
+          />
+        ),
       },
       {
         key: 'sort',
@@ -44,6 +63,12 @@ export const useEntityListQueryFilters = ({
         value: sortLabel,
         active: sort !== 'newest',
         onPress: () => sortRef.current?.present(),
+        options: sortOptions.map(option => ({
+          key: option.value,
+          label: option.label,
+          selected: sort === option.value,
+          onSelect: () => onSortChange(option.value),
+        })),
       },
     ],
     modals: (

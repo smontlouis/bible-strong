@@ -14,6 +14,7 @@ type ActionMenuContentProps = {
 
 type ActionSheetItemProps = ActionMenuContentProps & {
   onPress: () => void
+  nested?: boolean
 }
 
 export const ActionMenuContent = ({ icon, label, color = 'default' }: ActionMenuContentProps) => {
@@ -33,11 +34,12 @@ export const ActionMenuContent = ({ icon, label, color = 'default' }: ActionMenu
   )
 }
 
-export const ActionSheetItem = ({ icon, label, color, onPress }: ActionSheetItemProps) => (
+export const ActionSheetItem = ({ icon, label, color, onPress, nested }: ActionSheetItemProps) => (
   <TouchableBox
     className="border-continuous overflow-visible flex-row items-center justify-between p-[20px] border-b-[1px] border-border"
     onPress={onPress}
   >
     <ActionMenuContent icon={icon} label={label} color={color} />
+    {nested && <FeatherIcon name="chevron-right" size={20} color="tertiary" />}
   </TouchableBox>
 )

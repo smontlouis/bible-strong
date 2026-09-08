@@ -1,3 +1,6 @@
+import BibleSelectorTrigger from './BibleSelectorTrigger'
+import BibleBookmarkTrigger from '~features/bookmarks/BibleBookmarkTrigger'
+import BibleOptionsMenu from './BibleOptionsMenu'
 import { PAGE_CONTENT_MAX_WIDTH } from '~common/ui/PageContent'
 import { useEffect, useRef } from 'react'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
@@ -593,7 +596,10 @@ const Header = ({
                 </Box>
                 {strongModeButton}
                 {interlinearModeButton}
-                <MenuView
+                <BibleOptionsMenu
+                  bookNumber={bookNumber}
+                  chapter={chapter}
+                  version={version}
                   accessibilityLabel={t('accessibility.focusOptions')}
                   actions={focusMenuActions}
                   onPressAction={({ nativeEvent }) => {
@@ -626,7 +632,7 @@ const Header = ({
                     <Text className="text-primary text-[11px] font-bold">Focus</Text>
                     <FeatherIcon name="chevron-down" size={12} color="primary" />
                   </AnimatedBox>
-                </MenuView>
+                </BibleOptionsMenu>
                 <TouchableBox
                   className="overflow-hidden border-continuous items-center justify-center w-[28px] h-[28px] bg-light-primary rounded-[12px]"
                   onPress={toggleFocusContext}
@@ -659,7 +665,11 @@ const Header = ({
           <>
             <HStack className="overflow-hidden border-continuous items-center gap-[3px] pl-[10px]">
               <HStack className="overflow-hidden border-continuous">
-                <TouchableBox
+                <BibleSelectorTrigger
+                  kind="book"
+                  data={getDefaultStore().get(bibleAtom).data}
+                  actions={actions}
+                  coverage={coverage}
                   className="overflow-hidden border-continuous items-center justify-center pl-[12px] pr-[7px] h-[32px]"
                   onPress={() => {
                     openBookSelector({
@@ -681,9 +691,12 @@ const Header = ({
                       ? truncate(`${t(bookName)} ${chapter}`, 10)
                       : `${t(bookName)} ${chapter}`}
                   </AnimatedText>
-                </TouchableBox>
+                </BibleSelectorTrigger>
               </HStack>
-              <TouchableBox
+              <BibleSelectorTrigger
+                kind="version"
+                data={getDefaultStore().get(bibleAtom).data}
+                actions={actions}
                 className="overflow-hidden border-continuous items-center justify-center pl-[7px] pr-[12px] h-[32px]"
                 onPress={() =>
                   openVersionSelector({
@@ -701,7 +714,7 @@ const Header = ({
                 <AnimatedText className="font-bold text-[14px]" style={translateYTransitionStyle}>
                   {version}
                 </AnimatedText>
-              </TouchableBox>
+              </BibleSelectorTrigger>
             </HStack>
 
             <VerseSelectorPopup bibleAtom={bibleAtom} coverage={coverage} preferCoverage>
@@ -765,7 +778,10 @@ const Header = ({
                 {interlinearModeButton}
 
                 {/* Three-dots menu */}
-                <MenuView
+                <BibleOptionsMenu
+                  bookNumber={bookNumber}
+                  chapter={chapter}
+                  version={version}
                   accessibilityLabel={t('accessibility.bibleOptions')}
                   actions={mainMenuActions}
                   onPressAction={({ nativeEvent }) => {
@@ -802,7 +818,7 @@ const Header = ({
                   >
                     <FeatherIcon name="more-vertical" size={18} />
                   </AnimatedBox>
-                </MenuView>
+                </BibleOptionsMenu>
                 {focusVerses && focusVerses.length > 0 && (
                   <TouchableBox
                     className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[32px]"
@@ -840,14 +856,15 @@ const Header = ({
       )}
       {currentChapterBookmark && (
         <Box className="overflow-hidden border-continuous absolute right-[24px] bottom-[-18px]">
-          <TouchableBox
-            className="overflow-hidden border-continuous items-center justify-center h-[100%]"
+          <BibleBookmarkTrigger
+            book={bookNumber}
+            chapter={chapter}
+            version={version}
             onPress={() => bookmarkModalRef.current?.present()}
-            accessibilityRole="button"
             accessibilityLabel={t('Modifier le marque-page')}
           >
             <IonIcon name="bookmark" size={24} color={currentChapterBookmark.color} />
-          </TouchableBox>
+          </BibleBookmarkTrigger>
         </Box>
       )}
     </AnimatedVStack>

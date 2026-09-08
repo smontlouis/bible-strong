@@ -1,3 +1,4 @@
+import StudyOptionsPanel from './StudyOptionsPanel'
 import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
@@ -10,7 +11,6 @@ import { useTranslation } from 'react-i18next'
 import EntityChipList from '~common/EntityChipList'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import { deltaToPlainText } from '~helpers/deltaToPlainText'
@@ -130,12 +130,9 @@ const StudyItem = ({
           />
         </Box>
         {!!setStudySettings && (
-          <LinkBox
-            className="p-[10px] absolute top-[0px] right-[0px]"
-            onPress={() => setStudySettings(study.id)}
-          >
-            <FeatherIcon color="tertiary" name="more-vertical" size={20} />
-          </LinkBox>
+          <Box className="absolute top-0 right-0">
+            <StudyOptionsPanel study={study} />
+          </Box>
         )}
       </Box>
     </Box>

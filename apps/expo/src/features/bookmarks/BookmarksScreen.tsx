@@ -1,20 +1,21 @@
+import BookmarkOptionsPanel from './BookmarkOptionsPanel'
 import { getBookmarkVerse } from './bookmarkVerse'
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { type SheetRef } from '~common/sheet'
 import Empty from '~common/Empty'
-import Header from '~common/Header'
+import FiltersHeader from '~common/FiltersHeader'
+import { useEntityListQueryFilters } from '~common/EntityListQueryFilters'
+import type { EntityListSort } from '~features/entityListQuery/entityListQuery'
 import Link from '~common/Link'
 import Border from '~common/ui/Border'
 import Box, { VStack } from '~common/ui/Box'
 import FlatList from '~common/ui/FlatList'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import { FeatherIcon, IonIcon } from '~common/ui/Icon'
+import { IonIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { selectSortedBookmarks } from '~redux/selectors/bookmarks'
 import type { Bookmark } from '~common/types'
-import BookmarkModal from './BookmarkModal'
 import books from '~assets/bible_versions/books-desc'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
@@ -34,12 +35,10 @@ const formatReference = (bookmark: Bookmark): string => {
 
 type BookmarkItemProps = {
   item: Bookmark
-  onEdit: (bookmark: Bookmark) => void
   onNavigate: (bookmark: Bookmark) => void
 }
 
-const BookmarkItem = ({ item, onEdit, onNavigate }: BookmarkItemProps) => {
-  const { t } = useTranslation()
+const BookmarkItem = ({ item, onNavigate }: BookmarkItemProps) => {
   const reference = formatReference(item)
 
   return (
@@ -56,9 +55,7 @@ const BookmarkItem = ({ item, onEdit, onNavigate }: BookmarkItemProps) => {
             </VStack>
           </Box>
         </Link>
-        <Link accessibilityLabel={t('accessibility.options')} onPress={() => onEdit(item)} padding>
-          <FeatherIcon name="more-vertical" size={20} />
-        </Link>
+        <BookmarkOptionsPanel bookmark={item} onNavigate={() => onNavigate(item)} />
       </Box>
       <Border className="mx-[20px]" />
     </Box>
@@ -75,14 +72,25 @@ const BookmarksScreen = ({ isFormSheet = false }: BookmarksScreenProps) => {
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
   const bookmarks = useSelector(selectSortedBookmarks)
-  const [selectedBookmark, setSelectedBookmark] = useState<Bookmark | null>(null)
-  const bookmarkModalRef = useRef<SheetRef>(null)
-
-  const handleEdit = (bookmark: Bookmark) => {
-    setSelectedBookmark(bookmark)
-    setTimeout(() => bookmarkModalRef.current?.present(), 0)
-  }
-
+  const [query, setQuery] = useState('')
+  const [sort, setSort] = useState<EntityListSort>('newest')
+  const queryFilters = useEntityListQueryFilters({
+    query,
+    sort,
+    onQueryChange: setQuery,
+    onSortChange: setSort,
+    sortOptions: [
+      { value: 'newest', label: t('entityList.sort.newest') },
+      { value: 'oldest', label: t('entityList.sort.oldest') },
+    ],
+  })
+  const visibleBookmarks = bookmarks
+    .filter(bookmark =>
+      `${bookmark.name} ${formatReference(bookmark)}`
+        .toLocaleLowerCase()
+        .includes(query.trim().toLocaleLowerCase())
+    )
+    .sort((a, b) => (sort === 'oldest' ? a.date - b.date : b.date - a.date))
   const handleNavigate = (bookmark: Bookmark) => {
     const verse = getBookmarkVerse(bookmark.verse)
     pushRouteOnce({
@@ -97,19 +105,23 @@ const BookmarksScreen = ({ isFormSheet = false }: BookmarksScreenProps) => {
     })
   }
 
-  const handleCloseModal = () => {
-    setSelectedBookmark(null)
-  }
-
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
-        <Header hasBackButton={hasBackButton} title={t('Marque-pages')} />
+        <FiltersHeader
+          hasBackButton={hasBackButton}
+          title={t('Marque-pages')}
+          filters={queryFilters.filters}
+          onReset={() => {
+            setQuery('')
+            setSort('newest')
+          }}
+        />
         {bookmarks.length > 0 ? (
           <FlatList
-            data={bookmarks}
+            data={visibleBookmarks}
             renderItem={({ item }: { item: Bookmark }) => (
-              <BookmarkItem item={item} onEdit={handleEdit} onNavigate={handleNavigate} />
+              <BookmarkItem item={item} onNavigate={handleNavigate} />
             )}
             keyExtractor={(item: Bookmark) => item.id}
             contentContainerStyle={{ paddingBottom: 70 }}
@@ -120,11 +132,6 @@ const BookmarksScreen = ({ isFormSheet = false }: BookmarksScreenProps) => {
             message={t('Aucun marque-page...')}
           />
         )}
-        <BookmarkModal
-          sheetRef={bookmarkModalRef}
-          onClose={handleCloseModal}
-          existingBookmark={selectedBookmark || undefined}
-        />
       </Box>
     </FormSheetScreen>
   )
