@@ -1,3 +1,4 @@
+import DisplayModeTrigger from './DisplayModeTrigger'
 import BibleSelectorTrigger from './BibleSelectorTrigger'
 import BibleBookmarkTrigger from '~features/bookmarks/BibleBookmarkTrigger'
 import BibleOptionsMenu from './BibleOptionsMenu'
@@ -372,7 +373,9 @@ const Header = ({
   ]
 
   const strongModeButton = isStrongCapableBibleVersion(version) ? (
-    <AnimatedTouchableBox
+    <DisplayModeTrigger
+      kind="strong"
+      bibleAtom={bibleAtom}
       className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
       onPress={() => strongModeSheetRef.current?.present()}
       disabled={isStrongDownloadVisible}
@@ -407,11 +410,13 @@ const Header = ({
       ) : (
         <StrongMark highlighted={strongMode !== 'hidden'} />
       )}
-    </AnimatedTouchableBox>
+    </DisplayModeTrigger>
   ) : null
 
   const interlinearModeButton = isInterlinearCapableBibleVersion(version) ? (
-    <AnimatedTouchableBox
+    <DisplayModeTrigger
+      kind="interlinear"
+      bibleAtom={bibleAtom}
       className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
       onPress={() => interlinearModeSheetRef.current?.present()}
       disabled={isInterlinearDownloadVisible}
@@ -437,7 +442,7 @@ const Header = ({
       ) : (
         <InterlinearMark highlighted={isInterlinearModeEnabled(interlinearMode)} />
       )}
-    </AnimatedTouchableBox>
+    </DisplayModeTrigger>
   ) : null
 
   if (annotationModeEnabled) {

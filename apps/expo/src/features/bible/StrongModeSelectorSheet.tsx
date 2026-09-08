@@ -1,3 +1,4 @@
+import InlineDisplayModeContent from './InlineDisplayModeContent'
 import { useAtomValue } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
 import { useQuery } from '@tanstack/react-query'
@@ -33,10 +34,12 @@ import {
 } from '~features/resources/useOfflineResourceRegistry'
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
-  sheetRef: RefObject<SheetRef | null>
+  sheetRef?: RefObject<SheetRef | null>
+  inline?: boolean
+  onClose?: () => void
 }
 
-const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
+const StrongModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onClose }: Props) => {
   const { t } = useTranslation()
   const appLanguage = useLanguage()
   const bible = useAtomValue(bibleAtom)
@@ -117,7 +120,8 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
         actions.finishBibleModeAcquisition(false)
       }
       actions.setStrongMode(mode)
-      sheetRef.current?.dismiss()
+      sheetRef?.current?.dismiss()
+      onClose?.()
     }
   }
 
@@ -142,7 +146,8 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
       })
       if (!plan.items.length) {
         actions.setStrongMode(mode)
-        sheetRef.current?.dismiss()
+        sheetRef?.current?.dismiss()
+        onClose?.()
         return
       }
 
@@ -175,8 +180,9 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
       ? t('Télécharger les ressources pour {{mode}}', { mode })
       : t('resource.action.connectionRequired')
 
+  const Container = inline ? InlineDisplayModeContent : Sheet
   return (
-    <Sheet ref={sheetRef} header={<SheetHeader title={t('Affichage du texte')} />}>
+    <Container ref={sheetRef} header={<SheetHeader title={t('Affichage du texte')} />}>
       <SheetView className="p-[16px] gap-[10px]">
         <BibleDisplayModeCard
           layout="list"
@@ -233,7 +239,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
           </Box>
         </BibleDisplayModeCard>
       </SheetView>
-    </Sheet>
+    </Container>
   )
 }
 

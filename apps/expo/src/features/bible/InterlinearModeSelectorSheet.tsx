@@ -1,3 +1,4 @@
+import InlineDisplayModeContent from './InlineDisplayModeContent'
 import { twMerge } from '~common/ui/classNames'
 import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
@@ -40,7 +41,9 @@ import {
 } from '~features/resources/useOfflineResourceRegistry'
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
-  sheetRef: RefObject<SheetRef | null>
+  sheetRef?: RefObject<SheetRef | null>
+  inline?: boolean
+  onClose?: () => void
 }
 
 type AvailabilityByLocale = Partial<Record<ResourceLanguage, InterlinearSidecarAvailability>>
@@ -49,7 +52,7 @@ type DisplayMode = 'hidden' | InterlinearDisplayMode
 const isActiveDownload = (status?: string) =>
   status === 'queued' || status === 'downloading' || status === 'inserting'
 
-const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
+const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onClose }: Props) => {
   const stylingTheme = useStylingTheme()
 
   const { t } = useTranslation()
@@ -122,7 +125,8 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     if (resolvedAvailability.status === 'available') {
       if (modeAfterDownload) {
         actions.setInterlinearMode(modeAfterDownload, locale)
-        sheetRef.current?.dismiss()
+        sheetRef?.current?.dismiss()
+        onClose?.()
       }
       return
     }
@@ -145,7 +149,8 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
         actions.finishBibleModeAcquisition(false)
       }
       actions.setInterlinearMode('hidden', selectedLocale)
-      sheetRef.current?.dismiss()
+      sheetRef?.current?.dismiss()
+      onClose?.()
       return
     }
 
@@ -159,7 +164,8 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
       (mayFallback && resolvedAvailability[fallbackLocale]?.status === 'available')
     ) {
       actions.setInterlinearMode(mode, selectedLocale)
-      sheetRef.current?.dismiss()
+      sheetRef?.current?.dismiss()
+      onClose?.()
       return
     }
 
@@ -266,8 +272,9 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
       ? t('Télécharger les ressources pour {{mode}}', { mode })
       : t('resource.action.connectionRequired')
 
+  const Container = inline ? InlineDisplayModeContent : Sheet
   return (
-    <Sheet ref={sheetRef} header={<SheetHeader title={t('Affichage du texte')} />}>
+    <Container ref={sheetRef} header={<SheetHeader title={t('Affichage du texte')} />}>
       <SheetView className="p-[16px] gap-[10px]">
         <Box className="overflow-hidden border-continuous flex-row gap-[10px]">
           <BibleDisplayModeCard
@@ -388,7 +395,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
           </Box>
         )}
       </SheetView>
-    </Sheet>
+    </Container>
   )
 }
 
