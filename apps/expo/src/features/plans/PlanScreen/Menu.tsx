@@ -1,9 +1,10 @@
 import { type SheetRef } from '~common/sheet'
-import { MenuView, type MenuAction } from '~common/ui/MenuView'
+import { type MenuAction } from '~common/ui/MenuView'
+import ContextualMenu from '~common/ContextualPanel/ContextualMenu'
 import { useRouter } from 'expo-router'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert } from 'react-native'
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useDispatch } from 'react-redux'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -15,49 +16,45 @@ interface Props {
   planId: string
   title: string
   onRemove?: () => void
+  details?: React.ReactNode
 }
 
-const Menu = ({ modalRefDetails, planId, title, onRemove }: Props) => {
+const Menu = ({ modalRefDetails, planId, title, onRemove, details }: Props) => {
   const router = useRouter()
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const openInNewTab = useOpenInNewTab()
+  const confirm = useConfirmDialog()
 
-  const onResetPress = () => {
-    Alert.alert(
-      t('Attention'),
-      t(
-        'Êtes-vous vraiment sur de remettre à zéro votre plan ? Vous perdrez toute votre progression.'
-      ),
-      [
-        { text: t('Annuler'), onPress: () => null, style: 'cancel' },
-        {
-          text: t('Remettre à zéro'),
-          onPress: () => {
-            dispatch(resetPlan(planId))
-          },
-          style: 'destructive',
-        },
-      ]
+  const onResetPress = async () => {
+    if (
+      await confirm({
+        title: t('Attention'),
+        message: t(
+          'Êtes-vous vraiment sur de remettre à zéro votre plan ? Vous perdrez toute votre progression.'
+        ),
+        cancelLabel: t('Annuler'),
+        confirmLabel: t('Remettre à zéro'),
+        destructive: true,
+      })
     )
+      dispatch(resetPlan(planId))
   }
 
-  const onRemovePress = () => {
-    Alert.alert(t('Attention'), t('Êtes-vous sûr de vouloir arrêter ce plan ?'), [
-      { text: t('Annuler'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Supprimer'),
-        onPress: () => {
-          dispatch(removePlan(planId))
-          if (onRemove) {
-            onRemove()
-          } else {
-            router.back()
-          }
-        },
-        style: 'destructive',
-      },
-    ])
+  const onRemovePress = async () => {
+    if (
+      await confirm({
+        title: t('Attention'),
+        message: t('Êtes-vous sûr de vouloir arrêter ce plan ?'),
+        cancelLabel: t('Annuler'),
+        confirmLabel: t('Supprimer'),
+        destructive: true,
+      })
+    ) {
+      dispatch(removePlan(planId))
+      if (onRemove) onRemove()
+      else router.back()
+    }
   }
 
   const actions: MenuAction[] = [
@@ -85,7 +82,16 @@ const Menu = ({ modalRefDetails, planId, title, onRemove }: Props) => {
   ]
 
   return (
-    <MenuView
+    <ContextualMenu
+      panelTitle={title}
+      panelWidth={500}
+      icons={{
+        details: 'info',
+        'open-in-new-tab': 'external-link',
+        reset: 'rotate-ccw',
+        remove: 'trash-2',
+      }}
+      screens={details ? { details: { title: t('Détails'), content: () => details } } : {}}
       actions={actions}
       onPressAction={({ nativeEvent }) => {
         switch (nativeEvent.event) {
@@ -113,7 +119,7 @@ const Menu = ({ modalRefDetails, planId, title, onRemove }: Props) => {
       <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
         <FeatherIcon name="more-vertical" size={18} />
       </Box>
-    </MenuView>
+    </ContextualMenu>
   )
 }
 

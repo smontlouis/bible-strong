@@ -19,6 +19,7 @@ import Text from '~common/ui/Text'
 import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
 import { GROUP_COLORS } from '../../../state/tabs'
+import InlineSheetContent from '~common/ContextualPanel/InlineSheetContent'
 
 const StyledTextInput = (
   componentProps: Omit<UIComponentProps<typeof SheetTextInput>, 'theme'> & {
@@ -49,6 +50,7 @@ interface EditGroupModalProps {
   initialColor?: string
   onSave: (data: { name: string; color: string }) => void
   onClose?: () => void
+  inline?: boolean
 }
 
 const EditGroupModal = ({
@@ -58,6 +60,7 @@ const EditGroupModal = ({
   initialColor = GROUP_COLORS[0],
   onSave,
   onClose,
+  inline = false,
 }: EditGroupModalProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -70,7 +73,8 @@ const EditGroupModal = ({
   }
 
   const handleClose = () => {
-    sheetRef.current?.dismiss()
+    if (inline) onClose?.()
+    else sheetRef.current?.dismiss()
   }
 
   const handleSave = () => {
@@ -91,8 +95,9 @@ const EditGroupModal = ({
 
   const isDisabled = !name.trim()
 
+  const Container = inline ? InlineSheetContent : Sheet
   return (
-    <Sheet
+    <Container
       ref={sheetRef}
       onDismiss={handleDismiss}
       onPresent={handlePresent}
@@ -126,7 +131,13 @@ const EditGroupModal = ({
 
         <Box className="overflow-hidden border-continuous gap-[8px]">
           <Text className="text-tertiary text-[13px]">{t('Couleur')}</Text>
-          <HStack className="gap-[12px] items-center justify-between">
+          <HStack
+            className={
+              inline
+                ? 'gap-[8px] items-center flex-wrap'
+                : 'gap-[12px] items-center justify-between'
+            }
+          >
             {GROUP_COLORS.map((color, index) => (
               <TouchableBox
                 className="overflow-hidden border-continuous w-[32px] h-[32px] rounded-[16px] items-center justify-center"
@@ -145,7 +156,7 @@ const EditGroupModal = ({
           </HStack>
         </Box>
       </SheetView>
-    </Sheet>
+    </Container>
   )
 }
 

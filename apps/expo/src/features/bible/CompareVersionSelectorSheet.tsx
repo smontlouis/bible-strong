@@ -1,4 +1,10 @@
-import { Sheet, type SheetRef } from '~common/sheet'
+import { type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
+import FiltersHeader from '~common/FiltersHeader'
+import PanelSearch from '~common/ContextualPanel/PanelSearch'
+import InlineSheetContent from '~common/ContextualPanel/InlineSheetContent'
+import HeaderAction from '~common/ContextualPanel/HeaderAction'
+import HeaderContent from '~common/ContextualPanel/HeaderContent'
 import React from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
@@ -15,9 +21,13 @@ import BibleOfflineDetailsSheet from './VersionSelectorSheet/BibleOfflineDetails
 import { useBibleOfflineDetails } from './VersionSelectorSheet/useBibleOfflineDetails'
 type CompareVersionSelectorSheetProps = {
   sheetRef: React.RefObject<SheetRef | null>
+  inline?: boolean
 }
 
-const CompareVersionSelectorSheet = ({ sheetRef }: CompareVersionSelectorSheetProps) => {
+const CompareVersionSelectorSheet = ({
+  sheetRef,
+  inline = false,
+}: CompareVersionSelectorSheetProps) => {
   const insets = useSafeAreaInsets()
   const theme = useTheme()
   const { t } = useTranslation()
@@ -33,10 +43,38 @@ const CompareVersionSelectorSheet = ({ sheetRef }: CompareVersionSelectorSheetPr
     dispatch(toggleCompareVersion(versionId))
   }
 
+  const Container = inline ? InlineSheetContent : Sheet
   return (
     <>
-      <Sheet
+      {inline && (
+        <>
+          <HeaderAction>
+            <FiltersHeader
+              buttonOnly
+              title={t('Sélectionner les versions')}
+              {...versionCatalog.headerProps}
+              filters={versionCatalog.headerProps.filters.filter(filter => filter.key !== 'search')}
+            />
+          </HeaderAction>
+          <HeaderContent>
+            <PanelSearch value={versionCatalog.query} onChange={versionCatalog.setQuery} />
+          </HeaderContent>
+        </>
+      )}
+      <Container
         ref={sheetRef}
+        panelWidth={500}
+        panelHeaderRight={
+          <FiltersHeader
+            buttonOnly
+            title={t('Sélectionner les versions')}
+            {...versionCatalog.headerProps}
+            filters={versionCatalog.headerProps.filters.filter(filter => filter.key !== 'search')}
+          />
+        }
+        panelHeaderContent={
+          <PanelSearch value={versionCatalog.query} onChange={versionCatalog.setQuery} />
+        }
         snapPoints={[1]}
         backgroundColor={theme.colors.reverse}
         scrollableOptions={{ scrollingExpandsSheet: false }}
@@ -71,7 +109,7 @@ const CompareVersionSelectorSheet = ({ sheetRef }: CompareVersionSelectorSheetPr
             />
           )}
         />
-      </Sheet>
+      </Container>
       {versionCatalog.modals}
       <BibleOfflineDetailsSheet
         sheetRef={offlineDetails.sheetRef}

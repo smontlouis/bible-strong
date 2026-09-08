@@ -1,6 +1,7 @@
 import React from 'react'
-import { FlatList } from 'react-native'
-import { Sheet, type SheetRef } from '~common/sheet'
+import { FlatList, Platform } from 'react-native'
+import { type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import Link, { LinkBox } from '~common/Link'
@@ -27,10 +28,11 @@ import {
 const FONTS_DATA = ['Literata Book', ...fonts]
 
 interface Props {
-  paramsModalRef: React.RefObject<SheetRef | null>
+  paramsModalRef?: React.RefObject<SheetRef | null>
+  inline?: boolean
 }
 
-const ParamsModal = ({ paramsModalRef }: Props) => {
+const ParamsModal = ({ paramsModalRef, inline = false }: Props) => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const fontsViewRef = React.useRef(null)
@@ -46,12 +48,19 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
     useParamsModalLabels()
 
   const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
+  const isWeb = Platform.OS === 'web'
 
+  const Container = inline ? InlineParams : Sheet
   return (
-    <Sheet ref={paramsModalRef} backdrop={false}>
-      <Box className="overflow-hidden border-continuous p-[20px]">
+    <Container ref={paramsModalRef} backdrop={false} panelTitle={t('Mise en forme')}>
+      <Box
+        testID={isWeb ? 'bible-params-inline' : undefined}
+        className={isWeb ? '' : 'overflow-hidden border-continuous p-[20px]'}
+      >
         <HalfContainer border>
-          <Text className="flex-[5]">{t('Taille du texte')}</Text>
+          <Text className={isWeb ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
+            {t('Taille du texte')}
+          </Text>
           <Text className="ml-[5px] text-[12px] font-bold">{`${100 + fontSizeScale * 10}%`}</Text>
           <TouchableIcon
             accessibilityLabel={t('accessibility.decreaseTextSize')}
@@ -66,7 +75,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text className="flex-[5]">{t('Thème')}</Text>
+          <Text className={isWeb ? 'flex-[5] text-[14px]' : 'flex-[5]'}>{t('Thème')}</Text>
           <Text className="ml-[5px] text-[12px] font-bold">
             {preferredColorSchemeToString[preferredColorScheme]}
           </Text>
@@ -90,7 +99,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text className="flex-[5]">{t('Couleur Jour')}</Text>
+          <Text className={isWeb ? 'flex-[5] text-[14px]' : 'flex-[5]'}>{t('Couleur Jour')}</Text>
           <Text className="ml-[5px] text-[12px] font-bold">
             {preferredLightThemeToString[preferredLightTheme]}
           </Text>
@@ -99,7 +108,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredLightTheme === 'default' }}
             onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}
-            style={{ width: 40, height: 40 }}
+            style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
           >
             <Circle
               isSelected={preferredLightTheme === 'default'}
@@ -112,7 +121,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredLightTheme === 'sepia' }}
             onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}
-            style={{ width: 40, height: 40 }}
+            style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
           >
             <Circle
               isSelected={preferredLightTheme === 'sepia'}
@@ -125,7 +134,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredLightTheme === 'nature' }}
             onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
-            style={{ width: 40, height: 40 }}
+            style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
           >
             <Circle isSelected={preferredLightTheme === 'nature'} size={20} color="#EAF9EC" />
           </LinkBox>
@@ -134,13 +143,13 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredLightTheme === 'sunset' }}
             onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
-            style={{ width: 40, height: 40 }}
+            style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
           >
             <Circle isSelected={preferredLightTheme === 'sunset'} size={20} color="#FAE0D5" />
           </LinkBox>
         </HalfContainer>
         <HalfContainer border>
-          <Text className="flex-[5]">{t('Couleur Nuit')}</Text>
+          <Text className={isWeb ? 'flex-[5] text-[14px]' : 'flex-[5]'}>{t('Couleur Nuit')}</Text>
           <Text className="ml-[5px] text-[12px] font-bold">
             {preferredDarkThemeToString[preferredDarkTheme]}
           </Text>
@@ -149,7 +158,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredDarkTheme === 'dark' }}
             onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
-            style={{ width: 40, height: 40 }}
+            style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
           >
             <Circle isSelected={preferredDarkTheme === 'dark'} size={20} color="rgb(18,45,66)" />
           </LinkBox>
@@ -158,7 +167,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredDarkTheme === 'black' }}
             onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
-            style={{ width: 40, height: 40 }}
+            style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
           >
             <Circle isSelected={preferredDarkTheme === 'black'} size={20} color="black" />
           </LinkBox>
@@ -167,7 +176,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredDarkTheme === 'mauve' }}
             onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}
-            style={{ width: 40, height: 40 }}
+            style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
           >
             <Circle isSelected={preferredDarkTheme === 'mauve'} size={20} color="rgb(51,4,46)" />
           </LinkBox>
@@ -176,7 +185,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
             accessibilityRole="radio"
             accessibilityState={{ checked: preferredDarkTheme === 'night' }}
             onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}
-            style={{ width: 40, height: 40 }}
+            style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
           >
             <Circle isSelected={preferredDarkTheme === 'night'} size={20} color="rgb(0,50,100)" />
           </LinkBox>
@@ -207,8 +216,12 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
           />
         </Box>
       </Box>
-    </Sheet>
+    </Container>
   )
 }
 
 export default ParamsModal
+
+const InlineParams = ({
+  children,
+}: import('~common/ContextualPanel/ContextualSheet').ContextualSheetProps) => <>{children}</>

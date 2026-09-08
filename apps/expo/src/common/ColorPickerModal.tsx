@@ -3,12 +3,16 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import * as NativeUI from 'react-native'
-import { Alert, TouchableOpacity } from 'react-native'
+import { Platform, TouchableOpacity } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
-import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
+import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
+import HeaderReplacement from '~common/ContextualPanel/HeaderReplacement'
+import PanelTransition from '~common/ContextualPanel/PanelTransition'
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import type { Theme as AppTheme } from '~themes'
 
 import ColorEditModal from '~common/ColorEditModal'
@@ -113,6 +117,21 @@ const ColorPickerModal = ({ inline = false }: { inline?: boolean }) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const insets = useSafeAreaInsets()
+  const confirm = useConfirmDialog()
+  const [editing, setEditing] = useState(false)
+  const [direction, setDirection] = useState<'forward' | 'backward'>('forward')
+  const openEditor = () => {
+    if (Platform.OS === 'web') {
+      setDirection('forward')
+      setEditing(true)
+    } else editModalRef.current?.present()
+  }
+  const closeEditor = () => {
+    if (Platform.OS === 'web') {
+      setDirection('backward')
+      setEditing(false)
+    } else editModalRef.current?.dismiss()
+  }
 
   const { theme: currentTheme } = useCurrentThemeSelector()
   const { colors: themeColors, customHighlightColors, defaultColorTypes } = useHighlightColors()
@@ -170,7 +189,7 @@ const ColorPickerModal = ({ inline = false }: { inline?: boolean }) => {
       chosenName: '',
       chosenType: 'background',
     })
-    editModalRef.current?.present()
+    openEditor()
   }
 
   // Open modal for editing a default color
@@ -186,7 +205,7 @@ const ColorPickerModal = ({ inline = false }: { inline?: boolean }) => {
         `${t('Couleur')} ${index + 1}`,
       chosenType: currentType,
     })
-    editModalRef.current?.present()
+    openEditor()
   }
 
   // Open modal for editing a custom color
@@ -199,7 +218,7 @@ const ColorPickerModal = ({ inline = false }: { inline?: boolean }) => {
       chosenType: color.type || 'background',
       onDelete: () => handleDeleteCustomColor(color),
     })
-    editModalRef.current?.present()
+    openEditor()
   }
 
   const handleSave = (hex: string, name: string | undefined, type: HighlightType) => {
@@ -246,31 +265,27 @@ const ColorPickerModal = ({ inline = false }: { inline?: boolean }) => {
     dispatch(deleteCustomColor(colorId))
   }
 
-  const handleDeleteCustomColor = (color: CustomColor) => {
+  const handleDeleteCustomColor = async (color: CustomColor) => {
     const totalCount = getTotalUsageCount(color.id)
 
     if (totalCount > 0) {
-      Alert.alert(
-        t('Supprimer la couleur'),
-        t(
+      const accepted = await confirm({
+        title: t('Supprimer la couleur'),
+        message: t(
           'Cette couleur est utilisée par {{count}} surbrillance(s). Elles seront également supprimées.',
           { count: totalCount }
         ),
-        [
-          { text: t('Annuler'), style: 'cancel' },
-          {
-            text: t('Supprimer'),
-            style: 'destructive',
-            onPress: () => {
-              deleteColorAndHighlightsAndAnnotations(color.id)
-              editModalRef.current?.dismiss()
-            },
-          },
-        ]
-      )
+        confirmLabel: t('Supprimer'),
+        cancelLabel: t('Annuler'),
+        destructive: true,
+      })
+      if (accepted) {
+        deleteColorAndHighlightsAndAnnotations(color.id)
+        closeEditor()
+      }
     } else {
       dispatch(deleteCustomColor(color.id))
-      editModalRef.current?.dismiss()
+      closeEditor()
     }
   }
 
@@ -287,10 +302,12 @@ const ColorPickerModal = ({ inline = false }: { inline?: boolean }) => {
   }
 
   const handleModalClose = () => {
+    setEditing(false)
     setColorPickerModal(false)
   }
 
   const Container = inline ? InlinePaletteContainer : Sheet
+  const Transition = Platform.OS === 'web' ? PanelTransition : NativePaletteTransition
   return (
     <>
       <Container
@@ -298,143 +315,193 @@ const ColorPickerModal = ({ inline = false }: { inline?: boolean }) => {
         onDismiss={handleModalClose}
         header={<SheetHeader title={t('Palette de couleurs')} />}
       >
-        <SheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}>
-          <SectionTitle>{t('Couleurs par défaut')}</SectionTitle>
-          {([1, 2, 3, 4, 5] as const).map(i => {
-            const colorKey = `color${i}` as ColorKey
-            const currentHex = themeColors[colorKey as keyof typeof themeColors]
-            const currentType =
-              defaultColorTypes[colorKey as keyof typeof defaultColorTypes] || 'background'
-            const isModified = isDefaultColorModified(colorKey)
-            const colorName = defaultColorNames[colorKey as keyof typeof defaultColorNames]
-            const isSelected = item && item.selectedColor === colorKey
-
-            return (
-              <ColorRow key={i}>
+        {Platform.OS === 'web' && editing ? (
+          <Transition key="editor" direction={direction}>
+            <HeaderReplacement
+              title={
+                modalState.mode === 'add'
+                  ? t('Nouvelle couleur')
+                  : t('Modifier {{name}}', { name: modalState.chosenName })
+              }
+              onBack={closeEditor}
+            >
+              {modalState.onDelete && (
                 <TouchableBox
-                  className="border-continuous overflow-visible"
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    flex: 1,
-                    overflow: 'visible',
-                  }}
-                  onPress={isSelectionMode ? () => handleColorSelect(colorKey) : undefined}
-                  activeOpacity={isSelectionMode ? 0.7 : 1}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('Supprimer')}
+                  onPress={modalState.onDelete}
+                  className="p-2"
                 >
-                  <Box className="border-continuous overflow-visible mr-[10px]">
-                    <HighlightTypeIndicator
-                      color={currentHex}
-                      type={currentType}
-                      size={30}
-                      isSelected={isSelected}
-                    />
-                  </Box>
-                  <Text className="font-bold text-[14px] flex-[1]">
-                    {colorName || `${t('Couleur')} ${i}`}
-                  </Text>
+                  <FeatherIcon name="trash-2" size={16} color="quart" />
                 </TouchableBox>
-                <Text className="text-tertiary text-[12px] mr-[10px]">
-                  {getTotalUsageCount(`color${i}`)} {t('surbrillance(s)')}
-                </Text>
-                {isModified && (
-                  <IconButton
-                    onPress={() => resetDefaultColor(colorKey)}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    <FeatherIcon name="refresh-cw" size={14} color="grey" />
-                  </IconButton>
-                )}
-                <IconButton
-                  onPress={() => openEditDefaultModal(colorKey, currentHex, i)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <FeatherIcon name="settings" size={16} color="grey" />
-                </IconButton>
-              </ColorRow>
-            )
-          })}
+              )}
+            </HeaderReplacement>
+            <ColorEditModal
+              inline
+              modalRef={editModalRef}
+              mode={modalState.mode === 'add' ? 'add' : 'edit'}
+              initialHex={modalState.chosenHex}
+              initialName={modalState.chosenName}
+              initialType={modalState.chosenType}
+              onSave={handleSave}
+              onClose={closeEditor}
+            />
+          </Transition>
+        ) : (
+          <Transition key="palette" direction={direction}>
+            <SheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}>
+              <SectionTitle>{t('Couleurs par défaut')}</SectionTitle>
+              {([1, 2, 3, 4, 5] as const).map(i => {
+                const colorKey = `color${i}` as ColorKey
+                const currentHex = themeColors[colorKey as keyof typeof themeColors]
+                const currentType =
+                  defaultColorTypes[colorKey as keyof typeof defaultColorTypes] || 'background'
+                const isModified = isDefaultColorModified(colorKey)
+                const colorName = defaultColorNames[colorKey as keyof typeof defaultColorNames]
+                const isSelected = item && item.selectedColor === colorKey
 
-          <SectionTitle>{t('Mes couleurs')}</SectionTitle>
-          {customHighlightColors.length === 0 && (
-            <Box className="overflow-hidden border-continuous px-[15px] py-[10px]">
-              <Text className="text-tertiary text-[13px]">{t('Aucune couleur personnalisée')}</Text>
-            </Box>
-          )}
-          {customHighlightColors.map((color: CustomColor, index: number) => {
-            const isSelected = item && item.selectedColor === color.id
+                return (
+                  <ColorRow key={i}>
+                    <TouchableBox
+                      className="border-continuous overflow-visible"
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        flex: 1,
+                        overflow: 'visible',
+                      }}
+                      onPress={isSelectionMode ? () => handleColorSelect(colorKey) : undefined}
+                      activeOpacity={isSelectionMode ? 0.7 : 1}
+                    >
+                      <Box className="border-continuous overflow-visible mr-[10px]">
+                        <HighlightTypeIndicator
+                          color={currentHex}
+                          type={currentType}
+                          size={30}
+                          isSelected={isSelected}
+                        />
+                      </Box>
+                      <Text className="font-bold text-[14px] flex-[1]">
+                        {colorName || `${t('Couleur')} ${i}`}
+                      </Text>
+                    </TouchableBox>
+                    <Text className="text-tertiary text-[12px] mr-[10px]">
+                      {getTotalUsageCount(`color${i}`)} {t('surbrillance(s)')}
+                    </Text>
+                    {isModified && (
+                      <IconButton
+                        accessibilityRole="button"
+                        accessibilityLabel={`${t('Réinitialiser')} ${colorName || `${t('Couleur')} ${i}`}`}
+                        onPress={() => resetDefaultColor(colorKey)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                        <FeatherIcon name="refresh-cw" size={14} color="grey" />
+                      </IconButton>
+                    )}
+                    <IconButton
+                      accessibilityRole="button"
+                      accessibilityLabel={t('Modifier {{name}}', {
+                        name: colorName || `${t('Couleur')} ${i}`,
+                      })}
+                      onPress={() => openEditDefaultModal(colorKey, currentHex, i)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <FeatherIcon name="settings" size={16} color="grey" />
+                    </IconButton>
+                  </ColorRow>
+                )
+              })}
 
-            return (
-              <ColorRow key={color.id}>
-                <TouchableBox
-                  className="border-continuous overflow-visible"
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    flex: 1,
-                    overflow: 'visible',
-                  }}
-                  onPress={isSelectionMode ? () => handleColorSelect(color.id) : undefined}
-                  activeOpacity={isSelectionMode ? 0.7 : 1}
-                >
-                  <Box className="border-continuous overflow-visible mr-[10px]">
-                    <HighlightTypeIndicator
-                      color={color.hex}
-                      type={color.type || 'background'}
-                      size={30}
-                      isSelected={isSelected}
-                    />
-                  </Box>
-                  <Text className="font-bold text-[14px] flex-[1]">
-                    {color.name || `${t('Couleur personnalisée')} ${index + 1}`}
+              <SectionTitle>{t('Mes couleurs')}</SectionTitle>
+              {customHighlightColors.length === 0 && (
+                <Box className="overflow-hidden border-continuous px-[15px] py-[10px]">
+                  <Text className="text-tertiary text-[13px]">
+                    {t('Aucune couleur personnalisée')}
                   </Text>
-                </TouchableBox>
-                <Text className="text-tertiary text-[12px] mr-[10px]">
-                  {getTotalUsageCount(color.id)} {t('surbrillance(s)')}
-                </Text>
-
-                <IconButton
-                  onPress={() => openEditCustomModal(color, index)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <FeatherIcon name="settings" size={16} color="grey" />
-                </IconButton>
-              </ColorRow>
-            )
-          })}
-
-          {customHighlightColors.length < MAX_CUSTOM_COLORS && (
-            <TouchableOpacity accessibilityRole="button" onPress={openAddModal}>
-              <Box className="overflow-hidden border-continuous flex-row items-center p-[15px]">
-                <Box className="overflow-hidden border-continuous w-[30px] h-[30px] rounded-[10px] bg-light-primary mr-[10px] items-center justify-center">
-                  <FeatherIcon name="plus" size={20} color="primary" />
                 </Box>
-                <Text className="font-bold text-primary text-[14px]">
-                  {t('Ajouter une couleur')}
-                </Text>
-              </Box>
-            </TouchableOpacity>
-          )}
+              )}
+              {customHighlightColors.map((color: CustomColor, index: number) => {
+                const isSelected = item && item.selectedColor === color.id
 
-          {customHighlightColors.length >= MAX_CUSTOM_COLORS && (
-            <Box className="overflow-hidden border-continuous p-[15px]">
-              <Text className="text-tertiary text-[12px]">
-                {t('Limite de 20 couleurs personnalisées atteinte')}
-              </Text>
-            </Box>
-          )}
-        </SheetScrollView>
+                return (
+                  <ColorRow key={color.id}>
+                    <TouchableBox
+                      className="border-continuous overflow-visible"
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        flex: 1,
+                        overflow: 'visible',
+                      }}
+                      onPress={isSelectionMode ? () => handleColorSelect(color.id) : undefined}
+                      activeOpacity={isSelectionMode ? 0.7 : 1}
+                    >
+                      <Box className="border-continuous overflow-visible mr-[10px]">
+                        <HighlightTypeIndicator
+                          color={color.hex}
+                          type={color.type || 'background'}
+                          size={30}
+                          isSelected={isSelected}
+                        />
+                      </Box>
+                      <Text className="font-bold text-[14px] flex-[1]">
+                        {color.name || `${t('Couleur personnalisée')} ${index + 1}`}
+                      </Text>
+                    </TouchableBox>
+                    <Text className="text-tertiary text-[12px] mr-[10px]">
+                      {getTotalUsageCount(color.id)} {t('surbrillance(s)')}
+                    </Text>
+
+                    <IconButton
+                      accessibilityRole="button"
+                      accessibilityLabel={t('Modifier {{name}}', {
+                        name: color.name || `${t('Couleur personnalisée')} ${index + 1}`,
+                      })}
+                      onPress={() => openEditCustomModal(color, index)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <FeatherIcon name="settings" size={16} color="grey" />
+                    </IconButton>
+                  </ColorRow>
+                )
+              })}
+
+              {customHighlightColors.length < MAX_CUSTOM_COLORS && (
+                <TouchableOpacity accessibilityRole="button" onPress={openAddModal}>
+                  <Box className="overflow-hidden border-continuous flex-row items-center p-[15px]">
+                    <Box className="overflow-hidden border-continuous w-[30px] h-[30px] rounded-[10px] bg-light-primary mr-[10px] items-center justify-center">
+                      <FeatherIcon name="plus" size={20} color="primary" />
+                    </Box>
+                    <Text className="font-bold text-primary text-[14px]">
+                      {t('Ajouter une couleur')}
+                    </Text>
+                  </Box>
+                </TouchableOpacity>
+              )}
+
+              {customHighlightColors.length >= MAX_CUSTOM_COLORS && (
+                <Box className="overflow-hidden border-continuous p-[15px]">
+                  <Text className="text-tertiary text-[12px]">
+                    {t('Limite de 20 couleurs personnalisées atteinte')}
+                  </Text>
+                </Box>
+              )}
+            </SheetScrollView>
+          </Transition>
+        )}
       </Container>
 
-      <ColorEditModal
-        modalRef={editModalRef}
-        mode={modalState.mode === 'add' ? 'add' : 'edit'}
-        initialHex={modalState.chosenHex}
-        initialName={modalState.chosenName}
-        initialType={modalState.chosenType}
-        onSave={handleSave}
-        onDelete={modalState.onDelete}
-      />
+      {Platform.OS !== 'web' && (
+        <ColorEditModal
+          modalRef={editModalRef}
+          mode={modalState.mode === 'add' ? 'add' : 'edit'}
+          initialHex={modalState.chosenHex}
+          initialName={modalState.chosenName}
+          initialType={modalState.chosenType}
+          onSave={handleSave}
+          onDelete={modalState.onDelete}
+        />
+      )}
     </>
   )
 }
@@ -444,3 +511,10 @@ const InlinePaletteContainer = ({
 }: import('~common/sheet').SheetProps & { ref?: React.Ref<SheetRef> }) => <Box>{children}</Box>
 
 export default ColorPickerModal
+
+const NativePaletteTransition = ({
+  children,
+}: {
+  children: React.ReactNode
+  direction: string
+}) => <>{children}</>

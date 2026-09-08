@@ -1,4 +1,7 @@
 import { SheetFlashList, Sheet, SheetHeader, type SheetRef } from '~common/sheet'
+import InlineSheetContent from '~common/ContextualPanel/InlineSheetContent'
+import HeaderContent from '~common/ContextualPanel/HeaderContent'
+import HeaderReplacement from '~common/ContextualPanel/HeaderReplacement'
 import { useTheme } from '~themes/ThemeProvider'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
@@ -81,6 +84,7 @@ type RelationResourceFailure = {
 }
 
 type Props = {
+  inline?: boolean
   ref?: Ref<SheetRef | null>
   title?: string
   sourceEndpoint: RelationEndpoint | null
@@ -289,6 +293,7 @@ const CreateEntityRelationModal = ({
   onCreated,
   onSelectTarget,
   allowedTypes,
+  inline = false,
 }: Props) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
@@ -790,8 +795,9 @@ const CreateEntityRelationModal = ({
     </Box>
   )
 
+  const Container = inline ? InlineSheetContent : Sheet
   return (
-    <Sheet
+    <Container
       ref={ref}
       snapPoints={[0.75]}
       header={
@@ -805,7 +811,13 @@ const CreateEntityRelationModal = ({
         </SheetHeader>
       }
     >
-      <VStack className="overflow-hidden border-continuous flex-[1]">
+      {inline && (
+        <>
+          {browseMode && <HeaderReplacement title={modalTitle} onBack={exitBrowseMode} />}
+          <HeaderContent>{searchHeader}</HeaderContent>
+        </>
+      )}
+      <VStack className={inline ? 'h-[360px]' : 'overflow-hidden border-continuous flex-[1]'}>
         {resourceFailure ? (
           <ResourceUnavailableView
             identity={resourceFailure.identity}
@@ -923,7 +935,7 @@ const CreateEntityRelationModal = ({
           />
         )}
       </VStack>
-    </Sheet>
+    </Container>
   )
 }
 

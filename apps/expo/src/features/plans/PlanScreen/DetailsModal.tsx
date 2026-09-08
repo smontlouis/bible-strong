@@ -1,8 +1,9 @@
 import React from 'react'
-import { Sheet, SheetScrollView, type SheetFooterProps, type SheetRef } from '~common/sheet'
+import { SheetScrollView, type SheetFooterProps, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
-import { Image as RNImage } from 'react-native'
+import { Image as RNImage, Platform } from 'react-native'
 import { ComputedPlanItem } from '~common/types'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
@@ -10,7 +11,8 @@ import { wp } from '~helpers/utils'
 const width = wp(100) - 20 > 600 ? 600 : wp(100) - 20
 
 interface Props extends Omit<ComputedPlanItem, 'status' | 'progress' | 'type' | 'lang'> {
-  modalRefDetails: React.RefObject<SheetRef | null>
+  modalRefDetails?: React.RefObject<SheetRef | null>
+  inline?: boolean
   header?: React.ReactElement
   footer?: (props: SheetFooterProps) => React.ReactNode
 }
@@ -24,6 +26,7 @@ const DetailsModal = ({
   author,
   footer,
   header,
+  inline = false,
 }: Props) => {
   const { t } = useTranslation()
   const [height, setHeight] = React.useState<number>()
@@ -40,11 +43,25 @@ const DetailsModal = ({
     )
   }, [image])
 
+  const Container = inline ? InlineDetails : Sheet
   return (
-    <Sheet ref={modalRefDetails} snapPoints={[1]} footer={footer} header={header}>
+    <Container
+      ref={modalRefDetails}
+      panelTitle={t('Détails')}
+      panelWidth={500}
+      snapPoints={[1]}
+      footer={footer}
+      header={header}
+    >
       <SheetScrollView>
         {/** TODO: fix */}
-        <Box className="overflow-hidden border-continuous px-[20px] pt-[20px] pb-[200px]">
+        <Box
+          className={
+            Platform.OS === 'web'
+              ? 'p-[16px]'
+              : 'overflow-hidden border-continuous px-[20px] pt-[20px] pb-[200px]'
+          }
+        >
           {!!image && (
             <Box className="overflow-hidden border-continuous mb-[20px] rounded-[20px]">
               <Image
@@ -87,8 +104,12 @@ const DetailsModal = ({
           )}
         </Box>
       </SheetScrollView>
-    </Sheet>
+    </Container>
   )
 }
 
 export default DetailsModal
+
+const InlineDetails = ({
+  children,
+}: import('~common/ContextualPanel/ContextualSheet').ContextualSheetProps) => <>{children}</>

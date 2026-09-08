@@ -8,7 +8,7 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { useDeleteGroup } from '../../../state/tabGroups'
 import { TabGroup, closeAllTabsAtom, tabGroupsAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherContext'
-interface GroupActionsPopoverProps {
+export interface GroupActionsPopoverProps {
   triggerStyle?: StyleProp<ViewStyle>
   onOpen?: () => void
   accessibilityLabel: string

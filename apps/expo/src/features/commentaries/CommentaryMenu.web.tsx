@@ -21,6 +21,7 @@ export default function CommentaryMenu(
       initialScreen={props.direct ? 'sources' : 'actions'}
       screens={{
         actions: {
+          width: 340,
           title: t('Commentaires'),
           content: nav => (
             <>

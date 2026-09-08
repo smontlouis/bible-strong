@@ -1,6 +1,6 @@
 import React from 'react'
 import { READING_TEXT_MAX_WIDTH, PLAN_READING_HORIZONTAL_PADDING } from '~common/readingLayout'
-import { MenuView } from '~common/ui/MenuView'
+import PlanSliceMenu from './PlanSliceMenu'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { Share } from 'react-native'
@@ -199,7 +199,9 @@ const PlanSliceScreen = ({
         hasBackButton
         onCustomBackPress={handleBack}
         rightComponent={
-          <MenuView
+          <PlanSliceMenu
+            version={version}
+            onVersionChange={versionActions.setSelectedVersion}
             actions={[
               {
                 id: 'mark-read',
@@ -242,7 +244,7 @@ const PlanSliceScreen = ({
             <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
               <FeatherIcon name="more-vertical" size={18} />
             </Box>
-          </MenuView>
+          </PlanSliceMenu>
         }
       />
       <ScrollView

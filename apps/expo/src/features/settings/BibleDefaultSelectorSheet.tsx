@@ -1,7 +1,10 @@
 import React from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Sheet, type SheetRef } from '~common/sheet'
+import { type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
+import FiltersHeader from '~common/FiltersHeader'
+import PanelSearch from '~common/ContextualPanel/PanelSearch'
 import VersionSelectorItem from '~features/bible/VersionSelectorItem'
 import {
   useVersionCatalog,
@@ -72,6 +75,18 @@ const BibleDefaultSelectorSheet = ({
     <>
       <Sheet
         ref={sheetRef}
+        panelWidth={500}
+        panelHeaderRight={
+          <FiltersHeader
+            buttonOnly
+            title={title}
+            {...headerProps}
+            filters={headerProps.filters.filter(filter => filter.key !== 'search')}
+          />
+        }
+        panelHeaderContent={
+          <PanelSearch value={versionCatalog.query} onChange={versionCatalog.setQuery} />
+        }
         snapPoints={[1]}
         onPresent={() => {
           versionCatalog.resetSearch()

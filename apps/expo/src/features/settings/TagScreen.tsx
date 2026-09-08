@@ -1,12 +1,13 @@
 import { type SheetRef } from '~common/sheet'
-import { MenuView } from '~common/ui/MenuView'
 import React, { useRef, useState } from 'react'
-import { Alert } from 'react-native'
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useDispatch } from 'react-redux'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
 import RenameModal from '~common/RenameModal'
+import ContextualMenu from '~common/ContextualPanel/ContextualMenu'
+import PanelTextForm from '~common/ContextualPanel/PanelTextForm'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import SectionList from '~common/ui/SectionList'
 import Box from '~common/ui/Box'
@@ -56,6 +57,7 @@ const TagScreen = () => {
     wordAnnotations,
   } = useTagData(tagId)
 
+  const confirm = useConfirmDialog()
   const renameModalRef = useRef<SheetRef>(null)
   const [tagToRename, setTagToRename] = useState<{ id: string; name: string } | null>(null)
   const createTabGroupFromTag = useCreateTabGroupFromTag()
@@ -119,19 +121,20 @@ const TagScreen = () => {
 
   const isEmpty = sections.length === 0
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!tag) return
-    Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer ce tag ?'), [
-      { text: t('Non'), style: 'cancel' },
-      {
-        text: t('Oui'),
-        style: 'destructive',
-        onPress: () => {
-          dispatch(removeTag(tag.id))
-          router.back()
-        },
-      },
-    ])
+    if (
+      await confirm({
+        title: t('Attention'),
+        message: t('Êtes-vous vraiment sur de supprimer ce tag ?'),
+        cancelLabel: t('Non'),
+        confirmLabel: t('Oui'),
+        destructive: true,
+      })
+    ) {
+      dispatch(removeTag(tag.id))
+      router.back()
+    }
   }
 
   const handleOpenInTabGroup = () => {
@@ -171,7 +174,25 @@ const TagScreen = () => {
           hasBackButton={hasBackButton}
           title={tag.name}
           rightComponent={
-            <MenuView
+            <ContextualMenu
+              panelTitle={tag.name}
+              icons={{ edit: 'edit-3', 'create-group': 'layers', delete: 'trash-2' }}
+              screens={{
+                edit: {
+                  title: t("Renommer l'étiquette"),
+                  width: 380,
+                  content: navigation => (
+                    <PanelTextForm
+                      initialValue={tag.name}
+                      label={t("Nom de l'étiquette")}
+                      onSave={value => {
+                        dispatch(updateTag(tag.id, value))
+                        navigation.back()
+                      }}
+                    />
+                  ),
+                },
+              }}
               actions={[
                 { id: 'edit', title: t('Éditer'), image: 'pencil' },
                 {
@@ -204,7 +225,7 @@ const TagScreen = () => {
               <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
                 <FeatherIcon name="more-vertical" size={18} />
               </Box>
-            </MenuView>
+            </ContextualMenu>
           }
         />
         <RenameModal

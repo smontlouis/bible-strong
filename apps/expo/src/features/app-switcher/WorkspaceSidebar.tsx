@@ -24,7 +24,7 @@ import {
   type TabGroup,
 } from '~state/tabs'
 import EditGroupModal from './BottomTabBar/EditGroupModal'
-import GroupActionsPopover from './BottomTabBar/GroupActionsPopover'
+import GroupActionsPopover from '~features/app-switcher/BottomTabBar/GroupActionsPopover'
 import ViewGroupsModal from './BottomTabBar/ViewGroupsModal'
 import TabIcon, { tabIconColorConfig } from './utils/getIconByTabType'
 import { useOpenInNewTab } from './utils/useOpenInNewTab'

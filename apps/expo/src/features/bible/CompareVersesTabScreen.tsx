@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { MenuView } from '~common/ui/MenuView'
+import ContextualMenu from '~common/ContextualPanel/ContextualMenu'
 import verseToReference from '~helpers/verseToReference'
 import Header from '~common/Header'
 import Box from '~common/ui/Box'
@@ -70,7 +70,18 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
               height={40}
               width={40}
             />
-            <MenuView
+            <ContextualMenu
+              panelTitle={t('Comparer')}
+              icons={{ 'choose-versions': 'check-square', 'open-tab': 'external-link' }}
+              screens={{
+                'choose-versions': {
+                  title: t('Sélectionner les versions'),
+                  width: 500,
+                  content: () => (
+                    <CompareVersionSelectorSheet inline sheetRef={compareVersionSelectorRef} />
+                  ),
+                },
+              }}
               actions={[
                 {
                   id: 'choose-versions',
@@ -106,7 +117,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
               <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[40px] w-[40px]">
                 <FeatherIcon name="more-vertical" size={18} />
               </Box>
-            </MenuView>
+            </ContextualMenu>
           </Box>
         }
       />

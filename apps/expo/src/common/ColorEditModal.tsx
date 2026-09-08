@@ -115,6 +115,7 @@ export type ColorEditModalProps = {
   onSave: (hex: string, name: string | undefined, type: HighlightType) => void
   onClose?: () => void
   onDelete?: () => void
+  inline?: boolean
 }
 
 const ColorEditModal = ({
@@ -126,6 +127,7 @@ const ColorEditModal = ({
   onSave,
   onClose,
   onDelete,
+  inline = false,
 }: ColorEditModalProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -148,7 +150,8 @@ const ColorEditModal = ({
   const handleSave = () => {
     const trimmedName = chosenName.trim() || undefined
     onSave(chosenHex, trimmedName, chosenType)
-    modalRef.current?.dismiss()
+    if (inline) onClose?.()
+    else modalRef.current?.dismiss()
   }
 
   const getModalTitle = () => {
@@ -157,8 +160,9 @@ const ColorEditModal = ({
       : `${t('Modifier {{name}}', { name: chosenName })}`
   }
 
+  const Container = inline ? InlineColorEditor : Sheet
   return (
-    <Sheet
+    <Container
       ref={modalRef}
       onPresent={handlePresent}
       onDismiss={onClose}
@@ -181,7 +185,7 @@ const ColorEditModal = ({
       }
     >
       <Box className="overflow-hidden border-continuous px-[20px] pb-[20px]">
-        <Box className="overflow-hidden border-continuous h-[250px]">
+        <Box className={inline ? 'h-[190px]' : 'overflow-hidden border-continuous h-[250px]'}>
           <ColorPicker value={chosenHex} onChangeJS={handleColorChange} />
         </Box>
         <Box className="overflow-hidden border-continuous flex-row items-center">
@@ -194,7 +198,7 @@ const ColorEditModal = ({
           />
         </Box>
 
-        <Box className="overflow-hidden border-continuous my-[40px]">
+        <Box className={inline ? 'my-[16px]' : 'overflow-hidden border-continuous my-[40px]'}>
           <Text className="text-[12px] text-tertiary">{t('Type de surlignage')}</Text>
           <TypeSelectorContainer>
             <TypeButton
@@ -282,8 +286,12 @@ const ColorEditModal = ({
         </Box>
         <Button onPress={handleSave}>{t('Valider')}</Button>
       </Box>
-    </Sheet>
+    </Container>
   )
 }
 
 export default ColorEditModal
+
+const InlineColorEditor = ({
+  children,
+}: import('~common/sheet').SheetProps & { ref?: React.Ref<SheetRef> }) => <Box>{children}</Box>

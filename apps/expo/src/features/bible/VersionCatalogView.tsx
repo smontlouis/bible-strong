@@ -1,11 +1,14 @@
 import PanelSearch from '~common/ContextualPanel/PanelSearch'
+import { PanelNavigationContext } from '~common/ContextualPanel/NavigationContext'
+import type { PanelNavigation } from '~common/ContextualPanel/types'
 import React from 'react'
 import { Platform, SectionList, TouchableOpacity, type SectionListRenderItem } from 'react-native'
 import { useNavigation } from 'expo-router'
 import { useAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import FiltersHeader from '~common/FiltersHeader'
-import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
+import { SheetHeader, SheetView, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -128,7 +131,22 @@ export const useVersionCatalog = (
     return () => unsubscribe()
   }, [navigation, resetSearchOnFocus])
 
-  const openStyleInfo = (readingProfile: TranslationReadingProfile) => {
+  const openStyleInfo = (
+    readingProfile: TranslationReadingProfile,
+    navigation?: PanelNavigation | null
+  ) => {
+    if (navigation?.openScreen) {
+      navigation.openScreen({
+        title: labels.profiles[readingProfile],
+        width: 380,
+        content: () => (
+          <Text className="p-3 text-[14px] leading-[22px]">
+            {t(STYLE_INFO_KEYS[readingProfile])}
+          </Text>
+        ),
+      })
+      return
+    }
     setActiveStyleInfo(readingProfile)
     styleInfoRef.current?.present()
   }
@@ -235,7 +253,10 @@ type VersionCatalogListProps = {
   grouping: BibleVersionGrouping
   query: string
   renderItem: SectionListRenderItem<VersionCatalogItem, VersionCatalogSection>
-  openStyleInfo: (readingProfile: TranslationReadingProfile) => void
+  openStyleInfo: (
+    readingProfile: TranslationReadingProfile,
+    navigation?: PanelNavigation | null
+  ) => void
   bottomInset?: number
   revealVersionId?: string
   revealKey?: number
@@ -303,6 +324,7 @@ export const VersionCatalogList = ({
   scrollToTopKey,
   listHeaderComponent,
 }: VersionCatalogListProps) => {
+  const panelNavigation = React.useContext(PanelNavigationContext)
   const { t } = useTranslation()
   const listRef = React.useRef<SectionList<VersionCatalogItem, VersionCatalogSection>>(null)
   const listHeightRef = React.useRef(0)
@@ -391,7 +413,7 @@ export const VersionCatalogList = ({
                 accessibilityLabel={t('versionCatalog.styleInfo', { style: section.title })}
                 hitSlop={12}
                 style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
-                onPress={() => openStyleInfo(section.readingProfile!)}
+                onPress={() => openStyleInfo(section.readingProfile!, panelNavigation)}
               >
                 <FeatherIcon name="info" size={16} color="tertiary" />
               </TouchableOpacity>

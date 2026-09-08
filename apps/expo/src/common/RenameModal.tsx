@@ -4,14 +4,8 @@ import { useTranslation } from 'react-i18next'
 import type { TextInput as RNTextInput } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
-import {
-  Sheet,
-  SheetFooter,
-  SheetHeader,
-  SheetTextInput,
-  SheetView,
-  type SheetRef,
-} from '~common/sheet'
+import { SheetFooter, SheetHeader, SheetTextInput, SheetView, type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Button from '~common/ui/Button'
 import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'

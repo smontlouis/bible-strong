@@ -9,7 +9,8 @@ import type { Theme as AppTheme } from '~themes'
 import { useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { Alert } from 'react-native'
+import { Alert, Platform } from 'react-native'
+import StudyOptionsPanel from './StudyOptionsPanel'
 import { useDispatch } from 'react-redux'
 import { ActionSheetItem } from '~common/ActionMenu'
 import Header from '~common/Header'
@@ -115,9 +116,18 @@ const EditHeader = ({
           onTitlePress={openRenameModal}
           hasBackButton={hasBackButton}
           rightComponent={
-            <Link onPress={open} padding>
-              <FeatherIcon name="more-vertical" size={20} />
-            </Link>
+            Platform.OS === 'web' ? (
+              <StudyOptionsPanel
+                study={study}
+                studyId={studyId}
+                includeRelations
+                afterDelete={() => router.back()}
+              />
+            ) : (
+              <Link onPress={open} padding>
+                <FeatherIcon name="more-vertical" size={20} />
+              </Link>
+            )
           }
         >
           {children}

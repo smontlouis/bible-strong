@@ -63,6 +63,16 @@ const PlanScreen = ({
             planId={id}
             title={title || ''}
             onRemove={onRemove}
+            details={
+              <DetailsModal
+                inline
+                title={title || ''}
+                image={cacheImage}
+                id={id}
+                author={author || { id: '', displayName: '', photoUrl: '' }}
+                description={description}
+              />
+            }
           />
         }
       />

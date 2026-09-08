@@ -42,6 +42,7 @@ export default function BibleOptionsMenu({
       screens={{
         ...bookmarkPanel.screens,
         actions: {
+          width: 340,
           title: t('accessibility.bibleOptions'),
           content: nav => (
             <>

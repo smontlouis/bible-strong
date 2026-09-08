@@ -22,7 +22,7 @@ import Text from '~common/ui/Text'
 import { getAnnotationGroupVerseKey } from '~features/entityListQuery/wordAnnotationsQuery'
 import { getBibleViewParamsForVerseKeys } from '~features/studyRelations/openableStudyObjects'
 import { isBookInTestament } from '~helpers/bibleBookCatalog'
-import { useColorInfo } from '~helpers/useColorName'
+import { useAllColors, useColorInfo } from '~helpers/useColorName'
 import verseToReference from '~helpers/verseToReference'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
@@ -229,6 +229,21 @@ const WordAnnotationsScreen = () => {
   const versions = useSelector(selectAvailableAnnotationVersions)
   const selectedTag = queryState.tagId ? tags[queryState.tagId] : undefined
   const colorInfo = useColorInfo(queryState.colorId || undefined)
+  const allColors = useAllColors()
+  const webChoices = <T,>(
+    choices: { value: T; label: string; color?: string }[],
+    selected: T,
+    onSelect: (value: T) => void
+  ) =>
+    NativeUI.Platform.OS === 'web'
+      ? choices.map(choice => ({
+          key: String(choice.value),
+          label: choice.label,
+          color: choice.color,
+          selected: choice.value === selected,
+          onSelect: () => onSelect(choice.value),
+        }))
+      : undefined
   const books = sections.flatMap(section => section.data)
   useEffect(() => {
     if (
@@ -478,6 +493,18 @@ const WordAnnotationsScreen = () => {
             value: colorInfo?.name || t('Toutes'),
             active: Boolean(queryState.colorId),
             onPress: () => colorModalRef.current?.present(),
+            options: webChoices(
+              [
+                { value: '', label: t('Toutes') },
+                ...allColors.map(color => ({
+                  value: color.id,
+                  label: color.name,
+                  color: color.hex,
+                })),
+              ],
+              queryState.colorId || '',
+              colorId => setQueryState(state => ({ ...state, colorId: colorId || null }))
+            ),
           },
           {
             key: 'tag',
@@ -485,6 +512,18 @@ const WordAnnotationsScreen = () => {
             label: t('Tags'),
             value: selectedTag?.name || t('Tous'),
             active: Boolean(queryState.tagId),
+            searchable: true,
+            showCheckbox: true,
+            options: webChoices(
+              [
+                { value: '', label: t('Tous') },
+                ...Object.values(tags)
+                  .filter(tag => tag?.id && tag?.name)
+                  .map(tag => ({ value: tag.id, label: tag.name })),
+              ],
+              queryState.tagId || '',
+              tagId => setQueryState(state => ({ ...state, tagId: tagId || null }))
+            ),
             onPress: () =>
               setUnifiedTagsModal({
                 mode: 'filter',
@@ -499,6 +538,16 @@ const WordAnnotationsScreen = () => {
             value: queryState.annotationType || t('Tous'),
             active: Boolean(queryState.annotationType),
             onPress: () => styleModalRef.current?.present(),
+            options: webChoices<typeof queryState.annotationType>(
+              [
+                { value: null, label: t('Tous') },
+                { value: 'background', label: t('Arrière-plan') },
+                { value: 'underline', label: t('Souligné') },
+                { value: 'circle', label: t('Entouré') },
+              ],
+              queryState.annotationType,
+              annotationType => setQueryState(state => ({ ...state, annotationType }))
+            ),
           },
           {
             key: 'version',
@@ -507,6 +556,15 @@ const WordAnnotationsScreen = () => {
             value: queryState.version || t('Toutes'),
             active: Boolean(queryState.version),
             onPress: () => versionModalRef.current?.present(),
+            searchable: true,
+            options: webChoices(
+              [
+                { value: '', label: t('Toutes') },
+                ...versions.map(value => ({ value, label: value })),
+              ],
+              queryState.version || '',
+              version => setQueryState(state => ({ ...state, version: version || null }))
+            ),
           },
           {
             key: 'testament',
@@ -520,6 +578,23 @@ const WordAnnotationsScreen = () => {
                   : t('Nouveau Testament'),
             active: queryState.testament !== 'all',
             onPress: () => testamentModalRef.current?.present(),
+            options: webChoices<typeof queryState.testament>(
+              [
+                { value: 'all', label: t('Toute la Bible') },
+                { value: 'old', label: t('Ancien Testament') },
+                { value: 'new', label: t('Nouveau Testament') },
+              ],
+              queryState.testament,
+              testament =>
+                setQueryState(state => ({
+                  ...state,
+                  testament,
+                  book:
+                    state.book && testament !== 'all' && !isBookInTestament(state.book, testament)
+                      ? null
+                      : state.book,
+                }))
+            ),
           },
           {
             key: 'book',
@@ -528,6 +603,30 @@ const WordAnnotationsScreen = () => {
             value: books.find(book => book.Numero === queryState.book)?.Nom || t('Tous'),
             active: Boolean(queryState.book),
             onPress: () => bookModalRef.current?.present(),
+            searchable: true,
+            options: webChoices(
+              [
+                { value: 0, label: t('Tous') },
+                ...books
+                  .filter(
+                    book =>
+                      queryState.testament === 'all' ||
+                      isBookInTestament(book.Numero, queryState.testament)
+                  )
+                  .map(book => ({ value: book.Numero, label: book.Nom })),
+              ],
+              queryState.book || 0,
+              book =>
+                setQueryState(state => ({
+                  ...state,
+                  book: book || null,
+                  testament: book
+                    ? isBookInTestament(book, 'new')
+                      ? 'new'
+                      : 'old'
+                    : state.testament,
+                }))
+            ),
           },
           {
             key: 'sort',
@@ -541,6 +640,15 @@ const WordAnnotationsScreen = () => {
                   : t('entityList.sort.oldest'),
             active: queryState.sort !== defaultWordAnnotationsListQueryState.sort,
             onPress: () => sortModalRef.current?.present(),
+            options: webChoices<typeof queryState.sort>(
+              [
+                { value: 'bible', label: t('Ordre biblique') },
+                { value: 'newest', label: t('entityList.sort.newest') },
+                { value: 'oldest', label: t('entityList.sort.oldest') },
+              ],
+              queryState.sort,
+              sort => setQueryState(state => ({ ...state, sort }))
+            ),
           },
         ]}
       />

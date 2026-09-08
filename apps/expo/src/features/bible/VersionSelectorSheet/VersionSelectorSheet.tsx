@@ -1,4 +1,7 @@
-import { Sheet, type SheetRef } from '~common/sheet'
+import { type SheetRef } from '~common/sheet'
+import Sheet from '~common/ContextualPanel/ContextualSheet'
+import FiltersHeader from '~common/FiltersHeader'
+import PanelSearch from '~common/ContextualPanel/PanelSearch'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -61,6 +64,18 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
     <>
       <Sheet
         ref={sheetRef}
+        panelWidth={500}
+        panelHeaderRight={
+          <FiltersHeader
+            buttonOnly
+            title={t('Version')}
+            {...versionCatalog.headerProps}
+            filters={versionCatalog.headerProps.filters.filter(filter => filter.key !== 'search')}
+          />
+        }
+        panelHeaderContent={
+          <PanelSearch value={versionCatalog.query} onChange={versionCatalog.setQuery} />
+        }
         snapPoints={[1]}
         backgroundColor={theme.colors.reverse}
         onPresent={() => {

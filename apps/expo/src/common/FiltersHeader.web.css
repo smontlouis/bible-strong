@@ -29,6 +29,7 @@
   background: #80808015;
 }
 .bs-filter-popover {
+  transition: width 180ms ease;
   width: 340px;
   max-width: calc(100vw - 24px);
   border: 1px solid;
@@ -36,6 +37,11 @@
   padding: 8px;
   box-shadow: 0 8px 32px #00000020;
   z-index: 1100;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bs-filter-popover {
+    transition: none;
+  }
 }
 .bs-filter-popover button {
   font: inherit;
@@ -142,4 +148,8 @@
 .bs-filter-trigger:focus-visible {
   outline: 2px solid #5983f0;
   outline-offset: 2px;
+}
+.bs-filter-heading:has([data-contextual-header-replacement])
+  > :not(:has([data-contextual-header-replacement])) {
+  display: none;
 }

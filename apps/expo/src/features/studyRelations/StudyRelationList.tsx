@@ -5,7 +5,8 @@ import {
   useState,
 } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert } from 'react-native'
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
+import ContextualMenu from '~common/ContextualPanel/ContextualMenu'
 import { useDispatch, useSelector } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
@@ -204,6 +205,7 @@ const StudyRelationList = ({
 }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
+  const confirm = useConfirmDialog()
   const editModalRef = useRef<SheetRef>(null)
   const [editingModel, setEditingModel] = useState<RelationDisplayModel | null>(null)
   const [draft, setDraft] = useState<RelationDraft>({
@@ -237,7 +239,7 @@ const StudyRelationList = ({
 
   if (relations.length === 0 && !showEmptyState) return null
 
-  const openEditModal = (model: RelationDisplayModel) => {
+  const openEditModal = (model: RelationDisplayModel, present = true) => {
     setEditingModel(model)
     setDraft({
       label: model.relation.label || '',
@@ -245,7 +247,7 @@ const StudyRelationList = ({
       direction: model.relation.direction,
     })
     setIsLabelExpanded(Boolean(model.relation.label))
-    editModalRef.current?.present()
+    if (present) editModalRef.current?.present()
   }
 
   const cycleDraftType = () => {
@@ -289,20 +291,20 @@ const StudyRelationList = ({
     closeEditModal()
   }
 
-  const confirmDelete = (model = editingModel) => {
+  const confirmDelete = async (model = editingModel) => {
     if (!model) return
-
-    Alert.alert(t('Supprimer la relation'), t('Voulez-vous supprimer cette relation?'), [
-      { text: t('Annuler'), style: 'cancel' },
-      {
-        text: t('Supprimer'),
-        style: 'destructive',
-        onPress: () => {
-          dispatch(deleteStudyRelation(model.relation.id))
-          closeEditModal()
-        },
-      },
-    ])
+    if (
+      await confirm({
+        title: t('Supprimer la relation'),
+        message: t('Voulez-vous supprimer cette relation?'),
+        cancelLabel: t('Annuler'),
+        confirmLabel: t('Supprimer'),
+        destructive: true,
+      })
+    ) {
+      dispatch(deleteStudyRelation(model.relation.id))
+      closeEditModal()
+    }
   }
 
   const getDraftRelationText = (model: RelationDisplayModel) => {
@@ -333,6 +335,92 @@ const StudyRelationList = ({
 
     onOpenEndpoint(model.targetEndpoint)
   }
+
+  const hasDirectionalType = isDirectionalType(draft.type)
+
+  const renderEditForm = () =>
+    editingModel ? (
+      <SheetView className="p-[20px] gap-[22px]">
+        <VStack className="overflow-hidden border-continuous gap-[10px]">
+          <HStack className="overflow-hidden border-continuous items-center flex-wrap">
+            <Text className="font-bold text-[14px]" numberOfLines={1} style={{ flexShrink: 1 }}>
+              {getEndpointLabel(editingModel.activeEndpoint)}
+            </Text>
+            <TouchableBox
+              className="overflow-hidden border-continuous ml-[6px] pl-[10px] py-[6px] rounded-tl-[16px] rounded-bl-[16px] bg-light-grey"
+              onPress={cycleDraftType}
+              style={{
+                paddingRight: hasDirectionalType ? 6 : 10,
+                marginRight: hasDirectionalType ? 0 : 6,
+                borderBottomRightRadius: hasDirectionalType ? 0 : 16,
+                borderTopRightRadius: hasDirectionalType ? 0 : 16,
+              }}
+            >
+              <Text className="font-bold text-[12px] text-primary">
+                {getDraftRelationText(editingModel)}
+              </Text>
+            </TouchableBox>
+            {hasDirectionalType ? (
+              <TouchableBox
+                className="border-continuous overflow-hidden mr-[6px] pl-[4px] pr-[6px] h-[28px] rounded-tr-[16px] rounded-br-[16px] border-l-[1px] border-reverse bg-light-grey items-center justify-center"
+                onPress={toggleDirection}
+              >
+                <MaterialIcon name="swap-horiz" size={16} color="primary" />
+              </TouchableBox>
+            ) : null}
+            <Text className="font-bold text-[14px]">
+              {editingModel.targetEndpoint.type === 'note' ||
+              editingModel.targetEndpoint.type === 'study'
+                ? `${t('une')} `
+                : ''}
+            </Text>
+            <Box className="overflow-hidden border-continuous mx-[4px]">
+              <TargetIcon type={editingModel.targetEndpoint.type} />
+            </Box>
+            <Text className="font-bold text-[14px]" numberOfLines={1} style={{ flexShrink: 1 }}>
+              {editingModel.targetEndpoint.type === 'note'
+                ? t('note')
+                : editingModel.targetEndpoint.type === 'study'
+                  ? t('étude')
+                  : getDraftTargetTitle(editingModel)}
+            </Text>
+          </HStack>
+          {getRelationSubtitle(editingModel) ? (
+            <Text className="text-[13px] text-tertiary" numberOfLines={1}>
+              {getRelationSubtitle(editingModel)}
+            </Text>
+          ) : null}
+        </VStack>
+
+        <VStack className="overflow-hidden border-continuous gap-[8px] mt-auto items-end">
+          {isLabelExpanded ? (
+            <VStack className="overflow-hidden border-continuous gap-[8px] self-stretch">
+              <Text className="text-[13px] text-tertiary">{t('Libellé')}</Text>
+              <LabelInput
+                value={draft.label}
+                onChangeText={label => setDraft(current => ({ ...current, label }))}
+                placeholder={t('Libellé court')}
+                maxLength={80}
+                returnKeyType="done"
+              />
+            </VStack>
+          ) : (
+            <TouchableBox
+              className="overflow-hidden border-continuous flex-row items-center justify-end py-[6px]"
+              onPress={() => setIsLabelExpanded(true)}
+            >
+              <Text className="text-[12px] text-tertiary">{t('Ajouter un libellé')}</Text>
+              <FeatherIcon
+                name="chevron-down"
+                size={14}
+                color="tertiary"
+                style={{ marginLeft: 4 }}
+              />
+            </TouchableBox>
+          )}
+        </VStack>
+      </SheetView>
+    ) : null
 
   const renderRelation = (model: RelationDisplayModel, index: number, sectionLength: number) => {
     const relationTitle = getRelationTitleParts(model, relationTitlePrefixes, t)
@@ -395,7 +483,41 @@ const StudyRelationList = ({
               ) : null}
             </Box>
           </TouchableBox>
-          <MenuView
+          <ContextualMenu
+            panelTitle={t('Relations')}
+            icons={{ edit: 'edit-3', delete: 'trash-2' }}
+            onPanelClose={() => setEditingModel(null)}
+            screens={{
+              edit: {
+                title: t('Modifier la relation'),
+                width: 500,
+                onEnter: () => openEditModal(model, false),
+                content: navigation => (
+                  <>
+                    {renderEditForm()}
+                    <Box className="flex-row justify-end gap-3 p-3">
+                      <Button
+                        reverse
+                        onPress={() => {
+                          closeEditModal()
+                          navigation.back()
+                        }}
+                      >
+                        {t('Annuler')}
+                      </Button>
+                      <Button
+                        onPress={() => {
+                          saveEdit()
+                          navigation.back()
+                        }}
+                      >
+                        {t('Enregistrer')}
+                      </Button>
+                    </Box>
+                  </>
+                ),
+              },
+            }}
             actions={menuActions}
             onPressAction={({ nativeEvent }) => {
               if (nativeEvent.event === 'edit') openEditModal(model)
@@ -405,13 +527,11 @@ const StudyRelationList = ({
             <Box className="overflow-hidden border-continuous w-[42px] h-[42px] items-center justify-center">
               <FeatherIcon name="more-vertical" size={18} />
             </Box>
-          </MenuView>
+          </ContextualMenu>
         </Box>
       </Box>
     )
   }
-
-  const hasDirectionalType = isDirectionalType(draft.type)
 
   return (
     <VStack className="overflow-hidden border-continuous flex-[1]">
@@ -480,88 +600,7 @@ const StudyRelationList = ({
           </SheetFooter>
         )}
       >
-        {editingModel ? (
-          <SheetView className="p-[20px] gap-[22px]">
-            <VStack className="overflow-hidden border-continuous gap-[10px]">
-              <HStack className="overflow-hidden border-continuous items-center flex-wrap">
-                <Text className="font-bold text-[14px]" numberOfLines={1} style={{ flexShrink: 1 }}>
-                  {getEndpointLabel(editingModel.activeEndpoint)}
-                </Text>
-                <TouchableBox
-                  className="overflow-hidden border-continuous ml-[6px] pl-[10px] py-[6px] rounded-tl-[16px] rounded-bl-[16px] bg-light-grey"
-                  onPress={cycleDraftType}
-                  style={{
-                    paddingRight: hasDirectionalType ? 6 : 10,
-                    marginRight: hasDirectionalType ? 0 : 6,
-                    borderBottomRightRadius: hasDirectionalType ? 0 : 16,
-                    borderTopRightRadius: hasDirectionalType ? 0 : 16,
-                  }}
-                >
-                  <Text className="font-bold text-[12px] text-primary">
-                    {getDraftRelationText(editingModel)}
-                  </Text>
-                </TouchableBox>
-                {hasDirectionalType ? (
-                  <TouchableBox
-                    className="border-continuous overflow-hidden mr-[6px] pl-[4px] pr-[6px] h-[28px] rounded-tr-[16px] rounded-br-[16px] border-l-[1px] border-reverse bg-light-grey items-center justify-center"
-                    onPress={toggleDirection}
-                  >
-                    <MaterialIcon name="swap-horiz" size={16} color="primary" />
-                  </TouchableBox>
-                ) : null}
-                <Text className="font-bold text-[14px]">
-                  {editingModel.targetEndpoint.type === 'note' ||
-                  editingModel.targetEndpoint.type === 'study'
-                    ? `${t('une')} `
-                    : ''}
-                </Text>
-                <Box className="overflow-hidden border-continuous mx-[4px]">
-                  <TargetIcon type={editingModel.targetEndpoint.type} />
-                </Box>
-                <Text className="font-bold text-[14px]" numberOfLines={1} style={{ flexShrink: 1 }}>
-                  {editingModel.targetEndpoint.type === 'note'
-                    ? t('note')
-                    : editingModel.targetEndpoint.type === 'study'
-                      ? t('étude')
-                      : getDraftTargetTitle(editingModel)}
-                </Text>
-              </HStack>
-              {getRelationSubtitle(editingModel) ? (
-                <Text className="text-[13px] text-tertiary" numberOfLines={1}>
-                  {getRelationSubtitle(editingModel)}
-                </Text>
-              ) : null}
-            </VStack>
-
-            <VStack className="overflow-hidden border-continuous gap-[8px] mt-auto items-end">
-              {isLabelExpanded ? (
-                <VStack className="overflow-hidden border-continuous gap-[8px] self-stretch">
-                  <Text className="text-[13px] text-tertiary">{t('Libellé')}</Text>
-                  <LabelInput
-                    value={draft.label}
-                    onChangeText={label => setDraft(current => ({ ...current, label }))}
-                    placeholder={t('Libellé court')}
-                    maxLength={80}
-                    returnKeyType="done"
-                  />
-                </VStack>
-              ) : (
-                <TouchableBox
-                  className="overflow-hidden border-continuous flex-row items-center justify-end py-[6px]"
-                  onPress={() => setIsLabelExpanded(true)}
-                >
-                  <Text className="text-[12px] text-tertiary">{t('Ajouter un libellé')}</Text>
-                  <FeatherIcon
-                    name="chevron-down"
-                    size={14}
-                    color="tertiary"
-                    style={{ marginLeft: 4 }}
-                  />
-                </TouchableBox>
-              )}
-            </VStack>
-          </SheetView>
-        ) : null}
+        {renderEditForm()}
       </Sheet>
     </VStack>
   )

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import type { ContextualPanelProps } from './types'
+import { useRef, useState } from 'react'
+import type { ContextualPanelProps, PanelScreen } from './types'
 export function usePanelNavigation({
   initialScreen,
   screens,
@@ -7,13 +7,22 @@ export function usePanelNavigation({
   onOpen,
 }: ContextualPanelProps) {
   const [isOpen, setOpen] = useState(false)
+  const openRef = useRef(false)
+  const nextScreen = useRef(0)
+  const [inlineScreens, setInlineScreens] = useState<Record<string, PanelScreen>>({})
   const [history, setHistory] = useState([initialScreen])
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward')
-  const screen = screens[history[history.length - 1]] ?? screens[initialScreen]
+  const screen =
+    screens[history[history.length - 1]] ??
+    inlineScreens[history[history.length - 1]] ??
+    screens[initialScreen]
   const close = () => {
+    if (!openRef.current) return
+    openRef.current = false
     setOpen(false)
     setHistory([initialScreen])
-    if (isOpen) onClose?.()
+    setInlineScreens({})
+    onClose?.()
   }
   return {
     isOpen,
@@ -22,14 +31,23 @@ export function usePanelNavigation({
     direction,
     canGoBack: history.length > 1,
     present: () => {
+      if (openRef.current) return
+      openRef.current = true
       onOpen?.()
       setHistory([initialScreen])
       setDirection('forward')
       setOpen(true)
     },
     navigation: {
+      openScreen: (screen: PanelScreen) => {
+        const key = `inline-screen-${++nextScreen.current}`
+        setInlineScreens(current => ({ ...current, [key]: screen }))
+        setDirection('forward')
+        setHistory(current => [...current, key])
+      },
       open: (name: string) => {
         if (screens[name]) {
+          screens[name].onEnter?.()
           setDirection('forward')
           setHistory(current => [...current, name])
         }
