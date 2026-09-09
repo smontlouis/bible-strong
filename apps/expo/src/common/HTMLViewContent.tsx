@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { type HTMLViewLinkPayload } from './htmlContentTypes'
 import { useTheme } from '~themes/ThemeProvider'
 import HTMLContentDOM from './HTMLContentDOM'
@@ -10,6 +10,7 @@ type Props = {
 
 const HTMLViewContent = ({ html, onLinkClicked }: Props) => {
   const theme = useTheme()
+  const [contentHeight, setContentHeight] = useState(200)
   return (
     <HTMLContentDOM
       html={html}
@@ -22,10 +23,13 @@ const HTMLViewContent = ({ html, onLinkClicked }: Props) => {
       onLinkClicked={async payload => {
         onLinkClicked(payload)
       }}
+      onSizeChange={async height => {
+        if (Number.isFinite(height) && height > 0) setContentHeight(Math.ceil(height))
+      }}
       dom={{
         // Keep the same native WebView implementation as the Bible reader.
         useExpoDOMWebView: false,
-        matchContents: true,
+        containerStyle: { height: contentHeight, flex: 0, width: '100%' },
         scrollEnabled: false,
         style: { width: '100%', backgroundColor: 'transparent' },
         contentInsetAdjustmentBehavior: 'never',

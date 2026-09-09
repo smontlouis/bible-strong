@@ -1,6 +1,6 @@
 'use dom'
 
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { IS_DOM, type DOMProps } from 'expo/dom'
 import literata from '~assets/fonts/literata'
 import type { HTMLViewLinkPayload } from './htmlContentTypes'
@@ -9,6 +9,7 @@ type Props = {
   html: string
   colors: { background: string; text: string; link: string; emphasis: string }
   onLinkClicked: (payload: HTMLViewLinkPayload) => Promise<void>
+  onSizeChange: (height: number) => Promise<void>
   dom?: DOMProps
 }
 
@@ -34,14 +35,33 @@ function cleanHTML(html: string) {
   return document.body.innerHTML
 }
 
-export default function HTMLContentDOM({ html, colors, onLinkClicked }: Props) {
+export default function HTMLContentDOM({ html, colors, onLinkClicked, onSizeChange }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null)
   const [content, setContent] = useState('')
   useEffect(() => {
     setContent(cleanHTML(html))
   }, [html])
 
+  useEffect(() => {
+    if (!IS_DOM) return
+    const container = containerRef.current
+    if (!container) return
+
+    // Measure the content root, not the document: the document can retain the
+    // native viewport height and prevent shorter entries from shrinking.
+    const reportSize = () => {
+      void onSizeChange(Math.ceil(Math.max(container.offsetHeight, container.scrollHeight, 200)))
+    }
+    reportSize()
+    const observer =
+      typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(reportSize)
+    observer?.observe(container)
+    return () => observer?.disconnect()
+  }, [content, onSizeChange])
+
   return (
     <div
+      ref={containerRef}
       className="editorial-html"
       style={
         {

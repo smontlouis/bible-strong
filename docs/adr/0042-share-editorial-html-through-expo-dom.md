@@ -6,8 +6,11 @@
 Dictionary and Nave definitions use the same `HTMLContentDOM` component on Web
 and native, hosted by `HTMLViewContent`. The native host explicitly uses
 `react-native-webview` (`useExpoDOMWebView: false`), matching the Bible reader,
-rather than depending on Expo's default WebView implementation. It uses Expo DOM's
-`matchContents` sizing with scrolling owned by the surrounding screen.
+rather than depending on Expo's default WebView implementation. It starts with an explicit
+200-point native height. The DOM content root reports its measured height through
+an asynchronous native action after rendering and whenever its size changes.
+The host applies that height to its non-flexing WebView container; scrolling
+remains owned by the surrounding screen. It does not use `matchContents`.
 
 The DOM component owns scoped editorial CSS and the bundled Literata font. Theme
 colors cross the boundary as serializable values. Delegated link clicks preserve
