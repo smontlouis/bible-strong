@@ -72,6 +72,24 @@ const makeGroup = (tabs: TabItem[], activeTabIndex = 0): TabGroup => ({
 })
 
 describe('tabGroupsFirestoreSync', () => {
+  it.each([true, false])('syncs and hydrates group collapse state (%s)', isCollapsed => {
+    const group = { ...makeGroup([makeTab('a')]), isCollapsed }
+    const payload = prepareTabGroupForSync(group)
+    expect(payload.isCollapsed).toBe(isCollapsed)
+    expect(hydrateTabGroup(payload, { ...group, isCollapsed: !isCollapsed }).isCollapsed).toBe(
+      isCollapsed
+    )
+    expect(createTabGroupsSyncIntent([group], [{ ...group, isCollapsed: !isCollapsed }])).toEqual(
+      expect.objectContaining({ set: { [group.id]: expect.objectContaining({ isCollapsed }) } })
+    )
+  })
+
+  it('preserves collapse state when an older client sends a group without the field', () => {
+    const local = { ...makeGroup([makeTab('a')]), isCollapsed: true }
+    const { isCollapsed: _, ...remote } = prepareTabGroupForSync(local)
+    expect(hydrateTabGroup(remote, local).isCollapsed).toBe(true)
+    expect(prepareTabGroupForSync({ ...local, isDefault: true }).isCollapsed).toBe(false)
+  })
   it('omits local-only active tab and preview data from Firestore payloads', () => {
     const group = makeGroup([makeTab('a', 'preview-a'), makeTab('b')], 1)
 

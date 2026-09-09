@@ -7,6 +7,7 @@ export type PanelNavigation = {
 }
 export type PanelScreen = {
   title: string
+  hideHeader?: boolean
   /** Optional web width for this screen; height follows its content. */
   width?: number
   onEnter?: () => void

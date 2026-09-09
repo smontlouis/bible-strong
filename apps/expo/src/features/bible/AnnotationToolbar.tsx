@@ -2,20 +2,11 @@ import { twMerge } from '~common/ui/classNames'
 import { useTheme } from '~themes/ThemeProvider'
 import { type SheetRef, SheetView } from '~common/sheet'
 import Sheet from './SelectedVersesModal/SelectionSheet'
-import { TouchableOpacity, type ViewStyle } from 'react-native'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import BackgroundIcon from '~assets/images/BackgroundIcon'
-import CircleSketchIcon from '~assets/images/CircleSketchIcon'
-import Box, {
-  AnimatedBox,
-  BoxProps,
-  FadingBox,
-  FadingText,
-  HStack,
-  TouchableBox,
-} from '~common/ui/Box'
+import AnnotationPreview from './AnnotationPreview'
+import Box, { AnimatedBox, HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import verseToReference from '~helpers/verseToReference'
@@ -76,52 +67,6 @@ type Props = {
   isEnabled: boolean
 }
 
-interface IconButtonProps extends BoxProps {
-  disabled?: boolean
-  children: React.ReactNode
-  isSelected?: boolean
-  label?: string
-}
-
-const IconButton = ({ disabled, children, isSelected, label, ...props }: IconButtonProps) => {
-  return (
-    <Box
-      style={[
-        { borderWidth: isSelected ? 2 : 1, opacity: isSelected ? 1 : disabled ? 0.5 : 0.85 },
-        props.style,
-        {
-          transitionProperty: ['backgroundColor', 'borderColor', 'opacity'],
-          transitionDuration: 300,
-        } as unknown as ViewStyle,
-      ]}
-      {...props}
-      className={twMerge(
-        'overflow-hidden border-continuous',
-        twMerge(
-          isSelected ? 'border-primary' : 'border-border',
-          twMerge(
-            'overflow-hidden border-continuous px-[20px] py-[10px] rounded-[18px] gap-[10px] items-center justify-center',
-            props.className
-          )
-        )
-      )}
-    >
-      {children}
-      {label && (
-        <Text
-          className={twMerge(
-            isSelected ? 'text-primary' : 'text-tertiary',
-            'text-[12px] font-bold'
-          )}
-          numberOfLines={1}
-        >
-          {label}
-        </Text>
-      )}
-    </Box>
-  )
-}
-
 type AnnotationTypeButtonProps = {
   disabled: boolean
   type: AnnotationType
@@ -140,14 +85,27 @@ const AnnotationTypeButton = ({
   label,
 }: AnnotationTypeButtonProps) => (
   <TouchableBox
-    className="overflow-hidden border-continuous"
+    className={twMerge(
+      'flex-1 min-w-0 items-center justify-center gap-[6px] min-h-[75px] px-[4px] py-[10px] rounded-[12px] border',
+      !disabled && activeType === type ? 'border-primary bg-light-grey' : 'border-border'
+    )}
+    accessibilityRole="button"
+    accessibilityLabel={label}
+    accessibilityState={{ disabled, selected: !disabled && activeType === type }}
     disabled={disabled}
     onPress={() => onPress(type)}
-    style={[{ opacity: disabled ? 0.6 : 1 }, [{ opacity: disabled ? 0.6 : 1 }]]}
+    style={{ opacity: disabled ? 0.5 : 1 }}
   >
-    <IconButton disabled={disabled} isSelected={!disabled && activeType === type} label={label}>
-      {children}
-    </IconButton>
+    {children}
+    <Text
+      className={twMerge(
+        'text-[13px]',
+        !disabled && activeType === type ? 'text-primary font-bold' : 'text-default'
+      )}
+      numberOfLines={1}
+    >
+      {label}
+    </Text>
   </TouchableBox>
 )
 
@@ -157,28 +115,6 @@ type AnnotationColorPaletteProps = {
   selectedColor?: string
   onSelectColor: (colorKey: string, type: AnnotationType) => void
 }
-
-type AnnotationTargetLabelProps = {
-  label: string
-  reference: string
-}
-
-const AnnotationTargetLabel = ({ label, reference }: AnnotationTargetLabelProps) => (
-  <HStack className="overflow-hidden border-continuous max-w-[220px] items-center justify-center">
-    <FadingText
-      className="overflow-hidden border-continuous text-[15px] text-grey"
-      numberOfLines={1}
-    >
-      {`${label} `}
-    </FadingText>
-    <FadingText
-      className="overflow-hidden border-continuous text-[15px] text-grey font-bold"
-      numberOfLines={1}
-    >
-      {reference}
-    </FadingText>
-  </HStack>
-)
 
 const AnnotationColorPalette = ({
   disabled,
@@ -190,20 +126,20 @@ const AnnotationColorPalette = ({
   const setColorPickerModal = useSetAtom(colorPickerModalAtom)
 
   return (
-    <HStack className="overflow-hidden border-continuous items-center justify-center gap-[10px] pb-[16px] px-[20px]">
+    <HStack className="overflow-hidden border-continuous items-center justify-center gap-[8px] flex-wrap py-[14px] px-[16px]">
       {colorItems.map(color => (
         <TouchableBox
-          className="border-continuous overflow-hidden rounded-[12px] items-center justify-center bg-reverse border-primary"
+          className="border-continuous overflow-hidden rounded-full items-center justify-center border-primary"
           key={color.key}
           onPress={() => onSelectColor(color.key, type)}
-          style={{ borderWidth: selectedColor === color.key ? 2 : 0, width: 30, height: 30 }}
+          style={{ borderWidth: selectedColor === color.key ? 2 : 0, width: 36, height: 36 }}
         >
           <Box
-            className="overflow-hidden border-continuous rounded-[8px]"
+            className="overflow-hidden border-continuous rounded-full"
             style={[
               {
-                width: selectedColor === color.key ? 20 : 24,
-                height: selectedColor === color.key ? 20 : 24,
+                width: selectedColor === color.key ? 26 : 28,
+                height: selectedColor === color.key ? 26 : 28,
               },
               { backgroundColor: color.hex },
             ]}
@@ -218,7 +154,7 @@ const AnnotationColorPalette = ({
             onSelectColor: colorKey => onSelectColor(colorKey, type),
           })
         }}
-        style={{ width: 30, height: 30 }}
+        style={{ width: 36, height: 36 }}
       >
         <FeatherIcon name="plus" size={16} color="primary" />
       </TouchableBox>
@@ -248,7 +184,10 @@ const AnnotationToolbar = ({
 }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const disabled = !selectedAnnotation && !hasSelection
+  const disabled = !isEnabled || (!selectedAnnotation && !hasSelection)
+  const noteDisabled = !isEnabled || !selectedAnnotation || !onNotePress
+  const tagsDisabled = !isEnabled || !selectedAnnotation || !onTagsPress
+  const relationsDisabled = !isEnabled || !selectedAnnotation || !onRelationsPress
   const [annotationTypeSelection, setAnnotationTypeSelection] = useState<{
     annotationId?: string
     type: AnnotationType
@@ -261,17 +200,10 @@ const AnnotationToolbar = ({
     setAnnotationTypeSelection({ annotationId: selectedAnnotation?.id, type })
   }
 
-  const resolvedColor = useResolvedColor(selectedAnnotation?.color)
+  const resolvedColor = useResolvedColor(selectedAnnotation?.color ?? 'color1')
 
-  const getColor = (type: AnnotationType) => {
-    if (activeAnnotationType === type) {
-      return selectedAnnotation?.type === type ? resolvedColor : theme.colors.tertiary
-    }
-    if (selectedAnnotation) {
-      return selectedAnnotation.type === type ? resolvedColor : theme.colors.grey
-    }
-    return theme.colors.grey
-  }
+  const getColor = (type: AnnotationType) =>
+    selectedAnnotation?.type === type ? resolvedColor : theme.colors.grey
 
   const handleApply = (color: string, type: AnnotationType) => {
     if (selectedAnnotation) {
@@ -284,140 +216,36 @@ const AnnotationToolbar = ({
 
   return (
     <Sheet ref={ref} backdrop={false} onClose={onClose}>
-      <SheetView className="pt-[14px]">
-        <Box className="overflow-hidden border-continuous px-[20px] min-h-[92px] justify-center relative">
-          <Text className="font-bold text-[18px] text-center px-[76px]">{t('Mode libre')}</Text>
-
+      <SheetView className="pt-[14px]" testID="annotation-toolbar">
+        <HStack className="px-[16px] pb-[14px] items-center gap-[8px]">
+          <Box className="flex-1 min-w-0 gap-[4px]">
+            <Text className="font-bold text-[18px]" numberOfLines={1}>
+              {t('Mode libre')}
+            </Text>
+            <Text className="text-[14px] text-grey" numberOfLines={2}>
+              {selectedAnnotation
+                ? verseToReference([selectedAnnotation.verseKey])
+                : selection
+                  ? formatSelectionRange(selection)
+                  : t('Sélectionnez du texte dans la Bible')}
+            </Text>
+          </Box>
           {(selectedAnnotation || hasSelection) && (
-            <AnimatedBox
-              className="overflow-hidden border-continuous absolute right-[20px] top-[0px]"
-              layout={LinearTransition}
-            >
-              <TouchableOpacity
+            <Box className="pl-[6px]">
+              <TouchableBox
+                className="w-[48px] h-[44px] gap-[3px] items-center justify-center rounded-[8px]"
+                accessibilityRole="button"
                 accessibilityLabel={t('Supprimer')}
-                accessibilityRole="button"
-                accessibilityState={{ disabled }}
                 onPress={selectedAnnotation ? onDeleteAnnotation : onEraseAnnotations}
-                disabled={disabled}
               >
-                <Box className="border-continuous overflow-hidden w-[32px] h-[32px] rounded-[10px] items-center justify-center border-quart border-[1px]">
-                  <FeatherIcon name="trash-2" size={17} color="quart" />
-                </Box>
-              </TouchableOpacity>
-            </AnimatedBox>
+                <FeatherIcon name="trash-2" size={20} color="quart" />
+              </TouchableBox>
+            </Box>
           )}
-
-          {selectedAnnotation && (
-            <AnimatedBox
-              className="border-continuous overflow-visible flex-row gap-[6px] absolute left-[20px] top-[0px]"
-              layout={LinearTransition}
-            >
-              <TouchableOpacity
-                accessibilityLabel={t('Note')}
-                accessibilityRole="button"
-                accessibilityState={{ disabled }}
-                onPress={onNotePress}
-                disabled={disabled}
-              >
-                <Box className="border-continuous overflow-hidden w-[32px] h-[32px] rounded-[10px] items-center justify-center border-border border-[1px]">
-                  <FeatherIcon
-                    name={selectedAnnotation.noteId ? 'file-text' : 'file-plus'}
-                    size={17}
-                    color={selectedAnnotation.noteId ? 'primary' : 'grey'}
-                  />
-                </Box>
-              </TouchableOpacity>
-              <TouchableOpacity
-                accessibilityLabel={`${t('Étiquettes')}, ${tagsCount}`}
-                accessibilityRole="button"
-                accessibilityState={{ disabled }}
-                onPress={onTagsPress}
-                disabled={disabled}
-              >
-                <Box className="border-continuous overflow-visible relative">
-                  <Box className="border-continuous overflow-hidden w-[32px] h-[32px] rounded-[10px] items-center justify-center border-border border-[1px]">
-                    <FeatherIcon name="tag" size={18} color={tagsCount > 0 ? 'primary' : 'grey'} />
-                  </Box>
-                  {tagsCount > 0 && (
-                    <Box className="overflow-hidden border-continuous absolute bottom-[-1px] right-[-4px] bg-primary rounded-[8px] w-[14px] h-[14px] items-center justify-center">
-                      <Text className="text-[8px] text-reverse font-bold">{tagsCount}</Text>
-                    </Box>
-                  )}
-                </Box>
-              </TouchableOpacity>
-              <TouchableOpacity
-                accessibilityLabel={`${t('Relations')}, ${relationsCount}`}
-                accessibilityRole="button"
-                accessibilityState={{ disabled }}
-                onPress={onRelationsPress}
-                disabled={disabled}
-              >
-                <Box className="border-continuous overflow-visible relative">
-                  <Box className="border-continuous overflow-hidden w-[32px] h-[32px] rounded-[10px] items-center justify-center border-border border-[1px]">
-                    <FeatherIcon
-                      name="git-merge"
-                      size={18}
-                      color={relationsCount > 0 ? 'primary' : 'grey'}
-                    />
-                  </Box>
-                  {relationsCount > 0 && (
-                    <Box className="overflow-hidden border-continuous absolute bottom-[-1px] right-[-4px] bg-primary rounded-[8px] w-[14px] h-[14px] items-center justify-center">
-                      <Text className="text-[8px] text-reverse font-bold">{relationsCount}</Text>
-                    </Box>
-                  )}
-                </Box>
-              </TouchableOpacity>
-            </AnimatedBox>
-          )}
-
-          <FadingBox
-            className="overflow-hidden border-continuous"
-            keyProp={
-              selectedAnnotation ? 'selectedAnnotation' : hasSelection ? 'hasSelection' : 'empty'
-            }
-          >
-            {selectedAnnotation ? (
-              <AnimatedBox
-                className="overflow-hidden border-continuous items-center justify-center mt-[6px]"
-                layout={LinearTransition}
-              >
-                <AnimatedBox
-                  layout={LinearTransition}
-                  className="overflow-hidden border-continuous"
-                >
-                  <AnnotationTargetLabel
-                    label={t('Appliquer à')}
-                    reference={verseToReference([selectedAnnotation.verseKey])}
-                  />
-                </AnimatedBox>
-              </AnimatedBox>
-            ) : hasSelection && selection?.start && selection?.end ? (
-              <AnimatedBox
-                className="overflow-hidden border-continuous items-center justify-center mt-[8px]"
-                layout={LinearTransition}
-              >
-                <AnimatedBox
-                  layout={LinearTransition}
-                  className="overflow-hidden border-continuous"
-                >
-                  <AnnotationTargetLabel
-                    label={t('Appliquer à')}
-                    reference={formatSelectionRange(selection)}
-                  />
-                </AnimatedBox>
-              </AnimatedBox>
-            ) : (
-              <Box className="overflow-hidden border-continuous items-center justify-center mt-[8px]">
-                <FadingText className="overflow-hidden border-continuous text-[13px] text-grey text-center">
-                  {t('Sélectionnez du texte dans la Bible')}
-                </FadingText>
-              </Box>
-            )}
-          </FadingBox>
-        </Box>
+        </HStack>
 
         <AnimatedBox layout={LinearTransition} className="overflow-hidden border-continuous">
-          <HStack className="overflow-hidden border-continuous px-[20px] pb-[20px] gap-[10px] items-center justify-center">
+          <HStack className="overflow-hidden border-continuous mx-[16px] gap-[8px] items-center">
             <AnnotationTypeButton
               disabled={disabled}
               type="background"
@@ -425,7 +253,7 @@ const AnnotationToolbar = ({
               onPress={setActiveAnnotationType}
               label={t('Surligner')}
             >
-              <BackgroundIcon width={30} height={30} color={getColor('background')} />
+              <AnnotationPreview type="background" color={getColor('background')} />
             </AnnotationTypeButton>
 
             <AnnotationTypeButton
@@ -435,7 +263,7 @@ const AnnotationToolbar = ({
               onPress={setActiveAnnotationType}
               label={t('Souligner')}
             >
-              <FeatherIcon name="underline" size={28} color={getColor('underline')} />
+              <AnnotationPreview type="underline" color={getColor('underline')} />
             </AnnotationTypeButton>
 
             <AnnotationTypeButton
@@ -445,10 +273,10 @@ const AnnotationToolbar = ({
               onPress={setActiveAnnotationType}
               label={t('Entourer')}
             >
-              <CircleSketchIcon width={28} height={28} color={getColor('circle')} />
+              <AnnotationPreview type="circle" color={getColor('circle')} />
             </AnnotationTypeButton>
           </HStack>
-          <Box className="border-continuous overflow-hidden border-t-[1px] border-border pt-[12px]">
+          <Box className="border-continuous overflow-hidden">
             <AnnotationColorPalette
               disabled={disabled}
               type={activeAnnotationType}
@@ -461,6 +289,70 @@ const AnnotationToolbar = ({
             />
           </Box>
         </AnimatedBox>
+        <HStack className="mx-[16px] border-t border-border py-[12px] items-center">
+          <TouchableBox
+            className="flex-1 min-w-0 h-[44px] flex-row gap-[6px] items-center justify-center"
+            accessibilityRole="button"
+            accessibilityLabel={t('Note')}
+            onPress={onNotePress}
+            disabled={noteDisabled}
+            accessibilityState={{ disabled: noteDisabled }}
+            style={{ opacity: noteDisabled ? 0.35 : 1 }}
+          >
+            <FeatherIcon
+              name={selectedAnnotation?.noteId ? 'file-text' : 'file-plus'}
+              size={20}
+              color={selectedAnnotation?.noteId ? 'primary' : 'grey'}
+            />
+            <Text className="text-[13px] text-default" numberOfLines={1}>
+              {t('Note')}
+            </Text>
+          </TouchableBox>
+          <Box className="w-px h-[24px] bg-border" />
+          <TouchableBox
+            className="flex-1 min-w-0 h-[44px] flex-row gap-[6px] items-center justify-center"
+            accessibilityRole="button"
+            accessibilityLabel={`${t('Étiquettes')}, ${tagsCount}`}
+            onPress={onTagsPress}
+            disabled={tagsDisabled}
+            accessibilityState={{ disabled: tagsDisabled }}
+            style={{ opacity: tagsDisabled ? 0.35 : 1 }}
+          >
+            <FeatherIcon name="tag" size={20} color={tagsCount > 0 ? 'primary' : 'grey'} />
+            <Text className="text-[13px] text-default" numberOfLines={1}>
+              {t('Étiquettes')}
+            </Text>
+            {tagsCount > 0 && (
+              <Box className="absolute right-0 top-0 bg-primary rounded-full min-w-[14px] h-[14px] px-[2px] items-center justify-center">
+                <Text className="text-[8px] text-reverse font-bold">{tagsCount}</Text>
+              </Box>
+            )}
+          </TouchableBox>
+          <Box className="w-px h-[24px] bg-border" />
+          <TouchableBox
+            className="flex-1 min-w-0 h-[44px] flex-row gap-[6px] items-center justify-center"
+            accessibilityRole="button"
+            accessibilityLabel={`${t('Relations')}, ${relationsCount}`}
+            onPress={onRelationsPress}
+            disabled={relationsDisabled}
+            accessibilityState={{ disabled: relationsDisabled }}
+            style={{ opacity: relationsDisabled ? 0.35 : 1 }}
+          >
+            <FeatherIcon
+              name="git-merge"
+              size={20}
+              color={relationsCount > 0 ? 'primary' : 'grey'}
+            />
+            <Text className="text-[13px] text-default" numberOfLines={1}>
+              {t('Relations')}
+            </Text>
+            {relationsCount > 0 && (
+              <Box className="absolute right-0 top-0 bg-primary rounded-full min-w-[14px] h-[14px] px-[2px] items-center justify-center">
+                <Text className="text-[8px] text-reverse font-bold">{relationsCount}</Text>
+              </Box>
+            )}
+          </TouchableBox>
+        </HStack>
       </SheetView>
     </Sheet>
   )

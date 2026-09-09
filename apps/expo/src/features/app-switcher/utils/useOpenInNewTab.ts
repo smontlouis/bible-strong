@@ -3,43 +3,46 @@ import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { toast } from '~helpers/toast'
 import generateUUID from '~helpers/generateUUID'
-import { TabItem, tabsAtomsAtom } from '../../../state/tabs'
+import { TabItem, DEFAULT_GROUP_ID } from '../../../state/tabs'
+import { addTabToGroupAtom, useSwitchGroup } from '~state/tabGroups'
 import { useSlideNewTab } from './useSlideNewTab'
 
 export const useOpenInNewTab = () => {
   const router = useRouter()
   const { t } = useTranslation()
-  const dispatchTabs = useSetAtom(tabsAtomsAtom)
+  const addTab = useSetAtom(addTabToGroupAtom)
+  const switchGroup = useSwitchGroup()
   const { triggerSlideNewTab } = useSlideNewTab()
 
   const openInNewTab = (data?: TabItem, params: { autoRedirect?: true } = {}) => {
     const newTabId = `new-${generateUUID()}`
-    dispatchTabs({
-      type: 'insert',
-      value: {
-        id: newTabId,
-        title: t('tabs.new'),
-        isRemovable: true,
-        type: 'new',
-        data: {},
-        ...data,
-      },
-    })
+    const tab: TabItem = {
+      id: newTabId,
+      title: t('tabs.new'),
+      isRemovable: true,
+      type: 'new',
+      data: {},
+      ...data,
+    }
+    addTab({ groupId: DEFAULT_GROUP_ID, tab })
+    const goToTab = () => {
+      switchGroup(DEFAULT_GROUP_ID)
+      router.dismissTo('/')
+      triggerSlideNewTab(tab.id)
+    }
 
     if (!params.autoRedirect) {
       toast(t('tabs.created'), {
         action: {
           label: t('common.goTo'),
           onClick: () => {
-            router.dismissTo('/')
-            triggerSlideNewTab(newTabId)
+            goToTab()
             toast.dismiss()
           },
         },
       })
     } else {
-      triggerSlideNewTab(newTabId)
-      router.dismissTo('/')
+      goToTab()
     }
   }
 

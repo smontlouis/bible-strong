@@ -93,7 +93,10 @@ function PanelFrame({
         <HeaderActionContext.Provider value={active ? actionTarget : null}>
           <HeaderContentContext.Provider value={active ? contentTarget : null}>
             <PanelTransition direction={direction}>
-              <div className="bs-filter-heading">
+              <div
+                className="bs-filter-heading"
+                style={screen.hideHeader ? { display: 'none' } : undefined}
+              >
                 {canGoBack && (
                   <button
                     className="bs-panel-back"

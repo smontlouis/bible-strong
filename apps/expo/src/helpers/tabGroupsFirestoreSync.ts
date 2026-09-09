@@ -74,6 +74,7 @@ export function prepareTabGroupForSync(
   const { activeTabIndex, ...groupWithoutLocalState } = group
   const prepared = {
     ...groupWithoutLocalState,
+    isCollapsed: group.isDefault ? false : (group.isCollapsed ?? false),
     updatedAt: options?.updatedAt ?? group.updatedAt,
     tabs: group.tabs.map(tab => {
       const { base64Preview, ...tabWithoutPreview } = tab
@@ -171,6 +172,9 @@ export function hydrateTabGroup(
 
   return {
     ...firestoreGroup,
+    isCollapsed: firestoreGroup.isDefault
+      ? false
+      : (firestoreGroup.isCollapsed ?? localGroup?.isCollapsed),
     tabs,
     activeTabIndex: resolveLocalActiveTabIndex(firestoreGroup.tabs, localGroup),
   }

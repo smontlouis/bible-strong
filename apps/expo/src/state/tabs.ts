@@ -255,6 +255,7 @@ export interface TabGroup {
   name: string
   color?: string
   isDefault: boolean
+  isCollapsed?: boolean
   tabs: TabItem[]
   activeTabIndex: number
   createdAt: number
@@ -451,8 +452,17 @@ const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
 const migrateTabGroups = (groups: TabGroup[]): TabGroup[] => {
   // If valid tab groups structure exists, apply tab migrations and return
   if (groups.length > 0 && groups[0].tabs !== undefined) {
+    let collapsedIds: unknown = []
+    try {
+      collapsedIds = JSON.parse(storage.getString('collapsedWorkspaceGroups') || '[]')
+    } catch {
+      /* Ignore malformed legacy display preferences. */
+    }
     return groups.map(group => ({
       ...group,
+      isCollapsed: group.isDefault
+        ? false
+        : (group.isCollapsed ?? (Array.isArray(collapsedIds) && collapsedIds.includes(group.id))),
       tabs: migrateTabsToRemovable(group.tabs),
     }))
   }

@@ -1,4 +1,6 @@
 {
+  "workspace.newTabShort": "Onglet",
+  "workspace.newGroupShort": "Groupe",
   "Quoi de neuf ?": "Quoi de neuf ?",
   "Les changements depuis votre dernière visite": "Les changements depuis votre dernière visite",
   "Il y a {{formattedDate}}": "Il y a {{formattedDate}}",
