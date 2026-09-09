@@ -357,7 +357,9 @@ const WorkspaceSidebar = ({
                         {group.tabs.length === 0 && !group.isDefault && (
                           <TouchableBox
                             className="overflow-hidden border-continuous justify-center px-[8px]"
-                            onPress={addTab}
+                            onPress={() =>
+                              openInNewTab(undefined, { autoRedirect: true, groupId: group.id })
+                            }
                             accessibilityRole="button"
                             style={{ minHeight: rowHeight }}
                           >

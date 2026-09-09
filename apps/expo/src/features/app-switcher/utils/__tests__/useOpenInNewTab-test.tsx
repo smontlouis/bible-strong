@@ -90,3 +90,23 @@ it('opens a tab created from a web side panel immediately and dismisses the pane
   act(() => view!.unmount())
   mockPanelOpen = false
 })
+
+it('creates and opens a tab in the explicitly requested group', () => {
+  jest.clearAllMocks()
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
+  let open!: ReturnType<typeof useOpenInNewTab>
+  function Probe() {
+    open = useOpenInNewTab()
+    return null
+  }
+  let view!: ReactTestRenderer
+  act(() => {
+    view = create(<Probe />)
+  })
+  act(() => open(undefined, { autoRedirect: true, groupId: 'clicked-group' }))
+  expect(mockAdd).toHaveBeenCalledWith(expect.objectContaining({ groupId: 'clicked-group' }))
+  expect(mockSwitch).toHaveBeenCalledWith('clicked-group')
+  expect(mockDismiss).toHaveBeenCalledWith('/')
+  expect(mockSlide).toHaveBeenCalledWith('new-123')
+  act(() => view.unmount())
+})
