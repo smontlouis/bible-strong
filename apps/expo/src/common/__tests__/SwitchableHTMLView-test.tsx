@@ -1,8 +1,14 @@
 import React, { act } from 'react'
+import { Platform } from 'react-native'
 import { create, type ReactTestRenderer } from 'react-test-renderer'
 import SwitchableHTMLView from '../SwitchableHTMLView'
 import Native from '../StylizedHTMLViewNative'
 import DOM from '../HTMLContentDOM'
+
+beforeEach(() => {
+  Platform.OS = 'ios'
+  mockEngine = 'native'
+})
 
 let mockEngine = 'native'
 let mockTypography = { fontFamily: 'Avenir', fontSize: 19, lineHeight: 35 }
@@ -36,6 +42,17 @@ it('switches engines without changing content or link payload and follows Bible 
   const dom = view.root.findByType(DOM)
   expect(dom.props.html).toBe(html)
   expect(dom.props.typography).toEqual(mockTypography)
+  expect(dom.props.dom.containerStyle).toMatchObject({ height: 200, flex: 0 })
+  for (const height of [1400, 320]) {
+    await act(async () => {
+      await view.root.findByType(DOM).props.onSizeChange(height)
+    })
+    expect(view.root.findByType(DOM).props.dom.containerStyle.height).toBe(height)
+  }
+  await act(async () => {
+    await view.root.findByType(DOM).props.onSizeChange(0)
+  })
+  expect(view.root.findByType(DOM).props.dom.containerStyle.height).toBe(320)
   await act(async () => {
     await dom.props.onLinkClicked(payload)
   })
@@ -45,3 +62,24 @@ it('switches engines without changing content or link payload and follows Bible 
   expect(view.root.findByType(Native).props.html).toBe(html)
   act(() => view.unmount())
 })
+
+it.each(['native', 'dom'])(
+  'always uses direct DOM on web when the mobile preference is %s',
+  preference => {
+    Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
+    Platform.OS = 'web'
+    mockEngine = preference
+    let view!: ReactTestRenderer
+    act(() => {
+      view = create(<SwitchableHTMLView value="<p>Lecture</p>" />)
+    })
+    expect(view.root.findAllByType(Native)).toHaveLength(0)
+    expect(view.root.findByType(DOM).props.html).toBe('<p>Lecture</p>')
+    act(() => {
+      view.update(<SwitchableHTMLView value="<p>Lecture</p>" engine="native" />)
+    })
+    expect(view.root.findAllByType(Native)).toHaveLength(0)
+    expect(view.root.findByType(DOM).props.html).toBe('<p>Lecture</p>')
+    act(() => view.unmount())
+  }
+)

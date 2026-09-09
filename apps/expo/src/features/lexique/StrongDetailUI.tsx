@@ -14,7 +14,8 @@ import {
 import { useTranslation, type TFunction } from 'react-i18next'
 import { DomUtils, parseDocument } from 'htmlparser2'
 import { hasChildren, isTag, isText, type ChildNode } from 'domhandler'
-import StylizedHTMLView from '~common/StylizedHTMLView'
+import SwitchableHTMLView from '~common/SwitchableHTMLView'
+import { linkifyStrongReferences, normalizeExternalContextLinks } from '~common/stylizedHtmlUtils'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -24,11 +25,7 @@ import type {
   StrongLexiconRelation,
 } from '~features/resources/strongLexiconAccess'
 import { linkifyStrongEditorialBibleReferences } from './strongEditorialHtml'
-import {
-  getScaledStrongTextStyle,
-  getStrongEditorialHtmlStyles,
-  type StrongReadingTypography,
-} from './strongEditorialHtmlStyles'
+import { getScaledStrongTextStyle, type StrongReadingTypography } from './strongEditorialHtmlStyles'
 import { isStrongEditorialPreviewOverflowing } from './strongDetailPreview'
 import { getStrongEntityAvatarSource } from './strongEntityAvatars'
 import { isStrongOriginalUnnamed } from './strongOriginalPresentation'
@@ -107,14 +104,12 @@ export const StrongLexicalRelationCard = ({
 
 type StrongEditorialHtmlProps = {
   value?: string
-  readingTypography: StrongReadingTypography
   onOpenBibleReference: (osis: string) => void
   onOpenStrong: (stepCode: string) => void
 }
 
 export const StrongEditorialHtml = ({
   value,
-  readingTypography,
   onOpenBibleReference,
   onOpenStrong,
 }: StrongEditorialHtmlProps) => {
@@ -122,17 +117,13 @@ export const StrongEditorialHtml = ({
   if (!value) return null
 
   return (
-    <StylizedHTMLView
-      value={linkifyStrongEditorialBibleReferences(value, theme.colors.primary)}
-      htmlStyle={getStrongEditorialHtmlStyles(theme, readingTypography)}
-      additionalSystemFonts={
-        readingTypography.fontFamily ? [readingTypography.fontFamily] : undefined
-      }
-      onLinkPress={(target, metadata) => {
-        if (typeof metadata === 'number') {
-          onOpenStrong(`${metadata <= 39 ? 'H' : 'G'}${target}`)
-          return
-        }
+    <SwitchableHTMLView
+      value={linkifyStrongReferences(
+        normalizeExternalContextLinks(
+          linkifyStrongEditorialBibleReferences(value, theme.colors.primary)
+        )
+      )}
+      onLinkPress={target => {
         if (target.startsWith('bible://')) {
           onOpenBibleReference(target.slice('bible://'.length))
           return
@@ -337,7 +328,6 @@ export const StrongEntitySummaryCard = ({
       {!!entity.shortDescription && (
         <StrongEditorialHtml
           value={entity.shortDescription}
-          readingTypography={readingTypography}
           onOpenBibleReference={onOpenBibleReference}
           onOpenStrong={onOpenStrong}
         />
@@ -352,7 +342,6 @@ export const StrongEntitySummaryCard = ({
         >
           <StrongEditorialHtml
             value={detailedDescription}
-            readingTypography={readingTypography}
             onOpenBibleReference={onOpenBibleReference}
             onOpenStrong={onOpenStrong}
           />

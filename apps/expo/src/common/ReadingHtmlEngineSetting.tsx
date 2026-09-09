@@ -1,3 +1,4 @@
+import { Platform } from 'react-native'
 import { useAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { readingHtmlEngineAtom } from '~state/readingHtmlEngine'
@@ -7,6 +8,7 @@ import Text from './ui/Text'
 export default function ReadingHtmlEngineSetting() {
   const { t } = useTranslation()
   const [engine, setEngine] = useAtom(readingHtmlEngineAtom)
+  if (Platform.OS === 'web') return null
   return (
     <Box className="px-[20px] py-[12px] gap-[8px]">
       <Text>{t('readingHtml.engineTitle')}</Text>

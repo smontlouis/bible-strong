@@ -6,10 +6,10 @@ import { readingHtmlEngineAtom } from '~state/readingHtmlEngine'
 import HTMLContentDOM from './HTMLContentDOM'
 import StylizedHTMLViewNative from './StylizedHTMLViewNative'
 import { useReadingTypography } from './useReadingTypography'
-import { webFontFamily, type HtmlEngine } from './readingHtml'
+import type { HtmlEngine } from './readingHtml'
 import type { HTMLViewLinkPayload } from './htmlContentTypes'
 
-/** Set engine="native" or engine="dom" to override the persisted reading preference. */
+/** Web always uses DOM. On mobile, engine overrides the persisted preference. */
 export default function SwitchableHTMLView({
   value,
   engine,
@@ -41,14 +41,10 @@ export default function SwitchableHTMLView({
   const padding = padded ? { paddingTop: 8, paddingHorizontal: 28, paddingBottom: 48 } : undefined
   return (
     <View style={padding}>
-      {(engine ?? preferredEngine) === 'native' ? (
+      {Platform.OS !== 'web' && (engine ?? preferredEngine) === 'native' ? (
         <StylizedHTMLViewNative
           html={value}
-          typography={{
-            ...typography,
-            fontFamily:
-              Platform.OS === 'web' ? webFontFamily(typography.fontFamily) : typography.fontFamily,
-          }}
+          typography={typography}
           colors={colors}
           onLinkClicked={onLink}
         />

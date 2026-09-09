@@ -6,20 +6,13 @@ import Empty from '~common/Empty'
 import { VStack } from '~common/ui/Box'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
 import { StrongEditorialHtml, StrongEyebrow } from './StrongDetailUI'
-import type { StrongReadingTypography } from './strongEditorialHtmlStyles'
 type Props = {
   entry: StrongLexiconEntry
-  readingTypography: StrongReadingTypography
   onOpenBibleReference: (osis: string) => void
   onOpenStrong: (stepCode: string) => void
 }
 
-const StrongDictionaryPage = ({
-  entry,
-  readingTypography,
-  onOpenBibleReference,
-  onOpenStrong,
-}: Props) => {
+const StrongDictionaryPage = ({ entry, onOpenBibleReference, onOpenStrong }: Props) => {
   const { t } = useTranslation()
   const resource = entry.resources[0]
   if (!resource) {
@@ -43,7 +36,6 @@ const StrongDictionaryPage = ({
         <StrongEyebrow>{resource.source}</StrongEyebrow>
         <StrongEditorialHtml
           value={resource.contentHtml}
-          readingTypography={readingTypography}
           onOpenBibleReference={onOpenBibleReference}
           onOpenStrong={onOpenStrong}
         />

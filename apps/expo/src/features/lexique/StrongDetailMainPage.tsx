@@ -345,7 +345,6 @@ const StrongDetailMainPage = ({
           >
             <StrongEditorialHtml
               value={entry.nameMeaningHtml}
-              readingTypography={readingTypography}
               onOpenBibleReference={onOpenBibleReference}
               onOpenStrong={onOpenStrong}
             />
@@ -354,7 +353,6 @@ const StrongDetailMainPage = ({
         {entry.definitionHtml ? (
           <StrongEditorialHtml
             value={entry.definitionHtml}
-            readingTypography={readingTypography}
             onOpenBibleReference={onOpenBibleReference}
             onOpenStrong={onOpenStrong}
           />

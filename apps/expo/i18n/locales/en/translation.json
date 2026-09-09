@@ -2086,7 +2086,7 @@
   "commandPalette.openTool": "Open {{scope}}",
   "commandPalette.openList": "Open list: {{scope}}",
   "readingHtml.engineTitle": "Text rendering",
-  "readingHtml.engineDescription": "Commentaries and dictionaries. Font, size and line spacing follow your Bible settings.",
+  "readingHtml.engineDescription": "Commentaries, dictionaries, Nave and lexicon. Font, size and line spacing follow your Bible settings.",
   "readingHtml.native": "Native",
   "readingHtml.dom": "WebView"
 }

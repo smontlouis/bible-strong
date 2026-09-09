@@ -2113,7 +2113,7 @@
   "commandPalette.openTool": "Ouvrir {{scope}}",
   "commandPalette.openList": "Ouvrir la liste : {{scope}}",
   "readingHtml.engineTitle": "Rendu des textes",
-  "readingHtml.engineDescription": "Commentaires et dictionnaires. La police, la taille et l’interligne suivent les réglages de la Bible.",
+  "readingHtml.engineDescription": "Commentaires, dictionnaires, Nave et lexique. La police, la taille et l’interligne suivent les réglages de la Bible.",
   "readingHtml.native": "Natif",
   "readingHtml.dom": "WebView"
 }

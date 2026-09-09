@@ -4,7 +4,6 @@ import StrongDictionaryPage from './StrongDictionaryPage'
 import StrongEntryRouteScaffold from './StrongEntryRouteScaffold'
 import type { StrongDetailRouteContext } from './strongDetailRoutes'
 import { useStrongEntryRoute } from './useStrongEntryRoute'
-import { useStrongReadingTypography } from './useStrongReadingTypography'
 import { useStrongRouteNavigation } from './useStrongRouteNavigation'
 
 type Props = {
@@ -14,7 +13,6 @@ type Props = {
 
 const StrongDictionaryRouteScreen = ({ context, isFormSheet }: Props) => {
   const { t } = useTranslation()
-  const readingTypography = useStrongReadingTypography()
   const navigation = useStrongRouteNavigation(context)
   const entryState = useStrongEntryRoute(context)
 
@@ -35,7 +33,6 @@ const StrongDictionaryRouteScreen = ({ context, isFormSheet }: Props) => {
       {entryState.entry && (
         <StrongDictionaryPage
           entry={entryState.entry}
-          readingTypography={readingTypography}
           onOpenBibleReference={navigation.openBibleReference}
           onOpenStrong={navigation.openStrong}
         />
