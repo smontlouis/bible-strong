@@ -1,0 +1,122 @@
+{
+  "dev": true,
+  "fixtures": [
+    {
+      "chars": 1534,
+      "id": "short",
+      "source": "Dictionnaire Aaron — premier paragraphe"
+    },
+    {
+      "chars": 22537,
+      "id": "dictionary",
+      "source": "Dictionnaire Aaron — intégral"
+    },
+    {
+      "chars": 4924,
+      "id": "nave",
+      "source": "Nave Aaron — intégral"
+    },
+    {
+      "chars": 4655,
+      "id": "commentary",
+      "source": "Bible annotée — Matthieu 4:1"
+    },
+    {
+      "chars": 112685,
+      "id": "stress",
+      "source": "Synthétique : dictionnaire Aaron répété 5 fois"
+    }
+  ],
+  "samples": [
+    {
+      "chars": 4655,
+      "engine": "native",
+      "fixture": "commentary",
+      "maxJsGapMs": 73.3486659526825,
+      "readyMs": 99.84508299827576,
+      "scrollMaxJsGapMs": 17.681749939918518,
+      "timedOut": false
+    },
+    {
+      "chars": 4655,
+      "engine": "dom",
+      "fixture": "commentary",
+      "maxJsGapMs": 25.969666957855225,
+      "readyMs": 516.7394160032272,
+      "scrollMaxJsGapMs": 18.123541951179504,
+      "timedOut": false
+    },
+    {
+      "chars": 4655,
+      "engine": "dom",
+      "fixture": "commentary",
+      "maxJsGapMs": 17.37666690349579,
+      "readyMs": 500.2032079696655,
+      "scrollMaxJsGapMs": 16.805583000183105,
+      "timedOut": false
+    },
+    {
+      "chars": 4655,
+      "engine": "native",
+      "fixture": "commentary",
+      "maxJsGapMs": 64.52908301353455,
+      "readyMs": 82.87712502479553,
+      "scrollMaxJsGapMs": 17.550709009170532,
+      "timedOut": false
+    },
+    {
+      "chars": 4655,
+      "engine": "native",
+      "fixture": "commentary",
+      "maxJsGapMs": 63.08512508869171,
+      "readyMs": 83.00324988365173,
+      "scrollMaxJsGapMs": 17.541082978248596,
+      "timedOut": false
+    },
+    {
+      "chars": 4655,
+      "engine": "dom",
+      "fixture": "commentary",
+      "maxJsGapMs": 16.68808400630951,
+      "readyMs": 466.47004199028015,
+      "scrollMaxJsGapMs": 17.66191601753235,
+      "timedOut": false
+    },
+    {
+      "chars": 4655,
+      "engine": "dom",
+      "fixture": "commentary",
+      "maxJsGapMs": 22.431874990463257,
+      "readyMs": 483.64304196834564,
+      "scrollMaxJsGapMs": 17.710874915122986,
+      "timedOut": false
+    },
+    {
+      "chars": 4655,
+      "engine": "native",
+      "fixture": "commentary",
+      "maxJsGapMs": 62.22637498378754,
+      "readyMs": 82.99862492084503,
+      "scrollMaxJsGapMs": 17.551957964897156,
+      "timedOut": false
+    },
+    {
+      "chars": 4655,
+      "engine": "native",
+      "fixture": "commentary",
+      "maxJsGapMs": 69.99145901203156,
+      "readyMs": 99.59941697120667,
+      "scrollMaxJsGapMs": 17.538458943367004,
+      "timedOut": false
+    },
+    {
+      "chars": 4655,
+      "engine": "dom",
+      "fixture": "commentary",
+      "maxJsGapMs": 19.175292015075684,
+      "readyMs": 466.8805420398712,
+      "scrollMaxJsGapMs": 17.51204204559326,
+      "timedOut": false
+    }
+  ]
+}

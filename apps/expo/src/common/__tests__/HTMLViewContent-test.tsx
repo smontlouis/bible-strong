@@ -3,6 +3,10 @@ import { create, type ReactTestRenderer } from 'react-test-renderer'
 import HTMLViewContent from '../HTMLViewContent'
 import HTMLContentDOM from '../HTMLContentDOM'
 
+jest.mock('../useReadingTypography', () => ({
+  useReadingTypography: () => ({ fontFamily: 'Avenir', fontSize: 19, lineHeight: 35 }),
+}))
+
 jest.mock('../HTMLContentDOM', () => ({ __esModule: true, default: 'HTMLContentDOM' }))
 jest.mock('~themes/ThemeProvider', () => ({ useTheme: () => ({ colors: {} }) }))
 

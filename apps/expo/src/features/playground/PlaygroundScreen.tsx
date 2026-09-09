@@ -8,7 +8,8 @@ import AbelOnboarding from '~features/onboarding/AbelOnboarding'
 import SelectResources from '~features/onboarding/SelectResources'
 import themes from '~themes'
 import PlaygroundHome from './PlaygroundHome'
-type PlaygroundView = 'home' | 'abel-onboarding' | 'offline-setup'
+import HTMLRenderingBenchmark from './HTMLRenderingBenchmark'
+type PlaygroundView = 'home' | 'abel-onboarding' | 'offline-setup' | 'html-benchmark'
 
 const PlaygroundScreen = () => {
   const [view, setView] = useState<PlaygroundView>('home')
@@ -21,6 +22,7 @@ const PlaygroundScreen = () => {
   }, [colorScheme])
 
   const renderView = () => {
+    if (view === 'html-benchmark') return <HTMLRenderingBenchmark onBack={() => setView('home')} />
     if (view === 'abel-onboarding') {
       return <AbelOnboarding completionMode="confirmation" onComplete={() => setView('home')} />
     }
@@ -31,6 +33,7 @@ const PlaygroundScreen = () => {
 
     return (
       <PlaygroundHome
+        onOpenHTMLBenchmark={() => setView('html-benchmark')}
         selectedTheme={selectedTheme}
         onSelectTheme={setSelectedTheme}
         onOpenAbelOnboarding={() => setView('abel-onboarding')}

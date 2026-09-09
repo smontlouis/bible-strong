@@ -25,6 +25,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import fonts from '~helpers/fonts'
+import ReadingHtmlEngineSetting from '~common/ReadingHtmlEngineSetting'
 import { RootState } from '~redux/modules/reducer'
 import {
   decreaseSettingsFontSizeScale,
@@ -369,6 +370,7 @@ const BibleParamsModal = ({
               <Circle isSelected={preferredDarkTheme === 'night'} size={20} color="rgb(0,50,100)" />
             </LinkBox>
           </HalfContainer>
+          <ReadingHtmlEngineSetting />
           <HalfContainer border>
             <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
               {t('Taille du texte')}

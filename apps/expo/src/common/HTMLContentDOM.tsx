@@ -1,46 +1,38 @@
 'use dom'
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, type CSSProperties } from 'react'
 import { IS_DOM, type DOMProps } from 'expo/dom'
-import literata from '~assets/fonts/literata'
+import { useFonts } from 'expo-font'
 import type { HTMLViewLinkPayload } from './htmlContentTypes'
+import {
+  cleanReadingHTML,
+  defaultReadingTypography,
+  readingHtmlCSS,
+  webFontFamily,
+  type ReadingTypography,
+} from './readingHtml'
 
 type Props = {
   html: string
   colors: { background: string; text: string; link: string; emphasis: string }
   onLinkClicked: (payload: HTMLViewLinkPayload) => Promise<void>
   onSizeChange: (height: number) => Promise<void>
+  typography?: ReadingTypography
+  padded?: boolean
   dom?: DOMProps
 }
 
-// Editorial HTML is now in the application document on Web. Keep content
-// formatting, but never allow embedded scripts or event handlers to execute.
-function cleanHTML(html: string) {
-  const document = new DOMParser().parseFromString(html, 'text/html')
-  document
-    .querySelectorAll('script, style, iframe, object, embed, link, meta, base, form, svg, math')
-    .forEach(node => node.remove())
-  document.body.querySelectorAll('*').forEach(element => {
-    for (const attribute of Array.from(element.attributes)) {
-      const name = attribute.name.toLowerCase()
-      if (name.startsWith('on') || ['srcdoc', 'style', 'id'].includes(name))
-        element.removeAttribute(attribute.name)
-      if (
-        ['href', 'src', 'xlink:href'].includes(name) &&
-        /^(javascript|vbscript|data):/i.test(attribute.value.replace(/[\s\u0000-\u001f]/g, ''))
-      )
-        element.removeAttribute(attribute.name)
-    }
-  })
-  return document.body.innerHTML
-}
-
-export default function HTMLContentDOM({ html, colors, onLinkClicked, onSizeChange }: Props) {
+export default function HTMLContentDOM({
+  html,
+  colors,
+  onLinkClicked,
+  onSizeChange,
+  typography = defaultReadingTypography,
+  padded = true,
+}: Props) {
+  useFonts({ 'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf') })
   const containerRef = useRef<HTMLDivElement>(null)
-  const [content, setContent] = useState('')
-  useEffect(() => {
-    setContent(cleanHTML(html))
-  }, [html])
+  const content = cleanReadingHTML(html)
 
   useEffect(() => {
     if (!IS_DOM) return
@@ -50,14 +42,16 @@ export default function HTMLContentDOM({ html, colors, onLinkClicked, onSizeChan
     // Measure the content root, not the document: the document can retain the
     // native viewport height and prevent shorter entries from shrinking.
     const reportSize = () => {
-      void onSizeChange(Math.ceil(Math.max(container.offsetHeight, container.scrollHeight, 200)))
+      void onSizeChange(
+        Math.ceil(Math.max(container.offsetHeight, container.scrollHeight, padded ? 200 : 1))
+      )
     }
     reportSize()
     const observer =
       typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(reportSize)
     observer?.observe(container)
     return () => observer?.disconnect()
-  }, [content, onSizeChange])
+  }, [content, onSizeChange, padded])
 
   return (
     <div
@@ -65,6 +59,7 @@ export default function HTMLContentDOM({ html, colors, onLinkClicked, onSizeChan
       className="editorial-html"
       style={
         {
+          '--html-font-family': webFontFamily(typography.fontFamily),
           '--html-background': colors.background,
           '--html-text': colors.text,
           '--html-link': colors.link,
@@ -84,11 +79,9 @@ export default function HTMLContentDOM({ html, colors, onLinkClicked, onSizeChan
     >
       <style>{`
         ${IS_DOM ? 'html, body { margin: 0; padding: 0; }' : ''}
-        @font-face { font-family: 'Literata Book'; src: local('Literata Book'), url('${literata}') format('woff'); }
-        .editorial-html { box-sizing: border-box; width: 100%; min-height: 200px; padding: 8px 28px 48px; font-family: 'Literata Book', Georgia, serif; font-size: 18px; line-height: 26px; color: var(--html-text); background: var(--html-background); overflow-wrap: break-word; }
-        .editorial-html a { color: var(--html-link); text-decoration: underline; border: none; cursor: pointer; }
-        .editorial-html strong, .editorial-html bold { color: var(--html-emphasis); }
-        .editorial-html ul { margin: 0; padding: 0; list-style: none; }
+        .editorial-html { display: flow-root; box-sizing: border-box; width: 100%; min-height: ${padded ? 200 : 0}px; padding: ${padded ? '8px 28px 48px' : '0'}; font-family: var(--html-font-family); font-size: ${typography.fontSize}px; line-height: ${typography.lineHeight}px; color: var(--html-text); overflow-wrap: break-word; -webkit-text-size-adjust: none; }
+        ${readingHtmlCSS(typography, colors)}
+        .editorial-html a { cursor: pointer; border: none; }
         .editorial-html img { max-width: 100%; height: auto; }
       `}</style>
       <div dangerouslySetInnerHTML={{ __html: content }} />

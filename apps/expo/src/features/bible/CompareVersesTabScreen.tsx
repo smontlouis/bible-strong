@@ -121,7 +121,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
           </Box>
         }
       />
-      <ScrollView contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}>
+      <ScrollView contentContainerStyle={{ maxWidth: 600, paddingBottom: 20, flexGrow: 1 }}>
         <CompareCard
           selectedVerses={selectedVerses}
           strongMode={strongMode}

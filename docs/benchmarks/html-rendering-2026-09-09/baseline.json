@@ -1,0 +1,387 @@
+{
+  "dev": true,
+  "fixtures": [
+    {
+      "chars": 1534,
+      "id": "short",
+      "source": "Dictionnaire Aaron — premier paragraphe"
+    },
+    {
+      "chars": 22537,
+      "id": "dictionary",
+      "source": "Dictionnaire Aaron — intégral"
+    },
+    {
+      "chars": 4924,
+      "id": "nave",
+      "source": "Nave Aaron — intégral"
+    },
+    {
+      "chars": 112685,
+      "id": "stress",
+      "source": "Synthétique : dictionnaire Aaron répété 5 fois"
+    }
+  ],
+  "samples": [
+    {
+      "chars": 1534,
+      "engine": "native",
+      "fixture": "short",
+      "maxJsGapMs": 809.5243750810623,
+      "readyMs": 832.7372089624405,
+      "scrollMaxJsGapMs": 17.43525004386902,
+      "timedOut": false
+    },
+    {
+      "chars": 1534,
+      "engine": "dom",
+      "fixture": "short",
+      "maxJsGapMs": 26.15125000476837,
+      "readyMs": 1966.439167022705,
+      "scrollMaxJsGapMs": 17.03883397579193,
+      "timedOut": false
+    },
+    {
+      "chars": 22537,
+      "engine": "native",
+      "fixture": "dictionary",
+      "maxJsGapMs": 337.84620797634125,
+      "readyMs": 365.9247080087662,
+      "scrollMaxJsGapMs": 17.021584033966064,
+      "timedOut": false
+    },
+    {
+      "chars": 22537,
+      "engine": "dom",
+      "fixture": "dictionary",
+      "maxJsGapMs": 19.809208035469055,
+      "readyMs": 450.658499956131,
+      "scrollMaxJsGapMs": 16.87233304977417,
+      "timedOut": false
+    },
+    {
+      "chars": 4924,
+      "engine": "native",
+      "fixture": "nave",
+      "maxJsGapMs": 283.71916699409485,
+      "readyMs": 299.3298749923706,
+      "scrollMaxJsGapMs": 16.962999939918518,
+      "timedOut": false
+    },
+    {
+      "chars": 4924,
+      "engine": "dom",
+      "fixture": "nave",
+      "maxJsGapMs": 21.844457983970642,
+      "readyMs": 483.45495796203613,
+      "scrollMaxJsGapMs": 17.931750059127808,
+      "timedOut": false
+    },
+    {
+      "chars": 112685,
+      "engine": "native",
+      "fixture": "stress",
+      "maxJsGapMs": 975.6545420885086,
+      "readyMs": 999.4480420351028,
+      "scrollMaxJsGapMs": 17.68400001525879,
+      "timedOut": false
+    },
+    {
+      "chars": 112685,
+      "engine": "dom",
+      "fixture": "stress",
+      "maxJsGapMs": 25.54675006866455,
+      "readyMs": 500.10983300209045,
+      "scrollMaxJsGapMs": 17.065542101860046,
+      "timedOut": false
+    },
+    {
+      "chars": 1534,
+      "engine": "dom",
+      "fixture": "short",
+      "maxJsGapMs": 23.82937502861023,
+      "readyMs": 482.78229200839996,
+      "scrollMaxJsGapMs": 16.885083079338074,
+      "timedOut": false
+    },
+    {
+      "chars": 1534,
+      "engine": "native",
+      "fixture": "short",
+      "maxJsGapMs": 47.669957995414734,
+      "readyMs": 66.2161660194397,
+      "scrollMaxJsGapMs": 17.10529100894928,
+      "timedOut": false
+    },
+    {
+      "chars": 22537,
+      "engine": "dom",
+      "fixture": "dictionary",
+      "maxJsGapMs": 25.515666007995605,
+      "readyMs": 499.9945830106735,
+      "scrollMaxJsGapMs": 16.87970793247223,
+      "timedOut": false
+    },
+    {
+      "chars": 22537,
+      "engine": "native",
+      "fixture": "dictionary",
+      "maxJsGapMs": 169.10516607761383,
+      "readyMs": 182.65874993801117,
+      "scrollMaxJsGapMs": 17.166208028793335,
+      "timedOut": false
+    },
+    {
+      "chars": 4924,
+      "engine": "dom",
+      "fixture": "nave",
+      "maxJsGapMs": 19.740041971206665,
+      "readyMs": 483.50479102134705,
+      "scrollMaxJsGapMs": 17.07841694355011,
+      "timedOut": false
+    },
+    {
+      "chars": 4924,
+      "engine": "native",
+      "fixture": "nave",
+      "maxJsGapMs": 170.17820799350739,
+      "readyMs": 199.68220901489258,
+      "scrollMaxJsGapMs": 16.973124980926514,
+      "timedOut": false
+    },
+    {
+      "chars": 112685,
+      "engine": "dom",
+      "fixture": "stress",
+      "maxJsGapMs": 24.69554102420807,
+      "readyMs": 499.1484580039978,
+      "scrollMaxJsGapMs": 17.825291991233826,
+      "timedOut": false
+    },
+    {
+      "chars": 112685,
+      "engine": "native",
+      "fixture": "stress",
+      "maxJsGapMs": 676.7854160070419,
+      "readyMs": 699.1939998865128,
+      "scrollMaxJsGapMs": 17.168208956718445,
+      "timedOut": false
+    },
+    {
+      "chars": 1534,
+      "engine": "native",
+      "fixture": "short",
+      "maxJsGapMs": 38.64366698265076,
+      "readyMs": 66.3350419998169,
+      "scrollMaxJsGapMs": 16.99862504005432,
+      "timedOut": false
+    },
+    {
+      "chars": 1534,
+      "engine": "dom",
+      "fixture": "short",
+      "maxJsGapMs": 23.293209075927734,
+      "readyMs": 483.2158329486847,
+      "scrollMaxJsGapMs": 17.174291014671326,
+      "timedOut": false
+    },
+    {
+      "chars": 22537,
+      "engine": "native",
+      "fixture": "dictionary",
+      "maxJsGapMs": 162.23020792007446,
+      "readyMs": 182.74233400821686,
+      "scrollMaxJsGapMs": 16.960124969482422,
+      "timedOut": false
+    },
+    {
+      "chars": 22537,
+      "engine": "dom",
+      "fixture": "dictionary",
+      "maxJsGapMs": 30.598000049591064,
+      "readyMs": 483.01254200935364,
+      "scrollMaxJsGapMs": 17.94962501525879,
+      "timedOut": false
+    },
+    {
+      "chars": 4924,
+      "engine": "native",
+      "fixture": "nave",
+      "maxJsGapMs": 164.29608297348022,
+      "readyMs": 183.36266708374023,
+      "scrollMaxJsGapMs": 17.04199993610382,
+      "timedOut": false
+    },
+    {
+      "chars": 4924,
+      "engine": "dom",
+      "fixture": "nave",
+      "maxJsGapMs": 19.13587498664856,
+      "readyMs": 483.2896670103073,
+      "scrollMaxJsGapMs": 17.83370792865753,
+      "timedOut": false
+    },
+    {
+      "chars": 112685,
+      "engine": "native",
+      "fixture": "stress",
+      "maxJsGapMs": 944.4228749275208,
+      "readyMs": 965.647125005722,
+      "scrollMaxJsGapMs": 16.846582889556885,
+      "timedOut": false
+    },
+    {
+      "chars": 112685,
+      "engine": "dom",
+      "fixture": "stress",
+      "maxJsGapMs": 30.89929211139679,
+      "readyMs": 499.87050008773804,
+      "scrollMaxJsGapMs": 17.044417023658752,
+      "timedOut": false
+    },
+    {
+      "chars": 1534,
+      "engine": "dom",
+      "fixture": "short",
+      "maxJsGapMs": 29.99358296394348,
+      "readyMs": 499.93533396720886,
+      "scrollMaxJsGapMs": 17.09737503528595,
+      "timedOut": false
+    },
+    {
+      "chars": 1534,
+      "engine": "native",
+      "fixture": "short",
+      "maxJsGapMs": 56.184332966804504,
+      "readyMs": 82.01583397388458,
+      "scrollMaxJsGapMs": 17.227999925613403,
+      "timedOut": false
+    },
+    {
+      "chars": 22537,
+      "engine": "dom",
+      "fixture": "dictionary",
+      "maxJsGapMs": 27.77775001525879,
+      "readyMs": 484.0500410795212,
+      "scrollMaxJsGapMs": 17.05637502670288,
+      "timedOut": false
+    },
+    {
+      "chars": 22537,
+      "engine": "native",
+      "fixture": "dictionary",
+      "maxJsGapMs": 231.52358305454254,
+      "readyMs": 249.43504106998444,
+      "scrollMaxJsGapMs": 17.25824999809265,
+      "timedOut": false
+    },
+    {
+      "chars": 4924,
+      "engine": "dom",
+      "fixture": "nave",
+      "maxJsGapMs": 23.08916699886322,
+      "readyMs": 483.5564579963684,
+      "scrollMaxJsGapMs": 17.346042037010193,
+      "timedOut": false
+    },
+    {
+      "chars": 4924,
+      "engine": "native",
+      "fixture": "nave",
+      "maxJsGapMs": 276.01641595363617,
+      "readyMs": 299.70091593265533,
+      "scrollMaxJsGapMs": 17.86383295059204,
+      "timedOut": false
+    },
+    {
+      "chars": 112685,
+      "engine": "dom",
+      "fixture": "stress",
+      "maxJsGapMs": 24.34795904159546,
+      "readyMs": 533.6067500114441,
+      "scrollMaxJsGapMs": 17.02233397960663,
+      "timedOut": false
+    },
+    {
+      "chars": 112685,
+      "engine": "native",
+      "fixture": "stress",
+      "maxJsGapMs": 1192.0337499380112,
+      "readyMs": 1216.2299159765244,
+      "scrollMaxJsGapMs": 17.12999999523163,
+      "timedOut": false
+    },
+    {
+      "chars": 1534,
+      "engine": "native",
+      "fixture": "short",
+      "maxJsGapMs": 53.18220901489258,
+      "readyMs": 66.29612493515015,
+      "scrollMaxJsGapMs": 17.20691692829132,
+      "timedOut": false
+    },
+    {
+      "chars": 1534,
+      "engine": "dom",
+      "fixture": "short",
+      "maxJsGapMs": 16.920875072479248,
+      "readyMs": 500.3930410146713,
+      "scrollMaxJsGapMs": 16.763625025749207,
+      "timedOut": false
+    },
+    {
+      "chars": 22537,
+      "engine": "native",
+      "fixture": "dictionary",
+      "maxJsGapMs": 206.67133402824402,
+      "readyMs": 232.97358298301697,
+      "scrollMaxJsGapMs": 17.15608310699463,
+      "timedOut": false
+    },
+    {
+      "chars": 22537,
+      "engine": "dom",
+      "fixture": "dictionary",
+      "maxJsGapMs": 27.77358305454254,
+      "readyMs": 483.88295900821686,
+      "scrollMaxJsGapMs": 18.002957940101624,
+      "timedOut": false
+    },
+    {
+      "chars": 4924,
+      "engine": "native",
+      "fixture": "nave",
+      "maxJsGapMs": 202.2329169511795,
+      "readyMs": 216.35287499427795,
+      "scrollMaxJsGapMs": 16.87374997138977,
+      "timedOut": false
+    },
+    {
+      "chars": 4924,
+      "engine": "dom",
+      "fixture": "nave",
+      "maxJsGapMs": 32.744207978248596,
+      "readyMs": 466.857833981514,
+      "scrollMaxJsGapMs": 17.09433400630951,
+      "timedOut": false
+    },
+    {
+      "chars": 112685,
+      "engine": "native",
+      "fixture": "stress",
+      "maxJsGapMs": 684.534875035286,
+      "readyMs": 699.5104999542236,
+      "scrollMaxJsGapMs": 17.15404200553894,
+      "timedOut": false
+    },
+    {
+      "chars": 112685,
+      "engine": "dom",
+      "fixture": "stress",
+      "maxJsGapMs": 25.0804580450058,
+      "readyMs": 499.8406660556793,
+      "scrollMaxJsGapMs": 17.191290974617004,
+      "timedOut": false
+    }
+  ]
+}

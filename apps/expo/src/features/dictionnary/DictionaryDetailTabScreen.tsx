@@ -8,7 +8,7 @@ import { ScrollView, Share } from 'react-native'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 import books from '~assets/bible_versions/books-desc'
-import HTMLViewContent from '~common/HTMLViewContent'
+import SwitchableHTMLView from '~common/SwitchableHTMLView'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
@@ -504,8 +504,9 @@ const DictionnaryDetailScreen = ({
           <Loading message={t('Chargement...')} />
         ) : (
           dictionnaireItem?.definition && (
-            <HTMLViewContent
-              html={dictionnaireItem.definition.replace(/\n/gi, '')}
+            <SwitchableHTMLView
+              padded
+              value={dictionnaireItem.definition.replace(/\n/gi, '')}
               onLinkClicked={openLink}
             />
           )

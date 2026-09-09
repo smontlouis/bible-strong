@@ -13,14 +13,19 @@ const output = ts.transpileModule(source, {
 }).outputText
 const loaded = { exports: {} as typeof import('../HTMLContentDOM') }
 new Function('require', 'module', 'exports', output)(
-  (name: string) => (name === '~assets/fonts/literata' ? 'literata.woff' : require(name)),
+  (name: string) =>
+    name === './readingHtml'
+      ? require('../readingHtml')
+      : name === '~assets/fonts/LiterataBook-Regular.otf'
+        ? 'literata.woff'
+        : require(name),
   loaded,
   loaded.exports
 )
 const HTMLContentDOM = loaded.exports.default
 
 jest.mock('expo/dom', () => ({ IS_DOM: true }))
-jest.mock('~assets/fonts/literata', () => 'literata.woff')
+jest.mock('expo-font', () => ({ useFonts: () => [true] }))
 
 it('reports rendered content height, including later growth and shrinkage', () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })

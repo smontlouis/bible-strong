@@ -71,6 +71,7 @@ type PlaygroundHomeProps = {
   onSelectTheme: (theme: CurrentTheme) => void
   onOpenAbelOnboarding: () => void
   onOpenOfflineSetup: () => void
+  onOpenHTMLBenchmark: () => void
 }
 
 const PlaygroundHome = ({
@@ -78,6 +79,7 @@ const PlaygroundHome = ({
   onSelectTheme,
   onOpenAbelOnboarding,
   onOpenOfflineSetup,
+  onOpenHTMLBenchmark,
 }: PlaygroundHomeProps) => {
   const stylingTheme = useStylingTheme()
 
@@ -131,6 +133,13 @@ const PlaygroundHome = ({
             <Text className="text-dark-grey text-[11px] font-bold uppercase">
               {t('playground.experiences')}
             </Text>
+            <PlaygroundLink
+              eyebrow="Performance mobile"
+              title="HTML : Native / Expo DOM"
+              description="Comparer les mêmes textes, leurs temps d’affichage et les pauses JavaScript."
+              icon="activity"
+              onPress={onOpenHTMLBenchmark}
+            />
             <PlaygroundLink
               eyebrow={t('playground.abelEyebrow')}
               title={t('playground.abelTitle')}
