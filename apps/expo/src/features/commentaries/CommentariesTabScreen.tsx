@@ -227,7 +227,10 @@ const CommentariesTabScreen = ({
 
       <ScrollView
         style={{ backgroundColor: theme.colors.lightGrey }}
-        contentContainerStyle={[pageContentStyle, { paddingBottom: scrollBottomInset }]}
+        contentContainerStyle={[
+          pageContentStyle,
+          { maxWidth: 600, paddingBottom: scrollBottomInset },
+        ]}
         scrollIndicatorInsets={{ right: 1 }}
       >
         <>

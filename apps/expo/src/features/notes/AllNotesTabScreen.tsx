@@ -1,5 +1,5 @@
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
@@ -15,7 +15,6 @@ import { RootState } from '~redux/modules/reducer'
 import { selectRelationCountsByEndpointIdentity } from '~redux/selectors/bible'
 import { selectNoteListRows } from '~redux/selectors/notes'
 import type { NoteListRow } from '~features/entityListQuery/noteListRows'
-import { NotesTab } from '~state/tabs'
 import { unifiedTagsModalAtom } from '~state/app'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
 import { createNoteEndpoint } from '~features/studyRelations/endpoints'
@@ -32,10 +31,9 @@ import {
 
 type AllNotesTabScreenProps = {
   hasBackButton?: boolean
-  notesAtom: PrimitiveAtom<NotesTab>
 }
 
-const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps) => {
+const AllNotesTabScreen = ({ hasBackButton }: AllNotesTabScreenProps) => {
   const { t } = useTranslation()
   const pushRouteOnce = usePushRouteOnce()
 
@@ -176,7 +174,6 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
         ref={noteSettingsModal.getRef()}
         noteId={noteSettingsId}
         onClosed={() => setNoteSettingsId(null)}
-        notesAtom={notesAtom}
       />
     </Container>
   )

@@ -951,8 +951,8 @@ body {
 }
 
 .ql-editor {
-  /* Match the native study header and PageContent reading column. */
-  max-width: 830px;
+  /* Keep long-form study text in a centered reading column. */
+  max-width: 600px;
   margin: 0 auto;
 }
 

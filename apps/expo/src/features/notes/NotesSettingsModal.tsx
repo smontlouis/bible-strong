@@ -1,7 +1,5 @@
 import { type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
-import { produce } from 'immer'
-import { PrimitiveAtom, useAtom } from 'jotai'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
@@ -11,7 +9,6 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { RootState } from '~redux/modules/reducer'
 import { deleteNote } from '~redux/modules/user'
-import { NotesTab } from '~state/tabs'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { getBibleViewParamsForVerseKeys } from '~features/studyRelations/openableStudyObjects'
 
@@ -19,15 +16,13 @@ type Props = {
   ref?: React.RefObject<SheetRef | null>
   noteId: string | null
   onClosed?: () => void
-  notesAtom: PrimitiveAtom<NotesTab>
 }
 
-const NotesSettingsModal = ({ ref, noteId, onClosed, notesAtom }: Props) => {
+const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const pushRouteOnce = usePushRouteOnce()
   const openInNewTab = useOpenInNewTab()
-  const [, setNotesTab] = useAtom(notesAtom)
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
   const relations = useSelector((state: RootState) => state.user.bible.relations)
 
@@ -104,11 +99,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed, notesAtom }: Props) => {
   const openNoteDetail = () => {
     if (!noteId) return
     close()
-    setNotesTab(
-      produce(draft => {
-        draft.data.noteId = noteId
-      })
-    )
+    pushRouteOnce({ pathname: '/note', params: { noteId } })
   }
 
   return (

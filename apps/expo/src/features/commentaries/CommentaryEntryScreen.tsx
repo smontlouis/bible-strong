@@ -132,13 +132,16 @@ const CommentaryEntryScreen = () => {
             failure={{ cause: 'not-found', recoveries: [] }}
           />
         ) : (
-          <ScrollView ref={scrollRef} contentContainerStyle={{ padding: 18, paddingBottom: 44 }}>
+          <ScrollView
+            ref={scrollRef}
+            contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 44 }}
+          >
             <CommentaryRoomIntro
               compact
               entry={entry}
               language={projection.language}
               onPress={() =>
-                router.replace({
+                router.push({
                   pathname: '/commentary-chapter',
                   params: {
                     projectionId: projection.projectionId,

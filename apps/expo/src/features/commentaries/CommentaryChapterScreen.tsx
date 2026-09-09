@@ -232,7 +232,7 @@ const CommentaryChapterScreen = () => {
             </Box>
           }
         />
-        <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 40 }}>
+        <ScrollView contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 40 }}>
           <CommentaryRoomIntro entry={entry} language={projection.language} />
 
           <Box className="overflow-hidden border-continuous flex-row items-center justify-between">

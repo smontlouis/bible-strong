@@ -140,7 +140,7 @@ const StrongConcordancePage = ({
       recycleItems
       contentContainerStyle={[
         pageContentStyle,
-        { paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
+        { maxWidth: 600, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
       ]}
       keyExtractor={verse => `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
       onEndReached={() => {

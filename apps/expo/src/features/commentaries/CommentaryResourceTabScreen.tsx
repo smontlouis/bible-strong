@@ -68,7 +68,6 @@ const CommentaryResourceTabScreen = ({
   })
   const selectorTab = useAtomValue(selectorAtom)
   const selectorActions = useBibleTabActions(selectorAtom)
-  const detailScrollRef = React.useRef<React.ComponentRef<typeof ScrollView>>(null)
 
   useEffect(() => {
     if (!parsed) return
@@ -196,11 +195,14 @@ const CommentaryResourceTabScreen = ({
           background
           hasBackButton={Boolean(tab.data.sectionId)}
           onCustomBackPress={() =>
-            setTab(
-              produce(draft => {
-                draft.data.sectionId = undefined
-              })
-            )
+            router.push({
+              pathname: '/commentary-chapter',
+              params: {
+                projectionId: projection.projectionId,
+                book: String(book),
+                chapter: String(chapter),
+              },
+            })
           }
           title={entry.author}
           subTitle={passage}
@@ -223,20 +225,20 @@ const CommentaryResourceTabScreen = ({
               failure={{ cause: 'not-found', recoveries: [] }}
             />
           ) : (
-            <ScrollView
-              ref={detailScrollRef}
-              contentContainerStyle={{ padding: 18, paddingBottom: 32 }}
-            >
+            <ScrollView contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 32 }}>
               <CommentaryRoomIntro
                 compact
                 entry={entry}
                 language={projection.language}
                 onPress={() =>
-                  setTab(
-                    produce(draft => {
-                      draft.data.sectionId = undefined
-                    })
-                  )
+                  router.push({
+                    pathname: '/commentary-chapter',
+                    params: {
+                      projectionId: projection.projectionId,
+                      book: String(book),
+                      chapter: String(chapter),
+                    },
+                  })
                 }
               />
               <Box
@@ -270,21 +272,27 @@ const CommentaryResourceTabScreen = ({
                   }}
                   onPrevious={() => {
                     if (!previousSection) return
-                    setTab(
-                      produce(draft => {
-                        draft.data.sectionId = previousSection.id
-                      })
-                    )
-                    detailScrollRef.current?.scrollTo({ y: 0, animated: true })
+                    router.push({
+                      pathname: '/commentary-entry',
+                      params: {
+                        projectionId: projection.projectionId,
+                        book: String(book),
+                        chapter: String(chapter),
+                        sectionId: previousSection.id,
+                      },
+                    })
                   }}
                   onNext={() => {
                     if (!nextSection) return
-                    setTab(
-                      produce(draft => {
-                        draft.data.sectionId = nextSection.id
-                      })
-                    )
-                    detailScrollRef.current?.scrollTo({ y: 0, animated: true })
+                    router.push({
+                      pathname: '/commentary-entry',
+                      params: {
+                        projectionId: projection.projectionId,
+                        book: String(book),
+                        chapter: String(chapter),
+                        sectionId: nextSection.id,
+                      },
+                    })
                   }}
                 />
                 <Box className="overflow-hidden border-continuous mt-[14px]">
@@ -304,7 +312,7 @@ const CommentaryResourceTabScreen = ({
         ) : (
           <ScrollView
             stickyHeaderIndices={[1]}
-            contentContainerStyle={{ padding: 18, paddingBottom: 32 }}
+            contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 32 }}
           >
             <CommentaryRoomIntro entry={entry} language={projection.language} />
 

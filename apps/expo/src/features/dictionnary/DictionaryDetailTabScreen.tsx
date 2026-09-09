@@ -429,7 +429,7 @@ const DictionnaryDetailScreen = ({
           </MenuView>
         }
       />
-      <AppScrollView>
+      <AppScrollView contentContainerStyle={{ maxWidth: 600 }}>
         {correspondenceSources.length > 1 && (
           <Box className="overflow-hidden border-continuous px-[20px] pb-[12px]">
             <Text className="text-[12px] font-bold text-tertiary mb-[7px]">
@@ -446,21 +446,18 @@ const DictionnaryDetailScreen = ({
                     key={`${source.resource.work}:${source.resource.language}:${source.id}`}
                     disabled={selected}
                     onPress={() =>
-                      setDictionaryTab(current => ({
-                        ...current,
-                        title: source.word,
-                        data: {
-                          ...current.data,
+                      pushRouteOnce({
+                        pathname: '/dictionnary-detail',
+                        params: {
                           word: source.word,
-                          entryId: source.id,
+                          entryId: String(source.id),
                           correspondenceId: correspondenceQuery.data?.correspondenceId,
                           work: source.resource.work,
                           resourceId: source.resourceId,
                           dictionaryTitle: source.title,
                           language: source.resource.language,
-                          directory: true,
                         },
-                      }))
+                      })
                     }
                     style={[
                       { opacity: selected ? 0.6 : 1 },

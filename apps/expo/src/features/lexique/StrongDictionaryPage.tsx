@@ -36,7 +36,7 @@ const StrongDictionaryPage = ({
       style={{ flex: 1 }}
       contentContainerStyle={[
         pageContentStyle,
-        { paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
+        { maxWidth: 600, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
       ]}
     >
       <VStack className="overflow-hidden border-continuous gap-[14px]">

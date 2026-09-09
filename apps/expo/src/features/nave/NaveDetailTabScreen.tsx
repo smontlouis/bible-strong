@@ -312,7 +312,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
           </MenuView>
         }
       />
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ maxWidth: 600 }}>
         {(tags || relationCount > 0) && (
           <Box className="overflow-hidden border-continuous mt-[0px] px-[20px]">
             <EntityChipList

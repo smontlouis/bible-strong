@@ -1,7 +1,7 @@
 import { twMerge } from '~common/ui/classNames'
 import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
-import PageContent, { PAGE_CONTENT_MAX_WIDTH } from '~common/ui/PageContent'
+import PageContent from '~common/ui/PageContent'
 import React, { useRef, useState } from 'react'
 import { ScrollView, type ScrollView as ScrollViewType } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -218,7 +218,7 @@ const StrongDetailMainPage = ({
           backgroundColor: colorWithOpacity(resolveThemeColor(stylingTheme, 'primary'), 0.1),
         }}
       >
-        <PageContent className="gap-[11px]" style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH - 40 }}>
+        <PageContent className="gap-[11px]" style={{ maxWidth: 600 }}>
           <Text className="text-primary font-bold text-[12px] uppercase">{entry.stepCode}</Text>
           <HStack className="overflow-hidden border-continuous items-end gap-[16px]">
             <VStack className="overflow-hidden border-continuous flex-[1] gap-[5px]">
@@ -266,7 +266,7 @@ const StrongDetailMainPage = ({
       </VStack>
 
       <Box className="border-continuous overflow-hidden mx-[-20px] py-[10px] bg-reverse border-b-[1px] border-border z-[10]">
-        <PageContent>
+        <PageContent style={{ maxWidth: 600 }}>
           <JumpNavigationContent
             anchors={[
               {
@@ -329,7 +329,7 @@ const StrongDetailMainPage = ({
       )}
 
       {!!contextVerse && (
-        <PageContent style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH - 40 }}>
+        <PageContent style={{ maxWidth: 600 }}>
           <Box className="overflow-hidden border-continuous w-[42px] h-[3px] bg-default mt-[34px] mb-[2px]" />
         </PageContent>
       )}
@@ -423,7 +423,7 @@ const StrongDetailMainPage = ({
           className="border-continuous overflow-hidden mx-[-20px] mt-[30px] px-[20px] pt-[22px] pb-[26px] bg-light-grey border-t-[1px] border-b-[1px] border-border gap-[14px]"
           onLayout={event => setAnchor('entity', event.nativeEvent.layout.y)}
         >
-          <PageContent className="gap-[14px]" style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH - 40 }}>
+          <PageContent className="gap-[14px]" style={{ maxWidth: 600 }}>
             <StrongEntitySummaryCard
               entity={entry.entity}
               plain

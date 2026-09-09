@@ -19,7 +19,7 @@ const NotesTabScreen = ({ notesAtom }: NotesTabScreenProps) => {
   } = notesTab
 
   if (!noteId) {
-    return <AllNotesTabScreen hasBackButton={hasBackButton} notesAtom={notesAtom} />
+    return <AllNotesTabScreen hasBackButton={hasBackButton} />
   }
 
   return <NoteDetailTabScreen notesAtom={notesAtom} noteId={noteId} />

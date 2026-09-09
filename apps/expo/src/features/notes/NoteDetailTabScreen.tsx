@@ -477,6 +477,7 @@ ${currentNote.description}
           contentContainerStyle={[
             pageContentStyle,
             {
+              maxWidth: 600,
               padding: 20,
               paddingBottom: isEditing ? 20 : insets.bottom + 100,
             },

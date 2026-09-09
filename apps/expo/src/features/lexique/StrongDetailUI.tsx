@@ -1,6 +1,6 @@
 import { twMerge } from '~common/ui/classNames'
 
-import PageContent, { PAGE_CONTENT_MAX_WIDTH } from '~common/ui/PageContent'
+import PageContent from '~common/ui/PageContent'
 import { Image } from 'expo-image'
 import { useTheme } from '~themes/ThemeProvider'
 import React from 'react'
@@ -52,7 +52,7 @@ export const StrongEditorialSection = ({
     onLayout={onLayout}
     style={{ paddingTop: separated ? 24 : 0, borderTopWidth: separated ? 1 : 0 }}
   >
-    <PageContent className="gap-[12px]" style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH - 40 }}>
+    <PageContent className="gap-[12px]" style={{ maxWidth: 600 }}>
       <StrongEyebrow>{title}</StrongEyebrow>
       {children}
     </PageContent>
