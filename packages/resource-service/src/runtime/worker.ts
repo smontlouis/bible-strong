@@ -81,6 +81,9 @@ const analyticsEnabled = (bindings: Env) => bindings.SEARCH_ANALYTICS_ENABLED ==
 const runtimeRouteFrom = (request: Request): string => {
   const url = new URL(request.url)
   if (url.pathname === '/v1/search-events') return 'search-events'
+  if (url.pathname === '/v1/bibles/semantic-search') return 'bible-semantic-search-many'
+  if (/^\/v1\/bibles\/[^/]+\/semantic-search$/u.test(url.pathname))
+    return 'bible-semantic-search-one'
   if (url.pathname === '/v1/bibles/search') return 'bible-search-many'
   if (/^\/v1\/bibles\/[^/]+\/search$/u.test(url.pathname)) return 'bible-search-one'
   if (url.pathname === '/v1/strong-lexicon/entries') return 'strong-search'

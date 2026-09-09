@@ -11,7 +11,12 @@ import { activeTabIdAtom, appSwitcherModeAtom, type TabItem } from '~state/tabs'
 import { useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'
 
-export default function NewTabSearch({ tabAtom }: { tabAtom: PrimitiveAtom<TabItem> }) {
+export default function NewTabSearch({
+  tabAtom,
+}: {
+  tabAtom: PrimitiveAtom<TabItem>
+  onPlanPress?: () => void
+}) {
   const { t } = useTranslation()
   const theme = useTheme()
   const [tab, setTab] = useAtom(tabAtom)

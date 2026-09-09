@@ -15,6 +15,7 @@ import type { BibleCanonId } from '@bible-strong/resource-domain/bible-canon'
 
 export type BibleSearchInput = {
   versionId: string
+  mode?: 'standard' | 'semantic'
   query: string
   book?: number
   section?: 'ot' | 'nt'

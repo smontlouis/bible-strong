@@ -1,3 +1,4 @@
+import { useAppendOnlySearchResults, passageResultKey } from './useAppendOnlySearchResults'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import PageContent, { pageContentStyle } from '~common/ui/PageContent'
@@ -35,7 +36,12 @@ import SearchEmptyState from '~features/search/SearchEmptyState'
 import { useOpenStudyObject } from '~features/studyRelations/useOpenStudyObject'
 import type { RootState } from '~redux/modules/reducer'
 import { useSelector } from 'react-redux'
-import { searchFiltersAtom, SearchSection, type SearchCanon } from '~state/searchFilters'
+import {
+  searchFiltersAtom,
+  SearchSection,
+  type SearchCanon,
+  type SearchFilters,
+} from '~state/searchFilters'
 import {
   DEFAULT_BIBLE_VERSION_FILTER,
   resolveSearchVersionFilter,
@@ -102,6 +108,8 @@ import { createSearchExperienceController } from './searchExperience'
 type Props = {
   searchValue: string
   setSearchValue: (value: string) => void
+  initialFilters?: SearchFilters
+  onFiltersChange?: (filters: SearchFilters) => void
 }
 
 const MIN_SEARCH_LENGTH = SEARCH_MIN_QUERY_LENGTH
@@ -120,8 +128,13 @@ const useKeyboardFooterBottom = (footerHeight: number) => {
   return bottom
 }
 
-const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
-  const { t } = useTranslation()
+const SQLiteSearchScreen = ({
+  searchValue,
+  setSearchValue,
+  initialFilters,
+  onFiltersChange,
+}: Props) => {
+  const { t, i18n } = useTranslation()
   const theme = useTheme()
   const keyboardFooterBottom = useKeyboardFooterBottom(SEARCH_ALPHABET_FOOTER_HEIGHT)
   const openStudyObject = useOpenStudyObject()
@@ -137,6 +150,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   // Global persisted filters — read once at mount, write on every change
   const globalFilters = useAtomValue(searchFiltersAtom)
   const setGlobalFilters = useSetAtom(searchFiltersAtom)
+  const startingFilters = initialFilters ?? globalFilters
 
   const debouncedSearchValue = useDebounce(searchValue, 600)
   const [noteResults, setNoteResults] = useState<SearchEntityResult[]>([])
@@ -150,15 +164,15 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const [strongLetter, setStrongLetter] = useState('a')
   const [dictionaryLetter, setDictionaryLetter] = useState('a')
   const [naveLetter, setNaveLetter] = useState('a')
-  const [section, _setSection] = useState<SearchSection>(globalFilters.section)
-  const [canon, _setCanon] = useState<SearchCanon>(globalFilters.canon)
-  const [book, _setBook] = useState(globalFilters.book)
+  const [section, _setSection] = useState<SearchSection>(startingFilters.section)
+  const [canon, _setCanon] = useState<SearchCanon>(startingFilters.canon)
+  const [book, _setBook] = useState(startingFilters.book)
   const [selectedVersion, _setSelectedVersion] = useState(
-    globalFilters.selectedVersion || DEFAULT_BIBLE_VERSION_FILTER
+    startingFilters.selectedVersion || DEFAULT_BIBLE_VERSION_FILTER
   )
   const resolvedSelectedVersion = resolveSearchVersionFilter(selectedVersion, defaultBibleVersion)
-  const [sortOrder, _setSortOrder] = useState<SearchSortOrder>(globalFilters.sortOrder)
-  const [itemFilters, _setItemFilters] = useState(globalFilters.itemFilters)
+  const [sortOrder, _setSortOrder] = useState<SearchSortOrder>(startingFilters.sortOrder)
+  const [itemFilters, _setItemFilters] = useState(startingFilters.itemFilters)
   const searchOriginRef = useRef<'typed' | 'example'>('typed')
   const [initialSearchStartedAt] = useState(Date.now)
   const searchStartedAtRef = useRef(initialSearchStartedAt)
@@ -245,7 +259,18 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       writeSelectedVersion: _setSelectedVersion,
       writeSortOrder: _setSortOrder,
       writeItemFilters: _setItemFilters,
-      persist: patch => setGlobalFilters(previous => ({ ...previous, ...patch })),
+      persist: patch => {
+        setGlobalFilters(previous => ({ ...previous, ...patch }))
+        onFiltersChange?.({
+          section,
+          canon,
+          book,
+          selectedVersion,
+          sortOrder,
+          itemFilters,
+          ...patch,
+        })
+      },
     },
     searchItemFilterOrder,
     allSearchItemFilters
@@ -437,17 +462,23 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
 
   const trimmedSearchValue = debouncedSearchValue.trim()
   const strongReference = parseStrongReference(trimmedSearchValue)
-  const isBibleReference = isExactBibleReferenceInput(trimmedSearchValue)
+  const isBibleReference = isExactBibleReferenceInput(
+    trimmedSearchValue,
+    i18n.language.startsWith('fr') ? 'fr' : 'en'
+  )
   const shouldSearchPassages =
     itemFilters.passages &&
     searchValue.trim().length >= MIN_SEARCH_LENGTH &&
     trimmedSearchValue.length >= MIN_SEARCH_LENGTH &&
+    searchValue.trim() === trimmedSearchValue &&
     Boolean(resolvedSelectedVersion) &&
     !strongReference &&
     !isBibleReference
   const passageQuery = useInfiniteQuery({
     queryKey: [
-      'sqlite-passage-search',
+      'sqlite-passage-search-v2',
+      resourcesLanguage.NAVE,
+      i18n.language,
       trimmedSearchValue,
       section,
       canon,
@@ -496,6 +527,60 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
+  const semanticPassageQuery = useInfiniteQuery({
+    queryKey: [
+      'semantic-passage-search-v1',
+      resourcesLanguage.NAVE,
+      i18n.language,
+      trimmedSearchValue,
+      section,
+      canon,
+      book,
+      resolvedSelectedVersion,
+      sortOrder,
+      isConnected,
+    ],
+    queryFn: async ({ pageParam, signal }) => {
+      const sectionMap: Record<string, 'ot' | 'nt'> = { at: 'ot', nt: 'nt' }
+      const options: SearchOptions = {
+        signal,
+        mode: 'semantic',
+        limit: PASSAGE_SEARCH_PAGE_SIZE,
+        offset: pageParam,
+        sortOrder,
+        version: resolvedSelectedVersion,
+        canon: canon || getBibleVersionCanonId(resolvedSelectedVersion),
+        searchLanguage: resourcesLanguage.NAVE,
+        ...(book && { book }),
+        ...(sectionMap[section] && { section: sectionMap[section] }),
+      }
+
+      return await appLogger.measure(
+        'database',
+        'search.semantic',
+        () => resources.bibleSearch.searchPage(debouncedSearchValue, options),
+        {
+          queryLength: debouncedSearchValue.length,
+          version: resolvedSelectedVersion,
+          book,
+          section,
+          canon,
+          sortOrder,
+        },
+        signal
+      )
+    },
+    initialPageParam: 0,
+    getNextPageParam: (_lastPage, pages) => {
+      const loaded = pages.reduce((total, page) => total + page.results.length, 0)
+      const count = pages[0]?.count ?? 0
+      return loaded < count ? loaded : undefined
+    },
+    enabled: shouldSearchPassages && Boolean(isConnected),
+    retry: false,
+    ...staticResourceQueryOptions,
+    ...localQueryOptions,
+  })
   const results: SearchResult[] | null = !itemFilters.passages
     ? null
     : strongReference || isBibleReference
@@ -503,7 +588,36 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       : shouldSearchPassages
         ? (passageQuery.data?.pages.flatMap(page => page.results) ?? null)
         : null
-  const totalCount = passageQuery.data?.pages[0]?.count ?? 0
+  const semanticResults =
+    shouldSearchPassages && isConnected
+      ? (semanticPassageQuery.data?.pages.flatMap(page => page.results) ?? [])
+      : []
+  const isSemanticSearching =
+    shouldSearchPassages && Boolean(isConnected) && semanticPassageQuery.isFetching
+  const semanticSearchError =
+    shouldSearchPassages && isConnected && semanticPassageQuery.isError
+      ? t('search.semanticUnavailable')
+      : null
+  const mergedPassages = useAppendOnlySearchResults(
+    JSON.stringify([
+      trimmedSearchValue,
+      section,
+      canon,
+      book,
+      resolvedSelectedVersion,
+      sortOrder,
+      resourcesLanguage.NAVE,
+      isConnected,
+    ]),
+    shouldSearchPassages
+      ? [
+          ...(results ?? []),
+          ...(!passageQuery.isPending || passageQuery.isError ? semanticResults : []),
+        ]
+      : [],
+    passageResultKey
+  )
+  const totalCount = mergedPassages.length
   const isSearching = shouldSearchPassages && passageQuery.isFetching
   const searchError = passageQuery.isError ? t('search.error.searchFailed') : null
 
@@ -665,11 +779,13 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     strongResults,
     dictionaryResults,
     naveResults,
-    passageResults: results,
+    passageResults: mergedPassages,
     totalPassageCount: totalCount,
+    semanticSearchError,
     searchError,
     loading: {
       passages: isSearching,
+      semanticPassages: isSemanticSearching,
       notes: isNoteSearching,
       links: isLinkSearching,
       studies: isStudySearching,
@@ -682,15 +798,20 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const searchFacets = getSearchFacets(searchModel.sections)
   const publicSearchSources = getPublicSearchSources(itemFilters)
   const publicResultCounts = getPublicSearchResultCounts(searchModel.sections)
-  const passageMatchAnalytics = getPassageMatchAnalytics(results ?? [])
+  const passageMatchAnalytics = getPassageMatchAnalytics(mergedPassages)
   const publicSearchErrorCount = [
     itemFilters.passages && passageQuery.isError,
+    itemFilters.passages && semanticPassageQuery.isError,
     itemFilters.strong && strongQuery.isError,
     itemFilters.dictionary && dictionaryQuery.isError,
     itemFilters.nave && naveQuery.isError,
   ].filter(Boolean).length
   const isPublicSearchLoading =
-    isSearching || isStrongSearching || isDictionarySearching || isNaveSearching
+    isSearching ||
+    isSemanticSearching ||
+    isStrongSearching ||
+    isDictionarySearching ||
+    isNaveSearching
   const searchAnalyticsOutcome: SearchAnalyticsEvent['outcome'] = publicSearchErrorCount
     ? publicResultCounts.total
       ? 'partial_error'
@@ -822,6 +943,22 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const dismissSearchInput = () => {
     searchInputRef.current?.blur()
     Keyboard.dismiss()
+  }
+
+  function renderSemanticStatus(): ReactNode {
+    if (semanticSearchError)
+      return (
+        <TouchableBox
+          className="px-[20px] py-[12px]"
+          onPress={() => void semanticPassageQuery.refetch()}
+        >
+          <Text className="text-grey">{semanticSearchError}</Text>
+          <Text className="text-primary">{t('Réessayer')}</Text>
+        </TouchableBox>
+      )
+    return isSemanticSearching ? (
+      <Text className="px-[20px] py-[12px] text-grey">{t('search.semanticLoading')}</Text>
+    ) : null
   }
 
   function renderPassageError(): ReactNode {
@@ -1138,6 +1275,12 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       const fetchNextPage = (sectionId: SearchSectionId) => {
         if (
           sectionId === 'passages' &&
+          semanticPassageQuery.hasNextPage &&
+          !semanticPassageQuery.isFetchingNextPage
+        )
+          void semanticPassageQuery.fetchNextPage()
+        if (
+          sectionId === 'passages' &&
           passageQuery.hasNextPage &&
           !passageQuery.isFetchingNextPage
         ) {
@@ -1166,7 +1309,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
         (sectionId === 'nave' && isNaveSearching)
 
       const sectionHasMore = (sectionId: SearchSectionId) =>
-        (sectionId === 'passages' && passageQuery.hasNextPage) ||
+        (sectionId === 'passages' &&
+          (passageQuery.hasNextPage || semanticPassageQuery.hasNextPage)) ||
         (sectionId === 'strong' && strongQuery.hasNextPage) ||
         (sectionId === 'dictionary' && dictionaryQuery.hasNextPage) ||
         (sectionId === 'nave' && naveQuery.hasNextPage)
@@ -1229,7 +1373,14 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                 visibleCount={0}
                 onLoadMore={() => undefined}
                 onPressItem={openSearchItem}
-                statusMessage={soloPaginatedSection.id === 'passages' ? renderPassageError() : null}
+                statusMessage={
+                  soloPaginatedSection.id === 'passages' ? (
+                    <>
+                      {renderPassageError()}
+                      {renderSemanticStatus()}
+                    </>
+                  ) : null
+                }
                 isLoading={isSectionLoading(soloPaginatedSection.id)}
                 hasMore={sectionHasMore(soloPaginatedSection.id)}
                 showLoadMoreButton={false}
@@ -1302,15 +1453,13 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
               }
               onLoadMore={() => {
                 const currentVisible = visibleCounts[section.id] || SEARCH_SECTION_PREVIEW_LIMIT
-                increaseVisibleCount(section.id)
                 if (
                   section.id === 'passages' &&
-                  currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length &&
-                  passageQuery.hasNextPage &&
-                  !passageQuery.isFetchingNextPage
-                ) {
-                  void passageQuery.fetchNextPage()
-                }
+                  currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length
+                )
+                  fetchNextPage(section.id)
+                increaseVisibleCount(section.id)
+
                 if (
                   section.id === 'strong' &&
                   currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length &&
@@ -1338,7 +1487,14 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
               }}
               onPressItem={openSearchItem}
               renderItem={renderSearchResult}
-              statusMessage={section.id === 'passages' ? renderPassageError() : null}
+              statusMessage={
+                section.id === 'passages' ? (
+                  <>
+                    {renderPassageError()}
+                    {renderSemanticStatus()}
+                  </>
+                ) : null
+              }
               isLoading={isSectionLoading(section.id)}
               hasMore={sectionHasMore(section.id)}
               showLoadMoreButton={!isSoloPaginatedSection(section.id)}

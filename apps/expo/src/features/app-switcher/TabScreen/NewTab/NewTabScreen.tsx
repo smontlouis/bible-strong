@@ -3,7 +3,7 @@ import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import { useAtom } from 'jotai/react'
 import React from 'react'
-import { ScrollView } from 'react-native'
+import { Platform, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import Empty from '~common/Empty'
@@ -33,7 +33,11 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
     <SelectBibleReferenceModalProvider>
       <Box className="flex-1 bg-light-grey">
         <ScrollView
-          style={{ flex: 1, backgroundColor: theme.colors.lightGrey }}
+          style={{
+            flex: 1,
+            backgroundColor: theme.colors.lightGrey,
+            ...(Platform.OS === 'web' ? { scrollbarGutter: 'stable' } : {}),
+          }}
           contentInsetAdjustmentBehavior="never"
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{ flexGrow: 1 }}

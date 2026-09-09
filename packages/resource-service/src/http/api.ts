@@ -147,7 +147,26 @@ const BibleApi = HttpApiGroup.make('bibles')
       .addError(ResourceInternalProblem, { status: 500 })
   )
   .add(
+    HttpApiEndpoint.get('searchBiblesSemantic', '/v1/bibles/semantic-search')
+      .setUrlParams(BibleMultiSearchQuery)
+      .addSuccess(BibleMultiSearchResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
     HttpApiEndpoint.get('searchBible', '/v1/bibles/:version/search')
+      .setPath(BibleVersionPath)
+      .setUrlParams(BibleSearchQuery)
+      .addSuccess(BibleSearchResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('searchBibleSemantic', '/v1/bibles/:version/semantic-search')
       .setPath(BibleVersionPath)
       .setUrlParams(BibleSearchQuery)
       .addSuccess(BibleSearchResponseDto)
@@ -255,7 +274,10 @@ const DictionaryApi = HttpApiGroup.make('dictionaries')
       .addError(ResourceInternalProblem, { status: 500 })
   )
   .add(
-    HttpApiEndpoint.get('discoverDictionaryPassageEntries', '/v1/dictionaries/verses/:verseKey/entries')
+    HttpApiEndpoint.get(
+      'discoverDictionaryPassageEntries',
+      '/v1/dictionaries/verses/:verseKey/entries'
+    )
       .setPath(DictionaryPassagePath)
       .setUrlParams(DictionaryPassageQuery)
       .addSuccess(DictionaryPassageDiscoveryResponseDto)

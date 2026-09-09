@@ -6,7 +6,8 @@ import Box, { HStack } from '~common/ui/Box'
 import { Chip } from '~common/ui/NewChip'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import { parseResponse } from '~helpers/bcvParser'
+import { parseBibleReferenceSegments, type BibleReferenceSegment } from '~helpers/bcvParser'
+import { useTranslation } from 'react-i18next'
 import formatVerseContent from '~helpers/formatVerseContent'
 import useBibleVerses from '~features/resources/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
@@ -14,56 +15,16 @@ import i18n from '~i18n'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { getBibleViewParamsForReferenceSegment } from './searchNavigation'
-export interface ParsedSegment {
-  book: number
-  chapter: number
-  startVerse: number
-  endVerse: number
-  isWholeChapter: boolean
-}
-
-/**
- * Parse the `parsed` string from `parseResponse` into structured segments.
- * Format: "bookNum_chapter", "bookNum_chapter:verse", "bookNum_chapter:startVerse-endVerse"
- * Multiple segments are comma-separated.
- */
-function parseParsedString(parsed: string): ParsedSegment[] {
-  if (!parsed) return []
-
-  return parsed
-    .split(',')
-    .map(segment => {
-      const [bookChapter, verseRange] = segment.split(':')
-      const [bookStr, chapterStr] = bookChapter.split('_')
-      const book = parseInt(bookStr, 10)
-      const chapter = parseInt(chapterStr, 10)
-
-      if (isNaN(book) || isNaN(chapter)) return null
-
-      if (!verseRange) {
-        return { book, chapter, startVerse: 1, endVerse: 3, isWholeChapter: true }
-      }
-
-      const [startStr, endStr] = verseRange.split('-')
-      const start = parseInt(startStr, 10)
-      const end = endStr ? parseInt(endStr, 10) : start
-
-      return { book, chapter, startVerse: start, endVerse: end, isWholeChapter: false }
-    })
-    .filter((s): s is ParsedSegment => s !== null)
-}
-
-export function parseBibleReference(searchValue: string): ParsedSegment[] {
-  const { parsed } = parseResponse(searchValue)
-  return parseParsedString(parsed)
-}
-
 interface Props {
   searchValue: string
 }
 
 const BibleReferenceWidget = ({ searchValue }: Props) => {
-  const segments = parseBibleReference(searchValue)
+  const { i18n: translation } = useTranslation()
+  const segments = parseBibleReferenceSegments(
+    searchValue,
+    translation.language.startsWith('fr') ? 'fr' : 'en'
+  )
 
   if (segments.length === 0) return null
 
@@ -79,13 +40,15 @@ const BibleReferenceWidget = ({ searchValue }: Props) => {
   )
 }
 
-const ReferenceItem = ({ segment }: { segment: ParsedSegment }) => {
+const ReferenceItem = ({ segment }: { segment: BibleReferenceSegment }) => {
   const stylingTheme = useStylingTheme()
 
   const pushRouteOnce = usePushRouteOnce()
   const version = useDefaultBibleVersion()
 
-  const verseCount = segment.endVerse - segment.startVerse + 1
+  const verseCount = segment.isWholeChapter
+    ? Math.min(3, segment.endVerse)
+    : segment.endVerse - segment.startVerse + 1
   const verseIds = Array.from({ length: verseCount }, (_, i) => ({
     Livre: segment.book,
     Chapitre: segment.chapter,

@@ -1,3 +1,4 @@
+import GlobalCommandPalette from './commandPalette/GlobalCommandPalette'
 import { finishPageTransition, navigateWithPageTransition } from '~navigation/pageTransition'
 import { usePathname, useRouter } from 'expo-router'
 import type { ReactNode } from 'react'
@@ -64,6 +65,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
 
   return (
     <HStack className="flex-1 bg-light-grey overflow-hidden">
+      <GlobalCommandPalette />
       {isWide && (
         <Box
           testID="workspace-sidebar-motion"
@@ -100,7 +102,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
               openHome={() => visitPage('home')}
               openMenu={() => visitPage('settings')}
               activePage={getWorkspacePageForPath(pathname)}
-              isContentActive={isWorkspace}
+              isContentActive={isWorkspace || panel.showsStudy}
               onSelectContent={() => {
                 setOverlayOpen(false)
                 if (!isWorkspace) router.push('/')

@@ -2,7 +2,7 @@ import type { FuseResultMatch } from 'fuse.js'
 import type { SearchResult } from '~helpers/biblesDb'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
 import type { SearchItemType } from '~state/searchFilters'
-import type { ParsedSegment } from '~features/search/BibleReferenceWidget'
+import type { BibleReferenceSegment } from '~helpers/bcvParser'
 
 export type MatchRange = [number, number]
 export type SearchReferenceMode = 'navigation' | 'target'
@@ -22,7 +22,7 @@ export type SearchEntityResult = {
   }
   passage?: SearchResult
   passageReason?: string
-  referenceSegment?: ParsedSegment
+  referenceSegment?: BibleReferenceSegment
   matches?: readonly FuseResultMatch[]
 }
 

@@ -80,3 +80,35 @@ describe('v1 aggregate Bible search API', () => {
     }
   })
 })
+
+it('routes standard and semantic searches independently, for one or several versions', async () => {
+  const modes: unknown[] = []
+  const bibleSearch: BibleSearchRepositoryService = {
+    search: input => {
+      modes.push(input.mode)
+      return Effect.succeed({
+        versionId: 'LSG',
+        revision: 'r1',
+        textRevision: 'r1',
+        count: 0,
+        results: [],
+      })
+    },
+    searchMany: input => {
+      modes.push(input.mode)
+      return Effect.succeed({ resources: [], count: 0, results: [] })
+    },
+  }
+  const web = makeResourceWebHandler(undefined, undefined, { bibleSearch })
+  try {
+    for (const path of ['LSG/search', 'LSG/semantic-search', 'search', 'semantic-search']) {
+      const response = await web.handler(
+        new Request(`http://localhost/v1/bibles/${path}?q=enfance&versions=LSG`)
+      )
+      assert.equal(response.status, 200, await response.text())
+    }
+    assert.deepEqual(modes, ['standard', 'semantic', 'standard', 'semantic'])
+  } finally {
+    await web.dispose()
+  }
+})

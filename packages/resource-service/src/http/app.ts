@@ -387,6 +387,33 @@ const BibleApiLive = HttpApiBuilder.group(ResourceApi, 'bibles', handlers =>
       const versionIds = urlParams.versions.split(',')
       return readBibleSearchMany({
         versionIds,
+        mode: 'standard',
+        query: urlParams.q,
+        book: urlParams.book,
+        section: urlParams.section,
+        canon: urlParams.canon,
+        sortOrder: urlParams.sortOrder,
+        limit: urlParams.limit,
+        offset: urlParams.offset,
+        language: urlParams.language,
+      }).pipe(
+        Effect.tap(response =>
+          addResponseHeaders({
+            'x-request-id': requestId,
+            'x-resource-revisions': response.resources
+              .map(resource => `${resource.versionId}:${resource.revision}`)
+              .join(','),
+          })
+        ),
+        Effect.mapError(cause => toHttpProblem(cause, requestId))
+      )
+    })
+    .handle('searchBiblesSemantic', ({ urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      const versionIds = urlParams.versions.split(',')
+      return readBibleSearchMany({
+        versionIds,
+        mode: 'semantic',
         query: urlParams.q,
         book: urlParams.book,
         section: urlParams.section,
@@ -412,6 +439,7 @@ const BibleApiLive = HttpApiBuilder.group(ResourceApi, 'bibles', handlers =>
       return serveRevisionedResponse(
         readBibleSearch({
           versionId: path.version,
+          mode: 'standard',
           query: urlParams.q,
           book: urlParams.book,
           section: urlParams.section,
@@ -431,6 +459,38 @@ const BibleApiLive = HttpApiBuilder.group(ResourceApi, 'bibles', handlers =>
           urlParams.section ?? '*',
           urlParams.canon ?? '*',
           urlParams.sortOrder ?? 'relevance',
+          urlParams.language ?? 'fr',
+          urlParams.limit ?? 100,
+          urlParams.offset ?? 0,
+        ]
+      )
+    })
+    .handle('searchBibleSemantic', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readBibleSearch({
+          versionId: path.version,
+          mode: 'semantic',
+          query: urlParams.q,
+          book: urlParams.book,
+          section: urlParams.section,
+          canon: urlParams.canon,
+          sortOrder: urlParams.sortOrder,
+          limit: urlParams.limit,
+          offset: urlParams.offset,
+          language: urlParams.language,
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        [
+          'bible-semantic-search',
+          path.version,
+          urlParams.q,
+          urlParams.book ?? '*',
+          urlParams.section ?? '*',
+          urlParams.canon ?? '*',
+          urlParams.sortOrder ?? 'relevance',
+          urlParams.language ?? 'fr',
           urlParams.limit ?? 100,
           urlParams.offset ?? 0,
         ]

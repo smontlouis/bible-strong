@@ -13,8 +13,8 @@ import {
 
 jest.mock('~assets/bible_versions/books-desc', () => [{ Numero: 1, Nom: 'Genèse', Chapitres: 50 }])
 
-jest.mock('~features/search/BibleReferenceWidget', () => ({
-  parseBibleReference: () => [],
+jest.mock('~helpers/bcvParser', () => ({
+  parseBibleReferenceSegments: () => [],
 }))
 
 jest.mock('~i18n', () => ({

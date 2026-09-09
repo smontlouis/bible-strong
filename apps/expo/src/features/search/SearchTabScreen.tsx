@@ -4,7 +4,6 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import Header from '~common/Header'
 import Container from '~common/ui/Container'
 import i18n from '~i18n'
 import { SearchTab } from '../../state/tabs'
@@ -44,7 +43,14 @@ const SearchTabScreen = ({ searchAtom }: SearchScreenProps) => {
 
   return (
     <Container>
-      <SQLiteSearchScreen searchValue={searchValue} setSearchValue={setSearchValue} />
+      <SQLiteSearchScreen
+        searchValue={searchValue}
+        setSearchValue={setSearchValue}
+        initialFilters={searchTab.data.filters}
+        onFiltersChange={filters =>
+          setSearchTab(previous => ({ ...previous, data: { ...previous.data, filters } }))
+        }
+      />
     </Container>
   )
 }

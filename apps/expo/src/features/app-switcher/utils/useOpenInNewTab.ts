@@ -1,3 +1,4 @@
+import { useWorkspaceRoutePanel } from '~navigation/useWorkspaceRoutePanel'
 import { useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
@@ -9,6 +10,7 @@ import { useSlideNewTab } from './useSlideNewTab'
 
 export const useOpenInNewTab = () => {
   const router = useRouter()
+  const { open: isPanelOpen } = useWorkspaceRoutePanel()
   const { t } = useTranslation()
   const addTab = useSetAtom(addTabToGroupAtom)
   const switchGroup = useSwitchGroup()
@@ -31,7 +33,7 @@ export const useOpenInNewTab = () => {
       triggerSlideNewTab(tab.id)
     }
 
-    if (!params.autoRedirect) {
+    if (!params.autoRedirect && !isPanelOpen) {
       toast(t('tabs.created'), {
         action: {
           label: t('common.goTo'),

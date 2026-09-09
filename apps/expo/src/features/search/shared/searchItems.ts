@@ -1,5 +1,9 @@
 import { getBook } from '~helpers/bibleBookCatalog'
-import { parseBibleReference } from '~features/search/BibleReferenceWidget'
+import {
+  parseBibleReferenceSegments,
+  type BibleReferenceSegment,
+  type BcvLanguage,
+} from '~helpers/bcvParser'
 import type { SearchResult } from '~helpers/biblesDb'
 import { deltaToPlainText } from '~helpers/deltaToPlainText'
 import formatVerseContent from '~helpers/formatVerseContent'
@@ -162,11 +166,23 @@ export const getSortedStudySearchItems = (
     return Number(right?.modified_at || 0) - Number(left?.modified_at || 0)
   })
 
+type ReferenceSearchOptions = {
+  mode: SearchReferenceMode
+  version?: string
+  language?: BcvLanguage
+}
+
 export const getReferenceSearchItems = (
   query: string,
-  options: { mode: SearchReferenceMode; version?: string } = { mode: 'navigation' }
+  options: ReferenceSearchOptions = { mode: 'navigation' }
 ): SearchEntityResult[] =>
-  parseBibleReference(query).map((segment, index) => {
+  getReferenceSearchItemsFromSegments(parseBibleReferenceSegments(query, options.language), options)
+
+export const getReferenceSearchItemsFromSegments = (
+  segments: BibleReferenceSegment[],
+  options: ReferenceSearchOptions = { mode: 'navigation' }
+): SearchEntityResult[] =>
+  segments.map((segment, index) => {
     const startVerse = segment.startVerse
     const endVerse = options.mode === 'target' && segment.isWholeChapter ? 1 : segment.endVerse
     const isWholeChapter = options.mode === 'navigation' && segment.isWholeChapter

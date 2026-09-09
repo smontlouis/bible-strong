@@ -1,3 +1,4 @@
+import type { SearchFilters } from './searchFilters'
 import { produce } from 'immer'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { atom, getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
@@ -92,6 +93,7 @@ export interface SearchTab extends TabBase {
   type: 'search'
   data: {
     searchValue: string
+    filters?: SearchFilters
   }
 }
 

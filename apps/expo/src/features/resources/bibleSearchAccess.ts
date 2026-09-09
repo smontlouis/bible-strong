@@ -3,14 +3,16 @@ import {
   searchVerses,
   searchVersesCount,
   searchVersesPage,
-  type SearchOptions,
+  type SearchOptions as LocalSearchOptions,
   type SearchResult,
 } from '~helpers/biblesDb'
 import { Schema } from 'effect'
 import { BibleMultiSearchResponseDto, BibleSearchResponseDto } from './bibleChapterContract'
 import { ResourceAccessError, resourceAccessErrorFromHttpResponse } from './resourceAccessError'
 
-export type { SearchOptions, SearchResult, SearchSortOrder } from '~helpers/biblesDb'
+export type SearchOptions = LocalSearchOptions & { mode?: 'standard' | 'semantic' }
+
+export type { SearchResult, SearchSortOrder } from '~helpers/biblesDb'
 
 export type BibleSearchPage = {
   results: SearchResult[]
@@ -26,9 +28,14 @@ export type BibleSearchAccess = {
 
 export const localBibleSearchAccess: BibleSearchAccess = {
   getInstalledVersions,
-  searchPage: searchVersesPage,
-  searchVerses,
-  searchVersesCount,
+  searchPage: (query, options) =>
+    options?.mode === 'semantic'
+      ? Promise.resolve({ results: [], count: 0 })
+      : searchVersesPage(query, options),
+  searchVerses: (query, options) =>
+    options?.mode === 'semantic' ? Promise.resolve([]) : searchVerses(query, options),
+  searchVersesCount: (query, options) =>
+    options?.mode === 'semantic' ? Promise.resolve(0) : searchVersesCount(query, options),
 }
 
 type HttpBibleSearchAccessOptions = {
@@ -75,7 +82,10 @@ export const createHttpBibleSearchAccess = ({
   const normalizedBaseUrl = normalizeBaseUrl(baseUrl)
 
   const searchVersion = async (version: string, query: string, options: SearchOptions = {}) => {
-    const request = createRequestController(options.signal, timeoutMs)
+    const request = createRequestController(
+      options.signal,
+      options.mode === 'semantic' ? Math.max(timeoutMs, 45_000) : timeoutMs
+    )
     try {
       const params = new URLSearchParams({ q: query })
       if (options.book !== undefined) params.set('book', String(options.book))
@@ -86,7 +96,7 @@ export const createHttpBibleSearchAccess = ({
       if (options.offset !== undefined) params.set('offset', String(options.offset))
       if (options.searchLanguage) params.set('language', options.searchLanguage)
       const response = await fetcher(
-        `${normalizedBaseUrl}/v1/bibles/${encodeURIComponent(version)}/search?${params}`,
+        `${normalizedBaseUrl}/v1/bibles/${encodeURIComponent(version)}/${options.mode === 'semantic' ? 'semantic-search' : 'search'}?${params}`,
         { headers: { accept: 'application/json' }, signal: request.signal }
       )
       const payload: unknown = await response.json().catch(() => undefined)
@@ -119,7 +129,10 @@ export const createHttpBibleSearchAccess = ({
         : [...versions]
     if (requestedVersions.length === 0) return { results: [], count: 0 }
     if (!options.version) {
-      const request = createRequestController(options.signal, timeoutMs)
+      const request = createRequestController(
+        options.signal,
+        options.mode === 'semantic' ? Math.max(timeoutMs, 45_000) : timeoutMs
+      )
       try {
         const params = new URLSearchParams({ q: query, versions: requestedVersions.join(',') })
         if (options.book !== undefined) params.set('book', String(options.book))
@@ -129,10 +142,13 @@ export const createHttpBibleSearchAccess = ({
         if (options.limit !== undefined) params.set('limit', String(options.limit))
         if (options.offset !== undefined) params.set('offset', String(options.offset))
         if (options.searchLanguage) params.set('language', options.searchLanguage)
-        const response = await fetcher(`${normalizedBaseUrl}/v1/bibles/search?${params}`, {
-          headers: { accept: 'application/json' },
-          signal: request.signal,
-        })
+        const response = await fetcher(
+          `${normalizedBaseUrl}/v1/bibles/${options.mode === 'semantic' ? 'semantic-search' : 'search'}?${params}`,
+          {
+            headers: { accept: 'application/json' },
+            signal: request.signal,
+          }
+        )
         const payload: unknown = await response.json().catch(() => undefined)
         if (!response.ok) {
           const code =
@@ -209,10 +225,12 @@ export const createHybridBibleSearchAccess = ({
     operation: (access: BibleSearchAccess) => Promise<T>
   ) => {
     const access = await select(options)
+    if (options?.mode === 'semantic' && access === offline) return operation(localBibleSearchAccess)
     try {
       return await operation(access)
     } catch (error) {
       const canRetryOffline =
+        options?.mode !== 'semantic' &&
         access === online &&
         !options?.signal?.aborted &&
         error instanceof ResourceAccessError &&

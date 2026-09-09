@@ -373,6 +373,41 @@ describe('Bible search PostgreSQL repository', { skip: !runIntegration }, () => 
         sources: ['openbible'],
       })
 
+      // The fast path must never invoke or await the embedding provider.
+      let embeddingCalls = 0
+      const separated = makeKyselyBibleSearchRepository(database, {
+        embeddingProvider: {
+          ...testEmbeddingProvider,
+          embedQuery: async text => {
+            embeddingCalls += 1
+            return testEmbeddingProvider.embedQuery(text)
+          },
+        },
+      })
+      const standard = await Effect.runPromise(
+        separated.search({ versionId: 'LSG', query: 'monde dieu', mode: 'standard' })
+      )
+      assert.equal(embeddingCalls, 0)
+      assert.ok(standard.results.length > 0)
+      assert.ok(standard.results.every(result => result.match?.kind !== 'semantic'))
+      const related = await Effect.runPromise(
+        separated.search({ versionId: 'LSG', query: 'monde dieu', mode: 'semantic' })
+      )
+      assert.equal(embeddingCalls, 1)
+      assert.ok(related.results.length > 0)
+      assert.ok(related.results.every(result => result.match?.kind === 'semantic'))
+      const page = await Effect.runPromise(
+        separated.search({
+          versionId: 'LSG',
+          query: 'monde dieu',
+          mode: 'semantic',
+          limit: 1,
+          offset: 1,
+        })
+      )
+      assert.deepEqual(page.results, related.results.slice(1, 2))
+      assert.equal(page.count, related.count)
+
       const noMatch = await search('xylophone quantique', { language: 'fr' })
       assert.equal(noMatch.count, 0)
 

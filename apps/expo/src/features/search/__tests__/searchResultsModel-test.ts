@@ -1,6 +1,6 @@
 /* eslint-disable import/first */
-jest.mock('../BibleReferenceWidget', () => ({
-  parseBibleReference: jest.fn(() => []),
+jest.mock('~helpers/bcvParser', () => ({
+  parseBibleReferenceSegments: jest.fn(() => []),
 }))
 
 jest.mock('~i18n', () => ({
@@ -250,4 +250,27 @@ describe('searchResultsModel', () => {
       { id: 'notes', count: 1 },
     ])
   })
+})
+
+it('keeps standard passages visible while semantic passages load or fail', () => {
+  const passage = {
+    version: 'LSG',
+    book: 43,
+    chapter: 3,
+    verse: 16,
+    text: 'Dieu aime',
+    highlighted: 'Dieu aime',
+  }
+  for (const failed of [false, true]) {
+    const model = getSearchResultsModel({
+      ...baseInput,
+      passageResults: [passage],
+      totalPassageCount: 1,
+      loading: { ...emptyLoading, semanticPassages: !failed },
+      semanticSearchError: failed ? 'unavailable' : null,
+    })
+    expect(model.sections.find(section => section.id === 'passages')?.items).toHaveLength(1)
+    expect(model.sections.filter(section => section.itemFilterType === 'passages')).toHaveLength(1)
+    expect(model.showNoResults).toBe(false)
+  }
 })

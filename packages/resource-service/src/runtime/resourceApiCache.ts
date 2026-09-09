@@ -25,7 +25,11 @@ const catalogResourceIdsFrom = (request: Request): string[] => {
   const url = new URL(request.url)
   const pathname = url.pathname
   const match = (pattern: RegExp) => pathname.match(pattern)?.slice(1)
-  if (pathname === '/v1/bibles/search' || pathname === '/v1/bibles/chapters') {
+  if (
+    pathname === '/v1/bibles/search' ||
+    pathname === '/v1/bibles/semantic-search' ||
+    pathname === '/v1/bibles/chapters'
+  ) {
     return (url.searchParams.get('versions') ?? '')
       .split(',')
       .filter(Boolean)

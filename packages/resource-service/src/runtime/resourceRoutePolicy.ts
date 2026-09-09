@@ -8,6 +8,7 @@ export const resourceRequestClassFrom = (request: Request): ResourceRequestClass
   if (url.pathname === '/v1/search-events') return 'search'
   if (
     url.pathname.endsWith('/search') ||
+    url.pathname.endsWith('/semantic-search') ||
     url.pathname.endsWith('/random') ||
     url.searchParams.has('search')
   ) {

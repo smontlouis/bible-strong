@@ -1,3 +1,4 @@
+import { Platform } from 'react-native'
 import { Image, type ImageSource } from 'expo-image'
 import type { PrimitiveAtom } from 'jotai/vanilla'
 import { useState, type ReactNode } from 'react'
@@ -101,7 +102,9 @@ export default function NewTabContent({
       >
         {t('newTab.heading')}
       </Text>
-      {isWide && <NewTabSearch tabAtom={tabAtom} />}
+      {(isWide || Platform.OS === 'web') && (
+        <NewTabSearch tabAtom={tabAtom} onPlanPress={onPlanPress} />
+      )}
       <Box className={isWide ? 'mt-[38px]' : undefined}>
         <SectionHeading title={t('newTab.reading')} compact={compact} />
         <NewTabItem

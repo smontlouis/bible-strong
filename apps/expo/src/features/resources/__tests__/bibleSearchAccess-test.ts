@@ -325,3 +325,70 @@ describe('hybrid Bible search access', () => {
     expect(online.searchPage).not.toHaveBeenCalled()
   })
 })
+
+it.each([true, false])(
+  'uses the separate semantic endpoint with all filters (single version: %s)',
+  async single => {
+    const resource = { kind: 'bible-text', versionId: 'LSG', revision: 'r1', textRevision: 'r1' }
+    const fetcher = jest.fn(
+      async (_input: RequestInfo | URL) =>
+        new Response(
+          JSON.stringify({
+            ...(single ? { resource } : { resources: [resource] }),
+            count: 0,
+            results: [],
+          }),
+          { status: 200 }
+        )
+    )
+    const access = createHttpBibleSearchAccess({
+      baseUrl: 'http://resource.test',
+      versions: ['LSG'],
+      fetcher,
+      isOnline: async () => true,
+    })
+    await access.searchPage('enfance de Jésus', {
+      mode: 'semantic',
+      ...(single ? { version: 'LSG' } : { versionIds: ['LSG'] }),
+      book: 42,
+      section: 'nt',
+      canon: 'protestant-66',
+      limit: 3,
+      offset: 6,
+      searchLanguage: 'fr',
+    })
+    const url = new URL(String(fetcher.mock.calls[0]?.[0]))
+    expect(url.pathname).toBe(
+      single ? '/v1/bibles/LSG/semantic-search' : '/v1/bibles/semantic-search'
+    )
+    expect(Object.fromEntries(url.searchParams)).toMatchObject({
+      q: 'enfance de Jésus',
+      book: '42',
+      section: 'nt',
+      canon: 'protestant-66',
+      limit: '3',
+      offset: '6',
+      language: 'fr',
+    })
+  }
+)
+
+it('does not duplicate offline text results into the semantic group', async () => {
+  const offline: BibleSearchAccess = {
+    getInstalledVersions: async () => ['LSG'],
+    searchPage: jest.fn(async () => ({ results: [], count: 99 })),
+    searchVerses: jest.fn(async () => []),
+    searchVersesCount: jest.fn(async () => 99),
+  }
+  const access = createHybridBibleSearchAccess({
+    offline,
+    online: offline,
+    remotelyReadableVersions: new Set(['LSG']),
+    isOnline: async () => false,
+  })
+  await expect(access.searchPage('amour', { version: 'LSG', mode: 'semantic' })).resolves.toEqual({
+    results: [],
+    count: 0,
+  })
+  expect(offline.searchPage).not.toHaveBeenCalled()
+})

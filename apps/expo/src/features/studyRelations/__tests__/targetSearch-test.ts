@@ -1,7 +1,7 @@
 import { searchReferenceAndStrongTargets, searchRelationTargets } from '../targetSearch'
 
-jest.mock('~features/search/BibleReferenceWidget', () => ({
-  parseBibleReference: (query: string) =>
+jest.mock('~helpers/bcvParser', () => ({
+  parseBibleReferenceSegments: (query: string) =>
     query.toLowerCase().includes('jean') || query.toLowerCase().includes('jn')
       ? [{ book: 43, chapter: 3, startVerse: 16, endVerse: 16, isWholeChapter: false }]
       : [],

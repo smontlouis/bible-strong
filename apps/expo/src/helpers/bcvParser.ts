@@ -3,15 +3,9 @@ import {
   type BibleReferenceParser,
 } from '@bible-strong/bible-reference-parser/reference-parser'
 
-// import structuredClone from '@ungap/structured-clone'
 import { getLanguage } from '../../i18n'
 import { getSupportedOsisBookNumber, normalizeOsisReference } from './osisReference'
 
-// if (!('structuredClone' in globalThis)) {
-//   globalThis.structuredClone = structuredClone
-// }
-
-const language = getLanguage()
 export type BcvLanguage = 'fr' | 'en'
 
 interface OsisAndIndices {
@@ -40,20 +34,9 @@ const bcvByLanguage: Record<BcvLanguage, BibleReferenceParser> = {
   en: createBibleReferenceParser('en'),
 }
 
-const getBcvParser = (parserLanguage: BcvLanguage = language === 'fr' ? 'fr' : 'en') =>
-  bcvByLanguage[parserLanguage]
+const getBcvParser = (parserLanguage: BcvLanguage = getLanguage()) => bcvByLanguage[parserLanguage]
 
-export const bcv = getBcvParser()
-
-type BookID = string
-
-function getLastVerseInChapter(book: BookID, chapter: number): number {
-  const verse = getBcvParser().lastVerse(book, chapter)
-  if (verse === undefined) throw new Error(`Unknown Bible chapter: ${book}.${chapter}`)
-  return verse
-}
-
-const getBookNumber = (book: BookID, _parserLanguage?: BcvLanguage): number | undefined =>
+const getBookNumber = (book: string, _parserLanguage?: BcvLanguage): number | undefined =>
   getSupportedOsisBookNumber(book)
 
 const parseOsisRef = (osisRef: string, parserLanguage?: BcvLanguage) => {
@@ -202,113 +185,71 @@ export const parseInlineBibleReferences = (
   return mergeSameChapterSequence(text, parsedReferences)
 }
 
-export const isExactBibleReferenceInput = (text: string, parserLanguage?: BcvLanguage): boolean => {
-  const trimmed = text.trim()
-  if (!trimmed) return false
-
-  const references = parseInlineBibleReferences(trimmed, parserLanguage)
-  if (references.length === 0 || references[0].start !== 0) return false
-
+const coversWholeInput = (text: string, references: InlineBibleReference[]): boolean => {
+  if (!text || !references.length || references[0].start !== 0) return false
   let previousEnd = 0
   for (const reference of references) {
-    if (!/^[,;\s]*$/u.test(trimmed.slice(previousEnd, reference.start))) return false
+    if (!/^[,;\s]*$/u.test(text.slice(previousEnd, reference.start))) return false
     previousEnd = reference.end
   }
-
-  return previousEnd === trimmed.length
+  return previousEnd === text.length
 }
 
-export function getIntermediateChapters(startRef: string, endRef: string) {
-  const [startBook, startChapterStr, startVerseStr] = startRef.split('.')
-  const [endBook, endChapterStr, endVerseStr] = endRef.split('.')
+export const isExactBibleReferenceInput = (text: string, parserLanguage?: BcvLanguage): boolean => {
+  const trimmed = text.trim()
+  return coversWholeInput(trimmed, parseInlineBibleReferences(trimmed, parserLanguage))
+}
 
-  const startChapter = parseInt(startChapterStr, 10)
-  const endChapter = parseInt(endChapterStr, 10)
-  const startVerse = startVerseStr ? parseInt(startVerseStr, 10) : null
-  const endVerse = endVerseStr ? parseInt(endVerseStr, 10) : null
+export interface BibleReferenceSegment {
+  book: number
+  chapter: number
+  startVerse: number
+  endVerse: number
+  isWholeChapter: boolean
+}
 
-  if (startBook !== endBook) {
-    throw new Error('Multi-book range not supported in this version')
-  }
-
-  const results: string[] = []
-
-  // Cas 1 : premier chapitre, partiel ou complet
-  if (startVerse) {
-    const lastVerse = getLastVerseInChapter(startBook, startChapter)
-    results.push(
-      `${startBook}.${startChapter}.${startVerse}-${startBook}.${startChapter}.${lastVerse}`
-    )
-  } else {
-    results.push(`${startBook}.${startChapter}`)
-  }
-
-  // Cas 2 : chapitres intermédiaires entiers
-  for (let c = startChapter + 1; c < endChapter; c++) {
-    results.push(`${startBook}.${c}`)
-  }
-
-  // Cas 3 : dernier chapitre, partiel ou complet
-  if (endChapter > startChapter) {
-    if (endVerse) {
-      results.push(`${startBook}.${endChapter}.1-${startBook}.${endChapter}.${endVerse}`)
-    } else {
-      results.push(`${startBook}.${endChapter}`)
+const segmentsFromOsis = (osis: string, parserLanguage: BcvLanguage): BibleReferenceSegment[] =>
+  osis.split(',').flatMap(segment => {
+    const [startRef, endRef] = segment.split('-')
+    const start = parseOsisRef(startRef)
+    const end = endRef ? parseOsisRef(endRef) : start
+    // Cross-book ranges have no supported reading surface yet.
+    if (!start || !end || start.book !== end.book) return []
+    const segments: BibleReferenceSegment[] = []
+    for (let chapter = start.chapter; chapter <= end.chapter; chapter += 1) {
+      const startVerse = chapter === start.chapter ? (start.verse ?? 1) : 1
+      const endVerse =
+        chapter === end.chapter && end.verse
+          ? end.verse
+          : getBcvParser(parserLanguage).lastVerse(start.book, chapter)
+      if (!endVerse || startVerse > endVerse) continue
+      segments.push({
+        book: start.bookNumber,
+        chapter,
+        startVerse,
+        endVerse,
+        isWholeChapter:
+          (chapter !== start.chapter || !start.verse) && (chapter !== end.chapter || !end.verse),
+      })
     }
+    return segments
+  })
+
+/** Parse once; all consumers use the same recognized text and chapter segments. */
+export function parseBibleReferenceInput(
+  text: string,
+  parserLanguage: BcvLanguage = getLanguage()
+) {
+  const trimmed = text.trim()
+  const references = parseInlineBibleReferences(trimmed, parserLanguage)
+  return {
+    references,
+    isExact: coversWholeInput(trimmed, references),
+    segments: references.flatMap(reference =>
+      segmentsFromOsis(reference.target.osis, parserLanguage)
+    ),
   }
-
-  return results
 }
 
-export const parseResponse = (res: string) => {
-  const str: string = bcv.parse(res).osis()
-
-  const parsedArray = str
-    .split(',')
-    .map(s => {
-      const [startRef, endRef] = s.split('-')
-
-      if (!endRef) {
-        return s
-      }
-
-      const [sb, sc] = startRef.split('.')
-      const [eb, ec] = endRef.split('.')
-
-      if (sb !== eb) {
-        return undefined
-      }
-
-      if (sc !== ec) {
-        return getIntermediateChapters(startRef, endRef)
-      }
-
-      return s
-    })
-    .filter((x): x is string => Boolean(x))
-    .flat()
-    .map(s => {
-      const [startRef, endRef] = s.split('-')
-      const [sb, sc, sv] = startRef.split('.')
-      const ev = endRef?.split('.')[2]
-
-      const sbNum = getBookNumber(sb)
-
-      if (!sbNum || !sc) {
-        return undefined
-      }
-
-      if (!sv) {
-        return `${sbNum}_${sc}`
-      }
-
-      if (!ev) {
-        return `${sbNum}_${sc}:${sv}`
-      }
-
-      return `${sbNum}_${sc}:${sv}-${ev}`
-    })
-    .join(',')
-
-  return { original: str, parsed: parsedArray }
-}
+export const parseBibleReferenceSegments = (text: string, parserLanguage?: BcvLanguage) =>
+  parseBibleReferenceInput(text, parserLanguage).segments

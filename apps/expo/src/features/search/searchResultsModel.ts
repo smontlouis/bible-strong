@@ -49,6 +49,7 @@ const searchFacetOrder: SearchItemType[] = [
 type SearchItemFilters = Record<SearchItemType, boolean>
 
 type SearchLoadingState = {
+  semanticPassages?: boolean
   passages: boolean
   notes: boolean
   links: boolean
@@ -70,6 +71,7 @@ type SearchResultsModelInput = {
   dictionaryResults: DictionarySearchRow[]
   naveResults: NaveSearchItemRow[]
   passageResults: SearchResult[] | null
+  semanticSearchError?: string | null
   totalPassageCount: number
   searchError: string | null
   loading: SearchLoadingState
@@ -143,6 +145,7 @@ export const getSearchResultsModel = ({
   naveResults,
   passageResults,
   totalPassageCount,
+  semanticSearchError,
   searchError,
   loading,
   t,
@@ -167,7 +170,9 @@ export const getSearchResultsModel = ({
           }),
         ]
       : []),
-    ...(passageItems.length || (itemFilters.passages && (loading.passages || searchError))
+    ...(passageItems.length ||
+    (itemFilters.passages &&
+      (loading.passages || loading.semanticPassages || searchError || semanticSearchError))
       ? [
           getSection({
             id: 'passages',

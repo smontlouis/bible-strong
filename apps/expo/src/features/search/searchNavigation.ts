@@ -1,14 +1,9 @@
+import type { BibleReferenceSegment } from '~helpers/bcvParser'
 import { getBook } from '~helpers/bibleBookCatalog'
 
 export { getBibleViewParamsForSearchResult } from '~features/studyRelations/openableStudyObjects'
 
-export type BibleReferenceSegment = {
-  book: number
-  chapter: number
-  startVerse: number
-  endVerse: number
-  isWholeChapter: boolean
-}
+export type { BibleReferenceSegment } from '~helpers/bcvParser'
 
 export const getBibleViewParamsForReferenceSegment = (segment: BibleReferenceSegment) => ({
   contextDisplayMode: segment.isWholeChapter ? ('fullChapter' as const) : ('focused' as const),

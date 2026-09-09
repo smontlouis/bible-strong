@@ -16,4 +16,5 @@ export const BIBLE_SEARCH_CACHE_REVISION = JSON.stringify({
   embeddingContract: TOPIC_EMBEDDING_CONTRACT,
   embeddingThreshold: TOPIC_EMBEDDING_MIN_SIMILARITY,
   ranking: BIBLE_SEARCH_RANKING_REVISION,
+  execution: 'independent-standard-semantic-v1',
 })

@@ -140,24 +140,29 @@ export const makeKyselyBibleSearchRepository = (
             )}) / ${fuzzyTerms.length}`
           : sql`0`
       const normalizedTopicQuery = normalizeTopicSearchText(topicQuery)
-      const topicSearchEnabled = parsed?.kind !== 'phrase'
+      const topicSearchEnabled = parsed?.kind !== 'phrase' && input.mode !== 'semantic'
       const topicTerms = normalizedTopicQuery.split(/\s+/).filter(Boolean)
       const semanticQueryEnabled =
-        topicSearchEnabled && topicTerms.some(term => /[aeiouy]/.test(term))
+        parsed?.kind !== 'phrase' &&
+        input.mode !== 'standard' &&
+        topicTerms.some(term => /[aeiouy]/.test(term))
       const topicQueryText = topicTerms.map(term => `${term}:*`).join(' & ')
       const topicTextQuery = topicQueryText
         ? sql`to_tsquery('simple', ${topicQueryText})`
         : sql`to_tsquery('simple', '')`
       let topicEmbedding: number[] | undefined
       if (options.embeddingProvider && normalizedTopicQuery && semanticQueryEnabled) {
-        const exactTopic = yield* tryDatabasePromise('bible.search.topic-exact-probe', () =>
-          database
-            .selectFrom('thematic_topic_aliases')
-            .select('topic_id')
-            .where('normalized_alias', '=', normalizedTopicQuery)
-            .limit(1)
-            .executeTakeFirst()
-        ).pipe(Effect.mapError(cause => new BibleSearchRepositoryFailure({ cause })))
+        const exactTopic =
+          input.mode === 'semantic'
+            ? undefined
+            : yield* tryDatabasePromise('bible.search.topic-exact-probe', () =>
+                database
+                  .selectFrom('thematic_topic_aliases')
+                  .select('topic_id')
+                  .where('normalized_alias', '=', normalizedTopicQuery)
+                  .limit(1)
+                  .executeTakeFirst()
+              ).pipe(Effect.mapError(cause => new BibleSearchRepositoryFailure({ cause })))
         if (!exactTopic) {
           topicEmbedding = yield* Effect.tryPromise({
             try: () => options.embeddingProvider!.embedQuery(topicQuery),
@@ -165,7 +170,9 @@ export const makeKyselyBibleSearchRepository = (
           }).pipe(
             Effect.catchAll(cause => {
               options.reportEmbeddingFailure?.(cause)
-              return Effect.succeed(undefined)
+              return input.mode === 'semantic'
+                ? Effect.fail(new BibleSearchRepositoryFailure({ cause }))
+                : Effect.succeed(undefined)
             })
           )
         }
@@ -220,7 +227,7 @@ export const makeKyselyBibleSearchRepository = (
               FROM active_publications ap
               JOIN bible_verses bv ON bv.publication_id = ap.id
              WHERE ${filterSql}
-               AND ${parsed ? textSearchPredicate : sql`FALSE`}
+               AND ${parsed && input.mode !== 'semantic' ? textSearchPredicate : sql`FALSE`}
           ),
           fuzzy_matches AS MATERIALIZED (
             SELECT ap.version_id,
@@ -237,7 +244,7 @@ export const makeKyselyBibleSearchRepository = (
               JOIN bible_verses bv ON bv.publication_id = ap.id
              WHERE ${filterSql}
                AND NOT EXISTS (SELECT 1 FROM exact_matches)
-               AND ${fuzzyPredicate}
+               AND ${input.mode !== 'semantic' ? fuzzyPredicate : sql`FALSE`}
                AND ${shortTermsPredicate}
           ),
           lexical_ranked AS (
@@ -739,6 +746,7 @@ export const makeKyselyBibleSearchRepository = (
       searchMany({
         versionIds: [input.versionId],
         query: input.query,
+        mode: input.mode,
         book: input.book,
         section: input.section,
         canon: input.canon,

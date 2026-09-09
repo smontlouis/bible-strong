@@ -3,6 +3,10 @@ import { create, type ReactTestRenderer } from 'react-test-renderer'
 import { useOpenInNewTab } from '../useOpenInNewTab'
 import { toast } from '~helpers/toast'
 
+let mockPanelOpen = false
+jest.mock('~navigation/useWorkspaceRoutePanel', () => ({
+  useWorkspaceRoutePanel: () => ({ open: mockPanelOpen }),
+}))
 const mockAdd = jest.fn()
 const mockSwitch = jest.fn()
 const mockDismiss = jest.fn()
@@ -62,4 +66,27 @@ it('inserts into the default group and only switches when opening the created ta
   expect(mockSwitch).toHaveBeenLastCalledWith('default-group')
   expect(mockSlide).toHaveBeenLastCalledWith('existing-resource')
   act(() => view!.unmount())
+})
+
+it('opens a tab created from a web side panel immediately and dismisses the panel', () => {
+  jest.clearAllMocks()
+  mockPanelOpen = true
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
+  let open: ReturnType<typeof useOpenInNewTab>
+  function Probe() {
+    open = useOpenInNewTab()
+    return null
+  }
+  let view: ReactTestRenderer
+  act(() => {
+    view = create(<Probe />)
+  })
+  act(() => open({ id: 'from-panel', title: 'Resource', type: 'new', isRemovable: true, data: {} }))
+  expect(mockAdd).toHaveBeenCalled()
+  expect(mockDismiss).toHaveBeenCalledWith('/')
+  expect(mockSwitch).toHaveBeenCalledWith('default-group')
+  expect(mockSlide).toHaveBeenCalledWith('from-panel')
+  expect(toast).not.toHaveBeenCalled()
+  act(() => view!.unmount())
+  mockPanelOpen = false
 })
