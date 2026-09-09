@@ -23,6 +23,8 @@ const HTMLViewContent = ({ html, onLinkClicked }: Props) => {
         onLinkClicked(payload)
       }}
       dom={{
+        // Keep the same native WebView implementation as the Bible reader.
+        useExpoDOMWebView: false,
         matchContents: true,
         scrollEnabled: false,
         style: { width: '100%', backgroundColor: 'transparent' },

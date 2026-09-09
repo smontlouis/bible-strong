@@ -383,28 +383,9 @@ export default function CommandPalette({ tabAtom, onPlanPress, onDone, inputId }
             }}
           />
         )}
-        {scope && (
-          <Command.Group heading={t('commandPalette.create')}>
-            <Command.Item
-              className="bs-command-see-all"
-              value="scope:open-list"
-              onSelect={() => create(scope.type)}
-            >
-              <PaletteItemLabel type={scope.type}>
-                {t(
-                  scope.source || scope.type === 'plan'
-                    ? 'commandPalette.openList'
-                    : 'commandPalette.openTool',
-                  { scope: t(scope.key) }
-                )}
-              </PaletteItemLabel>
-              <small>↗</small>
-            </Command.Item>
-          </Command.Group>
-        )}
-        {query.trim() && (!scope || scope.source) && (
+        {!scope && query.trim() && (
           <Command.Group heading={t('Rechercher')}>
-            <Command.Item value="search:free" onSelect={() => openSearch(scope?.source)}>
+            <Command.Item value="search:free" onSelect={() => openSearch()}>
               <PaletteItemLabel type="search">
                 {t('commandPalette.search', { query: query.trim() })}
               </PaletteItemLabel>

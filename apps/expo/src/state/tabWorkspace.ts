@@ -226,7 +226,6 @@ export interface TabWorkspaceAdapter {
   writeActiveGroupId(groupId: string): void
   cleanupGroup(groupId: string): void
   createGroupId(): string
-  createDefaultTab(): TabItem
   now(): number
   warn(message: string, detail?: string): void
 }
@@ -240,7 +239,7 @@ export const createTabWorkspaceController = (adapter: TabWorkspaceAdapter, maxGr
       name,
       color,
       isDefault: false,
-      tabs: [adapter.createDefaultTab()],
+      tabs: [],
       activeTabIndex: 0,
       createdAt: now,
       updatedAt: now,

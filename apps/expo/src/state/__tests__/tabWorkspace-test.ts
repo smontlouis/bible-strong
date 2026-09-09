@@ -196,12 +196,31 @@ describe('tabWorkspace', () => {
         },
         cleanupGroup: id => cleaned.push(id),
         createGroupId: () => 'created',
-        createDefaultTab: () => makeTab('new'),
         now: () => 10,
         warn: jest.fn(),
       },
       3
     )
+
+    expect(workspace.createGroup({ name: 'Empty group', color: '#123456' })).toBe('created')
+    expect(groups.find(group => group.id === 'created')).toMatchObject({
+      tabs: [],
+      activeTabIndex: 0,
+    })
+    expect(workspace.switchGroup('created')).toBe(true)
+    expect(activeGroupId).toBe('created')
+    expect(cachedTabIds).toEqual([])
+
+    const firstTab = makeTab('first')
+    const added = addTabToGroup(groups, 'created', firstTab)
+    expect(added.ok).toBe(true)
+    expect(added.groups.find(group => group.id === 'created')).toMatchObject({
+      tabs: [firstTab],
+      activeTabIndex: 0,
+    })
+    expect(workspace.deleteGroup('created')).toBe(true)
+    expect(cleaned).toEqual(['created'])
+    cleaned.length = 0
 
     expect(workspace.switchGroup('other')).toBe(true)
     expect(activeGroupId).toBe('other')

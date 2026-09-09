@@ -4,7 +4,9 @@
 - Date: 2026-09-07
 
 Dictionary and Nave definitions use the same `HTMLContentDOM` component on Web
-and native, hosted by `HTMLViewContent`. The native host uses Expo DOM's
+and native, hosted by `HTMLViewContent`. The native host explicitly uses
+`react-native-webview` (`useExpoDOMWebView: false`), matching the Bible reader,
+rather than depending on Expo's default WebView implementation. It uses Expo DOM's
 `matchContents` sizing with scrolling owned by the surrounding screen.
 
 The DOM component owns scoped editorial CSS and the bundled Literata font. Theme
