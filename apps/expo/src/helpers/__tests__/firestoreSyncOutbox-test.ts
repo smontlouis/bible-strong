@@ -156,6 +156,90 @@ describe('FirestoreSyncOutbox', () => {
     )
   })
 
+  it('replays the latest complete comparison without resurrecting removed versions', async () => {
+    const storage = createStorage()
+    const execute = jest.fn(async () => undefined)
+    const outbox = createFirestoreSyncOutbox({
+      storage,
+      execute,
+      now: () => 100,
+      schedule: noSchedule,
+    })
+    const mergeFields = ['bible.settings.compare', 'bible.settings.compareSelectionVersion']
+    outbox.enqueue('user-1', {
+      kind: 'document-set',
+      path: ['users', 'user-1'],
+      merge: true,
+      data: { bible: { settings: { lineHeight: 24 } } },
+    })
+    outbox.enqueue('user-1', {
+      kind: 'document-set',
+      path: ['users', 'user-1'],
+      merge: true,
+      mergeFields,
+      data: {
+        bible: { settings: { compare: { LSG: true, DBY: true }, compareSelectionVersion: 2 } },
+      },
+    })
+    outbox.enqueue('user-1', {
+      kind: 'document-set',
+      path: ['users', 'user-1'],
+      merge: true,
+      mergeFields,
+      data: { bible: { settings: { compare: { DBY: true }, compareSelectionVersion: 2 } } },
+    })
+    const restored = createFirestoreSyncOutbox({
+      storage,
+      execute,
+      now: () => 100,
+      schedule: noSchedule,
+    })
+    await restored.replay('user-1')
+    expect(execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        intent: expect.objectContaining({
+          data: {
+            bible: {
+              settings: { compare: { DBY: true }, compareSelectionVersion: 2, lineHeight: 24 },
+            },
+          },
+          mergeFields: expect.arrayContaining([...mergeFields, 'bible.settings.lineHeight']),
+        }),
+      })
+    )
+  })
+
+  it('keeps an empty comparison replacement when other settings are queued afterward', () => {
+    const outbox = createFirestoreSyncOutbox({
+      storage: createStorage(),
+      execute: async () => undefined,
+      now: () => 100,
+      schedule: noSchedule,
+    })
+    const mergeFields = ['bible.settings.compare', 'bible.settings.compareSelectionVersion']
+    for (const compare of [{ LSG: true }, {}]) {
+      outbox.enqueue('user-1', {
+        kind: 'document-set',
+        path: ['users', 'user-1'],
+        merge: true,
+        mergeFields,
+        data: { bible: { settings: { compare, compareSelectionVersion: 2 } } },
+      })
+    }
+    outbox.enqueue('user-1', {
+      kind: 'document-set',
+      path: ['users', 'user-1'],
+      merge: true,
+      data: { bible: { settings: { lineHeight: 25 } } },
+    })
+    expect(outbox.getPending('user-1')[0].intent).toEqual(
+      expect.objectContaining({
+        data: { bible: { settings: { compare: {}, compareSelectionVersion: 2, lineHeight: 25 } } },
+        mergeFields: expect.arrayContaining([...mergeFields, 'bible.settings.lineHeight']),
+      })
+    )
+  })
+
   it('replays different account queues independently', async () => {
     const storage = createStorage()
     let releaseUser1!: () => void

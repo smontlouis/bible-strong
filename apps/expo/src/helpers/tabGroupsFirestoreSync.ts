@@ -1,5 +1,5 @@
 import { TabGroup, TabItem } from '~state/tabs'
-import { clampTabIndex } from '~state/tabWorkspace'
+import { clampTabIndex, compareTabGroupOrder } from '~state/tabWorkspace'
 import {
   writeToSubcollection,
   deleteFromSubcollection,
@@ -216,8 +216,8 @@ export async function fetchTabGroupsFromFirestore(userId: string): Promise<TabGr
 
   const groups: TabGroup[] = Object.values(data).map(g => hydrateTabGroup(g as FirestoreTabGroup))
 
-  // Sort by createdAt to maintain order
-  groups.sort((a, b) => a.createdAt - b.createdAt)
+  // Restore shared positions, falling back to creation order for legacy groups.
+  groups.sort(compareTabGroupOrder)
 
   console.log(`[TabGroupsSync] Fetched ${groups.length} groups from Firestore`)
   return groups
@@ -279,8 +279,8 @@ export function mergeTabGroups(localGroups: TabGroup[], remoteGroups: TabGroup[]
     }
   }
 
-  // Sort by createdAt to maintain consistent order
-  return merged.sort((a, b) => a.createdAt - b.createdAt)
+  // Use the same persisted order for cached and live snapshots.
+  return merged.sort(compareTabGroupOrder)
 }
 
 /**
@@ -318,7 +318,7 @@ export function reconcileTabGroupsSnapshot({
     }
   }
 
-  return finalGroups.sort((a, b) => a.createdAt - b.createdAt)
+  return finalGroups.sort(compareTabGroupOrder)
 }
 
 // ============================================================================

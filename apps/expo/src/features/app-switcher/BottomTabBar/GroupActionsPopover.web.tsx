@@ -26,10 +26,7 @@ export default function GroupActionsPopover(props: GroupActionsPopoverProps) {
     <ContextualPanel
       trigger={<Box style={props.triggerStyle}>{props.children}</Box>}
       accessibilityLabel={props.accessibilityLabel}
-      onOpen={() => {
-        edit.reset()
-        props.onOpen?.()
-      }}
+      onOpen={edit.reset}
       onClose={edit.flush}
       initialScreen="actions"
       screens={{
@@ -91,7 +88,7 @@ export default function GroupActionsPopover(props: GroupActionsPopoverProps) {
                 icon="x-circle"
                 label={t('tabs.closeAll')}
                 onPress={() => {
-                  closeTabs()
+                  closeTabs(props.group.id)
                   navigation.close()
                 }}
               />

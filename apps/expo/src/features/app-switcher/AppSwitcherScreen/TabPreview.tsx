@@ -96,7 +96,7 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
           ]}
         >
           <>
-            {base64Preview && (
+            {Boolean(base64Preview) && (
               <Image
                 style={styles.previewImage}
                 source={{ uri: `data:image/jpeg;base64,${base64Preview}` }}

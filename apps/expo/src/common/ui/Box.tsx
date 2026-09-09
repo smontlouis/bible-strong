@@ -1,7 +1,7 @@
 import { motify, MotiTransitionProp, StyleValueWithReplacedTransforms } from '@alloc/moti'
 import { ImageStyle } from 'expo-image'
 import React from 'react'
-import { TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native'
+import { Platform, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
 
@@ -22,11 +22,19 @@ import Text, { AnimatedText, TextProps } from './Text'
 export type BoxProps = React.ComponentPropsWithRef<typeof View> & {
   className?: string
   as?: React.ElementType
+  /** React Native Web data attributes, omitted from native views. */
+  dataSet?: Record<string, string>
 }
 
-const Box = ({ as: Component = View, className, style, ...props }: BoxProps) => {
+const Box = ({ as: Component = View, className, style, dataSet, ...props }: BoxProps) => {
   const classStyles = useResolveClassNames(className ?? '')
-  return <Component {...props} style={[className ? classStyles : undefined, style]} />
+  return (
+    <Component
+      {...props}
+      {...(dataSet && Platform.OS === 'web' ? { dataSet } : {})}
+      style={[className ? classStyles : undefined, style]}
+    />
+  )
 }
 
 export const HStack = ({ className, ...props }: BoxProps) => (

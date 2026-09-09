@@ -1,10 +1,10 @@
-import { resolveFontFamily } from '~themes/styleValues'
-import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { Image } from 'expo-image'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { TouchableBox } from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import TabIcon from '~features/app-switcher/utils/getIconByTabType'
 import { BibleTab, getDefaultBibleTab, getDefaultData, TabItem } from '../../../../state/tabs'
@@ -14,6 +14,10 @@ interface NewTabItemProps {
   type: TabItem['type']
   newAtom: PrimitiveAtom<TabItem>
   onPlanPress?: () => void
+  title?: string
+  description?: string
+  hero?: boolean
+  compact?: boolean
 }
 
 const useOpenTabByType = ({ type, newAtom, onPlanPress }: NewTabItemProps) => {
@@ -76,24 +80,67 @@ const useOpenTabByType = ({ type, newAtom, onPlanPress }: NewTabItemProps) => {
   }
 }
 
-const NewTabItem = ({ type, newAtom, onPlanPress }: NewTabItemProps) => {
-  const stylingTheme = useStylingTheme()
-
+const NewTabItem = ({
+  type,
+  newAtom,
+  onPlanPress,
+  title,
+  description,
+  hero = false,
+  compact = false,
+}: NewTabItemProps) => {
   const { t } = useTranslation()
   const { onPress } = useOpenTabByType({ type, newAtom, onPlanPress })
 
   return (
     <TouchableBox
-      className="overflow-hidden border-continuous h-[72px] px-[18px] flex-row items-center bg-reverse rounded-[20px]"
+      testID={`new-tab-tool-${type}`}
+      accessibilityLabel={title ?? t(`tabs.${type}`)}
+      accessibilityHint={description}
+      activeOpacity={0.7}
+      className={
+        hero
+          ? 'relative overflow-hidden border-continuous flex-row items-center bg-light-primary rounded-[18px] px-[24px] py-[24px]'
+          : 'border-continuous flex-row items-center bg-reverse border border-border rounded-[12px] px-[18px] py-[18px] min-h-[92px] gap-[14px]'
+      }
+      style={hero ? { minHeight: compact ? 180 : 218 } : undefined}
       onPress={onPress}
     >
-      <TabIcon type={type} size={26} />
-      <Text
-        className="ml-[16px] text-[16px]"
-        style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+      <Box
+        className={
+          hero
+            ? 'flex-1 flex-row items-center gap-[24px] z-10'
+            : 'flex-row items-center flex-1 gap-[14px]'
+        }
+        style={hero ? { paddingRight: compact ? 82 : 270 } : undefined}
       >
-        {t(`tabs.${type}`)}
-      </Text>
+        {(!hero || !compact) && <TabIcon type={type} size={hero ? 64 : 28} />}
+        <Box className="flex-1 min-w-0 gap-[6px]">
+          <Text className={hero ? 'text-[36px] font-medium' : 'text-[16px] font-medium'}>
+            {title ?? t(`tabs.${type}`)}
+          </Text>
+          {description ? (
+            <Text className="text-[13px] leading-[19px] text-tertiary">{description}</Text>
+          ) : null}
+        </Box>
+      </Box>
+      {hero && (
+        <Image
+          source={require('~assets/images/new-tab/bible-reader.webp')}
+          accessible={false}
+          pointerEvents="none"
+          contentFit="contain"
+          contentPosition="bottom"
+          style={{
+            position: 'absolute',
+            right: compact ? 24 : 42,
+            bottom: 0,
+            width: compact ? 125 : 295,
+            height: compact ? 108 : 205,
+          }}
+        />
+      )}
+      <FeatherIcon name="chevron-right" size={hero ? 22 : 18} color="tertiary" />
     </TouchableBox>
   )
 }

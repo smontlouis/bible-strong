@@ -2,6 +2,11 @@
 
 This directory is the repo-level reference set for agents and humans working on Bible Strong.
 
+## Visual Identity
+
+- [Bible Strong Brand Guidelines](charte-graphique.md): shared visual identity and illustration styles.
+- [Bible Strong Illustrated Worlds](design/illustrations.md): `bible-strong-univers-v1`, visual references, drawing rules, color families, and reusable generation prompts.
+
 ## Start Here
 
 | Document | Purpose |

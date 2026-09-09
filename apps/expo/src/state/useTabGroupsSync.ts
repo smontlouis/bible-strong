@@ -1,5 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from 'react'
-import { useAtomValue, useSetAtom } from 'jotai/react'
+import { useEffect } from 'react'
 import { getDefaultStore } from 'jotai/vanilla'
 import debounce from 'debounce'
 import * as Sentry from '@sentry/react-native'
@@ -25,7 +24,6 @@ import {
   prepareTabGroupForSync,
   FirestoreTabGroup,
   reconcileTabGroupsSnapshot,
-  createTabGroupsSyncIntent,
 } from '~helpers/tabGroupsFirestoreSync'
 import { batchWriteSubcollection, type BatchChanges } from '~helpers/firestoreSubcollections'
 import {
@@ -41,13 +39,26 @@ import {
   recordAccountMigrationPreferredDocuments,
 } from '../migrations/accountMigrationMutationJournal'
 
+import { createTabGroupsSyncQueue, type TabGroupChanges } from './tabGroupsSyncQueue'
+
+const changesToIntent = (changes: TabGroupChanges): FirestoreSyncIntent => ({
+  kind: 'subcollection',
+  collection: 'tabGroups',
+  set: Object.fromEntries(
+    [...changes].flatMap(([id, group]) =>
+      group ? [[id, prepareTabGroupForSync(group) as unknown as Record<string, unknown>]] : []
+    )
+  ),
+  delete: [...changes].filter(([, group]) => !group).map(([id]) => id),
+})
+
 const SYNC_DEBOUNCE_MS = 1000
 
 // Store unsubscribe function at module level for cleanup before logout
 let currentTabGroupsUnsubscribe: (() => void) | null = null
 
 /**
- * Cleanup tabGroups Firestore subscription.
+ * Stop tab group observation and persist unsent changes before account state is reset.
  * Call this BEFORE signOut() to avoid permission-denied errors.
  */
 export const cleanupTabGroupsSubscription = () => {
@@ -79,98 +90,108 @@ export const useTabGroupsSync = ({
   outgoingEnabled: boolean
 }) => {
   const { isLogged, user } = useLogin()
-  const groups = useAtomValue(tabGroupsAtom)
-  const setGroups = useSetAtom(tabGroupsAtom)
-  const setActiveGroupId = useSetAtom(activeGroupIdAtom)
 
-  const previousGroupsRef = useRef<TabGroup[]>([])
-  const lastRemoteUpdateRef = useRef<number>(0)
-  const isSyncingRef = useRef(false)
-  const unsubscribeRef = useRef<(() => void) | null>(null)
-  // Track pending deletions to prevent subscription from re-adding deleted groups
-  const pendingDeletionsRef = useRef<Set<string>>(new Set())
+  useEffect(() => {
+    if (!isLogged || !user.id) return
+    const userId = user.id
+    const store = getDefaultStore()
+    let disposed = false
+    let applyingRemote = false
+    const setActiveGroupId = (id: string) => store.set(activeGroupIdAtom, id)
 
-  // Cooldown period: sync debounce + small buffer
-  const REMOTE_UPDATE_COOLDOWN = SYNC_DEBOUNCE_MS + 100
-
-  /**
-   * Sync changed groups to Firestore
-   */
-  const syncChangesToFirestore = useCallback(
-    async (userId: string, newGroups: TabGroup[], oldGroups: TabGroup[]) => {
-      // Skip if we're currently syncing
-      if (isSyncingRef.current) {
-        return
-      }
-
-      // Skip sync during migration
-      if (isMigrationInProgress()) {
-        console.log('[TabGroupsSync] Skipping sync - migration in progress')
-        return
-      }
-
-      isSyncingRef.current = true
-      const intent = createTabGroupsSyncIntent(newGroups, oldGroups)
-
+    const persistChanges = async (changes: TabGroupChanges) => {
+      const intent = changesToIntent(changes)
       try {
         await runFirestoreSyncIntentsSerialized(userId, [intent], async () => {
           try {
-            const newGroupIds = new Set(newGroups.map(g => g.id))
-
-            // Deleted groups
-            for (const oldGroup of oldGroups) {
-              if (!newGroupIds.has(oldGroup.id)) {
-                await deleteTabGroupFromFirestore(userId, oldGroup.id)
-                pendingDeletionsRef.current.delete(oldGroup.id)
-              }
+            for (const [id, group] of changes) {
+              if (group) await syncTabGroupToFirestore(userId, group)
+              else await deleteTabGroupFromFirestore(userId, id)
             }
-
-            // Added or modified groups
-            for (const newGroup of newGroups) {
-              const oldGroup = oldGroups.find(g => g.id === newGroup.id)
-
-              const newForCompare = prepareTabGroupForSync(newGroup)
-              const oldForCompare = oldGroup ? prepareTabGroupForSync(oldGroup) : null
-
-              if (
-                !oldForCompare ||
-                JSON.stringify(newForCompare) !== JSON.stringify(oldForCompare)
-              ) {
-                await syncTabGroupToFirestore(userId, newGroup)
-              }
-            }
-            firestoreSyncOutbox.supersedePending(userId, intent)
+            firestoreSyncOutbox.supersedePending(
+              userId,
+              changesToIntent(new Map([...changes, ...queue.getOutstanding()]))
+            )
           } catch (error) {
-            firestoreSyncOutbox.enqueue(userId, intent)
+            firestoreSyncOutbox.enqueue(
+              userId,
+              changesToIntent(new Map([...changes, ...queue.getOutstanding()]))
+            )
             throw error
           }
         })
-        console.log(`[TabGroupsSync] Synced groups to Firestore`)
       } catch (error) {
-        console.error('[TabGroupsSync] Error syncing to Firestore:', error)
         Sentry.captureException(error, {
           tags: { feature: 'tabGroupsSync', action: 'syncChanges' },
         })
-      } finally {
-        isSyncingRef.current = false
       }
-    },
-    []
-  )
+    }
 
-  const [debouncedSync] = useState(() => debounce(syncChangesToFirestore, SYNC_DEBOUNCE_MS))
+    const queue = createTabGroupsSyncQueue(store.get(tabGroupsAtom), persistChanges)
+    const flush = () => {
+      if (incomingEnabled && isMigrationInProgress()) {
+        debouncedSync()
+        return
+      }
+      void queue.flush()
+    }
+    const debouncedSync = debounce(flush, SYNC_DEBOUNCE_MS)
 
-  /**
-   * Handle initial load: migrate local groups to Firestore if needed
-   */
-  const handleInitialLoad = useCallback(
-    async (userId: string) => {
+    const applyRemoteGroups = (groups: TabGroup[]) => {
+      const retryingIds = new Set<string>()
+      for (const { intent } of firestoreSyncOutbox.getPending(userId)) {
+        if (intent.kind === 'subcollection' && intent.collection === 'tabGroups') {
+          Object.keys(intent.set).forEach(id => retryingIds.add(id))
+          intent.delete.forEach(id => retryingIds.add(id))
+        }
+      }
+      const merged = queue.applyRemote(groups, retryingIds)
+      const safeGroups = merged.length > 0 ? merged : [createDefaultGroup()]
+      // Update the baseline synchronously: a real user action after this write
+      // must be recorded even if React batches both updates into one render.
+      applyingRemote = true
+      try {
+        store.set(tabGroupsAtom, safeGroups)
+      } finally {
+        applyingRemote = false
+      }
+      return safeGroups
+    }
+
+    const unsubscribeLocal = outgoingEnabled
+      ? store.sub(tabGroupsAtom, () => {
+          if (applyingRemote) return
+          const changes = queue.recordLocal(store.get(tabGroupsAtom))
+          if (changes.size === 0) return
+          if (!incomingEnabled) {
+            recordAccountMigrationDeletedDocuments(
+              userId,
+              'tabGroups',
+              [...changes].filter(([, group]) => !group).map(([id]) => id)
+            )
+            recordAccountMigrationPreferredDocuments(
+              userId,
+              'tabGroups',
+              [...changes].filter(([, group]) => !!group).map(([id]) => id)
+            )
+          }
+          if (!incomingEnabled || [...changes.values()].some(group => !group)) {
+            debouncedSync.clear()
+            flush()
+          } else {
+            debouncedSync()
+          }
+        })
+      : () => {}
+
+    const handleInitialLoad = async () => {
       let migrationChanges: BatchChanges | undefined
       try {
         // Fetch remote groups (uses cache-first mode internally for instant response)
         const remoteGroups = await fetchTabGroupsFromFirestore(userId)
         // Local state may have changed while Firestore was resolving its first
         // snapshot, so always reconcile against the latest persisted workspace.
+        if (disposed) return
         const localGroups = getDefaultStore().get(tabGroupsAtom)
 
         if (remoteGroups.length === 0) {
@@ -211,16 +232,12 @@ export const useTabGroupsSync = ({
           // Merge remote with local, preserving local base64Previews
           const merged = mergeTabGroups(localGroups, remoteGroups)
 
-          // NOTE: We intentionally do NOT set lastRemoteUpdateRef here.
-          // The cooldown is only meant to prevent sync loops from real-time subscription
-          // updates, not from initial data loading. Setting it here would block
-          // legitimate user actions (like deletions) for 1100ms after login.
-          setGroups(merged)
+          const applied = applyRemoteGroups(merged)
 
           // Ensure active group exists
           const activeGroupId = getDefaultStore().get(activeGroupIdAtom)
-          if (!merged.find(g => g.id === activeGroupId)) {
-            setActiveGroupId(merged[0]?.id || DEFAULT_GROUP_ID)
+          if (!applied.find(g => g.id === activeGroupId)) {
+            setActiveGroupId(applied[0]?.id || DEFAULT_GROUP_ID)
           }
 
           // Reset to view mode (first tab expanded) and trigger animation reset
@@ -245,253 +262,49 @@ export const useTabGroupsSync = ({
           tags: { feature: 'tabGroupsSync', action: 'initialLoad' },
         })
       }
-    },
-    [setGroups, setActiveGroupId]
-  )
+    }
 
-  /**
-   * Subscribe to Firestore changes
-   */
-  const setupFirestoreSubscription = useCallback(
-    (userId: string) => {
-      return subscribeToTabGroupsFirestore(userId, (data, changes) => {
-        // Skip updates while migration is in progress
-        if (isMigrationInProgress()) {
-          console.log('[TabGroupsSync] Skipping Firestore update - migration in progress')
-          return
-        }
-
-        // Skip if we're currently syncing to avoid loops
-        if (isSyncingRef.current) {
-          return
-        }
-
-        console.log(
-          '[TabGroupsSync] Firestore update received:',
-          Object.keys(data).length,
-          'groups,',
-          changes.removed.length,
-          'removed'
-        )
-
-        const localGroups = getDefaultStore().get(tabGroupsAtom)
-        // Cache snapshots are bootstrap data and cannot authoritatively delete
-        // device-local groups or change the active workspace.
-        const removedIds = new Set(changes.fromCache ? [] : changes.removed)
-
-        // Filter out deleted groups from local state
-        const localWithoutDeleted = localGroups.filter(g => !removedIds.has(g.id))
-
-        // Convert Firestore data to TabGroup array
-        // Filter out pending deletions to prevent re-adding groups that are being deleted
-        const pendingDeletions = pendingDeletionsRef.current
-        const remoteGroups: TabGroup[] = Object.values(data)
-          .map(g => g as FirestoreTabGroup)
-          .filter(g => {
-            const id = g.id
-            if (pendingDeletions.has(id)) {
-              console.log(`[TabGroupsSync] Filtered out pending deletion: ${id}`)
-              return false
-            }
-            return true
-          })
-          .map(g =>
-            hydrateTabGroup(
-              g,
-              localWithoutDeleted.find(lg => lg.id === g.id)
-            )
+    let unsubscribeRemote: (() => void) | undefined
+    if (incomingEnabled) {
+      void handleInitialLoad()
+      unsubscribeRemote = subscribeToTabGroupsFirestore(userId, (data, changes) => {
+        if (disposed || isMigrationInProgress()) return
+        const localGroups = store.get(tabGroupsAtom)
+        const remoteGroups = Object.values(data).map(group =>
+          hydrateTabGroup(
+            group as FirestoreTabGroup,
+            localGroups.find(local => local.id === group.id)
           )
-
-        // Sort by createdAt
-        remoteGroups.sort((a, b) => a.createdAt - b.createdAt)
-
-        const finalGroups = reconcileTabGroupsSnapshot({
+        )
+        const reconciled = reconcileTabGroupsSnapshot({
           localGroups,
           remoteGroups,
           removedIds: changes.removed,
           fromCache: changes.fromCache,
         })
-
-        // Check if active group was deleted
-        const activeGroupId = getDefaultStore().get(activeGroupIdAtom)
-        if (removedIds.has(activeGroupId) || !finalGroups.find(g => g.id === activeGroupId)) {
-          setActiveGroupId(finalGroups[0]?.id || DEFAULT_GROUP_ID)
-          // Reset to view mode after group deletion; shared values will align to the new active group.
-          const store = getDefaultStore()
+        const applied = applyRemoteGroups(reconciled)
+        const activeId = store.get(activeGroupIdAtom)
+        if (!applied.some(group => group.id === activeId)) {
+          setActiveGroupId(applied[0]?.id || DEFAULT_GROUP_ID)
           store.set(appSwitcherModeAtom, 'view')
-          store.set(resetTabAnimationTriggerAtom, prev => prev + 1)
+          store.set(resetTabAnimationTriggerAtom, previous => previous + 1)
         }
-
-        lastRemoteUpdateRef.current = Date.now()
-        // Ensure groups is never empty to prevent race condition crashes
-        const safeGroups = finalGroups.length > 0 ? finalGroups : [createDefaultGroup()]
-        setGroups(safeGroups)
-      })
-    },
-    [setGroups, setActiveGroupId]
-  )
-
-  // Effect: Handle login/logout transitions
-  useEffect(() => {
-    if (incomingEnabled && isLogged && user.id) {
-      // Load only after account migrations have reached a safe terminal state.
-      handleInitialLoad(user.id)
-    }
-  }, [incomingEnabled, isLogged, user.id, handleInitialLoad])
-
-  // Effect: Setup Firestore subscription when logged in
-  useEffect(() => {
-    if (incomingEnabled && isLogged && user.id) {
-      const unsubscribe = setupFirestoreSubscription(user.id)
-      unsubscribeRef.current = unsubscribe
-      // Also store at module level for cleanup before logout
-      currentTabGroupsUnsubscribe = unsubscribe
-    }
-
-    return () => {
-      if (unsubscribeRef.current) {
-        unsubscribeRef.current()
-        unsubscribeRef.current = null
-        currentTabGroupsUnsubscribe = null
-      }
-    }
-  }, [incomingEnabled, isLogged, user.id, setupFirestoreSubscription])
-
-  // Effect: Watch local changes and sync to Firestore
-  useEffect(() => {
-    if (!outgoingEnabled || !isLogged || !user.id) {
-      previousGroupsRef.current = groups
-      return
-    }
-
-    // Detect deleted groups
-    const currentIds = new Set(groups.map(g => g.id))
-    const deletedGroups: TabGroup[] = []
-    for (const prevGroup of previousGroupsRef.current) {
-      if (!currentIds.has(prevGroup.id)) {
-        pendingDeletionsRef.current.add(prevGroup.id)
-        deletedGroups.push(prevGroup)
-        console.log(`[TabGroupsSync] Marked group ${prevGroup.id} as pending deletion`)
-      }
-    }
-
-    // CRITICAL: Sync deletions IMMEDIATELY - bypass cooldown and debounce
-    // Deletions are user-initiated and must propagate to Firestore right away
-    // to prevent the subscription from re-adding the deleted group
-    if (deletedGroups.length > 0 && !incomingEnabled) {
-      recordAccountMigrationDeletedDocuments(
-        user.id,
-        'tabGroups',
-        deletedGroups.map(group => group.id)
-      )
-    }
-
-    if (deletedGroups.length > 0 && !isSyncingRef.current) {
-      console.log(`[TabGroupsSync] Syncing ${deletedGroups.length} deletion(s) immediately`)
-      ;(async () => {
-        isSyncingRef.current = true
-        const intent: FirestoreSyncIntent = {
-          kind: 'subcollection',
-          collection: 'tabGroups',
-          set: {},
-          delete: deletedGroups.map(group => group.id),
-        }
-        try {
-          await runFirestoreSyncIntentsSerialized(user.id, [intent], async () => {
-            try {
-              for (const deleted of deletedGroups) {
-                await deleteTabGroupFromFirestore(user.id, deleted.id)
-                pendingDeletionsRef.current.delete(deleted.id)
-              }
-              firestoreSyncOutbox.supersedePending(user.id, intent)
-            } catch (error) {
-              firestoreSyncOutbox.enqueue(user.id, intent)
-              throw error
-            }
-          })
-          console.log(`[TabGroupsSync] Immediate deletion sync complete`)
-        } catch (error) {
-          console.error('[TabGroupsSync] Error syncing deletions:', error)
-          Sentry.captureException(error, {
-            tags: { feature: 'tabGroupsSync', action: 'immediateDeletion' },
-          })
-        } finally {
-          isSyncingRef.current = false
-        }
-      })()
-    }
-
-    // For additions/modifications: apply cooldown to prevent sync loops
-    const timeSinceRemote = Date.now() - lastRemoteUpdateRef.current
-    const isWithinCooldown = timeSinceRemote < REMOTE_UPDATE_COOLDOWN
-    const additionsOrModifications = groups.filter(g => {
-      const oldGroup = previousGroupsRef.current.find(og => og.id === g.id)
-      return (
-        !oldGroup ||
-        JSON.stringify(prepareTabGroupForSync(g)) !==
-          JSON.stringify(prepareTabGroupForSync(oldGroup))
-      )
-    })
-    const hasAdditionsOrModifications = additionsOrModifications.length > 0
-
-    if (!incomingEnabled && hasAdditionsOrModifications) {
-      recordAccountMigrationPreferredDocuments(
-        user.id,
-        'tabGroups',
-        additionsOrModifications.map(group => group.id)
-      )
-      additionsOrModifications.forEach(group => {
-        const intent: FirestoreSyncIntent = {
-          kind: 'subcollection',
-          collection: 'tabGroups',
-          set: {
-            [group.id]: prepareTabGroupForSync(group) as unknown as Record<string, unknown>,
-          },
-          delete: [],
-        }
-        runFirestoreSyncIntentsSerialized(user.id, [intent], async () => {
-          try {
-            await syncTabGroupToFirestore(user.id, group)
-            firestoreSyncOutbox.supersedePending(user.id, intent)
-          } catch (error) {
-            firestoreSyncOutbox.enqueue(user.id, intent)
-            throw error
-          }
-        }).catch(error => {
-          console.error('[TabGroupsSync] Error syncing outgoing-only group:', error)
-          Sentry.captureException(error, {
-            tags: { feature: 'tabGroupsSync', action: 'outgoingOnlySync' },
-          })
-        })
       })
     }
 
-    if (
-      incomingEnabled &&
-      previousGroupsRef.current.length > 0 &&
-      hasAdditionsOrModifications &&
-      !isWithinCooldown
-    ) {
-      debouncedSync(user.id, groups, previousGroupsRef.current)
-    }
-
-    previousGroupsRef.current = groups
-  }, [
-    incomingEnabled,
-    outgoingEnabled,
-    groups,
-    isLogged,
-    user.id,
-    debouncedSync,
-    REMOTE_UPDATE_COOLDOWN,
-  ])
-
-  // Cleanup debounce on unmount
-  useEffect(() => {
-    return () => {
+    const cleanup = () => {
+      if (disposed) return
+      disposed = true
+      unsubscribeLocal()
+      unsubscribeRemote?.()
+      if (currentTabGroupsUnsubscribe === cleanup) currentTabGroupsUnsubscribe = null
       debouncedSync.clear()
+      const pending = queue.dispose()
+      if (pending.size > 0) firestoreSyncOutbox.enqueue(userId, changesToIntent(pending))
     }
-  }, [debouncedSync])
+    currentTabGroupsUnsubscribe = cleanup
+    return cleanup
+  }, [incomingEnabled, outgoingEnabled, isLogged, user.id])
 }
 
 export default useTabGroupsSync

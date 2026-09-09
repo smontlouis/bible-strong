@@ -2040,5 +2040,22 @@
   "workspace.hideSidebar": "Hide sidebar",
   "workspace.showSidebar": "Show sidebar",
   "workspace.groupActions": "Actions for {{name}}",
-  "workspace.closeTab": "Close {{title}}"
+  "workspace.closeTab": "Close {{title}}",
+  "newTab.heading": "What would you like to explore?",
+  "newTab.reading": "Read and explore",
+  "newTab.bibleDescription": "Open the Bible and start reading",
+  "newTab.compareDescription": "Compare Bible versions",
+  "newTab.plan": "Reading plan",
+  "newTab.planDescription": "Follow a reading plan",
+  "newTab.timelineDescription": "Explore biblical history",
+  "newTab.personal": "Studies and notes",
+  "newTab.studyDescription": "Find your studies",
+  "newTab.notesDescription": "Find your notes",
+  "newTab.library": "Library",
+  "newTab.strongDescription": "Explore Greek and Hebrew words",
+  "newTab.naveDescription": "Explore biblical themes",
+  "newTab.dictionaryDescription": "Look up definitions",
+  "newTab.commentaryDescription": "Understand biblical passages",
+  "newTab.searchPlaceholder": "Search for a passage or resource",
+  "newTab.focusSearch": "Focus the search field"
 }

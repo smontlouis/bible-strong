@@ -24,8 +24,11 @@ const SearchInput = ({
   const theme = useTheme()
   const { t } = useTranslation()
   return (
-    <Box className="overflow-hidden border-continuous">
-      <Box className="border-continuous overflow-visible flex-row items-center justify-center px-[14px] rounded-[10px] bg-[rgba(0,0,0,0.1)] mt-[0px] mb-[5px] h-[36px]">
+    <Box className="overflow-visible border-continuous">
+      <Box
+        dataSet={{ focusGroup: 'true' }}
+        className="border-continuous overflow-visible flex-row items-center justify-center px-[14px] rounded-[10px] bg-[rgba(0,0,0,0.1)] mt-[0px] mb-[5px] h-[36px]"
+      >
         <Icon.Feather
           color={theme.colors.default}
           name="search"

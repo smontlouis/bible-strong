@@ -251,6 +251,8 @@ export const GROUP_COLORS = [
 export type GroupColor = (typeof GROUP_COLORS)[number]
 
 export interface TabGroup {
+  /** Shared display position; legacy groups fall back to creation order. */
+  sortOrder?: number
   id: string
   name: string
   color?: string
@@ -1184,19 +1186,20 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
 // ============================================================================
 
 /**
- * Close all tabs in the current group
+ * Close all tabs in the specified group, defaulting to the current group
  */
-export const closeAllTabsAtom = atom(null, (get, set) => {
+export const closeAllTabsAtom = atom(null, (get, set, groupId?: string) => {
   const groups = get(tabGroupsAtom)
   const activeId = get(activeGroupIdAtom)
+  const targetId = groupId ?? activeId
 
   set(
     tabGroupsAtom,
     groups.map(g =>
-      g.id === activeId ? { ...g, tabs: [], activeTabIndex: 0, updatedAt: Date.now() } : g
+      g.id === targetId ? { ...g, tabs: [], activeTabIndex: 0, updatedAt: Date.now() } : g
     )
   )
-  set(cachedTabIdsAtom, [])
+  if (targetId === activeId) set(cachedTabIdsAtom, [])
 })
 
 // ============================================================================

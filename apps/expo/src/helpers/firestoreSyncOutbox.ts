@@ -20,6 +20,8 @@ export type FirestoreSyncIntent =
       path: string[]
       data: SerializableDocument
       merge: boolean
+      /** Replace these complete fields instead of recursively merging their leaves. */
+      mergeFields?: string[]
     }
   | {
       kind: 'document-delete'
@@ -123,24 +125,59 @@ const mergeSubcollectionIntents = (
 
 const mergeDocuments = (
   previous: SerializableDocument,
-  next: SerializableDocument
+  next: SerializableDocument,
+  replaceFields = new Set<string>(),
+  prefix = ''
 ): SerializableDocument => {
   const merged = { ...previous }
   for (const [key, value] of Object.entries(next)) {
+    const fieldPath = prefix ? `${prefix}.${key}` : key
     const previousValue = merged[key]
     merged[key] =
       !isEncodedDeleteField(previousValue) &&
       !isEncodedDeleteField(value) &&
+      !replaceFields.has(fieldPath) &&
       previousValue &&
       value &&
       typeof previousValue === 'object' &&
       typeof value === 'object' &&
       !Array.isArray(previousValue) &&
-      !Array.isArray(value)
-        ? mergeDocuments(previousValue as SerializableDocument, value as SerializableDocument)
+      !Array.isArray(value) &&
+      Object.keys(value).length > 0
+        ? mergeDocuments(
+            previousValue as SerializableDocument,
+            value as SerializableDocument,
+            replaceFields,
+            fieldPath
+          )
         : value
   }
   return merged
+}
+
+const documentLeafPaths = (data: SerializableDocument, prefix = ''): string[] =>
+  Object.entries(data).flatMap(([key, value]) => {
+    const path = prefix ? `${prefix}.${key}` : key
+    return isPlainObject(value) && !isEncodedDeleteField(value) && Object.keys(value).length
+      ? documentLeafPaths(value, path)
+      : [path]
+  })
+
+const mergeDocumentIntents = (
+  previous: Extract<FirestoreSyncIntent, { kind: 'document-set' }>,
+  next: Extract<FirestoreSyncIntent, { kind: 'document-set' }>
+): Extract<FirestoreSyncIntent, { kind: 'document-set' }> => {
+  const data = mergeDocuments(previous.data, next.data, new Set(next.mergeFields))
+  if (!previous.mergeFields && !next.mergeFields) return { ...next, data }
+  const paths = [
+    ...new Set([
+      ...(previous.mergeFields ?? documentLeafPaths(previous.data)),
+      ...(next.mergeFields ?? documentLeafPaths(next.data)),
+    ]),
+  ]
+  // A complete parent replacement already includes any later nested updates.
+  const mergeFields = paths.filter(path => !paths.some(parent => path.startsWith(`${parent}.`)))
+  return { ...next, data, mergeFields }
 }
 
 const parseEntries = (value: string | undefined): FirestoreSyncOutboxEntry[] => {
@@ -221,10 +258,7 @@ export const createFirestoreSyncOutbox = ({
             encodedIntent.kind === 'document-set' &&
             existing.intent.merge &&
             encodedIntent.merge
-          ? {
-              ...encodedIntent,
-              data: mergeDocuments(existing.intent.data, encodedIntent.data),
-            }
+          ? mergeDocumentIntents(existing.intent, encodedIntent)
           : encodedIntent
     const entry: FirestoreSyncOutboxEntry = {
       id,
@@ -341,9 +375,11 @@ const executeFirestoreSyncOutboxEntry = async ({
     return
   }
 
-  await setDoc(reference, decodeFirestoreSyncData(intent.data) as SerializableDocument, {
-    merge: intent.merge,
-  })
+  await setDoc(
+    reference,
+    decodeFirestoreSyncData(intent.data) as SerializableDocument,
+    intent.mergeFields ? { mergeFields: intent.mergeFields } : { merge: intent.merge }
+  )
 }
 
 export const firestoreSyncOutbox = createFirestoreSyncOutbox({

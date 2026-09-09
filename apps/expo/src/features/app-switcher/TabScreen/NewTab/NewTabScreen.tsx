@@ -3,18 +3,18 @@ import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import { useAtom } from 'jotai/react'
 import React from 'react'
+import { ScrollView } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import Empty from '~common/Empty'
-import Header from '~common/Header'
 import Box from '~common/ui/Box'
-import Container from '~common/ui/Container'
-import Text from '~common/ui/Text'
 import Spacer from '~common/ui/Spacer'
-import ScrollView from '~common/ui/ScrollView'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import PlanItem from '~features/plans/MyPlanListScreen/MyPlanItem'
 import { useComputedPlanItems } from '~features/plans/plan.hooks'
-import { NewTab, TabItem, tabTypes } from '../../../../state/tabs'
-import NewTabItem from './NewTabItem'
+import { NewTab, TabItem } from '../../../../state/tabs'
+import NewTabContent from './NewTabContent'
+import { useTheme } from '~themes/ThemeProvider'
 import { SelectBibleReferenceModalProvider } from './SelectBibleReferenceModalProvider'
 export interface NewTabScreenProps {
   newAtom: PrimitiveAtom<NewTab>
@@ -22,24 +22,34 @@ export interface NewTabScreenProps {
 
 const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
   const { t } = useTranslation()
+  const theme = useTheme()
+  const insets = useSafeAreaInsets()
+  const { bottomBarHeight } = useBottomBarHeightInTab()
   const [, setTab] = useAtom(newAtom as unknown as PrimitiveAtom<TabItem>)
   const planSelectorRef = React.useRef<SheetRef>(null)
   const plans = useComputedPlanItems()
 
   return (
     <SelectBibleReferenceModalProvider>
-      <Container>
-        <Header title={t('tabs.new')} />
-        <ScrollView backgroundColor="lightGrey">
-          <Box className="overflow-hidden border-continuous px-[20px] pt-[20px] pb-[40px] gap-[12px]">
-            {tabTypes.map(type => (
-              <NewTabItem
-                key={type}
-                type={type}
-                newAtom={newAtom as unknown as PrimitiveAtom<TabItem>}
-                onPlanPress={() => planSelectorRef.current?.present()}
-              />
-            ))}
+      <Box className="flex-1 bg-light-grey">
+        <ScrollView
+          style={{ flex: 1, backgroundColor: theme.colors.lightGrey }}
+          contentInsetAdjustmentBehavior="never"
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          <Box
+            className="w-full self-center px-[24px]"
+            style={{
+              maxWidth: 800,
+              paddingTop: insets.top + 44,
+              paddingBottom: bottomBarHeight + 40,
+            }}
+          >
+            <NewTabContent
+              tabAtom={newAtom as unknown as PrimitiveAtom<TabItem>}
+              onPlanPress={() => planSelectorRef.current?.present()}
+            />
           </Box>
         </ScrollView>
         <Sheet ref={planSelectorRef} snapPoints={[1]} header={<SheetHeader title={t('Plans')} />}>
@@ -72,7 +82,7 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
             )}
           </SheetScrollView>
         </Sheet>
-      </Container>
+      </Box>
     </SelectBibleReferenceModalProvider>
   )
 }

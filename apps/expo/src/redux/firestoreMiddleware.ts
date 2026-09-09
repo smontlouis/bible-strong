@@ -104,6 +104,7 @@ import { RootState } from '~redux/modules/reducer'
 import { deleteDoc, deleteField, doc, firebaseDb, setDoc } from '../helpers/firebase'
 import { fetchPlan, markAsRead, removePlan, resetPlan } from './modules/plan'
 import { canonicalizeImportedDataForFirestore } from './firestoreImportDataCanonicalization'
+import { buildCompareSettingsWrite } from './compareSelectionSync'
 import {
   groupUserBibleSyncOperations,
   planBookmarkSync,
@@ -609,7 +610,11 @@ const firestoreMiddleware: Middleware = store => next => async action => {
 
   // ========== SETTINGS SYNC (reste dans le document user) ==========
   if (isSettingsAction(action)) {
-    if (!diffState?.user?.bible?.settings) return result
+    const comparisonWrite =
+      toggleCompareVersion.match(action) || resetCompareVersion.match(action)
+        ? buildCompareSettingsWrite(state.user.bible.settings)
+        : undefined
+    if (!comparisonWrite && !diffState?.user?.bible?.settings) return result
 
     // The generic deep diff represents arrays as numeric-keyed objects. Send the
     // complete ordered selection so Firestore persists an actual array.
@@ -618,8 +623,10 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       reorderSettingsCommentarySelection.match(action)
     const settingsUpdate = isCommentarySelectionAction
       ? { commentarySelection: state.user.bible.settings.commentarySelection }
-      : diffState.user.bible.settings
-    const cleanedSettings = cleanForFirestore(settingsUpdate)
+      : diffState?.user?.bible?.settings
+    // Empty compare maps are intentional clears, not missing values to strip.
+    const cleanedSettings = comparisonWrite?.settings ?? cleanForFirestore(settingsUpdate)
+    const mergeFields = comparisonWrite?.mergeFields
 
     // Ne pas sync si le résultat est vide/null (évite les erreurs Firestore)
     if (!cleanedSettings) return result
@@ -630,10 +637,11 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       path: ['users', userId],
       data,
       merge: true,
+      ...(mergeFields ? { mergeFields } : {}),
     }
     await handleSyncWithRetry(
       async () => {
-        await setDoc(userDocRef, data, { merge: true })
+        await setDoc(userDocRef, data, mergeFields ? { mergeFields } : { merge: true })
       },
       userId,
       'settings_sync',

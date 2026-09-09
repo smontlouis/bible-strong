@@ -10,7 +10,6 @@ import { TabGroup, closeAllTabsAtom, tabGroupsAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherContext'
 export interface GroupActionsPopoverProps {
   triggerStyle?: StyleProp<ViewStyle>
-  onOpen?: () => void
   accessibilityLabel: string
   children: React.ReactNode
   group: TabGroup
@@ -23,7 +22,6 @@ export interface GroupActionsPopoverProps {
 const GroupActionsPopover = memo(
   ({
     triggerStyle,
-    onOpen,
     accessibilityLabel,
     children,
     group,
@@ -43,7 +41,7 @@ const GroupActionsPopover = memo(
     }
 
     const handleCloseAllTabs = () => {
-      closeAllTabs()
+      closeAllTabs(group.id)
       closeSheet()
     }
 
@@ -90,7 +88,6 @@ const GroupActionsPopover = memo(
           className="overflow-hidden border-continuous"
           style={triggerStyle}
           onPress={() => {
-            onOpen?.()
             sheetRef.current?.present()
           }}
           accessibilityRole="button"

@@ -60,7 +60,6 @@ const WorkspaceSidebar = ({
   const { colorScheme } = useCurrentThemeSelector()
   const rowHeight = Platform.OS === 'web' ? 32 : 44
   const labelStyle = { color: colorScheme === 'dark' ? '#e3e3e3' : '#3c4043' }
-  const groupHeight = Platform.OS === 'web' ? 26 : 44
   const actionSize = Platform.OS === 'web' ? 28 : 44
   const groups = useAtomValue(tabGroupsAtom)
   const activeGroupId = useAtomValue(activeGroupIdAtom)
@@ -123,7 +122,10 @@ const WorkspaceSidebar = ({
             </TouchableBox>
           </HStack>
           <ScrollView
-            style={{ flex: 1 }}
+            style={{
+              flex: 1,
+              ...(Platform.OS === 'web' ? { scrollbarGutter: 'stable' } : {}),
+            }}
             contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 8, gap: 8 }}
           >
             {[
@@ -165,7 +167,7 @@ const WorkspaceSidebar = ({
                                 accessibilityRole="button"
                                 accessibilityLabel={group.name}
                                 accessibilityState={{ expanded: !collapsed }}
-                                style={{ minHeight: groupHeight }}
+                                style={{ minHeight: rowHeight }}
                               >
                                 <Text
                                   className="flex-[1] text-[12px] font-normal"
@@ -189,11 +191,10 @@ const WorkspaceSidebar = ({
                                 onGroupCreated={onSelectContent}
                                 onEditGroup={() => setEditingGroup(group)}
                                 onViewGroups={() => viewGroupsRef.current?.present()}
-                                onOpen={() => switchGroup(group.id)}
                               >
                                 <Box
                                   className="overflow-hidden border-continuous items-center justify-center"
-                                  style={{ width: actionSize, height: groupHeight }}
+                                  style={{ width: actionSize, height: rowHeight }}
                                 >
                                   <FeatherIcon
                                     name="more-horizontal"
@@ -214,7 +215,7 @@ const WorkspaceSidebar = ({
                                 accessibilityRole="button"
                                 accessibilityLabel={group.name}
                                 accessibilityState={{ expanded: !collapsed }}
-                                style={{ width: actionSize, height: groupHeight }}
+                                style={{ width: actionSize, height: rowHeight }}
                               >
                                 <FeatherIcon
                                   name={collapsed ? 'chevron-down' : 'chevron-up'}

@@ -48,6 +48,35 @@ This is a UI-driven mobile app. Level 1 Ready requires app launch plus represent
 - Download LSG, confirm the installed state, remove that test copy, and confirm online reading remains available.
 - Repeat the zero-copy read and Downloads state check on both iOS and Android.
 
+## Tab Group Synchronization Across Sessions
+
+Use the same development account in two independent browser sessions (or a browser
+and a native development client). Use disposable tabs and groups.
+
+- Open a tab in session A. As soon as it appears in B, close it in B. Confirm it
+  disappears in A. Repeat in both directions, including acting immediately after
+  observing the preceding change.
+- Open and close tabs rapidly in two different groups. After one second without
+  local changes plus network latency, both sessions should show the final tab lists.
+- With network throttling enabled, make another change while the preceding write
+  is still pending. Confirm the final state propagates once that write completes.
+- Drag a group above or below another group. Confirm the other session adopts
+  that order and keeps it after reloading. New groups should appear at the end.
+- Edit a group and delete that group before the debounce expires. Confirm it does
+  not reappear. Selecting an active tab remains local to each session.
+
+The outgoing debounce remains 1000 ms. Received snapshots update the comparison
+baseline synchronously; there is no cooldown that discards user actions. Pending
+and in-flight local changes are retained per group, and failed or interrupted work
+is handed to the existing account-scoped Firestore retry outbox. This does not add
+field-level conflict resolution for concurrent edits to the same group.
+
+Automated regression coverage lives in
+`apps/expo/src/state/__tests__/useTabGroupsSync-test.tsx`; run it with
+`yarn workspace @bible-strong/expo test useTabGroupsSync-test --watchman=false --runInBand`.
+These tests simulate Firestore callbacks and delayed writes; they do not replace
+the two-session smoke above.
+
 ## Optional Follow-Up
 
 - Strong concordance lookup from a verse.

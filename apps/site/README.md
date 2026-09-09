@@ -1,17 +1,19 @@
 # Bible Strong Site
 
-Le site public Bible Strong utilise [TanStack Start](https://tanstack.com/start), le routage fichier TanStack Router, Tailwind CSS v4 et les primitives shadcn/ui.
+The Bible Strong public site uses [TanStack Start](https://tanstack.com/start), TanStack Router file-based routing, Tailwind CSS v4, and shadcn/ui primitives.
 
-## Développement
+## Development
 
-Depuis la racine du monorepo :
+The [Bible Strong Brand Guidelines](../../docs/charte-graphique.md) document [Illustrated Worlds](../../docs/design/illustrations.md), with visual references and prompts for creating scenes consistent with the site and application illustrations.
+
+From the monorepo root:
 
 ```bash
 yarn install
 yarn dev:site
 ```
 
-L’application est disponible sur `http://localhost:3000`.
+The application is available at `http://localhost:3000`.
 
 ## Validation
 
@@ -20,10 +22,10 @@ yarn workspace @bible-strong/site typecheck
 yarn workspace @bible-strong/site build
 ```
 
-Les routes se trouvent dans `src/routes`. Le fichier `src/routeTree.gen.ts` est généré avec `yarn workspace @bible-strong/site generate-routes`.
+Routes live in `src/routes`. Generate `src/routeTree.gen.ts` with `yarn workspace @bible-strong/site generate-routes`.
 
-Les composants shadcn/ui vivent dans `components/ui`; les variables du thème, les fontes et les styles éditoriaux globaux sont définis dans `src/styles.css`.
+The shadcn/ui components live in `components/ui`; theme variables, fonts, and global editorial styles are defined in `src/styles.css`.
 
-## Déploiement
+## Deployment
 
-Le build produit un serveur Nitro dans `.output/server` et les assets publics dans `.output/public`. `vercel.json` sélectionne l’adaptateur TanStack Start sur Vercel.
+The build produces a Nitro server in `.output/server` and public assets in `.output/public`. `vercel.json` selects the TanStack Start adapter on Vercel.

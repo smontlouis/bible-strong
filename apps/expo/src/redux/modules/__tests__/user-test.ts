@@ -1,5 +1,7 @@
 // Mock react-native before other imports
 import type { ChangelogItem } from '~common/types'
+import { diff } from '~helpers/deep-obj'
+import { buildCompareSettingsWrite } from '../../compareSelectionSync'
 import reducer, {
   UserState,
   verifyEmail,
@@ -473,6 +475,46 @@ describe('User Reducer', () => {
 
     expect(newState.bible.settings.compare).toEqual({ DBY: true })
     expect(newState.bible.settings.compareSelectionVersion).toBe(2)
+  })
+
+  it('preserves an explicit selection after syncing to a legacy account and reloading', () => {
+    const selected = reducer(initialState, toggleCompareVersion('DBY'))
+    const changed = diff(initialState.bible.settings, selected.bible.settings) as Record<
+      string,
+      unknown
+    >
+    const write = buildCompareSettingsWrite(selected.bible.settings)
+    // The local migration already stamped v2, so the generic diff omits that marker.
+    expect(changed).not.toHaveProperty('compareSelectionVersion')
+    expect(write.settings.compareSelectionVersion).toBe(2)
+    expect(write.mergeFields).toContain('bible.settings.compare')
+    expect(write.settings.compare).toEqual({ DBY: true })
+
+    const reloaded = reducer(
+      selected,
+      receiveLiveUpdates({
+        remoteUserData: {
+          id: 'test-user',
+          bible: { settings: { ...initialState.bible.settings, ...write.settings } },
+        },
+      } as never)
+    )
+    expect(reloaded.bible.settings.compare).toEqual({ DBY: true })
+  })
+
+  it('syncs an explicit empty comparison even when reset produces no local diff', () => {
+    const reset = reducer(initialState, resetCompareVersion())
+    const changed = diff(initialState.bible.settings, reset.bible.settings) as Record<
+      string,
+      unknown
+    >
+    const write = buildCompareSettingsWrite(reset.bible.settings)
+    expect(changed).toEqual({})
+    expect(write.settings).toEqual({ compare: {}, compareSelectionVersion: 2 })
+    expect(write.mergeFields).toEqual([
+      'bible.settings.compare',
+      'bible.settings.compareSelectionVersion',
+    ])
   })
 
   describe('addChangelog', () => {

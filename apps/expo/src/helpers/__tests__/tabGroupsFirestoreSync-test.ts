@@ -1,5 +1,6 @@
 import {
   hydrateTabGroup,
+  mergeTabGroups,
   prepareTabGroupForSync,
   reconcileTabGroupsSnapshot,
   subscribeToTabGroupsFirestore,
@@ -260,4 +261,28 @@ describe('tabGroupsFirestoreSync', () => {
       { includeMetadataChanges: true }
     )
   })
+})
+
+it.each([true, false])(
+  'restores shared group positions in a fresh session (cache: %s)',
+  fromCache => {
+    const first = { ...makeGroup([]), id: 'older', createdAt: 100, sortOrder: 1 }
+    const second = { ...makeGroup([]), id: 'newer', createdAt: 200, sortOrder: 0 }
+    const remoteGroups = [first, second].map(group =>
+      hydrateTabGroup(prepareTabGroupForSync(group))
+    )
+    expect(
+      reconcileTabGroupsSnapshot({ localGroups: [], remoteGroups, removedIds: [], fromCache }).map(
+        group => group.id
+      )
+    ).toEqual(['newer', 'older'])
+  }
+)
+
+it('preserves legacy creation order and appends newly created groups after positioned groups', () => {
+  const older = { ...makeGroup([]), id: 'older', createdAt: 100 }
+  const newer = { ...makeGroup([]), id: 'newer', createdAt: 200 }
+  expect(mergeTabGroups([], [newer, older]).map(group => group.id)).toEqual(['older', 'newer'])
+  const positioned = { ...older, sortOrder: 0 }
+  expect(mergeTabGroups([], [newer, positioned]).map(group => group.id)).toEqual(['older', 'newer'])
 })

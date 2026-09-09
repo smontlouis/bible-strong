@@ -1,4 +1,5 @@
 import type { TabGroup } from './tabs'
+import { assignTabGroupOrder } from './tabWorkspace'
 
 export type SidebarDrag =
   | { kind: 'tab'; groupId: string; tabId: string }
@@ -21,7 +22,7 @@ export function applySidebarDrop(
     const index =
       next.findIndex(group => group.id === destination.id) + (target.edge === 'after' ? 1 : 0)
     next.splice(index, 0, source)
-    return { groups: next, activeGroupId }
+    return { groups: assignTabGroupOrder(next, now), activeGroupId }
   }
   const moved = source.tabs.find(tab => tab.id === drag.tabId)
   if (!moved || target.tabId === moved.id) return null

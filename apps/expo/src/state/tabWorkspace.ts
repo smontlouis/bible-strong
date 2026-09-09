@@ -1,5 +1,13 @@
 import type { TabGroup, TabItem } from './tabs'
 
+export const compareTabGroupOrder = (a: TabGroup, b: TabGroup): number =>
+  (a.sortOrder ?? a.createdAt) - (b.sortOrder ?? b.createdAt)
+
+export const assignTabGroupOrder = (groups: TabGroup[], now = Date.now()): TabGroup[] =>
+  groups.map((group, sortOrder) =>
+    group.sortOrder === sortOrder ? group : { ...group, sortOrder, updatedAt: now }
+  )
+
 export const clampTabIndex = (index: number, tabsLength: number): number => {
   if (tabsLength <= 0) return 0
   if (index < 0) return 0
@@ -206,7 +214,7 @@ export const reorderTabGroups = (
 
   return {
     ok: true,
-    groups: nextGroups,
+    groups: assignTabGroupOrder(nextGroups),
   }
 }
 

@@ -1,6 +1,6 @@
 import type { TextProps } from '../Text'
 import React from 'react'
-import type { View } from 'react-native'
+import { Platform, type View } from 'react-native'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import Box, { HStack, VStack, SafeAreaBox, type BoxProps } from '../Box'
 
@@ -19,7 +19,11 @@ jest.mock('uniwind', () => ({
       })
     ),
 }))
-jest.mock('react-native', () => ({ View: 'View', TouchableOpacity: 'TouchableOpacity' }))
+jest.mock('react-native', () => ({
+  View: 'View',
+  TouchableOpacity: 'TouchableOpacity',
+  Platform: { OS: 'ios' },
+}))
 jest.mock('react-native-reanimated', () => ({
   __esModule: true,
   default: { createAnimatedComponent: (component: unknown) => component },
@@ -69,6 +73,22 @@ describe('layout primitives', () => {
       renderer = create(<SafeAreaBox className="p-4" />)
     })
     expect(flattenedStyle(renderer).padding).toBe(16)
+  })
+
+  it('forwards focus-group metadata on web without sending web-only props to native views', () => {
+    act(() => {
+      renderer = create(<Box dataSet={{ focusGroup: 'true' }} />)
+    })
+    expect(renderer.root.findByType('View' as React.ElementType).props.dataSet).toBeUndefined()
+    const platform = jest.replaceProperty(Platform, 'OS', 'web')
+    try {
+      act(() => renderer.update(<Box dataSet={{ focusGroup: 'true' }} />))
+      expect(renderer.root.findByType('View' as React.ElementType).props.dataSet).toEqual({
+        focusGroup: 'true',
+      })
+    } finally {
+      platform.restore()
+    }
   })
 
   it('lets explicit styles override classes and has no implicit layout styles', () => {

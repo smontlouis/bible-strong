@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Bible Strong Illustrations'
+  short_description: 'Create illustrations matching the brand guidelines'
+  default_prompt: 'Use $bible-strong-illustrations to create an illustration in the Bible Strong Illustrated Worlds style.'

@@ -79,10 +79,14 @@ it('reorders whole groups without moving their tabs or the default group', () =>
     groups,
     'one',
     { kind: 'group', groupId: 'two' },
-    { groupId: 'one', edge: 'before' }
+    { groupId: 'one', edge: 'before' },
+    123
   )!
   expect(result.groups.map(group => group.id)).toEqual(['default', 'two', 'one'])
-  expect(result.groups[1]).toBe(groups[2])
+  expect(result.groups[1].tabs).toBe(groups[2].tabs)
+  expect(result.groups.map(group => group.sortOrder)).toEqual([0, 1, 2])
+  expect(result.groups.every(group => group.updatedAt === 123)).toBe(true)
+  expect(result.groups.map(group => group.createdAt)).toEqual([0, 0, 0])
   expect(result.activeGroupId).toBe('one')
   expect(
     applySidebarDrop(

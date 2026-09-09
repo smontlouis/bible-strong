@@ -173,6 +173,7 @@ describe('tabWorkspace', () => {
 
     expect(result.ok).toBe(true)
     expect(result.groups.map(group => group.id)).toEqual(['second', 'third', 'default'])
+    expect(result.groups.map(group => group.sortOrder)).toEqual([0, 1, 2])
   })
 
   it('owns persistence, cache eviction, activation, and cleanup through its adapter', () => {

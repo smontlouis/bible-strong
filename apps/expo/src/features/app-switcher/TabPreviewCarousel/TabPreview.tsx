@@ -47,7 +47,7 @@ const TabPreview = ({ tabAtom }: TabPreviewProps & BoxProps) => {
       className="border-continuous overflow-visible bg-reverse items-center justify-center"
       style={{ marginRight: GAP, width: WIDTH, height: HEIGHT }}
     >
-      {deferredBase64 && (
+      {Boolean(deferredBase64) && (
         <Image
           style={styles.previewImage}
           source={{ uri: `data:image/jpeg;base64,${deferredBase64}` }}

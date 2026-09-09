@@ -3,6 +3,42 @@
   scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
 
+/* One theme-colored focus ring, including React Native Web and portaled controls.
+   !important intentionally replaces browser/third-party outlines and focus rings. */
+:focus,
+[data-focus-visible='true'] {
+  outline: none !important;
+}
+:where(
+  :focus-visible:not([role='dialog']):not([role='menu']):not(:has(:focus-visible)),
+  [data-focus-visible='true']:not(:has(:focus-visible))
+) {
+  box-shadow: 0 0 0 2px var(--bs-focus-color, #5983f0) !important;
+}
+
+/* Compound fields own the ring only while their text input is focused.
+   Their clear/submit buttons still get an individual keyboard focus ring. */
+[data-focus-group='true']:has(input:focus, textarea:focus) {
+  box-shadow: 0 0 0 2px var(--bs-focus-color, #5983f0) !important;
+}
+[data-focus-group='true'] :is(input, textarea):focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* High-contrast modes may suppress shadows; retain a single visible indicator. */
+@media (forced-colors: active) {
+  :focus-visible:where(:not([role='dialog']):not([role='menu']):not(:has(:focus-visible))),
+  [data-focus-visible='true']:where(:not(:has(:focus-visible))),
+  [data-focus-group='true']:has(input:focus, textarea:focus) {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px;
+  }
+  [data-focus-group='true'] :is(input, textarea):focus {
+    outline: none !important;
+  }
+}
+
 /* Offscreen tab previews must not scroll the whole workspace when focused. */
 #compact-workspace {
   overflow: clip !important;

@@ -39,6 +39,14 @@ const InnerApp = () => {
     fontFamily: { ...selected.fontFamily, paragraph: webFontFamily(fontFamily) },
   }
 
+  // Portaled menus/dialogs sit outside ScopedTheme; their focus ring follows the app palette.
+  useEffect(() => {
+    document.documentElement.style.setProperty('--bs-focus-color', selected.colors.primary)
+    return () => {
+      document.documentElement.style.removeProperty('--bs-focus-color')
+    }
+  }, [selected.colors.primary])
+
   return (
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
