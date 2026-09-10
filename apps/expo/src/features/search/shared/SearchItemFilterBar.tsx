@@ -1,7 +1,7 @@
+import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import { getUniverseColor } from '~themes/universeColors'
 import { twMerge } from '~common/ui/classNames'
 
-import { ScrollView } from 'react-native'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { HStack, TouchableBox } from '~common/ui/Box'
@@ -102,7 +102,7 @@ const SearchItemFilterBar = ({
   maxHeight = 40,
 }: Props) => {
   const { t } = useTranslation()
-  const scrollRef = useRef<ScrollView>(null)
+  const scrollRef = useRef<HorizontalControlScrollView>(null)
   const enabledSet = new Set(enabledTypes)
   const enabledTypesKey = enabledTypes.join('|')
 
@@ -111,7 +111,7 @@ const SearchItemFilterBar = ({
   }, [enabledTypesKey])
 
   return (
-    <ScrollView
+    <HorizontalControlScrollView
       ref={scrollRef}
       horizontal
       keyboardShouldPersistTaps="handled"
@@ -144,7 +144,7 @@ const SearchItemFilterBar = ({
             )
           })}
       </HStack>
-    </ScrollView>
+    </HorizontalControlScrollView>
   )
 }
 

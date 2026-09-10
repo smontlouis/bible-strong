@@ -107,6 +107,7 @@ function PanelFrameLayout({
                 className="bs-filter-heading"
                 style={screen.hideHeader ? { display: 'none' } : undefined}
               >
+                {screen.headerLeft}
                 {canGoBack && (
                   <button
                     className="bs-panel-back"

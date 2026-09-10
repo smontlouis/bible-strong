@@ -206,6 +206,14 @@ const RelationsText = ({ relationItems, settings, onClick, isParallel, isDisable
           key={item.key}
           settings={settings}
           isParallel={isParallel}
+          role={isDisabled ? undefined : 'link'}
+          tabIndex={isDisabled ? -1 : 0}
+          onKeyDown={(event: React.KeyboardEvent) => {
+            if (isDisabled || event.key !== 'Enter') return
+            event.preventDefault()
+            event.stopPropagation()
+            onClick(item)
+          }}
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation()
             onClick(item)

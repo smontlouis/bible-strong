@@ -1,3 +1,4 @@
+import { useReferencePreview } from '~features/bibleReferencePreview/state'
 import { twMerge } from '~common/ui/classNames'
 
 import PageContent from '~common/ui/PageContent'
@@ -226,6 +227,7 @@ export const StrongEditorialPreview = ({
   onOpenBibleReference: (osis: string) => void
   onOpenStrong: (stepCode: string) => void
 }) => {
+  const preview = useReferencePreview()
   const theme = useTheme()
   if (!value) return null
   const document = parseDocument(
@@ -253,8 +255,14 @@ export const StrongEditorialPreview = ({
     >
       {renderEditorialPreviewNodes(document.children, {
         linkColor: theme.colors.primary,
-        onOpenBibleReference,
-        onOpenStrong,
+        onOpenBibleReference: osis => {
+          const open = () => onOpenBibleReference(osis)
+          if (!preview({ href: `bible://${osis}`, type: 'verse' }, open)) open()
+        },
+        onOpenStrong: code => {
+          const open = () => onOpenStrong(code)
+          if (!preview({ href: `strong://${code}`, type: '' }, open)) open()
+        },
       })}
     </Text>
   )

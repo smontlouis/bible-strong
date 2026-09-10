@@ -1,6 +1,6 @@
+import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import { twMerge } from '~common/ui/classNames'
 
-import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -18,7 +18,7 @@ const SearchFacetBar = ({ facets, selectedFacet, onSelect }: Props) => {
   const { t } = useTranslation()
 
   return (
-    <ScrollView
+    <HorizontalControlScrollView
       horizontal
       keyboardShouldPersistTaps="handled"
       showsHorizontalScrollIndicator={false}
@@ -66,7 +66,7 @@ const SearchFacetBar = ({ facets, selectedFacet, onSelect }: Props) => {
           )
         })}
       </HStack>
-    </ScrollView>
+    </HorizontalControlScrollView>
   )
 }
 

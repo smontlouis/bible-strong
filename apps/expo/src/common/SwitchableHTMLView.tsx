@@ -1,30 +1,37 @@
-import { useAtomValue } from 'jotai/react'
+import type { PreviewSource } from '~features/bibleReferencePreview/resourceTarget'
+import { useReferencePreview } from '~features/bibleReferencePreview/state'
 import { useState } from 'react'
 import { Platform, View } from 'react-native'
 import { useTheme } from '~themes/ThemeProvider'
-import { readingHtmlEngineAtom } from '~state/readingHtmlEngine'
 import HTMLContentDOM from './HTMLContentDOM'
 import StylizedHTMLViewNative from './StylizedHTMLViewNative'
 import { useReadingTypography } from './useReadingTypography'
 import type { HtmlEngine } from './readingHtml'
 import type { HTMLViewLinkPayload } from './htmlContentTypes'
 
-/** Web always uses DOM. On mobile, engine overrides the persisted preference. */
+/** Web always uses DOM. On mobile, engine is a code-only override; native is the default. */
 export default function SwitchableHTMLView({
   value,
+  previewSource,
+  compact = false,
   engine,
   padded = false,
   onLinkPress,
   onLinkClicked,
 }: {
   value?: string
+  previewSource?: PreviewSource
+  compact?: boolean
   engine?: HtmlEngine
   padded?: boolean
   onLinkPress?: (href: string) => void
   onLinkClicked?: (payload: HTMLViewLinkPayload) => void
 }) {
-  const preferredEngine = useAtomValue(readingHtmlEngineAtom)
-  const typography = useReadingTypography()
+  const preview = useReferencePreview()
+  const readingTypography = useReadingTypography()
+  const typography = compact
+    ? { ...readingTypography, fontSize: 16, lineHeight: 24 }
+    : readingTypography
   const theme = useTheme()
   const [height, setHeight] = useState(200)
   const colors = {
@@ -34,14 +41,17 @@ export default function SwitchableHTMLView({
     emphasis: theme.colors.quart,
   }
   const onLink = (payload: HTMLViewLinkPayload) => {
-    onLinkClicked?.(payload)
-    onLinkPress?.(payload.href)
+    const open = () => {
+      onLinkClicked?.(payload)
+      onLinkPress?.(payload.href)
+    }
+    if (!preview(payload, open, undefined, previewSource)) open()
   }
   if (!value) return null
   const padding = padded ? { paddingTop: 8, paddingHorizontal: 28, paddingBottom: 48 } : undefined
   return (
     <View style={padding}>
-      {Platform.OS !== 'web' && (engine ?? preferredEngine) === 'native' ? (
+      {Platform.OS !== 'web' && (engine ?? 'native') === 'native' ? (
         <StylizedHTMLViewNative
           html={value}
           typography={typography}

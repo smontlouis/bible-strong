@@ -324,7 +324,11 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
           </Box>
         )}
         {naveItem?.description && (
-          <HTMLViewContent html={naveItem.description} onLinkClicked={openLink} />
+          <HTMLViewContent
+            previewSource={{ kind: 'nave', language: naveResourceLanguage }}
+            html={naveItem.description}
+            onLinkClicked={openLink}
+          />
         )}
       </ScrollView>
     </FormSheetScreen>

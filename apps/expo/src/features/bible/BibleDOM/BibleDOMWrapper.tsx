@@ -1,3 +1,6 @@
+import { useResourcesLanguageValue } from '~state/resourcesLanguage'
+import { previewHistoryAtom } from '~features/bibleReferencePreview/state'
+import { createReaderPreview } from '~features/bibleReferencePreview/readerPreview'
 import { getEntityChipListState } from '~common/entityChips'
 import type { TagsObj } from '~common/types'
 import { createVerseEndpoint } from '~features/studyRelations/endpoints'
@@ -407,6 +410,18 @@ export const BibleDOMWrapper = ({
   const isConnected = useConnection()
   const { openVersionSelector } = useBookAndVersionSelector()
   const openRelationEndpoint = useOpenRelationEndpoint()
+  const previewLanguages = useResourcesLanguageValue()
+  const setPreviewHistory = useSetAtom(previewHistoryAtom)
+  const previewReaderEndpoint = (endpoint: RelationEndpoint, open: () => void) => {
+    const request = createReaderPreview(endpoint, version, t('Note'), open, {
+      nave: previewLanguages.NAVE,
+      dictionary: previewLanguages.DICTIONNAIRE,
+    })
+    if (!request) return false
+    setPreviewHistory([request])
+    return true
+  }
+
   const isContextFocused = contextDisplayMode === 'focused'
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   useEffect(() => {
@@ -727,7 +742,11 @@ export const BibleDOMWrapper = ({
 
       case NAVIGATE_TO_BIBLE_NOTE: {
         const payload = getNoteNavigationPayload(action.payload)
-        if (payload.noteId) openNote?.(payload.noteId, payload.verseIds)
+        if (payload.noteId) {
+          const noteId = payload.noteId
+          const open = () => openNote?.(noteId, payload.verseIds)
+          if (!previewReaderEndpoint({ type: 'note', noteId }, open)) open()
+        }
         break
       }
       case NAVIGATE_TO_BIBLE_LINK: {
@@ -741,7 +760,9 @@ export const BibleDOMWrapper = ({
           if (strongSelection) {
             setSelectedCode(strongSelection)
           } else {
-            openRelationEndpoint(action.payload as RelationEndpoint)
+            const endpoint = action.payload as RelationEndpoint
+            const open = () => openRelationEndpoint(endpoint)
+            if (!previewReaderEndpoint(endpoint, open)) open()
           }
         }
         break
@@ -777,16 +798,28 @@ export const BibleDOMWrapper = ({
           return
         }
 
-        pushRouteOnce({
-          pathname: '/bible-view',
-          params: {
-            contextDisplayMode: 'focused',
-            book: targetBook,
-            chapter: String(action.chapter),
-            verse: String(action.verse),
-          },
-        })
+        const open = () =>
+          pushRouteOnce({
+            pathname: '/bible-view',
+            params: {
+              contextDisplayMode: 'focused',
+              book: targetBook,
+              chapter: String(action.chapter),
+              verse: String(action.verse),
+            },
+          })
 
+        if (
+          !previewReaderEndpoint(
+            createVerseEndpoint(
+              [`${targetBook}-${action.chapter}-${action.verse}`],
+              undefined,
+              version
+            ),
+            open
+          )
+        )
+          open()
         break
       }
       case SWIPE_LEFT: {

@@ -506,6 +506,13 @@ const DictionnaryDetailScreen = ({
         ) : (
           dictionnaireItem?.definition && (
             <SwitchableHTMLView
+              previewSource={{
+                kind: 'dictionary',
+                work,
+                resourceId,
+                dictionaryTitle: resolvedDictionaryTitle,
+                language: dictionaryResourceLanguage,
+              }}
               padded
               value={dictionnaireItem.definition.replace(/\n/gi, '')}
               onLinkClicked={openLink}

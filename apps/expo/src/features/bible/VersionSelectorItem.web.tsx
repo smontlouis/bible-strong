@@ -1,3 +1,7 @@
+import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
+import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
+import StrongMark from './StrongMark'
+import InterlinearMark from './InterlinearMark'
 import { twMerge } from '~common/ui/classNames'
 
 import { TouchableOpacity } from 'react-native'
@@ -12,6 +16,7 @@ const VersionSelectorItem = ({
   isSelected,
   onChange,
   showSelectionCheckbox,
+  showStrongIndex,
   selectionRequirement = 'bible',
 }: Props) => {
   const resources = useResourceAccess()
@@ -49,9 +54,22 @@ const VersionSelectorItem = ({
           >
             {version.id}
           </Text>
-          <Text className={twMerge(isSelected ? 'text-primary' : 'text-default', 'text-[16px]')}>
-            {version.displayName || version.name}
-          </Text>
+          <Box className="flex-row items-center gap-[5px] flex-wrap">
+            <Text
+              className={twMerge(
+                isSelected ? 'text-primary' : 'text-default',
+                'text-[16px] shrink'
+              )}
+            >
+              {version.displayName || version.name}
+            </Text>
+            {version.hasAudio && <FeatherIcon name="volume-2" size={16} color="primary" />}
+            {(showStrongIndex || selectionRequirement === 'strong') &&
+              isStrongCapableBibleVersion(version.id) && <StrongMark passive />}
+            {showStrongIndex && isInterlinearCapableBibleVersion(version.id) && (
+              <InterlinearMark passive />
+            )}
+          </Box>
           {version.c ? (
             <Text className="text-tertiary text-[10px]" numberOfLines={1}>
               {version.c}

@@ -12,6 +12,7 @@ export type PanelScreen = {
   width?: number
   onEnter?: () => void
   content: (navigation: PanelNavigation) => ReactNode
+  headerLeft?: ReactNode
   headerRight?: ReactNode
   headerContent?: ReactNode
   footer?: ReactNode

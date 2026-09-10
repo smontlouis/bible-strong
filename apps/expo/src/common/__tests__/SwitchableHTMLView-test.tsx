@@ -8,12 +8,11 @@ import DOM from '../HTMLContentDOM'
 beforeEach(() => {
   Platform.OS = 'ios'
   mockEngine = 'native'
+  mockPreview.mockReset().mockReturnValue(false)
 })
 
-let mockEngine = 'native'
+let mockEngine: 'native' | 'dom' = 'native'
 let mockTypography = { fontFamily: 'Avenir', fontSize: 19, lineHeight: 35 }
-jest.mock('jotai/react', () => ({ useAtomValue: () => mockEngine }))
-jest.mock('~state/readingHtmlEngine', () => ({ readingHtmlEngineAtom: {} }))
 jest.mock('../useReadingTypography', () => ({ useReadingTypography: () => mockTypography }))
 jest.mock('../StylizedHTMLViewNative', () => ({ __esModule: true, default: 'NativeReader' }))
 jest.mock('../HTMLContentDOM', () => ({ __esModule: true, default: 'DOMReader' }))
@@ -29,7 +28,9 @@ it('switches engines without changing content or link payload and follows Bible 
   const onLink = jest.fn()
   const html = '<p><a href="Aaron" class="dictionary">Aaron</a></p>'
   let view!: ReactTestRenderer
-  const render = () => <SwitchableHTMLView value={html} onLinkClicked={onLink} />
+  const render = () => (
+    <SwitchableHTMLView value={html} engine={mockEngine} onLinkClicked={onLink} />
+  )
   act(() => {
     view = create(render())
   })
@@ -63,15 +64,15 @@ it('switches engines without changing content or link payload and follows Bible 
   act(() => view.unmount())
 })
 
-it.each(['native', 'dom'])(
-  'always uses direct DOM on web when the mobile preference is %s',
+it.each(['native', 'dom'] as const)(
+  'always uses direct DOM on web when the code override is %s',
   preference => {
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
     Platform.OS = 'web'
     mockEngine = preference
     let view!: ReactTestRenderer
     act(() => {
-      view = create(<SwitchableHTMLView value="<p>Lecture</p>" />)
+      view = create(<SwitchableHTMLView value="<p>Lecture</p>" engine={mockEngine} />)
     })
     expect(view.root.findAllByType(Native)).toHaveLength(0)
     expect(view.root.findByType(DOM).props.html).toBe('<p>Lecture</p>')
@@ -83,3 +84,32 @@ it.each(['native', 'dom'])(
     act(() => view.unmount())
   }
 )
+
+it('opens Bible previews first and preserves the original action for the external button', async () => {
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
+  mockPreview.mockReturnValue(true)
+  const onLink = jest.fn()
+  let view!: ReactTestRenderer
+  act(() => {
+    view = create(
+      <SwitchableHTMLView
+        value='<a href="bible://John.3.16">Jean 3:16</a>'
+        onLinkClicked={onLink}
+      />
+    )
+  })
+  const payload = { href: 'bible://John.3.16', content: 'Jean 3:16', type: '' }
+  act(() => view.root.findByType(Native).props.onLinkClicked(payload))
+  expect(onLink).not.toHaveBeenCalled()
+  const [target, open] = mockPreview.mock.calls[0] as unknown as [unknown, () => void]
+  expect(target).toEqual(payload)
+  act(() => open())
+  expect(onLink).toHaveBeenCalledTimes(1)
+  expect(onLink).toHaveBeenCalledWith(payload)
+  act(() => view.unmount())
+})
+
+const mockPreview = jest.fn(() => false)
+jest.mock('~features/bibleReferencePreview/state', () => ({
+  useReferencePreview: () => mockPreview,
+}))

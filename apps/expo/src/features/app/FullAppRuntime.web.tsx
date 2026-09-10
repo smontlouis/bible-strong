@@ -1,3 +1,4 @@
+import ReferencePreviewHost from '~features/bibleReferencePreview/ReferencePreviewHost'
 import ConfirmDialogHost from '~common/ConfirmDialog/ConfirmDialogHost.web'
 import { useWorkspaceRoutePanel } from '~navigation/useWorkspaceRoutePanel'
 import WorkspaceLayout from '~features/app-switcher/WorkspaceLayout'
@@ -95,6 +96,7 @@ const FullAppRuntime = ({ theme }: { theme: Theme }) => {
               <ThemedToaster />
               <ChangelogModal />
               <UnifiedTagsModal />
+              <ReferencePreviewHost />
               <ColorPickerModal />
               <ColorChangeModal />
             </StrongAudioProvider>

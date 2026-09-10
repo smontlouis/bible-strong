@@ -1,6 +1,6 @@
 'use dom'
 
-import { useEffect, useRef, type CSSProperties } from 'react'
+import { useEffect, useId, useRef, type CSSProperties } from 'react'
 import { IS_DOM, type DOMProps } from 'expo/dom'
 import { useFonts } from 'expo-font'
 import type { HTMLViewLinkPayload } from './htmlContentTypes'
@@ -31,6 +31,8 @@ export default function HTMLContentDOM({
   padded = true,
 }: Props) {
   useFonts({ 'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf') })
+  const instanceId = useId()
+  const selector = `.editorial-html[data-reading-id="${instanceId}"]`
   const containerRef = useRef<HTMLDivElement>(null)
   const content = cleanReadingHTML(html)
 
@@ -57,6 +59,7 @@ export default function HTMLContentDOM({
     <div
       ref={containerRef}
       className="editorial-html"
+      data-reading-id={instanceId}
       style={
         {
           '--html-font-family': webFontFamily(typography.fontFamily),
@@ -79,10 +82,10 @@ export default function HTMLContentDOM({
     >
       <style>{`
         ${IS_DOM ? 'html, body { margin: 0; padding: 0; }' : ''}
-        .editorial-html { display: flow-root; box-sizing: border-box; width: 100%; min-height: ${padded ? 200 : 0}px; padding: ${padded ? '8px 28px 48px' : '0'}; font-family: var(--html-font-family); font-size: ${typography.fontSize}px; line-height: ${typography.lineHeight}px; color: var(--html-text); overflow-wrap: break-word; -webkit-text-size-adjust: none; }
-        ${readingHtmlCSS(typography, colors)}
-        .editorial-html a { cursor: pointer; border: none; }
-        .editorial-html img { max-width: 100%; height: auto; }
+        ${selector} { display: flow-root; box-sizing: border-box; width: 100%; min-height: ${padded ? 200 : 0}px; padding: ${padded ? '8px 28px 48px' : '0'}; font-family: var(--html-font-family); font-size: ${typography.fontSize}px; line-height: ${typography.lineHeight}px; color: var(--html-text); overflow-wrap: break-word; -webkit-text-size-adjust: none; }
+        ${readingHtmlCSS(typography, colors, selector)}
+        ${selector} a { cursor: pointer; border: none; }
+        ${selector} img { max-width: 100%; height: auto; }
       `}</style>
       <div dangerouslySetInnerHTML={{ __html: content }} />
     </div>

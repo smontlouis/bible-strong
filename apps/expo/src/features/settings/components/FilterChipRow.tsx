@@ -1,5 +1,6 @@
+import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import React from 'react'
-import { ScrollView, TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { useTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import { EaseView } from 'react-native-ease'
@@ -64,7 +65,7 @@ const FilterChipRow = ({
   ]
 
   return (
-    <ScrollView
+    <HorizontalControlScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ paddingHorizontal: 16, gap: 8, paddingVertical: 8 }}
@@ -104,7 +105,7 @@ const FilterChipRow = ({
           </EaseView>
         </TouchableOpacity>
       ))}
-    </ScrollView>
+    </HorizontalControlScrollView>
   )
 }
 

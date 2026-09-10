@@ -33,8 +33,9 @@ export default function ContextualSheet({
     const capture = (event: Event) => {
       if (!(event.target instanceof Element)) return
       const element =
-        event.target.closest<HTMLElement>('button, [role="button"], [role="menuitem"], a') ??
-        event.target
+        event.target.closest<HTMLElement>(
+          'button, [role="button"], [role="menuitem"], [role="link"], a'
+        ) ?? event.target
       if (!(element instanceof HTMLElement)) return
       lastAnchor.current = element
       const rect = element.getBoundingClientRect()
@@ -102,6 +103,7 @@ export default function ContextualSheet({
           ...panelScreens,
           content: {
             title: panelTitle ?? heading?.title ?? '',
+            headerLeft: heading?.leftComponent,
             headerRight: panelHeaderRight ?? heading?.rightComponent,
             headerContent: panelHeaderContent ?? (
               <>

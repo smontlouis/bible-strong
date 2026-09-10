@@ -26,10 +26,8 @@ and the Bible and study DOM components keep their existing responsibilities.
 
 Commentary sections, dictionary and Nave details, and full lexicon editorial HTML
 use `SwitchableHTMLView`. Web always renders DOM directly, including when the
-mobile preference or an explicit prop requests native rendering. On mobile, its
-`engine` prop can force `native` or `dom`; otherwise it uses the device-local
-`readingHtmlEngineAtom`, defaulting to native rendering. Bible Params exposes
-this preference on mobile for production comparisons; the setting is hidden on Web. Switching engines does not change
+an explicit prop requests native rendering. On mobile, its
+`engine` prop can force `native` or `dom`; otherwise it defaults to native rendering. This is a code-only choice; Bible Params does not expose a renderer setting. Switching engines does not change
 the route, resource identity, or current tab.
 
 Both implementations share `readingHtml.ts` for sanitizing and editorial tag
@@ -50,9 +48,17 @@ import SwitchableHTMLView from '~common/SwitchableHTMLView'
 <SwitchableHTMLView value={html} engine="dom" onLinkPress={openLink} />
 ```
 
-Omit `engine` to follow **Bible Params → Rendu des textes** on mobile. Web ignores
+Omit `engine` to use native rendering on mobile. Web ignores
 the override and always uses direct DOM. Use `padded` for
 standalone dictionary-style content; omit it inside cards that already provide
 padding. `onLinkClicked` preserves `{ href, content, type }` for dictionary
 navigation. The DOM reader loads the same bundled Literata OTF as the Bible.
 The native reader enables adjacent paragraph margin collapsing to mirror CSS.
+
+## Bible reference previews (2026-09-10)
+
+On Web, editorial Bible links open a shared preview through the application host before navigation. Native platforms retain their original direct navigation and form sheets. The preview uses ContextualSheet (anchored popover on Web only), loads the requested passage through Resource access and provides the
+original link action in its header. The HTML document continues to emit the same
+serializable href/text/class payload. Dictionary, Strong and Nave links also use the preview, carrying their resource source context; ordinary external links retain their handlers. Concordance verse clicks remain direct navigation.
+See `apps/expo/src/features/bibleReferencePreview/README.md` for target formats,
+version selection and the additional native-text entry points.

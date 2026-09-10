@@ -1,4 +1,10 @@
 {
+  "horizontalScroll.left": "Défiler vers la gauche",
+  "horizontalScroll.right": "Défiler vers la droite",
+  "resourcePreview.open": "Ouvrir la fiche complète",
+  "resourcePreview.unavailable": "Ce contenu est indisponible. Vous pouvez toujours ouvrir sa fiche.",
+  "referencePreview.open": "Ouvrir le passage dans la Bible",
+  "referencePreview.unavailable": "Le texte de ce passage est indisponible. Vous pouvez toujours ouvrir sa référence.",
   "Hébreu": "Hébreu",
   "home.discovery.openLexicon": "Ouvrir le lexique",
   "Grec": "Grec",

@@ -43,3 +43,23 @@ it('gives native and DOM the same blue underlined links and restrained emphasis'
     '.editorial-html a { color: #5890ff; text-decoration-line: underline; text-decoration-color: #5890ff; }'
   )
 })
+
+it('scopes compact preview styles independently from the article', () => {
+  const articleSelector = '.editorial-html[data-reading-id="article"]'
+  const previewSelector = '.editorial-html[data-reading-id="preview"]'
+  const article = readingHtmlCSS(
+    { fontFamily: 'Arial', fontSize: 23, lineHeight: 40 },
+    colors,
+    articleSelector
+  )
+  const preview = readingHtmlCSS(
+    { fontFamily: 'Arial', fontSize: 16, lineHeight: 24 },
+    colors,
+    previewSelector
+  )
+  for (const rule of article.split('\n')) expect(rule.startsWith(articleSelector + ' ')).toBe(true)
+  for (const rule of preview.split('\n')) expect(rule.startsWith(previewSelector + ' ')).toBe(true)
+  expect(article).toContain('font-size: 46px; line-height: 80px')
+  expect(preview).toContain('font-size: 32px; line-height: 48px')
+  expect(preview).not.toContain(articleSelector)
+})

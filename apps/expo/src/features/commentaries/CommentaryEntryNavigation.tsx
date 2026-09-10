@@ -1,3 +1,4 @@
+import { useReferencePreview } from '~features/bibleReferencePreview/state'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -20,6 +21,7 @@ const CommentaryEntryNavigation = ({
   referenceDisabled?: boolean
   onReferencePress: () => void
 }) => {
+  const preview = useReferencePreview()
   const { t } = useTranslation()
 
   return (
@@ -45,7 +47,9 @@ const CommentaryEntryNavigation = ({
         activeOpacity={0.62}
         disabled={referenceDisabled}
         accessibilityRole={referenceDisabled ? undefined : 'link'}
-        onPress={onReferencePress}
+        onPress={() => {
+          if (!preview({ href: reference, type: 'verse' }, onReferencePress)) onReferencePress()
+        }}
         style={[
           { opacity: referenceDisabled ? 0.6 : 1 },
           [{ opacity: referenceDisabled ? 0.6 : 1 }],

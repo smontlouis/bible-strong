@@ -1,4 +1,10 @@
 {
+  "horizontalScroll.left": "Scroll left",
+  "horizontalScroll.right": "Scroll right",
+  "resourcePreview.open": "Open full entry",
+  "resourcePreview.unavailable": "This content is unavailable. You can still open its entry.",
+  "referencePreview.open": "Open passage in the Bible",
+  "referencePreview.unavailable": "The passage text is unavailable. You can still open its reference.",
   "Hébreu": "Hebrew",
   "home.discovery.openLexicon": "Open the lexicon",
   "Grec": "Greek",

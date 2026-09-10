@@ -98,7 +98,11 @@ export function readingHtmlStyles(
   }
 }
 
-export function readingHtmlCSS(typography: ReadingTypography, colors: ReadingColors): string {
+export function readingHtmlCSS(
+  typography: ReadingTypography,
+  colors: ReadingColors,
+  selector = '.editorial-html'
+): string {
   const rules = readingHtmlStyles(typography, colors)
   return Object.entries(rules)
     .map(([tag, styles]) => {
@@ -108,7 +112,7 @@ export function readingHtmlCSS(typography: ReadingTypography, colors: ReadingCol
           return `${property}: ${typeof value === 'number' ? `${value}px` : value}`
         })
         .join('; ')
-      return `.editorial-html ${tag} { ${declarations}; }`
+      return `${selector} ${tag} { ${declarations}; }`
     })
     .join('\n')
 }
