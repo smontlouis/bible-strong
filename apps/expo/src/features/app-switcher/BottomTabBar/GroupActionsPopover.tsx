@@ -1,9 +1,10 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { ActionSheetItem } from '~common/ActionMenu'
 import { Sheet, SheetView, type SheetRef } from '~common/sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import React, { memo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, type StyleProp, type ViewStyle } from 'react-native'
+import { type StyleProp, type ViewStyle } from 'react-native'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { useDeleteGroup } from '../../../state/tabGroups'
 import { TabGroup, closeAllTabsAtom, tabGroupsAtom } from '../../../state/tabs'
@@ -30,6 +31,7 @@ const GroupActionsPopover = memo(
     onViewGroups,
   }: GroupActionsPopoverProps) => {
     const { t } = useTranslation()
+    const confirmDeletion = useConfirmDialog()
     const sheetRef = useRef<SheetRef>(null)
     const closeAllTabs = useSetAtom(closeAllTabsAtom)
     const deleteGroup = useDeleteGroup()
@@ -52,24 +54,19 @@ const GroupActionsPopover = memo(
 
     const handleDelete = () => {
       closeSheet()
-      Alert.alert(t('tabs.deleteGroupTitle'), t('tabs.deleteGroupMessage'), [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () => {
-            // Calculer l'index de navigation AVANT la suppression
-            const currentIndex = groups.findIndex(g => g.id === group.id)
-            const targetIndex = Math.max(0, currentIndex - 1)
-
-            // Supprimer le groupe
-            deleteGroup(group.id)
-
-            // Naviguer vers le groupe précédent (ou default)
-            groupPager.navigateToPage(targetIndex, groups.length - 1)
-          },
-        },
-      ])
+      void confirmDeletion({
+        title: t('tabs.deleteGroupTitle'),
+        message: t('tabs.deleteGroupMessage'),
+        cancelLabel: t('common.cancel'),
+        confirmLabel: t('common.delete'),
+        destructive: true,
+      }).then(confirmed => {
+        if (!confirmed) return
+        const currentIndex = groups.findIndex(g => g.id === group.id)
+        const targetIndex = Math.max(0, currentIndex - 1)
+        deleteGroup(group.id)
+        groupPager.navigateToPage(targetIndex, groups.length - 1)
+      })
     }
 
     const handleCreateGroup = () => {

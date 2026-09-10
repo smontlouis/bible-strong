@@ -1,3 +1,4 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { pageContentStyle } from '~common/ui/PageContent'
 import * as Sentry from '@sentry/react-native'
 import { useTheme } from '~themes/ThemeProvider'
@@ -7,7 +8,7 @@ import { produce } from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, Platform, ScrollView, Share } from 'react-native'
+import { Platform, ScrollView, Share } from 'react-native'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
@@ -77,6 +78,7 @@ const NoteDetailTabScreen = ({
   const pushRouteOnce = usePushRouteOnce()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
+  const confirmDeletion = useConfirmDialog()
   const dispatch = useDispatch()
   const theme = useTheme()
   const [, setNotesTab] = useAtom(notesAtom)
@@ -271,20 +273,20 @@ const NoteDetailTabScreen = ({
   const deleteNoteFunc = () => {
     if (!noteId) return
 
-    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette note?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Oui'),
-        onPress: () => {
-          dispatch(deleteNote(noteId))
-          if (isAnnotationNote && annotationId) {
-            dispatch(updateWordAnnotation(annotationId, { noteId: undefined }))
-          }
-          goBack()
-        },
-        style: 'destructive',
-      },
-    ])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: t('Voulez-vous vraiment supprimer cette note?'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(confirmed => {
+      if (!confirmed) return
+      dispatch(deleteNote(noteId))
+      if (isAnnotationNote && annotationId) {
+        dispatch(updateWordAnnotation(annotationId, { noteId: undefined }))
+      }
+      goBack()
+    })
   }
 
   const cancelEditing = () => {

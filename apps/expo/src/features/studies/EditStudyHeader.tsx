@@ -1,3 +1,4 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import * as Icon from '@expo/vector-icons'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { memo, useCallback } from 'react'
@@ -9,7 +10,7 @@ import type { Theme as AppTheme } from '~themes'
 import { useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { Alert, Platform } from 'react-native'
+import { Platform } from 'react-native'
 import StudyOptionsPanel from './StudyOptionsPanel'
 import { useDispatch } from 'react-redux'
 import { ActionSheetItem } from '~common/ActionMenu'
@@ -89,24 +90,25 @@ const EditHeader = ({
   const router = useRouter()
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
+  const confirmDeletion = useConfirmDialog()
   const dispatch = useDispatch<AppDispatch>()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const { ref, open, close } = useSheet()
 
   const deleteStudyConfirmation = useCallback(() => {
-    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette étude?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Oui'),
-        onPress: () => {
-          dispatch(deleteStudy(study.id))
-          close()
-          router.back()
-        },
-        style: 'destructive',
-      },
-    ])
-  }, [dispatch, study.id, close, router, t])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: t('Voulez-vous vraiment supprimer cette étude?'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(confirmed => {
+      if (!confirmed) return
+      dispatch(deleteStudy(study.id))
+      close()
+      router.back()
+    })
+  }, [dispatch, study.id, close, router, t, confirmDeletion])
 
   if (isReadOnly) {
     return (

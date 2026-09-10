@@ -1,7 +1,8 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useSetAtom } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert } from 'react-native'
+
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { ActionSheetItem } from '~common/ActionMenu'
 import { type SheetRef } from '~common/sheet'
@@ -22,6 +23,7 @@ interface Props {
 
 const StudySettingsModal = ({ ref, studyId, onClosed, openRenameModal }: Props) => {
   const { t } = useTranslation()
+  const confirmDeletion = useConfirmDialog()
   const dispatch = useDispatch()
   const study = useSelector(
     (state: RootState) => (studyId ? state.user.bible.studies[studyId] : undefined),
@@ -35,17 +37,17 @@ const StudySettingsModal = ({ ref, studyId, onClosed, openRenameModal }: Props) 
   }
 
   const deleteStudyConfirmation = (id: string) => {
-    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette étude?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Oui'),
-        onPress: () => {
-          dispatch(deleteStudy(id))
-          close()
-        },
-        style: 'destructive',
-      },
-    ])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: t('Voulez-vous vraiment supprimer cette étude?'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(confirmed => {
+      if (!confirmed) return
+      dispatch(deleteStudy(id))
+      close()
+    })
   }
 
   return (

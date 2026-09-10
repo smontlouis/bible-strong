@@ -11,6 +11,7 @@ import { useAnnotationEvents } from './useAnnotationEvents'
 
 /** Callbacks for gesture handling passed through to touch selection */
 interface AnnotationModeCallbacks {
+  onMouseSelectionStart?: () => boolean
   /** Called on single tap - receives verseKey and touch position */
   onTapVerse?: (verseKey: string, position: { x: number; y: number }) => void
   /** Called on double tap - receives verseKey and touch position */
@@ -77,6 +78,7 @@ export function useAnnotationModeController({
 }: UseAnnotationModeControllerProps): UseAnnotationModeControllerReturn {
   const { clearSelectionTrigger, applyAnnotationTrigger, eraseSelectionTrigger } = triggers
   const {
+    onMouseSelectionStart,
     onTapVerse,
     onDoubleTapVerse,
     onLongPressVerse,
@@ -96,6 +98,7 @@ export function useAnnotationModeController({
     highlightRects,
     annotationMode: annotationMode ?? false,
     callbacks: {
+      onMouseSelectionStart,
       onTapVerse,
       onDoubleTapVerse,
       onLongPressVerse,

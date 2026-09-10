@@ -1,7 +1,8 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useTheme } from '~themes/ThemeProvider'
 import { getDefaultStore } from 'jotai/vanilla'
 import React from 'react'
-import { Alert, Platform, Switch } from 'react-native'
+import { Platform, Switch } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -52,6 +53,7 @@ type Props = {
 
 const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
   const { t, i18n } = useTranslation()
+  const confirmDeletion = useConfirmDialog()
   const theme = useTheme()
   const isConnected = useConnection()
   const versionId = version?.id
@@ -176,27 +178,23 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
   }
 
   const removeBible = () => {
-    Alert.alert(
-      t('Attention'),
-      t(
+    void confirmDeletion({
+      title: t('Attention'),
+      message: t(
         indexPresent
           ? strongVersionId
             ? 'bibleOfflineDetails.removeBibleWithStrongConfirm'
             : 'bibleOfflineDetails.removeBibleWithInterlinearConfirm'
           : 'downloads.deleteConfirm'
       ),
-      [
-        { text: t('Non'), style: 'cancel' },
-        {
-          text: t('Oui'),
-          style: 'destructive',
-          onPress: async () => {
-            await deleteDownloadedItem(createDownloadedItemDeletionPlan(bibleId))
-            refreshInstalledState()
-          },
-        },
-      ]
-    )
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(async confirmed => {
+      if (!confirmed) return
+      await deleteDownloadedItem(createDownloadedItemDeletionPlan(bibleId))
+      refreshInstalledState()
+    })
   }
 
   const cancelDownload = () => {

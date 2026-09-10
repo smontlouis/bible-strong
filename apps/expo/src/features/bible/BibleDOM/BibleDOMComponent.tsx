@@ -924,6 +924,18 @@ const LoadedBibleContent = ({
       eraseSelectionTrigger,
     },
     callbacks: {
+      onMouseSelectionStart: () => {
+        if (
+          suppressVerseGestures ||
+          isSelectionMode ||
+          Object.keys(selectedVerses).length > 0 ||
+          isParallelVerseMode ||
+          (version === 'BHG' && verses.some(verse => Boolean(verse.InterlinearTokens?.length)))
+        )
+          return false
+        dispatch({ type: ENTER_ANNOTATION_MODE, payload: {} }).catch(console.error)
+        return true
+      },
       onTapVerse: handleTapVerse,
       onDoubleTapVerse: handleDoubleTapVerse,
       onLongPressVerse: handleLongPressVerse,

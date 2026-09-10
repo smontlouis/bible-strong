@@ -1,10 +1,11 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useAllColors } from '~helpers/useColorName'
 import { pageContentStyle } from '~common/ui/PageContent'
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { Alert, FlatList } from 'react-native'
+import { FlatList } from 'react-native'
 import { ActionSheetItem } from '~common/ActionMenu'
 import Empty from '~common/Empty'
 import FiltersHeader from '~common/FiltersHeader'
@@ -56,6 +57,7 @@ type HighlightsScreenProps = {
 
 const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
   const { t } = useTranslation()
+  const confirmDeletion = useConfirmDialog()
   const dispatch = useDispatch()
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
@@ -222,37 +224,37 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
   })()
 
   const handleDelete = () => {
-    Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer cette surbrillance ?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Oui'),
-        onPress: () => {
-          if (settingsData?.stringIds) {
-            dispatch(removeHighlight({ selectedVerses: settingsData.stringIds }))
-          }
-          setSettingsData(null)
-          closeSettings()
-        },
-        style: 'destructive',
-      },
-    ])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: t('Êtes-vous vraiment sur de supprimer cette surbrillance ?'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(confirmed => {
+      if (!confirmed) return
+      if (settingsData?.stringIds) {
+        dispatch(removeHighlight({ selectedVerses: settingsData.stringIds }))
+      }
+      setSettingsData(null)
+      closeSettings()
+    })
   }
 
   const handleDeleteAnnotation = () => {
-    Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer cette annotation ?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Oui'),
-        onPress: () => {
-          if (annotationSettingsData?.id) {
-            dispatch(removeWordAnnotationAction(annotationSettingsData.id))
-          }
-          setAnnotationSettingsData(null)
-          closeAnnotationSettings()
-        },
-        style: 'destructive',
-      },
-    ])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: t('Êtes-vous vraiment sur de supprimer cette annotation ?'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(confirmed => {
+      if (!confirmed) return
+      if (annotationSettingsData?.id) {
+        dispatch(removeWordAnnotationAction(annotationSettingsData.id))
+      }
+      setAnnotationSettingsData(null)
+      closeAnnotationSettings()
+    })
   }
 
   return (

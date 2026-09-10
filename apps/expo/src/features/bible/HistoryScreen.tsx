@@ -1,8 +1,9 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useEffect, useState } from 'react'
 import * as NativeUI from 'react-native'
-import { Alert } from 'react-native'
+
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
 import type { Theme as AppTheme } from '~themes'
@@ -201,6 +202,7 @@ const HistoryItem = ({ item, currentTime }: { item: HistoryItemType; currentTime
 }
 
 const History = () => {
+  const confirmDeletion = useConfirmDialog()
   const history = useAtomValue(historyAtom)
   const deleteHistory = useSetAtom(deleteHistoryAtom)
   const { t } = useTranslation()
@@ -212,10 +214,15 @@ const History = () => {
   }, [])
 
   const confirmDeleteHistory = () => {
-    Alert.alert(t('history.clearTitle'), t('history.clearMessage', { count: history.length }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('history.clearAction'), style: 'destructive', onPress: deleteHistory },
-    ])
+    void confirmDeletion({
+      title: t('history.clearTitle'),
+      message: t('history.clearMessage', { count: history.length }),
+      cancelLabel: t('common.cancel'),
+      confirmLabel: t('history.clearAction'),
+      destructive: true,
+    }).then(confirmed => {
+      if (confirmed) return deleteHistory()
+    })
   }
 
   return (

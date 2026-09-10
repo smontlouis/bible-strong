@@ -1,6 +1,7 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
-import { Alert, Platform, type LayoutChangeEvent } from 'react-native'
+import { Platform, type LayoutChangeEvent } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
 import BibleViewport from './BibleViewport'
@@ -187,6 +188,7 @@ const BibleViewer = ({
   initialAnnotationId,
 }: BibleViewerProps) => {
   const { t } = useTranslation()
+  const confirmDeletion = useConfirmDialog()
   const pushRouteOnce = usePushRouteOnce()
   const openEntityRelations = useOpenEntityRelations()
   const openNote = useOpenNote()
@@ -656,24 +658,22 @@ const BibleViewer = ({
       if (hasTags) warnings.push(t('des tags'))
       if (hasRelations) warnings.push(t('des relations'))
 
-      Alert.alert(
-        t('Attention'),
-        t('Cette annotation a {{items}} associé(s). Voulez-vous vraiment la supprimer ?', {
+      void confirmDeletion({
+        title: t('Attention'),
+        message: t('Cette annotation a {{items}} associé(s). Voulez-vous vraiment la supprimer ?', {
           items: warnings.join(' ' + t('et') + ' '),
         }),
-        [
-          { text: t('Non'), style: 'cancel' },
-          {
-            text: t('Oui'),
-            style: 'destructive',
-            onPress: () => annotationMode.deleteSelectedAnnotation(),
-          },
-        ]
-      )
+        cancelLabel: t('Non'),
+        confirmLabel: t('Oui'),
+        destructive: true,
+      }).then(confirmed => {
+        if (!confirmed) return
+        annotationMode.deleteSelectedAnnotation()
+      })
     } else {
       annotationMode.deleteSelectedAnnotation()
     }
-  }, [annotationMode, annotationRelationCount, t])
+  }, [annotationMode, annotationRelationCount, t, confirmDeletion])
 
   // Keep annotation mode's verses reference updated
   const { enabled: annotationModeEnabled, setVerses: setAnnotationVerses } = annotationMode
@@ -780,10 +780,15 @@ const BibleViewer = ({
       .filter(Boolean)
       .join('\n\n')
 
-    Alert.alert(t('Attention'), message, [
-      { text: t('Non'), style: 'cancel' },
-      { text: t('Oui'), style: 'destructive', onPress: onConfirm },
-    ])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: message,
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(confirmed => {
+      if (confirmed) return onConfirm()
+    })
   }
 
   const handleEraseAnnotations = () => {

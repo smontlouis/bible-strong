@@ -1,9 +1,10 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import TagOptionsPanel from './TagOptionsPanel'
 import PanelSearch from '~common/ContextualPanel/PanelSearch'
 import { useAtom } from 'jotai/react'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useEffect, useRef, useState } from 'react'
-import { Alert } from 'react-native'
+
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
 import { useResolveClassNames } from 'uniwind'
@@ -150,6 +151,7 @@ type TagsScreenProps = {
 }
 
 const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
+  const confirmDeletion = useConfirmDialog()
   const { t } = useTranslation()
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
@@ -184,17 +186,17 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
   }, [isOpen, open])
 
   const promptLogout = () => {
-    Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer ce tag ?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Oui'),
-        onPress: () => {
-          dispatch(removeTag(isOpen?.id || ''))
-          close()
-        },
-        style: 'destructive',
-      },
-    ])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: t('Êtes-vous vraiment sur de supprimer ce tag ?'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(confirmed => {
+      if (!confirmed) return
+      dispatch(removeTag(isOpen?.id || ''))
+      close()
+    })
   }
 
   const handleOpenInTabGroup = () => {

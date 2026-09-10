@@ -82,6 +82,8 @@ export interface TouchSelectionCallbacks {
   onDoubleTapVerse?: (verseKey: string, position: { x: number; y: number }) => void
   /** Called on long press */
   onLongPressVerse?: (verseKey: string) => void
+  /** Allow a mouse drag to enter annotation mode from reading mode. */
+  onMouseSelectionStart?: () => boolean
   /** Called when drag starts */
   onDragStart?: () => void
   /** Called to notify which verse is currently being touched (for visual feedback) */
@@ -623,7 +625,10 @@ export function useTouchSelection({
       }
       callbacksRef.current.onTouchedVerseChange?.(null)
 
-      if (annotationModeRef.current && touchState.startWord) {
+      if (
+        touchState.startWord &&
+        (annotationModeRef.current || callbacksRef.current.onMouseSelectionStart?.())
+      ) {
         touchState.isDragging = true
         suppressMouseClickUntil = Date.now() + 700
         e.preventDefault()

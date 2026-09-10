@@ -156,4 +156,73 @@ describe('Web mouse gestures for Bible annotations', () => {
     })
     expect(onTapVerse).not.toHaveBeenCalled()
   })
+  it('enters annotation mode from a reading-mode mouse drag and suppresses the trailing click', () => {
+    const onTapVerse = jest.fn()
+    const onDragStart = jest.fn()
+    const onMouseSelectionStart = jest.fn(() => true)
+    const onSelectionChange = jest.fn()
+    act(() => {
+      root.render(
+        <Harness
+          annotationMode={false}
+          callbacks={{ onTapVerse, onDragStart, onMouseSelectionStart }}
+          onSelectionChange={onSelectionChange}
+        />
+      )
+    })
+    const target = host.querySelector('[data-verse-key]')!
+
+    act(() => {
+      target.dispatchEvent(
+        new MouseEvent('mousedown', { bubbles: true, button: 0, clientX: 10, clientY: 10 })
+      )
+      window.dispatchEvent(
+        new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: 70, clientY: 10 })
+      )
+      window.dispatchEvent(
+        new MouseEvent('mouseup', { bubbles: true, button: 0, clientX: 70, clientY: 10 })
+      )
+      target.dispatchEvent(
+        new MouseEvent('click', { bubbles: true, button: 0, clientX: 70, clientY: 10 })
+      )
+      jest.advanceTimersByTime(250)
+    })
+
+    expect(onMouseSelectionStart).toHaveBeenCalledTimes(1)
+    expect(onDragStart).toHaveBeenCalledTimes(1)
+    expect(onSelectionChange).toHaveBeenLastCalledWith({
+      start: { verseKey: '1-1-1', wordIndex: 0 },
+      end: { verseKey: '1-1-1', wordIndex: 1 },
+    })
+    expect(onTapVerse).not.toHaveBeenCalled()
+  })
+  it.each([false, undefined])(
+    'does not select when reading mode rejects dragging (%s)',
+    allowed => {
+      const onMouseSelectionStart = jest.fn(() => false)
+      const onSelectionChange = jest.fn()
+      act(() => {
+        root.render(
+          <Harness
+            annotationMode={false}
+            callbacks={allowed === undefined ? {} : { onMouseSelectionStart }}
+            onSelectionChange={onSelectionChange}
+          />
+        )
+      })
+      const target = host.querySelector('[data-verse-key]')!
+      act(() => {
+        target.dispatchEvent(
+          new MouseEvent('mousedown', { bubbles: true, button: 0, clientX: 70, clientY: 10 })
+        )
+        window.dispatchEvent(
+          new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: 10, clientY: 10 })
+        )
+        window.dispatchEvent(
+          new MouseEvent('mouseup', { bubbles: true, button: 0, clientX: 10, clientY: 10 })
+        )
+      })
+      expect(onSelectionChange).not.toHaveBeenCalled()
+    }
+  )
 })

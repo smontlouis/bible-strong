@@ -1,3 +1,4 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Alert } from 'react-native'
@@ -322,6 +323,7 @@ function useDownloadedItems() {
 
 const DownloadsScreen = () => {
   const { t } = useTranslation()
+  const confirmDeletion = useConfirmDialog()
   const lang = useLanguage()
   const resources = useResourceAccess()
   const isConnected = useConnection()
@@ -576,40 +578,39 @@ const DownloadsScreen = () => {
         ? t('downloads.deleteCountWithStrong', { count: deletionEntries.length })
         : t('downloads.deleteCount', { count: deletionEntries.length })
 
-    Alert.alert(t('Attention'), confirmation, [
-      { text: t('Non'), style: 'cancel' },
-      {
-        text: t('Oui'),
-        style: 'destructive',
-        onPress: async () => {
-          const deletedItemIds: string[] = []
-          setBatchDeletionProgress({ completed: 0, total: deletionEntries.length })
-
-          try {
-            for (const { itemId, plan } of deletionEntries) {
-              await deleteDownloadedItem(plan)
-              deletedItemIds.push(itemId)
-              setBatchDeletionProgress({
-                completed: deletedItemIds.length,
-                total: deletionEntries.length,
-              })
-            }
-            await refreshInstalledStateAfterDeletion()
-            setSelectedItems(new Set())
-          } catch {
-            await refreshInstalledStateAfterDeletion().catch(() => undefined)
-            setSelectedItems(previous => {
-              const remaining = new Set(previous)
-              deletedItemIds.forEach(itemId => remaining.delete(itemId))
-              return remaining
-            })
-            Alert.alert(t('Erreur'), t('downloads.deleteFailed'))
-          } finally {
-            setBatchDeletionProgress(null)
-          }
-        },
-      },
-    ])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: confirmation,
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(async confirmed => {
+      if (!confirmed) return
+      const deletedItemIds: string[] = []
+      setBatchDeletionProgress({ completed: 0, total: deletionEntries.length })
+      try {
+        for (const { itemId, plan } of deletionEntries) {
+          await deleteDownloadedItem(plan)
+          deletedItemIds.push(itemId)
+          setBatchDeletionProgress({
+            completed: deletedItemIds.length,
+            total: deletionEntries.length,
+          })
+        }
+        await refreshInstalledStateAfterDeletion()
+        setSelectedItems(new Set())
+      } catch {
+        await refreshInstalledStateAfterDeletion().catch(() => undefined)
+        setSelectedItems(previous => {
+          const remaining = new Set(previous)
+          deletedItemIds.forEach(itemId => remaining.delete(itemId))
+          return remaining
+        })
+        Alert.alert(t('Erreur'), t('downloads.deleteFailed'))
+      } finally {
+        setBatchDeletionProgress(null)
+      }
+    })
   }
 
   const handleDownloadItem = (item: UnifiedItem) => {
@@ -678,17 +679,17 @@ const DownloadsScreen = () => {
         ? t('downloads.deleteBibleWithStrongConfirm')
         : t('downloads.deleteConfirm')
 
-    Alert.alert(t('Attention'), confirmation, [
-      { text: t('Non'), style: 'cancel' },
-      {
-        text: t('Oui'),
-        style: 'destructive',
-        onPress: async () => {
-          await deleteDownloadedItem(deletionPlan)
-          await refreshInstalledStateAfterDeletion()
-        },
-      },
-    ])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: confirmation,
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(async confirmed => {
+      if (!confirmed) return
+      await deleteDownloadedItem(deletionPlan)
+      await refreshInstalledStateAfterDeletion()
+    })
   }
 
   const handleStatusToggle = (s: StatusFilter) => {

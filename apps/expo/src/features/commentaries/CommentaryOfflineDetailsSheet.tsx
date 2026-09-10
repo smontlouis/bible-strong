@@ -1,7 +1,8 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import type { CommentaryCatalogEntry } from '@bible-strong/resource-catalog/commentaries'
 import { useTheme } from '~themes/ThemeProvider'
 import React from 'react'
-import { Alert } from 'react-native'
+
 import { useTranslation } from 'react-i18next'
 import { SheetScrollView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
@@ -43,6 +44,7 @@ const formatMegabytes = (bytes: number, language: string) =>
 
 const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
   const { t, i18n } = useTranslation()
+  const confirmDeletion = useConfirmDialog()
   const theme = useTheme()
   const isConnected = useConnection()
   const identity = projection
@@ -81,16 +83,16 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
   }
 
   const remove = () => {
-    Alert.alert(t('Attention'), t('downloads.deleteConfirm'), [
-      { text: t('Non'), style: 'cancel' },
-      {
-        text: t('Oui'),
-        style: 'destructive',
-        onPress: async () => {
-          await deleteDownloadedItem(createDownloadedItemDeletionPlan(itemId))
-        },
-      },
-    ])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: t('downloads.deleteConfirm'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(async confirmed => {
+      if (!confirmed) return
+      await deleteDownloadedItem(createDownloadedItemDeletionPlan(itemId))
+    })
   }
 
   return (

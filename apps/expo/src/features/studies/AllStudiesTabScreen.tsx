@@ -1,7 +1,7 @@
 import { pageContentStyle } from '~common/ui/PageContent'
 import { type SheetRef } from '~common/sheet'
 import { useEffect, useRef, useState } from 'react'
-import { FlatList } from 'react-native'
+import { FlatList, Platform } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useAtom, useSetAtom } from 'jotai/react'
 import Empty from '~common/Empty'
@@ -63,6 +63,9 @@ const StudiesScreen = ({
   const { isInTab } = useTabContext()
   const dispatch = useDispatch()
   const r = useMediaQueriesArray()
+  const [listWidth, setListWidth] = useState(0)
+  const columns =
+    Platform.OS === 'web' ? (listWidth >= 1000 ? 4 : listWidth >= 720 ? 3 : 2) : r([2, 2, 3, 3])
 
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const [studySettingsId, setStudySettingsId] = useState<string | false>(false)
@@ -257,8 +260,9 @@ const StudiesScreen = ({
         />
         {filteredStudies.length ? (
           <FlatList
-            key={r(['xs', 'sm', 'md', 'lg'])}
-            numColumns={r([2, 2, 3, 3])}
+            key={columns}
+            onLayout={event => setListWidth(event.nativeEvent.layout.width)}
+            numColumns={columns}
             data={filteredStudies}
             contentContainerStyle={[pageContentStyle, { paddingBottom: 100 }]}
             keyExtractor={item => item.id}
@@ -267,6 +271,7 @@ const StudiesScreen = ({
               return (
                 <StudyItem
                   study={item}
+                  columns={columns}
                   setStudySettings={openStudySettings}
                   onPress={onStudyPress}
                   relationCount={relationCountsByEndpoint[endpointIdentity(endpoint)] || 0}

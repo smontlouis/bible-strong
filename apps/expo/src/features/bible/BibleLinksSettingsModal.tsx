@@ -1,8 +1,9 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert } from 'react-native'
+
 import { useDispatch, useSelector } from 'react-redux'
 import { useSetAtom } from 'jotai/react'
 import { ActionSheetItem } from '~common/ActionMenu'
@@ -22,6 +23,7 @@ type Props = {
 
 const LinksSettingsModal = ({ ref, linkId, onClosed, title, onEditRelations }: Props) => {
   const { t } = useTranslation()
+  const confirmDeletion = useConfirmDialog()
   const dispatch = useDispatch()
   const pushRouteOnce = usePushRouteOnce()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
@@ -33,17 +35,17 @@ const LinksSettingsModal = ({ ref, linkId, onClosed, title, onEditRelations }: P
 
   const deleteLinkConfirmation = () => {
     if (!linkId) return
-    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer ce lien?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Oui'),
-        onPress: () => {
-          dispatch(deleteLink(linkId))
-          close()
-        },
-        style: 'destructive',
-      },
-    ])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: t('Voulez-vous vraiment supprimer ce lien?'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(confirmed => {
+      if (!confirmed) return
+      dispatch(deleteLink(linkId))
+      close()
+    })
   }
 
   const navigateToBible = () => {

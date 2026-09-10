@@ -1,3 +1,4 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -5,7 +6,7 @@ import { useSetAtom } from 'jotai/react'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useEffect, useState } from 'react'
 import * as NativeUI from 'react-native'
-import { ActivityIndicator, Alert, Dimensions, Image, Linking, ScrollView } from 'react-native'
+import { ActivityIndicator, Dimensions, Image, Linking, ScrollView } from 'react-native'
 import {
   KeyboardAvoidingView,
   KeyboardStickyView,
@@ -115,6 +116,7 @@ const BibleLinkScreen = () => {
 
   const dispatch = useDispatch()
   const { t } = useTranslation()
+  const confirmDeletion = useConfirmDialog()
   const router = useRouter()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
@@ -205,17 +207,17 @@ const BibleLinkScreen = () => {
   const deleteCurrentLink = () => {
     if (!currentLink?.id) return
 
-    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer ce lien?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Oui'),
-        onPress: () => {
-          dispatch(deleteLink(currentLink.id!))
-          router.back()
-        },
-        style: 'destructive',
-      },
-    ])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: t('Voulez-vous vraiment supprimer ce lien?'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(confirmed => {
+      if (!confirmed) return
+      dispatch(deleteLink(currentLink.id!))
+      router.back()
+    })
   }
 
   const cancelEditing = () => {

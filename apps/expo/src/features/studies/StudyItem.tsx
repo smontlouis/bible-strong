@@ -50,6 +50,7 @@ const StudyLink = (
 }
 
 export type StudyItemProps = {
+  columns?: number
   study: Study
   theme: Theme
   setStudySettings?: (studyId: string) => void
@@ -60,6 +61,7 @@ export type StudyItemProps = {
 
 const StudyItem = ({
   study,
+  columns,
   theme,
   setStudySettings,
   onPress,
@@ -78,7 +80,7 @@ const StudyItem = ({
   return (
     <Box
       className="overflow-hidden border-continuous"
-      style={{ width: r(['50%', '50%', '33%', '33%']) }}
+      style={{ width: columns ? `${100 / columns}%` : r(['50%', '50%', '33%', '33%']) }}
     >
       <Box
         className="overflow-hidden border-continuous m-[10px] bg-reverse p-[10px] h-[230px] rounded-[8px] relative"

@@ -1,8 +1,9 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert } from 'react-native'
+
 import { useDispatch, useSelector } from 'react-redux'
 import { ActionSheetItem } from '~common/ActionMenu'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
@@ -20,6 +21,7 @@ type Props = {
 
 const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
   const { t } = useTranslation()
+  const confirmDeletion = useConfirmDialog()
   const dispatch = useDispatch()
   const pushRouteOnce = usePushRouteOnce()
   const openInNewTab = useOpenInNewTab()
@@ -32,17 +34,17 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
 
   const deleteNoteConfirmation = () => {
     if (!noteId) return
-    Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette note?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Oui'),
-        onPress: () => {
-          dispatch(deleteNote(noteId))
-          close()
-        },
-        style: 'destructive',
-      },
-    ])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: t('Voulez-vous vraiment supprimer cette note?'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(confirmed => {
+      if (!confirmed) return
+      dispatch(deleteNote(noteId))
+      close()
+    })
   }
 
   const navigateToBible = () => {

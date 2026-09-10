@@ -1,8 +1,9 @@
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { twMerge } from '~common/ui/classNames'
 import { resolveThemeColor } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
-import { Alert, Linking, Platform, TouchableOpacity } from 'react-native'
+import { Linking, Platform, TouchableOpacity } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
 import { getDefaultStore } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -320,6 +321,7 @@ const VersionSelectorItem = ({
   onOpenOfflineDetails,
 }: Props) => {
   const { t } = useTranslation()
+  const confirmDeletion = useConfirmDialog()
   const [reportedStrongIndexAvailable, setReportedStrongIndexAvailable] = React.useState<boolean>()
   const [strongExpansion, setStrongExpansion] = React.useState({
     collapseKey: strongCollapseKey,
@@ -484,14 +486,15 @@ const VersionSelectorItem = ({
   }
 
   const confirmDelete = () => {
-    Alert.alert(t('Attention'), t('Etes-vous vraiment sur de supprimer cette version ?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Oui'),
-        onPress: deleteVersion,
-        style: 'destructive',
-      },
-    ])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: t('Etes-vous vraiment sur de supprimer cette version ?'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(confirmed => {
+      if (confirmed) return deleteVersion()
+    })
   }
 
   const renderSelectionCheckbox = (disabled?: boolean) => {
