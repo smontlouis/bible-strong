@@ -7,7 +7,6 @@ import { useAtom, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import RenameModal from '~common/RenameModal'
-import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import FabButton from '~common/ui/FabButton'
@@ -94,8 +93,6 @@ const EditStudyScreen = ({
   )
   const relationCount = useRelationCount(studyEndpoint)
   const canGoBackInStack = useCanGoBackInStack()
-  const hasTagOrRelationChips =
-    Boolean(currentStudy?.tags && Object.keys(currentStudy.tags).length > 0) || relationCount > 0
 
   const onDeltaChangeCallback = (
     delta: Study['content'] | null,
@@ -156,19 +153,12 @@ const EditStudyScreen = ({
         title={currentStudy.title}
         study={currentStudy}
         studyId={studyId}
-      >
-        {isReadOnly && hasTagOrRelationChips && (
-          <Box className="overflow-hidden border-continuous px-[20px] mt-[-10px] pb-[10px]">
-            <EntityChipList
-              tags={currentStudy.tags}
-              relationCount={relationCount}
-              onRelationPress={() => openEntityRelations(studyEndpoint)}
-            />
-          </Box>
-        )}
-      </EditStudyHeader>
+      />
 
       <StudiesDomWrapper
+        tags={currentStudy.tags}
+        relationCount={relationCount}
+        onOpenRelations={() => openEntityRelations(studyEndpoint)}
         isReadOnly={isReadOnly}
         onDeltaChangeCallback={onDeltaChangeCallback}
         contentToDisplay={currentStudy.content}

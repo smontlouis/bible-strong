@@ -1,0 +1,311 @@
+/* Only loaded by DesktopHome.web.tsx. The viewport selects the desktop home;
+   its allocated space (sidebar/panels included) controls the layout below. */
+.bs-home-container {
+  container: home / inline-size;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+}
+
+.bs-home-verse-height {
+  overflow: hidden;
+  border-radius: 20px;
+  transition: height 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.bs-home-verse-content {
+  display: flex;
+  flex-direction: column;
+}
+.bs-home-verse-fade {
+  animation: bs-home-verse-in 240ms ease-out;
+}
+
+@keyframes bs-home-verse-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bs-home-verse-height {
+    transition: none;
+  }
+  .bs-home-verse-fade {
+    animation: none;
+  }
+}
+
+.bs-home-content {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.bs-home-search {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.bs-home-search > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.bs-home-shortcut {
+  flex-shrink: 0;
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: var(--color-light-grey);
+  color: var(--color-grey);
+  font:
+    12px system-ui,
+    sans-serif;
+  white-space: nowrap;
+}
+
+.bs-home-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2.25fr) minmax(300px, 1fr);
+  align-items: start;
+  gap: 20px;
+  grid-template-rows: auto 1fr;
+}
+
+.bs-home-grid > .bs-home-search {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.bs-home-grid > .bs-home-search > * {
+  width: 100%;
+}
+
+.bs-home-main {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  container: home-main / inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.bs-home-aside {
+  grid-column: 2;
+  grid-row: 2;
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.bs-home-learning {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.bs-home-learning-card,
+.bs-home-learning-body,
+.bs-home-tools > div {
+  min-width: 0;
+}
+
+.bs-home-learning-card > * {
+  height: 100%;
+  width: 100%;
+}
+.bs-home-learning-body {
+  display: grid;
+  height: 100%;
+}
+.bs-home-learning-image {
+  height: 120px;
+  min-width: 0;
+}
+
+.bs-home-tools {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.bs-home-main [data-home-stats-grid] {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0 1px;
+}
+
+.bs-home-main [data-home-stats-group] {
+  display: contents;
+}
+.bs-home-main [data-home-stats-group] > * {
+  min-width: 0;
+}
+
+/* Short vertical dividers, with no horizontal separator between rows. */
+.bs-home-main [data-home-stats-group] > *::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -1px;
+  bottom: 0;
+  width: 1px;
+  border-top: 14px solid var(--color-reverse);
+  border-bottom: 14px solid var(--color-reverse);
+  pointer-events: none;
+}
+
+@container home (max-width: 1039px) {
+  .bs-home-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+  }
+  .bs-home-grid > .bs-home-search {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .bs-home-main {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .bs-home-aside {
+    grid-column: 1;
+    grid-row: 3;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container home (max-width: 759px) {
+  .bs-home-content {
+    padding: 20px 24px 24px;
+  }
+  .bs-home-aside {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container home (max-width: 439px) {
+  .bs-home-content {
+    padding: 16px;
+  }
+}
+
+@container home-main (max-width: 739px) {
+  .bs-home-main [data-home-stats-grid] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .bs-home-tools {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container home-main (max-width: 619px) {
+  .bs-home-learning {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .bs-home-learning-body {
+    grid-template-columns: 130px minmax(0, 1fr);
+    align-items: stretch;
+  }
+  .bs-home-learning-image {
+    height: 100%;
+    min-height: 120px;
+  }
+}
+
+@container home-main (max-width: 559px) {
+  .bs-home-main [data-home-verse-illustration] {
+    display: none;
+  }
+  .bs-home-main [data-home-verse-header] {
+    flex-wrap: wrap;
+  }
+}
+
+@container home-main (max-width: 379px) {
+  .bs-home-main [data-home-stats-grid] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .bs-home-tools {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .bs-home-learning-body {
+    grid-template-columns: 95px minmax(0, 1fr);
+  }
+}
+
+.bs-home-discovery-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.bs-home-discovery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.bs-home-discovery-grid > * {
+  min-width: 0;
+}
+@container home-main (max-width: 559px) {
+  .bs-home-discovery-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The category and shuffle share the first row; content spans both columns. */
+.bs-home-discovery-grid > .bs-home-discovery-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 36px;
+  grid-template-rows: 36px 100px;
+  padding: 8px 12px;
+}
+.bs-home-discovery-card > * {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  min-width: 0;
+  min-height: 0;
+}
+.bs-home-discovery-card > .bs-home-discovery-category {
+  grid-column: 1;
+  grid-row: 1;
+}
+.bs-home-discovery-card > .bs-home-discovery-shuffle {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* Only the displayed entry remounts; card geometry and controls stay stable. */
+.bs-home-discovery-fade {
+  animation: bs-home-discovery-fade-in 220ms ease-out;
+}
+@keyframes bs-home-discovery-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bs-home-discovery-fade {
+    animation: none;
+  }
+}

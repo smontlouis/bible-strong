@@ -1,3 +1,4 @@
+import { getUniverseColor } from '~themes/universeColors'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -44,7 +45,7 @@ const BibleButton = (_props: BibleButtonProps) => {
       accessibilityLabel={t('tabs.bible')}
       style={{ ...(TAB_ICON_SIZE ? { width: TAB_ICON_SIZE, height: TAB_ICON_SIZE } : {}) }}
     >
-      <FeatherIcon name="book-open" size={23} color={'tertiary'} />
+      <FeatherIcon name="book-open" size={23} color={getUniverseColor('bible')} />
     </TouchableBox>
   )
 }

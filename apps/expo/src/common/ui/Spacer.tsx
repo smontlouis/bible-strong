@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import Box from './Box'
 
@@ -15,16 +15,12 @@ const Spacer = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { size = 1 } = props
-  const classStyles = useResolveClassNames(twMerge('', className))
+  const resolvedClassName = twMerge('', className)
   return (
     <Box
       {...props}
-      style={
-        [classStyles, { marginTop: size * 15 }, props.style] as UIComponentProps<
-          typeof Box
-        >['style']
-      }
-      className="overflow-hidden border-continuous"
+      style={[{ marginTop: size * 15 }, props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

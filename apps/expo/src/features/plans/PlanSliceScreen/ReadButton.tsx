@@ -1,7 +1,8 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import { useRouter } from 'expo-router'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
@@ -19,18 +20,16 @@ const StyledLink = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'bg-success w-[60px] h-[60px] rounded-[30px] justify-center items-center flex-row elevation-[2]',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'bg-success w-[60px] h-[60px] rounded-[30px] justify-center items-center flex-row elevation-[2]',
+    className
   )
   return (
     <Link
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             shadowColor: theme.colors.default,
             shadowOffset: { width: 0, height: 4 },
@@ -61,7 +60,7 @@ const ReadButton = ({ readingSliceId, planId, isRead, onRead }: Props) => {
       onRead()
       return
     }
-    router.back()
+    goBackOrHome(router)
   }
   return (
     <StyledLink onPress={onPress} style={{ opacity: isRead ? 0.3 : 1 }}>

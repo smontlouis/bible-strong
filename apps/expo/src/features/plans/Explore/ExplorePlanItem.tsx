@@ -1,3 +1,4 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import { SheetFooter, type SheetFooterProps, type SheetRef } from '~common/sheet'
 import { useRouter } from 'expo-router'
 import { Image } from 'expo-image'
@@ -109,7 +110,7 @@ const ExplorePlanItem = ({
                   .unwrap()
                   .then(() => {
                     setIsLoading(false)
-                    router.back()
+                    goBackOrHome(router)
                     modalRef?.current?.dismiss()
                     toast.success(t('Plan ajouté avec succès'))
                   })

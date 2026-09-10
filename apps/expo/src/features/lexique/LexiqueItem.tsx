@@ -3,7 +3,7 @@ import { useTheme as useStylingTheme, useTheme as useAppTheme } from '~themes/Th
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { Pressable } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import { useTranslation } from 'react-i18next'
@@ -20,17 +20,15 @@ const SectionItem = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'h-[80px] ml-[20px] mr-[20px] bg-reverse border-b-border border-b-[1px] items-start justify-center',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'h-[80px] ml-[20px] mr-[20px] bg-reverse border-b-border border-b-[1px] items-start justify-center',
+    className
   )
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }
@@ -47,20 +45,20 @@ const Chip = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isHebreu } = props
-  const classStyles = useResolveClassNames(
-    twMerge('rounded-[10px] pt-[2px] pb-[2px] pl-[5px] pr-[5px] mb-[3px]', className)
+  const resolvedClassName = twMerge(
+    'rounded-[10px] pt-[2px] pb-[2px] pl-[5px] pr-[5px] mb-[3px]',
+    className
   )
   return (
     <Box
       {...props}
       style={
         [
-          classStyles,
           { backgroundColor: isHebreu ? theme.colors.lightPrimary : theme.colors.border },
           props.style,
         ] as UIComponentProps<typeof Box>['style']
       }
-      className="overflow-hidden border-continuous"
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

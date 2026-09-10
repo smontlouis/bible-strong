@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons'
 import type { ComponentProps, ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -27,14 +27,15 @@ const Container = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-row items-center px-[20px] pt-[20px] pb-[8px] gap-[8px]', className)
+  const resolvedClassName = twMerge(
+    'flex-row items-center px-[20px] pt-[20px] pb-[8px] gap-[8px]',
+    className
   )
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }
@@ -47,15 +48,12 @@ const Title = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('text-[12px] font-semibold text-grey uppercase', className)
-  )
+  const resolvedClassName = twMerge('text-[12px] font-semibold text-grey uppercase', className)
   return (
     <Text
       {...props}
-      style={
-        [classStyles, { letterSpacing: 0.5 }, props.style] as UIComponentProps<typeof Text>['style']
-      }
+      className={resolvedClassName}
+      style={[{ letterSpacing: 0.5 }, props.style] as UIComponentProps<typeof Text>['style']}
     />
   )
 }

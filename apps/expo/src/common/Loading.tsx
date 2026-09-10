@@ -3,7 +3,7 @@ import React from 'react'
 import * as NativeUI from 'react-native'
 import { ActivityIndicator, StyleProp, ViewStyle } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
 
@@ -21,13 +21,12 @@ const Container = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-[1] items-center justify-center min-h-[300px]', className)
-  )
+  const resolvedClassName = twMerge('flex-[1] items-center justify-center min-h-[300px]', className)
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }

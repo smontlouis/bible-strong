@@ -5,7 +5,7 @@ import * as NativeUI from 'react-native'
 import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import EntityChipList from '~common/EntityChipList'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import { SheetHeader, type SheetRef } from '~common/sheet'
@@ -28,13 +28,15 @@ const ItemRow = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-row items-center p-[15px] border-b-[1px] border-b-border', className)
+  const resolvedClassName = twMerge(
+    'flex-row items-center p-[15px] border-b-[1px] border-b-border',
+    className
   )
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }
@@ -47,16 +49,15 @@ const IconContainer = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'w-[36px] h-[36px] rounded-[12px] bg-light-grey items-center justify-center mr-[12px]',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'w-[36px] h-[36px] rounded-[12px] bg-light-grey items-center justify-center mr-[12px]',
+    className
   )
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }

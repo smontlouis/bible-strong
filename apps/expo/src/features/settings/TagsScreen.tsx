@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import { type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import { pageContentStyle } from '~common/ui/PageContent'
@@ -50,17 +50,15 @@ const Chip = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'rounded-[20px] bg-border pt-[3px] pb-[3px] pl-[7px] pr-[7px] mr-[5px] mb-[5px] mt-[5px]',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'rounded-[20px] bg-border pt-[3px] pb-[3px] pl-[7px] pr-[7px] mr-[5px] mb-[5px] mt-[5px]',
+    className
   )
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

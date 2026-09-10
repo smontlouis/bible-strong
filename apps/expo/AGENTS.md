@@ -427,3 +427,12 @@ Risk policy:
 Domain language:
 - Read root `CONTEXT-MAP.md` and this app's `CONTEXT.md`.
 - Read relevant ADRs under `../../docs/adr/` when present.
+
+### Forward Tailwind classes
+
+Pass `className` through shared UI wrappers to the underlying React Native
+component; Uniwind's Metro integration handles native styles and direct Web CSS.
+Do not call `useResolveClassNames` inside UI components. Use `twMerge` for wrapper
+defaults, with caller classes last, and keep computed values in `style`. Custom
+components such as Link must forward classes. Use `withUniwind` for third-party
+style slots (see `common/ui/classNameIcons.ts`). See ADR-0044.

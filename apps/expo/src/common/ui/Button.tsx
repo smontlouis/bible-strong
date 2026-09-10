@@ -9,7 +9,7 @@ import {
   ViewStyle,
 } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import Link, { LinkProps } from '~common/Link'
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
@@ -100,12 +100,13 @@ const WrapperButton = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
 
-  const classStyles = useResolveClassNames(twMerge('', className))
+  const resolvedClassName = twMerge('', className)
   return (
     <NativeUI.TouchableOpacity
       {...props}
+      className={resolvedClassName}
       style={
-        [classStyles, buttonStyles({ ...props, theme }), props.style] as UIComponentProps<
+        [buttonStyles({ ...props, theme }), props.style] as UIComponentProps<
           typeof NativeUI.TouchableOpacity
         >['style']
       }
@@ -129,12 +130,13 @@ const WrapperLink = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
 
-  const classStyles = useResolveClassNames(twMerge('', className))
+  const resolvedClassName = twMerge('', className)
   return (
     <ButtonLink
       {...props}
+      className={resolvedClassName}
       style={
-        [classStyles, buttonStyles({ ...props, theme }), props.style] as UIComponentProps<
+        [buttonStyles({ ...props, theme }), props.style] as UIComponentProps<
           typeof ButtonLink
         >['style']
       }
@@ -156,13 +158,13 @@ const TextButton = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { small, reverse } = props
-  const classStyles = useResolveClassNames(twMerge('font-bold text-[16px]', className))
+  const resolvedClassName = twMerge('font-bold text-[16px]', className)
   return (
     <NativeUI.Text
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             color: reverse ? theme?.colors.default : 'white',
             ...(small && {

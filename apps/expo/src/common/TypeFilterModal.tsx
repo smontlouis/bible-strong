@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import * as NativeUI from 'react-native'
 import { TouchableOpacity } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import type { Theme as AppTheme } from '~themes'
@@ -22,13 +22,15 @@ const TypeRow = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-row items-center p-[16px] border-b-[1px] border-b-border', className)
+  const resolvedClassName = twMerge(
+    'flex-row items-center p-[16px] border-b-[1px] border-b-border',
+    className
   )
   return (
     <TouchableOpacity
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
     />
   )
 }
@@ -41,11 +43,12 @@ const SectionHeader = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('p-[16px] pb-[8px] bg-light-grey', className))
+  const resolvedClassName = twMerge('p-[16px] pb-[8px] bg-light-grey', className)
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }

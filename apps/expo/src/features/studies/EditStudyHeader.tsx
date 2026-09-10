@@ -1,9 +1,10 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
-import * as Icon from '@expo/vector-icons'
+import * as Icon from '~common/ui/classNameIcons'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { memo, useCallback } from 'react'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import PageContent from '~common/ui/PageContent'
 import type { Theme as AppTheme } from '~themes'
 
@@ -35,14 +36,15 @@ const HeaderBox = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('items-center pl-[15px] pr-[15px] border-b-[1px] border-b-border', className)
+  const resolvedClassName = twMerge(
+    'items-center pl-[15px] pr-[15px] border-b-[1px] border-b-border',
+    className
   )
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }
@@ -55,11 +57,12 @@ const ValidateIcon = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('text-success', className))
+  const resolvedClassName = twMerge('text-success', className)
   return (
     <Icon.Feather
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.Feather>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Icon.Feather>['style']}
     />
   )
 }
@@ -73,7 +76,6 @@ type EditHeaderProps = {
   hasBackButton?: boolean
   study: Study
   studyId: string
-  children?: React.ReactNode
 }
 
 const EditHeader = ({
@@ -85,7 +87,6 @@ const EditHeader = ({
   hasBackButton = true,
   study,
   studyId,
-  children,
 }: EditHeaderProps) => {
   const router = useRouter()
   const openInNewTab = useOpenInNewTab()
@@ -106,7 +107,7 @@ const EditHeader = ({
       if (!confirmed) return
       dispatch(deleteStudy(study.id))
       close()
-      router.back()
+      goBackOrHome(router)
     })
   }, [dispatch, study.id, close, router, t, confirmDeletion])
 
@@ -123,7 +124,7 @@ const EditHeader = ({
                 study={study}
                 studyId={studyId}
                 includeRelations
-                afterDelete={() => router.back()}
+                afterDelete={() => goBackOrHome(router)}
               />
             ) : (
               <Link onPress={open} padding>
@@ -131,9 +132,7 @@ const EditHeader = ({
               </Link>
             )
           }
-        >
-          {children}
-        </Header>
+        />
         <Sheet ref={ref}>
           <PublishStudyMenuItem study={study} onClosed={close} />
           <ActionSheetItem

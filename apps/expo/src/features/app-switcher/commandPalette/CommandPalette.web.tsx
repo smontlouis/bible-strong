@@ -1,3 +1,4 @@
+import { resolveUniverseColors } from '~themes/universeColors'
 import { parseBibleReferenceInput } from '~helpers/bcvParser'
 import { paletteScopes, isPassageScope, createScopedPassageTab, type PaletteScope } from './scopes'
 import PlanSuggestions from './PlanSuggestions.web'
@@ -22,7 +23,7 @@ import { getDefaultBibleTab, getDefaultData, tabGroupsAtom, type TabItem } from 
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import { useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'
-import { colorWithOpacity, resolveThemeColor } from '~themes/colorValues'
+import { resolveThemeColor } from '~themes/colorValues'
 import TabIcon, { tabIconColorConfig } from '../utils/getIconByTabType'
 import { useOpenInNewTab } from '../utils/useOpenInNewTab'
 import { useSlideNewTab } from '../utils/useSlideNewTab'
@@ -31,16 +32,15 @@ import { destinations, findTabs, matchesQuery } from './results'
 
 function PaletteItemLabel({ type, children }: { type: TabItem['type']; children: ReactNode }) {
   const theme = useTheme()
-  const color = resolveThemeColor(
-    theme,
-    type === 'bible' ? 'color1' : tabIconColorConfig[type] || 'grey'
-  )
+  const color = resolveThemeColor(theme, tabIconColorConfig[type] || 'grey')
   return (
     <span className="bs-command-item-label">
       <span
         className="bs-command-item-icon"
         aria-hidden="true"
-        style={{ backgroundColor: colorWithOpacity(color, 0.12) }}
+        style={{
+          backgroundColor: resolveUniverseColors(theme.colors, type).background,
+        }}
       >
         <TabIcon type={type} size={16} color={color} />
       </span>
@@ -82,7 +82,7 @@ export default function CommandPalette({ tabAtom, onPlanPress, onDone, inputId }
     inputRef.current?.focus()
   }
   const [focused, setFocused] = useState(false)
-  const showSuggestions = !tabAtom || focused
+  const showSuggestions = Boolean(onDone) || !tabAtom || focused
   const referenceInput = parseBibleReferenceInput(
     query,
     i18n.language.startsWith('fr') ? 'fr' : 'en'
@@ -198,7 +198,7 @@ export default function CommandPalette({ tabAtom, onPlanPress, onDone, inputId }
           asChild
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          autoFocus={!tabAtom}
+          autoFocus={Boolean(onDone) || !tabAtom}
           value={query}
           onValueChange={setQuery}
           placeholder={
@@ -396,7 +396,7 @@ export default function CommandPalette({ tabAtom, onPlanPress, onDone, inputId }
       </Command.List>
       {showSuggestions && (
         <div className="bs-command-footer">
-          {t(tabAtom ? 'commandPalette.keyboardInline' : 'commandPalette.keyboard')}
+          {t(onDone || !tabAtom ? 'commandPalette.keyboard' : 'commandPalette.keyboardInline')}
         </div>
       )}
     </Command>

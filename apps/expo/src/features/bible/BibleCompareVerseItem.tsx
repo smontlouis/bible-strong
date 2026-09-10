@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import * as NativeUI from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import Link from '~common/Link'
@@ -35,13 +35,12 @@ const Container = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('p-[20px] border-t-border border-t-[1px]', className)
-  )
+  const resolvedClassName = twMerge('p-[20px] border-t-border border-t-[1px]', className)
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }

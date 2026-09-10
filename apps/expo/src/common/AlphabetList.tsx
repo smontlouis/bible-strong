@@ -3,7 +3,7 @@ import { useRef, useState } from 'react'
 import { TouchableOpacity } from 'react-native'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import PageContent from '~common/ui/PageContent'
 import { alphabet } from '~helpers/alphabet'
 import type { Theme as AppTheme } from '~themes'
@@ -21,16 +21,15 @@ const StyledText = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { isSelected } = props
-  const classStyles = useResolveClassNames(twMerge('', className))
+  const resolvedClassName = twMerge('', className)
   return (
     <Text
       {...props}
+      className={resolvedClassName}
       style={
-        [
-          classStyles,
-          { fontWeight: isSelected ? 'bold' : 'normal' },
-          props.style,
-        ] as UIComponentProps<typeof Text>['style']
+        [{ fontWeight: isSelected ? 'bold' : 'normal' }, props.style] as UIComponentProps<
+          typeof Text
+        >['style']
       }
     />
   )
@@ -47,20 +46,17 @@ const StyledUnderline = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { color } = props
-  const classStyles = useResolveClassNames(
-    twMerge('mt-[5px] h-[8px] w-[30px] rounded-[5px]', className)
-  )
+  const resolvedClassName = twMerge('mt-[5px] h-[8px] w-[30px] rounded-[5px]', className)
   return (
     <Box
       {...props}
       style={
         [
-          classStyles,
           { backgroundColor: color ? theme.colors[color] : theme.colors.primary },
           props.style,
         ] as UIComponentProps<typeof Box>['style']
       }
-      className="overflow-hidden border-continuous"
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

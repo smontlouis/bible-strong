@@ -13,7 +13,7 @@ export const MAX_BOOKMARKS = 8
 
 // RTK Action Creators
 export const addBookmarkAction = createAction(ADD_BOOKMARK, (bookmark: Bookmark) => ({
-  payload: bookmark,
+  payload: { ...bookmark, createdAt: bookmark.createdAt ?? bookmark.date },
 }))
 
 export const removeBookmark = createAction(REMOVE_BOOKMARK, (bookmarkId: string) => ({

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import * as NativeUI from 'react-native'
 import { useDispatch } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import { type SheetRef } from '~common/sheet'
 import type { Theme as AppTheme } from '~themes'
 
@@ -125,15 +125,12 @@ const EditButton = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('p-[5px]', className))
+  const resolvedClassName = twMerge('p-[5px]', className)
   return (
     <NativeUI.TouchableOpacity
       {...props}
-      style={
-        [classStyles, {}, props.style] as UIComponentProps<
-          typeof NativeUI.TouchableOpacity
-        >['style']
-      }
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']}
     />
   )
 }
@@ -146,15 +143,12 @@ const WarningButton = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('p-[2px]', className))
+  const resolvedClassName = twMerge('p-[2px]', className)
   return (
     <NativeUI.TouchableOpacity
       {...props}
-      style={
-        [classStyles, {}, props.style] as UIComponentProps<
-          typeof NativeUI.TouchableOpacity
-        >['style']
-      }
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']}
     />
   )
 }

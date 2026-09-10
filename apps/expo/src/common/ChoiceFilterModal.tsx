@@ -2,7 +2,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { forwardRef } from 'react'
 import { Pressable } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import { SheetFlatList, SheetHeader, type SheetRef, type SheetSnapPoint } from '~common/sheet'
@@ -18,13 +18,15 @@ const ChoiceRow = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-row items-center p-[16px] border-b-[1px] border-b-border', className)
+  const resolvedClassName = twMerge(
+    'flex-row items-center p-[16px] border-b-[1px] border-b-border',
+    className
   )
   return (
     <Pressable
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Pressable>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Pressable>['style']}
     />
   )
 }

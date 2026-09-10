@@ -1,5 +1,7 @@
 'use dom'
 
+import EntityChipsDOM from '~common/EntityChipsDOM'
+import type { EntityChip } from '~common/entityChips'
 import debounce from 'debounce'
 import { DOMImperativeFactory, useDOMImperativeHandle } from 'expo/dom'
 import type { JSONValue } from 'expo/build/dom/dom.types'
@@ -34,6 +36,11 @@ import './ModuleEntity'
 import { installStudyBlockSelection } from './studyBlockSelection'
 
 interface Props {
+  metadataItems?: EntityChip[]
+  metadataColor?: string
+  metadataBackgroundColor?: string
+  onMetadataPress?: (type: EntityChip['type'], id: string) => Promise<void>
+
   onEditorMessage: (message: string) => Promise<void>
   dom: import('expo/dom').DOMProps
   fontFamily: string
@@ -119,6 +126,10 @@ function normalizeReloadContent(content: JSONValue): DeltaStatic | null {
 }
 
 export default function StudiesDOMComponent({
+  metadataItems = [],
+  metadataColor = 'inherit',
+  metadataBackgroundColor = 'transparent',
+  onMetadataPress,
   onEditorMessage,
   fontFamily,
   language,
@@ -321,6 +332,16 @@ export default function StudiesDOMComponent({
           to { opacity: 1; }
         }
       `}</style>
+      {isReadOnly && (
+        <EntityChipsDOM
+          items={metadataItems}
+          color={metadataColor}
+          backgroundColor={metadataBackgroundColor}
+          onPress={(type, id) => {
+            void onMetadataPress?.(type, id)
+          }}
+        />
+      )}
       <div
         id="editor"
         ref={editorRef}

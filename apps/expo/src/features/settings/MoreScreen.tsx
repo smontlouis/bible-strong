@@ -1,3 +1,5 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
+import { resolveUniverseColors } from '~themes/universeColors'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
 import { Image } from 'expo-image'
@@ -8,7 +10,7 @@ import { memo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Alert, Platform } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -46,13 +48,12 @@ export const LinkItem = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-row items-center px-[20px] py-[15px]', className)
-  )
+  const resolvedClassName = twMerge('flex-row items-center px-[20px] py-[15px]', className)
   return (
     <Link
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Link>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Link>['style']}
     />
   )
 }
@@ -203,36 +204,56 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="Lexique">
-            <IconCircle bg="rgba(59, 130, 246, 0.1)">
-              <LexiqueIcon size={20} color="primary" />
+            <IconCircle bg={resolveUniverseColors(theme.colors, 'strong').background}>
+              <LexiqueIcon size={20} />
             </IconCircle>
-            <Text className="flex-[1] text-primary text-[15px]">{t('Lexique')}</Text>
+            <Text
+              className="flex-[1] text-[15px]"
+              style={{ color: resolveUniverseColors(theme.colors, 'strong').foreground }}
+            >
+              {t('Lexique')}
+            </Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="Dictionnaire">
-            <IconCircle bg="rgba(251, 191, 36, 0.1)">
-              <DictionnaryIcon size={20} color="secondary" />
+            <IconCircle bg={resolveUniverseColors(theme.colors, 'dictionary').background}>
+              <DictionnaryIcon size={20} />
             </IconCircle>
-            <Text className="flex-[1] text-secondary text-[15px]">{t('Dictionnaire')}</Text>
+            <Text
+              className="flex-[1] text-[15px]"
+              style={{ color: resolveUniverseColors(theme.colors, 'dictionary').foreground }}
+            >
+              {t('Dictionnaire')}
+            </Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="Nave">
-            <IconCircle bg="rgba(147, 51, 234, 0.1)">
-              <NaveIcon size={20} color="quint" />
+            <IconCircle bg={resolveUniverseColors(theme.colors, 'nave').background}>
+              <NaveIcon size={20} />
             </IconCircle>
-            <Text className="flex-[1] text-quint text-[15px]">{t('Bible Thématique Nave')}</Text>
+            <Text
+              className="flex-[1] text-[15px]"
+              style={{ color: resolveUniverseColors(theme.colors, 'nave').foreground }}
+            >
+              {t('Bible Thématique Nave')}
+            </Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="CommentaryLibrary">
-            <IconCircle bg="rgba(38, 166, 154, 0.1)">
+            <IconCircle bg={resolveUniverseColors(theme.colors, 'commentary').background}>
               <Image
                 source={require('~assets/images/tab-icons/comment.svg')}
                 style={{ width: 20, height: 20 }}
-                tintColor="#26A69A"
+                tintColor={resolveUniverseColors(theme.colors, 'commentary').foreground}
                 contentFit="contain"
               />
             </IconCircle>
-            <Text className="flex-[1] text-[#26A69A] text-[15px]">{t('Commentaires')}</Text>
+            <Text
+              className="flex-[1] text-[15px]"
+              style={{ color: resolveUniverseColors(theme.colors, 'commentary').foreground }}
+            >
+              {t('Commentaires')}
+            </Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="Plans" isLast>
@@ -461,7 +482,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
 
 const MoreScreen = () => {
   const router = useRouter()
-  const closeMenu = () => router.back()
+  const closeMenu = () => goBackOrHome(router)
 
   const isWide = useResponsiveWorkspace()
   return <More closeMenu={closeMenu} inWorkspace={isWide} />

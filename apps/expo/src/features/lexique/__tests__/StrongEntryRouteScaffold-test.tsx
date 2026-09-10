@@ -1,6 +1,7 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import StrongEntryRouteScaffold from '../StrongEntryRouteScaffold'
+import StrongEntryMetadata from '../StrongEntryMetadata'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
 const mockOpenEntityRelations = jest.fn()
 const tags = { tag1: { id: 'tag1', name: 'À revoir' } }
@@ -107,7 +108,7 @@ describe('StrongEntryRouteScaffold', () => {
     consoleError.mockRestore()
   })
 
-  it('shows Strong tags and relations inside the detail header', () => {
+  it('keeps Strong metadata in the content and preserves relation navigation', () => {
     act(() => {
       renderer = create(
         <StrongEntryRouteScaffold
@@ -130,11 +131,17 @@ describe('StrongEntryRouteScaffold', () => {
           }
           title="Étude de mot"
         >
-          <></>
+          <StrongEntryMetadata
+            entry={
+              { stepCode: 'H0310A', language: 'hebrew', gloss: 'après', original: 'אַחַר' } as never
+            }
+          />
         </StrongEntryRouteScaffold>
       )
     })
 
+    const header = renderer.root.find(node => String(node.type) === 'Header')
+    expect(header.findAll(node => String(node.type) === 'EntityChipList')).toHaveLength(0)
     const chips = renderer.root.find(node => String(node.type) === 'EntityChipList')
     expect(chips.props.tags).toBe(tags)
     expect(chips.props.relationCount).toBe(3)

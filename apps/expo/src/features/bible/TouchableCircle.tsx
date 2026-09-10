@@ -2,7 +2,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import * as NativeUI from 'react-native'
 import { TouchableOpacityProps, ViewProps } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 const Touchable = (
@@ -13,17 +13,12 @@ const Touchable = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-[1] items-center justify-center', className)
-  )
+  const resolvedClassName = twMerge('flex-[1] items-center justify-center', className)
   return (
     <NativeUI.TouchableOpacity
       {...props}
-      style={
-        [classStyles, {}, props.style] as UIComponentProps<
-          typeof NativeUI.TouchableOpacity
-        >['style']
-      }
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']}
     />
   )
 }
@@ -40,13 +35,13 @@ const Container = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { color, size } = props
-  const classStyles = useResolveClassNames(twMerge('', className))
+  const resolvedClassName = twMerge('', className)
   return (
     <NativeUI.View
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           { width: size, height: size, borderRadius: size / 3, backgroundColor: color },
           props.style,
         ] as UIComponentProps<typeof NativeUI.View>['style']

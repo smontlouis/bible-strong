@@ -3,7 +3,7 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import MultipleChoiceFilterModal from '../MultipleChoiceFilterModal'
 jest.mock('~themes/ThemeProvider', () => ({ useTheme: () => ({ colors: {} }) }))
 // Behavioral tests do not run Metro's generated Uniwind stylesheet.
-jest.mock('uniwind', () => ({ useResolveClassNames: () => ({}) }))
+jest.mock('uniwind', () => ({ withUniwind: (component: unknown) => component }))
 
 jest.mock('react-native', () => {
   const ReactModule = jest.requireActual<typeof React>('react')

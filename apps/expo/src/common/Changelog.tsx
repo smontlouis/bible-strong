@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import * as NativeUI from 'react-native'
 import { Platform } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ModalSheet'
 import type { Theme as AppTheme } from '~themes'
@@ -51,12 +51,13 @@ export const ChangelogTag = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { type } = props
-  const classStyles = useResolveClassNames(twMerge('ml-[10px] p-[3px] rounded-[3px]', className))
+  const resolvedClassName = twMerge('ml-[10px] p-[3px] rounded-[3px]', className)
   return (
     <NativeUI.View
       {...props}
+      className={resolvedClassName}
       style={
-        [classStyles, { backgroundColor: getTagColor(type) }, props.style] as UIComponentProps<
+        [{ backgroundColor: getTagColor(type) }, props.style] as UIComponentProps<
           typeof NativeUI.View
         >['style']
       }

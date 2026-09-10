@@ -27,6 +27,7 @@ jest.mock('react-i18next', () => ({
 jest.mock('~common/Link', () => () => null)
 jest.mock('~common/NaveIcon', () => () => null)
 jest.mock('~common/LexiqueIcon', () => () => null)
+jest.mock('~common/icons/ResourceIcon', () => () => null)
 jest.mock('~common/DictionnaryIcon', () => () => null)
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: () => null }))
 jest.mock('~common/ui/Paragraph', () => () => null)

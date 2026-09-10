@@ -1,5 +1,6 @@
 // Mock react-native before other imports
 import type { Bookmark } from '~common/types'
+import { selectLatestAddedBookmark } from '~redux/selectors/bookmarks'
 import userReducer, { UserState } from '../user'
 import {
   addBookmarkAction,
@@ -164,7 +165,10 @@ describe('Bookmarks Reducer', () => {
     it('should add a bookmark', () => {
       const bookmark = createBookmark('bookmark-1')
       const newState = userReducer(initialState, addBookmarkAction(bookmark))
-      expect(newState.bible.bookmarks['bookmark-1']).toEqual(bookmark)
+      expect(newState.bible.bookmarks['bookmark-1']).toEqual({
+        ...bookmark,
+        createdAt: bookmark.date,
+      })
     })
 
     it('should add multiple bookmarks', () => {
@@ -268,6 +272,41 @@ describe('Bookmarks Reducer', () => {
   })
 
   describe('moveBookmark', () => {
+    it('resumes the latest added bookmark even after an older one is moved', () => {
+      let state = userReducer(
+        initialState,
+        addBookmarkAction(createBookmark('older', { date: 100 }))
+      )
+      state = userReducer(state, addBookmarkAction(createBookmark('newer', { date: 200 })))
+      state = userReducer(state, moveBookmark('older', { book: 2, chapter: 3 }))
+      expect(state.bible.bookmarks.older.createdAt).toBe(100)
+      expect(selectLatestAddedBookmark.resultFunc(state.bible.bookmarks)?.id).toBe('newer')
+      state = userReducer(
+        state,
+        moveBookmark('newer', { book: 19, chapter: 68, verse: 4, version: 'BDS' })
+      )
+      expect(selectLatestAddedBookmark.resultFunc(state.bible.bookmarks)).toMatchObject({
+        id: 'newer',
+        book: 19,
+        chapter: 68,
+        verse: 4,
+        version: 'BDS',
+        createdAt: 200,
+      })
+      state = userReducer(state, removeBookmark('newer'))
+      expect(selectLatestAddedBookmark.resultFunc(state.bible.bookmarks)?.id).toBe('older')
+      state = userReducer(state, removeBookmark('older'))
+      expect(selectLatestAddedBookmark.resultFunc(state.bible.bookmarks)).toBeUndefined()
+    })
+
+    it('preserves the known date when moving a legacy bookmark', () => {
+      initialState.bible.bookmarks.legacy = createBookmark('legacy', { date: 100 })
+      initialState.bible.bookmarks.newer = createBookmark('newer', { date: 200 })
+      const state = userReducer(initialState, moveBookmark('legacy', { book: 2, chapter: 1 }))
+      expect(state.bible.bookmarks.legacy.createdAt).toBe(100)
+      expect(selectLatestAddedBookmark.resultFunc(state.bible.bookmarks)?.id).toBe('newer')
+    })
+
     it('should move bookmark to new location', () => {
       const state = {
         ...initialState,

@@ -13,15 +13,20 @@ jest.mock('react-native', () => ({
   Platform: { OS: 'web' },
   useWindowDimensions: () => ({ width: 1600 }),
 }))
-jest.mock('jotai', () => ({ useAtom: () => [false, jest.fn()] }))
+jest.mock('jotai', () => ({ useAtom: () => [false, jest.fn()], useSetAtom: () => jest.fn() }))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 jest.mock('~navigation/pageTransition', () => ({
   finishPageTransition: jest.fn(),
   navigateWithPageTransition: jest.fn(),
 }))
 jest.mock('~navigation/useWorkspaceRoutePanel', () => ({
-  useWorkspaceRoutePanel: () => ({ open: true, showsStudy: mockShowsStudy, reservedWidth: 500 }),
-  WORKSPACE_DOCKED_SIDEBAR_BREAKPOINT: 1400,
+  useWorkspaceRoutePanel: () => ({
+    open: true,
+    showsStudy: mockShowsStudy,
+    reservedWidth: 500,
+    sidebarDocked: true,
+  }),
+  workspaceSidebarDockedAtom: {},
   workspaceSidebarHiddenAtom: {},
 }))
 jest.mock('~common/ui/Box', () => ({

@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
@@ -59,17 +59,15 @@ const SmallCircle = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'w-[6px] h-[6px] opacity-[0.5] bg-primary rounded-[3px] items-center justify-center',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'w-[6px] h-[6px] opacity-[0.5] bg-primary rounded-[3px] items-center justify-center',
+    className
   )
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }
@@ -88,15 +86,15 @@ const Circle = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isComplete, isNext, isSectionCompleted } = props
-  const classStyles = useResolveClassNames(
-    twMerge('w-[18px] h-[18px] rounded-[9px] items-center justify-center', className)
+  const resolvedClassName = twMerge(
+    'w-[18px] h-[18px] rounded-[9px] items-center justify-center',
+    className
   )
   return (
     <Box
       {...props}
       style={
         [
-          classStyles,
           {
             backgroundColor: isSectionCompleted
               ? theme.colors.success
@@ -111,7 +109,7 @@ const Circle = (
           props.style,
         ] as UIComponentProps<typeof Box>['style']
       }
-      className="overflow-hidden border-continuous"
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }
@@ -124,13 +122,12 @@ const Line = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isComplete, isNext, isSectionCompleted } = props
-  const classStyles = useResolveClassNames(twMerge('h-[10px]', className))
+  const resolvedClassName = twMerge('h-[10px]', className)
   return (
     <Box
       {...props}
       style={
         [
-          classStyles,
           {
             width: isComplete || isNext ? 3 : 2,
             backgroundColor: isSectionCompleted
@@ -142,7 +139,7 @@ const Line = (
           props.style,
         ] as UIComponentProps<typeof Box>['style']
       }
-      className="overflow-hidden border-continuous"
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

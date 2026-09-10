@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import * as NativeUI from 'react-native'
 import Carousel from 'react-native-reanimated-carousel'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
@@ -25,13 +25,12 @@ const Container = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('bg-light-grey pt-[20px] pb-[0px] overflow-visible', className)
-  )
+  const resolvedClassName = twMerge('bg-light-grey pt-[20px] pb-[0px] overflow-visible', className)
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }

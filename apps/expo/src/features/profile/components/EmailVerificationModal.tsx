@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import * as NativeUI from 'react-native'
 import { ActivityIndicator } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import { SheetHeader, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ModalSheet'
 import type { Theme as AppTheme } from '~themes'
@@ -70,12 +70,12 @@ const WarningIcon = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('bg-quart rounded-[20px] p-[8px]', className))
+  const resolvedClassName = twMerge('bg-quart rounded-[20px] p-[8px]', className)
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }
@@ -88,17 +88,15 @@ const ResendButton = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('py-[12px] px-[20px] bg-primary rounded-[10px] items-center', className)
+  const resolvedClassName = twMerge(
+    'py-[12px] px-[20px] bg-primary rounded-[10px] items-center',
+    className
   )
   return (
     <NativeUI.TouchableOpacity
       {...props}
-      style={
-        [classStyles, {}, props.style] as UIComponentProps<
-          typeof NativeUI.TouchableOpacity
-        >['style']
-      }
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']}
     />
   )
 }

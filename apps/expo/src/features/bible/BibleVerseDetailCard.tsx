@@ -1,9 +1,10 @@
+import { getUniverseColor } from '~themes/universeColors'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useEffect, useRef, useState } from 'react'
 import * as NativeUI from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
 
@@ -74,13 +75,15 @@ const VersetWrapper = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('w-[25px] mr-[5px] border-r-[3px] border-r-[transparent] items-end', className)
+  const resolvedClassName = twMerge(
+    'w-[25px] mr-[5px] border-r-[3px] border-r-[transparent] items-end',
+    className
   )
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }
@@ -93,13 +96,12 @@ const NumberText = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('mt-[0px] text-[9px] justify-end mr-[3px]', className)
-  )
+  const resolvedClassName = twMerge('mt-[0px] text-[9px] justify-end mr-[3px]', className)
   return (
     <Paragraph
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Paragraph>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Paragraph>['style']}
     />
   )
 }
@@ -112,13 +114,12 @@ const StyledVerse = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('pl-[0px] pr-[10px] mb-[5px] flex-row', className)
-  )
+  const resolvedClassName = twMerge('pl-[0px] pr-[10px] mb-[5px] flex-row', className)
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }
@@ -489,7 +490,9 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       return (
         <Container>
           <Empty
-            iconElement={<FeatherIcon name="book-open" size={36} color="tertiary" />}
+            iconElement={
+              <FeatherIcon name="book-open" size={36} color={getUniverseColor('bible')} />
+            }
             message={t('resource.strong.noLexiconForVerse')}
           />
         </Container>
@@ -500,7 +503,9 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       return (
         <Container>
           <Empty
-            iconElement={<FeatherIcon name="book-open" size={36} color="tertiary" />}
+            iconElement={
+              <FeatherIcon name="book-open" size={36} color={getUniverseColor('bible')} />
+            }
             message={t('strongSource.unavailableMessage')}
           >
             <Box className="overflow-hidden border-continuous mt-[24px] w-[260px]">

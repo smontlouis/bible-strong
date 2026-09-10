@@ -4,7 +4,7 @@ import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess
 import StrongCard from '../StrongCard'
 jest.mock('~themes/ThemeProvider', () => ({ useTheme: () => ({ colors: {} }) }))
 // Behavioral tests do not run Metro's generated Uniwind stylesheet.
-jest.mock('uniwind', () => ({ useResolveClassNames: () => ({}) }))
+jest.mock('uniwind', () => ({ withUniwind: (component: unknown) => component }))
 
 const mockPushRouteOnce = jest.fn()
 const mockDismissTo = jest.fn()

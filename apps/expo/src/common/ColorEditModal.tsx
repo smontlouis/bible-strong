@@ -5,7 +5,7 @@ import * as NativeUI from 'react-native'
 import { TouchableOpacity } from 'react-native'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import { SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme, useTheme } from '~themes/ThemeProvider'
@@ -28,16 +28,15 @@ const StyledTextInput = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'flex-[1] text-[16px] py-[10px] px-[12px] bg-opacity5 rounded-[8px] text-default',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'flex-[1] text-[16px] py-[10px] px-[12px] bg-opacity5 rounded-[8px] text-default',
+    className
   )
   return (
     <SheetTextInput
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof SheetTextInput>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof SheetTextInput>['style']}
     />
   )
 }
@@ -50,11 +49,12 @@ const TypeSelectorContainer = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('flex-row mt-[10px]', className))
+  const resolvedClassName = twMerge('flex-row mt-[10px]', className)
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }
@@ -70,15 +70,16 @@ const TypeButton = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isSelected } = props
-  const classStyles = useResolveClassNames(
-    twMerge('flex-[1] py-[10px] px-[8px] rounded-[8px] items-center', className)
+  const resolvedClassName = twMerge(
+    'flex-[1] py-[10px] px-[8px] rounded-[8px] items-center',
+    className
   )
   return (
     <TouchableOpacity
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           { backgroundColor: isSelected ? theme.colors.primary : theme.colors.opacity5 },
           props.style,
         ] as UIComponentProps<typeof TouchableOpacity>['style']
@@ -95,13 +96,15 @@ const PreviewContainer = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('p-[15px] rounded-[8px] bg-opacity5 mt-[10px] mb-[15px] h-[80px]', className)
+  const resolvedClassName = twMerge(
+    'p-[15px] rounded-[8px] bg-opacity5 mt-[10px] mb-[15px] h-[80px]',
+    className
   )
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }

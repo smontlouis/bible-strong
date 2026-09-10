@@ -1,3 +1,4 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import { type SheetRef } from '~common/sheet'
 import React, { useRef, useState } from 'react'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
@@ -133,7 +134,7 @@ const TagScreen = () => {
       })
     ) {
       dispatch(removeTag(tag.id))
-      router.back()
+      goBackOrHome(router)
     }
   }
 

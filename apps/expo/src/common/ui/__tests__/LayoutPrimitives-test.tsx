@@ -5,20 +5,6 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import Box, { HStack, VStack, SafeAreaBox, type BoxProps } from '../Box'
 
 // Metro compiles classes; this test covers our composition and ref contract.
-jest.mock('uniwind', () => ({
-  useResolveClassNames: (classes: string) =>
-    Object.assign(
-      {},
-      ...classes.split(' ').map(name => {
-        const styles: Record<string, object> = {
-          'flex-row': { flexDirection: 'row' },
-          'flex-col': { flexDirection: 'column' },
-          'p-4': { padding: 16 },
-        }
-        return styles[name]
-      })
-    ),
-}))
 jest.mock('react-native', () => ({
   View: 'View',
   TouchableOpacity: 'TouchableOpacity',
@@ -40,7 +26,10 @@ jest.mock('~themes/ThemeProvider', () => ({
 }))
 
 const flattenedStyle = (renderer: ReactTestRenderer) =>
-  Object.assign({}, ...renderer.root.findByType('View' as React.ElementType).props.style)
+  renderer.root.findByType('View' as React.ElementType).props.style ?? {}
+
+const classes = (renderer: ReactTestRenderer) =>
+  renderer.root.findByType('View' as React.ElementType).props.className ?? ''
 
 describe('layout primitives', () => {
   let renderer: ReactTestRenderer
@@ -59,20 +48,30 @@ describe('layout primitives', () => {
         createNodeMock: () => nativeView,
       })
     })
-    expect(flattenedStyle(renderer).flexDirection).toBe('row')
+    expect(classes(renderer)).toBe('flex-row')
     expect(ref.current).toBe(nativeView)
     act(() => renderer.update(<HStack testID="stack" className="flex-col" />))
-    expect(flattenedStyle(renderer).flexDirection).toBe('column')
+    expect(classes(renderer)).toBe('flex-col')
     act(() => renderer.update(<VStack testID="stack" />))
-    expect(flattenedStyle(renderer).flexDirection).toBe('column')
+    expect(classes(renderer)).toBe('flex-col')
     expect(renderer.root.findByType('View' as React.ElementType).props.testID).toBe('stack')
+  })
+
+  it('forwards classes and styles through a custom as component', () => {
+    const Custom = (props: BoxProps) => <Box {...props} />
+    const style = { padding: 24 }
+    act(() => {
+      renderer = create(<Box as={Custom} className="p-4" style={style} />)
+    })
+    expect(classes(renderer)).toBe('p-4')
+    expect(flattenedStyle(renderer)).toBe(style)
   })
 
   it('forwards caller classes through the safe-area variant', () => {
     act(() => {
       renderer = create(<SafeAreaBox className="p-4" />)
     })
-    expect(flattenedStyle(renderer).padding).toBe(16)
+    expect(classes(renderer).split(' ')).toContain('p-4')
   })
 
   it('forwards focus-group metadata on web without sending web-only props to native views', () => {
@@ -102,9 +101,10 @@ describe('layout primitives', () => {
       backgroundColor: 'rgba(37, 62, 81, 0.3)',
     })
     act(() => renderer.update(<Box className="p-4" />))
-    expect(flattenedStyle(renderer).padding).toBe(16)
+    expect(classes(renderer).split(' ')).toContain('p-4')
     act(() => renderer.update(<Box />))
     expect(flattenedStyle(renderer)).toEqual({})
+    expect(classes(renderer)).toBe('')
   })
 })
 

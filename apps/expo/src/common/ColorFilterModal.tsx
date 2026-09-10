@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import * as NativeUI from 'react-native'
 import { TouchableOpacity } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import type { Theme as AppTheme } from '~themes'
@@ -22,16 +22,13 @@ const ColorCircle = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { color } = props
-  const classStyles = useResolveClassNames(
-    twMerge('w-[24px] h-[24px] rounded-[6px] mr-[12px]', className)
-  )
+  const resolvedClassName = twMerge('w-[24px] h-[24px] rounded-[6px] mr-[12px]', className)
   return (
     <NativeUI.View
       {...props}
+      className={resolvedClassName}
       style={
-        [classStyles, { backgroundColor: color }, props.style] as UIComponentProps<
-          typeof NativeUI.View
-        >['style']
+        [{ backgroundColor: color }, props.style] as UIComponentProps<typeof NativeUI.View>['style']
       }
     />
   )
@@ -45,13 +42,15 @@ const ColorRow = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-row items-center p-[16px] border-b-[1px] border-b-border', className)
+  const resolvedClassName = twMerge(
+    'flex-row items-center p-[16px] border-b-[1px] border-b-border',
+    className
   )
   return (
     <TouchableOpacity
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
     />
   )
 }

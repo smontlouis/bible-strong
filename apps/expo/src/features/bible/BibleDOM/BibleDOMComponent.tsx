@@ -1,5 +1,7 @@
 'use dom'
 
+import EntityChipsDOM from '~common/EntityChipsDOM'
+import type { EntityChip } from '~common/entityChips'
 import { READING_TEXT_MAX_WIDTH, BIBLE_READING_HORIZONTAL_PADDING } from '~common/readingLayout'
 import { setup, styled, keyframes } from 'goober'
 import { createGlobalStyles } from 'goober/global'
@@ -181,6 +183,8 @@ type Props = Pick<
   | 'chapterEntityModuleStatus'
   | 'chapterEntityDownloadState'
 > & {
+  focusedMetadataItems?: EntityChip[]
+  onFocusedMetadataPress?: (type: EntityChip['type'], id: string) => Promise<void>
   dispatch: Dispatch
   dom: import('expo/dom').DOMProps
   translations: BibleDOMTranslations
@@ -549,6 +553,8 @@ function isClickInsideSelection(
 // ============================================================================
 
 const LoadedBibleContent = ({
+  focusedMetadataItems = [],
+  onFocusedMetadataPress,
   verses,
   parallelVerses,
   parallelColumnWidth: preferredColumnWidth = 75,
@@ -1327,6 +1333,15 @@ const LoadedBibleContent = ({
                 isCompact={!passageMedia.isIntroductionStartChapter}
               />
             )}
+            {/* Keep introduction media at its original scroll origin. Metadata follows it. */}
+            <EntityChipsDOM
+              items={focusedMetadataItems}
+              color={settings.colors[settings.theme].primary}
+              backgroundColor={settings.colors[settings.theme].lightPrimary}
+              onPress={(type, id) => {
+                void onFocusedMetadataPress?.(type, id)
+              }}
+            />
             <m.div {...versePositionLayoutProps}>
               {/* Unified verse rendering for all modes */}
               <UnifiedVersesRenderer

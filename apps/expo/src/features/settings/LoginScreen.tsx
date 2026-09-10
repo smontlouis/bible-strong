@@ -1,3 +1,4 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useEffect } from 'react'
@@ -20,7 +21,7 @@ const LoginScreen = () => {
 
   useEffect(() => {
     if (isLogged) {
-      router.back()
+      goBackOrHome(router)
     }
   }, [isLogged, router])
 

@@ -4,7 +4,7 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 // Behavioral tests do not run Metro's generated Uniwind stylesheet.
-jest.mock('uniwind', () => ({ useResolveClassNames: () => ({}) }))
+jest.mock('uniwind', () => ({ withUniwind: (component: unknown) => component }))
 
 const mockLoadVerse = jest.fn()
 const mockEnrichVerse = jest.fn(async (_request: unknown, result: unknown) => result)

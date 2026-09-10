@@ -19,7 +19,10 @@ jest.mock(
   { virtual: true }
 )
 jest.mock('~themes/ThemeProvider', () => ({
-  useTheme: () => ({ colors: {}, fontFamily: { text: 'Arial', title: 'Arial' } }),
+  useTheme: () => ({
+    colors: { default: '#102030', reverse: '#ffffff', lightPrimary: '#ddeeff', quart: '#cc2233' },
+    fontFamily: { text: 'Arial', title: 'Arial' },
+  }),
 }))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: 'Icon' }))
@@ -53,6 +56,12 @@ it('preserves the current form while a nested selector is open and after going b
     )
   })
   act(() => view!.root.findByType('Popover' as React.ElementType).props.onOpenChange(true))
+  expect(view!.root.findByType('Content' as React.ElementType).props.style).toMatchObject({
+    '--color-default': '#102030',
+    '--color-reverse': '#ffffff',
+    '--color-light-primary': '#ddeeff',
+    '--color-quart': '#cc2233',
+  })
   act(() => view!.root.findByType('input').props.onChange({ target: { value: 'Genèse 1' } }))
   act(() => navigation.open('selector'))
   expect(view!.root.findByType('input').props.value).toBe('Genèse 1')
@@ -60,5 +69,29 @@ it('preserves the current form while a nested selector is open and after going b
   act(() => navigation.back())
   expect(view!.root.findByType('input').props.value).toBe('Genèse 1')
   expect(view!.root.findByType('Content' as React.ElementType).props.style.width).toBe(340)
+  act(() => view!.unmount())
+})
+
+it('does not rebuild list content when the header portal targets mount', () => {
+  const renderRow = jest.fn()
+  function Row() {
+    renderRow()
+    return <span>Row</span>
+  }
+  const content = jest.fn(() => <Row />)
+  let view: ReactTestRenderer
+  act(() => {
+    view = create(
+      <ContextualPanel
+        trigger={null}
+        accessibilityLabel="List"
+        initialScreen="list"
+        screens={{ list: { title: 'List', content } }}
+      />,
+      { createNodeMock: () => ({}) }
+    )
+  })
+  expect(content).toHaveBeenCalledTimes(1)
+  expect(renderRow).toHaveBeenCalledTimes(1)
   act(() => view!.unmount())
 })

@@ -3,7 +3,7 @@ import React from 'react'
 import * as NativeUI from 'react-native'
 import { TextInputProps as RNTextInputProps } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import Box from '~common/ui/Box'
 import type { Theme as AppTheme } from '~themes'
 import { Theme } from '~themes'
@@ -23,14 +23,16 @@ const StyledTextInput = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { leftIcon } = props
-  const classStyles = useResolveClassNames(
-    twMerge('text-default h-[48px] border-border border-[2px] rounded-[10px]', className)
+  const resolvedClassName = twMerge(
+    'text-default h-[48px] border-border border-[2px] rounded-[10px]',
+    className
   )
   return (
     <NativeUI.TextInput
       {...props}
+      className={resolvedClassName}
       style={
-        [classStyles, { paddingLeft: leftIcon ? 45 : 15 }, props.style] as UIComponentProps<
+        [{ paddingLeft: leftIcon ? 45 : 15 }, props.style] as UIComponentProps<
           typeof NativeUI.TextInput
         >['style']
       }
@@ -46,12 +48,12 @@ const LeftIcon = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('absolute left-[15px] bottom-[13px]', className))
+  const resolvedClassName = twMerge('absolute left-[15px] bottom-[13px]', className)
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

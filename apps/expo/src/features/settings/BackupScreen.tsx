@@ -1,8 +1,8 @@
-import * as Icon from '@expo/vector-icons'
+import * as Icon from '~common/ui/classNameIcons'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import Header from '~common/Header'
 import Link, { LinkProps } from '~common/Link'
 import Container from '~common/ui/Container'
@@ -20,13 +20,12 @@ const LinkItem = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-row items-center px-[20px] py-[15px]', className)
-  )
+  const resolvedClassName = twMerge('flex-row items-center px-[20px] py-[15px]', className)
   return (
     <Link
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Link>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Link>['style']}
     />
   )
 }
@@ -39,11 +38,12 @@ const StyledIcon = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('text-grey mr-[15px]', className))
+  const resolvedClassName = twMerge('text-grey mr-[15px]', className)
   return (
     <Icon.Feather
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.Feather>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Icon.Feather>['style']}
     />
   )
 }

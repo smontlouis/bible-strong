@@ -2,7 +2,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useState } from 'react'
 import type { GestureResponderEvent } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -20,17 +20,15 @@ const StyledChip = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'rounded-[20px] bg-light-primary pt-[3px] pb-[3px] pl-[7px] pr-[7px] mr-[5px] mb-[2px] mt-[5px]',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'rounded-[20px] bg-light-primary pt-[3px] pb-[3px] pl-[7px] pr-[7px] mr-[5px] mb-[2px] mt-[5px]',
+    className
   )
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

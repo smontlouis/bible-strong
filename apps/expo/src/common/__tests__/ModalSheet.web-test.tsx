@@ -20,7 +20,10 @@ jest.mock(
 )
 jest.mock('../modal-sheet.css', () => ({}))
 jest.mock('~themes/ThemeProvider', () => ({
-  useTheme: () => ({ colors: {}, fontFamily: { title: 'Arial', text: 'Arial' } }),
+  useTheme: () => ({
+    colors: { default: '#111', reverse: '#fff', lightPrimary: '#eef' },
+    fontFamily: { title: 'Arial', text: 'Arial' },
+  }),
 }))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 jest.mock('../ui/Icon', () => ({ FeatherIcon: 'Icon' }))
@@ -50,6 +53,11 @@ it('keeps imperative lifecycle notifications single and respects non-dismissable
   })
   const backdrop = () => view!.root.findByType('Backdrop' as React.ElementType)
   expect(backdrop().props.isOpen).toBe(true)
+  expect(view!.root.findByType('Dialog' as React.ElementType).props.style).toMatchObject({
+    '--color-default': '#111',
+    '--color-reverse': '#fff',
+    '--color-light-primary': '#eef',
+  })
   expect(backdrop().props.isDismissable).toBe(false)
   expect(backdrop().props.isKeyboardDismissDisabled).toBe(true)
   expect(onPresent).toHaveBeenCalledTimes(1)

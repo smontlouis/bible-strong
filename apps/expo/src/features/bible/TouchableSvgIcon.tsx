@@ -2,7 +2,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { ComponentType } from 'react'
 import * as NativeUI from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
 
@@ -25,14 +25,13 @@ const Touchable = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { disabled } = props
-  const classStyles = useResolveClassNames(
-    twMerge('flex-[1] items-center justify-center', className)
-  )
+  const resolvedClassName = twMerge('flex-[1] items-center justify-center', className)
   return (
     <NativeUI.TouchableOpacity
       {...props}
+      className={resolvedClassName}
       style={
-        [classStyles, { opacity: disabled ? 0.3 : 1 }, props.style] as UIComponentProps<
+        [{ opacity: disabled ? 0.3 : 1 }, props.style] as UIComponentProps<
           typeof NativeUI.TouchableOpacity
         >['style']
       }

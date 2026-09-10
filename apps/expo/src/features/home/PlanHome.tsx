@@ -1,3 +1,4 @@
+import { getUniverseColor } from '~themes/universeColors'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { twMerge } from '~common/ui/classNames'
@@ -84,7 +85,7 @@ const useGetFirstPlans = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 }
-const PlanHome = () => {
+const PlanHome = ({ compact = false }: { compact?: boolean }) => {
   const stylingTheme = useStylingTheme()
 
   const { t } = useTranslation()
@@ -96,6 +97,57 @@ const PlanHome = () => {
 
   useUpdatePlans()
   useGetFirstPlans()
+
+  if (compact) {
+    const percent = Math.round(Math.max(0, Math.min(1, progress ?? 0)) * 100)
+    return (
+      <Box className="gap-[20px]">
+        <Box className="flex-row flex-wrap items-center justify-between gap-[12px]">
+          <Text className="font-bold text-[19px]">{t('home.dashboard.currentPlan')}</Text>
+        </Box>
+        {id && currentPlan ? (
+          <LinkBox route="Plan" params={{ planId: id, plan: currentPlan }} className="gap-[20px]">
+            <Box className="flex-row items-center gap-[16px]">
+              <Box className="w-[80px] h-[80px] rounded-[12px] bg-light-primary overflow-hidden items-center justify-center">
+                {cacheImage ? (
+                  <Image
+                    source={{ uri: cacheImage }}
+                    contentFit="cover"
+                    style={{ width: '100%', height: '100%' }}
+                    accessible={false}
+                  />
+                ) : (
+                  <FeatherIcon name="book-open" size={32} color={getUniverseColor('bible')} />
+                )}
+              </Box>
+              <Box className="flex-1 gap-[10px]">
+                <Text className="text-[19px] font-bold">{title}</Text>
+                <Text className="text-grey text-[12px]">
+                  {t('home.dashboard.planProgress', { percent })}
+                </Text>
+                <Box
+                  accessibilityRole="progressbar"
+                  accessibilityValue={{ min: 0, max: 100, now: percent }}
+                  className="h-[5px] rounded-full bg-light-primary overflow-hidden"
+                >
+                  <Box
+                    className="h-full bg-primary rounded-full"
+                    style={{ width: `${percent}%` }}
+                  />
+                </Box>
+              </Box>
+            </Box>
+            <Box className="flex-row items-center justify-between bg-light-primary rounded-[12px] px-[16px] py-[13px]">
+              <Text className="text-primary text-[13px] font-bold">{t('Continuer ce plan')}</Text>
+              <FeatherIcon name="arrow-right" size={17} color="primary" />
+            </Box>
+          </LinkBox>
+        ) : (
+          <Text className="text-grey text-[13px]">{t("Vous n'avez aucun plan")}</Text>
+        )}
+      </Box>
+    )
+  }
 
   return (
     <Box className="overflow-hidden border-continuous bg-light-grey px-[20px] pt-[20px]">

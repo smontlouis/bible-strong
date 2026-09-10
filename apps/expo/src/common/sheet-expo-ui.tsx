@@ -25,6 +25,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import PageContent from '~common/ui/PageContent'
 import { useTheme } from '~themes/ThemeProvider'
+import { webThemeVariables } from '~themes/webThemeVariables'
 
 import Back from '~common/Back'
 import type {
@@ -212,6 +213,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
         backdropComponent={backdrop ? undefined : null}
         backgroundStyle={
           {
+            ...webThemeVariables(theme.colors),
             backgroundColor: backgroundColor || theme.colors.reverse,
             borderTopLeftRadius: cornerRadius,
             borderTopRightRadius: cornerRadius,

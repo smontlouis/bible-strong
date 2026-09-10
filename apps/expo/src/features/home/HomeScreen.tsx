@@ -1,3 +1,4 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
@@ -5,6 +6,7 @@ import Color from 'color'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
 import React from 'react'
 import { Linking, Platform, ScrollView as RNScrollView } from 'react-native'
+import DesktopHome from './DesktopHome'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -38,8 +40,11 @@ export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const isWide = useResponsiveWorkspace()
   const appleIsReviewing =
     Platform.OS === 'web' ? false : getValue(getRemoteConfig(), 'apple_reviewing').asBoolean()
+
+  if (Platform.OS === 'web' && isWide) return <DesktopHome />
 
   return (
     <Box className="overflow-hidden border-continuous bg-light-grey flex-[1]">
@@ -193,7 +198,7 @@ export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
 
 const HomeScreen = () => {
   const router = useRouter()
-  const closeHome = () => router.back()
+  const closeHome = () => goBackOrHome(router)
 
   const isWide = useResponsiveWorkspace()
   return <Home closeHome={closeHome} inWorkspace={isWide} />

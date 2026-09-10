@@ -1,3 +1,4 @@
+import ResourceDiscoveryEntry from './ResourceDiscoveryEntry'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -27,12 +28,14 @@ import {
 import ResourceDownloadWidget from './ResourceDownloadWidget'
 type StrongOfTheDayProps = {
   type: 'grec' | 'hebreu'
+  discovery?: boolean
   color1?: string
   color2?: string
 }
 
 const StrongOfTheDay = ({
   type,
+  discovery = false,
   color1 = 'rgb(69,150,220)',
   color2 = 'rgb(89,131,240)',
 }: StrongOfTheDayProps) => {
@@ -139,6 +142,17 @@ const StrongOfTheDay = ({
 
   const { original, gloss, stepCode, language } = strongReference
   const book = language === 'greek' ? 40 : 1
+
+  if (discovery)
+    return (
+      <ResourceDiscoveryEntry
+        original={original}
+        title={gloss}
+        detail={{ route: 'Strong', params: { book, reference: stepCode } }}
+        isRefreshing={strongQuery.isFetching}
+        onShuffle={() => void strongQuery.refetch()}
+      />
+    )
 
   return (
     <Link route="Strong" params={{ book, reference: stepCode }}>

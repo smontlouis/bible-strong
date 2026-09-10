@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import Box from '~common/ui/Box'
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
@@ -18,15 +18,12 @@ const IconCircle = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { bg, size = 36 } = props
-  const classStyles = useResolveClassNames(
-    twMerge('rounded-[10px] items-center justify-center', className)
-  )
+  const resolvedClassName = twMerge('rounded-[10px] items-center justify-center', className)
   return (
     <Box
       {...props}
       style={
         [
-          classStyles,
           {
             width: size,
             height: size,
@@ -37,7 +34,7 @@ const IconCircle = (
           props.style,
         ] as UIComponentProps<typeof Box>['style']
       }
-      className="overflow-hidden border-continuous"
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

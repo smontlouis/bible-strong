@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import * as NativeUI from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import Header from '~common/Header'
 import { LinkBox } from '~common/Link'
 import { HStack, SafeAreaBox } from '~common/ui/Box'
@@ -32,14 +32,16 @@ const RowContainer = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { border } = props
-  const classStyles = useResolveClassNames(
-    twMerge('px-[16px] py-[14px] border-b-border flex-row items-center', className)
+  const resolvedClassName = twMerge(
+    'px-[16px] py-[14px] border-b-border flex-row items-center',
+    className
   )
   return (
     <NativeUI.View
       {...props}
+      className={resolvedClassName}
       style={
-        [classStyles, { borderBottomWidth: border ? 1 : 0 }, props.style] as UIComponentProps<
+        [{ borderBottomWidth: border ? 1 : 0 }, props.style] as UIComponentProps<
           typeof NativeUI.View
         >['style']
       }

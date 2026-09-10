@@ -1,3 +1,4 @@
+import ResourceDiscoveryEntry from './ResourceDiscoveryEntry'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
@@ -20,7 +21,11 @@ import {
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
 import ResourceDownloadWidget from './ResourceDownloadWidget'
-const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)' }) => {
+const NaveOfTheDay = ({
+  discovery = false,
+  color1 = 'rgb(80, 83, 140)',
+  color2 = 'rgb(48, 51, 107)',
+}) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const [resourceLanguage] = useResourceLanguage('NAVE')
@@ -107,6 +112,17 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
   }
 
   const { name, normalizedName } = naveReference
+
+  if (discovery)
+    return (
+      <ResourceDiscoveryEntry
+        iconKind="nave"
+        title={name}
+        detail={{ route: 'NaveDetail', params: { name, name_lower: normalizedName } }}
+        isRefreshing={naveQuery.isFetching}
+        onShuffle={() => void naveQuery.refetch()}
+      />
+    )
 
   return (
     <Link route="NaveDetail" params={{ name, name_lower: normalizedName }}>

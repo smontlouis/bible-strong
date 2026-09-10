@@ -1,3 +1,4 @@
+import { getUniverseColor } from '~themes/universeColors'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform, ScrollView, TouchableOpacity } from 'react-native'
@@ -41,7 +42,7 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
           >
             <TouchableSvgIcon
               icon={LexiqueIcon}
-              color={resourceType === 'strong' ? 'primary' : 'grey'}
+              color={resourceType === 'strong' ? getUniverseColor('strong') : 'grey'}
               onPress={() => onPress('strong')}
               label={t('Lexique')}
             />
@@ -52,7 +53,7 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
           >
             <TouchableSvgIcon
               icon={DictionnaireIcon}
-              color={resourceType === 'dictionary' ? 'secondary' : 'grey'}
+              color={resourceType === 'dictionary' ? getUniverseColor('dictionary') : 'grey'}
               onPress={() => onPress('dictionary')}
               label={t('Dictionnaire')}
             />
@@ -63,7 +64,7 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
           >
             <TouchableSvgIcon
               icon={NaveIcon}
-              color={resourceType === 'nave' ? 'quint' : 'grey'}
+              color={resourceType === 'nave' ? getUniverseColor('nave') : 'grey'}
               onPress={() => onPress('nave')}
               label={t('Thèmes')}
             />
@@ -74,7 +75,7 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
           >
             <TouchableSvgIcon
               icon={RefIcon}
-              color={resourceType === 'reference' ? 'quart' : 'grey'}
+              color={resourceType === 'reference' ? getUniverseColor('reference') : 'grey'}
               onPress={() => onPress('reference')}
               label={t('Références')}
             />
@@ -85,7 +86,7 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
           >
             <TouchableSvgIcon
               icon={CommentIcon}
-              color={resourceType === 'commentary' ? '#26A69A' : 'grey'}
+              color={resourceType === 'commentary' ? getUniverseColor('commentary') : 'grey'}
               onPress={() => onPress('commentary')}
               label={t('Comment.')}
             />
@@ -102,7 +103,7 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
               <FeatherIcon
                 name="layers"
                 size={20}
-                color={resourceType === 'compare' ? '#00897B' : 'grey'}
+                color={resourceType === 'compare' ? getUniverseColor('compare') : 'grey'}
               />
               <Text className="mt-[5px] text-[9px] text-grey">{t('Comparer')}</Text>
             </TouchableOpacity>

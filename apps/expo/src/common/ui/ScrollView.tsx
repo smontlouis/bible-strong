@@ -3,7 +3,7 @@ import React from 'react'
 import * as NativeUI from 'react-native'
 import { ScrollViewProps, StyleProp, StyleSheet, ViewStyle } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme, useTheme } from '~themes/ThemeProvider'
 import { pageContentStyle } from './PageContent'
@@ -27,13 +27,13 @@ const ScrollView = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { orientation, backgroundColor } = props
-  const classStyles = useResolveClassNames(twMerge('ml-auto mr-auto w-[100%]', className))
+  const resolvedClassName = twMerge('ml-auto mr-auto w-[100%]', className)
   return (
     <NativeUI.ScrollView
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             backgroundColor: backgroundColor
               ? theme.colors[backgroundColor as keyof typeof theme.colors] || backgroundColor

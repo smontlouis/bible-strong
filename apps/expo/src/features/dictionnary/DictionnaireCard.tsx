@@ -1,11 +1,11 @@
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, Theme, useTheme } from '~themes/ThemeProvider'
-import * as Icon from '@expo/vector-icons'
+import * as Icon from '~common/ui/classNameIcons'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import * as NativeUI from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 import truncHTML from 'trunc-html'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import Empty from '~common/Empty'
@@ -36,18 +36,17 @@ const Container = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('flex-[1] pb-[18px]', className))
+  const resolvedClassName = twMerge('flex-[1] pb-[18px]', className)
   return (
     <Box
       {...props}
       style={
         [
-          classStyles,
           { width: itemWidth, paddingHorizontal: itemHorizontalMargin },
           props.style,
         ] as UIComponentProps<typeof Box>['style']
       }
-      className="overflow-hidden border-continuous"
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }
@@ -60,13 +59,12 @@ const TitleBorder = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('mt-[10px] w-[35px] h-[3px] bg-secondary', className)
-  )
+  const resolvedClassName = twMerge('mt-[10px] w-[35px] h-[3px] bg-secondary', className)
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }
@@ -79,11 +77,12 @@ const ViewItem = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('mt-[15px]', className))
+  const resolvedClassName = twMerge('mt-[15px]', className)
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }
@@ -96,15 +95,12 @@ const OpenStrongIcon = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('pt-[5px] flex-row items-center', className))
+  const resolvedClassName = twMerge('pt-[5px] flex-row items-center', className)
   return (
     <NativeUI.TouchableOpacity
       {...props}
-      style={
-        [classStyles, {}, props.style] as UIComponentProps<
-          typeof NativeUI.TouchableOpacity
-        >['style']
-      }
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']}
     />
   )
 }
@@ -117,11 +113,12 @@ const IconFeather = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('pt-[5px] text-default', className))
+  const resolvedClassName = twMerge('pt-[5px] text-default', className)
   return (
     <Icon.Feather
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.Feather>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Icon.Feather>['style']}
     />
   )
 }

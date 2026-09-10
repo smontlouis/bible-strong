@@ -1,3 +1,4 @@
+import { resolveUniverseColors } from '~themes/universeColors'
 import { useTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
@@ -35,35 +36,35 @@ const StudyTab = ({
     >
       <ActionItem
         svgSource={require('~assets/images/tab-icons/lexique.svg')}
-        tintColor={theme.colors.primary}
+        tintColor={resolveUniverseColors(theme.colors, 'strong').foreground}
         label={t('Lexique')}
         onPress={showStrongDetail}
         disabled={moreThanOneVerseSelected}
       />
       <ActionItem
         svgSource={require('~assets/images/tab-icons/dictionary.svg')}
-        tintColor={theme.colors.secondary}
+        tintColor={resolveUniverseColors(theme.colors, 'dictionary').foreground}
         label={t('Dictionnaire')}
         onPress={showDictionaryDetail}
         disabled={moreThanOneVerseSelected}
       />
       <ActionItem
         svgSource={require('~assets/images/tab-icons/nave.svg')}
-        tintColor={theme.colors.quint}
+        tintColor={resolveUniverseColors(theme.colors, 'nave').foreground}
         label={t('Thèmes')}
         onPress={onOpenNave}
         disabled={moreThanOneVerseSelected}
       />
       <ActionItem
         svgSource={require('~assets/images/tab-icons/references.svg')}
-        tintColor={theme.colors.quart}
+        tintColor={resolveUniverseColors(theme.colors, 'references').foreground}
         label={t('Références')}
         onPress={onOpenReferences}
         disabled={moreThanOneVerseSelected}
       />
       <ActionItem
         svgSource={require('~assets/images/tab-icons/comment.svg')}
-        tintColor="#26A69A"
+        tintColor={resolveUniverseColors(theme.colors, 'commentary').foreground}
         label={t('Commentaire')}
         onPress={openCommentariesScreen}
         disabled={moreThanOneVerseSelected}

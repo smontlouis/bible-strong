@@ -1,9 +1,9 @@
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
-import * as Icon from '@expo/vector-icons'
+import * as Icon from '~common/ui/classNameIcons'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import PageContent from '~common/ui/PageContent'
 import type { Theme as AppTheme } from '~themes'
 
@@ -19,14 +19,12 @@ const HeaderBox = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('h-[54px] items-center border-b-border', className)
-  )
+  const resolvedClassName = twMerge('h-[54px] items-center border-b-border', className)
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }
@@ -39,11 +37,12 @@ const FeatherIcon = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('text-default', className))
+  const resolvedClassName = twMerge('text-default', className)
   return (
     <Icon.Feather
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.Feather>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Icon.Feather>['style']}
     />
   )
 }

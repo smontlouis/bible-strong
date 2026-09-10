@@ -5,7 +5,7 @@ import * as NativeUI from 'react-native'
 import { FlatList } from 'react-native'
 import { useSelector } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import { pageContentStyle } from '~common/ui/PageContent'
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
@@ -43,13 +43,15 @@ const TabContainer = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-row bg-reverse border-b-[1px] border-b-border px-[16px]', className)
+  const resolvedClassName = twMerge(
+    'flex-row bg-reverse border-b-[1px] border-b-border px-[16px]',
+    className
   )
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }
@@ -65,13 +67,13 @@ const Tab = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { active } = props
-  const classStyles = useResolveClassNames(twMerge('py-[12px] px-[16px] border-b-[2px]', className))
+  const resolvedClassName = twMerge('py-[12px] px-[16px] border-b-[2px]', className)
   return (
     <NativeUI.TouchableOpacity
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           { borderBottomColor: active ? theme.colors.primary : 'transparent' },
           props.style,
         ] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']
@@ -91,13 +93,13 @@ const TabText = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { active } = props
-  const classStyles = useResolveClassNames(twMerge('text-[14px]', className))
+  const resolvedClassName = twMerge('text-[14px]', className)
   return (
     <NativeUI.Text
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             fontWeight: active ? 'bold' : 'normal',
             color: active ? theme.colors.primary : theme.colors.tertiary,
@@ -117,20 +119,15 @@ const AnnotationCard = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'bg-reverse mx-[16px] my-[8px] p-[16px] rounded-[8px] border-[1px] border-border',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'bg-reverse mx-[16px] my-[8px] p-[16px] rounded-[8px] border-[1px] border-border',
+    className
   )
   return (
     <NativeUI.TouchableOpacity
       {...props}
-      style={
-        [classStyles, {}, props.style] as UIComponentProps<
-          typeof NativeUI.TouchableOpacity
-        >['style']
-      }
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']}
     />
   )
 }
@@ -143,11 +140,12 @@ const AnnotationText = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('text-[16px] text-default mb-[8px]', className))
+  const resolvedClassName = twMerge('text-[16px] text-default mb-[8px]', className)
   return (
     <NativeUI.Text
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.Text>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.Text>['style']}
     />
   )
 }
@@ -160,11 +158,12 @@ const AnnotationMeta = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('text-[13px] text-tertiary', className))
+  const resolvedClassName = twMerge('text-[13px] text-tertiary', className)
   return (
     <NativeUI.Text
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.Text>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.Text>['style']}
     />
   )
 }
@@ -177,13 +176,12 @@ const EmptyState = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-[1] justify-center items-center p-[32px]', className)
-  )
+  const resolvedClassName = twMerge('flex-[1] justify-center items-center p-[32px]', className)
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }
@@ -196,13 +194,12 @@ const EmptyText = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('text-[16px] text-tertiary text-center', className)
-  )
+  const resolvedClassName = twMerge('text-[16px] text-tertiary text-center', className)
   return (
     <NativeUI.Text
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.Text>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.Text>['style']}
     />
   )
 }

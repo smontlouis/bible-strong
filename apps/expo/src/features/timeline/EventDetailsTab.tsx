@@ -2,7 +2,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
 import * as NativeUI from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
@@ -27,15 +27,16 @@ const TabItem = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isRouteActive, isFirst, isLast } = props
-  const classStyles = useResolveClassNames(
-    twMerge('flex-[1] items-center justify-center h-[35px] my-[5px] mx-[10px]', className)
+  const resolvedClassName = twMerge(
+    'flex-[1] items-center justify-center h-[35px] my-[5px] mx-[10px]',
+    className
   )
   return (
     <NativeUI.TouchableOpacity
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             ...(isFirst && {
               marginRight: 0,

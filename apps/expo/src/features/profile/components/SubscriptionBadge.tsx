@@ -3,7 +3,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import Box, { HStack } from '~common/ui/Box'
@@ -34,17 +34,15 @@ const Badge = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'flex-row items-center px-[10px] py-[5px] rounded-[15px] border-[1px] border-[#F59E0B] bg-reverse',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'flex-row items-center px-[10px] py-[5px] rounded-[15px] border-[1px] border-[#F59E0B] bg-reverse',
+    className
   )
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

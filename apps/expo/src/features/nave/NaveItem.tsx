@@ -4,7 +4,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { memo, useCallback } from 'react'
 import { Pressable } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import Link from '~common/Link'
@@ -26,17 +26,15 @@ const SectionItem = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'h-[60px] ml-[20px] mr-[20px] bg-reverse border-b-border border-b-[1px] items-start justify-center',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'h-[60px] ml-[20px] mr-[20px] bg-reverse border-b-border border-b-[1px] items-start justify-center',
+    className
   )
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

@@ -91,6 +91,9 @@ const NewTabItem = ({
 }: NewTabItemProps) => {
   const { t } = useTranslation()
   const { onPress } = useOpenTabByType({ type, newAtom, onPlanPress })
+  const isLibraryResource =
+    type === 'strong' || type === 'nave' || type === 'dictionary' || type === 'commentary'
+  const iconSize = hero ? 64 : isLibraryResource ? 34 : 28
 
   return (
     <TouchableBox
@@ -114,7 +117,7 @@ const NewTabItem = ({
         }
         style={hero ? { paddingRight: compact ? 82 : 270 } : undefined}
       >
-        {(!hero || !compact) && <TabIcon type={type} size={hero ? 64 : 28} />}
+        {(!hero || !compact) && <TabIcon type={type} size={iconSize} />}
         <Box className="flex-1 min-w-0 gap-[6px]">
           <Text className={hero ? 'text-[36px] font-medium' : 'text-[16px] font-medium'}>
             {title ?? t(`tabs.${type}`)}

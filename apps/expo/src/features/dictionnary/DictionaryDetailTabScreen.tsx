@@ -1,3 +1,4 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import { twMerge } from '~common/ui/classNames'
 import { resolveThemeColor } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
@@ -180,7 +181,7 @@ const DictionnaryDetailScreen = ({
         })
       )
     } else {
-      router.back()
+      goBackOrHome(router)
     }
   }
 

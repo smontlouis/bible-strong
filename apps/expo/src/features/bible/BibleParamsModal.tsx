@@ -3,7 +3,7 @@ import React from 'react'
 import * as NativeUI from 'react-native'
 import { FlatList } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
@@ -58,18 +58,17 @@ export const HalfContainer = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { border } = props
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'min-h-[60px] px-[20px] pr-[10px] py-[8px] border-b-border flex-row items-center',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'min-h-[60px] px-[20px] pr-[10px] py-[8px] border-b-border flex-row items-center',
+    className
   )
   return (
     <NativeUI.View
       {...props}
       testID="bible-params-row"
+      className={resolvedClassName}
       style={
-        [classStyles, { borderBottomWidth: border ? 1 : 0 }, props.style] as UIComponentProps<
+        [{ borderBottomWidth: border ? 1 : 0 }, props.style] as UIComponentProps<
           typeof NativeUI.View
         >['style']
       }
@@ -88,13 +87,13 @@ export const FontText = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isSelected } = props
-  const classStyles = useResolveClassNames(twMerge('text-[16px] pl-[15px] pr-[15px]', className))
+  const resolvedClassName = twMerge('text-[16px] pl-[15px] pr-[15px]', className)
   return (
     <Paragraph
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           { color: isSelected ? theme.colors.primary : theme.colors.default },
           props.style,
         ] as UIComponentProps<typeof Paragraph>['style']

@@ -1,18 +1,10 @@
 import React from 'react'
+import ResourceIconDOM from '~common/icons/ResourceIconDOM'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
 
 type Props = {
   type: RelationEndpoint['type']
 }
-
-const BookLetterIcon = ({ letter }: { letter: string }) => (
-  <svg viewBox="0 0 18 22" aria-hidden="true">
-    <path d="M3 1h14v20H4.5A3.5 3.5 0 0 1 1 17.5v-13A3.5 3.5 0 0 1 4.5 1H17M1 17.5A3.5 3.5 0 0 1 4.5 14H17" />
-    <text x="9" y="11.5" textAnchor="middle">
-      {letter}
-    </text>
-  </svg>
-)
 
 const EntityTypeIcon = ({ type }: Props) => {
   switch (type) {
@@ -42,12 +34,12 @@ const EntityTypeIcon = ({ type }: Props) => {
         </svg>
       )
     case 'strong':
-      return <BookLetterIcon letter="א" />
+      return <ResourceIconDOM kind="strong" />
     case 'dictionary':
     case 'word':
-      return <BookLetterIcon letter="A" />
+      return <ResourceIconDOM kind="dictionary" />
     case 'nave':
-      return <BookLetterIcon letter="N" />
+      return <ResourceIconDOM kind="nave" />
   }
 }
 

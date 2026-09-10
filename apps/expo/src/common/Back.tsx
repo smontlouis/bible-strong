@@ -1,4 +1,4 @@
-import { navigateWithPageTransition } from '~navigation/pageTransition'
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import { useNavigation, useRouter } from 'expo-router'
 import React, { FC, PropsWithChildren } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -34,7 +34,7 @@ const Back: FC<PropsWithChildren<BackProps>> = ({
       }
       currentNavigation = currentNavigation.getParent()
     }
-    navigateWithPageTransition(previousPath, () => router.back(), 'back')
+    goBackOrHome(router, previousPath)
     onGoBack?.()
   }
 

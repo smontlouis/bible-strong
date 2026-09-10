@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import Link from '~common/Link'
@@ -19,14 +19,15 @@ const FineLine = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('absolute top-[0px] bottom-[0px] left-[36px] w-[2px] bg-light-primary', className)
+  const resolvedClassName = twMerge(
+    'absolute top-[0px] bottom-[0px] left-[36px] w-[2px] bg-light-primary',
+    className
   )
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }
@@ -39,16 +40,15 @@ const NextButton = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'p-[4px] rounded-[3px] bg-primary text-[white] text-[11px] font-bold mr-[10px]',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'p-[4px] rounded-[3px] bg-primary text-[white] text-[11px] font-bold mr-[10px]',
+    className
   )
   return (
     <Text
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Text>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Text>['style']}
     />
   )
 }

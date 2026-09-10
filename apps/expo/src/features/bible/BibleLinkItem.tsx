@@ -5,7 +5,7 @@ import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import EntityChipList from '~common/EntityChipList'
@@ -30,13 +30,12 @@ const LinkItemContainer = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('py-[20px] p-[20px] pr-[0px] flex-row', className)
-  )
+  const resolvedClassName = twMerge('py-[20px] p-[20px] pr-[0px] flex-row', className)
   return (
     <Link
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Link>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Link>['style']}
     />
   )
 }
@@ -48,18 +47,15 @@ const LinkTypeIcon = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { bgColor } = props
-  const classStyles = useResolveClassNames(
-    twMerge('w-[24px] h-[24px] rounded-[4px] mr-[10px] items-center justify-center', className)
+  const resolvedClassName = twMerge(
+    'w-[24px] h-[24px] rounded-[4px] mr-[10px] items-center justify-center',
+    className
   )
   return (
     <Box
       {...props}
-      style={
-        [classStyles, { backgroundColor: bgColor }, props.style] as UIComponentProps<
-          typeof Box
-        >['style']
-      }
-      className="overflow-hidden border-continuous"
+      style={[{ backgroundColor: bgColor }, props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

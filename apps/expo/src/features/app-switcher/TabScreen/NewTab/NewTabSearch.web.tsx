@@ -1,29 +1,35 @@
-import { usePathname } from 'expo-router'
-import { useAtomValue } from 'jotai/react'
+import { useSetAtom } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
-import { useEffect } from 'react'
-import { activeTabIdAtom, appSwitcherModeAtom, type TabItem } from '~state/tabs'
-import CommandPalette from '../../commandPalette/CommandPalette.web'
+import { useTranslation } from 'react-i18next'
+import { LinkBox } from '~common/Link'
+import Text from '~common/ui/Text'
+import { FeatherIcon } from '~common/ui/Icon'
+import type { TabItem } from '~state/tabs'
+import { commandPaletteOpenAtom, commandPaletteReturnFocusAtom } from '../../commandPalette/state'
 
-export default function NewTabSearch({
-  tabAtom,
-  onPlanPress,
-}: {
+export default function NewTabSearch(_props: {
   tabAtom: PrimitiveAtom<TabItem>
   onPlanPress?: () => void
 }) {
-  const tab = useAtomValue(tabAtom)
-  const activeId = useAtomValue(activeTabIdAtom)
-  const mode = useAtomValue(appSwitcherModeAtom)
-  const pathname = usePathname()
-  const isActive = activeId === tab.id && mode === 'view' && pathname === '/'
-  const inputId = `command-search-${tab.id}`
-  useEffect(() => {
-    if (!isActive) return
-    const frame = requestAnimationFrame(() =>
-      document.getElementById(inputId)?.querySelector('input')?.focus()
-    )
-    return () => cancelAnimationFrame(frame)
-  }, [isActive, inputId])
-  return <CommandPalette tabAtom={tabAtom} inputId={inputId} onPlanPress={onPlanPress} />
+  const { t } = useTranslation()
+  const setOpen = useSetAtom(commandPaletteOpenAtom)
+  const setReturnFocus = useSetAtom(commandPaletteReturnFocusAtom)
+  return (
+    <LinkBox
+      accessibilityLabel={t('commandPalette.label')}
+      className="flex-row items-center gap-[12px] bg-reverse border border-border rounded-[16px] px-[16px] py-[16px]"
+      onPress={event => {
+        if (event?.currentTarget instanceof HTMLElement) setReturnFocus(event.currentTarget)
+        setOpen(true)
+      }}
+    >
+      <FeatherIcon name="search" size={20} color="grey" />
+      <Text className="flex-1 text-grey text-[15px]">{t('commandPalette.placeholder')}</Text>
+      <Text className="text-grey text-[12px] bg-light-grey rounded-[6px] px-[7px] py-[4px]">
+        {typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
+          ? '⌘ K'
+          : 'Ctrl K'}
+      </Text>
+    </LinkBox>
+  )
 }

@@ -1,3 +1,4 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import { useImperativeHandle, useLayoutEffect, useRef, useState } from 'react'
 import { useAtomValue } from 'jotai/react'
 import { usePathname, useRouter, useGlobalSearchParams } from 'expo-router'
@@ -42,7 +43,7 @@ export default function ResourceModal(props: ResourceModalProps) {
   useImperativeHandle(props.resourceModalRef, () => {
     const present = () => setRequest(value => value + 1)
     const dismiss = () => {
-      if (pathname === '/passage-resources' && params.sourceId === sourceId) router.back()
+      if (pathname === '/passage-resources' && params.sourceId === sourceId) goBackOrHome(router)
     }
     return {
       present,

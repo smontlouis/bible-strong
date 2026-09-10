@@ -4,9 +4,8 @@ import { useTheme as useStylingTheme, Theme } from '~themes/ThemeProvider'
 import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
-import type { Theme as AppTheme } from '~themes'
 
+import type { Theme as AppTheme } from '~themes'
 
 import EntityChipList from '~common/EntityChipList'
 import Link from '~common/Link'
@@ -29,13 +28,12 @@ const NoteLink = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('py-[20px] p-[20px] pr-[0px] flex-row', className)
-  )
+  const resolvedClassName = twMerge('py-[20px] p-[20px] pr-[0px] flex-row', className)
   return (
     <Link
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Link>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Link>['style']}
     />
   )
 }

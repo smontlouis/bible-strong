@@ -1,3 +1,4 @@
+import { getUniverseColor } from '~themes/universeColors'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
@@ -11,13 +12,13 @@ export const searchTypeIconConfig: Record<
     color: string
   }
 > = {
-  passages: { name: 'book-open', color: 'color1' },
-  notes: { name: 'file-text', color: 'color2' },
-  links: { name: 'link', color: 'secondary' },
-  studies: { name: 'feather', color: 'tertiary' },
-  strong: { color: 'primary' },
-  dictionary: { color: 'secondary' },
-  nave: { color: 'quint' },
+  passages: { name: 'book-open', color: getUniverseColor('passages') },
+  notes: { name: 'file-text', color: getUniverseColor('notes') },
+  links: { name: 'link', color: getUniverseColor('links') },
+  studies: { name: 'feather', color: getUniverseColor('studies') },
+  strong: { color: getUniverseColor('strong') },
+  dictionary: { color: getUniverseColor('dictionary') },
+  nave: { color: getUniverseColor('nave') },
 }
 
 const SearchTypeIcon = ({

@@ -2,7 +2,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
 import * as NativeUI from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import Paragraph from '~common/ui/Paragraph'
@@ -33,12 +33,13 @@ const ReferenceText = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('text-primary', className))
+  const resolvedClassName = twMerge('text-primary', className)
   return (
     <NativeUI.Text
       {...props}
+      className={resolvedClassName}
       style={
-        [classStyles, { textDecorationLine: 'underline' }, props.style] as UIComponentProps<
+        [{ textDecorationLine: 'underline' }, props.style] as UIComponentProps<
           typeof NativeUI.Text
         >['style']
       }

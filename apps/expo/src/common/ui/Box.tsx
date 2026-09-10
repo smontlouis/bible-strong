@@ -3,7 +3,6 @@ import { ImageStyle } from 'expo-image'
 import React from 'react'
 import { Platform, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
 
 import Animated, {
   AnimatedProps,
@@ -27,12 +26,12 @@ export type BoxProps = React.ComponentPropsWithRef<typeof View> & {
 }
 
 const Box = ({ as: Component = View, className, style, dataSet, ...props }: BoxProps) => {
-  const classStyles = useResolveClassNames(className ?? '')
   return (
     <Component
       {...props}
       {...(dataSet && Platform.OS === 'web' ? { dataSet } : {})}
-      style={[className ? classStyles : undefined, style]}
+      className={className}
+      style={style}
     />
   )
 }

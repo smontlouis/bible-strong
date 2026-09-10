@@ -4,7 +4,7 @@ import { AnimatedProgressCircle } from '@convective/react-native-reanimated-prog
 import Lottie from 'lottie-react-native'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import { Image } from 'expo-image'
@@ -25,17 +25,15 @@ const CircleImage = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'absolute top-[2px] right-[0px] left-[2px] bottom-[0px] w-[34px] h-[34px] rounded-[17px] bg-light-grey',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'absolute top-[2px] right-[0px] left-[2px] bottom-[0px] w-[34px] h-[34px] rounded-[17px] bg-light-grey',
+    className
   )
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

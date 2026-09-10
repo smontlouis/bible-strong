@@ -3,7 +3,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import * as NativeUI from 'react-native'
 import Avatar from 'react-native-boring-avatars'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
 
@@ -41,16 +41,15 @@ const AvatarImage = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { size } = props
-  const classStyles = useResolveClassNames(twMerge('bg-light-grey', className))
+  const resolvedClassName = twMerge('bg-light-grey', className)
   return (
     <NativeUI.Image
       {...props}
+      className={resolvedClassName}
       style={
-        [
-          classStyles,
-          { width: size, height: size, borderRadius: size / 2 },
-          props.style,
-        ] as UIComponentProps<typeof NativeUI.Image>['style']
+        [{ width: size, height: size, borderRadius: size / 2 }, props.style] as UIComponentProps<
+          typeof NativeUI.Image
+        >['style']
       }
     />
   )

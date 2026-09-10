@@ -4,13 +4,13 @@ import {
   useTheme as useAppTheme,
   withTheme,
 } from '~themes/ThemeProvider'
-import * as Icon from '@expo/vector-icons'
+import * as Icon from '~common/ui/classNameIcons'
 import { appleAuth, AppleButton } from '@invertase/react-native-apple-authentication'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useState } from 'react'
 import * as NativeUI from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import { useTranslation } from 'react-i18next'
@@ -35,21 +35,18 @@ const SocialButton = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { color } = props
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'flex-row rounded-[48px] h-[48px] items-center justify-center pl-[10px] pr-[10px] flex-[1]',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'flex-row rounded-[48px] h-[48px] items-center justify-center pl-[10px] pr-[10px] flex-[1]',
+    className
   )
   return (
     <NativeUI.TouchableOpacity
       {...props}
+      className={resolvedClassName}
       style={
-        [
-          classStyles,
-          { backgroundColor: color || theme.colors.reverse },
-          props.style,
-        ] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']
+        [{ backgroundColor: color || theme.colors.reverse }, props.style] as UIComponentProps<
+          typeof NativeUI.TouchableOpacity
+        >['style']
       }
     />
   )
@@ -63,11 +60,12 @@ const ButtonIcon = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('mr-[15px]', className))
+  const resolvedClassName = twMerge('mr-[15px]', className)
   return (
     <Icon.FontAwesome
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.FontAwesome>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Icon.FontAwesome>['style']}
     />
   )
 }
@@ -80,12 +78,13 @@ const ButtonText = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { color } = props
-  const classStyles = useResolveClassNames(twMerge('text-[16px]', className))
+  const resolvedClassName = twMerge('text-[16px]', className)
   return (
     <Text
       {...props}
+      className={resolvedClassName}
       style={
-        [classStyles, { color: color || theme.colors.default }, props.style] as UIComponentProps<
+        [{ color: color || theme.colors.default }, props.style] as UIComponentProps<
           typeof Text
         >['style']
       }

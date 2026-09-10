@@ -1,3 +1,4 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
@@ -15,7 +16,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import { MenuView } from '~common/ui/MenuView'
 import { pageContentStyle } from '~common/ui/PageContent'
 import YoutubePlayer from '~helpers/react-native-youtube-iframe'
@@ -64,16 +65,15 @@ const StyledTextInput = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'text-default h-[48px] border-border border-[2px] rounded-[10px] px-[15px] text-[16px]',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'text-default h-[48px] border-border border-[2px] rounded-[10px] px-[15px] text-[16px]',
+    className
   )
   return (
     <NativeUI.TextInput
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.TextInput>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.TextInput>['style']}
     />
   )
 }
@@ -216,7 +216,7 @@ const BibleLinkScreen = () => {
     }).then(confirmed => {
       if (!confirmed) return
       dispatch(deleteLink(currentLink.id!))
-      router.back()
+      goBackOrHome(router)
     })
   }
 

@@ -1,3 +1,4 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import React from 'react'
 import { READING_TEXT_MAX_WIDTH, PLAN_READING_HORIZONTAL_PADDING } from '~common/readingLayout'
 import PlanSliceMenu from './PlanSliceMenu'
@@ -129,7 +130,7 @@ const PlanSliceScreen = ({
       onRead()
       return
     }
-    router.back()
+    goBackOrHome(router)
   }
 
   const handleBack = () => {
@@ -137,7 +138,7 @@ const PlanSliceScreen = ({
       onBack()
       return
     }
-    router.back()
+    goBackOrHome(router)
   }
 
   const openSliceInNewTab = () => {

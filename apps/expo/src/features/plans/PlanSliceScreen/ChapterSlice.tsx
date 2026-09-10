@@ -1,3 +1,4 @@
+import { getUniverseColor } from '~themes/universeColors'
 import React from 'react'
 import { ChapterSlice as ChapterSliceProps } from 'src/common/types'
 import Box from '~common/ui/Box'
@@ -94,7 +95,7 @@ const ChapterSlice = ({ id, chapters, subType }: ChapterSliceProps) => {
                       name="book-open"
                       size={15}
                       style={{ marginRight: 10 }}
-                      color="grey"
+                      color={getUniverseColor('bible')}
                     />
                     <FeatherIcon name="chevron-right" color="grey" />
                   </Box>

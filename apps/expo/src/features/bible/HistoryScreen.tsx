@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import * as NativeUI from 'react-native'
 
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
@@ -40,18 +40,16 @@ const Chip = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { color } = props
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'h-[15px] self-end rounded-[7px] justify-center items-center px-[5px] mb-[5px]',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'h-[15px] self-end rounded-[7px] justify-center items-center px-[5px] mb-[5px]',
+    className
   )
   return (
     <NativeUI.View
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             backgroundColor:
               theme.colors[color as keyof typeof theme.colors] || color || theme.colors.border,

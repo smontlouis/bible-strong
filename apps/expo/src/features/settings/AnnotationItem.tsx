@@ -7,7 +7,7 @@ import * as NativeUI from 'react-native'
 import { TouchableOpacity } from 'react-native'
 import HighlightOptions from '~common/HighlightOptions'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import EntityChipList from '~common/EntityChipList'
@@ -33,11 +33,12 @@ const DateText = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('text-tertiary', className))
+  const resolvedClassName = twMerge('text-tertiary', className)
   return (
     <NativeUI.Text
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.Text>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.Text>['style']}
     />
   )
 }
@@ -50,14 +51,15 @@ const AnnotationContainer = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('m-[20px] pb-[20px] mb-[0px] border-b-border border-b-[1px]', className)
+  const resolvedClassName = twMerge(
+    'm-[20px] pb-[20px] mb-[0px] border-b-border border-b-[1px]',
+    className
   )
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

@@ -3,12 +3,12 @@ import { finishPageTransition, navigateWithPageTransition } from '~navigation/pa
 import { usePathname, useRouter } from 'expo-router'
 import type { ReactNode } from 'react'
 import { useEffect, useLayoutEffect, useState } from 'react'
-import { useAtom } from 'jotai'
-import { Platform, useWindowDimensions } from 'react-native'
+import { useAtom, useSetAtom } from 'jotai'
+import { Platform } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import {
   useWorkspaceRoutePanel,
-  WORKSPACE_DOCKED_SIDEBAR_BREAKPOINT,
+  workspaceSidebarDockedAtom,
   workspaceSidebarHiddenAtom,
 } from '~navigation/useWorkspaceRoutePanel'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
@@ -31,8 +31,11 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   const panel = useWorkspaceRoutePanel()
   const [sidebarHidden, setSidebarHidden] = useAtom(workspaceSidebarHiddenAtom)
   const [overlayOpen, setOverlayOpen] = useState(false)
-  const { width } = useWindowDimensions()
-  const overlayMode = Platform.OS === 'web' && width < WORKSPACE_DOCKED_SIDEBAR_BREAKPOINT
+  const setSidebarDocked = useSetAtom(workspaceSidebarDockedAtom)
+  const overlayMode = Platform.OS === 'web' && !panel.sidebarDocked
+  useLayoutEffect(() => {
+    if (Platform.OS === 'web') setSidebarDocked(panel.sidebarDocked)
+  }, [panel.sidebarDocked, setSidebarDocked])
   const sidebarVisible = isWide && (overlayMode ? overlayOpen : !sidebarHidden)
   useEffect(() => {
     setOverlayOpen(false)

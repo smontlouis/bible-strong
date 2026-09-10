@@ -1,3 +1,4 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import { useImperativeHandle, useRef, useState } from 'react'
 import { atom } from 'jotai/vanilla'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -35,7 +36,7 @@ export default function PassageResourcesScreen() {
   })
   const ref = useRef<SheetRef>(null)
   useImperativeHandle(ref, () => {
-    const close = () => router.back()
+    const close = () => goBackOrHome(router)
     return {
       present: () => {},
       presentAt: () => {},

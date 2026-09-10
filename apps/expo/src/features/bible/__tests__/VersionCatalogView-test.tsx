@@ -1,4 +1,6 @@
 import React from 'react'
+import { Platform } from 'react-native'
+import { PanelNavigationContext } from '~common/ContextualPanel/NavigationContext'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import { VersionCatalogList } from '../VersionCatalogView'
 import type { VersionCatalogSection } from '../versionCatalog'
@@ -9,6 +11,8 @@ const mockScrollTo = jest.fn()
 jest.mock('react-native', () => {
   const React = jest.requireActual<typeof import('react')>('react')
   return {
+    Platform: { OS: 'ios' },
+    useWindowDimensions: () => ({ width: 1200, height: 800 }),
     SectionList: React.forwardRef(
       (
         { children, ...props }: React.PropsWithChildren<Record<string, unknown>>,
@@ -101,7 +105,7 @@ const sections: VersionCatalogSection[] = Array.from({ length: 5 }, (_, sectionI
         ),
 }))
 
-const createRenderer = () => {
+const createRenderer = (inPanel = false) => {
   let renderer: ReactTestRenderer
   const consoleError = jest.spyOn(console, 'error').mockImplementation((message, ...args) => {
     if (typeof message === 'string' && message.startsWith('react-test-renderer is deprecated')) {
@@ -113,16 +117,20 @@ const createRenderer = () => {
   try {
     act(() => {
       renderer = create(
-        <VersionCatalogList
-          sections={sections}
-          grouping="language"
-          query=""
-          revealVersionId="BHG"
-          revealKey={1}
-          scrollToTopKey="language:all:"
-          openStyleInfo={jest.fn()}
-          renderItem={() => null}
-        />
+        <PanelNavigationContext.Provider
+          value={inPanel ? { open: jest.fn(), back: jest.fn(), close: jest.fn() } : null}
+        >
+          <VersionCatalogList
+            sections={sections}
+            grouping="language"
+            query=""
+            revealVersionId="BHG"
+            revealKey={1}
+            scrollToTopKey="language:all:"
+            openStyleInfo={jest.fn()}
+            renderItem={() => null}
+          />
+        </PanelNavigationContext.Provider>
       )
     })
   } finally {
@@ -145,6 +153,7 @@ describe('VersionCatalogList', () => {
     ;(
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }
     ).IS_REACT_ACT_ENVIRONMENT = true
+    Platform.OS = 'ios'
     mockScrollTo.mockClear()
     mockScrollToLocation.mockClear()
   })
@@ -197,5 +206,28 @@ describe('VersionCatalogList', () => {
       y: 3456,
     })
     expect(mockScrollToLocation).toHaveBeenCalledTimes(3)
+  })
+  it('bounds web panel lists and preserves native and standalone rendering', () => {
+    Platform.OS = 'web'
+    const panel = createRenderer(true)
+    const list = panel.root.findByType('SectionList' as never)
+    expect(list.props.style.maxHeight).toBe(420)
+    expect(list.props.initialNumToRender).toBe(8)
+    expect(list.props.windowSize).toBe(3)
+    act(() => list.props.onLayout({ nativeEvent: { layout: { height: 420 } } }))
+    expect(mockScrollToLocation).toHaveBeenCalledWith({
+      sectionIndex: 4,
+      itemIndex: 0,
+      animated: false,
+      viewPosition: 0.5,
+    })
+    const standalone = createRenderer()
+    const standaloneList = standalone.root.findByType('SectionList' as never)
+    expect(standaloneList.props.style).toBeUndefined()
+    expect(standaloneList.props.initialNumToRender).toBe(44)
+    act(() => {
+      panel.unmount()
+      standalone.unmount()
+    })
   })
 })

@@ -1,3 +1,4 @@
+import { getUniverseColor } from '~themes/universeColors'
 import { useTheme } from '~themes/ThemeProvider'
 import { Image } from 'expo-image'
 import React from 'react'
@@ -18,18 +19,18 @@ const icons = {
 }
 
 export const tabIconColorConfig: Partial<Record<TabItem['type'], string>> = {
-  bible: 'tertiary',
-  search: 'tertiary',
-  compare: 'tertiary',
-  plan: 'tertiary',
-  timeline: 'tertiary',
-  study: 'tertiary',
-  notes: 'color2',
-  strong: 'primary',
-  nave: 'quint',
-  dictionary: 'secondary',
-  commentary: '#26A69A',
-  'commentary-resource': '#26A69A',
+  bible: getUniverseColor('bible'),
+  search: getUniverseColor('search'),
+  compare: getUniverseColor('compare'),
+  plan: getUniverseColor('plan'),
+  timeline: getUniverseColor('timeline'),
+  study: getUniverseColor('study'),
+  notes: getUniverseColor('notes'),
+  strong: getUniverseColor('strong'),
+  nave: getUniverseColor('nave'),
+  dictionary: getUniverseColor('dictionary'),
+  commentary: getUniverseColor('commentary'),
+  'commentary-resource': getUniverseColor('commentary-resource'),
 }
 
 interface TabIconProps {

@@ -1,3 +1,4 @@
+import { resolveUniverseColors } from '~themes/universeColors'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import type { ReactNode } from 'react'
@@ -56,7 +57,13 @@ const SearchSectionBlock = <SectionId extends string = string>({
     <Box className="overflow-hidden border-continuous pt-[10px]">
       <HStack className="overflow-hidden border-continuous px-[20px] py-[8px] items-center gap-[8px]">
         {section.iconType ? (
-          <Box className="overflow-hidden border-continuous w-[36px] h-[36px] rounded-[10px] bg-light-grey items-center justify-center">
+          <Box
+            className="overflow-hidden border-continuous w-[36px] h-[36px] rounded-[10px] items-center justify-center"
+            style={{
+              backgroundColor: resolveUniverseColors(stylingTheme.colors, section.iconType)
+                .background,
+            }}
+          >
             <SearchTypeIcon type={section.iconType} />
           </Box>
         ) : null}

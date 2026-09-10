@@ -33,6 +33,7 @@ export interface LinkProps<R extends keyof MainStackProps> extends Pick<
   onPress?: (event?: GestureResponderEvent) => void
   padding?: boolean
   paddingSmall?: boolean
+  className?: string
   style?: StyleProp<ViewStyle>
   size?: number
   hitSlop?: TouchableOpacityProps['hitSlop']

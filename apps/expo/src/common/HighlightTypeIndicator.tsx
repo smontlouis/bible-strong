@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import * as NativeUI from 'react-native'
 import { View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import Text from '~common/ui/Text'
 import type { HighlightType } from '~redux/modules/user'
 import type { Theme as AppTheme } from '~themes'
@@ -17,15 +17,12 @@ const Touchable = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('items-center justify-center', className))
+  const resolvedClassName = twMerge('items-center justify-center', className)
   return (
     <NativeUI.TouchableOpacity
       {...props}
-      style={
-        [classStyles, {}, props.style] as UIComponentProps<
-          typeof NativeUI.TouchableOpacity
-        >['style']
-      }
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']}
     />
   )
 }
@@ -44,13 +41,13 @@ const CircleContainer = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { color, size, isSelected } = props
-  const classStyles = useResolveClassNames(twMerge('overflow-visible', className))
+  const resolvedClassName = twMerge('overflow-visible', className)
   return (
     <NativeUI.View
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             width: size,
             height: size,
@@ -80,13 +77,13 @@ const TextContainer = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { size, isSelected } = props
-  const classStyles = useResolveClassNames(twMerge('items-center justify-center', className))
+  const resolvedClassName = twMerge('items-center justify-center', className)
   return (
     <NativeUI.View
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             width: size,
             height: size,

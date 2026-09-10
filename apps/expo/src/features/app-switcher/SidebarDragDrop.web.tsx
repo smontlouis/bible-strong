@@ -1,3 +1,4 @@
+import { resolveUniverseColors } from '~themes/universeColors'
 import { createContext, useContext, useRef, useState, type RefCallback } from 'react'
 import {
   DragDropProvider,
@@ -21,7 +22,7 @@ import {
 } from '~state/tabs'
 import { applySidebarDrop, type SidebarDrag, type SidebarDrop } from '~state/sidebarDragDrop'
 import { useTheme } from '~themes/ThemeProvider'
-import { colorWithOpacity, resolveThemeColor } from '~themes/colorValues'
+import { resolveThemeColor } from '~themes/colorValues'
 import Color from 'color'
 import { webFontFamily } from '~helpers/webFontFamily'
 import TabIcon, { tabIconColorConfig } from './utils/getIconByTabType'
@@ -50,10 +51,7 @@ const sensors = [
 
 function PreviewTab({ tab }: { tab: TabItem }) {
   const theme = useTheme()
-  const color = resolveThemeColor(
-    theme,
-    tab.type === 'bible' ? 'color1' : tabIconColorConfig[tab.type] || 'grey'
-  )
+  const color = resolveThemeColor(theme, tabIconColorConfig[tab.type] || 'grey')
   return (
     <div
       style={{
@@ -74,7 +72,7 @@ function PreviewTab({ tab }: { tab: TabItem }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: colorWithOpacity(color, 0.12),
+          background: resolveUniverseColors(theme.colors, tab.type).background,
         }}
       >
         <TabIcon type={tab.type} size={12} color={color} />

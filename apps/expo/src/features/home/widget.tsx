@@ -1,5 +1,5 @@
 import { twMerge } from '~common/ui/classNames'
-import React from 'react'
+import React, { createContext, useContext } from 'react'
 import { AnimatedProgressCircle } from '@convective/react-native-reanimated-progress'
 import { useTheme } from '~themes/ThemeProvider'
 import Loading from '~common/Loading'
@@ -11,19 +11,28 @@ import { useTranslation } from 'react-i18next'
 export const itemWidth = wp(50) > 300 ? 300 : wp(50)
 export const itemHeight = 120
 
-export const WidgetContainer = (props: BoxProps) => (
-  <Box
-    {...props}
-    style={[{ width: itemWidth, height: itemHeight }, props.style]}
-    className={twMerge(
-      'overflow-hidden border-continuous',
-      twMerge(
-        'overflow-hidden border-continuous mr-[16px] bg-reverse items-center justify-center rounded-[20px]',
-        props.className
-      )
-    )}
-  />
-)
+export const WidgetWidthContext = createContext<number | '100%' | undefined>(undefined)
+
+export const WidgetContainer = (props: BoxProps) => {
+  const width = useContext(WidgetWidthContext)
+  return (
+    <Box
+      {...props}
+      style={[
+        { width: width ?? itemWidth, height: itemHeight },
+        width !== undefined && { marginRight: 0 },
+        props.style,
+      ]}
+      className={twMerge(
+        'overflow-hidden border-continuous',
+        twMerge(
+          'overflow-hidden border-continuous mr-[16px] bg-reverse items-center justify-center rounded-[20px]',
+          props.className
+        )
+      )}
+    />
+  )
+}
 
 export const WidgetLoading = () => {
   return (

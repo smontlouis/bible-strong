@@ -2,7 +2,13 @@ import PanelSearch from '~common/ContextualPanel/PanelSearch'
 import { PanelNavigationContext } from '~common/ContextualPanel/NavigationContext'
 import type { PanelNavigation } from '~common/ContextualPanel/types'
 import React from 'react'
-import { Platform, SectionList, TouchableOpacity, type SectionListRenderItem } from 'react-native'
+import {
+  Platform,
+  SectionList,
+  TouchableOpacity,
+  useWindowDimensions,
+  type SectionListRenderItem,
+} from 'react-native'
 import { useNavigation } from 'expo-router'
 import { useAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
@@ -325,6 +331,8 @@ export const VersionCatalogList = ({
   listHeaderComponent,
 }: VersionCatalogListProps) => {
   const panelNavigation = React.useContext(PanelNavigationContext)
+  const { height: windowHeight } = useWindowDimensions()
+  const isWebPanel = Platform.OS === 'web' && Boolean(panelNavigation)
   const { t } = useTranslation()
   const listRef = React.useRef<SectionList<VersionCatalogItem, VersionCatalogSection>>(null)
   const listHeightRef = React.useRef(0)
@@ -375,6 +383,7 @@ export const VersionCatalogList = ({
   return (
     <SectionList<VersionCatalogItem, VersionCatalogSection>
       ref={listRef}
+      style={isWebPanel ? { maxHeight: Math.min(420, windowHeight * 0.65) } : undefined}
       contentContainerStyle={{
         paddingTop: 0,
         paddingBottom: bottomInset,
@@ -383,7 +392,9 @@ export const VersionCatalogList = ({
       stickySectionHeadersEnabled
       sections={sections}
       keyExtractor={item => item.id}
-      initialNumToRender={44}
+      initialNumToRender={isWebPanel ? 8 : 44}
+      maxToRenderPerBatch={isWebPanel ? 8 : undefined}
+      windowSize={isWebPanel ? 3 : undefined}
       getItemLayout={(_, index) => ({
         index,
         length: ESTIMATED_CATALOG_ROW_HEIGHT,

@@ -7,7 +7,7 @@ import { Platform, TouchableOpacity } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import HeaderReplacement from '~common/ContextualPanel/HeaderReplacement'
@@ -52,13 +52,15 @@ const ColorRow = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-row items-center py-[12px] px-[15px] border-b-[1px] border-b-border', className)
+  const resolvedClassName = twMerge(
+    'flex-row items-center py-[12px] px-[15px] border-b-[1px] border-b-border',
+    className
   )
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }
@@ -71,13 +73,15 @@ const SectionTitle = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('text-[12px] text-tertiary mt-[15px] mb-[10px] ml-[15px] uppercase', className)
+  const resolvedClassName = twMerge(
+    'text-[12px] text-tertiary mt-[15px] mb-[10px] ml-[15px] uppercase',
+    className
   )
   return (
     <Text
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Text>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Text>['style']}
     />
   )
 }
@@ -90,11 +94,12 @@ const IconButton = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('p-[8px]', className))
+  const resolvedClassName = twMerge('p-[8px]', className)
   return (
     <TouchableOpacity
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
     />
   )
 }

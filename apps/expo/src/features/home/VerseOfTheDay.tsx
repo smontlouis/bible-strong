@@ -1,7 +1,7 @@
 import DateTimePicker from '@expo/ui/community/datetime-picker'
 import React, { useEffect, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
-import { Platform, Share, View } from 'react-native'
+import { Platform, Share, View, type ViewStyle } from 'react-native'
 import { EaseView } from 'react-native-ease'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
@@ -21,10 +21,16 @@ import { setNotificationVOD } from '~redux/modules/user'
 import VerseImageModal from './VerseImageModal'
 import { useImageUrls } from './useImageUrls'
 import { useVerseOfTheDay } from './useVerseOfTheDay'
+import { resolveFontFamily } from '~themes/styleValues'
+import { selectFontFamily } from '~redux/selectors/user'
 export const VERSE_CARD_HEIGHT = 240
 
 interface Props {
   addDay: number
+  desktop?: boolean
+  navigation?: React.ReactNode
+  footer?: React.ReactNode
+  style?: ViewStyle
 }
 
 const dayToAgo = (day: number, t: TFunction<'translation'>) => {
@@ -92,8 +98,9 @@ const SkeletonLines = () => {
   )
 }
 
-const VerseOfTheDay = ({ addDay }: Props) => {
+const VerseOfTheDay = ({ addDay, desktop = false, navigation, footer, style }: Props) => {
   const { t } = useTranslation()
+  const bibleFont = useSelector(selectFontFamily)
   const [timerPickerOpen, setTimePicker] = useState(false)
   const verseOfTheDay = useVerseOfTheDay(addDay)
   const imageUrls = useImageUrls(verseOfTheDay)
@@ -104,6 +111,27 @@ const VerseOfTheDay = ({ addDay }: Props) => {
   )
   const ago = dayToAgo(addDay, t)
   const notificationModalRef = React.useRef<SheetRef>(null)
+  const cardClassName = desktop
+    ? 'flex-1 p-[24px] pb-[12px]'
+    : 'overflow-hidden border-continuous px-[20px] rounded-[30px] bg-reverse py-[20px]'
+  const cardStyle = desktop ? style : { height: VERSE_CARD_HEIGHT }
+  const dayHeader = (
+    <Box
+      dataSet={desktop ? { 'home-verse-header': '' } : undefined}
+      className="flex-row items-center justify-between gap-[12px]"
+    >
+      <Text
+        className={
+          desktop
+            ? 'text-primary font-bold text-[12px] uppercase tracking-[1.5px]'
+            : 'text-grey font-bold text-[14px]'
+        }
+      >
+        {ago}
+      </Text>
+      {navigation}
+    </Box>
+  )
 
   const [initialHour, initialMinutes] = verseOfTheDayTime.split(':').map(n => Number(n))
 
@@ -129,28 +157,25 @@ const VerseOfTheDay = ({ addDay }: Props) => {
 
   if (!verseOfTheDay) {
     return (
-      <Box
-        className="overflow-hidden border-continuous px-[20px] rounded-[30px] bg-reverse py-[20px]"
-        style={{ height: VERSE_CARD_HEIGHT }}
-      >
-        <Text className="text-grey font-bold text-[14px]">{ago}</Text>
+      <Box className={cardClassName} style={cardStyle}>
+        {dayHeader}
         <Box className="overflow-hidden border-continuous mt-[10px]">
           <SkeletonLines />
         </Box>
+        {desktop && <Box className="mt-auto pt-[12px] items-start">{footer}</Box>}
       </Box>
     )
   }
 
   if (verseOfTheDay && 'error' in verseOfTheDay) {
     return (
-      <Box
-        className="overflow-hidden border-continuous px-[20px] rounded-[30px] bg-reverse py-[20px]"
-        style={{ height: VERSE_CARD_HEIGHT }}
-      >
+      <Box className={cardClassName} style={cardStyle}>
+        {desktop && dayHeader}
         <Empty
           source={require('~assets/images/empty.json')}
           message="Impossible de charger le verset du jour..."
         />
+        {desktop && <Box className="mt-auto pt-[12px] items-start">{footer}</Box>}
       </Box>
     )
   }
@@ -161,12 +186,11 @@ const VerseOfTheDay = ({ addDay }: Props) => {
   }
 
   return (
-    <Box
-      className="overflow-hidden border-continuous px-[20px] rounded-[30px] bg-reverse py-[20px]"
-      style={{ height: VERSE_CARD_HEIGHT }}
-    >
-      <Text className="text-grey font-bold text-[14px]">{ago}</Text>
+    <Box className={cardClassName} style={cardStyle}>
+      {dayHeader}
       <Link
+        key={desktop ? `${addDay}:${version}:${title}:${content}` : 'verse'}
+        className={desktop ? 'bs-home-verse-fade' : undefined}
         route="BibleView"
         params={{
           contextDisplayMode: 'focused',
@@ -176,16 +200,33 @@ const VerseOfTheDay = ({ addDay }: Props) => {
           version,
           focusVerses: [verse],
         }}
-        style={{ marginTop: 10 }}
+        style={{ marginTop: desktop ? 22 : 10 }}
       >
-        <Paragraph className="font-bold" numberOfLines={3} scaleLineHeight={-1}>
+        <Paragraph
+          numberOfLines={desktop ? undefined : 3}
+          scaleLineHeight={-1}
+          style={{
+            fontFamily: resolveFontFamily(bibleFont),
+            fontWeight: 'normal',
+            ...(desktop ? { fontSize: 23, lineHeight: 34, maxWidth: 600 } : {}),
+          }}
+        >
           {removeBreakLines(content)}
         </Paragraph>
-        <Text className="text-grey text-[12px] mt-[5px]" numberOfLines={2}>
+        <Text
+          className={desktop ? 'text-grey text-[14px] mt-[16px]' : 'text-grey text-[12px] mt-[5px]'}
+          numberOfLines={2}
+        >
           {title} - {version}
         </Text>
       </Link>
-      <Box className="overflow-hidden border-continuous flex-row items-center mt-auto">
+      <Box
+        className={
+          desktop
+            ? 'flex-row flex-wrap items-center gap-[12px] mt-auto pt-[12px]'
+            : 'overflow-hidden border-continuous flex-row items-center mt-auto'
+        }
+      >
         <Box className="overflow-hidden border-continuous flex-row items-center justify-center opacity-[0.5]">
           {!addDay && (
             <Link
@@ -207,6 +248,7 @@ const VerseOfTheDay = ({ addDay }: Props) => {
             <FeatherIcon size={16} name="image" />
           </Link>
         </Box>
+        {footer}
       </Box>
       <VerseImageModal
         modalRef={imageModalRef}

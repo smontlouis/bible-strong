@@ -1,3 +1,4 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import React, { useState } from 'react'
 import { withTheme } from '~themes/ThemeProvider'
 import * as Icon from '@expo/vector-icons'
@@ -27,7 +28,7 @@ const ForgotPasswordScreen = ({ theme }: { theme: Theme }) => {
     }
     setLoading(true)
     await FireAuth.resetPassword(email).finally(() => setLoading(false))
-    router.back()
+    goBackOrHome(router)
   }
 
   return (

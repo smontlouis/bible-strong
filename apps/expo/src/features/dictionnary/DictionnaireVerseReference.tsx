@@ -1,7 +1,7 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import * as NativeUI from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
@@ -23,15 +23,16 @@ const StyledView = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isSelected } = props
-  const classStyles = useResolveClassNames(
-    twMerge('rounded-[5px] pl-[3px] pr-[3px] mb-[5px] overflow-hidden', className)
+  const resolvedClassName = twMerge(
+    'rounded-[5px] pl-[3px] pr-[3px] mb-[5px] overflow-hidden',
+    className
   )
   return (
     <NativeUI.TouchableOpacity
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           { backgroundColor: isSelected ? theme.colors.secondary : theme.colors.lightSecondary },
           props.style,
         ] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']
@@ -48,13 +49,13 @@ const StyledText = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isSelected } = props
-  const classStyles = useResolveClassNames(twMerge('', className))
+  const resolvedClassName = twMerge('', className)
   return (
     <Paragraph
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           { color: isSelected ? theme.colors.reverse : theme.colors.default },
           props.style,
         ] as UIComponentProps<typeof Paragraph>['style']

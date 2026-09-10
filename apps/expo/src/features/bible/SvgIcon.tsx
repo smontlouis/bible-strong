@@ -3,7 +3,7 @@ import React from 'react'
 import * as NativeUI from 'react-native'
 import type { SvgProps } from 'react-native-svg'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme, Theme } from '~themes'
 import { withTheme } from '~themes/ThemeProvider'
 
@@ -15,13 +15,12 @@ const Div = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-[1] items-center justify-center', className)
-  )
+  const resolvedClassName = twMerge('flex-[1] items-center justify-center', className)
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }

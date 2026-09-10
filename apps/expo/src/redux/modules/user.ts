@@ -1040,6 +1040,7 @@ const userSlice = createSlice({
     builder.addCase(moveBookmark, (state, action) => {
       const { id, book, chapter, verse, version } = action.payload
       if (state.bible.bookmarks[id]) {
+        state.bible.bookmarks[id].createdAt ??= state.bible.bookmarks[id].date
         state.bible.bookmarks[id].book = book
         state.bible.bookmarks[id].chapter = chapter
         state.bible.bookmarks[id].verse = verse

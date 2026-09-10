@@ -1,3 +1,4 @@
+import ResourceDiscoveryEntry from './ResourceDiscoveryEntry'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
@@ -21,7 +22,11 @@ import {
 } from '~features/resources/resourceFailure'
 import ResourceDownloadWidget from './ResourceDownloadWidget'
 import { getRandomDictionaryEntryId } from './dictionaryWidgetEntry'
-const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47,128,237,1)' }) => {
+const DictionnaireOfTheDay = ({
+  discovery = false,
+  color1 = 'rgba(86,204,242,1)',
+  color2 = 'rgba(47,128,237,1)',
+}) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const lang = useLanguage()
@@ -129,6 +134,26 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
 
   const { word } = strongReference
 
+  if (discovery)
+    return (
+      <ResourceDiscoveryEntry
+        iconKind="dictionary"
+        title={word}
+        detail={{
+          route: 'DictionnaryDetail',
+          params: {
+            word,
+            work,
+            resourceId: dictionary.resourceId,
+            dictionaryTitle: dictionary.title,
+            language: lang,
+          },
+        }}
+        isRefreshing={strongQuery.isFetching}
+        onShuffle={() => void strongQuery.refetch()}
+      />
+    )
+
   return (
     <Link
       route="DictionnaryDetail"
@@ -167,9 +192,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
         <Link route="Dictionnaire" style={{ width: '100%' }}>
           <Box className="overflow-hidden border-continuous flex-row items-center justify-center bg-[rgba(0,0,0,0.04)] py-[10px]">
             <DictionnaireIcon style={{ marginRight: 10 }} size={20} color="white" />
-            <Text className="text-[white] font-bold text-[12px]">
-              {t('Explorer les dictionnaires')}
-            </Text>
+            <Text className="text-[white] font-bold text-[12px]">{t('Dictionnaires')}</Text>
           </Box>
         </Link>
       </WidgetContainer>

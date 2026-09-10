@@ -17,3 +17,22 @@ host. PanelAction reuses ActionSheetItem on native to preserve the original
 transparent rows, spacing, typography and separators. No automatic interception
 of arbitrary sheet refs is introduced. Advanced color management still opens
 the existing dedicated editor after closing this panel.
+
+List rows use the shared PanelAction, FilterChoices, Box, Text and Checkbox
+components. Their className props follow the standard Uniwind path (ADR-0044):
+direct Tailwind CSS on Web and native styles on mobile. Do not add a separate
+HTML row implementation merely to bypass class-to-style conversion.
+
+The frame creates list content outside the stateful header layout so mounting
+portal targets does not recreate that content. Lists which manage their own
+virtualization must have a bounded scrolling viewport; clipping an unbounded
+list with the outer `.bs-filter-options` element does not provide that viewport.
+The version catalog bounds its own viewport and uses a smaller initial batch
+only inside web panels. Keep the shared 200 ms transition independent of these
+rendering optimizations.
+
+The Web popover forwards the active palette as CSS variables via
+`webThemeVariables`. Its body portal is outside Uniwind's `ScopedTheme`;
+setting only the inherited `color` does not cover descendants with explicit
+`text-default`, `text-grey`, or background utilities. Keep the palette on the
+portal boundary so global component-library tokens cannot recolor its contents.

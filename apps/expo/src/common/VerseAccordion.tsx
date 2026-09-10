@@ -1,3 +1,4 @@
+import { getUniverseColor } from '~themes/universeColors'
 import { useTheme } from '~themes/ThemeProvider'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
@@ -58,7 +59,7 @@ const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
         onPress={toggleExpand}
       >
         <HStack className="items-center gap-[8px] flex-[1]">
-          <FeatherIcon name="book-open" size={16} color={theme.colors.primary} />
+          <FeatherIcon name="book-open" size={16} color={getUniverseColor('bible')} />
           <Text className="text-[14px] text-primary font-bold">{reference}</Text>
         </HStack>
         <EaseView

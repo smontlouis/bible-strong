@@ -6,7 +6,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useState } from 'react'
 import { Platform, TouchableOpacity, type TouchableOpacityProps } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import PageContent from '~common/ui/PageContent'
 import type { Theme as AppTheme } from '~themes'
 
@@ -413,15 +413,13 @@ const FormatIcon = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isSelected } = props
-  const classStyles = useResolveClassNames(
-    twMerge('w-[25px] h-[25px] items-center justify-center', className)
-  )
+  const resolvedClassName = twMerge('w-[25px] h-[25px] items-center justify-center', className)
   return (
     <TouchableOpacity
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           { backgroundColor: isSelected ? theme.colors.lightPrimary : 'transparent' },
           props.style,
         ] as UIComponentProps<typeof TouchableOpacity>['style']

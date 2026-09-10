@@ -10,6 +10,7 @@ import {
 import { Popover } from '@heroui/react/popover'
 import { useTheme } from '~themes/ThemeProvider'
 import { webFontFamily } from '~helpers/webFontFamily'
+import { webThemeVariables } from '~themes/webThemeVariables'
 import type { SheetProps, SheetRef } from '~common/sheet'
 import '~common/FiltersHeader.web.css'
 
@@ -84,6 +85,7 @@ export default function StrongSelectionContainer({
         className="bs-filter-popover"
         data-strong-selection-panel
         style={{
+          ...webThemeVariables(theme.colors),
           width: 440,
           background: theme.colors.reverse,
           color: theme.colors.default,

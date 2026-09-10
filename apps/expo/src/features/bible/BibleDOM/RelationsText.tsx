@@ -1,3 +1,4 @@
+import { resolveUniverseColors } from '~themes/universeColors'
 import Feather from '@expo/vector-icons/Feather'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useState } from 'react'
@@ -110,30 +111,7 @@ const getIconColor = (
   targetType: VerseRelationItem['targetType'],
   settings: RootStyles['settings']
 ) => {
-  const colors = settings.colors[settings.theme]
-
-  switch (targetType) {
-    case 'note':
-      return colors.quart
-    case 'externalLink':
-      return colors.secondary
-    case 'study':
-      return colors.tertiary
-    case 'verse':
-      return colors.primary
-    case 'strong':
-      return colors.primary
-    case 'nave':
-      return colors.quint
-    case 'dictionary':
-      return colors.secondary
-    case 'annotation':
-      return colors.primary
-    case 'word':
-      return colors.tertiary
-    default:
-      return colors.default
-  }
+  return resolveUniverseColors(settings.colors[settings.theme], targetType).foreground
 }
 
 const SvgMaskIcon = ({

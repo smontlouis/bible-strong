@@ -1,7 +1,7 @@
-import * as Icon from '@expo/vector-icons'
+import * as Icon from '~common/ui/classNameIcons'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
@@ -19,13 +19,13 @@ export const FeatherIcon = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { color = 'default' } = props
-  const classStyles = useResolveClassNames(twMerge('', className))
+  const resolvedClassName = twMerge('', className)
   return (
     <Icon.Feather
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             color:
               theme.colors[color as keyof typeof theme.colors] || color || theme.colors.default,
@@ -45,13 +45,13 @@ export const IonIcon = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { color = 'default' } = props
-  const classStyles = useResolveClassNames(twMerge('', className))
+  const resolvedClassName = twMerge('', className)
   return (
     <Icon.Ionicons
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             color:
               theme.colors[color as keyof typeof theme.colors] || color || theme.colors.default,
@@ -74,13 +74,13 @@ export const MaterialIcon = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { color } = props
-  const classStyles = useResolveClassNames(twMerge('', className))
+  const resolvedClassName = twMerge('', className)
   return (
     <Icon.MaterialIcons
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             color:
               theme.colors[color as keyof typeof theme.colors] || color || theme.colors.default,
@@ -100,13 +100,13 @@ export const TextIcon = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { color } = props
-  const classStyles = useResolveClassNames(twMerge('text-[16px] font-bold mr-[5px]', className))
+  const resolvedClassName = twMerge('text-[16px] font-bold mr-[5px]', className)
   return (
     <Text
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           { color: theme.colors[color as keyof typeof theme.colors] || theme.colors.default },
           props.style,
         ] as UIComponentProps<typeof Text>['style']

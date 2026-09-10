@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import Box from './Box'
 
@@ -15,13 +15,12 @@ const RoundedCorner = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { reverse } = props
-  const classStyles = useResolveClassNames(twMerge('h-[30px] bg-reverse', className))
+  const resolvedClassName = twMerge('h-[30px] bg-reverse', className)
   return (
     <Box
       {...props}
       style={
         [
-          classStyles,
           {
             ...(reverse
               ? {
@@ -36,7 +35,7 @@ const RoundedCorner = (
           props.style,
         ] as UIComponentProps<typeof Box>['style']
       }
-      className="overflow-hidden border-continuous"
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

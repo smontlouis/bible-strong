@@ -22,10 +22,8 @@ import {
   useBibleTabActions,
 } from 'src/state/tabs'
 import Back from '~common/Back'
-import EntityChipList from '~common/EntityChipList'
 import ParallelIcon from '~common/ParallelIcon'
 import { type SheetRef } from '~common/sheet'
-import type { TagsObj } from '~common/types'
 import Box, {
   AnimatedBox,
   AnimatedTouchableBox,
@@ -45,7 +43,6 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import { createVerseEndpoint } from '~features/studyRelations/domain'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
-import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import generateUUID from '~helpers/generateUUID'
 import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
@@ -186,18 +183,6 @@ const Header = ({
         version
       )
     : null
-  const storedFocusedVerseRelationCount = useRelationCount(focusedVerseEndpoint)
-  const focusedVerseRelationCount = hidePersonalBibleData ? 0 : storedFocusedVerseRelationCount
-  const highlights = useSelector((state: RootState) => state.user.bible.highlights)
-  const focusedVerseTags = (
-    hasFocusVerses && !hidePersonalBibleData ? focusVerses : []
-  ).reduce<TagsObj>((acc, focusVerse) => {
-    const verseKey = `${bookNumber}-${chapter}-${focusVerse}`
-    const tags = highlights[verseKey]?.tags
-    return tags ? { ...acc, ...tags } : acc
-  }, {})
-  const hasFocusedVerseTags = Object.keys(focusedVerseTags).length > 0
-  const hasFocusEntityChips = hasFocusedVerseTags || focusedVerseRelationCount > 0
 
   useEffect(() => {
     const { selectedBook, selectedChapter, selectedVersion, focusVerses } = bible.data
@@ -213,7 +198,6 @@ const Header = ({
 
   const isHeaderCollapsed = !isFormSheet && isFullScreenBible
   const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
-  const focusedHeaderMinHeight = headerHeight + (hasFocusVerses && hasFocusEntityChips ? 10 : 0)
   const fullScreenOpacity = isHeaderCollapsed ? 0 : 1
   const fullScreenTranslateY = isHeaderCollapsed ? -4 : 0
   const TOP_INSET = isFormSheet ? 0 : insets.top
@@ -547,7 +531,7 @@ const Header = ({
         { paddingTop: TOP_INSET, zIndex: nativeHeaderZIndex },
         {
           height: isHeaderCollapsed ? 20 + TOP_INSET : undefined,
-          minHeight: isHeaderCollapsed ? 20 + TOP_INSET : focusedHeaderMinHeight + TOP_INSET,
+          minHeight: isHeaderCollapsed ? 20 + TOP_INSET : headerHeight + TOP_INSET,
           transitionProperty: 'height',
           transitionDuration: 300,
         },
@@ -593,12 +577,6 @@ const Header = ({
                   >
                     {`${focusedReference} - ${version}`}
                   </Text>
-                  <EntityChipList
-                    tags={focusedVerseTags}
-                    relationCount={focusedVerseRelationCount}
-                    onRelationPress={openFocusedVerseRelations}
-                    limit={2}
-                  />
                 </Box>
                 {strongModeButton}
                 {interlinearModeButton}

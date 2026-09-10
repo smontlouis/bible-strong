@@ -2,7 +2,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import type { LayoutChangeEvent, TextStyle } from 'react-native'
 import * as NativeUI from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
@@ -26,15 +26,16 @@ const StyledView = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isSelected } = props
-  const classStyles = useResolveClassNames(
-    twMerge('rounded-[5px] pl-[3px] pr-[3px] mb-[5px] overflow-hidden', className)
+  const resolvedClassName = twMerge(
+    'rounded-[5px] pl-[3px] pr-[3px] mb-[5px] overflow-hidden',
+    className
   )
   return (
     <NativeUI.TouchableOpacity
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           { backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary },
           props.style,
         ] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']
@@ -52,14 +53,16 @@ const StyledCircle = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('w-[25px] h-[25px] bg-light-primary items-center justify-center mx-[3px]', className)
+  const resolvedClassName = twMerge(
+    'w-[25px] h-[25px] bg-light-primary items-center justify-center mx-[3px]',
+    className
   )
   return (
     <NativeUI.TouchableOpacity
       {...props}
+      className={resolvedClassName}
       style={
-        [classStyles, { borderRadius: 25 / 2 }, props.style] as UIComponentProps<
+        [{ borderRadius: 25 / 2 }, props.style] as UIComponentProps<
           typeof NativeUI.TouchableOpacity
         >['style']
       }
@@ -81,13 +84,13 @@ const StyledInsideCircle = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isSelected, isConcordance } = props
-  const classStyles = useResolveClassNames(twMerge('items-center justify-center', className))
+  const resolvedClassName = twMerge('items-center justify-center', className)
   return (
     <NativeUI.View
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             width: isConcordance ? 12 : 15,
             height: isConcordance ? 12 : 15,
@@ -118,13 +121,13 @@ const StyledText = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isFromConcordance, isSelected } = props
-  const classStyles = useResolveClassNames(twMerge('', className))
+  const resolvedClassName = twMerge('', className)
   return (
     <Paragraph
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             color: isSelected ? theme.colors.reverse : theme.colors.default,
             ...(isFromConcordance
@@ -153,13 +156,13 @@ const ConcordanceText = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isConcordance } = props
-  const classStyles = useResolveClassNames(twMerge('', className))
+  const resolvedClassName = twMerge('', className)
   return (
     <Paragraph
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             ...(isConcordance
               ? {

@@ -38,6 +38,21 @@ const sourceFiles = git([
   .split('\n')
   .filter(file => file.startsWith('apps/expo/src/'))
 
+const classResolutionFindings = sourceFiles.flatMap(file => {
+  if (!file.endsWith('.tsx') || file.includes('/__tests__/') || !existsSync(file)) return []
+  return readFileSync(file, 'utf8')
+    .split('\n')
+    .flatMap((line, index) =>
+      /\buseResolveClassNames\s*\(/.test(line) ? [`${file}:${index + 1}`] : []
+    )
+})
+if (classResolutionFindings.length) {
+  console.error('Forward className to UI components instead of resolving CSS during rendering:')
+  console.error(classResolutionFindings.join('\n'))
+  console.error('Use the standard withUniwind adapter for third-party style slots.')
+  process.exit(1)
+}
+
 const findings = []
 const staleBaselineEntries = []
 const currentCounts = new Map()

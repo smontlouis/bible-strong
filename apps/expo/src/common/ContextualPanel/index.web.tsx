@@ -1,9 +1,10 @@
 import { Popover } from '@heroui/react/popover'
-import { useImperativeHandle, useState } from 'react'
+import { useImperativeHandle, useState, type ReactNode } from 'react'
 import { HeaderActionContext, HeaderContentContext } from './HeaderActionContext'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '~themes/ThemeProvider'
 import { webFontFamily } from '~helpers/webFontFamily'
+import { webThemeVariables } from '~themes/webThemeVariables'
 import { FeatherIcon } from '~common/ui/Icon'
 import type { ContextualPanelProps, PanelScreen, PanelNavigation } from './types'
 import { usePanelNavigation } from './usePanelNavigation'
@@ -44,6 +45,7 @@ export default function ContextualPanel(props: ContextualPanelProps) {
         offset={8}
         className="bs-filter-popover"
         style={{
+          ...webThemeVariables(theme.colors),
           width: panel.screen.width ?? props.width ?? 340,
           background: theme.colors.reverse,
           color: theme.colors.default,
@@ -70,19 +72,27 @@ export default function ContextualPanel(props: ContextualPanelProps) {
   )
 }
 
-function PanelFrame({
-  screen,
-  navigation,
-  active,
-  canGoBack,
-  direction,
-}: {
+type PanelFrameProps = {
   screen: PanelScreen
   navigation: PanelNavigation
   active: boolean
   canGoBack: boolean
   direction: 'forward' | 'backward'
-}) {
+}
+
+function PanelFrame(props: PanelFrameProps) {
+  // Keep the list element stable while the layout initializes its header portals.
+  return <PanelFrameLayout {...props} content={props.screen.content(props.navigation)} />
+}
+
+function PanelFrameLayout({
+  screen,
+  navigation,
+  active,
+  canGoBack,
+  direction,
+  content,
+}: PanelFrameProps & { content: ReactNode }) {
   const { t } = useTranslation()
   const theme = useTheme()
   const [actionTarget, setActionTarget] = useState<HTMLDivElement | null>(null)
@@ -118,7 +128,7 @@ function PanelFrame({
               </div>
               {screen.headerContent}
               <div ref={setContentTarget} />
-              <div className="bs-filter-options">{screen.content(navigation)}</div>
+              <div className="bs-filter-options">{content}</div>
               {screen.footer}
             </PanelTransition>
           </HeaderContentContext.Provider>

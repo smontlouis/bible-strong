@@ -8,7 +8,7 @@ jest.mock('react-native', () => ({
 }))
 jest.mock('~themes/ThemeProvider', () => ({ useTheme: () => ({ colors: {} }) }))
 // Behavioral tests do not run Metro's generated Uniwind stylesheet.
-jest.mock('uniwind', () => ({ useResolveClassNames: () => ({}) }))
+jest.mock('uniwind', () => ({ withUniwind: (component: unknown) => component }))
 
 jest.mock('~common/ui/Paragraph', () => ({
   __esModule: true,

@@ -2,6 +2,7 @@ import { useImperativeHandle, useRef, useState } from 'react'
 import { Modal } from '@heroui/react/modal'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '~themes/ThemeProvider'
+import { webThemeVariables } from '~themes/webThemeVariables'
 import { webFontFamily } from '~helpers/webFontFamily'
 import { FeatherIcon } from './ui/Icon'
 import type { ModalSheetProps } from './ModalSheet'
@@ -71,6 +72,7 @@ export default function ModalSheet({
           <Modal.Dialog
             className="bs-modal-dialog"
             style={{
+              ...webThemeVariables(theme.colors),
               background: theme.colors.reverse,
               color: theme.colors.default,
               borderColor: theme.colors.border,

@@ -5,7 +5,7 @@ jest.mock('~themes/ThemeProvider', () => ({
   useTheme: () => jest.requireActual('../../../../test/themeFixture').themeFixture,
 }))
 // Behavioral tests do not run Metro's generated Uniwind stylesheet.
-jest.mock('uniwind', () => ({ useResolveClassNames: () => ({}) }))
+jest.mock('uniwind', () => ({ withUniwind: (component: unknown) => component }))
 
 const mockPushRouteOnce = jest.fn()
 

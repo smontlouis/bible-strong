@@ -1,7 +1,7 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import * as NativeUI from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
@@ -28,13 +28,13 @@ const Circle = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isSelected, color, size } = props
-  const classStyles = useResolveClassNames(twMerge('border-[2px] ml-[10px]', className))
+  const resolvedClassName = twMerge('border-[2px] ml-[10px]', className)
   return (
     <NativeUI.View
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             width: size,
             height: size,

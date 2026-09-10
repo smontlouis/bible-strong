@@ -284,6 +284,8 @@ export interface Bookmark {
   chapter: number
   verse?: number // undefined pour les bookmarks de chapitre
   date: number
+  /** Creation time; older synced bookmarks fall back to date. */
+  createdAt?: number
   version?: string
 }
 

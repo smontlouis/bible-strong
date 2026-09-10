@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import * as NativeUI from 'react-native'
 import { ActivityIndicator, Linking, Modal } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import { migrationProgressAtom } from 'src/state/migration'
@@ -23,13 +23,15 @@ const ModalContent = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-[1] bg-reverse justify-center items-center p-[30px]', className)
+  const resolvedClassName = twMerge(
+    'flex-[1] bg-reverse justify-center items-center p-[30px]',
+    className
   )
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }
@@ -40,16 +42,15 @@ const IconContainer = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'w-[100px] h-[100px] rounded-[50px] bg-light-primary justify-center items-center mb-[30px]',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'w-[100px] h-[100px] rounded-[50px] bg-light-primary justify-center items-center mb-[30px]',
+    className
   )
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }
@@ -60,13 +61,15 @@ const ErrorBox = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('bg-light-grey p-[15px] rounded-[10px] mb-[20px] w-[100%]', className)
+  const resolvedClassName = twMerge(
+    'bg-light-grey p-[15px] rounded-[10px] mb-[20px] w-[100%]',
+    className
   )
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }
@@ -79,11 +82,12 @@ const Backdrop = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('flex-[1] bg-[rgba(0,0,0,0.9)]', className))
+  const resolvedClassName = twMerge('flex-[1] bg-[rgba(0,0,0,0.9)]', className)
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }

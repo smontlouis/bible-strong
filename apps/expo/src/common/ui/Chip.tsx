@@ -2,7 +2,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import * as NativeUI from 'react-native'
 import { TouchableOpacity } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
@@ -20,15 +20,16 @@ const StyledChip = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isSelected } = props
-  const classStyles = useResolveClassNames(
-    twMerge('rounded-[20px] pt-[5px] pb-[5px] pl-[12px] pr-[12px] mr-[5px] mb-[5px]', className)
+  const resolvedClassName = twMerge(
+    'rounded-[20px] pt-[5px] pb-[5px] pl-[12px] pr-[12px] mr-[5px] mb-[5px]',
+    className
   )
   return (
     <NativeUI.View
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary,
             ...(isSelected && {
@@ -57,12 +58,13 @@ const StyledText = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { isSelected } = props
-  const classStyles = useResolveClassNames(twMerge('', className))
+  const resolvedClassName = twMerge('', className)
   return (
     <Text
       {...props}
+      className={resolvedClassName}
       style={
-        [classStyles, { color: isSelected ? 'white' : 'black' }, props.style] as UIComponentProps<
+        [{ color: isSelected ? 'white' : 'black' }, props.style] as UIComponentProps<
           typeof Text
         >['style']
       }

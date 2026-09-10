@@ -7,7 +7,7 @@ import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useDispatch, useSelector } from 'react-redux'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import { SheetFooter, SheetHeader, SheetTextInput, SheetView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import generateUUID from '~helpers/generateUUID'
@@ -45,15 +45,16 @@ const BookmarkListItem = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isSelected } = props
-  const classStyles = useResolveClassNames(
-    twMerge('flex-row items-center p-[12px] mb-[8px] rounded-[8px] border-primary', className)
+  const resolvedClassName = twMerge(
+    'flex-row items-center p-[12px] mb-[8px] rounded-[8px] border-primary',
+    className
   )
   return (
     <NativeUI.TouchableOpacity
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             backgroundColor: isSelected ? theme.colors.lightPrimary : theme.colors.lightGrey,
             borderWidth: isSelected ? 2 : 0,
@@ -75,21 +76,18 @@ const StyledTextInput = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'text-default h-[48px] border-border border-[2px] rounded-[10px] px-[15px] text-[16px]',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'text-default h-[48px] border-border border-[2px] rounded-[10px] px-[15px] text-[16px]',
+    className
   )
   return (
     <SheetTextInput
       {...props}
+      className={resolvedClassName}
       style={
-        [
-          classStyles,
-          { placeholderTextColor: theme.colors.border },
-          props.style,
-        ] as UIComponentProps<typeof SheetTextInput>['style']
+        [{ placeholderTextColor: theme.colors.border }, props.style] as UIComponentProps<
+          typeof SheetTextInput
+        >['style']
       }
     />
   )

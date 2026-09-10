@@ -1,3 +1,4 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { atom } from 'jotai'
 import { useState } from 'react'
@@ -31,7 +32,7 @@ const NoteScreen = () => {
       noteId={noteId}
       initialVerseKeys={initialVerseKeys}
       initialVersion={version}
-      onBackPress={router.back}
+      onBackPress={() => goBackOrHome(router)}
       isFormSheet={IS_FORM_SHEET}
     />
   )

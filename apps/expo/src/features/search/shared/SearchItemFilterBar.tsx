@@ -1,3 +1,4 @@
+import { getUniverseColor } from '~themes/universeColors'
 import { twMerge } from '~common/ui/classNames'
 
 import { ScrollView } from 'react-native'
@@ -32,13 +33,13 @@ export const searchItemFilterConfig: Record<
     color: string
   }
 > = {
-  passages: { labelKey: 'Passages', color: 'color1' },
-  notes: { labelKey: 'Notes', color: 'color2' },
-  links: { labelKey: 'Liens', color: 'secondary' },
-  studies: { labelKey: 'Études', color: 'tertiary' },
-  strong: { labelKey: 'Strong', color: 'primary' },
-  dictionary: { labelKey: 'Dictionnaire', color: 'secondary' },
-  nave: { labelKey: 'Nave', color: 'quint' },
+  passages: { labelKey: 'Passages', color: getUniverseColor('passages') },
+  notes: { labelKey: 'Notes', color: getUniverseColor('notes') },
+  links: { labelKey: 'Liens', color: getUniverseColor('links') },
+  studies: { labelKey: 'Études', color: getUniverseColor('studies') },
+  strong: { labelKey: 'Strong', color: getUniverseColor('strong') },
+  dictionary: { labelKey: 'Dictionnaire', color: getUniverseColor('dictionary') },
+  nave: { labelKey: 'Nave', color: getUniverseColor('nave') },
 }
 
 export const getNextSearchItemFilters = (

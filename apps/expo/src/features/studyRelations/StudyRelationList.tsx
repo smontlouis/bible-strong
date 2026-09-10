@@ -1,3 +1,4 @@
+import { getUniverseColor } from '~themes/universeColors'
 import {
   type ComponentPropsWithRef as UIComponentProps,
   type ComponentProps,
@@ -9,7 +10,7 @@ import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import ContextualMenu from '~common/ContextualPanel/ContextualMenu'
 import { useDispatch, useSelector } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Empty from '~common/Empty'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -79,15 +80,15 @@ const targetIconConfig: Record<
     color: string
   }
 > = {
-  verse: { name: 'book-open', color: 'color1' },
-  note: { name: 'file-text', color: 'color2' },
-  study: { name: 'feather', color: 'tertiary' },
-  strong: { name: 'hash', color: 'primary' },
-  nave: { name: 'layers', color: 'quint' },
-  dictionary: { name: 'book', color: 'secondary' },
-  externalLink: { name: 'link', color: 'secondary' },
-  annotation: { name: 'edit-3', color: 'primary' },
-  word: { name: 'type', color: 'tertiary' },
+  verse: { name: 'book-open', color: getUniverseColor('verse') },
+  note: { name: 'file-text', color: getUniverseColor('note') },
+  study: { name: 'feather', color: getUniverseColor('study') },
+  strong: { name: 'hash', color: getUniverseColor('strong') },
+  nave: { name: 'layers', color: getUniverseColor('nave') },
+  dictionary: { name: 'book', color: getUniverseColor('dictionary') },
+  externalLink: { name: 'link', color: getUniverseColor('externalLink') },
+  annotation: { name: 'edit-3', color: getUniverseColor('annotation') },
+  word: { name: 'type', color: getUniverseColor('word') },
 }
 
 const LabelInput = (
@@ -98,16 +99,15 @@ const LabelInput = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'min-h-[44px] border-[1px] border-border rounded-[12px] px-[12px] text-default bg-light-grey',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'min-h-[44px] border-[1px] border-border rounded-[12px] px-[12px] text-default bg-light-grey',
+    className
   )
   return (
     <SheetTextInput
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof SheetTextInput>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof SheetTextInput>['style']}
     />
   )
 }

@@ -11,7 +11,7 @@ import {
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import useDeviceOrientation, { Orientation } from '~helpers/useDeviceOrientation'
 import type { Theme as AppTheme } from '~themes'
 import { Theme } from '~themes'
@@ -32,15 +32,16 @@ const SectionList = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { orientation } = props
-  const classStyles = useResolveClassNames(
-    twMerge('pb-[30px] rounded-tl-[30px] rounded-tr-[30px] w-[100%] ml-auto mr-auto', className)
+  const resolvedClassName = twMerge(
+    'pb-[30px] rounded-tl-[30px] rounded-tr-[30px] w-[100%] ml-auto mr-auto',
+    className
   )
   return (
     <NativeUI.SectionList
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             backgroundColor: theme?.colors.reverse,
             ...(orientation.tablet && {

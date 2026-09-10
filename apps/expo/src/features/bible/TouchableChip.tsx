@@ -2,7 +2,7 @@ import * as Icon from '@expo/vector-icons'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import * as NativeUI from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme, Theme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
@@ -17,17 +17,16 @@ const Touchable = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { disabled } = props
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'flex-row items-center justify-center mr-[10px] bg-light-primary h-[30px] px-[10px] rounded-[20px]',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'flex-row items-center justify-center mr-[10px] bg-light-primary h-[30px] px-[10px] rounded-[20px]',
+    className
   )
   return (
     <NativeUI.TouchableOpacity
       {...props}
+      className={resolvedClassName}
       style={
-        [classStyles, { opacity: disabled ? 0.3 : 1 }, props.style] as UIComponentProps<
+        [{ opacity: disabled ? 0.3 : 1 }, props.style] as UIComponentProps<
           typeof NativeUI.TouchableOpacity
         >['style']
       }
@@ -60,13 +59,13 @@ const StyledIcon = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { color, isSelected, disabled } = props
-  const classStyles = useResolveClassNames(twMerge('mr-[8px]', className))
+  const resolvedClassName = twMerge('mr-[8px]', className)
   return (
     <Icon.Feather
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           {
             color: disabled
               ? theme.colors.grey

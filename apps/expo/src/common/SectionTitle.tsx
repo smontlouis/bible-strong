@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import Box from '~common/ui/Box'
 import type { Theme as AppTheme } from '~themes'
 import { Theme } from '~themes'
@@ -17,21 +17,19 @@ const SectionTitle = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { color } = props
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'text-[20px] ml-[20px] mt-[10px] h-[30px] w-[30px] rounded-[15px] justify-center items-center overflow-visible',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'text-[20px] ml-[20px] mt-[10px] h-[30px] w-[30px] rounded-[15px] justify-center items-center overflow-visible',
+    className
   )
   return (
     <Box
       {...props}
       style={
-        [classStyles, { backgroundColor: theme.colors[color] }, props.style] as UIComponentProps<
+        [{ backgroundColor: theme.colors[color] }, props.style] as UIComponentProps<
           typeof Box
         >['style']
       }
-      className="overflow-hidden border-continuous"
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }

@@ -1,3 +1,4 @@
+import { resolveUniverseColors } from '~themes/universeColors'
 import {
   SidebarDragProvider,
   SidebarDragGroup,
@@ -288,7 +289,7 @@ const WorkspaceSidebar = ({
                         {group.tabs.map((tab, index) => {
                           const iconColor = resolveThemeColor(
                             stylingTheme,
-                            tab.type === 'bible' ? 'color1' : tabIconColorConfig[tab.type] || 'grey'
+                            tabIconColorConfig[tab.type] || 'grey'
                           )
                           const selected =
                             isContentActive && group.id === activeGroupId && tab.id === activeTabId
@@ -319,7 +320,10 @@ const WorkspaceSidebar = ({
                                       <Box
                                         className="w-[20px] h-[20px] rounded-[5px] items-center justify-center shrink-0"
                                         style={{
-                                          backgroundColor: colorWithOpacity(iconColor, 0.12),
+                                          backgroundColor: resolveUniverseColors(
+                                            stylingTheme.colors,
+                                            tab.type
+                                          ).background,
                                         }}
                                       >
                                         <TabIcon type={tab.type} size={12} color={iconColor} />

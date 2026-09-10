@@ -1,3 +1,4 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import { type SheetRef } from '~common/sheet'
 import { type MenuAction } from '~common/ui/MenuView'
 import ContextualMenu from '~common/ContextualPanel/ContextualMenu'
@@ -53,7 +54,7 @@ const Menu = ({ modalRefDetails, planId, title, onRemove, details }: Props) => {
     ) {
       dispatch(removePlan(planId))
       if (onRemove) onRemove()
-      else router.back()
+      else goBackOrHome(router)
     }
   }
 

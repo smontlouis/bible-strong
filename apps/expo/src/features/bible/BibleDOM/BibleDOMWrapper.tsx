@@ -1,3 +1,8 @@
+import { getEntityChipListState } from '~common/entityChips'
+import type { TagsObj } from '~common/types'
+import { createVerseEndpoint } from '~features/studyRelations/endpoints'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { webFontFamily } from '~helpers/webFontFamily'
 import { useTheme } from '~themes/ThemeProvider'
 import * as Haptics from 'expo-haptics'
@@ -415,6 +420,26 @@ export const BibleDOMWrapper = ({
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const router = useRouter()
+  const focusedEndpoint =
+    personalBibleDataEnabled && focusVerses?.length
+      ? createVerseEndpoint(
+          focusVerses.map(verse => `${book.Numero}-${chapter}-${verse}`),
+          undefined,
+          version
+        )
+      : null
+  const focusedRelationCount = useRelationCount(focusedEndpoint)
+  const openFocusedRelations = useOpenEntityRelations()
+  const focusedTags: TagsObj = {}
+  for (const verse of personalBibleDataEnabled ? (focusVerses ?? []) : []) {
+    Object.assign(focusedTags, highlightedVerses[`${book.Numero}-${chapter}-${verse}`]?.tags)
+  }
+  const focusedMetadataItems = getEntityChipListState({
+    tags: focusedTags,
+    relationCount: focusedRelationCount,
+    canOpenRelations: !!focusedEndpoint,
+  }).items
+
   const queryClient = useQueryClient()
   const pushRouteOnce = usePushRouteOnce()
   const [isResettingDatabase, setIsResettingDatabase] = useState(false)
@@ -1029,6 +1054,11 @@ export const BibleDOMWrapper = ({
       }}
     >
       <BibleDOMComponent
+        focusedMetadataItems={focusedMetadataItems}
+        onFocusedMetadataPress={async (type, id) => {
+          if (type === 'relation' && focusedEndpoint) openFocusedRelations(focusedEndpoint)
+          else if (type === 'tag') pushRouteOnce({ pathname: '/tag', params: { tagId: id } })
+        }}
         dom={{
           useExpoDOMWebView: false,
           webviewDebuggingEnabled: __DEV__,

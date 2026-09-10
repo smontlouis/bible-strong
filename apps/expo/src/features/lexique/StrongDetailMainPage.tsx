@@ -1,3 +1,4 @@
+import StrongEntryMetadata from './StrongEntryMetadata'
 import { twMerge } from '~common/ui/classNames'
 import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
@@ -219,6 +220,7 @@ const StrongDetailMainPage = ({
         }}
       >
         <PageContent className="gap-[11px]" style={{ maxWidth: 600 }}>
+          <StrongEntryMetadata entry={entry} />
           <Text className="text-primary font-bold text-[12px] uppercase">{entry.stepCode}</Text>
           <HStack className="overflow-hidden border-continuous items-end gap-[16px]">
             <VStack className="overflow-hidden border-continuous flex-[1] gap-[5px]">

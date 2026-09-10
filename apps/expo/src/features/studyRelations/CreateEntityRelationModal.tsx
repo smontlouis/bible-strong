@@ -1,3 +1,4 @@
+import { getUniverseColor } from '~themes/universeColors'
 import { SheetFlashList, SheetHeader, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import RelationVersionButton from './RelationVersionButton'
@@ -772,7 +773,7 @@ const CreateEntityRelationModal = ({
         })
       }
     >
-      <FeatherIcon name="book-open" size={14} color="primary" />
+      <FeatherIcon name="book-open" size={14} color={getUniverseColor('bible')} />
       <Text className="text-primary text-[13px] font-bold">{passageVersion}</Text>
       <FeatherIcon name="chevron-down" size={13} color="primary" />
     </RelationVersionButton>

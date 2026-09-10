@@ -1,10 +1,10 @@
-import * as Icon from '@expo/vector-icons'
+import * as Icon from '~common/ui/classNameIcons'
 import { useQuery } from '@tanstack/react-query'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import * as NativeUI from 'react-native'
 import { FlatList, TouchableOpacity } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import { pageContentStyle } from '~common/ui/PageContent'
 import type { Theme as AppTheme } from '~themes'
 
@@ -33,16 +33,15 @@ const OccurencesNumber = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'ml-[10px] pr-[4px] pl-[4px] pt-[2px] pb-[2px] rounded-[3px] bg-light-primary',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'ml-[10px] pr-[4px] pl-[4px] pt-[2px] pb-[2px] rounded-[3px] bg-light-primary',
+    className
   )
   return (
     <NativeUI.View
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
     />
   )
 }
@@ -55,12 +54,12 @@ const ListItem = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('border-b-[1px] border-b-border', className))
+  const resolvedClassName = twMerge('border-b-[1px] border-b-border', className)
   return (
     <Box
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Box>['style']}
-      className="overflow-hidden border-continuous"
+      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
 }
@@ -73,11 +72,12 @@ const StyledIcon = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('text-default', className))
+  const resolvedClassName = twMerge('text-default', className)
   return (
     <Icon.Feather
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.Feather>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Icon.Feather>['style']}
     />
   )
 }

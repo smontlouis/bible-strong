@@ -1,3 +1,4 @@
+import { getEntityChipListState } from '~common/entityChips'
 import { webFontFamily } from '~helpers/webFontFamily'
 import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useEffect, useRef, useState } from 'react'
@@ -37,6 +38,9 @@ import type { RootState } from '~redux/modules/reducer'
 const IPAD_FORM_SHEET_KEYBOARD_OFFSET = -54
 
 type Props = {
+  tags?: import('~common/types').TagsObj
+  relationCount?: number
+  onOpenRelations?: () => void
   params: Readonly<EditStudyScreenProps>
   isReadOnly: boolean
   onDeltaChangeCallback: (
@@ -70,6 +74,9 @@ const encodeDeltaContent = (content: Study['content'] | undefined) =>
   encodeURIComponent(JSON.stringify(content ?? { ops: [] }))
 
 export default function StudiesDomWrapper({
+  tags,
+  relationCount = 0,
+  onOpenRelations,
   params,
   isReadOnly,
   onDeltaChangeCallback,
@@ -273,6 +280,18 @@ export default function StudiesDomWrapper({
 
   const editor = (
     <StudiesDOMComponent
+      metadataItems={
+        isReadOnly
+          ? getEntityChipListState({ tags, relationCount, canOpenRelations: !!onOpenRelations })
+              .items
+          : []
+      }
+      metadataColor={theme.colors.primary}
+      metadataBackgroundColor={theme.colors.lightPrimary}
+      onMetadataPress={async (type, id) => {
+        if (type === 'relation') onOpenRelations?.()
+        else pushRouteOnce({ pathname: '/tag', params: { tagId: id } })
+      }}
       onEditorMessage={async message =>
         handleMessage({ nativeEvent: { data: message } } as WebViewMessageEvent)
       }

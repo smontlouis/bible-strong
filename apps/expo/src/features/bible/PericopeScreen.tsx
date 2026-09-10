@@ -1,9 +1,9 @@
-import * as Icon from '@expo/vector-icons'
+import * as Icon from '~common/ui/classNameIcons'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { Fragment, useState } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import { useQuery } from '@tanstack/react-query'
@@ -56,15 +56,12 @@ const PericopeHeading = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { size } = props
-  const classStyles = useResolveClassNames(twMerge('ml-[20px] mb-[20px] font-bold', className))
+  const resolvedClassName = twMerge('ml-[20px] mb-[20px] font-bold', className)
   return (
     <Paragraph
       {...props}
-      style={
-        [classStyles, { fontSize: size }, props.style] as UIComponentProps<
-          typeof Paragraph
-        >['style']
-      }
+      className={resolvedClassName}
+      style={[{ fontSize: size }, props.style] as UIComponentProps<typeof Paragraph>['style']}
     />
   )
 }
@@ -77,11 +74,12 @@ const StyledIcon = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(twMerge('text-default', className))
+  const resolvedClassName = twMerge('text-default', className)
   return (
     <Icon.Feather
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Icon.Feather>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Icon.Feather>['style']}
     />
   )
 }

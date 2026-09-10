@@ -18,7 +18,9 @@ jest.mock('react-native', () => {
 
 jest.mock('~themes/ThemeProvider', () => ({
   Global: () => null,
-  useTheme: () => ({ colors: { reverse: '#fff', border: '#ddd' } }),
+  useTheme: () => ({
+    colors: { default: '#111', reverse: '#fff', border: '#ddd', lightPrimary: '#eef' },
+  }),
 }))
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
@@ -32,12 +34,14 @@ jest.mock('@expo/ui/community/bottom-sheet', () => {
         accessibilityDescription,
         accessibilityLabel,
         backdropComponent,
+        backgroundStyle,
         children,
         onClose,
       }: React.PropsWithChildren<{
         accessibilityDescription?: string
         accessibilityLabel?: string
         backdropComponent?: React.ComponentType | null
+        backgroundStyle?: Record<string, unknown>
         onClose?: () => void
       }>,
       ref
@@ -57,7 +61,7 @@ jest.mock('@expo/ui/community/bottom-sheet', () => {
       return visible
         ? ReactModule.createElement(
             'ExpoBottomSheet',
-            { backdropComponent },
+            { backdropComponent, backgroundStyle },
             ReactModule.createElement('DrawerTitle', {}, accessibilityLabel),
             ReactModule.createElement('DrawerDescription', {}, accessibilityDescription),
             children
@@ -124,6 +128,13 @@ describe('Sheet on web', () => {
 
     act(() => ref.current?.present())
     expect(renderer!.root.findAll(node => String(node.type) === 'ExpoBottomSheet')).toHaveLength(1)
+    expect(
+      renderer!.root.find(node => String(node.type) === 'ExpoBottomSheet').props.backgroundStyle
+    ).toMatchObject({
+      '--color-default': '#111',
+      '--color-reverse': '#fff',
+      '--color-light-primary': '#eef',
+    })
     expect(renderer!.root.findAll(node => String(node.type) === 'DrawerTitle')).toHaveLength(1)
     expect(renderer!.root.findAll(node => String(node.type) === 'DrawerDescription')).toHaveLength(
       1

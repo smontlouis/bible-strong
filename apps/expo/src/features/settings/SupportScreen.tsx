@@ -4,7 +4,7 @@ import * as Icon from '@expo/vector-icons'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { Linking } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import type { Theme as AppTheme } from '~themes'
 
 import Header from '~common/Header'
@@ -24,13 +24,15 @@ const LinkItem = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge('flex-row items-center px-[20px] py-[15px] border-b-[1px] border-b-border', className)
+  const resolvedClassName = twMerge(
+    'flex-row items-center px-[20px] py-[15px] border-b-[1px] border-b-border',
+    className
   )
   return (
     <Link
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof Link>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof Link>['style']}
     />
   )
 }
@@ -46,13 +48,13 @@ const StyledIcon = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { color } = props
-  const classStyles = useResolveClassNames(twMerge('ml-auto mr-[15px]', className))
+  const resolvedClassName = twMerge('ml-auto mr-[15px]', className)
   return (
     <Icon.Feather
       {...props}
+      className={resolvedClassName}
       style={
         [
-          classStyles,
           { color: color ? theme.colors[color] : theme.colors.grey },
           props.style,
         ] as UIComponentProps<typeof Icon.Feather>['style']

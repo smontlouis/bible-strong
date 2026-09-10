@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TextInput as RNTextInput } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
-import { useResolveClassNames } from 'uniwind'
+
 import { SheetFooter, SheetHeader, SheetTextInput, SheetView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -23,16 +23,15 @@ const StyledTextInput = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const classStyles = useResolveClassNames(
-    twMerge(
-      'text-default h-[48px] border-border border-[2px] rounded-[10px] px-[15px] text-[16px]',
-      className
-    )
+  const resolvedClassName = twMerge(
+    'text-default h-[48px] border-border border-[2px] rounded-[10px] px-[15px] text-[16px]',
+    className
   )
   return (
     <SheetTextInput
       {...props}
-      style={[classStyles, {}, props.style] as UIComponentProps<typeof SheetTextInput>['style']}
+      className={resolvedClassName}
+      style={[props.style] as UIComponentProps<typeof SheetTextInput>['style']}
     />
   )
 }

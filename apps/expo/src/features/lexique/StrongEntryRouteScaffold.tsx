@@ -1,18 +1,11 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
 import Empty from '~common/Empty'
-import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import { createStrongEndpoint } from '~features/studyRelations/endpoints'
-import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
-import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
-import type { RootState } from '~redux/modules/reducer'
-import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import StrongEntryMenu from './StrongEntryMenu'
 import type { StrongDetailRouteContext } from './strongDetailRoutes'
 import { useStrongEntryRoute } from './useStrongEntryRoute'
@@ -55,22 +48,6 @@ const StrongEntryRouteScaffold = ({
 }: Props) => {
   const { t } = useTranslation()
   const canGoBackInStack = useCanGoBackInStack()
-  const selectStrongTags = makeStrongTagsSelector()
-  const tags = useSelector((state: RootState) =>
-    entryState.entry
-      ? selectStrongTags(state, entryState.entry.stepCode, entryState.entry.language === 'greek')
-      : undefined
-  )
-  const strongEndpoint = entryState.entry
-    ? createStrongEndpoint({
-        language: entryState.entry.language,
-        code: entryState.entry.stepCode,
-        labelFallback: entryState.entry.gloss,
-        originalWord: entryState.entry.original,
-      })
-    : null
-  const relationCount = useRelationCount(strongEndpoint)
-  const openEntityRelations = useOpenEntityRelations()
   const header = (
     <Header
       hasBackButton={hasBackButton ?? (onBack ? true : isFormSheet ? canGoBackInStack : true)}
@@ -83,17 +60,7 @@ const StrongEntryRouteScaffold = ({
           <StrongEntryMenu context={context} entry={entryState.entry} />
         ) : undefined
       }
-    >
-      {entryState.entry && (tags || relationCount > 0) && (
-        <Box className="overflow-hidden border-continuous px-[20px] mt-[-8px] pb-[10px]">
-          <EntityChipList
-            tags={tags}
-            relationCount={relationCount}
-            onRelationPress={() => strongEndpoint && openEntityRelations(strongEndpoint)}
-          />
-        </Box>
-      )}
-    </Header>
+    />
   )
 
   if (

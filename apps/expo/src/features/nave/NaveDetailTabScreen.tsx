@@ -1,3 +1,4 @@
+import { goBackOrHome } from '~navigation/goBackOrHome'
 import React, { useCallback, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
@@ -75,7 +76,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
         })
       )
     } else {
-      router.back()
+      goBackOrHome(router)
     }
   }, [isInTab, setNaveTab, router])
 
