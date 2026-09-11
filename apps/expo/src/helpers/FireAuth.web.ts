@@ -1,3 +1,4 @@
+import { identifyAnalyticsUser, trackAnalyticsEvent } from './analytics'
 import * as Sentry from '@sentry/react-native'
 import {
   createUserWithEmailAndPassword,
@@ -94,6 +95,12 @@ export class WebFireAuth {
           credentialIsNewUser: result.credentialIsNewUser,
         })
         attempt.complete(result)
+        void identifyAnalyticsUser(result.userId)
+        if (classification === 'new-account' || classification === 'existing-account') {
+          void trackAnalyticsEvent(classification === 'new-account' ? 'sign_up' : 'login', {
+            method: provider,
+          })
+        }
         appLogger.info('sync', 'account_entry.authentication_completed', {
           lifecycleState: 'classified',
           operation,
@@ -122,6 +129,7 @@ export class WebFireAuth {
 
     onAuthStateChanged(getAuth(firebaseApp), async user => {
       if (!user) {
+        void identifyAnalyticsUser(null)
         const wasAuthenticated = Boolean(this.user)
         this.user = null
         this.profile = null
@@ -167,6 +175,7 @@ export class WebFireAuth {
         this.user = user
         this.profile = profile
         this.previousEmailVerified = emailVerified
+        void identifyAnalyticsUser(profile.id)
         this.onLogin?.({ profile, accountEntryClassification })
         Sentry.getCurrentScope().setUser(profile)
         return
@@ -330,6 +339,7 @@ export class WebFireAuth {
 
   logout = async () => {
     await signOut(getAuth(firebaseApp))
+    void identifyAnalyticsUser(null)
     if (this.user) {
       runAllCleanups()
       this.user = null

@@ -1,6 +1,6 @@
 import WorkspaceLayout from '~features/app-switcher/WorkspaceLayout'
 import { SheetProvider } from '~common/sheet'
-import { getAnalytics, logScreenView } from '@react-native-firebase/analytics'
+import { trackAnalyticsScreen } from '~helpers/analytics'
 import * as Sentry from '@sentry/react-native'
 
 import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-router'
@@ -108,12 +108,8 @@ const NavigationTracking = () => {
         segments,
         params: Object.keys(params).length > 0 ? params : undefined,
       })
-    } else {
-      logScreenView(getAnalytics(), {
-        screen_class: screenName,
-        screen_name: screenName,
-      })
     }
+    void trackAnalyticsScreen(segments)
 
     Sentry.addBreadcrumb({
       category: 'screen',

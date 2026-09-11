@@ -1,3 +1,4 @@
+import { analyticsMiddleware } from './analyticsMiddleware'
 import { configureStore as createRTKStore } from '@reduxjs/toolkit'
 import {
   persistStore,
@@ -83,7 +84,13 @@ function configureStore() {
       getDefaultMiddleware({
         serializableCheck: false,
         immutableCheck: false,
-      }).concat(logger, crashReporter, themeAppearanceMiddleware, firestoreMiddleware),
+      }).concat(
+        logger,
+        crashReporter,
+        themeAppearanceMiddleware,
+        firestoreMiddleware,
+        analyticsMiddleware
+      ),
     devTools: false,
     enhancers: defaultEnhancers =>
       __DEV__ ? [...defaultEnhancers, devToolsEnhancer()] : defaultEnhancers,

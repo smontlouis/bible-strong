@@ -1,3 +1,4 @@
+import { trackAnalyticsScreen } from '~helpers/analytics'
 import ReferencePreviewHost from '~features/bibleReferencePreview/ReferencePreviewHost'
 import ConfirmDialogHost from '~common/ConfirmDialog/ConfirmDialogHost.web'
 import { useWorkspaceRoutePanel } from '~navigation/useWorkspaceRoutePanel'
@@ -33,6 +34,7 @@ const NavigationTracking = () => {
     if (previousPathname.current === pathname) return
     const screenName = segments[segments.length - 1] || 'index'
     appLogger.info('navigation', 'screen.changed', { pathname, screenName, segments })
+    void trackAnalyticsScreen(segments)
     Sentry.addBreadcrumb({
       category: 'screen',
       message: `Navigated to: ${pathname}`,

@@ -151,13 +151,6 @@ const useAppLoad = () => {
         startPersistence()
         if (!active) return
         setIsLoadingCompleted(true)
-        if (!isPlaygroundEnabled && !__DEV__) {
-          const { getAnalytics, logScreenView } = await import('@react-native-firebase/analytics')
-          logScreenView(getAnalytics(), {
-            screen_class: 'Bible',
-            screen_name: 'Bible',
-          })
-        }
       } catch (error) {
         appLogger.captureError('startup', 'app.preparation.failed', error, { preparationStep })
         if (active) {

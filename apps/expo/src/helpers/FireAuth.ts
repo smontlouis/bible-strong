@@ -1,5 +1,5 @@
+import { identifyAnalyticsUser, trackAnalyticsEvent } from './analytics'
 import { appleAuth } from '@invertase/react-native-apple-authentication'
-import { getAnalytics, setUserId as analyticsSetUserId } from '@react-native-firebase/analytics'
 import {
   FirebaseAuthTypes,
   getAuth,
@@ -108,6 +108,12 @@ const FireAuth = class {
           credentialIsNewUser: result.credentialIsNewUser,
         })
         attempt.complete(result)
+        void identifyAnalyticsUser(result.userId)
+        if (classification === 'new-account' || classification === 'existing-account') {
+          void trackAnalyticsEvent(classification === 'new-account' ? 'sign_up' : 'login', {
+            method: provider,
+          })
+        }
         appLogger.info('sync', 'account_entry.authentication_completed', {
           lifecycleState: 'classified',
           operation,
@@ -150,6 +156,7 @@ const FireAuth = class {
 
     const authInstance = getAuth()
     onAuthStateChanged(authInstance, async user => {
+      if (!user) void identifyAnalyticsUser(null)
       if (user && user.isAnonymous) {
         console.log('[Auth] Deprecated, user exists and is anonymous', user.uid)
         return
@@ -218,9 +225,7 @@ const FireAuth = class {
           this.user = user // Store user
           this.previousEmailVerified = emailVerified
 
-          if (!__DEV__) {
-            analyticsSetUserId(getAnalytics(), profile.id)
-          }
+          void identifyAnalyticsUser(profile.id)
           // Keep enough identity to correlate a support report without attaching the
           // complete Firebase profile (display name, photo URL and account metadata).
           Sentry.getCurrentScope().setUser({ id: profile.id, email: profile.email })
