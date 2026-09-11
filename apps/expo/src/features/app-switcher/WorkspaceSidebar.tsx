@@ -145,7 +145,7 @@ const WorkspaceSidebar = ({
                   : '#ffffff'
               return (
                 <SidebarDragGroup key={group.id} groupId={group.id} isDefault={group.isDefault}>
-                  <Box className="overflow-hidden border-continuous gap-[4px]">
+                  <Box className="overflow-visible border-continuous gap-[4px]">
                     {!group.isDefault && (
                       <SidebarDragGroupHandle groupId={group.id}>
                         <SidebarHoverActions>
@@ -231,7 +231,7 @@ const WorkspaceSidebar = ({
                     )}
                     {!collapsed && (
                       <Box
-                        className="overflow-hidden border-continuous gap-[0px]"
+                        className="overflow-visible border-continuous gap-[0px]"
                         style={{
                           paddingLeft: group.isDefault ? 0 : 4,
                           marginLeft: group.isDefault ? 0 : 4,
@@ -245,6 +245,10 @@ const WorkspaceSidebar = ({
                               <HStack
                                 className="border-continuous overflow-visible items-center rounded-[8px]"
                                 style={{
+                                  boxShadow:
+                                    activePage === 'home'
+                                      ? '0 2px 7px rgba(89, 131, 240, 0.1)'
+                                      : undefined,
                                   backgroundColor: colorWithOpacity(
                                     resolveThemeColor(
                                       stylingTheme,
@@ -305,6 +309,9 @@ const WorkspaceSidebar = ({
                                   <HStack
                                     className="border-continuous overflow-visible items-center rounded-[8px]"
                                     style={{
+                                      boxShadow: selected
+                                        ? '0 2px 7px rgba(89, 131, 240, 0.1)'
+                                        : undefined,
                                       backgroundColor: colorWithOpacity(
                                         resolveThemeColor(
                                           stylingTheme,
@@ -395,9 +402,12 @@ const WorkspaceSidebar = ({
           </ScrollView>
           <Box className="border-continuous overflow-hidden px-[12px] pt-[8px] pb-[8px] gap-[4px]">
             {Platform.OS === 'web' ? (
-              <HStack className="gap-2" testID="workspace-create-actions">
+              <HStack
+                className="bg-reverse rounded-[14px] items-center overflow-hidden shadow-[0_2px_7px_rgba(89,131,240,0.1)]"
+                testID="workspace-create-actions"
+              >
                 <TouchableBox
-                  className="flex-1 flex-row items-center justify-center gap-[6px] rounded-[8px] border border-border min-h-[36px]"
+                  className="flex-1 flex-row items-center justify-center gap-[6px] min-h-[36px] hover:bg-light-grey"
                   onPress={addTab}
                   accessibilityRole="button"
                   accessibilityLabel={t('tabs.new')}
@@ -407,8 +417,9 @@ const WorkspaceSidebar = ({
                     {t('workspace.newTabShort')}
                   </Text>
                 </TouchableBox>
+                <Box className="w-px h-[20px] bg-border" />
                 <TouchableBox
-                  className="flex-1 flex-row items-center justify-center gap-[6px] rounded-[8px] border border-border min-h-[36px]"
+                  className="flex-1 flex-row items-center justify-center gap-[6px] min-h-[36px] hover:bg-light-grey"
                   onPress={() => createRef.current?.present()}
                   disabled={groups.length >= MAX_TAB_GROUPS}
                   accessibilityRole="button"

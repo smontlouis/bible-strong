@@ -11,7 +11,10 @@ import { useTheme } from '~themes/ThemeProvider'
 import './MenuView.web.css'
 
 export type { MenuAction, MenuComponentProps, MenuComponentRef }
-export type AccessibleMenuComponentProps = MenuComponentProps & { accessibilityLabel?: string }
+export type AccessibleMenuComponentProps = MenuComponentProps & {
+  accessibilityLabel?: string
+  renderActionIcon?: (action: MenuAction) => React.ReactNode
+}
 
 const icons: Record<string, React.ComponentProps<typeof Feather>['name']> = {
   gearshape: 'settings',
@@ -84,17 +87,21 @@ function renderActions(
   menuStyle: MenuStyle,
   path = 'menu',
   parentDisabled = false,
-  insideSection = false
+  insideSection = false,
+  renderActionIcon?: (action: MenuAction) => React.ReactNode
 ): React.ReactNode[] {
   return actions.map((action, index) => {
     const key = `${path}-${index}`
     const disabled = parentDisabled || !!action.attributes?.disabled
     const icon = typeof action.image === 'string' ? icons[action.image] : undefined
+    const customIcon = renderActionIcon?.(action)
     const content = (
       <>
         <span className="bs-menu-icon" aria-hidden="true">
           {action.state === 'on' ? (
             '✓'
+          ) : customIcon ? (
+            customIcon
           ) : icon ? (
             <Feather
               name={icon}
@@ -116,7 +123,15 @@ function renderActions(
           {...menuSelection(action.subactions, key)}
         >
           {action.title ? <Header className="bs-menu-heading">{action.title}</Header> : null}
-          {renderActions(action.subactions, select, menuStyle, key, disabled, true)}
+          {renderActions(
+            action.subactions,
+            select,
+            menuStyle,
+            key,
+            disabled,
+            true,
+            renderActionIcon
+          )}
         </Dropdown.Section>
       )
     }
@@ -140,7 +155,15 @@ function renderActions(
             offset={4}
           >
             <Dropdown.Menu className="bs-menu-list" aria-label={action.title}>
-              {renderActions(action.subactions, select, menuStyle, key, disabled)}
+              {renderActions(
+                action.subactions,
+                select,
+                menuStyle,
+                key,
+                disabled,
+                false,
+                renderActionIcon
+              )}
             </Dropdown.Menu>
           </Dropdown.Popover>
         </Dropdown.SubmenuTrigger>
@@ -190,6 +213,7 @@ export const MenuView = forwardRef<MenuComponentRef, AccessibleMenuComponentProp
       children,
       title,
       accessibilityLabel,
+      renderActionIcon,
       testID,
       style,
       shouldOpenOnLongPress,
@@ -259,7 +283,15 @@ export const MenuView = forwardRef<MenuComponentRef, AccessibleMenuComponentProp
             offset={6}
           >
             <Dropdown.Menu className="bs-menu-list" aria-label={title || label}>
-              {renderActions(availableActions, select, menuStyle)}
+              {renderActions(
+                availableActions,
+                select,
+                menuStyle,
+                'menu',
+                false,
+                false,
+                renderActionIcon
+              )}
             </Dropdown.Menu>
           </Dropdown.Popover>
         </Dropdown>

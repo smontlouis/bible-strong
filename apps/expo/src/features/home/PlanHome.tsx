@@ -103,7 +103,7 @@ const PlanHome = ({ compact = false }: { compact?: boolean }) => {
     return (
       <Box className="gap-[20px]">
         <Box className="flex-row flex-wrap items-center justify-between gap-[12px]">
-          <Text className="font-bold text-[19px]">{t('home.dashboard.currentPlan')}</Text>
+          <Text className="font-bold text-[16px]">{t('home.dashboard.currentPlan')}</Text>
         </Box>
         {id && currentPlan ? (
           <LinkBox route="Plan" params={{ planId: id, plan: currentPlan }} className="gap-[20px]">
@@ -121,7 +121,7 @@ const PlanHome = ({ compact = false }: { compact?: boolean }) => {
                 )}
               </Box>
               <Box className="flex-1 gap-[10px]">
-                <Text className="text-[19px] font-bold">{title}</Text>
+                <Text className="text-[16px] font-bold">{title}</Text>
                 <Text className="text-grey text-[12px]">
                   {t('home.dashboard.planProgress', { percent })}
                 </Text>
@@ -136,7 +136,7 @@ const PlanHome = ({ compact = false }: { compact?: boolean }) => {
                   />
                 </Box>
               </Box>
-              <Box className="bg-light-primary rounded-full w-[28px] h-[28px] shrink-0 items-center justify-center">
+              <Box className="bg-light-primary rounded-full w-[28px] h-[28px] shrink-0 self-end items-center justify-center">
                 <FeatherIcon name="chevron-right" size={17} color="primary" />
               </Box>
             </Box>

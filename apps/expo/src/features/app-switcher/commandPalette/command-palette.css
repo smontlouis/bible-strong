@@ -196,16 +196,21 @@
   flex-shrink: 0;
   max-width: 45%;
   padding: 6px 8px;
-  border: 1px solid var(--command-border);
+  border: none;
   border-radius: 7px;
   background: var(--command-active);
-  color: var(--command-primary);
+  color: var(--command-text);
   font: inherit;
   font-size: 12px;
   cursor: pointer;
 }
 .bs-command-scope > span:first-of-type {
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.bs-command-scope > span:last-of-type {
+  opacity: 0.4;
 }

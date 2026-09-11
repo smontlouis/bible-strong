@@ -3,7 +3,7 @@ import { useFonts } from 'expo-font'
 import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
-import { MenuView } from '~common/ui/MenuView'
+import { MenuView } from '~common/ui/MenuView.web'
 import Text from '~common/ui/Text'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useTheme } from '~themes/ThemeProvider'
@@ -50,7 +50,7 @@ export default function ResourceDiscovery() {
         <Box className="gap-[6px]">
           <Text
             accessibilityRole="header"
-            className="text-[24px]"
+            className="text-[22px]"
             style={{ fontFamily: resolveFontFamily(theme.fontFamily.title) }}
           >
             {t('newTab.library')}
@@ -59,6 +59,16 @@ export default function ResourceDiscovery() {
         </Box>
         <MenuView
           accessibilityLabel={t('home.discovery.allResources')}
+          renderActionIcon={action => {
+            const kinds = {
+              lexique: 'strong',
+              nave: 'nave',
+              dictionnaire: 'dictionary',
+              'commentary-library': 'commentary',
+            } as const
+            const kind = kinds[action.id as keyof typeof kinds]
+            return kind ? <ResourceIcon kind={kind} size={20} /> : null
+          }}
           actions={[
             { id: 'lexique', title: t('Lexique'), image: 'textformat' },
             { id: 'nave', title: t('tabs.nave'), image: 'square.stack.3d.up' },

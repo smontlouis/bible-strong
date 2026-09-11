@@ -47,7 +47,7 @@ export default function ResourceDiscoveryEntry({
                 {original}
               </Text>
             ) : null}
-            <Text className="text-[18px] leading-[23px] font-bold" numberOfLines={2}>
+            <Text className="text-[16px] leading-[22px] font-bold" numberOfLines={2}>
               {title}
             </Text>
           </Box>

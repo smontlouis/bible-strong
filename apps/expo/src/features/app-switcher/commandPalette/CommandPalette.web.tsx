@@ -43,14 +43,15 @@ function PaletteItemLabel({
   creation?: boolean
 }) {
   const theme = useTheme()
-  const color = resolveThemeColor(theme, tabIconColorConfig[type] || 'grey')
+  const colorType = creation ? 'study' : type
+  const color = resolveThemeColor(theme, tabIconColorConfig[colorType] || 'grey')
   return (
     <span className="bs-command-item-label">
       <span
         className="bs-command-item-icon"
         aria-hidden="true"
         style={{
-          backgroundColor: resolveUniverseColors(theme.colors, type).background,
+          backgroundColor: resolveUniverseColors(theme.colors, colorType).background,
         }}
       >
         {creation ? (
@@ -171,6 +172,7 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
           <button
             type="button"
             className="bs-command-scope"
+            style={{ backgroundColor: resolveUniverseColors(theme.colors, scope.type).background }}
             aria-label={t('commandPalette.removeScope', { scope: t(scope.key) })}
             onMouseDown={event => event.preventDefault()}
             onKeyDown={event => {
@@ -179,7 +181,9 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
             onClick={removeScope}
           >
             <TabIcon type={scope.type} size={14} />
-            <span>{t(scope.key)}</span>
+            <span style={{ color: resolveUniverseColors(theme.colors, scope.type).foreground }}>
+              {t(scope.key)}
+            </span>
             <span aria-hidden="true">×</span>
           </button>
         )}

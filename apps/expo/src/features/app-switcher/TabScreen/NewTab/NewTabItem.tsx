@@ -3,6 +3,7 @@ import { Image } from 'expo-image'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
+import { Platform } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -45,7 +46,7 @@ const NewTabItem = ({
   const { onPress } = useOpenTabByType({ type, newAtom, onPlanPress })
   const isLibraryResource =
     type === 'strong' || type === 'nave' || type === 'dictionary' || type === 'commentary'
-  const iconSize = hero ? 64 : isLibraryResource ? 34 : 28
+  const iconSize = hero ? (Platform.OS === 'web' ? 64 : 40) : isLibraryResource ? 34 : 28
 
   return (
     <TouchableBox
@@ -67,9 +68,16 @@ const NewTabItem = ({
             ? 'flex-1 flex-row items-center gap-[24px] z-10'
             : 'flex-row items-center flex-1 gap-[14px]'
         }
-        style={hero ? { paddingRight: compact ? 82 : 270 } : undefined}
+        style={
+          hero
+            ? {
+                paddingRight: compact ? 82 : 270,
+                ...(Platform.OS !== 'web' && { alignItems: 'flex-start' }),
+              }
+            : undefined
+        }
       >
-        {(!hero || !compact) && <TabIcon type={type} size={iconSize} />}
+        <TabIcon type={type} size={iconSize} />
         <Box className="flex-1 min-w-0 gap-[6px]">
           <Text className={hero ? 'text-[36px] font-medium' : 'text-[16px] font-medium'}>
             {title ?? t(`tabs.${type}`)}

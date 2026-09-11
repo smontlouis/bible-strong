@@ -62,10 +62,10 @@ export default function ResumeBookmark({ card = false }: { card?: boolean }) {
   )
   if (!card) return action
   return (
-    <Box className="bg-reverse rounded-[20px] p-[24px] gap-[18px] shadow-[0_2px_7px_rgba(89,131,240,0.1)]">
-      <Text className="font-bold text-[19px]">{t('home.desktop.resumeReading')}</Text>
+    <Box className="bg-reverse rounded-[20px] p-[16px] gap-[18px] shadow-[0_2px_7px_rgba(89,131,240,0.1)]">
+      <Text className="font-bold text-[16px]">{t('home.desktop.resumeReading')}</Text>
       <LinkBox
-        className="flex-row items-center gap-[16px] py-[10px]"
+        className="flex-row items-center gap-[16px]"
         accessibilityLabel={
           bookmark ? t('home.desktop.resumeBookmark', { reference }) : t('Lire la Bible')
         }
@@ -92,7 +92,7 @@ export default function ResumeBookmark({ card = false }: { card?: boolean }) {
           />
         </Box>
         <Box className="flex-1 gap-[6px]">
-          <Text className="text-[17px] font-bold">
+          <Text className="text-[16px] font-bold">
             {reference ?? t('Lire la Bible')}
             {bookmark?.version ? ` · ${bookmark.version}` : ''}
           </Text>
@@ -105,7 +105,7 @@ export default function ResumeBookmark({ card = false }: { card?: boolean }) {
             <Text className="text-grey text-[12px]">{t('home.dashboard.noBookmark')}</Text>
           )}
         </Box>
-        <Box className="bg-light-primary rounded-full w-[28px] h-[28px] shrink-0 items-center justify-center">
+        <Box className="bg-light-primary rounded-full w-[28px] h-[28px] shrink-0 self-end items-center justify-center">
           <FeatherIcon name="chevron-right" size={17} color="primary" />
         </Box>
       </LinkBox>
