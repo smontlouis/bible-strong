@@ -59,6 +59,7 @@ const EventScreen = () => {
     <TimelineEventDetailView
       event={event}
       onOpenEvent={openEvent}
+      canGoBack
       isFormSheet={IS_FORM_SHEET}
       menuItems={[
         {

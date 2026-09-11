@@ -7,13 +7,11 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import { useQuery } from '@tanstack/react-query'
-import { wp } from '~helpers/utils'
+import { useLayoutSize } from '~helpers/useLayoutSize'
 import EventDetailVerse from './EventDetailVerse'
 import { getEvents } from './events'
 import { TimelineEvent, TimelineEventDetail } from './types'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-const imageWidth = wp(80, true)
-const sliderWidth = wp(100, true)
 
 const Media = ({
   images,
@@ -26,6 +24,9 @@ const Media = ({
 }) => {
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
+  const { ref, size, onLayout } = useLayoutSize()
+  const sliderWidth = size.width
+  const imageWidth = Math.max(0, sliderWidth * 0.8)
 
   const { data: events } = useQuery({
     queryKey: ['timeline'],
@@ -37,7 +38,7 @@ const Media = ({
   }, [])
 
   return (
-    <Box className="overflow-hidden border-continuous py-[20px]">
+    <Box ref={ref} onLayout={onLayout} className="overflow-hidden border-continuous py-[20px]">
       {!!scriptures?.length && (
         <Box className="overflow-hidden border-continuous px-[20px] mt-[20px]">
           <Paragraph className="mb-[10px]" fontFamily="title">
@@ -51,7 +52,7 @@ const Media = ({
         </Box>
       )}
       {!!images?.length && (
-        <Box className="overflow-hidden border-continuous py-[20px] bg-[rgb(18,45,66)] h-[400px]">
+        <Box className="overflow-hidden border-continuous py-[20px] bg-[rgb(18,45,66)]">
           <Paragraph className="mb-[20px] px-[20px] text-[white]" fontFamily="title">
             {t('Images')}
           </Paragraph>
@@ -66,6 +67,7 @@ const Media = ({
             renderItem={({ item }: { item: TimelineEventDetail['images'][0] }) => (
               <Box className="overflow-hidden border-continuous">
                 <Image
+                  draggable={false}
                   style={{ width: imageWidth, height: imageWidth }}
                   source={{
                     uri: `http://timeline.biblehistory.com/media/images/original/${item.file}`,
@@ -82,11 +84,10 @@ const Media = ({
             }}
             style={{
               width: sliderWidth,
+              height: imageWidth + 60,
               alignItems: 'center',
               justifyContent: 'center',
             }}
-            width={imageWidth + 20}
-            height={imageWidth + 60}
           />
         </Box>
       )}

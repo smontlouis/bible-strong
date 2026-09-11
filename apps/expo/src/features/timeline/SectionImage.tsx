@@ -9,7 +9,7 @@ import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { wp } from '~helpers/utils'
 import { ShallowTimelineSection } from './types'
-import { getTimelineImageUri } from './timelineImage'
+import { getTimelinePeriodImageSource } from './timelinePeriodImages'
 const width = wp(50, 500)
 
 const SectionImage = ({
@@ -72,9 +72,7 @@ const SectionImage = ({
         >
           <Image
             style={{ width, height: width, borderRadius: 10 }}
-            source={{
-              uri: getTimelineImageUri(image),
-            }}
+            source={getTimelinePeriodImageSource(image)}
           />
         </Box>
         <Box
