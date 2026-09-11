@@ -55,8 +55,8 @@ const NewTabItem = ({
       activeOpacity={0.7}
       className={
         hero
-          ? 'relative overflow-hidden border-continuous flex-row items-center bg-reverse border border-border rounded-[18px] px-[24px] py-[24px]'
-          : 'border-continuous flex-row items-center bg-reverse border border-border rounded-[12px] px-[18px] py-[18px] min-h-[92px] gap-[14px]'
+          ? 'relative overflow-hidden border-continuous flex-row items-center bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)] rounded-[18px] px-[24px] py-[24px]'
+          : 'border-continuous flex-row items-center bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)] rounded-[18px] px-[18px] py-[18px] min-h-[92px] gap-[14px]'
       }
       style={hero ? { minHeight: compact ? 180 : 218 } : undefined}
       onPress={onPress}

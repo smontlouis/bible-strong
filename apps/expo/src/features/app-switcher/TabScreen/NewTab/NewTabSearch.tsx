@@ -59,10 +59,11 @@ export default function NewTabSearch({
   return (
     <Box
       dataSet={{ focusGroup: 'true' }}
-      className="flex-row items-center bg-reverse rounded-[16px] border px-[12px] min-h-[58px] gap-[10px]"
+      className="flex-row items-center bg-reverse rounded-[16px] px-[12px] min-h-[58px] gap-[10px]"
       style={{
-        borderColor:
-          Platform.OS !== 'web' && focused ? theme.colors.primary : theme.colors.lightPrimary,
+        boxShadow: focused
+          ? '0 2px 7px rgba(89, 131, 240, 0.2)'
+          : '0 2px 7px rgba(89, 131, 240, 0.1)',
       }}
     >
       <TouchableBox

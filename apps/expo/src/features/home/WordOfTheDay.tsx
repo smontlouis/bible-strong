@@ -137,7 +137,7 @@ const DictionnaireOfTheDay = ({
   if (discovery)
     return (
       <ResourceDiscoveryEntry
-        iconKind="dictionary"
+        category={t('tabs.dictionary')}
         title={word}
         detail={{
           route: 'DictionnaryDetail',

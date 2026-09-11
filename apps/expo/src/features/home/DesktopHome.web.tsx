@@ -69,7 +69,10 @@ function LearningCard({
 } & LinkProps<keyof MainStackProps>) {
   return (
     <div className="bs-home-learning-card">
-      <LinkBox {...props} className="bg-reverse rounded-[18px] overflow-hidden">
+      <LinkBox
+        {...props}
+        className="bg-reverse rounded-[18px] overflow-hidden shadow-[0_2px_7px_rgba(89,131,240,0.1)]"
+      >
         <div className="bs-home-learning-body">
           <div className="bs-home-learning-image">
             <Image
@@ -181,7 +184,7 @@ export default function DesktopHome() {
                   openCommandPalette(true)
                 }}
                 accessibilityLabel={t('commandPalette.label')}
-                className="flex-row items-center gap-[12px] border border-border bg-reverse rounded-[12px] px-[16px] py-[14px]"
+                className="flex-row items-center gap-[12px] shadow-[0_2px_7px_rgba(89,131,240,0.1)] bg-reverse rounded-[16px] px-[16px] py-[14px]"
               >
                 <FeatherIcon name="search" size={19} color="grey" />
                 <Text className="text-grey text-[13px] flex-1 min-w-0" numberOfLines={1}>
@@ -196,7 +199,7 @@ export default function DesktopHome() {
             </div>
             <div className="bs-home-main">
               <DailyVerse />
-              <Box className="bg-reverse rounded-[18px] p-[4px]">
+              <Box className="bg-reverse rounded-[18px] p-[4px] shadow-[0_2px_7px_rgba(89,131,240,0.1)]">
                 <ProfileStats desktop />
               </Box>
               <Box>
@@ -228,7 +231,7 @@ export default function DesktopHome() {
             </div>
             <div className="bs-home-aside">
               <ResumeBookmark card />
-              <Box className="bg-reverse rounded-[20px] p-[24px]">
+              <Box className="bg-reverse rounded-[20px] p-[24px] shadow-[0_2px_7px_rgba(89,131,240,0.1)]">
                 <PlanHome compact />
               </Box>
               <LinkBox
@@ -255,9 +258,6 @@ export default function DesktopHome() {
                   style={{ position: 'absolute', right: 0, bottom: 0, width: 240, height: 160 }}
                   accessible={false}
                 />
-                <Box className="mt-auto">
-                  <FeatherIcon name="arrow-right" size={22} color="white" />
-                </Box>
               </LinkBox>
             </div>
           </div>

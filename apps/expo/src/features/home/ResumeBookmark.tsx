@@ -62,7 +62,7 @@ export default function ResumeBookmark({ card = false }: { card?: boolean }) {
   )
   if (!card) return action
   return (
-    <Box className="bg-reverse rounded-[20px] p-[24px] gap-[18px]">
+    <Box className="bg-reverse rounded-[20px] p-[24px] gap-[18px] shadow-[0_2px_7px_rgba(89,131,240,0.1)]">
       <Text className="font-bold text-[19px]">{t('home.desktop.resumeReading')}</Text>
       <LinkBox
         className="flex-row items-center gap-[16px] py-[10px]"
@@ -84,10 +84,10 @@ export default function ResumeBookmark({ card = false }: { card?: boolean }) {
           })
         }
       >
-        <Box className="w-[40px] h-[52px] items-center justify-center">
+        <Box className="w-[44px] h-[44px] shrink-0 rounded-[12px] bg-light-grey items-center justify-center">
           <IonIcon
             name={bookmark ? 'bookmark' : 'book-outline'}
-            size={34}
+            size={22}
             color={bookmark?.color || 'primary'}
           />
         </Box>
@@ -105,7 +105,9 @@ export default function ResumeBookmark({ card = false }: { card?: boolean }) {
             <Text className="text-grey text-[12px]">{t('home.dashboard.noBookmark')}</Text>
           )}
         </Box>
-        <FeatherIcon name="arrow-right" size={20} color="grey" />
+        <Box className="bg-light-primary rounded-full w-[28px] h-[28px] shrink-0 items-center justify-center">
+          <FeatherIcon name="chevron-right" size={17} color="primary" />
+        </Box>
       </LinkBox>
     </Box>
   )

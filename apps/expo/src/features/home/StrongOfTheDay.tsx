@@ -146,6 +146,7 @@ const StrongOfTheDay = ({
   if (discovery)
     return (
       <ResourceDiscoveryEntry
+        category={t(type === 'hebreu' ? 'Hébreu' : 'Grec')}
         original={original}
         title={gloss}
         detail={{ route: 'Strong', params: { book, reference: stepCode } }}

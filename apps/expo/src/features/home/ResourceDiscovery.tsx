@@ -1,7 +1,6 @@
 import ResourceIcon from '~common/icons/ResourceIcon'
 import { useFonts } from 'expo-font'
 import { useTranslation } from 'react-i18next'
-import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { MenuView } from '~common/ui/MenuView'
@@ -24,32 +23,24 @@ export default function ResourceDiscovery() {
       id: 'hebrew',
       label: t('Hébreu'),
       kind: 'strong' as const,
-      route: 'Lexique' as const,
-      action: t('home.discovery.openLexicon'),
       entry: <StrongOfTheDay type="hebreu" discovery />,
     },
     {
       id: 'greek',
       label: t('Grec'),
       kind: 'strong' as const,
-      route: 'Lexique' as const,
-      action: t('home.discovery.openLexicon'),
       entry: <StrongOfTheDay type="grec" discovery />,
     },
     {
       id: 'nave',
       label: t('tabs.nave'),
       kind: 'nave' as const,
-      route: 'Nave' as const,
-      action: t('home.discovery.openNave'),
       entry: <NaveOfTheDay discovery />,
     },
     {
       id: 'dictionary',
       label: t('tabs.dictionary'),
       kind: 'dictionary' as const,
-      route: 'Dictionnaire' as const,
-      action: t('home.discovery.openDictionary'),
       entry: <WordOfTheDay discovery />,
     },
   ]
@@ -69,10 +60,14 @@ export default function ResourceDiscovery() {
         <MenuView
           accessibilityLabel={t('home.discovery.allResources')}
           actions={[
-            { id: 'lexique', title: t('Lexique') },
-            { id: 'nave', title: t('tabs.nave') },
-            { id: 'dictionnaire', title: t('tabs.dictionary') },
-            { id: 'commentary-library', title: t('tabs.commentary') },
+            { id: 'lexique', title: t('Lexique'), image: 'textformat' },
+            { id: 'nave', title: t('tabs.nave'), image: 'square.stack.3d.up' },
+            { id: 'dictionnaire', title: t('tabs.dictionary'), image: 'book' },
+            {
+              id: 'commentary-library',
+              title: t('tabs.commentary'),
+              image: 'bubble.left.and.bubble.right',
+            },
           ]}
           onPressAction={({ nativeEvent }) => {
             const routes = {
@@ -85,9 +80,9 @@ export default function ResourceDiscovery() {
             if (route) pushRoute({ pathname: route })
           }}
         >
-          <Box className="flex-row items-center justify-center gap-[10px] px-[16px] min-h-[44px] rounded-[12px] border border-border">
+          <Box className="flex-row items-center justify-center gap-[10px] px-[16px] min-h-[44px] rounded-[12px] bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)]">
             <Text className="text-[14px] font-medium">{t('home.discovery.allResources')}</Text>
-            <FeatherIcon name="arrow-right" size={19} color="grey" />
+            <FeatherIcon name="chevron-down" size={16} color="grey" />
           </Box>
         </MenuView>
       </div>
@@ -96,20 +91,11 @@ export default function ResourceDiscovery() {
           {rows.map(row => (
             <Box
               key={row.id}
-              className="bs-home-discovery-card border rounded-[18px]"
-              style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.reverse }}
+              className="bs-home-discovery-card rounded-[18px] shadow-[0_2px_7px_rgba(89,131,240,0.1)]"
+              style={{ backgroundColor: theme.colors.reverse }}
             >
-              <Box className="bs-home-discovery-category min-w-0">
-                <Link
-                  route={row.route}
-                  accessibilityLabel={`${row.action} · ${row.label}`}
-                  className="self-start flex-row items-center gap-[8px] min-h-[36px]"
-                >
-                  <ResourceIcon kind={row.kind} size={30} />
-                  <Text className="text-[14px] font-bold shrink" numberOfLines={1}>
-                    {row.label}
-                  </Text>
-                </Link>
+              <Box className="bs-home-discovery-icon items-center justify-center bg-light-grey rounded-[14px]">
+                <ResourceIcon kind={row.kind} size={32} />
               </Box>
               {row.entry}
             </Box>

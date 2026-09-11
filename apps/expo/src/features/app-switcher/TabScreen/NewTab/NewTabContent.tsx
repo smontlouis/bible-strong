@@ -1,7 +1,7 @@
 import { Platform } from 'react-native'
 import { Image, type ImageSource } from 'expo-image'
 import type { PrimitiveAtom } from 'jotai/vanilla'
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -11,6 +11,8 @@ import { useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'
 import NewTabItem from './NewTabItem'
 import NewTabSearch from './NewTabSearch'
+
+const ITEM_GAP = 14
 
 function SectionHeading({
   title,
@@ -24,8 +26,9 @@ function SectionHeading({
   const theme = useTheme()
   return (
     <Box
-      className="relative flex-row items-center gap-[16px] mb-[16px]"
-      style={{ minHeight: image ? 104 : 36, paddingRight: image ? (compact ? 90 : 126) : 0 }}
+      pointerEvents="box-none"
+      className="relative flex-row items-center mb-[10px] overflow-visible z-10"
+      style={{ minHeight: 32, paddingRight: image ? (compact ? 102 : 138) : 0 }}
     >
       <Text
         accessibilityRole="header"
@@ -34,7 +37,6 @@ function SectionHeading({
       >
         {title}
       </Text>
-      <Box className="flex-1 h-px bg-border" />
       {image && (
         <Image
           source={image}
@@ -45,7 +47,7 @@ function SectionHeading({
           style={{
             position: 'absolute',
             right: 0,
-            bottom: -18,
+            bottom: -22,
             width: compact ? 90 : 126,
             height: 110,
           }}
@@ -79,11 +81,6 @@ export default function NewTabContent({
       onPlanPress={onPlanPress}
     />
   )
-  const gridCell = (key: string, child: ReactNode) => (
-    <Box key={key} style={{ width: libraryColumns ? '48.5%' : '100%' }}>
-      {child}
-    </Box>
-  )
 
   return (
     <Box
@@ -115,7 +112,10 @@ export default function NewTabContent({
           hero
           compact={compact}
         />
-        <Box className={compact ? 'gap-[12px] mt-[14px]' : 'flex-row gap-[14px] mt-[14px]'}>
+        <Box
+          className={compact ? undefined : 'flex-row'}
+          style={{ gap: ITEM_GAP, marginTop: ITEM_GAP }}
+        >
           <Box className="flex-1">
             {renderItem('compare', t('tabs.compare'), t('newTab.compareDescription'))}
           </Box>
@@ -127,14 +127,14 @@ export default function NewTabContent({
           </Box>
         </Box>
       </Box>
-      <Box className={sideBySide ? 'flex-row gap-[28px] mt-[22px]' : 'gap-[8px] mt-[20px]'}>
+      <Box className={sideBySide ? 'flex-row gap-[28px] mt-[64px]' : 'gap-[64px] mt-[64px]'}>
         <Box style={sideBySide ? { flex: 0.34 } : undefined}>
           <SectionHeading
             title={t('newTab.personal')}
             compact={compact}
             image={require('~assets/images/new-tab/notes-writer.webp')}
           />
-          <Box className={personalColumns ? 'flex-row gap-[14px]' : 'gap-[12px]'}>
+          <Box className={personalColumns ? 'flex-row' : undefined} style={{ gap: ITEM_GAP }}>
             <Box className={personalColumns ? 'flex-1' : undefined}>
               {renderItem('study', t('Études'), t('newTab.studyDescription'))}
             </Box>
@@ -149,20 +149,23 @@ export default function NewTabContent({
             compact={compact}
             image={require('~assets/images/new-tab/library-reader.webp')}
           />
-          <Box className="flex-row flex-wrap justify-between gap-y-[12px]">
-            {gridCell(
-              'strong',
-              renderItem('strong', t('tabs.strong'), t('newTab.strongDescription'))
-            )}
-            {gridCell('nave', renderItem('nave', t('tabs.nave'), t('newTab.naveDescription')))}
-            {gridCell(
-              'dictionary',
-              renderItem('dictionary', t('tabs.dictionary'), t('newTab.dictionaryDescription'))
-            )}
-            {gridCell(
-              'commentary',
-              renderItem('commentary', t('tabs.commentary'), t('newTab.commentaryDescription'))
-            )}
+          <Box style={{ gap: ITEM_GAP }}>
+            <Box className={libraryColumns ? 'flex-row' : undefined} style={{ gap: ITEM_GAP }}>
+              <Box className={libraryColumns ? 'flex-1 min-w-0' : undefined}>
+                {renderItem('strong', t('tabs.strong'), t('newTab.strongDescription'))}
+              </Box>
+              <Box className={libraryColumns ? 'flex-1 min-w-0' : undefined}>
+                {renderItem('nave', t('tabs.nave'), t('newTab.naveDescription'))}
+              </Box>
+            </Box>
+            <Box className={libraryColumns ? 'flex-row' : undefined} style={{ gap: ITEM_GAP }}>
+              <Box className={libraryColumns ? 'flex-1 min-w-0' : undefined}>
+                {renderItem('dictionary', t('tabs.dictionary'), t('newTab.dictionaryDescription'))}
+              </Box>
+              <Box className={libraryColumns ? 'flex-1 min-w-0' : undefined}>
+                {renderItem('commentary', t('tabs.commentary'), t('newTab.commentaryDescription'))}
+              </Box>
+            </Box>
           </Box>
         </Box>
       </Box>

@@ -136,10 +136,9 @@ const PlanHome = ({ compact = false }: { compact?: boolean }) => {
                   />
                 </Box>
               </Box>
-            </Box>
-            <Box className="flex-row items-center justify-between bg-light-primary rounded-[12px] px-[16px] py-[13px]">
-              <Text className="text-primary text-[13px] font-bold">{t('Continuer ce plan')}</Text>
-              <FeatherIcon name="arrow-right" size={17} color="primary" />
+              <Box className="bg-light-primary rounded-full w-[28px] h-[28px] shrink-0 items-center justify-center">
+                <FeatherIcon name="chevron-right" size={17} color="primary" />
+              </Box>
             </Box>
           </LinkBox>
         ) : (

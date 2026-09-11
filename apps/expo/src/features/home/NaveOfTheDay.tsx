@@ -116,7 +116,7 @@ const NaveOfTheDay = ({
   if (discovery)
     return (
       <ResourceDiscoveryEntry
-        iconKind="nave"
+        category={t('tabs.nave')}
         title={name}
         detail={{ route: 'NaveDetail', params: { name, name_lower: normalizedName } }}
         isRefreshing={naveQuery.isFetching}

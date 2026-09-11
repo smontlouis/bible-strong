@@ -22,7 +22,7 @@ export default function NewTabSearch(_props: {
   return (
     <LinkBox
       accessibilityLabel={t('commandPalette.label')}
-      className="flex-row items-center gap-[12px] bg-reverse border border-border rounded-[16px] px-[16px] py-[16px]"
+      className="flex-row items-center gap-[12px] bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)] rounded-[16px] px-[16px] py-[16px]"
       onPress={event => {
         if (event?.currentTarget instanceof HTMLElement) setReturnFocus(event.currentTarget)
         setScope(undefined)
