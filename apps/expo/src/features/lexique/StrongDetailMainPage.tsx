@@ -1,3 +1,4 @@
+import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import StrongEntryMetadata from './StrongEntryMetadata'
 import { twMerge } from '~common/ui/classNames'
 import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
@@ -119,7 +120,7 @@ const JumpNavigationContent = ({
   anchors: { id: Anchor; label: string; visible: boolean }[]
   onPress: (anchor: Anchor) => void
 }) => (
-  <ScrollView
+  <HorizontalControlScrollView
     horizontal
     showsHorizontalScrollIndicator={false}
     contentContainerStyle={{ paddingHorizontal: 14, gap: 7 }}
@@ -138,7 +139,7 @@ const JumpNavigationContent = ({
           </Box>
         </TouchableBox>
       ))}
-  </ScrollView>
+  </HorizontalControlScrollView>
 )
 
 const StrongDetailMainPage = ({
@@ -500,7 +501,7 @@ const StrongDetailMainPage = ({
             </Text>
           </HStack>
           {lemmaStats.length > 0 && (
-            <ScrollView
+            <HorizontalControlScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               style={{ marginHorizontal: -20 }}
@@ -557,7 +558,7 @@ const StrongDetailMainPage = ({
                   </Box>
                 </TouchableBox>
               ))}
-            </ScrollView>
+            </HorizontalControlScrollView>
           )}
           {concordanceLoading ? (
             <Loading />

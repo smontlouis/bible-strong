@@ -489,7 +489,11 @@ const ResourceSidebarContent = ({
         rightComponent={heading?.rightComponent}
       />
       <Box className="flex-1 min-h-0 overflow-hidden">{children}</Box>
-      {Footer && <Footer />}
+      {Footer && (
+        <Box className="bg-light-grey pt-[12px] pb-[12px]">
+          <Footer />
+        </Box>
+      )}
     </Box>
   )
 }

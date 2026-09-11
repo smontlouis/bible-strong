@@ -6,6 +6,7 @@ import { versions } from '~helpers/bibleVersions'
 import { useVersionCatalog, VersionCatalogList } from '~features/bible/VersionCatalogView'
 import VersionSelectorItem from '~features/bible/VersionSelectorItem'
 import ParamsModal from './ParamsModal'
+import BibleFontList from '~features/bible/BibleFontList'
 import type { PlanSliceMenuProps } from './PlanSliceMenu'
 
 export default function PlanSliceMenu(props: PlanSliceMenuProps) {
@@ -26,7 +27,12 @@ export default function PlanSliceMenu(props: PlanSliceMenuProps) {
           'open-tab': 'external-link',
         }}
         screens={{
-          format: { title: t('Mise en forme'), width: 430, content: () => <ParamsModal inline /> },
+          format: {
+            title: t('Mise en forme'),
+            width: 430,
+            content: nav => <ParamsModal inline onFonts={() => nav.open('fonts')} />,
+          },
+          fonts: { title: t('Polices'), content: nav => <BibleFontList onSelect={nav.back} /> },
           version: {
             title: t('Changer de version'),
             headerRight: (

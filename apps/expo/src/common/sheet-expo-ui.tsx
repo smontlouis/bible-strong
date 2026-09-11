@@ -231,7 +231,6 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
                   bottom: webContainerBounds.bottom,
                   maxWidth: Math.min(maxWidth, webContainerBounds.width),
                   maxHeight: webContainerBounds.height,
-                  overflow: 'auto' as const,
                   visibility:
                     webContainerBounds.width > 0 && webContainerBounds.height > 0
                       ? ('visible' as const)

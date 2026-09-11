@@ -9,6 +9,7 @@ import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
 
 import Empty from '~common/Empty'
+import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
@@ -64,7 +65,7 @@ const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
 const nativeItemWidth = slideWidth + itemHorizontalMargin * 2
 const itemGap = 10
-const WEB_STRONG_CARD_MAX_WIDTH = 350
+const WEB_STRONG_CARD_MAX_WIDTH = 250
 const WEB_STRONG_CARD_MAX_HEIGHT = 600
 
 const VersetWrapper = (
@@ -619,6 +620,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
             ref={strongCardsScrollRef}
             data={strongCards}
             horizontal
+            renderScrollComponent={isWeb ? renderStrongCardsScrollView : undefined}
             showsHorizontalScrollIndicator={false}
             snapToInterval={carouselStep}
             snapToAlignment="start"
@@ -670,3 +672,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
 }
 
 export default BibleVerseDetailCard
+
+const renderStrongCardsScrollView = (props: NativeUI.ScrollViewProps) => (
+  <HorizontalControlScrollView {...props} />
+)

@@ -1,6 +1,7 @@
 import { useContext, useLayoutEffect, useState, type Ref } from 'react'
 import { Sheet, type SheetProps, type SheetRef } from '~common/sheet'
 import { BibleViewportContext } from '../BibleViewport.web'
+import { getSelectionSheetMaxWidth } from './selectionSheetLayout'
 import { getSelectionSheetBounds } from './selectionSheetBounds'
 
 export default function SelectionSheet({
@@ -38,6 +39,7 @@ export default function SelectionSheet({
     <Sheet
       {...props}
       ref={ref}
+      maxWidth={getSelectionSheetMaxWidth(bounds?.width ?? 400)}
       webContainerBounds={bounds}
       onPresent={() => {
         setActive(true)

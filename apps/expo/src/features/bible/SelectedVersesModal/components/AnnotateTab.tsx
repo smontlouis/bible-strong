@@ -1,6 +1,6 @@
 import AddToStudyAction from '~features/studies/AddToStudyAction'
 import { useTranslation } from 'react-i18next'
-import { ScrollView } from 'react-native'
+import ActionsLayout from './ActionsLayout'
 import ActionItem from './ActionItem'
 import VerseTagsAction from './VerseTagsAction'
 import VerseBookmarkAction from './VerseBookmarkAction'
@@ -46,12 +46,7 @@ const AnnotateTab = ({
   const { hasBookmark, hasFocus } = activeStates
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 16 }}
-      style={{ width: screenWidth }}
-    >
+    <ActionsLayout width={screenWidth}>
       <ActionItem name="file-plus" label={t('Note')} onPress={onCreateNoteClick} />
       <VerseTagsAction selectedVerses={selectedVerses} reference={reference} onPress={addTag} />
       <ActionItem name="link" label={t('Lien')} onPress={onCreateLinkClick} />
@@ -73,7 +68,7 @@ const AnnotateTab = ({
           variant="emphasized"
         />
       )}
-    </ScrollView>
+    </ActionsLayout>
   )
 }
 

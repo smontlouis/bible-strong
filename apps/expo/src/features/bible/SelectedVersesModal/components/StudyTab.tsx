@@ -1,7 +1,7 @@
 import { resolveUniverseColors } from '~themes/universeColors'
 import { useTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
-import { ScrollView } from 'react-native'
+import ActionsLayout from './ActionsLayout'
 import ActionItem from './ActionItem'
 interface StudyTabProps {
   screenWidth: number
@@ -28,12 +28,7 @@ const StudyTab = ({
   const theme = useTheme()
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 16 }}
-      style={{ width: screenWidth }}
-    >
+    <ActionsLayout width={screenWidth}>
       <ActionItem
         svgSource={require('~assets/images/tab-icons/lexique.svg')}
         tintColor={resolveUniverseColors(theme.colors, 'strong').foreground}
@@ -70,7 +65,7 @@ const StudyTab = ({
         disabled={moreThanOneVerseSelected}
       />
       <ActionItem name="layers" label={t('Comparer')} onPress={compareVerses} />
-    </ScrollView>
+    </ActionsLayout>
   )
 }
 

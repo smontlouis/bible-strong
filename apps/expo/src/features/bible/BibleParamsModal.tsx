@@ -1,7 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
 import * as NativeUI from 'react-native'
-import { FlatList } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -15,7 +14,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import IconLongPress from '~assets/images/IconLongPress'
 import IconShortPress from '~assets/images/IconShortPress'
 import { LineHeightIcon } from '~common/LineHeightIcon'
-import Link, { LinkBox } from '~common/Link'
+import { LinkBox } from '~common/Link'
 import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Border from '~common/ui/Border'
@@ -24,13 +23,12 @@ import Circle from '~common/ui/Circle'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import fonts from '~helpers/fonts'
+import BibleFontList from './BibleFontList'
 import { RootState } from '~redux/modules/reducer'
 import {
   decreaseSettingsFontSizeScale,
   increaseSettingsFontSizeScale,
   isContextualInformationDisplayEnabled,
-  setFontFamily,
   setSettingsAlignContent,
   setSettingsContextualInformationDisplay,
   setSettingsLineHeight,
@@ -172,6 +170,7 @@ interface BibleParamsModalprops {
   modalRef?: React.RefObject<SheetRef | null>
   inline?: boolean
   onClose?: () => void
+  onFonts?: () => void
   onPalette?: () => void
   onShareOptions?: () => void
 }
@@ -180,10 +179,12 @@ const BibleParamsModal = ({
   modalRef,
   inline = false,
   onClose,
+  onFonts,
   onPalette,
   onShareOptions,
 }: BibleParamsModalprops) => {
   const { t } = useTranslation()
+  const fontsRef = React.useRef<SheetRef>(null)
   const shareRef = React.useRef<SheetRef>(null)
   const setColorPickerModal = useSetAtom(colorPickerModalAtom)
 
@@ -232,9 +233,6 @@ const BibleParamsModal = ({
     isContextualInformationDisplayEnabled(state.user.bible.settings.contextualInformationDisplay)
   )
 
-  const fontsViewRef = React.useRef(null)
-
-  const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
   const insets = useSafeAreaInsets()
   const Container = inline ? InlineParamsContainer : Sheet
   return (
@@ -526,39 +524,20 @@ const BibleParamsModal = ({
               size={25}
             />
           </HalfContainer>
-          <Box className="overflow-hidden border-continuous h-[60px]">
-            <FlatList
-              ref={fontsViewRef}
-              ListHeaderComponent={
-                <Text
-                  className={inline ? 'ml-[20px] mr-[50px] text-[14px]' : 'ml-[20px] mr-[50px]'}
-                >
-                  {t('Polices')}
-                </Text>
-              }
-              horizontal
-              getItemLayout={(data, index) => ({
-                length: 100,
-                offset: 100 * index,
-                index,
-              })}
-              initialScrollIndex={initialScrollIndex === -1 ? 0 : initialScrollIndex}
-              style={{ paddingVertical: 15 }}
-              data={['Literata Book', ...fonts]}
-              keyExtractor={item => item}
-              renderItem={({ item }) => {
-                const isSelected = fontFamily === item
-                return (
-                  <Link onPress={() => dispatch(setFontFamily(item))}>
-                    <FontText isSelected={isSelected} style={{ fontFamily: item }}>
-                      {item}
-                    </FontText>
-                  </Link>
-                )
-              }}
-            />
-            <Border testID="bible-params-separator" />
-          </Box>
+          <TouchableBox
+            accessibilityRole="button"
+            accessibilityLabel={t('Polices')}
+            testID="bible-params-link"
+            className="min-h-[60px] px-[20px] py-[8px] items-center flex-row"
+            onPress={() => (onFonts ? onFonts() : fontsRef.current?.present())}
+          >
+            <Text className={inline ? 'flex-1 text-[14px]' : 'flex-1'}>{t('Polices')}</Text>
+            <Text className="text-[14px] text-grey mr-[12px]" style={{ fontFamily }}>
+              {fontFamily}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </TouchableBox>
+          <Border testID="bible-params-separator" />
           <TouchableBox
             testID="bible-params-link"
             accessibilityRole="button"
@@ -598,6 +577,11 @@ const BibleParamsModal = ({
           </TouchableBox>
         </SheetScrollView>
       </Container>
+      {!onFonts && (
+        <Sheet ref={fontsRef} header={<SheetHeader title={t('Polices')} />}>
+          <BibleFontList onSelect={() => fontsRef.current?.close()} />
+        </Sheet>
+      )}
       {!inline && (
         <Sheet ref={shareRef} header={<SheetHeader title={t('bible.settings.shareOptions')} />}>
           <BibleShareOptionsScreen inline />

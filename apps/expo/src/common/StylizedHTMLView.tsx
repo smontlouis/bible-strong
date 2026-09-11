@@ -4,6 +4,7 @@ import { DomUtils } from 'htmlparser2'
 import { useEffect, useRef, useState } from 'react'
 import { Platform, useWindowDimensions } from 'react-native'
 import Box from '~common/ui/Box'
+import { appFonts } from '~helpers/appFonts'
 import { Theme } from '~themes'
 import {
   getLegacyLinkPressArguments,
@@ -174,6 +175,7 @@ const StylizedHTMLView = ({
           enableUserAgentStyles={false}
           systemFonts={[
             ...defaultSystemFonts,
+            ...Object.keys(appFonts),
             monospaceFontFamily,
             ...Object.values(theme.fontFamily),
             ...additionalSystemFonts,

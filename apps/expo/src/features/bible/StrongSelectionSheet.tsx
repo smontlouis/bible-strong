@@ -1,3 +1,4 @@
+import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import StrongSelectionContainer from './StrongSelectionContainer'
 import { twMerge } from '~common/ui/classNames'
 import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
@@ -195,7 +196,7 @@ const StrongSelectionSheet = ({
   }
 
   const syncSelectedPreviewDuringSwipe = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (!programmaticPreviewScrollRef.current) {
+    if (Platform.OS === 'web' || !programmaticPreviewScrollRef.current) {
       syncSelectedPreview(event)
     }
   }
@@ -416,7 +417,7 @@ const StrongSelectionSheet = ({
             skipEntering={false}
             skipExiting={false}
           >
-            <ScrollView
+            <HorizontalControlScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{
@@ -454,9 +455,9 @@ const StrongSelectionSheet = ({
                   </TouchableOpacity>
                 )
               })}
-            </ScrollView>
+            </HorizontalControlScrollView>
 
-            <ScrollView
+            <HorizontalControlScrollView
               ref={previewPagerRef}
               horizontal
               scrollEnabled={displayedPreviews.length > 1}
@@ -548,7 +549,7 @@ const StrongSelectionSheet = ({
                   </Box>
                 )
               })}
-            </ScrollView>
+            </HorizontalControlScrollView>
           </FadingBox>
         )}
 

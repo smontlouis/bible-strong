@@ -191,22 +191,7 @@ const CommentaryResourceTabScreen = ({
   return (
     <FormSheetScreen isFormSheet={false}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
-        <Header
-          background
-          hasBackButton={Boolean(tab.data.sectionId)}
-          onCustomBackPress={() =>
-            router.push({
-              pathname: '/commentary-chapter',
-              params: {
-                projectionId: projection.projectionId,
-                book: String(book),
-                chapter: String(chapter),
-              },
-            })
-          }
-          title={entry.author}
-          subTitle={passage}
-        />
+        <Header background title={entry.author} subTitle={passage} />
 
         {tab.data.sectionId ? (
           query.isPending ? (

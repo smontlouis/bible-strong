@@ -1,3 +1,4 @@
+import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import { goBackOrHome } from '~navigation/goBackOrHome'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { resolveFontFamily } from '~themes/styleValues'
@@ -5,7 +6,7 @@ import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import Color from 'color'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
 import React from 'react'
-import { Linking, Platform, ScrollView as RNScrollView } from 'react-native'
+import { Linking, Platform } from 'react-native'
 import DesktopHome from './DesktopHome'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -75,7 +76,7 @@ export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
           </Text>
         </Box>
         <Box className="overflow-hidden border-continuous bg-light-grey pt-[20px]">
-          <RNScrollView
+          <HorizontalControlScrollView
             horizontal
             style={{ overflow: 'visible' }}
             showsHorizontalScrollIndicator={false}
@@ -89,7 +90,7 @@ export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
             <StrongOfTheDay type="hebreu" color1="rgba(248,131,121,1)" color2="rgba(255,77,93,1)" />
             <NaveOfTheDay />
             <WordOfTheDay color1="#ffd255" color2="#ffbc00" />
-          </RNScrollView>
+          </HorizontalControlScrollView>
         </Box>
         <Box className="overflow-hidden border-continuous bg-light-grey pt-[40px] px-[20px]">
           <Text

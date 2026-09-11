@@ -24,7 +24,7 @@ const ResourceIcon = ({
 
   return (
     <Svg width={size} height={size} viewBox={shapes.viewBox} fill="none" {...props}>
-      <Rect {...shapes.frame} stroke={ink} strokeWidth={2} />
+      <Rect {...shapes.frame} fill="none" stroke={ink} strokeWidth={2} />
       <Path
         d={symbol.path}
         transform={'transform' in symbol ? symbol.transform : undefined}

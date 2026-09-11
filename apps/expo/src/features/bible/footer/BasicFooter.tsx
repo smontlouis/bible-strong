@@ -1,3 +1,4 @@
+import { Platform } from 'react-native'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { resolveThemeColor } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
@@ -62,7 +63,7 @@ const BasicFooter = ({
           { opacity: isDisabled || !onPrevChapter ? 0.6 : 1 },
           [
             {
-              bottom: isWide ? '25%' : 10 + bottomBarHeight,
+              bottom: Platform.OS === 'web' ? '50%' : isWide ? '25%' : 10 + bottomBarHeight,
               opacity: isDisabled || !onPrevChapter ? 0.6 : 1,
             },
             {
@@ -95,7 +96,7 @@ const BasicFooter = ({
           { opacity: isDisabled || !onNextChapter ? 0.6 : 1 },
           [
             {
-              bottom: isWide ? '25%' : 10 + bottomBarHeight,
+              bottom: Platform.OS === 'web' ? '50%' : isWide ? '25%' : 10 + bottomBarHeight,
               opacity: isDisabled || !onNextChapter ? 0.6 : 1,
             },
             {

@@ -1,10 +1,10 @@
+import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import { twMerge } from '~common/ui/classNames'
 
 import { pageContentStyle } from '~common/ui/PageContent'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { LegendList } from '@legendapp/list'
 import React, { useState } from 'react'
-import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -159,7 +159,7 @@ const StrongConcordancePage = ({
           </HStack>
 
           {lemmaStats && lemmaStats.lemmas.length > 0 && (
-            <ScrollView
+            <HorizontalControlScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               style={{ marginHorizontal: -20, marginTop: 16 }}
@@ -222,7 +222,7 @@ const StrongConcordancePage = ({
                   </Box>
                 </TouchableBox>
               ))}
-            </ScrollView>
+            </HorizontalControlScrollView>
           )}
         </>
       }

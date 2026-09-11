@@ -7,6 +7,7 @@ import { MenuView } from '~common/ui/MenuView'
 import ContextualPanel from '~common/ContextualPanel'
 import PanelAction from '~common/ContextualPanel/PanelAction'
 import BibleParamsModal from './BibleParamsModal'
+import BibleFontList from './BibleFontList'
 import PassageExportSheet from './passageExport/PassageExportSheet'
 import type { VersionCode } from '~state/tabs'
 type Props = ComponentProps<typeof MenuView> & {
@@ -80,10 +81,15 @@ export default function BibleOptionsMenu({
             <BibleParamsModal
               inline
               onClose={nav.close}
+              onFonts={() => nav.open('fonts')}
               onPalette={() => nav.open('palette')}
               onShareOptions={() => nav.open('share-options')}
             />
           ),
+        },
+        fonts: {
+          title: t('Polices'),
+          content: nav => <BibleFontList onSelect={nav.back} />,
         },
         palette: { title: t('Palette de couleurs'), content: () => <ColorPickerModal inline /> },
         'share-options': {

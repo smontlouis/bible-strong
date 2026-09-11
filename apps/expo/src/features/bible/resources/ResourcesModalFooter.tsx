@@ -1,7 +1,8 @@
+import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import { getUniverseColor } from '~themes/universeColors'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Platform, ScrollView, TouchableOpacity } from 'react-native'
+import { Platform, TouchableOpacity } from 'react-native'
 import CommentIcon from '~common/CommentIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -29,8 +30,11 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
   const iconWidth = Platform.OS === 'web' ? 74 : wp(18)
 
   return (
-    <Box className="border-continuous overflow-hidden mx-[20px] bg-reverse py-[10px] rounded-[20px] border-[1px] border-border">
-      <ScrollView
+    <Box
+      className="border-continuous overflow-hidden bg-reverse py-[10px] rounded-[20px] border-[1px] border-border"
+      style={{ marginHorizontal: Platform.OS === 'web' ? 12 : 20 }}
+    >
+      <HorizontalControlScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ flexGrow: 1 }}
@@ -109,7 +113,7 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
             </TouchableOpacity>
           </Box>
         </HStack>
-      </ScrollView>
+      </HorizontalControlScrollView>
     </Box>
   )
 })

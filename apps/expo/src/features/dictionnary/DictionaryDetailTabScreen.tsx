@@ -1,3 +1,4 @@
+import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import { goBackOrHome } from '~navigation/goBackOrHome'
 import { twMerge } from '~common/ui/classNames'
 import { resolveThemeColor } from '~themes/colorValues'
@@ -5,7 +6,7 @@ import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
-import { ScrollView, Share } from 'react-native'
+import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 import books from '~assets/bible_versions/books-desc'
@@ -438,7 +439,7 @@ const DictionnaryDetailScreen = ({
                 count: correspondenceSources.length,
               })}
             </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <HorizontalControlScrollView horizontal showsHorizontalScrollIndicator={false}>
               {correspondenceSources.map(source => {
                 const selected = isCurrentSource(source)
                 return (
@@ -489,7 +490,7 @@ const DictionnaryDetailScreen = ({
                   </TouchableBox>
                 )
               })}
-            </ScrollView>
+            </HorizontalControlScrollView>
           </Box>
         )}
         {(tags || relationCount > 0) && (
