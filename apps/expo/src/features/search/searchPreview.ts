@@ -28,6 +28,9 @@ export function createPreviewSearchFilters(
     selectedVersion: version,
     sortOrder: 'relevance',
     itemFilters: {
+      commentary: !source || source === 'commentary',
+      plan: !source || source === 'plan',
+      timeline: !source || source === 'timeline',
       passages: !source || source === 'passages',
       notes: !source || source === 'notes',
       studies: !source || source === 'studies',
@@ -41,6 +44,7 @@ export function createPreviewSearchFilters(
 
 export async function loadSearchPreview({
   resources,
+  limit = SEARCH_PREVIEW_LIMIT,
   source,
   query,
   version,
@@ -56,6 +60,7 @@ export async function loadSearchPreview({
     dictionary: Pick<ResourceAccessRegistry['dictionary'], 'searchPage' | 'listByLetterPage'>
     nave: Pick<ResourceAccessRegistry['nave'], 'searchPage' | 'listByLetterPage'>
   }
+  limit?: number
   source: PublicPreviewSource
   mode?: 'standard' | 'semantic'
   query: string
@@ -65,7 +70,6 @@ export async function loadSearchPreview({
   signal: AbortSignal
   t: (key: string) => string
 }): Promise<SearchPreviewPage> {
-  const limit = SEARCH_PREVIEW_LIMIT
   switch (source) {
     case 'passages': {
       if (parseStrongReference(query) || isExactBibleReferenceInput(query, parserLanguage))

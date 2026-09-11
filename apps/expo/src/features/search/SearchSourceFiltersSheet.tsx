@@ -12,6 +12,9 @@ import { searchItemFilterConfig, searchItemFilterOrder } from './shared/SearchIt
 import SearchTypeIcon from './shared/SearchTypeIcon'
 export type SearchSourceFiltersProps = {
   itemFilters: SearchItemFilters
+  enabledTypes?: SearchItemType[]
+  emptyMeansAll?: boolean
+  showPassageFilters?: boolean
   passageFilterCount: number
   onToggle: (type: SearchItemType) => void
   onReset: () => void
@@ -19,9 +22,21 @@ export type SearchSourceFiltersProps = {
 }
 
 const SearchSourceFiltersSheet = forwardRef<SheetRef, SearchSourceFiltersProps>(
-  ({ itemFilters, passageFilterCount, onToggle, onReset, onOpenPassageFilters }, ref) => {
+  (
+    {
+      itemFilters,
+      passageFilterCount,
+      onToggle,
+      onReset,
+      onOpenPassageFilters,
+      enabledTypes = searchItemFilterOrder,
+      emptyMeansAll = false,
+      showPassageFilters = true,
+    },
+    ref
+  ) => {
     const { t } = useTranslation()
-    const allSelected = searchItemFilterOrder.every(type => itemFilters[type])
+    const allSelected = enabledTypes.every(type => itemFilters[type])
 
     return (
       <Sheet
@@ -45,9 +60,10 @@ const SearchSourceFiltersSheet = forwardRef<SheetRef, SearchSourceFiltersProps>(
         }
       >
         <SheetScrollView>
-          {searchItemFilterOrder.map(type => {
+          {enabledTypes.map(type => {
             const config = searchItemFilterConfig[type]
-            const checked = itemFilters[type]
+            const checked =
+              !!itemFilters[type] && (!emptyMeansAll || !allSelected || enabledTypes.length === 1)
 
             return (
               <HStack
@@ -77,7 +93,7 @@ const SearchSourceFiltersSheet = forwardRef<SheetRef, SearchSourceFiltersProps>(
                   </Text>
                 </TouchableBox>
 
-                {type === 'passages' ? (
+                {showPassageFilters && type === 'passages' ? (
                   <TouchableBox
                     className="overflow-hidden border-continuous min-w-[64px] items-center justify-center"
                     accessibilityLabel={t('search.passageFilters.title')}

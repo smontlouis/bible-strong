@@ -1,3 +1,10 @@
+import { getTabForSearchResult } from '~features/app-switcher/commandPalette/searchResultTab'
+import PassageActionButtons from './discovery/PassageActionButtons'
+import { useCatalogSearch } from './discovery/useCatalogSearch'
+import { useSelectCatalogResult } from './discovery/useSelectCatalogResult'
+import { normalizeSearchItemFilters } from '~state/searchFilters'
+import generateUUID from '~helpers/generateUUID'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { useAppendOnlySearchResults, passageResultKey } from './useAppendOnlySearchResults'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
@@ -5,7 +12,7 @@ import PageContent, { pageContentStyle } from '~common/ui/PageContent'
 import type { ReactNode } from 'react'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, Keyboard, TextInput, TouchableOpacity } from 'react-native'
+import { FlatList, Keyboard, TextInput } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from '~common/KeyboardAwareScrollView'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
@@ -15,8 +22,7 @@ import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList'
 import FilterHeaderButton from '~common/FilterHeaderButton'
 import SearchInput from '~common/SearchInput'
-import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
-import { Chip } from '~common/ui/NewChip'
+import Box, { TouchableBox, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
@@ -137,6 +143,7 @@ const SQLiteSearchScreen = ({
   const { t, i18n } = useTranslation()
   const theme = useTheme()
   const keyboardFooterBottom = useKeyboardFooterBottom(SEARCH_ALPHABET_FOOTER_HEIGHT)
+  const openCatalogTab = useOpenInNewTab()
   const openStudyObject = useOpenStudyObject()
   const resources = useResourceAccess()
   const isConnected = useConnection()
@@ -172,7 +179,9 @@ const SQLiteSearchScreen = ({
   )
   const resolvedSelectedVersion = resolveSearchVersionFilter(selectedVersion, defaultBibleVersion)
   const [sortOrder, _setSortOrder] = useState<SearchSortOrder>(startingFilters.sortOrder)
-  const [itemFilters, _setItemFilters] = useState(startingFilters.itemFilters)
+  const [itemFilters, _setItemFilters] = useState(() =>
+    normalizeSearchItemFilters(startingFilters.itemFilters, startingFilters.discoveryScope)
+  )
   const searchOriginRef = useRef<'typed' | 'example'>('typed')
   const [initialSearchStartedAt] = useState(Date.now)
   const searchStartedAtRef = useRef(initialSearchStartedAt)
@@ -258,7 +267,7 @@ const SQLiteSearchScreen = ({
       writeBook: _setBook,
       writeSelectedVersion: _setSelectedVersion,
       writeSortOrder: _setSortOrder,
-      writeItemFilters: _setItemFilters,
+      writeItemFilters: value => _setItemFilters(normalizeSearchItemFilters(value)),
       persist: patch => {
         setGlobalFilters(previous => ({ ...previous, ...patch }))
         onFiltersChange?.({
@@ -269,6 +278,7 @@ const SQLiteSearchScreen = ({
           sortOrder,
           itemFilters,
           ...patch,
+          discoveryScope: undefined,
         })
       },
     },
@@ -768,7 +778,30 @@ const SQLiteSearchScreen = ({
     : []
   const isNaveSearching = shouldSearchNave && naveQuery.isFetching
 
+  const catalogScopes = (['commentary', 'plan', 'timeline'] as const).filter(
+    type => itemFilters[type]
+  )
+  const catalog = useCatalogSearch(
+    debouncedSearchValue,
+    undefined,
+    catalogScopes.length > 0 &&
+      (!!browseItemType || debouncedSearchValue.trim().length >= MIN_SEARCH_LENGTH),
+    catalogScopes
+  )
+  const catalogSelection = useSelectCatalogResult(tab =>
+    openCatalogTab(tab, { autoRedirect: true })
+  )
+  const catalogResults: SearchEntityResult[] = catalog.items.map(item => ({
+    id: item.id,
+    title: item.title,
+    subtitle: item.subtitle,
+    type: item.type,
+    iconType: item.type,
+    catalogResult: item,
+  }))
   const searchModel = getSearchResultsModel({
+    catalogResults,
+    catalogError: catalog.error,
     query: searchValue,
     debouncedQuery: debouncedSearchValue,
     browseItemType,
@@ -784,6 +817,7 @@ const SQLiteSearchScreen = ({
     semanticSearchError,
     searchError,
     loading: {
+      catalog: catalog.loading,
       passages: isSearching,
       semanticPassages: isSemanticSearching,
       notes: isNoteSearching,
@@ -1007,6 +1041,17 @@ const SQLiteSearchScreen = ({
   const openSearchItem = (item: SearchEntityResult) => {
     dismissSearchInput()
     recordResultOpened(item)
+    if (item.catalogResult) {
+      void catalogSelection.select({ ...item.catalogResult.tab, id: generateUUID() })
+      return
+    }
+    if (initialFilters?.openResultsInNewTabs) {
+      const tab = getTabForSearchResult(item, defaultBibleVersion)
+      if (tab) {
+        openCatalogTab(tab, { autoRedirect: true })
+        return
+      }
+    }
     openStudyObject(item)
   }
 
@@ -1167,6 +1212,10 @@ const SQLiteSearchScreen = ({
     const hasSearch = debouncedSearchValue.trim().length > 0
 
     switch (browseItemType) {
+      case 'commentary':
+      case 'plan':
+      case 'timeline':
+        return <Text className="p-[20px] text-grey">{t('commandPalette.noResults')}</Text>
       case 'notes':
         return (
           <Empty
@@ -1269,6 +1318,7 @@ const SQLiteSearchScreen = ({
             key={item.id}
             item={item}
             onPress={() => openSearchItem(item)}
+            actions={item.passage ? <PassageActionButtons item={item} /> : undefined}
           />
         )
 
@@ -1302,6 +1352,8 @@ const SQLiteSearchScreen = ({
       }
 
       const isSectionLoading = (sectionId: SearchSectionId) =>
+        (['commentary', 'plan', 'timeline'].includes(sectionId) &&
+          (catalog.loading || catalogSelection.loading)) ||
         (sectionId === 'passages' && isSearching) ||
         (sectionId === 'links' && isLinkSearching) ||
         (sectionId === 'strong' && isStrongSearching) ||
@@ -1488,7 +1540,15 @@ const SQLiteSearchScreen = ({
               onPressItem={openSearchItem}
               renderItem={renderSearchResult}
               statusMessage={
-                section.id === 'passages' ? (
+                ['commentary', 'plan', 'timeline'].includes(section.id) && catalog.error ? (
+                  <TouchableBox
+                    onPress={catalog.retry}
+                    accessibilityRole="button"
+                    className="px-[20px] py-[12px]"
+                  >
+                    <Text className="text-primary">{t('Réessayer')}</Text>
+                  </TouchableBox>
+                ) : section.id === 'passages' ? (
                   <>
                     {renderPassageError()}
                     {renderSemanticStatus()}
@@ -1617,9 +1677,8 @@ const ReferenceSearchResultRow = ({
   const content = verses.map(v => v.Texte).join(' ')
 
   return (
-    <TouchableOpacity
-      accessibilityRole="button"
-      activeOpacity={0.7}
+    <SharedSearchEntityResultRow
+      item={{ ...item, chip: version }}
       onPress={() => {
         onOpen()
         pushRouteOnce({
@@ -1627,24 +1686,16 @@ const ReferenceSearchResultRow = ({
           params: getBibleViewParamsForReferenceSegment(segment),
         })
       }}
-    >
-      <Box className="border-continuous overflow-hidden px-[20px] py-[12px] border-b-[1px] border-border">
-        <VStack className="overflow-hidden border-continuous">
-          <HStack className="overflow-hidden border-continuous items-center gap-[6px] mb-[2px]">
-            <Text className="font-bold text-[15px]" numberOfLines={1}>
-              {item.title}
-            </Text>
-            <Chip>{version}</Chip>
-          </HStack>
-          {content ? (
-            <Paragraph small numberOfLines={5}>
-              {removeBreakLines(content)}
-              {segment.isWholeChapter ? '...' : ''}
-            </Paragraph>
-          ) : null}
-        </VStack>
-      </Box>
-    </TouchableOpacity>
+      description={
+        content ? (
+          <Paragraph small numberOfLines={5}>
+            {removeBreakLines(content)}
+            {segment.isWholeChapter ? '...' : ''}
+          </Paragraph>
+        ) : undefined
+      }
+      actions={<PassageActionButtons item={item} />}
+    />
   )
 }
 

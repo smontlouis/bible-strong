@@ -98,3 +98,15 @@ L'onglet Recherche (mobile et web) et les aperçus Commande K lancent deux requ�
 Les deux opérations partagent les filtres et le contrat de réponse, mais ont leurs propres clés TanStack Query, erreurs et pages. Les résultats classiques sont affichés en premier, puis les résultats supplémentaires sont ajoutés sans doublons (version, livre, chapitre, verset de début). Les pages suivantes conservent les positions déjà affichées. Le compteur indique le nombre de résultats uniques chargés ; « Voir plus » reste disponible tant qu’une des sources a une page suivante. La recherche par sens dispose d'un délai client de 45 secondes, sans retarder la recherche classique. Elle n'est pas lancée hors ligne ; une panne IA ne déclenche pas une copie des résultats SQLite dans la liste. Un changement de texte, langue ou filtre invalide la requête affichée et annule le signal de l'ancienne requête.
 
 Le Worker doit être déployé avec les nouvelles routes avant de distribuer le client. La révision du cache change pour éviter qu'une ancienne réponse hybride soit servie par la route classique. Les anciens clients peuvent toujours lire `/search`, mais n'obtiennent plus les correspondances vectorielles par cette route.
+
+## Content discovery
+
+The existing Passages filter covers both Bible references and full-text passage search.
+Commentary, Plans and Timeline are appended to the source filters.
+All sources share the same input, result sections and counted facets. Passage results expose icon actions for a Bible tab and
+a comparison tab. Commentary search indexes catalog titles/authors, plans index
+saved and published titles, and timeline indexes period/event names. Published
+plans load through the existing plan thunk before opening a tab. Native selection
+uses the shared discovery results in a search sheet; Web uses command-palette
+rows. See ADR-0045 for the distinct Passage/Comparison command modes and the
+new-tab launch behavior. Existing library/list tabs remain valid.

@@ -1,6 +1,6 @@
 import type { SearchResult } from '~helpers/biblesDb'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
-import type { SearchItemType } from '~state/searchFilters'
+import type { SearchItemType, SearchItemFilters } from '~state/searchFilters'
 import type { SearchResultSection } from './shared/SearchSectionBlock'
 import {
   getDictionarySearchItems,
@@ -16,6 +16,9 @@ import type { SearchEntityResult } from './shared/searchResultTypes'
 export const SEARCH_MIN_QUERY_LENGTH = 2
 
 export type SearchSectionId =
+  | 'commentary'
+  | 'plan'
+  | 'timeline'
   | 'reference'
   | 'notes'
   | 'links'
@@ -44,11 +47,13 @@ const searchFacetOrder: SearchItemType[] = [
   'strong',
   'dictionary',
   'nave',
+  'commentary',
+  'plan',
+  'timeline',
 ]
 
-type SearchItemFilters = Record<SearchItemType, boolean>
-
 type SearchLoadingState = {
+  catalog?: boolean
   semanticPassages?: boolean
   passages: boolean
   notes: boolean
@@ -60,6 +65,8 @@ type SearchLoadingState = {
 }
 
 type SearchResultsModelInput = {
+  catalogResults?: SearchEntityResult[]
+  catalogError?: boolean
   query: string
   debouncedQuery: string
   browseItemType?: SearchItemType
@@ -133,6 +140,8 @@ export const getSectionsForFacet = (sections: SQLiteSearchResultSection[], facet
   facet === 'all' ? sections : sections.filter(section => section.itemFilterType === facet)
 
 export const getSearchResultsModel = ({
+  catalogResults = [],
+  catalogError = false,
   query,
   debouncedQuery,
   browseItemType,
@@ -160,6 +169,19 @@ export const getSearchResultsModel = ({
   const passageItems = itemFilters.passages ? getPassageSearchItems(passageResults ?? []) : []
 
   const sections: SQLiteSearchResultSection[] = [
+    ...(['commentary', 'plan', 'timeline'] as const).flatMap(type => {
+      const items = catalogResults.filter(item => item.type === type)
+      return itemFilters[type] && (items.length || loading.catalog || catalogError)
+        ? [
+            getSection({
+              id: type,
+              title: t(type === 'plan' ? 'Plans' : `tabs.${type}`),
+              items,
+              itemFilterType: type,
+            }),
+          ]
+        : []
+    }),
     ...(referenceItems.length
       ? [
           getSection({
@@ -225,6 +247,8 @@ export const getSearchResultsModel = ({
   ]
 
   const isBrowseLoading =
+    (['commentary', 'plan', 'timeline'].includes(browseItemType ?? '') &&
+      Boolean(loading.catalog)) ||
     (browseItemType === 'notes' && loading.notes) ||
     (browseItemType === 'links' && loading.links) ||
     (browseItemType === 'studies' && loading.studies) ||

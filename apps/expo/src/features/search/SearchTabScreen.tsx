@@ -48,7 +48,10 @@ const SearchTabScreen = ({ searchAtom }: SearchScreenProps) => {
         setSearchValue={setSearchValue}
         initialFilters={searchTab.data.filters}
         onFiltersChange={filters =>
-          setSearchTab(previous => ({ ...previous, data: { ...previous.data, filters } }))
+          setSearchTab(previous => ({
+            ...previous,
+            data: { ...previous.data, filters: { ...previous.data.filters, ...filters } },
+          }))
         }
       />
     </Container>

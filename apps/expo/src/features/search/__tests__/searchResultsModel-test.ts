@@ -274,3 +274,36 @@ it('keeps standard passages visible while semantic passages load or fail', () =>
     expect(model.showNoResults).toBe(false)
   }
 })
+
+it('integrates catalog matches into existing result sections and counted facets', () => {
+  const catalogResults: SearchEntityResult[] = [
+    { id: 'commentary:a', title: 'Study notes', type: 'commentary', iconType: 'commentary' },
+    { id: 'timeline:a', title: 'Moïse', type: 'timeline', iconType: 'timeline' },
+    { id: 'plan:a', title: 'Lecture', type: 'plan', iconType: 'plan' },
+  ]
+  const model = getSearchResultsModel({
+    ...baseInput,
+    catalogResults,
+    itemFilters: { ...allFilters, commentary: true, timeline: true, plan: false },
+  })
+  expect(model.sections.map(section => section.id)).toEqual(['commentary', 'timeline'])
+  expect(getSearchFacets(model.sections)).toEqual([
+    { id: 'all', count: 2 },
+    { id: 'commentary', count: 1 },
+    { id: 'timeline', count: 1 },
+  ])
+  expect(getSectionsForFacet(model.sections, 'timeline')[0].items[0].title).toBe('Moïse')
+})
+
+it('keeps catalog loading and failures inside the selected result section', () => {
+  const model = getSearchResultsModel({
+    ...baseInput,
+    query: '',
+    debouncedQuery: '',
+    browseItemType: 'plan',
+    itemFilters: { ...allFilters, plan: true },
+    loading: { ...emptyLoading, catalog: true },
+  })
+  expect(model.isBrowseLoading).toBe(true)
+  expect(model.sections[0]).toMatchObject({ id: 'plan', count: 0, items: [] })
+})

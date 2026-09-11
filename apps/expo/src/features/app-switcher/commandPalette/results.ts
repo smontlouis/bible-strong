@@ -1,9 +1,16 @@
+import { matchesQuery } from '~features/search/shared/matchesQuery'
 import { parseBibleReferenceInput } from '~helpers/bcvParser'
 import type { BcvLanguage } from '~helpers/bcvParser'
 import type { TabGroup } from '~state/tabs'
 
+export { matchesQuery } from '~features/search/shared/matchesQuery'
+
 export const destinations = [
-  { type: 'bible', key: 'Bible', aliases: 'bible scripture lecture lire read' },
+  {
+    type: 'bible',
+    key: 'Bible',
+    aliases: 'bible scripture lecture lire read passage verset verse reference',
+  },
   { type: 'notes', key: 'tabs.notes', aliases: 'notes note' },
   { type: 'study', key: 'Études', aliases: 'etudes etude studies study' },
   { type: 'compare', key: 'tabs.compare', aliases: 'comparer comparaison compare parallel' },
@@ -14,19 +21,6 @@ export const destinations = [
   { type: 'nave', key: 'tabs.nave', aliases: 'nave themes topics' },
   { type: 'commentary', key: 'tabs.commentary', aliases: 'commentaires commentary' },
 ] as const
-
-export function matchesQuery(query: string, ...values: string[]) {
-  const normalize = (value: string) =>
-    value
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-  const text = normalize(values.join(' '))
-  return normalize(query)
-    .trim()
-    .split(/\s+/)
-    .every(word => text.includes(word))
-}
 
 export function findPassages(query: string, language: BcvLanguage) {
   const parsed = parseBibleReferenceInput(query, language)

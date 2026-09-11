@@ -1,3 +1,4 @@
+import type { CatalogResult } from '../discovery/catalogSearch'
 import type { FuseResultMatch } from 'fuse.js'
 import type { SearchResult } from '~helpers/biblesDb'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
@@ -9,6 +10,7 @@ export type SearchReferenceMode = 'navigation' | 'target'
 
 export type SearchEntityResult = {
   id: string
+  catalogResult?: CatalogResult
   type: SearchItemType
   title: string
   chip?: string

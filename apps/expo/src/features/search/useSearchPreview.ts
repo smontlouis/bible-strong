@@ -28,7 +28,12 @@ export type SearchPreviewSection = {
   error: boolean
 }
 
-export function useSearchPreview(query: string, version: string, selectedSource?: SearchItemType) {
+export function useSearchPreview(
+  query: string,
+  version: string,
+  selectedSource?: SearchItemType,
+  limit = SEARCH_PREVIEW_LIMIT
+) {
   const { t, i18n } = useTranslation()
   const resources = useResourceAccess()
   const languages = useAtomValue(resourcesLanguageAtom)
@@ -59,6 +64,7 @@ export function useSearchPreview(query: string, version: string, selectedSource?
     queries: requests.map(({ source, mode }) => ({
       queryKey: [
         'search-preview-v2',
+        limit,
         source,
         mode,
         debouncedQuery,
@@ -70,6 +76,7 @@ export function useSearchPreview(query: string, version: string, selectedSource?
       queryFn: ({ signal }: { signal: AbortSignal }) =>
         loadSearchPreview({
           resources,
+          limit,
           source,
           mode,
           query: debouncedQuery,
@@ -117,8 +124,8 @@ export function useSearchPreview(query: string, version: string, selectedSource?
         },
       ].map(section => ({
         ...section,
-        items: section.items.slice(0, SEARCH_PREVIEW_LIMIT),
-        hasMore: section.items.length > SEARCH_PREVIEW_LIMIT,
+        items: section.items.slice(0, limit),
+        hasMore: section.items.length > limit,
         loading: false,
         error: false,
       }))
@@ -147,9 +154,7 @@ export function useSearchPreview(query: string, version: string, selectedSource?
         return [
           {
             source: request.source,
-            items: passages
-              ? passageItems
-              : (result.data?.items.slice(0, SEARCH_PREVIEW_LIMIT) ?? []),
+            items: passages ? passageItems : (result.data?.items.slice(0, limit) ?? []),
             hasMore: Boolean(result.data?.hasMore || (passages && semantic?.data?.hasMore)),
             loading: result.isFetching,
             enriching: passages && Boolean(semantic?.isFetching),

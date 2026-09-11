@@ -73,7 +73,7 @@ export default function SearchFiltersTrigger({
         <>
           {searchItemFilterOrder.map(type => {
             const config = searchItemFilterConfig[type]
-            const checked = s.itemFilters[type]
+            const checked = !!s.itemFilters[type]
             return (
               <HStack key={type} className="items-center">
                 <TouchableBox

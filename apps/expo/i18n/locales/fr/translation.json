@@ -1030,7 +1030,7 @@
   "app.deleteAccount": "Supprimer mon compte",
   "app.deleteAccountConfirmButton": "Supprimer",
   "app.deleteAccountBody": "Cette action est irréversible. Toutes vos données seront définitivement supprimées (notes, surlignages, études, favoris...).",
-  "app.deleteAccountTypeConfirm": "Tapez «\u00a0{{text}}\u00a0» pour confirmer la suppression :",
+  "app.deleteAccountTypeConfirm": "Tapez « {{text}} » pour confirmer la suppression :",
   "profile.emailNotVerified": "Email non vérifié",
   "profile.emailNotVerifiedDesc": "Vérifiez votre boîte de réception pour confirmer votre adresse email",
   "profile.resendVerification": "Renvoyer l'email",
@@ -2163,5 +2163,8 @@
   "home.dashboard.timelineDescription": "Explorer la Bible dans son contexte historique.",
   "home.dashboard.studyTools": "Les outils d’étude",
   "home.dashboard.allPlans": "Tous les plans",
-  "home.dashboard.planProgress": "{{percent}} % terminé"
+  "home.dashboard.planProgress": "{{percent}} % terminé",
+  "Ouvrir dans un nouvel onglet": "Ouvrir dans un nouvel onglet",
+  "search.content": "Contenus",
+  "accessibility.newNote": "Créer une note"
 }

@@ -182,26 +182,30 @@ export const SearchEntityResultRow = ({
   showArrow,
   description,
   descriptionColor = 'grey',
+  actions,
 }: {
   item: SearchEntityResult
   onPress: () => void
   showArrow?: boolean
   description?: React.ReactNode
   descriptionColor?: string
+  actions?: React.ReactNode
 }) => {
   const stylingTheme = useStylingTheme()
   return (
-    <TouchableOpacity accessibilityRole="button" onPress={onPress} activeOpacity={0.7}>
-      <HStack
-        className="border-continuous overflow-hidden px-[20px] py-[12px] border-b-[1px] border-l-[3px] border-border items-center gap-[12px]"
-        style={{
-          borderLeftColor: resolveThemeColor(
-            stylingTheme,
-            searchTypeIconConfig[item.iconType].color
-          ),
-        }}
+    <HStack
+      className="border-continuous overflow-hidden border-b-[1px] border-l-[3px] border-border items-center"
+      style={{
+        borderLeftColor: resolveThemeColor(stylingTheme, searchTypeIconConfig[item.iconType].color),
+      }}
+    >
+      <TouchableOpacity
+        accessibilityRole="button"
+        onPress={onPress}
+        activeOpacity={0.7}
+        style={{ flex: 1, minWidth: 0, paddingHorizontal: 20, paddingVertical: 12 }}
       >
-        <VStack className="overflow-hidden border-continuous flex-[1]">
+        <VStack className="overflow-hidden border-continuous">
           <HStack className="overflow-hidden border-continuous items-center gap-[6px] mb-[2px]">
             <HighlightedText value={item.title} match={getMatchForKey(item, 'title')} bold />
             {item.chip ? <Chip>{item.chip}</Chip> : null}
@@ -238,9 +242,20 @@ export const SearchEntityResultRow = ({
             </Text>
           ) : null}
         </VStack>
-        {showArrow ? <FeatherIcon name="arrow-right" size={20} color="grey" /> : null}
-      </HStack>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      {actions ? (
+        <HStack className="shrink-0 items-center pr-[16px] py-[12px]">{actions}</HStack>
+      ) : showArrow ? (
+        <TouchableOpacity
+          onPress={onPress}
+          accessibilityRole="button"
+          accessibilityLabel={item.title}
+          style={{ padding: 20 }}
+        >
+          <FeatherIcon name="arrow-right" size={20} color="grey" />
+        </TouchableOpacity>
+      ) : null}
+    </HStack>
   )
 }
 

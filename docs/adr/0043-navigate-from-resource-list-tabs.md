@@ -1,6 +1,6 @@
 # ADR-0043: Navigate from resource list tabs
 
-- Status: Accepted
+- Status: Partially superseded by ADR-0045 (new-tab creation only)
 - Date: 2026-09-07
 
 Creating a lexicon, dictionary, Nave, notes or studies tab opens its list directly.

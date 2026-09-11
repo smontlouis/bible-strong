@@ -1,7 +1,11 @@
+import { FeatherIcon } from '~common/ui/Icon'
+import { tabContentKey } from './priorities'
+import { useCreateDiscoveryDocument } from '~features/search/discovery/useCreateDiscoveryDocument'
 import { resolveUniverseColors } from '~themes/universeColors'
 import { parseBibleReferenceInput } from '~helpers/bcvParser'
-import { paletteScopes, isPassageScope, createScopedPassageTab, type PaletteScope } from './scopes'
-import PlanSuggestions from './PlanSuggestions.web'
+import { paletteScopes, isPassageScope, type PaletteScope } from './scopes'
+import CatalogSuggestions from './CatalogSuggestions.web'
+import PassageSuggestions from './PassageSuggestions.web'
 import { getReferenceSearchItemsFromSegments } from '~features/search/shared/searchItems'
 import ContentSuggestions from './ContentSuggestions.web'
 import { getTabForSearchResult } from './searchResultTab'
@@ -16,10 +20,9 @@ import { useAtomValue, useStore } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getBook } from '~helpers/bibleBookCatalog'
 import generateUUID from '~helpers/generateUUID'
 import { useSwitchGroup } from '~state/tabGroups'
-import { getDefaultBibleTab, getDefaultData, tabGroupsAtom, type TabItem } from '~state/tabs'
+import { tabGroupsAtom, type TabItem } from '~state/tabs'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import { useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'
@@ -27,10 +30,18 @@ import { resolveThemeColor } from '~themes/colorValues'
 import TabIcon, { tabIconColorConfig } from '../utils/getIconByTabType'
 import { useOpenInNewTab } from '../utils/useOpenInNewTab'
 import { useSlideNewTab } from '../utils/useSlideNewTab'
-import { useSelectBibleReference } from '../TabScreen/NewTab/SelectBibleReferenceModalProvider'
+
 import { destinations, findTabs, matchesQuery } from './results'
 
-function PaletteItemLabel({ type, children }: { type: TabItem['type']; children: ReactNode }) {
+function PaletteItemLabel({
+  type,
+  children,
+  creation = false,
+}: {
+  type: TabItem['type']
+  children: ReactNode
+  creation?: boolean
+}) {
   const theme = useTheme()
   const color = resolveThemeColor(theme, tabIconColorConfig[type] || 'grey')
   return (
@@ -42,7 +53,11 @@ function PaletteItemLabel({ type, children }: { type: TabItem['type']; children:
           backgroundColor: resolveUniverseColors(theme.colors, type).background,
         }}
       >
-        <TabIcon type={type} size={16} color={color} />
+        {creation ? (
+          <FeatherIcon name="plus" size={16} color={color} />
+        ) : (
+          <TabIcon type={type} size={16} color={color} />
+        )}
       </span>
       <span className="bs-command-item-text">{children}</span>
     </span>
@@ -51,12 +66,12 @@ function PaletteItemLabel({ type, children }: { type: TabItem['type']; children:
 
 export interface PaletteProps {
   tabAtom?: PrimitiveAtom<TabItem>
-  onPlanPress?: () => void
   onDone?: () => void
+  initialScope?: string
   inputId?: string
 }
 
-export default function CommandPalette({ tabAtom, onPlanPress, onDone, inputId }: PaletteProps) {
+export default function CommandPalette({ tabAtom, onDone, inputId, initialScope }: PaletteProps) {
   const { t, i18n } = useTranslation()
   const theme = useTheme()
   const router = useRouter()
@@ -68,9 +83,10 @@ export default function CommandPalette({ tabAtom, onPlanPress, onDone, inputId }
   const { triggerSlideNewTab } = useSlideNewTab()
   const openInNewTab = useOpenInNewTab()
   const defaultVersion = useDefaultBibleVersion()
-  const { openBibleReferenceModal } = useSelectBibleReference()
   const [query, setQuery] = useState('')
-  const [scope, setScope] = useState<PaletteScope>()
+  const [scope, setScope] = useState<PaletteScope | undefined>(() =>
+    paletteScopes.find(item => item.type === initialScope)
+  )
   const inputRef = useRef<HTMLInputElement>(null)
   const selectScope = (next: PaletteScope) => {
     setScope(next)
@@ -87,16 +103,20 @@ export default function CommandPalette({ tabAtom, onPlanPress, onDone, inputId }
     query,
     i18n.language.startsWith('fr') ? 'fr' : 'en'
   )
-  const passages = referenceInput.isExact ? referenceInput.references : []
+  const [tabLimit, setTabLimit] = useState(3)
   const tabs = findTabs(groups, query, recentIds)
+  const visibleTabs = tabs.slice(0, tabLimit)
+  const excludedKeys = visibleTabs.flatMap(({ tab }) => {
+    const key = tabContentKey(tab)
+    return key ? [key] : []
+  })
   const actions = destinations.filter(item => matchesQuery(query, t(item.key), item.aliases))
   const matchingScopes = paletteScopes.filter(candidate =>
     actions.some(action => action.type === candidate.type)
   )
-  const scopedPassages =
-    isPassageScope(scope) && referenceInput.isExact
-      ? getReferenceSearchItemsFromSegments(referenceInput.segments)
-      : []
+  const scopedPassages = referenceInput.isExact
+    ? getReferenceSearchItemsFromSegments(referenceInput.segments)
+    : []
   const openTab = (tab: TabItem) => {
     if (tabAtom) {
       const previous = store.get(tabAtom)
@@ -105,6 +125,7 @@ export default function CommandPalette({ tabAtom, onPlanPress, onDone, inputId }
     } else openInNewTab(tab, { autoRedirect: true })
     onDone?.()
   }
+  const documents = useCreateDiscoveryDocument(openTab, onDone)
   const openSearch = (source?: SearchItemType) =>
     openTab({
       id: generateUUID(),
@@ -113,42 +134,17 @@ export default function CommandPalette({ tabAtom, onPlanPress, onDone, inputId }
       title: query.trim(),
       data: {
         searchValue: query.trim(),
-        filters: createPreviewSearchFilters(defaultVersion, source),
+        filters: {
+          ...createPreviewSearchFilters(defaultVersion, source),
+          openResultsInNewTabs: true,
+        },
       },
     })
-  const create = (type: (typeof destinations)[number]['type']) => {
-    if (type === 'plan') {
-      onDone?.()
-      if (onPlanPress) onPlanPress()
-      return
+  const chooseCategory = (type: (typeof destinations)[number]['type']) => {
+    const next = paletteScopes.find(candidate => candidate.type === type)
+    if (next) {
+      selectScope(next)
     }
-    if (type === 'compare') {
-      onDone?.()
-      openBibleReferenceModal({
-        onSelect: data =>
-          openTab({
-            id: generateUUID(),
-            title: t('tabs.compare'),
-            isRemovable: true,
-            type: 'compare',
-            data: {
-              selectedVerses: {
-                [`${data.selectedBook.Numero}-${data.selectedChapter}-${data.selectedVerse}`]: true,
-              },
-            },
-          }),
-      })
-      return
-    }
-    if (type === 'bible') openTab(getDefaultBibleTab(defaultVersion))
-    else
-      openTab({
-        id: generateUUID(),
-        isRemovable: true,
-        type,
-        title: t(`tabs.${type}`),
-        ...getDefaultData(type),
-      } as TabItem)
   }
   return (
     <Command
@@ -200,7 +196,10 @@ export default function CommandPalette({ tabAtom, onPlanPress, onDone, inputId }
           onBlur={() => setFocused(false)}
           autoFocus={Boolean(onDone) || !tabAtom}
           value={query}
-          onValueChange={setQuery}
+          onValueChange={value => {
+            setQuery(value)
+            setTabLimit(3)
+          }}
           placeholder={
             scope
               ? t(
@@ -240,86 +239,29 @@ export default function CommandPalette({ tabAtom, onPlanPress, onDone, inputId }
                 onSelect={() => selectScope(candidate)}
               >
                 <PaletteItemLabel type={candidate.type}>
-                  {t(
-                    candidate.type === 'compare'
-                      ? 'commandPalette.compareScope'
-                      : 'commandPalette.searchIn',
-                    { scope: t(candidate.key) }
-                  )}
+                  {t('commandPalette.searchIn', { scope: t(candidate.key) })}
                 </PaletteItemLabel>
                 <small>↵</small>
               </Command.Item>
             ))}
           </Command.Group>
         )}
-        {isPassageScope(scope) && (
-          <Command.Group heading={t(scope.key)}>
-            {scopedPassages.map(passage => (
-              <Command.Item
-                key={passage.id}
-                value={`scoped-passage:${passage.id}`}
-                onSelect={() => {
-                  const tab = createScopedPassageTab(scope.type, passage, defaultVersion)
-                  if (tab) openTab(tab)
-                }}
-              >
-                <PaletteItemLabel type={scope.type}>
-                  {t(
-                    scope.type === 'compare'
-                      ? 'commandPalette.comparePassage'
-                      : scope.type === 'commentary'
-                        ? 'commandPalette.commentPassage'
-                        : 'commandPalette.open',
-                    { title: passage.title }
-                  )}
-                </PaletteItemLabel>
-              </Command.Item>
-            ))}
-            {!scopedPassages.length && (
-              <div className="bs-command-status">{t('commandPalette.passagePlaceholder')}</div>
-            )}
-          </Command.Group>
+        {(!scope || isPassageScope(scope)) && scopedPassages.length > 0 && (
+          <PassageSuggestions
+            items={scopedPassages}
+            version={defaultVersion}
+            compare={scope?.type === 'compare'}
+            onSelect={openTab}
+          />
         )}
-        {!scope && passages.length > 0 && (
-          <Command.Group heading={t('commandPalette.passages')}>
-            {passages.map(passage => (
-              <Command.Item
-                key={passage.target.osis}
-                value={`passage:${passage.target.osis}`}
-                onSelect={() => {
-                  const book = getBook(passage.target.book)
-                  if (!book) return
-                  const tab = getDefaultBibleTab(defaultVersion)
-                  const selection = {
-                    selectedBook: book,
-                    selectedChapter: passage.target.chapter,
-                    selectedVerse: passage.target.verse,
-                  }
-                  openTab({
-                    ...tab,
-                    title: passage.text,
-                    data: {
-                      ...tab.data,
-                      ...selection,
-                      temp: selection,
-                      focusVerses: passage.target.focusVerses,
-                    },
-                  })
-                }}
-              >
-                <PaletteItemLabel type="bible">
-                  {t('commandPalette.open', { title: passage.text })}
-                </PaletteItemLabel>
-                <small>{defaultVersion}</small>
-              </Command.Item>
-            ))}
-          </Command.Group>
+        {isPassageScope(scope) && !scopedPassages.length && (
+          <div className="bs-command-status">{t('commandPalette.passagePlaceholder')}</div>
         )}
         {!scope && tabs.length > 0 && (
           <Command.Group
             heading={t(query.trim() ? 'commandPalette.tabs' : 'commandPalette.recentTabs')}
           >
-            {tabs.map(item => (
+            {visibleTabs.map(item => (
               <Command.Item
                 key={item.tab.id}
                 value={`tab:${item.tab.id}`}
@@ -347,28 +289,45 @@ export default function CommandPalette({ tabAtom, onPlanPress, onDone, inputId }
                 </small>
               </Command.Item>
             ))}
+            {tabs.length > tabLimit && (
+              <Command.Item value="tabs:more" onSelect={() => setTabLimit(value => value + 3)}>
+                {t('Voir plus')}
+              </Command.Item>
+            )}
           </Command.Group>
         )}
-        {!scope && actions.length > 0 && (
-          <Command.Group heading={t('commandPalette.create')}>
+        {!scope && actions.length > 0 && (!query.trim() || !matchingScopes.length) && (
+          <Command.Group heading={t('commandPalette.scopeHeading')}>
             {actions.map(item => (
               <Command.Item
                 key={item.type}
-                value={`create:${item.type}`}
-                onSelect={() => create(item.type)}
+                value={`category:${item.type}`}
+                onSelect={() => chooseCategory(item.type)}
               >
-                <PaletteItemLabel type={item.type}>{t(item.key)}</PaletteItemLabel>
-                <small>＋</small>
+                <PaletteItemLabel type={item.type}>
+                  {t(item.type === 'bible' ? 'Passage' : item.key)}
+                </PaletteItemLabel>
+                <small>↵</small>
               </Command.Item>
             ))}
           </Command.Group>
         )}
-        {showSuggestions && scope?.type === 'plan' && (
-          <PlanSuggestions query={query} onSelect={openTab} />
+        {(scope?.type === 'notes' || (scope?.type === 'study' && documents.canCreateStudy)) && (
+          <Command.Group>
+            <Command.Item
+              value="document:create"
+              onSelect={scope.type === 'notes' ? documents.createNote : documents.createStudy}
+            >
+              <PaletteItemLabel type={scope.type} creation>
+                {t(scope.type === 'notes' ? 'accessibility.newNote' : 'accessibility.newStudy')}
+              </PaletteItemLabel>
+            </Command.Item>
+          </Command.Group>
         )}
         {showSuggestions && ((!scope && query.trim().length >= 2) || scope?.source) && (
           <ContentSuggestions
             key={scope?.type || 'all'}
+            excludedKeys={scope ? [] : excludedKeys}
             source={scope?.source}
             query={query}
             version={defaultVersion}
@@ -383,6 +342,23 @@ export default function CommandPalette({ tabAtom, onPlanPress, onDone, inputId }
             }}
           />
         )}
+        {showSuggestions &&
+          ((!scope && query.trim().length >= 2) ||
+            scope?.type === 'plan' ||
+            scope?.type === 'commentary' ||
+            scope?.type === 'timeline') && (
+            <CatalogSuggestions
+              key={`${scope?.type || 'all'}:${query}`}
+              query={query}
+              excludedKeys={scope ? [] : excludedKeys}
+              scope={
+                scope?.type === 'plan' || scope?.type === 'commentary' || scope?.type === 'timeline'
+                  ? scope.type
+                  : undefined
+              }
+              onSelect={openTab}
+            />
+          )}
         {!scope && query.trim() && (
           <Command.Group heading={t('Rechercher')}>
             <Command.Item value="search:free" onSelect={() => openSearch()}>

@@ -49,11 +49,8 @@ describe('palette scopes', () => {
       },
     })
   })
-  it('opens commentary at the beginning of the passage', () => {
-    expect(createScopedPassageTab('commentary', passage, 'LSG')).toMatchObject({
-      type: 'commentary',
-      data: { verse: '1-1-2' },
-    })
+  it('searches commentary catalogs rather than treating them as passages', () => {
+    expect(isPassageScope(paletteScopes.find(scope => scope.type === 'commentary'))).toBe(false)
   })
   it('does not create a passage tab from an unrelated content result', () => {
     expect(
@@ -64,7 +61,6 @@ describe('palette scopes', () => {
     expect(paletteScopes.filter(isPassageScope).map(scope => scope.type)).toEqual([
       'bible',
       'compare',
-      'commentary',
     ])
     expect(paletteScopes.find(scope => scope.type === 'study')?.source).toBe('studies')
     expect(paletteScopes.find(scope => scope.type === 'strong')?.source).toBe('strong')

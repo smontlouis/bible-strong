@@ -5,13 +5,18 @@ import { LinkBox } from '~common/Link'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import type { TabItem } from '~state/tabs'
-import { commandPaletteOpenAtom, commandPaletteReturnFocusAtom } from '../../commandPalette/state'
+import {
+  commandPaletteOpenAtom,
+  commandPaletteReturnFocusAtom,
+  commandPaletteScopeAtom,
+} from '../../commandPalette/state'
 
 export default function NewTabSearch(_props: {
   tabAtom: PrimitiveAtom<TabItem>
   onPlanPress?: () => void
 }) {
   const { t } = useTranslation()
+  const setScope = useSetAtom(commandPaletteScopeAtom)
   const setOpen = useSetAtom(commandPaletteOpenAtom)
   const setReturnFocus = useSetAtom(commandPaletteReturnFocusAtom)
   return (
@@ -20,6 +25,7 @@ export default function NewTabSearch(_props: {
       className="flex-row items-center gap-[12px] bg-reverse border border-border rounded-[16px] px-[16px] py-[16px]"
       onPress={event => {
         if (event?.currentTarget instanceof HTMLElement) setReturnFocus(event.currentTarget)
+        setScope(undefined)
         setOpen(true)
       }}
     >

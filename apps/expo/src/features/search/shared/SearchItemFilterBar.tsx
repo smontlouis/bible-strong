@@ -16,7 +16,14 @@ export const searchItemFilterOrder: SearchItemType[] = [
   'strong',
   'dictionary',
   'nave',
+  'commentary',
+  'plan',
+  'timeline',
 ]
+
+export const relationSearchItemFilterOrder = searchItemFilterOrder.filter(
+  type => !['commentary', 'plan', 'timeline'].includes(type)
+)
 
 export const allSearchItemFilters = searchItemFilterOrder.reduce(
   (filters, type) => ({
@@ -33,6 +40,9 @@ export const searchItemFilterConfig: Record<
     color: string
   }
 > = {
+  commentary: { labelKey: 'tabs.commentary', color: getUniverseColor('commentary') },
+  plan: { labelKey: 'Plans', color: getUniverseColor('plan') },
+  timeline: { labelKey: 'tabs.timeline', color: getUniverseColor('timeline') },
   passages: { labelKey: 'Passages', color: getUniverseColor('passages') },
   notes: { labelKey: 'Notes', color: getUniverseColor('notes') },
   links: { labelKey: 'Liens', color: getUniverseColor('links') },

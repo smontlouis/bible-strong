@@ -1,3 +1,4 @@
+import { contentPriority, resultContentKey } from './priorities'
 import { getPassageSearchExcerpt } from '~features/search/shared/searchPassageExcerpt'
 import { Command } from 'cmdk'
 import { useTranslation } from 'react-i18next'
@@ -9,6 +10,9 @@ import { useTheme } from '~themes/ThemeProvider'
 import { colorWithOpacity, resolveThemeColor } from '~themes/colorValues'
 
 const sourceLabels: Record<SearchItemType, string> = {
+  commentary: 'tabs.commentary',
+  plan: 'Plans',
+  timeline: 'tabs.timeline',
   notes: 'Notes',
   studies: 'Études',
   links: 'Liens',
@@ -24,16 +28,31 @@ export default function ContentSuggestions({
   source,
   onSelect,
   onSeeAll,
+  excludedKeys = [],
 }: {
   query: string
   version: string
+  excludedKeys?: string[]
   source?: SearchItemType
   onSelect: (item: SearchEntityResult) => void
   onSeeAll: (source: SearchItemType) => void
 }) {
   const { t } = useTranslation()
   const theme = useTheme()
-  const { sections, waiting } = useSearchPreview(query, version, source)
+  const { sections, waiting } = useSearchPreview(query, version, source, 12)
+  const rankedSections = [...sections]
+    .sort((a, b) => contentPriority.indexOf(a.source) - contentPriority.indexOf(b.source))
+    .map(section => {
+      const items = section.items.filter(
+        item => !excludedKeys.includes(resultContentKey(item) || '')
+      )
+      return {
+        ...section,
+        items: items.slice(0, source ? 12 : 3),
+        hasMore: section.hasMore || items.length > (source ? 12 : 3),
+      }
+    })
+    .filter(section => section.items.length)
   return (
     <>
       {waiting && (
@@ -41,12 +60,20 @@ export default function ContentSuggestions({
           {t('commandPalette.loading')}
         </div>
       )}
-      {source && !waiting && !sections.length && (
+      {source &&
+        !waiting &&
+        !sections.some(section => section.loading || section.enriching) &&
+        !rankedSections.length && (
+          <div className="bs-command-status" role="status">
+            {t('commandPalette.noResults')}
+          </div>
+        )}
+      {sections.some(section => section.error && !section.items.length) && (
         <div className="bs-command-status" role="status">
-          {t('commandPalette.noResults')}
+          {t('commandPalette.sourceUnavailable')}
         </div>
       )}
-      {sections.map(section => (
+      {rankedSections.map(section => (
         <Command.Group key={section.source} heading={t(sourceLabels[section.source])}>
           {section.items.map(item => (
             <Command.Item
@@ -99,7 +126,7 @@ export default function ContentSuggestions({
               {t('commandPalette.sourceUnavailable')}
             </div>
           )}
-          {(section.items.length > 0 || section.error) && (
+          {(section.hasMore || section.error) && (
             <Command.Item
               className="bs-command-see-all"
               value={`all:${section.source}`}

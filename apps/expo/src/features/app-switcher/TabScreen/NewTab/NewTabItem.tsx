@@ -1,3 +1,4 @@
+import { useLaunchSearch } from '../../commandPalette/useLaunchSearch'
 import { Image } from 'expo-image'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -7,9 +8,7 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import TabIcon from '~features/app-switcher/utils/getIconByTabType'
-import { BibleTab, getDefaultBibleTab, getDefaultData, TabItem } from '../../../../state/tabs'
-import { useDefaultBibleVersion } from '../../../../state/useDefaultBibleVersion'
-import { useSelectBibleReference } from './SelectBibleReferenceModalProvider'
+import { getDefaultData, TabItem } from '../../../../state/tabs'
 interface NewTabItemProps {
   type: TabItem['type']
   newAtom: PrimitiveAtom<TabItem>
@@ -20,58 +19,11 @@ interface NewTabItemProps {
   compact?: boolean
 }
 
-const useOpenTabByType = ({ type, newAtom, onPlanPress }: NewTabItemProps) => {
+const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
+  const launchSearch = useLaunchSearch()
   const [tab, setTab] = useAtom(newAtom)
-  const { openBibleReferenceModal } = useSelectBibleReference()
-  const defaultVersion = useDefaultBibleVersion()
-
-  const onBibleSelectDone = (data: BibleTab['data']['temp']) => {
-    const getData = () => {
-      const reference = `${data.selectedBook.Numero}-${data.selectedChapter}-${data.selectedVerse}`
-
-      if (type === 'compare') {
-        return {
-          selectedVerses: { [reference]: true },
-        }
-      }
-      if (type === 'commentary') {
-        return {
-          verse: reference,
-        }
-      }
-
-      return { ...getDefaultBibleTab(defaultVersion).data, ...data }
-    }
-    setTab({
-      ...tab,
-      type,
-      data: getData(),
-    } as TabItem)
-  }
-
   const onPress = () => {
-    if (type === 'plan') {
-      onPlanPress?.()
-      return
-    }
-
-    // Bible: ouvrir directement avec les données par défaut
-    if (type === 'bible') {
-      setTab({
-        ...getDefaultBibleTab(defaultVersion),
-        id: tab.id,
-      })
-      return
-    }
-
-    // Only comparison needs an initial passage selection.
-    if (type === 'compare') {
-      openBibleReferenceModal({
-        onSelect: onBibleSelectDone,
-      })
-      return
-    }
-
+    if (launchSearch(type)) return
     setTab({ ...tab, base64Preview: '', type, ...getDefaultData(type) } as TabItem)
   }
 
@@ -103,7 +55,7 @@ const NewTabItem = ({
       activeOpacity={0.7}
       className={
         hero
-          ? 'relative overflow-hidden border-continuous flex-row items-center bg-light-primary rounded-[18px] px-[24px] py-[24px]'
+          ? 'relative overflow-hidden border-continuous flex-row items-center bg-reverse border border-border rounded-[18px] px-[24px] py-[24px]'
           : 'border-continuous flex-row items-center bg-reverse border border-border rounded-[12px] px-[18px] py-[18px] min-h-[92px] gap-[14px]'
       }
       style={hero ? { minHeight: compact ? 180 : 218 } : undefined}

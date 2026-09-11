@@ -5,10 +5,11 @@ import generateUUID from '~helpers/generateUUID'
 import { getDefaultBibleTab, type TabItem, type VersionCode } from '~state/tabs'
 
 export const paletteScopes = [
-  { type: 'bible', key: 'Bible', source: undefined },
+  { type: 'bible', key: 'Passage', source: undefined },
   { type: 'compare', key: 'tabs.compare', source: undefined },
   { type: 'commentary', key: 'tabs.commentary', source: undefined },
   { type: 'plan', key: 'Plans', source: undefined },
+  { type: 'timeline', key: 'tabs.timeline', source: undefined },
   { type: 'notes', key: 'tabs.notes', source: 'notes' },
   { type: 'study', key: 'Études', source: 'studies' },
   { type: 'strong', key: 'tabs.strong', source: 'strong' },
@@ -20,11 +21,11 @@ export const paletteScopes = [
   source: SearchItemType | undefined
 }[]
 export type PaletteScope = (typeof paletteScopes)[number]
-export type PassageScope = 'bible' | 'compare' | 'commentary'
+export type PassageScope = 'bible' | 'compare'
 export const isPassageScope = (
   scope?: PaletteScope
-): scope is Extract<PaletteScope, { type: PassageScope }> =>
-  scope?.type === 'bible' || scope?.type === 'compare' || scope?.type === 'commentary'
+): scope is Extract<PaletteScope, { type: 'bible' | 'compare' }> =>
+  scope?.type === 'bible' || scope?.type === 'compare'
 
 export function createScopedPassageTab(
   scope: PassageScope,
@@ -46,7 +47,6 @@ export function createScopedPassageTab(
       type: 'compare',
       data: { selectedVerses: Object.fromEntries(keys.map(key => [key, true])) },
     }
-  if (scope === 'commentary') return { ...base, type: 'commentary', data: { verse: keys[0] } }
   const tab = getDefaultBibleTab(version)
   const selection = {
     selectedBook: book,
