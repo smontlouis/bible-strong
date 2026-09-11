@@ -44,11 +44,20 @@ const CommentaryResourceTabScreen = ({
   commentaryAtom: PrimitiveAtom<CommentaryResourceTab>
 }) => {
   const [tab, setTab] = useAtom(commentaryAtom)
+  const scrollRef = React.useRef<React.ComponentRef<typeof ScrollView>>(null)
   const parsed = parseCommentaryResourceParams({
     projectionId: tab.data?.projectionId,
     book: String(tab.data?.book ?? ''),
     chapter: String(tab.data?.chapter ?? ''),
   })
+  const selectSection = (sectionId: string) => {
+    setTab(
+      produce(draft => {
+        draft.data.sectionId = sectionId
+      })
+    )
+    scrollRef.current?.scrollTo({ y: 0, animated: true })
+  }
   const resources = useResourceAccess()
   const router = useRouter()
   const { t } = useTranslation()
@@ -210,7 +219,10 @@ const CommentaryResourceTabScreen = ({
               failure={{ cause: 'not-found', recoveries: [] }}
             />
           ) : (
-            <ScrollView contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 32 }}>
+            <ScrollView
+              ref={scrollRef}
+              contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 32 }}
+            >
               <CommentaryRoomIntro
                 compact
                 entry={entry}
@@ -257,27 +269,11 @@ const CommentaryResourceTabScreen = ({
                   }}
                   onPrevious={() => {
                     if (!previousSection) return
-                    router.push({
-                      pathname: '/commentary-entry',
-                      params: {
-                        projectionId: projection.projectionId,
-                        book: String(book),
-                        chapter: String(chapter),
-                        sectionId: previousSection.id,
-                      },
-                    })
+                    selectSection(previousSection.id)
                   }}
                   onNext={() => {
                     if (!nextSection) return
-                    router.push({
-                      pathname: '/commentary-entry',
-                      params: {
-                        projectionId: projection.projectionId,
-                        book: String(book),
-                        chapter: String(chapter),
-                        sectionId: nextSection.id,
-                      },
-                    })
+                    selectSection(nextSection.id)
                   }}
                 />
                 <Box className="overflow-hidden border-continuous mt-[14px]">

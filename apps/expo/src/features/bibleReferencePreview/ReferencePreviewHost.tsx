@@ -1,3 +1,4 @@
+import LinkPreviewContent from './LinkPreviewContent'
 import StudyPreviewContent from './StudyPreviewContent'
 import { Fragment, useEffect, useRef } from 'react'
 import { useAtom } from 'jotai/react'
@@ -90,7 +91,9 @@ export default function ReferencePreviewHost() {
               style={{ maxHeight: Math.min(360, height * 0.55), flexGrow: 0 }}
               contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 10 }}
             >
-              {request.kind === 'study' ? (
+              {request.kind === 'link' ? (
+                <LinkPreviewContent linkId={request.linkId} />
+              ) : request.kind === 'study' ? (
                 <StudyPreviewContent studyId={request.studyId} />
               ) : request.kind === 'note' ? (
                 <NotePreviewContent noteId={request.noteId} />

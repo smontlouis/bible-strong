@@ -751,7 +751,12 @@ export const BibleDOMWrapper = ({
       }
       case NAVIGATE_TO_BIBLE_LINK: {
         const linkId = getStringPayload(action.payload)
-        if (linkId) openLink?.(linkId)
+        if (linkId) {
+          const open = () => openLink?.(linkId)
+          if (Platform.OS === 'web') {
+            setPreviewHistory([{ kind: 'link', linkId, title: t('Lien'), open }])
+          } else open()
+        }
         break
       }
       case NAVIGATE_TO_RELATION_ENDPOINT: {

@@ -43,7 +43,7 @@ it('preserves disjoint cross-chapter passages and the relation version', () => {
     ],
   })
 })
-it('previews studies but leaves external links on their existing navigation', () => {
+it('previews studies and saved external links on Web', () => {
   expect(
     createReaderPreview({ type: 'study', studyId: 'study' }, 'LSG', 'Note', () => {})
   ).toMatchObject({ kind: 'study', studyId: 'study' })
@@ -54,11 +54,19 @@ it('previews studies but leaves external links on their existing navigation', ()
       'Note',
       () => {}
     )
-  ).toBeUndefined()
+  ).toMatchObject({ kind: 'link', linkId: 'link' })
 })
 
 it.each(['ios', 'android'] as const)('keeps native reader navigation on %s', platform => {
   Platform.OS = platform
+  expect(
+    createReaderPreview(
+      { type: 'externalLink', linkId: 'link', sourceKey: 'link', url: 'https://example.com' },
+      'LSG',
+      'Lien',
+      () => {}
+    )
+  ).toBeUndefined()
   expect(
     createReaderPreview({ type: 'note', noteId: 'note' }, 'LSG', 'Note', () => {})
   ).toBeUndefined()

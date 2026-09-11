@@ -19,6 +19,7 @@ export type ReferencePreviewRequest = ReferencePreviewTarget & {
   open: () => void
 }
 export type PreviewRequest =
+  | { kind: 'link'; linkId: string; title: string; open: () => void }
   | { kind: 'study'; studyId: string; title: string; open: () => void }
   | { kind: 'note'; noteId: string; title: string; open: () => void }
   | ReferencePreviewRequest

@@ -17,6 +17,13 @@ export function createReaderPreview(
   }
 ): PreviewRequest | undefined {
   if (Platform.OS !== 'web') return
+  if (endpoint.type === 'externalLink')
+    return {
+      kind: 'link',
+      linkId: endpoint.linkId,
+      title: endpoint.labelFallback || endpoint.label || endpoint.url,
+      open,
+    }
   if (endpoint.type === 'note')
     return { kind: 'note', noteId: endpoint.noteId, title: noteTitle, open }
   if (endpoint.type === 'study')

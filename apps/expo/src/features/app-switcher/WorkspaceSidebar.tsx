@@ -294,7 +294,12 @@ const WorkspaceSidebar = ({
                           const selected =
                             isContentActive && group.id === activeGroupId && tab.id === activeTabId
                           return (
-                            <SidebarDragTab key={tab.id} groupId={group.id} tabId={tab.id}>
+                            <SidebarDragTab
+                              key={tab.id}
+                              groupId={group.id}
+                              tabId={tab.id}
+                              title={tab.title}
+                            >
                               <SidebarHoverActions>
                                 {showActions => (
                                   <HStack

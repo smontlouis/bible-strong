@@ -1,3 +1,4 @@
+import ExternalLinkCard from './ExternalLinkCard'
 import { goBackOrHome } from '~navigation/goBackOrHome'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { resolveFontFamily } from '~themes/styleValues'
@@ -358,7 +359,17 @@ const BibleLinkScreen = () => {
                 </VStack>
               )}
 
-              {!isEditing && currentLink && (
+              {!isEditing && currentLink && !isYoutubeLink && (
+                <Box className="py-[20px] gap-[12px]">
+                  <ExternalLinkCard link={currentLink} onOpen={openInBrowser} onEdit={editLink} />
+                  <EntityChipList
+                    tags={currentLink.tags}
+                    relationCount={relationCount}
+                    onRelationPress={() => linkEndpoint && openEntityRelations(linkEndpoint)}
+                  />
+                </Box>
+              )}
+              {!isEditing && currentLink && isYoutubeLink && (
                 <Box className="overflow-hidden border-continuous py-[20px]">
                   <EntityChipList
                     tags={currentLink?.tags}
@@ -452,7 +463,7 @@ const BibleLinkScreen = () => {
             </KeyboardStickyView>
           )}
         </KeyboardAvoidingView>
-        {!isEditing && (
+        {!isEditing && isYoutubeLink && (
           <Box
             className="overflow-hidden border-continuous absolute right-[20px]"
             style={{ bottom: insets.bottom + 20 }}

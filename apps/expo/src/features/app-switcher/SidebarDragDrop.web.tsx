@@ -335,7 +335,7 @@ export function SidebarDragGroupHandle({ children, groupId }: SidebarDragGroupPr
     </div>
   )
 }
-export function SidebarDragTab({ children, groupId, tabId }: SidebarDragTabProps) {
+export function SidebarDragTab({ children, groupId, tabId, title }: SidebarDragTabProps) {
   const context = useContext(DragContext)!
   const reducedMotion = useReducedMotion()
   const index =
@@ -353,6 +353,7 @@ export function SidebarDragTab({ children, groupId, tabId }: SidebarDragTabProps
     <div
       ref={sortable.ref}
       data-sidebar-drag-tab={tabId}
+      title={title}
       style={{ opacity: sortable.isDragSource ? 0.2 : 1, cursor: 'grab', touchAction: 'none' }}
       tabIndex={0}
     >

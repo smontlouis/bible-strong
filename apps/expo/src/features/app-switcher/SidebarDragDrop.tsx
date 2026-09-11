@@ -5,7 +5,12 @@ export type SidebarDragProviderProps = {
   onExpandGroup: (id: string) => void
 }
 export type SidebarDragGroupProps = { children: ReactNode; groupId: string; isDefault?: boolean }
-export type SidebarDragTabProps = { children: ReactNode; groupId: string; tabId: string }
+export type SidebarDragTabProps = {
+  children: ReactNode
+  groupId: string
+  tabId: string
+  title?: string
+}
 export function SidebarDragProvider({ children }: SidebarDragProviderProps) {
   return <>{children()}</>
 }

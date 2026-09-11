@@ -40,7 +40,9 @@ as well as inline Bible-reference navigation. The external action preserves the
 original route/callback and its note context. Note content is selected live from
 Redux (including annotation notes) and remains read-only in the preview.
 
-Tags, relation counters, external links, existing Strong selection and
+Saved external links use the compact link card, with live Redux metadata and an explicit browser action. The preview header opens the full link screen for editing.
+
+Tags, relation counters, existing Strong selection and
 concordance navigation retain their original behavior. Reader preview selection
 is deliberately scoped to the Bible DOM bridge, not the global route handler.
 Inline relation links expose link semantics and Enter activation, and the Web
