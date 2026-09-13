@@ -2138,5 +2138,12 @@
   "home.dashboard.planProgress": "{{percent}}% complete",
   "Ouvrir dans un nouvel onglet": "Open in a new tab",
   "search.content": "Content",
-  "accessibility.newNote": "Create a note"
+  "accessibility.newNote": "Create a note",
+  "hotkeys.tabActions": "Tab options",
+  "hotkeys.noActions": "No available actions",
+  "hotkeys.recentTabs": "Recent tabs",
+  "hotkeys.switcherHint": "Release to open · Shift to go back · Escape to cancel",
+  "hotkeys.filterActions": "Filter actions…",
+  "hotkeys.verseRange": "Verse from 1 to {{max}}",
+  "hotkeys.goToVerse": "Go"
 }

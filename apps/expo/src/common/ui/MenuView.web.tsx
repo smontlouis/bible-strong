@@ -1,3 +1,4 @@
+import { useTabCommands } from '~common/useTabCommands'
 import type { MenuAction, MenuComponentProps, MenuComponentRef } from '@expo/ui/community/menu'
 import Feather from '@expo/vector-icons/Feather'
 import { Dropdown } from '@heroui/react/dropdown'
@@ -12,6 +13,7 @@ import './MenuView.web.css'
 
 export type { MenuAction, MenuComponentProps, MenuComponentRef }
 export type AccessibleMenuComponentProps = MenuComponentProps & {
+  tabActions?: boolean
   accessibilityLabel?: string
   renderActionIcon?: (action: MenuAction) => React.ReactNode
 }
@@ -210,6 +212,7 @@ export const MenuView = forwardRef<MenuComponentRef, AccessibleMenuComponentProp
   (
     {
       actions,
+      tabActions,
       children,
       title,
       accessibilityLabel,
@@ -254,6 +257,10 @@ export const MenuView = forwardRef<MenuComponentRef, AccessibleMenuComponentProp
       changeOpen(false)
       onPressAction?.({ nativeEvent: { event: action.id ?? action.title } })
     }
+
+    useTabCommands(tabActions ? actions : undefined, id => {
+      onPressAction?.({ nativeEvent: { event: id } })
+    })
 
     return (
       <View style={style}>

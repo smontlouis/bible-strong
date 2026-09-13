@@ -68,6 +68,7 @@ const TimelineEventDetailContent = ({
         rightComponent={
           menuItems?.length ? (
             <MenuView
+              tabActions
               actions={menuItems.map(item => ({
                 id: item.label,
                 title: item.label,

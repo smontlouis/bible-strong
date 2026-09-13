@@ -20,11 +20,13 @@ export default function StudyOptionsPanel({
   studyId = study.id,
   includeRelations = false,
   afterDelete,
+  tabActions = false,
 }: {
   study: Study
   studyId?: string
   includeRelations?: boolean
   afterDelete?: () => void
+  tabActions?: boolean
 }) {
   const { t } = useTranslation()
   const confirmDelete = useConfirmDelete()
@@ -33,8 +35,46 @@ export default function StudyOptionsPanel({
   const tags = useEntityTagsScreen('studies', studyId)
   const endpoint = createStudyEndpoint(studyId, study.title)
   const openEndpoint = useOpenRelationEndpoint()
+  const openInNewTab = () =>
+    openTab(
+      {
+        id: 'study-' + generateUUID(),
+        type: 'study',
+        title: study.title,
+        isRemovable: true,
+        data: { studyId },
+      },
+      { autoRedirect: true }
+    )
+  const removeStudy = () => {
+    void confirmDelete(t('Voulez-vous vraiment supprimer cette étude?'), () => {
+      dispatch(deleteStudy(studyId))
+      afterDelete?.()
+    })
+  }
   return (
     <ContextualPanel
+      commands={
+        tabActions
+          ? {
+              actions: [
+                { id: 'publish', title: t('Partager') },
+                { id: 'tags', title: t('Éditer les tags') },
+                { id: 'rename', title: t('Renommer') },
+                ...(includeRelations
+                  ? [{ id: 'relations', title: t('Éditer les relations') }]
+                  : []),
+                { id: 'open-tab', title: t('tab.openInNewTab') },
+                { id: 'delete', title: t('Supprimer'), attributes: { destructive: true } },
+              ],
+              select: (id, nav) => {
+                if (id === 'open-tab') openInNewTab()
+                else if (id === 'delete') removeStudy()
+                else nav.open(id)
+              },
+            }
+          : undefined
+      }
       triggerSize={40}
       trigger={<FeatherIcon name="more-vertical" size={20} color="tertiary" />}
       accessibilityLabel={t('accessibility.options')}
@@ -71,16 +111,7 @@ export default function StudyOptionsPanel({
                 label={t('tab.openInNewTab')}
                 onPress={() => {
                   nav.close()
-                  openTab(
-                    {
-                      id: 'study-' + generateUUID(),
-                      type: 'study',
-                      title: study.title,
-                      isRemovable: true,
-                      data: { studyId },
-                    },
-                    { autoRedirect: true }
-                  )
+                  openInNewTab()
                 }}
               />
               <PanelAction
@@ -89,14 +120,15 @@ export default function StudyOptionsPanel({
                 label={t('Supprimer')}
                 onPress={() => {
                   nav.close()
-                  void confirmDelete(t('Voulez-vous vraiment supprimer cette étude?'), () => {
-                    dispatch(deleteStudy(studyId))
-                    afterDelete?.()
-                  })
+                  removeStudy()
                 }}
               />
             </>
           ),
+        },
+        publish: {
+          title: t('Partager'),
+          content: nav => <PublishStudyMenuItem study={study} onClosed={nav.close} />,
         },
         tags: tags.screen,
         relations: {

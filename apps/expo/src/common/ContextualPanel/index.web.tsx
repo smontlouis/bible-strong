@@ -1,3 +1,4 @@
+import { useTabCommands } from '~common/useTabCommands'
 import { Popover } from '@heroui/react/popover'
 import { useImperativeHandle, useState, type ReactNode } from 'react'
 import { HeaderActionContext, HeaderContentContext } from './HeaderActionContext'
@@ -14,6 +15,15 @@ import '../FiltersHeader.web.css'
 export default function ContextualPanel(props: ContextualPanelProps) {
   const theme = useTheme()
   const panel = usePanelNavigation(props)
+  useTabCommands(props.commands?.actions, id => {
+    props.commands?.select(id, {
+      ...panel.navigation,
+      open: screen => {
+        panel.present()
+        panel.navigation.open(screen)
+      },
+    })
+  })
   useImperativeHandle(props.controllerRef, () => ({
     present: () => (panel.isOpen ? panel.navigation.close() : panel.present()),
     dismiss: panel.navigation.close,

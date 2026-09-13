@@ -12,9 +12,16 @@ export default function CommentaryMenu(
   const { t } = useTranslation()
   const [details, setDetails] = useState<CommentaryProjection>()
   if (!props.actions?.some(action => action.id === 'choose-commentaries'))
-    return <MenuView {...props} />
+    return <MenuView tabActions {...props} />
   return (
     <ContextualPanel
+      commands={{
+        actions: props.actions,
+        select: (id, nav) => {
+          if (id === 'choose-commentaries') nav.open('sources')
+          else props.onPressAction?.({ nativeEvent: { event: id } })
+        },
+      }}
       trigger={props.children}
       accessibilityLabel={props.accessibilityLabel || t('accessibility.options')}
       width={500}

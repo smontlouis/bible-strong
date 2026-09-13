@@ -211,6 +211,7 @@ const LexiqueListScreen = ({
           title={t('Lexique')}
           rightComponent={
             <MenuView
+              tabActions
               actions={[
                 {
                   id: 'language',

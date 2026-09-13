@@ -258,6 +258,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
         subTitle={naveItem?.normalizedName}
         rightComponent={
           <MenuView
+            tabActions
             actions={
               [
                 { id: 'tags', title: t('Étiquettes'), image: 'tag' },

@@ -7,6 +7,17 @@ export default function ContextualMenu(props: ContextualMenuProps) {
   const { t } = useTranslation()
   return (
     <ContextualPanel
+      commands={
+        props.tabActions
+          ? {
+              actions: props.actions,
+              select: (id, nav) => {
+                if (props.screens[id]) nav.open(id)
+                else props.onPressAction?.({ nativeEvent: { event: id } })
+              },
+            }
+          : undefined
+      }
       trigger={props.children}
       accessibilityLabel={props.accessibilityLabel || t('accessibility.options')}
       initialScreen="menu-actions"

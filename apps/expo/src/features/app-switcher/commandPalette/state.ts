@@ -9,3 +9,5 @@ export const commandPaletteReturnFocusAtom = atom<HTMLElement | null>(null)
 
 // One-shot scope supplied by category launchers; the new-tab page stays intact.
 export const commandPaletteScopeAtom = atom<string | undefined>(undefined)
+
+export const TAB_ACTIONS_SCOPE = 'tab-actions'

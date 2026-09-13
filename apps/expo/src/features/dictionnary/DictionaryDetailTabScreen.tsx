@@ -370,6 +370,7 @@ const DictionnaryDetailScreen = ({
         subTitle={resolvedDictionaryTitle}
         rightComponent={
           <MenuView
+            tabActions
             actions={
               [
                 { id: 'tags', title: t('Étiquettes'), image: 'tag' },

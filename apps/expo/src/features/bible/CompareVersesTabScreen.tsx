@@ -71,6 +71,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
               width={40}
             />
             <ContextualMenu
+              tabActions
               panelTitle={t('Comparer')}
               icons={{ 'choose-versions': 'check-square', 'open-tab': 'external-link' }}
               screens={{

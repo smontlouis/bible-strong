@@ -15,6 +15,7 @@ export default function PlanSliceMenu(props: PlanSliceMenuProps) {
   return (
     <>
       <ContextualMenu
+        tabActions
         {...props}
         panelWidth={500}
         panelTitle={t('Options')}

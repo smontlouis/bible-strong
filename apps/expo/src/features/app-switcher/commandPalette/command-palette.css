@@ -214,3 +214,61 @@
 .bs-command-scope > span:last-of-type {
   opacity: 0.4;
 }
+
+.bs-tab-switcher {
+  font-size: 14px;
+  line-height: 20px;
+  padding: 20px;
+  border-radius: 16px;
+}
+.bs-tab-switcher h2 {
+  font-size: 16px;
+  margin: 0 0 8px;
+}
+.bs-tab-switcher p {
+  font-size: 12px;
+  opacity: 0.7;
+  margin: 0 0 14px;
+}
+.bs-tab-switcher [role='listbox'] {
+  max-height: min(420px, 60vh);
+  overflow-y: auto;
+  outline: none;
+}
+/* The selected option identifies keyboard focus inside the switcher. */
+.bs-tab-switcher [role='listbox']:focus-visible,
+.bs-tab-switcher [role='listbox'][data-focus-visible='true'] {
+  box-shadow: none !important;
+}
+.bs-tab-switcher [role='option'] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.bs-tab-switcher-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bs-tab-switcher small {
+  max-width: 30%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.65;
+}
+.bs-tab-switcher-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  flex-shrink: 0;
+}

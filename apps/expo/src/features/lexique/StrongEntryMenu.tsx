@@ -77,6 +77,7 @@ const StrongEntryMenu = ({ context, entry }: Props) => {
 
   return (
     <MenuView
+      tabActions
       actions={
         [
           { id: 'language', title: menuTitle, image: 'globe' },

@@ -1,3 +1,4 @@
+import BibleVerseKeyboardDialog from './BibleVerseKeyboardDialog'
 import DisplayModeTrigger from './DisplayModeTrigger'
 import BibleSelectorTrigger from './BibleSelectorTrigger'
 import BibleBookmarkTrigger from '~features/bookmarks/BibleBookmarkTrigger'
@@ -77,6 +78,7 @@ interface BibleHeaderProps {
   onEditFocusTags?: () => void
   isInTab?: boolean
   coverage?: BibleVersionCoverage
+  onNavigateToVerse: (verse: number) => void
 }
 
 const Header = ({
@@ -89,6 +91,7 @@ const Header = ({
   onEditFocusTags,
   isInTab,
   coverage,
+  onNavigateToVerse,
 }: BibleHeaderProps) => {
   const router = useRouter()
   const { t } = useTranslation()
@@ -824,6 +827,11 @@ const Header = ({
         chapter={chapter}
         version={version}
         existingBookmark={currentChapterBookmark || undefined}
+      />
+      <BibleVerseKeyboardDialog
+        bibleAtom={bibleAtom}
+        coverage={coverage}
+        onNavigate={onNavigateToVerse}
       />
       <PassageExportSheet
         ref={exportSheetRef}

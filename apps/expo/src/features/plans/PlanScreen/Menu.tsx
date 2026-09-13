@@ -84,6 +84,7 @@ const Menu = ({ modalRefDetails, planId, title, onRemove, details }: Props) => {
 
   return (
     <ContextualMenu
+      tabActions
       panelTitle={title}
       panelWidth={500}
       icons={{

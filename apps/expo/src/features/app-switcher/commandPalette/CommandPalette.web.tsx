@@ -1,3 +1,4 @@
+import TabActionResults from './TabActionResults.web'
 import { FeatherIcon } from '~common/ui/Icon'
 import { tabContentKey } from './priorities'
 import { useCreateDiscoveryDocument } from '~features/search/discovery/useCreateDiscoveryDocument'
@@ -12,7 +13,7 @@ import { getTabForSearchResult } from './searchResultTab'
 import { createPreviewSearchFilters } from '~features/search/searchPreview'
 import { useOpenStudyObject } from '~features/studyRelations/useOpenStudyObject'
 import type { SearchItemType } from '~state/searchFilters'
-import { recentCommandTabIdsAtom } from './state'
+import { recentCommandTabIdsAtom, TAB_ACTIONS_SCOPE } from './state'
 import './command-palette.css'
 import { Command } from 'cmdk'
 import { useRouter } from 'expo-router'
@@ -85,16 +86,19 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
   const openInNewTab = useOpenInNewTab()
   const defaultVersion = useDefaultBibleVersion()
   const [query, setQuery] = useState('')
+  const [actionMode, setActionMode] = useState(initialScope === TAB_ACTIONS_SCOPE)
   const [scope, setScope] = useState<PaletteScope | undefined>(() =>
     paletteScopes.find(item => item.type === initialScope)
   )
   const inputRef = useRef<HTMLInputElement>(null)
   const selectScope = (next: PaletteScope) => {
+    setActionMode(false)
     setScope(next)
     setQuery('')
     inputRef.current?.focus()
   }
   const removeScope = () => {
+    setActionMode(false)
     setScope(undefined)
     inputRef.current?.focus()
   }
@@ -162,27 +166,44 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
           '--command-border': theme.colors.border,
           '--command-active': theme.colors.lightPrimary,
           '--command-primary': theme.colors.primary,
+          '--command-danger': theme.colors.quart,
           fontFamily: resolveFontFamily(theme.fontFamily.text),
         } as CSSProperties
       }
     >
       <div className="bs-command-input-row">
         <span aria-hidden="true">⌕</span>
-        {scope && (
+        {(scope || actionMode) && (
           <button
             type="button"
             className="bs-command-scope"
-            style={{ backgroundColor: resolveUniverseColors(theme.colors, scope.type).background }}
-            aria-label={t('commandPalette.removeScope', { scope: t(scope.key) })}
+            style={{
+              backgroundColor: actionMode
+                ? theme.colors.lightPrimary
+                : resolveUniverseColors(theme.colors, scope!.type).background,
+            }}
+            aria-label={t('commandPalette.removeScope', {
+              scope: t(actionMode ? 'hotkeys.tabActions' : scope!.key),
+            })}
             onMouseDown={event => event.preventDefault()}
             onKeyDown={event => {
               if (event.key === 'Enter' || event.key === ' ') event.stopPropagation()
             }}
             onClick={removeScope}
           >
-            <TabIcon type={scope.type} size={14} />
-            <span style={{ color: resolveUniverseColors(theme.colors, scope.type).foreground }}>
-              {t(scope.key)}
+            {actionMode ? (
+              <FeatherIcon name="sliders" size={14} color={theme.colors.primary} />
+            ) : (
+              <TabIcon type={scope!.type} size={14} />
+            )}
+            <span
+              style={{
+                color: actionMode
+                  ? theme.colors.primary
+                  : resolveUniverseColors(theme.colors, scope!.type).foreground,
+              }}
+            >
+              {t(actionMode ? 'hotkeys.tabActions' : scope!.key)}
             </span>
             <span aria-hidden="true">×</span>
           </button>
@@ -190,7 +211,12 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
         <Command.Input
           ref={inputRef}
           onKeyDown={event => {
-            if (event.key === 'Backspace' && !event.nativeEvent.isComposing && !query && scope) {
+            if (
+              event.key === 'Backspace' &&
+              !event.nativeEvent.isComposing &&
+              !query &&
+              (scope || actionMode)
+            ) {
               event.preventDefault()
               removeScope()
             }
@@ -201,18 +227,24 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
           autoFocus={Boolean(onDone) || !tabAtom}
           value={query}
           onValueChange={value => {
-            setQuery(value)
+            if (!actionMode && value.trimStart().startsWith('>')) {
+              setActionMode(true)
+              setScope(undefined)
+              setQuery(value.trimStart().slice(1).trimStart())
+            } else setQuery(value)
             setTabLimit(3)
           }}
           placeholder={
-            scope
-              ? t(
-                  isPassageScope(scope)
-                    ? 'commandPalette.passagePlaceholder'
-                    : 'commandPalette.scopedPlaceholder',
-                  { scope: t(scope.key) }
-                )
-              : t('commandPalette.placeholder')
+            actionMode
+              ? t('hotkeys.filterActions')
+              : scope
+                ? t(
+                    isPassageScope(scope)
+                      ? 'commandPalette.passagePlaceholder'
+                      : 'commandPalette.scopedPlaceholder',
+                    { scope: t(scope.key) }
+                  )
+                : t('commandPalette.placeholder')
           }
           aria-label={t('commandPalette.label')}
           autoComplete="off"
@@ -223,8 +255,12 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
         </Command.Input>
         <kbd>
           {typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
-            ? '⌘ K'
-            : 'Ctrl K'}
+            ? actionMode
+              ? '⌘ ⇧ K'
+              : '⌘ K'
+            : actionMode
+              ? 'Ctrl Shift K'
+              : 'Ctrl K'}
         </kbd>
       </div>
       <Command.List
@@ -234,144 +270,152 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
           if (event.button === 0) event.preventDefault()
         }}
       >
-        {!scope && query.trim() && matchingScopes.length > 0 && (
-          <Command.Group heading={t('commandPalette.scopeHeading')}>
-            {matchingScopes.map(candidate => (
-              <Command.Item
-                key={candidate.type}
-                value={`scope:${candidate.type}`}
-                onSelect={() => selectScope(candidate)}
-              >
-                <PaletteItemLabel type={candidate.type}>
-                  {t('commandPalette.searchIn', { scope: t(candidate.key) })}
-                </PaletteItemLabel>
-                <small>↵</small>
-              </Command.Item>
-            ))}
-          </Command.Group>
-        )}
-        {(!scope || isPassageScope(scope)) && scopedPassages.length > 0 && (
-          <PassageSuggestions
-            items={scopedPassages}
-            version={defaultVersion}
-            compare={scope?.type === 'compare'}
-            onSelect={openTab}
-          />
-        )}
-        {isPassageScope(scope) && !scopedPassages.length && (
-          <div className="bs-command-status">{t('commandPalette.passagePlaceholder')}</div>
-        )}
-        {!scope && tabs.length > 0 && (
-          <Command.Group
-            heading={t(query.trim() ? 'commandPalette.tabs' : 'commandPalette.recentTabs')}
-          >
-            {visibleTabs.map(item => (
-              <Command.Item
-                key={item.tab.id}
-                value={`tab:${item.tab.id}`}
-                onSelect={() => {
-                  onDone?.()
-                  switchGroup(item.groupId)
-                  router.dismissTo('/')
-                  triggerSlideNewTab(item.tab.id)
-                }}
-              >
-                <PaletteItemLabel type={item.tab.type}>{item.tab.title}</PaletteItemLabel>
-                <small className="bs-command-group">
-                  {!item.isDefaultGroup && (
-                    <span
-                      className="bs-command-group-dot"
-                      aria-hidden="true"
-                      style={{
-                        backgroundColor: resolveThemeColor(theme, item.groupColor || '#64748b'),
-                      }}
-                    />
-                  )}
-                  <span className="bs-command-group-name">
-                    {item.isDefaultGroup ? t('Principal') : item.groupName}
-                  </span>
-                </small>
-              </Command.Item>
-            ))}
-            {tabs.length > tabLimit && (
-              <Command.Item value="tabs:more" onSelect={() => setTabLimit(value => value + 3)}>
-                {t('Voir plus')}
-              </Command.Item>
+        {actionMode ? (
+          <TabActionResults query={query.trim()} onDone={onDone} />
+        ) : (
+          <>
+            {!scope && query.trim() && matchingScopes.length > 0 && (
+              <Command.Group heading={t('commandPalette.scopeHeading')}>
+                {matchingScopes.map(candidate => (
+                  <Command.Item
+                    key={candidate.type}
+                    value={`scope:${candidate.type}`}
+                    onSelect={() => selectScope(candidate)}
+                  >
+                    <PaletteItemLabel type={candidate.type}>
+                      {t('commandPalette.searchIn', { scope: t(candidate.key) })}
+                    </PaletteItemLabel>
+                    <small>↵</small>
+                  </Command.Item>
+                ))}
+              </Command.Group>
             )}
-          </Command.Group>
-        )}
-        {!scope && actions.length > 0 && (!query.trim() || !matchingScopes.length) && (
-          <Command.Group heading={t('commandPalette.scopeHeading')}>
-            {actions.map(item => (
-              <Command.Item
-                key={item.type}
-                value={`category:${item.type}`}
-                onSelect={() => chooseCategory(item.type)}
+            {(!scope || isPassageScope(scope)) && scopedPassages.length > 0 && (
+              <PassageSuggestions
+                items={scopedPassages}
+                version={defaultVersion}
+                compare={scope?.type === 'compare'}
+                onSelect={openTab}
+              />
+            )}
+            {isPassageScope(scope) && !scopedPassages.length && (
+              <div className="bs-command-status">{t('commandPalette.passagePlaceholder')}</div>
+            )}
+            {!scope && tabs.length > 0 && (
+              <Command.Group
+                heading={t(query.trim() ? 'commandPalette.tabs' : 'commandPalette.recentTabs')}
               >
-                <PaletteItemLabel type={item.type}>
-                  {t(item.type === 'bible' ? 'Passage' : item.key)}
-                </PaletteItemLabel>
-                <small>↵</small>
-              </Command.Item>
-            ))}
-          </Command.Group>
-        )}
-        {(scope?.type === 'notes' || (scope?.type === 'study' && documents.canCreateStudy)) && (
-          <Command.Group>
-            <Command.Item
-              value="document:create"
-              onSelect={scope.type === 'notes' ? documents.createNote : documents.createStudy}
-            >
-              <PaletteItemLabel type={scope.type} creation>
-                {t(scope.type === 'notes' ? 'accessibility.newNote' : 'accessibility.newStudy')}
-              </PaletteItemLabel>
-            </Command.Item>
-          </Command.Group>
-        )}
-        {showSuggestions && ((!scope && query.trim().length >= 2) || scope?.source) && (
-          <ContentSuggestions
-            key={scope?.type || 'all'}
-            excludedKeys={scope ? [] : excludedKeys}
-            source={scope?.source}
-            query={query}
-            version={defaultVersion}
-            onSeeAll={openSearch}
-            onSelect={item => {
-              const tab = getTabForSearchResult(item, defaultVersion)
-              if (tab) openTab(tab)
-              else {
-                onDone?.()
-                openStudyObject(item)
-              }
-            }}
-          />
-        )}
-        {showSuggestions &&
-          ((!scope && query.trim().length >= 2) ||
-            scope?.type === 'plan' ||
-            scope?.type === 'commentary' ||
-            scope?.type === 'timeline') && (
-            <CatalogSuggestions
-              key={`${scope?.type || 'all'}:${query}`}
-              query={query}
-              excludedKeys={scope ? [] : excludedKeys}
-              scope={
-                scope?.type === 'plan' || scope?.type === 'commentary' || scope?.type === 'timeline'
-                  ? scope.type
-                  : undefined
-              }
-              onSelect={openTab}
-            />
-          )}
-        {!scope && query.trim() && (
-          <Command.Group heading={t('Rechercher')}>
-            <Command.Item value="search:free" onSelect={() => openSearch()}>
-              <PaletteItemLabel type="search">
-                {t('commandPalette.search', { query: query.trim() })}
-              </PaletteItemLabel>
-              <small>↵</small>
-            </Command.Item>
-          </Command.Group>
+                {visibleTabs.map(item => (
+                  <Command.Item
+                    key={item.tab.id}
+                    value={`tab:${item.tab.id}`}
+                    onSelect={() => {
+                      onDone?.()
+                      switchGroup(item.groupId)
+                      router.dismissTo('/')
+                      triggerSlideNewTab(item.tab.id)
+                    }}
+                  >
+                    <PaletteItemLabel type={item.tab.type}>{item.tab.title}</PaletteItemLabel>
+                    <small className="bs-command-group">
+                      {!item.isDefaultGroup && (
+                        <span
+                          className="bs-command-group-dot"
+                          aria-hidden="true"
+                          style={{
+                            backgroundColor: resolveThemeColor(theme, item.groupColor || '#64748b'),
+                          }}
+                        />
+                      )}
+                      <span className="bs-command-group-name">
+                        {item.isDefaultGroup ? t('Principal') : item.groupName}
+                      </span>
+                    </small>
+                  </Command.Item>
+                ))}
+                {tabs.length > tabLimit && (
+                  <Command.Item value="tabs:more" onSelect={() => setTabLimit(value => value + 3)}>
+                    {t('Voir plus')}
+                  </Command.Item>
+                )}
+              </Command.Group>
+            )}
+            {!scope && actions.length > 0 && (!query.trim() || !matchingScopes.length) && (
+              <Command.Group heading={t('commandPalette.scopeHeading')}>
+                {actions.map(item => (
+                  <Command.Item
+                    key={item.type}
+                    value={`category:${item.type}`}
+                    onSelect={() => chooseCategory(item.type)}
+                  >
+                    <PaletteItemLabel type={item.type}>
+                      {t(item.type === 'bible' ? 'Passage' : item.key)}
+                    </PaletteItemLabel>
+                    <small>↵</small>
+                  </Command.Item>
+                ))}
+              </Command.Group>
+            )}
+            {(scope?.type === 'notes' || (scope?.type === 'study' && documents.canCreateStudy)) && (
+              <Command.Group>
+                <Command.Item
+                  value="document:create"
+                  onSelect={scope.type === 'notes' ? documents.createNote : documents.createStudy}
+                >
+                  <PaletteItemLabel type={scope.type} creation>
+                    {t(scope.type === 'notes' ? 'accessibility.newNote' : 'accessibility.newStudy')}
+                  </PaletteItemLabel>
+                </Command.Item>
+              </Command.Group>
+            )}
+            {showSuggestions && ((!scope && query.trim().length >= 2) || scope?.source) && (
+              <ContentSuggestions
+                key={scope?.type || 'all'}
+                excludedKeys={scope ? [] : excludedKeys}
+                source={scope?.source}
+                query={query}
+                version={defaultVersion}
+                onSeeAll={openSearch}
+                onSelect={item => {
+                  const tab = getTabForSearchResult(item, defaultVersion)
+                  if (tab) openTab(tab)
+                  else {
+                    onDone?.()
+                    openStudyObject(item)
+                  }
+                }}
+              />
+            )}
+            {showSuggestions &&
+              ((!scope && query.trim().length >= 2) ||
+                scope?.type === 'plan' ||
+                scope?.type === 'commentary' ||
+                scope?.type === 'timeline') && (
+                <CatalogSuggestions
+                  key={`${scope?.type || 'all'}:${query}`}
+                  query={query}
+                  excludedKeys={scope ? [] : excludedKeys}
+                  scope={
+                    scope?.type === 'plan' ||
+                    scope?.type === 'commentary' ||
+                    scope?.type === 'timeline'
+                      ? scope.type
+                      : undefined
+                  }
+                  onSelect={openTab}
+                />
+              )}
+            {!scope && query.trim() && (
+              <Command.Group heading={t('Rechercher')}>
+                <Command.Item value="search:free" onSelect={() => openSearch()}>
+                  <PaletteItemLabel type="search">
+                    {t('commandPalette.search', { query: query.trim() })}
+                  </PaletteItemLabel>
+                  <small>↵</small>
+                </Command.Item>
+              </Command.Group>
+            )}
+          </>
         )}
       </Command.List>
       {showSuggestions && (

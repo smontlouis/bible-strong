@@ -9,6 +9,7 @@ import React from 'react'
 
 export type { MenuAction, MenuComponentRef }
 export type AccessibleMenuComponentProps = MenuComponentProps & {
+  tabActions?: boolean
   accessibilityLabel?: string
 }
 
@@ -157,7 +158,7 @@ const withAndroidMenuIcons = (actions: MenuAction[]): MenuAction[] =>
   }))
 
 export const MenuView = React.forwardRef<MenuComponentRef, AccessibleMenuComponentProps>(
-  ({ accessibilityLabel, actions, children, ...props }, ref) => {
+  ({ accessibilityLabel, tabActions: _tabActions, actions, children, ...props }, ref) => {
     const trigger =
       accessibilityLabel && React.isValidElement<Record<string, unknown>>(children)
         ? React.cloneElement(children, {

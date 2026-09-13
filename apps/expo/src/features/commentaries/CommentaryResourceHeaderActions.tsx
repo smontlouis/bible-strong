@@ -39,6 +39,7 @@ const CommentaryResourceHeaderActions = ({
         />
       ) : null}
       <MenuView
+        tabActions
         actions={[
           {
             id: 'open-tab',

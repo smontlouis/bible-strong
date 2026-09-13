@@ -168,6 +168,7 @@ type Props = Pick<
   | 'versesWithNonHighlightTags'
   | 'settings'
   | 'verseToScroll'
+  | 'verseNavigationRequest'
   | 'contextDisplayMode'
   | 'version'
   | 'interlinearMode'
@@ -569,6 +570,7 @@ const LoadedBibleContent = ({
   versesWithNonHighlightTags,
   settings,
   verseToScroll,
+  verseNavigationRequest,
   contextDisplayMode,
   version,
   interlinearMode,
@@ -1159,7 +1161,7 @@ const LoadedBibleContent = ({
     if (scrollTargetVerse === 1) {
       scrollDOMTo(getDOMScrollTarget(containerRef.current), { top: 0 })
     }
-  }, [chapter, scrollTargetVerse, hasVerses])
+  }, [chapter, scrollTargetVerse, hasVerses, verseNavigationRequest])
 
   useEffect(() => {
     if (!scrollTargetVerse || !hasVerses) return
@@ -1180,7 +1182,14 @@ const LoadedBibleContent = ({
         }, 400)
       }
     })
-  }, [scrollTargetVerse, hasVerses, annotationScrollKey, contextDisplayMode, focusKey])
+  }, [
+    scrollTargetVerse,
+    hasVerses,
+    annotationScrollKey,
+    contextDisplayMode,
+    focusKey,
+    verseNavigationRequest,
+  ])
 
   useEffect(() => {
     if (!selectedVerseElementId || !hasVerses) {

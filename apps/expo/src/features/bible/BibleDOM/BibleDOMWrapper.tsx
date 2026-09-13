@@ -231,6 +231,7 @@ export type WebViewProps = {
   studyRelations: StudyRelationsObj
   wordAnnotations: WordAnnotationsObj
   settings: RootState['user']['bible']['settings']
+  verseNavigationRequest?: number
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
   passageMedia: ResolvedPassageMediaChapter
@@ -351,6 +352,7 @@ export const BibleDOMWrapper = ({
   wordAnnotations,
   settings,
   verseToScroll,
+  verseNavigationRequest,
   contextDisplayMode,
   version,
   interlinearMode,
@@ -1129,6 +1131,7 @@ export const BibleDOMWrapper = ({
         wordAnnotations={wordAnnotations}
         settings={trimmedSettings}
         verseToScroll={verseToScroll}
+        verseNavigationRequest={verseNavigationRequest}
         contextDisplayMode={contextDisplayMode}
         version={version}
         interlinearMode={interlinearMode}

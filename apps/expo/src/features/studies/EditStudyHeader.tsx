@@ -121,6 +121,7 @@ const EditHeader = ({
           rightComponent={
             Platform.OS === 'web' ? (
               <StudyOptionsPanel
+                tabActions
                 study={study}
                 studyId={studyId}
                 includeRelations

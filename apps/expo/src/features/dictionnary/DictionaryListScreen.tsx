@@ -380,6 +380,7 @@ const DictionaryListScreen = ({
           title={t('Dictionnaire')}
           rightComponent={
             <MenuView
+              tabActions
               actions={
                 [
                   {

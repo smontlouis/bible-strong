@@ -192,6 +192,7 @@ const NaveListScreen = ({
           rightComponent={
             <Box className="overflow-hidden border-continuous flex-row items-center">
               <MenuView
+                tabActions
                 actions={[
                   {
                     id: 'language',

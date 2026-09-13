@@ -1,3 +1,4 @@
+import type { MenuAction } from '~common/ui/MenuView'
 import type { ReactNode, Ref, RefObject } from 'react'
 export type PanelNavigation = {
   open: (screen: string) => void
@@ -18,6 +19,7 @@ export type PanelScreen = {
   footer?: ReactNode
 }
 export type ContextualPanelProps = {
+  commands?: { actions: MenuAction[]; select: (id: string, navigation: PanelNavigation) => void }
   trigger: ReactNode
   triggerSize?: number
   accessibilityLabel: string

@@ -3,11 +3,12 @@ import {
   commandPaletteScopeAtom,
   commandPaletteReturnFocusAtom,
   recentCommandTabIdsAtom,
+  TAB_ACTIONS_SCOPE,
 } from './state'
 import * as Dialog from '@radix-ui/react-dialog'
 import { usePathname } from 'expo-router'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { activeGroupAtom, activeTabIdAtom, appSwitcherModeAtom } from '~state/tabs'
 import CommandPalette from './CommandPalette.web'
@@ -27,6 +28,7 @@ export default function GlobalCommandPalette() {
     if (pathname !== '/' || mode !== 'view' || !activeId || activeType === 'new') return
     setRecentIds(previous => [activeId, ...previous.filter(id => id !== activeId)].slice(0, 50))
   }, [activeId, activeType, pathname, mode, setRecentIds])
+  const [launchRevision, setLaunchRevision] = useState(0)
   const [initialScope, setInitialScope] = useAtom(commandPaletteScopeAtom)
   const [open, setOpen] = useAtom(commandPaletteOpenAtom)
   const [restoreFocus, setRestoreFocus] = useAtom(commandPaletteReturnFocusAtom)
@@ -42,12 +44,19 @@ export default function GlobalCommandPalette() {
       event.preventDefault()
       if (event.repeat) return
       if (!open) {
-        setInitialScope(undefined)
         setRestoreFocus(
           document.activeElement instanceof HTMLElement ? document.activeElement : null
         )
       }
-      setOpen(previous => !previous)
+      if (event.shiftKey) {
+        setInitialScope(TAB_ACTIONS_SCOPE)
+        // Reset an already-open palette too, including a manually removed chip.
+        setLaunchRevision(revision => revision + 1)
+        setOpen(true)
+      } else {
+        if (!open) setInitialScope(undefined)
+        setOpen(previous => !previous)
+      }
     }
     document.addEventListener('keydown', handleKey, true)
     return () => document.removeEventListener('keydown', handleKey, true)
@@ -67,7 +76,11 @@ export default function GlobalCommandPalette() {
           }}
         >
           <Dialog.Title className="bs-command-sr-only">{t('commandPalette.label')}</Dialog.Title>
-          <CommandPalette initialScope={initialScope} onDone={() => setOpen(false)} />
+          <CommandPalette
+            key={`${initialScope ?? 'search'}:${launchRevision}`}
+            initialScope={initialScope}
+            onDone={() => setOpen(false)}
+          />
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

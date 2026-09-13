@@ -36,6 +36,16 @@ export default function BibleOptionsMenu({
   } as const
   return (
     <ContextualPanel
+      commands={{
+        actions,
+        select: (id, nav) => {
+          if (id === 'bookmark') {
+            bookmarkPanel.prepare()
+            nav.open('bookmark')
+          } else if (id === 'params' || id === 'export') nav.open(id)
+          else onPressAction?.({ nativeEvent: { event: id } })
+        },
+      }}
       width={430}
       accessibilityLabel={accessibilityLabel || t('accessibility.bibleOptions')}
       trigger={children}

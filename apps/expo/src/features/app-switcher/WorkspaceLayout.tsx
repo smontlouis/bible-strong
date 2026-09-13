@@ -1,3 +1,4 @@
+import WorkspaceKeyboardShortcuts from './WorkspaceKeyboardShortcuts'
 import GlobalCommandPalette from './commandPalette/GlobalCommandPalette'
 import { finishPageTransition, navigateWithPageTransition } from '~navigation/pageTransition'
 import { usePathname, useRouter } from 'expo-router'
@@ -69,6 +70,14 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   return (
     <HStack className="flex-1 bg-light-grey overflow-hidden">
       <GlobalCommandPalette />
+      <WorkspaceKeyboardShortcuts
+        toggleSidebar={() => {
+          if (isWide) {
+            if (overlayMode) setOverlayOpen(value => !value)
+            else setSidebarHidden(value => !value)
+          }
+        }}
+      />
       {isWide && (
         <Box
           testID="workspace-sidebar-motion"

@@ -1,3 +1,4 @@
+import { TabCommandContext } from '~common/useTabCommands'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtomValue } from 'jotai/react'
 import React, { memo, Ref } from 'react'
@@ -139,7 +140,7 @@ const TabScreen = ({ tabAtom, ref }: TabScreenProps) => {
         accessibilityElementsHidden={!isAccessibilityVisible}
         importantForAccessibility={isAccessibilityVisible ? 'auto' : 'no-hide-descendants'}
       >
-        {tabComponent}
+        <TabCommandContext.Provider value={tab.id}>{tabComponent}</TabCommandContext.Provider>
       </TabScreenWrapper>
     )
   }

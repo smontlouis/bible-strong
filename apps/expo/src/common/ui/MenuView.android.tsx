@@ -13,6 +13,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 export type { MenuAction, MenuComponentRef }
 export type AccessibleMenuComponentProps = MenuComponentProps & {
+  tabActions?: boolean
   accessibilityLabel?: string
 }
 

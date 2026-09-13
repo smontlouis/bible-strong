@@ -1,3 +1,5 @@
+import { useBibleKeyboardShortcut } from './useBibleKeyboardShortcut'
+import { nextAvailableStrongMode } from './bibleKeyboardActions'
 import InlineDisplayModeContent from './InlineDisplayModeContent'
 import { useAtomValue } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
@@ -125,6 +127,17 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onClose 
       onClose?.()
     }
   }
+
+  useBibleKeyboardShortcut(
+    's',
+    bible.id,
+    () => {
+      selectMode(
+        nextAvailableStrongMode(selectedMode, strongAvailable, reverseInterlinearAvailable)
+      )
+    },
+    !inline && availabilityQuery.isSuccess
+  )
 
   const requestDownload = (mode: Exclude<StrongMode, 'hidden'>) => {
     if (Platform.OS === 'web') return

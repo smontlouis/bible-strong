@@ -271,6 +271,7 @@ const BibleViewer = ({
   const parallelColumnWidth = useAtomValue(parallelColumnWidthAtom)
   const parallelDisplayMode = useAtomValue(parallelDisplayModeAtom)
   const actions = useBibleTabActions(bibleAtom)
+  const [verseNavigationRequest, setVerseNavigationRequest] = useState(0)
 
   const {
     data: {
@@ -1221,6 +1222,7 @@ const BibleViewer = ({
     wordAnnotations: viewerPersonalData.wordAnnotations,
     settings,
     verseToScroll: verse,
+    verseNavigationRequest,
     pericopeChapter: getPericopeChapter(pericope, displayedBook, displayedChapter),
     passageMedia,
     openNote: hidePersonalBibleData ? undefined : openBibleNote,
@@ -1352,6 +1354,11 @@ const BibleViewer = ({
   return (
     <BibleViewport className="overflow-hidden border-continuous flex-[1] bg-reverse">
       <BibleHeader
+        onNavigateToVerse={destination => {
+          if (isContextFocused) actions.clearFocusVerses()
+          actions.setSelectedVerse(destination)
+          setVerseNavigationRequest(request => request + 1)
+        }}
         bibleAtom={bibleAtom}
         onBibleParamsClick={bibleParamsModal.open}
         isFormSheet={isFormSheet}

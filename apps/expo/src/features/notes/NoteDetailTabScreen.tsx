@@ -401,6 +401,7 @@ ${currentNote.description}
         rightComponent={
           currentNote ? (
             <MenuView
+              tabActions
               actions={
                 [
                   { id: 'share', title: t('Partager'), image: 'square.and.arrow.up' },
