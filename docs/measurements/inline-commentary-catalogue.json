@@ -1,0 +1,598 @@
+{
+  "resources": 36,
+  "largestChapter": {
+    "id": "database:egw-writings:en",
+    "sourceRevision": "egw-writings-en-d6a3c4a1fdfdba1b9eaa",
+    "revision": "egw-writings-en-799e192c56e4661d4ba0",
+    "sourceSchemasPreserved": true,
+    "chapters": 1120,
+    "worstChapter": {
+      "book": 43,
+      "chapter": 1,
+      "sections": 1238,
+      "bytes": 314583,
+      "gzipBytes": 61676,
+      "cacheValueBytes": 621656
+    },
+    "largestCacheValueBytes": 621656
+  },
+  "largestCacheValueBytes": 621656,
+  "results": [
+    {
+      "id": "database:abbott:en",
+      "sourceRevision": "abbott-en-9238307a9b511baa875f",
+      "revision": "abbott-en-d7caff0a9e881ac8153c",
+      "sourceSchemasPreserved": true,
+      "chapters": 260,
+      "worstChapter": {
+        "book": 46,
+        "chapter": 15,
+        "sections": 30,
+        "bytes": 6226,
+        "gzipBytes": 2415,
+        "cacheValueBytes": 12300
+      },
+      "largestCacheValueBytes": 12300
+    },
+    {
+      "id": "database:acbc:en",
+      "sourceRevision": "acbc-en-d5b4d62e13fadea97337",
+      "revision": "acbc-en-2cc740b3a01ad8015e70",
+      "sourceSchemasPreserved": true,
+      "chapters": 1166,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 159,
+        "bytes": 37320,
+        "gzipBytes": 12246,
+        "cacheValueBytes": 74118
+      },
+      "largestCacheValueBytes": 74118
+    },
+    {
+      "id": "database:acbc:fr",
+      "sourceRevision": "acbc-fr-aa487f33945f3e4ee181",
+      "revision": "acbc-fr-279d188d0459a1b82755",
+      "sourceSchemasPreserved": true,
+      "chapters": 1166,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 159,
+        "bytes": 38367,
+        "gzipBytes": 12590,
+        "cacheValueBytes": 74664
+      },
+      "largestCacheValueBytes": 74664
+    },
+    {
+      "id": "database:aquifer-fr:en",
+      "sourceRevision": "aquifer-fr-en-e04022776e056f4f2e91",
+      "revision": "aquifer-fr-en-958ac7bb5b6dd60ecaa8",
+      "sourceSchemasPreserved": true,
+      "chapters": 1189,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 57,
+        "bytes": 12829,
+        "gzipBytes": 3703,
+        "cacheValueBytes": 25388
+      },
+      "largestCacheValueBytes": 25388
+    },
+    {
+      "id": "database:aquifer-fr:fr",
+      "sourceRevision": "aquifer-fr-fr-018f54814cd9915c8c9d",
+      "revision": "aquifer-fr-fr-3f149e17916768ed6ba3",
+      "sourceSchemasPreserved": true,
+      "chapters": 1189,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 57,
+        "bytes": 12722,
+        "gzipBytes": 4162,
+        "cacheValueBytes": 24726
+      },
+      "largestCacheValueBytes": 24726
+    },
+    {
+      "id": "database:barnes:en",
+      "sourceRevision": "barnes-en-b03b02707ab409656471",
+      "revision": "barnes-en-f43e9cee160451cadcc8",
+      "sourceSchemasPreserved": true,
+      "chapters": 1180,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 176,
+        "bytes": 43875,
+        "gzipBytes": 13186,
+        "cacheValueBytes": 86738
+      },
+      "largestCacheValueBytes": 86738
+    },
+    {
+      "id": "database:barnes:fr",
+      "sourceRevision": "barnes-fr-833aed48200b2ba6726f",
+      "revision": "barnes-fr-56082eee89615d9fa233",
+      "sourceSchemasPreserved": true,
+      "chapters": 1180,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 176,
+        "bytes": 44398,
+        "gzipBytes": 13398,
+        "cacheValueBytes": 87060
+      },
+      "largestCacheValueBytes": 87060
+    },
+    {
+      "id": "database:bible-annotee:fr",
+      "sourceRevision": "bible-annotee-fr-9aa26382402383ab2c08",
+      "revision": "bible-annotee-fr-8dd7f948b4c255c8ee6b",
+      "sourceSchemasPreserved": true,
+      "chapters": 1189,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 95,
+        "bytes": 21688,
+        "gzipBytes": 7032,
+        "cacheValueBytes": 42504
+      },
+      "largestCacheValueBytes": 42504
+    },
+    {
+      "id": "database:burkitt:en",
+      "sourceRevision": "burkitt-en-063b1c408020c9817c9b",
+      "revision": "burkitt-en-972338770310ff4ae686",
+      "sourceSchemasPreserved": true,
+      "chapters": 260,
+      "worstChapter": {
+        "book": 45,
+        "chapter": 8,
+        "sections": 33,
+        "bytes": 8198,
+        "gzipBytes": 2866,
+        "cacheValueBytes": 16290
+      },
+      "largestCacheValueBytes": 16290
+    },
+    {
+      "id": "database:calvin:en",
+      "sourceRevision": "calvin-en-cd97f68a4494cb717d44",
+      "revision": "calvin-en-21a0ee1716d93ab92325",
+      "sourceSchemasPreserved": true,
+      "chapters": 801,
+      "worstChapter": {
+        "book": 25,
+        "chapter": 3,
+        "sections": 64,
+        "bytes": 15778,
+        "gzipBytes": 5504,
+        "cacheValueBytes": 31264
+      },
+      "largestCacheValueBytes": 31264
+    },
+    {
+      "id": "database:catena-aurea:en",
+      "sourceRevision": "catena-aurea-en-c901356fd0ead52a6984",
+      "revision": "catena-aurea-en-3a835b1c38b92c3c260c",
+      "sourceSchemasPreserved": true,
+      "chapters": 89,
+      "worstChapter": {
+        "book": 42,
+        "chapter": 1,
+        "sections": 38,
+        "bytes": 9644,
+        "gzipBytes": 3292,
+        "cacheValueBytes": 19166
+      },
+      "largestCacheValueBytes": 19166
+    },
+    {
+      "id": "database:darby-notes:en",
+      "sourceRevision": "darby-notes-en-18282161736e80a7c5d8",
+      "revision": "darby-notes-en-04b8498a650fb1ec5cb2",
+      "sourceSchemasPreserved": true,
+      "chapters": 1185,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 43,
+        "bytes": 6785,
+        "gzipBytes": 2074,
+        "cacheValueBytes": 13460
+      },
+      "largestCacheValueBytes": 13460
+    },
+    {
+      "id": "database:douay-rheims-notes:en",
+      "sourceRevision": "douay-rheims-notes-en-fb804de36080ec88a5e7",
+      "revision": "douay-rheims-notes-en-c9c21659014ff979732c",
+      "sourceSchemasPreserved": true,
+      "chapters": 390,
+      "worstChapter": {
+        "book": 46,
+        "chapter": 11,
+        "sections": 21,
+        "bytes": 5604,
+        "gzipBytes": 2157,
+        "cacheValueBytes": 11064
+      },
+      "largestCacheValueBytes": 11064
+    },
+    {
+      "id": "database:egw-writings:en",
+      "sourceRevision": "egw-writings-en-d6a3c4a1fdfdba1b9eaa",
+      "revision": "egw-writings-en-799e192c56e4661d4ba0",
+      "sourceSchemasPreserved": true,
+      "chapters": 1120,
+      "worstChapter": {
+        "book": 43,
+        "chapter": 1,
+        "sections": 1238,
+        "bytes": 314583,
+        "gzipBytes": 61676,
+        "cacheValueBytes": 621656
+      },
+      "largestCacheValueBytes": 621656
+    },
+    {
+      "id": "database:family-notes:en",
+      "sourceRevision": "family-notes-en-872679b80c220229a07d",
+      "revision": "family-notes-en-aef67f2db7e1e7b7743a",
+      "sourceSchemasPreserved": true,
+      "chapters": 256,
+      "worstChapter": {
+        "book": 46,
+        "chapter": 15,
+        "sections": 49,
+        "bytes": 10704,
+        "gzipBytes": 3714,
+        "cacheValueBytes": 21300
+      },
+      "largestCacheValueBytes": 21300
+    },
+    {
+      "id": "database:fourfold-gospel:en",
+      "sourceRevision": "fourfold-gospel-en-693c1abd0850fb46334e",
+      "revision": "fourfold-gospel-en-3f3a25af7abf4c9114d1",
+      "sourceSchemasPreserved": true,
+      "chapters": 119,
+      "worstChapter": {
+        "book": 42,
+        "chapter": 1,
+        "sections": 74,
+        "bytes": 18088,
+        "gzipBytes": 6334,
+        "cacheValueBytes": 36070
+      },
+      "largestCacheValueBytes": 36070
+    },
+    {
+      "id": "database:fre-aug:fr",
+      "sourceRevision": "fre-aug-fr-415245c703a304a8b771",
+      "revision": "fre-aug-fr-7576a02d9f06ef7bc721",
+      "sourceSchemasPreserved": true,
+      "chapters": 499,
+      "worstChapter": {
+        "book": 18,
+        "chapter": 38,
+        "sections": 40,
+        "bytes": 10278,
+        "gzipBytes": 3950,
+        "cacheValueBytes": 19664
+      },
+      "largestCacheValueBytes": 19664
+    },
+    {
+      "id": "database:fre-chry:fr",
+      "sourceRevision": "fre-chry-fr-2bdfedc472c938567396",
+      "revision": "fre-chry-fr-c390dfd5844ba71e0358",
+      "sourceSchemasPreserved": true,
+      "chapters": 336,
+      "worstChapter": {
+        "book": 43,
+        "chapter": 1,
+        "sections": 11,
+        "bytes": 2962,
+        "gzipBytes": 1296,
+        "cacheValueBytes": 5624
+      },
+      "largestCacheValueBytes": 5624
+    },
+    {
+      "id": "database:geneva-notes:en",
+      "sourceRevision": "geneva-notes-en-0770abc34d5bb7a13828",
+      "revision": "geneva-notes-en-d4039d5aaaadf9639312",
+      "sourceSchemasPreserved": true,
+      "chapters": 1161,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 100,
+        "bytes": 24676,
+        "gzipBytes": 7745,
+        "cacheValueBytes": 49242
+      },
+      "largestCacheValueBytes": 49242
+    },
+    {
+      "id": "database:jfb:en",
+      "sourceRevision": "jfb-en-a6a97a3773ef772881c5",
+      "revision": "jfb-en-26091c1ed3898ec1fbc9",
+      "sourceSchemasPreserved": true,
+      "chapters": 1189,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 70,
+        "bytes": 15780,
+        "gzipBytes": 5718,
+        "cacheValueBytes": 31450
+      },
+      "largestCacheValueBytes": 31450
+    },
+    {
+      "id": "database:kd:en",
+      "sourceRevision": "kd-en-3f851c602afa810d0f5e",
+      "revision": "kd-en-f958ec6b51ebe6237ad2",
+      "sourceSchemasPreserved": true,
+      "chapters": 929,
+      "worstChapter": {
+        "book": 5,
+        "chapter": 28,
+        "sections": 37,
+        "bytes": 9012,
+        "gzipBytes": 3310,
+        "cacheValueBytes": 17788
+      },
+      "largestCacheValueBytes": 17788
+    },
+    {
+      "id": "database:king-comments:en",
+      "sourceRevision": "king-comments-en-d2755427acc046391663",
+      "revision": "king-comments-en-52bf050ec07328457f52",
+      "sourceSchemasPreserved": true,
+      "chapters": 1189,
+      "worstChapter": {
+        "book": 16,
+        "chapter": 3,
+        "sections": 31,
+        "bytes": 8012,
+        "gzipBytes": 2875,
+        "cacheValueBytes": 15702
+      },
+      "largestCacheValueBytes": 15702
+    },
+    {
+      "id": "database:lightfoot:en",
+      "sourceRevision": "lightfoot-en-9d64acedb0a6da58d4be",
+      "revision": "lightfoot-en-a68aa1be42ebe971010e",
+      "sourceSchemasPreserved": true,
+      "chapters": 87,
+      "worstChapter": {
+        "book": 42,
+        "chapter": 1,
+        "sections": 26,
+        "bytes": 6517,
+        "gzipBytes": 2583,
+        "cacheValueBytes": 12928
+      },
+      "largestCacheValueBytes": 12928
+    },
+    {
+      "id": "database:luther:en",
+      "sourceRevision": "luther-en-4bad45d99ccbf288ae85",
+      "revision": "luther-en-7d77d393614584221c21",
+      "sourceSchemasPreserved": true,
+      "chapters": 148,
+      "worstChapter": {
+        "book": 48,
+        "chapter": 3,
+        "sections": 29,
+        "bytes": 7240,
+        "gzipBytes": 2618,
+        "cacheValueBytes": 14274
+      },
+      "largestCacheValueBytes": 14274
+    },
+    {
+      "id": "database:mhc:en",
+      "sourceRevision": "mhc-en-fe3fdcd1e6af4c705d92",
+      "revision": "mhc-en-867b788eb7df744a7eeb",
+      "sourceSchemasPreserved": true,
+      "chapters": 1189,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 127,
+        "bytes": 31103,
+        "gzipBytes": 9285,
+        "cacheValueBytes": 62096
+      },
+      "largestCacheValueBytes": 62096
+    },
+    {
+      "id": "database:mhcc:en",
+      "sourceRevision": "mhcc-en-1fe1426ec4de4755c157",
+      "revision": "mhcc-en-1cc6b00b8e3ccc4984bc",
+      "sourceSchemasPreserved": true,
+      "chapters": 1189,
+      "worstChapter": {
+        "book": 20,
+        "chapter": 14,
+        "sections": 33,
+        "bytes": 6646,
+        "gzipBytes": 2490,
+        "cacheValueBytes": 13184
+      },
+      "largestCacheValueBytes": 13184
+    },
+    {
+      "id": "database:mhm:en",
+      "sourceRevision": "mhm-en-68eeba1faebb43940012",
+      "revision": "mhm-en-97b92eddc01c632eaae1",
+      "sourceSchemasPreserved": true,
+      "chapters": 1189,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 169,
+        "bytes": 41553,
+        "gzipBytes": 11676,
+        "cacheValueBytes": 82148
+      },
+      "largestCacheValueBytes": 82148
+    },
+    {
+      "id": "database:MHY:fr",
+      "sourceRevision": "mhy-fr-e8d2ab796c382ad19c96",
+      "revision": "mhy-fr-4015a53f64acdc87d37e",
+      "sourceSchemasPreserved": true,
+      "chapters": 1188,
+      "worstChapter": {
+        "book": 20,
+        "chapter": 14,
+        "sections": 34,
+        "bytes": 7453,
+        "gzipBytes": 2863,
+        "cacheValueBytes": 14326
+      },
+      "largestCacheValueBytes": 14326
+    },
+    {
+      "id": "database:pnt:en",
+      "sourceRevision": "pnt-en-efbcf9b9b7992f71e64d",
+      "revision": "pnt-en-21b90b750a3d0bb7a1ee",
+      "sourceSchemasPreserved": true,
+      "chapters": 259,
+      "worstChapter": {
+        "book": 40,
+        "chapter": 26,
+        "sections": 70,
+        "bytes": 16671,
+        "gzipBytes": 6181,
+        "cacheValueBytes": 33234
+      },
+      "largestCacheValueBytes": 33234
+    },
+    {
+      "id": "database:rashi-en:en",
+      "sourceRevision": "rashi-en-en-52513cc424e5870f63c7",
+      "revision": "rashi-en-en-17355a5fb881c0f453e3",
+      "sourceSchemasPreserved": true,
+      "chapters": 927,
+      "worstChapter": {
+        "book": 5,
+        "chapter": 32,
+        "sections": 174,
+        "bytes": 36817,
+        "gzipBytes": 10650,
+        "cacheValueBytes": 72422
+      },
+      "largestCacheValueBytes": 72422
+    },
+    {
+      "id": "database:rwp:en",
+      "sourceRevision": "rwp-en-540b62b2acbc9774778e",
+      "revision": "rwp-en-77983d3ebaf62873bed6",
+      "sourceSchemasPreserved": true,
+      "chapters": 260,
+      "worstChapter": {
+        "book": 43,
+        "chapter": 6,
+        "sections": 71,
+        "bytes": 18540,
+        "gzipBytes": 6842,
+        "cacheValueBytes": 34034
+      },
+      "largestCacheValueBytes": 34034
+    },
+    {
+      "id": "database:scofield:en",
+      "sourceRevision": "scofield-en-125c3300e3d686065c73",
+      "revision": "scofield-en-76e78bafe5966b32c2b4",
+      "sourceSchemasPreserved": true,
+      "chapters": 948,
+      "worstChapter": {
+        "book": 40,
+        "chapter": 13,
+        "sections": 17,
+        "bytes": 4000,
+        "gzipBytes": 1492,
+        "cacheValueBytes": 7868
+      },
+      "largestCacheValueBytes": 7868
+    },
+    {
+      "id": "database:sdabc:en",
+      "sourceRevision": "sdabc-en-1a8c21e8b487d9f854b2",
+      "revision": "sdabc-en-fd98bc9a1715b5bd9280",
+      "sourceSchemasPreserved": true,
+      "chapters": 1189,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 172,
+        "bytes": 38742,
+        "gzipBytes": 12686,
+        "cacheValueBytes": 76546
+      },
+      "largestCacheValueBytes": 76546
+    },
+    {
+      "id": "database:sdabc:fr",
+      "sourceRevision": "sdabc-fr-03cad47bb468c679790c",
+      "revision": "sdabc-fr-94d373a9f24871402b6e",
+      "sourceSchemasPreserved": true,
+      "chapters": 1189,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 172,
+        "bytes": 39956,
+        "gzipBytes": 12992,
+        "cacheValueBytes": 77936
+      },
+      "largestCacheValueBytes": 77936
+    },
+    {
+      "id": "database:treasury-david:en",
+      "sourceRevision": "treasury-david-en-e8aef7efd7d9f9823e86",
+      "revision": "treasury-david-en-95c6e44a33a692ac47c7",
+      "sourceSchemasPreserved": true,
+      "chapters": 150,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 106,
+        "sections": 1,
+        "bytes": 453,
+        "gzipBytes": 327,
+        "cacheValueBytes": 792
+      },
+      "largestCacheValueBytes": 792
+    },
+    {
+      "id": "database:wesley:en",
+      "sourceRevision": "wesley-en-bdcdb812f0cb9cbd35e7",
+      "revision": "wesley-en-f31c2f1527686a1593ed",
+      "sourceSchemasPreserved": true,
+      "chapters": 1136,
+      "worstChapter": {
+        "book": 19,
+        "chapter": 119,
+        "sections": 74,
+        "bytes": 13063,
+        "gzipBytes": 4214,
+        "cacheValueBytes": 26016
+      },
+      "largestCacheValueBytes": 26016
+    }
+  ]
+}

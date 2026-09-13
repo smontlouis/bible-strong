@@ -1,3 +1,4 @@
+import InlineCommentarySettings from '~features/commentaries/InlineCommentarySettings'
 import { useBibleBookmarkScreens } from '~features/bookmarks/useBibleBookmarkScreens'
 import ColorPickerModal from '~common/ColorPickerModal'
 import BibleShareOptionsScreen from '~features/settings/BibleShareOptionsScreen'
@@ -91,11 +92,16 @@ export default function BibleOptionsMenu({
             <BibleParamsModal
               inline
               onClose={nav.close}
+              onInlineCommentaries={() => nav.open('inline-commentaries')}
               onFonts={() => nav.open('fonts')}
               onPalette={() => nav.open('palette')}
               onShareOptions={() => nav.open('share-options')}
             />
           ),
+        },
+        'inline-commentaries': {
+          title: t('inlineCommentary.title'),
+          content: () => <InlineCommentarySettings />,
         },
         fonts: {
           title: t('Polices'),

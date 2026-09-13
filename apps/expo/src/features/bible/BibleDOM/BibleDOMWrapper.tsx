@@ -1,3 +1,5 @@
+import type { LabeledCommentaryChip } from './InlineCommentaryChips'
+import { OPEN_INLINE_COMMENTARY } from './dispatch'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
 import { previewHistoryAtom } from '~features/bibleReferencePreview/state'
 import { createReaderPreview } from '~features/bibleReferencePreview/readerPreview'
@@ -280,6 +282,11 @@ export type WebViewProps = {
   onEnterAnnotationMode?: () => void
   // Red words data
   redWords?: Record<string, { start: number; end: number }[]> | null
+  inlineCommentaries?: {
+    introduction: LabeledCommentaryChip[]
+    afterVerses: Record<number, LabeledCommentaryChip[]>
+  }
+  onOpenInlineCommentary?: (chip: LabeledCommentaryChip) => void
   chapterEntities: StrongLexiconChapterEntity[]
   chapterEntitiesLoaded: boolean
   chapterEntityModuleStatus: StrongLexiconModuleAvailability['status'] | null
@@ -399,6 +406,8 @@ export const BibleDOMWrapper = ({
   onEnterAnnotationMode,
   isFormSheet,
   redWords,
+  inlineCommentaries,
+  onOpenInlineCommentary,
   chapterEntities,
   chapterEntitiesLoaded,
   chapterEntityModuleStatus,
@@ -889,6 +898,24 @@ export const BibleDOMWrapper = ({
         break
       }
 
+      case OPEN_INLINE_COMMENTARY: {
+        const payload = action.payload
+        if (isRecord(payload) && typeof payload.sectionId === 'string') {
+          const chips = [
+            ...(inlineCommentaries?.introduction ?? []),
+            ...Object.values(inlineCommentaries?.afterVerses ?? {}).flat(),
+          ]
+          const chip = chips.find(
+            chip =>
+              chip.sectionId === payload.sectionId &&
+              chip.resourceId === payload.resourceId &&
+              chip.language === payload.language &&
+              chip.revision === payload.revision
+          )
+          if (chip) onOpenInlineCommentary?.(chip)
+        }
+        break
+      }
       case OPEN_CANONICAL_BIBLE_REFERENCE: {
         const osis = getStringPayload(action.payload)
         if (osis) onOpenCanonicalBibleReference?.(osis)
@@ -1155,6 +1182,7 @@ export const BibleDOMWrapper = ({
         taggedVersesInChapter={taggedVersesInChapter}
         versesWithNonHighlightTags={versesWithNonHighlightTags}
         redWords={redWords}
+        inlineCommentaries={inlineCommentaries}
         chapterEntities={chapterEntities}
         chapterEntitiesLoaded={chapterEntitiesLoaded}
         chapterEntityModuleStatus={chapterEntityModuleStatus}

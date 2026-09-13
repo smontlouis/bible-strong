@@ -357,6 +357,35 @@ export const commentaryVerses = pgTable(
   ]
 )
 
+/** Precomputed reading projection. Index queries deliberately omit content. */
+export const commentaryReadingSections = pgTable(
+  'commentary_reading_sections',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    id: text('id').notNull(),
+    book: integer('book').notNull(),
+    chapter: integer('chapter').notNull(),
+    range_start_verse: integer('range_start_verse').notNull(),
+    range_end_verse: integer('range_end_verse').notNull(),
+    excerpt: text('excerpt').notNull(),
+    content: text('content').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'commentary_reading_sections_primary',
+      columns: [table.publication_id, table.id],
+    }),
+    index('commentary_reading_sections_chapter').on(
+      table.publication_id,
+      table.book,
+      table.chapter,
+      table.range_start_verse
+    ),
+  ]
+)
+
 export const crossReferenceLinks = pgTable(
   'cross_reference_links',
   {

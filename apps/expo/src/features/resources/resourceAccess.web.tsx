@@ -1,4 +1,9 @@
 import {
+  createCommentaryReadingAccess,
+  type CommentaryReadingAccess,
+} from './commentaryReadingAccess'
+import { commentaryReadingCache } from './commentaryReadingCache'
+import {
   createHttpSearchAnalyticsAccess,
   noOpSearchAnalyticsAccess,
   type SearchAnalyticsAccess,
@@ -67,6 +72,7 @@ export type ResourceAccessRegistry = {
   strongBible: StrongBibleResourceAccess
   interlinearBible: InterlinearBibleResourceAccess
   timeline: TimelineAccess
+  commentaryReading: CommentaryReadingAccess
   commentary: CommentaryAccess
   offlineCopies: { isAvailable: (identity: LocalResourceRef) => Promise<boolean> }
   capabilities: { getOnlineAccess: (identity: ResourceIdentity) => OnlineAccessState }
@@ -211,6 +217,12 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   strongBible,
   interlinearBible,
   timeline,
+  commentaryReading: createCommentaryReadingAccess({
+    baseUrl: resourceApiBaseUrl,
+    fetcher: resourceApiFetch,
+    isOnline: async () => onlineManager.isOnline(),
+    cache: commentaryReadingCache,
+  }),
   commentary,
   offlineCopies: { isAvailable: async () => false },
   capabilities: {

@@ -967,7 +967,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "abbott-en-9238307a9b511baa875f"
+    "resourceRevision": "abbott-en-d7caff0a9e881ac8153c"
   },
   {
     "id": "database:acbc:en",
@@ -980,7 +980,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "acbc-en-d5b4d62e13fadea97337"
+    "resourceRevision": "acbc-en-2cc740b3a01ad8015e70"
   },
   {
     "id": "database:acbc:fr",
@@ -993,7 +993,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "acbc-fr-aa487f33945f3e4ee181"
+    "resourceRevision": "acbc-fr-279d188d0459a1b82755"
   },
   {
     "id": "database:aquifer-fr:en",
@@ -1006,7 +1006,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "aquifer-fr-en-e04022776e056f4f2e91"
+    "resourceRevision": "aquifer-fr-en-958ac7bb5b6dd60ecaa8"
   },
   {
     "id": "database:aquifer-fr:fr",
@@ -1019,7 +1019,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "aquifer-fr-fr-018f54814cd9915c8c9d"
+    "resourceRevision": "aquifer-fr-fr-3f149e17916768ed6ba3"
   },
   {
     "id": "database:barnes:en",
@@ -1032,7 +1032,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "barnes-en-b03b02707ab409656471"
+    "resourceRevision": "barnes-en-f43e9cee160451cadcc8"
   },
   {
     "id": "database:barnes:fr",
@@ -1045,7 +1045,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "barnes-fr-833aed48200b2ba6726f"
+    "resourceRevision": "barnes-fr-56082eee89615d9fa233"
   },
   {
     "id": "database:bible-annotee:fr",
@@ -1058,7 +1058,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "bible-annotee-fr-9aa26382402383ab2c08"
+    "resourceRevision": "bible-annotee-fr-8dd7f948b4c255c8ee6b"
   },
   {
     "id": "database:BOST:fr",
@@ -1084,7 +1084,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "burkitt-en-063b1c408020c9817c9b"
+    "resourceRevision": "burkitt-en-972338770310ff4ae686"
   },
   {
     "id": "database:CALMET:fr",
@@ -1110,7 +1110,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "calvin-en-cd97f68a4494cb717d44"
+    "resourceRevision": "calvin-en-21a0ee1716d93ab92325"
   },
   {
     "id": "database:catena-aurea:en",
@@ -1123,7 +1123,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "catena-aurea-en-c901356fd0ead52a6984"
+    "resourceRevision": "catena-aurea-en-3a835b1c38b92c3c260c"
   },
   {
     "id": "database:darby-notes:en",
@@ -1136,7 +1136,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "darby-notes-en-18282161736e80a7c5d8"
+    "resourceRevision": "darby-notes-en-04b8498a650fb1ec5cb2"
   },
   {
     "id": "database:DICTIONNAIRE:en",
@@ -1173,7 +1173,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "douay-rheims-notes-en-fb804de36080ec88a5e7"
+    "resourceRevision": "douay-rheims-notes-en-c9c21659014ff979732c"
   },
   {
     "id": "database:EASTON_WEBSTER:en",
@@ -1212,7 +1212,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "family-notes-en-872679b80c220229a07d"
+    "resourceRevision": "family-notes-en-aef67f2db7e1e7b7743a"
   },
   {
     "id": "database:fourfold-gospel:en",
@@ -1225,7 +1225,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "fourfold-gospel-en-693c1abd0850fb46334e"
+    "resourceRevision": "fourfold-gospel-en-3f3a25af7abf4c9114d1"
   },
   {
     "id": "database:fre-aug:fr",
@@ -1238,7 +1238,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "fre-aug-fr-415245c703a304a8b771"
+    "resourceRevision": "fre-aug-fr-7576a02d9f06ef7bc721"
   },
   {
     "id": "database:fre-chry:fr",
@@ -1251,7 +1251,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "fre-chry-fr-2bdfedc472c938567396"
+    "resourceRevision": "fre-chry-fr-c390dfd5844ba71e0358"
   },
   {
     "id": "database:geneva-notes:en",
@@ -1264,7 +1264,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "geneva-notes-en-0770abc34d5bb7a13828"
+    "resourceRevision": "geneva-notes-en-d4039d5aaaadf9639312"
   },
   {
     "id": "database:ISBE:en",
@@ -1290,7 +1290,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "jfb-en-a6a97a3773ef772881c5"
+    "resourceRevision": "jfb-en-26091c1ed3898ec1fbc9"
   },
   {
     "id": "database:kd:en",
@@ -1303,7 +1303,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "kd-en-3f851c602afa810d0f5e"
+    "resourceRevision": "kd-en-f958ec6b51ebe6237ad2"
   },
   {
     "id": "database:king-comments:en",
@@ -1316,7 +1316,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "king-comments-en-d2755427acc046391663"
+    "resourceRevision": "king-comments-en-52bf050ec07328457f52"
   },
   {
     "id": "database:LELIEVRE:fr",
@@ -1342,7 +1342,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "lightfoot-en-9d64acedb0a6da58d4be"
+    "resourceRevision": "lightfoot-en-a68aa1be42ebe971010e"
   },
   {
     "id": "database:luther:en",
@@ -1355,7 +1355,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "luther-en-4bad45d99ccbf288ae85"
+    "resourceRevision": "luther-en-7d77d393614584221c21"
   },
   {
     "id": "database:mhc:en",
@@ -1368,7 +1368,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "mhc-en-fe3fdcd1e6af4c705d92"
+    "resourceRevision": "mhc-en-867b788eb7df744a7eeb"
   },
   {
     "id": "database:mhcc:en",
@@ -1381,7 +1381,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "mhcc-en-1fe1426ec4de4755c157"
+    "resourceRevision": "mhcc-en-1cc6b00b8e3ccc4984bc"
   },
   {
     "id": "database:mhm:en",
@@ -1394,7 +1394,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "mhm-en-68eeba1faebb43940012"
+    "resourceRevision": "mhm-en-97b92eddc01c632eaae1"
   },
   {
     "id": "database:MHY:fr",
@@ -1407,7 +1407,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "mhy-fr-e8d2ab796c382ad19c96"
+    "resourceRevision": "mhy-fr-4015a53f64acdc87d37e"
   },
   {
     "id": "database:NAVE:en",
@@ -1444,7 +1444,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "pnt-en-efbcf9b9b7992f71e64d"
+    "resourceRevision": "pnt-en-21b90b750a3d0bb7a1ee"
   },
   {
     "id": "database:rashi-en:en",
@@ -1457,7 +1457,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "rashi-en-en-52513cc424e5870f63c7"
+    "resourceRevision": "rashi-en-en-17355a5fb881c0f453e3"
   },
   {
     "id": "database:rwp:en",
@@ -1470,7 +1470,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "rwp-en-540b62b2acbc9774778e"
+    "resourceRevision": "rwp-en-77983d3ebaf62873bed6"
   },
   {
     "id": "database:scofield:en",
@@ -1483,7 +1483,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "scofield-en-125c3300e3d686065c73"
+    "resourceRevision": "scofield-en-76e78bafe5966b32c2b4"
   },
   {
     "id": "database:sdabc:en",
@@ -1496,7 +1496,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "sdabc-en-1a8c21e8b487d9f854b2"
+    "resourceRevision": "sdabc-en-fd98bc9a1715b5bd9280"
   },
   {
     "id": "database:sdabc:fr",
@@ -1509,7 +1509,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "sdabc-fr-03cad47bb468c679790c"
+    "resourceRevision": "sdabc-fr-94d373a9f24871402b6e"
   },
   {
     "id": "database:SMITH:en",
@@ -1559,7 +1559,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "treasury-david-en-e8aef7efd7d9f9823e86"
+    "resourceRevision": "treasury-david-en-95c6e44a33a692ac47c7"
   },
   {
     "id": "database:TRESOR:fr",
@@ -1597,7 +1597,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "wesley-en-bdcdb812f0cb9cbd35e7"
+    "resourceRevision": "wesley-en-f31c2f1527686a1593ed"
   },
   {
     "id": "database:WESTPHAL:fr",

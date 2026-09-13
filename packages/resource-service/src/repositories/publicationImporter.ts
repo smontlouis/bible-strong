@@ -1,3 +1,7 @@
+import {
+  buildCommentaryReadingSections,
+  createCommentaryReadingIndex,
+} from '@bible-strong/resource-domain/contracts/commentarySections'
 import { createHash } from 'node:crypto'
 
 import { Data, Effect } from 'effect'
@@ -875,15 +879,69 @@ export const importPublicationBundle = (
                       commentaryCanonical.documents.map(document => [document.id, document.content])
                     )
                   : undefined
-              await insertChunks(
-                transaction,
-                'commentary_verses',
-                commentaryCanonical.verses.map(verse => ({
-                  publication_id: publication.id,
-                  verse_key: verse.verseKey,
-                  content: commentaryVerseContent(commentaryCanonical, verse, commentaryDocuments),
-                }))
-              )
+              for (let offset = 0; offset < commentaryCanonical.verses.length; offset += 100) {
+                assertNotInterrupted(signal)
+                await insertChunks(
+                  transaction,
+                  'commentary_verses',
+                  commentaryCanonical.verses.slice(offset, offset + 100).map(verse => ({
+                    publication_id: publication.id,
+                    verse_key: verse.verseKey,
+                    content: commentaryVerseContent(
+                      commentaryCanonical,
+                      verse,
+                      commentaryDocuments
+                    ),
+                  }))
+                )
+              }
+              const readingChapters = new Map<
+                string,
+                (typeof commentaryCanonical.verses)[number][]
+              >()
+              for (const verse of commentaryCanonical.verses) {
+                const [book, chapter] = verse.verseKey.split('-')
+                const key = `${book}-${chapter}`
+                const chapterVerses = readingChapters.get(key) ?? []
+                chapterVerses.push(verse)
+                readingChapters.set(key, chapterVerses)
+              }
+              for (const [chapterKey, chapterVerses] of readingChapters) {
+                const [book, chapter] = chapterKey.split('-').map(Number)
+                // Expand normalized documents only for this chapter, not a second
+                // complete expanded corpus in memory while building the index.
+                const comments = Object.fromEntries(
+                  chapterVerses.map(verse => [
+                    verse.verseKey.split('-')[2],
+                    commentaryVerseContent(commentaryCanonical, verse, commentaryDocuments),
+                  ])
+                )
+                const sections = buildCommentaryReadingSections({
+                  entry: {
+                    id: commentaryCanonical.resourceId,
+                    publicationId: commentaryCanonical.resourceId,
+                  },
+                  language: commentaryCanonical.language,
+                  book,
+                  chapter,
+                  comments,
+                })
+                const index = createCommentaryReadingIndex(sections)
+                await insertChunks(
+                  transaction,
+                  'commentary_reading_sections',
+                  sections.map((section, ordinal) => ({
+                    publication_id: publication.id,
+                    id: section.id,
+                    book,
+                    chapter,
+                    range_start_verse: section.rangeStartVerse,
+                    range_end_verse: section.rangeEndVerse,
+                    excerpt: index[ordinal].excerpt,
+                    content: section.content,
+                  }))
+                )
+              }
             } else if (canonical.format === 'bible-strong-canonical-cross-references') {
               const crossReferenceCanonical = canonical as CanonicalCrossReferencePublication
               await insertChunks(

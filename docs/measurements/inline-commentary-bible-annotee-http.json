@@ -1,0 +1,13 @@
+{
+  "resourceId": "bible-annotee",
+  "language": "fr",
+  "revision": "bible-annotee-fr-8dd7f948b4c255c8ee6b",
+  "book": 19,
+  "chapter": 119,
+  "sections": 95,
+  "indexBytes": 21688,
+  "fullSectionBytes": 4849,
+  "indexMs": 66.81629199999998,
+  "sectionMs": 6.253166000000192,
+  "environment": "Local PostgreSQL and in-process HTTP handler, cold request; not deployed network latency."
+}

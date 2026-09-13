@@ -1,3 +1,5 @@
+import { COMMENTARY_READING_INDEX_VERSION } from "@bible-strong/resource-domain/contracts/commentaryReadingContract";
+import { writeCommentaryReadingIndex } from "./commentaryReadingIndex.js";
 import { createHash, randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
 import { createReadStream, existsSync } from "node:fs";
@@ -99,7 +101,7 @@ type LibraryIndex = {
   }>;
 };
 
-type CatalogResource = {
+export type CatalogResource = {
   id: string;
   title: string;
   author: string;
@@ -116,6 +118,7 @@ type CanonicalCommentary = {
   revision: string;
   sourceVersion: string;
   sourceSha256: string;
+  readingIndexVersion: typeof COMMENTARY_READING_INDEX_VERSION;
   verses: Array<{ verseKey: Passage; content: string }>;
 };
 
@@ -127,12 +130,14 @@ type CanonicalNormalizedCommentary = {
   revision: string;
   sourceVersion: string;
   sourceSha256: string;
+  readingIndexVersion: typeof COMMENTARY_READING_INDEX_VERSION;
   documents: Array<{ id: string; content: string }>;
   verses: Array<{ verseKey: Passage; documentIds: string[] }>;
 };
 
-type AnyCanonicalCommentary =
-  CanonicalCommentary | CanonicalNormalizedCommentary;
+export type AnyCanonicalCommentary =
+  | CanonicalCommentary
+  | CanonicalNormalizedCommentary;
 
 type CommentaryManifest = {
   format: "bible-strong-resource-publication";
@@ -430,6 +435,9 @@ export const buildCanonicalCommentary = (
   sourceHash.update("}");
   const sourceSha256 = sourceHash.digest("hex");
   const revisionHash = createHash("sha256");
+  revisionHash.update(
+    `commentary-reading-index:${COMMENTARY_READING_INDEX_VERSION}\0`
+  );
   updateJsonArrayHash(revisionHash, verses);
   const revision = `${resourceId.toLowerCase()}-${language}-${revisionHash.digest("hex").slice(0, 20)}`;
   return {
@@ -440,6 +448,7 @@ export const buildCanonicalCommentary = (
     revision,
     sourceVersion,
     sourceSha256,
+    readingIndexVersion: COMMENTARY_READING_INDEX_VERSION,
     verses
   };
 };
@@ -540,6 +549,9 @@ const buildCanonicalEgwWritings = async (
   updateJsonArrayHash(sourceHash, verses);
   sourceHash.update("}");
   const revisionHash = createHash("sha256");
+  revisionHash.update(
+    `commentary-reading-index:${COMMENTARY_READING_INDEX_VERSION}\0`
+  );
   updateJsonArrayHash(revisionHash, documents);
   updateJsonArrayHash(revisionHash, verses);
   return {
@@ -550,6 +562,7 @@ const buildCanonicalEgwWritings = async (
     revision: `${resourceId}-${language}-${revisionHash.digest("hex").slice(0, 20)}`,
     sourceVersion,
     sourceSha256: sourceHash.digest("hex"),
+    readingIndexVersion: COMMENTARY_READING_INDEX_VERSION,
     documents,
     verses
   };
@@ -568,7 +581,8 @@ const writeCanonicalJson = async (
       language: canonical.language,
       revision: canonical.revision,
       sourceVersion: canonical.sourceVersion,
-      sourceSha256: canonical.sourceSha256
+      sourceSha256: canonical.sourceSha256,
+      readingIndexVersion: canonical.readingIndexVersion
     };
     const prefix = JSON.stringify(metadata).slice(0, -1);
     await file.write(prefix);
@@ -664,6 +678,7 @@ const createSqlite = async (
       }
       database.exec("COMMIT");
     }
+    writeCommentaryReadingIndex(database, canonical);
     database
       .prepare("INSERT INTO RESOURCE_METADATA VALUES (?, ?, ?, ?, ?)")
       .run(
@@ -680,7 +695,7 @@ const createSqlite = async (
   await utimes(sqlitePath, REPRODUCIBLE_ZIP_TIME, REPRODUCIBLE_ZIP_TIME);
 };
 
-const buildBundle = async (
+export const buildCommentaryPublicationBundle = async (
   stagingRoot: string,
   catalogResource: CatalogResource,
   language: Language,
@@ -793,7 +808,7 @@ const buildBundle = async (
   return { bundlePath, manifest, sqliteBytes: sqliteStats.size };
 };
 
-const prepareCatalogContractReplacements = async (
+export const prepareCatalogContractReplacements = async (
   catalogResources: readonly CatalogResource[],
   publications: readonly {
     catalogResource: CatalogResource;
@@ -933,6 +948,43 @@ const prepareCatalogContractReplacements = async (
   ];
 };
 
+export function selectCommentaryPublicationResources(
+  catalogResources: CatalogResource[],
+  availableResources: Record<string, unknown>,
+  requestedResourceIds: ReadonlySet<string>
+): CatalogResource[] {
+  const selectedCatalogResources = requestedResourceIds.size
+    ? catalogResources.filter((resource) =>
+        requestedResourceIds.has(resource.id)
+      )
+    : catalogResources;
+  if (
+    requestedResourceIds.size &&
+    selectedCatalogResources.length !== requestedResourceIds.size
+  ) {
+    const unknown = [...requestedResourceIds].filter(
+      (resourceId) =>
+        !catalogResources.some((resource) => resource.id === resourceId)
+    );
+    throw new Error(
+      `commentary-publication-resource-unknown:${unknown.join(",")}`
+    );
+  }
+  if (
+    !requestedResourceIds.size &&
+    catalogResources.length !== Object.keys(availableResources).length
+  ) {
+    throw new Error(
+      `commentary-catalog-library-count-mismatch:${catalogResources.length}:${Object.keys(availableResources).length}`
+    );
+  }
+  for (const resource of selectedCatalogResources) {
+    if (!availableResources[resource.id])
+      throw new Error(`commentary-library-resource-missing:${resource.id}`);
+  }
+  return selectedCatalogResources;
+}
+
 const main = async (): Promise<void> => {
   const libraryIndexPath = path.join(libraryRoot, "index.json");
   const catalogPath = path.join(workflowRoot, "data/catalog.json");
@@ -949,11 +1001,6 @@ const main = async (): Promise<void> => {
   const catalogResources = catalogEnvelope.resources.filter(
     (resource) => resource.languages.length > 0
   );
-  if (catalogResources.length !== Object.keys(index.resources).length) {
-    throw new Error(
-      `commentary-catalog-library-count-mismatch:${catalogResources.length}:${Object.keys(index.resources).length}`
-    );
-  }
   const requestedResourceIds = new Set(
     process.argv
       .flatMap((argument, position, arguments_) =>
@@ -961,20 +1008,11 @@ const main = async (): Promise<void> => {
       )
       .filter(Boolean)
   );
-  const selectedCatalogResources = requestedResourceIds.size
-    ? catalogResources.filter((resource) =>
-        requestedResourceIds.has(resource.id)
-      )
-    : catalogResources;
-  if (selectedCatalogResources.length !== requestedResourceIds.size) {
-    const unknown = [...requestedResourceIds].filter(
-      (resourceId) =>
-        !catalogResources.some((resource) => resource.id === resourceId)
-    );
-    throw new Error(
-      `commentary-publication-resource-unknown:${unknown.join(",")}`
-    );
-  }
+  const selectedCatalogResources = selectCommentaryPublicationResources(
+    catalogResources,
+    index.resources,
+    requestedResourceIds
+  );
   const entriesByResource = await loadCommentaryLibraryEntries(
     index,
     undefined,
@@ -1002,7 +1040,7 @@ const main = async (): Promise<void> => {
                 index,
                 entries
               );
-        const bundle = await buildBundle(
+        const bundle = await buildCommentaryPublicationBundle(
           stagingRoot,
           catalogResource,
           language,

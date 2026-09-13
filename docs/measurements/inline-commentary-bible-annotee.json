@@ -1,0 +1,128 @@
+{
+  "resource": {
+    "resourceId": "bible-annotee",
+    "language": "fr",
+    "revision": "bible-annotee-fr-9aa26382402383ab2c08"
+  },
+  "sourceSha256": "039e5abd683ac18465a8d3162d02bc7fa7b0c9e25185b4fd0089e601e788a8e2",
+  "sourceBytes": 22900736,
+  "environment": {
+    "node": "v22.21.1",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "note": "Desktop SQLite lookup timings; not device or network latency."
+  },
+  "generationMs": 697.9254579999999,
+  "baselineBytes": 22900736,
+  "indexedBytes": 29360128,
+  "addedBytes": 6459392,
+  "chapters": 1216,
+  "sections": 23319,
+  "totalIndexBytes": 5771488,
+  "median": {
+    "book": 4,
+    "chapter": 27,
+    "sections": 18,
+    "bytes": 4388,
+    "gzipBytes": 1780,
+    "lookupMs": 0.02133400000002439
+  },
+  "p95": {
+    "book": 11,
+    "chapter": 11,
+    "sections": 37,
+    "bytes": 9081,
+    "gzipBytes": 3539,
+    "lookupMs": 0.02437499999996362
+  },
+  "worst": [
+    {
+      "book": 19,
+      "chapter": 119,
+      "sections": 95,
+      "bytes": 21688,
+      "gzipBytes": 7062,
+      "lookupMs": 0.057332999999971435
+    },
+    {
+      "book": 40,
+      "chapter": 26,
+      "sections": 70,
+      "bytes": 17779,
+      "gzipBytes": 6368,
+      "lookupMs": 0.04212499999994179
+    },
+    {
+      "book": 42,
+      "chapter": 1,
+      "sections": 69,
+      "bytes": 17607,
+      "gzipBytes": 6125,
+      "lookupMs": 0.040582999999969616
+    },
+    {
+      "book": 43,
+      "chapter": 6,
+      "sections": 62,
+      "bytes": 15626,
+      "gzipBytes": 5537,
+      "lookupMs": 0.03879200000005767
+    },
+    {
+      "book": 26,
+      "chapter": 16,
+      "sections": 60,
+      "bytes": 15069,
+      "gzipBytes": 5459,
+      "lookupMs": 0.03837500000008731
+    },
+    {
+      "book": 42,
+      "chapter": 22,
+      "sections": 58,
+      "bytes": 14829,
+      "gzipBytes": 5110,
+      "lookupMs": 0.03337499999997817
+    },
+    {
+      "book": 40,
+      "chapter": 27,
+      "sections": 57,
+      "bytes": 14519,
+      "gzipBytes": 5338,
+      "lookupMs": 0.037542000000030384
+    },
+    {
+      "book": 6,
+      "chapter": 15,
+      "sections": 61,
+      "bytes": 14427,
+      "gzipBytes": 5019,
+      "lookupMs": 0.03475000000003092
+    },
+    {
+      "book": 43,
+      "chapter": 11,
+      "sections": 54,
+      "bytes": 13824,
+      "gzipBytes": 4990,
+      "lookupMs": 0.03520800000001145
+    },
+    {
+      "book": 43,
+      "chapter": 8,
+      "sections": 53,
+      "bytes": 13615,
+      "gzipBytes": 4908,
+      "lookupMs": 0.03320799999983137
+    }
+  ],
+  "queryPlan": [
+    {
+      "id": 3,
+      "parent": 0,
+      "notused": 62,
+      "detail": "SEARCH COMMENTARY_READING_SECTIONS USING INDEX COMMENTARY_READING_CHAPTER (book=? AND chapter=?)"
+    }
+  ]
+}

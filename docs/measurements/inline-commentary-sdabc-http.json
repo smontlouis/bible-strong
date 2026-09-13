@@ -1,0 +1,13 @@
+{
+  "resourceId": "sdabc",
+  "language": "fr",
+  "revision": "sdabc-fr-94d373a9f24871402b6e",
+  "book": 19,
+  "chapter": 119,
+  "sections": 172,
+  "indexBytes": 39956,
+  "fullSectionBytes": 1562,
+  "indexMs": 68.22170900000015,
+  "sectionMs": 8.93645800000013,
+  "environment": "Local PostgreSQL and in-process HTTP handler, cold request; not deployed network latency."
+}

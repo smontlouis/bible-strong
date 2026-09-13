@@ -1,0 +1,16 @@
+{
+  "resource": {
+    "kind": "commentary",
+    "resourceId": "egw-writings",
+    "language": "en",
+    "revision": "egw-writings-en-d6a3c4a1fdfdba1b9eaa"
+  },
+  "book": 43,
+  "chapter": 1,
+  "sections": 1238,
+  "chips": 36,
+  "maxSectionsPerChip": 276,
+  "preservedSections": 1238,
+  "bridgeBytes": 13305,
+  "indexBytes": 314530
+}

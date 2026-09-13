@@ -1,5 +1,6 @@
 'use dom'
 
+import InlineCommentaryChips from './InlineCommentaryChips'
 import { styled } from 'goober'
 import { Bookmark, Verse as TVerse } from '~common/types'
 import { HighlightsObj } from '~redux/modules/user'
@@ -93,6 +94,7 @@ const getPericopeVerse = (pericopeChapter: PericopeChapter, verse: number) => {
 // ============================================================================
 
 export interface UnifiedVersesRendererProps {
+  inlineCommentaries?: WebViewProps['inlineCommentaries']
   verses: TVerse[]
   parallelVerses: ParallelVerse[]
   focusVerses: WebViewProps['focusVerses']
@@ -255,6 +257,7 @@ function PericopeHeaders({
 }
 
 export function UnifiedVersesRenderer({
+  inlineCommentaries,
   verses,
   parallelVerses,
   focusVerses,
@@ -308,6 +311,9 @@ export function UnifiedVersesRenderer({
 
   return (
     <>
+      {!annotationMode && (
+        <InlineCommentaryChips chips={inlineCommentaries?.introduction} settings={settings} />
+      )}
       {verses.map((verse, i) => {
         if (verse.Verset == 0) return null
 
@@ -439,6 +445,10 @@ export function UnifiedVersesRenderer({
               redWords={redWords}
               passageMedia={passageMediaAfterVerses[verseNumber]}
               passageMediaGallerySections={passageMediaGallerySections}
+            />
+            <InlineCommentaryChips
+              chips={inlineCommentaries?.afterVerses[verseNumber]}
+              settings={settings}
             />
           </Span>
         )

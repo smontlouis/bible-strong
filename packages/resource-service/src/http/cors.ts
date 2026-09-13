@@ -1,4 +1,4 @@
-export const RESOURCE_CORS_ALLOWED_METHODS = ['GET', 'HEAD', 'OPTIONS'] as const
+export const RESOURCE_CORS_ALLOWED_METHODS = ['GET', 'HEAD', 'POST', 'OPTIONS'] as const
 export const RESOURCE_CORS_ALLOWED_HEADERS = [
   'accept',
   'content-type',

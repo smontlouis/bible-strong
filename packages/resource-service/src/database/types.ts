@@ -3,6 +3,7 @@ import type { Kyselify } from 'drizzle-orm/kysely'
 import type {
   bibleVerses,
   commentaryVerses,
+  commentaryReadingSections,
   crossReferenceLinks,
   timelineEvents,
   interlinearBibleSegmentIdentities,
@@ -46,6 +47,7 @@ import type {
 
 export type ResourcePublicationRow = Kyselify<typeof resourcePublications>
 export type BibleVerseRow = Kyselify<typeof bibleVerses>
+export type CommentaryReadingSectionRow = Kyselify<typeof commentaryReadingSections>
 export type CommentaryVerseRow = Kyselify<typeof commentaryVerses>
 export type CrossReferenceLinkRow = Kyselify<typeof crossReferenceLinks>
 export type TimelineEventRow = Kyselify<typeof timelineEvents>
@@ -92,6 +94,7 @@ export type ResourceDatabase = {
   resource_publications: ResourcePublicationRow
   bible_verses: BibleVerseRow
   commentary_verses: CommentaryVerseRow
+  commentary_reading_sections: CommentaryReadingSectionRow
   cross_reference_links: CrossReferenceLinkRow
   timeline_events: TimelineEventRow
   nave_topics: NaveTopicRow

@@ -264,6 +264,7 @@
     "typescript-eslint": "^8.33.1"
   },
   "dependencies": {
+    "@bible-strong/resource-domain": "workspace:*",
     "@radix-ui/react-dialog": "^1.1.17",
     "@radix-ui/react-label": "^2.1.10",
     "@radix-ui/react-progress": "^1.1.10",

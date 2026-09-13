@@ -1,9 +1,19 @@
+import { getCommentaryByPublicationId } from '@bible-strong/resource-catalog/commentaries'
+import { getInlineCommentaryResources } from '~features/commentaries/inlineCommentarySelection'
+import {
+  placeInlineCommentaries,
+  summarizeInlineCommentaryChip,
+} from '~features/commentaries/inlineCommentaryPlacement'
+import InlineCommentaryReader, {
+  type InlineCommentaryRequest,
+} from '~features/commentaries/InlineCommentaryReader'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
 import { Platform, type LayoutChangeEvent } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import Box from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
+import Text from '~common/ui/Text'
 import BibleViewport from './BibleViewport'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import { BibleError, BibleLoadingError } from '~helpers/bibleErrors'
@@ -428,6 +438,67 @@ const BibleViewer = ({
     ...localQueryOptions,
   })
   const redWords = redWordsQuery.data ?? null
+  const [inlineCommentaryRequest, setInlineCommentaryRequest] = useState<InlineCommentaryRequest>()
+  const readingCommentaries = getInlineCommentaryResources(
+    settings.inlineCommentaries,
+    settings.commentarySelection
+  )
+  const inlineCommentaryQuery = useQuery({
+    queryKey: [
+      'inline-commentary-index',
+      book.Numero,
+      chapter,
+      readingCommentaries,
+      readingCommentaries.map(resource =>
+        getOfflineResourceQuerySignal(resourceRegistry, {
+          kind: 'commentary',
+          ...resource,
+        })
+      ),
+    ],
+    queryFn: () =>
+      resources.commentaryReading.loadIndex({
+        book: book.Numero,
+        chapter,
+        resources: readingCommentaries,
+      }),
+    enabled: extrasEnabled && readingCommentaries.length > 0,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+    networkMode: 'always',
+  })
+  const inlinePlacement = placeInlineCommentaries(
+    inlineCommentaryQuery.data?.indexes ?? [],
+    isContextFocused && focusVerses?.length
+      ? focusVerses.map(Number)
+      : verses.map(verse => Number(verse.Verset)),
+    isContextFocused
+  )
+  const labelInlineChip = (
+    chip: import('~features/commentaries/inlineCommentaryPlacement').InlineCommentaryChip
+  ) => {
+    const name =
+      getCommentaryByPublicationId(chip.resourceId, chip.language)?.shortName ?? chip.resourceId
+    const mixedLanguages = readingCommentaries.some(
+      resource =>
+        resource.language !== chip.language &&
+        getCommentaryByPublicationId(resource.resourceId, resource.language)?.shortName === name
+    )
+    return {
+      ...summarizeInlineCommentaryChip(chip),
+      label: mixedLanguages ? `${name} · ${chip.language.toUpperCase()}` : name,
+    }
+  }
+  const inlineCommentaries = {
+    introduction: inlinePlacement.introduction.map(labelInlineChip),
+    afterVerses: Object.fromEntries(
+      Object.entries(inlinePlacement.afterVerses).map(([verse, chips]) => [
+        verse,
+        chips.map(labelInlineChip),
+      ])
+    ),
+  }
+
   const redWordsUnavailable =
     redWordsAvailabilityQuery.data?.status === 'unavailable'
       ? (redWordsAvailabilityQuery.data as Extract<
@@ -1268,6 +1339,30 @@ const BibleViewer = ({
       : handleEnterAnnotationModeFromDoubleTap,
     // Red words
     redWords: settings.redWordsDisplay ? redWords : null,
+    inlineCommentaries,
+    onOpenInlineCommentary: summary => {
+      const chip = [
+        ...inlinePlacement.introduction,
+        ...Object.values(inlinePlacement.afterVerses).flat(),
+      ].find(
+        candidate =>
+          candidate.sectionId === summary.sectionId &&
+          candidate.resourceId === summary.resourceId &&
+          candidate.language === summary.language &&
+          candidate.revision === summary.revision
+      )
+      if (!chip) return
+      setInlineCommentaryRequest({
+        resourceId: chip.resourceId,
+        language: chip.language,
+        revision: chip.revision,
+        book: book.Numero,
+        chapter,
+        sectionId: chip.sectionId,
+        sections: chip.sections,
+        excerpt: chip.excerpt,
+      })
+    },
     chapterEntities,
     chapterEntitiesLoaded,
     chapterEntityModuleStatus,
@@ -1420,6 +1515,32 @@ const BibleViewer = ({
           />
         </Box>
       )}
+      {readingCommentaries.length > 0 &&
+        (inlineCommentaryQuery.isError || !!inlineCommentaryQuery.data?.unavailable.length) && (
+          <Box className="flex-row items-center gap-[12px] px-[16px] py-[8px] bg-reverse">
+            <Text className="flex-1 text-[12px] text-tertiary">
+              {t('inlineCommentary.unavailable')}
+            </Text>
+            <TouchableBox
+              className="min-h-[44px] justify-center"
+              accessibilityRole="button"
+              onPress={() => void inlineCommentaryQuery.refetch()}
+            >
+              <Text className="text-[12px] font-semibold text-primary">
+                {t('bible.error.retry')}
+              </Text>
+            </TouchableBox>
+            <TouchableBox
+              className="min-h-[44px] justify-center"
+              accessibilityRole="button"
+              onPress={bibleParamsModal.open}
+            >
+              <Text className="text-[12px] font-semibold text-primary">
+                {t('inlineCommentary.options')}
+              </Text>
+            </TouchableBox>
+          </Box>
+        )}
       <Box
         className="overflow-hidden border-continuous flex-[1]"
         style={{ zIndex: domLayerZIndex }}
@@ -1463,6 +1584,10 @@ const BibleViewer = ({
           isInTab={isInTab}
         />
       )}
+      <InlineCommentaryReader
+        request={inlineCommentaryRequest}
+        onClose={() => setInlineCommentaryRequest(undefined)}
+      />
       {!hidePersonalBibleData && (
         <SelectedVersesModal
           ref={versesModal.getRef()}

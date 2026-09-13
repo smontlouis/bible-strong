@@ -158,3 +158,7 @@ export const setSettingsContextualInformationDisplay = createAction(
 )
 
 export const isContextualInformationDisplayEnabled = (value?: boolean): boolean => value !== false
+
+export const setSettingsInlineCommentaries = createAction<string[]>(
+  'user/SET_SETTINGS_INLINE_COMMENTARIES'
+)

@@ -1,0 +1,27 @@
+{
+  "environment": "actual local HTTP service on 127.0.0.1:8787, PostgreSQL 55439, published R2 source copies",
+  "production": false,
+  "book": 19,
+  "chapter": 119,
+  "indexResponseBytes": 66032,
+  "checks": [
+    {
+      "resourceId": "bible-annotee",
+      "sections": 95,
+      "lastVerse": 176,
+      "lastSectionId": "bible-annotee-fr-19-119-176-176",
+      "exactRevision": "bible-annotee-fr-8dd7f948b4c255c8ee6b",
+      "fullBodyPresentOnExplicitRequest": true,
+      "indexContainsNoFullBodies": true
+    },
+    {
+      "resourceId": "barnes",
+      "sections": 176,
+      "lastVerse": 176,
+      "lastSectionId": "barnes-fr-19-119-176-176",
+      "exactRevision": "barnes-fr-56082eee89615d9fa233",
+      "fullBodyPresentOnExplicitRequest": true,
+      "indexContainsNoFullBodies": true
+    }
+  ]
+}

@@ -52,6 +52,80 @@ export const makeKyselySupplementaryRepository = (
     ).pipe(Effect.mapError(cause => new SupplementaryRepositoryFailure({ cause })))
 
   return {
+    findCommentaryReadingIndex: input =>
+      Effect.gen(function* () {
+        const resourceIdentity = commentaryIdentity(input.collection, input.language)
+        const publication = yield* findActivePublication(resourceIdentity)
+        if (!publication)
+          return yield* new ActiveSupplementaryPublicationUnavailable({ resourceIdentity })
+        const sections = yield* tryDatabasePromise('commentary.reading.index', () =>
+          database
+            .selectFrom('commentary_reading_sections')
+            .select(['id', 'range_start_verse', 'range_end_verse', 'excerpt'])
+            .where('publication_id', '=', publication.id)
+            .where('book', '=', input.book)
+            .where('chapter', '=', input.chapter)
+            .orderBy('range_start_verse')
+            .orderBy('range_end_verse')
+            .orderBy('id')
+            .execute()
+        ).pipe(Effect.mapError(cause => new SupplementaryRepositoryFailure({ cause })))
+        if (sections.length === 0) {
+          const indexed = yield* tryDatabasePromise('commentary.reading.index-presence', () =>
+            database
+              .selectFrom('commentary_reading_sections')
+              .select('id')
+              .where('publication_id', '=', publication.id)
+              .limit(1)
+              .executeTakeFirst()
+          ).pipe(Effect.mapError(cause => new SupplementaryRepositoryFailure({ cause })))
+          if (!indexed)
+            return yield* new ActiveSupplementaryPublicationUnavailable({ resourceIdentity })
+        }
+        return {
+          revision: publication.revision,
+          sections: sections.map(row => ({
+            id: row.id,
+            rangeStartVerse: row.range_start_verse,
+            rangeEndVerse: row.range_end_verse,
+            excerpt: row.excerpt,
+          })),
+        }
+      }),
+    findCommentaryReadingSection: input =>
+      Effect.gen(function* () {
+        const resourceIdentity = commentaryIdentity(input.resourceId, input.language)
+        const publication = yield* tryDatabasePromise('commentary.reading.revision', () =>
+          database
+            .selectFrom('resource_publications')
+            .select(['id', 'revision'])
+            .where('resource_identity', '=', resourceIdentity)
+            .where('revision', '=', input.revision)
+            .where('activated_at', 'is not', null)
+            .executeTakeFirst()
+        ).pipe(Effect.mapError(cause => new SupplementaryRepositoryFailure({ cause })))
+        if (!publication) return yield* new SupplementaryContentNotFound({ resourceIdentity })
+        const section = yield* tryDatabasePromise('commentary.reading.section', () =>
+          database
+            .selectFrom('commentary_reading_sections')
+            .select(['id', 'range_start_verse', 'range_end_verse', 'content'])
+            .where('publication_id', '=', publication.id)
+            .where('book', '=', input.book)
+            .where('chapter', '=', input.chapter)
+            .where('id', '=', input.sectionId)
+            .executeTakeFirst()
+        ).pipe(Effect.mapError(cause => new SupplementaryRepositoryFailure({ cause })))
+        if (!section) return yield* new SupplementaryContentNotFound({ resourceIdentity })
+        return {
+          revision: publication.revision,
+          section: {
+            id: section.id,
+            rangeStartVerse: section.range_start_verse,
+            rangeEndVerse: section.range_end_verse,
+            content: section.content,
+          },
+        }
+      }),
     findCommentaryVerse: input =>
       Effect.gen(function* () {
         const resourceIdentity = commentaryIdentity(input.collection, input.language)

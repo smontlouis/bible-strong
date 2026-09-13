@@ -1,0 +1,13 @@
+{
+  "resourceId": "MHY",
+  "language": "fr",
+  "revision": "mhy-fr-4015a53f64acdc87d37e",
+  "book": 20,
+  "chapter": 14,
+  "sections": 34,
+  "indexBytes": 7453,
+  "fullSectionBytes": 263,
+  "indexMs": 63.41533299999992,
+  "sectionMs": 6.538457999999991,
+  "environment": "Local PostgreSQL and in-process HTTP handler, cold request; not deployed network latency."
+}

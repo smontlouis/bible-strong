@@ -38,6 +38,30 @@ const interlinearManifest = {
 } as PublicationBundleManifest
 
 describe('development artifact server', () => {
+  it('uses the commentary catalog directory while preserving the legacy MHY path', () => {
+    for (const [resourceId, filename, directory] of [
+      ['bible-annotee', 'commentary-bible-annotee-fr.sqlite.zip', 'commentaries'],
+      ['MHY', 'commentaires-mhy.sqlite.zip', 'databases'],
+    ]) {
+      const commentary = {
+        ...manifest,
+        identity: { kind: 'commentary' as const, resourceId, language: 'fr' as const },
+        offlineArtifact: { ...manifest.offlineArtifact, path: `offline/${filename}` },
+      } as PublicationBundleManifest
+      const artifact = createDevelopmentArtifact(commentary, Buffer.from('commentary'))
+      assert.equal(artifact.route, `/${directory}/${filename}`)
+      assert.equal(
+        respondWithDevelopmentArtifact(
+          new Request(
+            `http://localhost:8788/${directory}/${filename}?sha256=${manifest.offlineArtifact.sha256}`
+          ),
+          artifact
+        ).status,
+        200
+      )
+    }
+  })
+
   it('serves the bundle bytes at the mobile catalog path with integrity headers', async () => {
     const bytes = Buffer.from('immutable LSG bundle')
     const artifact = createDevelopmentArtifact(manifest, bytes)

@@ -1,3 +1,8 @@
+import { COMMENTARY_READING_INDEX_VERSION } from '@bible-strong/resource-domain/contracts/commentaryReadingContract'
+import {
+  buildCommentaryReadingSections,
+  createCommentaryReadingIndex,
+} from '@bible-strong/resource-domain/contracts/commentarySections'
 import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
 import { lstat, readFile, realpath } from 'node:fs/promises'
@@ -563,6 +568,7 @@ export type CanonicalCommentaryPublicationV1 = {
   revision: string
   sourceVersion: string
   sourceSha256: string
+  readingIndexVersion?: typeof COMMENTARY_READING_INDEX_VERSION
   verses: Array<{ verseKey: string; content: string }>
 }
 
@@ -574,6 +580,7 @@ export type CanonicalCommentaryPublicationV2 = {
   revision: string
   sourceVersion: string
   sourceSha256: string
+  readingIndexVersion?: typeof COMMENTARY_READING_INDEX_VERSION
   documents: Array<{ id: string; content: string }>
   verses: Array<{ verseKey: string; documentIds: string[] }>
 }
@@ -1151,6 +1158,8 @@ export const decodeCanonicalCommentary = (value: unknown): CanonicalCommentaryPu
   const candidate = value as Partial<CanonicalCommentaryPublication>
   if (
     candidate.format !== 'bible-strong-canonical-commentary' ||
+    (candidate.readingIndexVersion !== undefined &&
+      candidate.readingIndexVersion !== COMMENTARY_READING_INDEX_VERSION) ||
     (candidate.schemaVersion !== 1 && candidate.schemaVersion !== 2) ||
     !isNonEmptyString(candidate.resourceId) ||
     !/^[A-Za-z0-9][A-Za-z0-9-]{1,63}$/u.test(candidate.resourceId) ||
@@ -2086,7 +2095,7 @@ const validateDictionaryDirectoryOfflineParity = async (
   }
 }
 
-const validateCommentaryOfflineParity = async (
+export const validateCommentaryOfflineParity = async (
   offlineContent: Uint8Array,
   canonical: CanonicalCommentaryPublication
 ) => {
@@ -2112,6 +2121,63 @@ const validateCommentaryOfflineParity = async (
       requireSqliteString(metadata?.source_sha256) !== canonical.sourceSha256
     ) {
       throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+    if (canonical.readingIndexVersion !== undefined) {
+      const documents =
+        canonical.schemaVersion === 2
+          ? new Map(canonical.documents.map(document => [document.id, document.content]))
+          : new Map<string, string>()
+      const chapters = new Map<string, (typeof canonical.verses)[number][]>()
+      for (const verse of canonical.verses) {
+        const [book, chapter] = verse.verseKey.split('-')
+        const key = `${book}-${chapter}`
+        const chapterVerses = chapters.get(key) ?? []
+        chapterVerses.push(verse)
+        chapters.set(key, chapterVerses)
+      }
+      let expectedCount = 0
+      for (const [key, chapterVerses] of chapters) {
+        const [book, chapter] = key.split('-').map(Number)
+        const comments = Object.fromEntries(
+          chapterVerses.map(verse => [
+            verse.verseKey.split('-')[2]!,
+            commentaryVerseContent(canonical, verse, documents),
+          ])
+        )
+        const sections = buildCommentaryReadingSections({
+          entry: { id: canonical.resourceId, publicationId: canonical.resourceId },
+          language: canonical.language,
+          book: book!,
+          chapter: chapter!,
+          comments,
+        })
+        const indexes = createCommentaryReadingIndex(sections)
+        const rows = readSqliteRows(
+          database,
+          `SELECT id, range_start_verse, range_end_verse, excerpt
+           FROM COMMENTARY_READING_SECTIONS WHERE book=${book} AND chapter=${chapter}`
+        )
+        expectedCount += sections.length
+        if (rows.length !== sections.length)
+          throw new Error('OFFLINE_ARTIFACT_READING_INDEX_MISMATCH')
+        const byId = new Map(rows.map(row => [row.id, row]))
+        for (const [index, section] of sections.entries()) {
+          const row = byId.get(section.id)
+          if (
+            !row ||
+            row.range_start_verse !== section.rangeStartVerse ||
+            row.range_end_verse !== section.rangeEndVerse ||
+            row.excerpt !== indexes[index]!.excerpt
+          ) {
+            throw new Error('OFFLINE_ARTIFACT_READING_INDEX_MISMATCH')
+          }
+        }
+      }
+      const total = readSqliteRows(
+        database,
+        'SELECT COUNT(*) AS count FROM COMMENTARY_READING_SECTIONS'
+      )[0]?.count
+      if (total !== expectedCount) throw new Error('OFFLINE_ARTIFACT_READING_INDEX_MISMATCH')
     }
     if (canonical.schemaVersion === 2) {
       const documentRows = readSqliteRows(database, 'SELECT id, content FROM COMMENTARY_DOCUMENTS')

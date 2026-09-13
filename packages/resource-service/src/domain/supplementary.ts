@@ -1,3 +1,11 @@
+import {
+  CommentaryReadingIndexRequest,
+  CommentaryReadingIndexResponse,
+  CommentaryReadingIndexEntry,
+  CommentaryReadingResourceIndex,
+  CommentaryReadingSectionRequest,
+  CommentaryReadingSectionResponse,
+} from '@bible-strong/resource-domain/contracts/commentaryReadingContract'
 import { Context, Data, Effect } from 'effect'
 
 import {
@@ -59,6 +67,21 @@ export type SupplementaryRepositoryError =
   | SupplementaryRepositoryFailure
 
 export type SupplementaryRepositoryService = {
+  findCommentaryReadingIndex: (input: CommentaryChapterLookup) => Effect.Effect<
+    {
+      revision: string
+      sections: readonly CommentaryReadingIndexEntry[]
+    },
+    SupplementaryRepositoryError
+  >
+  findCommentaryReadingSection: (input: CommentaryReadingSectionRequest) => Effect.Effect<
+    {
+      revision: string
+      section: { id: string; rangeStartVerse: number; rangeEndVerse: number; content: string }
+    },
+    SupplementaryRepositoryError
+  >
+
   findCommentaryVerse: (
     input: CommentaryVerseLookup
   ) => Effect.Effect<ActiveCommentaryVerse, SupplementaryRepositoryError>
@@ -127,5 +150,78 @@ export const readCrossReferences = (input: CrossReferenceLookup) =>
       resource: revisionDto('cross-references', 'TRESOR', 'fr', active.revision),
       verseKey: active.verseKey,
       references: active.references,
+    })
+  })
+
+export const readCommentaryReadingIndex = (input: CommentaryReadingIndexRequest) =>
+  Effect.gen(function* () {
+    const repository = yield* SupplementaryRepository
+    const resources = [
+      ...new Map(
+        input.resources.map(resource => [`${resource.resourceId}:${resource.language}`, resource])
+      ).values(),
+    ]
+    const results = yield* Effect.forEach(
+      resources,
+      resource =>
+        repository
+          .findCommentaryReadingIndex({
+            collection: resource.resourceId,
+            language: resource.language,
+            book: input.book,
+            chapter: input.chapter,
+          })
+          .pipe(
+            Effect.map(result => ({ resource, result, cause: undefined })),
+            Effect.catchAll(error =>
+              Effect.succeed({
+                resource,
+                result: undefined,
+                cause:
+                  error._tag === 'ActiveSupplementaryPublicationUnavailable'
+                    ? ('index-unavailable' as const)
+                    : error._tag === 'SupplementaryContentNotFound'
+                      ? ('not-found' as const)
+                      : ('temporary-unavailable' as const),
+              })
+            )
+          ),
+      { concurrency: 5 }
+    )
+    return new CommentaryReadingIndexResponse({
+      book: input.book,
+      chapter: input.chapter,
+      indexes: results.flatMap(item =>
+        item.result
+          ? [
+              new CommentaryReadingResourceIndex({
+                resource: revisionDto(
+                  'commentary',
+                  item.resource.resourceId,
+                  item.resource.language,
+                  item.result.revision
+                ),
+                sections: item.result.sections.map(
+                  section => new CommentaryReadingIndexEntry(section)
+                ),
+              }),
+            ]
+          : []
+      ),
+      unavailable: results.flatMap(item =>
+        item.cause ? [{ ...item.resource, cause: item.cause }] : []
+      ),
+    })
+  })
+
+export const readCommentaryReadingSection = (input: CommentaryReadingSectionRequest) =>
+  Effect.gen(function* () {
+    const repository = yield* SupplementaryRepository
+    const result = yield* repository.findCommentaryReadingSection(input)
+    return new CommentaryReadingSectionResponse({
+      resource: revisionDto('commentary', input.resourceId, input.language, result.revision),
+      book: input.book,
+      chapter: input.chapter,
+      section: result.section,
     })
   })

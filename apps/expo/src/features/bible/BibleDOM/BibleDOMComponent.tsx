@@ -179,6 +179,7 @@ type Props = Pick<
   | 'isSelectionMode'
   | 'selectedCode'
   | 'redWords'
+  | 'inlineCommentaries'
   | 'chapterEntities'
   | 'chapterEntitiesLoaded'
   | 'chapterEntityModuleStatus'
@@ -582,6 +583,7 @@ const LoadedBibleContent = ({
   selectedCode,
   dispatch,
   translations,
+  inlineCommentaries,
   chapterEntities,
   chapterEntitiesLoaded,
   chapterEntityModuleStatus,
@@ -1354,6 +1356,7 @@ const LoadedBibleContent = ({
             <m.div {...versePositionLayoutProps}>
               {/* Unified verse rendering for all modes */}
               <UnifiedVersesRenderer
+                inlineCommentaries={inlineCommentaries}
                 verses={verses}
                 parallelVerses={parallelVerses}
                 focusVerses={focusVerses}

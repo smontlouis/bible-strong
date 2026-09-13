@@ -1,3 +1,9 @@
+import {
+  CommentaryReadingIndexRequest,
+  CommentaryReadingIndexResponse,
+  CommentaryReadingSectionRequest,
+  CommentaryReadingSectionResponse,
+} from '@bible-strong/resource-domain/contracts/commentaryReadingContract'
 import { HttpApi, HttpApiEndpoint, HttpApiGroup } from '@effect/platform'
 import { Schema } from 'effect'
 
@@ -519,6 +525,23 @@ const StrongLexiconApi = HttpApiGroup.make('strongLexicon')
   .addError(ResourceRateLimitedProblem, { status: 429 })
 
 const SupplementaryApi = HttpApiGroup.make('supplementary')
+  .add(
+    HttpApiEndpoint.post('getCommentaryReadingIndex', '/v1/commentaries/reading-index')
+      .setPayload(CommentaryReadingIndexRequest)
+      .addSuccess(CommentaryReadingIndexResponse)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.post('getCommentaryReadingSection', '/v1/commentaries/reading-section')
+      .setPayload(CommentaryReadingSectionRequest)
+      .addSuccess(CommentaryReadingSectionResponse)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
   .add(
     HttpApiEndpoint.get('getCommentaryCoverage', '/v1/commentaries/:collection/:language/coverage')
       .setPath(CommentaryCoveragePath)

@@ -218,6 +218,13 @@
       "when": 1788269544929,
       "tag": "0033_groovy_kronos",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1789286914493,
+      "tag": "0034_commentary_reading_index",
+      "breakpoints": true
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { normalizeInlineCommentaries } from '~features/commentaries/inlineCommentarySelection'
 import { AnyAction, createSlice, PayloadAction, ThunkAction } from '@reduxjs/toolkit'
 import type { JSONValue } from 'expo/build/dom/dom.types'
 import { getDefaultStore } from 'jotai/vanilla'
@@ -95,6 +96,7 @@ import {
   setDefaultColorType,
   setSettingsAlignContent,
   setSettingsCommentaires,
+  setSettingsInlineCommentaries,
   setSettingsCommentarySelection,
   reorderSettingsCommentarySelection,
   setSettingsContextualInformationDisplay,
@@ -558,6 +560,7 @@ export interface UserState {
       relationsDisplay?: 'inline' | 'block'
       tagsDisplay: 'inline' | 'block'
       commentsDisplay: boolean
+      inlineCommentaries?: string[]
       commentarySelection: CommentarySelectionState
       contextualInformationDisplay?: boolean
       redWordsDisplay: boolean
@@ -658,6 +661,7 @@ const getInitialState = (): UserState => ({
       relationsDisplay: 'inline',
       tagsDisplay: 'inline',
       commentsDisplay: false,
+      inlineCommentaries: [],
       commentarySelection:
         getLanguage() === 'en'
           ? ['barnes:en', 'acbc:en', 'mhcc:en']
@@ -769,6 +773,7 @@ const userSlice = createSlice({
       const currentStudies = state.bible.studies
       const currentChangelog = state.bible.changelog
       const currentWordAnnotations = state.bible.wordAnnotations
+      const currentInlineCommentaries = state.bible.settings.inlineCommentaries
       const currentCommentarySelection = state.bible.settings.commentarySelection
 
       // Merge bible (only settings and other non-subcollection data)
@@ -778,6 +783,10 @@ const userSlice = createSlice({
       Object.assign(state.bible.settings, normalizeCompareSelection(bible?.settings))
       state.bible.settings.commentarySelection = normalizeCommentarySelection(
         bible?.settings?.commentarySelection ?? currentCommentarySelection
+      )
+      state.bible.settings.inlineCommentaries = normalizeInlineCommentaries(
+        bible?.settings?.inlineCommentaries ?? currentInlineCommentaries,
+        state.bible.settings.commentarySelection
       )
 
       // Restore subcollection data
@@ -1311,8 +1320,18 @@ const userSlice = createSlice({
     builder.addCase(setSettingsCommentaires, (state, action) => {
       state.bible.settings.commentsDisplay = action.payload
     })
+    builder.addCase(setSettingsInlineCommentaries, (state, action) => {
+      state.bible.settings.inlineCommentaries = normalizeInlineCommentaries(
+        action.payload,
+        state.bible.settings.commentarySelection
+      )
+    })
     builder.addCase(setSettingsCommentarySelection, (state, action) => {
       state.bible.settings.commentarySelection = normalizeCommentarySelection(action.payload)
+      state.bible.settings.inlineCommentaries = normalizeInlineCommentaries(
+        state.bible.settings.inlineCommentaries,
+        state.bible.settings.commentarySelection
+      )
     })
     builder.addCase(reorderSettingsCommentarySelection, (state, action) => {
       const current = state.bible.settings.commentarySelection

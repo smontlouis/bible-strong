@@ -7,11 +7,54 @@ import test from "node:test";
 
 import {
   buildCanonicalCommentary,
-  loadCommentaryLibraryEntries
+  loadCommentaryLibraryEntries,
+  selectCommentaryPublicationResources
 } from "../src/packageCommentaryResourcePublications.js";
 
 const sha256 = (value: string): string =>
   createHash("sha256").update(value).digest("hex");
+
+test("targeted rebuilds accept a partial library without weakening exhaustive publication", () => {
+  const catalog = ["barnes", "bible-annotee"].map((id) => ({
+    id,
+    title: id,
+    author: "fixture",
+    languages: ["fr" as const],
+    rights: "fixture",
+    source: "fixture"
+  }));
+  assert.deepEqual(
+    selectCommentaryPublicationResources(
+      catalog,
+      { barnes: {} },
+      new Set(["barnes"])
+    ).map((resource) => resource.id),
+    ["barnes"]
+  );
+  assert.throws(
+    () =>
+      selectCommentaryPublicationResources(catalog, { barnes: {} }, new Set()),
+    /count-mismatch/
+  );
+  assert.throws(
+    () =>
+      selectCommentaryPublicationResources(
+        catalog,
+        { barnes: {} },
+        new Set(["bible-annotee"])
+      ),
+    /resource-missing/
+  );
+  assert.throws(
+    () =>
+      selectCommentaryPublicationResources(
+        catalog,
+        { barnes: {} },
+        new Set(["unknown"])
+      ),
+    /resource-unknown/
+  );
+});
 
 test("publishes one canonical Barnes unit across its complete range", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "commentary-publication-"));
@@ -96,6 +139,13 @@ test("publishes one canonical Barnes unit across its complete range", async () =
     );
     assert.ok(
       canonical.verses.every((verse) => !verse.content.includes("Variante"))
+    );
+    assert.equal(canonical.readingIndexVersion, 2);
+    const legacyRevision = `barnes-fr-${sha256(JSON.stringify(canonical.verses)).slice(0, 20)}`;
+    assert.notEqual(canonical.revision, legacyRevision);
+    assert.equal(
+      canonical.revision,
+      `barnes-fr-${sha256(`commentary-reading-index:2\0${JSON.stringify(canonical.verses)}`).slice(0, 20)}`
     );
   } finally {
     await rm(root, { recursive: true, force: true });

@@ -1,0 +1,80 @@
+{
+  "source": "published R2 EGW copy",
+  "reference": "materialized PostgreSQL sections built before normalized-reader optimization",
+  "chapters": 1120,
+  "sections": 85014,
+  "allIdsRangesExcerptsAndBodiesEqual": true,
+  "environment": "Desktop Node/SQLite; not device latency",
+  "john1": {
+    "book": 43,
+    "chapter": 1,
+    "sections": 1238,
+    "documents": 1240,
+    "associations": 6222,
+    "legacyRepeatedBodyBytes": 5227681,
+    "graphBytes": 1615881,
+    "readAndBuildMs": 65.78729100000055
+  },
+  "john15": {
+    "book": 43,
+    "chapter": 15,
+    "sections": 1239,
+    "documents": 2065,
+    "associations": 21668,
+    "legacyRepeatedBodyBytes": 17633736,
+    "graphBytes": 3230576,
+    "readAndBuildMs": 110.54462500000045
+  },
+  "worst": [
+    {
+      "book": 43,
+      "chapter": 15,
+      "sections": 1239,
+      "documents": 2065,
+      "associations": 21668,
+      "legacyRepeatedBodyBytes": 17633736,
+      "graphBytes": 3230576,
+      "readAndBuildMs": 110.54462500000045
+    },
+    {
+      "book": 43,
+      "chapter": 6,
+      "sections": 1029,
+      "documents": 1168,
+      "associations": 15217,
+      "legacyRepeatedBodyBytes": 14389511,
+      "graphBytes": 2019163,
+      "readAndBuildMs": 85.57687499999884
+    },
+    {
+      "book": 61,
+      "chapter": 1,
+      "sections": 565,
+      "documents": 1308,
+      "associations": 15061,
+      "legacyRepeatedBodyBytes": 12302253,
+      "graphBytes": 2020642,
+      "readAndBuildMs": 59.76920799999971
+    },
+    {
+      "book": 43,
+      "chapter": 17,
+      "sections": 1167,
+      "documents": 1699,
+      "associations": 13604,
+      "legacyRepeatedBodyBytes": 11930683,
+      "graphBytes": 2427670,
+      "readAndBuildMs": 82.02320800000052
+    },
+    {
+      "book": 43,
+      "chapter": 14,
+      "sections": 1170,
+      "documents": 1469,
+      "associations": 12540,
+      "legacyRepeatedBodyBytes": 11587202,
+      "graphBytes": 2216363,
+      "readAndBuildMs": 81.20308400000067
+    }
+  ]
+}

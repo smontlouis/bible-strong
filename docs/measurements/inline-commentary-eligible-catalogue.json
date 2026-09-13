@@ -1,0 +1,24 @@
+{
+  "sourceReport": "inline-commentary-catalogue.json",
+  "eligibility": "All published commentaries except the separate EGW Writings collection",
+  "resources": 35,
+  "largestChapter": {
+    "id": "database:barnes:fr",
+    "sourceRevision": "barnes-fr-833aed48200b2ba6726f",
+    "revision": "barnes-fr-56082eee89615d9fa233",
+    "sourceSchemasPreserved": true,
+    "chapters": 1180,
+    "worstChapter": {
+      "book": 19,
+      "chapter": 119,
+      "sections": 176,
+      "bytes": 44398,
+      "gzipBytes": 13398,
+      "cacheValueBytes": 87060
+    },
+    "largestCacheValueBytes": 87060
+  },
+  "fiveResourcePayloadUpperBoundBytes": 208524,
+  "upperBoundNote": "Sum of five individual worst chapters; those maxima may occur in different chapters. Excludes small batch envelope overhead. Not a measured same-chapter response.",
+  "largestCacheValueBytes": 87060
+}

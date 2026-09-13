@@ -100,6 +100,8 @@ import {
 } from '../domain/strongLexicon'
 import {
   ActiveSupplementaryPublicationUnavailable,
+  readCommentaryReadingIndex,
+  readCommentaryReadingSection,
   readCommentaryChapter,
   readCommentaryCoverage,
   readCommentaryVerse,
@@ -1003,6 +1005,32 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
 
 const SupplementaryApiLive = HttpApiBuilder.group(ResourceApi, 'supplementary', handlers =>
   handlers
+    .handle('getCommentaryReadingIndex', ({ payload, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return readCommentaryReadingIndex(payload).pipe(
+        Effect.tap(() =>
+          addResponseHeaders({ 'x-request-id': requestId, 'cache-control': 'no-store' })
+        )
+      )
+    })
+    .handle('getCommentaryReadingSection', ({ payload, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readCommentaryReadingSection(payload).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match'],
+        [
+          'commentary-reading-section',
+          payload.resourceId,
+          payload.language,
+          payload.book,
+          payload.chapter,
+          payload.sectionId,
+        ]
+      )
+    })
     .handle('getCommentaryCoverage', ({ path, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
       return serveRevisionedResponse(
@@ -1187,6 +1215,18 @@ const unavailableStrongLexiconRepository: StrongLexiconRepositoryService = {
 }
 
 const unavailableSupplementaryRepository: SupplementaryRepositoryService = {
+  findCommentaryReadingIndex: input =>
+    Effect.fail(
+      new SupplementaryContentNotFound({
+        resourceIdentity: `commentary:${input.collection}:${input.language}`,
+      })
+    ),
+  findCommentaryReadingSection: input =>
+    Effect.fail(
+      new SupplementaryContentNotFound({
+        resourceIdentity: `commentary:${input.resourceId}:${input.language}`,
+      })
+    ),
   findCommentaryVerse: input =>
     Effect.fail(
       new ActiveSupplementaryPublicationUnavailable({

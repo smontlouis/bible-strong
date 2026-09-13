@@ -2139,11 +2139,22 @@
   "Ouvrir dans un nouvel onglet": "Open in a new tab",
   "search.content": "Content",
   "accessibility.newNote": "Create a note",
+  "inlineCommentary.title": "Reading commentaries",
+  "inlineCommentary.unavailable": "Some commentaries are unavailable.",
+  "inlineCommentary.description": "Show selected commentaries as chips in the Bible. Full text loads only when opened.",
+  "inlineCommentary.download": "Download for offline reading",
+  "inlineCommentary.noSelection": "Choose commentaries in Resources first.",
+  "inlineCommentary.offlineReady": "Available offline",
+  "inlineCommentary.onlineOnly": "Connection required for full text",
+  "inlineCommentary.editionUnavailable": "This edition is no longer available. Refresh the chapter’s commentaries.",
+  "inlineCommentary.refresh": "Refresh commentaries",
   "hotkeys.tabActions": "Tab options",
   "hotkeys.noActions": "No available actions",
   "hotkeys.recentTabs": "Recent tabs",
   "hotkeys.switcherHint": "Release to open · Shift to go back · Escape to cancel",
   "hotkeys.filterActions": "Filter actions…",
   "hotkeys.verseRange": "Verse from 1 to {{max}}",
-  "hotkeys.goToVerse": "Go"
+  "hotkeys.goToVerse": "Go",
+  "inlineCommentary.passage": "Verses {{start}}–{{end}}",
+  "inlineCommentary.options": "Options"
 }

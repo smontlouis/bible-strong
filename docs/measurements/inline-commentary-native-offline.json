@@ -1,0 +1,28 @@
+{
+  "device": "iPhone 17 Pro Max",
+  "udid": "ACAC811E-AE07-4C47-BFF8-BB61EAB99FFC",
+  "resource": "bible-annotee:fr",
+  "chapter": "Luke 1",
+  "mode": "Verified SQLite copied into simulator as an explicitly local QA fixture; not installed through production download flow",
+  "resourceServicePortsStopped": [
+    8787,
+    8788
+  ],
+  "airplaneMode": false,
+  "legacy": {
+    "revision": "bible-annotee-fr-9aa26382402383ab2c08",
+    "prebuiltIndex": false,
+    "sidecarSections": 69,
+    "originalSha256Unchanged": true,
+    "indexHasNoFullBodies": true,
+    "nativeSheetFullTextObserved": "Luke 1:18"
+  },
+  "indexedCopy": {
+    "revision": "bible-annotee-fr-8dd7f948b4c255c8ee6b",
+    "status": "verified",
+    "nativeSheetFullTextObserved": "Luke 1:18",
+    "sqliteHashUnchanged": true,
+    "newSidecarCount": 0
+  },
+  "fixtureFilesRemovedAfterTest": true
+}

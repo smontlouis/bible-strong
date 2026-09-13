@@ -1,0 +1,13 @@
+{
+  "resourceId": "egw-writings",
+  "language": "en",
+  "revision": "egw-writings-en-799e192c56e4661d4ba0",
+  "book": 43,
+  "chapter": 15,
+  "sections": 1239,
+  "indexBytes": 313672,
+  "fullSectionBytes": 405,
+  "indexMs": 107.74675000000002,
+  "sectionMs": 7.122541000000183,
+  "environment": "Local PostgreSQL and in-process HTTP handler, cold request; not deployed network latency."
+}

@@ -14,10 +14,12 @@ export const createDevelopmentArtifact = (
 ): DevelopmentArtifact => {
   const filename = path.basename(manifest.offlineArtifact.path)
   const databasePrefix =
-    (manifest.identity.kind === 'nave' || manifest.identity.kind === 'timeline') &&
-    manifest.identity.language === 'en'
-      ? '/databases/en'
-      : '/databases'
+    manifest.identity.kind === 'commentary' && manifest.identity.resourceId !== 'MHY'
+      ? '/commentaries'
+      : (manifest.identity.kind === 'nave' || manifest.identity.kind === 'timeline') &&
+          manifest.identity.language === 'en'
+        ? '/databases/en'
+        : '/databases'
   const databaseKinds = new Set([
     'nave',
     'dictionary',

@@ -1,3 +1,9 @@
+import { localCommentaryReading } from './commentaryReadingLocal'
+import {
+  createCommentaryReadingAccess,
+  type CommentaryReadingAccess,
+} from './commentaryReadingAccess'
+import { commentaryReadingCache } from './commentaryReadingCache'
 import { createContext, useContext, type ReactNode } from 'react'
 import Constants from 'expo-constants'
 import { onlineManager } from '@tanstack/react-query'
@@ -110,6 +116,7 @@ export type ResourceAccessRegistry = {
   strongBible: StrongBibleResourceAccess
   interlinearBible: InterlinearBibleResourceAccess
   timeline: TimelineAccess
+  commentaryReading: CommentaryReadingAccess
   commentary: CommentaryAccess
   offlineCopies: {
     getStrongBibleAvailability: StrongBibleResourceAccess['getAvailability']
@@ -360,6 +367,13 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
     online: onlineTimelineAccess,
     remotelyReadableLanguages: remotelyReadableTimelineLanguages,
     isOnline: async () => onlineManager.isOnline(),
+  }),
+  commentaryReading: createCommentaryReadingAccess({
+    baseUrl: resourceApiBaseUrl,
+    fetcher: resourceApiFetch,
+    isOnline: async () => onlineManager.isOnline(),
+    cache: commentaryReadingCache,
+    local: localCommentaryReading,
   }),
   commentary: commentaryAccess,
   offlineCopies: {

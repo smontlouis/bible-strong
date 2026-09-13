@@ -2418,6 +2418,7 @@ __metadata:
     "@babel/runtime": "npm:^7.28.4"
     "@types/node": "npm:^22.15.29"
     effect: "npm:3.22.1"
+    htmlparser2: "npm:^10.0.0"
     tsx: "npm:4.20.6"
     typescript: "npm:~6.0.3"
   languageName: unknown
@@ -2459,6 +2460,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@bible-strong/resource-studio@workspace:apps/resource-studio"
   dependencies:
+    "@bible-strong/resource-domain": "workspace:*"
     "@eslint/js": "npm:^9.28.0"
     "@radix-ui/react-dialog": "npm:^1.1.17"
     "@radix-ui/react-label": "npm:^2.1.10"

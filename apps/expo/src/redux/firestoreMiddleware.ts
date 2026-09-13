@@ -58,6 +58,7 @@ import {
   setDefaultStrongBibleVersion,
   setSettingsAlignContent,
   setSettingsCommentaires,
+  setSettingsInlineCommentaries,
   setSettingsCommentarySelection,
   reorderSettingsCommentarySelection,
   setSettingsContextualInformationDisplay,
@@ -479,6 +480,7 @@ const isSettingsAction = isAnyOf(
   setSettingsRelationsDisplay,
   setSettingsTagsDisplay,
   setSettingsCommentaires,
+  setSettingsInlineCommentaries,
   setSettingsCommentarySelection,
   reorderSettingsCommentarySelection,
   setSettingsContextualInformationDisplay,
@@ -619,10 +621,14 @@ const firestoreMiddleware: Middleware = store => next => async action => {
     // The generic deep diff represents arrays as numeric-keyed objects. Send the
     // complete ordered selection so Firestore persists an actual array.
     const isCommentarySelectionAction =
+      setSettingsInlineCommentaries.match(action) ||
       setSettingsCommentarySelection.match(action) ||
       reorderSettingsCommentarySelection.match(action)
     const settingsUpdate = isCommentarySelectionAction
-      ? { commentarySelection: state.user.bible.settings.commentarySelection }
+      ? {
+          commentarySelection: state.user.bible.settings.commentarySelection,
+          inlineCommentaries: state.user.bible.settings.inlineCommentaries ?? [],
+        }
       : diffState?.user?.bible?.settings
     // Empty compare maps are intentional clears, not missing values to strip.
     const cleanedSettings = comparisonWrite?.settings ?? cleanForFirestore(settingsUpdate)

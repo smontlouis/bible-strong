@@ -10,6 +10,18 @@ import {
 import { makeResourceWebHandler } from '../app'
 
 const supplementary: SupplementaryRepositoryService = {
+  findCommentaryReadingIndex: input =>
+    Effect.fail(
+      new SupplementaryContentNotFound({
+        resourceIdentity: `commentary:${input.collection}:${input.language}`,
+      })
+    ),
+  findCommentaryReadingSection: input =>
+    Effect.fail(
+      new SupplementaryContentNotFound({
+        resourceIdentity: `commentary:${input.resourceId}:${input.language}`,
+      })
+    ),
   findCommentaryCoverage: input =>
     Effect.succeed({
       ...input,

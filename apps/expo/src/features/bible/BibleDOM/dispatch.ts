@@ -76,3 +76,5 @@ const PERSONAL_BIBLE_DATA_ACTIONS = new Set<string>([
 
 export const isPersonalBibleDataAction = (actionType: string): boolean =>
   PERSONAL_BIBLE_DATA_ACTIONS.has(actionType)
+
+export const OPEN_INLINE_COMMENTARY = 'OPEN_INLINE_COMMENTARY'

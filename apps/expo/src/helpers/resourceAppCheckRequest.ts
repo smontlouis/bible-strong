@@ -45,7 +45,7 @@ export const getResourceAppCheckHeaders = async (
     ? { [FIREBASE_APP_CHECK_HEADER]: await getToken(forceRefresh) }
     : {}
 
-const runWithRequestDeadline = <T>(
+export const runWithRequestDeadline = <T>(
   operation: (signal: AbortSignal) => Promise<T>,
   sourceSignal: AbortSignal | undefined,
   timeoutMs: number
