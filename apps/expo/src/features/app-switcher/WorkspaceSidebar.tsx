@@ -1,3 +1,4 @@
+import SidebarAccountCard from './SidebarAccountCard'
 import { resolveUniverseColors } from '~themes/universeColors'
 import {
   SidebarDragProvider,
@@ -446,24 +447,30 @@ const WorkspaceSidebar = ({
                 </Text>
               </TouchableBox>
             )}
-            <TouchableBox
-              className="overflow-hidden border-continuous flex-row items-center px-[10px]"
-              onPress={openMenu}
-              accessibilityRole="button"
-              accessibilityLabel={t('settings.settings')}
-              accessibilityState={{ selected: activePage === 'settings' }}
-              style={{
-                minHeight: rowHeight,
-                backgroundColor:
-                  activePage === 'settings' ? stylingTheme.colors.reverse : undefined,
-                borderRadius: 8,
-              }}
-            >
-              <FeatherIcon name="settings" size={16} color="grey" />
-              <Text className="ml-[8px] text-[13px]" style={labelStyle}>
-                {t('settings.settings')}
-              </Text>
-            </TouchableBox>
+            {Platform.OS === 'web' ? (
+              <Box className="mt-[4px]">
+                <SidebarAccountCard openSettings={openMenu} onSelectContent={onSelectContent} />
+              </Box>
+            ) : (
+              <TouchableBox
+                className="overflow-hidden border-continuous flex-row items-center px-[10px]"
+                onPress={openMenu}
+                accessibilityRole="button"
+                accessibilityLabel={t('settings.settings')}
+                accessibilityState={{ selected: activePage === 'settings' }}
+                style={{
+                  minHeight: rowHeight,
+                  backgroundColor:
+                    activePage === 'settings' ? stylingTheme.colors.reverse : undefined,
+                  borderRadius: 8,
+                }}
+              >
+                <FeatherIcon name="settings" size={16} color="grey" />
+                <Text className="ml-[8px] text-[13px]" style={labelStyle}>
+                  {t('settings.settings')}
+                </Text>
+              </TouchableBox>
+            )}
           </Box>
           <EditGroupModal
             sheetRef={editRef}

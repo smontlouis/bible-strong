@@ -1,4 +1,9 @@
 {
+  "workspace.profile": "Profil",
+  "workspace.myResources": "Mes ressources",
+  "workspace.guest": "Invité",
+  "workspace.accountMenu": "Menu du compte",
+  "workspace.logoutFailed": "Impossible de vous déconnecter. Réessayez.",
   "horizontalScroll.left": "Défiler vers la gauche",
   "horizontalScroll.right": "Défiler vers la droite",
   "resourcePreview.open": "Ouvrir la fiche complète",

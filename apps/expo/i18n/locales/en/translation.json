@@ -1,4 +1,9 @@
 {
+  "workspace.profile": "Profile",
+  "workspace.myResources": "My resources",
+  "workspace.guest": "Guest",
+  "workspace.accountMenu": "Account menu",
+  "workspace.logoutFailed": "Unable to sign out. Please try again.",
   "horizontalScroll.left": "Scroll left",
   "horizontalScroll.right": "Scroll right",
   "resourcePreview.open": "Open full entry",
