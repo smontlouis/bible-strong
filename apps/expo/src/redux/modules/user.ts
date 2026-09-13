@@ -97,6 +97,7 @@ import {
   setSettingsAlignContent,
   setSettingsCommentaires,
   setSettingsInlineCommentaries,
+  setSettingsInlineCommentariesEnabled,
   setSettingsCommentarySelection,
   reorderSettingsCommentarySelection,
   setSettingsContextualInformationDisplay,
@@ -560,6 +561,7 @@ export interface UserState {
       relationsDisplay?: 'inline' | 'block'
       tagsDisplay: 'inline' | 'block'
       commentsDisplay: boolean
+      inlineCommentariesEnabled?: boolean
       inlineCommentaries?: string[]
       commentarySelection: CommentarySelectionState
       contextualInformationDisplay?: boolean
@@ -773,6 +775,7 @@ const userSlice = createSlice({
       const currentStudies = state.bible.studies
       const currentChangelog = state.bible.changelog
       const currentWordAnnotations = state.bible.wordAnnotations
+      const currentInlineCommentariesEnabled = state.bible.settings.inlineCommentariesEnabled
       const currentInlineCommentaries = state.bible.settings.inlineCommentaries
       const currentCommentarySelection = state.bible.settings.commentarySelection
 
@@ -788,6 +791,9 @@ const userSlice = createSlice({
         bible?.settings?.inlineCommentaries ?? currentInlineCommentaries,
         state.bible.settings.commentarySelection
       )
+
+      state.bible.settings.inlineCommentariesEnabled =
+        bible?.settings?.inlineCommentariesEnabled ?? currentInlineCommentariesEnabled
 
       // Restore subcollection data
       state.bible.bookmarks = currentBookmarks
@@ -1319,6 +1325,15 @@ const userSlice = createSlice({
     })
     builder.addCase(setSettingsCommentaires, (state, action) => {
       state.bible.settings.commentsDisplay = action.payload
+    })
+    builder.addCase(setSettingsInlineCommentariesEnabled, (state, action) => {
+      state.bible.settings.inlineCommentariesEnabled = action.payload
+      if (action.payload && !state.bible.settings.inlineCommentaries?.length) {
+        state.bible.settings.inlineCommentaries = normalizeInlineCommentaries(
+          state.bible.settings.commentarySelection,
+          state.bible.settings.commentarySelection
+        )
+      }
     })
     builder.addCase(setSettingsInlineCommentaries, (state, action) => {
       state.bible.settings.inlineCommentaries = normalizeInlineCommentaries(

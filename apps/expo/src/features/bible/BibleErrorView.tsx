@@ -79,10 +79,7 @@ const BibleErrorView = ({ error }: { error: BibleError }) => {
 
   return (
     <Box className="overflow-hidden border-continuous flex-[1]">
-      <Empty
-        source={require('~assets/images/empty.json')}
-        message={t(failurePresentation.detailKey)}
-      >
+      <Empty message={t(failurePresentation.detailKey)}>
         {showActions && (
           <Box className="overflow-hidden border-continuous mt-[20px] gap-[10px] items-center">
             {canRetry && <Button onPress={handleRetry}>{t('bible.error.retry')}</Button>}

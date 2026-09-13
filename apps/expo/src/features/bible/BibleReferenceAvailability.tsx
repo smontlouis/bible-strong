@@ -12,10 +12,7 @@ export const BibleReferenceUnavailable = ({ verseKeys }: { verseKeys: string[] }
 
   return (
     <Box className="overflow-hidden border-continuous flex-[1]">
-      <Empty
-        source={require('~assets/images/empty.json')}
-        message={`${reference}\n${t('bibleVerse.textUnavailableInstalled')}`}
-      >
+      <Empty message={`${reference}\n${t('bibleVerse.textUnavailableInstalled')}`}>
         <Box className="overflow-hidden border-continuous mt-[20px]">
           <Button onPress={() => router.push('/downloads')}>
             {t('bible.error.goToDownloads')}

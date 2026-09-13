@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import FiltersHeader from '~common/FiltersHeader'
 import MultipleChoiceFilterModal from '~common/MultipleChoiceFilterModal'
 import SearchFilterModal from '~common/SearchFilterModal'
-import { type SheetRef } from '~common/sheet'
+import { SheetHeader, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Box from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
@@ -268,7 +268,8 @@ const CommentarySelectorSheet = ({ sheetRef, inline = false, onOpenDetails }: Pr
   }
 
   const Container = inline ? InlineCommentaryContainer : Sheet
-  const FilterPlacement = inline ? HeaderAction : React.Fragment
+  const isWebPanel = inline || Platform.OS === 'web'
+  const FilterPlacement = isWebPanel ? HeaderAction : React.Fragment
   return (
     <>
       <Container
@@ -282,10 +283,13 @@ const CommentarySelectorSheet = ({ sheetRef, inline = false, onOpenDetails }: Pr
         }}
         header={
           <>
+            {Platform.OS === 'web' && !inline && (
+              <SheetHeader title={t('commentaries.selector.title')} />
+            )}
             <FilterPlacement>
               <FiltersHeader
-                buttonOnly={inline}
-                title={inline ? '' : t('commentaries.selector.title')}
+                buttonOnly={isWebPanel}
+                title={isWebPanel ? '' : t('commentaries.selector.title')}
                 onReset={() => {
                   setQuery('')
                   setTraditions([])

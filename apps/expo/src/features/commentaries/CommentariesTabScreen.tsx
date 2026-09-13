@@ -1,3 +1,4 @@
+import CommentIcon from '~common/CommentIcon'
 import { pageContentStyle } from '~common/ui/PageContent'
 import { useQuery } from '@tanstack/react-query'
 import MenuView from '~features/commentaries/CommentaryMenu'
@@ -257,7 +258,7 @@ const CommentariesTabScreen = ({
             />
           ) : displayedContent.selectedResourceIds.length === 0 ? (
             <Empty
-              icon={require('~assets/images/empty-state-icons/comment.svg')}
+              iconElement={<CommentIcon size={36} />}
               message={t('commentaries.selector.noneSelected')}
             />
           ) : (

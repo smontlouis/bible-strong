@@ -1,3 +1,4 @@
+import type { InlineCommentaryRequest } from '~features/commentaries/InlineCommentaryReader'
 import { Platform } from 'react-native'
 import { createContext, useContext } from 'react'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
@@ -19,6 +20,12 @@ export type ReferencePreviewRequest = ReferencePreviewTarget & {
   open: () => void
 }
 export type PreviewRequest =
+  | {
+      kind: 'commentary'
+      title: string
+      request: InlineCommentaryRequest
+      open: (sectionId?: string) => void
+    }
   | { kind: 'link'; linkId: string; title: string; open: () => void }
   | { kind: 'study'; studyId: string; title: string; open: () => void }
   | { kind: 'note'; noteId: string; title: string; open: () => void }

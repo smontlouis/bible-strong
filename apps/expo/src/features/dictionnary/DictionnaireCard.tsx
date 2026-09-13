@@ -187,12 +187,7 @@ const DictionnaireCard = ({
   }
 
   if (!word) {
-    return (
-      <Empty
-        source={require('~assets/images/empty.json')}
-        message="Impossible de charger ce mot..."
-      />
-    )
+    return <Empty message="Impossible de charger ce mot..." />
   }
 
   const { html } = truncHTML(definition.replace(/\n/gi, ''), 500)

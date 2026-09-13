@@ -19,7 +19,12 @@ export function normalizeInlineCommentaries(value: unknown, selected: readonly s
 }
 
 /** Selection IDs are UI identities; the delivery API uses publication identities (e.g. MHY). */
-export function getInlineCommentaryResources(value: unknown, selected: readonly string[]) {
+export function getInlineCommentaryResources(
+  value: unknown,
+  selected: readonly string[],
+  enabled = true
+) {
+  if (!enabled) return []
   return normalizeInlineCommentaries(value, selected).flatMap(id => {
     const projection = parseCommentaryProjectionId(id)
     const entry = projection ? COMMENTARY_CATALOG_BY_ID.get(projection.resourceId) : undefined

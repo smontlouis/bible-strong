@@ -35,7 +35,9 @@ function harness({ projection = false } = {}) {
     getFirstAsync: jest.fn(async (sql: string) => {
       if (sql.includes('RESOURCE_METADATA')) return { revision }
       if (sql.includes('sqlite_master'))
-        return projection ? { name: 'COMMENTARY_READING_SECTIONS' } : null
+        return projection && sql.includes('COMMENTARY_READING_SECTIONS')
+          ? { name: 'COMMENTARY_READING_SECTIONS' }
+          : null
       return null
     }),
     getAllAsync: jest.fn(async (_sql: string) => [
@@ -111,34 +113,30 @@ it('reads only the projection for new copies, without loading a chapter body', a
   expect(h.database.closeAsync).toHaveBeenCalledTimes(1)
 })
 
-it('migrates only a visited legacy chapter to a separate sidecar and reuses it', async () => {
+it('does not read or rebuild a sidecar for an older copy without a prebuilt index', async () => {
   const h = harness()
-  const result = await localCommentaryReading.index('barnes', 'fr', 1, 1)
-  expect(result?.sections[0]).toMatchObject({
-    id: request.sectionId,
-    excerpt: 'Complete commentary.',
-  })
-  expect([...h.files.keys()]).toEqual([
-    '/documents/commentary-reading-index-v1/barnes%3Afr%3Ar1%3A1%3A1.json',
-  ])
-  expect([...h.files.values()][0]).not.toContain('<p>')
-  await localCommentaryReading.index('barnes', 'fr', 1, 1)
-  expect(localCommentaryChapterSource.loadResourceChapter).toHaveBeenCalledTimes(1)
-  const opened = await localCommentaryReading.section(request)
-  expect(opened?.section.content).toBe('<p>Complete commentary.</p>')
-  expect(opened?.resource.revision).toBe('r1')
+  jest.mocked(FileSystem.readAsStringAsync).mockResolvedValue(
+    JSON.stringify({
+      resource: { kind: 'commentary', resourceId: 'barnes', language: 'fr', revision: 'r1' },
+      sections: [
+        { id: request.sectionId, rangeStartVerse: 1, rangeEndVerse: 2, excerpt: 'Old sidecar' },
+      ],
+    })
+  )
+  await expect(localCommentaryReading.index('barnes', 'fr', 1, 1)).resolves.toBeUndefined()
+  expect(h.database.getAllAsync).not.toHaveBeenCalled()
+  expect(localCommentaryChapterSource.loadResourceChapter).not.toHaveBeenCalled()
+  expect(FileSystem.readAsStringAsync).not.toHaveBeenCalled()
+  expect(FileSystem.writeAsStringAsync).not.toHaveBeenCalled()
+  expect(FileSystem.makeDirectoryAsync).not.toHaveBeenCalled()
+  expect(h.database.closeAsync).toHaveBeenCalledTimes(1)
 })
 
-it('does not save a legacy index when the installed revision changes while reading', async () => {
-  const h = harness()
-  jest.mocked(localCommentaryChapterSource.loadResourceChapter).mockImplementation(async () => {
-    h.setRevision('r2')
-    return { 1: '<p>New edition.</p>' }
-  })
-  await expect(localCommentaryReading.index('barnes', 'fr', 1, 1)).rejects.toThrow(
-    'COMMENTARY_REVISION_CHANGED'
-  )
-  expect(h.files.size).toBe(0)
+it('keeps ordinary source content readable and rejects a mismatched revision', async () => {
+  const h = harness({ projection: true })
+  const opened = await localCommentaryReading.section(request)
+  expect(opened?.section.content).toBe('<p>Complete commentary.</p>')
+  h.setRevision('r2')
   await expect(localCommentaryReading.section(request)).resolves.toBeUndefined()
 })
 

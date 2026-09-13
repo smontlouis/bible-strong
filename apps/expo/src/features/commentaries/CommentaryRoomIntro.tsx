@@ -77,10 +77,13 @@ const CommentaryRoomIntro = ({
         className="border-continuous overflow-hidden bg-reverse rounded-[22px] border-[1px] border-border px-[18px] py-[17px] mb-[16px]"
         activeOpacity={0.62}
         onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={t('commentaries.details.openRoom', { commentary: entry.title })}
+        disabled={!onPress}
+        accessibilityRole={onPress ? 'button' : undefined}
+        accessibilityLabel={
+          onPress ? t('commentaries.details.openRoom', { commentary: entry.title }) : undefined
+        }
       >
-        <CommentaryIdentity entry={entry} language={language} showChevron />
+        <CommentaryIdentity entry={entry} language={language} showChevron={!!onPress} />
       </TouchableBox>
     )
   }

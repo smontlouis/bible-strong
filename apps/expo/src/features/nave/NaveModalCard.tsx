@@ -117,10 +117,7 @@ const NaveModalCard = ({ selectedVerse, selectedVersion, updateVerse }: Props) =
                 />
               </>
             ) : (
-              <Empty
-                source={require('~assets/images/empty.json')}
-                message={t('resource.nave.noTopicsForVerse')}
-              />
+              <Empty message={t('resource.nave.noTopicsForVerse')} />
             )}
           </Box>
         </SheetScrollView>

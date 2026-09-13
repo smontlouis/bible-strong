@@ -147,7 +147,7 @@ export default function SidebarAccountCard({
             className="flex-1 min-w-0 flex-row items-center gap-[9px] min-h-[44px] px-[4px] rounded-[8px] hover:bg-light-grey"
           >
             <UserAvatar
-              size={32}
+              size={38}
               photoURL={user.photoURL}
               displayName={user.displayName}
               email={user.email}

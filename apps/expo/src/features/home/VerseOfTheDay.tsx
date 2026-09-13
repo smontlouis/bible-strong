@@ -171,10 +171,7 @@ const VerseOfTheDay = ({ addDay, desktop = false, navigation, footer, style }: P
     return (
       <Box className={cardClassName} style={cardStyle}>
         {desktop && dayHeader}
-        <Empty
-          source={require('~assets/images/empty.json')}
-          message="Impossible de charger le verset du jour..."
-        />
+        <Empty message="Impossible de charger le verset du jour..." />
         {desktop && <Box className="mt-auto pt-[12px] items-start">{footer}</Box>}
       </Box>
     )

@@ -1,3 +1,4 @@
+import CommentIcon from '~common/CommentIcon'
 import { useQuery } from '@tanstack/react-query'
 import { produce } from 'immer'
 import { useAtom, useAtomValue } from 'jotai/react'
@@ -5,11 +6,9 @@ import { atom, type PrimitiveAtom } from 'jotai/vanilla'
 import { useRouter } from 'expo-router'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Linking } from 'react-native'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
-import StylizedHTMLView from '~common/SwitchableHTMLView'
 import ScrollView from '~common/ui/ScrollView'
 import Box, { TouchableBox } from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
@@ -24,15 +23,10 @@ import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { getDefaultBibleTab, type CommentaryResourceTab, useBibleTabActions } from '~state/tabs'
 import { openCommentaryBookSelector } from './commentaryBookSelector'
-import CommentaryEntryNavigation from './CommentaryEntryNavigation'
+import CommentarySectionCard from './CommentarySectionCard'
 import CommentaryRoomIntro from './CommentaryRoomIntro'
-import {
-  getCommentaryBibleViewRoute,
-  getCommentaryPassageBibleViewRoute,
-} from './commentaryReferenceNavigation'
 import { getCoveredCommentaryLocation } from './commentaryResourceNavigation'
 import {
-  commentaryHrefToOsis,
   formatCommentaryResourceTabTitle,
   parseCommentaryResourceParams,
 } from './commentaryResourceParams'
@@ -223,11 +217,13 @@ const CommentaryResourceTabScreen = ({
               ref={scrollRef}
               contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 32 }}
             >
-              <CommentaryRoomIntro
-                compact
+              <CommentarySectionCard
                 entry={entry}
                 language={projection.language}
-                onPress={() =>
+                book={book}
+                chapter={chapter}
+                section={section}
+                onResourcePress={() =>
                   router.push({
                     pathname: '/commentary-chapter',
                     params: {
@@ -237,57 +233,9 @@ const CommentaryResourceTabScreen = ({
                     },
                   })
                 }
+                onPrevious={previousSection ? () => selectSection(previousSection.id) : undefined}
+                onNext={nextSection ? () => selectSection(nextSection.id) : undefined}
               />
-              <Box
-                className="overflow-hidden border-continuous bg-reverse rounded-[20px] px-[18px] py-[18px]"
-                style={{
-                  shadowColor: 'rgb(89,131,240)',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 7,
-                  elevation: 1,
-                  overflow: 'visible',
-                }}
-              >
-                <CommentaryEntryNavigation
-                  hasPrevious={Boolean(previousSection)}
-                  hasNext={Boolean(nextSection)}
-                  reference={
-                    section.rangeStartVerse === 0 && section.rangeEndVerse === 0
-                      ? t('commentaries.resource.introduction')
-                      : passage!
-                  }
-                  referenceDisabled={section.rangeStartVerse === 0}
-                  onReferencePress={() => {
-                    const route = getCommentaryPassageBibleViewRoute({
-                      book,
-                      chapter,
-                      startVerse: section.rangeStartVerse,
-                      endVerse: section.rangeEndVerse,
-                    })
-                    if (route) router.push(route)
-                  }}
-                  onPrevious={() => {
-                    if (!previousSection) return
-                    selectSection(previousSection.id)
-                  }}
-                  onNext={() => {
-                    if (!nextSection) return
-                    selectSection(nextSection.id)
-                  }}
-                />
-                <Box className="overflow-hidden border-continuous mt-[14px]">
-                  <StylizedHTMLView
-                    value={section.content}
-                    onLinkPress={href => {
-                      const osis = commentaryHrefToOsis(href)
-                      const route = osis ? getCommentaryBibleViewRoute(osis) : undefined
-                      if (route) router.push(route)
-                      else if (/^https?:\/\//iu.test(href)) void Linking.openURL(href)
-                    }}
-                  />
-                </Box>
-              </Box>
             </ScrollView>
           )
         ) : (
@@ -337,7 +285,7 @@ const CommentaryResourceTabScreen = ({
               />
             ) : query.data.sections.length === 0 ? (
               <Empty
-                icon={require('~assets/images/empty-state-icons/comment.svg')}
+                iconElement={<CommentIcon size={36} />}
                 message={t('commentaries.resource.emptyChapter')}
               />
             ) : (

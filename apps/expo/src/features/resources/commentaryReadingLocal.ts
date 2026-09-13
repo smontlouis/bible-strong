@@ -1,9 +1,7 @@
-import * as FileSystem from 'expo-file-system/legacy'
 import { Schema } from 'effect'
 import {
   buildCommentaryReadingSections,
   buildNormalizedCommentaryReadingSections,
-  createCommentaryReadingIndex,
 } from '@bible-strong/resource-domain/contracts/commentarySections'
 import {
   CommentaryReadingResourceIndex,
@@ -14,11 +12,6 @@ import { openSQLiteDatabase } from '~helpers/sqlite'
 import { getLocalResourceAvailability } from './resourceAvailability'
 import { localCommentaryChapterSource } from './commentaryAccess'
 import type { CommentaryReadingLocal } from './commentaryReadingAccess'
-
-const migrations = new Map<
-  string,
-  Promise<Schema.Schema.Type<typeof CommentaryReadingResourceIndex>>
->()
 
 async function openInstalled(resourceId: string, language: 'fr' | 'en') {
   const available = await getLocalResourceAvailability({ kind: 'commentary', resourceId, language })
@@ -140,45 +133,8 @@ export const localCommentaryReading: CommentaryReadingLocal = {
     } finally {
       await database.closeAsync()
     }
-    // Legacy copies remain checksum-identical. Migrate only visited chapters into a revision-bound sidecar.
-    const name = encodeURIComponent(`${resourceId}:${language}:${revision}:${book}:${chapter}`)
-    const directory = `${FileSystem.documentDirectory}commentary-reading-index-v1/`
-    const path = `${directory}${name}.json`
-    try {
-      const cached = Schema.decodeUnknownSync(CommentaryReadingResourceIndex)(
-        JSON.parse(await FileSystem.readAsStringAsync(path))
-      )
-      if (
-        cached.resource.revision === revision &&
-        cached.resource.resourceId === resourceId &&
-        cached.resource.language === language
-      )
-        return cached
-    } catch {}
-    const running = migrations.get(path)
-    if (running) return running
-    const migration = (async () => {
-      const sections = await loadReadingSections(resourceId, language, book, chapter, revision)
-      if (!sections) throw new Error('COMMENTARY_REVISION_CHANGED')
-      const result = Schema.decodeUnknownSync(CommentaryReadingResourceIndex)({
-        resource,
-        sections: createCommentaryReadingIndex(sections),
-      })
-      // Re-check after reading to avoid labeling data from a concurrent download with the old revision.
-      const current = await openInstalled(resourceId, language)
-      if (!current) throw new Error('COMMENTARY_REVISION_CHANGED')
-      await current.database.closeAsync()
-      if (current.revision !== revision) throw new Error('COMMENTARY_REVISION_CHANGED')
-      await FileSystem.makeDirectoryAsync(directory, { intermediates: true })
-      await FileSystem.writeAsStringAsync(path, JSON.stringify(result))
-      return result
-    })()
-    migrations.set(path, migration)
-    try {
-      return await migration
-    } finally {
-      migrations.delete(path)
-    }
+    // Older copies need the published update; chapter reading never builds an index.
+    return undefined
   },
   async section(request) {
     // The full text already exists in the source tables; do not duplicate an

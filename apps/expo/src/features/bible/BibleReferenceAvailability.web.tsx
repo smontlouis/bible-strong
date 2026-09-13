@@ -7,10 +7,7 @@ export const BibleReferenceUnavailable = ({ verseKeys }: { verseKeys: string[] }
   const { t } = useTranslation()
   return (
     <Box className="overflow-hidden border-continuous flex-[1]">
-      <Empty
-        source={require('~assets/images/empty.json')}
-        message={`${verseToReference(verseKeys)}\n${t('resource.web.connectionRequired')}`}
-      />
+      <Empty message={`${verseToReference(verseKeys)}\n${t('resource.web.connectionRequired')}`} />
     </Box>
   )
 }

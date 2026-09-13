@@ -33,3 +33,12 @@ it('uses MHY publication identity for the legacy French Henry selection', () => 
     { resourceId: 'MHY', language: 'fr' },
   ])
 })
+
+it('disables resource loading without losing the saved selection', () => {
+  const selected = ['barnes:fr']
+  expect(getInlineCommentaryResources(selected, selected, false)).toEqual([])
+  expect(getInlineCommentaryResources(selected, selected, true)).toEqual([
+    { resourceId: 'barnes', language: 'fr' },
+  ])
+  expect(selected).toEqual(['barnes:fr'])
+})

@@ -1,6 +1,7 @@
+import InlineCommentaryReader from '~features/commentaries/InlineCommentaryReader'
 import LinkPreviewContent from './LinkPreviewContent'
 import StudyPreviewContent from './StudyPreviewContent'
-import { Fragment, useEffect, useRef } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { useAtom } from 'jotai/react'
 import { useQuery } from '@tanstack/react-query'
 import { ActivityIndicator, useWindowDimensions } from 'react-native'
@@ -24,6 +25,16 @@ export default function ReferencePreviewHost() {
   const [history, setHistory] = useAtom(previewHistoryAtom)
   const request = history.at(-1)
   const rootRequest = history[0]
+  const [commentarySelection, setCommentarySelection] = useState<{
+    request: typeof request
+    sectionId: string
+  }>()
+  const commentarySectionId =
+    request?.kind === 'commentary'
+      ? commentarySelection?.request === request
+        ? commentarySelection.sectionId
+        : request.request.sectionId
+      : undefined
   const resources = useResourceAccess()
   const versionQuery = useQuery({
     queryKey: [
@@ -52,7 +63,8 @@ export default function ReferencePreviewHost() {
     if (!request) return
     sheet.current?.dismiss()
     setHistory([])
-    request.open()
+    if (request.kind === 'commentary') request.open(commentarySectionId)
+    else request.open()
   }
   const openButton = (
     <TouchableBox
@@ -111,6 +123,13 @@ export default function ReferencePreviewHost() {
                 request={{ ...request, version: versionQuery.data ?? request.version }}
               />
             )
+          ) : request.kind === 'commentary' ? (
+            <InlineCommentaryReader
+              embedded
+              request={{ ...request.request, sectionId: commentarySectionId! }}
+              onClose={() => setHistory([])}
+              onSelectSection={sectionId => setCommentarySelection({ request, sectionId })}
+            />
           ) : (
             <SheetScrollView
               key={JSON.stringify(request)}

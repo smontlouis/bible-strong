@@ -160,10 +160,7 @@ const TagScreen = () => {
     return (
       <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
         <Header hasBackButton={hasBackButton} title="" />
-        <Empty
-          source={require('~assets/images/empty.json')}
-          message={t("Cette étiquette n'existe pas...")}
-        />
+        <Empty message={t("Cette étiquette n'existe pas...")} />
       </FormSheetScreen>
     )
   }

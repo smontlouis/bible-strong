@@ -189,10 +189,7 @@ const DictionnaireVerseDetailScreen = ({
           </Box>
         </SheetScrollView>
       ) : (
-        <Empty
-          source={require('~assets/images/empty.json')}
-          message={t('Aucun article ne cite précisément ce verset.')}
-        />
+        <Empty message={t('Aucun article ne cite précisément ce verset.')} />
       )}
     </Box>
   )

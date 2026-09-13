@@ -1,12 +1,11 @@
+import { previewHistoryAtom } from '~features/bibleReferencePreview/state'
 import { getCommentaryByPublicationId } from '@bible-strong/resource-catalog/commentaries'
 import { getInlineCommentaryResources } from '~features/commentaries/inlineCommentarySelection'
 import {
   placeInlineCommentaries,
   summarizeInlineCommentaryChip,
 } from '~features/commentaries/inlineCommentaryPlacement'
-import InlineCommentaryReader, {
-  type InlineCommentaryRequest,
-} from '~features/commentaries/InlineCommentaryReader'
+import type { InlineCommentaryRequest } from '~features/commentaries/InlineCommentaryReader'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
@@ -438,10 +437,11 @@ const BibleViewer = ({
     ...localQueryOptions,
   })
   const redWords = redWordsQuery.data ?? null
-  const [inlineCommentaryRequest, setInlineCommentaryRequest] = useState<InlineCommentaryRequest>()
+  const setCommentaryPreview = useSetAtom(previewHistoryAtom)
   const readingCommentaries = getInlineCommentaryResources(
     settings.inlineCommentaries,
-    settings.commentarySelection
+    settings.commentarySelection,
+    settings.inlineCommentariesEnabled
   )
   const inlineCommentaryQuery = useQuery({
     queryKey: [
@@ -477,8 +477,8 @@ const BibleViewer = ({
   const labelInlineChip = (
     chip: import('~features/commentaries/inlineCommentaryPlacement').InlineCommentaryChip
   ) => {
-    const name =
-      getCommentaryByPublicationId(chip.resourceId, chip.language)?.shortName ?? chip.resourceId
+    const entry = getCommentaryByPublicationId(chip.resourceId, chip.language)
+    const name = entry?.shortName ?? chip.resourceId
     const mixedLanguages = readingCommentaries.some(
       resource =>
         resource.language !== chip.language &&
@@ -486,6 +486,7 @@ const BibleViewer = ({
     )
     return {
       ...summarizeInlineCommentaryChip(chip),
+      author: entry?.author ?? name,
       label: mixedLanguages ? `${name} · ${chip.language.toUpperCase()}` : name,
     }
   }
@@ -1352,16 +1353,47 @@ const BibleViewer = ({
           candidate.revision === summary.revision
       )
       if (!chip) return
-      setInlineCommentaryRequest({
+      const entry = getCommentaryByPublicationId(chip.resourceId, chip.language)
+      if (!entry) return
+      const openCommentary = (sectionId = chip.sectionId) =>
+        pushRouteOnce({
+          pathname: '/commentary-entry',
+          params: {
+            projectionId: `${entry.id}:${chip.language}`,
+            book: String(book.Numero),
+            chapter: String(chapter),
+            sectionId,
+          },
+        })
+      if (Platform.OS !== 'web') {
+        openCommentary()
+        return
+      }
+      const index = inlineCommentaryQuery.data?.indexes.find(
+        item =>
+          item.resource.resourceId === chip.resourceId &&
+          item.resource.language === chip.language &&
+          item.resource.revision === chip.revision
+      )
+      const request: InlineCommentaryRequest = {
         resourceId: chip.resourceId,
         language: chip.language,
         revision: chip.revision,
         book: book.Numero,
         chapter,
         sectionId: chip.sectionId,
-        sections: chip.sections,
+        sections:
+          index?.sections.map(section => ({
+            sectionId: section.id,
+            rangeStartVerse: section.rangeStartVerse,
+            rangeEndVerse: section.rangeEndVerse,
+            excerpt: section.excerpt,
+          })) ?? chip.sections,
         excerpt: chip.excerpt,
-      })
+      }
+      setCommentaryPreview([
+        { kind: 'commentary', title: entry.shortName, request, open: openCommentary },
+      ])
     },
     chapterEntities,
     chapterEntitiesLoaded,
@@ -1584,10 +1616,6 @@ const BibleViewer = ({
           isInTab={isInTab}
         />
       )}
-      <InlineCommentaryReader
-        request={inlineCommentaryRequest}
-        onClose={() => setInlineCommentaryRequest(undefined)}
-      />
       {!hidePersonalBibleData && (
         <SelectedVersesModal
           ref={versesModal.getRef()}

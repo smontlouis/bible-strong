@@ -11,10 +11,7 @@ const BibleErrorView = ({ error: _error }: { error: BibleError }) => {
 
   return (
     <Box className="overflow-hidden border-continuous flex-[1]">
-      <Empty
-        source={require('~assets/images/empty.json')}
-        message={t('resource.web.connectionRequired')}
-      >
+      <Empty message={t('resource.web.connectionRequired')}>
         <Box className="overflow-hidden border-continuous mt-[20px]">
           <Button
             onPress={() =>

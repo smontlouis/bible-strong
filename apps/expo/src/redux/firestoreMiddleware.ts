@@ -59,6 +59,7 @@ import {
   setSettingsAlignContent,
   setSettingsCommentaires,
   setSettingsInlineCommentaries,
+  setSettingsInlineCommentariesEnabled,
   setSettingsCommentarySelection,
   reorderSettingsCommentarySelection,
   setSettingsContextualInformationDisplay,
@@ -481,6 +482,7 @@ const isSettingsAction = isAnyOf(
   setSettingsTagsDisplay,
   setSettingsCommentaires,
   setSettingsInlineCommentaries,
+  setSettingsInlineCommentariesEnabled,
   setSettingsCommentarySelection,
   reorderSettingsCommentarySelection,
   setSettingsContextualInformationDisplay,
@@ -622,12 +624,14 @@ const firestoreMiddleware: Middleware = store => next => async action => {
     // complete ordered selection so Firestore persists an actual array.
     const isCommentarySelectionAction =
       setSettingsInlineCommentaries.match(action) ||
+      setSettingsInlineCommentariesEnabled.match(action) ||
       setSettingsCommentarySelection.match(action) ||
       reorderSettingsCommentarySelection.match(action)
     const settingsUpdate = isCommentarySelectionAction
       ? {
           commentarySelection: state.user.bible.settings.commentarySelection,
           inlineCommentaries: state.user.bible.settings.inlineCommentaries ?? [],
+          inlineCommentariesEnabled: state.user.bible.settings.inlineCommentariesEnabled,
         }
       : diffState?.user?.bible?.settings
     // Empty compare maps are intentional clears, not missing values to strip.

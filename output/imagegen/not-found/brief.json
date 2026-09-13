@@ -1,0 +1,31 @@
+{
+  "style": "bible-strong-univers-v1",
+  "mode": "built-in image_gen",
+  "file": "empty-box-neutral-gray-v1.png",
+  "editTarget": "/Users/stephane/.codex/generated_images/01a08efd-ddb5-7ac3-b522-eeebb5870af9/exec-5e41552c-cd60-46bb-8e81-ed11276bd049.png",
+  "prompt": "Edit the attached image as the sole edit target. Preserve exactly the character identity, round glasses, bun hairstyle, pose, two hands on opposite box flaps, open EMPTY box, framing and proportions. Bible Strong illustration style bible-strong-univers-v1: rounded flat filled shapes and fine internal detail lines. Change the entire blue/violet palette into soft neutral grayscale: medium-light gray skin and clothes, slightly darker gray hair, very light gray box flaps, medium gray box interior, dark charcoal fine detail lines. No residual blue, purple or saturated colors. Change the smiling mouth into a small neutral closed mouth, a nearly straight soft line. Relax the eyebrows to a calm, mildly puzzled neutral expression looking into the empty box: neither smiling nor sad, no distress. Preserve all other good details. CRITICAL: remove the gray checkerboard pattern completely. Output a genuinely transparent alpha background around the isolated character and box, not a rendered checkerboard, not a white or gray backdrop. Clean edges without halos. No text, symbols, logos, new objects or ground shadow.",
+  "transparencyCorrectionPrompt": "Background extraction only. Preserve the exact grayscale woman, neutral straight mouth, glasses, empty open box, pose and all foreground pixels of this image. REMOVE THE ENTIRE CHECKERBOARD BACKGROUND. The checkerboard is an unwanted opaque artifact. Deliver an actual PNG cutout with an alpha channel: pixels outside the woman and box must have alpha zero. Do not depict transparency as a pattern. No new background color, no checkerboard, no backdrop, no shadow. Do not redraw or recolor the foreground.",
+  "validation": {
+    "alphaMin": 0,
+    "alphaMax": 255,
+    "fullyTransparentPixels": 243076,
+    "totalPixels": 409600,
+    "checkedBackgrounds": [
+      "white",
+      "dark"
+    ],
+    "checkedDisplaySize": 180
+  },
+  "finalMaster": "empty-box-neutral-gray-alpha-final.png",
+  "appAsset": "apps/expo/src/assets/images/empty-state-illustration.png",
+  "alphaWorkflow": "User-authorized local processing: Vision foreground mask, 8px edge contraction, lens-background cleanup, RGBA PNG export and 640px resize.",
+  "integration": {
+    "component": "apps/expo/src/common/Empty.tsx",
+    "defaultIllustration": true,
+    "explicitCustomVisualsPreserved": true,
+    "commentaryEmptyStatesMigrated": true,
+    "paddingHorizontal": 24,
+    "paddingVertical": 32,
+    "textMaxWidth": 360
+  }
+}

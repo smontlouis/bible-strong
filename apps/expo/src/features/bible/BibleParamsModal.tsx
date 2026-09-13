@@ -1,4 +1,3 @@
-import InlineCommentarySettings from '~features/commentaries/InlineCommentarySettings'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
 import * as NativeUI from 'react-native'
@@ -171,7 +170,6 @@ interface BibleParamsModalprops {
   modalRef?: React.RefObject<SheetRef | null>
   inline?: boolean
   onClose?: () => void
-  onInlineCommentaries?: () => void
   onFonts?: () => void
   onPalette?: () => void
   onShareOptions?: () => void
@@ -181,19 +179,11 @@ const BibleParamsModal = ({
   modalRef,
   inline = false,
   onClose,
-  onInlineCommentaries,
   onFonts,
   onPalette,
   onShareOptions,
 }: BibleParamsModalprops) => {
   const { t } = useTranslation()
-  const inlineCommentariesRef = React.useRef<SheetRef>(null)
-  const inlineCommentaryCount = useSelector(
-    (state: RootState) =>
-      (state.user.bible.settings.inlineCommentaries ?? []).filter(id =>
-        state.user.bible.settings.commentarySelection.some(selected => selected === id)
-      ).length
-  )
   const fontsRef = React.useRef<SheetRef>(null)
   const shareRef = React.useRef<SheetRef>(null)
   const setColorPickerModal = useSetAtom(colorPickerModalAtom)
@@ -535,23 +525,6 @@ const BibleParamsModal = ({
             />
           </HalfContainer>
           <TouchableBox
-            testID="bible-params-link"
-            accessibilityRole="button"
-            className="min-h-[60px] px-[20px] py-[8px] flex-row items-center gap-[12px]"
-            onPress={() =>
-              onInlineCommentaries
-                ? onInlineCommentaries()
-                : inlineCommentariesRef.current?.present()
-            }
-          >
-            <Text className={inline ? 'flex-1 text-[14px]' : 'flex-1'}>
-              {t('inlineCommentary.title')}
-            </Text>
-            <Text className="text-[12px] text-grey">{inlineCommentaryCount || t('Désactivé')}</Text>
-            <FeatherIcon name="chevron-right" size={18} color="grey" />
-          </TouchableBox>
-          <Border testID="bible-params-separator" />
-          <TouchableBox
             accessibilityRole="button"
             accessibilityLabel={t('Polices')}
             testID="bible-params-link"
@@ -604,14 +577,6 @@ const BibleParamsModal = ({
           </TouchableBox>
         </SheetScrollView>
       </Container>
-      {!onInlineCommentaries && (
-        <Sheet
-          ref={inlineCommentariesRef}
-          header={<SheetHeader title={t('inlineCommentary.title')} />}
-        >
-          <InlineCommentarySettings />
-        </Sheet>
-      )}
       {!onFonts && (
         <Sheet ref={fontsRef} header={<SheetHeader title={t('Polices')} />}>
           <BibleFontList onSelect={() => fontsRef.current?.close()} />

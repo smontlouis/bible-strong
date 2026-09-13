@@ -202,7 +202,6 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
               <Text className="text-[30px] font-bold mb-[40px]">{t(book.Nom)}</Text>
               {!Object.keys(pericopeBook).length ? (
                 <Empty
-                  source={require('~assets/images/empty.json')}
                   message={t('Aucun péricope pour ce Livre, essayez avec une autre version.')}
                 />
               ) : (

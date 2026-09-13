@@ -31,7 +31,7 @@ jest.mock('~common/ui/Box', () => ({
   TouchableBox: 'TouchableBox',
 }))
 jest.mock('~common/ui/Text', () => 'Text')
-jest.mock('~common/SwitchableHTMLView', () => 'HTMLView')
+jest.mock('../CommentarySectionCard', () => 'CommentaryCard')
 jest.mock('~features/resources/ResourceUnavailableView', () => 'Unavailable')
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: jest.fn() }) }))
@@ -63,41 +63,51 @@ afterEach(() => {
 })
 const flush = () => new Promise(resolve => setTimeout(resolve, 10))
 
-it('shows excerpts for a group and loads only the section explicitly selected', async () => {
+it('opens the requested section directly and navigates without preloading other bodies', async () => {
   mockLoadSection.mockResolvedValue({ section: { content: '<p>Selected section</p>' } })
   const grouped = {
     ...request,
+    sectionId: 'first',
     sections: [
       { sectionId: 'first', rangeStartVerse: 1, rangeEndVerse: 2, excerpt: 'First excerpt' },
-      { sectionId: 'second', rangeStartVerse: 2, rangeEndVerse: 2, excerpt: 'Second excerpt' },
+      { sectionId: 'second', rangeStartVerse: 3, rangeEndVerse: 3, excerpt: 'Second excerpt' },
     ],
   }
+  const select = jest.fn()
   await act(async () => {
     renderer = create(
       <QueryClientProvider client={client}>
-        <InlineCommentaryReader request={grouped} onClose={jest.fn()} />
+        <InlineCommentaryReader
+          embedded
+          request={grouped}
+          onClose={jest.fn()}
+          onSelectSection={select}
+        />
       </QueryClientProvider>
     )
-  })
-  expect(mockLoadSection).not.toHaveBeenCalled()
-  const list = renderer!.root.find(node => String(node.type) === 'SheetFlatList')
-  const item = list.props.renderItem({ item: grouped.sections[1], index: 1 })
-  await act(async () => {
-    item.props.onPress()
   })
   await act(async () => {
     await flush()
   })
   expect(mockLoadSection).toHaveBeenCalledTimes(1)
-  expect(mockLoadSection).toHaveBeenCalledWith(
+  expect(mockLoadSection).toHaveBeenLastCalledWith(
+    expect.objectContaining({ sectionId: 'first', revision: 'r1' })
+  )
+  expect(renderer!.root.findAll(node => String(node.type) === 'Sheet')).toHaveLength(0)
+  const card = renderer!.root.find(node => String(node.type) === 'CommentaryCard')
+  expect(card.props.book).toBe(1)
+  expect(card.props.chapter).toBe(1)
+  await act(async () => {
+    card.props.onNext()
+  })
+  await act(async () => {
+    await flush()
+  })
+  expect(mockLoadSection).toHaveBeenCalledTimes(2)
+  expect(mockLoadSection).toHaveBeenLastCalledWith(
     expect.objectContaining({ sectionId: 'second', revision: 'r1' })
   )
-  const header = renderer!.root.find(node => String(node.type) === 'Sheet').props.header
-  await act(async () => {
-    header.props.onBackPress()
-  })
-  expect(renderer!.root.findAll(node => String(node.type) === 'SheetFlatList')).toHaveLength(1)
-  expect(mockLoadSection).toHaveBeenCalledTimes(1)
+  expect(select).toHaveBeenCalledWith('second')
 })
 
 it('does not load full content until opened, then reads the exact requested revision', async () => {
@@ -122,8 +132,8 @@ it('does not load full content until opened, then reads the exact requested revi
   })
   expect(mockLoadSection).toHaveBeenCalledTimes(1)
   expect(mockLoadSection).toHaveBeenCalledWith(request)
-  const html = renderer!.root.find(node => String(node.type) === 'HTMLView')
-  expect(html.props.value).toBe('<p>Complete</p>')
+  const html = renderer!.root.find(node => String(node.type) === 'CommentaryCard')
+  expect(html.props.section.content).toBe('<p>Complete</p>')
   const header = renderer!.root.find(node => String(node.type) === 'Sheet').props.header
   expect(header.props.title).toBe('Henry')
 })

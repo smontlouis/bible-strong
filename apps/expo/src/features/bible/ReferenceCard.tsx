@@ -147,12 +147,7 @@ export const ReferenceCard = ({
   }
 
   if (!data) {
-    return (
-      <Empty
-        source={require('~assets/images/empty.json')}
-        message={t('resource.crossReferences.noneForVerse')}
-      />
-    )
+    return <Empty message={t('resource.crossReferences.noneForVerse')} />
   }
 
   return (
@@ -172,12 +167,7 @@ const References = ({
   const stylingTheme = useStylingTheme()
 
   if (!references.length) {
-    return (
-      <Empty
-        source={require('~assets/images/empty.json')}
-        message="Aucune référence pour ce verset..."
-      />
-    )
+    return <Empty message="Aucune référence pour ce verset..." />
   }
 
   return (

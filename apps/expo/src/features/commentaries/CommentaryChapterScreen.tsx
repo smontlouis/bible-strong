@@ -1,3 +1,4 @@
+import CommentIcon from '~common/CommentIcon'
 import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
@@ -306,7 +307,7 @@ const CommentaryChapterScreen = () => {
             />
           ) : visibleSections.length === 0 ? (
             <Empty
-              icon={require('~assets/images/empty-state-icons/comment.svg')}
+              iconElement={<CommentIcon size={36} />}
               message={t('commentaries.resource.emptyChapter')}
             />
           ) : (

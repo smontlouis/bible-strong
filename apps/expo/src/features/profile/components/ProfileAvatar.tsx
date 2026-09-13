@@ -8,7 +8,7 @@ const ProfileAvatar = () => {
 
   return (
     <UserAvatar
-      size={100}
+      size={130}
       photoURL={user.photoURL}
       displayName={user.displayName}
       email={user.email}

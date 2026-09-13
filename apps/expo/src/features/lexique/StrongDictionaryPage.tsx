@@ -16,12 +16,7 @@ const StrongDictionaryPage = ({ entry, onOpenBibleReference, onOpenStrong }: Pro
   const { t } = useTranslation()
   const resource = entry.resources[0]
   if (!resource) {
-    return (
-      <Empty
-        source={require('~assets/images/empty.json')}
-        message={t('strongDetail.dictionary.unavailable')}
-      />
-    )
+    return <Empty message={t('strongDetail.dictionary.unavailable')} />
   }
 
   return (

@@ -99,7 +99,7 @@ const TimelineSearchScreen = () => {
     return (
       <Empty
         {...(hasSearched
-          ? { source: require('~assets/images/empty.json'), message: t('Aucun résultat') }
+          ? { message: t('Aucun résultat') }
           : {
               icon: require('~assets/images/empty-state-icons/search.svg'),
               message: t('Faites une recherche dans la Bible !'),

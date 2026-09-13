@@ -1,11 +1,9 @@
-import Color from 'color'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import * as NativeUI from 'react-native'
-import Avatar from 'react-native-boring-avatars'
 import { twMerge } from '~common/ui/classNames'
+import GeneratedUserAvatar from './GeneratedUserAvatar'
 
 import type { Theme as AppTheme } from '~themes'
-import { useTheme } from '~themes/ThemeProvider'
 
 interface UserAvatarProps {
   size?: number
@@ -15,23 +13,17 @@ interface UserAvatarProps {
 }
 
 const UserAvatar = ({ size = 60, photoURL, displayName, email }: UserAvatarProps) => {
-  const theme = useTheme()
-
-  // Create 5 shades of primary color using Color library
-  const basePrimary = theme.colors.primary
-  const colors = [
-    Color(basePrimary).lighten(0.4).hex(),
-    Color(basePrimary).lighten(0.2).hex(),
-    Color(basePrimary).hex(),
-    Color(basePrimary).darken(0.18).hex(),
-    Color(basePrimary).darken(0.32).hex(),
-  ]
-
   if (photoURL) {
     return <AvatarImage source={{ uri: photoURL }} size={size} />
   }
 
-  return <Avatar size={size} name={displayName || email || 'user'} variant="beam" colors={colors} />
+  return (
+    <GeneratedUserAvatar
+      size={size}
+      name={displayName || email || 'user'}
+      traits={{ shape: [0.11, 0.35, 0.54, 0.65, 0.888, 0.933], 'body.r': 0.999 }}
+    />
+  )
 }
 
 const AvatarImage = (

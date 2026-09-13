@@ -43,12 +43,7 @@ const StrongEntityPage = ({
   const { t } = useTranslation()
   if (loading) return <Loading message={t('Chargement...')} />
   if (!entity) {
-    return (
-      <Empty
-        source={require('~assets/images/empty.json')}
-        message={t('strongDetail.entity.unavailable')}
-      />
-    )
+    return <Empty message={t('strongDetail.entity.unavailable')} />
   }
 
   const { graph, remaining } = splitStrongEntityRelations(entity)

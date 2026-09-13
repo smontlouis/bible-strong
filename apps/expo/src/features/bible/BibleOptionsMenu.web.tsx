@@ -1,8 +1,16 @@
-import InlineCommentarySettings from '~features/commentaries/InlineCommentarySettings'
+import InlineCommentarySettings, {
+  InlineCommentaryManageAction,
+} from '~features/commentaries/InlineCommentarySettings'
+import { useInlineCommentaryMenuAction } from '~features/commentaries/useInlineCommentaryMenuAction'
+import CommentarySelectorSheet, {
+  type CommentaryProjection,
+} from '~features/commentaries/CommentarySelectorSheet'
+import CommentarySourceDetails from '~features/commentaries/CommentarySourceDetails'
+import HeaderAction from '~common/ContextualPanel/HeaderAction'
 import { useBibleBookmarkScreens } from '~features/bookmarks/useBibleBookmarkScreens'
 import ColorPickerModal from '~common/ColorPickerModal'
 import BibleShareOptionsScreen from '~features/settings/BibleShareOptionsScreen'
-import type { ComponentProps } from 'react'
+import { useState, type ComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MenuView } from '~common/ui/MenuView'
 import ContextualPanel from '~common/ContextualPanel'
@@ -20,15 +28,20 @@ export default function BibleOptionsMenu({
   bookNumber,
   chapter,
   version,
-  actions,
+  actions: suppliedActions,
   onPressAction,
   children,
   accessibilityLabel,
 }: Props) {
   const { t } = useTranslation()
+  const inlineAction = useInlineCommentaryMenuAction()
+  const actions = [...suppliedActions]
+  actions.splice(1, 0, inlineAction)
+  const [commentaryDetails, setCommentaryDetails] = useState<CommentaryProjection>()
   const bookmarkPanel = useBibleBookmarkScreens(bookNumber, chapter, version)
   const icons = {
     params: 'type',
+    'inline-commentaries': 'message-square',
     parallel: 'columns',
     history: 'clock',
     bookmark: 'bookmark',
@@ -43,7 +56,8 @@ export default function BibleOptionsMenu({
           if (id === 'bookmark') {
             bookmarkPanel.prepare()
             nav.open('bookmark')
-          } else if (id === 'params' || id === 'export') nav.open(id)
+          } else if (id === 'params' || id === 'export' || id === 'inline-commentaries')
+            nav.open(id)
           else onPressAction?.({ nativeEvent: { event: id } })
         },
       }}
@@ -66,13 +80,20 @@ export default function BibleOptionsMenu({
                     label={action.title}
                     icon={icons[action.id as keyof typeof icons]}
                     nested={
-                      action.id === 'params' || action.id === 'export' || action.id === 'bookmark'
+                      action.id === 'params' ||
+                      action.id === 'export' ||
+                      action.id === 'bookmark' ||
+                      action.id === 'inline-commentaries'
                     }
                     onPress={() => {
                       if (action.id === 'bookmark') {
                         bookmarkPanel.prepare()
                         nav.open('bookmark')
-                      } else if (action.id === 'params' || action.id === 'export')
+                      } else if (
+                        action.id === 'params' ||
+                        action.id === 'export' ||
+                        action.id === 'inline-commentaries'
+                      )
                         nav.open(action.id)
                       else {
                         nav.close()
@@ -92,7 +113,6 @@ export default function BibleOptionsMenu({
             <BibleParamsModal
               inline
               onClose={nav.close}
-              onInlineCommentaries={() => nav.open('inline-commentaries')}
               onFonts={() => nav.open('fonts')}
               onPalette={() => nav.open('palette')}
               onShareOptions={() => nav.open('share-options')}
@@ -101,7 +121,32 @@ export default function BibleOptionsMenu({
         },
         'inline-commentaries': {
           title: t('inlineCommentary.title'),
-          content: () => <InlineCommentarySettings />,
+          content: nav => (
+            <>
+              <HeaderAction>
+                <InlineCommentaryManageAction onPress={() => nav.open('commentary-sources')} />
+              </HeaderAction>
+              <InlineCommentarySettings onManage={() => nav.open('commentary-sources')} />
+            </>
+          ),
+        },
+        'commentary-sources': {
+          title: t('commentaries.selector.title'),
+          width: 500,
+          content: nav => (
+            <CommentarySelectorSheet
+              inline
+              onOpenDetails={projection => {
+                setCommentaryDetails(projection)
+                nav.open('commentary-details')
+              }}
+            />
+          ),
+        },
+        'commentary-details': {
+          title: commentaryDetails?.entry.title ?? t('Commentaires'),
+          content: () =>
+            commentaryDetails ? <CommentarySourceDetails projection={commentaryDetails} /> : null,
         },
         fonts: {
           title: t('Polices'),

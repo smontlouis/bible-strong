@@ -2226,6 +2226,8 @@ __metadata:
     "@bible-strong/bible-reference-parser": "workspace:*"
     "@bible-strong/resource-catalog": "workspace:*"
     "@bible-strong/resource-domain": "workspace:*"
+    "@blobatar/react": "npm:2.7.0"
+    "@blobatar/react-native": "npm:2.7.0"
     "@convective/react-native-reanimated-progress": "npm:^1.0.8"
     "@dagrejs/dagre": "npm:^3.0.0"
     "@dnd-kit/collision": "npm:^0.5.0"
@@ -2283,6 +2285,7 @@ __metadata:
     babel-plugin-react-compiler: "npm:^1.0.0"
     babel-plugin-transform-remove-console: "npm:^6.9.4"
     babel-preset-expo: "npm:~56.0.0"
+    blobatar: "npm:2.7.0"
     blurhash: "npm:^2.0.5"
     cmdk: "npm:^1.1.1"
     color: "npm:^4.2.3"
@@ -2353,7 +2356,6 @@ __metadata:
     react-dom: "npm:19.2.3"
     react-i18next: "npm:11.18.6"
     react-native: "patch:react-native@npm%3A0.85.3#~/.yarn/patches/react-native-npm-0.85.3-2292697f2f.patch"
-    react-native-boring-avatars: "npm:^1.0.1"
     react-native-ease: "npm:^0.4.0"
     react-native-edge-to-edge: "npm:^1.4.3"
     react-native-gesture-handler: "npm:~2.31.1"
@@ -2562,6 +2564,35 @@ __metadata:
   resolution: "@bible-strong/workspace@workspace:."
   languageName: unknown
   linkType: soft
+
+"@blobatar/react-native@npm:2.7.0":
+  version: 2.7.0
+  resolution: "@blobatar/react-native@npm:2.7.0"
+  peerDependencies:
+    blobatar: 2.x
+    react: ">=18"
+    react-native: ">=0.76"
+    react-native-reanimated: ">=4"
+    react-native-svg: ">=15"
+    react-native-worklets: ">=0.5"
+  peerDependenciesMeta:
+    react-native-reanimated:
+      optional: true
+    react-native-worklets:
+      optional: true
+  checksum: 10c0/35c5d347941b424aee1c4d97a4963df5a10cd986ce8ad35e30d26fdb053162599249eeb02b1d856c001a613e9aa45fabab91533a4b78b3656971dc5420c3c742
+  languageName: node
+  linkType: hard
+
+"@blobatar/react@npm:2.7.0":
+  version: 2.7.0
+  resolution: "@blobatar/react@npm:2.7.0"
+  peerDependencies:
+    blobatar: 2.x
+    react: ">=18"
+  checksum: 10c0/63431c8081c2a09f8d156df64785ea5a29ea21d028201b506db3648c69c44f2f5a4a86936362f1191e3c09f812346f95b846a34c2363c8eb48e78732e423ea13
+  languageName: node
+  linkType: hard
 
 "@cloudflare/kv-asset-handler@npm:0.5.0":
   version: 0.5.0
@@ -13845,6 +13876,21 @@ __metadata:
   version: 2.1.5
   resolution: "blake3-wasm@npm:2.1.5"
   checksum: 10c0/5dc729d8e3a9d1d7ab016b36cdda264a327ada0239716df48435163e11d2bf6df25d6e421655a1f52649098ae49555268a654729b7d02768f77c571ab37ef814
+  languageName: node
+  linkType: hard
+
+"blobatar@npm:2.7.0":
+  version: 2.7.0
+  resolution: "blobatar@npm:2.7.0"
+  peerDependencies:
+    react: ">=18"
+    vue: ">=3"
+  peerDependenciesMeta:
+    react:
+      optional: true
+    vue:
+      optional: true
+  checksum: 10c0/5ea1a585b325d39741ff7941d3b84c9d2f54d8d1d27292b0b6d4cd16b03d36df148f03969f58122436e83be7521bd042d9adb18766fe44ce2fb0349b123427b5
   languageName: node
   linkType: hard
 
@@ -26106,18 +26152,6 @@ multer@emadalam/multer:
     "@types/react": ^16.8.0 || ^17.0.0 || ^18.0.0
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
   checksum: 10c0/628c76339bd47dee0dbc378d57eb07051b4e2cd52f8b0794f640bed8fd33a64b2573035e298cae6ca8a8b3e969eb122fc74d2fabe738be10080f8cd5e0497589
-  languageName: node
-  linkType: hard
-
-"react-native-boring-avatars@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "react-native-boring-avatars@npm:1.0.1"
-  dependencies:
-    react-native-svg: "npm:^12.1.1"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/da475c2df7d5fc40d2cc7de2ef65e6b824eb5490920f6ef4e6f046b34215f5de2850c502a6cb0e80325e5b363bfc7b36c55da3f7b798dafeda3194f8d681ac3c
   languageName: node
   linkType: hard
 

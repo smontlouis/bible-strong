@@ -42,11 +42,12 @@ The reader never silently substitutes another revision's text.
   from the existing local chapter source only when opening a section, so the
   complete work is not duplicated inside its download. Online section delivery
   retains a materialized body for one direct, revision-bound request.
-- Existing Offline copies keep their original checksummed bytes. On first reading
-  of a chapter, the application builds a revision-bound JSON sidecar next to the
-  installed resources. Subsequent index reads use that sidecar. Opening full text
-  still works from the original local data. Revision replacement during migration
-  invalidates the result.
+- Older Offline copies without `COMMENTARY_READING_SECTIONS` must be updated
+  through download management to supply an inline index. Chapter reading does not
+  load their full content to generate positions or excerpts, and no longer reads
+  or writes the former per-chapter JSON sidecars. Those copies remain usable in
+  ordinary commentary reading. Online indexes and their existing preview cache
+  remain available independently of an installed copy.
 - The persistent online index cache stores previews, not a complete Offline copy.
   Cached previews alone cannot guarantee full-text access without connectivity.
 
@@ -60,7 +61,7 @@ publication. Installing/removing an Offline copy also refreshes the chapter inde
 ## Publication contract
 
 Shared section construction belongs to `resource-domain`. Studio packaging,
-service importing, parity validation and native legacy migration use the same
+service importing and parity validation use the same
 reading projection. Canonical publications declare `readingIndexVersion: 2` and
 include that algorithm version in the content-derived revision hash. Future
 algorithm changes require a new version and compatible readers/importers.
@@ -132,7 +133,8 @@ its HTML repeatedly for every association. An exhaustive comparison across EGW's
 against the prior materialized projection. For John 15, source graph serialization
 was 3,230,576 bytes versus 17,633,736 bytes of repeated chapter bodies. These are
 desktop measurements, not device peak-memory or latency measurements; the source
-bodies are still read only when opening full text or migrating an old offline copy.
+bodies are read only when opening full text. The legacy-index migration measured
+in that historical report has since been removed.
 Reports are in `docs/measurements/inline-commentary-*.json`.
 
 Run the reproducible measurement on a verified local SQLite artifact:

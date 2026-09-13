@@ -74,10 +74,7 @@ const StrongEntryRouteScaffold = ({
       <FormSheetScreen isFormSheet={isFormSheet}>
         {header}
         {entryState.entryQuery.isError ? (
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message={t("Cette entrée Strong n'a pas pu être chargée.")}
-          />
+          <Empty message={t("Cette entrée Strong n'a pas pu être chargée.")} />
         ) : (
           <Loading message={t('Chargement...')} />
         )}
@@ -142,7 +139,6 @@ const StrongEntryRouteScaffold = ({
       <FormSheetScreen isFormSheet={isFormSheet}>
         {header}
         <Empty
-          source={require('~assets/images/empty.json')}
           message={t('Aucune entrée lexicale trouvée pour {{code}}.', {
             code: entryState.identity?.code ?? '',
           })}
