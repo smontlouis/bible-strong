@@ -449,18 +449,18 @@ const DictionnaryDetailScreen = ({
                     key={`${source.resource.work}:${source.resource.language}:${source.id}`}
                     disabled={selected}
                     onPress={() =>
-                      pushRouteOnce({
-                        pathname: '/dictionnary-detail',
-                        params: {
-                          word: source.word,
-                          entryId: String(source.id),
-                          correspondenceId: correspondenceQuery.data?.correspondenceId,
-                          work: source.resource.work,
-                          resourceId: source.resourceId,
-                          dictionaryTitle: source.title,
-                          language: source.resource.language,
-                        },
-                      })
+                      setDictionaryTab(
+                        produce(draft => {
+                          draft.title = source.word
+                          draft.data.word = source.word
+                          draft.data.entryId = source.id
+                          draft.data.correspondenceId = correspondenceQuery.data?.correspondenceId
+                          draft.data.work = source.resource.work
+                          draft.data.resourceId = source.resourceId
+                          draft.data.dictionaryTitle = source.title
+                          draft.data.language = source.resource.language
+                        })
+                      )
                     }
                     style={[
                       { opacity: selected ? 0.6 : 1 },

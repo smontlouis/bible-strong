@@ -28,7 +28,7 @@ En ligne, le répertoire est fédéré par le Resource service. Hors ligne, l’
 
 ### Lecture d’un article
 
-`DictionaryDetailTabScreen` conserve l’identité exacte de l’article (`work`, `resourceId`, `language`, `entryId`). Lorsqu’une correspondance existe, un sélecteur montre les autres dictionnaires et variantes linguistiques. Les liens `bible://`, `strong://` et les liens vers d’autres articles ouvrent leur surface native.
+`DictionaryDetailTabScreen` conserve l’identité exacte de l’article (`work`, `resourceId`, `language`, `entryId`). Lorsqu’une correspondance existe, un sélecteur montre les autres dictionnaires et variantes linguistiques. Le sélecteur « Aussi dans… » met à jour le state Jotai de l’écran ou de l’onglet courant, sans modifier la route ni ajouter d’écran à la pile de navigation. Les liens `bible://`, `strong://` et les liens vers d’autres articles ouvrent leur surface native.
 
 ### Accueil et téléchargements
 

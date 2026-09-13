@@ -18,11 +18,30 @@ import { previewHistoryAtom, PreviewNestedContext, type ReferencePreviewRequest 
 import NotePreviewContent from './NotePreviewContent'
 import ResourcePreviewContent from './ResourcePreviewContent'
 import { loadReferencePreview } from './loadPreview'
+import { selectBibleReferenceVersion } from '~helpers/bibleReferenceVersion'
 
 export default function ReferencePreviewHost() {
   const [history, setHistory] = useAtom(previewHistoryAtom)
   const request = history.at(-1)
   const rootRequest = history[0]
+  const resources = useResourceAccess()
+  const versionQuery = useQuery({
+    queryKey: [
+      'reference-preview-version',
+      request?.kind === 'bible' ? request.version : null,
+      request?.kind === 'bible' ? request.selections.map(selection => selection.book) : [],
+    ],
+    queryFn: () =>
+      request?.kind === 'bible'
+        ? selectBibleReferenceVersion(
+            request.version,
+            request.selections.map(selection => selection.book),
+            resources.bibleContent
+          )
+        : Promise.resolve(null),
+    enabled: request?.kind === 'bible',
+    ...localQueryOptions,
+  })
   const { height } = useWindowDimensions()
   const sheet = useRef<SheetRef>(null)
   const { t } = useTranslation()
@@ -56,7 +75,7 @@ export default function ReferencePreviewHost() {
           title={
             request
               ? request.kind === 'bible'
-                ? `${request.title} · ${request.version}`
+                ? `${request.title} · ${versionQuery.data ?? request.version}`
                 : request.kind === 'dictionary'
                   ? `${request.title} · ${request.source.dictionaryTitle}`
                   : request.kind === 'study'
@@ -84,7 +103,14 @@ export default function ReferencePreviewHost() {
       <PreviewNestedContext.Provider value={true}>
         {request &&
           (request.kind === 'bible' ? (
-            <PreviewContent key={JSON.stringify(request)} request={request} />
+            versionQuery.isPending ? (
+              <ActivityIndicator />
+            ) : (
+              <PreviewContent
+                key={JSON.stringify(request)}
+                request={{ ...request, version: versionQuery.data ?? request.version }}
+              />
+            )
           ) : (
             <SheetScrollView
               key={JSON.stringify(request)}

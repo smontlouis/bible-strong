@@ -21,6 +21,13 @@ including offline copies. Loading and unavailable states retain the open action;
 unavailable text can be retried. Queries are keyed by version and selection, so an
 old response cannot replace a newer preview. Requests are ephemeral and never synced.
 
+When the selected version's canon omits a referenced book, previews and the Bible
+reference screen select an accessible version whose published coverage includes it,
+preferring the same language. The preview header identifies that version; the default
+Bible preference is unchanged. This selection happens before text loading and does
+not substitute another version after a loading failure or for a missing verse in a
+book already included in the selected canon.
+
 The body uses the reading font at 16px / 24px, with verse numbers only and continuous text between verses.
 
 Dictionary word targets carry their source work, resource ID, language and title;

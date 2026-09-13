@@ -25,6 +25,7 @@ import Box from '~common/ui/Box'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import type { StrongMode } from '~helpers/strongBiblePublications'
+import { selectBibleReferenceVersion } from '~helpers/bibleReferenceVersion'
 import {
   BiblePartialReferenceNotice,
   BibleReferenceUnavailable,
@@ -128,18 +129,24 @@ const BibleScreen = () => {
       'screen-resolution',
       requestedVerseKeysSignature,
     ],
-    queryFn: () =>
-      resolveBibleVerses(
+    queryFn: async () => {
+      const referenceVersion = await selectBibleReferenceVersion(
+        requestedVersion || defaultVersion,
+        [bookNumber],
+        resources.bibleContent
+      )
+      return resolveBibleVerses(
         {
           verseKeys: requestedVerseKeys,
-          preferredVersion: requestedVersion,
+          preferredVersion: referenceVersion,
           defaultVersion,
         },
         {
           loadVerseTexts: (version, verseKeys) =>
             resources.bibleContent.loadVerseTexts({ version, verseKeys }),
         }
-      ),
+      )
+    },
     enabled: shouldResolveVersion,
     staleTime: Infinity,
   })
