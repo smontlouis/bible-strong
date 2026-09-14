@@ -14,7 +14,11 @@ export const destinations = [
   { type: 'notes', key: 'tabs.notes', aliases: 'notes note' },
   { type: 'study', key: 'Études', aliases: 'etudes etude studies study' },
   { type: 'compare', key: 'tabs.compare', aliases: 'comparer comparaison compare parallel' },
-  { type: 'plan', key: 'Plans', aliases: 'plans lecture reading' },
+  {
+    type: 'plan',
+    key: 'Plans & Méditations',
+    aliases: 'plans lecture reading meditation meditations recueil devotional',
+  },
   { type: 'timeline', key: 'tabs.timeline', aliases: 'chronologie timeline histoire' },
   { type: 'strong', key: 'tabs.strong', aliases: 'strong lexique lexicon grec hebreu' },
   { type: 'dictionary', key: 'tabs.dictionary', aliases: 'dictionnaire dictionary' },

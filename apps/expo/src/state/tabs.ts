@@ -163,6 +163,7 @@ export interface PlanTab extends TabBase {
   data: {
     planId: string
     readingSliceId?: string
+    meditationDate?: string
   }
 }
 

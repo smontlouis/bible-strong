@@ -8,6 +8,20 @@ import type {
   ReadingSlice,
   Section,
 } from '~common/types'
+import { getEditorialKind } from './readingCalendar'
+
+/** An old download alone is not participation. Legacy reading history remains resumable. */
+export const hasPlanParticipation = (participation?: OngoingPlan): boolean =>
+  Boolean(
+    participation &&
+    (participation.startDate ||
+      participation.status === 'Progress' ||
+      participation.status === 'Completed' ||
+      Object.values(participation.readingSlices).some(status => status === 'Completed'))
+  )
+
+export const canUpdatePlanProgress = (plan?: Plan, participation?: OngoingPlan): boolean =>
+  Boolean(plan && getEditorialKind(plan) === 'reading-plan' && hasPlanParticipation(participation))
 
 export const getPlanReadingSlices = (plan?: Pick<Plan, 'sections'>): ReadingSlice[] =>
   plan?.sections.flatMap(section => section.readingSlices) ?? []
@@ -81,6 +95,11 @@ export const areOngoingPlansEqual = (prev: OngoingPlan[], next: OngoingPlan[]): 
     const nextPlan = next[index]
     if (!prevPlan || !nextPlan) return false
     if (prevPlan.id !== nextPlan.id || prevPlan.status !== nextPlan.status) return false
+    if (
+      prevPlan.startDate !== nextPlan.startDate ||
+      prevPlan.reminderTime !== nextPlan.reminderTime
+    )
+      return false
 
     const prevEntries = Object.entries(prevPlan.readingSlices ?? {})
     const nextEntries = Object.entries(nextPlan.readingSlices ?? {})
@@ -108,22 +127,16 @@ export const markReadingSliceAsRead = ({
   const readingSlices = getPlanReadingSlices(plan)
   const readingSliceIndex = readingSlices.findIndex(slice => slice.id === readingSliceId)
   const existingOngoingPlan = ongoingPlans.find(ongoingPlan => ongoingPlan.id === planId)
+  if (readingSliceIndex < 0 || !canUpdatePlanProgress(plan, existingOngoingPlan))
+    return ongoingPlans
   const nextOngoingPlans: OngoingPlan[] = ongoingPlans.map(ongoingPlan => ({
     ...ongoingPlan,
-    status: ongoingPlan.status === 'Progress' ? ('Idle' as const) : ongoingPlan.status,
     readingSlices: { ...ongoingPlan.readingSlices },
   }))
 
-  let targetOngoingPlanIndex = nextOngoingPlans.findIndex(ongoingPlan => ongoingPlan.id === planId)
-
-  if (targetOngoingPlanIndex === -1) {
-    nextOngoingPlans.push({
-      id: planId,
-      status: 'Progress',
-      readingSlices: {},
-    })
-    targetOngoingPlanIndex = nextOngoingPlans.length - 1
-  }
+  const targetOngoingPlanIndex = nextOngoingPlans.findIndex(
+    ongoingPlan => ongoingPlan.id === planId
+  )
 
   const targetOngoingPlan = nextOngoingPlans[targetOngoingPlanIndex]
   const currentStatus = existingOngoingPlan?.readingSlices[readingSliceId]
@@ -156,8 +169,8 @@ export const markReadingSliceAsRead = ({
     }
   }
 
-  const completedCount = Object.values(targetOngoingPlan.readingSlices).filter(
-    status => status === 'Completed'
+  const completedCount = readingSlices.filter(
+    reading => targetOngoingPlan.readingSlices[reading.id] === 'Completed'
   ).length
 
   targetOngoingPlan.status = readingSlices.length === completedCount ? 'Completed' : 'Progress'

@@ -21,6 +21,7 @@ import verseToReference from '~helpers/verseToReference'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import { VersionCode } from '~state/tabs'
 import type { AppDispatch } from '~redux/store'
+import { normalizeMeditationCollection } from './readingCalendar'
 import { areOngoingPlansEqual, buildComputedPlan, buildComputedPlanItem } from './planProgress'
 
 interface VerseContent {
@@ -83,7 +84,7 @@ export const useComputedPlan = (id: string): ComputedPlan | undefined => {
     return
   }
 
-  return buildComputedPlan(plan, ongoingPlan)
+  return buildComputedPlan(normalizeMeditationCollection(plan), ongoingPlan)
 }
 
 const compareMyPlans = (prev: Plan[], next: Plan[]) => {

@@ -37,6 +37,7 @@ const Container = (
 
 const UserWidget = () => {
   const [carouselWidth, setCarouselWidth] = React.useState(0)
+  const [activeVerseIndex, setActiveVerseIndex] = React.useState(visibleVerseOffsets.length - 1)
 
   return (
     <Container>
@@ -72,7 +73,18 @@ const UserWidget = () => {
               rotateZDeg: 0,
               opacityInterval: 0.4,
             }}
-            renderItem={({ item: addDay }) => <VerseOfTheDay addDay={addDay} />}
+            onSnapToItem={setActiveVerseIndex}
+            renderItem={({ item: addDay, index }) => (
+              <Box
+                accessibilityElementsHidden={index !== activeVerseIndex}
+                importantForAccessibility={
+                  index === activeVerseIndex ? 'auto' : 'no-hide-descendants'
+                }
+                pointerEvents={index === activeVerseIndex ? 'auto' : 'none'}
+              >
+                <VerseOfTheDay addDay={addDay} />
+              </Box>
+            )}
             defaultIndex={visibleVerseOffsets.length - 1}
           />
         )}

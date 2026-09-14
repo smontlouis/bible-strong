@@ -47,8 +47,12 @@ if (!isPlaygroundEnabled) {
   const { default: notifee, EventType } =
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('@notifee/react-native') as typeof import('@notifee/react-native')
-  notifee.onBackgroundEvent(async ({ type }) => {
-    if (type === EventType.PRESS || type === EventType.DISMISSED) return
+  notifee.onBackgroundEvent(async ({ type, detail }) => {
+    if (type !== EventType.PRESS) return
+    // A background handler cannot navigate. Persist the intent until the authenticated UI is ready.
+    const { getReadingReminderInbox } =
+      await import('~features/daily-reading/readingReminderInbox.native')
+    getReadingReminderInbox().remember(detail.notification?.id, detail.notification?.data)
   })
 }
 

@@ -1,3 +1,6 @@
+import { useSelector } from 'react-redux'
+import { selectFontFamily } from '~redux/selectors/user'
+import { resolveFontFamily } from '~themes/styleValues'
 import { twMerge } from '~common/ui/classNames'
 
 import React from 'react'
@@ -13,18 +16,16 @@ type Props = TextSliceProps & {
 
 const TextSlice = ({ description, subType, planLanguage }: Props) => {
   const isDevotional = subType === 'devotional'
+  const fontFamily = resolveFontFamily(useSelector(selectFontFamily))
   const content = isDevotional
     ? description.replace(/^\n|\n$/g, '')
     : description.replace(/^\n/, '')
   return (
     <Box
-      {...(isDevotional && {
-        center: true,
-        backgroundColor: 'lightGrey',
-        paddingVertical: 20,
-        marginBottom: 40,
-      })}
-      className="overflow-hidden border-continuous px-[20px]"
+      className={twMerge(
+        'overflow-hidden border-continuous px-[20px]',
+        isDevotional && 'bg-light-grey py-[20px] mb-[32px]'
+      )}
     >
       {isDevotional && (
         <FeatherIcon color="primary" name="minus" style={{ marginBottom: 20 }} size={30} />
@@ -32,7 +33,7 @@ const TextSlice = ({ description, subType, planLanguage }: Props) => {
       <ReferenceParagraph
         scaleLineHeight={1}
         planLanguage={planLanguage}
-        style={{ textAlign: isDevotional ? 'center' : 'left' }}
+        style={{ textAlign: isDevotional ? 'center' : 'left', fontFamily }}
         className={twMerge(isDevotional ? 'text-primary' : 'text-default')}
       >
         {content}

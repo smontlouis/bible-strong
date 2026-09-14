@@ -12,6 +12,7 @@ import reducer, {
   onUserUpdateProfile,
   receiveSubcollectionUpdates,
   setNotificationVOD,
+  setDailyMeditation,
   setNotificationId,
   toggleCompareVersion,
   resetCompareVersion,
@@ -184,6 +185,24 @@ describe('User Reducer', () => {
 
     expect(freshState.bible.settings.compare).toEqual({})
     expect(freshState.bible.settings.compareSelectionVersion).toBe(2)
+  })
+
+  describe('daily-reading source', () => {
+    it('keeps the standalone verse by default and preserves reminders when changing source', () => {
+      expect(initialState.bible.settings.dailyMeditationId).toBeUndefined()
+      const selected = reducer(initialState, setDailyMeditation('avec-dieu-chaque-jour'))
+      expect(selected.bible.settings.dailyMeditationId).toBe('avec-dieu-chaque-jour')
+      expect(selected.notifications).toEqual(initialState.notifications)
+      const restored = reducer(selected, setDailyMeditation(null))
+      expect(restored.bible.settings.dailyMeditationId).toBeNull()
+      expect(restored.notifications).toEqual(initialState.notifications)
+    })
+
+    it('keeps the selected source through a settings import', () => {
+      const selected = reducer(initialState, setDailyMeditation('avec-dieu-chaque-jour'))
+      const restored = reducer(initialState, importData({ bible: selected.bible, studies: {} }))
+      expect(restored.bible.settings.dailyMeditationId).toBe('avec-dieu-chaque-jour')
+    })
   })
 
   describe('verifyEmail', () => {

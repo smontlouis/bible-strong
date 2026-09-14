@@ -5,6 +5,8 @@ import {
   buildComputedPlanItem,
   calculateReadingProgress,
   markReadingSliceAsRead,
+  hasPlanParticipation,
+  canUpdatePlanProgress,
 } from '../planProgress'
 
 const createReadingSlice = (id: string): ReadingSlice => ({
@@ -155,7 +157,7 @@ describe('planProgress', () => {
       ])
 
       const ongoingPlans = markReadingSliceAsRead({
-        ongoingPlans: [],
+        ongoingPlans: [{ id: 'plan-1', status: 'Progress', readingSlices: {} }],
         plan,
         planId: 'plan-1',
         readingSliceId: 'slice-1',
@@ -177,7 +179,7 @@ describe('planProgress', () => {
       ])
 
       const ongoingPlans = markReadingSliceAsRead({
-        ongoingPlans: [],
+        ongoingPlans: [{ id: 'plan-1', status: 'Progress', readingSlices: {} }],
         plan,
         planId: 'plan-1',
         readingSliceId: 'slice-1',
@@ -186,13 +188,14 @@ describe('planProgress', () => {
       expect(ongoingPlans[0].status).toBe('Completed')
     })
 
-    it('moves other in-progress Reading plans to Idle', () => {
+    it('preserves other active plans when reading a different plan', () => {
       const plan = createPlan('plan-2', [
         createSection('section-1', [createReadingSlice('slice-2')]),
       ])
 
       const ongoingPlans = markReadingSliceAsRead({
         ongoingPlans: [
+          { id: 'plan-2', status: 'Progress', readingSlices: {} },
           {
             id: 'plan-1',
             status: 'Progress',
@@ -204,10 +207,83 @@ describe('planProgress', () => {
         readingSliceId: 'slice-2',
       })
 
-      expect(ongoingPlans.find(ongoingPlan => ongoingPlan.id === 'plan-1')?.status).toBe('Idle')
+      expect(ongoingPlans.find(ongoingPlan => ongoingPlan.id === 'plan-1')?.status).toBe('Progress')
       expect(ongoingPlans.find(ongoingPlan => ongoingPlan.id === 'plan-2')?.status).toBe(
         'Completed'
       )
     })
+  })
+})
+
+describe('participation boundary', () => {
+  const plan = createPlan('reading-plan', [createSection('section', [createReadingSlice('a')])])
+  const download: OngoingPlan = { id: plan.id, status: 'Idle', readingSlices: {} }
+
+  it('does not turn a cached preview or old empty download into participation', () => {
+    expect(hasPlanParticipation(undefined)).toBe(false)
+    expect(hasPlanParticipation(download)).toBe(false)
+    for (const records of [[], [download]]) {
+      expect(
+        markReadingSliceAsRead({
+          ongoingPlans: records,
+          plan,
+          planId: plan.id,
+          readingSliceId: 'a',
+        })
+      ).toBe(records)
+    }
+  })
+
+  it('keeps undated legacy progress resumable without assigning a start date', () => {
+    const legacy: OngoingPlan = { ...download, readingSlices: { a: 'Completed' } }
+    expect(hasPlanParticipation(legacy)).toBe(true)
+    expect(canUpdatePlanProgress(plan, legacy)).toBe(true)
+    const result = markReadingSliceAsRead({
+      ongoingPlans: [legacy],
+      plan,
+      planId: plan.id,
+      readingSliceId: 'a',
+    })
+    expect(result[0].readingSlices.a).toBe('Next')
+    expect(result[0].startDate).toBeUndefined()
+  })
+
+  it('does not write new undated meditation history through a legacy plan action', () => {
+    const legacy: OngoingPlan = { ...download, readingSlices: { a: 'Completed' } }
+    expect(canUpdatePlanProgress({ ...plan, kind: 'daily-meditation' }, legacy)).toBe(false)
+    const records = [legacy]
+    expect(
+      markReadingSliceAsRead({
+        ongoingPlans: records,
+        plan: { ...plan, kind: 'daily-meditation' },
+        planId: plan.id,
+        readingSliceId: 'a',
+      })
+    ).toBe(records)
+  })
+
+  it('ignores invalid reading IDs and does not let orphaned legacy IDs prevent completion', () => {
+    const existing: OngoingPlan = {
+      ...download,
+      status: 'Progress',
+      readingSlices: { orphaned: 'Completed' },
+    }
+    const records = [existing]
+    expect(
+      markReadingSliceAsRead({
+        ongoingPlans: records,
+        plan,
+        planId: plan.id,
+        readingSliceId: 'unknown',
+      })
+    ).toBe(records)
+    const result = markReadingSliceAsRead({
+      ongoingPlans: records,
+      plan,
+      planId: plan.id,
+      readingSliceId: 'a',
+    })
+    expect(result[0].status).toBe('Completed')
+    expect(result[0].readingSlices.orphaned).toBe('Completed')
   })
 })

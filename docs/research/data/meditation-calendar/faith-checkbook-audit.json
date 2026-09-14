@@ -1,0 +1,11 @@
+{
+  "id": "faith-checkbook",
+  "source": "https://archive.spurgeon.org/fcb/fcb-bod.htm",
+  "sourceEntries": 366,
+  "localEntries": 365,
+  "dateAlignedTitleMatches": 365,
+  "titleDifferences": [],
+  "missingDates": [
+    "02-29"
+  ]
+}

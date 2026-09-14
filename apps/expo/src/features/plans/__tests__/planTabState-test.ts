@@ -2,6 +2,8 @@ import type { ComputedPlan, ComputedReadingSlice } from '~common/types'
 import type { PlanTab } from '~state/tabs'
 import {
   findPlanTabReadingSlice,
+  getLegacyPlanRouteId,
+  getLegacyReadingRouteLocation,
   getRecoveredPlanTabTitle,
   leavePlanSliceInTab,
   openPlanSliceInTab,
@@ -81,5 +83,40 @@ describe('planTabState', () => {
 
     expect(opened).toEqual({ planId: 'plan-1', readingSliceId: 'slice-1' })
     expect(closed).toEqual({ planId: 'plan-1', readingSliceId: undefined })
+  })
+})
+
+describe('legacy route recovery', () => {
+  it('recovers only identity from old content snapshots', () => {
+    expect(
+      getLegacyPlanRouteId(JSON.stringify({ id: 'plan-a', title: 'Old title', sections: [] }))
+    ).toBe('plan-a')
+    expect(
+      getLegacyReadingRouteLocation(
+        JSON.stringify({
+          id: 'day-a',
+          planId: 'plan-a',
+          slices: [{ type: 'Text', description: 'Old text' }],
+        })
+      )
+    ).toEqual({ planId: 'plan-a', readingSliceId: 'day-a' })
+  })
+
+  it.each([undefined, null, 'not-json', 'null', '[]', '{}', '{"id":12}', '{"id":""}'])(
+    'does not throw on a malformed plan link: %s',
+    value => {
+      expect(getLegacyPlanRouteId(value)).toBeUndefined()
+    }
+  )
+
+  it.each([
+    '{}',
+    '{"id":"a"}',
+    '{"planId":"p"}',
+    '{"id":3,"planId":"p"}',
+    '{"id":"a","planId":""}',
+    'broken',
+  ])('does not recover an invalid reading location: %s', value => {
+    expect(getLegacyReadingRouteLocation(value)).toBeUndefined()
   })
 })

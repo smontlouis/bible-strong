@@ -1,0 +1,1898 @@
+{
+  "status": "Candidate correction based on source-title comparison: 355 normalized matches, 10 minor spelling differences. Not applied; no full-body comparison.",
+  "source": "https://godieu.com/doc/meditations/charles-haddon-spurgeon/liste.html",
+  "differences": [
+    {
+      "id": "112",
+      "sourceDate": "0113",
+      "localTitle": "Jamais jetté dehors",
+      "similarity": 0.97
+    },
+    {
+      "id": "219",
+      "sourceDate": "0429",
+      "localTitle": "Oublie et pardonne",
+      "similarity": 0.941
+    },
+    {
+      "id": "288",
+      "sourceDate": "0707",
+      "localTitle": "Un choeur de montagnes",
+      "similarity": 0.973
+    },
+    {
+      "id": "335",
+      "sourceDate": "0823",
+      "localTitle": "Aime et recherche la vraie sagesse",
+      "similarity": 0.967
+    },
+    {
+      "id": "350",
+      "sourceDate": "0907",
+      "localTitle": "La portée de la grâce tout-puissante",
+      "similarity": 0.984
+    },
+    {
+      "id": "356",
+      "sourceDate": "0913",
+      "localTitle": "La rosée de ciel",
+      "similarity": 0.923
+    },
+    {
+      "id": "360",
+      "sourceDate": "0917",
+      "localTitle": "Comme la palmier et comme le cèdre",
+      "similarity": 0.964
+    },
+    {
+      "id": "364",
+      "sourceDate": "0921",
+      "localTitle": "Laisses les épreuves te bénir",
+      "similarity": 0.98
+    },
+    {
+      "id": "394",
+      "sourceDate": "1021",
+      "localTitle": "La tableau de multiplication de Dieu",
+      "similarity": 0.968
+    },
+    {
+      "id": "397",
+      "sourceDate": "1024",
+      "localTitle": "Pieuse fermetée",
+      "similarity": 0.963
+    }
+  ],
+  "mapping": [
+    {
+      "readingSliceId": "100",
+      "currentTitle": "La première promesse de la Bible, Janvier 1",
+      "proposedSourceDate": "01-01"
+    },
+    {
+      "readingSliceId": "101",
+      "currentTitle": "A la conquête de la victoire, Janvier 2",
+      "proposedSourceDate": "01-02"
+    },
+    {
+      "readingSliceId": "102",
+      "currentTitle": "Se reposer sur une promesse, Janvier 3",
+      "proposedSourceDate": "01-03"
+    },
+    {
+      "readingSliceId": "103",
+      "currentTitle": "Se reposer dans le calme, Janvier 4",
+      "proposedSourceDate": "01-04"
+    },
+    {
+      "readingSliceId": "104",
+      "currentTitle": "Une garantie merveilleuse, Janvier 5",
+      "proposedSourceDate": "01-05"
+    },
+    {
+      "readingSliceId": "105",
+      "currentTitle": "L'aide d'en dehors, Janvier 6",
+      "proposedSourceDate": "01-06"
+    },
+    {
+      "readingSliceId": "106",
+      "currentTitle": "Toujours grandissant, Janvier 7",
+      "proposedSourceDate": "01-07"
+    },
+    {
+      "readingSliceId": "107",
+      "currentTitle": "La pureté de coeur et de la vie, Janvier 8",
+      "proposedSourceDate": "01-08"
+    },
+    {
+      "readingSliceId": "108",
+      "currentTitle": "Obtenir en donnant, Janvier 9",
+      "proposedSourceDate": "01-09"
+    },
+    {
+      "readingSliceId": "109",
+      "currentTitle": "Récompense divine, Janvier 10",
+      "proposedSourceDate": "01-10"
+    },
+    {
+      "readingSliceId": "110",
+      "currentTitle": "La foi place l'arc, Janvier 11",
+      "proposedSourceDate": "01-11"
+    },
+    {
+      "readingSliceId": "111",
+      "currentTitle": "Aimés jusqu'à la fin, Janvier 12",
+      "proposedSourceDate": "01-12"
+    },
+    {
+      "readingSliceId": "112",
+      "currentTitle": "Jamais jetté dehors, Janvier 13",
+      "proposedSourceDate": "01-13"
+    },
+    {
+      "readingSliceId": "113",
+      "currentTitle": "Le repos est un don, Janvier 14",
+      "proposedSourceDate": "01-14"
+    },
+    {
+      "readingSliceId": "114",
+      "currentTitle": "Riches par la foi, Janvier 15",
+      "proposedSourceDate": "01-15"
+    },
+    {
+      "readingSliceId": "115",
+      "currentTitle": "Même l'appel le plus faible est entendu, Janvier 16",
+      "proposedSourceDate": "01-16"
+    },
+    {
+      "readingSliceId": "116",
+      "currentTitle": "Un homme sans crainte, Janvier 17",
+      "proposedSourceDate": "01-17"
+    },
+    {
+      "readingSliceId": "117",
+      "currentTitle": "Christ et ses enfants, Janvier 18",
+      "proposedSourceDate": "01-18"
+    },
+    {
+      "readingSliceId": "118",
+      "currentTitle": "Confession de bouche; croyance de coeur, Janvier 19",
+      "proposedSourceDate": "01-19"
+    },
+    {
+      "readingSliceId": "119",
+      "currentTitle": "Le vainqueur, Janvier 20",
+      "proposedSourceDate": "01-20"
+    },
+    {
+      "readingSliceId": "120",
+      "currentTitle": "Les ennemis de Dieu s'inclineront, Janvier 21",
+      "proposedSourceDate": "01-21"
+    },
+    {
+      "readingSliceId": "121",
+      "currentTitle": "La libéralité chrétienne, Janvier 22",
+      "proposedSourceDate": "01-22"
+    },
+    {
+      "readingSliceId": "122",
+      "currentTitle": "Un sacrifice agrée, Janvier 23",
+      "proposedSourceDate": "01-23"
+    },
+    {
+      "readingSliceId": "123",
+      "currentTitle": "Il prend soin de nos pieds, Janvier 24",
+      "proposedSourceDate": "01-24"
+    },
+    {
+      "readingSliceId": "124",
+      "currentTitle": "Il agit sur la confession honnête, Janvier 25",
+      "proposedSourceDate": "01-25"
+    },
+    {
+      "readingSliceId": "125",
+      "currentTitle": "Dieu met la crainte en déroute, Janvier 26",
+      "proposedSourceDate": "01-26"
+    },
+    {
+      "readingSliceId": "126",
+      "currentTitle": "Repentance précieuse, Janvier 27",
+      "proposedSourceDate": "01-27"
+    },
+    {
+      "readingSliceId": "127",
+      "currentTitle": "Les larmes cesseront, Janvier 28",
+      "proposedSourceDate": "01-28"
+    },
+    {
+      "readingSliceId": "128",
+      "currentTitle": "L'obéissance apporte la bénédiction, Janvier 29",
+      "proposedSourceDate": "01-29"
+    },
+    {
+      "readingSliceId": "129",
+      "currentTitle": "Une escorte merveilleuse, Janvier 30",
+      "proposedSourceDate": "01-30"
+    },
+    {
+      "readingSliceId": "130",
+      "currentTitle": "Dieu est toujours à l'écoute, Janvier 31",
+      "proposedSourceDate": "01-31"
+    },
+    {
+      "readingSliceId": "131",
+      "currentTitle": "Ne jamais désespérer, Février 1",
+      "proposedSourceDate": "02-01"
+    },
+    {
+      "readingSliceId": "132",
+      "currentTitle": "Grandissez, Février 2",
+      "proposedSourceDate": "02-02"
+    },
+    {
+      "readingSliceId": "133",
+      "currentTitle": "Il donne librement et gratuitement, Février 3",
+      "proposedSourceDate": "02-03"
+    },
+    {
+      "readingSliceId": "134",
+      "currentTitle": "Il reviendra, Février 4",
+      "proposedSourceDate": "02-04"
+    },
+    {
+      "readingSliceId": "135",
+      "currentTitle": "La justice est satisfaite, Février 5",
+      "proposedSourceDate": "02-05"
+    },
+    {
+      "readingSliceId": "136",
+      "currentTitle": "Bénédiction dans la ville, Février 6",
+      "proposedSourceDate": "02-06"
+    },
+    {
+      "readingSliceId": "137",
+      "currentTitle": "Détournes-toi de ta rébellion, Février 7",
+      "proposedSourceDate": "02-07"
+    },
+    {
+      "readingSliceId": "138",
+      "currentTitle": "Sécurité joyeuse, Février 8",
+      "proposedSourceDate": "02-08"
+    },
+    {
+      "readingSliceId": "139",
+      "currentTitle": "La crasse purgée, Février 9",
+      "proposedSourceDate": "02-09"
+    },
+    {
+      "readingSliceId": "140",
+      "currentTitle": "Un témoin fidèle, Février 10",
+      "proposedSourceDate": "02-10"
+    },
+    {
+      "readingSliceId": "141",
+      "currentTitle": "Les enfants sont-ils dedans?, Février 11",
+      "proposedSourceDate": "02-11"
+    },
+    {
+      "readingSliceId": "142",
+      "currentTitle": "Dieu prend plaisir à donner, Février 12",
+      "proposedSourceDate": "02-12"
+    },
+    {
+      "readingSliceId": "143",
+      "currentTitle": "Béni dans les champs, Février 13",
+      "proposedSourceDate": "02-13"
+    },
+    {
+      "readingSliceId": "144",
+      "currentTitle": "Miséricorde à celui qui ne mérite rien, Février 14",
+      "proposedSourceDate": "02-14"
+    },
+    {
+      "readingSliceId": "145",
+      "currentTitle": "Toujours à son souvenir, Février 15",
+      "proposedSourceDate": "02-15"
+    },
+    {
+      "readingSliceId": "146",
+      "currentTitle": "Vous avez affaire avec Dieu, Février 16",
+      "proposedSourceDate": "02-16"
+    },
+    {
+      "readingSliceId": "147",
+      "currentTitle": "Dieu peut te rendre fort, Février 17",
+      "proposedSourceDate": "02-17"
+    },
+    {
+      "readingSliceId": "148",
+      "currentTitle": "Dieu répondra, Février 18",
+      "proposedSourceDate": "02-18"
+    },
+    {
+      "readingSliceId": "149",
+      "currentTitle": "Ce qui vient après est meilleur, Février 19",
+      "proposedSourceDate": "02-19"
+    },
+    {
+      "readingSliceId": "150",
+      "currentTitle": "Guidés continuellement, Février 20",
+      "proposedSourceDate": "02-20"
+    },
+    {
+      "readingSliceId": "151",
+      "currentTitle": "Il bénit l'humilité, Février 21",
+      "proposedSourceDate": "02-21"
+    },
+    {
+      "readingSliceId": "152",
+      "currentTitle": "L'affranchissement engendre la foi, Février 22",
+      "proposedSourceDate": "02-22"
+    },
+    {
+      "readingSliceId": "153",
+      "currentTitle": "Communion ininterrompue, Février 23",
+      "proposedSourceDate": "02-23"
+    },
+    {
+      "readingSliceId": "154",
+      "currentTitle": "Entendez afin d'être entendu, Février 24",
+      "proposedSourceDate": "02-24"
+    },
+    {
+      "readingSliceId": "155",
+      "currentTitle": "Mis à part, Février 25",
+      "proposedSourceDate": "02-25"
+    },
+    {
+      "readingSliceId": "156",
+      "currentTitle": "Vérité établie, Février 26",
+      "proposedSourceDate": "02-26"
+    },
+    {
+      "readingSliceId": "157",
+      "currentTitle": "Une confiance pleine et inébranlable, Février 27",
+      "proposedSourceDate": "02-27"
+    },
+    {
+      "readingSliceId": "158",
+      "currentTitle": "Biens immobiliers dans le ciel, Février 28",
+      "proposedSourceDate": "02-28"
+    },
+    {
+      "readingSliceId": "159",
+      "currentTitle": "Ce qui nous suit, Mars 1",
+      "proposedSourceDate": "02-29"
+    },
+    {
+      "readingSliceId": "160",
+      "currentTitle": "Joie pour les rejetés, Mars 2",
+      "proposedSourceDate": "03-01"
+    },
+    {
+      "readingSliceId": "161",
+      "currentTitle": "Donner sans chuchotement, Mars 3",
+      "proposedSourceDate": "03-02"
+    },
+    {
+      "readingSliceId": "162",
+      "currentTitle": "Non abandonnés à la mort, Mars 4",
+      "proposedSourceDate": "03-03"
+    },
+    {
+      "readingSliceId": "163",
+      "currentTitle": "Honores ton Dieu, Mars 5",
+      "proposedSourceDate": "03-04"
+    },
+    {
+      "readingSliceId": "164",
+      "currentTitle": "Bénédictions sur la maison, Mars 6",
+      "proposedSourceDate": "03-05"
+    },
+    {
+      "readingSliceId": "165",
+      "currentTitle": "Gardien de l'orphelin, Mars 7",
+      "proposedSourceDate": "03-06"
+    },
+    {
+      "readingSliceId": "166",
+      "currentTitle": "Libérés des chaînes, Mars 8",
+      "proposedSourceDate": "03-07"
+    },
+    {
+      "readingSliceId": "167",
+      "currentTitle": "Notre nourriture bénie, Mars 9",
+      "proposedSourceDate": "03-08"
+    },
+    {
+      "readingSliceId": "168",
+      "currentTitle": "Priez pour la paix, Mars 10",
+      "proposedSourceDate": "03-09"
+    },
+    {
+      "readingSliceId": "169",
+      "currentTitle": "Marcher dans la lumière, Mars 11",
+      "proposedSourceDate": "03-10"
+    },
+    {
+      "readingSliceId": "170",
+      "currentTitle": "À qui la bataille?, Mars 12",
+      "proposedSourceDate": "03-11"
+    },
+    {
+      "readingSliceId": "171",
+      "currentTitle": "Sortir avec joie, Mars 13",
+      "proposedSourceDate": "03-12"
+    },
+    {
+      "readingSliceId": "172",
+      "currentTitle": "Ne dédaignez pas la jeunesse, Mars 14",
+      "proposedSourceDate": "03-13"
+    },
+    {
+      "readingSliceId": "173",
+      "currentTitle": "Le tendre Consolateur, Mars 15",
+      "proposedSourceDate": "03-14"
+    },
+    {
+      "readingSliceId": "174",
+      "currentTitle": "Dieu est un sanctuaire, Mars 16",
+      "proposedSourceDate": "03-15"
+    },
+    {
+      "readingSliceId": "175",
+      "currentTitle": "Un modèle pour les autres, Mars 17",
+      "proposedSourceDate": "03-16"
+    },
+    {
+      "readingSliceId": "176",
+      "currentTitle": "Ayez peur d'avoir peur, Mars 18",
+      "proposedSourceDate": "03-17"
+    },
+    {
+      "readingSliceId": "177",
+      "currentTitle": "Continuez dans la droiture, Mars 19",
+      "proposedSourceDate": "03-18"
+    },
+    {
+      "readingSliceId": "178",
+      "currentTitle": "Devenir convenable pour la gloire, Mars 20",
+      "proposedSourceDate": "03-19"
+    },
+    {
+      "readingSliceId": "179",
+      "currentTitle": "Disposition divine, Mars 21",
+      "proposedSourceDate": "03-20"
+    },
+    {
+      "readingSliceId": "180",
+      "currentTitle": "Évitez cette glissade, Mars 22",
+      "proposedSourceDate": "03-21"
+    },
+    {
+      "readingSliceId": "181",
+      "currentTitle": "Grâce pour celui qui est humble, Mars 23",
+      "proposedSourceDate": "03-22"
+    },
+    {
+      "readingSliceId": "182",
+      "currentTitle": "Un Guide sûr, Mars 24",
+      "proposedSourceDate": "03-23"
+    },
+    {
+      "readingSliceId": "183",
+      "currentTitle": "Établi et gardé, Mars 25",
+      "proposedSourceDate": "03-24"
+    },
+    {
+      "readingSliceId": "184",
+      "currentTitle": "Sommeil régénérateur, Mars 26",
+      "proposedSourceDate": "03-25"
+    },
+    {
+      "readingSliceId": "185",
+      "currentTitle": "Le soin des pauvres, Mars 27",
+      "proposedSourceDate": "03-26"
+    },
+    {
+      "readingSliceId": "186",
+      "currentTitle": "S'approcher de Dieu, Mars 28",
+      "proposedSourceDate": "03-27"
+    },
+    {
+      "readingSliceId": "187",
+      "currentTitle": "Montrer le chemin, Mars 29",
+      "proposedSourceDate": "03-28"
+    },
+    {
+      "readingSliceId": "188",
+      "currentTitle": "La foi intrépide, Mars 30",
+      "proposedSourceDate": "03-29"
+    },
+    {
+      "readingSliceId": "189",
+      "currentTitle": "Prières, action de grâces, éloges, Mars 31",
+      "proposedSourceDate": "03-30"
+    },
+    {
+      "readingSliceId": "190",
+      "currentTitle": "Il désaltère l'âme asséchée et altérée, Avril 1",
+      "proposedSourceDate": "03-31"
+    },
+    {
+      "readingSliceId": "191",
+      "currentTitle": "La route du Roi, Avril 2",
+      "proposedSourceDate": "04-01"
+    },
+    {
+      "readingSliceId": "192",
+      "currentTitle": "Y mettre du coeur, Avril 3",
+      "proposedSourceDate": "04-02"
+    },
+    {
+      "readingSliceId": "193",
+      "currentTitle": "Sensible à l'avertissement, Avril 4",
+      "proposedSourceDate": "04-03"
+    },
+    {
+      "readingSliceId": "194",
+      "currentTitle": "Les frelons de Dieu, Avril 5",
+      "proposedSourceDate": "04-04"
+    },
+    {
+      "readingSliceId": "195",
+      "currentTitle": "Non oublié, Avril 6",
+      "proposedSourceDate": "04-05"
+    },
+    {
+      "readingSliceId": "196",
+      "currentTitle": "Un seul Roi; un seul Seigneur, Avril 7",
+      "proposedSourceDate": "04-06"
+    },
+    {
+      "readingSliceId": "197",
+      "currentTitle": "Sans crainte de l'homme, Avril 8",
+      "proposedSourceDate": "04-07"
+    },
+    {
+      "readingSliceId": "198",
+      "currentTitle": "Gardé jusqu'à la fin du travail, Avril 9",
+      "proposedSourceDate": "04-08"
+    },
+    {
+      "readingSliceId": "199",
+      "currentTitle": "La position suprême de la Parole de Dieu, Avril 10",
+      "proposedSourceDate": "04-09"
+    },
+    {
+      "readingSliceId": "200",
+      "currentTitle": "Regardes et vis!, Avril 11",
+      "proposedSourceDate": "04-10"
+    },
+    {
+      "readingSliceId": "201",
+      "currentTitle": "Étroite camaraderie, Avril 12",
+      "proposedSourceDate": "04-11"
+    },
+    {
+      "readingSliceId": "202",
+      "currentTitle": "Il ne se souviens plus, Avril 13",
+      "proposedSourceDate": "04-12"
+    },
+    {
+      "readingSliceId": "203",
+      "currentTitle": "Ce corps façonné à nouveau, Avril 14",
+      "proposedSourceDate": "04-13"
+    },
+    {
+      "readingSliceId": "204",
+      "currentTitle": "Son choix est le mien, Avril 15",
+      "proposedSourceDate": "04-14"
+    },
+    {
+      "readingSliceId": "205",
+      "currentTitle": "Ce que désirent les justes le sera accordé, Avril 16",
+      "proposedSourceDate": "04-15"
+    },
+    {
+      "readingSliceId": "206",
+      "currentTitle": "Tourné entièrement vers la sainteté, Avril 17",
+      "proposedSourceDate": "04-16"
+    },
+    {
+      "readingSliceId": "207",
+      "currentTitle": "La paix avec les ennemis, Avril 18",
+      "proposedSourceDate": "04-17"
+    },
+    {
+      "readingSliceId": "208",
+      "currentTitle": "Il n'échoue jamais, Avril 19",
+      "proposedSourceDate": "04-18"
+    },
+    {
+      "readingSliceId": "209",
+      "currentTitle": "Le chercheur par excellence, Avril 20",
+      "proposedSourceDate": "04-19"
+    },
+    {
+      "readingSliceId": "210",
+      "currentTitle": "Par la foi et non pas les sentiments, Avril 21",
+      "proposedSourceDate": "04-20"
+    },
+    {
+      "readingSliceId": "211",
+      "currentTitle": "Dieu rembourse, Avril 22",
+      "proposedSourceDate": "04-21"
+    },
+    {
+      "readingSliceId": "212",
+      "currentTitle": "La puissance de redresser, Avril 23",
+      "proposedSourceDate": "04-22"
+    },
+    {
+      "readingSliceId": "213",
+      "currentTitle": "Sans crainte de la mort, Avril 24",
+      "proposedSourceDate": "04-23"
+    },
+    {
+      "readingSliceId": "214",
+      "currentTitle": "Condition à la bénédiction, Avril 25",
+      "proposedSourceDate": "04-24"
+    },
+    {
+      "readingSliceId": "215",
+      "currentTitle": "L'héritage à laisser à ses enfants, Avril 26",
+      "proposedSourceDate": "04-25"
+    },
+    {
+      "readingSliceId": "216",
+      "currentTitle": "Conduite agréable, Avril 27",
+      "proposedSourceDate": "04-26"
+    },
+    {
+      "readingSliceId": "217",
+      "currentTitle": "Il achèvera son oeuvre en moi., Avril 28",
+      "proposedSourceDate": "04-27"
+    },
+    {
+      "readingSliceId": "218",
+      "currentTitle": "Réciprocité mutuelle, Avril 29",
+      "proposedSourceDate": "04-28"
+    },
+    {
+      "readingSliceId": "219",
+      "currentTitle": "Oublie et pardonne, Avril 30",
+      "proposedSourceDate": "04-29"
+    },
+    {
+      "readingSliceId": "220",
+      "currentTitle": "La récompense du vainqueur, Mai 1",
+      "proposedSourceDate": "04-30"
+    },
+    {
+      "readingSliceId": "221",
+      "currentTitle": "Une abondance de chants, Mai 2",
+      "proposedSourceDate": "05-01"
+    },
+    {
+      "readingSliceId": "222",
+      "currentTitle": "Ensemencement spirituel, Mai 3",
+      "proposedSourceDate": "05-02"
+    },
+    {
+      "readingSliceId": "223",
+      "currentTitle": "Prêtez l'oreille au signal, Mai 4",
+      "proposedSourceDate": "05-03"
+    },
+    {
+      "readingSliceId": "224",
+      "currentTitle": "Victoire par renversement, Mai 5",
+      "proposedSourceDate": "05-04"
+    },
+    {
+      "readingSliceId": "225",
+      "currentTitle": "Pourquoi demeurer captif, Mai 6",
+      "proposedSourceDate": "05-05"
+    },
+    {
+      "readingSliceId": "226",
+      "currentTitle": "Le remède contre l'envie, Mai 7",
+      "proposedSourceDate": "05-06"
+    },
+    {
+      "readingSliceId": "227",
+      "currentTitle": "Ne laissez aucun mal demeurer, Mai 8",
+      "proposedSourceDate": "05-07"
+    },
+    {
+      "readingSliceId": "228",
+      "currentTitle": "Serviteurs recherchés, Mai 9",
+      "proposedSourceDate": "05-08"
+    },
+    {
+      "readingSliceId": "229",
+      "currentTitle": "La confiance engendre la joie, Mai 10",
+      "proposedSourceDate": "05-09"
+    },
+    {
+      "readingSliceId": "230",
+      "currentTitle": "Craignez seulement Dieu, Mai 11",
+      "proposedSourceDate": "05-10"
+    },
+    {
+      "readingSliceId": "231",
+      "currentTitle": "Attente de la finale, Mai 12",
+      "proposedSourceDate": "05-11"
+    },
+    {
+      "readingSliceId": "232",
+      "currentTitle": "L'honneur du service, Mai 13",
+      "proposedSourceDate": "05-12"
+    },
+    {
+      "readingSliceId": "233",
+      "currentTitle": "Le jour est proche, Mai 14",
+      "proposedSourceDate": "05-13"
+    },
+    {
+      "readingSliceId": "234",
+      "currentTitle": "La chirurgie pour guérison, Mai 15",
+      "proposedSourceDate": "05-14"
+    },
+    {
+      "readingSliceId": "235",
+      "currentTitle": "Les endroits élevés de Dieu, Mai 16",
+      "proposedSourceDate": "05-15"
+    },
+    {
+      "readingSliceId": "236",
+      "currentTitle": "Nous recevons ce que nous donnons, Mai 17",
+      "proposedSourceDate": "05-16"
+    },
+    {
+      "readingSliceId": "237",
+      "currentTitle": "Aucun besoin de lésiner, Mai 18",
+      "proposedSourceDate": "05-17"
+    },
+    {
+      "readingSliceId": "238",
+      "currentTitle": "Pertes surmontées, Mai 19",
+      "proposedSourceDate": "05-18"
+    },
+    {
+      "readingSliceId": "239",
+      "currentTitle": "Nous pouvons parler pour Dieu, Mai 20",
+      "proposedSourceDate": "05-19"
+    },
+    {
+      "readingSliceId": "240",
+      "currentTitle": "N'osons pas le doute, Mai 21",
+      "proposedSourceDate": "05-20"
+    },
+    {
+      "readingSliceId": "241",
+      "currentTitle": "Pluie sans nuages? Jamais!, Mai 22",
+      "proposedSourceDate": "05-21"
+    },
+    {
+      "readingSliceId": "242",
+      "currentTitle": "Sujet de confiance, Mai 23",
+      "proposedSourceDate": "05-22"
+    },
+    {
+      "readingSliceId": "243",
+      "currentTitle": "Pleine confiance en Dieu, Mai 24",
+      "proposedSourceDate": "05-23"
+    },
+    {
+      "readingSliceId": "244",
+      "currentTitle": "Un par majorité!, Mai 25",
+      "proposedSourceDate": "05-24"
+    },
+    {
+      "readingSliceId": "245",
+      "currentTitle": "Le trésor de Dieu, Mai 26",
+      "proposedSourceDate": "05-25"
+    },
+    {
+      "readingSliceId": "246",
+      "currentTitle": "Les choses les plus communes sont bénies, Mai 27",
+      "proposedSourceDate": "05-26"
+    },
+    {
+      "readingSliceId": "247",
+      "currentTitle": "Tel est ta vie; tel est ton fruit, Mai 28",
+      "proposedSourceDate": "05-27"
+    },
+    {
+      "readingSliceId": "248",
+      "currentTitle": "Rappelez à Dieu sa promesse, Mai 29",
+      "proposedSourceDate": "05-28"
+    },
+    {
+      "readingSliceId": "249",
+      "currentTitle": "Faire ce qu'Il dit; travailler avec Lui, Mai 30",
+      "proposedSourceDate": "05-29"
+    },
+    {
+      "readingSliceId": "250",
+      "currentTitle": "Prévoyance sainte, Mai 31",
+      "proposedSourceDate": "05-30"
+    },
+    {
+      "readingSliceId": "251",
+      "currentTitle": "Prendre courage, Juin 1",
+      "proposedSourceDate": "05-31"
+    },
+    {
+      "readingSliceId": "252",
+      "currentTitle": "Les promesses de Dieu subsistent, Juin 2",
+      "proposedSourceDate": "06-01"
+    },
+    {
+      "readingSliceId": "253",
+      "currentTitle": "Libération immédiate, Juin 3",
+      "proposedSourceDate": "06-02"
+    },
+    {
+      "readingSliceId": "254",
+      "currentTitle": "Les pieds qui ne chancellent point, Juin 4",
+      "proposedSourceDate": "06-03"
+    },
+    {
+      "readingSliceId": "255",
+      "currentTitle": "Son bien précieux, Juin 5",
+      "proposedSourceDate": "06-04"
+    },
+    {
+      "readingSliceId": "256",
+      "currentTitle": "Y a-t-il une différence?, Juin 6",
+      "proposedSourceDate": "06-05"
+    },
+    {
+      "readingSliceId": "257",
+      "currentTitle": "Il écoute toujours, Juin 7",
+      "proposedSourceDate": "06-06"
+    },
+    {
+      "readingSliceId": "258",
+      "currentTitle": "L'endroit le plus sûr, Juin 8",
+      "proposedSourceDate": "06-07"
+    },
+    {
+      "readingSliceId": "259",
+      "currentTitle": "Sagesse pour celui qui demande, Juin 9",
+      "proposedSourceDate": "06-08"
+    },
+    {
+      "readingSliceId": "260",
+      "currentTitle": "Un Nom digne de confiance, Juin 10",
+      "proposedSourceDate": "06-09"
+    },
+    {
+      "readingSliceId": "261",
+      "currentTitle": "Un Berger les garde et les protège, Juin 11",
+      "proposedSourceDate": "06-10"
+    },
+    {
+      "readingSliceId": "262",
+      "currentTitle": "Aucune raison de rougir, Juin 12",
+      "proposedSourceDate": "06-11"
+    },
+    {
+      "readingSliceId": "263",
+      "currentTitle": "Demeure sans risque à part, Juin 13",
+      "proposedSourceDate": "06-12"
+    },
+    {
+      "readingSliceId": "264",
+      "currentTitle": "Culture divine, Juin 14",
+      "proposedSourceDate": "06-13"
+    },
+    {
+      "readingSliceId": "265",
+      "currentTitle": "Il demeure constamment, Juin 15",
+      "proposedSourceDate": "06-14"
+    },
+    {
+      "readingSliceId": "266",
+      "currentTitle": "Bénédictions à la maison étendues, Juin 16",
+      "proposedSourceDate": "06-15"
+    },
+    {
+      "readingSliceId": "267",
+      "currentTitle": "Ne professez pas seulement mais possédez aussi, Juin 17",
+      "proposedSourceDate": "06-16"
+    },
+    {
+      "readingSliceId": "268",
+      "currentTitle": "Notre champ de bataille, Juin 18",
+      "proposedSourceDate": "06-17"
+    },
+    {
+      "readingSliceId": "269",
+      "currentTitle": "Dieu Lui-même travaillera, Juin 19",
+      "proposedSourceDate": "06-18"
+    },
+    {
+      "readingSliceId": "270",
+      "currentTitle": "Un coeur intègre, Juin 20",
+      "proposedSourceDate": "06-19"
+    },
+    {
+      "readingSliceId": "271",
+      "currentTitle": "Le Seigneur est notre compagnon, Juin 21",
+      "proposedSourceDate": "06-20"
+    },
+    {
+      "readingSliceId": "272",
+      "currentTitle": "La victoire du faible, Juin 22",
+      "proposedSourceDate": "06-21"
+    },
+    {
+      "readingSliceId": "273",
+      "currentTitle": "Il est avec nous; nous sommes avec Lui, Juin 23",
+      "proposedSourceDate": "06-22"
+    },
+    {
+      "readingSliceId": "274",
+      "currentTitle": "Un ennemi frustré, Juin 24",
+      "proposedSourceDate": "06-23"
+    },
+    {
+      "readingSliceId": "275",
+      "currentTitle": "Le surplus du Seigneur, Juin 25",
+      "proposedSourceDate": "06-24"
+    },
+    {
+      "readingSliceId": "276",
+      "currentTitle": "Un escalier vers le ciel, Juin 26",
+      "proposedSourceDate": "06-25"
+    },
+    {
+      "readingSliceId": "277",
+      "currentTitle": "Ce ne sera pas long, Juin 27",
+      "proposedSourceDate": "06-26"
+    },
+    {
+      "readingSliceId": "278",
+      "currentTitle": "Remerciez-le et demeurez près de Lui, Juin 28",
+      "proposedSourceDate": "06-27"
+    },
+    {
+      "readingSliceId": "279",
+      "currentTitle": "Un regard du Seigneur!, Juin 29",
+      "proposedSourceDate": "06-28"
+    },
+    {
+      "readingSliceId": "280",
+      "currentTitle": "Invitation à prier, Juin 30",
+      "proposedSourceDate": "06-29"
+    },
+    {
+      "readingSliceId": "281",
+      "currentTitle": "Regard en arrière; regard en avant, Juillet 1",
+      "proposedSourceDate": "06-30"
+    },
+    {
+      "readingSliceId": "282",
+      "currentTitle": "Dieu avec nous, Juillet 2",
+      "proposedSourceDate": "07-01"
+    },
+    {
+      "readingSliceId": "283",
+      "currentTitle": "Sommeil régénérateur, Juillet 3",
+      "proposedSourceDate": "07-02"
+    },
+    {
+      "readingSliceId": "284",
+      "currentTitle": "Un guide pour toujours, Juillet 4",
+      "proposedSourceDate": "07-03"
+    },
+    {
+      "readingSliceId": "285",
+      "currentTitle": "La Parole, nourriture nécessaire, Juillet 5",
+      "proposedSourceDate": "07-04"
+    },
+    {
+      "readingSliceId": "286",
+      "currentTitle": "Affranchissement complet, Juillet 6",
+      "proposedSourceDate": "07-05"
+    },
+    {
+      "readingSliceId": "287",
+      "currentTitle": "Son Amour; Son Don; Son Fils, Juillet 7",
+      "proposedSourceDate": "07-06"
+    },
+    {
+      "readingSliceId": "288",
+      "currentTitle": "Un choeur de montagnes, Juillet 8",
+      "proposedSourceDate": "07-07"
+    },
+    {
+      "readingSliceId": "289",
+      "currentTitle": "Le campement de l'Ange, Juillet 9",
+      "proposedSourceDate": "07-08"
+    },
+    {
+      "readingSliceId": "290",
+      "currentTitle": "Fidèle et Utile, Juillet 10",
+      "proposedSourceDate": "07-09"
+    },
+    {
+      "readingSliceId": "291",
+      "currentTitle": "Aimer l'Eglise, Juillet 11",
+      "proposedSourceDate": "07-10"
+    },
+    {
+      "readingSliceId": "292",
+      "currentTitle": "Jamais séparé de Dieu, Juillet 12",
+      "proposedSourceDate": "07-11"
+    },
+    {
+      "readingSliceId": "293",
+      "currentTitle": "Qui délivre, quand et comment, Juillet 13",
+      "proposedSourceDate": "07-12"
+    },
+    {
+      "readingSliceId": "294",
+      "currentTitle": "La confiance allant de soi, Juillet 14",
+      "proposedSourceDate": "07-13"
+    },
+    {
+      "readingSliceId": "295",
+      "currentTitle": "Les fardeaux déchargés sur Lui, Juillet 15",
+      "proposedSourceDate": "07-14"
+    },
+    {
+      "readingSliceId": "296",
+      "currentTitle": "Il console l'affligé, Juillet 16",
+      "proposedSourceDate": "07-15"
+    },
+    {
+      "readingSliceId": "297",
+      "currentTitle": "Un mot à celui qui boite, Juillet 17",
+      "proposedSourceDate": "07-16"
+    },
+    {
+      "readingSliceId": "298",
+      "currentTitle": "Vaillant pour la vérité, Juillet 18",
+      "proposedSourceDate": "07-17"
+    },
+    {
+      "readingSliceId": "299",
+      "currentTitle": "La communion dans le désert, Juillet 19",
+      "proposedSourceDate": "07-18"
+    },
+    {
+      "readingSliceId": "300",
+      "currentTitle": "Des chaussures résistantes, Juillet 20",
+      "proposedSourceDate": "07-19"
+    },
+    {
+      "readingSliceId": "301",
+      "currentTitle": "Dans l'attente de son apparition, Juillet 21",
+      "proposedSourceDate": "07-20"
+    },
+    {
+      "readingSliceId": "302",
+      "currentTitle": "Briller autant que des étoiles, Juillet 22",
+      "proposedSourceDate": "07-21"
+    },
+    {
+      "readingSliceId": "303",
+      "currentTitle": "Un engagement éternel, Juillet 23",
+      "proposedSourceDate": "07-22"
+    },
+    {
+      "readingSliceId": "304",
+      "currentTitle": "Plus aucun souvenir, Juillet 24",
+      "proposedSourceDate": "07-23"
+    },
+    {
+      "readingSliceId": "305",
+      "currentTitle": "La pureté parfaite t'attend, Juillet 25",
+      "proposedSourceDate": "07-24"
+    },
+    {
+      "readingSliceId": "306",
+      "currentTitle": "Rien ne peut nous alarmer, Juillet 26",
+      "proposedSourceDate": "07-25"
+    },
+    {
+      "readingSliceId": "307",
+      "currentTitle": "Un changement de nom, Juillet 27",
+      "proposedSourceDate": "07-26"
+    },
+    {
+      "readingSliceId": "308",
+      "currentTitle": "Plus que des simples mots, Juillet 28",
+      "proposedSourceDate": "07-27"
+    },
+    {
+      "readingSliceId": "309",
+      "currentTitle": "S'humilier, être élevé, Juillet 29",
+      "proposedSourceDate": "07-28"
+    },
+    {
+      "readingSliceId": "310",
+      "currentTitle": "Il met en déroute notre ennemi, Juillet 30",
+      "proposedSourceDate": "07-29"
+    },
+    {
+      "readingSliceId": "311",
+      "currentTitle": "La promesse de la réunion à venir, Juillet 31",
+      "proposedSourceDate": "07-30"
+    },
+    {
+      "readingSliceId": "312",
+      "currentTitle": "Un appel; la délivrance, Août 1",
+      "proposedSourceDate": "07-31"
+    },
+    {
+      "readingSliceId": "313",
+      "currentTitle": "L'alliance atteint les enfants, Août 2",
+      "proposedSourceDate": "08-01"
+    },
+    {
+      "readingSliceId": "314",
+      "currentTitle": "Déclare ce qu'Il t'enseigne, Août 3",
+      "proposedSourceDate": "08-02"
+    },
+    {
+      "readingSliceId": "315",
+      "currentTitle": "Le droit aux choses saintes, Août 4",
+      "proposedSourceDate": "08-03"
+    },
+    {
+      "readingSliceId": "316",
+      "currentTitle": "Il bénit et Il garde, Août 5",
+      "proposedSourceDate": "08-04"
+    },
+    {
+      "readingSliceId": "317",
+      "currentTitle": "La loi dans le coeur, Août 6",
+      "proposedSourceDate": "08-05"
+    },
+    {
+      "readingSliceId": "318",
+      "currentTitle": "Va et prend ta propriété, Août 7",
+      "proposedSourceDate": "08-06"
+    },
+    {
+      "readingSliceId": "319",
+      "currentTitle": "Les règles pour la prospérité, Août 8",
+      "proposedSourceDate": "08-07"
+    },
+    {
+      "readingSliceId": "320",
+      "currentTitle": "La confiance qui n'est pas mal placée, Août 9",
+      "proposedSourceDate": "08-08"
+    },
+    {
+      "readingSliceId": "321",
+      "currentTitle": "Tailler pour obtenir du fruit, Août 10",
+      "proposedSourceDate": "08-09"
+    },
+    {
+      "readingSliceId": "322",
+      "currentTitle": "Il abaisse pour élever, Août 11",
+      "proposedSourceDate": "08-10"
+    },
+    {
+      "readingSliceId": "323",
+      "currentTitle": "Attendre sans courir, Août 12",
+      "proposedSourceDate": "08-11"
+    },
+    {
+      "readingSliceId": "324",
+      "currentTitle": "La lumière dans l'obscurité, Août 13",
+      "proposedSourceDate": "08-12"
+    },
+    {
+      "readingSliceId": "325",
+      "currentTitle": "Avant et pendant l'appel, Août 14",
+      "proposedSourceDate": "08-13"
+    },
+    {
+      "readingSliceId": "326",
+      "currentTitle": "Le châtiment sur ses enfants ne dure pas à toujours, Août 15",
+      "proposedSourceDate": "08-14"
+    },
+    {
+      "readingSliceId": "327",
+      "currentTitle": "La garantie que donne son Nom, Août 16",
+      "proposedSourceDate": "08-15"
+    },
+    {
+      "readingSliceId": "328",
+      "currentTitle": "Admettez et confessez le péché; ne le cachez point, Août 17",
+      "proposedSourceDate": "08-16"
+    },
+    {
+      "readingSliceId": "329",
+      "currentTitle": "Qui a la majorité?, Août 18",
+      "proposedSourceDate": "08-17"
+    },
+    {
+      "readingSliceId": "330",
+      "currentTitle": "Si tu cherches, tu trouveras, Août 19",
+      "proposedSourceDate": "08-18"
+    },
+    {
+      "readingSliceId": "331",
+      "currentTitle": "La récompense attend le juste, Août 20",
+      "proposedSourceDate": "08-19"
+    },
+    {
+      "readingSliceId": "332",
+      "currentTitle": "Délivrance sans limite, Août 21",
+      "proposedSourceDate": "08-20"
+    },
+    {
+      "readingSliceId": "333",
+      "currentTitle": "Une nuit de pleurs; un jour de réjouissance, Août 22",
+      "proposedSourceDate": "08-21"
+    },
+    {
+      "readingSliceId": "334",
+      "currentTitle": "La colère qui tourne à la gloire de Dieu, Août 23",
+      "proposedSourceDate": "08-22"
+    },
+    {
+      "readingSliceId": "335",
+      "currentTitle": "Aime et recherche la vraie sagesse, Août 24",
+      "proposedSourceDate": "08-23"
+    },
+    {
+      "readingSliceId": "336",
+      "currentTitle": "Dieu au-dessus de la philosophie humaine, Août 25",
+      "proposedSourceDate": "08-24"
+    },
+    {
+      "readingSliceId": "337",
+      "currentTitle": "La nourriture et le repos, Août 26",
+      "proposedSourceDate": "08-25"
+    },
+    {
+      "readingSliceId": "338",
+      "currentTitle": "Il prend soin des faibles, Août 27",
+      "proposedSourceDate": "08-26"
+    },
+    {
+      "readingSliceId": "339",
+      "currentTitle": "Hommes de choix, Août 28",
+      "proposedSourceDate": "08-27"
+    },
+    {
+      "readingSliceId": "340",
+      "currentTitle": "Sans égard aux circonstances, il me sauvera, Août 29",
+      "proposedSourceDate": "08-28"
+    },
+    {
+      "readingSliceId": "341",
+      "currentTitle": "Rafraîchissement abondant, Août 30",
+      "proposedSourceDate": "08-29"
+    },
+    {
+      "readingSliceId": "342",
+      "currentTitle": "Consolation, sécurité, satisfaction, Août 31",
+      "proposedSourceDate": "08-30"
+    },
+    {
+      "readingSliceId": "343",
+      "currentTitle": "Divine, éternelle et invariable, Septembre 1",
+      "proposedSourceDate": "08-31"
+    },
+    {
+      "readingSliceId": "344",
+      "currentTitle": "Demeurer dans l'obéissance, dans l'amour, Septembre 2",
+      "proposedSourceDate": "09-01"
+    },
+    {
+      "readingSliceId": "345",
+      "currentTitle": "Suivre pour connaître, Septembre 3",
+      "proposedSourceDate": "09-02"
+    },
+    {
+      "readingSliceId": "346",
+      "currentTitle": "Hors de la mort spirituel, Septembre 4",
+      "proposedSourceDate": "09-03"
+    },
+    {
+      "readingSliceId": "347",
+      "currentTitle": "La victoire sans le combat, Septembre 5",
+      "proposedSourceDate": "09-04"
+    },
+    {
+      "readingSliceId": "348",
+      "currentTitle": "Avec moi où que je sois, Septembre 6",
+      "proposedSourceDate": "09-05"
+    },
+    {
+      "readingSliceId": "349",
+      "currentTitle": "Un coeur fortifié, Septembre 7",
+      "proposedSourceDate": "09-06"
+    },
+    {
+      "readingSliceId": "350",
+      "currentTitle": "La portée de la grâce tout-puissante, Septembre 8",
+      "proposedSourceDate": "09-07"
+    },
+    {
+      "readingSliceId": "351",
+      "currentTitle": "Brisé et fumant encore, Septembre 9",
+      "proposedSourceDate": "09-08"
+    },
+    {
+      "readingSliceId": "352",
+      "currentTitle": "La crainte à son endroit, Septembre 10",
+      "proposedSourceDate": "09-09"
+    },
+    {
+      "readingSliceId": "353",
+      "currentTitle": "A l'entrée; à la sortie, Septembre 11",
+      "proposedSourceDate": "09-10"
+    },
+    {
+      "readingSliceId": "354",
+      "currentTitle": "Ceux qui souffrent font les croyants forts, Septembre 12",
+      "proposedSourceDate": "09-11"
+    },
+    {
+      "readingSliceId": "355",
+      "currentTitle": "Qu'arrive-t-il de ma maison?, Septembre 13",
+      "proposedSourceDate": "09-12"
+    },
+    {
+      "readingSliceId": "356",
+      "currentTitle": "La rosée de ciel, Septembre 14",
+      "proposedSourceDate": "09-13"
+    },
+    {
+      "readingSliceId": "357",
+      "currentTitle": "La marque de l'approbation divine, Septembre 15",
+      "proposedSourceDate": "09-14"
+    },
+    {
+      "readingSliceId": "358",
+      "currentTitle": "L'abri le plus sûr, Septembre 16",
+      "proposedSourceDate": "09-15"
+    },
+    {
+      "readingSliceId": "359",
+      "currentTitle": "La récompense est certaine, Septembre 17",
+      "proposedSourceDate": "09-16"
+    },
+    {
+      "readingSliceId": "360",
+      "currentTitle": "Comme la palmier et comme le cèdre, Septembre 18",
+      "proposedSourceDate": "09-17"
+    },
+    {
+      "readingSliceId": "361",
+      "currentTitle": "Sécurité complète, Septembre 19",
+      "proposedSourceDate": "09-18"
+    },
+    {
+      "readingSliceId": "362",
+      "currentTitle": "Pourquoi tu dois chanter, Septembre 20",
+      "proposedSourceDate": "09-19"
+    },
+    {
+      "readingSliceId": "363",
+      "currentTitle": "Complaisance parfaite, Septembre 21",
+      "proposedSourceDate": "09-20"
+    },
+    {
+      "readingSliceId": "364",
+      "currentTitle": "Laisses les épreuves te bénir, Septembre 22",
+      "proposedSourceDate": "09-21"
+    },
+    {
+      "readingSliceId": "365",
+      "currentTitle": "Des rivières larges sans navires ennemis, Septembre 23",
+      "proposedSourceDate": "09-22"
+    },
+    {
+      "readingSliceId": "366",
+      "currentTitle": "La délivrance de la poussière et de la paille, Septembre 24",
+      "proposedSourceDate": "09-23"
+    },
+    {
+      "readingSliceId": "367",
+      "currentTitle": "Le torrent qui donne la vie, Septembre 25",
+      "proposedSourceDate": "09-24"
+    },
+    {
+      "readingSliceId": "368",
+      "currentTitle": "Le sacrifice a été accepté, Septembre 26",
+      "proposedSourceDate": "09-25"
+    },
+    {
+      "readingSliceId": "369",
+      "currentTitle": "Parmi les rachetés, Septembre 27",
+      "proposedSourceDate": "09-26"
+    },
+    {
+      "readingSliceId": "370",
+      "currentTitle": "La lumière divine dans les ténèbres, Septembre 28",
+      "proposedSourceDate": "09-27"
+    },
+    {
+      "readingSliceId": "371",
+      "currentTitle": "Le travail est effectué; reposes-toi en Lui, Septembre 29",
+      "proposedSourceDate": "09-28"
+    },
+    {
+      "readingSliceId": "372",
+      "currentTitle": "Pour glorifier Jésus-Christ, Septembre 30",
+      "proposedSourceDate": "09-29"
+    },
+    {
+      "readingSliceId": "373",
+      "currentTitle": "Le besoin d'ouvrir nos bouches, Octobre 1",
+      "proposedSourceDate": "09-30"
+    },
+    {
+      "readingSliceId": "374",
+      "currentTitle": "Un engagement qu'il se rappelle, Octobre 2",
+      "proposedSourceDate": "10-01"
+    },
+    {
+      "readingSliceId": "375",
+      "currentTitle": "La consolation d'être en route pour la maison, Octobre 3",
+      "proposedSourceDate": "10-02"
+    },
+    {
+      "readingSliceId": "376",
+      "currentTitle": "Reflets de la beauté du Seigneur, Octobre 4",
+      "proposedSourceDate": "10-03"
+    },
+    {
+      "readingSliceId": "377",
+      "currentTitle": "L'aimant puissant, Octobre 5",
+      "proposedSourceDate": "10-04"
+    },
+    {
+      "readingSliceId": "378",
+      "currentTitle": "Au commandement de Dieu, Octobre 6",
+      "proposedSourceDate": "10-05"
+    },
+    {
+      "readingSliceId": "379",
+      "currentTitle": "La conduite de notre guide, Octobre 7",
+      "proposedSourceDate": "10-06"
+    },
+    {
+      "readingSliceId": "380",
+      "currentTitle": "Toujours le premier pour nous rencontrer, Octobre 8",
+      "proposedSourceDate": "10-07"
+    },
+    {
+      "readingSliceId": "381",
+      "currentTitle": "Jamais seul, Octobre 9",
+      "proposedSourceDate": "10-08"
+    },
+    {
+      "readingSliceId": "382",
+      "currentTitle": "Qu'est-ce qui sanctifie nos offrandes?, Octobre 10",
+      "proposedSourceDate": "10-09"
+    },
+    {
+      "readingSliceId": "383",
+      "currentTitle": "La porte ouverte de la communion, Octobre 11",
+      "proposedSourceDate": "10-10"
+    },
+    {
+      "readingSliceId": "384",
+      "currentTitle": "Libre de marcher avec Lui, Octobre 12",
+      "proposedSourceDate": "10-11"
+    },
+    {
+      "readingSliceId": "385",
+      "currentTitle": "La marque d'engagement de la grâce, Octobre 13",
+      "proposedSourceDate": "10-12"
+    },
+    {
+      "readingSliceId": "386",
+      "currentTitle": "Une promesse triple, Octobre 14",
+      "proposedSourceDate": "10-13"
+    },
+    {
+      "readingSliceId": "387",
+      "currentTitle": "Jamais Honteux, Octobre 15",
+      "proposedSourceDate": "10-14"
+    },
+    {
+      "readingSliceId": "388",
+      "currentTitle": "Soutenu par l'alimentation, Octobre 16",
+      "proposedSourceDate": "10-15"
+    },
+    {
+      "readingSliceId": "389",
+      "currentTitle": "Un avec le Christ Jésus, Octobre 17",
+      "proposedSourceDate": "10-16"
+    },
+    {
+      "readingSliceId": "390",
+      "currentTitle": "Sainte crainte, Octobre 18",
+      "proposedSourceDate": "10-17"
+    },
+    {
+      "readingSliceId": "391",
+      "currentTitle": "Larmes, puis joyeuse moisson, Octobre 19",
+      "proposedSourceDate": "10-18"
+    },
+    {
+      "readingSliceId": "392",
+      "currentTitle": "Châtiment mesuré, Octobre 20",
+      "proposedSourceDate": "10-19"
+    },
+    {
+      "readingSliceId": "393",
+      "currentTitle": "De chaque péché, Octobre 21",
+      "proposedSourceDate": "10-20"
+    },
+    {
+      "readingSliceId": "394",
+      "currentTitle": "La tableau de multiplication de Dieu, Octobre 22",
+      "proposedSourceDate": "10-21"
+    },
+    {
+      "readingSliceId": "395",
+      "currentTitle": "Plaider devant Dieu selon sa promesse, Octobre 23",
+      "proposedSourceDate": "10-22"
+    },
+    {
+      "readingSliceId": "396",
+      "currentTitle": "Moisson de lumière, joie, Octobre 24",
+      "proposedSourceDate": "10-23"
+    },
+    {
+      "readingSliceId": "397",
+      "currentTitle": "Pieuse fermetée, Octobre 25",
+      "proposedSourceDate": "10-24"
+    },
+    {
+      "readingSliceId": "398",
+      "currentTitle": "Dieu d'abord, puis le reste ensuite, Octobre 26",
+      "proposedSourceDate": "10-25"
+    },
+    {
+      "readingSliceId": "399",
+      "currentTitle": "A cause de nous, Octobre 27",
+      "proposedSourceDate": "10-26"
+    },
+    {
+      "readingSliceId": "400",
+      "currentTitle": "Son service, son visage, son nom, Octobre 28",
+      "proposedSourceDate": "10-27"
+    },
+    {
+      "readingSliceId": "401",
+      "currentTitle": "Péchés d'ignorance, Octobre 29",
+      "proposedSourceDate": "10-28"
+    },
+    {
+      "readingSliceId": "402",
+      "currentTitle": "Maintenez la différence, Octobre 30",
+      "proposedSourceDate": "10-29"
+    },
+    {
+      "readingSliceId": "403",
+      "currentTitle": "Nettoyage complet, Octobre 31",
+      "proposedSourceDate": "10-30"
+    },
+    {
+      "readingSliceId": "404",
+      "currentTitle": "Immortel jusqu'au travail effectué, Novembre 1",
+      "proposedSourceDate": "10-31"
+    },
+    {
+      "readingSliceId": "405",
+      "currentTitle": "Perfection et conservation, Novembre 2",
+      "proposedSourceDate": "11-01"
+    },
+    {
+      "readingSliceId": "406",
+      "currentTitle": "Richesse Merveilleuse, Novembre 3",
+      "proposedSourceDate": "11-02"
+    },
+    {
+      "readingSliceId": "407",
+      "currentTitle": "Au temps de Dieu, Novembre 4",
+      "proposedSourceDate": "11-03"
+    },
+    {
+      "readingSliceId": "408",
+      "currentTitle": "Vous faites les tranchées, Novembre 5",
+      "proposedSourceDate": "11-04"
+    },
+    {
+      "readingSliceId": "409",
+      "currentTitle": "La souffrance aura une fin, Novembre 6",
+      "proposedSourceDate": "11-05"
+    },
+    {
+      "readingSliceId": "410",
+      "currentTitle": "Plaisir et désirs, Novembre 7",
+      "proposedSourceDate": "11-06"
+    },
+    {
+      "readingSliceId": "411",
+      "currentTitle": "La véritable humilité est récompensée, Novembre 8",
+      "proposedSourceDate": "11-07"
+    },
+    {
+      "readingSliceId": "412",
+      "currentTitle": "L'importance de grâce, Novembre 9",
+      "proposedSourceDate": "11-08"
+    },
+    {
+      "readingSliceId": "413",
+      "currentTitle": "La connaissance nécessaire, Novembre 10",
+      "proposedSourceDate": "11-09"
+    },
+    {
+      "readingSliceId": "414",
+      "currentTitle": "Promenade sans trébuchement, Novembre 11",
+      "proposedSourceDate": "11-10"
+    },
+    {
+      "readingSliceId": "415",
+      "currentTitle": "Les hommes libres du Seigneur, Novembre 12",
+      "proposedSourceDate": "11-11"
+    },
+    {
+      "readingSliceId": "416",
+      "currentTitle": "Les âmes sanctifiées sont satisfaites, Novembre 13",
+      "proposedSourceDate": "11-12"
+    },
+    {
+      "readingSliceId": "417",
+      "currentTitle": "La surveillance qui ne flanche point, Novembre 14",
+      "proposedSourceDate": "11-13"
+    },
+    {
+      "readingSliceId": "418",
+      "currentTitle": "Le nom à employer, Novembre 15",
+      "proposedSourceDate": "11-14"
+    },
+    {
+      "readingSliceId": "419",
+      "currentTitle": "Richesse sans limites, Novembre 16",
+      "proposedSourceDate": "11-15"
+    },
+    {
+      "readingSliceId": "420",
+      "currentTitle": "Les armes sont condamnées à échouer, Novembre 17",
+      "proposedSourceDate": "11-16"
+    },
+    {
+      "readingSliceId": "421",
+      "currentTitle": "Dieu n'abandonne jamais, Novembre 18",
+      "proposedSourceDate": "11-17"
+    },
+    {
+      "readingSliceId": "422",
+      "currentTitle": "Clairement surnaturel, Novembre 19",
+      "proposedSourceDate": "11-18"
+    },
+    {
+      "readingSliceId": "423",
+      "currentTitle": "De l'obéissance à la bénédiction, Novembre 20",
+      "proposedSourceDate": "11-19"
+    },
+    {
+      "readingSliceId": "424",
+      "currentTitle": "Faim satisfaite, Novembre 21",
+      "proposedSourceDate": "11-20"
+    },
+    {
+      "readingSliceId": "425",
+      "currentTitle": "Le regard extérieur et ascendant, Novembre 22",
+      "proposedSourceDate": "11-21"
+    },
+    {
+      "readingSliceId": "426",
+      "currentTitle": "Aucune condamnation, Novembre 23",
+      "proposedSourceDate": "11-22"
+    },
+    {
+      "readingSliceId": "427",
+      "currentTitle": "L'acquisition de la persévérance, Novembre 24",
+      "proposedSourceDate": "11-23"
+    },
+    {
+      "readingSliceId": "428",
+      "currentTitle": "Pardon et rémission, Novembre 25",
+      "proposedSourceDate": "11-24"
+    },
+    {
+      "readingSliceId": "429",
+      "currentTitle": "Montagnes aplanies, Novembre 26",
+      "proposedSourceDate": "11-25"
+    },
+    {
+      "readingSliceId": "430",
+      "currentTitle": "Miracle divin merveilleux, Novembre 27",
+      "proposedSourceDate": "11-26"
+    },
+    {
+      "readingSliceId": "431",
+      "currentTitle": "Se reposer dans sa présence, Novembre 28",
+      "proposedSourceDate": "11-27"
+    },
+    {
+      "readingSliceId": "432",
+      "currentTitle": "La source qui jaillit, Novembre 29",
+      "proposedSourceDate": "11-28"
+    },
+    {
+      "readingSliceId": "433",
+      "currentTitle": "La réjouissance du Seigneur, Novembre 30",
+      "proposedSourceDate": "11-29"
+    },
+    {
+      "readingSliceId": "434",
+      "currentTitle": "Dieu est dans la ligne de front, Décembre 1",
+      "proposedSourceDate": "11-30"
+    },
+    {
+      "readingSliceId": "435",
+      "currentTitle": "La véritable marche, Décembre 2",
+      "proposedSourceDate": "12-01"
+    },
+    {
+      "readingSliceId": "436",
+      "currentTitle": "Notre exemple le plus saint, Décembre 3",
+      "proposedSourceDate": "12-02"
+    },
+    {
+      "readingSliceId": "437",
+      "currentTitle": "La paix et la sécurité malgré tout le reste, Décembre 4",
+      "proposedSourceDate": "12-03"
+    },
+    {
+      "readingSliceId": "438",
+      "currentTitle": "Couvert et protégé, Décembre 5",
+      "proposedSourceDate": "12-04"
+    },
+    {
+      "readingSliceId": "439",
+      "currentTitle": "Endroits élevés de retraite, Décembre 6",
+      "proposedSourceDate": "12-05"
+    },
+    {
+      "readingSliceId": "440",
+      "currentTitle": "Passer à travers sans être englouti, Décembre 7",
+      "proposedSourceDate": "12-06"
+    },
+    {
+      "readingSliceId": "441",
+      "currentTitle": "Il donne la force; bénit par la paix, Décembre 8",
+      "proposedSourceDate": "12-07"
+    },
+    {
+      "readingSliceId": "442",
+      "currentTitle": "Suivre mène à l'honneur, Décembre 9",
+      "proposedSourceDate": "12-08"
+    },
+    {
+      "readingSliceId": "443",
+      "currentTitle": "Le tout de la foi, Décembre 10",
+      "proposedSourceDate": "12-09"
+    },
+    {
+      "readingSliceId": "444",
+      "currentTitle": "Dieu est notre allié, Décembre 11",
+      "proposedSourceDate": "12-10"
+    },
+    {
+      "readingSliceId": "445",
+      "currentTitle": "Avoir confiance et agir; agir et avoir confiance, Décembre 12",
+      "proposedSourceDate": "12-11"
+    },
+    {
+      "readingSliceId": "446",
+      "currentTitle": "Un coeur tranquille et silencieux, Décembre 13",
+      "proposedSourceDate": "12-12"
+    },
+    {
+      "readingSliceId": "447",
+      "currentTitle": "Le soir éclatant de lumière, Décembre 14",
+      "proposedSourceDate": "12-13"
+    },
+    {
+      "readingSliceId": "448",
+      "currentTitle": "Rien ne sera plus usé, Décembre 15",
+      "proposedSourceDate": "12-14"
+    },
+    {
+      "readingSliceId": "449",
+      "currentTitle": "Paix mondiale, Décembre 16",
+      "proposedSourceDate": "12-15"
+    },
+    {
+      "readingSliceId": "450",
+      "currentTitle": "Expulsion divine, Décembre 17",
+      "proposedSourceDate": "12-16"
+    },
+    {
+      "readingSliceId": "451",
+      "currentTitle": "La camaraderie la plus proche et plus chère, Décembre 18",
+      "proposedSourceDate": "12-17"
+    },
+    {
+      "readingSliceId": "452",
+      "currentTitle": "Défendu et couvert, Décembre 19",
+      "proposedSourceDate": "12-18"
+    },
+    {
+      "readingSliceId": "453",
+      "currentTitle": "Des afflictions, mais aucuns os cassés, Décembre 20",
+      "proposedSourceDate": "12-19"
+    },
+    {
+      "readingSliceId": "454",
+      "currentTitle": "Hommes comme hommes; Dieu comme Dieu, Décembre 21",
+      "proposedSourceDate": "12-20"
+    },
+    {
+      "readingSliceId": "455",
+      "currentTitle": "De la colère à l'amour, Décembre 22",
+      "proposedSourceDate": "12-21"
+    },
+    {
+      "readingSliceId": "456",
+      "currentTitle": "Tout pleinement en sa plénitude, Décembre 23",
+      "proposedSourceDate": "12-22"
+    },
+    {
+      "readingSliceId": "457",
+      "currentTitle": "Choses précieuses, Décembre 24",
+      "proposedSourceDate": "12-23"
+    },
+    {
+      "readingSliceId": "458",
+      "currentTitle": "Au-delà du Jourdain en chantant, Décembre 25",
+      "proposedSourceDate": "12-24"
+    },
+    {
+      "readingSliceId": "459",
+      "currentTitle": "Il est venu; Il vient, Décembre 26",
+      "proposedSourceDate": "12-25"
+    },
+    {
+      "readingSliceId": "460",
+      "currentTitle": "A Dieu seulement tu peux faire confiance, Décembre 27",
+      "proposedSourceDate": "12-26"
+    },
+    {
+      "readingSliceId": "461",
+      "currentTitle": "Sa bonté et son engagement, Décembre 28",
+      "proposedSourceDate": "12-27"
+    },
+    {
+      "readingSliceId": "462",
+      "currentTitle": "Assurance absolue, Décembre 29",
+      "proposedSourceDate": "12-28"
+    },
+    {
+      "readingSliceId": "463",
+      "currentTitle": "Il nous portera à la maison, Décembre 30",
+      "proposedSourceDate": "12-29"
+    },
+    {
+      "readingSliceId": "464",
+      "currentTitle": "Aimés à la perfection, Décembre 31",
+      "proposedSourceDate": "12-30"
+    }
+  ],
+  "supplementarySource": "https://godieu.com/doc/meditations/charles-haddon-spurgeon/0922.html",
+  "missingEntry": {
+    "date": "12-31",
+    "source": "https://godieu.com/doc/meditations/charles-haddon-spurgeon/1231.html"
+  }
+}

@@ -546,6 +546,8 @@ export interface UserState {
     naves: Record<string, unknown>
     wordAnnotations: WordAnnotationsObj
     settings: {
+      /** Absent or null keeps the standalone verse of the day. */
+      dailyMeditationId?: string | null
       defaultBibleVersion?: string
       defaultStrongBibleVersionId?: StrongBibleVersionId
       alignContent: 'left' | 'justify'
@@ -1004,6 +1006,9 @@ const userSlice = createSlice({
     },
     setNotificationVOD(state, action: PayloadAction<string>) {
       state.notifications.verseOfTheDay = action.payload
+    },
+    setDailyMeditation(state, action: PayloadAction<string | null>) {
+      state.bible.settings.dailyMeditationId = action.payload
     },
     setNotificationId(state, action: PayloadAction<string>) {
       state.notifications.notificationId = action.payload
@@ -1565,6 +1570,7 @@ export const {
   receiveSubcollectionUpdates,
   importData,
   setNotificationVOD,
+  setDailyMeditation,
   setNotificationId,
   toggleCompareVersion,
   resetCompareVersion,

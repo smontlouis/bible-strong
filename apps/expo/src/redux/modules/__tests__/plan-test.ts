@@ -7,6 +7,8 @@ import reducer, {
   markAsRead,
   fetchPlans,
   fetchPlan,
+  startPlan,
+  setPlanReminder,
 } from '../plan'
 import { RECEIVE_LIVE_UPDATES, IMPORT_DATA, USER_LOGOUT } from '../user'
 import type { Plan, OngoingPlan, OnlinePlan, Section, ReadingSlice } from '~common/types'
@@ -216,7 +218,7 @@ describe('Plan Reducer', () => {
   })
 
   describe('markAsRead', () => {
-    it('should create ongoingPlan if it does not exist and mark slice as completed', () => {
+    it('requires explicit start before a first reading can be marked', () => {
       const section = createSection('section-1', [
         createReadingSlice('slice-1'),
         createReadingSlice('slice-2'),
@@ -227,7 +229,11 @@ describe('Plan Reducer', () => {
         myPlans: [plan],
       }
 
-      const newState = reducer(state, markAsRead({ readingSliceId: 'slice-1', planId: 'plan-1' }))
+      expect(reducer(state, markAsRead({ readingSliceId: 'slice-1', planId: 'plan-1' }))).toEqual(
+        state
+      )
+      const started = reducer(state, startPlan({ planId: 'plan-1', startDate: '2026-09-14' }))
+      const newState = reducer(started, markAsRead({ readingSliceId: 'slice-1', planId: 'plan-1' }))
 
       expect(newState.ongoingPlans).toHaveLength(1)
       expect(newState.ongoingPlans[0].id).toBe('plan-1')
@@ -261,7 +267,7 @@ describe('Plan Reducer', () => {
       expect(newState.ongoingPlans[0].readingSlices['slice-2']).toBeUndefined()
     })
 
-    it('should set plan status to Progress', () => {
+    it('does not enroll an old empty download through a mark action', () => {
       const section = createSection('section-1', [createReadingSlice('slice-1')])
       const plan = createPlan('plan-1', [section])
       const state = {
@@ -277,7 +283,7 @@ describe('Plan Reducer', () => {
       }
 
       const newState = reducer(state, markAsRead({ readingSliceId: 'slice-1', planId: 'plan-1' }))
-      expect(newState.ongoingPlans[0].status).toBe('Completed')
+      expect(newState).toEqual(state)
     })
 
     it('should set plan status to Completed when all slices are done', () => {
@@ -299,7 +305,7 @@ describe('Plan Reducer', () => {
       expect(newState.ongoingPlans[0].status).toBe('Completed')
     })
 
-    it('should set other plans to Idle when marking a new plan', () => {
+    it('preserves other active plans when marking a new plan', () => {
       const section1 = createSection('section-1', [createReadingSlice('slice-1')])
       const section2 = createSection('section-2', [createReadingSlice('slice-2')])
       const plan1 = createPlan('plan-1', [section1])
@@ -316,9 +322,10 @@ describe('Plan Reducer', () => {
         ],
       }
 
-      const newState = reducer(state, markAsRead({ readingSliceId: 'slice-2', planId: 'plan-2' }))
+      const started = reducer(state, startPlan({ planId: 'plan-2', startDate: '2026-09-14' }))
+      const newState = reducer(started, markAsRead({ readingSliceId: 'slice-2', planId: 'plan-2' }))
 
-      expect(newState.ongoingPlans.find(p => p.id === 'plan-1')?.status).toBe('Idle')
+      expect(newState.ongoingPlans.find(p => p.id === 'plan-1')?.status).toBe('Progress')
       expect(newState.ongoingPlans.find(p => p.id === 'plan-2')?.status).toBe('Completed')
     })
   })
@@ -367,9 +374,9 @@ describe('Plan Reducer', () => {
       expect(newState.myPlans[0].title).toBe('Updated Title')
     })
 
-    it('should create ongoingPlan entry if not exists', () => {
+    it('creates a legacy ongoing entry only when explicitly requested', () => {
       const plan = createPlan('plan-1')
-      const action = { type: fetchPlan.fulfilled.type, payload: plan }
+      const action = fetchPlan.fulfilled(plan, 'request', { id: plan.id, enroll: true })
       const newState = reducer(initialState, action)
       expect(newState.ongoingPlans).toHaveLength(1)
       expect(newState.ongoingPlans[0]).toEqual({
@@ -473,5 +480,52 @@ describe('Plan Reducer', () => {
       expect(newState.ongoingPlans).toEqual([])
       expect(newState.onlinePlans).toEqual([])
     })
+  })
+})
+
+describe('scheduled participation', () => {
+  const initialState = reducer(undefined, { type: 'test/init' })
+  it('acquires a preview without following it', () => {
+    const plan = createPlan('plan-1')
+    const state = reducer(
+      initialState,
+      fetchPlan.fulfilled(plan, 'request', { id: plan.id, enroll: false })
+    )
+    expect(state.myPlans).toEqual([plan])
+    expect(state.ongoingPlans).toEqual([])
+  })
+
+  it('schedules legacy progress without clearing completed readings', () => {
+    const plan = createPlan('plan-1')
+    const existing: OngoingPlan = {
+      id: plan.id,
+      status: 'Progress',
+      readingSlices: { old: 'Completed' },
+    }
+    const state = reducer(
+      { ...initialState, myPlans: [plan], ongoingPlans: [existing] },
+      startPlan({ planId: plan.id, startDate: '2026-09-14' })
+    )
+    expect(state.ongoingPlans[0]).toEqual({ ...existing, startDate: '2026-09-14' })
+    expect(reducer(state, startPlan({ planId: plan.id, startDate: '2026-02-30' }))).toEqual(state)
+  })
+
+  it('does not enroll a meditation into a relative schedule', () => {
+    const plan: Plan = { ...createPlan('collection'), type: 'Livre de méditation' }
+    const state = { ...initialState, myPlans: [plan] }
+    expect(reducer(state, startPlan({ planId: plan.id, startDate: '2026-09-14' }))).toEqual(state)
+  })
+
+  it('validates and disables reminder times without changing progress', () => {
+    const existing: OngoingPlan = {
+      id: 'plan-1',
+      status: 'Progress',
+      readingSlices: { old: 'Completed' },
+    }
+    const state = { ...initialState, ongoingPlans: [existing] }
+    expect(reducer(state, setPlanReminder({ planId: 'plan-1', time: '25:00' }))).toEqual(state)
+    const enabled = reducer(state, setPlanReminder({ planId: 'plan-1', time: '08:30' }))
+    expect(enabled.ongoingPlans[0].reminderTime).toBe('08:30')
+    expect(reducer(enabled, setPlanReminder({ planId: 'plan-1', time: null }))).toEqual(state)
   })
 })

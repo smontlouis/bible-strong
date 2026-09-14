@@ -4,7 +4,9 @@ import Sheet from '~common/ContextualPanel/ContextualSheet'
 import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
-import PlanItem from '~features/plans/MyPlanListScreen/MyPlanItem'
+import Link from '~common/Link'
+import Text from '~common/ui/Text'
+import { getEditorialKind } from '~features/plans/readingCalendar'
 import { useComputedPlanItems } from '~features/plans/plan.hooks'
 import generateUUID from '~helpers/generateUUID'
 import { useOpenInNewTab } from '../utils/useOpenInNewTab'
@@ -32,14 +34,13 @@ export default function PlanPicker({
         replacement.current = tabAtom
         sheet.current?.present()
       })}
-      <Sheet ref={sheet} snapPoints={[1]} header={<SheetHeader title={t('Plans')} />}>
+      <Sheet ref={sheet} snapPoints={[1]} header={<SheetHeader title={t('Plans & Méditations')} />}>
         <SheetScrollView>
           {plans.length ? (
             <Box className="p-[20px] gap-[16px]">
               {plans.map(plan => (
-                <PlanItem
+                <Link
                   key={plan.id}
-                  {...plan}
                   onPress={() => {
                     sheet.current?.dismiss()
                     const nextTab: TabItem = {
@@ -56,7 +57,18 @@ export default function PlanPicker({
                         store.set(target, { ...nextTab, id: previous.id })
                     } else openTab(nextTab, { autoRedirect: true })
                   }}
-                />
+                >
+                  <Box className="bg-reverse rounded-[12px] p-[16px] gap-[6px] min-h-[64px]">
+                    <Text className="text-default font-bold">{plan.title}</Text>
+                    <Text className="text-grey text-[13px]">
+                      {t(
+                        getEditorialKind(plan) === 'daily-meditation'
+                          ? 'dailyReading.collection'
+                          : 'readingPlans.tab'
+                      )}
+                    </Text>
+                  </Box>
+                </Link>
               ))}
             </Box>
           ) : (

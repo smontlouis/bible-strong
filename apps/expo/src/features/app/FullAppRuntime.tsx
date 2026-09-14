@@ -1,3 +1,4 @@
+import ReadingReminders from '~features/daily-reading/ReadingReminders'
 import WorkspaceLayout from '~features/app-switcher/WorkspaceLayout'
 import { SheetProvider } from '~common/sheet'
 import { trackAnalyticsScreen } from '~helpers/analytics'
@@ -58,6 +59,7 @@ const PostMigrationStartup = ({ children }: { children: ReactNode }) => {
   return (
     <>
       {children}
+      <ReadingReminders />
       {resourcesReady && <DeferredVerseOfTheDayPrefetch />}
     </>
   )

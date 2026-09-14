@@ -8,7 +8,7 @@ export const paletteScopes = [
   { type: 'bible', key: 'Passage', source: undefined },
   { type: 'compare', key: 'tabs.compare', source: undefined },
   { type: 'commentary', key: 'tabs.commentary', source: undefined },
-  { type: 'plan', key: 'Plans', source: undefined },
+  { type: 'plan', key: 'Plans & Méditations', source: undefined },
   { type: 'timeline', key: 'tabs.timeline', source: undefined },
   { type: 'notes', key: 'tabs.notes', source: 'notes' },
   { type: 'study', key: 'Études', source: 'studies' },

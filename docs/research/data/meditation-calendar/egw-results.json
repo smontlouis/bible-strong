@@ -1,0 +1,110 @@
+{
+  "auditedAt": "2026-09-14",
+  "scope": "Official table-of-contents identifiers and dates, not complete text comparison.",
+  "collections": [
+    {
+      "id": "avec-dieu-chaque-jour",
+      "source": "https://text.egwwritings.org/book/b155",
+      "sourceSha256": "314d3468c3f6eb75294b240ca7c7990d1c8bcc76f8f5fd683e57d19c8cf3f000",
+      "localSha256": "6a847a79707d2bc254c60108ceafb7bb4221c068a0ec2ebd4a9f1369b86767df",
+      "sourceEntries": 366,
+      "localEntries": 366,
+      "matchingIdAndDate": 366,
+      "dateMismatches": [],
+      "missingSourceIds": [],
+      "titleDifferenceIds": [],
+      "sourceEntriesNotImported": []
+    },
+    {
+      "id": "christ-triumphant",
+      "source": "https://text.egwwritings.org/book/b9",
+      "sourceSha256": "c3ccf4ffa64215609a93b1482bdaca87432dbac94abbf89f750559842347778c",
+      "localSha256": "117e73aae2f05e8dbbf56daedcf02cf77fefdfb2f9aa48770ec6d4cf53a491ac",
+      "sourceEntries": 366,
+      "localEntries": 366,
+      "matchingIdAndDate": 366,
+      "dateMismatches": [],
+      "missingSourceIds": [],
+      "titleDifferenceIds": [],
+      "sourceEntriesNotImported": []
+    },
+    {
+      "id": "conflict-and-courage",
+      "source": "https://text.egwwritings.org/book/b17",
+      "sourceSha256": "79506d4ac3a3fe1c9ff4a5585cf2558fd5dc98febd3b6f4916bf42666d03dc92",
+      "localSha256": "a18be3e678b9897d05a3cf32b92e1790491cfeb4981393ae7cee1612dca132bf",
+      "sourceEntries": 365,
+      "localEntries": 365,
+      "matchingIdAndDate": 365,
+      "dateMismatches": [],
+      "missingSourceIds": [],
+      "titleDifferenceIds": [],
+      "sourceEntriesNotImported": []
+    },
+    {
+      "id": "gods-amazing-grace",
+      "source": "https://text.egwwritings.org/book/b33",
+      "sourceSha256": "eefb411aa65590ec4c1da7495ff5d971e682ad7670fe8b7b895b2c9c4426ae54",
+      "localSha256": "9dcf54c820716729f3921329b950d8d8485db9a65954422a2cf1080d51928dab",
+      "sourceEntries": 365,
+      "localEntries": 365,
+      "matchingIdAndDate": 365,
+      "dateMismatches": [],
+      "missingSourceIds": [],
+      "titleDifferenceIds": [],
+      "sourceEntriesNotImported": []
+    },
+    {
+      "id": "levez-vos-yeux-en-haut",
+      "source": "https://text.egwwritings.org/book/b1812",
+      "sourceSha256": "a795bf30557b614244acea4a0d775f5fb547ffec8c406b7c049cedfc21db5eb9",
+      "localSha256": "b2e3e5fced9466cbe462f71ce6a08cc8e295ee91f2fb3aea62a7846fcbbb040f",
+      "sourceEntries": 365,
+      "localEntries": 365,
+      "matchingIdAndDate": 365,
+      "dateMismatches": [],
+      "missingSourceIds": [],
+      "titleDifferenceIds": [],
+      "sourceEntriesNotImported": []
+    },
+    {
+      "id": "puissance-de-la-grace",
+      "source": "https://text.egwwritings.org/book/b220",
+      "sourceSha256": "2a170657ec55bd097b9a1e7e7d1085c8398254dc922c65424adf9edeeb600a18",
+      "localSha256": "a88322cdbddb595ee1f88762b105766121cfdd79890b3b16e314d5b20c747570",
+      "sourceEntries": 366,
+      "localEntries": 366,
+      "matchingIdAndDate": 366,
+      "dateMismatches": [],
+      "missingSourceIds": [],
+      "titleDifferenceIds": [],
+      "sourceEntriesNotImported": []
+    },
+    {
+      "id": "the-faith-i-live-by",
+      "source": "https://text.egwwritings.org/book/b131",
+      "sourceSha256": "7a8a5bd8c150d3b1d337a1d50cc4d52208420344f2d6b16100cd9757400285ba",
+      "localSha256": "eb042ff91303a3e4f247469b2ca8ce5aaa54faf583b3cd2b3a7b6e8bfbab4542",
+      "sourceEntries": 365,
+      "localEntries": 365,
+      "matchingIdAndDate": 365,
+      "dateMismatches": [],
+      "missingSourceIds": [],
+      "titleDifferenceIds": [],
+      "sourceEntriesNotImported": []
+    },
+    {
+      "id": "vous-recevrez-puissance",
+      "source": "https://text.egwwritings.org/book/b2698",
+      "sourceSha256": "f952471bd3c9038f01d7f4162413da3f1bab703fd6cf8bd790107fdc92a13043",
+      "localSha256": "47a6c836f2004194973c446acd5add28846fa4679c4f9dcc8a6313a1cf5cb56f",
+      "sourceEntries": 366,
+      "localEntries": 366,
+      "matchingIdAndDate": 366,
+      "dateMismatches": [],
+      "missingSourceIds": [],
+      "titleDifferenceIds": [],
+      "sourceEntriesNotImported": []
+    }
+  ]
+}

@@ -12,6 +12,7 @@ import {
 // Import action creators from user.ts
 import {
   importData,
+  setDailyMeditation,
   onUserLogout,
   resetCompareVersion,
   saveAllLogsAsSeen,
@@ -104,7 +105,14 @@ import {
 import i18n from '~i18n'
 import { RootState } from '~redux/modules/reducer'
 import { deleteDoc, deleteField, doc, firebaseDb, setDoc } from '../helpers/firebase'
-import { fetchPlan, markAsRead, removePlan, resetPlan } from './modules/plan'
+import {
+  fetchPlan,
+  markAsRead,
+  removePlan,
+  resetPlan,
+  startPlan,
+  setPlanReminder,
+} from './modules/plan'
 import { canonicalizeImportedDataForFirestore } from './firestoreImportDataCanonicalization'
 import { buildCompareSettingsWrite } from './compareSelectionSync'
 import {
@@ -464,9 +472,17 @@ async function handleSyncWithRetry(
 }
 
 // RTK Matchers for action grouping
-const isPlanAction = isAnyOf(removePlan, fetchPlan.fulfilled, resetPlan, markAsRead)
+const isPlanAction = isAnyOf(
+  removePlan,
+  fetchPlan.fulfilled,
+  resetPlan,
+  markAsRead,
+  startPlan,
+  setPlanReminder
+)
 
 const isSettingsAction = isAnyOf(
+  setDailyMeditation,
   setSettingsAlignContent,
   setSettingsLineHeight,
   increaseSettingsFontSizeScale,
@@ -594,6 +610,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
 
   // ========== PLAN SYNC ==========
   if (isPlanAction(action)) {
+    if (oldState.plan.ongoingPlans === plan.ongoingPlans) return result
     const data = { plan: removeUndefinedVariables(plan.ongoingPlans) }
     const intent: FirestoreSyncIntent = {
       kind: 'document-set',
@@ -635,7 +652,10 @@ const firestoreMiddleware: Middleware = store => next => async action => {
         }
       : diffState?.user?.bible?.settings
     // Empty compare maps are intentional clears, not missing values to strip.
-    const cleanedSettings = comparisonWrite?.settings ?? cleanForFirestore(settingsUpdate)
+    // Null is an intentional return to the standalone verse, not an empty value to discard.
+    const cleanedSettings = setDailyMeditation.match(action)
+      ? { dailyMeditationId: state.user.bible.settings.dailyMeditationId ?? null }
+      : (comparisonWrite?.settings ?? cleanForFirestore(settingsUpdate))
     const mergeFields = comparisonWrite?.mergeFields
 
     // Ne pas sync si le résultat est vide/null (évite les erreurs Firestore)

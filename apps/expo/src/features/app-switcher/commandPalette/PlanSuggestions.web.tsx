@@ -2,6 +2,7 @@ import { useTheme } from '~themes/ThemeProvider'
 import { colorWithOpacity } from '~themes/colorValues'
 import { Command } from 'cmdk'
 import { useTranslation } from 'react-i18next'
+import { getEditorialKind } from '~features/plans/readingCalendar'
 import { useComputedPlanItems } from '~features/plans/plan.hooks'
 import type { TabItem } from '~state/tabs'
 import generateUUID from '~helpers/generateUUID'
@@ -19,7 +20,7 @@ export default function PlanSuggestions({
   const theme = useTheme()
   const plans = useComputedPlanItems().filter(plan => matchesQuery(query, plan.title))
   return (
-    <Command.Group heading={t('Plans')}>
+    <Command.Group heading={t('Plans & Méditations')}>
       {plans.slice(0, 8).map(plan => (
         <Command.Item
           key={plan.id}
@@ -43,6 +44,13 @@ export default function PlanSuggestions({
               <TabIcon type="plan" size={16} />
             </span>
             <span className="bs-command-item-text">{plan.title}</span>
+            <span className="bs-command-status">
+              {t(
+                getEditorialKind(plan) === 'daily-meditation'
+                  ? 'dailyReading.collection'
+                  : 'readingPlans.tab'
+              )}
+            </span>
           </span>
         </Command.Item>
       ))}

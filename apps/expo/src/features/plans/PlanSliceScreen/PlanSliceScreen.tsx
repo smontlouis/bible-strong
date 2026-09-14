@@ -1,3 +1,14 @@
+import { useReadingContent } from '~features/daily-reading/useDailyMeditation'
+import { useComputedPlan } from '../plan.hooks'
+import {
+  getLegacyReadingRouteLocation,
+  findPlanTabReadingSlice,
+  buildPlanTabReadingSlice,
+} from '../planTabState'
+import Loading from '~common/Loading'
+import Empty from '~common/Empty'
+import Button from '~common/ui/Button'
+import type { MenuAction } from '~common/ui/MenuView'
 import { goBackOrHome } from '~navigation/goBackOrHome'
 import React from 'react'
 import { READING_TEXT_MAX_WIDTH, PLAN_READING_HORIZONTAL_PADDING } from '~common/readingLayout'
@@ -32,6 +43,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useBookAndVersionSelector } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
+import { canUpdatePlanProgress } from '../planProgress'
 const extractTitle = (slice: EntitySlice) => {
   switch (slice.type) {
     case 'Verse':
@@ -66,18 +78,25 @@ const PlanSliceScreen = ({
   onRead,
 }: Props) => {
   const router = useRouter()
-  const params = useLocalSearchParams<{ readingSlice?: string }>()
+  const params = useLocalSearchParams<{
+    readingSlice?: string
+    planId?: string
+    readingSliceId?: string
+  }>()
   const openInNewTab = useOpenInNewTab()
 
-  // Parse complex object from URL string
+  const legacyLocation = getLegacyReadingRouteLocation(params.readingSlice)
+  const contentPlanId =
+    readingSliceFromProps?.planId || params.planId || legacyLocation?.planId || ''
+  const contentReadingId =
+    readingSliceFromProps?.id || params.readingSliceId || legacyLocation?.readingSliceId
+  const { isError: contentError, retry: retryContent } = useReadingContent(contentPlanId)
+  const currentPlan = useComputedPlan(contentPlanId)
+  const currentReading = findPlanTabReadingSlice(currentPlan, contentReadingId)
   const readingSlice =
     readingSliceFromProps ||
-    (params.readingSlice
-      ? (JSON.parse(params.readingSlice) as ComputedReadingSlice & {
-          planId: string
-          planTitle?: string
-          planLanguage?: Plan['lang']
-        })
+    (currentPlan && currentReading
+      ? buildPlanTabReadingSlice(currentPlan, currentReading)
       : undefined)
   const {
     id,
@@ -95,6 +114,12 @@ const PlanSliceScreen = ({
   const paramsModalRef = React.useRef<SheetRef>(null)
 
   const selectIsRead = makeIsReadSelector()
+  const canRecordProgress = useSelector((state: RootState) =>
+    canUpdatePlanProgress(
+      state.plan.myPlans.find(plan => plan.id === planId),
+      state.plan.ongoingPlans.find(plan => plan.id === planId)
+    )
+  )
   const isRead = useSelector((state: RootState) => selectIsRead(state, planId ?? '', id ?? ''))
   const version = useDefaultBibleVersion()
   const { openVersionSelector } = useBookAndVersionSelector()
@@ -125,6 +150,7 @@ const PlanSliceScreen = ({
   }
 
   const onMarkAsReadSelect = () => {
+    if (!canRecordProgress) return
     dispatch(markAsRead({ readingSliceId: id!, planId: planId! }))
     if (onRead) {
       onRead()
@@ -193,10 +219,46 @@ const PlanSliceScreen = ({
     }
   }
 
+  const completionActions: MenuAction[] = canRecordProgress
+    ? [
+        {
+          id: 'mark-read',
+          title: isRead ? t('Marquer comme non lu') : t('Marquer comme lu'),
+          image: 'checkmark',
+        },
+      ]
+    : []
+
+  if (!readingSlice) {
+    return (
+      <Container>
+        <Header hasBackButton title={t('readingPlans.tab')} onCustomBackPress={handleBack} />
+        {contentError || currentPlan ? (
+          <>
+            <Empty message={t('dailyReading.unavailableReading')} />
+            {contentError && (
+              <Box className="p-[20px]">
+                <Button
+                  onPress={() => {
+                    void retryContent()
+                  }}
+                >
+                  {t('dailyReading.retry')}
+                </Button>
+              </Box>
+            )}
+          </>
+        ) : (
+          <Loading />
+        )}
+      </Container>
+    )
+  }
+
   return (
     <Container>
       <Header
-        title={sliceTitle}
+        title={sliceTitle || planTitle || routePlanTitle || title || ''}
         hasBackButton
         onCustomBackPress={handleBack}
         rightComponent={
@@ -204,11 +266,7 @@ const PlanSliceScreen = ({
             version={version}
             onVersionChange={versionActions.setSelectedVersion}
             actions={[
-              {
-                id: 'mark-read',
-                title: isRead ? t('Marquer comme non lu') : t('Marquer comme lu'),
-                image: 'checkmark',
-              },
+              ...completionActions,
               {
                 id: 'version',
                 title: `${t('Changer de version')} (${version})`,
@@ -269,7 +327,7 @@ const PlanSliceScreen = ({
           )}
         </PauseText>
         {title && (
-          <Box className="overflow-hidden border-continuous px-[20px] mb-[50px]">
+          <Box className={`overflow-hidden border-continuous px-[20px] mb-[50px]`}>
             <ReferenceParagraph scale={3} planLanguage={planLanguage}>
               {title}
             </ReferenceParagraph>
@@ -279,7 +337,9 @@ const PlanSliceScreen = ({
           <Slice key={slice.id} {...slice} planLanguage={planLanguage} />
         ))}
         <Box className="overflow-hidden border-continuous h-[80px] items-center justify-center mt-[30px]">
-          <ReadButton isRead={isRead} readingSliceId={id!} planId={planId!} onRead={onRead} />
+          {canRecordProgress && (
+            <ReadButton isRead={isRead} readingSliceId={id!} planId={planId!} onRead={onRead} />
+          )}
         </Box>
       </ScrollView>
       <ParamsModal paramsModalRef={paramsModalRef} />

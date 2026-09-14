@@ -18,9 +18,17 @@ interface Props {
   title: string
   onRemove?: () => void
   details?: React.ReactNode
+  canManageParticipation?: boolean
 }
 
-const Menu = ({ modalRefDetails, planId, title, onRemove, details }: Props) => {
+const Menu = ({
+  modalRefDetails,
+  planId,
+  title,
+  onRemove,
+  details,
+  canManageParticipation = true,
+}: Props) => {
   const router = useRouter()
   const dispatch = useDispatch()
   const { t } = useTranslation()
@@ -94,7 +102,11 @@ const Menu = ({ modalRefDetails, planId, title, onRemove, details }: Props) => {
         remove: 'trash-2',
       }}
       screens={details ? { details: { title: t('Détails'), content: () => details } } : {}}
-      actions={actions}
+      actions={
+        canManageParticipation
+          ? actions
+          : actions.filter(action => !['reset', 'remove'].includes(action.id ?? ''))
+      }
       onPressAction={({ nativeEvent }) => {
         switch (nativeEvent.event) {
           case 'details':

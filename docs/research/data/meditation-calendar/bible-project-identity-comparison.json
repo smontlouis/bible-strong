@@ -1,0 +1,78 @@
+[
+  {
+    "id": "bible-project-plan",
+    "localEntries": 358,
+    "remoteEntries": 358,
+    "orderedIdsEqual": true,
+    "missingRemoteIds": [],
+    "missingLocalIds": [],
+    "changedFields": {
+      "11": [
+        "/slices/0/url"
+      ],
+      "22": [
+        "/slices/0/url"
+      ],
+      "29": [
+        "/slices/0/url"
+      ],
+      "3": [
+        "/slices/0/url"
+      ],
+      "321": [
+        "/slices/0/url"
+      ],
+      "350": [
+        "/slices/0/description"
+      ],
+      "39": [
+        "/slices/0/url"
+      ],
+      "52": [
+        "/slices/0/url"
+      ],
+      "56": [
+        "/slices/0/url"
+      ],
+      "64": [
+        "/slices/0/url"
+      ]
+    },
+    "localSha256": "cfc8ac5d585b48acf0648fac8ff912c1897488250ebac480bebad482481d7390",
+    "remoteSha256": "a71c3824790b4840a2dd4d5b2ecfd691bde13f2c684e1a87babc7bd1033d7101",
+    "localLastUpdate": null,
+    "remoteLastUpdate": "1587254084993"
+  },
+  {
+    "id": "bible-project-plan-en",
+    "localEntries": 358,
+    "remoteEntries": 358,
+    "orderedIdsEqual": true,
+    "missingRemoteIds": [],
+    "missingLocalIds": [],
+    "changedFields": {
+      "236": [
+        "/slices/0/url"
+      ],
+      "301": [
+        "/slices/0/url"
+      ],
+      "333": [
+        "/slices/0/url"
+      ],
+      "335": [
+        "/slices/0/url"
+      ],
+      "5": [
+        "/slices/0/url"
+      ],
+      "77": [
+        "/slices/0/url"
+      ]
+    },
+    "localSha256": "fbed8d4d6e7a0e5cdec9dc97ac3e240185b4edbbdf546ecff9a0508f65fa5a18",
+    "remoteSha256": "cc5d7f7063108630ae1eca94fb13a6c9011799fe81f10d2fa14d9b7c1b59b82d",
+    "localLastUpdate": null,
+    "remoteLastUpdate": "1593842848204"
+  }
+]

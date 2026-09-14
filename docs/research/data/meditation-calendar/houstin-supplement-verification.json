@@ -1,0 +1,19 @@
+{
+  "source": "https://heritier.xyz/assets/files/365-jours-PDF.pdf",
+  "sourceSha256": "3794e666d80583dc19571a2b52fac4b9625124ce083e53c21bd030aa385640c8",
+  "checks": [
+    {
+      "date": "07-17",
+      "transcription": "index_split_212.html",
+      "allParagraphsMatchPDF": true,
+      "paragraphs": 7
+    },
+    {
+      "date": "12-31",
+      "transcription": "index_split_384.html",
+      "allParagraphsMatchPDF": true,
+      "paragraphs": 4
+    }
+  ],
+  "method": "Whitespace, punctuation and diacritic normalization for comparison only; transcription text remains unchanged."
+}

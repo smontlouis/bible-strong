@@ -13,6 +13,7 @@ import {
 import { RootState } from './reducer'
 import { importData, receiveLiveUpdates, USER_LOGOUT } from './user'
 import { markReadingSliceAsRead } from '~features/plans/planProgress'
+import { getEditorialKind, isCivilDate } from '~features/plans/readingCalendar'
 
 type ImageModel = { [key: string]: string }
 
@@ -45,14 +46,15 @@ export const fetchPlans = createAsyncThunk('plan/fetchPlans', async () => {
 
 export const fetchPlan = createAsyncThunk(
   'plan/fetchPlan',
-  async ({ id, update = false }: { id: string; update?: boolean }) => {
+  async ({ id, update = false }: { id: string; update?: boolean; enroll?: boolean }) => {
     const planRef = doc(firebaseDb, 'plans', id)
 
     const planSnapshot = await getDoc(planRef)
     const plan = planSnapshot.data() as OnlinePlan
+    if (!plan) throw new Error('Reading content is unavailable')
 
     if (update) {
-      updateDoc(planRef, { downloads: increment })
+      await updateDoc(planRef, { downloads: increment })
     }
 
     const snapshot = await getDocs(collection(firebaseDb, 'plans', id, 'plan-sections'))
@@ -106,6 +108,25 @@ const planSlice = createSlice({
   name: 'plan',
   initialState,
   reducers: {
+    startPlan(state, action: PayloadAction<{ planId: string; startDate: string }>) {
+      const { planId, startDate } = action.payload
+      const plan = state.myPlans.find(item => item.id === planId)
+      if (!plan || getEditorialKind(plan) !== 'reading-plan' || !isCivilDate(startDate)) return
+      const existing = state.ongoingPlans.find(item => item.id === planId)
+      if (existing) {
+        existing.startDate = startDate
+        if (existing.status !== 'Completed') existing.status = 'Progress'
+      } else {
+        state.ongoingPlans.push({ id: planId, status: 'Progress', readingSlices: {}, startDate })
+      }
+    },
+    setPlanReminder(state, action: PayloadAction<{ planId: string; time: string | null }>) {
+      const plan = state.ongoingPlans.find(item => item.id === action.payload.planId)
+      const { time } = action.payload
+      if (!plan || (time !== null && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time))) return
+      if (time === null) delete plan.reminderTime
+      else plan.reminderTime = time
+    },
     cacheImage(state, action: PayloadAction<{ id: string; value: string }>) {
       state.images[action.payload.id] = action.payload.value
     },
@@ -130,7 +151,7 @@ const planSlice = createSlice({
       }
     },
     addPlan(state, action: PayloadAction<Plan>) {
-      state.myPlans.push(action.payload)
+      if (!state.myPlans.some(plan => plan.id === action.payload.id)) state.myPlans.push(action.payload)
     },
     markAsRead(state, action: PayloadAction<{ readingSliceId: string; planId: string }>) {
       const { readingSliceId, planId } = action.payload
@@ -144,7 +165,7 @@ const planSlice = createSlice({
     },
   },
   extraReducers: builder => {
-    builder.addCase(fetchPlan.fulfilled, (state, action: PayloadAction<Plan>) => {
+    builder.addCase(fetchPlan.fulfilled, (state, action) => {
       let planAlreadyExistsIndex = state.myPlans.findIndex(
         myPlan => action.payload.id === myPlan.id
       )
@@ -156,7 +177,7 @@ const planSlice = createSlice({
 
       const ongoingPlan = state.ongoingPlans.find(oP => oP.id === action.payload.id)
 
-      if (!ongoingPlan) {
+      if (!ongoingPlan && action.meta?.arg?.enroll === true) {
         state.ongoingPlans.push({
           id: action.payload.id,
           status: 'Idle',
@@ -196,5 +217,13 @@ const planSlice = createSlice({
   },
 })
 
-export const { cacheImage, resetPlan, markAsRead, removePlan, addPlan } = planSlice.actions
+export const {
+  cacheImage,
+  resetPlan,
+  markAsRead,
+  removePlan,
+  addPlan,
+  startPlan,
+  setPlanReminder,
+} = planSlice.actions
 export default planSlice.reducer

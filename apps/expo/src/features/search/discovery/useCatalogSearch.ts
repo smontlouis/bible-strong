@@ -4,6 +4,7 @@ import type { AppDispatch } from '~redux/store'
 import type { RootState } from '~redux/modules/reducer'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { getEditorialKind } from '~features/plans/readingCalendar'
 import { useComputedPlanItems } from '~features/plans/plan.hooks'
 import { getEvents } from '~features/timeline/events'
 import { matchesQuery } from '../shared/matchesQuery'
@@ -22,7 +23,7 @@ export function useCatalogSearch(
 ) {
   const includes = (type: CatalogScope) =>
     enabled && (!scope || scope === type) && (!selectedScopes || selectedScopes.includes(type))
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const savedPlans = useComputedPlanItems()
   const cachedPlans = useSelector((state: RootState) => state.plan.onlinePlans)
   const dispatch = useDispatch<AppDispatch>()
@@ -54,6 +55,11 @@ export function useCatalogSearch(
               .map(plan => ({
                 id: `plan:${plan.id}`,
                 title: plan.title,
+                subtitle: t(
+                  getEditorialKind(plan) === 'daily-meditation'
+                    ? 'dailyReading.collection'
+                    : 'readingPlans.tab'
+                ),
                 type: 'plan' as const,
                 tab: {
                   type: 'plan' as const,

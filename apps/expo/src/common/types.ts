@@ -10,6 +10,8 @@ export interface User {
 
 export interface Plan {
   id: string
+  /** Stable editorial classification; localized legacy type labels remain readable. */
+  kind?: 'reading-plan' | 'daily-meditation'
   lastUpdate?: number
   downloads?: number
   title: string
@@ -18,7 +20,13 @@ export interface Plan {
   description?: string
   sections: Section[]
   author: User
-  type: 'yearly' | 'meditation'
+  type:
+    | 'yearly'
+    | 'meditation'
+    | 'Plan annuel'
+    | 'Yearly Plan'
+    | 'Livre de méditation'
+    | 'Meditation Book'
   lang: 'fr' | 'en'
 }
 
@@ -26,6 +34,10 @@ export interface OngoingPlan {
   id: string
   status: PlanStatus
   readingSlices: { [id: string]: PlanStatus }
+  /** Civil date chosen by the reader; absent for legacy progress until explicitly scheduled. */
+  startDate?: string
+  /** Device-local reminder time, HH:mm. Absence means disabled. */
+  reminderTime?: string
 }
 
 type WithOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
@@ -64,6 +76,8 @@ export type SliceType = 'Text' | 'Image' | 'Verse' | 'Chapter' | 'Video'
 
 export interface ReadingSlice {
   id: string
+  /** Editorial month/day; null denotes an explicitly undated complementary reading. */
+  calendarDate?: string | null
   title?: string
   slices: EntitySlice[]
 }

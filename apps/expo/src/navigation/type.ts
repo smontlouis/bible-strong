@@ -134,7 +134,7 @@ type NaveDetailScreenProps = {
 
 type PlanScreenProps = {
   planId: string
-  plan: ComputedPlanItem
+  plan?: ComputedPlanItem
 }
 
 type PlanSliceScreenProps = {

@@ -30,6 +30,12 @@
 
 **Reading plan** — An ordered program of Bible readings, meditations, media, or teaching units.
 
+**Plan participation** — A reader's progress through a Reading plan, with a chosen start date and a fixed calendar when scheduled.
+
+**Meditation collection** — An editorial book of daily readings assigned to calendar dates rather than to a reader's start date.
+
+**Daily-reading source** — The reader's choice between the standalone verse of the day and the opening passage from one Meditation collection.
+
 **Plan slice** — One reading or teaching unit inside a Reading plan.
 
 **Strong entry** — A Hebrew or Greek lexical entry identified by a Strong number.
