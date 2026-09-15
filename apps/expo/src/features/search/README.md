@@ -22,7 +22,7 @@ La feature Search permet de rechercher des versets bibliques en mode hors ligne 
 
 ### Interface utilisateur
 
-- Barre de recherche avec debouncing
+- Recherche automatique après une pause de saisie de 800 ms
 - Resultats pagines
 - Mise en evidence des termes recherches
 - Navigation directe vers les versets trouves
@@ -51,6 +51,27 @@ navigation.navigate('SearchTab')
 - `react-i18next` : Internationalisation
 
 ## Palette web et recherche persistante
+
+La recherche complète garde un brouillon dans `SearchQueryInput` : les frappes ne
+modifient ni la requête exécutée ni l'état global des onglets. Un debounce de
+800 ms lance automatiquement la recherche après la dernière frappe. La touche
+clavier Rechercher permet de lancer immédiatement la recherche ; aucun bouton
+supplémentaire ni libellé « Résultats pour » n'est affiché.
+Effacer réinitialise la recherche ; les exemples et recherches préremplies
+continuent de lancer directement leur requête. Les feuilles de sélection de catégorie et
+les aperçus de la palette conservent leur fonctionnement dynamique.
+
+Le brouillon survit au remontage du même onglet en mémoire et est enregistré à la
+perte de focus. Les anciens onglets sans `draftSearchValue` restent compatibles.
+Une nouvelle soumission conserve les objets de l'ancienne liste jusqu'aux premiers
+résultats utiles, ou jusqu'à une réponse finale vide, à filtres et version inchangés.
+Les clics sur cette liste ancienne ne sont pas attribués à la nouvelle recherche dans
+les analytics. La pagination attend les résultats courants.
+
+Sans résultat visible, le chargement affiche un spinner centré. Les sections
+n'affichent pas de spinner de liste vide quand leurs lignes sont rendues par une
+liste virtualisée extérieure. L'enrichissement sémantique ne présente plus de
+message « Recherche de résultats supplémentaires ».
 
 La palette de commandes affiche un aperçu de trois résultats par source. Elle réutilise
 les accès `bibleSearch`, `strongLexicon`, `dictionary` et `nave`, ainsi que les convertisseurs

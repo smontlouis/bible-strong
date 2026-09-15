@@ -18,6 +18,7 @@ import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import { BibleError, BibleLoadingError } from '~helpers/bibleErrors'
 import { usePrevious } from '~helpers/usePrevious'
 import BibleHeader from './BibleHeader'
+import PassageContextButton from './PassageContextButton'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -947,18 +948,6 @@ const BibleViewer = ({
     })
   }
 
-  const editFocusTags = () => {
-    if (!focusVerses?.length) return
-
-    setUnifiedTagsModal({
-      mode: 'select',
-      entity: 'highlights',
-      ids: Object.fromEntries(
-        focusVerses.map(focusVerse => [`${book.Numero}-${chapter}-${focusVerse}`, true])
-      ),
-    })
-  }
-
   const toggleCreateNote = () => {
     const verseKeys = getSelectedVerseKeys(selectedVerses)
     openNote({ verseKeys, version })
@@ -1493,9 +1482,17 @@ const BibleViewer = ({
         onExitAnnotationMode={handleExitAnnotationMode}
         annotationModeEnabled={annotationMode.enabled && !hidePersonalBibleData}
         hidePersonalBibleData={hidePersonalBibleData}
-        onEditFocusTags={editFocusTags}
         coverage={coverageData}
       />
+      {!!focusVerses?.length && !annotationMode.enabled && (
+        <PassageContextButton
+          focused={isContextFocused}
+          isFormSheet={isFormSheet}
+          onExpand={actions.expandContext}
+          onCollapse={actions.collapseContext}
+          onExit={actions.clearFocusVerses}
+        />
+      )}
       {settings.redWordsDisplay && redWordsFailureIsTemporary && (
         <Box className="border-continuous overflow-hidden bg-reverse border-b-[1px] border-border">
           <ResourceUnavailableView

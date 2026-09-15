@@ -25,7 +25,7 @@ export default function PassageActionButtons({ item }: { item: SearchEntityResul
       : undefined)
   if (!referenceSegment) return null
   return (
-    <HStack className="items-center shrink-0 gap-[8px]">
+    <HStack className="items-center shrink-0 gap-[4px]">
       {([false, true] as const).map(compare => (
         <PassageActionButton
           key={String(compare)}

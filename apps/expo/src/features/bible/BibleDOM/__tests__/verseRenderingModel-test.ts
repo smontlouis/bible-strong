@@ -21,6 +21,29 @@ const verse = {
 }
 
 describe('verseRenderingModel', () => {
+  it('shows only the selected passage in previews, including disjoint ranges', () => {
+    const selected = [2, 4]
+    const visible = [1, 2, 3, 4, 5].filter(verseNumber =>
+      shouldRenderVerseInFocusedContext({
+        verseNumber,
+        isContextFocused: true,
+        hasFocusVerses: true,
+        isFocused: selected.includes(verseNumber),
+        fadePosition: getFadePosition(verseNumber, true, { prev: 1, next: 5 }),
+        hideAdjacentVerses: true,
+      })
+    )
+    expect(visible).toEqual([2, 4])
+    expect(
+      shouldRenderVerseInFocusedContext({
+        verseNumber: 1,
+        isContextFocused: false,
+        hasFocusVerses: true,
+        isFocused: false,
+        hideAdjacentVerses: true,
+      })
+    ).toBe(true)
+  })
   it('creates canonical Verse keys from Bible row identity', () => {
     expect(createVerseKey(verse)).toBe('1-1-2')
   })

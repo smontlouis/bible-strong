@@ -116,11 +116,6 @@ export default function ContentSuggestions({
               {t('commandPalette.loading')}
             </div>
           )}
-          {section.enriching && !section.loading && (
-            <div className="bs-command-status" role="status">
-              {t('search.semanticLoading')}
-            </div>
-          )}
           {section.error && (
             <div className="bs-command-status" role="status">
               {t('commandPalette.sourceUnavailable')}

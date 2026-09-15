@@ -72,15 +72,22 @@ export const shouldRenderVerseInFocusedContext = ({
   hasFocusVerses,
   isFocused,
   fadePosition,
+  hideAdjacentVerses = false,
 }: {
   verseNumber: number
   isContextFocused: boolean
   hasFocusVerses: boolean
   isFocused?: boolean
   fadePosition?: FadePosition
+  hideAdjacentVerses?: boolean
 }) => {
   void verseNumber
-  return !(isContextFocused && hasFocusVerses && !isFocused && !fadePosition)
+  return !(
+    isContextFocused &&
+    hasFocusVerses &&
+    !isFocused &&
+    (hideAdjacentVerses || !fadePosition)
+  )
 }
 
 export const getTaggedVersesByLastVerse = (taggedVerses: TaggedVerse[] | null | undefined) =>

@@ -1,5 +1,6 @@
 'use dom'
 
+import { getPassageContextHeaderHeight } from '../passagePreviewPresentation'
 import EntityChipsDOM from '~common/EntityChipsDOM'
 import type { EntityChip } from '~common/entityChips'
 import { READING_TEXT_MAX_WIDTH, BIBLE_READING_HORIZONTAL_PADDING } from '~common/readingLayout'
@@ -1029,10 +1030,12 @@ const LoadedBibleContent = ({
     }
   }, [parallelVerses?.length, parallelColumnWidth, parallelDisplayMode])
 
+  const expandedHeaderHeight =
+    HEADER_HEIGHT + getPassageContextHeaderHeight(focusVerses, annotationMode)
   useEffect(() => {
     if (isFormSheet) return
     if (keepControlsVisible) {
-      document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT}px`)
+      document.documentElement.style.setProperty('--header-height', `${expandedHeaderHeight}px`)
       return
     }
 
@@ -1063,7 +1066,7 @@ const LoadedBibleContent = ({
           dispatch({
             type: SWIPE_UP,
           })
-          document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT}px`)
+          document.documentElement.style.setProperty('--header-height', `${expandedHeaderHeight}px`)
         }
         reachedBoundaries = true
         return
@@ -1085,7 +1088,7 @@ const LoadedBibleContent = ({
           dispatch({
             type: SWIPE_UP,
           })
-          document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT}px`)
+          document.documentElement.style.setProperty('--header-height', `${expandedHeaderHeight}px`)
           canSwipeUp = false
           canSwipeDown = true
         }
@@ -1096,10 +1099,12 @@ const LoadedBibleContent = ({
     }
 
     return addDOMScrollListener(scrollTarget, handleScroll)
-  }, [dispatch, isFormSheet, keepControlsVisible])
+  }, [dispatch, isFormSheet, keepControlsVisible, expandedHeaderHeight])
 
   const hasVerses = verses.length > 0
-  const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
+  const headerHeight =
+    (isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT) +
+    getPassageContextHeaderHeight(focusVerses, annotationMode)
   const scrollTargetVerse = getScrollTargetVerse({
     verseToScroll,
     contextDisplayMode,
@@ -1356,6 +1361,7 @@ const LoadedBibleContent = ({
             <m.div {...versePositionLayoutProps}>
               {/* Unified verse rendering for all modes */}
               <UnifiedVersesRenderer
+                isPassagePreview={Boolean(focusVerses?.length)}
                 inlineCommentaries={inlineCommentaries}
                 verses={verses}
                 parallelVerses={parallelVerses}
@@ -1602,7 +1608,9 @@ const VersesRendererContent = ({ settings, dispatch, translations, verses, ...re
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
   })
 
-  const headerHeight = rest.isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
+  const headerHeight =
+    (rest.isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT) +
+    getPassageContextHeaderHeight(rest.focusVerses, rest.annotationMode)
 
   useEffect(() => {
     dispatch({

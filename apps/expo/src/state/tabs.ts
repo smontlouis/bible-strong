@@ -93,6 +93,7 @@ export interface SearchTab extends TabBase {
   type: 'search'
   data: {
     searchValue: string
+    draftSearchValue?: string
     filters?: SearchFilters
   }
 }

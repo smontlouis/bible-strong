@@ -21,8 +21,14 @@ import { useAtomValue, useSetAtom } from 'jotai/react'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList'
 import FilterHeaderButton from '~common/FilterHeaderButton'
-import SearchInput from '~common/SearchInput'
-import Box, { TouchableBox, VStack } from '~common/ui/Box'
+import SearchQueryInput from './SearchQueryInput'
+import SearchSpinner from './SearchSpinner'
+import { usePersonalSearchResults } from './usePersonalSearchResults'
+import {
+  getSearchResultsPresentation,
+  type SearchResultsSnapshot,
+} from './searchResultsPresentation'
+import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
@@ -35,7 +41,6 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import { appLogger } from '~helpers/agentObservability'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import type { SearchAnalyticsEvent } from '~features/resources/searchAnalyticsAccess'
-import useDebounce from '~helpers/useDebounce'
 import useBibleVerses from '~features/resources/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
 import SearchEmptyState from '~features/search/SearchEmptyState'
@@ -63,16 +68,8 @@ import SearchSectionBlock, {
   SEARCH_SECTION_LOAD_MORE_COUNT,
   SEARCH_SECTION_PREVIEW_LIMIT,
 } from './shared/SearchSectionBlock'
-import { searchWithMatches } from './shared/searchFuzzy'
-import {
-  getSortedLinkSearchItems,
-  getSortedNoteSearchItems,
-  getSortedStudySearchItems,
-  type DictionarySearchRow,
-  type NaveSearchItemRow,
-} from './shared/searchItems'
+import { type DictionarySearchRow, type NaveSearchItemRow } from './shared/searchItems'
 import type { SearchEntityResult } from './shared/searchResultTypes'
-import Header from '~common/Header'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import {
   getSearchResultsModel,
@@ -114,6 +111,9 @@ import { createSearchExperienceController } from './searchExperience'
 type Props = {
   searchValue: string
   setSearchValue: (value: string) => void
+  initialDraft?: string
+  draftKey?: object
+  onSaveDraft?: (draft: string) => void
   initialFilters?: SearchFilters
   onFiltersChange?: (filters: SearchFilters) => void
 }
@@ -138,6 +138,9 @@ const SQLiteSearchScreen = ({
   searchValue,
   setSearchValue,
   initialFilters,
+  initialDraft,
+  draftKey,
+  onSaveDraft,
   onFiltersChange,
 }: Props) => {
   const { t, i18n } = useTranslation()
@@ -159,13 +162,7 @@ const SQLiteSearchScreen = ({
   const setGlobalFilters = useSetAtom(searchFiltersAtom)
   const startingFilters = initialFilters ?? globalFilters
 
-  const debouncedSearchValue = useDebounce(searchValue, 600)
-  const [noteResults, setNoteResults] = useState<SearchEntityResult[]>([])
-  const [linkResults, setLinkResults] = useState<SearchEntityResult[]>([])
-  const [studyResults, setStudyResults] = useState<SearchEntityResult[]>([])
-  const [isNoteSearching, setIsNoteSearching] = useState(false)
-  const [isLinkSearching, setIsLinkSearching] = useState(false)
-  const [isStudySearching, setIsStudySearching] = useState(false)
+  const [previousSearch, setPreviousSearch] = useState<SearchResultsSnapshot | null>(null)
   const [visibleCounts, setVisibleCounts] = useState<Partial<Record<SearchSectionId, number>>>({})
   const [selectedFacet, setSelectedFacet] = useState<SearchFacetId>('all')
   const [strongLetter, setStrongLetter] = useState('a')
@@ -357,120 +354,19 @@ const SQLiteSearchScreen = ({
 
   useEffect(() => {
     setVisibleCounts({})
-  }, [debouncedSearchValue])
+  }, [searchValue])
 
-  useEffect(() => {
-    const trimmed = debouncedSearchValue.trim()
-    const shouldSearch =
-      itemFilters.notes && browseItemType === 'notes'
-        ? searchValue.trim() === trimmed
-        : itemFilters.notes &&
-          browseItemType !== 'notes' &&
-          searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-          trimmed.length >= MIN_SEARCH_LENGTH
+  const { noteResults, linkResults, studyResults } = usePersonalSearchResults(
+    searchValue,
+    browseItemType,
+    itemFilters,
+    notes,
+    links,
+    studies,
+    t
+  )
 
-    if (!shouldSearch) {
-      if (browseItemType === 'notes' && searchValue.trim() !== trimmed) return
-      setNoteResults([])
-      setIsNoteSearching(false)
-      return
-    }
-
-    let cancelled = false
-    setIsNoteSearching(true)
-    const timeout = setTimeout(() => {
-      if (cancelled) return
-      const sortedItems = getSortedNoteSearchItems(notes, t)
-      setNoteResults(
-        browseItemType === 'notes' && trimmed.length < MIN_SEARCH_LENGTH
-          ? sortedItems
-          : searchWithMatches(sortedItems, trimmed)
-      )
-      setIsNoteSearching(false)
-    }, 0)
-
-    return () => {
-      cancelled = true
-      clearTimeout(timeout)
-      setIsNoteSearching(false)
-    }
-  }, [browseItemType, debouncedSearchValue, itemFilters.notes, notes, searchValue, t])
-
-  useEffect(() => {
-    const trimmed = debouncedSearchValue.trim()
-    const shouldSearch =
-      itemFilters.studies && browseItemType === 'studies'
-        ? searchValue.trim() === trimmed
-        : itemFilters.studies &&
-          browseItemType !== 'studies' &&
-          searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-          trimmed.length >= MIN_SEARCH_LENGTH
-
-    if (!shouldSearch) {
-      if (browseItemType === 'studies' && searchValue.trim() !== trimmed) return
-      setStudyResults([])
-      setIsStudySearching(false)
-      return
-    }
-
-    let cancelled = false
-    setIsStudySearching(true)
-    const timeout = setTimeout(() => {
-      if (cancelled) return
-      const sortedItems = getSortedStudySearchItems(studies, t)
-      setStudyResults(
-        browseItemType === 'studies' && trimmed.length < MIN_SEARCH_LENGTH
-          ? sortedItems
-          : searchWithMatches(sortedItems, trimmed)
-      )
-      setIsStudySearching(false)
-    }, 0)
-
-    return () => {
-      cancelled = true
-      clearTimeout(timeout)
-      setIsStudySearching(false)
-    }
-  }, [browseItemType, debouncedSearchValue, itemFilters.studies, searchValue, studies, t])
-
-  useEffect(() => {
-    const trimmed = debouncedSearchValue.trim()
-    const shouldSearch =
-      itemFilters.links && browseItemType === 'links'
-        ? searchValue.trim() === trimmed
-        : itemFilters.links &&
-          browseItemType !== 'links' &&
-          searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-          trimmed.length >= MIN_SEARCH_LENGTH
-
-    if (!shouldSearch) {
-      if (browseItemType === 'links' && searchValue.trim() !== trimmed) return
-      setLinkResults([])
-      setIsLinkSearching(false)
-      return
-    }
-
-    let cancelled = false
-    setIsLinkSearching(true)
-    const timeout = setTimeout(() => {
-      if (cancelled) return
-      const sortedItems = getSortedLinkSearchItems(links, t)
-      setLinkResults(
-        browseItemType === 'links' && trimmed.length < MIN_SEARCH_LENGTH
-          ? sortedItems
-          : searchWithMatches(sortedItems, trimmed)
-      )
-      setIsLinkSearching(false)
-    }, 0)
-
-    return () => {
-      cancelled = true
-      clearTimeout(timeout)
-      setIsLinkSearching(false)
-    }
-  }, [browseItemType, debouncedSearchValue, itemFilters.links, links, searchValue, t])
-
-  const trimmedSearchValue = debouncedSearchValue.trim()
+  const trimmedSearchValue = searchValue.trim()
   const strongReference = parseStrongReference(trimmedSearchValue)
   const isBibleReference = isExactBibleReferenceInput(
     trimmedSearchValue,
@@ -478,9 +374,7 @@ const SQLiteSearchScreen = ({
   )
   const shouldSearchPassages =
     itemFilters.passages &&
-    searchValue.trim().length >= MIN_SEARCH_LENGTH &&
     trimmedSearchValue.length >= MIN_SEARCH_LENGTH &&
-    searchValue.trim() === trimmedSearchValue &&
     Boolean(resolvedSelectedVersion) &&
     !strongReference &&
     !isBibleReference
@@ -514,9 +408,9 @@ const SQLiteSearchScreen = ({
       return await appLogger.measure(
         'database',
         'search.sqlite',
-        () => resources.bibleSearch.searchPage(debouncedSearchValue, options),
+        () => resources.bibleSearch.searchPage(searchValue, options),
         {
-          queryLength: debouncedSearchValue.length,
+          queryLength: searchValue.length,
           version: resolvedSelectedVersion,
           book,
           section,
@@ -568,9 +462,9 @@ const SQLiteSearchScreen = ({
       return await appLogger.measure(
         'database',
         'search.semantic',
-        () => resources.bibleSearch.searchPage(debouncedSearchValue, options),
+        () => resources.bibleSearch.searchPage(searchValue, options),
         {
-          queryLength: debouncedSearchValue.length,
+          queryLength: searchValue.length,
           version: resolvedSelectedVersion,
           book,
           section,
@@ -633,10 +527,7 @@ const SQLiteSearchScreen = ({
 
   const shouldSearchStrong =
     itemFilters.strong &&
-    ((browseItemType === 'strong' && searchValue.trim() === trimmedSearchValue) ||
-      (browseItemType !== 'strong' &&
-        searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-        trimmedSearchValue.length >= MIN_SEARCH_LENGTH))
+    (browseItemType === 'strong' || trimmedSearchValue.length >= MIN_SEARCH_LENGTH)
   const strongQuery = useInfiniteQuery({
     queryKey: [
       'sqlite-strong-search',
@@ -646,6 +537,17 @@ const SQLiteSearchScreen = ({
       strongLetter,
     ],
     queryFn: async ({ pageParam, signal }) => {
+      // Keep conditional option construction outside try/catch: React Compiler
+      // otherwise skips memoization for the entire search screen.
+      const options = {
+        signal,
+        language: resourcesLanguage.STRONG,
+        limit: 20,
+        ...(pageParam ? { cursor: pageParam } : {}),
+        ...(browseItemType === 'strong' && !trimmedSearchValue
+          ? { prefix: strongLetter }
+          : { search: trimmedSearchValue }),
+      }
       try {
         if (strongReference) {
           const entries = await resources.strongLexicon.loadPreview(
@@ -664,15 +566,7 @@ const SQLiteSearchScreen = ({
             })),
           }
         }
-        return await resources.strongLexicon.listEntries({
-          signal,
-          language: resourcesLanguage.STRONG,
-          limit: 20,
-          ...(pageParam ? { cursor: pageParam } : {}),
-          ...(browseItemType === 'strong' && !trimmedSearchValue
-            ? { prefix: strongLetter }
-            : { search: trimmedSearchValue }),
-        })
+        return await resources.strongLexicon.listEntries(options)
       } catch (error) {
         appLogger.captureError('database', 'search.strong.failed', error)
         throw error
@@ -692,10 +586,7 @@ const SQLiteSearchScreen = ({
 
   const shouldSearchDictionary =
     itemFilters.dictionary &&
-    ((browseItemType === 'dictionary' && searchValue.trim() === trimmedSearchValue) ||
-      (browseItemType !== 'dictionary' &&
-        searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-        trimmedSearchValue.length >= MIN_SEARCH_LENGTH))
+    (browseItemType === 'dictionary' || trimmedSearchValue.length >= MIN_SEARCH_LENGTH)
   const dictionaryQuery = useInfiniteQuery({
     queryKey: [
       'sqlite-dictionary-search',
@@ -705,18 +596,21 @@ const SQLiteSearchScreen = ({
       dictionaryLetter,
     ],
     queryFn: async ({ pageParam, signal }) => {
+      const options = { signal, limit: 20, ...(pageParam ? { cursor: pageParam } : {}) }
+      const browseByLetter = browseItemType === 'dictionary' && !trimmedSearchValue
       try {
-        return browseItemType === 'dictionary' && !trimmedSearchValue
-          ? await resources.dictionary.listByLetterPage(
-              dictionaryLetter,
-              { signal, limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
-              resourcesLanguage.DICTIONNAIRE
-            )
-          : await resources.dictionary.searchPage(
-              trimmedSearchValue,
-              { signal, limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
-              resourcesLanguage.DICTIONNAIRE
-            )
+        if (browseByLetter) {
+          return await resources.dictionary.listByLetterPage(
+            dictionaryLetter,
+            options,
+            resourcesLanguage.DICTIONNAIRE
+          )
+        }
+        return await resources.dictionary.searchPage(
+          trimmedSearchValue,
+          options,
+          resourcesLanguage.DICTIONNAIRE
+        )
       } catch (error) {
         appLogger.captureError('database', 'search.dictionary.failed', error)
         throw error
@@ -736,10 +630,7 @@ const SQLiteSearchScreen = ({
 
   const shouldSearchNave =
     itemFilters.nave &&
-    ((browseItemType === 'nave' && searchValue.trim() === trimmedSearchValue) ||
-      (browseItemType !== 'nave' &&
-        searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-        trimmedSearchValue.length >= MIN_SEARCH_LENGTH))
+    (browseItemType === 'nave' || trimmedSearchValue.length >= MIN_SEARCH_LENGTH)
   const naveQuery = useInfiniteQuery({
     queryKey: [
       'sqlite-nave-search',
@@ -749,18 +640,13 @@ const SQLiteSearchScreen = ({
       naveLetter,
     ],
     queryFn: async ({ pageParam, signal }) => {
+      const options = { signal, limit: 20, ...(pageParam ? { cursor: pageParam } : {}) }
+      const browseByLetter = browseItemType === 'nave' && !trimmedSearchValue
       try {
-        return browseItemType === 'nave' && !trimmedSearchValue
-          ? await resources.nave.listByLetterPage(
-              naveLetter,
-              { signal, limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
-              resourcesLanguage.NAVE
-            )
-          : await resources.nave.searchPage(
-              trimmedSearchValue,
-              { signal, limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
-              resourcesLanguage.NAVE
-            )
+        if (browseByLetter) {
+          return await resources.nave.listByLetterPage(naveLetter, options, resourcesLanguage.NAVE)
+        }
+        return await resources.nave.searchPage(trimmedSearchValue, options, resourcesLanguage.NAVE)
       } catch (error) {
         appLogger.captureError('database', 'search.nave.failed', error)
         throw error
@@ -782,10 +668,10 @@ const SQLiteSearchScreen = ({
     type => itemFilters[type]
   )
   const catalog = useCatalogSearch(
-    debouncedSearchValue,
+    searchValue,
     undefined,
     catalogScopes.length > 0 &&
-      (!!browseItemType || debouncedSearchValue.trim().length >= MIN_SEARCH_LENGTH),
+      (!!browseItemType || searchValue.trim().length >= MIN_SEARCH_LENGTH),
     catalogScopes
   )
   const catalogSelection = useSelectCatalogResult(tab =>
@@ -799,11 +685,11 @@ const SQLiteSearchScreen = ({
     iconType: item.type,
     catalogResult: item,
   }))
-  const searchModel = getSearchResultsModel({
+  const currentSearchModel = getSearchResultsModel({
     catalogResults,
     catalogError: catalog.error,
     query: searchValue,
-    debouncedQuery: debouncedSearchValue,
+    debouncedQuery: searchValue,
     browseItemType,
     itemFilters,
     noteResults,
@@ -820,18 +706,36 @@ const SQLiteSearchScreen = ({
       catalog: catalog.loading,
       passages: isSearching,
       semanticPassages: isSemanticSearching,
-      notes: isNoteSearching,
-      links: isLinkSearching,
-      studies: isStudySearching,
+      notes: false,
+      links: false,
+      studies: false,
       strong: isStrongSearching,
       dictionary: isDictionarySearching,
       nave: isNaveSearching,
     },
     t,
   })
+  const searchContext = JSON.stringify([
+    section,
+    canon,
+    book,
+    resolvedSelectedVersion,
+    sortOrder,
+    itemFilters,
+    resourcesLanguage,
+    i18n.language,
+    isConnected,
+  ])
+  const currentSnapshot = { query: searchValue, context: searchContext, model: currentSearchModel }
+  const displayedSearch = getSearchResultsPresentation(currentSnapshot, previousSearch)
+  const isShowingPreviousResults = displayedSearch !== currentSnapshot
+  useEffect(() => {
+    if (previousSearch && !isShowingPreviousResults) setPreviousSearch(null)
+  }, [previousSearch, isShowingPreviousResults])
+  const searchModel = displayedSearch.model
   const searchFacets = getSearchFacets(searchModel.sections)
   const publicSearchSources = getPublicSearchSources(itemFilters)
-  const publicResultCounts = getPublicSearchResultCounts(searchModel.sections)
+  const publicResultCounts = getPublicSearchResultCounts(currentSearchModel.sections)
   const passageMatchAnalytics = getPassageMatchAnalytics(mergedPassages)
   const publicSearchErrorCount = [
     itemFilters.passages && passageQuery.isError,
@@ -884,7 +788,6 @@ const SQLiteSearchScreen = ({
       !searchStartedOnlineRef.current ||
       !trimmedSearchValue ||
       trimmedSearchValue.length < MIN_SEARCH_LENGTH ||
-      searchValue.trim() !== trimmedSearchValue ||
       !publicSearchSources.length
     ) {
       return undefined
@@ -969,6 +872,7 @@ const SQLiteSearchScreen = ({
   const resetPassageFilters = searchExperience.resetPassageFilters
 
   const updateSearchValue = (value: string, origin: 'typed' | 'example' = 'typed') => {
+    setPreviousSearch(value.trim() ? displayedSearch : null)
     searchOriginRef.current = origin
     setSelectedFacet('all')
     setSearchValue(value)
@@ -990,9 +894,7 @@ const SQLiteSearchScreen = ({
           <Text className="text-primary">{t('Réessayer')}</Text>
         </TouchableBox>
       )
-    return isSemanticSearching ? (
-      <Text className="px-[20px] py-[12px] text-grey">{t('search.semanticLoading')}</Text>
-    ) : null
+    return null
   }
 
   function renderPassageError(): ReactNode {
@@ -1040,7 +942,7 @@ const SQLiteSearchScreen = ({
 
   const openSearchItem = (item: SearchEntityResult) => {
     dismissSearchInput()
-    recordResultOpened(item)
+    if (!isShowingPreviousResults) recordResultOpened(item)
     if (item.catalogResult) {
       void catalogSelection.select({ ...item.catalogResult.tab, id: generateUUID() })
       return
@@ -1056,7 +958,7 @@ const SQLiteSearchScreen = ({
   }
 
   const renderBrowseAlphabet = () => {
-    if (debouncedSearchValue.trim()) return null
+    if (searchValue.trim()) return null
 
     switch (browseItemType) {
       case 'strong':
@@ -1209,7 +1111,7 @@ const SQLiteSearchScreen = ({
   }
 
   const renderSoloEmptyState = () => {
-    const hasSearch = debouncedSearchValue.trim().length > 0
+    const hasSearch = searchValue.trim().length > 0
 
     switch (browseItemType) {
       case 'commentary':
@@ -1259,7 +1161,7 @@ const SQLiteSearchScreen = ({
           />
         )
       default:
-        return <SearchNoResultsState query={debouncedSearchValue} />
+        return <SearchNoResultsState query={searchValue} />
     }
   }
 
@@ -1291,6 +1193,9 @@ const SQLiteSearchScreen = ({
   }
 
   function renderContent(): ReactNode {
+    if (searchModel.isLoading && !searchModel.sections.some(section => section.items.length)) {
+      return <SearchSpinner fill />
+    }
     const browseDatabaseState = renderBrowseDatabaseState()
 
     if (browseDatabaseState) {
@@ -1310,7 +1215,7 @@ const SQLiteSearchScreen = ({
             item={item}
             onOpen={() => {
               dismissSearchInput()
-              recordResultOpened(item)
+              if (!isShowingPreviousResults) recordResultOpened(item)
             }}
           />
         ) : (
@@ -1323,6 +1228,7 @@ const SQLiteSearchScreen = ({
         )
 
       const fetchNextPage = (sectionId: SearchSectionId) => {
+        if (isShowingPreviousResults) return
         if (
           sectionId === 'passages' &&
           semanticPassageQuery.hasNextPage &&
@@ -1355,7 +1261,6 @@ const SQLiteSearchScreen = ({
         (['commentary', 'plan', 'timeline'].includes(sectionId) &&
           (catalog.loading || catalogSelection.loading)) ||
         (sectionId === 'passages' && isSearching) ||
-        (sectionId === 'links' && isLinkSearching) ||
         (sectionId === 'strong' && isStrongSearching) ||
         (sectionId === 'dictionary' && isDictionarySearching) ||
         (sectionId === 'nave' && isNaveSearching)
@@ -1433,8 +1338,8 @@ const SQLiteSearchScreen = ({
                     </>
                   ) : null
                 }
-                isLoading={isSectionLoading(soloPaginatedSection.id)}
-                hasMore={sectionHasMore(soloPaginatedSection.id)}
+                isLoading={!isShowingPreviousResults && isSectionLoading(soloPaginatedSection.id)}
+                hasMore={!isShowingPreviousResults && sectionHasMore(soloPaginatedSection.id)}
                 showLoadMoreButton={false}
                 headerAction={
                   soloPaginatedSection.id === 'passages' ? passageFilterAction : undefined
@@ -1479,14 +1384,12 @@ const SQLiteSearchScreen = ({
           keyExtractor={(section: SQLiteSearchResultSection) => section.id}
           ListEmptyComponent={
             searchModel.isLoading ? (
-              <Box className="overflow-hidden border-continuous px-[20px] py-[16px]">
-                <Text className="text-grey">{String(t('Recherche en cours...'))}</Text>
-              </Box>
+              <SearchSpinner />
             ) : searchModel.showNoResults ? (
               browseItemType ? (
                 renderSoloEmptyState()
               ) : (
-                <SearchNoResultsState query={debouncedSearchValue} />
+                <SearchNoResultsState query={searchValue} />
               )
             ) : (
               <SearchEmptyState
@@ -1555,8 +1458,8 @@ const SQLiteSearchScreen = ({
                   </>
                 ) : null
               }
-              isLoading={isSectionLoading(section.id)}
-              hasMore={sectionHasMore(section.id)}
+              isLoading={!isShowingPreviousResults && isSectionLoading(section.id)}
+              hasMore={!isShowingPreviousResults && sectionHasMore(section.id)}
               showLoadMoreButton={!isSoloPaginatedSection(section.id)}
               headerAction={section.id === 'passages' ? passageFilterAction : undefined}
             />
@@ -1570,50 +1473,46 @@ const SQLiteSearchScreen = ({
 
   return (
     <Box className="overflow-hidden border-continuous flex-[1]">
-      <Header
-        title=""
-        rightComponent={
-          <SearchFiltersTrigger
-            initialScreen="sources"
-            activeCount={sourceFilterCount}
-            passages={passageFilterProps}
-            sources={sourceFilterProps}
-          >
-            <FilterHeaderButton
-              activeFilterCount={sourceFilterCount}
-              onPress={() => sourceFiltersRef.current?.present()}
+      <Box testID="workspace-page-header" className="border-b-[1px] border-border">
+        <PageContent>
+          <HStack className="items-center gap-[4px] pl-[20px] pt-[6px] pb-[4px]">
+            <Box className="flex-1 pt-[5px]">
+              <SearchQueryInput
+                inputRef={searchInputRef}
+                query={searchValue}
+                initialDraft={initialDraft}
+                draftKey={draftKey}
+                onSaveDraft={onSaveDraft}
+                onSubmit={updateSearchValue}
+              />
+            </Box>
+            <SearchFiltersTrigger
+              initialScreen="sources"
+              activeCount={sourceFilterCount}
+              passages={passageFilterProps}
+              sources={sourceFilterProps}
+            >
+              <FilterHeaderButton
+                activeFilterCount={sourceFilterCount}
+                onPress={() => sourceFiltersRef.current?.present()}
+              />
+            </SearchFiltersTrigger>
+          </HStack>
+          {shouldShowFacets ? (
+            <SearchFacetBar
+              facets={searchFacets}
+              selectedFacet={effectiveSelectedFacet}
+              onSelect={setSelectedFacet}
             />
-          </SearchFiltersTrigger>
-        }
-      >
-        <Box className="overflow-hidden border-continuous pb-[5px]">
-          <Box className="overflow-hidden border-continuous px-[20px]">
-            <SearchInput
-              inputRef={searchInputRef}
-              placeholder={t('search.placeholder')}
-              onChangeText={updateSearchValue}
-              value={searchValue}
-              onDelete={() => updateSearchValue('')}
-            />
-          </Box>
-          <Box className="overflow-hidden border-continuous">
-            <VStack className="overflow-hidden border-continuous">
-              {shouldShowFacets ? (
-                <SearchFacetBar
-                  facets={searchFacets}
-                  selectedFacet={effectiveSelectedFacet}
-                  onSelect={setSelectedFacet}
-                />
-              ) : null}
-            </VStack>
-          </Box>
-        </Box>
-      </Header>
+          ) : null}
+        </PageContent>
+      </Box>
 
       <SearchSourceFiltersSheet ref={sourceFiltersRef} {...sourceFilterProps} />
 
       <PassageSearchFiltersSheet ref={passageFiltersRef} {...passageFilterProps} />
 
+      {isShowingPreviousResults && currentSearchModel.isLoading ? <SearchSpinner /> : null}
       {renderContent()}
       {browseAlphabet ? (
         <Box

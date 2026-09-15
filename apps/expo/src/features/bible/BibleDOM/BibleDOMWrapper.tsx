@@ -1,3 +1,4 @@
+import { getPassageContextHeaderHeight } from '../passagePreviewPresentation'
 import type { LabeledCommentaryChip } from './InlineCommentaryChips'
 import { OPEN_INLINE_COMMENTARY } from './dispatch'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
@@ -1095,7 +1096,9 @@ export const BibleDOMWrapper = ({
     }
   )
   const TOP_INSET = isFormSheet ? 0 : insets.top
-  const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
+  const headerHeight =
+    (isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT) +
+    getPassageContextHeaderHeight(focusVerses, annotationMode)
   const nativeLayerZIndex = Platform.OS === 'web' ? 0 : -1
   const webInlineScrollStyle =
     Platform.OS === 'web'

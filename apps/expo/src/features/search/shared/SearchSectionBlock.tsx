@@ -1,3 +1,4 @@
+import SearchSpinner from '../SearchSpinner'
 import { resolveUniverseColors } from '~themes/universeColors'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
@@ -78,11 +79,7 @@ const SearchSectionBlock = <SectionId extends string = string>({
         {headerAction}
       </HStack>
       {statusMessage}
-      {isLoading && !visibleItems.length ? (
-        <Box className="overflow-hidden border-continuous px-[20px] py-[16px]">
-          <Text className="text-grey">{String(i18n.t('Recherche en cours...'))}</Text>
-        </Box>
-      ) : null}
+      {isLoading && !section.items.length ? <SearchSpinner /> : null}
       {visibleItems.map(item =>
         renderItem ? (
           renderItem(item)

@@ -17,7 +17,6 @@ import { useSelector } from 'react-redux'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import {
   BibleTab,
-  getBibleContextDisplayMode,
   parallelColumnWidthAtom,
   parallelDisplayModeAtom,
   useBibleTabActions,
@@ -42,8 +41,6 @@ import {
 } from '~features/app-switcher/utils/constants'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import BookmarkModal from '~features/bookmarks/BookmarkModal'
-import { createVerseEndpoint } from '~features/studyRelations/domain'
-import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import generateUUID from '~helpers/generateUUID'
 import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
@@ -55,6 +52,7 @@ import { useBookAndVersionSelector } from './BookSelectorSheet/BookSelectorSheet
 import PassageExportSheet from './passageExport/PassageExportSheet'
 import { VerseSelectorPopup } from './VerseSelectorPopup'
 import { shouldShowBibleBackButton } from './bibleHeaderNavigation'
+import { getPassagePreviewMenuActions } from './passagePreviewPresentation'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
 import StrongMark from './StrongMark'
 import {
@@ -75,7 +73,6 @@ interface BibleHeaderProps {
   onExitAnnotationMode?: () => void
   annotationModeEnabled?: boolean
   hidePersonalBibleData?: boolean
-  onEditFocusTags?: () => void
   isInTab?: boolean
   coverage?: BibleVersionCoverage
   onNavigateToVerse: (verse: number) => void
@@ -88,7 +85,6 @@ const Header = ({
   onExitAnnotationMode,
   annotationModeEnabled,
   hidePersonalBibleData = false,
-  onEditFocusTags,
   isInTab,
   coverage,
   onNavigateToVerse,
@@ -113,7 +109,6 @@ const Header = ({
     canGoBackInStack,
   })
   const openInNewTab = useOpenInNewTab()
-  const openEntityRelations = useOpenEntityRelations()
 
   // Bookmark ref
   const bookmarkModalRef = useRef<SheetRef>(null)
@@ -121,8 +116,6 @@ const Header = ({
   const interlinearModeSheetRef = useRef<SheetRef>(null)
   const strongModeSheetRef = useRef<SheetRef>(null)
   const bible = useAtomValue(bibleAtom)
-  const contextDisplayMode = getBibleContextDisplayMode(bible.data)
-  const isContextFocused = contextDisplayMode === 'focused'
   const {
     selectedBook: book,
     selectedChapter: chapter,
@@ -179,14 +172,6 @@ const Header = ({
   const focusedReference = hasFocusVerses
     ? verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })
     : ''
-  const focusedVerseEndpoint = hasFocusVerses
-    ? createVerseEndpoint(
-        focusVerses.map(focusVerse => `${bookNumber}-${chapter}-${focusVerse}`),
-        focusedReference,
-        version
-      )
-    : null
-
   useEffect(() => {
     const { selectedBook, selectedChapter, selectedVersion, focusVerses } = bible.data
     const ref = verseToReference({
@@ -228,60 +213,8 @@ const Header = ({
     })
   }
 
-  const openFocusedVerseRelations = () => {
-    if (!focusedVerseEndpoint) return
-    openEntityRelations(focusedVerseEndpoint)
-  }
-
   const isVerticalParallelMode = displayMode === 'vertical'
   const nextColumnWidth = columnWidth === 50 ? 75 : columnWidth === 75 ? 100 : 50
-  const toggleFocusContext = () => {
-    if (isContextFocused) actions.expandContext()
-    else actions.collapseContext()
-  }
-
-  const focusMenuActions: MenuAction[] = [
-    {
-      id: 'toggle-context',
-      title: isContextFocused ? t('tab.readWholeChapter') : t('tab.closeContext'),
-      image: isContextFocused
-        ? 'arrow.up.left.and.arrow.down.right'
-        : 'arrow.down.right.and.arrow.up.left',
-    },
-    ...(hasFocusVerses && !hidePersonalBibleData && onEditFocusTags
-      ? [
-          {
-            id: 'tags',
-            title: t('Éditer les tags'),
-            image: 'tag' as const,
-          },
-        ]
-      : []),
-    ...(focusedVerseEndpoint && !hidePersonalBibleData
-      ? [
-          {
-            id: 'relations',
-            title: t('Éditer les relations'),
-            image: 'arrow.triangle.merge' as const,
-          },
-        ]
-      : []),
-    {
-      id: 'export',
-      title: t('passageExport.menuAction'),
-      image: 'square.and.arrow.up',
-    },
-    {
-      id: 'open-tab',
-      title: t('tab.openInNewTab'),
-      image: 'arrow.up.forward.square',
-    },
-    {
-      id: 'clear-focus',
-      title: t('Quitter le mode focus'),
-      image: 'xmark',
-    },
-  ]
 
   const parallelMenuActions: MenuAction[] = [
     {
@@ -358,6 +291,30 @@ const Header = ({
       image: 'arrow.up.forward.square',
     },
   ]
+
+  const handleMenuAction = (id: string) => {
+    switch (id) {
+      case 'params':
+        onBibleParamsClick()
+        break
+      case 'parallel':
+        if (isParallel) removeAllParallelVersions()
+        else addParallelVersion()
+        break
+      case 'history':
+        router.push('/history')
+        break
+      case 'bookmark':
+        bookmarkModalRef.current?.present()
+        break
+      case 'export':
+        exportSheetRef.current?.present()
+        break
+      case 'open-tab':
+        openInBibleTab()
+        break
+    }
+  }
 
   const strongModeButton = isStrongCapableBibleVersion(version) ? (
     <DisplayModeTrigger
@@ -527,6 +484,8 @@ const Header = ({
     )
   }
 
+  // Recreate the native animated frame when leaving focus: reusing it can keep
+  // the newly mounted book selector invisible on iOS.
   return (
     <AnimatedVStack
       className="border-continuous overflow-visible justify-center w-[100%] bg-reverse border-b-[1px] border-border absolute top-[0px] left-[0px]"
@@ -540,7 +499,7 @@ const Header = ({
         },
       ]}
       testID="workspace-page-header"
-      key="default-header"
+      key={hasFocusVerses ? 'focused-header' : 'chapter-header'}
       entering={FadeIn}
       exiting={FadeOut}
     >
@@ -566,88 +525,34 @@ const Header = ({
           </Back>
         ) : null}
         {hasFocusVerses ? (
-          <>
-            <AnimatedBox
-              className="overflow-hidden border-continuous flex-[1]"
-              style={translateYTransitionStyle}
+          <HStack className="overflow-hidden border-continuous flex-1 items-center">
+            <Box className="overflow-hidden border-continuous flex-1 pl-[22px]">
+              <AnimatedText
+                className="font-bold text-[14px]"
+                numberOfLines={1}
+                style={[{ flexShrink: 1 }, translateYTransitionStyle]}
+              >
+                {`${focusedReference} - ${version}`}
+              </AnimatedText>
+            </Box>
+            {strongModeButton}
+            {interlinearModeButton}
+            <BibleOptionsMenu
+              bookNumber={bookNumber}
+              chapter={chapter}
+              version={version}
+              accessibilityLabel={t('accessibility.bibleOptions')}
+              actions={getPassagePreviewMenuActions(mainMenuActions)}
+              onPressAction={({ nativeEvent }) => handleMenuAction(nativeEvent.event)}
             >
-              <HStack className="overflow-hidden border-continuous px-[15px] items-center justify-between gap-[8px]">
-                <Box className="overflow-hidden border-continuous flex-[1]">
-                  <Text
-                    className="font-bold text-[14px]"
-                    numberOfLines={1}
-                    style={{ flexShrink: 1 }}
-                  >
-                    {`${focusedReference} - ${version}`}
-                  </Text>
-                </Box>
-                {strongModeButton}
-                {interlinearModeButton}
-                <BibleOptionsMenu
-                  bookNumber={bookNumber}
-                  chapter={chapter}
-                  version={version}
-                  accessibilityLabel={t('accessibility.focusOptions')}
-                  actions={focusMenuActions}
-                  onPressAction={({ nativeEvent }) => {
-                    switch (nativeEvent.event) {
-                      case 'toggle-context':
-                        toggleFocusContext()
-                        break
-                      case 'open-tab':
-                        openInBibleTab()
-                        break
-                      case 'tags':
-                        onEditFocusTags?.()
-                        break
-                      case 'relations':
-                        openFocusedVerseRelations()
-                        break
-                      case 'export':
-                        exportSheetRef.current?.present()
-                        break
-                      case 'clear-focus':
-                        actions.clearFocusVerses()
-                        break
-                    }
-                  }}
-                >
-                  <AnimatedBox
-                    className="overflow-hidden border-continuous flex-row items-center justify-center w-[76px] h-[28px] bg-light-primary rounded-[12px] gap-[3px]"
-                    style={opacityTransitionStyle}
-                  >
-                    <Text className="text-primary text-[11px] font-bold">Focus</Text>
-                    <FeatherIcon name="chevron-down" size={12} color="primary" />
-                  </AnimatedBox>
-                </BibleOptionsMenu>
-                <TouchableBox
-                  className="overflow-hidden border-continuous items-center justify-center w-[28px] h-[28px] bg-light-primary rounded-[12px]"
-                  onPress={toggleFocusContext}
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    isContextFocused ? t('tab.readWholeChapter') : t('tab.closeContext')
-                  }
-                  accessibilityState={{ expanded: !isContextFocused }}
-                  style={opacityTransitionStyle}
-                >
-                  <FeatherIcon
-                    name={isContextFocused ? 'maximize-2' : 'minimize-2'}
-                    size={14}
-                    color="primary"
-                  />
-                </TouchableBox>
-                <TouchableBox
-                  className="overflow-hidden border-continuous items-center justify-center w-[28px] h-[28px] bg-light-primary rounded-[12px]"
-                  onPress={() => actions.clearFocusVerses()}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('accessibility.clearFocus')}
-                  style={opacityTransitionStyle}
-                >
-                  <FeatherIcon name="x" size={15} color="primary" />
-                </TouchableBox>
-              </HStack>
-            </AnimatedBox>
-          </>
+              <AnimatedBox
+                className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
+                style={opacityTransitionStyle}
+              >
+                <FeatherIcon name="more-vertical" size={18} />
+              </AnimatedBox>
+            </BibleOptionsMenu>
+          </HStack>
         ) : (
           <>
             <HStack className="overflow-hidden border-continuous items-center gap-[3px] pl-[10px]">
@@ -771,29 +676,7 @@ const Header = ({
                   version={version}
                   accessibilityLabel={t('accessibility.bibleOptions')}
                   actions={mainMenuActions}
-                  onPressAction={({ nativeEvent }) => {
-                    switch (nativeEvent.event) {
-                      case 'params':
-                        onBibleParamsClick()
-                        break
-                      case 'parallel':
-                        if (isParallel) removeAllParallelVersions()
-                        else addParallelVersion()
-                        break
-                      case 'history':
-                        router.push('/history')
-                        break
-                      case 'bookmark':
-                        bookmarkModalRef.current?.present()
-                        break
-                      case 'export':
-                        exportSheetRef.current?.present()
-                        break
-                      case 'open-tab':
-                        openInBibleTab()
-                        break
-                    }
-                  }}
+                  onPressAction={({ nativeEvent }) => handleMenuAction(nativeEvent.event)}
                 >
                   <AnimatedBox
                     className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"

@@ -103,6 +103,7 @@ export interface UnifiedVersesRendererProps {
   settings: RootStyles['settings']
   verseToScroll: number | undefined
   contextDisplayMode: WebViewProps['contextDisplayMode']
+  isPassagePreview?: boolean
   version: string
   interlinearMode?: WebViewProps['interlinearMode']
   pericopeChapter: PericopeChapter
@@ -266,6 +267,7 @@ export function UnifiedVersesRenderer({
   settings,
   verseToScroll,
   contextDisplayMode,
+  isPassagePreview = false,
   version,
   interlinearMode,
   pericopeChapter,
@@ -311,7 +313,7 @@ export function UnifiedVersesRenderer({
 
   return (
     <>
-      {!annotationMode && (
+      {!annotationMode && !(isPassagePreview && isContextFocused) && (
         <InlineCommentaryChips chips={inlineCommentaries?.introduction} settings={settings} />
       )}
       {verses.map((verse, i) => {
@@ -320,6 +322,19 @@ export function UnifiedVersesRenderer({
         const { Livre, Chapitre, Verset } = verse
         const verseNumber = Number(Verset)
         const verseKey = createVerseKey(verse)
+
+        // Apply before annotation/parallel rendering too: previews contain the passage alone.
+        if (
+          isPassagePreview &&
+          !shouldRenderVerseInFocusedContext({
+            verseNumber,
+            isContextFocused,
+            hasFocusVerses: Boolean(focusVersesNumeric?.length),
+            isFocused: focusVersesNumeric?.includes(verseNumber),
+            hideAdjacentVerses: true,
+          })
+        )
+          return null
 
         const pericope = getPericopeVerse(pericopeChapter, verseNumber)
         const tag = taggedVersesByLastVerse.get(verseKey)

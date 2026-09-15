@@ -18,6 +18,25 @@ La feature Bible est le cœur de l'application Bible Strong. Elle fournit une ex
 - Affichage interlinéaire (texte original avec traduction)
 - Personnalisation de la taille de police et de l'interligne
 
+### Lecture d'un passage ciblé
+
+En focus, seuls les versets ciblés sont affichés, sans voisins floutés, dans
+l'aperçu et dans l'onglet Bible. Le menu utilise les mêmes trois points verticaux
+que le lecteur normal ; le badge « Focus » et sa commande d'agrandissement sont
+retirés. Le bouton Strong « S » reste disponible. Le menu reprend les mêmes
+actions et leur ordre que le chapitre normal, sauf l'affichage parallèle ; les
+gestionnaires d'actions sont partagés entre les deux présentations.
+
+Un sous-header natif s'affiche sous le header, au-dessus du texte : « Lire le chapitre entier »
+développe le contexte, puis « Revenir au passage » rétablit le focus en conservant
+les versets ciblés. Le texte réserve la hauteur de ce sous-header, y compris lors du retour au passage.
+La commande de lecture reste centrée ; la croix est à droite du sous-header.
+Le sous-header suit l'état plein écran du header avec une transition de 300 ms ;
+ses commandes masquées ne capturent ni les touches ni le focus d'accessibilité.
+La croix conserve sa fonction d'origine : elle efface le focus et revient à la
+lecture normale, sans fermer l'aperçu. Fermer la feuille reste une action de
+navigation distincte.
+
 ### Annotations et étude
 - Système de surlignage avec 8 couleurs prédéfinies
 - Prise de notes sur les versets

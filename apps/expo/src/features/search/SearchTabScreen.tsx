@@ -26,26 +26,31 @@ const SearchTabScreen = ({ searchAtom }: SearchScreenProps) => {
     setSearchTab(
       produce(draft => {
         draft.data.searchValue = value
-      })
-    )
-
-  const setTitle = (title: string) =>
-    setSearchTab(
-      produce(draft => {
-        draft.title = title
+        delete draft.data.draftSearchValue
+        draft.title = value || t('Recherche')
       })
     )
 
   useEffect(() => {
-    setTitle(searchValue || t('Recherche'))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchValue])
+    const title = searchValue || t('Recherche')
+    setSearchTab(previous => (previous.title === title ? previous : { ...previous, title }))
+  }, [searchValue, setSearchTab, t])
 
   return (
     <Container>
       <SQLiteSearchScreen
         searchValue={searchValue}
         setSearchValue={setSearchValue}
+        initialDraft={searchTab.data.draftSearchValue}
+        draftKey={searchAtom}
+        onSaveDraft={value =>
+          setSearchTab(previous => {
+            const draftSearchValue = value === previous.data.searchValue ? undefined : value
+            return previous.data.draftSearchValue === draftSearchValue
+              ? previous
+              : { ...previous, data: { ...previous.data, draftSearchValue } }
+          })
+        }
         initialFilters={searchTab.data.filters}
         onFiltersChange={filters =>
           setSearchTab(previous => ({

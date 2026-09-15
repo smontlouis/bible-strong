@@ -158,10 +158,10 @@ export const HighlightedText = ({
 }
 
 const PassageDescription = ({ highlighted }: { highlighted?: string }) => {
-  const parts = getPassageSearchExcerpt(highlighted || '').split(/(\{\{.*?\}\})/g)
+  const parts = getPassageSearchExcerpt(highlighted || '', 240).split(/(\{\{.*?\}\})/g)
 
   return (
-    <Paragraph small numberOfLines={1}>
+    <Paragraph small numberOfLines={3}>
       {parts.map((part, i) => {
         if (part.startsWith('{{') && part.endsWith('}}')) {
           return (
@@ -214,14 +214,7 @@ export const SearchEntityResultRow = ({
           {description ? (
             description
           ) : item.passage ? (
-            <VStack className="overflow-hidden border-continuous gap-[3px]">
-              <PassageDescription highlighted={item.description} />
-              {item.passageReason ? (
-                <Text className="text-[11px] text-grey" numberOfLines={1}>
-                  {item.passageReason}
-                </Text>
-              ) : null}
-            </VStack>
+            <PassageDescription highlighted={item.description} />
           ) : item.description ? (
             <HighlightedText
               value={item.description}
