@@ -1,6 +1,14 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import CreateEntityRelationModal from '../CreateEntityRelationModal'
+jest.mock('~helpers/verseToReference', () => ({
+  __esModule: true,
+  default: (keys: string[]) => keys.join(', '),
+}))
+jest.mock('~i18n', () => ({ __esModule: true, default: { t: (key: string) => key } }))
+jest.mock('~features/resources/resourceAccess', () => ({
+  useResourceAccess: () => ({ bibleContent: { loadChapter: jest.fn() } }),
+}))
 
 const mockDispatch = jest.fn()
 jest.mock('react-redux', () => ({ useDispatch: () => mockDispatch }))

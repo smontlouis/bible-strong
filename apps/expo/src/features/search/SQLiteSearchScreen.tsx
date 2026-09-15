@@ -1,3 +1,4 @@
+import { usePassageFilterChoices } from './usePassageFilterChoices'
 import { getSearchRateLimitNotice, searchRateLimitQueryOptions } from './searchRateLimit'
 import { getTabForSearchResult } from '~features/app-switcher/commandPalette/searchResultTab'
 import PassageActionButtons from './discovery/PassageActionButtons'
@@ -6,7 +7,7 @@ import { useSelectCatalogResult } from './discovery/useSelectCatalogResult'
 import { normalizeSearchItemFilters } from '~state/searchFilters'
 import generateUUID from '~helpers/generateUUID'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-import { useAppendOnlySearchResults, passageResultKey } from './useAppendOnlySearchResults'
+import { usePassageSearch } from './usePassageSearch'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import PageContent, { pageContentStyle } from '~common/ui/PageContent'
@@ -33,11 +34,7 @@ import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import type {
-  SearchOptions,
-  SearchResult,
-  SearchSortOrder,
-} from '~features/resources/bibleSearchAccess'
+import type { SearchSortOrder } from '~features/resources/bibleSearchAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { appLogger } from '~helpers/agentObservability'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
@@ -59,7 +56,6 @@ import {
   resolveSearchVersionFilter,
 } from '~state/searchVersionFilter'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
-import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import SharedSearchEntityResultRow from './shared/SearchEntityResultRow'
@@ -96,11 +92,7 @@ import PassageSearchFiltersSheet from './PassageSearchFiltersSheet'
 import type { SheetRef } from '~common/sheet'
 import SearchSourceFiltersSheet from './SearchSourceFiltersSheet'
 import SearchFiltersTrigger from './SearchFiltersTrigger'
-import { parseStrongReference } from '~helpers/bibleSearchInput'
-import { getBooksForCanon } from '~helpers/bibleBookCatalog'
-import { getBibleVersionCanonId, versions } from '~helpers/bibleVersions'
 import { createStrongIdentity } from '~helpers/strongIdentities'
-import { isExactBibleReferenceInput } from '~helpers/bcvParser'
 import {
   getOpenedResultAnalytics,
   getPassageMatchAnalytics,
@@ -121,7 +113,6 @@ type Props = {
 
 const MIN_SEARCH_LENGTH = SEARCH_MIN_QUERY_LENGTH
 const SEARCH_ALPHABET_FOOTER_HEIGHT = 70
-const PASSAGE_SEARCH_PAGE_SIZE = 20
 
 type DictionaryRow = DictionarySearchRow
 type NaveRow = NaveSearchItemRow
@@ -152,7 +143,6 @@ const SQLiteSearchScreen = ({
   const resources = useResourceAccess()
   const isConnected = useConnection()
   const defaultBibleVersion = useDefaultBibleVersion()
-  const resourceRegistry = useOfflineResourceRegistry()
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const links = useSelector((state: RootState) => state.user.bible.links)
@@ -238,21 +228,9 @@ const SQLiteSearchScreen = ({
     enabled: browseItemType === 'nave',
   })
 
-  const installedVersions = [...resourceRegistry.resources.values()].flatMap(entry =>
-    entry.resource.kind === 'bible' &&
-    (entry.availability.status === 'available' || entry.availability.status === 'corrupt')
-      ? [entry.resource.versionId]
-      : []
-  )
-  const remotelyReadableVersions = isConnected
-    ? Object.keys(versions).filter(
-        versionId =>
-          resources.capabilities.getOnlineAccess({ kind: 'bible-text', versionId }).status ===
-          'remotely-readable'
-      )
-    : []
-  const searchableVersions = Array.from(
-    new Set([...installedVersions, ...remotelyReadableVersions])
+  const { searchableVersions, ...passageChoices } = usePassageFilterChoices(
+    canon,
+    resolvedSelectedVersion
   )
   const searchableVersionsKey = searchableVersions.join('\u0000')
   const searchExperience = createSearchExperienceController(
@@ -307,52 +285,6 @@ const SQLiteSearchScreen = ({
     reconcileSelectedVersion()
   }, [canon, defaultBibleVersion, searchableVersionsKey, resolvedSelectedVersion, selectedVersion])
 
-  const canonBooks = getBooksForCanon(canon || getBibleVersionCanonId(resolvedSelectedVersion))
-  const books = [
-    {
-      Numero: 0,
-      Nom: t('Tout'),
-      Chapitres: 0,
-    },
-    ...canonBooks,
-  ].map(b => ({
-    value: b.Numero,
-    label: t(b.Nom),
-  }))
-
-  const sectionValues: { value: SearchSection; label: string }[] = [
-    { value: '', label: t('Toute la Bible') },
-    { value: 'at', label: t('Ancien Testament') },
-    { value: 'nt', label: t('Nouveau Testament') },
-  ]
-
-  const canonLabels: Record<Exclude<SearchCanon, ''>, string> = {
-    'protestant-66': t('search.canon.protestant'),
-    'catholic-73': t('search.canon.catholic'),
-    'clementine-vulgate': t('search.canon.clementine'),
-    'theotex-septuagint': t('search.canon.septuagint'),
-  }
-  const availableCanons = Array.from(
-    new Set(searchableVersions.map(version => getBibleVersionCanonId(version)))
-  )
-  const canonValues: { value: SearchCanon; label: string }[] = [
-    { value: '', label: t('Tous les canons') },
-    ...availableCanons.map(value => ({ value, label: canonLabels[value] })),
-  ]
-
-  const versionValues = [
-    {
-      value: DEFAULT_BIBLE_VERSION_FILTER,
-      label: `${t('bibleDefaults.defaultReadingTitle')} (${defaultBibleVersion})`,
-    },
-    ...searchableVersions.map(v => ({ value: v, label: v })),
-  ]
-
-  const sortOrderValues: { value: SearchSortOrder; label: string }[] = [
-    { value: 'relevance', label: t('Pertinence') },
-    { value: 'book', label: t('Ordre biblique') },
-  ]
-
   useEffect(() => {
     setVisibleCounts({})
   }, [searchValue])
@@ -367,164 +299,29 @@ const SQLiteSearchScreen = ({
     t
   )
 
-  const trimmedSearchValue = searchValue.trim()
-  const strongReference = parseStrongReference(trimmedSearchValue)
-  const isBibleReference = isExactBibleReferenceInput(
+  const {
     trimmedSearchValue,
-    i18n.language.startsWith('fr') ? 'fr' : 'en'
-  )
-  const shouldSearchPassages =
-    itemFilters.passages &&
-    trimmedSearchValue.length >= MIN_SEARCH_LENGTH &&
-    Boolean(resolvedSelectedVersion) &&
-    !strongReference &&
-    !isBibleReference
-  const passageQuery = useInfiniteQuery({
-    queryKey: [
-      'sqlite-passage-search-v2',
-      resourcesLanguage.NAVE,
-      i18n.language,
-      trimmedSearchValue,
-      section,
-      canon,
-      book,
-      resolvedSelectedVersion,
-      sortOrder,
-      isConnected,
-    ],
-    queryFn: async ({ pageParam, signal }) => {
-      const sectionMap: Record<string, 'ot' | 'nt'> = { at: 'ot', nt: 'nt' }
-      const options: SearchOptions = {
-        signal,
-        limit: PASSAGE_SEARCH_PAGE_SIZE,
-        offset: pageParam,
-        sortOrder,
-        version: resolvedSelectedVersion,
-        canon: canon || getBibleVersionCanonId(resolvedSelectedVersion),
-        searchLanguage: resourcesLanguage.NAVE,
-        ...(book && { book }),
-        ...(sectionMap[section] && { section: sectionMap[section] }),
-      }
-
-      return await appLogger.measure(
-        'database',
-        'search.sqlite',
-        () => resources.bibleSearch.searchPage(searchValue, options),
-        {
-          queryLength: searchValue.length,
-          version: resolvedSelectedVersion,
-          book,
-          section,
-          canon,
-          sortOrder,
-        },
-        signal
-      )
-    },
-    initialPageParam: 0,
-    getNextPageParam: (_lastPage, pages) => {
-      const loaded = pages.reduce((total, page) => total + page.results.length, 0)
-      const count = pages[0]?.count ?? 0
-      return loaded < count ? loaded : undefined
-    },
-    enabled: shouldSearchPassages,
-    ...searchRateLimitQueryOptions,
-    ...staticResourceQueryOptions,
-    ...localQueryOptions,
+    strongReference,
+    isBibleReference,
+    shouldSearchPassages,
+    passageQuery,
+    semanticPassageQuery,
+    isSemanticSearching,
+    semanticSearchError,
+    mergedPassages,
+    totalCount,
+    isSearching,
+    searchError,
+  } = usePassageSearch({
+    searchValue,
+    version: resolvedSelectedVersion,
+    searchLanguage: resourcesLanguage.NAVE,
+    enabled: itemFilters.passages,
+    section,
+    canon,
+    book,
+    sortOrder,
   })
-  const semanticPassageQuery = useInfiniteQuery({
-    queryKey: [
-      'semantic-passage-search-v1',
-      resourcesLanguage.NAVE,
-      i18n.language,
-      trimmedSearchValue,
-      section,
-      canon,
-      book,
-      resolvedSelectedVersion,
-      sortOrder,
-      isConnected,
-    ],
-    queryFn: async ({ pageParam, signal }) => {
-      const sectionMap: Record<string, 'ot' | 'nt'> = { at: 'ot', nt: 'nt' }
-      const options: SearchOptions = {
-        signal,
-        mode: 'semantic',
-        limit: PASSAGE_SEARCH_PAGE_SIZE,
-        offset: pageParam,
-        sortOrder,
-        version: resolvedSelectedVersion,
-        canon: canon || getBibleVersionCanonId(resolvedSelectedVersion),
-        searchLanguage: resourcesLanguage.NAVE,
-        ...(book && { book }),
-        ...(sectionMap[section] && { section: sectionMap[section] }),
-      }
-
-      return await appLogger.measure(
-        'database',
-        'search.semantic',
-        () => resources.bibleSearch.searchPage(searchValue, options),
-        {
-          queryLength: searchValue.length,
-          version: resolvedSelectedVersion,
-          book,
-          section,
-          canon,
-          sortOrder,
-        },
-        signal
-      )
-    },
-    initialPageParam: 0,
-    getNextPageParam: (_lastPage, pages) => {
-      const loaded = pages.reduce((total, page) => total + page.results.length, 0)
-      const count = pages[0]?.count ?? 0
-      return loaded < count ? loaded : undefined
-    },
-    enabled: shouldSearchPassages && Boolean(isConnected),
-    ...searchRateLimitQueryOptions,
-    ...staticResourceQueryOptions,
-    ...localQueryOptions,
-  })
-  const results: SearchResult[] | null = !itemFilters.passages
-    ? null
-    : strongReference || isBibleReference
-      ? []
-      : shouldSearchPassages
-        ? (passageQuery.data?.pages.flatMap(page => page.results) ?? null)
-        : null
-  const semanticResults =
-    shouldSearchPassages && isConnected
-      ? (semanticPassageQuery.data?.pages.flatMap(page => page.results) ?? [])
-      : []
-  const isSemanticSearching =
-    shouldSearchPassages && Boolean(isConnected) && semanticPassageQuery.isFetching
-  const semanticSearchError =
-    shouldSearchPassages && isConnected && semanticPassageQuery.isError
-      ? t('search.semanticUnavailable')
-      : null
-  const mergedPassages = useAppendOnlySearchResults(
-    JSON.stringify([
-      trimmedSearchValue,
-      section,
-      canon,
-      book,
-      resolvedSelectedVersion,
-      sortOrder,
-      resourcesLanguage.NAVE,
-      isConnected,
-    ]),
-    shouldSearchPassages
-      ? [
-          ...(results ?? []),
-          ...(!passageQuery.isPending || passageQuery.isError ? semanticResults : []),
-        ]
-      : [],
-    passageResultKey
-  )
-  const totalCount = mergedPassages.length
-  const isSearching = shouldSearchPassages && passageQuery.isFetching
-  const searchError = passageQuery.isError ? t('search.error.searchFailed') : null
 
   const shouldSearchStrong =
     itemFilters.strong &&
@@ -876,7 +673,9 @@ const SQLiteSearchScreen = ({
     sortOrder !== 'relevance',
   ].filter(Boolean).length
   const sourceFilterCount =
-    activeItemFilterTypes.length === searchItemFilterOrder.length ? 0 : activeItemFilterTypes.length
+    (activeItemFilterTypes.length === searchItemFilterOrder.length
+      ? 0
+      : activeItemFilterTypes.length) + activePassageFilterCount
 
   const resetPassageFilters = searchExperience.resetPassageFilters
 
@@ -1181,11 +980,7 @@ const SQLiteSearchScreen = ({
     book,
     selectedVersion,
     sortOrder,
-    sectionChoices: sectionValues,
-    canonChoices: canonValues,
-    bookChoices: books,
-    versionChoices: versionValues,
-    sortOrderChoices: sortOrderValues,
+    ...passageChoices,
     onSectionChange: setSection,
     onCanonChange: setCanon,
     onBookChange: setBook,

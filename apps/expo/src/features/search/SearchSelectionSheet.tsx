@@ -1,12 +1,22 @@
+import { usePassageFilterChoices } from './usePassageFilterChoices'
+import { createSearchExperienceController } from './searchExperience'
+import {
+  DEFAULT_BIBLE_VERSION_FILTER,
+  resolveSearchVersionFilter,
+} from '~state/searchVersionFilter'
+import PassageSearchFiltersSheet from './PassageSearchFiltersSheet'
+import SearchFiltersTrigger from './SearchFiltersTrigger'
+import { isSelectableVersePassage } from './passageSelection'
+import { toast } from '~helpers/toast'
+import type { SearchSortOrder } from '~features/resources/bibleSearchAccess'
+import { usePassageSearch } from './usePassageSearch'
+import { getSearchRateLimitNotice } from './searchRateLimit'
 import SearchSourceFiltersSheet from './SearchSourceFiltersSheet'
-import SearchTypeIcon from './shared/SearchTypeIcon'
 import { FilterHeaderButtonContent } from '~common/FilterHeaderButton'
 import HeaderAction from '~common/ContextualPanel/HeaderAction'
 import { useCatalogSearch } from './discovery/useCatalogSearch'
-import { getUniverseColor } from '~themes/universeColors'
 import { SheetFlashList, SheetHeader, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
-import RelationVersionButton from '~features/studyRelations/RelationVersionButton'
 import InlineSheetContent from '~common/ContextualPanel/InlineSheetContent'
 import HeaderContent from '~common/ContextualPanel/HeaderContent'
 import { useTheme } from '~themes/ThemeProvider'
@@ -19,8 +29,7 @@ import { useTranslation } from 'react-i18next'
 import AlphabetList from '~common/AlphabetList'
 import SheetSearchInput from '~common/SheetSearchInput'
 import Empty from '~common/Empty'
-import Box, { HStack, VStack, TouchableBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
+import Box, { VStack, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useBibleVerses from '~features/resources/useBibleVerses'
 import useDebounce from '~helpers/useDebounce'
@@ -29,7 +38,6 @@ import type { NaveTopicSummary } from '~features/resources/naveAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import SharedSearchEntityResultRow from '~features/search/shared/SearchEntityResultRow'
 import {
-  getNextSearchItemFilters,
   relationSearchItemFilterOrder,
   searchItemFilterOrder,
   searchItemFilterConfig,
@@ -40,11 +48,20 @@ import SearchSectionBlock, {
   type SearchResultSection,
 } from '~features/search/shared/SearchSectionBlock'
 import { searchRelationTargetsWithMatches } from '~features/search/shared/searchFuzzy'
-import { getStrongSearchItems } from '~features/search/shared/searchItems'
+import {
+  getStrongSearchItems,
+  getPassageSearchItems,
+  getReferenceSearchItems,
+} from '~features/search/shared/searchItems'
 import type { SearchEntityResult } from '~features/search/shared/searchResultTypes'
 import { removeBreakLines } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
-import type { SearchItemFilters, SearchItemType } from '~state/searchFilters'
+import type {
+  SearchSection,
+  SearchCanon,
+  SearchItemFilters,
+  SearchItemType,
+} from '~state/searchFilters'
 import { getEndpointFallbackLabel, type RelationEndpoint } from '~features/studyRelations/domain'
 import { createDictionaryEndpoint, createNaveEndpoint } from '~features/studyRelations/endpoints'
 import {
@@ -63,11 +80,7 @@ import { resourceFailureFromAccessError } from '~features/resources/resourceFail
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import type { OfflineCopyIdentity } from '~helpers/offlineCopyId'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
-import { useBookAndVersionSelector } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
-import type { BibleTab, VersionCode } from '~state/tabs'
-const VERSION_SELECTOR_BOOK = { Numero: 1, Nom: 'Genèse', Chapitres: 50 } as const
-const EMPTY_VERSIONS: VersionCode[] = []
-const EMPTY_SELECTED_VERSES = {}
+import type { VersionCode } from '~state/tabs'
 
 type BrowseMode = 'note' | 'link' | 'study' | 'strong' | 'nave' | 'dictionary'
 type NaveRow = NaveTopicSummary
@@ -287,9 +300,10 @@ const SearchSelectionSheet = ({
 }: SearchSelectionSheetProps) => {
   const { t } = useTranslation()
   const filtersRef = useRef<SheetRef>(null)
+  const passageFiltersRef = useRef<SheetRef>(null)
+  const selectingRef = useRef(false)
   const resources = useResourceAccess()
   const defaultBibleVersion = useDefaultBibleVersion()
-  const { openVersionSelector } = useBookAndVersionSelector()
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const enabledItemTypes = allowedSources ?? getAllowedSearchItemTypes(allowedTypes)
   const allowedTypesKey = `${enabledItemTypes.join('|')}:${initialSource ?? ''}`
@@ -308,7 +322,39 @@ const SearchSelectionSheet = ({
   const [strongLetter, setStrongLetter] = useState('a')
   const [naveLetter, setNaveLetter] = useState('a')
   const [dictionaryLetter, setDictionaryLetter] = useState('a')
-  const [passageVersion, setPassageVersion] = useState<VersionCode>(defaultBibleVersion)
+  const [passageSection, setPassageSection] = useState<SearchSection>('')
+  const [passageCanon, setPassageCanon] = useState<SearchCanon>('')
+  const [passageBook, setPassageBook] = useState(0)
+  const [passageSortOrder, setPassageSortOrder] = useState<SearchSortOrder>('relevance')
+  const [selectedVersion, setSelectedVersion] = useState(DEFAULT_BIBLE_VERSION_FILTER)
+  const passageVersion = resolveSearchVersionFilter(selectedVersion, defaultBibleVersion)
+  const { searchableVersions, ...passageChoices } = usePassageFilterChoices(
+    passageCanon,
+    passageVersion
+  )
+  const searchExperience = createSearchExperienceController(
+    {
+      readFilters: () => ({
+        section: passageSection,
+        canon: passageCanon,
+        book: passageBook,
+        selectedVersion,
+        sortOrder: passageSortOrder,
+        itemFilters,
+      }),
+      searchableVersions: () => searchableVersions,
+      defaultBibleVersion: () => defaultBibleVersion,
+      writeSection: setPassageSection,
+      writeCanon: setPassageCanon,
+      writeBook: setPassageBook,
+      writeSelectedVersion: setSelectedVersion,
+      writeSortOrder: setPassageSortOrder,
+      writeItemFilters: setItemFilters,
+      persist: () => {},
+    },
+    enabledItemTypes,
+    getSearchItemFiltersForTypes(enabledItemTypes)
+  )
   const [visibleCounts, setVisibleCounts] = useState<
     Partial<Record<RelationTargetSectionId, number>>
   >({})
@@ -377,6 +423,21 @@ const SearchSelectionSheet = ({
     const itemType = relationTypeToSearchItemType[type]
     return enabledItemTypes.includes(itemType) && itemFilters[itemType]
   }
+
+  const passageSearch = usePassageSearch({
+    searchValue: debouncedResourceSearchValue,
+    version: passageVersion,
+    searchLanguage: resourcesLanguage.NAVE,
+    enabled: Boolean(isAllowed('verse')),
+    section: passageSection,
+    canon: passageCanon,
+    book: passageBook,
+    sortOrder: passageSortOrder,
+  })
+  const passageSearchNotice = getSearchRateLimitNotice([
+    ...(passageSearch.shouldSearchPassages ? [passageSearch.passageQuery] : []),
+    ...(passageSearch.canSearchSemantic ? [passageSearch.semanticPassageQuery] : []),
+  ])
 
   const shouldLoadStrongTargets =
     isAllowed('strong') &&
@@ -499,7 +560,7 @@ const SearchSelectionSheet = ({
   }
 
   const toggleItemFilter = (type: SearchItemType) => {
-    setItemFilters(filters => getNextSearchItemFilters(filters, type, enabledItemTypes))
+    searchExperience.toggleItemFilter(type)
     setVisibleCounts({})
   }
 
@@ -512,6 +573,7 @@ const SearchSelectionSheet = ({
   }
 
   const resetPicker = () => {
+    searchExperience.resetPassageFilters()
     handleSearch('')
     setItemFilters(getSearchItemFiltersForTypes(enabledItemTypes))
     setVisibleCounts({})
@@ -519,14 +581,24 @@ const SearchSelectionSheet = ({
 
   const selectTarget = async (target: SearchEntityResult) => {
     if (!enabledItemTypes.includes(target.type) || !itemFilters[target.type]) return
-    await onSelectItem(target, passageVersion)
-    resetPicker()
+    if (selectingRef.current) return
+    selectingRef.current = true
+    try {
+      await onSelectItem(target, passageVersion)
+      resetPicker()
+    } catch {
+      toast(t('search.error.searchFailed'))
+    }
+    selectingRef.current = false
   }
 
   const immediateReferenceResults = searchReferenceAndStrongTargets(searchValue, passageVersion)
-  const referenceItems = immediateReferenceResults.filter(
-    result => result.endpoint.type === 'verse' && isAllowed('verse')
-  )
+  const referenceItems = isAllowed('verse')
+    ? getReferenceSearchItems(searchValue, { mode: 'navigation', version: passageVersion }).filter(
+        isSelectableVersePassage
+      )
+    : []
+  const passageItems = [...referenceItems, ...getPassageSearchItems(passageSearch.mergedPassages)]
   const noteItems = itemFilters.notes ? fuzzyNoteTargets : []
   const linkItems = itemFilters.links ? fuzzyLinkTargets : []
   const studyItems = itemFilters.studies ? fuzzyStudyTargets : []
@@ -581,13 +653,13 @@ const SearchSelectionSheet = ({
           ]
         : []
     }),
-    ...(referenceItems.length
+    ...(passageItems.length
       ? [
           {
             id: 'passages' as const,
             title: t('Passages'),
-            count: referenceItems.length,
-            items: referenceItems,
+            count: passageItems.length,
+            items: passageItems,
           },
         ]
       : []),
@@ -642,6 +714,8 @@ const SearchSelectionSheet = ({
       : []),
   ]
   const isListLoading =
+    passageSearch.isSearching ||
+    passageSearch.isSemanticSearching ||
     catalog.loading ||
     isLocalSearchPending ||
     isStrongPending ||
@@ -720,6 +794,16 @@ const SearchSelectionSheet = ({
           showArrow
         />
       )
+    if (item.type === 'passages' && (item.passage || endpoint?.type === 'verse')) {
+      return (
+        <SharedSearchEntityResultRow
+          key={item.id}
+          item={item}
+          onPress={() => void selectTarget(item)}
+          showArrow
+        />
+      )
+    }
     if (!endpoint) return null
 
     return (
@@ -757,44 +841,40 @@ const SearchSelectionSheet = ({
   )
   const renderLoadingState = () => <LoadingIndicator />
 
-  const passageVersionSelector = (
-    <RelationVersionButton
-      version={passageVersion}
-      onVersionChange={setPassageVersion}
-      className="overflow-hidden border-continuous flex-row items-center justify-center gap-[5px] px-[8px] py-[6px] rounded-[8px] bg-light-grey"
-      accessibilityRole="button"
-      accessibilityLabel={t('accessibility.chooseVersion', { version: passageVersion })}
-      onPress={() =>
-        openVersionSelector({
-          actions: {
-            setSelectedVersion: version => setPassageVersion(version),
-            setParallelVersion: () => undefined,
-          },
-          data: {
-            selectedVersion: passageVersion,
-            parallelVersions: EMPTY_VERSIONS,
-            selectedBook: VERSION_SELECTOR_BOOK,
-            selectedChapter: 1,
-            selectedVerse: 1,
-            focusVerses: undefined,
-            temp: {
-              selectedBook: VERSION_SELECTOR_BOOK,
-              selectedChapter: 1,
-              selectedVerse: 1,
-            },
-            selectedVerses: EMPTY_SELECTED_VERSES,
-            selectionMode: 'grid',
-            isSelectionMode: undefined,
-            contextDisplayMode: 'focused',
-          } satisfies BibleTab['data'],
-        })
-      }
-    >
-      <FeatherIcon name="book-open" size={14} color={getUniverseColor('bible')} />
-      <Text className="text-primary text-[13px] font-bold">{passageVersion}</Text>
-      <FeatherIcon name="chevron-down" size={13} color="primary" />
-    </RelationVersionButton>
-  )
+  const passageFilterCount = [
+    selectedVersion !== DEFAULT_BIBLE_VERSION_FILTER,
+    Boolean(passageSection),
+    Boolean(passageCanon),
+    passageBook !== 0,
+    passageSortOrder !== 'relevance',
+  ].filter(Boolean).length
+  const passageFilterProps = {
+    defaultVersionValue: DEFAULT_BIBLE_VERSION_FILTER,
+    section: passageSection,
+    canon: passageCanon,
+    book: passageBook,
+    selectedVersion,
+    sortOrder: passageSortOrder,
+    ...passageChoices,
+    onSectionChange: searchExperience.setSection,
+    onCanonChange: searchExperience.selectCanon,
+    onBookChange: searchExperience.setBook,
+    onVersionChange: searchExperience.selectVersion,
+    onSortOrderChange: searchExperience.setSortOrder,
+    onReset: searchExperience.resetPassageFilters,
+  }
+  const sourceFilterProps = {
+    itemFilters,
+    enabledTypes: enabledItemTypes,
+    showPassageFilters: enabledItemTypes.includes('passages'),
+    passageFilterCount,
+    onToggle: toggleItemFilter,
+    onReset: () => {
+      searchExperience.resetItemFilters()
+      setVisibleCounts({})
+    },
+    onOpenPassageFilters: () => passageFiltersRef.current?.present(),
+  }
 
   const searchHeader = (
     <Box className="overflow-hidden border-continuous px-[20px] pt-[8px] pb-[12px]">
@@ -809,29 +889,23 @@ const SearchSelectionSheet = ({
   )
 
   const allSelected = enabledItemTypes.every(type => itemFilters[type])
-  const singleType = activeItemTypes.length === 1 ? activeItemTypes[0] : undefined
-  const canChangeFilters = enabledItemTypes.length > 1
-  const filterContent = singleType ? (
-    <HStack className="items-center gap-[6px] px-[12px] mr-[8px] min-h-[44px]">
-      <SearchTypeIcon type={singleType} size={16} color="primary" />
-      <Text className="text-primary text-[13px]" numberOfLines={1}>
-        {t(searchItemFilterConfig[singleType].labelKey)}
-      </Text>
-      {canChangeFilters && <FeatherIcon name="chevron-down" size={13} color="primary" />}
-    </HStack>
-  ) : (
-    <FilterHeaderButtonContent activeFilterCount={allSelected ? 0 : activeItemTypes.length} />
-  )
-  const filterControl = canChangeFilters ? (
-    <TouchableBox
-      accessibilityRole="button"
-      accessibilityLabel={t('Filtrer')}
-      onPress={() => filtersRef.current?.present()}
+  const filterControl = (
+    <SearchFiltersTrigger
+      initialScreen="sources"
+      activeCount={(allSelected ? 0 : activeItemTypes.length) + passageFilterCount}
+      passages={passageFilterProps}
+      sources={sourceFilterProps}
     >
-      {filterContent}
-    </TouchableBox>
-  ) : (
-    filterContent
+      <TouchableBox
+        accessibilityRole="button"
+        accessibilityLabel={t('Filtrer')}
+        onPress={() => filtersRef.current?.present()}
+      >
+        <FilterHeaderButtonContent
+          activeFilterCount={(allSelected ? 0 : activeItemTypes.length) + passageFilterCount}
+        />
+      </TouchableBox>
+    </SearchFiltersTrigger>
   )
   const Container = inline ? InlineSheetContent : Sheet
   return (
@@ -910,7 +984,6 @@ const SearchSelectionSheet = ({
               renderItem={({ item: section }: { item: RelationTargetSection }) => (
                 <SearchSectionBlock
                   section={section}
-                  headerAction={section.id === 'passages' ? passageVersionSelector : undefined}
                   visibleCount={
                     browseMode === section.id &&
                     (section.id === 'strong' ||
@@ -922,6 +995,22 @@ const SearchSelectionSheet = ({
                   onLoadMore={() => {
                     const currentVisible = visibleCounts[section.id] || SEARCH_SECTION_PREVIEW_LIMIT
                     increaseVisibleCount(section.id)
+                    if (
+                      section.id === 'passages' &&
+                      currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length
+                    ) {
+                      if (
+                        passageSearch.passageQuery.hasNextPage &&
+                        !passageSearch.passageQuery.isFetchingNextPage
+                      )
+                        void passageSearch.passageQuery.fetchNextPage()
+                      if (
+                        passageSearch.canSearchSemantic &&
+                        passageSearch.semanticPassageQuery.hasNextPage &&
+                        !passageSearch.semanticPassageQuery.isFetchingNextPage
+                      )
+                        void passageSearch.semanticPassageQuery.fetchNextPage()
+                    }
                     if (
                       section.id === 'strong' &&
                       currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length &&
@@ -950,12 +1039,17 @@ const SearchSelectionSheet = ({
                   onPressItem={() => undefined}
                   renderItem={renderTargetSearchItem}
                   isLoading={
+                    (section.id === 'passages' &&
+                      (passageSearch.isSearching || passageSearch.isSemanticSearching)) ||
                     (section.id === 'strong' && (strongQuery.isFetching || isStrongPending)) ||
                     (section.id === 'dictionary' &&
                       (dictionaryQuery.isFetching || isDictionaryPending)) ||
                     (section.id === 'nave' && (naveQuery.isFetching || isNavePending))
                   }
                   hasMore={
+                    (section.id === 'passages' &&
+                      (passageSearch.passageQuery.hasNextPage ||
+                        passageSearch.semanticPassageQuery.hasNextPage)) ||
                     (section.id === 'strong' && strongQuery.hasNextPage) ||
                     (section.id === 'dictionary' && dictionaryQuery.hasNextPage) ||
                     (section.id === 'nave' && naveQuery.hasNextPage)
@@ -972,6 +1066,33 @@ const SearchSelectionSheet = ({
               )}
               keyExtractor={(section: RelationTargetSection) => section.id}
               estimatedItemSize={260}
+              ListHeaderComponent={
+                passageSearchNotice ||
+                passageSearch.searchError ||
+                passageSearch.semanticSearchError ? (
+                  <Box className="p-5 gap-2">
+                    <Text>
+                      {passageSearchNotice
+                        ? t(
+                            passageSearchNotice.retrying
+                              ? 'search.rateLimitedRetrying'
+                              : 'search.rateLimited',
+                            { seconds: passageSearchNotice.seconds }
+                          )
+                        : passageSearch.searchError || passageSearch.semanticSearchError}
+                    </Text>
+                    <Text
+                      onPress={() => {
+                        void passageSearch.passageQuery.refetch()
+                        if (passageSearch.canSearchSemantic)
+                          void passageSearch.semanticPassageQuery.refetch()
+                      }}
+                    >
+                      {t('Réessayer')}
+                    </Text>
+                  </Box>
+                ) : null
+              }
               ListEmptyComponent={isListLoading ? renderLoadingState() : renderEmptyState()}
             />
           )}
@@ -990,20 +1111,8 @@ const SearchSelectionSheet = ({
           )}
         </VStack>
       </Container>
-      <SearchSourceFiltersSheet
-        ref={filtersRef}
-        itemFilters={itemFilters}
-        enabledTypes={enabledItemTypes}
-        emptyMeansAll
-        showPassageFilters={false}
-        passageFilterCount={0}
-        onToggle={toggleItemFilter}
-        onReset={() => {
-          setItemFilters(getSearchItemFiltersForTypes(enabledItemTypes))
-          setVisibleCounts({})
-        }}
-        onOpenPassageFilters={() => {}}
-      />
+      <SearchSourceFiltersSheet ref={filtersRef} {...sourceFilterProps} />
+      <PassageSearchFiltersSheet ref={passageFiltersRef} {...passageFilterProps} />
     </>
   )
 }

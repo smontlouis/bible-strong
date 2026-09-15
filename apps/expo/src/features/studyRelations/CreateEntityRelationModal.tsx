@@ -1,3 +1,5 @@
+import { resolvePassageTarget } from '~features/search/passageSelection'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { Ref } from 'react'
 import { useDispatch } from 'react-redux'
 import { useTranslation } from 'react-i18next'
@@ -42,6 +44,7 @@ export default function CreateEntityRelationModal({
   title,
   ...props
 }: Props) {
+  const resources = useResourceAccess()
   const dispatch = useDispatch<AppDispatch>()
   const { t } = useTranslation()
   return (
@@ -49,7 +52,8 @@ export default function CreateEntityRelationModal({
       {...props}
       sourceEndpoint={sourceEndpoint}
       title={title || t('Ajouter une relation')}
-      onSelectItem={async target => {
+      onSelectItem={async (item, version) => {
+        const target = await resolvePassageTarget(item, version, resources.bibleContent.loadChapter)
         if (!target.endpoint) return
         if (onSelectTarget) {
           await onSelectTarget(target as RelationTargetResult)

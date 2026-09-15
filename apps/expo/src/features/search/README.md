@@ -138,3 +138,27 @@ plans load through the existing plan thunk before opening a tab. Native selectio
 uses the shared discovery results in a search sheet; Web uses command-palette
 rows. See ADR-0045 for the distinct Passage/Comparison command modes and the
 new-tab launch behavior. Existing library/list tabs remain valid.
+
+## Recherche de passages et insertion dans les études
+
+`usePassageSearch` est commun à la recherche globale et à `SearchSelectionSheet`.
+Il orchestre les mêmes requêtes textuelles et sémantiques, filtres, clés de cache,
+annulations, pagination et déduplication stable. Le texte reste recherchable hors
+ligne ; la recherche sémantique nécessite une connexion. Les références bibliques
+et codes Strong ne déclenchent pas ces requêtes textuelles.
+
+Un clic sur un passage dans `CreateEntityRelationModal` insère directement le
+résultat choisi, sans seconde sélection ni confirmation. Les références de chapitre
+seul (comme `Gen 3`) sont exclues ; une référence doit préciser ses versets. `resolvePassageTarget`
+convertit sa plage exacte en clés de versets, en conservant sa version. Une plage
+sur plusieurs chapitres est résolue sans ajouter les versets voisins. L'adaptateur
+conserve la distinction entre création d'une relation et insertion d'un lien ou
+bloc dans le document. La palette conserve l'ouverture directe des résultats.
+
+Le sélecteur utilise le même bouton `SearchFiltersTrigger`, les mêmes panneaux
+`SearchSourceFiltersSheet` et `PassageSearchFiltersSheet` que la recherche. La version,
+le canon, le testament, le livre et l'ordre sont accessibles depuis les filtres des
+passages, sans raccourci séparé sous la recherche ou dans les résultats.
+`usePassageFilterChoices` partage les options disponibles et
+`createSearchExperienceController` les règles de modification/réinitialisation.
+Les filtres du sélecteur restent locaux, avec ses seules sources autorisées.

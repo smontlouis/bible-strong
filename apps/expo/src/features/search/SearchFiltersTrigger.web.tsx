@@ -21,6 +21,7 @@ export default function SearchFiltersTrigger({
 }: SearchFiltersTriggerProps) {
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
+  const enabledTypes = s.enabledTypes ?? searchItemFilterOrder
   const choice = <T extends string | number>(
     key: string,
     label: string,
@@ -66,12 +67,10 @@ export default function SearchFiltersTrigger({
   const screens: Record<string, PanelScreen> = {
     sources: {
       title: t('search.sourceFilters.title'),
-      headerRight: searchItemFilterOrder.every(type => s.itemFilters[type])
-        ? undefined
-        : reset(s.onReset),
+      headerRight: enabledTypes.every(type => s.itemFilters[type]) ? undefined : reset(s.onReset),
       content: navigation => (
         <>
-          {searchItemFilterOrder.map(type => {
+          {enabledTypes.map(type => {
             const config = searchItemFilterConfig[type]
             const checked = !!s.itemFilters[type]
             return (
@@ -89,12 +88,14 @@ export default function SearchFiltersTrigger({
               </HStack>
             )
           })}
-          <PanelAction
-            label={t('search.passageFilters.title')}
-            icon="sliders"
-            nested
-            onPress={() => navigation.open('passages')}
-          />
+          {s.showPassageFilters !== false && (
+            <PanelAction
+              label={t('search.passageFilters.title')}
+              icon="sliders"
+              nested
+              onPress={() => navigation.open('passages')}
+            />
+          )}
         </>
       ),
     },
