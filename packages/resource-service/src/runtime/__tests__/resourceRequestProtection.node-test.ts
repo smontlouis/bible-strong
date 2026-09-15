@@ -63,7 +63,7 @@ describe('Resource request protection', () => {
     assert.equal(keys[0].includes('verified-app-check-token'), false)
   })
 
-  it('uses the stricter search counter for search and random routes', async () => {
+  it('uses the dedicated search counter for search and random routes', async () => {
     const calls: string[] = []
     const limiters = {
       reading: acceptedLimiter(calls, 'reading'),

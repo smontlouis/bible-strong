@@ -73,6 +73,13 @@ n'affichent pas de spinner de liste vide quand leurs lignes sont rendues par une
 liste virtualisée extérieure. L'enrichissement sémantique ne présente plus de
 message « Recherche de résultats supplémentaires ».
 
+Les recherches distantes et les aperçus réessaient une seule fois après un HTTP
+429, en respectant `Retry-After` (60 secondes par défaut). Les autres erreurs ne
+sont pas relancées automatiquement. La recherche complète affiche un message de
+limitation distinct pendant l'attente, puis un message invitant à patienter si la
+seconde tentative est encore refusée. Les annulations de requête empêchent une
+ancienne recherche de repartir après ce délai.
+
 La palette de commandes affiche un aperçu de trois résultats par source. Elle réutilise
 les accès `bibleSearch`, `strongLexicon`, `dictionary` et `nave`, ainsi que les convertisseurs
 de résultats et la recherche Fuse des notes, études et liens de cette feature.

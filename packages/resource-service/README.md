@@ -365,7 +365,7 @@ responses sent to the application remain `private, no-store`, and cache failures
 After App Check succeeds and before any cache, Hyperdrive, or R2 access, the Worker fingerprints the
 short-lived attestation token with SHA-256 and applies a Cloudflare-local counter. The raw token is
 never used as a counter key or written to logs. Deterministic and bounded reads allow 300 requests
-per minute per attested client, dynamic search and random routes allow 60, and artifact requests
+per minute per attested client, dynamic search and random routes allow 300, and artifact requests
 including byte ranges allow 120. A rejected request returns `429`, `Retry-After: 60`, and
 `private, no-store`; the protected origin is not opened. Counter failures fail open and emit a
 structured error so a Cloudflare limiter incident does not make resources unavailable.

@@ -1,3 +1,4 @@
+import { searchRateLimitQueryOptions } from './searchRateLimit'
 import { useAppendOnlySearchResults } from './useAppendOnlySearchResults'
 import { useQueries } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
@@ -89,7 +90,7 @@ export function useSearchPreview(
       enabled: ready,
       staleTime: 30_000,
       networkMode: 'always' as const,
-      retry: false,
+      ...searchRateLimitQueryOptions,
     })),
   })
   // User-owned content stays in the Redux-backed local search path, never in remote query keys.

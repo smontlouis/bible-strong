@@ -1085,6 +1085,8 @@
   "Aucun lien": "No link",
   "Aucune étude trouvée": "No study found",
   "Aucune étude...": "No study...",
+  "search.rateLimitedRetrying": "Too many searches in a short time. Retrying automatically after {{seconds}} seconds.",
+  "search.rateLimited": "The search limit has been reached. Wait {{seconds}} seconds before trying again.",
   "search.placeholder": "Search",
   "search.sourceFilters.title": "Filter results",
   "search.passageFilters.title": "Passage filters",

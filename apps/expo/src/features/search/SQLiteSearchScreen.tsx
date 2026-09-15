@@ -1,3 +1,4 @@
+import { getSearchRateLimitNotice, searchRateLimitQueryOptions } from './searchRateLimit'
 import { getTabForSearchResult } from '~features/app-switcher/commandPalette/searchResultTab'
 import PassageActionButtons from './discovery/PassageActionButtons'
 import { useCatalogSearch } from './discovery/useCatalogSearch'
@@ -427,7 +428,7 @@ const SQLiteSearchScreen = ({
       return loaded < count ? loaded : undefined
     },
     enabled: shouldSearchPassages,
-    retry: false,
+    ...searchRateLimitQueryOptions,
     ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
@@ -481,7 +482,7 @@ const SQLiteSearchScreen = ({
       return loaded < count ? loaded : undefined
     },
     enabled: shouldSearchPassages && Boolean(isConnected),
-    retry: false,
+    ...searchRateLimitQueryOptions,
     ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
@@ -575,7 +576,7 @@ const SQLiteSearchScreen = ({
     initialPageParam: undefined as string | undefined,
     getNextPageParam: page => page.nextCursor,
     enabled: shouldSearchStrong,
-    retry: false,
+    ...searchRateLimitQueryOptions,
     ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
@@ -619,7 +620,7 @@ const SQLiteSearchScreen = ({
     initialPageParam: undefined as string | undefined,
     getNextPageParam: page => page.nextCursor,
     enabled: shouldSearchDictionary,
-    retry: false,
+    ...searchRateLimitQueryOptions,
     ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
@@ -655,7 +656,7 @@ const SQLiteSearchScreen = ({
     initialPageParam: undefined as string | undefined,
     getNextPageParam: page => page.nextCursor,
     enabled: shouldSearchNave,
-    retry: false,
+    ...searchRateLimitQueryOptions,
     ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
@@ -663,6 +664,14 @@ const SQLiteSearchScreen = ({
     ? (naveQuery.data?.pages.flatMap(page => page.topics) ?? [])
     : []
   const isNaveSearching = shouldSearchNave && naveQuery.isFetching
+
+  const rateLimitNotice = getSearchRateLimitNotice([
+    ...(shouldSearchPassages ? [passageQuery] : []),
+    ...(shouldSearchPassages && isConnected ? [semanticPassageQuery] : []),
+    ...(shouldSearchStrong ? [strongQuery] : []),
+    ...(shouldSearchDictionary ? [dictionaryQuery] : []),
+    ...(shouldSearchNave ? [naveQuery] : []),
+  ])
 
   const catalogScopes = (['commentary', 'plan', 'timeline'] as const).filter(
     type => itemFilters[type]
@@ -1512,6 +1521,15 @@ const SQLiteSearchScreen = ({
 
       <PassageSearchFiltersSheet ref={passageFiltersRef} {...passageFilterProps} />
 
+      {rateLimitNotice && (
+        <Box className="px-[20px] py-[12px] bg-light-grey">
+          <Text accessibilityLiveRegion="polite" className="text-grey text-[13px]">
+            {t(rateLimitNotice.retrying ? 'search.rateLimitedRetrying' : 'search.rateLimited', {
+              seconds: rateLimitNotice.seconds,
+            })}
+          </Text>
+        </Box>
+      )}
       {isShowingPreviousResults && currentSearchModel.isLoading ? <SearchSpinner /> : null}
       {renderContent()}
       {browseAlphabet ? (

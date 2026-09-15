@@ -1103,6 +1103,8 @@
   "Aucun lien": "Aucun lien",
   "Aucune étude trouvée": "Aucune étude trouvée",
   "Aucune étude...": "Aucune étude...",
+  "search.rateLimitedRetrying": "Trop de recherches rapprochées. Nouvelle tentative automatique après {{seconds}} secondes.",
+  "search.rateLimited": "La limite de recherche est atteinte. Patientez {{seconds}} secondes avant de réessayer.",
   "search.placeholder": "Rechercher",
   "search.sourceFilters.title": "Filtrer les résultats",
   "search.passageFilters.title": "Filtres des passages",
