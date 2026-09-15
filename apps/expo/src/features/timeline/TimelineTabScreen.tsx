@@ -1,3 +1,5 @@
+import useTimelineLanguage from './useTimelineLanguage'
+import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { produce } from 'immer'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -21,6 +23,7 @@ interface Props {
 const TimelineTabScreen = ({ timelineAtom }: Props) => {
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
+  const language = useTimelineLanguage()
   const [timelineTab, setTimelineTab] = useAtom(timelineAtom)
   const isCurrentTab = useIsCurrentTab()
   const { data: sections } = useQuery({
@@ -51,7 +54,9 @@ const TimelineTabScreen = ({ timelineAtom }: Props) => {
 
     setTimelineTab(
       produce(draft => {
-        draft.title = section?.title || t('Chronologie de la Bible')
+        draft.title = section
+          ? getLegacyLocalizedField(language, { fr: section.title, en: section.titleEn })
+          : t('Chronologie de la Bible')
         draft.data.sectionIndex = sectionIndex
         draft.data.eventSlug = undefined
         draft.data.event = undefined

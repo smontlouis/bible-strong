@@ -4,7 +4,7 @@ import { useSharedValue } from 'react-native-reanimated'
 import Box from '~common/ui/Box'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
-import useLanguage from '~helpers/useLanguage'
+import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import CurrentSectionImage from './CurrentSectionImage'
@@ -68,7 +68,7 @@ const Timeline = ({
   const modalRef = React.useRef<SheetRef>(null)
   const openInNewTab = useOpenInNewTab()
   const pushRouteOnce = usePushRouteOnce()
-  const lang = useLanguage()
+  const lang = useTimelineLanguage()
 
   const timeline = useTimelineDetails()
   const eventDetailSlugs = new Set(timeline.map(e => e.slug))

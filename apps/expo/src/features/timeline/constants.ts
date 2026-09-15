@@ -1,5 +1,6 @@
 import { wp } from '~helpers/utils'
 import i18n from '~i18n'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 
 export const offsetTop = 50
 export const rows = 24
@@ -15,33 +16,34 @@ export const mapRange = (
   [toMin, toMax]: [number, number]
 ) => toMin + ((toMax - toMin) * (current - fromMin)) / (fromMax - fromMin)
 
-export const calculateLabel = (start: number, end: number) => {
+export const calculateLabel = (start: number, end: number, language: ResourceLanguage) => {
+  const t = i18n.getFixedT(language)
   const absStart = Math.abs(start)
   const absEnd = Math.abs(end)
   const range = Math.abs(start - end)
 
   if (start >= 3000 && end >= 3000) {
-    return i18n.t('Après le millenium')
+    return t('Après le millenium')
   }
 
   if (start >= 2010 && end >= 2010) {
-    return i18n.t('Futur')
+    return t('Futur')
   }
 
   if (end === 2020) {
-    return `${absStart}${i18n.t('-Futur')}`
+    return `${absStart}${t('-Futur')}`
   }
 
   if (end === 1844) {
-    return i18n.t('457 av.JC. à 1844')
+    return t('457 av.JC. à 1844')
   }
 
   if (start === end) {
-    return `${absStart}${start < 0 ? i18n.t(' av.JC') : ''}`
+    return `${absStart}${start < 0 ? t(' av.JC') : ''}`
   }
 
   if (start < 0 && end < 0) {
-    return `${absStart}-${absEnd} ${i18n.t('av.JC')}${range > 50 ? ` (${range})` : ''}`
+    return `${absStart}-${absEnd} ${t('av.JC')}${range > 50 ? ` (${range})` : ''}`
   }
 
   if (start > 0 && end > 0) {
@@ -49,7 +51,7 @@ export const calculateLabel = (start: number, end: number) => {
   }
 
   if (start < 0 && end > 0) {
-    return `${absStart} ${i18n.t('av.JC')} ${i18n.t('à')} ${end}${range > 50 ? ` (${range})` : ''}`
+    return `${absStart} ${t('av.JC')} ${t('à')} ${end}${range > 50 ? ` (${range})` : ''}`
   }
 
   return start

@@ -5,7 +5,7 @@ import { Image } from 'expo-image'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import useLanguage from '~helpers/useLanguage'
+import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { wp } from '~helpers/utils'
 import { ShallowTimelineSection } from './types'
@@ -25,7 +25,7 @@ const SectionImage = ({
 }: ShallowTimelineSection & { direction?: 'previous' | 'next' }) => {
   const stylingTheme = useStylingTheme()
 
-  const lang = useLanguage()
+  const lang = useTimelineLanguage()
 
   return (
     <Box className="overflow-hidden border-continuous flex-[1] bg-reverse flex-row">

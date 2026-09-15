@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { offset } from './constants'
-import { useTranslation } from 'react-i18next'
+import { useTimelineTranslation } from './useTimelineLanguage'
 const Datebar = ({
   width,
   x,
@@ -24,7 +24,7 @@ const Datebar = ({
 }) => {
   const stylingTheme = useStylingTheme()
 
-  const { t } = useTranslation()
+  const { t } = useTimelineTranslation()
   const values: number[] = []
   for (let year = startYear; year < endYear; year += interval) {
     values.push(year)

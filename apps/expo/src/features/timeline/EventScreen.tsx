@@ -1,3 +1,5 @@
+import useTimelineLanguage from './useTimelineLanguage'
+import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
@@ -12,6 +14,7 @@ import { IS_FORM_SHEET } from '~helpers/constants'
 const EventScreen = () => {
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
+  const language = useTimelineLanguage()
   const openInNewTab = useOpenInNewTab()
   const params = useLocalSearchParams<{ slug?: string }>()
   const { data: sections } = useQuery({
@@ -36,7 +39,7 @@ const EventScreen = () => {
 
     openInNewTab({
       id: `timeline-${generateUUID()}`,
-      title: event.title,
+      title: getLegacyLocalizedField(language, { fr: event.title, en: event.titleEn }),
       isRemovable: true,
       type: 'timeline',
       data: {

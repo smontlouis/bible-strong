@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next'
+import { useTimelineTranslation } from './useTimelineLanguage'
 import { viewportWidth, wp, wpUI } from '~helpers/utils'
 import { mapRange, offset, scrollViewHeight } from './constants'
 import {
@@ -17,7 +17,7 @@ export const useTimeline = ({
   endYear: number
   interval: number
 }) => {
-  const { t } = useTranslation()
+  const { t } = useTimelineTranslation()
   const x = useSharedValue(viewportWidth)
   const y = useSharedValue(0)
   const ratio = 100 / interval // 1 year = 1px with ratio = 1

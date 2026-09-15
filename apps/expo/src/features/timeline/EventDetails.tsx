@@ -1,7 +1,7 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
-import useLanguage from '~helpers/useLanguage'
+import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
@@ -49,8 +49,8 @@ export const EventDetailsContent = ({
 }: EventDetailsProps & {
   onOpenEvent?: (event: TimelineEventProps) => void
 }) => {
-  const lang = useLanguage()
-  const date = calculateLabel(start, end)
+  const lang = useTimelineLanguage()
+  const date = calculateLabel(start, end, lang)
   const resources = useResourceAccess()
   const resourceLanguage = useAtomValue(resourcesLanguageAtom).TIMELINE
   const resourceRegistry = useOfflineResourceRegistry()

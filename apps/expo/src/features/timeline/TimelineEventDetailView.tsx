@@ -7,7 +7,7 @@ import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
-import useLanguage from '~helpers/useLanguage'
+import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { EventDetailsContent, EventDetailsProps } from './EventDetails'
@@ -43,7 +43,7 @@ const TimelineEventDetailContent = ({
   menuItems,
 }: Props) => {
   const { t } = useTranslation()
-  const lang = useLanguage()
+  const lang = useTimelineLanguage()
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : canGoBack
 

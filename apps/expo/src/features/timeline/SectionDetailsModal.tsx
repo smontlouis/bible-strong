@@ -11,7 +11,7 @@ import InlineLink from '~common/InlineLink'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import useLanguage from '~helpers/useLanguage'
+import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { wp } from '~helpers/utils'
 import { ShallowTimelineSection } from './types'
@@ -41,7 +41,7 @@ const SectionDetailsModal = ({
 }: Props) => {
   const stylingTheme = useStylingTheme()
 
-  const lang = useLanguage()
+  const lang = useTimelineLanguage()
   const { t } = useTranslation()
   const isWeb = Platform.OS === 'web'
   const imageWidth = isWeb ? ('100%' as const) : width

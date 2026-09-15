@@ -7,7 +7,7 @@ import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import { TimelineSection } from './types'
 import { Image } from 'expo-image'
-import useLanguage from '~helpers/useLanguage'
+import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { getTimelinePeriodImageSource } from './timelinePeriodImages'
 const LinkBox = (props: React.ComponentProps<typeof Box> & React.ComponentProps<typeof Link>) => (
@@ -35,7 +35,7 @@ const TimelineItem = ({
 }: TimelineSection & { goTo: number; onPress?: (goTo: number) => void }) => {
   const stylingTheme = useStylingTheme()
 
-  const lang = useLanguage()
+  const lang = useTimelineLanguage()
   return (
     <LinkBox
       className="px-[20px] mb-[30px] items-center justify-center flex-row"

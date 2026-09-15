@@ -11,7 +11,7 @@ import { Image } from 'expo-image'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import useLanguage from '~helpers/useLanguage'
+import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { calculateLabel, offset, rowToPx } from './constants'
@@ -55,12 +55,12 @@ const TimelineEvent = ({
   hasDetails = true,
 }: Props) => {
   const pushRouteOnce = usePushRouteOnce()
-  const lang = useLanguage()
+  const lang = useTimelineLanguage()
   const [top] = React.useState(() => rowToPx(row))
   const [left] = React.useState(() => yearsToPx(start))
   const [width] = React.useState(() => calculateEventWidth(start, end, isFixed))
 
-  const label = calculateLabel(start, end)
+  const label = calculateLabel(start, end, lang)
 
   const onOpenEvent = () => {
     if (!hasDetails) return

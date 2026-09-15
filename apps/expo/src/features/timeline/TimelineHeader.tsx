@@ -14,7 +14,7 @@ import Back from '~common/Back'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
-import useLanguage from '~helpers/useLanguage'
+import useTimelineLanguage from './useTimelineLanguage'
 
 const HeaderBox = (
   componentProps: Omit<UIComponentProps<typeof Box>, keyof { topInset: number } | 'theme'> &
@@ -81,7 +81,7 @@ const TimelineHeader = ({
 }: Props) => {
   const stylingTheme = useStylingTheme()
 
-  const lang = useLanguage()
+  const lang = useTimelineLanguage()
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const topInset = isFormSheet ? 0 : insets.top

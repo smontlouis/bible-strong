@@ -4,6 +4,14 @@
 
 La feature Timeline offre une chronologie biblique interactive permettant de naviguer à travers les événements historiques de la Bible. Elle présente une visualisation temporelle avec sections, sous-sections et événements détaillés.
 
+La langue de la ressource (`resourcesLanguage.TIMELINE`) s'applique aux articles,
+aux titres et descriptions des sections, aux événements et aux repères de dates.
+`useTimelineLanguage` centralise ce choix pour les métadonnées bilingues locales ;
+`useTimelineTranslation` lie les libellés de dates à cette langue sans modifier
+la langue générale de l'interface. Le cache des métadonnées reste commun car le
+fichier embarqué contient les deux langues ; les articles distants restent indexés
+par langue.
+
 ## Fonctionnalités principales
 
 ### Navigation temporelle
