@@ -2,9 +2,20 @@ import { useLocalSearchParams } from 'expo-router'
 import LexiqueScreen from '~features/lexique/LexiqueScreen'
 
 const LexiqueRoute = () => {
-  const params = useLocalSearchParams<{ mode?: string; tabId?: string }>()
+  const params = useLocalSearchParams<{ mode?: string; tabId?: string; lexicalLanguage?: string }>()
 
-  return <LexiqueScreen isNewTabSelection={params.mode === 'newTab'} newTabId={params.tabId} />
+  const lexicalLanguage =
+    params.lexicalLanguage === 'hebrew' || params.lexicalLanguage === 'greek'
+      ? params.lexicalLanguage
+      : undefined
+  return (
+    <LexiqueScreen
+      key={lexicalLanguage ?? 'all'}
+      initialLexicalLanguage={lexicalLanguage}
+      isNewTabSelection={params.mode === 'newTab'}
+      newTabId={params.tabId}
+    />
+  )
 }
 
 export default LexiqueRoute

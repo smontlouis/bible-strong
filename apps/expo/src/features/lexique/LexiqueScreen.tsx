@@ -6,12 +6,14 @@ import LexiqueListScreen from './LexiqueListScreen'
 import { createStrongDetailRoute } from './strongDetailRoutes'
 
 type LexiqueScreenProps = {
+  initialLexicalLanguage?: 'hebrew' | 'greek'
   isFormSheet?: boolean
   isNewTabSelection?: boolean
   newTabId?: string
 }
 
 const LexiqueScreen = ({
+  initialLexicalLanguage,
   isFormSheet = false,
   isNewTabSelection = false,
   newTabId,
@@ -31,6 +33,7 @@ const LexiqueScreen = ({
 
   return (
     <LexiqueListScreen
+      initialLexicalLanguage={initialLexicalLanguage}
       hasBackButton
       isFormSheet={isFormSheet}
       isNewTabSelection={isNewTabSelection}

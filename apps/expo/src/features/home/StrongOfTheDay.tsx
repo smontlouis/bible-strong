@@ -196,7 +196,11 @@ const StrongOfTheDay = ({
             {truncate(original, 10)}
           </Paragraph>
         </Box>
-        <Link route="Lexique" style={{ width: '100%' }}>
+        <Link
+          route="Lexique"
+          params={{ lexicalLanguage: type === 'grec' ? 'greek' : 'hebrew' }}
+          style={{ width: '100%' }}
+        >
           <Box className="overflow-hidden border-continuous flex-row items-center justify-center bg-[rgba(0,0,0,0.04)] py-[10px]">
             <LexiqueIcon style={{ marginRight: 10 }} size={20} color="white" />
             <Text className="text-[white] font-bold text-[12px]">{t('Lexique')}</Text>

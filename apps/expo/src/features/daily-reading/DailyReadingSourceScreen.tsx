@@ -1,7 +1,7 @@
 import { useCollectionChoice } from './useCollectionChoice'
 import { Image } from 'expo-image'
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { ActivityIndicator, SectionList } from 'react-native'
 import FiltersHeader from '~common/FiltersHeader'
 import { useTranslation } from 'react-i18next'
@@ -17,6 +17,11 @@ import { pageContentStyle } from '~common/ui/PageContent'
 import Text from '~common/ui/Text'
 import { useFireStorage } from '~features/plans/plan.hooks'
 import { getEditorialKind } from '~features/plans/readingCalendar'
+import {
+  defaultReadingPlanFilters,
+  resolveReadingPlanFilters,
+  type ReadingPlanFilters,
+} from '~features/plans/readingPlanFilters'
 import { fetchPlans } from '~redux/modules/plan'
 import { setDailyMeditation } from '~redux/modules/user'
 import type { RootState } from '~redux/modules/reducer'
@@ -101,11 +106,16 @@ type SourceItem =
 
 const DailyReadingSourceScreen = ({ embedded = false }: { embedded?: boolean }) => {
   const Layout = embedded ? Box : Container
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const router = useRouter()
-  const { collectionId } = useLocalSearchParams<{ collectionId?: string }>()
+  const { collectionId, language } = useLocalSearchParams<{
+    collectionId?: string
+    language?: string | string[]
+  }>()
   const dispatch = useDispatch<AppDispatch>()
-  const [lang, setLang] = useState<'all' | 'fr' | 'en'>('all')
+  const lang = resolveReadingPlanFilters({ language }, i18n.language).language
+  const setLang = (value: ReadingPlanFilters['language']) => router.setParams({ language: value })
+  const resetLanguage = () => setLang(defaultReadingPlanFilters(i18n.language).language)
   const selectedId = useSelector((state: RootState) => state.user.bible.settings.dailyMeditationId)
   const status = useSelector((state: RootState) => state.plan.onlineStatus)
   const online = useSelector(selectSortedOnlinePlans)
@@ -123,7 +133,7 @@ const DailyReadingSourceScreen = ({ embedded = false }: { embedded?: boolean }) 
       value: t(lang === 'all' ? 'Tous' : lang === 'fr' ? 'Français' : 'Anglais'),
       active: lang !== 'all',
       onPress: () => {},
-      options: (['all', 'fr', 'en'] as const).map(value => ({
+      options: (['fr', 'en', 'all'] as const).map(value => ({
         key: value,
         label: t(value === 'all' ? 'Tous' : value === 'fr' ? 'Français' : 'Anglais'),
         selected: lang === value,
@@ -164,7 +174,7 @@ const DailyReadingSourceScreen = ({ embedded = false }: { embedded?: boolean }) 
               title={t('dailyReading.collections')}
               buttonOnly
               filters={filters}
-              onReset={() => setLang('all')}
+              onReset={resetLanguage}
             />
           }
         />
@@ -175,7 +185,7 @@ const DailyReadingSourceScreen = ({ embedded = false }: { embedded?: boolean }) 
             title={t('dailyReading.collections')}
             buttonOnly
             filters={filters}
-            onReset={() => setLang('all')}
+            onReset={resetLanguage}
           />
         </Box>
       )}

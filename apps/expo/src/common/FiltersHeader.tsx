@@ -2,7 +2,7 @@ import { FilterHeaderButtonContent } from './FilterHeaderButton'
 import FilterChoices from './FilterChoices'
 import { useTranslation } from 'react-i18next'
 import { Platform } from 'react-native'
-import { useState, type ComponentProps } from 'react'
+import { useState, type ComponentProps, type ReactNode } from 'react'
 import PanelSearch from './ContextualPanel/PanelSearch'
 import { useTheme } from '~themes/ThemeProvider'
 import { resolveThemeColor } from '~themes/colorValues'
@@ -34,12 +34,14 @@ export type FiltersHeaderItem = {
 }
 export default function FiltersHeader({
   title,
+  children,
   hasBackButton,
   filters,
   onReset,
   buttonOnly = false,
 }: {
   title: string
+  children?: ReactNode
   buttonOnly?: boolean
   hasBackButton?: boolean
   filters: FiltersHeaderItem[]
@@ -170,6 +172,7 @@ export default function FiltersHeader({
         <Text className="flex-1 text-[14px] font-bold">{title}</Text>
         {filterButton}
       </PageContent>
+      {children && <PageContent>{children}</PageContent>}
     </Box>
   )
 }

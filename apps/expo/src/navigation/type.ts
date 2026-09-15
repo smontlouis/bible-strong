@@ -103,7 +103,7 @@ type StudiesScreenProps = {
   studyId?: string
 }
 
-type LexiqueScreenProps = undefined
+type LexiqueScreenProps = { lexicalLanguage?: 'hebrew' | 'greek' } | undefined
 
 export type EditStudyScreenProps = {
   studyId: string

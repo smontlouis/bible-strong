@@ -6,6 +6,24 @@ La feature Plans permet aux utilisateurs de suivre des plans de lecture biblique
 
 ## Fonctionnalités principales
 
+### Filtres de découverte
+
+Le header des Plans de lecture utilise `FiltersHeader` avec recherche et langue.
+Les paramètres de `/plans` sont la source des filtres : `language=fr|en|all` et
+`search=<texte>`. Sans langue explicite (ou avec une valeur invalide), la langue
+actuelle de l'utilisateur est sélectionnée. Les modifications du panneau utilisent
+`router.setParams`, sans état local de filtre ni listener de focus.
+
+Les filtres s'appliquent uniquement à « À découvrir ». « Vos plans » reste visible
+indépendamment de la recherche et de la langue. Choisir une autre langue ou « Tout »
+est une action explicite ; Réinitialiser revient à la langue utilisateur et vide
+la recherche. Le retour depuis un détail conserve les paramètres de l'écran ; une
+nouvelle entrée sans paramètres reprend les valeurs par défaut.
+
+Le catalogue des recueils (`/daily-reading`) applique le même paramètre `language`
+et le même défaut utilisateur. Son filtre et sa réinitialisation mettent à jour
+les paramètres de navigation ; le choix du verset du jour reste toujours visible.
+
 ### Types de plans
 - **Plans annuels** (`yearly`) : Lecture complète de la Bible sur une année
 - **Plans de méditation** (`meditation`) : Études thématiques courtes

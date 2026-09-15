@@ -17,6 +17,7 @@ import type { AppDispatch } from '~redux/store'
 import { useFireStorage } from './plan.hooks'
 import { getEditorialKind } from './readingCalendar'
 import { hasPlanParticipation, getPlanResumeDay } from './planProgress'
+import { filterReadingPlans, type ReadingPlanFilters } from './readingPlanFilters'
 
 const ReadingPlanCard = ({ plan, active }: { plan: OnlinePlan; active: boolean }) => {
   const { t } = useTranslation()
@@ -102,7 +103,7 @@ const ReadingPlanCard = ({ plan, active }: { plan: OnlinePlan; active: boolean }
   )
 }
 
-const ReadingPlansScreen = () => {
+const ReadingPlansScreen = ({ filters }: { filters: ReadingPlanFilters }) => {
   const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
   const online = useSelector((state: RootState) => state.plan.onlinePlans)
@@ -115,6 +116,7 @@ const ReadingPlansScreen = () => {
   ].filter(plan => getEditorialKind(plan) === 'reading-plan')
   const isActive = (id: string) => hasPlanParticipation(ongoing.find(item => item.id === id))
   const active = plans.filter(plan => isActive(plan.id))
+  const discoverable = filterReadingPlans(plans, filters)
   useEffect(() => {
     dispatch(fetchPlans())
   }, [dispatch])
@@ -142,11 +144,13 @@ const ReadingPlansScreen = () => {
           </Button>
         </Box>
       )}
-      {status === 'Resolved' && !plans.length && (
-        <Text className="text-grey">{t('readingPlans.noAvailablePlans')}</Text>
+      {status === 'Resolved' && !discoverable.length && (
+        <Text className="text-grey">
+          {t(plans.length ? 'readingPlans.noMatchingPlans' : 'readingPlans.noAvailablePlans')}
+        </Text>
       )}
       {(['fr', 'en'] as const).map(language => {
-        const entries = plans.filter(plan => plan.lang === language)
+        const entries = discoverable.filter(plan => plan.lang === language)
         if (!entries.length) return null
         return (
           <Box key={language} className="mb-[20px]">

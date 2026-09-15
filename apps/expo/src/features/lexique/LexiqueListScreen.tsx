@@ -2,11 +2,10 @@ import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { MenuView } from '~common/ui/MenuView'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 import AlphabetList from '~common/AlphabetList'
 import Empty from '~common/Empty'
-import Header from '~common/Header'
+import FiltersHeader from '~common/FiltersHeader'
 import Loading from '~common/Loading'
 import SearchInput from '~common/SearchInput'
 import SectionTitle from '~common/SectionTitle'
@@ -18,12 +17,11 @@ import { getFirstLetterFrom } from '~helpers/alphabet'
 import { useInfiniteResultsByLetterOrSearch, useSearchValue } from './useUtilities'
 import { useTranslation } from 'react-i18next'
 import LexiqueItem from './LexiqueItem'
-import { FeatherIcon } from '~common/ui/Icon'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
-import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
+import { useResourceLanguage } from '~state/resourcesLanguage'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import useConnection from '~helpers/useConnection'
 import ResourceUnavailableScreen from '~features/resources/ResourceUnavailableScreen'
@@ -59,6 +57,7 @@ const useSectionResults = (results: StrongLexiconSearchResult[]) => {
 }
 
 interface LexiqueListScreenProps {
+  initialLexicalLanguage?: 'hebrew' | 'greek'
   hasBackButton?: boolean
   isFormSheet?: boolean
   isNewTabSelection?: boolean
@@ -67,6 +66,7 @@ interface LexiqueListScreenProps {
 }
 
 const LexiqueListScreen = ({
+  initialLexicalLanguage,
   hasBackButton,
   isFormSheet = false,
   isNewTabSelection = false,
@@ -81,11 +81,10 @@ const LexiqueListScreen = ({
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
-  const {
-    language: strongResourceLanguage,
-    menuTitle: strongLanguageMenuTitle,
-    toggleLanguage: toggleStrongLanguage,
-  } = useStrongLexiconLanguage()
+  const [strongResourceLanguage, setStrongResourceLanguage] = useResourceLanguage('STRONG')
+  const [lexicalLanguage, setLexicalLanguage] = useState<'all' | 'hebrew' | 'greek'>(
+    initialLexicalLanguage ?? 'all'
+  )
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
   const coreAvailabilityQuery = useQuery({
@@ -101,10 +100,11 @@ const LexiqueListScreen = ({
   const { results, isLoading, error, recoveries, retry, fetchNextPage, hasNextPage } =
     useInfiniteResultsByLetterOrSearch(
       {
-        queryKey: ['strong-lexicon'],
+        queryKey: ['strong-lexicon', lexicalLanguage],
         query: (value, options) =>
           resources.strongLexicon.listEntries({
             language: strongResourceLanguage,
+            lexicalLanguage: lexicalLanguage === 'all' ? undefined : lexicalLanguage,
             search: value,
             ...options,
           }),
@@ -112,10 +112,11 @@ const LexiqueListScreen = ({
         resourceLanguage: strongResourceLanguage,
       },
       {
-        queryKey: ['strong-lexicon'],
+        queryKey: ['strong-lexicon', lexicalLanguage],
         query: (value, options) =>
           resources.strongLexicon.listEntries({
             language: strongResourceLanguage,
+            lexicalLanguage: lexicalLanguage === 'all' ? undefined : lexicalLanguage,
             prefix: value,
             ...options,
           }),
@@ -206,28 +207,45 @@ const LexiqueListScreen = ({
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
-        <Header
+        <FiltersHeader
           hasBackButton={showBackButton}
           title={t('Lexique')}
-          rightComponent={
-            <MenuView
-              tabActions
-              actions={[
-                {
-                  id: 'language',
-                  title: strongLanguageMenuTitle,
-                  image: 'globe',
-                },
-              ]}
-              onPressAction={({ nativeEvent }) => {
-                if (nativeEvent.event === 'language') toggleStrongLanguage()
-              }}
-            >
-              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
-                <FeatherIcon name="more-vertical" size={18} />
-              </Box>
-            </MenuView>
-          }
+          onReset={() => setLexicalLanguage('all')}
+          filters={[
+            {
+              key: 'language',
+              icon: 'globe',
+              label: t('menu.language'),
+              value: t(`versionCatalog.language.${strongResourceLanguage}`),
+              onPress: () => {},
+              options: (['fr', 'en'] as const).map(language => ({
+                key: language,
+                label: t(`versionCatalog.language.${language}`),
+                selected: strongResourceLanguage === language,
+                onSelect: () => setStrongResourceLanguage(language),
+              })),
+            },
+            {
+              key: 'lexicon',
+              icon: 'book-open',
+              label: t('Lexique'),
+              value: t(
+                lexicalLanguage === 'all'
+                  ? 'Tout'
+                  : lexicalLanguage === 'hebrew'
+                    ? 'Hébreu'
+                    : 'Grec'
+              ),
+              active: lexicalLanguage !== 'all',
+              onPress: () => {},
+              options: (['all', 'hebrew', 'greek'] as const).map(language => ({
+                key: language,
+                label: t(language === 'all' ? 'Tout' : language === 'hebrew' ? 'Hébreu' : 'Grec'),
+                selected: lexicalLanguage === language,
+                onSelect: () => setLexicalLanguage(language),
+              })),
+            },
+          ]}
         >
           <Box className="overflow-hidden border-continuous pb-[10px] px-[20px]">
             <SearchInput
@@ -237,7 +255,7 @@ const LexiqueListScreen = ({
               onDelete={() => setSearchValue('')}
             />
           </Box>
-        </Header>
+        </FiltersHeader>
         <Box className="overflow-hidden border-continuous flex-[1] pt-[20px]">
           {isLoading ? (
             <Loading message={t('Chargement...')} />
