@@ -1,0 +1,103 @@
+{
+  "projectId": "bible-strong-app",
+  "verifiedAt": "2026-09-15T12:56:13.906106+00:00",
+  "sha256": "01991902da1b223789cdf8a99b0f27dea3831bd626098c419f2307fce882a0c7",
+  "documents": [
+    {
+      "path": "plans/ten-days-of-prayer-2026-en",
+      "updateTime": "2026-09-15T12:55:55.296174Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2026-en/plan-sections/01",
+      "updateTime": "2026-09-15T12:50:33.663046Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2026-fr",
+      "updateTime": "2026-09-15T12:55:55.296174Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2026-fr/plan-sections/01",
+      "updateTime": "2026-09-15T12:52:00.664235Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2025-en",
+      "updateTime": "2026-09-15T12:55:55.296174Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2025-en/plan-sections/01",
+      "updateTime": "2026-09-15T12:50:33.663046Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2025-fr",
+      "updateTime": "2026-09-15T12:55:55.296174Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2025-fr/plan-sections/01",
+      "updateTime": "2026-09-15T12:52:00.664235Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2024-en",
+      "updateTime": "2026-09-15T12:55:55.296174Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2024-en/plan-sections/01",
+      "updateTime": "2026-09-15T12:50:33.663046Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2024-fr",
+      "updateTime": "2026-09-15T12:55:55.296174Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2024-fr/plan-sections/01",
+      "updateTime": "2026-09-15T12:52:00.664235Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2023-en",
+      "updateTime": "2026-09-15T12:55:55.296174Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2023-en/plan-sections/01",
+      "updateTime": "2026-09-15T12:50:33.663046Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2023-fr",
+      "updateTime": "2026-09-15T12:55:55.296174Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2023-fr/plan-sections/01",
+      "updateTime": "2026-09-15T12:52:00.664235Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2016-en",
+      "updateTime": "2026-09-15T12:55:55.296174Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2016-en/plan-sections/01",
+      "updateTime": "2026-09-15T12:52:00.664235Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2016-fr",
+      "updateTime": "2026-09-15T12:55:55.296174Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2016-fr/plan-sections/01",
+      "updateTime": "2026-09-15T12:52:00.664235Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2014-en",
+      "updateTime": "2026-09-15T12:55:55.296174Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2014-en/plan-sections/01",
+      "updateTime": "2026-09-15T12:52:00.664235Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2014-fr",
+      "updateTime": "2026-09-15T12:55:55.296174Z"
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2014-fr/plan-sections/01",
+      "updateTime": "2026-09-15T12:52:00.664235Z"
+    }
+  ]
+}

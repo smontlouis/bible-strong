@@ -20,6 +20,8 @@ export interface Plan {
   subTitle?: string
   image?: string
   description?: string
+  /** Full publisher credit, displayed in the plan details. */
+  attribution?: { text: string; url: string }
   sections: Section[]
   author: User
   type:

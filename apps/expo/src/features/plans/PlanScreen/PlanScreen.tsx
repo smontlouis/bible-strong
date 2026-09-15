@@ -82,6 +82,7 @@ const PlanScreen = ({
                   id={id}
                   author={author || { id: '', displayName: '', photoUrl: '' }}
                   description={description}
+                  attribution={plan?.attribution}
                 />
               }
             />
@@ -112,6 +113,7 @@ const PlanScreen = ({
         id={id}
         author={author || { id: '', displayName: '', photoUrl: '' }}
         description={description}
+        attribution={plan?.attribution}
       />
     </Container>
   )

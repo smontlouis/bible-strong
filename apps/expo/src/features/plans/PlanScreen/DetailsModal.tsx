@@ -7,6 +7,7 @@ import { Platform } from 'react-native'
 import { ComputedPlanItem } from '~common/types'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import Link from '~common/Link'
 
 interface Props extends Omit<ComputedPlanItem, 'status' | 'progress' | 'type' | 'lang'> {
   modalRefDetails?: React.RefObject<SheetRef | null>
@@ -22,6 +23,7 @@ const DetailsModal = ({
   downloads,
   description,
   author,
+  attribution,
   footer,
   header,
   inline = false,
@@ -63,6 +65,16 @@ const DetailsModal = ({
             </Text>
           )}
           <Text className="text-default text-[15px] leading-[24px] mt-[20px]">{description}</Text>
+          {attribution && (
+            <Box className="mt-[20px] gap-[8px]">
+              <Text className="text-grey text-[13px] leading-[20px]">{attribution.text}</Text>
+              <Link href={attribution.url} className="min-h-[44px] justify-center">
+                <Text className="text-primary text-[13px]">
+                  {new URL(attribution.url).hostname}
+                </Text>
+              </Link>
+            </Box>
+          )}
           {!!author.displayName && (
             <Box className="overflow-hidden border-continuous mt-[40px] flex-row items-center justify-center">
               {author.photoUrl && (

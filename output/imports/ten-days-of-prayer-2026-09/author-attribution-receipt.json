@@ -1,0 +1,185 @@
+{
+  "commitTime": "2026-09-15T12:55:55.296174Z",
+  "updates": [
+    {
+      "path": "plans/ten-days-of-prayer-2026-en",
+      "fields": {
+        "author": {
+          "id": "general-conference-ministerial",
+          "displayName": "10 Days of Prayer",
+          "photoUrl": ""
+        },
+        "attribution": {
+          "text": "Published by the Ministerial Association of the General Conference of Seventh-day Adventists.",
+          "url": "https://www.tendaysofprayer.org/2026"
+        },
+        "lastUpdate": 1789430400002
+      }
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2026-fr",
+      "fields": {
+        "author": {
+          "id": "general-conference-ministerial",
+          "displayName": "10 jours de prière",
+          "photoUrl": ""
+        },
+        "attribution": {
+          "text": "Publié par l’Association pastorale de la Conférence générale des adventistes du septième jour.",
+          "url": "https://www.tendaysofprayer.org/2026"
+        },
+        "lastUpdate": 1789430400002
+      }
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2025-en",
+      "fields": {
+        "author": {
+          "id": "general-conference-ministerial",
+          "displayName": "10 Days of Prayer",
+          "photoUrl": ""
+        },
+        "attribution": {
+          "text": "Published by the Ministerial Association of the General Conference of Seventh-day Adventists.",
+          "url": "https://www.tendaysofprayer.org/2025"
+        },
+        "lastUpdate": 1789430400002
+      }
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2025-fr",
+      "fields": {
+        "author": {
+          "id": "general-conference-ministerial",
+          "displayName": "10 jours de prière",
+          "photoUrl": ""
+        },
+        "attribution": {
+          "text": "Publié par l’Association pastorale de la Conférence générale des adventistes du septième jour.",
+          "url": "https://www.tendaysofprayer.org/2025"
+        },
+        "lastUpdate": 1789430400002
+      }
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2024-en",
+      "fields": {
+        "author": {
+          "id": "general-conference-ministerial",
+          "displayName": "10 Days of Prayer",
+          "photoUrl": ""
+        },
+        "attribution": {
+          "text": "Published by the Ministerial Association of the General Conference of Seventh-day Adventists.",
+          "url": "https://www.tendaysofprayer.org/2024"
+        },
+        "lastUpdate": 1789430400002
+      }
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2024-fr",
+      "fields": {
+        "author": {
+          "id": "general-conference-ministerial",
+          "displayName": "10 jours de prière",
+          "photoUrl": ""
+        },
+        "attribution": {
+          "text": "Publié par l’Association pastorale de la Conférence générale des adventistes du septième jour.",
+          "url": "https://www.tendaysofprayer.org/2024"
+        },
+        "lastUpdate": 1789430400002
+      }
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2023-en",
+      "fields": {
+        "author": {
+          "id": "general-conference-ministerial",
+          "displayName": "10 Days of Prayer",
+          "photoUrl": ""
+        },
+        "attribution": {
+          "text": "Published by the Ministerial Association of the General Conference of Seventh-day Adventists.",
+          "url": "https://www.tendaysofprayer.org/2023"
+        },
+        "lastUpdate": 1789430400002
+      }
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2023-fr",
+      "fields": {
+        "author": {
+          "id": "general-conference-ministerial",
+          "displayName": "10 jours de prière",
+          "photoUrl": ""
+        },
+        "attribution": {
+          "text": "Publié par l’Association pastorale de la Conférence générale des adventistes du septième jour.",
+          "url": "https://www.tendaysofprayer.org/2023"
+        },
+        "lastUpdate": 1789430400002
+      }
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2016-en",
+      "fields": {
+        "author": {
+          "id": "general-conference-ministerial",
+          "displayName": "10 Days of Prayer",
+          "photoUrl": ""
+        },
+        "attribution": {
+          "text": "Published by the Ministerial Association of the General Conference of Seventh-day Adventists.",
+          "url": "https://www.tendaysofprayer.org/"
+        },
+        "lastUpdate": 1789430400002
+      }
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2016-fr",
+      "fields": {
+        "author": {
+          "id": "general-conference-ministerial",
+          "displayName": "10 jours de prière",
+          "photoUrl": ""
+        },
+        "attribution": {
+          "text": "Publié par l’Association pastorale de la Conférence générale des adventistes du septième jour.",
+          "url": "https://www.tendaysofprayer.org/"
+        },
+        "lastUpdate": 1789430400002
+      }
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2014-en",
+      "fields": {
+        "author": {
+          "id": "general-conference-ministerial",
+          "displayName": "10 Days of Prayer",
+          "photoUrl": ""
+        },
+        "attribution": {
+          "text": "Published by the Ministerial Association of the General Conference of Seventh-day Adventists.",
+          "url": "https://www.tendaysofprayer.org/"
+        },
+        "lastUpdate": 1789430400002
+      }
+    },
+    {
+      "path": "plans/ten-days-of-prayer-2014-fr",
+      "fields": {
+        "author": {
+          "id": "general-conference-ministerial",
+          "displayName": "10 jours de prière",
+          "photoUrl": ""
+        },
+        "attribution": {
+          "text": "Publié par l’Association pastorale de la Conférence générale des adventistes du septième jour.",
+          "url": "https://www.tendaysofprayer.org/"
+        },
+        "lastUpdate": 1789430400002
+      }
+    }
+  ]
+}

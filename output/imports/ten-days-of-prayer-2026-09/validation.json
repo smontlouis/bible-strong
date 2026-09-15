@@ -1,0 +1,70 @@
+{
+  "projectId": "bible-strong-app",
+  "plans": 12,
+  "concepts": 6,
+  "days": 120,
+  "documents": 24,
+  "sha256": "01991902da1b223789cdf8a99b0f27dea3831bd626098c419f2307fce882a0c7",
+  "editions": [
+    {
+      "id": "ten-days-of-prayer-2026-en",
+      "days": 10,
+      "characters": 70347
+    },
+    {
+      "id": "ten-days-of-prayer-2026-fr",
+      "days": 10,
+      "characters": 75473
+    },
+    {
+      "id": "ten-days-of-prayer-2025-en",
+      "days": 10,
+      "characters": 59017
+    },
+    {
+      "id": "ten-days-of-prayer-2025-fr",
+      "days": 10,
+      "characters": 72783
+    },
+    {
+      "id": "ten-days-of-prayer-2024-en",
+      "days": 10,
+      "characters": 49684
+    },
+    {
+      "id": "ten-days-of-prayer-2024-fr",
+      "days": 10,
+      "characters": 53465
+    },
+    {
+      "id": "ten-days-of-prayer-2023-en",
+      "days": 10,
+      "characters": 50424
+    },
+    {
+      "id": "ten-days-of-prayer-2023-fr",
+      "days": 10,
+      "characters": 53127
+    },
+    {
+      "id": "ten-days-of-prayer-2016-en",
+      "days": 10,
+      "characters": 79469
+    },
+    {
+      "id": "ten-days-of-prayer-2016-fr",
+      "days": 10,
+      "characters": 84592
+    },
+    {
+      "id": "ten-days-of-prayer-2014-en",
+      "days": 10,
+      "characters": 64139
+    },
+    {
+      "id": "ten-days-of-prayer-2014-fr",
+      "days": 10,
+      "characters": 70480
+    }
+  ]
+}
