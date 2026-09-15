@@ -1,5 +1,6 @@
 import { goBackOrHome } from '~navigation/goBackOrHome'
 import { useRouter } from 'expo-router'
+import { useTranslation } from 'react-i18next'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
 
@@ -51,11 +52,12 @@ interface Props {
 }
 
 const ReadButton = ({ readingSliceId, planId, isRead, onRead }: Props) => {
+  const { t } = useTranslation()
   const router = useRouter()
   const dispatch = useDispatch()
 
   const onPress = () => {
-    dispatch(markAsRead({ readingSliceId, planId }))
+    if (!isRead) dispatch(markAsRead({ readingSliceId, planId }))
     if (onRead) {
       onRead()
       return
@@ -63,8 +65,8 @@ const ReadButton = ({ readingSliceId, planId, isRead, onRead }: Props) => {
     goBackOrHome(router)
   }
   return (
-    <StyledLink onPress={onPress} style={{ opacity: isRead ? 0.3 : 1 }}>
-      <MaterialIcon color="white" name="check" size={22} />
+    <StyledLink onPress={onPress} accessibilityLabel={t(isRead ? 'Retour' : 'Marquer comme lu')}>
+      <MaterialIcon color="white" name={isRead ? 'arrow-back' : 'check'} size={22} />
     </StyledLink>
   )
 }

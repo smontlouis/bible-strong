@@ -1,4 +1,4 @@
-import json,pathlib,datetime as dt,hashlib,collections
+import json,pathlib,datetime as dt,hashlib,collections,base64
 ROOT=pathlib.Path(__file__).parent
 MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
 def build():
@@ -8,7 +8,7 @@ def build():
  docs=[];summary=[];revision=hashlib.sha256((ROOT/'readings.json').read_bytes()).hexdigest();updated=int(dt.datetime.now(dt.timezone.utc).timestamp()*1000)
  for year in range(2021,2027):
   identity=f'la-bonne-semence-{year}';entries=[r for r in rows if r['date'].startswith(str(year))];assert len(entries)==(366 if year==2024 else 365)
-  root={'id':identity,'kind':'daily-meditation','type':'Livre de méditation','title':f'La Bonne Semence {year}','lang':'fr','image':'lbs','author':{'id':'bpc','displayName':'Bibles et Publications Chrétiennes','photoUrl':''},'description':f'Édition {year} du calendrier La Bonne Semence. Bibles et Publications Chrétiennes. https://editeurbpc.com/calendriers/la-bonne-semence','editionYear':year,'sourceUrl':'https://editeurbpc.com/calendriers/la-bonne-semence','lastUpdate':updated,'downloads':0,'importRevision':revision,'rights':{'basis':'publisher-permission','confirmation':'User confirmed permission from BPC and production import on 2026-09-14','publisher':'Bibles et Publications Chrétiennes'}}
+  root={'id':identity,'kind':'daily-meditation','type':'Livre de méditation','title':f'La Bonne Semence {year}','lang':'fr','image':'data:image/png;base64,'+base64.b64encode((ROOT/'neutral-cover.png').read_bytes()).decode(),'author':{'id':'bpc','displayName':'Bibles et Publications Chrétiennes','photoUrl':''},'description':f'Édition {year} du calendrier La Bonne Semence. Bibles et Publications Chrétiennes. https://editeurbpc.com/calendriers/la-bonne-semence','editionYear':year,'sourceUrl':'https://editeurbpc.com/calendriers/la-bonne-semence','lastUpdate':updated,'downloads':0,'importRevision':revision,'rights':{'basis':'publisher-permission','confirmation':'User confirmed permission from BPC and production import on 2026-09-14','publisher':'Bibles et Publications Chrétiennes'}}
   docs.append({'path':f'plans/{identity}','data':root})
   for m in range(1,13):
    month=[r for r in entries if int(r['date'][5:7])==m]

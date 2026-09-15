@@ -77,16 +77,12 @@ def cover(label, days, lang, color):
     image=Image.new('RGB',(640,360),color)
     d=ImageDraw.Draw(image)
     font=ROOT/'apps/expo/src/assets/fonts/eina-03-bold.otf'
-    small=ImageFont.truetype(str(font),17)
-    large=ImageFont.truetype(str(font),52 if len(label)<10 else 43)
-    d.text((36,30),'BIBLE STRONG',font=small,fill='#ffffff')
-    d.line((36,65,604,65), fill='#ffffff',width=1)
-    d.text((36,116),label,font=large,fill='#ffffff')
-    d.text((38,195),f'{days} '+('JOURS' if lang=='fr' else 'DAYS'),font=small,fill='#ffffff')
-    # A repeated page motif distinguishes the collection without stock photography.
-    for i in range(4):
-        x=440+i*22
-        d.arc((x,200,x+140,390),180,330,fill='#d9e2dc',width=2)
+    large=ImageFont.truetype(str(font),90 if len(label)<10 else 72)
+    box=d.textbbox((0,0),label,font=large)
+    d.text(((640-(box[2]-box[0]))/2,115),label,font=large,fill='#ffffff')
+    # Broad page lines remain legible when the cover is displayed as a thumbnail.
+    d.line((80,252,320,273,560,252),fill='#d9e2dc',width=5)
+    d.line((80,273,320,294,560,273),fill='#d9e2dc',width=5)
     buf=io.BytesIO();image.save(buf,format='PNG',optimize=True)
     path=OUT/'covers'/f'{label.lower()}-{lang}.png';path.parent.mkdir(exist_ok=True);path.write_bytes(buf.getvalue())
     return 'data:image/png;base64,'+base64.b64encode(buf.getvalue()).decode()

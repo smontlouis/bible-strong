@@ -1,4 +1,6 @@
 import { Platform } from 'react-native'
+import Button from '~common/ui/Button'
+import { useLocalReadingDate } from '~features/daily-reading/useDailyMeditation'
 import { hasPlanParticipation } from '../planProgress'
 import { goBackOrHome } from '~navigation/goBackOrHome'
 import { SheetView, type SheetRef } from '~common/sheet'
@@ -46,6 +48,9 @@ const Menu = ({
   )
   const started = hasPlanParticipation(participation)
   const startDate = participation?.startDate
+  const today = useLocalReadingDate()
+  const [initialDate, setInitialDate] = React.useState<string | null>(null)
+  const dateTitle = t(startDate ? 'readingPlans.changeStartDate' : 'readingPlans.defineStartDate')
   const reminderSheet = React.useRef<SheetRef>(null)
   const reminderControl = (
     <ReminderSettings
@@ -54,16 +59,32 @@ const Menu = ({
       onChange={time => dispatch(setPlanReminder({ planId, time }))}
     />
   )
-  const dateControl = startDate ? (
-    <ReadingDatePicker
-      value={startDate}
-      label={t('readingPlans.startDate')}
-      onChange={date => {
-        dispatch(startPlan({ planId, startDate: date }))
-        dateSheet.current?.dismiss()
-      }}
-    />
-  ) : null
+  const dateControl = (
+    <Box className="gap-[16px]">
+      <ReadingDatePicker
+        value={startDate ?? initialDate ?? today}
+        label={t('readingPlans.startDate')}
+        onChange={date => {
+          if (!startDate) {
+            setInitialDate(date)
+            return
+          }
+          dispatch(startPlan({ planId, startDate: date }))
+          dateSheet.current?.dismiss()
+        }}
+      />
+      {!startDate && (
+        <Button
+          onPress={() => {
+            dispatch(startPlan({ planId, startDate: initialDate ?? today }))
+            dateSheet.current?.dismiss()
+          }}
+        >
+          {t('readingPlans.defineStartDate')}
+        </Button>
+      )}
+    </Box>
+  )
 
   const onResetPress = async () => {
     if (
@@ -107,14 +128,14 @@ const Menu = ({
       title: t('tab.openInNewTab'),
       image: 'arrow.up.forward.square',
     },
-    ...(canManageParticipation && startDate
+    ...(canManageParticipation && started
       ? [
           {
             id: 'start-date',
-            title: t('readingPlans.changeStartDate'),
+            title: dateTitle,
             image: 'calendar' as const,
           },
-          ...(Platform.OS !== 'web'
+          ...(Platform.OS !== 'web' && startDate
             ? [{ id: 'reminder', title: t('dailyReading.reminder'), image: 'bell' as const }]
             : []),
         ]
@@ -151,10 +172,10 @@ const Menu = ({
             ? { reminder: { title: t('dailyReading.reminder'), content: () => reminderControl } }
             : {}),
           ...(details ? { details: { title: t('Détails'), content: () => details } } : {}),
-          ...(canManageParticipation && startDate
+          ...(canManageParticipation && started
             ? {
                 'start-date': {
-                  title: t('readingPlans.changeStartDate'),
+                  title: dateTitle,
                   content: () => dateControl,
                 },
               }
@@ -203,7 +224,7 @@ const Menu = ({
           <SheetView className="p-[20px]">{reminderControl}</SheetView>
         </Sheet>
       )}
-      <Sheet ref={dateSheet} modalTitle={t('readingPlans.changeStartDate')}>
+      <Sheet ref={dateSheet} modalTitle={dateTitle}>
         <SheetView className="p-[20px]">{dateControl}</SheetView>
       </Sheet>
     </>

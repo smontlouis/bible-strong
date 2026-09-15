@@ -4,7 +4,7 @@ ROOT=pathlib.Path(__file__).parent
 (ROOT/'sources').mkdir(exist_ok=True)
 class Node:
  def __init__(self,tag='',attrs=()):self.tag=tag;self.attrs=dict(attrs);self.children=[]
- def text(self):return ''.join(c if isinstance(c,str) else ('\n\n'+c.text()+'\n\n' if c.tag in ['p','li'] else '\n' if c.tag=='br' else c.text()) for c in self.children).strip()
+ def text(self):return ''.join(c if isinstance(c,str) else ('\n\n'+c.text()+'\n\n' if (c.tag in ['p','li'] or 'strophe' in c.attrs.get('class','').split()) else '\n' if c.tag=='br' else c.text()+'\n' if 'vers' in c.attrs.get('class','').split() else c.text()) for c in self.children).strip()
  def find(self,p):
   out=[self] if p(self) else []
   for c in self.children:

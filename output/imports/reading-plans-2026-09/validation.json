@@ -4,7 +4,7 @@
   "concepts": 14,
   "days": 642,
   "documents": 72,
-  "sha256": "2274e640d4940da59f802551ea38451d30f927e4b652b0e6acda173eeb12404b",
+  "sha256": "b11e1d0e2b4cf953a253b7324296850e557fbd89ca2d9eeab7ff398219b9f38a",
   "editions": [
     {
       "id": "bibleproject-character-of-god-fr",
@@ -136,5 +136,6 @@
       "days": 4,
       "source": "Bible Strong"
     }
-  ]
+  ],
+  "latestCorrectionReceipt": "../reading-ui-fixes-2026-09/receipt.json"
 }

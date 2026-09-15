@@ -2,7 +2,7 @@
   "projectId": "bible-strong-app",
   "documents": 78,
   "readings": 2191,
-  "revision": "15adb07fae171abcc4cce4f89135bedb7a254e19fbf0e093cce850e5486be503",
+  "revision": "247b12b8743e2b1ec91f305f05462958411f9f6ea205b25429d17a41b373ec2e",
   "editions": [
     {
       "id": "la-bonne-semence-2021",
@@ -54,5 +54,7 @@
     }
   ],
   "repeatedContentDates": [],
-  "maxDocumentJsonBytes": 71883
+  "maxDocumentJsonBytes": 71883,
+  "correctedPoems": 114,
+  "latestCorrectionReceipt": "../reading-ui-fixes-2026-09/receipt.json"
 }

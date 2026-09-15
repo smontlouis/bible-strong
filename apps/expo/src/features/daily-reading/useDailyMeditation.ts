@@ -48,7 +48,9 @@ export const useReadingContent = (collectionId: string) => {
     queryKey: ['reading-content', collectionId],
     queryFn: () => dispatch(fetchPlan({ id: collectionId, enroll: false })).unwrap(),
     enabled: !collection && Boolean(collectionId),
-    staleTime: Infinity,
+    // Redux content can be removed independently of the query cache.
+    // Re-enabling the query must fetch and repopulate Redux.
+    staleTime: 0,
     retry: 1,
   })
   return {

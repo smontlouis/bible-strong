@@ -129,14 +129,9 @@ const ScheduledPlanContent = ({ plan, onReadingSlicePress }: Props) => {
                     }}
                   />
                 </Box>
-                <Text className="text-grey text-[12px]">
-                  {t(
-                    completed === readings.length
-                      ? 'readingPlans.finished'
-                      : 'readingPlans.dayOfTotal',
-                    { day: resumeDay, total: readings.length }
-                  )}
-                </Text>
+                {completed === readings.length && (
+                  <Text className="text-grey text-[12px]">{t('readingPlans.finished')}</Text>
+                )}
               </Box>
             )}
           </Box>
