@@ -2,7 +2,7 @@ import { useCollectionChoice } from './useCollectionChoice'
 import { Image } from 'expo-image'
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, ScrollView } from 'react-native'
+import { ActivityIndicator, SectionList } from 'react-native'
 import FiltersHeader from '~common/FiltersHeader'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
@@ -36,15 +36,15 @@ const CollectionCard = ({
   const { t } = useTranslation()
   const { choose, pending, error } = useCollectionChoice(collection)
   return (
-    <Box className="bg-reverse rounded-[20px] p-[12px] mb-[12px]">
+    <Box className="bg-reverse border-b border-border px-[16px] py-[10px]">
       <Box className="flex-row items-center gap-[8px]">
         <Link
           onPress={onPress}
           accessibilityLabel={collection.title}
           accessibilityHint={t('dailyReading.browseCollection')}
-          className="flex-1 flex-row items-center gap-[16px]"
+          className="flex-1 flex-row items-center gap-[12px]"
         >
-          <Box className="bg-light-grey rounded-[12px] overflow-hidden w-[72px] h-[72px]">
+          <Box className="bg-light-grey rounded-[8px] overflow-hidden w-[44px] h-[44px]">
             {image ? (
               <Image
                 source={{ uri: image }}
@@ -57,9 +57,12 @@ const CollectionCard = ({
               </Box>
             )}
           </Box>
-          <Box className="flex-1 gap-[5px]">
-            <Text className="text-default font-bold text-[16px]">{collection.title}</Text>
-            <Text className="text-grey text-[13px]">{collection.author?.displayName}</Text>
+          <Box className="flex-1 gap-[3px]">
+            <Text className="text-default text-[16px]">{collection.title}</Text>
+            {collection.author?.displayName &&
+              collection.author.displayName !== collection.title && (
+                <Text className="text-grey text-[12px]">{collection.author.displayName}</Text>
+              )}
           </Box>
         </Link>
         <Link
@@ -91,6 +94,10 @@ const CollectionCard = ({
     </Box>
   )
 }
+
+type SourceItem =
+  | { id: 'standalone'; kind: 'standalone' }
+  | { id: string; kind: 'collection'; collection: OnlinePlan }
 
 const DailyReadingSourceScreen = ({ embedded = false }: { embedded?: boolean }) => {
   const Layout = embedded ? Box : Container
@@ -129,6 +136,20 @@ const DailyReadingSourceScreen = ({ embedded = false }: { embedded?: boolean }) 
     dispatch(fetchPlans())
   }, [dispatch])
 
+  const sections: { key: string; title?: string; data: SourceItem[] }[] = [
+    { key: 'standalone', data: [{ id: 'standalone', kind: 'standalone' }] },
+    ...(['fr', 'en'] as const)
+      .filter(language => lang === 'all' || lang === language)
+      .map(language => ({
+        key: language,
+        title: t(language === 'fr' ? 'Français' : 'Anglais'),
+        data: collections
+          .filter(collection => collection.lang === language)
+          .map(collection => ({ id: collection.id, kind: 'collection' as const, collection })),
+      }))
+      .filter(section => section.data.length > 0),
+  ]
+
   if (collectionId)
     return <Redirect href={{ pathname: '/meditation-collection', params: { collectionId } }} />
 
@@ -158,77 +179,70 @@ const DailyReadingSourceScreen = ({ embedded = false }: { embedded?: boolean }) 
           />
         </Box>
       )}
-      <ScrollView contentContainerStyle={[pageContentStyle, { padding: 24, paddingBottom: 48 }]}>
-        <>
-          <Text className="text-default text-[28px] font-bold mb-[12px]">
-            {t('dailyReading.heading')}
-          </Text>
-          <Text className="text-grey text-[15px] leading-[24px] mb-[24px]">
-            {t('dailyReading.description')}
-          </Text>
-          <Link
-            accessibilityRole="radio"
-            accessibilityState={{ checked: !selectedId }}
-            onPress={() => dispatch(setDailyMeditation(null))}
-            className="flex-row items-center bg-reverse rounded-[24px] p-[20px] gap-[16px] mb-[32px]"
-          >
-            <Box className="bg-light-grey rounded-[16px] p-[14px]">
-              <FeatherIcon name="sun" size={24} color="primary" />
-            </Box>
-            <Box className="flex-1 gap-[5px]">
-              <Text className="text-default font-bold text-[16px]">
-                {t('dailyReading.default')}
+      <SectionList<SourceItem>
+        style={{ flex: 1 }}
+        contentContainerStyle={[pageContentStyle, { paddingBottom: 24 }]}
+        sections={sections}
+        stickySectionHeadersEnabled
+        keyExtractor={item => item.id}
+        initialNumToRender={24}
+        renderSectionHeader={({ section }) =>
+          section.title ? (
+            <Box className="min-h-[40px] px-[16px] justify-center bg-light-grey border-b border-border">
+              <Text accessibilityRole="header" className="text-grey text-[14px] font-bold">
+                {section.title}
               </Text>
-              <Text className="text-grey text-[13px]">{t('dailyReading.defaultDescription')}</Text>
             </Box>
-            <FeatherIcon
-              name={!selectedId ? 'check-circle' : 'circle'}
-              color={!selectedId ? 'primary' : 'grey'}
-              size={22}
+          ) : null
+        }
+        renderItem={({ item }) =>
+          item.kind === 'standalone' ? (
+            <Link
+              accessibilityRole="radio"
+              accessibilityState={{ checked: !selectedId }}
+              onPress={() => dispatch(setDailyMeditation(null))}
+              className="flex-row items-center bg-reverse border-b border-border px-[16px] py-[10px] gap-[12px] min-h-[64px]"
+            >
+              <Box className="bg-light-grey rounded-[8px] w-[44px] h-[44px] items-center justify-center">
+                <FeatherIcon name="sun" size={22} color="primary" />
+              </Box>
+              <Text className="text-default text-[16px] flex-1">{t('dailyReading.default')}</Text>
+              <Box className="w-[44px] h-[44px] items-center justify-center">
+                <FeatherIcon
+                  name={!selectedId ? 'check-circle' : 'circle'}
+                  color={!selectedId ? 'primary' : 'grey'}
+                  size={22}
+                />
+              </Box>
+            </Link>
+          ) : (
+            <CollectionCard
+              collection={item.collection}
+              selected={selectedId === item.id}
+              onPress={() =>
+                router.push({
+                  pathname: '/meditation-collection',
+                  params: { collectionId: item.id },
+                })
+              }
             />
-          </Link>
-          {status === 'Pending' && !collections.length && (
-            <ActivityIndicator accessibilityLabel={t('Chargement...')} />
-          )}
-          {status === 'Rejected' && (
-            <Box className="gap-[12px] mb-[20px]">
+          )
+        }
+        ListFooterComponent={
+          status === 'Pending' && !collections.length ? (
+            <Box className="p-[16px]">
+              <ActivityIndicator accessibilityLabel={t('Chargement...')} />
+            </Box>
+          ) : status === 'Rejected' ? (
+            <Box className="p-[16px] gap-[8px]">
               <Text className="text-grey">{t('dailyReading.catalogError')}</Text>
               <Button reverse onPress={() => dispatch(fetchPlans())}>
                 {t('dailyReading.retry')}
               </Button>
             </Box>
-          )}
-          {(['fr', 'en'] as const)
-            .filter(value => lang === 'all' || lang === value)
-            .map(value => {
-              const entries = collections.filter(collection => collection.lang === value)
-              if (!entries.length) return null
-              return (
-                <Box key={value} className="mb-[24px]">
-                  <Text
-                    accessibilityRole="header"
-                    className="text-default font-bold text-[18px] mb-[16px]"
-                  >
-                    {t(value === 'fr' ? 'Français' : 'Anglais')}
-                  </Text>
-                  {entries.map(collection => (
-                    <CollectionCard
-                      key={collection.id}
-                      collection={collection}
-                      selected={selectedId === collection.id}
-                      onPress={() =>
-                        router.push({
-                          pathname: '/meditation-collection',
-                          params: { collectionId: collection.id },
-                        })
-                      }
-                    />
-                  ))}
-                </Box>
-              )
-            })}
-        </>
-      </ScrollView>
+          ) : null
+        }
+      />
     </Layout>
   )
 }

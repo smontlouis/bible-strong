@@ -1,0 +1,318 @@
+{
+  "projectId": "bible-strong-app",
+  "revision": "15adb07fae171abcc4cce4f89135bedb7a254e19fbf0e093cce850e5486be503",
+  "documents": [
+    {
+      "path": "plans/la-bonne-semence-2021",
+      "updateTime": "2026-09-14T19:19:54.223175Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2021/plan-sections/01",
+      "updateTime": "2026-09-14T19:19:54.223175Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2021/plan-sections/02",
+      "updateTime": "2026-09-14T19:19:54.223175Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2021/plan-sections/03",
+      "updateTime": "2026-09-14T19:19:54.223175Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2021/plan-sections/04",
+      "updateTime": "2026-09-14T19:19:54.223175Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2021/plan-sections/05",
+      "updateTime": "2026-09-14T19:19:54.223175Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2021/plan-sections/06",
+      "updateTime": "2026-09-14T19:19:54.223175Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2021/plan-sections/07",
+      "updateTime": "2026-09-14T19:19:54.223175Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2021/plan-sections/08",
+      "updateTime": "2026-09-14T19:19:54.223175Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2021/plan-sections/09",
+      "updateTime": "2026-09-14T19:19:54.223175Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2021/plan-sections/10",
+      "updateTime": "2026-09-14T19:19:54.223175Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2021/plan-sections/11",
+      "updateTime": "2026-09-14T19:19:54.223175Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2021/plan-sections/12",
+      "updateTime": "2026-09-14T19:19:54.223175Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2022",
+      "updateTime": "2026-09-14T19:19:57.778351Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2022/plan-sections/01",
+      "updateTime": "2026-09-14T19:19:57.778351Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2022/plan-sections/02",
+      "updateTime": "2026-09-14T19:19:57.778351Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2022/plan-sections/03",
+      "updateTime": "2026-09-14T19:19:57.778351Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2022/plan-sections/04",
+      "updateTime": "2026-09-14T19:19:57.778351Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2022/plan-sections/05",
+      "updateTime": "2026-09-14T19:19:57.778351Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2022/plan-sections/06",
+      "updateTime": "2026-09-14T19:19:57.778351Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2022/plan-sections/07",
+      "updateTime": "2026-09-14T19:19:57.778351Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2022/plan-sections/08",
+      "updateTime": "2026-09-14T19:19:57.778351Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2022/plan-sections/09",
+      "updateTime": "2026-09-14T19:19:57.778351Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2022/plan-sections/10",
+      "updateTime": "2026-09-14T19:19:57.778351Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2022/plan-sections/11",
+      "updateTime": "2026-09-14T19:19:57.778351Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2022/plan-sections/12",
+      "updateTime": "2026-09-14T19:19:57.778351Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2023",
+      "updateTime": "2026-09-14T19:20:01.510768Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2023/plan-sections/01",
+      "updateTime": "2026-09-14T19:20:01.510768Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2023/plan-sections/02",
+      "updateTime": "2026-09-14T19:20:01.510768Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2023/plan-sections/03",
+      "updateTime": "2026-09-14T19:20:01.510768Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2023/plan-sections/04",
+      "updateTime": "2026-09-14T19:20:01.510768Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2023/plan-sections/05",
+      "updateTime": "2026-09-14T19:20:01.510768Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2023/plan-sections/06",
+      "updateTime": "2026-09-14T19:20:01.510768Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2023/plan-sections/07",
+      "updateTime": "2026-09-14T19:20:01.510768Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2023/plan-sections/08",
+      "updateTime": "2026-09-14T19:20:01.510768Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2023/plan-sections/09",
+      "updateTime": "2026-09-14T19:20:01.510768Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2023/plan-sections/10",
+      "updateTime": "2026-09-14T19:20:01.510768Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2023/plan-sections/11",
+      "updateTime": "2026-09-14T19:20:01.510768Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2023/plan-sections/12",
+      "updateTime": "2026-09-14T19:20:01.510768Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2024",
+      "updateTime": "2026-09-14T19:20:05.573856Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2024/plan-sections/01",
+      "updateTime": "2026-09-14T19:20:05.573856Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2024/plan-sections/02",
+      "updateTime": "2026-09-14T19:20:05.573856Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2024/plan-sections/03",
+      "updateTime": "2026-09-14T19:20:05.573856Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2024/plan-sections/04",
+      "updateTime": "2026-09-14T19:20:05.573856Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2024/plan-sections/05",
+      "updateTime": "2026-09-14T19:20:05.573856Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2024/plan-sections/06",
+      "updateTime": "2026-09-14T19:20:05.573856Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2024/plan-sections/07",
+      "updateTime": "2026-09-14T19:20:05.573856Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2024/plan-sections/08",
+      "updateTime": "2026-09-14T19:20:05.573856Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2024/plan-sections/09",
+      "updateTime": "2026-09-14T19:20:05.573856Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2024/plan-sections/10",
+      "updateTime": "2026-09-14T19:20:05.573856Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2024/plan-sections/11",
+      "updateTime": "2026-09-14T19:20:05.573856Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2024/plan-sections/12",
+      "updateTime": "2026-09-14T19:20:05.573856Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2025",
+      "updateTime": "2026-09-14T19:20:09.073966Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2025/plan-sections/01",
+      "updateTime": "2026-09-14T19:20:09.073966Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2025/plan-sections/02",
+      "updateTime": "2026-09-14T19:20:09.073966Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2025/plan-sections/03",
+      "updateTime": "2026-09-14T19:20:09.073966Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2025/plan-sections/04",
+      "updateTime": "2026-09-14T19:20:09.073966Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2025/plan-sections/05",
+      "updateTime": "2026-09-14T19:20:09.073966Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2025/plan-sections/06",
+      "updateTime": "2026-09-14T19:20:09.073966Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2025/plan-sections/07",
+      "updateTime": "2026-09-14T19:20:09.073966Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2025/plan-sections/08",
+      "updateTime": "2026-09-14T19:20:09.073966Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2025/plan-sections/09",
+      "updateTime": "2026-09-14T19:20:09.073966Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2025/plan-sections/10",
+      "updateTime": "2026-09-14T19:20:09.073966Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2025/plan-sections/11",
+      "updateTime": "2026-09-14T19:20:09.073966Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2025/plan-sections/12",
+      "updateTime": "2026-09-14T19:20:09.073966Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2026",
+      "updateTime": "2026-09-14T19:20:12.630032Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2026/plan-sections/01",
+      "updateTime": "2026-09-14T19:20:12.630032Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2026/plan-sections/02",
+      "updateTime": "2026-09-14T19:20:12.630032Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2026/plan-sections/03",
+      "updateTime": "2026-09-14T19:20:12.630032Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2026/plan-sections/04",
+      "updateTime": "2026-09-14T19:20:12.630032Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2026/plan-sections/05",
+      "updateTime": "2026-09-14T19:20:12.630032Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2026/plan-sections/06",
+      "updateTime": "2026-09-14T19:20:12.630032Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2026/plan-sections/07",
+      "updateTime": "2026-09-14T19:20:12.630032Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2026/plan-sections/08",
+      "updateTime": "2026-09-14T19:20:12.630032Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2026/plan-sections/09",
+      "updateTime": "2026-09-14T19:20:12.630032Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2026/plan-sections/10",
+      "updateTime": "2026-09-14T19:20:12.630032Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2026/plan-sections/11",
+      "updateTime": "2026-09-14T19:20:12.630032Z"
+    },
+    {
+      "path": "plans/la-bonne-semence-2026/plan-sections/12",
+      "updateTime": "2026-09-14T19:20:12.630032Z"
+    }
+  ]
+}

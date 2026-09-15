@@ -145,15 +145,11 @@ const DailyMeditationCard = ({
         }
       >
         <Box className="overflow-hidden border-continuous flex-row items-center justify-center opacity-[0.5]">
-          {!addDay && (
+          {!addDay && Platform.OS !== 'web' && (
             <Link
               size={44}
               accessibilityLabel={t('Recevoir une notification quotidienne')}
-              onPress={() =>
-                Platform.OS === 'web'
-                  ? router.push('/daily-reading')
-                  : notificationModalRef.current?.present()
-              }
+              onPress={() => notificationModalRef.current?.present()}
             >
               <FeatherIcon name="bell" size={16} />
             </Link>

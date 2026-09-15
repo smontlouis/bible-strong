@@ -1,0 +1,18 @@
+{
+  "status": "published-and-verified",
+  "projectId": "bible-strong-app",
+  "database": "(default)",
+  "productionWrites": 78,
+  "verifiedReadings": 2191,
+  "editions": {
+    "2021": 365,
+    "2022": 365,
+    "2023": 365,
+    "2024": 366,
+    "2025": 365,
+    "2026": 365
+  },
+  "publicReadback": "all parents and monthly sections match prepared documents",
+  "existingLbs": "unchanged",
+  "verifiedAt": "2026-09-14T19:20:54.889814+00:00"
+}

@@ -16,7 +16,7 @@ This report is a directional agent-readability score, not a product quality verd
 | `bibleReferencePreview` | 9/10 | 12 | 5 | no | no | no mapped smoke path |
 | `bookmarks` | 8/10 | 8 | 2 | no | no | no mapped smoke path; no feature README |
 | `commentaries` | 7/10 | 46 | 17 | no | no | no mapped smoke path; no feature README; 4 eslint-disable markers |
-| `daily-reading` | 8/10 | 21 | 9 | no | no | no mapped smoke path; no feature README |
+| `daily-reading` | 8/10 | 25 | 11 | no | no | no mapped smoke path; no feature README |
 | `dictionnary` | 9/10 | 12 | 2 | yes | no | 2 eslint-disable markers |
 | `entityListQuery` | 8/10 | 6 | 5 | no | no | no mapped smoke path; no feature README |
 | `feature-onboarding` | 6/10 | 9 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README |
@@ -28,7 +28,7 @@ This report is a directional agent-readability score, not a product quality verd
 | `notes` | 7/10 | 9 | 1 | no | no | no mapped smoke path; no feature README; 1 eslint-disable markers |
 | `onboarding` | 8/10 | 54 | 11 | yes | yes | 3 eslint-disable markers; sensitive user/account surface |
 | `passageMediaLibrary` | 6/10 | 3 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README |
-| `plans` | 9/10 | 38 | 4 | yes | no | 1 eslint-disable markers |
+| `plans` | 9/10 | 38 | 6 | yes | no | 1 eslint-disable markers |
 | `playground` | 8/10 | 5 | 1 | no | no | no mapped smoke path; no feature README |
 | `profile` | 5/10 | 9 | 0 | no | yes | no colocated feature tests; no mapped smoke path; no feature README; sensitive user/account surface |
 | `resources` | 8/10 | 41 | 28 | no | no | no mapped smoke path; no feature README |

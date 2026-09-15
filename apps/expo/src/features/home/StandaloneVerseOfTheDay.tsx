@@ -1,3 +1,4 @@
+import { useLocalReadingDate } from '~features/daily-reading/useDailyMeditation'
 import ReminderSettings from '~features/daily-reading/ReminderSettings'
 import { useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
@@ -103,7 +104,8 @@ const StandaloneVerseOfTheDay = ({
   footer,
   style,
 }: VerseCardProps) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const displayedDate = useLocalReadingDate(addDay)
   const router = useRouter()
   const bibleFont = useSelector(selectFontFamily)
   const verseOfTheDay = useVerseOfTheDay(addDay)
@@ -113,7 +115,13 @@ const StandaloneVerseOfTheDay = ({
   const verseOfTheDayTime = useSelector(
     (state: RootState) => state.user.notifications.verseOfTheDay
   )
-  const ago = dayToAgo(addDay, t)
+  const ago =
+    dayToAgo(addDay, t) ??
+    new Date(`${displayedDate}T12:00:00`).toLocaleDateString(i18n.language, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })
   const notificationModalRef = React.useRef<SheetRef>(null)
   const cardClassName = desktop
     ? 'flex-1 p-[24px] pb-[12px]'
@@ -214,14 +222,10 @@ const StandaloneVerseOfTheDay = ({
         }
       >
         <Box className="overflow-hidden border-continuous flex-row items-center justify-center opacity-[0.5]">
-          {!addDay && (
+          {!addDay && Platform.OS !== 'web' && (
             <Link
               accessibilityLabel={t('Recevoir une notification quotidienne')}
-              onPress={() =>
-                Platform.OS === 'web'
-                  ? router.push('/daily-reading')
-                  : notificationModalRef.current?.present()
-              }
+              onPress={() => notificationModalRef.current?.present()}
               size={44}
             >
               <FeatherIcon size={16} name="bell" />

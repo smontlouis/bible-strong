@@ -1,5 +1,6 @@
 import type { Plan } from '~common/types'
 import {
+  getEditorialKind,
   findMeditationForDate,
   getMeditationDateKey,
   isCivilDate,
@@ -12,6 +13,8 @@ export const resolveMeditationReading = (
   requestedDate: string | undefined,
   today: string
 ) => {
+  if (getEditorialKind(collection) !== 'daily-meditation')
+    return { reading: undefined, date: undefined }
   if (readingId) {
     const reading = collection.sections
       .flatMap(section => section.readingSlices)

@@ -11,7 +11,8 @@ export const getEditorialKind = (
   content: Pick<Plan, 'type' | 'kind'>
 ): EditorialKind | undefined => {
   if (content.kind === 'reading-plan' || content.kind === 'daily-meditation') return content.kind
-  if (['yearly', 'Plan annuel', 'Yearly Plan'].includes(content.type)) return 'reading-plan'
+  if (['reading-plan', 'yearly', 'Plan annuel', 'Yearly Plan'].includes(content.type))
+    return 'reading-plan'
   if (['meditation', 'Livre de méditation', 'Meditation Book'].includes(content.type))
     return 'daily-meditation'
   return undefined

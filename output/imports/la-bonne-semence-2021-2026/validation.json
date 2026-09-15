@@ -1,0 +1,58 @@
+{
+  "projectId": "bible-strong-app",
+  "documents": 78,
+  "readings": 2191,
+  "revision": "15adb07fae171abcc4cce4f89135bedb7a254e19fbf0e093cce850e5486be503",
+  "editions": [
+    {
+      "id": "la-bonne-semence-2021",
+      "year": 2021,
+      "readings": 365,
+      "sections": 12,
+      "first": "2021-01-01",
+      "last": "2021-12-31"
+    },
+    {
+      "id": "la-bonne-semence-2022",
+      "year": 2022,
+      "readings": 365,
+      "sections": 12,
+      "first": "2022-01-01",
+      "last": "2022-12-31"
+    },
+    {
+      "id": "la-bonne-semence-2023",
+      "year": 2023,
+      "readings": 365,
+      "sections": 12,
+      "first": "2023-01-01",
+      "last": "2023-12-31"
+    },
+    {
+      "id": "la-bonne-semence-2024",
+      "year": 2024,
+      "readings": 366,
+      "sections": 12,
+      "first": "2024-01-01",
+      "last": "2024-12-31"
+    },
+    {
+      "id": "la-bonne-semence-2025",
+      "year": 2025,
+      "readings": 365,
+      "sections": 12,
+      "first": "2025-01-01",
+      "last": "2025-12-31"
+    },
+    {
+      "id": "la-bonne-semence-2026",
+      "year": 2026,
+      "readings": 365,
+      "sections": 12,
+      "first": "2026-01-01",
+      "last": "2026-12-31"
+    }
+  ],
+  "repeatedContentDates": [],
+  "maxDocumentJsonBytes": 71883
+}

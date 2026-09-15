@@ -160,7 +160,7 @@ const TextButton = (
   const { small, reverse } = props
   const resolvedClassName = twMerge('font-bold text-[16px]', className)
   return (
-    <NativeUI.Text
+    <Text
       {...props}
       className={resolvedClassName}
       style={

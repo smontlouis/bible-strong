@@ -1,0 +1,436 @@
+[
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/365j",
+    "data": {
+      "author": {
+        "displayName": "David Houstin & Ezechiel 37 Ministères",
+        "photoUrl": "https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2F365j-logo.png?alt=media&token=627010ab-f3a7-4b2e-a669-4d7bb87e0c34",
+        "id": "david-housin"
+      },
+      "id": "365j",
+      "description": "\"365 jours pour ranimer la flamme\" est un recueil de méditations bibliques écrites par David Houstin et Ezechiel 37 Ministères.",
+      "lastUpdate": "1608403040299",
+      "image": "365j",
+      "type": "Livre de méditation",
+      "downloads": 24883,
+      "lang": "fr",
+      "title": "365 jours pour ranimer la flamme"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/avec-dieu-chaque-jour",
+    "data": {
+      "description": "Les méditations groupées dans ce volume consistent en un texte biblique pour chaque jour, accompagné d'extraits appropriés des écrits de Madame Ellen Gould White qui, pendant soixante-dix ans, s'occupa des besoins spirituels de ceux qui l'entouraient.\n\nElle ne se borna pas à faire des principes chrétiens le thème de ses écrits et de ses causeries publiques, mais elle en donna la démonstration pratique dans sa vie d'enfant, de jeune femme, de mère, de voisine secourable, de personnalité de premier plan au sein de son Église, et en tant que voyageuse ayant parcouru le monde entier\n\nQuelques-unes des exhortations contenues dans ce petit volume étaient, originellement destinées à la famille, considérée dans son ensemble, d'autres aux parents, aux enfants ou aux jeunes gens. Parfois, ces citations ont une portée plus générale. Mais dans chaque cas, le message parle clairement au cœur du lecteur, quels que soient son âge, sa profession ou sa situation.\n\nCe petit ouvrage a été compilé par les soins du “Conseil d'administration des publications d'E. G. White”, qui a fait ce travail en harmonie avec les instructions laissées par Madame White au sujet de la publication et de la compilation de ses écrits.\n\nPuissent les brèves méditations quotidiennes qui leur sont offertes dans ce petit livre aider les lecteurs à vivre avec Dieu jour après jour, tel est le vœu sincère des éditeurs et du Conseil d'administration des publications d'E. G. White.",
+      "lastUpdate": "1587254084990",
+      "image": "avec-dieu-chaque-jour",
+      "author": {
+        "displayName": "EGW",
+        "photoUrl": "https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2FEGW.jpg?alt=media&token=cc894c50-7df2-42ac-a03a-abd86f1952fd",
+        "id": "ellen-g-white"
+      },
+      "title": "Avec Dieu Chaque Jour",
+      "downloads": 20286,
+      "lang": "fr",
+      "id": "avec-dieu-chaque-jour",
+      "type": "Livre de méditation"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/bible-project-plan",
+    "data": {
+      "lang": "fr",
+      "title": "Lire les écritures",
+      "featured": true,
+      "type": "Plan annuel",
+      "subTitle": "The Bible Project",
+      "id": "bible-project-plan",
+      "image": "readscripture",
+      "downloads": 2894,
+      "description": "Découvrez le plan \"ReadScripture\" développé par le ministère Crazy Love en collaboration avec The Bible Project.\nLes vidéos du Projet biblique, illustrées à la main, expliquent des concepts et des thèmes difficiles, en plus des textes bibliques.Ce tout nouveau plan de lecture thématique met constamment en évidence les textes dans leur ensemble afin que vous puissiez toujours avoir une vue d'ensemble dans votre lecture.\n\nCe plan se déroule généralement sur 365 jours, mais vous êtes libres de le lire à votre rythme !",
+      "lastUpdate": "1587254084993",
+      "author": {
+        "photoUrl": "https://lh3.googleusercontent.com/a-/AOh14GgMHihnLd5Bje30QhtP8s_eaUALPMDalSyOhTAWiw=s96-c",
+        "displayName": "Stéphane MLC",
+        "id": "ZvfOG5Yt9rN2lKc4sjb3n5W5pit1"
+      }
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/bible-project-plan-en",
+    "data": {
+      "author": {
+        "displayName": "Stéphane MLC",
+        "id": "ZvfOG5Yt9rN2lKc4sjb3n5W5pit1",
+        "photoUrl": "https://lh3.googleusercontent.com/a-/AOh14GgMHihnLd5Bje30QhtP8s_eaUALPMDalSyOhTAWiw=s96-c"
+      },
+      "downloads": 713,
+      "image": "readscripture-en",
+      "id": "bible-project-plan-en",
+      "description": "Discover the \"ReadScripture\" plan that the Crazy Love Ministry has developed in collaboration with The Bible Project. This plan usually runs for 365 days, but you are free to read it at your own pace!",
+      "lastUpdate": "1593842848204",
+      "type": "Yearly Plan",
+      "lang": "en",
+      "title": "Read Scripture"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/christ-triumphant",
+    "data": {
+      "type": "Meditation Book",
+      "title": "Christ Triumphant",
+      "image": "christ-triumphant",
+      "lang": "en",
+      "author": {
+        "displayName": "EGW",
+        "photoUrl": "https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2FEGW.jpg?alt=media&token=cc894c50-7df2-42ac-a03a-abd86f1952fd",
+        "id": "ellen-g-white"
+      },
+      "downloads": 2223,
+      "lastUpdate": "1593842848202",
+      "id": "christ-triumphant",
+      "description": "Daily readings— drawn from letters, manuscripts, and other Ellen White sources— pull together to illustrate the background, purpose, and enormity of the great controversy battle. And, as the title suggests, each reading declares the power of God to overcome in the fierce conflict, despite the foreboding circumstances."
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/conflict-and-courage",
+    "data": {
+      "downloads": 1747,
+      "type": "Meditation Book",
+      "lang": "en",
+      "lastUpdate": "1593842848202",
+      "author": {
+        "photoUrl": "https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2FEGW.jpg?alt=media&token=cc894c50-7df2-42ac-a03a-abd86f1952fd",
+        "displayName": "EGW",
+        "id": "ellen-g-white"
+      },
+      "title": "Conflict and Courage",
+      "image": "conflict-and-courage",
+      "description": "Prophets and priests, kings and apostles, parade though the inspired pages of this daily devotional. Arranged roughly in chronological order, each reading focuses on some decisive moment in salvation history, and shows how the lessons of the past illuminate our future. In the exploits and failures of saints and sinners we find counsel, comfort and hope for today a passing of the torch so that the same faith that blazed in God's servants of old might burn anew in us.",
+      "id": "conflict-and-courage"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/faith-checkbook",
+    "data": {
+      "lastUpdate": "1608280881176",
+      "title": "Faith's checkbook",
+      "lang": "en",
+      "description": "Faith's Checkbook Daily Devotional from Charles Spurgeon is a popular daily Bible devotion. Faith's Checkbook Daily Devotional from Charles Spurgeon offers wisdom and insight for applying Biblical truths to the ups and downs of everyday life. Reading daily devotions provides strength and encouragement in your daily walk with Jesus Christ.",
+      "downloads": 2188,
+      "image": "faith-checkbook",
+      "type": "Meditation Book",
+      "id": "faith-checkbook",
+      "author": {
+        "photoUrl": "https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2FSPUR.png?alt=media&token=55583056-aa13-4875-8f67-b7f51c93b0f5",
+        "displayName": "Charles Spurgeon",
+        "id": "charles-spurgeon"
+      }
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/gods-amazing-grace",
+    "data": {
+      "image": "gods-amazing-grace",
+      "lastUpdate": "1593842848202",
+      "description": "“As we make Christ our daily companion we shall feel that the powers of an unseen world are all around us; and by looking unto Jesus we shall become assimilated to His image. By beholding we become changed. The characters is softened, refined, and ennobled . . . The soul that turns to God for its help, its support, its power, by daily, earnest prayer, will have noble aspirations, clear perceptions of truth and duty, lofty purposes of action, and a continual hungering and thirsting after righteousness. By maintaining a connection with God, we shall be enabled to diffuse to others, through our association with them, the light, the peace, the serenity, that rule in our hearts” (p. 290). May you find the serenity that comes from knowing the One whose Spirit inspired these pages.",
+      "title": "God's Amazing Grace",
+      "id": "gods-amazing-grace",
+      "type": "Meditation Book",
+      "author": {
+        "id": "ellen-g-white",
+        "displayName": "EGW",
+        "photoUrl": "https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2FEGW.jpg?alt=media&token=cc894c50-7df2-42ac-a03a-abd86f1952fd"
+      },
+      "downloads": 1799,
+      "lang": "en"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/la-bonne-semence-2021",
+    "data": {
+      "author": {
+        "id": "bpc",
+        "photoUrl": "",
+        "displayName": "Bibles et Publications Chrétiennes"
+      },
+      "lastUpdate": 1789413345237,
+      "description": "Édition 2021 du calendrier La Bonne Semence. Bibles et Publications Chrétiennes. https://editeurbpc.com/calendriers/la-bonne-semence",
+      "kind": "daily-meditation",
+      "id": "la-bonne-semence-2021",
+      "sourceUrl": "https://editeurbpc.com/calendriers/la-bonne-semence",
+      "editionYear": 2021,
+      "lang": "fr",
+      "image": "lbs",
+      "downloads": 2,
+      "rights": {
+        "publisher": "Bibles et Publications Chrétiennes",
+        "basis": "publisher-permission",
+        "confirmation": "User confirmed permission from BPC and production import on 2026-09-14"
+      },
+      "title": "La Bonne Semence 2021",
+      "type": "Livre de méditation",
+      "importRevision": "15adb07fae171abcc4cce4f89135bedb7a254e19fbf0e093cce850e5486be503"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/la-bonne-semence-2022",
+    "data": {
+      "description": "Édition 2022 du calendrier La Bonne Semence. Bibles et Publications Chrétiennes. https://editeurbpc.com/calendriers/la-bonne-semence",
+      "kind": "daily-meditation",
+      "lastUpdate": 1789413345237,
+      "rights": {
+        "basis": "publisher-permission",
+        "publisher": "Bibles et Publications Chrétiennes",
+        "confirmation": "User confirmed permission from BPC and production import on 2026-09-14"
+      },
+      "id": "la-bonne-semence-2022",
+      "lang": "fr",
+      "image": "lbs",
+      "type": "Livre de méditation",
+      "title": "La Bonne Semence 2022",
+      "editionYear": 2022,
+      "downloads": 2,
+      "importRevision": "15adb07fae171abcc4cce4f89135bedb7a254e19fbf0e093cce850e5486be503",
+      "author": {
+        "id": "bpc",
+        "displayName": "Bibles et Publications Chrétiennes",
+        "photoUrl": ""
+      },
+      "sourceUrl": "https://editeurbpc.com/calendriers/la-bonne-semence"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/la-bonne-semence-2023",
+    "data": {
+      "rights": {
+        "publisher": "Bibles et Publications Chrétiennes",
+        "confirmation": "User confirmed permission from BPC and production import on 2026-09-14",
+        "basis": "publisher-permission"
+      },
+      "importRevision": "15adb07fae171abcc4cce4f89135bedb7a254e19fbf0e093cce850e5486be503",
+      "downloads": 3,
+      "sourceUrl": "https://editeurbpc.com/calendriers/la-bonne-semence",
+      "editionYear": 2023,
+      "id": "la-bonne-semence-2023",
+      "lastUpdate": 1789413345237,
+      "image": "lbs",
+      "kind": "daily-meditation",
+      "title": "La Bonne Semence 2023",
+      "lang": "fr",
+      "description": "Édition 2023 du calendrier La Bonne Semence. Bibles et Publications Chrétiennes. https://editeurbpc.com/calendriers/la-bonne-semence",
+      "author": {
+        "photoUrl": "",
+        "displayName": "Bibles et Publications Chrétiennes",
+        "id": "bpc"
+      },
+      "type": "Livre de méditation"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/la-bonne-semence-2024",
+    "data": {
+      "author": {
+        "photoUrl": "",
+        "displayName": "Bibles et Publications Chrétiennes",
+        "id": "bpc"
+      },
+      "kind": "daily-meditation",
+      "editionYear": 2024,
+      "image": "lbs",
+      "type": "Livre de méditation",
+      "lang": "fr",
+      "title": "La Bonne Semence 2024",
+      "downloads": 3,
+      "description": "Édition 2024 du calendrier La Bonne Semence. Bibles et Publications Chrétiennes. https://editeurbpc.com/calendriers/la-bonne-semence",
+      "lastUpdate": 1789413345237,
+      "importRevision": "15adb07fae171abcc4cce4f89135bedb7a254e19fbf0e093cce850e5486be503",
+      "sourceUrl": "https://editeurbpc.com/calendriers/la-bonne-semence",
+      "rights": {
+        "publisher": "Bibles et Publications Chrétiennes",
+        "confirmation": "User confirmed permission from BPC and production import on 2026-09-14",
+        "basis": "publisher-permission"
+      },
+      "id": "la-bonne-semence-2024"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/la-bonne-semence-2025",
+    "data": {
+      "lastUpdate": 1789413345237,
+      "importRevision": "15adb07fae171abcc4cce4f89135bedb7a254e19fbf0e093cce850e5486be503",
+      "id": "la-bonne-semence-2025",
+      "description": "Édition 2025 du calendrier La Bonne Semence. Bibles et Publications Chrétiennes. https://editeurbpc.com/calendriers/la-bonne-semence",
+      "rights": {
+        "publisher": "Bibles et Publications Chrétiennes",
+        "confirmation": "User confirmed permission from BPC and production import on 2026-09-14",
+        "basis": "publisher-permission"
+      },
+      "type": "Livre de méditation",
+      "title": "La Bonne Semence 2025",
+      "sourceUrl": "https://editeurbpc.com/calendriers/la-bonne-semence",
+      "lang": "fr",
+      "image": "lbs",
+      "author": {
+        "id": "bpc",
+        "photoUrl": "",
+        "displayName": "Bibles et Publications Chrétiennes"
+      },
+      "editionYear": 2025,
+      "downloads": 2,
+      "kind": "daily-meditation"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/la-bonne-semence-2026",
+    "data": {
+      "editionYear": 2026,
+      "rights": {
+        "publisher": "Bibles et Publications Chrétiennes",
+        "basis": "publisher-permission",
+        "confirmation": "User confirmed permission from BPC and production import on 2026-09-14"
+      },
+      "description": "Édition 2026 du calendrier La Bonne Semence. Bibles et Publications Chrétiennes. https://editeurbpc.com/calendriers/la-bonne-semence",
+      "kind": "daily-meditation",
+      "sourceUrl": "https://editeurbpc.com/calendriers/la-bonne-semence",
+      "importRevision": "15adb07fae171abcc4cce4f89135bedb7a254e19fbf0e093cce850e5486be503",
+      "id": "la-bonne-semence-2026",
+      "author": {
+        "displayName": "Bibles et Publications Chrétiennes",
+        "id": "bpc",
+        "photoUrl": ""
+      },
+      "image": "lbs",
+      "downloads": 5,
+      "lang": "fr",
+      "title": "La Bonne Semence 2026",
+      "type": "Livre de méditation",
+      "lastUpdate": 1789413345237
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/lbs",
+    "data": {
+      "title": "La Bonne Semence 2020",
+      "lang": "fr",
+      "downloads": 8730,
+      "lastUpdate": "1789413960616",
+      "image": "lbs",
+      "author": {
+        "displayName": "La bonne semence",
+        "id": "lbs",
+        "photoUrl": "https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Flbs-logo.png?alt=media&token=aee578a0-f47c-48be-8693-db27aaf7250c"
+      },
+      "type": "Livre de méditation",
+      "description": "Le site officiel de \"La Bonne Semence\" est disponible à l'adresse : https://labonnesemence.com",
+      "id": "lbs"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/levez-vos-yeux-en-haut",
+    "data": {
+      "image": "levez-vos-yeux-en-haut",
+      "lastUpdate": "1607423629140",
+      "downloads": 8289,
+      "author": {
+        "displayName": "EGW",
+        "id": "ellen-g-white",
+        "photoUrl": "https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2FEGW.jpg?alt=media&token=cc894c50-7df2-42ac-a03a-abd86f1952fd"
+      },
+      "title": "Levez vos Yeux en Haut",
+      "description": "Les yeux fixés sur Jésus, qui n'est pas seulement notre exemple, mais aussi l'auteur et l'aboutissement de notre foi, allons de l'avant, en ayant confiance qu'Il nous donnera toute la force nécessaire pour chaque devoir. Tout au long de sa vie Ellen White a constamment montré Jésus comme étant notre espérance et notre salut. Qu'elle offre des messages de réprimande pour les croyants errants ou bien pour l'apprentissage pour les fidèles, son thème récurrent était le Christ, et uniquement le Christ. Dans ces extraits de ses lettres et manuscrits, nos pensées sont amenées à se tourner vers le ciel tout comme nous sommes encouragés à “suivre étape par étape, en gardant nos yeux fixés sur notre chef ”. Nous sommes réellement capables d'être d'authentiques chrétiens que quand notre attention reste concentrée sur le Christ.",
+      "id": "levez-vos-yeux-en-haut",
+      "type": "Livre de méditation",
+      "lang": "fr"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/ltdlf",
+    "data": {
+      "lang": "fr",
+      "author": {
+        "id": "charles-spurgeon",
+        "displayName": "Charles Spurgeon",
+        "photoUrl": "https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2FSPUR.png?alt=media&token=55583056-aa13-4875-8f67-b7f51c93b0f5"
+      },
+      "type": "Livre de méditation",
+      "lastUpdate": "1608972308349",
+      "title": "Les trésors de la Foi",
+      "downloads": 12037,
+      "description": "\"Les Trésors de la Foi\" est un recueil de 366 méditations bibliques de Charles Spurgeon.",
+      "image": "ltdlf",
+      "id": "ltdlf"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/puissance-de-la-grace",
+    "data": {
+      "image": "puissance-de-la-grace",
+      "downloads": 13183,
+      "title": "Puissance de la Grâce",
+      "type": "Livre de méditation",
+      "id": "puissance-de-la-grace",
+      "description": "“Alors que nous faisons du Christ notre compagnon quotidien, nous devons réaliser que les pouvoirs d'un monde invisible nous entourent, et par le regard que nous portons sur Jésus, nous deviendrons être assimilés à Son image. En voyant, nous changeons. Les caractères s'adoucissent, se raffinent, et s'anoblissent... L'âme qui se tourne vers Dieu pour son aide, son soutien, sa puissance, par une fervente prière quotidienne, aura de nobles aspirations, et des perceptions claires de la vérité et du devoir, de nobles objectifs dans l'action, et une soif et une faim continue de justice. En entretenant un lien avec Dieu, nous sommes en mesure de diffuser à d'autres, grâces à nos relations avec eux, la lumière, la paix, la sérénité, qui dirigent nos cœurs” (p. 290\n\nPuissiez-vous trouver la sérénité qui vient en connaissant Celui dont l'Esprit a inspiré ces pages.",
+      "author": {
+        "displayName": "EGW",
+        "id": "ellen-g-white",
+        "photoUrl": "https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2FEGW.jpg?alt=media&token=cc894c50-7df2-42ac-a03a-abd86f1952fd"
+      },
+      "lang": "fr",
+      "lastUpdate": "1587254084988"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/the-faith-i-live-by",
+    "data": {
+      "id": "the-faith-i-live-by",
+      "author": {
+        "displayName": "EGW",
+        "id": "ellen-g-white",
+        "photoUrl": "https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2FEGW.jpg?alt=media&token=cc894c50-7df2-42ac-a03a-abd86f1952fd"
+      },
+      "downloads": 2150,
+      "lastUpdate": "1593842848202",
+      "type": "Meditation Book",
+      "image": "the-faith-i-live-by",
+      "description": "This devotional book is devoted exclusively to the subject of Bible doctrines. Providing both inspiration and information, each month focuses on a different topic. The daily readings are selections from Ellen White's previously published and unpublished writings that relate to the basic truths of Scripture. The book is extensively indexed with Scripture, topical, and outline indexes.",
+      "lang": "en",
+      "title": "The Faith I Live By"
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/tpqir",
+    "data": {
+      "description": "\"Tout Pour Qu'Il Règne\" est un recueil de méditations bibliques d'Oswald Chambers.",
+      "type": "Livre de méditation",
+      "author": {
+        "displayName": "Oswald Chambers",
+        "id": "tpqir",
+        "photoUrl": "https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Foswald-chambers.jpg?alt=media&token=18ebfe0e-77a0-45db-a8bb-9ac5a63cc259"
+      },
+      "lang": "fr",
+      "lastUpdate": "1608402369080",
+      "title": "Tout pour qu'il règne",
+      "image": "tpqir",
+      "id": "tpqir",
+      "downloads": 7840
+    }
+  },
+  {
+    "name": "projects/bible-strong-app/databases/(default)/documents/plans/vous-recevrez-puissance",
+    "data": {
+      "lastUpdate": "1587254084988",
+      "type": "Livre de méditation",
+      "title": "Vous recevrez une Puissance",
+      "id": "vous-recevrez-puissance",
+      "description": "Qui était Ellen White et pourquoi des millions de personnes accordent-elles une valeur et une signification particulière à ses écrits? \n\nEn bref, elle fut une femme aux dons spirituels remarquables, qui vécut la plus grande partie de sa vie au XIXe siècle (1827-1915). Ses écrits ont pourtant eu un impact révolutionnaire sur des millions de personnes du XXe siècle à travers le monde. \n\nDurant sa vie, elle a rédigé plus de cinq mille articles pour des périodiques et vingt-six livres. Mais aujourd'hui, en incluant les compilations tirées de cinquante-cinq mille pages de ses manuscrits, plus de cent titres sont disponibles en anglais. Si l'on en croit les informations disponibles, on peut penser qu'elle est la femme la plus traduite dans toute l'histoire de la littérature, et l'auteur américain, quelque soit le sexe, le plus traduit. Ses écrits couvrent un large champ de sujets. On peut citer l'éducation, la santé, la prophétie, la nutrition, les sujets culturels, le créationisme et l'origine de la vie. Son chef d'œuvre, Le meilleur chemin (en anglais: Steps to Christ), est un livre sur la vie chrétienne qui a transformé la vie d'un grand nombre de personnes. Il a été publié en plus de cent trente-cinq langues différentes.",
+      "lang": "fr",
+      "image": "vous-recevrez-une-puissance",
+      "author": {
+        "displayName": "EGW",
+        "photoUrl": "https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2FEGW.jpg?alt=media&token=cc894c50-7df2-42ac-a03a-abd86f1952fd",
+        "id": "ellen-g-white"
+      },
+      "downloads": 14033
+    }
+  }
+]

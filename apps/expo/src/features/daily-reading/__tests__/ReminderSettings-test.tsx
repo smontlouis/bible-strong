@@ -116,3 +116,13 @@ describe('reminder settings', () => {
     expect(change).not.toHaveBeenCalled()
   })
 })
+
+it('shows only the native time control on iOS, without a duplicate time label', () => {
+  mount('07:00')
+  expect(renderer!.root.findAll(node => String(node.type) === 'DateTimePicker')).toHaveLength(1)
+  expect(
+    renderer!.root
+      .findAll(node => String(node.type) === 'Text')
+      .some(node => node.props.children === '07:00')
+  ).toBe(false)
+})

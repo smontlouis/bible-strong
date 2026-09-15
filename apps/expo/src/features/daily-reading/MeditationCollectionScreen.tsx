@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { useLocalSearchParams } from 'expo-router'
+import { Redirect, useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import type { ComputedReadingSlice, Plan } from '~common/types'
 import Header from '~common/Header'
@@ -41,9 +41,12 @@ export default function MeditationCollectionScreen({
   const image = useFireStorage(collection?.image)
   const details = useRef<SheetRef>(null)
   const title = collection?.title ?? t('dailyReading.collection') ?? ''
+  if (collection && getEditorialKind(collection) === 'reading-plan')
+    return <Redirect href={{ pathname: '/plan', params: { planId: id } }} />
   return (
     <Container>
       <Header
+        maxWidth={1180}
         title={title}
         hasBackButton={hasBackButton}
         rightComponent={

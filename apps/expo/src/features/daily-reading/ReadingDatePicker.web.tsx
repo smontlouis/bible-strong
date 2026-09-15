@@ -6,6 +6,7 @@ import { I18nProvider } from 'react-aria-components'
 import { useTranslation } from 'react-i18next'
 import { webFontFamily } from '~helpers/webFontFamily'
 import { isCivilDate } from '~features/plans/readingCalendar'
+import themes from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
 import './reading-datepicker.generated.web.css'
 import type { ReadingDatePickerProps } from './ReadingDatePicker'
@@ -20,10 +21,14 @@ const ReadingDatePicker = ({
   const theme = useTheme()
   const { i18n } = useTranslation()
   const fontFamily = webFontFamily(theme.fontFamily.text)
+  const dark = ['black', 'dark', 'mauve', 'night'].some(
+    name => themes[name].colors === theme.colors
+  )
+  const themeClass = `reading-datepicker-theme${dark ? ' dark' : ''}`
   return (
     <I18nProvider locale={i18n.language}>
       <DatePicker
-        className="reading-datepicker-theme"
+        className={themeClass}
         aria-label={label}
         value={isCivilDate(value) ? parseDate(value) : null}
         minValue={minimum && isCivilDate(minimum) ? parseDate(minimum) : undefined}
@@ -43,7 +48,7 @@ const ReadingDatePicker = ({
             </DatePicker.Trigger>
           </DateField.Suffix>
         </DateField.Group>
-        <DatePicker.Popover className="reading-datepicker-theme" style={{ fontFamily }}>
+        <DatePicker.Popover className={themeClass} style={{ fontFamily }}>
           <Calendar aria-label={label}>
             <Calendar.Header>
               <Calendar.YearPickerTrigger>

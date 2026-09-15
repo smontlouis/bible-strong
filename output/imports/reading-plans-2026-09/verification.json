@@ -1,0 +1,295 @@
+{
+  "projectId": "bible-strong-app",
+  "verifiedAt": "2026-09-15T11:40:56.780488+00:00",
+  "sha256": "2274e640d4940da59f802551ea38451d30f927e4b652b0e6acda173eeb12404b",
+  "documents": [
+    {
+      "path": "plans/bibleproject-character-of-god-fr",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-character-of-god-fr/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-character-of-god-en",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-character-of-god-en/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-hope-fr",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-hope-fr/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-hope-en",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-hope-en/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-lords-prayer-en",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-lords-prayer-en/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-sermon-on-the-mount-en",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-sermon-on-the-mount-en/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-how-to-read-the-bible-fr",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-how-to-read-the-bible-fr/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-how-to-read-the-bible-en",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-how-to-read-the-bible-en/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-writings-of-john-fr",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-writings-of-john-fr/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-writings-of-john-fr/plan-sections/02",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-writings-of-john-en",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-writings-of-john-en/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-writings-of-john-en/plan-sections/02",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-pauls-letters-fr",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-pauls-letters-fr/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-pauls-letters-fr/plan-sections/02",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-pauls-letters-fr/plan-sections/03",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-pauls-letters-en",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-pauls-letters-en/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-pauls-letters-en/plan-sections/02",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-pauls-letters-en/plan-sections/03",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-gospels-fr",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-gospels-fr/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-gospels-fr/plan-sections/02",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-gospels-fr/plan-sections/03",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-gospels-fr/plan-sections/04",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-gospels-fr/plan-sections/05",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-gospels-en",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-gospels-en/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-gospels-en/plan-sections/02",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-gospels-en/plan-sections/03",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-gospels-en/plan-sections/04",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bibleproject-gospels-en/plan-sections/05",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-mark-fr",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-mark-fr/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-mark-en",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-mark-en/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-john-fr",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-john-fr/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-john-fr/plan-sections/02",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-john-en",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-john-en/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-john-en/plan-sections/02",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-proverbs-fr",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-proverbs-fr/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-proverbs-fr/plan-sections/02",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-proverbs-en",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-proverbs-en/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-proverbs-en/plan-sections/02",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-acts-fr",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-acts-fr/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-acts-fr/plan-sections/02",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-acts-en",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-acts-en/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-acts-en/plan-sections/02",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-james-fr",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-james-fr/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-james-en",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-james-en/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-philippians-fr",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-philippians-fr/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-philippians-en",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    },
+    {
+      "path": "plans/bible-strong-philippians-en/plan-sections/01",
+      "updateTime": "2026-09-15T11:40:31.442284Z"
+    }
+  ]
+}

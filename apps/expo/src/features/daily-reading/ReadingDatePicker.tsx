@@ -63,9 +63,10 @@ const ReadingDatePicker = ({
         }
       >
         <Text
-          numberOfLines={1}
           className={
-            variant === 'pill' ? 'text-primary font-bold' : 'text-primary text-[14px] font-bold'
+            variant === 'pill'
+              ? 'text-primary font-bold text-center shrink'
+              : 'text-primary text-[14px] font-bold text-center shrink'
           }
         >
           {date.toLocaleDateString(i18n.language, {

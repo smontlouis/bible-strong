@@ -7,9 +7,8 @@ import type { ComputedPlanItem, OngoingPlan } from '~common/types'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
-import { useLocalReadingDate } from '~features/daily-reading/useDailyMeditation'
 import { useFireStorage } from './plan.hooks'
-import { getScheduledPlanDay } from './readingCalendar'
+import { getPlanResumeDay } from './planProgress'
 
 const FollowedPlanCard = ({
   plan,
@@ -18,34 +17,24 @@ const FollowedPlanCard = ({
   plan: ComputedPlanItem
   participation: OngoingPlan
 }) => {
-  const { t, i18n } = useTranslation()
-  const today = useLocalReadingDate()
+  const { t } = useTranslation()
   const image = useFireStorage(plan.image)
-  const total = useSelector(
-    (state: RootState) =>
-      state.plan.myPlans
-        .find(item => item.id === plan.id)
-        ?.sections.reduce((count, section) => count + section.readingSlices.length, 0) ?? 0
+  const content = useSelector((state: RootState) =>
+    state.plan.myPlans.find(item => item.id === plan.id)
   )
-  const percent = Math.round(Math.max(0, Math.min(1, plan.progress)) * 100)
-  const day = participation.startDate
-    ? getScheduledPlanDay(participation.startDate, today)
-    : undefined
-  const detail =
-    plan.status === 'Completed'
-      ? t('readingPlans.finished')
-      : day !== undefined && total > 0 && day > total
-        ? t('readingPlans.calendarEnded')
-        : day !== undefined && day > 0
-          ? t('readingPlans.todayDay', { day })
-          : participation.startDate && day !== undefined
-            ? t('readingPlans.startsOn', {
-                date: new Date(`${participation.startDate}T12:00:00`).toLocaleDateString(
-                  i18n.language,
-                  { day: 'numeric', month: 'long' }
-                ),
-              })
-            : t('readingPlans.legacyProgress')
+  const readings = content?.sections.flatMap(section => section.readingSlices) ?? []
+  const total = readings.length
+  const day = getPlanResumeDay(readings, participation.readingSlices)
+  const completed = readings.filter(
+    reading => participation.readingSlices[reading.id] === 'Completed'
+  ).length
+  const percent = total ? (completed / total) * 100 : 0
+  const detail = !total
+    ? t('readingPlans.continue')
+    : t(total > 0 && completed === total ? 'readingPlans.finished' : 'readingPlans.dayOfTotal', {
+        day,
+        total,
+      })
 
   return (
     <Link
@@ -55,11 +44,11 @@ const FollowedPlanCard = ({
       accessibilityHint={t('readingPlans.continue')}
       className="flex-row items-center gap-[16px] bg-reverse rounded-[20px] p-[16px]"
     >
-      <Box className="w-[64px] h-[80px] rounded-[12px] bg-light-grey overflow-hidden items-center justify-center">
+      <Box className="w-[80px] h-[64px] rounded-[12px] bg-light-grey overflow-hidden items-center justify-center">
         {image ? (
           <Image
             source={{ uri: image }}
-            contentFit="contain"
+            contentFit="cover"
             accessible={false}
             style={{ width: '100%', height: '100%' }}
           />
@@ -69,18 +58,17 @@ const FollowedPlanCard = ({
       </Box>
       <Box className="flex-1 gap-[8px]">
         <Text className="text-default text-[16px] font-bold">{plan.title}</Text>
-        <Text className="text-grey text-[12px]">{detail}</Text>
         <Box className="flex-row items-center gap-[10px]">
           <Box
             accessibilityRole="progressbar"
-            accessibilityLabel={t('home.dashboard.planProgress', { percent })}
-            accessibilityValue={{ min: 0, max: 100, now: percent }}
-            className="flex-1 h-[5px] bg-light-grey rounded-full overflow-hidden"
+            accessibilityLabel={detail}
+            accessibilityValue={{ min: 0, max: total, now: completed }}
+            className="w-[50px] h-[5px] bg-light-grey rounded-full overflow-hidden"
           >
             <Box className="h-full bg-primary rounded-full" style={{ width: `${percent}%` }} />
           </Box>
-          <Text className="text-grey text-[12px]" style={{ fontVariant: ['tabular-nums'] }}>
-            {percent} %
+          <Text className="text-grey text-[12px] shrink" style={{ fontVariant: ['tabular-nums'] }}>
+            {detail}
           </Text>
         </Box>
       </Box>

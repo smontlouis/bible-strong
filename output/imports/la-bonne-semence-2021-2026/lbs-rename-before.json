@@ -1,0 +1,46 @@
+{
+  "name": "projects/bible-strong-app/databases/(default)/documents/plans/lbs",
+  "fields": {
+    "author": {
+      "mapValue": {
+        "fields": {
+          "id": {
+            "stringValue": "lbs"
+          },
+          "displayName": {
+            "stringValue": "La bonne semence"
+          },
+          "photoUrl": {
+            "stringValue": "https://firebasestorage.googleapis.com/v0/b/bible-strong-app.appspot.com/o/images%2Flbs-logo.png?alt=media&token=aee578a0-f47c-48be-8693-db27aaf7250c"
+          }
+        }
+      }
+    },
+    "description": {
+      "stringValue": "Le site officiel de \"La Bonne Semence\" est disponible à l'adresse : https://labonnesemence.com"
+    },
+    "lang": {
+      "stringValue": "fr"
+    },
+    "lastUpdate": {
+      "stringValue": "1608402226478"
+    },
+    "downloads": {
+      "doubleValue": 8728
+    },
+    "id": {
+      "stringValue": "lbs"
+    },
+    "type": {
+      "stringValue": "Livre de méditation"
+    },
+    "title": {
+      "stringValue": "La bonne semence"
+    },
+    "image": {
+      "stringValue": "lbs"
+    }
+  },
+  "createTime": "2020-12-19T19:35:38.465584Z",
+  "updateTime": "2026-09-14T16:54:33.341700Z"
+}

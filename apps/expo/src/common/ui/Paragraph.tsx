@@ -1,3 +1,4 @@
+import { resolveFontFamily } from '~themes/styleValues'
 import { useSelector } from 'react-redux'
 import type { RootState } from '~redux/modules/reducer'
 import type { Theme } from '~themes'
@@ -30,7 +31,9 @@ const Paragraph = ({
       selectable={props.selectable ?? true}
       style={[
         {
-          fontFamily: fontFamily ? theme.fontFamily[fontFamily] : theme.fontFamily.paragraph,
+          fontFamily: resolveFontFamily(
+            fontFamily ? theme.fontFamily[fontFamily] : theme.fontFamily.paragraph
+          ),
           fontSize: small ? 14 : scaleFontSize(19, scale + fontSizeScale),
           lineHeight: small ? 22 : scaleFontSize(29, scale + fontSizeScale, scaleLineHeight),
         },

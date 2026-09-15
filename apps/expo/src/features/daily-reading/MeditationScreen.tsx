@@ -17,7 +17,7 @@ import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { READING_TEXT_MAX_WIDTH } from '~common/readingLayout'
-import { getMeditationTitle, toCivilDate } from '~features/plans/readingCalendar'
+import { getMeditationTitle, toCivilDate, isCivilDate } from '~features/plans/readingCalendar'
 import { useReadingContent, useLocalReadingDate } from './useDailyMeditation'
 import { resolveMeditationReading } from './resolveMeditationReading'
 
@@ -48,7 +48,9 @@ export const MeditationReader = ({
   const wide = isWeb && availableWidth >= 860
   const cover = useFireStorage(collection?.image)
   const reading = resolved?.reading
-  const date = resolved?.date ?? (!readingId ? (requestedDate ?? today) : undefined)
+  const date =
+    resolved?.date ??
+    (!readingId ? (requestedDate && isCivilDate(requestedDate) ? requestedDate : today) : undefined)
   const { t } = useTranslation()
   const router = useRouter()
   const paramsSheet = useRef<SheetRef>(null)
@@ -80,6 +82,7 @@ export const MeditationReader = ({
   return (
     <Container>
       <Header
+        maxWidth={940}
         hasBackButton
         onCustomBackPress={onBack}
         title={reading ? getMeditationTitle(reading) : t('dailyReading.meditationHeading')}
@@ -119,6 +122,7 @@ export const MeditationReader = ({
         }
       />
       <ScrollView
+        key={`${collectionId}:${reading?.id ?? date ?? readingId}`}
         onLayout={event => setAvailableWidth(event.nativeEvent.layout.width)}
         contentContainerStyle={{
           width: '100%',
@@ -177,6 +181,7 @@ export const MeditationReader = ({
                 {!wide && (
                   <Link
                     size={36}
+                    hitSlop={4}
                     className="bg-light-grey rounded-[18px]"
                     accessibilityLabel={t('dailyReading.previous')}
                     onPress={() => move(-1)}
@@ -196,6 +201,7 @@ export const MeditationReader = ({
                   <Box className="flex-row items-center justify-between">
                     <Link
                       size={36}
+                      hitSlop={4}
                       accessibilityLabel={t('dailyReading.previous')}
                       onPress={() => move(-1)}
                       className="bg-light-grey rounded-[18px]"
@@ -204,6 +210,7 @@ export const MeditationReader = ({
                     </Link>
                     <Link
                       size={36}
+                      hitSlop={4}
                       accessibilityLabel={t('dailyReading.next')}
                       onPress={() => move(1)}
                       className="bg-light-grey rounded-[18px]"
@@ -214,6 +221,7 @@ export const MeditationReader = ({
                 ) : (
                   <Link
                     size={36}
+                    hitSlop={4}
                     className="bg-light-grey rounded-[18px]"
                     accessibilityLabel={t('dailyReading.next')}
                     onPress={() => move(1)}

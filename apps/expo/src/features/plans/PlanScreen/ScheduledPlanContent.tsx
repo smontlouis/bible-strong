@@ -2,7 +2,7 @@ import ReadingDatePicker from '~features/daily-reading/ReadingDatePicker'
 import { Image } from 'expo-image'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
-import { ScrollView } from 'react-native'
+import { Platform, ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import type { ComputedPlan, ComputedReadingSlice, Plan } from '~common/types'
@@ -12,13 +12,14 @@ import Button from '~common/ui/Button'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { pageContentStyle } from '~common/ui/PageContent'
-import ReminderSettings from '~features/daily-reading/ReminderSettings'
 import { useLocalReadingDate } from '~features/daily-reading/useDailyMeditation'
-import { startPlan, setPlanReminder, markAsRead } from '~redux/modules/plan'
+import { startPlan, markAsRead } from '~redux/modules/plan'
 import type { RootState } from '~redux/modules/reducer'
 import { useFireStorage } from '../plan.hooks'
-import { getPlanDayDate, getScheduledPlanDay, isCivilDate } from '../readingCalendar'
-import EntitySlice from './EntitySlice'
+import { getPlanDayDate, getScheduledPlanDay } from '../readingCalendar'
+import { hasPlanParticipation, getPlanResumeDay } from '../planProgress'
+import { chapterToReference } from '~helpers/chapterToReference'
+import verseToReference from '~helpers/verseToReference'
 
 interface Props {
   plan: ComputedPlan
@@ -34,11 +35,15 @@ const ScheduledPlanContent = ({ plan, onReadingSlicePress }: Props) => {
   const participation = useSelector((state: RootState) =>
     state.plan.ongoingPlans.find(item => item.id === plan.id)
   )
+  const started = hasPlanParticipation(participation)
+  const [width, setWidth] = useState(0)
+  const desktop = Platform.OS === 'web' && width >= 800
   const today = useLocalReadingDate()
   const params = useLocalSearchParams<{ date?: string }>()
-  const [startDate, setStartDate] = useState(today)
   const [chosenDay, setChosenDay] = useState<number | null>(null)
   const readings = plan.sections.flatMap(section => section.data)
+  const resumeDay = getPlanResumeDay(readings)
+  const completed = readings.filter(item => item.status === 'Completed').length
   const scheduledDay = participation?.startDate
     ? getScheduledPlanDay(participation.startDate, today)
     : undefined
@@ -50,8 +55,7 @@ const ScheduledPlanContent = ({ plan, onReadingSlicePress }: Props) => {
         (participation?.startDate && params.date
           ? getScheduledPlanDay(participation.startDate, params.date)
           : undefined) ??
-        scheduledDay ??
-        1
+        (started ? resumeDay : 1)
     )
   )
   const reading = readings[selectedDay - 1]
@@ -62,125 +66,165 @@ const ScheduledPlanContent = ({ plan, onReadingSlicePress }: Props) => {
     (item, index) => scheduledDay && index + 1 < scheduledDay && item.status !== 'Completed'
   )
   const cover = useFireStorage(plan.image)
-  const formattedDate = (value: string) =>
-    new Date(`${value}T12:00:00`).toLocaleDateString(i18n.language, {
-      day: 'numeric',
-      month: 'long',
-    })
-  const openReading = () => {
-    if (!reading) return
-    const payload = { ...reading, planId: plan.id, planTitle: plan.title, planLanguage: plan.lang }
+  const formattedDate = (value: string) => {
+    const current = new Date(`${value}T12:00:00`)
+    const month = current.toLocaleDateString(i18n.language, { month: 'short' })
+    return `${month}\n${current.getDate()}`
+  }
+  const openReading = (entry = reading) => {
+    if (!entry) return
+    const payload = { ...entry, planId: plan.id, planTitle: plan.title, planLanguage: plan.lang }
     if (onReadingSlicePress) onReadingSlicePress(payload)
     else
       router.push({
         pathname: '/plan-slice',
-        params: { planId: plan.id, readingSliceId: reading.id },
+        params: { planId: plan.id, readingSliceId: entry.id },
       })
   }
 
+  const visibleDays = Math.max(3, Math.min(7, Math.floor((width - (desktop ? 96 : 72)) / 72)))
+  const windowStart = Math.max(
+    0,
+    Math.min(selectedDay - 1 - Math.floor(visibleDays / 2), readings.length - visibleDays)
+  )
+  const days = readings.slice(windowStart, windowStart + visibleDays)
+  if (!readings.length)
+    return (
+      <Box className="p-[24px]">
+        <Text className="text-grey">{t('dailyReading.noEntry')}</Text>
+      </Box>
+    )
   return (
-    <ScrollView contentContainerStyle={[pageContentStyle, { padding: 24, paddingBottom: 48 }]}>
-      <Box className="gap-[24px]">
-        {cover && (
-          <Box
-            className="rounded-[24px] overflow-hidden bg-light-grey"
-            style={{ aspectRatio: 2.2, maxHeight: 240 }}
-          >
-            <Image
-              source={{ uri: cover }}
-              contentFit="cover"
-              style={{ width: '100%', height: '100%' }}
-            />
-          </Box>
-        )}
-        <Box className="gap-[10px]">
-          <Text className="text-primary font-bold text-[12px] uppercase">
-            {t('readingPlans.duration', { count: readings.length })}
-          </Text>
-          <Text className="text-default font-bold text-[28px]">{plan.title}</Text>
-          <Text className="text-grey text-[14px]">{plan.author?.displayName}</Text>
-        </Box>
-        {!participation?.startDate ? (
-          <>
-            <Text className="text-default text-[16px] leading-[26px]">{plan.description}</Text>
-            <Box className="bg-light-grey rounded-[24px] p-[20px] gap-[16px]">
-              <Text className="text-default font-bold text-[18px]">
-                {t('readingPlans.startTitle')}
-              </Text>
-              <Text className="text-grey text-[14px] leading-[22px]">
-                {t('readingPlans.startDescription')}
-              </Text>
-              <ReadingDatePicker
-                value={startDate}
-                label={t('readingPlans.startDate')}
-                onChange={setStartDate}
-              />
-              <Button
-                disabled={!isCivilDate(startDate)}
-                onPress={() => dispatch(startPlan({ planId: plan.id, startDate }))}
-              >
-                {t('readingPlans.start')}
-              </Button>
-              {!!plan.progress && (
-                <Text className="text-grey text-[13px]">{t('readingPlans.keepProgress')}</Text>
-              )}
-            </Box>
-          </>
-        ) : (
-          <Box className="bg-light-grey rounded-[24px] p-[20px] gap-[12px]">
-            <Box className="flex-row justify-between gap-[12px]">
-              <Text className="text-default font-bold">
-                {t('readingPlans.progress', {
-                  count: readings.filter(item => item.status === 'Completed').length,
-                  total: readings.length,
-                })}
-              </Text>
-              <Text className="text-primary font-bold">{Math.round(plan.progress * 100)} %</Text>
-            </Box>
-            <Box className="bg-reverse rounded-[4px] h-[6px] overflow-hidden">
-              <Box
-                className="bg-primary h-[6px]"
-                style={{ width: `${Math.round(plan.progress * 100)}%` }}
+    <ScrollView
+      onLayout={event => setWidth(event.nativeEvent.layout.width)}
+      contentContainerStyle={[
+        pageContentStyle,
+        { maxWidth: 1000, padding: desktop ? 32 : 20, paddingBottom: 48 },
+      ]}
+    >
+      <Box className="gap-[28px]">
+        <Box className={desktop ? 'flex-row items-center gap-[24px]' : 'items-center gap-[16px]'}>
+          {cover && (
+            <Box
+              className="bg-light-grey rounded-[18px] overflow-hidden"
+              style={{ width: desktop ? 180 : 144, height: desktop ? 104 : 88 }}
+            >
+              <Image
+                source={{ uri: cover }}
+                contentFit="cover"
+                style={{ width: '100%', height: '100%' }}
               />
             </Box>
-            <Text className="text-grey text-[13px]">
-              {t('readingPlans.since', { date: formattedDate(participation.startDate) })}
-            </Text>
-            {scheduledDay !== undefined && scheduledDay < 1 && (
-              <Text className="text-grey">{t('readingPlans.upcoming')}</Text>
-            )}
-            {!!missed.length && (
-              <Link
-                className="py-[8px]"
-                onPress={() =>
-                  setChosenDay(readings.findIndex(item => item.id === missed[0].id) + 1)
-                }
-              >
-                <Text className="text-primary">
-                  {t('readingPlans.missed', { count: missed.length })}
+          )}
+          <Box className={desktop ? 'flex-1 gap-[12px]' : 'w-full items-center gap-[8px]'}>
+            <Text className="text-default font-bold text-[26px]">{plan.title}</Text>
+            <Text className="text-grey text-[14px]">{plan.author?.displayName}</Text>
+            {started && (
+              <Box className="flex-row items-center gap-[8px] mt-[8px]">
+                <Box className="w-[50px] h-[6px] rounded-full bg-light-grey overflow-hidden">
+                  <Box
+                    className="h-full bg-primary"
+                    style={{
+                      width: `${readings.length ? (completed / readings.length) * 100 : 0}%`,
+                    }}
+                  />
+                </Box>
+                <Text className="text-grey text-[12px]">
+                  {t(
+                    completed === readings.length
+                      ? 'readingPlans.finished'
+                      : 'readingPlans.dayOfTotal',
+                    { day: resumeDay, total: readings.length }
+                  )}
                 </Text>
-              </Link>
+              </Box>
             )}
           </Box>
+        </Box>
+        {!started && !!plan.description && (
+          <Text className="text-default text-[15px] leading-[24px]">{plan.description}</Text>
         )}
-        <Box className="flex-row justify-between items-center gap-[12px]">
-          <Link
-            size={44}
-            disabled={selectedDay <= 1}
-            onPress={() => setChosenDay(selectedDay - 1)}
-            accessibilityLabel={t('dailyReading.previous')}
-          >
-            <FeatherIcon
-              name="chevron-left"
-              size={20}
-              color={selectedDay <= 1 ? 'grey' : 'primary'}
-            />
-          </Link>
-          <Box className="items-center gap-[4px]">
+        <Box className="bg-light-grey rounded-[24px] p-[16px] gap-[20px]">
+          <Box className="flex-row items-center justify-between gap-[12px]">
             <Text className="text-default font-bold text-[18px]">
-              {t('readingPlans.day', { day: selectedDay })}
+              {t('readingPlans.dayOfTotal', { day: selectedDay, total: readings.length })}
             </Text>
-            {selectedDate && participation?.startDate && (
+            <Box className="flex-row">
+              <Link
+                size={36}
+                hitSlop={4}
+                accessibilityLabel={t('dailyReading.previous')}
+                disabled={selectedDay <= 1}
+                onPress={() => setChosenDay(selectedDay - 1)}
+              >
+                <FeatherIcon
+                  name="chevron-left"
+                  size={20}
+                  color={selectedDay <= 1 ? 'grey' : 'primary'}
+                />
+              </Link>
+              <Link
+                size={36}
+                hitSlop={4}
+                accessibilityLabel={t('dailyReading.next')}
+                disabled={selectedDay >= readings.length}
+                onPress={() => setChosenDay(selectedDay + 1)}
+              >
+                <FeatherIcon
+                  name="chevron-right"
+                  size={20}
+                  color={selectedDay >= readings.length ? 'grey' : 'primary'}
+                />
+              </Link>
+            </Box>
+          </Box>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
+            <Box className="flex-1 flex-row justify-between gap-[12px]">
+              {days.map((item, index) => {
+                const day = windowStart + index + 1
+                const selected = day === selectedDay
+                const done = item.status === 'Completed'
+                const dayDate = participation?.startDate
+                  ? getPlanDayDate(participation.startDate, day)
+                  : undefined
+                return (
+                  <Link
+                    key={item.id}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${t('readingPlans.day', { day })}${done ? `, ${t('readingPlans.dayCompleted')}` : ''}`}
+                    accessibilityState={{ selected }}
+                    onPress={() => setChosenDay(day)}
+                  >
+                    <Box className="items-center gap-[6px] w-[60px]">
+                      <Box
+                        className={`w-[40px] h-[40px] rounded-full items-center justify-center ${selected ? 'bg-primary' : done ? 'bg-success' : 'bg-reverse'}`}
+                      >
+                        {done ? (
+                          <FeatherIcon name="check" size={20} color="white" />
+                        ) : (
+                          <Text className={`${selected ? 'text-white' : 'text-default'} font-bold`}>
+                            {day}
+                          </Text>
+                        )}
+                      </Box>
+                      {done && !dayDate && <Text className="text-grey text-[11px]">{day}</Text>}
+                      {dayDate && (
+                        <Text className="text-grey text-[11px] leading-[16px] text-center">
+                          {dayDate === today ? t('dailyReading.today') : formattedDate(dayDate)}
+                        </Text>
+                      )}
+                    </Box>
+                  </Link>
+                )
+              })}
+            </Box>
+          </ScrollView>
+          {selectedDate && participation?.startDate && (
+            <Box className="self-start">
               <ReadingDatePicker
                 value={selectedDate}
                 label={t('dailyReading.chooseDate')}
@@ -190,59 +234,83 @@ const ScheduledPlanContent = ({ plan, onReadingSlicePress }: Props) => {
                   setChosenDay(getScheduledPlanDay(participation.startDate!, date) ?? 1)
                 }
               />
-            )}
-          </Box>
-          <Link
-            size={44}
-            disabled={selectedDay >= readings.length}
-            onPress={() => setChosenDay(selectedDay + 1)}
-            accessibilityLabel={t('dailyReading.next')}
-          >
-            <FeatherIcon
-              name="chevron-right"
-              size={20}
-              color={selectedDay >= readings.length ? 'grey' : 'primary'}
-            />
-          </Link>
+            </Box>
+          )}
+          {!!missed.length && (
+            <Link
+              onPress={() => setChosenDay(readings.findIndex(item => item.id === missed[0].id) + 1)}
+            >
+              <Text className="text-primary text-[13px]">
+                {t('readingPlans.missed', { count: missed.length })}
+              </Text>
+            </Link>
+          )}
+          {reading && (
+            <Box className="bg-reverse rounded-[18px] px-[16px]">
+              {reading.slices
+                .filter(slice => slice.type !== 'Image')
+                .map((slice, index) => {
+                  const title =
+                    slice.type === 'Chapter'
+                      ? chapterToReference(slice.chapters)
+                      : slice.type === 'Verse'
+                        ? verseToReference(slice.verses, { isPlan: true })
+                        : slice.type === 'Video' || slice.type === 'Title'
+                          ? slice.title
+                          : t('dailyReading.meditationHeading')
+                  return (
+                    <Box key={`${slice.id}:${index}`}>
+                      <Box
+                        className={`min-h-[68px] flex-row items-center gap-[14px] py-[14px] ${index ? 'border-t border-border' : ''}`}
+                      >
+                        <FeatherIcon
+                          name={
+                            reading.status === 'Completed'
+                              ? 'check-circle'
+                              : slice.type === 'Video'
+                                ? 'play-circle'
+                                : 'book-open'
+                          }
+                          size={22}
+                          color={reading.status === 'Completed' ? 'success' : 'grey'}
+                        />
+                        <Text className="flex-1 text-default text-[17px]">{title}</Text>
+                      </Box>
+                    </Box>
+                  )
+                })}
+            </Box>
+          )}
         </Box>
-        {reading && (
-          <Box className="gap-[16px]">
-            {reading.title && (
-              <Text className="text-default font-bold text-[18px]">{reading.title}</Text>
+        <Box className={desktop ? 'self-end min-w-[200px]' : 'w-full'}>
+          <Button
+            disabled={!reading}
+            onPress={() => {
+              if (!started) {
+                dispatch(startPlan({ planId: plan.id, startDate: today }))
+                setChosenDay(1)
+                openReading(readings[0])
+              } else openReading()
+            }}
+          >
+            {t(
+              started
+                ? reading?.status === 'Completed'
+                  ? 'readingPlans.reread'
+                  : 'readingPlans.continue'
+                : 'readingPlans.start'
             )}
-            {reading.slices
-              .filter(slice => slice.type === 'Chapter' || slice.type === 'Verse')
-              .map((slice, index) => (
-                <EntitySlice
-                  key={`${slice.id}:${index}`}
-                  {...slice}
-                  status={reading.status}
-                  isSectionCompleted={reading.status === 'Completed'}
-                />
-              ))}
-            <Button onPress={openReading}>
-              {t(participation?.startDate ? 'readingPlans.read' : 'readingPlans.preview')}
-            </Button>
-            {participation?.startDate && (
-              <Button
-                reverse
-                onPress={() =>
-                  dispatch(markAsRead({ planId: plan.id, readingSliceId: reading.id }))
-                }
-              >
-                {t(
-                  reading.status === 'Completed' ? 'readingPlans.unmark' : 'readingPlans.complete'
-                )}
-              </Button>
-            )}
-          </Box>
-        )}
-        {participation?.startDate && (
-          <ReminderSettings
-            scope={`plan:${plan.id}`}
-            time={participation.reminderTime}
-            onChange={time => dispatch(setPlanReminder({ planId: plan.id, time }))}
-          />
+          </Button>
+        </Box>
+        {started && reading && (
+          <Link
+            onPress={() => dispatch(markAsRead({ planId: plan.id, readingSliceId: reading.id }))}
+            className="self-center py-[8px]"
+          >
+            <Text className="text-grey text-[13px]">
+              {t(reading.status === 'Completed' ? 'readingPlans.unmark' : 'readingPlans.complete')}
+            </Text>
+          </Link>
         )}
       </Box>
     </ScrollView>

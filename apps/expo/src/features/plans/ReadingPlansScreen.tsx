@@ -1,6 +1,6 @@
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { ActivityIndicator, ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
@@ -11,17 +11,15 @@ import Button from '~common/ui/Button'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { pageContentStyle } from '~common/ui/PageContent'
-import useLanguage from '~helpers/useLanguage'
-import { fetchPlan, fetchPlans } from '~redux/modules/plan'
+import { fetchPlans } from '~redux/modules/plan'
 import type { RootState } from '~redux/modules/reducer'
 import type { AppDispatch } from '~redux/store'
 import { useFireStorage } from './plan.hooks'
 import { getEditorialKind } from './readingCalendar'
-import { hasPlanParticipation } from './planProgress'
+import { hasPlanParticipation, getPlanResumeDay } from './planProgress'
 
 const ReadingPlanCard = ({ plan, active }: { plan: OnlinePlan; active: boolean }) => {
   const { t } = useTranslation()
-  const dispatch = useDispatch<AppDispatch>()
   const router = useRouter()
   const image = useFireStorage(plan.image)
   const cached = useSelector((state: RootState) =>
@@ -30,38 +28,28 @@ const ReadingPlanCard = ({ plan, active }: { plan: OnlinePlan; active: boolean }
   const progress = useSelector((state: RootState) =>
     state.plan.ongoingPlans.find(item => item.id === plan.id)
   )
-  const [pending, setPending] = useState(false)
-  const [failed, setFailed] = useState(false)
-  const total = cached?.sections.flatMap(section => section.readingSlices).length
+  const total = cached?.sections.flatMap(section => section.readingSlices).length ?? plan.duration
+  const resumeDay = getPlanResumeDay(
+    cached?.sections.flatMap(section => section.readingSlices) ?? [],
+    progress?.readingSlices
+  )
   const completed =
     cached?.sections
       .flatMap(section => section.readingSlices)
       .filter(reading => progress?.readingSlices[reading.id] === 'Completed').length ?? 0
-  const open = async () => {
-    setPending(true)
-    setFailed(false)
-    try {
-      if (!cached) await dispatch(fetchPlan({ id: plan.id, enroll: false })).unwrap()
-      router.push({ pathname: '/plan', params: { planId: plan.id } })
-    } catch {
-      setFailed(true)
-    } finally {
-      setPending(false)
-    }
-  }
+  const open = () => router.push({ pathname: '/plan', params: { planId: plan.id } })
   return (
-    <Box className="bg-reverse rounded-[24px] p-[16px] mb-[16px]">
+    <Box className="bg-reverse rounded-[20px] p-[16px] mb-[12px]">
       <Link
         onPress={open}
-        disabled={pending}
         accessibilityLabel={plan.title}
         className="flex-row gap-[16px] items-center"
       >
-        <Box className="rounded-[14px] bg-light-grey overflow-hidden w-[88px] h-[104px]">
+        <Box className="rounded-[14px] bg-light-grey overflow-hidden w-[96px] h-[64px]">
           {image ? (
             <Image
               source={{ uri: image }}
-              contentFit="contain"
+              contentFit="cover"
               style={{ width: '100%', height: '100%' }}
             />
           ) : (
@@ -71,37 +59,51 @@ const ReadingPlanCard = ({ plan, active }: { plan: OnlinePlan; active: boolean }
           )}
         </Box>
         <Box className="flex-1 gap-[8px]">
-          <Text className="text-default font-bold text-[18px]">{plan.title}</Text>
-          <Text className="text-grey text-[13px]">
-            {total
-              ? t(active ? 'readingPlans.progress' : 'readingPlans.duration', {
-                  count: active ? completed : total,
-                  total,
-                })
-              : t('readingPlans.journey')}
-          </Text>
+          <Text className="text-default font-bold text-[16px]">{plan.title}</Text>
+          <Box className="flex-row flex-wrap items-center gap-[8px]">
+            {active && !!total && (
+              <Box className="w-[50px] h-[6px] bg-light-grey rounded-full overflow-hidden">
+                <Box
+                  className="h-full bg-primary"
+                  style={{ width: `${(completed / total) * 100}%` }}
+                />
+              </Box>
+            )}
+            <Text className="text-grey text-[13px]">
+              {total
+                ? t(
+                    active
+                      ? completed === total
+                        ? 'readingPlans.finished'
+                        : 'readingPlans.dayOfTotal'
+                      : 'readingPlans.duration',
+                    {
+                      day: resumeDay,
+                      count: active ? completed : total,
+                      total,
+                    }
+                  )
+                : t('readingPlans.journey')}
+            </Text>
+          </Box>
           <Text className="text-primary font-bold text-[13px]">
-            {t(active ? 'readingPlans.continue' : 'readingPlans.discover')}
+            {t(
+              active
+                ? total && completed === total
+                  ? 'readingPlans.reread'
+                  : 'readingPlans.continue'
+                : 'readingPlans.discover'
+            )}
           </Text>
         </Box>
-        {pending ? (
-          <ActivityIndicator />
-        ) : (
-          <FeatherIcon name="chevron-right" color="primary" size={20} />
-        )}
+        <FeatherIcon name="chevron-right" color="primary" size={20} />
       </Link>
-      {failed && (
-        <Text accessibilityRole="alert" className="text-grey mt-[12px]">
-          {t('dailyReading.downloadError')}
-        </Text>
-      )}
     </Box>
   )
 }
 
 const ReadingPlansScreen = () => {
   const { t } = useTranslation()
-  const lang = useLanguage()
   const dispatch = useDispatch<AppDispatch>()
   const online = useSelector((state: RootState) => state.plan.onlinePlans)
   const local = useSelector((state: RootState) => state.plan.myPlans)
@@ -118,12 +120,6 @@ const ReadingPlansScreen = () => {
   }, [dispatch])
   return (
     <ScrollView contentContainerStyle={[pageContentStyle, { padding: 24, paddingBottom: 48 }]}>
-      <Text className="text-default font-bold text-[28px] mb-[12px]">
-        {t('readingPlans.heading')}
-      </Text>
-      <Text className="text-grey text-[15px] leading-[24px] mb-[28px]">
-        {t('readingPlans.description')}
-      </Text>
       {!!active.length && (
         <Text className="text-default font-bold text-[18px] mb-[16px]">
           {t('readingPlans.yours')}
@@ -146,11 +142,23 @@ const ReadingPlansScreen = () => {
           </Button>
         </Box>
       )}
-      {plans
-        .filter(plan => plan.lang === lang && !isActive(plan.id))
-        .map(plan => (
-          <ReadingPlanCard key={plan.id} plan={plan} active={false} />
-        ))}
+      {status === 'Resolved' && !plans.length && (
+        <Text className="text-grey">{t('readingPlans.noAvailablePlans')}</Text>
+      )}
+      {(['fr', 'en'] as const).map(language => {
+        const entries = plans.filter(plan => plan.lang === language)
+        if (!entries.length) return null
+        return (
+          <Box key={language} className="mb-[20px]">
+            <Text accessibilityRole="header" className="text-grey font-bold text-[14px] mb-[12px]">
+              {t(language === 'fr' ? 'Français' : 'Anglais')}
+            </Text>
+            {entries.map(plan => (
+              <ReadingPlanCard key={plan.id} plan={plan} active={isActive(plan.id)} />
+            ))}
+          </Box>
+        )
+      })}
     </ScrollView>
   )
 }

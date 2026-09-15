@@ -7,7 +7,8 @@ import { twMerge } from '~common/ui/classNames'
 import Box from '~common/ui/Box'
 import type { Theme as AppTheme } from '~themes'
 import { Theme } from '~themes'
-import { withTheme } from '~themes/ThemeProvider'
+import { resolveTextTypography } from './textTypography'
+import { useTheme, withTheme } from '~themes/ThemeProvider'
 
 interface StyledTextInputProps {
   leftIcon?: React.ReactNode
@@ -20,7 +21,9 @@ const StyledTextInput = (
   > &
     Omit<StyledTextInputProps, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
-  const { theme: _themeOverride, className, ...props } = componentProps
+  const { theme: themeOverride, className, ...props } = componentProps
+  const inheritedTheme = useTheme()
+  const theme = themeOverride ?? inheritedTheme
 
   const { leftIcon } = props
   const resolvedClassName = twMerge(
@@ -31,11 +34,10 @@ const StyledTextInput = (
     <NativeUI.TextInput
       {...props}
       className={resolvedClassName}
-      style={
-        [{ paddingLeft: leftIcon ? 45 : 15 }, props.style] as UIComponentProps<
-          typeof NativeUI.TextInput
-        >['style']
-      }
+      style={resolveTextTypography(theme.fontFamily.text, [
+        { paddingLeft: leftIcon ? 45 : 15 },
+        props.style,
+      ])}
     />
   )
 }

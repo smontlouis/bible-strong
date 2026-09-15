@@ -323,14 +323,15 @@ export const useVersesToContent = (verses: string) => {
 export const useFireStorage = (src?: string) => {
   const dispatch = useDispatch<AppDispatch>()
   const cachedUri = useSelector((state: RootState) => src && state.plan.images[src])
-  const imageUrl = src ? cachedUri || cdnUrl(`images/${src}.png`) : undefined
+  const directImage = !!src && /^(https:\/\/|data:image\/png;base64,)/.test(src)
+  const imageUrl = directImage ? src : src ? cachedUri || cdnUrl(`images/${src}.png`) : undefined
 
   // Keep the external Redux image cache synchronized with the requested source.
   // https://react.dev/learn/you-might-not-need-an-effect
   React.useEffect(() => {
-    if (!src || !imageUrl || cachedUri) return
+    if (!src || !imageUrl || cachedUri || directImage) return
     dispatch(cacheImage({ id: src, value: imageUrl }))
-  }, [src, imageUrl, cachedUri, dispatch])
+  }, [src, imageUrl, cachedUri, directImage, dispatch])
 
   return imageUrl
 }

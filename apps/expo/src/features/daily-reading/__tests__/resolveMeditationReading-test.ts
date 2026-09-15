@@ -43,3 +43,10 @@ it('does not substitute another entry for a broken legacy reading ID', () => {
     resolveMeditationReading(book, 'missing', '2026-01-01', '2026-09-14').reading
   ).toBeUndefined()
 })
+
+it('does not render a reading plan through the meditation reader', () => {
+  expect(
+    resolveMeditationReading({ ...book, type: 'yearly' }, 'new-year', '2026-01-01', '2026-09-14')
+      .reading
+  ).toBeUndefined()
+})

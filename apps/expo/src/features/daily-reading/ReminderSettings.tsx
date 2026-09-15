@@ -20,7 +20,7 @@ const ReminderSettings = ({
   scope?: string
   onChange: (time: string | null) => void
 }) => {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [pending, setPending] = useState(false)
   const mounted = useRef(true)
@@ -74,13 +74,15 @@ const ReminderSettings = ({
           {pending && <ActivityIndicator accessibilityLabel={t('Chargement...')} />}
           {time ? (
             <>
-              <Link
-                onPress={() => setOpen(true)}
-                className="min-h-[44px] justify-center"
-                accessibilityLabel={t("Choisir l'heure")}
-              >
-                <Text className="text-primary text-[18px] font-bold">{validTime ?? '07:00'}</Text>
-              </Link>
+              {Platform.OS !== 'ios' && (
+                <Link
+                  onPress={() => setOpen(true)}
+                  className="min-h-[44px] justify-center"
+                  accessibilityLabel={t("Choisir l'heure")}
+                >
+                  <Text className="text-primary text-[18px] font-bold">{validTime ?? '07:00'}</Text>
+                </Link>
+              )}
               {(Platform.OS === 'ios' || open) && (
                 <DateTimePicker
                   value={date}
@@ -129,19 +131,6 @@ const ReminderSettings = ({
               </Link>
             </Box>
           )}
-          {time &&
-            delivery.permission === 'allowed' &&
-            delivery.phase === 'scheduled' &&
-            through && (
-              <Text className="text-grey text-[12px] leading-[18px]">
-                {t('dailyReading.remindersThrough', {
-                  date: new Date(`${through}T12:00:00`).toLocaleDateString(i18n.language, {
-                    day: 'numeric',
-                    month: 'long',
-                  }),
-                })}
-              </Text>
-            )}
           {time &&
             delivery.permission === 'allowed' &&
             (delivery.phase === 'idle' || delivery.phase === 'scheduled') &&

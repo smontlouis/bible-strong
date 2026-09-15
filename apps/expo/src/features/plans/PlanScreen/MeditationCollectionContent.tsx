@@ -36,14 +36,26 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
   const today = useLocalReadingDate()
   const cover = useFireStorage(plan.image)
   const scroll = useRef<ScrollView>(null)
+  const columnY = useRef(0)
+  const listY = useRef(0)
+  const rowY = useRef<Record<string, number>>({})
+  const pendingToday = useRef(false)
+  const revealToday = () => {
+    const y = rowY.current[today.slice(5)]
+    if (pendingToday.current && y !== undefined) {
+      scroll.current?.scrollTo({
+        y: Math.max(0, columnY.current + listY.current + y - 24),
+        animated: true,
+      })
+      pendingToday.current = false
+    }
+  }
   const [chosenDate, setChosenDate] = useState<string | null>(null)
   const date = chosenDate ?? today
   const all = plan.sections.flatMap(section => section.data)
   const readings = all.filter(
     reading => getMeditationDateKey(reading)?.slice(0, 2) === date.slice(5, 7)
   )
-  const hasHistory = all.some(reading => reading.status === 'Completed')
-  const selectedReading = all.find(reading => getMeditationDateKey(reading) === date.slice(5))
   const monthLabel = new Date(`${date}T12:00:00`).toLocaleDateString(i18n.language, {
     month: 'long',
     year: 'numeric',
@@ -53,6 +65,7 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
   })
   const moveMonth = (offset: number) => {
     const current = new Date(`${date}T12:00:00`)
+    rowY.current = {}
     setChosenDate(toCivilDate(new Date(current.getFullYear(), current.getMonth() + offset, 1, 12)))
   }
   const open = (reading: ComputedReadingSlice) => {
@@ -116,10 +129,14 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
           </Box>
           <Box className={desktop ? 'gap-[12px]' : 'flex-1 gap-[8px]'}>
             <Text className="text-default font-bold text-[22px] leading-[28px]">{plan.title}</Text>
-            <Text className="text-grey text-[14px]">{plan.author.displayName}</Text>
+            {plan.author.displayName !== plan.title && (
+              <Text className="text-grey text-[14px]">{plan.author.displayName}</Text>
+            )}
             <Box className="self-start mt-[8px]">
               <Button
+                small
                 reverse
+                style={{ gap: 8, paddingHorizontal: 12, ...(isChosen ? { opacity: 1 } : {}) }}
                 leftIcon={
                   <FeatherIcon name={isChosen ? 'check' : 'sun'} size={16} color="primary" />
                 }
@@ -139,12 +156,18 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
             </Box>
           </Box>
         </Box>
-        <Box className="flex-1 min-w-0 gap-[24px] w-full">
+        <Box
+          className="flex-1 min-w-0 gap-[24px] w-full"
+          onLayout={event => {
+            columnY.current = event.nativeEvent.layout.y
+          }}
+        >
           <Box className="gap-[12px]">
             <Box className="flex-row items-center justify-between gap-[12px]">
               <Box className="flex-1 flex-row items-center gap-[12px]">
                 <Link
                   size={36}
+                  hitSlop={4}
                   className="bg-light-grey rounded-[18px]"
                   accessibilityLabel={t('dailyReading.previousMonth')}
                   onPress={() => moveMonth(-1)}
@@ -156,6 +179,7 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
                 </Text>
                 <Link
                   size={36}
+                  hitSlop={4}
                   className="bg-light-grey rounded-[18px]"
                   accessibilityLabel={t('dailyReading.nextMonth')}
                   onPress={() => moveMonth(1)}
@@ -166,8 +190,10 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
               <Link
                 accessibilityLabel={t('dailyReading.today')}
                 onPress={() => {
+                  pendingToday.current = true
+                  if (date.slice(0, 7) !== today.slice(0, 7)) rowY.current = {}
                   setChosenDate(today)
-                  scroll.current?.scrollTo({ y: 0, animated: true })
+                  revealToday()
                 }}
               >
                 <Box className="min-h-[44px] justify-center">
@@ -178,52 +204,63 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
               </Link>
             </Box>
           </Box>
-          {hasHistory && (
-            <Text className="text-grey text-[12px]">{t('dailyReading.legacyHistory')}</Text>
-          )}
-          {!selectedReading && <Text className="text-grey">{t('dailyReading.noEntry')}</Text>}
-          <Box>
+          <Box
+            onLayout={event => {
+              listY.current = event.nativeEvent.layout.y
+              revealToday()
+            }}
+          >
             {readings.map(reading => {
               const key = getMeditationDateKey(reading)
-              const selected = key === date.slice(5)
+              const selected = key === today.slice(5) && date.slice(0, 4) === today.slice(0, 4)
               const isToday = key === today.slice(5) && date.slice(0, 4) === today.slice(0, 4)
               return (
-                <Link key={reading.id} onPress={() => open(reading)} accessibilityRole="button">
-                  <Box
-                    className={`min-h-[68px] flex-row items-center gap-[16px] px-[12px] py-[14px] ${selected ? 'bg-light-grey rounded-[14px]' : 'border-b border-border'}`}
-                  >
-                    {key && (
-                      <Box className="w-[38px] gap-[2px]">
-                        <Text
-                          className={`${selected ? 'text-primary' : 'text-default'} font-bold text-[19px]`}
-                        >
-                          {Number(key.slice(3))}
-                        </Text>
-                        <Text className={`${selected ? 'text-primary' : 'text-grey'} text-[12px]`}>
-                          {shortMonth}
-                        </Text>
-                      </Box>
-                    )}
-                    <Box className="flex-1 gap-[6px]">
-                      {isToday && (
-                        <Box className="self-start bg-light-primary rounded-[8px] px-[8px] py-[3px]">
-                          <Text className="text-primary text-[10px] font-bold uppercase">
-                            {t('dailyReading.today')}
+                <Box
+                  key={reading.id}
+                  onLayout={event => {
+                    if (key) rowY.current[key] = event.nativeEvent.layout.y
+                    revealToday()
+                  }}
+                >
+                  <Link onPress={() => open(reading)} accessibilityRole="button">
+                    <Box
+                      className={`min-h-[68px] flex-row items-center gap-[16px] px-[12px] py-[14px] ${selected ? 'bg-light-grey rounded-[14px]' : 'border-b border-border'}`}
+                    >
+                      {key && (
+                        <Box className="w-[38px] gap-[2px]">
+                          <Text
+                            className={`${selected ? 'text-primary' : 'text-default'} font-bold text-[19px]`}
+                          >
+                            {Number(key.slice(3))}
+                          </Text>
+                          <Text
+                            className={`${selected ? 'text-primary' : 'text-grey'} text-[12px]`}
+                          >
+                            {shortMonth}
                           </Text>
                         </Box>
                       )}
-                      <Text className="text-default text-[16px]">
-                        {getMeditationTitle(reading)}
-                      </Text>
-                      {reading.status === 'Completed' && (
-                        <Text className="text-grey text-[12px]">
-                          {t('dailyReading.previouslyRead')}
+                      <Box className="flex-1 gap-[6px]">
+                        {isToday && (
+                          <Box className="self-start bg-light-primary rounded-[8px] px-[8px] py-[3px]">
+                            <Text className="text-primary text-[10px] font-bold uppercase">
+                              {t('dailyReading.today')}
+                            </Text>
+                          </Box>
+                        )}
+                        <Text className="text-default text-[16px]">
+                          {getMeditationTitle(reading)}
                         </Text>
-                      )}
+                        {reading.status === 'Completed' && (
+                          <Text className="text-grey text-[12px]">
+                            {t('dailyReading.previouslyRead')}
+                          </Text>
+                        )}
+                      </Box>
+                      <FeatherIcon name="chevron-right" size={18} color="primary" />
                     </Box>
-                    <FeatherIcon name="chevron-right" size={18} color="primary" />
-                  </Box>
-                </Link>
+                  </Link>
+                </Box>
               )
             })}
             {!readings.length && <Text className="text-grey">{t('dailyReading.noEntry')}</Text>}

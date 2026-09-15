@@ -7,6 +7,7 @@ import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from './ui/Icon'
 interface Props {
+  maxWidth?: number
   background?: boolean
   hasBackButton?: boolean
   isModal?: boolean
@@ -21,6 +22,7 @@ interface Props {
 }
 
 const Header = ({
+  maxWidth,
   background,
   hasBackButton,
   isModal,
@@ -47,7 +49,7 @@ const Header = ({
         )
       )}
     >
-      <PageContent>
+      <PageContent style={maxWidth ? { maxWidth } : undefined}>
         <Box
           className="overflow-hidden border-continuous flex-row items-center"
           style={{ minHeight: 54 }}

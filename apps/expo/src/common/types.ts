@@ -14,6 +14,8 @@ export interface Plan {
   kind?: 'reading-plan' | 'daily-meditation'
   lastUpdate?: number
   downloads?: number
+  /** Number of ordered reading days, available before downloading sections. */
+  duration?: number
   title: string
   subTitle?: string
   image?: string
@@ -21,6 +23,7 @@ export interface Plan {
   sections: Section[]
   author: User
   type:
+    | 'reading-plan'
     | 'yearly'
     | 'meditation'
     | 'Plan annuel'
@@ -134,6 +137,9 @@ export interface VideoSlice {
   title: string
   description?: string
   url: string
+  /** Alternate browser-compatible source for publisher-hosted videos. */
+  webUrl?: string
+  poster?: string
 }
 
 export interface OngoingReadingSlice {

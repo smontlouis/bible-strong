@@ -2279,5 +2279,15 @@
   "dailyReading.nextMonth": "Mois suivant",
   "dailyReading.dailyMeditation": "Méditation du jour",
   "dailyReading.collectionSelected": "Sélectionnée",
-  "dailyReading.homeVerseHint": "Son verset apparaîtra sur votre accueil."
+  "dailyReading.homeVerseHint": "Son verset apparaîtra sur votre accueil.",
+  "readingPlans.changeStartDate": "Modifier la date de début",
+  "readingPlans.daysProgress": "{{count}} jours sur {{total}}",
+  "readingPlans.dayOfTotal": "Jour {{day}} sur {{total}}",
+  "readingPlans.explorePlans": "Découvrir les plans",
+  "readingPlans.readAtYourPace": "La Bible, à votre rythme.",
+  "readingPlans.reread": "Relire",
+  "readingPlans.dayCompleted": "Journée terminée",
+  "readingPlans.noAvailablePlans": "Aucun plan disponible pour le moment.",
+  "readingPlans.videoUnavailable": "Vidéo indisponible dans le lecteur.",
+  "readingPlans.openVideo": "Ouvrir la vidéo"
 }

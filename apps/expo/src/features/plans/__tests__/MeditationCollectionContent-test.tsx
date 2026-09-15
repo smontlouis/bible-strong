@@ -66,7 +66,7 @@ it('browses dated readings without exposing complementary entries', () => {
   })
   expect(text()).toContain('Today')
   expect(text()).not.toContain('October,')
-  expect(text()).toContain('dailyReading.legacyHistory')
+  expect(text()).not.toContain('dailyReading.legacyHistory')
   expect(text()).not.toContain('Bonus')
   expect(text()).not.toContain('dailyReading.additionalReadings')
   act(() =>

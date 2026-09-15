@@ -177,3 +177,14 @@ export const markReadingSliceAsRead = ({
 
   return nextOngoingPlans
 }
+
+/** Resume at the earliest gap, even when later readings are already complete. */
+export const getPlanResumeDay = (
+  readings: readonly { id: string; status?: string }[],
+  completed?: OngoingPlan['readingSlices']
+): number => {
+  const index = readings.findIndex(
+    reading => (completed ? completed[reading.id] : reading.status) !== 'Completed'
+  )
+  return index < 0 ? Math.max(1, readings.length) : index + 1
+}

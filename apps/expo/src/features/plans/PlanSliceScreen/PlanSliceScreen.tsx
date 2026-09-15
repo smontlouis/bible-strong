@@ -33,7 +33,6 @@ import { setDefaultBibleVersion } from '~redux/modules/user'
 import { useDefaultBibleVersion } from '../../../state/useDefaultBibleVersion'
 import { BibleTab } from '../../../state/tabs'
 import ParamsModal from './ParamsModal'
-import PauseText from './PauseText'
 import ReadButton from './ReadButton'
 import ReferenceParagraph from './ReferenceParagraph'
 import Slice from './Slice'
@@ -307,27 +306,25 @@ const PlanSliceScreen = ({
         }
       />
       <ScrollView
+        key={`${planId}:${id}`}
         contentContainerStyle={{
           width: '100%',
           alignSelf: 'center',
           maxWidth: READING_TEXT_MAX_WIDTH + PLAN_READING_HORIZONTAL_PADDING * 2,
+          paddingTop: 24,
+          paddingBottom: 32,
         }}
       >
         {isRead && (
-          <Box className="overflow-hidden border-continuous opacity-[0.6] bg-success rounded-[30px] p-[20px] mx-[20px] items-center justify-center flex-row">
-            <FeatherIcon name="check" size={20} color="reverse" />
-            <Paragraph className="ml-[5px] text-reverse font-bold" scale={-2} fontFamily="text">
-              {t('Vous avez déjà terminé cette lecture.')}
+          <Box className="overflow-hidden border-continuous bg-light-grey rounded-[12px] p-[12px] mx-[20px] mb-[20px] items-center justify-center flex-row">
+            <FeatherIcon name="check" size={18} color="primary" />
+            <Paragraph className="ml-[5px] text-default font-bold" scale={-2} fontFamily="text">
+              {t('readingPlans.dayCompleted')}
             </Paragraph>
           </Box>
         )}
-        <PauseText>
-          {t(
-            'Prenez une grande inspiration,\n alors que vous vous apprêtez à passer du\n temps avec Dieu'
-          )}
-        </PauseText>
         {title && (
-          <Box className={`overflow-hidden border-continuous px-[20px] mb-[50px]`}>
+          <Box className={`overflow-hidden border-continuous px-[20px] mb-[24px]`}>
             <ReferenceParagraph scale={3} planLanguage={planLanguage}>
               {title}
             </ReferenceParagraph>

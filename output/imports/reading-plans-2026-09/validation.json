@@ -1,0 +1,140 @@
+{
+  "projectId": "bible-strong-app",
+  "plans": 26,
+  "concepts": 14,
+  "days": 642,
+  "documents": 72,
+  "sha256": "2274e640d4940da59f802551ea38451d30f927e4b652b0e6acda173eeb12404b",
+  "editions": [
+    {
+      "id": "bibleproject-character-of-god-fr",
+      "days": 6,
+      "source": "https://www.bible.com/fr/reading-plans/64091"
+    },
+    {
+      "id": "bibleproject-character-of-god-en",
+      "days": 6,
+      "source": "https://www.bible.com/reading-plans/28160"
+    },
+    {
+      "id": "bibleproject-hope-fr",
+      "days": 7,
+      "source": "https://www.bible.com/fr/reading-plans/40045"
+    },
+    {
+      "id": "bibleproject-hope-en",
+      "days": 7,
+      "source": "https://www.bible.com/reading-plans/38843"
+    },
+    {
+      "id": "bibleproject-lords-prayer-en",
+      "days": 8,
+      "source": "https://www.bible.com/reading-plans/53262"
+    },
+    {
+      "id": "bibleproject-sermon-on-the-mount-en",
+      "days": 10,
+      "source": "https://www.bible.com/reading-plans/55424"
+    },
+    {
+      "id": "bibleproject-how-to-read-the-bible-fr",
+      "days": 19,
+      "source": "https://www.bible.com/fr/reading-plans/64097"
+    },
+    {
+      "id": "bibleproject-how-to-read-the-bible-en",
+      "days": 19,
+      "source": "https://www.bible.com/reading-plans/29316"
+    },
+    {
+      "id": "bibleproject-writings-of-john-fr",
+      "days": 25,
+      "source": "https://www.bible.com/fr/reading-plans/20337"
+    },
+    {
+      "id": "bibleproject-writings-of-john-en",
+      "days": 25,
+      "source": "https://www.bible.com/reading-plans/9098"
+    },
+    {
+      "id": "bibleproject-pauls-letters-fr",
+      "days": 60,
+      "source": "https://www.bible.com/fr/reading-plans/20338"
+    },
+    {
+      "id": "bibleproject-pauls-letters-en",
+      "days": 60,
+      "source": "https://www.bible.com/reading-plans/4822"
+    },
+    {
+      "id": "bibleproject-gospels-fr",
+      "days": 90,
+      "source": "https://www.bible.com/fr/reading-plans/24152"
+    },
+    {
+      "id": "bibleproject-gospels-en",
+      "days": 90,
+      "source": "https://www.bible.com/reading-plans/8868"
+    },
+    {
+      "id": "bible-strong-mark-fr",
+      "days": 16,
+      "source": "Bible Strong"
+    },
+    {
+      "id": "bible-strong-mark-en",
+      "days": 16,
+      "source": "Bible Strong"
+    },
+    {
+      "id": "bible-strong-john-fr",
+      "days": 21,
+      "source": "Bible Strong"
+    },
+    {
+      "id": "bible-strong-john-en",
+      "days": 21,
+      "source": "Bible Strong"
+    },
+    {
+      "id": "bible-strong-proverbs-fr",
+      "days": 31,
+      "source": "Bible Strong"
+    },
+    {
+      "id": "bible-strong-proverbs-en",
+      "days": 31,
+      "source": "Bible Strong"
+    },
+    {
+      "id": "bible-strong-acts-fr",
+      "days": 28,
+      "source": "Bible Strong"
+    },
+    {
+      "id": "bible-strong-acts-en",
+      "days": 28,
+      "source": "Bible Strong"
+    },
+    {
+      "id": "bible-strong-james-fr",
+      "days": 5,
+      "source": "Bible Strong"
+    },
+    {
+      "id": "bible-strong-james-en",
+      "days": 5,
+      "source": "Bible Strong"
+    },
+    {
+      "id": "bible-strong-philippians-fr",
+      "days": 4,
+      "source": "Bible Strong"
+    },
+    {
+      "id": "bible-strong-philippians-en",
+      "days": 4,
+      "source": "Bible Strong"
+    }
+  ]
+}

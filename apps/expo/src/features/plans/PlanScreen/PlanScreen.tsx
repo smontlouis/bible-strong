@@ -63,6 +63,7 @@ const PlanScreen = ({
   return (
     <Container>
       <Header
+        maxWidth={1000}
         title={title}
         hasBackButton={hasBackButton}
         rightComponent={
@@ -101,7 +102,7 @@ const PlanScreen = ({
         </Box>
       )}
       {plan?.sections && (
-        <ScheduledPlanContent plan={plan} onReadingSlicePress={onReadingSlicePress} />
+        <ScheduledPlanContent key={plan.id} plan={plan} onReadingSlicePress={onReadingSlicePress} />
       )}
       <SuccessModal modalRef={modalRef} isPlanCompleted={isPlanCompleted} />
       <DetailsModal
