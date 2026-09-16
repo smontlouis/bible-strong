@@ -3344,6 +3344,7 @@ input {
   }
   .hero-actions {
     justify-content: center;
+    align-items: center;
   }
   .hero-universe {
     width: 100%;
@@ -3419,9 +3420,6 @@ input {
   }
   .button--compact {
     display: none;
-  }
-  .landing-nav__actions .button--web-app {
-    display: inline-flex;
   }
   .hero-section {
     padding-top: 44px;
@@ -4119,5 +4117,19 @@ html[data-theme-transition='active']::view-transition-new(root) {
 @media (max-width: 520px) {
   .hero-phone {
     --phone-scale: 0.513636;
+  }
+}
+
+.button--mobile-app {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .landing-nav__actions .button--web-app {
+    display: none;
+  }
+
+  .landing-nav__actions .button--mobile-app {
+    display: inline-flex;
   }
 }

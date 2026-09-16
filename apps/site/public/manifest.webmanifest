@@ -1,0 +1,15 @@
+{
+  "name": "Bible Strong",
+  "short_name": "Bible Strong",
+  "start_url": "/",
+  "display": "browser",
+  "icons": [{ "src": "/images/icon.png", "sizes": "1024x1024", "type": "image/png" }],
+  "prefer_related_applications": true,
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "com.smontlouis.biblestrong",
+      "url": "https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong"
+    }
+  ]
+}

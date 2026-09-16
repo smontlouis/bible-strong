@@ -7,13 +7,11 @@ import Lenis from 'lenis'
 import { useCurrentLocale, useI18n } from '../locales'
 import LandingBibleViewerDemo from '../components/LandingBibleViewerDemo'
 import { TextReveal } from '../components/ui/text-reveal'
+import { MobileDownloadLink } from '../components/MobileAppPromotion'
+import { appStoreUrl, playStoreUrl, webAppUrl } from '../lib/app-links'
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
 
-const appStoreUrl = 'https://apps.apple.com/fr/app/bible-strong/id1454738221?mt=8'
-const webAppUrl = 'https://web.bible-strong.app/home'
-const playStoreUrl =
-  'https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'
 export type ThemePreference = 'auto' | 'light' | 'dark'
 const themePreferences: ThemePreference[] = ['auto', 'light', 'dark']
 const themeCookieName = 'bible-strong-landing-theme'
@@ -265,6 +263,7 @@ function LandingHeader({
           <a className="button button--compact button--web-app" href={webAppUrl}>
             {t('home.cta.openApp')}
           </a>
+          <MobileDownloadLink />
           <ThemeToggle
             value={theme}
             onChange={onThemeChange}

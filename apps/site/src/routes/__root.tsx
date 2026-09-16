@@ -10,6 +10,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { name: 'apple-itunes-app', content: 'app-id=1454738221' },
       { title: 'Bible Strong App - Lexique Hébreu et Grec' },
       { name: 'description', content: "Le projet Bible Strong met à disposition des outils efficaces d'étude de la Bible pour développer et affermir une foi réfléchie en Dieu par sa Parole." },
       { property: 'og:image', content: '/image-fb.jpg' },
@@ -17,6 +18,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     links: [
       { rel: 'stylesheet', href: appCss },
       { rel: 'icon', href: '/images/icon.png' },
+      { rel: 'manifest', href: '/manifest.webmanifest' },
     ],
     scripts: [
       { src: 'https://www.googletagmanager.com/gtag/js?id=UA-109677220-2', async: true },
