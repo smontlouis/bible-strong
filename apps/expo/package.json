@@ -53,6 +53,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web --port 9090",
     "web:export": "expo export --platform web",
+    "web:build": "EXPO_NO_DOTENV=1 dotenv -e .env.production -- expo export --platform web",
     "themes:generate": "node scripts/generate-theme-css.cjs",
     "themes:check": "node scripts/generate-theme-css.cjs --check"
   },
