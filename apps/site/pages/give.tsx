@@ -68,7 +68,7 @@ export default function GivePage() {
                 {mode === 'one-time' && <Input className="w-[120px] font-semibold" type="number" placeholder={t('free')} onFocus={() => setAmount('')} value={freeAmount} onChange={(event) => setFreeAmount(event.target.value)} />}
               </div>
             </DonationStep>
-            {mode === 'one-time' ? <Button asChild><a href={donationLink}>{t('donate')}</a></Button> : amount && <div className="h-[359px] w-72">{monthlyButtons[amount]}</div>}
+            {mode === 'one-time' ? <Button asChild><a href={donationLink}>{t('donate')}</a></Button> : amount && <div key={amount} className="h-[359px] w-72">{monthlyButtons[amount]}</div>}
           </div>
         </div>
       </section>
