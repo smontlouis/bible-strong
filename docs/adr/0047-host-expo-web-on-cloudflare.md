@@ -13,7 +13,10 @@ study workspace needs economical static delivery and automatic production update
 
 Keep the public site on Vercel at `bible-strong.app`. Serve Expo's single-page web
 export through Cloudflare Workers Static Assets at `web.bible-strong.app`. Use
-Cloudflare Builds and the existing Vercel Git integration to deploy from `master`.
+GitHub Actions and the existing Vercel Git integration to deploy from `master`.
+GitHub Actions uses a dedicated Cloudflare deployment token and avoids granting
+additional permissions to manage Cloudflare Builds. The workflow lives in the
+repository and deploys production only from the production branch.
 
 Keep Firebase Authentication and reCAPTCHA Enterprise App Check for the browser
 client. Add the web origin to the Resource API CORS allowlist without relaxing

@@ -1,0 +1,49 @@
+name: Deploy Expo Web
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: expo-web-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build and deploy to Cloudflare
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: expo-web-production
+      url: https://web.bible-strong.app
+    steps:
+      - name: Check out production source
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Export Expo Web with production settings
+        run: yarn workspace @bible-strong/expo web:build
+
+      - name: Deploy static assets
+        env:
+          CLOUDFLARE_ACCOUNT_ID: 412013be38e98e0e90906c8ece4a173f
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WEB_API_TOKEN }}
+        run: yarn workspace @bible-strong/resource-service exec wrangler deploy --config ../../apps/expo/wrangler.jsonc
+
+      - name: Verify the production entry point
+        run: curl --fail --silent --show-error --retry 5 --retry-delay 5 --output /dev/null https://web.bible-strong.app/home
