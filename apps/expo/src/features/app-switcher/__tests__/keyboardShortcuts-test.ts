@@ -12,6 +12,15 @@ const key = (overrides: Partial<Parameters<typeof workspaceShortcut>[0]>) => ({
 })
 
 describe('workspace keyboard shortcuts', () => {
+  it('accepts synthetic input events without getModifierState', () => {
+    const event = key({ key: 'a', code: 'KeyA', getModifierState: undefined })
+    expect(workspaceShortcut(event, true)).toBeUndefined()
+    expect(workspaceShortcut(event, false)).toBeUndefined()
+    expect(workspaceShortcut({ ...event, key: 'b', metaKey: true }, true)).toBe('sidebar')
+    expect(
+      workspaceShortcut({ ...event, key: 'n', ctrlKey: true, altKey: true }, false)
+    ).toBeUndefined()
+  })
   it('handles Option alternate characters on Mac', () => {
     expect(
       workspaceShortcut(key({ key: '˜', code: 'KeyN', metaKey: true, altKey: true }), true)

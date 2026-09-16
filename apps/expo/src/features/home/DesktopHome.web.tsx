@@ -177,6 +177,7 @@ export default function DesktopHome() {
           <OfflineNotice />
           <div className="bs-home-grid">
             <div className="bs-home-search">
+              <LoginPrompt className="mx-0 rounded-[20px] px-[16px] py-[16px]" />
               <LinkBox
                 onPress={event => {
                   if (event?.currentTarget instanceof HTMLElement)
@@ -261,7 +262,6 @@ export default function DesktopHome() {
               </LinkBox>
             </div>
           </div>
-          <LoginPrompt />
           <HStack className="items-center flex-wrap gap-[24px] border-t border-border pt-[16px]">
             <ResourceLink href={`https://bible-strong.app/${lang === 'fr' ? 'fr/' : ''}give`}>
               {t('home.desktop.support')}
@@ -269,6 +269,9 @@ export default function DesktopHome() {
             <ResourceLink route="FAQ">{t('FAQ')}</ResourceLink>
             <ResourceLink href="https://www.facebook.com/fr.bible.strong">
               {t('Suivre')}
+            </ResourceLink>
+            <ResourceLink href="https://bible-strong.app">
+              {t('home.desktop.downloadApp')}
             </ResourceLink>
           </HStack>
         </div>

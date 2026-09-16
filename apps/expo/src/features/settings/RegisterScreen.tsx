@@ -44,7 +44,7 @@ const RegisterScreen = () => {
     <Container>
       <Header hasBackButton title={t('Créer un compte')} />
       <ScrollView>
-        <Box className="overflow-hidden border-continuous p-[20px]">
+        <Box className="overflow-hidden border-continuous p-[20px] web:w-full web:max-w-[500px] web:self-center">
           <TextInput
             placeholder={t('Nom')}
             leftIcon={<Icon.Feather name="user" size={20} color={theme.colors.darkGrey} />}

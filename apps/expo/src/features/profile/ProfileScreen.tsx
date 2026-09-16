@@ -28,12 +28,14 @@ const ProfileScreen = () => {
     <Container>
       <Header hasBackButton title={t('profile.title')} />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 40 }}>
-        <Box className="overflow-hidden border-continuous p-[20px]">
-          <ProfileHeader />
-        </Box>
-        <ProfileStats />
-        <Box className="overflow-hidden border-continuous pt-[20px]">
-          <ProfileActions />
+        <Box className="web:w-full web:max-w-[500px] web:self-center">
+          <Box className="overflow-hidden border-continuous p-[20px]">
+            <ProfileHeader />
+          </Box>
+          <ProfileStats />
+          <Box className="overflow-hidden border-continuous pt-[20px]">
+            <ProfileActions />
+          </Box>
         </Box>
       </ScrollView>
     </Container>

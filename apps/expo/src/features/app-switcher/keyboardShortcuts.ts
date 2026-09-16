@@ -1,20 +1,23 @@
 export type WorkspaceShortcut = 'new' | 'close' | 'previous' | 'next' | 'switcher' | 'sidebar'
-type ShortcutEvent = { keyCode?: number } & Pick<
+type ShortcutEvent = {
+  keyCode?: number
+  getModifierState?: KeyboardEvent['getModifierState']
+} & Pick<
   KeyboardEvent,
-  | 'key'
-  | 'code'
-  | 'ctrlKey'
-  | 'metaKey'
-  | 'altKey'
-  | 'shiftKey'
-  | 'isComposing'
-  | 'getModifierState'
+  'key' | 'code' | 'ctrlKey' | 'metaKey' | 'altKey' | 'shiftKey' | 'isComposing'
 >
 export function workspaceShortcut(
   event: ShortcutEvent,
   mac: boolean
 ): WorkspaceShortcut | undefined {
-  if (event.isComposing || event.getModifierState('AltGraph')) return
+  if (
+    event.isComposing ||
+    event.key === 'AltGraph' ||
+    (typeof event.getModifierState === 'function'
+      ? event.getModifierState('AltGraph')
+      : event.ctrlKey && event.altKey)
+  )
+    return
   const mod = mac ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey
   // Option can replace event.key with a symbol. Chromium/WebKit's legacy virtual
   // letter code preserves the layout's letter (unlike physical event.code on AZERTY).

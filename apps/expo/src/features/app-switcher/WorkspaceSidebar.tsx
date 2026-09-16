@@ -107,12 +107,19 @@ const WorkspaceSidebar = ({
           }}
         >
           <HStack className="overflow-hidden border-continuous items-center pl-[20px] pr-[8px] py-[10px]">
-            <Image
-              source={require('~assets/images/icon.png')}
-              style={{ width: 24, height: 24, borderRadius: 12 }}
-              accessibilityLabel="Bible Strong"
-            />
-            <Text className="flex-[1] ml-[10px] font-bold text-[15px]">Bible Strong</Text>
+            <TouchableBox
+              className="flex-1 flex-row items-center min-h-[40px]"
+              onPress={openHome}
+              accessibilityRole="button"
+              accessibilityLabel={`Bible Strong — ${t('Accueil')}`}
+            >
+              <Image
+                source={require('~assets/images/icon.png')}
+                style={{ width: 24, height: 24, borderRadius: 12 }}
+                accessible={false}
+              />
+              <Text className="flex-1 ml-[10px] font-bold text-[15px]">Bible Strong</Text>
+            </TouchableBox>
             <TouchableBox
               className="overflow-hidden border-continuous items-center justify-center"
               onPress={onCollapse}

@@ -57,6 +57,8 @@
 
 .bs-home-search {
   display: flex;
+  flex-direction: column;
+  gap: 20px;
   justify-content: flex-end;
   min-width: 0;
 }

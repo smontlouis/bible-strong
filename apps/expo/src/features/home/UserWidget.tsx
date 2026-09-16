@@ -93,14 +93,19 @@ const UserWidget = () => {
   )
 }
 
-export const LoginPrompt = () => {
+export const LoginPrompt = ({ className }: { className?: string }) => {
   const { isLogged } = useLogin()
   const { t } = useTranslation()
 
   if (isLogged) return null
 
   return (
-    <Box className="overflow-hidden border-continuous px-[20px] rounded-[30px] mx-[20px] bg-primary py-[20px]">
+    <Box
+      className={twMerge(
+        'overflow-hidden border-continuous px-[20px] rounded-[30px] mx-[20px] bg-primary py-[20px]',
+        className
+      )}
+    >
       <Paragraph className="font-bold text-reverse mb-[20px]" scale={-1}>
         {t('Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !')}
       </Paragraph>
