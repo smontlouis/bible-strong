@@ -4,6 +4,8 @@ export type AnalyticsEvent =
   | 'note_created'
   | 'plan_started'
   | 'plan_reading_completed'
+  | 'study_tab_view'
+  | 'workspace_drawer_view'
 export type AnalyticsParameters = Record<string, string | number>
 export type AnalyticsTransport = {
   event: (name: string, parameters: AnalyticsParameters) => void | Promise<void>

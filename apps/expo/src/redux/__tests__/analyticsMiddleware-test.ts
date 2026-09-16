@@ -7,7 +7,7 @@ jest.mock('../modules/user/notes', () => ({
   addNoteAction: { match: (action: { type: string }) => action.type === 'note' },
 }))
 jest.mock('../modules/plan', () => ({
-  addPlan: { match: (action: { type: string }) => action.type === 'plan' },
+  startPlan: { match: (action: { type: string }) => action.type === 'start' },
   markAsRead: { match: (action: { type: string }) => action.type === 'reading' },
 }))
 
@@ -52,5 +52,22 @@ it('counts completing a reading but not unmarking it', () => {
 it('does not count a duplicate plan or state hydration as a new plan', () => {
   run(state(), state(), { type: 'plan', payload: { id: 'plan' } })
   run(state(), state(true, true), { type: 'persist/REHYDRATE' })
+  expect(trackAnalyticsEvent).not.toHaveBeenCalled()
+})
+
+it('ignores automatic plan downloads and counts only a new participation', () => {
+  const before = state()
+  before.plan.myPlans = []
+  run(before, state(), { type: 'plan', payload: { id: 'plan' } })
+  expect(trackAnalyticsEvent).not.toHaveBeenCalled()
+  const after = state()
+  after.plan.ongoingPlans[0].startDate = '2026-09-16'
+  const action = { type: 'start', payload: { planId: 'plan', startDate: '2026-09-16' } }
+  run(state(), after, action)
+  expect(trackAnalyticsEvent).toHaveBeenCalledTimes(1)
+  expect(trackAnalyticsEvent).toHaveBeenCalledWith('plan_started')
+  jest.clearAllMocks()
+  run(after, after, action)
+  run(state(), state(), action)
   expect(trackAnalyticsEvent).not.toHaveBeenCalled()
 })

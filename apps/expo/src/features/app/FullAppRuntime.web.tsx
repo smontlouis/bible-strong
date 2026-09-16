@@ -1,4 +1,5 @@
 import { trackAnalyticsScreen } from '~helpers/analytics'
+import WorkspaceAnalytics from '~features/app-switcher/WorkspaceAnalytics.web'
 import ReferencePreviewHost from '~features/bibleReferencePreview/ReferencePreviewHost'
 import ConfirmDialogHost from '~common/ConfirmDialog/ConfirmDialogHost.web'
 import { useWorkspaceRoutePanel } from '~navigation/useWorkspaceRoutePanel'
@@ -60,6 +61,7 @@ const FullAppRuntime = ({ theme }: { theme: Theme }) => {
             <StrongAudioProvider>
               <InitHooks />
               <NavigationTracking />
+              <WorkspaceAnalytics />
               <WorkspaceLayout>
                 <Stack
                   screenOptions={{

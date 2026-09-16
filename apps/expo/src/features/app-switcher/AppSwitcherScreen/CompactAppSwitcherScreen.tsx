@@ -1,4 +1,5 @@
-import { useAtomValue } from 'jotai/react'
+import { compactWorkspaceDrawerAtom } from '../workspaceViewTracking'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import React, { useEffect, useRef, useState } from 'react'
 import { useWindowDimensions } from 'react-native'
 import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
@@ -36,6 +37,7 @@ const AppSwitcherScreen = ({ openHome, openMenu }: AppSwitcherScreenFuncs) => (
 )
 
 const AppSwitcherScreenWrapper = () => {
+  const setDrawer = useSetAtom(compactWorkspaceDrawerAtom)
   const { width: screenWidth } = useWindowDimensions()
   const drawerWidth = Math.min(screenWidth * DRAWER_WIDTH_PERCENT, MAX_DRAWER_WIDTH)
 
@@ -48,24 +50,30 @@ const AppSwitcherScreenWrapper = () => {
   // SharedValue pour la position: -1 (menu), 0 (centre), 1 (home)
   const position = useSharedValue(0)
 
+  useEffect(() => () => setDrawer(null), [setDrawer])
+
   const openMenu = () => {
+    setDrawer('menu')
     setHasOpenedMenu(true)
     position.set(withSpring(-1))
     isMenuOpen.current = true
   }
 
   const closeMenu = () => {
+    setDrawer(current => (current === 'menu' ? null : current))
     position.set(withSpring(0))
     isMenuOpen.current = false
   }
 
   const openHome = () => {
+    setDrawer('home')
     setHasOpenedHome(true)
     position.set(withSpring(1))
     isHomeOpen.current = true
   }
 
   const closeHome = () => {
+    setDrawer(current => (current === 'home' ? null : current))
     position.set(withSpring(0))
     isHomeOpen.current = false
   }
