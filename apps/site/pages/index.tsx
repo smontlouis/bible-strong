@@ -11,6 +11,7 @@ import { TextReveal } from '../components/ui/text-reveal'
 gsap.registerPlugin(useGSAP, ScrollTrigger)
 
 const appStoreUrl = 'https://apps.apple.com/fr/app/bible-strong/id1454738221?mt=8'
+const webAppUrl = 'https://web.bible-strong.app/home'
 const playStoreUrl =
   'https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'
 export type ThemePreference = 'auto' | 'light' | 'dark'
@@ -261,8 +262,8 @@ function LandingHeader({
           </a>
         </div>
         <div className="landing-nav__actions">
-          <a className="button button--compact" href="#telecharger">
-            {t('home.cta.download')}
+          <a className="button button--compact button--web-app" href={webAppUrl}>
+            {t('home.cta.openApp')}
           </a>
           <ThemeToggle
             value={theme}
@@ -980,8 +981,8 @@ export default function Home({ initialTheme }: HomeProps) {
             <a className="button" href="#telecharger">
               {t('home.cta.download')}
             </a>
-            <a className="text-link" href="#parcours">
-              {t('home.cta.discover')} <span aria-hidden="true">↓</span>
+            <a className="text-link text-link--web" href={webAppUrl}>
+              {t('home.cta.readOnline')} <span aria-hidden="true">→</span>
             </a>
           </div>
           <p className="hero-proof">{t('home.hero.proof')}</p>
@@ -1244,6 +1245,7 @@ export default function Home({ initialTheme }: HomeProps) {
         </a>
         <p>{t('home.footer.line')}</p>
         <div>
+          <a href={webAppUrl}>{t('home.cta.readOnline')}</a>
           <a href={supportPath}>{t('support')}</a>
           <a href="https://github.com/smontlouis/bible-strong" target="_blank" rel="noreferrer">
             GitHub

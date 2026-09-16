@@ -12,6 +12,8 @@ export default {
   'home.theme.dark': 'Sombre',
   'home.language.switch': 'Passer en anglais',
   'home.cta.download': 'Télécharger l’app',
+  'home.cta.openApp': 'Ouvrir l’app',
+  'home.cta.readOnline': 'Lire en ligne',
   'home.cta.discover': 'Le parcours',
   'home.hero.title': 'Un verset. Une étude entière.',
   'home.hero.body': 'Lisez, explorez les mots originaux et reliez vos découvertes sans jamais perdre le fil du texte.',

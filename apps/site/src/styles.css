@@ -674,6 +674,10 @@ input {
   transform: translateY(3px);
 }
 
+.text-link--web:hover span {
+  transform: translateX(3px);
+}
+
 .hero-visual {
   position: relative;
   min-width: 0;
@@ -3415,6 +3419,9 @@ input {
   }
   .button--compact {
     display: none;
+  }
+  .landing-nav__actions .button--web-app {
+    display: inline-flex;
   }
   .hero-section {
     padding-top: 44px;

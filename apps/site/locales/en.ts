@@ -12,6 +12,8 @@ export default {
   'home.theme.dark': 'Dark',
   'home.language.switch': 'Switch to French',
   'home.cta.download': 'Download the app',
+  'home.cta.openApp': 'Open the app',
+  'home.cta.readOnline': 'Read online',
   'home.cta.discover': 'The journey',
   'home.hero.title': 'One verse. A complete study.',
   'home.hero.body': 'Read, explore original words, and connect discoveries without ever losing the thread of the text.',
