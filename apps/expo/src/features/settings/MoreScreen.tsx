@@ -1,7 +1,7 @@
 import { goBackOrHome } from '~navigation/goBackOrHome'
 import { resolveUniverseColors } from '~themes/universeColors'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
-import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
+import { getAppleReviewing } from '~helpers/getAppleReviewing'
 import { Image } from 'expo-image'
 import * as Updates from 'expo-updates'
 import { useSetAtom } from 'jotai/react'
@@ -119,8 +119,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
     }
   }
 
-  const appleIsReviewing =
-    Platform.OS === 'web' ? false : getValue(getRemoteConfig(), 'apple_reviewing').asBoolean()
+  const appleIsReviewing = getAppleReviewing()
 
   const promptNuke = () => {
     Alert.alert(

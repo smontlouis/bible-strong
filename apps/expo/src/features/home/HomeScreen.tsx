@@ -4,7 +4,7 @@ import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsi
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import Color from 'color'
-import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
+import { getAppleReviewing } from '~helpers/getAppleReviewing'
 import React from 'react'
 import { Linking, Platform } from 'react-native'
 import DesktopHome from './DesktopHome'
@@ -42,8 +42,7 @@ export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const isWide = useResponsiveWorkspace()
-  const appleIsReviewing =
-    Platform.OS === 'web' ? false : getValue(getRemoteConfig(), 'apple_reviewing').asBoolean()
+  const appleIsReviewing = getAppleReviewing()
 
   if (Platform.OS === 'web' && isWide) return <DesktopHome />
 
