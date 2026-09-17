@@ -1,0 +1,5 @@
+# Private assistant API boundary
+
+The application owns the interface, browser-local conversations, editorial context projection and public request/event contract (`packages/ai-contract`). The provider-specific server and its research/evaluation suite live in a separate private repository. Clients communicate with the deployed service over authenticated HTTPS and never import the server implementation. App builds need no private registry credentials.
+
+The extraction preserves the deployed API identity and request/event behavior. Contract changes must be synchronized with the server before rollout. The original local work and Git history were backed up before removing server files from this working tree. The public assistant branch was rebuilt directly on origin/master without the old server-containing commit. The original feat/strobi branch is retained locally for recovery; a local pre-push guard rejects outgoing history containing the private server paths. Never publish that archived branch history.

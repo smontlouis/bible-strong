@@ -107,6 +107,8 @@
     "@expo/cli@npm:^56.1.16": "patch:@expo/cli@npm%3A56.1.16#~/.yarn/patches/@expo-cli-npm-56.1.16-7d7dd3fde0.patch",
     "@react-native-masked-view/masked-view@npm:^0.3.2": "patch:@react-native-masked-view/masked-view@npm%3A0.3.2#~/.yarn/patches/@react-native-masked-view-masked-view-npm-0.3.2-7e49df0087.patch",
     "@expo/ui@npm:^56.0.18": "patch:@expo/ui@npm%3A56.0.18#~/.yarn/patches/@expo-ui-npm-56.0.18-1c9708e21e.patch",
-    "vaul@npm:^1.1.2": "patch:vaul@npm%3A1.1.2#~/.yarn/patches/vaul-npm-1.1.2-7a571c1ad6.patch"
+    "vaul@npm:^1.1.2": "patch:vaul@npm%3A1.1.2#~/.yarn/patches/vaul-npm-1.1.2-7a571c1ad6.patch",
+    "metro": "patch:metro@npm%3A0.84.4#~/.yarn/patches/metro-npm-0.84.4-68d21d57b4.patch",
+    "metro-runtime": "patch:metro-runtime@npm%3A0.84.4#~/.yarn/patches/metro-runtime-npm-0.84.4-9533293c73.patch"
   }
 }

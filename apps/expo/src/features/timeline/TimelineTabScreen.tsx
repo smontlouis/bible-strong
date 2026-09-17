@@ -91,7 +91,13 @@ const TimelineTabScreen = ({ timelineAtom }: Props) => {
   }, [isCurrentTab, timelineAtom, timelineTab.data.eventSlug, timelineTab.data.sectionIndex])
 
   if (timelineTab.data.eventSlug) {
-    return <TimelineEventDetailView event={activeEvent} onOpenEvent={goToEvent} />
+    return (
+      <TimelineEventDetailView
+        assistantScope={`tab:${timelineTab.id}`}
+        event={activeEvent}
+        onOpenEvent={goToEvent}
+      />
+    )
   }
 
   if (timelineTab.data.sectionIndex !== undefined) {

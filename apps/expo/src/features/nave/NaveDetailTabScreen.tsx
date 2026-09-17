@@ -1,3 +1,5 @@
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
+import { naveContext } from '~features/study-assistant/resourceContext'
 import { goBackOrHome } from '~navigation/goBackOrHome'
 import React, { useCallback, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -102,6 +104,14 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     ...localQueryOptions,
   })
   const naveItem = naveQuery.data ?? null
+  useAssistantResourceContext(
+    isInTab ? `tab:${naveTab.id}` : 'panel',
+    naveContext({
+      name: naveItem?.name || name,
+      name_lower: naveItem?.normalizedName || name_lower,
+      language: naveResourceLanguage,
+    })
+  )
   const { t } = useTranslation()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const selectNaveTags = makeNaveTagsSelector()

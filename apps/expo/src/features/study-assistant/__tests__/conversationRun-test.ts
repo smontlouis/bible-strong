@@ -1,0 +1,221 @@
+import { prepareMemory } from '../conversationMemory'
+import { runConversation } from '../conversationRun'
+import { type Conversation, type ReadingContext } from '../conversations'
+const empty: Conversation = { id: 'thread', title: '', updatedAt: 1, messages: [] }
+it('freezes message context and completes the streamed answer', async () => {
+  const context: ReadingContext = {
+    key: 'k',
+    label: 'Jean 1',
+    detail: 'Jean 1 · LSG',
+    kind: 'passage',
+  }
+  const updates: Conversation[] = []
+  await runConversation({
+    conversation: empty,
+    question: 'Explique',
+    context,
+    controller: new AbortController(),
+    isCurrent: () => true,
+    onUpdate: c => updates.push(c),
+    onProgress: () => {},
+    onError: () => {},
+    request: async (input, _signal, emit) => {
+      context.detail = 'Romains 8'
+      expect(input.readingContext).toBe('Jean 1 · LSG')
+      emit({ type: 'delta', text: 'Une réponse.' })
+      emit({ type: 'done', requestId: 'r', model: 'm', modelCalls: 1, toolCalls: 0 })
+    },
+  })
+  expect(updates.at(-1)?.messages[0].context?.detail).toBe('Jean 1 · LSG')
+  expect(updates.at(-1)?.messages[1]).toMatchObject({ text: 'Une réponse.', state: 'complete' })
+})
+it('keeps cancelled text but excludes it from future model history', async () => {
+  const updates: Conversation[] = [],
+    controller = new AbortController(),
+    errors: string[] = []
+  await runConversation({
+    conversation: empty,
+    question: 'Explique',
+    context: null,
+    controller,
+    isCurrent: () => true,
+    onUpdate: c => updates.push(c),
+    onProgress: () => {},
+    onError: k => errors.push(k),
+    request: async (_i, _s, emit) => {
+      emit({ type: 'delta', text: 'Partie reçue' })
+      controller.abort()
+      throw new Error('aborted')
+    },
+  })
+  expect(updates.at(-1)?.messages[1]).toMatchObject({ text: 'Partie reçue', state: 'interrupted' })
+  expect(
+    (
+      await prepareMemory(
+        updates.at(-1)!,
+        async () => {
+          throw new Error('Not needed')
+        },
+        new AbortController().signal,
+        () => {},
+        () => {}
+      )
+    ).history
+  ).toEqual([])
+  expect(errors).toEqual(['assistant.interrupted'])
+})
+it('ignores late output after the account session is replaced', async () => {
+  let current = true
+  const updates: Conversation[] = []
+  await runConversation({
+    conversation: empty,
+    question: 'Explique',
+    context: null,
+    controller: new AbortController(),
+    isCurrent: () => current,
+    onUpdate: c => updates.push(c),
+    onProgress: () => {},
+    onError: () => {},
+    request: async (_i, _s, emit) => {
+      current = false
+      emit({ type: 'delta', text: 'Other account must not see this' })
+      emit({ type: 'done', requestId: 'r', model: 'm', modelCalls: 1, toolCalls: 0 })
+    },
+  })
+  expect(updates).toHaveLength(1)
+  expect(updates[0].messages[1].text).toBe('')
+})
+
+it('persists the checkpoint and sends it with recent history before answering', async () => {
+  const messages = Array.from({ length: 17 }, (_, i) => [
+    {
+      id: `u${i}`,
+      role: 'user' as const,
+      text: 'q'.repeat(100),
+      state: 'complete' as const,
+      createdAt: i,
+    },
+    {
+      id: `a${i}`,
+      role: 'assistant' as const,
+      text: 'a'.repeat(1900),
+      state: 'complete' as const,
+      createdAt: i,
+    },
+  ]).flat()
+  const updates: Conversation[] = [],
+    progress: string[] = []
+  await runConversation({
+    conversation: { ...empty, messages },
+    question: 'Suite',
+    context: null,
+    controller: new AbortController(),
+    isCurrent: () => true,
+    onUpdate: c => updates.push(c),
+    onProgress: k => progress.push(k),
+    onError: () => {},
+    compact: async () => 'Mémoire condensée',
+    request: async (input, _s, emit) => {
+      expect(updates.at(-1)?.memory?.summary).toBe('Mémoire condensée')
+      expect(input.memorySummary).toBe('Mémoire condensée')
+      expect(input.history).toHaveLength(12)
+      emit({ type: 'delta', text: 'Suite de la discussion' })
+      emit({ type: 'done', requestId: 'r', model: 'm', modelCalls: 1, toolCalls: 0 })
+    },
+  })
+  expect(progress).toContain('assistant.modal.compacting')
+  expect(updates.at(-1)?.messages).toHaveLength(36)
+  expect(updates.at(-1)?.messages.at(-1)?.state).toBe('complete')
+})
+
+it('preserves a partial answer on network failure and never retries automatically', async () => {
+  const updates: Conversation[] = [],
+    errors: string[] = []
+  const request = jest.fn(async (_input, _signal, emit) => {
+    emit({ type: 'delta', text: 'Texte reçu avant la panne.' })
+    throw new TypeError('Network request failed')
+  })
+  await runConversation({
+    conversation: empty,
+    question: 'Question',
+    context: null,
+    controller: new AbortController(),
+    request,
+    isCurrent: () => true,
+    onUpdate: c => updates.push(c),
+    onProgress: () => {},
+    onError: e => errors.push(e),
+  })
+  expect(request).toHaveBeenCalledTimes(1)
+  expect(updates.at(-1)?.messages.at(-1)).toMatchObject({
+    text: 'Texte reçu avant la panne.',
+    state: 'error',
+  })
+  expect(errors).toEqual(['assistant.unavailable'])
+  expect(
+    (
+      await prepareMemory(
+        updates.at(-1)!,
+        async () => {
+          throw new Error('Not needed')
+        },
+        new AbortController().signal,
+        () => {},
+        () => {}
+      )
+    ).history
+  ).toEqual([])
+})
+it('retains tool results and interrupts unfinished calls without adding them to model memory', async () => {
+  const updates: Conversation[] = []
+  await runConversation({
+    conversation: empty,
+    question: 'Explique',
+    context: null,
+    controller: new AbortController(),
+    isCurrent: () => true,
+    onUpdate: c => updates.push(c),
+    onProgress: () => {},
+    onError: () => {},
+    request: async (_i, _s, emit) => {
+      emit({
+        type: 'tool',
+        callId: '1',
+        name: 'get_passage',
+        request: '{}',
+        result: '',
+        state: 'running',
+      })
+      emit({
+        type: 'tool',
+        callId: '1',
+        name: 'get_passage',
+        request: '{}',
+        result: 'PRIVATE_TOOL_PREVIEW',
+        state: 'complete',
+      })
+      emit({
+        type: 'tool',
+        callId: '2',
+        name: 'search',
+        request: '{}',
+        result: '',
+        state: 'running',
+      })
+      emit({ type: 'delta', text: 'Réponse' })
+      emit({ type: 'done', requestId: 'r', model: 'm', modelCalls: 1, toolCalls: 2 })
+    },
+  })
+  const conversation = updates.at(-1)!
+  expect(conversation.messages[1].tools?.map(t => t.state)).toEqual(['complete', 'interrupted'])
+  const memory = await prepareMemory(
+    conversation,
+    async () => {
+      throw new Error('unexpected')
+    },
+    new AbortController().signal,
+    () => {},
+    () => {}
+  )
+  expect(JSON.stringify(memory)).not.toContain('PRIVATE_TOOL_PREVIEW')
+})

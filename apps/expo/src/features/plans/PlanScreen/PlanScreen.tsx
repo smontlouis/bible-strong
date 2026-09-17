@@ -1,3 +1,5 @@
+import { editorialContext } from '~features/study-assistant/editorialContext'
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { getLegacyPlanRouteId } from '../planTabState'
 import { useReadingContent } from '~features/daily-reading/useDailyMeditation'
 import { useTranslation } from 'react-i18next'
@@ -20,6 +22,7 @@ import Menu from './Menu'
 import SuccessModal from './SuccessModal'
 
 interface Props {
+  assistantScope?: string
   planId?: string
   hasBackButton?: boolean
   onReadingSlicePress?: (
@@ -29,6 +32,7 @@ interface Props {
 }
 
 const PlanScreen = ({
+  assistantScope = 'panel',
   planId: planIdFromProps,
   hasBackButton = true,
   onReadingSlicePress,
@@ -43,6 +47,7 @@ const PlanScreen = ({
   const { t } = useTranslation()
   const { isError, retry } = useReadingContent(id)
   const plan = useComputedPlan(id)
+  useAssistantResourceContext(assistantScope, editorialContext(plan))
   const title = plan?.title ?? t('readingPlans.tab')
   const image = plan?.image
   const description = plan?.description

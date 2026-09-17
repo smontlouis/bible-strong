@@ -13,6 +13,7 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { EventDetailsContent, EventDetailsProps } from './EventDetails'
 import { TimelineEvent } from './types'
 interface Props {
+  assistantScope?: string
   event?: TimelineEvent | (EventDetailsProps & { sectionIndex?: number })
   onOpenEvent: (event: TimelineEvent) => void
   canGoBack?: boolean
@@ -35,6 +36,7 @@ const getMenuItemImage = (icon: string): MenuAction['image'] => {
 }
 
 const TimelineEventDetailContent = ({
+  assistantScope,
   event,
   onOpenEvent,
   canGoBack,
@@ -86,7 +88,7 @@ const TimelineEventDetailContent = ({
         }
       />
       <ScrollView>
-        <EventDetailsContent {...event} onOpenEvent={onOpenEvent} />
+        <EventDetailsContent assistantScope={assistantScope} {...event} onOpenEvent={onOpenEvent} />
       </ScrollView>
     </FormSheetScreen>
   )

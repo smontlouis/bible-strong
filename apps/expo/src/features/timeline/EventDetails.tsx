@@ -1,3 +1,5 @@
+import { timelineContext } from '~features/study-assistant/referenceContext'
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
@@ -39,6 +41,7 @@ const Description = ({ description, article }: Partial<TimelineEventDetail>) => 
 }
 
 export const EventDetailsContent = ({
+  assistantScope = 'panel',
   slug,
   image,
   title,
@@ -47,6 +50,7 @@ export const EventDetailsContent = ({
   end,
   onOpenEvent,
 }: EventDetailsProps & {
+  assistantScope?: string
   onOpenEvent?: (event: TimelineEventProps) => void
 }) => {
   const lang = useTimelineLanguage()
@@ -69,6 +73,8 @@ export const EventDetailsContent = ({
     networkMode: 'always',
   })
   const event = eventQuery.data?.status === 'available' ? eventQuery.data.detail : undefined
+
+  useAssistantResourceContext(assistantScope, timelineContext(event, resourceLanguage))
 
   if (eventQuery.isPending) {
     return (

@@ -11,6 +11,8 @@
 - [Application API](./apps/api/CONTEXT.md) — owns Firebase-backed server operations used by Bible Strong clients.
 - [Bible reference parsing](./packages/bible-reference-parser/CONTEXT.md) — turns French and English Bible-reference text into canonical passage references.
 
+- [Study assistant API contract](./packages/ai-contract/CONTEXT.md) — public requests and streamed responses for a separately hosted service.
+
 ## Relationships
 
 - **Resource authoring → Resource delivery**: Resource Studio produces immutable publication bundles; the Resource service validates and activates them.
@@ -19,3 +21,6 @@
 - **Resource catalog → Resource delivery / Study workspace**: publisher and client consume the same versioned artifact catalog.
 - **Bible reference parsing → Study workspace**: the parser recognizes inline references used for navigation and study links.
 - **Application API → Study workspace / Public site**: Firebase functions provide account-adjacent and content-processing operations to both clients.
+
+- **Study assistant → Resource delivery**: bounded read-only tools use the Resource API through a Worker service binding.
+- **Study workspace → Study assistant**: authenticated clients consume the same Markdown stream contract on native and web; provider implementation is maintained in a separate private repository.

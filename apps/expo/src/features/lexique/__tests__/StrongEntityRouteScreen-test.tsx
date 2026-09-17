@@ -13,7 +13,23 @@ jest.mock('@tanstack/react-query', () => ({
   useQuery: ({ queryKey }: { queryKey: string[] }) =>
     queryKey[1] === 'availability'
       ? { data: { status: 'available', moduleId: 'entities' }, isPending: false }
-      : { data: { name: 'Aaron' }, isPending: false },
+      : {
+          data: {
+            id: 1,
+            uniqueName: 'person:aaron',
+            name: 'Aaron',
+            category: 'person',
+            type: 'person',
+            strongCodes: ['H0175'],
+            relations: [],
+            description: '',
+            shortDescription: '',
+            brief: '',
+            summaryHtml: '',
+            articleHtml: '',
+          },
+          isPending: false,
+        },
 }))
 
 jest.mock('~features/resources/resourceAccess', () => ({

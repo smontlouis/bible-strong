@@ -1,3 +1,5 @@
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
+import { commentaryCollectionContext } from '~features/study-assistant/resourceContext'
 import CommentIcon from '~common/CommentIcon'
 import { pageContentStyle } from '~common/ui/PageContent'
 import { useQuery } from '@tanstack/react-query'
@@ -21,7 +23,7 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { Theme } from '~themes'
 import { CommentaryTab } from '../../state/tabs'
-import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
+import { useTabContext, useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
@@ -126,6 +128,11 @@ const CommentariesTabScreen = ({
     isError,
     retry,
   } = useComments(verse)
+  const { isInTab } = useTabContext()
+  useAssistantResourceContext(
+    isInTab ? `tab:${commentaryTab.id}` : 'panel',
+    commentaryCollectionContext(verse, selectedResourceIds)
+  )
   const currentVerseNumber = Number(verse.split('-')[2])
   const commentaryAvailability = buildCommentaryVerseAvailability({
     selectedProjectionIds: selectedResourceIds,

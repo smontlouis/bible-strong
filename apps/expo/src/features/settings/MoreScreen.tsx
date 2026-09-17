@@ -195,6 +195,20 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
               {t('settings.resources')}
             </Text>
           </SectionCardHeader>
+          {(__DEV__ || process.env.EXPO_PUBLIC_AI_API_URL) && (
+            <CardLinkItem
+              onPress={() => {
+                closeMenu()
+                router.push('/study-assistant')
+              }}
+            >
+              <IconCircle bg="rgba(89, 131, 240, 0.1)">
+                <FeatherIcon name="message-circle" size={20} color="primary" />
+              </IconCircle>
+              <Text className="flex-[1] text-[15px]">{t('assistant.title')}</Text>
+              <FeatherIcon name="chevron-right" size={20} color="grey" />
+            </CardLinkItem>
+          )}
           <CardLinkItem route="History">
             <IconCircle bg="rgba(107, 114, 128, 0.1)">
               <FeatherIcon name="clock" size={20} color="grey" />

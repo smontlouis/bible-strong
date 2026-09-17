@@ -1,3 +1,5 @@
+import { editorialContext } from '~features/study-assistant/editorialContext'
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { useRef, useState } from 'react'
 import { Image } from 'expo-image'
 import { useFireStorage } from '~features/plans/plan.hooks'
@@ -22,6 +24,7 @@ import { useReadingContent, useLocalReadingDate } from './useDailyMeditation'
 import { resolveMeditationReading } from './resolveMeditationReading'
 
 interface MeditationReaderProps {
+  assistantScope?: string
   collectionId: string
   readingId?: string
   date?: string
@@ -31,6 +34,7 @@ interface MeditationReaderProps {
 }
 
 export const MeditationReader = ({
+  assistantScope = 'panel',
   collectionId,
   readingId,
   date: requestedDate,
@@ -48,6 +52,7 @@ export const MeditationReader = ({
   const wide = isWeb && availableWidth >= 860
   const cover = useFireStorage(collection?.image)
   const reading = resolved?.reading
+  useAssistantResourceContext(assistantScope, editorialContext(collection, reading))
   const date =
     resolved?.date ??
     (!readingId ? (requestedDate && isCivilDate(requestedDate) ? requestedDate : today) : undefined)

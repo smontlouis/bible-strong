@@ -1,3 +1,5 @@
+import { editorialContext } from '~features/study-assistant/editorialContext'
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { useReadingContent } from '~features/daily-reading/useDailyMeditation'
 import { useComputedPlan } from '../plan.hooks'
 import {
@@ -60,6 +62,7 @@ const EMPTY_ARRAY: never[] = []
 const EMPTY_OBJECT = {}
 
 interface Props {
+  assistantScope?: string
   readingSlice?: ComputedReadingSlice & {
     planId: string
     planTitle?: string
@@ -71,6 +74,7 @@ interface Props {
 }
 
 const PlanSliceScreen = ({
+  assistantScope = 'panel',
   readingSlice: readingSliceFromProps,
   planTitle,
   onBack,
@@ -108,6 +112,7 @@ const PlanSliceScreen = ({
     ComputedReadingSlice & { planId: string; planTitle?: string; planLanguage: Plan['lang'] }
   >
 
+  useAssistantResourceContext(assistantScope, editorialContext(currentPlan, readingSlice))
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const paramsModalRef = React.useRef<SheetRef>(null)
