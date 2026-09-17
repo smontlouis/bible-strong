@@ -54,12 +54,12 @@ export default function ToolTimeline({
     const search = /search|find|concordance/.test(tool.name)
     const label = tool.name.includes('strong')
       ? 'strong'
-      : tool.name.includes('passage')
-        ? 'passage'
-        : tool.name.includes('nave')
-          ? 'nave'
-          : tool.name.includes('comment')
-            ? 'commentary'
+      : tool.name.includes('comment')
+        ? 'commentary'
+        : tool.name.includes('passage')
+          ? 'passage'
+          : tool.name.includes('nave')
+            ? 'nave'
             : tool.name.includes('dictionary')
               ? 'dictionary'
               : 'search'

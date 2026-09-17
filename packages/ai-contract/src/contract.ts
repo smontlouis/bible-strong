@@ -13,7 +13,14 @@ export type ToolActivity = {
   result: string
   state: 'running' | 'complete' | 'error' | 'interrupted'
 }
+export type RoutingDecision = {
+  sequence: number
+  selectedFamilies: string[]
+  allowedTools: string[]
+  phase: 'initial' | 'expansion'
+}
 export type StudyEvent =
+  | ({ type: 'routing' } & RoutingDecision)
   | ({ type: 'tool' } & ToolActivity)
   | { type: 'status'; message: string }
   | { type: 'delta'; text: string }
@@ -70,6 +77,7 @@ export function parseStudyEvent(value: unknown): StudyEvent {
   if (!value || typeof value !== 'object') throw new Error('INVALID_STREAM')
   const event = value as Record<string, unknown>
   if (event.type === 'tool') return { type: 'tool', ...parseToolActivity(event) }
+  if (event.type === 'routing') return { type: 'routing', ...parseRoutingDecision(event) }
   if (event.type === 'reset') return { type: 'reset' }
   if (event.type === 'delta' && typeof event.text === 'string')
     return { type: 'delta', text: event.text }
@@ -112,5 +120,29 @@ export function parseToolActivity(value: unknown): ToolActivity {
     request: v.request as string,
     result: v.result as string,
     state: v.state as ToolActivity['state'],
+  }
+}
+
+export function parseRoutingDecision(value: unknown): RoutingDecision {
+  if (!value || typeof value !== 'object') throw new Error('INVALID_ROUTING_EVENT')
+  const v = value as Record<string, unknown>
+  const names = (items: unknown, max: number): items is string[] =>
+    Array.isArray(items) &&
+    items.length <= max &&
+    items.every(item => typeof item === 'string' && /^[a-z][a-z0-9_]{0,79}$/.test(item))
+  if (
+    !Number.isInteger(v.sequence) ||
+    Number(v.sequence) < 1 ||
+    Number(v.sequence) > 3 ||
+    !names(v.selectedFamilies, 6) ||
+    !names(v.allowedTools, 20) ||
+    !['initial', 'expansion'].includes(String(v.phase))
+  )
+    throw new Error('INVALID_ROUTING_EVENT')
+  return {
+    sequence: Number(v.sequence),
+    selectedFamilies: v.selectedFamilies,
+    allowedTools: v.allowedTools,
+    phase: v.phase as RoutingDecision['phase'],
   }
 }

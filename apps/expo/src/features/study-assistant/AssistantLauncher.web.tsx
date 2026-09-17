@@ -1,3 +1,4 @@
+import RoutingDetails from './RoutingDetails.web'
 import ErrorState from './ErrorState.web'
 import ToolTimeline from './ToolTimeline.web'
 import { runConversation } from './conversationRun'
@@ -388,6 +389,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                       </>
                     ) : (
                       <>
+                        {!!m.routing?.length && <RoutingDetails decisions={m.routing} />}
                         {!!m.tools?.length && (
                           <ToolTimeline tools={m.tools} running={m.state === 'streaming' && busy} />
                         )}

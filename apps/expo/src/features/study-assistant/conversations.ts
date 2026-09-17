@@ -1,4 +1,9 @@
-import { parseToolActivity, type ToolActivity } from '@bible-strong/ai-contract/contract'
+import {
+  parseToolActivity,
+  parseRoutingDecision,
+  type RoutingDecision,
+  type ToolActivity,
+} from '@bible-strong/ai-contract/contract'
 import { validCheckpoint, type MemoryCheckpoint } from './conversationMemory'
 
 export type ReadingContext = {
@@ -24,6 +29,7 @@ export type LocalMessage = {
   role: 'user' | 'assistant'
   text: string
   state: 'complete' | 'streaming' | 'interrupted' | 'error'
+  routing?: RoutingDecision[]
   tools?: ToolActivity[]
   context?: ReadingContext
   createdAt: number
@@ -102,6 +108,9 @@ export function loadConversations(storage: ConversationStorage, account: string)
           throw new Error('LOCAL_HISTORY_INVALID')
         if (m.tools !== undefined && (!Array.isArray(m.tools) || m.tools.length > 6))
           throw new Error('LOCAL_HISTORY_INVALID')
+        if (m.routing !== undefined && (!Array.isArray(m.routing) || m.routing.length > 3))
+          throw new Error('LOCAL_HISTORY_INVALID')
+        const routing = m.routing?.map(parseRoutingDecision)
         const tools = m.tools?.map(value => {
           const tool = parseToolActivity(value)
           return {
@@ -111,6 +120,7 @@ export function loadConversations(storage: ConversationStorage, account: string)
         })
         return {
           ...(tools ? { tools } : {}),
+          ...(routing ? { routing } : {}),
           id: m.id,
           role: m.role,
           text: m.text,

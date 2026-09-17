@@ -2446,5 +2446,17 @@
   "assistant.modal.action.editorialReferences": "Explorer les passages bibliques",
   "assistant.modal.prompt.editorialReferences": "Comment les passages bibliques éclairent-ils cette lecture ?",
   "assistant.modal.action.editorialReflect": "Une piste de réflexion",
-  "assistant.modal.prompt.editorialReflect": "Quelle question pourrait m’aider à réfléchir à cette lecture ?"
+  "assistant.modal.prompt.editorialReflect": "Quelle question pourrait m’aider à réfléchir à cette lecture ?",
+  "assistant.routing.title": "Outils autorisés par JEV",
+  "assistant.routing.explanation": "Ces outils étaient disponibles pour Gloo. La timeline indique ceux qui ont réellement été appelés.",
+  "assistant.routing.initial": "Sélection initiale",
+  "assistant.routing.expansion": "Élargissement des accès",
+  "assistant.routing.families": "Familles disponibles",
+  "assistant.routing.none": "Aucune",
+  "assistant.routing.family.lexical": "Lexique Strong",
+  "assistant.routing.family.search": "Recherche biblique",
+  "assistant.routing.family.thematic": "Thèmes Nave",
+  "assistant.routing.family.background": "Dictionnaires",
+  "assistant.routing.family.commentary": "Commentaires",
+  "assistant.routing.family.passage": "Passages bibliques"
 }

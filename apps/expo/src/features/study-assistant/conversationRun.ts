@@ -1,5 +1,10 @@
 import { prepareMemory, type Compactor } from './conversationMemory'
-import type { StudyEvent, StudyRequest, ToolActivity } from '@bible-strong/ai-contract/contract'
+import type {
+  StudyEvent,
+  StudyRequest,
+  ToolActivity,
+  RoutingDecision,
+} from '@bible-strong/ai-contract/contract'
 import { type Conversation, type LocalMessage, type ReadingContext } from './conversations'
 const errorKeys: Record<string, string> = {
   SIGN_IN_REQUIRED: 'assistant.signIn',
@@ -61,6 +66,7 @@ export async function runConversation({
     messages: [...conversation.messages, user, answer],
   }
   let tools: ToolActivity[] = []
+  let routing: RoutingDecision[] = []
   const update = (text: string, state: LocalMessage['state']) => {
     next = {
       ...next,
@@ -70,6 +76,7 @@ export async function runConversation({
               ...m,
               text,
               state,
+              routing,
               tools: tools.map(tool =>
                 state !== 'streaming' && tool.state === 'running'
                   ? { ...tool, state: 'interrupted' as const }
@@ -124,6 +131,14 @@ export async function runConversation({
       controller.signal,
       event => {
         if (!isCurrent() || controller.signal.aborted) return
+        if (event.type === 'routing') {
+          const { type: _type, ...decision } = event
+          routing = [
+            ...routing.filter(item => item.sequence !== decision.sequence),
+            decision,
+          ].slice(0, 3)
+          update(output, 'streaming')
+        }
         if (event.type === 'tool') {
           const { type: _type, ...activity } = event
           const found = tools.some(tool => tool.callId === activity.callId)

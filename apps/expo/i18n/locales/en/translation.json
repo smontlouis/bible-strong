@@ -2418,5 +2418,17 @@
   "assistant.modal.action.editorialReferences": "Explore the Bible passages",
   "assistant.modal.prompt.editorialReferences": "How do the Bible passages illuminate this reading?",
   "assistant.modal.action.editorialReflect": "A question to reflect on",
-  "assistant.modal.prompt.editorialReflect": "What question could help me reflect on this reading?"
+  "assistant.modal.prompt.editorialReflect": "What question could help me reflect on this reading?",
+  "assistant.routing.title": "Tools authorized by JEV",
+  "assistant.routing.explanation": "These tools were available to Gloo. The timeline shows those actually called.",
+  "assistant.routing.initial": "Initial selection",
+  "assistant.routing.expansion": "Expanded access",
+  "assistant.routing.families": "Available families",
+  "assistant.routing.none": "None",
+  "assistant.routing.family.lexical": "Strong lexicon",
+  "assistant.routing.family.search": "Bible search",
+  "assistant.routing.family.thematic": "Nave topics",
+  "assistant.routing.family.background": "Dictionaries",
+  "assistant.routing.family.commentary": "Commentaries",
+  "assistant.routing.family.passage": "Bible passages"
 }

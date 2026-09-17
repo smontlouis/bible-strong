@@ -202,11 +202,19 @@ it('retains tool results and interrupts unfinished calls without adding them to 
         result: '',
         state: 'running',
       })
+      emit({
+        type: 'routing',
+        sequence: 1,
+        phase: 'initial',
+        selectedFamilies: ['commentary'],
+        allowedTools: ['get_commentary_excerpt'],
+      })
       emit({ type: 'delta', text: 'Réponse' })
       emit({ type: 'done', requestId: 'r', model: 'm', modelCalls: 1, toolCalls: 2 })
     },
   })
   const conversation = updates.at(-1)!
+  expect(conversation.messages[1].routing?.[0].selectedFamilies).toEqual(['commentary'])
   expect(conversation.messages[1].tools?.map(t => t.state)).toEqual(['complete', 'interrupted'])
   const memory = await prepareMemory(
     conversation,
@@ -218,4 +226,5 @@ it('retains tool results and interrupts unfinished calls without adding them to 
     () => {}
   )
   expect(JSON.stringify(memory)).not.toContain('PRIVATE_TOOL_PREVIEW')
+  expect(JSON.stringify(memory)).not.toContain('get_commentary_excerpt')
 })
