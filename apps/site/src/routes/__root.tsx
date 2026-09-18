@@ -20,10 +20,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { rel: 'icon', href: '/images/icon.png' },
       { rel: 'manifest', href: '/manifest.webmanifest' },
     ],
-    scripts: [
-      { src: 'https://www.googletagmanager.com/gtag/js?id=UA-109677220-2', async: true },
-      { children: "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','UA-109677220-2');" },
-    ],
   }),
   shellComponent: RootDocument,
   notFoundComponent: () => <main className="grid min-h-screen place-items-center p-6"><p>Page introuvable.</p></main>,

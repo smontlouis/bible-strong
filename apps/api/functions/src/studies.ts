@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions/v1'
 import puppeteer, { Browser } from 'puppeteer-core'
 import chromium from '@sparticuz/chromium-min'
+import { deleteStudyFiles } from './studyFiles'
 
 const admin = require('firebase-admin')
 const cors = require('cors')({ origin: true })
@@ -97,15 +98,10 @@ export const onStudyUpdate = functions.firestore
     }
   })
 
-export const deleteStudy = functions.firestore
+export const deleteStudy = functions
+  .runWith({ failurePolicy: true })
+  .firestore
   .document('studies/{studyId}')
-  .onDelete(async (snap, context) => {
-    try {
-      const { id } = snap.data()
-      await bucket.file(`images/studies/${id}.jpg`).delete()
-      await bucket.file(`images/studies/${id}-whatsapp.jpg`).delete()
-      console.log(`Files deleted for ${id}`)
-    } catch (e) {
-      console.log(e)
-    }
+  .onDelete(async (snap) => {
+    await deleteStudyFiles(snap.id)
   })
