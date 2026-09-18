@@ -1,3 +1,4 @@
+import ShortcutGuide from './ShortcutGuide.web'
 import TabActionResults from './TabActionResults.web'
 import { FeatherIcon } from '~common/ui/Icon'
 import { tabContentKey } from './priorities'
@@ -103,7 +104,8 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
     inputRef.current?.focus()
   }
   const [focused, setFocused] = useState(false)
-  const showSuggestions = Boolean(onDone) || !tabAtom || focused
+  const [helpOpen, setHelpOpen] = useState(false)
+  const showSuggestions = Boolean(onDone) || !tabAtom || focused || helpOpen
   const referenceInput = parseBibleReferenceInput(
     query,
     i18n.language.startsWith('fr') ? 'fr' : 'en'
@@ -157,6 +159,10 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
       className="bs-command"
       shouldFilter={false}
       loop
+      onFocusCapture={() => setFocused(true)}
+      onBlurCapture={event => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false)
+      }}
       label={t('commandPalette.label')}
       style={
         {
@@ -222,8 +228,6 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
             }
           }}
           asChild
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
           autoFocus={Boolean(onDone) || !tabAtom}
           value={query}
           onValueChange={value => {
@@ -420,7 +424,10 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
       </Command.List>
       {showSuggestions && (
         <div className="bs-command-footer">
-          {t(onDone || !tabAtom ? 'commandPalette.keyboard' : 'commandPalette.keyboardInline')}
+          <span>
+            {t(onDone || !tabAtom ? 'commandPalette.keyboard' : 'commandPalette.keyboardInline')}
+          </span>
+          <ShortcutGuide open={helpOpen} onOpenChange={setHelpOpen} />
         </div>
       )}
     </Command>
