@@ -1,7 +1,33 @@
+import { parseStudyWidget, type StudyWidget } from './widgets'
+export {
+  parseStudyWidget,
+  widgetMemoryText,
+  parsePassageTarget,
+  type StudyWidget,
+  type PassageWidget,
+  type LexicalWidget,
+  type SourceGroupWidget,
+  type NaveWidget,
+  type EntityWidget,
+  type TimelineWidget,
+  type BookWidget,
+  type ReadingWidget,
+  type FurtherResourcesWidget,
+  type ResourceSuggestion,
+  type PassageTarget,
+} from './widgets'
+import { parseStudySource, type StudySource } from './sources'
+export { parseStudySource, sourceLink, sourceIdFromLink, type StudySource } from './sources'
 export const STREAM_VERSION = 1
 export type HistoryMessage = { role: 'user' | 'assistant'; content: string }
 export type StudyRequest = {
   question: string
+  appLanguage?: 'fr' | 'en'
+  /** Legacy combined preference, retained for older clients. */
+  bibleVersion?: string
+  defaultBibleVersion?: string
+  defaultStrongBibleVersion?: string
+  readingBibleVersion?: string
   history: HistoryMessage[]
   readingContext: string
   memorySummary?: string
@@ -20,6 +46,8 @@ export type RoutingDecision = {
   phase: 'initial' | 'expansion'
 }
 export type StudyEvent =
+  | { type: 'widget'; widget: StudyWidget }
+  | { type: 'source'; source: StudySource }
   | ({ type: 'routing' } & RoutingDecision)
   | ({ type: 'tool' } & ToolActivity)
   | { type: 'status'; message: string }
@@ -33,12 +61,35 @@ export function parseStudyRequest(value: unknown): StudyRequest {
   const input = value as Record<string, unknown>
   if (
     Object.keys(input).some(
-      key => !['question', 'history', 'readingContext', 'memorySummary'].includes(key)
+      key =>
+        ![
+          'question',
+          'history',
+          'readingContext',
+          'memorySummary',
+          'appLanguage',
+          'bibleVersion',
+          'defaultBibleVersion',
+          'defaultStrongBibleVersion',
+          'readingBibleVersion',
+        ].includes(key)
     )
   )
     throw new Error('INVALID_REQUEST')
   if (typeof input.question !== 'string' || !input.question.trim() || input.question.length > 4000)
     throw new Error('INVALID_REQUEST')
+  if (input.appLanguage !== undefined && !['fr', 'en'].includes(String(input.appLanguage)))
+    throw new Error('INVALID_LANGUAGE')
+  for (const field of [
+    'bibleVersion',
+    'defaultBibleVersion',
+    'defaultStrongBibleVersion',
+    'readingBibleVersion',
+  ]) {
+    const value = input[field]
+    if (value !== undefined && (typeof value !== 'string' || !/^[A-Za-z0-9_-]{1,40}$/.test(value)))
+      throw new Error('INVALID_VERSION')
+  }
   const context = input.readingContext ?? ''
   if (typeof context !== 'string' || context.length > 13000) throw new Error('INVALID_REQUEST')
   const summary = input.memorySummary ?? ''
@@ -46,6 +97,17 @@ export function parseStudyRequest(value: unknown): StudyRequest {
   const history = parseHistory(input.history, 32000 - summary.length)
   return {
     question: input.question.trim(),
+    ...(input.appLanguage ? { appLanguage: input.appLanguage as 'fr' | 'en' } : {}),
+    ...(input.bibleVersion ? { bibleVersion: input.bibleVersion as string } : {}),
+    ...(input.defaultBibleVersion
+      ? { defaultBibleVersion: input.defaultBibleVersion as string }
+      : {}),
+    ...(input.defaultStrongBibleVersion
+      ? { defaultStrongBibleVersion: input.defaultStrongBibleVersion as string }
+      : {}),
+    ...(input.readingBibleVersion
+      ? { readingBibleVersion: input.readingBibleVersion as string }
+      : {}),
     history,
     readingContext: context,
     memorySummary: summary,
@@ -78,6 +140,8 @@ export function parseStudyEvent(value: unknown): StudyEvent {
   const event = value as Record<string, unknown>
   if (event.type === 'tool') return { type: 'tool', ...parseToolActivity(event) }
   if (event.type === 'routing') return { type: 'routing', ...parseRoutingDecision(event) }
+  if (event.type === 'source') return { type: 'source', source: parseStudySource(event.source) }
+  if (event.type === 'widget') return { type: 'widget', widget: parseStudyWidget(event.widget) }
   if (event.type === 'reset') return { type: 'reset' }
   if (event.type === 'delta' && typeof event.text === 'string')
     return { type: 'delta', text: event.text }
@@ -134,7 +198,7 @@ export function parseRoutingDecision(value: unknown): RoutingDecision {
     !Number.isInteger(v.sequence) ||
     Number(v.sequence) < 1 ||
     Number(v.sequence) > 3 ||
-    !names(v.selectedFamilies, 6) ||
+    !names(v.selectedFamilies, 8) ||
     !names(v.allowedTools, 20) ||
     !['initial', 'expansion'].includes(String(v.phase))
   )

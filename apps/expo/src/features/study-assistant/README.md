@@ -72,4 +72,46 @@ Plan overview, open reading step, meditation collection and the resolved meditat
 
 The loaded Strong entity profile publishes its editorial identity, descriptions, lexical codes and relationships (including certainty), without personal fields. The loaded timeline event publishes its title, period/dates, article and scripture references in the selected resource language. Timeline detail screens pass their tab scope to the shared content renderer; standalone route details use panel scope. These contexts reuse the bounded 12,000-character editorial snapshot policy; no extra model call happens on navigation. Timeline overview/panning does not invent a selected event.
 
-Each new routed response can retain up to three public routing snapshots: initial allowed tool families/names and cumulative access after expansions. The expandable routing details distinguish authorized tools from executed tool activity. No provider prompts, reasoning, probabilities, keys or raw routing request bodies are sent. Old conversations have no routing record; do not infer one from their calls. Routing snapshots are excluded from model history and memory inputs.
+Each new routed response can retain up to three public routing snapshots: initial allowed tool families/names and cumulative access after expansions. Routing details are kept for diagnostics but are not shown in the conversation. Executed tools remain visible in ToolTimeline. No provider prompts, reasoning, probabilities, keys or raw routing request bodies are sent. Old conversations have no routing record; do not infer one from their calls. Routing snapshots are excluded from model history and memory inputs.
+
+### Interactive references
+
+The public `source` SSE event carries a bounded, validated destination and a preview for a successful passage/Strong/commentary/dictionary read. The response can cite its response-local URL. The renderer resolves that URL only against sources persisted with the same message; unknown source IDs remain text. Historic inference strips response-local source URLs to avoid reusing another message's IDs. Gloo's general retrieved citations are not automatically treated as local sources or sentence-level proof.
+
+Source links open the existing ReferencePreviewHost on click, displaying the retrieved excerpt and the standard external-open icon. No hover preview is used. The experimental Base UI Inline Citation specimen and its dependency/Metro workaround were removed.
+
+### Study widgets
+
+`widgets/` owns deterministic presentation and exact client resource reads. `packages/ai-contract/src/widgets.ts` validates bounded descriptors. The 17 study presentations cover passages and translations, Strong/concordance/word analysis, attributed commentaries/dictionaries/Nave, people/relations/places/events, book overviews, editorial reading steps/meditations and further resources.
+
+Widgets persist per message. Subsequent model memory includes only ordered resource identities, not the full client-loaded texts. Expansions, filters, passage selections and translation changes are temporary exploration controls; reloading restores the original descriptor. Changing a version does not rewrite the earlier assistant analysis, which is stated next to the controls. Difference highlighting is lexical alignment, not semantic equivalence, and differing versification is signalled.
+
+All cards use the shared theme tokens and sans-serif assistant typography. Wide content uses a Radix dialog; resource references use the existing click previews and exact internal routes. Successful source reads supply attributed excerpts. Missing resources, coverage or morphology are explicit; no generated text replaces unavailable source content. Only source-provided valid coordinates generate map links.
+
+Reading widgets resolve public editorial content through `useReadingContent` without enrolling or updating progress. Candidate resources are explicitly distinguished from documents actually read. Private orchestration, prompts, provider credentials and editorial tools remain in the private API repository. See `plans/assistant-study-widgets.md` for validation evidence and source limitations.
+
+### Widget playground (development, web)
+
+Open `/ai-widgets` or choose **Les 17 widgets** from `/playground`. The gallery mounts one actual `StudyWidget` at a time and uses the existing Resource access adapters. Commentary/dictionary examples resolve published content before constructing their source descriptors. No model request is sent and no assistant quota is consumed. The theme override is local to the gallery; reset clears the current widget's temporary controls. The selected example is retained in the `widget` query parameter, so a link can target one presentation directly. Descriptions, example requests, interaction checklists and the public descriptor are shown alongside the preview. The route redirects outside development and on native platforms.
+
+Verified: all 17 examples render real resource content; search, copy, reset, wide/compact controls, scoped light/dark theme and 390px layout. Expo typecheck, targeted lint and web export pass. React Doctor only reports the already-known legacy StudyAssistantScreen compiler errors.
+
+Passage UI simplification: `passages` and legacy `passage_comparison` descriptors both render a plain list with reference previews, Bible navigation and reading expansion. No passage selection or Read/Compare switch remains. Translation comparison retains its version controls and lexical differences. The playground has 16 entries after merging the two passage presentations.
+
+The playground's **Ce que Gloo reçoit** panel loads exact tool descriptions, argument schemas and the selection-guidance paragraph from the private repository's loopback-only diagnostic server (`yarn dev:widget-catalog` in bible-strong-ai). It distinguishes explicit presentation calls from widgets emitted automatically after a successful resource read. The panel shows the local prompt version, explains JEV-dependent tool exposure, and does not claim to trace a specific model request or deployed version. No private prompt is bundled or persisted in the public app. This request does not consume an AI quota. The public gallery now contains 16 entries after passage-list simplification.
+
+### Application language and source editions
+
+Every chat request now includes `appLanguage` (fr/en) and a preferred `bibleVersion`. The selected reading context carries its edition explicitly; it wins over the user's default Bible, followed by the language default (LSG/fr, KJV/en). This is separate from the response-language instruction. An explicit edition in the question can override the default through the tool's version argument. Source citations and concordance widgets persist the actual version; reopening an English source in a French UI does not switch its text to LSG. Word analysis rejects a mismatched fallback edition.
+
+The private engine uses English system/tool/routing instructions, while responses default to the application language unless the user asks otherwise. English-only or French-only source text is not relabelled as another edition. The currently exposed dictionary/commentary tools remain French-only and advertise that limitation. Nave, lexicon and reference-resource reads can select French or English where published. Older request payloads remain compatible with the previous French/LSG defaults.
+
+Validated: default English/KJV retrieval; French app with KJV source and French explanation; click preview stays KJV; structured tests cover English app with explicit LSG, missing alignment without a substituted edition, KJV search/concordance, and JEV preference propagation. Original French app/resource settings restored after live testing.
+
+### Independent normal, Strong and open-reading Bible preferences
+
+A question snapshots `appLanguage`, `defaultBibleVersion`, `defaultStrongBibleVersion` and optional `readingBibleVersion` before memory preparation. The defaults use the same resolution as the Bible-defaults settings screen; an open/pinned passage supplies its own edition independently. New text searches use the normal default; concordance uses the Strong default; the open passage keeps its own edition. Explicit user version requests override those defaults. Legacy `bibleVersion` requests remain accepted for older clients.
+
+No unavailable alignment is copied between translations. A text-only read can suggest the configured Strong edition for a **separate** read; source links and widgets retain each actual edition. Ordinary prose links use the uniquely known edition from source/widget evidence, including concordance, without guessing when several editions are present. Temporary preference changes cannot alter the settings of an already-started question.
+
+Verification: mocked S21 reading / NBS text search / KJV Strong index exercise all three priorities; tests cover explicit overrides, DBY index selection, unavailable indexes, legacy requests and frozen settings. Live smoke with the user's unchanged LSG normal default and DBR Strong default returned a DBR concordance (G3306, 105 distinct verses); a prose reference reopened Matthieu 10:11 in DBR after page reload. Private provider rules remain in bible-strong-ai; the playground can display their exact version-priority policy.

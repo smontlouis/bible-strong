@@ -1,14 +1,39 @@
+import { versions } from '~helpers/bibleVersions'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
+import { resolveStrongNavigationVersionId } from '~helpers/strongBiblePublications'
+import { assistantLanguagePreferences } from './languagePreferences'
+import { getLanguage } from '~i18n'
+import { store } from '~redux/store'
 import { fetch as expoFetch } from 'expo/fetch'
 import { readStudyStream } from '@bible-strong/ai-contract/stream'
 import type { StudyRequest, StudyEvent } from '@bible-strong/ai-contract/contract'
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 import { getResourceAppCheckToken } from '~helpers/resourceAppCheck'
 export const assistantAvailable = Boolean(process.env.EXPO_PUBLIC_AI_API_URL)
+export function captureAssistantPreferences(readingBibleVersion?: string) {
+  const settings = store.getState().user.bible.settings
+  return assistantLanguagePreferences(
+    getLanguage(),
+    settings.defaultBibleVersion && versions[settings.defaultBibleVersion]
+      ? settings.defaultBibleVersion
+      : getDefaultBibleVersion(getLanguage()),
+    readingBibleVersion,
+    resolveStrongNavigationVersionId(settings.defaultStrongBibleVersionId || '') || 'LSG'
+  )
+}
 export async function askAssistant(
   input: StudyRequest,
   signal: AbortSignal,
   onEvent: (event: StudyEvent) => void
 ) {
+  const preferences = {
+    ...captureAssistantPreferences(input.readingBibleVersion || input.bibleVersion),
+    ...(input.appLanguage ? { appLanguage: input.appLanguage } : {}),
+    ...(input.defaultBibleVersion ? { defaultBibleVersion: input.defaultBibleVersion } : {}),
+    ...(input.defaultStrongBibleVersion
+      ? { defaultStrongBibleVersion: input.defaultStrongBibleVersion }
+      : {}),
+  }
   const base = process.env.EXPO_PUBLIC_AI_API_URL
   if (!base) throw new Error('AI_UNAVAILABLE')
   const user = getCurrentAuthUser()
@@ -22,7 +47,7 @@ export async function askAssistant(
       Authorization: `Bearer ${token}`,
       'X-Firebase-AppCheck': appCheck,
     },
-    body: JSON.stringify(input),
+    body: JSON.stringify({ ...input, ...preferences }),
     signal,
   })
   if (!response.ok) {
@@ -36,7 +61,10 @@ export async function askAssistant(
 }
 
 export async function compactAssistant(
-  input: { summary: string; history: import('@bible-strong/ai-contract/contract').HistoryMessage[] },
+  input: {
+    summary: string
+    history: import('@bible-strong/ai-contract/contract').HistoryMessage[]
+  },
   signal: AbortSignal
 ): Promise<string> {
   const base = process.env.EXPO_PUBLIC_AI_API_URL,

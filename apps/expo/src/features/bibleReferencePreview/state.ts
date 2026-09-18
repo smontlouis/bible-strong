@@ -20,6 +20,7 @@ export type ReferencePreviewRequest = ReferencePreviewTarget & {
   open: () => void
 }
 export type PreviewRequest =
+  | { kind: 'excerpt'; title: string; text: string; open: () => void }
   | {
       kind: 'commentary'
       title: string

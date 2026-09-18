@@ -1,3 +1,7 @@
+import Loading from '~common/Loading'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { parseSourcedTimelineDates } from './sourcedDates'
+import type { EventDetailsProps } from './EventDetails'
 import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { useLocalSearchParams } from 'expo-router'
@@ -14,10 +18,12 @@ import { IS_FORM_SHEET } from '~helpers/constants'
 const EventScreen = () => {
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
-  const language = useTimelineLanguage()
+  const preferredLanguage = useTimelineLanguage()
   const openInNewTab = useOpenInNewTab()
-  const params = useLocalSearchParams<{ slug?: string }>()
-  const { data: sections } = useQuery({
+  const params = useLocalSearchParams<{ slug?: string; language?: string }>()
+  const language =
+    params.language === 'fr' || params.language === 'en' ? params.language : preferredLanguage
+  const { data: sections, isPending: metadataPending } = useQuery({
     queryKey: ['timeline'],
     queryFn: getEvents,
   })
@@ -25,12 +31,33 @@ const EventScreen = () => {
   const eventsWithSection = sections?.flatMap((section, sectionIndex) =>
     section.events.map(event => ({ ...event, sectionIndex }))
   )
-  const event = eventsWithSection?.find(item => item.slug === params.slug)
+  const metadata = eventsWithSection?.find(item => item.slug === params.slug)
+  const resources = useResourceAccess()
+  const fallback = useQuery({
+    queryKey: ['timeline-direct-event', language, params.slug],
+    queryFn: () => resources.timeline.loadEvent(language, params.slug!),
+    enabled: Boolean(params.slug && !metadata),
+    staleTime: 300000,
+  })
+  const detail = fallback.data?.status === 'available' ? fallback.data.detail : undefined
+  const dates = detail ? parseSourcedTimelineDates(detail.dates) : undefined
+  const directEvent: (EventDetailsProps & { sectionIndex?: number }) | undefined = detail
+    ? {
+        slug: detail.slug,
+        title: detail.title,
+        titleEn: detail.title,
+        image: undefined,
+        start: dates?.start ?? 0,
+        end: dates?.end ?? 0,
+        dateLabel: detail.dates || t('timeline.unknownDate'),
+      }
+    : undefined
+  const event = metadata || directEvent
 
   const openEvent = (nextEvent: TimelineEvent) => {
     pushRouteOnce({
       pathname: '/event',
-      params: { slug: nextEvent.slug },
+      params: { slug: nextEvent.slug, language },
     })
   }
 
@@ -43,9 +70,11 @@ const EventScreen = () => {
       isRemovable: true,
       type: 'timeline',
       data: {
+        language,
         sectionIndex: event.sectionIndex,
         eventSlug: event.slug,
         event: {
+          dateLabel: 'dateLabel' in event ? event.dateLabel : undefined,
           slug: event.slug,
           title: event.title,
           titleEn: event.titleEn,
@@ -58,8 +87,10 @@ const EventScreen = () => {
     })
   }
 
+  if (!event && params.slug && (metadataPending || fallback.isPending)) return <Loading />
   return (
     <TimelineEventDetailView
+      languageOverride={language}
       event={event}
       onOpenEvent={openEvent}
       canGoBack

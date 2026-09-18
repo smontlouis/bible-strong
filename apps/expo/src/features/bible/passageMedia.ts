@@ -401,3 +401,22 @@ export const getPassageMediaForStrong = (input: ResolvePassageMediaStrongInput) 
 
 export const getPassageMediaLibrary = (input: ResolvePassageMediaLibraryInput) =>
   resolvePassageMediaLibrary(passageMediaCatalog, input)
+
+/** Resolve any registered work, including book introductions outside the library index. */
+export const getPassageMediaById = (
+  workId: string,
+  language: ActiveLanguage
+): ResolvedPassageMedia | null => {
+  const work = getWorksById(passageMediaCatalog).get(workId)
+  return work ? resolveEdition(work, language, passageMediaCatalog.attribution.label) : null
+}
+export const getPassageMediaForBook = (
+  book: number,
+  language: ActiveLanguage
+): ResolvedPassageMedia[] =>
+  passageMediaCatalog.works.flatMap(work => {
+    if (!work.anchors.some(anchor => anchor.book === book && anchor.placement === 'introduction'))
+      return []
+    const edition = resolveEdition(work, language, passageMediaCatalog.attribution.label)
+    return edition ? [edition] : []
+  })

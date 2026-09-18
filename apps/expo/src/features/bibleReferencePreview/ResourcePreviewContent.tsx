@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { ActivityIndicator, Linking } from 'react-native'
 import { useTranslation } from 'react-i18next'
+import type { ReadingTypography } from '~common/readingHtml'
 import SwitchableHTMLView from '~common/SwitchableHTMLView'
 import type { HTMLViewLinkPayload } from '~common/htmlContentTypes'
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -18,7 +19,13 @@ import { parseReferencePreviewLink } from './referenceTarget'
 import { parseResourcePreviewLink, type ResourcePreviewTarget } from './resourceTarget'
 import { loadResourcePreview } from './loadResourcePreview'
 
-export default function ResourcePreviewContent({ target }: { target: ResourcePreviewTarget }) {
+export default function ResourcePreviewContent({
+  target,
+  typography,
+}: {
+  target: ResourcePreviewTarget
+  typography?: ReadingTypography
+}) {
   const resources = useResourceAccess()
   const theme = useTheme()
   const push = usePushRouteOnce()
@@ -63,7 +70,14 @@ export default function ResourcePreviewContent({ target }: { target: ResourcePre
     if (resource?.kind === 'dictionary')
       push(createDictionaryInternalLinkRoute(resource.word, resource.source))
     else if (resource?.kind === 'nave')
-      push({ pathname: '/nave-detail', params: { name: resource.name, name_lower: resource.name } })
+      push({
+        pathname: '/nave-detail',
+        params: {
+          name: resource.name,
+          name_lower: resource.name,
+          language: resource.source.language,
+        },
+      })
     else if (resource?.kind === 'strong')
       push(
         createStrongDetailRoute('index', {
@@ -106,7 +120,13 @@ export default function ResourcePreviewContent({ target }: { target: ResourcePre
           <Text className="text-[16px] font-semibold">{data.gloss}</Text>
         </>
       )}
-      <SwitchableHTMLView compact value={html} previewSource={target.source} onLinkClicked={open} />
+      <SwitchableHTMLView
+        typography={typography}
+        compact
+        value={html}
+        previewSource={target.source}
+        onLinkClicked={open}
+      />
     </Box>
   )
 }

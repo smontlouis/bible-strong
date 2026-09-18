@@ -1,4 +1,8 @@
 import {
+  parseStudyWidget,
+  type StudyWidget,
+  parseStudySource,
+  type StudySource,
   parseToolActivity,
   parseRoutingDecision,
   type RoutingDecision,
@@ -7,6 +11,7 @@ import {
 import { validCheckpoint, type MemoryCheckpoint } from './conversationMemory'
 
 export type ReadingContext = {
+  bibleVersion?: string
   key: string
   label: string
   detail: string
@@ -29,6 +34,8 @@ export type LocalMessage = {
   role: 'user' | 'assistant'
   text: string
   state: 'complete' | 'streaming' | 'interrupted' | 'error'
+  widgets?: StudyWidget[]
+  sources?: StudySource[]
   routing?: RoutingDecision[]
   tools?: ToolActivity[]
   context?: ReadingContext
@@ -49,6 +56,8 @@ const isContext = (value: unknown): value is ReadingContext => {
   if (!value || typeof value !== 'object') return false
   const c = value as ReadingContext
   return (
+    (c.bibleVersion === undefined ||
+      (typeof c.bibleVersion === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(c.bibleVersion))) &&
     typeof c.key === 'string' &&
     c.key.length < 1000 &&
     typeof c.label === 'string' &&
@@ -110,6 +119,12 @@ export function loadConversations(storage: ConversationStorage, account: string)
           throw new Error('LOCAL_HISTORY_INVALID')
         if (m.routing !== undefined && (!Array.isArray(m.routing) || m.routing.length > 3))
           throw new Error('LOCAL_HISTORY_INVALID')
+        if (m.sources !== undefined && (!Array.isArray(m.sources) || m.sources.length > 6))
+          throw new Error('LOCAL_HISTORY_INVALID')
+        if (m.widgets !== undefined && (!Array.isArray(m.widgets) || m.widgets.length > 6))
+          throw new Error('LOCAL_HISTORY_INVALID')
+        const widgets = m.widgets?.map(parseStudyWidget)
+        const sources = m.sources?.map(parseStudySource)
         const routing = m.routing?.map(parseRoutingDecision)
         const tools = m.tools?.map(value => {
           const tool = parseToolActivity(value)
@@ -121,6 +136,8 @@ export function loadConversations(storage: ConversationStorage, account: string)
         return {
           ...(tools ? { tools } : {}),
           ...(routing ? { routing } : {}),
+          ...(sources ? { sources } : {}),
+          ...(widgets ? { widgets } : {}),
           id: m.id,
           role: m.role,
           text: m.text,

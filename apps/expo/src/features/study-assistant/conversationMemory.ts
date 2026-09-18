@@ -1,3 +1,4 @@
+import { widgetMemoryText } from '@bible-strong/ai-contract/contract'
 import type { HistoryMessage } from '@bible-strong/ai-contract/contract'
 import type { Conversation, LocalMessage } from './conversations'
 export type MemoryCheckpoint = {
@@ -45,17 +46,31 @@ function pairs(messages: LocalMessage[]) {
       a.role !== 'assistant' ||
       a.state !== 'complete' ||
       !u.text.trim() ||
-      !a.text.trim()
+      (!a.text.trim() && !a.widgets?.length)
     )
       continue
     const content = `${u.context ? `[Contexte de ce message : ${u.context.detail}]\n` : ''}${u.text}`
+    const widgetContext = a.widgets?.map(widgetMemoryText).join('\n') || ''
+    const assistantContent = [
+      a.text.replace(
+        /\[([^\]]+)\]\(https:\/\/bible-strong\.app\/assistant-source\/s[1-6]\)/g,
+        '$1'
+      ),
+      widgetContext,
+    ]
+      .filter(Boolean)
+      .join('\n')
+      .slice(0, 60000)
     result.push({
       id: a.id,
       history: [
         { role: 'user', content },
-        { role: 'assistant', content: a.text },
+        {
+          role: 'assistant',
+          content: assistantContent,
+        },
       ],
-      size: content.length + a.text.length,
+      size: content.length + assistantContent.length,
     })
   }
   return result

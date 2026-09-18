@@ -106,7 +106,13 @@ export function bibleContext(tab: import('~state/tabs').BibleTab): ReadingContex
         verses: data.focusVerses,
       })
   const detail = `${label} · ${data.selectedVersion}`.slice(0, 500)
-  return { key: `${tab.id}:${detail}`, label: label.slice(0, 450), detail, kind: 'passage' }
+  return {
+    key: `${tab.id}:${detail}`,
+    label: label.slice(0, 450),
+    detail,
+    kind: 'passage',
+    bibleVersion: data.selectedVersion,
+  }
 }
 
 export function commentaryCollectionContext(

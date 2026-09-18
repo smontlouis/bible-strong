@@ -67,7 +67,13 @@ export function useReadingContext(): ReadingContext | null {
     if (!word && !reference) return null
     const label = [word, reference].filter(Boolean).join(' · ')
     const detail = [label, location, version].filter(Boolean).join(' · ').slice(0, 500)
-    return { key: detail, label: label.slice(0, 500), detail, kind: 'word' }
+    return {
+      key: detail,
+      label: label.slice(0, 500),
+      detail,
+      kind: 'word',
+      ...(version ? { bibleVersion: version } : {}),
+    }
   }
   const fromWord = (data: StrongDetailRouteContext) => {
     let identity

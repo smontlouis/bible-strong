@@ -93,6 +93,7 @@ const TimelineTabScreen = ({ timelineAtom }: Props) => {
   if (timelineTab.data.eventSlug) {
     return (
       <TimelineEventDetailView
+        languageOverride={timelineTab.data.language}
         assistantScope={`tab:${timelineTab.id}`}
         event={activeEvent}
         onOpenEvent={goToEvent}

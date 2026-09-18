@@ -126,6 +126,7 @@ export interface StrongTab extends TabBase {
 export interface NaveTab extends TabBase {
   type: 'nave'
   data: {
+    language?: 'fr' | 'en'
     name_lower?: string
     name?: string
   }
@@ -171,9 +172,11 @@ export interface PlanTab extends TabBase {
 export interface TimelineTab extends TabBase {
   type: 'timeline'
   data: {
+    language?: 'fr' | 'en'
     sectionIndex?: number
     eventSlug?: string
     event?: {
+      dateLabel?: string
       slug: string
       title: string
       titleEn: string

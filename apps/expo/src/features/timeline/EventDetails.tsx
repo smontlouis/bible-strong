@@ -22,7 +22,7 @@ import {
 export type EventDetailsProps = Pick<
   TimelineEventProps,
   'slug' | 'image' | 'title' | 'titleEn' | 'start' | 'end'
->
+> & { dateLabel?: string }
 
 const Description = ({ description, article }: Partial<TimelineEventDetail>) => {
   return (
@@ -41,6 +41,8 @@ const Description = ({ description, article }: Partial<TimelineEventDetail>) => 
 }
 
 export const EventDetailsContent = ({
+  dateLabel,
+  languageOverride,
   assistantScope = 'panel',
   slug,
   image,
@@ -50,13 +52,16 @@ export const EventDetailsContent = ({
   end,
   onOpenEvent,
 }: EventDetailsProps & {
+  languageOverride?: 'fr' | 'en'
   assistantScope?: string
   onOpenEvent?: (event: TimelineEventProps) => void
 }) => {
-  const lang = useTimelineLanguage()
-  const date = calculateLabel(start, end, lang)
+  const preferredLanguage = useTimelineLanguage()
+  const lang = languageOverride || preferredLanguage
+  const date = dateLabel || calculateLabel(start, end, lang)
   const resources = useResourceAccess()
-  const resourceLanguage = useAtomValue(resourcesLanguageAtom).TIMELINE
+  const preferredResourceLanguage = useAtomValue(resourcesLanguageAtom).TIMELINE
+  const resourceLanguage = languageOverride || preferredResourceLanguage
   const resourceRegistry = useOfflineResourceRegistry()
   const eventQuery = useQuery({
     queryKey: [

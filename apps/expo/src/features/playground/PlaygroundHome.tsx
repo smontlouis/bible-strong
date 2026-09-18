@@ -1,8 +1,9 @@
+import { useRouter } from 'expo-router'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import { useTranslation } from 'react-i18next'
-import { Pressable, ScrollView, useWindowDimensions } from 'react-native'
+import { Platform, Pressable, ScrollView, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -83,6 +84,7 @@ const PlaygroundHome = ({
 }: PlaygroundHomeProps) => {
   const stylingTheme = useStylingTheme()
 
+  const router = useRouter()
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const { width } = useWindowDimensions()
@@ -133,6 +135,15 @@ const PlaygroundHome = ({
             <Text className="text-dark-grey text-[11px] font-bold uppercase">
               {t('playground.experiences')}
             </Text>
+            {Platform.OS === 'web' && (
+              <PlaygroundLink
+                eyebrow="Assistant IA"
+                title="Les 16 widgets"
+                description="Explorer les composants, leurs descriptions et leurs interactions, sans appel à l’IA."
+                icon="grid"
+                onPress={() => router.push('/ai-widgets')}
+              />
+            )}
             <PlaygroundLink
               eyebrow="Performance mobile"
               title="HTML : Native / Expo DOM"

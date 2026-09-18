@@ -63,3 +63,14 @@
   padding: 0.6em;
   border: 1px solid rgba(120, 130, 140, 0.3);
 }
+.bs-assistant-passage-link {
+  display: inline;
+  color: var(--color-primary);
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

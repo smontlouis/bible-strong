@@ -228,3 +228,118 @@ it('retains tool results and interrupts unfinished calls without adding them to 
   expect(JSON.stringify(memory)).not.toContain('PRIVATE_TOOL_PREVIEW')
   expect(JSON.stringify(memory)).not.toContain('get_commentary_excerpt')
 })
+
+it('preserves ordered resource cards when a grouped card grows and the response is interrupted', async () => {
+  const updates: Conversation[] = []
+  const controller = new AbortController()
+  await runConversation({
+    conversation: empty,
+    question: 'Compare ces événements',
+    context: null,
+    controller,
+    isCurrent: () => true,
+    onUpdate: c => updates.push(c),
+    onProgress: () => {},
+    onError: () => {},
+    request: async (_input, _signal, emit) => {
+      emit({
+        type: 'widget',
+        widget: {
+          id: 'w1',
+          kind: 'event_timeline',
+          title: 'Événements',
+          events: ['creation'],
+          language: 'fr',
+        },
+      })
+      emit({
+        type: 'widget',
+        widget: {
+          id: 'w2',
+          kind: 'book_overview',
+          title: 'Genèse',
+          book: 1,
+          version: 'LSG',
+          language: 'fr',
+        },
+      })
+      emit({
+        type: 'widget',
+        widget: {
+          id: 'w1',
+          kind: 'event_timeline',
+          title: 'Événements',
+          events: ['creation', 'flood'],
+          language: 'fr',
+        },
+      })
+      controller.abort()
+      throw new Error('aborted')
+    },
+  })
+  expect(updates.at(-1)?.messages[1]).toMatchObject({
+    state: 'interrupted',
+    widgets: [
+      { id: 'w1', events: ['creation', 'flood'] },
+      { id: 'w2', book: 1 },
+    ],
+  })
+})
+it('freezes the selected Bible version with the reading context', async () => {
+  await runConversation({
+    conversation: empty,
+    question: 'Explain',
+    context: {
+      key: 'k',
+      label: 'John',
+      detail: 'John 15:4 · KJV',
+      kind: 'passage',
+      bibleVersion: 'KJV',
+    },
+    controller: new AbortController(),
+    isCurrent: () => true,
+    onUpdate: () => {},
+    onProgress: () => {},
+    onError: () => {},
+    request: async (input, _signal, emit) => {
+      expect(input.readingBibleVersion).toBe('KJV')
+      expect(input.defaultBibleVersion).toBeUndefined()
+      emit({ type: 'done', requestId: 'r', model: 'm', modelCalls: 1, toolCalls: 0 })
+    },
+  })
+})
+it('keeps preference values fixed for a question even if settings change before the request', async () => {
+  const preferences = {
+    appLanguage: 'fr' as const,
+    defaultBibleVersion: 'NBS',
+    defaultStrongBibleVersion: 'KJV',
+  }
+  await runConversation({
+    conversation: empty,
+    question: 'Explain',
+    context: {
+      key: 's21',
+      label: 'Jean',
+      detail: 'Jean 15:4 · S21',
+      kind: 'passage',
+      bibleVersion: 'S21',
+    },
+    preferences,
+    controller: new AbortController(),
+    isCurrent: () => true,
+    onUpdate: () => {
+      preferences.defaultStrongBibleVersion = 'LSG'
+    },
+    onProgress: () => {},
+    onError: () => {},
+    request: async (input, _signal, emit) => {
+      expect(input).toMatchObject({
+        appLanguage: 'fr',
+        defaultBibleVersion: 'NBS',
+        defaultStrongBibleVersion: 'KJV',
+        readingBibleVersion: 'S21',
+      })
+      emit({ type: 'done', requestId: 'r', model: 'm', modelCalls: 1, toolCalls: 0 })
+    },
+  })
+})

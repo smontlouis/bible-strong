@@ -1,5 +1,7 @@
 import { prepareMemory, type Compactor } from './conversationMemory'
 import type {
+  StudyWidget,
+  StudySource,
   StudyEvent,
   StudyRequest,
   ToolActivity,
@@ -21,6 +23,7 @@ export type ConversationRequest = (
 ) => Promise<void>
 export async function runConversation({
   conversation,
+  preferences,
   question,
   context,
   controller,
@@ -32,6 +35,10 @@ export async function runConversation({
   onError,
 }: {
   conversation: Conversation
+  preferences?: Pick<
+    StudyRequest,
+    'appLanguage' | 'defaultBibleVersion' | 'defaultStrongBibleVersion' | 'readingBibleVersion'
+  >
   question: string
   context: ReadingContext | null
   controller: AbortController
@@ -42,6 +49,7 @@ export async function runConversation({
   onProgress: (key: string) => void
   onError: (key: string) => void
 }) {
+  const preferenceSnapshot = { ...preferences }
   const timestamp = Date.now(),
     snapshot = context ? { ...context } : undefined
   const user: LocalMessage = {
@@ -67,6 +75,8 @@ export async function runConversation({
   }
   let tools: ToolActivity[] = []
   let routing: RoutingDecision[] = []
+  let sources: StudySource[] = []
+  let widgets: StudyWidget[] = []
   const update = (text: string, state: LocalMessage['state']) => {
     next = {
       ...next,
@@ -77,6 +87,8 @@ export async function runConversation({
               text,
               state,
               routing,
+              sources,
+              widgets,
               tools: tools.map(tool =>
                 state !== 'streaming' && tool.state === 'running'
                   ? { ...tool, state: 'interrupted' as const }
@@ -116,7 +128,9 @@ export async function runConversation({
     onProgress('assistant.preparing')
     await request(
       {
+        ...preferenceSnapshot,
         question,
+        ...(snapshot?.bibleVersion ? { readingBibleVersion: snapshot.bibleVersion } : {}),
         history: memory.history,
         memorySummary: memory.memorySummary,
         readingContext: [
@@ -131,6 +145,22 @@ export async function runConversation({
       controller.signal,
       event => {
         if (!isCurrent() || controller.signal.aborted) return
+        if (event.type === 'widget') {
+          const index = widgets.findIndex(widget => widget.id === event.widget.id)
+          widgets = (
+            index < 0
+              ? [...widgets, event.widget]
+              : widgets.map((widget, i) => (i === index ? event.widget : widget))
+          ).slice(0, 6)
+          update(output, 'streaming')
+        }
+        if (event.type === 'source') {
+          sources = [
+            ...sources.filter(source => source.id !== event.source.id),
+            event.source,
+          ].slice(0, 6)
+          update(output, 'streaming')
+        }
         if (event.type === 'routing') {
           const { type: _type, ...decision } = event
           routing = [

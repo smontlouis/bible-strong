@@ -8,6 +8,8 @@ export default function AssistantMarkdown({
 }: {
   text: string
   streaming: boolean
+  sources?: import('@bible-strong/ai-contract/contract').StudySource[]
+  widgets?: import('@bible-strong/ai-contract/contract').StudyWidget[]
 }) {
   const { colors } = useTheme()
   return (

@@ -1421,12 +1421,14 @@ const GraphSceneLayer = ({
 }
 
 export const StrongEntityRelationGraph = ({
+  languageOverride,
   entity,
   currentProfileEntityKey,
   onOpenProfile,
   onOpenEntity,
 }: {
   entity: StrongLexiconEntity
+  languageOverride?: 'fr' | 'en'
   currentProfileEntityKey?: string
   onOpenProfile: (entityKey: string) => void
   onOpenEntity: (relation: StrongLexiconEntityRelation) => void
@@ -1434,7 +1436,8 @@ export const StrongEntityRelationGraph = ({
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const queryClient = useQueryClient()
-  const { language } = useStrongLexiconLanguage()
+  const { language: preferredLanguage } = useStrongLexiconLanguage()
+  const language = languageOverride || preferredLanguage
   const reduceMotion = useReducedMotion()
   const [width, setWidth] = useState(330)
   const rootNavigation = createRootNavigation(entity)

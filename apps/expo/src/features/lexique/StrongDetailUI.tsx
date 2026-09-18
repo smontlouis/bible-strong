@@ -1,3 +1,4 @@
+import { getReadingTypography, type ReadingTypography } from '~common/readingHtml'
 import { useReferencePreview } from '~features/bibleReferencePreview/state'
 import { twMerge } from '~common/ui/classNames'
 
@@ -104,6 +105,7 @@ export const StrongLexicalRelationCard = ({
 )
 
 type StrongEditorialHtmlProps = {
+  typography?: ReadingTypography
   value?: string
   onOpenBibleReference: (osis: string) => void
   onOpenStrong: (stepCode: string) => void
@@ -111,6 +113,7 @@ type StrongEditorialHtmlProps = {
 
 export const StrongEditorialHtml = ({
   value,
+  typography,
   onOpenBibleReference,
   onOpenStrong,
 }: StrongEditorialHtmlProps) => {
@@ -119,6 +122,7 @@ export const StrongEditorialHtml = ({
 
   return (
     <SwitchableHTMLView
+      typography={typography}
       value={linkifyStrongReferences(
         normalizeExternalContextLinks(
           linkifyStrongEditorialBibleReferences(value, theme.colors.primary)
@@ -336,6 +340,11 @@ export const StrongEntitySummaryCard = ({
       {!!entity.shortDescription && (
         <StrongEditorialHtml
           value={entity.shortDescription}
+          typography={getReadingTypography(
+            readingTypography.fontFamily || 'sans-serif',
+            readingTypography.fontSizeScale,
+            readingTypography.lineHeight
+          )}
           onOpenBibleReference={onOpenBibleReference}
           onOpenStrong={onOpenStrong}
         />
@@ -350,6 +359,11 @@ export const StrongEntitySummaryCard = ({
         >
           <StrongEditorialHtml
             value={detailedDescription}
+            typography={getReadingTypography(
+              readingTypography.fontFamily || 'sans-serif',
+              readingTypography.fontSizeScale,
+              readingTypography.lineHeight
+            )}
             onOpenBibleReference={onOpenBibleReference}
             onOpenStrong={onOpenStrong}
           />

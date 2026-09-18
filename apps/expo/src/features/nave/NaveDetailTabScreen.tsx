@@ -7,7 +7,7 @@ import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
-import { useRouter } from 'expo-router'
+import { useRouter, useLocalSearchParams } from 'expo-router'
 import { produce } from 'immer'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -66,7 +66,13 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
   } = naveTab
 
   const addHistory = useSetAtom(historyAtom)
-  const naveResourceLanguage = useAtomValue(resourcesLanguageAtom).NAVE
+  const preferredNaveLanguage = useAtomValue(resourcesLanguageAtom).NAVE
+  const routeParams = useLocalSearchParams<{ language?: string }>()
+  const requestedLanguage = isInTab ? naveTab.data.language : routeParams.language
+  const naveResourceLanguage =
+    requestedLanguage === 'fr' || requestedLanguage === 'en'
+      ? requestedLanguage
+      : preferredNaveLanguage
 
   // Go back to list view (for tab context)
   const goBack = useCallback(() => {
@@ -176,6 +182,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
       pushRouteOnce({
         pathname: '/nave-detail',
         params: {
+          language: naveResourceLanguage,
           name_lower: item,
           name: item,
         },
@@ -310,6 +317,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
                     isRemovable: true,
                     type: 'nave',
                     data: {
+                      language: naveResourceLanguage,
                       name: name || naveItem.name,
                       name_lower,
                     },

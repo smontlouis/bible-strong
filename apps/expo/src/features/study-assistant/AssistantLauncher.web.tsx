@@ -1,4 +1,4 @@
-import RoutingDetails from './RoutingDetails.web'
+import StudyWidget from './widgets/StudyWidget.web'
 import ErrorState from './ErrorState.web'
 import ToolTimeline from './ToolTimeline.web'
 import { runConversation } from './conversationRun'
@@ -21,7 +21,12 @@ import { resolveFontFamily } from '~themes/styleValues'
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 import { useTheme } from '~themes/ThemeProvider'
 import AssistantMarkdown from './AssistantMarkdown'
-import { askAssistant, compactAssistant, assistantAvailable } from './client'
+import {
+  askAssistant,
+  compactAssistant,
+  assistantAvailable,
+  captureAssistantPreferences,
+} from './client'
 import {
   loadConversations,
   loadSelectedConversation,
@@ -199,6 +204,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
       conversation: source,
       question,
       context: readingContext,
+      preferences: captureAssistantPreferences(readingContext?.bibleVersion),
       controller,
       request: askAssistant,
       compact: compactAssistant,
@@ -389,16 +395,20 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                       </>
                     ) : (
                       <>
-                        {!!m.routing?.length && <RoutingDetails decisions={m.routing} />}
                         {!!m.tools?.length && (
                           <ToolTimeline tools={m.tools} running={m.state === 'streaming' && busy} />
                         )}
                         {m.text && (
                           <AssistantMarkdown
                             text={m.text}
+                            sources={m.sources}
+                            widgets={m.widgets}
                             streaming={m.state === 'streaming' && busy}
                           />
                         )}{' '}
+                        {m.widgets?.map(widget => (
+                          <StudyWidget key={widget.id} widget={widget} />
+                        ))}
                         {(m.state === 'interrupted' || m.state === 'error') &&
                           !(error && m.id === current.messages.at(-1)?.id) && (
                             <small className="bs-assistant-incomplete">
