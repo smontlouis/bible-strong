@@ -1,5 +1,32 @@
 # Web assistant modal
 
+## Live dictation
+
+The web composer uses the official assistant-ui Dictate/StopDictation primitives with
+`LiveDictationAdapter`. A mono PCM16 AudioWorklet streams microphone audio; partial
+transcripts replace the preview and the final transcript is committed once. Stop
+waits for the last words before unlocking Send/Enter. Closing the modal, showing
+history, changing/deleting the conversation, signing out or leaving the page releases
+the microphone and ignores late results. Browser microphone permission and a secure
+context (HTTPS or localhost) are required. This does not add native iOS/Android capture.
+
+`POST /v1/study-assistant/dictation` uses the existing Firebase ID token and App Check
+headers. The private service returns `{ token, url }` for a short-lived transcription
+session; permanent credentials and model selection remain private. Audio and tokens
+are not persisted in conversations. Deploy this backend route before releasing the
+client. No new client environment variable or dependency is needed.
+
+Transport matches the transcription-stream v1 protocol in `@ai-sdk/gateway` 4.0.86
+and `@ai-sdk/provider-utils` 5.0.44. Capture stops after two minutes or at the composer
+character limit; connection/finalization timeouts unlock the editor and preserve its
+partial text. These client limits are UX bounds, not server-enforced spending limits.
+
+Validation: live Grok STT via Vercel accepted a synthetic French recording and emitted
+partial, final and finish frames. Unit tests cover stop/finalization, cancellation,
+disconnects, timeouts, interim replacement and microphone denial. The microphone
+button was visually checked in the signed-in localhost app. A real microphone session
+through the authenticated app remains a manual check after backend rollout.
+
 Entry: `AssistantLauncher.web.tsx`, mounted only in `FullAppRuntime.web.tsx`. The native screen remains separate. Uses `@assistant-ui/react` 0.15.20 AssistantModal/Thread/Composer primitives with a custom external-store runtime and the existing authenticated Worker SSE client.
 
 `useReadingContext.web.ts` observes active Bible selection/chapter and Strong tab/route context. Pin/remove controls affect only future messages. `conversations.ts` validates, limits and serializes browser-local histories by account; it also builds the smaller inference history. `conversationRun.ts` owns one cancellable streaming operation, snapshots context and refuses late updates from an obsolete session. No keys, tokens or full editorial resource dumps are stored in local conversations. Persistence is debounced and flushed on page hide. Opening the modal or history does not trigger inference.
@@ -125,3 +152,9 @@ Verification: mocked S21 reading / NBS text search / KJV Strong index exercise a
 The concordance widget uses the existing `ConcordanceVerse` / `CanonicalStrongVerseText` renderer to emphasize indexed words. Its heading is the exact Strong identifier; the former family/scope badge and explanatory notice are no longer shown in the card. Retrieval scope and source-version checks are unchanged. The translation checkbox no longer has its generic explanatory paragraph.
 
 Word analysis reuses the resource modal's `CanonicalStrongVerseText`, `StrongResourceScrollProvider`, occurrence mapping and `StrongCard`. Selecting a word replaces the whole body with its lexical card; a back arrow in the widget header returns to the verse. The detail body does not repeat the Bible reference/version, but keeps that context for opening the full lexical resource. Typography stays sans-serif. Verified Demeurez→G3306→back→sarment→G2814, header placement, and H7050 highlighted words using actual Strong spans. Scoped regression suites: 65 tests passed; types, targeted lint, style guard and web export passed. Broader React Doctor diagnostics remain in unchanged legacy/other widget files.
+
+## Development diagnostics on Cloudflare
+
+In web development, **Debug** opens an optional panel. **Enable for 15 minutes** requests an account-authorized session from the same Cloudflare service; the existing Firebase sign-in is sufficient, with no extra password or provider confirmation. It traces subsequent real requests, never replays old messages. The panel exposes Jev scores/raw decisions, base versus actually sent prompts, tool schemas/calls/results, timing and reported usage. Authentication secrets are removed server-side. Raw events are expandable and can be copied explicitly as JSON; copied traces may contain private prompts and conversation text.
+
+The session and traces remain in component memory, separate from stored conversations, and clear on disabling, expiry/account changes or navigation between conversations (session remains until expiry when switching conversations). The normal chat route stays unchanged. Diagnostic modules and their network endpoints are removed from production web JavaScript by `__DEV__` guards; server authorization is independent of that UI guard. The backend requires a separate UID allowlist, origin allowlist, feature switch and signed temporary session. A server-disabled or unauthorized request cannot expose diagnostics.

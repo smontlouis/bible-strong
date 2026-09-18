@@ -625,3 +625,37 @@
   font-size: 11px;
   overflow-wrap: anywhere;
 }
+.bs-assistant-compose-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bs-assistant-dictate {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--as-border);
+  border-radius: 50%;
+  background: var(--as-surface);
+  color: var(--as-ink);
+  cursor: pointer;
+}
+.bs-assistant-dictate-active {
+  background: var(--as-accent);
+  color: var(--as-surface);
+}
+.bs-assistant-dictate:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.bs-assistant-dictate:focus-visible {
+  outline: 2px solid var(--as-accent);
+  outline-offset: 3px;
+}
+.bs-assistant-dictation-status {
+  display: block;
+  padding: 4px 12px 10px;
+  font-size: 12px;
+  color: var(--as-muted);
+}

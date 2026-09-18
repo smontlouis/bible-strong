@@ -10,6 +10,31 @@ import type { StudyRequest, StudyEvent } from '@bible-strong/ai-contract/contrac
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 import { getResourceAppCheckToken } from '~helpers/resourceAppCheck'
 export const assistantAvailable = Boolean(process.env.EXPO_PUBLIC_AI_API_URL)
+export async function connectAssistantDictation(signal: AbortSignal): Promise<WebSocket> {
+  const base = process.env.EXPO_PUBLIC_AI_API_URL
+  const user = getCurrentAuthUser()
+  if (!base || !user) throw new Error('SIGN_IN_REQUIRED')
+  const [token, appCheck] = await Promise.all([user.getIdToken(), getResourceAppCheckToken()])
+  const response = await expoFetch(`${base.replace(/\/$/, '')}/v1/study-assistant/dictation`, {
+    method: 'POST',
+    signal: AbortSignal.any([signal, AbortSignal.timeout(15000)]),
+    headers: { Authorization: `Bearer ${token}`, 'X-Firebase-AppCheck': appCheck },
+  })
+  if (!response.ok)
+    throw new Error(response.status === 429 ? 'DAILY_LIMIT' : 'DICTATION_UNAVAILABLE')
+  const session = await response.json()
+  const url = new URL(session.url)
+  if (
+    url.protocol !== 'wss:' ||
+    url.origin !== 'wss://ai-gateway.vercel.sh' ||
+    url.pathname !== '/v4/ai/transcription-model' ||
+    typeof session.token !== 'string' ||
+    !/^vcst_[A-Za-z0-9._-]+$/.test(session.token)
+  )
+    throw new Error('INVALID_DICTATION_SESSION')
+  if (signal.aborted || getCurrentAuthUser()?.uid !== user.uid) throw new Error('INTERRUPTED')
+  return new WebSocket(url, ['ai-gateway-transcription.v1', `ai-gateway-auth.${session.token}`])
+}
 export function captureAssistantPreferences(readingBibleVersion?: string) {
   const settings = store.getState().user.bible.settings
   return assistantLanguagePreferences(

@@ -1,3 +1,4 @@
+import type { DebugEntry, DebugSession } from './debug/trace'
 import StudyWidget from './widgets/StudyWidget.web'
 import ErrorState from './ErrorState.web'
 import ToolTimeline from './ToolTimeline.web'
@@ -26,6 +27,7 @@ import {
   compactAssistant,
   assistantAvailable,
   captureAssistantPreferences,
+  connectAssistantDictation,
 } from './client'
 import {
   loadConversations,
@@ -39,6 +41,12 @@ import {
 } from './conversations'
 import { useReadingContext } from './useReadingContext.web'
 import './assistant-modal.css'
+import { LiveDictationAdapter } from './dictationAdapter'
+import { captureDictationAudio, dictationSupported } from './dictationAudio.web'
+
+const DebugPanel = __DEV__
+  ? (require('./debug/DebugPanel.web').default as typeof import('./debug/DebugPanel.web').default)
+  : null
 
 const contextCaption = (value: ReadingContext) =>
   ['passage', 'word'].includes(value.kind) ? value.detail : value.label
@@ -66,9 +74,22 @@ function Avatar() {
 function Icon({
   name,
 }: {
-  name: 'close' | 'plus' | 'history' | 'send' | 'stop' | 'pin' | 'back' | 'trash' | 'collapse'
+  name:
+    | 'close'
+    | 'plus'
+    | 'history'
+    | 'send'
+    | 'stop'
+    | 'pin'
+    | 'back'
+    | 'trash'
+    | 'collapse'
+    | 'mic'
+    | 'bug'
 }) {
   const paths = {
+    bug: 'm8 2 2 2m6-2-2 2M9 7V6a3 3 0 0 1 6 0v1M8 7h8a1 1 0 0 1 1 1v8a5 5 0 0 1-10 0V8a1 1 0 0 1 1-1ZM12 10v11M3 12h4m10 0h4M3 6l4 3m10 0 4-3M3 20l4-3m10 0 4 3',
+    mic: 'M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0V5ZM5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8',
     collapse: 'm6 9 6 6 6-6',
     close: 'm6 6 12 12M6 18 18 6',
     plus: 'M12 5v14M5 12h14',
@@ -110,6 +131,22 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     router = useRouter(),
     { colors, fontFamily } = useTheme()
   const liveContext = useReadingContext()
+  const [debugOpen, setDebugOpen] = useState(false)
+  const [debugSession, setDebugSession] = useState<DebugSession | null>(null)
+  const [debugEntries, setDebugEntries] = useState<DebugEntry[]>([])
+  useEffect(() => {
+    if (!debugSession) return
+    const clear = () => {
+      setDebugSession(null)
+      setDebugEntries([])
+    }
+    const timer = setTimeout(clear, Math.max(0, debugSession.expiresAt - Date.now()))
+    window.addEventListener('pagehide', clear)
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('pagehide', clear)
+    }
+  }, [debugSession])
   const [open, setOpen] = useState(false),
     [historyOpen, setHistoryOpen] = useState(false)
   const [conversations, setConversations] = useState<Conversation[]>([]),
@@ -124,6 +161,33 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
   const [pinned, setPinned] = useState<ReadingContext | null>(null),
     [excluded, setExcluded] = useState<string | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
+  const [dictationState, setDictationState] = useState<
+    'idle' | 'starting' | 'listening' | 'stopping'
+  >('idle')
+  const [dictationError, setDictationError] = useState('')
+  const [dictation] = useState(
+    () =>
+      new LiveDictationAdapter({
+        connect: connectAssistantDictation,
+        capture: captureDictationAudio,
+        onError: setDictationError,
+        onState: state => {
+          setDictationState(state)
+          if (state === 'starting') setDictationError('')
+        },
+      })
+  )
+  useEffect(() => {
+    const cancel = () => dictation.cancel()
+    window.addEventListener('pagehide', cancel)
+    return () => {
+      window.removeEventListener('pagehide', cancel)
+      cancel()
+    }
+  }, [dictation])
+  useEffect(() => {
+    if (!open || historyOpen) dictation.cancel()
+  }, [open, historyOpen, dictation])
   const loginRef = useRef<HTMLButtonElement | null>(null)
   const active = useRef<AbortController | null>(null),
     latest = useRef(conversations)
@@ -200,13 +264,29 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     setBusy(true)
     setError('')
     setHistoryOpen(false)
+    if (__DEV__ && debugOpen) setDebugEntries([])
+    const session = __DEV__ && debugOpen ? debugSession : null
     return runConversation({
       conversation: source,
       question,
       context: readingContext,
       preferences: captureAssistantPreferences(readingContext?.bibleVersion),
       controller,
-      request: askAssistant,
+      request: session
+        ? (input, signal, emit) => {
+            if (!__DEV__) return askAssistant(input, signal, emit)
+            const { askDebugAssistant } =
+              require('./debug/client.web') as typeof import('./debug/client.web')
+            return askDebugAssistant(input, signal, emit, session, entry => {
+              if (
+                active.current === controller &&
+                !signal.aborted &&
+                Date.now() < session.expiresAt
+              )
+                setDebugEntries(previous => [...previous, entry].slice(-251))
+            })
+          }
+        : askAssistant,
       compact: compactAssistant,
       isCurrent: () => active.current === controller,
       onUpdate: publish,
@@ -224,6 +304,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     await send(message.content.flatMap(p => (p.type === 'text' ? [p.text] : [])).join('\n'))
   }
   const runtime = useExternalStoreRuntime({
+    adapters: { dictation },
     messages: current.messages,
     convertMessage,
     isRunning: busy,
@@ -234,6 +315,8 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
   })
   const reset = () => {
     if (busy) return
+    dictation.cancel()
+    setDebugEntries([])
     setCurrent(newConversation())
     setHistoryOpen(false)
     setError('')
@@ -241,12 +324,15 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
   }
   const choose = (c: Conversation) => {
     if (busy) return
+    dictation.cancel()
+    setDebugEntries([])
     setCurrent(c)
     setHistoryOpen(false)
     setError('')
     runtime.thread.composer.setText('')
   }
   const remove = (id: string) => {
+    if (current.id === id) dictation.cancel()
     const next = conversations.filter(c => c.id !== id)
     setConversations(next)
     if (current.id === id) setCurrent(newConversation())
@@ -282,7 +368,14 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                 : ['start', 'theme']
   return (
     <AssistantRuntimeProvider runtime={runtime}>
-      <Modal.Root open={open} onOpenChange={setOpen} unstable_openOnRunStart={false}>
+      <Modal.Root
+        open={open}
+        onOpenChange={value => {
+          if (!value) dictation.cancel()
+          setOpen(value)
+        }}
+        unstable_openOnRunStart={false}
+      >
         {ready &&
           createPortal(
             <Modal.Anchor className="bs-assistant-anchor" style={vars}>
@@ -302,7 +395,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
           align="end"
           sideOffset={14}
           collisionPadding={12}
-          className="bs-assistant-modal"
+          className={`bs-assistant-modal ${__DEV__ && debugOpen ? 'bs-assistant-debug-open' : ''}`}
           style={vars}
           aria-label={t('assistant.title')}
           onOpenAutoFocus={event => {
@@ -316,6 +409,23 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                 {current.title || t('assistant.modal.newChat')}
               </strong>
             </div>
+            {__DEV__ && signedIn && (
+              <button
+                type="button"
+                className="bs-assistant-icon"
+                aria-label={t('assistant.debug.title')}
+                aria-pressed={debugOpen}
+                disabled={busy}
+                title={t('assistant.debug.title')}
+                onClick={() => {
+                  setDebugOpen(!debugOpen)
+                  setDebugSession(null)
+                  setDebugEntries([])
+                }}
+              >
+                <Icon name="bug" />
+              </button>
+            )}
             <button
               type="button"
               className="bs-assistant-icon"
@@ -463,6 +573,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                   {signedIn ? (
                     <ComposerPrimitive.Root className="bs-assistant-composer">
                       <ComposerPrimitive.Input
+                        submitMode={dictationState === 'idle' ? 'enter' : 'none'}
                         ref={inputRef}
                         className="bs-assistant-input"
                         placeholder={t('assistant.modal.placeholder')}
@@ -506,23 +617,63 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                         ) : (
                           <span />
                         )}
-                        {busy ? (
-                          <ComposerPrimitive.Cancel
-                            className="bs-assistant-send"
-                            aria-label={t('assistant.stop')}
-                          >
-                            <Icon name="stop" />
-                          </ComposerPrimitive.Cancel>
-                        ) : (
-                          <ComposerPrimitive.Send
-                            className="bs-assistant-send"
-                            aria-label={t('assistant.send')}
-                            disabled={!ready || !assistantAvailable}
-                          >
-                            <Icon name="send" />
-                          </ComposerPrimitive.Send>
-                        )}
+                        <div className="bs-assistant-compose-actions">
+                          {dictationSupported() &&
+                            !busy &&
+                            (dictationState === 'idle' ? (
+                              <ComposerPrimitive.Dictate
+                                onClick={() =>
+                                  dictation.setTextLength(inputRef.current?.value.length || 0)
+                                }
+                                className="bs-assistant-dictate"
+                                aria-label={t('assistant.dictation.start')}
+                                title={t('assistant.dictation.start')}
+                                disabled={!ready || !assistantAvailable}
+                              >
+                                <Icon name="mic" />
+                              </ComposerPrimitive.Dictate>
+                            ) : (
+                              <ComposerPrimitive.StopDictation
+                                className="bs-assistant-dictate bs-assistant-dictate-active"
+                                aria-label={t('assistant.dictation.stop')}
+                                title={t('assistant.dictation.stop')}
+                                disabled={dictationState === 'stopping'}
+                              >
+                                <Icon name="stop" />
+                              </ComposerPrimitive.StopDictation>
+                            ))}
+                          {busy ? (
+                            <ComposerPrimitive.Cancel
+                              className="bs-assistant-send"
+                              aria-label={t('assistant.stop')}
+                            >
+                              <Icon name="stop" />
+                            </ComposerPrimitive.Cancel>
+                          ) : (
+                            <ComposerPrimitive.Send
+                              className="bs-assistant-send"
+                              aria-label={t('assistant.send')}
+                              disabled={!ready || !assistantAvailable || dictationState !== 'idle'}
+                            >
+                              <Icon name="send" />
+                            </ComposerPrimitive.Send>
+                          )}
+                        </div>
                       </div>
+                      {dictationState !== 'idle' && (
+                        <span className="bs-assistant-dictation-status" role="status">
+                          {dictationState === 'starting'
+                            ? t('assistant.dictation.starting')
+                            : dictationState === 'stopping'
+                              ? t('assistant.dictation.stopping')
+                              : t('assistant.dictation.listening')}
+                        </span>
+                      )}
+                      {dictationError && (
+                        <span className="bs-assistant-dictation-status" role="alert">
+                          {t(dictationError)}
+                        </span>
+                      )}
                     </ComposerPrimitive.Root>
                   ) : (
                     <button
@@ -554,6 +705,15 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                 </ThreadPrimitive.ViewportFooter>
               </ThreadPrimitive.Viewport>
             </ThreadPrimitive.Root>
+          )}
+          {__DEV__ && debugOpen && DebugPanel && (
+            <DebugPanel
+              session={debugSession}
+              entries={debugEntries}
+              busy={busy}
+              onSession={setDebugSession}
+              onClear={() => setDebugEntries([])}
+            />
           )}
           {storageError && (
             <ErrorState
