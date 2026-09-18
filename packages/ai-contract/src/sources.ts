@@ -58,7 +58,7 @@ export function parseStudySource(value: unknown): StudySource {
       !['strong', 'dstrong', 'estrong', 'ustrong'].includes(v.params.identityKind))
   )
     throw new Error('INVALID_SOURCE')
-  if (v.kind === 'commentary' && !['acbc', 'barnes'].includes(v.params.resourceId))
+  if (v.kind === 'commentary' && !['acbc', 'barnes', 'aquifer-fr'].includes(v.params.resourceId))
     throw new Error('INVALID_SOURCE')
   if (
     v.kind === 'dictionary' &&

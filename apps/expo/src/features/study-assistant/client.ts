@@ -9,8 +9,9 @@ import { readStudyStream } from '@bible-strong/ai-contract/stream'
 import type { StudyRequest, StudyEvent } from '@bible-strong/ai-contract/contract'
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 import { getResourceAppCheckToken } from '~helpers/resourceAppCheck'
+import type { DictationConnection } from './dictationAdapter'
 export const assistantAvailable = Boolean(process.env.EXPO_PUBLIC_AI_API_URL)
-export async function connectAssistantDictation(signal: AbortSignal): Promise<WebSocket> {
+export async function connectAssistantDictation(signal: AbortSignal): Promise<DictationConnection> {
   const base = process.env.EXPO_PUBLIC_AI_API_URL
   const user = getCurrentAuthUser()
   if (!base || !user) throw new Error('SIGN_IN_REQUIRED')
@@ -33,7 +34,15 @@ export async function connectAssistantDictation(signal: AbortSignal): Promise<We
   )
     throw new Error('INVALID_DICTATION_SESSION')
   if (signal.aborted || getCurrentAuthUser()?.uid !== user.uid) throw new Error('INTERRUPTED')
-  return new WebSocket(url, ['ai-gateway-transcription.v1', `ai-gateway-auth.${session.token}`])
+  if (
+    session.providerOptions != null &&
+    (typeof session.providerOptions !== 'object' || Array.isArray(session.providerOptions))
+  )
+    throw new Error('INVALID_DICTATION_SESSION')
+  return {
+    socket: new WebSocket(url, ['ai-gateway-transcription.v1', `ai-gateway-auth.${session.token}`]),
+    providerOptions: session.providerOptions,
+  }
 }
 export function captureAssistantPreferences(readingBibleVersion?: string) {
   const settings = store.getState().user.bible.settings

@@ -20,6 +20,34 @@ import { parseStudySource, type StudySource } from './sources'
 export { parseStudySource, sourceLink, sourceIdFromLink, type StudySource } from './sources'
 export const STREAM_VERSION = 1
 export type HistoryMessage = { role: 'user' | 'assistant'; content: string }
+export const STUDY_SURFACE_KINDS = [
+  'passage',
+  'word',
+  'commentary',
+  'dictionary',
+  'nave',
+  'plan',
+  'meditation',
+  'entity',
+  'person',
+  'place',
+  'timeline',
+] as const
+export type StudySurfaceContext = {
+  kind: (typeof STUDY_SURFACE_KINDS)[number]
+  resourceId?: string
+  language?: 'fr' | 'en'
+  book?: number
+  chapter?: number
+  startVerse?: number
+  endVerse?: number
+  sectionId?: string
+  work?: string
+  entryId?: number
+  normalizedName?: string
+  bibleVersion?: string
+  reference?: string
+}
 export type StudyRequest = {
   question: string
   appLanguage?: 'fr' | 'en'
@@ -30,6 +58,7 @@ export type StudyRequest = {
   readingBibleVersion?: string
   history: HistoryMessage[]
   readingContext: string
+  activeContext?: StudySurfaceContext
   memorySummary?: string
 }
 export type ToolActivity = {
@@ -66,6 +95,7 @@ export function parseStudyRequest(value: unknown): StudyRequest {
           'question',
           'history',
           'readingContext',
+          'activeContext',
           'memorySummary',
           'appLanguage',
           'bibleVersion',
@@ -92,6 +122,7 @@ export function parseStudyRequest(value: unknown): StudyRequest {
   }
   const context = input.readingContext ?? ''
   if (typeof context !== 'string' || context.length > 13000) throw new Error('INVALID_REQUEST')
+  const activeContext = parseStudySurfaceContext(input.activeContext)
   const summary = input.memorySummary ?? ''
   if (typeof summary !== 'string' || summary.length > 3000) throw new Error('INVALID_MEMORY')
   const history = parseHistory(input.history, 32000 - summary.length)
@@ -110,8 +141,77 @@ export function parseStudyRequest(value: unknown): StudyRequest {
       : {}),
     history,
     readingContext: context,
+    ...(activeContext ? { activeContext } : {}),
     memorySummary: summary,
   }
+}
+export function parseStudySurfaceContext(value: unknown): StudySurfaceContext | undefined {
+  if (value === undefined) return undefined
+  if (!value || typeof value !== 'object' || Array.isArray(value))
+    throw new Error('INVALID_ACTIVE_CONTEXT')
+  const input = value as Record<string, unknown>
+  const allowed = [
+    'kind',
+    'resourceId',
+    'language',
+    'book',
+    'chapter',
+    'startVerse',
+    'endVerse',
+    'sectionId',
+    'work',
+    'entryId',
+    'normalizedName',
+    'bibleVersion',
+    'reference',
+  ]
+  if (
+    Object.keys(input).some(key => !allowed.includes(key)) ||
+    !STUDY_SURFACE_KINDS.includes(input.kind as StudySurfaceContext['kind'])
+  )
+    throw new Error('INVALID_ACTIVE_CONTEXT')
+  const bounded = (key: string, pattern: RegExp, max = 200) => {
+    const field = input[key]
+    if (
+      field !== undefined &&
+      (typeof field !== 'string' || field.length > max || !pattern.test(field))
+    )
+      throw new Error('INVALID_ACTIVE_CONTEXT')
+  }
+  bounded('resourceId', /^[A-Za-z0-9][A-Za-z0-9-]{1,63}$/u, 64)
+  bounded('sectionId', /^[A-Za-z0-9][A-Za-z0-9._:-]{0,199}$/u)
+  bounded('work', /^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/u, 80)
+  bounded('normalizedName', /^[^\\/\u0000-\u001f]{1,200}$/u)
+  bounded('bibleVersion', /^[A-Za-z0-9_-]{1,40}$/u, 40)
+  bounded('reference', /^(?:[GH]\d{1,5}[A-Za-z]{0,4}|[^\u0000-\u001f]{1,200})$/u)
+  if (input.language !== undefined && !['fr', 'en'].includes(String(input.language)))
+    throw new Error('INVALID_ACTIVE_CONTEXT')
+  for (const [key, max] of [
+    ['book', 66],
+    ['chapter', 150],
+    ['entryId', 10_000_000],
+  ] as const) {
+    const field = input[key]
+    if (
+      field !== undefined &&
+      (!Number.isInteger(field) || Number(field) < 1 || Number(field) > max)
+    )
+      throw new Error('INVALID_ACTIVE_CONTEXT')
+  }
+  for (const key of ['startVerse', 'endVerse'] as const) {
+    const field = input[key]
+    if (field !== undefined && (!Number.isInteger(field) || Number(field) < 0 || Number(field) > 176))
+      throw new Error('INVALID_ACTIVE_CONTEXT')
+  }
+  if (
+    input.startVerse !== undefined &&
+    input.endVerse !== undefined &&
+    Number(input.endVerse) < Number(input.startVerse)
+  )
+    throw new Error('INVALID_ACTIVE_CONTEXT')
+  return Object.fromEntries(
+    Object.entries(input).filter(([, field]) => field !== undefined)
+  ) as StudySurfaceContext
 }
 export function parseHistory(value: unknown = [], maxCharacters = 32000): HistoryMessage[] {
   if (!Array.isArray(value) || value.length > 300 || value.length % 2)

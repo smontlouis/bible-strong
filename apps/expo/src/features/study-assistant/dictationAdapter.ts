@@ -12,8 +12,12 @@ type DictationSocket = Pick<
   | 'onclose'
 >
 type AudioCapture = { sampleRate: number; stop: () => Promise<void> }
+export type DictationConnection = {
+  socket: DictationSocket
+  providerOptions?: Record<string, unknown>
+}
 type Dependencies = {
-  connect: (signal: AbortSignal) => Promise<DictationSocket>
+  connect: (signal: AbortSignal) => Promise<DictationConnection>
   capture: (
     signal: AbortSignal,
     onAudio: (bytes: ArrayBuffer) => void,
@@ -74,8 +78,8 @@ export class LiveDictationAdapter implements DictationAdapter {
     const fail = (key = 'assistant.dictation.error') => {
       if (finished) return
       // Keep the partial text visible and editable after a disconnect.
-      deps.onError(key)
       finish('error')
+      deps.onError(key)
     }
     const session: DictationAdapter.Session = {
       status: { type: 'starting' },
@@ -140,7 +144,8 @@ export class LiveDictationAdapter implements DictationAdapter {
           await audio.stop()
           return
         }
-        socket = await deps.connect(abort.signal)
+        const connection = await deps.connect(abort.signal)
+        socket = connection.socket
         if (finished) {
           socket.close()
           return
@@ -151,6 +156,7 @@ export class LiveDictationAdapter implements DictationAdapter {
             JSON.stringify({
               type: 'transcription-stream.start',
               inputAudioFormat: { type: 'audio/pcm', rate: audio!.sampleRate },
+              ...(connection.providerOptions && { providerOptions: connection.providerOptions }),
             })
           )
           streaming = true

@@ -1,7 +1,5 @@
 import type { DebugEntry, DebugSession } from './debug/trace'
-import StudyWidget from './widgets/StudyWidget.web'
 import ErrorState from './ErrorState.web'
-import ToolTimeline from './ToolTimeline.web'
 import { runConversation } from './conversationRun'
 import { createPortal } from 'react-dom'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
@@ -12,16 +10,18 @@ import {
   AssistantModalPrimitive as Modal,
   AssistantRuntimeProvider,
   ComposerPrimitive,
+  ThreadListItemPrimitive,
+  ThreadListPrimitive,
   ThreadPrimitive,
   useExternalStoreRuntime,
   type AppendMessage,
-  type ThreadMessageLike,
 } from '@assistant-ui/react'
 import { selectUserLoginInfo } from '~redux/selectors/user'
 import { resolveFontFamily } from '~themes/styleValues'
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
+import { toast } from '~helpers/toast'
+import i18n from '~i18n'
 import { useTheme } from '~themes/ThemeProvider'
-import AssistantMarkdown from './AssistantMarkdown'
 import {
   askAssistant,
   compactAssistant,
@@ -36,13 +36,14 @@ import {
   saveConversations,
   newConversation,
   type Conversation,
-  type LocalMessage,
   type ReadingContext,
 } from './conversations'
 import { useReadingContext } from './useReadingContext.web'
 import './assistant-modal.css'
 import { LiveDictationAdapter } from './dictationAdapter'
 import { captureDictationAudio, dictationSupported } from './dictationAudio.web'
+import { convertMessage } from './messageRuntime'
+import { AssistantMessage, UserMessage } from './MessageRenderer.web'
 
 const DebugPanel = __DEV__
   ? (require('./debug/DebugPanel.web').default as typeof import('./debug/DebugPanel.web').default)
@@ -80,14 +81,19 @@ function Icon({
     | 'history'
     | 'send'
     | 'stop'
+    | 'stopFilled'
     | 'pin'
     | 'back'
     | 'trash'
     | 'collapse'
     | 'mic'
     | 'bug'
+    | 'pending'
+    | 'error'
 }) {
   const paths = {
+    error: 'M12 8v5m0 3.5v.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
+    pending: 'M21 12a9 9 0 1 1-2.64-6.36',
     bug: 'm8 2 2 2m6-2-2 2M9 7V6a3 3 0 0 1 6 0v1M8 7h8a1 1 0 0 1 1 1v8a5 5 0 0 1-10 0V8a1 1 0 0 1 1-1ZM12 10v11M3 12h4m10 0h4M3 6l4 3m10 0 4-3M3 20l4-3m10 0 4 3',
     mic: 'M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0V5ZM5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8',
     collapse: 'm6 9 6 6 6-6',
@@ -96,6 +102,7 @@ function Icon({
     history: 'M3 11a9 9 0 1 1 2 7M3 4v7h7M12 7v5l3 2',
     send: 'm5 12 7-7 7 7M12 5v14',
     stop: 'M7 7h10v10H7z',
+    stopFilled: 'M7 7h10v10H7z',
     pin: 'm9 3 6 0-1 6 4 4v2h-5v6h-2v-6H6v-2l4-4-1-6Z',
     back: 'm14 5-7 7 7 7',
     trash: 'M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 10v7M14 10v7',
@@ -105,7 +112,7 @@ function Icon({
       width="18"
       height="18"
       viewBox="0 0 24 24"
-      fill="none"
+      fill={name === 'stopFilled' ? 'currentColor' : 'none'}
       stroke="currentColor"
       strokeWidth="1.65"
       strokeLinecap="round"
@@ -116,12 +123,6 @@ function Icon({
     </svg>
   )
 }
-const convertMessage = (m: LocalMessage): ThreadMessageLike => ({
-  id: m.id,
-  role: m.role,
-  content: [{ type: 'text', text: m.text }],
-  createdAt: new Date(m.createdAt),
-})
 export default function AssistantLauncher() {
   const { id } = useSelector(selectUserLoginInfo)
   return <AccountAssistant key={id || 'guest'} account={id || 'guest'} signedIn={Boolean(id)} />
@@ -162,19 +163,18 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     [excluded, setExcluded] = useState<string | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const [dictationState, setDictationState] = useState<
-    'idle' | 'starting' | 'listening' | 'stopping'
+    'idle' | 'starting' | 'listening' | 'stopping' | 'error'
   >('idle')
-  const [dictationError, setDictationError] = useState('')
   const [dictation] = useState(
     () =>
       new LiveDictationAdapter({
         connect: connectAssistantDictation,
         capture: captureDictationAudio,
-        onError: setDictationError,
-        onState: state => {
-          setDictationState(state)
-          if (state === 'starting') setDictationError('')
+        onError: key => {
+          toast.error(i18n.t(key))
+          setDictationState('error')
         },
+        onState: setDictationState,
       })
   )
   useEffect(() => {
@@ -192,6 +192,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
   const active = useRef<AbortController | null>(null),
     latest = useRef(conversations)
   const context = pinned || (liveContext?.key !== excluded ? liveContext : null)
+  const dictationActive = ['starting', 'listening', 'stopping'].includes(dictationState)
   useEffect(() => {
     latest.current = conversations
   }, [conversations])
@@ -303,35 +304,25 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
   const onNew = async (message: AppendMessage) => {
     await send(message.content.flatMap(p => (p.type === 'text' ? [p.text] : [])).join('\n'))
   }
-  const runtime = useExternalStoreRuntime({
-    adapters: { dictation },
-    messages: current.messages,
-    convertMessage,
-    isRunning: busy,
-    onNew,
-    onCancel: async () => {
-      active.current?.abort()
-    },
-  })
-  const reset = () => {
+  const startNewThread = () => {
     if (busy) return
     dictation.cancel()
     setDebugEntries([])
     setCurrent(newConversation())
     setHistoryOpen(false)
     setError('')
-    runtime.thread.composer.setText('')
   }
-  const choose = (c: Conversation) => {
+  const switchToThread = (id: string) => {
     if (busy) return
+    const conversation = conversations.find(item => item.id === id)
+    if (!conversation) return
     dictation.cancel()
     setDebugEntries([])
-    setCurrent(c)
+    setCurrent(conversation)
     setHistoryOpen(false)
     setError('')
-    runtime.thread.composer.setText('')
   }
-  const remove = (id: string) => {
+  const deleteThread = (id: string) => {
     if (current.id === id) dictation.cancel()
     const next = conversations.filter(c => c.id !== id)
     setConversations(next)
@@ -342,6 +333,42 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
       setStorageError(true)
     }
   }
+  const renameThread = (id: string, title: string) => {
+    setConversations(previous =>
+      previous.map(conversation =>
+        conversation.id === id ? { ...conversation, title, updatedAt: Date.now() } : conversation
+      )
+    )
+    if (current.id === id) setCurrent(previous => ({ ...previous, title, updatedAt: Date.now() }))
+  }
+  const runtime = useExternalStoreRuntime({
+    adapters: {
+      dictation,
+      threadList: {
+        threadId: current.id,
+        threads: conversations.map(conversation => ({
+          id: conversation.id,
+          status: 'regular' as const,
+          title: conversation.title,
+          custom: {
+            updatedAt: conversation.updatedAt,
+            messageCount: conversation.messages.length,
+          },
+        })),
+        onSwitchToNewThread: startNewThread,
+        onSwitchToThread: switchToThread,
+        onRename: renameThread,
+        onDelete: deleteThread,
+      },
+    },
+    messages: current.messages,
+    convertMessage,
+    isRunning: busy,
+    onNew,
+    onCancel: async () => {
+      active.current?.abort()
+    },
+  })
   const vars = {
     fontFamily: resolveFontFamily(fontFamily.text),
     '--as-surface': colors.reverse,
@@ -437,16 +464,17 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
             >
               <Icon name="history" />
             </button>
-            <button
-              type="button"
-              className="bs-assistant-icon"
-              title={t('assistant.new')}
-              aria-label={t('assistant.new')}
-              disabled={busy}
-              onClick={reset}
-            >
-              <Icon name="plus" />
-            </button>
+            <ThreadListPrimitive.New asChild>
+              <button
+                type="button"
+                className="bs-assistant-icon"
+                title={t('assistant.new')}
+                aria-label={t('assistant.new')}
+                disabled={busy}
+              >
+                <Icon name="plus" />
+              </button>
+            </ThreadListPrimitive.New>
           </header>
           {historyOpen ? (
             <section className="bs-assistant-history">
@@ -459,29 +487,41 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
               {!conversations.length && (
                 <p className="bs-assistant-empty-history">{t('assistant.modal.noHistory')}</p>
               )}
-              {conversations.map(c => (
-                <div key={c.id} className="bs-assistant-history-row">
-                  <button onClick={() => choose(c)}>
-                    <strong>{c.title}</strong>
-                    <span>
-                      {new Date(c.updatedAt).toLocaleDateString()} ·{' '}
-                      {Math.floor(c.messages.length / 2)}{' '}
-                      {t(
-                        c.messages.length === 2
-                          ? 'assistant.modal.exchange'
-                          : 'assistant.modal.exchanges'
-                      )}
-                    </span>
-                  </button>
-                  <button
-                    className="bs-assistant-icon"
-                    onClick={() => remove(c.id)}
-                    aria-label={`${t('assistant.modal.delete')} ${c.title}`}
-                  >
-                    <Icon name="trash" />
-                  </button>
-                </div>
-              ))}
+              <ThreadListPrimitive.Root>
+                <ThreadListPrimitive.Items>
+                  {({ threadListItem }) => {
+                    const conversation = conversations.find(item => item.id === threadListItem.id)
+                    if (!conversation) return null
+                    return (
+                      <ThreadListItemPrimitive.Root className="bs-assistant-history-row">
+                        <ThreadListItemPrimitive.Trigger asChild>
+                          <button disabled={busy}>
+                            <strong>{conversation.title}</strong>
+                            <span>
+                              {new Date(conversation.updatedAt).toLocaleDateString()} ·{' '}
+                              {Math.floor(conversation.messages.length / 2)}{' '}
+                              {t(
+                                conversation.messages.length === 2
+                                  ? 'assistant.modal.exchange'
+                                  : 'assistant.modal.exchanges'
+                              )}
+                            </span>
+                          </button>
+                        </ThreadListItemPrimitive.Trigger>
+                        <ThreadListItemPrimitive.Delete asChild>
+                          <button
+                            className="bs-assistant-icon"
+                            disabled={busy}
+                            aria-label={`${t('assistant.modal.delete')} ${conversation.title}`}
+                          >
+                            <Icon name="trash" />
+                          </button>
+                        </ThreadListItemPrimitive.Delete>
+                      </ThreadListItemPrimitive.Root>
+                    )
+                  }}
+                </ThreadListPrimitive.Items>
+              </ThreadListPrimitive.Root>
             </section>
           ) : (
             <ThreadPrimitive.Root
@@ -493,42 +533,19 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     <h2>{t('assistant.modal.welcome')}</h2>
                   </div>
                 )}
-                {current.messages.map(m => (
-                  <article
-                    key={m.id}
-                    className={`bs-assistant-message bs-assistant-message-${m.role}`}
-                  >
-                    {m.role === 'user' ? (
-                      <>
-                        <div>{m.text}</div>
-                        {m.context && <small>{contextCaption(m.context)}</small>}
-                      </>
+                <ThreadPrimitive.Messages>
+                  {({ message }) =>
+                    message.role === 'user' ? (
+                      <UserMessage />
                     ) : (
-                      <>
-                        {!!m.tools?.length && (
-                          <ToolTimeline tools={m.tools} running={m.state === 'streaming' && busy} />
-                        )}
-                        {m.text && (
-                          <AssistantMarkdown
-                            text={m.text}
-                            sources={m.sources}
-                            widgets={m.widgets}
-                            streaming={m.state === 'streaming' && busy}
-                          />
-                        )}{' '}
-                        {m.widgets?.map(widget => (
-                          <StudyWidget key={widget.id} widget={widget} />
-                        ))}
-                        {(m.state === 'interrupted' || m.state === 'error') &&
-                          !(error && m.id === current.messages.at(-1)?.id) && (
-                            <small className="bs-assistant-incomplete">
-                              {t('assistant.modal.incomplete')}
-                            </small>
-                          )}
-                      </>
-                    )}
-                  </article>
-                ))}
+                      <AssistantMessage
+                        busy={busy}
+                        error={error}
+                        lastMessageId={current.messages.at(-1)?.id}
+                      />
+                    )
+                  }
+                </ThreadPrimitive.Messages>
                 {progress && (
                   <div className="bs-assistant-progress" role="status">
                     <span />
@@ -573,7 +590,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                   {signedIn ? (
                     <ComposerPrimitive.Root className="bs-assistant-composer">
                       <ComposerPrimitive.Input
-                        submitMode={dictationState === 'idle' ? 'enter' : 'none'}
+                        submitMode={dictationActive ? 'none' : 'enter'}
                         ref={inputRef}
                         className="bs-assistant-input"
                         placeholder={t('assistant.modal.placeholder')}
@@ -620,26 +637,56 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                         <div className="bs-assistant-compose-actions">
                           {dictationSupported() &&
                             !busy &&
-                            (dictationState === 'idle' ? (
+                            (dictationState === 'idle' || dictationState === 'error' ? (
                               <ComposerPrimitive.Dictate
                                 onClick={() =>
                                   dictation.setTextLength(inputRef.current?.value.length || 0)
                                 }
-                                className="bs-assistant-dictate"
-                                aria-label={t('assistant.dictation.start')}
-                                title={t('assistant.dictation.start')}
+                                className={`bs-assistant-dictate${dictationState === 'error' ? ' bs-assistant-dictate-error' : ''}`}
+                                aria-label={
+                                  dictationState === 'error'
+                                    ? `${t('assistant.dictation.error')} ${t('assistant.dictation.start')}`
+                                    : t('assistant.dictation.start')
+                                }
+                                title={
+                                  dictationState === 'error'
+                                    ? t('assistant.dictation.error')
+                                    : t('assistant.dictation.start')
+                                }
                                 disabled={!ready || !assistantAvailable}
                               >
-                                <Icon name="mic" />
+                                <Icon name={dictationState === 'error' ? 'error' : 'mic'} />
                               </ComposerPrimitive.Dictate>
                             ) : (
                               <ComposerPrimitive.StopDictation
-                                className="bs-assistant-dictate bs-assistant-dictate-active"
-                                aria-label={t('assistant.dictation.stop')}
-                                title={t('assistant.dictation.stop')}
-                                disabled={dictationState === 'stopping'}
+                                className={`bs-assistant-dictate${dictationState === 'listening' ? ' bs-assistant-dictate-active' : ' bs-assistant-dictate-pending'}`}
+                                aria-label={
+                                  dictationState === 'starting'
+                                    ? t('assistant.dictation.starting')
+                                    : dictationState === 'stopping'
+                                      ? t('assistant.dictation.stopping')
+                                      : t('assistant.dictation.stop')
+                                }
+                                title={
+                                  dictationState === 'starting'
+                                    ? t('assistant.dictation.starting')
+                                    : dictationState === 'stopping'
+                                      ? t('assistant.dictation.stopping')
+                                      : t('assistant.dictation.stop')
+                                }
+                                disabled={dictationState !== 'listening'}
                               >
-                                <Icon name="stop" />
+                                <span
+                                  className={
+                                    dictationState === 'listening'
+                                      ? undefined
+                                      : 'bs-assistant-dictate-spinner'
+                                  }
+                                >
+                                  <Icon
+                                    name={dictationState === 'listening' ? 'stopFilled' : 'pending'}
+                                  />
+                                </span>
                               </ComposerPrimitive.StopDictation>
                             ))}
                           {busy ? (
@@ -653,27 +700,13 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                             <ComposerPrimitive.Send
                               className="bs-assistant-send"
                               aria-label={t('assistant.send')}
-                              disabled={!ready || !assistantAvailable || dictationState !== 'idle'}
+                              disabled={!ready || !assistantAvailable || dictationActive}
                             >
                               <Icon name="send" />
                             </ComposerPrimitive.Send>
                           )}
                         </div>
                       </div>
-                      {dictationState !== 'idle' && (
-                        <span className="bs-assistant-dictation-status" role="status">
-                          {dictationState === 'starting'
-                            ? t('assistant.dictation.starting')
-                            : dictationState === 'stopping'
-                              ? t('assistant.dictation.stopping')
-                              : t('assistant.dictation.listening')}
-                        </span>
-                      )}
-                      {dictationError && (
-                        <span className="bs-assistant-dictation-status" role="alert">
-                          {t(dictationError)}
-                        </span>
-                      )}
                     </ComposerPrimitive.Root>
                   ) : (
                     <button

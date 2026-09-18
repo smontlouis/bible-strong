@@ -19,7 +19,7 @@ function setup(draftLength = 0) {
   const errors = jest.fn(),
     state = jest.fn()
   const adapter = new LiveDictationAdapter({
-    connect: async () => socket,
+    connect: async () => ({ socket, providerOptions: { test: { interimResults: true } } }),
     capture: async s => {
       signal = s
       return audio
@@ -49,6 +49,18 @@ function setup(draftLength = 0) {
 }
 beforeEach(() => jest.useFakeTimers())
 afterEach(() => jest.useRealTimers())
+
+it('forwards server streaming options before audio so partial transcripts are requested', async () => {
+  const s = setup()
+  await flush()
+  s.open()
+  expect(JSON.parse(s.socket.send.mock.calls[0][0])).toEqual({
+    type: 'transcription-stream.start',
+    inputAudioFormat: { type: 'audio/pcm', rate: 24000 },
+    providerOptions: { test: { interimResults: true } },
+  })
+  s.adapter.cancel()
+})
 
 it('previews partials, waits for final words after stop, then commits once', async () => {
   const s = setup()

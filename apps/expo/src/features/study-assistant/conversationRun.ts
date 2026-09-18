@@ -133,6 +133,7 @@ export async function runConversation({
         ...(snapshot?.bibleVersion ? { readingBibleVersion: snapshot.bibleVersion } : {}),
         history: memory.history,
         memorySummary: memory.memorySummary,
+        activeContext: snapshot?.activeContext || (snapshot ? { kind: snapshot.kind } : undefined),
         readingContext: [
           snapshot?.detail,
           snapshot?.content

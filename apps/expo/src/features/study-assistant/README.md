@@ -9,9 +9,13 @@ waits for the last words before unlocking Send/Enter. Closing the modal, showing
 history, changing/deleting the conversation, signing out or leaving the page releases
 the microphone and ignores late results. Browser microphone permission and a secure
 context (HTTPS or localhost) are required. This does not add native iOS/Android capture.
+The single icon button owns every visible state: microphone at rest, spinner while
+connecting or finalizing, filled Stop while listening, and an error icon after failure.
+Errors also use the app error toast; no dictation status or error copy is placed below
+the composer. The button remains the same 28px size as Send in every state.
 
 `POST /v1/study-assistant/dictation` uses the existing Firebase ID token and App Check
-headers. The private service returns `{ token, url }` for a short-lived transcription
+headers. The private service returns `{ token, url, providerOptions }` for a short-lived transcription
 session; permanent credentials and model selection remain private. Audio and tokens
 are not persisted in conversations. Deploy this backend route before releasing the
 client. No new client environment variable or dependency is needed.
@@ -27,7 +31,23 @@ disconnects, timeouts, interim replacement and microphone denial. The microphone
 button was visually checked in the signed-in localhost app. A real microphone session
 through the authenticated app remains a manual check after backend rollout.
 
-Entry: `AssistantLauncher.web.tsx`, mounted only in `FullAppRuntime.web.tsx`. The native screen remains separate. Uses `@assistant-ui/react` 0.15.20 AssistantModal/Thread/Composer primitives with a custom external-store runtime and the existing authenticated Worker SSE client.
+Entry: `AssistantLauncher.web.tsx`, mounted only in `FullAppRuntime.web.tsx`. The native screen remains separate. Uses `@assistant-ui/react` 0.15.21 AssistantModal/Thread/Composer primitives with a custom external-store runtime and the existing authenticated Worker SSE client.
+
+Web messages use the official `ThreadPrimitive.Messages`, `MessagePrimitive.Root` and
+`MessagePrimitive.Parts` pipeline. `LocalMessage` remains the validated, versioned local
+storage format; `messageRuntime.ts` converts it at the runtime boundary without rewriting
+stored conversations. Text becomes a text part, while reading context, tool timelines,
+routing decisions, sources and widgets become named Bible Strong data parts. Tool activity
+uses native `tool-call` parts with stable call IDs, parsed arguments, results and terminal
+error state. The custom part renderer keeps source citations and study widgets while the
+official `StreamdownTextPrimitive` renders the active text part.
+Assistant message status maps streaming/completion/interruption/error into assistant-ui's
+runtime status; user messages intentionally omit status because the runtime forbids it.
+
+Conversation selection and management use an `ExternalStoreThreadListAdapter` plus
+`ThreadListPrimitive`, `ThreadListItemPrimitive.Trigger`, `Delete` and `New`. Bible Strong
+still owns the local account-scoped persistence; the adapter is the synchronous bridge
+recommended when an external store already owns both messages and thread selection.
 
 `useReadingContext.web.ts` observes active Bible selection/chapter and Strong tab/route context. Pin/remove controls affect only future messages. `conversations.ts` validates, limits and serializes browser-local histories by account; it also builds the smaller inference history. `conversationRun.ts` owns one cancellable streaming operation, snapshots context and refuses late updates from an obsolete session. No keys, tokens or full editorial resource dumps are stored in local conversations. Persistence is debounced and flushed on page hide. Opening the modal or history does not trigger inference.
 
@@ -43,7 +63,6 @@ Local limits: 50 conversations, 300 messages each, 2 million serialized characte
 - Root typecheck and root build passed. Web export passed. Targeted ESLint passed. Style/architecture checks passed (architecture retains its existing warnings).
 - Broad Expo tests: 5 failing suites, 394 passing, with 1 failing assertion and import/environment failures already present in the earlier baseline. Full source lint (excluding generated .scratch output) reports 5 unrelated existing errors. Site tests and Resource service tests passed separately because root test stops on the Expo failures.
 - React Doctor on the new code: no errors after extraction of the async runner; remaining warnings are component size/complexity and browser-storage hydration in an effect.
-
 
 Additional browser checks: Strong-tab identity was normalized using the existing lexical route helper (G2839H, not an unprefixed number); removing the context switched to free conversation. The avatar and modal stay above the non-modal verse-selection sheet. The local conversation tests now include the extracted request runner, making nine feature tests in total.
 
@@ -77,7 +96,6 @@ Validation: 26 frontend tests, 20 server tests (one optional resource integratio
 
 Error banners use the installed assistant-ui Elements ErrorState with translated text. Quota errors explain the UTC reset without an immediate retry button. Transient failures can be retried explicitly with the original question and reading-context snapshot; the failed final pair is replaced instead of duplicating the user message. Storage failures use the same banner. Retry progress is announced with role=status; errors use role=alert.
 
-
 ### Official component installation
 
 Run from the monorepo root:
@@ -87,7 +105,6 @@ npx shadcn@latest add @assistant-ui/elements-tool-call @assistant-ui/elements-to
 ```
 
 `apps/expo/components.json` maps the official registry to this feature's components folder. Installed dependencies: lucide-react, radix-ui and tw-shimmer. The adapters hold application state and map real events to component props. Local upstream extensions: timeline renderStep composition, failed/interrupted indicator, translated labels and optional retry action. CSS bridges Radix height/open attributes and bounds result previews. SwapLabel opts out of Expo React Compiler because compiling its upstream hook array caused a hook-queue crash. Preserve these small extensions when updating registry files. Web-only shimmer CSS belongs in global.web.css; do not modify generated global.css.
-
 
 The visible activity UI now uses ToolTimeline's standard icon/verb/target rows, without nested ToolCall disclosures or success-state wording. Icons identify resource/search type; only failed or interrupted steps include a status label. ToolCall remains installed but is not rendered in the timeline. The renderStep extension was removed.
 
@@ -129,6 +146,12 @@ The playground's **Ce que Gloo reçoit** panel loads exact tool descriptions, ar
 
 `PassageWidget` translation controls use HeroUI's compound `Select` and `ListBox` primitives. The trigger and options intentionally render only stable version identifiers such as `LSG` or `DBY`; full publication names belong to the version catalog, not this compact comparison card. The portaled menu receives the current Bible Strong theme as concrete CSS variables, remains bounded and scrollable, and retains React Aria keyboard/focus behavior. Verified in light/dark themes and a 390 px viewport.
 
+### Active-context capability floor
+
+Each question carries a bounded structured `activeContext` in addition to the readable context caption. The active surface guarantees the relevant minimum tool family (for example commentary plus passage on a commentary screen); Jev still performs admission and may add other families required by the question. This makes the open resource readable without exposing the full tool catalog. Context metadata is not evidence: the private service must still read the exact resource before attributing its content.
+
+Commentary context includes the selected resource, language, book, chapter, section and visible verse range. The server resolves the current publication revision before reading the section, so the model does not invent or manage revision identifiers. Requests from older clients remain valid without structured context.
+
 Compact widget polish reuses the same HeroUI select adapter for the concordance book filter, aligned to the card's right edge. Concordance references use a smaller title style while matched Strong words keep the shared concordance emphasis. `VerseAnalysisWidget` uses a centered HeroUI spinner inside a 200 px minimum loading region for both verse and lexical-entry reads. Standalone `StrongWidget` no longer repeats its identifier below the widget header. `EntityWidget` opts into the shared entity card's compact mode with a 16 px internal name, 40 px avatar and 13/21 editorial typography; full entity screens keep their original sizing.
 
 ### Application language and source editions
@@ -158,3 +181,11 @@ Word analysis reuses the resource modal's `CanonicalStrongVerseText`, `StrongRes
 In web development, **Debug** opens an optional panel. **Enable for 15 minutes** requests an account-authorized session from the same Cloudflare service; the existing Firebase sign-in is sufficient, with no extra password or provider confirmation. It traces subsequent real requests, never replays old messages. The panel exposes Jev scores/raw decisions, base versus actually sent prompts, tool schemas/calls/results, timing and reported usage. Authentication secrets are removed server-side. Raw events are expandable and can be copied explicitly as JSON; copied traces may contain private prompts and conversation text.
 
 The session and traces remain in component memory, separate from stored conversations, and clear on disabling, expiry/account changes or navigation between conversations (session remains until expiry when switching conversations). The normal chat route stays unchanged. Diagnostic modules and their network endpoints are removed from production web JavaScript by `__DEV__` guards; server authorization is independent of that UI guard. The backend requires a separate UID allowlist, origin allowlist, feature switch and signed temporary session. A server-disabled or unauthorized request cannot expose diagnostics.
+
+Live partials must be explicitly requested: the private service supplies
+`providerOptions.xai.streaming.interimResults=true`, forwarded unchanged in the
+transcription start frame. With defaults, an 11-second continuous French recording
+produced text only after audio-done (11.8s); enabling interims produced the first
+partial at 1.4s and subsequent updates during speech. The original smoke test
+checked frame types but not their arrival before audio-done. Regression tests now
+cover the server option and its forwarding before capture frames.

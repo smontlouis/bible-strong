@@ -22,6 +22,7 @@ it('freezes message context and completes the streamed answer', async () => {
     request: async (input, _signal, emit) => {
       context.detail = 'Romains 8'
       expect(input.readingContext).toBe('Jean 1 · LSG')
+      expect(input.activeContext).toEqual({ kind: 'passage' })
       emit({ type: 'delta', text: 'Une réponse.' })
       emit({ type: 'done', requestId: 'r', model: 'm', modelCalls: 1, toolCalls: 0 })
     },

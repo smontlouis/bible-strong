@@ -35,6 +35,16 @@ describe('assistant resource context', () => {
     expect(c.detail).toContain('resourceId=acbc')
     expect(c.detail).toContain('sectionId=section-4')
     expect(c.detail).toContain('Texte non fourni')
+    expect(c.activeContext).toEqual({
+      kind: 'commentary',
+      resourceId: 'acbc',
+      language: 'fr',
+      book: 43,
+      chapter: 15,
+      startVerse: 4,
+      endVerse: 5,
+      sectionId: 'section-4',
+    })
     expect(commentaryContext({ projectionId: 'unknown:fr', book: 43, chapter: 15 })).toBeNull()
   })
   it('keeps a multi-author list distinct from one selected commentary', () => {
@@ -51,6 +61,7 @@ describe('assistant resource context', () => {
     const b = dictionaryContext({ word: 'Berger', work: 'westphal', entryId: 17, language: 'fr' })!
     expect(a.key).not.toBe(b.key)
     expect(a.detail).toContain('entryId=17')
+    expect(a.activeContext).toMatchObject({ kind: 'dictionary', work: 'bost', entryId: 17 })
     expect(
       naveContext({ name: 'Patience', name_lower: 'patience', language: 'en' })?.detail
     ).toContain('langue=en')

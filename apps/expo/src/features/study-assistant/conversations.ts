@@ -9,6 +9,10 @@ import {
   type ToolActivity,
 } from '@bible-strong/ai-contract/contract'
 import { validCheckpoint, type MemoryCheckpoint } from './conversationMemory'
+import {
+  parseStudySurfaceContext,
+  type StudySurfaceContext,
+} from '@bible-strong/ai-contract/contract'
 
 export type ReadingContext = {
   bibleVersion?: string
@@ -16,6 +20,7 @@ export type ReadingContext = {
   label: string
   detail: string
   content?: string
+  activeContext?: StudySurfaceContext
   kind:
     | 'passage'
     | 'word'
@@ -55,7 +60,14 @@ const MAX_CHARACTERS = 2_000_000
 const isContext = (value: unknown): value is ReadingContext => {
   if (!value || typeof value !== 'object') return false
   const c = value as ReadingContext
+  let validActiveContext = true
+  try {
+    parseStudySurfaceContext(c.activeContext)
+  } catch {
+    validActiveContext = false
+  }
   return (
+    validActiveContext &&
     (c.bibleVersion === undefined ||
       (typeof c.bibleVersion === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(c.bibleVersion))) &&
     typeof c.key === 'string' &&

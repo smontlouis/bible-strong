@@ -59,7 +59,8 @@
   },
   "dependencies": {
     "@alloc/moti": "^54.0.0-beta.8",
-    "@assistant-ui/react": "0.15.20",
+    "@assistant-ui/react": "^0.15.21",
+    "@assistant-ui/react-streamdown": "0.3.16",
     "@babel/plugin-transform-class-properties": "^7.25.9",
     "@babel/plugin-transform-private-methods": "^7.25.9",
     "@babel/plugin-transform-private-property-in-object": "^7.25.9",

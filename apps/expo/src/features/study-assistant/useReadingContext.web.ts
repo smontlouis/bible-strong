@@ -73,6 +73,11 @@ export function useReadingContext(): ReadingContext | null {
       detail,
       kind: 'word',
       ...(version ? { bibleVersion: version } : {}),
+      activeContext: {
+        kind: 'word',
+        ...(version ? { bibleVersion: version } : {}),
+        ...(reference ? { reference } : {}),
+      },
     }
   }
   const fromWord = (data: StrongDetailRouteContext) => {

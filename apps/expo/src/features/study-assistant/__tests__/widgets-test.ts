@@ -2,6 +2,25 @@ import { textDifferences } from '../widgets/textDifferences'
 import { parseStudyWidget } from '@bible-strong/ai-contract/contract'
 import { loadWidgetPassage } from '../widgets/passageData'
 const p = { book: 43, chapter: 3, start: 16, end: 16, version: 'LSG' }
+it('accepts Aquifer as a published commentary suggestion', () => {
+  expect(
+    parseStudyWidget({
+      id: 'w1',
+      kind: 'further_resources',
+      title: 'Pour aller plus loin',
+      items: [
+        {
+          kind: 'commentary',
+          label: 'Tyndale Open Study Notes',
+          id: 'aquifer-fr',
+          language: 'fr',
+          book: 29,
+          chapter: 1,
+        },
+      ],
+    })
+  ).toMatchObject({ items: [{ id: 'aquifer-fr' }] })
+})
 it('rejects impossible widget shapes and translation comparisons of different passages', () => {
   expect(() =>
     parseStudyWidget({ id: 'w1', kind: 'passage_comparison', title: 'Compare', passages: [p] })

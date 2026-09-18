@@ -1,16 +1,19 @@
 import i18n from '~i18n'
 import type { ReadingContext } from './conversations'
+import type { StudySurfaceContext } from '@bible-strong/ai-contract/contract'
 import verseToReference from '~helpers/verseToReference'
 import { parseCommentaryResourceParams } from '~features/commentaries/commentaryResourceParams'
 const context = (
   kind: ReadingContext['kind'],
   label: string,
-  details: string[]
+  details: string[],
+  activeContext?: StudySurfaceContext
 ): ReadingContext => ({
   kind,
   label: label.slice(0, 450),
   detail: details.filter(Boolean).join(' · ').slice(0, 500),
   key: JSON.stringify([kind, ...details]).slice(0, 990),
+  ...(activeContext ? { activeContext } : {}),
 })
 export function commentaryContext(
   data: {
@@ -38,14 +41,29 @@ export function commentaryContext(
           )
         : undefined,
   })
-  return context('commentary', `${parsed.entry.author} · ${reference}`, [
-    `Commentaire ouvert : ${parsed.entry.title}`,
-    `Auteur : ${parsed.entry.author}`,
-    reference,
-    `resourceId=${parsed.projection.resourceId}; langue=${parsed.projection.language}`,
-    data.sectionId ? `sectionId=${data.sectionId}` : '',
-    "Texte non fourni : consulter cet auteur avant de l'expliquer ; ne pas substituer un autre commentaire.",
-  ])
+  return context(
+    'commentary',
+    `${parsed.entry.author} · ${reference}`,
+    [
+      `Commentaire ouvert : ${parsed.entry.title}`,
+      `Auteur : ${parsed.entry.author}`,
+      reference,
+      `resourceId=${parsed.projection.resourceId}; langue=${parsed.projection.language}`,
+      data.sectionId ? `sectionId=${data.sectionId}` : '',
+      "Texte non fourni : consulter cet auteur avant de l'expliquer ; ne pas substituer un autre commentaire.",
+    ],
+    {
+      kind: 'commentary',
+      resourceId: parsed.projection.resourceId,
+      language: parsed.projection.language,
+      book: parsed.book,
+      chapter: parsed.chapter,
+      ...(section
+        ? { startVerse: section.rangeStartVerse, endVerse: section.rangeEndVerse }
+        : {}),
+      ...(data.sectionId ? { sectionId: data.sectionId } : {}),
+    }
+  )
 }
 export function dictionaryContext(data: {
   word?: string
@@ -56,14 +74,24 @@ export function dictionaryContext(data: {
 }): ReadingContext | null {
   if (!data.word?.trim()) return null
   const title = data.dictionaryTitle || data.work || i18n.t('Dictionnaire')
-  return context('dictionary', `${data.word} · ${title}`, [
-    `Article ouvert : ${data.word}`,
-    `Dictionnaire : ${title}`,
-    data.work ? `work=${data.work}` : '',
-    data.entryId ? `entryId=${data.entryId}` : '',
-    data.language ? `langue=${data.language}` : '',
-    "Texte non fourni : lire cet article avant de l'expliquer.",
-  ])
+  return context(
+    'dictionary',
+    `${data.word} · ${title}`,
+    [
+      `Article ouvert : ${data.word}`,
+      `Dictionnaire : ${title}`,
+      data.work ? `work=${data.work}` : '',
+      data.entryId ? `entryId=${data.entryId}` : '',
+      data.language ? `langue=${data.language}` : '',
+      "Texte non fourni : lire cet article avant de l'expliquer.",
+    ],
+    {
+      kind: 'dictionary',
+      ...(data.work ? { work: data.work } : {}),
+      ...(data.entryId ? { entryId: data.entryId } : {}),
+      ...(data.language === 'fr' || data.language === 'en' ? { language: data.language } : {}),
+    }
+  )
 }
 export function naveContext(data: {
   name?: string
@@ -71,12 +99,21 @@ export function naveContext(data: {
   language?: string
 }): ReadingContext | null {
   if (!data.name && !data.name_lower) return null
-  return context('nave', `${data.name || data.name_lower} · Nave`, [
-    `Thème Nave ouvert : ${data.name || data.name_lower}`,
-    data.name_lower ? `normalizedName=${data.name_lower}` : '',
-    data.language ? `langue=${data.language}` : '',
-    "Texte non fourni : lire ce thème avant d'expliquer ses références.",
-  ])
+  return context(
+    'nave',
+    `${data.name || data.name_lower} · Nave`,
+    [
+      `Thème Nave ouvert : ${data.name || data.name_lower}`,
+      data.name_lower ? `normalizedName=${data.name_lower}` : '',
+      data.language ? `langue=${data.language}` : '',
+      "Texte non fourni : lire ce thème avant d'expliquer ses références.",
+    ],
+    {
+      kind: 'nave',
+      ...(data.name_lower ? { normalizedName: data.name_lower } : {}),
+      ...(data.language === 'fr' || data.language === 'en' ? { language: data.language } : {}),
+    }
+  )
 }
 export function pickReadingContext({
   panelOpen,
@@ -112,6 +149,12 @@ export function bibleContext(tab: import('~state/tabs').BibleTab): ReadingContex
     detail,
     kind: 'passage',
     bibleVersion: data.selectedVersion,
+    activeContext: {
+      kind: 'passage',
+      bibleVersion: data.selectedVersion,
+      book: data.selectedBook.Numero,
+      chapter: data.selectedChapter,
+    },
   }
 }
 
@@ -132,9 +175,14 @@ export function commentaryCollectionContext(
     })
     return parsed ? [`${parsed.entry.author} (${projectionId})`] : []
   })
-  return context('commentary', `${i18n.t('Commentaires')} · ${reference}`, [
-    `Liste de commentaires ouverte : ${reference}`,
-    authors.join(', '),
-    "Aucun auteur unique sélectionné. Préciser l'auteur si nécessaire ; les textes ne sont pas fournis.",
-  ])
+  return context(
+    'commentary',
+    `${i18n.t('Commentaires')} · ${reference}`,
+    [
+      `Liste de commentaires ouverte : ${reference}`,
+      authors.join(', '),
+      "Aucun auteur unique sélectionné. Préciser l'auteur si nécessaire ; les textes ne sont pas fournis.",
+    ],
+    { kind: 'commentary', book, chapter }
+  )
 }

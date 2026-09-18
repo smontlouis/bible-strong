@@ -385,7 +385,7 @@ function parseResourceSuggestion(value: unknown): ResourceSuggestion {
     throw new Error('INVALID_RESOURCE_SUGGESTION')
   if (
     r.kind === 'commentary' &&
-    (!['acbc', 'barnes'].includes(r.id) ||
+    (!['acbc', 'barnes', 'aquifer-fr'].includes(r.id) ||
       !Number.isInteger(r.book) ||
       !Number.isInteger(r.chapter) ||
       r.book! < 1 ||

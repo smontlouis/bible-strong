@@ -406,6 +406,12 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
+  line-height: 0;
+}
+.bs-assistant-send svg {
+  display: block;
+  width: 14px;
+  height: 14px;
 }
 .bs-assistant-login {
   width: 100%;
@@ -539,6 +545,7 @@
   background: transparent;
   border: 0;
   cursor: pointer;
+  line-height: 0;
 }
 .bs-assistant-official-tools [data-slot='collapsible-content'] {
   --collapsible-panel-height: var(--radix-collapsible-content-height);
@@ -633,17 +640,45 @@
 .bs-assistant-dictate {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
   border: 1px solid var(--as-border);
   border-radius: 50%;
   background: var(--as-surface);
   color: var(--as-ink);
   cursor: pointer;
+  scale: 1;
+  transition-property: background-color, color, border-color, box-shadow, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
 }
 .bs-assistant-dictate-active {
-  background: var(--as-accent);
-  color: var(--as-surface);
+  background: #e5e7eb;
+  border-color: transparent;
+  color: #000;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+}
+.bs-assistant-dictate-pending {
+  background: var(--as-soft);
+  color: var(--as-accent);
+}
+.bs-assistant-dictate-error {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+.bs-assistant-dictate:not(:disabled):active {
+  scale: 0.96;
+}
+.bs-assistant-dictate-spinner {
+  display: grid;
+  place-items: center;
+  animation: bs-assistant-spin 0.8s linear infinite;
+}
+.bs-assistant-dictate svg {
+  display: block;
+  width: 14px;
+  height: 14px;
 }
 .bs-assistant-dictate:disabled {
   opacity: 0.5;
@@ -653,9 +688,16 @@
   outline: 2px solid var(--as-accent);
   outline-offset: 3px;
 }
-.bs-assistant-dictation-status {
-  display: block;
-  padding: 4px 12px 10px;
-  font-size: 12px;
-  color: var(--as-muted);
+@keyframes bs-assistant-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bs-assistant-dictate-spinner {
+    animation-duration: 1.6s;
+  }
+  .bs-assistant-dictate {
+    transition: none;
+  }
 }

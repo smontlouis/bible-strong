@@ -35,6 +35,27 @@ it('opens the exact read section and rejects unknown destinations', () => {
   expect(sourceIdFromLink(sourceLink('s1'))).toBe('s1')
   expect(sourceIdFromLink('https://evil.example/assistant-source/s1')).toBeUndefined()
 })
+it('accepts and opens an exact Aquifer commentary source', () => {
+  const aquifer = parseStudySource({
+    ...commentary,
+    title: 'Tyndale Open Study Notes',
+    params: {
+      resourceId: 'aquifer-fr',
+      book: '29',
+      chapter: '1',
+      sectionId: 'aquifer-fr-fr-29-1-1-20',
+    },
+  })
+  expect(sourceRoute(aquifer)).toEqual({
+    pathname: '/commentary-entry',
+    params: {
+      projectionId: 'aquifer-fr:fr',
+      book: '29',
+      chapter: '1',
+      sectionId: 'aquifer-fr-fr-29-1-1-20',
+    },
+  })
+})
 it('links Bible text nodes without modifying code or existing source links', () => {
   const tree = {
     type: 'root',
