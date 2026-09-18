@@ -46,7 +46,6 @@ export default function FurtherResourcesWidget({ widget }: { widget: Descriptor 
       eyebrow={t('assistant.widgets.furtherResources')}
       icon={<LibraryIcon size={17} />}
     >
-      <p className="bs-widget-notice">{t('assistant.widgets.suggestionsNotice')}</p>
       {!!widget.unavailable?.length && (
         <p className="bs-widget-notice" role="status">
           {t('assistant.widgets.partialResources')}

@@ -13,6 +13,7 @@ import WidgetFrame, { useCloseExpandedWidget } from './WidgetFrame.web'
 import { loadWidgetPassage } from './passageData'
 import { getVersions, getBibleVersionVersificationId } from '~helpers/bibleVersions'
 import { textDifferences } from './textDifferences'
+import VersionSelect from './VersionSelect.web'
 const identity = (p: PassageTarget) => `${p.version}:${p.book}:${p.chapter}:${p.start}:${p.end}`
 function PassageCard({
   passage,
@@ -92,21 +93,15 @@ function PassageCard({
           {label}
         </button>
         {onVersion ? (
-          <select
-            className="bs-widget-version-picker"
-            aria-label={t('assistant.widgets.translationFor', {
+          <VersionSelect
+            label={t('assistant.widgets.translationFor', {
               reference: label,
               version: passage.version,
             })}
             value={passage.version}
-            onChange={event => onVersion(event.target.value)}
-          >
-            {versions?.map(version => (
-              <option key={version} value={version}>
-                {version} · {getVersions()[version]?.name || version}
-              </option>
-            ))}
-          </select>
+            versions={versions || [passage.version]}
+            onChange={onVersion}
+          />
         ) : (
           <span className="bs-widget-version">{passage.version}</span>
         )}
@@ -171,7 +166,6 @@ export default function PassageWidget({ widget }: { widget: Descriptor }) {
             />
             {t('assistant.widgets.highlightDifferences')}
           </label>
-          <p>{t('assistant.widgets.differenceHint', { version: passages[0].version })}</p>
           {passages.some((p, i) => p.version !== widget.passages[i]?.version) && (
             <p>{t('assistant.widgets.translationChanged')}</p>
           )}

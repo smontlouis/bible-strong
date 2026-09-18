@@ -8,6 +8,13 @@ export type WidgetExample = {
   checks: string[]
   widget: StudyWidget
 }
+export type WidgetStory = {
+  id: string
+  category: string
+  title: string
+  description: string
+  states: { exampleId: string; label: string }[]
+}
 const passage = (book: number, chapter: number, start: number, end = start, version = 'LSG') => ({
   book,
   chapter,
@@ -58,13 +65,13 @@ export const widgetExamples: WidgetExample[] = [
     category: 'Mots & lexique',
     title: 'Concordance',
     description:
-      'Les versets d’une famille Strong, avec le nombre de versets distincts, un filtre par livre et la suite des résultats.',
-    prompt: 'Montre tous les passages correspondant à la famille Strong H7050.',
+      'Les versets associés au Strong, avec les mots correspondants en emphase, un filtre par livre et la suite des résultats.',
+    prompt: 'Montre les passages associés au Strong H7050.',
     checks: ['Filtrer sur Zacharie.', 'Revenir à tous les livres et afficher la suite.'],
     widget: {
       ...base,
       kind: 'concordance',
-      title: 'La famille H7050',
+      title: 'H7050',
       reference: 'H7050',
       identityKind: 'strong',
       scope: 'classic_family',
@@ -92,11 +99,11 @@ export const widgetExamples: WidgetExample[] = [
     category: 'Mots & lexique',
     title: 'Mots du verset',
     description:
-      'Le texte devient exploratoire : sélectionnez un mot pour consulter ses identités Strong et sa grammaire réellement disponible.',
+      'Les mots cliquables du modal Lexique : un clic remplace le verset par sa fiche Strong, puis Retour au verset permet de revenir.',
     prompt: 'J’aimerais explorer les mots de Jean 15:4 pour comprendre ce que signifie demeurer.',
     checks: [
       'Cliquer sur Demeurez.',
-      'Vérifier la fiche G3306 et le signalement de morphologie absente.',
+      'Lire la fiche G3306, puis revenir au verset pour choisir un autre mot.',
     ],
     widget: {
       ...base,
@@ -300,3 +307,122 @@ export const widgetExamples: WidgetExample[] = [
     },
   },
 ]
+
+export const widgetStories: WidgetStory[] = [
+  {
+    id: 'passage-widget',
+    category: 'Bible',
+    title: 'PassageWidget',
+    description:
+      'Le composant des textes bibliques exacts, partagé entre une liste de passages et une comparaison de traductions.',
+    states: [
+      { exampleId: 'passages', label: 'Passages' },
+      { exampleId: 'translations', label: 'Traductions' },
+    ],
+  },
+  {
+    id: 'verse-analysis-widget',
+    category: 'Bible',
+    title: 'VerseAnalysisWidget',
+    description:
+      'Le composant d’exploration des mots d’un verset : texte aligné, sélection d’un mot et remplacement par sa fiche Strong.',
+    states: [{ exampleId: 'words', label: 'Mots du verset' }],
+  },
+  {
+    id: 'concordance-widget',
+    category: 'Mots & lexique',
+    title: 'ConcordanceWidget',
+    description:
+      'La concordance d’un identifiant Strong, avec décompte, filtre par livre, pagination et mots correspondants en emphase.',
+    states: [{ exampleId: 'concordance', label: 'Résultats' }],
+  },
+  {
+    id: 'strong-entry-widget',
+    category: 'Mots & lexique',
+    title: 'StrongWidget',
+    description:
+      'La fiche d’une identité lexicale précise : original, translittération, définition, morphologie et prononciation.',
+    states: [{ exampleId: 'strong', label: 'Fiche' }],
+  },
+  {
+    id: 'source-group-widget',
+    category: 'Ressources',
+    title: 'SourceGroupWidget',
+    description:
+      'Le comparateur de contenus attribués. Il présente plusieurs lectures réelles sans mélanger leurs auteurs ni leurs œuvres.',
+    states: [
+      { exampleId: 'commentaries', label: 'Commentaires' },
+      { exampleId: 'dictionaries', label: 'Dictionnaires' },
+    ],
+  },
+  {
+    id: 'nave-widget',
+    category: 'Ressources',
+    title: 'NaveWidget',
+    description:
+      'L’entrée thématique Nave, avec ses subdivisions, ses références et l’ouverture du thème complet.',
+    states: [{ exampleId: 'nave', label: 'Thème' }],
+  },
+  {
+    id: 'further-resources-widget',
+    category: 'Ressources',
+    title: 'FurtherResourcesWidget',
+    description:
+      'Une liste de ressources réellement ouvrables pour poursuivre l’étude dans les différents catalogues de l’app.',
+    states: [{ exampleId: 'resources', label: 'Suggestions' }],
+  },
+  {
+    id: 'entity-widget',
+    category: 'Personnes & histoire',
+    title: 'EntityWidget',
+    description:
+      'Le composant partagé des entités bibliques : profils de personnes, relations et lieux documentés.',
+    states: [
+      { exampleId: 'person', label: 'Personnage' },
+      { exampleId: 'relations', label: 'Relations' },
+      { exampleId: 'place', label: 'Lieu' },
+    ],
+  },
+  {
+    id: 'timeline-widget',
+    category: 'Personnes & histoire',
+    title: 'TimelineWidget',
+    description:
+      'Une chronologie de plusieurs événements lus, avec dates sourcées, approximations et ouverture des détails.',
+    states: [{ exampleId: 'timeline', label: 'Événements' }],
+  },
+  {
+    id: 'book-widget',
+    category: 'Lecture',
+    title: 'BookWidget',
+    description:
+      'La présentation d’un livre biblique : panoramas disponibles, structure éditoriale et accès aux chapitres.',
+    states: [{ exampleId: 'book', label: 'Présentation' }],
+  },
+  {
+    id: 'reading-widget',
+    category: 'Lecture',
+    title: 'ReadingWidget',
+    description:
+      'Le lecteur de contenu éditorial sans écriture personnelle, partagé entre les étapes de plan et les méditations.',
+    states: [
+      { exampleId: 'plan', label: 'Plan de lecture' },
+      { exampleId: 'meditation', label: 'Méditation' },
+    ],
+  },
+]
+
+export function resolveWidgetStory(widgetId?: string, stateId?: string) {
+  const story =
+    widgetStories.find(item => item.id === widgetId) ||
+    widgetStories.find(item => item.states.some(state => state.exampleId === widgetId)) ||
+    widgetStories.find(item => item.states.some(state => state.exampleId === stateId)) ||
+    widgetStories[0]
+  const state =
+    story.states.find(item => item.exampleId === stateId) ||
+    story.states.find(item => item.exampleId === widgetId) ||
+    story.states[0]
+  const example = widgetExamples.find(item => item.id === state.exampleId)
+  if (!example) throw new Error(`Unknown widget playground state: ${state.exampleId}`)
+  return { story, state, example }
+}

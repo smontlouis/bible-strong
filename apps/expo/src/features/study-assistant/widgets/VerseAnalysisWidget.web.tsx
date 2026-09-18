@@ -1,28 +1,100 @@
-import { useSetAtom } from 'jotai'
-import { ArrowUpRightIcon } from 'lucide-react'
-import { previewHistoryAtom } from '~features/bibleReferencePreview/state'
-import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useSetAtom } from 'jotai'
+import { ArrowLeftIcon, ArrowUpRightIcon } from 'lucide-react'
+import { Spinner } from '@heroui/react/spinner'
 import type { PassageWidget } from '@bible-strong/ai-contract/contract'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import { buildCanonicalStrongVerseRuns } from '~helpers/canonicalStrongVerse'
+import { useTheme } from '~themes/ThemeProvider'
+import { resolveFontFamily } from '~themes/styleValues'
+import { useResourcesLanguageValue } from '~state/resourcesLanguage'
+import { resolveStrongNavigationVersionId } from '~helpers/strongBiblePublications'
+import CanonicalStrongVerseText from '~features/bible/CanonicalStrongVerseText'
+import StrongCard from '~features/bible/StrongCard'
+import { StrongResourceScrollProvider } from '~features/bible/StrongResourceScrollContext'
+import {
+  getStrongWordOccurrences,
+  type StrongWordOccurrence,
+} from '~features/bible/strongResourceCardContext'
+import { previewHistoryAtom } from '~features/bibleReferencePreview/state'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import verseToReference from '~helpers/verseToReference'
 import WidgetFrame from './WidgetFrame.web'
-import StrongWidget from './StrongWidget.web'
+
+function WordEntry({
+  occurrence,
+  passage,
+  language,
+}: {
+  occurrence: StrongWordOccurrence
+  passage: PassageWidget['passages'][number]
+  language: 'fr' | 'en'
+}) {
+  const resources = useResourceAccess(),
+    theme = useTheme(),
+    { t } = useTranslation()
+  const query = useQuery({
+    queryKey: [
+      'assistant-widget-lexicon',
+      occurrence.identity.code,
+      occurrence.identity.kind,
+      language,
+    ],
+    queryFn: () => resources.strongLexicon.loadEntry(occurrence.identity, language),
+    staleTime: 300000,
+  })
+  if (query.isPending)
+    return (
+      <div className="bs-widget-centered-loading">
+        <Spinner aria-label={t('Chargement...')} color="accent" size="md" />
+      </div>
+    )
+  if (query.isError || !query.data)
+    return (
+      <div className="bs-widget-unavailable">
+        <p>{t('assistant.widgets.resourceUnavailable')}</p>
+        <button onClick={() => void query.refetch()}>{t('assistant.errors.retry')}</button>
+      </div>
+    )
+  return (
+    <div className="bs-widget-inline-strong">
+      <StrongCard
+        theme={{
+          ...theme,
+          fontFamily: {
+            ...theme.fontFamily,
+            paragraph: resolveFontFamily(theme.fontFamily.text) || 'sans-serif',
+          },
+        }}
+        book={String(passage.book)}
+        strongEntry={query.data}
+        strongVerseContext={{
+          book: passage.book,
+          bibleChapter: passage.chapter,
+          bibleVerse: passage.start,
+          bibleVersion: passage.version,
+          strongBibleVersionId: resolveStrongNavigationVersionId(passage.version),
+          clickedWord: occurrence.clickedWord,
+          morphologyCodes: occurrence.morphologyCodes,
+        }}
+      />
+    </div>
+  )
+}
 export default function VerseAnalysisWidget({ widget }: { widget: PassageWidget }) {
-  const { t, i18n } = useTranslation(),
+  const { t } = useTranslation(),
     resources = useResourceAccess(),
+    theme = useTheme(),
     p = widget.passages[0]
+  const language = useResourcesLanguageValue().STRONG
   const [selected, setSelected] = useState<number | null>(null)
-  const [identityIndex, setIdentityIndex] = useState(0)
   const query = useQuery({
     queryKey: ['assistant-word-analysis', p.version, p.book, p.chapter, p.start],
     queryFn: async () => {
       const result = await resources.strongBible.loadVerse({
         currentVersionId: p.version,
-        defaultVersionId: p.version === 'KJV' ? 'KJV' : 'LSG',
+        defaultVersionId: resolveStrongNavigationVersionId(p.version) || 'LSG',
         book: p.book,
         chapter: p.chapter,
         verse: p.start,
@@ -33,10 +105,11 @@ export default function VerseAnalysisWidget({ widget }: { widget: PassageWidget 
     },
     staleTime: 300000,
   })
+  const occurrences = query.data ? getStrongWordOccurrences(query.data.verse) : []
+  const occurrence = selected === null ? undefined : occurrences[selected]
   const setPreview = useSetAtom(previewHistoryAtom),
     navigate = usePushRouteOnce()
-  const label = verseToReference({ bookNum: p.book, chapterNum: p.chapter, verses: [p.start] }),
-    version = query.data?.provenance.versionId || p.version
+  const label = verseToReference({ bookNum: p.book, chapterNum: p.chapter, verses: [p.start] })
   const openPassage = () =>
     navigate({
       pathname: '/bible-view',
@@ -45,36 +118,30 @@ export default function VerseAnalysisWidget({ widget }: { widget: PassageWidget 
         chapter: String(p.chapter),
         verse: String(p.start),
         focusVerses: JSON.stringify([p.start]),
-        version,
+        version: p.version,
         contextDisplayMode: 'focused',
       },
     })
-  const runs = query.data
-    ? buildCanonicalStrongVerseRuns(query.data.verse.Texte, query.data.verse.StrongSpans)
-    : []
-  const run = selected === null ? undefined : runs[selected]
-  const identity = run?.kind === 'strong' ? run.identities[identityIndex] : undefined
-  const codes =
-    run?.kind === 'strong' && identity
-      ? [
-          ...new Set(
-            run.morphologies
-              ?.filter(m => m.identity.code === identity.code && m.identity.kind === identity.kind)
-              .flatMap(m => m.codes) || []
-          ),
-        ]
-      : []
-  const morphology = useQuery({
-    queryKey: ['assistant-word-morphology', codes, i18n.language],
-    queryFn: () =>
-      resources.strongLexicon.loadMorphologies(codes, i18n.language.startsWith('en') ? 'en' : 'fr'),
-    enabled: codes.length > 0,
-    staleTime: 300000,
-  })
   return (
-    <div className="bs-widget-analysis-group">
-      <WidgetFrame title={widget.title} eyebrow={t('assistant.widgets.wordAnalysis')}>
-        <div className="bs-widget-word-analysis">
+    <WidgetFrame
+      title={occurrence ? occurrence.clickedWord || occurrence.identity.code : widget.title}
+      eyebrow={t(occurrence ? 'assistant.widgets.strong' : 'assistant.widgets.wordAnalysis')}
+      icon={
+        occurrence ? (
+          <button
+            type="button"
+            className="bs-widget-icon"
+            aria-label={t('assistant.widgets.backToVerse')}
+            title={t('assistant.widgets.backToVerse')}
+            onClick={() => setSelected(null)}
+          >
+            <ArrowLeftIcon size={18} />
+          </button>
+        ) : undefined
+      }
+    >
+      <div className={occurrence ? 'bs-widget-word-detail' : 'bs-widget-word-analysis'}>
+        {!occurrence && (
           <header>
             <button
               type="button"
@@ -84,7 +151,7 @@ export default function VerseAnalysisWidget({ widget }: { widget: PassageWidget 
                   {
                     kind: 'bible',
                     title: label,
-                    version,
+                    version: p.version,
                     selections: [
                       { book: p.book, chapter: p.chapter, start: p.start, end: p.start },
                     ],
@@ -95,7 +162,7 @@ export default function VerseAnalysisWidget({ widget }: { widget: PassageWidget 
             >
               {label}
             </button>
-            <span>{version}</span>
+            <span>{p.version}</span>
             <button
               type="button"
               className="bs-widget-icon"
@@ -105,94 +172,43 @@ export default function VerseAnalysisWidget({ widget }: { widget: PassageWidget 
               <ArrowUpRightIcon size={16} />
             </button>
           </header>
-          {query.isPending ? (
-            <p role="status">{t('Chargement...')}</p>
-          ) : query.isError ? (
-            <div>
-              <p>{t('assistant.widgets.resourceUnavailable')}</p>
-              <button type="button" onClick={() => void query.refetch()}>
-                {t('assistant.errors.retry')}
-              </button>
-            </div>
-          ) : (
-            <>
-              <p className="bs-widget-word-text">
-                {runs.map((r, index) =>
-                  r.kind === 'text' ? (
-                    <span key={index}>{r.text}</span>
-                  ) : (
-                    <button
-                      type="button"
-                      key={index}
-                      aria-pressed={selected === index}
-                      onClick={() => {
-                        setSelected(index)
-                        setIdentityIndex(0)
-                      }}
-                    >
-                      {r.word || t('assistant.widgets.untranslated')}
-                    </button>
-                  )
-                )}
-              </p>
-              <p className="bs-widget-word-hint">{t('assistant.widgets.chooseWord')}</p>
-              {run?.kind === 'strong' && (
-                <div className="bs-widget-word-details">
-                  <strong>{run.word || t('assistant.widgets.untranslated')}</strong>
-                  <div>
-                    {run.identities.map((i, index) => (
-                      <button
-                        type="button"
-                        key={`${i.kind}:${i.code}`}
-                        aria-pressed={index === identityIndex}
-                        onClick={() => setIdentityIndex(index)}
-                      >
-                        <code>{i.code}</code>
-                      </button>
-                    ))}
-                  </div>
-                  {codes.length > 0 ? (
-                    <>
-                      <small>{t('assistant.widgets.morphology')}</small>
-                      {morphology.isPending ? (
-                        <p>{t('Chargement...')}</p>
-                      ) : morphology.isError ? (
-                        <p>{t('assistant.widgets.resourceUnavailable')}</p>
-                      ) : (
-                        codes.map(code => {
-                          const m = morphology.data?.find(item => item.code === code)
-                          return (
-                            <p key={code}>
-                              <code>{code}</code>{' '}
-                              {m?.meaning || t('assistant.widgets.resourceUnavailable')}
-                              {m?.description ? ` · ${m.description}` : ''}
-                            </p>
-                          )
-                        })
-                      )}
-                    </>
-                  ) : (
-                    <p>{t('assistant.widgets.noMorphology')}</p>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </WidgetFrame>
-      {identity && (
-        <StrongWidget
-          widget={{
-            id: widget.id,
-            kind: 'strong_entry',
-            title: identity.code,
-            reference: identity.code,
-            identityKind: identity.kind,
-            language: i18n.language.startsWith('en') ? 'en' : 'fr',
-            scope: 'precise_identity',
-          }}
-        />
-      )}
-    </div>
+        )}
+        {occurrence ? (
+          <WordEntry occurrence={occurrence} passage={p} language={language} />
+        ) : query.isPending ? (
+          <div className="bs-widget-centered-loading">
+            <Spinner aria-label={t('Chargement...')} color="accent" size="md" />
+          </div>
+        ) : query.isError ? (
+          <div className="bs-widget-unavailable">
+            <p>{t('assistant.widgets.resourceUnavailable')}</p>
+            <button onClick={() => void query.refetch()}>{t('assistant.errors.retry')}</button>
+          </div>
+        ) : (
+          <>
+            <StrongResourceScrollProvider
+              value={{
+                currentTarget: null,
+                registerStrongWordLayout: () => {},
+                scrollToStrongCard: (_reference, index) => setSelected(index),
+              }}
+            >
+              <div className="bs-widget-canonical-words">
+                <CanonicalStrongVerseText
+                  verse={query.data.verse}
+                  small
+                  textStyle={{
+                    fontFamily: resolveFontFamily(theme.fontFamily.text),
+                    fontSize: 15,
+                    lineHeight: 26,
+                  }}
+                />
+              </div>
+            </StrongResourceScrollProvider>
+            <p className="bs-widget-word-hint">{t('assistant.widgets.chooseWord')}</p>
+          </>
+        )}
+      </div>
+    </WidgetFrame>
   )
 }

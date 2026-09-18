@@ -124,10 +124,21 @@
   color: var(--pg-text);
   font-size: 12px;
 }
-.ai-pg-catalog nav button > span {
+.ai-pg-catalog nav button > span:first-child {
   color: var(--pg-muted);
   font-size: 10px;
   font-variant-numeric: tabular-nums;
+}
+.ai-pg-story-name {
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.ai-pg-catalog nav button > small {
+  flex-shrink: 0;
+  color: var(--pg-muted);
+  font-size: 9px;
+  font-weight: 400;
 }
 .ai-pg-catalog nav button > svg {
   margin-left: auto;
@@ -163,6 +174,65 @@
   color: var(--pg-muted);
   font-size: 13px;
   margin: 0;
+}
+.ai-pg-state-picker {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding: 14px 16px;
+  margin: 0 0 12px;
+  border: 1px solid var(--pg-line);
+  border-radius: 12px;
+  background: var(--pg-soft);
+}
+.ai-pg-state-picker > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ai-pg-state-picker > div:first-child small {
+  color: var(--pg-muted);
+  font-size: 9px;
+  white-space: nowrap;
+}
+.ai-pg-state-picker [role='tablist'] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.ai-pg-state-picker [role='tab'] {
+  padding: 7px 11px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--pg-muted);
+  font-size: 11px;
+}
+.ai-pg-state-picker [role='tab'][aria-selected='true'] {
+  border-color: var(--pg-line);
+  background: var(--pg-bg);
+  color: var(--pg-accent);
+  box-shadow: 0 1px 3px #0001;
+  font-weight: 600;
+}
+.ai-pg-state-description {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0 2px 18px;
+}
+.ai-pg-state-description > span {
+  flex-shrink: 0;
+  color: var(--pg-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+.ai-pg-state-description p {
+  margin: 0;
+  color: var(--pg-muted);
+  font-size: 11px;
 }
 .ai-pg-live {
   display: flex;
@@ -385,6 +455,17 @@
   }
   .ai-pg-detail-heading h2 {
     font-size: 25px;
+  }
+  .ai-pg-state-picker {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+  .ai-pg-state-description {
+    display: block;
+  }
+  .ai-pg-state-description > span {
+    display: block;
+    margin-bottom: 4px;
   }
   .ai-pg-toolbar button {
     font-size: 10px;

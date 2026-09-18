@@ -280,10 +280,28 @@ const getEntityLabel = (category: string, type: string, t: TFunction<'translatio
   return t(`strongDetail.entity.type.${typeKey}`, { defaultValue: type })
 }
 
+const entityCardPresentation = (compact: boolean) =>
+  compact
+    ? { avatarSize: 40, nameClassName: 'font-bold text-[16px]' }
+    : { avatarSize: 48, nameClassName: 'font-bold text-[20px]' }
+
+const resolveEntityEditorialTypography = (
+  readingTypography: StrongReadingTypography,
+  editorialTypography?: ReadingTypography
+) =>
+  editorialTypography ??
+  getReadingTypography(
+    readingTypography.fontFamily || 'sans-serif',
+    readingTypography.fontSizeScale,
+    readingTypography.lineHeight
+  )
+
 export const StrongEntitySummaryCard = ({
   entity,
   expanded = false,
   plain = false,
+  compact = false,
+  editorialTypography,
   readingTypography,
   onOpenBibleReference,
   onOpenStrong,
@@ -291,12 +309,19 @@ export const StrongEntitySummaryCard = ({
   entity: StrongLexiconEntity
   expanded?: boolean
   plain?: boolean
+  compact?: boolean
+  editorialTypography?: ReadingTypography
   readingTypography: StrongReadingTypography
   onOpenBibleReference: (osis: string) => void
   onOpenStrong: (stepCode: string) => void
 }) => {
   const { t } = useTranslation()
   const detailedDescription = entity.articleHtml || entity.summaryHtml
+  const presentation = entityCardPresentation(compact)
+  const resolvedEditorialTypography = resolveEntityEditorialTypography(
+    readingTypography,
+    editorialTypography
+  )
 
   return (
     <VStack
@@ -312,12 +337,12 @@ export const StrongEntitySummaryCard = ({
       <HStack className="overflow-hidden border-continuous gap-[12px] items-center">
         <Image
           source={getStrongEntityAvatarSource(entity.category, entity.type)}
-          style={{ width: 48, height: 48 }}
+          style={{ width: presentation.avatarSize, height: presentation.avatarSize }}
           contentFit="contain"
         />
         <VStack className="overflow-hidden border-continuous flex-[1] gap-[3px]">
           <StrongEyebrow>{getEntityLabel(entity.category, entity.type, t)}</StrongEyebrow>
-          <Text className="font-bold text-[20px]">{entity.name}</Text>
+          <Text className={presentation.nameClassName}>{entity.name}</Text>
           {!plain && (
             <HStack className="overflow-hidden border-continuous gap-[6px] flex-wrap">
               {entity.strongCodes.map(code => (
@@ -340,11 +365,7 @@ export const StrongEntitySummaryCard = ({
       {!!entity.shortDescription && (
         <StrongEditorialHtml
           value={entity.shortDescription}
-          typography={getReadingTypography(
-            readingTypography.fontFamily || 'sans-serif',
-            readingTypography.fontSizeScale,
-            readingTypography.lineHeight
-          )}
+          typography={resolvedEditorialTypography}
           onOpenBibleReference={onOpenBibleReference}
           onOpenStrong={onOpenStrong}
         />
@@ -359,11 +380,7 @@ export const StrongEntitySummaryCard = ({
         >
           <StrongEditorialHtml
             value={detailedDescription}
-            typography={getReadingTypography(
-              readingTypography.fontFamily || 'sans-serif',
-              readingTypography.fontSizeScale,
-              readingTypography.lineHeight
-            )}
+            typography={resolvedEditorialTypography}
             onOpenBibleReference={onOpenBibleReference}
             onOpenStrong={onOpenStrong}
           />

@@ -2457,7 +2457,7 @@
   "assistant.widgets.verseCount_one": "{{count}} distinct verse",
   "assistant.widgets.verseCount_other": "{{count}} distinct verses",
   "assistant.widgets.wordAnalysis": "Words in the verse",
-  "assistant.widgets.chooseWord": "Select an underlined word to inspect its lexical identity.",
+  "assistant.widgets.chooseWord": "Select a word to open its Strong entry.",
   "assistant.widgets.untranslated": "Untranslated word",
   "assistant.widgets.morphology": "Morphology of this occurrence",
   "assistant.widgets.noMorphology": "No morphology provided for this occurrence.",
@@ -2495,7 +2495,6 @@
   "assistant.widgets.openReading": "Open complete reading",
   "assistant.widgets.reflection": "Reflection · assistant",
   "assistant.widgets.furtherResources": "Explore further",
-  "assistant.widgets.suggestionsNotice": "Resources to consult. Their content has not necessarily been read by the assistant.",
   "assistant.widgets.partialResources": "Partial search: some categories could not be consulted.",
   "assistant.widgets.noResources": "No resources found in this selection.",
   "assistant.widgets.resourceKind.media": "Video",
@@ -2511,5 +2510,6 @@
   "assistant.widgets.passageMode": "Passage display",
   "assistant.widgets.readMode": "Read",
   "assistant.widgets.comparedCount_one": "{{count}} passage compared",
-  "assistant.widgets.comparedCount_other": "{{count}} passages compared"
+  "assistant.widgets.comparedCount_other": "{{count}} passages compared",
+  "assistant.widgets.backToVerse": "Back to verse"
 }

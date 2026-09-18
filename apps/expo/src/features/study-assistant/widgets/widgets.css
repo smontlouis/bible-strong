@@ -242,11 +242,6 @@
   flex: 1;
   min-width: 0;
 }
-.bs-widget-lexicon-heading small {
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  color: var(--sw-accent);
-}
 .bs-widget-original {
   font-size: 30px;
   line-height: 1.5;
@@ -267,24 +262,6 @@
   max-height: 230px;
   overflow: auto;
 }
-.bs-widget-scope {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.bs-widget-scope strong {
-  color: var(--sw-accent);
-  font-size: 13px;
-}
-.bs-widget-scope span {
-  font-size: 11px;
-}
-.bs-widget-scope small {
-  margin-left: auto;
-  font-size: 10px;
-  color: var(--sw-muted);
-}
 .bs-widget-notice {
   font-size: 11px;
   line-height: 1.5;
@@ -294,37 +271,17 @@
   border-radius: 8px;
   margin: 12px 0;
 }
-.bs-widget-filter {
+.bs-widget-concordance-toolbar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 11px;
+  justify-content: flex-end;
+  gap: 12px;
+  margin: 0 0 14px;
+}
+.bs-widget-concordance-toolbar > small {
+  margin-right: auto;
   color: var(--sw-muted);
-  margin: 14px 0;
-}
-.bs-widget-filter select {
-  min-width: 0;
-  flex: 1;
-  font: inherit;
-  color: var(--sw-ink);
-  background: var(--sw-surface);
-  border: 1px solid var(--sw-line);
-  border-radius: 7px;
-  padding: 7px;
-}
-.bs-widget-occurrences {
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-.bs-widget-occurrences li {
-  padding: 13px 0;
-  border-top: 1px solid var(--sw-line);
-}
-.bs-widget-occurrences li p {
-  font-size: 13px;
-  line-height: 1.65;
-  margin: 6px 0 0;
+  font-size: 10px;
 }
 .bs-widget-load-more {
   display: block;
@@ -462,8 +419,8 @@
 }
 .bs-widget-entity {
   padding: 16px;
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: 12px;
+  line-height: 1.6;
 }
 .bs-widget-resource-open {
   display: flex;
@@ -728,17 +685,94 @@
   color: var(--sw-muted);
   font-size: 13px;
 }
-.bs-widget-version-picker {
-  min-width: 0;
-  max-width: 46%;
+.bs-widget-version-select {
+  min-width: 76px;
+  max-width: 108px;
   margin-left: auto;
+}
+.bs-widget-version-select-trigger {
+  display: flex;
+  width: 100%;
+  min-height: 28px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
   border: 1px solid var(--sw-line);
   border-radius: 6px;
   background: var(--sw-soft);
   color: var(--sw-ink);
   font: inherit;
   font-size: 10px;
+  padding: 5px 7px;
+  cursor: pointer;
+}
+.bs-widget-version-select-value {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bs-widget-version-select-indicator {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+.bs-widget-version-select-popover {
+  min-width: 112px;
+  max-height: min(320px, var(--visual-viewport-height, 320px));
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--bs-version-select-border);
+  border-radius: 10px;
+  background: var(--bs-version-select-background);
+  color: var(--bs-version-select-foreground);
+  box-shadow: 0 10px 32px rgb(0 0 0 / 18%);
+  outline: none;
+}
+.bs-widget-version-select-list {
+  display: flex;
+  min-width: 110px;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
   padding: 5px;
+  outline: none;
+}
+.bs-widget-version-select-item {
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 9px;
+  border-radius: 6px;
+  color: var(--bs-version-select-foreground);
+  font-size: 11px;
+  line-height: 18px;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+}
+.bs-widget-version-select-item[data-hovered='true'],
+.bs-widget-version-select-item[data-focused='true'] {
+  background: var(--bs-version-select-hover);
+}
+.bs-widget-version-select-item[data-focus-visible='true'] {
+  box-shadow: inset 0 0 0 2px var(--bs-version-select-accent);
+}
+.bs-widget-version-select-item[data-selected='true'] {
+  color: var(--bs-version-select-accent);
+  font-weight: 600;
+}
+.bs-widget-version-select-check {
+  color: var(--bs-version-select-accent);
+  font-size: 11px;
+}
+.bs-widget-book-select {
+  width: min(210px, 68%);
+  min-width: 145px;
+  max-width: 210px;
+  margin-left: 0;
 }
 .bs-widget-translation-controls {
   padding: 12px 16px;
@@ -773,4 +807,29 @@
 }
 .bs-study-widget {
   overflow-wrap: anywhere;
+}
+.bs-widget-shared-concordance {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.bs-widget-canonical-words {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin: 18px 0 8px;
+}
+.bs-widget-inline-strong {
+  display: flex;
+  min-height: 220px;
+  max-height: 420px;
+}
+
+.bs-widget-word-detail {
+  padding: 0 0 12px;
+}
+.bs-widget-centered-loading {
+  display: grid;
+  min-height: 200px;
+  place-items: center;
 }

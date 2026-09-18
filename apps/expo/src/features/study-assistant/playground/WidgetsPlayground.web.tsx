@@ -20,17 +20,22 @@ import { ThemeProvider, useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import StudyWidget from '../widgets/StudyWidget.web'
-import { widgetExamples } from './catalog'
+import { resolveWidgetStory, widgetExamples, widgetStories } from './catalog'
 import { resolveExample } from './resolveExample.web'
 import './playground.css'
 
 function PlaygroundContent({ dark, onTheme }: { dark: boolean; onTheme: () => void }) {
   const router = useRouter()
   const detail = useRef<HTMLElement>(null)
-  const { widget: selectedId } = useLocalSearchParams<{ widget?: string }>()
-  const selected =
-    widgetExamples.find(e => e.id === (selectedId === 'comparison' ? 'passages' : selectedId)) ||
-    widgetExamples[0]
+  const { widget: selectedId, state: selectedStateId } = useLocalSearchParams<{
+    widget?: string
+    state?: string
+  }>()
+  const {
+    story: selectedStory,
+    state: selectedState,
+    example: selected,
+  } = resolveWidgetStory(selectedId === 'comparison' ? 'passages' : selectedId, selectedStateId)
   const [search, setSearch] = useState('')
   const [wide, setWide] = useState(false)
   const [reset, setReset] = useState(0)
@@ -48,18 +53,26 @@ function PlaygroundContent({ dark, onTheme }: { dark: boolean; onTheme: () => vo
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-  const filtered = widgetExamples.filter(e =>
-    `${e.title} ${e.category} ${e.description}`
+  const filtered = widgetStories.filter(story =>
+    `${story.title} ${story.category} ${story.description} ${story.states
+      .map(state => widgetExamples.find(example => example.id === state.exampleId)?.title || '')
+      .join(' ')}`
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .includes(normalized)
   )
-  const categories = [...new Set(filtered.map(e => e.category))]
-  const index = widgetExamples.indexOf(selected)
-  const choose = (id: string) => {
-    router.setParams({ widget: id })
+  const categories = [...new Set(filtered.map(story => story.category))]
+  const index = widgetStories.indexOf(selectedStory)
+  const chooseStory = (id: string) => {
+    const story = widgetStories.find(item => item.id === id) || widgetStories[0]
+    router.setParams({ widget: story.id, state: story.states[0].exampleId })
     detail.current?.scrollIntoView({ block: 'start' })
+    setCopied('')
+    setCopyError(false)
+  }
+  const chooseState = (exampleId: string) => {
+    router.setParams({ widget: selectedStory.id, state: exampleId })
     setCopied('')
     setCopyError(false)
   }
@@ -96,7 +109,7 @@ function PlaygroundContent({ dark, onTheme }: { dark: boolean; onTheme: () => vo
               Les widgets <br />
               de l’assistant<span>.</span>
             </h1>
-            <p>{widgetExamples.length} façons de prolonger une réponse par une exploration.</p>
+            <p>{widgetStories.length} composants, avec leurs différents états interactifs.</p>
           </div>
           <label className="ai-pg-search">
             <Search size={16} />
@@ -113,16 +126,17 @@ function PlaygroundContent({ dark, onTheme }: { dark: boolean; onTheme: () => vo
               <section key={category}>
                 <h2>{category}</h2>
                 {filtered
-                  .filter(e => e.category === category)
-                  .map(e => (
+                  .filter(story => story.category === category)
+                  .map(story => (
                     <button
-                      key={e.id}
-                      aria-current={selected.id === e.id ? 'page' : undefined}
-                      onClick={() => choose(e.id)}
+                      key={story.id}
+                      aria-current={selectedStory.id === story.id ? 'page' : undefined}
+                      onClick={() => chooseStory(story.id)}
                     >
-                      <span>{String(widgetExamples.indexOf(e) + 1).padStart(2, '0')}</span>
-                      {e.title}
-                      {e.id === selected.id && <ArrowRight size={14} />}
+                      <span>{String(widgetStories.indexOf(story) + 1).padStart(2, '0')}</span>
+                      <span className="ai-pg-story-name">{story.title}</span>
+                      {story.states.length > 1 && <small>{story.states.length} états</small>}
+                      {story.id === selectedStory.id && <ArrowRight size={14} />}
                     </button>
                   ))}
               </section>
@@ -132,18 +146,43 @@ function PlaygroundContent({ dark, onTheme }: { dark: boolean; onTheme: () => vo
             )}
           </nav>
         </aside>
-        <section ref={detail} className="ai-pg-detail" aria-label={selected.title}>
+        <section ref={detail} className="ai-pg-detail" aria-label={selectedStory.title}>
           <div className="ai-pg-detail-heading">
             <div>
               <span className="ai-pg-eyebrow">
-                {selected.category} / {String(index + 1).padStart(2, '0')}
+                {selectedStory.category} / {String(index + 1).padStart(2, '0')}
               </span>
-              <h2>{selected.title}</h2>
-              <p>{selected.description}</p>
+              <h2>{selectedStory.title}</h2>
+              <p>{selectedStory.description}</p>
             </div>
             <span className="ai-pg-live">
               <span /> Vrai composant
             </span>
+          </div>
+          <div className="ai-pg-state-picker">
+            <div>
+              <span className="ai-pg-eyebrow">ÉTATS DU WIDGET</span>
+              <small>{`${selectedStory.states.length} ${
+                selectedStory.states.length > 1 ? 'états' : 'état'
+              }`}</small>
+            </div>
+            <div role="tablist" aria-label={`États de ${selectedStory.title}`}>
+              {selectedStory.states.map(state => (
+                <button
+                  key={state.exampleId}
+                  type="button"
+                  role="tab"
+                  aria-selected={state.exampleId === selectedState.exampleId}
+                  onClick={() => chooseState(state.exampleId)}
+                >
+                  {state.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="ai-pg-state-description">
+            <span>{selected.title}</span>
+            <p>{selected.description}</p>
           </div>
           <div className="ai-pg-toolbar">
             <div role="group" aria-label="Largeur de l’aperçu">
@@ -183,7 +222,10 @@ function PlaygroundContent({ dark, onTheme }: { dark: boolean; onTheme: () => vo
                   <button onClick={() => void query.refetch()}>Réessayer</button>
                 </div>
               ) : (
-                <StudyWidget key={`${selected.id}:${reset}`} widget={query.data} />
+                <StudyWidget
+                  key={`${selectedStory.id}:${selected.id}:${reset}`}
+                  widget={query.data}
+                />
               )}
             </div>
           </div>
@@ -199,15 +241,19 @@ function PlaygroundContent({ dark, onTheme }: { dark: boolean; onTheme: () => vo
                 onClick={async () => {
                   try {
                     await navigator.clipboard.writeText(selected.prompt)
-                    setCopied(selected.id)
+                    setCopied(`${selectedStory.id}:${selected.id}`)
                     setCopyError(false)
                   } catch {
                     setCopyError(true)
                   }
                 }}
               >
-                {copied === selected.id ? <Check size={14} /> : <Copy size={14} />}{' '}
-                {copied === selected.id ? 'Copié' : 'Copier la demande'}
+                {copied === `${selectedStory.id}:${selected.id}` ? (
+                  <Check size={14} />
+                ) : (
+                  <Copy size={14} />
+                )}{' '}
+                {copied === `${selectedStory.id}:${selected.id}` ? 'Copié' : 'Copier la demande'}
               </button>
               {copyError && <p role="status">Sélectionnez le texte ci-dessus pour le copier.</p>}
             </section>
@@ -231,9 +277,11 @@ function PlaygroundContent({ dark, onTheme }: { dark: boolean; onTheme: () => vo
           </details>
           <footer className="ai-pg-bottom">
             <span>
-              {index + 1} / {widgetExamples.length}
+              {index + 1} / {widgetStories.length}
             </span>
-            <button onClick={() => choose(widgetExamples[(index + 1) % widgetExamples.length].id)}>
+            <button
+              onClick={() => chooseStory(widgetStories[(index + 1) % widgetStories.length].id)}
+            >
               Widget suivant <ArrowRight size={15} />
             </button>
           </footer>

@@ -1,3 +1,7 @@
+import ConcordanceVerse from '~features/bible/ConcordanceVerse'
+import { getStrongReferenceNumber } from '~helpers/strongIdentities'
+import { useTheme } from '~themes/ThemeProvider'
+import { resolveFontFamily } from '~themes/styleValues'
 import { resolveStrongNavigationVersionId } from '~helpers/strongBiblePublications'
 import { useState } from 'react'
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
@@ -10,11 +14,13 @@ import verseToReference from '~helpers/verseToReference'
 import { previewHistoryAtom } from '~features/bibleReferencePreview/state'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import WidgetFrame from './WidgetFrame.web'
+import WidgetSelect from './WidgetSelect.web'
 export default function ConcordanceWidget({ widget }: { widget: LexicalWidget }) {
   const { t } = useTranslation(),
     resources = useResourceAccess(),
     setPreview = useSetAtom(previewHistoryAtom),
     navigate = usePushRouteOnce()
+  const { fontFamily } = useTheme()
   const [book, setBook] = useState(0)
   const requestedVersion = widget.version || 'LSG'
   const indexedVersion = resolveStrongNavigationVersionId(requestedVersion)
@@ -64,36 +70,29 @@ export default function ConcordanceWidget({ widget }: { widget: LexicalWidget })
     .reduce((n, c) => n + c.versesCountByBook, 0)
   const version =
     query.data?.pages[0]?.provenance.versionId || counts.data?.provenance.versionId || 'LSG'
+  const bookItems = [
+    { id: '0', label: t('assistant.widgets.allBooks') },
+    ...(counts.data?.counts.map(c => ({
+      id: String(c.Livre),
+      label: `${getBook(c.Livre)?.Nom} (${c.versesCountByBook})`,
+    })) || []),
+  ]
   const body = (
     <div className="bs-widget-concordance">
-      <div className="bs-widget-scope">
-        <strong>{widget.reference}</strong>
-        <span>
-          {t(
-            widget.scope === 'classic_family'
-              ? 'assistant.widgets.classicScope'
-              : 'assistant.widgets.preciseScope'
-          )}
-        </span>
+      <div className="bs-widget-concordance-toolbar">
         <small>
           {version} ·{' '}
           {total === undefined ? '…' : t('assistant.widgets.verseCount', { count: total })}
         </small>
+        <WidgetSelect
+          className="bs-widget-book-select"
+          label={t('assistant.widgets.bookFilter')}
+          value={String(book)}
+          items={bookItems}
+          popoverMinWidth={210}
+          onChange={value => setBook(Number(value))}
+        />
       </div>
-      {widget.scope === 'classic_family' && (
-        <p className="bs-widget-notice">{t('assistant.widgets.classicNotice')}</p>
-      )}
-      <label className="bs-widget-filter">
-        {t('assistant.widgets.bookFilter')}
-        <select value={book} onChange={event => setBook(Number(event.target.value))}>
-          <option value={0}>{t('assistant.widgets.allBooks')}</option>
-          {counts.data?.counts.map(c => (
-            <option key={c.Livre} value={c.Livre}>
-              {getBook(c.Livre)?.Nom} ({c.versesCountByBook})
-            </option>
-          ))}
-        </select>
-      </label>
       {query.isPending ? (
         <p role="status">{t('Chargement...')}</p>
       ) : query.isError ? (
@@ -106,7 +105,7 @@ export default function ConcordanceWidget({ widget }: { widget: LexicalWidget })
       ) : !verses.length ? (
         <p>{t('assistant.widgets.noVerses')}</p>
       ) : (
-        <ol className="bs-widget-occurrences">
+        <ol className="bs-widget-shared-concordance">
           {verses.map((verse, index) => {
             const b = Number(verse.Livre),
               c = Number(verse.Chapitre),
@@ -114,10 +113,17 @@ export default function ConcordanceWidget({ widget }: { widget: LexicalWidget })
               label = verseToReference({ bookNum: b, chapterNum: c, verses: [v] })
             return (
               <li key={`${b}:${c}:${v}:${index}`}>
-                <button
-                  type="button"
-                  className="bs-widget-reference"
-                  onClick={() =>
+                <ConcordanceVerse
+                  verse={verse}
+                  t={t}
+                  concordanceFor={getStrongReferenceNumber(widget.reference) || widget.reference}
+                  textStyle={{
+                    fontFamily: resolveFontFamily(fontFamily.text),
+                    fontSize: 14,
+                    lineHeight: 24,
+                  }}
+                  referenceTextStyle={{ fontSize: 12, lineHeight: 18, fontWeight: '600' }}
+                  onOpenVerse={() =>
                     setPreview([
                       {
                         kind: 'bible',
@@ -139,10 +145,7 @@ export default function ConcordanceWidget({ widget }: { widget: LexicalWidget })
                       },
                     ])
                   }
-                >
-                  {label}
-                </button>
-                <p>{verse.Texte}</p>
+                />
               </li>
             )
           })}
@@ -161,7 +164,7 @@ export default function ConcordanceWidget({ widget }: { widget: LexicalWidget })
     </div>
   )
   return (
-    <WidgetFrame title={widget.title} eyebrow={t('assistant.widgets.concordance')}>
+    <WidgetFrame title={widget.reference} eyebrow={t('assistant.widgets.concordance')}>
       {body}
     </WidgetFrame>
   )

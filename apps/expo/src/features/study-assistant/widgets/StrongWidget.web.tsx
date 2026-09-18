@@ -50,7 +50,6 @@ export default function StrongWidget({ widget }: { widget: LexicalWidget }) {
           <>
             <div className="bs-widget-lexicon-heading">
               <div>
-                <small>{widget.reference}</small>
                 <div
                   className="bs-widget-original"
                   dir={entry.language === 'hebrew' ? 'rtl' : 'ltr'}

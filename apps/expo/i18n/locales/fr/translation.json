@@ -2485,7 +2485,7 @@
   "assistant.widgets.verseCount_one": "{{count}} verset distinct",
   "assistant.widgets.verseCount_other": "{{count}} versets distincts",
   "assistant.widgets.wordAnalysis": "Mots du verset",
-  "assistant.widgets.chooseWord": "Sélectionnez un mot souligné pour consulter son identité lexicale.",
+  "assistant.widgets.chooseWord": "Touchez un mot pour consulter sa fiche Strong.",
   "assistant.widgets.untranslated": "Mot sans équivalent français",
   "assistant.widgets.morphology": "Morphologie de cette occurrence",
   "assistant.widgets.noMorphology": "Aucune morphologie fournie pour cette occurrence.",
@@ -2523,7 +2523,6 @@
   "assistant.widgets.openReading": "Ouvrir la lecture complète",
   "assistant.widgets.reflection": "Piste de réflexion · assistant",
   "assistant.widgets.furtherResources": "Pour approfondir",
-  "assistant.widgets.suggestionsNotice": "Des ressources à consulter. Leur contenu n’a pas nécessairement été lu par l’assistant.",
   "assistant.widgets.partialResources": "Recherche partielle : certaines catégories n’ont pas pu être consultées.",
   "assistant.widgets.noResources": "Aucune ressource trouvée dans cette sélection.",
   "assistant.widgets.resourceKind.media": "Vidéo",
@@ -2539,5 +2538,6 @@
   "assistant.widgets.passageMode": "Affichage des passages",
   "assistant.widgets.readMode": "Lire",
   "assistant.widgets.comparedCount_one": "{{count}} passage comparé",
-  "assistant.widgets.comparedCount_other": "{{count}} passages comparés"
+  "assistant.widgets.comparedCount_other": "{{count}} passages comparés",
+  "assistant.widgets.backToVerse": "Retour au verset"
 }

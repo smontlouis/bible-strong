@@ -138,7 +138,7 @@ const PlaygroundHome = ({
             {Platform.OS === 'web' && (
               <PlaygroundLink
                 eyebrow="Assistant IA"
-                title="Les 16 widgets"
+                title="Catalogue des widgets IA"
                 description="Explorer les composants, leurs descriptions et leurs interactions, sans appel à l’IA."
                 icon="grid"
                 onPress={() => router.push('/ai-widgets')}

@@ -82,7 +82,13 @@ function EntityBody({ widget, expanded = false }: { widget: Descriptor; expanded
         <StrongEntitySummaryCard
           entity={entity}
           plain
+          compact
           expanded={expanded}
+          editorialTypography={{
+            fontFamily: resolveFontFamily(fontFamily.text) || 'sans-serif',
+            fontSize: 13,
+            lineHeight: 21,
+          }}
           readingTypography={{
             fontFamily: resolveFontFamily(fontFamily.text),
             fontSizeScale: 0,
