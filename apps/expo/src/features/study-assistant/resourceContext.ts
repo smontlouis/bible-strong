@@ -58,9 +58,7 @@ export function commentaryContext(
       language: parsed.projection.language,
       book: parsed.book,
       chapter: parsed.chapter,
-      ...(section
-        ? { startVerse: section.rangeStartVerse, endVerse: section.rangeEndVerse }
-        : {}),
+      ...(section ? { startVerse: section.rangeStartVerse, endVerse: section.rangeEndVerse } : {}),
       ...(data.sectionId ? { sectionId: data.sectionId } : {}),
     }
   )

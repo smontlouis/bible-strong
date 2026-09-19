@@ -54,7 +54,11 @@ const plan: ComputedPlan = {
   ],
 }
 let renderer: ReactTestRenderer
-const text = () => renderer.root.findAll(node => String(node.type) === 'Text').map(node => node.props.children).join(' ')
+const text = () =>
+  renderer.root
+    .findAll(node => String(node.type) === 'Text')
+    .map(node => node.props.children)
+    .join(' ')
 afterEach(() => {
   act(() => renderer.unmount())
   jest.clearAllMocks()
