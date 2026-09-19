@@ -3,10 +3,17 @@ import { create, type ReactTestRenderer } from 'react-test-renderer'
 import Text from '../Text'
 import type { Text as NativeText } from 'react-native'
 
-jest.mock('react-native', () => ({ Text: 'Text' }))
+jest.mock('react-native', () => ({
+  Platform: { OS: 'web' },
+  StyleSheet: { flatten: (style: unknown) => style },
+  Text: 'Text',
+}))
 jest.mock('react-native-reanimated', () => ({
   __esModule: true,
   default: { createAnimatedComponent: (component: unknown) => component },
+}))
+jest.mock('~themes/ThemeProvider', () => ({
+  useTheme: () => jest.requireActual('../../../../test/themeFixture').themeFixture,
 }))
 
 it('forwards merged classes, inline overrides and refs without resolving CSS', () => {
@@ -29,7 +36,10 @@ it('forwards merged classes, inline overrides and refs without resolving CSS', (
   )
   expect(props.className).not.toContain('text-default')
   expect(props.className).not.toContain('text-[16px]')
-  expect(props.style).toBe(style)
+  expect(props.style).toEqual([
+    style,
+    { fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
+  ])
   expect(ref.current).toBe(nativeText)
   act(() => renderer!.unmount())
 })

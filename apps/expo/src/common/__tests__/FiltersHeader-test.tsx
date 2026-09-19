@@ -1,6 +1,54 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import FiltersHeader, { type FiltersHeaderItem } from '../FiltersHeader'
+jest.mock('../ContextualPanel', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return ({
+    accessibilityLabel,
+    initialScreen,
+    screens,
+    trigger,
+  }: {
+    accessibilityLabel: string
+    initialScreen: string
+    screens: Record<
+      string,
+      {
+        headerRight?: React.ReactNode
+        content: (navigation: {
+          open: jest.Mock
+          close: jest.Mock
+          back: jest.Mock
+        }) => React.ReactNode
+      }
+    >
+    trigger: React.ReactNode
+  }) => {
+    const screen = screens[initialScreen]
+    const navigation = { open: jest.fn(), close: jest.fn(), back: jest.fn() }
+    return ReactModule.createElement(
+      'ContextualPanel',
+      { accessibilityLabel },
+      trigger,
+      screen.headerRight,
+      screen.content(navigation)
+    )
+  }
+})
+jest.mock('react-native-reanimated', () => {
+  const animation = {
+    duration: () => animation,
+    withInitialValues: () => animation,
+    reduceMotion: () => animation,
+  }
+  return {
+    __esModule: true,
+    default: { View: 'AnimatedView' },
+    FadeInLeft: animation,
+    FadeInRight: animation,
+    ReduceMotion: { System: 'system' },
+  }
+})
 jest.mock('~themes/ThemeProvider', () => ({
   useTheme: () => jest.requireActual('../../../test/themeFixture').themeFixture,
 }))
@@ -19,6 +67,7 @@ jest.mock('react-i18next', () => ({
 jest.mock('react-native', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return {
+    Platform: { OS: 'ios' },
     TouchableOpacity: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
       ReactModule.createElement('TouchableOpacity', props, children),
   }
@@ -35,8 +84,10 @@ jest.mock('~common/ui/Box', () => {
     ReactModule.createElement('Box', props, children)
   const HStack = ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
     ReactModule.createElement('HStack', props, children)
+  const TouchableBox = ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
+    ReactModule.createElement('TouchableOpacity', props, children)
 
-  return { __esModule: true, default: Box, HStack }
+  return { __esModule: true, default: Box, HStack, TouchableBox }
 })
 
 jest.mock('~common/ui/Icon', () => {
@@ -44,6 +95,7 @@ jest.mock('~common/ui/Icon', () => {
   return {
     FeatherIcon: (props: Record<string, unknown>) =>
       ReactModule.createElement('FeatherIcon', props),
+    IonIcon: (props: Record<string, unknown>) => ReactModule.createElement('IonIcon', props),
   }
 })
 

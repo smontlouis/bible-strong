@@ -3,6 +3,13 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import DictionaryListScreen from '~features/dictionnary/DictionaryListScreen'
 import LexiqueListScreen from '~features/lexique/LexiqueListScreen'
 import NaveListScreen from '~features/nave/NaveListScreen'
+jest.mock('expo-router', () => ({
+  useNavigation: () => ({ goBack: jest.fn() }),
+  useRouter: () => ({ push: jest.fn(), back: jest.fn() }),
+  useLocalSearchParams: () => ({}),
+  useGlobalSearchParams: () => ({}),
+  usePathname: () => '/',
+}))
 jest.mock('react-native', () => ({ Platform: { OS: 'web' } }))
 jest.mock('~themes/ThemeProvider', () => ({
   useTheme: () => jest.requireActual('../../../../test/themeFixture').themeFixture,
@@ -87,6 +94,7 @@ jest.mock('~common/Header', () => {
 })
 jest.mock('~common/AlphabetList', () => () => null)
 jest.mock('~common/Empty', () => () => null)
+jest.mock('~common/FiltersHeader', () => () => null)
 jest.mock('~common/Loading', () => () => null)
 jest.mock('~common/SearchInput', () => () => null)
 jest.mock('~common/SectionTitle', () => () => null)

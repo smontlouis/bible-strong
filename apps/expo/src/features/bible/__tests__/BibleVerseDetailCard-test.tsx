@@ -493,8 +493,8 @@ describe('BibleVerseDetailCard', () => {
       const carousel = () => renderer.root.find(node => String(node.type) === 'FlatList')
       act(() => content.props.onLayout({ nativeEvent: { layout: { width: 500, height: 800 } } }))
       expect(carousel().props.getItemLayout(undefined, 2)).toEqual({
-        length: 360,
-        offset: 720,
+        length: 260,
+        offset: 520,
         index: 2,
       })
       expect(carousel().props.contentContainerStyle.paddingBottom).toBe(20)
