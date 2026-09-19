@@ -1,3 +1,5 @@
+import { timelineContext } from '~features/study-assistant/referenceContext'
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
@@ -20,7 +22,7 @@ import {
 export type EventDetailsProps = Pick<
   TimelineEventProps,
   'slug' | 'image' | 'title' | 'titleEn' | 'start' | 'end'
->
+> & { dateLabel?: string }
 
 const Description = ({ description, article }: Partial<TimelineEventDetail>) => {
   return (
@@ -39,6 +41,9 @@ const Description = ({ description, article }: Partial<TimelineEventDetail>) => 
 }
 
 export const EventDetailsContent = ({
+  dateLabel,
+  languageOverride,
+  assistantScope = 'panel',
   slug,
   image,
   title,
@@ -47,12 +52,16 @@ export const EventDetailsContent = ({
   end,
   onOpenEvent,
 }: EventDetailsProps & {
+  languageOverride?: 'fr' | 'en'
+  assistantScope?: string
   onOpenEvent?: (event: TimelineEventProps) => void
 }) => {
-  const lang = useTimelineLanguage()
-  const date = calculateLabel(start, end, lang)
+  const preferredLanguage = useTimelineLanguage()
+  const lang = languageOverride || preferredLanguage
+  const date = dateLabel || calculateLabel(start, end, lang)
   const resources = useResourceAccess()
-  const resourceLanguage = useAtomValue(resourcesLanguageAtom).TIMELINE
+  const preferredResourceLanguage = useAtomValue(resourcesLanguageAtom).TIMELINE
+  const resourceLanguage = languageOverride || preferredResourceLanguage
   const resourceRegistry = useOfflineResourceRegistry()
   const eventQuery = useQuery({
     queryKey: [
@@ -69,6 +78,8 @@ export const EventDetailsContent = ({
     networkMode: 'always',
   })
   const event = eventQuery.data?.status === 'available' ? eventQuery.data.detail : undefined
+
+  useAssistantResourceContext(assistantScope, timelineContext(event, resourceLanguage))
 
   if (eventQuery.isPending) {
     return (

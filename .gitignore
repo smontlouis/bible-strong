@@ -161,3 +161,14 @@ ios/
 # Service account keys
 scripts/google-service-account.json
 /apps/api/functions/helpers/service-account.json
+
+# Study assistant development credentials and Wrangler state
+/packages/ai-service/.dev.vars
+/packages/ai-service/.wrangler/
+/packages/ai-service/dist/
+
+/apps/expo/.scratch/
+
+# Server implementation lives in a separate private repository.
+/packages/ai-service/
+/scripts/gloo-prototype/

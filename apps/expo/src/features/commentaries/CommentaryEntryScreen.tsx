@@ -1,3 +1,5 @@
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
+import { commentaryContext } from '~features/study-assistant/resourceContext'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React from 'react'
@@ -60,6 +62,14 @@ const CommentaryEntryScreen = () => {
     networkMode: 'always',
     retry: false,
   })
+
+  useAssistantResourceContext(
+    'panel',
+    commentaryContext(
+      params,
+      query.data?.sections.find(item => item.id === params.sectionId)
+    )
+  )
 
   if (!parsed || !params.sectionId) {
     return (

@@ -1,0 +1,158 @@
+.bs-debug {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: auto;
+  border-top: 1px solid var(--as-border);
+  background: var(--as-soft);
+  color: var(--as-ink);
+  font-size: 11px;
+}
+.bs-debug > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px 6px;
+}
+.bs-debug > header > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.bs-debug > header strong {
+  font-size: 12px;
+}
+.bs-debug > header span,
+.bs-debug-note,
+.bs-debug-session {
+  color: var(--as-muted);
+}
+.bs-debug-note {
+  margin: 0;
+  padding: 0 14px 10px;
+  line-height: 1.5;
+}
+.bs-debug button {
+  border: 1px solid var(--as-border);
+  border-radius: 6px;
+  background: var(--as-surface);
+  padding: 5px 8px;
+  color: var(--as-ink);
+  font: inherit;
+  cursor: pointer;
+}
+.bs-debug button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.bs-debug button:focus-visible,
+.bs-debug summary:focus-visible {
+  outline: 2px solid var(--as-accent);
+  outline-offset: 2px;
+}
+.bs-debug-session {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 14px 8px;
+}
+.bs-debug-metrics {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 14px;
+  border-block: 1px solid var(--as-border);
+  font-family: ui-monospace, monospace;
+}
+.bs-debug-metrics strong {
+  color: var(--as-accent);
+}
+.bs-debug nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 14px;
+}
+.bs-debug nav [aria-pressed='true'] {
+  color: var(--as-accent);
+  border-color: var(--as-accent);
+}
+.bs-debug-copy {
+  margin-left: auto;
+}
+.bs-debug-events {
+  max-height: 240px;
+  overflow: auto;
+  padding: 0 14px 10px;
+}
+.bs-debug-event {
+  border-bottom: 1px solid var(--as-border);
+}
+.bs-debug-event summary {
+  display: flex;
+  cursor: pointer;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 0;
+  font-family: ui-monospace, monospace;
+}
+.bs-debug-event summary span,
+.bs-debug-event time {
+  color: var(--as-muted);
+  font-size: 10px;
+}
+.bs-debug-event summary time {
+  margin-left: auto;
+}
+.bs-debug-event summary::before {
+  content: '›';
+}
+.bs-debug-event[open] summary::before {
+  content: '⌄';
+}
+.bs-debug-event pre {
+  margin: 0 0 8px;
+  padding: 10px;
+  background: var(--as-surface);
+  border: 1px solid var(--as-border);
+  border-radius: 6px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font:
+    11px/1.6 ui-monospace,
+    monospace;
+  max-height: 320px;
+  overflow: auto;
+  user-select: text;
+}
+.bs-debug-auth {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 14px;
+}
+.bs-debug-auth p {
+  width: 100%;
+  margin: 0 0 5px;
+}
+.bs-debug-auth input {
+  min-width: 0;
+  border: 1px solid var(--as-border);
+  border-radius: 6px;
+  padding: 7px;
+  color: var(--as-ink);
+  background: var(--as-surface);
+}
+.bs-assistant-modal.bs-assistant-debug-open {
+  width: min(680px, calc(100vw - 24px));
+  height: min(900px, calc(100dvh - 114px));
+}
+.bs-assistant-debug-open .bs-assistant-thread {
+  min-height: 160px;
+  flex: 1 1 50%;
+}
+.bs-assistant-debug-open .bs-debug {
+  max-height: 48%;
+}

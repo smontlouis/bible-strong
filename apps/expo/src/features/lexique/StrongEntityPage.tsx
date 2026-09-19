@@ -20,6 +20,7 @@ import { StrongEntityRelationGraph } from './StrongEntityRelationGraph'
 import { splitStrongEntityRelations } from './strongEntityPresentation'
 import type { StrongReadingTypography } from './strongEditorialHtmlStyles'
 type Props = {
+  language?: 'fr' | 'en'
   entity?: StrongLexiconEntity
   loading: boolean
   readingTypography: StrongReadingTypography
@@ -32,6 +33,7 @@ type Props = {
 const ENTITY_LOCATION_VISIBLE = false
 
 const StrongEntityPage = ({
+  language,
   entity,
   loading,
   readingTypography,
@@ -112,6 +114,7 @@ const StrongEntityPage = ({
       {graph.length > 0 && (
         <StrongEditorialSection title={t('strongDetail.entity.relationships')} separated>
           <StrongEntityRelationGraph
+            languageOverride={language}
             entity={entity}
             currentProfileEntityKey={entity.uniqueName}
             onOpenProfile={onOpenEntityProfile}

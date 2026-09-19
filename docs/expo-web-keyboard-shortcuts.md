@@ -47,3 +47,12 @@ Row menus should not opt in. The command registry is transient, not persisted.
 
 Both shortcuts require the active Bible tab on the workspace route. They ignore
 editable fields, modal/menu interactions, modifiers, composition and key repeat.
+
+## In-app guide
+
+The palette footer exposes “Shortcuts & help” on the right. Its accessible dialog
+lists platform-specific palette, workspace and Bible shortcuts, followed by search
+examples, all current categories, cross-group tab matching, full search and the
+`>` action mode. Escape closes the guide first; the palette keeps its query and
+filter. The guide shares the palette's theme and has a scrollable body on small
+windows. French and English copy lives under `shortcutGuide.*`.

@@ -1,0 +1,703 @@
+.bs-assistant-anchor {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: inherit;
+}
+.bs-assistant-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 21px;
+  border: 1px solid color-mix(in srgb, var(--as-accent) 60%, white);
+  background: var(--as-accent);
+  color: white;
+  cursor: pointer;
+  box-shadow:
+    0 7px 24px color-mix(in srgb, var(--as-accent) 25%, transparent),
+    inset 0 1px 0 #ffffff40;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+.bs-assistant-avatar:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--as-accent) 30%, transparent);
+}
+.bs-assistant-avatar svg {
+  width: 40px;
+  height: 40px;
+}
+.bs-assistant-badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  font-weight: 700;
+  line-height: 16px;
+  padding: 0 4px;
+  border-radius: 6px;
+  background: var(--as-surface);
+  color: var(--as-accent);
+  border: 1px solid var(--as-border);
+}
+.bs-assistant-hint {
+  background: var(--as-surface);
+  border: 1px solid var(--as-border);
+  color: var(--as-muted);
+  padding: 8px 11px;
+  border-radius: 11px;
+  font-size: 12px;
+  max-width: 170px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 3px 14px #00000008;
+  pointer-events: none;
+}
+.bs-assistant-modal {
+  box-sizing: border-box;
+  z-index: 1060;
+  width: min(440px, calc(100vw - 24px));
+  height: min(600px, calc(100dvh - 114px));
+  display: flex;
+  flex-direction: column;
+  background: var(--as-surface);
+  color: var(--as-ink);
+  border: 1px solid var(--as-border);
+  border-radius: 16px;
+  box-shadow:
+    0 22px 80px #15223826,
+    0 4px 16px #15223812;
+  overflow: hidden;
+  font-family: inherit;
+  outline: none;
+  transform-origin: bottom right;
+}
+.bs-assistant-modal[data-state='open'] {
+  animation: bs-assistant-enter 180ms ease-out;
+}
+.bs-assistant-modal * {
+  box-sizing: border-box;
+}
+.bs-assistant-modal button,
+.bs-assistant-modal textarea {
+  font: inherit;
+}
+.bs-assistant-modal button {
+  cursor: pointer;
+}
+.bs-assistant-modal button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.bs-assistant-modal button:focus-visible,
+.bs-assistant-avatar:focus-visible {
+  outline: 2px solid var(--as-accent);
+  outline-offset: 3px;
+}
+.bs-assistant-modal button {
+  color: inherit;
+}
+.bs-assistant-header {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  padding: 7px 12px 7px 15px;
+  border-bottom: 1px solid var(--as-border);
+  min-height: 44px;
+}
+.bs-assistant-heading {
+  flex: 1;
+  min-width: 0;
+}
+.bs-assistant-heading strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bs-assistant-avatar[data-state='open'] {
+  border-radius: 50%;
+  width: 46px;
+  height: 46px;
+  background: var(--as-soft);
+  color: var(--as-ink);
+  border-color: var(--as-border);
+  box-shadow: none;
+}
+.bs-assistant-avatar[data-state='open'] svg {
+  width: 20px;
+  height: 20px;
+}
+.bs-assistant-icon {
+  border: 0;
+  background: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  flex-shrink: 0;
+  color: var(--as-muted) !important;
+  transition: background 120ms;
+}
+.bs-assistant-icon:hover,
+.bs-assistant-icon[aria-pressed='true'] {
+  background: var(--as-soft);
+  color: var(--as-accent) !important;
+}
+.bs-assistant-thread {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+}
+.bs-assistant-viewport {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1;
+  min-height: 0;
+  padding: 24px 26px 18px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--as-border) transparent;
+}
+.bs-assistant-thread-empty .bs-assistant-viewport {
+  justify-content: center;
+}
+.bs-assistant-welcome {
+  flex-shrink: 0;
+  padding: 0 8px;
+}
+.bs-assistant-welcome h2 {
+  font-family: inherit;
+  font-size: 22px;
+  line-height: 1.35;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  margin: 0 0 25px;
+}
+.bs-assistant-suggestions {
+  display: grid;
+  gap: 4px;
+  margin-top: 20px;
+}
+.bs-assistant-suggestions button {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  text-align: left;
+  padding: 9px 8px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+  line-height: 1.5;
+  transition: background 150ms;
+}
+.bs-assistant-suggestions button:hover {
+  background: var(--as-soft);
+}
+.bs-assistant-suggestions button span:first-child {
+  color: var(--as-muted);
+  font-size: 17px;
+}
+.bs-assistant-suggestions button span:last-child {
+  color: var(--as-ink);
+}
+.bs-assistant-message {
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0 0 23px;
+  overflow-wrap: anywhere;
+}
+.bs-assistant-message-user {
+  padding: 12px 15px;
+  background: var(--as-soft);
+  border: 1px solid var(--as-border);
+  border-radius: 16px 16px 5px 16px;
+  margin-left: 27px;
+  white-space: pre-wrap;
+}
+.bs-assistant-message-user small {
+  display: block;
+  font-size: 10px;
+  color: var(--as-muted);
+  margin-top: 7px;
+  white-space: normal;
+}
+.bs-assistant-message-assistant .study-assistant-markdown {
+  font-size: 14px;
+  line-height: 1.8;
+}
+.bs-assistant-message-assistant .study-assistant-markdown h1,
+.bs-assistant-message-assistant .study-assistant-markdown h2 {
+  font-size: 18px;
+}
+.bs-assistant-message-assistant .study-assistant-markdown p {
+  margin: 0 0 12px;
+}
+.bs-assistant-incomplete {
+  font-size: 11px;
+  color: var(--as-muted);
+  display: block;
+  margin-top: 8px;
+}
+.bs-assistant-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--as-muted);
+  padding-bottom: 12px;
+}
+.bs-assistant-progress span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--as-accent);
+  animation: bs-assistant-pulse 1.4s ease-in-out infinite;
+}
+.bs-assistant-error,
+.bs-assistant-storage-error {
+  padding: 10px 12px;
+  background: var(--as-soft);
+  color: var(--as-ink);
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 10px;
+}
+.bs-assistant-storage-error {
+  margin: 0 14px 12px;
+}
+.bs-assistant-compose-area {
+  position: sticky;
+  bottom: -18px;
+  flex-shrink: 0;
+  padding: 12px 0 0;
+  background: var(--as-surface);
+  margin-top: auto;
+}
+.bs-assistant-thread-empty .bs-assistant-compose-area {
+  position: static;
+  margin-top: 0;
+  padding: 0;
+}
+.bs-assistant-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border: 1px solid var(--as-border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--as-soft) 35%, var(--as-surface));
+  padding: 10px;
+  transition:
+    border-color 150ms,
+    box-shadow 150ms;
+}
+.bs-assistant-composer-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+}
+.bs-assistant-context-chip {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  max-width: calc(100% - 42px);
+  border: 1px solid var(--as-border);
+  border-radius: 20px;
+  background: var(--as-surface);
+  padding: 1px 3px 1px 8px;
+}
+.bs-assistant-context-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 4px 3px;
+  border: 0;
+  background: none;
+  font-size: 11px !important;
+  line-height: 1.4;
+}
+.bs-assistant-context-label span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bs-assistant-context-label[aria-pressed='true'] {
+  color: var(--as-accent);
+}
+.bs-assistant-context-label svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+.bs-assistant-chip-remove {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: var(--as-muted) !important;
+}
+.bs-assistant-chip-remove:hover {
+  background: var(--as-soft);
+}
+.bs-assistant-chip-remove svg {
+  width: 12px;
+  height: 12px;
+}
+.bs-assistant-context-restore {
+  border: 0;
+  border-radius: 14px;
+  padding: 5px 9px;
+  background: var(--as-soft);
+  font-size: 11px !important;
+  color: var(--as-muted) !important;
+}
+.bs-assistant-composer:focus-within {
+  border-color: color-mix(in srgb, var(--as-accent) 70%, var(--as-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--as-accent) 8%, transparent);
+}
+.bs-assistant-input {
+  border: 0;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: var(--as-ink);
+  font-size: 14px !important;
+  line-height: 1.6;
+  min-height: 48px;
+  width: 100%;
+  max-height: 120px;
+  flex: 1;
+  min-width: 0;
+  padding: 7px 4px;
+}
+.bs-assistant-input::placeholder {
+  color: var(--as-muted);
+}
+.bs-assistant-send {
+  border: 0;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  background: var(--as-accent);
+  color: white !important;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+.bs-assistant-send svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+.bs-assistant-login {
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--as-accent);
+  color: white !important;
+  font-size: 13px;
+}
+.bs-assistant-history {
+  padding: 18px 22px;
+  flex: 1;
+  overflow: auto;
+}
+.bs-assistant-history h2 {
+  font-size: 22px;
+  font-family: inherit;
+  font-weight: 400;
+  margin: 20px 0 7px;
+}
+.bs-assistant-history > p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--as-muted);
+}
+.bs-assistant-back {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--as-muted) !important;
+  font-size: 11px !important;
+}
+.bs-assistant-history-row {
+  display: flex;
+  border-bottom: 1px solid var(--as-border);
+  gap: 6px;
+  align-items: center;
+  padding: 8px 0;
+}
+.bs-assistant-history-row > button:first-child {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 10px 3px;
+}
+.bs-assistant-history-row strong {
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 290px;
+}
+.bs-assistant-history-row span {
+  font-size: 10px;
+  color: var(--as-muted);
+}
+.bs-assistant-empty-history {
+  padding: 35px 0;
+}
+@keyframes bs-assistant-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes bs-assistant-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+@media (max-width: 600px) {
+  .bs-assistant-anchor {
+    right: 14px;
+    bottom: 16px;
+  }
+  .bs-assistant-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+  }
+  .bs-assistant-modal {
+    height: calc(100dvh - 100px);
+    border-radius: 20px;
+  }
+  .bs-assistant-hint {
+    max-width: 140px;
+  }
+  .bs-assistant-viewport {
+    padding: 22px 20px;
+  }
+  .bs-assistant-welcome h2 {
+    font-size: 21px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bs-assistant-modal,
+  .bs-assistant-progress span {
+    animation: none;
+  }
+  .bs-assistant-avatar {
+    transition: none;
+  }
+}
+/* The composer owns the visible focus ring, rather than the textarea inside it. */
+.bs-assistant-modal .bs-assistant-input:focus,
+.bs-assistant-modal .bs-assistant-input:focus-visible {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Theme/overflow bridge for the installed assistant-ui registry components. */
+.bs-assistant-official-tools [data-slot='collapsible-trigger'] {
+  max-width: 100%;
+  flex-wrap: wrap;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  line-height: 0;
+}
+.bs-assistant-official-tools [data-slot='collapsible-content'] {
+  --collapsible-panel-height: var(--radix-collapsible-content-height);
+}
+.bs-assistant-official-tools
+  [data-slot='collapsible-trigger'][data-state='open']
+  > svg:first-child {
+  transform: rotate(90deg);
+}
+.bs-assistant-official-tools [data-slot='tool-call'] p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 180px;
+  overflow: auto;
+}
+.bs-assistant-modal {
+  --color-foreground: var(--as-ink);
+  --color-background: var(--as-surface);
+  --color-popover: var(--as-surface);
+}
+
+/* Keep persistent assistant surfaces above page snapshots during navigation.
+   Their normal z-index cannot order them above the View Transition top layer. */
+.bs-assistant-anchor {
+  view-transition-name: study-assistant-launcher;
+}
+.bs-assistant-modal {
+  view-transition-name: study-assistant-panel;
+}
+::view-transition-group(study-assistant-launcher),
+::view-transition-group(study-assistant-panel) {
+  animation: none;
+  z-index: 2147483646;
+}
+::view-transition-group(study-assistant-panel) {
+  z-index: 2147483647;
+}
+::view-transition-old(study-assistant-launcher),
+::view-transition-old(study-assistant-panel) {
+  display: none;
+}
+::view-transition-new(study-assistant-launcher),
+::view-transition-new(study-assistant-panel) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Radix measures its opening height before later streamed steps arrive. Allow
+   the open timeline to grow; a captured pixel height clips subsequent calls. */
+.bs-assistant-official-tools [data-slot='collapsible-content'][data-state='open'] {
+  height: auto;
+}
+
+.bs-assistant-routing {
+  font-size: 12px;
+  color: var(--as-muted);
+  margin-bottom: 10px;
+}
+.bs-assistant-routing > button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  padding: 6px 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.bs-assistant-routing section {
+  padding: 10px;
+  background: var(--as-soft);
+  border-radius: 8px;
+  margin: 6px 0;
+}
+.bs-assistant-routing p {
+  margin: 6px 0;
+  line-height: 1.5;
+}
+.bs-assistant-routing ul {
+  padding-left: 18px;
+  margin: 6px 0;
+}
+.bs-assistant-routing code {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.bs-assistant-compose-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bs-assistant-dictate {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border: 1px solid var(--as-border);
+  border-radius: 50%;
+  background: var(--as-surface);
+  color: var(--as-ink);
+  cursor: pointer;
+  scale: 1;
+  transition-property: background-color, color, border-color, box-shadow, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+.bs-assistant-dictate-active {
+  background: #e5e7eb;
+  border-color: transparent;
+  color: #000;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+}
+.bs-assistant-dictate-pending {
+  background: var(--as-soft);
+  color: var(--as-accent);
+}
+.bs-assistant-dictate-error {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+.bs-assistant-dictate:not(:disabled):active {
+  scale: 0.96;
+}
+.bs-assistant-dictate-spinner {
+  display: grid;
+  place-items: center;
+  animation: bs-assistant-spin 0.8s linear infinite;
+}
+.bs-assistant-dictate svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+.bs-assistant-dictate:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.bs-assistant-dictate:focus-visible {
+  outline: 2px solid var(--as-accent);
+  outline-offset: 3px;
+}
+@keyframes bs-assistant-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bs-assistant-dictate-spinner {
+    animation-duration: 1.6s;
+  }
+  .bs-assistant-dictate {
+    transition: none;
+  }
+}

@@ -1,3 +1,6 @@
+import { useLocalSearchParams } from 'expo-router'
+import { entityContext } from '~features/study-assistant/referenceContext'
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
@@ -20,7 +23,10 @@ const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Pr
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const readingTypography = useStrongReadingTypography()
-  const { language } = useStrongLexiconLanguage()
+  const { language: preferredLanguage } = useStrongLexiconLanguage()
+  const params = useLocalSearchParams<{ language?: string }>()
+  const language =
+    params.language === 'fr' || params.language === 'en' ? params.language : preferredLanguage
   const navigation = useStrongRouteNavigation(context)
   const entryState = useStrongEntryRoute(context)
   const availabilityQuery = useQuery({
@@ -34,6 +40,7 @@ const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Pr
     enabled: Boolean(entityKey && availabilityQuery.data?.status === 'available'),
     networkMode: 'always',
   })
+  useAssistantResourceContext('panel', entityContext(entityQuery.data, language))
   const availability = availabilityQuery.data ?? {
     status: 'missing' as const,
     moduleId: 'entities' as const,
@@ -48,6 +55,7 @@ const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Pr
       title={entityQuery.data?.name ?? t('strongDetail.entity.title')}
     >
       <StrongEntityPage
+        language={language}
         entity={entityQuery.data}
         readingTypography={readingTypography}
         loading={

@@ -1,3 +1,5 @@
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
+import { naveContext } from '~features/study-assistant/resourceContext'
 import { goBackOrHome } from '~navigation/goBackOrHome'
 import React, { useCallback, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -5,7 +7,7 @@ import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
-import { useRouter } from 'expo-router'
+import { useRouter, useLocalSearchParams } from 'expo-router'
 import { produce } from 'immer'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -64,7 +66,13 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
   } = naveTab
 
   const addHistory = useSetAtom(historyAtom)
-  const naveResourceLanguage = useAtomValue(resourcesLanguageAtom).NAVE
+  const preferredNaveLanguage = useAtomValue(resourcesLanguageAtom).NAVE
+  const routeParams = useLocalSearchParams<{ language?: string }>()
+  const requestedLanguage = isInTab ? naveTab.data.language : routeParams.language
+  const naveResourceLanguage =
+    requestedLanguage === 'fr' || requestedLanguage === 'en'
+      ? requestedLanguage
+      : preferredNaveLanguage
 
   // Go back to list view (for tab context)
   const goBack = useCallback(() => {
@@ -102,6 +110,14 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     ...localQueryOptions,
   })
   const naveItem = naveQuery.data ?? null
+  useAssistantResourceContext(
+    isInTab ? `tab:${naveTab.id}` : 'panel',
+    naveContext({
+      name: naveItem?.name || name,
+      name_lower: naveItem?.normalizedName || name_lower,
+      language: naveResourceLanguage,
+    })
+  )
   const { t } = useTranslation()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const selectNaveTags = makeNaveTagsSelector()
@@ -166,6 +182,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
       pushRouteOnce({
         pathname: '/nave-detail',
         params: {
+          language: naveResourceLanguage,
           name_lower: item,
           name: item,
         },
@@ -300,6 +317,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
                     isRemovable: true,
                     type: 'nave',
                     data: {
+                      language: naveResourceLanguage,
                       name: name || naveItem.name,
                       name_lower,
                     },

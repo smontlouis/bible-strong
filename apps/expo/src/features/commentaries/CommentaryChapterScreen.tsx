@@ -1,3 +1,5 @@
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
+import { commentaryContext } from '~features/study-assistant/resourceContext'
 import CommentIcon from '~common/CommentIcon'
 import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
@@ -92,6 +94,7 @@ const CommentaryChapterScreen = () => {
     focusVerse?: string
   }>()
   const parsed = parseCommentaryResourceParams(params)
+  useAssistantResourceContext('panel', commentaryContext(params))
   const parsedFocusVerse = Number(params.focusVerse)
   const focusVerse =
     Number.isSafeInteger(parsedFocusVerse) && parsedFocusVerse > 0 ? parsedFocusVerse : undefined

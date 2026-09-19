@@ -13,6 +13,8 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { EventDetailsContent, EventDetailsProps } from './EventDetails'
 import { TimelineEvent } from './types'
 interface Props {
+  languageOverride?: 'fr' | 'en'
+  assistantScope?: string
   event?: TimelineEvent | (EventDetailsProps & { sectionIndex?: number })
   onOpenEvent: (event: TimelineEvent) => void
   canGoBack?: boolean
@@ -35,6 +37,8 @@ const getMenuItemImage = (icon: string): MenuAction['image'] => {
 }
 
 const TimelineEventDetailContent = ({
+  languageOverride,
+  assistantScope,
   event,
   onOpenEvent,
   canGoBack,
@@ -43,7 +47,8 @@ const TimelineEventDetailContent = ({
   menuItems,
 }: Props) => {
   const { t } = useTranslation()
-  const lang = useTimelineLanguage()
+  const preferredLanguage = useTimelineLanguage()
+  const lang = languageOverride || preferredLanguage
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : canGoBack
 
@@ -86,7 +91,12 @@ const TimelineEventDetailContent = ({
         }
       />
       <ScrollView>
-        <EventDetailsContent {...event} onOpenEvent={onOpenEvent} />
+        <EventDetailsContent
+          languageOverride={languageOverride}
+          assistantScope={assistantScope}
+          {...event}
+          onOpenEvent={onOpenEvent}
+        />
       </ScrollView>
     </FormSheetScreen>
   )

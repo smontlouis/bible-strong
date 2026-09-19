@@ -6,7 +6,7 @@ import { useTheme } from '~themes/ThemeProvider'
 import HTMLContentDOM from './HTMLContentDOM'
 import StylizedHTMLViewNative from './StylizedHTMLViewNative'
 import { useReadingTypography } from './useReadingTypography'
-import type { HtmlEngine } from './readingHtml'
+import type { HtmlEngine, ReadingTypography } from './readingHtml'
 import type { HTMLViewLinkPayload } from './htmlContentTypes'
 
 /** Web always uses DOM. On mobile, engine is a code-only override; native is the default. */
@@ -14,6 +14,7 @@ export default function SwitchableHTMLView({
   value,
   previewSource,
   compact = false,
+  typography: typographyOverride,
   engine,
   padded = false,
   onLinkPress,
@@ -22,6 +23,7 @@ export default function SwitchableHTMLView({
   value?: string
   previewSource?: PreviewSource
   compact?: boolean
+  typography?: ReadingTypography
   engine?: HtmlEngine
   padded?: boolean
   onLinkPress?: (href: string) => void
@@ -29,9 +31,9 @@ export default function SwitchableHTMLView({
 }) {
   const preview = useReferencePreview()
   const readingTypography = useReadingTypography()
-  const typography = compact
-    ? { ...readingTypography, fontSize: 16, lineHeight: 24 }
-    : readingTypography
+  const typography =
+    typographyOverride ??
+    (compact ? { ...readingTypography, fontSize: 16, lineHeight: 24 } : readingTypography)
   const theme = useTheme()
   const [height, setHeight] = useState(200)
   const colors = {

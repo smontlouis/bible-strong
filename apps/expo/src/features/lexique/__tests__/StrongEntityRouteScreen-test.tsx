@@ -3,6 +3,9 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 
 import StrongEntityRouteScreen from '../StrongEntityRouteScreen'
 
+let mockRouteParams: { language?: string } = {}
+jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockRouteParams }))
+
 const mockEntryState = { entry: { stepCode: 'H0175' } }
 
 jest.mock('react-i18next', () => ({
@@ -13,7 +16,23 @@ jest.mock('@tanstack/react-query', () => ({
   useQuery: ({ queryKey }: { queryKey: string[] }) =>
     queryKey[1] === 'availability'
       ? { data: { status: 'available', moduleId: 'entities' }, isPending: false }
-      : { data: { name: 'Aaron' }, isPending: false },
+      : {
+          data: {
+            id: 1,
+            uniqueName: 'person:aaron',
+            name: 'Aaron',
+            category: 'person',
+            type: 'person',
+            strongCodes: ['H0175'],
+            relations: [],
+            description: '',
+            shortDescription: '',
+            brief: '',
+            summaryHtml: '',
+            articleHtml: '',
+          },
+          isPending: false,
+        },
 }))
 
 jest.mock('~features/resources/resourceAccess', () => ({
@@ -57,6 +76,7 @@ describe('StrongEntityRouteScreen', () => {
   let consoleError: jest.SpyInstance
 
   beforeEach(() => {
+    mockRouteParams = {}
     ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
     consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined)
   })
@@ -76,5 +96,13 @@ describe('StrongEntityRouteScreen', () => {
     expect(scaffold.props.requireEntry).toBe(false)
     expect(scaffold.props.title).toBe('Aaron')
     expect(renderer.root.find(node => String(node.type) === 'StrongEntityPage')).toBeDefined()
+  })
+  it('keeps the explicit resource language for a profile opened by a widget', () => {
+    mockRouteParams = { language: 'en' }
+    act(() => {
+      renderer = create(<StrongEntityRouteScreen context={{}} entityKey="person:aaron" />)
+    })
+    const page = renderer.root.find(node => String(node.type) === 'StrongEntityPage')
+    expect(page.props.language).toBe('en')
   })
 })

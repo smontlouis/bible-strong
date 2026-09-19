@@ -1252,6 +1252,12 @@ export default function Home({ initialTheme }: HomeProps) {
           <a href={locale === 'fr' ? '/fr/politique-de-confidentialite' : '/privacy-policy'}>
             {t('home.footer.privacy')}
           </a>
+          <a href={locale === 'fr' ? '/fr/eula' : '/eula-en'}>
+            {locale === 'fr' ? 'Conditions d’utilisation' : 'Terms of use'}
+          </a>
+          <a href={locale === 'fr' ? '/fr/data-deletion' : '/data-deletion'}>
+            {locale === 'fr' ? 'Supprimer mes données' : 'Delete my data'}
+          </a>
         </div>
       </footer>
     </main>

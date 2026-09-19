@@ -2,12 +2,14 @@ import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import * as NativeUI from 'react-native'
+import type { TextStyle } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
 
 import Text from '~common/ui/Text'
 import { getBook } from '~helpers/bibleBookCatalog'
+import type { StrongVerseTextStyle } from './BibleStrongReference'
 import CanonicalStrongVerseText from './CanonicalStrongVerseText'
 
 import type { TFunction } from 'react-i18next'
@@ -54,9 +56,18 @@ type Props = {
   t: TFunction<'translation', undefined>
   verse: Verse
   concordanceFor: string
+  textStyle?: StrongVerseTextStyle
+  referenceTextStyle?: TextStyle
 }
 
-const ConcordanceVerse = ({ verse, onOpenVerse, t, concordanceFor }: Props) => {
+const ConcordanceVerse = ({
+  verse,
+  onOpenVerse,
+  t,
+  concordanceFor,
+  textStyle,
+  referenceTextStyle,
+}: Props) => {
   const stylingTheme = useStylingTheme()
 
   const bookNumber = Number(verse.Livre)
@@ -66,10 +77,17 @@ const ConcordanceVerse = ({ verse, onOpenVerse, t, concordanceFor }: Props) => {
   const bookName = t(book?.Nom || 'Livre {{bookNumber}}', book ? undefined : { bookNumber })
 
   return (
-    <Container onPress={() => onOpenVerse(verse)}>
+    <Container
+      accessibilityRole="button"
+      accessibilityLabel={`${bookName} ${chapterNumber}:${verseNumber}`}
+      onPress={() => onOpenVerse(verse)}
+    >
       <Text
         className="text-[16px] mb-[5px]"
-        style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+        style={{
+          fontFamily: textStyle?.fontFamily || resolveFontFamily(stylingTheme.fontFamily.title),
+          ...referenceTextStyle,
+        }}
       >
         {bookName} {chapterNumber}:{verseNumber}
       </Text>
@@ -78,6 +96,7 @@ const ConcordanceVerse = ({ verse, onOpenVerse, t, concordanceFor }: Props) => {
           verse={{ ...verse, Livre: bookNumber }}
           concordanceFor={concordanceFor}
           small
+          textStyle={textStyle}
         />
       </VerseText>
     </Container>

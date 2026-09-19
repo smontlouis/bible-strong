@@ -1,0 +1,13 @@
+{
+  "name": "@bible-strong/ai-contract",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./contract": "./src/contract.ts",
+    "./stream": "./src/stream.ts"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.28.4"
+  }
+}

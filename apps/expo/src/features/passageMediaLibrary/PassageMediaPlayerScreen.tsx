@@ -11,7 +11,7 @@ import Box, { VStack } from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
-import { formatPassageMediaDuration, getPassageMediaLibrary } from '~features/bible/passageMedia'
+import { formatPassageMediaDuration, getPassageMediaById } from '~features/bible/passageMedia'
 import { IS_FORM_SHEET } from '~helpers/constants'
 import useLanguage from '~helpers/useLanguage'
 const YOUTUBE_PLAYER_BASE_URL =
@@ -21,11 +21,16 @@ const PassageMediaPlayerScreen = () => {
   const stylingTheme = useStylingTheme()
 
   const { t } = useTranslation()
-  const { workId } = useLocalSearchParams<{ workId?: string }>()
-  const language = useLanguage()
+  const { workId, language: requestedLanguage } = useLocalSearchParams<{
+    workId?: string
+    language?: string
+  }>()
+  const preferredLanguage = useLanguage()
+  const language =
+    requestedLanguage === 'fr' || requestedLanguage === 'en' ? requestedLanguage : preferredLanguage
   const { width: windowWidth } = useWindowDimensions()
   const [playerError, setPlayerError] = useState<string>()
-  const item = getPassageMediaLibrary({ language }).find(media => media.workId === workId)
+  const item = workId ? getPassageMediaById(workId, language) : null
   const playerWidth = Math.min(windowWidth - 32, 720)
   const playerHeight = (playerWidth * 9) / 16
 

@@ -1,3 +1,4 @@
+import AssistantLauncher from '~features/study-assistant/AssistantLauncher.web'
 import { trackAnalyticsScreen } from '~helpers/analytics'
 import WorkspaceAnalytics from '~features/app-switcher/WorkspaceAnalytics.web'
 import ReferencePreviewHost from '~features/bibleReferencePreview/ReferencePreviewHost'
@@ -96,6 +97,7 @@ const FullAppRuntime = ({ theme }: { theme: Theme }) => {
                   />
                 </Stack>
               </WorkspaceLayout>
+              <AssistantLauncher />
               <ConfirmDialogHost />
               <ThemedToaster />
               <ChangelogModal />

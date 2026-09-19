@@ -1,11 +1,11 @@
 import React, { ComponentProps, ComponentType, Ref } from 'react'
-import { ImageStyle, TextStyle, View, ViewStyle } from 'react-native'
+import { View, ViewStyle } from 'react-native'
 import { AnimatedStyle } from 'react-native-reanimated'
 import { AnimatedBox } from '~common/ui/Box'
 
 interface TabScreenWrapperProps {
   children: React.ReactNode
-  style: AnimatedStyle<ViewStyle | ImageStyle | TextStyle>
+  style: AnimatedStyle<ViewStyle>
   ref?: Ref<View>
   accessibilityElementsHidden?: boolean
   importantForAccessibility?: 'auto' | 'yes' | 'no' | 'no-hide-descendants'

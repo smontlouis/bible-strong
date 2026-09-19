@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
 import { useAtom } from 'jotai'
-import { Pressable } from 'react-native'
+import { Pressable, type TextStyle, type ViewStyle } from 'react-native'
 import Animated, { type AnimatedStyle } from 'react-native-reanimated'
 import { useTheme } from '~themes/ThemeProvider'
 import { Image } from 'expo-image'
@@ -86,7 +86,7 @@ const SegmentedLanguageToggle = ({
   const containerWidth = isLarge ? 200 : 100
   const height = isLarge ? 44 : 36
   const indicatorWidth = containerWidth / 2 - 4
-  const indicatorStyle: AnimatedStyle = {
+  const indicatorStyle: AnimatedStyle<ViewStyle> = {
     position: 'absolute',
     top: 3,
     left: value === 'fr' ? 3 : containerWidth / 2 + 1,
@@ -98,7 +98,7 @@ const SegmentedLanguageToggle = ({
     transitionDuration: 250,
     transitionTimingFunction: 'ease-out',
   }
-  const frenchTextStyle: AnimatedStyle = {
+  const frenchTextStyle: AnimatedStyle<TextStyle> = {
     fontSize: isLarge ? 16 : 13,
     fontWeight: '600',
     color: value === 'fr' ? '#FFFFFF' : theme.colors.grey,
@@ -106,7 +106,7 @@ const SegmentedLanguageToggle = ({
     transitionProperty: 'color',
     transitionDuration: 200,
   }
-  const englishTextStyle: AnimatedStyle = {
+  const englishTextStyle: AnimatedStyle<TextStyle> = {
     fontSize: isLarge ? 16 : 13,
     fontWeight: '600',
     color: value === 'en' ? '#FFFFFF' : theme.colors.grey,

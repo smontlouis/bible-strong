@@ -139,9 +139,26 @@ input {
   background: url('/images/background.jpg') right / contain fixed no-repeat;
 }
 .legal-content {
-  max-width: 31.25rem;
+  max-width: 46rem;
   margin: 0 auto;
-  padding-top: 1.25rem;
+  padding: 1.25rem 0 3rem;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+.legal-content p + p {
+  margin-top: 1rem;
+}
+.legal-content a {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.legal-content nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+.legal-content li + li {
+  margin-top: 0.5rem;
 }
 .legal-content h1 {
   margin: 2.5rem 0;
@@ -1166,6 +1183,7 @@ input {
 
 .landing-footer > div {
   display: flex;
+  flex-wrap: wrap;
   justify-self: end;
   gap: 20px;
 }

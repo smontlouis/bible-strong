@@ -13,7 +13,7 @@ type SelectableProps = {
   isSelected?: boolean
 }
 
-export type StrongVerseTextStyle = Pick<TextStyle, 'fontSize' | 'lineHeight'>
+export type StrongVerseTextStyle = Pick<TextStyle, 'fontSize' | 'lineHeight' | 'fontFamily'>
 
 const StyledView = (
   componentProps: Omit<
@@ -239,6 +239,8 @@ const BibleStrongRef = ({
         if (!word) {
           return (
             <StyledCircle
+              accessibilityRole="button"
+              accessibilityLabel={`Strong ${reference}`}
               activeOpacity={0.5}
               onPress={() => scrollToStrongCard(reference, occurrenceIndex)}
               onLayout={registerLayout}
@@ -251,6 +253,8 @@ const BibleStrongRef = ({
 
         return (
           <StyledView
+            accessibilityRole="button"
+            accessibilityLabel={word}
             activeOpacity={0.5}
             onPress={() => scrollToStrongCard(reference, occurrenceIndex)}
             onLayout={registerLayout}

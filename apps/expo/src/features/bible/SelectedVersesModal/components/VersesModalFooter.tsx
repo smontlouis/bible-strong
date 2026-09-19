@@ -2,7 +2,8 @@ import { useTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import type { GestureType } from 'react-native-gesture-handler'
 import { GestureDetector } from 'react-native-gesture-handler'
-import type { AnimatedStyle, StyleProps } from 'react-native-reanimated'
+import type { ViewStyle } from 'react-native'
+import type { AnimatedStyle } from 'react-native-reanimated'
 import Animated from 'react-native-reanimated'
 import type { SheetFooterProps } from '~common/sheet'
 import { AnimatedBox } from '~common/ui/Box'
@@ -11,7 +12,7 @@ import TabButton from './TabButton'
 interface VersesModalFooterProps {
   sheetFooterProps?: SheetFooterProps
   panGesture: GestureType
-  indicatorAnimatedStyle: AnimatedStyle<StyleProps>
+  indicatorAnimatedStyle: AnimatedStyle<ViewStyle>
   onContainerWidthChange: (width: number) => void
   tabWidth: number
   activeTabIndex: number

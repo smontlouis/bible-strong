@@ -151,7 +151,8 @@ const planSlice = createSlice({
       }
     },
     addPlan(state, action: PayloadAction<Plan>) {
-      if (!state.myPlans.some(plan => plan.id === action.payload.id)) state.myPlans.push(action.payload)
+      if (!state.myPlans.some(plan => plan.id === action.payload.id))
+        state.myPlans.push(action.payload)
     },
     markAsRead(state, action: PayloadAction<{ readingSliceId: string; planId: string }>) {
       const { readingSliceId, planId } = action.payload
