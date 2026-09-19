@@ -33,6 +33,12 @@ through the authenticated app remains a manual check after backend rollout.
 
 Entry: `AssistantLauncher.web.tsx`, mounted only in `FullAppRuntime.web.tsx`. The native screen remains separate. Uses `@assistant-ui/react` 0.15.21 AssistantModal/Thread/Composer primitives with a custom external-store runtime and the existing authenticated Worker SSE client.
 
+Production activation requires both `EXPO_PUBLIC_AI_API_URL` and exact membership in
+`EXPO_PUBLIC_AI_BETA_UIDS`. This public UID list only hides the launcher, settings entry
+and direct-screen composer for accounts outside the beta. It is bundled client metadata,
+not an authorization boundary. The Worker independently authenticates Firebase Auth and
+App Check, then enforces its server-owned `AI_ALLOWED_UIDS` on every endpoint.
+
 Web messages use the official `ThreadPrimitive.Messages`, `MessagePrimitive.Root` and
 `MessagePrimitive.Parts` pipeline. `LocalMessage` remains the validated, versioned local
 storage format; `messageRuntime.ts` converts it at the runtime boundary without rewriting

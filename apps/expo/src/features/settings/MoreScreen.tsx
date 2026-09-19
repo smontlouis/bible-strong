@@ -26,6 +26,7 @@ import SectionCard, { SectionCardHeader } from '~common/ui/SectionCard'
 import Text from '~common/ui/Text'
 import UserAvatar from '~common/ui/UserAvatar'
 import DeleteAccountModal from '~features/profile/components/DeleteAccountModal'
+import { assistantAccessible } from '~features/study-assistant/assistantConfig'
 import extractFirstName from '~helpers/extractFirstName'
 import { nukeApp } from '~helpers/nukeApp'
 import { toast } from '~helpers/toast'
@@ -195,7 +196,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
               {t('settings.resources')}
             </Text>
           </SectionCardHeader>
-          {(__DEV__ || process.env.EXPO_PUBLIC_AI_API_URL) && (
+          {assistantAccessible(user?.id) && (
             <CardLinkItem
               onPress={() => {
                 closeMenu()

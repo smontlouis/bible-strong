@@ -10,7 +10,6 @@ import type { StudyRequest, StudyEvent } from '@bible-strong/ai-contract/contrac
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 import { getResourceAppCheckToken } from '~helpers/resourceAppCheck'
 import type { DictationConnection } from './dictationAdapter'
-export const assistantAvailable = Boolean(process.env.EXPO_PUBLIC_AI_API_URL)
 export async function connectAssistantDictation(signal: AbortSignal): Promise<DictationConnection> {
   const base = process.env.EXPO_PUBLIC_AI_API_URL
   const user = getCurrentAuthUser()

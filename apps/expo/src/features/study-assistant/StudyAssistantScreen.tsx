@@ -9,7 +9,8 @@ import Text from '~common/ui/Text'
 import Header from '~common/Header'
 import { useTheme } from '~themes/ThemeProvider'
 import AssistantMarkdown from './AssistantMarkdown'
-import { askAssistant, assistantAvailable } from './client'
+import { askAssistant } from './client'
+import { assistantAccessible, assistantAvailable } from './assistantConfig'
 import type { HistoryMessage } from '@bible-strong/ai-contract/contract'
 
 type Turn = { question: string; answer: string }
@@ -26,6 +27,7 @@ export default function StudyAssistantScreen() {
   const [error, setError] = useState('')
   const [progress, setProgress] = useState('')
   const active = useRef<AbortController | null>(null)
+  const assistantAccess = assistantAccessible(userId)
   useEffect(
     () => () => {
       active.current?.abort()
@@ -185,9 +187,13 @@ export default function StudyAssistantScreen() {
               {error}
             </Text>
           )}
-          {!assistantAvailable && (
+          {!assistantAvailable ? (
             <Text className="mt-4 text-grey">{t('assistant.unavailable')}</Text>
-          )}
+          ) : !userId ? (
+            <Text className="mt-4 text-grey">{t('assistant.signIn')}</Text>
+          ) : !assistantAccess ? (
+            <Text className="mt-4 text-grey">{t('assistant.betaOnly')}</Text>
+          ) : null}
         </ScrollView>
         <HStack className="items-end gap-3 border-t border-border p-4">
           <TextInput
@@ -198,6 +204,7 @@ export default function StudyAssistantScreen() {
             placeholder={t('assistant.placeholder')}
             placeholderTextColor={colors.grey}
             accessibilityLabel={t('assistant.placeholder')}
+            editable={assistantAccess}
             style={{
               flex: 1,
               color: colors.default,
@@ -210,7 +217,7 @@ export default function StudyAssistantScreen() {
           />
           <Pressable
             accessibilityRole="button"
-            disabled={!busy && (!assistantAvailable || !question.trim())}
+            disabled={!busy && (!assistantAccess || !question.trim())}
             onPress={
               busy
                 ? stop

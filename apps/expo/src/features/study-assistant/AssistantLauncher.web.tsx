@@ -25,10 +25,10 @@ import { useTheme } from '~themes/ThemeProvider'
 import {
   askAssistant,
   compactAssistant,
-  assistantAvailable,
   captureAssistantPreferences,
   connectAssistantDictation,
 } from './client'
+import { assistantAccessible, assistantAvailable } from './assistantConfig'
 import {
   loadConversations,
   loadSelectedConversation,
@@ -125,6 +125,7 @@ function Icon({
 }
 export default function AssistantLauncher() {
   const { id } = useSelector(selectUserLoginInfo)
+  if (!assistantAccessible(id)) return null
   return <AccountAssistant key={id || 'guest'} account={id || 'guest'} signedIn={Boolean(id)} />
 }
 function AccountAssistant({ account, signedIn }: { account: string; signedIn: boolean }) {
