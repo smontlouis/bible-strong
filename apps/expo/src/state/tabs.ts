@@ -28,6 +28,7 @@ import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { PendingBibleModeAcquisition } from '~helpers/bibleModeAcquisition'
 import { migrateLegacyBibleTabData } from '../migrations/legacyBibleVersionMigration'
 import { appLogger } from '~helpers/agentObservability'
+import { useBibleRouteNavigation } from './bibleRouteNavigation'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -786,21 +787,26 @@ export type BibleTabActions = ReturnType<typeof useBibleTabActions>
 
 export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setBibleTab = useSetAtom(tabAtom)
+  const routeNavigation = useBibleRouteNavigation()
 
-  const setSelectedVersion = (selectedVersion: VersionCode) =>
+  const setSelectedVersion = (selectedVersion: VersionCode) => {
+    if (routeNavigation) return routeNavigation.changeVersion(selectedVersion)
     setBibleTab(
       produce(draft => {
         draft.data = selectBibleTabVersion(draft.data, selectedVersion)
       })
     )
+  }
 
-  const setStrongMode = (strongMode: StrongMode) =>
+  const setStrongMode = (strongMode: StrongMode) => {
+    if (routeNavigation) return routeNavigation.changeStrongMode(strongMode)
     setBibleTab(
       produce(draft => {
         draft.data.strongMode = strongMode
         draft.data.pendingModeAcquisition = undefined
       })
     )
+  }
 
   const setInterlinearMode = (
     interlinearMode: InterlinearMode,
@@ -821,7 +827,23 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       })
     )
 
-  const finishBibleModeAcquisition = (succeeded: boolean) =>
+  const finishBibleModeAcquisition = (succeeded: boolean) => {
+    const current = getDefaultStore().get(tabAtom).data
+    const acquisition = current.pendingModeAcquisition
+    if (
+      routeNavigation &&
+      succeeded &&
+      acquisition?.kind === 'strong' &&
+      current.selectedVersion === acquisition.versionId
+    ) {
+      setBibleTab(
+        produce(draft => {
+          draft.data.pendingModeAcquisition = undefined
+        })
+      )
+      routeNavigation.changeStrongMode(acquisition.mode)
+      return
+    }
     setBibleTab(
       produce(draft => {
         const acquisition = draft.data.pendingModeAcquisition
@@ -837,6 +859,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         }
       })
     )
+  }
 
   const setSelectedBook = (selectedBook: Book) =>
     setBibleTab(
@@ -949,7 +972,11 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       })
     )
 
-  const validateTempSelected = () =>
+  const validateTempSelected = () => {
+    if (routeNavigation) {
+      const current = getDefaultStore().get(tabAtom).data.temp
+      return routeNavigation.openChapter(current.selectedBook, current.selectedChapter)
+    }
     setBibleTab(
       produce(draft => {
         draft.data.selectedBook = draft.data.temp.selectedBook
@@ -957,6 +984,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         draft.data.selectedVerse = draft.data.temp.selectedVerse
       })
     )
+  }
 
   const toggleSelectionMode = () =>
     setBibleTab(
@@ -1047,6 +1075,10 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   }
 
   const clearFocusVerses = () => {
+    if (routeNavigation) {
+      const current = getDefaultStore().get(tabAtom).data
+      return routeNavigation.replaceWithChapter(current.selectedBook, current.selectedChapter)
+    }
     setBibleTab(
       produce(draft => {
         draft.data.focusVerses = undefined
@@ -1057,6 +1089,17 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   }
 
   const goToPrevChapter = (coverage?: BibleVersionCoverage) => {
+    if (routeNavigation) {
+      const current = getDefaultStore().get(tabAtom).data
+      const target = getPreviousAvailableChapterLocation(
+        current.selectedBook,
+        current.selectedChapter,
+        coverage,
+        resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(current.selectedVersion))
+      )
+      if (target) routeNavigation.openChapter(target.book, target.chapter)
+      return
+    }
     setBibleTab(
       produce(draft => {
         const currentBook = draft.data.selectedBook
@@ -1084,6 +1127,17 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   }
 
   const goToNextChapter = (coverage?: BibleVersionCoverage) => {
+    if (routeNavigation) {
+      const current = getDefaultStore().get(tabAtom).data
+      const target = getNextAvailableChapterLocation(
+        current.selectedBook,
+        current.selectedChapter,
+        coverage,
+        resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(current.selectedVersion))
+      )
+      if (target) routeNavigation.openChapter(target.book, target.chapter)
+      return
+    }
     setBibleTab(
       produce(draft => {
         const currentBook = draft.data.selectedBook
@@ -1111,6 +1165,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   }
 
   const goToChapter = ({ book, chapter }: { book: Book; chapter: number }) => {
+    if (routeNavigation) return routeNavigation.openChapter(book, chapter)
     setBibleTab(
       produce(draft => {
         draft.data.selectedBook = book

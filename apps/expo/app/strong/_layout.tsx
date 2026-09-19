@@ -15,6 +15,11 @@ const StrongLayout = () => {
         }}
       >
         <Stack.Screen name="index" />
+        <Stack.Screen name="[code]/index" />
+        <Stack.Screen name="[code]/dictionary" />
+        <Stack.Screen name="[code]/related" />
+        <Stack.Screen name="[code]/concordance" />
+        <Stack.Screen name="entity/[uniqueName]" />
         <Stack.Screen name="entity" />
         <Stack.Screen name="dictionary" />
         <Stack.Screen name="related" />

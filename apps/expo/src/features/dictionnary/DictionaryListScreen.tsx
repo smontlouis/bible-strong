@@ -486,7 +486,12 @@ const DictionaryListScreen = ({
                     />
                   )
                 }
-                return <DictionnaireItem word={item.word} onSelect={() => selectWord(item.word)} />
+                return (
+                  <DictionnaireItem
+                    word={item.word}
+                    onSelect={() => selectWord(item.word, selectedDictionary, item.id)}
+                  />
+                )
               }}
               removeClippedSubviews
               initialNumToRender={10}

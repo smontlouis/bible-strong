@@ -32,10 +32,16 @@ const TimelineItem = ({
   color,
   goTo,
   onPress,
-}: TimelineSection & { goTo: number; onPress?: (goTo: number) => void }) => {
+  languageOverride,
+}: TimelineSection & {
+  goTo: number
+  onPress?: (goTo: number) => void
+  languageOverride?: 'fr' | 'en'
+}) => {
   const stylingTheme = useStylingTheme()
 
-  const lang = useTimelineLanguage()
+  const preferredLanguage = useTimelineLanguage()
+  const lang = languageOverride ?? preferredLanguage
   return (
     <LinkBox
       className="px-[20px] mb-[30px] items-center justify-center flex-row"

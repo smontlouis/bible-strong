@@ -67,7 +67,7 @@ const TimelineTabScreen = ({ timelineAtom }: Props) => {
   const goToEvent = (event: TimelineEvent) => {
     pushRouteOnce({
       pathname: '/event',
-      params: { slug: event.slug },
+      params: { slug: event.slug, language: timelineTab.data.language ?? language },
     })
   }
 

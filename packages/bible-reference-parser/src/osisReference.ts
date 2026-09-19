@@ -67,7 +67,7 @@ const CANONICAL_OSIS_BOOK_IDS = [
   'Rev',
 ]
 
-const SUPPORTED_OSIS_BOOK_ENTRIES: [string, number][] = [
+const SUPPORTED_OSIS_BOOK_ENTRIES: readonly (readonly [string, number])[] = [
   ...CANONICAL_OSIS_BOOK_IDS.map((book, index): [string, number] => [book, index + 1]),
   ['Tob', 67],
   ['Jdt', 68],
@@ -83,9 +83,15 @@ const SUPPORTED_OSIS_BOOK_ENTRIES: [string, number][] = [
 ]
 
 const SUPPORTED_OSIS_BOOK_NUMBERS = new Map(SUPPORTED_OSIS_BOOK_ENTRIES)
+const SUPPORTED_OSIS_BOOK_IDS_BY_NUMBER = new Map(
+  SUPPORTED_OSIS_BOOK_ENTRIES.map(([book, number]) => [number, book] as const)
+)
 
 export const getSupportedOsisBookNumber = (book: string): number | undefined =>
   SUPPORTED_OSIS_BOOK_NUMBERS.get(book)
+
+export const getSupportedOsisBookId = (bookNumber: number): string | undefined =>
+  SUPPORTED_OSIS_BOOK_IDS_BY_NUMBER.get(bookNumber)
 
 type OsisPoint = {
   book: string

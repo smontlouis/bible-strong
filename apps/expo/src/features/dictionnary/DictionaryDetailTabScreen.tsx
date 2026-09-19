@@ -5,7 +5,7 @@ import { goBackOrHome } from '~navigation/goBackOrHome'
 import { twMerge } from '~common/ui/classNames'
 import { resolveThemeColor } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { Share } from 'react-native'
@@ -32,7 +32,10 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import { getDefaultDictionaryWork } from '~features/resources/dictionaryAccess'
+import {
+  getDefaultDictionaryWork,
+  type DictionaryEntry,
+} from '~features/resources/dictionaryAccess'
 import { RootState } from '~redux/modules/reducer'
 import { makeWordTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
@@ -59,11 +62,16 @@ import { createDictionaryInternalLinkRoute } from './dictionaryInternalNavigatio
 interface DictionaryDetailScreenProps {
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
   isFormSheet?: boolean
+  onEntryResolved?: (
+    entry: DictionaryEntry,
+    context: { work: string; language: 'fr' | 'en' }
+  ) => void
 }
 
 const DictionnaryDetailScreen = ({
   dictionaryAtom,
   isFormSheet = false,
+  onEntryResolved,
 }: DictionaryDetailScreenProps) => {
   const stylingTheme = useStylingTheme()
 
@@ -123,16 +131,29 @@ const DictionnaryDetailScreen = ({
   const dictionaryQuery = useQuery({
     queryKey: ['dictionary-detail', work, dictionaryResourceLanguage, entryId, word],
     queryFn: async () =>
-      word
+      entryId || word
         ? ((entryId
             ? await resources.dictionary.loadEntryById(entryId, dictionaryResourceLanguage, work)
-            : await resources.dictionary.loadItem(word, dictionaryResourceLanguage, work)) ?? null)
+            : await resources.dictionary.loadItem(word!, dictionaryResourceLanguage, work)) ?? null)
         : null,
-    enabled: !!word,
+    enabled: entryId !== undefined || !!word,
     staleTime: Infinity,
     ...localQueryOptions,
   })
   const dictionnaireItem = dictionaryQuery.data ?? null
+  const resolvedEntryRef = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (dictionnaireItem) {
+      const identity = `${dictionaryResourceLanguage}:${work}:${dictionnaireItem.id ?? ''}:${dictionnaireItem.word}`
+      if (resolvedEntryRef.current !== identity) {
+        resolvedEntryRef.current = identity
+        onEntryResolved?.(dictionnaireItem, {
+          work,
+          language: dictionaryResourceLanguage,
+        })
+      }
+    }
+  }, [dictionnaireItem, dictionaryResourceLanguage, onEntryResolved, work])
   useAssistantResourceContext(
     isInTab ? `tab:${dictionaryTab.id}` : 'panel',
     dictionaryContext({

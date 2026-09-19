@@ -6,7 +6,6 @@ import {
   type CommentaryCatalogEntry,
   type CommentaryLanguage,
 } from '@bible-strong/resource-catalog/commentaries'
-import { useRouter } from 'expo-router'
 import React from 'react'
 import { Platform, SectionList, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -30,6 +29,7 @@ import {
 } from './commentaryCatalogFilters'
 import { createCommentaryProjectionId } from './commentarySelection'
 import type { RootState } from '~redux/modules/reducer'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 type CommentarySelectionFilter = 'all' | 'selected'
 
 type Projection = {
@@ -85,8 +85,8 @@ const CommentaryLibraryItem = ({
 }
 
 const CommentaryLibraryScreen = () => {
+  const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
-  const router = useRouter()
   const insets = useSafeAreaInsets()
   const detailsRef = React.useRef<SheetRef>(null)
   const selectedCommentaries = useSelector(
@@ -225,7 +225,7 @@ const CommentaryLibraryScreen = () => {
               <CommentaryLibraryItem
                 projection={item}
                 onOpen={() =>
-                  router.push({
+                  pushRouteOnce({
                     pathname: '/commentary-chapter',
                     params: { projectionId, book: '1', chapter: '1' },
                   })

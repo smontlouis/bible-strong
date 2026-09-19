@@ -1,5 +1,12 @@
 import type { StrongReference } from '~common/types'
 import type { StrongTab } from '~state/tabs'
+import { createStrongIdentityForBook } from '~helpers/strongIdentities'
+import {
+  buildPublicStrongEntityPath,
+  buildPublicStrongPath,
+  parsePublicStrongCode,
+  type PublicStrongEntryPage,
+} from './publicStrongRoutes'
 
 export type StrongDetailPage = 'index' | 'entity' | 'dictionary' | 'related' | 'concordance'
 
@@ -26,25 +33,51 @@ export const createStrongDetailRoute = (
   page: StrongDetailPage,
   context: StrongDetailRouteContext,
   options: StrongDetailRouteOptions = {}
-) => ({
-  pathname: STRONG_DETAIL_PATHNAMES[page],
-  params: compactParams({
-    book: context.book == null ? undefined : String(context.book),
-    reference: context.reference,
-    strongReference: context.strongReference ? JSON.stringify(context.strongReference) : undefined,
-    strongBibleVersionId: context.strongBibleVersionId,
-    identityKind: context.identityKind,
-    identityCode: context.identityCode,
-    bibleVersion: context.bibleVersion,
-    clickedWord: context.clickedWord,
-    bibleChapter: context.bibleChapter == null ? undefined : String(context.bibleChapter),
-    bibleVerse: context.bibleVerse == null ? undefined : String(context.bibleVerse),
-    morphologyCodes: context.morphologyCodes?.length
-      ? JSON.stringify(context.morphologyCodes)
-      : undefined,
-    entityKey: options.entityKey,
-  }),
-})
+) => {
+  const rawIdentity = context.identityCode || context.reference || context.strongReference?.Code
+  const publicIdentity = rawIdentity
+    ? createStrongIdentityForBook(rawIdentity, context.book ?? 1)
+    : undefined
+  const hasPublicIdentity = Boolean(publicIdentity && parsePublicStrongCode(publicIdentity.code))
+  const isPublicEntryPage = page !== 'entity'
+  const publicEntryPath =
+    isPublicEntryPage && publicIdentity && hasPublicIdentity
+      ? buildPublicStrongPath(publicIdentity.code, page as PublicStrongEntryPage)
+      : undefined
+  const publicEntityPath =
+    page === 'entity' && options.entityKey
+      ? buildPublicStrongEntityPath(options.entityKey)
+      : undefined
+  const pathname = publicEntryPath ?? publicEntityPath ?? STRONG_DETAIL_PATHNAMES[page]
+  const identityParams =
+    publicEntryPath || publicEntityPath
+      ? {}
+      : {
+          book: context.book == null ? undefined : String(context.book),
+          reference: context.reference,
+          strongReference: context.strongReference
+            ? JSON.stringify(context.strongReference)
+            : undefined,
+          identityKind: context.identityKind,
+          identityCode: context.identityCode,
+        }
+
+  return {
+    pathname,
+    params: compactParams({
+      ...identityParams,
+      strongBibleVersionId: context.strongBibleVersionId,
+      bibleVersion: context.bibleVersion,
+      clickedWord: context.clickedWord,
+      bibleChapter: context.bibleChapter == null ? undefined : String(context.bibleChapter),
+      bibleVerse: context.bibleVerse == null ? undefined : String(context.bibleVerse),
+      morphologyCodes: context.morphologyCodes?.length
+        ? JSON.stringify(context.morphologyCodes)
+        : undefined,
+      entityKey: publicEntityPath ? undefined : options.entityKey,
+    }),
+  }
+}
 
 const firstString = (value: unknown): string | undefined =>
   typeof value === 'string'

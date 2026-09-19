@@ -7,10 +7,12 @@ import { twMerge } from '~common/ui/classNames'
 import type { Theme as AppTheme } from '~themes'
 
 import { useTranslation } from 'react-i18next'
-import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { createStrongIdentityForBook } from '~helpers/strongIdentities'
+import { createStrongDetailRoute } from './strongDetailRoutes'
 
 const SectionItem = (
   componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
@@ -69,13 +71,26 @@ interface LexiqueItemProps extends StrongLexiconSearchResult {
 
 const LexiqueItem = ({ stepCode, language, original, gloss, onSelect }: LexiqueItemProps) => {
   const stylingTheme = useStylingTheme()
+  const pushRouteOnce = usePushRouteOnce()
 
   const { t } = useTranslation()
   const book = language === 'hebrew' ? 1 : 40
   const lexiqueType = language === 'hebrew' ? 'Hébreu' : 'Grec'
 
   const handlePress = () => {
-    onSelect?.(book, stepCode, gloss)
+    if (onSelect) {
+      onSelect(book, stepCode, gloss)
+      return
+    }
+    const identity = createStrongIdentityForBook(stepCode, book)
+    pushRouteOnce(
+      createStrongDetailRoute('index', {
+        book,
+        reference: identity.code,
+        identityKind: identity.kind,
+        identityCode: identity.code,
+      })
+    )
   }
 
   const content = (
@@ -105,22 +120,14 @@ const LexiqueItem = ({ stepCode, language, original, gloss, onSelect }: LexiqueI
     </SectionItem>
   )
 
-  if (onSelect) {
-    return (
-      <Pressable
-        accessibilityRole="button"
-        onPress={handlePress}
-        style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
-      >
-        {content}
-      </Pressable>
-    )
-  }
-
   return (
-    <Link route="Strong" params={{ book, reference: stepCode }}>
+    <Pressable
+      accessibilityRole={onSelect ? 'button' : 'link'}
+      onPress={handlePress}
+      style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+    >
       {content}
-    </Link>
+    </Pressable>
   )
 }
 

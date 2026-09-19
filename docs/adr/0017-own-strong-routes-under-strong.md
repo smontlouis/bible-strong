@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted
+Accepted. ADR-0053 adds `/strong/:code` and its normalized public subpages while preserving the
+query-parameter routes as compatibility adapters.
 
 ## Context
 

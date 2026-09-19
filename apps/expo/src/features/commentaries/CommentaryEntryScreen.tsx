@@ -24,23 +24,32 @@ import {
   getCommentaryBibleViewRoute,
   getCommentaryPassageBibleViewRoute,
 } from './commentaryReferenceNavigation'
-import { commentaryHrefToOsis, parseCommentaryResourceParams } from './commentaryResourceParams'
+import {
+  commentaryHrefToOsis,
+  parseCommentaryResourceParams,
+  type CommentaryScreenRouteParams,
+} from './commentaryResourceParams'
 import CommentaryEntryNavigation from './CommentaryEntryNavigation'
 import { groupCommentarySectionsForVerse } from './commentaryResourceNavigation'
-const CommentaryEntryScreen = () => {
-  const params = useLocalSearchParams<{
-    projectionId?: string
-    book?: string
-    chapter?: string
-    sectionId?: string
-    focusVerse?: string
-  }>()
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+const CommentaryEntryScreen = ({
+  routeParams,
+  onOpenChapter,
+  onSectionChange,
+}: {
+  routeParams?: CommentaryScreenRouteParams
+  onOpenChapter?: () => void
+  onSectionChange?: (sectionId: string) => void
+} = {}) => {
+  const localParams = useLocalSearchParams<CommentaryScreenRouteParams>()
+  const params = routeParams ?? localParams
   const parsed = parseCommentaryResourceParams(params)
   const parsedFocusVerse = Number(params.focusVerse)
   const focusVerse =
     Number.isSafeInteger(parsedFocusVerse) && parsedFocusVerse > 0 ? parsedFocusVerse : undefined
   const resources = useResourceAccess()
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const canGoBackInStack = useCanGoBackInStack()
   const scrollRef = React.useRef<React.ComponentRef<typeof ScrollView>>(null)
@@ -151,15 +160,17 @@ const CommentaryEntryScreen = () => {
               entry={entry}
               language={projection.language}
               onPress={() =>
-                router.push({
-                  pathname: '/commentary-chapter',
-                  params: {
-                    projectionId: projection.projectionId,
-                    book: String(book),
-                    chapter: String(chapter),
-                    focusVerse: focusVerse === undefined ? undefined : String(focusVerse),
-                  },
-                })
+                onOpenChapter
+                  ? onOpenChapter()
+                  : pushRouteOnce({
+                      pathname: '/commentary-chapter',
+                      params: {
+                        projectionId: projection.projectionId,
+                        book: String(book),
+                        chapter: String(chapter),
+                        focusVerse: focusVerse === undefined ? undefined : String(focusVerse),
+                      },
+                    })
               }
             />
             <Box
@@ -189,16 +200,18 @@ const CommentaryEntryScreen = () => {
                     startVerse: section.rangeStartVerse,
                     endVerse: section.rangeEndVerse,
                   })
-                  if (route) router.push(route)
+                  if (route) pushRouteOnce(route)
                 }}
                 onPrevious={() => {
                   if (!previousSection) return
-                  router.setParams({ sectionId: previousSection.id })
+                  if (onSectionChange) onSectionChange(previousSection.id)
+                  else router.setParams({ sectionId: previousSection.id })
                   scrollRef.current?.scrollTo({ y: 0, animated: true })
                 }}
                 onNext={() => {
                   if (!nextSection) return
-                  router.setParams({ sectionId: nextSection.id })
+                  if (onSectionChange) onSectionChange(nextSection.id)
+                  else router.setParams({ sectionId: nextSection.id })
                   scrollRef.current?.scrollTo({ y: 0, animated: true })
                 }}
               />
@@ -208,7 +221,7 @@ const CommentaryEntryScreen = () => {
                   onLinkPress={href => {
                     const osis = commentaryHrefToOsis(href)
                     const route = osis ? getCommentaryBibleViewRoute(osis) : undefined
-                    if (route) router.push(route)
+                    if (route) pushRouteOnce(route)
                     else if (/^https?:\/\//iu.test(href)) void Linking.openURL(href)
                   }}
                 />

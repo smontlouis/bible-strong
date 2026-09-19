@@ -1,5 +1,4 @@
 import { Linking } from 'react-native'
-import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import type { CommentaryCatalogEntry } from '@bible-strong/resource-catalog/commentaries'
 import Box from '~common/ui/Box'
@@ -12,6 +11,7 @@ import {
   getCommentaryBibleViewRoute,
   getCommentaryPassageBibleViewRoute,
 } from './commentaryReferenceNavigation'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 /** Shared article presentation for the full page and its inline preview. */
 export default function CommentarySectionCard({
@@ -35,7 +35,7 @@ export default function CommentarySectionCard({
   onResourcePress?: () => void
   preview?: boolean
 }) {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const start = section.rangeStartVerse
   const end = section.rangeEndVerse
@@ -73,7 +73,7 @@ export default function CommentarySectionCard({
                 startVerse: start,
                 endVerse: end,
               })
-              if (route) router.push(route)
+              if (route) pushRouteOnce(route)
             }}
           />
         )}
@@ -83,7 +83,7 @@ export default function CommentarySectionCard({
             onLinkPress={href => {
               const osis = commentaryHrefToOsis(href)
               const route = osis ? getCommentaryBibleViewRoute(osis) : undefined
-              if (route) router.push(route)
+              if (route) pushRouteOnce(route)
               else if (/^https?:\/\//iu.test(href)) void Linking.openURL(href)
             }}
           />

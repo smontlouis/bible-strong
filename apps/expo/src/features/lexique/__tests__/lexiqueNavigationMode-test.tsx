@@ -53,25 +53,15 @@ describe('lexicon navigation mode', () => {
     act(() => list.props.onStrongSelect(1, 'H0310A'))
 
     expect(mockPushRouteOnce).toHaveBeenNthCalledWith(1, {
-      pathname: '/strong',
-      params: {
-        book: '1',
-        identityCode: 'H0310A',
-        identityKind: 'dstrong',
-        reference: 'H0310A',
-      },
+      pathname: '/strong/h0310a',
+      params: {},
     })
 
     act(() => list.props.onStrongSelect(1, 'H0413'))
 
     expect(mockPushRouteOnce).toHaveBeenNthCalledWith(2, {
-      pathname: '/strong',
-      params: {
-        book: '1',
-        identityCode: 'H0413',
-        identityKind: 'strong',
-        reference: 'H0413',
-      },
+      pathname: '/strong/h0413',
+      params: {},
     })
   })
 
@@ -111,8 +101,8 @@ describe('lexicon navigation mode', () => {
     expect(getDefaultStore().get(strongAtom).data).toEqual({})
     expect(mockPushRouteOnce).toHaveBeenCalledWith(
       expect.objectContaining({
-        pathname: '/strong',
-        params: expect.objectContaining({ book: '40', reference: 'G0002' }),
+        pathname: '/strong/g0002',
+        params: {},
       })
     )
   })

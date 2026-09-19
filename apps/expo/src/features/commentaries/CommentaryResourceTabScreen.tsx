@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query'
 import { produce } from 'immer'
 import { useAtom, useAtomValue } from 'jotai/react'
 import { atom, type PrimitiveAtom } from 'jotai/vanilla'
-import { useRouter } from 'expo-router'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import Empty from '~common/Empty'
@@ -32,6 +31,7 @@ import {
   formatCommentaryResourceTabTitle,
   parseCommentaryResourceParams,
 } from './commentaryResourceParams'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 const formatRange = (start: number, end: number) => (start === end ? `${start}` : `${start}–${end}`)
 
 const CommentaryResourceTabScreen = ({
@@ -39,6 +39,7 @@ const CommentaryResourceTabScreen = ({
 }: {
   commentaryAtom: PrimitiveAtom<CommentaryResourceTab>
 }) => {
+  const pushRouteOnce = usePushRouteOnce()
   const [tab, setTab] = useAtom(commentaryAtom)
   const scrollRef = React.useRef<React.ComponentRef<typeof ScrollView>>(null)
   const parsed = parseCommentaryResourceParams({
@@ -55,7 +56,6 @@ const CommentaryResourceTabScreen = ({
     scrollRef.current?.scrollTo({ y: 0, animated: true })
   }
   const resources = useResourceAccess()
-  const router = useRouter()
   const { t } = useTranslation()
   const { openBookSelector } = useBookAndVersionSelector()
   const [selectorAtom] = React.useState(() => {
@@ -227,7 +227,7 @@ const CommentaryResourceTabScreen = ({
                 chapter={chapter}
                 section={section}
                 onResourcePress={() =>
-                  router.push({
+                  pushRouteOnce({
                     pathname: '/commentary-chapter',
                     params: {
                       projectionId: projection.projectionId,
@@ -300,7 +300,7 @@ const CommentaryResourceTabScreen = ({
                       key={candidate.id}
                       activeOpacity={0.62}
                       onPress={() =>
-                        router.push({
+                        pushRouteOnce({
                           pathname: '/commentary-entry',
                           params: {
                             projectionId: tab.data.projectionId,

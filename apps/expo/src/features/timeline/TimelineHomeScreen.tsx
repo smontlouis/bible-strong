@@ -20,15 +20,24 @@ interface Props {
   hasBackButton?: boolean
   isFormSheet?: boolean
   onSectionPress?: (sectionIndex: number) => void
+  languageOverride?: 'fr' | 'en'
+  onLanguageChange?: (language: 'fr' | 'en') => void
 }
 
-const TimelineHomeScreen = ({ hasBackButton, isFormSheet = false, onSectionPress }: Props) => {
+const TimelineHomeScreen = ({
+  hasBackButton,
+  isFormSheet = false,
+  onSectionPress,
+  languageOverride,
+  onLanguageChange,
+}: Props) => {
   const modalRef = React.useRef<SheetRef>(null)
   const { t } = useTranslation()
   const openInNewTab = useOpenInNewTab()
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = hasBackButton ?? (isFormSheet ? canGoBackInStack : true)
-  const [timelineResourceLanguage, setTimelineResourceLanguage] = useResourceLanguage('TIMELINE')
+  const [preferredTimelineLanguage, setTimelineResourceLanguage] = useResourceLanguage('TIMELINE')
+  const timelineResourceLanguage = languageOverride ?? preferredTimelineLanguage
 
   const { data: events } = useQuery({
     queryKey: ['timeline'],
@@ -41,13 +50,14 @@ const TimelineHomeScreen = ({ hasBackButton, isFormSheet = false, onSectionPress
       title: t('Chronologie de la Bible'),
       isRemovable: true,
       type: 'timeline',
-      data: {},
+      data: languageOverride ? { language: languageOverride } : {},
     })
   }
 
   const toggleTimelineLanguage = () => {
     const nextLanguage = timelineResourceLanguage === 'fr' ? 'en' : 'fr'
-    setTimelineResourceLanguage(nextLanguage)
+    if (onLanguageChange) onLanguageChange(nextLanguage)
+    else setTimelineResourceLanguage(nextLanguage)
     toast(t('menu.languageChanged', { language: nextLanguage === 'fr' ? 'Français' : 'English' }))
   }
 
@@ -105,7 +115,13 @@ const TimelineHomeScreen = ({ hasBackButton, isFormSheet = false, onSectionPress
         />
         <ScrollView backgroundColor="lightGrey">
           {events?.map((event, i) => (
-            <TimelineItem goTo={i} key={event.id} onPress={onSectionPress} {...event} />
+            <TimelineItem
+              goTo={i}
+              key={event.id}
+              onPress={onSectionPress}
+              languageOverride={timelineResourceLanguage}
+              {...event}
+            />
           ))}
         </ScrollView>
         <TimelineHomeDetailModal modalRef={modalRef} />

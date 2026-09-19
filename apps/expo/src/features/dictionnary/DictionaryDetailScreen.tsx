@@ -1,13 +1,15 @@
 import React, { useState } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import generateUUID from '~helpers/generateUUID'
 import { DictionaryTab } from '../../state/tabs'
 import DictionaryDetailTabScreen from './DictionaryDetailTabScreen'
 import { IS_FORM_SHEET } from '~helpers/constants'
+import { buildPublicDictionaryPath } from './publicDictionaryRoutes'
 
 const DictionaryDetailScreen = () => {
+  const router = useRouter()
   const params = useLocalSearchParams<{
     word?: string
     work?: string
@@ -40,6 +42,23 @@ const DictionaryDetailScreen = () => {
     } as DictionaryTab)
   )
 
-  return <DictionaryDetailTabScreen dictionaryAtom={onTheFlyAtom} isFormSheet={IS_FORM_SHEET} />
+  return (
+    <DictionaryDetailTabScreen
+      dictionaryAtom={onTheFlyAtom}
+      isFormSheet={IS_FORM_SHEET}
+      onEntryResolved={(entry, context) => {
+        const entryId = entry.id ?? Number(params.entryId)
+        if (!Number.isSafeInteger(entryId) || entryId <= 0) return
+        router.replace(
+          buildPublicDictionaryPath({
+            work: context.work,
+            language: context.language,
+            entryId,
+            word: entry.word,
+          })
+        )
+      }}
+    />
+  )
 }
 export default DictionaryDetailScreen

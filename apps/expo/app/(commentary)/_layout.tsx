@@ -16,6 +16,8 @@ const CommentaryLayout = () => {
       >
         <Stack.Screen name="commentary-chapter" />
         <Stack.Screen name="commentary-entry" />
+        <Stack.Screen name="commentary/[language]/[resource]/[book]/[chapter]/index" />
+        <Stack.Screen name="commentary/[language]/[resource]/[book]/[chapter]/[section]" />
       </Stack>
     </ModalRouteFrame>
   )

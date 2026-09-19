@@ -25,6 +25,7 @@ import { IS_FORM_SHEET } from '~helpers/constants'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { getDefaultBibleTab, useBibleTabActions } from '~state/tabs'
 import { openCommentaryBookSelector } from './commentaryBookSelector'
 import CommentaryResourceHeaderActions from './CommentaryResourceHeaderActions'
@@ -34,7 +35,10 @@ import {
   getCoveredCommentaryLocation,
   groupCommentarySectionsForVerse,
 } from './commentaryResourceNavigation'
-import { parseCommentaryResourceParams } from './commentaryResourceParams'
+import {
+  parseCommentaryResourceParams,
+  type CommentaryScreenRouteParams,
+} from './commentaryResourceParams'
 const formatRange = (start: number, end: number, introductionLabel: string) => {
   if (start === 0 && end === 0) return introductionLabel
   return start === end ? `${start}` : `${start}–${end}`
@@ -86,13 +90,19 @@ const CommentarySectionCard = ({
   </TouchableBox>
 )
 
-const CommentaryChapterScreen = () => {
-  const params = useLocalSearchParams<{
-    projectionId?: string
-    book?: string
-    chapter?: string
-    focusVerse?: string
-  }>()
+const CommentaryChapterScreen = ({
+  routeParams,
+  onChapterChange,
+  onClearFocus,
+  onOpenSection,
+}: {
+  routeParams?: CommentaryScreenRouteParams
+  onChapterChange?: (book: number, chapter: number) => void
+  onClearFocus?: () => void
+  onOpenSection?: (sectionId: string) => void
+} = {}) => {
+  const localParams = useLocalSearchParams<CommentaryScreenRouteParams>()
+  const params = routeParams ?? localParams
   const parsed = parseCommentaryResourceParams(params)
   useAssistantResourceContext('panel', commentaryContext(params))
   const parsedFocusVerse = Number(params.focusVerse)
@@ -100,6 +110,7 @@ const CommentaryChapterScreen = () => {
     Number.isSafeInteger(parsedFocusVerse) && parsedFocusVerse > 0 ? parsedFocusVerse : undefined
   const resources = useResourceAccess()
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const canGoBackInStack = useCanGoBackInStack()
   const { openBookSelector } = useBookAndVersionSelector()
@@ -125,12 +136,21 @@ const CommentaryChapterScreen = () => {
     const nextBook = selectorTab.data.selectedBook.Numero
     const nextChapter = selectorTab.data.selectedChapter
     if (nextBook === parsed.book && nextChapter === parsed.chapter) return
-    router.setParams({
-      book: String(nextBook),
-      chapter: String(nextChapter),
-      focusVerse: undefined,
-    })
-  }, [parsed, router, selectorTab.data.selectedBook.Numero, selectorTab.data.selectedChapter])
+    if (onChapterChange) onChapterChange(nextBook, nextChapter)
+    else {
+      router.setParams({
+        book: String(nextBook),
+        chapter: String(nextChapter),
+        focusVerse: undefined,
+      })
+    }
+  }, [
+    onChapterChange,
+    parsed,
+    router,
+    selectorTab.data.selectedBook.Numero,
+    selectorTab.data.selectedChapter,
+  ])
 
   const query = useQuery({
     queryKey: [
@@ -204,8 +224,9 @@ const CommentaryChapterScreen = () => {
           chapterVerseCount: countLsgChapters[`${book}-${chapter}`],
         })
 
-  const openSection = (sectionId: string) =>
-    router.push({
+  const openSection = (sectionId: string) => {
+    if (onOpenSection) return onOpenSection(sectionId)
+    pushRouteOnce({
       pathname: '/commentary-entry',
       params: {
         projectionId: projection.projectionId,
@@ -215,6 +236,7 @@ const CommentaryChapterScreen = () => {
         focusVerse: focusVerse === undefined ? undefined : String(focusVerse),
       },
     })
+  }
 
   return (
     <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
@@ -280,7 +302,9 @@ const CommentaryChapterScreen = () => {
                 <TouchableBox
                   className="overflow-hidden border-continuous rounded-[16px] bg-light-grey items-center justify-center"
                   activeOpacity={0.62}
-                  onPress={() => router.setParams({ focusVerse: undefined })}
+                  onPress={() =>
+                    onClearFocus ? onClearFocus() : router.setParams({ focusVerse: undefined })
+                  }
                   accessibilityRole="button"
                   accessibilityLabel={t('commentaries.resource.exitVerseFilter')}
                   style={{ width: 28, height: 28 }}

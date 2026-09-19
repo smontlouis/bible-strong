@@ -27,6 +27,10 @@ import {
   BibleReferenceUnavailable,
 } from './BibleReferenceAvailability'
 import { resolveBibleTabResources } from '~helpers/bibleTabResourceResolution'
+import {
+  BibleRouteNavigationProvider,
+  type BibleRouteNavigationAdapter,
+} from '~state/bibleRouteNavigation'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const deepmerge = require('@fastify/deepmerge')()
 
@@ -35,6 +39,7 @@ interface BibleTabScreenProps {
   isFormSheet?: boolean
   isInTab?: boolean
   initialAnnotationId?: string
+  routeNavigation?: BibleRouteNavigationAdapter
 }
 
 const BibleTabScreen = ({
@@ -42,6 +47,7 @@ const BibleTabScreen = ({
   isFormSheet,
   isInTab = true,
   initialAnnotationId,
+  routeNavigation,
 }: BibleTabScreenProps) => {
   const [bible, setBible] = useAtom(bibleAtom)
   useAssistantResourceContext(isInTab ? `tab:${bible.id}` : 'panel', bibleContext(bible))
@@ -228,15 +234,19 @@ const BibleTabScreen = ({
       bibleContent
     )
 
-  if (isFormSheet) {
-    return (
-      <BookSelectorSheetProvider>
-        <LocalUnifiedTagsModalProvider>{content}</LocalUnifiedTagsModalProvider>
-      </BookSelectorSheetProvider>
-    )
-  }
+  const wrappedContent = isFormSheet ? (
+    <BookSelectorSheetProvider>
+      <LocalUnifiedTagsModalProvider>{content}</LocalUnifiedTagsModalProvider>
+    </BookSelectorSheetProvider>
+  ) : (
+    content
+  )
 
-  return content
+  return (
+    <BibleRouteNavigationProvider adapter={routeNavigation}>
+      {wrappedContent}
+    </BibleRouteNavigationProvider>
+  )
 }
 
 export default BibleTabScreen

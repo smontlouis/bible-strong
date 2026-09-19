@@ -1,4 +1,8 @@
-import { getSupportedOsisBookNumber, normalizeOsisReference } from '../osisReference'
+import {
+  getSupportedOsisBookId,
+  getSupportedOsisBookNumber,
+  normalizeOsisReference,
+} from '../osisReference'
 
 describe('normalizeOsisReference', () => {
   it.each([
@@ -28,5 +32,9 @@ describe('normalizeOsisReference', () => {
     expect(getSupportedOsisBookNumber('4Macc')).toBe(76)
     expect(getSupportedOsisBookNumber('PssSol')).toBe(77)
     expect(getSupportedOsisBookNumber('PrMan')).toBeUndefined()
+    expect(getSupportedOsisBookId(1)).toBe('Gen')
+    expect(getSupportedOsisBookId(43)).toBe('John')
+    expect(getSupportedOsisBookId(77)).toBe('PssSol')
+    expect(getSupportedOsisBookId(78)).toBeUndefined()
   })
 })

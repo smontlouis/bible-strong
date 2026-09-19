@@ -2,15 +2,19 @@ import { COMMENTARY_CATALOG_BY_ID } from '@bible-strong/resource-catalog/comment
 
 import { parseCommentaryProjectionId } from './commentarySelection'
 
+export type CommentaryScreenRouteParams = {
+  projectionId?: string
+  book?: string
+  chapter?: string
+  sectionId?: string
+  focusVerse?: string
+}
+
 export const parseCommentaryResourceParams = ({
   projectionId,
   book,
   chapter,
-}: {
-  projectionId?: string
-  book?: string
-  chapter?: string
-}) => {
+}: CommentaryScreenRouteParams) => {
   const projection = projectionId ? parseCommentaryProjectionId(projectionId) : undefined
   const entry = projection ? COMMENTARY_CATALOG_BY_ID.get(projection.resourceId) : undefined
   const bookNumber = Number(book)

@@ -2,6 +2,10 @@ import { navigateWithPageTransition } from './pageTransition'
 import { useRouter } from 'expo-router'
 import type { HrefObject } from 'expo-router'
 import { store } from 'expo-router/build/global-state/router-store'
+import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
+import { normalizePublicRoute } from './publicRouteNormalization'
+import { getLanguage } from '~i18n'
+import { useResourcesLanguageValue } from '~state/resourcesLanguage'
 
 type RouteParams = Record<
   string,
@@ -36,17 +40,27 @@ const normalizedParamsEqual = (currentParams: RouteParams, targetParams: RoutePa
 
 export const usePushRouteOnce = () => {
   const router = useRouter()
+  const defaultBibleVersion = useDefaultBibleVersion()
+  const timelineLanguage = useResourcesLanguageValue().TIMELINE
 
   return (route: PushRoute) => {
+    const normalizedRoute = normalizePublicRoute(
+      route,
+      defaultBibleVersion,
+      getLanguage(),
+      timelineLanguage
+    ) as PushRoute
     const routeInfo = store.getRouteInfo()
 
     if (
-      routeInfo.pathname === route.pathname &&
-      normalizedParamsEqual(routeInfo.params as RouteParams, route.params)
+      routeInfo.pathname === normalizedRoute.pathname &&
+      normalizedParamsEqual(routeInfo.params as RouteParams, normalizedRoute.params)
     ) {
       return
     }
 
-    navigateWithPageTransition(route.pathname, () => router.push(route as HrefObject))
+    navigateWithPageTransition(normalizedRoute.pathname, () =>
+      router.push(normalizedRoute as HrefObject)
+    )
   }
 }

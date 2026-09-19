@@ -5,13 +5,17 @@ import generateUUID from '~helpers/generateUUID'
 import { NaveTab } from '../../state/tabs'
 import NaveDetailTabScreen from './NaveDetailTabScreen'
 import { IS_FORM_SHEET } from '~helpers/constants'
-const NaveDetailScreen = () => {
-  const params = useLocalSearchParams<{ name_lower?: string; name?: string }>()
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 
-  // Parse params from URL strings
-  const name_lower = params.name_lower || ''
-  const name = params.name || ''
-
+export const NaveRouteScreen = ({
+  nameLower,
+  name = nameLower,
+  language,
+}: {
+  nameLower: string
+  name?: string
+  language?: ResourceLanguage
+}) => {
   const onTheFlyAtom = useMemo(
     () =>
       atom<NaveTab>({
@@ -20,15 +24,21 @@ const NaveDetailScreen = () => {
         isRemovable: true,
         hasBackButton: true,
         type: 'nave',
-        data: {
-          name_lower,
-          name,
-        },
+        data: { name_lower: nameLower, name, language },
       } as NaveTab),
-
-    [name, name_lower]
+    [language, name, nameLower]
   )
 
   return <NaveDetailTabScreen naveAtom={onTheFlyAtom} isFormSheet={IS_FORM_SHEET} />
+}
+
+const NaveDetailScreen = () => {
+  const params = useLocalSearchParams<{ name_lower?: string; name?: string }>()
+
+  // Parse params from URL strings
+  const name_lower = params.name_lower || ''
+  const name = params.name || ''
+
+  return <NaveRouteScreen nameLower={name_lower} name={name} />
 }
 export default NaveDetailScreen
