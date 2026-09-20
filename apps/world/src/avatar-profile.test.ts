@@ -3,16 +3,19 @@ import { loadProfile, parseProfile, PROFILE_KEY, saveProfile } from './avatar-pr
 
 afterEach(() => vi.unstubAllGlobals())
 describe('local avatar profile', () => {
-  it('restores name, avatar and color after saving', () => {
-    const values = new Map<string, string>()
-    vi.stubGlobal('localStorage', {
-      getItem: (key: string) => values.get(key) ?? null,
-      setItem: (key: string, value: string) => values.set(key, value),
-    })
-    expect(saveProfile({ avatar: 'nova', name: '  Stéphane  ', color: '#73CDD0' })).toBe(true)
-    expect(values.has(PROFILE_KEY)).toBe(true)
-    expect(loadProfile()).toEqual({ avatar: 'nova', name: 'Stéphane', color: '#73cdd0' })
-  })
+  it.each(['nova', 'short-slime', 'rounded-square'] as const)(
+    'restores name, %s avatar and color after saving',
+    avatar => {
+      const values = new Map<string, string>()
+      vi.stubGlobal('localStorage', {
+        getItem: (key: string) => values.get(key) ?? null,
+        setItem: (key: string, value: string) => values.set(key, value),
+      })
+      expect(saveProfile({ avatar, name: '  Stéphane  ', color: '#73CDD0' })).toBe(true)
+      expect(values.has(PROFILE_KEY)).toBe(true)
+      expect(loadProfile()).toEqual({ avatar, name: 'Stéphane', color: '#73cdd0' })
+    }
+  )
   it('rejects unsupported avatars, malformed colors and blank names', () => {
     for (const override of [{ avatar: 'citrus' }, { color: 'red' }, { name: '   ' }]) {
       expect(

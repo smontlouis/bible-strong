@@ -1,3 +1,8 @@
+import { chooseCentralSpawn } from './multiplayer-spawn'
+import { WorldMultiplayer } from './multiplayer'
+import { RemoteAvatars } from './remote-avatars'
+import type { PresenceStatus } from './multiplayer-protocol'
+import type { AvatarId } from './avatar-profile'
 import { occlusionDepth } from './occlusion-depth'
 import { AmbientZoneEditor } from './ambient-zone-editor'
 import type { AmbientEditorModel } from './ambient-zones'
@@ -36,14 +41,18 @@ export type WorldState = {
   behind: string[]
   moving: boolean
   fps: number
+  multiplayer?: PresenceStatus
 }
 export type Controls = {
+  multiplayerEnabled?: boolean
+  retryMultiplayer?: () => void
   discoveryAction?: HTMLButtonElement | null
   ambientEditor?: AmbientEditorModel
   shoreEditor?: ShoreEditorModel
   shoreZoom?: number
   navigation: NavigationDocument
   direction: Point
+  avatar: AvatarId
   avatarColor: string
   avatarName: string
   paused: boolean
@@ -63,6 +72,9 @@ export function createWorld(
 ) {
   const rendererResolution = Math.min(window.devicePixelRatio || 1, 2)
   class StudyScene extends Phaser.Scene {
+    network!: WorldMultiplayer
+    remoteAvatars!: RemoteAvatars
+    facing = { x: 0, y: 1 }
     position = { ...SPAWN }
     blob!: Phaser.GameObjects.Image
     shadow!: Phaser.GameObjects.Ellipse
@@ -113,7 +125,7 @@ export function createWorld(
     }
 
     create() {
-      this.position = findSafePosition(SPAWN, controls.navigation) ?? { ...SPAWN }
+      this.position = chooseCentralSpawn(controls.navigation, []) ?? findSafePosition(SPAWN, controls.navigation) ?? { ...SPAWN }
       this.background = new WorldBackground(this)
       this.ambience = new WorldAmbience(this, controls.ambientEditor)
       this.clouds = new WorldClouds(this)
@@ -132,6 +144,9 @@ export function createWorld(
           .setDepth(object.always ? 2000 : object.baseY)
         this.foreground.push({ object, image })
       })
+      this.network = new WorldMultiplayer()
+      this.remoteAvatars = new RemoteAvatars(this, rendererResolution)
+      controls.retryMultiplayer = () => this.network.retry()
       this.readers = createWorldReaders(this)
       this.shadow = this.add.ellipse(SPAWN.x, SPAWN.y, 30, 10, 0x183c45, 0.25).setDepth(-1)
       this.blob = this.add
@@ -157,6 +172,8 @@ export function createWorld(
         window.removeEventListener('blur', this.blur)
         window.removeEventListener('focus', this.focusWindow)
         this.mapTiles.destroy()
+        this.network.destroy()
+        controls.retryMultiplayer = undefined
       })
       this.cameras.main.centerOn(SPAWN.x, SPAWN.y)
       onReady()
@@ -176,6 +193,14 @@ export function createWorld(
         this.lastReset = controls.reset
         this.resetInput()
       }
+      const arrival = this.network.takeSpawn()
+      if (arrival) {
+        this.position = { x: arrival.x, y: arrival.y }
+        this.facing = { x: arrival.dx, y: arrival.dy }
+        this.blobAvatar.reset()
+        this.resetInput()
+        this.cameras.main.centerOn(arrival.x, arrival.y)
+      }
       let direction = controls.direction
       const horizontal =
         Number(this.keys.RIGHT.isDown || this.keys.D.isDown) -
@@ -191,10 +216,19 @@ export function createWorld(
       const next = move(this.position, direction, delta / 1000, controls.navigation)
       const moving = Math.hypot(next.x - this.position.x, next.y - this.position.y) > 0.01
       this.position = next
+      if (moving) {
+        const length = Math.max(1, Math.hypot(direction.x, direction.y))
+        this.facing = { x: direction.x / length, y: direction.y / length }
+      }
+      this.network.update(
+        { ...next, dx: this.facing.x, dy: this.facing.y, moving },
+        { avatar: controls.avatar, name: controls.avatarName, color: controls.avatarColor },
+        controls.multiplayerEnabled !== false, performance.now(),
+      )
       if (moving) this.gait += delta / 100
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       const bounce = 0 // Hops are already drawn into the sprite frames.
-      this.blobAvatar.update(this.blob, direction, moving, reducedMotion, delta)
+      this.blobAvatar.update(this.blob, direction, moving, reducedMotion, delta, controls.avatar)
       this.blob
         .setTint(Number.parseInt(controls.avatarColor.slice(1), 16))
         .setPosition(next.x, next.y)
@@ -238,6 +272,7 @@ export function createWorld(
           .setAlpha(labelAlpha)
           .setVisible(Boolean(controls.avatarName) && labelAlpha > 0.01)
       }
+      this.remoteAvatars.update(this.network, performance.now(), delta, reducedMotion, labelScaleX, labelScaleY, fade * fade * (3 - 2 * fade))
       const targetX = controls.overview ? WIDTH / 2 : next.x
       const targetY = controls.overview ? HEIGHT / 2 : next.y - 38 / zoom
       const halfWidth = screenWidth / zoom / 2,
@@ -341,6 +376,7 @@ export function createWorld(
           behind,
           moving,
           fps: Math.round(this.game.loop.actualFps),
+          multiplayer: this.network.status,
         })
       }
     }

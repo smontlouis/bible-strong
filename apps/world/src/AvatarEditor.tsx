@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { AVATARS, NAME_LIMIT, parseProfile, type AvatarProfile } from './avatar-profile'
+import {
+  AVATARS,
+  NAME_LIMIT,
+  parseProfile,
+  type AvatarProfile,
+  type AvatarId,
+} from './avatar-profile'
 import './avatar-editor.css'
 
 export const profileCopy = {
@@ -51,14 +57,15 @@ const COLORS = [
   '#a2ce86',
 ]
 
-export function AvatarPreview({ color }: { color: string }) {
+export function AvatarPreview({ color, avatar }: { color: string; avatar: AvatarId }) {
+  const image = (AVATARS.find(item => item.id === avatar) ?? AVATARS[0]).image
   return (
     <span
       className="avatar-art"
-      style={{ '--avatar-color': color } as CSSProperties}
+      style={{ '--avatar-color': color, '--avatar-image': `url("${image}")` } as CSSProperties}
       aria-hidden="true"
     >
-      <img src={AVATARS[0].image} alt="" draggable={false} />
+      <img src={image} alt="" draggable={false} />
     </span>
   )
 }
@@ -103,7 +110,7 @@ export function AvatarEditor({
           <span className="avatar-stage-star" aria-hidden="true">
             ✦
           </span>
-          <AvatarPreview color={draft.color} />
+          <AvatarPreview color={draft.color} avatar={draft.avatar} />
           <span className="avatar-stage-name">{draft.name.trim() || t.guest}</span>
         </div>
         <form
@@ -142,9 +149,9 @@ export function AvatarEditor({
                   aria-pressed={draft.avatar === avatar.id}
                   onClick={() => setDraft({ ...draft, avatar: avatar.id })}
                 >
-                  <AvatarPreview color={draft.color} />
+                  <AvatarPreview color={draft.color} avatar={avatar.id} />
                   <span>{avatar.name}</span>
-                  <span aria-hidden="true">✓</span>
+                  <span aria-hidden="true">{draft.avatar === avatar.id ? '✓' : ''}</span>
                 </button>
               ))}
             </div>

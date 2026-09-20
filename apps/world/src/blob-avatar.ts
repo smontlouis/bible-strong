@@ -1,7 +1,8 @@
+import type { AvatarId } from './avatar-profile'
 import type Phaser from 'phaser'
 import type { Point } from './world'
 
-const ROOT = './assets/avatars/blob'
+const ROOT = './assets/avatars'
 const FRAME_COUNT = 24
 const FRAME_RATE = 24
 const CYCLE_MS = (FRAME_COUNT / FRAME_RATE) * 1000
@@ -11,12 +12,14 @@ const DISPLAY_SIZE = { down: 52, up: 52, right: 65 } as const
 type Facing = 'down' | 'up' | 'right' | 'left'
 
 export function loadBlobAvatar(scene: Phaser.Scene) {
-  for (const direction of ['down', 'up', 'right']) {
-    scene.load.spritesheet(`blob-${direction}`, `${ROOT}/${direction}.png`, {
-      frameWidth: 256,
-      frameHeight: 256,
-    })
-    scene.load.image(`blob-idle-${direction}`, `${ROOT}/idle-${direction}.png`)
+  for (const shape of ['blob', 'short-slime', 'rounded-square']) {
+    for (const direction of ['down', 'up', 'right']) {
+      scene.load.spritesheet(`${shape}-${direction}`, `${ROOT}/${shape}/${direction}.png`, {
+        frameWidth: 256,
+        frameHeight: 256,
+      })
+      scene.load.image(`${shape}-idle-${direction}`, `${ROOT}/${shape}/idle-${direction}.png`)
+    }
   }
 }
 
@@ -35,7 +38,8 @@ export class BlobAvatar {
     direction: Point,
     moving: boolean,
     reducedMotion: boolean,
-    delta: number
+    delta: number,
+    avatar: AvatarId
   ) {
     if (moving) {
       const facing =
@@ -52,13 +56,17 @@ export class BlobAvatar {
     const animated = moving && !reducedMotion
     this.elapsed = animated ? (this.elapsed + Math.min(delta, 50)) % CYCLE_MS : 0
     const sheet = this.facing === 'left' ? 'right' : this.facing
-    const texture = `blob-${animated ? '' : 'idle-'}${sheet}`
+    const shape = avatar === 'nova' ? 'blob' : avatar
+    const texture = `${shape}-${animated ? '' : 'idle-'}${sheet}`
     const frame = animated ? Math.floor((this.elapsed * FRAME_RATE) / 1000) % FRAME_COUNT : '__BASE'
     if (sprite.texture.key !== texture) sprite.setTexture(texture, frame)
     else if (String(sprite.frame.name) !== String(frame)) sprite.setFrame(frame)
     sprite
       .setFlipX(this.facing === 'left')
-      .setOrigin(0.5, sheet === 'right' ? 218 / 224 : 550 / 576)
-      .setDisplaySize(DISPLAY_SIZE[sheet], DISPLAY_SIZE[sheet])
+      .setOrigin(0.5, avatar !== 'nova' ? 229 / 256 : sheet === 'right' ? 218 / 224 : 550 / 576)
+      .setDisplaySize(
+        avatar !== 'nova' ? 52 : DISPLAY_SIZE[sheet],
+        avatar !== 'nova' ? 52 : DISPLAY_SIZE[sheet]
+      )
   }
 }

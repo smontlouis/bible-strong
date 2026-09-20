@@ -422,3 +422,8 @@ select {
 .diagnostic-filter-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
 .diagnostic-filter-options label { display: flex; align-items: center; gap: 5px; cursor: pointer; min-height: 24px; }
 .diagnostic-filter-options input { accent-color: #7fe2bf; }
+
+.world-presence { display: flex; align-items: center; justify-content: flex-end; gap: 7px; max-width: 240px; margin-top: 8px; padding: 7px 10px; border-radius: 12px; background: #fff9eae8; color: #193d49; font-size: 11px; line-height: 1.4; }
+.presence-dot { width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: #c38937; }
+.world-presence[data-state="online"] .presence-dot { background: #23826d; }
+.world-presence button { border: 0; padding: 2px; color: inherit; background: none; text-decoration: underline; cursor: pointer; }

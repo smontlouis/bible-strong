@@ -1,8 +1,11 @@
 export const PROFILE_KEY = 'bible-strong.world.profile.v1'
 export const AVATARS = [
-  { id: 'nova', name: 'Blob', image: './assets/avatars/blob/thumbnail.png' },
+  { id: 'nova', name: 'Citron', image: './assets/avatars/blob/thumbnail.png' },
+  { id: 'short-slime', name: 'Short slime', image: './assets/avatars/short-slime/thumbnail.png' },
+  { id: 'rounded-square', name: 'Cubo', image: './assets/avatars/rounded-square/thumbnail.png' },
 ] as const
-export type AvatarProfile = { avatar: 'nova'; name: string; color: string }
+export type AvatarId = (typeof AVATARS)[number]['id']
+export type AvatarProfile = { avatar: AvatarId; name: string; color: string }
 export const DEFAULT_PROFILE: AvatarProfile = { avatar: 'nova', name: '', color: '#73cdd0' }
 export const NAME_LIMIT = 24
 
@@ -10,7 +13,7 @@ export function parseProfile(value: unknown): AvatarProfile | null {
   if (!value || typeof value !== 'object') return null
   const profile = value as Record<string, unknown>
   if (
-    profile.avatar !== 'nova' ||
+    !AVATARS.some(avatar => avatar.id === profile.avatar) ||
     typeof profile.name !== 'string' ||
     typeof profile.color !== 'string' ||
     !/^#[0-9a-f]{6}$/i.test(profile.color)
@@ -21,7 +24,7 @@ export function parseProfile(value: unknown): AvatarProfile | null {
     .trim()
     .slice(0, NAME_LIMIT)
   if (!name) return null
-  return { avatar: 'nova', name, color: profile.color.toLowerCase() }
+  return { avatar: profile.avatar as AvatarId, name, color: profile.color.toLowerCase() }
 }
 
 export function loadProfile(): AvatarProfile | null {

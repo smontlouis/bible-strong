@@ -12,6 +12,10 @@ yarn dev:world
 
 Open http://localhost:5186. On a phone on the same network, use the Network address printed by Vite. No account, API keys, AI service or database is required. The app is the `@bible-strong/world` workspace under `apps/world`.
 
+## Multiplayer
+
+Visitors now share an event room with live avatars, names and colors. `yarn dev:world` starts both the frontend and the local multiplayer Worker. See [multiplayer operation and validation](docs/multiplayer.md) for deployment, network behavior and load checks.
+
 ## Edit navigation zones
 
 Use **Éditer les zones / Edit zones** at the bottom of the screen. The editor loads Leaflet + Geoman Free on demand, over the same image with pixel coordinates (Leaflet latitude is `-y`, longitude is `x`).

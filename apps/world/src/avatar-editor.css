@@ -3,7 +3,7 @@
   width: 100%;
   height: 100%;
   background: var(--avatar-color);
-  mask: url('/assets/avatars/blob/thumbnail.png') center / contain no-repeat;
+  mask: var(--avatar-image) center / contain no-repeat;
 }
 .avatar-art img {
   display: block;
@@ -180,6 +180,15 @@
   margin: 21px 0 0;
   padding: 0;
   min-width: 0;
+}
+.avatar-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.avatar-option[aria-pressed='false'] {
+  background: transparent;
+  border-color: #d6ded6;
 }
 .avatar-option {
   display: flex;

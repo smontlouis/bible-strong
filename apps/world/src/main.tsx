@@ -25,6 +25,11 @@ const ZoneEditor = lazy(() => import('./ZoneEditor'))
 
 const copy = {
   fr: {
+    online: 'dans le monde',
+    connecting: 'Connexion au monde…',
+    offline: 'Reconnexion… Tu peux continuer à explorer.',
+    full: 'Le monde est complet pour le moment.',
+    retry: 'Réessayer',
     title: 'Un monde à explorer',
     brand: 'Bible Strong',
     hint: 'Déplace ton avatar avec le joystick.',
@@ -51,6 +56,11 @@ const copy = {
     walked: 'lieux visités',
   },
   en: {
+    online: 'in the world',
+    connecting: 'Connecting to the world…',
+    offline: 'Reconnecting… You can keep exploring.',
+    full: 'The world is full at the moment.',
+    retry: 'Try again',
     title: 'A world to explore',
     brand: 'Bible Strong',
     hint: 'Move your avatar with the joystick.',
@@ -156,6 +166,7 @@ function App() {
     ambientEditor,
     navigation: initial.document,
     direction: { x: 0, y: 0 },
+    avatar: profile.avatar,
     avatarColor: profile.color,
     avatarName: profile.name,
     paused: !savedProfile,
@@ -248,12 +259,14 @@ function App() {
   }, [])
 
   useEffect(() => {
+    controls.current.avatar = profile.avatar
     controls.current.avatarColor = profile.color
     controls.current.avatarName = profile.name
     controls.current.overview = overview
     controls.current.debug = debug
     controls.current.diagnosticFilters = diagnosticFilters
     controls.current.paused = Boolean(opened) || Boolean(editorMode) || profileOpen
+    controls.current.multiplayerEnabled = !editorMode
     controls.current.navigation = navigation
     controls.current.direction = { x: 0, y: 0 }
   }, [profile, profileOpen, overview, debug, diagnosticFilters, opened, editorMode, navigation])
@@ -363,12 +376,21 @@ function App() {
               setProfileOpen(true)
             }}
           >
-            <AvatarPreview color={profile.color} />
+            <AvatarPreview color={profile.color} avatar={profile.avatar} />
             <span className="profile-button-copy">
               <strong>{profile.name || profileCopy[language].guest}</strong>
               <small>{profileCopy[language].edit} ↗</small>
             </span>
           </button>
+          {ready && profile.name && !editorMode && (
+            <div className="world-presence" data-state={state.multiplayer?.state ?? 'connecting'} role="status" aria-live="polite">
+              <span className="presence-dot" aria-hidden="true" />
+              <span>{state.multiplayer?.state === 'online'
+                ? `${state.multiplayer.count} ${t.online}`
+                : t[state.multiplayer?.state ?? 'connecting']}</span>
+              {state.multiplayer?.state === 'full' && <button onClick={() => controls.current.retryMultiplayer?.()}>{t.retry}</button>}
+            </div>
+          )}
           {profileStorageError && (
             <span className="profile-storage-error" role="status">
               {profileCopy[language].storage}

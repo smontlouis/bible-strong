@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "lib": ["ES2022", "DOM"], "module": "ESNext",
+    "moduleResolution": "Bundler", "strict": true, "skipLibCheck": true,
+    "resolveJsonModule": true, "esModuleInterop": true, "noEmit": true, "types": ["@cloudflare/workers-types"]
+  },
+  "include": ["server", "src/multiplayer-protocol.ts", "src/avatar-profile.ts"]
+}

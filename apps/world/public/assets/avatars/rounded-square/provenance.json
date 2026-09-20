@@ -1,0 +1,12 @@
+{
+  "source": "Approved imagegen rounded-square sheets",
+  "idleFrame": 3,
+  "frames": 24,
+  "columns": 6,
+  "rows": 4,
+  "frameSize": 256,
+  "frameRate": 24,
+  "originY": 0.89453125,
+  "left": "Mirror right",
+  "processing": "Remove green, neutralize RGB for tint, center and align row baselines"
+}

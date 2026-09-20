@@ -1,0 +1,137 @@
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+const sockets = vi.hoisted(() => [] as any[])
+vi.mock('partysocket', () => ({
+  default: class extends EventTarget {
+    readyState = 0
+    bufferedAmount = 0
+    sent: any[] = []
+    reconnect = vi.fn()
+    constructor() {
+      super()
+      sockets.push(this)
+    }
+    send(value: string) {
+      this.sent.push(JSON.parse(value))
+    }
+    close() {
+      this.readyState = 3
+      this.dispatchEvent(new Event('close'))
+    }
+    open() {
+      this.readyState = 1
+      this.dispatchEvent(new Event('open'))
+    }
+    receive(message: unknown) {
+      this.dispatchEvent(new MessageEvent('message', { data: JSON.stringify(message) }))
+    }
+  },
+}))
+import { WorldMultiplayer } from './multiplayer'
+const pose = { x: 836, y: 542, dx: 1, dy: 0, moving: true }
+const profile = { avatar: 'nova' as const, name: 'Visitor', color: '#73cdd0' }
+let network: WorldMultiplayer
+let doc: EventTarget & { hidden: boolean }
+beforeEach(() => {
+  vi.useFakeTimers()
+  sockets.length = 0
+  doc = Object.assign(new EventTarget(), { hidden: false })
+  vi.stubGlobal('document', doc)
+  vi.stubGlobal('window', { setInterval, clearInterval })
+  vi.stubGlobal('location', { host: 'localhost:8791' })
+  vi.stubGlobal('WebSocket', { OPEN: 1 })
+  network = new WorldMultiplayer()
+})
+afterEach(() => {
+  network.destroy()
+  vi.useRealTimers()
+  vi.unstubAllGlobals()
+})
+function join() {
+  network.update(pose, profile, true, 0)
+  const socket = sockets[0]
+  socket.open()
+  socket.receive({ type: 'welcome', id: 'local', spawn: pose, players: [] })
+  network.takeSpawn()
+  return socket
+}
+it('sends a fresh join and never queues movement while disconnected', () => {
+  network.update(pose, profile, true, 0)
+  expect(sockets[0].sent).toHaveLength(0)
+  sockets[0].open()
+  expect(sockets[0].sent[0]).toMatchObject({ type: 'join', pose })
+  sockets[0].receive({ type: 'welcome', id: 'local', spawn: pose, players: [] })
+  network.takeSpawn()
+  network.update(pose, profile, true, 100)
+  sockets[0].close()
+  network.update({ ...pose, x: 850 }, profile, true, 200)
+  expect(sockets[0].sent).toHaveLength(2)
+  sockets[0].open()
+  expect(sockets[0].sent.at(-1)).toMatchObject({ type: 'join', pose: { x: 850 } })
+})
+it('throttles motion but sends the final stop immediately', () => {
+  const socket = join()
+  network.update(pose, profile, true, 100)
+  network.update({ ...pose, x: 837 }, profile, true, 110)
+  expect(socket.sent.filter((m: any) => m.type === 'move')).toHaveLength(1)
+  network.update({ ...pose, x: 837, moving: false }, profile, true, 115)
+  expect(socket.sent.at(-1)).toMatchObject({ type: 'move', pose: { x: 837, moving: false } })
+})
+it('retries an unsent final position after backpressure clears', () => {
+  const socket = join()
+  socket.bufferedAmount = 20_000
+  network.update({ ...pose, moving: false }, profile, true, 100)
+  expect(socket.sent).toHaveLength(1)
+  socket.bufferedAmount = 0
+  network.update({ ...pose, moving: false }, profile, true, 200)
+  expect(socket.sent.at(-1)).toMatchObject({ type: 'move', pose: { moving: false } })
+})
+it('handles batched frames, departures, and clears ghosts on disconnect', () => {
+  const socket = join()
+  const remote = { id: 'remote', profile, pose, seq: 1 }
+  socket.receive({ type: 'frame', players: [{ ...remote, id: 'local' }, remote] })
+  expect(network.status).toEqual({ state: 'online', count: 2 })
+  expect(network.remotes.size).toBe(1)
+  socket.receive({ type: 'leave', id: 'remote' })
+  expect(network.status.count).toBe(1)
+  socket.close()
+  expect(network.status.state).toBe('offline')
+  expect(network.remotes.size).toBe(0)
+})
+it('leaves in the background and rejoins; editors stay disconnected', () => {
+  join()
+  doc.hidden = true
+  doc.dispatchEvent(new Event('visibilitychange'))
+  expect(sockets[0].readyState).toBe(3)
+  doc.hidden = false
+  doc.dispatchEvent(new Event('visibilitychange'))
+  expect(sockets).toHaveLength(2)
+  network.update(pose, profile, false, 100)
+  doc.hidden = true
+  doc.dispatchEvent(new Event('visibilitychange'))
+  doc.hidden = false
+  doc.dispatchEvent(new Event('visibilitychange'))
+  expect(sockets).toHaveLength(2)
+})
+it('does not retry a full room until explicitly requested', () => {
+  const socket = join()
+  socket.receive({ type: 'full' })
+  network.update(pose, profile, true, 100)
+  expect(network.status.state).toBe('full')
+  expect(sockets).toHaveLength(1)
+  network.retry()
+  expect(sockets).toHaveLength(2)
+})
+
+it('applies the reserved server position before publishing any local movement', () => {
+  network.update(pose, profile, true, 0)
+  const socket = sockets[0]
+  socket.open()
+  const spawn = { ...pose, x: 720, y: 470, moving: false }
+  socket.receive({ type: 'welcome', id: 'local', spawn, players: [] })
+  network.update(pose, profile, true, 100)
+  expect(socket.sent.filter((m: any) => m.type === 'move')).toHaveLength(0)
+  expect(network.takeSpawn()).toEqual(spawn)
+  expect(network.takeSpawn()).toBeNull()
+  network.update(spawn, profile, true, 200)
+  expect(socket.sent.at(-1)).toMatchObject({ type: 'move', pose: spawn })
+})

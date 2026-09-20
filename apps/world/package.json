@@ -5,24 +5,31 @@
   "packageManager": "yarn@4.12.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0 --port 5186",
-    "build": "tsc --noEmit && vite build",
-    "lint": "tsc --noEmit",
+    "dev": "node scripts/dev.mjs",
+    "build": "yarn typecheck && vite build",
+    "lint": "yarn typecheck",
     "segment:benchmark": "node scripts/benchmark-sam3.mjs",
     "segment:build": "node scripts/build-sam3-occluders.mjs",
     "tiles": "node scripts/generate-map-tiles.mjs",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run --config vitest.config.ts"
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json",
+    "test": "vitest run --config vitest.config.ts",
+    "dev:multiplayer": "wrangler dev --assets public --port 8791",
+    "deploy": "yarn build && wrangler deploy",
+    "test:multiplayer": "node scripts/test-multiplayer.mjs",
+    "dev:client": "vite --host 0.0.0.0 --port 5186"
   },
   "dependencies": {
     "@geoman-io/leaflet-geoman-free": "^2.20.1",
     "leaflet": "1.9.4",
     "nipplejs": "1.0.4",
+    "partyserver": "^0.5.10",
+    "partysocket": "^1.3.0",
     "phaser": "3.90.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260920.1",
     "@fal-ai/client": "^1.10.1",
     "@types/leaflet": "^1.9.22",
     "@types/node": "^24.13.3",
@@ -32,6 +39,7 @@
     "sharp": "^0.35.2",
     "typescript": "~6.0.3",
     "vite": "^8.0.13",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "wrangler": "^4.135.0"
   }
 }
