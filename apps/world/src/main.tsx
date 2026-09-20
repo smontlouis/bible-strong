@@ -19,6 +19,7 @@ import { ComparisonsDiscovery } from './ComparisonsDiscovery'
 import { CommentariesDiscovery } from './CommentariesDiscovery'
 import { AvatarEditor, AvatarPreview, profileCopy } from './AvatarEditor'
 import { DEFAULT_PROFILE, loadProfile, saveProfile } from './avatar-profile'
+import { loadVisitedPlaces, saveVisitedPlaces } from './visited-places'
 import './style.css'
 const ZoneEditor = lazy(() => import('./ZoneEditor'))
 
@@ -178,7 +179,10 @@ function App() {
   const [diagnosticFilters, setDiagnosticFilters] = useState(() => makeDiagnosticFilters())
   const [language, setLanguage] = useState<Language>('fr')
   const [opened, setOpened] = useState<WorldState['station']>(null)
-  const [visited, setVisited] = useState<string[]>([])
+  const [visited, setVisited] = useState(loadVisitedPlaces)
+  useEffect(() => {
+    saveVisitedPlaces(visited)
+  }, [visited])
   const t = copy[language]
   const name = (station: (typeof stations)[number]) =>
     language === 'fr' ? station.name : station[language]

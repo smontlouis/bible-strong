@@ -141,7 +141,7 @@ export function createWorld(
       // Keep the label above scenery and clouds, independently of the avatar's depth.
       this.nameTagBackground = this.add.graphics().setDepth(4000)
       this.nameTag = this.add.text(SPAWN.x, SPAWN.y + 5, '', {
-        fontFamily: 'Pulp, sans-serif', fontSize: '10px', color: '#193d49',
+        fontFamily: 'Pulp, sans-serif', fontSize: '12px', color: '#193d49',
         padding: { x: 5, y: 3 },
       }).setOrigin(0.5, 0).setResolution(rendererResolution).setDepth(4001)
       this.debugLayer = this.add.graphics().setDepth(3000)
@@ -205,8 +205,6 @@ export function createWorld(
           -this.nameTag.width / 2, 0, this.nameTag.width, this.nameTag.height, 4,
         )
       }
-      this.nameTag.setPosition(next.x, next.y + 5).setVisible(Boolean(controls.avatarName))
-      this.nameTagBackground.setPosition(next.x, next.y + 5).setVisible(Boolean(controls.avatarName))
       this.shadow.setPosition(next.x, next.y)
 
       const station = stationAt(next, controls.navigation)
@@ -225,6 +223,21 @@ export function createWorld(
           ? Math.min(screenWidth / SCENERY_WIDTH, screenHeight / SCENERY_HEIGHT) * 0.98
           : Math.max(1.2, screenHeight / HEIGHT) * controls.zoom
       camera.setZoom(zoom)
+      // Keep label dimensions and spacing fixed in screen pixels as the world zooms.
+      const labelScaleX = screenWidth / parent.clientWidth / zoom
+      const labelScaleY = screenHeight / parent.clientHeight / zoom
+      const relativeZoom = zoom / Math.max(1.2, screenHeight / HEIGHT)
+      const fade = Phaser.Math.Clamp((relativeZoom - 0.65) / 0.2, 0, 1)
+      const targetAlpha = controls.avatarName ? fade * fade * (3 - 2 * fade) : 0
+      const labelAlpha = Phaser.Math.Linear(
+        this.nameTag.alpha, targetAlpha, 1 - Math.exp(-Math.min(delta, 50) / 100),
+      )
+      for (const label of [this.nameTag, this.nameTagBackground]) {
+        label.setPosition(next.x, next.y + 5 * labelScaleY)
+          .setScale(labelScaleX, labelScaleY)
+          .setAlpha(labelAlpha)
+          .setVisible(Boolean(controls.avatarName) && labelAlpha > 0.01)
+      }
       const targetX = controls.overview ? WIDTH / 2 : next.x
       const targetY = controls.overview ? HEIGHT / 2 : next.y - 38 / zoom
       const halfWidth = screenWidth / zoom / 2,
