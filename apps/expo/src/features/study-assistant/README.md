@@ -195,3 +195,13 @@ produced text only after audio-done (11.8s); enabling interims produced the firs
 partial at 1.4s and subsequent updates during speech. The original smoke test
 checked frame types but not their arrival before audio-done. Regression tests now
 cover the server option and its forwarding before capture frames.
+
+### Opening public resource tabs
+
+An explicit navigation request can open Bible/comparison, Bible-text search, Strong,
+Nave, dictionary, passage/resource commentary, timeline or public plan/meditation
+content. `open_public_tab` opts into the extended schema; legacy `open_tab` clients
+keep passage-only actions. The UI revalidates each action before creating a fresh
+existing tab. No personal destinations or arbitrary routes are accepted. Search
+initializes passage-only filters, and editorial reading tabs load with no enrollment
+or progress write. See ADR-0058 for the public/private boundary.

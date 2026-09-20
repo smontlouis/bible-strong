@@ -1,3 +1,9 @@
+import { parsePublicTabAction, type PublicOpenTabAction } from './publicTabActions'
+export {
+  PUBLIC_TAB_TARGET_SCHEMAS,
+  type PublicOpenTabAction,
+  type PublicTabType,
+} from './publicTabActions'
 import { parseStudyWidget, type StudyWidget } from './widgets'
 export {
   parseStudyWidget,
@@ -20,7 +26,7 @@ import { parseStudySource, type StudySource } from './sources'
 export { parseStudySource, sourceLink, sourceIdFromLink, type StudySource } from './sources'
 export const STREAM_VERSION = 1
 export type HistoryMessage = { role: 'user' | 'assistant'; content: string }
-export const CLIENT_CAPABILITIES = ['open_tab'] as const
+export const CLIENT_CAPABILITIES = ['open_tab', 'open_public_tab'] as const
 export type ClientCapability = (typeof CLIENT_CAPABILITIES)[number]
 export const STUDY_SURFACE_KINDS = [
   'passage',
@@ -86,12 +92,13 @@ export type PassageTabTarget = {
   version: string
   isWholeChapter?: boolean
 }
-export type OpenTabAction = {
+export type PassageOpenTabAction = {
   id: string
   kind: 'open_tab'
   tabType: 'bible' | 'compare'
   target: PassageTabTarget
 }
+export type OpenTabAction = PassageOpenTabAction | PublicOpenTabAction
 export type AssistantAction = OpenTabAction
 export type StudyEvent =
   | { type: 'widget'; widget: StudyWidget }
@@ -311,14 +318,15 @@ export function parseAssistantAction(value: unknown): AssistantAction {
     Object.keys(action).some(key => !['id', 'kind', 'tabType', 'target'].includes(key)) ||
     typeof action.id !== 'string' ||
     !/^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$/u.test(action.id) ||
-    action.kind !== 'open_tab' ||
-    !['bible', 'compare'].includes(String(action.tabType))
+    action.kind !== 'open_tab'
   )
     throw new Error('INVALID_ACTION')
+  if (action.tabType !== 'bible' && action.tabType !== 'compare')
+    return parsePublicTabAction(action.id, action.tabType, action.target)
   return {
     id: action.id,
     kind: 'open_tab',
-    tabType: action.tabType as OpenTabAction['tabType'],
+    tabType: action.tabType,
     target: parsePassageTabTarget(action.target),
   }
 }

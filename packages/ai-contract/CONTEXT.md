@@ -11,3 +11,5 @@
 **Default Strong Bible** — The configured indexed edition for concordance or a separately attributed alternative when the open edition has no published word alignment.
 
 **Open reading version** — The edition of the passage attached to a Study request, independently of both defaults.
+
+**Public tab action** — An explicit request to navigate to public editorial content in a new application tab, excluding user-owned items and participation changes.
