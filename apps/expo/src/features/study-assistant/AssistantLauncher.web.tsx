@@ -452,7 +452,6 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
         {ready &&
           createPortal(
             <Modal.Anchor className="bs-assistant-anchor" style={vars}>
-              {!open && context && <span className="bs-assistant-hint">{context.label}</span>}
               <Modal.Trigger
                 className="bs-assistant-avatar"
                 aria-label={t(open ? 'assistant.modal.close' : 'assistant.modal.open')}

@@ -492,7 +492,7 @@
 @media (max-width: 600px) {
   .bs-assistant-anchor {
     right: 14px;
-    bottom: 16px;
+    bottom: calc(64px + env(safe-area-inset-bottom));
   }
   .bs-assistant-avatar {
     --bs-assistant-avatar-size: 52px;
