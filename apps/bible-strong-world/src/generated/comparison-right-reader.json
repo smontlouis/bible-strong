@@ -1,0 +1,35 @@
+{
+  "frameRate": 12,
+  "frameCount": 120,
+  "duration": 10,
+  "x": 887.3317307692307,
+  "y": 686.23046875,
+  "width": 85.9375,
+  "height": 127.32421875,
+  "depth": 812.1,
+  "synchronize": true,
+  "pages": [
+    {
+      "key": "reader-0",
+      "firstFrame": 0,
+      "frameCount": 88,
+      "width": 1936,
+      "height": 2048
+    },
+    {
+      "key": "reader-1",
+      "firstFrame": 88,
+      "frameCount": 32,
+      "width": 1936,
+      "height": 768
+    }
+  ],
+  "sourceCrop": {
+    "left": 803,
+    "top": 117,
+    "width": 325,
+    "height": 477,
+    "videoWidth": 1248,
+    "videoHeight": 768
+  }
+}

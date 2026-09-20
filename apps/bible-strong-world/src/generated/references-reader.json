@@ -1,0 +1,28 @@
+{
+  "frameRate": 12,
+  "frameCount": 120,
+  "duration": 10,
+  "x": 1313.6778846153845,
+  "y": 199.296875,
+  "width": 82.65625,
+  "height": 98.1640625,
+  "depth": 290.1,
+  "synchronize": false,
+  "pages": [
+    {
+      "key": "reader-0",
+      "firstFrame": 0,
+      "frameCount": 120,
+      "width": 2028,
+      "height": 2020
+    }
+  ],
+  "sourceCrop": {
+    "left": 158,
+    "top": 162,
+    "width": 299,
+    "height": 359,
+    "videoWidth": 832,
+    "videoHeight": 768
+  }
+}

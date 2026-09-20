@@ -81,6 +81,10 @@ yarn workspace @bible-strong/world tiles /absolute/path/to/upscale.png
 
 This command preserves the logical 1671 × 941 coordinate system, writes the lightweight preview and 2×/4× tiles under `public/assets/map`, and updates `src/generated/map-tiles.json`. The high-resolution source remains outside the repository.
 
+The world also has a repeating water background and generated perimeter completions. See [background artwork](docs/background-assets.md) for asset provenance, prompts, layer placement and the offline rebuild command. These decorations keep the original map and navigation coordinates intact.
+
+The high-resolution source can be kept locally under the ignored `art-workbench/sources/` directory. [Character experiments](docs/character-experiments.md) documents the first crop → illustrated reader → MiniMax video experiment; these files are not part of the web build.
+
 ## Benchmark the new occlusion masks
 
 Put `FAL_KEY=…` in the ignored repository-root `.env`, then run the ten-object SAM 3 pilot against the same upscale used for the map:

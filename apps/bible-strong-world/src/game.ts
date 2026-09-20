@@ -1,5 +1,9 @@
 import Phaser from 'phaser'
 import { MapTileStreamer } from './map-tile-streamer'
+import { SCENERY_HEIGHT, SCENERY_WIDTH, WorldBackground } from './world-background'
+import { WATER_VARIANTS } from './water-decorations'
+import { createWorldReaders, loadWorldReaders } from './world-readers'
+import type { AnimatedReader } from './animated-reader'
 import {
   HEIGHT,
   WIDTH,
@@ -49,6 +53,8 @@ export function createWorld(
     focus!: Phaser.GameObjects.Ellipse
     debugLayer!: Phaser.GameObjects.Graphics
     mapTiles!: MapTileStreamer
+    background!: WorldBackground
+    readers!: AnimatedReader[]
     keys!: Record<string, Phaser.Input.Keyboard.Key>
     lastReset = 0
     lastPublished = 0
@@ -68,6 +74,12 @@ export function createWorld(
     }
 
     preload() {
+      loadWorldReaders(this)
+      this.load.image('world-water', './assets/map/water.webp')
+      for (const variant of WATER_VARIANTS) {
+        this.load.image(`water-${variant}`, `./assets/map/water-${variant}.webp`)
+      }
+      this.load.image('world-shore', './assets/map/shore.webp')
       this.load.image('map-preview', './assets/map/preview.webp')
       for (const object of occluders) this.load.image(`occlusion-${object.id}`, object.url)
       for (const name of ['nova', 'citrus', 'strobi']) this.load.image(name, `./assets/${name}.png`)
@@ -76,11 +88,8 @@ export function createWorld(
 
     create() {
       this.position = findSafePosition(SPAWN, controls.navigation) ?? { ...SPAWN }
-      this.add
-        .image(0, 0, 'map-preview')
-        .setOrigin(0)
-        .setDisplaySize(WIDTH, HEIGHT)
-        .setDepth(-110)
+      this.background = new WorldBackground(this)
+      this.add.image(0, 0, 'map-preview').setOrigin(0).setDisplaySize(WIDTH, HEIGHT).setDepth(-110)
       this.mapTiles = new MapTileStreamer(this)
       occluders.forEach(object => {
         this.add
@@ -89,6 +98,7 @@ export function createWorld(
           .setDisplaySize(object.width, object.height)
           .setDepth(object.always ? 2000 : object.baseY)
       })
+      this.readers = createWorldReaders(this)
       this.shadow = this.add.ellipse(SPAWN.x, SPAWN.y, 30, 10, 0x183c45, 0.25).setDepth(-1)
       this.focus = this.add
         .ellipse(0, 0, 44, 18)
@@ -164,7 +174,7 @@ export function createWorld(
       const screenWidth = this.scale.width,
         screenHeight = this.scale.height
       const zoom = controls.overview
-        ? Math.min(screenWidth / WIDTH, screenHeight / HEIGHT) * 0.98
+        ? Math.min(screenWidth / SCENERY_WIDTH, screenHeight / SCENERY_HEIGHT) * 0.98
         : Math.max(1.2, screenHeight / HEIGHT) * controls.zoom
       camera.setZoom(zoom)
       const targetX = controls.overview ? WIDTH / 2 : next.x
@@ -181,11 +191,10 @@ export function createWorld(
       // Phaser zooms around the viewport center; scroll is relative to the unzoomed viewport.
       camera.scrollX += (centerX - screenWidth / 2 - camera.scrollX) * smoothing
       camera.scrollY += (centerY - screenHeight / 2 - camera.scrollY) * smoothing
-      this.mapTiles.update(
-        camera,
-        time,
-        controls.overview ? 1 : rendererResolution
-      )
+      this.background.update(camera)
+      for (const reader of this.readers)
+        reader.update(camera, controls.paused || !this.active || document.hidden)
+      this.mapTiles.update(camera, time, controls.overview ? 1 : rendererResolution)
 
       this.debugLayer.clear()
       if (controls.debug) {
