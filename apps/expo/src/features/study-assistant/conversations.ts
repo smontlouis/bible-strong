@@ -1,18 +1,16 @@
 import {
-  parseStudyWidget,
-  type StudyWidget,
-  parseStudySource,
-  type StudySource,
-  parseToolActivity,
   parseRoutingDecision,
+  parseStudySource,
+  parseStudySurfaceContext,
+  parseStudyWidget,
+  parseToolActivity,
   type RoutingDecision,
+  type StudySource,
+  type StudySurfaceContext,
+  type StudyWidget,
   type ToolActivity,
 } from '@bible-strong/ai-contract/contract'
 import { validCheckpoint, type MemoryCheckpoint } from './conversationMemory'
-import {
-  parseStudySurfaceContext,
-  type StudySurfaceContext,
-} from '@bible-strong/ai-contract/contract'
 
 export type ReadingContext = {
   bibleVersion?: string
@@ -34,6 +32,7 @@ export type ReadingContext = {
     | 'place'
     | 'timeline'
 }
+
 export type LocalMessage = {
   id: string
   role: 'user' | 'assistant'
@@ -46,39 +45,54 @@ export type LocalMessage = {
   context?: ReadingContext
   createdAt: number
 }
+
 export type Conversation = {
   memory?: MemoryCheckpoint
   id: string
   title: string
   updatedAt: number
   messages: LocalMessage[]
+  summaryMessageCount?: number
 }
-export type ConversationStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
-export const storageKey = (account: string) =>
-  `bible-strong.assistant.v1:${encodeURIComponent(account)}`
-export const followReadingPreferenceKey = (account: string) =>
-  `${storageKey(account)}:follow-reading`
-const MAX_CHARACTERS = 2_000_000
+
+export type ConversationMetadata = Omit<Conversation, 'messages' | 'summaryMessageCount'> & {
+  createdAt: number
+  messageCount: number
+  schemaVersion: 1
+}
+
+export type ConversationTurn = {
+  schemaVersion: 1
+  createdAt: number
+  user: LocalMessage
+  assistant: LocalMessage
+}
+
+export const MAX_CONVERSATIONS = 50
+export const MAX_MESSAGES = 300
+
 const isContext = (value: unknown): value is ReadingContext => {
   if (!value || typeof value !== 'object') return false
-  const c = value as ReadingContext
+  const context = value as ReadingContext
   let validActiveContext = true
   try {
-    parseStudySurfaceContext(c.activeContext)
+    parseStudySurfaceContext(context.activeContext)
   } catch {
     validActiveContext = false
   }
   return (
     validActiveContext &&
-    (c.bibleVersion === undefined ||
-      (typeof c.bibleVersion === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(c.bibleVersion))) &&
-    typeof c.key === 'string' &&
-    c.key.length < 1000 &&
-    typeof c.label === 'string' &&
-    c.label.length <= 500 &&
-    typeof c.detail === 'string' &&
-    c.detail.length <= 500 &&
-    (c.content === undefined || (typeof c.content === 'string' && c.content.length <= 12000)) &&
+    (context.bibleVersion === undefined ||
+      (typeof context.bibleVersion === 'string' &&
+        /^[A-Za-z0-9_-]{1,40}$/.test(context.bibleVersion))) &&
+    typeof context.key === 'string' &&
+    context.key.length < 1000 &&
+    typeof context.label === 'string' &&
+    context.label.length <= 500 &&
+    typeof context.detail === 'string' &&
+    context.detail.length <= 500 &&
+    (context.content === undefined ||
+      (typeof context.content === 'string' && context.content.length <= 12000)) &&
     [
       'passage',
       'word',
@@ -91,116 +105,191 @@ const isContext = (value: unknown): value is ReadingContext => {
       'person',
       'place',
       'timeline',
-    ].includes(c.kind)
+    ].includes(context.kind)
   )
 }
-export function loadConversations(storage: ConversationStorage, account: string): Conversation[] {
-  const raw = storage.getItem(storageKey(account))
-  if (!raw) return []
-  if (raw.length > MAX_CHARACTERS) throw new Error('LOCAL_HISTORY_INVALID')
-  const data: unknown = JSON.parse(raw)
-  if (!Array.isArray(data) || data.length > 50) throw new Error('LOCAL_HISTORY_INVALID')
-  return data.map((c: Conversation) => {
-    if (
-      !c ||
-      typeof c.id !== 'string' ||
-      c.id.length > 100 ||
-      typeof c.title !== 'string' ||
-      c.title.length > 120 ||
-      !Number.isFinite(c.updatedAt) ||
-      !Array.isArray(c.messages) ||
-      c.messages.length > 300
-    )
-      throw new Error('LOCAL_HISTORY_INVALID')
+
+export function parsePersistedMessage(value: unknown): LocalMessage {
+  if (!value || typeof value !== 'object') throw new Error('CLOUD_HISTORY_INVALID')
+  const message = value as LocalMessage
+  if (
+    typeof message.id !== 'string' ||
+    message.id.length > 100 ||
+    !['user', 'assistant'].includes(message.role) ||
+    typeof message.text !== 'string' ||
+    message.text.length > 60000 ||
+    (message.role === 'user' && message.text.length > 5000) ||
+    !Number.isFinite(message.createdAt) ||
+    !['complete', 'streaming', 'interrupted', 'error'].includes(message.state) ||
+    (message.context !== undefined && !isContext(message.context))
+  )
+    throw new Error('CLOUD_HISTORY_INVALID')
+  if (message.tools !== undefined && (!Array.isArray(message.tools) || message.tools.length > 6))
+    throw new Error('CLOUD_HISTORY_INVALID')
+  if (
+    message.routing !== undefined &&
+    (!Array.isArray(message.routing) || message.routing.length > 3)
+  )
+    throw new Error('CLOUD_HISTORY_INVALID')
+  if (
+    message.sources !== undefined &&
+    (!Array.isArray(message.sources) || message.sources.length > 6)
+  )
+    throw new Error('CLOUD_HISTORY_INVALID')
+  if (
+    message.widgets !== undefined &&
+    (!Array.isArray(message.widgets) || message.widgets.length > 6)
+  )
+    throw new Error('CLOUD_HISTORY_INVALID')
+
+  const widgets = message.widgets?.map(parseStudyWidget)
+  const sources = message.sources?.map(parseStudySource)
+  const routing = message.routing?.map(parseRoutingDecision)
+  const tools = message.tools?.map(item => {
+    const tool = parseToolActivity(item)
     return {
-      id: c.id,
-      title: c.title,
-      updatedAt: c.updatedAt,
-      ...(validCheckpoint(c.memory) ? { memory: c.memory } : {}),
-      messages: c.messages.map(m => {
-        if (
-          !m ||
-          typeof m.id !== 'string' ||
-          !['user', 'assistant'].includes(m.role) ||
-          typeof m.text !== 'string' ||
-          m.text.length > 60000 ||
-          !Number.isFinite(m.createdAt) ||
-          !['complete', 'streaming', 'interrupted', 'error'].includes(m.state) ||
-          (m.context !== undefined && !isContext(m.context))
-        )
-          throw new Error('LOCAL_HISTORY_INVALID')
-        if (m.tools !== undefined && (!Array.isArray(m.tools) || m.tools.length > 6))
-          throw new Error('LOCAL_HISTORY_INVALID')
-        if (m.routing !== undefined && (!Array.isArray(m.routing) || m.routing.length > 3))
-          throw new Error('LOCAL_HISTORY_INVALID')
-        if (m.sources !== undefined && (!Array.isArray(m.sources) || m.sources.length > 6))
-          throw new Error('LOCAL_HISTORY_INVALID')
-        if (m.widgets !== undefined && (!Array.isArray(m.widgets) || m.widgets.length > 6))
-          throw new Error('LOCAL_HISTORY_INVALID')
-        const widgets = m.widgets?.map(parseStudyWidget)
-        const sources = m.sources?.map(parseStudySource)
-        const routing = m.routing?.map(parseRoutingDecision)
-        const tools = m.tools?.map(value => {
-          const tool = parseToolActivity(value)
-          return {
-            ...tool,
-            state: tool.state === 'running' ? ('interrupted' as const) : tool.state,
-          }
-        })
-        return {
-          ...(tools ? { tools } : {}),
-          ...(routing ? { routing } : {}),
-          ...(sources ? { sources } : {}),
-          ...(widgets ? { widgets } : {}),
-          id: m.id,
-          role: m.role,
-          text: m.text,
-          state: m.state === 'streaming' ? 'interrupted' : m.state,
-          createdAt: m.createdAt,
-          ...(m.context ? { context: m.context } : {}),
-        }
-      }),
+      ...tool,
+      state: tool.state === 'running' ? ('interrupted' as const) : tool.state,
     }
   })
+  return {
+    ...(tools ? { tools } : {}),
+    ...(routing ? { routing } : {}),
+    ...(sources ? { sources } : {}),
+    ...(widgets ? { widgets } : {}),
+    id: message.id,
+    role: message.role,
+    text: message.text,
+    state: message.state === 'streaming' ? 'interrupted' : message.state,
+    createdAt: message.createdAt,
+    ...(message.context ? { context: message.context } : {}),
+  }
 }
-export function saveConversations(
-  storage: ConversationStorage,
-  account: string,
-  conversations: Conversation[]
-) {
-  if (conversations.length > 50 || conversations.some(c => c.messages.length > 300))
-    throw new Error('LOCAL_HISTORY_FULL')
-  const raw = JSON.stringify(conversations)
-  if (raw.length > MAX_CHARACTERS) throw new Error('LOCAL_HISTORY_FULL')
-  storage.setItem(storageKey(account), raw)
+
+export function parseConversationMetadata(id: string, value: unknown): ConversationMetadata {
+  if (!value || typeof value !== 'object') throw new Error('CLOUD_HISTORY_INVALID')
+  const metadata = value as Partial<ConversationMetadata>
+  if (
+    id.length > 100 ||
+    metadata.schemaVersion !== 1 ||
+    typeof metadata.title !== 'string' ||
+    metadata.title.length > 120 ||
+    !Number.isFinite(metadata.createdAt) ||
+    !Number.isFinite(metadata.updatedAt) ||
+    !Number.isInteger(metadata.messageCount) ||
+    metadata.messageCount! < 0 ||
+    metadata.messageCount! > MAX_MESSAGES
+  )
+    throw new Error('CLOUD_HISTORY_INVALID')
+  return {
+    id,
+    schemaVersion: 1,
+    title: metadata.title,
+    createdAt: metadata.createdAt!,
+    updatedAt: metadata.updatedAt!,
+    messageCount: metadata.messageCount!,
+    ...(validCheckpoint(metadata.memory) ? { memory: metadata.memory } : {}),
+  }
 }
+
+export function parseConversationTurn(value: unknown): ConversationTurn {
+  if (!value || typeof value !== 'object') throw new Error('CLOUD_HISTORY_INVALID')
+  const turn = value as Partial<ConversationTurn>
+  const user = parsePersistedMessage(turn.user)
+  const assistant = parsePersistedMessage(turn.assistant)
+  if (
+    turn.schemaVersion !== 1 ||
+    !Number.isFinite(turn.createdAt) ||
+    user.role !== 'user' ||
+    user.state !== 'complete' ||
+    assistant.role !== 'assistant' ||
+    assistant.state === 'streaming'
+  )
+    throw new Error('CLOUD_HISTORY_INVALID')
+  return { schemaVersion: 1, createdAt: turn.createdAt!, user, assistant }
+}
+
+export function hydrateConversation(
+  metadata: ConversationMetadata,
+  turns: ConversationTurn[]
+): Conversation {
+  const messages = turns.flatMap(turn => [turn.user, turn.assistant])
+  if (messages.length > MAX_MESSAGES || metadata.messageCount !== messages.length)
+    throw new Error('CLOUD_HISTORY_INVALID')
+  return {
+    id: metadata.id,
+    title: metadata.title,
+    updatedAt: metadata.updatedAt,
+    messages,
+    ...(metadata.memory ? { memory: metadata.memory } : {}),
+  }
+}
+
+export function latestCompletedTurn(conversation: Conversation): ConversationTurn | undefined {
+  const user = conversation.messages.at(-2)
+  const assistant = conversation.messages.at(-1)
+  if (
+    !user ||
+    !assistant ||
+    user.role !== 'user' ||
+    user.state !== 'complete' ||
+    assistant.role !== 'assistant' ||
+    assistant.state === 'streaming'
+  )
+    return undefined
+  return { schemaVersion: 1, createdAt: user.createdAt, user, assistant }
+}
+
+export function persistableTurns(conversation: Conversation): ConversationTurn[] {
+  const turns: ConversationTurn[] = []
+  for (let index = 0; index < conversation.messages.length; index += 2) {
+    const user = conversation.messages[index]
+    const assistant = conversation.messages[index + 1]
+    if (!user || !assistant || assistant.state === 'streaming') continue
+    const turn = parseConversationTurn({
+      schemaVersion: 1,
+      createdAt: user.createdAt,
+      user,
+      assistant,
+    })
+    turns.push(turn)
+  }
+  return turns
+}
+
+export function conversationMetadata(conversation: Conversation): ConversationMetadata {
+  return parseConversationMetadata(conversation.id, {
+    schemaVersion: 1,
+    title: conversation.title,
+    createdAt: conversation.messages[0]?.createdAt ?? conversation.updatedAt,
+    updatedAt: conversation.updatedAt,
+    messageCount: persistableTurns(conversation).length * 2,
+    memory: conversation.memory,
+  })
+}
+
+export function assertConversationCapacity(conversations: Conversation[], current: Conversation) {
+  if (
+    current.messages.length > MAX_MESSAGES - 2 ||
+    (!current.messages.length && conversations.length >= MAX_CONVERSATIONS)
+  )
+    throw new Error('CLOUD_HISTORY_FULL')
+}
+
 export function newConversation(): Conversation {
   return { id: crypto.randomUUID(), title: '', updatedAt: Date.now(), messages: [] }
 }
 
-export function loadSelectedConversation(
-  storage: ConversationStorage,
-  account: string,
-  conversations: Conversation[]
-): Conversation | undefined {
-  const id = storage.getItem(`${storageKey(account)}:active`)
-  return id === null ? conversations[0] : conversations.find(c => c.id === id)
-}
-export function saveSelectedConversation(
-  storage: ConversationStorage,
-  account: string,
-  id: string | null
-) {
-  storage.setItem(`${storageKey(account)}:active`, id || '')
-}
-export function loadFollowReadingPreference(
-  storage: ConversationStorage,
-  account: string
-): boolean {
+type PreferenceStorage = Pick<Storage, 'getItem' | 'setItem'>
+export const followReadingPreferenceKey = (account: string) =>
+  `bible-strong.assistant-ui.v1:${encodeURIComponent(account)}:follow-reading`
+
+export function loadFollowReadingPreference(storage: PreferenceStorage, account: string): boolean {
   return storage.getItem(followReadingPreferenceKey(account)) === 'true'
 }
+
 export function saveFollowReadingPreference(
-  storage: ConversationStorage,
+  storage: PreferenceStorage,
   account: string,
   enabled: boolean
 ) {

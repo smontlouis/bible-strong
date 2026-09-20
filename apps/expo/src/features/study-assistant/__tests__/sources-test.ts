@@ -72,18 +72,9 @@ it('links Bible text nodes without modifying code or existing source links', () 
 })
 
 it('keeps citation destinations across reload but excludes response-local links from model history', async () => {
-  const { loadConversations, saveConversations } = await import('../conversations')
+  const { conversationMetadata, hydrateConversation, persistableTurns } =
+    await import('../conversations')
   const { prepareMemory } = await import('../conversationMemory')
-  const values = new Map<string, string>()
-  const storage = {
-    getItem: (key: string) => values.get(key) ?? null,
-    setItem: (key: string, value: string) => {
-      values.set(key, value)
-    },
-    removeItem: (key: string) => {
-      values.delete(key)
-    },
-  }
   const conversation = {
     id: 'c',
     title: 'Question',
@@ -106,8 +97,10 @@ it('keeps citation destinations across reload but excludes response-local links 
       },
     ],
   }
-  saveConversations(storage, 'test', [conversation])
-  const restored = loadConversations(storage, 'test')[0]
+  const restored = hydrateConversation(
+    conversationMetadata(conversation),
+    persistableTurns(conversation)
+  )
   expect(restored.messages[1].sources).toEqual([commentary])
   const memory = await prepareMemory(
     restored,

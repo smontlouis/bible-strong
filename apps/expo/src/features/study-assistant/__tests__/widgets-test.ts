@@ -1,6 +1,7 @@
 import { textDifferences } from '../widgets/textDifferences'
 import { parseStudyWidget } from '@bible-strong/ai-contract/contract'
 import { loadWidgetPassage } from '../widgets/passageData'
+import type { Conversation } from '../conversations'
 const p = { book: 43, chapter: 3, start: 16, end: 16, version: 'LSG' }
 it('accepts Aquifer as a published commentary suggestion', () => {
   expect(
@@ -55,7 +56,8 @@ it('renders only exact source text and fails on a missing verse', async () => {
 })
 
 it('persists descriptors and keeps the ordered references available for follow-up questions', async () => {
-  const { loadConversations, saveConversations } = await import('../conversations')
+  const { conversationMetadata, hydrateConversation, persistableTurns } =
+    await import('../conversations')
   const { prepareMemory } = await import('../conversationMemory')
   const widget = parseStudyWidget({
     id: 'w1',
@@ -63,35 +65,26 @@ it('persists descriptors and keeps the ordered references available for follow-u
     title: 'Deux passages',
     passages: [p, { ...p, book: 45, chapter: 8, start: 1, end: 1 }],
   })
-  const values = new Map<string, string>()
-  const storage = {
-    getItem: (key: string) => values.get(key) ?? null,
-    setItem: (key: string, value: string) => {
-      values.set(key, value)
-    },
-    removeItem: (key: string) => {
-      values.delete(key)
-    },
+  const conversation: Conversation = {
+    id: 'c',
+    title: 'T',
+    updatedAt: 1,
+    messages: [
+      { id: 'q', role: 'user', text: 'Montre deux passages', state: 'complete', createdAt: 1 },
+      {
+        id: 'a',
+        role: 'assistant',
+        text: '',
+        state: 'complete',
+        createdAt: 2,
+        widgets: [widget],
+      },
+    ],
   }
-  saveConversations(storage, 'u', [
-    {
-      id: 'c',
-      title: 'T',
-      updatedAt: 1,
-      messages: [
-        { id: 'q', role: 'user', text: 'Montre deux passages', state: 'complete', createdAt: 1 },
-        {
-          id: 'a',
-          role: 'assistant',
-          text: '',
-          state: 'complete',
-          createdAt: 2,
-          widgets: [widget],
-        },
-      ],
-    },
-  ])
-  const loaded = loadConversations(storage, 'u')[0]
+  const loaded = hydrateConversation(
+    conversationMetadata(conversation),
+    persistableTurns(conversation)
+  )
   expect(loaded.messages[1].widgets).toEqual([widget])
   const memory = await prepareMemory(
     loaded,

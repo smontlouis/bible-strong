@@ -16,6 +16,7 @@ import {
   orderBy,
   limit,
   startAfter,
+  runTransaction,
   waitForPendingWrites,
 } from '@react-native-firebase/firestore'
 import { getStorage, ref } from '@react-native-firebase/storage'
@@ -47,6 +48,7 @@ export {
   orderBy,
   limit,
   startAfter,
+  runTransaction,
   firestoreDeleteField as deleteField,
   firestoreIncrement,
   waitForPendingWrites,

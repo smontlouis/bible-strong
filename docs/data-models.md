@@ -226,3 +226,17 @@ another compatible installed Bible. The normal full-document subcollection sync 
 field for new and updated entities.
 
 Any change that rewrites keys, entity shapes, or sync timing must include migration and rollback thinking.
+
+### Assistant conversations
+
+Authenticated assistant history is stored under the owning account:
+
+```text
+users/{uid}/assistantConversations/{conversationId}
+users/{uid}/assistantConversations/{conversationId}/turns/{userMessageId}
+```
+
+The parent contains bounded index metadata and the optional memory checkpoint. Each turn document
+contains one complete user message and one terminal assistant message. Streaming output remains in
+UI memory and is committed transactionally only when complete, interrupted, or failed. Firestore is
+the canonical store; browser storage contains no conversation transcript.

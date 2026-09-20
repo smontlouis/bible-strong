@@ -1,21 +1,83 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read: if request.auth.uid != null;  
+    function signedIn() {
+      return request.auth != null;
+    }
+    function owns(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+    function validConversation() {
+      return request.resource.data.keys().hasAll([
+          'schemaVersion', 'title', 'createdAt', 'updatedAt', 'messageCount'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'schemaVersion', 'title', 'createdAt', 'updatedAt', 'messageCount', 'memory'
+        ])
+        && request.resource.data.schemaVersion == 1
+        && request.resource.data.title is string
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.createdAt is int
+        && request.resource.data.updatedAt is int
+        && request.resource.data.messageCount is int
+        && request.resource.data.messageCount >= 0
+        && request.resource.data.messageCount <= 300;
+    }
+    function validMessage(message, role) {
+      return message is map
+        && message.keys().hasAll(['id', 'role', 'text', 'state', 'createdAt'])
+        && message.keys().hasOnly([
+          'id', 'role', 'text', 'state', 'createdAt', 'context', 'widgets', 'sources', 'routing',
+          'tools'
+        ])
+        && message.id is string
+        && message.id.size() > 0
+        && message.id.size() <= 100
+        && message.role == role
+        && message.text is string
+        && message.text.size() <= 60000
+        && (role != 'user' || message.text.size() <= 5000)
+        && message.createdAt is int
+        && ((role == 'user' && message.state == 'complete')
+          || (role == 'assistant' && message.state in ['complete', 'interrupted', 'error']))
+        && (!('widgets' in message) || (message.widgets is list && message.widgets.size() <= 6))
+        && (!('sources' in message) || (message.sources is list && message.sources.size() <= 6))
+        && (!('routing' in message) || (message.routing is list && message.routing.size() <= 3))
+        && (!('tools' in message) || (message.tools is list && message.tools.size() <= 6));
+    }
+    function validTurn() {
+      return request.resource.data.keys().hasAll(['schemaVersion', 'createdAt', 'user', 'assistant'])
+        && request.resource.data.keys().hasOnly(['schemaVersion', 'createdAt', 'user', 'assistant'])
+        && request.resource.data.schemaVersion == 1
+        && request.resource.data.createdAt is int
+        && validMessage(request.resource.data.user, 'user')
+        && validMessage(request.resource.data.assistant, 'assistant');
     }
     match /stats/{document=**} {
-    	allow read: if true;
+      allow read: if true;
     }
     match /studies/{studyId} {
-    	allow create, update: if request.resource.data.user.id == request.auth.uid;
-    	allow delete: if resource.data.user.id == request.auth.uid;
+      allow read: if signedIn();
+      allow create, update: if request.resource.data.user.id == request.auth.uid;
+      allow delete: if resource.data.user.id == request.auth.uid;
     }
     match /users/{userId} {
-      allow write: if userId == request.auth.uid;
+      allow read, write: if owns(userId);
+    }
+    match /users/{userId}/{collectionName}/{document=**} {
+      allow read, write: if owns(userId) && collectionName != 'assistantConversations';
+    }
+    match /users/{userId}/assistantConversations/{conversationId} {
+      allow read, delete: if owns(userId);
+      allow create, update: if owns(userId) && validConversation();
+    }
+    match /users/{userId}/assistantConversations/{conversationId}/turns/{turnId} {
+      allow read, delete: if owns(userId);
+      allow create, update: if owns(userId) && validTurn();
     }
     match /users-status/{userId} {
-      allow write: if userId == request.auth.uid;
+      allow read: if signedIn();
+      allow write: if owns(userId);
     }
     match /commentaries-FR/{commentaryId} {
       allow write: if true;
@@ -31,6 +93,9 @@ service cloud.firestore {
       allow read: if true;
       allow update: if (request.resource.data.diff(resource.data).affectedKeys()
         .hasOnly(['downloads']));
+    }
+    match /events/{document=**} {
+      allow read: if signedIn();
     }
   }
 }

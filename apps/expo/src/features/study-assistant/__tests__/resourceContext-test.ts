@@ -5,7 +5,7 @@ import {
   naveContext,
   pickReadingContext,
 } from '../resourceContext'
-import { loadConversations, saveConversations, type ReadingContext } from '../conversations'
+import { parsePersistedMessage, type ReadingContext } from '../conversations'
 jest.mock('~i18n', () => ({
   getLanguage: () => 'fr',
   __esModule: true,
@@ -100,29 +100,21 @@ describe('assistant resource context', () => {
     ).toBe(reader)
     expect(pickReadingContext({ ...options, panel: null, interaction: null })).toBeNull()
   })
-  it('persists new resource kinds and bounds provider context', () => {
+  it('validates persisted resource kinds and bounds provider context', () => {
     const context = dictionaryContext({
       word: 'a'.repeat(400),
       dictionaryTitle: 'b'.repeat(400),
       work: 'bost',
     })!
     expect(context.detail.length).toBeLessThanOrEqual(500)
-    let raw = ''
-    const storage = {
-      getItem: () => raw,
-      setItem: (_key: string, value: string) => {
-        raw = value
-      },
-      removeItem: () => {},
-    }
-    saveConversations(storage, 'account', [
-      {
-        id: 'c',
-        title: 'q',
-        updatedAt: 1,
-        messages: [{ id: 'u', role: 'user', text: 'q', state: 'complete', createdAt: 1, context }],
-      },
-    ])
-    expect(loadConversations(storage, 'account')[0].messages[0].context?.kind).toBe('dictionary')
+    const restored = parsePersistedMessage({
+      id: 'u',
+      role: 'user',
+      text: 'q',
+      state: 'complete',
+      createdAt: 1,
+      context,
+    })
+    expect(restored.context?.kind).toBe('dictionary')
   })
 })

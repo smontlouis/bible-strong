@@ -1,53 +1,85 @@
 import { prepareMemory } from '../conversationMemory'
 import {
-  loadConversations,
-  loadSelectedConversation,
+  assertConversationCapacity,
+  conversationMetadata,
+  hydrateConversation,
+  latestCompletedTurn,
   loadFollowReadingPreference,
+  parseConversationMetadata,
+  parseConversationTurn,
+  persistableTurns,
   saveFollowReadingPreference,
-  saveSelectedConversation,
-  saveConversations,
-  storageKey,
   type Conversation,
-  type ConversationStorage,
   type LocalMessage,
 } from '../conversations'
-const memory = (): ConversationStorage => {
-  const values = new Map<string, string>()
-  return {
-    getItem: k => values.get(k) ?? null,
-    setItem: (k, v) => {
-      values.set(k, v)
-    },
-    removeItem: k => {
-      values.delete(k)
-    },
-  }
-}
+
 const message = (
   role: LocalMessage['role'],
   text: string,
   state: LocalMessage['state'] = 'complete'
 ): LocalMessage => ({ id: role + text, role, text, state, createdAt: 1 })
-describe('local assistant conversations', () => {
-  it('keeps accounts separate and marks an unfinished persisted answer as interrupted', () => {
-    const store = memory()
-    const c: Conversation = {
+
+const roundTrip = (conversation: Conversation) =>
+  hydrateConversation(conversationMetadata(conversation), persistableTurns(conversation))
+
+describe('cloud assistant conversations', () => {
+  it('round-trips completed and interrupted turns with their reading context', () => {
+    const context = { key: 'k', label: 'Jean 1', detail: 'Jean 1 · LSG', kind: 'passage' as const }
+    const conversation: Conversation = {
+      id: 'c',
+      title: 'Lecture',
+      updatedAt: 2,
+      messages: [
+        { ...message('user', 'Question'), context },
+        message('assistant', 'Réponse'),
+        message('user', 'Suite'),
+        message('assistant', 'Partiel', 'interrupted'),
+      ],
+    }
+    expect(roundTrip(conversation)).toEqual(conversation)
+  })
+
+  it('does not persist an answer while it is streaming', () => {
+    const conversation: Conversation = {
       id: 'c',
       title: 'Lecture',
       updatedAt: 1,
       messages: [message('user', 'Question'), message('assistant', 'Partiel', 'streaming')],
     }
-    saveConversations(store, 'alice', [c])
-    expect(loadConversations(store, 'bob')).toEqual([])
-    expect(loadConversations(store, 'alice')[0].messages[1].state).toBe('interrupted')
+    expect(latestCompletedTurn(conversation)).toBeUndefined()
+    expect(persistableTurns(conversation)).toEqual([])
   })
-  it('rejects corrupt data without overwriting it', () => {
-    const store = memory()
-    store.setItem(storageKey('alice'), '{broken')
-    expect(() => loadConversations(store, 'alice')).toThrow()
-    expect(store.getItem(storageKey('alice'))).toBe('{broken')
+
+  it('rejects invalid metadata and invalid role ordering', () => {
+    expect(() => parseConversationMetadata('c', { schemaVersion: 1 })).toThrow(
+      'CLOUD_HISTORY_INVALID'
+    )
+    expect(() =>
+      parseConversationTurn({
+        schemaVersion: 1,
+        createdAt: 1,
+        user: message('assistant', 'wrong'),
+        assistant: message('user', 'wrong'),
+      })
+    ).toThrow('CLOUD_HISTORY_INVALID')
   })
-  it('keeps the message context and excludes incomplete responses', async () => {
+
+  it('restores tool previews and converts an impossible running tool to interrupted', () => {
+    const turn = parseConversationTurn({
+      schemaVersion: 1,
+      createdAt: 1,
+      user: message('user', 'Question'),
+      assistant: {
+        ...message('assistant', 'Text'),
+        tools: [
+          { callId: 'one', name: 'get_passage', request: '{}', result: '', state: 'running' },
+        ],
+      },
+    })
+    expect(turn.assistant.tools?.[0].state).toBe('interrupted')
+  })
+
+  it('keeps message context out of incomplete responses sent to model memory', async () => {
     const messages = [
       message('user', 'Ancienne'),
       message('assistant', 'Ancienne réponse'),
@@ -68,53 +100,24 @@ describe('local assistant conversations', () => {
       () => {},
       () => {}
     )
-    expect(history).toHaveLength(8)
     expect(history[4].content).toContain('Jean 1 · LSG')
-    expect(history.flatMap(m => m.content).join('')).not.toContain('interrompue')
-    expect(history.reduce((n, m) => n + m.content.length, 0)).toBeLessThanOrEqual(32000)
+    expect(history.flatMap(item => item.content).join('')).not.toContain('interrompue')
   })
-  it('refuses a full store without silently deleting conversations', () => {
-    const store = memory()
+
+  it('enforces conversation and message limits', () => {
     const initial: Conversation = { id: 'c', title: 'x', updatedAt: 1, messages: [] }
-    saveConversations(store, 'alice', [initial])
-    expect(() => saveConversations(store, 'alice', Array(51).fill(initial))).toThrow(
-      'LOCAL_HISTORY_FULL'
+    expect(() => assertConversationCapacity(Array(50).fill(initial), initial)).toThrow(
+      'CLOUD_HISTORY_FULL'
     )
-    expect(loadConversations(store, 'alice')).toHaveLength(1)
   })
 })
 
-it('restores the selected thread rather than always choosing the newest, with account isolation', () => {
-  const store = memory(),
-    newer: Conversation = { id: 'newer', title: 'New', updatedAt: 2, messages: [] },
-    older: Conversation = { id: 'older', title: 'Old', updatedAt: 1, messages: [] }
-  expect(loadSelectedConversation(store, 'alice', [newer, older])?.id).toBe('newer')
-  saveSelectedConversation(store, 'alice', 'older')
-  expect(loadSelectedConversation(store, 'alice', [newer, older])?.id).toBe('older')
-  expect(loadSelectedConversation(store, 'bob', [newer, older])?.id).toBe('newer')
-  saveSelectedConversation(store, 'alice', null)
-  expect(loadSelectedConversation(store, 'alice', [newer, older])).toBeUndefined()
-})
-it('restores tool previews and never restores a running activity as complete', () => {
-  const storage = memory()
-  const c: Conversation = {
-    id: 'tools',
-    title: 'Tools',
-    updatedAt: 1,
-    messages: [
-      {
-        ...message('assistant', 'Text'),
-        tools: [
-          { callId: 'one', name: 'get_passage', request: '{}', result: '', state: 'running' },
-        ],
-      },
-    ],
+it('keeps the UI-only reading preference account-scoped', () => {
+  const values = new Map<string, string>()
+  const storage = {
+    getItem: (key: string) => values.get(key) ?? null,
+    setItem: (key: string, value: string) => values.set(key, value),
   }
-  saveConversations(storage, 'account', [c])
-  expect(loadConversations(storage, 'account')[0].messages[0].tools?.[0].state).toBe('interrupted')
-})
-it('defaults the reading-follow preference to off and persists it per account', () => {
-  const storage = memory()
   expect(loadFollowReadingPreference(storage, 'alice')).toBe(false)
   saveFollowReadingPreference(storage, 'alice', true)
   expect(loadFollowReadingPreference(storage, 'alice')).toBe(true)

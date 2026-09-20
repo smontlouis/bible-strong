@@ -40,9 +40,9 @@ not an authorization boundary. The Worker independently authenticates Firebase A
 App Check, then enforces its server-owned `AI_ALLOWED_UIDS` on every endpoint.
 
 Web messages use the official `ThreadPrimitive.Messages`, `MessagePrimitive.Root` and
-`MessagePrimitive.Parts` pipeline. `LocalMessage` remains the validated, versioned local
-storage format; `messageRuntime.ts` converts it at the runtime boundary without rewriting
-stored conversations. Text becomes a text part, while reading context, tool timelines,
+`MessagePrimitive.Parts` pipeline. `LocalMessage` remains the validated application format;
+`messageRuntime.ts` converts it at the runtime boundary without rewriting stored conversations.
+Text becomes a text part, while reading context, tool timelines,
 routing decisions, sources and widgets become named Bible Strong data parts. Tool activity
 uses native `tool-call` parts with stable call IDs, parsed arguments, results and terminal
 error state. The custom part renderer keeps source citations and study widgets while the
@@ -52,12 +52,12 @@ runtime status; user messages intentionally omit status because the runtime forb
 
 Conversation selection and management use an `ExternalStoreThreadListAdapter` plus
 `ThreadListPrimitive`, `ThreadListItemPrimitive.Trigger`, `Delete` and `New`. Bible Strong
-still owns the local account-scoped persistence; the adapter is the synchronous bridge
-recommended when an external store already owns both messages and thread selection.
+owns account-scoped persistence in Firestore; the adapter bridges subscribed application state
+to assistant-ui.
 
-`useReadingContext.web.ts` observes active Bible selection/chapter and Strong tab/route context. Pin/remove controls affect only future messages. `conversations.ts` validates, limits and serializes browser-local histories by account; it also builds the smaller inference history. `conversationRun.ts` owns one cancellable streaming operation, snapshots context and refuses late updates from an obsolete session. No keys, tokens or full editorial resource dumps are stored in local conversations. Persistence is debounced and flushed on page hide. Opening the modal or history does not trigger inference.
+`useReadingContext.web.ts` observes active Bible selection/chapter and Strong tab/route context. Pin/remove controls affect only future messages. `conversations.ts` validates and limits the persisted model, while `conversationRepository.web.ts` owns Firestore subscriptions and writes. `conversationRun.ts` owns one cancellable streaming operation, snapshots context and refuses late updates from an obsolete session. No keys or tokens are stored in conversations. Streaming stays in memory; one terminal turn and its conversation metadata are committed together. Opening the modal or history does not trigger inference.
 
-Local limits: 50 conversations, 300 messages each, 2 million serialized characters. No generated summaries, cloud synchronization, cross-browser-tab write coordination or automatic account-history merging in this slice. The UI shows storage failures. Backend authentication and the two-account beta allowlist remain enforced.
+Cloud limits: 50 conversations and 300 messages each. The index is subscribed independently from the selected conversation's turns. There is no local-history import or fallback. The UI shows storage failures. Backend authentication and the beta allowlist remain enforced.
 
 ## Verification (2026-09-17)
 
@@ -96,7 +96,7 @@ Stability follow-up: the selected conversation ID is persisted per account, so c
 
 The Worker emits bounded public `tool` events keyed by call ID. The web modal displays a compact timeline, expanded during a response and collapsed afterwards. Individual invocations disclose the technical name, parameters and a truncated data preview. The official assistant-ui registry components are installed through shadcn and composed by thin adapters. Radix disclosures and upstream label animations remain in use. Errors and unfinished calls are distinct from completed calls.
 
-Up to six activities per assistant message are stored with local history. Reload converts running activities to interrupted. Tool display data never enters conversation memory or subsequent model history. Historical messages from before this change do not have a timeline.
+Up to six activities per assistant message are stored with cloud history. Defensive loading converts a running activity to interrupted. Tool display data never enters conversation memory or subsequent model history. Historical messages from before this change do not have a timeline.
 
 Validation: 26 frontend tests, 20 server tests (one optional resource integration skipped), typechecks, targeted lint and web export passed. The browser smoke on 2026-09-17 reached DAILY_LIMIT before generation, so live visual confirmation remains pending; no quota was changed.
 
@@ -116,7 +116,7 @@ The visible activity UI now uses ToolTimeline's standard icon/verb/target rows, 
 
 ### Reading plans and meditations
 
-Plan overview, open reading step, meditation collection and the resolved meditation publish account-independent editorial context in route panels and plan tabs. `editorialContext` explicitly projects only titles, descriptions, resource/step IDs, language, reference slices and text slices; it never spreads participation/progress data. Up to 12,000 characters of the open editorial content are attached at send time, with an explicit truncation marker. This first integration uses already-loaded Firebase catalog content, not a new Resource Service tool. Context remains a user-role untrusted document, never system instructions. The Worker allows a 13,000-character reading context. Snapshots retain the excerpt locally; subsequent model history retains reference metadata only. Video transcripts and image contents are not inferred. New suggestions cover explanation, biblical references and reflection.
+Plan overview, open reading step, meditation collection and the resolved meditation publish account-independent editorial context in route panels and plan tabs. `editorialContext` explicitly projects only titles, descriptions, resource/step IDs, language, reference slices and text slices; it never spreads participation/progress data. Up to 12,000 characters of the open editorial content are attached at send time, with an explicit truncation marker. This first integration uses already-loaded Firebase catalog content, not a new Resource Service tool. Context remains a user-role untrusted document, never system instructions. The Worker allows a 13,000-character reading context. Snapshots retain the excerpt with the account-owned turn; subsequent model history retains reference metadata only. Video transcripts and image contents are not inferred. New suggestions cover explanation, biblical references and reflection.
 
 ### People, places and timeline events
 

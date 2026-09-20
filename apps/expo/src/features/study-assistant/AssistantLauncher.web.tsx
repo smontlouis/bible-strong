@@ -32,17 +32,21 @@ import {
 } from './client'
 import { assistantAccessible, assistantAvailable } from './assistantConfig'
 import {
-  loadConversations,
-  loadSelectedConversation,
+  assertConversationCapacity,
   loadFollowReadingPreference,
   saveFollowReadingPreference,
   followReadingPreferenceKey,
-  saveSelectedConversation,
-  saveConversations,
   newConversation,
   type Conversation,
   type ReadingContext,
 } from './conversations'
+import {
+  deleteConversation,
+  observeConversation,
+  observeConversationIndex,
+  renameConversation,
+  saveConversation,
+} from './conversationRepository.web'
 import { useReadingContext } from './useReadingContext.web'
 import './assistant-modal.css'
 import { LiveDictationAdapter } from './dictationAdapter'
@@ -147,7 +151,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     [current, setCurrent] = useState<Conversation>(() => newConversation())
   const [ready, setReady] = useState(false),
     [storageError, setStorageError] = useState(false),
-    [writable, setWritable] = useState(true)
+    [cloudIds, setCloudIds] = useState<string[]>([])
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
     [retrying, setRetrying] = useState(false),
@@ -204,38 +208,92 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     if (!value) dictation.cancel()
   }
   const loginRef = useRef<HTMLButtonElement | null>(null)
-  const active = useRef<AbortController | null>(null),
-    latest = useRef(conversations)
+  const active = useRef<AbortController | null>(null)
+  const receivedInitialIndex = useRef(false)
   const context = followReading ? pinned || liveContext : null
   const dictationActive = ['starting', 'listening', 'stopping'].includes(dictationState)
   useEffect(() => {
-    latest.current = conversations
-  }, [conversations])
-  useEffect(() => {
     try {
-      const saved = loadConversations(localStorage, account)
-      setConversations(saved)
-      const selected = loadSelectedConversation(localStorage, account, saved)
-      if (selected) setCurrent(selected)
       setFollowReading(loadFollowReadingPreference(localStorage, account))
     } catch {
       setStorageError(true)
-      setWritable(false)
     }
-    setReady(true)
+    const stop = observeConversationIndex(
+      account,
+      remote => {
+        const ids = remote.map(conversation => conversation.id)
+        setCloudIds(ids)
+        setConversations(previous => {
+          const localOnly = previous.filter(
+            conversation => !ids.includes(conversation.id) && conversation.messages.length
+          )
+          return [
+            ...localOnly,
+            ...remote.map(conversation => {
+              const local = previous.find(item => item.id === conversation.id)
+              return local?.messages.length
+                ? { ...conversation, messages: local.messages, memory: local.memory }
+                : conversation
+            }),
+          ]
+        })
+        setCurrent(previous => {
+          if (!receivedInitialIndex.current) {
+            receivedInitialIndex.current = true
+            return remote[0] || previous
+          }
+          const metadata = remote.find(item => item.id === previous.id)
+          if (metadata)
+            return previous.messages.length
+              ? { ...previous, title: metadata.title, updatedAt: metadata.updatedAt }
+              : metadata
+          return previous
+        })
+        setStorageError(false)
+        setReady(true)
+      },
+      () => {
+        setStorageError(true)
+        setReady(true)
+      }
+    )
     return () => {
+      stop()
       active.current?.abort()
       active.current = null
     }
   }, [account])
+  const currentIsCloud = cloudIds.includes(current.id)
   useEffect(() => {
-    if (!ready || !writable) return
+    if (!currentIsCloud) return
+    return observeConversation(
+      account,
+      current.id,
+      conversation => {
+        if (!conversation) {
+          setConversations(previous => previous.filter(item => item.id !== current.id))
+          setCloudIds(previous => previous.filter(item => item !== current.id))
+          setCurrent(previous => (previous.id === current.id ? newConversation() : previous))
+          return
+        }
+        if (active.current) return
+        setCurrent(conversation)
+        setConversations(previous => [
+          conversation,
+          ...previous.filter(item => item.id !== conversation.id),
+        ])
+      },
+      () => setStorageError(true)
+    )
+  }, [account, current.id, currentIsCloud])
+  useEffect(() => {
+    if (!ready) return
     try {
       saveFollowReadingPreference(localStorage, account, followReading)
     } catch {
       setStorageError(true)
     }
-  }, [account, followReading, ready, writable])
+  }, [account, followReading, ready])
   useEffect(() => {
     const key = followReadingPreferenceKey(account)
     const sync = (event: StorageEvent) => {
@@ -246,39 +304,19 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     window.addEventListener('storage', sync)
     return () => window.removeEventListener('storage', sync)
   }, [account])
-  useEffect(() => {
-    if (!ready || !writable) return
-    const save = () => {
-      try {
-        saveConversations(localStorage, account, latest.current)
-        setStorageError(false)
-      } catch {
-        setStorageError(true)
-      }
-    }
-    const timer = setTimeout(save, 500)
-    window.addEventListener('pagehide', save)
-    return () => {
-      clearTimeout(timer)
-      window.removeEventListener('pagehide', save)
-    }
-  }, [account, conversations, ready, writable])
-  const hasMessages = current.messages.length > 0
-  useEffect(() => {
-    if (!ready || !writable) return
-    try {
-      saveSelectedConversation(localStorage, account, hasMessages ? current.id : null)
-    } catch {
-      setStorageError(true)
-    }
-  }, [account, current.id, hasMessages, ready, writable])
   const publish = (conversation: Conversation) => {
     setCurrent(conversation)
     setConversations(previous => [conversation, ...previous.filter(c => c.id !== conversation.id)])
+    if (conversation.messages.at(-1)?.state !== 'streaming') {
+      void saveConversation(account, conversation)
+        .then(() => setStorageError(false))
+        .catch(() => setStorageError(true))
+    }
   }
   const send = (text: string, source = current, readingContext = context) => {
     const question = text.trim()
-    if (!question || active.current || !ready) return
+    if (!question || active.current || !ready || (currentIsCloud && !current.messages.length))
+      return
     if (!signedIn || getCurrentAuthUser()?.uid !== account) {
       setError('assistant.signIn')
       return
@@ -287,10 +325,9 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
       setError('assistant.unavailable')
       return
     }
-    if (
-      current.messages.length >= 298 ||
-      (!current.messages.length && conversations.length >= 50)
-    ) {
+    try {
+      assertConversationCapacity(conversations, current)
+    } catch {
       setStorageError(true)
       return
     }
@@ -366,23 +403,31 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     setError('')
   }
   const deleteThread = (id: string) => {
-    if (current.id === id) dictation.cancel()
-    const next = conversations.filter(c => c.id !== id)
-    setConversations(next)
-    if (current.id === id) setCurrent(newConversation())
-    try {
-      saveConversations(localStorage, account, next)
-    } catch {
-      setStorageError(true)
-    }
+    if (busy) return
+    void deleteConversation(account, id)
+      .then(() => {
+        if (current.id === id) dictation.cancel()
+        setConversations(previous => previous.filter(conversation => conversation.id !== id))
+        if (current.id === id) setCurrent(newConversation())
+        setCloudIds(previous => previous.filter(item => item !== id))
+      })
+      .catch(() => setStorageError(true))
   }
   const renameThread = (id: string, title: string) => {
+    const normalizedTitle = title.slice(0, 120)
+    const updatedAt = Date.now()
     setConversations(previous =>
       previous.map(conversation =>
-        conversation.id === id ? { ...conversation, title, updatedAt: Date.now() } : conversation
+        conversation.id === id
+          ? { ...conversation, title: normalizedTitle, updatedAt }
+          : conversation
       )
     )
-    if (current.id === id) setCurrent(previous => ({ ...previous, title, updatedAt: Date.now() }))
+    if (current.id === id)
+      setCurrent(previous => ({ ...previous, title: normalizedTitle, updatedAt }))
+    void renameConversation(account, id, normalizedTitle, updatedAt).catch(() =>
+      setStorageError(true)
+    )
   }
   const changeFollowReading = (enabled: boolean) => {
     setFollowReading(enabled)
@@ -399,7 +444,10 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
           title: conversation.title,
           custom: {
             updatedAt: conversation.updatedAt,
-            messageCount: conversation.messages.length,
+            messageCount:
+              conversation.summaryMessageCount === undefined
+                ? conversation.messages.length
+                : conversation.summaryMessageCount,
           },
         })),
         onSwitchToNewThread: startNewThread,
@@ -541,7 +589,6 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                 {t('assistant.modal.back')}
               </button>
               <h2>{t('assistant.modal.history')}</h2>
-              <p>{t('assistant.modal.local')}</p>
               {!conversations.length && (
                 <p className="bs-assistant-empty-history">{t('assistant.modal.noHistory')}</p>
               )}

@@ -1,7 +1,8 @@
 import { prepareMemory, type MemoryCheckpoint } from '../conversationMemory'
 import {
-  loadConversations,
-  saveConversations,
+  conversationMetadata,
+  hydrateConversation,
+  persistableTurns,
   type Conversation,
   type LocalMessage,
 } from '../conversations'
@@ -44,17 +45,12 @@ it('summarizes only old pairs, preserves recent text and reuses a persisted chec
   expect(result.history).toHaveLength(12)
   expect(result.memorySummary).toBe('Mémoire.')
   expect(JSON.stringify(c.messages)).toBe(original)
-  let raw = ''
-  const storage = {
-    getItem: () => raw,
-    setItem: (_k: string, v: string) => {
-      raw = v
-    },
-    removeItem: () => {},
-  }
-  saveConversations(storage, 'account', [{ ...c, memory: saved[0] }])
+  const restored = hydrateConversation(
+    conversationMetadata({ ...c, memory: saved[0] }),
+    persistableTurns(c)
+  )
   await prepareMemory(
-    loadConversations(storage, 'account')[0],
+    restored,
     compact,
     new AbortController().signal,
     () => {},
@@ -148,22 +144,9 @@ it('compacts an oversized single exchange instead of slicing its content', async
   expect(result.memorySummary).toBe('Résumé complet')
 })
 
-it('discards obsolete checkpoints while preserving all original messages', () => {
+it('round-trips cloud turns while preserving all original messages', () => {
   const c = conversation(17)
-  const raw = JSON.stringify([
-    {
-      ...c,
-      memory: {
-        version: 'memory-1',
-        summary: 'Old unvalidated text',
-        coveredPairs: 10,
-        throughId: 'a9',
-        digest: 'a'.repeat(64),
-      },
-    },
-  ])
-  const store = { getItem: () => raw, setItem: () => {}, removeItem: () => {} }
-  const loaded = loadConversations(store, 'test')[0]
+  const loaded = hydrateConversation(conversationMetadata(c), persistableTurns(c))
   expect(loaded.memory).toBeUndefined()
   expect(loaded.messages).toEqual(c.messages)
 })

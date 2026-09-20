@@ -66,6 +66,8 @@
 
 **Guest adoption** — The one-time assignment of eligible Guest-session data to a genuinely new account before account hydration.
 
+**Assistant conversation** — A private account-owned sequence of complete question/answer turns, synchronized through Firestore independently of the assistant model service.
+
 ## Avoid
 
 - Use **Offline copy**, not “offline cache”, for a deliberately installed complete resource.
