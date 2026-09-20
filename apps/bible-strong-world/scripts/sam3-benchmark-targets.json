@@ -1,0 +1,76 @@
+[
+  {
+    "id": "plaza-south-east-tree",
+    "prompt": "a single leafy tree with its trunk"
+  },
+  {
+    "id": "rail-east",
+    "prompt": "the wooden bridge railing in the foreground"
+  },
+  {
+    "id": "ref-central-bench",
+    "prompt": "a single wooden garden bench"
+  },
+  {
+    "id": "dict-front-books",
+    "prompt": "the small stack of books on the ground"
+  },
+  {
+    "id": "central-table",
+    "prompt": "the round wooden table and the open book on it"
+  },
+  {
+    "id": "pergola-west-column",
+    "prompt": "the single white stone pergola column"
+  },
+  {
+    "id": "compare-west-arch",
+    "prompt": "one complete wooden pergola arch, including all purple flowers, green vines, the horizontal top beam, and both vertical posts",
+    "positive": [[653, 663], [704, 646], [759, 659], [646, 700], [646, 743], [774, 714], [774, 742]],
+    "negative": [[620, 700], [809, 700], [704, 805], [704, 605]]
+  },
+  {
+    "id": "comment-library",
+    "prompt": "one complete rectangular teal wall bookshelf, including its outer frame, both shelves, and every colored book inside",
+    "positive": [[1374, 590], [1394, 592], [1412, 592], [1374, 615], [1394, 615], [1412, 615], [1374, 640], [1394, 640], [1412, 640]],
+    "negative": [[1358, 614], [1428, 614], [1394, 566], [1394, 661]]
+  },
+  {
+    "id": "lex-library",
+    "prompt": "the blue bookshelf and the stacks of books beside it"
+  },
+  {
+    "id": "themes-heart-flowers",
+    "prompt": "the cluster of blue and purple flowers below the heart medallion"
+  },
+  {
+    "id": "lex-east-books",
+    "prompt": "one complete small stack of four blue books on the ground, including every book",
+    "positive": [[960, 201], [965, 210], [970, 218], [978, 216]],
+    "negative": [[938, 210], [994, 210], [966, 232], [966, 181]]
+  },
+  {
+    "id": "dict-east-grasses",
+    "prompt": "one complete tall cluster of green ornamental leaves near the island entrance",
+    "positive": [[543, 242], [549, 252], [552, 263]],
+    "negative": [[520, 255], [576, 255], [550, 292]]
+  },
+  {
+    "id": "compare-east-pot",
+    "prompt": "one complete potted plant, including the purple pot and every green leaf",
+    "positive": [[1043, 716], [1048, 730], [1048, 741]],
+    "negative": [[1010, 726], [1080, 726], [1048, 765]]
+  },
+  {
+    "id": "plaza-east-shrub",
+    "prompt": "one complete dark teal round shrub, excluding the tree and the surrounding grass",
+    "positive": [[1076, 446], [1076, 456], [1075, 466]],
+    "negative": [[1040, 455], [1115, 455], [1075, 490], [1075, 415]]
+  },
+  {
+    "id": "comment-column-shrub",
+    "prompt": "one complete upright leafy shrub directly in front of the white column and flower pot",
+    "positive": [[1555, 748], [1563, 758], [1564, 773]],
+    "negative": [[1525, 760], [1595, 760], [1560, 798]]
+  }
+]

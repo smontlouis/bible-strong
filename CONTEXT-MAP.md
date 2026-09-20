@@ -8,6 +8,7 @@
 - [Resource catalog](./packages/resource-catalog/CONTEXT.md) — owns generated artifact catalogs and immutable publication metadata.
 - [Resource authoring](./apps/resource-studio/CONTEXT.md) — acquires, transforms, validates, and packages Bible Strong resources.
 - [Public site](./apps/site/CONTEXT.md) — exposes public Bible Strong pages and shared study content on the web.
+- [Event exploration world](./apps/bible-strong-world/CONTEXT.md) — presents Bible Strong resources through a joystick-driven illustrated world for ASI Europe.
 - [Application API](./apps/api/CONTEXT.md) — owns Firebase-backed server operations used by Bible Strong clients.
 - [Bible reference parsing](./packages/bible-reference-parser/CONTEXT.md) — turns French and English Bible-reference text into canonical passage references.
 
@@ -21,6 +22,7 @@
 - **Resource catalog → Resource delivery / Study workspace**: publisher and client consume the same versioned artifact catalog.
 - **Bible reference parsing → Study workspace**: the parser recognizes inline references used for navigation and study links.
 - **Application API → Study workspace / Public site**: Firebase functions provide account-adjacent and content-processing operations to both clients.
+- **Event exploration world → Bible Strong product**: the standalone event experience introduces the six study-resource families without owning their publication data.
 
 - **Study assistant → Resource delivery**: bounded read-only tools use the Resource API through a Worker service binding.
 - **Study workspace → Study assistant**: authenticated clients consume the same Markdown stream contract on native and web; provider implementation is maintained in a separate private repository.

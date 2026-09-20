@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "source": "magnific_upscale_gOG9ALKSXO.png",
+  "worldWidth": 1671,
+  "worldHeight": 941,
+  "tileSize": 512,
+  "overlap": 2,
+  "format": "webp",
+  "levels": [
+    {
+      "scale": 2,
+      "width": 3342,
+      "height": 1882,
+      "columns": 7,
+      "rows": 4
+    },
+    {
+      "scale": 4,
+      "width": 6684,
+      "height": 3764,
+      "columns": 14,
+      "rows": 8
+    }
+  ]
+}

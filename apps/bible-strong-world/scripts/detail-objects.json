@@ -1,0 +1,2611 @@
+[
+  {
+    "id": "dict-west-grasses",
+    "name": "Dictionnaire · herbes ouest",
+    "box": [
+      43,
+      222,
+      121,
+      283
+    ],
+    "baseY": 275,
+    "positive": [
+      [
+        74,
+        250
+      ],
+      [
+        98,
+        250
+      ]
+    ],
+    "feet": [
+      [
+        79,
+        270,
+        33,
+        12
+      ]
+    ]
+  },
+  {
+    "id": "dict-aloe",
+    "name": "Dictionnaire · plante près du meuble",
+    "box": [
+      114,
+      218,
+      164,
+      275
+    ],
+    "baseY": 269,
+    "positive": [
+      [
+        137,
+        241
+      ],
+      [
+        137,
+        262
+      ]
+    ],
+    "feet": [
+      [
+        137,
+        264,
+        17,
+        10
+      ]
+    ],
+    "negative": [
+      [
+        162,
+        239
+      ],
+      [
+        148,
+        280
+      ]
+    ]
+  },
+  {
+    "id": "dict-cabinet",
+    "name": "Dictionnaire · meuble à tiroirs",
+    "box": [
+      152,
+      171,
+      201,
+      276
+    ],
+    "baseY": 266,
+    "positive": [
+      [
+        179,
+        211
+      ],
+      [
+        178,
+        251
+      ]
+    ],
+    "feet": [
+      [
+        174,
+        259,
+        22,
+        11
+      ]
+    ]
+  },
+  {
+    "id": "dict-potted-tree",
+    "name": "Dictionnaire · arbuste en pot",
+    "box": [
+      149,
+      234,
+      217,
+      297
+    ],
+    "baseY": 286,
+    "positive": [
+      [
+        183,
+        260
+      ],
+      [
+        186,
+        284
+      ]
+    ],
+    "feet": [
+      [
+        184,
+        283,
+        27,
+        11
+      ]
+    ],
+    "negative": [
+      [
+        223,
+        264
+      ],
+      [
+        164,
+        215
+      ]
+    ]
+  },
+  {
+    "id": "dict-west-shrubs",
+    "name": "Dictionnaire · massif ouest",
+    "box": [
+      80,
+      265,
+      187,
+      326
+    ],
+    "baseY": 315,
+    "positive": [
+      [
+        128,
+        294
+      ],
+      [
+        165,
+        310
+      ]
+    ],
+    "feet": [
+      [
+        120,
+        294,
+        33,
+        14
+      ],
+      [
+        165,
+        311,
+        24,
+        12
+      ]
+    ]
+  },
+  {
+    "id": "dict-front-books",
+    "name": "Dictionnaire · livres au sol",
+    "box": [
+      195,
+      271,
+      262,
+      329
+    ],
+    "baseY": 317,
+    "positive": [
+      [
+        229,
+        285
+      ],
+      [
+        233,
+        313
+      ]
+    ],
+    "feet": [
+      [
+        229,
+        315,
+        27,
+        11
+      ]
+    ],
+    "negative": [
+      [
+        201,
+        289
+      ],
+      [
+        259,
+        298
+      ]
+    ],
+    "fillHoles": true
+  },
+  {
+    "id": "dict-east-cabinet",
+    "name": "Dictionnaire · petite bibliothèque",
+    "box": [
+      426,
+      150,
+      480,
+      271
+    ],
+    "baseY": 259,
+    "positive": [
+      [
+        452,
+        193
+      ],
+      [
+        452,
+        240
+      ]
+    ],
+    "feet": [
+      [
+        454,
+        256,
+        23,
+        12
+      ]
+    ],
+    "negative": [
+      [
+        471,
+        181
+      ],
+      [
+        478,
+        202
+      ]
+    ]
+  },
+  {
+    "id": "dict-east-books",
+    "name": "Dictionnaire · livres près de la bibliothèque",
+    "box": [
+      472,
+      214,
+      506,
+      259
+    ],
+    "baseY": 250,
+    "positive": [
+      [
+        485,
+        233
+      ],
+      [
+        493,
+        249
+      ]
+    ],
+    "feet": [
+      [
+        488,
+        248,
+        17,
+        10
+      ]
+    ]
+  },
+  {
+    "id": "dict-east-grasses",
+    "name": "Dictionnaire · végétation entrée",
+    "box": [
+      527,
+      240,
+      567,
+      282
+    ],
+    "baseY": 270,
+    "positive": [
+      [
+        549,
+        256
+      ]
+    ],
+    "feet": [
+      [
+        546,
+        269,
+        16,
+        10
+      ]
+    ],
+    "negative": [
+      [
+        530,
+        259
+      ],
+      [
+        557,
+        278
+      ],
+      [
+        533,
+        243
+      ]
+    ]
+  },
+  {
+    "id": "dict-entry-shrub",
+    "name": "Dictionnaire · buisson près du pont",
+    "box": [
+      419,
+      281,
+      479,
+      332
+    ],
+    "baseY": 320,
+    "positive": [
+      [
+        448,
+        310
+      ]
+    ],
+    "feet": [
+      [
+        447,
+        320,
+        23,
+        12
+      ]
+    ]
+  },
+  {
+    "id": "dict-south-shrubs",
+    "name": "Dictionnaire · massif sud",
+    "box": [
+      261,
+      326,
+      380,
+      378
+    ],
+    "baseY": 363,
+    "positive": [
+      [
+        290,
+        354
+      ],
+      [
+        334,
+        357
+      ],
+      [
+        363,
+        353
+      ]
+    ],
+    "feet": [
+      [
+        290,
+        356,
+        22,
+        12
+      ],
+      [
+        329,
+        363,
+        25,
+        12
+      ],
+      [
+        362,
+        352,
+        18,
+        12
+      ]
+    ]
+  },
+  {
+    "id": "lex-west-pillar",
+    "name": "Lexique · stèle ouest",
+    "box": [
+      645,
+      125,
+      685,
+      224
+    ],
+    "baseY": 211,
+    "positive": [
+      [
+        663,
+        171
+      ],
+      [
+        664,
+        203
+      ]
+    ],
+    "feet": [
+      [
+        664,
+        211,
+        17,
+        9
+      ]
+    ]
+  },
+  {
+    "id": "lex-library",
+    "name": "Lexique · bibliothèque et livres",
+    "box": [
+      685,
+      151,
+      777,
+      233
+    ],
+    "baseY": 222,
+    "positive": [
+      [
+        714,
+        193
+      ],
+      [
+        748,
+        215
+      ],
+      [
+        714,
+        166
+      ]
+    ],
+    "feet": [
+      [
+        732,
+        218,
+        41,
+        12
+      ]
+    ]
+  },
+  {
+    "id": "lex-east-books",
+    "name": "Lexique · pile de livres",
+    "box": [
+      946,
+      192,
+      985,
+      223
+    ],
+    "baseY": 215,
+    "positive": [
+      [
+        966,
+        211
+      ]
+    ],
+    "feet": [
+      [
+        965,
+        213,
+        18,
+        10
+      ]
+    ]
+  },
+  {
+    "id": "lex-east-pillar",
+    "name": "Lexique · stèle est",
+    "box": [
+      970,
+      112,
+      1015,
+      204
+    ],
+    "baseY": 194,
+    "positive": [
+      [
+        990,
+        158
+      ],
+      [
+        990,
+        189
+      ]
+    ],
+    "feet": [
+      [
+        990,
+        193,
+        17,
+        9
+      ]
+    ]
+  },
+  {
+    "id": "lex-west-shrubs",
+    "name": "Lexique · massif ouest",
+    "box": [
+      655,
+      212,
+      758,
+      270
+    ],
+    "baseY": 255,
+    "positive": [
+      [
+        681,
+        234
+      ],
+      [
+        726,
+        247
+      ]
+    ],
+    "feet": [
+      [
+        679,
+        246,
+        23,
+        12
+      ],
+      [
+        726,
+        257,
+        18,
+        10
+      ]
+    ]
+  },
+  {
+    "id": "lex-small-shrub",
+    "name": "Lexique · buisson près du pont",
+    "box": [
+      733,
+      235,
+      772,
+      271
+    ],
+    "baseY": 266,
+    "positive": [
+      [
+        752,
+        254
+      ]
+    ],
+    "feet": [
+      [
+        752,
+        263,
+        17,
+        9
+      ]
+    ],
+    "negative": [
+      [
+        775,
+        254
+      ],
+      [
+        748,
+        273
+      ]
+    ]
+  },
+  {
+    "id": "lex-east-shrubs",
+    "name": "Lexique · massif est",
+    "box": [
+      953,
+      224,
+      1021,
+      269
+    ],
+    "baseY": 267,
+    "positive": [
+      [
+        972,
+        249
+      ],
+      [
+        995,
+        239
+      ]
+    ],
+    "feet": [
+      [
+        971,
+        254,
+        20,
+        10
+      ],
+      [
+        996,
+        248,
+        19,
+        11
+      ]
+    ],
+    "negative": [
+      [
+        952,
+        237
+      ],
+      [
+        984,
+        274
+      ],
+      [
+        1013,
+        264
+      ]
+    ],
+    "candidate": 2
+  },
+  {
+    "id": "ref-central-bench",
+    "name": "Références · banc central",
+    "box": [
+      1301,
+      243,
+      1403,
+      304
+    ],
+    "baseY": 290,
+    "positive": [
+      [
+        1340,
+        262
+      ],
+      [
+        1374,
+        282
+      ],
+      [
+        1318,
+        280
+      ]
+    ],
+    "feet": [],
+    "candidate": 0,
+    "fillHoles": true
+  },
+  {
+    "id": "ref-rear-bench",
+    "name": "Références · banc du fond",
+    "box": [
+      1350,
+      204,
+      1462,
+      251
+    ],
+    "baseY": 236,
+    "positive": [
+      [
+        1390,
+        223
+      ],
+      [
+        1429,
+        238
+      ]
+    ],
+    "feet": [
+      [
+        1403,
+        235,
+        46,
+        10
+      ]
+    ],
+    "negative": [
+      [
+        1438,
+        225
+      ],
+      [
+        1407,
+        247
+      ],
+      [
+        1386,
+        202
+      ]
+    ],
+    "fillHoles": true
+  },
+  {
+    "id": "ref-east-bench",
+    "name": "Références · banc est",
+    "box": [
+      1450,
+      281,
+      1543,
+      359
+    ],
+    "baseY": 337,
+    "positive": [
+      [
+        1495,
+        323
+      ],
+      [
+        1496,
+        343
+      ],
+      [
+        1524,
+        315
+      ]
+    ],
+    "feet": [
+      [
+        1496,
+        329,
+        35,
+        15
+      ]
+    ],
+    "negative": [
+      [
+        1465,
+        307
+      ],
+      [
+        1523,
+        290
+      ],
+      [
+        1557,
+        329
+      ]
+    ],
+    "fillHoles": true
+  },
+  {
+    "id": "ref-west-flowers",
+    "name": "Références · massif ouest",
+    "box": [
+      1110,
+      209,
+      1268,
+      277
+    ],
+    "baseY": 258,
+    "positive": [
+      [
+        1145,
+        241
+      ],
+      [
+        1182,
+        247
+      ],
+      [
+        1238,
+        250
+      ]
+    ],
+    "feet": [
+      [
+        1145,
+        252,
+        29,
+        12
+      ],
+      [
+        1190,
+        258,
+        24,
+        11
+      ],
+      [
+        1239,
+        259,
+        24,
+        11
+      ]
+    ]
+  },
+  {
+    "id": "ref-center-vine",
+    "name": "Références · pied du panneau central",
+    "box": [
+      1281,
+      189,
+      1322,
+      237
+    ],
+    "baseY": 225,
+    "positive": [
+      [
+        1301,
+        214
+      ]
+    ],
+    "feet": [
+      [
+        1304,
+        225,
+        16,
+        9
+      ]
+    ]
+  },
+  {
+    "id": "ref-east-vine",
+    "name": "Références · pied du panneau est",
+    "box": [
+      1416,
+      200,
+      1471,
+      262
+    ],
+    "baseY": 246,
+    "positive": [
+      [
+        1440,
+        230
+      ]
+    ],
+    "feet": [
+      [
+        1441,
+        244,
+        24,
+        12
+      ]
+    ]
+  },
+  {
+    "id": "ref-south-tree",
+    "name": "Références · arbre corail sud",
+    "box": [
+      1240,
+      287,
+      1345,
+      367
+    ],
+    "baseY": 353,
+    "positive": [
+      [
+        1292,
+        320
+      ],
+      [
+        1298,
+        352
+      ]
+    ],
+    "feet": [
+      [
+        1300,
+        351,
+        22,
+        12
+      ]
+    ]
+  },
+  {
+    "id": "ref-south-shrubs",
+    "name": "Références · massif sud",
+    "box": [
+      1263,
+      336,
+      1430,
+      391
+    ],
+    "baseY": 378,
+    "positive": [
+      [
+        1298,
+        368
+      ],
+      [
+        1363,
+        367
+      ],
+      [
+        1407,
+        374
+      ]
+    ],
+    "feet": [
+      [
+        1301,
+        372,
+        28,
+        12
+      ],
+      [
+        1349,
+        378,
+        29,
+        12
+      ],
+      [
+        1393,
+        377,
+        29,
+        11
+      ]
+    ]
+  },
+  {
+    "id": "ref-south-flowers",
+    "name": "Références · fleurs corail",
+    "box": [
+      1330,
+      302,
+      1400,
+      359
+    ],
+    "baseY": 347,
+    "positive": [
+      [
+        1362,
+        343
+      ],
+      [
+        1361,
+        357
+      ]
+    ],
+    "feet": [
+      [
+        1362,
+        351,
+        26,
+        11
+      ]
+    ],
+    "negative": [
+      [
+        1376,
+        306
+      ],
+      [
+        1405,
+        338
+      ],
+      [
+        1312,
+        325
+      ]
+    ],
+    "candidate": 2
+  },
+  {
+    "id": "ref-east-flowers",
+    "name": "Références · massif du banc est",
+    "box": [
+      1420,
+      281,
+      1484,
+      354
+    ],
+    "baseY": 337,
+    "positive": [
+      [
+        1459,
+        313
+      ],
+      [
+        1466,
+        339
+      ]
+    ],
+    "feet": [
+      [
+        1455,
+        327,
+        23,
+        16
+      ]
+    ],
+    "negative": [
+      [
+        1428,
+        294
+      ],
+      [
+        1418,
+        320
+      ],
+      [
+        1488,
+        323
+      ]
+    ]
+  },
+  {
+    "id": "ref-far-east-flowers",
+    "name": "Références · massif extérieur est",
+    "box": [
+      1515,
+      267,
+      1603,
+      367
+    ],
+    "baseY": 348,
+    "positive": [
+      [
+        1554,
+        313
+      ],
+      [
+        1539,
+        342
+      ]
+    ],
+    "feet": [
+      [
+        1558,
+        310,
+        31,
+        15
+      ],
+      [
+        1540,
+        344,
+        27,
+        13
+      ]
+    ]
+  },
+  {
+    "id": "themes-heart",
+    "name": "Thèmes · médaillon cœur",
+    "box": [
+      181,
+      479,
+      288,
+      587
+    ],
+    "baseY": 608,
+    "positive": [
+      [
+        230,
+        530
+      ]
+    ],
+    "feet": [],
+    "candidate": 2,
+    "fillHoles": true,
+    "negative": [
+      [
+        226,
+        601
+      ],
+      [
+        274,
+        591
+      ]
+    ]
+  },
+  {
+    "id": "themes-mountain",
+    "name": "Thèmes · médaillon montagne",
+    "box": [
+      286,
+      508,
+      404,
+      625
+    ],
+    "baseY": 634,
+    "positive": [
+      [
+        335,
+        568
+      ]
+    ],
+    "feet": [],
+    "candidate": 2,
+    "fillHoles": true,
+    "negative": [
+      [
+        333,
+        638
+      ],
+      [
+        399,
+        603
+      ]
+    ]
+  },
+  {
+    "id": "themes-flame",
+    "name": "Thèmes · médaillon flamme",
+    "box": [
+      417,
+      546,
+      525,
+      673
+    ],
+    "baseY": 669,
+    "positive": [
+      [
+        472,
+        609
+      ]
+    ],
+    "feet": [],
+    "candidate": 2,
+    "fillHoles": true,
+    "negative": [
+      [
+        468,
+        682
+      ],
+      [
+        525,
+        660
+      ]
+    ]
+  },
+  {
+    "id": "themes-west-cypress",
+    "name": "Thèmes · cyprès ouest",
+    "box": [
+      18,
+      487,
+      96,
+      610
+    ],
+    "baseY": 594,
+    "positive": [
+      [
+        59,
+        549
+      ],
+      [
+        58,
+        592
+      ]
+    ],
+    "feet": [
+      [
+        58,
+        595,
+        20,
+        12
+      ]
+    ]
+  },
+  {
+    "id": "themes-north-cypress",
+    "name": "Thèmes · cyprès nord",
+    "box": [
+      97,
+      443,
+      160,
+      581
+    ],
+    "baseY": 565,
+    "positive": [
+      [
+        128,
+        508
+      ],
+      [
+        127,
+        559
+      ]
+    ],
+    "feet": [
+      [
+        128,
+        566,
+        21,
+        12
+      ]
+    ]
+  },
+  {
+    "id": "themes-south-cypress",
+    "name": "Thèmes · cyprès sud",
+    "box": [
+      121,
+      626,
+      202,
+      755
+    ],
+    "baseY": 741,
+    "positive": [
+      [
+        162,
+        684
+      ],
+      [
+        162,
+        737
+      ]
+    ],
+    "feet": [
+      [
+        161,
+        739,
+        24,
+        12
+      ]
+    ]
+  },
+  {
+    "id": "themes-left-bench",
+    "name": "Thèmes · banc gauche",
+    "box": [
+      183,
+      614,
+      273,
+      659
+    ],
+    "baseY": 644,
+    "positive": [
+      [
+        224,
+        632
+      ],
+      [
+        251,
+        648
+      ]
+    ],
+    "feet": [
+      [
+        226,
+        641,
+        38,
+        10
+      ]
+    ]
+  },
+  {
+    "id": "themes-right-bench",
+    "name": "Thèmes · banc droit",
+    "box": [
+      409,
+      669,
+      497,
+      724
+    ],
+    "baseY": 708,
+    "positive": [
+      [
+        452,
+        690
+      ],
+      [
+        480,
+        710
+      ]
+    ],
+    "feet": [
+      [
+        455,
+        704,
+        37,
+        12
+      ]
+    ]
+  },
+  {
+    "id": "themes-heart-flowers",
+    "name": "Thèmes · fleurs sous le cœur",
+    "box": [
+      165,
+      574,
+      281,
+      619
+    ],
+    "baseY": 608,
+    "positive": [
+      [
+        198,
+        599
+      ],
+      [
+        250,
+        605
+      ]
+    ],
+    "feet": [
+      [
+        196,
+        603,
+        22,
+        10
+      ],
+      [
+        245,
+        607,
+        30,
+        10
+      ]
+    ]
+  },
+  {
+    "id": "themes-center-flowers",
+    "name": "Thèmes · fleurs sous la montagne",
+    "box": [
+      316,
+      596,
+      428,
+      648
+    ],
+    "baseY": 636,
+    "positive": [
+      [
+        347,
+        632
+      ],
+      [
+        406,
+        620
+      ]
+    ],
+    "feet": [
+      [
+        348,
+        635,
+        30,
+        10
+      ],
+      [
+        405,
+        620,
+        21,
+        10
+      ]
+    ],
+    "negative": [
+      [
+        387,
+        628
+      ],
+      [
+        390,
+        600
+      ],
+      [
+        312,
+        650
+      ]
+    ]
+  },
+  {
+    "id": "themes-east-flowers",
+    "name": "Thèmes · massif est",
+    "box": [
+      493,
+      587,
+      557,
+      703
+    ],
+    "baseY": 686,
+    "positive": [
+      [
+        527,
+        639
+      ],
+      [
+        514,
+        681
+      ]
+    ],
+    "feet": [
+      [
+        535,
+        625,
+        15,
+        19
+      ],
+      [
+        523,
+        666,
+        23,
+        25
+      ]
+    ]
+  },
+  {
+    "id": "themes-west-flowers",
+    "name": "Thèmes · massif ouest",
+    "box": [
+      50,
+      579,
+      127,
+      744
+    ],
+    "baseY": 719,
+    "positive": [
+      [
+        82,
+        613
+      ],
+      [
+        84,
+        673
+      ],
+      [
+        114,
+        713
+      ]
+    ],
+    "feet": [
+      [
+        83,
+        612,
+        26,
+        16
+      ],
+      [
+        84,
+        659,
+        23,
+        22
+      ],
+      [
+        105,
+        706,
+        21,
+        21
+      ]
+    ],
+    "negative": [
+      [
+        66,
+        559
+      ],
+      [
+        110,
+        630
+      ],
+      [
+        124,
+        677
+      ]
+    ]
+  },
+  {
+    "id": "themes-south-west-flowers",
+    "name": "Thèmes · fleurs au sud-ouest",
+    "box": [
+      173,
+      701,
+      265,
+      808
+    ],
+    "baseY": 791,
+    "positive": [
+      [
+        198,
+        748
+      ],
+      [
+        237,
+        777
+      ]
+    ],
+    "feet": [
+      [
+        200,
+        779,
+        22,
+        15
+      ],
+      [
+        239,
+        790,
+        23,
+        14
+      ]
+    ],
+    "negative": [
+      [
+        245,
+        735
+      ],
+      [
+        267,
+        754
+      ],
+      [
+        235,
+        815
+      ]
+    ]
+  },
+  {
+    "id": "themes-south-east-flowers",
+    "name": "Thèmes · fleurs au sud-est",
+    "box": [
+      357,
+      665,
+      453,
+      791
+    ],
+    "baseY": 767,
+    "positive": [
+      [
+        379,
+        719
+      ],
+      [
+        414,
+        749
+      ],
+      [
+        370,
+        775
+      ]
+    ],
+    "feet": [
+      [
+        378,
+        761,
+        22,
+        17
+      ],
+      [
+        420,
+        753,
+        27,
+        13
+      ],
+      [
+        365,
+        781,
+        24,
+        9
+      ]
+    ]
+  },
+  {
+    "id": "themes-front-flowers",
+    "name": "Thèmes · bordure fleurie sud",
+    "box": [
+      270,
+      764,
+      366,
+      818
+    ],
+    "baseY": 799,
+    "positive": [
+      [
+        301,
+        797
+      ],
+      [
+        342,
+        786
+      ]
+    ],
+    "feet": [
+      [
+        298,
+        798,
+        23,
+        12
+      ],
+      [
+        338,
+        789,
+        22,
+        12
+      ]
+    ],
+    "negative": [],
+    "candidate": 0
+  },
+  {
+    "id": "compare-books",
+    "name": "Comparaisons · pile de livres",
+    "box": [
+      976,
+      776,
+      1030,
+      821
+    ],
+    "baseY": 810,
+    "positive": [
+      [
+        1005,
+        801
+      ]
+    ],
+    "feet": [
+      [
+        1006,
+        807,
+        21,
+        10
+      ]
+    ]
+  },
+  {
+    "id": "compare-west-pot",
+    "name": "Comparaisons · plante en pot ouest",
+    "box": [
+      600,
+      721,
+      650,
+      785
+    ],
+    "baseY": 773,
+    "positive": [
+      [
+        625,
+        750
+      ],
+      [
+        626,
+        769
+      ]
+    ],
+    "feet": [
+      [
+        625,
+        772,
+        18,
+        10
+      ]
+    ]
+  },
+  {
+    "id": "compare-east-pot",
+    "name": "Comparaisons · plante en pot est",
+    "box": [
+      1020,
+      701,
+      1069,
+      754
+    ],
+    "baseY": 742,
+    "positive": [
+      [
+        1045,
+        722
+      ],
+      [
+        1048,
+        740
+      ]
+    ],
+    "feet": [
+      [
+        1046,
+        740,
+        16,
+        9
+      ]
+    ],
+    "negative": [
+      [
+        1024,
+        714
+      ],
+      [
+        1030,
+        738
+      ],
+      [
+        1067,
+        751
+      ]
+    ],
+    "candidate": 0
+  },
+  {
+    "id": "compare-west-shrubs",
+    "name": "Comparaisons · massif ouest",
+    "box": [
+      606,
+      790,
+      700,
+      881
+    ],
+    "baseY": 860,
+    "positive": [
+      [
+        635,
+        823
+      ],
+      [
+        678,
+        848
+      ]
+    ],
+    "feet": [
+      [
+        634,
+        830,
+        23,
+        17
+      ],
+      [
+        672,
+        859,
+        28,
+        18
+      ]
+    ]
+  },
+  {
+    "id": "compare-front-shrubs",
+    "name": "Comparaisons · massif sud",
+    "box": [
+      750,
+      849,
+      919,
+      923
+    ],
+    "baseY": 904,
+    "positive": [
+      [
+        779,
+        886
+      ],
+      [
+        831,
+        883
+      ],
+      [
+        884,
+        893
+      ]
+    ],
+    "feet": [
+      [
+        782,
+        899,
+        26,
+        13
+      ],
+      [
+        829,
+        895,
+        30,
+        16
+      ],
+      [
+        879,
+        904,
+        32,
+        13
+      ]
+    ]
+  },
+  {
+    "id": "compare-east-shrubs",
+    "name": "Comparaisons · massif est",
+    "box": [
+      986,
+      786,
+      1103,
+      887
+    ],
+    "baseY": 860,
+    "positive": [
+      [
+        1066,
+        836
+      ],
+      [
+        1023,
+        865
+      ],
+      [
+        1087,
+        806
+      ]
+    ],
+    "feet": [
+      [
+        1082,
+        814,
+        20,
+        23
+      ],
+      [
+        1059,
+        847,
+        26,
+        15
+      ],
+      [
+        1017,
+        865,
+        25,
+        14
+      ]
+    ]
+  },
+  {
+    "id": "compare-west-arch",
+    "name": "Comparaisons · arche fleurie ouest",
+    "box": [
+      633,
+      624,
+      791,
+      795
+    ],
+    "baseY": 748,
+    "positive": [
+      [
+        653,
+        663
+      ],
+      [
+        704,
+        646
+      ],
+      [
+        759,
+        659
+      ],
+      [
+        646,
+        743
+      ]
+    ],
+    "feet": [
+      [
+        645,
+        746,
+        10,
+        39
+      ],
+      [
+        774,
+        714,
+        10,
+        33
+      ]
+    ]
+  },
+  {
+    "id": "compare-east-arch",
+    "name": "Comparaisons · arche fleurie est",
+    "box": [
+      883,
+      627,
+      1041,
+      793
+    ],
+    "baseY": 749,
+    "positive": [
+      [
+        902,
+        656
+      ],
+      [
+        962,
+        646
+      ],
+      [
+        1025,
+        692
+      ],
+      [
+        1026,
+        753
+      ]
+    ],
+    "feet": [
+      [
+        898,
+        713,
+        10,
+        33
+      ],
+      [
+        1024,
+        750,
+        10,
+        36
+      ]
+    ]
+  },
+  {
+    "id": "comment-west-pot",
+    "name": "Commentaires · plante en pot ouest",
+    "box": [
+      1143,
+      646,
+      1230,
+      731
+    ],
+    "baseY": 714,
+    "positive": [
+      [
+        1187,
+        682
+      ],
+      [
+        1188,
+        711
+      ]
+    ],
+    "feet": [
+      [
+        1189,
+        711,
+        21,
+        13
+      ]
+    ],
+    "fillHoles": true,
+    "negative": [
+      [
+        1170,
+        712
+      ],
+      [
+        1221,
+        711
+      ]
+    ]
+  },
+  {
+    "id": "comment-east-pot",
+    "name": "Commentaires · plante en pot est",
+    "box": [
+      1547,
+      645,
+      1608,
+      750
+    ],
+    "baseY": 735,
+    "positive": [
+      [
+        1575,
+        689
+      ],
+      [
+        1575,
+        729
+      ]
+    ],
+    "feet": [
+      [
+        1573,
+        734,
+        25,
+        12
+      ]
+    ],
+    "negative": [
+      [
+        1532,
+        684
+      ],
+      [
+        1538,
+        727
+      ],
+      [
+        1606,
+        718
+      ]
+    ]
+  },
+  {
+    "id": "comment-west-cypress",
+    "name": "Commentaires · cyprès ouest",
+    "box": [
+      1157,
+      592,
+      1208,
+      691
+    ],
+    "baseY": 678,
+    "positive": [
+      [
+        1180,
+        638
+      ]
+    ],
+    "feet": [
+      [
+        1182,
+        676,
+        18,
+        11
+      ]
+    ]
+  },
+  {
+    "id": "comment-rear-column",
+    "name": "Commentaires · pilier arrière",
+    "box": [
+      1270,
+      529,
+      1310,
+      674
+    ],
+    "baseY": 660,
+    "positive": [
+      [
+        1290,
+        588
+      ],
+      [
+        1292,
+        646
+      ]
+    ],
+    "feet": [
+      [
+        1291,
+        660,
+        15,
+        9
+      ]
+    ]
+  },
+  {
+    "id": "comment-library",
+    "name": "Commentaires · bibliothèque au mur",
+    "box": [
+      1369,
+      579,
+      1418,
+      650
+    ],
+    "baseY": 640,
+    "positive": [
+      [
+        1394,
+        614
+      ]
+    ],
+    "feet": [
+      [
+        1395,
+        642,
+        23,
+        6
+      ]
+    ]
+  },
+  {
+    "id": "comment-library-east",
+    "name": "Commentaires · livres sous la vigne",
+    "box": [
+      1480,
+      618,
+      1522,
+      660
+    ],
+    "baseY": 653,
+    "positive": [
+      [
+        1499,
+        642
+      ]
+    ],
+    "feet": [
+      [
+        1500,
+        650,
+        19,
+        7
+      ]
+    ]
+  },
+  {
+    "id": "comment-west-shrubs",
+    "name": "Commentaires · massif ouest",
+    "box": [
+      1181,
+      712,
+      1286,
+      803
+    ],
+    "baseY": 783,
+    "positive": [
+      [
+        1214,
+        747
+      ],
+      [
+        1256,
+        778
+      ]
+    ],
+    "feet": [
+      [
+        1214,
+        749,
+        22,
+        23
+      ],
+      [
+        1258,
+        784,
+        24,
+        13
+      ]
+    ]
+  },
+  {
+    "id": "comment-south-west-shrub",
+    "name": "Commentaires · buisson sud-ouest",
+    "box": [
+      1290,
+      775,
+      1375,
+      821
+    ],
+    "baseY": 808,
+    "positive": [
+      [
+        1320,
+        790
+      ],
+      [
+        1313,
+        804
+      ]
+    ],
+    "feet": [
+      [
+        1329,
+        805,
+        32,
+        13
+      ]
+    ],
+    "negative": [
+      [
+        1347,
+        786
+      ],
+      [
+        1351,
+        816
+      ],
+      [
+        1305,
+        764
+      ]
+    ],
+    "candidate": 0
+  },
+  {
+    "id": "comment-south-shrubs",
+    "name": "Commentaires · massif sud",
+    "box": [
+      1382,
+      778,
+      1503,
+      837
+    ],
+    "baseY": 821,
+    "positive": [
+      [
+        1407,
+        817
+      ],
+      [
+        1454,
+        808
+      ],
+      [
+        1485,
+        820
+      ]
+    ],
+    "feet": [
+      [
+        1408,
+        817,
+        24,
+        13
+      ],
+      [
+        1453,
+        811,
+        24,
+        13
+      ],
+      [
+        1481,
+        817,
+        21,
+        12
+      ]
+    ],
+    "negative": [
+      [
+        1408,
+        835
+      ],
+      [
+        1482,
+        831
+      ]
+    ]
+  },
+  {
+    "id": "comment-south-east-shrubs",
+    "name": "Commentaires · massif sud-est",
+    "box": [
+      1467,
+      751,
+      1540,
+      822
+    ],
+    "baseY": 802,
+    "positive": [
+      [
+        1495,
+        795
+      ],
+      [
+        1510,
+        780
+      ]
+    ],
+    "feet": [
+      [
+        1505,
+        800,
+        30,
+        13
+      ]
+    ],
+    "negative": [
+      [
+        1541,
+        795
+      ],
+      [
+        1515,
+        739
+      ],
+      [
+        1478,
+        828
+      ]
+    ],
+    "candidate": 0
+  },
+  {
+    "id": "plaza-left-bench",
+    "name": "Place · banc ouest",
+    "box": [
+      672,
+      374,
+      759,
+      428
+    ],
+    "baseY": 405,
+    "positive": [
+      [
+        712,
+        401
+      ],
+      [
+        742,
+        389
+      ]
+    ],
+    "feet": []
+  },
+  {
+    "id": "plaza-right-bench",
+    "name": "Place · banc est",
+    "box": [
+      919,
+      371,
+      982,
+      419
+    ],
+    "baseY": 403,
+    "positive": [
+      [
+        950,
+        392
+      ]
+    ],
+    "feet": []
+  },
+  {
+    "id": "plaza-west-shrub",
+    "name": "Place · massif ouest",
+    "box": [
+      559,
+      356,
+      626,
+      436
+    ],
+    "baseY": 427,
+    "positive": [
+      [
+        590,
+        390
+      ],
+      [
+        604,
+        397
+      ],
+      [
+        595,
+        422
+      ]
+    ],
+    "feet": [
+      [
+        595,
+        425,
+        19,
+        10
+      ]
+    ],
+    "negative": [
+      [
+        567,
+        392
+      ],
+      [
+        617,
+        421
+      ],
+      [
+        578,
+        439
+      ]
+    ],
+    "candidate": 2
+  },
+  {
+    "id": "plaza-west-small-shrub",
+    "name": "Place · petit buisson ouest",
+    "box": [
+      581,
+      436,
+      622,
+      472
+    ],
+    "baseY": 461,
+    "positive": [
+      [
+        603,
+        453
+      ]
+    ],
+    "feet": [
+      [
+        602,
+        460,
+        18,
+        10
+      ]
+    ]
+  },
+  {
+    "id": "plaza-north-grass",
+    "name": "Place · herbes près du pont nord",
+    "box": [
+      741,
+      308,
+      784,
+      349
+    ],
+    "baseY": 339,
+    "positive": [
+      [
+        761,
+        329
+      ]
+    ],
+    "feet": [
+      [
+        762,
+        339,
+        19,
+        10
+      ]
+    ]
+  },
+  {
+    "id": "plaza-west-bench-grass",
+    "name": "Place · herbes près du banc ouest",
+    "box": [
+      734,
+      351,
+      790,
+      391
+    ],
+    "baseY": 378,
+    "positive": [
+      [
+        759,
+        369
+      ],
+      [
+        755,
+        378
+      ]
+    ],
+    "feet": [
+      [
+        766,
+        377,
+        20,
+        9
+      ]
+    ],
+    "negative": [
+      [
+        782,
+        365
+      ],
+      [
+        762,
+        393
+      ]
+    ],
+    "candidate": 2
+  },
+  {
+    "id": "plaza-south-west-shrubs",
+    "name": "Place · massif sud-ouest",
+    "box": [
+      705,
+      514,
+      790,
+      568
+    ],
+    "baseY": 552,
+    "positive": [
+      [
+        729,
+        544
+      ],
+      [
+        765,
+        548
+      ]
+    ],
+    "feet": [
+      [
+        731,
+        547,
+        22,
+        12
+      ],
+      [
+        764,
+        554,
+        22,
+        10
+      ]
+    ]
+  },
+  {
+    "id": "plaza-south-east-tree",
+    "name": "Place · arbre sud-est",
+    "box": [
+      918,
+      488,
+      991,
+      558
+    ],
+    "baseY": 546,
+    "positive": [
+      [
+        958,
+        521
+      ],
+      [
+        958,
+        543
+      ]
+    ],
+    "feet": [
+      [
+        959,
+        543,
+        24,
+        12
+      ]
+    ]
+  },
+  {
+    "id": "plaza-south-east-shrubs",
+    "name": "Place · massif sud-est",
+    "box": [
+      875,
+      529,
+      947,
+      572
+    ],
+    "baseY": 558,
+    "positive": [
+      [
+        899,
+        546
+      ],
+      [
+        926,
+        552
+      ]
+    ],
+    "feet": [
+      [
+        899,
+        549,
+        20,
+        11
+      ],
+      [
+        926,
+        558,
+        17,
+        10
+      ]
+    ]
+  },
+  {
+    "id": "plaza-east-shrub",
+    "name": "Place · buisson près du pont commentaires",
+    "box": [
+      1047,
+      431,
+      1106,
+      476
+    ],
+    "baseY": 463,
+    "positive": [
+      [
+        1076,
+        454
+      ],
+      [
+        1063,
+        454
+      ]
+    ],
+    "feet": [
+      [
+        1078,
+        460,
+        22,
+        12
+      ]
+    ],
+    "negative": [
+      [
+        1098,
+        454
+      ],
+      [
+        1066,
+        480
+      ]
+    ],
+    "candidate": 1
+  },
+  {
+    "id": "comment-column-shrub",
+    "name": "Commentaires · buisson près du pilier est",
+    "box": [
+      1540,
+      731,
+      1587,
+      785
+    ],
+    "positive": [
+      [
+        1562,
+        757
+      ],
+      [
+        1565,
+        770
+      ]
+    ],
+    "negative": [
+      [
+        1534,
+        761
+      ],
+      [
+        1579,
+        784
+      ]
+    ],
+    "feet": [
+      [
+        1564,
+        775,
+        17,
+        10
+      ]
+    ],
+    "baseY": 775
+  }
+]

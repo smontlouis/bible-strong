@@ -1,0 +1,37 @@
+{
+  "name": "@bible-strong/world",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "yarn@4.12.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 5186",
+    "build": "tsc --noEmit && vite build",
+    "lint": "tsc --noEmit",
+    "segment:benchmark": "node scripts/benchmark-sam3.mjs",
+    "segment:build": "node scripts/build-sam3-occluders.mjs",
+    "tiles": "node scripts/generate-map-tiles.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts"
+  },
+  "dependencies": {
+    "@geoman-io/leaflet-geoman-free": "^2.20.1",
+    "leaflet": "1.9.4",
+    "nipplejs": "1.0.4",
+    "phaser": "3.90.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@fal-ai/client": "^1.10.1",
+    "@types/leaflet": "^1.9.22",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "sharp": "^0.35.2",
+    "typescript": "~6.0.3",
+    "vite": "^8.0.13",
+    "vitest": "^4.1.10"
+  }
+}
