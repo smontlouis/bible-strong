@@ -1,0 +1,131 @@
+.commentaries-verse {
+  margin-top: 22px;
+}
+.commentaries-reveal {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: var(--lex-blue);
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+}
+.commentaries-reveal > span {
+  margin-left: auto;
+}
+.commentaries-insight {
+  margin-top: 18px;
+  padding: 22px;
+  background: #edf2ff;
+  border: 1px solid #cbd8fb;
+  border-radius: 18px;
+  animation: lex-enter 240ms ease-out;
+}
+.commentaries-insight p {
+  font-size: 15px;
+  line-height: 1.65;
+  margin: 12px 0;
+}
+.commentaries-insight h2 {
+  font:
+    26px Georgia,
+    serif;
+  margin: 0;
+}
+.commentaries-insight small,
+.commentaries-source {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #59627c;
+}
+.commentaries-author {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin: 28px 0;
+}
+.commentaries-author > span {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #f8d852;
+  font:
+    22px Georgia,
+    serif;
+}
+.commentaries-author small {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+}
+.commentaries-hint {
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 24px;
+  color: #59627c;
+}
+.commentaries-choices {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.commentaries-choices button {
+  flex: 1;
+  padding: 13px 10px;
+  min-width: 88px;
+  border: 1px solid #dfd9c9;
+  border-radius: 13px;
+  background: #fffefa;
+  color: var(--lex-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+.commentaries-choices button span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+.commentaries-choices button[aria-pressed='true'] {
+  background: var(--lex-blue);
+  border-color: var(--lex-blue);
+  color: white;
+}
+.commentaries-source a {
+  color: var(--lex-ink);
+  text-underline-offset: 3px;
+}
+.commentaries-question {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 18px;
+  padding: 20px;
+  background: #fff0bd;
+  border-radius: 18px;
+  animation: lex-enter 240ms ease-out;
+}
+.commentaries-question > span {
+  font:
+    46px Georgia,
+    serif;
+  color: #957220;
+}
+.commentaries-question p {
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .commentaries-insight,
+  .commentaries-question {
+    animation: none;
+  }
+}

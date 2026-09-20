@@ -1,0 +1,127 @@
+.comparisons-cards {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+.comparisons-card {
+  padding: 17px 20px;
+  background: #fffefa;
+  border: 1px solid #dfd9c9;
+  border-radius: 18px;
+  animation: lex-enter 320ms ease-out both;
+}
+.comparisons-card:nth-child(2) {
+  border-color: #cbd8fa;
+  background: #f0f4ff;
+}
+.comparisons-version {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 13px;
+}
+.comparisons-version strong {
+  font-size: 11px;
+  background: #e6edff;
+  padding: 5px 8px;
+  border-radius: 6px;
+}
+.comparisons-version span,
+.comparisons-card small {
+  font-size: 10px;
+  color: #59627c;
+}
+.comparisons-card small {
+  letter-spacing: 1px;
+}
+.comparisons-card p {
+  font:
+    19px/1.55 Georgia,
+    serif;
+  margin: 8px 0 0;
+}
+.comparisons-card mark {
+  color: inherit;
+  background: transparent;
+  border-radius: 4px;
+  transition:
+    background 250ms ease,
+    box-shadow 250ms ease;
+}
+.comparisons-card mark.is-lit {
+  background: #ffe172;
+  box-shadow: 0 2px 0 #d7aa24;
+}
+.comparisons-action {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  background: var(--lex-blue);
+  color: white;
+  border: 0;
+  border-radius: 14px;
+  font-size: 13px;
+}
+.comparisons-action > span {
+  font-size: 20px;
+}
+.comparisons-note {
+  font-size: 11px;
+  color: #59627c;
+  line-height: 1.6;
+  margin: 12px 0 0;
+}
+.comparisons-insight {
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 17px;
+  border-radius: 14px;
+  background: #fff0bd;
+  animation: lex-enter 250ms ease-out;
+}
+.comparisons-path {
+  display: grid;
+  gap: 14px;
+  margin: 28px 0;
+}
+.comparisons-path button {
+  border: 1px solid #dfd9c9;
+  background: #fffefa;
+  color: var(--lex-ink);
+  border-radius: 16px;
+  padding: 18px;
+  text-align: left;
+}
+.comparisons-path button[aria-expanded='true'] {
+  background: #f0f4ff;
+  border-color: var(--lex-blue);
+}
+.comparisons-step-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+.comparisons-step-title > span:first-child {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #f8d852;
+}
+.comparisons-step-title > span:last-child {
+  margin-left: auto;
+}
+.comparisons-path p {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  animation: lex-enter 250ms ease-out;
+}

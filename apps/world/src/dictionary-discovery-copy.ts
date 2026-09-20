@@ -46,7 +46,7 @@ export const dictionaryCopy = {
         icon: 'book',
       },
     ],
-    source: 'Synthèse pédagogique · d’après Easton, « Publican »',
+    source: 'D’après Easton, « Publican »',
     passages: [
       {
         label: 'Zachée',
@@ -109,7 +109,7 @@ export const dictionaryCopy = {
         icon: 'book',
       },
     ],
-    source: 'Learning summary · based on Easton, “Publican”',
+    source: 'Based on Easton, “Publican”',
     passages: [
       {
         label: 'Zacchaeus',

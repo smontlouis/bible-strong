@@ -13,6 +13,10 @@ import { useCameraZoomGestures } from './use-camera-zoom-gestures'
 import { diagnosticCategories, diagnosticCopy, makeDiagnosticFilters } from './diagnostic-filters'
 import { DictionaryDiscovery } from './DictionaryDiscovery'
 import { LexiconDiscovery } from './LexiconDiscovery'
+import { ReferencesDiscovery } from './ReferencesDiscovery'
+import { ThemesDiscovery } from './ThemesDiscovery'
+import { ComparisonsDiscovery } from './ComparisonsDiscovery'
+import { CommentariesDiscovery } from './CommentariesDiscovery'
 import { AvatarEditor, AvatarPreview, profileCopy } from './AvatarEditor'
 import { DEFAULT_PROFILE, loadProfile, saveProfile } from './avatar-profile'
 import './style.css'
@@ -345,21 +349,27 @@ function App() {
       <aside className="world-bottom">
         <div className="joystick-zone" ref={joystick} role="group" aria-label={t.joystick} />
         <div className="companion-controls">
-          <button className="profile-button" aria-label={profileCopy[language].edit}
-            aria-haspopup="dialog" onClick={() => {
+          <button
+            className="profile-button"
+            aria-label={profileCopy[language].edit}
+            aria-haspopup="dialog"
+            onClick={() => {
               controls.current.paused = true
               controls.current.direction = { x: 0, y: 0 }
               setProfileOpen(true)
-            }}>
+            }}
+          >
             <AvatarPreview color={profile.color} />
             <span className="profile-button-copy">
               <strong>{profile.name || profileCopy[language].guest}</strong>
               <small>{profileCopy[language].edit} ↗</small>
             </span>
           </button>
-          {profileStorageError && <span className="profile-storage-error" role="status">
-            {profileCopy[language].storage}
-          </span>}
+          {profileStorageError && (
+            <span className="profile-storage-error" role="status">
+              {profileCopy[language].storage}
+            </span>
+          )}
         </div>
       </aside>
       <footer className="world-footer">
@@ -419,45 +429,35 @@ function App() {
         <br />
         {state.behind.join(' / ') || '—'}
       </output>
-      {profileOpen && <AvatarEditor profile={profile} language={language}
-        onClose={() => setProfileOpen(false)}
-        onSave={next => {
-          setProfileStorageError(!saveProfile(next))
-          setProfile(next)
-          setProfileOpen(false)
-        }} />}
+      {profileOpen && (
+        <AvatarEditor
+          profile={profile}
+          language={language}
+          onClose={() => setProfileOpen(false)}
+          onSave={next => {
+            setProfileStorageError(!saveProfile(next))
+            setProfile(next)
+            setProfileOpen(false)
+          }}
+        />
+      )}
       {opened?.id === 'lexicon' && (
         <LexiconDiscovery language={language} onClose={() => setOpened(null)} />
       )}
       {opened?.id === 'dictionary' && (
         <DictionaryDiscovery language={language} onClose={() => setOpened(null)} />
       )}
-      {opened && opened.id !== 'lexicon' && opened.id !== 'dictionary' && (
-        <div className="modal-scrim" onClick={() => setOpened(null)}>
-          <section
-            className="resource-card"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="resource-title"
-            onClick={e => e.stopPropagation()}
-            onKeyDown={e => {
-              if (e.key === 'Escape') setOpened(null)
-              if (e.key === 'Tab') e.preventDefault()
-            }}
-          >
-            <div className="resource-icon" style={{ background: opened.color }}>
-              ▤
-            </div>
-            <small>
-              {t.brand} · {visited.length}/6 {t.walked}
-            </small>
-            <h1 id="resource-title">{name(opened)}</h1>
-            <p>{t.intro}</p>
-            <button autoFocus onClick={() => setOpened(null)}>
-              {t.close}
-            </button>
-          </section>
-        </div>
+      {opened?.id === 'references' && (
+        <ReferencesDiscovery language={language} onClose={() => setOpened(null)} />
+      )}
+      {opened?.id === 'themes' && (
+        <ThemesDiscovery language={language} onClose={() => setOpened(null)} />
+      )}
+      {opened?.id === 'comparison' && (
+        <ComparisonsDiscovery language={language} onClose={() => setOpened(null)} />
+      )}
+      {opened?.id === 'commentaries' && (
+        <CommentariesDiscovery language={language} onClose={() => setOpened(null)} />
       )}
       {editorMode && (
         <EditorNavigation

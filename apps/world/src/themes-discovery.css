@@ -1,0 +1,121 @@
+.themes-map {
+  margin-top: 8px;
+  padding: 20px 18px 12px;
+  border: 1px solid #dfd9c9;
+  border-radius: 20px;
+  background: #fffefa;
+  text-align: center;
+}
+.themes-map > small {
+  color: #63708d;
+  font-size: 12px;
+}
+.themes-seed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 12px auto 0;
+  min-height: 52px;
+  padding: 12px 24px;
+  border: 0;
+  border-radius: 30px;
+  background: #ffe172;
+  color: var(--lex-ink);
+  font: inherit;
+}
+.themes-branches {
+  min-height: 72px;
+}
+.themes-branches > div {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  padding-top: 20px;
+  animation: lex-enter 300ms ease-out both;
+}
+.themes-branches > div > span {
+  position: relative;
+  flex: 1;
+  border: 1px solid #ccd8f4;
+  border-radius: 12px;
+  background: #edf2ff;
+  padding: 10px 6px;
+  font-size: 12px;
+}
+.themes-branches > div > span::before {
+  content: '';
+  position: absolute;
+  top: -21px;
+  height: 20px;
+  left: 50%;
+  width: 1px;
+  background: #b4c8f5;
+}
+.themes-branches p,
+.themes-hint,
+.themes-note {
+  color: #63708d;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.themes-topic-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 28px 0 20px;
+  color: var(--lex-ink);
+}
+.themes-topic-label > svg {
+  color: var(--lex-blue);
+  flex-shrink: 0;
+}
+.themes-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 18px;
+}
+.themes-choices button {
+  min-height: 44px;
+  border: 1px solid #d5dcef;
+  border-radius: 24px;
+  padding: 10px 14px;
+  background: #fffefa;
+  color: var(--lex-ink);
+  font: inherit;
+  font-size: 13px;
+}
+.themes-choices button[aria-pressed='true'] {
+  background: #e7eeff;
+  border-color: var(--lex-blue);
+  box-shadow: inset 0 0 0 1px var(--lex-blue);
+}
+.themes-reading,
+.themes-preview {
+  animation: lex-enter 280ms ease-out both;
+}
+.themes-reading {
+  min-height: 185px;
+}
+.themes-note {
+  margin-top: 18px;
+}
+.themes-preview {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border-radius: 18px;
+  padding: 22px;
+  background: #edf2ff;
+  min-height: 110px;
+}
+.themes-preview > span {
+  color: var(--lex-blue);
+  font-size: 28px;
+}
+.themes-preview > p {
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+}

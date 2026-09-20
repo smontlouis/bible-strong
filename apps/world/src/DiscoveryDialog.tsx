@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useId, useRef, useState, type ReactNode } from 'react'
 import './lexicon-discovery.css'
 
 type DiscoveryCopy = {
@@ -32,6 +32,7 @@ export function DiscoveryDialog({
   const headingId = useId()
   const dialog = useRef<HTMLDialogElement>(null)
   const content = useRef<HTMLDivElement>(null)
+  const nextButton = useRef<HTMLButtonElement>(null)
   const gesture = useRef<{ x: number; y: number } | null>(null)
   const [slide, setSlide] = useState(0)
   useEffect(() => {
@@ -43,11 +44,15 @@ export function DiscoveryDialog({
       if (previous instanceof HTMLElement) previous.focus()
     }
   }, [])
+  useLayoutEffect(() => {
+    content.current?.scrollTo({ top: 0 })
+  }, [slide])
   function navigate(next: number) {
     if (next < 0 || next >= t.titles.length) return
+    // Keep keyboard focus inside the dialog when a slide removes its focused control.
+    if (content.current?.contains(document.activeElement)) nextButton.current?.focus()
     onNavigate?.()
     setSlide(next)
-    content.current?.scrollTo({ top: 0 })
   }
   return (
     <dialog
@@ -59,7 +64,11 @@ export function DiscoveryDialog({
         if (event.target === event.currentTarget) onClose()
       }}
       onKeyDown={event => {
-        if (event.target instanceof HTMLAudioElement) return
+        if (
+          event.target instanceof HTMLElement &&
+          event.target.closest('input, textarea, select, audio, [role=tablist]')
+        )
+          return
         if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
           event.preventDefault()
           navigate(slide + (event.key === 'ArrowRight' ? 1 : -1))
@@ -86,6 +95,10 @@ export function DiscoveryDialog({
           ref={content}
           className="lexicon-content"
           onTouchStart={event => {
+            if (event.touches.length !== 1) {
+              gesture.current = null
+              return
+            }
             const touch = event.touches[0]
             gesture.current = { x: touch.clientX, y: touch.clientY }
           }}
@@ -103,9 +116,15 @@ export function DiscoveryDialog({
               navigate(slide + (dx < 0 ? 1 : -1))
           }}
         >
-          <section key={slide} className="lexicon-slide" aria-label={`${slide + 1} / 3`}>
+          <section
+            key={slide}
+            className="lexicon-slide"
+            aria-label={`${slide + 1} / ${t.titles.length}`}
+          >
             <div className="lexicon-heading">
-              <span className="lexicon-step">0{slide + 1} / 03</span>
+              <span className="lexicon-step">
+                {String(slide + 1).padStart(2, '0')} / {String(t.titles.length).padStart(2, '0')}
+              </span>
               <h1 id={headingId}>{t.titles[slide]}</h1>
               <p>{t.descriptions[slide]}</p>
             </div>
@@ -132,13 +151,16 @@ export function DiscoveryDialog({
                 />
               ))}
             </nav>
-            <span aria-live="polite">{slide + 1} / 3</span>
+            <span aria-live="polite">
+              {slide + 1} / {t.titles.length}
+            </span>
           </div>
           <button
+            ref={nextButton}
             className="lexicon-next"
-            onClick={() => (slide === 2 ? onClose() : navigate(slide + 1))}
+            onClick={() => (slide === t.titles.length - 1 ? onClose() : navigate(slide + 1))}
           >
-            {slide === 2 ? t.finish : t.next}
+            {slide === t.titles.length - 1 ? t.finish : t.next}
             <span aria-hidden="true">→</span>
           </button>
         </footer>
