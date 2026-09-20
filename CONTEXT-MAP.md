@@ -8,7 +8,7 @@
 - [Resource catalog](./packages/resource-catalog/CONTEXT.md) — owns generated artifact catalogs and immutable publication metadata.
 - [Resource authoring](./apps/resource-studio/CONTEXT.md) — acquires, transforms, validates, and packages Bible Strong resources.
 - [Public site](./apps/site/CONTEXT.md) — exposes public Bible Strong pages and shared study content on the web.
-- [Event exploration world](./apps/bible-strong-world/CONTEXT.md) — presents Bible Strong resources through a joystick-driven illustrated world for ASI Europe.
+- [Event exploration world](./apps/world/CONTEXT.md) — presents Bible Strong resources through a joystick-driven illustrated world for ASI Europe.
 - [Application API](./apps/api/CONTEXT.md) — owns Firebase-backed server operations used by Bible Strong clients.
 - [Bible reference parsing](./packages/bible-reference-parser/CONTEXT.md) — turns French and English Bible-reference text into canonical passage references.
 

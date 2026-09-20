@@ -1,0 +1,126 @@
+.world-editor-navigation {
+  position: absolute;
+  z-index: 110;
+  top: 16px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 16px;
+  background: #fffcf5f5;
+  color: #173f4d;
+  border: 1px solid #d2e1dc;
+  border-radius: 18px;
+  box-shadow: 0 8px 30px #12384425;
+  font-size: 13px;
+}
+.world-editor-tabs {
+  display: flex;
+  gap: 5px;
+  flex: 1;
+  overflow: auto;
+}
+.world-editor-navigation button {
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  padding: 11px 13px;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  font: inherit;
+}
+.world-editor-navigation button[aria-pressed='true'] {
+  background: #24565f;
+  color: white;
+}
+.world-editor-navigation .editor-done {
+  background: #e9eee5;
+  border-color: #d2e1dc;
+}
+.is-world-editing > .world-header,
+.is-world-editing > .world-bottom,
+.is-world-editing > .world-footer,
+.is-world-editing > .camera-controls,
+.is-world-editing > .journey-pill,
+.is-world-editing > .diagnostic-filters,
+.is-world-editing > .world-debug {
+  visibility: hidden;
+}
+.is-world-editing > .shore-editor {
+  top: 100px;
+  width: 304px;
+  bottom: 20px;
+}
+.is-world-editing > .zone-editor {
+  top: 96px;
+}
+.world-shell.is-editing > .world-editor-navigation {
+  visibility: visible;
+  pointer-events: auto;
+}
+.editor-live {
+  font-size: 10px;
+  color: #36806c;
+  white-space: nowrap;
+}
+.ambient-editor input[type='text'],
+.ambient-editor input[type='number'] {
+  border: 1px solid #c2d7d6;
+  background: #fffef8;
+  border-radius: 8px;
+  padding: 8px;
+  color: inherit;
+  min-width: 0;
+  width: 100%;
+  font: inherit;
+}
+.ambient-editor input[type='color'] {
+  height: 30px;
+  width: 56px;
+  border: 0;
+  background: none;
+  margin-left: auto;
+}
+.editor-dimensions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.editor-save-bar {
+  position: sticky;
+  bottom: -18px;
+  background: #fffcf5;
+  padding: 12px 0;
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid #d2e1dc;
+}
+.editor-save-bar button {
+  background: #24565f;
+  color: white;
+  font-weight: 600;
+}
+@media (max-width: 850px) {
+  .world-editor-navigation {
+    gap: 6px;
+    left: 8px;
+    right: 8px;
+    padding: 8px;
+  }
+  .world-editor-navigation > strong {
+    display: none;
+  }
+  .world-editor-navigation button {
+    padding: 10px 9px;
+  }
+  .is-world-editing > .shore-editor {
+    width: 250px;
+    left: 8px;
+    top: 82px;
+  }
+  .is-world-editing > .zone-editor {
+    top: 80px;
+  }
+}

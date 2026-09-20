@@ -1,0 +1,11 @@
+{
+  "id": "cat-tile",
+  "x": 700.8046875,
+  "y": 379.296875,
+  "width": 36.28125,
+  "height": 24.5234375,
+  "frameCount": 120,
+  "frameRate": 12,
+  "sourceTile": "2/2-1",
+  "depth": 405.1
+}

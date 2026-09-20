@@ -1,0 +1,11 @@
+{
+  "id": "duck-tile",
+  "x": 1061,
+  "y": 49.8062015503876,
+  "width": 62.5,
+  "height": 37.354651162790695,
+  "frameCount": 120,
+  "frameRate": 12,
+  "sourceTile": "4/8-0",
+  "depth": -79
+}

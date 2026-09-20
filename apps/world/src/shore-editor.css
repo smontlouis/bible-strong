@@ -1,0 +1,98 @@
+.shore-editor {
+  position: absolute;
+  z-index: 40;
+  top: 90px;
+  bottom: 24px;
+  left: 20px;
+  width: 280px;
+  padding: 18px;
+  border: 1px solid #dce5d9;
+  border-radius: 20px;
+  background: #fffcf1f5;
+  color: #173f4d;
+  box-shadow: 0 12px 40px #12384430;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13px;
+}
+.shore-editor header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.shore-editor h2 {
+  margin: 0;
+  font-size: 21px;
+}
+.shore-editor p {
+  margin: 0;
+  line-height: 1.5;
+}
+.shore-editor small {
+  line-height: 1.5;
+  opacity: 0.75;
+}
+.shore-editor button,
+.shore-editor select {
+  padding: 9px 10px;
+  border: 1px solid #c2d7d6;
+  border-radius: 10px;
+  color: inherit;
+  background: #fffef8;
+  cursor: pointer;
+  font: inherit;
+}
+.shore-editor button[aria-pressed='true'] {
+  background: #24565f;
+  color: white;
+  border-color: #24565f;
+}
+.shore-editor button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.shore-editor label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+.shore-editor label select,
+.shore-editor input[type='range'] {
+  width: 100%;
+}
+.shore-editor input {
+  accent-color: #24565f;
+}
+.shore-editor output {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+.shore-tools {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.shore-tools button {
+  flex: 1;
+}
+.is-shore-editing .world-bottom,
+.is-shore-editing .world-footer,
+.is-shore-editing .camera-controls,
+.is-shore-editing .journey-pill,
+.is-shore-editing .diagnostic-filters {
+  visibility: hidden;
+}
+@media (max-width: 600px) {
+  .shore-editor {
+    left: 8px;
+    top: 80px;
+    bottom: 12px;
+    width: 220px;
+    padding: 12px;
+    font-size: 12px;
+  }
+}

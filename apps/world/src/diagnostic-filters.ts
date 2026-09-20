@@ -1,0 +1,63 @@
+export const diagnosticCategories = [
+  'shorelines',
+  'navigation',
+  'occluders',
+  'particles',
+  'butterfly',
+  'dragonfly',
+  'light',
+  'fish',
+  'duck',
+  'cat',
+] as const
+export type DiagnosticCategory = (typeof diagnosticCategories)[number]
+export type DiagnosticFilters = Record<DiagnosticCategory, boolean>
+export const makeDiagnosticFilters = (enabled = true): DiagnosticFilters =>
+  Object.fromEntries(diagnosticCategories.map(category => [category, enabled])) as DiagnosticFilters
+export const diagnosticCopy = {
+  fr: {
+    title: 'Zones affichées',
+    all: 'Tout',
+    none: 'Aucun',
+    shorelines: 'Rivages',
+    navigation: 'Navigation',
+    occluders: 'Décor',
+    particles: 'Particules',
+    butterfly: 'Papillons',
+    dragonfly: 'Libellules',
+    light: 'Lueurs',
+    fish: 'Poissons',
+    duck: 'Canard',
+    cat: 'Chat',
+  },
+  en: {
+    title: 'Visible zones',
+    all: 'All',
+    none: 'None',
+    shorelines: 'Shorelines',
+    navigation: 'Navigation',
+    occluders: 'Scenery',
+    particles: 'Particles',
+    butterfly: 'Butterflies',
+    dragonfly: 'Dragonflies',
+    light: 'Glows',
+    fish: 'Fish',
+    duck: 'Duck',
+    cat: 'Cat',
+  },
+  zh: {
+    title: '显示区域',
+    all: '全部',
+    none: '清空',
+    shorelines: '海岸线',
+    navigation: '导航',
+    occluders: '景物',
+    particles: '粒子',
+    butterfly: '蝴蝶',
+    dragonfly: '蜻蜓',
+    light: '灯光',
+    fish: '鱼群',
+    duck: '鸭子',
+    cat: '猫',
+  },
+}

@@ -1,0 +1,11 @@
+{
+  "id": "fish-tile",
+  "x": 1176.5,
+  "y": 431,
+  "width": 75,
+  "height": 52.5,
+  "frameCount": 120,
+  "frameRate": 12,
+  "sourceTile": "4/9-3",
+  "depth": -79
+}

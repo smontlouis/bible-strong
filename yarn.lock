@@ -2805,9 +2805,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@bible-strong/world@workspace:apps/bible-strong-world":
+"@bible-strong/world@workspace:apps/world":
   version: 0.0.0-use.local
-  resolution: "@bible-strong/world@workspace:apps/bible-strong-world"
+  resolution: "@bible-strong/world@workspace:apps/world"
   dependencies:
     "@fal-ai/client": "npm:^1.10.1"
     "@geoman-io/leaflet-geoman-free": "npm:^2.20.1"

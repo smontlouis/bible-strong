@@ -1,0 +1,251 @@
+.zone-editor {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  background: #f5f6ef;
+  color: #193d49;
+}
+.editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: max(14px, env(safe-area-inset-top)) 20px 12px;
+  border-bottom: 1px solid #d6ded8;
+}
+.editor-header strong {
+  font-weight: 500;
+  font-size: 20px;
+}
+.editor-header small {
+  display: block;
+  font-size: 11px;
+  opacity: 0.65;
+  margin-top: 3px;
+}
+.zone-editor button {
+  border: 1px solid #cad6ce;
+  border-radius: 9px;
+  background: #fffefa;
+  padding: 9px 12px;
+  font-size: 12px;
+}
+.zone-editor button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.zone-editor button[aria-pressed='true'] {
+  outline: 2px solid #174452;
+  outline-offset: -2px;
+}
+.zone-editor .editor-test,
+.zone-editor .editor-save {
+  background: #193f4c;
+  color: #fff9ed;
+  border-color: #193f4c;
+}
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #d6ded8;
+}
+.toolbar-spacer {
+  flex: 1;
+}
+.zone-editor .allowed-tool {
+  color: #066e4a;
+  background: #e0f5e9;
+  border-color: #87bba0;
+}
+.zone-editor .blocked-tool {
+  color: #b42540;
+  background: #fde9eb;
+  border-color: #e3a0aa;
+}
+.editor-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 270px;
+  flex: 1;
+  min-height: 0;
+}
+.editor-map-wrap {
+  position: relative;
+  min-height: 0;
+}
+.editor-map {
+  width: 100%;
+  height: 100%;
+  background: #b8dce3;
+  font-family: Pulp, sans-serif;
+}
+.editor-map .leaflet-marker-icon {
+  border: 2px solid #174452;
+  background: #fffdf1;
+  border-radius: 50%;
+}
+.editor-map .marker-icon-middle {
+  border-color: #61848b;
+  opacity: 0.8;
+}
+.editor-help {
+  position: absolute;
+  z-index: 1000;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 9px 14px;
+  border-radius: 12px;
+  background: #fffdf1ee;
+  box-shadow: 0 2px 12px #12445015;
+  font-size: 12px;
+  width: max-content;
+  max-width: calc(100% - 28px);
+  pointer-events: none;
+}
+.editor-sidebar {
+  padding: 16px;
+  border-left: 1px solid #d6ded8;
+  overflow: auto;
+}
+.editor-legend {
+  display: flex;
+  gap: 14px;
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+.editor-legend span:first-child {
+  color: #087b54;
+}
+.editor-legend span:last-child {
+  color: #c12747;
+}
+.editor-sidebar > small {
+  display: block;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.zone-inspector {
+  display: grid;
+  gap: 8px;
+  padding: 14px 0;
+  border-bottom: 1px solid #d6ded8;
+}
+.zone-inspector label {
+  font-size: 11px;
+  display: grid;
+  gap: 4px;
+}
+.zone-inspector input,
+.zone-inspector select {
+  width: 100%;
+  padding: 8px;
+  background: white;
+  border: 1px solid #cad6ce;
+  border-radius: 7px;
+  font: inherit;
+  font-size: 13px;
+  color: inherit;
+}
+.zone-editor .delete-zone {
+  color: #bb2841;
+}
+.editor-sidebar h2 {
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  margin: 18px 0 8px;
+}
+.zone-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.zone-editor .zone-list button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 9px 8px;
+  background: transparent;
+  border-color: transparent;
+}
+.zone-list button[aria-pressed='true'] {
+  background: #e5eeea;
+}
+.zone-list i {
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.zone-list .allowed {
+  background: #28a573;
+}
+.zone-list .blocked {
+  background: #ea5265;
+}
+.zone-list small {
+  margin-left: auto;
+  opacity: 0.5;
+}
+.editor-status {
+  min-height: 30px;
+  padding: 8px 16px max(8px, env(safe-area-inset-bottom));
+  border-top: 1px solid #d6ded8;
+  font-size: 11px;
+}
+.editor-status.error {
+  color: #b42540;
+  background: #fde9eb;
+}
+.world-shell.is-editing > :not(.zone-editor):not(.world-editor-navigation) {
+  visibility: hidden;
+  pointer-events: none;
+}
+.world-footer .footer-actions {
+  display: flex;
+  gap: 8px;
+}
+@media (max-width: 700px) {
+  .editor-header {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .editor-header strong {
+    font-size: 16px;
+  }
+  .editor-header small {
+    display: none;
+  }
+  .editor-toolbar {
+    padding: 8px;
+    gap: 5px;
+  }
+  .editor-toolbar button {
+    padding: 8px;
+    font-size: 11px;
+  }
+  .editor-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(180px, 1fr) 190px;
+  }
+  .editor-sidebar {
+    border-left: 0;
+    border-top: 1px solid #d6ded8;
+    padding: 10px 14px;
+  }
+  .zone-inspector {
+    grid-template-columns: 1fr 1fr;
+  }
+  .editor-help {
+    font-size: 11px;
+  }
+}

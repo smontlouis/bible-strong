@@ -1,0 +1,11 @@
+{
+  "id": "fish-west-tile",
+  "x": 512.5,
+  "y": 398.5,
+  "width": 48,
+  "height": 63.5,
+  "frameCount": 120,
+  "frameRate": 12,
+  "sourceTile": "4/4-3",
+  "depth": -79
+}
