@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { occlusionDepth } from './occlusion-depth'
 export interface ReaderManifest {
   synchronize?: boolean
   frameRate: number
@@ -28,7 +29,7 @@ export class AnimatedReader {
 
   constructor(
     scene: Phaser.Scene,
-    id: string,
+    private readonly id: string,
     private readonly manifest: ReaderManifest
   ) {
     const animationKey = `${id}-reading`
@@ -49,8 +50,9 @@ export class AnimatedReader {
       .play(animationKey)
   }
 
-  update(camera: Phaser.Cameras.Scene2D.Camera, paused: boolean) {
+  update(camera: Phaser.Cameras.Scene2D.Camera, paused: boolean, avatarX: number) {
     const manifest = this.manifest
+    this.sprite.setDepth(occlusionDepth(this.id, manifest.depth, avatarX))
     const width = camera.width / camera.zoom
     const height = camera.height / camera.zoom
     const left = camera.scrollX + camera.width / 2 - width / 2

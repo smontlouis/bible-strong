@@ -1,0 +1,10 @@
+{
+  "status": "IN_QUEUE",
+  "request_id": "01a0bff0-c52c-73b3-8eea-ac012be13899",
+  "response_url": "https://queue.fal.run/fal-ai/minimax/requests/01a0bff0-c52c-73b3-8eea-ac012be13899",
+  "status_url": "https://queue.fal.run/fal-ai/minimax/requests/01a0bff0-c52c-73b3-8eea-ac012be13899/status",
+  "cancel_url": "https://queue.fal.run/fal-ai/minimax/requests/01a0bff0-c52c-73b3-8eea-ac012be13899/cancel",
+  "logs": null,
+  "metrics": {},
+  "queue_position": 0
+}

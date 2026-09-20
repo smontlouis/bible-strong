@@ -1,0 +1,49 @@
+{
+  "image": "blob-down-spritesheet.png",
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "columns": 8,
+  "rows": 3,
+  "frameCount": 24,
+  "frameRate": 12,
+  "durationSeconds": 2,
+  "repeat": -1,
+  "sourceFrames": [
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    14,
+    15,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    25,
+    26,
+    27,
+    28
+  ],
+  "sourceFrameRate": 24,
+  "sourceCrop": {
+    "x": 96,
+    "y": 48,
+    "width": 576,
+    "height": 576
+  },
+  "origin": {
+    "x": 0.5,
+    "y": 0.9652777777777778
+  },
+  "notes": "Two distinct hops; three held apex frames. Shared crop preserves vertical movement. Transparent grayscale frames for tinting."
+}

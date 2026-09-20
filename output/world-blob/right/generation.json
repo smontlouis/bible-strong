@@ -1,0 +1,7 @@
+{
+  "model": "fal-ai/minimax/hailuo-2.3/standard/image-to-video",
+  "prompt": "Animate this exact white blob as a RIGHT-FACING 2D game sprite doing repeated small rhythmic hops IN PLACE. Preserve the three-quarter right-facing orientation throughout: both large vertical black capsule eyes stay on the RIGHT side of its face; its slightly fuller rounded rump stays on the lower LEFT rear silhouette. Six seconds of cute gentle springy locomotion, with weight and momentum. Each hop: slight downward squash and widening to build impulse, brisk push-off, slight vertical stretch, short airborne phase, soft landing squash, recovery, repeat. Small hops, not huge jumps. About one or two hops per second with subtle natural variation. Keep the character anchored to the same horizontal location with no sideways travel; the game will move it later. Always look to screen RIGHT, never turn toward the camera or left, never rotate the body. Preserve the original body shape and large eyes consistently, flat white body and crisp black outline, no mouth, limbs, feet, tail, accessories, shading, shadows, floor, particles or scenery. Locked camera, no zoom, constant overall scale. Uniform flat bright green chroma key background for later removal. Return to starting pose at the end for a repeating cycle.",
+  "duration": "6",
+  "prompt_optimizer": false,
+  "source_image": "/Users/stephane/.codex/generated_images/01a0bfcb-0ac9-7672-bac9-03331986b056/exec-b10e0368-0800-427d-b350-0ab22e923ef5.png"
+}

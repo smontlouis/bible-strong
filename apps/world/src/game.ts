@@ -1,3 +1,4 @@
+import { occlusionDepth } from './occlusion-depth'
 import { AmbientZoneEditor } from './ambient-zone-editor'
 import type { AmbientEditorModel } from './ambient-zones'
 import { ShoreWaves } from './shore-waves'
@@ -13,6 +14,7 @@ import { SCENERY_HEIGHT, SCENERY_WIDTH, WorldBackground } from './world-backgrou
 import { WATER_VARIANTS } from './water-decorations'
 import { createWorldReaders, loadWorldReaders } from './world-readers'
 import type { AnimatedReader } from './animated-reader'
+import { BlobAvatar, loadBlobAvatar } from './blob-avatar'
 import {
   HEIGHT,
   WIDTH,
@@ -26,7 +28,6 @@ import {
   type Station,
 } from './world'
 
-export type Avatar = 'nova' | 'citrus' | 'strobi'
 export type WorldState = {
   x: number
   y: number
@@ -43,7 +44,8 @@ export type Controls = {
   shoreZoom?: number
   navigation: NavigationDocument
   direction: Point
-  avatar: Avatar
+  avatarColor: string
+  avatarName: string
   paused: boolean
   overview: boolean
   debug: boolean
@@ -64,6 +66,8 @@ export function createWorld(
     position = { ...SPAWN }
     blob!: Phaser.GameObjects.Image
     shadow!: Phaser.GameObjects.Ellipse
+    nameTag!: Phaser.GameObjects.Text
+    nameTagBackground!: Phaser.GameObjects.Graphics
     debugLayer!: Phaser.GameObjects.Graphics
     ambientZoneEditor?: AmbientZoneEditor
     shoreWaves?: ShoreWaves
@@ -74,10 +78,12 @@ export function createWorld(
     ambientTiles!: AmbientTiles
     background!: WorldBackground
     readers!: AnimatedReader[]
+    foreground: { object: (typeof occluders)[number]; image: Phaser.GameObjects.Image }[] = []
     keys!: Record<string, Phaser.Input.Keyboard.Key>
     lastReset = 0
     lastPublished = 0
     gait = 0
+    blobAvatar = new BlobAvatar()
     active = true
     previousNavigation = controls.navigation
     resetInput = () => {
@@ -93,6 +99,7 @@ export function createWorld(
     }
 
     preload() {
+      loadBlobAvatar(this)
       loadAmbientTiles(this)
       loadWorldReaders(this)
       this.load.image('world-water', './assets/map/water.webp')
@@ -102,7 +109,6 @@ export function createWorld(
       this.load.image('world-shore', './assets/map/shore.webp')
       this.load.image('map-preview', './assets/map/preview.webp')
       for (const object of occluders) this.load.image(`occlusion-${object.id}`, object.url)
-      for (const name of ['nova', 'citrus', 'strobi']) this.load.image(name, `./assets/${name}.png`)
       this.load.on('loaderror', onError)
     }
 
@@ -119,20 +125,28 @@ export function createWorld(
       this.mapTiles = new MapTileStreamer(this)
       if (controls.shoreEditor) this.shoreWaves = new ShoreWaves(this, controls.shoreEditor)
       occluders.forEach(object => {
-        this.add
+        const image = this.add
           .image(object.x, object.y, `occlusion-${object.id}`)
           .setOrigin(0)
           .setDisplaySize(object.width, object.height)
           .setDepth(object.always ? 2000 : object.baseY)
+        this.foreground.push({ object, image })
       })
       this.readers = createWorldReaders(this)
       this.shadow = this.add.ellipse(SPAWN.x, SPAWN.y, 30, 10, 0x183c45, 0.25).setDepth(-1)
       this.blob = this.add
-        .image(SPAWN.x, SPAWN.y, controls.avatar)
+        .image(SPAWN.x, SPAWN.y, 'blob-idle-down')
         .setOrigin(0.5, 0.95)
         .setDisplaySize(52, 52)
+      // Keep the label above scenery and clouds, independently of the avatar's depth.
+      this.nameTagBackground = this.add.graphics().setDepth(4000)
+      this.nameTag = this.add.text(SPAWN.x, SPAWN.y + 5, '', {
+        fontFamily: 'Pulp, sans-serif', fontSize: '10px', color: '#193d49',
+        padding: { x: 5, y: 3 },
+      }).setOrigin(0.5, 0).setResolution(rendererResolution).setDepth(4001)
       this.debugLayer = this.add.graphics().setDepth(3000)
-      this.keys = this.input.keyboard!.addKeys('UP,DOWN,LEFT,RIGHT,W,A,S,D,Z,Q') as Record<
+      // Global key capture blocks typing in DOM inputs even when this scene is paused.
+      this.keys = this.input.keyboard!.addKeys('UP,DOWN,LEFT,RIGHT,W,A,S,D,Z,Q', false) as Record<
         string,
         Phaser.Input.Keyboard.Key
       >
@@ -157,6 +171,7 @@ export function createWorld(
         this.resetInput()
       }
       if (this.lastReset !== controls.reset) {
+        this.blobAvatar.reset()
         this.position = findSafePosition(SPAWN, controls.navigation) ?? this.position
         this.lastReset = controls.reset
         this.resetInput()
@@ -177,17 +192,23 @@ export function createWorld(
       const moving = Math.hypot(next.x - this.position.x, next.y - this.position.y) > 0.01
       this.position = next
       if (moving) this.gait += delta / 100
-      const bounce =
-        moving && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-          ? Math.abs(Math.sin(this.gait)) * 3
-          : 0
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const bounce = 0 // Hops are already drawn into the sprite frames.
+      this.blobAvatar.update(this.blob, direction, moving, reducedMotion, delta)
       this.blob
-        .setTexture(controls.avatar)
-        .setPosition(next.x, next.y - bounce)
+        .setTint(Number.parseInt(controls.avatarColor.slice(1), 16))
+        .setPosition(next.x, next.y)
         .setDepth(next.y)
-        .setDisplaySize(52, 52)
-      if (direction.x) this.blob.setFlipX(direction.x < 0)
-      this.shadow.setPosition(next.x, next.y).setScale(1 - bounce / 18)
+      if (this.nameTag.text !== controls.avatarName) {
+        this.nameTag.setText(controls.avatarName)
+        this.nameTagBackground.clear().fillStyle(0xfff9ea, 1).fillRoundedRect(
+          -this.nameTag.width / 2, 0, this.nameTag.width, this.nameTag.height, 4,
+        )
+      }
+      this.nameTag.setPosition(next.x, next.y + 5).setVisible(Boolean(controls.avatarName))
+      this.nameTagBackground.setPosition(next.x, next.y + 5).setVisible(Boolean(controls.avatarName))
+      this.shadow.setPosition(next.x, next.y)
+
       const station = stationAt(next, controls.navigation)
 
       const camera = this.cameras.main
@@ -256,7 +277,7 @@ export function createWorld(
       )
       this.ambientTiles.update(camera, controls.paused || !this.active || document.hidden)
       for (const reader of this.readers)
-        reader.update(camera, controls.paused || !this.active || document.hidden)
+        reader.update(camera, controls.paused || !this.active || document.hidden, next.x)
       this.mapTiles.update(camera, time, controls.overview ? 1 : rendererResolution)
 
       this.ambientDiagnostics.update(
@@ -293,7 +314,7 @@ export function createWorld(
           .filter(
             o =>
               !o.always &&
-              next.y < o.baseY &&
+              next.y < occlusionDepth(o.id, o.baseY, next.x) &&
               next.x > o.x - 18 &&
               next.x < o.x + o.width + 18 &&
               next.y > o.y &&

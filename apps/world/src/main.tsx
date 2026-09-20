@@ -6,12 +6,15 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import nipplejs from 'nipplejs'
 import { clampCameraZoom } from './camera-zoom'
-import { createWorld, type Avatar, type Controls, type WorldState } from './game'
+import { createWorld, type Controls, type WorldState } from './game'
 import { defaultNavigation, SPAWN, stations } from './world'
 import { loadNavigation, navigationFingerprint } from './navigation-document'
 import { useCameraZoomGestures } from './use-camera-zoom-gestures'
 import { diagnosticCategories, diagnosticCopy, makeDiagnosticFilters } from './diagnostic-filters'
+import { DictionaryDiscovery } from './DictionaryDiscovery'
 import { LexiconDiscovery } from './LexiconDiscovery'
+import { AvatarEditor, AvatarPreview, profileCopy } from './AvatarEditor'
+import { DEFAULT_PROFILE, loadProfile, saveProfile } from './avatar-profile'
 import './style.css'
 const ZoneEditor = lazy(() => import('./ZoneEditor'))
 
@@ -125,6 +128,10 @@ function CameraControls({
 }
 
 function App() {
+  const [savedProfile] = useState(loadProfile)
+  const [profile, setProfile] = useState(savedProfile ?? DEFAULT_PROFILE)
+  const [profileOpen, setProfileOpen] = useState(!savedProfile)
+  const [profileStorageError, setProfileStorageError] = useState(false)
   const [initial, setInitial] = useState(() => ({
     document: structuredClone(defaultNavigation),
     error: false,
@@ -144,8 +151,9 @@ function App() {
     ambientEditor,
     navigation: initial.document,
     direction: { x: 0, y: 0 },
-    avatar: 'nova',
-    paused: false,
+    avatarColor: profile.color,
+    avatarName: profile.name,
+    paused: !savedProfile,
     overview: false,
     debug: false,
     zoom: 1,
@@ -164,7 +172,6 @@ function App() {
   const [overview, setOverview] = useState(false)
   const [debug, setDebug] = useState(() => new URLSearchParams(location.search).has('debug'))
   const [diagnosticFilters, setDiagnosticFilters] = useState(() => makeDiagnosticFilters())
-  const [avatar, setAvatar] = useState<Avatar>('nova')
   const [language, setLanguage] = useState<Language>('fr')
   const [opened, setOpened] = useState<WorldState['station']>(null)
   const [visited, setVisited] = useState<string[]>([])
@@ -233,14 +240,15 @@ function App() {
   }, [])
 
   useEffect(() => {
-    controls.current.avatar = avatar
+    controls.current.avatarColor = profile.color
+    controls.current.avatarName = profile.name
     controls.current.overview = overview
     controls.current.debug = debug
     controls.current.diagnosticFilters = diagnosticFilters
-    controls.current.paused = Boolean(opened) || Boolean(editorMode)
+    controls.current.paused = Boolean(opened) || Boolean(editorMode) || profileOpen
     controls.current.navigation = navigation
     controls.current.direction = { x: 0, y: 0 }
-  }, [avatar, overview, debug, diagnosticFilters, opened, editorMode, navigation])
+  }, [profile, profileOpen, overview, debug, diagnosticFilters, opened, editorMode, navigation])
   useEffect(() => {
     document.documentElement.lang = language
   }, [language])
@@ -272,7 +280,7 @@ function App() {
       ambientEditor.mode = 'select'
       ambientEditor.notify()
     }
-    controls.current.paused = Boolean(mode) || Boolean(opened)
+    controls.current.paused = Boolean(mode) || Boolean(opened) || profileOpen
     controls.current.direction = { x: 0, y: 0 }
     setEditorMode(mode)
   }
@@ -337,18 +345,21 @@ function App() {
       <aside className="world-bottom">
         <div className="joystick-zone" ref={joystick} role="group" aria-label={t.joystick} />
         <div className="companion-controls">
-          <div className="avatar-choices" role="group" aria-label={t.choose}>
-            {(['nova', 'citrus', 'strobi'] as const).map(a => (
-              <button
-                key={a}
-                aria-label={a}
-                aria-pressed={a === avatar}
-                onClick={() => setAvatar(a)}
-              >
-                <img src={`./assets/${a}.png`} alt="" />
-              </button>
-            ))}
-          </div>
+          <button className="profile-button" aria-label={profileCopy[language].edit}
+            aria-haspopup="dialog" onClick={() => {
+              controls.current.paused = true
+              controls.current.direction = { x: 0, y: 0 }
+              setProfileOpen(true)
+            }}>
+            <AvatarPreview color={profile.color} />
+            <span className="profile-button-copy">
+              <strong>{profile.name || profileCopy[language].guest}</strong>
+              <small>{profileCopy[language].edit} ↗</small>
+            </span>
+          </button>
+          {profileStorageError && <span className="profile-storage-error" role="status">
+            {profileCopy[language].storage}
+          </span>}
         </div>
       </aside>
       <footer className="world-footer">
@@ -408,10 +419,20 @@ function App() {
         <br />
         {state.behind.join(' / ') || '—'}
       </output>
+      {profileOpen && <AvatarEditor profile={profile} language={language}
+        onClose={() => setProfileOpen(false)}
+        onSave={next => {
+          setProfileStorageError(!saveProfile(next))
+          setProfile(next)
+          setProfileOpen(false)
+        }} />}
       {opened?.id === 'lexicon' && (
         <LexiconDiscovery language={language} onClose={() => setOpened(null)} />
       )}
-      {opened && opened.id !== 'lexicon' && (
+      {opened?.id === 'dictionary' && (
+        <DictionaryDiscovery language={language} onClose={() => setOpened(null)} />
+      )}
+      {opened && opened.id !== 'lexicon' && opened.id !== 'dictionary' && (
         <div className="modal-scrim" onClick={() => setOpened(null)}>
           <section
             className="resource-card"

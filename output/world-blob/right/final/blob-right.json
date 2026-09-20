@@ -1,0 +1,51 @@
+{
+  "image": "blob-right-spritesheet.png",
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "columns": 8,
+  "rows": 3,
+  "frameCount": 24,
+  "frameRate": 12,
+  "durationSeconds": 2,
+  "repeat": -1,
+  "sourceVideo": "../v3/blob-right-hop-minimax-v3.mp4",
+  "sourceFrames": [
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35
+  ],
+  "correctedFrameIndices": [
+    3,
+    4,
+    5,
+    15,
+    16,
+    17
+  ],
+  "origin": {
+    "x": 0.5,
+    "y": 0.9732142857142857
+  },
+  "notes": "Two extracted cycles slowed from 24 to 12 fps. Six lower-lobe corrections via imagegen; other poses from video. Shared crop and grayscale transparent output."
+}

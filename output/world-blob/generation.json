@@ -1,0 +1,7 @@
+{
+  "model": "fal-ai/minimax/hailuo-2.3/standard/image-to-video",
+  "prompt": "Animate this exact white rounded blob with its two large vertical black eyes and black outline as a front-facing 2D game sprite hopping IN PLACE. Six seconds of repeated small rhythmic hops, about one hop per second. Each hop has clear anticipation: the body compresses slightly downward and widens, then pushes off briskly, stretches vertically a little, rises a short distance, falls and squashes softly on landing, then recovers. Cute gentle springy locomotion, with weight and momentum, not a floating balloon. Eyes stay attached consistently to the body and retain their exact design. Always face directly toward the viewer. Fixed locked camera, no zoom, no perspective change, no growing or shrinking overall, no horizontal drift. Return to the starting resting pose at the end for a looping cycle. Keep the white body and solid black eyes and outline. No mouth, limbs, feet, accessories, particles, scenery, ground line, lighting changes or shadows. Uniform flat bright green chroma key background throughout for later background removal. Preserve the original character design.",
+  "duration": "6",
+  "prompt_optimizer": false,
+  "source_image": "/Users/stephane/.codex/generated_images/01a0bfcb-0ac9-7672-bac9-03331986b056/exec-f349e21c-0fa6-4358-9d53-7744753ce98a.png"
+}
