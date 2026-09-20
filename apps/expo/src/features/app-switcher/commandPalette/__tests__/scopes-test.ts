@@ -2,6 +2,11 @@ import { createScopedPassageTab, paletteScopes, isPassageScope } from '../scopes
 import type { SearchEntityResult } from '~features/search/shared/searchResultTypes'
 
 jest.mock('~helpers/generateUUID', () => ({ __esModule: true, default: () => 'scoped-tab' }))
+jest.mock('~helpers/bibleVersions', () => ({ versions: { LSG: {}, KJV: {} } }))
+jest.mock('~helpers/verseToReference', () => ({
+  __esModule: true,
+  default: () => 'Genèse 1',
+}))
 jest.mock('~helpers/bibleBookCatalog', () => ({
   getBook: () => ({ Numero: 1, Nom: 'Genèse', Chapitres: 50 }),
 }))
@@ -56,6 +61,9 @@ describe('palette scopes', () => {
     expect(
       createScopedPassageTab('compare', { ...passage, referenceSegment: undefined }, 'LSG')
     ).toBeUndefined()
+  })
+  it('rejects a Bible version that is not in the application catalog', () => {
+    expect(createScopedPassageTab('bible', passage, 'NOT_A_VERSION')).toBeUndefined()
   })
   it('separates passage actions from source filters', () => {
     expect(paletteScopes.filter(isPassageScope).map(scope => scope.type)).toEqual([

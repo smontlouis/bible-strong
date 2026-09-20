@@ -8,7 +8,8 @@ import { useSetAtom } from 'jotai/react'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { memo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Alert, Platform } from 'react-native'
+import { ActivityIndicator, Platform } from 'react-native'
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { twMerge } from '~common/ui/classNames'
 
 import DictionnaryIcon from '~common/DictionnaryIcon'
@@ -92,12 +93,17 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
 
   const lang = useLanguage()
   const { t } = useTranslation()
+  const confirm = useConfirmDialog()
 
-  const promptLogout = () => {
-    Alert.alert(t('Attention'), t('Voulez-vous vraiment vous déconnecter ?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      { text: t('Oui'), onPress: () => logout(), style: 'destructive' },
-    ])
+  const promptLogout = async () => {
+    const confirmed = await confirm({
+      title: t('Attention'),
+      message: t('Voulez-vous vraiment vous déconnecter ?'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('Se déconnecter'),
+      destructive: true,
+    })
+    if (confirmed) await logout()
   }
 
   const checkForUpdate = async () => {
@@ -122,15 +128,15 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
 
   const appleIsReviewing = getAppleReviewing()
 
-  const promptNuke = () => {
-    Alert.alert(
-      '☢️ Nuke app',
-      'Reset TOTAL : MMKV, Firebase auth, databases, fichiers… puis reload. Continuer ?',
-      [
-        { text: 'Annuler', onPress: () => null, style: 'cancel' },
-        { text: 'Nuke', onPress: () => nukeApp(), style: 'destructive' },
-      ]
-    )
+  const promptNuke = async () => {
+    const confirmed = await confirm({
+      title: '☢️ Nuke app',
+      message: 'Reset TOTAL : MMKV, Firebase auth, databases, fichiers… puis reload. Continuer ?',
+      cancelLabel: 'Annuler',
+      confirmLabel: 'Nuke',
+      destructive: true,
+    })
+    if (confirmed) await nukeApp()
   }
 
   return (

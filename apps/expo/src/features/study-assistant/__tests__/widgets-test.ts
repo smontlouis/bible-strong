@@ -139,18 +139,18 @@ it('keeps concordance scope explicit and rejects ambiguous suffixed family reque
     })
   ).toMatchObject({ reference: 'H7050A', identityKind: 'dstrong' })
 })
-it('validates one-verse analysis and prevents cross-resource source groups', () => {
+it('validates a contiguous verse-analysis passage and prevents cross-resource source groups', () => {
   expect(
     parseStudyWidget({ id: 'w1', kind: 'verse_analysis', title: 'Mots', passages: [p] })
   ).toMatchObject({ kind: 'verse_analysis' })
-  expect(() =>
+  expect(
     parseStudyWidget({
       id: 'w1',
       kind: 'verse_analysis',
       title: 'Mots',
       passages: [{ ...p, end: 17 }],
     })
-  ).toThrow()
+  ).toMatchObject({ passages: [{ start: 16, end: 17 }] })
   const source = {
     id: 's1',
     title: 'Fronde',

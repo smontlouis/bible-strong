@@ -2,6 +2,8 @@ import { prepareMemory } from '../conversationMemory'
 import {
   loadConversations,
   loadSelectedConversation,
+  loadFollowReadingPreference,
+  saveFollowReadingPreference,
   saveSelectedConversation,
   saveConversations,
   storageKey,
@@ -110,4 +112,11 @@ it('restores tool previews and never restores a running activity as complete', (
   }
   saveConversations(storage, 'account', [c])
   expect(loadConversations(storage, 'account')[0].messages[0].tools?.[0].state).toBe('interrupted')
+})
+it('defaults the reading-follow preference to off and persists it per account', () => {
+  const storage = memory()
+  expect(loadFollowReadingPreference(storage, 'alice')).toBe(false)
+  saveFollowReadingPreference(storage, 'alice', true)
+  expect(loadFollowReadingPreference(storage, 'alice')).toBe(true)
+  expect(loadFollowReadingPreference(storage, 'bob')).toBe(false)
 })

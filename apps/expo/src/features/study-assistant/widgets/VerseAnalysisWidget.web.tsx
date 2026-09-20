@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSetAtom } from 'jotai'
-import { ArrowLeftIcon, ArrowUpRightIcon } from 'lucide-react'
+import { ArrowLeftIcon, ArrowUpRightIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { Spinner } from '@heroui/react/spinner'
 import type { PassageWidget } from '@bible-strong/ai-contract/contract'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -86,9 +86,11 @@ export default function VerseAnalysisWidget({ widget }: { widget: PassageWidget 
   const { t } = useTranslation(),
     resources = useResourceAccess(),
     theme = useTheme(),
-    p = widget.passages[0]
+    target = widget.passages[0]
   const language = useResourcesLanguageValue().STRONG
+  const [verse, setVerse] = useState(target.start)
   const [selected, setSelected] = useState<number | null>(null)
+  const p = { ...target, start: verse, end: verse }
   const query = useQuery({
     queryKey: ['assistant-word-analysis', p.version, p.book, p.chapter, p.start],
     queryFn: async () => {
@@ -163,6 +165,37 @@ export default function VerseAnalysisWidget({ widget }: { widget: PassageWidget 
               {label}
             </button>
             <span>{p.version}</span>
+            {target.start < target.end && (
+              <nav
+                className="bs-widget-verse-navigation"
+                aria-label={t('assistant.widgets.verseNavigation')}
+              >
+                <button
+                  type="button"
+                  className="bs-widget-icon"
+                  disabled={verse === target.start}
+                  aria-label={t('assistant.widgets.previousVerse')}
+                  onClick={() => {
+                    setSelected(null)
+                    setVerse(current => Math.max(target.start, current - 1))
+                  }}
+                >
+                  <ChevronLeftIcon size={16} />
+                </button>
+                <button
+                  type="button"
+                  className="bs-widget-icon"
+                  disabled={verse === target.end}
+                  aria-label={t('assistant.widgets.nextVerse')}
+                  onClick={() => {
+                    setSelected(null)
+                    setVerse(current => Math.min(target.end, current + 1))
+                  }}
+                >
+                  <ChevronRightIcon size={16} />
+                </button>
+              </nav>
+            )}
             <button
               type="button"
               className="bs-widget-icon"

@@ -56,6 +56,8 @@ export type Conversation = {
 export type ConversationStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
 export const storageKey = (account: string) =>
   `bible-strong.assistant.v1:${encodeURIComponent(account)}`
+export const followReadingPreferenceKey = (account: string) =>
+  `${storageKey(account)}:follow-reading`
 const MAX_CHARACTERS = 2_000_000
 const isContext = (value: unknown): value is ReadingContext => {
   if (!value || typeof value !== 'object') return false
@@ -190,4 +192,17 @@ export function saveSelectedConversation(
   id: string | null
 ) {
   storage.setItem(`${storageKey(account)}:active`, id || '')
+}
+export function loadFollowReadingPreference(
+  storage: ConversationStorage,
+  account: string
+): boolean {
+  return storage.getItem(followReadingPreferenceKey(account)) === 'true'
+}
+export function saveFollowReadingPreference(
+  storage: ConversationStorage,
+  account: string,
+  enabled: boolean
+) {
+  storage.setItem(followReadingPreferenceKey(account), enabled ? 'true' : 'false')
 }

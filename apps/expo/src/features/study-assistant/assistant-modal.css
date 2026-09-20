@@ -9,44 +9,30 @@
   font-family: inherit;
 }
 .bs-assistant-avatar {
+  --bs-assistant-avatar-size: 58px;
   position: relative;
   display: grid;
   place-items: center;
-  width: 58px;
-  height: 58px;
-  border-radius: 21px;
-  border: 1px solid color-mix(in srgb, var(--as-accent) 60%, white);
-  background: var(--as-accent);
-  color: white;
+  width: var(--bs-assistant-avatar-size);
+  height: var(--bs-assistant-avatar-size);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--as-accent);
   cursor: pointer;
-  box-shadow:
-    0 7px 24px color-mix(in srgb, var(--as-accent) 25%, transparent),
-    inset 0 1px 0 #ffffff40;
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease;
+  box-shadow: none;
+  transform-origin: bottom right;
+  transition: transform 180ms ease;
 }
 .bs-assistant-avatar:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 30px color-mix(in srgb, var(--as-accent) 30%, transparent);
+  box-shadow: none;
 }
 .bs-assistant-avatar svg {
-  width: 40px;
-  height: 40px;
+  width: 100%;
+  height: 100%;
 }
-.bs-assistant-badge {
-  position: absolute;
-  right: -4px;
-  bottom: -4px;
-  font-size: 9px;
-  letter-spacing: 0.03em;
-  font-weight: 700;
-  line-height: 16px;
-  padding: 0 4px;
-  border-radius: 6px;
-  background: var(--as-surface);
-  color: var(--as-accent);
-  border: 1px solid var(--as-border);
+.bs-assistant-avatar[data-state='open'] {
+  transform: scale(1.5);
 }
 .bs-assistant-hint {
   background: var(--as-surface);
@@ -114,10 +100,16 @@
   padding: 7px 12px 7px 15px;
   border-bottom: 1px solid var(--as-border);
   min-height: 44px;
+  cursor: pointer;
 }
 .bs-assistant-heading {
   flex: 1;
   min-width: 0;
+  align-self: stretch;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
 }
 .bs-assistant-heading strong {
   display: block;
@@ -126,19 +118,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.bs-assistant-avatar[data-state='open'] {
-  border-radius: 50%;
-  width: 46px;
-  height: 46px;
-  background: var(--as-soft);
-  color: var(--as-ink);
-  border-color: var(--as-border);
-  box-shadow: none;
-}
-.bs-assistant-avatar[data-state='open'] svg {
-  width: 20px;
-  height: 20px;
 }
 .bs-assistant-icon {
   border: 0;
@@ -324,29 +303,42 @@
   background: var(--as-surface);
   padding: 1px 3px 1px 8px;
 }
+.bs-assistant-context-chip-pinned {
+  border-color: color-mix(in srgb, var(--as-accent) 55%, var(--as-border));
+  background: color-mix(in srgb, var(--as-accent) 10%, var(--as-surface));
+  color: var(--as-accent);
+}
+.bs-assistant-chip-pin {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--as-muted) !important;
+}
+.bs-assistant-chip-pin:hover,
+.bs-assistant-chip-pin[aria-pressed='true'] {
+  color: var(--as-accent) !important;
+  background: color-mix(in srgb, var(--as-accent) 12%, transparent);
+}
+.bs-assistant-chip-pin svg {
+  width: 13px;
+  height: 13px;
+}
 .bs-assistant-context-label {
   display: flex;
   align-items: center;
-  gap: 5px;
   min-width: 0;
-  padding: 4px 3px;
-  border: 0;
-  background: none;
+  padding: 4px 3px 4px 2px;
   font-size: 11px !important;
   line-height: 1.4;
-}
-.bs-assistant-context-label span {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.bs-assistant-context-label[aria-pressed='true'] {
-  color: var(--as-accent);
-}
-.bs-assistant-context-label svg {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
 }
 .bs-assistant-chip-remove {
   display: grid;
@@ -503,9 +495,7 @@
     bottom: 16px;
   }
   .bs-assistant-avatar {
-    width: 52px;
-    height: 52px;
-    border-radius: 18px;
+    --bs-assistant-avatar-size: 52px;
   }
   .bs-assistant-modal {
     height: calc(100dvh - 100px);

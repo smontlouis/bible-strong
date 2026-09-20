@@ -23,7 +23,6 @@ import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRe
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { linkTypeConfig } from '~helpers/fetchOpenGraphData'
 import formatVerseContent from '~helpers/formatVerseContent'
-import { getNoteTitle } from '~helpers/getNoteTitle'
 import { getDateLocale, type ActiveLanguage } from '~helpers/languageUtils'
 import truncate from '~helpers/truncate'
 import { useMountTime } from '~helpers/useMountTime'
@@ -141,7 +140,8 @@ export const NoteItem = ({
   })
   const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
   const metadataLabel = title ? `${title} - ${relativeDate}` : relativeDate
-  const noteTitle = getNoteTitle(item, '')
+  const noteTitle = item.title?.trim() ?? ''
+  const noteDescription = item.description?.trim() ?? ''
 
   const content = (
     <Box className="overflow-hidden border-continuous p-[20px]">
@@ -150,15 +150,17 @@ export const NoteItem = ({
       </Box>
       {!!noteTitle && (
         <Text
-          className="text-[16px]"
+          className="text-[17px]"
+          numberOfLines={2}
+          ellipsizeMode="tail"
           style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
         >
           {noteTitle}
         </Text>
       )}
-      {!!item.description && item.description !== noteTitle && (
-        <Paragraph scale={-3} scaleLineHeight={-1}>
-          {truncate(item.description, 100)}
+      {!!noteDescription && noteDescription !== noteTitle && (
+        <Paragraph scale={-1} scaleLineHeight={-1}>
+          {truncate(noteDescription, 100)}
         </Paragraph>
       )}
       <EntityChipList tags={item.tags} />

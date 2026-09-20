@@ -6,6 +6,7 @@ import type {
   StudyRequest,
   ToolActivity,
   RoutingDecision,
+  AssistantAction,
 } from '@bible-strong/ai-contract/contract'
 import { type Conversation, type LocalMessage, type ReadingContext } from './conversations'
 const errorKeys: Record<string, string> = {
@@ -33,6 +34,7 @@ export async function runConversation({
   onUpdate,
   onProgress,
   onError,
+  onAction,
 }: {
   conversation: Conversation
   preferences?: Pick<
@@ -48,6 +50,7 @@ export async function runConversation({
   onUpdate: (conversation: Conversation) => void
   onProgress: (key: string) => void
   onError: (key: string) => void
+  onAction?: (action: AssistantAction) => void
 }) {
   const preferenceSnapshot = { ...preferences }
   const timestamp = Date.now(),
@@ -104,6 +107,7 @@ export async function runConversation({
   onProgress('assistant.preparing')
   let complete = false,
     output = ''
+  const handledActionIds = new Set<string>()
   const timeout = setTimeout(() => controller.abort(), 330000)
   try {
     const memory = await prepareMemory(
@@ -130,6 +134,7 @@ export async function runConversation({
       {
         ...preferenceSnapshot,
         question,
+        clientCapabilities: ['open_tab'],
         ...(snapshot?.bibleVersion ? { readingBibleVersion: snapshot.bibleVersion } : {}),
         history: memory.history,
         memorySummary: memory.memorySummary,
@@ -177,6 +182,10 @@ export async function runConversation({
             ? tools.map(tool => (tool.callId === activity.callId ? activity : tool))
             : [...tools, activity].slice(0, 6)
           update(output, 'streaming')
+        }
+        if (event.type === 'action' && !handledActionIds.has(event.action.id)) {
+          handledActionIds.add(event.action.id)
+          onAction?.(event.action)
         }
         if (event.type === 'status') onProgress('assistant.searching')
         if (event.type === 'reset') {

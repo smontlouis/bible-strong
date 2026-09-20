@@ -4,7 +4,8 @@ import * as Sharing from 'expo-sharing'
 import React from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Alert, Platform } from 'react-native'
+import { Platform } from 'react-native'
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useDispatch } from 'react-redux'
 import Header from '~common/Header'
 import { toast } from '~helpers/toast'
@@ -33,6 +34,7 @@ const AutomaticBackupsScreen = () => {
 
 const AutoBackupsList = () => {
   const { t } = useTranslation()
+  const confirm = useConfirmDialog()
   const dispatch = useDispatch()
   const {
     data: backups = [],
@@ -61,25 +63,18 @@ const AutoBackupsList = () => {
     },
   })
 
-  const handleRestore = (backup: BackupInfo) => {
+  const handleRestore = async (backup: BackupInfo) => {
     if (restoreMutation.isPending) return
-    Alert.alert(
-      t('backups.restoreTitle'),
-      t('backups.restoreMessage', {
+    const confirmed = await confirm({
+      title: t('backups.restoreTitle'),
+      message: t('backups.restoreMessage', {
         date: format(backup.timestamp, 'dd/MM/yyyy HH:mm'),
       }),
-      [
-        {
-          text: t('backups.cancel'),
-          style: 'cancel',
-        },
-        {
-          text: t('backups.restore'),
-          style: 'destructive',
-          onPress: () => restoreMutation.mutate(backup),
-        },
-      ]
-    )
+      cancelLabel: t('backups.cancel'),
+      confirmLabel: t('backups.restore'),
+      destructive: true,
+    })
+    if (confirmed) restoreMutation.mutate(backup)
   }
 
   const exportMutation = useMutation({

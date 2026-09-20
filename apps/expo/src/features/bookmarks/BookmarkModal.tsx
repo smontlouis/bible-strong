@@ -2,7 +2,6 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import * as NativeUI from 'react-native'
-import { Alert } from 'react-native'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useDispatch, useSelector } from 'react-redux'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
@@ -194,9 +193,7 @@ const BookmarkModal = ({
     } else {
       // Creating new bookmark
       if (bookmarksCount >= MAX_BOOKMARKS) {
-        Alert.alert(t('Limite atteinte'), t('bookmark.maxReached'), [
-          { text: t('OK'), style: 'default' },
-        ])
+        toast.warning(t('bookmark.maxReached'))
         return
       }
 

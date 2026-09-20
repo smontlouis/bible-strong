@@ -286,6 +286,41 @@ it('preserves ordered resource cards when a grouped card grows and the response 
     ],
   })
 })
+
+it('executes each streamed client action only once', async () => {
+  const onAction = jest.fn()
+  const action = {
+    id: 'open-genesis-4-3',
+    kind: 'open_tab' as const,
+    tabType: 'bible' as const,
+    target: {
+      kind: 'passage' as const,
+      book: 1,
+      chapter: 4,
+      startVerse: 3,
+      endVerse: 3,
+      version: 'DARBY',
+    },
+  }
+  await runConversation({
+    conversation: empty,
+    question: 'Ouvre Genèse 4:3 en Darby',
+    context: null,
+    controller: new AbortController(),
+    isCurrent: () => true,
+    onUpdate: () => {},
+    onProgress: () => {},
+    onError: () => {},
+    onAction,
+    request: async (_input, _signal, emit) => {
+      emit({ type: 'action', action })
+      emit({ type: 'action', action })
+      emit({ type: 'done', requestId: 'r', model: 'm', modelCalls: 1, toolCalls: 0 })
+    },
+  })
+  expect(onAction).toHaveBeenCalledTimes(1)
+  expect(onAction).toHaveBeenCalledWith(action)
+})
 it('freezes the selected Bible version with the reading context', async () => {
   await runConversation({
     conversation: empty,

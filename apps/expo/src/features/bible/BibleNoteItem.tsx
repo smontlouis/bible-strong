@@ -16,7 +16,6 @@ import Text from '~common/ui/Text'
 import { useTranslation } from 'react-i18next'
 import Paragraph from '~common/ui/Paragraph'
 import type { NoteListRow } from '~features/entityListQuery/noteListRows'
-import { getNoteTitle } from '~helpers/getNoteTitle'
 import { getDateLocale } from '~helpers/languageUtils'
 import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
@@ -58,7 +57,8 @@ const BibleNoteItem = ({ item, onPress, relationCount, onRelationPress }: Props)
   })
   const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
   const metadataLabel = item.reference ? `${item.reference} - ${relativeDate}` : relativeDate
-  const noteTitle = getNoteTitle(item.note, '')
+  const noteTitle = item.note.title?.trim() ?? ''
+  const noteDescription = item.note.description?.trim() ?? ''
 
   const hasChips = Boolean(Object.keys(item.note.tags || {}).length || relationCount)
 
@@ -74,15 +74,17 @@ const BibleNoteItem = ({ item, onPress, relationCount, onRelationPress }: Props)
               <Text className="text-dark-grey font-bold text-[11px]">{metadataLabel}</Text>
               {!!noteTitle && (
                 <Text
-                  className="text-[16px]"
+                  className="text-[17px]"
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
                   style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
                 >
                   {noteTitle}
                 </Text>
               )}
-              {!!item.note.description && item.note.description !== noteTitle && (
-                <Paragraph scale={-3} scaleLineHeight={-1}>
-                  {truncate(item.note.description, 100)}
+              {!!noteDescription && noteDescription !== noteTitle && (
+                <Paragraph scale={-1} scaleLineHeight={-1}>
+                  {truncate(noteDescription, 100)}
                 </Paragraph>
               )}
             </Box>

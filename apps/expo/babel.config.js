@@ -1,6 +1,5 @@
 module.exports = function (api) {
-  const isWeb = api.caller(caller => caller?.platform === 'web')
-  const isTest = api.env('test')
+  api.cache(true)
 
   const config = {
     presets: ['babel-preset-expo'],
@@ -24,10 +23,6 @@ module.exports = function (api) {
       ],
       // Automatically adds debug labels to Jotai atoms
       'jotai/babel/plugin-debug-label',
-      [
-        'react-native-worklets/plugin',
-        { bundleMode: !isWeb && !isTest, importForwarding: { moduleNames: ['remend'] } },
-      ],
     ],
     env: {
       test: {

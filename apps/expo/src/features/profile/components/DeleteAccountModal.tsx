@@ -1,7 +1,7 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Alert } from 'react-native'
+import { ActivityIndicator } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import { SheetFooter, SheetHeader, SheetTextInput, SheetView, type SheetRef } from '~common/sheet'
@@ -15,6 +15,7 @@ import Button from '~common/ui/Button'
 import Text from '~common/ui/Text'
 import FireAuth from '~helpers/FireAuth'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
+import { toast } from '~helpers/toast'
 
 type DeleteAccountModalProps = {
   modalRef: React.RefObject<SheetRef | null>
@@ -55,9 +56,9 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
       const authError = error as { code?: string; message?: string }
       console.error('[Auth] Delete error:', authError.code, authError.message)
       if (authError.code === 'auth/requires-recent-login') {
-        Alert.alert(t('Attention'), t('app.deleteAccountRequiresRecentLogin'))
+        toast.warning(t('app.deleteAccountRequiresRecentLogin'))
       } else {
-        Alert.alert(t('Erreur'), authError.message)
+        toast.error(authError.message || t('Erreur'))
       }
     }
   }

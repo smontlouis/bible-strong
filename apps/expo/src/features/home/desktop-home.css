@@ -47,7 +47,7 @@
 .bs-home-content {
   box-sizing: border-box;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 16px 32px 24px;
   display: flex;
@@ -172,7 +172,7 @@
   pointer-events: none;
 }
 
-@container home (max-width: 1039px) {
+@container home (max-width: 999px) {
   .bs-home-grid {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto auto;
@@ -207,7 +207,7 @@
   }
 }
 
-@container home-main (max-width: 739px) {
+@container home-main (max-width: 599px) {
   .bs-home-main [data-home-stats-grid] {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -216,7 +216,7 @@
   }
 }
 
-@container home-main (max-width: 619px) {
+@container home-main (max-width: 559px) {
   .bs-home-learning {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -228,9 +228,6 @@
     height: 100%;
     min-height: 120px;
   }
-}
-
-@container home-main (max-width: 559px) {
   .bs-home-main [data-home-verse-illustration] {
     display: none;
   }

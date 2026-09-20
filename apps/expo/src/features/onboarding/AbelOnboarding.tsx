@@ -2,7 +2,8 @@ import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Alert, Pressable, useWindowDimensions } from 'react-native'
+import { Pressable, useWindowDimensions } from 'react-native'
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Animated, {
@@ -190,6 +191,7 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
 
   const theme = useTheme()
   const { t } = useTranslation()
+  const confirm = useConfirmDialog()
   const insets = useSafeAreaInsets()
   const { width } = useWindowDimensions()
   const reduceMotion = useReducedMotion()
@@ -265,17 +267,14 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
     if (!isFinishing) setIsFinishing(true)
   }
 
-  const confirmSkip = () => {
-    Alert.alert(t('onboarding.abel.skipConfirmTitle'), t('onboarding.abel.skipConfirmMessage'), [
-      {
-        text: t('onboarding.abel.keepDiscovering'),
-        style: 'cancel',
-      },
-      {
-        text: t('onboarding.abel.skip'),
-        onPress: finish,
-      },
-    ])
+  const confirmSkip = async () => {
+    const confirmed = await confirm({
+      title: t('onboarding.abel.skipConfirmTitle'),
+      message: t('onboarding.abel.skipConfirmMessage'),
+      cancelLabel: t('onboarding.abel.keepDiscovering'),
+      confirmLabel: t('onboarding.abel.skip'),
+    })
+    if (confirmed) finish()
   }
 
   const advance = () => {

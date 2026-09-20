@@ -1,6 +1,7 @@
 import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, Platform } from 'react-native'
+import { Platform } from 'react-native'
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { type SheetRef } from '~common/sheet'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -14,16 +15,21 @@ import DeleteAccountModal from './DeleteAccountModal'
 const ProfileActions = () => {
   const { t } = useTranslation()
   const { user, logout } = useLogin()
+  const confirm = useConfirmDialog()
   const passwordModalRef = useRef<SheetRef>(null)
   const deleteAccountModalRef = useRef<SheetRef>(null)
 
   const isEmailProvider = user.provider === 'password'
 
-  const promptLogout = () => {
-    Alert.alert(t('Attention'), t('Voulez-vous vraiment vous déconnecter ?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      { text: t('Oui'), onPress: () => logout(), style: 'destructive' },
-    ])
+  const promptLogout = async () => {
+    const confirmed = await confirm({
+      title: t('Attention'),
+      message: t('Voulez-vous vraiment vous déconnecter ?'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('Se déconnecter'),
+      destructive: true,
+    })
+    if (confirmed) await logout()
   }
 
   return (
@@ -59,7 +65,7 @@ const ProfileActions = () => {
           </CardLinkItem>
         )}
 
-        <CardLinkItem onPress={promptLogout}>
+        <CardLinkItem onPress={() => void promptLogout()}>
           <IconCircle bg="rgba(239, 68, 68, 0.1)">
             <FeatherIcon name="log-out" size={20} color="quart" />
           </IconCircle>

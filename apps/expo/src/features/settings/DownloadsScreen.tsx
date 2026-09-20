@@ -1,7 +1,6 @@
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Alert } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import FiltersHeader from '~common/FiltersHeader'
 import Loading from '~common/Loading'
@@ -38,11 +37,13 @@ import {
 import { createOfflineCopyId, parseOfflineCopyId } from '~helpers/offlineCopy'
 import { useDownloadQueue } from '~helpers/useDownloadQueue'
 import useLanguage from '~helpers/useLanguage'
+import { toast } from '~helpers/toast'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import {
   createDownloadedItemDeletionPlan,
   deleteDownloadedItem,
+  type DownloadedItemDeletionPlan,
 } from '~helpers/deleteDownloadedItem'
 import { buildBibleVersionGroups } from './downloadVersionGroups'
 import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
@@ -321,6 +322,30 @@ function useDownloadedItems() {
 // Main screen component
 // ---------------------------------------------------------------------------
 
+const deleteDownloadBatch = async ({
+  entries,
+  refresh,
+  onProgress,
+}: {
+  entries: { itemId: string; plan: DownloadedItemDeletionPlan }[]
+  refresh: () => Promise<unknown>
+  onProgress: (completed: number) => void
+}) => {
+  const deletedItemIds: string[] = []
+  try {
+    for (const { itemId, plan } of entries) {
+      await deleteDownloadedItem(plan)
+      deletedItemIds.push(itemId)
+      onProgress(deletedItemIds.length)
+    }
+    await refresh()
+    return { status: 'completed' as const, deletedItemIds }
+  } catch {
+    await refresh().catch(() => undefined)
+    return { status: 'failed' as const, deletedItemIds }
+  }
+}
+
 const DownloadsScreen = () => {
   const { t } = useTranslation()
   const confirmDeletion = useConfirmDialog()
@@ -586,30 +611,24 @@ const DownloadsScreen = () => {
       destructive: true,
     }).then(async confirmed => {
       if (!confirmed) return
-      const deletedItemIds: string[] = []
       setBatchDeletionProgress({ completed: 0, total: deletionEntries.length })
-      try {
-        for (const { itemId, plan } of deletionEntries) {
-          await deleteDownloadedItem(plan)
-          deletedItemIds.push(itemId)
-          setBatchDeletionProgress({
-            completed: deletedItemIds.length,
-            total: deletionEntries.length,
-          })
-        }
-        await refreshInstalledStateAfterDeletion()
+      const result = await deleteDownloadBatch({
+        entries: deletionEntries,
+        refresh: refreshInstalledStateAfterDeletion,
+        onProgress: completed =>
+          setBatchDeletionProgress({ completed, total: deletionEntries.length }),
+      })
+      if (result.status === 'completed') {
         setSelectedItems(new Set())
-      } catch {
-        await refreshInstalledStateAfterDeletion().catch(() => undefined)
+      } else {
         setSelectedItems(previous => {
           const remaining = new Set(previous)
-          deletedItemIds.forEach(itemId => remaining.delete(itemId))
+          result.deletedItemIds.forEach(itemId => remaining.delete(itemId))
           return remaining
         })
-        Alert.alert(t('Erreur'), t('downloads.deleteFailed'))
-      } finally {
-        setBatchDeletionProgress(null)
+        toast.error(t('downloads.deleteFailed'))
       }
+      setBatchDeletionProgress(null)
     })
   }
 
@@ -621,17 +640,18 @@ const DownloadsScreen = () => {
   const handleRedownloadItem = (item: UnifiedItem) => {
     if (!isConnected) return
     const deletionPlan = createDownloadedItemDeletionPlan(item.id, { bibleMode: 'replace' })
-    Alert.alert(t('Attention'), t('downloads.redownloadConfirm'), [
-      { text: t('Non'), style: 'cancel' },
-      {
-        text: t('Oui'),
-        onPress: async () => {
-          await deleteDownloadedItem(deletionPlan)
-          await refreshInstalledStateAfterDeletion()
-          handleDownloadItem(item)
-        },
-      },
-    ])
+    void confirmDeletion({
+      title: t('Attention'),
+      message: t('downloads.redownloadConfirm'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('Oui'),
+      destructive: true,
+    }).then(async confirmed => {
+      if (!confirmed) return
+      await deleteDownloadedItem(deletionPlan)
+      await refreshInstalledStateAfterDeletion()
+      handleDownloadItem(item)
+    })
   }
 
   const handleUpdateItem = (item: UnifiedItem) => {
@@ -650,13 +670,14 @@ const DownloadsScreen = () => {
         ? t('downloads.updateBibleWithStrongConfirm')
         : t('downloads.updateConfirm')
 
-    Alert.alert(t('downloads.updateAvailable'), confirmation, [
-      { text: t('downloads.later'), style: 'cancel' },
-      {
-        text: t('downloads.update'),
-        onPress: () => handleDownloadItem(item),
-      },
-    ])
+    void confirmDeletion({
+      title: t('downloads.updateAvailable'),
+      message: confirmation,
+      cancelLabel: t('downloads.later'),
+      confirmLabel: t('downloads.update'),
+    }).then(confirmed => {
+      if (confirmed) handleDownloadItem(item)
+    })
   }
 
   const handleDownloadUpdates = () => {

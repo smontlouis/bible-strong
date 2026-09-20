@@ -66,6 +66,7 @@
     "@babel/plugin-transform-private-property-in-object": "^7.25.9",
     "@babel/preset-env": "^7.26.9",
     "@bible-strong/ai-contract": "workspace:*",
+    "@bible-strong/avatar-react": "0.1.0",
     "@bible-strong/bible-reference-parser": "workspace:*",
     "@bible-strong/resource-catalog": "workspace:*",
     "@bible-strong/resource-domain": "workspace:*",

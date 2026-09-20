@@ -143,7 +143,7 @@ function parsePassageWidget(value: unknown): PassageWidget {
     throw new Error('INVALID_WIDGET_COMPARISON')
   if (
     w.kind === 'verse_analysis' &&
-    (passages.length !== 1 || passages[0].start !== passages[0].end)
+    (passages.length !== 1 || passages[0].end - passages[0].start > 7)
   )
     throw new Error('INVALID_WIDGET_VERSE_ANALYSIS')
   if (w.kind === 'translation_comparison') {

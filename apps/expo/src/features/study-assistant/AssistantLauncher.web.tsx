@@ -16,6 +16,8 @@ import {
   useExternalStoreRuntime,
   type AppendMessage,
 } from '@assistant-ui/react'
+import { createAvatar } from '@bible-strong/avatar-react'
+import '@bible-strong/avatar-react/styles.css'
 import { selectUserLoginInfo } from '~redux/selectors/user'
 import { resolveFontFamily } from '~themes/styleValues'
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
@@ -32,6 +34,9 @@ import { assistantAccessible, assistantAvailable } from './assistantConfig'
 import {
   loadConversations,
   loadSelectedConversation,
+  loadFollowReadingPreference,
+  saveFollowReadingPreference,
+  followReadingPreferenceKey,
   saveSelectedConversation,
   saveConversations,
   newConversation,
@@ -44,6 +49,9 @@ import { LiveDictationAdapter } from './dictationAdapter'
 import { captureDictationAudio, dictationSupported } from './dictationAudio.web'
 import { convertMessage } from './messageRuntime'
 import { AssistantMessage, UserMessage } from './MessageRenderer.web'
+import strobiDefinition from './strobi.avatar.json'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import { createTabForAssistantAction } from './assistantActions'
 
 const DebugPanel = __DEV__
   ? (require('./debug/DebugPanel.web').default as typeof import('./debug/DebugPanel.web').default)
@@ -52,26 +60,9 @@ const DebugPanel = __DEV__
 const contextCaption = (value: ReadingContext) =>
   ['passage', 'word'].includes(value.kind) ? value.detail : value.label
 
-function Avatar() {
-  return (
-    <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
-      <path
-        d="M9 14c6-2 10-1 15 3 5-4 9-5 15-3v23c-6-2-10-1-15 2-5-3-9-4-15-2V14Z"
-        fill="currentColor"
-        opacity=".18"
-      />
-      <path
-        d="M9 14c6-2 10-1 15 3 5-4 9-5 15-3v23c-6-2-10-1-15 2-5-3-9-4-15-2V14Zm15 3v22"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinejoin="round"
-      />
-      <path d="M31 6v6m-3-3h6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <circle cx="17" cy="25" r="1.5" fill="currentColor" />
-      <circle cx="31" cy="25" r="1.5" fill="currentColor" />
-    </svg>
-  )
-}
+const StrobiAvatar = createAvatar(strobiDefinition)
+type StrobiAnimation = 'idle' | 'sleeping' | 'excited' | 'thinking' | 'listening'
+
 function Icon({
   name,
 }: {
@@ -83,9 +74,9 @@ function Icon({
     | 'stop'
     | 'stopFilled'
     | 'pin'
+    | 'pinFilled'
     | 'back'
     | 'trash'
-    | 'collapse'
     | 'mic'
     | 'bug'
     | 'pending'
@@ -96,7 +87,6 @@ function Icon({
     pending: 'M21 12a9 9 0 1 1-2.64-6.36',
     bug: 'm8 2 2 2m6-2-2 2M9 7V6a3 3 0 0 1 6 0v1M8 7h8a1 1 0 0 1 1 1v8a5 5 0 0 1-10 0V8a1 1 0 0 1 1-1ZM12 10v11M3 12h4m10 0h4M3 6l4 3m10 0 4-3M3 20l4-3m10 0 4 3',
     mic: 'M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0V5ZM5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8',
-    collapse: 'm6 9 6 6 6-6',
     close: 'm6 6 12 12M6 18 18 6',
     plus: 'M12 5v14M5 12h14',
     history: 'M3 11a9 9 0 1 1 2 7M3 4v7h7M12 7v5l3 2',
@@ -104,6 +94,7 @@ function Icon({
     stop: 'M7 7h10v10H7z',
     stopFilled: 'M7 7h10v10H7z',
     pin: 'm9 3 6 0-1 6 4 4v2h-5v6h-2v-6H6v-2l4-4-1-6Z',
+    pinFilled: 'm9 3 6 0-1 6 4 4v2h-5v6h-2v-6H6v-2l4-4-1-6Z',
     back: 'm14 5-7 7 7 7',
     trash: 'M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 10v7M14 10v7',
   }
@@ -112,7 +103,7 @@ function Icon({
       width="18"
       height="18"
       viewBox="0 0 24 24"
-      fill={name === 'stopFilled' ? 'currentColor' : 'none'}
+      fill={name === 'stopFilled' || name === 'pinFilled' ? 'currentColor' : 'none'}
       stroke="currentColor"
       strokeWidth="1.65"
       strokeLinecap="round"
@@ -132,6 +123,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
   const { t } = useTranslation(),
     router = useRouter(),
     { colors, fontFamily } = useTheme()
+  const openInNewTab = useOpenInNewTab()
   const liveContext = useReadingContext()
   const [debugOpen, setDebugOpen] = useState(false)
   const [debugSession, setDebugSession] = useState<DebugSession | null>(null)
@@ -160,8 +152,25 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     [error, setError] = useState(''),
     [retrying, setRetrying] = useState(false),
     [progress, setProgress] = useState('')
-  const [pinned, setPinned] = useState<ReadingContext | null>(null),
-    [excluded, setExcluded] = useState<string | null>(null)
+  const [avatarSleeping, setAvatarSleeping] = useState(false)
+  const [avatarHovered, setAvatarHovered] = useState(false)
+  const [followReading, setFollowReading] = useState(false),
+    [pinned, setPinned] = useState<ReadingContext | null>(null)
+  useEffect(() => {
+    if (open || !ready) return
+    const sleepTimer = window.setTimeout(() => setAvatarSleeping(true), 10_000)
+    return () => window.clearTimeout(sleepTimer)
+  }, [open, ready])
+  const avatarAnimation: StrobiAnimation =
+    busy && open
+      ? 'thinking'
+      : avatarHovered
+        ? 'listening'
+        : open
+          ? 'excited'
+          : avatarSleeping
+            ? 'sleeping'
+            : 'idle'
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const [dictationState, setDictationState] = useState<
     'idle' | 'starting' | 'listening' | 'stopping' | 'error'
@@ -189,10 +198,15 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
   useEffect(() => {
     if (!open || historyOpen) dictation.cancel()
   }, [open, historyOpen, dictation])
+  const changeOpen = (value: boolean) => {
+    setOpen(value)
+    setAvatarSleeping(false)
+    if (!value) dictation.cancel()
+  }
   const loginRef = useRef<HTMLButtonElement | null>(null)
   const active = useRef<AbortController | null>(null),
     latest = useRef(conversations)
-  const context = pinned || (liveContext?.key !== excluded ? liveContext : null)
+  const context = followReading ? pinned || liveContext : null
   const dictationActive = ['starting', 'listening', 'stopping'].includes(dictationState)
   useEffect(() => {
     latest.current = conversations
@@ -203,6 +217,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
       setConversations(saved)
       const selected = loadSelectedConversation(localStorage, account, saved)
       if (selected) setCurrent(selected)
+      setFollowReading(loadFollowReadingPreference(localStorage, account))
     } catch {
       setStorageError(true)
       setWritable(false)
@@ -212,6 +227,24 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
       active.current?.abort()
       active.current = null
     }
+  }, [account])
+  useEffect(() => {
+    if (!ready || !writable) return
+    try {
+      saveFollowReadingPreference(localStorage, account, followReading)
+    } catch {
+      setStorageError(true)
+    }
+  }, [account, followReading, ready, writable])
+  useEffect(() => {
+    const key = followReadingPreferenceKey(account)
+    const sync = (event: StorageEvent) => {
+      if (event.key !== key) return
+      setFollowReading(event.newValue === 'true')
+      if (event.newValue !== 'true') setPinned(null)
+    }
+    window.addEventListener('storage', sync)
+    return () => window.removeEventListener('storage', sync)
   }, [account])
   useEffect(() => {
     if (!ready || !writable) return
@@ -294,6 +327,15 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
       onUpdate: publish,
       onProgress: key => setProgress(t(key)),
       onError: key => setError(key),
+      onAction: action => {
+        const tab = createTabForAssistantAction(action)
+        if (!tab) {
+          toast.error(t('assistant.unavailable'))
+          return
+        }
+        openInNewTab(tab, { autoRedirect: true })
+        changeOpen(false)
+      },
     }).finally(() => {
       if (active.current === controller) {
         active.current = null
@@ -341,6 +383,10 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
       )
     )
     if (current.id === id) setCurrent(previous => ({ ...previous, title, updatedAt: Date.now() }))
+  }
+  const changeFollowReading = (enabled: boolean) => {
+    setFollowReading(enabled)
+    if (!enabled) setPinned(null)
   }
   const runtime = useExternalStoreRuntime({
     adapters: {
@@ -399,8 +445,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
       <Modal.Root
         open={open}
         onOpenChange={value => {
-          if (!value) dictation.cancel()
-          setOpen(value)
+          changeOpen(value)
         }}
         unstable_openOnRunStart={false}
       >
@@ -411,9 +456,14 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
               <Modal.Trigger
                 className="bs-assistant-avatar"
                 aria-label={t(open ? 'assistant.modal.close' : 'assistant.modal.open')}
+                onMouseEnter={() => setAvatarHovered(true)}
+                onMouseLeave={() => setAvatarHovered(false)}
               >
-                {open ? <Icon name="collapse" /> : <Avatar />}
-                {!open && <span className="bs-assistant-badge">IA</span>}
+                <StrobiAvatar
+                  animation={avatarAnimation}
+                  size="var(--bs-assistant-avatar-size)"
+                  ariaLabel="Strobi"
+                />
               </Modal.Trigger>
             </Modal.Anchor>,
             document.body
@@ -421,7 +471,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
         <Modal.Content
           side="top"
           align="end"
-          sideOffset={14}
+          sideOffset={50}
           collisionPadding={12}
           className={`bs-assistant-modal ${__DEV__ && debugOpen ? 'bs-assistant-debug-open' : ''}`}
           style={vars}
@@ -432,11 +482,19 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
           }}
         >
           <header className="bs-assistant-header">
-            <div className="bs-assistant-heading">
+            <button
+              type="button"
+              className="bs-assistant-heading"
+              aria-label={t('assistant.modal.close')}
+              onClick={() => {
+                dictation.cancel()
+                changeOpen(false)
+              }}
+            >
               <strong title={current.title || t('assistant.modal.newChat')}>
                 {current.title || t('assistant.modal.newChat')}
               </strong>
-            </div>
+            </button>
             {__DEV__ && signedIn && (
               <button
                 type="button"
@@ -601,25 +659,33 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                       />
                       <div className="bs-assistant-composer-toolbar">
                         {context ? (
-                          <div className="bs-assistant-context-chip">
+                          <div
+                            className={`bs-assistant-context-chip${pinned ? ' bs-assistant-context-chip-pinned' : ''}`}
+                            data-pinned={pinned ? 'true' : 'false'}
+                          >
                             <button
                               type="button"
-                              className="bs-assistant-context-label"
+                              className="bs-assistant-chip-pin"
                               aria-pressed={Boolean(pinned)}
+                              aria-label={t(
+                                pinned ? 'assistant.modal.unpin' : 'assistant.modal.pin'
+                              )}
                               title={t(pinned ? 'assistant.modal.unpin' : 'assistant.modal.pin')}
                               onClick={() => setPinned(pinned ? null : { ...context })}
                             >
-                              {pinned && <Icon name="pin" />}
-                              <span>{contextCaption(context)}</span>
+                              <Icon name={pinned ? 'pinFilled' : 'pin'} />
                             </button>
+                            <span
+                              className="bs-assistant-context-label"
+                              title={contextCaption(context)}
+                            >
+                              {contextCaption(context)}
+                            </span>
                             <button
                               type="button"
                               className="bs-assistant-chip-remove"
                               aria-label={t('assistant.modal.removeContext')}
-                              onClick={() => {
-                                setPinned(null)
-                                setExcluded(liveContext?.key || null)
-                              }}
+                              onClick={() => changeFollowReading(false)}
                             >
                               <Icon name="close" />
                             </button>
@@ -628,9 +694,10 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                           <button
                             type="button"
                             className="bs-assistant-context-restore"
-                            onClick={() => setExcluded(null)}
+                            aria-pressed={false}
+                            onClick={() => changeFollowReading(true)}
                           >
-                            {t('assistant.modal.useContext')}
+                            {t('assistant.modal.followReading')}
                           </button>
                         ) : (
                           <span />
@@ -714,7 +781,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                       ref={loginRef}
                       className="bs-assistant-login"
                       onClick={() => {
-                        setOpen(false)
+                        changeOpen(false)
                         router.push('/login')
                       }}
                     >

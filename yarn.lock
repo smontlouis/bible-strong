@@ -2410,6 +2410,27 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@bible-strong/avatar-core@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@bible-strong/avatar-core@npm:0.1.0"
+  dependencies:
+    ajv: "npm:^8.20.0"
+  checksum: 10c0/5cd0c5a186051df2acfa84fb29ce7c2529975d95d51a6fc13486f604000e859a594234ad3110684cf271b70269d9c438b99efc6c70d535df312a93b614b8aa9f
+  languageName: node
+  linkType: hard
+
+"@bible-strong/avatar-react@npm:0.1.0":
+  version: 0.1.0
+  resolution: "@bible-strong/avatar-react@npm:0.1.0"
+  dependencies:
+    "@bible-strong/avatar-core": "npm:^0.1.0"
+  peerDependencies:
+    react: ^19.0.0
+    react-dom: ^19.0.0
+  checksum: 10c0/b0669c5302a9ea9a95753c8a376829632c446e9de5aa16d8e7f94eba0f26357a024d856eb8fa6ee6cb885f2beb794b13f8d223a0d1debce1e058064078e81d57
+  languageName: node
+  linkType: hard
+
 "@bible-strong/bible-reference-parser@workspace:*, @bible-strong/bible-reference-parser@workspace:packages/bible-reference-parser":
   version: 0.0.0-use.local
   resolution: "@bible-strong/bible-reference-parser@workspace:packages/bible-reference-parser"
@@ -2432,6 +2453,7 @@ __metadata:
     "@babel/preset-env": "npm:^7.26.9"
     "@babel/runtime": "npm:^7.28.4"
     "@bible-strong/ai-contract": "workspace:*"
+    "@bible-strong/avatar-react": "npm:0.1.0"
     "@bible-strong/bible-reference-parser": "workspace:*"
     "@bible-strong/resource-catalog": "workspace:*"
     "@bible-strong/resource-domain": "workspace:*"
@@ -13935,6 +13957,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ajv@npm:^8.20.0":
+  version: 8.20.0
+  resolution: "ajv@npm:8.20.0"
+  dependencies:
+    fast-deep-equal: "npm:^3.1.3"
+    fast-uri: "npm:^3.0.1"
+    json-schema-traverse: "npm:^1.0.0"
+    require-from-string: "npm:^2.0.2"
+  checksum: 10c0/5df9a1c8f83863cde1bd3a9ddb426f599718f88e3dc9153616c79fb28e0be455335830d7f21d745576519f057b371352daa31047b6a33d7036fe08777d60cf2a
+  languageName: node
+  linkType: hard
+
 "algoliasearch-helper@npm:>=3":
   version: 3.29.3
   resolution: "algoliasearch-helper@npm:3.29.3"
@@ -19232,6 +19266,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fast-uri@npm:^3.0.1":
+  version: 3.1.8
+  resolution: "fast-uri@npm:3.1.8"
+  checksum: 10c0/c9c47860a7f9110176d94bb30a02942182f0bfc8d6780e9702f320336dc2dadb83b1d9879cceaf8d4b439642d1ec6d78c317cb808ab155455551bd5d9d7c22d8
+  languageName: node
+  linkType: hard
+
 "fast-xml-builder@npm:^1.2.0":
   version: 1.3.1
   resolution: "fast-xml-builder@npm:1.3.1"
@@ -22716,6 +22757,13 @@ __metadata:
   version: 0.4.1
   resolution: "json-schema-traverse@npm:0.4.1"
   checksum: 10c0/108fa90d4cc6f08243aedc6da16c408daf81793bf903e9fd5ab21983cda433d5d2da49e40711da016289465ec2e62e0324dcdfbc06275a607fe3233fde4942ce
+  languageName: node
+  linkType: hard
+
+"json-schema-traverse@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "json-schema-traverse@npm:1.0.0"
+  checksum: 10c0/71e30015d7f3d6dc1c316d6298047c8ef98a06d31ad064919976583eb61e1018a60a0067338f0f79cabc00d84af3fcc489bd48ce8a46ea165d9541ba17fb30c6
   languageName: node
   linkType: hard
 
