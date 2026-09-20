@@ -7,6 +7,7 @@ import generateUUID from '~helpers/generateUUID'
 import type { DictionaryTab } from '~state/tabs'
 import DictionaryDetailTabScreen from './DictionaryDetailTabScreen'
 import { buildPublicDictionaryPath, parsePublicDictionaryRoute } from './publicDictionaryRoutes'
+import PublicPage from '~features/app/PublicPage'
 
 export const PublicDictionaryRouteScreen = () => {
   const router = useRouter()
@@ -31,24 +32,26 @@ export const PublicDictionaryRouteScreen = () => {
     })
   )
   return route ? (
-    <DictionaryDetailTabScreen
-      dictionaryAtom={dictionaryAtom}
-      onEntryResolved={(entry, context) => {
-        const entryId = entry.id ?? (context.work === route.work ? route.entryId : undefined)
-        if (!entryId) return
-        const canonicalPath = buildPublicDictionaryPath({
-          language: context.language,
-          work: context.work,
-          entryId,
-          word: entry.word,
-        })
-        const currentPath = `/dictionary/${first(params.language)}/${first(params.work)}/${first(
-          params.entryId
-        )}/${first(params.slug)}`
-        if (canonicalPath === currentPath) return
-        router.replace(canonicalPath)
-      }}
-    />
+    <PublicPage title={route.slug.replaceAll('-', ' ')}>
+      <DictionaryDetailTabScreen
+        dictionaryAtom={dictionaryAtom}
+        onEntryResolved={(entry, context) => {
+          const entryId = entry.id ?? (context.work === route.work ? route.entryId : undefined)
+          if (!entryId) return
+          const canonicalPath = buildPublicDictionaryPath({
+            language: context.language,
+            work: context.work,
+            entryId,
+            word: entry.word,
+          })
+          const currentPath = `/dictionary/${first(params.language)}/${first(params.work)}/${first(
+            params.entryId
+          )}/${first(params.slug)}`
+          if (canonicalPath === currentPath) return
+          router.replace(canonicalPath)
+        }}
+      />
+    </PublicPage>
   ) : (
     <ResourceUnavailableView
       title="Article de dictionnaire introuvable"

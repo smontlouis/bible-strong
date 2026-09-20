@@ -29,10 +29,15 @@ jest.mock('~common/ui/Text', () => {
 })
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: () => null }))
 let mockFullScreen = false
+let mockPublicShell = false
+jest.mock('~navigation/PublicShellContext', () => ({
+  usePublicShell: () => ({ active: mockPublicShell }),
+}))
 jest.mock('~state/app', () => ({ isFullScreenBibleAtom: {} }))
 jest.mock('jotai/react', () => ({ useAtomValue: () => mockFullScreen }))
 beforeEach(() => {
   mockFullScreen = false
+  mockPublicShell = false
 })
 beforeAll(() => {
   ;(
@@ -101,6 +106,27 @@ it('keeps both directions available without clearing the passage selection', () 
     expect(onExit).not.toHaveBeenCalled()
     act(() => tree.root.findAllByType('Button' as React.ElementType)[1].props.onPress())
     expect(onExit).toHaveBeenCalledTimes(1)
+  } finally {
+    act(() => tree?.unmount())
+  }
+})
+
+it('renders the public chapter action as a contained button', () => {
+  mockPublicShell = true
+  let tree!: ReactTestRenderer
+  try {
+    act(() => {
+      tree = create(
+        <PassageContextButton focused onExpand={() => {}} onCollapse={() => {}} onExit={() => {}} />
+      )
+    })
+    const action = tree.root.findAllByType('Button' as React.ElementType)[0]
+    expect(action.props.className).toContain('h-[36px]')
+    expect(action.props.className).toContain('rounded-[12px]')
+    expect(action.props.className).toContain('border-border')
+    expect(action.props.className).not.toContain('border-primary')
+    expect(action.props.className).not.toContain('flex-1 mx-[56px]')
+    expect(tree.root.findAllByType('Button' as React.ElementType)).toHaveLength(1)
   } finally {
     act(() => tree?.unmount())
   }

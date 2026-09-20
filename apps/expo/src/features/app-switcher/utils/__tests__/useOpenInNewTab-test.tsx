@@ -16,8 +16,11 @@ jest.mock('~navigation/useWorkspaceRoutePanel', () => ({
 const mockAdd = jest.fn()
 const mockSwitch = jest.fn()
 const mockDismiss = jest.fn()
+const mockPush = jest.fn()
 const mockSlide = jest.fn()
-jest.mock('expo-router', () => ({ useRouter: () => ({ dismissTo: mockDismiss }) }))
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ dismissTo: mockDismiss, push: mockPush }),
+}))
 jest.mock('jotai/react', () => ({
   useSetAtom: () => mockAdd,
   useStore: () => ({ get: () => mockActiveGroupId }),
@@ -123,5 +126,28 @@ it('creates and opens a tab in the explicitly requested group', () => {
   expect(mockSwitch).toHaveBeenCalledWith('clicked-group')
   expect(mockDismiss).toHaveBeenCalledWith('/')
   expect(mockSlide).toHaveBeenCalledWith('new-123')
+  act(() => view.unmount())
+})
+
+it('can push the workspace root when opening from a public page', () => {
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
+  let open!: ReturnType<typeof useOpenInNewTab>
+  function Probe() {
+    open = useOpenInNewTab()
+    return null
+  }
+  let view!: ReactTestRenderer
+  act(() => {
+    view = create(<Probe />)
+  })
+  act(() =>
+    open(
+      { id: 'public-bible', title: 'Genèse 3:3', type: 'new', isRemovable: true, data: {} },
+      { autoRedirect: true, navigation: 'push' }
+    )
+  )
+  expect(mockPush).toHaveBeenCalledWith('/')
+  expect(mockDismiss).not.toHaveBeenCalled()
+  expect(mockSlide).toHaveBeenCalledWith('public-bible')
   act(() => view.unmount())
 })

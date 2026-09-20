@@ -3,12 +3,20 @@ import { Redirect, useLocalSearchParams, useRouter } from 'expo-router'
 import { BibleRouteScreen, type BibleRouteInput } from '~features/bible/BibleScreen'
 import { buildPublicBiblePath, parsePublicBibleRoute } from '~features/bible/publicBibleRoutes'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
-import { createPublicBibleNavigation } from '~features/bible/publicBibleNavigation'
+import {
+  createPublicBibleNavigation,
+  createPublicBibleTab,
+} from '~features/bible/publicBibleNavigation'
+import PublicPage from '~features/app/PublicPage'
+import { useTranslation } from 'react-i18next'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 
 const firstString = (value: string | string[] | undefined): string | undefined =>
   Array.isArray(value) ? value[0] : value
 
 const PublicBibleRoute = () => {
+  const { t } = useTranslation()
+  const openInNewTab = useOpenInNewTab()
   const router = useRouter()
   const params = useLocalSearchParams<{
     segments?: string | string[]
@@ -53,20 +61,33 @@ const PublicBibleRoute = () => {
         ? 'reverse-interlinear'
         : 'hidden'
 
+  const passageLabel = passage
+    ? `:${passage.startVerse}${passage.endVerse ? `–${passage.endVerse}` : ''}`
+    : ''
+  const title = `${t(route.book.Nom)} ${route.chapter}${passageLabel} · ${route.version}`
+  const openApp = () => {
+    openInNewTab(createPublicBibleTab(route, title), {
+      autoRedirect: true,
+      navigation: 'push',
+    })
+  }
+
   return (
-    <BibleRouteScreen
-      input={{
-        version: route.version,
-        book: route.book,
-        chapter: route.chapter,
-        verse: passage?.startVerse,
-        focusVerses,
-        contextDisplayMode: passage ? 'focused' : 'fullChapter',
-        strongMode,
-        interlinearLocale: route.glossLanguage,
-      }}
-      routeNavigation={routeNavigation}
-    />
+    <PublicPage title={title} onOpenApp={openApp}>
+      <BibleRouteScreen
+        input={{
+          version: route.version,
+          book: route.book,
+          chapter: route.chapter,
+          verse: passage?.startVerse,
+          focusVerses,
+          contextDisplayMode: passage ? 'focused' : 'fullChapter',
+          strongMode,
+          interlinearLocale: route.glossLanguage,
+        }}
+        routeNavigation={routeNavigation}
+      />
+    </PublicPage>
   )
 }
 

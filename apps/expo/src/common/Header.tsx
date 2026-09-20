@@ -6,6 +6,7 @@ import Back from '~common/Back'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from './ui/Icon'
+import { usePublicShell } from '~navigation/PublicShellContext'
 interface Props {
   maxWidth?: number
   background?: boolean
@@ -36,6 +37,9 @@ const Header = ({
   children,
   ...props
 }: Props) => {
+  const publicShell = usePublicShell()
+  const showBackButton = hasBackButton && !publicShell.active
+  if (publicShell.active) return null
   return (
     <Box
       {...props}
@@ -54,14 +58,14 @@ const Header = ({
           className="overflow-hidden border-continuous flex-row items-center"
           style={{ minHeight: 54 }}
         >
-          {hasBackButton && (
+          {showBackButton && (
             <Back onCustomPress={onCustomBackPress} padding>
               <FeatherIcon name={isModal ? 'x' : 'arrow-left'} size={20} />
             </Back>
           )}
           <VStack
             className="overflow-hidden border-continuous flex-[1]"
-            style={{ paddingLeft: hasBackButton ? 0 : 20 }}
+            style={{ paddingLeft: showBackButton ? 0 : 20 }}
           >
             <HStack className="overflow-hidden border-continuous">
               <Text

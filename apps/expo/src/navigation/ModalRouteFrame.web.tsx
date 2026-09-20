@@ -13,8 +13,10 @@ import { useTranslation } from 'react-i18next'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useWorkspaceRoutePanel, workspacePanelClosingAtom } from './useWorkspaceRoutePanel'
+import { usePublicShell } from './PublicShellContext'
 
 const ModalRouteFrame = ({ children }: { children: ReactNode }) => {
+  const publicShell = usePublicShell()
   const { enabled, open, panelWidth, reservedWidth, closeTarget } = useWorkspaceRoutePanel()
   const isFocused = useIsFocused()
   const routeParams = useGlobalSearchParams()
@@ -55,6 +57,10 @@ const ModalRouteFrame = ({ children }: { children: ReactNode }) => {
     }
     setClosing(true)
     closeTimer.current = setTimeout(back, 240)
+  }
+
+  if (publicShell.active) {
+    return <Box className="flex-1 min-w-0 bg-reverse overflow-hidden">{children}</Box>
   }
 
   return (

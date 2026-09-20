@@ -3,6 +3,7 @@ import { Redirect, useLocalSearchParams } from 'expo-router'
 import { NaveRouteScreen } from '~features/nave/NaveDetailScreen'
 import { buildPublicNavePath, parsePublicNaveRoute } from '~features/nave/publicNaveRoutes'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import PublicPage from '~features/app/PublicPage'
 
 const PublicNaveRoute = () => {
   const params = useLocalSearchParams<{
@@ -18,7 +19,9 @@ const PublicNaveRoute = () => {
     if (requestedPath !== canonicalPath) return <Redirect href={canonicalPath} />
   }
   return route ? (
-    <NaveRouteScreen nameLower={route.topic} language={route.language} />
+    <PublicPage title={route.topic}>
+      <NaveRouteScreen nameLower={route.topic} language={route.language} />
+    </PublicPage>
   ) : (
     <ResourceUnavailableView
       title="Thème Nave introuvable"

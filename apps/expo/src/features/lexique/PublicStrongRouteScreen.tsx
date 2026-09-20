@@ -1,4 +1,5 @@
 import { Redirect, type Href, useLocalSearchParams } from 'expo-router'
+import type { ReactNode } from 'react'
 
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { IS_FORM_SHEET } from '~helpers/constants'
@@ -15,6 +16,7 @@ import {
   type PublicStrongEntryPage,
 } from './publicStrongRoutes'
 import { parseStrongDetailRouteParams } from './strongDetailRoutes'
+import PublicPage from '~features/app/PublicPage'
 
 type PublicStrongRouteParams = {
   code?: string | string[]
@@ -52,16 +54,18 @@ export const PublicStrongEntryRouteScreen = ({ page }: { page: PublicStrongEntry
 
   const { context: contextualParams } = parseStrongDetailRouteParams(params)
   const context = { ...contextualParams, ...publicStrongContext(identity) }
+  const title = identity.code
+  let content: ReactNode
   if (page === 'dictionary') {
-    return <StrongDictionaryRouteScreen context={context} isFormSheet={IS_FORM_SHEET} />
+    content = <StrongDictionaryRouteScreen context={context} isFormSheet={IS_FORM_SHEET} />
+  } else if (page === 'related') {
+    content = <StrongRelatedRouteScreen context={context} isFormSheet={IS_FORM_SHEET} />
+  } else if (page === 'concordance') {
+    content = <StrongConcordanceRouteScreen context={context} isFormSheet={IS_FORM_SHEET} />
+  } else {
+    content = <StrongMainScreen key={identity.code} context={context} isFormSheet={IS_FORM_SHEET} />
   }
-  if (page === 'related') {
-    return <StrongRelatedRouteScreen context={context} isFormSheet={IS_FORM_SHEET} />
-  }
-  if (page === 'concordance') {
-    return <StrongConcordanceRouteScreen context={context} isFormSheet={IS_FORM_SHEET} />
-  }
-  return <StrongMainScreen key={identity.code} context={context} isFormSheet={IS_FORM_SHEET} />
+  return <PublicPage title={title}>{content}</PublicPage>
 }
 
 export const PublicStrongEntityRouteScreen = () => {
@@ -83,11 +87,13 @@ export const PublicStrongEntityRouteScreen = () => {
 
   const { context } = parseStrongDetailRouteParams(params)
   return (
-    <StrongEntityRouteScreen
-      key={uniqueName}
-      context={context}
-      entityKey={uniqueName}
-      isFormSheet={IS_FORM_SHEET}
-    />
+    <PublicPage title={uniqueName}>
+      <StrongEntityRouteScreen
+        key={uniqueName}
+        context={context}
+        entityKey={uniqueName}
+        isFormSheet={IS_FORM_SHEET}
+      />
+    </PublicPage>
   )
 }

@@ -6,6 +6,7 @@ import {
   buildPublicTimelineIndexPath,
   parsePublicTimelineRoute,
 } from '~features/timeline/publicTimelineRoutes'
+import PublicPage from '~features/app/PublicPage'
 
 const PublicTimelineIndexRoute = () => {
   const router = useRouter()
@@ -24,10 +25,12 @@ const PublicTimelineIndexRoute = () => {
   if (requestedLanguage !== route.language) return <Redirect href={canonicalPath} />
 
   return (
-    <TimelineHomeScreen
-      languageOverride={route.language}
-      onLanguageChange={language => router.replace(buildPublicTimelineIndexPath(language))}
-    />
+    <PublicPage title="Chronologie biblique">
+      <TimelineHomeScreen
+        languageOverride={route.language}
+        onLanguageChange={language => router.replace(buildPublicTimelineIndexPath(language))}
+      />
+    </PublicPage>
   )
 }
 
