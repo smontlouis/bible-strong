@@ -210,12 +210,18 @@ select {
   object-fit: contain;
 }
 .discover-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  visibility: hidden;
+  white-space: nowrap;
   background: #163f51;
   color: #fff9ea;
   border: 0;
   border-radius: 18px;
-  min-height: 52px;
-  padding: 13px 24px;
+  min-height: 44px;
+  padding: 10px 16px;
   box-shadow: 0 4px 18px #163f5125;
   max-width: 260px;
 }

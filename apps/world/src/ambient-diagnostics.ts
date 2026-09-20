@@ -23,15 +23,6 @@ const names: Record<string, Record<Kind, string>> = {
     duck: 'Duck',
     cat: 'Cat',
   },
-  zh: {
-    light: '灯光',
-    particles: '粒子',
-    butterfly: '蝴蝶',
-    dragonfly: '蜻蜓',
-    fish: '鱼群',
-    duck: '鸭子',
-    cat: '猫',
-  },
 }
 const colors: Record<Kind, number> = {
   light: 0xffdc70,

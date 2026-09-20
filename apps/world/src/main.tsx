@@ -11,6 +11,7 @@ import { defaultNavigation, SPAWN, stations } from './world'
 import { loadNavigation, navigationFingerprint } from './navigation-document'
 import { useCameraZoomGestures } from './use-camera-zoom-gestures'
 import { diagnosticCategories, diagnosticCopy, makeDiagnosticFilters } from './diagnostic-filters'
+import { LexiconDiscovery } from './LexiconDiscovery'
 import './style.css'
 const ZoneEditor = lazy(() => import('./ZoneEditor'))
 
@@ -66,31 +67,6 @@ const copy = {
     zoomOut: 'Zoom out',
     choose: 'Choose my avatar',
     walked: 'places visited',
-  },
-  zh: {
-    title: '探索这个世界',
-    brand: 'Bible Strong',
-    hint: '使用摇杆移动你的角色。',
-    home: '返回广场',
-    overview: '世界全景',
-    follow: '跟随角色',
-    explore: '探索',
-    close: '关闭',
-    joystick: '移动摇杆',
-    here: '圣经广场',
-    prototype: '原型 · ASI Europe',
-    loading: '正在准备旅程…',
-    error: '无法加载地图，请刷新页面。',
-    visit: '靠近各个地点以了解更多。',
-    keyboard: '方向键 / WASD / ZQSD',
-    debug: '诊断',
-    edit: '编辑区域',
-    draftError: '无法读取项目导航文件，已加载原始地图。',
-    intro: '这是此资源的初步预览。Bible Strong 的演示将在后续阶段添加。',
-    zoomIn: '放大',
-    zoomOut: '缩小',
-    choose: '选择角色',
-    walked: '已探索地点',
   },
 }
 type Language = keyof typeof copy
@@ -329,7 +305,6 @@ function App() {
         >
           <option value="fr">FR</option>
           <option value="en">EN</option>
-          <option value="zh">中文</option>
         </select>
       </header>
       <div className="journey-pill">
@@ -349,6 +324,16 @@ function App() {
           {failed ? t.error : t.loading}
         </div>
       )}
+      <button
+        ref={element => {
+          controls.current.discoveryAction = element
+        }}
+        className="discover-button"
+        disabled={!ready || !state.station}
+        onClick={discover}
+      >
+        {t.explore} →
+      </button>
       <aside className="world-bottom">
         <div className="joystick-zone" ref={joystick} role="group" aria-label={t.joystick} />
         <div className="companion-controls">
@@ -364,11 +349,6 @@ function App() {
               </button>
             ))}
           </div>
-          {state.station && (
-            <button className="discover-button" disabled={!ready} onClick={discover}>
-              {t.explore} →
-            </button>
-          )}
         </div>
       </aside>
       <footer className="world-footer">
@@ -428,7 +408,10 @@ function App() {
         <br />
         {state.behind.join(' / ') || '—'}
       </output>
-      {opened && (
+      {opened?.id === 'lexicon' && (
+        <LexiconDiscovery language={language} onClose={() => setOpened(null)} />
+      )}
+      {opened && opened.id !== 'lexicon' && (
         <div className="modal-scrim" onClick={() => setOpened(null)}>
           <section
             className="resource-card"

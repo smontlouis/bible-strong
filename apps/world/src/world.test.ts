@@ -1,3 +1,6 @@
+import { parseNavigation } from './navigation-document'
+import savedNavigation from '../public/navigation/archipelago.json'
+import { defaultNavigation, stationAt, inPolygon, type NavigationDocument } from './world'
 import { describe, expect, it } from 'vitest'
 import { canStand, move, SPAWN, stations, detailObstacles, occluders, type Point } from './world'
 
@@ -66,5 +69,37 @@ describe('archipelago navigation', () => {
       }
     }
     expect([...reached].sort()).toEqual(stations.map(s => s.id).sort())
+  })
+})
+
+
+describe('island discovery', () => {
+  it.each([defaultNavigation, parseNavigation(savedNavigation)])(
+    'makes discovery available throughout every island, including its entrance',
+    navigation => {
+      for (const station of stations) {
+        const island = navigation.zones.find(zone => zone.id === station.islandZoneId)!
+        let covered = 0
+        for (let y = 0; y < 941; y += 12) {
+          for (let x = 0; x < 1671; x += 12) {
+            if (!inPolygon({ x, y }, island.points)) continue
+            expect(stationAt({ x, y }, navigation)?.id).toBe(station.id)
+            covered++
+          }
+        }
+        expect(covered).toBeGreaterThan(50)
+      }
+      expect(stationAt(SPAWN, navigation)).toBeNull()
+      expect(stationAt({ x: 830, y: 320 }, navigation)).toBeNull()
+      expect(stationAt({ x: 500, y: 450 }, navigation)).toBeNull()
+    }
+  )
+
+  it('uses the current edited island contour', () => {
+    const navigation: NavigationDocument = { ...defaultNavigation, zones: [
+      { id: 'land-1', name: 'Renamed island', kind: 'allowed', points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
+    ] }
+    expect(stationAt({ x: 50, y: 50 }, navigation)?.id).toBe('dictionary')
+    expect(stationAt(stations[0], navigation)).toBeNull()
   })
 })

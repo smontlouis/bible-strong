@@ -19,7 +19,7 @@ import {
   SPAWN,
   move,
   occluders,
-  stations,
+  stationAt,
   findSafePosition,
   type NavigationDocument,
   type Point,
@@ -37,6 +37,7 @@ export type WorldState = {
   fps: number
 }
 export type Controls = {
+  discoveryAction?: HTMLButtonElement | null
   ambientEditor?: AmbientEditorModel
   shoreEditor?: ShoreEditorModel
   shoreZoom?: number
@@ -63,7 +64,6 @@ export function createWorld(
     position = { ...SPAWN }
     blob!: Phaser.GameObjects.Image
     shadow!: Phaser.GameObjects.Ellipse
-    focus!: Phaser.GameObjects.Ellipse
     debugLayer!: Phaser.GameObjects.Graphics
     ambientZoneEditor?: AmbientZoneEditor
     shoreWaves?: ShoreWaves
@@ -127,11 +127,6 @@ export function createWorld(
       })
       this.readers = createWorldReaders(this)
       this.shadow = this.add.ellipse(SPAWN.x, SPAWN.y, 30, 10, 0x183c45, 0.25).setDepth(-1)
-      this.focus = this.add
-        .ellipse(0, 0, 44, 18)
-        .setStrokeStyle(2, 0xfff7cd, 0.9)
-        .setDepth(-1)
-        .setVisible(false)
       this.blob = this.add
         .image(SPAWN.x, SPAWN.y, controls.avatar)
         .setOrigin(0.5, 0.95)
@@ -193,9 +188,7 @@ export function createWorld(
         .setDisplaySize(52, 52)
       if (direction.x) this.blob.setFlipX(direction.x < 0)
       this.shadow.setPosition(next.x, next.y).setScale(1 - bounce / 18)
-      const station = stations.find(s => Math.hypot(s.x - next.x, s.y - next.y) < 54) ?? null
-      this.focus.setVisible(Boolean(station))
-      if (station) this.focus.setPosition(station.x, station.y)
+      const station = stationAt(next, controls.navigation)
 
       const camera = this.cameras.main
       const screenWidth = this.scale.width,
@@ -226,6 +219,26 @@ export function createWorld(
       if (!shoreEditing) {
         camera.scrollX += (centerX - screenWidth / 2 - camera.scrollX) * smoothing
         camera.scrollY += (centerY - screenHeight / 2 - camera.scrollY) * smoothing
+      }
+      const action = controls.discoveryAction
+      if (action) {
+        // Match Phaser's centered zoom, then convert renderer pixels to CSS pixels.
+        const scaleX = parent.clientWidth / screenWidth
+        const scaleY = parent.clientHeight / screenHeight
+        const avatarX = ((next.x - camera.scrollX - screenWidth / 2) * zoom + screenWidth / 2) * scaleX
+        const avatarY = ((next.y - bounce - camera.scrollY - screenHeight / 2) * zoom + screenHeight / 2) * scaleY
+        const x = Phaser.Math.Clamp(
+          avatarX + 28 * zoom * scaleX + 10,
+          8,
+          Math.max(8, parent.clientWidth - action.offsetWidth - 8)
+        )
+        const y = Phaser.Math.Clamp(
+          avatarY - 30 * zoom * scaleY - action.offsetHeight / 2,
+          8,
+          Math.max(8, parent.clientHeight - action.offsetHeight - 8)
+        )
+        action.style.transform = `translate3d(${x}px, ${y}px, 0)`
+        action.style.visibility = station && !controls.paused ? 'visible' : 'hidden'
       }
       this.shoreWaves?.update(
         delta,

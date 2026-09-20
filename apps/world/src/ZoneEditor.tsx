@@ -91,43 +91,6 @@ const messages = {
     tooMany: 'Maximum of 150 zones reached.',
     nameHint: '100 characters maximum',
   },
-  zh: {
-    title: '编辑区域',
-    allowed: '允许',
-    blocked: '禁止',
-    addAllowed: '+ 绿色区域',
-    addBlocked: '+ 红色障碍',
-    test: '用摇杆测试',
-    save: '保存',
-    export: '导出 JSON',
-    import: '导入 JSON',
-    undo: '撤销',
-    redo: '重做',
-    fit: '整张地图',
-    cancel: '停止绘制',
-    select: '在地图或列表中选择区域。',
-    vertices: '拖动控制点。小控制点可添加顶点。右键点击顶点可删除。',
-    draw: '放置顶点，然后点击第一个点闭合。也可以按回车完成。',
-    name: '区域名称',
-    kind: '类型',
-    remove: '删除区域',
-    drag: '移动整个区域',
-    edit: '编辑顶点',
-    invalid: '无效区域：避免交叉并保持在地图内。',
-    invalidFile: '文件不兼容或区域无效，当前草稿已保留。',
-    saveFailed: '无法保存项目，请确认本地服务器正在运行。',
-    saved: '已保存到项目。',
-    changed: '有未保存的修改',
-    restored: '已加载项目文件',
-    unsaved: '工作草稿',
-    precedence: '红色区域优先，即使与绿色区域重叠也会阻挡移动。',
-    noSpace: '没有足够宽的空间供角色站立。请先调整区域。',
-    zones: '区域',
-    local: '直接保存到项目 · JSON 导出为可选备份',
-    importLabel: '选择区域文件',
-    tooMany: '最多允许 150 个区域。',
-    nameHint: '最多 100 个字符',
-  },
 }
 
 type EditorApi = {
@@ -225,7 +188,7 @@ export default function ZoneEditor({ initial, initialSavedFingerprint, onDraft, 
     blockedPane.style.zIndex = '420'
     map.fitBounds(bounds, { padding: [18, 18] })
     map.setMaxBounds(L.latLngBounds(bounds).pad(0.3))
-    map.pm.setLang(editorState.mapLanguage === 'zh' ? 'zh' : editorState.mapLanguage)
+    map.pm.setLang(editorState.mapLanguage)
     const layers = new Map<string, L.Polygon>()
     let current: string | null = null
     let drawKind: Zone['kind'] = 'allowed'

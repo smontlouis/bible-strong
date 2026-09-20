@@ -329,52 +329,71 @@ export function move(
 export const stations = [
   {
     id: 'dictionary',
+    islandZoneId: 'land-1',
     name: 'Dictionnaire',
     en: 'Dictionary',
-    zh: '词典',
     x: 394,
     y: 336,
     color: '#f4b932',
   },
   {
     id: 'lexicon',
+    islandZoneId: 'land-3',
     name: 'Lexique',
     en: 'Lexicon',
-    zh: '原文词汇',
     x: 790,
     y: 259,
     color: '#497fe8',
   },
   {
     id: 'references',
+    islandZoneId: 'land-5',
     name: 'Références',
     en: 'References',
-    zh: '经文参照',
     x: 1385,
     y: 328,
     color: '#ef8d7c',
   },
-  { id: 'themes', name: 'Thèmes', en: 'Themes', zh: '主题', x: 394, y: 731, color: '#719cfa' },
+  {
+    id: 'themes',
+    islandZoneId: 'land-7',
+    name: 'Thèmes',
+    en: 'Themes',
+    x: 394,
+    y: 731,
+    color: '#719cfa',
+  },
   {
     id: 'comparison',
+    islandZoneId: 'land-9',
     name: 'Comparaisons',
     en: 'Comparison',
-    zh: '译本比较',
     x: 838,
     y: 830,
     color: '#b18be3',
   },
   {
     id: 'commentaries',
+    islandZoneId: 'land-11',
     name: 'Commentaires',
     en: 'Commentaries',
-    zh: '注释',
     x: 1385,
     y: 802,
     color: '#52b5b7',
   },
 ] as const
 export type Station = (typeof stations)[number]
+
+// Discovery follows the island's edited ground contour, excluding the connecting bridges.
+export function stationAt(point: Point, navigation = defaultNavigation): Station | null {
+  return (
+    stations.find(station =>
+      navigation.zones.some(zone =>
+        zone.id === station.islandZoneId && zone.kind === 'allowed' && inPolygon(point, zone.points)
+      )
+    ) ?? null
+  )
+}
 
 // Source-aligned SAM 3 cutouts are generated offline; see scripts/build-sam3-occluders.mjs.
 export { default as occluders } from './generated/occlusion-manifest.json'
