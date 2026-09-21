@@ -2,7 +2,7 @@ import { useTheme } from '~themes/ThemeProvider'
 import * as Icon from '@expo/vector-icons'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { TextInputProps } from 'react-native'
+import { TextInput, TextInputProps } from 'react-native'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from './ui/Icon'
 import { SheetTextInput } from '~common/sheet'
@@ -19,7 +19,7 @@ const SheetSearchInput = ({
   placeholder,
   onDelete,
   ...props
-}: Props & TextInputProps) => {
+}: Props & TextInputProps & { ref?: React.Ref<TextInput> }) => {
   const theme = useTheme()
   const { t } = useTranslation()
 

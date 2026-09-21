@@ -1,3 +1,5 @@
+import PassageBrowser from './PassageBrowser.web'
+import { getPickerResultTab } from './pickerSelection'
 import ShortcutGuide from './ShortcutGuide.web'
 import TabActionResults from './TabActionResults.web'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -302,7 +304,16 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
                 onSelect={openTab}
               />
             )}
-            {isPassageScope(scope) && !scopedPassages.length && (
+            {isPassageScope(scope) && !query.trim() && (
+              <PassageBrowser
+                version={defaultVersion}
+                onSelect={item => {
+                  const tab = getPickerResultTab(item, defaultVersion, scope.type)
+                  if (tab) openTab(tab)
+                }}
+              />
+            )}
+            {isPassageScope(scope) && !scopedPassages.length && !!query.trim() && (
               <div className="bs-command-status">{t('commandPalette.passagePlaceholder')}</div>
             )}
             {!scope && tabs.length > 0 && (

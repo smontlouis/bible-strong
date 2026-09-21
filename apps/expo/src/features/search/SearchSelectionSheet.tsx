@@ -1,3 +1,4 @@
+import PassageBrowser from './PassageBrowser'
 import { usePassageFilterChoices } from './usePassageFilterChoices'
 import { createSearchExperienceController } from './searchExperience'
 import {
@@ -15,15 +16,15 @@ import SearchSourceFiltersSheet from './SearchSourceFiltersSheet'
 import { FilterHeaderButtonContent } from '~common/FilterHeaderButton'
 import HeaderAction from '~common/ContextualPanel/HeaderAction'
 import { useCatalogSearch } from './discovery/useCatalogSearch'
-import { SheetFlashList, SheetHeader, type SheetRef } from '~common/sheet'
+import { SheetHeader, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import InlineSheetContent from '~common/ContextualPanel/InlineSheetContent'
 import HeaderContent from '~common/ContextualPanel/HeaderContent'
 import { useTheme } from '~themes/ThemeProvider'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
-import { Ref, useDeferredValue, useState, useRef } from 'react'
-import { ActivityIndicator, Platform } from 'react-native'
+import { Fragment, type PropsWithChildren, Ref, useDeferredValue, useState, useRef } from 'react'
+import { ActivityIndicator, FlatList, Platform, TextInput } from 'react-native'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import AlphabetList from '~common/AlphabetList'
@@ -107,6 +108,7 @@ type RelationResourceFailure = {
 }
 
 export type SearchSelectionSheetProps = {
+  browsePassages?: boolean
   inline?: boolean
   active?: boolean
   ref?: Ref<SheetRef | null>
@@ -286,6 +288,11 @@ const LoadingIndicator = () => {
   )
 }
 
+const WebSearchResultsContainer = ({ children }: PropsWithChildren) => (
+  <VStack className="h-[360px]">{children}</VStack>
+)
+const SearchResultsContainer = Platform.OS === 'web' ? WebSearchResultsContainer : Fragment
+
 const SearchSelectionSheet = ({
   ref,
   active = true,
@@ -297,11 +304,14 @@ const SearchSelectionSheet = ({
   initialSource,
   allowedTypes,
   inline = false,
+  browsePassages = false,
 }: SearchSelectionSheetProps) => {
   const { t } = useTranslation()
   const filtersRef = useRef<SheetRef>(null)
   const passageFiltersRef = useRef<SheetRef>(null)
   const selectingRef = useRef(false)
+  const searchInputRef = useRef<TextInput>(null)
+  const resultsListRef = useRef<FlatList<RelationTargetSection>>(null)
   const resources = useResourceAccess()
   const defaultBibleVersion = useDefaultBibleVersion()
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
@@ -883,7 +893,8 @@ const SearchSelectionSheet = ({
         onChangeText={handleSearch}
         onDelete={() => handleSearch('')}
         placeholder={placeholder}
-        autoFocus
+        ref={searchInputRef}
+        autoFocus={Platform.OS === 'web'}
       />
     </Box>
   )
@@ -907,6 +918,12 @@ const SearchSelectionSheet = ({
       </TouchableBox>
     </SearchFiltersTrigger>
   )
+  const showPassageBrowser =
+    active &&
+    browsePassages &&
+    !searchValue.trim() &&
+    activeItemTypes.length === 1 &&
+    activeItemTypes[0] === 'passages'
   const Container = inline ? InlineSheetContent : Sheet
   return (
     <>
@@ -916,6 +933,7 @@ const SearchSelectionSheet = ({
           resetPicker()
           onDismiss?.()
         }}
+        onPresent={() => searchInputRef.current?.focus()}
         panelWidth={500}
         panelHeaderContent={searchHeader}
         snapPoints={[0.75]}
@@ -931,16 +949,12 @@ const SearchSelectionSheet = ({
             {inline && <HeaderContent>{searchHeader}</HeaderContent>}
           </>
         )}
-        <VStack
-          className={
-            Platform.OS === 'web' ? 'h-[360px]' : 'overflow-hidden border-continuous flex-[1]'
-          }
-        >
-          {catalog.error ? (
+        <SearchResultsContainer>
+          {!showPassageBrowser && catalog.error ? (
             <Box className="p-[20px]">
               <Text onPress={catalog.retry}>{t('Réessayer')}</Text>
             </Box>
-          ) : resourceFailure ? (
+          ) : !showPassageBrowser && resourceFailure ? (
             <ResourceUnavailableView
               identity={resourceFailure.identity}
               title={resourceFailure.title}
@@ -954,9 +968,10 @@ const SearchSelectionSheet = ({
               onRetry={() => void resourceFailure.retry()}
             />
           ) : (
-            <SheetFlashList
+            <FlatList
+              ref={resultsListRef}
               keyboardShouldPersistTaps="handled"
-              data={searchSections}
+              data={showPassageBrowser ? [] : searchSections}
               onEndReachedThreshold={0.4}
               onEndReached={() => {
                 if (
@@ -1065,11 +1080,19 @@ const SearchSelectionSheet = ({
                 />
               )}
               keyExtractor={(section: RelationTargetSection) => section.id}
-              estimatedItemSize={260}
               ListHeaderComponent={
-                passageSearchNotice ||
-                passageSearch.searchError ||
-                passageSearch.semanticSearchError ? (
+                showPassageBrowser ? (
+                  <PassageBrowser
+                    key={passageVersion}
+                    version={passageVersion}
+                    onSelect={selectTarget}
+                    onNavigate={() =>
+                      resultsListRef.current?.scrollToOffset({ offset: 0, animated: false })
+                    }
+                  />
+                ) : passageSearchNotice ||
+                  passageSearch.searchError ||
+                  passageSearch.semanticSearchError ? (
                   <Box className="p-5 gap-2">
                     <Text>
                       {passageSearchNotice
@@ -1093,7 +1116,13 @@ const SearchSelectionSheet = ({
                   </Box>
                 ) : null
               }
-              ListEmptyComponent={isListLoading ? renderLoadingState() : renderEmptyState()}
+              ListEmptyComponent={
+                showPassageBrowser
+                  ? null
+                  : isListLoading
+                    ? renderLoadingState()
+                    : renderEmptyState()
+              }
             />
           )}
           {!deferredSearchHasValue && browseMode === 'strong' && (
@@ -1109,7 +1138,7 @@ const SearchSelectionSheet = ({
               setLetter={setDictionaryLetter}
             />
           )}
-        </VStack>
+        </SearchResultsContainer>
       </Container>
       <SearchSourceFiltersSheet ref={filtersRef} {...sourceFilterProps} />
       <PassageSearchFiltersSheet ref={passageFiltersRef} {...passageFilterProps} />

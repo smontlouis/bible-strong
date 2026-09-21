@@ -31,6 +31,7 @@ export default function GlobalCommandPalette() {
     <SearchSelectionSheet
       ref={sheet}
       active={open}
+      browsePassages
       title={t('Rechercher')}
       allowedSources={getPickerAllowedSources(scope)}
       allowedTypes={['verse', 'note', 'study', 'strong', 'dictionary', 'nave']}
