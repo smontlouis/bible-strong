@@ -16,6 +16,8 @@ jest.mock('../databaseTypes', () => ({
   SHARED_DBS: ['BIBLES'],
 }))
 
+import { QueryClient, QueryObserver } from '@tanstack/react-query'
+
 import {
   createOfflineCopyId,
   getOfflineCopyInvalidationKeys,
@@ -140,5 +142,40 @@ describe('Offline copy identity', () => {
         language: 'fr',
       })
     ).toContainEqual(['resource', 'commentary'])
+  })
+})
+
+describe('dictionary passage discovery after installation', () => {
+  it.each<OfflineCopyIdentity>([
+    { kind: 'dictionary', work: 'bost', resourceId: 'BOST', language: 'fr' },
+    { kind: 'dictionary', work: 'calmet', resourceId: 'CALMET', language: 'fr' },
+    { kind: 'dictionary-directory' },
+  ])('refreshes an open offline resource modal after installing $kind', async identity => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    let installed = false
+    const observer = new QueryObserver(client, {
+      queryKey: ['dictionary-passage-entries', '1-1-1', 'fr'],
+      networkMode: 'always',
+      queryFn: async () => {
+        if (!installed) throw new Error('OFFLINE_COPY_REQUIRED')
+        return [{ word: 'Création' }]
+      },
+    })
+    const unsubscribe = observer.subscribe(() => {})
+    try {
+      await observer.refetch()
+      expect(observer.getCurrentResult().isError).toBe(true)
+      installed = true
+      await Promise.all(
+        getOfflineCopyInvalidationKeys(identity).map(queryKey =>
+          client.invalidateQueries({ queryKey })
+        )
+      )
+      expect(observer.getCurrentResult().data).toEqual([{ word: 'Création' }])
+      expect(observer.getCurrentResult().isError).toBe(false)
+    } finally {
+      unsubscribe()
+      client.clear()
+    }
   })
 })

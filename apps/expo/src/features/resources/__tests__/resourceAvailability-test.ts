@@ -52,6 +52,7 @@ jest.mock('~helpers/databases', () => ({
 
 jest.mock('~helpers/sqlite', () => ({
   dbManager: { getDB: jest.fn() },
+  openSQLiteDatabase: jest.fn(),
   initSQLiteDir: jest.fn(),
 }))
 
@@ -85,7 +86,8 @@ import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSi
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import * as FileSystem from 'expo-file-system/legacy'
 import { getDbPath, initLanguageDirs } from '~helpers/databases'
-import { dbManager } from '~helpers/sqlite'
+import { dbManager, openSQLiteDatabase } from '~helpers/sqlite'
+import { DatabaseSync } from 'node:sqlite'
 
 const mockGetInfoAsync = FileSystem.getInfoAsync as jest.MockedFunction<
   typeof FileSystem.getInfoAsync
@@ -135,6 +137,43 @@ const createDependencies = ({
 
 describe('resourceAvailability', () => {
   beforeEach(() => jest.clearAllMocks())
+
+  it('recognizes a healthy dictionary directory using the actual SQLite quick_check result', async () => {
+    const database = new DatabaseSync(':memory:')
+    for (const table of [
+      'dictionary_works',
+      'dictionary_entries',
+      'dictionary_correspondences',
+      'dictionary_correspondence_members',
+      'dictionary_passage_anchors',
+    ]) {
+      database.exec(`CREATE TABLE ${table} (id INTEGER PRIMARY KEY)`)
+    }
+    const closeAsync = jest.fn(async () => {})
+    jest.mocked(openSQLiteDatabase).mockResolvedValue({
+      getFirstAsync: async (sql: string) => database.prepare(sql).get(),
+      getAllAsync: async (sql: string) => database.prepare(sql).all(),
+      closeAsync,
+    } as never)
+    const resource = { kind: 'dictionary-directory' as const }
+    const dependencies = createDependencies({
+      files: new Set(['file:///docs/SQLite/shared/dictionary-directory.sqlite']),
+    })
+    try {
+      await expect(getLocalResourceAvailability(resource, dependencies)).resolves.toEqual({
+        status: 'available',
+        resource,
+      })
+      expect(closeAsync).toHaveBeenCalledTimes(1)
+      database.exec('DROP TABLE dictionary_entries')
+      await expect(getLocalResourceAvailability(resource, dependencies)).resolves.toMatchObject({
+        status: 'corrupt',
+        reason: 'integrity-check-failed',
+      })
+    } finally {
+      database.close()
+    }
+  })
 
   it.each([
     {

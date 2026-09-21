@@ -175,6 +175,7 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
       ]
     case 'dictionary':
       return [
+        ['dictionary-passage-entries'],
         ['dictionary'],
         ['resource-results', 'dictionary'],
         ['resource-infinite-results', 'dictionary'],
@@ -188,6 +189,7 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
       ]
     case 'dictionary-directory':
       return [
+        ['dictionary-passage-entries'],
         ['dictionary'],
         ['resource-results', 'dictionary'],
         ['resource-infinite-results', 'dictionary'],

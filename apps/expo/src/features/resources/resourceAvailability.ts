@@ -255,7 +255,7 @@ export const probeLocalResourceAvailability = async (
     try {
       const database = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
       try {
-        const integrity = await database.getFirstAsync<{ integrity_check: string }>(
+        const integrity = await database.getFirstAsync<{ quick_check: string }>(
           'PRAGMA quick_check'
         )
         const tables = await database.getAllAsync<{ name: string }>(
@@ -263,7 +263,7 @@ export const probeLocalResourceAvailability = async (
         )
         const tableNames = new Set(tables.map(table => table.name.toLowerCase()))
         const valid =
-          integrity?.integrity_check === 'ok' &&
+          integrity?.quick_check === 'ok' &&
           [
             'dictionary_works',
             'dictionary_entries',
