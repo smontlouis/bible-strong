@@ -32,6 +32,7 @@ export default function GlobalCommandPalette() {
       ref={sheet}
       active={open}
       browsePassages
+      requirePassageVerse={scope === 'compare'}
       title={t('Rechercher')}
       allowedSources={getPickerAllowedSources(scope)}
       allowedTypes={['verse', 'note', 'study', 'strong', 'dictionary', 'nave']}

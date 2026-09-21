@@ -306,6 +306,8 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
             )}
             {isPassageScope(scope) && !query.trim() && (
               <PassageBrowser
+                key={scope.type}
+                requireVerse={scope.type === 'compare'}
                 version={defaultVersion}
                 onSelect={item => {
                   const tab = getPickerResultTab(item, defaultVersion, scope.type)

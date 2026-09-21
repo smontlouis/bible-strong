@@ -2,23 +2,46 @@ import { Command } from 'cmdk'
 import { useTranslation } from 'react-i18next'
 import { usePassageBrowser, type PassageBrowserProps } from '~features/search/usePassageBrowser'
 
-export default function PassageBrowser({ version, onSelect }: PassageBrowserProps) {
+export default function PassageBrowser({
+  version,
+  onSelect,
+  requireVerse = false,
+}: PassageBrowserProps) {
   const { t } = useTranslation()
-  const { books, book, chapters, setSelectedBook, chapterResult } = usePassageBrowser(version)
+  const {
+    books,
+    book,
+    chapters,
+    verses,
+    selectedChapter,
+    setSelectedChapter,
+    setSelectedBook,
+    chapterResult,
+  } = usePassageBrowser(version)
   return (
-    <Command.Group heading={book ? t(book.Nom) : t('Livres')}>
+    <Command.Group
+      heading={book ? `${t(book.Nom)}${selectedChapter ? ` ${selectedChapter}` : ''}` : t('Livres')}
+    >
       {book ? (
         <>
-          <Command.Item value="passage-books" onSelect={() => setSelectedBook(null)}>
-            ← {t('Livres')}
+          <Command.Item
+            value="passage-books"
+            onSelect={() => (selectedChapter ? setSelectedChapter(null) : setSelectedBook(null))}
+          >
+            ← {t(selectedChapter ? 'Chapitres' : 'Livres')}
           </Command.Item>
-          {chapters.map(chapter => (
+          {(selectedChapter ? verses : chapters).map(number => (
             <Command.Item
-              key={`${book.Numero}:${chapter}`}
-              value={`chapter:${book.Numero}:${chapter}`}
-              onSelect={() => onSelect(chapterResult(chapter))}
+              key={`${book.Numero}:${selectedChapter ?? 0}:${number}`}
+              value={`passage:${book.Numero}:${selectedChapter ?? 0}:${number}`}
+              onSelect={() => {
+                if (selectedChapter) onSelect(chapterResult(selectedChapter, number))
+                else if (requireVerse) setSelectedChapter(number)
+                else onSelect(chapterResult(number))
+              }}
             >
-              {t(book.Nom)} {chapter}
+              {t(book.Nom)} {selectedChapter ? `${selectedChapter}:` : ''}
+              {number}
             </Command.Item>
           ))}
         </>

@@ -8,10 +8,20 @@ import { usePassageBrowser, type PassageBrowserProps } from './usePassageBrowser
 export default function PassageBrowser({
   version,
   onSelect,
+  requireVerse = false,
   onNavigate,
 }: PassageBrowserProps & { onNavigate: () => void }) {
   const { t } = useTranslation()
-  const { books, book, chapters, setSelectedBook, chapterResult } = usePassageBrowser(version)
+  const {
+    books,
+    book,
+    chapters,
+    verses,
+    selectedChapter,
+    setSelectedChapter,
+    setSelectedBook,
+    chapterResult,
+  } = usePassageBrowser(version)
 
   if (!book) {
     return (
@@ -40,25 +50,35 @@ export default function PassageBrowser({
       <TouchableBox
         className="flex-row items-center gap-3 px-5 py-4"
         accessibilityRole="button"
-        accessibilityLabel={t('Livres')}
+        accessibilityLabel={t(selectedChapter ? 'Chapitres' : 'Livres')}
         onPress={() => {
-          setSelectedBook(null)
+          if (selectedChapter) setSelectedChapter(null)
+          else setSelectedBook(null)
           onNavigate()
         }}
       >
         <FeatherIcon name="arrow-left" size={20} />
-        <Text className="font-bold">{t(book.Nom)}</Text>
+        <Text className="font-bold">
+          {t(book.Nom)}
+          {selectedChapter ? ` ${selectedChapter}` : ''}
+        </Text>
       </TouchableBox>
       <Box className="flex-row flex-wrap gap-2 px-5 pb-8">
-        {chapters.map(chapter => (
+        {(selectedChapter ? verses : chapters).map(number => (
           <TouchableBox
-            key={chapter}
+            key={number}
             className="h-12 w-12 items-center justify-center rounded-md bg-opacity5"
             accessibilityRole="button"
-            accessibilityLabel={`${t(book.Nom)}, ${t('Chapitre')} ${chapter}`}
-            onPress={() => onSelect(chapterResult(chapter))}
+            accessibilityLabel={`${t(book.Nom)}${selectedChapter ? ` ${selectedChapter}, ${t('Verset')}` : `, ${t('Chapitre')}`} ${number}`}
+            onPress={() => {
+              if (selectedChapter) onSelect(chapterResult(selectedChapter, number))
+              else if (requireVerse) {
+                setSelectedChapter(number)
+                onNavigate()
+              } else onSelect(chapterResult(number))
+            }}
           >
-            <Text>{chapter}</Text>
+            <Text>{number}</Text>
           </TouchableBox>
         ))}
       </Box>

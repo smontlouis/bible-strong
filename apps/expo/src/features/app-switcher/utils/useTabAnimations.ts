@@ -210,10 +210,10 @@ export const useTabAnimations = () => {
             withDelay(
               carouselFadeDelay,
               withTiming(0, undefined, finish => {
-                if (!finish) {
-                  tabPreviewCarousel.opacity.set(1)
-                  return
-                }
+                // Cancellation runs before Reanimated detaches this animation.
+                // Writing its opacity here would recursively cancel it again.
+                // The replacement transition owns the new opacity value.
+                if (!finish) return
                 tabPreviewCarousel.translateY.set(HEIGHT)
                 activeTabPreview.zIndex.set(3)
                 runOnJS(takeActiveTabSnapshot)(

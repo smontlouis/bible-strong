@@ -109,6 +109,7 @@ type RelationResourceFailure = {
 
 export type SearchSelectionSheetProps = {
   browsePassages?: boolean
+  requirePassageVerse?: boolean
   inline?: boolean
   active?: boolean
   ref?: Ref<SheetRef | null>
@@ -305,6 +306,7 @@ const SearchSelectionSheet = ({
   allowedTypes,
   inline = false,
   browsePassages = false,
+  requirePassageVerse = false,
 }: SearchSelectionSheetProps) => {
   const { t } = useTranslation()
   const filtersRef = useRef<SheetRef>(null)
@@ -1083,7 +1085,8 @@ const SearchSelectionSheet = ({
               ListHeaderComponent={
                 showPassageBrowser ? (
                   <PassageBrowser
-                    key={passageVersion}
+                    key={`${passageVersion}:${requirePassageVerse}`}
+                    requireVerse={requirePassageVerse}
                     version={passageVersion}
                     onSelect={selectTarget}
                     onNavigate={() =>
