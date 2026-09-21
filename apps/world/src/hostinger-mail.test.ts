@@ -35,6 +35,7 @@ describe('Hostinger notification transport', () => {
       .mockResolvedValueOnce(new Response(null, { status: 204 }))
     expect(await sendHostingerNotification(id, mail, env, request)).toBe('sent')
     expect(request.mock.calls[0][0]).toContain('/folders/INBOX.Sent/messages/search')
+    expect(JSON.parse(String(request.mock.calls[0][1]?.body))).toEqual({ subject: id })
     const [url, init] = request.mock.calls[1]
     expect(url).toBe('https://api.mail.hostinger.com/api/v1/mailboxes/AC123/send')
     expect(init?.redirect).toBe('error')

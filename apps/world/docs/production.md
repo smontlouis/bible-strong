@@ -42,12 +42,19 @@ reads and the multiplayer WebSocket were checked live. Editor write routes retur
 Hostinger and the owner/sender/recipient identities have been installed; the local
 admin bypass token was not uploaded.
 
-Cloudflare Zero Trust has been activated by the owner. The Access application and
-owner-only policy are prepared in the dashboard but await confirmation before
-creation. The current Wrangler OAuth session cannot create Access configuration. `GUESTBOOK_ADMIN_URL` is
-intentionally not set in production yet, so notifications remain durably queued
-instead of sending links to an inaccessible admin page. Activate it after verifying
-the owner login and the page/API policy coverage.
+Cloudflare Access is configured with application `3149cd6f-cad0-4f62-a875-856421d1c8fa`
+and an owner-only email policy. It covers `world.bible-strong.app/admin*` and
+`world.bible-strong.app/api/guestbook/admin*`, accepts only email one-time PIN,
+and uses a 24-hour session. `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD` are installed
+on the Worker. Public pages and guestbook reads return 200; all admin entry points
+redirect to Access. The owner confirmed that the admin login works.
+
+`GUESTBOOK_ADMIN_URL=https://world.bible-strong.app/admin` is now installed, enabling
+Hostinger notifications to the configured owner address. Previously queued messages
+resume on their next durable alarm (up to one hour after an unconfigured attempt).
+New messages schedule an alarm within one second; actual delivery depends on the
+mail provider. The Hostinger transport was tested earlier; no synthetic public
+guestbook message was created during activation.
 
 ## Automatic deployment
 

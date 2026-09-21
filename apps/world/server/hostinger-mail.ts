@@ -57,7 +57,9 @@ export async function sendHostingerNotification(
     // duplicates if sending succeeds without a searchable Sent copy.
     const found = await request(`${base}/folders/INBOX.Sent/messages/search?perPage=1`, {
       ...init,
-      body: JSON.stringify({ subject, to: mail.to }),
+      // Multiple criteria match unrelated messages on Hostinger. Search only the
+      // unique entry ID, then verify the full subject below before acknowledging.
+      body: JSON.stringify({ subject: id }),
       signal: AbortSignal.timeout(10_000),
     })
     if (!found.ok) {

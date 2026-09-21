@@ -137,6 +137,7 @@ export class Guestbook extends DurableObject<GuestbookEnv> {
           Date.now() + (result === 'unconfigured' ? 3_600_000 : retryDelay(attempts)),
           result === 'sent' ? null : result
         )
+        console.info('guestbook.notification', { id: row.entry_id, result, attempts })
       }
     } finally {
       await this.scheduleNotifications()
