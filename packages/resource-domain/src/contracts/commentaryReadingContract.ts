@@ -1,4 +1,4 @@
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 import { SupplementaryRevisionDto } from '@bible-strong/resource-domain/contracts/supplementaryContract'
 
 export const COMMENTARY_READING_INDEX_VERSION = 2 as const

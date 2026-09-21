@@ -14,7 +14,7 @@ import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { getDictionaryDbPath, getDictionaryDirectoryDbPath } from '~helpers/databases'
 import { openSQLiteDatabase } from '~helpers/sqlite'
 import type { ResourceAvailability } from './resourceModel'
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 import {
   decodeDictionaryPageCursor,
   decodeDictionaryDirectoryPageCursor,

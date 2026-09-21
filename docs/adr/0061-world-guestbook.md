@@ -26,8 +26,9 @@ the authorization boundary. The local developer bridge is restricted to loopback
 and uses an ignored random token never bundled into the browser.
 
 Persist a notification outbox row atomically with each new signature. Use the
-Guestbook object's own alarm for retries, independently of multiplayer. A private
-mailer service binding owns the eventual provider integration and idempotent handoff.
-Hostinger setup is pending, so unconfigured notifications remain queued and the admin
-page says so explicitly. No SMTP provider or credentials are inferred from the sender
+Guestbook object's own alarm for retries, independently of multiplayer. Hostinger's HTTPS Mail API owns delivery from the selected mailbox; an optional
+private mailer binding can override it. Reconcile the unique notification subject
+against the Sent folder before retrying. Hostinger does not document idempotent sends,
+so ambiguous failures can still produce duplicates when the Sent copy is unavailable.
+Unconfigured notifications remain queued and the admin page says so explicitly. No SMTP provider or credentials are inferred from the sender
 address. Existing messages are not retroactively queued.

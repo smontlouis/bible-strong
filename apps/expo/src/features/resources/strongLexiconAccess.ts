@@ -14,7 +14,7 @@ import type {
   StrongLexiconResource,
   StrongLexiconSearchResult,
 } from '@bible-strong/resource-domain/strong-lexicon'
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 import {
   createStrongIdentity,
   getDisplayedStrongIdentities,

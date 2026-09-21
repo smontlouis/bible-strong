@@ -26,7 +26,7 @@ import { DEFAULT_PROFILE, loadProfile, saveProfile } from './avatar-profile'
 import { loadVisitedPlaces, saveVisitedPlaces } from './visited-places'
 import './style.css'
 const GuestbookAdmin = lazy(() => import('./GuestbookAdmin'))
-const ZoneEditor = lazy(() => import('./ZoneEditor'))
+const ZoneEditor = import.meta.env.DEV ? lazy(() => import('./ZoneEditor')) : () => null
 
 const copy = {
   fr: {
@@ -192,7 +192,9 @@ function App() {
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
   const [overview, setOverview] = useState(false)
-  const [debug, setDebug] = useState(() => new URLSearchParams(location.search).has('debug'))
+  const [debug, setDebug] = useState(
+    () => import.meta.env.DEV && new URLSearchParams(location.search).has('debug')
+  )
   const [diagnosticFilters, setDiagnosticFilters] = useState(() => makeDiagnosticFilters())
   const [language, setLanguage] = useState<Language>('fr')
   const [guestbookOpen, setGuestbookOpen] = useState(false)
@@ -307,6 +309,7 @@ function App() {
   }, [navigation])
 
   function switchEditor(mode: EditorMode | null) {
+    if (!import.meta.env.DEV) return
     shoreEditor.editing = mode === 'shorelines'
     shoreEditor.paused = false
     ambientEditor.editing = mode !== null && mode !== 'navigation' && mode !== 'shorelines'
@@ -457,16 +460,21 @@ function App() {
       </aside>
       <footer className="world-footer">
         {initial.error && <span title={t.draftError}>{t.draftError}</span>}
-        <div className="footer-actions">
-          <button disabled={!ready || !navigationLoaded} onClick={() => switchEditor('shorelines')}>
-            {editorCopy[language].open}
-          </button>
-          <button onClick={() => setDebug(v => !v)} aria-pressed={debug}>
-            {t.debug}
-          </button>
-        </div>
+        {import.meta.env.DEV && (
+          <div className="footer-actions">
+            <button
+              disabled={!ready || !navigationLoaded}
+              onClick={() => switchEditor('shorelines')}
+            >
+              {editorCopy[language].open}
+            </button>
+            <button onClick={() => setDebug(v => !v)} aria-pressed={debug}>
+              {t.debug}
+            </button>
+          </div>
+        )}
       </footer>
-      {debug && (
+      {import.meta.env.DEV && debug && (
         <fieldset className="diagnostic-filters">
           <legend>{diagnosticCopy[language].title}</legend>
           <div className="diagnostic-filter-actions">
@@ -499,19 +507,21 @@ function App() {
           </div>
         </fieldset>
       )}
-      <output
-        className={`world-debug ${debug ? '' : 'sr-only'}`}
-        data-testid="world-state"
-        data-x={state.x.toFixed(1)}
-        data-y={state.y.toFixed(1)}
-        data-moving={state.moving}
-        data-behind={state.behind.join(',')}
-        data-camera-zoom={state.cameraZoom.toFixed(3)}
-      >
-        x {state.x.toFixed(0)} · y {state.y.toFixed(0)} · {state.fps} fps
-        <br />
-        {state.behind.join(' / ') || '—'}
-      </output>
+      {import.meta.env.DEV && (
+        <output
+          className={`world-debug ${debug ? '' : 'sr-only'}`}
+          data-testid="world-state"
+          data-x={state.x.toFixed(1)}
+          data-y={state.y.toFixed(1)}
+          data-moving={state.moving}
+          data-behind={state.behind.join(',')}
+          data-camera-zoom={state.cameraZoom.toFixed(3)}
+        >
+          x {state.x.toFixed(0)} · y {state.y.toFixed(0)} · {state.fps} fps
+          <br />
+          {state.behind.join(' / ') || '—'}
+        </output>
+      )}
       {profileOpen && (
         <AvatarEditor
           profile={profile}
@@ -549,7 +559,7 @@ function App() {
       {opened?.id === 'commentaries' && (
         <CommentariesDiscovery language={language} onClose={() => setOpened(null)} />
       )}
-      {editorMode && (
+      {import.meta.env.DEV && editorMode && (
         <EditorNavigation
           mode={editorMode}
           language={language}
@@ -557,7 +567,7 @@ function App() {
           onClose={() => switchEditor(null)}
         />
       )}
-      {ambientEditor.editing && (
+      {import.meta.env.DEV && ambientEditor.editing && (
         <AmbientEditorPanel
           model={ambientEditor}
           language={language}
@@ -566,7 +576,7 @@ function App() {
           }}
         />
       )}
-      {shoreEditing && (
+      {import.meta.env.DEV && shoreEditing && (
         <ShoreEditor
           model={shoreEditor}
           language={language}
@@ -576,7 +586,7 @@ function App() {
           onClose={() => switchEditor(null)}
         />
       )}
-      {editing && (
+      {import.meta.env.DEV && editing && (
         <Suspense fallback={<div className="zone-editor">{t.loading}</div>}>
           <ZoneEditor
             initial={navigation}
@@ -601,7 +611,7 @@ function App() {
 
 const root = createRoot(document.getElementById('root')!)
 root.render(
-  location.pathname === '/admin-guestbook' ? (
+  ['/admin', '/admin/', '/admin-guestbook'].includes(location.pathname) ? (
     <Suspense fallback={<p>…</p>}>
       <GuestbookAdmin />
     </Suspense>

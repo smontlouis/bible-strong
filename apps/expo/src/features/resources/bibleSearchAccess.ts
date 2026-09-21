@@ -6,7 +6,7 @@ import {
   type SearchOptions as LocalSearchOptions,
   type SearchResult,
 } from '~helpers/biblesDb'
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 import { BibleMultiSearchResponseDto, BibleSearchResponseDto } from './bibleChapterContract'
 import { ResourceAccessError, resourceAccessErrorFromHttpResponse } from './resourceAccessError'
 

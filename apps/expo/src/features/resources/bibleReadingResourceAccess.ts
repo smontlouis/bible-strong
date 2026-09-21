@@ -12,7 +12,7 @@ import { versionHasPericope } from '~helpers/pericopes'
 import { versionHasRedWords } from '~helpers/redWords'
 import type { OfflineCopyIdentity } from '~helpers/offlineCopyId'
 import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 import { BiblePericopeIndexDto } from './bibleChapterContract'
 import { CrossReferenceResponseDto } from './supplementaryContract'
 

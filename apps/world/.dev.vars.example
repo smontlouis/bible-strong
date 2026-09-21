@@ -10,7 +10,10 @@ GUESTBOOK_ADMIN_EMAIL=
 ACCESS_TEAM_DOMAIN=
 ACCESS_AUD=
 
-# Notification preparation; no email is sent until the private mailer is bound.
+# Hostinger Mail API credentials (server only, never use VITE_ prefixes).
+HOSTINGER_MAIL_API_TOKEN=
+HOSTINGER_MAILBOX_ID=
+# Notifications require all three settings below as well as Hostinger credentials.
 GUESTBOOK_NOTIFICATION_TO=
 GUESTBOOK_NOTIFICATION_FROM=
 GUESTBOOK_ADMIN_URL=

@@ -1,4 +1,4 @@
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 import { decodeStrongLexiconPageCursor, encodeStrongLexiconPageCursor } from '../resourcePageCursor'
 
 export { decodeStrongLexiconPageCursor, encodeStrongLexiconPageCursor }

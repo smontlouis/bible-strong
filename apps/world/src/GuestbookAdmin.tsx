@@ -189,7 +189,7 @@ export default function GuestbookAdmin() {
             disabled={busy !== null}
             onClick={() => {
               setSelected(null)
-              history.replaceState(null, '', '/admin-guestbook')
+              history.replaceState(null, '', '/admin')
             }}
           >
             {t.clear}

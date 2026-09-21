@@ -1,4 +1,4 @@
-name: Deploy Expo Web
+name: Deploy World
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: expo-web-production
+  group: world-production
   cancel-in-progress: false
 
 permissions:
@@ -19,8 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     environment:
-      name: expo-web-production
-      url: https://web.bible-strong.app
+      name: world-production
+      url: https://world.bible-strong.app
     steps:
       - name: Check out production source
         uses: actions/checkout@v5
@@ -36,17 +36,17 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Export Expo Web with production settings
-        run: yarn workspace @bible-strong/expo web:build
+      - name: Test World
+        run: yarn workspace @bible-strong/world test
 
-      - name: Check Cloudflare asset size limit
-        run: node apps/expo/scripts/check-web-assets.mjs
+      - name: Build production assets
+        run: yarn workspace @bible-strong/world build
 
-      - name: Deploy static assets
+      - name: Deploy Worker and static assets
         env:
           CLOUDFLARE_ACCOUNT_ID: 412013be38e98e0e90906c8ece4a173f
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WEB_API_TOKEN }}
-        run: yarn workspace @bible-strong/resource-service exec wrangler deploy --config ../../apps/expo/wrangler.jsonc
+        run: yarn workspace @bible-strong/world exec wrangler deploy
 
       - name: Verify the production entry point
-        run: curl --fail --silent --show-error --retry 5 --retry-delay 5 --output /dev/null https://web.bible-strong.app/home
+        run: curl --fail --silent --show-error --retry 5 --retry-delay 5 --output /dev/null https://world.bible-strong.app/health

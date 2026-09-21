@@ -155,18 +155,21 @@ export class WorldRoom extends Server<Env> {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url)
+    if (url.pathname.startsWith('/__study-world/'))
+      return new Response('Not found', { status: 404 })
+    const adminPage = ['/admin', '/admin/', '/admin-guestbook'].includes(url.pathname)
     if (url.pathname === '/health') return Response.json({ ok: true })
     const origin = request.headers.get('Origin')
     const allowed = [url.origin, ...(env.ALLOWED_ORIGINS ?? '').split(',').map(s => s.trim())]
     if (origin && !allowed.includes(origin)) return new Response('Forbidden', { status: 403 })
-    if (url.pathname === '/admin-guestbook' || url.pathname === '/api/guestbook/admin') {
+    if (adminPage || url.pathname === '/api/guestbook/admin') {
       const actor = await authenticateAdmin(request, env)
       if (!actor)
         return Response.json(
           { error: 'unauthorized' },
           { status: 401, headers: { 'Cache-Control': 'no-store' } }
         )
-      if (url.pathname === '/admin-guestbook') return env.ASSETS.fetch(request)
+      if (adminPage) return env.ASSETS.fetch(request)
       const stub = env.Guestbook.get(env.Guestbook.idFromName('asi-europe'))
       const reply = (body: unknown, status = 200) =>
         Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } })

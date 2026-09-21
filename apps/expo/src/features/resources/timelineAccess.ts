@@ -1,5 +1,5 @@
 import * as FileSystem from 'expo-file-system/legacy'
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 
 import type { TimelineEventDetail } from '~features/timeline/types'
 import type { ResourceLanguage } from '~helpers/databaseTypes'

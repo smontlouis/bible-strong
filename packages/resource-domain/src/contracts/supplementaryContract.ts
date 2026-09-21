@@ -1,4 +1,4 @@
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 
 const VerseKey = Schema.String.pipe(Schema.pattern(/^[1-9]\d*-(?:0-0|[1-9]\d*-(?:0|[1-9]\d*))$/u))
 const CommentaryCollection = Schema.String.pipe(Schema.pattern(/^[A-Za-z0-9][A-Za-z0-9-]{1,63}$/u))

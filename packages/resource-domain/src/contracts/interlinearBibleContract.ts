@@ -1,4 +1,4 @@
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 
 const VersionId = Schema.Literal('BHG')
 const Language = Schema.Literal('fr', 'en')

@@ -45,7 +45,7 @@ allowlist. Reading and signing do not require a multiplayer WebSocket connection
 
 ## Administration and notifications
 
-Open `/admin-guestbook` to browse all, visible or removed entries. An email deep link
+Open `/admin` to browse all, visible or removed entries. An email deep link
 uses `?message=<id>` to select one entry. Removing an entry hides it from subsequent
 public API reads; restoring makes it visible again. Existing open public dialogs
 refresh when reopened. Removal is reversible and records the last actor and time.
@@ -55,7 +55,7 @@ old entries are not retroactively emailed.
 The Worker validates Cloudflare Access RS256 JWT signatures against the configured
 team's keys, plus issuer, audience, expiry and the exact administrator email. An
 email header alone never grants access. Configure an Access application protecting
-**both** `/admin-guestbook` and `/api/guestbook/admin`, with the same audience and an
+`/admin`, `/admin/*`, the legacy `/admin-guestbook` alias, and `/api/guestbook/admin`, with the same audience and an
 Allow policy restricted to `GUESTBOOK_ADMIN_EMAIL`. Also protect/disable alternate
 production hostnames such as the workers.dev hostname. Missing Access configuration
 fails closed. Admin writes require a JSON body and the `X-Guestbook-Admin: 1` header;
@@ -76,28 +76,44 @@ An idempotent repost does not enqueue a second email. The administration shows q
 counts and each entry's status (`queued`, `sent`, or `legacy`). `sent` means the mailer
 acknowledged delivery/acceptance, not that a human read the email.
 
-### Email setup still pending
+### Hostinger Mail API setup
 
-Hostinger SMTP configuration has not been confirmed. No external email provider or
-SMTP credentials have been provisioned by this change, and no real notification is
-sent until the transport is connected. Prepare server-only variables:
+The alarm sends through the [Hostinger Mail API](https://api.mail.hostinger.com/)
+using the existing mailbox; SMTP passwords are unnecessary. Create a token scoped
+to the sender mailbox in hPanel. The current provider UI grants SMTP/IMAP and webhook
+permissions together, so keep the token server-side. Set these ignored local variables
+or production Worker secrets:
+
+- `HOSTINGER_MAIL_API_TOKEN`: Hostinger token (secret).
+- `HOSTINGER_MAILBOX_ID`: resource ID (`AC...`) of the sender mailbox, available from
+  authenticated `GET https://api.mail.hostinger.com/api/v1/me`. Verify its address
+  matches `GUESTBOOK_NOTIFICATION_FROM`; Hostinger chooses the sender by mailbox ID.
 
 - `GUESTBOOK_NOTIFICATION_TO`: notification recipient.
 - `GUESTBOOK_NOTIFICATION_FROM`: verified sender address.
-- `GUESTBOOK_ADMIN_URL`: production HTTPS URL ending in `/admin-guestbook`.
+- `GUESTBOOK_ADMIN_URL`: production HTTPS URL `https://world.bible-strong.app/admin`.
 - `ACCESS_TEAM_DOMAIN`: `<team>.cloudflareaccess.com`, without a scheme.
 - `ACCESS_AUD`: Access application audience.
 - `GUESTBOOK_ADMIN_EMAIL`: the sole allowed administrator email.
 
-The transport boundary is a **private service binding** named `GUESTBOOK_MAILER`.
-Its adapter will connect to the confirmed mail service (for example Hostinger SMTP).
-The contract is `POST /send`, JSON `{from,to,subject,text}`, with a stable
-`Idempotency-Key: guestbook:<entry-id>`. It must durably deduplicate that key and return
-an OK JSON `{messageId: "..."}` only after accepting responsibility for the email.
-Do not expose the adapter as an unauthenticated public endpoint. A timeout may follow
-an accepted send, so idempotency must be handled by the adapter, not assumed from SMTP.
-The implementation prepares and tests this boundary; the actual SMTP adapter and
-binding are intentionally deferred until the mail setup is confirmed.
+The server calls `POST /api/v1/mailboxes/{id}/send` with plain text and a fixed
+configured recipient. Only HTTP 204 acknowledges a send. Before each attempt, it
+searches `INBOX.Sent` for the notification's unique subject and recipient, recovering
+accepted sends whose acknowledgement was lost. Search failures block sending and
+are retried. The durable outbox prevents ordinary duplicate publication emails.
+Hostinger does **not** document an idempotency key: if sending succeeds but its Sent
+copy is missing or delayed, a retry can still duplicate an email. This is at-least-once
+notification delivery, not an exactly-once guarantee. Retain the Sent copies.
+
+An optional private `GUESTBOOK_MAILER` service binding still overrides Hostinger.
+Its contract is `POST /send`, JSON `{from,to,subject,text}`, stable
+`Idempotency-Key: guestbook:<entry-id>`, OK JSON `{messageId: "..."}`. No public
+email-sending endpoint is exposed.
+
+Local credentials alone do not activate notifications: `GUESTBOOK_ADMIN_URL` must
+also be a real HTTPS admin URL. Finish Cloudflare Access and deploy the server secrets
+before enabling production notifications. Do not point real notifications at an
+invented URL or assume local configuration has been deployed.
 
 The alarm design follows the [Cloudflare alarm API](https://developers.cloudflare.com/durable-objects/api/alarms/).
 Access verification follows the [application token contract](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/application-token/).

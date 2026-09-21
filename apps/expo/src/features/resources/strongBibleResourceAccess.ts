@@ -1,5 +1,5 @@
 import type { Verse } from '~common/types'
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 import type { StrongBibleSpan } from '~helpers/canonicalStrongVerse'
 import type {
   StrongBibleLemmaStat,

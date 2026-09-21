@@ -12,7 +12,7 @@ import { warnAboutRecoverableResourceIntegrity } from './recoverableIntegrity'
 import { getLocalResourceAvailability } from './resourceAvailability'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { ResourceAvailability } from './resourceModel'
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 import {
   encodeNavePageCursor,
   NaveTopicListResponseDto,

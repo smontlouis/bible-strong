@@ -161,7 +161,9 @@ export function createAmbientEditor() {
         model.zones = parseAmbientZones(await response.json())
         saved = JSON.stringify(model.zones)
         try {
-          const draft = JSON.parse(localStorage.getItem(DRAFT) ?? 'null')
+          const draft = JSON.parse(
+            (import.meta.env.DEV ? localStorage.getItem(DRAFT) : null) ?? 'null'
+          )
           if (draft?.base === saved) model.zones = parseAmbientZones(draft.zones)
         } catch {
           /* Use project data. */
@@ -176,6 +178,7 @@ export function createAmbientEditor() {
       model.notify()
     },
     async saveProject() {
+      if (!import.meta.env.DEV) return
       if (!model.loaded || model.saving) return
       model.saving = true
       model.error = false

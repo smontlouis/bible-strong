@@ -20,12 +20,14 @@ export class ShoreWaves {
   ) {
     this.waves = scene.add.graphics().setDepth(-70)
     this.guides = scene.add.graphics().setDepth(3100)
-    scene.input.on('pointerdown', this.down)
-    scene.input.on('pointermove', this.move)
-    scene.input.on('pointerup', this.up)
-    scene.input.on('pointerupoutside', this.up)
-    scene.input.on('wheel', this.wheel)
-    window.addEventListener('blur', this.cancel)
+    if (import.meta.env.DEV) {
+      scene.input.on('pointerdown', this.down)
+      scene.input.on('pointermove', this.move)
+      scene.input.on('pointerup', this.up)
+      scene.input.on('pointerupoutside', this.up)
+      scene.input.on('wheel', this.wheel)
+      window.addEventListener('blur', this.cancel)
+    }
     scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       window.removeEventListener('blur', this.cancel)
       scene.input

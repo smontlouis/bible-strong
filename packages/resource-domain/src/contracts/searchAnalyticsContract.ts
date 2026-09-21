@@ -1,4 +1,4 @@
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 
 const SearchAnalyticsEventNameSchema = Schema.Literal('search_performed', 'result_opened')
 export type SearchAnalyticsEventName = typeof SearchAnalyticsEventNameSchema.Type

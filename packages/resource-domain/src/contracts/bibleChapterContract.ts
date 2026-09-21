@@ -1,4 +1,4 @@
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 
 export class BibleChapterRequest extends Schema.Class<BibleChapterRequest>('BibleChapterRequest')({
   version: Schema.String.pipe(Schema.pattern(/^[A-Z0-9][A-Z0-9_-]{1,31}$/)),

@@ -1,4 +1,4 @@
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 
 import type { Verse } from '~common/types'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'

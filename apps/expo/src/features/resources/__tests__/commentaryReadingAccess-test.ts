@@ -1,5 +1,5 @@
 import { createCommentaryReadingAccess } from '../commentaryReadingAccess'
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 import { CommentaryReadingResourceIndex } from '@bible-strong/resource-domain/contracts/commentaryReadingContract'
 
 const resource = { kind: 'commentary', resourceId: 'barnes', language: 'fr', revision: 'r1' }

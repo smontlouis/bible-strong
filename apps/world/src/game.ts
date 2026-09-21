@@ -89,7 +89,7 @@ export function createWorld(
     mapTiles!: MapTileStreamer
     clouds!: WorldClouds
     ambience!: WorldAmbience
-    ambientDiagnostics!: AmbientDiagnostics
+    ambientDiagnostics?: AmbientDiagnostics
     ambientTiles!: AmbientTiles
     centralBook!: CentralBook
     background!: WorldBackground
@@ -135,9 +135,13 @@ export function createWorld(
       this.background = new WorldBackground(this)
       this.ambience = new WorldAmbience(this, controls.ambientEditor)
       this.clouds = new WorldClouds(this)
-      if (controls.ambientEditor)
+      if (import.meta.env.DEV && controls.ambientEditor)
         this.ambientZoneEditor = new AmbientZoneEditor(this, controls.ambientEditor)
-      this.ambientDiagnostics = new AmbientDiagnostics(this, () => this.ambience.diagnosticRegions)
+      if (import.meta.env.DEV)
+        this.ambientDiagnostics = new AmbientDiagnostics(
+          this,
+          () => this.ambience.diagnosticRegions
+        )
       this.ambientTiles = new AmbientTiles(this)
       this.centralBook = new CentralBook(this)
       this.add.image(0, 0, 'map-preview').setOrigin(0).setDisplaySize(WIDTH, HEIGHT).setDepth(-110)
@@ -340,7 +344,7 @@ export function createWorld(
       this.shoreWaves?.update(
         delta,
         !this.active || document.hidden || (controls.paused && !shoreEditing),
-        controls.debug && controls.diagnosticFilters?.shorelines !== false
+        import.meta.env.DEV && controls.debug && controls.diagnosticFilters?.shorelines !== false
       )
       this.ambientZoneEditor?.update()
       this.background.update(camera)
@@ -357,14 +361,14 @@ export function createWorld(
         reader.update(camera, controls.paused || !this.active || document.hidden, next.x)
       this.mapTiles.update(camera, time, controls.overview ? 1 : rendererResolution)
 
-      this.ambientDiagnostics.update(
+      this.ambientDiagnostics?.update(
         camera,
         controls.debug,
         document.documentElement.lang,
         controls.diagnosticFilters
       )
       this.debugLayer.clear()
-      if (controls.debug) {
+      if (import.meta.env.DEV && controls.debug) {
         for (const { points, kind } of controls.diagnosticFilters?.navigation !== false
           ? controls.navigation.zones
           : []) {

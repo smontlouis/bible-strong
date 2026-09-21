@@ -1,4 +1,4 @@
-import { Schema } from 'effect'
+import * as Schema from 'effect/Schema'
 
 const VersionId = Schema.String.pipe(Schema.pattern(/^[A-Z0-9][A-Z0-9_-]{1,31}$/))
 const Book = Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 77))

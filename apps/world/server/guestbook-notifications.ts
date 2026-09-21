@@ -1,15 +1,20 @@
 import type { GuestbookEntry } from '../src/guestbook'
-export interface NotificationEnv {
+import {
+  hostingerConfigured,
+  sendHostingerNotification,
+  type HostingerMailEnv,
+} from './hostinger-mail'
+export interface NotificationEnv extends HostingerMailEnv {
   GUESTBOOK_NOTIFICATION_TO?: string
   GUESTBOOK_NOTIFICATION_FROM?: string
   GUESTBOOK_ADMIN_URL?: string
-  // Private service adapter, to connect once the Hostinger transport is confirmed.
+  // Optional alternative private transport; Hostinger is used when absent.
   GUESTBOOK_MAILER?: { fetch(request: Request): Promise<Response> }
 }
 export function notificationsConfigured(env: NotificationEnv) {
   try {
     return Boolean(
-      env.GUESTBOOK_MAILER &&
+      (env.GUESTBOOK_MAILER || hostingerConfigured(env)) &&
       env.GUESTBOOK_NOTIFICATION_TO &&
       env.GUESTBOOK_NOTIFICATION_FROM &&
       env.GUESTBOOK_ADMIN_URL &&
@@ -46,6 +51,8 @@ export async function deliverNotification(
   env: NotificationEnv
 ): Promise<'sent' | 'unconfigured' | 'failed'> {
   if (!notificationsConfigured(env)) return 'unconfigured'
+  if (!env.GUESTBOOK_MAILER)
+    return sendHostingerNotification(entry.id, notificationEmail(entry, env), env)
   try {
     const response = await env.GUESTBOOK_MAILER!.fetch(
       new Request('https://guestbook-mailer.internal/send', {

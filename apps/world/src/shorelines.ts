@@ -53,7 +53,8 @@ export function createShoreEditor() {
   let lines: Shoreline[] = []
   let saveError = false
   try {
-    lines = parseShorelines(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]'))
+    if (import.meta.env.DEV)
+      lines = parseShorelines(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]'))
   } catch {
     saveError = true
   }
@@ -84,7 +85,9 @@ export function createShoreEditor() {
         // Recover a draft only if its base still matches the project file.
         let recovered: Shoreline[] | undefined
         try {
-          const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) ?? 'null')
+          const draft = JSON.parse(
+            (import.meta.env.DEV ? localStorage.getItem(DRAFT_KEY) : null) ?? 'null'
+          )
           if (draft?.base === saved) recovered = parseShorelines(draft.lines)
           else if (!draft && lines.length) recovered = lines
         } catch {
@@ -101,6 +104,7 @@ export function createShoreEditor() {
       model.notify()
     },
     async saveProject() {
+      if (!import.meta.env.DEV) return
       if (!model.loaded || model.saving) return
       const snapshot = JSON.stringify(model.lines)
       model.saving = true

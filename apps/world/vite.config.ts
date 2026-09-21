@@ -77,6 +77,7 @@ function readBody(request: IncomingMessage) {
 function navigationSavePlugin(): Plugin {
   return {
     name: 'study-world-navigation-save',
+    apply: 'serve',
     configureServer(server) {
       server.middlewares.use(NAVIGATION_API, async (request, response) => {
         if (request.method !== 'PUT') {
@@ -113,6 +114,7 @@ function sceneDocumentSavePlugin(
 ): Plugin {
   return {
     name: `study-world-${kind}-save`,
+    apply: 'serve',
     configureServer(server) {
       server.middlewares.use(`/__study-world/${kind}`, async (request, response) => {
         if (request.method !== 'PUT') {
@@ -152,6 +154,7 @@ function sceneDocumentSavePlugin(
 function localGuestbookAdmin(): Plugin {
   return {
     name: 'local-guestbook-admin',
+    apply: 'serve',
     configureServer(server) {
       server.middlewares.use(async (request, response, next) => {
         if (request.url?.split('?')[0] !== '/api/guestbook/admin') return next()
@@ -203,5 +206,5 @@ export default defineConfig({
       ],
     },
   },
-  base: './',
+  base: '/',
 })
