@@ -1,3 +1,5 @@
+import { ExplorationJournal, JournalIcon, journalCopy } from './ExplorationJournal'
+import { findTravelDestination } from './world-travel'
 import { islandActions, type IslandActionId } from './island-actions'
 import { GuestbookDialog } from './GuestbookDialog'
 import { nearGuestbook } from './guestbook'
@@ -11,7 +13,7 @@ import nipplejs from 'nipplejs'
 import { clampCameraZoom } from './camera-zoom'
 import { ControlIcon } from './ControlIcon'
 import { createWorld, type Controls, type WorldState } from './game'
-import { defaultNavigation, SPAWN, stations } from './world'
+import { defaultNavigation, SPAWN, stations, type Station } from './world'
 import { loadNavigation, navigationFingerprint } from './navigation-document'
 import { useCameraZoomGestures } from './use-camera-zoom-gestures'
 import { diagnosticCategories, diagnosticCopy, makeDiagnosticFilters } from './diagnostic-filters'
@@ -21,7 +23,7 @@ import { ReferencesDiscovery } from './ReferencesDiscovery'
 import { ThemesDiscovery } from './ThemesDiscovery'
 import { ComparisonsDiscovery } from './ComparisonsDiscovery'
 import { CommentariesDiscovery } from './CommentariesDiscovery'
-import { AvatarEditor, AvatarPreview, profileCopy } from './AvatarEditor'
+import { AvatarEditor, profileCopy } from './AvatarEditor'
 import { DEFAULT_PROFILE, loadProfile, saveProfile } from './avatar-profile'
 import { loadVisitedPlaces, saveVisitedPlaces } from './visited-places'
 import './style.css'
@@ -30,6 +32,7 @@ const ZoneEditor = import.meta.env.DEV ? lazy(() => import('./ZoneEditor')) : ()
 
 const copy = {
   fr: {
+    camera: 'Caméra',
     online: 'dans le monde',
     connecting: 'Connexion au monde…',
     offline: 'Reconnexion… Tu peux continuer à explorer.',
@@ -61,6 +64,7 @@ const copy = {
     walked: 'lieux visités',
   },
   en: {
+    camera: 'Camera',
     online: 'in the world',
     connecting: 'Connecting to the world…',
     offline: 'Reconnecting… You can keep exploring.',
@@ -104,10 +108,13 @@ function CameraControls({
   controls: Controls
   overview: boolean
   setOverview: (value: boolean | ((current: boolean) => boolean)) => void
-  labels: Pick<(typeof copy)['fr'], 'follow' | 'home' | 'overview' | 'zoomIn' | 'zoomOut'>
+  labels: Pick<
+    (typeof copy)['fr'],
+    'camera' | 'follow' | 'home' | 'overview' | 'zoomIn' | 'zoomOut'
+  >
 }) {
   return (
-    <nav className="camera-controls" aria-label="Camera">
+    <nav className="camera-controls" aria-label={labels.camera}>
       <button
         onClick={() => setOverview(value => !value)}
         title={overview ? labels.follow : labels.overview}
@@ -117,24 +124,33 @@ function CameraControls({
         <ControlIcon name={overview ? 'follow' : 'overview'} />
       </button>
       <button
+        title={labels.zoomIn}
         aria-label={labels.zoomIn}
         onClick={() => {
-          controls.zoom = clampCameraZoom(controls.zoom + 0.2)
+          controls.zoom = clampCameraZoom(
+            (overview ? controls.minimumZoom : controls.zoom) + 0.2,
+            controls.minimumZoom
+          )
           setOverview(false)
         }}
       >
         <ControlIcon name="plus" />
       </button>
       <button
+        title={labels.zoomOut}
         aria-label={labels.zoomOut}
         onClick={() => {
-          controls.zoom = clampCameraZoom(controls.zoom - 0.2)
+          controls.zoom = clampCameraZoom(
+            (overview ? controls.minimumZoom : controls.zoom) - 0.2,
+            controls.minimumZoom
+          )
           setOverview(false)
         }}
       >
         <ControlIcon name="minus" />
       </button>
       <button
+        title={labels.home}
         aria-label={labels.home}
         onClick={() => {
           controls.reset++
@@ -151,6 +167,8 @@ function App() {
   const [savedProfile] = useState(loadProfile)
   const [profile, setProfile] = useState(savedProfile ?? DEFAULT_PROFILE)
   const [profileOpen, setProfileOpen] = useState(!savedProfile)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [travelError, setTravelError] = useState(false)
   const [profileStorageError, setProfileStorageError] = useState(false)
   const [initial, setInitial] = useState(() => ({
     document: structuredClone(defaultNavigation),
@@ -179,6 +197,7 @@ function App() {
     overview: false,
     debug: false,
     zoom: 1,
+    minimumZoom: 0,
     reset: 0,
   })
   const [state, setState] = useState<WorldState>({
@@ -275,13 +294,15 @@ function App() {
     controls.current.overview = overview
     controls.current.debug = debug
     controls.current.diagnosticFilters = diagnosticFilters
-    controls.current.paused = Boolean(opened) || guestbookOpen || Boolean(editorMode) || profileOpen
+    controls.current.paused =
+      menuOpen || Boolean(opened) || guestbookOpen || Boolean(editorMode) || profileOpen
     controls.current.multiplayerEnabled = !editorMode
     controls.current.navigation = navigation
     controls.current.direction = { x: 0, y: 0 }
   }, [
     profile,
     profileOpen,
+    menuOpen,
     overview,
     debug,
     diagnosticFilters,
@@ -322,7 +343,8 @@ function App() {
       ambientEditor.mode = 'select'
       ambientEditor.notify()
     }
-    controls.current.paused = Boolean(mode) || Boolean(opened) || guestbookOpen || profileOpen
+    controls.current.paused =
+      Boolean(mode) || menuOpen || Boolean(opened) || guestbookOpen || profileOpen
     controls.current.direction = { x: 0, y: 0 }
     setEditorMode(mode)
   }
@@ -342,39 +364,40 @@ function App() {
     setVisited(old => (old.includes(state.station!.id) ? old : [...old, state.station!.id]))
   }
 
+  function travel(station: Station) {
+    const destination = findTravelDestination(station, navigation)
+    if (!destination) {
+      setTravelError(true)
+      return
+    }
+    controls.current.travelTo = destination
+    controls.current.direction = { x: 0, y: 0 }
+    setOverview(false)
+    setMenuOpen(false)
+  }
+
   return (
     <main
       className={`world-shell ${editing ? 'is-editing' : ''} ${editorMode ? 'is-world-editing' : ''}`}
     >
       <div className="world-canvas" ref={host} aria-label="Bible Strong — archipel" />
       <header className="world-header">
-        <div className="world-brand">
-          <span className="brand-mark" aria-hidden="true" />
-          <div>
-            <strong>{t.brand}</strong>
-            <small>{t.title}</small>
-          </div>
-        </div>
-        <select
-          aria-label="Language"
-          value={language}
-          onChange={e => setLanguage(e.target.value as Language)}
+        <button
+          className="journal-trigger"
+          aria-haspopup="dialog"
+          aria-expanded={menuOpen}
+          disabled={!ready || Boolean(editorMode)}
+          onClick={() => {
+            controls.current.paused = true
+            controls.current.direction = { x: 0, y: 0 }
+            setTravelError(false)
+            setMenuOpen(true)
+          }}
         >
-          <option value="fr">FR</option>
-          <option value="en">EN</option>
-        </select>
+          <JournalIcon />
+          {journalCopy[language].menu}
+        </button>
       </header>
-      <div className="journey-pill">
-        <span className="live-dot" />
-        {state.station ? name(state.station) : t.here}
-        <span className="journey-count">{visited.length}/6</span>
-      </div>
-      <CameraControls
-        controls={controls.current}
-        overview={overview}
-        setOverview={setOverview}
-        labels={t}
-      />
       {!ready && (
         <div className="loading">
           <span className="loading-blob">··</span>
@@ -404,7 +427,8 @@ function App() {
               Boolean(opened) ||
               guestbookOpen ||
               Boolean(editorMode) ||
-              profileOpen
+              profileOpen ||
+              menuOpen
             }
             aria-label={label}
             aria-haspopup="dialog"
@@ -417,22 +441,6 @@ function App() {
       <aside className="world-bottom">
         <div className="joystick-zone" ref={joystick} role="group" aria-label={t.joystick} />
         <div className="companion-controls">
-          <button
-            className="profile-button"
-            aria-label={profileCopy[language].edit}
-            aria-haspopup="dialog"
-            onClick={() => {
-              controls.current.paused = true
-              controls.current.direction = { x: 0, y: 0 }
-              setProfileOpen(true)
-            }}
-          >
-            <AvatarPreview color={profile.color} avatar={profile.avatar} />
-            <span className="profile-button-copy">
-              <strong>{profile.name || profileCopy[language].guest}</strong>
-              <small>{profileCopy[language].edit} ↗</small>
-            </span>
-          </button>
           {ready && profile.name && !editorMode && (
             <div
               className="world-presence"
@@ -450,11 +458,6 @@ function App() {
                 <button onClick={() => controls.current.retryMultiplayer?.()}>{t.retry}</button>
               )}
             </div>
-          )}
-          {profileStorageError && (
-            <span className="profile-storage-error" role="status">
-              {profileCopy[language].storage}
-            </span>
           )}
         </div>
       </aside>
@@ -521,6 +524,35 @@ function App() {
           <br />
           {state.behind.join(' / ') || '—'}
         </output>
+      )}
+      {menuOpen && (
+        <ExplorationJournal
+          language={language}
+          onLanguage={setLanguage}
+          profile={profile}
+          onAvatar={() => setProfileOpen(true)}
+          visited={visited}
+          onTravel={travel}
+          onClose={() => setMenuOpen(false)}
+          travelError={travelError}
+          camera={
+            <CameraControls
+              controls={controls.current}
+              overview={overview}
+              setOverview={setOverview}
+              labels={t}
+            />
+          }
+          status={
+            <>
+              {profileStorageError && (
+                <span className="profile-storage-error" role="status">
+                  {profileCopy[language].storage}
+                </span>
+              )}
+            </>
+          }
+        />
       )}
       {profileOpen && (
         <AvatarEditor

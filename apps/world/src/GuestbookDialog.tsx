@@ -38,7 +38,6 @@ const copy = {
     loadError: 'Les pages sont momentanément indisponibles.',
     success: 'Ta trace est ici.',
     thanks: 'Merci, tu fais maintenant partie de cette aventure !',
-    public: 'Ton pseudo et ton message seront publics après une vérification automatique.',
     back: 'Revenir au monde',
   },
   en: {
@@ -67,7 +66,6 @@ const copy = {
     loadError: 'The pages are temporarily unavailable.',
     success: 'Your memory is here.',
     thanks: 'Thank you for being part of this adventure!',
-    public: 'Your nickname and message will be public after an automatic check.',
     back: 'Return to the world',
   },
 }
@@ -281,7 +279,7 @@ export function GuestbookDialog({
               <p>{t.thanks}</p>
               <blockquote>{published.message}</blockquote>
               <strong>— {published.profile.name}</strong>
-              <button className="guestbook-submit" onClick={onClose}>
+              <button className="guestbook-submit" data-modal-close>
                 {t.back} →
               </button>
             </div>
@@ -310,14 +308,10 @@ export function GuestbookDialog({
                 disabled={sending}
                 value={draft.message}
                 onChange={event => edit({ message: event.target.value })}
-                aria-describedby="guestbook-public"
               />
               <span className="guestbook-count">
                 {draft.message.length} / {MESSAGE_LIMIT}
               </span>
-              <p className="guestbook-public" id="guestbook-public">
-                {t.public}
-              </p>
               {error && (
                 <p className="guestbook-error" role="alert">
                   {error}

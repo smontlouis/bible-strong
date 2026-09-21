@@ -23,12 +23,26 @@ export function Modal({
   onKeyDown?: KeyboardEventHandler<HTMLDialogElement>
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
+  const closing = useRef(false)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  function requestClose() {
+    if (closeDisabled || closing.current) return
+    closing.current = true
+    const element = dialog.current!
+    element.dataset.closing = 'true'
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      onClose()
+      return
+    }
+    closeTimer.current = setTimeout(onClose, 160)
+  }
   useEffect(() => {
     const previous = document.activeElement
     const element = dialog.current!
     element.showModal()
     initialFocus?.current?.focus()
     return () => {
+      clearTimeout(closeTimer.current)
       element.close()
       if (previous instanceof HTMLElement && previous.isConnected) previous.focus()
     }
@@ -38,9 +52,18 @@ export function Modal({
       ref={dialog}
       className={`world-modal ${className}`}
       aria-labelledby={labelledBy}
+      onClickCapture={event => {
+        if (
+          event.target instanceof Element &&
+          event.target.closest('[data-modal-close]')
+        ) {
+          event.stopPropagation()
+          requestClose()
+        }
+      }}
       onCancel={event => {
         event.preventDefault()
-        if (!closeDisabled) onClose()
+        requestClose()
       }}
       onClick={event => {
         if (event.target !== event.currentTarget || closeDisabled) return
@@ -52,7 +75,7 @@ export function Modal({
           event.clientY < bounds.top ||
           event.clientY > bounds.bottom
         )
-          onClose()
+          requestClose()
       }}
       onKeyDown={onKeyDown}
     >
@@ -61,7 +84,7 @@ export function Modal({
         className="world-modal-close"
         aria-label={closeLabel}
         disabled={closeDisabled}
-        onClick={onClose}
+        onClick={requestClose}
       >
         <ControlIcon name="close" />
       </button>

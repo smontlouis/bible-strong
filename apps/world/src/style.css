@@ -169,13 +169,20 @@ select {
   gap: 20px;
 }
 .joystick-zone {
+  visibility: hidden;
   position: relative;
   width: 152px;
   height: 152px;
   flex-shrink: 0;
   touch-action: none;
-  pointer-events: auto;
+  pointer-events: none;
   user-select: none;
+}
+@media (hover: none) and (pointer: coarse) {
+  .joystick-zone {
+    visibility: visible;
+    pointer-events: auto;
+  }
 }
 .joystick-caption {
   position: absolute;

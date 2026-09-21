@@ -106,9 +106,6 @@
   color: #857455;
   margin-top: 5px;
 }
-.guestbook-public {
-  font-size: 11px !important;
-}
 .guestbook-submit {
   display: flex;
   justify-content: space-between;

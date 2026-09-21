@@ -76,3 +76,11 @@ uses the first texture for a stable restart. No video, audio or inference runs i
 
 Tests cover fresh delay sampling, frozen frame/rest clocks, reduced-motion fallback, transparent
 asset bounds, visible cream pages and matching resting poses.
+
+## Avatar contact with bushes
+
+`BushRustle` animates the shrub cutouts (`-shrub` / `-shrubs`) and the large southeast plaza bush (`plaza-south-east-tree`) while a local or interpolated remote avatar actually moves against their opaque silhouette. Contact uses a cached alpha mask, the avatar's feet shifted up four source units, and a 12-unit radius including a small margin. Stopping or leaving restores the canopy immediately and stops emission; existing leaves fade over 750 ms.
+
+The overlay is enlarged 7% horizontally and 4% vertically to cover the baked scenery. WebGL shears only the top edge by at most 1.3 source units with a fixed base; Canvas falls back to a tiny rotation. Leaves use a bright green fill with a dark outline, remain opaque during takeoff, and rise clear of the canopy. Leaf emission is limited to three every 220 ms per active bush and a shared pool of 64. Pause, hidden/inactive windows and reduced-motion preferences reset the bushes and hide particles. Geometry and multiplayer messages are unchanged.
+
+The east plaza shrub receives an asset-specific foliage alpha correction before its runtime texture and contact mask are created: yellow ground and olive ground shadow are excluded. This prevents the enlarged moving overlay from hiding avatars behind a patch of soil.

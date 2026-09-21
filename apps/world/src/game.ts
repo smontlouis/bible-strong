@@ -1,3 +1,4 @@
+import { cameraZoomBounds, clampCameraZoom } from './camera-zoom'
 import { islandActions, type IslandActionId } from './island-actions'
 import { nearGuestbook } from './guestbook'
 import { chooseCentralSpawn } from './multiplayer-spawn'
@@ -6,10 +7,12 @@ import { RemoteAvatars } from './remote-avatars'
 import type { PresenceStatus } from './multiplayer-protocol'
 import type { AvatarId } from './avatar-profile'
 import { occlusionDepth } from './occlusion-depth'
+import { maskSignGround } from './occluder-masks'
 import { AmbientZoneEditor } from './ambient-zone-editor'
 import type { AmbientEditorModel } from './ambient-zones'
 import { ShoreWaves } from './shore-waves'
 import type { ShoreEditorModel } from './shorelines'
+import { BushRustle } from './bush-rustle'
 import { WorldAmbience } from './world-ambience'
 import { WorldClouds } from './world-clouds'
 import { AmbientDiagnostics } from './ambient-diagnostics'
@@ -63,7 +66,9 @@ export type Controls = {
   debug: boolean
   diagnosticFilters?: DiagnosticFilters
   zoom: number
+  minimumZoom: number
   reset: number
+  travelTo?: Point
 }
 
 export function createWorld(
@@ -88,6 +93,7 @@ export function createWorld(
     shoreWaves?: ShoreWaves
     mapTiles!: MapTileStreamer
     clouds!: WorldClouds
+    bushes!: BushRustle
     ambience!: WorldAmbience
     ambientDiagnostics?: AmbientDiagnostics
     ambientTiles!: AmbientTiles
@@ -153,8 +159,10 @@ export function createWorld(
           .setOrigin(0)
           .setDisplaySize(object.width, object.height)
           .setDepth(object.always ? 2000 : object.baseY)
+        maskSignGround(this, object, image)
         this.foreground.push({ object, image })
       })
+      this.bushes = new BushRustle(this, this.foreground)
       this.network = new WorldMultiplayer()
       this.remoteAvatars = new RemoteAvatars(this, rendererResolution)
       controls.retryMultiplayer = () => this.network.retry()
@@ -218,6 +226,14 @@ export function createWorld(
         this.resetInput()
         this.cameras.main.centerOn(arrival.x, arrival.y)
       }
+      const destination = controls.travelTo
+      if (destination) {
+        controls.travelTo = undefined
+        this.position = findSafePosition(destination, controls.navigation) ?? this.position
+        this.blobAvatar.reset()
+        this.resetInput()
+        this.cameras.main.centerOn(this.position.x, this.position.y)
+      }
       let direction = controls.direction
       const horizontal =
         Number(this.keys.RIGHT.isDown || this.keys.D.isDown) -
@@ -270,11 +286,16 @@ export function createWorld(
         camera.setZoom(Phaser.Math.Clamp(camera.zoom * controls.shoreZoom, 0.4, 8))
         controls.shoreZoom = undefined
       }
+      const bounds = cameraZoomBounds(screenWidth, screenHeight, SCENERY_WIDTH, SCENERY_HEIGHT, HEIGHT)
+      // Keep a fully zoomed-out view fitted when the viewport rotates or resizes.
+      const wasAtMinimum = controls.zoom <= controls.minimumZoom
+      controls.minimumZoom = bounds.minimum
+      controls.zoom = wasAtMinimum ? bounds.minimum : clampCameraZoom(controls.zoom, bounds.minimum)
       const zoom = shoreEditing
         ? camera.zoom
         : controls.overview
-          ? Math.min(screenWidth / SCENERY_WIDTH, screenHeight / SCENERY_HEIGHT) * 0.98
-          : Math.max(1.2, screenHeight / HEIGHT) * controls.zoom
+          ? bounds.overview
+          : bounds.base * controls.zoom
       camera.setZoom(zoom)
       // Keep label dimensions and spacing fixed in screen pixels as the world zooms.
       const labelScaleX = screenWidth / parent.clientWidth / zoom
@@ -302,6 +323,11 @@ export function createWorld(
         labelScaleX,
         labelScaleY,
         fade * fade * (3 - 2 * fade)
+      )
+      this.bushes.update(
+        delta,
+        [{ ...next, moving }, ...this.remoteAvatars.contacts],
+        reducedMotion || controls.paused || !this.active || document.hidden
       )
       const targetX = controls.overview ? WIDTH / 2 : next.x
       const targetY = controls.overview ? HEIGHT / 2 : next.y - 38 / zoom

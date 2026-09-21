@@ -22,21 +22,27 @@ export function useCameraZoomGestures(
     const beginPinch = () => {
       if (touches.size !== 2) return
       pinchStartDistance = distance()
-      pinchStartZoom = controlsRef.current.zoom
+      pinchStartZoom = controlsRef.current.overview
+        ? controlsRef.current.minimumZoom
+        : controlsRef.current.zoom
+      controlsRef.current.zoom = pinchStartZoom
       setOverview(false)
     }
     const onWheel = (event: WheelEvent) => {
-      if (controlsRef.current.shoreEditor?.editing || controlsRef.current.ambientEditor?.editing) return
+      if (controlsRef.current.shoreEditor?.editing || controlsRef.current.ambientEditor?.editing)
+        return
       event.preventDefault()
       controlsRef.current.zoom = zoomFromWheel(
-        controlsRef.current.zoom,
+        controlsRef.current.overview ? controlsRef.current.minimumZoom : controlsRef.current.zoom,
         event.deltaY,
+        controlsRef.current.minimumZoom,
         event.deltaMode
       )
       setOverview(false)
     }
     const onPointerDown = (event: PointerEvent) => {
-      if (controlsRef.current.shoreEditor?.editing || controlsRef.current.ambientEditor?.editing) return
+      if (controlsRef.current.shoreEditor?.editing || controlsRef.current.ambientEditor?.editing)
+        return
       if (event.pointerType !== 'touch') return
       touches.set(event.pointerId, { x: event.clientX, y: event.clientY })
       zone.setPointerCapture(event.pointerId)
@@ -50,7 +56,8 @@ export function useCameraZoomGestures(
       controlsRef.current.zoom = zoomFromPinch(
         pinchStartZoom,
         pinchStartDistance,
-        distance()
+        distance(),
+        controlsRef.current.minimumZoom
       )
     }
     const onPointerEnd = (event: PointerEvent) => {

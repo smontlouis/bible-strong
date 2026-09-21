@@ -1,4 +1,5 @@
 import type Phaser from 'phaser'
+import type { BushContact } from './bush-rustle'
 import { BlobAvatar } from './blob-avatar'
 import type { WorldMultiplayer } from './multiplayer'
 
@@ -10,6 +11,7 @@ type Visual = {
 }
 
 export class RemoteAvatars {
+  readonly contacts: BushContact[] = []
   private avatars = new Map<string, Visual>()
   constructor(
     private scene: Phaser.Scene,
@@ -24,6 +26,7 @@ export class RemoteAvatars {
     labelScaleY: number,
     labelAlpha: number
   ) {
+    this.contacts.length = 0
     for (const [id, visual] of this.avatars) {
       if (!network.remotes.has(id)) {
         visual.sprite.destroy()
@@ -54,6 +57,12 @@ export class RemoteAvatars {
         this.avatars.set(id, visual)
       }
       const pose = track.sample(now)
+      const distance = Math.hypot(pose.x - visual.sprite.x, pose.y - visual.sprite.y)
+      this.contacts.push({
+        x: pose.x,
+        y: pose.y,
+        moving: pose.moving && distance > 0.01 && distance < 100,
+      })
       const { profile } = track.player
       // Prime orientation even for a visitor who was already stationary when we joined.
       if (!pose.moving)
