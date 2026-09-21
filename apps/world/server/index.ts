@@ -15,7 +15,16 @@ import {
 
 const navigation = parseNavigation(navigationJson)
 
-type Session = { player: Player | null; lastSeen: number; window: number; messages: number }
+const RESUME_TTL = 24 * 60 * 60 * 1000
+type SavedSession = { player: Player; expires: number }
+type Session = {
+  player: Player | null
+  lastSeen: number
+  window: number
+  messages: number
+  resumeToken?: string
+  hidden?: boolean
+}
 interface Env extends GuestbookEnv {
   WorldRoom: DurableObjectNamespace<WorldRoom>
   ALLOWED_ORIGINS?: string
@@ -39,16 +48,17 @@ export class WorldRoom extends Server<Env> {
     }, 50)
   }
   async onConnect(connection: Connection<Session>) {
-    if ([...this.getConnections()].filter(c => c.readyState === 1).length > MAX_PLAYERS) {
+    if ([...this.getConnections()].filter(c => c.readyState === 1).length > MAX_PLAYERS + 16) {
       connection.send(JSON.stringify({ type: 'full' } satisfies ServerMessage))
       connection.close(4008, 'Room full')
       return
     }
     const now = Date.now()
     connection.setState({ player: null, lastSeen: now, window: now, messages: 0 })
-    if ((await this.ctx.storage.getAlarm()) === null) await this.ctx.storage.setAlarm(now + 30_000)
+    const alarm = await this.ctx.storage.getAlarm()
+    if (alarm === null || alarm > now + 30_000) await this.ctx.storage.setAlarm(now + 30_000)
   }
-  onMessage(connection: Connection<Session>, raw: string | ArrayBuffer) {
+  async onMessage(connection: Connection<Session>, raw: string | ArrayBuffer) {
     const session = connection.state
     if (!session) return
     const now = Date.now()
@@ -76,33 +86,72 @@ export class WorldRoom extends Server<Env> {
       return
     }
     if (message.type === 'join' && !session.player) {
-      const occupied = [...this.getConnections<Session>()].flatMap(c =>
-        c.state?.player ? [c.state.player.pose] : []
-      )
-      const spawn = chooseCentralSpawn(navigation, occupied)
-      if (!spawn) {
-        connection.send(JSON.stringify({ type: 'full' } satisfies ServerMessage))
-        connection.close(4008, 'No free arrival position')
-        return
-      }
-      next.player = {
-        id: crypto.randomUUID(),
-        profile: message.profile,
-        pose: { ...spawn, dx: 0, dy: 1, moving: false },
-        seq: 0,
-      }
+      // Serialize resume/arrival against close callbacks and other join attempts.
+      await this.ctx.blockConcurrencyWhile(async () => {
+        const previous = message.resumeToken
+          ? [...this.getConnections<Session>()].find(
+              c =>
+                c.id !== connection.id &&
+                c.state?.resumeToken === message.resumeToken &&
+                c.state?.player
+            )
+          : undefined
+        const saved = message.resumeToken
+          ? await this.ctx.storage.get<SavedSession>(`resume:${message.resumeToken}`)
+          : undefined
+        const restored =
+          previous?.state?.player ?? (saved && saved.expires > now ? saved.player : null)
+        const occupied = [...this.getConnections<Session>()].flatMap(c =>
+          c.state?.player ? [c.state.player.pose] : []
+        )
+        if (occupied.length - (previous ? 1 : 0) >= MAX_PLAYERS) {
+          connection.send(JSON.stringify({ type: 'full' } satisfies ServerMessage))
+          connection.close(4008, 'Room full')
+          return
+        }
+        const spawn = restored?.pose ?? chooseCentralSpawn(navigation, occupied)
+        if (!spawn) {
+          connection.send(JSON.stringify({ type: 'full' } satisfies ServerMessage))
+          connection.close(4008, 'No free arrival position')
+          return
+        }
+        next.resumeToken = restored ? message.resumeToken! : crypto.randomUUID()
+        next.player = {
+          id: restored?.id ?? crypto.randomUUID(),
+          profile: message.profile,
+          pose: { ...spawn, dx: restored?.pose.dx ?? 0, dy: restored?.pose.dy ?? 1, moving: false },
+          seq: restored ? restored.seq + 1 : 0,
+        }
+        if (previous?.state) {
+          // Retire the old transport without publishing a departure for the resumed avatar.
+          previous.setState({ ...previous.state, player: null })
+          previous.close(4001, 'Session resumed')
+        }
+        connection.setState(next)
+        if (message.resumeToken) await this.ctx.storage.delete(`resume:${message.resumeToken}`)
+        const players = [...this.getConnections<Session>()].flatMap(c =>
+          c.state?.player ? [c.state.player] : []
+        )
+        connection.send(
+          JSON.stringify({
+            type: 'welcome',
+            id: next.player.id,
+            spawn: next.player.pose,
+            players,
+            resumeToken: next.resumeToken,
+          } satisfies ServerMessage)
+        )
+        this.pending.delete(next.player.id)
+        this.broadcast(
+          JSON.stringify({ type: 'player', player: next.player } satisfies ServerMessage),
+          [connection.id]
+        )
+      })
+      return
+    } else if (session.player && message.type === 'visibility') {
+      next.hidden = message.hidden
       connection.setState(next)
-      const players = [...this.getConnections<Session>()].flatMap(c =>
-        c.state?.player ? [c.state.player] : []
-      )
-      connection.send(
-        JSON.stringify({
-          type: 'welcome',
-          id: next.player.id,
-          spawn: next.player.pose,
-          players,
-        } satisfies ServerMessage)
-      )
+      return
     } else if (session.player && message.type === 'move') {
       if (message.seq <= session.player.seq) {
         connection.setState(next)
@@ -117,16 +166,20 @@ export class WorldRoom extends Server<Env> {
       connection.setState(next)
       return
     }
-    if (message.type === 'join')
-      this.broadcast(
-        JSON.stringify({ type: 'player', player: next.player! } satisfies ServerMessage),
-        [connection.id]
-      )
-    else this.queue(next.player!)
+    this.queue(next.player!)
   }
   private remove(connection: Connection<Session>) {
     const session = connection.state
     if (!session?.player) return
+    if (session.resumeToken) {
+      // Attachments survive hibernation; persist only when the transport actually leaves.
+      this.ctx.waitUntil(
+        this.ctx.storage.put(`resume:${session.resumeToken}`, {
+          player: { ...session.player, pose: { ...session.player.pose, moving: false } },
+          expires: Date.now() + RESUME_TTL,
+        } satisfies SavedSession)
+      )
+    }
     const id = session.player.id
     this.pending.delete(id)
     connection.setState({ ...session, player: null })
@@ -143,12 +196,23 @@ export class WorldRoom extends Server<Env> {
     let active = false
     for (const connection of this.getConnections<Session>()) {
       const session = connection.state
-      if (!session || Date.now() - session.lastSeen > (session.player ? 45_000 : 10_000)) {
+      if (
+        !session ||
+        Date.now() - session.lastSeen >
+          (session.player ? (session.hidden ? RESUME_TTL : 45_000) : 10_000)
+      ) {
         this.remove(connection)
         connection.close(4000, 'Session expired')
       } else active = true
     }
-    if (active) await this.ctx.storage.setAlarm(Date.now() + 30_000)
+    const saved = await this.ctx.storage.list<SavedSession>({ prefix: 'resume:' })
+    const expired = [...saved]
+      .filter(([, value]) => value.expires <= Date.now())
+      .map(([key]) => key)
+    for (let i = 0; i < expired.length; i += 128)
+      await this.ctx.storage.delete(expired.slice(i, i + 128))
+    if (active || saved.size > expired.length)
+      await this.ctx.storage.setAlarm(Date.now() + (active ? 30_000 : 60 * 60 * 1000))
   }
 }
 

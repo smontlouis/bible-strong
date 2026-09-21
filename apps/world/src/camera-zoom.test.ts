@@ -12,6 +12,18 @@ const boundsFor = (width: number, height: number) =>
 
 describe('camera zoom', () => {
   it.each([
+    [430, 780],
+    [780, 430],
+    [1280, 720],
+  ])('preserves framing and zoom limits on Retina at %i × %i', (width, height) => {
+    const standard = boundsFor(width, height)
+    const retina = cameraZoomBounds(width * 2, height * 2, 2071, 1341, 941, 2)
+    expect(retina.minimum).toBeCloseTo(standard.minimum)
+    expect((width * 2) / retina.base).toBeCloseTo(width / standard.base)
+    expect((height * 2) / retina.overview).toBeCloseTo(height / standard.overview)
+  })
+
+  it.each([
     [390, 844],
     [844, 390],
     [1440, 900],

@@ -1,6 +1,6 @@
 # Event multiplayer
 
-World uses `partyserver` on Cloudflare Durable Objects and `partysocket` in the browser. All visitors join `asi-europe`; the room admits up to 100 connections. This is a presence experience: avatars can pass through each other and resource discoveries remain local.
+World uses `partyserver` on Cloudflare Durable Objects and `partysocket` in the browser. All visitors join `asi-europe`; the room admits up to 100 participants (plus 16 bounded pending connections for handshakes and transport replacement). This is a presence experience: avatars can pass through each other and resource discoveries remain local.
 
 ## Local development
 
@@ -20,8 +20,8 @@ To keep a separate frontend host such as Vercel, set `VITE_WORLD_MULTIPLAYER_HOS
 - The server batches changed participants every 50 ms. Browsers interpolate buffered snapshots with a 100 ms delay. Teleports snap; packet loss holds the last position instead of extrapolating through obstacles.
 - Avatars reuse the existing animation assets, tint, ground-depth ordering and zoom-aware labels. Transient movement never enters React state.
 - Profile edits synchronize. Opening a resource keeps the visitor present and stationary. World editors leave the room to avoid publishing experimental navigation.
-- Backgrounding leaves the room cleanly; returning rejoins on a free central-island position with a fresh full snapshot. Socket interruption reconnects automatically. Heartbeats detect stalled connections; server alarms remove abandoned sessions. Old movements are never queued for replay.
-- Room state lives in WebSocket attachments so hibernation retains current participants. No movement history is stored. Empty rooms stop scheduling cleanup alarms.
+- Backgrounding keeps the connection and avatar session, publishes a final stop, and marks the connection hidden. Hidden connections tolerate up to 24 hours without application heartbeats; visible connections retain the 45-second stale timeout. On return, heartbeats resume with a fresh grace period. If the browser or network closes the socket, a private server-issued token restores the same participant ID and last server-known position for 24 hours after disconnection, with a fresh snapshot and continuing movement sequence. The token stays in tab-scoped sessionStorage (or memory if storage is unavailable), never in public player broadcasts. A resumed connection replaces any older transport for that token. Old movements are never queued for replay.
+- Room state lives in WebSocket attachments so hibernation retains current participants. No movement history is stored. Disconnected session snapshots are stored for resumption and deleted on resume or expiry. Empty rooms with retained sessions run hourly expiry cleanup; rooms with neither connections nor saved sessions stop scheduling alarms.
 - A full room allows solo exploration and offers a retry button. Network failure never blocks movement.
 
 ## Validation

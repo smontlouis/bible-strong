@@ -1,3 +1,13 @@
+export const AVATAR_COLORS = [
+  '#ffffff',
+  '#73cdd0',
+  '#7398f2',
+  '#b39ae9',
+  '#f3a3cb',
+  '#f09075',
+  '#f7d45d',
+  '#a2ce86',
+]
 export const PROFILE_KEY = 'bible-strong.world.profile.v1'
 export const AVATARS = [
   { id: 'nova', name: 'Bean', image: '/assets/avatars/blob/thumbnail.png' },
@@ -10,6 +20,31 @@ export type AvatarId = (typeof AVATARS)[number]['id']
 export type AvatarProfile = { avatar: AvatarId; name: string; color: string }
 export const DEFAULT_PROFILE: AvatarProfile = { avatar: 'nova', name: '', color: '#73cdd0' }
 export const NAME_LIMIT = 24
+
+const BIBLICAL_NAMES = [
+  'Noah', 'Esther', 'Ruth', 'Daniel', 'Hannah', 'David', 'Sarah', 'Caleb',
+  'Miriam', 'Joshua', 'Abigail', 'Elijah', 'Deborah', 'Samuel', 'Lydia', 'Ezra',
+  'Rachel', 'Isaac', 'Naomi', 'Jonah', 'Martha', 'Seth', 'Rebecca', 'Levi',
+]
+const EXPLORER_ADJECTIVES = [
+  'Joyful', 'Brave', 'Kind', 'Faithful', 'Hopeful', 'Gentle', 'Patient', 'Cheerful',
+  'Peaceful', 'Grateful', 'Humble', 'Curious', 'Steadfast', 'Generous', 'Wise', 'Radiant',
+]
+
+/** English suggestions in both interface languages, chosen during first-visit initialization. */
+export function generateExplorerName() {
+  const name = BIBLICAL_NAMES[Math.floor(Math.random() * BIBLICAL_NAMES.length)]
+  const adjective = EXPLORER_ADJECTIVES[Math.floor(Math.random() * EXPLORER_ADJECTIVES.length)]
+  return `${adjective} ${name}`
+}
+
+export function generateExplorerProfile(): AvatarProfile {
+  return {
+    name: generateExplorerName(),
+    avatar: AVATARS[Math.floor(Math.random() * AVATARS.length)].id,
+    color: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)],
+  }
+}
 
 export function parseProfile(value: unknown): AvatarProfile | null {
   if (!value || typeof value !== 'object') return null

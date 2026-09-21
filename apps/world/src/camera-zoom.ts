@@ -6,9 +6,11 @@ export function cameraZoomBounds(
   screenHeight: number,
   sceneryWidth: number,
   sceneryHeight: number,
-  worldHeight: number
+  worldHeight: number,
+  rendererResolution = 1
 ) {
-  const base = Math.max(1.2, screenHeight / worldHeight)
+  // The camera uses backing-buffer pixels; framing stays constant in CSS pixels.
+  const base = Math.max(1.2 * rendererResolution, screenHeight / worldHeight)
   const overview = Math.min(screenWidth / sceneryWidth, screenHeight / sceneryHeight) * 0.98
   return { base, overview, minimum: overview / base }
 }

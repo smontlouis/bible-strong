@@ -11,7 +11,7 @@
 :root {
   font-family: Pulp, sans-serif;
   color: #193d49;
-  background: #59bdd5;
+  background: #fff;
   font-synthesis: none;
 }
 * {
@@ -49,6 +49,19 @@ select:focus-visible {
 }
 .world-canvas canvas {
   display: block;
+}
+.path-feedback {
+  position: fixed;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: 18px;
+  background: #fff9ea;
+  color: #813737;
+  text-align: center;
+  pointer-events: none;
 }
 .world-header {
   position: absolute;
@@ -330,18 +343,97 @@ select {
   z-index: 10;
 }
 .loading {
-  color: #fff9ea;
-  gap: 20px;
+  background: #fff;
+  backdrop-filter: none;
+  color: #193d49;
+  gap: 16px;
   text-align: center;
+  z-index: 100;
+  opacity: 1;
+  transition: opacity 1s ease-out;
 }
-.loading-blob {
-  background: #52b5b7;
-  width: 70px;
-  height: 80px;
+.loading.is-revealing {
+  opacity: 0;
+}
+.world-shell.is-loading > :not(.world-canvas):not(.loading) {
+  visibility: hidden;
+}
+.loading-slime {
+  width: 96px;
+  height: 96px;
   margin: auto;
-  border-radius: 50% 50% 40% 40%;
-  font-size: 45px;
-  color: #10272e;
+  background: url('/assets/avatars/short-slime/down.png') no-repeat 0 0 / 480px 288px;
+  background-blend-mode: multiply;
+  mask: url('/assets/avatars/short-slime/down.png') no-repeat 0 0 / 480px 288px;
+  /* 15 frames, 5 columns × 3 rows, at the avatar's native 24 fps. */
+  animation: slime-walk 625ms steps(1) infinite;
+}
+@keyframes slime-walk {
+  0.000000% {
+    background-position: 0px 0px;
+    mask-position: 0px 0px;
+  }
+  6.666667% {
+    background-position: -96px 0px;
+    mask-position: -96px 0px;
+  }
+  13.333333% {
+    background-position: -192px 0px;
+    mask-position: -192px 0px;
+  }
+  20.000000% {
+    background-position: -288px 0px;
+    mask-position: -288px 0px;
+  }
+  26.666667% {
+    background-position: -384px 0px;
+    mask-position: -384px 0px;
+  }
+  33.333333% {
+    background-position: 0px -96px;
+    mask-position: 0px -96px;
+  }
+  40.000000% {
+    background-position: -96px -96px;
+    mask-position: -96px -96px;
+  }
+  46.666667% {
+    background-position: -192px -96px;
+    mask-position: -192px -96px;
+  }
+  53.333333% {
+    background-position: -288px -96px;
+    mask-position: -288px -96px;
+  }
+  60.000000% {
+    background-position: -384px -96px;
+    mask-position: -384px -96px;
+  }
+  66.666667% {
+    background-position: 0px -192px;
+    mask-position: 0px -192px;
+  }
+  73.333333% {
+    background-position: -96px -192px;
+    mask-position: -96px -192px;
+  }
+  80.000000% {
+    background-position: -192px -192px;
+    mask-position: -192px -192px;
+  }
+  86.666667% {
+    background-position: -288px -192px;
+    mask-position: -288px -192px;
+  }
+  93.333333% {
+    background-position: -384px -192px;
+    mask-position: -384px -192px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-slime {
+    animation: none;
+  }
 }
 .resource-card {
   background: #fff9ec;

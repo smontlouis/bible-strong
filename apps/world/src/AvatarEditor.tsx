@@ -2,6 +2,7 @@ import { Modal } from './Modal'
 import { useRef, useState, type CSSProperties } from 'react'
 import {
   AVATARS,
+  AVATAR_COLORS,
   NAME_LIMIT,
   parseProfile,
   type AvatarProfile,
@@ -43,16 +44,6 @@ export const profileCopy = {
     colors: ['White', 'Turquoise', 'Blue', 'Purple', 'Pink', 'Coral', 'Yellow', 'Green'],
   },
 }
-const COLORS = [
-  '#ffffff',
-  '#73cdd0',
-  '#7398f2',
-  '#b39ae9',
-  '#f3a3cb',
-  '#f09075',
-  '#f7d45d',
-  '#a2ce86',
-]
 
 export function AvatarPreview({ color, avatar }: { color: string; avatar: AvatarId }) {
   const image = (AVATARS.find(item => item.id === avatar) ?? AVATARS[0]).image
@@ -69,11 +60,13 @@ export function AvatarPreview({ color, avatar }: { color: string; avatar: Avatar
 
 export function AvatarEditor({
   profile,
+  onboarding,
   language,
   onSave,
   onClose,
 }: {
   profile: AvatarProfile
+  onboarding: boolean
   language: keyof typeof profileCopy
   onSave: (profile: AvatarProfile) => void
   onClose: () => void
@@ -83,10 +76,11 @@ export function AvatarEditor({
   const t = profileCopy[language]
   return (
     <Modal
-      className="avatar-dialog"
+      className={`avatar-dialog ${onboarding ? 'is-onboarding' : ''}`}
       labelledBy="avatar-title"
       closeLabel={t.close}
       onClose={onClose}
+      closeDisabled={onboarding}
       initialFocus={input}
     >
       <div className="avatar-editor-layout">
@@ -144,7 +138,7 @@ export function AvatarEditor({
           <fieldset className="avatar-fieldset">
             <legend>{t.color}</legend>
             <div className="avatar-palette">
-              {COLORS.map((color, i) => (
+              {AVATAR_COLORS.map((color, i) => (
                 <button
                   type="button"
                   key={color}
@@ -169,7 +163,7 @@ export function AvatarEditor({
             </div>
           </fieldset>
           <button className="avatar-save" type="submit" disabled={!draft.name.trim()}>
-            {profile.name ? t.update : t.save}
+            {onboarding ? t.save : t.update}
             <span aria-hidden="true">→</span>
           </button>
         </form>

@@ -7,12 +7,13 @@ export const MAX_PLAYERS = 100
 export type Pose = { x: number; y: number; dx: number; dy: number; moving: boolean }
 export type Player = { id: string; profile: AvatarProfile; pose: Pose; seq: number }
 export type ClientMessage =
-  | { type: 'join'; version: number; profile: AvatarProfile; pose: Pose }
+  | { type: 'join'; version: number; profile: AvatarProfile; pose: Pose; resumeToken?: string }
+  | { type: 'visibility'; hidden: boolean }
   | { type: 'move'; pose: Pose; seq: number }
   | { type: 'profile'; profile: AvatarProfile }
   | { type: 'ping' }
 export type ServerMessage =
-  | { type: 'welcome'; id: string; spawn: Pose; players: Player[] }
+  | { type: 'welcome'; id: string; spawn: Pose; players: Player[]; resumeToken?: string }
   | { type: 'player'; player: Player }
   | { type: 'frame'; players: Player[] }
   | { type: 'leave'; id: string }
@@ -44,10 +45,28 @@ export function parseClientMessage(raw: string): ClientMessage | null {
     const m = JSON.parse(raw)
     if (!m || typeof m !== 'object') return null
     if (m.type === 'ping') return { type: 'ping' }
+    if (m.type === 'visibility' && typeof m.hidden === 'boolean')
+      return { type: 'visibility', hidden: m.hidden }
     if (m.type === 'join' && m.version === PROTOCOL_VERSION) {
       const profile = parseProfile(m.profile),
         pose = parsePose(m.pose)
-      return profile && pose ? { type: 'join', version: PROTOCOL_VERSION, profile, pose } : null
+      if (
+        m.resumeToken !== undefined &&
+        (typeof m.resumeToken !== 'string' ||
+          !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(
+            m.resumeToken
+          ))
+      )
+        return null
+      return profile && pose
+        ? {
+            type: 'join',
+            version: PROTOCOL_VERSION,
+            profile,
+            pose,
+            ...(m.resumeToken ? { resumeToken: m.resumeToken } : {}),
+          }
+        : null
     }
     if (m.type === 'profile') {
       const profile = parseProfile(m.profile)

@@ -1,4 +1,7 @@
 import { cameraZoomBounds, clampCameraZoom } from './camera-zoom'
+import { arrivalZoom } from './world-arrival'
+import { Pathfinder } from './pathfinding'
+import { WalkingRoute } from './walking-route'
 import { islandActions, type IslandActionId } from './island-actions'
 import { nearGuestbook } from './guestbook'
 import { chooseCentralSpawn } from './multiplayer-spawn'
@@ -40,6 +43,7 @@ import {
 } from './world'
 
 export type WorldState = {
+  pathBlocked?: boolean
   x: number
   y: number
   cameraZoom: number
@@ -50,6 +54,9 @@ export type WorldState = {
   multiplayer?: PresenceStatus
 }
 export type Controls = {
+  cancelWalk?: boolean
+  walkToScreen?: Point
+  arrivalStartedAt?: number | null
   multiplayerEnabled?: boolean
   retryMultiplayer?: () => void
   discoveryActions?: Partial<Record<IslandActionId, HTMLButtonElement | null>>
@@ -106,9 +113,17 @@ export function createWorld(
     lastPublished = 0
     gait = 0
     blobAvatar = new BlobAvatar()
+    pathfinder = new Pathfinder(controls.navigation)
+    route = new WalkingRoute()
+    routeLayer!: Phaser.GameObjects.Graphics
+    rejectedTarget?: Point
+    rejectedUntil = 0
     active = true
     previousNavigation = controls.navigation
     resetInput = () => {
+      this.route.cancel()
+      controls.walkToScreen = undefined
+      this.rejectedTarget = undefined
       controls.direction = { x: 0, y: 0 }
       this.input.keyboard?.resetKeys()
     }
@@ -136,6 +151,18 @@ export function createWorld(
     }
 
     create() {
+      // RESIZE replaces the backing buffer with CSS dimensions, losing Retina detail.
+      // NONE lets us keep physical pixels while displaying the canvas at CSS size.
+      const resizeCanvas = () => {
+        this.scale.resize(
+          Math.max(1, Math.round(parent.clientWidth * rendererResolution)),
+          Math.max(1, Math.round(parent.clientHeight * rendererResolution))
+        )
+      }
+      const resizeObserver = new ResizeObserver(resizeCanvas)
+      resizeObserver.observe(parent)
+      this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => resizeObserver.disconnect())
+      resizeCanvas()
       this.position = chooseCentralSpawn(controls.navigation, []) ??
         findSafePosition(SPAWN, controls.navigation) ?? { ...SPAWN }
       this.background = new WorldBackground(this)
@@ -185,6 +212,7 @@ export function createWorld(
         .setResolution(rendererResolution)
         .setDepth(4001)
       this.debugLayer = this.add.graphics().setDepth(3000)
+      this.routeLayer = this.add.graphics().setDepth(-2)
       // Global key capture blocks typing in DOM inputs even when this scene is paused.
       this.keys = this.input.keyboard!.addKeys('UP,DOWN,LEFT,RIGHT,W,A,S,D,Z,Q', false) as Record<
         string,
@@ -208,6 +236,7 @@ export function createWorld(
       if (!this.blob) return
       if (this.input.keyboard) this.input.keyboard.enabled = !controls.paused
       if (this.previousNavigation !== controls.navigation) {
+        this.pathfinder = new Pathfinder(controls.navigation)
         this.position = findSafePosition(this.position, controls.navigation) ?? this.position
         this.previousNavigation = controls.navigation
         this.resetInput()
@@ -242,11 +271,37 @@ export function createWorld(
         Number(this.keys.DOWN.isDown || this.keys.S.isDown) -
         Number(this.keys.UP.isDown || this.keys.W.isDown || this.keys.Z.isDown)
       if (horizontal || vertical) direction = { x: horizontal, y: vertical }
+      const manual = Math.hypot(direction.x, direction.y) >= 0.12
+      if (manual || controls.cancelWalk) {
+        controls.cancelWalk = false
+        this.route.cancel()
+        this.rejectedTarget = undefined
+        controls.walkToScreen = undefined
+      }
       if (controls.paused || !this.active || document.hidden) {
         direction = { x: 0, y: 0 }
         this.resetInput()
       }
-      const next = move(this.position, direction, delta / 1000, controls.navigation)
+      if (controls.walkToScreen) {
+        const screen = controls.walkToScreen
+        controls.walkToScreen = undefined
+        const target = this.cameras.main.getWorldPoint(
+          screen.x * this.scale.width / parent.clientWidth,
+          screen.y * this.scale.height / parent.clientHeight
+        )
+        const path = this.pathfinder.find(this.position, target)
+        this.route.points = path ?? []
+        this.rejectedTarget = path ? undefined : target
+        this.rejectedUntil = time + 1800
+      }
+      const following = this.route.points.length > 0
+      const next = following
+        ? this.route.advance(this.position, delta / 1000, controls.navigation)
+        : move(this.position, direction, delta / 1000, controls.navigation)
+      if (following) {
+        const length = Math.hypot(next.x - this.position.x, next.y - this.position.y)
+        direction = length > 0 ? { x: (next.x - this.position.x) / length, y: (next.y - this.position.y) / length } : { x: 0, y: 0 }
+      }
       const moving = Math.hypot(next.x - this.position.x, next.y - this.position.y) > 0.01
       this.position = next
       if (moving) {
@@ -286,21 +341,54 @@ export function createWorld(
         camera.setZoom(Phaser.Math.Clamp(camera.zoom * controls.shoreZoom, 0.4, 8))
         controls.shoreZoom = undefined
       }
-      const bounds = cameraZoomBounds(screenWidth, screenHeight, SCENERY_WIDTH, SCENERY_HEIGHT, HEIGHT)
+      const bounds = cameraZoomBounds(
+        screenWidth,
+        screenHeight,
+        SCENERY_WIDTH,
+        SCENERY_HEIGHT,
+        HEIGHT,
+        rendererResolution
+      )
       // Keep a fully zoomed-out view fitted when the viewport rotates or resizes.
       const wasAtMinimum = controls.zoom <= controls.minimumZoom
       controls.minimumZoom = bounds.minimum
       controls.zoom = wasAtMinimum ? bounds.minimum : clampCameraZoom(controls.zoom, bounds.minimum)
-      const zoom = shoreEditing
-        ? camera.zoom
-        : controls.overview
-          ? bounds.overview
-          : bounds.base * controls.zoom
+      const cameraArrival = arrivalZoom(
+        controls.arrivalStartedAt,
+        performance.now(),
+        bounds.minimum,
+        controls.zoom
+      )
+      const zoom =
+        cameraArrival !== undefined
+          ? bounds.base *
+            (reducedMotion && controls.arrivalStartedAt !== null ? controls.zoom : cameraArrival)
+          : shoreEditing
+            ? camera.zoom
+            : controls.overview
+              ? bounds.overview
+              : bounds.base * controls.zoom
       camera.setZoom(zoom)
+      this.routeLayer.clear()
+      if (this.route.points.length) {
+        this.routeLayer.lineStyle(2 / zoom, 0xfff9ea, 0.7)
+        this.routeLayer.beginPath().moveTo(next.x, next.y)
+        for (const point of this.route.points) this.routeLayer.lineTo(point.x, point.y)
+        this.routeLayer.strokePath()
+        const target = this.route.points[this.route.points.length - 1]
+        this.routeLayer.strokeCircle(target.x, target.y, 7 / zoom)
+      }
+      if (this.rejectedTarget && time < this.rejectedUntil) {
+        const { x, y } = this.rejectedTarget
+        const radius = 6 / zoom
+        this.routeLayer.lineStyle(2 / zoom, 0xb53939, 1)
+          .lineBetween(x - radius, y - radius, x + radius, y + radius)
+          .lineBetween(x - radius, y + radius, x + radius, y - radius)
+      }
       // Keep label dimensions and spacing fixed in screen pixels as the world zooms.
       const labelScaleX = screenWidth / parent.clientWidth / zoom
       const labelScaleY = screenHeight / parent.clientHeight / zoom
-      const relativeZoom = zoom / Math.max(1.2, screenHeight / HEIGHT)
+      const relativeZoom = zoom / bounds.base
       const fade = Phaser.Math.Clamp((relativeZoom - 0.65) / 0.2, 0, 1)
       const targetAlpha = controls.avatarName ? fade * fade * (3 - 2 * fade) : 0
       const labelAlpha = Phaser.Math.Linear(
@@ -330,7 +418,7 @@ export function createWorld(
         reducedMotion || controls.paused || !this.active || document.hidden
       )
       const targetX = controls.overview ? WIDTH / 2 : next.x
-      const targetY = controls.overview ? HEIGHT / 2 : next.y - 38 / zoom
+      const targetY = controls.overview ? HEIGHT / 2 : next.y - 38 * rendererResolution / zoom
       const halfWidth = screenWidth / zoom / 2,
         halfHeight = screenHeight / zoom / 2
       const centerX =
@@ -339,7 +427,7 @@ export function createWorld(
         halfHeight > HEIGHT / 2
           ? HEIGHT / 2
           : Phaser.Math.Clamp(targetY, halfHeight, HEIGHT - halfHeight)
-      const smoothing = 1 - Math.exp(-Math.min(delta, 50) / 110)
+      const smoothing = cameraArrival !== undefined ? 1 : 1 - Math.exp(-Math.min(delta, 50) / 110)
       // Phaser zooms around the viewport center; scroll is relative to the unzoomed viewport.
       if (!shoreEditing) {
         camera.scrollX += (centerX - screenWidth / 2 - camera.scrollX) * smoothing
@@ -385,7 +473,8 @@ export function createWorld(
       this.centralBook.update(camera, delta, controls.paused || !this.active || document.hidden)
       for (const reader of this.readers)
         reader.update(camera, controls.paused || !this.active || document.hidden, next.x)
-      this.mapTiles.update(camera, time, controls.overview ? 1 : rendererResolution)
+      // Camera zoom already includes the physical-pixel density.
+      this.mapTiles.update(camera, time, 1)
 
       this.ambientDiagnostics?.update(
         camera,
@@ -429,6 +518,7 @@ export function createWorld(
           )
           .map(o => o.name)
         publish({
+          pathBlocked: Boolean(this.rejectedTarget && time < this.rejectedUntil),
           ...next,
           cameraZoom: zoom,
           station,
@@ -449,8 +539,9 @@ export function createWorld(
     parent,
     backgroundColor: '#59bdd5',
     scene: StudyScene,
-    scale: { mode: Phaser.Scale.RESIZE },
-    render: { antialias: true, roundPixels: false },
+    scale: { mode: Phaser.Scale.NONE },
+    // Phaser otherwise defaults pixelArt to true when the scale zoom is not 1.
+    render: { pixelArt: false, antialias: true, antialiasGL: true, roundPixels: false },
     fps: { target: 60 },
     banner: false,
     audio: { noAudio: true },

@@ -64,7 +64,7 @@ it('sends a fresh join and never queues movement while disconnected', () => {
   network.update(pose, profile, true, 100)
   sockets[0].close()
   network.update({ ...pose, x: 850 }, profile, true, 200)
-  expect(sockets[0].sent).toHaveLength(2)
+  expect(sockets[0].sent).toHaveLength(3)
   sockets[0].open()
   expect(sockets[0].sent.at(-1)).toMatchObject({ type: 'join', pose: { x: 850 } })
 })
@@ -80,7 +80,7 @@ it('retries an unsent final position after backpressure clears', () => {
   const socket = join()
   socket.bufferedAmount = 20_000
   network.update({ ...pose, moving: false }, profile, true, 100)
-  expect(socket.sent).toHaveLength(1)
+  expect(socket.sent).toHaveLength(2)
   socket.bufferedAmount = 0
   network.update({ ...pose, moving: false }, profile, true, 200)
   expect(socket.sent.at(-1)).toMatchObject({ type: 'move', pose: { moving: false } })
@@ -97,20 +97,50 @@ it('handles batched frames, departures, and clears ghosts on disconnect', () => 
   expect(network.status.state).toBe('offline')
   expect(network.remotes.size).toBe(0)
 })
-it('leaves in the background and rejoins; editors stay disconnected', () => {
-  join()
+it('keeps the same connection in the background and resumes heartbeats on return', () => {
+  const socket = join()
   doc.hidden = true
   doc.dispatchEvent(new Event('visibilitychange'))
-  expect(sockets[0].readyState).toBe(3)
+  expect(socket.readyState).toBe(1)
+  expect(socket.sent.at(-1)).toEqual({ type: 'visibility', hidden: true })
+  expect(socket.sent.at(-2)).toMatchObject({ type: 'move', pose: { moving: false } })
+  const sent = socket.sent.length
+  vi.advanceTimersByTime(90_000)
+  network.update(pose, profile, true, 90_000)
+  expect(socket.sent).toHaveLength(sent)
   doc.hidden = false
   doc.dispatchEvent(new Event('visibilitychange'))
-  expect(sockets).toHaveLength(2)
+  expect(sockets).toHaveLength(1)
+  expect(socket.sent.at(-1)).toEqual({ type: 'ping' })
+  vi.advanceTimersByTime(5000)
+  expect(socket.reconnect).not.toHaveBeenCalled()
+})
+it('keeps editors disconnected across visibility changes', () => {
+  const socket = join()
   network.update(pose, profile, false, 100)
   doc.hidden = true
   doc.dispatchEvent(new Event('visibilitychange'))
   doc.hidden = false
   doc.dispatchEvent(new Event('visibilitychange'))
-  expect(sockets).toHaveLength(2)
+  expect(socket.readyState).toBe(3)
+  expect(sockets).toHaveLength(1)
+})
+it('resumes with the private token and continues the server movement sequence', () => {
+  const socket = join()
+  const resumeToken = 'a83e66e5-83a6-4ac9-a5ac-02127eb5b495'
+  socket.receive({
+    type: 'welcome',
+    id: 'local',
+    spawn: pose,
+    resumeToken,
+    players: [{ id: 'local', profile, pose, seq: 20 }],
+  })
+  network.takeSpawn()
+  network.update({ ...pose, x: 840 }, profile, true, 100)
+  expect(socket.sent.at(-1)).toMatchObject({ type: 'move', seq: 21 })
+  socket.close()
+  socket.open()
+  expect(socket.sent.at(-1)).toMatchObject({ type: 'join', resumeToken })
 })
 it('does not retry a full room until explicitly requested', () => {
   const socket = join()
@@ -134,4 +164,32 @@ it('applies the reserved server position before publishing any local movement', 
   expect(network.takeSpawn()).toBeNull()
   network.update(spawn, profile, true, 200)
   expect(socket.sent.at(-1)).toMatchObject({ type: 'move', pose: spawn })
+})
+
+it('persists the resume credential across client recreation in the same tab', () => {
+  const data = new Map<string, string>()
+  vi.stubGlobal('sessionStorage', {
+    getItem: (key: string) => data.get(key) ?? null,
+    setItem: (key: string, value: string) => data.set(key, value),
+    removeItem: (key: string) => data.delete(key),
+  })
+  const socket = join()
+  const resumeToken = 'a83e66e5-83a6-4ac9-a5ac-02127eb5b495'
+  socket.receive({ type: 'welcome', id: 'local', spawn: pose, players: [], resumeToken })
+  network.destroy()
+  network = new WorldMultiplayer()
+  network.update(pose, profile, true, 100)
+  sockets[1].open()
+  expect(sockets[1].sent[0]).toMatchObject({ type: 'join', resumeToken })
+})
+it('does not automatically reclaim a session resumed in another tab', () => {
+  const socket = join()
+  socket.dispatchEvent(Object.assign(new Event('close'), { code: 4001 }))
+  network.update(pose, profile, true, 100)
+  expect(sockets).toHaveLength(1)
+  expect(socket.readyState).toBe(3)
+  network.retry()
+  expect(sockets).toHaveLength(2)
+  sockets[1].open()
+  expect(sockets[1].sent[0].resumeToken).toBeUndefined()
 })

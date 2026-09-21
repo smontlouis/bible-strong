@@ -67,6 +67,9 @@
   background: #153d4b88;
   backdrop-filter: blur(7px);
 }
+.avatar-dialog.is-onboarding > .world-modal-close {
+  display: none;
+}
 .avatar-editor-layout {
   display: grid;
   grid-template-columns: 270px 1fr;

@@ -1,6 +1,7 @@
 import { useEffect, type Dispatch, type RefObject, type SetStateAction } from 'react'
 import { zoomFromPinch, zoomFromWheel } from './camera-zoom'
 import type { Controls } from './game'
+import { PointerTap } from './pointer-tap'
 
 export function useCameraZoomGestures(
   zoneRef: RefObject<HTMLElement | null>,
@@ -14,6 +15,11 @@ export function useCameraZoomGestures(
     const touches = new Map<number, { x: number; y: number }>()
     let pinchStartDistance = 0
     let pinchStartZoom = controlsRef.current.zoom
+    const tap = new PointerTap()
+    const resetPointers = () => {
+      tap.reset()
+      touches.clear()
+    }
 
     const distance = () => {
       const [first, second] = [...touches.values()]
@@ -29,6 +35,7 @@ export function useCameraZoomGestures(
       setOverview(false)
     }
     const onWheel = (event: WheelEvent) => {
+      tap.cancel()
       if (controlsRef.current.shoreEditor?.editing || controlsRef.current.ambientEditor?.editing)
         return
       event.preventDefault()
@@ -43,12 +50,15 @@ export function useCameraZoomGestures(
     const onPointerDown = (event: PointerEvent) => {
       if (controlsRef.current.shoreEditor?.editing || controlsRef.current.ambientEditor?.editing)
         return
+      if (event.button !== 0 || controlsRef.current.paused) return
+      tap.start(event.pointerId, { x: event.clientX, y: event.clientY }, performance.now())
       if (event.pointerType !== 'touch') return
       touches.set(event.pointerId, { x: event.clientX, y: event.clientY })
       zone.setPointerCapture(event.pointerId)
       beginPinch()
     }
     const onPointerMove = (event: PointerEvent) => {
+      tap.move({ x: event.clientX, y: event.clientY })
       if (!touches.has(event.pointerId)) return
       touches.set(event.pointerId, { x: event.clientX, y: event.clientY })
       if (touches.size !== 2) return
@@ -61,6 +71,13 @@ export function useCameraZoomGestures(
       )
     }
     const onPointerEnd = (event: PointerEvent) => {
+      if (
+        tap.end(event.pointerId, { x: event.clientX, y: event.clientY }, performance.now(), event.type !== 'pointerup') &&
+        !controlsRef.current.paused
+      ) {
+        const bounds = zone.getBoundingClientRect()
+        controlsRef.current.walkToScreen = { x: event.clientX - bounds.left, y: event.clientY - bounds.top }
+      }
       if (!touches.delete(event.pointerId)) return
       if (zone.hasPointerCapture(event.pointerId)) zone.releasePointerCapture(event.pointerId)
       beginPinch()
@@ -71,13 +88,15 @@ export function useCameraZoomGestures(
     zone.addEventListener('pointermove', onPointerMove)
     zone.addEventListener('pointerup', onPointerEnd)
     zone.addEventListener('pointercancel', onPointerEnd)
+    window.addEventListener('blur', resetPointers)
     return () => {
       zone.removeEventListener('wheel', onWheel)
       zone.removeEventListener('pointerdown', onPointerDown)
       zone.removeEventListener('pointermove', onPointerMove)
       zone.removeEventListener('pointerup', onPointerEnd)
       zone.removeEventListener('pointercancel', onPointerEnd)
-      touches.clear()
+      window.removeEventListener('blur', resetPointers)
+      resetPointers()
     }
   }, [controlsRef, setOverview, zoneRef])
 }

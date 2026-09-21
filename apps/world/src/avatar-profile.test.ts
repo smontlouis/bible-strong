@@ -1,8 +1,37 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { loadProfile, parseProfile, PROFILE_KEY, saveProfile } from './avatar-profile'
+import {
+  AVATARS,
+  AVATAR_COLORS,
+  DEFAULT_PROFILE,
+  generateExplorerName,
+  generateExplorerProfile,
+  loadProfile,
+  parseProfile,
+  PROFILE_KEY,
+  saveProfile,
+} from './avatar-profile'
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.restoreAllMocks()
+})
 describe('local avatar profile', () => {
+  it.each([0, 0.999])('generates an immediately usable profile from the preset palette (%s)', sample => {
+    vi.spyOn(Math, 'random').mockReturnValue(sample)
+    const profile = generateExplorerProfile()
+    expect(profile.avatar).toBe(AVATARS[Math.floor(sample * AVATARS.length)].id)
+    expect(profile.color).toBe(AVATAR_COLORS[Math.floor(sample * AVATAR_COLORS.length)])
+    expect(parseProfile(profile)).toEqual(profile)
+  })
+  it('suggests English biblical names that can be accepted without editing', () => {
+    const random = vi.spyOn(Math, 'random')
+    random.mockReturnValueOnce(0).mockReturnValueOnce(0)
+    expect(generateExplorerName()).toBe('Joyful Noah')
+    random.mockReturnValueOnce(0.999).mockReturnValueOnce(0.999)
+    const name = generateExplorerName()
+    expect(name).toBe('Radiant Levi')
+    expect(parseProfile({ ...DEFAULT_PROFILE, name })?.name).toBe(name)
+  })
   it.each(['nova', 'short-slime', 'rounded-square', 'cloud', 'triangle'] as const)(
     'restores name, %s avatar and color after saving',
     avatar => {

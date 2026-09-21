@@ -5,7 +5,7 @@ const endpoint = process.env.WORLD_TEST_URL || 'ws://127.0.0.1:8792/parties/worl
 const clients = []
 const profile = { avatar: 'nova', name: 'QA visitor', color: '#73cdd0' }
 const pose = { x: 836, y: 542, dx: 1, dy: 0, moving: false }
-async function connect(join = true) {
+async function connect(join = true, resumeToken) {
   const ws = new WebSocket(endpoint)
   const client = { ws, messages: [], id: null, closed: null, received: 0 }
   clients.push(client)
@@ -28,7 +28,14 @@ async function connect(join = true) {
     setTimeout(() => reject(new Error('Open timeout')), 5000).unref()
   })
   client.send = message => ws.send(JSON.stringify(message))
-  if (join) client.send({ type: 'join', version: 2, profile, pose })
+  if (join)
+    client.send({
+      type: 'join',
+      version: 2,
+      profile,
+      pose,
+      ...(resumeToken ? { resumeToken } : {}),
+    })
   return client
 }
 async function until(predicate, label, timeout = 5000) {
@@ -72,13 +79,26 @@ try {
     846,
     'out-of-order movement ignored'
   )
+  const token = a.messages.find(m => m.type === 'welcome').resumeToken
+  assert(token)
+  assert(!JSON.stringify(b.messages).includes(token), 'resume token is private')
   a.ws.close()
   await until(() => b.messages.some(m => m.type === 'leave' && m.id === a.id), 'leave broadcast')
-  const rejoined = await connect()
+  const rejoined = await connect(true, token)
   await until(() => rejoined.id, 'reconnection snapshot')
-  assert(
-    !rejoined.messages.find(m => m.type === 'welcome').players.some(p => p.id === a.id),
-    'no ghost after reconnect'
+  assert.equal(rejoined.id, a.id, 'same identity after reconnect')
+  assert.equal(
+    rejoined.messages.find(m => m.type === 'welcome').spawn.x,
+    846,
+    'same position after reconnect'
+  )
+  const replacement = await connect(true, token)
+  await until(() => replacement.id && rejoined.closed === 4001, 'replace stale connection')
+  assert.equal(replacement.id, a.id)
+  assert.equal(
+    replacement.messages.find(m => m.type === 'welcome').players.filter(p => p.id === a.id).length,
+    1,
+    'no duplicate avatar'
   )
   const invalid = await connect()
   await until(() => invalid.id, 'invalid test join')
@@ -168,7 +188,7 @@ try {
     capacity.push(c)
   }
   await until(() => capacity.every(c => c.id), 'room capacity')
-  const excess = await connect(false)
+  const excess = await connect()
   await until(() => excess.messages.some(m => m.type === 'full'), 'room full feedback')
   console.log('PASS: 100-visitor room capacity; excess visitor receives full status')
 } finally {

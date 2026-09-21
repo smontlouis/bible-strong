@@ -52,6 +52,12 @@ export function Modal({
       ref={dialog}
       className={`world-modal ${className}`}
       aria-labelledby={labelledBy}
+      onKeyDownCapture={event => {
+        if (closeDisabled && event.key === 'Escape') {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+      }}
       onClickCapture={event => {
         if (
           event.target instanceof Element &&

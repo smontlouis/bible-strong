@@ -11,6 +11,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import nipplejs from 'nipplejs'
 import { clampCameraZoom } from './camera-zoom'
+import { ARRIVAL_ZOOM_DELAY_MS, ARRIVAL_DURATION_MS, ARRIVAL_FADE_MS } from './world-arrival'
 import { ControlIcon } from './ControlIcon'
 import { createWorld, type Controls, type WorldState } from './game'
 import { defaultNavigation, SPAWN, stations, type Station } from './world'
@@ -24,7 +25,7 @@ import { ThemesDiscovery } from './ThemesDiscovery'
 import { ComparisonsDiscovery } from './ComparisonsDiscovery'
 import { CommentariesDiscovery } from './CommentariesDiscovery'
 import { AvatarEditor, profileCopy } from './AvatarEditor'
-import { DEFAULT_PROFILE, loadProfile, saveProfile } from './avatar-profile'
+import { AVATAR_COLORS, generateExplorerProfile, loadProfile, saveProfile } from './avatar-profile'
 import { loadVisitedPlaces, saveVisitedPlaces } from './visited-places'
 import './style.css'
 const GuestbookAdmin = lazy(() => import('./GuestbookAdmin'))
@@ -41,6 +42,7 @@ const copy = {
     title: 'Un monde à explorer',
     brand: 'Bible Strong',
     hint: 'Déplace ton avatar avec le joystick.',
+    pathBlocked: 'Impossible de rejoindre cet endroit.',
     home: 'Retour à la place',
     overview: 'Vue d’ensemble',
     follow: 'Suivre mon avatar',
@@ -73,6 +75,7 @@ const copy = {
     title: 'A world to explore',
     brand: 'Bible Strong',
     hint: 'Move your avatar with the joystick.',
+    pathBlocked: 'This spot cannot be reached.',
     home: 'Back to the plaza',
     overview: 'World overview',
     follow: 'Follow my avatar',
@@ -165,7 +168,8 @@ function CameraControls({
 
 function App() {
   const [savedProfile] = useState(loadProfile)
-  const [profile, setProfile] = useState(savedProfile ?? DEFAULT_PROFILE)
+  const [profile, setProfile] = useState(() => savedProfile ?? generateExplorerProfile())
+  const [onboarding, setOnboarding] = useState(!savedProfile)
   const [profileOpen, setProfileOpen] = useState(!savedProfile)
   const [menuOpen, setMenuOpen] = useState(false)
   const [travelError, setTravelError] = useState(false)
@@ -193,10 +197,11 @@ function App() {
     avatar: profile.avatar,
     avatarColor: profile.color,
     avatarName: profile.name,
-    paused: !savedProfile,
+    paused: true,
+    arrivalStartedAt: null,
     overview: false,
     debug: false,
-    zoom: 1,
+    zoom: window.matchMedia('(hover: none) and (pointer: coarse)').matches ? 1.75 : 2,
     minimumZoom: 0,
     reset: 0,
   })
@@ -208,7 +213,9 @@ function App() {
     moving: false,
     fps: 0,
   })
+  const [loadingColor] = useState(() => AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)])
   const [ready, setReady] = useState(false)
+  const [revealing, setRevealing] = useState(false)
   const [failed, setFailed] = useState(false)
   const [overview, setOverview] = useState(false)
   const [debug, setDebug] = useState(
@@ -251,11 +258,20 @@ function App() {
       host.current!,
       controls.current,
       setState,
-      () => setReady(true),
+      () => {
+        controls.current.arrivalStartedAt = performance.now()
+        setRevealing(true)
+      },
       () => setFailed(true)
     )
     return () => game.destroy(true)
   }, [navigationLoaded])
+
+  useEffect(() => {
+    if (!revealing || failed) return
+    const finish = setTimeout(() => setReady(true), ARRIVAL_ZOOM_DELAY_MS + ARRIVAL_DURATION_MS)
+    return () => clearTimeout(finish)
+  }, [revealing, failed])
 
   useEffect(() => {
     const stick = nipplejs.create({
@@ -266,6 +282,9 @@ function App() {
       color: { front: '#fff6df', back: '#163f51' },
       restOpacity: 0.85,
       fadeTime: 100,
+    })
+    stick.on('start', () => {
+      controls.current.cancelWalk = true
     })
     stick.on('move', ({ data }) => {
       controls.current.direction = { x: data.vector.x, y: -data.vector.y }
@@ -295,11 +314,12 @@ function App() {
     controls.current.debug = debug
     controls.current.diagnosticFilters = diagnosticFilters
     controls.current.paused =
-      menuOpen || Boolean(opened) || guestbookOpen || Boolean(editorMode) || profileOpen
+      !ready || menuOpen || Boolean(opened) || guestbookOpen || Boolean(editorMode) || profileOpen
     controls.current.multiplayerEnabled = !editorMode
     controls.current.navigation = navigation
     controls.current.direction = { x: 0, y: 0 }
   }, [
+    ready,
     profile,
     profileOpen,
     menuOpen,
@@ -378,7 +398,7 @@ function App() {
 
   return (
     <main
-      className={`world-shell ${editing ? 'is-editing' : ''} ${editorMode ? 'is-world-editing' : ''}`}
+      className={`world-shell ${!ready ? 'is-loading' : ''} ${editing ? 'is-editing' : ''} ${editorMode ? 'is-world-editing' : ''}`}
     >
       <div className="world-canvas" ref={host} aria-label="Bible Strong — archipel" />
       <header className="world-header">
@@ -399,8 +419,12 @@ function App() {
         </button>
       </header>
       {!ready && (
-        <div className="loading">
-          <span className="loading-blob">··</span>
+        <div
+          className={`loading ${revealing && !failed ? 'is-revealing' : ''}`}
+          role="status"
+          style={{ transitionDuration: `${ARRIVAL_FADE_MS}ms` }}
+        >
+          <span className="loading-slime" style={{ backgroundColor: loadingColor }} aria-hidden="true" />
           {failed ? t.error : t.loading}
         </div>
       )}
@@ -439,6 +463,7 @@ function App() {
         )
       })}
       <aside className="world-bottom">
+        {state.pathBlocked && <p className="path-feedback" role="status">{t.pathBlocked}</p>}
         <div className="joystick-zone" ref={joystick} role="group" aria-label={t.joystick} />
         <div className="companion-controls">
           {ready && profile.name && !editorMode && (
@@ -554,14 +579,18 @@ function App() {
           }
         />
       )}
-      {profileOpen && (
+      {ready && profileOpen && (
         <AvatarEditor
           profile={profile}
+          onboarding={onboarding}
           language={language}
-          onClose={() => setProfileOpen(false)}
+          onClose={() => {
+            if (!onboarding) setProfileOpen(false)
+          }}
           onSave={next => {
             setProfileStorageError(!saveProfile(next))
             setProfile(next)
+            setOnboarding(false)
             setProfileOpen(false)
           }}
         />

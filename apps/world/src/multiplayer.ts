@@ -31,7 +31,15 @@ export class WorldMultiplayer {
   }
   private seq = 0
   private destroyed = false
-  private suspended = document.hidden
+  private superseded = false
+  private resumeToken: string | undefined = this.readResumeToken()
+  private readResumeToken() {
+    try {
+      return sessionStorage.getItem('world-resume-token') || undefined
+    } catch {
+      return undefined
+    }
+  }
   private enabled = false
   private heartbeat = window.setInterval(() => {
     if (!this.socket || document.hidden) return
@@ -44,10 +52,17 @@ export class WorldMultiplayer {
     } else this.send({ type: 'ping' })
   }, 5000)
   private visibility = () => {
-    // Mobile background timers are unreliable. Leave cleanly, then rejoin with a fresh snapshot.
-    this.suspended = document.hidden
-    if (document.hidden) this.disconnect()
-    else if (this.profile && this.enabled) this.connect()
+    if (!this.enabled) return
+    this.pose = { ...this.pose, moving: false }
+    if (document.hidden && this.id && !this.pendingSpawn)
+      this.send({ type: 'move', pose: this.pose, seq: ++this.seq })
+    this.send({ type: 'visibility', hidden: document.hidden })
+    if (!document.hidden) {
+      // Give the connection a heartbeat round trip before treating it as stale.
+      this.lastReceived = performance.now()
+      this.send({ type: 'ping' })
+      if (!this.socket && this.profile && this.status.state !== 'full') this.connect()
+    }
   }
   constructor() {
     document.addEventListener('visibilitychange', this.visibility)
@@ -61,9 +76,8 @@ export class WorldMultiplayer {
       if (this.socket) this.disconnect()
       return
     }
-    if (!this.socket && !this.suspended && !this.destroyed && this.status.state !== 'full')
-      this.connect()
-    if (!this.id || this.pendingSpawn) return
+    if (!this.socket && !this.destroyed && this.status.state !== 'full') this.connect()
+    if (!this.id || this.pendingSpawn || document.hidden) return
     const profileKey = JSON.stringify(this.profile)
     if (profileKey !== this.lastProfile) {
       if (this.send({ type: 'profile', profile: this.profile })) this.lastProfile = profileKey
@@ -86,7 +100,7 @@ export class WorldMultiplayer {
     return false
   }
   private connect() {
-    if (this.destroyed || this.suspended || !this.profile || this.socket) return
+    if (this.destroyed || this.superseded || !this.profile || this.socket) return
     const host = import.meta.env.VITE_WORLD_MULTIPLAYER_HOST || location.host
     const socket = new PartySocket({
       host,
@@ -104,7 +118,13 @@ export class WorldMultiplayer {
       this.lastProfile = JSON.stringify(this.profile)
       this.lastPose = ''
       this.lastReceived = performance.now()
-      this.send({ type: 'join', version: PROTOCOL_VERSION, profile: this.profile, pose: this.pose })
+      this.send({
+        type: 'join',
+        version: PROTOCOL_VERSION,
+        profile: this.profile,
+        pose: this.pose,
+        ...(this.resumeToken ? { resumeToken: this.resumeToken } : {}),
+      })
     })
     socket.addEventListener('message', event => {
       if (this.socket !== socket) return
@@ -117,6 +137,15 @@ export class WorldMultiplayer {
       const now = performance.now()
       this.lastReceived = now
       if (message.type === 'welcome') {
+        this.resumeToken = message.resumeToken
+        try {
+          if (this.resumeToken) sessionStorage.setItem('world-resume-token', this.resumeToken)
+          else sessionStorage.removeItem('world-resume-token')
+        } catch {
+          /* In-memory resumption still works when storage is unavailable. */
+        }
+        this.seq = message.players.find(player => player.id === message.id)?.seq ?? 0
+        this.send({ type: 'visibility', hidden: document.hidden })
         this.pendingSpawn = message.spawn
         this.pose = message.spawn
         this.id = message.id
@@ -140,8 +169,19 @@ export class WorldMultiplayer {
         this.status = { state: 'full', count: 0 }
       }
     })
-    socket.addEventListener('close', () => {
-      if (this.socket === socket) this.disconnected()
+    socket.addEventListener('close', event => {
+      if (this.socket !== socket) return
+      if (event.code === 4001) {
+        // A copied tab resumed this session. Do not fight it with automatic reconnects.
+        this.superseded = true
+        this.resumeToken = undefined
+        try {
+          sessionStorage.removeItem('world-resume-token')
+        } catch {
+          /* Storage may be unavailable. */
+        }
+        this.disconnect()
+      } else this.disconnected()
     })
     socket.addEventListener('error', () => {
       if (this.socket === socket) this.disconnected()
@@ -160,6 +200,7 @@ export class WorldMultiplayer {
     this.disconnected()
   }
   retry() {
+    this.superseded = false
     this.disconnect()
     this.connect()
   }
