@@ -1,2 +1,16 @@
 # Server-only Vercel AI Gateway key for Jev. Never use a VITE_ variable.
 AI_GATEWAY_API_KEY=
+
+# Administrator identity, also used by the localhost-only dev bridge.
+GUESTBOOK_ADMIN_EMAIL=
+# Generated automatically by yarn dev:world (never put it in VITE_ variables).
+# GUESTBOOK_LOCAL_ADMIN_TOKEN=
+
+# Production Cloudflare Access application settings (both page and API).
+ACCESS_TEAM_DOMAIN=
+ACCESS_AUD=
+
+# Notification preparation; no email is sent until the private mailer is bound.
+GUESTBOOK_NOTIFICATION_TO=
+GUESTBOOK_NOTIFICATION_FROM=
+GUESTBOOK_ADMIN_URL=

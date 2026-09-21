@@ -1,6 +1,9 @@
 # Guestbook
 
-Visitors near the central book can read and sign it without an account. The UI is
+Visitors anywhere on the central island can read and sign its book without an account.
+A circular plus button stays anchored to the book and fades/scales in and out when
+entering/leaving the island. Activation follows the edited `land-0` ground contour,
+excluding bridges. The six resource islands use the same interaction at fixed island centers. The UI is
 French/English, keeps a local draft and pauses movement while the dialog is open.
 Names and messages are public after automatic Jev admission; there is no manual
 approval queue. Text is rendered as plain text, never HTML.
@@ -39,3 +42,62 @@ command, which applies the `v2` Guestbook SQLite migration and `/api/*` asset ro
 The local Vite server proxies this endpoint to port 8791. A separately hosted
 frontend uses the existing `VITE_WORLD_MULTIPLAYER_HOST` host and the Worker origin
 allowlist. Reading and signing do not require a multiplayer WebSocket connection.
+
+## Administration and notifications
+
+Open `/admin-guestbook` to browse all, visible or removed entries. An email deep link
+uses `?message=<id>` to select one entry. Removing an entry hides it from subsequent
+public API reads; restoring makes it visible again. Existing open public dialogs
+refresh when reopened. Removal is reversible and records the last actor and time.
+No GET request or email link changes visibility. Existing signatures are preserved;
+old entries are not retroactively emailed.
+
+The Worker validates Cloudflare Access RS256 JWT signatures against the configured
+team's keys, plus issuer, audience, expiry and the exact administrator email. An
+email header alone never grants access. Configure an Access application protecting
+**both** `/admin-guestbook` and `/api/guestbook/admin`, with the same audience and an
+Allow policy restricted to `GUESTBOOK_ADMIN_EMAIL`. Also protect/disable alternate
+production hostnames such as the workers.dev hostname. Missing Access configuration
+fails closed. Admin writes require a JSON body and the `X-Guestbook-Admin: 1` header;
+admin API responses are not CORS-enabled. Serve the admin page on the Worker origin.
+
+Local development: `yarn dev:world` creates an ignored random
+`GUESTBOOK_LOCAL_ADMIN_TOKEN` in `.dev.vars`. Set `GUESTBOOK_ADMIN_EMAIL` there.
+The Vite-only bridge injects that token server-side exclusively for loopback clients,
+loopback Host names and same-origin requests. The browser never receives the token.
+The Worker accepts it only on loopback URLs. Restart the dev server after changing
+`.dev.vars`; never configure this token in production.
+
+Approved signatures and outbox rows are stored in one SQLite transaction. An alarm
+is reserved before this transaction. Notifications are handled by the Durable Object
+alarm, never by the signing request. Failed deliveries retry with bounded exponential
+backoff (up to one hour); an unconfigured transport retains rows and checks hourly.
+An idempotent repost does not enqueue a second email. The administration shows queue
+counts and each entry's status (`queued`, `sent`, or `legacy`). `sent` means the mailer
+acknowledged delivery/acceptance, not that a human read the email.
+
+### Email setup still pending
+
+Hostinger SMTP configuration has not been confirmed. No external email provider or
+SMTP credentials have been provisioned by this change, and no real notification is
+sent until the transport is connected. Prepare server-only variables:
+
+- `GUESTBOOK_NOTIFICATION_TO`: notification recipient.
+- `GUESTBOOK_NOTIFICATION_FROM`: verified sender address.
+- `GUESTBOOK_ADMIN_URL`: production HTTPS URL ending in `/admin-guestbook`.
+- `ACCESS_TEAM_DOMAIN`: `<team>.cloudflareaccess.com`, without a scheme.
+- `ACCESS_AUD`: Access application audience.
+- `GUESTBOOK_ADMIN_EMAIL`: the sole allowed administrator email.
+
+The transport boundary is a **private service binding** named `GUESTBOOK_MAILER`.
+Its adapter will connect to the confirmed mail service (for example Hostinger SMTP).
+The contract is `POST /send`, JSON `{from,to,subject,text}`, with a stable
+`Idempotency-Key: guestbook:<entry-id>`. It must durably deduplicate that key and return
+an OK JSON `{messageId: "..."}` only after accepting responsibility for the email.
+Do not expose the adapter as an unauthenticated public endpoint. A timeout may follow
+an accepted send, so idempotency must be handled by the adapter, not assumed from SMTP.
+The implementation prepares and tests this boundary; the actual SMTP adapter and
+binding are intentionally deferred until the mail setup is confirmed.
+
+The alarm design follows the [Cloudflare alarm API](https://developers.cloudflare.com/durable-objects/api/alarms/).
+Access verification follows the [application token contract](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/application-token/).

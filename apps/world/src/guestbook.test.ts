@@ -1,3 +1,4 @@
+import { defaultNavigation } from './world'
 import { describe, expect, it } from 'vitest'
 import { nearGuestbook, parseSubmission } from './guestbook'
 import { moderateGuestbook } from '../server/guestbook-moderation'
@@ -15,11 +16,35 @@ const answers = (risk = 0.01) => ({
   ),
 })
 describe('guestbook admission', () => {
-  it('offers the book at the reachable central rim, not on other islands', () => {
+  it('offers the book throughout the central island, excluding bridges and other islands', () => {
     expect(nearGuestbook({ x: 836, y: 542 })).toBe(true)
+    expect(nearGuestbook({ x: 620, y: 445 })).toBe(true)
+    expect(nearGuestbook({ x: 1040, y: 465 })).toBe(true)
+    expect(nearGuestbook({ x: 836, y: 315 })).toBe(false)
     expect(nearGuestbook({ x: 965, y: 470 })).toBe(true)
     expect(nearGuestbook({ x: 836, y: 590 })).toBe(false)
     expect(nearGuestbook({ x: 790, y: 259 })).toBe(false)
+  })
+  it('uses the edited central island contour', () => {
+    const navigation = {
+      ...defaultNavigation,
+      zones: [
+        {
+          id: 'land-0',
+          name: 'Place',
+          kind: 'allowed' as const,
+          points: [
+            [800, 400],
+            [900, 400],
+            [900, 500],
+            [800, 500],
+          ] as const,
+        },
+      ],
+    }
+    expect(nearGuestbook({ x: 836, y: 465 }, navigation)).toBe(true)
+    expect(nearGuestbook({ x: 620, y: 445 }, navigation)).toBe(false)
+    expect(nearGuestbook({ x: 836, y: 465 }, { ...navigation, zones: [] })).toBe(false)
   })
   it('rejects empty, oversized and malformed submissions before moderation', () => {
     expect(parseSubmission(submission)).toEqual(submission)

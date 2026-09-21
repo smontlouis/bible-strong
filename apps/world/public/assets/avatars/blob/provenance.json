@@ -1,84 +1,15 @@
 {
-  "frameWidth": 256,
-  "frameHeight": 256,
+  "source": "Pencil native vector bodies with separate editable eyes",
   "frames": 24,
+  "columns": 8,
+  "rows": 3,
+  "frameSize": 256,
   "frameRate": 24,
-  "down": {
-    "source": "magnific_animate-this-exact-white-_P3VWhu742C.mp4",
-    "sourceFrames": [
-      16,
-      17,
-      19,
-      20,
-      22,
-      23,
-      25,
-      26,
-      28,
-      29,
-      31,
-      32,
-      34,
-      35,
-      37,
-      38,
-      40,
-      41,
-      43,
-      44,
-      46,
-      47,
-      49,
-      50
-    ],
-    "crop": [
-      96,
-      32,
-      672,
-      608
-    ],
-    "originY": 0.9548611111111112
+  "idleFrame": null,
+  "originY": {
+    "down": 0.9548611111111112,
+    "up": 0.9548611111111112,
+    "right": 0.9732142857142857
   },
-  "right": {
-    "source": "MiniMax Hailuo 2.3 v3, six poses corrected with imagegen",
-    "sourceFrames": [
-      12,
-      13,
-      14,
-      15,
-      16,
-      17,
-      18,
-      19,
-      20,
-      21,
-      22,
-      23,
-      24,
-      25,
-      26,
-      27,
-      28,
-      29,
-      30,
-      31,
-      32,
-      33,
-      34,
-      35
-    ],
-    "originY": 0.9732142857142857,
-    "cropFrom256Frame": [
-      16,
-      16,
-      240,
-      240
-    ]
-  },
-  "left": "Mirror right",
-  "up": {
-    "source": "down.png",
-    "method": "Eye-only white fills, alpha and silhouette preserved",
-    "idle": "idle-down.png with eye-only fills"
-  }
+  "left": "Mirror right"
 }

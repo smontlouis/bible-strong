@@ -1,3 +1,4 @@
+import { islandActions, type IslandActionId } from './island-actions'
 import { GuestbookDialog } from './GuestbookDialog'
 import { nearGuestbook } from './guestbook'
 import { createAmbientEditor, ambientKinds } from './ambient-zones'
@@ -24,6 +25,7 @@ import { AvatarEditor, AvatarPreview, profileCopy } from './AvatarEditor'
 import { DEFAULT_PROFILE, loadProfile, saveProfile } from './avatar-profile'
 import { loadVisitedPlaces, saveVisitedPlaces } from './visited-places'
 import './style.css'
+const GuestbookAdmin = lazy(() => import('./GuestbookAdmin'))
 const ZoneEditor = lazy(() => import('./ZoneEditor'))
 
 const copy = {
@@ -167,6 +169,7 @@ function App() {
   const controls = useRef<Controls>({
     shoreEditor,
     ambientEditor,
+    discoveryActions: {},
     navigation: initial.document,
     direction: { x: 0, y: 0 },
     avatar: profile.avatar,
@@ -193,7 +196,7 @@ function App() {
   const [diagnosticFilters, setDiagnosticFilters] = useState(() => makeDiagnosticFilters())
   const [language, setLanguage] = useState<Language>('fr')
   const [guestbookOpen, setGuestbookOpen] = useState(false)
-  const atGuestbook = nearGuestbook(state)
+  const atGuestbook = nearGuestbook(state, navigation)
   const [opened, setOpened] = useState<WorldState['station']>(null)
   const [visited, setVisited] = useState(loadVisitedPlaces)
   useEffect(() => {
@@ -274,7 +277,17 @@ function App() {
     controls.current.multiplayerEnabled = !editorMode
     controls.current.navigation = navigation
     controls.current.direction = { x: 0, y: 0 }
-  }, [profile, profileOpen, overview, debug, diagnosticFilters, opened, guestbookOpen, editorMode, navigation])
+  }, [
+    profile,
+    profileOpen,
+    overview,
+    debug,
+    diagnosticFilters,
+    opened,
+    guestbookOpen,
+    editorMode,
+    navigation,
+  ])
   useEffect(() => {
     document.documentElement.lang = language
   }, [language])
@@ -311,14 +324,15 @@ function App() {
     setEditorMode(mode)
   }
 
-  function discover() {
-    if (atGuestbook) {
+  function discover(id: IslandActionId) {
+    if (!ready || controls.current.paused) return
+    if (id === 'guestbook' && atGuestbook) {
       controls.current.paused = true
       controls.current.direction = { x: 0, y: 0 }
       setGuestbookOpen(true)
       return
     }
-    if (!state.station) return
+    if (!state.station || state.station.id !== id) return
     controls.current.paused = true
     controls.current.direction = { x: 0, y: 0 }
     setOpened(state.station)
@@ -364,17 +378,39 @@ function App() {
           {failed ? t.error : t.loading}
         </div>
       )}
-      <button
-        ref={element => {
-          controls.current.discoveryAction = element
-        }}
-        className="discover-button"
-        disabled={!ready || (!state.station && !atGuestbook)}
-        aria-haspopup="dialog"
-        onClick={discover}
-      >
-        {atGuestbook ? (language === 'fr' ? 'Signer le livre d’or' : 'Sign the guestbook') : t.explore} →
-      </button>
+      {islandActions.map(action => {
+        const station = stations.find(station => station.id === action.id)
+        const label =
+          action.id === 'guestbook'
+            ? language === 'fr'
+              ? 'Signer le livre d’or'
+              : 'Sign the guestbook'
+            : `${t.explore} · ${station ? name(station) : ''}`
+        return (
+          <button
+            key={action.id}
+            type="button"
+            ref={element => {
+              controls.current.discoveryActions![action.id] = element
+            }}
+            className="discover-button"
+            data-island={action.id}
+            disabled={
+              !ready ||
+              (action.id === 'guestbook' ? !atGuestbook : state.station?.id !== action.id) ||
+              Boolean(opened) ||
+              guestbookOpen ||
+              Boolean(editorMode) ||
+              profileOpen
+            }
+            aria-label={label}
+            aria-haspopup="dialog"
+            onClick={() => discover(action.id)}
+          >
+            <ControlIcon name="plus" />
+          </button>
+        )
+      })}
       <aside className="world-bottom">
         <div className="joystick-zone" ref={joystick} role="group" aria-label={t.joystick} />
         <div className="companion-controls">
@@ -395,12 +431,21 @@ function App() {
             </span>
           </button>
           {ready && profile.name && !editorMode && (
-            <div className="world-presence" data-state={state.multiplayer?.state ?? 'connecting'} role="status" aria-live="polite">
+            <div
+              className="world-presence"
+              data-state={state.multiplayer?.state ?? 'connecting'}
+              role="status"
+              aria-live="polite"
+            >
               <span className="presence-dot" aria-hidden="true" />
-              <span>{state.multiplayer?.state === 'online'
-                ? `${state.multiplayer.count} ${t.online}`
-                : t[state.multiplayer?.state ?? 'connecting']}</span>
-              {state.multiplayer?.state === 'full' && <button onClick={() => controls.current.retryMultiplayer?.()}>{t.retry}</button>}
+              <span>
+                {state.multiplayer?.state === 'online'
+                  ? `${state.multiplayer.count} ${t.online}`
+                  : t[state.multiplayer?.state ?? 'connecting']}
+              </span>
+              {state.multiplayer?.state === 'full' && (
+                <button onClick={() => controls.current.retryMultiplayer?.()}>{t.retry}</button>
+              )}
             </div>
           )}
           {profileStorageError && (
@@ -479,7 +524,13 @@ function App() {
           }}
         />
       )}
-      {guestbookOpen && <GuestbookDialog language={language} profile={profile} onClose={() => setGuestbookOpen(false)} />}
+      {guestbookOpen && (
+        <GuestbookDialog
+          language={language}
+          profile={profile}
+          onClose={() => setGuestbookOpen(false)}
+        />
+      )}
       {opened?.id === 'lexicon' && (
         <LexiconDiscovery language={language} onClose={() => setOpened(null)} />
       )}
@@ -549,5 +600,13 @@ function App() {
 }
 
 const root = createRoot(document.getElementById('root')!)
-root.render(<App />)
+root.render(
+  location.pathname === '/admin-guestbook' ? (
+    <Suspense fallback={<p>…</p>}>
+      <GuestbookAdmin />
+    </Suspense>
+  ) : (
+    <App />
+  )
+)
 if (import.meta.hot) import.meta.hot.dispose(() => root.unmount())

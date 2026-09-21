@@ -25,7 +25,7 @@ The visitor's visual companion and controllable character in the Exploration wor
 _Avoid_: Player unit
 
 **Guestbook**:
-The shared collection of public visitor notes, opened near the central book.
+The shared collection of public visitor notes, opened from the central island.
 
 **Signature**:
 A visitor's note and chosen public name, published after automatic admission.

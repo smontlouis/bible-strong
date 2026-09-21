@@ -1,6 +1,6 @@
 import { parseAmbientZones } from './src/ambient-zones'
 import { parseShorelines } from './src/shorelines'
-import { mkdir, rename, writeFile } from 'node:fs/promises'
+import { mkdir, rename, writeFile, readFile } from 'node:fs/promises'
 import type { IncomingMessage } from 'node:http'
 import { dirname, resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
@@ -148,16 +148,53 @@ function sceneDocumentSavePlugin(
   }
 }
 
+/** Dev-only bridge: credentials never reach browser code or LAN clients. */
+function localGuestbookAdmin(): Plugin {
+  return {
+    name: 'local-guestbook-admin',
+    configureServer(server) {
+      server.middlewares.use(async (request, response, next) => {
+        if (request.url?.split('?')[0] !== '/api/guestbook/admin') return next()
+        const address = request.socket.remoteAddress
+        const host = request.headers.host
+        const origin = request.headers.origin
+        if (
+          !['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(address || '') ||
+          !host ||
+          !/^(localhost|127\.0\.0\.1|\[::1\])(:[0-9]+)?$/.test(host) ||
+          (origin && origin !== `http://${host}`)
+        ) {
+          response.statusCode = 403
+          response.end('Forbidden')
+          return
+        }
+        try {
+          const vars = await readFile(resolve(server.config.root, '.dev.vars'), 'utf8')
+          const token = vars.match(/^GUESTBOOK_LOCAL_ADMIN_TOKEN=([a-f0-9]{64})$/m)?.[1]
+          if (token) request.headers.authorization = `Bearer ${token}`
+        } catch {
+          /* Worker rejects unconfigured access. */
+        }
+        next()
+      })
+    },
+  }
+}
+
 export default defineConfig({
   plugins: [
     react(),
+    localGuestbookAdmin(),
     navigationSavePlugin(),
     sceneDocumentSavePlugin('shorelines', parseShorelines),
     sceneDocumentSavePlugin('ambience', parseAmbientZones),
   ],
   // Saving editor documents should not reload the world mid-edit.
   server: {
-    proxy: { "/api/guestbook": { target: "http://127.0.0.1:8791" }, "/parties": { target: "http://127.0.0.1:8791", ws: true } },
+    proxy: {
+      '/api/guestbook': { target: 'http://127.0.0.1:8791' },
+      '/parties': { target: 'http://127.0.0.1:8791', ws: true },
+    },
     watch: {
       ignored: [
         '**/public/ambience/archipelago.json',

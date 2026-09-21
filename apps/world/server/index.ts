@@ -1,3 +1,4 @@
+import { authenticateAdmin, validAdminMutation } from './guestbook-auth'
 import { routeGuestbook, type GuestbookEnv } from './guestbook'
 export { Guestbook } from './guestbook'
 import navigationJson from '../public/navigation/archipelago.json'
@@ -18,6 +19,7 @@ type Session = { player: Player | null; lastSeen: number; window: number; messag
 interface Env extends GuestbookEnv {
   WorldRoom: DurableObjectNamespace<WorldRoom>
   ALLOWED_ORIGINS?: string
+  ASSETS: Fetcher
 }
 
 export class WorldRoom extends Server<Env> {
@@ -157,6 +159,47 @@ export default {
     const origin = request.headers.get('Origin')
     const allowed = [url.origin, ...(env.ALLOWED_ORIGINS ?? '').split(',').map(s => s.trim())]
     if (origin && !allowed.includes(origin)) return new Response('Forbidden', { status: 403 })
+    if (url.pathname === '/admin-guestbook' || url.pathname === '/api/guestbook/admin') {
+      const actor = await authenticateAdmin(request, env)
+      if (!actor)
+        return Response.json(
+          { error: 'unauthorized' },
+          { status: 401, headers: { 'Cache-Control': 'no-store' } }
+        )
+      if (url.pathname === '/admin-guestbook') return env.ASSETS.fetch(request)
+      const stub = env.Guestbook.get(env.Guestbook.idFromName('asi-europe'))
+      const reply = (body: unknown, status = 200) =>
+        Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } })
+      if (request.method === 'GET') {
+        const cursor = Number(url.searchParams.get('cursor') ?? Number.MAX_SAFE_INTEGER)
+        const filter = url.searchParams.get('filter') ?? 'all'
+        const id = url.searchParams.get('message') ?? undefined
+        if (
+          !Number.isSafeInteger(cursor) ||
+          cursor < 1 ||
+          !['all', 'visible', 'removed'].includes(filter) ||
+          (id && !/^[0-9a-f-]{36}$/i.test(id))
+        )
+          return reply({ error: 'invalid' }, 400)
+        return reply(await stub.adminList(cursor, filter as 'all' | 'visible' | 'removed', id))
+      }
+      if (request.method !== 'POST') return reply({ error: 'method' }, 405)
+      if (!validAdminMutation(request)) return reply({ error: 'forbidden' }, 403)
+      try {
+        const data = (await request.json()) as { id?: unknown; removed?: unknown }
+        if (
+          typeof data.id !== 'string' ||
+          !/^[0-9a-f-]{36}$/i.test(data.id) ||
+          typeof data.removed !== 'boolean'
+        )
+          return reply({ error: 'invalid' }, 400)
+        return (await stub.adminSetVisibility(data.id, data.removed, actor))
+          ? reply({ ok: true })
+          : reply({ error: 'not_found' }, 404)
+      } catch {
+        return reply({ error: 'invalid' }, 400)
+      }
+    }
     if (url.pathname === '/api/guestbook') {
       if (request.method === 'OPTIONS')
         return new Response(null, {

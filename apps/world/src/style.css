@@ -225,23 +225,54 @@ select {
   top: 0;
   left: 0;
   z-index: 5;
-  visibility: hidden;
-  white-space: nowrap;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  border: 2px solid #fff9eabf;
+  border-radius: 50%;
   background: #163f51;
   color: #fff9ea;
-  border: 0;
-  border-radius: 18px;
-  min-height: 44px;
-  padding: 10px 16px;
-  box-shadow: 0 4px 18px #163f5125;
-  max-width: 260px;
+  box-shadow:
+    0 5px 18px #163f5140,
+    0 0 0 5px #fff9ea35;
+  opacity: 0;
+  scale: 0.65;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 180ms ease,
+    scale 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    visibility 0s 220ms;
 }
-.discover-button:disabled {
-  background: #fff9eae8;
-  color: #47666e;
-  font-size: 12px;
-  box-shadow: none;
-  cursor: default;
+.discover-button[data-visible='true'] {
+  opacity: 1;
+  scale: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+.discover-button svg {
+  width: 25px;
+  height: 25px;
+}
+.discover-button[data-visible='true']:hover {
+  scale: 1.08;
+  background: #21566a;
+}
+.discover-button[data-visible='true']:active {
+  scale: 0.94;
+}
+.discover-button:focus-visible {
+  outline: 3px solid #f4b932;
+  outline-offset: 7px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .discover-button {
+    transition: none;
+    scale: 1;
+  }
 }
 .world-footer {
   position: absolute;
@@ -379,9 +410,8 @@ select {
     gap: 8px;
   }
   .discover-button {
-    max-width: 180px;
-    padding: 12px 14px;
-    font-size: 13px;
+    width: 48px;
+    height: 48px;
   }
   .world-footer {
     left: 12px;
@@ -427,14 +457,69 @@ select {
   font-size: 12px;
   pointer-events: auto;
 }
-.diagnostic-filters legend { padding: 3px 7px; background: #142b39; border-radius: 5px; }
-.diagnostic-filter-actions { display: flex; gap: 8px; margin-bottom: 8px; }
-.diagnostic-filter-actions button { padding: 4px 12px; border: 1px solid #78929b; border-radius: 6px; color: white; background: #284450; cursor: pointer; }
-.diagnostic-filter-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
-.diagnostic-filter-options label { display: flex; align-items: center; gap: 5px; cursor: pointer; min-height: 24px; }
-.diagnostic-filter-options input { accent-color: #7fe2bf; }
+.diagnostic-filters legend {
+  padding: 3px 7px;
+  background: #142b39;
+  border-radius: 5px;
+}
+.diagnostic-filter-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.diagnostic-filter-actions button {
+  padding: 4px 12px;
+  border: 1px solid #78929b;
+  border-radius: 6px;
+  color: white;
+  background: #284450;
+  cursor: pointer;
+}
+.diagnostic-filter-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+}
+.diagnostic-filter-options label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  min-height: 24px;
+}
+.diagnostic-filter-options input {
+  accent-color: #7fe2bf;
+}
 
-.world-presence { display: flex; align-items: center; justify-content: flex-end; gap: 7px; max-width: 240px; margin-top: 8px; padding: 7px 10px; border-radius: 12px; background: #fff9eae8; color: #193d49; font-size: 11px; line-height: 1.4; }
-.presence-dot { width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: #c38937; }
-.world-presence[data-state="online"] .presence-dot { background: #23826d; }
-.world-presence button { border: 0; padding: 2px; color: inherit; background: none; text-decoration: underline; cursor: pointer; }
+.world-presence {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  max-width: 240px;
+  margin-top: 8px;
+  padding: 7px 10px;
+  border-radius: 12px;
+  background: #fff9eae8;
+  color: #193d49;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.presence-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: #c38937;
+}
+.world-presence[data-state='online'] .presence-dot {
+  background: #23826d;
+}
+.world-presence button {
+  border: 0;
+  padding: 2px;
+  color: inherit;
+  background: none;
+  text-decoration: underline;
+  cursor: pointer;
+}

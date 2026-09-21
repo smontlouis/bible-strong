@@ -15,8 +15,9 @@
   ],
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/parties/*", "/api/*", "/health"],
+    "run_worker_first": ["/parties/*", "/api/*", "/admin-guestbook", "/health"],
   },
   "vars": { "ALLOWED_ORIGINS": "http://localhost:5186,http://127.0.0.1:5186" },
   "observability": { "enabled": true },

@@ -1,0 +1,143 @@
+html:has(.guestbook-admin) {
+  overflow-y: auto;
+  height: auto;
+  background: #f6f3eb;
+}
+body:has(.guestbook-admin) {
+  /* Let wheel/touch gestures reach the document instead of trapping them here. */
+  overflow: visible;
+  overscroll-behavior: auto;
+  height: auto;
+  background: #f6f3eb;
+}
+.guestbook-admin {
+  box-sizing: border-box;
+  max-width: 920px;
+  padding: 48px 24px 80px;
+  margin: 0 auto;
+  color: #193d49;
+  font:
+    15px/1.6 system-ui,
+    sans-serif;
+}
+.guestbook-admin > header,
+.admin-entries header,
+.admin-entries footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.admin-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.guestbook-admin h1 {
+  font:
+    44px/1.2 Georgia,
+    serif;
+  margin: 12px 0 24px;
+}
+.guestbook-admin a {
+  color: inherit;
+}
+.guestbook-admin button,
+.guestbook-admin select {
+  font: inherit;
+  border: 1px solid #193d4933;
+  border-radius: 12px;
+  padding: 9px 14px;
+  color: inherit;
+  background: #fffdf7;
+  cursor: pointer;
+}
+.guestbook-admin button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.guestbook-admin :focus-visible {
+  outline: 3px solid #5983f0;
+  outline-offset: 3px;
+}
+.guestbook-admin nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 24px 0;
+}
+.guestbook-admin nav button[aria-pressed='true'] {
+  background: #193d49;
+  color: white;
+}
+.admin-delivery {
+  display: grid;
+  gap: 8px;
+  background: #eee4cb;
+  border: 1px solid #ded0ac;
+  padding: 18px 22px;
+  border-radius: 16px;
+  margin: 28px 0 20px;
+  font-size: 13px;
+}
+.admin-delivery strong {
+  font-weight: 500;
+}
+.admin-entries {
+  display: grid;
+  gap: 16px;
+  margin: 20px 0;
+}
+.admin-entries article {
+  border: 1px solid #193d4922;
+  border-radius: 18px;
+  padding: 24px;
+  background: #fffdf7;
+}
+.admin-entries article[data-removed='true'] {
+  background: #edece7;
+  border-style: dashed;
+}
+.admin-entries time,
+.admin-status {
+  font-size: 12px;
+  color: #607079;
+}
+.admin-message {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font:
+    20px/1.6 Georgia,
+    serif;
+  margin: 20px 0;
+}
+.guestbook-admin .admin-remove {
+  color: #9a3226;
+  border-color: #9a322644;
+}
+.guestbook-admin .admin-restore {
+  background: #193d49;
+  color: white;
+}
+@media (max-width: 600px) {
+  .guestbook-admin {
+    padding: 28px 16px 60px;
+  }
+  .guestbook-admin h1 {
+    font-size: 34px;
+  }
+  .admin-entries article {
+    padding: 18px;
+  }
+  .admin-entries header,
+  .admin-entries footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .admin-entries footer button {
+    width: 100%;
+    margin-top: 8px;
+  }
+}

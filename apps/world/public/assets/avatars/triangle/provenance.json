@@ -1,0 +1,11 @@
+{
+  "source": "Triangle poses edited in Pencil; back copied from front without eyes",
+  "frames": 15,
+  "columns": 5,
+  "rows": 3,
+  "frameSize": 256,
+  "frameRate": 24,
+  "idleFrame": 0,
+  "originY": 0.91015625,
+  "left": "Mirror right"
+}

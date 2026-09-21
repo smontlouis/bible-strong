@@ -3,7 +3,7 @@ import { loadProfile, parseProfile, PROFILE_KEY, saveProfile } from './avatar-pr
 
 afterEach(() => vi.unstubAllGlobals())
 describe('local avatar profile', () => {
-  it.each(['nova', 'short-slime', 'rounded-square'] as const)(
+  it.each(['nova', 'short-slime', 'rounded-square', 'cloud', 'triangle'] as const)(
     'restores name, %s avatar and color after saving',
     avatar => {
       const values = new Map<string, string>()

@@ -3,6 +3,8 @@ export const AVATARS = [
   { id: 'nova', name: 'Bean', image: './assets/avatars/blob/thumbnail.png' },
   { id: 'short-slime', name: 'Slime', image: './assets/avatars/short-slime/thumbnail.png' },
   { id: 'rounded-square', name: 'Cubee', image: './assets/avatars/rounded-square/thumbnail.png' },
+  { id: 'cloud', name: 'Cloud', image: './assets/avatars/cloud/thumbnail.png' },
+  { id: 'triangle', name: 'Triangle', image: './assets/avatars/triangle/thumbnail.png' },
 ] as const
 export type AvatarId = (typeof AVATARS)[number]['id']
 export type AvatarProfile = { avatar: AvatarId; name: string; color: string }

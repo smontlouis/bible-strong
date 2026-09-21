@@ -1,3 +1,4 @@
+import { defaultNavigation, inPolygon, type NavigationDocument } from './world'
 import { parseProfile, type AvatarProfile } from './avatar-profile'
 
 export const MESSAGE_LIMIT = 500
@@ -5,9 +6,14 @@ export type GuestbookSubmission = { id: string; profile: AvatarProfile; message:
 export type GuestbookEntry = GuestbookSubmission & { createdAt: number }
 export type GuestbookPage = { entries: GuestbookEntry[]; cursor: number | null }
 
-/** Reachable rim around the central book, in source-image coordinates. */
-export function nearGuestbook(point: { x: number; y: number }) {
-  return ((point.x - 836) / 135) ** 2 + ((point.y - 470) / 90) ** 2 <= 1
+/** The whole central island activates the book; connecting bridges stay separate. */
+export function nearGuestbook(
+  point: { x: number; y: number },
+  navigation: NavigationDocument = defaultNavigation
+) {
+  return navigation.zones.some(
+    zone => zone.id === 'land-0' && zone.kind === 'allowed' && inPolygon(point, zone.points)
+  )
 }
 
 export function parseSubmission(value: unknown): GuestbookSubmission | null {

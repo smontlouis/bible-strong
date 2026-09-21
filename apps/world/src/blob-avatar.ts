@@ -11,7 +11,7 @@ const DISPLAY_SIZE = { down: 52, up: 52, right: 65 } as const
 type Facing = 'down' | 'up' | 'right' | 'left'
 
 export function loadBlobAvatar(scene: Phaser.Scene) {
-  for (const shape of ['blob', 'short-slime', 'rounded-square']) {
+  for (const shape of ['blob', 'short-slime', 'rounded-square', 'cloud', 'triangle']) {
     for (const direction of ['down', 'up', 'right']) {
       scene.load.spritesheet(`${shape}-${direction}`, `${ROOT}/${shape}/${direction}.png`, {
         frameWidth: 256,
@@ -55,16 +55,18 @@ export class BlobAvatar {
     }
     // Opposite keys can briefly cancel each other during a turn.
     this.stoppedFor = moving ? 0 : this.stoppedFor + delta
-    const animated = !reducedMotion && (moving || this.stoppedFor < STOP_GRACE_MS)
+    const floating = avatar === 'cloud'
+    const frameRate = floating ? 12 : FRAME_RATE
+    const animated = !reducedMotion && (floating || moving || this.stoppedFor < STOP_GRACE_MS)
     const frameCount = avatar === 'nova' ? 24 : 15
-    const cycleMs = (frameCount / FRAME_RATE) * 1000
+    const cycleMs = (frameCount / frameRate) * 1000
     this.elapsed = animated
-      ? (this.elapsed + (moving ? Math.min(delta, 50) : 0)) % cycleMs
+      ? (this.elapsed + (moving || floating ? Math.min(delta, 50) : 0)) % cycleMs
       : 0
     const sheet = this.facing === 'left' ? 'right' : this.facing
     const shape = avatar === 'nova' ? 'blob' : avatar
     const texture = `${shape}-${animated ? '' : 'idle-'}${sheet}`
-    const frame = animated ? Math.floor((this.elapsed * FRAME_RATE) / 1000) % frameCount : '__BASE'
+    const frame = animated ? Math.floor((this.elapsed * frameRate) / 1000) % frameCount : '__BASE'
     if (sprite.texture.key !== texture) sprite.setTexture(texture, frame)
     else if (String(sprite.frame.name) !== String(frame)) sprite.setFrame(frame)
     sprite

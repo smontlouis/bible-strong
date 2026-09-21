@@ -1,8 +1,17 @@
+import { GuestbookStore } from './guestbook-store'
+import type { GuestbookAdminEnv } from './guestbook-auth'
+import {
+  deliverNotification,
+  notificationsConfigured,
+  retryDelay,
+  type NotificationEnv,
+} from './guestbook-notifications'
+import type { AdminFilter } from '../src/guestbook-admin'
 import { DurableObject } from 'cloudflare:workers'
 import { parseSubmission, type GuestbookEntry } from '../src/guestbook'
 import { moderateGuestbook, GUESTBOOK_POLICY_VERSION } from './guestbook-moderation'
 
-export interface GuestbookEnv {
+export interface GuestbookEnv extends GuestbookAdminEnv, NotificationEnv {
   Guestbook: DurableObjectNamespace<Guestbook>
   AI_GATEWAY_API_KEY?: string
 }
@@ -10,6 +19,7 @@ const json = (body: unknown, status = 200) =>
   Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } })
 
 export class Guestbook extends DurableObject<GuestbookEnv> {
+  private store: GuestbookStore
   private pending = new Map<string, Promise<Response>>()
   constructor(ctx: DurableObjectState, env: GuestbookEnv) {
     super(ctx, env)
@@ -19,6 +29,7 @@ export class Guestbook extends DurableObject<GuestbookEnv> {
     ctx.storage.sql.exec(
       `CREATE TABLE IF NOT EXISTS attempts (client TEXT PRIMARY KEY, window INTEGER NOT NULL, count INTEGER NOT NULL)`
     )
+    this.store = new GuestbookStore(ctx.storage.sql)
   }
   async fetch(request: Request): Promise<Response> {
     const sql = this.ctx.storage.sql
@@ -26,16 +37,7 @@ export class Guestbook extends DurableObject<GuestbookEnv> {
       const raw = new URL(request.url).searchParams.get('cursor')
       const cursor = raw === null ? Number.MAX_SAFE_INTEGER : Number(raw)
       if (!Number.isSafeInteger(cursor) || cursor < 1) return json({ error: 'invalid' }, 400)
-      const rows = sql
-        .exec<{
-          seq: number
-          payload: string
-        }>('SELECT seq, payload FROM entries WHERE seq < ? ORDER BY seq DESC LIMIT 21', cursor)
-        .toArray()
-      return json({
-        entries: rows.slice(0, 20).map(row => JSON.parse(row.payload)),
-        cursor: rows.length > 20 ? rows[19].seq : null,
-      })
+      return json(this.store.list(cursor))
     }
     if (request.method !== 'POST') return json({ error: 'method' }, 405)
     let submission
@@ -55,6 +57,8 @@ export class Guestbook extends DurableObject<GuestbookEnv> {
         JSON.stringify(entry.profile) !== JSON.stringify(submission.profile)
       )
         return json({ error: 'conflict' }, 409)
+      if (this.store.removed(entry.id)) return json({ error: 'removed' }, 410)
+      await this.scheduleNotifications()
       return json({ entry })
     }
     const active = this.pending.get(submission.id)
@@ -80,12 +84,20 @@ export class Guestbook extends DurableObject<GuestbookEnv> {
       const result = await moderateGuestbook(submission, this.env.AI_GATEWAY_API_KEY)
       if (result !== 'accepted') return json({ error: result }, result === 'rejected' ? 422 : 503)
       const entry: GuestbookEntry = { ...submission, createdAt: Date.now() }
-      sql.exec(
-        'INSERT INTO entries (id, payload, policy) VALUES (?, ?, ?)',
-        entry.id,
-        JSON.stringify(entry),
-        GUESTBOOK_POLICY_VERSION
-      )
+      // Reserve a durable wake-up before committing the entry and its outbox row.
+      // There is no external email I/O on this publication path.
+      const alarm = await this.ctx.storage.getAlarm()
+      if (alarm === null || alarm > Date.now() + 1000)
+        await this.ctx.storage.setAlarm(Date.now() + 1000)
+      this.ctx.storage.transactionSync(() => {
+        sql.exec(
+          'INSERT INTO entries (id, payload, policy) VALUES (?, ?, ?)',
+          entry.id,
+          JSON.stringify(entry),
+          GUESTBOOK_POLICY_VERSION
+        )
+        this.store.enqueue(entry.id)
+      })
       return json({ entry }, 201)
     })()
     this.pending.set(submission.id, operation)
@@ -93,6 +105,41 @@ export class Guestbook extends DurableObject<GuestbookEnv> {
       return await operation
     } finally {
       this.pending.delete(submission.id)
+    }
+  }
+  async adminList(cursor: number, filter: AdminFilter, id?: string) {
+    await this.scheduleNotifications()
+    return {
+      ...this.store.list(cursor, filter, true, id),
+      notificationsConfigured: notificationsConfigured(this.env),
+      pendingNotifications: this.store.pendingCount(),
+    }
+  }
+  adminSetVisibility(id: string, removed: boolean, actor: string) {
+    return this.store.setVisibility(id, removed, actor)
+  }
+  private async scheduleNotifications() {
+    const next = this.store.nextAttempt()
+    if (next === null) return
+    const scheduled = await this.ctx.storage.getAlarm()
+    const target = Math.max(Date.now() + 1000, next)
+    if (scheduled === null || target < scheduled) await this.ctx.storage.setAlarm(target)
+  }
+  async alarm() {
+    try {
+      for (const row of this.store.due()) {
+        const result = await deliverNotification(JSON.parse(row.payload), this.env)
+        const attempts = row.attempts + (result === 'unconfigured' ? 0 : 1)
+        this.store.delivery(
+          row.entry_id,
+          result === 'sent',
+          attempts,
+          Date.now() + (result === 'unconfigured' ? 3_600_000 : retryDelay(attempts)),
+          result === 'sent' ? null : result
+        )
+      }
+    } finally {
+      await this.scheduleNotifications()
     }
   }
 }

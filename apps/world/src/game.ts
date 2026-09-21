@@ -1,3 +1,4 @@
+import { islandActions, type IslandActionId } from './island-actions'
 import { nearGuestbook } from './guestbook'
 import { chooseCentralSpawn } from './multiplayer-spawn'
 import { WorldMultiplayer } from './multiplayer'
@@ -48,7 +49,7 @@ export type WorldState = {
 export type Controls = {
   multiplayerEnabled?: boolean
   retryMultiplayer?: () => void
-  discoveryAction?: HTMLButtonElement | null
+  discoveryActions?: Partial<Record<IslandActionId, HTMLButtonElement | null>>
   ambientEditor?: AmbientEditorModel
   shoreEditor?: ShoreEditorModel
   shoreZoom?: number
@@ -129,7 +130,8 @@ export function createWorld(
     }
 
     create() {
-      this.position = chooseCentralSpawn(controls.navigation, []) ?? findSafePosition(SPAWN, controls.navigation) ?? { ...SPAWN }
+      this.position = chooseCentralSpawn(controls.navigation, []) ??
+        findSafePosition(SPAWN, controls.navigation) ?? { ...SPAWN }
       this.background = new WorldBackground(this)
       this.ambience = new WorldAmbience(this, controls.ambientEditor)
       this.clouds = new WorldClouds(this)
@@ -160,10 +162,16 @@ export function createWorld(
         .setDisplaySize(52, 52)
       // Keep the label above scenery and clouds, independently of the avatar's depth.
       this.nameTagBackground = this.add.graphics().setDepth(4000)
-      this.nameTag = this.add.text(SPAWN.x, SPAWN.y + 5, '', {
-        fontFamily: 'Pulp, sans-serif', fontSize: '12px', color: '#193d49',
-        padding: { x: 5, y: 3 },
-      }).setOrigin(0.5, 0).setResolution(rendererResolution).setDepth(4001)
+      this.nameTag = this.add
+        .text(SPAWN.x, SPAWN.y + 5, '', {
+          fontFamily: 'Pulp, sans-serif',
+          fontSize: '12px',
+          color: '#193d49',
+          padding: { x: 5, y: 3 },
+        })
+        .setOrigin(0.5, 0)
+        .setResolution(rendererResolution)
+        .setDepth(4001)
       this.debugLayer = this.add.graphics().setDepth(3000)
       // Global key capture blocks typing in DOM inputs even when this scene is paused.
       this.keys = this.input.keyboard!.addKeys('UP,DOWN,LEFT,RIGHT,W,A,S,D,Z,Q', false) as Record<
@@ -228,7 +236,8 @@ export function createWorld(
       this.network.update(
         { ...next, dx: this.facing.x, dy: this.facing.y, moving },
         { avatar: controls.avatar, name: controls.avatarName, color: controls.avatarColor },
-        controls.multiplayerEnabled !== false, performance.now(),
+        controls.multiplayerEnabled !== false,
+        performance.now()
       )
       if (moving) this.gait += delta / 100
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -240,9 +249,10 @@ export function createWorld(
         .setDepth(next.y)
       if (this.nameTag.text !== controls.avatarName) {
         this.nameTag.setText(controls.avatarName)
-        this.nameTagBackground.clear().fillStyle(0xfff9ea, 1).fillRoundedRect(
-          -this.nameTag.width / 2, 0, this.nameTag.width, this.nameTag.height, 4,
-        )
+        this.nameTagBackground
+          .clear()
+          .fillStyle(0xfff9ea, 1)
+          .fillRoundedRect(-this.nameTag.width / 2, 0, this.nameTag.width, this.nameTag.height, 4)
       }
       this.shadow.setPosition(next.x, next.y)
 
@@ -269,15 +279,26 @@ export function createWorld(
       const fade = Phaser.Math.Clamp((relativeZoom - 0.65) / 0.2, 0, 1)
       const targetAlpha = controls.avatarName ? fade * fade * (3 - 2 * fade) : 0
       const labelAlpha = Phaser.Math.Linear(
-        this.nameTag.alpha, targetAlpha, 1 - Math.exp(-Math.min(delta, 50) / 100),
+        this.nameTag.alpha,
+        targetAlpha,
+        1 - Math.exp(-Math.min(delta, 50) / 100)
       )
       for (const label of [this.nameTag, this.nameTagBackground]) {
-        label.setPosition(next.x, next.y + 5 * labelScaleY)
+        label
+          .setPosition(next.x, next.y + 5 * labelScaleY)
           .setScale(labelScaleX, labelScaleY)
           .setAlpha(labelAlpha)
           .setVisible(Boolean(controls.avatarName) && labelAlpha > 0.01)
       }
-      this.remoteAvatars.update(this.network, performance.now(), delta, reducedMotion, labelScaleX, labelScaleY, fade * fade * (3 - 2 * fade))
+      this.remoteAvatars.update(
+        this.network,
+        performance.now(),
+        delta,
+        reducedMotion,
+        labelScaleX,
+        labelScaleY,
+        fade * fade * (3 - 2 * fade)
+      )
       const targetX = controls.overview ? WIDTH / 2 : next.x
       const targetY = controls.overview ? HEIGHT / 2 : next.y - 38 / zoom
       const halfWidth = screenWidth / zoom / 2,
@@ -294,25 +315,27 @@ export function createWorld(
         camera.scrollX += (centerX - screenWidth / 2 - camera.scrollX) * smoothing
         camera.scrollY += (centerY - screenHeight / 2 - camera.scrollY) * smoothing
       }
-      const action = controls.discoveryAction
-      if (action) {
-        // Match Phaser's centered zoom, then convert renderer pixels to CSS pixels.
-        const scaleX = parent.clientWidth / screenWidth
-        const scaleY = parent.clientHeight / screenHeight
-        const avatarX = ((next.x - camera.scrollX - screenWidth / 2) * zoom + screenWidth / 2) * scaleX
-        const avatarY = ((next.y - bounce - camera.scrollY - screenHeight / 2) * zoom + screenHeight / 2) * scaleY
-        const x = Phaser.Math.Clamp(
-          avatarX + 28 * zoom * scaleX + 10,
-          8,
-          Math.max(8, parent.clientWidth - action.offsetWidth - 8)
-        )
-        const y = Phaser.Math.Clamp(
-          avatarY - 30 * zoom * scaleY - action.offsetHeight / 2,
-          8,
-          Math.max(8, parent.clientHeight - action.offsetHeight - 8)
-        )
-        action.style.transform = `translate3d(${x}px, ${y}px, 0)`
-        action.style.visibility = (station || nearGuestbook(next)) && !controls.paused ? 'visible' : 'hidden'
+      const activeAction = nearGuestbook(next, controls.navigation) ? 'guestbook' : station?.id
+      for (const anchor of islandActions) {
+        const action = controls.discoveryActions?.[anchor.id]
+        if (!action) continue
+        // Project a fixed island anchor, independently of the avatar and its bounce.
+        const x =
+          (((anchor.x - camera.scrollX - screenWidth / 2) * zoom + screenWidth / 2) *
+            parent.clientWidth) /
+          screenWidth
+        const y =
+          (((anchor.y - camera.scrollY - screenHeight / 2) * zoom + screenHeight / 2) *
+            parent.clientHeight) /
+          screenHeight
+        action.style.translate = `${x - action.offsetWidth / 2}px ${y - action.offsetHeight / 2}px`
+        const visible = anchor.id === activeAction && !controls.paused
+        const value = String(visible)
+        if (action.dataset.visible !== value) {
+          action.dataset.visible = value
+          action.disabled = !visible
+          action.setAttribute('aria-hidden', String(!visible))
+        }
       }
       this.shoreWaves?.update(
         delta,
