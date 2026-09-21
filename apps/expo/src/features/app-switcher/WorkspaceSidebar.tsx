@@ -248,7 +248,7 @@ const WorkspaceSidebar = ({
                         }}
                       >
                         {group.isDefault && (
-                          <SidebarHoverActions>
+                          <SidebarHoverActions showOnTouch={false}>
                             {showActions => (
                               <HStack
                                 className="border-continuous overflow-visible items-center rounded-[8px]"
@@ -312,7 +312,7 @@ const WorkspaceSidebar = ({
                               tabId={tab.id}
                               title={tab.title}
                             >
-                              <SidebarHoverActions>
+                              <SidebarHoverActions showOnTouch={false}>
                                 {showActions => (
                                   <HStack
                                     className="border-continuous overflow-visible items-center rounded-[8px]"
@@ -364,6 +364,7 @@ const WorkspaceSidebar = ({
                                           { opacity: selected || showActions ? 1 : 0 },
                                         ]}
                                         onPress={() => closeTab(group, tab.id)}
+                                        disabled={!selected && !showActions}
                                         accessibilityRole="button"
                                         accessibilityLabel={t('workspace.closeTab', {
                                           title: tab.title,

@@ -1,7 +1,13 @@
 import { useEffect, useState, type ReactNode } from 'react'
 
 /** Mouse hover and keyboard focus reveal actions without making each row a tab stop. */
-const HoverActionsRow = ({ children }: { children: (showActions: boolean) => ReactNode }) => {
+const HoverActionsRow = ({
+  children,
+  showOnTouch = true,
+}: {
+  children: (showActions: boolean) => ReactNode
+  showOnTouch?: boolean
+}) => {
   const [hovered, setHovered] = useState(false)
   const [focused, setFocused] = useState(false)
   const [touched, setTouched] = useState(false)
@@ -25,9 +31,12 @@ const HoverActionsRow = ({ children }: { children: (showActions: boolean) => Rea
       onPointerLeave={() => setHovered(false)}
       onFocus={event => setFocused(event.target.matches(':focus-visible'))}
       onBlur={() => setFocused(false)}
-      onTouchStart={() => setTouched(true)}
+      onTouchStart={() => {
+        setHovered(false)
+        setTouched(true)
+      }}
     >
-      {children(touchOnly || hovered || focused || touched)}
+      {children(hovered || focused || (showOnTouch && (touchOnly || touched)))}
     </div>
   )
 }

@@ -1,8 +1,12 @@
 import type { ReactNode } from 'react'
 
-/** Native touch layouts keep secondary actions visible. */
-const HoverActionsRow = ({ children }: { children: (showActions: boolean) => ReactNode }) => (
-  <>{children(true)}</>
-)
+/** Touch actions stay visible unless the caller handles visibility through selection. */
+const HoverActionsRow = ({
+  children,
+  showOnTouch = true,
+}: {
+  children: (showActions: boolean) => ReactNode
+  showOnTouch?: boolean
+}) => <>{children(showOnTouch)}</>
 
 export default HoverActionsRow
