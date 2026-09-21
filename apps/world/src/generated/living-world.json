@@ -1,0 +1,112 @@
+[
+  {
+    "id": "living-mouette",
+    "x": 64.91927083333334,
+    "y": 386.01953125,
+    "width": 24.595703125,
+    "height": 21.5,
+    "frameCount": 120,
+    "frameRate": 12,
+    "sourceTile": "4/0-3",
+    "depth": -70
+  },
+  {
+    "id": "living-escargot",
+    "x": 189.6484375,
+    "y": 297.66015625,
+    "width": 25.02734375,
+    "height": 14.61328125,
+    "frameCount": 120,
+    "frameRate": 12,
+    "sourceTile": "4/1-2",
+    "depth": 317.1
+  },
+  {
+    "id": "living-lapin",
+    "x": 399.12109375,
+    "y": 290.7734375,
+    "width": 25.53125,
+    "height": 35.10546875,
+    "frameCount": 120,
+    "frameRate": 12,
+    "sourceTile": "4/3-2",
+    "depth": 325.1
+  },
+  {
+    "id": "living-papillons",
+    "x": 294.1328125,
+    "y": 419.27734375,
+    "width": 58.95703125,
+    "height": 34.9375,
+    "frameCount": 120,
+    "frameRate": 12,
+    "sourceTile": "4/2-3",
+    "depth": 634.1
+  },
+  {
+    "id": "living-rougegorge",
+    "x": 1492.32421875,
+    "y": 294.63671875,
+    "width": 28.38671875,
+    "height": 24.1875,
+    "frameCount": 120,
+    "frameRate": 12,
+    "sourceTile": "4/11-2",
+    "depth": 337.1
+  },
+  {
+    "id": "living-oiseaux",
+    "x": 1300.6640625,
+    "y": 439.265625,
+    "width": 87.17578125,
+    "height": 38.96875,
+    "frameCount": 120,
+    "frameRate": 12,
+    "sourceTile": "4/10-3",
+    "depth": 692.1
+  },
+  {
+    "id": "living-papillon-lanterne",
+    "x": 1234.4765625,
+    "y": 562.73046875,
+    "width": 22.5078125,
+    "height": 24.01953125,
+    "frameCount": 120,
+    "frameRate": 12,
+    "sourceTile": "4/9-4",
+    "depth": 692.2
+  },
+  {
+    "id": "living-abeille",
+    "x": 707.0234375,
+    "y": 673.26171875,
+    "width": 22.171875,
+    "height": 26.37109375,
+    "frameCount": 120,
+    "frameRate": 12,
+    "sourceTile": "4/5-5",
+    "depth": 748.1
+  },
+  {
+    "id": "living-grenouille",
+    "x": 1228.93359375,
+    "y": 853.8359375,
+    "width": 26.03515625,
+    "height": 29.39453125,
+    "frameCount": 120,
+    "frameRate": 12,
+    "sourceTile": "4/9-6",
+    "depth": -70
+  },
+  {
+    "id": "living-nid",
+    "x": 1487.95703125,
+    "y": 71.61197916666666,
+    "width": 19.8203125,
+    "height": 18.739583333333336,
+    "frameCount": 120,
+    "frameRate": 12,
+    "sourceTile": "4/11-0",
+    "depth": 240.1
+  }
+]

@@ -3,9 +3,8 @@ import type Phaser from 'phaser'
 import type { Point } from './world'
 
 const ROOT = './assets/avatars'
-const FRAME_COUNT = 24
 const FRAME_RATE = 24
-const CYCLE_MS = (FRAME_COUNT / FRAME_RATE) * 1000
+const STOP_GRACE_MS = 120
 // Side frames need more transparent padding to contain their exaggerated poses.
 // Match visible body/eye size, rather than rendering both padded sheets at 52px.
 const DISPLAY_SIZE = { down: 52, up: 52, right: 65 } as const
@@ -27,10 +26,12 @@ export function loadBlobAvatar(scene: Phaser.Scene) {
 export class BlobAvatar {
   private facing: Facing = 'down'
   private elapsed = 0
+  private stoppedFor = STOP_GRACE_MS
 
   reset() {
     this.facing = 'down'
     this.elapsed = 0
+    this.stoppedFor = STOP_GRACE_MS
   }
 
   update(
@@ -50,20 +51,32 @@ export class BlobAvatar {
           : direction.y < 0
             ? 'up'
             : 'down'
-      if (facing !== this.facing) this.elapsed = 0
       this.facing = facing
     }
-    const animated = moving && !reducedMotion
-    this.elapsed = animated ? (this.elapsed + Math.min(delta, 50)) % CYCLE_MS : 0
+    // Opposite keys can briefly cancel each other during a turn.
+    this.stoppedFor = moving ? 0 : this.stoppedFor + delta
+    const animated = !reducedMotion && (moving || this.stoppedFor < STOP_GRACE_MS)
+    const frameCount = avatar === 'nova' ? 24 : 15
+    const cycleMs = (frameCount / FRAME_RATE) * 1000
+    this.elapsed = animated
+      ? (this.elapsed + (moving ? Math.min(delta, 50) : 0)) % cycleMs
+      : 0
     const sheet = this.facing === 'left' ? 'right' : this.facing
     const shape = avatar === 'nova' ? 'blob' : avatar
     const texture = `${shape}-${animated ? '' : 'idle-'}${sheet}`
-    const frame = animated ? Math.floor((this.elapsed * FRAME_RATE) / 1000) % FRAME_COUNT : '__BASE'
+    const frame = animated ? Math.floor((this.elapsed * FRAME_RATE) / 1000) % frameCount : '__BASE'
     if (sprite.texture.key !== texture) sprite.setTexture(texture, frame)
     else if (String(sprite.frame.name) !== String(frame)) sprite.setFrame(frame)
     sprite
       .setFlipX(this.facing === 'left')
-      .setOrigin(0.5, avatar !== 'nova' ? 229 / 256 : sheet === 'right' ? 218 / 224 : 550 / 576)
+      .setOrigin(
+        0.5,
+        avatar !== 'nova'
+          ? 233 / 256
+          : sheet === 'right'
+            ? 218 / 224
+            : 550 / 576
+      )
       .setDisplaySize(
         avatar !== 'nova' ? 52 : DISPLAY_SIZE[sheet],
         avatar !== 'nova' ? 52 : DISPLAY_SIZE[sheet]

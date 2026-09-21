@@ -1,0 +1,12 @@
+[
+  { "id": "living-mouette", "sourceTile": "4/0-3", "region": [0.45, 0.0, 0.75, 0.24], "depth": -70 },
+  { "id": "living-escargot", "sourceTile": "4/1-2", "region": [0.43, 0.28, 0.70, 0.50], "depth": 317.1 },
+  { "id": "living-lapin", "sourceTile": "4/3-2", "region": [0.08, 0.22, 0.36, 0.60], "depth": 325.1 },
+  { "id": "living-papillons", "sourceTile": "4/2-3", "region": [0.28, 0.23, 0.80, 0.67], "depth": 634.1 },
+  { "id": "living-rougegorge", "sourceTile": "4/11-2", "region": [0.59, 0.24, 0.92, 0.56], "depth": 337.1 },
+  { "id": "living-oiseaux", "sourceTile": "4/10-3", "region": [0.12, 0.38, 0.88, 0.79], "depth": 692.1 },
+  { "id": "living-papillon-lanterne", "sourceTile": "4/9-4", "region": [0.58, 0.32, 0.86, 0.61], "depth": 692.2 },
+  { "id": "living-abeille", "sourceTile": "4/5-5", "region": [0.49, 0.19, 0.75, 0.47], "depth": 748.1 },
+  { "id": "living-grenouille", "sourceTile": "4/9-6", "region": [0.54, 0.60, 0.87, 0.93], "depth": -70 },
+  { "id": "living-nid", "sourceTile": "4/11-0", "region": [0.58, 0.51, 0.83, 0.74], "depth": 240.1 }
+]

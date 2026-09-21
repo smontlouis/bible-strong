@@ -1,3 +1,5 @@
+import { routeGuestbook, type GuestbookEnv } from './guestbook'
+export { Guestbook } from './guestbook'
 import navigationJson from '../public/navigation/archipelago.json'
 import { parseNavigation } from '../src/navigation-document'
 import { chooseCentralSpawn } from '../src/multiplayer-spawn'
@@ -13,7 +15,7 @@ import {
 const navigation = parseNavigation(navigationJson)
 
 type Session = { player: Player | null; lastSeen: number; window: number; messages: number }
-interface Env {
+interface Env extends GuestbookEnv {
   WorldRoom: DurableObjectNamespace<WorldRoom>
   ALLOWED_ORIGINS?: string
 }
@@ -152,11 +154,28 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url)
     if (url.pathname === '/health') return Response.json({ ok: true })
-    if (url.pathname !== `/parties/world-room/${ROOM}`)
-      return new Response('Not found', { status: 404 })
     const origin = request.headers.get('Origin')
     const allowed = [url.origin, ...(env.ALLOWED_ORIGINS ?? '').split(',').map(s => s.trim())]
     if (origin && !allowed.includes(origin)) return new Response('Forbidden', { status: 403 })
+    if (url.pathname === '/api/guestbook') {
+      if (request.method === 'OPTIONS')
+        return new Response(null, {
+          status: 204,
+          headers: {
+            'Access-Control-Allow-Origin': origin || url.origin,
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            Vary: 'Origin',
+          },
+        })
+      const result = await routeGuestbook(request, env)
+      const response = new Response(result.body, result)
+      response.headers.set('Access-Control-Allow-Origin', origin || url.origin)
+      response.headers.set('Vary', 'Origin')
+      return response
+    }
+    if (url.pathname !== `/parties/world-room/${ROOM}`)
+      return new Response('Not found', { status: 404 })
     if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket')
       return new Response('WebSocket required', { status: 426 })
     // Connection routing identifiers are generated here, never trusted from the URL.

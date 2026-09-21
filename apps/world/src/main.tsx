@@ -1,3 +1,5 @@
+import { GuestbookDialog } from './GuestbookDialog'
+import { nearGuestbook } from './guestbook'
 import { createAmbientEditor, ambientKinds } from './ambient-zones'
 import { AmbientEditorPanel, EditorNavigation, editorCopy, type EditorMode } from './WorldEditor'
 import { createShoreEditor } from './shorelines'
@@ -6,6 +8,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import nipplejs from 'nipplejs'
 import { clampCameraZoom } from './camera-zoom'
+import { ControlIcon } from './ControlIcon'
 import { createWorld, type Controls, type WorldState } from './game'
 import { defaultNavigation, SPAWN, stations } from './world'
 import { loadNavigation, navigationFingerprint } from './navigation-document'
@@ -109,7 +112,7 @@ function CameraControls({
         aria-label={overview ? labels.follow : labels.overview}
         aria-pressed={overview}
       >
-        {overview ? '◎' : '⌘'}
+        <ControlIcon name={overview ? 'follow' : 'overview'} />
       </button>
       <button
         aria-label={labels.zoomIn}
@@ -118,7 +121,7 @@ function CameraControls({
           setOverview(false)
         }}
       >
-        +
+        <ControlIcon name="plus" />
       </button>
       <button
         aria-label={labels.zoomOut}
@@ -127,7 +130,7 @@ function CameraControls({
           setOverview(false)
         }}
       >
-        −
+        <ControlIcon name="minus" />
       </button>
       <button
         aria-label={labels.home}
@@ -136,7 +139,7 @@ function CameraControls({
           setOverview(false)
         }}
       >
-        ↺
+        <ControlIcon name="reset" />
       </button>
     </nav>
   )
@@ -189,6 +192,8 @@ function App() {
   const [debug, setDebug] = useState(() => new URLSearchParams(location.search).has('debug'))
   const [diagnosticFilters, setDiagnosticFilters] = useState(() => makeDiagnosticFilters())
   const [language, setLanguage] = useState<Language>('fr')
+  const [guestbookOpen, setGuestbookOpen] = useState(false)
+  const atGuestbook = nearGuestbook(state)
   const [opened, setOpened] = useState<WorldState['station']>(null)
   const [visited, setVisited] = useState(loadVisitedPlaces)
   useEffect(() => {
@@ -265,11 +270,11 @@ function App() {
     controls.current.overview = overview
     controls.current.debug = debug
     controls.current.diagnosticFilters = diagnosticFilters
-    controls.current.paused = Boolean(opened) || Boolean(editorMode) || profileOpen
+    controls.current.paused = Boolean(opened) || guestbookOpen || Boolean(editorMode) || profileOpen
     controls.current.multiplayerEnabled = !editorMode
     controls.current.navigation = navigation
     controls.current.direction = { x: 0, y: 0 }
-  }, [profile, profileOpen, overview, debug, diagnosticFilters, opened, editorMode, navigation])
+  }, [profile, profileOpen, overview, debug, diagnosticFilters, opened, guestbookOpen, editorMode, navigation])
   useEffect(() => {
     document.documentElement.lang = language
   }, [language])
@@ -301,12 +306,18 @@ function App() {
       ambientEditor.mode = 'select'
       ambientEditor.notify()
     }
-    controls.current.paused = Boolean(mode) || Boolean(opened) || profileOpen
+    controls.current.paused = Boolean(mode) || Boolean(opened) || guestbookOpen || profileOpen
     controls.current.direction = { x: 0, y: 0 }
     setEditorMode(mode)
   }
 
   function discover() {
+    if (atGuestbook) {
+      controls.current.paused = true
+      controls.current.direction = { x: 0, y: 0 }
+      setGuestbookOpen(true)
+      return
+    }
     if (!state.station) return
     controls.current.paused = true
     controls.current.direction = { x: 0, y: 0 }
@@ -321,7 +332,7 @@ function App() {
       <div className="world-canvas" ref={host} aria-label="Bible Strong — archipel" />
       <header className="world-header">
         <div className="world-brand">
-          <span className="brand-mark">●</span>
+          <span className="brand-mark" aria-hidden="true" />
           <div>
             <strong>{t.brand}</strong>
             <small>{t.title}</small>
@@ -358,10 +369,11 @@ function App() {
           controls.current.discoveryAction = element
         }}
         className="discover-button"
-        disabled={!ready || !state.station}
+        disabled={!ready || (!state.station && !atGuestbook)}
+        aria-haspopup="dialog"
         onClick={discover}
       >
-        {t.explore} →
+        {atGuestbook ? (language === 'fr' ? 'Signer le livre d’or' : 'Sign the guestbook') : t.explore} →
       </button>
       <aside className="world-bottom">
         <div className="joystick-zone" ref={joystick} role="group" aria-label={t.joystick} />
@@ -467,6 +479,7 @@ function App() {
           }}
         />
       )}
+      {guestbookOpen && <GuestbookDialog language={language} profile={profile} onClose={() => setGuestbookOpen(false)} />}
       {opened?.id === 'lexicon' && (
         <LexiconDiscovery language={language} onClose={() => setOpened(null)} />
       )}

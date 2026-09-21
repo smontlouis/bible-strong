@@ -58,3 +58,21 @@ Diagnostic now includes independent category toggles for navigation, scenery cut
 The procedural water ripple effect was subsequently removed at the user's request, along with its Diagnostic category. Animated fish/duck water patches and the static repeating background remain unchanged.
 
 Butterflies now bank toward their horizontal path velocity, capped at ±30 degrees. A 280 ms exponential response softens turns and returns them upright as lateral movement slows. The complete four-wing silhouette and body rotate together; paused/offscreen clocks retain existing behavior.
+
+## Central book
+
+The original central book now plays the approved ten-second MiniMax page-turn sequence at 12 fps,
+then rests for a newly sampled 2–5 seconds before each replay. `src/central-book.ts` advances both
+the frames and the rest on one scene-local clock: offscreen, world pause, and focus loss freeze
+both; reduced motion reveals the original static map. Its depth is 489.1, directly above the
+central table cutout, so normal avatar occlusion is preserved.
+
+The offline source, crop coordinates, MiniMax request, silent master and SAM 3 segmentation are
+kept in `art-workbench/experiments/central-book-v1/`. Rebuild with
+`node scripts/build-central-book.mjs` from the World workspace. The book mask includes the first
+frame's footprint to avoid exposing the static book through moving pages. Three transparent WebP
+atlases (about 1.7 MiB total, each below 2048 pixels per side) ship to the browser. The final hold
+uses the first texture for a stable restart. No video, audio or inference runs in the browser.
+
+Tests cover fresh delay sampling, frozen frame/rest clocks, reduced-motion fallback, transparent
+asset bounds, visible cream pages and matching resting poses.

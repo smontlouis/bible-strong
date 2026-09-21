@@ -1,0 +1,34 @@
+{
+  "frameCount": 120,
+  "frameRate": 12,
+  "x": 763.5905172413793,
+  "y": 356.3984375,
+  "width": 145.2801724137931,
+  "height": 114.1875,
+  "depth": 489.1,
+  "pages": [
+    {
+      "key": "book-0",
+      "firstFrame": 0,
+      "frameCount": 48
+    },
+    {
+      "key": "book-1",
+      "firstFrame": 48,
+      "frameCount": 48
+    },
+    {
+      "key": "book-2",
+      "firstFrame": 96,
+      "frameCount": 24
+    }
+  ],
+  "sourceCrop": {
+    "left": 150,
+    "top": 15,
+    "width": 630,
+    "height": 504,
+    "videoWidth": 928,
+    "videoHeight": 768
+  }
+}

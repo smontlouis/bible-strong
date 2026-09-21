@@ -73,7 +73,7 @@ for (const [direction, file] of Object.entries({ down: 'face', right: 'droite', 
         .png()
         .toBuffer()
       await writeFile(resolve(out, `idle-${direction}.png`), idleFrame)
-      if (direction === 'down') await writeFile(resolve(out, 'thumbnail.png'), idleFrame)
+      if (direction === 'down') await writeFile(resolve(out, 'thumbnail.png'), idle)
     }
   }
   await sharp({ create: { width: 1536, height: 1024, channels: 4, background: '#00000000' } })

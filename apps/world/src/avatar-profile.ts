@@ -1,8 +1,8 @@
 export const PROFILE_KEY = 'bible-strong.world.profile.v1'
 export const AVATARS = [
-  { id: 'nova', name: 'Citron', image: './assets/avatars/blob/thumbnail.png' },
-  { id: 'short-slime', name: 'Short slime', image: './assets/avatars/short-slime/thumbnail.png' },
-  { id: 'rounded-square', name: 'Cubo', image: './assets/avatars/rounded-square/thumbnail.png' },
+  { id: 'nova', name: 'Bean', image: './assets/avatars/blob/thumbnail.png' },
+  { id: 'short-slime', name: 'Slime', image: './assets/avatars/short-slime/thumbnail.png' },
+  { id: 'rounded-square', name: 'Cubee', image: './assets/avatars/rounded-square/thumbnail.png' },
 ] as const
 export type AvatarId = (typeof AVATARS)[number]['id']
 export type AvatarProfile = { avatar: AvatarId; name: string; color: string }

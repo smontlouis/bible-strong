@@ -1,0 +1,82 @@
+[
+  {
+    "number": 1,
+    "name": "mouette",
+    "sourceTile": "01-0-3",
+    "generatedPath": "/Users/stephane/.codex/generated_images/01a0c20d-1940-74b1-a772-9bf43f8ada43/exec-c0b7dd1e-afd4-481a-85f2-ac7bff3e95d4.png",
+    "file": "01-mouette.png",
+    "prompt": "Use case: precise-object-edit. Asset: a static first frame for a later localized ambient animation in the Bible Strong illustrated world. Input image is the exact EDIT TARGET, not merely inspiration. Preserve the complete existing background, identical square framing, perspective, every object position, contour, color, water ripple, foliage, lighting and all four tile edges. Add only the requested small animal(s). Match the existing hand-drawn thin dark outlines, flat color fills and simple cel-shaded highlights; friendly restrained storybook aesthetic, not photorealistic or 3D. Keep animal(s) modest in scale and entirely inside frame, with room for gentle future movement. No text, labels, border, motion lines, blur, camera shift, zoom, new scenery or unrelated additions. Render one standalone square edited tile. Add exactly one small white and pale-gray gull with yellow beak and folded wings, perched securely on the upper shoulder of the large foreground rock around 56% x 27% y. Full body visible, about 17% image width, head facing left."
+  },
+  {
+    "number": 2,
+    "name": "escargot",
+    "sourceTile": "02-1-2",
+    "generatedPath": "/Users/stephane/.codex/generated_images/01a0c20d-1940-74b1-a772-9bf43f8ada43/exec-3c017d43-3764-4c98-a9ae-9f8df8eb9ab7.png",
+    "file": "02-escargot.png",
+    "prompt": "Use case: precise-object-edit. Asset: a static first frame for a later localized ambient animation in the Bible Strong illustrated world. Input image is the exact EDIT TARGET, not merely inspiration. Preserve the complete existing background, identical square framing, perspective, every object position, contour, color, water ripple, foliage, lighting and all four tile edges. Add only the requested small animal(s). Match the existing hand-drawn thin dark outlines, flat color fills and simple cel-shaded highlights; friendly restrained storybook aesthetic, not photorealistic or 3D. Keep animal(s) modest in scale and entirely inside frame, with room for gentle future movement. No text, labels, border, motion lines, blur, camera shift, zoom, new scenery or unrelated additions. Render one standalone square edited tile. Add one small ochre spiral-shell snail on the clear yellow ground just left of the book stack around 56% x 47% y. Body and two antennae clearly visible, about 12% image width."
+  },
+  {
+    "number": 3,
+    "name": "lapin",
+    "sourceTile": "03-3-2",
+    "generatedPath": "/Users/stephane/.codex/generated_images/01a0c20d-1940-74b1-a772-9bf43f8ada43/exec-50a1a2c9-4040-4ecc-be3c-3ba3e2b3e6b5.png",
+    "file": "03-lapin.png",
+    "prompt": "Use case: precise-object-edit. Asset: a static first frame for a later localized ambient animation in the Bible Strong illustrated world. Input image is the exact EDIT TARGET, not merely inspiration. Preserve the complete existing background, identical square framing, perspective, every object position, contour, color, water ripple, foliage, lighting and all four tile edges. Add only the requested small animal(s). Match the existing hand-drawn thin dark outlines, flat color fills and simple cel-shaded highlights; friendly restrained storybook aesthetic, not photorealistic or 3D. Keep animal(s) modest in scale and entirely inside frame, with room for gentle future movement. No text, labels, border, motion lines, blur, camera shift, zoom, new scenery or unrelated additions. Render one standalone square edited tile. Add one small cream rabbit sitting on the sandy ground to the left of the central shrub around 23% x 48% y. About 20% image height including upright ears, full body visible, paws grounded, facing slightly right."
+  },
+  {
+    "number": 4,
+    "name": "papillons",
+    "sourceTile": "04-2-3",
+    "generatedPath": "/Users/stephane/.codex/generated_images/01a0c20d-1940-74b1-a772-9bf43f8ada43/exec-5b632e83-3798-404a-9db6-49264fde4a13.png",
+    "file": "04-papillons.png",
+    "prompt": "Use case: precise-object-edit. Asset: a static first frame for a later localized ambient animation in the Bible Strong illustrated world. Input image is the exact EDIT TARGET, not merely inspiration. Preserve the complete existing background, identical square framing, perspective, every object position, contour, color, water ripple, foliage, lighting and all four tile edges. Add only the requested small animal(s). Match the existing hand-drawn thin dark outlines, flat color fills and simple cel-shaded highlights; friendly restrained storybook aesthetic, not photorealistic or 3D. Keep animal(s) modest in scale and entirely inside frame, with room for gentle future movement. No text, labels, border, motion lines, blur, camera shift, zoom, new scenery or unrelated additions. Render one standalone square edited tile. Add exactly two small butterflies hovering in the clear space above the blue flower arches, one warm pale-yellow around 47% x 44% y and one peach around 64% x 53% y. Each about 10% image width, clear separated wings."
+  },
+  {
+    "number": 5,
+    "name": "rougegorge",
+    "sourceTile": "05-11-2",
+    "generatedPath": "/Users/stephane/.codex/generated_images/01a0c20d-1940-74b1-a772-9bf43f8ada43/exec-a01161f1-74f1-4da8-8bb3-062f5ea45dc4.png",
+    "file": "05-rougegorge.png",
+    "prompt": "Use case: precise-object-edit. Asset: a static first frame for a later localized ambient animation in the Bible Strong illustrated world. Input image is the exact EDIT TARGET, not merely inspiration. Preserve the complete existing background, identical square framing, perspective, every object position, contour, color, water ripple, foliage, lighting and all four tile edges. Add only the requested small animal(s). Match the existing hand-drawn thin dark outlines, flat color fills and simple cel-shaded highlights; friendly restrained storybook aesthetic, not photorealistic or 3D. Keep animal(s) modest in scale and entirely inside frame, with room for gentle future movement. No text, labels, border, motion lines, blur, camera shift, zoom, new scenery or unrelated additions. Render one standalone square edited tile. Add one small robin with a warm orange-red breast, brown wings and cream belly, perched on the stone bench around 73% x 44% y. Full body, tiny feet visibly touching bench, folded wings, about 16% image height."
+  },
+  {
+    "number": 6,
+    "name": "oiseaux",
+    "sourceTile": "06-10-3",
+    "generatedPath": "/Users/stephane/.codex/generated_images/01a0c20d-1940-74b1-a772-9bf43f8ada43/exec-ef164136-f947-47e6-94fe-07eb2db5d235.png",
+    "file": "06-oiseaux.png",
+    "prompt": "Use case: precise-object-edit. Asset: a static first frame for a later localized ambient animation in the Bible Strong illustrated world. Input image is the exact EDIT TARGET, not merely inspiration. Preserve the complete existing background, identical square framing, perspective, every object position, contour, color, water ripple, foliage, lighting and all four tile edges. Add only the requested small animal(s). Match the existing hand-drawn thin dark outlines, flat color fills and simple cel-shaded highlights; friendly restrained storybook aesthetic, not photorealistic or 3D. Keep animal(s) modest in scale and entirely inside frame, with room for gentle future movement. No text, labels, border, motion lines, blur, camera shift, zoom, new scenery or unrelated additions. Render one standalone square edited tile. Add exactly two small songbirds perched on the exposed horizontal teal pergola beam near 28% x 68% y and 69% x 71% y, facing each other, one warm tan and one slate blue. Each about 15% image height. Feet anchored on beam, bodies above it, folded wings."
+  },
+  {
+    "number": 7,
+    "name": "papillon-lanterne",
+    "sourceTile": "07-9-4",
+    "generatedPath": "/Users/stephane/.codex/generated_images/01a0c20d-1940-74b1-a772-9bf43f8ada43/exec-9511ad6c-c6f1-404d-b2d5-39374cf5cf71.png",
+    "file": "07-papillon-lanterne.png",
+    "prompt": "Use case: precise-object-edit. Asset: a static first frame for a later localized ambient animation in the Bible Strong illustrated world. Input image is the exact EDIT TARGET, not merely inspiration. Preserve the complete existing background, identical square framing, perspective, every object position, contour, color, water ripple, foliage, lighting and all four tile edges. Add only the requested small animal(s). Match the existing hand-drawn thin dark outlines, flat color fills and simple cel-shaded highlights; friendly restrained storybook aesthetic, not photorealistic or 3D. Keep animal(s) modest in scale and entirely inside frame, with room for gentle future movement. No text, labels, border, motion lines, blur, camera shift, zoom, new scenery or unrelated additions. Render one standalone square edited tile. Add one small soft cream-gold moth hovering just left of the glowing lantern around 73% x 46% y. About 10% image width, wings open and clearly outlined, leave lantern visible."
+  },
+  {
+    "number": 8,
+    "name": "abeille",
+    "sourceTile": "08-5-5",
+    "generatedPath": "/Users/stephane/.codex/generated_images/01a0c20d-1940-74b1-a772-9bf43f8ada43/exec-233bb13b-0818-4aae-97ff-9cd8ab041e06.png",
+    "file": "08-abeille.png",
+    "prompt": "Use case: precise-object-edit. Asset: a static first frame for a later localized ambient animation in the Bible Strong illustrated world. Input image is the exact EDIT TARGET, not merely inspiration. Preserve the complete existing background, identical square framing, perspective, every object position, contour, color, water ripple, foliage, lighting and all four tile edges. Add only the requested small animal(s). Match the existing hand-drawn thin dark outlines, flat color fills and simple cel-shaded highlights; friendly restrained storybook aesthetic, not photorealistic or 3D. Keep animal(s) modest in scale and entirely inside frame, with room for gentle future movement. No text, labels, border, motion lines, blur, camera shift, zoom, new scenery or unrelated additions. Render one standalone square edited tile. Add one small golden-yellow and dark-brown bee hovering beside the hanging wisteria around 57% x 40% y, about 10% image width. Two subtle translucent pale-blue wings, simple charming anatomy."
+  },
+  {
+    "number": 9,
+    "name": "grenouille",
+    "sourceTile": "09-9-6",
+    "generatedPath": "/Users/stephane/.codex/generated_images/01a0c20d-1940-74b1-a772-9bf43f8ada43/exec-c75f382f-1f11-4634-a5cd-7825351731c1.png",
+    "file": "09-grenouille.png",
+    "prompt": "Use case: precise-object-edit. Asset: a static first frame for a later localized ambient animation in the Bible Strong illustrated world. Input image is the exact EDIT TARGET, not merely inspiration. Preserve the complete existing background, identical square framing, perspective, every object position, contour, color, water ripple, foliage, lighting and all four tile edges. Add only the requested small animal(s). Match the existing hand-drawn thin dark outlines, flat color fills and simple cel-shaded highlights; friendly restrained storybook aesthetic, not photorealistic or 3D. Keep animal(s) modest in scale and entirely inside frame, with room for gentle future movement. No text, labels, border, motion lines, blur, camera shift, zoom, new scenery or unrelated additions. Render one standalone square edited tile. Add one small green frog sitting securely on the existing small foreground rock around 71% x 85% y, near reeds. About 18% image width. Full body and folded legs visible, round eyes, muted lighter green throat, facing upper-left."
+  },
+  {
+    "number": 10,
+    "name": "nid",
+    "sourceTile": "10-11-0",
+    "generatedPath": "/Users/stephane/.codex/generated_images/01a0c20d-1940-74b1-a772-9bf43f8ada43/exec-09ef0678-1a62-411b-875f-ead3db7a8810.png",
+    "file": "10-nid.png",
+    "prompt": "Use case: precise-object-edit. Asset: a static first frame for a later localized ambient animation in the Bible Strong illustrated world. Input image is the exact EDIT TARGET, not merely inspiration. Preserve the complete existing background, identical square framing, perspective, every object position, contour, color, water ripple, foliage, lighting and all four tile edges. Add only the requested small animal(s). Match the existing hand-drawn thin dark outlines, flat color fills and simple cel-shaded highlights; friendly restrained storybook aesthetic, not photorealistic or 3D. Keep animal(s) modest in scale and entirely inside frame, with room for gentle future movement. No text, labels, border, motion lines, blur, camera shift, zoom, new scenery or unrelated additions. Render one standalone square edited tile. Add one small woven tan bird nest nestled securely in the existing central tree fork around 67% x 58% y, with exactly two tiny songbird chicks peeking above the rim. Nest about 20% image width. Integrate with existing branches, preserve tree silhouette."
+  }
+]

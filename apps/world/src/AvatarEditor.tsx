@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { Modal } from './Modal'
+import { useRef, useState, type CSSProperties } from 'react'
 import {
   AVATARS,
   NAME_LIMIT,
@@ -21,9 +22,7 @@ export const profileCopy = {
     save: 'C’est parti !',
     update: 'Enregistrer',
     close: 'Fermer',
-    soon: 'D’autres compagnons arrivent bientôt.',
     guest: 'Explorateur',
-    local: 'Ton personnage est gardé sur cet appareil.',
     storage: 'Profil utilisé pour cette visite. Le navigateur n’a pas pu l’enregistrer.',
     colors: ['Blanc', 'Turquoise', 'Bleu', 'Violet', 'Rose', 'Corail', 'Jaune', 'Vert'],
   },
@@ -39,9 +38,7 @@ export const profileCopy = {
     save: 'Let’s explore!',
     update: 'Save changes',
     close: 'Close',
-    soon: 'More companions are coming soon.',
     guest: 'Explorer',
-    local: 'Your character is saved on this device.',
     storage: 'Profile applied for this visit. Your browser could not save it.',
     colors: ['White', 'Turquoise', 'Blue', 'Purple', 'Pink', 'Coral', 'Yellow', 'Green'],
   },
@@ -82,28 +79,16 @@ export function AvatarEditor({
   onClose: () => void
 }) {
   const [draft, setDraft] = useState(profile)
-  const dialog = useRef<HTMLDialogElement>(null)
   const input = useRef<HTMLInputElement>(null)
   const t = profileCopy[language]
-  useEffect(() => {
-    const element = dialog.current!
-    element.showModal()
-    input.current?.focus()
-    return () => element.close()
-  }, [])
   return (
-    <dialog
-      ref={dialog}
+    <Modal
       className="avatar-dialog"
-      aria-labelledby="avatar-title"
-      onCancel={event => {
-        event.preventDefault()
-        onClose()
-      }}
+      labelledBy="avatar-title"
+      closeLabel={t.close}
+      onClose={onClose}
+      initialFocus={input}
     >
-      <button className="avatar-close" type="button" aria-label={t.close} onClick={onClose}>
-        ×
-      </button>
       <div className="avatar-editor-layout">
         <div className="avatar-stage">
           <span className="avatar-stage-orbit" aria-hidden="true" />
@@ -155,7 +140,6 @@ export function AvatarEditor({
                 </button>
               ))}
             </div>
-            <p className="avatar-soon">{t.soon}</p>
           </fieldset>
           <fieldset className="avatar-fieldset">
             <legend>{t.color}</legend>
@@ -188,9 +172,8 @@ export function AvatarEditor({
             {profile.name ? t.update : t.save}
             <span aria-hidden="true">→</span>
           </button>
-          <p className="avatar-local">{t.local}</p>
         </form>
       </div>
-    </dialog>
+    </Modal>
   )
 }

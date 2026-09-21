@@ -59,18 +59,6 @@
   display: grid;
   place-items: center;
 }
-.lexicon-close {
-  display: grid;
-  place-items: center;
-  padding: 0;
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid #1c346023;
-  background: transparent;
-  color: var(--lex-ink);
-}
 .lexicon-content {
   flex: 1;
   min-height: 0;
@@ -435,4 +423,10 @@
     animation: none !important;
     transition: none !important;
   }
+}
+
+.lexicon-header {
+  padding-right: 72px;
+  min-height: 68px;
+  box-sizing: border-box;
 }

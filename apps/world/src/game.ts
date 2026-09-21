@@ -1,3 +1,4 @@
+import { nearGuestbook } from './guestbook'
 import { chooseCentralSpawn } from './multiplayer-spawn'
 import { WorldMultiplayer } from './multiplayer'
 import { RemoteAvatars } from './remote-avatars'
@@ -13,6 +14,7 @@ import { WorldClouds } from './world-clouds'
 import { AmbientDiagnostics } from './ambient-diagnostics'
 import { type DiagnosticFilters } from './diagnostic-filters'
 import { AmbientTiles, loadAmbientTiles } from './ambient-tiles'
+import { CentralBook, loadCentralBook } from './central-book'
 import Phaser from 'phaser'
 import { MapTileStreamer } from './map-tile-streamer'
 import { SCENERY_HEIGHT, SCENERY_WIDTH, WorldBackground } from './world-background'
@@ -88,6 +90,7 @@ export function createWorld(
     ambience!: WorldAmbience
     ambientDiagnostics!: AmbientDiagnostics
     ambientTiles!: AmbientTiles
+    centralBook!: CentralBook
     background!: WorldBackground
     readers!: AnimatedReader[]
     foreground: { object: (typeof occluders)[number]; image: Phaser.GameObjects.Image }[] = []
@@ -113,6 +116,7 @@ export function createWorld(
     preload() {
       loadBlobAvatar(this)
       loadAmbientTiles(this)
+      loadCentralBook(this)
       loadWorldReaders(this)
       this.load.image('world-water', './assets/map/water.webp')
       for (const variant of WATER_VARIANTS) {
@@ -133,6 +137,7 @@ export function createWorld(
         this.ambientZoneEditor = new AmbientZoneEditor(this, controls.ambientEditor)
       this.ambientDiagnostics = new AmbientDiagnostics(this, () => this.ambience.diagnosticRegions)
       this.ambientTiles = new AmbientTiles(this)
+      this.centralBook = new CentralBook(this)
       this.add.image(0, 0, 'map-preview').setOrigin(0).setDisplaySize(WIDTH, HEIGHT).setDepth(-110)
       this.mapTiles = new MapTileStreamer(this)
       if (controls.shoreEditor) this.shoreWaves = new ShoreWaves(this, controls.shoreEditor)
@@ -307,7 +312,7 @@ export function createWorld(
           Math.max(8, parent.clientHeight - action.offsetHeight - 8)
         )
         action.style.transform = `translate3d(${x}px, ${y}px, 0)`
-        action.style.visibility = station && !controls.paused ? 'visible' : 'hidden'
+        action.style.visibility = (station || nearGuestbook(next)) && !controls.paused ? 'visible' : 'hidden'
       }
       this.shoreWaves?.update(
         delta,
@@ -324,6 +329,7 @@ export function createWorld(
         (controls.paused && !shoreEditing) || !this.active || document.hidden
       )
       this.ambientTiles.update(camera, controls.paused || !this.active || document.hidden)
+      this.centralBook.update(camera, delta, controls.paused || !this.active || document.hidden)
       for (const reader of this.readers)
         reader.update(camera, controls.paused || !this.active || document.hidden, next.x)
       this.mapTiles.update(camera, time, controls.overview ? 1 : rendererResolution)

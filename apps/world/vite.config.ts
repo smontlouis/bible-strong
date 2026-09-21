@@ -157,7 +157,7 @@ export default defineConfig({
   ],
   // Saving editor documents should not reload the world mid-edit.
   server: {
-    proxy: { "/parties": { target: "http://127.0.0.1:8791", ws: true } },
+    proxy: { "/api/guestbook": { target: "http://127.0.0.1:8791" }, "/parties": { target: "http://127.0.0.1:8791", ws: true } },
     watch: {
       ignored: [
         '**/public/ambience/archipelago.json',

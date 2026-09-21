@@ -9,6 +9,7 @@ export const diagnosticCategories = [
   'fish',
   'duck',
   'cat',
+  'fauna',
 ] as const
 export type DiagnosticCategory = (typeof diagnosticCategories)[number]
 export type DiagnosticFilters = Record<DiagnosticCategory, boolean>
@@ -29,6 +30,7 @@ export const diagnosticCopy = {
     fish: 'Poissons',
     duck: 'Canard',
     cat: 'Chat',
+    fauna: 'Petite faune',
   },
   en: {
     title: 'Visible zones',
@@ -44,5 +46,6 @@ export const diagnosticCopy = {
     fish: 'Fish',
     duck: 'Duck',
     cat: 'Cat',
+    fauna: 'Small wildlife',
   },
 }

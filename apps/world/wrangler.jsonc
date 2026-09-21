@@ -3,12 +3,20 @@
   "name": "bible-strong-world",
   "main": "server/index.ts",
   "compatibility_date": "2026-09-01",
-  "durable_objects": { "bindings": [{ "name": "WorldRoom", "class_name": "WorldRoom" }] },
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["WorldRoom"] }],
+  "durable_objects": {
+    "bindings": [
+      { "name": "WorldRoom", "class_name": "WorldRoom" },
+      { "name": "Guestbook", "class_name": "Guestbook" },
+    ],
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["WorldRoom"] },
+    { "tag": "v2", "new_sqlite_classes": ["Guestbook"] },
+  ],
   "assets": {
     "directory": "./dist",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/parties/*", "/health"],
+    "run_worker_first": ["/parties/*", "/api/*", "/health"],
   },
   "vars": { "ALLOWED_ORIGINS": "http://localhost:5186,http://127.0.0.1:5186" },
   "observability": { "enabled": true },

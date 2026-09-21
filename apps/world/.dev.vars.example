@@ -1,0 +1,2 @@
+# Server-only Vercel AI Gateway key for Jev. Never use a VITE_ variable.
+AI_GATEWAY_API_KEY=

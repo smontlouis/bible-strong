@@ -3,8 +3,9 @@ import fish from './generated/fish-tile.json'
 import duck from './generated/duck-tile.json'
 import fishWest from './generated/fish-west-tile.json'
 import cat from './generated/cat-tile.json'
+import livingWorld from './generated/living-world.json'
 
-export const ambientTileManifests = [fish, duck, fishWest, cat]
+export const ambientTileManifests = [fish, duck, fishWest, cat, ...livingWorld]
 
 export function loadAmbientTiles(scene: Phaser.Scene) {
   for (const tile of ambientTileManifests)

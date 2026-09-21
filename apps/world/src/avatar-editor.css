@@ -26,7 +26,7 @@
 }
 .profile-button .avatar-art {
   width: 32px;
-  height: 40px;
+  height: 32px;
   flex-shrink: 0;
 }
 .profile-button-copy {
@@ -67,18 +67,6 @@
   background: #153d4b88;
   backdrop-filter: blur(7px);
 }
-.avatar-close {
-  position: absolute;
-  z-index: 1;
-  right: 12px;
-  top: 12px;
-  width: 36px;
-  height: 36px;
-  border: 0;
-  border-radius: 50%;
-  background: #193d490a;
-  font-size: 25px;
-}
 .avatar-editor-layout {
   display: grid;
   grid-template-columns: 270px 1fr;
@@ -105,7 +93,7 @@
 }
 .avatar-stage .avatar-art {
   width: 138px;
-  height: 172px;
+  height: 138px;
   filter: none;
 }
 .avatar-stage-orbit {
@@ -202,16 +190,12 @@
   font-size: 13px;
 }
 .avatar-option .avatar-art {
-  width: 25px;
+  width: 32px;
   height: 32px;
+  flex-shrink: 0;
 }
 .avatar-option > span:last-child {
   margin-left: auto;
-}
-.avatar-soon {
-  font-size: 11px;
-  color: #72847c;
-  margin: 9px 0 0;
 }
 .avatar-palette {
   display: flex;
@@ -269,12 +253,6 @@
   opacity: 0.45;
   cursor: default;
 }
-.avatar-local {
-  text-align: center;
-  color: #7d8980;
-  font-size: 10px;
-  margin: 12px 0 0;
-}
 @media (max-width: 600px) {
   .avatar-editor-layout {
     grid-template-columns: 1fr;
@@ -287,7 +265,7 @@
   }
   .avatar-stage .avatar-art {
     width: 66px;
-    height: 84px;
+    height: 66px;
   }
   .avatar-stage-name {
     font-size: 15px;

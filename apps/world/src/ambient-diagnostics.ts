@@ -3,7 +3,7 @@ import type { DiagnosticFilters } from './diagnostic-filters'
 import type { AmbientRegion } from './world-ambience'
 import { ambientTileManifests } from './ambient-tiles'
 
-type Kind = AmbientRegion['kind'] | 'fish' | 'duck' | 'cat'
+type Kind = AmbientRegion['kind'] | 'fish' | 'duck' | 'cat' | 'fauna'
 const names: Record<string, Record<Kind, string>> = {
   fr: {
     light: 'Lueur',
@@ -13,6 +13,7 @@ const names: Record<string, Record<Kind, string>> = {
     fish: 'Poissons',
     duck: 'Canard',
     cat: 'Chat',
+    fauna: 'Petite faune',
   },
   en: {
     light: 'Glow',
@@ -22,6 +23,7 @@ const names: Record<string, Record<Kind, string>> = {
     fish: 'Fish',
     duck: 'Duck',
     cat: 'Cat',
+    fauna: 'Small wildlife',
   },
 }
 const colors: Record<Kind, number> = {
@@ -32,6 +34,7 @@ const colors: Record<Kind, number> = {
   fish: 0x5bdcff,
   duck: 0xffbd70,
   cat: 0xffefac,
+  fauna: 0x9cebb1,
 }
 
 /** Diagnostic bounds are derived from the same regions that drive the effects. */
@@ -55,7 +58,9 @@ export class AmbientDiagnostics {
           ? 'fish'
           : tile.id.startsWith('cat')
             ? 'cat'
-            : 'duck') as Kind,
+            : tile.id.startsWith('living-')
+              ? 'fauna'
+              : 'duck') as Kind,
       })),
     ]
   }
