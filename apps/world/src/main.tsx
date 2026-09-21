@@ -42,7 +42,6 @@ const copy = {
     title: 'Un monde à explorer',
     brand: 'Bible Strong',
     hint: 'Déplace ton avatar avec le joystick.',
-    pathBlocked: 'Impossible de rejoindre cet endroit.',
     home: 'Retour à la place',
     overview: 'Vue d’ensemble',
     follow: 'Suivre mon avatar',
@@ -75,7 +74,6 @@ const copy = {
     title: 'A world to explore',
     brand: 'Bible Strong',
     hint: 'Move your avatar with the joystick.',
-    pathBlocked: 'This spot cannot be reached.',
     home: 'Back to the plaza',
     overview: 'World overview',
     follow: 'Follow my avatar',
@@ -463,7 +461,6 @@ function App() {
         )
       })}
       <aside className="world-bottom">
-        {state.pathBlocked && <p className="path-feedback" role="status">{t.pathBlocked}</p>}
         <div className="joystick-zone" ref={joystick} role="group" aria-label={t.joystick} />
         <div className="companion-controls">
           {ready && profile.name && !editorMode && (

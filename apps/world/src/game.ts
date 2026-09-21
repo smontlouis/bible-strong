@@ -2,6 +2,7 @@ import { cameraZoomBounds, clampCameraZoom } from './camera-zoom'
 import { arrivalZoom } from './world-arrival'
 import { Pathfinder } from './pathfinding'
 import { WalkingRoute } from './walking-route'
+import { isPointerSteering, pointerDirection, type PointerPress } from './pointer-steering'
 import { islandActions, type IslandActionId } from './island-actions'
 import { nearGuestbook } from './guestbook'
 import { chooseCentralSpawn } from './multiplayer-spawn'
@@ -43,7 +44,6 @@ import {
 } from './world'
 
 export type WorldState = {
-  pathBlocked?: boolean
   x: number
   y: number
   cameraZoom: number
@@ -54,6 +54,7 @@ export type WorldState = {
   multiplayer?: PresenceStatus
 }
 export type Controls = {
+  pointerPress?: PointerPress
   cancelWalk?: boolean
   walkToScreen?: Point
   arrivalStartedAt?: number | null
@@ -115,12 +116,17 @@ export function createWorld(
     blobAvatar = new BlobAvatar()
     pathfinder = new Pathfinder(controls.navigation)
     route = new WalkingRoute()
-    routeLayer!: Phaser.GameObjects.Graphics
+    destinationMarker!: Phaser.GameObjects.Image
+    blockedMarker!: Phaser.GameObjects.Image
+    destinationShadow!: Phaser.GameObjects.Ellipse
+    destinationMotion = { shown: false, alpha: 0, size: 0.25 }
+    blockedMotion = { shown: false, alpha: 0, size: 0.25 }
     rejectedTarget?: Point
     rejectedUntil = 0
     active = true
     previousNavigation = controls.navigation
     resetInput = () => {
+      controls.pointerPress = undefined
       this.route.cancel()
       controls.walkToScreen = undefined
       this.rejectedTarget = undefined
@@ -134,8 +140,42 @@ export function createWorld(
     focusWindow = () => {
       this.active = true
     }
+    animateMarker(
+      motion: { shown: boolean; alpha: number; size: number },
+      shown: boolean,
+      reducedMotion: boolean
+    ) {
+      if (reducedMotion) {
+        this.tweens.killTweensOf(motion)
+        motion.shown = shown
+        motion.alpha = shown ? 1 : 0
+        motion.size = 1
+        return
+      }
+      if (motion.shown === shown) return
+      this.tweens.killTweensOf(motion)
+      if (shown && motion.alpha === 0) motion.size = 0.25
+      motion.shown = shown
+      this.tweens.add({
+        targets: motion,
+        alpha: shown ? 1 : 0,
+        size: shown ? 1 : 0.94,
+        duration: shown ? 180 : 140,
+        ease: 'Cubic.Out',
+      })
+    }
+    cancelWalkOnKey = (event: KeyboardEvent) => {
+      if (!controls.paused && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'].includes(event.code)) {
+        this.route.cancel()
+        controls.pointerPress = undefined
+        this.rejectedTarget = undefined
+        controls.walkToScreen = undefined
+      }
+    }
 
     preload() {
+      this.load.image('navigation-destination', './assets/navigation/destination-arrow.png')
+      this.load.image('navigation-blocked', './assets/navigation/blocked-cross.png')
       loadBlobAvatar(this)
       loadAmbientTiles(this)
       loadCentralBook(this)
@@ -212,18 +252,25 @@ export function createWorld(
         .setResolution(rendererResolution)
         .setDepth(4001)
       this.debugLayer = this.add.graphics().setDepth(3000)
-      this.routeLayer = this.add.graphics().setDepth(-2)
+      this.destinationShadow = this.add.ellipse(0, 0, 14, 6, 0x183c45)
+        .setDepth(3000).setVisible(false)
+      this.destinationMarker = this.add.image(0, 0, 'navigation-destination')
+        .setOrigin(0.5, 0.9234).setDepth(3001).setVisible(false)
+      this.blockedMarker = this.add.image(0, 0, 'navigation-blocked')
+        .setDepth(3001).setVisible(false)
       // Global key capture blocks typing in DOM inputs even when this scene is paused.
       this.keys = this.input.keyboard!.addKeys('UP,DOWN,LEFT,RIGHT,W,A,S,D,Z,Q', false) as Record<
         string,
         Phaser.Input.Keyboard.Key
       >
+      this.input.keyboard!.on('keydown', this.cancelWalkOnKey)
       this.cameras.main.setBackgroundColor('#59bdd5')
       window.addEventListener('blur', this.blur)
       window.addEventListener('focus', this.focusWindow)
       this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
         window.removeEventListener('blur', this.blur)
         window.removeEventListener('focus', this.focusWindow)
+        this.input.keyboard?.off('keydown', this.cancelWalkOnKey)
         this.mapTiles.destroy()
         this.network.destroy()
         controls.retryMultiplayer = undefined
@@ -277,6 +324,22 @@ export function createWorld(
         this.route.cancel()
         this.rejectedTarget = undefined
         controls.walkToScreen = undefined
+        controls.pointerPress = undefined
+      }
+      const press = controls.pointerPress
+      if (press && isPointerSteering(press, performance.now())) {
+        this.route.cancel()
+        this.rejectedTarget = undefined
+        controls.walkToScreen = undefined
+        const camera = this.cameras.main
+        const target = camera.getWorldPoint(
+          press.screen.x * this.scale.width / parent.clientWidth,
+          press.screen.y * this.scale.height / parent.clientHeight
+        )
+        direction = pointerDirection(
+          { x: target.x - this.position.x, y: target.y - (this.position.y - 16) },
+          { x: camera.zoom * parent.clientWidth / this.scale.width, y: camera.zoom * parent.clientHeight / this.scale.height }
+        )
       }
       if (controls.paused || !this.active || document.hidden) {
         direction = { x: 0, y: 0 }
@@ -292,7 +355,7 @@ export function createWorld(
         const path = this.pathfinder.find(this.position, target)
         this.route.points = path ?? []
         this.rejectedTarget = path ? undefined : target
-        this.rejectedUntil = time + 1800
+        this.rejectedUntil = time + 500
       }
       const following = this.route.points.length > 0
       const next = following
@@ -369,21 +432,28 @@ export function createWorld(
               ? bounds.overview
               : bounds.base * controls.zoom
       camera.setZoom(zoom)
-      this.routeLayer.clear()
+      const markerScaleX = screenWidth / parent.clientWidth / zoom
+      const markerScaleY = screenHeight / parent.clientHeight / zoom
+      this.animateMarker(this.destinationMotion, this.route.points.length > 0, reducedMotion)
+      const destinationSize = 36 * this.destinationMotion.size
+      this.destinationMarker.setAlpha(this.destinationMotion.alpha)
+        .setVisible(this.destinationMotion.alpha > 0)
+        .setDisplaySize(destinationSize * markerScaleX, destinationSize * markerScaleY)
+      this.destinationShadow.setAlpha(0.22 * this.destinationMotion.alpha)
+        .setVisible(this.destinationMotion.alpha > 0)
+        .setDisplaySize(14 * markerScaleX * this.destinationMotion.size, 6 * markerScaleY * this.destinationMotion.size)
       if (this.route.points.length) {
-        this.routeLayer.lineStyle(2 / zoom, 0xfff9ea, 0.7)
-        this.routeLayer.beginPath().moveTo(next.x, next.y)
-        for (const point of this.route.points) this.routeLayer.lineTo(point.x, point.y)
-        this.routeLayer.strokePath()
         const target = this.route.points[this.route.points.length - 1]
-        this.routeLayer.strokeCircle(target.x, target.y, 7 / zoom)
+        this.destinationMarker.setPosition(target.x, target.y - 2 * markerScaleY)
+        this.destinationShadow.setPosition(target.x, target.y)
       }
-      if (this.rejectedTarget && time < this.rejectedUntil) {
-        const { x, y } = this.rejectedTarget
-        const radius = 6 / zoom
-        this.routeLayer.lineStyle(2 / zoom, 0xb53939, 1)
-          .lineBetween(x - radius, y - radius, x + radius, y + radius)
-          .lineBetween(x - radius, y + radius, x + radius, y - radius)
+      this.animateMarker(this.blockedMotion, Boolean(this.rejectedTarget && time < this.rejectedUntil), reducedMotion)
+      const blockedSize = 30 * this.blockedMotion.size
+      this.blockedMarker.setAlpha(this.blockedMotion.alpha)
+        .setVisible(this.blockedMotion.alpha > 0)
+        .setDisplaySize(blockedSize * markerScaleX, blockedSize * markerScaleY)
+      if (this.rejectedTarget) {
+        this.blockedMarker.setPosition(this.rejectedTarget.x, this.rejectedTarget.y)
       }
       // Keep label dimensions and spacing fixed in screen pixels as the world zooms.
       const labelScaleX = screenWidth / parent.clientWidth / zoom
@@ -518,7 +588,6 @@ export function createWorld(
           )
           .map(o => o.name)
         publish({
-          pathBlocked: Boolean(this.rejectedTarget && time < this.rejectedUntil),
           ...next,
           cameraZoom: zoom,
           station,

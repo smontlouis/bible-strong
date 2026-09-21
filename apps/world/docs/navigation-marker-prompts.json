@@ -1,0 +1,14 @@
+{
+  "mode": "built-in image_gen",
+  "reference": "public/assets/map/preview.webp",
+  "assets": [
+    {
+      "path": "public/assets/navigation/blocked-cross.png",
+      "prompt": "Use case: stylized-concept. Asset type: small navigation marker sprite for the illustrated Bible Strong world. Input image is ONLY a style reference, do not edit or reproduce the map. Generate ONE isolated bold X-shaped cross indicating an inaccessible point (diagonal X, not a religious cross and not a plus). Match the world's hand-inked storybook illustration: crisp dark brown outlines, warm coral red fill, simple flat shaded beveled edges, friendly slightly rounded corners. Centered, front-facing, symmetric, very readable at 24 pixels. Occupy 80% of a square canvas with balanced transparent padding. Genuinely transparent background with alpha, no checkerboard drawing, no floor, no shadow outside the silhouette, no text, no badge, no other objects."
+    },
+    {
+      "path": "public/assets/navigation/destination-arrow.png",
+      "prompt": "Use case: stylized-concept. Asset type: small destination marker sprite for the illustrated Bible Strong world. Input image is ONLY a style reference; do not reproduce the map. Generate ONE isolated arrow pointing straight DOWN: short thick vertical shaft at top, broad triangular arrowhead ending in a precise bottom-center tip. Match the world's hand-inked storybook illustration: crisp dark brown outline, warm golden yellow and cream fill matching the yellow dictionary island, simple flat shaded beveled edges, friendly slightly rounded corners. Centered, front-facing, symmetric, readable at 28 pixels. Occupy 80% of a square canvas with balanced transparent padding. Genuinely transparent background with alpha, no checkerboard drawing, no floor, no external shadow, no text, no badge, no other objects."
+    }
+  ]
+}

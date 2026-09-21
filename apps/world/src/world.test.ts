@@ -46,7 +46,7 @@ describe('archipelago navigation', () => {
   })
 
   it('connects the plaza to all six resources with a blob-width route', () => {
-    // Flood fill is a validation of annotations only; runtime has no click/pathfinding.
+    // Validate annotation connectivity independently of the runtime A* planner.
     const step = 6
     const queue: Point[] = [{ ...SPAWN }]
     const seen = new Set<string>([`${SPAWN.x},${SPAWN.y}`])

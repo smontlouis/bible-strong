@@ -1,4 +1,4 @@
-import { move, type NavigationDocument, type Point } from './world'
+import { move, MOVE_SPEED, type NavigationDocument, type Point } from './world'
 
 /** Follows waypoints through the normal collision solver, with no overshoot at arrival. */
 export class WalkingRoute {
@@ -18,7 +18,7 @@ export class WalkingRoute {
         this.points.shift()
         continue
       }
-      const duration = Math.min(remaining, distance / 115)
+      const duration = Math.min(remaining, distance / MOVE_SPEED)
       const previous = next
       next = move(next, { x: (target.x - next.x) / distance, y: (target.y - next.y) / distance }, duration, navigation)
       remaining -= duration

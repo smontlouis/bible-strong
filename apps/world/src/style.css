@@ -50,19 +50,7 @@ select:focus-visible {
 .world-canvas canvas {
   display: block;
 }
-.path-feedback {
-  position: fixed;
-  left: 50%;
-  bottom: max(24px, env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-  margin: 0;
-  padding: 10px 16px;
-  border-radius: 18px;
-  background: #fff9ea;
-  color: #813737;
-  text-align: center;
-  pointer-events: none;
-}
+
 .world-header {
   position: absolute;
   top: max(20px, env(safe-area-inset-top));

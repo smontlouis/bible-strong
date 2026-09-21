@@ -7,6 +7,7 @@ export const WIDTH = 1671
 export const HEIGHT = 941
 export const SPAWN: Point = { x: 836, y: 542 }
 export const RADIUS = 7
+export const MOVE_SPEED = 115
 
 export const walkable: { name: string; points: Polygon }[] = [
   {
@@ -307,7 +308,7 @@ export function move(
   const magnitude = Math.hypot(direction.x, direction.y)
   if (magnitude < 0.12) return position
   const scale = Math.min(1, magnitude) / magnitude
-  const distance = 115 * Math.min(seconds, 0.05)
+  const distance = MOVE_SPEED * Math.min(seconds, 0.05)
   const dx = direction.x * scale * distance
   const dy = direction.y * scale * distance
   // Substeps prevent tunnelling; axis fallback lets the avatar slide along edges.
