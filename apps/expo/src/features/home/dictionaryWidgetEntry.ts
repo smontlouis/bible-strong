@@ -1,9 +1,43 @@
-const DICTIONARY_ENTRY_ID_RANGES = {
-  fr: { min: 5437, max: 10872 },
-  en: { min: 1, max: 8620 },
-} as const
+import type { ResourceLanguage } from '~helpers/databaseTypes'
+import type { DictionaryAccess, DictionaryWork } from '~features/resources/dictionaryAccess'
+import type { OfflineResourceRegistrySnapshot } from '~features/resources/resourceAvailability'
 
-export const getRandomDictionaryEntryId = (language: 'fr' | 'en', random = Math.random()) => {
-  const { min, max } = DICTIONARY_ENTRY_ID_RANGES[language]
-  return Math.floor(random * (max - min + 1) + min)
+export const selectDictionaryWidgetWork = (
+  language: ResourceLanguage,
+  works: readonly DictionaryWork[],
+  snapshot: OfflineResourceRegistrySnapshot
+): DictionaryWork => {
+  const candidates = works.filter(work => work.resource.language === language)
+  const defaultWork = language === 'en' ? 'easton-webster' : 'westphal'
+  const installed = new Set(
+    [...snapshot.resources.values()].flatMap(entry =>
+      entry.resource.kind === 'dictionary' &&
+      entry.resource.language === language &&
+      entry.availability.status === 'available'
+        ? [entry.resource.work]
+        : []
+    )
+  )
+  return (
+    candidates.find(work => work.resource.work === defaultWork && installed.has(defaultWork)) ??
+    candidates.find(work => installed.has(work.resource.work)) ??
+    candidates.find(work => work.resource.work === defaultWork) ??
+    candidates[0]
+  )
+}
+
+export const loadDictionaryWidgetEntry = async (
+  access: Pick<DictionaryAccess, 'listByLetterPage'>,
+  language: ResourceLanguage,
+  work: string,
+  random = Math.random
+) => {
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz'
+  const start = Math.floor(random() * alphabet.length)
+  for (let offset = 0; offset < alphabet.length; offset++) {
+    const letter = alphabet[(start + offset) % alphabet.length]
+    const { entries } = await access.listByLetterPage(letter, { limit: 100 }, language, work)
+    if (entries.length) return entries[Math.floor(random() * entries.length)]
+  }
+  return null
 }

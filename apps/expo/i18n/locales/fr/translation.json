@@ -2215,6 +2215,7 @@
   "dailyReading.retry": "Réessayer",
   "dailyReading.change": "Choisir la source du verset du jour",
   "dailyReading.read": "Lire la méditation",
+  "dailyReading.offlineContent": "Ce contenu n’est pas disponible hors ligne. Connectez-vous à Internet pour le consulter.",
   "dailyReading.noEntry": "Ce recueil ne propose pas de méditation disponible pour cette date.",
   "dailyReading.previous": "Jour précédent",
   "dailyReading.next": "Jour suivant",

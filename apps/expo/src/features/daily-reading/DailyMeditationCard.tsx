@@ -45,7 +45,10 @@ const DailyMeditationCard = ({
   const router = useRouter()
   const fontFamily = resolveFontFamily(useSelector(selectFontFamily))
   const date = useLocalReadingDate(addDay)
-  const { collection, opening, lookup, isError, retry } = useDailyMeditation(collectionId, date)
+  const { collection, opening, lookup, isError, isOffline, retry } = useDailyMeditation(
+    collectionId,
+    date
+  )
   const cover = useFireStorage(collection?.image)
   const dayLabels = [
     "Aujourd'hui",
@@ -122,7 +125,9 @@ const DailyMeditationCard = ({
           }}
           className="py-[12px]"
         >
-          <Text className="text-grey">{t('dailyReading.downloadError')}</Text>
+          <Text className="text-grey">
+            {isOffline ? t('dailyReading.offlineContent') : t('dailyReading.downloadError')}
+          </Text>
           <Text className="text-primary mt-[8px]">{t('dailyReading.retry')}</Text>
         </Link>
       ) : lookup ? (

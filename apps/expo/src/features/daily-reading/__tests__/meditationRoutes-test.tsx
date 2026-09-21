@@ -23,6 +23,7 @@ beforeEach(() => {
   jest.mocked(useReadingContent).mockReturnValue({
     collection,
     isError: false,
+    isOffline: false,
     retry: jest.fn(),
   })
 })
@@ -55,6 +56,7 @@ it('keeps reading plans on their own screens', () => {
   jest.mocked(useReadingContent).mockReturnValue({
     collection: { ...collection, id: 'plan', type: 'yearly' },
     isError: false,
+    isOffline: false,
     retry: jest.fn(),
   })
   jest.mocked(useLocalSearchParams).mockReturnValue({ planId: 'plan', readingSliceId: '1' })

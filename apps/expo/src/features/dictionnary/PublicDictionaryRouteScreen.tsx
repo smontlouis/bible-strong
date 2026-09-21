@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import generateUUID from '~helpers/generateUUID'
+import { IS_FORM_SHEET } from '~helpers/constants'
 import type { DictionaryTab } from '~state/tabs'
 import DictionaryDetailTabScreen from './DictionaryDetailTabScreen'
 import { buildPublicDictionaryPath, parsePublicDictionaryRoute } from './publicDictionaryRoutes'
@@ -35,6 +36,7 @@ export const PublicDictionaryRouteScreen = () => {
     <PublicPage title={route.slug.replaceAll('-', ' ')}>
       <DictionaryDetailTabScreen
         dictionaryAtom={dictionaryAtom}
+        isFormSheet={IS_FORM_SHEET}
         onEntryResolved={(entry, context) => {
           const entryId = entry.id ?? (context.work === route.work ? route.entryId : undefined)
           if (!entryId) return

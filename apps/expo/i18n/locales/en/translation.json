@@ -2187,6 +2187,7 @@
   "dailyReading.retry": "Try again",
   "dailyReading.change": "Choose the daily verse source",
   "dailyReading.read": "Read the meditation",
+  "dailyReading.offlineContent": "This content is not available offline. Connect to the Internet to read it.",
   "dailyReading.noEntry": "This collection has no available meditation for this date.",
   "dailyReading.previous": "Previous day",
   "dailyReading.next": "Next day",

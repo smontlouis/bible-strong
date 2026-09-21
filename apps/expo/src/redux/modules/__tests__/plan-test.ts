@@ -1,4 +1,5 @@
 // Mock react-native before other imports
+import { getDoc, getDocs } from '~helpers/firebase'
 import reducer, {
   cacheImage,
   removePlan,
@@ -528,4 +529,24 @@ describe('scheduled participation', () => {
     expect(enabled.ongoingPlans[0].reminderTime).toBe('08:30')
     expect(reducer(enabled, setPlanReminder({ planId: 'plan-1', time: null }))).toEqual(state)
   })
+})
+
+it('rejects an empty Firestore cache instead of storing a meditation collection without content', async () => {
+  jest.mocked(getDoc).mockResolvedValue({ data: () => createPlan('book') } as never)
+  jest
+    .mocked(getDocs)
+    .mockResolvedValue({ empty: true, docs: [], metadata: { fromCache: true } } as never)
+  const dispatch = jest.fn()
+  const result = await fetchPlan({ id: 'book', enroll: false })(dispatch, jest.fn(), undefined)
+  expect(fetchPlan.rejected.match(result)).toBe(true)
+  expect(result).toMatchObject({ error: { message: 'Reading content is not available offline' } })
+})
+
+it('accepts a server-confirmed empty collection', async () => {
+  jest.mocked(getDoc).mockResolvedValue({ data: () => createPlan('book') } as never)
+  jest
+    .mocked(getDocs)
+    .mockResolvedValue({ empty: true, docs: [], metadata: { fromCache: false } } as never)
+  const result = await fetchPlan({ id: 'book', enroll: false })(jest.fn(), jest.fn(), undefined)
+  expect(fetchPlan.fulfilled.match(result)).toBe(true)
 })

@@ -40,7 +40,7 @@ export default function MeditationCollectionScreen({
   const params = useLocalSearchParams<{ collectionId?: string }>()
   const id = requestedId ?? params.collectionId ?? ''
   const { t } = useTranslation()
-  const { isError, retry } = useReadingContent(id)
+  const { collection: content, isError, isOffline, retry } = useReadingContent(id)
   const collection = useComputedPlan(id)
   useAssistantResourceContext(assistantScope, editorialContext(collection))
   const image = useFireStorage(collection?.image)
@@ -75,10 +75,12 @@ export default function MeditationCollectionScreen({
           )
         }
       />
-      {!collection && !isError && <Loading />}
-      {!collection && isError && (
+      {!content && !isError && <Loading />}
+      {!content && isError && (
         <Box className="p-[20px] gap-[16px]">
-          <Text className="text-grey">{t('dailyReading.downloadError')}</Text>
+          <Text className="text-grey">
+            {isOffline ? t('dailyReading.offlineContent') : t('dailyReading.downloadError')}
+          </Text>
           <Button
             onPress={() => {
               void retry()
@@ -88,7 +90,7 @@ export default function MeditationCollectionScreen({
           </Button>
         </Box>
       )}
-      {collection && getEditorialKind(collection) === 'daily-meditation' && (
+      {content && collection && getEditorialKind(collection) === 'daily-meditation' && (
         <MeditationCollectionContent plan={collection} onReadingSlicePress={onReadingSlicePress} />
       )}
       {collection && (

@@ -49,6 +49,10 @@ it('discovers entries offline with only Bost and Calmet installed using the publ
     INSERT INTO dictionary_works VALUES (3, 'westphal', 'WESTPHAL', 'fr', 'Westphal', 'Westphal');
     INSERT INTO dictionary_entries VALUES (1, 10, 'fr', 'Création', 'creation');
     INSERT INTO dictionary_entries VALUES (2, 20, 'fr', 'Dieu', 'dieu');
+    INSERT INTO dictionary_entries VALUES (2, 21, 'fr', 'Création', 'creation');
+    INSERT INTO dictionary_correspondences VALUES (1, 'creation', 'Création');
+    INSERT INTO dictionary_correspondence_members VALUES (1, 1, 10, 0);
+    INSERT INTO dictionary_correspondence_members VALUES (1, 2, 21, 1);
     INSERT INTO dictionary_entries VALUES (3, 30, 'fr', 'Terre', 'terre');
     INSERT INTO dictionary_passage_anchors VALUES ('1-1-1', 1, 10, 1, 0);
     INSERT INTO dictionary_passage_anchors VALUES ('1-1-1', 2, 20, 2, 0);
@@ -82,6 +86,21 @@ it('discovers entries offline with only Bost and Calmet installed using the publ
       ['bost', 10, 'source-citation'],
       ['calmet', 20, 'verse-name'],
     ])
+    const page = await access.browseDirectoryPage('c', { limit: 1 }, 'fr')
+    expect(page.entries.map(entry => entry.label)).toEqual(['Création'])
+    expect(page.entries[0].sources.map(source => source.resource.work)).toEqual(['bost', 'calmet'])
+    const first = await access.searchDirectoryPage('i', { limit: 1 }, 'fr')
+    expect(first.entries.map(entry => entry.label)).toEqual(['Création'])
+    expect(first.nextCursor).toBeDefined()
+    const second = await access.searchDirectoryPage(
+      'i',
+      { limit: 1, cursor: first.nextCursor },
+      'fr'
+    )
+    expect(second.entries.map(entry => entry.label)).toEqual(['Dieu'])
+    expect(second.nextCursor).toBeUndefined()
+    const search = await access.searchDirectoryPage('dieu', {}, 'fr')
+    expect(search.entries.map(entry => entry.label)).toEqual(['Dieu'])
     expect(online.discoverPassageEntries).not.toHaveBeenCalled()
     expect(offlineResourceRegistry.markCorrupt).not.toHaveBeenCalled()
   } finally {

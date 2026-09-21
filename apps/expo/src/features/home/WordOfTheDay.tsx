@@ -21,7 +21,12 @@ import {
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
 import ResourceDownloadWidget from './ResourceDownloadWidget'
-import { getRandomDictionaryEntryId } from './dictionaryWidgetEntry'
+import { loadDictionaryWidgetEntry, selectDictionaryWidgetWork } from './dictionaryWidgetEntry'
+import { KNOWN_DICTIONARY_WORKS } from '~features/resources/dictionaryAccess'
+import {
+  useOfflineResourceRegistry,
+  getOfflineResourceQuerySignal,
+} from '~features/resources/useOfflineResourceRegistry'
 const DictionnaireOfTheDay = ({
   discovery = false,
   color1 = 'rgba(86,204,242,1)',
@@ -31,17 +36,9 @@ const DictionnaireOfTheDay = ({
   const resources = useResourceAccess()
   const lang = useLanguage()
   const isConnected = useConnection()
-  const work = lang === 'en' ? 'easton-webster' : 'westphal'
-  const dictionary =
-    lang === 'en'
-      ? {
-          resourceId: 'EASTON_WEBSTER',
-          title: 'Easton’s Bible Dictionary & Webster’s 1828 Dictionary',
-        }
-      : {
-          resourceId: 'WESTPHAL',
-          title: 'Dictionnaire encyclopédique de la Bible',
-        }
+  const registry = useOfflineResourceRegistry()
+  const dictionary = selectDictionaryWidgetWork(lang, KNOWN_DICTIONARY_WORKS, registry)
+  const work = dictionary.resource.work
   const resourceTitle = dictionary.title
   const resourceIdentity = {
     kind: 'dictionary' as const,
@@ -49,9 +46,15 @@ const DictionnaireOfTheDay = ({
     resourceId: dictionary.resourceId,
     language: lang,
   }
+  const resourceSignal = getOfflineResourceQuerySignal(registry, resourceIdentity)
   const [randomSeed, setRandomSeed] = useState(0)
   const availabilityQuery = useQuery({
-    queryKey: [...resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', lang), isConnected],
+    queryKey: [
+      ...resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', lang),
+      work,
+      resourceSignal,
+      isConnected,
+    ],
     queryFn: () =>
       resources.dictionary.getAvailability?.(lang, work) ??
       Promise.resolve({ status: 'available' as const }),
@@ -59,10 +62,8 @@ const DictionnaireOfTheDay = ({
     staleTime: Infinity,
   })
   const strongQuery = useQuery({
-    queryKey: ['home-dictionary-random', lang, randomSeed, isConnected],
-    queryFn: async () =>
-      (await resources.dictionary.loadItemByRowId(getRandomDictionaryEntryId(lang), lang, work)) ??
-      null,
+    queryKey: ['home-dictionary-random', lang, work, resourceSignal, randomSeed, isConnected],
+    queryFn: () => loadDictionaryWidgetEntry(resources.dictionary, lang, work),
     ...localQueryOptions,
   })
   const strongReference = strongQuery.data
@@ -110,7 +111,7 @@ const DictionnaireOfTheDay = ({
     return (
       <WidgetContainer>
         <ResourceUnavailableView
-          identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: lang }}
+          identity={resourceIdentity}
           title={resourceTitle}
           fileSize={22}
           failure={
@@ -143,6 +144,7 @@ const DictionnaireOfTheDay = ({
           route: 'DictionnaryDetail',
           params: {
             word,
+            entryId: String(strongReference.id),
             work,
             resourceId: dictionary.resourceId,
             dictionaryTitle: dictionary.title,
@@ -159,6 +161,7 @@ const DictionnaireOfTheDay = ({
       route="DictionnaryDetail"
       params={{
         word,
+        entryId: String(strongReference.id),
         work,
         resourceId: dictionary.resourceId,
         dictionaryTitle: dictionary.title,

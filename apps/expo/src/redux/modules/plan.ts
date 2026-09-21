@@ -58,6 +58,10 @@ export const fetchPlan = createAsyncThunk(
     }
 
     const snapshot = await getDocs(collection(firebaseDb, 'plans', id, 'plan-sections'))
+    // An empty offline Firestore cache is not evidence that a collection has no readings.
+    if (snapshot.empty && snapshot.metadata.fromCache) {
+      throw new Error('Reading content is not available offline')
+    }
     const sections = snapshot.docs.map((x: FirebaseFirestoreTypes.QueryDocumentSnapshot) =>
       x.data()
     ) as Section[]

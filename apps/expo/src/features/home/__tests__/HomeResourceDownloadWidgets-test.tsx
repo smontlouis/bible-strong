@@ -4,7 +4,9 @@ import { downloadManager } from '~helpers/downloadManager'
 import NaveOfTheDay from '../NaveOfTheDay'
 import StrongOfTheDay from '../StrongOfTheDay'
 import WordOfTheDay from '../WordOfTheDay'
-import { getRandomDictionaryEntryId } from '../dictionaryWidgetEntry'
+import { loadDictionaryWidgetEntry, selectDictionaryWidgetWork } from '../dictionaryWidgetEntry'
+import { KNOWN_DICTIONARY_WORKS } from '~features/resources/dictionaryAccess'
+import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 jest.mock('react-native', () => ({ Platform: { OS: 'web' } }))
 jest.mock('~themes/ThemeProvider', () => ({
   useTheme: () => jest.requireActual('../../../../test/themeFixture').themeFixture,
@@ -15,8 +17,42 @@ let mockAvailabilityReason: 'offline-copy-required' | 'invalid-offline-copy' =
   'offline-copy-required'
 let mockStrongAvailabilityStatus: 'missing' | 'incompatible' | 'corrupt' = 'missing'
 let mockAvailabilityError = false
+let mockInstalledDictionaryWorks: string[] = []
+let mockDictionaryEntry: { id: number; word: string; normalizedWord: string } | undefined
+const mockQueryKeys: unknown[][] = []
 const mockAvailabilityRefetch = jest.fn()
 const mockContentRefetch = jest.fn()
+
+jest.mock('~features/resources/dictionaryAccess', () => ({
+  KNOWN_DICTIONARY_WORKS: [
+    {
+      resource: { work: 'westphal', language: 'fr' },
+      resourceId: 'WESTPHAL',
+      title: 'Dictionnaire encyclopédique de la Bible',
+    },
+    { resource: { work: 'bost', language: 'fr' }, resourceId: 'BOST', title: 'Bost' },
+    { resource: { work: 'calmet', language: 'fr' }, resourceId: 'CALMET', title: 'Calmet' },
+    {
+      resource: { work: 'easton-webster', language: 'en' },
+      resourceId: 'EASTON_WEBSTER',
+      title: 'Easton',
+    },
+  ],
+}))
+jest.mock('~features/resources/useOfflineResourceRegistry', () => ({
+  useOfflineResourceRegistry: () => ({
+    resources: new Map(
+      mockInstalledDictionaryWorks.map(work => [
+        work,
+        {
+          resource: { kind: 'dictionary', work, language: 'fr' },
+          availability: { status: 'available' },
+        },
+      ])
+    ),
+  }),
+  getOfflineResourceQuerySignal: () => [],
+}))
 
 jest.mock('expo-linear-gradient', () => ({ LinearGradient: () => null }))
 
@@ -24,7 +60,10 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }))
 
-jest.mock('~common/Link', () => () => null)
+jest.mock('~common/Link', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return (props: Record<string, unknown>) => ReactModule.createElement('Link', props)
+})
 jest.mock('~common/NaveIcon', () => () => null)
 jest.mock('~common/LexiqueIcon', () => () => null)
 jest.mock('~common/icons/ResourceIcon', () => () => null)
@@ -81,7 +120,29 @@ jest.mock('~helpers/downloadManager', () => ({
 
 jest.mock('@tanstack/react-query', () => ({
   useQuery: ({ queryKey }: { queryKey: readonly unknown[] }) => {
+    mockQueryKeys.push([...queryKey])
     const serializedKey = queryKey.join(':')
+    if (mockDictionaryEntry && serializedKey.includes('home-dictionary-random')) {
+      return {
+        data: mockDictionaryEntry,
+        isPending: false,
+        isSuccess: true,
+        isError: false,
+        refetch: mockContentRefetch,
+      }
+    }
+    if (
+      mockDictionaryEntry &&
+      serializedKey.includes('availability') &&
+      serializedKey.includes('DICTIONNAIRE')
+    ) {
+      return {
+        data: { status: 'available' },
+        isPending: false,
+        isError: false,
+        refetch: mockAvailabilityRefetch,
+      }
+    }
     if (serializedKey.includes('strong-lexicon:availability')) {
       return {
         data: {
@@ -154,6 +215,9 @@ describe('Home resource download widgets', () => {
 
   beforeEach(() => {
     mockIsConnected = true
+    mockInstalledDictionaryWorks = []
+    mockDictionaryEntry = undefined
+    mockQueryKeys.length = 0
     mockAvailabilityReason = 'offline-copy-required'
     mockStrongAvailabilityStatus = 'missing'
     mockAvailabilityError = false
@@ -168,6 +232,33 @@ describe('Home resource download widgets', () => {
   afterEach(() => {
     act(() => renderer?.unmount())
     jest.restoreAllMocks()
+  })
+
+  it('uses an installed Bost copy for availability and content when Westphal is absent', () => {
+    mockInstalledDictionaryWorks = ['bost', 'calmet']
+    mockIsConnected = false
+    act(() => {
+      renderer = create(<WordOfTheDay />)
+    })
+    expect(mockQueryKeys.find(key => key.includes('availability'))).toContain('bost')
+    expect(mockQueryKeys.find(key => key.includes('home-dictionary-random'))).toContain('bost')
+  })
+
+  it('opens the exact entry from the installed work shown by the widget', () => {
+    mockInstalledDictionaryWorks = ['bost', 'calmet']
+    mockIsConnected = false
+    mockDictionaryEntry = { id: 42001, word: 'Babel', normalizedWord: 'babel' }
+    act(() => {
+      renderer = create(<WordOfTheDay />)
+    })
+    const link = renderer.root.find(node => String(node.type) === 'Link')
+    expect(link.props.params).toMatchObject({
+      work: 'bost',
+      resourceId: 'BOST',
+      entryId: '42001',
+      word: 'Babel',
+      language: 'fr',
+    })
   })
 
   it('offers to download Nave when its offline copy is absent', () => {
@@ -330,15 +421,40 @@ describe('Home resource download widgets', () => {
 })
 
 describe('Dictionary home widget entry selection', () => {
-  it.each([
-    ['fr', 0, 5437],
-    ['fr', 0.999999, 10872],
-    ['en', 0, 1],
-    ['en', 0.999999, 8620],
-  ] as const)(
-    'selects an existing %s dictionary entry for random value %s',
-    (language, random, id) => {
-      expect(getRandomDictionaryEntryId(language, random)).toBe(id)
-    }
-  )
+  it('prefers installed works in the requested language', () => {
+    mockInstalledDictionaryWorks = ['bost', 'calmet']
+    const snapshot = useOfflineResourceRegistry()
+    expect(selectDictionaryWidgetWork('fr', KNOWN_DICTIONARY_WORKS, snapshot).resource.work).toBe(
+      'bost'
+    )
+    expect(selectDictionaryWidgetWork('en', KNOWN_DICTIONARY_WORKS, snapshot).resource.work).toBe(
+      'easton-webster'
+    )
+    mockInstalledDictionaryWorks = ['westphal', 'bost']
+    expect(
+      selectDictionaryWidgetWork('fr', KNOWN_DICTIONARY_WORKS, useOfflineResourceRegistry())
+        .resource.work
+    ).toBe('westphal')
+  })
+
+  it('selects a real entry with a sparse id and skips empty letters', async () => {
+    const entry = { id: 42001, word: 'Babel', normalizedWord: 'babel' }
+    const listByLetterPage = jest
+      .fn()
+      .mockResolvedValueOnce({ entries: [] })
+      .mockResolvedValueOnce({ entries: [entry] })
+    await expect(
+      loadDictionaryWidgetEntry({ listByLetterPage }, 'fr', 'bost', () => 0)
+    ).resolves.toEqual(entry)
+    expect(listByLetterPage).toHaveBeenNthCalledWith(1, 'a', { limit: 100 }, 'fr', 'bost')
+    expect(listByLetterPage).toHaveBeenNthCalledWith(2, 'b', { limit: 100 }, 'fr', 'bost')
+  })
+
+  it('finishes when the selected dictionary has no alphabetical entries', async () => {
+    const listByLetterPage = jest.fn().mockResolvedValue({ entries: [] })
+    await expect(
+      loadDictionaryWidgetEntry({ listByLetterPage }, 'fr', 'calmet', () => 0)
+    ).resolves.toBeNull()
+    expect(listByLetterPage).toHaveBeenCalledTimes(26)
+  })
 })

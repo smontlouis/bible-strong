@@ -715,17 +715,17 @@ const loadLocalDirectoryPage = async ({
          LEFT JOIN dictionary_correspondences correspondence
            ON correspondence.correspondence_key = member.correspondence_key
          WHERE work.work IN (${workPlaceholders})
+       ), localized_entries AS (
+         SELECT group_key, correspondence_id, word AS label, normalized_word AS normalized_label,
+                ROW_NUMBER() OVER (
+                  PARTITION BY group_key ORDER BY normalized_word, work, entry_id
+                ) AS label_rank
+         FROM installed_entries
+         WHERE language = ?
        ), directory_keys AS (
-         SELECT candidate.group_key, MAX(candidate.correspondence_id) AS correspondence_id,
-                (SELECT localized.word FROM installed_entries localized
-                 WHERE localized.group_key = candidate.group_key AND localized.language = ?
-                 ORDER BY localized.normalized_word, localized.work, localized.entry_id LIMIT 1) AS label,
-                (SELECT localized.normalized_word FROM installed_entries localized
-                 WHERE localized.group_key = candidate.group_key AND localized.language = ?
-                 ORDER BY localized.normalized_word, localized.work, localized.entry_id LIMIT 1) AS normalized_label
-         FROM installed_entries candidate
-         GROUP BY candidate.group_key
-         HAVING SUM(CASE WHEN candidate.language = ? THEN 1 ELSE 0 END) > 0
+         SELECT group_key, correspondence_id, label, normalized_label
+         FROM localized_entries
+         WHERE label_rank = 1
        ), page_keys AS (
          SELECT group_key, correspondence_id, label, normalized_label
          FROM directory_keys
@@ -742,8 +742,6 @@ const loadLocalDirectoryPage = async ({
        JOIN installed_entries entry ON entry.group_key = key.group_key
        ORDER BY key.normalized_label, key.group_key, entry.language, entry.work, entry.entry_id`,
       ...works,
-      language,
-      language,
       language,
       normalizedInitial ?? null,
       normalizedInitial ? `${normalizedInitial}%` : null,

@@ -43,7 +43,7 @@ export const MeditationReader = ({
   onDateChange,
 }: MeditationReaderProps) => {
   const today = useLocalReadingDate()
-  const { collection, isError, retry } = useReadingContent(collectionId)
+  const { collection, isError, isOffline, retry } = useReadingContent(collectionId)
   const resolved = collection
     ? resolveMeditationReading(collection, readingId, requestedDate, today)
     : undefined
@@ -245,13 +245,18 @@ export const MeditationReader = ({
               <MeditationContent reading={reading} language={collection.lang} wide={wide} />
             )}
             {isError && (
-              <Button
-                onPress={() => {
-                  void retry()
-                }}
-              >
-                {t('dailyReading.retry')}
-              </Button>
+              <Box className="gap-[16px]">
+                <Text className="text-grey">
+                  {isOffline ? t('dailyReading.offlineContent') : t('dailyReading.downloadError')}
+                </Text>
+                <Button
+                  onPress={() => {
+                    void retry()
+                  }}
+                >
+                  {t('dailyReading.retry')}
+                </Button>
+              </Box>
             )}
             {!collection && !isError && (
               <ActivityIndicator accessibilityLabel={t('Chargement...')} />
