@@ -47,6 +47,7 @@ const CommentariesDiscovery = lazy(() =>
 import { AvatarEditor, profileCopy } from './AvatarEditor'
 import { AVATAR_COLORS, generateExplorerProfile, loadProfile, saveProfile } from './avatar-profile'
 import { loadVisitedPlaces, saveVisitedPlaces } from './visited-places'
+import { loadLanguage, saveLanguage } from './language'
 import './style.css'
 const GuestbookAdmin = lazy(() => import('./GuestbookAdmin'))
 const ZoneEditor = import.meta.env.DEV ? lazy(() => import('./ZoneEditor')) : () => null
@@ -242,7 +243,7 @@ function App() {
     () => import.meta.env.DEV && new URLSearchParams(location.search).has('debug')
   )
   const [diagnosticFilters, setDiagnosticFilters] = useState(() => makeDiagnosticFilters())
-  const [language, setLanguage] = useState<Language>('fr')
+  const [language, setLanguage] = useState<Language>(loadLanguage)
   const [storyOpen, setStoryOpen] = useState(false)
   const [guestbookOpen, setGuestbookOpen] = useState(false)
   const [gamesOpen, setGamesOpen] = useState(false)
@@ -339,7 +340,15 @@ function App() {
   }, [])
 
   useEffect(() => {
-    controls.current.activity = currentActivity({ ready, menuOpen, profileOpen, opened, storyOpen, guestbookOpen, gamesOpen })
+    controls.current.activity = currentActivity({
+      ready,
+      menuOpen,
+      profileOpen,
+      opened,
+      storyOpen,
+      guestbookOpen,
+      gamesOpen,
+    })
     controls.current.avatar = profile.avatar
     controls.current.avatarColor = profile.color
     controls.current.avatarName = profile.name
@@ -375,6 +384,30 @@ function App() {
   ])
   useEffect(() => {
     document.documentElement.lang = language
+    saveLanguage(language)
+    const title =
+      language === 'fr'
+        ? 'Bible Strong World — Explore la Bible autrement'
+        : 'Bible Strong World — A new way to explore the Bible'
+    const description =
+      language === 'fr'
+        ? 'Explore un monde interactif pour découvrir la Bible : lexiques, dictionnaire, commentaires et jeux bibliques, en solo ou avec d’autres explorateurs.'
+        : 'Explore an interactive world of Bible lexicons, a dictionary, commentaries and Bible games. Discover Scripture on your own or with other explorers.'
+    document.title = title
+    for (const selector of ['meta[property="og:title"]', 'meta[name="twitter:title"]'])
+      document.querySelector(selector)?.setAttribute('content', title)
+    for (const selector of [
+      'meta[name="description"]',
+      'meta[property="og:description"]',
+      'meta[name="twitter:description"]',
+    ])
+      document.querySelector(selector)?.setAttribute('content', description)
+    document
+      .querySelector('meta[property="og:locale"]')
+      ?.setAttribute('content', language === 'fr' ? 'fr_FR' : 'en_US')
+    document
+      .querySelector('meta[property="og:locale:alternate"]')
+      ?.setAttribute('content', language === 'fr' ? 'en_US' : 'fr_FR')
   }, [language])
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => {

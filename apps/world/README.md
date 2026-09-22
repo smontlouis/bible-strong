@@ -162,3 +162,22 @@ identity cards: 110 people, 52 places and 38 objects in seven review batches. Re
 for 4, 3, 2 or 1 points, or review all translations and sources, save notes and
 export decisions. This development-only review UI uses the same source cards as live multiplayer.
 See [the identity catalogue notes](who-bank/README.md).
+
+## Search and sharing metadata
+
+`index.html` supplies French metadata before JavaScript runs: canonical production URL,
+Open Graph / Twitter card, WebSite structured data and icons. The interface language
+switch updates the title and description in French/English; both languages share one
+URL, so the sitemap contains only the root page. `public/robots.txt` excludes service,
+admin and local workshop paths from crawling.
+
+Regenerate the committed favicon, Apple icon, app icons and 1200 × 630 social card:
+
+```sh
+node apps/world/scripts/build-seo-assets.mjs
+```
+
+The icons reuse `public/assets/avatars/short-slime/thumbnail.png`, the neutral
+front-facing frame already extracted from the game's sprite sheet. The script
+applies the game's blue tint (`#7398f2`) and a thin black outline before resizing.
+The social card layout is defined in the same generation script.

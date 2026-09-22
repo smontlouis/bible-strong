@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /parties/
+Disallow: /admin
+Disallow: /__study-world/
+Disallow: /health
+Disallow: /game-lab.html
+Disallow: /question-lab.html
+Disallow: /who-lab.html
+
+Sitemap: https://world.bible-strong.app/sitemap.xml
