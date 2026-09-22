@@ -57,6 +57,31 @@ const createHarness = (
 }
 
 describe('searchExperience', () => {
+  it('resets source and passage restrictions together for an example search', () => {
+    const harness = createHarness({
+      section: 'nt',
+      canon: 'catholic-73',
+      book: 43,
+      selectedVersion: 'KJV',
+      sortOrder: 'book',
+      itemFilters: { ...allItemFilters, passages: false, strong: false },
+    })
+
+    harness.controller.resetAllFilters()
+
+    const expected = {
+      section: '',
+      canon: '',
+      book: 0,
+      selectedVersion: DEFAULT_BIBLE_VERSION_FILTER,
+      sortOrder: 'relevance',
+      itemFilters: allItemFilters,
+    }
+    expect(harness.filters()).toEqual(expected)
+    expect(harness.persist).toHaveBeenCalledTimes(1)
+    expect(harness.persist).toHaveBeenCalledWith(expected)
+  })
+
   it('keeps the persisted version while startup only exposes another Offline copy', () => {
     const harness = createHarness({ selectedVersion: 'KJV' }, ['BHG'])
 

@@ -680,6 +680,7 @@ const SQLiteSearchScreen = ({
   const resetPassageFilters = searchExperience.resetPassageFilters
 
   const updateSearchValue = (value: string, origin: 'typed' | 'example' = 'typed') => {
+    if (origin === 'example') searchExperience.resetAllFilters()
     setPreviousSearch(value.trim() ? displayedSearch : null)
     searchOriginRef.current = origin
     setSelectedFacet('all')

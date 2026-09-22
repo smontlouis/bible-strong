@@ -33,6 +33,23 @@ export const createSearchExperienceController = (
 ) => {
   const persist = (patch: Partial<SearchFilters>) => adapter.persist(patch)
 
+  const resetPassageFilters = (sourceReset?: Pick<SearchFilters, 'itemFilters'>) => {
+    adapter.writeSelectedVersion(DEFAULT_BIBLE_VERSION_FILTER)
+    adapter.writeSection('')
+    adapter.writeCanon('')
+    adapter.writeBook(0)
+    adapter.writeSortOrder('relevance')
+    if (sourceReset) adapter.writeItemFilters(sourceReset.itemFilters)
+    persist({
+      selectedVersion: DEFAULT_BIBLE_VERSION_FILTER,
+      section: '',
+      canon: '',
+      book: 0,
+      sortOrder: 'relevance',
+      ...sourceReset,
+    })
+  }
+
   return {
     reconcileSelectedVersion() {
       const current = adapter.readFilters()
@@ -125,19 +142,12 @@ export const createSearchExperienceController = (
       persist({ itemFilters: allItemFilters })
     },
 
+    resetAllFilters() {
+      resetPassageFilters({ itemFilters: allItemFilters })
+    },
+
     resetPassageFilters() {
-      adapter.writeSelectedVersion(DEFAULT_BIBLE_VERSION_FILTER)
-      adapter.writeSection('')
-      adapter.writeCanon('')
-      adapter.writeBook(0)
-      adapter.writeSortOrder('relevance')
-      persist({
-        selectedVersion: DEFAULT_BIBLE_VERSION_FILTER,
-        section: '',
-        canon: '',
-        book: 0,
-        sortOrder: 'relevance',
-      })
+      resetPassageFilters()
     },
   }
 }
