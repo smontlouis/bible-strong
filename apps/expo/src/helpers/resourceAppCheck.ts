@@ -25,6 +25,10 @@ export const initializeResourceAppCheck = (): Promise<FirebaseAppCheckTypes.Modu
   appCheckInitialization = initializeAppCheck(getApp(), {
     provider,
     isTokenAutoRefreshEnabled: true,
+  }).catch(error => {
+    // A transient initialization failure must not poison the rest of the session.
+    appCheckInitialization = undefined
+    throw error
   })
   return appCheckInitialization
 }
@@ -51,22 +55,57 @@ export class ResourceAppCheckError extends Error {
   }
 }
 
-export const getResourceAppCheckToken = async (forceRefresh = false): Promise<string> => {
+let pendingAcquisition: { promise: Promise<string>; forceRefresh: boolean } | undefined
+let lastFailure: { error: ResourceAppCheckError; retryAt: number } | undefined
+let initialFailure: ResourceAppCheckError | undefined
+let consecutiveFailures = 0
+
+const acquireResourceAppCheckToken = async (forceRefresh: boolean): Promise<string> => {
   try {
     const result = await getToken(await initializeResourceAppCheck(), forceRefresh)
     if (!result.token) throw new Error('RESOURCE_APP_CHECK_TOKEN_MISSING')
+    lastFailure = undefined
+    initialFailure = undefined
+    consecutiveFailures = 0
     return result.token
   } catch (error) {
     const errorCode =
       error instanceof ResourceAppCheckError ? error.code : getAppCheckFailureCode(error)
+    const failure =
+      error instanceof ResourceAppCheckError ? error : new ResourceAppCheckError(errorCode, error)
+    initialFailure ??= failure
+    consecutiveFailures++
+    // Suppress repeated callers, without scheduling unattended retries or caching tokens.
+    // The native SDK remains responsible for token expiry and its own, possibly longer backoff.
+    const retryAfterMs = Math.min(2_000 * 2 ** Math.min(consecutiveFailures - 1, 4), 30_000)
+    lastFailure = { error: failure, retryAt: Date.now() + retryAfterMs }
     appLogger.captureError('download', 'resource_app_check.token_failed', error, {
       forceRefresh,
       errorCode,
+      consecutiveFailures,
+      retryAfterMs,
+      initialFailure: initialFailure.cause,
     })
-    throw error instanceof ResourceAppCheckError
-      ? error
-      : new ResourceAppCheckError(errorCode, error)
+    throw failure
   }
+}
+
+export const getResourceAppCheckToken = async (forceRefresh = false): Promise<string> => {
+  const pending = pendingAcquisition
+  if (pending) {
+    const token = await pending.promise
+    if (!forceRefresh || pending.forceRefresh) return token
+    // A non-forced lookup may return the very token the server just rejected.
+    // Queue one shared forced refresh after it succeeds; never retry its failure immediately.
+    return getResourceAppCheckToken(true)
+  }
+  if (lastFailure && Date.now() < lastFailure.retryAt) throw lastFailure.error
+
+  const promise = acquireResourceAppCheckToken(forceRefresh).finally(() => {
+    pendingAcquisition = undefined
+  })
+  pendingAcquisition = { promise, forceRefresh }
+  return promise
 }
 
 const guardedResourceApiFetch = createResourceAppCheckFetch(fetch, getResourceAppCheckToken)
