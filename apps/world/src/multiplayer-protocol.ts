@@ -1,3 +1,4 @@
+import { isReaction, type ReactionId } from './reactions'
 import {
   parseGameAction,
   type GameAction,
@@ -13,6 +14,7 @@ export const MAX_PLAYERS = 100
 export type Pose = { x: number; y: number; dx: number; dy: number; moving: boolean }
 export type Player = { id: string; profile: AvatarProfile; pose: Pose; seq: number }
 export type ClientMessage =
+  | { type: 'reaction'; reaction: ReactionId }
   | { type: 'game'; command: GameAction }
   | { type: 'join'; version: number; profile: AvatarProfile; pose: Pose; resumeToken?: string }
   | { type: 'visibility'; hidden: boolean }
@@ -20,6 +22,7 @@ export type ClientMessage =
   | { type: 'profile'; profile: AvatarProfile }
   | { type: 'ping' }
 export type ServerMessage =
+  | { type: 'reaction'; id: string; reaction: ReactionId }
   | { type: 'game-error'; error: GameError }
   | { type: 'games'; snapshot: GamesSnapshot; error?: GameError }
   | { type: 'welcome'; id: string; spawn: Pose; players: Player[]; resumeToken?: string }
@@ -57,6 +60,8 @@ export function parseClientMessage(raw: string): ClientMessage | null {
       const command = parseGameAction(m.command)
       return command ? { type: 'game', command } : null
     }
+    if (m.type === 'reaction')
+      return isReaction(m.reaction) ? { type: 'reaction', reaction: m.reaction } : null
     if (m.type === 'ping') return { type: 'ping' }
     if (m.type === 'visibility' && typeof m.hidden === 'boolean')
       return { type: 'visibility', hidden: m.hidden }

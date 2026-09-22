@@ -1,0 +1,113 @@
+.reaction-controls {
+  position: absolute;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(94px, calc(env(safe-area-inset-bottom) + 82px));
+  z-index: 12;
+}
+.reaction-trigger {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  padding: 4px;
+  border: 2px solid #bfd4d4;
+  border-radius: 20px;
+  background: #fffdf4;
+  box-shadow:
+    0 4px 0 #8daeb0,
+    0 8px 20px #244e5726;
+  cursor: pointer;
+}
+.reaction-trigger[aria-expanded='true'] {
+  background: #dcf1e9;
+}
+.reaction-icon {
+  position: relative;
+  display: block;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+.reaction-icon > * {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.reaction-body {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-blend-mode: multiply;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+}
+.reaction-panel {
+  position: absolute;
+  bottom: 74px;
+  right: 0;
+  width: min(310px, calc(100vw - 32px));
+  padding: 16px;
+  border: 1px solid #c4dbd4;
+  border-radius: 24px;
+  background: #fffdf4;
+  color: #244e57;
+  box-shadow: 0 12px 36px #163f5133;
+}
+.reaction-panel > p {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.reaction-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.reaction-grid button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.reaction-grid button > span:last-child {
+  font-size: 9px;
+  line-height: 1.3;
+}
+.reaction-grid button:hover:enabled {
+  background: #e4efe8;
+}
+.reaction-grid button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.reaction-controls button:focus-visible {
+  outline: 3px solid var(--bs-blue-dark);
+  outline-offset: 3px;
+}
+.reaction-panel > .reaction-unavailable {
+  font-size: 12px;
+  font-weight: 400;
+  margin: 12px 0 0;
+}
+@media (max-width: 600px) {
+  .reaction-controls {
+    right: max(16px, env(safe-area-inset-right));
+  }
+}
+@media (max-height: 480px) {
+  .reaction-controls {
+    bottom: max(72px, calc(env(safe-area-inset-bottom) + 60px));
+  }
+  .reaction-panel {
+    padding: 10px;
+    bottom: 68px;
+  }
+}

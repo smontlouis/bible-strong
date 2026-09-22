@@ -139,3 +139,32 @@ it('expires abandoned sessions after 24 hours and refuses to restore expired cre
   await room.onAlarm()
   expect(saved.size).toBe(0)
 })
+
+it('broadcasts reactions with the authenticated sender identity and throttles across hibernation', async () => {
+  const sender = await join()
+  const observer = await join()
+  await send(sender, { type: 'reaction', reaction: 'love', id: observer.state.player.id })
+  const expected = { type: 'reaction', reaction: 'love', id: sender.state.player.id }
+  expect(sender.messages.at(-1)).toEqual(expected)
+  expect(observer.messages.at(-1)).toEqual(expected)
+  room = new WorldRoom((room as any).ctx, { connections } as never)
+  await send(sender, { type: 'reaction', reaction: 'laugh' })
+  expect(observer.messages.filter((m: any) => m.type === 'reaction')).toHaveLength(1)
+  vi.advanceTimersByTime(1500)
+  await send(sender, { type: 'reaction', reaction: 'bravo' })
+  expect(observer.messages.at(-1)).toEqual({ ...expected, reaction: 'bravo' })
+  const newcomer = await join()
+  expect(newcomer.messages.some((m: any) => m.type === 'reaction')).toBe(false)
+  await send(sender, { type: 'visibility', hidden: true })
+  vi.advanceTimersByTime(1500)
+  await send(sender, { type: 'reaction', reaction: 'sad' })
+  expect(observer.messages.filter((m: any) => m.type === 'reaction')).toHaveLength(2)
+})
+
+it('rejects unknown reactions instead of broadcasting arbitrary image paths', async () => {
+  const sender = await join()
+  const observer = await join()
+  await send(sender, { type: 'reaction', reaction: '/untrusted.png' })
+  expect(sender.code).toBe(4002)
+  expect(observer.messages.some((m: any) => m.type === 'reaction')).toBe(false)
+})

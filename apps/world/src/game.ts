@@ -1,3 +1,4 @@
+import { AvatarReactions, loadReactions } from './avatar-reactions'
 import { GAME_STATION } from './game-station'
 import { cameraZoomBounds, clampCameraZoom } from './camera-zoom'
 import { arrivalZoom } from './world-arrival'
@@ -89,6 +90,7 @@ export function createWorld(
   class StudyScene extends Phaser.Scene {
     network!: WorldMultiplayer
     remoteAvatars!: RemoteAvatars
+    reactions!: AvatarReactions
     facing = { x: 0, y: 1 }
     position = { ...SPAWN }
     blob!: Phaser.GameObjects.Image
@@ -185,6 +187,7 @@ export function createWorld(
     }
 
     preload() {
+      loadReactions(this)
       this.load.image('game-terminal', './assets/games/terminal.webp')
       this.load.image('game-terminal-ground', './assets/games/terminal-ground.webp')
       this.load.image('navigation-destination', './assets/navigation/destination-arrow.webp')
@@ -254,6 +257,7 @@ export function createWorld(
       this.network = new WorldMultiplayer()
       controls.network = this.network
       this.remoteAvatars = new RemoteAvatars(this, rendererResolution)
+      this.reactions = new AvatarReactions(this)
       controls.retryMultiplayer = () => this.network.retry()
       this.shadow = this.add.ellipse(SPAWN.x, SPAWN.y, 30, 10, 0x183c45, 0.25).setDepth(-1)
       this.blob = this.add
@@ -547,6 +551,14 @@ export function createWorld(
         labelScaleY,
         fade * fade * (3 - 2 * fade),
         !controls.paused && this.active && !document.hidden
+      )
+      this.reactions.update(
+        this.network,
+        { ...next, color: controls.avatarColor },
+        performance.now(),
+        labelScaleX,
+        labelScaleY,
+        reducedMotion
       )
       this.bushes.update(
         delta,

@@ -1,0 +1,34 @@
+{
+  "size": 128,
+  "source": "Image Gen; slime reactions with bold outlines",
+  "images": {
+    "hello": {
+      "original": "hello-v3.png",
+      "sha256": "017800629b8dbf4f3c51de0f8b578e0ed93385d152c4023ea91f8a9115cfb876"
+    },
+    "love": {
+      "original": "love.png",
+      "sha256": "429a9e53a93b7c223fe4a5f510a36fb16088c81d237a1329b80a04787d4de830"
+    },
+    "laugh": {
+      "original": "laugh.png",
+      "sha256": "e65a39e57aad2585d36117060ecca206399433c4faac7b66fa69d2dd66dab4a8"
+    },
+    "wow": {
+      "original": "wow.png",
+      "sha256": "c2aea009df7762364dccba92e346c31b89292baed54b74e5f2b44b86e13a8b86"
+    },
+    "think": {
+      "original": "think.png",
+      "sha256": "b8d26137faa8a3a39e8bf274158db81fee36f5654f25bca64b8fc33bd0685185"
+    },
+    "sad": {
+      "original": "sad.png",
+      "sha256": "a634769ca706052a0ca1058d8bd8e39aad70f4be4209eff01d64dc4f50a629a8"
+    },
+    "bravo": {
+      "original": "bravo-v3.png",
+      "sha256": "74ab2757623b2cbcc2f6c2ed0bfa2b6bb93932bdffe275bf46deb5fff0543946"
+    }
+  }
+}

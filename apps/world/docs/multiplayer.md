@@ -46,3 +46,20 @@ The script checks joins/snapshots, movement, profile edits, stale sequence rejec
 - No production deployment was performed. Physical phones and the event network still need an on-site smoke test.
 
 Arrival-position follow-up: 91 World tests pass. A live burst of 30 join attempts reserved 15 non-overlapping central-island positions and rejected the remaining arrivals until space was available. The 100-connection test moves each visitor off the central island before admitting the next one.
+
+## Avatar reactions
+
+The bottom-right reaction picker sends one of seven fixed reaction identifiers. The room
+assigns the sender from its admitted connection, limits reactions to one every 1.5 seconds
+(in the hibernating session attachment), and broadcasts only to admitted, visible visitors.
+Reactions are transient: they are not stored, included in welcome snapshots, or replayed
+after reconnecting. Clients clear them on departure, backgrounding and disconnect.
+Each reaction follows its avatar for three seconds, with screen-sized artwork above scenery.
+Reduced-motion users see a static reaction for the same duration.
+
+The first set uses the approved slime artwork for every avatar shape, tinted with the
+sender's profile color. Colored hearts, tears and confetti are a separate untinted layer.
+The fourteen lossless WebP layers are 128 × 128 and total about 36 KB. Rebuild with
+`node scripts/build-reactions.mjs <approved-image-directory>` from `apps/world`; the source
+filenames and hashes are recorded in `public/assets/reactions/slime/provenance.json`.
+Full-resolution concepts are not served by the application.

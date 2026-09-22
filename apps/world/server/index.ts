@@ -1,3 +1,4 @@
+import { REACTION_COOLDOWN_MS } from '../src/reactions'
 import { WorldGames } from './games/room'
 import type { GameAIEnv } from './games/ai'
 import { authenticateAdmin, validAdminMutation } from './guestbook-auth'
@@ -26,6 +27,7 @@ type Session = {
   messages: number
   resumeToken?: string
   hidden?: boolean
+  lastReaction?: number
   lastGameAction?: number
 }
 interface Env extends GuestbookEnv, GameAIEnv {
@@ -109,11 +111,29 @@ export class WorldRoom extends Server<Env> {
       connection.close(4002, 'Invalid message')
       return
     }
-    const next = {
+    const next: Session = {
       ...session,
       lastSeen: now,
       window: now - session.window >= 1000 ? now : session.window,
       messages,
+    }
+    if (message.type === 'reaction') {
+      const allowed =
+        session.player &&
+        !session.hidden &&
+        now - (session.lastReaction ?? -Infinity) >= REACTION_COOLDOWN_MS
+      connection.setState({ ...next, ...(allowed ? { lastReaction: now } : {}) })
+      if (allowed) {
+        const frame = JSON.stringify({
+          type: 'reaction',
+          id: session.player!.id,
+          reaction: message.reaction,
+        } satisfies ServerMessage)
+        // Only admitted visitors receive reactions; never persist or replay them on join.
+        for (const peer of this.getConnections<Session>())
+          if (peer.readyState === 1 && peer.state?.player && !peer.state.hidden) peer.send(frame)
+      }
+      return
     }
     if (message.type === 'game' && session.player) {
       const presenceOnly =

@@ -1,3 +1,4 @@
+import { ReactionPicker } from './ReactionPicker'
 import { WorldLoading } from './WorldLoading'
 import { StoryDialog } from './StoryDialog'
 import { BibleGames } from './BibleGames'
@@ -553,6 +554,22 @@ function App() {
           )}
         </div>
       </aside>
+      {ready &&
+        !editorMode &&
+        !editing &&
+        !menuOpen &&
+        !profileOpen &&
+        !opened &&
+        !guestbookOpen &&
+        !storyOpen &&
+        !gamesOpen && (
+          <ReactionPicker
+            network={controls.current.network}
+            color={profile.color}
+            language={language}
+            online={state.multiplayer?.state === 'online'}
+          />
+        )}
       <footer className="world-footer">
         {initial.error && <span title={t.draftError}>{t.draftError}</span>}
         {import.meta.env.DEV && (

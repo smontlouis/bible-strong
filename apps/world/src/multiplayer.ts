@@ -1,3 +1,9 @@
+import {
+  isReaction,
+  REACTION_COOLDOWN_MS,
+  REACTION_DURATION_MS,
+  type ReactionId,
+} from './reactions'
 import { GamesClient } from './games-client'
 import PartySocket from 'partysocket'
 import { parseProfile, type AvatarProfile } from './avatar-profile'
@@ -22,6 +28,30 @@ export class WorldMultiplayer {
         ? [{ id, profile: track.player.profile }]
         : []
     })
+  }
+  readonly reactions = new Map<string, { reaction: ReactionId; startedAt: number }>()
+  private lastReactionSent = -Infinity
+  get playerId() {
+    return this.id
+  }
+  sendReaction(reaction: ReactionId) {
+    const now = performance.now()
+    if (
+      !isReaction(reaction) ||
+      !this.id ||
+      !this.enabled ||
+      document.hidden ||
+      this.status.state !== 'online' ||
+      now - this.lastReactionSent < REACTION_COOLDOWN_MS
+    )
+      return false
+    if (!this.send({ type: 'reaction', reaction })) return false
+    this.lastReactionSent = now
+    return true
+  }
+  expireReactions(now: number) {
+    for (const [id, event] of this.reactions)
+      if (now - event.startedAt >= REACTION_DURATION_MS) this.reactions.delete(id)
   }
   readonly remotes = new Map<string, RemoteTrack>()
   status: PresenceStatus = { state: 'connecting', count: 0 }
@@ -63,6 +93,7 @@ export class WorldMultiplayer {
   }, 5000)
   private visibility = () => {
     if (!this.enabled) return
+    this.reactions.clear()
     this.pose = { ...this.pose, moving: false }
     if (document.hidden && this.id && !this.pendingSpawn)
       this.send({ type: 'move', pose: this.pose, seq: ++this.seq })
@@ -146,6 +177,16 @@ export class WorldMultiplayer {
       }
       const now = performance.now()
       this.lastReceived = now
+      if (message.type === 'reaction') {
+        if (
+          !document.hidden &&
+          this.id &&
+          isReaction(message.reaction) &&
+          (message.id === this.id || this.remotes.has(message.id))
+        )
+          this.reactions.set(message.id, { reaction: message.reaction, startedAt: now })
+        return
+      }
       if (message.type === 'games') {
         this.games.receive(message.snapshot, message.error)
         return
@@ -155,6 +196,7 @@ export class WorldMultiplayer {
         return
       }
       if (message.type === 'welcome') {
+        this.reactions.clear()
         this.games.connect(message.id)
         this.resumeToken = message.resumeToken
         try {
@@ -181,6 +223,7 @@ export class WorldMultiplayer {
         }
         this.status = { state: 'online', count: this.remotes.size + 1 }
       } else if (message.type === 'leave') {
+        this.reactions.delete(message.id)
         this.remotes.delete(message.id)
         if (this.id) this.status = { state: 'online', count: this.remotes.size + 1 }
       } else if (message.type === 'full') {
@@ -207,6 +250,7 @@ export class WorldMultiplayer {
     })
   }
   private disconnected() {
+    this.reactions.clear()
     this.games.disconnect()
     this.pendingSpawn = null
     this.id = null
