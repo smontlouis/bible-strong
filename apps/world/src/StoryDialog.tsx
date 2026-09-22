@@ -113,19 +113,17 @@ export function StoryDialog({
             )}
             {chapter.id === 'about' && (
               <figure className="story-portrait">
-                <div className="story-photo-placeholder" role="img" aria-label={t.photo}>
-                  <svg
-                    viewBox="0 0 80 80"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    aria-hidden="true"
-                  >
-                    <circle cx="40" cy="28" r="13" />
-                    <path d="M15 70v-7a25 25 0 0 1 50 0v7" />
-                  </svg>
-                  <span>{t.photo}</span>
-                </div>
+                <img
+                  className="story-photo"
+                  src="/assets/story/family-pencil-960.webp"
+                  srcSet="/assets/story/family-pencil-480.webp 480w, /assets/story/family-pencil-960.webp 960w"
+                  sizes="(max-width: 760px) calc(100vw - 70px), (max-width: 1120px) calc(100vw - 434px), 686px"
+                  width={960}
+                  height={1280}
+                  alt={t.photo}
+                  loading="lazy"
+                  decoding="async"
+                />
                 <figcaption>
                   <strong>Stéphane</strong>
                   <span>{t.photoHint}</span>
