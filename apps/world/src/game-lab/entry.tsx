@@ -237,7 +237,10 @@ function Frame() {
         invitationAction={model.invitationAction}
         nearby={people.filter(p => !model.game?.players.some(member => member.id === p.id))}
         onOpen={() => setOpen(true)}
-        close={() => setOpen(false)}
+        close={() => {
+          if (model.game?.phase === 'finished') send({ action: 'leave' })
+          setOpen(false)
+        }}
         selectInvitation={selected => {
           setModel(m => ({ ...m, selected, open: true }))
           log('Invitation ouverte')

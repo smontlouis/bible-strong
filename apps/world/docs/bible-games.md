@@ -331,3 +331,15 @@ keeps ignoring the clicks. The bottom-right reaction button stays permanent.
   follows the identity across reconnects. A join from another protocol version gets `outdated`
   and close 4003; the page stops reconnecting and offers a reload. A reconnect in the same page
   keeps the avatar where the visitor walked instead of snapping back.
+
+## Invitations until the game starts, leaving finished games — 2026-09-22
+
+Visitors can receive and accept invitations while they have no game, wait in a lobby that has
+not started (solo lobby included, host or guest), or look at a finished summary. Accepting leaves
+the current lobby: its host passes to another player, and a lobby left empty disappears. Creating
+a lobby keeps the invitations already received. Preparation, a running round and a started solo
+run still answer `busy`, and a visitor already in the inviter's lobby cannot be invited again.
+
+Closing the dialog on a finished game (victory, solo review, interrupted game) sends `leave`, so
+"My game" disappears. Offline, the departure is sent when the connection returns. A game that
+ended while the dialog was closed still shows "My game" once, so the visitor sees the result.

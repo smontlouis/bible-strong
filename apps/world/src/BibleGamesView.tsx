@@ -276,7 +276,8 @@ export function BibleGamesView({
   const id = useId()
   const t = copy[game?.options.language ?? language]
   const host = game?.host === me
-  const canReceive = !game || game.phase === 'finished'
+  // Invitations stay welcome until the visitor's own game actually starts.
+  const canReceive = !game || game.phase === 'lobby' || game.phase === 'finished'
   // Screen transitions and shakes are pure presentation keyed on the snapshot.
   const shell = useRef<HTMLDivElement>(null)
   const screenKey = selectedInvitation
@@ -368,16 +369,28 @@ export function BibleGamesView({
                 onBack={close}
               />
             ) : game?.solo ? (
-              <SoloGameView
-                key={game.id}
-                game={game}
-                now={online ? now : snapshot.now}
-                online={online}
-                error={error}
-                titleId={id}
-                send={send}
-                onShake={onShake}
-              />
+              <>
+                {canReceive && (
+                  <InvitationNotifications
+                    invitations={invitations}
+                    now={now}
+                    language={language}
+                    inline
+                    disabled={invitationAction !== null}
+                    onSelect={selectInvitation}
+                  />
+                )}
+                <SoloGameView
+                  key={game.id}
+                  game={game}
+                  now={online ? now : snapshot.now}
+                  online={online}
+                  error={error}
+                  titleId={id}
+                  send={send}
+                  onShake={onShake}
+                />
+              </>
             ) : game && counting ? (
               <>
                 <Countdown

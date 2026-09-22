@@ -137,8 +137,15 @@ describe('invitations and lobby', () => {
     command('a', { action: 'create', options })
     command('a', { action: 'invite', target: 'b' })
     command('b', { action: 'create', options })
+    // Both lobbies are still waiting: each host may invite the other.
+    expect(engine.snapshot('b').invitations).toHaveLength(1)
+    command('b', { action: 'invite', target: 'a' })
+    command('a', { action: 'accept', invitation: engine.snapshot('a').invitations[0].id })
+    expect(engine.data.games).toHaveLength(1)
+    expect(engine.data.games[0].players.map(p => p.id)).toEqual(['b', 'a'])
+    // A's own lobby is gone, and so is the invitation it had sent to B.
+    engine.tick()
     expect(engine.snapshot('b').invitations).toHaveLength(0)
-    fails('busy', () => command('b', { action: 'invite', target: 'a' }))
   })
 })
 describe('round authority and privacy', () => {
@@ -887,5 +894,42 @@ describe('audit fixes', () => {
     command('a', { action: 'create', options })
     expect(engine.data.games).toHaveLength(MAX_GAMES)
     expect(engine.snapshot('a').game?.host).toBe('a')
+  })
+})
+
+describe('invitations before a game starts', () => {
+  it('invites a visitor waiting in another lobby and moves them on accept', () => {
+    command('c', { action: 'create', options })
+    command('d', { action: 'create', options })
+    command('d', { action: 'invite', target: 'e' })
+    const other = engine.data.games.find(g => g.host === 'd')!
+    command('e', { action: 'accept', invitation: engine.snapshot('e').invitations[0].id })
+    // C hosts a lobby with nobody yet; D hosts one with a guest. Both can still be invited.
+    lobby()
+    command('a', { action: 'invite', target: 'c' })
+    command('a', { action: 'invite', target: 'd' })
+    command('d', { action: 'accept', invitation: engine.snapshot('d').invitations[0].id })
+    const mine = engine.data.games.find(g => g.host === 'a')!
+    expect(mine.players.map(p => p.id)).toEqual(['a', 'b', 'd'])
+    // D's former lobby keeps its guest, who becomes host.
+    expect(other.players.map(p => p.id)).toEqual(['e'])
+    expect(other.host).toBe('e')
+    expect(engine.snapshot('c').invitations).toHaveLength(1)
+  })
+  it('keeps visitors in a started game or already in the lobby out of reach', () => {
+    const g = start()
+    command('c', { action: 'create', options })
+    fails('busy', () => command('c', { action: 'invite', target: 'a' }))
+    g.phase = 'lobby'
+    fails('busy', () => command('a', { action: 'invite', target: 'b' }))
+  })
+  it('refuses an invitation received before the visitor’s own game started', () => {
+    command('c', { action: 'create', options })
+    lobby()
+    command('c', { action: 'invite', target: 'a' })
+    const invitation = engine.snapshot('a').invitations[0].id
+    const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
+    launch(effect, structuredClone(rounds))
+    fails('busy', () => command('a', { action: 'accept', invitation }))
   })
 })

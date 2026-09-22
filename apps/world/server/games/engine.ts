@@ -234,6 +234,10 @@ export class GameEngine {
     if (g.phase !== 'lobby' && g.phase !== 'finished' && g.players.length < 2)
       this.finish(g, 'not_enough_players')
   }
+  /** Visitors may receive and accept invitations until their own game actually starts. */
+  private available(g: Game) {
+    return g.phase === 'lobby' || g.phase === 'finished'
+  }
   /** Pause time a player may still hold: REJOIN_MS in total per game, never renewed. */
   private pauseLeft(g: Game, p: GameMember, now = this.now()) {
     const used = g.pauseUsed?.[p.id] ?? 0
@@ -346,7 +350,7 @@ export class GameEngine {
         pausedAt: null,
         updated: now,
       })
-      this.data.invitations = this.data.invitations.filter(i => i.to !== id)
+      // Received invitations stay valid: a lobby that has not started can still be swapped.
       return
     }
     if (action.action === 'accept' || action.action === 'decline') {
@@ -356,11 +360,13 @@ export class GameEngine {
         this.data.invitations = this.data.invitations.filter(i => i !== invite)
         return
       }
-      if (g && g.phase !== 'finished') return fail('busy')
+      // A lobby that has not started, or a finished summary, can be swapped for this one.
+      if (g && !this.available(g)) return fail('busy')
       const target = this.data.games.find(
         item => item.id === invite.gameId && item.phase === 'lobby'
       )
       if (!target) return fail('expired')
+      if (g === target) return
       if (target.players.length >= 4) return fail('full')
       if (g) this.remove(id)
       target.players.push({ id, profile: visitor.profile, score: 0, absentSince: null })
@@ -374,11 +380,8 @@ export class GameEngine {
       if (g.players.length >= 4) return fail('full')
       const target = this.visitor(action.target)
       if (!target?.present || target.id === id) return fail('unavailable')
-      if (
-        this.current(target.id)?.phase !== undefined &&
-        this.current(target.id)?.phase !== 'finished'
-      )
-        return fail('busy')
+      const other = this.current(target.id)
+      if (other === g || (other && !this.available(other))) return fail('busy')
       if (Math.hypot(target.x - visitor.x, target.y - visitor.y) > 180) return fail('too_far')
       if (
         (this.data.limits[`invite:${id}:${target.id}`] ?? 0) > now ||

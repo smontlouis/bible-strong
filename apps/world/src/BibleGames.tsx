@@ -77,11 +77,23 @@ export function BibleGames({
   }, [open, invitations.length])
   const now = Math.max(state.snapshot.now, clock + state.offset)
   const send = (action: GameAction) => network.games.command(action)
+  // Closing a finished game (victory, summary, interruption) leaves it, so "My game" goes
+  // away. Offline, the departure is sent as soon as the connection returns.
+  const [leaveOnReturn, setLeaveOnReturn] = useState<string | null>(null)
   const close = () => {
+    if (game?.phase === 'finished') {
+      if (!(state.online && send({ action: 'leave' }))) setLeaveOnReturn(game.id)
+    }
     setSelectedInvitation(null)
     setInvitationIssue(null)
     onClose()
   }
+  useEffect(() => {
+    if (!leaveOnReturn || !state.online) return
+    if (game?.id === leaveOnReturn && game.phase === 'finished' && !open)
+      network.games.command({ action: 'leave' })
+    setLeaveOnReturn(null)
+  }, [leaveOnReturn, state.online, game?.id, game?.phase, open, network])
   const selectInvitation = (invite: GameInvitation) => {
     setSelectedInvitation(invite)
     setInvitationIssue(null)
