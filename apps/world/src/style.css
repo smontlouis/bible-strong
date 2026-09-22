@@ -22,6 +22,14 @@
 body {
   margin: 0;
   overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+input,
+textarea,
+[contenteditable]:not([contenteditable='false']) {
+  -webkit-user-select: text;
+  user-select: text;
 }
 button,
 select {
