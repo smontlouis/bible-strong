@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { AnimatedReader, loadReader } from './animated-reader'
+import { AnimatedReader, loadReader, type ReaderManifest } from './animated-reader'
 import reader0 from './generated/lexicon-reader.json'
 import reader1 from './generated/dictionary-reader.json'
 import reader2 from './generated/themes-reader.json'
@@ -8,7 +8,7 @@ import reader4 from './generated/references-reader.json'
 import reader5 from './generated/comparison-left-reader.json'
 import reader6 from './generated/comparison-right-reader.json'
 
-export const worldReaders = [
+export const worldReaders: { id: string; manifest: ReaderManifest }[] = [
   { id: 'lexicon-reader', manifest: reader0 },
   { id: 'dictionary-reader', manifest: reader1 },
   { id: 'themes-reader', manifest: reader2 },

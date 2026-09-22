@@ -350,73 +350,13 @@ select {
   width: 96px;
   height: 96px;
   margin: auto;
-  background: url('/assets/avatars/short-slime/down.png') no-repeat 0 0 / 480px 288px;
+  background: url('/assets/avatars/short-slime/idle-down.png') no-repeat center / contain;
   background-blend-mode: multiply;
-  mask: url('/assets/avatars/short-slime/down.png') no-repeat 0 0 / 480px 288px;
-  /* 15 frames, 5 columns × 3 rows, at the avatar's native 24 fps. */
-  animation: slime-walk 625ms steps(1) infinite;
+  mask: url('/assets/avatars/short-slime/idle-down.png') no-repeat center / contain;
+  animation: slime-bob 900ms ease-in-out infinite alternate;
 }
-@keyframes slime-walk {
-  0.000000% {
-    background-position: 0px 0px;
-    mask-position: 0px 0px;
-  }
-  6.666667% {
-    background-position: -96px 0px;
-    mask-position: -96px 0px;
-  }
-  13.333333% {
-    background-position: -192px 0px;
-    mask-position: -192px 0px;
-  }
-  20.000000% {
-    background-position: -288px 0px;
-    mask-position: -288px 0px;
-  }
-  26.666667% {
-    background-position: -384px 0px;
-    mask-position: -384px 0px;
-  }
-  33.333333% {
-    background-position: 0px -96px;
-    mask-position: 0px -96px;
-  }
-  40.000000% {
-    background-position: -96px -96px;
-    mask-position: -96px -96px;
-  }
-  46.666667% {
-    background-position: -192px -96px;
-    mask-position: -192px -96px;
-  }
-  53.333333% {
-    background-position: -288px -96px;
-    mask-position: -288px -96px;
-  }
-  60.000000% {
-    background-position: -384px -96px;
-    mask-position: -384px -96px;
-  }
-  66.666667% {
-    background-position: 0px -192px;
-    mask-position: 0px -192px;
-  }
-  73.333333% {
-    background-position: -96px -192px;
-    mask-position: -96px -192px;
-  }
-  80.000000% {
-    background-position: -192px -192px;
-    mask-position: -192px -192px;
-  }
-  86.666667% {
-    background-position: -288px -192px;
-    mask-position: -288px -192px;
-  }
-  93.333333% {
-    background-position: -384px -192px;
-    mask-position: -384px -192px;
-  }
+@keyframes slime-bob {
+  to { transform: translateY(-6px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .loading-slime {

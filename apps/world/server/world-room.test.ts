@@ -1,3 +1,12 @@
+vi.mock('./games/room', () => ({
+  WorldGames: class {
+    presence() {}
+    command() {}
+    tick() {
+      return null
+    }
+  },
+}))
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 vi.mock('./guestbook', () => ({ Guestbook: class {}, routeGuestbook: vi.fn() }))
 vi.mock('partyserver', () => ({

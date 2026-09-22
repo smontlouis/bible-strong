@@ -102,3 +102,30 @@ Use `--only=object-id` to retry one target. The script normalizes the source to 
 Run the complete cached review with `--all`, then build source-aligned 2× production candidates with `yarn segment:build`. The builder uses only SAM 3 masks: it fills the outer contour for compact objects, preserves openings in arches and railings, removes detached fragments, and fills internal mask holes. Results are written under ignored `segmentation-qa/sam3-production/`. Production sprites use exact RGB pixels from the normalized upscale; only their alpha comes from SAM 3 and deterministic contour cleanup.
 
 No production-ready or measured mobile performance guarantee is implied by this prototype.
+
+## Games between avatars
+
+The **Play together** button opens Who am I? and Bible challenge for 2–4 visitors.
+See [rules, local setup, limits and validation](docs/bible-games.md).
+
+## Game Lab (local UI gallery)
+
+Open **http://localhost:5186/game-lab.html** while `yarn dev:world` is running.
+For UI-only work, `yarn workspace @bible-strong/world dev:client` is sufficient:
+no Worker, second player, credentials, Resources or AI calls are needed.
+
+The gallery renders the production presentation components with 40 selectable
+states and five guided journeys. Switch French/English, player count, viewpoint
+and mobile/keyboard/tablet/desktop sizes. The clock starts paused; controls advance
+time, switch turns, simulate connection loss, resolve pending operations and replay
+the victory animation. The URL preserves the selected state and player settings.
+
+Buttons in the preview work: create a lobby, start, answer, accept/decline an
+invitation, move to the next round. `Moïse`/`Moses` is correct, `David` is incorrect,
+and `prophète` requests clarification. Simulated responses take 1.2 seconds. This is
+an interface workshop, not a replacement for multiplayer or provider integration tests.
+
+`BibleGames` owns live subscriptions and orchestration. `BibleGamesView` takes plain
+snapshots, a clock and callbacks; the lab supplies these without creating a network
+client. Fixtures and simulations live under `src/game-lab/`. The separate HTML entry
+is not included in production; the build check rejects leaked lab markers or pages.

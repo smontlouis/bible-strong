@@ -1,6 +1,6 @@
 export const ARRIVAL_ZOOM_DELAY_MS = 500
 export const ARRIVAL_FADE_MS = 500
-export const ARRIVAL_DURATION_MS = 1000
+export const ARRIVAL_DURATION_MS = 2500
 
 /** null holds the distant view; undefined leaves normal camera controls in charge. */
 export function arrivalZoom(

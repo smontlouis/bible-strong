@@ -29,3 +29,12 @@ The shared collection of public visitor notes, opened from the central island.
 
 **Signature**:
 A visitor's note and chosen public name, published after automatic admission.
+
+**Bible game**:
+An optional shared biblical discovery activity between nearby visitors.
+
+**Lobby**:
+The group of invited visitors preparing to play one Bible game.
+
+**Round**:
+One shared question or identity to discover, followed by its answer and biblical source.

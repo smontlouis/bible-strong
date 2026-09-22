@@ -45,7 +45,23 @@ export class BushRustle {
   private bushes: Bush[] = []
   private leaves: Leaf[] = []
 
-  constructor(scene: Phaser.Scene, foreground: Foreground[]) {
+  constructor(
+    private readonly scene: Phaser.Scene,
+    foreground: Foreground[]
+  ) {
+    this.add(foreground)
+    // Fixed pool: concurrent visitors cannot create unbounded particles.
+    for (let i = 0; i < 64; i++) {
+      const image = scene.add
+        .ellipse(0, 0, 4.6, 2.4, [0x9dcf50, 0xc5df72, 0xe0e994][i % 3])
+        .setStrokeStyle(0.6, 0x365d30, 0.9)
+        .setVisible(false)
+      this.leaves.push({ image, age: 1, vx: 0, vy: 0, spin: 0 })
+    }
+  }
+
+  add(foreground: Foreground[]) {
+    const scene = this.scene
     for (const entry of foreground) {
       if (!isReactiveBush(entry.object.id)) continue
       const { object, image } = entry
@@ -77,19 +93,12 @@ export class BushRustle {
             { x: object.width / 2, y: 0 },
           ])
           .setDepth(image.depth)
+          .setAlpha(image.alpha)
         image.setVisible(false)
       }
       const bush = { ...entry, mask, rope, phase: this.bushes.length * 1.73, cooldown: 0 }
       this.bushes.push(bush)
       this.pose(bush, 0)
-    }
-    // Fixed pool: concurrent visitors cannot create unbounded particles.
-    for (let i = 0; i < 64; i++) {
-      const image = scene.add
-        .ellipse(0, 0, 4.6, 2.4, [0x9dcf50, 0xc5df72, 0xe0e994][i % 3])
-        .setStrokeStyle(0.6, 0x365d30, 0.9)
-        .setVisible(false)
-      this.leaves.push({ image, age: 1, vx: 0, vy: 0, spin: 0 })
     }
   }
 
@@ -108,6 +117,7 @@ export class BushRustle {
   update(delta: number, avatars: BushContact[], disabled: boolean) {
     const dt = Math.min(delta, 50) / 1000
     for (const bush of this.bushes) {
+      bush.rope?.setAlpha(bush.image.alpha)
       const contact = disabled
         ? undefined
         : avatars.find(avatar => touchesBush(bush.object, bush.mask, avatar))

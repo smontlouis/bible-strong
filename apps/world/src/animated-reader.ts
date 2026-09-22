@@ -1,3 +1,4 @@
+import { AssetReveal } from './asset-reveal'
 import Phaser from 'phaser'
 import { occlusionDepth } from './occlusion-depth'
 export interface ReaderManifest {
@@ -25,6 +26,7 @@ export function loadReader(scene: Phaser.Scene, id: string, manifest: ReaderMani
 
 export class AnimatedReader {
   private readonly sprite: Phaser.GameObjects.Sprite
+  private readonly reveal = new AssetReveal()
   private readonly reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
 
   constructor(
@@ -43,6 +45,7 @@ export class AnimatedReader {
       scene.anims.create({ key: animationKey, frames, frameRate: manifest.frameRate, repeat: -1 })
     this.sprite = scene.add
       .sprite(manifest.x, manifest.y, frames[0].key, frames[0].frame)
+      .setAlpha(0)
       .setOrigin(0)
       .setDisplaySize(manifest.width, manifest.height)
       // Same ground anchor as the desk, just above its cutout so fingers cover paper.
@@ -50,7 +53,7 @@ export class AnimatedReader {
       .play(animationKey)
   }
 
-  update(camera: Phaser.Cameras.Scene2D.Camera, paused: boolean, avatarX: number) {
+  update(camera: Phaser.Cameras.Scene2D.Camera, paused: boolean, avatarX: number, delta = 0) {
     const manifest = this.manifest
     this.sprite.setDepth(occlusionDepth(this.id, manifest.depth, avatarX))
     const width = camera.width / camera.zoom
@@ -62,6 +65,7 @@ export class AnimatedReader {
       manifest.x < left + width &&
       manifest.y + manifest.height > top &&
       manifest.y < top + height
+    this.sprite.setAlpha(this.reveal.update(delta, visible && !paused, this.reducedMotion.matches))
     this.sprite.setVisible(visible)
     if (this.reducedMotion.matches) {
       this.sprite.anims.pause(this.sprite.anims.currentAnim!.frames[0])

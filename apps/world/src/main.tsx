@@ -1,3 +1,4 @@
+import { BibleGames } from './BibleGames'
 import { ExplorationJournal, JournalIcon, journalCopy } from './ExplorationJournal'
 import { findTravelDestination } from './world-travel'
 import { islandActions, type IslandActionId } from './island-actions'
@@ -11,19 +12,33 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import nipplejs from 'nipplejs'
 import { clampCameraZoom } from './camera-zoom'
-import { ARRIVAL_ZOOM_DELAY_MS, ARRIVAL_DURATION_MS, ARRIVAL_FADE_MS } from './world-arrival'
+import { ARRIVAL_FADE_MS } from './world-arrival'
 import { ControlIcon } from './ControlIcon'
+import { Modal } from './Modal'
+import { DiscoveryBoundary } from './DiscoveryBoundary'
 import { createWorld, type Controls, type WorldState } from './game'
 import { defaultNavigation, SPAWN, stations, type Station } from './world'
 import { loadNavigation, navigationFingerprint } from './navigation-document'
 import { useCameraZoomGestures } from './use-camera-zoom-gestures'
 import { diagnosticCategories, diagnosticCopy, makeDiagnosticFilters } from './diagnostic-filters'
-import { DictionaryDiscovery } from './DictionaryDiscovery'
-import { LexiconDiscovery } from './LexiconDiscovery'
-import { ReferencesDiscovery } from './ReferencesDiscovery'
-import { ThemesDiscovery } from './ThemesDiscovery'
-import { ComparisonsDiscovery } from './ComparisonsDiscovery'
-import { CommentariesDiscovery } from './CommentariesDiscovery'
+const DictionaryDiscovery = lazy(() =>
+  import('./DictionaryDiscovery').then(module => ({ default: module.DictionaryDiscovery }))
+)
+const LexiconDiscovery = lazy(() =>
+  import('./LexiconDiscovery').then(module => ({ default: module.LexiconDiscovery }))
+)
+const ReferencesDiscovery = lazy(() =>
+  import('./ReferencesDiscovery').then(module => ({ default: module.ReferencesDiscovery }))
+)
+const ThemesDiscovery = lazy(() =>
+  import('./ThemesDiscovery').then(module => ({ default: module.ThemesDiscovery }))
+)
+const ComparisonsDiscovery = lazy(() =>
+  import('./ComparisonsDiscovery').then(module => ({ default: module.ComparisonsDiscovery }))
+)
+const CommentariesDiscovery = lazy(() =>
+  import('./CommentariesDiscovery').then(module => ({ default: module.CommentariesDiscovery }))
+)
 import { AvatarEditor, profileCopy } from './AvatarEditor'
 import { AVATAR_COLORS, generateExplorerProfile, loadProfile, saveProfile } from './avatar-profile'
 import { loadVisitedPlaces, saveVisitedPlaces } from './visited-places'
@@ -211,7 +226,9 @@ function App() {
     moving: false,
     fps: 0,
   })
-  const [loadingColor] = useState(() => AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)])
+  const [loadingColor] = useState(
+    () => AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)]
+  )
   const [ready, setReady] = useState(false)
   const [revealing, setRevealing] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -222,6 +239,7 @@ function App() {
   const [diagnosticFilters, setDiagnosticFilters] = useState(() => makeDiagnosticFilters())
   const [language, setLanguage] = useState<Language>('fr')
   const [guestbookOpen, setGuestbookOpen] = useState(false)
+  const [gamesOpen, setGamesOpen] = useState(false)
   const atGuestbook = nearGuestbook(state, navigation)
   const [opened, setOpened] = useState<WorldState['station']>(null)
   const [visited, setVisited] = useState(loadVisitedPlaces)
@@ -267,7 +285,7 @@ function App() {
 
   useEffect(() => {
     if (!revealing || failed) return
-    const finish = setTimeout(() => setReady(true), ARRIVAL_ZOOM_DELAY_MS + ARRIVAL_DURATION_MS)
+    const finish = setTimeout(() => setReady(true), ARRIVAL_FADE_MS)
     return () => clearTimeout(finish)
   }, [revealing, failed])
 
@@ -312,7 +330,13 @@ function App() {
     controls.current.debug = debug
     controls.current.diagnosticFilters = diagnosticFilters
     controls.current.paused =
-      !ready || menuOpen || Boolean(opened) || guestbookOpen || Boolean(editorMode) || profileOpen
+      !ready ||
+      menuOpen ||
+      Boolean(opened) ||
+      guestbookOpen ||
+      gamesOpen ||
+      Boolean(editorMode) ||
+      profileOpen
     controls.current.multiplayerEnabled = !editorMode
     controls.current.navigation = navigation
     controls.current.direction = { x: 0, y: 0 }
@@ -326,6 +350,7 @@ function App() {
     diagnosticFilters,
     opened,
     guestbookOpen,
+    gamesOpen,
     editorMode,
     navigation,
   ])
@@ -362,7 +387,7 @@ function App() {
       ambientEditor.notify()
     }
     controls.current.paused =
-      Boolean(mode) || menuOpen || Boolean(opened) || guestbookOpen || profileOpen
+      Boolean(mode) || menuOpen || Boolean(opened) || guestbookOpen || gamesOpen || profileOpen
     controls.current.direction = { x: 0, y: 0 }
     setEditorMode(mode)
   }
@@ -422,7 +447,11 @@ function App() {
           role="status"
           style={{ transitionDuration: `${ARRIVAL_FADE_MS}ms` }}
         >
-          <span className="loading-slime" style={{ backgroundColor: loadingColor }} aria-hidden="true" />
+          <span
+            className="loading-slime"
+            style={{ backgroundColor: loadingColor }}
+            aria-hidden="true"
+          />
           {failed ? t.error : t.loading}
         </div>
       )}
@@ -592,6 +621,16 @@ function App() {
           }}
         />
       )}
+      {ready && !editorMode && controls.current.network && (
+        <BibleGames
+          network={controls.current.network}
+          language={language}
+          open={gamesOpen}
+          onOpen={() => setGamesOpen(true)}
+          onClose={() => setGamesOpen(false)}
+          disabled={menuOpen || profileOpen || !!opened || guestbookOpen}
+        />
+      )}
       {guestbookOpen && (
         <GuestbookDialog
           language={language}
@@ -599,24 +638,46 @@ function App() {
           onClose={() => setGuestbookOpen(false)}
         />
       )}
-      {opened?.id === 'lexicon' && (
-        <LexiconDiscovery language={language} onClose={() => setOpened(null)} />
-      )}
-      {opened?.id === 'dictionary' && (
-        <DictionaryDiscovery language={language} onClose={() => setOpened(null)} />
-      )}
-      {opened?.id === 'references' && (
-        <ReferencesDiscovery language={language} onClose={() => setOpened(null)} />
-      )}
-      {opened?.id === 'themes' && (
-        <ThemesDiscovery language={language} onClose={() => setOpened(null)} />
-      )}
-      {opened?.id === 'comparison' && (
-        <ComparisonsDiscovery language={language} onClose={() => setOpened(null)} />
-      )}
-      {opened?.id === 'commentaries' && (
-        <CommentariesDiscovery language={language} onClose={() => setOpened(null)} />
-      )}
+      <DiscoveryBoundary
+        key={opened?.id ?? 'closed'}
+        language={language}
+        onClose={() => setOpened(null)}
+      >
+        <Suspense
+          fallback={
+            opened ? (
+              <Modal
+                labelledBy="discovery-loading"
+                closeLabel={t.close}
+                onClose={() => setOpened(null)}
+              >
+                <p id="discovery-loading" role="status">
+                  {language === 'fr' ? 'Chargement…' : 'Loading…'}
+                </p>
+              </Modal>
+            ) : null
+          }
+        >
+          {opened?.id === 'lexicon' && (
+            <LexiconDiscovery language={language} onClose={() => setOpened(null)} />
+          )}
+          {opened?.id === 'dictionary' && (
+            <DictionaryDiscovery language={language} onClose={() => setOpened(null)} />
+          )}
+          {opened?.id === 'references' && (
+            <ReferencesDiscovery language={language} onClose={() => setOpened(null)} />
+          )}
+          {opened?.id === 'themes' && (
+            <ThemesDiscovery language={language} onClose={() => setOpened(null)} />
+          )}
+          {opened?.id === 'comparison' && (
+            <ComparisonsDiscovery language={language} onClose={() => setOpened(null)} />
+          )}
+          {opened?.id === 'commentaries' && (
+            <CommentariesDiscovery language={language} onClose={() => setOpened(null)} />
+          )}
+        </Suspense>
+      </DiscoveryBoundary>
       {import.meta.env.DEV && editorMode && (
         <EditorNavigation
           mode={editorMode}

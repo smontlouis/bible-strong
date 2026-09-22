@@ -8,35 +8,36 @@ This report is a directional agent-readability score, not a product quality verd
 
 | Domain | Score | Files | Tests | Smoke | Sensitive | Main Risks |
 |---|---:|---:|---:|---|---|---|
-| `app` | 5/10 | 5 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 4 eslint-disable markers |
+| `app` | 7/10 | 11 | 1 | no | no | no mapped smoke path; no feature README; 4 eslint-disable markers |
 | `app-rating` | 5/10 | 5 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 3 eslint-disable markers |
-| `app-switcher` | 7/10 | 90 | 11 | no | no | no mapped smoke path; no feature README; 8 eslint-disable markers |
+| `app-switcher` | 7/10 | 95 | 13 | no | no | no mapped smoke path; no feature README; 8 eslint-disable markers |
 | `audio` | 9/10 | 1 | 1 | no | no | no mapped smoke path |
-| `bible` | 8/10 | 273 | 63 | yes | no | 45 console calls; 15 eslint-disable markers |
+| `bible` | 8/10 | 277 | 69 | yes | no | 45 console calls; 15 eslint-disable markers |
 | `bibleReferencePreview` | 9/10 | 12 | 5 | no | no | no mapped smoke path |
 | `bookmarks` | 8/10 | 8 | 2 | no | no | no mapped smoke path; no feature README |
-| `commentaries` | 7/10 | 46 | 17 | no | no | no mapped smoke path; no feature README; 4 eslint-disable markers |
-| `daily-reading` | 8/10 | 25 | 11 | no | no | no mapped smoke path; no feature README |
-| `dictionnary` | 9/10 | 12 | 2 | yes | no | 2 eslint-disable markers |
+| `commentaries` | 7/10 | 48 | 18 | no | no | no mapped smoke path; no feature README; 4 eslint-disable markers |
+| `daily-reading` | 8/10 | 25 | 13 | no | no | no mapped smoke path; no feature README |
+| `dictionnary` | 9/10 | 14 | 3 | yes | no | 2 eslint-disable markers |
 | `entityListQuery` | 8/10 | 6 | 5 | no | no | no mapped smoke path; no feature README |
 | `feature-onboarding` | 6/10 | 9 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README |
 | `history` | 8/10 | 1 | 1 | no | no | no mapped smoke path; no feature README |
 | `home` | 8/10 | 35 | 5 | no | no | no mapped smoke path; 2 eslint-disable markers |
-| `lexique` | 8/10 | 42 | 15 | yes | no | no feature README; 1 eslint-disable markers |
+| `lexique` | 8/10 | 44 | 17 | yes | no | no feature README; 1 eslint-disable markers |
 | `migrations` | 8/10 | 2 | 2 | no | no | no mapped smoke path; no feature README |
-| `nave` | 7/10 | 11 | 0 | yes | no | no colocated feature tests; 2 eslint-disable markers |
+| `nave` | 9/10 | 12 | 1 | yes | no | 2 eslint-disable markers |
 | `notes` | 7/10 | 9 | 1 | no | no | no mapped smoke path; no feature README; 1 eslint-disable markers |
 | `onboarding` | 8/10 | 54 | 11 | yes | yes | 3 eslint-disable markers; sensitive user/account surface |
 | `passageMediaLibrary` | 6/10 | 3 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README |
-| `plans` | 9/10 | 38 | 6 | yes | no | 1 eslint-disable markers |
+| `plans` | 9/10 | 41 | 11 | yes | no | 1 eslint-disable markers |
 | `playground` | 8/10 | 5 | 1 | no | no | no mapped smoke path; no feature README |
-| `profile` | 5/10 | 9 | 0 | no | yes | no colocated feature tests; no mapped smoke path; no feature README; sensitive user/account surface |
-| `resources` | 8/10 | 41 | 28 | no | no | no mapped smoke path; no feature README |
-| `search` | 9/10 | 36 | 9 | yes | no | 1 eslint-disable markers |
+| `profile` | 7/10 | 9 | 1 | no | yes | no mapped smoke path; no feature README; sensitive user/account surface |
+| `resources` | 8/10 | 41 | 29 | no | no | no mapped smoke path; no feature README |
+| `search` | 10/10 | 46 | 17 | yes | no | none from static scan |
 | `settings` | 9/10 | 49 | 7 | yes | yes | sensitive user/account surface |
 | `studies` | 7/10 | 47 | 4 | no | no | no mapped smoke path; 16 console calls; 3 eslint-disable markers |
+| `study-assistant` | 9/10 | 66 | 19 | no | no | no mapped smoke path |
 | `studyRelations` | 8/10 | 15 | 6 | no | no | no mapped smoke path; no feature README |
-| `timeline` | 9/10 | 33 | 1 | yes | no | 4 eslint-disable markers |
+| `timeline` | 9/10 | 36 | 3 | yes | no | 4 eslint-disable markers |
 | `tips` | 6/10 | 2 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README |
 
 ## Scoring Inputs

@@ -1,6 +1,7 @@
 import type { AvatarId } from './avatar-profile'
 import type Phaser from 'phaser'
 import type { Point } from './world'
+import { isInView } from './lazy-scene-assets'
 
 const ROOT = './assets/avatars'
 const FRAME_RATE = 24
@@ -13,13 +14,28 @@ type Facing = 'down' | 'up' | 'right' | 'left'
 export function loadBlobAvatar(scene: Phaser.Scene) {
   for (const shape of ['blob', 'short-slime', 'rounded-square', 'cloud', 'triangle']) {
     for (const direction of ['down', 'up', 'right']) {
-      scene.load.spritesheet(`${shape}-${direction}`, `${ROOT}/${shape}/${direction}.png`, {
-        frameWidth: 256,
-        frameHeight: 256,
-      })
       scene.load.image(`${shape}-idle-${direction}`, `${ROOT}/${shape}/idle-${direction}.png`)
     }
   }
+}
+
+const requestedSheets = new WeakMap<Phaser.Scene, Set<string>>()
+
+/** Failed optional sheets stay on their idle pose rather than retrying every frame. */
+function requestSheet(scene: Phaser.Scene, shape: string, direction: string) {
+  let requested = requestedSheets.get(scene)
+  if (!requested) {
+    requested = new Set()
+    requestedSheets.set(scene, requested)
+  }
+  const key = `${shape}-${direction}`
+  if (requested.has(key) || scene.textures.exists(key)) return
+  requested.add(key)
+  scene.load.spritesheet(key, `${ROOT}/${shape}/${direction}.png`, {
+    frameWidth: 256,
+    frameHeight: 256,
+  })
+  if (!scene.load.isLoading() && scene.load.isReady()) scene.load.start()
 }
 
 /** The frame includes the hop: its origin stays anchored to the ground. */
@@ -40,7 +56,8 @@ export class BlobAvatar {
     moving: boolean,
     reducedMotion: boolean,
     delta: number,
-    avatar: AvatarId
+    avatar: AvatarId,
+    allowLoading = true
   ) {
     if (moving) {
       const facing =
@@ -65,20 +82,23 @@ export class BlobAvatar {
       : 0
     const sheet = this.facing === 'left' ? 'right' : this.facing
     const shape = avatar === 'nova' ? 'blob' : avatar
-    const texture = `${shape}-${animated ? '' : 'idle-'}${sheet}`
-    const frame = animated ? Math.floor((this.elapsed * frameRate) / 1000) % frameCount : '__BASE'
+    if (
+      animated &&
+      allowLoading &&
+      isInView(
+        { x: sprite.x - 33, y: sprite.y - 65, width: 66, height: 70 },
+        sprite.scene.cameras.main
+      )
+    )
+      requestSheet(sprite.scene, shape, sheet)
+    const sheetReady = animated && sprite.scene.textures.exists(`${shape}-${sheet}`)
+    const texture = `${shape}-${sheetReady ? '' : 'idle-'}${sheet}`
+    const frame = sheetReady ? Math.floor((this.elapsed * frameRate) / 1000) % frameCount : '__BASE'
     if (sprite.texture.key !== texture) sprite.setTexture(texture, frame)
     else if (String(sprite.frame.name) !== String(frame)) sprite.setFrame(frame)
     sprite
       .setFlipX(this.facing === 'left')
-      .setOrigin(
-        0.5,
-        avatar !== 'nova'
-          ? 233 / 256
-          : sheet === 'right'
-            ? 218 / 224
-            : 550 / 576
-      )
+      .setOrigin(0.5, avatar !== 'nova' ? 233 / 256 : sheet === 'right' ? 218 / 224 : 550 / 576)
       .setDisplaySize(
         avatar !== 'nova' ? 52 : DISPLAY_SIZE[sheet],
         avatar !== 'nova' ? 52 : DISPLAY_SIZE[sheet]

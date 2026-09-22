@@ -9,7 +9,7 @@
     "pixelRatio": 2,
     "baseY": 275,
     "always": false,
-    "url": "./assets/occlusion/dict-west-grasses.png"
+    "url": "./assets/occlusion/dict-west-grasses.webp"
   },
   {
     "id": "dict-aloe",
@@ -21,7 +21,7 @@
     "pixelRatio": 2,
     "baseY": 269,
     "always": false,
-    "url": "./assets/occlusion/dict-aloe.png"
+    "url": "./assets/occlusion/dict-aloe.webp"
   },
   {
     "id": "dict-cabinet",
@@ -33,7 +33,7 @@
     "pixelRatio": 2,
     "baseY": 266,
     "always": false,
-    "url": "./assets/occlusion/dict-cabinet.png"
+    "url": "./assets/occlusion/dict-cabinet.webp"
   },
   {
     "id": "dict-potted-tree",
@@ -45,7 +45,7 @@
     "pixelRatio": 2,
     "baseY": 286,
     "always": false,
-    "url": "./assets/occlusion/dict-potted-tree.png"
+    "url": "./assets/occlusion/dict-potted-tree.webp"
   },
   {
     "id": "dict-west-shrubs",
@@ -57,7 +57,7 @@
     "pixelRatio": 2,
     "baseY": 315,
     "always": false,
-    "url": "./assets/occlusion/dict-west-shrubs.png"
+    "url": "./assets/occlusion/dict-west-shrubs.webp"
   },
   {
     "id": "dict-front-books",
@@ -69,7 +69,7 @@
     "pixelRatio": 2,
     "baseY": 317,
     "always": false,
-    "url": "./assets/occlusion/dict-front-books.png"
+    "url": "./assets/occlusion/dict-front-books.webp"
   },
   {
     "id": "dict-east-cabinet",
@@ -81,7 +81,7 @@
     "pixelRatio": 2,
     "baseY": 259,
     "always": false,
-    "url": "./assets/occlusion/dict-east-cabinet.png"
+    "url": "./assets/occlusion/dict-east-cabinet.webp"
   },
   {
     "id": "dict-east-books",
@@ -93,7 +93,7 @@
     "pixelRatio": 2,
     "baseY": 250,
     "always": false,
-    "url": "./assets/occlusion/dict-east-books.png"
+    "url": "./assets/occlusion/dict-east-books.webp"
   },
   {
     "id": "dict-east-grasses",
@@ -105,7 +105,7 @@
     "pixelRatio": 2,
     "baseY": 270,
     "always": false,
-    "url": "./assets/occlusion/dict-east-grasses.png"
+    "url": "./assets/occlusion/dict-east-grasses.webp"
   },
   {
     "id": "dict-entry-shrub",
@@ -117,7 +117,7 @@
     "pixelRatio": 2,
     "baseY": 320,
     "always": false,
-    "url": "./assets/occlusion/dict-entry-shrub.png"
+    "url": "./assets/occlusion/dict-entry-shrub.webp"
   },
   {
     "id": "dict-south-shrubs",
@@ -129,7 +129,7 @@
     "pixelRatio": 2,
     "baseY": 363,
     "always": false,
-    "url": "./assets/occlusion/dict-south-shrubs.png"
+    "url": "./assets/occlusion/dict-south-shrubs.webp"
   },
   {
     "id": "lex-west-pillar",
@@ -141,7 +141,7 @@
     "pixelRatio": 2,
     "baseY": 211,
     "always": false,
-    "url": "./assets/occlusion/lex-west-pillar.png"
+    "url": "./assets/occlusion/lex-west-pillar.webp"
   },
   {
     "id": "lex-library",
@@ -153,7 +153,7 @@
     "pixelRatio": 2,
     "baseY": 222,
     "always": false,
-    "url": "./assets/occlusion/lex-library.png"
+    "url": "./assets/occlusion/lex-library.webp"
   },
   {
     "id": "lex-east-books",
@@ -165,7 +165,7 @@
     "pixelRatio": 2,
     "baseY": 215,
     "always": false,
-    "url": "./assets/occlusion/lex-east-books.png"
+    "url": "./assets/occlusion/lex-east-books.webp"
   },
   {
     "id": "lex-east-pillar",
@@ -177,7 +177,7 @@
     "pixelRatio": 2,
     "baseY": 194,
     "always": false,
-    "url": "./assets/occlusion/lex-east-pillar.png"
+    "url": "./assets/occlusion/lex-east-pillar.webp"
   },
   {
     "id": "lex-west-shrubs",
@@ -189,7 +189,7 @@
     "pixelRatio": 2,
     "baseY": 255,
     "always": false,
-    "url": "./assets/occlusion/lex-west-shrubs.png"
+    "url": "./assets/occlusion/lex-west-shrubs.webp"
   },
   {
     "id": "lex-small-shrub",
@@ -201,7 +201,7 @@
     "pixelRatio": 2,
     "baseY": 266,
     "always": false,
-    "url": "./assets/occlusion/lex-small-shrub.png"
+    "url": "./assets/occlusion/lex-small-shrub.webp"
   },
   {
     "id": "lex-east-shrubs",
@@ -213,7 +213,7 @@
     "pixelRatio": 2,
     "baseY": 267,
     "always": false,
-    "url": "./assets/occlusion/lex-east-shrubs.png"
+    "url": "./assets/occlusion/lex-east-shrubs.webp"
   },
   {
     "id": "ref-central-bench",
@@ -225,7 +225,7 @@
     "pixelRatio": 2,
     "baseY": 290,
     "always": false,
-    "url": "./assets/occlusion/ref-central-bench.png"
+    "url": "./assets/occlusion/ref-central-bench.webp"
   },
   {
     "id": "ref-rear-bench",
@@ -237,7 +237,7 @@
     "pixelRatio": 2,
     "baseY": 236,
     "always": false,
-    "url": "./assets/occlusion/ref-rear-bench.png"
+    "url": "./assets/occlusion/ref-rear-bench.webp"
   },
   {
     "id": "ref-east-bench",
@@ -249,7 +249,7 @@
     "pixelRatio": 2,
     "baseY": 337,
     "always": false,
-    "url": "./assets/occlusion/ref-east-bench.png"
+    "url": "./assets/occlusion/ref-east-bench.webp"
   },
   {
     "id": "ref-west-flowers",
@@ -261,7 +261,7 @@
     "pixelRatio": 2,
     "baseY": 258,
     "always": false,
-    "url": "./assets/occlusion/ref-west-flowers.png"
+    "url": "./assets/occlusion/ref-west-flowers.webp"
   },
   {
     "id": "ref-center-vine",
@@ -273,7 +273,7 @@
     "pixelRatio": 2,
     "baseY": 225,
     "always": false,
-    "url": "./assets/occlusion/ref-center-vine.png"
+    "url": "./assets/occlusion/ref-center-vine.webp"
   },
   {
     "id": "ref-east-vine",
@@ -285,7 +285,7 @@
     "pixelRatio": 2,
     "baseY": 246,
     "always": false,
-    "url": "./assets/occlusion/ref-east-vine.png"
+    "url": "./assets/occlusion/ref-east-vine.webp"
   },
   {
     "id": "ref-south-tree",
@@ -297,7 +297,7 @@
     "pixelRatio": 2,
     "baseY": 353,
     "always": false,
-    "url": "./assets/occlusion/ref-south-tree.png"
+    "url": "./assets/occlusion/ref-south-tree.webp"
   },
   {
     "id": "ref-south-shrubs",
@@ -309,7 +309,7 @@
     "pixelRatio": 2,
     "baseY": 378,
     "always": false,
-    "url": "./assets/occlusion/ref-south-shrubs.png"
+    "url": "./assets/occlusion/ref-south-shrubs.webp"
   },
   {
     "id": "ref-south-flowers",
@@ -321,7 +321,7 @@
     "pixelRatio": 2,
     "baseY": 347,
     "always": false,
-    "url": "./assets/occlusion/ref-south-flowers.png"
+    "url": "./assets/occlusion/ref-south-flowers.webp"
   },
   {
     "id": "ref-east-flowers",
@@ -333,7 +333,7 @@
     "pixelRatio": 2,
     "baseY": 337,
     "always": false,
-    "url": "./assets/occlusion/ref-east-flowers.png"
+    "url": "./assets/occlusion/ref-east-flowers.webp"
   },
   {
     "id": "ref-far-east-flowers",
@@ -345,7 +345,7 @@
     "pixelRatio": 2,
     "baseY": 348,
     "always": false,
-    "url": "./assets/occlusion/ref-far-east-flowers.png"
+    "url": "./assets/occlusion/ref-far-east-flowers.webp"
   },
   {
     "id": "themes-heart",
@@ -357,7 +357,7 @@
     "pixelRatio": 2,
     "baseY": 608,
     "always": false,
-    "url": "./assets/occlusion/themes-heart.png"
+    "url": "./assets/occlusion/themes-heart.webp"
   },
   {
     "id": "themes-mountain",
@@ -369,7 +369,7 @@
     "pixelRatio": 2,
     "baseY": 634,
     "always": false,
-    "url": "./assets/occlusion/themes-mountain.png"
+    "url": "./assets/occlusion/themes-mountain.webp"
   },
   {
     "id": "themes-flame",
@@ -381,7 +381,7 @@
     "pixelRatio": 2,
     "baseY": 669,
     "always": false,
-    "url": "./assets/occlusion/themes-flame.png"
+    "url": "./assets/occlusion/themes-flame.webp"
   },
   {
     "id": "themes-west-cypress",
@@ -393,7 +393,7 @@
     "pixelRatio": 2,
     "baseY": 594,
     "always": false,
-    "url": "./assets/occlusion/themes-west-cypress.png"
+    "url": "./assets/occlusion/themes-west-cypress.webp"
   },
   {
     "id": "themes-north-cypress",
@@ -405,7 +405,7 @@
     "pixelRatio": 2,
     "baseY": 565,
     "always": false,
-    "url": "./assets/occlusion/themes-north-cypress.png"
+    "url": "./assets/occlusion/themes-north-cypress.webp"
   },
   {
     "id": "themes-south-cypress",
@@ -417,7 +417,7 @@
     "pixelRatio": 2,
     "baseY": 741,
     "always": false,
-    "url": "./assets/occlusion/themes-south-cypress.png"
+    "url": "./assets/occlusion/themes-south-cypress.webp"
   },
   {
     "id": "themes-left-bench",
@@ -429,7 +429,7 @@
     "pixelRatio": 2,
     "baseY": 644,
     "always": false,
-    "url": "./assets/occlusion/themes-left-bench.png"
+    "url": "./assets/occlusion/themes-left-bench.webp"
   },
   {
     "id": "themes-right-bench",
@@ -441,7 +441,7 @@
     "pixelRatio": 2,
     "baseY": 708,
     "always": false,
-    "url": "./assets/occlusion/themes-right-bench.png"
+    "url": "./assets/occlusion/themes-right-bench.webp"
   },
   {
     "id": "themes-heart-flowers",
@@ -453,7 +453,7 @@
     "pixelRatio": 2,
     "baseY": 608,
     "always": false,
-    "url": "./assets/occlusion/themes-heart-flowers.png"
+    "url": "./assets/occlusion/themes-heart-flowers.webp"
   },
   {
     "id": "themes-center-flowers",
@@ -465,7 +465,7 @@
     "pixelRatio": 2,
     "baseY": 636,
     "always": false,
-    "url": "./assets/occlusion/themes-center-flowers.png"
+    "url": "./assets/occlusion/themes-center-flowers.webp"
   },
   {
     "id": "themes-east-flowers",
@@ -477,7 +477,7 @@
     "pixelRatio": 2,
     "baseY": 686,
     "always": false,
-    "url": "./assets/occlusion/themes-east-flowers.png"
+    "url": "./assets/occlusion/themes-east-flowers.webp"
   },
   {
     "id": "themes-west-flowers",
@@ -489,7 +489,7 @@
     "pixelRatio": 2,
     "baseY": 719,
     "always": false,
-    "url": "./assets/occlusion/themes-west-flowers.png"
+    "url": "./assets/occlusion/themes-west-flowers.webp"
   },
   {
     "id": "themes-south-west-flowers",
@@ -501,7 +501,7 @@
     "pixelRatio": 2,
     "baseY": 791,
     "always": false,
-    "url": "./assets/occlusion/themes-south-west-flowers.png"
+    "url": "./assets/occlusion/themes-south-west-flowers.webp"
   },
   {
     "id": "themes-south-east-flowers",
@@ -513,7 +513,7 @@
     "pixelRatio": 2,
     "baseY": 767,
     "always": false,
-    "url": "./assets/occlusion/themes-south-east-flowers.png"
+    "url": "./assets/occlusion/themes-south-east-flowers.webp"
   },
   {
     "id": "themes-front-flowers",
@@ -525,7 +525,7 @@
     "pixelRatio": 2,
     "baseY": 799,
     "always": false,
-    "url": "./assets/occlusion/themes-front-flowers.png"
+    "url": "./assets/occlusion/themes-front-flowers.webp"
   },
   {
     "id": "compare-books",
@@ -537,7 +537,7 @@
     "pixelRatio": 2,
     "baseY": 810,
     "always": false,
-    "url": "./assets/occlusion/compare-books.png"
+    "url": "./assets/occlusion/compare-books.webp"
   },
   {
     "id": "compare-west-pot",
@@ -549,7 +549,7 @@
     "pixelRatio": 2,
     "baseY": 773,
     "always": false,
-    "url": "./assets/occlusion/compare-west-pot.png"
+    "url": "./assets/occlusion/compare-west-pot.webp"
   },
   {
     "id": "compare-east-pot",
@@ -561,7 +561,7 @@
     "pixelRatio": 2,
     "baseY": 742,
     "always": false,
-    "url": "./assets/occlusion/compare-east-pot.png"
+    "url": "./assets/occlusion/compare-east-pot.webp"
   },
   {
     "id": "compare-west-shrubs",
@@ -573,7 +573,7 @@
     "pixelRatio": 2,
     "baseY": 860,
     "always": false,
-    "url": "./assets/occlusion/compare-west-shrubs.png"
+    "url": "./assets/occlusion/compare-west-shrubs.webp"
   },
   {
     "id": "compare-front-shrubs",
@@ -585,7 +585,7 @@
     "pixelRatio": 2,
     "baseY": 904,
     "always": false,
-    "url": "./assets/occlusion/compare-front-shrubs.png"
+    "url": "./assets/occlusion/compare-front-shrubs.webp"
   },
   {
     "id": "compare-east-shrubs",
@@ -597,7 +597,7 @@
     "pixelRatio": 2,
     "baseY": 860,
     "always": false,
-    "url": "./assets/occlusion/compare-east-shrubs.png"
+    "url": "./assets/occlusion/compare-east-shrubs.webp"
   },
   {
     "id": "compare-west-arch",
@@ -609,7 +609,7 @@
     "pixelRatio": 2,
     "baseY": 748,
     "always": false,
-    "url": "./assets/occlusion/compare-west-arch.png"
+    "url": "./assets/occlusion/compare-west-arch.webp"
   },
   {
     "id": "compare-east-arch",
@@ -621,7 +621,7 @@
     "pixelRatio": 2,
     "baseY": 749,
     "always": false,
-    "url": "./assets/occlusion/compare-east-arch.png"
+    "url": "./assets/occlusion/compare-east-arch.webp"
   },
   {
     "id": "comment-west-pot",
@@ -633,7 +633,7 @@
     "pixelRatio": 2,
     "baseY": 714,
     "always": false,
-    "url": "./assets/occlusion/comment-west-pot.png"
+    "url": "./assets/occlusion/comment-west-pot.webp"
   },
   {
     "id": "comment-east-pot",
@@ -645,7 +645,7 @@
     "pixelRatio": 2,
     "baseY": 735,
     "always": false,
-    "url": "./assets/occlusion/comment-east-pot.png"
+    "url": "./assets/occlusion/comment-east-pot.webp"
   },
   {
     "id": "comment-west-cypress",
@@ -657,7 +657,7 @@
     "pixelRatio": 2,
     "baseY": 678,
     "always": false,
-    "url": "./assets/occlusion/comment-west-cypress.png"
+    "url": "./assets/occlusion/comment-west-cypress.webp"
   },
   {
     "id": "comment-rear-column",
@@ -669,7 +669,7 @@
     "pixelRatio": 2,
     "baseY": 660,
     "always": false,
-    "url": "./assets/occlusion/comment-rear-column.png"
+    "url": "./assets/occlusion/comment-rear-column.webp"
   },
   {
     "id": "comment-library",
@@ -681,7 +681,7 @@
     "pixelRatio": 2,
     "baseY": 640,
     "always": false,
-    "url": "./assets/occlusion/comment-library.png"
+    "url": "./assets/occlusion/comment-library.webp"
   },
   {
     "id": "comment-library-east",
@@ -693,7 +693,7 @@
     "pixelRatio": 2,
     "baseY": 653,
     "always": false,
-    "url": "./assets/occlusion/comment-library-east.png"
+    "url": "./assets/occlusion/comment-library-east.webp"
   },
   {
     "id": "comment-west-shrubs",
@@ -705,7 +705,7 @@
     "pixelRatio": 2,
     "baseY": 783,
     "always": false,
-    "url": "./assets/occlusion/comment-west-shrubs.png"
+    "url": "./assets/occlusion/comment-west-shrubs.webp"
   },
   {
     "id": "comment-south-west-shrub",
@@ -717,7 +717,7 @@
     "pixelRatio": 2,
     "baseY": 808,
     "always": false,
-    "url": "./assets/occlusion/comment-south-west-shrub.png"
+    "url": "./assets/occlusion/comment-south-west-shrub.webp"
   },
   {
     "id": "comment-south-shrubs",
@@ -729,7 +729,7 @@
     "pixelRatio": 2,
     "baseY": 821,
     "always": false,
-    "url": "./assets/occlusion/comment-south-shrubs.png"
+    "url": "./assets/occlusion/comment-south-shrubs.webp"
   },
   {
     "id": "comment-south-east-shrubs",
@@ -741,7 +741,7 @@
     "pixelRatio": 2,
     "baseY": 802,
     "always": false,
-    "url": "./assets/occlusion/comment-south-east-shrubs.png"
+    "url": "./assets/occlusion/comment-south-east-shrubs.webp"
   },
   {
     "id": "plaza-left-bench",
@@ -753,7 +753,7 @@
     "pixelRatio": 2,
     "baseY": 405,
     "always": false,
-    "url": "./assets/occlusion/plaza-left-bench.png"
+    "url": "./assets/occlusion/plaza-left-bench.webp"
   },
   {
     "id": "plaza-right-bench",
@@ -765,7 +765,7 @@
     "pixelRatio": 2,
     "baseY": 403,
     "always": false,
-    "url": "./assets/occlusion/plaza-right-bench.png"
+    "url": "./assets/occlusion/plaza-right-bench.webp"
   },
   {
     "id": "plaza-west-shrub",
@@ -777,7 +777,7 @@
     "pixelRatio": 2,
     "baseY": 427,
     "always": false,
-    "url": "./assets/occlusion/plaza-west-shrub.png"
+    "url": "./assets/occlusion/plaza-west-shrub.webp"
   },
   {
     "id": "plaza-west-small-shrub",
@@ -789,7 +789,7 @@
     "pixelRatio": 2,
     "baseY": 461,
     "always": false,
-    "url": "./assets/occlusion/plaza-west-small-shrub.png"
+    "url": "./assets/occlusion/plaza-west-small-shrub.webp"
   },
   {
     "id": "plaza-north-grass",
@@ -801,7 +801,7 @@
     "pixelRatio": 2,
     "baseY": 339,
     "always": false,
-    "url": "./assets/occlusion/plaza-north-grass.png"
+    "url": "./assets/occlusion/plaza-north-grass.webp"
   },
   {
     "id": "plaza-west-bench-grass",
@@ -813,7 +813,7 @@
     "pixelRatio": 2,
     "baseY": 378,
     "always": false,
-    "url": "./assets/occlusion/plaza-west-bench-grass.png"
+    "url": "./assets/occlusion/plaza-west-bench-grass.webp"
   },
   {
     "id": "plaza-south-west-shrubs",
@@ -825,7 +825,7 @@
     "pixelRatio": 2,
     "baseY": 552,
     "always": false,
-    "url": "./assets/occlusion/plaza-south-west-shrubs.png"
+    "url": "./assets/occlusion/plaza-south-west-shrubs.webp"
   },
   {
     "id": "plaza-south-east-tree",
@@ -837,7 +837,7 @@
     "pixelRatio": 2,
     "baseY": 546,
     "always": false,
-    "url": "./assets/occlusion/plaza-south-east-tree.png"
+    "url": "./assets/occlusion/plaza-south-east-tree.webp"
   },
   {
     "id": "plaza-south-east-shrubs",
@@ -849,7 +849,7 @@
     "pixelRatio": 2,
     "baseY": 558,
     "always": false,
-    "url": "./assets/occlusion/plaza-south-east-shrubs.png"
+    "url": "./assets/occlusion/plaza-south-east-shrubs.webp"
   },
   {
     "id": "plaza-east-shrub",
@@ -861,7 +861,7 @@
     "pixelRatio": 2,
     "baseY": 463,
     "always": false,
-    "url": "./assets/occlusion/plaza-east-shrub.png"
+    "url": "./assets/occlusion/plaza-east-shrub.webp"
   },
   {
     "id": "comment-column-shrub",
@@ -873,7 +873,7 @@
     "pixelRatio": 2,
     "baseY": 775,
     "always": false,
-    "url": "./assets/occlusion/comment-column-shrub.png"
+    "url": "./assets/occlusion/comment-column-shrub.webp"
   },
   {
     "id": "tree-west",
@@ -885,7 +885,7 @@
     "pixelRatio": 2,
     "baseY": 380,
     "always": false,
-    "url": "./assets/occlusion/tree-west.png"
+    "url": "./assets/occlusion/tree-west.webp"
   },
   {
     "id": "central-table",
@@ -897,7 +897,7 @@
     "pixelRatio": 2,
     "baseY": 489,
     "always": false,
-    "url": "./assets/occlusion/central-table.png"
+    "url": "./assets/occlusion/central-table.webp"
   },
   {
     "id": "tree-north-east",
@@ -909,7 +909,7 @@
     "pixelRatio": 2,
     "baseY": 374,
     "always": false,
-    "url": "./assets/occlusion/tree-north-east.png"
+    "url": "./assets/occlusion/tree-north-east.webp"
   },
   {
     "id": "cypress-east",
@@ -921,7 +921,7 @@
     "pixelRatio": 2,
     "baseY": 427,
     "always": false,
-    "url": "./assets/occlusion/cypress-east.png"
+    "url": "./assets/occlusion/cypress-east.webp"
   },
   {
     "id": "sign-west",
@@ -933,7 +933,7 @@
     "pixelRatio": 2,
     "baseY": 483,
     "always": false,
-    "url": "./assets/occlusion/sign-west.png"
+    "url": "./assets/occlusion/sign-west.webp"
   },
   {
     "id": "sign-east",
@@ -945,7 +945,7 @@
     "pixelRatio": 2,
     "baseY": 480,
     "always": false,
-    "url": "./assets/occlusion/sign-east.png"
+    "url": "./assets/occlusion/sign-east.webp"
   },
   {
     "id": "dictionary-desk",
@@ -957,7 +957,7 @@
     "pixelRatio": 2,
     "baseY": 308,
     "always": false,
-    "url": "./assets/occlusion/dictionary-desk.png"
+    "url": "./assets/occlusion/dictionary-desk.webp"
   },
   {
     "id": "lexicon-desk",
@@ -969,7 +969,7 @@
     "pixelRatio": 2,
     "baseY": 254,
     "always": false,
-    "url": "./assets/occlusion/lexicon-desk.png"
+    "url": "./assets/occlusion/lexicon-desk.webp"
   },
   {
     "id": "themes-table",
@@ -981,7 +981,7 @@
     "pixelRatio": 2,
     "baseY": 747,
     "always": false,
-    "url": "./assets/occlusion/themes-table.png"
+    "url": "./assets/occlusion/themes-table.webp"
   },
   {
     "id": "comparison-left",
@@ -993,7 +993,7 @@
     "pixelRatio": 2,
     "baseY": 799,
     "always": false,
-    "url": "./assets/occlusion/comparison-left.png"
+    "url": "./assets/occlusion/comparison-left.webp"
   },
   {
     "id": "comparison-right",
@@ -1005,7 +1005,7 @@
     "pixelRatio": 2,
     "baseY": 812,
     "always": false,
-    "url": "./assets/occlusion/comparison-right.png"
+    "url": "./assets/occlusion/comparison-right.webp"
   },
   {
     "id": "commentary-table",
@@ -1017,7 +1017,7 @@
     "pixelRatio": 2,
     "baseY": 765,
     "always": false,
-    "url": "./assets/occlusion/commentary-table.png"
+    "url": "./assets/occlusion/commentary-table.webp"
   },
   {
     "id": "pergola-west-column",
@@ -1029,7 +1029,7 @@
     "pixelRatio": 2,
     "baseY": 692,
     "always": false,
-    "url": "./assets/occlusion/pergola-west-column.png"
+    "url": "./assets/occlusion/pergola-west-column.webp"
   },
   {
     "id": "pergola-east-column",
@@ -1041,7 +1041,7 @@
     "pixelRatio": 2,
     "baseY": 773,
     "always": false,
-    "url": "./assets/occlusion/pergola-east-column.png"
+    "url": "./assets/occlusion/pergola-east-column.webp"
   },
   {
     "id": "rail-west",
@@ -1053,7 +1053,7 @@
     "pixelRatio": 2,
     "baseY": 410,
     "always": true,
-    "url": "./assets/occlusion/rail-west.png"
+    "url": "./assets/occlusion/rail-west.webp"
   },
   {
     "id": "rail-south-west",
@@ -1065,7 +1065,7 @@
     "pixelRatio": 2,
     "baseY": 610,
     "always": true,
-    "url": "./assets/occlusion/rail-south-west.png"
+    "url": "./assets/occlusion/rail-south-west.webp"
   },
   {
     "id": "rail-east",
@@ -1077,7 +1077,7 @@
     "pixelRatio": 2,
     "baseY": 409,
     "always": true,
-    "url": "./assets/occlusion/rail-east.png"
+    "url": "./assets/occlusion/rail-east.webp"
   },
   {
     "id": "rail-south-east",
@@ -1089,6 +1089,6 @@
     "pixelRatio": 2,
     "baseY": 626,
     "always": true,
-    "url": "./assets/occlusion/rail-south-east.png"
+    "url": "./assets/occlusion/rail-south-east.webp"
   }
 ]

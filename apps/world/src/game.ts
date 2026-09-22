@@ -11,7 +11,7 @@ import { RemoteAvatars } from './remote-avatars'
 import type { PresenceStatus } from './multiplayer-protocol'
 import type { AvatarId } from './avatar-profile'
 import { occlusionDepth } from './occlusion-depth'
-import { maskSignGround } from './occluder-masks'
+import { LazyOccluders } from './lazy-occluders'
 import { AmbientZoneEditor } from './ambient-zone-editor'
 import type { AmbientEditorModel } from './ambient-zones'
 import { ShoreWaves } from './shore-waves'
@@ -21,14 +21,12 @@ import { WorldAmbience } from './world-ambience'
 import { WorldClouds } from './world-clouds'
 import { AmbientDiagnostics } from './ambient-diagnostics'
 import { type DiagnosticFilters } from './diagnostic-filters'
-import { AmbientTiles, loadAmbientTiles } from './ambient-tiles'
-import { CentralBook, loadCentralBook } from './central-book'
+import { LazyWorldAnimations } from './lazy-world-animations'
 import Phaser from 'phaser'
 import { MapTileStreamer } from './map-tile-streamer'
+import { arrivalTileTarget } from './map-tiles'
 import { SCENERY_HEIGHT, SCENERY_WIDTH, WorldBackground } from './world-background'
 import { WATER_VARIANTS } from './water-decorations'
-import { createWorldReaders, loadWorldReaders } from './world-readers'
-import type { AnimatedReader } from './animated-reader'
 import { BlobAvatar, loadBlobAvatar } from './blob-avatar'
 import {
   HEIGHT,
@@ -54,6 +52,7 @@ export type WorldState = {
   multiplayer?: PresenceStatus
 }
 export type Controls = {
+  network?: WorldMultiplayer
   pointerPress?: PointerPress
   cancelWalk?: boolean
   walkToScreen?: Point
@@ -104,11 +103,9 @@ export function createWorld(
     bushes!: BushRustle
     ambience!: WorldAmbience
     ambientDiagnostics?: AmbientDiagnostics
-    ambientTiles!: AmbientTiles
-    centralBook!: CentralBook
+    animations!: LazyWorldAnimations
     background!: WorldBackground
-    readers!: AnimatedReader[]
-    foreground: { object: (typeof occluders)[number]; image: Phaser.GameObjects.Image }[] = []
+    lazyOccluders!: LazyOccluders
     keys!: Record<string, Phaser.Input.Keyboard.Key>
     lastReset = 0
     lastPublished = 0
@@ -165,7 +162,21 @@ export function createWorld(
       })
     }
     cancelWalkOnKey = (event: KeyboardEvent) => {
-      if (!controls.paused && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyZ', 'KeyQ'].includes(event.code)) {
+      if (
+        !controls.paused &&
+        [
+          'ArrowUp',
+          'ArrowDown',
+          'ArrowLeft',
+          'ArrowRight',
+          'KeyW',
+          'KeyA',
+          'KeyS',
+          'KeyD',
+          'KeyZ',
+          'KeyQ',
+        ].includes(event.code)
+      ) {
         this.route.cancel()
         controls.pointerPress = undefined
         this.rejectedTarget = undefined
@@ -174,23 +185,21 @@ export function createWorld(
     }
 
     preload() {
-      this.load.image('navigation-destination', './assets/navigation/destination-arrow.png')
-      this.load.image('navigation-blocked', './assets/navigation/blocked-cross.png')
+      this.load.image('navigation-destination', './assets/navigation/destination-arrow.webp')
+      this.load.image('navigation-blocked', './assets/navigation/blocked-cross.webp')
       loadBlobAvatar(this)
-      loadAmbientTiles(this)
-      loadCentralBook(this)
-      loadWorldReaders(this)
       this.load.image('world-water', './assets/map/water.webp')
       for (const variant of WATER_VARIANTS) {
         this.load.image(`water-${variant}`, `./assets/map/water-${variant}.webp`)
       }
       this.load.image('world-shore', './assets/map/shore.webp')
       this.load.image('map-preview', './assets/map/preview.webp')
-      for (const object of occluders) this.load.image(`occlusion-${object.id}`, object.url)
       this.load.on('loaderror', onError)
     }
 
     create() {
+      // Optional lazy assets must never turn a usable world into a loading error.
+      this.load.off('loaderror', onError)
       // RESIZE replaces the backing buffer with CSS dimensions, losing Retina detail.
       // NONE lets us keep physical pixels while displaying the canvas at CSS size.
       const resizeCanvas = () => {
@@ -215,25 +224,16 @@ export function createWorld(
           this,
           () => this.ambience.diagnosticRegions
         )
-      this.ambientTiles = new AmbientTiles(this)
-      this.centralBook = new CentralBook(this)
+      this.animations = new LazyWorldAnimations(this)
       this.add.image(0, 0, 'map-preview').setOrigin(0).setDisplaySize(WIDTH, HEIGHT).setDepth(-110)
       this.mapTiles = new MapTileStreamer(this)
       if (controls.shoreEditor) this.shoreWaves = new ShoreWaves(this, controls.shoreEditor)
-      occluders.forEach(object => {
-        const image = this.add
-          .image(object.x, object.y, `occlusion-${object.id}`)
-          .setOrigin(0)
-          .setDisplaySize(object.width, object.height)
-          .setDepth(object.always ? 2000 : object.baseY)
-        maskSignGround(this, object, image)
-        this.foreground.push({ object, image })
-      })
-      this.bushes = new BushRustle(this, this.foreground)
+      this.bushes = new BushRustle(this, [])
+      this.lazyOccluders = new LazyOccluders(this, this.bushes)
       this.network = new WorldMultiplayer()
+      controls.network = this.network
       this.remoteAvatars = new RemoteAvatars(this, rendererResolution)
       controls.retryMultiplayer = () => this.network.retry()
-      this.readers = createWorldReaders(this)
       this.shadow = this.add.ellipse(SPAWN.x, SPAWN.y, 30, 10, 0x183c45, 0.25).setDepth(-1)
       this.blob = this.add
         .image(SPAWN.x, SPAWN.y, 'blob-idle-down')
@@ -252,12 +252,19 @@ export function createWorld(
         .setResolution(rendererResolution)
         .setDepth(4001)
       this.debugLayer = this.add.graphics().setDepth(3000)
-      this.destinationShadow = this.add.ellipse(0, 0, 14, 6, 0x183c45)
-        .setDepth(3000).setVisible(false)
-      this.destinationMarker = this.add.image(0, 0, 'navigation-destination')
-        .setOrigin(0.5, 0.9234).setDepth(3001).setVisible(false)
-      this.blockedMarker = this.add.image(0, 0, 'navigation-blocked')
-        .setDepth(3001).setVisible(false)
+      this.destinationShadow = this.add
+        .ellipse(0, 0, 14, 6, 0x183c45)
+        .setDepth(3000)
+        .setVisible(false)
+      this.destinationMarker = this.add
+        .image(0, 0, 'navigation-destination')
+        .setOrigin(0.5, 0.9234)
+        .setDepth(3001)
+        .setVisible(false)
+      this.blockedMarker = this.add
+        .image(0, 0, 'navigation-blocked')
+        .setDepth(3001)
+        .setVisible(false)
       // Global key capture blocks typing in DOM inputs even when this scene is paused.
       this.keys = this.input.keyboard!.addKeys('UP,DOWN,LEFT,RIGHT,W,A,S,D,Z,Q', false) as Record<
         string,
@@ -273,6 +280,7 @@ export function createWorld(
         this.input.keyboard?.off('keydown', this.cancelWalkOnKey)
         this.mapTiles.destroy()
         this.network.destroy()
+        controls.network = undefined
         controls.retryMultiplayer = undefined
       })
       this.cameras.main.centerOn(SPAWN.x, SPAWN.y)
@@ -333,12 +341,15 @@ export function createWorld(
         controls.walkToScreen = undefined
         const camera = this.cameras.main
         const target = camera.getWorldPoint(
-          press.screen.x * this.scale.width / parent.clientWidth,
-          press.screen.y * this.scale.height / parent.clientHeight
+          (press.screen.x * this.scale.width) / parent.clientWidth,
+          (press.screen.y * this.scale.height) / parent.clientHeight
         )
         direction = pointerDirection(
           { x: target.x - this.position.x, y: target.y - (this.position.y - 16) },
-          { x: camera.zoom * parent.clientWidth / this.scale.width, y: camera.zoom * parent.clientHeight / this.scale.height }
+          {
+            x: (camera.zoom * parent.clientWidth) / this.scale.width,
+            y: (camera.zoom * parent.clientHeight) / this.scale.height,
+          }
         )
       }
       if (controls.paused || !this.active || document.hidden) {
@@ -349,8 +360,8 @@ export function createWorld(
         const screen = controls.walkToScreen
         controls.walkToScreen = undefined
         const target = this.cameras.main.getWorldPoint(
-          screen.x * this.scale.width / parent.clientWidth,
-          screen.y * this.scale.height / parent.clientHeight
+          (screen.x * this.scale.width) / parent.clientWidth,
+          (screen.y * this.scale.height) / parent.clientHeight
         )
         const path = this.pathfinder.find(this.position, target)
         this.route.points = path ?? []
@@ -363,7 +374,10 @@ export function createWorld(
         : move(this.position, direction, delta / 1000, controls.navigation)
       if (following) {
         const length = Math.hypot(next.x - this.position.x, next.y - this.position.y)
-        direction = length > 0 ? { x: (next.x - this.position.x) / length, y: (next.y - this.position.y) / length } : { x: 0, y: 0 }
+        direction =
+          length > 0
+            ? { x: (next.x - this.position.x) / length, y: (next.y - this.position.y) / length }
+            : { x: 0, y: 0 }
       }
       const moving = Math.hypot(next.x - this.position.x, next.y - this.position.y) > 0.01
       this.position = next
@@ -380,7 +394,15 @@ export function createWorld(
       if (moving) this.gait += delta / 100
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       const bounce = 0 // Hops are already drawn into the sprite frames.
-      this.blobAvatar.update(this.blob, direction, moving, reducedMotion, delta, controls.avatar)
+      this.blobAvatar.update(
+        this.blob,
+        direction,
+        moving,
+        reducedMotion,
+        delta,
+        controls.avatar,
+        !controls.paused && this.active && !document.hidden
+      )
       this.blob
         .setTint(Number.parseInt(controls.avatarColor.slice(1), 16))
         .setPosition(next.x, next.y)
@@ -416,6 +438,11 @@ export function createWorld(
       const wasAtMinimum = controls.zoom <= controls.minimumZoom
       controls.minimumZoom = bounds.minimum
       controls.zoom = wasAtMinimum ? bounds.minimum : clampCameraZoom(controls.zoom, bounds.minimum)
+      if (
+        !controls.paused &&
+        (manual || controls.pointerPress || controls.walkToScreen || this.route.points.length)
+      )
+        controls.arrivalStartedAt = undefined
       const cameraArrival = arrivalZoom(
         controls.arrivalStartedAt,
         performance.now(),
@@ -436,20 +463,30 @@ export function createWorld(
       const markerScaleY = screenHeight / parent.clientHeight / zoom
       this.animateMarker(this.destinationMotion, this.route.points.length > 0, reducedMotion)
       const destinationSize = 36 * this.destinationMotion.size
-      this.destinationMarker.setAlpha(this.destinationMotion.alpha)
+      this.destinationMarker
+        .setAlpha(this.destinationMotion.alpha)
         .setVisible(this.destinationMotion.alpha > 0)
         .setDisplaySize(destinationSize * markerScaleX, destinationSize * markerScaleY)
-      this.destinationShadow.setAlpha(0.22 * this.destinationMotion.alpha)
+      this.destinationShadow
+        .setAlpha(0.22 * this.destinationMotion.alpha)
         .setVisible(this.destinationMotion.alpha > 0)
-        .setDisplaySize(14 * markerScaleX * this.destinationMotion.size, 6 * markerScaleY * this.destinationMotion.size)
+        .setDisplaySize(
+          14 * markerScaleX * this.destinationMotion.size,
+          6 * markerScaleY * this.destinationMotion.size
+        )
       if (this.route.points.length) {
         const target = this.route.points[this.route.points.length - 1]
         this.destinationMarker.setPosition(target.x, target.y - 2 * markerScaleY)
         this.destinationShadow.setPosition(target.x, target.y)
       }
-      this.animateMarker(this.blockedMotion, Boolean(this.rejectedTarget && time < this.rejectedUntil), reducedMotion)
+      this.animateMarker(
+        this.blockedMotion,
+        Boolean(this.rejectedTarget && time < this.rejectedUntil),
+        reducedMotion
+      )
       const blockedSize = 30 * this.blockedMotion.size
-      this.blockedMarker.setAlpha(this.blockedMotion.alpha)
+      this.blockedMarker
+        .setAlpha(this.blockedMotion.alpha)
         .setVisible(this.blockedMotion.alpha > 0)
         .setDisplaySize(blockedSize * markerScaleX, blockedSize * markerScaleY)
       if (this.rejectedTarget) {
@@ -480,7 +517,8 @@ export function createWorld(
         reducedMotion,
         labelScaleX,
         labelScaleY,
-        fade * fade * (3 - 2 * fade)
+        fade * fade * (3 - 2 * fade),
+        !controls.paused && this.active && !document.hidden
       )
       this.bushes.update(
         delta,
@@ -488,7 +526,7 @@ export function createWorld(
         reducedMotion || controls.paused || !this.active || document.hidden
       )
       const targetX = controls.overview ? WIDTH / 2 : next.x
-      const targetY = controls.overview ? HEIGHT / 2 : next.y - 38 * rendererResolution / zoom
+      const targetY = controls.overview ? HEIGHT / 2 : next.y - (38 * rendererResolution) / zoom
       const halfWidth = screenWidth / zoom / 2,
         halfHeight = screenHeight / zoom / 2
       const centerX =
@@ -539,12 +577,20 @@ export function createWorld(
         next,
         (controls.paused && !shoreEditing) || !this.active || document.hidden
       )
-      this.ambientTiles.update(camera, controls.paused || !this.active || document.hidden)
-      this.centralBook.update(camera, delta, controls.paused || !this.active || document.hidden)
-      for (const reader of this.readers)
-        reader.update(camera, controls.paused || !this.active || document.hidden, next.x)
       // Camera zoom already includes the physical-pixel density.
-      this.mapTiles.update(camera, time, 1)
+      const arrivalSettled = cameraArrival === undefined || reducedMotion
+      const canStream = this.active && !document.hidden
+      const arrivalTarget = !arrivalSettled
+        ? arrivalTileTarget(camera, bounds.base * controls.zoom, next, rendererResolution)
+        : undefined
+      this.mapTiles.update(camera, time, 1, canStream, arrivalTarget)
+      this.lazyOccluders.update(camera, delta, canStream, arrivalTarget?.view)
+      // Scene.create has already completed the essential preload. Download nearby artwork
+      // immediately, independently of the intro/menu pause that controls animation playback.
+      this.animations.update(camera, delta, !canStream || controls.paused, next.x, {
+        enabled: canStream,
+        view: arrivalTarget?.view,
+      })
 
       this.ambientDiagnostics?.update(
         camera,

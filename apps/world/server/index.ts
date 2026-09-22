@@ -1,3 +1,5 @@
+import { WorldGames } from './games/room'
+import type { GameAIEnv } from './games/ai'
 import { authenticateAdmin, validAdminMutation } from './guestbook-auth'
 import { routeGuestbook, type GuestbookEnv } from './guestbook'
 export { Guestbook } from './guestbook'
@@ -24,8 +26,9 @@ type Session = {
   messages: number
   resumeToken?: string
   hidden?: boolean
+  lastGameAction?: number
 }
-interface Env extends GuestbookEnv {
+interface Env extends GuestbookEnv, GameAIEnv {
   WorldRoom: DurableObjectNamespace<WorldRoom>
   ALLOWED_ORIGINS?: string
   ASSETS: Fetcher
@@ -33,6 +36,38 @@ interface Env extends GuestbookEnv {
 
 export class WorldRoom extends Server<Env> {
   static options = { hibernate: true }
+  private gameService?: WorldGames
+  private get games() {
+    return (this.gameService ??= new WorldGames(
+      this.ctx,
+      this.env,
+      () =>
+        [...this.getConnections<Session>()].flatMap(c =>
+          c.state?.player && c.readyState === 1
+            ? [
+                {
+                  id: c.state.player.id,
+                  profile: c.state.player.profile,
+                  x: c.state.player.pose.x,
+                  y: c.state.player.pose.y,
+                  present: !c.state.hidden,
+                },
+              ]
+            : []
+        ),
+      (id, snapshot, error) => {
+        for (const c of this.getConnections<Session>())
+          if (c.state?.player?.id === id && c.readyState === 1)
+            c.send(
+              JSON.stringify({
+                type: 'games',
+                snapshot,
+                ...(error ? { error } : {}),
+              } satisfies ServerMessage)
+            )
+      }
+    ))
+  }
   private pending = new Map<string, Player>()
   private flushTimer: ReturnType<typeof setTimeout> | undefined
   private queue(player: Player) {
@@ -79,6 +114,17 @@ export class WorldRoom extends Server<Env> {
       lastSeen: now,
       window: now - session.window >= 1000 ? now : session.window,
       messages,
+    }
+    if (message.type === 'game' && session.player) {
+      if (now - (session.lastGameAction ?? 0) < 250) {
+        connection.send(
+          JSON.stringify({ type: 'game-error', error: 'rate_limited' } satisfies ServerMessage)
+        )
+        return
+      }
+      connection.setState({ ...next, lastGameAction: now })
+      this.games.command(session.player.id, message.command)
+      return
     }
     if (message.type === 'ping') {
       connection.setState(next)
@@ -141,6 +187,7 @@ export class WorldRoom extends Server<Env> {
             resumeToken: next.resumeToken,
           } satisfies ServerMessage)
         )
+        this.games.presence(next.player.id, true)
         this.pending.delete(next.player.id)
         this.broadcast(
           JSON.stringify({ type: 'player', player: next.player } satisfies ServerMessage),
@@ -151,6 +198,7 @@ export class WorldRoom extends Server<Env> {
     } else if (session.player && message.type === 'visibility') {
       next.hidden = message.hidden
       connection.setState(next)
+      this.games.presence(session.player.id, !message.hidden)
       return
     } else if (session.player && message.type === 'move') {
       if (message.seq <= session.player.seq) {
@@ -181,6 +229,7 @@ export class WorldRoom extends Server<Env> {
       )
     }
     const id = session.player.id
+    this.games.presence(id, false)
     this.pending.delete(id)
     connection.setState({ ...session, player: null })
     this.broadcast(JSON.stringify({ type: 'leave', id } satisfies ServerMessage), [connection.id])
@@ -211,8 +260,11 @@ export class WorldRoom extends Server<Env> {
       .map(([key]) => key)
     for (let i = 0; i < expired.length; i += 128)
       await this.ctx.storage.delete(expired.slice(i, i + 128))
-    if (active || saved.size > expired.length)
-      await this.ctx.storage.setAlarm(Date.now() + (active ? 30_000 : 60 * 60 * 1000))
+    const gameWake = this.games.tick()
+    if (active || saved.size > expired.length || gameWake !== null)
+      await this.ctx.storage.setAlarm(
+        Math.min(gameWake ?? Infinity, Date.now() + (active ? 30_000 : 60 * 60 * 1000))
+      )
   }
 }
 

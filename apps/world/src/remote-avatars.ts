@@ -24,7 +24,8 @@ export class RemoteAvatars {
     reducedMotion: boolean,
     labelScaleX: number,
     labelScaleY: number,
-    labelAlpha: number
+    labelAlpha: number,
+    allowLoading = true
   ) {
     this.contacts.length = 0
     for (const [id, visual] of this.avatars) {
@@ -63,6 +64,7 @@ export class RemoteAvatars {
         y: pose.y,
         moving: pose.moving && distance > 0.01 && distance < 100,
       })
+      visual.sprite.setPosition(pose.x, pose.y)
       const { profile } = track.player
       // Prime orientation even for a visitor who was already stationary when we joined.
       if (!pose.moving)
@@ -72,7 +74,8 @@ export class RemoteAvatars {
           true,
           true,
           0,
-          profile.avatar
+          profile.avatar,
+          allowLoading
         )
       visual.animation.update(
         visual.sprite,
@@ -80,7 +83,8 @@ export class RemoteAvatars {
         pose.moving,
         reducedMotion,
         delta,
-        profile.avatar
+        profile.avatar,
+        allowLoading
       )
       visual.sprite
         .setPosition(pose.x, pose.y)

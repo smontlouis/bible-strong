@@ -18,7 +18,17 @@ const scripts = (
       .map(name => readFile(new URL(name, directory), 'utf8'))
   )
 ).join('\n')
-for (const marker of ['/__study-world/', 'diagnostic-filters', 'zone-editor', 'world-state']) {
+for (const marker of [
+  '/__study-world/',
+  'diagnostic-filters',
+  'zone-editor',
+  'world-state',
+  'bible-strong-game-lab',
+]) {
   assert(!scripts.includes(marker), `Development capability leaked into production: ${marker}`)
 }
+assert(
+  !(await readdir(new URL('../dist/', import.meta.url))).includes('game-lab.html'),
+  'Game Lab page in production'
+)
 console.log('Production artifact: no editor chunks, save URLs or diagnostic controls')

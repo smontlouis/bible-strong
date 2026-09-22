@@ -203,7 +203,7 @@ async function makeSprite(row, alpha, logicalBounds, destination) {
       (logicalBounds.bottom - logicalBounds.top) * OUTPUT_SCALE,
       { kernel: sharp.kernel.lanczos3 }
     )
-    .png({ compressionLevel: 9, adaptiveFiltering: true })
+    .webp({ lossless: true })
     .toFile(destination)
 }
 
@@ -224,7 +224,7 @@ for (const row of rows) {
     right: Math.ceil((row.geometry.left + localBounds.right) / SCALE),
     bottom: Math.ceil((row.geometry.top + localBounds.bottom) / SCALE),
   }
-  const destination = resolve(spritesRoot, `${row.id}.png`)
+  const destination = resolve(spritesRoot, `${row.id}.webp`)
   await makeSprite(row, alpha, logicalBounds, destination)
   totalBytes += (await stat(destination)).size
   manifest.push({
@@ -237,7 +237,7 @@ for (const row of rows) {
     pixelRatio: OUTPUT_SCALE,
     baseY: current.baseY,
     always: current.always,
-    url: `./assets/occlusion/${row.id}.png`,
+    url: `./assets/occlusion/${row.id}.webp`,
   })
 }
 

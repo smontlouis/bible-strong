@@ -1,3 +1,4 @@
+import { AssetReveal } from './asset-reveal'
 import type Phaser from 'phaser'
 import book from './generated/central-book.json'
 
@@ -14,6 +15,7 @@ export function loadCentralBook(scene: Phaser.Scene) {
 
 /** A local clock keeps both page turns and random rests frozen when inactive. */
 export class CentralBook {
+  private readonly reveal = new AssetReveal()
   private readonly reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
   private readonly sprite: Phaser.GameObjects.Image
   private readonly frames = book.pages.flatMap(page =>
@@ -27,16 +29,25 @@ export class CentralBook {
   private frame = 0
 
   constructor(scene: Phaser.Scene) {
-    this.sprite = scene.add.image(book.x, book.y, this.frames[0].key, this.frames[0].frame)
-      .setOrigin(0).setDisplaySize(book.width, book.height).setDepth(book.depth)
+    this.sprite = scene.add
+      .image(book.x, book.y, this.frames[0].key, this.frames[0].frame)
+      .setAlpha(0)
+      .setOrigin(0)
+      .setDisplaySize(book.width, book.height)
+      .setDepth(book.depth)
   }
 
   update(camera: Phaser.Cameras.Scene2D.Camera, delta: number, paused: boolean) {
-    const width = camera.width / camera.zoom, height = camera.height / camera.zoom
+    const width = camera.width / camera.zoom,
+      height = camera.height / camera.zoom
     const left = camera.scrollX + camera.width / 2 - width / 2
     const top = camera.scrollY + camera.height / 2 - height / 2
-    const visible = book.x < left + width && book.x + book.width > left &&
-      book.y < top + height && book.y + book.height > top
+    const visible =
+      book.x < left + width &&
+      book.x + book.width > left &&
+      book.y < top + height &&
+      book.y + book.height > top
+    this.sprite.setAlpha(this.reveal.update(delta, visible && !paused, this.reducedMotion.matches))
     this.sprite.setVisible(visible && !this.reducedMotion.matches)
     if (!visible || paused || this.reducedMotion.matches) return
 
@@ -49,14 +60,14 @@ export class CentralBook {
       if (this.rest > 0) return
     }
     this.elapsed += step
-    const duration = book.frameCount / book.frameRate * 1000
+    const duration = (book.frameCount / book.frameRate) * 1000
     let nextFrame: number
     if (this.elapsed >= duration) {
       this.elapsed = 0
       this.rest = 2000 + Math.random() * 3000
       nextFrame = book.frameCount - 1
     } else {
-      nextFrame = Math.floor(this.elapsed * book.frameRate / 1000)
+      nextFrame = Math.floor((this.elapsed * book.frameRate) / 1000)
     }
     if (nextFrame !== this.frame) {
       this.frame = nextFrame

@@ -26,6 +26,9 @@ describe('animated ambient tiles', () => {
           this.visible = value
           return this
         },
+        setAlpha() {
+          return this
+        },
         setOrigin() {
           return this
         },

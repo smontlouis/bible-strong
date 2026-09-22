@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  chooseMapLevel,
-  mapTileManifest,
-  tilePlacement,
-  visibleTileCoordinates,
-} from './map-tiles'
+import { chooseMapLevel, mapTileManifest, tilePlacement, visibleTileCoordinates } from './map-tiles'
 
 describe('progressive map tiles', () => {
   it('uses the preview for overview, 2x for normal follow and 4x for close zoom', () => {

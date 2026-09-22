@@ -1,3 +1,9 @@
+import {
+  parseGameAction,
+  type GameAction,
+  type GameError,
+  type GamesSnapshot,
+} from './games-protocol'
 import { parseProfile, type AvatarProfile } from './avatar-profile'
 
 export const ROOM = 'asi-europe'
@@ -7,12 +13,15 @@ export const MAX_PLAYERS = 100
 export type Pose = { x: number; y: number; dx: number; dy: number; moving: boolean }
 export type Player = { id: string; profile: AvatarProfile; pose: Pose; seq: number }
 export type ClientMessage =
+  | { type: 'game'; command: GameAction }
   | { type: 'join'; version: number; profile: AvatarProfile; pose: Pose; resumeToken?: string }
   | { type: 'visibility'; hidden: boolean }
   | { type: 'move'; pose: Pose; seq: number }
   | { type: 'profile'; profile: AvatarProfile }
   | { type: 'ping' }
 export type ServerMessage =
+  | { type: 'game-error'; error: GameError }
+  | { type: 'games'; snapshot: GamesSnapshot; error?: GameError }
   | { type: 'welcome'; id: string; spawn: Pose; players: Player[]; resumeToken?: string }
   | { type: 'player'; player: Player }
   | { type: 'frame'; players: Player[] }
@@ -44,6 +53,10 @@ export function parseClientMessage(raw: string): ClientMessage | null {
   try {
     const m = JSON.parse(raw)
     if (!m || typeof m !== 'object') return null
+    if (m.type === 'game') {
+      const command = parseGameAction(m.command)
+      return command ? { type: 'game', command } : null
+    }
     if (m.type === 'ping') return { type: 'ping' }
     if (m.type === 'visibility' && typeof m.hidden === 'boolean')
       return { type: 'visibility', hidden: m.hidden }

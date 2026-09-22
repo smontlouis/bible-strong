@@ -1,3 +1,4 @@
+import { GamesClient } from './games-client'
 import PartySocket from 'partysocket'
 import { parseProfile, type AvatarProfile } from './avatar-profile'
 import { RemoteTrack } from './multiplayer-interpolation'
@@ -13,6 +14,15 @@ import {
 
 /** Owns transport and transient presence, independent of React and Phaser. */
 export class WorldMultiplayer {
+  readonly games = new GamesClient(command => this.send({ type: 'game', command }))
+  nearby() {
+    return [...this.remotes].flatMap(([id, track]) => {
+      const pose = track.sample(performance.now())
+      return Math.hypot(pose.x - this.pose.x, pose.y - this.pose.y) <= 180
+        ? [{ id, profile: track.player.profile }]
+        : []
+    })
+  }
   readonly remotes = new Map<string, RemoteTrack>()
   status: PresenceStatus = { state: 'connecting', count: 0 }
   private socket: PartySocket | null = null
@@ -136,7 +146,16 @@ export class WorldMultiplayer {
       }
       const now = performance.now()
       this.lastReceived = now
+      if (message.type === 'games') {
+        this.games.receive(message.snapshot, message.error)
+        return
+      }
+      if (message.type === 'game-error') {
+        this.games.error(message.error)
+        return
+      }
       if (message.type === 'welcome') {
+        this.games.connect(message.id)
         this.resumeToken = message.resumeToken
         try {
           if (this.resumeToken) sessionStorage.setItem('world-resume-token', this.resumeToken)
@@ -188,6 +207,7 @@ export class WorldMultiplayer {
     })
   }
   private disconnected() {
+    this.games.disconnect()
     this.pendingSpawn = null
     this.id = null
     this.remotes.clear()
