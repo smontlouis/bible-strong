@@ -10,7 +10,7 @@ const copy = {
     race: 'LA COURSE AUX INDICES',
     points: 'points',
     point: 'point',
-    ready: 'À toi de jouer',
+    ready: 'À toi',
     active: 'À la main',
     eligible: 'Peut répondre',
     waiting: 'Patiente',
@@ -38,7 +38,7 @@ const copy = {
     race: 'THE CLUE RACE',
     points: 'points',
     point: 'point',
-    ready: 'Your turn',
+    ready: 'You',
     active: 'Their turn',
     eligible: 'Can answer',
     waiting: 'Waiting',
@@ -160,17 +160,17 @@ export function WhoRound({
   const fr = game.options.language === 'fr'
   const activeName = game.players.find(p => p.id === w.active)?.profile.name ?? ''
   const titles = {
-    ready: fr ? 'À TOI DE JOUER !' : 'YOUR TURN!',
-    race: fr ? 'À VOUS DE JOUER !' : 'EVERYONE CAN ANSWER!',
-    waiting: fr ? `${activeName} A LA MAIN` : `${activeName}’S TURN`,
-    wrong: fr ? 'PAS CETTE FOIS !' : 'NOT THIS TIME!',
-    blocked: fr ? 'PROCHAIN INDICE…' : 'NEXT CLUE…',
-    checking: fr ? 'RÉPONSE ENVOYÉE !' : 'ANSWER SENT!',
-    checkingOther: fr ? 'VÉRIFICATION…' : 'CHECKING…',
-    clarify: fr ? 'PRÉCISE TA RÉPONSE !' : 'BE MORE SPECIFIC!',
-    unavailable: fr ? 'RÉESSAIE !' : 'TRY AGAIN!',
-    paused: fr ? 'PAUSE RECONNEXION' : 'RECONNECTING',
-    offline: fr ? 'RECONNEXION…' : 'RECONNECTING…',
+    ready: fr ? 'À toi de jouer !' : 'Your turn!',
+    race: fr ? 'À vous de jouer !' : 'Everyone can answer!',
+    waiting: fr ? `${activeName} a la main` : `${activeName}’s turn`,
+    wrong: fr ? 'Pas cette fois !' : 'Not this time!',
+    blocked: fr ? 'Prochain indice…' : 'Next clue…',
+    checking: fr ? 'Réponse envoyée !' : 'Answer sent!',
+    checkingOther: fr ? 'Vérification…' : 'Checking…',
+    clarify: fr ? 'Précise ta réponse !' : 'Be more specific!',
+    unavailable: fr ? 'Réessaie !' : 'Try again!',
+    paused: fr ? 'Pause reconnexion' : 'Reconnecting',
+    offline: fr ? 'Reconnexion…' : 'Reconnecting…',
   }
   const detail =
     state === 'wrong'
@@ -194,6 +194,18 @@ export function WhoRound({
                   ? 'Ta place et ta réponse sont conservées.'
                   : 'Your place and answer are saved.'
                 : t.prepare
+  const submitLabel =
+    sent === acknowledgement || own?.status === 'pending'
+      ? fr
+        ? 'Envoyé'
+        : 'Sent'
+      : !eligible
+        ? fr
+          ? 'Patiente'
+          : 'Wait'
+        : fr
+          ? 'Valider'
+          : 'Answer'
   const icon =
     state === 'wrong'
       ? '×'
@@ -294,19 +306,37 @@ export function WhoRound({
             placeholder={t.placeholder}
             onChange={e => setText(e.target.value)}
           />
-          <button className="games-primary" type="submit" disabled={locked || !text.trim()}>
-            {sent === acknowledgement || own?.status === 'pending'
-              ? fr
-                ? 'Envoyé ✓'
-                : 'Sent ✓'
-              : !eligible
-                ? fr
-                  ? 'Patiente'
-                  : 'Wait'
-                : fr
-                  ? 'Valider'
-                  : 'Answer'}{' '}
-            <span aria-hidden="true">↗</span>
+          <button
+            className="games-primary who-submit"
+            type="submit"
+            disabled={locked || !text.trim()}
+            aria-label={submitLabel}
+            title={submitLabel}
+          >
+            <span className="who-submit-label">{submitLabel}</span>
+            <svg
+              className="who-submit-icon"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              {sent === acknowledgement || own?.status === 'pending' ? (
+                <path d="M5 12l4 4L19 6" />
+              ) : !eligible ? (
+                <>
+                  <circle cx="12" cy="12" r="8" />
+                  <path d="M12 8v4l3 2" />
+                </>
+              ) : (
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              )}
+            </svg>
           </button>
         </div>
         <p className="who-rules">{w.mode === 'duel' ? t.duelRule : t.raceRule}</p>

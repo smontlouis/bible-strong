@@ -1041,7 +1041,7 @@
   width: 40px;
   height: 46px;
 }
-.who-contestant[data-active='true'] .who-portrait {
+.who-contestant[data-active='true'][data-me='true'] .who-portrait {
   box-shadow:
     0 0 0 2px #fff,
     0 0 0 4px var(--g-blue);
@@ -1417,6 +1417,9 @@
   flex: 0 0 auto;
   padding: 0 16px;
 }
+.who-submit-icon {
+  flex-shrink: 0;
+}
 .who-rules {
   margin: 0;
   font-size: 12px;
@@ -1579,6 +1582,18 @@
   }
   .who-riddle > img {
     display: none;
+  }
+  .who-input-row .who-submit {
+    width: 52px;
+    padding: 0;
+  }
+  .who-submit-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
   .who-riddle {
     padding: 16px 16px 18px;

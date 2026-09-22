@@ -566,11 +566,11 @@ export function BibleGamesView({
                           <strong>
                             {game.ownAnswer?.status === 'pending'
                               ? game.options.language === 'fr'
-                                ? 'AUX AUTRES DE JOUER !'
-                                : 'WAITING FOR THE OTHERS!'
+                                ? 'Aux autres de jouer !'
+                                : 'Waiting for the others!'
                               : game.options.language === 'fr'
-                                ? 'À VOUS DE JOUER !'
-                                : 'EVERYONE CAN ANSWER!'}
+                                ? 'À vous de jouer !'
+                                : 'Everyone can answer!'}
                           </strong>
                           <span>
                             {game.answered.length} / {game.players.length}{' '}
@@ -636,7 +636,7 @@ export function BibleGamesView({
                     {game.phase === 'reveal' && game.result && (
                       <section className="games-reveal">
                         <span className="games-answer-label">
-                          {game.options.language === 'fr' ? 'LA RÉPONSE' : 'THE ANSWER'}
+                          {game.options.language === 'fr' ? 'La réponse' : 'The answer'}
                         </span>
                         <h2>{game.result.answer}</h2>
                         {game.choices && !game.result.void && (
