@@ -1,0 +1,1380 @@
+[
+  {
+    "id": "who-object-011",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "Le panier de Moïse",
+      "aliases": [
+        "panier de Moïse",
+        "corbeille de Moïse",
+        "caisse de Moïse",
+        "caisse de joncs",
+        "panier de joncs"
+      ],
+      "explanation": "La mère de Moïse le plaça dans un récipient de joncs enduit de bitume et de poix, puis le déposa parmi les roseaux du fleuve."
+    },
+    "en": {
+      "answer": "Moses’ basket",
+      "aliases": [
+        "Moses' basket",
+        "bulrush basket",
+        "ark of bulrushes",
+        "Moses' ark"
+      ],
+      "explanation": "Moses' mother placed him in a container of bulrushes coated with slime and pitch, then set it among the reeds by the river."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "On m’avait enduit de bitume et de poix.",
+        "en": "I had been coated with slime and pitch.",
+        "reference": {
+          "book": 2,
+          "chapter": 2,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%202%3A3&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Une servante m’a récupéré sur l’ordre de la fille de Pharaon.",
+        "en": "A maid fetched me on the orders of Pharaoh’s daughter.",
+        "reference": {
+          "book": 2,
+          "chapter": 2,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%202%3A5&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Quand on m’a ouvert, on a découvert un petit garçon qui pleurait.",
+        "en": "When I was opened, a crying baby boy was found inside.",
+        "reference": {
+          "book": 2,
+          "chapter": 2,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%202%3A6&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Fabriqué en joncs, j’ai protégé le bébé qui deviendrait le libérateur d’Israël.",
+        "en": "Made of bulrushes, I sheltered the baby who would become Israel’s deliverer.",
+        "reference": {
+          "book": 2,
+          "chapter": 2,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%202%3A3&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-012",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "Les tables de la Loi",
+      "aliases": [
+        "tables de la Loi",
+        "tables des dix commandements",
+        "tables de pierre"
+      ],
+      "explanation": "Les premières tables portaient l’écriture de Dieu. Moïse les brisa en voyant l’idolâtrie du peuple ; Dieu lui demanda ensuite d’en tailler deux nouvelles."
+    },
+    "en": {
+      "answer": "The tablets of the Law",
+      "aliases": [
+        "tablets of the Law",
+        "Ten Commandments tablets",
+        "stone tablets"
+      ],
+      "explanation": "The first tablets bore God's writing. Moses broke them when he saw the people's idolatry; God then told him to cut two replacements."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Une écriture couvrait mes deux faces.",
+        "en": "Writing covered both of my sides.",
+        "reference": {
+          "book": 2,
+          "chapter": 32,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2032%3A15&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Mon premier exemplaire et son écriture étaient l’œuvre de Dieu.",
+        "en": "My original form and its writing were God’s work.",
+        "reference": {
+          "book": 2,
+          "chapter": 32,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2032%3A16&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Moïse m’a brisé au pied de la montagne en voyant le veau et les danses.",
+        "en": "Moses broke me at the foot of the mountain when he saw the calf and the dancing.",
+        "reference": {
+          "book": 2,
+          "chapter": 32,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2032%3A19&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Pour me remplacer, Moïse devait tailler deux plaques de pierre semblables aux premières.",
+        "en": "To replace me, Moses had to cut two stone slabs like the first ones.",
+        "reference": {
+          "book": 2,
+          "chapter": 34,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2034%3A1&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-013",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "Le veau d’or",
+      "aliases": [
+        "veau d’or",
+        "veau d'or"
+      ],
+      "explanation": "Aaron façonna cette idole avec l’or apporté par le peuple. Moïse la brûla, la réduisit en poudre et la répandit sur l’eau."
+    },
+    "en": {
+      "answer": "The golden calf",
+      "aliases": [
+        "golden calf"
+      ],
+      "explanation": "Aaron fashioned this idol from the gold brought by the people. Moses burned it, ground it to powder and scattered it on the water."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Après ma destruction, ma poussière fut répandue sur de l’eau que le peuple dut boire.",
+        "en": "After my destruction, my powder was scattered on water that the people had to drink.",
+        "reference": {
+          "book": 2,
+          "chapter": 32,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2032%3A20&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Ma matière provenait de bijoux que les Israélites portaient aux oreilles.",
+        "en": "My material came from jewellery the Israelites wore in their ears.",
+        "reference": {
+          "book": 2,
+          "chapter": 32,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2032%3A3&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Aaron a construit devant moi un lieu de sacrifice.",
+        "en": "Aaron built a place of sacrifice in front of me.",
+        "reference": {
+          "book": 2,
+          "chapter": 32,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2032%3A5&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "J’étais une image de jeune bovin en métal précieux, fabriquée pendant l’absence de Moïse.",
+        "en": "I was an image of a young bovine in precious metal, made while Moses was away.",
+        "reference": {
+          "book": 2,
+          "chapter": 32,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2032%3A4&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-014",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "La tunique de Joseph",
+      "aliases": [
+        "tunique de Joseph",
+        "vêtement de Joseph",
+        "habit de Joseph",
+        "tunique multicolore de Joseph",
+        "tunique de plusieurs couleurs"
+      ],
+      "explanation": "Jacob donna ce vêtement à Joseph. Ses frères le lui retirèrent, le trempèrent dans le sang d’un bouc et le présentèrent à leur père."
+    },
+    "en": {
+      "answer": "Joseph’s coat",
+      "aliases": [
+        "Joseph's coat",
+        "Joseph's robe",
+        "coat of many colours",
+        "coat of many colors"
+      ],
+      "explanation": "Jacob gave this garment to Joseph. His brothers removed it, dipped it in a goat's blood and presented it to their father."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "On m’a trempé dans le sang d’un bouc.",
+        "en": "I was dipped in a goat’s blood.",
+        "reference": {
+          "book": 1,
+          "chapter": 37,
+          "verse": 31
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2037%3A31&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "À ma vue, un père a cru qu’une bête féroce avait dévoré son fils.",
+        "en": "On seeing me, a father believed a wild animal had devoured his son.",
+        "reference": {
+          "book": 1,
+          "chapter": 37,
+          "verse": 33
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2037%3A33&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Les frères de mon propriétaire me lui avaient retiré avant de le jeter dans une citerne.",
+        "en": "My owner’s brothers had taken me off him before throwing him into a pit.",
+        "reference": {
+          "book": 1,
+          "chapter": 37,
+          "verse": 23
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2037%3A23&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Jacob m’avait offert au fils qu’il aimait particulièrement, celui qui racontait ses rêves.",
+        "en": "Jacob had given me to the son he especially loved, the one who told his dreams.",
+        "reference": {
+          "book": 1,
+          "chapter": 37,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2037%3A3&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-015",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "La fronde de David",
+      "aliases": [
+        "fronde de David",
+        "fronde"
+      ],
+      "explanation": "David emporta sa fronde et des pierres pour affronter Goliath. Le projectile atteignit le front du Philistin."
+    },
+    "en": {
+      "answer": "David’s sling",
+      "aliases": [
+        "David's sling",
+        "sling"
+      ],
+      "explanation": "David took his sling and stones to face Goliath. The projectile struck the Philistine's forehead."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mon utilisateur avait choisi cinq projectiles lisses dans un torrent.",
+        "en": "My user had chosen five smooth projectiles from a brook.",
+        "reference": {
+          "book": 9,
+          "chapter": 17,
+          "verse": 40
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2017%3A40&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je lui ai permis de vaincre sans qu’il ait d’épée à la main.",
+        "en": "I enabled him to prevail without a sword in his hand.",
+        "reference": {
+          "book": 9,
+          "chapter": 17,
+          "verse": 50
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2017%3A50&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Le projectile que j’ai lancé s’est enfoncé dans le front du Philistin.",
+        "en": "The projectile I launched sank into the Philistine’s forehead.",
+        "reference": {
+          "book": 9,
+          "chapter": 17,
+          "verse": 49
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2017%3A49&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "J’étais l’arme à pierre du jeune berger qui affronta Goliath.",
+        "en": "I was the stone-throwing weapon of the young shepherd who faced Goliath.",
+        "reference": {
+          "book": 9,
+          "chapter": 17,
+          "verse": 50
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2017%3A50&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-016",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "L’épée de Goliath",
+      "aliases": [
+        "épée de Goliath",
+        "epee de Goliath"
+      ],
+      "explanation": "David utilisa l’arme du Philistin après l’avoir abattu. Plus tard, il la retrouva chez le sacrificateur, enveloppée derrière l’éphod."
+    },
+    "en": {
+      "answer": "Goliath’s sword",
+      "aliases": [
+        "Goliath's sword"
+      ],
+      "explanation": "David used the Philistine's weapon after bringing him down. Later, he found it with the priest, wrapped behind the ephod."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "On m’avait conservée enveloppée dans un vêtement, derrière l’éphod.",
+        "en": "I had been kept wrapped in a cloth behind the ephod.",
+        "reference": {
+          "book": 9,
+          "chapter": 21,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2021%3A9&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "David a déclaré qu’aucune arme n’était comparable à moi et a demandé qu’on me lui donne.",
+        "en": "David said there was none like me and asked to be given me.",
+        "reference": {
+          "book": 9,
+          "chapter": 21,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2021%3A9&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Après la chute de mon premier propriétaire, David m’a tirée de mon fourreau.",
+        "en": "After my first owner fell, David drew me from my sheath.",
+        "reference": {
+          "book": 9,
+          "chapter": 17,
+          "verse": 51
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2017%3A51&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "J’ai servi à couper la tête du géant philistin auquel j’appartenais.",
+        "en": "I was used to cut off the head of the Philistine giant who owned me.",
+        "reference": {
+          "book": 9,
+          "chapter": 17,
+          "verse": 51
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2017%3A51&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-017",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "Le cordon écarlate de Rahab",
+      "aliases": [
+        "cordon écarlate de Rahab",
+        "cordon rouge de Rahab",
+        "fil écarlate"
+      ],
+      "explanation": "Ce signe devait être attaché à la fenêtre de Rahab. Les espions liaient à ce signe la protection de sa famille réunie dans sa maison."
+    },
+    "en": {
+      "answer": "Rahab’s scarlet cord",
+      "aliases": [
+        "Rahab's scarlet cord",
+        "scarlet cord",
+        "scarlet thread"
+      ],
+      "explanation": "This sign was to be tied in Rahab's window. The spies linked it to the protection of her family gathered in her house."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "L’accord dont j’étais le signe exigeait que les proches restent à l’intérieur.",
+        "en": "The agreement I signalled required relatives to remain inside.",
+        "reference": {
+          "book": 6,
+          "chapter": 2,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%202%3A19&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Les deux visiteurs ont demandé qu’on me place à la fenêtre par laquelle ils étaient descendus.",
+        "en": "The two visitors asked for me to be placed in the window through which they had descended.",
+        "reference": {
+          "book": 6,
+          "chapter": 2,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%202%3A18&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "La femme qui avait caché les visiteurs m’a attaché à sa fenêtre après leur départ.",
+        "en": "The woman who had hidden the visitors tied me in her window after they left.",
+        "reference": {
+          "book": 6,
+          "chapter": 2,
+          "verse": 21
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%202%3A21&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis un lien rouge vif, signe convenu pour la maison de Rahab.",
+        "en": "I am a bright red line, the agreed sign for Rahab’s house.",
+        "reference": {
+          "book": 6,
+          "chapter": 2,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%202%3A18&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-018",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "La manne",
+      "aliases": [
+        "manne"
+      ],
+      "explanation": "Dieu fournit cette nourriture à Israël dans le désert. Elle était ramassée chaque matin, avec une provision double avant le sabbat."
+    },
+    "en": {
+      "answer": "Manna",
+      "aliases": [
+        "manna"
+      ],
+      "explanation": "God supplied this food to Israel in the wilderness. It was gathered each morning, with a double portion before the sabbath."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Quand le soleil devenait chaud, je fondais.",
+        "en": "When the sun grew hot, I melted.",
+        "reference": {
+          "book": 2,
+          "chapter": 16,
+          "verse": 21
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2016%3A21&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "On en ramassait une double quantité le sixième jour.",
+        "en": "A double quantity of me was gathered on the sixth day.",
+        "reference": {
+          "book": 2,
+          "chapter": 16,
+          "verse": 22
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2016%3A22&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "J’étais blanche et mon goût rappelait un gâteau au miel.",
+        "en": "I was white and tasted like wafers made with honey.",
+        "reference": {
+          "book": 2,
+          "chapter": 16,
+          "verse": 31
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2016%3A31&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la nourriture que Dieu fit trouver au peuple chaque matin dans le désert.",
+        "en": "I am the food God provided for the people to find each morning in the wilderness.",
+        "reference": {
+          "book": 2,
+          "chapter": 16,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2016%3A15&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-019",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "Le chandelier du tabernacle",
+      "aliases": [
+        "chandelier du tabernacle",
+        "chandelier à sept branches",
+        "chandelier d’or",
+        "ménorah"
+      ],
+      "explanation": "Ce chandelier d’or travaillé au marteau portait sept lampes. Son décor comprenait des formes d’amandes, des pommes et des fleurs."
+    },
+    "en": {
+      "answer": "The tabernacle lampstand",
+      "aliases": [
+        "tabernacle lampstand",
+        "golden lampstand",
+        "seven-branched lampstand",
+        "menorah",
+        "golden candlestick",
+        "tabernacle candlestick"
+      ],
+      "explanation": "This beaten-gold lampstand carried seven lamps. Its decoration included almond-shaped bowls, knobs and flowers."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mon décor comportait des formes d’amandes et des fleurs.",
+        "en": "My decoration included almond shapes and flowers.",
+        "reference": {
+          "book": 2,
+          "chapter": 25,
+          "verse": 33
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2025%3A33&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "On devait me fabriquer d’une seule pièce en or travaillé au marteau.",
+        "en": "I was to be made as one piece of beaten gold.",
+        "reference": {
+          "book": 2,
+          "chapter": 25,
+          "verse": 36
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2025%3A36&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Trois branches sortaient de chacun de mes deux côtés.",
+        "en": "Three branches extended from each of my two sides.",
+        "reference": {
+          "book": 2,
+          "chapter": 25,
+          "verse": 32
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2025%3A32&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Mes sept lampes devaient éclairer l’espace devant moi dans le sanctuaire.",
+        "en": "My seven lamps were to light the space in front of me in the sanctuary.",
+        "reference": {
+          "book": 2,
+          "chapter": 25,
+          "verse": 37
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2025%3A37&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-020",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "L’autel des parfums",
+      "aliases": [
+        "autel des parfums",
+        "autel d’encens",
+        "autel d’or"
+      ],
+      "explanation": "Cet autel recouvert d’or était placé devant le voile. Aaron y brûlait du parfum, sans y offrir les sacrifices réservés à l’autre autel."
+    },
+    "en": {
+      "answer": "The altar of incense",
+      "aliases": [
+        "altar of incense",
+        "incense altar",
+        "golden altar"
+      ],
+      "explanation": "This gold-covered altar stood before the veil. Aaron burned incense on it without offering the sacrifices reserved for the other altar."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Ma base était carrée : une coudée de côté pour deux de hauteur.",
+        "en": "My base was square: one cubit on each side and two cubits high.",
+        "reference": {
+          "book": 2,
+          "chapter": 30,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2030%3A2&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Mes cornes et mes côtés devaient être recouverts d’or pur.",
+        "en": "My horns and sides were to be covered with pure gold.",
+        "reference": {
+          "book": 2,
+          "chapter": 30,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2030%3A3&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "On ne devait offrir sur moi ni holocauste ni libation.",
+        "en": "Neither burnt offerings nor drink offerings were to be presented on me.",
+        "reference": {
+          "book": 2,
+          "chapter": 30,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2030%3A9&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Aaron faisait monter sur moi une fumée odorante chaque matin en préparant les lampes.",
+        "en": "Aaron burned fragrant incense on me each morning while tending the lamps.",
+        "reference": {
+          "book": 2,
+          "chapter": 30,
+          "verse": 7
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2030%3A7&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-021",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "Le pectoral du jugement",
+      "aliases": [
+        "pectoral du jugement",
+        "pectoral d’Aaron",
+        "pectoral du grand prêtre"
+      ],
+      "explanation": "Cette pièce sacerdotale portait douze pierres gravées des noms d’Israël. Aaron la portait sur son cœur, avec l’urim et le thummim."
+    },
+    "en": {
+      "answer": "The breastplate of judgment",
+      "aliases": [
+        "breastplate of judgment",
+        "high priest’s breastplate",
+        "Aaron's breastplate"
+      ],
+      "explanation": "This priestly item carried twelve stones engraved with Israel's names. Aaron wore it over his heart, with the Urim and Thummim."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je devais être carré, plié en deux, large et long d’un empan.",
+        "en": "I was to be square and folded double, a span long and a span wide.",
+        "reference": {
+          "book": 2,
+          "chapter": 28,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2028%3A16&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Douze pierres gravées portaient les noms des fils d’Israël.",
+        "en": "Twelve engraved stones bore the names of Israel’s sons.",
+        "reference": {
+          "book": 2,
+          "chapter": 28,
+          "verse": 21
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2028%3A21&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "On devait placer en moi l’urim et le thummim.",
+        "en": "The Urim and Thummim were to be placed in me.",
+        "reference": {
+          "book": 2,
+          "chapter": 28,
+          "verse": 30
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2028%3A30&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Aaron me portait sur son cœur lorsqu’il entrait dans le sanctuaire.",
+        "en": "Aaron wore me over his heart when he entered the holy place.",
+        "reference": {
+          "book": 2,
+          "chapter": 28,
+          "verse": 29
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2028%3A29&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-022",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "La cuve de bronze du tabernacle",
+      "aliases": [
+        "cuve de bronze",
+        "cuve d’airain",
+        "cuve du tabernacle"
+      ],
+      "explanation": "La cuve et sa base furent faites avec les miroirs des femmes. Placée entre la tente et l’autel, elle servait aux ablutions des prêtres."
+    },
+    "en": {
+      "answer": "The bronze laver of the tabernacle",
+      "aliases": [
+        "bronze laver",
+        "brass laver",
+        "tabernacle laver"
+      ],
+      "explanation": "The laver and its base were made from the women's mirrors. Standing between the tent and the altar, it supplied water for the priests' washing."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Des miroirs de femmes ont fourni le métal de ma fabrication.",
+        "en": "Women’s mirrors supplied the metal from which I was made.",
+        "reference": {
+          "book": 2,
+          "chapter": 38,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2038%3A8&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Ma place était entre la tente d’assignation et l’autel.",
+        "en": "My place was between the tent of meeting and the altar.",
+        "reference": {
+          "book": 2,
+          "chapter": 30,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2030%3A18&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Aaron et ses fils utilisaient mon eau pour se laver les mains et les pieds.",
+        "en": "Aaron and his sons used my water to wash their hands and feet.",
+        "reference": {
+          "book": 2,
+          "chapter": 30,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2030%3A19&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "J’étais un grand récipient de métal pour les ablutions, posé sur une base du même métal.",
+        "en": "I was a large metal washing vessel standing on a base of the same metal.",
+        "reference": {
+          "book": 2,
+          "chapter": 30,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2030%3A18&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-023",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "La mer de bronze",
+      "aliases": [
+        "mer de bronze",
+        "mer d’airain",
+        "mer de fonte"
+      ],
+      "explanation": "Cette grande installation du Temple de Salomon était ronde et reposait sur douze bœufs. Le texte de 1 Rois décrit ses dimensions et son décor."
+    },
+    "en": {
+      "answer": "The bronze sea",
+      "aliases": [
+        "bronze sea",
+        "brazen sea",
+        "molten sea"
+      ],
+      "explanation": "This large installation in Solomon's Temple was round and rested on twelve oxen. First Kings describes its dimensions and decoration."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mon bord était façonné comme une fleur de lis.",
+        "en": "My rim was shaped like a lily flower.",
+        "reference": {
+          "book": 11,
+          "chapter": 7,
+          "verse": 26
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%207%3A26&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "J’étais ronde, avec dix coudées d’un bord à l’autre.",
+        "en": "I was round, measuring ten cubits from rim to rim.",
+        "reference": {
+          "book": 11,
+          "chapter": 7,
+          "verse": 23
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%207%3A23&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Douze bœufs me portaient, tournés trois par trois vers les quatre directions.",
+        "en": "Twelve oxen supported me, facing the four directions in groups of three.",
+        "reference": {
+          "book": 11,
+          "chapter": 7,
+          "verse": 25
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%207%3A25&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Malgré mon nom qui évoque l’océan, j’étais un immense bassin de métal du Temple de Salomon.",
+        "en": "Although my name suggests an ocean, I was an enormous metal basin in Solomon’s Temple.",
+        "reference": {
+          "book": 11,
+          "chapter": 7,
+          "verse": 23
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%207%3A23&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-024",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "Le fer de hache retrouvé par Élisée",
+      "aliases": [
+        "fer de hache",
+        "hache d’Élisée",
+        "fer de hache flottant"
+      ],
+      "explanation": "Un homme perdit dans le Jourdain le fer d’un outil emprunté. Élisée jeta un morceau de bois à l’endroit indiqué, et le fer se mit à flotter."
+    },
+    "en": {
+      "answer": "The axe head recovered by Elisha",
+      "aliases": [
+        "axe head",
+        "floating axe head",
+        "ax head"
+      ],
+      "explanation": "A man lost the iron head of a borrowed tool in the Jordan. Elisha threw a piece of wood at the indicated place, and the iron floated."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "L’homme qui m’a perdu s’est alarmé parce que j’avais été emprunté.",
+        "en": "The man who lost me was alarmed because I had been borrowed.",
+        "reference": {
+          "book": 12,
+          "chapter": 6,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%206%3A5&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je suis tombé dans l’eau pendant qu’il abattait une poutre.",
+        "en": "I fell into the water while he was cutting down a beam.",
+        "reference": {
+          "book": 12,
+          "chapter": 6,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%206%3A5&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Après qu’Élisée eut jeté du bois à cet endroit, je me suis mis à flotter.",
+        "en": "After Elisha threw wood into that spot, I began to float.",
+        "reference": {
+          "book": 12,
+          "chapter": 6,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%206%3A6&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "J’étais la partie en fer de l’outil coupant, que l’homme put reprendre en tendant la main.",
+        "en": "I was the iron cutting part of the tool, which the man recovered by reaching out his hand.",
+        "reference": {
+          "book": 12,
+          "chapter": 6,
+          "verse": 7
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%206%3A7&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-025",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "Le vase d’huile de la veuve aidée par Élisée",
+      "aliases": [
+        "vase d’huile de la veuve",
+        "vase d’huile de la veuve aidée par Élisée",
+        "pot d’huile de la veuve"
+      ],
+      "explanation": "La veuve ne possédait qu’un peu d’huile. Sur les instructions d’Élisée, elle en remplit des récipients empruntés, puis put payer ses dettes."
+    },
+    "en": {
+      "answer": "The oil jar of the widow helped by Elisha",
+      "aliases": [
+        "oil jar of the widow helped by Elisha",
+        "widow’s jar of oil",
+        "widow's jar of oil"
+      ],
+      "explanation": "The widow had only a little oil. Following Elisha's instructions, she filled borrowed containers from it and was able to pay her debts."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mon contenu a permis de payer une dette et de faire vivre une famille.",
+        "en": "My contents made it possible to pay a debt and support a family.",
+        "reference": {
+          "book": 12,
+          "chapter": 4,
+          "verse": 7
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%204%3A7&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Ma propriétaire avait reçu l’ordre d’emprunter beaucoup de récipients vides.",
+        "en": "My owner had been told to borrow many empty containers.",
+        "reference": {
+          "book": 12,
+          "chapter": 4,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%204%3A3&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Ce qui coulait de moi s’est arrêté quand il n’y a plus eu de récipient disponible.",
+        "en": "What flowed from me stopped when no more containers were available.",
+        "reference": {
+          "book": 12,
+          "chapter": 4,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%204%3A6&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je contenais le peu d’huile qui restait à une veuve venue demander l’aide d’Élisée.",
+        "en": "I held the little oil remaining to a widow who came to Elisha for help.",
+        "reference": {
+          "book": 12,
+          "chapter": 4,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%204%3A2&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-026",
+    "category": "object",
+    "testament": "new",
+    "fr": {
+      "answer": "Les trente pièces d’argent de Judas",
+      "aliases": [
+        "trente pièces d’argent",
+        "30 pièces d’argent",
+        "argent de Judas"
+      ],
+      "explanation": "Judas reçut cette somme pour livrer Jésus, puis la rapporta. Les prêtres l’employèrent à acheter le champ du potier."
+    },
+    "en": {
+      "answer": "Judas’ thirty pieces of silver",
+      "aliases": [
+        "thirty pieces of silver",
+        "30 pieces of silver",
+        "Judas' silver"
+      ],
+      "explanation": "Judas received this payment to betray Jesus, then returned it. The priests used it to buy the potter's field."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "On ne voulait pas me remettre dans le trésor, parce que j’étais le prix du sang.",
+        "en": "I was not to be put into the treasury because I was the price of blood.",
+        "reference": {
+          "book": 40,
+          "chapter": 27,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2027%3A6&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "J’ai servi à acheter le champ du potier pour y enterrer des étrangers.",
+        "en": "I was used to buy the potter’s field as a burial place for strangers.",
+        "reference": {
+          "book": 40,
+          "chapter": 27,
+          "verse": 7
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2027%3A7&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Judas m’a jeté dans le Temple avant de partir.",
+        "en": "Judas threw me down in the Temple before leaving.",
+        "reference": {
+          "book": 40,
+          "chapter": 27,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2027%3A5&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la somme de trente unités de métal précieux promise pour livrer Jésus.",
+        "en": "I am the payment of thirty precious-metal coins promised for betraying Jesus.",
+        "reference": {
+          "book": 40,
+          "chapter": 26,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2026%3A15&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-027",
+    "category": "object",
+    "testament": "new",
+    "fr": {
+      "answer": "La croix de Jésus",
+      "aliases": [
+        "croix de Jésus",
+        "croix du Christ",
+        "croix"
+      ],
+      "explanation": "Jésus porta l’instrument de son supplice vers Golgotha. Simon de Cyrène fut aussi contraint de le porter ; une inscription y indiquait le motif royal de la condamnation."
+    },
+    "en": {
+      "answer": "Jesus’ cross",
+      "aliases": [
+        "Jesus' cross",
+        "cross of Christ",
+        "cross"
+      ],
+      "explanation": "Jesus carried the instrument of his execution toward Golgotha. Simon of Cyrene was also compelled to carry it; an inscription on it stated the royal charge against him."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "L’inscription fixée sur moi était lisible en hébreu, en grec et en latin.",
+        "en": "The inscription attached to me could be read in Hebrew, Greek and Latin.",
+        "reference": {
+          "book": 43,
+          "chapter": 19,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2019%3A20&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Simon de Cyrène a été réquisitionné pour me porter.",
+        "en": "Simon of Cyrene was compelled to carry me.",
+        "reference": {
+          "book": 41,
+          "chapter": 15,
+          "verse": 21
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%2015%3A21&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Jésus m’a portée en allant au lieu appelé Golgotha.",
+        "en": "Jesus carried me on the way to the place called Golgotha.",
+        "reference": {
+          "book": 43,
+          "chapter": 19,
+          "verse": 17
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2019%3A17&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis l’instrument du supplice auquel Jésus fut attaché entre deux autres condamnés.",
+        "en": "I am the instrument of execution on which Jesus was fastened between two other condemned men.",
+        "reference": {
+          "book": 43,
+          "chapter": 19,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2019%3A18&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-028",
+    "category": "object",
+    "testament": "new",
+    "fr": {
+      "answer": "Le filet des cent cinquante-trois poissons",
+      "aliases": [
+        "filet des 153 poissons",
+        "filet des cent cinquante-trois poissons",
+        "filet de la pêche de Jean 21"
+      ],
+      "explanation": "Après une nuit sans prise, les disciples jetèrent leur filet sur l’ordre de Jésus. Il contenait 153 gros poissons et ne se déchira pas."
+    },
+    "en": {
+      "answer": "The net of the 153 fish",
+      "aliases": [
+        "net of the 153 fish",
+        "net of 153 fish",
+        "John 21 net"
+      ],
+      "explanation": "After a fruitless night, the disciples cast their net at Jesus' command. It held 153 large fish and did not tear."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Malgré le grand nombre de prises, je ne me suis pas déchiré.",
+        "en": "Despite the large catch, I did not tear.",
+        "reference": {
+          "book": 43,
+          "chapter": 21,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2021%3A11&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "J’ai été traîné jusqu’au rivage depuis une distance d’environ deux cents coudées.",
+        "en": "I was dragged toward shore from about two hundred cubits away.",
+        "reference": {
+          "book": 43,
+          "chapter": 21,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2021%3A8&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Sur l’ordre de Jésus, on m’avait jeté à droite de la barque.",
+        "en": "At Jesus’ command, I had been cast on the right side of the boat.",
+        "reference": {
+          "book": 43,
+          "chapter": 21,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2021%3A6&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Simon Pierre m’a tiré à terre, rempli de cent cinquante-trois gros poissons.",
+        "en": "Simon Peter hauled me ashore, filled with one hundred and fifty-three large fish.",
+        "reference": {
+          "book": 43,
+          "chapter": 21,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2021%3A11&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-029",
+    "category": "object",
+    "testament": "new",
+    "fr": {
+      "answer": "Les cinq pains d’orge",
+      "aliases": [
+        "cinq pains d’orge",
+        "cinq pains",
+        "5 pains"
+      ],
+      "explanation": "Un garçon possédait cinq pains d’orge et deux poissons. Jésus rendit grâces et les distribua ; douze paniers furent remplis avec les morceaux de pain restants."
+    },
+    "en": {
+      "answer": "The five barley loaves",
+      "aliases": [
+        "five barley loaves",
+        "five loaves",
+        "5 loaves"
+      ],
+      "explanation": "A boy had five barley loaves and two fish. Jesus gave thanks and distributed them; twelve baskets were filled with the remaining bread fragments."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mes morceaux restants ont rempli douze paniers.",
+        "en": "My remaining fragments filled twelve baskets.",
+        "reference": {
+          "book": 43,
+          "chapter": 6,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%206%3A13&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Jésus a rendu grâces avant de me distribuer à ceux qui étaient assis.",
+        "en": "Jesus gave thanks before distributing me to those who were seated.",
+        "reference": {
+          "book": 43,
+          "chapter": 6,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%206%3A11&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Un jeune garçon me possédait, accompagné de deux poissons.",
+        "en": "A young boy had me, along with two fish.",
+        "reference": {
+          "book": 43,
+          "chapter": 6,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%206%3A9&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "J’étais composé de cinq portions de nourriture cuite à base d’orge, multipliées pour la foule.",
+        "en": "I consisted of five baked portions made from barley, multiplied for the crowd.",
+        "reference": {
+          "book": 43,
+          "chapter": 6,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%206%3A9&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-030",
+    "category": "object",
+    "testament": "new",
+    "fr": {
+      "answer": "Le bassin du lavement des pieds",
+      "aliases": [
+        "bassin du lavement des pieds",
+        "bassin de Jésus",
+        "bassin du lavement"
+      ],
+      "explanation": "Pendant le repas, Jésus versa de l’eau dans un bassin, lava les pieds des disciples et les essuya avec le linge dont il s’était ceint."
+    },
+    "en": {
+      "answer": "The basin used for washing the disciples’ feet",
+      "aliases": [
+        "foot-washing basin",
+        "basin used by Jesus",
+        "basin for washing the disciples’ feet"
+      ],
+      "explanation": "During the meal, Jesus poured water into a basin, washed the disciples' feet and dried them with the towel he had tied around himself."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mon usage accompagne un exemple que le maître demande à ses disciples d’imiter.",
+        "en": "My use accompanies an example that the master asks his disciples to imitate.",
+        "reference": {
+          "book": 43,
+          "chapter": 13,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2013%3A15&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Celui qui m’a utilisé avait quitté ses vêtements et s’était ceint d’un linge.",
+        "en": "The one using me had laid aside his garments and tied a towel around himself.",
+        "reference": {
+          "book": 43,
+          "chapter": 13,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2013%3A4&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Pierre a d’abord refusé le geste accompli avec mon contenu.",
+        "en": "Peter initially refused the action performed with my contents.",
+        "reference": {
+          "book": 43,
+          "chapter": 13,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2013%3A8&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Jésus m’a rempli d’eau pour laver les pieds de ses disciples.",
+        "en": "Jesus filled me with water to wash his disciples’ feet.",
+        "reference": {
+          "book": 43,
+          "chapter": 13,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2013%3A5&version=KJV"
+      }
+    ]
+  }
+]

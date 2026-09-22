@@ -63,3 +63,15 @@ The fourteen lossless WebP layers are 128 × 128 and total about 36 KB. Rebuild 
 `node scripts/build-reactions.mjs <approved-image-directory>` from `apps/world`; the source
 filenames and hashes are recorded in `public/assets/reactions/slime/provenance.json`.
 Full-resolution concepts are not served by the application.
+
+### Avatar activity badges
+
+The current open UI publishes one public activity (`menu`, `exploration`, `game`,
+`board`, `book`) or `null` through the existing presence socket. Only the category
+is shared. Player snapshots include it for newcomers; the client republishes its
+current UI state after reconnecting. Closing the UI clears the activity.
+
+The reaction renderer also draws a compact blue badge with a white icon at the
+same screen-sized avatar anchor. Reactions temporarily replace it. Activity badges
+persist until the UI closes, follow interpolated avatars, disappear with departed
+visitors, and respect reduced motion.

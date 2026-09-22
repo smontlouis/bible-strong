@@ -54,6 +54,26 @@ function join() {
   network.takeSpawn()
   return socket
 }
+it('keeps anonymous question history across fresh clients without using it as a resume credential', () => {
+  network.destroy()
+  const values = new Map<string, string>()
+  vi.stubGlobal('crypto', { getRandomValues: crypto.getRandomValues.bind(crypto) })
+  vi.stubGlobal('localStorage', {
+    getItem: (key: string) => values.get(key),
+    setItem: (key: string, value: string) => values.set(key, value),
+  })
+  network = new WorldMultiplayer()
+  let socket = join()
+  const history = socket.sent[0].gameHistoryId
+  expect(history).toMatch(/^[0-9a-f-]{36}$/)
+  expect(socket.sent[0].resumeToken).toBeUndefined()
+  network.destroy()
+  sockets.length = 0
+  network = new WorldMultiplayer()
+  socket = join()
+  expect(socket.sent[0].gameHistoryId).toBe(history)
+  expect(socket.sent[0].resumeToken).toBeUndefined()
+})
 it('sends a fresh join and never queues movement while disconnected', () => {
   network.update(pose, profile, true, 0)
   expect(sockets[0].sent).toHaveLength(0)
@@ -227,4 +247,15 @@ it('clears a departing visitor’s reaction and ignores reactions in a hidden ta
   expect(network.sendReaction('hello')).toBe(false)
   socket.receive({ type: 'reaction', id: 'local', reaction: 'hello' })
   expect(network.reactions.size).toBe(0)
+})
+
+it('sends activity changes once and restores the current activity after reconnect', () => {
+  const socket = join()
+  network.setActivity('book')
+  network.setActivity('book')
+  expect(socket.sent.filter((m: any) => m.type === 'activity')).toEqual([{ type: 'activity', activity: 'book' }])
+  socket.receive({ type: 'welcome', id: 'local', spawn: pose, players: [] })
+  network.setActivity('book')
+  network.setActivity(null)
+  expect(socket.sent.filter((m: any) => m.type === 'activity').slice(-2)).toEqual([{ type: 'activity', activity: 'book' }, { type: 'activity', activity: null }])
 })

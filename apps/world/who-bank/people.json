@@ -1,0 +1,656 @@
+[
+  {
+    "id": "who-person-001",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Abraham",
+      "aliases": [
+        "Abram"
+      ],
+      "explanation": "Abraham reçoit la promesse d'une descendance nombreuse. Isaac est le fils que Dieu lui demande d'offrir avant d'arrêter le sacrifice."
+    },
+    "en": {
+      "answer": "Abraham",
+      "aliases": [
+        "Abram"
+      ],
+      "explanation": "Abraham receives the promise of numerous descendants. Isaac is the son God asks him to offer before stopping the sacrifice."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je pèse quatre cents sicles d'argent pour payer Éphron.",
+        "en": "I weigh out four hundred shekels of silver to pay Ephron.",
+        "reference": {
+          "book": 1,
+          "chapter": 23,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2023%3A16&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Ma femme rit en entendant qu'elle aura un enfant malgré notre vieillesse.",
+        "en": "My wife laughs when she hears that she will have a child despite our old age.",
+        "reference": {
+          "book": 1,
+          "chapter": 18,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2018%3A12&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Dieu me montre les étoiles pour me parler de ma descendance.",
+        "en": "God shows me the stars to describe my future descendants.",
+        "reference": {
+          "book": 1,
+          "chapter": 15,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2015%3A5&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Dieu me demande d'offrir mon fils Isaac sur une montagne.",
+        "en": "God asks me to offer my son Isaac on a mountain.",
+        "reference": {
+          "book": 1,
+          "chapter": 22,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2022%3A2&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-002",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Joseph",
+      "aliases": [
+        "Joseph fils de Jacob"
+      ],
+      "explanation": "Joseph, fils de Jacob, est vendu puis élevé au pouvoir en Égypte. Sa tunique et la coupe cachée chez son frère appartiennent à son récit."
+    },
+    "en": {
+      "answer": "Joseph",
+      "aliases": [
+        "Joseph son of Jacob"
+      ],
+      "explanation": "Joseph, Jacob's son, is sold and later given authority in Egypt. His coat and the cup hidden in his brother's sack belong to his story."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je fais cacher ma coupe d'argent dans le sac de mon plus jeune frère.",
+        "en": "I have my silver cup hidden in my youngest brother's sack.",
+        "reference": {
+          "book": 1,
+          "chapter": 44,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2044%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Pharaon me confie l'autorité sur tout le pays d'Égypte.",
+        "en": "Pharaoh puts me in charge of all the land of Egypt.",
+        "reference": {
+          "book": 1,
+          "chapter": 41,
+          "verse": 41
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2041%3A41&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je suis vendu pour vingt pièces d'argent et emmené en Égypte.",
+        "en": "I am sold for twenty pieces of silver and taken to Egypt.",
+        "reference": {
+          "book": 1,
+          "chapter": 37,
+          "verse": 28
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2037%3A28&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Mon père Jacob m'offre une tunique de plusieurs couleurs.",
+        "en": "My father Jacob gives me a coat of many colours.",
+        "reference": {
+          "book": 1,
+          "chapter": 37,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2037%3A3&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-003",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Moïse",
+      "aliases": [
+        "Moise"
+      ],
+      "explanation": "Moïse est placé bébé dans une corbeille. Plus tard, Dieu l'appelle au buisson ardent et l'envoie faire sortir Israël d'Égypte."
+    },
+    "en": {
+      "answer": "Moses",
+      "aliases": [],
+      "explanation": "Moses is placed in a basket as a baby. Later, God calls him at the burning bush and sends him to lead Israel out of Egypt."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je garde le troupeau de mon beau-père Jéthro au pays de Madian.",
+        "en": "I tend the flock of my father-in-law Jethro in Midian.",
+        "reference": {
+          "book": 2,
+          "chapter": 3,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%203%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Bébé, ma mère me place dans une corbeille parmi les roseaux au bord du fleuve.",
+        "en": "As a baby, my mother places me in a basket among the reeds by the river.",
+        "reference": {
+          "book": 2,
+          "chapter": 2,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%202%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je vois un buisson en feu qui ne se consume pas.",
+        "en": "I see a bush burning without being consumed.",
+        "reference": {
+          "book": 2,
+          "chapter": 3,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%203%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Dieu m'envoie auprès de Pharaon pour faire sortir les Israélites d'Égypte.",
+        "en": "God sends me to Pharaoh to lead the Israelites out of Egypt.",
+        "reference": {
+          "book": 2,
+          "chapter": 3,
+          "verse": 10
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%203%3A10&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-004",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "David",
+      "aliases": [],
+      "explanation": "David est le jeune berger choisi parmi les fils d'Isaï. Il joue de la harpe pour Saül et vainc Goliath avec une fronde."
+    },
+    "en": {
+      "answer": "David",
+      "aliases": [],
+      "explanation": "David is the young shepherd chosen from Jesse's sons. He plays the harp for Saul and defeats Goliath with a sling."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Jonathan conclut une alliance avec moi par amitié.",
+        "en": "Jonathan makes a covenant with me out of friendship.",
+        "reference": {
+          "book": 9,
+          "chapter": 18,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2018%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Quand je joue de la harpe, le roi Saül se trouve soulagé.",
+        "en": "When I play the harp, King Saul finds relief.",
+        "reference": {
+          "book": 9,
+          "chapter": 16,
+          "verse": 23
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2016%3A23&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je suis le plus jeune fils d'Isaï et je garde les brebis quand Samuel vient.",
+        "en": "I am Jesse's youngest son and am tending sheep when Samuel arrives.",
+        "reference": {
+          "book": 9,
+          "chapter": 16,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2016%3A11&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je terrasse le champion philistin Goliath avec une fronde et une pierre.",
+        "en": "I defeat the Philistine champion Goliath with a sling and a stone.",
+        "reference": {
+          "book": 9,
+          "chapter": 17,
+          "verse": 50
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2017%3A50&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-005",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Esther",
+      "aliases": [
+        "Hadassa",
+        "Hadassah"
+      ],
+      "explanation": "Orpheline élevée par Mardochée, Esther devient reine. Elle risque sa vie devant le roi et dénonce Haman pour défendre son peuple."
+    },
+    "en": {
+      "answer": "Esther",
+      "aliases": [
+        "Hadassah"
+      ],
+      "explanation": "An orphan raised by Mordecai, Esther becomes queen. She risks her life before the king and exposes Haman to defend her people."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Après la mort de mes parents, Mardochée m'élève comme sa fille.",
+        "en": "After my parents die, Mordecai raises me as his daughter.",
+        "reference": {
+          "book": 17,
+          "chapter": 2,
+          "verse": 7
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%202%3A7&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Avant d'approcher le roi, je demande aux Juifs de Suse de jeûner trois jours.",
+        "en": "Before approaching the king, I ask the Jews of Susa to fast for three days.",
+        "reference": {
+          "book": 17,
+          "chapter": 4,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%204%3A16&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Le roi me tend son sceptre d'or lorsque je me présente dans la cour.",
+        "en": "The king holds out his golden sceptre when I appear in the court.",
+        "reference": {
+          "book": 17,
+          "chapter": 5,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%205%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la reine qui dénonce Haman comme l'ennemi de mon peuple.",
+        "en": "I am the queen who exposes Haman as the enemy of my people.",
+        "reference": {
+          "book": 17,
+          "chapter": 7,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%207%3A6&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-006",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Marie, mère de Jésus",
+      "aliases": [
+        "Marie",
+        "Marie de Nazareth"
+      ],
+      "explanation": "Marie reçoit l'annonce de la naissance de Jésus, rend visite à Élisabeth et garde dans son cœur les événements entourant cette naissance."
+    },
+    "en": {
+      "answer": "Mary, mother of Jesus",
+      "aliases": [
+        "Mary",
+        "Mary of Nazareth"
+      ],
+      "explanation": "Mary receives the announcement of Jesus' birth, visits Elizabeth and treasures the events surrounding his birth in her heart."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je conserve dans mon cœur les événements racontés autour d'une naissance.",
+        "en": "I treasure in my heart the events reported around a birth.",
+        "reference": {
+          "book": 42,
+          "chapter": 2,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%202%3A19&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je rends visite à Élisabeth dans la maison de Zacharie.",
+        "en": "I visit Elizabeth in Zechariah's house.",
+        "reference": {
+          "book": 42,
+          "chapter": 1,
+          "verse": 40
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%201%3A40&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Un ange m'annonce que je vais avoir un fils et que je dois l'appeler Jésus.",
+        "en": "An angel tells me I will have a son and must call him Jesus.",
+        "reference": {
+          "book": 42,
+          "chapter": 1,
+          "verse": 31
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%201%3A31&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la mère de Jésus, fiancée à Joseph avant sa naissance.",
+        "en": "I am Jesus' mother, betrothed to Joseph before his birth.",
+        "reference": {
+          "book": 40,
+          "chapter": 1,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%201%3A18&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-007",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Pierre",
+      "aliases": [
+        "Simon Pierre",
+        "Simon",
+        "Céphas",
+        "Cephas"
+      ],
+      "explanation": "Pierre est un disciple de Jésus. Il marche sur l'eau vers lui, puis le renie trois fois ; les Actes racontent aussi son séjour chez un tanneur."
+    },
+    "en": {
+      "answer": "Peter",
+      "aliases": [
+        "Simon Peter",
+        "Simon",
+        "Cephas"
+      ],
+      "explanation": "Peter is a disciple of Jesus. He walks on water towards him, then denies him three times; Acts also describes his stay with a tanner."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je séjourne plusieurs jours chez un tanneur à Joppé.",
+        "en": "I stay for several days with a tanner in Joppa.",
+        "reference": {
+          "book": 44,
+          "chapter": 9,
+          "verse": 43
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%209%3A43&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "À un homme qui ne marche pas, je dis ne pas avoir d'argent ni d'or, puis je lui ordonne de marcher au nom de Jésus.",
+        "en": "I tell a man unable to walk that I have no silver or gold, then command him to walk in Jesus' name.",
+        "reference": {
+          "book": 44,
+          "chapter": 3,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%203%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je sors d'une barque et marche sur l'eau pour aller vers Jésus.",
+        "en": "I step out of a boat and walk on water towards Jesus.",
+        "reference": {
+          "book": 40,
+          "chapter": 14,
+          "verse": 29
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2014%3A29&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je pleure après avoir renié Jésus trois fois, comme il l'avait annoncé avant le chant du coq.",
+        "en": "I weep after denying Jesus three times, as he had predicted before the rooster crowed.",
+        "reference": {
+          "book": 40,
+          "chapter": 26,
+          "verse": 75
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2026%3A75&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-008",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Paul",
+      "aliases": [
+        "Saul de Tarse"
+      ],
+      "explanation": "Paul fabrique des tentes et annonce l'Évangile aux nations. Sa rencontre avec Jésus sur la route de Damas marque un tournant dans sa vie."
+    },
+    "en": {
+      "answer": "Paul",
+      "aliases": [
+        "Saul of Tarsus"
+      ],
+      "explanation": "Paul makes tents and proclaims the gospel to the nations. His encounter with Jesus on the road to Damascus marks a turning point in his life."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mon métier consiste à fabriquer des tentes.",
+        "en": "My trade is making tents.",
+        "reference": {
+          "book": 44,
+          "chapter": 18,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2018%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "En prison, je prie et chante avec Silas au milieu de la nuit.",
+        "en": "In prison, I pray and sing with Silas at midnight.",
+        "reference": {
+          "book": 44,
+          "chapter": 16,
+          "verse": 25
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A25&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Dieu me confie une mission d'apôtre auprès des non-Juifs, comme à Pierre auprès des Juifs.",
+        "en": "God gives me an apostolic mission to the Gentiles, as he gives Peter one to the Jews.",
+        "reference": {
+          "book": 48,
+          "chapter": 2,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Galatians%202%3A8&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "En approchant de Damas, je suis soudain entouré d'une lumière venue du ciel.",
+        "en": "As I approach Damascus, a light from heaven suddenly surrounds me.",
+        "reference": {
+          "book": 44,
+          "chapter": 9,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%209%3A3&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-009",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Jean-Baptiste",
+      "aliases": [
+        "Jean Baptiste",
+        "Jean le Baptiste"
+      ],
+      "explanation": "Jean-Baptiste prépare la venue du Seigneur. Son vêtement et sa nourriture rappellent sa vie au désert ; il baptise Jésus dans le Jourdain."
+    },
+    "en": {
+      "answer": "John the Baptist",
+      "aliases": [
+        "John Baptist",
+        "John the Baptizer"
+      ],
+      "explanation": "John the Baptist prepares the way of the Lord. His clothing and food reflect his wilderness life; he baptizes Jesus in the Jordan."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je dis que Jésus doit prendre plus de place, et moi moins.",
+        "en": "I say that Jesus must become greater while I become less.",
+        "reference": {
+          "book": 43,
+          "chapter": 3,
+          "verse": 30
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%203%3A30&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Mon ministère est associé à une voix dans le désert qui prépare le chemin du Seigneur.",
+        "en": "My ministry is associated with a voice in the wilderness preparing the Lord's way.",
+        "reference": {
+          "book": 41,
+          "chapter": 1,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%201%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je porte un vêtement de poils de chameau et mange des sauterelles et du miel sauvage.",
+        "en": "I wear camel-hair clothing and eat locusts and wild honey.",
+        "reference": {
+          "book": 40,
+          "chapter": 3,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%203%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Jésus vient me trouver au Jourdain pour être baptisé par moi.",
+        "en": "Jesus comes to me at the Jordan to be baptized by me.",
+        "reference": {
+          "book": 40,
+          "chapter": 3,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%203%3A13&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-010",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Zachée",
+      "aliases": [
+        "Zachee"
+      ],
+      "explanation": "Zachée est un riche chef des collecteurs d'impôts à Jéricho. Il grimpe dans un sycomore pour voir Jésus, puis l'accueille chez lui."
+    },
+    "en": {
+      "answer": "Zacchaeus",
+      "aliases": [
+        "Zaccheus"
+      ],
+      "explanation": "Zacchaeus is a wealthy chief tax collector in Jericho. He climbs a sycamore to see Jesus and then welcomes him into his home."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je promets de rendre quatre fois ce que j'aurais pris injustement.",
+        "en": "I promise to repay four times anything I have taken unfairly.",
+        "reference": {
+          "book": 42,
+          "chapter": 19,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2019%3A8&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Jésus me dit qu'il doit séjourner chez moi aujourd'hui.",
+        "en": "Jesus tells me he must stay at my house that day.",
+        "reference": {
+          "book": 42,
+          "chapter": 19,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2019%3A5&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je suis un riche chef des collecteurs d'impôts dans le récit de Jéricho.",
+        "en": "I am a wealthy chief tax collector in the story set in Jericho.",
+        "reference": {
+          "book": 42,
+          "chapter": 19,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2019%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je grimpe dans un sycomore pour voir passer Jésus.",
+        "en": "I climb a sycamore tree to see Jesus pass by.",
+        "reference": {
+          "book": 42,
+          "chapter": 19,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2019%3A4&version=LSG%3BKJV"
+      }
+    ]
+  }
+]

@@ -27,4 +27,4 @@
 - **Study assistant → Resource delivery**: bounded read-only tools use the Resource API through a Worker service binding.
 - **Study workspace → Study assistant**: authenticated clients consume the same Markdown stream contract on native and web; provider implementation is maintained in a separate private repository.
 
-- **Event exploration world → Gloo Grounded**: optional avatar games use provider-grounded generation; Jev adjudicates free-text answers.
+- **Event exploration world → Curated game catalogue / Jev**: SQLite supplies bilingual game questions; Jev adjudicates non-exact written answers.

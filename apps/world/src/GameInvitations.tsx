@@ -178,7 +178,7 @@ export function InvitationDetail({
         />
         <h2>{t[invitation.options.kind]}</h2>
         <div className="game-invite-tags">
-          <span>{t[invitation.options.difficulty]}</span>
+          {invitation.options.kind !== 'who' && <span>{t[invitation.options.difficulty]}</span>}
           <span>{t.players}</span>
           <span>{t.rounds}</span>
         </div>

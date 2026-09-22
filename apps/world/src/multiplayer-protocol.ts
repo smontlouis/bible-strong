@@ -1,3 +1,4 @@
+import { isAvatarActivity, type AvatarActivity } from './avatar-activity'
 import { isReaction, type ReactionId } from './reactions'
 import {
   parseGameAction,
@@ -12,13 +13,21 @@ export const PROTOCOL_VERSION = 2
 export const SEND_INTERVAL = 1000 / 15
 export const MAX_PLAYERS = 100
 export type Pose = { x: number; y: number; dx: number; dy: number; moving: boolean }
-export type Player = { id: string; profile: AvatarProfile; pose: Pose; seq: number }
+export type Player = { id: string; profile: AvatarProfile; pose: Pose; seq: number; activity?: AvatarActivity | null }
 export type ClientMessage =
+  | { type: 'activity'; activity: AvatarActivity | null }
   | { type: 'reaction'; reaction: ReactionId }
   | { type: 'game'; command: GameAction }
-  | { type: 'join'; version: number; profile: AvatarProfile; pose: Pose; resumeToken?: string }
+  | {
+      type: 'join'
+      version: number
+      profile: AvatarProfile
+      pose: Pose
+      resumeToken?: string
+      gameHistoryId?: string
+    }
   | { type: 'visibility'; hidden: boolean }
-  | { type: 'move'; pose: Pose; seq: number }
+  | { type: 'move'; pose: Pose; seq: number; activity?: AvatarActivity | null }
   | { type: 'profile'; profile: AvatarProfile }
   | { type: 'ping' }
 export type ServerMessage =
@@ -62,26 +71,28 @@ export function parseClientMessage(raw: string): ClientMessage | null {
     }
     if (m.type === 'reaction')
       return isReaction(m.reaction) ? { type: 'reaction', reaction: m.reaction } : null
+    if (m.type === 'activity')
+      return m.activity === null || isAvatarActivity(m.activity) ? { type: 'activity', activity: m.activity } : null
     if (m.type === 'ping') return { type: 'ping' }
     if (m.type === 'visibility' && typeof m.hidden === 'boolean')
       return { type: 'visibility', hidden: m.hidden }
     if (m.type === 'join' && m.version === PROTOCOL_VERSION) {
       const profile = parseProfile(m.profile),
         pose = parsePose(m.pose)
-      if (
-        m.resumeToken !== undefined &&
-        (typeof m.resumeToken !== 'string' ||
-          !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(
-            m.resumeToken
-          ))
-      )
-        return null
+      for (const token of [m.resumeToken, m.gameHistoryId])
+        if (
+          token !== undefined &&
+          (typeof token !== 'string' ||
+            !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(token))
+        )
+          return null
       return profile && pose
         ? {
             type: 'join',
             version: PROTOCOL_VERSION,
             profile,
             pose,
+            ...(m.gameHistoryId ? { gameHistoryId: m.gameHistoryId } : {}),
             ...(m.resumeToken ? { resumeToken: m.resumeToken } : {}),
           }
         : null

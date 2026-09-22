@@ -36,7 +36,8 @@
 .games-launch {
   position: fixed;
   right: 24px;
-  bottom: 96px;
+  /* Reactions occupy the separate row above this button. */
+  bottom: var(--world-reactions-bottom, 94px);
   z-index: 30;
   display: flex;
   align-items: center;
@@ -1542,7 +1543,6 @@
   }
   .games-launch {
     right: 16px;
-    bottom: 100px;
     min-height: 48px;
     padding: 0 18px;
     font-size: 14px;

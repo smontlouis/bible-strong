@@ -6,6 +6,7 @@ import type { GameAction } from '../games-protocol'
 import {
   act,
   flows,
+  finishSoloLab,
   makeStory,
   people,
   reveal,
@@ -51,7 +52,7 @@ function Frame() {
     const g = next.game
     if (g?.solo) {
       tickSolo(g.solo, next.now)
-      if (g.solo.outcome) g.phase = 'finished'
+      if (g.solo.outcome) finishSoloLab(next)
       return next
     }
     if (

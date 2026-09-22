@@ -1,0 +1,2901 @@
+[
+  {
+    "id": "easy-ot-151",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "genesis-creator-heaven-earth",
+    "reference": {
+      "book": 1,
+      "chapter": 1,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Qui crée le ciel et la terre au commencement de la Genèse ?",
+      "answer": "Dieu",
+      "aliases": [
+        "Le Seigneur",
+        "L’Éternel"
+      ],
+      "explanation": "Le premier verset présente Dieu comme le créateur."
+    },
+    "en": {
+      "question": "Who creates heaven and earth at the beginning of Genesis?",
+      "answer": "God",
+      "aliases": [
+        "The Lord"
+      ],
+      "explanation": "The first verse presents God as the creator."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%201%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-152",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "creation-darkness-named-night",
+    "reference": {
+      "book": 1,
+      "chapter": 1,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Quel nom Dieu donne-t-il aux ténèbres ?",
+      "answer": "La nuit",
+      "aliases": [
+        "nuit",
+        "Nuit"
+      ],
+      "explanation": "Dieu distingue le jour de la nuit."
+    },
+    "en": {
+      "question": "What name does God give to the darkness?",
+      "answer": "Night",
+      "aliases": [],
+      "explanation": "God distinguishes day from night."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%201%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-153",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "creation-humanity-multiply",
+    "reference": {
+      "book": 1,
+      "chapter": 1,
+      "verse": 28
+    },
+    "fr": {
+      "question": "Quelle action liée aux générations futures Dieu demande-t-il aux premiers humains pour remplir la terre ?",
+      "answer": "Se multiplier",
+      "aliases": [
+        "Être féconds",
+        "Avoir des enfants"
+      ],
+      "explanation": "Dieu bénit les humains et les appelle à être féconds."
+    },
+    "en": {
+      "question": "What action concerning future generations does God ask of the first humans to fill the earth?",
+      "answer": "Multiply",
+      "aliases": [
+        "Be fruitful",
+        "Have children"
+      ],
+      "explanation": "God blesses human beings and calls them to be fruitful."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%201%3A28&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-154",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "creation-stars-maker",
+    "reference": {
+      "book": 1,
+      "chapter": 1,
+      "verse": 16
+    },
+    "fr": {
+      "question": "En plus des deux grands luminaires, quels petits points lumineux Dieu place-t-il dans le ciel ?",
+      "answer": "Les étoiles",
+      "aliases": [
+        "étoiles"
+      ],
+      "explanation": "Le récit inclut les étoiles parmi les œuvres de Dieu."
+    },
+    "en": {
+      "question": "Besides the two great lights, what smaller shining points does God place in the sky?",
+      "answer": "The stars",
+      "aliases": [
+        "stars"
+      ],
+      "explanation": "The account includes the stars among God's works."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%201%3A16&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-155",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "creation-fish-habitat",
+    "reference": {
+      "book": 1,
+      "chapter": 1,
+      "verse": 20
+    },
+    "fr": {
+      "question": "Quel milieu Dieu demande-t-il de peupler d'êtres vivants avant de mentionner les oiseaux ?",
+      "answer": "Les eaux",
+      "aliases": [
+        "eaux",
+        "L’eau",
+        "La mer"
+      ],
+      "explanation": "Les créatures aquatiques sont évoquées avant les oiseaux."
+    },
+    "en": {
+      "question": "What environment does God command to teem with living creatures before mentioning birds?",
+      "answer": "The waters",
+      "aliases": [
+        "waters",
+        "Water",
+        "The sea"
+      ],
+      "explanation": "Aquatic creatures are mentioned before birds."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%201%3A20&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-156",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "serpent-crawls-belly",
+    "reference": {
+      "book": 1,
+      "chapter": 3,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Sur quelle partie de son corps le serpent est-il condamné à ramper ?",
+      "answer": "Son ventre",
+      "aliases": [
+        "Le ventre"
+      ],
+      "explanation": "Le serpent doit avancer sur son ventre."
+    },
+    "en": {
+      "question": "On which part of its body is the serpent sentenced to crawl?",
+      "answer": "Its belly",
+      "aliases": [
+        "Belly"
+      ],
+      "explanation": "The serpent must move on its belly."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%203%3A14&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-157",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "cain-protective-mark",
+    "reference": {
+      "book": 1,
+      "chapter": 4,
+      "verse": 15
+    },
+    "fr": {
+      "question": "Que Dieu place-t-il sur Caïn pour empêcher qu'on le tue ?",
+      "answer": "Un signe",
+      "aliases": [
+        "signe",
+        "Une marque"
+      ],
+      "explanation": "Le signe protège Caïn contre la vengeance meurtrière."
+    },
+    "en": {
+      "question": "What does God put on Cain to prevent anyone killing him?",
+      "answer": "A mark",
+      "aliases": [
+        "mark",
+        "A sign"
+      ],
+      "explanation": "The mark protects Cain from deadly vengeance."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%204%3A15&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-158",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "enoch-walked-with-god",
+    "reference": {
+      "book": 1,
+      "chapter": 5,
+      "verse": 24
+    },
+    "fr": {
+      "question": "Quel homme marche avec Dieu puis disparaît parce que Dieu le prend ?",
+      "answer": "Hénoc",
+      "aliases": [
+        "Enoch",
+        "Énoch"
+      ],
+      "explanation": "La Genèse décrit la relation particulière d'Hénoc avec Dieu."
+    },
+    "en": {
+      "question": "Which man walks with God and then disappears because God takes him?",
+      "answer": "Enoch",
+      "aliases": [],
+      "explanation": "Genesis describes Enoch's particular relationship with God."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%205%3A24&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-159",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "ark-animals-two-command",
+    "reference": {
+      "book": 1,
+      "chapter": 6,
+      "verse": 19
+    },
+    "fr": {
+      "question": "Combien d'animaux de chaque espèce Dieu demande-t-il à Noé d'introduire selon l'ordre de Genèse 6 ?",
+      "answer": "Deux",
+      "aliases": [
+        "2"
+      ],
+      "explanation": "Cet ordre mentionne un mâle et une femelle pour conserver la vie."
+    },
+    "en": {
+      "question": "How many animals of each kind does God tell Noah to bring in according to the instruction in Genesis 6?",
+      "answer": "Two",
+      "aliases": [
+        "2"
+      ],
+      "explanation": "This instruction names a male and a female to preserve life."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%206%3A19&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-160",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "noah-promise-no-global-flood",
+    "reference": {
+      "book": 1,
+      "chapter": 9,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Quel désastre Dieu promet-il de ne plus employer pour détruire toute chair ?",
+      "answer": "Un déluge",
+      "aliases": [
+        "déluge"
+      ],
+      "explanation": "L'alliance écarte un nouveau déluge détruisant toute vie."
+    },
+    "en": {
+      "question": "What disaster does God promise never again to use to destroy all flesh?",
+      "answer": "A flood",
+      "aliases": [
+        "flood"
+      ],
+      "explanation": "The covenant rules out another flood destroying all life."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%209%3A11&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-161",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "babel-common-language",
+    "reference": {
+      "book": 1,
+      "chapter": 11,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Avant Babel, combien de langues la terre entière parle-t-elle selon le récit ?",
+      "answer": "Une seule",
+      "aliases": [
+        "seule",
+        "Une",
+        "1"
+      ],
+      "explanation": "Le récit commence avec une langue commune à tous."
+    },
+    "en": {
+      "question": "Before Babel, how many languages does the whole earth speak according to the account?",
+      "answer": "One",
+      "aliases": [
+        "1"
+      ],
+      "explanation": "The account begins with a language shared by everyone."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2011%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-162",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "abraham-covenant-circumcision",
+    "reference": {
+      "book": 1,
+      "chapter": 17,
+      "verse": 10
+    },
+    "fr": {
+      "question": "Quel rite corporel Dieu demande-t-il comme marque de l'alliance avec Abraham ?",
+      "answer": "La circoncision",
+      "aliases": [
+        "circoncision",
+        "Circoncire"
+      ],
+      "explanation": "Le rite concerne les hommes de la maison d'Abraham."
+    },
+    "en": {
+      "question": "What bodily rite does God require as a mark of the covenant with Abraham?",
+      "answer": "Circumcision",
+      "aliases": [],
+      "explanation": "The rite concerns the males of Abraham's household."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2017%3A10&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-163",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "isaac-reopens-wells",
+    "reference": {
+      "book": 1,
+      "chapter": 26,
+      "verse": 18
+    },
+    "fr": {
+      "question": "Quels ouvrages donnant accès à l'eau Isaac fait-il creuser à nouveau après leur obstruction ?",
+      "answer": "Des puits",
+      "aliases": [
+        "puits"
+      ],
+      "explanation": "Isaac rouvre les puits creusés au temps de son père."
+    },
+    "en": {
+      "question": "What structures giving access to water does Isaac reopen after they have been blocked?",
+      "answer": "Wells",
+      "aliases": [],
+      "explanation": "Isaac reopens the wells dug in his father's time."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2026%3A18&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-164",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "joseph-embraces-benjamin",
+    "reference": {
+      "book": 1,
+      "chapter": 45,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Quel frère Joseph serre-t-il contre lui en pleurant lorsqu'il révèle son identité ?",
+      "answer": "Benjamin",
+      "aliases": [],
+      "explanation": "Joseph et Benjamin pleurent dans les bras l'un de l'autre."
+    },
+    "en": {
+      "question": "Which brother does Joseph embrace while weeping when he reveals his identity?",
+      "answer": "Benjamin",
+      "aliases": [],
+      "explanation": "Joseph and Benjamin weep in each other's arms."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2045%3A14&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-165",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "moses-name-water-rescue",
+    "reference": {
+      "book": 2,
+      "chapter": 2,
+      "verse": 10
+    },
+    "fr": {
+      "question": "De quel élément la fille de Pharaon dit-elle avoir retiré Moïse en expliquant son nom ?",
+      "answer": "L'eau",
+      "aliases": [
+        "eau",
+        "Les eaux"
+      ],
+      "explanation": "Elle relie le nom de Moïse à son sauvetage hors de l'eau."
+    },
+    "en": {
+      "question": "From what element does Pharaoh's daughter say she drew Moses when explaining his name?",
+      "answer": "Water",
+      "aliases": [],
+      "explanation": "She connects Moses' name with his rescue from the water."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%202%3A10&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-166",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "marah-water-bitter",
+    "reference": {
+      "book": 2,
+      "chapter": 15,
+      "verse": 23
+    },
+    "fr": {
+      "question": "Quel goût empêche les Israélites de boire l'eau de Mara ?",
+      "answer": "L'amertume",
+      "aliases": [
+        "amertume",
+        "Amer",
+        "Elle est amère"
+      ],
+      "explanation": "L'eau est trop amère pour être bue."
+    },
+    "en": {
+      "question": "What taste prevents the Israelites drinking the water at Marah?",
+      "answer": "Bitterness",
+      "aliases": [],
+      "explanation": "The water is too bitter to drink."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2015%3A23&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-167",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "moses-face-shining",
+    "reference": {
+      "book": 2,
+      "chapter": 34,
+      "verse": 29
+    },
+    "fr": {
+      "question": "Quelle partie du corps de Moïse rayonne lorsqu'il redescend après avoir parlé avec Dieu ?",
+      "answer": "Son visage",
+      "aliases": [
+        "Sa face",
+        "Le visage"
+      ],
+      "explanation": "Moïse ignore d'abord que son visage rayonne."
+    },
+    "en": {
+      "question": "Which part of Moses' body shines when he comes down after speaking with God?",
+      "answer": "His face",
+      "aliases": [
+        "Face"
+      ],
+      "explanation": "Moses initially does not know that his face is shining."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2034%3A29&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-168",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "tabernacle-tent-meeting",
+    "reference": {
+      "book": 2,
+      "chapter": 33,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Quel abri de toile Moïse dresse-t-il hors du camp pour rencontrer Dieu ?",
+      "answer": "Une tente",
+      "aliases": [
+        "tente"
+      ],
+      "explanation": "Cette tente est appelée tente d'assignation ou de rencontre."
+    },
+    "en": {
+      "question": "What canvas shelter does Moses pitch outside the camp to meet with God?",
+      "answer": "A tent",
+      "aliases": [
+        "tent"
+      ],
+      "explanation": "This tent is called the tabernacle of the congregation or tent of meeting."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2033%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-169",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "lost-animal-return-neighbor",
+    "reference": {
+      "book": 5,
+      "chapter": 22,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Que doit-on faire du bœuf ou du mouton égaré de son prochain lorsqu'on le trouve ?",
+      "answer": "Le lui ramener",
+      "aliases": [
+        "lui ramener",
+        "Le rendre",
+        "Le ramener à son propriétaire"
+      ],
+      "explanation": "La loi demande de ramener l'animal à son propriétaire."
+    },
+    "en": {
+      "question": "What should someone do on finding a neighbour's wandering ox or sheep?",
+      "answer": "Return it to them",
+      "aliases": [
+        "Give it back",
+        "Bring it back to its owner"
+      ],
+      "explanation": "The law requires returning the animal to its owner."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Deuteronomy%2022%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-170",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "samson-pushes-pillars",
+    "reference": {
+      "book": 7,
+      "chapter": 16,
+      "verse": 29
+    },
+    "fr": {
+      "question": "Quels supports Samson saisit-il avant de faire s'écrouler le bâtiment des Philistins ?",
+      "answer": "Les colonnes",
+      "aliases": [
+        "colonnes",
+        "Les piliers"
+      ],
+      "explanation": "Samson s'appuie contre les colonnes qui soutiennent l'édifice."
+    },
+    "en": {
+      "question": "Which supports does Samson grasp before bringing down the Philistines' building?",
+      "answer": "The pillars",
+      "aliases": [
+        "pillars",
+        "Columns"
+      ],
+      "explanation": "Samson braces himself against the pillars supporting the building."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%2016%3A29&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-171",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "david-sheep-predators",
+    "reference": {
+      "book": 9,
+      "chapter": 17,
+      "verse": 34
+    },
+    "fr": {
+      "question": "Quels deux animaux sauvages David dit-il avoir affrontés pour protéger le troupeau ?",
+      "answer": "Un lion et un ours",
+      "aliases": [
+        "lion et un ours",
+        "Le lion et l’ours",
+        "Lion et ours"
+      ],
+      "explanation": "David raconte les dangers rencontrés lorsqu'il gardait les brebis."
+    },
+    "en": {
+      "question": "Which two wild animals does David say he faced to protect the flock?",
+      "answer": "A lion and a bear",
+      "aliases": [
+        "lion and a bear",
+        "Lion and bear",
+        "Bear and lion"
+      ],
+      "explanation": "David recounts dangers encountered while tending the sheep."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2017%3A34&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-172",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "naaman-servant-girl-advice",
+    "reference": {
+      "book": 12,
+      "chapter": 5,
+      "verse": 2
+    },
+    "fr": {
+      "question": "De quel peuple vient la jeune captive qui conseille à la femme de Naaman de l'envoyer auprès du prophète ?",
+      "answer": "Israël",
+      "aliases": [
+        "Les Israélites",
+        "Le peuple d’Israël"
+      ],
+      "explanation": "La jeune servante israélite témoigne de ce que le prophète peut faire."
+    },
+    "en": {
+      "question": "From which people does the young captive who advises Naaman's wife to send him to the prophet come?",
+      "answer": "Israel",
+      "aliases": [
+        "The Israelites"
+      ],
+      "explanation": "The young Israelite servant speaks of what the prophet can do."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%205%3A2&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-173",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "esther-golden-scepter",
+    "reference": {
+      "book": 17,
+      "chapter": 5,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Quel objet royal le roi tend-il à Esther pour l'accueillir lorsqu'elle se présente sans invitation ?",
+      "answer": "Le sceptre d'or",
+      "aliases": [
+        "sceptre d'or",
+        "Le sceptre",
+        "Un sceptre"
+      ],
+      "explanation": "Esther reçoit un signe favorable en voyant le sceptre tendu."
+    },
+    "en": {
+      "question": "What royal object does the king extend to welcome Esther when she comes uninvited?",
+      "answer": "The golden sceptre",
+      "aliases": [
+        "golden sceptre",
+        "Sceptre",
+        "Scepter",
+        "Golden scepter"
+      ],
+      "explanation": "Esther receives a favourable sign when the sceptre is extended."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%205%3A2&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-174",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "daniel-statue-head-gold",
+    "reference": {
+      "book": 27,
+      "chapter": 2,
+      "verse": 32
+    },
+    "fr": {
+      "question": "De quel métal est la tête de la statue vue en rêve par Nebucadnetsar ?",
+      "answer": "L'or",
+      "aliases": [
+        "or"
+      ],
+      "explanation": "La tête de la statue est décrite comme étant en or pur."
+    },
+    "en": {
+      "question": "What metal is the head of the statue Nebuchadnezzar sees in his dream made of?",
+      "answer": "Gold",
+      "aliases": [],
+      "explanation": "The statue's head is described as fine gold."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Daniel%202%3A32&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-175",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "belshazzar-writing-hand",
+    "reference": {
+      "book": 27,
+      "chapter": 5,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Quelle partie d'une main apparaît pour écrire sur le mur pendant le festin du roi ?",
+      "answer": "Des doigts",
+      "aliases": [
+        "doigts",
+        "Les doigts",
+        "Une main"
+      ],
+      "explanation": "Des doigts semblables à ceux d'une main humaine écrivent sur le mur."
+    },
+    "en": {
+      "question": "What part of a hand appears to write on the wall during the king's feast?",
+      "answer": "Fingers",
+      "aliases": [
+        "A hand"
+      ],
+      "explanation": "Fingers like those of a human hand write on the wall."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Daniel%205%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-176",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "jonah-sea-calms",
+    "reference": {
+      "book": 32,
+      "chapter": 1,
+      "verse": 15
+    },
+    "fr": {
+      "question": "Que devient la mer lorsque les marins jettent Jonas par-dessus bord ?",
+      "answer": "Elle se calme",
+      "aliases": [
+        "Le calme",
+        "Elle cesse de s’agiter"
+      ],
+      "explanation": "La mer cesse de se déchaîner après que Jonas y est jeté."
+    },
+    "en": {
+      "question": "What happens to the sea when the sailors throw Jonah overboard?",
+      "answer": "It becomes calm",
+      "aliases": [
+        "It calms down",
+        "Calm",
+        "The storm stops"
+      ],
+      "explanation": "The sea stops raging after Jonah is thrown into it."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jonah%201%3A15&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-177",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "job-restoration-double",
+    "reference": {
+      "book": 18,
+      "chapter": 42,
+      "verse": 10
+    },
+    "fr": {
+      "question": "Par quel facteur Dieu multiplie-t-il les biens de Job lors de sa restauration ?",
+      "answer": "Deux",
+      "aliases": [
+        "2"
+      ],
+      "explanation": "Job reçoit le double de ce qu'il possédait auparavant."
+    },
+    "en": {
+      "question": "By what factor does God multiply Job's possessions when restoring him?",
+      "answer": "Two",
+      "aliases": [
+        "2"
+      ],
+      "explanation": "Job receives twice as much as he had before."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%2042%3A10&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-178",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "job-adversary-satan",
+    "reference": {
+      "book": 18,
+      "chapter": 1,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Quel adversaire se présente parmi les fils de Dieu au début du livre de Job ?",
+      "answer": "Satan",
+      "aliases": [],
+      "explanation": "Le récit introduit Satan dans l'assemblée devant Dieu."
+    },
+    "en": {
+      "question": "Which adversary appears among the sons of God at the beginning of Job?",
+      "answer": "Satan",
+      "aliases": [],
+      "explanation": "The account introduces Satan into the gathering before God."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%201%3A6&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-179",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "psalm23-green-pastures",
+    "reference": {
+      "book": 19,
+      "chapter": 23,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Dans quels lieux couverts d'herbe le berger du psaume 23 fait-il reposer son troupeau ?",
+      "answer": "De verts pâturages",
+      "aliases": [
+        "Les pâturages",
+        "Des prairies"
+      ],
+      "explanation": "Le psaume décrit un repos paisible dans les pâturages."
+    },
+    "en": {
+      "question": "In what grassy places does the shepherd of Psalm 23 make his flock rest?",
+      "answer": "Green pastures",
+      "aliases": [
+        "Pastures",
+        "Meadows"
+      ],
+      "explanation": "The psalm describes peaceful rest in the pastures."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Psalm%2023%3A2&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-180",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "psalm23-dark-valley-presence",
+    "reference": {
+      "book": 19,
+      "chapter": 23,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Quelle présence permet au psalmiste de ne pas craindre dans la vallée sombre ?",
+      "answer": "Celle de Dieu",
+      "aliases": [
+        "Dieu",
+        "Le Seigneur",
+        "La présence de Dieu"
+      ],
+      "explanation": "Le psalmiste trouve du courage parce que le Seigneur est avec lui."
+    },
+    "en": {
+      "question": "Whose presence allows the psalmist to be unafraid in the dark valley?",
+      "answer": "God's presence",
+      "aliases": [
+        "God",
+        "The Lord"
+      ],
+      "explanation": "The psalmist finds courage because the Lord is with him."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Psalm%2023%3A4&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-181",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "psalm150-dance-praise",
+    "reference": {
+      "book": 19,
+      "chapter": 150,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Quelle expression corporelle accompagne le tambourin dans l'invitation à louer du psaume 150 ?",
+      "answer": "La danse",
+      "aliases": [
+        "danse"
+      ],
+      "explanation": "Le psaume associe la musique et la danse à la louange."
+    },
+    "en": {
+      "question": "What bodily expression accompanies the tambourine in Psalm 150's call to praise?",
+      "answer": "Dancing",
+      "aliases": [
+        "Dance"
+      ],
+      "explanation": "The psalm associates music and dancing with praise."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Psalm%20150%3A4&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-182",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "isaiah-volunteers-send-me",
+    "reference": {
+      "book": 23,
+      "chapter": 6,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Quel prophète se propose pour être envoyé par Dieu après avoir eu une vision de son trône ?",
+      "answer": "Ésaïe",
+      "aliases": [
+        "Isaïe",
+        "Isaiah"
+      ],
+      "explanation": "Ésaïe répond à l'appel en se déclarant prêt à partir."
+    },
+    "en": {
+      "question": "Which prophet volunteers to be sent by God after seeing a vision of his throne?",
+      "answer": "Isaiah",
+      "aliases": [],
+      "explanation": "Isaiah responds to the call by declaring himself ready to go."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Isaiah%206%3A8&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-183",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "psalm91-wings-shelter",
+    "reference": {
+      "book": 19,
+      "chapter": 91,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Sous quelle partie d'un oiseau le psaume 91 imagine-t-il l'abri offert par Dieu ?",
+      "answer": "Les ailes",
+      "aliases": [
+        "ailes"
+      ],
+      "explanation": "L'image des ailes exprime la protection divine."
+    },
+    "en": {
+      "question": "Under which part of a bird does Psalm 91 picture the shelter God offers?",
+      "answer": "The wings",
+      "aliases": [
+        "wings"
+      ],
+      "explanation": "The image of wings expresses God's protection."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Psalm%2091%3A4&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-184",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "psalm95-kneel-worship",
+    "reference": {
+      "book": 19,
+      "chapter": 95,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Quelle position du corps le psaume 95 invite-t-il à prendre devant le Seigneur créateur ?",
+      "answer": "S'agenouiller",
+      "aliases": [
+        "Se mettre à genoux",
+        "Se prosterner"
+      ],
+      "explanation": "Le psaume appelle à se prosterner et à fléchir le genou."
+    },
+    "en": {
+      "question": "What bodily posture does Psalm 95 invite people to take before the Lord their maker?",
+      "answer": "Kneeling",
+      "aliases": [
+        "Bow down",
+        "Kneel"
+      ],
+      "explanation": "The psalm calls people to bow down and kneel."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Psalm%2095%3A6&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-185",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "psalm104-lions-food",
+    "reference": {
+      "book": 19,
+      "chapter": 104,
+      "verse": 21
+    },
+    "fr": {
+      "question": "Quels jeunes félins rugissent en demandant leur nourriture à Dieu dans le psaume 104 ?",
+      "answer": "Les lionceaux",
+      "aliases": [
+        "lionceaux",
+        "De jeunes lions",
+        "Des lions"
+      ],
+      "explanation": "Le psaume décrit Dieu comme pourvoyant aux besoins des créatures."
+    },
+    "en": {
+      "question": "Which young cats roar while seeking their food from God in Psalm 104?",
+      "answer": "Young lions",
+      "aliases": [
+        "Lions",
+        "Lion cubs"
+      ],
+      "explanation": "The psalm describes God as providing for creatures' needs."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Psalm%20104%3A21&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-186",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "psalm118-day-rejoice",
+    "reference": {
+      "book": 19,
+      "chapter": 118,
+      "verse": 24
+    },
+    "fr": {
+      "question": "Quelle attitude le psaume demande-t-il d'avoir devant le jour que le Seigneur a fait ?",
+      "answer": "Se réjouir",
+      "aliases": [
+        "La joie",
+        "Être joyeux"
+      ],
+      "explanation": "Le jour reçu de Dieu devient une occasion de joie."
+    },
+    "en": {
+      "question": "What attitude does the psalm call for toward the day the Lord has made?",
+      "answer": "Rejoicing",
+      "aliases": [
+        "Joy",
+        "Rejoice"
+      ],
+      "explanation": "The day received from God becomes an occasion for joy."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Psalm%20118%3A24&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-187",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "psalm127-house-builder",
+    "reference": {
+      "book": 19,
+      "chapter": 127,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Qui doit bâtir la maison pour que le travail des bâtisseurs ne soit pas vain ?",
+      "answer": "Le Seigneur",
+      "aliases": [
+        "Seigneur",
+        "Dieu",
+        "L’Éternel"
+      ],
+      "explanation": "Le psaume rappelle la dépendance du travail humain envers Dieu."
+    },
+    "en": {
+      "question": "Who must build the house so that the builders' work is not in vain?",
+      "answer": "The Lord",
+      "aliases": [
+        "Lord",
+        "God"
+      ],
+      "explanation": "The psalm recalls human work's dependence on God."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Psalm%20127%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-188",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "psalm139-formed-womb",
+    "reference": {
+      "book": 19,
+      "chapter": 139,
+      "verse": 13
+    },
+    "fr": {
+      "question": "Dans quel lieu avant la naissance le psalmiste dit-il avoir été formé par Dieu ?",
+      "answer": "Dans le ventre de sa mère",
+      "aliases": [
+        "Le sein maternel",
+        "Le ventre maternel"
+      ],
+      "explanation": "Le psalmiste reconnaît l'action de Dieu dès sa formation."
+    },
+    "en": {
+      "question": "Where before birth does the psalmist say God formed him?",
+      "answer": "In his mother's womb",
+      "aliases": [
+        "The womb",
+        "His mother’s womb"
+      ],
+      "explanation": "The psalmist acknowledges God's work from his earliest formation."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Psalm%20139%3A13&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-189",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "psalm145-near-callers",
+    "reference": {
+      "book": 19,
+      "chapter": 145,
+      "verse": 18
+    },
+    "fr": {
+      "question": "De quelles personnes le Seigneur est-il proche selon le psaume 145 ?",
+      "answer": "De ceux qui l'invoquent",
+      "aliases": [
+        "Ceux qui l’appellent",
+        "Ceux qui prient"
+      ],
+      "explanation": "Le psaume parle de ceux qui invoquent Dieu avec sincérité."
+    },
+    "en": {
+      "question": "To which people is the Lord near according to Psalm 145?",
+      "answer": "Those who call on him",
+      "aliases": [
+        "Those who pray",
+        "His callers"
+      ],
+      "explanation": "The psalm speaks of people who call on God sincerely."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Psalm%20145%3A18&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-190",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "proverbs3-honor-possessions",
+    "reference": {
+      "book": 20,
+      "chapter": 3,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Avec quoi les Proverbes invitent-ils à honorer Dieu, en mentionnant les premiers produits des récoltes ?",
+      "answer": "Ses biens",
+      "aliases": [
+        "Ses richesses",
+        "Ses ressources"
+      ],
+      "explanation": "Les ressources matérielles peuvent servir à honorer le Seigneur."
+    },
+    "en": {
+      "question": "With what do Proverbs invite people to honour God, mentioning the first produce of the harvest?",
+      "answer": "Their possessions",
+      "aliases": [
+        "Their wealth",
+        "Their substance"
+      ],
+      "explanation": "Material resources can be used to honour the Lord."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%203%3A9&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-191",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "proverbs10-love-covers",
+    "reference": {
+      "book": 20,
+      "chapter": 10,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Quelle disposition couvre les fautes, contrairement à la haine qui provoque les querelles ?",
+      "answer": "L'amour",
+      "aliases": [
+        "amour",
+        "La charité"
+      ],
+      "explanation": "Le proverbe oppose les effets de la haine et de l'amour."
+    },
+    "en": {
+      "question": "What disposition covers offences, unlike hatred which stirs up quarrels?",
+      "answer": "Love",
+      "aliases": [
+        "Charity"
+      ],
+      "explanation": "The proverb contrasts the effects of hatred and love."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%2010%3A12&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-192",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "proverbs11-generous-refreshed",
+    "reference": {
+      "book": 20,
+      "chapter": 11,
+      "verse": 25
+    },
+    "fr": {
+      "question": "Que promet le proverbe à celui qui arrose les autres ?",
+      "answer": "Il sera lui-même arrosé",
+      "aliases": [
+        "Il sera désaltéré",
+        "Il recevra à son tour"
+      ],
+      "explanation": "La générosité est décrite comme portant du fruit aussi pour celui qui donne."
+    },
+    "en": {
+      "question": "What does the proverb promise to someone who refreshes others?",
+      "answer": "They will be refreshed",
+      "aliases": [
+        "They will be watered",
+        "They receive in return"
+      ],
+      "explanation": "Generosity is pictured as benefiting the giver too."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%2011%3A25&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-193",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "proverbs12-truth-pleases",
+    "reference": {
+      "book": 20,
+      "chapter": 12,
+      "verse": 22
+    },
+    "fr": {
+      "question": "Quelle manière honnête de parler plaît à Dieu, à l'inverse du mensonge ?",
+      "answer": "Dire la vérité",
+      "aliases": [
+        "La vérité",
+        "La sincérité"
+      ],
+      "explanation": "Le proverbe oppose le mensonge à la fidélité dans les paroles."
+    },
+    "en": {
+      "question": "What honest way of speaking pleases God, unlike lying?",
+      "answer": "Telling the truth",
+      "aliases": [
+        "Truth",
+        "Truthfulness"
+      ],
+      "explanation": "The proverb contrasts lying with truthful speech."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%2012%3A22&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-194",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "proverbs15-god-sees-all",
+    "reference": {
+      "book": 20,
+      "chapter": 15,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Où les yeux du Seigneur observent-ils les bons et les mauvais ?",
+      "answer": "Partout",
+      "aliases": [
+        "En tout lieu"
+      ],
+      "explanation": "Le proverbe affirme que le regard de Dieu atteint tout lieu."
+    },
+    "en": {
+      "question": "Where do the Lord's eyes watch the good and the evil?",
+      "answer": "Everywhere",
+      "aliases": [
+        "In every place"
+      ],
+      "explanation": "The proverb says that God's sight reaches every place."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%2015%3A3&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-195",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "proverbs16-pleasant-words-honey",
+    "reference": {
+      "book": 20,
+      "chapter": 16,
+      "verse": 24
+    },
+    "fr": {
+      "question": "À quel aliment sucré les paroles agréables sont-elles comparées ?",
+      "answer": "Du miel",
+      "aliases": [
+        "miel",
+        "Un rayon de miel"
+      ],
+      "explanation": "Les bonnes paroles sont comparées à un rayon de miel."
+    },
+    "en": {
+      "question": "To which sweet food are pleasant words compared?",
+      "answer": "Honey",
+      "aliases": [
+        "A honeycomb"
+      ],
+      "explanation": "Pleasant words are compared to a honeycomb."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%2016%3A24&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-196",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "proverbs18-name-strong-tower",
+    "reference": {
+      "book": 20,
+      "chapter": 18,
+      "verse": 10
+    },
+    "fr": {
+      "question": "À quel bâtiment fortifié le nom du Seigneur est-il comparé ?",
+      "answer": "Une tour forte",
+      "aliases": [
+        "tour forte",
+        "Une tour",
+        "Une forteresse"
+      ],
+      "explanation": "Le juste trouve une sécurité dans le nom du Seigneur."
+    },
+    "en": {
+      "question": "To which fortified building is the Lord's name compared?",
+      "answer": "A strong tower",
+      "aliases": [
+        "strong tower",
+        "Tower",
+        "A fortress"
+      ],
+      "explanation": "The righteous find safety in the Lord's name."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%2018%3A10&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-197",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "proverbs19-poor-lending-lord",
+    "reference": {
+      "book": 20,
+      "chapter": 19,
+      "verse": 17
+    },
+    "fr": {
+      "question": "À qui prête-t-on en prenant soin du pauvre, selon les Proverbes ?",
+      "answer": "Au Seigneur",
+      "aliases": [
+        "Dieu",
+        "À Dieu",
+        "À l’Éternel"
+      ],
+      "explanation": "Le proverbe relie la compassion envers les pauvres au service de Dieu."
+    },
+    "en": {
+      "question": "To whom does caring for the poor amount to lending, according to Proverbs?",
+      "answer": "The Lord",
+      "aliases": [
+        "Lord",
+        "God"
+      ],
+      "explanation": "The proverb connects compassion for the poor with service to God."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%2019%3A17&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-198",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "proverbs22-good-name-riches",
+    "reference": {
+      "book": 20,
+      "chapter": 22,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Que vaut-il mieux avoir que de grandes richesses selon les Proverbes ?",
+      "answer": "Une bonne réputation",
+      "aliases": [
+        "bonne réputation",
+        "Un bon nom",
+        "La réputation"
+      ],
+      "explanation": "La valeur d'une bonne réputation dépasse celle de la fortune."
+    },
+    "en": {
+      "question": "What is better to have than great riches according to Proverbs?",
+      "answer": "A good name",
+      "aliases": [
+        "good name",
+        "A good reputation",
+        "Reputation"
+      ],
+      "explanation": "A good reputation is valued above wealth."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%2022%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-199",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "ecclesiastes-two-better-one",
+    "reference": {
+      "book": 21,
+      "chapter": 4,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Combien de personnes valent mieux qu'une seule pour travailler et s'entraider selon l'Ecclésiaste ?",
+      "answer": "Deux",
+      "aliases": [
+        "2"
+      ],
+      "explanation": "Le passage souligne l'avantage de la compagnie et de l'aide mutuelle."
+    },
+    "en": {
+      "question": "How many people are better than one for work and mutual help according to Ecclesiastes?",
+      "answer": "Two",
+      "aliases": [
+        "2"
+      ],
+      "explanation": "The passage highlights the benefit of companionship and mutual help."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ecclesiastes%204%3A9&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-200",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "isaiah40-eagles-renewal",
+    "reference": {
+      "book": 23,
+      "chapter": 40,
+      "verse": 31
+    },
+    "fr": {
+      "question": "À quels oiseaux ceux qui espèrent en Dieu sont-ils comparés lorsqu'ils prennent leur envol ?",
+      "answer": "Des aigles",
+      "aliases": [
+        "aigles"
+      ],
+      "explanation": "Le prophète décrit un renouvellement des forces semblable au vol des aigles."
+    },
+    "en": {
+      "question": "To which birds are those who hope in God compared as they soar?",
+      "answer": "Eagles",
+      "aliases": [],
+      "explanation": "The prophet describes renewed strength like the flight of eagles."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Isaiah%2040%3A31&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-151",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-all-sinned",
+    "reference": {
+      "book": 45,
+      "chapter": 3,
+      "verse": 23
+    },
+    "fr": {
+      "question": "Selon Paul, qui a péché et manque de la gloire de Dieu ?",
+      "answer": "Tous",
+      "aliases": [
+        "Tout le monde",
+        "Tous les humains"
+      ],
+      "explanation": "Paul présente le péché comme une réalité qui concerne toute l'humanité."
+    },
+    "en": {
+      "question": "According to Paul, who has sinned and falls short of God's glory?",
+      "answer": "Everyone",
+      "aliases": [
+        "All",
+        "All people"
+      ],
+      "explanation": "Paul presents sin as a reality concerning all humanity."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%203%3A23&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-152",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-faith-peace-god",
+    "reference": {
+      "book": 45,
+      "chapter": 5,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Quelle relation les croyants ont-ils avec Dieu par Jésus-Christ ?",
+      "answer": "La paix avec Dieu",
+      "aliases": [
+        "paix avec Dieu",
+        "La paix"
+      ],
+      "explanation": "Paul associe la justification par la foi à la paix avec Dieu."
+    },
+    "en": {
+      "question": "What relationship do believers have with God through Jesus Christ?",
+      "answer": "Peace with God",
+      "aliases": [
+        "Peace"
+      ],
+      "explanation": "Paul connects justification by faith with peace with God."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%205%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-153",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-christ-died-sinners",
+    "reference": {
+      "book": 45,
+      "chapter": 5,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Que le Christ a-t-il fait pour nous alors que nous étions encore pécheurs ?",
+      "answer": "Il est mort pour nous",
+      "aliases": [
+        "Il est mort",
+        "Mourir pour nous"
+      ],
+      "explanation": "Paul voit dans cette mort la démonstration de l'amour de Dieu."
+    },
+    "en": {
+      "question": "What did Christ do for us while we were still sinners?",
+      "answer": "He died for us",
+      "aliases": [
+        "Died for us",
+        "His death"
+      ],
+      "explanation": "Paul sees this death as the demonstration of God's love."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%205%3A8&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-154",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-no-condemnation",
+    "reference": {
+      "book": 45,
+      "chapter": 8,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Quelle sentence n'y a-t-il plus pour ceux qui sont en Jésus-Christ ?",
+      "answer": "La condamnation",
+      "aliases": [
+        "condamnation"
+      ],
+      "explanation": "Paul annonce la liberté par rapport à la condamnation en Christ."
+    },
+    "en": {
+      "question": "What sentence is there no longer for those who are in Christ Jesus?",
+      "answer": "Condemnation",
+      "aliases": [],
+      "explanation": "Paul announces freedom from condemnation in Christ."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%208%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-155",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-spirit-abba",
+    "reference": {
+      "book": 45,
+      "chapter": 8,
+      "verse": 15
+    },
+    "fr": {
+      "question": "Quel mot familial accompagne Abba lorsque les croyants s'adressent à Dieu par l'Esprit ?",
+      "answer": "Père",
+      "aliases": [
+        "Notre Père"
+      ],
+      "explanation": "L'Esprit d'adoption permet de s'adresser à Dieu comme à un Père."
+    },
+    "en": {
+      "question": "Which family word accompanies Abba when believers address God through the Spirit?",
+      "answer": "Father",
+      "aliases": [],
+      "explanation": "The Spirit of adoption enables addressing God as Father."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%208%3A15&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-156",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-god-for-us",
+    "reference": {
+      "book": 45,
+      "chapter": 8,
+      "verse": 31
+    },
+    "fr": {
+      "question": "Qui est pour les croyants dans la question de Paul : s'il est pour nous, qui sera contre nous ?",
+      "answer": "Dieu",
+      "aliases": [
+        "Le Seigneur",
+        "L’Éternel"
+      ],
+      "explanation": "Paul encourage les croyants en leur rappelant le soutien de Dieu."
+    },
+    "en": {
+      "question": "Who is for believers in Paul's question: if he is for us, who can be against us?",
+      "answer": "God",
+      "aliases": [
+        "The Lord"
+      ],
+      "explanation": "Paul encourages believers by reminding them of God's support."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%208%3A31&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-157",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-love-inseparable",
+    "reference": {
+      "book": 45,
+      "chapter": 8,
+      "verse": 39
+    },
+    "fr": {
+      "question": "De quel amour aucune créature ne peut-elle nous séparer selon Paul ?",
+      "answer": "L'amour de Dieu en Jésus-Christ",
+      "aliases": [
+        "amour de Dieu en Jésus-Christ",
+        "L’amour de Dieu",
+        "L’amour du Christ"
+      ],
+      "explanation": "Paul termine son assurance par l'amour de Dieu manifesté en Christ."
+    },
+    "en": {
+      "question": "From what love can no created thing separate us according to Paul?",
+      "answer": "God's love in Christ Jesus",
+      "aliases": [
+        "God’s love",
+        "The love of God"
+      ],
+      "explanation": "Paul concludes his assurance with God's love in Christ."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%208%3A39&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-158",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-confess-jesus-lord",
+    "reference": {
+      "book": 45,
+      "chapter": 10,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Quel titre doit-on reconnaître à Jésus dans la confession de foi décrite par Paul ?",
+      "answer": "Seigneur",
+      "aliases": [],
+      "explanation": "Paul associe cette confession à la foi en la résurrection."
+    },
+    "en": {
+      "question": "What title is given to Jesus in the confession of faith Paul describes?",
+      "answer": "Lord",
+      "aliases": [],
+      "explanation": "Paul connects this confession with faith in the resurrection."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%2010%3A9&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-159",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-faith-hearing",
+    "reference": {
+      "book": 45,
+      "chapter": 10,
+      "verse": 17
+    },
+    "fr": {
+      "question": "Par quelle réception de la parole la foi vient-elle selon Paul ?",
+      "answer": "L'écoute",
+      "aliases": [
+        "écoute",
+        "Entendre",
+        "L’audition",
+        "Ce qu’on entend"
+      ],
+      "explanation": "Paul relie la naissance de la foi à l'écoute du message."
+    },
+    "en": {
+      "question": "Through what reception of the word does faith come according to Paul?",
+      "answer": "Hearing",
+      "aliases": [],
+      "explanation": "Paul connects the coming of faith with hearing the message."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%2010%3A17&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-160",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-living-sacrifice",
+    "reference": {
+      "book": 45,
+      "chapter": 12,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Quel type de sacrifice les croyants sont-ils invités à offrir avec leur propre corps ?",
+      "answer": "Un sacrifice vivant",
+      "aliases": [
+        "sacrifice vivant",
+        "Vivant"
+      ],
+      "explanation": "L'offrande concerne la vie entière donnée à Dieu."
+    },
+    "en": {
+      "question": "What kind of sacrifice are believers invited to offer with their own bodies?",
+      "answer": "A living sacrifice",
+      "aliases": [
+        "living sacrifice",
+        "Living"
+      ],
+      "explanation": "The offering concerns a whole life given to God."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%2012%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-161",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-bless-persecutors",
+    "reference": {
+      "book": 45,
+      "chapter": 12,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Quelle parole positive Paul demande-t-il de prononcer sur ceux qui nous persécutent ?",
+      "answer": "Une bénédiction",
+      "aliases": [
+        "bénédiction",
+        "Bénir",
+        "Les bénir"
+      ],
+      "explanation": "Paul demande de bénir au lieu de maudire."
+    },
+    "en": {
+      "question": "What positive word does Paul tell us to speak over those persecuting us?",
+      "answer": "A blessing",
+      "aliases": [
+        "blessing",
+        "Bless them",
+        "Blessing"
+      ],
+      "explanation": "Paul calls for blessing rather than cursing."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%2012%3A14&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-162",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-rejoice-weep-others",
+    "reference": {
+      "book": 45,
+      "chapter": 12,
+      "verse": 15
+    },
+    "fr": {
+      "question": "Que demande Paul de faire avec ceux qui pleurent ?",
+      "answer": "Pleurer avec eux",
+      "aliases": [
+        "Partager leur peine",
+        "Pleurer"
+      ],
+      "explanation": "Paul appelle à partager aussi bien la joie que la peine d'autrui."
+    },
+    "en": {
+      "question": "What does Paul say to do with those who weep?",
+      "answer": "Weep with them",
+      "aliases": [
+        "Share their sorrow",
+        "Weep"
+      ],
+      "explanation": "Paul calls for sharing both others' joy and sorrow."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%2012%3A15&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-163",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-live-peace-all",
+    "reference": {
+      "book": 45,
+      "chapter": 12,
+      "verse": 18
+    },
+    "fr": {
+      "question": "Quelle relation Paul demande-t-il de rechercher avec tous, autant que cela dépend de nous ?",
+      "answer": "La paix",
+      "aliases": [
+        "paix"
+      ],
+      "explanation": "Paul invite à faire sa part pour vivre en paix avec tous."
+    },
+    "en": {
+      "question": "What relationship does Paul say to seek with everyone as far as it depends on us?",
+      "answer": "Peace",
+      "aliases": [],
+      "explanation": "Paul invites each person to do their part to live at peace with everyone."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%2012%3A18&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-164",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-feed-hungry-enemy",
+    "reference": {
+      "book": 45,
+      "chapter": 12,
+      "verse": 20
+    },
+    "fr": {
+      "question": "Que doit-on donner à son ennemi s'il a faim ?",
+      "answer": "À manger",
+      "aliases": [
+        "De la nourriture",
+        "Du pain"
+      ],
+      "explanation": "Paul appelle à répondre au besoin de l'ennemi par un acte de bonté."
+    },
+    "en": {
+      "question": "What should someone give an enemy who is hungry?",
+      "answer": "Food",
+      "aliases": [
+        "Bread"
+      ],
+      "explanation": "Paul calls for meeting an enemy's need with kindness."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%2012%3A20&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-165",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "corinth-body-temple-spirit",
+    "reference": {
+      "book": 46,
+      "chapter": 6,
+      "verse": 19
+    },
+    "fr": {
+      "question": "De qui notre corps est-il présenté comme le temple ?",
+      "answer": "Du Saint-Esprit",
+      "aliases": [
+        "Saint-Esprit",
+        "Le Saint-Esprit",
+        "L’Esprit Saint"
+      ],
+      "explanation": "Paul rappelle aux croyants la présence de l'Esprit en eux."
+    },
+    "en": {
+      "question": "Of whom is our body described as the temple?",
+      "answer": "The Holy Spirit",
+      "aliases": [
+        "Holy Spirit",
+        "The Holy Ghost"
+      ],
+      "explanation": "Paul reminds believers of the Spirit's presence within them."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Corinthians%206%3A19&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-166",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "corinth-supper-proclaims-death",
+    "reference": {
+      "book": 46,
+      "chapter": 11,
+      "verse": 26
+    },
+    "fr": {
+      "question": "Quel événement concernant Jésus le repas du pain et de la coupe annonce-t-il jusqu'à son retour ?",
+      "answer": "Sa mort",
+      "aliases": [
+        "La mort de Jésus",
+        "La mort du Seigneur"
+      ],
+      "explanation": "Paul explique que ce repas rappelle la mort du Seigneur."
+    },
+    "en": {
+      "question": "What event concerning Jesus does the meal of bread and cup proclaim until he comes?",
+      "answer": "His death",
+      "aliases": [
+        "The Lord’s death",
+        "Jesus’ death"
+      ],
+      "explanation": "Paul explains that this meal recalls the Lord's death."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Corinthians%2011%3A26&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-167",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "corinth-love-patient-kind",
+    "reference": {
+      "book": 46,
+      "chapter": 13,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Quelle disposition Paul décrit-il comme patiente et pleine de bonté ?",
+      "answer": "L'amour",
+      "aliases": [
+        "amour",
+        "La charité"
+      ],
+      "explanation": "La patience et la bonté caractérisent l'amour dans ce passage."
+    },
+    "en": {
+      "question": "What disposition does Paul describe as patient and kind?",
+      "answer": "Love",
+      "aliases": [
+        "Charity"
+      ],
+      "explanation": "Patience and kindness characterize love in this passage."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Corinthians%2013%3A4&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-168",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "corinth-love-not-jealous",
+    "reference": {
+      "book": 46,
+      "chapter": 13,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Quel sentiment de rivalité Paul exclut-il de l'amour ?",
+      "answer": "La jalousie",
+      "aliases": [
+        "jalousie",
+        "L’envie"
+      ],
+      "explanation": "Paul affirme que l'amour n'envie pas les autres."
+    },
+    "en": {
+      "question": "What feeling of rivalry does Paul exclude from love?",
+      "answer": "Envy",
+      "aliases": [
+        "Jealousy"
+      ],
+      "explanation": "Paul says that love does not envy others."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Corinthians%2013%3A4&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-169",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "peter-devil-roaring-lion",
+    "reference": {
+      "book": 60,
+      "chapter": 5,
+      "verse": 8
+    },
+    "fr": {
+      "question": "À quel animal rugissant le diable est-il comparé pour inviter les croyants à la vigilance ?",
+      "answer": "Un lion",
+      "aliases": [
+        "lion"
+      ],
+      "explanation": "Pierre utilise l'image d'un lion cherchant une proie."
+    },
+    "en": {
+      "question": "To which roaring animal is the devil compared to urge believers to be watchful?",
+      "answer": "A lion",
+      "aliases": [
+        "lion"
+      ],
+      "explanation": "Peter uses the image of a lion seeking prey."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Peter%205%3A8&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-170",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "corinth-resurrection-firstfruits",
+    "reference": {
+      "book": 46,
+      "chapter": 15,
+      "verse": 20
+    },
+    "fr": {
+      "question": "Qui Paul présente-t-il comme ressuscité et prémices de ceux qui sont morts ?",
+      "answer": "Le Christ",
+      "aliases": [
+        "Christ",
+        "Jésus",
+        "Jésus-Christ"
+      ],
+      "explanation": "La résurrection du Christ fonde l'espérance de ceux qui lui appartiennent."
+    },
+    "en": {
+      "question": "Whom does Paul describe as risen and the firstfruits of those who have died?",
+      "answer": "Christ",
+      "aliases": [
+        "Jesus",
+        "Jesus Christ"
+      ],
+      "explanation": "Christ's resurrection grounds the hope of those who belong to him."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Corinthians%2015%3A20&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-171",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "corinth-bad-company",
+    "reference": {
+      "book": 46,
+      "chapter": 15,
+      "verse": 33
+    },
+    "fr": {
+      "question": "Quel type de fréquentations corrompt les bonnes habitudes selon Paul ?",
+      "answer": "Les mauvaises compagnies",
+      "aliases": [
+        "mauvaises compagnies",
+        "De mauvaises fréquentations"
+      ],
+      "explanation": "Paul avertit de l'influence négative de certaines fréquentations."
+    },
+    "en": {
+      "question": "What kind of company corrupts good habits according to Paul?",
+      "answer": "Bad company",
+      "aliases": [
+        "Evil communications",
+        "Bad influences"
+      ],
+      "explanation": "Paul warns about the negative influence of certain company."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Corinthians%2015%3A33&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-172",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "corinth-all-in-love",
+    "reference": {
+      "book": 46,
+      "chapter": 16,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Avec quelle disposition Paul demande-t-il que tout soit fait ?",
+      "answer": "L'amour",
+      "aliases": [
+        "amour",
+        "La charité"
+      ],
+      "explanation": "Paul donne à l'amour une place dans chaque action."
+    },
+    "en": {
+      "question": "With what disposition does Paul say everything should be done?",
+      "answer": "Love",
+      "aliases": [
+        "Charity"
+      ],
+      "explanation": "Paul gives love a place in every action."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Corinthians%2016%3A14&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-173",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "new-creation-christ",
+    "reference": {
+      "book": 47,
+      "chapter": 5,
+      "verse": 17
+    },
+    "fr": {
+      "question": "Que devient celui qui est en Christ, selon l'image de Paul ?",
+      "answer": "Une nouvelle créature",
+      "aliases": [
+        "nouvelle créature",
+        "Une nouvelle création"
+      ],
+      "explanation": "Paul décrit une existence renouvelée dans le Christ."
+    },
+    "en": {
+      "question": "What does someone in Christ become, according to Paul's image?",
+      "answer": "A new creation",
+      "aliases": [
+        "new creation",
+        "A new creature"
+      ],
+      "explanation": "Paul describes a renewed existence in Christ."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Corinthians%205%3A17&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-174",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "walk-faith-not-sight",
+    "reference": {
+      "book": 47,
+      "chapter": 5,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Par quoi les croyants marchent-ils plutôt que par la vue ?",
+      "answer": "La foi",
+      "aliases": [
+        "foi"
+      ],
+      "explanation": "Paul souligne la confiance en Dieu au-delà de ce qui est visible."
+    },
+    "en": {
+      "question": "By what do believers walk rather than by sight?",
+      "answer": "Faith",
+      "aliases": [],
+      "explanation": "Paul emphasizes trust in God beyond what is visible."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Corinthians%205%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-175",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "cheerful-giver",
+    "reference": {
+      "book": 47,
+      "chapter": 9,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Avec quelle humeur Dieu aime-t-il que l'on donne ?",
+      "answer": "Avec joie",
+      "aliases": [
+        "Joyeusement",
+        "La joie"
+      ],
+      "explanation": "Le don est présenté comme libre et joyeux, sans contrainte."
+    },
+    "en": {
+      "question": "With what mood does God love people to give?",
+      "answer": "Cheerfully",
+      "aliases": [
+        "With joy",
+        "Gladly"
+      ],
+      "explanation": "Giving is presented as willing and joyful rather than forced."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Corinthians%209%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-176",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "grace-sufficient-weakness",
+    "reference": {
+      "book": 47,
+      "chapter": 12,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Quel don le Seigneur déclare-t-il suffisant pour Paul dans sa faiblesse ?",
+      "answer": "Sa grâce",
+      "aliases": [
+        "La grâce"
+      ],
+      "explanation": "La grâce soutient Paul lorsque ses forces sont limitées."
+    },
+    "en": {
+      "question": "What gift does the Lord declare sufficient for Paul in weakness?",
+      "answer": "His grace",
+      "aliases": [
+        "Grace"
+      ],
+      "explanation": "Grace sustains Paul when his strength is limited."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Corinthians%2012%3A9&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-177",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "galatians-do-good-everyone",
+    "reference": {
+      "book": 48,
+      "chapter": 6,
+      "verse": 10
+    },
+    "fr": {
+      "question": "À qui Paul demande-t-il de faire du bien chaque fois que l'occasion se présente ?",
+      "answer": "À tous",
+      "aliases": [
+        "Tous",
+        "Tout le monde"
+      ],
+      "explanation": "Paul invite à faire du bien à tous et souligne aussi le soin des croyants."
+    },
+    "en": {
+      "question": "To whom does Paul say to do good whenever there is an opportunity?",
+      "answer": "Everyone",
+      "aliases": [
+        "All",
+        "All people"
+      ],
+      "explanation": "Paul calls for doing good to everyone and also emphasizes care for believers."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Galatians%206%3A10&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-178",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "galatians-sowing-reaping",
+    "reference": {
+      "book": 48,
+      "chapter": 6,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Que récolte-t-on selon l'image agricole employée par Paul ?",
+      "answer": "Ce que l'on sème",
+      "aliases": [
+        "Ce qu’il sème",
+        "Ce qu’on a semé"
+      ],
+      "explanation": "Paul lie les conséquences aux choix que l'on fait."
+    },
+    "en": {
+      "question": "What does a person reap according to Paul's farming image?",
+      "answer": "What they sow",
+      "aliases": [
+        "What you sow",
+        "What is sown"
+      ],
+      "explanation": "Paul links consequences with the choices people make."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Galatians%206%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-179",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "galatians-do-good-not-weary",
+    "reference": {
+      "book": 48,
+      "chapter": 6,
+      "verse": 9
+    },
+    "fr": {
+      "question": "De faire quoi Paul demande-t-il de ne pas se lasser ?",
+      "answer": "Le bien",
+      "aliases": [
+        "bien"
+      ],
+      "explanation": "Paul encourage la persévérance dans les bonnes actions."
+    },
+    "en": {
+      "question": "What does Paul tell believers not to grow weary of doing?",
+      "answer": "Good",
+      "aliases": [],
+      "explanation": "Paul encourages perseverance in doing good."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Galatians%206%3A9&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-180",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "ephesians-saved-grace",
+    "reference": {
+      "book": 49,
+      "chapter": 2,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Par quel don immérité sommes-nous sauvés au moyen de la foi, selon Paul ?",
+      "answer": "La grâce",
+      "aliases": [
+        "grâce"
+      ],
+      "explanation": "Le salut est présenté comme le don de Dieu."
+    },
+    "en": {
+      "question": "By what undeserved gift are we saved through faith according to Paul?",
+      "answer": "Grace",
+      "aliases": [],
+      "explanation": "Salvation is presented as God's gift."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ephesians%202%3A8&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-181",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "ephesians-sun-anger",
+    "reference": {
+      "book": 49,
+      "chapter": 4,
+      "verse": 26
+    },
+    "fr": {
+      "question": "Quel astre ne doit pas se coucher sur notre colère selon l'image de Paul ?",
+      "answer": "Le soleil",
+      "aliases": [
+        "soleil"
+      ],
+      "explanation": "Paul invite à ne pas entretenir la colère."
+    },
+    "en": {
+      "question": "Which heavenly body should not go down on our anger in Paul's image?",
+      "answer": "The sun",
+      "aliases": [
+        "sun"
+      ],
+      "explanation": "Paul calls for not nursing anger."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ephesians%204%3A26&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-182",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "ephesians-kind-forgive",
+    "reference": {
+      "book": 49,
+      "chapter": 4,
+      "verse": 32
+    },
+    "fr": {
+      "question": "Que Paul demande-t-il de faire réciproquement, comme Dieu l'a fait pour nous en Christ ?",
+      "answer": "Se pardonner",
+      "aliases": [
+        "Le pardon",
+        "Pardonner"
+      ],
+      "explanation": "Le pardon de Dieu devient le modèle des relations fraternelles."
+    },
+    "en": {
+      "question": "What does Paul ask people to do for one another as God has done for us in Christ?",
+      "answer": "Forgive one another",
+      "aliases": [
+        "Forgive each other",
+        "Forgiveness"
+      ],
+      "explanation": "God's forgiveness becomes the model for relationships with others."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ephesians%204%3A32&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-183",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "armor-truth-belt",
+    "reference": {
+      "book": 49,
+      "chapter": 6,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Quelle qualité Paul associe-t-il à la ceinture de l'armure spirituelle ?",
+      "answer": "La vérité",
+      "aliases": [
+        "vérité"
+      ],
+      "explanation": "La vérité est l'image de la ceinture qui équipe le croyant."
+    },
+    "en": {
+      "question": "What quality does Paul associate with the belt of spiritual armour?",
+      "answer": "Truth",
+      "aliases": [],
+      "explanation": "Truth is pictured as the belt equipping the believer."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ephesians%206%3A14&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-184",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "armor-righteousness-breastplate",
+    "reference": {
+      "book": 49,
+      "chapter": 6,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Quelle qualité Paul associe-t-il à la cuirasse de l'armure spirituelle ?",
+      "answer": "La justice",
+      "aliases": [
+        "justice"
+      ],
+      "explanation": "La justice est comparée à une protection portée sur le corps."
+    },
+    "en": {
+      "question": "What quality does Paul associate with the breastplate of spiritual armour?",
+      "answer": "Righteousness",
+      "aliases": [],
+      "explanation": "Righteousness is compared to protection worn over the body."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ephesians%206%3A14&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-185",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "philippians-rejoice-lord",
+    "reference": {
+      "book": 50,
+      "chapter": 4,
+      "verse": 4
+    },
+    "fr": {
+      "question": "En qui Paul demande-t-il de se réjouir toujours ?",
+      "answer": "Dans le Seigneur",
+      "aliases": [
+        "Le Seigneur",
+        "En Dieu"
+      ],
+      "explanation": "Paul répète son appel à la joie dans le Seigneur."
+    },
+    "en": {
+      "question": "In whom does Paul say to rejoice always?",
+      "answer": "In the Lord",
+      "aliases": [
+        "The Lord",
+        "In God"
+      ],
+      "explanation": "Paul repeats his call to rejoice in the Lord."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Philippians%204%3A4&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-186",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "philippians-peace-guards-heart",
+    "reference": {
+      "book": 50,
+      "chapter": 4,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Quelle réalité venant de Dieu garde les cœurs et les pensées en Jésus-Christ ?",
+      "answer": "La paix de Dieu",
+      "aliases": [
+        "paix de Dieu",
+        "La paix"
+      ],
+      "explanation": "Paul décrit une paix qui dépasse toute intelligence."
+    },
+    "en": {
+      "question": "What reality from God guards hearts and minds in Christ Jesus?",
+      "answer": "God's peace",
+      "aliases": [
+        "The peace of God",
+        "Peace"
+      ],
+      "explanation": "Paul describes a peace surpassing all understanding."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Philippians%204%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-187",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "philippians-strength-christ",
+    "reference": {
+      "book": 50,
+      "chapter": 4,
+      "verse": 13
+    },
+    "fr": {
+      "question": "Qui donne à Paul la force dont il parle pour affronter toutes ses situations ?",
+      "answer": "Le Christ",
+      "aliases": [
+        "Christ",
+        "Jésus",
+        "Jésus-Christ"
+      ],
+      "explanation": "Paul attribue sa capacité à persévérer à celui qui le fortifie."
+    },
+    "en": {
+      "question": "Who gives Paul the strength he speaks of to face all his circumstances?",
+      "answer": "Christ",
+      "aliases": [
+        "Jesus",
+        "Jesus Christ"
+      ],
+      "explanation": "Paul attributes his ability to persevere to the one who strengthens him."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Philippians%204%3A13&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-188",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "colossians-work-lord",
+    "reference": {
+      "book": 51,
+      "chapter": 3,
+      "verse": 23
+    },
+    "fr": {
+      "question": "Pour qui Paul invite-t-il à travailler de bon cœur plutôt que seulement pour les hommes ?",
+      "answer": "Le Seigneur",
+      "aliases": [
+        "Seigneur",
+        "Dieu",
+        "L’Éternel"
+      ],
+      "explanation": "Le travail quotidien peut être accompli dans un esprit de service à Dieu."
+    },
+    "en": {
+      "question": "For whom does Paul invite people to work wholeheartedly rather than merely for men?",
+      "answer": "The Lord",
+      "aliases": [
+        "Lord",
+        "God"
+      ],
+      "explanation": "Everyday work can be done in a spirit of service to God."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Colossians%203%3A23&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-189",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "thessalonians-pray-continually",
+    "reference": {
+      "book": 52,
+      "chapter": 5,
+      "verse": 17
+    },
+    "fr": {
+      "question": "Quelle activité spirituelle Paul demande-t-il de pratiquer sans cesse ?",
+      "answer": "La prière",
+      "aliases": [
+        "prière",
+        "Prier"
+      ],
+      "explanation": "Paul encourage une vie tournée continuellement vers Dieu."
+    },
+    "en": {
+      "question": "What spiritual activity does Paul say to practise without ceasing?",
+      "answer": "Prayer",
+      "aliases": [
+        "Praying",
+        "Pray"
+      ],
+      "explanation": "Paul encourages a life continually directed toward God."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Thessalonians%205%3A17&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-190",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "thessalonians-thanks-everything",
+    "reference": {
+      "book": 52,
+      "chapter": 5,
+      "verse": 18
+    },
+    "fr": {
+      "question": "Quelle expression de reconnaissance Paul demande-t-il en toute circonstance ?",
+      "answer": "Rendre grâces",
+      "aliases": [
+        "Remercier",
+        "La reconnaissance"
+      ],
+      "explanation": "La reconnaissance envers Dieu est encouragée au quotidien."
+    },
+    "en": {
+      "question": "What expression of gratitude does Paul call for in every circumstance?",
+      "answer": "Give thanks",
+      "aliases": [
+        "Thanksgiving",
+        "Be thankful"
+      ],
+      "explanation": "Gratitude toward God is encouraged in daily life."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Thessalonians%205%3A18&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-191",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "timothy-money-love-root",
+    "reference": {
+      "book": 54,
+      "chapter": 6,
+      "verse": 10
+    },
+    "fr": {
+      "question": "L'amour de quoi est-il présenté comme une racine de toutes sortes de maux ?",
+      "answer": "L'argent",
+      "aliases": [
+        "argent",
+        "Mammon",
+        "Les richesses"
+      ],
+      "explanation": "Le passage vise l'attachement à l'argent, pas simplement sa possession."
+    },
+    "en": {
+      "question": "The love of what is described as a root of all kinds of evil?",
+      "answer": "Money",
+      "aliases": [
+        "Mammon",
+        "Wealth"
+      ],
+      "explanation": "The passage targets attachment to money, not simply possessing it."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Timothy%206%3A10&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-192",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "timothy-one-mediator",
+    "reference": {
+      "book": 54,
+      "chapter": 2,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Qui est présenté comme le médiateur entre Dieu et les humains ?",
+      "answer": "Jésus-Christ",
+      "aliases": [
+        "Jésus",
+        "Le Christ"
+      ],
+      "explanation": "Le passage présente Jésus-Christ comme l'unique médiateur."
+    },
+    "en": {
+      "question": "Who is described as the mediator between God and human beings?",
+      "answer": "Jesus Christ",
+      "aliases": [
+        "Jesus",
+        "Christ"
+      ],
+      "explanation": "The passage describes Jesus Christ as the one mediator."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Timothy%202%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-193",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "hebrews-anchor-hope",
+    "reference": {
+      "book": 58,
+      "chapter": 6,
+      "verse": 19
+    },
+    "fr": {
+      "question": "Quelle attente confiante est comparée à une ancre pour l'âme ?",
+      "answer": "L'espérance",
+      "aliases": [
+        "espérance",
+        "L’espoir"
+      ],
+      "explanation": "L'espérance est décrite comme sûre et solide."
+    },
+    "en": {
+      "question": "What confident expectation is compared to an anchor for the soul?",
+      "answer": "Hope",
+      "aliases": [],
+      "explanation": "Hope is described as sure and steadfast."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Hebrews%206%3A19&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-194",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "hebrews-god-never-forsakes",
+    "reference": {
+      "book": 58,
+      "chapter": 13,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Que Dieu promet-il de ne jamais faire à celui qui se confie en lui ?",
+      "answer": "L'abandonner",
+      "aliases": [
+        "abandonner",
+        "Nous abandonner",
+        "Le délaisser",
+        "Laisser seul"
+      ],
+      "explanation": "La promesse de la présence de Dieu encourage le contentement."
+    },
+    "en": {
+      "question": "What does God promise never to do to the person trusting him?",
+      "answer": "Forsake them",
+      "aliases": [
+        "Abandon them",
+        "Leave them"
+      ],
+      "explanation": "The promise of God's presence encourages contentment."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Hebrews%2013%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-195",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "hebrews-jesus-unchanging",
+    "reference": {
+      "book": 58,
+      "chapter": 13,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Qui est présenté comme le même hier, aujourd'hui et éternellement ?",
+      "answer": "Jésus-Christ",
+      "aliases": [
+        "Jésus",
+        "Le Christ"
+      ],
+      "explanation": "Le verset souligne la constance de Jésus-Christ."
+    },
+    "en": {
+      "question": "Who is described as the same yesterday, today and forever?",
+      "answer": "Jesus Christ",
+      "aliases": [
+        "Jesus",
+        "Christ"
+      ],
+      "explanation": "The verse emphasizes Jesus Christ's constancy."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Hebrews%2013%3A8&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-196",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "james-orphans-widows",
+    "reference": {
+      "book": 59,
+      "chapter": 1,
+      "verse": 27
+    },
+    "fr": {
+      "question": "Quels deux groupes vulnérables Jacques demande-t-il de visiter dans leur détresse ?",
+      "answer": "Les orphelins et les veuves",
+      "aliases": [
+        "orphelins et les veuves",
+        "Orphelins et veuves"
+      ],
+      "explanation": "Jacques présente leur soutien comme une expression de la foi vécue."
+    },
+    "en": {
+      "question": "Which two vulnerable groups does James call for visiting in their distress?",
+      "answer": "Orphans and widows",
+      "aliases": [],
+      "explanation": "James presents supporting them as an expression of lived faith."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=James%201%3A27&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-197",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "james-slow-speak",
+    "reference": {
+      "book": 59,
+      "chapter": 1,
+      "verse": 19
+    },
+    "fr": {
+      "question": "Dans quelle activité de la bouche faut-il être lent, tout en étant prompt à écouter ?",
+      "answer": "Parler",
+      "aliases": [
+        "La parole"
+      ],
+      "explanation": "Jacques encourage l'écoute avant la parole et la colère."
+    },
+    "en": {
+      "question": "In what activity of the mouth should someone be slow while being quick to listen?",
+      "answer": "Speaking",
+      "aliases": [
+        "Speak",
+        "Talking"
+      ],
+      "explanation": "James encourages listening before speech and anger."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=James%201%3A19&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-198",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "james-faith-without-works",
+    "reference": {
+      "book": 59,
+      "chapter": 2,
+      "verse": 17
+    },
+    "fr": {
+      "question": "Comment Jacques décrit-il une foi qui n'est accompagnée d'aucune œuvre ?",
+      "answer": "Morte",
+      "aliases": [
+        "Elle est morte",
+        "Une foi morte"
+      ],
+      "explanation": "Jacques souligne le lien entre la foi et ses effets concrets."
+    },
+    "en": {
+      "question": "How does James describe faith that is not accompanied by works?",
+      "answer": "Dead",
+      "aliases": [
+        "It is dead"
+      ],
+      "explanation": "James emphasizes the connection between faith and its practical effects."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=James%202%3A17&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-199",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "peter-cast-anxieties",
+    "reference": {
+      "book": 60,
+      "chapter": 5,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Sur qui les croyants sont-ils invités à se décharger de tous leurs soucis ?",
+      "answer": "Dieu",
+      "aliases": [
+        "Le Seigneur",
+        "L’Éternel"
+      ],
+      "explanation": "Le passage invite à la confiance parce que Dieu prend soin des croyants."
+    },
+    "en": {
+      "question": "Upon whom are believers invited to cast all their anxieties?",
+      "answer": "God",
+      "aliases": [
+        "The Lord"
+      ],
+      "explanation": "The passage invites trust because God cares for believers."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Peter%205%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-200",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "john-god-love",
+    "reference": {
+      "book": 62,
+      "chapter": 4,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Quel mot complète la déclaration de Jean : Dieu est… ?",
+      "answer": "Amour",
+      "aliases": [
+        "L’amour"
+      ],
+      "explanation": "Jean relie la connaissance de Dieu à l'amour."
+    },
+    "en": {
+      "question": "What word completes John's declaration: God is…?",
+      "answer": "Love",
+      "aliases": [
+        "Charity"
+      ],
+      "explanation": "John connects knowing God with love."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20John%204%3A8&version=LSG%3BKJV"
+  }
+]

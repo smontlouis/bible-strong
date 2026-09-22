@@ -144,11 +144,9 @@ describe('round authority and privacy', () => {
     expect(g.phase).toBe('finished')
     expect(g.players.map(p => p.score)).toEqual(Array(size).fill(5))
   })
-  it('limits the room generation budget even with new visitor identities', () => {
+  it('ignores the obsolete AI generation budget for catalogue selection', () => {
     lobby()
     for (let i = 0; i < 60; i++) engine.data.limits[`budget:${i}`] = now + 60_000
-    fails('rate_limited', () => command('a', { action: 'start' }))
-    now += 60_001
     expect(command('a', { action: 'start' })?.type).toBe('generate')
   })
   it('hides answers, future clues, evidence and other answers before reveal', () => {
@@ -548,11 +546,22 @@ describe('solo four in a row under room authority', () => {
     for (let i = 0; i < 4; i++) {
       answer('a', `Pierre${i}`)
       expect(g.solo?.streak).toBe(i + 1)
-      if (i < 3) command('a', { action: 'next' })
+      if (i < 3) {
+        expect(g.phase).toBe('question')
+        expect(g.round).toBe(i + 1)
+        expect(g.solo?.pauses).toEqual([])
+        expect(engine.snapshot('a').game?.soloReview).toBeUndefined()
+      }
     }
     expect(g.phase).toBe('finished')
     expect(g.solo?.outcome).toBe('won')
-    expect(engine.snapshot('a').game?.result?.answer).toBe('Pierre3')
+    expect(engine.snapshot('a').game?.soloReview?.map(item => item.answer)).toEqual([
+      'Pierre0',
+      'Pierre1',
+      'Pierre2',
+      'Pierre3',
+    ])
+    expect(engine.snapshot('a').game?.result).toBeUndefined()
   })
   it('preserves a paused run beyond the multiplayer rejoin window', () => {
     const g = solo()
@@ -569,7 +578,6 @@ describe('solo four in a row under room authority', () => {
   it('can retry an unavailable check without losing the series or charging verification time', () => {
     const g = solo()
     answer('a', 'Pierre0')
-    command('a', { action: 'next' })
     const effect = answer('a', 'petre')
     now += 12001
     engine.tick()
@@ -583,14 +591,12 @@ describe('solo four in a row under room authority', () => {
   })
   it('refills questions without recycling round IDs, answers, or charging preparation time', () => {
     const g = solo()
-    for (let i = 0; i < 5; i++) {
-      engine.evaluated(answer('a', 'wrong'), 'wrong')
-      if (i < 4) command('a', { action: 'next' })
-    }
-    const effect = command('a', { action: 'next' }) as Extract<Effect, { type: 'generate' }>
+    let effect!: Extract<Effect, { type: 'generate' }>
+    for (let i = 0; i < 5; i++)
+      effect = engine.evaluated(answer('a', 'wrong'), 'wrong') as typeof effect
     expect(effect.exclude).toHaveLength(5)
     expect(g.round).toBe(5)
-    now += 90000
+    now += 10000
     engine.generated(
       effect,
       rounds.map((r, i) => ({ ...r, answer: `New${i}`, aliases: [] }))
@@ -611,11 +617,12 @@ it('passes a solo question without AI and guards duplicate and stale passes', ()
   engine.generated(effect, structuredClone(rounds))
   const g = engine.data.games[0]
   answer('a', 'Pierre0')
-  command('a', { action: 'next' })
   expect(command('a', { action: 'pass', gameId: g.id, round: 1 })).toBeUndefined()
   expect(g.solo?.streak).toBe(0)
   expect(g.solo?.best).toBe(1)
-  expect(engine.snapshot('a').game?.ownAnswer?.status).toBe('skipped')
+  expect(engine.snapshot('a').game?.soloFeedback?.status).toBe('skipped')
+  expect(g.round).toBe(2)
+  expect(engine.snapshot('a').game?.soloReview).toBeUndefined()
   fails('not_ready', () => command('a', { action: 'pass', gameId: g.id, round: 1 }))
 })
 
@@ -647,4 +654,80 @@ it('validates solo options and long-running round identifiers at the protocol bo
   expect(parseGameAction({ action: 'create', options: { ...options, mode: 'invalid' } })).toBeNull()
   expect(parseGameAction({ action: 'pass', gameId: 'test', round: 49 })).not.toBeNull()
   expect(parseGameAction({ action: 'pass', gameId: 'test', round: 50 })).toBeNull()
+})
+
+it('keeps solo time running after success, failure and pass, with a private persisted final review', () => {
+  command('a', { action: 'create', options: { ...options, mode: 'solo' } })
+  const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
+  const reserve = Array.from({ length: 50 }, (_, i) => ({
+    ...rounds[0],
+    question: `Q${i}`,
+    answer: `R${i}`,
+    catalogueId: `q-${i}`,
+  }))
+  engine.generated(effect, reserve)
+  let g = engine.data.games[0]
+  now += 1000
+  answer('a', 'R0')
+  const first = engine.snapshot('a').game!
+  expect(first).toMatchObject({
+    phase: 'question',
+    round: 1,
+    question: 'Q1',
+    soloFeedback: { status: 'correct' },
+  })
+  expect(first.result).toBeUndefined()
+  expect(first.soloReview).toBeUndefined()
+  now += 2000
+  const check = answer('a', 'wrong identity')
+  now += 5000
+  engine.evaluated(check, 'wrong')
+  expect(g.round).toBe(2)
+  expect(g.solo?.streak).toBe(0)
+  expect(g.solo?.remainingMs).toBe(117000)
+  now += 3000
+  command('a', { action: 'pass', gameId: g.id, round: g.round })
+  expect(g.round).toBe(3)
+  expect(g.solo?.remainingMs).toBe(114000)
+  // Recreation must retain the previous question outcomes, without leaking the reserve.
+  engine = new GameEngine(
+    JSON.parse(JSON.stringify(engine.data)),
+    () => visitors,
+    () => now
+  )
+  g = engine.data.games[0]
+  now += 114000
+  engine.tick()
+  const final = engine.snapshot('a').game!
+  expect(final.phase).toBe('finished')
+  expect(final.solo?.outcome).toBe('timeout')
+  expect(
+    final.soloReview?.map(item => [item.question, item.text, item.status, item.answer])
+  ).toEqual([
+    ['Q0', 'R0', 'correct', 'R0'],
+    ['Q1', 'wrong identity', 'wrong', 'R1'],
+    ['Q2', '', 'skipped', 'R2'],
+    ['Q3', '', 'timeout', 'R3'],
+  ])
+  expect(final.soloReview?.every(item => item.sources[0].url === rounds[0].url)).toBe(true)
+  expect(JSON.stringify(final)).not.toContain('Q4')
+  expect(final.soloReviewIncomplete).toBe(false)
+})
+
+it('does not reopen a solo round when an old verdict or submission arrives after auto-advance', () => {
+  command('a', { action: 'create', options: { ...options, mode: 'solo' } })
+  engine.generated(
+    command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>,
+    rounds
+  )
+  const check = answer('a', 'misspelled')
+  engine.evaluated(check, 'correct')
+  engine.evaluated(check, 'wrong')
+  const g = engine.data.games[0]
+  expect(g.round).toBe(1)
+  expect(g.solo?.streak).toBe(1)
+  expect(g.soloAnswers).toHaveLength(1)
+  fails('not_ready', () =>
+    command('a', { action: 'answer', gameId: g.id, round: 0, text: rounds[0].answer })
+  )
 })

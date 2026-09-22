@@ -5,18 +5,19 @@
   "packageManager": "yarn@4.12.0",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/dev.mjs",
+    "dev": "yarn catalogue:build && node scripts/dev.mjs",
     "build": "yarn typecheck && vite build && node scripts/check-production-build.mjs",
     "lint": "yarn typecheck",
     "segment:benchmark": "node scripts/benchmark-sam3.mjs",
     "segment:build": "node scripts/build-sam3-occluders.mjs",
     "tiles": "node scripts/generate-map-tiles.mjs",
-    "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json",
+    "typecheck": "yarn catalogue:build && tsc --noEmit && tsc -p tsconfig.server.json",
     "test": "vitest run --config vitest.config.ts",
-    "dev:multiplayer": "wrangler dev --assets public --port 8791",
+    "dev:multiplayer": "yarn catalogue:build && wrangler dev --assets public --port 8791",
     "deploy": "yarn build && wrangler deploy",
     "test:multiplayer": "node scripts/test-multiplayer.mjs",
-    "dev:client": "vite --host 0.0.0.0 --port 5186"
+    "dev:client": "vite --host 0.0.0.0 --port 5186",
+    "catalogue:build": "node scripts/build-game-catalogue.mjs"
   },
   "dependencies": {
     "@geoman-io/leaflet-geoman-free": "^2.20.1",

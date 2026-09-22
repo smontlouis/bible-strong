@@ -1,8 +1,21 @@
-.reaction-controls {
-  position: absolute;
+:root {
+  --world-reactions-bottom: max(94px, calc(env(safe-area-inset-bottom) + 82px));
+}
+.world-action-stack {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
   right: max(24px, env(safe-area-inset-right));
-  bottom: max(94px, calc(env(safe-area-inset-bottom) + 82px));
-  z-index: 12;
+  bottom: var(--world-reactions-bottom);
+  z-index: 31;
+}
+.world-action-stack .reaction-controls {
+  position: relative;
+}
+.world-action-stack .games-launch {
+  position: static;
 }
 .reaction-trigger {
   display: grid;
@@ -98,13 +111,13 @@
   margin: 12px 0 0;
 }
 @media (max-width: 600px) {
-  .reaction-controls {
+  .world-action-stack {
     right: max(16px, env(safe-area-inset-right));
   }
 }
 @media (max-height: 480px) {
-  .reaction-controls {
-    bottom: max(72px, calc(env(safe-area-inset-bottom) + 60px));
+  :root {
+    --world-reactions-bottom: max(72px, calc(env(safe-area-inset-bottom) + 60px));
   }
   .reaction-panel {
     padding: 10px;

@@ -1,4 +1,6 @@
 import { REACTION_COOLDOWN_MS } from '../src/reactions'
+import type { GameCatalogueEnv } from './games/catalogue'
+export { GameCatalogue } from './games/catalogue'
 import { WorldGames } from './games/room'
 import type { GameAIEnv } from './games/ai'
 import { authenticateAdmin, validAdminMutation } from './guestbook-auth'
@@ -27,10 +29,11 @@ type Session = {
   messages: number
   resumeToken?: string
   hidden?: boolean
+  gameHistoryId?: string
   lastReaction?: number
   lastGameAction?: number
 }
-interface Env extends GuestbookEnv, GameAIEnv {
+interface Env extends GuestbookEnv, GameAIEnv, GameCatalogueEnv {
   WorldRoom: DurableObjectNamespace<WorldRoom>
   ALLOWED_ORIGINS?: string
   ASSETS: Fetcher
@@ -49,6 +52,7 @@ export class WorldRoom extends Server<Env> {
             ? [
                 {
                   id: c.state.player.id,
+                  historyId: c.state.gameHistoryId,
                   profile: c.state.player.profile,
                   x: c.state.player.pose.x,
                   y: c.state.player.pose.y,
@@ -184,6 +188,7 @@ export class WorldRoom extends Server<Env> {
           return
         }
         next.resumeToken = restored ? message.resumeToken! : crypto.randomUUID()
+        next.gameHistoryId = message.gameHistoryId ?? previous?.state?.gameHistoryId
         next.player = {
           id: restored?.id ?? crypto.randomUUID(),
           profile: message.profile,
@@ -228,6 +233,9 @@ export class WorldRoom extends Server<Env> {
         return
       }
       next.player = { ...session.player, pose: message.pose, seq: message.seq }
+      connection.setState(next)
+    } else if (session.player && message.type === 'activity') {
+      next.player = { ...session.player, activity: message.activity }
       connection.setState(next)
     } else if (session.player && message.type === 'profile') {
       next.player = { ...session.player, profile: message.profile }

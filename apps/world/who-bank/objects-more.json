@@ -1,0 +1,550 @@
+[
+  {
+    "id": "who-object-031",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "Le buisson ardent",
+      "aliases": [
+        "buisson ardent",
+        "buisson en feu"
+      ],
+      "explanation": "Au mont Horeb, Moïse vit un buisson brûler sans se consumer. Dieu l’appela du milieu de ce spectacle et lui demanda d’ôter ses sandales."
+    },
+    "en": {
+      "answer": "The burning bush",
+      "aliases": [
+        "burning bush"
+      ],
+      "explanation": "At Mount Horeb, Moses saw a bush burning without being consumed. God called to him from within it and told him to remove his sandals."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "On me rencontre dans le récit où un berger conduit le troupeau de Jéthro jusqu’à Horeb.",
+        "en": "I appear in the account where a shepherd leads Jethro’s flock to Horeb.",
+        "reference": {
+          "book": 2,
+          "chapter": 3,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%203%3A1&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Celui qui s’approche reçoit l’ordre d’ôter ses sandales, car le sol est saint.",
+        "en": "The person approaching is told to remove his sandals because the ground is holy.",
+        "reference": {
+          "book": 2,
+          "chapter": 3,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%203%3A5&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Dieu appelle Moïse par son nom depuis le milieu de moi.",
+        "en": "God calls Moses by name from within me.",
+        "reference": {
+          "book": 2,
+          "chapter": 3,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%203%3A4&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis une plante entourée de flammes qui pourtant ne se consume pas.",
+        "en": "I am a plant surrounded by flames that is nevertheless not consumed.",
+        "reference": {
+          "book": 2,
+          "chapter": 3,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%203%3A2&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-032",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "La coupe d’argent de Joseph",
+      "aliases": [
+        "coupe d’argent de Joseph",
+        "coupe de Joseph",
+        "coupe d'argent de Joseph"
+      ],
+      "explanation": "Joseph fit cacher sa coupe dans le sac du plus jeune de ses frères. La recherche permit de la retrouver chez Benjamin et mit les frères à l’épreuve."
+    },
+    "en": {
+      "answer": "Joseph’s silver cup",
+      "aliases": [
+        "Joseph's silver cup",
+        "Joseph's cup"
+      ],
+      "explanation": "Joseph had his cup hidden in his youngest brother's sack. The search found it with Benjamin and put the brothers to the test."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "L’intendant affirme que son maître boit avec moi et s’en sert pour deviner.",
+        "en": "The steward claims that his master drinks from me and uses me for divination.",
+        "reference": {
+          "book": 1,
+          "chapter": 44,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2044%3A5&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "On m’a cachée à l’entrée d’un sac de nourriture, avec l’argent de l’achat.",
+        "en": "I was hidden at the opening of a food sack, with the purchase money.",
+        "reference": {
+          "book": 1,
+          "chapter": 44,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2044%3A2&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "La fouille a commencé par l’aîné et s’est terminée par le plus jeune, chez qui j’ai été trouvée.",
+        "en": "The search began with the eldest and ended with the youngest, with whom I was found.",
+        "reference": {
+          "book": 1,
+          "chapter": 44,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2044%3A12&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le récipient d’argent que Joseph fit placer dans le sac de Benjamin.",
+        "en": "I am the silver drinking vessel Joseph had placed in Benjamin’s sack.",
+        "reference": {
+          "book": 1,
+          "chapter": 44,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2044%3A2&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-033",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "La mâchoire d’âne de Samson",
+      "aliases": [
+        "mâchoire d’âne de Samson",
+        "mâchoire d’âne",
+        "machoire d'ane"
+      ],
+      "explanation": "Samson trouva une mâchoire d’âne fraîche et l’utilisa comme arme contre mille hommes. Après son chant de victoire, il la jeta."
+    },
+    "en": {
+      "answer": "Samson’s donkey jawbone",
+      "aliases": [
+        "Samson's donkey jawbone",
+        "donkey jawbone",
+        "jawbone of an ass"
+      ],
+      "explanation": "Samson found a fresh donkey jawbone and used it as a weapon against a thousand men. After his victory speech, he threw it away."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "J’ai été jetée après un chant de victoire, puis le lieu a reçu le nom de Ramath-Léchi.",
+        "en": "I was thrown away after a victory speech, and the place was called Ramath-lehi.",
+        "reference": {
+          "book": 7,
+          "chapter": 15,
+          "verse": 17
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%2015%3A17&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Le récit me décrit comme un os encore frais.",
+        "en": "The account describes me as a fresh bone.",
+        "reference": {
+          "book": 7,
+          "chapter": 15,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%2015%3A15&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Un seul homme s’est servi de moi pour en frapper mille.",
+        "en": "One man used me to strike down a thousand.",
+        "reference": {
+          "book": 7,
+          "chapter": 15,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%2015%3A15&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Samson m’a ramassée : j’étais la partie osseuse de la bouche d’un âne, devenue son arme.",
+        "en": "Samson picked me up: I was the bony part of a donkey’s mouth, turned into his weapon.",
+        "reference": {
+          "book": 7,
+          "chapter": 15,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%2015%3A15&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-034",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "Le manteau d’Élie",
+      "aliases": [
+        "manteau d’Élie",
+        "manteau d'Elie"
+      ],
+      "explanation": "Élie utilisa son manteau pour se couvrir le visage et pour frapper le Jourdain. Élisée le ramassa après le départ de son maître."
+    },
+    "en": {
+      "answer": "Elijah’s mantle",
+      "aliases": [
+        "Elijah's mantle",
+        "Elijah's cloak"
+      ],
+      "explanation": "Elijah used his mantle to cover his face and to strike the Jordan. Elisha picked it up after his master's departure."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "À l’entrée d’une caverne, mon propriétaire s’est couvert le visage avec moi.",
+        "en": "At the entrance to a cave, my owner covered his face with me.",
+        "reference": {
+          "book": 11,
+          "chapter": 19,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2019%3A13&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "J’ai été jeté sur Élisée alors qu’il labourait avec ses bœufs.",
+        "en": "I was thrown over Elisha while he was ploughing with his oxen.",
+        "reference": {
+          "book": 11,
+          "chapter": 19,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2019%3A19&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Roulé puis utilisé pour frapper le Jourdain, j’ai précédé la séparation de ses eaux.",
+        "en": "Rolled up and used to strike the Jordan, I preceded the parting of its waters.",
+        "reference": {
+          "book": 12,
+          "chapter": 2,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%202%3A8&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Élisée m’a ramassé après que je suis tombé d’Élie au moment de son départ.",
+        "en": "Elisha picked me up after I fell from Elijah at his departure.",
+        "reference": {
+          "book": 12,
+          "chapter": 2,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%202%3A13&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-035",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "La pierre Ében-Ézer",
+      "aliases": [
+        "pierre Ében-Ézer",
+        "Ében-Ézer",
+        "Ebenezer",
+        "pierre du secours"
+      ],
+      "explanation": "Après la victoire sur les Philistins, Samuel dressa une pierre entre Mitspa et Schen. Il la nomma Ében-Ézer pour rappeler le secours de Dieu."
+    },
+    "en": {
+      "answer": "The Ebenezer stone",
+      "aliases": [
+        "Ebenezer stone",
+        "Ebenezer",
+        "stone of help"
+      ],
+      "explanation": "After victory over the Philistines, Samuel set up a stone between Mizpeh and Shen. He named it Ebenezer to remember God's help."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "J’ai été placée entre Mitspa et Schen.",
+        "en": "I was placed between Mizpeh and Shen.",
+        "reference": {
+          "book": 9,
+          "chapter": 7,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%207%3A12&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Mon installation suit une bataille où un grand tonnerre met les Philistins en déroute.",
+        "en": "My installation follows a battle in which a great thunder throws the Philistines into confusion.",
+        "reference": {
+          "book": 9,
+          "chapter": 7,
+          "verse": 10
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%207%3A10&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "C’est Samuel qui m’a dressée après la victoire d’Israël.",
+        "en": "Samuel was the one who set me up after Israel’s victory.",
+        "reference": {
+          "book": 9,
+          "chapter": 7,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%207%3A12&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Mon nom commémore cette reconnaissance : jusqu’à cet endroit, l’Éternel nous a secourus.",
+        "en": "My name commemorates this acknowledgement: the Lord has helped us this far.",
+        "reference": {
+          "book": 9,
+          "chapter": 7,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%207%3A12&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-036",
+    "category": "object",
+    "testament": "new",
+    "fr": {
+      "answer": "Le livre aux sept sceaux",
+      "aliases": [
+        "livre aux sept sceaux",
+        "rouleau aux sept sceaux",
+        "livre scellé de sept sceaux"
+      ],
+      "explanation": "Dans la vision de Jean, ce livre écrit des deux côtés se trouve dans la main de celui qui siège sur le trône. L’Agneau est reconnu digne de l’ouvrir."
+    },
+    "en": {
+      "answer": "The scroll with seven seals",
+      "aliases": [
+        "scroll with seven seals",
+        "seven-sealed scroll",
+        "book with seven seals"
+      ],
+      "explanation": "In John's vision, this book written on both sides is in the hand of the one seated on the throne. The Lamb is recognized as worthy to open it."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Une écriture couvre mon intérieur et mon extérieur.",
+        "en": "Writing covers my inside and outside.",
+        "reference": {
+          "book": 66,
+          "chapter": 5,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Revelation%205%3A1&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je suis tenu dans la main droite de celui qui siège sur le trône.",
+        "en": "I am held in the right hand of the one seated on the throne.",
+        "reference": {
+          "book": 66,
+          "chapter": 5,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Revelation%205%3A1&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Jean pleure parce que personne n’est trouvé digne de m’ouvrir.",
+        "en": "John weeps because no one is found worthy to open me.",
+        "reference": {
+          "book": 66,
+          "chapter": 5,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Revelation%205%3A4&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Dans cette vision, l’Agneau peut m’ouvrir en rompant mes sept fermetures scellées.",
+        "en": "In this vision, the Lamb can open me by breaking my seven sealed fastenings.",
+        "reference": {
+          "book": 66,
+          "chapter": 5,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Revelation%205%3A9&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-037",
+    "category": "object",
+    "testament": "new",
+    "fr": {
+      "answer": "Le denier montré à Jésus",
+      "aliases": [
+        "denier montré à Jésus",
+        "denier de César",
+        "pièce de César",
+        "denier"
+      ],
+      "explanation": "Jésus demanda à voir la monnaie du tribut et interrogea ses interlocuteurs sur son effigie. Leur réponse, César, précéda son enseignement sur ce qui revient à César et à Dieu."
+    },
+    "en": {
+      "answer": "The denarius shown to Jesus",
+      "aliases": [
+        "denarius shown to Jesus",
+        "Caesar’s coin",
+        "Caesar's coin",
+        "tribute penny",
+        "denarius"
+      ],
+      "explanation": "Jesus asked to see the tribute money and questioned his listeners about its image. Their answer, Caesar, preceded his teaching on what belongs to Caesar and to God."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "La discussion où j’apparais implique des disciples des pharisiens venus avec les hérodiens.",
+        "en": "The discussion in which I appear involves Pharisees’ disciples arriving with Herodians.",
+        "reference": {
+          "book": 40,
+          "chapter": 22,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2022%3A16&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Jésus demande qu’on me lui montre comme monnaie servant au paiement du tribut.",
+        "en": "Jesus asks to be shown me as the money used to pay the tribute.",
+        "reference": {
+          "book": 40,
+          "chapter": 22,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2022%3A19&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Mon effigie et mon inscription font l’objet de sa question.",
+        "en": "My image and inscription are the subject of his question.",
+        "reference": {
+          "book": 40,
+          "chapter": 22,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2022%3A20&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Les interlocuteurs de Jésus reconnaissent César sur moi, avant qu’il parle de rendre à César ce qui lui revient.",
+        "en": "Those answering recognize Caesar on me, before Jesus speaks of giving Caesar what belongs to him.",
+        "reference": {
+          "book": 40,
+          "chapter": 22,
+          "verse": 21
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2022%3A21&version=KJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-038",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "Le joug de Jérémie",
+      "aliases": [
+        "joug de Jérémie",
+        "joug de bois de Jérémie"
+      ],
+      "explanation": "Jérémie porta un joug comme signe de la domination de Babylone. Hanania le brisa, mais une nouvelle parole annonça du fer à la place du bois."
+    },
+    "en": {
+      "answer": "Jeremiah’s yoke",
+      "aliases": [
+        "Jeremiah's yoke",
+        "wooden yoke of Jeremiah"
+      ],
+      "explanation": "Jeremiah wore a yoke as a sign of Babylon's rule. Hananiah broke it, but a new message announced iron in place of wood."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Après ma destruction, une parole annonce que le bois sera remplacé par du fer.",
+        "en": "After my destruction, a message announces that wood will be replaced by iron.",
+        "reference": {
+          "book": 24,
+          "chapter": 28,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Jeremiah%2028%3A13&version=KJV"
+      },
+      {
+        "points": 3,
+        "fr": "Hanania m’a brisé publiquement en annonçant la fin prochaine de la domination babylonienne.",
+        "en": "Hananiah broke me publicly while announcing an early end to Babylonian rule.",
+        "reference": {
+          "book": 24,
+          "chapter": 28,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Jeremiah%2028%3A11&version=KJV"
+      },
+      {
+        "points": 2,
+        "fr": "Jérémie avait reçu l’ordre de me fabriquer avec des liens et de me mettre sur lui.",
+        "en": "Jeremiah had been told to make me with bonds and put me on himself.",
+        "reference": {
+          "book": 24,
+          "chapter": 27,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Jeremiah%2027%3A2&version=KJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la pièce de bois portée sur le cou du prophète, image de la soumission à un maître.",
+        "en": "I am the wooden frame worn on the prophet’s neck, an image of submission to a master.",
+        "reference": {
+          "book": 24,
+          "chapter": 28,
+          "verse": 10
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Jeremiah%2028%3A10&version=KJV"
+      }
+    ]
+  }
+]

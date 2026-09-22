@@ -1,3 +1,4 @@
+vi.mock('./games/catalogue', () => ({ GameCatalogue: class {} }))
 vi.mock('./games/room', () => ({
   WorldGames: class {
     presence() {}
@@ -167,4 +168,14 @@ it('rejects unknown reactions instead of broadcasting arbitrary image paths', as
   await send(sender, { type: 'reaction', reaction: '/untrusted.png' })
   expect(sender.code).toBe(4002)
   expect(observer.messages.some((m: any) => m.type === 'reaction')).toBe(false)
+})
+
+it('shares current activity with newcomers and clears it for existing visitors', async () => {
+  const a = await join()
+  await send(a, { type: 'activity', activity: 'game' })
+  const b = await join()
+  expect(b.messages.find((m: any) => m.type === 'welcome').players.find((p: any) => p.id === a.state.player.id).activity).toBe('game')
+  await send(a, { type: 'activity', activity: null })
+  await vi.advanceTimersByTimeAsync(100)
+  expect(b.messages.filter((m: any) => m.type === 'frame').at(-1).players.find((p: any) => p.id === a.state.player.id).activity).toBeNull()
 })

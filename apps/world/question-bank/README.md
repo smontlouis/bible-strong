@@ -1,8 +1,8 @@
-# Draft question bank — Four in a Row
+# Question bank — Four in a Row and Bible challenge
 
 1,200 bilingual records in four batches: 200 Old Testament and 200 New Testament
 questions per level (50 per Testament/level in each batch).
-FR and EN translate the same fact. Questions require human review before publication.
+FR and EN translate the same fact. Editorial corrections can be reviewed in Question Lab.
 Explanations are paraphrases; Bible passage links support editorial review.
 
 Open http://localhost:5186/question-lab.html with `yarn dev:world` running.
@@ -16,9 +16,10 @@ separate shown-question histories. Unseen questions come first; the least recent
 shown question returns after exhaustion. This preview does not reproduce the
 server timer or multiplayer flow.
 
-Draft data stays outside public assets and production entry points. Human review
-precedes live integration and persistent server-side per-player selection. The
-existing live games still use their current provider while this catalogue is reviewed.
+Data stays outside public assets and the production client. The server seeds the
+shared SQLite GameCatalogue from these files and reserves questions for solo and
+Bible challenge with durable anonymous history. Review decisions in the browser
+do not change live content; edit the source JSON and rebuild to publish corrections.
 
 ## Source checks
 
@@ -53,4 +54,11 @@ Files ending in `-3.json` and `-4.json` each add another 300 bilingual questions
 with 50 questions per Testament and difficulty per batch. Batch 3 uses IDs
 101–150; batch 4 uses 151–200. Existing questions and review keys are unchanged.
 Open `question-lab.html?batch=3` or `question-lab.html?batch=4` to review one batch.
-Per-difficulty source notes accompany each batch. All additions remain drafts.
+Per-difficulty source notes accompany each batch. The source files seed the live server catalogue; review notes remain local.
+
+Review checks for batches 3–4 cover all 1,200 records: unique IDs, fact keys and
+normalized question text in both languages; balanced counts; and manual review of
+similar wording, shared passages and repeated answers. Rephrased duplicates and
+question/answer inversions were replaced in the new batches. Shared narratives
+remain where the requested facts differ (for example, a person's identity versus
+a separate event detail). These checks support, but do not replace, editorial review.

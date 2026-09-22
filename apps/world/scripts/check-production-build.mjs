@@ -25,6 +25,10 @@ for (const marker of [
   'world-state',
   'bible-strong-game-lab',
   'bible-strong-question-review-v1',
+  'bible-strong-who-review-v1',
+  'who-person-109',
+  'catalogue_questions',
+  'catalogue_history',
 ]) {
   assert(!scripts.includes(marker), `Development capability leaked into production: ${marker}`)
 }
@@ -37,3 +41,8 @@ assert(
   'Question review page in production'
 )
 console.log('Production artifact: no editor chunks, save URLs or diagnostic controls')
+
+assert(
+  !(await readdir(new URL('../dist/', import.meta.url))).includes('who-lab.html'),
+  'Who review page in production'
+)

@@ -1,0 +1,694 @@
+[
+  {
+    "id": "who-object-001",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "L’arche de Noé",
+      "aliases": [
+        "arche de Noé",
+        "bateau de Noé"
+      ],
+      "explanation": "Construite par Noé selon les instructions de Dieu, elle abrita sa famille et des animaux pendant le déluge."
+    },
+    "en": {
+      "answer": "Noah’s ark",
+      "aliases": [
+        "Noah's ark"
+      ],
+      "explanation": "Built by Noah according to God's instructions, it sheltered his family and animals during the flood."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Ma construction prévoyait trois niveaux superposés.",
+        "en": "My design included three levels.",
+        "reference": {
+          "book": 1,
+          "chapter": 6,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis+6%3A16&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je devais être enduite de poix à l’intérieur et à l’extérieur.",
+        "en": "I was to be coated with pitch inside and outside.",
+        "reference": {
+          "book": 1,
+          "chapter": 6,
+          "verse": 14
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis+6%3A14&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Après la montée des eaux, je me suis arrêtée sur les montagnes d’Ararat.",
+        "en": "After the waters rose, I came to rest on the mountains of Ararat.",
+        "reference": {
+          "book": 1,
+          "chapter": 8,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis+8%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Noé et sa famille sont entrés en moi avant le déluge.",
+        "en": "Noah and his family entered me before the flood.",
+        "reference": {
+          "book": 1,
+          "chapter": 7,
+          "verse": 7
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis+7%3A7&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-002",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "L’arche de l’alliance",
+      "aliases": [
+        "arche de l’alliance",
+        "arche de l'alliance",
+        "arche du témoignage"
+      ],
+      "explanation": "Ce coffre sacré était recouvert d’or. Dieu demanda à Moïse d’y déposer le témoignage qu’il lui donnerait."
+    },
+    "en": {
+      "answer": "The ark of the covenant",
+      "aliases": [
+        "ark of the covenant",
+        "ark of the testimony"
+      ],
+      "explanation": "This sacred chest was overlaid with gold. God told Moses to place inside it the testimony he would give him."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mes barres de transport ne devaient pas être retirées de mes anneaux.",
+        "en": "My carrying poles were not to be removed from my rings.",
+        "reference": {
+          "book": 2,
+          "chapter": 25,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus+25%3A15&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Mes parois étaient recouvertes d’or, au-dedans comme au-dehors.",
+        "en": "My surfaces were covered with gold, inside and outside.",
+        "reference": {
+          "book": 2,
+          "chapter": 25,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus+25%3A11&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Mon couvercle était surmonté de deux chérubins d’or.",
+        "en": "Two golden cherubim stood above my cover.",
+        "reference": {
+          "book": 2,
+          "chapter": 25,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus+25%3A18&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le coffre où Moïse devait déposer le témoignage donné par Dieu.",
+        "en": "I am the chest in which Moses was to place the testimony given by God.",
+        "reference": {
+          "book": 2,
+          "chapter": 25,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus+25%3A16&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-003",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "Le serpent d’airain",
+      "aliases": [
+        "serpent d'airain",
+        "serpent de bronze",
+        "Nehushtan",
+        "Nehuschtan"
+      ],
+      "explanation": "Moïse fabriqua cette représentation de serpent et l’éleva. Les personnes mordues qui la regardaient conservaient la vie."
+    },
+    "en": {
+      "answer": "The bronze serpent",
+      "aliases": [
+        "bronze serpent",
+        "brass serpent",
+        "brazen serpent",
+        "Nehushtan"
+      ],
+      "explanation": "Moses made this representation of a serpent and raised it up. Those who had been bitten could look at it and live."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Des siècles après ma fabrication, Ézéchias m’a mis en pièces.",
+        "en": "Centuries after I was made, Hezekiah broke me into pieces.",
+        "reference": {
+          "book": 12,
+          "chapter": 18,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2+Kings+18%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "J’ai été fixé en hauteur sur une perche.",
+        "en": "I was placed high on a pole.",
+        "reference": {
+          "book": 4,
+          "chapter": 21,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers+21%3A9&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Les personnes mordues pouvaient me regarder et rester en vie.",
+        "en": "People who had been bitten could look at me and live.",
+        "reference": {
+          "book": 4,
+          "chapter": 21,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers+21%3A9&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Moïse m’a façonné en métal, à l’image des reptiles qui mordaient le peuple.",
+        "en": "Moses shaped me from metal to resemble the reptiles biting the people.",
+        "reference": {
+          "book": 4,
+          "chapter": 21,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers+21%3A9&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-004",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "La verge d’Aaron",
+      "aliases": [
+        "verge d'Aaron",
+        "bâton d’Aaron",
+        "baton d'Aaron",
+        "verge fleurie"
+      ],
+      "explanation": "Parmi les verges des chefs d’Israël déposées devant Dieu, celle d’Aaron produisit des fleurs et des amandes, confirmant son choix."
+    },
+    "en": {
+      "answer": "Aaron’s rod",
+      "aliases": [
+        "Aaron's rod",
+        "Aaron's staff",
+        "budding rod"
+      ],
+      "explanation": "Among the rods of Israel's leaders placed before God, Aaron's produced blossoms and almonds, confirming God's choice."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "On devait me conserver comme signe pour faire cesser les murmures.",
+        "en": "I was to be kept as a sign to put an end to complaints.",
+        "reference": {
+          "book": 4,
+          "chapter": 17,
+          "verse": 10
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers+17%3A10&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "J’ai passé une nuit devant Dieu avec onze objets semblables à moi.",
+        "en": "I spent a night before God with eleven objects like me.",
+        "reference": {
+          "book": 4,
+          "chapter": 17,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers+17%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Au matin, j’avais produit des fleurs et même des amandes.",
+        "en": "By morning, I had produced blossoms and even almonds.",
+        "reference": {
+          "book": 4,
+          "chapter": 17,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers+17%3A8&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Le nom du frère de Moïse avait été écrit sur moi pour représenter Lévi.",
+        "en": "The name of Moses’ brother had been written on me to represent Levi.",
+        "reference": {
+          "book": 4,
+          "chapter": 17,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers+17%3A3&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-005",
+    "category": "object",
+    "testament": "old",
+    "fr": {
+      "answer": "La toison de Gédéon",
+      "aliases": [
+        "toison de Gédéon",
+        "toison",
+        "laine de Gédéon"
+      ],
+      "explanation": "Gédéon demanda deux signes successifs avec une toison : d’abord humide sur le sol sec, puis sèche sur le sol humide."
+    },
+    "en": {
+      "answer": "Gideon’s fleece",
+      "aliases": [
+        "Gideon's fleece",
+        "fleece"
+      ],
+      "explanation": "Gideon asked for two successive signs with a fleece: first wet on dry ground, then dry on wet ground."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "En me pressant, mon propriétaire a rempli une coupe d’eau.",
+        "en": "When my owner squeezed me, he filled a bowl with water.",
+        "reference": {
+          "book": 7,
+          "chapter": 6,
+          "verse": 38
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges+6%3A38&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Une première nuit, je devais être humide alors que le sol resterait sec.",
+        "en": "On the first night, I was to be wet while the ground stayed dry.",
+        "reference": {
+          "book": 7,
+          "chapter": 6,
+          "verse": 37
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges+6%3A37&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "La nuit suivante, ce fut l’inverse : je suis restée sèche sur le sol humide.",
+        "en": "The next night, the reverse happened: I stayed dry on wet ground.",
+        "reference": {
+          "book": 7,
+          "chapter": 6,
+          "verse": 40
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges+6%3A40&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Gédéon m’avait déposée sur une aire : j’étais une pièce de laine servant de signe.",
+        "en": "Gideon had laid me on a threshing floor: I was a piece of wool used as a sign.",
+        "reference": {
+          "book": 7,
+          "chapter": 6,
+          "verse": 37
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges+6%3A37&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-006",
+    "category": "object",
+    "testament": "new",
+    "fr": {
+      "answer": "La couronne d’épines",
+      "aliases": [
+        "couronne d'épines",
+        "couronne d’épines",
+        "couronne"
+      ],
+      "explanation": "Les soldats tressèrent des épines en couronne et la placèrent sur la tête de Jésus pour se moquer de sa royauté."
+    },
+    "en": {
+      "answer": "The crown of thorns",
+      "aliases": [
+        "crown of thorns",
+        "thorn crown",
+        "crown"
+      ],
+      "explanation": "The soldiers wove thorns into a crown and put it on Jesus' head to mock his kingship."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "J’accompagnais un vêtement de pourpre lorsque Pilate présenta Jésus à la foule.",
+        "en": "I accompanied a purple garment when Pilate presented Jesus to the crowd.",
+        "reference": {
+          "book": 43,
+          "chapter": 19,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John+19%3A5&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Des soldats m’ont confectionnée en tressant ma matière.",
+        "en": "Soldiers made me by weaving my material together.",
+        "reference": {
+          "book": 43,
+          "chapter": 19,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John+19%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "On m’a posée sur la tête de celui qu’on saluait en se moquant comme roi des Juifs.",
+        "en": "I was placed on the head of the one mockingly greeted as king of the Jews.",
+        "reference": {
+          "book": 40,
+          "chapter": 27,
+          "verse": 29
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew+27%3A29&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je ressemble à un insigne royal, mais je suis faite de branches piquantes.",
+        "en": "I resemble a royal headdress, but I am made of prickly branches.",
+        "reference": {
+          "book": 40,
+          "chapter": 27,
+          "verse": 29
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew+27%3A29&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-007",
+    "category": "object",
+    "testament": "new",
+    "fr": {
+      "answer": "La tunique sans couture de Jésus",
+      "aliases": [
+        "tunique de Jésus",
+        "tunique sans couture"
+      ],
+      "explanation": "Les soldats décidèrent de tirer au sort cette tunique, tissée d’une seule pièce, plutôt que de la déchirer."
+    },
+    "en": {
+      "answer": "Jesus’ seamless tunic",
+      "aliases": [
+        "Jesus' seamless tunic",
+        "seamless tunic",
+        "Jesus' coat"
+      ],
+      "explanation": "The soldiers decided to cast lots for this tunic, woven in one piece, rather than tear it."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mon attribution par le sort accomplit une parole de l’Écriture.",
+        "en": "The casting of lots for me fulfilled a passage of Scripture.",
+        "reference": {
+          "book": 43,
+          "chapter": 19,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John+19%3A24&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Des soldats ont décidé de me garder entière au lieu de me déchirer.",
+        "en": "Soldiers decided to keep me whole rather than tear me.",
+        "reference": {
+          "book": 43,
+          "chapter": 19,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John+19%3A24&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "J’étais tissée d’un seul tenant, du haut jusqu’en bas.",
+        "en": "I was woven in one piece from top to bottom.",
+        "reference": {
+          "book": 43,
+          "chapter": 19,
+          "verse": 23
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John+19%3A23&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "J’étais le vêtement de Jésus dépourvu de couture que les soldats se sont disputé au sort.",
+        "en": "I was Jesus’ garment without a seam that the soldiers cast lots for.",
+        "reference": {
+          "book": 43,
+          "chapter": 19,
+          "verse": 23
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John+19%3A23&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-008",
+    "category": "object",
+    "testament": "new",
+    "fr": {
+      "answer": "Le voile du Temple",
+      "aliases": [
+        "voile du Temple",
+        "rideau du Temple",
+        "voile",
+        "rideau"
+      ],
+      "explanation": "Au moment de la mort de Jésus, le voile du Temple se déchira du haut jusqu’en bas."
+    },
+    "en": {
+      "answer": "The veil of the Temple",
+      "aliases": [
+        "temple veil",
+        "veil of the temple",
+        "temple curtain",
+        "veil",
+        "curtain"
+      ],
+      "explanation": "At the time of Jesus' death, the veil of the Temple was torn from top to bottom."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Ma déchirure est racontée dans le même verset qu’un tremblement de terre et des rochers fendus.",
+        "en": "My tearing is described in the same verse as an earthquake and rocks splitting apart.",
+        "reference": {
+          "book": 40,
+          "chapter": 27,
+          "verse": 51
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew+27%3A51&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Ma déchirure allait du haut vers le bas.",
+        "en": "My tear ran from the top to the bottom.",
+        "reference": {
+          "book": 41,
+          "chapter": 15,
+          "verse": 38
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark+15%3A38&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je me trouvais dans le sanctuaire de Jérusalem.",
+        "en": "I was located in the sanctuary in Jerusalem.",
+        "reference": {
+          "book": 40,
+          "chapter": 27,
+          "verse": 51
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew+27%3A51&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la grande séparation de tissu du Temple qui s’est déchirée quand Jésus a expiré.",
+        "en": "I am the great fabric partition in the Temple that tore when Jesus breathed his last.",
+        "reference": {
+          "book": 41,
+          "chapter": 15,
+          "verse": 38
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark+15%3A38&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-009",
+    "category": "object",
+    "testament": "new",
+    "fr": {
+      "answer": "La pierre du tombeau de Jésus",
+      "aliases": [
+        "pierre du tombeau",
+        "pierre du sépulcre",
+        "pierre roulée"
+      ],
+      "explanation": "Une grande pierre fermait le tombeau de Jésus. Les femmes se demandaient qui la déplacerait, mais elles la trouvèrent déjà roulée."
+    },
+    "en": {
+      "answer": "The stone at Jesus’ tomb",
+      "aliases": [
+        "stone at Jesus' tomb",
+        "tomb stone",
+        "rolled stone"
+      ],
+      "explanation": "A large stone closed Jesus' tomb. The women wondered who would move it, but found it already rolled away."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "On avait pris soin de me sceller pour rendre les lieux sûrs.",
+        "en": "I had been sealed to secure the place.",
+        "reference": {
+          "book": 40,
+          "chapter": 27,
+          "verse": 66
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew+27%3A66&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Des femmes se demandaient qui pourrait me déplacer pour elles.",
+        "en": "Some women wondered who could move me for them.",
+        "reference": {
+          "book": 41,
+          "chapter": 16,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark+16%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "J’étais très grande, mais elles m’ont trouvée déjà roulée à l’écart.",
+        "en": "I was very large, but they found me already rolled away.",
+        "reference": {
+          "book": 41,
+          "chapter": 16,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark+16%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Joseph d’Arimathée m’avait roulée devant l’entrée où il venait de déposer le corps de Jésus.",
+        "en": "Joseph of Arimathea had rolled me across the entrance where he had just laid Jesus’ body.",
+        "reference": {
+          "book": 40,
+          "chapter": 27,
+          "verse": 60
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew+27%3A60&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-object-010",
+    "category": "object",
+    "testament": "new",
+    "fr": {
+      "answer": "Le vase d’albâtre de Béthanie",
+      "aliases": [
+        "vase d'albâtre",
+        "vase d’albâtre",
+        "flacon de parfum",
+        "vase de parfum"
+      ],
+      "explanation": "À Béthanie, une femme brisa un vase d’albâtre contenant du nard précieux et versa le parfum sur la tête de Jésus."
+    },
+    "en": {
+      "answer": "The alabaster jar at Bethany",
+      "aliases": [
+        "alabaster jar",
+        "alabaster box",
+        "alabaster flask",
+        "perfume jar"
+      ],
+      "explanation": "At Bethany, a woman broke an alabaster jar containing costly spikenard and poured the perfume on Jesus' head."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "L’emploi de mon contenu provoqua des critiques : certains l’estimaient à plus de trois cents deniers.",
+        "en": "The use of my contents drew criticism: some valued it at more than three hundred denarii.",
+        "reference": {
+          "book": 41,
+          "chapter": 14,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark+14%3A5&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "J’ai été apporté chez Simon le lépreux, à Béthanie.",
+        "en": "I was brought to Simon the leper’s house in Bethany.",
+        "reference": {
+          "book": 41,
+          "chapter": 14,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark+14%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Une femme m’a brisé pour verser mon contenu sur la tête de Jésus.",
+        "en": "A woman broke me to pour my contents over Jesus’ head.",
+        "reference": {
+          "book": 41,
+          "chapter": 14,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark+14%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis un récipient d’albâtre qui renfermait un parfum de nard précieux.",
+        "en": "I am an alabaster container that held costly spikenard perfume.",
+        "reference": {
+          "book": 41,
+          "chapter": 14,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark+14%3A3&version=LSG%3BKJV"
+      }
+    ]
+  }
+]

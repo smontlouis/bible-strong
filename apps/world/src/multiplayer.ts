@@ -1,3 +1,4 @@
+import { type AvatarActivity } from './avatar-activity'
 import {
   isReaction,
   REACTION_COOLDOWN_MS,
@@ -28,6 +29,13 @@ export class WorldMultiplayer {
         ? [{ id, profile: track.player.profile }]
         : []
     })
+  }
+  activity: AvatarActivity | null = null
+  private sentActivity: AvatarActivity | null | undefined
+  setActivity(activity: AvatarActivity | null) {
+    this.activity = activity
+    if (this.id && this.enabled && this.status.state === 'online' && this.sentActivity !== activity)
+      if (this.send({ type: 'activity', activity })) this.sentActivity = activity
   }
   readonly reactions = new Map<string, { reaction: ReactionId; startedAt: number }>()
   private lastReactionSent = -Infinity
@@ -72,6 +80,29 @@ export class WorldMultiplayer {
   private seq = 0
   private destroyed = false
   private superseded = false
+  // Anonymous repetition history only: never used to authenticate or resume an avatar.
+  private gameHistoryId = this.readGameHistoryId()
+  private readGameHistoryId() {
+    // getRandomValues also works on local HTTP/LAN previews where randomUUID is unavailable.
+    const bytes = crypto.getRandomValues(new Uint8Array(16))
+    bytes[6] = (bytes[6] & 0x0f) | 0x40
+    bytes[8] = (bytes[8] & 0x3f) | 0x80
+    const hex = [...bytes].map(byte => byte.toString(16).padStart(2, '0')).join('')
+    const fresh = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+    try {
+      const key = 'world-game-history-id'
+      const saved = localStorage.getItem(key)
+      if (
+        saved &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(saved)
+      )
+        return saved
+      localStorage.setItem(key, fresh)
+    } catch {
+      /* History remains stable for this client when storage is unavailable. */
+    }
+    return fresh
+  }
   private resumeToken: string | undefined = this.readResumeToken()
   private readResumeToken() {
     try {
@@ -161,6 +192,7 @@ export class WorldMultiplayer {
       this.lastReceived = performance.now()
       this.send({
         type: 'join',
+        gameHistoryId: this.gameHistoryId,
         version: PROTOCOL_VERSION,
         profile: this.profile,
         pose: this.pose,
@@ -196,6 +228,7 @@ export class WorldMultiplayer {
         return
       }
       if (message.type === 'welcome') {
+        this.sentActivity = undefined
         this.reactions.clear()
         this.games.connect(message.id)
         this.resumeToken = message.resumeToken

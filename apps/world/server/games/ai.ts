@@ -1,7 +1,5 @@
 import type { Round } from './engine'
-import type { GlooGameEnv } from './gloo'
-export { generateRounds, validateRounds } from './gloo'
-export type GameAIEnv = GlooGameEnv & { AI_GATEWAY_API_KEY?: string }
+export type GameAIEnv = { AI_GATEWAY_API_KEY?: string }
 import { boundedJSON } from './provider-json'
 export { boundedJSON } from './provider-json'
 async function evaluate(

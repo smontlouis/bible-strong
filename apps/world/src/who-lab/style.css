@@ -1,0 +1,77 @@
+.who-filter {
+  max-width: 340px;
+  margin-bottom: 24px;
+}
+.who-card {
+  padding: 24px;
+}
+.who-score {
+  margin: 24px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--bs-blue);
+}
+.who-clue {
+  display: flex;
+  gap: 16px;
+  border: 1px solid var(--bs-line-strong);
+  border-radius: 16px;
+  padding: 18px;
+  margin: 12px 0;
+  animation: clue-in 0.2s ease-out;
+}
+.who-clue p {
+  margin: 0 0 8px;
+}
+.who-points {
+  display: grid;
+  place-items: center;
+  background: var(--bs-yellow);
+  color: var(--bs-navy);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  font-size: 24px;
+}
+.who-translation {
+  color: var(--bs-muted);
+  font-size: 14px;
+}
+.who-card form .toolbar {
+  margin-top: 16px;
+}
+.who-card footer {
+  padding: 16px 0;
+  display: grid;
+  gap: 16px;
+}
+.who-card a,
+nav a {
+  color: var(--bs-blue);
+  text-underline-offset: 3px;
+}
+@keyframes clue-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .who-clue {
+    animation: none;
+  }
+}
+@media (max-width: 600px) {
+  .who-card {
+    padding: 16px;
+  }
+  .who-clue {
+    padding: 12px;
+    gap: 10px;
+  }
+}

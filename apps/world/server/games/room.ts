@@ -1,3 +1,4 @@
+import { GAME_CATALOGUE_NAME, type GameCatalogueEnv } from './catalogue'
 import type { GameAction, GameError, GamesSnapshot } from '../../src/games-protocol'
 import {
   emptyGames,
@@ -7,14 +8,14 @@ import {
   type GameData,
   type Visitor,
 } from './engine'
-import { generateRounds, judgeAnswer, type GameAIEnv } from './ai'
+import { judgeAnswer, type GameAIEnv } from './ai'
 
 /** One bounded game collection per event room, persisted in that room's SQLite store.
  * No network await inside a state transition. AI completions recheck operation IDs. */
 export class WorldGames {
   constructor(
     private ctx: DurableObjectState,
-    private env: GameAIEnv,
+    private env: GameAIEnv & GameCatalogueEnv,
     private visitors: () => Visitor[],
     private deliver: (id: string, snapshot: GamesSnapshot, error?: GameError) => void
   ) {
@@ -68,7 +69,24 @@ export class WorldGames {
   }
   private async execute(effect: Effect) {
     if (effect.type === 'generate') {
-      const rounds = await generateRounds(effect.options, this.env, fetch, effect.exclude)
+      let rounds = null
+      try {
+        rounds = await this.env.GameCatalogue.getByName(GAME_CATALOGUE_NAME).allocate({
+          operation: effect.operation,
+          options: effect.options,
+          players: effect.players ?? [effect.gameId],
+          exclude: effect.exclude ?? [],
+          count: effect.count ?? 5,
+        })
+      } catch (error) {
+        console.warn(
+          JSON.stringify({
+            event: 'game_catalogue_failed',
+            gameId: effect.gameId,
+            message: error instanceof Error ? error.message : 'Catalogue unavailable',
+          })
+        )
+      }
       const engine = this.read()
       engine.tick()
       engine.generated(effect, rounds)
@@ -77,8 +95,9 @@ export class WorldGames {
       const result = await judgeAnswer(effect.content, effect.text, this.env)
       const engine = this.read()
       engine.tick()
-      engine.evaluated(effect, result)
+      const next = engine.evaluated(effect, result)
       this.save(engine)
+      if (next) this.ctx.waitUntil(this.execute(next))
     }
   }
 }

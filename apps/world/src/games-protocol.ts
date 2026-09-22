@@ -52,7 +52,19 @@ export type WhoView = {
   winner?: string
   awarded?: number
 }
+export type SoloReviewItem = {
+  round: number
+  question: string
+  text: string
+  status: 'correct' | 'wrong' | 'skipped' | 'timeout'
+  answer: string
+  explanation: string
+  sources: { reference: string; url: string }[]
+}
 export type GameView = {
+  soloFeedback?: { round: number; status: 'correct' | 'wrong' | 'skipped'; at: number }
+  soloReview?: SoloReviewItem[]
+  soloReviewIncomplete?: boolean
   solo?: SoloRun
   who?: WhoView
   id: string
@@ -72,6 +84,7 @@ export type GameView = {
   answered: string[]
   ownAnswer?: { zone?: number; text: string; status: AnswerStatus; retriesLeft: number }
   result?: {
+    sources?: { reference: string; url: string }[]
     answer: string
     explanation: string
     reference: string

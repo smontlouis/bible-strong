@@ -1,0 +1,1958 @@
+[
+  {
+    "id": "who-place-011",
+    "category": "place",
+    "testament": "old",
+    "fr": {
+      "answer": "Égypte",
+      "aliases": [
+        "L'Égypte"
+      ],
+      "explanation": "Ce pays fut un refuge lors de famines, puis le lieu de l'esclavage d'Israël avant l'Exode."
+    },
+    "en": {
+      "answer": "Egypt",
+      "aliases": [],
+      "explanation": "This land provided refuge during famines, then became the place of Israel's slavery before the Exodus."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Un souverain y reçoit en rêve sept vaches grasses suivies de sept vaches maigres.",
+        "en": "A ruler here dreams of seven fat cows followed by seven lean cows.",
+        "reference": {
+          "book": 1,
+          "chapter": 41,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2041%3A1-4&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Joseph y organise des réserves de grain avant une longue famine.",
+        "en": "Joseph organizes grain reserves here before a long famine.",
+        "reference": {
+          "book": 1,
+          "chapter": 41,
+          "verse": 48
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2041%3A48&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Les descendants de Jacob y fabriquent des briques sous une dure servitude.",
+        "en": "Jacob's descendants make bricks here under harsh slavery.",
+        "reference": {
+          "book": 2,
+          "chapter": 1,
+          "verse": 14
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%201%3A14&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le pays dont Moïse conduit les Israélites hors de l'esclavage de Pharaon.",
+        "en": "I am the country from which Moses leads the Israelites out of Pharaoh's slavery.",
+        "reference": {
+          "book": 2,
+          "chapter": 12,
+          "verse": 51
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2012%3A51&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-012",
+    "category": "place",
+    "testament": "old",
+    "fr": {
+      "answer": "Haran",
+      "aliases": [
+        "Charan",
+        "Charan de Mésopotamie"
+      ],
+      "explanation": "Térach mourut dans cette ville, qu'Abram quitta ensuite ; la famille de Rebecca y vivait aussi."
+    },
+    "en": {
+      "answer": "Haran",
+      "aliases": [
+        "Charran"
+      ],
+      "explanation": "Terah died in this city, which Abram later left; Rebekah's family also lived here."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Térach termine sa vie chez moi à l'âge de deux cent cinq ans.",
+        "en": "Terah ends his life here at the age of two hundred five.",
+        "reference": {
+          "book": 1,
+          "chapter": 11,
+          "verse": 32
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2011%3A32&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Rebecca y envoie Jacob auprès de son frère Laban pour le protéger.",
+        "en": "Rebekah sends Jacob here to her brother Laban for protection.",
+        "reference": {
+          "book": 1,
+          "chapter": 27,
+          "verse": 43
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2027%3A43&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Près d'un puits, Jacob rencontre des bergers qui déclarent venir de chez moi.",
+        "en": "At a well, Jacob meets shepherds who say they come from me.",
+        "reference": {
+          "book": 1,
+          "chapter": 29,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2029%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Abram a soixante-quinze ans lorsqu'il me quitte pour répondre à l'appel de Dieu.",
+        "en": "Abram is seventy-five when he leaves me in response to God's call.",
+        "reference": {
+          "book": 1,
+          "chapter": 12,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2012%3A4&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-013",
+    "category": "place",
+    "testament": "old",
+    "fr": {
+      "answer": "Hébron",
+      "aliases": [
+        "Hebron"
+      ],
+      "explanation": "Ville liée à Abraham et à la sépulture de Sara, Hébron fut aussi le premier siège du règne de David."
+    },
+    "en": {
+      "answer": "Hebron",
+      "aliases": [],
+      "explanation": "Associated with Abraham and Sarah's burial, Hebron was also David's first royal seat."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je suis la ville des chênes de Mamré où Abraham dresse sa tente et bâtit un autel.",
+        "en": "I am the city near Mamre where Abraham pitches his tent and builds an altar.",
+        "reference": {
+          "book": 1,
+          "chapter": 13,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2013%3A18&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Sara est enterrée près de moi dans la caverne de Macpéla.",
+        "en": "Sarah is buried near me in the cave of Machpelah.",
+        "reference": {
+          "book": 1,
+          "chapter": 23,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2023%3A19&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Caleb me reçoit en héritage parce qu'il a suivi fidèlement Dieu.",
+        "en": "Caleb receives me as an inheritance because he followed God faithfully.",
+        "reference": {
+          "book": 6,
+          "chapter": 14,
+          "verse": 14
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%2014%3A14&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "David règne chez moi pendant sept ans et six mois avant de régner à Jérusalem.",
+        "en": "David reigns here for seven years and six months before ruling in Jerusalem.",
+        "reference": {
+          "book": 10,
+          "chapter": 5,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%205%3A5&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-014",
+    "category": "place",
+    "testament": "old",
+    "fr": {
+      "answer": "Béthel",
+      "aliases": [
+        "Bethel",
+        "Beth-El"
+      ],
+      "explanation": "Jacob donna à ce lieu son nom après son rêve ; il y revint ensuite pour bâtir un autel."
+    },
+    "en": {
+      "answer": "Bethel",
+      "aliases": [
+        "Beth-el"
+      ],
+      "explanation": "Jacob named this place after his dream and later returned to build an altar."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Jéroboam installe chez moi l'un des deux veaux d'or de son royaume.",
+        "en": "Jeroboam places one of his kingdom's two golden calves here.",
+        "reference": {
+          "book": 11,
+          "chapter": 12,
+          "verse": 29
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2012%3A29&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Jacob y revient avec sa maison pour bâtir un autel après avoir écarté les dieux étrangers.",
+        "en": "Jacob returns here with his household to build an altar after removing foreign gods.",
+        "reference": {
+          "book": 1,
+          "chapter": 35,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2035%3A1-7&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Mon ancien nom est Luz avant qu'un voyageur ne me donne un autre nom.",
+        "en": "My former name is Luz before a traveler gives me a new name.",
+        "reference": {
+          "book": 1,
+          "chapter": 28,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2028%3A19&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le lieu où Jacob rêve d'une échelle reliant la terre au ciel et parle de la maison de Dieu.",
+        "en": "I am the place where Jacob dreams of a ladder reaching heaven and speaks of God's house.",
+        "reference": {
+          "book": 1,
+          "chapter": 28,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2028%3A10-19&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-015",
+    "category": "place",
+    "testament": "old",
+    "fr": {
+      "answer": "Beer-Schéba",
+      "aliases": [
+        "Beer Schéba",
+        "Beer-Sheba",
+        "Bersabée",
+        "Beersheba"
+      ],
+      "explanation": "Ce lieu de puits et de serment est associé à Abraham et Isaac ; Jacob en partit vers Haran."
+    },
+    "en": {
+      "answer": "Beersheba",
+      "aliases": [
+        "Beer-sheba"
+      ],
+      "explanation": "This place of wells and oaths is associated with Abraham and Isaac; Jacob left it for Haran."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Abraham y invoque Dieu comme Dieu de l'éternité.",
+        "en": "Abraham calls here on God as the everlasting God.",
+        "reference": {
+          "book": 1,
+          "chapter": 21,
+          "verse": 33
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2021%3A33&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Élie y laisse son serviteur avant de marcher seul dans le désert.",
+        "en": "Elijah leaves his servant here before walking alone into the wilderness.",
+        "reference": {
+          "book": 11,
+          "chapter": 19,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2019%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Jacob part de chez moi pour se rendre à Haran.",
+        "en": "Jacob leaves me to travel to Haran.",
+        "reference": {
+          "book": 1,
+          "chapter": 28,
+          "verse": 10
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2028%3A10&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Mon nom rappelle le puits et le serment d'Abraham avec Abimélec, marqué par sept brebis.",
+        "en": "My name recalls Abraham's well and oath with Abimelech, marked by seven ewe lambs.",
+        "reference": {
+          "book": 1,
+          "chapter": 21,
+          "verse": 31
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2021%3A28-33&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-016",
+    "category": "place",
+    "testament": "old",
+    "fr": {
+      "answer": "Sichem",
+      "aliases": [
+        "Shechem"
+      ],
+      "explanation": "Abraham s'arrêta près de cette ville ; Josué y rassembla les tribus et les os de Joseph y furent enterrés."
+    },
+    "en": {
+      "answer": "Shechem",
+      "aliases": [
+        "Sichem"
+      ],
+      "explanation": "Abraham stopped near this city; Joshua gathered the tribes here, and Joseph's bones were buried here."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Roboam vient chez moi parce que le peuple s'y rassemble pour le faire roi.",
+        "en": "Rehoboam comes here because the people gather to make him king.",
+        "reference": {
+          "book": 11,
+          "chapter": 12,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2012%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je suis la ville près du chêne de Moré où Abram s'arrête en entrant en Canaan.",
+        "en": "I am the city near Moreh where Abram stops on entering Canaan.",
+        "reference": {
+          "book": 1,
+          "chapter": 12,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2012%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Les os de Joseph rapportés d'Égypte sont enterrés chez moi.",
+        "en": "Joseph's bones brought from Egypt are buried here.",
+        "reference": {
+          "book": 6,
+          "chapter": 24,
+          "verse": 32
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%2024%3A32&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Josué y réunit toutes les tribus pour renouveler leur engagement envers Dieu.",
+        "en": "Joshua gathers all the tribes here to renew their commitment to God.",
+        "reference": {
+          "book": 6,
+          "chapter": 24,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%2024%3A1-25&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-017",
+    "category": "place",
+    "testament": "old",
+    "fr": {
+      "answer": "Sodome",
+      "aliases": [],
+      "explanation": "Lot accueillit deux anges dans cette ville, détruite avec Gomorrhe après l'intercession d'Abraham."
+    },
+    "en": {
+      "answer": "Sodom",
+      "aliases": [],
+      "explanation": "Lot welcomed two angels in this city, which was destroyed with Gomorrah after Abraham's intercession."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Des hommes rassemblés devant une maison sont frappés d'aveuglement et ne trouvent plus la porte.",
+        "en": "Men gathered outside a house are struck blind and cannot find the door.",
+        "reference": {
+          "book": 1,
+          "chapter": 19,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2019%3A11&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Lot accueille deux anges chez moi à la fin du jour.",
+        "en": "Lot welcomes two angels here at the end of the day.",
+        "reference": {
+          "book": 1,
+          "chapter": 19,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2019%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Abraham demande que je sois épargnée s'il s'y trouve seulement dix justes.",
+        "en": "Abraham asks that I be spared if just ten righteous people can be found here.",
+        "reference": {
+          "book": 1,
+          "chapter": 18,
+          "verse": 32
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2018%3A32&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville détruite avec Gomorrhe par le soufre et le feu, tandis que Lot s'enfuit.",
+        "en": "I am the city destroyed with Gomorrah by sulfur and fire as Lot escapes.",
+        "reference": {
+          "book": 1,
+          "chapter": 19,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2019%3A24&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-018",
+    "category": "place",
+    "testament": "old",
+    "fr": {
+      "answer": "Silo",
+      "aliases": [
+        "Shilo",
+        "Shiloh"
+      ],
+      "explanation": "Le sanctuaire d'Israël se trouvait à Silo ; Anne y présenta Samuel, qui y servit auprès d'Éli."
+    },
+    "en": {
+      "answer": "Shiloh",
+      "aliases": [
+        "Silo"
+      ],
+      "explanation": "Israel's sanctuary stood at Shiloh; Hannah brought Samuel here, and he served with Eli."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mes jeunes filles participent à une fête annuelle en dansant près des vignes.",
+        "en": "My young women take part in a yearly festival by dancing near the vineyards.",
+        "reference": {
+          "book": 7,
+          "chapter": 21,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%2021%3A19-21&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Israël vient chercher l'arche chez moi avant un combat désastreux contre les Philistins.",
+        "en": "Israel fetches the ark from me before a disastrous battle with the Philistines.",
+        "reference": {
+          "book": 9,
+          "chapter": 4,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%204%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Anne y amène son jeune fils après l'avoir sevré, pour le consacrer à Dieu.",
+        "en": "Hannah brings her young son here after weaning him to dedicate him to God.",
+        "reference": {
+          "book": 9,
+          "chapter": 1,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%201%3A24&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville du sanctuaire où Samuel grandit auprès d'Éli et entend Dieu l'appeler.",
+        "en": "I am the sanctuary town where Samuel grows up with Eli and hears God calling him.",
+        "reference": {
+          "book": 9,
+          "chapter": 3,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%203%3A1-10&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-019",
+    "category": "place",
+    "testament": "old",
+    "fr": {
+      "answer": "Samarie",
+      "aliases": [
+        "Samaria"
+      ],
+      "explanation": "Omri bâtit cette capitale du royaume du Nord ; elle connut un siège et fut prise par les Assyriens."
+    },
+    "en": {
+      "answer": "Samaria",
+      "aliases": [],
+      "explanation": "Omri built this northern kingdom's capital; it endured a siege and was conquered by Assyria."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Omri achète la colline sur laquelle je suis construite à un homme nommé Schémer.",
+        "en": "Omri buys the hill on which I am built from a man named Shemer.",
+        "reference": {
+          "book": 11,
+          "chapter": 16,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2016%3A24&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Quatre lépreux quittent ma porte pendant une famine et découvrent un camp ennemi déserté.",
+        "en": "Four lepers leave my gate during a famine and discover an abandoned enemy camp.",
+        "reference": {
+          "book": 12,
+          "chapter": 7,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%207%3A1-7&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Le roi d'Assyrie me prend et déporte les habitants d'Israël.",
+        "en": "The king of Assyria captures me and deports Israel's people.",
+        "reference": {
+          "book": 12,
+          "chapter": 17,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%2017%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville bâtie par Omri, capitale d'Israël au nord, où règne ensuite Achab.",
+        "en": "I am the city built by Omri, Israel's northern capital, where Ahab later reigns.",
+        "reference": {
+          "book": 11,
+          "chapter": 16,
+          "verse": 29
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2016%3A29&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-020",
+    "category": "place",
+    "testament": "old",
+    "fr": {
+      "answer": "Guilgal",
+      "aliases": [
+        "Gilgal"
+      ],
+      "explanation": "Le camp de Guilgal accueillit les pierres du Jourdain et la célébration de la Pâque après l'entrée en Canaan."
+    },
+    "en": {
+      "answer": "Gilgal",
+      "aliases": [],
+      "explanation": "The camp at Gilgal received the Jordan memorial stones and hosted Passover after entry into Canaan."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Saül y attend Samuel avant d'offrir lui-même l'holocauste.",
+        "en": "Saul waits here for Samuel before offering the burnt offering himself.",
+        "reference": {
+          "book": 9,
+          "chapter": 13,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2013%3A8-12&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Mon nom est associé à l'opprobre de l'Égypte que Dieu déclare avoir roulé loin du peuple.",
+        "en": "My name is linked to the reproach of Egypt that God says he has rolled away.",
+        "reference": {
+          "book": 6,
+          "chapter": 5,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%205%3A9&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Les Israélites célèbrent la Pâque chez moi dans les plaines de Jéricho.",
+        "en": "The Israelites celebrate Passover here in the plains of Jericho.",
+        "reference": {
+          "book": 6,
+          "chapter": 5,
+          "verse": 10
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%205%3A10&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le camp où Josué dresse les douze pierres prises au Jourdain.",
+        "en": "I am the camp where Joshua sets up the twelve stones taken from the Jordan.",
+        "reference": {
+          "book": 6,
+          "chapter": 4,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%204%3A20&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-021",
+    "category": "place",
+    "testament": "old",
+    "fr": {
+      "answer": "Gabaon",
+      "aliases": [
+        "Gibeon"
+      ],
+      "explanation": "Cette ville est associée à une ruse envers Josué, au soleil arrêté et au sacrifice de Salomon."
+    },
+    "en": {
+      "answer": "Gibeon",
+      "aliases": [],
+      "explanation": "This city is associated with a deception against Joshua, the sun standing still, and Solomon's sacrifice."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Les hommes d'Abner et de Joab s'assoient face à face près de mon étang.",
+        "en": "Abner's and Joab's men sit facing each other beside my pool.",
+        "reference": {
+          "book": 10,
+          "chapter": 2,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%202%3A13&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Salomon offre mille holocaustes sur mon grand haut lieu.",
+        "en": "Solomon offers a thousand burnt offerings at my great high place.",
+        "reference": {
+          "book": 11,
+          "chapter": 3,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%203%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Mes habitants se présentent à Josué avec des provisions vieillies pour faire croire à un long voyage.",
+        "en": "My residents approach Joshua with old provisions to suggest a long journey.",
+        "reference": {
+          "book": 6,
+          "chapter": 9,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%209%3A3-6&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville au-dessus de laquelle Josué demande au soleil de s'arrêter.",
+        "en": "I am the city over which Joshua asks the sun to stand still.",
+        "reference": {
+          "book": 6,
+          "chapter": 10,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%2010%3A12&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-022",
+    "category": "place",
+    "testament": "old",
+    "fr": {
+      "answer": "Le mont Carmel",
+      "aliases": [
+        "Carmel",
+        "mont Carmel"
+      ],
+      "explanation": "Élie rassembla le peuple et les prophètes de Baal sur cette montagne pour l'épreuve du sacrifice."
+    },
+    "en": {
+      "answer": "Mount Carmel",
+      "aliases": [
+        "Carmel"
+      ],
+      "explanation": "Elijah gathered the people and Baal's prophets on this mountain for the test of the sacrifice."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Un serviteur y regarde vers la mer à plusieurs reprises avant d'apercevoir un petit nuage.",
+        "en": "A servant looks toward the sea here repeatedly before seeing a small cloud.",
+        "reference": {
+          "book": 11,
+          "chapter": 18,
+          "verse": 43
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2018%3A42-44&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Un autel y est réparé avec douze pierres, selon les tribus d'Israël.",
+        "en": "An altar here is repaired with twelve stones corresponding to Israel's tribes.",
+        "reference": {
+          "book": 11,
+          "chapter": 18,
+          "verse": 31
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2018%3A30-32&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Le peuple s'y voit demander de choisir entre l'Éternel et Baal.",
+        "en": "The people here are challenged to choose between the Lord and Baal.",
+        "reference": {
+          "book": 11,
+          "chapter": 18,
+          "verse": 21
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2018%3A19-21&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la montagne où Élie affronte les prophètes de Baal et où le feu consume son sacrifice.",
+        "en": "I am the mountain where Elijah confronts Baal's prophets and fire consumes his sacrifice.",
+        "reference": {
+          "book": 11,
+          "chapter": 18,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2018%3A19-39&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-023",
+    "category": "place",
+    "testament": "old",
+    "fr": {
+      "answer": "Le Jourdain",
+      "aliases": [
+        "Jourdain",
+        "Jordan"
+      ],
+      "explanation": "Ce fleuve est traversé par Israël ; Naaman s'y baigne et Jésus y est baptisé."
+    },
+    "en": {
+      "answer": "The Jordan River",
+      "aliases": [
+        "Jordan",
+        "River Jordan"
+      ],
+      "explanation": "Israel crosses this river; Naaman bathes here and Jesus is baptized here."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Un fer de hache emprunté tombe dans mes eaux avant de flotter par l'intervention d'Élisée.",
+        "en": "A borrowed axe head falls into my waters before floating through Elisha's intervention.",
+        "reference": {
+          "book": 12,
+          "chapter": 6,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%206%3A4-6&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Naaman se plonge sept fois dans mes eaux et retrouve une peau saine.",
+        "en": "Naaman dips seven times in my waters and his skin is restored.",
+        "reference": {
+          "book": 12,
+          "chapter": 5,
+          "verse": 14
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%205%3A14&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Mes eaux s'arrêtent lorsque les sacrificateurs portant l'arche entrent chez moi.",
+        "en": "My waters stop when the priests carrying the ark enter me.",
+        "reference": {
+          "book": 6,
+          "chapter": 3,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%203%3A14-17&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le fleuve dans lequel Jean baptise Jésus.",
+        "en": "I am the river in which John baptizes Jesus.",
+        "reference": {
+          "book": 41,
+          "chapter": 1,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%201%3A9&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-024",
+    "category": "place",
+    "testament": "old",
+    "fr": {
+      "answer": "La mer Rouge",
+      "aliases": [
+        "mer Rouge",
+        "mer des Roseaux",
+        "mer des Joncs"
+      ],
+      "explanation": "L'Exode raconte sa traversée à sec par Israël et la défaite de l'armée de Pharaon dans ses eaux."
+    },
+    "en": {
+      "answer": "The Red Sea",
+      "aliases": [
+        "Red Sea",
+        "Sea of Reeds"
+      ],
+      "explanation": "Exodus recounts Israel's dry crossing and the defeat of Pharaoh's army in its waters."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Un fort vent d'orient souffle sur moi toute une nuit.",
+        "en": "A strong east wind blows over me all night.",
+        "reference": {
+          "book": 2,
+          "chapter": 14,
+          "verse": 21
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2014%3A21&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Après ma traversée, Marie entraîne les femmes avec des tambourins et des danses.",
+        "en": "After I am crossed, Miriam leads the women with tambourines and dancing.",
+        "reference": {
+          "book": 2,
+          "chapter": 15,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2015%3A20&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Les chars et les cavaliers de Pharaon sont recouverts par mes eaux.",
+        "en": "Pharaoh's chariots and horsemen are covered by my waters.",
+        "reference": {
+          "book": 2,
+          "chapter": 14,
+          "verse": 28
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2014%3A28&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la mer qu'Israël traverse à pied sec derrière Moïse, entre deux murailles d'eau.",
+        "en": "I am the sea Israel crosses on dry ground behind Moses between walls of water.",
+        "reference": {
+          "book": 2,
+          "chapter": 14,
+          "verse": 22
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2013%3A18%3B14%3A21-22&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-025",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "Joppé",
+      "aliases": [
+        "Jaffa",
+        "Joppa",
+        "Japho"
+      ],
+      "explanation": "Cette ville portuaire est liée au départ de Jonas et aux séjours de Pierre chez Simon le corroyeur."
+    },
+    "en": {
+      "answer": "Joppa",
+      "aliases": [
+        "Jaffa"
+      ],
+      "explanation": "This port city is linked to Jonah's departure and Peter's stays with Simon the tanner."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Une disciple appelée Tabitha, connue pour ses bonnes œuvres, habite chez moi.",
+        "en": "A disciple called Tabitha, known for good works, lives here.",
+        "reference": {
+          "book": 44,
+          "chapter": 9,
+          "verse": 36
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%209%3A36&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Pierre monte prier sur un toit vers midi et reçoit une vision pendant son séjour.",
+        "en": "Peter goes onto a roof to pray around noon and receives a vision while staying here.",
+        "reference": {
+          "book": 44,
+          "chapter": 10,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2010%3A5-16&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Pierre loge chez moi chez Simon, un homme qui travaille les peaux.",
+        "en": "Peter lodges here with Simon, a man who works with hides.",
+        "reference": {
+          "book": 44,
+          "chapter": 9,
+          "verse": 43
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%209%3A43&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le port où Jonas trouve un navire pour fuir vers Tarsis.",
+        "en": "I am the port where Jonah finds a ship to flee toward Tarshish.",
+        "reference": {
+          "book": 32,
+          "chapter": 1,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Jonah%201%3A3&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-026",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "Béthanie",
+      "aliases": [
+        "Bethany"
+      ],
+      "explanation": "Ce village près de Jérusalem était celui de Marthe, Marie et Lazare ; Jésus y séjourna."
+    },
+    "en": {
+      "answer": "Bethany",
+      "aliases": [],
+      "explanation": "This village near Jerusalem was home to Martha, Mary, and Lazarus, and Jesus stayed here."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Jean me situe à environ quinze stades de Jérusalem.",
+        "en": "John places me about fifteen furlongs from Jerusalem.",
+        "reference": {
+          "book": 43,
+          "chapter": 11,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2011%3A18&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Chez Simon le lépreux, une femme verse un parfum précieux sur la tête de Jésus.",
+        "en": "At Simon the leper's house, a woman pours costly perfume on Jesus' head.",
+        "reference": {
+          "book": 40,
+          "chapter": 26,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2026%3A6-7&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Mes habitants peuvent voir sortir du tombeau un homme mort depuis quatre jours.",
+        "en": "My residents can see a man come out of a tomb after being dead for four days.",
+        "reference": {
+          "book": 43,
+          "chapter": 11,
+          "verse": 43
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2011%3A17-44&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le village de Marthe, Marie et Lazare, que Jésus aimait.",
+        "en": "I am the village of Martha, Mary, and Lazarus, whom Jesus loved.",
+        "reference": {
+          "book": 43,
+          "chapter": 11,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2011%3A1-5&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-027",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "Gethsémané",
+      "aliases": [
+        "Gethsemani",
+        "Gethsémani",
+        "jardin de Gethsémané"
+      ],
+      "explanation": "Jésus pria dans ce lieu avec ses disciples avant l'arrivée de Judas et son arrestation."
+    },
+    "en": {
+      "answer": "Gethsemane",
+      "aliases": [
+        "Garden of Gethsemane"
+      ],
+      "explanation": "Jesus prayed in this place with his disciples before Judas arrived and he was arrested."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Jésus y prend Pierre et les deux fils de Zébédée un peu à l'écart.",
+        "en": "Jesus takes Peter and the two sons of Zebedee a little aside here.",
+        "reference": {
+          "book": 40,
+          "chapter": 26,
+          "verse": 37
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2026%3A37&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Il y trouve ses compagnons endormis et leur parle d'une heure de veille.",
+        "en": "He finds his companions asleep here and speaks of watching for one hour.",
+        "reference": {
+          "book": 40,
+          "chapter": 26,
+          "verse": 40
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2026%3A40&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Il y demande que la coupe s'éloigne, tout en acceptant la volonté du Père.",
+        "en": "He asks here for the cup to pass while accepting the Father's will.",
+        "reference": {
+          "book": 40,
+          "chapter": 26,
+          "verse": 39
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2026%3A39&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le lieu où Jésus prie avant que Judas arrive pour le livrer.",
+        "en": "I am the place where Jesus prays before Judas arrives to betray him.",
+        "reference": {
+          "book": 40,
+          "chapter": 26,
+          "verse": 36
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2026%3A36-50&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-028",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "Le mont des Oliviers",
+      "aliases": [
+        "mont des Oliviers",
+        "montagne des Oliviers"
+      ],
+      "explanation": "Cette montagne à l'est de Jérusalem est un lieu fréquent d'enseignement et de prière de Jésus."
+    },
+    "en": {
+      "answer": "The Mount of Olives",
+      "aliases": [
+        "Mount of Olives",
+        "Olivet"
+      ],
+      "explanation": "This mountain east of Jerusalem is a frequent setting for Jesus' teaching and prayer."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "David me gravit en pleurant, la tête couverte et les pieds nus.",
+        "en": "David climbs me weeping, with his head covered and his feet bare.",
+        "reference": {
+          "book": 10,
+          "chapter": 15,
+          "verse": 30
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%2015%3A30&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Le prophète Zacharie me situe en face de Jérusalem, du côté de l'orient.",
+        "en": "The prophet Zechariah places me east of Jerusalem.",
+        "reference": {
+          "book": 38,
+          "chapter": 14,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Zechariah%2014%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Assis sur moi, Jésus répond en privé aux disciples au sujet de son avènement et de la fin.",
+        "en": "Sitting on me, Jesus privately answers the disciples about his coming and the end.",
+        "reference": {
+          "book": 40,
+          "chapter": 24,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2024%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la montagne d'où les disciples reviennent à Jérusalem après l'ascension de Jésus.",
+        "en": "I am the mountain from which the disciples return to Jerusalem after Jesus' ascension.",
+        "reference": {
+          "book": 44,
+          "chapter": 1,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%201%3A12&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-029",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "Golgotha",
+      "aliases": [
+        "Calvaire",
+        "le Calvaire",
+        "lieu du Crâne"
+      ],
+      "explanation": "Les Évangiles donnent ce nom au lieu où Jésus fut crucifié."
+    },
+    "en": {
+      "answer": "Golgotha",
+      "aliases": [
+        "Calvary",
+        "Place of the Skull"
+      ],
+      "explanation": "The Gospels give this name to the place where Jesus was crucified."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "On offre à Jésus une boisson mêlée de fiel à son arrivée chez moi.",
+        "en": "Jesus is offered a drink mixed with gall when he arrives here.",
+        "reference": {
+          "book": 40,
+          "chapter": 27,
+          "verse": 34
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2027%3A33-34&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Les soldats y partagent les vêtements de Jésus en tirant au sort.",
+        "en": "Soldiers divide his garments by casting lots here.",
+        "reference": {
+          "book": 40,
+          "chapter": 27,
+          "verse": 35
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2027%3A33-35&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Jésus y est placé entre deux autres condamnés.",
+        "en": "Jesus is placed between two other condemned men here.",
+        "reference": {
+          "book": 43,
+          "chapter": 19,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2019%3A17-18&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le lieu où Jésus est crucifié à l'extérieur de Jérusalem.",
+        "en": "I am the place outside Jerusalem where Jesus is crucified.",
+        "reference": {
+          "book": 43,
+          "chapter": 19,
+          "verse": 17
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2019%3A17-20&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-030",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "La Galilée",
+      "aliases": [
+        "Galilée"
+      ],
+      "explanation": "Cette région du nord est au centre du ministère de Jésus ; plusieurs de ses disciples en étaient originaires."
+    },
+    "en": {
+      "answer": "Galilee",
+      "aliases": [],
+      "explanation": "This northern region is central to Jesus' ministry; several of his disciples came from it."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Hérode m'a pour territoire lorsqu'il est présenté comme tétrarque au début du ministère de Jean.",
+        "en": "Herod rules me as tetrarch at the beginning of John's ministry.",
+        "reference": {
+          "book": 42,
+          "chapter": 3,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%203%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Après sa tentation, Jésus revient chez moi avec la puissance de l'Esprit.",
+        "en": "After his temptation, Jesus returns here in the power of the Spirit.",
+        "reference": {
+          "book": 42,
+          "chapter": 4,
+          "verse": 14
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%204%3A14&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Après sa résurrection, Jésus y donne rendez-vous à ses disciples.",
+        "en": "After his resurrection, Jesus arranges to meet his disciples here.",
+        "reference": {
+          "book": 40,
+          "chapter": 28,
+          "verse": 10
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2028%3A10&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la région qui comprend Nazareth et Capernaüm, où Jésus commence à prêcher.",
+        "en": "I am the region containing Nazareth and Capernaum where Jesus begins preaching.",
+        "reference": {
+          "book": 40,
+          "chapter": 4,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%204%3A12-17&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-031",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "La mer de Galilée",
+      "aliases": [
+        "mer de Galilée",
+        "lac de Galilée",
+        "lac de Tibériade",
+        "mer de Tibériade",
+        "lac de Génésareth",
+        "Génésareth",
+        "Tibériade"
+      ],
+      "explanation": "Ce lac porte plusieurs noms dans les Évangiles ; Jésus y appela des pêcheurs et y calma la tempête."
+    },
+    "en": {
+      "answer": "The Sea of Galilee",
+      "aliases": [
+        "Sea of Galilee",
+        "Lake Galilee",
+        "Sea of Tiberias",
+        "Lake Gennesaret",
+        "Lake Tiberias"
+      ],
+      "explanation": "This lake has several names in the Gospels; Jesus called fishermen here and calmed the storm here."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Sur mon rivage, une foule presse Jésus tandis que des pêcheurs lavent leurs filets.",
+        "en": "On my shore, a crowd presses Jesus while fishermen wash their nets.",
+        "reference": {
+          "book": 42,
+          "chapter": 5,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%205%3A1-2&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Jésus enseigne une foule depuis une barque posée sur mes eaux.",
+        "en": "Jesus teaches a crowd from a boat on my waters.",
+        "reference": {
+          "book": 41,
+          "chapter": 4,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%204%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Au milieu d'une traversée, Jésus parle au vent et à mes vagues pour les apaiser.",
+        "en": "During a crossing, Jesus speaks to the wind and my waves to calm them.",
+        "reference": {
+          "book": 41,
+          "chapter": 4,
+          "verse": 39
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%204%3A39&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le lac où Pierre et André pêchent quand Jésus les appelle à le suivre.",
+        "en": "I am the lake where Peter and Andrew fish when Jesus calls them to follow him.",
+        "reference": {
+          "book": 40,
+          "chapter": 4,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%204%3A18&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-032",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "Antioche de Syrie",
+      "aliases": [
+        "Antioche",
+        "Antioche sur l'Oronte"
+      ],
+      "explanation": "L'Église de cette ville envoya Barnabas et Saul en mission ; les disciples y furent appelés chrétiens."
+    },
+    "en": {
+      "answer": "Antioch of Syria",
+      "aliases": [
+        "Antioch",
+        "Syrian Antioch"
+      ],
+      "explanation": "This city's church sent Barnabas and Saul on mission, and the disciples were called Christians here."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Une communauté décide d'y envoyer un secours aux frères de Judée pendant la famine.",
+        "en": "A community here decides to send relief to believers in Judea during a famine.",
+        "reference": {
+          "book": 44,
+          "chapter": 11,
+          "verse": 29
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2011%3A27-30&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Des prophètes et des docteurs y jeûnent quand l'Esprit demande de mettre à part Barnabas et Saul.",
+        "en": "Prophets and teachers fast here when the Spirit asks for Barnabas and Saul to be set apart.",
+        "reference": {
+          "book": 44,
+          "chapter": 13,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2013%3A1-3&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Barnabas y fait venir Saul et tous deux enseignent ensemble pendant une année.",
+        "en": "Barnabas brings Saul here, and they teach together for a year.",
+        "reference": {
+          "book": 44,
+          "chapter": 11,
+          "verse": 26
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2011%3A26&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville où les disciples sont appelés chrétiens pour la première fois.",
+        "en": "I am the city where the disciples are first called Christians.",
+        "reference": {
+          "book": 44,
+          "chapter": 11,
+          "verse": 26
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2011%3A26&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-033",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "Damas",
+      "aliases": [
+        "Damascus"
+      ],
+      "explanation": "Saul se rendait vers cette ville lorsqu'il rencontra Jésus ; il y retrouva la vue avant de s'enfuir dans une corbeille."
+    },
+    "en": {
+      "answer": "Damascus",
+      "aliases": [],
+      "explanation": "Saul was traveling toward this city when he met Jesus; he regained sight here and later escaped in a basket."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Un gouverneur du roi Arétas fait garder mes portes pour saisir Paul.",
+        "en": "A governor under King Aretas guards me to seize Paul.",
+        "reference": {
+          "book": 47,
+          "chapter": 11,
+          "verse": 32
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Corinthians%2011%3A32&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Des disciples font descendre Saul de mes murailles dans une corbeille, de nuit.",
+        "en": "Disciples lower Saul from my walls in a basket at night.",
+        "reference": {
+          "book": 44,
+          "chapter": 9,
+          "verse": 25
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%209%3A25&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Ananias est envoyé chez moi dans une rue appelée la Droite.",
+        "en": "Ananias is sent here to a street called Straight.",
+        "reference": {
+          "book": 44,
+          "chapter": 9,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%209%3A11&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville vers laquelle Saul voyage lorsqu'une lumière céleste et la voix de Jésus l'arrêtent.",
+        "en": "I am the city toward which Saul travels when heavenly light and Jesus' voice stop him.",
+        "reference": {
+          "book": 44,
+          "chapter": 9,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%209%3A3-5&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-034",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "Philippes",
+      "aliases": [
+        "Philippi"
+      ],
+      "explanation": "Dans cette ville de Macédoine, Lydia accueillit Paul et Silas, qui furent ensuite emprisonnés."
+    },
+    "en": {
+      "answer": "Philippi",
+      "aliases": [],
+      "explanation": "In this Macedonian city, Lydia welcomed Paul and Silas, who were later imprisoned."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je suis présentée comme une colonie romaine de Macédoine.",
+        "en": "I am described as a Roman colony in Macedonia.",
+        "reference": {
+          "book": 44,
+          "chapter": 16,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A12&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Une marchande de pourpre y écoute Paul près d'une rivière et ouvre sa maison aux voyageurs.",
+        "en": "A seller of purple hears Paul by a river here and opens her home to the travelers.",
+        "reference": {
+          "book": 44,
+          "chapter": 16,
+          "verse": 14
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A13-15&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Paul et Silas chantent chez moi à minuit malgré leurs pieds entravés.",
+        "en": "Paul and Silas sing here at midnight despite their feet being fastened.",
+        "reference": {
+          "book": 44,
+          "chapter": 16,
+          "verse": 25
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A24-25&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville où un tremblement de terre ouvre la prison de Paul et Silas et où le geôlier vient à la foi.",
+        "en": "I am the city where an earthquake opens Paul and Silas's prison and the jailer comes to faith.",
+        "reference": {
+          "book": 44,
+          "chapter": 16,
+          "verse": 26
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A26-34&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-035",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "Éphèse",
+      "aliases": [
+        "Ephesus"
+      ],
+      "explanation": "Paul enseigna longtemps dans cette ville, où le culte d'Artémis suscita une émeute contre ses compagnons."
+    },
+    "en": {
+      "answer": "Ephesus",
+      "aliases": [],
+      "explanation": "Paul taught for a long time in this city, where the cult of Artemis sparked a riot against his companions."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Paul enseigne chaque jour chez moi dans l'école de Tyrannus.",
+        "en": "Paul teaches daily here in the school of Tyrannus.",
+        "reference": {
+          "book": 44,
+          "chapter": 19,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2019%3A9&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Des personnes ayant pratiqué la magie brûlent publiquement leurs livres.",
+        "en": "People who practiced magic publicly burn their books here.",
+        "reference": {
+          "book": 44,
+          "chapter": 19,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2019%3A19&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Un orfèvre nommé Démétrius y soulève les artisans qui fabriquent des sanctuaires d'argent.",
+        "en": "A silversmith named Demetrius stirs up artisans making silver shrines here.",
+        "reference": {
+          "book": 44,
+          "chapter": 19,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2019%3A24-28&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville dont la foule crie la grandeur de la déesse Diane.",
+        "en": "I am the city whose crowd shouts about the greatness of the goddess Diana.",
+        "reference": {
+          "book": 44,
+          "chapter": 19,
+          "verse": 28
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2019%3A28&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-036",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "Corinthe",
+      "aliases": [
+        "Corinth"
+      ],
+      "explanation": "Paul travailla ici avec Aquilas et Priscille et resta enseigner un an et demi ; il écrivit ensuite à cette Église."
+    },
+    "en": {
+      "answer": "Corinth",
+      "aliases": [],
+      "explanation": "Paul worked here with Aquila and Priscilla and taught for eighteen months; he later wrote to this church."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Le proconsul Gallion refuse chez moi de juger un différend religieux contre Paul.",
+        "en": "The proconsul Gallio refuses here to judge a religious complaint against Paul.",
+        "reference": {
+          "book": 44,
+          "chapter": 18,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2018%3A12-16&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Paul reste parmi mes habitants pendant un an et six mois pour enseigner.",
+        "en": "Paul stays among my residents for a year and six months to teach.",
+        "reference": {
+          "book": 44,
+          "chapter": 18,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2018%3A11&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Il y travaille avec Aquilas et Priscille, qui fabriquent des tentes comme lui.",
+        "en": "He works here with Aquila and Priscilla, who make tents as he does.",
+        "reference": {
+          "book": 44,
+          "chapter": 18,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2018%3A1-3&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville de l'Église à laquelle Paul adresse deux lettres, dont l'une contient son grand passage sur l'amour.",
+        "en": "I am the city of the church to which Paul addresses two letters, one containing his great passage about love.",
+        "reference": {
+          "book": 46,
+          "chapter": 1,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Corinthians%201%3A2%3B13%3A1-13%3B2%20Corinthians%201%3A1&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-037",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "Rome",
+      "aliases": [],
+      "explanation": "Paul rejoignit cette capitale comme prisonnier et y annonça le royaume de Dieu dans un logement loué."
+    },
+    "en": {
+      "answer": "Rome",
+      "aliases": [],
+      "explanation": "Paul reached this capital as a prisoner and proclaimed God's kingdom from rented lodging."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Des frères viennent jusqu'au Forum d'Appius et aux Trois-Tavernes accueillir Paul sur son chemin vers moi.",
+        "en": "Believers come as far as Appii Forum and the Three Taverns to greet Paul on his way to me.",
+        "reference": {
+          "book": 44,
+          "chapter": 28,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2028%3A15&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Paul vit chez moi deux années dans un logement qu'il loue et reçoit ses visiteurs.",
+        "en": "Paul lives here for two years in rented lodging and welcomes visitors.",
+        "reference": {
+          "book": 44,
+          "chapter": 28,
+          "verse": 30
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2028%3A30&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "À son arrivée, il reçoit la permission d'habiter à part avec un soldat qui le garde.",
+        "en": "On arrival, he is allowed to live separately with a soldier guarding him.",
+        "reference": {
+          "book": 44,
+          "chapter": 28,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2028%3A16&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la capitale impériale où Paul arrive après avoir fait appel à César.",
+        "en": "I am the imperial capital Paul reaches after appealing to Caesar.",
+        "reference": {
+          "book": 44,
+          "chapter": 28,
+          "verse": 14
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2025%3A11%3B28%3A14-16&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-038",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "Césarée",
+      "aliases": [
+        "Césarée maritime",
+        "Cesaree",
+        "Césarée de Palestine"
+      ],
+      "explanation": "Corneille vivait dans cette ville côtière ; Paul y fut détenu et comparut devant les gouverneurs."
+    },
+    "en": {
+      "answer": "Caesarea",
+      "aliases": [
+        "Caesarea Maritima",
+        "Caesarea by the sea"
+      ],
+      "explanation": "Cornelius lived in this coastal city; Paul was imprisoned here and appeared before governors."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Philippe l'évangéliste y habite avec ses quatre filles qui prophétisent.",
+        "en": "Philip the evangelist lives here with his four daughters who prophesy.",
+        "reference": {
+          "book": 44,
+          "chapter": 21,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2021%3A8-9&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Paul y est gardé dans le prétoire d'Hérode après son transfert depuis Jérusalem.",
+        "en": "Paul is guarded here in Herod's judgment hall after transfer from Jerusalem.",
+        "reference": {
+          "book": 44,
+          "chapter": 23,
+          "verse": 35
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2023%3A35&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Pierre y vient à la demande d'un centenier nommé Corneille.",
+        "en": "Peter comes here at the request of a centurion named Cornelius.",
+        "reference": {
+          "book": 44,
+          "chapter": 10,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2010%3A24&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville où Paul comparaît devant Félix, puis Festus et le roi Agrippa.",
+        "en": "I am the city where Paul appears before Felix, then Festus and King Agrippa.",
+        "reference": {
+          "book": 44,
+          "chapter": 25,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2024%3A1-3%3B25%3A1-23&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-039",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "Malte",
+      "aliases": [
+        "Mélite",
+        "Melita",
+        "Melite"
+      ],
+      "explanation": "Les naufragés qui voyageaient avec Paul furent accueillis sur cette île ; Paul y survécut à une morsure de vipère."
+    },
+    "en": {
+      "answer": "Malta",
+      "aliases": [
+        "Melita"
+      ],
+      "explanation": "The people shipwrecked with Paul were welcomed on this island, where Paul survived a viper's bite."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Le père de Publius y souffre de fièvre et de dysenterie avant d'être guéri.",
+        "en": "Publius's father suffers from fever and dysentery here before being healed.",
+        "reference": {
+          "book": 44,
+          "chapter": 28,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2028%3A8&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Mes habitants allument un feu pour accueillir des naufragés sous la pluie et dans le froid.",
+        "en": "My inhabitants light a fire to welcome shipwreck survivors in rain and cold.",
+        "reference": {
+          "book": 44,
+          "chapter": 28,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2028%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Une vipère s'attache à la main de Paul pendant qu'il met du bois sur le feu.",
+        "en": "A viper fastens onto Paul's hand while he puts wood on the fire.",
+        "reference": {
+          "book": 44,
+          "chapter": 28,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2028%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis l'île où Paul et ses compagnons échouent après leur naufrage en route vers Rome.",
+        "en": "I am the island where Paul and his companions land after their shipwreck on the way to Rome.",
+        "reference": {
+          "book": 44,
+          "chapter": 28,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2027%3A1%3B28%3A1&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-place-040",
+    "category": "place",
+    "testament": "new",
+    "fr": {
+      "answer": "Athènes",
+      "aliases": [
+        "Athenes"
+      ],
+      "explanation": "Paul visita cette ville grecque, parla à l'Aréopage et prit comme point de départ un autel au dieu inconnu."
+    },
+    "en": {
+      "answer": "Athens",
+      "aliases": [],
+      "explanation": "Paul visited this Greek city, spoke at the Areopagus, and began from an altar to an unknown god."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Une femme nommée Damaris et un homme nommé Denys se joignent à Paul après son discours.",
+        "en": "A woman named Damaris and a man named Dionysius join Paul here after his speech.",
+        "reference": {
+          "book": 44,
+          "chapter": 17,
+          "verse": 34
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2017%3A34&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Des philosophes épicuriens et stoïciens y discutent avec lui.",
+        "en": "Epicurean and Stoic philosophers debate with him here.",
+        "reference": {
+          "book": 44,
+          "chapter": 17,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2017%3A18&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Paul y remarque un autel portant une inscription au dieu inconnu.",
+        "en": "Paul notices an altar here inscribed to an unknown god.",
+        "reference": {
+          "book": 44,
+          "chapter": 17,
+          "verse": 23
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2017%3A23&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville grecque où Paul prononce son discours à l'Aréopage.",
+        "en": "I am the Greek city where Paul delivers his speech at the Areopagus.",
+        "reference": {
+          "book": 44,
+          "chapter": 17,
+          "verse": 22
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2017%3A22&version=LSG%3BKJV"
+      }
+    ]
+  }
+]

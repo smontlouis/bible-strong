@@ -1,5 +1,6 @@
 import {
   createSoloRun,
+  SOLO_MAX_QUESTIONS,
   pauseSolo,
   resumeSolo,
   submitSolo,
@@ -24,6 +25,8 @@ export const INVITE_MS = 60_000
 export const REJOIN_MS = 90_000
 const ROUND_MS = 60_000
 export type Round = {
+  catalogueId?: string
+  sources?: { reference: string; url: string }[]
   question: string
   clues: string[]
   choices: string[]
@@ -55,6 +58,8 @@ type WhoRound = {
   awarded?: number
 }
 export type Game = {
+  soloAnswers?: { round: number; text: string; status: 'correct' | 'wrong' | 'skipped' }[]
+  soloFeedback?: GameView['soloFeedback']
   solo?: SoloRun
   who?: WhoRound
   id: string
@@ -75,13 +80,22 @@ export type Game = {
 }
 type Invitation = { id: string; gameId: string; from: string; to: string; expires: number }
 export type GameData = { games: Game[]; invitations: Invitation[]; limits: Record<string, number> }
-export type Visitor = { id: string; profile: AvatarProfile; x: number; y: number; present: boolean }
+export type Visitor = {
+  historyId?: string
+  id: string
+  profile: AvatarProfile
+  x: number
+  y: number
+  present: boolean
+}
 export type Effect =
   | {
       type: 'generate'
       gameId: string
       operation: string
       options: GameOptions
+      count?: number
+      players?: string[]
       exclude?: string[]
     }
   | {
@@ -307,18 +321,18 @@ export class GameEngine {
         g.players.some(p => p.absentSince !== null)
       )
         return fail('not_ready')
-      if (
-        this.data.games.filter(g => g.phase === 'generating').length >= 3 ||
-        Object.keys(this.data.limits).filter(key => key.startsWith('budget:')).length >= 60
-      )
-        return fail('rate_limited')
       g.phase = 'generating'
       g.operation = this.uuid()
-      this.data.limits[`budget:${g.operation}`] = now + 60 * 60_000
-      g.deadline = now + 180_000
+      g.deadline = now + 15_000
       delete g.reason
       this.data.invitations = this.data.invitations.filter(i => i.gameId !== g!.id)
-      return { type: 'generate', gameId: g.id, operation: g.operation, options: g.options }
+      return {
+        type: 'generate',
+        gameId: g.id,
+        operation: g.operation,
+        options: g.options,
+        players: g.players.map(p => this.visitor(p.id)?.historyId ?? p.id),
+      }
     }
     if (action.action === 'next') {
       if (g.host !== id) return fail('not_host')
@@ -348,13 +362,15 @@ export class GameEngine {
       if (
         g.options.kind === 'quiz' &&
         g.options.difficulty === 'easy' &&
+        r.choices.length > 0 &&
         !r.choices.includes(action.text)
       )
         return fail('invalid')
       const exact = [r.answer, ...r.aliases].some(
         a => normalizeAnswer(a) === normalizeAnswer(action.text)
       )
-      const choice = g.options.kind === 'quiz' && g.options.difficulty === 'easy'
+      const choice =
+        g.options.kind === 'quiz' && g.options.difficulty === 'easy' && r.choices.length > 0
       const a: Answer = {
         text: action.text,
         status: exact ? 'correct' : choice ? 'wrong' : 'pending',
@@ -385,33 +401,45 @@ export class GameEngine {
     g: Game,
     a: Answer,
     status: 'correct' | 'wrong' | 'clarify' | 'unavailable' | 'skipped'
-  ) {
+  ): Effect | undefined {
     if (!g.solo || !settleSolo(g.solo, a.operation, status, this.now())) return
     g.players[0].score = g.solo.best
     if (status === 'correct' || status === 'wrong' || status === 'skipped') {
-      g.phase = g.solo.outcome ? 'finished' : 'reveal'
-      g.deadline = this.now() + 24 * 60 * 60_000
+      ;(g.soloAnswers ??= []).push({ round: g.round, text: a.text, status })
+      g.soloFeedback = { round: g.round, status, at: this.now() }
+      if (g.solo.outcome) this.finish(g)
+      else return this.advanceSolo(g)
     }
+  }
+  private advanceSolo(g: Game): Effect | undefined {
+    if (g.round + 1 >= SOLO_MAX_QUESTIONS) {
+      g.solo!.outcome = 'exhausted'
+      g.solo!.runningSince = null
+      this.finish(g)
+      return
+    }
+    g.round++
+    g.answers = {}
+    resumeSolo(g.solo!, 'feedback', this.now())
+    if (g.round >= g.rounds.length) return this.prepareSolo(g)
+    g.phase = 'question'
+    g.deadline = this.now() + 24 * 60 * 60_000
   }
   private prepareSolo(g: Game): Effect {
     const now = this.now()
-    if (
-      this.data.games.filter(item => item.phase === 'generating').length >= 3 ||
-      Object.keys(this.data.limits).filter(key => key.startsWith('budget:')).length >= 60
-    )
-      return fail('rate_limited')
     pauseSolo(g.solo!, 'preparing', now)
     g.phase = 'generating'
     g.operation = this.uuid()
-    this.data.limits[`budget:${g.operation}`] = now + 60 * 60_000
-    g.deadline = now + 180_000
+    g.deadline = now + 15_000
     delete g.reason
     return {
       type: 'generate',
       gameId: g.id,
       operation: g.operation,
       options: g.options,
-      exclude: g.rounds.map(r => r.answer),
+      players: g.players.map(p => this.visitor(p.id)?.historyId ?? p.id),
+      exclude: g.rounds.map(r => r.catalogueId ?? r.answer),
+      count: SOLO_MAX_QUESTIONS - g.rounds.length,
     }
   }
   private soloCommand(g: Game, id: string, action: GameAction): Effect | undefined {
@@ -433,27 +461,9 @@ export class GameEngine {
     }
     if (action.action === 'next') {
       if (run.outcome || run.pauses.includes('away')) return fail('not_ready')
-      if (g.phase === 'reveal') {
-        if (g.round + 1 >= 50) {
-          run.outcome = 'exhausted'
-          this.finish(g)
-          return
-        }
-        // Preparation can fail its rate limit; do not advance the index until accepted.
-        if (g.round + 1 >= g.rounds.length) {
-          const effect = this.prepareSolo(g)
-          g.round++
-          g.answers = {}
-          resumeSolo(run, 'feedback', now)
-          return effect
-        }
-        g.round++
-        g.answers = {}
-        g.phase = 'question'
-      } else if (
-        g.phase !== 'question' ||
-        !['clarify', 'unavailable'].includes(g.answers[id]?.status)
-      )
+      // Resume a persisted pre-continuous round without displaying its correction.
+      if (g.phase === 'reveal') return this.advanceSolo(g)
+      if (g.phase !== 'question' || !['clarify', 'unavailable'].includes(g.answers[id]?.status))
         return fail('not_ready')
       resumeSolo(run, 'feedback', now)
       resumeSolo(run, 'technical', now)
@@ -467,8 +477,7 @@ export class GameEngine {
       if (!submitSolo(run, operation, now)) return fail('not_ready')
       const a: Answer = { text: '', status: 'skipped', operation, attempts: 1, expires: now }
       g.answers[id] = a
-      this.soloVerdict(g, a, 'skipped')
-      return
+      return this.soloVerdict(g, a, 'skipped')
     }
     if (action.action === 'answer') {
       if (g.phase !== 'question' || action.gameId !== g.id || action.round !== g.round)
@@ -497,7 +506,7 @@ export class GameEngine {
           text: a.text,
           content: r,
         }
-      this.soloVerdict(g, a, a.status as 'correct' | 'wrong')
+      return this.soloVerdict(g, a, a.status as 'correct' | 'wrong')
     }
   }
   generated(effect: Extract<Effect, { type: 'generate' }>, rounds: Round[] | null) {
@@ -509,15 +518,21 @@ export class GameEngine {
       g.deadline <= this.now()
     )
       return
-    if (!rounds || rounds.length !== 5) {
+    if (
+      !rounds ||
+      (g.solo
+        ? !rounds.length || rounds.length > SOLO_MAX_QUESTIONS - g.rounds.length
+        : rounds.length !== 5)
+    ) {
       g.phase = 'lobby'
       g.reason = 'generation_failed'
       g.deadline = this.now() + (g.solo ? 24 * 60 * 60_000 : 10 * 60_000)
       return
     }
     if (g.solo) {
-      const previous = new Set(g.rounds.map(r => normalizeAnswer(r.answer)))
-      const fresh = rounds.filter(r => !previous.has(normalizeAnswer(r.answer)))
+      const identity = (r: Round) => r.catalogueId ?? normalizeAnswer(r.answer)
+      const previous = new Set(g.rounds.map(identity))
+      const fresh = rounds.filter(r => !previous.has(identity(r)))
       if (!fresh.length) {
         g.phase = 'lobby'
         g.reason = 'generation_failed'
@@ -552,8 +567,7 @@ export class GameEngine {
       return
     a.status = status
     if (g.solo) {
-      this.soloVerdict(g, a, status)
-      return
+      return this.soloVerdict(g, a, status)
     }
     this.settleWho(g)
     if (g.pausedAt === null && this.completed(g)) this.reveal(g)
@@ -733,7 +747,12 @@ export class GameEngine {
             ? 4
             : 3
       )
-      if (!g.solo && g.options.kind === 'quiz' && g.options.difficulty === 'easy')
+      if (
+        !g.solo &&
+        g.options.kind === 'quiz' &&
+        g.options.difficulty === 'easy' &&
+        r.choices.length > 0
+      )
         view.choices = r.choices
       if (g.who)
         view.who = {
@@ -765,12 +784,13 @@ export class GameEngine {
                 : a.status
               : a.status,
         }
-      if (g.phase !== 'question')
+      if (!g.solo && g.phase !== 'question')
         view.result = {
           answer: r.answer,
           explanation: r.explanation,
           reference: r.reference,
           url: r.url,
+          ...(r.sources ? { sources: r.sources } : {}),
           void: !!g.void,
           answers: Object.entries(g.answers).map(([id, a]) => ({
             id,
@@ -778,6 +798,33 @@ export class GameEngine {
             status: a.status,
           })),
         }
+    }
+    if (g.solo) {
+      if (g.soloFeedback) view.soloFeedback = { ...g.soloFeedback }
+      if (g.phase === 'finished') {
+        const answers: {
+          round: number
+          text: string
+          status: 'correct' | 'wrong' | 'skipped' | 'timeout'
+        }[] = [...(g.soloAnswers ?? [])]
+        if (g.solo.outcome === 'timeout' && r && !answers.some(a => a.round === g.round))
+          answers.push({ round: g.round, text: '', status: 'timeout' })
+        view.soloReviewIncomplete = (g.soloAnswers?.length ?? 0) < g.solo.answered
+        view.soloReview = answers.flatMap(a => {
+          const content = g.rounds[a.round]
+          return content
+            ? [
+                {
+                  ...a,
+                  question: content.question,
+                  answer: content.answer,
+                  explanation: content.explanation,
+                  sources: content.sources ?? [{ reference: content.reference, url: content.url }],
+                },
+              ]
+            : []
+        })
+      }
     }
     return { game: view, invitations, now }
   }

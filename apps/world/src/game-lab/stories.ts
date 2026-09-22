@@ -1,6 +1,7 @@
 import { createSoloRun, resumeSolo, pauseSolo, submitSolo, settleSolo } from '../solo-game'
 import type {
   GameView,
+  SoloReviewItem,
   GameOptions,
   GameInvitation,
   GameError,
@@ -11,7 +12,7 @@ export const stories = [
   ['station', 'Solo', 'Borne · entrée dans les jeux'],
   ['solo-choose', 'Solo', 'Choisir solo / ensemble'],
   ['solo-lobby', 'Solo', 'Prêt à jouer'],
-  ['solo-generating', 'Solo', 'Préparation Gloo'],
+  ['solo-generating', 'Solo', 'Chargement du catalogue'],
   ['solo-text', 'Solo', 'Réponse libre · clavier'],
   ['solo-clarify', 'Solo', 'Précision sans pénalité'],
   ['solo-generation-error', 'Solo', 'Préparation échouée · réessayer'],
@@ -27,7 +28,7 @@ export const stories = [
   ['lobby', 'Accueil', 'Salon · hôte'],
   ['guest', 'Accueil', 'Salon · invité'],
   ['full', 'Accueil', 'Salon complet'],
-  ['generating', 'Accueil', 'Préparation IA'],
+  ['generating', 'Accueil', 'Chargement du catalogue'],
   ['generation-error', 'Accueil', 'Échec de préparation'],
   ['your-turn', 'Qui suis-je ?', 'À toi de jouer'],
   ['their-turn', 'Qui suis-je ?', 'La main à l’adversaire'],
@@ -41,11 +42,11 @@ export const stories = [
   ['clue-4', 'Qui suis-je ?', 'Dernier indice'],
   ['race', 'Qui suis-je ?', 'Course à 3 ou 4'],
   ['blocked', 'Qui suis-je ?', 'Tentative utilisée'],
-  ['quiz', 'Défi biblique', 'Quatre choix'],
-  ['quiz-text', 'Défi biblique', 'Réponse libre'],
+  ['quiz', 'Défi biblique', 'Réponse écrite · découverte'],
+  ['quiz-text', 'Défi biblique', 'Réponse écrite · intermédiaire'],
   ['quiz-sent', 'Défi biblique', 'Attente des réponses'],
   ['quiz-win', 'Défi biblique', 'Bonne réponse'],
-  ['quiz-wrong', 'Défi biblique', 'Mauvais choix'],
+  ['quiz-wrong', 'Défi biblique', 'Mauvaise réponse'],
   ['win', 'Résultats', 'Victoire de manche'],
   ['other-wins', 'Résultats', 'L’autre joueur trouve'],
   ['no-winner', 'Résultats', 'Personne ne trouve'],
@@ -113,6 +114,7 @@ export const flows = {
 } satisfies Record<string, { name: string; steps: StoryId[] }>
 export type LabConfig = { language: 'fr' | 'en'; players: number; perspective: number }
 export type LabModel = {
+  soloHistory?: SoloReviewItem[]
   game: GameView | null
   invitations: GameInvitation[]
   selected: GameInvitation | null
@@ -135,6 +137,77 @@ export const people = ['Stéphane', 'Léa', 'Samuel', 'Miriam'].map((name, i) =>
   score: 0,
   absentSince: null as number | null,
 }))
+function soloLabItem(
+  round: number,
+  language: 'fr' | 'en',
+  status: SoloReviewItem['status'],
+  text: string
+): SoloReviewItem {
+  const fr = language === 'fr'
+  const examples = [
+    {
+      fr: 'Qui a conduit les Israélites hors d’Égypte ?',
+      en: 'Who led the Israelites out of Egypt?',
+      chapter: 3,
+      verse: 10,
+      explanationFr: 'Dieu envoie Moïse auprès du pharaon pour faire sortir son peuple d’Égypte.',
+      explanationEn: 'God sends Moses to Pharaoh to lead his people out of Egypt.',
+    },
+    {
+      fr: 'À qui Dieu a-t-il donné les deux tables du témoignage sur le mont Sinaï ?',
+      en: 'To whom did God give the two tablets of testimony on Mount Sinai?',
+      chapter: 31,
+      verse: 18,
+      explanationFr: 'Dieu donne les deux tables du témoignage à Moïse sur le mont Sinaï.',
+      explanationEn: 'God gives the two tablets of testimony to Moses on Mount Sinai.',
+    },
+    {
+      fr: 'Qui Dieu appelle-t-il depuis le buisson ardent ?',
+      en: 'Whom does God call from the burning bush?',
+      chapter: 3,
+      verse: 4,
+      explanationFr: 'Dieu appelle Moïse par son nom depuis le buisson.',
+      explanationEn: 'God calls Moses by name from the bush.',
+    },
+  ]
+  const q = examples[round % examples.length]
+  return {
+    round,
+    question: fr ? q.fr : q.en,
+    answer: fr ? 'Moïse' : 'Moses',
+    status,
+    text,
+    explanation: fr ? q.explanationFr : q.explanationEn,
+    sources: [
+      {
+        reference: `${fr ? 'Exode' : 'Exodus'} ${q.chapter}:${q.verse}`,
+        url: `https://web.bible-strong.app/bible-view?book=2&chapter=${q.chapter}&verse=${q.verse}&version=${fr ? 'LSG' : 'KJV'}`,
+      },
+    ],
+  }
+}
+export function finishSoloLab(model: LabModel) {
+  const g = model.game!
+  g.phase = 'finished'
+  g.soloReview = [...(model.soloHistory ?? [])]
+  if (g.solo?.outcome === 'timeout' && !g.soloReview.some(item => item.round === g.round))
+    g.soloReview.push(soloLabItem(g.round, g.options.language, 'timeout', ''))
+}
+function completeSoloLab(model: LabModel, status: 'correct' | 'wrong' | 'skipped') {
+  const g = model.game!
+  ;(model.soloHistory ??= []).push(
+    soloLabItem(g.round, g.options.language, status, g.ownAnswer?.text ?? '')
+  )
+  g.soloFeedback = { round: g.round, status, at: model.now }
+  delete g.ownAnswer
+  delete g.result
+  if (g.solo!.outcome) finishSoloLab(model)
+  else {
+    g.round++
+    g.phase = 'question'
+    g.question = soloLabItem(g.round, g.options.language, 'correct', '').question
+  }
+}
 export function makeStory(id: StoryId, config: LabConfig, now = Date.now()): LabModel {
   const fr = config.language === 'fr'
   const quiz = id.startsWith('quiz') || id.startsWith('solo-')
@@ -185,15 +258,9 @@ export function makeStory(id: StoryId, config: LabConfig, now = Date.now()): Lab
     question: fr
       ? 'Qui a conduit les Israélites hors d’Égypte ?'
       : 'Who led the Israelites out of Egypt?',
-    clues: clues.slice(0, zone + 1),
+    clues: quiz ? [] : clues.slice(0, zone + 1),
     ...(quiz
-      ? options.difficulty === 'easy'
-        ? {
-            choices: fr
-              ? ['Moïse', 'David', 'Daniel', 'Abraham']
-              : ['Moses', 'David', 'Daniel', 'Abraham'],
-          }
-        : {}
+      ? {}
       : {
           who: {
             mode: count === 2 ? 'duel' : 'race',
@@ -238,6 +305,7 @@ export function makeStory(id: StoryId, config: LabConfig, now = Date.now()): Lab
     game.host = me
     game.round = 0
     game.solo = createSoloRun()
+    game.question = soloLabItem(0, config.language, 'correct', '').question
     if (id === 'solo-choose') {
       model.game = null
       return model
@@ -253,6 +321,11 @@ export function makeStory(id: StoryId, config: LabConfig, now = Date.now()): Lab
     }
     resumeSolo(game.solo, 'preparing', now)
     game.solo.streak = game.solo.best = game.solo.answered = 2
+    game.round = 2
+    model.soloHistory = [0, 1].map(round =>
+      soloLabItem(round, config.language, 'correct', fr ? 'Moïse' : 'Moses')
+    )
+    game.question = soloLabItem(game.round, config.language, 'correct', '').question
     if (id === 'solo-paused') {
       model.online = false
       pauseSolo(game.solo, 'away', now)
@@ -267,9 +340,17 @@ export function makeStory(id: StoryId, config: LabConfig, now = Date.now()): Lab
         'solo-clarify',
       ].includes(id)
     ) {
-      if (id === 'solo-win') game.solo.streak = game.solo.best = game.solo.answered = 3
+      if (id === 'solo-win') {
+        game.solo.streak = game.solo.best = game.solo.answered = game.round = 3
+        model.soloHistory.push(soloLabItem(2, config.language, 'correct', fr ? 'Moïse' : 'Moses'))
+        game.question = soloLabItem(3, config.language, 'correct', '').question
+      }
       submitSolo(game.solo, 'lab-answer', now)
-      game.ownAnswer = { text: 'Moïse', status: 'pending', retriesLeft: 2 }
+      game.ownAnswer = {
+        text: id === 'solo-wrong' ? 'David' : fr ? 'Moïse' : 'Moses',
+        status: 'pending',
+        retriesLeft: 2,
+      }
       if (id !== 'solo-checking') {
         const status =
           id === 'solo-technical'
@@ -280,7 +361,7 @@ export function makeStory(id: StoryId, config: LabConfig, now = Date.now()): Lab
                 ? 'wrong'
                 : 'correct'
         settleSolo(game.solo, 'lab-answer', status, now)
-        if (status === 'correct' || status === 'wrong') reveal(model, status === 'correct')
+        if (status === 'correct' || status === 'wrong') completeSoloLab(model, status)
         else game.ownAnswer.status = status
         if (game.solo.outcome) game.phase = 'finished'
       }
@@ -289,7 +370,10 @@ export function makeStory(id: StoryId, config: LabConfig, now = Date.now()): Lab
       game.solo.remainingMs = 0
       game.solo.runningSince = null
       game.solo.outcome = 'timeout'
-      game.phase = 'finished'
+      model.soloHistory[1] = soloLabItem(1, config.language, 'wrong', 'David')
+      game.solo.streak = 0
+      game.solo.best = 1
+      finishSoloLab(model)
     }
     return model
   }
@@ -485,11 +569,17 @@ export function act(current: LabModel, action: GameAction): LabModel {
     }
     if (action.action === 'pass' && submitSolo(g.solo, 'lab-pass', m.now)) {
       settleSolo(g.solo, 'lab-pass', 'skipped', m.now)
-      reveal(m, false)
-      if (g.ownAnswer) g.ownAnswer.status = 'skipped'
+      g.ownAnswer = { text: '', status: 'skipped', retriesLeft: 0 }
+      completeSoloLab(m, 'skipped')
     }
-    if (action.action === 'answer' && submitSolo(g.solo, 'lab-answer', m.now))
+    if (action.action === 'answer' && submitSolo(g.solo, 'lab-answer', m.now)) {
       g.ownAnswer = { text: action.text, status: 'pending', retriesLeft: 2 }
+      const normalized = action.text.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase().trim()
+      if (['moise', 'moses'].includes(normalized)) {
+        settleSolo(g.solo, 'lab-answer', 'correct', m.now)
+        completeSoloLab(m, 'correct')
+      }
+    }
     return m
   }
   if (action.action === 'start') {
@@ -586,7 +676,7 @@ export function settle(current: LabModel): LabModel {
           : 'wrong'
       settleSolo(g.solo, 'lab-answer', status, m.now)
       if (status === 'clarify') g.ownAnswer.status = status
-      else reveal(m, status === 'correct')
+      else completeSoloLab(m, status)
       if (g.solo.outcome) g.phase = 'finished'
     }
     return m

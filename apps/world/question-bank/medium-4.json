@@ -1,0 +1,2869 @@
+[
+  {
+    "id": "medium-ot-151",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "hannah-vow-no-razor",
+    "reference": {
+      "book": 9,
+      "chapter": 1,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Quel instrument Anne promit-elle de ne pas laisser passer sur la tête de son fils consacré à Dieu ?",
+      "answer": "Un rasoir",
+      "aliases": [
+        "rasoir"
+      ],
+      "explanation": "Anne promit de consacrer son fils sans lui raser la tête."
+    },
+    "en": {
+      "question": "What instrument did Hannah promise would not touch the head of her son dedicated to God?",
+      "answer": "A razor",
+      "aliases": [
+        "razor"
+      ],
+      "explanation": "Hannah pledged her son to God without shaving his head."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%201%3A11&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-152",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "eli-sons-hophni-phinehas",
+    "reference": {
+      "book": 9,
+      "chapter": 2,
+      "verse": 34
+    },
+    "fr": {
+      "question": "Quels deux fils d'Éli devaient mourir le même jour selon l'annonce reçue ?",
+      "answer": "Hophni et Phinées",
+      "aliases": [
+        "Hophni et Phinée",
+        "Hophni et Phinehas"
+      ],
+      "explanation": "Le signe annoncé concernait la mort de ses deux fils."
+    },
+    "en": {
+      "question": "Which two sons of Eli were foretold to die on the same day?",
+      "answer": "Hophni and Phinehas",
+      "aliases": [],
+      "explanation": "The announced sign concerned the death of his two sons."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%202%3A34&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-153",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "samuel-call-lamp-god",
+    "reference": {
+      "book": 9,
+      "chapter": 3,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Quelle lumière n'était pas encore éteinte quand Samuel fut appelé pendant la nuit ?",
+      "answer": "La lampe de Dieu",
+      "aliases": [
+        "lampe de Dieu"
+      ],
+      "explanation": "Le récit situe l'appel avant l'extinction de la lampe."
+    },
+    "en": {
+      "question": "What light had not yet gone out when Samuel was called at night?",
+      "answer": "The lamp of God",
+      "aliases": [
+        "lamp of God"
+      ],
+      "explanation": "The account places the call before the lamp went out."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%203%3A3&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-154",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "eli-fall-broken-neck",
+    "reference": {
+      "book": 9,
+      "chapter": 4,
+      "verse": 18
+    },
+    "fr": {
+      "question": "Quelle blessure causa la mort d'Éli lorsqu'il tomba en apprenant la capture de l'arche ?",
+      "answer": "Une nuque brisée",
+      "aliases": [
+        "nuque brisée",
+        "cou brisé",
+        "fracture du cou"
+      ],
+      "explanation": "Éli tomba de son siège et se rompit la nuque."
+    },
+    "en": {
+      "question": "What injury caused Eli's death when he fell on hearing that the ark had been captured?",
+      "answer": "A broken neck",
+      "aliases": [
+        "broken neck",
+        "neck fracture"
+      ],
+      "explanation": "Eli fell from his seat and broke his neck."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%204%3A18&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-155",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "samuel-ebenezer-stone",
+    "reference": {
+      "book": 9,
+      "chapter": 7,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Quel nom Samuel donna-t-il à la pierre dressée pour rappeler le secours de Dieu ?",
+      "answer": "Ében-Ézer",
+      "aliases": [
+        "Ebenezer",
+        "Ében Ézer"
+      ],
+      "explanation": "Samuel nomma la pierre Ében-Ézer, en reconnaissance du secours reçu."
+    },
+    "en": {
+      "question": "What name did Samuel give the stone set up to remember God's help?",
+      "answer": "Eben-ezer",
+      "aliases": [
+        "Ebenezer"
+      ],
+      "explanation": "Samuel called the stone Eben-ezer in recognition of the help received."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%207%3A12&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-156",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "israel-king-like-nations",
+    "reference": {
+      "book": 9,
+      "chapter": 8,
+      "verse": 5
+    },
+    "fr": {
+      "question": "À qui les anciens d'Israël souhaitaient-ils ressembler en réclamant un roi ?",
+      "answer": "Aux autres nations",
+      "aliases": [
+        "autres nations",
+        "autres peuples"
+      ],
+      "explanation": "Ils voulaient être gouvernés comme les autres peuples."
+    },
+    "en": {
+      "question": "Whom did Israel's elders want to resemble by asking for a king?",
+      "answer": "The other nations",
+      "aliases": [
+        "other nations",
+        "other peoples"
+      ],
+      "explanation": "They wanted to be governed like the other peoples."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%208%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-157",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "saul-search-donkeys",
+    "reference": {
+      "book": 9,
+      "chapter": 9,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Quels animaux perdus Saül cherchait-il avant de rencontrer Samuel ?",
+      "answer": "Des ânesses",
+      "aliases": [
+        "ânesses",
+        "ânes"
+      ],
+      "explanation": "Saül cherchait les ânesses de son père."
+    },
+    "en": {
+      "question": "What lost animals was Saul seeking before meeting Samuel?",
+      "answer": "Donkeys",
+      "aliases": [
+        "asses"
+      ],
+      "explanation": "Saul was searching for his father's donkeys."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%209%3A3&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-158",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "saul-hides-baggage",
+    "reference": {
+      "book": 9,
+      "chapter": 10,
+      "verse": 22
+    },
+    "fr": {
+      "question": "Parmi quels objets Saül se cachait-il lorsqu'on le cherchait pour le présenter comme roi ?",
+      "answer": "Les bagages",
+      "aliases": [
+        "bagages"
+      ],
+      "explanation": "Saül était caché parmi les bagages."
+    },
+    "en": {
+      "question": "Among what was Saul hiding when people sought him to present him as king?",
+      "answer": "The baggage",
+      "aliases": [
+        "luggage",
+        "stuff",
+        "baggage"
+      ],
+      "explanation": "Saul was hidden among the baggage."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2010%3A22&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-159",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "saul-offers-burnt-offering",
+    "reference": {
+      "book": 9,
+      "chapter": 13,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Quel acte religieux Saül accomplit-il lui-même avant l'arrivée de Samuel ?",
+      "answer": "Il offrit un holocauste",
+      "aliases": [
+        "holocauste",
+        "offrir un sacrifice",
+        "un sacrifice"
+      ],
+      "explanation": "Saül présenta l'holocauste sans attendre Samuel."
+    },
+    "en": {
+      "question": "What religious act did Saul perform himself before Samuel arrived?",
+      "answer": "He offered a burnt offering",
+      "aliases": [
+        "burnt offering",
+        "offered a sacrifice"
+      ],
+      "explanation": "Saul presented the burnt offering without waiting for Samuel."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2013%3A9&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-160",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "jonathan-tastes-honey",
+    "reference": {
+      "book": 9,
+      "chapter": 14,
+      "verse": 27
+    },
+    "fr": {
+      "question": "Quel aliment Jonathan goûta-t-il avec le bout de son bâton sans connaître l'interdiction de Saül ?",
+      "answer": "Du miel",
+      "aliases": [
+        "miel"
+      ],
+      "explanation": "Jonathan trempa son bâton dans un rayon de miel."
+    },
+    "en": {
+      "question": "What food did Jonathan taste with the tip of his staff, unaware of Saul's ban?",
+      "answer": "Honey",
+      "aliases": [],
+      "explanation": "Jonathan dipped his staff into honeycomb."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2014%3A27&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-161",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "obedience-better-sacrifice",
+    "reference": {
+      "book": 9,
+      "chapter": 15,
+      "verse": 22
+    },
+    "fr": {
+      "question": "Que Samuel déclare-t-il préférable aux sacrifices ?",
+      "answer": "L'obéissance",
+      "aliases": [
+        "obéissance",
+        "obéir"
+      ],
+      "explanation": "Samuel souligne la priorité de l'obéissance à Dieu."
+    },
+    "en": {
+      "question": "What does Samuel declare better than sacrifice?",
+      "answer": "Obedience",
+      "aliases": [
+        "obeying",
+        "obey"
+      ],
+      "explanation": "Samuel emphasizes the priority of obeying God."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2015%3A22&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-162",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "david-father-jesse",
+    "reference": {
+      "book": 9,
+      "chapter": 16,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Chez quel père de famille Samuel fut-il envoyé pour oindre l'un de ses fils à Bethléhem ?",
+      "answer": "Isaï",
+      "aliases": [
+        "Jessé",
+        "Jesse"
+      ],
+      "explanation": "Dieu envoya Samuel chez Isaï."
+    },
+    "en": {
+      "question": "To which father in Bethlehem was Samuel sent to anoint one of his sons?",
+      "answer": "Jesse",
+      "aliases": [],
+      "explanation": "God sent Samuel to Jesse's household."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2016%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-163",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "michal-david-window-escape",
+    "reference": {
+      "book": 9,
+      "chapter": 19,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Par quelle ouverture Mical fit-elle descendre David pour lui permettre de fuir ?",
+      "answer": "Une fenêtre",
+      "aliases": [
+        "fenêtre"
+      ],
+      "explanation": "Mical aida David à sortir par une fenêtre."
+    },
+    "en": {
+      "question": "Through what opening did Michal lower David so he could escape?",
+      "answer": "A window",
+      "aliases": [
+        "window"
+      ],
+      "explanation": "Michal helped David escape through a window."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2019%3A12&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-164",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "david-wife-michal",
+    "reference": {
+      "book": 9,
+      "chapter": 18,
+      "verse": 27
+    },
+    "fr": {
+      "question": "Quelle fille de Saül devint l'épouse de David ?",
+      "answer": "Mical",
+      "aliases": [
+        "Michal"
+      ],
+      "explanation": "Saül donna sa fille Mical à David."
+    },
+    "en": {
+      "question": "Which daughter of Saul became David's wife?",
+      "answer": "Michal",
+      "aliases": [],
+      "explanation": "Saul gave his daughter Michal to David."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2018%3A27&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-165",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "jonathan-arrow-signal",
+    "reference": {
+      "book": 9,
+      "chapter": 20,
+      "verse": 20
+    },
+    "fr": {
+      "question": "Quels projectiles Jonathan utilisa-t-il pour transmettre à David un signal de danger ?",
+      "answer": "Des flèches",
+      "aliases": [
+        "flèches"
+      ],
+      "explanation": "Jonathan tira des flèches selon leur signal convenu."
+    },
+    "en": {
+      "question": "What projectiles did Jonathan use to signal danger to David?",
+      "answer": "Arrows",
+      "aliases": [],
+      "explanation": "Jonathan shot arrows according to their agreed signal."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2020%3A20&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-166",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "david-holy-bread",
+    "reference": {
+      "book": 9,
+      "chapter": 21,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Quel pain consacré le sacrificateur donna-t-il à David faute de pain ordinaire ?",
+      "answer": "Les pains de proposition",
+      "aliases": [
+        "pains consacrés",
+        "pain consacré",
+        "pains de présentation",
+        "pains de proposition"
+      ],
+      "explanation": "David reçut les pains retirés de devant Dieu."
+    },
+    "en": {
+      "question": "What consecrated bread did the priest give David when no ordinary bread was available?",
+      "answer": "The showbread",
+      "aliases": [
+        "shewbread",
+        "consecrated bread",
+        "bread of the Presence",
+        "showbread"
+      ],
+      "explanation": "David received the bread removed from before God."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2021%3A6&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-167",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "david-adullam-cave",
+    "reference": {
+      "book": 9,
+      "chapter": 22,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Dans quelle caverne David se réfugia-t-il et fut-il rejoint par sa famille ?",
+      "answer": "Adullam",
+      "aliases": [],
+      "explanation": "Ses proches le rejoignirent à la caverne d'Adullam."
+    },
+    "en": {
+      "question": "In which cave did David take refuge and receive his family?",
+      "answer": "Adullam",
+      "aliases": [],
+      "explanation": "His relatives joined him at the cave of Adullam."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2022%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-168",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "saul-medium-endor",
+    "reference": {
+      "book": 9,
+      "chapter": 28,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Dans quelle localité Saül chercha-t-il une femme capable d'évoquer les morts ?",
+      "answer": "En-Dor",
+      "aliases": [],
+      "explanation": "On lui indiqua une femme à En-Dor."
+    },
+    "en": {
+      "question": "In which locality did Saul seek a woman who could summon the dead?",
+      "answer": "En-dor",
+      "aliases": [
+        "Endor"
+      ],
+      "explanation": "He was directed to a woman at En-dor."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2028%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-169",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "david-asks-ephod",
+    "reference": {
+      "book": 9,
+      "chapter": 30,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Quel objet sacerdotal David demanda-t-il à Abiathar pour consulter Dieu ?",
+      "answer": "L'éphod",
+      "aliases": [
+        "éphod"
+      ],
+      "explanation": "Abiathar apporta l'éphod à David."
+    },
+    "en": {
+      "question": "What priestly object did David ask Abiathar to bring so he could inquire of God?",
+      "answer": "The ephod",
+      "aliases": [
+        "ephod"
+      ],
+      "explanation": "Abiathar brought the ephod to David."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2030%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-170",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "david-king-age30",
+    "reference": {
+      "book": 10,
+      "chapter": 5,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Quel âge avait David lorsqu'il devint roi ?",
+      "answer": "Trente ans",
+      "aliases": [
+        "30"
+      ],
+      "explanation": "David commença son règne à trente ans."
+    },
+    "en": {
+      "question": "How old was David when he became king?",
+      "answer": "Thirty years",
+      "aliases": [
+        "30"
+      ],
+      "explanation": "David began his reign at thirty."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%205%3A4&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-171",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "uzzah-touches-ark",
+    "reference": {
+      "book": 10,
+      "chapter": 6,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Quel homme étendit la main pour retenir l'arche lorsque les bœufs la firent pencher ?",
+      "answer": "Uzza",
+      "aliases": [
+        "Uzzah"
+      ],
+      "explanation": "Uzza tenta de retenir l'arche avec sa main."
+    },
+    "en": {
+      "question": "Who reached out to steady the ark when the oxen shook it?",
+      "answer": "Uzzah",
+      "aliases": [
+        "Uzza"
+      ],
+      "explanation": "Uzzah tried to steady the ark with his hand."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%206%3A6&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-172",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "david-throne-forever-promise",
+    "reference": {
+      "book": 10,
+      "chapter": 7,
+      "verse": 16
+    },
+    "fr": {
+      "question": "Pour quelle durée la promesse annonce-t-elle l'affermissement du trône de David ?",
+      "answer": "Pour toujours",
+      "aliases": [
+        "toujours",
+        "éternellement",
+        "à jamais"
+      ],
+      "explanation": "La promesse décrit un trône affermi pour toujours."
+    },
+    "en": {
+      "question": "For how long does the promise say David's throne will be established?",
+      "answer": "Forever",
+      "aliases": [
+        "for ever",
+        "eternally"
+      ],
+      "explanation": "The promise describes a throne established forever."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%207%3A16&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-173",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "bathsheba-husband-uriah",
+    "reference": {
+      "book": 10,
+      "chapter": 11,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Quel était le nom du mari de Bath-Schéba lorsque David la vit ?",
+      "answer": "Urie",
+      "aliases": [
+        "Uriah"
+      ],
+      "explanation": "Bath-Schéba était l'épouse d'Urie le Héthien."
+    },
+    "en": {
+      "question": "What was the name of Bathsheba's husband when David saw her?",
+      "answer": "Uriah",
+      "aliases": [],
+      "explanation": "Bathsheba was the wife of Uriah the Hittite."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%2011%3A3&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-174",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "david-child-dies-seventh-day",
+    "reference": {
+      "book": 10,
+      "chapter": 12,
+      "verse": 18
+    },
+    "fr": {
+      "question": "Quel jour l'enfant pour lequel David jeûnait mourut-il ?",
+      "answer": "Le septième jour",
+      "aliases": [
+        "7",
+        "septième jour"
+      ],
+      "explanation": "La mort de l'enfant survint le septième jour."
+    },
+    "en": {
+      "question": "On which day did the child for whom David was fasting die?",
+      "answer": "The seventh day",
+      "aliases": [
+        "7",
+        "seventh day"
+      ],
+      "explanation": "The child's death occurred on the seventh day."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%2012%3A18&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-175",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "absalom-steals-hearts",
+    "reference": {
+      "book": 10,
+      "chapter": 15,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Qu'Absalom gagnait-il symboliquement en accueillant favorablement les plaignants à la porte ?",
+      "answer": "Le cœur des Israélites",
+      "aliases": [
+        "cœurs",
+        "le cœur du peuple",
+        "l'affection du peuple",
+        "cœur des Israélites"
+      ],
+      "explanation": "Ses gestes lui attiraient l'attachement du peuple."
+    },
+    "en": {
+      "question": "What did Absalom figuratively win by warmly receiving complainants at the gate?",
+      "answer": "The hearts of Israel",
+      "aliases": [
+        "people's hearts",
+        "Israel's hearts",
+        "loyalty",
+        "hearts of Israel"
+      ],
+      "explanation": "His gestures drew the people's loyalty to him."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%2015%3A6&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-176",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "absalom-mule",
+    "reference": {
+      "book": 10,
+      "chapter": 18,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Sur quel animal Absalom était-il monté lorsque sa tête resta prise dans un arbre ?",
+      "answer": "Un mulet",
+      "aliases": [
+        "mulet"
+      ],
+      "explanation": "Le mulet continua tandis qu'Absalom restait suspendu."
+    },
+    "en": {
+      "question": "What animal was Absalom riding when his head became caught in a tree?",
+      "answer": "A mule",
+      "aliases": [
+        "mule"
+      ],
+      "explanation": "The mule continued while Absalom remained hanging."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%2018%3A9&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-177",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "gad-three-punishments",
+    "reference": {
+      "book": 10,
+      "chapter": 24,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Entre combien de fléaux Dieu demanda-t-il à David de choisir après le recensement ?",
+      "answer": "Trois",
+      "aliases": [
+        "3"
+      ],
+      "explanation": "Gad lui présenta trois possibilités."
+    },
+    "en": {
+      "question": "Between how many punishments did God ask David to choose after the census?",
+      "answer": "Three",
+      "aliases": [
+        "3"
+      ],
+      "explanation": "Gad presented three options."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%2024%3A12&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-178",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "adonijah-altar-horns",
+    "reference": {
+      "book": 11,
+      "chapter": 1,
+      "verse": 50
+    },
+    "fr": {
+      "question": "À quelle partie de l'autel Adonija s'agrippa-t-il par crainte de Salomon ?",
+      "answer": "Aux cornes",
+      "aliases": [
+        "cornes",
+        "cornes de l'autel"
+      ],
+      "explanation": "Adonija saisit les cornes de l'autel."
+    },
+    "en": {
+      "question": "To which part of the altar did Adonijah cling in fear of Solomon?",
+      "answer": "The horns",
+      "aliases": [
+        "horns",
+        "altar horns"
+      ],
+      "explanation": "Adonijah grasped the altar's horns."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%201%3A50&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-179",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "temple-cloud-dedication",
+    "reference": {
+      "book": 11,
+      "chapter": 8,
+      "verse": 10
+    },
+    "fr": {
+      "question": "Qu'est-ce qui remplit le temple au point d'empêcher les sacrificateurs d'y assurer le service ?",
+      "answer": "Une nuée",
+      "aliases": [
+        "nuée",
+        "nuage"
+      ],
+      "explanation": "La nuée marquait la gloire de Dieu dans le temple."
+    },
+    "en": {
+      "question": "What filled the temple so that the priests could not continue ministering there?",
+      "answer": "A cloud",
+      "aliases": [
+        "cloud"
+      ],
+      "explanation": "The cloud marked God's glory in the temple."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%208%3A10&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-180",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "solomon-wives-other-gods",
+    "reference": {
+      "book": 11,
+      "chapter": 11,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Qui détourna le cœur de Salomon vers d'autres dieux dans sa vieillesse ?",
+      "answer": "Ses femmes",
+      "aliases": [
+        "femmes",
+        "épouses"
+      ],
+      "explanation": "Ses femmes influencèrent ses choix religieux."
+    },
+    "en": {
+      "question": "Who turned Solomon's heart toward other gods in his old age?",
+      "answer": "His wives",
+      "aliases": [
+        "wives"
+      ],
+      "explanation": "His wives influenced his religious choices."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2011%3A4&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-181",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "jeroboam-calves-bethel-dan",
+    "reference": {
+      "book": 11,
+      "chapter": 12,
+      "verse": 29
+    },
+    "fr": {
+      "question": "Dans quelle ville Jéroboam plaça-t-il un veau d'or en plus de celui de Béthel ?",
+      "answer": "Dan",
+      "aliases": [],
+      "explanation": "Les deux veaux furent placés à Béthel et à Dan."
+    },
+    "en": {
+      "question": "In which city did Jeroboam place a golden calf besides the one at Bethel?",
+      "answer": "Dan",
+      "aliases": [],
+      "explanation": "The two calves were placed at Bethel and Dan."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2012%3A29&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-182",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "widow-flour-never-empty",
+    "reference": {
+      "book": 11,
+      "chapter": 17,
+      "verse": 16
+    },
+    "fr": {
+      "question": "Quelle provision sèche de la veuve ne s'épuisa pas pendant le séjour d'Élie ?",
+      "answer": "La farine",
+      "aliases": [
+        "farine"
+      ],
+      "explanation": "La farine et l'huile furent conservées selon la promesse."
+    },
+    "en": {
+      "question": "What dry provision of the widow did not run out during Elijah's stay?",
+      "answer": "Flour",
+      "aliases": [
+        "meal"
+      ],
+      "explanation": "The meal and oil lasted according to the promise."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2017%3A16&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-183",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "elijah-cloud-hand-size",
+    "reference": {
+      "book": 11,
+      "chapter": 18,
+      "verse": 44
+    },
+    "fr": {
+      "question": "À quelle partie du corps le serviteur compara-t-il la taille du petit nuage annoncé à Élie ?",
+      "answer": "Une main",
+      "aliases": [
+        "main",
+        "paume",
+        "paume d'une main"
+      ],
+      "explanation": "Le nuage avait la taille d'une paume de main."
+    },
+    "en": {
+      "question": "To what body part did the servant compare the size of the little cloud reported to Elijah?",
+      "answer": "A hand",
+      "aliases": [
+        "hand",
+        "a man's hand",
+        "palm"
+      ],
+      "explanation": "The cloud was the size of a man's hand."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2018%3A44&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-184",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "elijah-angel-cake-water",
+    "reference": {
+      "book": 11,
+      "chapter": 19,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Avec quelle boisson Élie trouva-t-il un gâteau près de sa tête dans le désert ?",
+      "answer": "De l'eau",
+      "aliases": [
+        "eau"
+      ],
+      "explanation": "Élie trouva un gâteau et une cruche d'eau."
+    },
+    "en": {
+      "question": "What drink did Elijah find with a cake near his head in the wilderness?",
+      "answer": "Water",
+      "aliases": [],
+      "explanation": "Elijah found a cake and a jar of water."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2019%3A6&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-185",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "jezebel-ahab-seal",
+    "reference": {
+      "book": 11,
+      "chapter": 21,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Avec le sceau de quel roi Jézabel scella-t-elle les lettres contre Naboth ?",
+      "answer": "Achab",
+      "aliases": [
+        "Ahab"
+      ],
+      "explanation": "Jézabel écrivit au nom d'Achab et utilisa son sceau."
+    },
+    "en": {
+      "question": "With which king's seal did Jezebel seal the letters against Naboth?",
+      "answer": "Ahab",
+      "aliases": [],
+      "explanation": "Jezebel wrote in Ahab's name and used his seal."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2021%3A8&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-186",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "elisha-double-portion-spirit",
+    "reference": {
+      "book": 12,
+      "chapter": 2,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Quelle part de l'esprit d'Élie Élisée demanda-t-il avant son départ ?",
+      "answer": "Une double portion",
+      "aliases": [
+        "double portion",
+        "double",
+        "deux parts"
+      ],
+      "explanation": "Élisée demanda qu'une double portion repose sur lui."
+    },
+    "en": {
+      "question": "What portion of Elijah's spirit did Elisha request before his departure?",
+      "answer": "A double portion",
+      "aliases": [
+        "double",
+        "twice",
+        "double portion"
+      ],
+      "explanation": "Elisha asked for a double portion to rest on him."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%202%3A9&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-187",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "valley-dig-ditches",
+    "reference": {
+      "book": 12,
+      "chapter": 3,
+      "verse": 16
+    },
+    "fr": {
+      "question": "Que le prophète ordonna-t-il de creuser dans la vallée avant l'arrivée de l'eau ?",
+      "answer": "Des fosses",
+      "aliases": [
+        "fosses"
+      ],
+      "explanation": "Des fosses devaient être préparées pour recevoir l'eau."
+    },
+    "en": {
+      "question": "What did the prophet command to be dug in the valley before water arrived?",
+      "answer": "Ditches",
+      "aliases": [
+        "trenches"
+      ],
+      "explanation": "Ditches were to be prepared to receive the water."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%203%3A16&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-188",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "poison-stew-flour",
+    "reference": {
+      "book": 12,
+      "chapter": 4,
+      "verse": 41
+    },
+    "fr": {
+      "question": "Que fit jeter Élisée dans le potage dangereux pour le rendre consommable ?",
+      "answer": "De la farine",
+      "aliases": [
+        "farine"
+      ],
+      "explanation": "Élisée utilisa de la farine avant de faire servir le potage."
+    },
+    "en": {
+      "question": "What did Elisha put into the harmful stew to make it safe?",
+      "answer": "Flour",
+      "aliases": [
+        "meal"
+      ],
+      "explanation": "Elisha used flour before having the stew served."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%204%3A41&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-189",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "elisha-servant-fire-army",
+    "reference": {
+      "book": 12,
+      "chapter": 6,
+      "verse": 17
+    },
+    "fr": {
+      "question": "Que vit le serviteur autour d'Élisée lorsque Dieu lui ouvrit les yeux ?",
+      "answer": "Des chevaux et des chars de feu",
+      "aliases": [
+        "chevaux et chars de feu",
+        "chars de feu",
+        "chevaux et des chars de feu"
+      ],
+      "explanation": "Dieu ouvrit les yeux du serviteur sur cette protection."
+    },
+    "en": {
+      "question": "What kind of horses and chariots did Elisha's servant see around him?",
+      "answer": "Horses and chariots of fire",
+      "aliases": [
+        "chariots and horses of fire",
+        "chariots of fire"
+      ],
+      "explanation": "God opened the servant's eyes to this protection."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%206%3A17&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-190",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "four-lepers-samaria",
+    "reference": {
+      "book": 12,
+      "chapter": 7,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Combien de lépreux étaient à l'entrée de la porte de Samarie lors de la famine ?",
+      "answer": "Quatre",
+      "aliases": [
+        "4"
+      ],
+      "explanation": "Quatre hommes décidèrent de se rendre au camp syrien."
+    },
+    "en": {
+      "question": "How many lepers were at Samaria's gate during the famine?",
+      "answer": "Four",
+      "aliases": [
+        "4"
+      ],
+      "explanation": "Four men decided to go to the Syrian camp."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%207%3A3&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-191",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "jehu-furious-driving",
+    "reference": {
+      "book": 12,
+      "chapter": 9,
+      "verse": 20
+    },
+    "fr": {
+      "question": "Comment le guetteur reconnut-il la manière de conduire le char de Jéhu ?",
+      "answer": "Il conduisait avec furie",
+      "aliases": [
+        "avec furie",
+        "furieusement",
+        "très vite"
+      ],
+      "explanation": "Sa conduite impétueuse permit de l'identifier."
+    },
+    "en": {
+      "question": "How did the watchman recognize Jehu's way of driving his chariot?",
+      "answer": "He drove furiously",
+      "aliases": [
+        "furiously",
+        "wildly",
+        "fast"
+      ],
+      "explanation": "His impetuous driving identified him."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%209%3A20&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-192",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "joash-king-age7",
+    "reference": {
+      "book": 14,
+      "chapter": 24,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Quel âge avait Joas lorsqu'il devint roi ?",
+      "answer": "Sept ans",
+      "aliases": [
+        "7"
+      ],
+      "explanation": "Joas commença à régner à sept ans."
+    },
+    "en": {
+      "question": "How old was Joash when he became king?",
+      "answer": "Seven years",
+      "aliases": [
+        "7"
+      ],
+      "explanation": "Joash began ruling at seven years old."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Chronicles%2024%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-193",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "hezekiah-destroys-bronze-serpent",
+    "reference": {
+      "book": 12,
+      "chapter": 18,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Quel roi brisa le serpent d'airain de Moïse parce qu'on lui offrait de l'encens ?",
+      "answer": "Ézéchias",
+      "aliases": [
+        "Hezekiah"
+      ],
+      "explanation": "Ézéchias supprima cet objet devenu l'objet d'un culte."
+    },
+    "en": {
+      "question": "Which king broke Moses' bronze serpent because people burned incense to it?",
+      "answer": "Hezekiah",
+      "aliases": [],
+      "explanation": "Hezekiah removed the object because it had become an object of worship."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%2018%3A4&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-194",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "hezekiah-sends-isaiah",
+    "reference": {
+      "book": 12,
+      "chapter": 19,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Vers quel prophète Ézéchias envoya-t-il des messagers après les menaces assyriennes ?",
+      "answer": "Ésaïe",
+      "aliases": [
+        "Isaïe",
+        "Isaiah"
+      ],
+      "explanation": "Les messagers allèrent consulter Ésaïe."
+    },
+    "en": {
+      "question": "To which prophet did Hezekiah send messengers after the Assyrian threats?",
+      "answer": "Isaiah",
+      "aliases": [],
+      "explanation": "The messengers went to consult Isaiah."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%2019%3A2&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-195",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "josiah-tears-clothes-law",
+    "reference": {
+      "book": 12,
+      "chapter": 22,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Quel geste de détresse Josias fit-il lorsqu'il entendit les paroles du livre de la loi ?",
+      "answer": "Il déchira ses vêtements",
+      "aliases": [
+        "déchirer ses vêtements",
+        "vêtements déchirés"
+      ],
+      "explanation": "La lecture provoqua chez Josias un profond bouleversement."
+    },
+    "en": {
+      "question": "What gesture of distress did Josiah make when he heard the book of the law?",
+      "answer": "He tore his clothes",
+      "aliases": [
+        "tore his clothes",
+        "rent his clothes"
+      ],
+      "explanation": "The reading deeply moved Josiah."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%2022%3A11&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-196",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "solomon-prayer-fire-temple",
+    "reference": {
+      "book": 14,
+      "chapter": 7,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Que fit le feu descendu du ciel après la prière de Salomon lors de la dédicace ?",
+      "answer": "Il consuma les sacrifices",
+      "aliases": [
+        "consumer les sacrifices",
+        "brûler les offrandes"
+      ],
+      "explanation": "Le feu consuma l'holocauste et les sacrifices."
+    },
+    "en": {
+      "question": "What did the fire from heaven do after Solomon's prayer at the dedication?",
+      "answer": "It consumed the sacrifices",
+      "aliases": [
+        "burned the sacrifices",
+        "consumed the offerings"
+      ],
+      "explanation": "The fire consumed the burnt offering and sacrifices."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Chronicles%207%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-197",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "temple-foundation-elders-weeping",
+    "reference": {
+      "book": 15,
+      "chapter": 3,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Que firent de nombreux vieillards ayant vu l'ancien temple lors de la pose des nouvelles fondations ?",
+      "answer": "Ils pleurèrent",
+      "aliases": [
+        "pleurer",
+        "pleurs"
+      ],
+      "explanation": "Des pleurs se mêlèrent aux cris de joie."
+    },
+    "en": {
+      "question": "What did many elders who had seen the former temple do when the new foundations were laid?",
+      "answer": "They wept",
+      "aliases": [
+        "wept",
+        "weeping"
+      ],
+      "explanation": "Weeping mingled with joyful shouting."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ezra%203%3A12&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-198",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "joy-lord-strength",
+    "reference": {
+      "book": 16,
+      "chapter": 8,
+      "verse": 10
+    },
+    "fr": {
+      "question": "Qu'est-ce qui est présenté comme la force du peuple dans Néhémie 8 ?",
+      "answer": "La joie de l'Éternel",
+      "aliases": [
+        "joie de l'Éternel"
+      ],
+      "explanation": "Le peuple fut encouragé à trouver sa force dans la joie de Dieu."
+    },
+    "en": {
+      "question": "What is presented as the people's strength in Nehemiah 8?",
+      "answer": "The joy of the Lord",
+      "aliases": [
+        "joy of the Lord"
+      ],
+      "explanation": "The people were encouraged to find strength in God's joy."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Nehemiah%208%3A10&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-199",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "haman-own-gallows",
+    "reference": {
+      "book": 17,
+      "chapter": 7,
+      "verse": 10
+    },
+    "fr": {
+      "question": "Sur quelle potence Haman fut-il finalement pendu ?",
+      "answer": "Celle préparée pour Mardochée",
+      "aliases": [
+        "potence de Mardochée",
+        "celle de Mardochée"
+      ],
+      "explanation": "Le supplice prévu pour Mardochée fut retourné contre Haman."
+    },
+    "en": {
+      "question": "On which gallows was Haman ultimately hanged?",
+      "answer": "The one prepared for Mordecai",
+      "aliases": [
+        "Mordecai's gallows",
+        "the gallows for Mordecai",
+        "one prepared for Mordecai"
+      ],
+      "explanation": "The punishment prepared for Mordecai was turned against Haman."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%207%3A10&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-ot-200",
+    "difficulty": "medium",
+    "testament": "old",
+    "factKey": "job-prays-friends-restored",
+    "reference": {
+      "book": 18,
+      "chapter": 42,
+      "verse": 10
+    },
+    "fr": {
+      "question": "Pour qui Job pria-t-il au moment où Dieu rétablit sa situation ?",
+      "answer": "Ses amis",
+      "aliases": [
+        "amis"
+      ],
+      "explanation": "Job intercéda pour ses amis avant son rétablissement."
+    },
+    "en": {
+      "question": "For whom did Job pray when God restored his fortunes?",
+      "answer": "His friends",
+      "aliases": [
+        "friends"
+      ],
+      "explanation": "Job interceded for his friends before his restoration."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%2042%3A10&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-151",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "women-support-jesus-resources",
+    "reference": {
+      "book": 42,
+      "chapter": 8,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Avec quoi les femmes qui accompagnaient Jésus contribuaient-elles à son ministère ?",
+      "answer": "Leurs biens",
+      "aliases": [
+        "biens",
+        "argent",
+        "ressources"
+      ],
+      "explanation": "Elles l'assistaient avec leurs biens."
+    },
+    "en": {
+      "question": "With what did the women accompanying Jesus support his ministry?",
+      "answer": "Their resources",
+      "aliases": [
+        "means",
+        "possessions",
+        "money",
+        "resources"
+      ],
+      "explanation": "They supported him from their own resources."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%208%3A3&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-152",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "james-john-fire-samaritans",
+    "reference": {
+      "book": 42,
+      "chapter": 9,
+      "verse": 54
+    },
+    "fr": {
+      "question": "Quels deux frères voulurent faire descendre le feu sur un village samaritain ?",
+      "answer": "Jacques et Jean",
+      "aliases": [
+        "Jean et Jacques",
+        "les fils de Zébédée"
+      ],
+      "explanation": "Les deux disciples proposèrent ce châtiment, mais Jésus les reprit."
+    },
+    "en": {
+      "question": "Which two brothers wanted to call down fire on a Samaritan village?",
+      "answer": "James and John",
+      "aliases": [
+        "John and James",
+        "sons of Zebedee"
+      ],
+      "explanation": "The two disciples proposed that punishment, but Jesus rebuked them."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%209%3A54&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-153",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "plow-look-back",
+    "reference": {
+      "book": 42,
+      "chapter": 9,
+      "verse": 62
+    },
+    "fr": {
+      "question": "Après avoir mis la main à quel outil Jésus avertit-il de ne pas regarder en arrière ?",
+      "answer": "La charrue",
+      "aliases": [
+        "charrue"
+      ],
+      "explanation": "L'image de la charrue souligne la résolution nécessaire."
+    },
+    "en": {
+      "question": "After putting one's hand to what tool does Jesus warn against looking back?",
+      "answer": "The plow",
+      "aliases": [
+        "plough",
+        "plow"
+      ],
+      "explanation": "The image of the plow emphasizes commitment."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%209%3A62&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-154",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "seventy-sent-disciples",
+    "reference": {
+      "book": 42,
+      "chapter": 10,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Selon Luc 10 dans la LSG et la KJV, combien d'autres disciples Jésus désigna-t-il pour aller devant lui ?",
+      "answer": "Soixante-dix",
+      "aliases": [
+        "70"
+      ],
+      "explanation": "Ces deux traductions donnent le nombre de soixante-dix."
+    },
+    "en": {
+      "question": "According to Luke 10 in the LSG and KJV, how many other disciples did Jesus appoint to go ahead of him?",
+      "answer": "Seventy",
+      "aliases": [
+        "70"
+      ],
+      "explanation": "These two translations give the number as seventy."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2010%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-155",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "samaritan-road-jerusalem-jericho",
+    "reference": {
+      "book": 42,
+      "chapter": 10,
+      "verse": 30
+    },
+    "fr": {
+      "question": "Vers quelle ville descendait le voyageur attaqué après avoir quitté Jérusalem ?",
+      "answer": "Jéricho",
+      "aliases": [],
+      "explanation": "La parabole situe le trajet entre Jérusalem et Jéricho."
+    },
+    "en": {
+      "question": "To which city was the attacked traveler descending after leaving Jerusalem?",
+      "answer": "Jericho",
+      "aliases": [],
+      "explanation": "The parable places the journey between Jerusalem and Jericho."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2010%3A30&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-156",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "midnight-friend-three-loaves",
+    "reference": {
+      "book": 42,
+      "chapter": 11,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Combien de pains l'homme demande-t-il à son ami au milieu de la nuit dans la parabole ?",
+      "answer": "Trois",
+      "aliases": [
+        "3"
+      ],
+      "explanation": "Il demande trois pains pour accueillir un visiteur."
+    },
+    "en": {
+      "question": "How many loaves does the man ask his friend for at midnight in the parable?",
+      "answer": "Three",
+      "aliases": [
+        "3"
+      ],
+      "explanation": "He asks for three loaves to welcome a visitor."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2011%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-157",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "rich-fool-soul-tonight",
+    "reference": {
+      "book": 42,
+      "chapter": 12,
+      "verse": 20
+    },
+    "fr": {
+      "question": "À quel moment la vie de l'homme riche doit-elle lui être redemandée dans la parabole ?",
+      "answer": "Cette nuit",
+      "aliases": [
+        "la nuit même",
+        "cette nuit-là"
+      ],
+      "explanation": "Son projet d'accumulation est interrompu dès cette nuit-là."
+    },
+    "en": {
+      "question": "When is the rich man's life to be required of him in the parable?",
+      "answer": "That night",
+      "aliases": [
+        "tonight",
+        "this night"
+      ],
+      "explanation": "His plan to accumulate wealth is interrupted that very night."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2012%3A20&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-158",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "bent-woman-eighteen-years",
+    "reference": {
+      "book": 42,
+      "chapter": 13,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Depuis combien d'années la femme courbée était-elle infirme avant sa guérison ?",
+      "answer": "Dix-huit ans",
+      "aliases": [
+        "18"
+      ],
+      "explanation": "Son infirmité durait depuis dix-huit ans."
+    },
+    "en": {
+      "question": "For how many years had the bent woman been infirm before being healed?",
+      "answer": "Eighteen years",
+      "aliases": [
+        "18"
+      ],
+      "explanation": "Her infirmity had lasted eighteen years."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2013%3A11&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-159",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "jerusalem-hen-chicks",
+    "reference": {
+      "book": 42,
+      "chapter": 13,
+      "verse": 34
+    },
+    "fr": {
+      "question": "À quel oiseau rassemblant ses petits Jésus compare-t-il son désir de protéger Jérusalem ?",
+      "answer": "Une poule",
+      "aliases": [
+        "poule"
+      ],
+      "explanation": "Jésus évoque la poule qui rassemble ses poussins sous ses ailes."
+    },
+    "en": {
+      "question": "To which bird gathering its young does Jesus compare his desire to protect Jerusalem?",
+      "answer": "A hen",
+      "aliases": [
+        "hen"
+      ],
+      "explanation": "Jesus evokes a hen gathering chicks under her wings."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2013%3A34&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-160",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "banquet-invite-poor",
+    "reference": {
+      "book": 42,
+      "chapter": 14,
+      "verse": 13
+    },
+    "fr": {
+      "question": "Quel groupe Jésus demande-t-il d'inviter à un festin, avec les estropiés, les boiteux et les aveugles ?",
+      "answer": "Les pauvres",
+      "aliases": [
+        "pauvres"
+      ],
+      "explanation": "Jésus demande d'accueillir ceux qui ne peuvent rendre l'invitation."
+    },
+    "en": {
+      "question": "Which group does Jesus say to invite to a feast along with the maimed, lame, and blind?",
+      "answer": "The poor",
+      "aliases": [
+        "poor"
+      ],
+      "explanation": "Jesus calls for welcoming those unable to repay the invitation."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2014%3A13&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-161",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "prodigal-ring-hand",
+    "reference": {
+      "book": 42,
+      "chapter": 15,
+      "verse": 22
+    },
+    "fr": {
+      "question": "Quel bijou le père fit-il mettre à la main de son fils revenu ?",
+      "answer": "Un anneau",
+      "aliases": [
+        "anneau"
+      ],
+      "explanation": "L'anneau faisait partie des signes d'accueil du fils."
+    },
+    "en": {
+      "question": "What piece of jewelry did the father put on his returning son's hand?",
+      "answer": "A ring",
+      "aliases": [
+        "ring"
+      ],
+      "explanation": "The ring was one of the signs of welcoming the son."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2015%3A22&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-162",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "elder-son-refuses-feast",
+    "reference": {
+      "book": 42,
+      "chapter": 15,
+      "verse": 28
+    },
+    "fr": {
+      "question": "Que l'aîné refusa-t-il de faire en apprenant la fête pour le retour de son frère ?",
+      "answer": "Entrer",
+      "aliases": [
+        "entrer dans la maison",
+        "participer à la fête"
+      ],
+      "explanation": "L'aîné se mit en colère et ne voulut pas entrer."
+    },
+    "en": {
+      "question": "What did the elder son refuse to do on hearing of the feast for his brother's return?",
+      "answer": "Go in",
+      "aliases": [
+        "enter",
+        "join the feast"
+      ],
+      "explanation": "The elder son became angry and would not enter."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2015%3A28&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-163",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "rich-man-lazarus-great-gulf",
+    "reference": {
+      "book": 42,
+      "chapter": 16,
+      "verse": 26
+    },
+    "fr": {
+      "question": "Quel obstacle infranchissable sépare l'homme riche d'Abraham et de Lazare dans la parabole ?",
+      "answer": "Un grand abîme",
+      "aliases": [
+        "abîme",
+        "gouffre",
+        "grand gouffre"
+      ],
+      "explanation": "Abraham explique qu'un grand abîme empêche tout passage."
+    },
+    "en": {
+      "question": "What impassable obstacle separates the rich man from Abraham and Lazarus in the parable?",
+      "answer": "A great gulf",
+      "aliases": [
+        "gulf",
+        "chasm",
+        "great chasm"
+      ],
+      "explanation": "Abraham explains that a great gulf prevents crossing."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2016%3A26&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-164",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "persistent-widow-judge",
+    "reference": {
+      "book": 42,
+      "chapter": 18,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Pourquoi le juge finit-il par faire justice à la veuve malgré son indifférence ?",
+      "answer": "Elle le dérangeait sans cesse",
+      "aliases": [
+        "insistance",
+        "persévérance",
+        "elle insistait"
+      ],
+      "explanation": "L'insistance de la veuve poussa le juge à agir."
+    },
+    "en": {
+      "question": "Why did the judge finally grant the widow justice despite his indifference?",
+      "answer": "She kept troubling him",
+      "aliases": [
+        "persistence",
+        "she persisted",
+        "kept coming"
+      ],
+      "explanation": "The widow's persistence pushed the judge to act."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2018%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-165",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "zacchaeus-fourfold-restitution",
+    "reference": {
+      "book": 42,
+      "chapter": 19,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Par combien Zachée promit-il de multiplier le remboursement de ce qu'il avait pris injustement ?",
+      "answer": "Quatre",
+      "aliases": [
+        "4"
+      ],
+      "explanation": "Zachée promit une restitution au quadruple."
+    },
+    "en": {
+      "question": "By what factor did Zacchaeus promise to repay anything he had taken unjustly?",
+      "answer": "Four",
+      "aliases": [
+        "4"
+      ],
+      "explanation": "Zacchaeus promised fourfold restitution."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2019%3A8&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-166",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "satan-sift-wheat",
+    "reference": {
+      "book": 42,
+      "chapter": 22,
+      "verse": 31
+    },
+    "fr": {
+      "question": "À quelle céréale Jésus compare-t-il les disciples que Satan demande à cribler ?",
+      "answer": "Le froment",
+      "aliases": [
+        "froment",
+        "blé"
+      ],
+      "explanation": "Jésus utilise l'image du froment passé au crible."
+    },
+    "en": {
+      "question": "To which grain does Jesus compare the disciples whom Satan wants to sift?",
+      "answer": "Wheat",
+      "aliases": [],
+      "explanation": "Jesus uses the image of wheat being sifted."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2022%3A31&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-167",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "peter-strengthen-brothers",
+    "reference": {
+      "book": 42,
+      "chapter": 22,
+      "verse": 32
+    },
+    "fr": {
+      "question": "Que Pierre devra-t-il faire pour ses frères après être revenu à Jésus ?",
+      "answer": "Les affermir",
+      "aliases": [
+        "affermir",
+        "fortifier",
+        "renforcer leur foi"
+      ],
+      "explanation": "Jésus lui confie la tâche d'affermir ses frères."
+    },
+    "en": {
+      "question": "What is Peter to do for his brothers after returning to Jesus?",
+      "answer": "Strengthen them",
+      "aliases": [
+        "strengthen",
+        "confirm his brothers"
+      ],
+      "explanation": "Jesus entrusts him with strengthening his brothers."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2022%3A32&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-168",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "herod-hopes-sign-jesus",
+    "reference": {
+      "book": 42,
+      "chapter": 23,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Quel spectacle Hérode espérait-il voir accomplir par Jésus lorsqu'il lui fut envoyé ?",
+      "answer": "Un miracle",
+      "aliases": [
+        "miracle",
+        "signe"
+      ],
+      "explanation": "Hérode souhaitait voir Jésus accomplir un signe."
+    },
+    "en": {
+      "question": "What did Herod hope to see Jesus perform when he was sent to him?",
+      "answer": "A miracle",
+      "aliases": [
+        "miracle",
+        "sign"
+      ],
+      "explanation": "Herod wanted to see Jesus perform a sign."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2023%3A8&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-169",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "disciples-wait-city-power",
+    "reference": {
+      "book": 42,
+      "chapter": 24,
+      "verse": 49
+    },
+    "fr": {
+      "question": "Dans quelle ville les disciples devaient-ils rester jusqu'à être revêtus de puissance ?",
+      "answer": "Jérusalem",
+      "aliases": [],
+      "explanation": "Jésus leur demanda d'attendre à Jérusalem."
+    },
+    "en": {
+      "question": "In which city were the disciples to remain until clothed with power?",
+      "answer": "Jerusalem",
+      "aliases": [],
+      "explanation": "Jesus told them to wait in Jerusalem."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2024%3A49&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-170",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "word-became-flesh",
+    "reference": {
+      "book": 43,
+      "chapter": 1,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Que devint la Parole pour habiter parmi nous, selon le prologue de Jean ?",
+      "answer": "Chair",
+      "aliases": [
+        "humaine",
+        "homme"
+      ],
+      "explanation": "Jean décrit la Parole devenue chair."
+    },
+    "en": {
+      "question": "What did the Word become to dwell among us, according to John's prologue?",
+      "answer": "Flesh",
+      "aliases": [
+        "human"
+      ],
+      "explanation": "John describes the Word becoming flesh."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%201%3A14&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-171",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "lamb-god-takes-sin",
+    "reference": {
+      "book": 43,
+      "chapter": 1,
+      "verse": 29
+    },
+    "fr": {
+      "question": "Que l'Agneau de Dieu enlève-t-il, selon Jean-Baptiste ?",
+      "answer": "Le péché du monde",
+      "aliases": [
+        "péché",
+        "les péchés du monde",
+        "péché du monde"
+      ],
+      "explanation": "Jean présente Jésus comme celui qui ôte le péché du monde."
+    },
+    "en": {
+      "question": "What does the Lamb of God take away, according to John the Baptist?",
+      "answer": "The sin of the world",
+      "aliases": [
+        "sin",
+        "world's sin",
+        "sin of the world"
+      ],
+      "explanation": "John presents Jesus as the one who takes away the world's sin."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%201%3A29&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-172",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "zeal-house-consumes",
+    "reference": {
+      "book": 43,
+      "chapter": 2,
+      "verse": 17
+    },
+    "fr": {
+      "question": "Quel zèle les disciples se rappelèrent-ils après l'intervention de Jésus dans le temple ?",
+      "answer": "Le zèle de la maison de Dieu",
+      "aliases": [
+        "maison de Dieu",
+        "zèle pour le temple",
+        "zèle de la maison de Dieu"
+      ],
+      "explanation": "Ils se souvinrent du texte sur le zèle pour la maison de Dieu."
+    },
+    "en": {
+      "question": "What zeal did the disciples recall after Jesus' action in the temple?",
+      "answer": "Zeal for God's house",
+      "aliases": [
+        "zeal for the temple"
+      ],
+      "explanation": "They remembered the text about zeal for God's house."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%202%3A17&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-173",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "born-water-spirit",
+    "reference": {
+      "book": 43,
+      "chapter": 3,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Selon Jésus à Nicodème, de quoi faut-il naître en plus de l'eau pour entrer dans le royaume ?",
+      "answer": "De l'Esprit",
+      "aliases": [
+        "Esprit"
+      ],
+      "explanation": "Jésus parle d'une naissance d'eau et d'Esprit."
+    },
+    "en": {
+      "question": "According to Jesus to Nicodemus, of what must one be born besides water to enter the kingdom?",
+      "answer": "The Spirit",
+      "aliases": [
+        "Holy Spirit",
+        "God's Spirit",
+        "Spirit"
+      ],
+      "explanation": "Jesus speaks of being born of water and the Spirit."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%203%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-174",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "harvest-four-months",
+    "reference": {
+      "book": 43,
+      "chapter": 4,
+      "verse": 35
+    },
+    "fr": {
+      "question": "Combien de mois Jésus cite-t-il dans le dicton sur l'attente de la moisson ?",
+      "answer": "Quatre",
+      "aliases": [
+        "4"
+      ],
+      "explanation": "Il oppose ce délai à des champs déjà prêts."
+    },
+    "en": {
+      "question": "How many months does Jesus cite in the saying about waiting for harvest?",
+      "answer": "Four",
+      "aliases": [
+        "4"
+      ],
+      "explanation": "He contrasts that delay with fields already ready."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%204%3A35&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-175",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "scriptures-testify-jesus",
+    "reference": {
+      "book": 43,
+      "chapter": 5,
+      "verse": 39
+    },
+    "fr": {
+      "question": "De qui les Écritures rendent-elles témoignage, selon Jésus à ses interlocuteurs ?",
+      "answer": "De Jésus",
+      "aliases": [
+        "Jésus",
+        "Christ"
+      ],
+      "explanation": "Jésus affirme que les Écritures témoignent de lui."
+    },
+    "en": {
+      "question": "About whom do the Scriptures testify, according to Jesus to his hearers?",
+      "answer": "Jesus",
+      "aliases": [
+        "Christ"
+      ],
+      "explanation": "Jesus states that the Scriptures testify about him."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%205%3A39&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-176",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "crowd-make-jesus-king",
+    "reference": {
+      "book": 43,
+      "chapter": 6,
+      "verse": 15
+    },
+    "fr": {
+      "question": "Quel titre la foule voulait-elle imposer à Jésus après la multiplication des pains ?",
+      "answer": "Roi",
+      "aliases": [],
+      "explanation": "Jésus se retira lorsqu'il comprit qu'on voulait le faire roi."
+    },
+    "en": {
+      "question": "What title did the crowd want to impose on Jesus after the feeding miracle?",
+      "answer": "King",
+      "aliases": [],
+      "explanation": "Jesus withdrew when he knew they wanted to make him king."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%206%3A15&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-177",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "living-water-spirit-meaning",
+    "reference": {
+      "book": 43,
+      "chapter": 7,
+      "verse": 39
+    },
+    "fr": {
+      "question": "Que désigne l'eau vive dans l'explication donnée par Jean après l'appel de Jésus ?",
+      "answer": "L'Esprit",
+      "aliases": [
+        "Esprit"
+      ],
+      "explanation": "Jean explique que Jésus parlait de l'Esprit."
+    },
+    "en": {
+      "question": "What does the living water signify in John's explanation after Jesus' invitation?",
+      "answer": "The Spirit",
+      "aliases": [
+        "Holy Spirit",
+        "God's Spirit",
+        "Spirit"
+      ],
+      "explanation": "John explains that Jesus was speaking about the Spirit."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%207%3A39&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-178",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "truth-makes-free",
+    "reference": {
+      "book": 43,
+      "chapter": 8,
+      "verse": 32
+    },
+    "fr": {
+      "question": "Que fera la vérité pour ceux qui la connaissent, selon Jésus ?",
+      "answer": "Elle les rendra libres",
+      "aliases": [
+        "libres",
+        "liberté",
+        "libérer"
+      ],
+      "explanation": "Jésus associe la connaissance de la vérité à la liberté."
+    },
+    "en": {
+      "question": "What will the truth do for those who know it, according to Jesus?",
+      "answer": "Make them free",
+      "aliases": [
+        "freedom",
+        "set free",
+        "liberate"
+      ],
+      "explanation": "Jesus connects knowing truth with freedom."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%208%3A32&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-179",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "first-stone-without-sin",
+    "reference": {
+      "book": 43,
+      "chapter": 8,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Quelle condition Jésus pose-t-il à celui qui jettera la première pierre ?",
+      "answer": "Être sans péché",
+      "aliases": [
+        "sans péché",
+        "ne pas avoir péché"
+      ],
+      "explanation": "Jésus invite d'abord chacun à regarder sa propre faute."
+    },
+    "en": {
+      "question": "What condition does Jesus set for the person who throws the first stone?",
+      "answer": "Being without sin",
+      "aliases": [
+        "sinless",
+        "without sin"
+      ],
+      "explanation": "Jesus first invites each person to consider their own sin."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%208%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-180",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "healed-blind-man-expelled",
+    "reference": {
+      "book": 43,
+      "chapter": 9,
+      "verse": 34
+    },
+    "fr": {
+      "question": "Que firent les interlocuteurs de l'aveugle guéri après avoir rejeté son témoignage ?",
+      "answer": "Ils le chassèrent",
+      "aliases": [
+        "chassé",
+        "exclu",
+        "le chasser"
+      ],
+      "explanation": "L'homme fut chassé après avoir défendu ce qui lui était arrivé."
+    },
+    "en": {
+      "question": "What did the healed blind man's interrogators do after rejecting his testimony?",
+      "answer": "They cast him out",
+      "aliases": [
+        "expelled him",
+        "threw him out"
+      ],
+      "explanation": "The man was cast out after defending what had happened to him."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%209%3A34&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-181",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "jesus-door-sheep",
+    "reference": {
+      "book": 43,
+      "chapter": 10,
+      "verse": 7
+    },
+    "fr": {
+      "question": "À quelle ouverture permettant l'accès aux brebis Jésus se compare-t-il ?",
+      "answer": "La porte",
+      "aliases": [
+        "porte"
+      ],
+      "explanation": "Jésus se présente comme la porte des brebis."
+    },
+    "en": {
+      "question": "To what opening giving access to the sheep does Jesus compare himself?",
+      "answer": "The door",
+      "aliases": [
+        "door"
+      ],
+      "explanation": "Jesus presents himself as the door of the sheep."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2010%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-182",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "spirit-guides-truth",
+    "reference": {
+      "book": 43,
+      "chapter": 16,
+      "verse": 13
+    },
+    "fr": {
+      "question": "Vers quoi l'Esprit de vérité conduira-t-il les disciples ?",
+      "answer": "Toute la vérité",
+      "aliases": [
+        "vérité",
+        "toute vérité"
+      ],
+      "explanation": "Jésus annonce que l'Esprit les conduira dans toute la vérité."
+    },
+    "en": {
+      "question": "Into what will the Spirit of truth guide the disciples?",
+      "answer": "All truth",
+      "aliases": [
+        "truth"
+      ],
+      "explanation": "Jesus says the Spirit will guide them into all truth."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2016%3A13&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-183",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "jesus-prays-believers-unity",
+    "reference": {
+      "book": 43,
+      "chapter": 17,
+      "verse": 21
+    },
+    "fr": {
+      "question": "Que Jésus demande-t-il pour tous ceux qui croiront, en les comparant à sa relation avec le Père ?",
+      "answer": "Qu'ils soient un",
+      "aliases": [
+        "unité",
+        "être un",
+        "un"
+      ],
+      "explanation": "Sa prière demande l'unité des croyants."
+    },
+    "en": {
+      "question": "What does Jesus ask for all believers, comparing them with his relationship with the Father?",
+      "answer": "That they may be one",
+      "aliases": [
+        "unity",
+        "be one"
+      ],
+      "explanation": "His prayer asks for believers' unity."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2017%3A21&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-184",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "arrest-lanterns-torches",
+    "reference": {
+      "book": 43,
+      "chapter": 18,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Quels objets pour éclairer la nuit les hommes conduits par Judas apportèrent-ils avec leurs armes ?",
+      "answer": "Des lanternes et des flambeaux",
+      "aliases": [
+        "lanternes",
+        "flambeaux",
+        "torches",
+        "lanternes et des flambeaux"
+      ],
+      "explanation": "Le groupe arriva avec de quoi éclairer et des armes."
+    },
+    "en": {
+      "question": "What objects for lighting the night did the men led by Judas bring with their weapons?",
+      "answer": "Lanterns and torches",
+      "aliases": [
+        "torches",
+        "lanterns"
+      ],
+      "explanation": "The group arrived with lights and weapons."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2018%3A3&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-185",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "cross-sour-wine-hyssop",
+    "reference": {
+      "book": 43,
+      "chapter": 19,
+      "verse": 29
+    },
+    "fr": {
+      "question": "Sur quelle plante l'éponge imbibée de vinaigre fut-elle fixée pour être portée à Jésus ?",
+      "answer": "L'hysope",
+      "aliases": [
+        "hysope"
+      ],
+      "explanation": "Jean mentionne une branche d'hysope."
+    },
+    "en": {
+      "question": "On what plant was the sponge of sour wine placed to lift it to Jesus?",
+      "answer": "Hyssop",
+      "aliases": [],
+      "explanation": "John mentions hyssop."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2019%3A29&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-186",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "risen-jesus-breathes-spirit",
+    "reference": {
+      "book": 43,
+      "chapter": 20,
+      "verse": 22
+    },
+    "fr": {
+      "question": "Quel geste Jésus ressuscité fit-il en disant aux disciples de recevoir le Saint-Esprit ?",
+      "answer": "Il souffla sur eux",
+      "aliases": [
+        "souffler",
+        "souffle"
+      ],
+      "explanation": "Jésus accompagna ses paroles d'un souffle."
+    },
+    "en": {
+      "question": "What did the risen Jesus do when telling the disciples to receive the Holy Spirit?",
+      "answer": "He breathed on them",
+      "aliases": [
+        "breathed",
+        "breathing"
+      ],
+      "explanation": "Jesus accompanied his words by breathing on them."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2020%3A22&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-187",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "risen-appearances-forty-days",
+    "reference": {
+      "book": 44,
+      "chapter": 1,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Pendant combien de jours Jésus se montra-t-il vivant aux apôtres avant son ascension ?",
+      "answer": "Quarante jours",
+      "aliases": [
+        "40"
+      ],
+      "explanation": "Les Actes mentionnent quarante jours d'apparitions."
+    },
+    "en": {
+      "question": "For how many days did Jesus show himself alive to the apostles before his ascension?",
+      "answer": "Forty days",
+      "aliases": [
+        "40"
+      ],
+      "explanation": "Acts mentions forty days of appearances."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%201%3A3&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-188",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "pentecost-joel-prophecy",
+    "reference": {
+      "book": 44,
+      "chapter": 2,
+      "verse": 16
+    },
+    "fr": {
+      "question": "Quel prophète Pierre cita-t-il pour expliquer les événements de la Pentecôte ?",
+      "answer": "Joël",
+      "aliases": [
+        "Joel"
+      ],
+      "explanation": "Pierre relia l'événement à l'annonce du prophète Joël."
+    },
+    "en": {
+      "question": "Which prophet did Peter quote to explain the events of Pentecost?",
+      "answer": "Joel",
+      "aliases": [],
+      "explanation": "Peter linked the event to Joel's prophecy."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%202%3A16&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-189",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "gamaliel-leave-apostles",
+    "reference": {
+      "book": 44,
+      "chapter": 5,
+      "verse": 38
+    },
+    "fr": {
+      "question": "Quel docteur de la loi conseilla au conseil de laisser les apôtres agir ?",
+      "answer": "Gamaliel",
+      "aliases": [],
+      "explanation": "Gamaliel invita à ne pas combattre une œuvre qui pourrait venir de Dieu."
+    },
+    "en": {
+      "question": "Which teacher of the law advised the council to leave the apostles alone?",
+      "answer": "Gamaliel",
+      "aliases": [],
+      "explanation": "Gamaliel warned against opposing a work that might be from God."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%205%3A38&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-190",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "simon-offers-money-spirit",
+    "reference": {
+      "book": 44,
+      "chapter": 8,
+      "verse": 18
+    },
+    "fr": {
+      "question": "Que Simon offrit-il aux apôtres pour obtenir le pouvoir de communiquer le Saint-Esprit ?",
+      "answer": "De l'argent",
+      "aliases": [
+        "argent"
+      ],
+      "explanation": "Simon voulut acheter ce pouvoir et fut repris."
+    },
+    "en": {
+      "question": "What did Simon offer the apostles to obtain the power to confer the Holy Spirit?",
+      "answer": "Money",
+      "aliases": [
+        "silver"
+      ],
+      "explanation": "Simon tried to buy that power and was rebuked."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%208%3A18&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-191",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "saul-eyes-scales-fall",
+    "reference": {
+      "book": 44,
+      "chapter": 9,
+      "verse": 18
+    },
+    "fr": {
+      "question": "À quoi Luc compare-t-il ce qui tomba des yeux de Saul lorsqu'il recouvra la vue ?",
+      "answer": "Des écailles",
+      "aliases": [
+        "écailles"
+      ],
+      "explanation": "Le récit parle de quelque chose ressemblant à des écailles."
+    },
+    "en": {
+      "question": "To what does Luke compare what fell from Saul's eyes as he regained sight?",
+      "answer": "Scales",
+      "aliases": [],
+      "explanation": "The account speaks of something like scales."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%209%3A18&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-192",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "peter-sheet-vision",
+    "reference": {
+      "book": 44,
+      "chapter": 10,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Quel grand objet de tissu Pierre vit-il descendre du ciel dans sa vision ?",
+      "answer": "Une nappe",
+      "aliases": [
+        "nappe",
+        "drap"
+      ],
+      "explanation": "La vision montrait une grande nappe tenue par les quatre coins."
+    },
+    "en": {
+      "question": "What large cloth object did Peter see descending from heaven in his vision?",
+      "answer": "A sheet",
+      "aliases": [
+        "sheet"
+      ],
+      "explanation": "The vision showed a large sheet held by its four corners."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2010%3A11&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-193",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "james-killed-sword",
+    "reference": {
+      "book": 44,
+      "chapter": 12,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Par quelle arme Hérode fit-il mourir Jacques, frère de Jean ?",
+      "answer": "L'épée",
+      "aliases": [
+        "épée"
+      ],
+      "explanation": "Jacques fut exécuté par l'épée."
+    },
+    "en": {
+      "question": "By what weapon did Herod have James, John's brother, killed?",
+      "answer": "The sword",
+      "aliases": [
+        "sword"
+      ],
+      "explanation": "James was executed by the sword."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2012%3A2&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-194",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "elymas-blindness",
+    "reference": {
+      "book": 44,
+      "chapter": 13,
+      "verse": 11
+    },
+    "fr": {
+      "question": "De quel handicap temporaire Élymas fut-il frappé après s'être opposé à Paul ?",
+      "answer": "La cécité",
+      "aliases": [
+        "cécité",
+        "aveugle",
+        "perte de vue"
+      ],
+      "explanation": "Élymas ne put plus voir et chercha quelqu'un pour le guider."
+    },
+    "en": {
+      "question": "What temporary disability struck Elymas after he opposed Paul?",
+      "answer": "Blindness",
+      "aliases": [
+        "blind"
+      ],
+      "explanation": "Elymas could not see and sought someone to guide him."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2013%3A11&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-195",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "jerusalem-council-circumcision-dispute",
+    "reference": {
+      "book": 44,
+      "chapter": 15,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Quel rite certains voulaient-ils imposer aux nouveaux croyants, provoquant la discussion de Jérusalem ?",
+      "answer": "La circoncision",
+      "aliases": [
+        "circoncision"
+      ],
+      "explanation": "Le différend portait sur l'obligation de la circoncision."
+    },
+    "en": {
+      "question": "What rite did some want to impose on new believers, prompting the Jerusalem discussion?",
+      "answer": "Circumcision",
+      "aliases": [],
+      "explanation": "The dispute concerned whether circumcision was required."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2015%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-196",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "priscilla-aquila-teach-apollos",
+    "reference": {
+      "book": 44,
+      "chapter": 18,
+      "verse": 26
+    },
+    "fr": {
+      "question": "Quel couple expliqua plus exactement la voie de Dieu à Apollos ?",
+      "answer": "Priscille et Aquilas",
+      "aliases": [
+        "Aquilas et Priscille",
+        "Prisca et Aquilas"
+      ],
+      "explanation": "Le couple prit Apollos à part pour l'instruire."
+    },
+    "en": {
+      "question": "Which couple explained God's way more accurately to Apollos?",
+      "answer": "Priscilla and Aquila",
+      "aliases": [
+        "Aquila and Priscilla",
+        "Prisca and Aquila"
+      ],
+      "explanation": "The couple took Apollos aside to instruct him."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2018%3A26&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-197",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "paul-handkerchiefs-healing",
+    "reference": {
+      "book": 44,
+      "chapter": 19,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Quels petits tissus ayant touché Paul étaient portés aux malades avec des linges ?",
+      "answer": "Des mouchoirs",
+      "aliases": [
+        "mouchoirs"
+      ],
+      "explanation": "Des mouchoirs et des linges étaient portés depuis son corps."
+    },
+    "en": {
+      "question": "What small cloths that had touched Paul were brought to the sick along with aprons?",
+      "answer": "Handkerchiefs",
+      "aliases": [],
+      "explanation": "Handkerchiefs and aprons were carried from his body."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2019%3A12&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-198",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "agabus-paul-belt",
+    "reference": {
+      "book": 44,
+      "chapter": 21,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Quel objet appartenant à Paul Agabus utilisa-t-il pour annoncer sa captivité ?",
+      "answer": "Sa ceinture",
+      "aliases": [
+        "ceinture",
+        "ceinture de Paul"
+      ],
+      "explanation": "Agabus se lia avec la ceinture de Paul."
+    },
+    "en": {
+      "question": "What object belonging to Paul did Agabus use to foretell his imprisonment?",
+      "answer": "His belt",
+      "aliases": [
+        "belt",
+        "girdle",
+        "Paul's girdle"
+      ],
+      "explanation": "Agabus bound himself with Paul's belt."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2021%3A11&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-199",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "paul-pharisee-resurrection",
+    "reference": {
+      "book": 44,
+      "chapter": 23,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Quelle espérance Paul invoqua-t-il pour expliquer son jugement devant les pharisiens et les sadducéens ?",
+      "answer": "La résurrection des morts",
+      "aliases": [
+        "résurrection",
+        "résurrection des morts"
+      ],
+      "explanation": "Paul centra sa défense sur l'espérance de la résurrection."
+    },
+    "en": {
+      "question": "What hope did Paul invoke to explain his trial before the Pharisees and Sadducees?",
+      "answer": "The resurrection of the dead",
+      "aliases": [
+        "resurrection",
+        "resurrection of the dead"
+      ],
+      "explanation": "Paul centered his defense on the hope of resurrection."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2023%3A6&version=LSG%3BKJV"
+  },
+  {
+    "id": "medium-nt-200",
+    "difficulty": "medium",
+    "testament": "new",
+    "factKey": "paul-appeals-caesar",
+    "reference": {
+      "book": 44,
+      "chapter": 25,
+      "verse": 11
+    },
+    "fr": {
+      "question": "À quelle autorité suprême Paul fit-il appel devant Festus ?",
+      "answer": "César",
+      "aliases": [],
+      "explanation": "Paul demanda que sa cause soit portée devant César."
+    },
+    "en": {
+      "question": "To which supreme authority did Paul appeal before Festus?",
+      "answer": "Caesar",
+      "aliases": [],
+      "explanation": "Paul asked for his case to be brought before Caesar."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2025%3A11&version=LSG%3BKJV"
+  }
+]

@@ -192,6 +192,9 @@ function App() {
         </div>
       </section>
       <nav>
+        <a href="/who-lab.html">
+          {t('Qui suis-je ? · atelier des indices', 'Who am I? · clue workshop')}
+        </a>
         <button
           className={playing ? 'games-secondary' : 'games-primary'}
           onClick={() => setPlaying(false)}

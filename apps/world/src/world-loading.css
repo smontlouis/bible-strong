@@ -59,11 +59,12 @@
   height: 96px;
   left: calc(50% - 48px);
   bottom: 93px;
-  background: var(--loading-avatar) url('/assets/avatars/short-slime/idle-down.png') no-repeat
-    center / contain;
+  /* The same 5 × 3 sheet and 24 fps cycle as the downward avatar movement. */
+  background: var(--loading-avatar) url('/assets/avatars/short-slime/down.png') no-repeat 0 0 /
+    480px 288px;
   background-blend-mode: multiply;
-  mask: url('/assets/avatars/short-slime/idle-down.png') no-repeat center / contain;
-  animation: slime-bob 900ms ease-in-out infinite alternate;
+  mask: url('/assets/avatars/short-slime/down.png') no-repeat 0 0 / 480px 288px;
+  animation: loading-slime-walk 625ms step-end infinite;
 }
 .loading-ripple {
   position: absolute;
@@ -194,9 +195,67 @@
   outline: 3px solid #315fcf;
   outline-offset: 4px;
 }
-@keyframes slime-bob {
-  to {
-    transform: translateY(-6px);
+@keyframes loading-slime-walk {
+  0%,
+  100% {
+    background-position: 0px 0px;
+    mask-position: 0px 0px;
+  }
+  6.6667% {
+    background-position: -96px 0px;
+    mask-position: -96px 0px;
+  }
+  13.3333% {
+    background-position: -192px 0px;
+    mask-position: -192px 0px;
+  }
+  20% {
+    background-position: -288px 0px;
+    mask-position: -288px 0px;
+  }
+  26.6667% {
+    background-position: -384px 0px;
+    mask-position: -384px 0px;
+  }
+  33.3333% {
+    background-position: 0px -96px;
+    mask-position: 0px -96px;
+  }
+  40% {
+    background-position: -96px -96px;
+    mask-position: -96px -96px;
+  }
+  46.6667% {
+    background-position: -192px -96px;
+    mask-position: -192px -96px;
+  }
+  53.3333% {
+    background-position: -288px -96px;
+    mask-position: -288px -96px;
+  }
+  60% {
+    background-position: -384px -96px;
+    mask-position: -384px -96px;
+  }
+  66.6667% {
+    background-position: 0px -192px;
+    mask-position: 0px -192px;
+  }
+  73.3333% {
+    background-position: -96px -192px;
+    mask-position: -96px -192px;
+  }
+  80% {
+    background-position: -192px -192px;
+    mask-position: -192px -192px;
+  }
+  86.6667% {
+    background-position: -288px -192px;
+    mask-position: -288px -192px;
+  }
+  93.3333% {
+    background-position: -384px -192px;
+    mask-position: -384px -192px;
   }
 }
 @keyframes loading-pulse {
@@ -231,6 +290,12 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .loading-slime {
+    background-image: url('/assets/avatars/short-slime/idle-down.png');
+    background-position: center;
+    background-size: contain;
+    mask: url('/assets/avatars/short-slime/idle-down.png') no-repeat center / contain;
+  }
   .loading-slime,
   .loading-dots i {
     animation: none;

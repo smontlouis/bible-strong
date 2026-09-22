@@ -58,7 +58,7 @@ const copy = {
     leave: 'Quitter la partie',
     generating: 'Votre aventure prend forme…',
     generatingDescription:
-      'Nous préparons cinq découvertes à partir des textes bibliques. Cela peut prendre une à deux minutes.',
+      'Nous choisissons cinq découvertes dans le catalogue biblique. Un instant…',
     round: 'Manche',
     clue: 'Indice',
     answer: 'Ta réponse',
@@ -145,7 +145,7 @@ const copy = {
     leave: 'Leave game',
     generating: 'Your adventure is taking shape…',
     generatingDescription:
-      'We are preparing five discoveries from biblical texts. This can take a minute or two.',
+      'We are selecting five discoveries from the Bible catalogue. One moment…',
     round: 'Round',
     clue: 'Clue',
     answer: 'Your answer',
@@ -305,7 +305,7 @@ export function BibleGamesView({
               />
             ) : game?.solo ? (
               <SoloGameView
-                key={`${game.id}:${game.round}`}
+                key={game.id}
                 game={game}
                 now={online ? now : snapshot.now}
                 online={online}
@@ -436,23 +436,30 @@ export function BibleGamesView({
                           ['testament', ['both', 'old', 'new']],
                           ['difficulty', ['easy', 'medium', 'hard']],
                         ] as const
-                      ).map(([key, values]) => (
-                        <label key={key}>
-                          {t[key]}
-                          <select
-                            value={options[key]}
-                            onChange={event =>
-                              setOptions({ ...options, [key]: event.target.value })
-                            }
-                          >
-                            {values.map(value => (
-                              <option key={value} value={value}>
-                                {t[value]}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                      ))}
+                      )
+                        .filter(
+                          ([key]) =>
+                            key !== 'difficulty' ||
+                            options.mode === 'solo' ||
+                            options.kind !== 'who'
+                        )
+                        .map(([key, values]) => (
+                          <label key={key}>
+                            {t[key]}
+                            <select
+                              value={options[key]}
+                              onChange={event =>
+                                setOptions({ ...options, [key]: event.target.value })
+                              }
+                            >
+                              {values.map(value => (
+                                <option key={value} value={value}>
+                                  {t[value]}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        ))}
                     </div>
                     <footer className="games-actions">
                       <small>
@@ -622,7 +629,7 @@ export function BibleGamesView({
                     )}
                     {game.phase === 'question' && game.who && (
                       <WhoRound
-                        key={`${game.id}:${game.round}`}
+                        key={game.id}
                         game={game}
                         me={state.me}
                         online={state.online}
@@ -690,7 +697,7 @@ export function BibleGamesView({
                           </ol>
                         )}
                         <AnswerForm
-                          key={`${game.id}:${game.round}`}
+                          key={game.id}
                           choices={game.choices}
                           initialText={game.ownAnswer?.text ?? ''}
                           status={game.ownAnswer?.status}
@@ -729,9 +736,24 @@ export function BibleGamesView({
                           </div>
                         )}
                         <p>{game.result.explanation}</p>
-                        <a href={game.result.url} target="_blank" rel="noopener noreferrer">
-                          {game.result.reference} <span>{t.read} ↗</span>
-                        </a>
+                        {(
+                          game.result.sources ?? [
+                            { reference: game.result.reference, url: game.result.url },
+                          ]
+                        )
+                          .filter(
+                            (source, i, all) => all.findIndex(s => s.url === source.url) === i
+                          )
+                          .map(source => (
+                            <a
+                              key={source.url}
+                              href={source.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {source.reference} <span>{t.read} ↗</span>
+                            </a>
+                          ))}
                         {game.result.void && <p className="games-notice">{t.void}</p>}
                         <div className="games-answer-list">
                           {game.result.answers.map(a => (

@@ -1,0 +1,4448 @@
+[
+  {
+    "id": "who-person-011",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Adam",
+      "aliases": [],
+      "explanation": "Adam est formé de la poussière du sol et placé dans le jardin. Il nomme les animaux et devient le père de Seth."
+    },
+    "en": {
+      "answer": "Adam",
+      "aliases": [],
+      "explanation": "Adam is formed from the dust and placed in the garden. He names the animals and becomes Seth's father."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "À cent trente ans, je deviens le père de Seth.",
+        "en": "At the age of one hundred and thirty, I become Seth's father.",
+        "reference": {
+          "book": 1,
+          "chapter": 5,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%205%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Dieu me place dans le jardin d'Éden pour le cultiver et le garder.",
+        "en": "God places me in the garden of Eden to tend and keep it.",
+        "reference": {
+          "book": 1,
+          "chapter": 2,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%202%3A15&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je donne des noms au bétail, aux oiseaux et aux animaux des champs.",
+        "en": "I give names to livestock, birds and the animals of the field.",
+        "reference": {
+          "book": 1,
+          "chapter": 2,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%202%3A20&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Dieu me forme avec la poussière du sol et souffle la vie dans mes narines.",
+        "en": "God forms me from the dust of the ground and breathes life into my nostrils.",
+        "reference": {
+          "book": 1,
+          "chapter": 2,
+          "verse": 7
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%202%3A7&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-012",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Ève",
+      "aliases": [
+        "Eve"
+      ],
+      "explanation": "Ève est la femme formée à partir d'une côte de l'homme. Trompée par le serpent, elle mange le fruit défendu et devient la mère de Caïn et d'Abel."
+    },
+    "en": {
+      "answer": "Eve",
+      "aliases": [],
+      "explanation": "Eve is the woman formed from the man's rib. Deceived by the serpent, she eats the forbidden fruit and becomes the mother of Cain and Abel."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mon premier fils s'appelle Caïn.",
+        "en": "My first son is called Cain.",
+        "reference": {
+          "book": 1,
+          "chapter": 4,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%204%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Quand Dieu m'interroge, j'explique que le serpent m'a trompée.",
+        "en": "When God questions me, I explain that the serpent deceived me.",
+        "reference": {
+          "book": 1,
+          "chapter": 3,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%203%3A13&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je prends du fruit défendu et j'en donne aussi à mon mari.",
+        "en": "I take the forbidden fruit and also give some to my husband.",
+        "reference": {
+          "book": 1,
+          "chapter": 3,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%203%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Dieu me forme à partir d'une côte prise à l'homme.",
+        "en": "God forms me from a rib taken from the man.",
+        "reference": {
+          "book": 1,
+          "chapter": 2,
+          "verse": 22
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%202%3A22&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-013",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Caïn",
+      "aliases": [
+        "Cain"
+      ],
+      "explanation": "Caïn cultive la terre. Après son offrande, il tue son frère Abel ; Dieu met ensuite un signe sur lui."
+    },
+    "en": {
+      "answer": "Cain",
+      "aliases": [],
+      "explanation": "Cain works the ground. After bringing his offering, he kills his brother Abel; God later puts a mark on him."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Dieu met un signe sur moi pour empêcher qu'on me tue.",
+        "en": "God puts a mark on me to prevent others from killing me.",
+        "reference": {
+          "book": 1,
+          "chapter": 4,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%204%3A15&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je cultive la terre, tandis que mon frère garde des brebis.",
+        "en": "I work the ground while my brother keeps sheep.",
+        "reference": {
+          "book": 1,
+          "chapter": 4,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%204%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "J'apporte à Dieu une offrande tirée des fruits de la terre.",
+        "en": "I bring God an offering from the produce of the ground.",
+        "reference": {
+          "book": 1,
+          "chapter": 4,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%204%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je tue mon frère Abel alors que nous sommes dans les champs.",
+        "en": "I kill my brother Abel while we are in the field.",
+        "reference": {
+          "book": 1,
+          "chapter": 4,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%204%3A8&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-014",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Noé",
+      "aliases": [
+        "Noe"
+      ],
+      "explanation": "Noé construit l'arche sur l'ordre de Dieu. Il traverse le déluge avec sa famille et reçoit le retour d'une colombe portant une feuille d'olivier."
+    },
+    "en": {
+      "answer": "Noah",
+      "aliases": [],
+      "explanation": "Noah builds the ark at God's command. He survives the flood with his family and receives a returning dove carrying an olive leaf."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Après le déluge, je cultive la terre et plante une vigne.",
+        "en": "After the flood, I work the ground and plant a vineyard.",
+        "reference": {
+          "book": 1,
+          "chapter": 9,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%209%3A20&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Mes trois fils sont Sem, Cham et Japhet.",
+        "en": "My three sons are Shem, Ham and Japheth.",
+        "reference": {
+          "book": 1,
+          "chapter": 6,
+          "verse": 10
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%206%3A10&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Une colombe revient vers moi avec une feuille d'olivier dans son bec.",
+        "en": "A dove returns to me with an olive leaf in its beak.",
+        "reference": {
+          "book": 1,
+          "chapter": 8,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%208%3A11&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Dieu me demande de construire une arche avec des compartiments et de l'enduire de poix.",
+        "en": "God tells me to build an ark with rooms and coat it with pitch.",
+        "reference": {
+          "book": 1,
+          "chapter": 6,
+          "verse": 14
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%206%3A14&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-015",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Sara",
+      "aliases": [
+        "Sarah",
+        "Saraï",
+        "Sarai"
+      ],
+      "explanation": "Sara, épouse d'Abraham, enfante Isaac dans sa vieillesse. Le récit associe sa maternité au rire."
+    },
+    "en": {
+      "answer": "Sarah",
+      "aliases": [
+        "Sarai"
+      ],
+      "explanation": "Sarah, Abraham's wife, gives birth to Isaac in old age. The narrative links her motherhood with laughter."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je vis cent vingt-sept ans.",
+        "en": "I live for one hundred and twenty-seven years.",
+        "reference": {
+          "book": 1,
+          "chapter": 23,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2023%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Mon mari me demande de préparer rapidement des gâteaux pour nos visiteurs.",
+        "en": "My husband asks me to quickly prepare cakes for our visitors.",
+        "reference": {
+          "book": 1,
+          "chapter": 18,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2018%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Après la naissance de mon fils, je dis que Dieu m'a donné un sujet de rire.",
+        "en": "After my son's birth, I say that God has given me laughter.",
+        "reference": {
+          "book": 1,
+          "chapter": 21,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2021%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis l'épouse d'Abraham qui donne naissance à Isaac.",
+        "en": "I am Abraham's wife who gives birth to Isaac.",
+        "reference": {
+          "book": 1,
+          "chapter": 21,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2021%3A3&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-016",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Lot",
+      "aliases": [],
+      "explanation": "Lot, neveu d'Abraham, choisit la plaine du Jourdain. Des anges le font sortir de Sodome avant sa destruction."
+    },
+    "en": {
+      "answer": "Lot",
+      "aliases": [],
+      "explanation": "Lot, Abraham's nephew, chooses the Jordan plain. Angels lead him out of Sodom before its destruction."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je finis par habiter dans une caverne avec mes deux filles.",
+        "en": "I eventually live in a cave with my two daughters.",
+        "reference": {
+          "book": 1,
+          "chapter": 19,
+          "verse": 30
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2019%3A30&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je choisis pour moi la plaine du Jourdain et me sépare de mon oncle.",
+        "en": "I choose the Jordan plain for myself and separate from my uncle.",
+        "reference": {
+          "book": 1,
+          "chapter": 13,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2013%3A11&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je suis capturé avec mes biens alors que j'habite Sodome.",
+        "en": "I am captured with my possessions while living in Sodom.",
+        "reference": {
+          "book": 1,
+          "chapter": 14,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2014%3A12&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Des anges me prennent par la main, avec ma femme et mes filles, pour nous faire sortir de Sodome.",
+        "en": "Angels take my hand, along with my wife and daughters, to lead us out of Sodom.",
+        "reference": {
+          "book": 1,
+          "chapter": 19,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2019%3A16&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-017",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Agar",
+      "aliases": [],
+      "explanation": "Agar est la servante égyptienne de Sara et la mère d'Ismaël. Dieu lui révèle un puits lorsque son fils manque d'eau."
+    },
+    "en": {
+      "answer": "Hagar",
+      "aliases": [],
+      "explanation": "Hagar is Sarah's Egyptian servant and Ishmael's mother. God reveals a well to her when her son runs out of water."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Dieu m'ouvre les yeux et je vois un puits où remplir mon outre.",
+        "en": "God opens my eyes and I see a well where I can fill my water bottle.",
+        "reference": {
+          "book": 1,
+          "chapter": 21,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2021%3A19&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Un ange me trouve près d'une source sur le chemin de Schur.",
+        "en": "An angel finds me by a spring on the way to Shur.",
+        "reference": {
+          "book": 1,
+          "chapter": 16,
+          "verse": 7
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2016%3A7&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je suis la servante égyptienne de Sara.",
+        "en": "I am Sarah's Egyptian servant.",
+        "reference": {
+          "book": 1,
+          "chapter": 16,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2016%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je donne à Abraham un fils nommé Ismaël.",
+        "en": "I bear Abraham a son named Ishmael.",
+        "reference": {
+          "book": 1,
+          "chapter": 16,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2016%3A15&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-018",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Isaac",
+      "aliases": [],
+      "explanation": "Isaac est le fils d'Abraham et Sara. Il épouse Rebecca, devient le père de jumeaux et est lié au récit du sacrifice arrêté."
+    },
+    "en": {
+      "answer": "Isaac",
+      "aliases": [],
+      "explanation": "Isaac is the son of Abraham and Sarah. He marries Rebekah, fathers twins and features in the account of the halted sacrifice."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je rouvre les puits creusés du temps de mon père, que les Philistins avaient comblés.",
+        "en": "I reopen wells dug in my father's time that the Philistines had filled.",
+        "reference": {
+          "book": 1,
+          "chapter": 26,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2026%3A18&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "J'ai soixante ans à la naissance de mes jumeaux.",
+        "en": "I am sixty years old when my twins are born.",
+        "reference": {
+          "book": 1,
+          "chapter": 25,
+          "verse": 26
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2025%3A26&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "J'épouse Rebecca et trouve du réconfort après la mort de ma mère.",
+        "en": "I marry Rebekah and find comfort after my mother's death.",
+        "reference": {
+          "book": 1,
+          "chapter": 24,
+          "verse": 67
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2024%3A67&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Mon père Abraham me lie et me dépose sur le bois d'un autel.",
+        "en": "My father Abraham binds me and lays me on the wood of an altar.",
+        "reference": {
+          "book": 1,
+          "chapter": 22,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2022%3A9&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-019",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Rebecca",
+      "aliases": [
+        "Rébecca",
+        "Rebekah"
+      ],
+      "explanation": "Rebecca offre de l'eau au serviteur d'Abraham et à ses chameaux. Elle épouse Isaac et aide ensuite Jacob à recevoir la bénédiction."
+    },
+    "en": {
+      "answer": "Rebekah",
+      "aliases": [
+        "Rebecca"
+      ],
+      "explanation": "Rebekah gives water to Abraham's servant and his camels. She marries Isaac and later helps Jacob receive the blessing."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je recouvre les mains et le cou de mon fils avec des peaux de chevreaux.",
+        "en": "I cover my son's hands and neck with young goats' skins.",
+        "reference": {
+          "book": 1,
+          "chapter": 27,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2027%3A16&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Dieu me dit que deux nations sont dans mon ventre et que l'aîné servira le plus jeune.",
+        "en": "God tells me that two nations are in my womb and the elder will serve the younger.",
+        "reference": {
+          "book": 1,
+          "chapter": 25,
+          "verse": 23
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2025%3A23&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je puise de l'eau pour tous les chameaux d'un voyageur.",
+        "en": "I draw water for all a traveller's camels.",
+        "reference": {
+          "book": 1,
+          "chapter": 24,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2024%3A20&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je deviens l'épouse d'Isaac, le fils d'Abraham.",
+        "en": "I become the wife of Isaac, Abraham's son.",
+        "reference": {
+          "book": 1,
+          "chapter": 24,
+          "verse": 67
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2024%3A67&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-020",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Ésaü",
+      "aliases": [
+        "Esau",
+        "Édom",
+        "Edom"
+      ],
+      "explanation": "Ésaü, fils aîné d'Isaac, est chasseur. Il vend son droit d'aînesse à Jacob puis retrouve son frère avec émotion."
+    },
+    "en": {
+      "answer": "Esau",
+      "aliases": [
+        "Edom"
+      ],
+      "explanation": "Esau, Isaac's elder son, is a hunter. He sells his birthright to Jacob and later embraces his returning brother."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Quand mon frère revient, je cours vers lui, je l'embrasse et nous pleurons.",
+        "en": "When my brother returns, I run to him, embrace him and weep with him.",
+        "reference": {
+          "book": 1,
+          "chapter": 33,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2033%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "À ma naissance, je suis roux et couvert de poils.",
+        "en": "At birth, I am red and covered with hair.",
+        "reference": {
+          "book": 1,
+          "chapter": 25,
+          "verse": 25
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2025%3A25&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je deviens un habile chasseur, un homme des champs.",
+        "en": "I become a skilled hunter, a man of the field.",
+        "reference": {
+          "book": 1,
+          "chapter": 25,
+          "verse": 27
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2025%3A27&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je vends mon droit d'aînesse à mon frère Jacob.",
+        "en": "I sell my birthright to my brother Jacob.",
+        "reference": {
+          "book": 1,
+          "chapter": 25,
+          "verse": 33
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2025%3A33&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-021",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Jacob",
+      "aliases": [
+        "Israël",
+        "Israel"
+      ],
+      "explanation": "Jacob est le fils d'Isaac et le frère d'Ésaü. Il rêve d'une échelle, travaille pour épouser Rachel et lutte jusqu'au lever du jour."
+    },
+    "en": {
+      "answer": "Jacob",
+      "aliases": [
+        "Israel"
+      ],
+      "explanation": "Jacob is Isaac's son and Esau's brother. He dreams of a ladder, works to marry Rachel and wrestles until daybreak."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Resté seul, je lutte avec un homme jusqu'au lever de l'aurore.",
+        "en": "Left alone, I wrestle with a man until daybreak.",
+        "reference": {
+          "book": 1,
+          "chapter": 32,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2032%3A24&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je travaille sept ans pour Rachel, mais mon amour fait paraître ce temps très court.",
+        "en": "I work seven years for Rachel, but love makes the time seem short.",
+        "reference": {
+          "book": 1,
+          "chapter": 29,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2029%3A20&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je nais en tenant le talon de mon frère jumeau Ésaü.",
+        "en": "I am born holding the heel of my twin brother Esau.",
+        "reference": {
+          "book": 1,
+          "chapter": 25,
+          "verse": 26
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2025%3A26&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je rêve d'une échelle reliant la terre au ciel, avec des anges qui montent et descendent.",
+        "en": "I dream of a ladder reaching from earth to heaven, with angels ascending and descending.",
+        "reference": {
+          "book": 1,
+          "chapter": 28,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2028%3A12&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-022",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Léa",
+      "aliases": [
+        "Lea"
+      ],
+      "explanation": "Léa est la fille aînée de Laban. Elle devient l'épouse de Jacob avant Rachel et donne naissance notamment à Ruben et Juda."
+    },
+    "en": {
+      "answer": "Leah",
+      "aliases": [],
+      "explanation": "Leah is Laban's elder daughter. She becomes Jacob's wife before Rachel and bears Reuben and Judah among her children."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "À la naissance de Juda, je décide de louer l'Éternel.",
+        "en": "At Judah's birth, I decide to praise the Lord.",
+        "reference": {
+          "book": 1,
+          "chapter": 29,
+          "verse": 35
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2029%3A35&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Mon premier fils s'appelle Ruben.",
+        "en": "My first son is named Reuben.",
+        "reference": {
+          "book": 1,
+          "chapter": 29,
+          "verse": 32
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2029%3A32&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Mon père me conduit auprès de Jacob le soir des noces, à la place de ma sœur.",
+        "en": "My father brings me to Jacob on the wedding night in place of my sister.",
+        "reference": {
+          "book": 1,
+          "chapter": 29,
+          "verse": 23
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2029%3A23&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la fille aînée de Laban, la sœur de Rachel.",
+        "en": "I am Laban's elder daughter, Rachel's sister.",
+        "reference": {
+          "book": 1,
+          "chapter": 29,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2029%3A16&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-023",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Rachel",
+      "aliases": [],
+      "explanation": "Rachel, fille de Laban, garde les brebis et devient l'épouse de Jacob. Elle est la mère de Joseph et Benjamin."
+    },
+    "en": {
+      "answer": "Rachel",
+      "aliases": [],
+      "explanation": "Rachel, Laban's daughter, tends sheep and becomes Jacob's wife. She is the mother of Joseph and Benjamin."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Au départ de chez mon père, je prends ses idoles domestiques.",
+        "en": "When leaving my father's home, I take his household idols.",
+        "reference": {
+          "book": 1,
+          "chapter": 31,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2031%3A19&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "En mourant, j'appelle mon fils Ben-Oni, mais son père le nomme Benjamin.",
+        "en": "As I die, I call my son Ben-oni, but his father names him Benjamin.",
+        "reference": {
+          "book": 1,
+          "chapter": 35,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2035%3A18&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je viens au puits avec les brebis de mon père Laban, car je suis bergère.",
+        "en": "I come to the well with my father Laban's sheep because I am a shepherdess.",
+        "reference": {
+          "book": 1,
+          "chapter": 29,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2029%3A9&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je donne naissance à Joseph et souhaite avoir encore un fils.",
+        "en": "I give birth to Joseph and hope to have another son.",
+        "reference": {
+          "book": 1,
+          "chapter": 30,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2030%3A24&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-024",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Juda",
+      "aliases": [],
+      "explanation": "Juda est l'un des fils de Jacob. Il propose de vendre Joseph et s'offre plus tard comme esclave à la place de Benjamin."
+    },
+    "en": {
+      "answer": "Judah",
+      "aliases": [],
+      "explanation": "Judah is one of Jacob's sons. He proposes selling Joseph and later offers himself as a slave in Benjamin's place."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je laisse mon cachet et mon bâton en gage à une femme.",
+        "en": "I leave my seal and staff as a pledge to a woman.",
+        "reference": {
+          "book": 1,
+          "chapter": 38,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2038%3A18&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je propose de rester esclave pour que Benjamin puisse repartir avec ses frères.",
+        "en": "I offer to remain as a slave so Benjamin can return with his brothers.",
+        "reference": {
+          "book": 1,
+          "chapter": 44,
+          "verse": 33
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2044%3A33&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je me porte garant du retour de Benjamin auprès de notre père.",
+        "en": "I guarantee Benjamin's safe return to our father.",
+        "reference": {
+          "book": 1,
+          "chapter": 43,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2043%3A9&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je propose à mes frères de vendre Joseph aux Ismaélites au lieu de le tuer.",
+        "en": "I suggest to my brothers that we sell Joseph to the Ishmaelites instead of killing him.",
+        "reference": {
+          "book": 1,
+          "chapter": 37,
+          "verse": 27
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2037%3A27&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-025",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Benjamin",
+      "aliases": [],
+      "explanation": "Benjamin est le dernier fils de Jacob et Rachel. En Égypte, il reçoit des faveurs particulières de Joseph, qui fait cacher une coupe dans son sac."
+    },
+    "en": {
+      "answer": "Benjamin",
+      "aliases": [],
+      "explanation": "Benjamin is Jacob and Rachel's youngest son. In Egypt he receives special favour from Joseph, who has a cup hidden in his sack."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Au repas en Égypte, ma portion est cinq fois plus grande que celle de mes frères.",
+        "en": "At a meal in Egypt, my portion is five times larger than my brothers'.",
+        "reference": {
+          "book": 1,
+          "chapter": 43,
+          "verse": 34
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2043%3A34&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Joseph me donne trois cents pièces d'argent et cinq vêtements de rechange.",
+        "en": "Joseph gives me three hundred pieces of silver and five changes of clothes.",
+        "reference": {
+          "book": 1,
+          "chapter": 45,
+          "verse": 22
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2045%3A22&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "La coupe recherchée est découverte dans mon sac.",
+        "en": "The missing cup is found in my sack.",
+        "reference": {
+          "book": 1,
+          "chapter": 44,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2044%3A12&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Ma mère Rachel meurt à ma naissance ; mon père change le nom qu'elle m'avait donné.",
+        "en": "My mother Rachel dies at my birth; my father changes the name she had given me.",
+        "reference": {
+          "book": 1,
+          "chapter": 35,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2035%3A18&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-026",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Aaron",
+      "aliases": [],
+      "explanation": "Aaron est le frère de Moïse et son porte-parole. Il joue un rôle dans le culte d'Israël, mais fabrique aussi le veau d'or."
+    },
+    "en": {
+      "answer": "Aaron",
+      "aliases": [],
+      "explanation": "Aaron is Moses' brother and spokesman. He serves in Israel's worship but also makes the golden calf."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Avec Hur, je soutiens les mains de mon frère pendant une bataille.",
+        "en": "With Hur, I support my brother's hands during a battle.",
+        "reference": {
+          "book": 2,
+          "chapter": 17,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2017%3A12&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Ma verge produit des boutons, des fleurs et des amandes.",
+        "en": "My rod produces buds, blossoms and almonds.",
+        "reference": {
+          "book": 4,
+          "chapter": 17,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2017%3A8&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je façonne un veau d'or avec les bijoux que le peuple m'apporte.",
+        "en": "I shape a golden calf from the jewellery the people bring me.",
+        "reference": {
+          "book": 2,
+          "chapter": 32,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2032%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Dieu me désigne comme le frère de Moïse qui parle facilement.",
+        "en": "God identifies me as Moses' brother who can speak well.",
+        "reference": {
+          "book": 2,
+          "chapter": 4,
+          "verse": 14
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%204%3A14&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-027",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Miriam",
+      "aliases": [
+        "Marie sœur de Moïse",
+        "Myriam"
+      ],
+      "explanation": "Miriam est la prophétesse sœur d'Aaron et Moïse. Elle entraîne les femmes avec un tambourin après la traversée de la mer."
+    },
+    "en": {
+      "answer": "Miriam",
+      "aliases": [],
+      "explanation": "Miriam is the prophetess and sister of Aaron and Moses. She leads the women with a timbrel after the crossing of the sea."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je meurs à Kadès et j'y suis enterrée.",
+        "en": "I die at Kadesh and am buried there.",
+        "reference": {
+          "book": 4,
+          "chapter": 20,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2020%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je reste sept jours hors du camp, et le peuple attend mon retour.",
+        "en": "I remain outside the camp for seven days, and the people wait for my return.",
+        "reference": {
+          "book": 4,
+          "chapter": 12,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2012%3A15&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Avec Aaron, je parle contre Moïse à cause de la femme qu'il a épousée.",
+        "en": "With Aaron, I speak against Moses because of the woman he married.",
+        "reference": {
+          "book": 4,
+          "chapter": 12,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2012%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Prophétesse et sœur d'Aaron, je prends un tambourin et les femmes me suivent en dansant.",
+        "en": "A prophetess and Aaron's sister, I take a timbrel and the women follow me dancing.",
+        "reference": {
+          "book": 2,
+          "chapter": 15,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2015%3A20&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-028",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Josué",
+      "aliases": [
+        "Josue"
+      ],
+      "explanation": "Josué est le successeur de Moïse. Il participe à l'exploration du pays et conduit le peuple lors de la prise de Jéricho."
+    },
+    "en": {
+      "answer": "Joshua",
+      "aliases": [],
+      "explanation": "Joshua succeeds Moses. He takes part in exploring the land and leads the people during the capture of Jericho."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Moïse me charge de choisir des hommes pour combattre Amalek.",
+        "en": "Moses tells me to choose men to fight Amalek.",
+        "reference": {
+          "book": 2,
+          "chapter": 17,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2017%3A9&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Avec Caleb, je déchire mes vêtements devant la peur du peuple après l'exploration du pays.",
+        "en": "With Caleb, I tear my clothes when the people fear after the exploration of the land.",
+        "reference": {
+          "book": 4,
+          "chapter": 14,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2014%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Après le septième tour de Jéricho, j'ordonne au peuple de pousser des cris.",
+        "en": "After the seventh circuit of Jericho, I tell the people to shout.",
+        "reference": {
+          "book": 6,
+          "chapter": 6,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%206%3A16&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Après la mort de Moïse, Dieu me demande de faire traverser le Jourdain au peuple.",
+        "en": "After Moses dies, God tells me to lead the people across the Jordan.",
+        "reference": {
+          "book": 6,
+          "chapter": 1,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%201%3A2&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-029",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Caleb",
+      "aliases": [],
+      "explanation": "Caleb fait partie des explorateurs fidèles. À quatre-vingt-cinq ans, il demande encore le pays montagneux qui lui a été promis."
+    },
+    "en": {
+      "answer": "Caleb",
+      "aliases": [],
+      "explanation": "Caleb is one of the faithful spies. At eighty-five, he still asks for the hill country promised to him."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je rappelle que j'ai maintenant quatre-vingt-cinq ans.",
+        "en": "I point out that I am now eighty-five years old.",
+        "reference": {
+          "book": 6,
+          "chapter": 14,
+          "verse": 10
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%2014%3A10&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je demande le pays montagneux où vivent les Anakim, malgré leurs villes fortifiées.",
+        "en": "I ask for the hill country where the Anakim live, despite their fortified cities.",
+        "reference": {
+          "book": 6,
+          "chapter": 14,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%2014%3A12&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Après l'exploration du pays, je fais taire le peuple et affirme que nous pouvons le conquérir.",
+        "en": "After exploring the land, I quiet the people and insist that we can conquer it.",
+        "reference": {
+          "book": 4,
+          "chapter": 13,
+          "verse": 30
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2013%3A30&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Avec Josué, je suis l'une des deux exceptions nommées parmi les adultes condamnés à ne pas entrer dans le pays.",
+        "en": "With Joshua, I am one of the two named exceptions among the adults condemned not to enter the land.",
+        "reference": {
+          "book": 4,
+          "chapter": 14,
+          "verse": 30
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2014%3A30&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-030",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Balaam",
+      "aliases": [],
+      "explanation": "Balaam est appelé par Balak pour maudire Israël. Dieu intervient sur son chemin et les paroles prononcées deviennent des bénédictions."
+    },
+    "en": {
+      "answer": "Balaam",
+      "aliases": [],
+      "explanation": "Balaam is summoned by Balak to curse Israel. God intervenes on his journey and the words he speaks become blessings."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je demande qu'on construise sept autels et qu'on prépare sept taureaux et sept béliers.",
+        "en": "I ask for seven altars to be built and seven bulls and seven rams to be prepared.",
+        "reference": {
+          "book": 4,
+          "chapter": 23,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2023%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Balak se met en colère contre moi parce que j'ai béni trois fois ceux qu'il voulait maudire.",
+        "en": "Balak becomes angry with me because I have blessed three times those he wanted cursed.",
+        "reference": {
+          "book": 4,
+          "chapter": 24,
+          "verse": 10
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2024%3A10&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Mes yeux s'ouvrent et je vois un ange sur le chemin avec une épée dégainée.",
+        "en": "My eyes are opened and I see an angel on the road with a drawn sword.",
+        "reference": {
+          "book": 4,
+          "chapter": 22,
+          "verse": 31
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2022%3A31&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Mon ânesse se met à parler après que je l'ai frappée trois fois.",
+        "en": "My donkey begins speaking after I have struck her three times.",
+        "reference": {
+          "book": 4,
+          "chapter": 22,
+          "verse": 28
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2022%3A28&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-031",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Rahab",
+      "aliases": [],
+      "explanation": "Rahab cache les espions israélites à Jéricho. Sa maison est marquée d'un cordon rouge et sa famille est épargnée."
+    },
+    "en": {
+      "answer": "Rahab",
+      "aliases": [],
+      "explanation": "Rahab hides the Israelite spies in Jericho. Her house is marked with a scarlet cord and her family is spared."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je cache deux hommes sur mon toit, sous des tiges de lin.",
+        "en": "I hide two men on my roof under stalks of flax.",
+        "reference": {
+          "book": 6,
+          "chapter": 2,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%202%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je les fais descendre par une corde depuis ma fenêtre, car ma maison est dans le rempart.",
+        "en": "I lower them by a rope from my window because my house is in the city wall.",
+        "reference": {
+          "book": 6,
+          "chapter": 2,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%202%3A15&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "J'attache un cordon rouge à ma fenêtre comme signe convenu.",
+        "en": "I tie a scarlet cord in my window as the agreed sign.",
+        "reference": {
+          "book": 6,
+          "chapter": 2,
+          "verse": 21
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%202%3A21&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Josué épargne ma famille à Jéricho parce que j'ai caché les espions.",
+        "en": "Joshua spares my family at Jericho because I hid the spies.",
+        "reference": {
+          "book": 6,
+          "chapter": 6,
+          "verse": 25
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%206%3A25&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-032",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Débora",
+      "aliases": [
+        "Debora",
+        "Déborah"
+      ],
+      "explanation": "Débora, prophétesse et juge, accompagne Barak contre Sisera. Elle célèbre ensuite la victoire dans un chant."
+    },
+    "en": {
+      "answer": "Deborah",
+      "aliases": [],
+      "explanation": "Deborah, a prophetess and judge, accompanies Barak against Sisera. She later celebrates the victory in a song."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je chante avec Barak après la victoire.",
+        "en": "I sing with Barak after the victory.",
+        "reference": {
+          "book": 7,
+          "chapter": 5,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%205%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "J'annonce que l'honneur de vaincre Sisera reviendra à une femme.",
+        "en": "I announce that the honour of defeating Sisera will go to a woman.",
+        "reference": {
+          "book": 7,
+          "chapter": 4,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%204%3A9&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Barak accepte de partir au combat à condition que je l'accompagne.",
+        "en": "Barak agrees to go into battle if I accompany him.",
+        "reference": {
+          "book": 7,
+          "chapter": 4,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%204%3A8&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis une prophétesse, femme de Lappidoth, qui exerce la fonction de juge en Israël.",
+        "en": "I am a prophetess, the wife of Lapidoth, who serves as a judge in Israel.",
+        "reference": {
+          "book": 7,
+          "chapter": 4,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%204%3A4&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-033",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Gédéon",
+      "aliases": [
+        "Gedeon",
+        "Jerubbaal",
+        "Jerub-Baal"
+      ],
+      "explanation": "Gédéon est appelé alors qu'il bat du blé à l'abri des Madianites. Avec trois cents hommes, il attaque au son des trompettes."
+    },
+    "en": {
+      "answer": "Gideon",
+      "aliases": [
+        "Jerubbaal"
+      ],
+      "explanation": "Gideon is called while threshing wheat out of the Midianites' sight. With three hundred men, he attacks to the sound of trumpets."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je bats du blé dans un pressoir pour le cacher aux Madianites.",
+        "en": "I thresh wheat in a winepress to hide it from the Midianites.",
+        "reference": {
+          "book": 7,
+          "chapter": 6,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%206%3A11&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je demande un signe : de la rosée sur une toison, tandis que le sol reste sec.",
+        "en": "I ask for a sign: dew on a fleece while the ground remains dry.",
+        "reference": {
+          "book": 7,
+          "chapter": 6,
+          "verse": 37
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%206%3A37&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je distribue à mes hommes des trompettes et des cruches vides contenant des torches.",
+        "en": "I give my men trumpets and empty jars with torches inside.",
+        "reference": {
+          "book": 7,
+          "chapter": 7,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%207%3A16&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Dieu choisit seulement trois cents hommes pour me faire vaincre Madian.",
+        "en": "God chooses only three hundred men to give me victory over Midian.",
+        "reference": {
+          "book": 7,
+          "chapter": 7,
+          "verse": 7
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%207%3A7&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-034",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Samson",
+      "aliases": [],
+      "explanation": "Samson reçoit une force exceptionnelle. Ses exploits, ses cheveux coupés et sa mort entre les colonnes du temple marquent son histoire."
+    },
+    "en": {
+      "answer": "Samson",
+      "aliases": [],
+      "explanation": "Samson receives extraordinary strength. His feats, his shorn hair and his death between the temple pillars mark his story."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je découvre un essaim d'abeilles et du miel dans la carcasse d'un lion.",
+        "en": "I discover a swarm of bees and honey in a lion's carcass.",
+        "reference": {
+          "book": 7,
+          "chapter": 14,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%2014%3A8&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je frappe mille hommes avec une mâchoire d'âne.",
+        "en": "I strike down a thousand men with a donkey's jawbone.",
+        "reference": {
+          "book": 7,
+          "chapter": 15,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%2015%3A15&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je saisis les deux colonnes centrales d'un temple et m'appuie contre elles.",
+        "en": "I grasp the two central pillars of a temple and lean against them.",
+        "reference": {
+          "book": 7,
+          "chapter": 16,
+          "verse": 29
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%2016%3A29&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Dalila me fait dormir sur ses genoux et fait couper mes sept tresses ; ma force me quitte.",
+        "en": "Delilah puts me to sleep on her knees and has my seven locks cut; my strength leaves me.",
+        "reference": {
+          "book": 7,
+          "chapter": 16,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%2016%3A19&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-035",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Ruth",
+      "aliases": [],
+      "explanation": "Ruth la Moabite choisit de rester avec Naomi. Elle glane chez Boaz, l'épouse et donne naissance à Obed."
+    },
+    "en": {
+      "answer": "Ruth",
+      "aliases": [],
+      "explanation": "Ruth the Moabite chooses to remain with Naomi. She gleans in Boaz's field, marries him and bears Obed."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mon fils s'appelle Obed ; il deviendra le grand-père de David.",
+        "en": "My son is named Obed; he will become David's grandfather.",
+        "reference": {
+          "book": 8,
+          "chapter": 4,
+          "verse": 17
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Ruth%204%3A17&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je glane derrière les moissonneurs dans un champ appartenant à Boaz.",
+        "en": "I glean behind the reapers in a field belonging to Boaz.",
+        "reference": {
+          "book": 8,
+          "chapter": 2,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Ruth%202%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Boaz m'épouse et Dieu me donne un fils.",
+        "en": "Boaz marries me and God gives me a son.",
+        "reference": {
+          "book": 8,
+          "chapter": 4,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Ruth%204%3A13&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je refuse de quitter Naomi et choisis son peuple et son Dieu.",
+        "en": "I refuse to leave Naomi and choose her people and her God.",
+        "reference": {
+          "book": 8,
+          "chapter": 1,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Ruth%201%3A16&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-036",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Naomi",
+      "aliases": [
+        "Noémi",
+        "Noemi"
+      ],
+      "explanation": "Naomi perd son mari et ses fils en Moab. Elle revient à Bethléhem avec Ruth et conseille celle-ci au sujet de Boaz."
+    },
+    "en": {
+      "answer": "Naomi",
+      "aliases": [
+        "Naomi"
+      ],
+      "explanation": "Naomi loses her husband and sons in Moab. She returns to Bethlehem with Ruth and advises her concerning Boaz."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je conseille à ma belle-fille de repérer où Boaz se couche, puis de découvrir ses pieds.",
+        "en": "I advise my daughter-in-law to note where Boaz lies down, then uncover his feet.",
+        "reference": {
+          "book": 8,
+          "chapter": 3,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Ruth%203%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "À mon retour, je demande qu'on m'appelle Mara, car ma vie est devenue amère.",
+        "en": "When I return, I ask to be called Mara because my life has become bitter.",
+        "reference": {
+          "book": 8,
+          "chapter": 1,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Ruth%201%3A20&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "En Moab, je perds mes deux fils après avoir perdu mon mari.",
+        "en": "In Moab, I lose both sons after already losing my husband.",
+        "reference": {
+          "book": 8,
+          "chapter": 1,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Ruth%201%3A5&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je reviens à Bethléhem avec Ruth, ma belle-fille moabite.",
+        "en": "I return to Bethlehem with Ruth, my Moabite daughter-in-law.",
+        "reference": {
+          "book": 8,
+          "chapter": 1,
+          "verse": 22
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Ruth%201%3A22&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-037",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Boaz",
+      "aliases": [
+        "Booz"
+      ],
+      "explanation": "Boaz est un parent d'Élimélec et le propriétaire du champ où Ruth glane. Il protège Ruth puis l'épouse."
+    },
+    "en": {
+      "answer": "Boaz",
+      "aliases": [
+        "Booz"
+      ],
+      "explanation": "Boaz is a relative of Elimelech and owns the field where Ruth gleans. He protects Ruth and later marries her."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "À la porte de la ville, je fais asseoir dix anciens pour régler une affaire familiale.",
+        "en": "At the city gate, I seat ten elders to settle a family matter.",
+        "reference": {
+          "book": 8,
+          "chapter": 4,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Ruth%204%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je suis un homme riche de la famille d'Élimélec, le mari de Naomi.",
+        "en": "I am a wealthy man of the family of Elimelech, Naomi's husband.",
+        "reference": {
+          "book": 8,
+          "chapter": 2,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Ruth%202%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "J'ordonne aux moissonneurs de laisser tomber des épis exprès pour une glaneuse.",
+        "en": "I tell the reapers to deliberately drop some grain for a woman gleaning.",
+        "reference": {
+          "book": 8,
+          "chapter": 2,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Ruth%202%3A16&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "J'épouse Ruth, qui donne ensuite naissance à un fils.",
+        "en": "I marry Ruth, who later gives birth to a son.",
+        "reference": {
+          "book": 8,
+          "chapter": 4,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Ruth%204%3A13&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-038",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Anne, mère de Samuel",
+      "aliases": [
+        "Anne",
+        "Hannah"
+      ],
+      "explanation": "Anne prie pour avoir un fils et promet de le consacrer à Dieu. Elle donne naissance à Samuel et le conduit auprès d'Éli."
+    },
+    "en": {
+      "answer": "Hannah",
+      "aliases": [],
+      "explanation": "Hannah prays for a son and promises to dedicate him to God. She gives birth to Samuel and brings him to Eli."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Chaque année, j'apporte un petit vêtement au fils que j'ai confié au sanctuaire.",
+        "en": "Each year, I bring a little coat to the son I entrusted to the sanctuary.",
+        "reference": {
+          "book": 9,
+          "chapter": 2,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%202%3A19&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Éli me croit ivre parce que mes lèvres bougent sans qu'on entende ma voix.",
+        "en": "Eli thinks I am drunk because my lips move without any sound.",
+        "reference": {
+          "book": 9,
+          "chapter": 1,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%201%3A13&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je promets de consacrer mon fils à Dieu toute sa vie si ma prière est exaucée.",
+        "en": "I promise to dedicate my son to God for his whole life if my prayer is answered.",
+        "reference": {
+          "book": 9,
+          "chapter": 1,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%201%3A11&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je donne naissance à Samuel après l'avoir demandé à Dieu.",
+        "en": "I give birth to Samuel after asking God for him.",
+        "reference": {
+          "book": 9,
+          "chapter": 1,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%201%3A20&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-039",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Samuel",
+      "aliases": [],
+      "explanation": "Samuel grandit auprès d'Éli et apprend à reconnaître l'appel de Dieu. Plus tard, il oint les premiers rois d'Israël."
+    },
+    "en": {
+      "answer": "Samuel",
+      "aliases": [],
+      "explanation": "Samuel grows up with Eli and learns to recognize God's call. Later, he anoints Israel's first kings."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je dresse une pierre appelée Ében-Ézer pour rappeler le secours de Dieu.",
+        "en": "I set up a stone called Ebenezer to remember God's help.",
+        "reference": {
+          "book": 9,
+          "chapter": 7,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%207%3A12&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je verse de l'huile sur David au milieu de ses frères.",
+        "en": "I pour oil over David in the presence of his brothers.",
+        "reference": {
+          "book": 9,
+          "chapter": 16,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2016%3A13&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Enfant, je cours vers Éli en croyant qu'il m'a appelé.",
+        "en": "As a child, I run to Eli, thinking he has called me.",
+        "reference": {
+          "book": 9,
+          "chapter": 3,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%203%3A5&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le fils qu'Anne a demandé à Dieu avant de le confier au sanctuaire.",
+        "en": "I am the son Hannah asked God for before entrusting him to the sanctuary.",
+        "reference": {
+          "book": 9,
+          "chapter": 1,
+          "verse": 27
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%201%3A27&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-040",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Saül",
+      "aliases": [
+        "Saul roi"
+      ],
+      "explanation": "Saül cherche les ânesses de son père avant de devenir roi. Il combat les Philistins et se montre jaloux de David."
+    },
+    "en": {
+      "answer": "Saul",
+      "aliases": [
+        "King Saul"
+      ],
+      "explanation": "Saul searches for his father's donkeys before becoming king. He fights the Philistines and becomes jealous of David."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mon père Kis m'envoie chercher ses ânesses égarées.",
+        "en": "My father Kish sends me to find his lost donkeys.",
+        "reference": {
+          "book": 9,
+          "chapter": 9,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%209%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Au moment de me présenter au peuple, je me cache parmi les bagages.",
+        "en": "When it is time to present me to the people, I hide among the baggage.",
+        "reference": {
+          "book": 9,
+          "chapter": 10,
+          "verse": 22
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2010%3A22&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je me mets en colère en entendant qu'on attribue dix mille victoires à David et mille à moi.",
+        "en": "I become angry when a song credits David with ten thousands and me with thousands.",
+        "reference": {
+          "book": 9,
+          "chapter": 18,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2018%3A8&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Samuel me présente comme le roi choisi par Dieu et le peuple acclame mon règne.",
+        "en": "Samuel presents me as God's chosen king and the people acclaim my reign.",
+        "reference": {
+          "book": 9,
+          "chapter": 10,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2010%3A24&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-041",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Jonathan",
+      "aliases": [],
+      "explanation": "Jonathan, fils de Saül, est l'ami de David. Il lui donne ses armes et l'avertit du danger que représente son père."
+    },
+    "en": {
+      "answer": "Jonathan",
+      "aliases": [],
+      "explanation": "Jonathan, Saul's son, is David's friend. He gives him his weapons and warns him of the danger posed by his father."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je goûte du miel avec le bout de mon bâton et mes yeux s'éclaircissent.",
+        "en": "I taste honey from the end of my rod and my eyes brighten.",
+        "reference": {
+          "book": 9,
+          "chapter": 14,
+          "verse": 27
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2014%3A27&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je prévois de tirer trois flèches pour faire passer un message à mon ami.",
+        "en": "I plan to shoot three arrows to send a message to my friend.",
+        "reference": {
+          "book": 9,
+          "chapter": 20,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2020%3A20&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je donne à David mon manteau, mon épée, mon arc et ma ceinture.",
+        "en": "I give David my robe, sword, bow and belt.",
+        "reference": {
+          "book": 9,
+          "chapter": 18,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2018%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le fils de Saül qui aime beaucoup David, alors que mon père veut le faire mourir.",
+        "en": "I am Saul's son who greatly delights in David while my father wants him killed.",
+        "reference": {
+          "book": 9,
+          "chapter": 19,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2019%3A1&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-042",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Abigaïl",
+      "aliases": [
+        "Abigail"
+      ],
+      "explanation": "Abigaïl intervient pour empêcher David de se venger de Nabal. Après la mort de son mari, elle devient l'épouse de David."
+    },
+    "en": {
+      "answer": "Abigail",
+      "aliases": [],
+      "explanation": "Abigail intervenes to prevent David from taking revenge on Nabal. After her husband's death, she becomes David's wife."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je rassemble en hâte du pain, du vin, des moutons préparés et des fruits secs.",
+        "en": "I quickly gather bread, wine, prepared sheep and dried fruit.",
+        "reference": {
+          "book": 9,
+          "chapter": 25,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2025%3A18&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je me jette aux pieds de David et lui demande d'écouter mes paroles.",
+        "en": "I fall at David's feet and ask him to hear my words.",
+        "reference": {
+          "book": 9,
+          "chapter": 25,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2025%3A24&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Mon mari Nabal est dur et méchant, tandis que je suis décrite comme intelligente.",
+        "en": "My husband Nabal is harsh and evil, while I am described as discerning.",
+        "reference": {
+          "book": 9,
+          "chapter": 25,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2025%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Après la mort de Nabal, je pars avec les messagers de David et deviens sa femme.",
+        "en": "After Nabal's death, I leave with David's messengers and become his wife.",
+        "reference": {
+          "book": 9,
+          "chapter": 25,
+          "verse": 42
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2025%3A42&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-043",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Salomon",
+      "aliases": [],
+      "explanation": "Salomon, fils de David, demande la sagesse. Son jugement entre deux femmes et la construction du temple sont célèbres."
+    },
+    "en": {
+      "answer": "Solomon",
+      "aliases": [],
+      "explanation": "Solomon, David's son, asks for wisdom. His judgment between two women and his building of the temple are well known."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "La reine de Séba vient éprouver ma réputation par des énigmes.",
+        "en": "The queen of Sheba comes to test my reputation with difficult questions.",
+        "reference": {
+          "book": 11,
+          "chapter": 10,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2010%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je demande à Dieu un cœur capable de bien juger le peuple.",
+        "en": "I ask God for a heart able to judge the people well.",
+        "reference": {
+          "book": 11,
+          "chapter": 3,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%203%3A9&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Devant deux femmes qui réclament le même enfant, j'ordonne qu'on le partage pour révéler la vraie mère.",
+        "en": "Before two women claiming the same child, I order him divided to reveal the true mother.",
+        "reference": {
+          "book": 11,
+          "chapter": 3,
+          "verse": 25
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%203%3A25&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le roi qui commence à construire le temple de l'Éternel à Jérusalem.",
+        "en": "I am the king who begins building the Lord's temple in Jerusalem.",
+        "reference": {
+          "book": 11,
+          "chapter": 6,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%206%3A1&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-044",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Élie",
+      "aliases": [
+        "Elie"
+      ],
+      "explanation": "Élie est nourri par des corbeaux et affronte les prophètes de Baal. Il est ensuite enlevé au ciel dans un tourbillon."
+    },
+    "en": {
+      "answer": "Elijah",
+      "aliases": [],
+      "explanation": "Elijah is fed by ravens and confronts the prophets of Baal. He is later taken up to heaven in a whirlwind."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Des corbeaux m'apportent du pain et de la viande matin et soir.",
+        "en": "Ravens bring me bread and meat morning and evening.",
+        "reference": {
+          "book": 11,
+          "chapter": 17,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2017%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je jette mon manteau sur Élisée pendant qu'il laboure.",
+        "en": "I throw my cloak over Elisha while he is ploughing.",
+        "reference": {
+          "book": 11,
+          "chapter": 19,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2019%3A19&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Au mont Carmel, je me tiens face à quatre cent cinquante prophètes de Baal.",
+        "en": "On Mount Carmel, I stand against four hundred and fifty prophets of Baal.",
+        "reference": {
+          "book": 11,
+          "chapter": 18,
+          "verse": 22
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2018%3A22&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Des chevaux et un char de feu apparaissent, puis je monte au ciel dans un tourbillon.",
+        "en": "Horses and a chariot of fire appear, and I go up to heaven in a whirlwind.",
+        "reference": {
+          "book": 12,
+          "chapter": 2,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%202%3A11&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-045",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Élisée",
+      "aliases": [
+        "Elisee"
+      ],
+      "explanation": "Élisée reçoit le manteau d'Élie et lui succède. Son ministère comprend la guérison de Naaman et plusieurs autres miracles."
+    },
+    "en": {
+      "answer": "Elisha",
+      "aliases": [],
+      "explanation": "Elisha receives Elijah's cloak and succeeds him. His ministry includes Naaman's healing and several other miracles."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je jette un morceau de bois dans l'eau et fais surnager un fer de hache.",
+        "en": "I throw a stick into the water and make an axe head float.",
+        "reference": {
+          "book": 12,
+          "chapter": 6,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%206%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je demande à une veuve d'emprunter beaucoup de vases vides avant que son huile soit multipliée.",
+        "en": "I tell a widow to borrow many empty vessels before her oil is multiplied.",
+        "reference": {
+          "book": 12,
+          "chapter": 4,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%204%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "J'envoie dire à Naaman de se laver sept fois dans le Jourdain.",
+        "en": "I send word to Naaman to wash seven times in the Jordan.",
+        "reference": {
+          "book": 12,
+          "chapter": 5,
+          "verse": 10
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%205%3A10&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je ramasse le manteau d'Élie après son départ vers le ciel.",
+        "en": "I pick up Elijah's cloak after he is taken to heaven.",
+        "reference": {
+          "book": 12,
+          "chapter": 2,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%202%3A13&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-046",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Achab",
+      "aliases": [],
+      "explanation": "Achab, roi d'Israël et mari de Jézabel, veut la vigne de Naboth. Il affronte Élie et meurt après avoir été blessé au combat."
+    },
+    "en": {
+      "answer": "Ahab",
+      "aliases": [],
+      "explanation": "Ahab, king of Israel and Jezebel's husband, wants Naboth's vineyard. He confronts Elijah and dies after being wounded in battle."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je me déguise avant d'aller au combat, tandis que Josaphat garde ses vêtements royaux.",
+        "en": "I disguise myself before battle while Jehoshaphat keeps his royal robes.",
+        "reference": {
+          "book": 11,
+          "chapter": 22,
+          "verse": 30
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2022%3A30&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je propose à Naboth d'acheter sa vigne pour en faire un jardin potager.",
+        "en": "I offer to buy Naboth's vineyard to turn it into a vegetable garden.",
+        "reference": {
+          "book": 11,
+          "chapter": 21,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2021%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "En voyant Élie, je l'accuse de troubler Israël.",
+        "en": "When I see Elijah, I accuse him of troubling Israel.",
+        "reference": {
+          "book": 11,
+          "chapter": 18,
+          "verse": 17
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2018%3A17&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Roi d'Israël, j'épouse Jézabel et je sers Baal.",
+        "en": "As king of Israel, I marry Jezebel and serve Baal.",
+        "reference": {
+          "book": 11,
+          "chapter": 16,
+          "verse": 31
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2016%3A31&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-047",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Jézabel",
+      "aliases": [
+        "Jezabel"
+      ],
+      "explanation": "Jézabel, épouse d'Achab, persécute les prophètes et fait organiser la mort de Naboth. Elle meurt lors de l'arrivée de Jéhu."
+    },
+    "en": {
+      "answer": "Jezebel",
+      "aliases": [],
+      "explanation": "Jezebel, Ahab's wife, persecutes the prophets and arranges Naboth's death. She dies when Jehu arrives."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "À l'arrivée de Jéhu, je me farde les yeux et regarde par une fenêtre.",
+        "en": "When Jehu arrives, I paint my eyes and look out of a window.",
+        "reference": {
+          "book": 12,
+          "chapter": 9,
+          "verse": 30
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%209%3A30&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "J'écris au nom du roi des lettres scellées pour organiser un complot contre Naboth.",
+        "en": "I write letters in the king's name and seal them to arrange a plot against Naboth.",
+        "reference": {
+          "book": 11,
+          "chapter": 21,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2021%3A8&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "J'envoie un messager menacer Élie de mort après la défaite des prophètes de Baal.",
+        "en": "I send a messenger threatening Elijah with death after the defeat of Baal's prophets.",
+        "reference": {
+          "book": 11,
+          "chapter": 19,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2019%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la fille d'Ethbaal, roi des Sidoniens, devenue l'épouse d'Achab.",
+        "en": "I am the daughter of Ethbaal, king of the Sidonians, who becomes Ahab's wife.",
+        "reference": {
+          "book": 11,
+          "chapter": 16,
+          "verse": 31
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2016%3A31&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-048",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Ézéchias",
+      "aliases": [
+        "Ezechias"
+      ],
+      "explanation": "Ézéchias est un roi de Juda qui réforme le culte. Il prie lors de la menace assyrienne et reçoit quinze années de vie supplémentaires."
+    },
+    "en": {
+      "answer": "Hezekiah",
+      "aliases": [],
+      "explanation": "Hezekiah is a king of Judah who reforms worship. He prays during the Assyrian threat and receives fifteen additional years of life."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je suis le fils d'Achaz qui devient roi de Juda.",
+        "en": "I am the son of Ahaz who becomes king of Judah.",
+        "reference": {
+          "book": 12,
+          "chapter": 18,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%2018%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je brise le serpent de bronze que le peuple avait commencé à honorer avec de l'encens.",
+        "en": "I break the bronze serpent to which the people had begun burning incense.",
+        "reference": {
+          "book": 12,
+          "chapter": 18,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%2018%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je déroule devant Dieu, dans le temple, la lettre menaçante que j'ai reçue.",
+        "en": "In the temple, I spread out before God the threatening letter I received.",
+        "reference": {
+          "book": 12,
+          "chapter": 19,
+          "verse": 14
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%2019%3A14&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Dieu m'accorde quinze années de vie supplémentaires.",
+        "en": "God grants me fifteen additional years of life.",
+        "reference": {
+          "book": 12,
+          "chapter": 20,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%2020%3A6&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-049",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Josias",
+      "aliases": [],
+      "explanation": "Josias devient roi très jeune. Après la découverte du livre de la loi, il renouvelle l'alliance et célèbre la Pâque."
+    },
+    "en": {
+      "answer": "Josiah",
+      "aliases": [],
+      "explanation": "Josiah becomes king very young. After the book of the law is found, he renews the covenant and celebrates the Passover."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "J'ordonne à tout le peuple de célébrer la Pâque selon le livre de l'alliance.",
+        "en": "I command all the people to celebrate the Passover according to the book of the covenant.",
+        "reference": {
+          "book": 12,
+          "chapter": 23,
+          "verse": 21
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%2023%3A21&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Devant tout le peuple, je renouvelle l'alliance en m'engageant à suivre Dieu et ses commandements.",
+        "en": "Before all the people, I renew the covenant and promise to follow God and his commandments.",
+        "reference": {
+          "book": 12,
+          "chapter": 23,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%2023%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je déchire mes vêtements quand on me lit le livre de la loi retrouvé dans le temple.",
+        "en": "I tear my clothes when the rediscovered book of the law is read to me.",
+        "reference": {
+          "book": 12,
+          "chapter": 22,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%2022%3A11&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je deviens roi de Juda à huit ans et règne trente et un ans à Jérusalem.",
+        "en": "I become king of Judah at eight and reign for thirty-one years in Jerusalem.",
+        "reference": {
+          "book": 12,
+          "chapter": 22,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%2022%3A1&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-050",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Job",
+      "aliases": [],
+      "explanation": "Job, homme du pays d'Uts, subit de grandes pertes et une maladie douloureuse. Ses échanges avec ses amis explorent la souffrance et la fidélité."
+    },
+    "en": {
+      "answer": "Job",
+      "aliases": [],
+      "explanation": "Job, a man from Uz, suffers great losses and a painful disease. His exchanges with his friends explore suffering and faithfulness."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "J'habite au pays d'Uts et suis décrit comme intègre et craignant Dieu.",
+        "en": "I live in the land of Uz and am described as upright and fearing God.",
+        "reference": {
+          "book": 18,
+          "chapter": 1,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%201%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Mes trois amis restent assis près de moi sept jours sans parler, tant ma souffrance est grande.",
+        "en": "My three friends sit beside me for seven days without speaking because my suffering is so great.",
+        "reference": {
+          "book": 18,
+          "chapter": 2,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%202%3A13&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Après mes pertes, je reconnais que je suis venu au monde nu et que Dieu donne et reprend.",
+        "en": "After my losses, I acknowledge that I came into the world naked and that God gives and takes away.",
+        "reference": {
+          "book": 18,
+          "chapter": 1,
+          "verse": 21
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%201%3A21&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Couvert d'ulcères, je me gratte avec un morceau de poterie en restant assis dans la cendre.",
+        "en": "Covered in sores, I scrape myself with a piece of pottery while sitting in ashes.",
+        "reference": {
+          "book": 18,
+          "chapter": 2,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%202%3A8&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-051",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Daniel",
+      "aliases": [
+        "Beltschatsar"
+      ],
+      "explanation": "Daniel reste fidèle à Dieu à Babylone. Il interprète les songes et survit à la fosse aux lions."
+    },
+    "en": {
+      "answer": "Daniel",
+      "aliases": [
+        "Belteshazzar"
+      ],
+      "explanation": "Daniel remains faithful to God in Babylon. He interprets dreams and survives the lions' den."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je décide de ne pas me souiller avec les mets et le vin du roi.",
+        "en": "I resolve not to defile myself with the king's food and wine.",
+        "reference": {
+          "book": 27,
+          "chapter": 1,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Daniel%201%3A8&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je prie trois fois par jour, les fenêtres ouvertes vers Jérusalem, malgré un décret.",
+        "en": "I pray three times a day with windows open towards Jerusalem despite a decree.",
+        "reference": {
+          "book": 27,
+          "chapter": 6,
+          "verse": 10
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Daniel%206%3A10&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "J'explique au roi son rêve d'une grande statue brillante.",
+        "en": "I explain to the king his dream of a great shining statue.",
+        "reference": {
+          "book": 27,
+          "chapter": 2,
+          "verse": 31
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Daniel%202%3A31&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Dieu envoie son ange fermer la gueule des lions pour qu'ils ne me blessent pas.",
+        "en": "God sends his angel to shut the lions' mouths so they do not harm me.",
+        "reference": {
+          "book": 27,
+          "chapter": 6,
+          "verse": 22
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Daniel%206%3A22&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-052",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Nebucadnetsar",
+      "aliases": [
+        "Nabuchodonosor",
+        "Nebucadnétsar",
+        "Neboukadnetsar"
+      ],
+      "explanation": "Nebucadnetsar est le roi de Babylone associé aux songes interprétés par Daniel. Il fait dresser une statue d'or et connaît une période d'humiliation."
+    },
+    "en": {
+      "answer": "Nebuchadnezzar",
+      "aliases": [
+        "Nebuchadrezzar"
+      ],
+      "explanation": "Nebuchadnezzar is the Babylonian king whose dreams Daniel interprets. He sets up a golden image and undergoes a period of humiliation."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mes rêves troublent mon esprit et m'empêchent de dormir pendant la deuxième année de mon règne.",
+        "en": "My dreams trouble my spirit and keep me from sleeping in the second year of my reign.",
+        "reference": {
+          "book": 27,
+          "chapter": 2,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Daniel%202%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je suis le roi de Babylone qui assiège Jérusalem sous le règne de Jojakim.",
+        "en": "I am the king of Babylon who besieges Jerusalem during Jehoiakim's reign.",
+        "reference": {
+          "book": 27,
+          "chapter": 1,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Daniel%201%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je fais dresser dans la plaine de Dura une statue d'or haute de soixante coudées.",
+        "en": "I set up a golden image sixty cubits high on the plain of Dura.",
+        "reference": {
+          "book": 27,
+          "chapter": 3,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Daniel%203%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis chassé du milieu des hommes et mange de l'herbe comme les bœufs.",
+        "en": "I am driven from human society and eat grass like oxen.",
+        "reference": {
+          "book": 27,
+          "chapter": 4,
+          "verse": 33
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Daniel%204%3A33&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-053",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Néhémie",
+      "aliases": [
+        "Nehemie"
+      ],
+      "explanation": "Néhémie, échanson du roi, obtient la permission de rebâtir Jérusalem. Il organise la reconstruction des murailles malgré l'opposition."
+    },
+    "en": {
+      "answer": "Nehemiah",
+      "aliases": [],
+      "explanation": "Nehemiah, the king's cupbearer, gains permission to rebuild Jerusalem. He organizes the rebuilding of its walls despite opposition."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "De nuit, j'inspecte les murailles détruites et les portes brûlées.",
+        "en": "At night, I inspect the broken walls and burnt gates.",
+        "reference": {
+          "book": 16,
+          "chapter": 2,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Nehemiah%202%3A13&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "J'organise le chantier pour que les porteurs travaillent tout en gardant une arme à portée.",
+        "en": "I organize the work so that the carriers labour while keeping a weapon ready.",
+        "reference": {
+          "book": 16,
+          "chapter": 4,
+          "verse": 17
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Nehemiah%204%3A17&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je demande au roi de m'envoyer en Juda pour rebâtir la ville où reposent mes pères.",
+        "en": "I ask the king to send me to Judah to rebuild the city of my ancestors' graves.",
+        "reference": {
+          "book": 16,
+          "chapter": 2,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Nehemiah%202%3A5&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Avant de conduire la reconstruction des murailles, je suis échanson du roi.",
+        "en": "Before leading the rebuilding of the walls, I am the king's cupbearer.",
+        "reference": {
+          "book": 16,
+          "chapter": 1,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Nehemiah%201%3A11&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-054",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Jonas",
+      "aliases": [],
+      "explanation": "Jonas fuit vers Tarsis au lieu d'aller à Ninive. Après sa délivrance, il annonce un avertissement à la ville."
+    },
+    "en": {
+      "answer": "Jonah",
+      "aliases": [],
+      "explanation": "Jonah flees towards Tarshish instead of going to Nineveh. After his rescue, he delivers a warning to the city."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Une plante me donne de l'ombre, ce qui me procure une grande joie.",
+        "en": "A plant gives me shade, bringing me great joy.",
+        "reference": {
+          "book": 32,
+          "chapter": 4,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Jonah%204%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je prends à Joppé un bateau pour Tarsis afin de fuir la mission reçue.",
+        "en": "I board a ship at Joppa for Tarshish to flee my mission.",
+        "reference": {
+          "book": 32,
+          "chapter": 1,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Jonah%201%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je parcours Ninive en annonçant que la ville sera renversée dans quarante jours.",
+        "en": "I walk through Nineveh announcing that the city will be overthrown in forty days.",
+        "reference": {
+          "book": 32,
+          "chapter": 3,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Jonah%203%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Pendant la tempête, je demande aux marins de me jeter à la mer pour qu'elle se calme.",
+        "en": "During the storm, I tell the sailors to throw me into the sea so it will become calm.",
+        "reference": {
+          "book": 32,
+          "chapter": 1,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Jonah%201%3A12&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-055",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Mardochée",
+      "aliases": [
+        "Mardochee"
+      ],
+      "explanation": "Mardochée élève Esther, découvre un complot contre le roi et refuse de s'incliner devant Haman. Le roi le fait ensuite honorer publiquement."
+    },
+    "en": {
+      "answer": "Mordecai",
+      "aliases": [],
+      "explanation": "Mordecai raises Esther, discovers a plot against the king and refuses to bow to Haman. The king later has him publicly honoured."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "J'apprends un complot contre le roi et le signale à la reine.",
+        "en": "I learn of a plot against the king and report it to the queen.",
+        "reference": {
+          "book": 17,
+          "chapter": 2,
+          "verse": 22
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%202%3A22&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Haman doit me revêtir d'un habit royal et me conduire à cheval dans la ville.",
+        "en": "Haman has to dress me in a royal robe and lead me on horseback through the city.",
+        "reference": {
+          "book": 17,
+          "chapter": 6,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%206%3A11&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "À la porte du roi, je refuse de m'incliner devant Haman.",
+        "en": "At the king's gate, I refuse to bow before Haman.",
+        "reference": {
+          "book": 17,
+          "chapter": 3,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%203%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "J'élève Esther comme ma propre fille après la mort de ses parents.",
+        "en": "I raise Esther as my own daughter after her parents die.",
+        "reference": {
+          "book": 17,
+          "chapter": 2,
+          "verse": 7
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%202%3A7&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-056",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Élisabeth",
+      "aliases": [
+        "Elisabeth"
+      ],
+      "explanation": "Élisabeth, épouse de Zacharie, enfante Jean-Baptiste dans sa vieillesse. Lors de la visite de Marie, son enfant tressaille en elle."
+    },
+    "en": {
+      "answer": "Elizabeth",
+      "aliases": [
+        "Elisabeth"
+      ],
+      "explanation": "Elizabeth, Zechariah's wife, gives birth to John the Baptist in old age. During Mary's visit, her baby leaps inside her."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Après être devenue enceinte, je me tiens cachée pendant cinq mois.",
+        "en": "After becoming pregnant, I remain secluded for five months.",
+        "reference": {
+          "book": 42,
+          "chapter": 1,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%201%3A24&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Mon enfant tressaille quand j'entends la salutation de Marie.",
+        "en": "My baby leaps when I hear Mary's greeting.",
+        "reference": {
+          "book": 42,
+          "chapter": 1,
+          "verse": 41
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%201%3A41&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je refuse que mon enfant reçoive le nom de son père et demande qu'on l'appelle Jean.",
+        "en": "I refuse to have my child named after his father and ask that he be called John.",
+        "reference": {
+          "book": 42,
+          "chapter": 1,
+          "verse": 60
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%201%3A60&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis l'épouse du prêtre Zacharie, et je descends d'Aaron.",
+        "en": "I am the wife of the priest Zechariah and a descendant of Aaron.",
+        "reference": {
+          "book": 42,
+          "chapter": 1,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%201%3A5&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-057",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Zacharie, père de Jean-Baptiste",
+      "aliases": [
+        "Zacharie le prêtre",
+        "Zacharie père de Jean"
+      ],
+      "explanation": "Zacharie reçoit l'annonce de la naissance de Jean pendant son service au temple. Devenu muet, il retrouve la parole après avoir confirmé le nom de son fils."
+    },
+    "en": {
+      "answer": "Zechariah, father of John the Baptist",
+      "aliases": [
+        "Zechariah the priest",
+        "Zacharias"
+      ],
+      "explanation": "Zechariah receives the announcement of John's birth while serving in the temple. Struck mute, he speaks again after confirming his son's name."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Le sort me désigne pour entrer dans le sanctuaire et offrir le parfum.",
+        "en": "I am chosen by lot to enter the sanctuary and burn incense.",
+        "reference": {
+          "book": 42,
+          "chapter": 1,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%201%3A9&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Un ange m'annonce que je resterai muet parce que je n'ai pas cru ses paroles.",
+        "en": "An angel tells me I will remain unable to speak because I did not believe his words.",
+        "reference": {
+          "book": 42,
+          "chapter": 1,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%201%3A20&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Sur une tablette, j'écris que le nom de mon fils est Jean.",
+        "en": "On a writing tablet, I write that my son's name is John.",
+        "reference": {
+          "book": 42,
+          "chapter": 1,
+          "verse": 63
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%201%3A63&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "L'ange m'annonce que mon épouse Élisabeth va me donner un fils.",
+        "en": "The angel announces that my wife Elizabeth will bear me a son.",
+        "reference": {
+          "book": 42,
+          "chapter": 1,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%201%3A13&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-058",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Joseph, époux de Marie",
+      "aliases": [
+        "Joseph époux de Marie",
+        "Joseph de Nazareth"
+      ],
+      "explanation": "Joseph, époux de Marie, obéit aux avertissements reçus en rêve. Il emmène sa famille en Égypte puis s'installe à Nazareth."
+    },
+    "en": {
+      "answer": "Joseph, husband of Mary",
+      "aliases": [
+        "Joseph husband of Mary",
+        "Joseph of Nazareth"
+      ],
+      "explanation": "Joseph, Mary's husband, obeys warnings received in dreams. He takes his family to Egypt and later settles in Nazareth."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Averti en rêve, j'évite la Judée où règne Archélaüs et me retire en Galilée.",
+        "en": "Warned in a dream, I avoid Judea under Archelaus and withdraw to Galilee.",
+        "reference": {
+          "book": 40,
+          "chapter": 2,
+          "verse": 22
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%202%3A22&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je pars de Nazareth à Bethléhem pour le recensement, car je descends de David.",
+        "en": "I travel from Nazareth to Bethlehem for the census because I descend from David.",
+        "reference": {
+          "book": 42,
+          "chapter": 2,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%202%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "De nuit, j'emmène le petit enfant et sa mère en Égypte.",
+        "en": "At night, I take the young child and his mother to Egypt.",
+        "reference": {
+          "book": 40,
+          "chapter": 2,
+          "verse": 14
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%202%3A14&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Un ange me demande de prendre Marie pour épouse, car l'enfant qu'elle porte vient du Saint-Esprit.",
+        "en": "An angel tells me to take Mary as my wife because the child she carries is from the Holy Spirit.",
+        "reference": {
+          "book": 40,
+          "chapter": 1,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%201%3A20&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-059",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Jésus",
+      "aliases": [
+        "Jésus-Christ",
+        "Jesus Christ"
+      ],
+      "explanation": "Jésus enseigne en paraboles et accomplit des miracles. Les Évangiles racontent son baptême, sa crucifixion et sa résurrection."
+    },
+    "en": {
+      "answer": "Jesus",
+      "aliases": [
+        "Jesus Christ"
+      ],
+      "explanation": "Jesus teaches in parables and performs miracles. The Gospels recount his baptism, crucifixion and resurrection."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je verse de l'eau dans un bassin et lave les pieds de mes disciples.",
+        "en": "I pour water into a basin and wash my disciples' feet.",
+        "reference": {
+          "book": 43,
+          "chapter": 13,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2013%3A5&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "J'ordonne au vent et à la mer de se taire, et le calme revient.",
+        "en": "I command the wind and sea to be still, and calm returns.",
+        "reference": {
+          "book": 41,
+          "chapter": 4,
+          "verse": 39
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%204%3A39&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Devant un tombeau, j'appelle Lazare d'une voix forte pour qu'il sorte.",
+        "en": "Outside a tomb, I call loudly for Lazarus to come out.",
+        "reference": {
+          "book": 43,
+          "chapter": 11,
+          "verse": 43
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2011%3A43&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Au tombeau, l'ange annonce que je suis ressuscité, comme je l'avais dit.",
+        "en": "At the tomb, the angel announces that I have risen, just as I said.",
+        "reference": {
+          "book": 40,
+          "chapter": 28,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2028%3A6&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-060",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "André",
+      "aliases": [
+        "Andre"
+      ],
+      "explanation": "André suit d'abord Jean-Baptiste puis conduit son frère Simon à Jésus. Il signale aussi le garçon qui possède cinq pains et deux poissons."
+    },
+    "en": {
+      "answer": "Andrew",
+      "aliases": [],
+      "explanation": "Andrew first follows John the Baptist and then brings his brother Simon to Jesus. He also points out the boy with five loaves and two fish."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Philippe vient me parler de visiteurs grecs ; nous allons ensuite ensemble trouver Jésus.",
+        "en": "Philip tells me about Greek visitors; we then go together to Jesus.",
+        "reference": {
+          "book": 43,
+          "chapter": 12,
+          "verse": 22
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2012%3A22&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je suis l'un des deux disciples qui quittent Jean-Baptiste pour suivre Jésus.",
+        "en": "I am one of the two disciples who leave John the Baptist to follow Jesus.",
+        "reference": {
+          "book": 43,
+          "chapter": 1,
+          "verse": 40
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%201%3A40&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je signale à Jésus un garçon qui possède cinq pains d'orge et deux poissons.",
+        "en": "I point out to Jesus a boy who has five barley loaves and two fish.",
+        "reference": {
+          "book": 43,
+          "chapter": 6,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%206%3A9&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je trouve mon frère Simon et lui annonce que nous avons trouvé le Messie.",
+        "en": "I find my brother Simon and tell him we have found the Messiah.",
+        "reference": {
+          "book": 43,
+          "chapter": 1,
+          "verse": 41
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%201%3A41&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-061",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Jacques, fils de Zébédée",
+      "aliases": [
+        "Jacques fils de Zébédée",
+        "Jacques le Majeur"
+      ],
+      "explanation": "Jacques, frère de Jean, quitte la pêche pour suivre Jésus. Il fait partie des trois disciples témoins de la transfiguration et meurt sous Hérode."
+    },
+    "en": {
+      "answer": "James, son of Zebedee",
+      "aliases": [
+        "James son of Zebedee",
+        "James the Greater"
+      ],
+      "explanation": "James, John's brother, leaves fishing to follow Jesus. He is one of the three disciples at the transfiguration and is killed under Herod."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Avec mon frère, je reçois le surnom de fils du tonnerre.",
+        "en": "With my brother, I receive the nickname sons of thunder.",
+        "reference": {
+          "book": 41,
+          "chapter": 3,
+          "verse": 17
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%203%3A17&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Jésus m'emmène sur une haute montagne avec Pierre et mon frère Jean.",
+        "en": "Jesus takes me up a high mountain with Peter and my brother John.",
+        "reference": {
+          "book": 40,
+          "chapter": 17,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2017%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Jésus m'appelle alors que je répare des filets dans la barque de mon père Zébédée.",
+        "en": "Jesus calls me while I mend nets in the boat with my father Zebedee.",
+        "reference": {
+          "book": 40,
+          "chapter": 4,
+          "verse": 21
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%204%3A21&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le frère de Jean qu'Hérode fait mourir par l'épée.",
+        "en": "I am John's brother whom Herod has killed with the sword.",
+        "reference": {
+          "book": 44,
+          "chapter": 12,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2012%3A2&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-062",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Jean, fils de Zébédée",
+      "aliases": [
+        "Jean fils de Zébédée",
+        "Jean apôtre",
+        "Jean l’apôtre"
+      ],
+      "explanation": "Jean, fils de Zébédée et frère de Jacques, fait partie des Douze. Il accompagne Pierre dans plusieurs épisodes des Actes."
+    },
+    "en": {
+      "answer": "John, son of Zebedee",
+      "aliases": [
+        "John son of Zebedee",
+        "John the apostle"
+      ],
+      "explanation": "John, Zebedee's son and James' brother, is one of the Twelve. He accompanies Peter in several episodes in Acts."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je raconte à Jésus que nous avons essayé d'empêcher quelqu'un de chasser des démons en son nom.",
+        "en": "I tell Jesus that we tried to stop someone casting out demons in his name.",
+        "reference": {
+          "book": 41,
+          "chapter": 9,
+          "verse": 38
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%209%3A38&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Avec Pierre, je monte au temple à l'heure de la prière.",
+        "en": "With Peter, I go up to the temple at the hour of prayer.",
+        "reference": {
+          "book": 44,
+          "chapter": 3,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%203%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Avec Jacques, je demande s'il faut faire descendre le feu du ciel sur un village samaritain.",
+        "en": "With James, I ask whether we should call down fire from heaven on a Samaritan village.",
+        "reference": {
+          "book": 42,
+          "chapter": 9,
+          "verse": 54
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%209%3A54&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le fils de Zébédée qui répare les filets dans une barque avec mon frère Jacques quand Jésus nous appelle.",
+        "en": "I am Zebedee's son mending nets in a boat with my brother James when Jesus calls us.",
+        "reference": {
+          "book": 40,
+          "chapter": 4,
+          "verse": 21
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%204%3A21&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-063",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Thomas",
+      "aliases": [
+        "Didyme"
+      ],
+      "explanation": "Thomas veut voir les marques des blessures de Jésus ressuscité. Il reconnaît ensuite Jésus comme son Seigneur et son Dieu."
+    },
+    "en": {
+      "answer": "Thomas",
+      "aliases": [
+        "Didymus"
+      ],
+      "explanation": "Thomas wants to see the marks of the risen Jesus' wounds. He then acknowledges Jesus as his Lord and God."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Quand Jésus décide de retourner près de Jérusalem, je propose aux autres disciples d'aller mourir avec lui.",
+        "en": "When Jesus decides to return near Jerusalem, I suggest that the other disciples go and die with him.",
+        "reference": {
+          "book": 43,
+          "chapter": 11,
+          "verse": 16
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2011%3A16&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je demande à Jésus comment connaître le chemin puisque nous ignorons où il va.",
+        "en": "I ask Jesus how we can know the way when we do not know where he is going.",
+        "reference": {
+          "book": 43,
+          "chapter": 14,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2014%3A5&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Devant Jésus ressuscité, je reconnais qu'il est mon Seigneur et mon Dieu.",
+        "en": "Before the risen Jesus, I acknowledge him as my Lord and my God.",
+        "reference": {
+          "book": 43,
+          "chapter": 20,
+          "verse": 28
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2020%3A28&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je refuse de croire à la résurrection avant de voir la marque des clous et de toucher les blessures.",
+        "en": "I refuse to believe in the resurrection until I see the nail marks and touch the wounds.",
+        "reference": {
+          "book": 43,
+          "chapter": 20,
+          "verse": 25
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2020%3A25&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-064",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Philippe, apôtre",
+      "aliases": [
+        "Philippe apôtre",
+        "Philippe de Bethsaïda"
+      ],
+      "explanation": "Philippe, originaire de Bethsaïda, conduit Nathanaël à Jésus. Il interroge aussi Jésus au sujet du Père."
+    },
+    "en": {
+      "answer": "Philip the apostle",
+      "aliases": [
+        "Philip apostle",
+        "Philip of Bethsaida"
+      ],
+      "explanation": "Philip, from Bethsaida, brings Nathanael to Jesus. He also asks Jesus about the Father."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je viens de Bethsaïda, la ville d'André et de Pierre.",
+        "en": "I come from Bethsaida, the town of Andrew and Peter.",
+        "reference": {
+          "book": 43,
+          "chapter": 1,
+          "verse": 44
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%201%3A44&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Devant une foule, j'estime que deux cents deniers de pain ne suffiraient pas.",
+        "en": "Facing a crowd, I estimate that two hundred pennyworth of bread would not be enough.",
+        "reference": {
+          "book": 43,
+          "chapter": 6,
+          "verse": 7
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%206%3A7&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je demande à Jésus de nous montrer le Père, en disant que cela nous suffirait.",
+        "en": "I ask Jesus to show us the Father, saying that this would satisfy us.",
+        "reference": {
+          "book": 43,
+          "chapter": 14,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2014%3A8&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je trouve Nathanaël et lui annonce que nous avons trouvé celui dont parlent Moïse et les prophètes.",
+        "en": "I find Nathanael and announce that we have found the one Moses and the prophets wrote about.",
+        "reference": {
+          "book": 43,
+          "chapter": 1,
+          "verse": 45
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%201%3A45&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-065",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Nathanaël",
+      "aliases": [
+        "Nathanael"
+      ],
+      "explanation": "Nathanaël est conduit vers Jésus par Philippe. Jésus le décrit comme un Israélite sans fraude et évoque l'avoir vu sous un figuier."
+    },
+    "en": {
+      "answer": "Nathanael",
+      "aliases": [],
+      "explanation": "Nathanael is brought to Jesus by Philip. Jesus describes him as an Israelite without deceit and says he saw him under a fig tree."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je suis originaire de Cana en Galilée et figure parmi les disciples réunis après la résurrection.",
+        "en": "I am from Cana in Galilee and am among the disciples gathered after the resurrection.",
+        "reference": {
+          "book": 43,
+          "chapter": 21,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2021%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Jésus dit de moi que je suis un véritable Israélite sans fraude.",
+        "en": "Jesus says I am a true Israelite without deceit.",
+        "reference": {
+          "book": 43,
+          "chapter": 1,
+          "verse": 47
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%201%3A47&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "En entendant parler de Jésus, je demande si quelque chose de bon peut venir de Nazareth.",
+        "en": "On hearing about Jesus, I ask whether anything good can come from Nazareth.",
+        "reference": {
+          "book": 43,
+          "chapter": 1,
+          "verse": 46
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%201%3A46&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Jésus me dit qu'il m'a vu sous le figuier avant que Philippe m'appelle.",
+        "en": "Jesus tells me he saw me under the fig tree before Philip called me.",
+        "reference": {
+          "book": 43,
+          "chapter": 1,
+          "verse": 48
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%201%3A48&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-066",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Silas",
+      "aliases": [],
+      "explanation": "Silas est un prophète qui encourage les croyants et accompagne Paul. Il reste à Bérée avec Timothée et chante avec Paul en prison à Philippes."
+    },
+    "en": {
+      "answer": "Silas",
+      "aliases": [],
+      "explanation": "Silas is a prophet who encourages believers and accompanies Paul. He stays in Berea with Timothy and sings with Paul in prison at Philippi."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Prophète, j'encourage les croyants d'Antioche avec Jude.",
+        "en": "As a prophet, I encourage the believers in Antioch with Judas.",
+        "reference": {
+          "book": 44,
+          "chapter": 15,
+          "verse": 32
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2015%3A32&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Paul me choisit pour partir en mission avec lui, et les frères nous recommandent à la grâce de Dieu.",
+        "en": "Paul chooses me to travel with him, and the believers commend us to God's grace.",
+        "reference": {
+          "book": 44,
+          "chapter": 15,
+          "verse": 40
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2015%3A40&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je reste à Bérée avec Timothée lorsque les frères font partir Paul.",
+        "en": "I remain in Berea with Timothy when the believers send Paul away.",
+        "reference": {
+          "book": 44,
+          "chapter": 17,
+          "verse": 14
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2017%3A14&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le compagnon de Paul qui prie et chante avec lui en prison au milieu de la nuit.",
+        "en": "I am Paul's companion who prays and sings with him in prison at midnight.",
+        "reference": {
+          "book": 44,
+          "chapter": 16,
+          "verse": 25
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A25&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-067",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Judas Iscariot",
+      "aliases": [
+        "Judas Iscariote"
+      ],
+      "explanation": "Judas Iscariot fait partie des Douze et tient leur bourse. Il livre Jésus après avoir négocié avec les principaux prêtres."
+    },
+    "en": {
+      "answer": "Judas Iscariot",
+      "aliases": [
+        "Judas Iscariot son of Simon"
+      ],
+      "explanation": "Judas Iscariot is one of the Twelve and keeps their money bag. He betrays Jesus after negotiating with the chief priests."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je garde la bourse commune, mais je prends ce qu'on y met.",
+        "en": "I keep the common money bag but take what is put into it.",
+        "reference": {
+          "book": 43,
+          "chapter": 12,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2012%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Après avoir reçu un morceau de pain, je sors aussitôt dans la nuit.",
+        "en": "After receiving a piece of bread, I immediately go out into the night.",
+        "reference": {
+          "book": 43,
+          "chapter": 13,
+          "verse": 30
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2013%3A30&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Les principaux prêtres me comptent trente pièces d'argent pour que je leur livre Jésus.",
+        "en": "The chief priests count out thirty pieces of silver for me to hand Jesus over to them.",
+        "reference": {
+          "book": 40,
+          "chapter": 26,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2026%3A15&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je choisis un baiser comme signe pour désigner Jésus à ceux qui viennent l'arrêter.",
+        "en": "I choose a kiss as the sign to identify Jesus to those coming to arrest him.",
+        "reference": {
+          "book": 40,
+          "chapter": 26,
+          "verse": 48
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2026%3A48&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-068",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Marthe",
+      "aliases": [],
+      "explanation": "Marthe, sœur de Marie et Lazare, accueille Jésus et le sert. Elle affirme aussi sa foi en lui devant le tombeau de son frère."
+    },
+    "en": {
+      "answer": "Martha",
+      "aliases": [],
+      "explanation": "Martha, sister of Mary and Lazarus, welcomes and serves Jesus. She also declares her faith in him near her brother's tomb."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je déclare à Jésus que je crois qu'il est le Christ, le Fils de Dieu.",
+        "en": "I tell Jesus that I believe he is the Christ, the Son of God.",
+        "reference": {
+          "book": 43,
+          "chapter": 11,
+          "verse": 27
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2011%3A27&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Quand Jésus demande d'enlever la pierre du tombeau, je rappelle que mon frère y est depuis quatre jours.",
+        "en": "When Jesus asks for the tombstone to be removed, I point out that my brother has been there four days.",
+        "reference": {
+          "book": 43,
+          "chapter": 11,
+          "verse": 39
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2011%3A39&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "À un repas de Béthanie, je sers tandis que Lazare est à table avec Jésus.",
+        "en": "At a meal in Bethany, I serve while Lazarus sits at the table with Jesus.",
+        "reference": {
+          "book": 43,
+          "chapter": 12,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2012%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Absorbée par le service, je demande à Jésus de dire à ma sœur de m'aider.",
+        "en": "Distracted by serving, I ask Jesus to tell my sister to help me.",
+        "reference": {
+          "book": 42,
+          "chapter": 10,
+          "verse": 40
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2010%3A40&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-069",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Marie de Béthanie",
+      "aliases": [
+        "Marie sœur de Marthe",
+        "Marie de Bethanie"
+      ],
+      "explanation": "Marie de Béthanie est la sœur de Marthe et Lazare. Elle écoute Jésus à ses pieds et répand du parfum sur eux."
+    },
+    "en": {
+      "answer": "Mary of Bethany",
+      "aliases": [
+        "Mary sister of Martha"
+      ],
+      "explanation": "Mary of Bethany is the sister of Martha and Lazarus. She listens at Jesus' feet and pours perfume on them."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Lorsque ma sœur me transmet l'appel de Jésus, je me lève rapidement pour aller vers lui.",
+        "en": "When my sister tells me Jesus is calling, I quickly get up and go to him.",
+        "reference": {
+          "book": 43,
+          "chapter": 11,
+          "verse": 29
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2011%3A29&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je tombe aux pieds de Jésus en disant que mon frère ne serait pas mort s'il avait été là.",
+        "en": "I fall at Jesus' feet, saying my brother would not have died if he had been there.",
+        "reference": {
+          "book": 43,
+          "chapter": 11,
+          "verse": 32
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2011%3A32&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je répands un parfum de nard précieux sur les pieds de Jésus et les essuie avec mes cheveux.",
+        "en": "I pour costly nard perfume on Jesus' feet and wipe them with my hair.",
+        "reference": {
+          "book": 43,
+          "chapter": 12,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2012%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la sœur de Marthe qui s'assied aux pieds de Jésus pour écouter sa parole.",
+        "en": "I am Martha's sister who sits at Jesus' feet to hear his teaching.",
+        "reference": {
+          "book": 42,
+          "chapter": 10,
+          "verse": 39
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2010%3A39&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-070",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Lazare de Béthanie",
+      "aliases": [
+        "Lazare frère de Marthe",
+        "Lazare de Bethanie"
+      ],
+      "explanation": "Lazare de Béthanie est le frère de Marthe et Marie. Jésus le rappelle à la vie après quatre jours au tombeau."
+    },
+    "en": {
+      "answer": "Lazarus of Bethany",
+      "aliases": [
+        "Lazarus of Bethany",
+        "Lazarus brother of Martha"
+      ],
+      "explanation": "Lazarus of Bethany is Martha and Mary's brother. Jesus calls him back to life after four days in the tomb."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Les principaux prêtres envisagent de me faire mourir, moi aussi.",
+        "en": "The chief priests plan to put me to death as well.",
+        "reference": {
+          "book": 43,
+          "chapter": 12,
+          "verse": 10
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2012%3A10&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Après mon retour à la vie, je suis à table avec Jésus pendant que Marthe sert.",
+        "en": "After returning to life, I sit at the table with Jesus while Martha serves.",
+        "reference": {
+          "book": 43,
+          "chapter": 12,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2012%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Quand Jésus arrive, je suis déjà au tombeau depuis quatre jours.",
+        "en": "When Jesus arrives, I have already been in the tomb for four days.",
+        "reference": {
+          "book": 43,
+          "chapter": 11,
+          "verse": 17
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2011%3A17&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je sors vivant du tombeau, les pieds et les mains encore liés de bandes.",
+        "en": "I come out of the tomb alive, with my hands and feet still bound in gravecloths.",
+        "reference": {
+          "book": 43,
+          "chapter": 11,
+          "verse": 44
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2011%3A44&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-071",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Marie de Magdala",
+      "aliases": [
+        "Marie-Madeleine",
+        "Marie Madeleine"
+      ],
+      "explanation": "Marie de Magdala accompagne Jésus et assiste à sa crucifixion. Elle découvre le tombeau vide et annonce avoir vu le Seigneur."
+    },
+    "en": {
+      "answer": "Mary Magdalene",
+      "aliases": [
+        "Mary of Magdala"
+      ],
+      "explanation": "Mary Magdalene accompanies Jesus and witnesses his crucifixion. She finds the empty tomb and announces that she has seen the Lord."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Sept démons sont sortis de moi.",
+        "en": "Seven demons have gone out of me.",
+        "reference": {
+          "book": 42,
+          "chapter": 8,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%208%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je me tiens près de la croix de Jésus avec sa mère et d'autres femmes.",
+        "en": "I stand near Jesus' cross with his mother and other women.",
+        "reference": {
+          "book": 43,
+          "chapter": 19,
+          "verse": 25
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2019%3A25&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Le premier jour de la semaine, je viens au tombeau alors qu'il fait encore sombre et vois la pierre enlevée.",
+        "en": "On the first day of the week, I come to the tomb while it is still dark and see the stone removed.",
+        "reference": {
+          "book": 43,
+          "chapter": 20,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2020%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je vais annoncer aux disciples que j'ai vu le Seigneur ressuscité.",
+        "en": "I go to tell the disciples that I have seen the risen Lord.",
+        "reference": {
+          "book": 43,
+          "chapter": 20,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2020%3A18&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-072",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Nicodème",
+      "aliases": [
+        "Nicodeme"
+      ],
+      "explanation": "Nicodème est un pharisien qui rencontre Jésus de nuit. Il intervient en faveur d'une écoute équitable et apporte des aromates pour son ensevelissement."
+    },
+    "en": {
+      "answer": "Nicodemus",
+      "aliases": [],
+      "explanation": "Nicodemus is a Pharisee who meets Jesus at night. He argues for a fair hearing and brings spices for Jesus' burial."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je demande si notre loi permet de juger un homme avant de l'avoir entendu.",
+        "en": "I ask whether our law judges a man before hearing him.",
+        "reference": {
+          "book": 43,
+          "chapter": 7,
+          "verse": 51
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%207%3A51&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Pour l'ensevelissement de Jésus, j'apporte un mélange de myrrhe et d'aloès.",
+        "en": "For Jesus' burial, I bring a mixture of myrrh and aloes.",
+        "reference": {
+          "book": 43,
+          "chapter": 19,
+          "verse": 39
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2019%3A39&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je demande comment un homme peut naître de nouveau quand il est vieux.",
+        "en": "I ask how a man can be born again when he is old.",
+        "reference": {
+          "book": 43,
+          "chapter": 3,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%203%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le chef religieux qui vient parler à Jésus pendant la nuit.",
+        "en": "I am the religious leader who comes to speak with Jesus at night.",
+        "reference": {
+          "book": 43,
+          "chapter": 3,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%203%3A2&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-073",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Ponce Pilate",
+      "aliases": [
+        "Pilate"
+      ],
+      "explanation": "Pilate est le gouverneur romain devant lequel Jésus est jugé. Il interroge Jésus, se lave les mains et le livre pour être crucifié."
+    },
+    "en": {
+      "answer": "Pontius Pilate",
+      "aliases": [
+        "Pilate"
+      ],
+      "explanation": "Pilate is the Roman governor before whom Jesus is tried. He questions Jesus, washes his hands and hands him over for crucifixion."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Ma femme m'envoie un message au tribunal après un rêve qui l'a troublée.",
+        "en": "My wife sends me a message at the judgment seat after a troubling dream.",
+        "reference": {
+          "book": 40,
+          "chapter": 27,
+          "verse": 19
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2027%3A19&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je demande à Jésus ce qu'est la vérité.",
+        "en": "I ask Jesus what truth is.",
+        "reference": {
+          "book": 43,
+          "chapter": 18,
+          "verse": 38
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2018%3A38&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je me lave les mains devant la foule pour déclarer que je ne suis pas responsable de ce sang.",
+        "en": "I wash my hands before the crowd to declare myself innocent of this blood.",
+        "reference": {
+          "book": 40,
+          "chapter": 27,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2027%3A24&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je fais libérer Barabbas et livre Jésus pour qu'il soit crucifié.",
+        "en": "I release Barabbas and hand Jesus over to be crucified.",
+        "reference": {
+          "book": 40,
+          "chapter": 27,
+          "verse": 26
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2027%3A26&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-074",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Hérode Antipas",
+      "aliases": [
+        "Antipas",
+        "Hérode le tétrarque"
+      ],
+      "explanation": "Hérode le tétrarque, appelé Antipas dans l'histoire, gouverne la Galilée. Il fait emprisonner Jean-Baptiste et ordonne son exécution."
+    },
+    "en": {
+      "answer": "Herod Antipas",
+      "aliases": [
+        "Antipas",
+        "Herod the tetrarch"
+      ],
+      "explanation": "Herod the tetrarch, known historically as Antipas, rules Galilee. He imprisons John the Baptist and orders his execution."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Quand Jésus m'est amené, j'espère le voir accomplir un miracle.",
+        "en": "When Jesus is brought to me, I hope to see him perform a miracle.",
+        "reference": {
+          "book": 42,
+          "chapter": 23,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2023%3A8&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je suis le tétrarque de Galilée pendant que Ponce Pilate gouverne la Judée.",
+        "en": "I am tetrarch of Galilee while Pontius Pilate governs Judea.",
+        "reference": {
+          "book": 42,
+          "chapter": 3,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%203%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je fais emprisonner Jean à cause d'Hérodias, la femme de mon frère que j'ai épousée.",
+        "en": "I imprison John because of Herodias, my brother's wife whom I married.",
+        "reference": {
+          "book": 41,
+          "chapter": 6,
+          "verse": 17
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%206%3A17&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Après une promesse faite lors de mon banquet, j'envoie un garde décapiter Jean en prison.",
+        "en": "After a promise made at my banquet, I send a guard to behead John in prison.",
+        "reference": {
+          "book": 41,
+          "chapter": 6,
+          "verse": 27
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%206%3A27&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-075",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Étienne",
+      "aliases": [
+        "Etienne"
+      ],
+      "explanation": "Étienne est choisi pour le service de la communauté. Son témoignage conduit à sa lapidation, pendant laquelle il prie pour ses meurtriers."
+    },
+    "en": {
+      "answer": "Stephen",
+      "aliases": [],
+      "explanation": "Stephen is chosen to serve the community. His testimony leads to his stoning, during which he prays for his killers."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Devant le conseil, mon visage paraît comme celui d'un ange.",
+        "en": "Before the council, my face appears like an angel's.",
+        "reference": {
+          "book": 44,
+          "chapter": 6,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%206%3A15&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je suis choisi parmi les sept hommes chargés du service, et décrit comme plein de foi et du Saint-Esprit.",
+        "en": "I am chosen among the seven men for service and described as full of faith and the Holy Spirit.",
+        "reference": {
+          "book": 44,
+          "chapter": 6,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%206%3A5&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je déclare voir les cieux ouverts et le Fils de l'homme debout à la droite de Dieu.",
+        "en": "I declare that I see heaven opened and the Son of Man standing at God's right hand.",
+        "reference": {
+          "book": 44,
+          "chapter": 7,
+          "verse": 56
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%207%3A56&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Pendant qu'on me lapide, je demande à Dieu de ne pas imputer ce péché à mes meurtriers.",
+        "en": "While being stoned, I ask God not to charge my killers with this sin.",
+        "reference": {
+          "book": 44,
+          "chapter": 7,
+          "verse": 60
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%207%3A60&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-076",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Philippe, évangéliste",
+      "aliases": [
+        "Philippe évangéliste",
+        "Philippe des sept"
+      ],
+      "explanation": "Philippe, l'un des Sept, annonce le Christ en Samarie et explique Ésaïe au fonctionnaire éthiopien. Il est distinct de l'apôtre du même nom."
+    },
+    "en": {
+      "answer": "Philip the evangelist",
+      "aliases": [
+        "Philip evangelist",
+        "Philip one of the seven"
+      ],
+      "explanation": "Philip, one of the Seven, proclaims Christ in Samaria and explains Isaiah to the Ethiopian official. He is distinct from the apostle with the same name."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je me retrouve à Azot, puis j'annonce la bonne nouvelle jusqu'à Césarée.",
+        "en": "I find myself at Azotus, then proclaim the good news as far as Caesarea.",
+        "reference": {
+          "book": 44,
+          "chapter": 8,
+          "verse": 40
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%208%3A40&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je descends dans une ville de Samarie pour y prêcher le Christ.",
+        "en": "I go down to a city of Samaria to preach Christ there.",
+        "reference": {
+          "book": 44,
+          "chapter": 8,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%208%3A5&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "J'ai quatre filles non mariées qui prophétisent.",
+        "en": "I have four unmarried daughters who prophesy.",
+        "reference": {
+          "book": 44,
+          "chapter": 21,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2021%3A9&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je descends dans l'eau et baptise le fonctionnaire éthiopien après lui avoir expliqué l'Écriture.",
+        "en": "I go down into the water and baptize the Ethiopian official after explaining Scripture to him.",
+        "reference": {
+          "book": 44,
+          "chapter": 8,
+          "verse": 38
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%208%3A38&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-077",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Barnabas",
+      "aliases": [],
+      "explanation": "Barnabas vend un champ au profit de la communauté. Il accueille Saul, voyage avec Paul et accompagne ensuite Marc."
+    },
+    "en": {
+      "answer": "Barnabas",
+      "aliases": [],
+      "explanation": "Barnabas sells a field for the community's benefit. He welcomes Saul, travels with Paul and later accompanies Mark."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Après un désaccord avec Paul, je pars pour Chypre avec Marc.",
+        "en": "After a disagreement with Paul, I sail to Cyprus with Mark.",
+        "reference": {
+          "book": 44,
+          "chapter": 15,
+          "verse": 39
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2015%3A39&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je vais chercher Saul à Tarse pour l'amener à Antioche.",
+        "en": "I go to Tarsus to find Saul and bring him to Antioch.",
+        "reference": {
+          "book": 44,
+          "chapter": 11,
+          "verse": 25
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2011%3A25&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je vends un champ et dépose l'argent aux pieds des apôtres.",
+        "en": "I sell a field and lay the money at the apostles' feet.",
+        "reference": {
+          "book": 44,
+          "chapter": 4,
+          "verse": 37
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%204%3A37&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis un Lévite originaire de Chypre dont les apôtres interprètent le surnom comme fils d'exhortation.",
+        "en": "I am a Levite from Cyprus whose nickname the apostles interpret as son of consolation.",
+        "reference": {
+          "book": 44,
+          "chapter": 4,
+          "verse": 36
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%204%3A36&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-078",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Timothée",
+      "aliases": [
+        "Timothee"
+      ],
+      "explanation": "Timothée accompagne Paul et reçoit ses conseils. Sa mère Eunice et sa grand-mère Loïs sont citées pour leur foi."
+    },
+    "en": {
+      "answer": "Timothy",
+      "aliases": [],
+      "explanation": "Timothy accompanies Paul and receives his counsel. His mother Eunice and grandmother Lois are remembered for their faith."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Je connais les saintes Écritures depuis mon enfance.",
+        "en": "I have known the holy Scriptures since childhood.",
+        "reference": {
+          "book": 55,
+          "chapter": 3,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Timothy%203%3A15&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "À Lystre, je suis présenté comme le fils d'une croyante juive et d'un père grec.",
+        "en": "At Lystra, I am introduced as the son of a Jewish believer and a Greek father.",
+        "reference": {
+          "book": 44,
+          "chapter": 16,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A1&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Paul se souvient de la foi de ma grand-mère Loïs et de ma mère Eunice.",
+        "en": "Paul remembers the faith of my grandmother Lois and my mother Eunice.",
+        "reference": {
+          "book": 55,
+          "chapter": 1,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Timothy%201%3A5&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Paul me demande de ne laisser personne mépriser ma jeunesse et d'être un exemple.",
+        "en": "Paul tells me to let no one despise my youth and to be an example.",
+        "reference": {
+          "book": 54,
+          "chapter": 4,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Timothy%204%3A12&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-079",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Corneille",
+      "aliases": [
+        "Corneille le centenier"
+      ],
+      "explanation": "Corneille est un centenier de Césarée qui prie et aide les pauvres. Il fait venir Pierre, puis le Saint-Esprit descend sur ceux qui écoutent."
+    },
+    "en": {
+      "answer": "Cornelius",
+      "aliases": [],
+      "explanation": "Cornelius is a centurion in Caesarea who prays and helps the poor. He sends for Peter, and the Holy Spirit falls on those listening."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "J'attends mon visiteur en ayant réuni mes parents et mes amis proches.",
+        "en": "I await my visitor after gathering my relatives and close friends.",
+        "reference": {
+          "book": 44,
+          "chapter": 10,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2010%3A24&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Je crains Dieu avec toute ma maison, donne beaucoup d'aumônes et prie continuellement.",
+        "en": "I fear God with my whole household, give generously and pray continually.",
+        "reference": {
+          "book": 44,
+          "chapter": 10,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2010%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Un ange me demande d'envoyer des hommes à Joppé pour faire venir Simon Pierre.",
+        "en": "An angel tells me to send men to Joppa to bring Simon Peter.",
+        "reference": {
+          "book": 44,
+          "chapter": 10,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2010%3A5&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le centenier de Césarée appartenant à la cohorte dite italienne.",
+        "en": "I am the centurion in Caesarea belonging to the band called the Italian cohort.",
+        "reference": {
+          "book": 44,
+          "chapter": 10,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2010%3A1&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-080",
+    "category": "person",
+    "testament": "new",
+    "fr": {
+      "answer": "Lydie",
+      "aliases": [],
+      "explanation": "Lydie, marchande de pourpre venue de Thyatire, écoute Paul à Philippes. Après son baptême, elle accueille les missionnaires chez elle."
+    },
+    "en": {
+      "answer": "Lydia",
+      "aliases": [],
+      "explanation": "Lydia, a seller of purple from Thyatira, hears Paul in Philippi. After being baptized, she welcomes the missionaries into her home."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Après leur sortie de prison, Paul et Silas viennent chez moi retrouver et encourager les croyants.",
+        "en": "After leaving prison, Paul and Silas come to my house to see and encourage the believers.",
+        "reference": {
+          "book": 44,
+          "chapter": 16,
+          "verse": 40
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A40&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Le Seigneur ouvre mon cœur pour que je prête attention à ce que dit Paul.",
+        "en": "The Lord opens my heart to pay attention to what Paul says.",
+        "reference": {
+          "book": 44,
+          "chapter": 16,
+          "verse": 14
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A14&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Après mon baptême et celui de ma maison, j'insiste pour que les missionnaires logent chez moi.",
+        "en": "After my household and I are baptized, I insist that the missionaries stay at my house.",
+        "reference": {
+          "book": 44,
+          "chapter": 16,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A15&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis une marchande de pourpre originaire de Thyatire.",
+        "en": "I am a seller of purple from Thyatira.",
+        "reference": {
+          "book": 44,
+          "chapter": 16,
+          "verse": 14
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A14&version=LSG%3BKJV"
+      }
+    ]
+  }
+]

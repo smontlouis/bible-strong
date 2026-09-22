@@ -1,0 +1,32 @@
+{
+  "generator": "built-in image_gen",
+  "images": [
+    {
+      "name": "hello-v2",
+      "prompt": "Edit the first reference image, the white slime waving hello. Keep the same white slime silhouette, black pill-shaped eyes, happy open smile, outline thickness, flat illustration style, scale and transparent background. Change ONLY the raised hand/arm on the right: replace the two-pronged mitten shape with ONE smooth elongated rounded capsule-like stub arm, like Kirby's simple fingerless arm. One single rounded tip, no fingers, no thumb, no split or fork, no hand lobes. The arm emerges naturally from the body and points diagonally upward in greeting. Keep the rest of the body and face unchanged. True transparent alpha background, no scenery, no text, no shadow.",
+      "refs": [
+        "/Users/stephane/Projects/bible-strong/bible-strong-app/output/imagegen/slime-reactions-v1/hello.png"
+      ],
+      "source": "/Users/stephane/.codex/generated_images/01a0c940-85e3-7c10-b4b5-e424c44c6f01/exec-6e91caae-aa48-4dad-ae41-5158c9b575ed.png"
+    },
+    {
+      "name": "sad",
+      "prompt": "Use case: stylized-concept. Create one new SAD reaction emoji belonging to the exact same white slime family as the references. First reference is the original avatar identity; second reference shows the reaction illustration style and outline thickness. Preserve the squat rounded dome body with gently flattened bottom, pure white body, smooth black outline, black simple pill-like eyes, no legs, no ears or hair. Sad expression: two slightly drooping black oval eyes, small downward-curved black mouth, a single small blue teardrop at the outer corner of one eye. Tender, clearly sad, not distressed or dramatic. No arms required. Flat minimal 2D cartoon, recognizable at 48px, match the existing emoji style. Centered on square canvas, body around 60% of canvas width, generous transparent padding. Pure white body for later recoloring, only the tear is blue. Genuine transparent alpha background. No painted checkerboard, no ground shadow, no scenery, no captions, no gradients or 3D.",
+      "refs": [
+        "/Users/stephane/Projects/bible-strong/bible-strong-app/apps/world/public/assets/avatars/short-slime/idle-down.png",
+        "/Users/stephane/Projects/bible-strong/bible-strong-app/output/imagegen/slime-reactions-v1/hello.png"
+      ],
+      "source": "/Users/stephane/.codex/generated_images/01a0c940-85e3-7c10-b4b5-e424c44c6f01/exec-335a43f7-868a-4ee8-83f4-454dc5533e0c.png"
+    },
+    {
+      "name": "bravo-v2",
+      "prompt": "Edit the reference white slime celebration emoji. Change ONLY the two raised mitten-like hands/arms: each arm must be ONE simple smooth rounded capsule-shaped stub with a single rounded tip, like Kirby's fingerless arms. Absolutely no thumb, no fingers, no split, no fork, no two-lobed hand. Both arms extend diagonally up and outward joyfully, flowing naturally out of the body. Preserve exactly the existing body silhouette, white fill, black outline thickness, happy closed curved eyes, open smile, the five colorful confetti pieces, overall scale and placement, flat 2D illustration style. Genuine transparent alpha background. No other changes, no scenery, no shadow, no text.",
+      "source": "/Users/stephane/.codex/generated_images/01a0c940-85e3-7c10-b4b5-e424c44c6f01/exec-75d8263c-893a-4a75-9039-1f70310adf10.png"
+    },
+    {
+      "name": "hello-v3",
+      "prompt": "Edit this exact white slime hello emoji. Change ONLY the raised arm on the right: shorten its protruding length by about 50 percent, making it a tiny compact rounded stub, close to the body, still pointing diagonally upward. Single rounded tip, no fingers, no thumb, no fork. Keep body size, body silhouette apart from that arm, face, eyes, mouth, outline thickness, white fill, canvas framing and scale unchanged. Maintain genuine transparent alpha background. Do not add anything. The desired arm is a short nub rather than an elongated capsule.",
+      "source": "/Users/stephane/.codex/generated_images/01a0c940-85e3-7c10-b4b5-e424c44c6f01/exec-cc5b6411-62d9-4933-b692-d419639b95da.png"
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+[
+  {
+    "id": "who-person-109",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Abel",
+      "aliases": [],
+      "explanation": "Abel, berger et frère de Caïn, offre à Dieu les premiers-nés de son troupeau. Hébreux rappelle le témoignage de sa foi même après sa mort."
+    },
+    "en": {
+      "answer": "Abel",
+      "aliases": [],
+      "explanation": "Abel, a shepherd and brother of Cain, offers God the firstborn of his flock. Hebrews recalls the testimony of his faith even after his death."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Selon l'épître aux Hébreux, ma foi continue de parler après ma mort.",
+        "en": "According to Hebrews, my faith continues to speak after my death.",
+        "reference": {
+          "book": 58,
+          "chapter": 11,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Hebrews%2011%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Dieu accueille favorablement mon offrande des premiers-nés de mon troupeau.",
+        "en": "God looks with favour on my offering from the firstborn of my flock.",
+        "reference": {
+          "book": 1,
+          "chapter": 4,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%204%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je suis berger, tandis que mon frère cultive la terre.",
+        "en": "I am a shepherd, while my brother works the soil.",
+        "reference": {
+          "book": 1,
+          "chapter": 4,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%204%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Mon frère Caïn me tue alors que nous sommes dans les champs.",
+        "en": "My brother Cain kills me while we are out in the field.",
+        "reference": {
+          "book": 1,
+          "chapter": 4,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%204%3A8&version=LSG%3BKJV"
+      }
+    ]
+  },
+  {
+    "id": "who-person-110",
+    "category": "person",
+    "testament": "old",
+    "fr": {
+      "answer": "Melchisédek",
+      "aliases": [
+        "Melchisédech",
+        "Melchizedek"
+      ],
+      "explanation": "Melchisédek est roi de Salem et sacrificateur du Dieu Très-Haut. Il apporte du pain et du vin, bénit Abram et reçoit de lui la dîme de tout."
+    },
+    "en": {
+      "answer": "Melchizedek",
+      "aliases": [
+        "Melchisedec",
+        "Melchisedek"
+      ],
+      "explanation": "Melchizedek is king of Salem and priest of God Most High. He brings bread and wine, blesses Abram and receives a tenth of everything from him."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Après sa victoire, Abram me donne la dixième part de tout.",
+        "en": "After his victory, Abram gives me a tenth of everything.",
+        "reference": {
+          "book": 1,
+          "chapter": 14,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2014%3A17-20&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Lors de cette rencontre, je fais apporter du pain et du vin.",
+        "en": "At this meeting, I bring out bread and wine.",
+        "reference": {
+          "book": 1,
+          "chapter": 14,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2014%3A18&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Je suis sacrificateur du Dieu Très-Haut.",
+        "en": "I serve as a priest of God Most High.",
+        "reference": {
+          "book": 1,
+          "chapter": 14,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2014%3A18&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le roi de Salem qui bénit Abram.",
+        "en": "I am the king of Salem who blesses Abram.",
+        "reference": {
+          "book": 1,
+          "chapter": 14,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2014%3A18-19&version=LSG%3BKJV"
+      }
+    ]
+  }
+]

@@ -1,6 +1,4 @@
 # Server-only keys. Never use a VITE_ variable.
-# Gloo Grounded chooses subjects, retrieves context and generates game rounds.
-GLOO_API_KEY=
 # Vercel AI Gateway is used only for Jev answer adjudication.
 AI_GATEWAY_API_KEY=
 
@@ -21,4 +19,4 @@ GUESTBOOK_NOTIFICATION_TO=
 GUESTBOOK_NOTIFICATION_FROM=
 GUESTBOOK_ADMIN_URL=
 
-# Games call Gloo Grounded directly. No local Resources API is needed.
+# Questions come from the shared SQLite GameCatalogue. No Resources API or Gloo key is needed.

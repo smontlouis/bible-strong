@@ -1,0 +1,650 @@
+[
+  {
+    "id": "who-place-001",
+    "testament": "old",
+    "fr": {
+      "answer": "Le jardin d'Éden",
+      "aliases": [
+        "Éden",
+        "Eden",
+        "jardin d'Eden"
+      ],
+      "explanation": "Dieu plaça le premier homme dans ce jardin ; l'arbre de vie et l'arbre de la connaissance y sont mentionnés."
+    },
+    "en": {
+      "answer": "The garden of Eden",
+      "aliases": [
+        "Eden",
+        "Garden of Eden"
+      ],
+      "explanation": "God placed the first man in this garden; the tree of life and the tree of knowledge are mentioned there."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Un fleuve m'arrose avant de se diviser en quatre bras.",
+        "en": "A river waters me before dividing into four branches.",
+        "reference": {
+          "book": 1,
+          "chapter": 2,
+          "verse": 10
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%202%3A10&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "On reçoit la mission de me cultiver et de me garder.",
+        "en": "Someone is given the task of tending and keeping me.",
+        "reference": {
+          "book": 1,
+          "chapter": 2,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%202%3A15&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Après une désobéissance, des chérubins gardent l'accès à l'arbre de vie qui s'y trouve.",
+        "en": "After an act of disobedience, cherubim guard access to the tree of life here.",
+        "reference": {
+          "book": 1,
+          "chapter": 3,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%203%3A24&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le jardin où Dieu a placé Adam avant la chute.",
+        "en": "I am the garden where God placed Adam before the fall.",
+        "reference": {
+          "book": 1,
+          "chapter": 2,
+          "verse": 8
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%202%3A8&version=LSG%3BKJV"
+      }
+    ],
+    "category": "place"
+  },
+  {
+    "id": "who-place-002",
+    "testament": "old",
+    "fr": {
+      "answer": "Babel",
+      "aliases": [
+        "Babylone"
+      ],
+      "explanation": "Dans le récit de la Genèse, cette ville du pays de Schinear reçoit son nom après la confusion des langues."
+    },
+    "en": {
+      "answer": "Babel",
+      "aliases": [
+        "Babylon"
+      ],
+      "explanation": "In Genesis, this city in the land of Shinar receives its name after the confusion of languages."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Mon chantier utilise de la brique plutôt que de la pierre, et du bitume comme mortier.",
+        "en": "My builders use brick instead of stone and bitumen for mortar.",
+        "reference": {
+          "book": 1,
+          "chapter": 11,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2011%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Mes bâtisseurs veulent se faire un nom et éviter d'être dispersés.",
+        "en": "My builders want to make a name for themselves and avoid being scattered.",
+        "reference": {
+          "book": 1,
+          "chapter": 11,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2011%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Leur projet est interrompu lorsque leurs langues sont brouillées.",
+        "en": "Their project is interrupted when their languages are confused.",
+        "reference": {
+          "book": 1,
+          "chapter": 11,
+          "verse": 7
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2011%3A7&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville de la tour que l'humanité voulait élever jusqu'au ciel.",
+        "en": "I am the city of the tower people wanted to reach heaven.",
+        "reference": {
+          "book": 1,
+          "chapter": 11,
+          "verse": 9
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2011%3A4-9&version=LSG%3BKJV"
+      }
+    ],
+    "category": "place"
+  },
+  {
+    "id": "who-place-003",
+    "testament": "old",
+    "fr": {
+      "answer": "Jéricho",
+      "aliases": [
+        "Jericho"
+      ],
+      "explanation": "Rahab accueillit les espions dans cette ville ; ses murailles tombèrent au temps de Josué."
+    },
+    "en": {
+      "answer": "Jericho",
+      "aliases": [],
+      "explanation": "Rahab sheltered the spies in this city; its walls fell in Joshua's time."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Une femme cache des visiteurs sous des tiges de lin sur son toit.",
+        "en": "A woman hides visitors under flax stalks on her roof.",
+        "reference": {
+          "book": 6,
+          "chapter": 2,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%202%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Un cordon écarlate à une fenêtre doit protéger une maisonnée lors de ma prise.",
+        "en": "A scarlet cord at a window is to protect a household when I am taken.",
+        "reference": {
+          "book": 6,
+          "chapter": 2,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%202%3A18&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Pendant six jours, une procession fait chaque jour une fois le tour de moi.",
+        "en": "For six days, a procession goes around me once each day.",
+        "reference": {
+          "book": 6,
+          "chapter": 6,
+          "verse": 3
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%206%3A3&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Au temps de Josué, mes murailles s'écroulent après les trompettes et les cris du peuple.",
+        "en": "In Joshua's time, my walls fall after trumpet blasts and the people's shout.",
+        "reference": {
+          "book": 6,
+          "chapter": 6,
+          "verse": 20
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%206%3A20&version=LSG%3BKJV"
+      }
+    ],
+    "category": "place"
+  },
+  {
+    "id": "who-place-004",
+    "testament": "old",
+    "fr": {
+      "answer": "Ninive",
+      "aliases": [
+        "Nineveh"
+      ],
+      "explanation": "Jonas fut envoyé dans cette grande ville ; ses habitants réagirent à son annonce par le jeûne et la repentance."
+    },
+    "en": {
+      "answer": "Nineveh",
+      "aliases": [],
+      "explanation": "Jonah was sent to this great city; its people responded to his announcement with fasting and repentance."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "À la fin du récit, Dieu rappelle que je compte aussi de nombreux animaux.",
+        "en": "At the end of the account, God points out that I also contain many animals.",
+        "reference": {
+          "book": 32,
+          "chapter": 4,
+          "verse": 11
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Jonah%204%3A11&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Mon roi quitte son trône, retire son manteau et s'assied sur la cendre.",
+        "en": "My king leaves his throne, removes his robe, and sits in ashes.",
+        "reference": {
+          "book": 32,
+          "chapter": 3,
+          "verse": 6
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Jonah%203%3A6&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Un avertissement annonce ma destruction dans quarante jours.",
+        "en": "A warning announces that I will be overthrown in forty days.",
+        "reference": {
+          "book": 32,
+          "chapter": 3,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Jonah%203%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la grande ville où Dieu envoie Jonas après son séjour dans le poisson.",
+        "en": "I am the great city to which God sends Jonah after his time in the fish.",
+        "reference": {
+          "book": 32,
+          "chapter": 3,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Jonah%203%3A2&version=LSG%3BKJV"
+      }
+    ],
+    "category": "place"
+  },
+  {
+    "id": "who-place-005",
+    "testament": "old",
+    "fr": {
+      "answer": "Le mont Sinaï",
+      "aliases": [
+        "Sinaï",
+        "Sinai",
+        "mont Sinai",
+        "Horeb",
+        "mont Horeb"
+      ],
+      "explanation": "Cette montagne est le lieu de la rencontre de Moïse avec Dieu lors du don de la loi à Israël."
+    },
+    "en": {
+      "answer": "Mount Sinai",
+      "aliases": [
+        "Sinai",
+        "Horeb",
+        "Mount Horeb"
+      ],
+      "explanation": "This mountain is where Moses meets God when the law is given to Israel."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Des limites sont fixées autour de moi pour empêcher le peuple de me toucher.",
+        "en": "Boundaries are set around me to stop the people from touching me.",
+        "reference": {
+          "book": 2,
+          "chapter": 19,
+          "verse": 12
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2019%3A12&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Une fumée semblable à celle d'une fournaise m'enveloppe et je tremble violemment.",
+        "en": "Smoke like that of a furnace covers me, and I shake violently.",
+        "reference": {
+          "book": 2,
+          "chapter": 19,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2019%3A18&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Moïse demeure sur moi quarante jours et quarante nuits.",
+        "en": "Moses stays on me for forty days and forty nights.",
+        "reference": {
+          "book": 2,
+          "chapter": 24,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2024%3A18&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la montagne où Moïse reçoit les tables de pierre écrites du doigt de Dieu.",
+        "en": "I am the mountain where Moses receives the stone tablets written by God's finger.",
+        "reference": {
+          "book": 2,
+          "chapter": 31,
+          "verse": 18
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2031%3A18&version=LSG%3BKJV"
+      }
+    ],
+    "category": "place"
+  },
+  {
+    "id": "who-place-006",
+    "testament": "new",
+    "fr": {
+      "answer": "Bethléhem",
+      "aliases": [
+        "Bethlehem",
+        "Bethléem"
+      ],
+      "explanation": "Joseph se rendit dans cette ville de David avec Marie ; Jésus y naquit sous le règne d'Hérode."
+    },
+    "en": {
+      "answer": "Bethlehem",
+      "aliases": [],
+      "explanation": "Joseph went to this city of David with Mary; Jesus was born here during Herod's reign."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Des spécialistes des Écritures me désignent en citant une prophétie sur un chef issu de Juda.",
+        "en": "Scripture experts identify me by citing a prophecy about a ruler from Judah.",
+        "reference": {
+          "book": 40,
+          "chapter": 2,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%202%3A5-6&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Joseph vient chez moi parce qu'il appartient à la maison de David.",
+        "en": "Joseph comes to me because he belongs to the house of David.",
+        "reference": {
+          "book": 42,
+          "chapter": 2,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%202%3A4&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Un nouveau-né est couché dans une crèche, faute de place dans l'hôtellerie.",
+        "en": "A newborn is laid in a manger because there is no room in the inn.",
+        "reference": {
+          "book": 42,
+          "chapter": 2,
+          "verse": 7
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%202%3A7&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville de Judée où Jésus est né.",
+        "en": "I am the town in Judea where Jesus was born.",
+        "reference": {
+          "book": 40,
+          "chapter": 2,
+          "verse": 1
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%202%3A1&version=LSG%3BKJV"
+      }
+    ],
+    "category": "place"
+  },
+  {
+    "id": "who-place-007",
+    "testament": "new",
+    "fr": {
+      "answer": "Nazareth",
+      "aliases": [],
+      "explanation": "Marie reçut l'annonce de l'ange dans cette ville de Galilée, où Jésus grandit ensuite."
+    },
+    "en": {
+      "answer": "Nazareth",
+      "aliases": [],
+      "explanation": "Mary received the angel's announcement in this Galilean town, where Jesus later grew up."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Des habitants furieux conduisent Jésus au bord d'une hauteur pour le précipiter en bas.",
+        "en": "Angry residents lead Jesus to the edge of a hill to throw him down.",
+        "reference": {
+          "book": 42,
+          "chapter": 4,
+          "verse": 29
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%204%3A29&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "En entendant mon nom, Nathanaël se demande s'il peut venir quelque chose de bon de chez moi.",
+        "en": "On hearing my name, Nathanael wonders whether anything good can come from me.",
+        "reference": {
+          "book": 43,
+          "chapter": 1,
+          "verse": 46
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%201%3A46&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "L'ange Gabriel vient chez moi annoncer à Marie la naissance de Jésus.",
+        "en": "The angel Gabriel comes here to announce Jesus' birth to Mary.",
+        "reference": {
+          "book": 42,
+          "chapter": 1,
+          "verse": 26
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%201%3A26-31&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville de Galilée où Jésus grandit après son retour avec Marie et Joseph.",
+        "en": "I am the Galilean town where Jesus grew up after returning with Mary and Joseph.",
+        "reference": {
+          "book": 42,
+          "chapter": 2,
+          "verse": 39
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%202%3A39-40&version=LSG%3BKJV"
+      }
+    ],
+    "category": "place"
+  },
+  {
+    "id": "who-place-008",
+    "testament": "new",
+    "fr": {
+      "answer": "Capernaüm",
+      "aliases": [
+        "Capernaum",
+        "Capharnaüm",
+        "Capharnaum"
+      ],
+      "explanation": "Jésus vint habiter dans cette ville au bord du lac ; plusieurs guérisons et rencontres y sont rapportées."
+    },
+    "en": {
+      "answer": "Capernaum",
+      "aliases": [
+        "Capharnaum"
+      ],
+      "explanation": "Jesus came to live in this lakeside town, where several healings and encounters are recorded."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Des collecteurs demandent à Pierre si son maître paie les deux drachmes.",
+        "en": "Collectors ask Peter whether his master pays the temple tax.",
+        "reference": {
+          "book": 40,
+          "chapter": 17,
+          "verse": 24
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2017%3A24&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Un centenier vient supplier Jésus au sujet de son serviteur paralysé.",
+        "en": "A centurion comes to plead with Jesus for his paralyzed servant.",
+        "reference": {
+          "book": 40,
+          "chapter": 8,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%208%3A5-6&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Une maison est si bondée qu'on ouvre son toit pour descendre un paralytique devant Jésus.",
+        "en": "A house is so crowded that its roof is opened to lower a paralyzed man before Jesus.",
+        "reference": {
+          "book": 41,
+          "chapter": 2,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%202%3A1-4&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Après avoir quitté Nazareth, Jésus vient habiter chez moi, au bord de la mer de Galilée.",
+        "en": "After leaving Nazareth, Jesus comes to live here beside the Sea of Galilee.",
+        "reference": {
+          "book": 40,
+          "chapter": 4,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%204%3A13&version=LSG%3BKJV"
+      }
+    ],
+    "category": "place"
+  },
+  {
+    "id": "who-place-009",
+    "testament": "new",
+    "fr": {
+      "answer": "Emmaüs",
+      "aliases": [
+        "Emmaus"
+      ],
+      "explanation": "Deux disciples se rendaient vers ce village quand Jésus ressuscité les rejoignit ; ils le reconnurent au repas."
+    },
+    "en": {
+      "answer": "Emmaus",
+      "aliases": [],
+      "explanation": "Two disciples were heading toward this village when the risen Jesus joined them; they recognized him at the meal."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Luc me situe à soixante stades de Jérusalem dans la LSG et la KJV.",
+        "en": "Luke places me sixty furlongs from Jerusalem in the LSG and KJV.",
+        "reference": {
+          "book": 42,
+          "chapter": 24,
+          "verse": 13
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2024%3A13&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "Des voyageurs pressent leur compagnon de rester, car le soir approche.",
+        "en": "Travelers urge their companion to stay because evening is approaching.",
+        "reference": {
+          "book": 42,
+          "chapter": 24,
+          "verse": 29
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2024%3A29&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Pendant le repas chez moi, les yeux de deux disciples s'ouvrent quand Jésus rompt le pain.",
+        "en": "During a meal here, two disciples' eyes are opened when Jesus breaks bread.",
+        "reference": {
+          "book": 42,
+          "chapter": 24,
+          "verse": 30
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2024%3A30-31&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis le village vers lequel marchent Cléopas et son compagnon lorsque Jésus ressuscité les rejoint.",
+        "en": "I am the village toward which Cleopas and his companion walk when the risen Jesus joins them.",
+        "reference": {
+          "book": 42,
+          "chapter": 24,
+          "verse": 15
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2024%3A13-18&version=LSG%3BKJV"
+      }
+    ],
+    "category": "place"
+  },
+  {
+    "id": "who-place-010",
+    "testament": "new",
+    "fr": {
+      "answer": "Jérusalem",
+      "aliases": [
+        "Jerusalem"
+      ],
+      "explanation": "Cette ville du temple est le cadre de nombreux événements des Évangiles et du début des Actes, dont la Pentecôte."
+    },
+    "en": {
+      "answer": "Jerusalem",
+      "aliases": [],
+      "explanation": "This temple city is the setting for many events in the Gospels and early Acts, including Pentecost."
+    },
+    "clues": [
+      {
+        "points": 4,
+        "fr": "Un bassin proche de la porte des brebis possède cinq portiques.",
+        "en": "A pool near the sheep gate has five porches.",
+        "reference": {
+          "book": 43,
+          "chapter": 5,
+          "verse": 2
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=John%205%3A2&version=LSG%3BKJV"
+      },
+      {
+        "points": 3,
+        "fr": "À douze ans, Jésus reste chez moi après la fête, sans que ses parents le sachent d'abord.",
+        "en": "At twelve, Jesus stays here after the feast without his parents initially knowing.",
+        "reference": {
+          "book": 42,
+          "chapter": 2,
+          "verse": 43
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%202%3A42-43&version=LSG%3BKJV"
+      },
+      {
+        "points": 2,
+        "fr": "Les apôtres doivent attendre chez moi la promesse du Père avant de partir témoigner.",
+        "en": "The apostles must wait here for the Father's promise before going out to bear witness.",
+        "reference": {
+          "book": 44,
+          "chapter": 1,
+          "verse": 4
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%201%3A4-8&version=LSG%3BKJV"
+      },
+      {
+        "points": 1,
+        "fr": "Je suis la ville où se trouve le temple, et où la foule entend les apôtres à la Pentecôte.",
+        "en": "I am the city of the temple where the crowd hears the apostles at Pentecost.",
+        "reference": {
+          "book": 44,
+          "chapter": 2,
+          "verse": 5
+        },
+        "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%202%3A1-11&version=LSG%3BKJV"
+      }
+    ],
+    "category": "place"
+  }
+]

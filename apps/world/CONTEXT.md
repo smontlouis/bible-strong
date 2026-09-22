@@ -47,3 +47,9 @@ The illustrated meeting point on the central island that opens solo and shared g
 
 **Solo streak**:
 Consecutive correct answers in the solo biblical challenge, aiming for four.
+
+**Game catalogue**:
+The shared bilingual collection of biblical questions and identities available to Bible games.
+
+**Question history**:
+The record of questions offered to an anonymous visitor, used to prioritize unfamiliar questions.

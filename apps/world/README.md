@@ -142,8 +142,8 @@ is not included in production; the build check rejects leaked lab markers or pag
 Open [Question Lab](http://localhost:5186/question-lab.html) for the bilingual
 1,200-question editorial prototype. Filter by batch/Testament/level, compare FR/EN, save
 review notes locally, export decisions and try a written-answer series.
-See [catalogue notes](question-bank/README.md). Draft questions are not yet used by
-live games or included in the production client.
+See [catalogue notes](question-bank/README.md). The server imports these questions into its shared SQLite catalogue for solo and
+Bible challenge. The answer bank is never included in the production client.
 
 ### The central story book
 
@@ -154,3 +154,11 @@ scrolling content. The About section intentionally contains a photo placeholder
 in `StoryDialog.tsx`, ready to be replaced by Stéphane's portrait. No generated
 illustration is required. Donation, contact and source links reuse the public
 project destinations; the final note action opens the community board.
+
+### Who am I? editorial pilot
+
+Open `/who-lab.html` (also linked from Question Lab) to preview 200 bilingual
+identity cards: 110 people, 52 places and 38 objects in seven review batches. Reveal clues progressively
+for 4, 3, 2 or 1 points, or review all translations and sources, save notes and
+export decisions. This development-only review UI uses the same source cards as live multiplayer.
+See [the identity catalogue notes](who-bank/README.md).

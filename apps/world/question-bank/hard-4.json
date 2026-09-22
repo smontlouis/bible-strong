@@ -1,0 +1,2835 @@
+[
+  {
+    "id": "hard-ot-151",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "temple-work-resumes-darius-second",
+    "reference": {
+      "book": 15,
+      "chapter": 4,
+      "verse": 24
+    },
+    "fr": {
+      "question": "Jusqu’à quelle année du règne de Darius les travaux du temple furent-ils interrompus, selon Esdras 4 ?",
+      "answer": "La deuxième",
+      "aliases": [
+        "deuxième",
+        "2",
+        "Seconde",
+        "2e",
+        "La seconde année"
+      ],
+      "explanation": "L’interruption dura jusqu’à la deuxième année de Darius."
+    },
+    "en": {
+      "question": "Until which year of Darius’s reign was work on the temple halted, according to Ezra 4?",
+      "answer": "The second",
+      "aliases": [
+        "second",
+        "2",
+        "Second year",
+        "2nd"
+      ],
+      "explanation": "The interruption lasted until Darius’s second year."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ezra%204%3A24&version=KJV"
+  },
+  {
+    "id": "hard-ot-152",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "temple-finished-month-adar",
+    "reference": {
+      "book": 15,
+      "chapter": 6,
+      "verse": 15
+    },
+    "fr": {
+      "question": "En quel mois le second temple fut-il achevé, selon Esdras 6 ?",
+      "answer": "Adar",
+      "aliases": [],
+      "explanation": "Le temple fut achevé le troisième jour du mois d’Adar."
+    },
+    "en": {
+      "question": "In which month was the second temple completed, according to Ezra 6?",
+      "answer": "Adar",
+      "aliases": [],
+      "explanation": "The temple was completed on the third day of Adar."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ezra%206%3A15&version=KJV"
+  },
+  {
+    "id": "hard-ot-153",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "ezra-silver-six-hundred-fifty-talents",
+    "reference": {
+      "book": 15,
+      "chapter": 8,
+      "verse": 26
+    },
+    "fr": {
+      "question": "Combien de talents d’argent Esdras pesa-t-il en premier pour les confier aux responsables du transport ?",
+      "answer": "Six cent cinquante",
+      "aliases": [
+        "650"
+      ],
+      "explanation": "La quantité d’argent pesée était de six cent cinquante talents."
+    },
+    "en": {
+      "question": "How many talents of silver did Ezra first weigh out to entrust to those responsible for the journey?",
+      "answer": "Six hundred and fifty",
+      "aliases": [
+        "650"
+      ],
+      "explanation": "The silver weighed out amounted to six hundred and fifty talents."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ezra%208%3A26&version=KJV"
+  },
+  {
+    "id": "hard-ot-154",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "ezra-assembly-heavy-rain",
+    "reference": {
+      "book": 15,
+      "chapter": 10,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Quel phénomène météorologique faisait trembler l’assemblée réunie à Jérusalem en Esdras 10, en plus de l’affaire à traiter ?",
+      "answer": "Une forte pluie",
+      "aliases": [
+        "forte pluie",
+        "La pluie",
+        "Des pluies"
+      ],
+      "explanation": "Le peuple était inquiet à cause de l’affaire et de la pluie."
+    },
+    "en": {
+      "question": "What weather made the assembly gathered in Jerusalem tremble in Ezra 10, besides the matter being addressed?",
+      "answer": "Heavy rain",
+      "aliases": [
+        "Rain",
+        "Great rain"
+      ],
+      "explanation": "The people trembled because of the matter and the rain."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ezra%2010%3A9&version=KJV"
+  },
+  {
+    "id": "hard-ot-155",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "eliashib-builds-sheep-gate",
+    "reference": {
+      "book": 16,
+      "chapter": 3,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Quelle porte Éliaschib et les sacrificateurs reconstruisirent-ils au début du chantier de Néhémie 3 ?",
+      "answer": "La porte des brebis",
+      "aliases": [
+        "porte des brebis",
+        "Porte des brebis"
+      ],
+      "explanation": "Les sacrificateurs commencèrent par la porte des brebis."
+    },
+    "en": {
+      "question": "Which gate did Eliashib and the priests rebuild at the start of Nehemiah 3’s work?",
+      "answer": "The Sheep Gate",
+      "aliases": [
+        "Sheep Gate",
+        "Sheep gate"
+      ],
+      "explanation": "The priests began with the Sheep Gate."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Nehemiah%203%3A1&version=KJV"
+  },
+  {
+    "id": "hard-ot-156",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "shallum-daughters-wall-repair",
+    "reference": {
+      "book": 16,
+      "chapter": 3,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Quels membres féminins de sa famille travaillèrent avec Schallum à la réparation de la muraille ?",
+      "answer": "Ses filles",
+      "aliases": [],
+      "explanation": "Schallum répara une section avec ses filles."
+    },
+    "en": {
+      "question": "Which female members of Shallum’s family worked with him repairing the wall?",
+      "answer": "His daughters",
+      "aliases": [],
+      "explanation": "Shallum repaired a section with his daughters."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Nehemiah%203%3A12&version=KJV"
+  },
+  {
+    "id": "hard-ot-157",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "nehemiah-governor-twelve-years",
+    "reference": {
+      "book": 16,
+      "chapter": 5,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Combien d’années Néhémie et ses frères renoncèrent-ils au pain du gouverneur pendant son premier mandat ?",
+      "answer": "Douze",
+      "aliases": [
+        "12"
+      ],
+      "explanation": "Il décrit une période de douze ans sans cette allocation."
+    },
+    "en": {
+      "question": "For how many years did Nehemiah and his brothers forgo the governor’s food allowance during his first term?",
+      "answer": "Twelve",
+      "aliases": [
+        "12"
+      ],
+      "explanation": "He describes twelve years without that allowance."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Nehemiah%205%3A14&version=KJV"
+  },
+  {
+    "id": "hard-ot-158",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "wall-finished-month-elul",
+    "reference": {
+      "book": 16,
+      "chapter": 6,
+      "verse": 15
+    },
+    "fr": {
+      "question": "En quel mois la muraille de Jérusalem fut-elle achevée sous Néhémie ?",
+      "answer": "Élul",
+      "aliases": [],
+      "explanation": "Le travail s’acheva le vingt-cinquième jour d’Élul."
+    },
+    "en": {
+      "question": "In which month was Jerusalem’s wall completed under Nehemiah?",
+      "answer": "Elul",
+      "aliases": [],
+      "explanation": "The work finished on the twenty-fifth day of Elul."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Nehemiah%206%3A15&version=KJV"
+  },
+  {
+    "id": "hard-ot-159",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "nehemiah-jerusalem-hanani",
+    "reference": {
+      "book": 16,
+      "chapter": 7,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Quel frère de Néhémie reçut avec Hanania la responsabilité de Jérusalem ?",
+      "answer": "Hanani",
+      "aliases": [],
+      "explanation": "Néhémie confia cette responsabilité à Hanani et Hanania."
+    },
+    "en": {
+      "question": "Which brother of Nehemiah was entrusted with Jerusalem alongside Hananiah?",
+      "answer": "Hanani",
+      "aliases": [],
+      "explanation": "Nehemiah entrusted this duty to Hanani and Hananiah."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Nehemiah%207%3A2&version=KJV"
+  },
+  {
+    "id": "hard-ot-160",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "wood-offering-selected-lots",
+    "reference": {
+      "book": 16,
+      "chapter": 10,
+      "verse": 34
+    },
+    "fr": {
+      "question": "Par quel procédé les familles fixèrent-elles leur tour pour apporter le bois à la maison de Dieu ?",
+      "answer": "Le tirage au sort",
+      "aliases": [
+        "tirage au sort",
+        "Le sort",
+        "Tirer au sort"
+      ],
+      "explanation": "Les tours de l’offrande du bois furent déterminés par le sort."
+    },
+    "en": {
+      "question": "By what method did the families assign their turns to bring wood to God’s house?",
+      "answer": "Casting lots",
+      "aliases": [
+        "Lots",
+        "By lot"
+      ],
+      "explanation": "The turns for the wood offering were assigned by lot."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Nehemiah%2010%3A34&version=KJV"
+  },
+  {
+    "id": "hard-ot-161",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "nehemiah-gates-closed-before-sabbath",
+    "reference": {
+      "book": 16,
+      "chapter": 13,
+      "verse": 19
+    },
+    "fr": {
+      "question": "À quel moment Néhémie ordonna-t-il de fermer les portes avant le sabbat ?",
+      "answer": "À l’approche de la nuit",
+      "aliases": [
+        "Avant la nuit",
+        "Au crépuscule",
+        "Quand les portes étaient dans l’ombre"
+      ],
+      "explanation": "Il fit fermer les portes lorsque l’ombre commençait à tomber."
+    },
+    "en": {
+      "question": "When did Nehemiah order the gates shut before the Sabbath?",
+      "answer": "As it grew dark",
+      "aliases": [
+        "At dusk",
+        "When the gates grew dark",
+        "Before nightfall"
+      ],
+      "explanation": "He had the gates shut as darkness began to fall."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Nehemiah%2013%3A19&version=KJV"
+  },
+  {
+    "id": "hard-ot-162",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "ahasuerus-127-provinces",
+    "reference": {
+      "book": 17,
+      "chapter": 1,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Sur combien de provinces Assuérus régnait-il selon le début d’Esther ?",
+      "answer": "Cent vingt-sept",
+      "aliases": [
+        "127"
+      ],
+      "explanation": "Le royaume décrit comptait cent vingt-sept provinces."
+    },
+    "en": {
+      "question": "Over how many provinces did Ahasuerus rule according to the opening of Esther?",
+      "answer": "One hundred and twenty-seven",
+      "aliases": [
+        "127"
+      ],
+      "explanation": "The kingdom described comprised one hundred and twenty-seven provinces."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%201%3A1&version=KJV"
+  },
+  {
+    "id": "hard-ot-163",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "esther-preparation-six-months-myrrh",
+    "reference": {
+      "book": 17,
+      "chapter": 2,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Combien de mois durait le traitement à l’huile de myrrhe des jeunes femmes avant leur présentation au roi ?",
+      "answer": "Six",
+      "aliases": [
+        "6"
+      ],
+      "explanation": "Six mois étaient consacrés à l’huile de myrrhe."
+    },
+    "en": {
+      "question": "How many months did the young women’s treatment with oil of myrrh last before presentation to the king?",
+      "answer": "Six",
+      "aliases": [
+        "6"
+      ],
+      "explanation": "Six months were devoted to oil of myrrh."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%202%3A12&version=KJV"
+  },
+  {
+    "id": "hard-ot-164",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "haman-lot-month-nisan",
+    "reference": {
+      "book": 17,
+      "chapter": 3,
+      "verse": 7
+    },
+    "fr": {
+      "question": "En quel premier mois le sort fut-il jeté devant Haman pour choisir une date contre les Juifs ?",
+      "answer": "Nisan",
+      "aliases": [],
+      "explanation": "Le tirage commença au mois de Nisan."
+    },
+    "en": {
+      "question": "In which first month was the lot cast before Haman to choose a date against the Jews?",
+      "answer": "Nisan",
+      "aliases": [],
+      "explanation": "The casting took place in the month of Nisan."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%203%3A7&version=KJV"
+  },
+  {
+    "id": "hard-ot-165",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "esther-messenger-hathach",
+    "reference": {
+      "book": 17,
+      "chapter": 4,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Quel eunuque Esther chargea-t-elle d’interroger Mardochée sur son deuil ?",
+      "answer": "Hathac",
+      "aliases": [
+        "Hathach",
+        "Hatac"
+      ],
+      "explanation": "Esther envoya Hathac auprès de Mardochée."
+    },
+    "en": {
+      "question": "Which eunuch did Esther commission to ask Mordecai about his mourning?",
+      "answer": "Hathach",
+      "aliases": [
+        "Hatach"
+      ],
+      "explanation": "Esther sent Hathach to Mordecai."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%204%3A5&version=KJV"
+  },
+  {
+    "id": "hard-ot-166",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "haman-gallows-fifty-cubits",
+    "reference": {
+      "book": 17,
+      "chapter": 5,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Quelle hauteur, en coudées, avait le bois qu’Haman fit préparer pour Mardochée ?",
+      "answer": "Cinquante",
+      "aliases": [
+        "50"
+      ],
+      "explanation": "Le bois devait s’élever à cinquante coudées."
+    },
+    "en": {
+      "question": "What height in cubits was the gallows Haman had prepared for Mordecai?",
+      "answer": "Fifty",
+      "aliases": [
+        "50"
+      ],
+      "explanation": "The gallows were to stand fifty cubits high."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%205%3A14&version=KJV"
+  },
+  {
+    "id": "hard-ot-167",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "purim-name-lot-pur",
+    "reference": {
+      "book": 17,
+      "chapter": 9,
+      "verse": 26
+    },
+    "fr": {
+      "question": "De quel mot signifiant sort vient le nom de la fête des Purim ?",
+      "answer": "Pur",
+      "aliases": [],
+      "explanation": "Le nom rappelle le pur, le sort jeté contre les Juifs."
+    },
+    "en": {
+      "question": "From which word meaning lot does the festival name Purim come?",
+      "answer": "Pur",
+      "aliases": [],
+      "explanation": "The name recalls the pur, the lot cast against the Jews."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%209%3A26&version=KJV"
+  },
+  {
+    "id": "hard-ot-168",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "job-sheep-seven-thousand",
+    "reference": {
+      "book": 18,
+      "chapter": 1,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Combien de brebis Job possédait-il au début du livre ?",
+      "answer": "Sept mille",
+      "aliases": [
+        "7000"
+      ],
+      "explanation": "Sa richesse initiale comprenait sept mille brebis."
+    },
+    "en": {
+      "question": "How many sheep did Job own at the beginning of the book?",
+      "answer": "Seven thousand",
+      "aliases": [
+        "7000"
+      ],
+      "explanation": "His initial wealth included seven thousand sheep."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%201%3A3&version=KJV"
+  },
+  {
+    "id": "hard-ot-169",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "job-friend-eliphaz-temanite",
+    "reference": {
+      "book": 18,
+      "chapter": 2,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Lequel des trois amis de Job était de Théman ?",
+      "answer": "Éliphaz",
+      "aliases": [
+        "Éliphaz de Théman"
+      ],
+      "explanation": "Éliphaz est présenté comme originaire de Théman."
+    },
+    "en": {
+      "question": "Which of Job’s three friends was a Temanite?",
+      "answer": "Eliphaz",
+      "aliases": [
+        "Eliphaz the Temanite"
+      ],
+      "explanation": "Eliphaz is identified as a Temanite."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%202%3A11&version=KJV"
+  },
+  {
+    "id": "hard-ot-170",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "job-caravans-tema",
+    "reference": {
+      "book": 18,
+      "chapter": 6,
+      "verse": 19
+    },
+    "fr": {
+      "question": "Quel lieu de caravanes est cité avec Séba dans l’image des torrents trompeurs en Job 6 ?",
+      "answer": "Théma",
+      "aliases": [],
+      "explanation": "Job évoque les caravanes de Théma et de Séba."
+    },
+    "en": {
+      "question": "Which place of caravans is named alongside Sheba in the image of unreliable streams in Job 6?",
+      "answer": "Tema",
+      "aliases": [],
+      "explanation": "Job mentions the caravans of Tema and Sheba."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%206%3A19&version=KJV"
+  },
+  {
+    "id": "hard-ot-171",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "job-words-iron-stylus",
+    "reference": {
+      "book": 18,
+      "chapter": 19,
+      "verse": 24
+    },
+    "fr": {
+      "question": "De quel métal Job voudrait-il que soit le burin gravant ses paroles dans le roc ?",
+      "answer": "Le fer",
+      "aliases": [
+        "fer"
+      ],
+      "explanation": "Il imagine ses paroles gravées avec un burin de fer."
+    },
+    "en": {
+      "question": "Of what metal does Job wish the pen engraving his words in rock to be?",
+      "answer": "Iron",
+      "aliases": [],
+      "explanation": "He imagines his words engraved with an iron pen."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%2019%3A24&version=KJV"
+  },
+  {
+    "id": "hard-ot-172",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "job-silver-mine-gold-refining",
+    "reference": {
+      "book": 18,
+      "chapter": 28,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Quel métal précieux est associé à une mine dès le premier verset de Job 28 ?",
+      "answer": "L’argent",
+      "aliases": [
+        "argent"
+      ],
+      "explanation": "Le chapitre commence par évoquer l’extraction de l’argent."
+    },
+    "en": {
+      "question": "Which precious metal is associated with a mine in the first verse of Job 28?",
+      "answer": "Silver",
+      "aliases": [],
+      "explanation": "The chapter opens by mentioning silver mining."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%2028%3A1&version=KJV"
+  },
+  {
+    "id": "hard-ot-173",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "job-covenant-eyes",
+    "reference": {
+      "book": 18,
+      "chapter": 31,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Avec quelle partie de son corps Job dit-il avoir conclu un pacte ?",
+      "answer": "Ses yeux",
+      "aliases": [
+        "Les yeux"
+      ],
+      "explanation": "Job parle d’un pacte conclu avec ses yeux."
+    },
+    "en": {
+      "question": "With what part of his body does Job say he made a covenant?",
+      "answer": "His eyes",
+      "aliases": [
+        "Eyes"
+      ],
+      "explanation": "Job speaks of a covenant made with his eyes."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%2031%3A1&version=KJV"
+  },
+  {
+    "id": "hard-ot-174",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "hidden-path-vulture-eye",
+    "reference": {
+      "book": 18,
+      "chapter": 28,
+      "verse": 7
+    },
+    "fr": {
+      "question": "L’œil de quel oiseau n’a pas aperçu le sentier caché évoqué en Job 28 ?",
+      "answer": "Le vautour",
+      "aliases": [
+        "vautour"
+      ],
+      "explanation": "Job évoque un sentier même invisible au vautour."
+    },
+    "en": {
+      "question": "The eye of which bird has not seen the hidden path described in Job 28?",
+      "answer": "The vulture",
+      "aliases": [
+        "vulture"
+      ],
+      "explanation": "Job describes a path unseen even by the vulture."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%2028%3A7&version=KJV"
+  },
+  {
+    "id": "hard-ot-175",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "sluggard-poverty-armed-man",
+    "reference": {
+      "book": 20,
+      "chapter": 6,
+      "verse": 11
+    },
+    "fr": {
+      "question": "À quel homme menaçant le manque est-il comparé après l’avertissement contre la paresse en Proverbes 6 ?",
+      "answer": "Un homme en armes",
+      "aliases": [
+        "homme en armes",
+        "Un homme armé",
+        "Un guerrier"
+      ],
+      "explanation": "Le manque est décrit comme arrivant à la manière d’un homme armé."
+    },
+    "en": {
+      "question": "To what threatening man is want compared after the warning against laziness in Proverbs 6?",
+      "answer": "An armed man",
+      "aliases": [
+        "armed man",
+        "An armed robber",
+        "Armed man"
+      ],
+      "explanation": "Want is pictured as arriving like an armed man."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%206%3A11&version=KJV"
+  },
+  {
+    "id": "hard-ot-176",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "gold-ring-pig-snout",
+    "reference": {
+      "book": 20,
+      "chapter": 11,
+      "verse": 22
+    },
+    "fr": {
+      "question": "Dans le groin de quel animal Proverbes 11 place-t-il un anneau d’or pour illustrer une beauté sans discernement ?",
+      "answer": "Un pourceau",
+      "aliases": [
+        "pourceau",
+        "Un porc",
+        "Un cochon"
+      ],
+      "explanation": "Le proverbe emploie l’image d’un anneau d’or au groin d’un pourceau."
+    },
+    "en": {
+      "question": "In which animal’s snout does Proverbs 11 place a gold ring to illustrate beauty without discretion?",
+      "answer": "A pig",
+      "aliases": [
+        "pig",
+        "Swine",
+        "A swine"
+      ],
+      "explanation": "The proverb uses a gold ring in a pig’s snout as its image."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%2011%3A22&version=KJV"
+  },
+  {
+    "id": "hard-ot-177",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "vinegar-on-nitre-heavy-heart",
+    "reference": {
+      "book": 20,
+      "chapter": 25,
+      "verse": 20
+    },
+    "fr": {
+      "question": "Sur quelle substance l’image de Proverbes 25 verse-t-elle du vinaigre pour évoquer des chants devant un cœur triste ?",
+      "answer": "Le nitre",
+      "aliases": [
+        "nitre",
+        "Du nitre",
+        "Le natron"
+      ],
+      "explanation": "L’image associe le vinaigre au nitre."
+    },
+    "en": {
+      "question": "On what substance does Proverbs 25 picture vinegar being poured to illustrate singing to a heavy heart?",
+      "answer": "Nitre",
+      "aliases": [
+        "Natron",
+        "Soda"
+      ],
+      "explanation": "The image pairs vinegar with nitre."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%2025%3A20&version=KJV"
+  },
+  {
+    "id": "hard-ot-178",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "hyraxes-houses-rocks",
+    "reference": {
+      "book": 20,
+      "chapter": 30,
+      "verse": 26
+    },
+    "fr": {
+      "question": "Dans quoi les damans, peuple sans puissance, établissent-ils leur maison selon Proverbes 30 ?",
+      "answer": "Les rochers",
+      "aliases": [
+        "rochers",
+        "Les rocs",
+        "Des rochers"
+      ],
+      "explanation": "Le proverbe souligne leur refuge dans les rochers."
+    },
+    "en": {
+      "question": "In what do the conies, a feeble people, make their homes according to Proverbs 30?",
+      "answer": "The rocks",
+      "aliases": [
+        "rocks",
+        "Rocks",
+        "Rock"
+      ],
+      "explanation": "The proverb highlights their refuge in rocks."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%2030%3A26&version=KJV"
+  },
+  {
+    "id": "hard-ot-179",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "dead-flies-perfumer-oil",
+    "reference": {
+      "book": 21,
+      "chapter": 10,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Quels petits animaux morts peuvent gâter l’huile du parfumeur selon l’Ecclésiaste ?",
+      "answer": "Des mouches",
+      "aliases": [
+        "mouches"
+      ],
+      "explanation": "L’image illustre le dommage causé par un peu de folie."
+    },
+    "en": {
+      "question": "What small dead creatures can spoil a perfumer’s ointment according to Ecclesiastes?",
+      "answer": "Flies",
+      "aliases": [],
+      "explanation": "The image illustrates the harm caused by a little folly."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ecclesiastes%2010%3A1&version=KJV"
+  },
+  {
+    "id": "hard-ot-180",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "ecclesiastes-silver-cord",
+    "reference": {
+      "book": 21,
+      "chapter": 12,
+      "verse": 6
+    },
+    "fr": {
+      "question": "De quel métal est le cordon évoqué avant le bris du vase d’or en Ecclésiaste 12 ?",
+      "answer": "L’argent",
+      "aliases": [
+        "argent"
+      ],
+      "explanation": "Le passage évoque un cordon d’argent."
+    },
+    "en": {
+      "question": "Of what metal is the cord described before the golden bowl breaks in Ecclesiastes 12?",
+      "answer": "Silver",
+      "aliases": [],
+      "explanation": "The passage describes a silver cord."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ecclesiastes%2012%3A6&version=KJV"
+  },
+  {
+    "id": "hard-ot-181",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "beloved-lips-scarlet-thread",
+    "reference": {
+      "book": 22,
+      "chapter": 4,
+      "verse": 3
+    },
+    "fr": {
+      "question": "À quoi les lèvres de la bien-aimée sont-elles comparées en Cantique 4:3 ?",
+      "answer": "Un fil cramoisi",
+      "aliases": [
+        "fil cramoisi",
+        "Un fil écarlate",
+        "Un fil rouge"
+      ],
+      "explanation": "Le chant compare ses lèvres à un fil cramoisi."
+    },
+    "en": {
+      "question": "To what are the beloved’s lips compared in Song of Solomon 4:3?",
+      "answer": "A scarlet thread",
+      "aliases": [
+        "scarlet thread",
+        "A thread of scarlet",
+        "Scarlet thread"
+      ],
+      "explanation": "The song compares her lips to a scarlet thread."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Song%20of%20Solomon%204%3A3&version=KJV"
+  },
+  {
+    "id": "hard-ot-182",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "seraphim-six-wings",
+    "reference": {
+      "book": 23,
+      "chapter": 6,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Combien d’ailes chacun des séraphins de la vision d’Ésaïe avait-il ?",
+      "answer": "Six",
+      "aliases": [
+        "6"
+      ],
+      "explanation": "Chaque séraphin avait six ailes."
+    },
+    "en": {
+      "question": "How many wings did each seraph in Isaiah’s vision have?",
+      "answer": "Six",
+      "aliases": [
+        "6"
+      ],
+      "explanation": "Each seraph had six wings."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Isaiah%206%3A2&version=KJV"
+  },
+  {
+    "id": "hard-ot-183",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "hired-razor-assyria-king",
+    "reference": {
+      "book": 23,
+      "chapter": 7,
+      "verse": 20
+    },
+    "fr": {
+      "question": "Quel roi est comparé à un rasoir loué au-delà du fleuve en Ésaïe 7 ?",
+      "answer": "Le roi d’Assyrie",
+      "aliases": [
+        "roi d’Assyrie",
+        "Le souverain d’Assyrie"
+      ],
+      "explanation": "L’image du rasoir représente le roi d’Assyrie."
+    },
+    "en": {
+      "question": "Which king is compared to a hired razor beyond the river in Isaiah 7?",
+      "answer": "The king of Assyria",
+      "aliases": [
+        "king of Assyria",
+        "Assyria’s king"
+      ],
+      "explanation": "The razor image represents the king of Assyria."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Isaiah%207%3A20&version=KJV"
+  },
+  {
+    "id": "hard-ot-184",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "precious-cornerstone-zion",
+    "reference": {
+      "book": 23,
+      "chapter": 28,
+      "verse": 16
+    },
+    "fr": {
+      "question": "Dans quel lieu Dieu dit-il poser une pierre éprouvée, une précieuse pierre angulaire, en Ésaïe 28 ?",
+      "answer": "Sion",
+      "aliases": [],
+      "explanation": "La pierre est annoncée comme posée en Sion."
+    },
+    "en": {
+      "question": "In which place does God say he lays a tested stone, a precious cornerstone, in Isaiah 28?",
+      "answer": "Zion",
+      "aliases": [],
+      "explanation": "The stone is announced as being laid in Zion."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Isaiah%2028%3A16&version=KJV"
+  },
+  {
+    "id": "hard-ot-185",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "hezekiah-shadow-ten-steps",
+    "reference": {
+      "book": 23,
+      "chapter": 38,
+      "verse": 8
+    },
+    "fr": {
+      "question": "De combien de degrés l’ombre devait-elle reculer sur le cadran d’Achaz comme signe pour Ézéchias ?",
+      "answer": "Dix",
+      "aliases": [
+        "10",
+        "Dix degrés",
+        "10 degrés"
+      ],
+      "explanation": "Le signe était un recul de dix degrés."
+    },
+    "en": {
+      "question": "By how many degrees was the shadow to go back on Ahaz’s sundial as a sign for Hezekiah?",
+      "answer": "Ten",
+      "aliases": [
+        "10",
+        "Ten degrees",
+        "10 degrees"
+      ],
+      "explanation": "The sign was a backward movement of ten degrees."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Isaiah%2038%3A8&version=KJV"
+  },
+  {
+    "id": "hard-ot-186",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "jeremiah-almond-branch",
+    "reference": {
+      "book": 24,
+      "chapter": 1,
+      "verse": 11
+    },
+    "fr": {
+      "question": "De quel arbre Jérémie vit-il une branche dans sa première vision rapportée au chapitre 1 ?",
+      "answer": "L’amandier",
+      "aliases": [
+        "amandier",
+        "Un amandier"
+      ],
+      "explanation": "Jérémie répondit qu’il voyait une branche d’amandier."
+    },
+    "en": {
+      "question": "From which tree did Jeremiah see a branch in his first recorded vision in chapter 1?",
+      "answer": "The almond tree",
+      "aliases": [
+        "almond tree",
+        "Almond"
+      ],
+      "explanation": "Jeremiah answered that he saw an almond branch."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jeremiah%201%3A11&version=KJV"
+  },
+  {
+    "id": "hard-ot-187",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "pashhur-puts-jeremiah-stocks",
+    "reference": {
+      "book": 24,
+      "chapter": 20,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Quel sacrificateur fit frapper Jérémie et le mit dans les ceps ?",
+      "answer": "Paschhur",
+      "aliases": [
+        "Pashur",
+        "Pashhur"
+      ],
+      "explanation": "Paschhur fit emprisonner Jérémie dans les ceps."
+    },
+    "en": {
+      "question": "Which priest had Jeremiah beaten and put in the stocks?",
+      "answer": "Pashhur",
+      "aliases": [
+        "Pashur"
+      ],
+      "explanation": "Pashhur had Jeremiah confined in the stocks."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jeremiah%2020%3A2&version=KJV"
+  },
+  {
+    "id": "hard-ot-188",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "babylon-exile-seventy-years",
+    "reference": {
+      "book": 24,
+      "chapter": 29,
+      "verse": 10
+    },
+    "fr": {
+      "question": "Après combien d’années pour Babylone Dieu promit-il de ramener les exilés selon Jérémie 29 ?",
+      "answer": "Soixante-dix",
+      "aliases": [
+        "70"
+      ],
+      "explanation": "La promesse mentionne une période de soixante-dix ans."
+    },
+    "en": {
+      "question": "After how many years for Babylon did God promise to bring the exiles back according to Jeremiah 29?",
+      "answer": "Seventy",
+      "aliases": [
+        "70"
+      ],
+      "explanation": "The promise mentions a period of seventy years."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jeremiah%2029%3A10&version=KJV"
+  },
+  {
+    "id": "hard-ot-189",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "rechabites-command-jonadab",
+    "reference": {
+      "book": 24,
+      "chapter": 35,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Quel ancêtre avait ordonné aux Récabites de ne pas boire de vin ?",
+      "answer": "Jonadab",
+      "aliases": [],
+      "explanation": "Ils invoquèrent l’ordre de Jonadab, fils de Récab."
+    },
+    "en": {
+      "question": "Which ancestor had ordered the Rechabites not to drink wine?",
+      "answer": "Jonadab",
+      "aliases": [],
+      "explanation": "They cited the command of Jonadab son of Rechab."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jeremiah%2035%3A6&version=KJV"
+  },
+  {
+    "id": "hard-ot-190",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "king-scroll-penknife",
+    "reference": {
+      "book": 24,
+      "chapter": 36,
+      "verse": 23
+    },
+    "fr": {
+      "question": "Avec quel outil le roi coupait-il le rouleau lu par Jehudi avant d’en jeter les morceaux au feu ?",
+      "answer": "Un canif",
+      "aliases": [
+        "canif",
+        "Le canif du secrétaire",
+        "Un couteau"
+      ],
+      "explanation": "Le roi découpait le rouleau avec un canif."
+    },
+    "en": {
+      "question": "With what tool did the king cut the scroll read by Jehudi before throwing the pieces into the fire?",
+      "answer": "A penknife",
+      "aliases": [
+        "penknife",
+        "A knife",
+        "Scribe’s knife"
+      ],
+      "explanation": "The king cut the scroll with a penknife."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jeremiah%2036%3A23&version=KJV"
+  },
+  {
+    "id": "hard-ot-191",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "jeremiah-rescue-old-rags",
+    "reference": {
+      "book": 24,
+      "chapter": 38,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Quels objets Ébed-Mélec fit-il descendre pour protéger Jérémie sous les cordes pendant son sauvetage ?",
+      "answer": "De vieux chiffons",
+      "aliases": [
+        "Des chiffons",
+        "De vieux haillons",
+        "Des lambeaux usés"
+      ],
+      "explanation": "Des chiffons usés servirent à protéger ses aisselles."
+    },
+    "en": {
+      "question": "What objects did Ebed-melech lower to protect Jeremiah under the ropes during his rescue?",
+      "answer": "Old rags",
+      "aliases": [
+        "Rags",
+        "Old clothes",
+        "Old cast clouts"
+      ],
+      "explanation": "Worn rags were used to protect his armpits."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jeremiah%2038%3A11&version=KJV"
+  },
+  {
+    "id": "hard-ot-192",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "ezekiel-jerusalem-brick",
+    "reference": {
+      "book": 26,
+      "chapter": 4,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Sur quel objet Ézéchiel devait-il dessiner Jérusalem pour représenter son siège ?",
+      "answer": "Une brique",
+      "aliases": [
+        "brique",
+        "Une tuile"
+      ],
+      "explanation": "Il devait représenter la ville sur une brique."
+    },
+    "en": {
+      "question": "On what object was Ezekiel to portray Jerusalem to represent its siege?",
+      "answer": "A brick",
+      "aliases": [
+        "brick",
+        "A tile",
+        "Tile"
+      ],
+      "explanation": "He was to portray the city on a brick."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ezekiel%204%3A1&version=KJV"
+  },
+  {
+    "id": "hard-ot-193",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "temple-women-tammuz",
+    "reference": {
+      "book": 26,
+      "chapter": 8,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Quel dieu des femmes pleuraient-elles à l’entrée du temple dans la vision d’Ézéchiel 8 ?",
+      "answer": "Thammuz",
+      "aliases": [
+        "Tammuz"
+      ],
+      "explanation": "Ézéchiel vit des femmes pleurant Thammuz."
+    },
+    "en": {
+      "question": "Which god were women mourning at the temple entrance in Ezekiel 8’s vision?",
+      "answer": "Tammuz",
+      "aliases": [
+        "Thammuz"
+      ],
+      "explanation": "Ezekiel saw women mourning Tammuz."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ezekiel%208%3A14&version=KJV"
+  },
+  {
+    "id": "hard-ot-194",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "ezekiel-great-eagle",
+    "reference": {
+      "book": 26,
+      "chapter": 17,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Quel grand oiseau aux longues ailes ouvre la parabole d’Ézéchiel 17 ?",
+      "answer": "Un aigle",
+      "aliases": [
+        "aigle"
+      ],
+      "explanation": "La parabole commence par un grand aigle."
+    },
+    "en": {
+      "question": "Which large bird with long wings opens the parable in Ezekiel 17?",
+      "answer": "An eagle",
+      "aliases": [
+        "eagle"
+      ],
+      "explanation": "The parable begins with a great eagle."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ezekiel%2017%3A3&version=KJV"
+  },
+  {
+    "id": "hard-ot-195",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "statue-belly-thighs-bronze",
+    "reference": {
+      "book": 27,
+      "chapter": 2,
+      "verse": 32
+    },
+    "fr": {
+      "question": "En quel métal étaient le ventre et les cuisses de la statue du rêve de Nebucadnetsar ?",
+      "answer": "L’airain",
+      "aliases": [
+        "airain",
+        "Le bronze",
+        "Du bronze"
+      ],
+      "explanation": "Cette partie de la statue était d’airain."
+    },
+    "en": {
+      "question": "Of what metal were the belly and thighs of the statue in Nebuchadnezzar’s dream?",
+      "answer": "Bronze",
+      "aliases": [
+        "Brass"
+      ],
+      "explanation": "This part of the statue was bronze."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Daniel%202%3A32&version=KJV"
+  },
+  {
+    "id": "hard-ot-196",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "goat-kingdom-greece",
+    "reference": {
+      "book": 27,
+      "chapter": 8,
+      "verse": 21
+    },
+    "fr": {
+      "question": "Quel royaume le bouc représente-t-il dans l’explication de la vision de Daniel 8 ?",
+      "answer": "La Grèce",
+      "aliases": [
+        "Grèce",
+        "Javan",
+        "Le roi de Javan",
+        "Le royaume grec"
+      ],
+      "explanation": "Le bouc est interprété comme le roi de Grèce."
+    },
+    "en": {
+      "question": "Which kingdom does the goat represent in the explanation of Daniel 8’s vision?",
+      "answer": "Greece",
+      "aliases": [
+        "Grecia",
+        "The king of Greece"
+      ],
+      "explanation": "The goat is interpreted as the king of Greece."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Daniel%208%3A21&version=KJV"
+  },
+  {
+    "id": "hard-ot-197",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "hosea-child-lo-ammi",
+    "reference": {
+      "book": 28,
+      "chapter": 1,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Quel nom signifiant que le peuple n’est plus celui de Dieu fut donné au fils de Gomer ?",
+      "answer": "Lo-Ammi",
+      "aliases": [
+        "Lo Ammi"
+      ],
+      "explanation": "Ce nom porte un message de rupture d’alliance."
+    },
+    "en": {
+      "question": "What name meaning that the people are no longer God’s people was given to Gomer’s son?",
+      "answer": "Lo-ammi",
+      "aliases": [
+        "Loammi"
+      ],
+      "explanation": "The name carries a message of broken covenant relationship."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Hosea%201%3A9&version=KJV"
+  },
+  {
+    "id": "hard-ot-198",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "jonah-plant-worm",
+    "reference": {
+      "book": 32,
+      "chapter": 4,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Quel petit animal Dieu fit-il intervenir pour frapper le ricin qui abritait Jonas ?",
+      "answer": "Un ver",
+      "aliases": [
+        "ver"
+      ],
+      "explanation": "Un ver attaqua la plante, qui sécha."
+    },
+    "en": {
+      "question": "What small creature did God appoint to attack the plant shading Jonah?",
+      "answer": "A worm",
+      "aliases": [
+        "worm"
+      ],
+      "explanation": "A worm attacked the plant, which withered."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jonah%204%3A7&version=KJV"
+  },
+  {
+    "id": "hard-ot-199",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "nahum-home-elkosh",
+    "reference": {
+      "book": 34,
+      "chapter": 1,
+      "verse": 1
+    },
+    "fr": {
+      "question": "De quel lieu le prophète Nahum est-il présenté comme originaire ?",
+      "answer": "Elkosch",
+      "aliases": [
+        "Elqosh",
+        "Elkosh"
+      ],
+      "explanation": "Le premier verset présente Nahum comme l’Elkoschien."
+    },
+    "en": {
+      "question": "From which place is the prophet Nahum described as coming?",
+      "answer": "Elkosh",
+      "aliases": [],
+      "explanation": "The opening verse identifies Nahum as the Elkoshite."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Nahum%201%3A1&version=KJV"
+  },
+  {
+    "id": "hard-ot-200",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "zechariah-scroll-twenty-cubits",
+    "reference": {
+      "book": 38,
+      "chapter": 5,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Quelle longueur, en coudées, avait le rouleau volant vu par Zacharie ?",
+      "answer": "Vingt",
+      "aliases": [
+        "20"
+      ],
+      "explanation": "Le rouleau mesurait vingt coudées de long."
+    },
+    "en": {
+      "question": "What length in cubits did the flying scroll seen by Zechariah have?",
+      "answer": "Twenty",
+      "aliases": [
+        "20"
+      ],
+      "explanation": "The scroll was twenty cubits long."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Zechariah%205%3A2&version=KJV"
+  },
+  {
+    "id": "hard-nt-151",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "thessalonian-letter-three-senders",
+    "reference": {
+      "book": 52,
+      "chapter": 1,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Quels deux collaborateurs sont nommés avec Paul au début de 1 Thessaloniciens ?",
+      "answer": "Silvain et Timothée",
+      "aliases": [
+        "Timothée et Silvain",
+        "Silas et Timothée"
+      ],
+      "explanation": "La salutation associe Paul, Silvain et Timothée."
+    },
+    "en": {
+      "question": "Which two co-workers are named with Paul at the beginning of 1 Thessalonians?",
+      "answer": "Silvanus and Timothy",
+      "aliases": [
+        "Timothy and Silvanus",
+        "Silas and Timothy",
+        "Silvanus and Timotheus"
+      ],
+      "explanation": "The greeting names Paul, Silvanus and Timothy together."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Thessalonians%201%3A1&version=KJV"
+  },
+  {
+    "id": "hard-nt-152",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "paul-gentle-nursing-mother",
+    "reference": {
+      "book": 52,
+      "chapter": 2,
+      "verse": 7
+    },
+    "fr": {
+      "question": "À quelle personne qui prend soin de ses enfants Paul compare-t-il sa douceur envers les Thessaloniciens ?",
+      "answer": "Une nourrice",
+      "aliases": [
+        "nourrice",
+        "Une mère",
+        "Une mère qui allaite"
+      ],
+      "explanation": "Paul emploie l’image d’une nourrice prenant soin de ses enfants."
+    },
+    "en": {
+      "question": "To which person caring for her children does Paul compare his gentleness toward the Thessalonians?",
+      "answer": "A nursing mother",
+      "aliases": [
+        "nursing mother",
+        "A nurse",
+        "Nurse",
+        "A mother"
+      ],
+      "explanation": "Paul uses the image of a nurse caring for her children."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Thessalonians%202%3A7&version=KJV"
+  },
+  {
+    "id": "hard-nt-153",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "lord-descent-archangel-voice",
+    "reference": {
+      "book": 52,
+      "chapter": 4,
+      "verse": 16
+    },
+    "fr": {
+      "question": "La voix de quel être céleste accompagne la descente du Seigneur en 1 Thessaloniciens 4 ?",
+      "answer": "Un archange",
+      "aliases": [
+        "archange"
+      ],
+      "explanation": "Paul mentionne une voix d’archange."
+    },
+    "en": {
+      "question": "The voice of what heavenly being accompanies the Lord’s descent in 1 Thessalonians 4?",
+      "answer": "An archangel",
+      "aliases": [
+        "archangel"
+      ],
+      "explanation": "Paul mentions the voice of an archangel."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Thessalonians%204%3A16&version=KJV"
+  },
+  {
+    "id": "hard-nt-154",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "man-lawlessness-son-perdition",
+    "reference": {
+      "book": 53,
+      "chapter": 2,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Quel titre de fils Paul associe-t-il à l’homme du péché en 2 Thessaloniciens 2 ?",
+      "answer": "Le fils de la perdition",
+      "aliases": [
+        "fils de la perdition",
+        "Fils de perdition"
+      ],
+      "explanation": "Le passage le désigne comme fils de la perdition."
+    },
+    "en": {
+      "question": "What title beginning with son does Paul associate with the man of sin in 2 Thessalonians 2?",
+      "answer": "The son of perdition",
+      "aliases": [
+        "son of perdition",
+        "Son of destruction"
+      ],
+      "explanation": "The passage calls him the son of perdition."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Thessalonians%202%3A3&version=KJV"
+  },
+  {
+    "id": "hard-nt-155",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "unwilling-work-not-eat",
+    "reference": {
+      "book": 53,
+      "chapter": 3,
+      "verse": 10
+    },
+    "fr": {
+      "question": "Que Paul dit-il de ne pas accorder à celui qui ne veut pas travailler ?",
+      "answer": "De la nourriture",
+      "aliases": [
+        "nourriture",
+        "À manger",
+        "Manger"
+      ],
+      "explanation": "L’instruction vise le refus volontaire de travailler."
+    },
+    "en": {
+      "question": "What does Paul say should not be given to someone unwilling to work?",
+      "answer": "Food",
+      "aliases": [
+        "Something to eat",
+        "Eating"
+      ],
+      "explanation": "The instruction addresses a deliberate unwillingness to work."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Thessalonians%203%3A10&version=KJV"
+  },
+  {
+    "id": "hard-nt-156",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "timothy-remain-ephesus",
+    "reference": {
+      "book": 54,
+      "chapter": 1,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Dans quelle ville Paul pria-t-il Timothée de rester pour corriger certains enseignements ?",
+      "answer": "Éphèse",
+      "aliases": [],
+      "explanation": "Timothée devait poursuivre sa mission à Éphèse."
+    },
+    "en": {
+      "question": "In which city did Paul urge Timothy to remain to correct certain teachings?",
+      "answer": "Ephesus",
+      "aliases": [],
+      "explanation": "Timothy was to continue his task in Ephesus."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Timothy%201%3A3&version=KJV"
+  },
+  {
+    "id": "hard-nt-157",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "hymenaeus-companion-alexander",
+    "reference": {
+      "book": 54,
+      "chapter": 1,
+      "verse": 20
+    },
+    "fr": {
+      "question": "Quel homme Paul nomme-t-il avec Hyménée comme livré à Satan pour apprendre à ne pas blasphémer ?",
+      "answer": "Alexandre",
+      "aliases": [],
+      "explanation": "Paul cite Hyménée et Alexandre."
+    },
+    "en": {
+      "question": "Whom does Paul name with Hymenaeus as handed over to Satan to learn not to blaspheme?",
+      "answer": "Alexander",
+      "aliases": [],
+      "explanation": "Paul names Hymenaeus and Alexander."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Timothy%201%3A20&version=KJV"
+  },
+  {
+    "id": "hard-nt-158",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "church-pillar-truth",
+    "reference": {
+      "book": 54,
+      "chapter": 3,
+      "verse": 15
+    },
+    "fr": {
+      "question": "De quoi l’Église est-elle appelée la colonne et l’appui en 1 Timothée 3 ?",
+      "answer": "La vérité",
+      "aliases": [
+        "vérité"
+      ],
+      "explanation": "Paul associe cette image au rôle de l’Église envers la vérité."
+    },
+    "en": {
+      "question": "Of what is the church called the pillar and support in 1 Timothy 3?",
+      "answer": "The truth",
+      "aliases": [
+        "truth"
+      ],
+      "explanation": "Paul links this image to the church’s role concerning truth."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Timothy%203%3A15&version=KJV"
+  },
+  {
+    "id": "hard-nt-159",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "timothy-reading-exhortation-teaching",
+    "reference": {
+      "book": 54,
+      "chapter": 4,
+      "verse": 13
+    },
+    "fr": {
+      "question": "À quelle activité liée aux textes Timothée doit-il s’appliquer avec l’exhortation et l’enseignement ?",
+      "answer": "La lecture",
+      "aliases": [
+        "lecture"
+      ],
+      "explanation": "Paul associe lecture, exhortation et enseignement."
+    },
+    "en": {
+      "question": "To what text-related activity should Timothy devote himself along with exhortation and teaching?",
+      "answer": "Reading",
+      "aliases": [],
+      "explanation": "Paul links reading, exhortation and teaching."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Timothy%204%3A13&version=KJV"
+  },
+  {
+    "id": "hard-nt-160",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "widow-register-sixty",
+    "reference": {
+      "book": 54,
+      "chapter": 5,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Quel âge minimum Paul indique-t-il pour inscrire une veuve sur la liste en 1 Timothée 5 ?",
+      "answer": "Soixante ans",
+      "aliases": [
+        "60",
+        "60 ans"
+      ],
+      "explanation": "La consigne fixe le seuil à soixante ans."
+    },
+    "en": {
+      "question": "What minimum age does Paul give for enrolling a widow in 1 Timothy 5?",
+      "answer": "Sixty years",
+      "aliases": [
+        "60",
+        "60 years"
+      ],
+      "explanation": "The instruction sets the threshold at sixty years."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Timothy%205%3A9&version=KJV"
+  },
+  {
+    "id": "hard-nt-161",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "rich-not-uncertain-wealth",
+    "reference": {
+      "book": 54,
+      "chapter": 6,
+      "verse": 17
+    },
+    "fr": {
+      "question": "En quoi les riches ne doivent-ils pas mettre leur espérance, selon 1 Timothée 6 ?",
+      "answer": "Des richesses incertaines",
+      "aliases": [
+        "richesses incertaines",
+        "La richesse",
+        "L’argent"
+      ],
+      "explanation": "Paul souligne l’incertitude de la richesse."
+    },
+    "en": {
+      "question": "In what must the rich not place their hope, according to 1 Timothy 6?",
+      "answer": "Uncertain riches",
+      "aliases": [
+        "Wealth",
+        "Riches"
+      ],
+      "explanation": "Paul emphasizes the uncertainty of wealth."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Timothy%206%3A17&version=KJV"
+  },
+  {
+    "id": "hard-nt-162",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "timothy-grandmother-lois",
+    "reference": {
+      "book": 55,
+      "chapter": 1,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Comment s’appelait la grand-mère de Timothée dont Paul loue la foi ?",
+      "answer": "Loïs",
+      "aliases": [],
+      "explanation": "Paul évoque la foi de Loïs."
+    },
+    "en": {
+      "question": "What was the name of Timothy’s grandmother whose faith Paul praises?",
+      "answer": "Lois",
+      "aliases": [],
+      "explanation": "Paul recalls Lois’s faith."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Timothy%201%3A5&version=KJV"
+  },
+  {
+    "id": "hard-nt-163",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "farmer-first-share-crops",
+    "reference": {
+      "book": 55,
+      "chapter": 2,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Quel travailleur Paul prend-il comme exemple de l’effort nécessaire avant de recueillir les fruits en 2 Timothée 2 ?",
+      "answer": "Le laboureur",
+      "aliases": [
+        "laboureur",
+        "Un cultivateur",
+        "Un agriculteur"
+      ],
+      "explanation": "Paul prend l’exemple du laboureur qui peine."
+    },
+    "en": {
+      "question": "Which worker does Paul use as an example of labouring before receiving the crops in 2 Timothy 2?",
+      "answer": "The hardworking farmer",
+      "aliases": [
+        "hardworking farmer",
+        "Farmer",
+        "Husbandman",
+        "The husbandman"
+      ],
+      "explanation": "Paul uses the example of the farmer who labours."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Timothy%202%3A6&version=KJV"
+  },
+  {
+    "id": "hard-nt-164",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "great-house-vessels-wood-clay",
+    "reference": {
+      "book": 55,
+      "chapter": 2,
+      "verse": 20
+    },
+    "fr": {
+      "question": "Outre l’or et l’argent, quels deux matériaux Paul nomme-t-il pour les vases d’une grande maison ?",
+      "answer": "Le bois et la terre",
+      "aliases": [
+        "bois et la terre",
+        "Le bois et l’argile"
+      ],
+      "explanation": "La maison contient aussi des récipients de bois et de terre."
+    },
+    "en": {
+      "question": "Besides gold and silver, what two materials does Paul name for vessels in a great house?",
+      "answer": "Wood and clay",
+      "aliases": [
+        "Wood and earth"
+      ],
+      "explanation": "The house also contains vessels of wood and clay."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Timothy%202%3A20&version=KJV"
+  },
+  {
+    "id": "hard-nt-165",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "moses-opponents-jannes-jambres",
+    "reference": {
+      "book": 55,
+      "chapter": 3,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Quels deux hommes sont nommés comme adversaires de Moïse en 2 Timothée 3 ?",
+      "answer": "Jannès et Jambrès",
+      "aliases": [
+        "Jambrès et Jannès"
+      ],
+      "explanation": "Paul cite Jannès et Jambrès comme exemples d’opposition."
+    },
+    "en": {
+      "question": "Which two men are named as opponents of Moses in 2 Timothy 3?",
+      "answer": "Jannes and Jambres",
+      "aliases": [
+        "Jambres and Jannes"
+      ],
+      "explanation": "Paul cites Jannes and Jambres as examples of opposition."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Timothy%203%3A8&version=KJV"
+  },
+  {
+    "id": "hard-nt-166",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "demas-destination-thessalonica",
+    "reference": {
+      "book": 55,
+      "chapter": 4,
+      "verse": 10
+    },
+    "fr": {
+      "question": "Dans quelle ville Démas partit-il après avoir abandonné Paul ?",
+      "answer": "Thessalonique",
+      "aliases": [],
+      "explanation": "Paul rapporte le départ de Démas pour Thessalonique."
+    },
+    "en": {
+      "question": "To which city did Demas go after abandoning Paul?",
+      "answer": "Thessalonica",
+      "aliases": [],
+      "explanation": "Paul reports Demas’s departure for Thessalonica."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Timothy%204%3A10&version=KJV"
+  },
+  {
+    "id": "hard-nt-167",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "paul-only-luke-present",
+    "reference": {
+      "book": 55,
+      "chapter": 4,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Quel compagnon Paul dit-il avoir seul avec lui en 2 Timothée 4:11 ?",
+      "answer": "Luc",
+      "aliases": [],
+      "explanation": "Paul constate que Luc seul est avec lui."
+    },
+    "en": {
+      "question": "Which companion does Paul say is alone with him in 2 Timothy 4:11?",
+      "answer": "Luke",
+      "aliases": [],
+      "explanation": "Paul states that only Luke is with him."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Timothy%204%3A11&version=KJV"
+  },
+  {
+    "id": "hard-nt-168",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "titus-left-crete",
+    "reference": {
+      "book": 56,
+      "chapter": 1,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Sur quelle île Paul laissa-t-il Tite pour organiser les Églises et établir des anciens ?",
+      "answer": "La Crète",
+      "aliases": [
+        "Crète"
+      ],
+      "explanation": "Tite devait poursuivre ce travail en Crète."
+    },
+    "en": {
+      "question": "On which island did Paul leave Titus to organize the churches and appoint elders?",
+      "answer": "Crete",
+      "aliases": [],
+      "explanation": "Titus was to continue this work in Crete."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Titus%201%3A5&version=KJV"
+  },
+  {
+    "id": "hard-nt-169",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "paul-winter-nicopolis",
+    "reference": {
+      "book": 56,
+      "chapter": 3,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Dans quelle ville Paul avait-il décidé de passer l’hiver et demandait-il à Tite de le rejoindre ?",
+      "answer": "Nicopolis",
+      "aliases": [],
+      "explanation": "Paul donna rendez-vous à Tite à Nicopolis."
+    },
+    "en": {
+      "question": "In which city had Paul decided to winter and asked Titus to join him?",
+      "answer": "Nicopolis",
+      "aliases": [],
+      "explanation": "Paul asked Titus to meet him in Nicopolis."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Titus%203%3A12&version=KJV"
+  },
+  {
+    "id": "hard-nt-170",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "philemon-paul-child-onesimus",
+    "reference": {
+      "book": 57,
+      "chapter": 1,
+      "verse": 10
+    },
+    "fr": {
+      "question": "Quel homme Paul appelle-t-il son enfant engendré dans les chaînes en écrivant à Philémon ?",
+      "answer": "Onésime",
+      "aliases": [],
+      "explanation": "Paul intercède pour Onésime."
+    },
+    "en": {
+      "question": "Whom does Paul call his child begotten in imprisonment when writing to Philemon?",
+      "answer": "Onesimus",
+      "aliases": [],
+      "explanation": "Paul intercedes for Onesimus."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Philemon%201%3A10&version=KJV"
+  },
+  {
+    "id": "hard-nt-171",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "paul-repay-onesimus-debt",
+    "reference": {
+      "book": 57,
+      "chapter": 1,
+      "verse": 19
+    },
+    "fr": {
+      "question": "Que Paul promet-il de faire personnellement si Onésime doit quelque chose à Philémon ?",
+      "answer": "Rembourser",
+      "aliases": [
+        "Payer la dette",
+        "Régler la dette"
+      ],
+      "explanation": "Paul s’engage lui-même à rembourser la dette."
+    },
+    "en": {
+      "question": "What does Paul personally promise to do if Onesimus owes Philemon anything?",
+      "answer": "Repay it",
+      "aliases": [
+        "Pay it",
+        "Pay the debt",
+        "Repay"
+      ],
+      "explanation": "Paul personally undertakes to repay the debt."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Philemon%201%3A19&version=KJV"
+  },
+  {
+    "id": "hard-nt-172",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "hebrews-drift-warning",
+    "reference": {
+      "book": 58,
+      "chapter": 2,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Quel danger lié au fait de s’éloigner Hébreux 2 oppose-t-il à l’attention au message entendu ?",
+      "answer": "Être emportés à la dérive",
+      "aliases": [
+        "S’éloigner du message",
+        "Les laisser échapper"
+      ],
+      "explanation": "L’exhortation demande de rester attaché au message."
+    },
+    "en": {
+      "question": "What danger of moving away does Hebrews 2 contrast with paying attention to what was heard?",
+      "answer": "Drifting away",
+      "aliases": [
+        "Letting them slip",
+        "Let them slip",
+        "Drift away"
+      ],
+      "explanation": "The exhortation calls for holding to the message."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Hebrews%202%3A1&version=KJV"
+  },
+  {
+    "id": "hard-nt-173",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "milk-infant-unskilled-righteousness",
+    "reference": {
+      "book": 58,
+      "chapter": 5,
+      "verse": 13
+    },
+    "fr": {
+      "question": "À quelle étape de la vie Hébreux compare-t-il celui qui ne se nourrit que de lait ?",
+      "answer": "Un enfant",
+      "aliases": [
+        "enfant",
+        "Un bébé",
+        "Un nourrisson"
+      ],
+      "explanation": "L’image du lait désigne une immaturité spirituelle."
+    },
+    "en": {
+      "question": "To what stage of life does Hebrews compare someone who feeds only on milk?",
+      "answer": "An infant",
+      "aliases": [
+        "infant",
+        "A babe",
+        "A baby",
+        "Child"
+      ],
+      "explanation": "The milk image describes spiritual immaturity."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Hebrews%205%3A13&version=KJV"
+  },
+  {
+    "id": "hard-nt-174",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "jesus-priest-order-melchizedek",
+    "reference": {
+      "book": 58,
+      "chapter": 6,
+      "verse": 20
+    },
+    "fr": {
+      "question": "Selon l’ordre de quel personnage Jésus est-il dit souverain sacrificateur pour toujours en Hébreux 6 ?",
+      "answer": "Melchisédek",
+      "aliases": [
+        "Melchisédec",
+        "Melchitsédek"
+      ],
+      "explanation": "Le passage associe ce sacerdoce à l’ordre de Melchisédek."
+    },
+    "en": {
+      "question": "After whose order is Jesus said to be a high priest forever in Hebrews 6?",
+      "answer": "Melchizedek",
+      "aliases": [
+        "Melchisedec"
+      ],
+      "explanation": "The passage associates this priesthood with the order of Melchizedek."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Hebrews%206%3A20&version=KJV"
+  },
+  {
+    "id": "hard-nt-175",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "high-priest-once-year-inner-room",
+    "reference": {
+      "book": 58,
+      "chapter": 9,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Combien de fois par an le souverain sacrificateur entrait-il seul dans le second tabernacle, selon Hébreux 9 ?",
+      "answer": "Une fois",
+      "aliases": [
+        "fois",
+        "1",
+        "Une fois par an",
+        "1 fois"
+      ],
+      "explanation": "Le texte évoque une entrée annuelle avec du sang."
+    },
+    "en": {
+      "question": "How many times a year did the high priest enter the second tabernacle alone, according to Hebrews 9?",
+      "answer": "Once",
+      "aliases": [
+        "1",
+        "Once a year",
+        "One time"
+      ],
+      "explanation": "The text describes an annual entrance with blood."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Hebrews%209%3A7&version=KJV"
+  },
+  {
+    "id": "hard-nt-176",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "faith-women-received-dead-resurrection",
+    "reference": {
+      "book": 58,
+      "chapter": 11,
+      "verse": 35
+    },
+    "fr": {
+      "question": "Qui Hébreux 11:35 mentionne-t-il comme ayant retrouvé ses morts par la résurrection ?",
+      "answer": "Des femmes",
+      "aliases": [
+        "femmes"
+      ],
+      "explanation": "Le passage évoque des femmes recevant leurs morts vivants."
+    },
+    "en": {
+      "question": "Whom does Hebrews 11:35 mention as having received their dead back through resurrection?",
+      "answer": "Women",
+      "aliases": [],
+      "explanation": "The passage mentions women receiving their dead back alive."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Hebrews%2011%3A35&version=KJV"
+  },
+  {
+    "id": "hard-nt-177",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "profane-esau-birthright",
+    "reference": {
+      "book": 58,
+      "chapter": 12,
+      "verse": 16
+    },
+    "fr": {
+      "question": "Quel homme Hébreux 12 cite-t-il comme ayant vendu son droit d’aînesse pour un repas ?",
+      "answer": "Ésaü",
+      "aliases": [],
+      "explanation": "Ésaü sert d’exemple dans l’avertissement."
+    },
+    "en": {
+      "question": "Whom does Hebrews 12 cite as having sold his birthright for one meal?",
+      "answer": "Esau",
+      "aliases": [],
+      "explanation": "Esau serves as an example in the warning."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Hebrews%2012%3A16&version=KJV"
+  },
+  {
+    "id": "hard-nt-178",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "hospitality-angels-unaware",
+    "reference": {
+      "book": 58,
+      "chapter": 13,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Quels êtres certains ont-ils accueillis sans le savoir en pratiquant l’hospitalité ?",
+      "answer": "Des anges",
+      "aliases": [
+        "anges"
+      ],
+      "explanation": "Hébreux rappelle cet exemple pour encourager l’hospitalité."
+    },
+    "en": {
+      "question": "What beings have some people unknowingly welcomed by practising hospitality?",
+      "answer": "Angels",
+      "aliases": [],
+      "explanation": "Hebrews recalls this example to encourage hospitality."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Hebrews%2013%3A2&version=KJV"
+  },
+  {
+    "id": "hard-nt-179",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "doubter-wave-sea",
+    "reference": {
+      "book": 59,
+      "chapter": 1,
+      "verse": 6
+    },
+    "fr": {
+      "question": "À quel mouvement de la mer Jacques compare-t-il celui qui doute en demandant la sagesse ?",
+      "answer": "Un flot agité par le vent",
+      "aliases": [
+        "flot agité par le vent",
+        "Une vague",
+        "Une vague agitée par le vent"
+      ],
+      "explanation": "L’image est celle d’une vague poussée par le vent."
+    },
+    "en": {
+      "question": "To what movement of the sea does James compare someone doubting while asking for wisdom?",
+      "answer": "A wave driven by the wind",
+      "aliases": [
+        "wave driven by the wind",
+        "A wave",
+        "A wind-tossed wave"
+      ],
+      "explanation": "The image is of a wave driven by the wind."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=James%201%3A6&version=KJV"
+  },
+  {
+    "id": "hard-nt-180",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "rahab-messengers-other-way",
+    "reference": {
+      "book": 59,
+      "chapter": 2,
+      "verse": 25
+    },
+    "fr": {
+      "question": "Que Rahab fit-elle pour le départ des messagers après les avoir accueillis, selon Jacques 2 ?",
+      "answer": "Elle les fit partir par un autre chemin",
+      "aliases": [
+        "Par un autre chemin",
+        "Les renvoyer par un autre chemin"
+      ],
+      "explanation": "Jacques souligne qu’elle les renvoya par un autre chemin."
+    },
+    "en": {
+      "question": "What did Rahab do about the messengers’ departure after receiving them, according to James 2?",
+      "answer": "Sent them out another way",
+      "aliases": [
+        "By another route",
+        "Sent them another way"
+      ],
+      "explanation": "James emphasizes that she sent them out by another route."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=James%202%3A25&version=KJV"
+  },
+  {
+    "id": "hard-nt-181",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "fig-tree-cannot-olives",
+    "reference": {
+      "book": 59,
+      "chapter": 3,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Quel fruit Jacques demande-t-il si un figuier peut produire ?",
+      "answer": "Des olives",
+      "aliases": [
+        "olives"
+      ],
+      "explanation": "La question souligne la cohérence entre un arbre et son fruit."
+    },
+    "en": {
+      "question": "What fruit does James ask whether a fig tree can produce?",
+      "answer": "Olives",
+      "aliases": [],
+      "explanation": "The question highlights consistency between a tree and its fruit."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=James%203%3A12&version=KJV"
+  },
+  {
+    "id": "hard-nt-182",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "life-vapor",
+    "reference": {
+      "book": 59,
+      "chapter": 4,
+      "verse": 14
+    },
+    "fr": {
+      "question": "À quel phénomène bref Jacques compare-t-il la vie qui apparaît puis disparaît ?",
+      "answer": "Une vapeur",
+      "aliases": [
+        "vapeur",
+        "De la vapeur",
+        "Une brume"
+      ],
+      "explanation": "L’image rappelle le caractère passager de la vie."
+    },
+    "en": {
+      "question": "To what brief phenomenon does James compare life that appears and then disappears?",
+      "answer": "A vapour",
+      "aliases": [
+        "vapour",
+        "Mist",
+        "A mist",
+        "Vapor"
+      ],
+      "explanation": "The image recalls life’s transient nature."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=James%204%3A14&version=KJV"
+  },
+  {
+    "id": "hard-nt-183",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "faith-tested-gold",
+    "reference": {
+      "book": 60,
+      "chapter": 1,
+      "verse": 7
+    },
+    "fr": {
+      "question": "À quel métal périssable éprouvé par le feu Pierre compare-t-il la valeur supérieure de la foi éprouvée ?",
+      "answer": "L’or",
+      "aliases": [
+        "or"
+      ],
+      "explanation": "La foi éprouvée est présentée comme plus précieuse que l’or."
+    },
+    "en": {
+      "question": "To what perishable metal tested by fire does Peter compare the greater value of tested faith?",
+      "answer": "Gold",
+      "aliases": [],
+      "explanation": "Tested faith is presented as more precious than gold."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Peter%201%3A7&version=KJV"
+  },
+  {
+    "id": "hard-nt-184",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "believers-living-stones",
+    "reference": {
+      "book": 60,
+      "chapter": 2,
+      "verse": 5
+    },
+    "fr": {
+      "question": "À quels matériaux vivants Pierre compare-t-il les croyants édifiés en maison spirituelle ?",
+      "answer": "Des pierres vivantes",
+      "aliases": [
+        "pierres vivantes",
+        "Pierres vivantes"
+      ],
+      "explanation": "Les croyants sont comparés à des pierres vivantes."
+    },
+    "en": {
+      "question": "To what living building materials does Peter compare believers built into a spiritual house?",
+      "answer": "Living stones",
+      "aliases": [
+        "Lively stones"
+      ],
+      "explanation": "Believers are compared to living stones."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Peter%202%3A5&version=KJV"
+  },
+  {
+    "id": "hard-nt-185",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "sarah-obedience-abraham-lord",
+    "reference": {
+      "book": 60,
+      "chapter": 3,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Quel titre Sara donnait-elle à Abraham, dans l’exemple rappelé par Pierre ?",
+      "answer": "Seigneur",
+      "aliases": [],
+      "explanation": "Pierre rappelle qu’elle l’appelait seigneur."
+    },
+    "en": {
+      "question": "What title did Sarah give Abraham in the example recalled by Peter?",
+      "answer": "Lord",
+      "aliases": [],
+      "explanation": "Peter recalls that she called him lord."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Peter%203%3A6&version=KJV"
+  },
+  {
+    "id": "hard-nt-186",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "stewards-varied-grace",
+    "reference": {
+      "book": 60,
+      "chapter": 4,
+      "verse": 10
+    },
+    "fr": {
+      "question": "De quoi les croyants doivent-ils être de bons dispensateurs en utilisant leurs dons, selon 1 Pierre 4 ?",
+      "answer": "La grâce de Dieu",
+      "aliases": [
+        "grâce de Dieu",
+        "Les diverses grâces de Dieu"
+      ],
+      "explanation": "Les dons servent à administrer la grâce diverse de Dieu."
+    },
+    "en": {
+      "question": "Of what should believers be good stewards when using their gifts, according to 1 Peter 4?",
+      "answer": "God’s grace",
+      "aliases": [
+        "The manifold grace of God",
+        "Grace"
+      ],
+      "explanation": "Gifts serve to administer God’s varied grace."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Peter%204%3A10&version=KJV"
+  },
+  {
+    "id": "hard-nt-187",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "transfiguration-voice-majestic-glory",
+    "reference": {
+      "book": 61,
+      "chapter": 1,
+      "verse": 17
+    },
+    "fr": {
+      "question": "De quelle gloire vint la voix honorant Jésus dans le souvenir de la transfiguration en 2 Pierre ?",
+      "answer": "La gloire magnifique",
+      "aliases": [
+        "gloire magnifique",
+        "La gloire majestueuse",
+        "Dieu le Père"
+      ],
+      "explanation": "Pierre évoque une voix venue de la gloire magnifique."
+    },
+    "en": {
+      "question": "From what glory came the voice honouring Jesus in 2 Peter’s recollection of the transfiguration?",
+      "answer": "The excellent glory",
+      "aliases": [
+        "excellent glory",
+        "The majestic glory",
+        "God the Father"
+      ],
+      "explanation": "Peter recalls a voice from the excellent glory."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Peter%201%3A17&version=KJV"
+  },
+  {
+    "id": "hard-nt-188",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "noah-preacher-righteousness",
+    "reference": {
+      "book": 61,
+      "chapter": 2,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Quel patriarche est appelé prédicateur de la justice en 2 Pierre 2 ?",
+      "answer": "Noé",
+      "aliases": [],
+      "explanation": "Le texte applique ce titre à Noé."
+    },
+    "en": {
+      "question": "Which patriarch is called a preacher of righteousness in 2 Peter 2?",
+      "answer": "Noah",
+      "aliases": [],
+      "explanation": "The text applies this title to Noah."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Peter%202%3A5&version=KJV"
+  },
+  {
+    "id": "hard-nt-189",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "lord-day-thousand-years",
+    "reference": {
+      "book": 61,
+      "chapter": 3,
+      "verse": 8
+    },
+    "fr": {
+      "question": "À combien d’années un jour est-il comparé devant le Seigneur en 2 Pierre 3 ?",
+      "answer": "Mille",
+      "aliases": [
+        "1000"
+      ],
+      "explanation": "L’image oppose un jour et mille ans."
+    },
+    "en": {
+      "question": "To how many years is one day compared with the Lord in 2 Peter 3?",
+      "answer": "A thousand",
+      "aliases": [
+        "thousand",
+        "1000"
+      ],
+      "explanation": "The image contrasts one day and a thousand years."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Peter%203%3A8&version=KJV"
+  },
+  {
+    "id": "hard-nt-190",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "advocate-father-jesus",
+    "reference": {
+      "book": 62,
+      "chapter": 2,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Qui est présenté comme avocat auprès du Père pour les croyants en 1 Jean 2 ?",
+      "answer": "Jésus-Christ",
+      "aliases": [
+        "Jésus",
+        "Le Christ"
+      ],
+      "explanation": "Le texte nomme Jésus-Christ le juste."
+    },
+    "en": {
+      "question": "Who is presented as the believers’ advocate with the Father in 1 John 2?",
+      "answer": "Jesus Christ",
+      "aliases": [
+        "Jesus",
+        "Christ"
+      ],
+      "explanation": "The text names Jesus Christ the righteous."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20John%202%3A1&version=KJV"
+  },
+  {
+    "id": "hard-nt-191",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "cain-works-evil-brother-righteous",
+    "reference": {
+      "book": 62,
+      "chapter": 3,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Pourquoi Caïn tua-t-il son frère, selon l’explication de 1 Jean 3 ?",
+      "answer": "Ses œuvres étaient mauvaises et celles de son frère justes",
+      "aliases": [
+        "Ses œuvres étaient mauvaises et celles d’Abel justes"
+      ],
+      "explanation": "Jean oppose les œuvres des deux frères."
+    },
+    "en": {
+      "question": "Why did Cain kill his brother, according to the explanation in 1 John 3?",
+      "answer": "His works were evil and his brother’s righteous",
+      "aliases": [
+        "His deeds were evil and Abel’s righteous"
+      ],
+      "explanation": "John contrasts the works of the two brothers."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20John%203%3A12&version=KJV"
+  },
+  {
+    "id": "hard-nt-192",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "perfect-love-casts-fear",
+    "reference": {
+      "book": 62,
+      "chapter": 4,
+      "verse": 18
+    },
+    "fr": {
+      "question": "Que l’amour parfait chasse-t-il selon 1 Jean 4 ?",
+      "answer": "La crainte",
+      "aliases": [
+        "crainte",
+        "La peur"
+      ],
+      "explanation": "Le passage oppose l’amour accompli à la crainte."
+    },
+    "en": {
+      "question": "What does perfect love cast out according to 1 John 4?",
+      "answer": "Fear",
+      "aliases": [
+        "Dread"
+      ],
+      "explanation": "The passage contrasts perfected love with fear."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20John%204%3A18&version=KJV"
+  },
+  {
+    "id": "hard-nt-193",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "demetrius-good-testimony",
+    "reference": {
+      "book": 64,
+      "chapter": 1,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Quel homme reçoit un bon témoignage de tous et de la vérité elle-même en 3 Jean ?",
+      "answer": "Démétrius",
+      "aliases": [],
+      "explanation": "La lettre recommande Démétrius par ce témoignage."
+    },
+    "en": {
+      "question": "Which man has a good testimony from everyone and from the truth itself in 3 John?",
+      "answer": "Demetrius",
+      "aliases": [],
+      "explanation": "The letter commends Demetrius through this testimony."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=3%20John%201%3A12&version=KJV"
+  },
+  {
+    "id": "hard-nt-194",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "michael-dispute-moses-body",
+    "reference": {
+      "book": 65,
+      "chapter": 1,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Au sujet du corps de quel homme Michel contestait-il avec le diable, selon Jude ?",
+      "answer": "Moïse",
+      "aliases": [],
+      "explanation": "Jude évoque une contestation au sujet du corps de Moïse."
+    },
+    "en": {
+      "question": "Over whose body was Michael disputing with the devil, according to Jude?",
+      "answer": "Moses",
+      "aliases": [],
+      "explanation": "Jude mentions a dispute over Moses’s body."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jude%201%3A9&version=KJV"
+  },
+  {
+    "id": "hard-nt-195",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "enoch-seventh-adam",
+    "reference": {
+      "book": 65,
+      "chapter": 1,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Quel homme est appelé le septième depuis Adam en Jude ?",
+      "answer": "Hénoc",
+      "aliases": [
+        "Énoch",
+        "Enoch"
+      ],
+      "explanation": "Jude présente Hénoc avec cette précision généalogique."
+    },
+    "en": {
+      "question": "Which man is called the seventh from Adam in Jude?",
+      "answer": "Enoch",
+      "aliases": [
+        "Henoch"
+      ],
+      "explanation": "Jude introduces Enoch with this genealogical description."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jude%201%3A14&version=KJV"
+  },
+  {
+    "id": "hard-nt-196",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "son-man-golden-girdle",
+    "reference": {
+      "book": 66,
+      "chapter": 1,
+      "verse": 13
+    },
+    "fr": {
+      "question": "De quel métal est la ceinture portée sur la poitrine par le personnage semblable à un fils d’homme en Apocalypse 1 ?",
+      "answer": "L’or",
+      "aliases": [
+        "or"
+      ],
+      "explanation": "La vision décrit une ceinture d’or."
+    },
+    "en": {
+      "question": "Of what metal is the belt around the chest of the figure like a son of man in Revelation 1?",
+      "answer": "Gold",
+      "aliases": [],
+      "explanation": "The vision describes a golden belt."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Revelation%201%3A13&version=KJV"
+  },
+  {
+    "id": "hard-nt-197",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "pergamum-white-stone",
+    "reference": {
+      "book": 66,
+      "chapter": 2,
+      "verse": 17
+    },
+    "fr": {
+      "question": "Quel petit objet blanc portant un nom nouveau est promis au vainqueur de Pergame ?",
+      "answer": "Un caillou",
+      "aliases": [
+        "caillou",
+        "Une pierre blanche",
+        "Un caillou blanc"
+      ],
+      "explanation": "La promesse mentionne un caillou blanc."
+    },
+    "en": {
+      "question": "What small white object bearing a new name is promised to the overcomer in Pergamum?",
+      "answer": "A stone",
+      "aliases": [
+        "stone",
+        "A white stone",
+        "White stone"
+      ],
+      "explanation": "The promise mentions a white stone."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Revelation%202%3A17&version=KJV"
+  },
+  {
+    "id": "hard-nt-198",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "laodicea-eye-salve",
+    "reference": {
+      "book": 66,
+      "chapter": 3,
+      "verse": 18
+    },
+    "fr": {
+      "question": "Quel remède pour les yeux est conseillé à Laodicée afin de voir ?",
+      "answer": "Un collyre",
+      "aliases": [
+        "collyre",
+        "Du collyre",
+        "Un remède pour les yeux"
+      ],
+      "explanation": "La lettre conseille un collyre pour les yeux."
+    },
+    "en": {
+      "question": "What eye remedy is advised for Laodicea so that it may see?",
+      "answer": "Eye salve",
+      "aliases": [
+        "Eyesalve",
+        "Salve"
+      ],
+      "explanation": "The letter advises salve for the eyes."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Revelation%203%3A18&version=KJV"
+  },
+  {
+    "id": "hard-nt-199",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "golden-bowls-incense-prayers",
+    "reference": {
+      "book": 66,
+      "chapter": 5,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Que représentent les parfums contenus dans les coupes d’or en Apocalypse 5 ?",
+      "answer": "Les prières des saints",
+      "aliases": [
+        "prières des saints",
+        "Les prières des croyants"
+      ],
+      "explanation": "La vision interprète les parfums comme les prières des saints."
+    },
+    "en": {
+      "question": "What does the incense in the golden bowls represent in Revelation 5?",
+      "answer": "The prayers of the saints",
+      "aliases": [
+        "prayers of the saints",
+        "Prayers",
+        "Saints’ prayers"
+      ],
+      "explanation": "The vision interprets the incense as the saints’ prayers."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Revelation%205%3A8&version=KJV"
+  },
+  {
+    "id": "hard-nt-200",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "multitude-palms-hands",
+    "reference": {
+      "book": 66,
+      "chapter": 7,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Quelles branches la grande foule vêtue de blanc tient-elle devant le trône ?",
+      "answer": "Des palmes",
+      "aliases": [
+        "palmes",
+        "Des branches de palmier"
+      ],
+      "explanation": "La foule porte des palmes à la main."
+    },
+    "en": {
+      "question": "What branches does the white-robed multitude hold before the throne?",
+      "answer": "Palm branches",
+      "aliases": [
+        "Palms"
+      ],
+      "explanation": "The multitude holds palm branches."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Revelation%207%3A9&version=KJV"
+  }
+]

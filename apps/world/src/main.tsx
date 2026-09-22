@@ -1,3 +1,4 @@
+import { currentActivity } from './avatar-activity'
 import { ReactionPicker } from './ReactionPicker'
 import { WorldLoading } from './WorldLoading'
 import { StoryDialog } from './StoryDialog'
@@ -334,6 +335,7 @@ function App() {
   }, [])
 
   useEffect(() => {
+    controls.current.activity = currentActivity({ ready, menuOpen, profileOpen, opened, storyOpen, guestbookOpen, gamesOpen })
     controls.current.avatar = profile.avatar
     controls.current.avatarColor = profile.color
     controls.current.avatarName = profile.name
@@ -554,22 +556,34 @@ function App() {
           )}
         </div>
       </aside>
-      {ready &&
-        !editorMode &&
-        !editing &&
-        !menuOpen &&
-        !profileOpen &&
-        !opened &&
-        !guestbookOpen &&
-        !storyOpen &&
-        !gamesOpen && (
-          <ReactionPicker
+      <div className="world-action-stack">
+        {ready &&
+          !editorMode &&
+          !editing &&
+          !menuOpen &&
+          !profileOpen &&
+          !opened &&
+          !guestbookOpen &&
+          !storyOpen &&
+          !gamesOpen && (
+            <ReactionPicker
+              network={controls.current.network}
+              color={profile.color}
+              language={language}
+              online={state.multiplayer?.state === 'online'}
+            />
+          )}
+        {ready && !editorMode && controls.current.network && (
+          <BibleGames
             network={controls.current.network}
-            color={profile.color}
             language={language}
-            online={state.multiplayer?.state === 'online'}
+            open={gamesOpen}
+            onOpen={() => setGamesOpen(true)}
+            onClose={() => setGamesOpen(false)}
+            disabled={menuOpen || profileOpen || !!opened || guestbookOpen || storyOpen}
           />
         )}
+      </div>
       <footer className="world-footer">
         {initial.error && <span title={t.draftError}>{t.draftError}</span>}
         {import.meta.env.DEV && (
@@ -689,16 +703,6 @@ function App() {
             setOnboarding(false)
             setProfileOpen(false)
           }}
-        />
-      )}
-      {ready && !editorMode && controls.current.network && (
-        <BibleGames
-          network={controls.current.network}
-          language={language}
-          open={gamesOpen}
-          onOpen={() => setGamesOpen(true)}
-          onClose={() => setGamesOpen(false)}
-          disabled={menuOpen || profileOpen || !!opened || guestbookOpen || storyOpen}
         />
       )}
       {storyOpen && (

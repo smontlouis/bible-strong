@@ -115,3 +115,85 @@
     animation: none !important;
   }
 }
+
+.solo-live-feedback {
+  min-height: 32px;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+.solo-live-feedback span {
+  display: inline-block;
+  color: var(--bs-blue-dark);
+  animation: solo-star 0.25s ease-out;
+}
+.solo-live-feedback [data-status='wrong'] {
+  color: var(--bs-red);
+}
+.solo-review {
+  padding-bottom: 20px;
+}
+.solo-review h2 {
+  margin-bottom: 16px;
+  font-size: 22px;
+}
+.solo-review ol {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.solo-review-item {
+  background: var(--bs-card);
+  border: 1px solid var(--bs-line);
+  border-radius: var(--bs-radius);
+  overflow: hidden;
+}
+.solo-review-item summary {
+  padding: 16px;
+  cursor: pointer;
+}
+.solo-review-item summary strong {
+  display: block;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+.solo-review-status {
+  font-weight: 700;
+  color: var(--bs-blue-dark);
+}
+.solo-review-item[data-status='wrong'] .solo-review-status {
+  color: var(--bs-red);
+}
+.solo-review-detail {
+  display: grid;
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+.solo-review-detail p {
+  margin: 0;
+}
+.solo-review-detail a {
+  color: var(--bs-blue-dark);
+}
+@media (prefers-reduced-motion: reduce) {
+  .solo-live-feedback span {
+    animation: none;
+  }
+}
+
+.solo-result {
+  padding: 18px 0;
+  gap: 8px;
+}
+.solo-result h2,
+.solo-result p {
+  margin: 0;
+}
+.solo-result-icon {
+  font-size: 40px;
+  line-height: 1.1;
+}
+.solo-review > h2 {
+  margin-top: 8px;
+}

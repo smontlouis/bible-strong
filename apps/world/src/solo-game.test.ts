@@ -30,19 +30,18 @@ describe('four consecutive answers, active-time solo challenge', () => {
       expect(submitSolo(run, `op-${i}`, 2000 + i * 2000)).toBe(true)
       settleSolo(run, `op-${i}`, status as 'correct' | 'wrong', 2500 + i * 2000)
       if (i === 2) expect([run.streak, run.best]).toEqual([0, 2])
-      resumeSolo(run, 'feedback', 3000 + i * 2000)
+      if (!run.outcome) expect(run.pauses).toEqual([])
     }
     expect(run.outcome).toBe('won')
     expect(run.answered).toBe(7)
     expect(submitSolo(run, 'extra', 999999)).toBe(false)
   })
 
-  it('freezes once across overlapping evaluation, absence and feedback pauses', () => {
+  it('freezes once across overlapping evaluation and absence pauses', () => {
     const run = ready()
     submitSolo(run, 'a', 11000)
     pauseSolo(run, 'away', 12000)
     settleSolo(run, 'a', 'correct', 15000)
-    resumeSolo(run, 'feedback', 20000)
     expect(soloRemaining(run, 90000)).toBe(110000)
     resumeSolo(run, 'away', 90000)
     resumeSolo(run, 'away', 95000)

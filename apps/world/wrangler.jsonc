@@ -7,12 +7,18 @@
     "bindings": [
       { "name": "WorldRoom", "class_name": "WorldRoom" },
       { "name": "Guestbook", "class_name": "Guestbook" },
+      { "name": "GameCatalogue", "class_name": "GameCatalogue" },
     ],
   },
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["WorldRoom"] },
     { "tag": "v2", "new_sqlite_classes": ["Guestbook"] },
+    { "tag": "v3", "new_sqlite_classes": ["GameCatalogue"] },
   ],
+  "build": {
+    "command": "node scripts/build-game-catalogue.mjs",
+    "watch_dir": ["question-bank", "who-bank"],
+  },
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",

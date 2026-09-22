@@ -103,3 +103,69 @@ Review is an explicit editorial phase: draft data is not shipped in the public
 client or connected to live games. Server-side catalogue selection and per-player
 history are a subsequent step after approval. Jev remains suitable for live free
 text adjudication; the prototype uses aliases and explicit self-assessment.
+
+## Curated SQLite catalogue in live games — 2026-09-22
+
+At the owner's request, replace Gloo generation with the 1,200 bilingual written
+questions and 200 bilingual identity cards. This supersedes the generation and
+prototype-only restrictions above. Jev remains the only game AI dependency, called
+only for written answers that do not match normalized canonical answers/aliases.
+All new Bible challenge rounds are written-answer, including easy difficulty.
+Who am I has four progressive clues, not three editorial difficulty tiers; hide
+its difficulty control, preserve Testament filtering, and mix people/places/objects.
+
+Add the SQLite-backed `GameCatalogue` class in additive migration v3. One named
+catalogue coordinates batch allocation/history for this event across its rooms;
+only allocation reaches it, never movement, sockets, scoring or answer checks.
+WorldRoom keeps its existing SQLite and game authority. This modest event catalogue
+is intentionally centralized for atomic group selection, not a replacement for
+per-room game state. A larger multi-event service would scope catalogues per event.
+
+Server-only JSON files are versioned seed material. A generated manifest hashes
+all files; an atomic reconciliation imports them on revision changes without losing
+history. Content is loaded into SQLite by the catalogue instance, not reimported
+by each room. Development watches both banks; build/deploy refresh the manifest.
+No public catalogue endpoint exists, and the browser bundle excludes the banks.
+Review labs remain local editorial tools: their browser decisions do not publish.
+
+Each private RPC reserves up to five questions and writes its operation ID and
+result atomically. Retry of the same operation returns the same batch. Prefer
+questions unseen by all participants, then those seen by the fewest participants,
+then the least recently offered (latest participant exposure). Randomize ties.
+A reserved batch counts as offered even if abandoned before all its questions
+are displayed. Within a solo run exclude catalogue IDs, not answer identities:
+different facts can share an answer. Allocation records expire after 48 hours;
+history remains durable. A lack of eligible content or storage failure returns a
+retryable preparation error, never invented content. Preparation recovery timeout
+is 15 seconds; obsolete AI generation budgets are removed.
+
+An anonymous UUID in browser localStorage identifies question history across room
+sessions, with in-memory fallback if storage is unavailable. It is not an account,
+a credential or an avatar resume token; it grants no read access and is never
+broadcast. Clearing browser storage or using another browser starts new history.
+The existing session token and 24-hour avatar resumption remain unchanged.
+
+Every clue retains its source link, revealed alongside the answer. Old persisted
+rounds can finish under their original choice/answer contract; every newly selected
+round uses the catalogue. Deployment is a separate operation: local data and cloud
+SQLite are separate, each initialized by the same versioned seed.
+
+## Continuous solo and final review — 2026-09-22
+
+Solo no longer reveals a correction or waits for Next between questions. A settled
+correct/wrong/skipped answer updates the streak and advances in the same persisted
+transition. The active timer resumes immediately after adjudication; only Jev,
+clarification, technical errors, presence and explicit dialog pauses freeze it.
+New runs reserve up to 50 catalogue questions before starting, avoiding mid-run
+loading pauses. These reserved questions count as offered under the existing
+history policy, even if the run finishes early. Legacy short batches refill
+automatically under operation guards if necessary.
+
+Store each final question verdict, submitted text and round index privately in the
+room. Send only a short verdict event during play; send the review with canonical
+answers, explanations and sources only when the run finishes. At timeout include
+the currently displayed unanswered question, never the unused reserve. Jev retries,
+clarifications and technical failures are not extra scored questions. A migrated
+old run may lack earlier verdicts; identify its review as incomplete rather than
+inventing results. The solo input stays mounted between questions to retain focus
+and the mobile keyboard. Multiplayer reveal/scoring behavior remains unchanged.

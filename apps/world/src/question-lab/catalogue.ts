@@ -1,6 +1,7 @@
 import type { Question } from './model'
 
-// Kept exclusively in the development review entry, never imported by the live game.
+// Browser-side catalogue import is exclusive to this development review entry.
+// Live games read the same source data through the server-only SQLite catalogue.
 const files = import.meta.glob<Question[]>('../../question-bank/*.json', {
   eager: true,
   import: 'default',

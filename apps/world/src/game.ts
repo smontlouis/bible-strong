@@ -1,3 +1,4 @@
+import type { AvatarActivity } from './avatar-activity'
 import { AvatarReactions, loadReactions } from './avatar-reactions'
 import { GAME_STATION } from './game-station'
 import { cameraZoomBounds, clampCameraZoom } from './camera-zoom'
@@ -53,6 +54,7 @@ export type WorldState = {
   multiplayer?: PresenceStatus
 }
 export type Controls = {
+  activity?: AvatarActivity | null
   network?: WorldMultiplayer
   pointerPress?: PointerPress
   cancelWalk?: boolean
@@ -417,6 +419,7 @@ export function createWorld(
         const length = Math.max(1, Math.hypot(direction.x, direction.y))
         this.facing = { x: direction.x / length, y: direction.y / length }
       }
+      this.network.setActivity(controls.activity ?? null)
       this.network.update(
         { ...next, dx: this.facing.x, dy: this.facing.y, moving },
         { avatar: controls.avatar, name: controls.avatarName, color: controls.avatarColor },

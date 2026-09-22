@@ -1,6 +1,7 @@
 /** Serializable rules shared by the room authority and the offline Game Lab. */
 export const SOLO_PLAY_MS = 120_000
 export const SOLO_TARGET = 4
+export const SOLO_MAX_QUESTIONS = 50
 export type SoloPause = 'preparing' | 'checking' | 'away' | 'feedback' | 'technical' | 'menu'
 export type SoloRun = {
   streak: number
@@ -75,8 +76,9 @@ export function settleSolo(
 ): boolean {
   if (run.outcome || !run.pending || run.pending !== operation) return false
   run.pending = null
-  // Add the next pause before releasing checking, including when the player is away.
-  pauseSolo(run, status === 'unavailable' ? 'technical' : 'feedback', now)
+  // Only unresolved answers need a pause. Settled answers resume immediately.
+  if (status === 'unavailable' || status === 'clarify')
+    pauseSolo(run, status === 'unavailable' ? 'technical' : 'feedback', now)
   resumeSolo(run, 'checking', now)
   if (status === 'unavailable' || status === 'clarify') return true
   run.answered++

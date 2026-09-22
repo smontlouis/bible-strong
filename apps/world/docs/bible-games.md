@@ -1,8 +1,9 @@
 # Bible games
 
 World includes **Who am I? / Qui suis-je ?** and **Bible challenge / Défi biblique**.
-Both support 2–4 visitors, five freshly generated rounds, FR/EN, three difficulties,
-people/places/objects/mixed subjects, and Old/New/both Testaments.
+Both support 2–4 visitors, five catalogue rounds, FR/EN and Old/New/both Testaments.
+Bible challenge and solo offer three difficulties. Who am I mixes people, places
+and objects with four progressive clues; it has no separate difficulty filter.
 
 ## Interaction
 
@@ -28,8 +29,7 @@ round immediately. Five rounds remain the length of a game.
 - The mode is selected at the beginning of each round. A departure does not switch
   a running race into a duel. The next round uses the remaining player count.
 
-**Bible challenge** uses four choices on Discovery difficulty and free-text answers
-otherwise. Each question lasts 60 seconds, with one point per correct answer.
+**Bible challenge** uses written answers at every difficulty. Each question lasts 60 seconds, with one point per correct answer.
 Answers stay private until reveal (Who players see their own incorrect feedback immediately).
 The host can advance after reveal; the server advances automatically after two minutes.
 Closing the dialog keeps the game; **Leave game** explicitly leaves it.
@@ -49,7 +49,7 @@ gets up to 12 seconds to complete even after the round's answer deadline.
 `server/games/engine.ts` is the deterministic game authority. `room.ts` persists
 its bounded state in the existing event room's SQLite store before sending private
 snapshots. Game state, deadlines and pending operation identities survive Durable
-Object recreation. Generation and evaluation completions re-read persisted state
+Object recreation. Catalogue and evaluation completions re-read persisted state
 and must match their operation ID and round. A lost asynchronous task times out
 safely; a late result cannot score a later round.
 
@@ -59,49 +59,55 @@ It cannot supply player identities, scores, source chapters, provider URLs or pr
 Credentials remain server-side. User answers are sent to Jev as untrusted data;
 player names and visitor identifiers are not included in AI requests.
 
-## Generated content
+## Shared SQLite catalogue
 
-Generation calls **Gloo Grounded** directly, using auto-routing and the shared
-`GlooGrounded` publisher. A single request retrieves sources and generates the five
-playable rounds according to the language, Testament, subject and difficulty.
-Game instructions remain in the system message, and displayed content uses the
-requested French or English language. There is no fixed chapter pool, `get_passage`
-tool, Resource API fetch or local database dependency for these games.
+`GameCatalogue` is a SQLite Durable Object shared by this event's rooms, with an
+additive v3 migration alongside WorldRoom and Guestbook. It stores 1,200 bilingual
+questions for solo/Bible challenge and 200 identities for Who am I. No new external
+database service, Gloo key, Resource binding or question-generation call is needed.
 
-The difficulty instructions cover both identity familiarity and clue specificity:
-widely known identities and accessible clues for Discovery, less obvious subjects
-and details for Intermediate, less familiar identities and subtle but fair clues
-for Advanced. These are model instructions, not an independently measured rating.
+`question-bank/*.json` and `who-bank/*.json` are the server-only seed sources.
+`yarn workspace @bible-strong/world catalogue:build` produces a content-hashed import
+manifest; dev/build/deploy refresh it automatically. The catalogue reconciles its
+SQLite rows atomically when that revision changes, retaining player history.
+The local dev watcher also rebuilds the manifest when either bank changes.
+Editorial Lab decisions remain browser-local and do not publish data: change the
+source files to correct live content. The answer bank never ships in client assets.
 
-The single generation response must include `sources_returned: true` with usable
-citation metadata and snippets. Validate the JSON shape, five distinct answers,
-four clues, choices, name leakage and canonical book/chapter ranges. The request is
-not retried. An unavailable provider, missing grounding or invalid content returns to the
-lobby. No silent fallback to another provider or prewritten questions.
+The private `allocate` RPC selects five records for multiplayer, or reserves up to
+50 records for a complete solo run before its clock starts. It filters questions by
+Testament and difficulty, identities by Testament. It prefers records unseen by
+all participants, then seen by the fewest participants, then least recently offered
+(using the latest participant exposure); ties are randomized. Exhaustion recycles
+oldest eligible content. Solo additionally excludes all catalogue IDs from its
+current run; different questions may have the same answer. The operation ID makes
+allocation idempotent: repeating an operation returns its original batch.
 
-Gloo grounding supplies retrieved context; it is not independent verification that
-every generated clue follows from its cited source. Explanations are paraphrases,
-not claimed verbatim Bible quotations. The reading link opens the model-proposed
-reference in LSG (French) or KJV (English); the displayed reference does not claim
-that Gloo retrieved that translation. Provider-supplied URLs are never fetched or
-used as the public reading link. Do not log provider content, snippets or secrets.
+An allocation counts the entire batch as offered, including questions not reached
+before abandoning a game. Anonymous history persists in SQLite and follows the
+browser's `world-game-history-id` localStorage UUID, independently of the 24-hour
+avatar session. The UUID is not authentication and is never broadcast. Clearing
+storage or using another browser/device starts a separate history. Reopening a
+room does not clear its SQLite; local Wrangler and deployed storage are separate.
 
-Exact normalized answers and generated aliases are checked locally. Other player
-answers still use `typesafe-ai/jev` via AI Gateway: reject instructions/multiple
-guesses; accept identity probability ≥0.8 with ambiguity <0.3; ask for clarification
-when ambiguity ≥0.55 or identity >0.2; otherwise mark incorrect. These are heuristics,
-not certainty guarantees. Jev receives the question, clues, expected identity and
-explanation; its job is identity adjudication, not re-verifying Gloo's research.
-Provider errors return `unavailable`, never `wrong`.
+Every record has FR/EN answer variants and a source; every identity keeps all four
+source links. Sources are revealed with answers. Exact normalized canonical answers
+and aliases, including the other language's variants, are checked in the room.
+Only unmatched written answers call `typesafe-ai/jev` via AI Gateway. Jev receives
+the question, clues, expected answer, variants and explanation, never player identity.
+It rejects instructions/multiple guesses, accepts identity probability ≥0.8 with
+ambiguity <0.3, requests clarification when ambiguity ≥0.55 or identity >0.2, and
+otherwise marks incorrect. These thresholds are heuristics. A provider error returns
+`unavailable`, never `wrong`. No AI checks question generation or sources at runtime.
 
 ## Bounds
 
 - 50 retained games per event room; 4 participants per game.
 - Lobby/final summary retention: 10 minutes. Absent participants: 90 seconds.
 - Creation cooldown: 10 seconds. Re-invite cooldown: 60 seconds; at most 3 incoming invites.
-- Generation: no per-player retry delay; at most 3 concurrent preparations and 60 starts/hour/room.
-- Generation overall timeout: 55 seconds; persisted recovery deadline: 180 seconds.
-- Gloo: one Grounded call per five-question batch, with a 50-second request timeout. Jev answer calls: 10 seconds, persisted expiry: 12 seconds.
+- Catalogue: 1–5 records per multiplayer RPC, up to 50 for solo; 15-second persisted preparation recovery deadline.
+- No AI generation budget/concurrency limits. Idempotency records expire after 48 hours; history persists.
+- Jev answer calls: 10 seconds, persisted expiry: 12 seconds.
 - Answers: 160 characters, at most 3 submissions per participant/round in Bible challenge, or per clue in Who am I?.
 - Transport: existing 40 messages/second; game commands at most 4/second/connection. Solo dialog pause/resume uses only the global transport limit, like presence updates.
 - Provider response bodies: 96 KB. Content validation rejects malformed output.
@@ -111,38 +117,34 @@ prevention or a production spend guarantee. Provider-side spending limits remain
 
 ## Local setup
 
-1. Set server-only `GLOO_API_KEY` and `AI_GATEWAY_API_KEY` in ignored
-   `apps/world/.dev.vars` (the latter is for Jev).
+1. Set server-only `AI_GATEWAY_API_KEY` in ignored `apps/world/.dev.vars` for Jev.
+   Catalogue loading and exact answers also work without it.
 2. Run **`yarn dev:world`** and open `http://localhost:5186` in independent sessions.
 
 **Do not start `yarn dev:resources` for games.** No Resource service, PostgreSQL,
 service binding or `get_passage` tool is needed. Other Bible Strong products still
 use Resources; their commands and service are unchanged. Provider secrets must
-never use a `VITE_` prefix. Production needs both keys on the World Worker.
+never use a `VITE_` prefix. Production needs only the Jev key for non-exact answers. Deploying the World Worker
+applies the additive catalogue migration and seeds cloud SQLite on its first use.
+No deployment is required for local tests.
 
 ## Validation
 
-Gloo migration checked on 2026-09-22: 255 World tests pass, typecheck and production
-build pass. Live generation produced five grounded rounds each for French Who am I?
-and English Bible challenge. The five live Jev calibration cases also passed,
-including the misspelled name, wrong identities, multiple guesses and instructions.
-
 ```sh
-yarn workspace @bible-strong/world test --maxWorkers=2 --no-file-parallelism
+yarn workspace @bible-strong/world test
 yarn workspace @bible-strong/world build
-node apps/world/scripts/test-games.mjs
-# Makes real Gloo and Jev calls using the local server-only keys:
+# Real local Worker/SQLite: continuous solo/final review, reconnect, 2/4 players, privacy, sources.
+node apps/world/scripts/test-game-catalogue.mjs
+# Optional real Jev calibration (uses the server-only key):
 yarn exec tsx apps/world/scripts/smoke-games-ai.ts
-# Only Gloo generation:
-yarn exec tsx apps/world/scripts/smoke-games-ai.ts --generation-only
 ```
 
-Tests exercise duel/race scoring, receipt order, stale submissions, disconnects,
-persistence, overlapping pauses, generation bounds, malformed outputs, absent
-sources, credential handling and the absence of any Resource/tool calls. Earlier
-browser validation covered the graphical board at 390×844, draft retention,
-handover, four-player blocking and a real local +4 round. No production deployment
-was performed. Device testing and sustained live load are outside these checks.
+The SQLite tests exercise all language/Testament/level combinations, history,
+exhaustion, idempotency, rollback and reopening the database. Room tests cover
+exact-answer bypass, Jev outages, retry and stale completions; existing engine
+tests retain timing, scoring and reconnect coverage. The real Worker smoke reads
+answer keys from local files only in its test process; no public test route exists.
+Compatibility scripts `test-games.mjs` and `test-solo.mjs` run this same smoke.
 
 ## Artwork
 
@@ -225,18 +227,20 @@ entry and simulation marker from production. See the World README for controls.
 ## Borne et défi solo
 
 La borne se trouve à gauche du pont nord de l’île centrale (760,359). L’action dorée
-« Jouer » apparaît à moins de 105 unités sur l’île. Elle ouvre les modes Solo / Jouer
+L’interaction étoile apparaît à moins de 70 unités sur l’île. Elle ouvre les modes Solo / Jouer
 ensemble. « Ma partie » reste accessible pendant une session, et les invitations
 conservent leur notification indépendante.
 
 Solo propose un « 4 à la suite » biblique, avec 120 secondes de temps actif et les
-catégories/niveaux existants. La meilleure série reste visible après une erreur ou
-un passage. Le chrono s’arrête pendant les explications, vérifications, générations,
-clarifications et interruptions. Fermer le panneau conserve la partie en pause ; la
+filtres Testament et niveau. La meilleure série reste visible après une erreur ou
+un passage. Le chrono continue entre les questions ; les corrections sont réservées au bilan final. Fermer le panneau conserve la partie en pause ; la
 reprise est possible avec la même identité jusqu’à 24 heures. Quitter le défi termine
-volontairement cette session. Les questions sont préparées par cinq ; un lot suivant
-peut donc demander une attente supplémentaire. Aucun service Resources nécessaire.
-Le contrat Gloo du solo contient uniquement question, réponse, alias, explication et
+volontairement cette session. Les questions du défi (50 au maximum) sont préparées avant le départ. Une réponse
+juste, fausse ou passée enchaîne immédiatement sur la suivante, sans pause de correction.
+Le chrono ne s’arrête que pour une vérification, une précision, un incident technique
+ou une interruption du joueur. Le bilan final rassemble les réponses correctes,
+incorrectes, passées et la question non répondue à expiration, avec leurs sources. Aucun service Resources nécessaire.
+Chaque fiche du catalogue solo contient question, réponse, alias, explication et
 référence biblique : ni indices ni choix multiples. Toutes les difficultés utilisent
 une réponse écrite, comparée d’abord localement puis confiée à Jev si elle n’est pas exacte.
 
@@ -244,7 +248,7 @@ Game Lab : `http://localhost:5186/game-lab.html?state=station` puis catégorie S
 ou parcours « Un défi solo ». Les états solo ignorent le nombre de joueurs choisi
 pour la galerie et ne connectent aucun autre avatar.
 
-Test réel Gloo, sur une salle locale disponible :
+Test du catalogue SQLite, sur une salle locale disponible :
 
 ```sh
 node apps/world/scripts/test-solo.mjs
@@ -252,5 +256,5 @@ node apps/world/scripts/test-solo.mjs
 WORLD_TEST_URL=ws://127.0.0.1:8792/parties/world-room/asi-europe node apps/world/scripts/test-solo.mjs
 ```
 
-Le script vérifie génération, confidentialité des réponses, pause, reconnexion,
+Le script vérifie chargement, confidentialité des réponses, pause, reconnexion,
 score et question suivante, puis quitte sa propre partie.

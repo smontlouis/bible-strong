@@ -1,0 +1,2837 @@
+[
+  {
+    "id": "hard-ot-101",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "jubal-musicians-ancestor",
+    "reference": {
+      "book": 1,
+      "chapter": 4,
+      "verse": 21
+    },
+    "fr": {
+      "question": "Quel descendant de Lémec est présenté comme l’ancêtre des joueurs de harpe et de chalumeau ?",
+      "answer": "Jubal",
+      "aliases": [],
+      "explanation": "Jubal est associé aux instruments de musique."
+    },
+    "en": {
+      "question": "Which descendant of Lamech is described as the ancestor of harp and pipe players?",
+      "answer": "Jubal",
+      "aliases": [],
+      "explanation": "Jubal is associated with musical instruments."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%204%3A21&version=KJV"
+  },
+  {
+    "id": "hard-ot-102",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "tubal-cain-metalworker",
+    "reference": {
+      "book": 1,
+      "chapter": 4,
+      "verse": 22
+    },
+    "fr": {
+      "question": "Quel fils de Tsilla forgeait des instruments d’airain et de fer ?",
+      "answer": "Tubal-Caïn",
+      "aliases": [
+        "Toubal-Caïn"
+      ],
+      "explanation": "Tubal-Caïn travaillait les métaux."
+    },
+    "en": {
+      "question": "Which son of Zillah forged instruments of bronze and iron?",
+      "answer": "Tubal-cain",
+      "aliases": [
+        "Tubalcain"
+      ],
+      "explanation": "Tubal-cain worked with metals."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%204%3A22&version=KJV"
+  },
+  {
+    "id": "hard-ot-103",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "noah-ark-length-300",
+    "reference": {
+      "book": 1,
+      "chapter": 6,
+      "verse": 15
+    },
+    "fr": {
+      "question": "Quelle longueur, en coudées, Dieu prescrivit-il pour l’arche de Noé ?",
+      "answer": "Trois cents",
+      "aliases": [
+        "300"
+      ],
+      "explanation": "L’arche devait mesurer trois cents coudées de long."
+    },
+    "en": {
+      "question": "What length in cubits did God prescribe for Noah’s ark?",
+      "answer": "Three hundred",
+      "aliases": [
+        "300"
+      ],
+      "explanation": "The ark was to be three hundred cubits long."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%206%3A15&version=KJV"
+  },
+  {
+    "id": "hard-ot-104",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "nahor-wife-milcah",
+    "reference": {
+      "book": 1,
+      "chapter": 11,
+      "verse": 29
+    },
+    "fr": {
+      "question": "Comment s’appelait la femme de Nachor, frère d’Abram ?",
+      "answer": "Milca",
+      "aliases": [],
+      "explanation": "Nachor épousa Milca, fille d’Haran."
+    },
+    "en": {
+      "question": "What was the name of Nahor’s wife, Nahor being Abram’s brother?",
+      "answer": "Milcah",
+      "aliases": [],
+      "explanation": "Nahor married Milcah, daughter of Haran."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2011%3A29&version=KJV"
+  },
+  {
+    "id": "hard-ot-105",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "abram-covenant-animals-age-three",
+    "reference": {
+      "book": 1,
+      "chapter": 15,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Quel âge devaient avoir la génisse, la chèvre et le bélier demandés à Abram pour l’alliance de Genèse 15 ?",
+      "answer": "Trois ans",
+      "aliases": [
+        "3"
+      ],
+      "explanation": "Les trois animaux devaient avoir trois ans."
+    },
+    "en": {
+      "question": "How old were the heifer, goat and ram requested from Abram for the covenant in Genesis 15 to be?",
+      "answer": "Three years",
+      "aliases": [
+        "3"
+      ],
+      "explanation": "The three animals were to be three years old."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2015%3A9&version=KJV"
+  },
+  {
+    "id": "hard-ot-106",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "hagar-well-beer-lahai-roi",
+    "reference": {
+      "book": 1,
+      "chapter": 16,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Quel nom reçut le puits entre Kadès et Bared après la rencontre d’Agar avec l’ange ?",
+      "answer": "Lachaï-Roï",
+      "aliases": [
+        "Beer-Lachaï-Roï",
+        "Beer-Lahai-Roi"
+      ],
+      "explanation": "Le récit nomme le puits Lachaï-Roï."
+    },
+    "en": {
+      "question": "What name was given to the well between Kadesh and Bered after Hagar’s encounter with the angel?",
+      "answer": "Beer-lahai-roi",
+      "aliases": [
+        "Beerlahairoi",
+        "Lahai-roi"
+      ],
+      "explanation": "The account names the well Beer-lahai-roi."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2016%3A14&version=KJV"
+  },
+  {
+    "id": "hard-ot-107",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "rebekah-gold-ring-half-shekel",
+    "reference": {
+      "book": 1,
+      "chapter": 24,
+      "verse": 22
+    },
+    "fr": {
+      "question": "Quel poids d’or avait l’anneau offert à Rebecca par le serviteur d’Abraham ?",
+      "answer": "Un demi-sicle",
+      "aliases": [
+        "demi-sicle",
+        "0,5",
+        "0.5",
+        "Un demi-sicle d’or"
+      ],
+      "explanation": "L’anneau d’or pesait un demi-sicle."
+    },
+    "en": {
+      "question": "What weight of gold was the ring given to Rebekah by Abraham’s servant?",
+      "answer": "Half a shekel",
+      "aliases": [
+        "0.5",
+        "Half-shekel"
+      ],
+      "explanation": "The gold ring weighed half a shekel."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2024%3A22&version=KJV"
+  },
+  {
+    "id": "hard-ot-108",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "abraham-servant-ten-camels",
+    "reference": {
+      "book": 1,
+      "chapter": 24,
+      "verse": 10
+    },
+    "fr": {
+      "question": "Combien de chameaux le serviteur d’Abraham prit-il pour chercher une épouse à Isaac ?",
+      "answer": "Dix",
+      "aliases": [
+        "10"
+      ],
+      "explanation": "Le serviteur partit avec dix chameaux."
+    },
+    "en": {
+      "question": "How many camels did Abraham’s servant take when seeking a wife for Isaac?",
+      "answer": "Ten",
+      "aliases": [
+        "10"
+      ],
+      "explanation": "The servant departed with ten camels."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2024%3A10&version=KJV"
+  },
+  {
+    "id": "hard-ot-109",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "abraham-wife-keturah",
+    "reference": {
+      "book": 1,
+      "chapter": 25,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Quelle femme Abraham épousa-t-il dans le récit qui suit la mort de Sara ?",
+      "answer": "Ketura",
+      "aliases": [
+        "Kétura"
+      ],
+      "explanation": "Genèse 25 nomme Ketura comme épouse d’Abraham."
+    },
+    "en": {
+      "question": "Which woman did Abraham marry in the account following Sarah’s death?",
+      "answer": "Keturah",
+      "aliases": [
+        "Ketura"
+      ],
+      "explanation": "Genesis 25 names Keturah as Abraham’s wife."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2025%3A1&version=KJV"
+  },
+  {
+    "id": "hard-ot-110",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "rebekah-two-goat-kids",
+    "reference": {
+      "book": 1,
+      "chapter": 27,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Combien de chevreaux Rebecca demanda-t-elle à Jacob d’apporter pour préparer le repas d’Isaac ?",
+      "answer": "Deux",
+      "aliases": [
+        "2"
+      ],
+      "explanation": "Rebecca demanda deux bons chevreaux."
+    },
+    "en": {
+      "question": "How many young goats did Rebekah ask Jacob to bring to prepare Isaac’s meal?",
+      "answer": "Two",
+      "aliases": [
+        "2"
+      ],
+      "explanation": "Rebekah requested two good young goats."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2027%3A9&version=KJV"
+  },
+  {
+    "id": "hard-ot-111",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "laban-stone-heap-jegar-sahadutha",
+    "reference": {
+      "book": 1,
+      "chapter": 31,
+      "verse": 47
+    },
+    "fr": {
+      "question": "Quel nom Laban donna-t-il au monceau de pierres que Jacob appela Galed ?",
+      "answer": "Jegar-Sahadutha",
+      "aliases": [
+        "Yegar-Sahadouta"
+      ],
+      "explanation": "Laban et Jacob donnèrent deux noms au même monceau."
+    },
+    "en": {
+      "question": "What name did Laban give the stone heap that Jacob called Galeed?",
+      "answer": "Jegar-sahadutha",
+      "aliases": [
+        "Jegarsahadutha"
+      ],
+      "explanation": "Laban and Jacob gave two names to the same heap."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2031%3A47&version=KJV"
+  },
+  {
+    "id": "hard-ot-112",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "jacob-camp-mahanaim",
+    "reference": {
+      "book": 1,
+      "chapter": 32,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Quel nom Jacob donna-t-il au lieu où des anges de Dieu le rencontrèrent sur son retour ?",
+      "answer": "Mahanaïm",
+      "aliases": [],
+      "explanation": "Jacob reconnut le camp de Dieu et nomma le lieu Mahanaïm."
+    },
+    "en": {
+      "question": "What name did Jacob give the place where God’s angels met him on his return journey?",
+      "answer": "Mahanaim",
+      "aliases": [],
+      "explanation": "Jacob recognized God’s camp and named the place Mahanaim."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2032%3A2&version=KJV"
+  },
+  {
+    "id": "hard-ot-113",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "baker-dream-three-baskets",
+    "reference": {
+      "book": 1,
+      "chapter": 40,
+      "verse": 16
+    },
+    "fr": {
+      "question": "Combien de corbeilles le chef des panetiers portait-il sur sa tête dans son rêve ?",
+      "answer": "Trois",
+      "aliases": [
+        "3"
+      ],
+      "explanation": "Son rêve comportait trois corbeilles sur sa tête."
+    },
+    "en": {
+      "question": "How many baskets did the chief baker carry on his head in his dream?",
+      "answer": "Three",
+      "aliases": [
+        "3"
+      ],
+      "explanation": "His dream featured three baskets on his head."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2040%3A16&version=KJV"
+  },
+  {
+    "id": "hard-ot-114",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "moses-first-son-gershom",
+    "reference": {
+      "book": 2,
+      "chapter": 2,
+      "verse": 22
+    },
+    "fr": {
+      "question": "Quel nom Moïse donna-t-il à son fils en disant qu’il vivait comme étranger ?",
+      "answer": "Guerschom",
+      "aliases": [
+        "Gershom",
+        "Guerchom"
+      ],
+      "explanation": "Moïse appela son fils Guerschom en rappelant son séjour à l’étranger."
+    },
+    "en": {
+      "question": "What name did Moses give his son, saying that he had been a stranger?",
+      "answer": "Gershom",
+      "aliases": [],
+      "explanation": "Moses named his son Gershom, recalling his life as a stranger."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%202%3A22&version=KJV"
+  },
+  {
+    "id": "hard-ot-115",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "passover-lamb-unbroken-bones",
+    "reference": {
+      "book": 2,
+      "chapter": 12,
+      "verse": 46
+    },
+    "fr": {
+      "question": "Que ne devait-on pas briser de l’agneau pascal, selon Exode 12 ?",
+      "answer": "Ses os",
+      "aliases": [
+        "Les os de l’agneau",
+        "Aucun os"
+      ],
+      "explanation": "La prescription interdisait de briser un os de l’agneau."
+    },
+    "en": {
+      "question": "What was not to be broken in the Passover lamb, according to Exodus 12?",
+      "answer": "Its bones",
+      "aliases": [
+        "Bones",
+        "Any bone"
+      ],
+      "explanation": "The command forbade breaking a bone of the lamb."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2012%3A46&version=KJV"
+  },
+  {
+    "id": "hard-ot-116",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "moses-second-son-eliezer",
+    "reference": {
+      "book": 2,
+      "chapter": 18,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Quel fils de Moïse portait un nom rappelant que Dieu l’avait secouru contre l’épée de Pharaon ?",
+      "answer": "Éliézer",
+      "aliases": [],
+      "explanation": "Le nom Éliézer évoquait le secours reçu de Dieu."
+    },
+    "en": {
+      "question": "Which son of Moses bore a name recalling that God had helped him against Pharaoh’s sword?",
+      "answer": "Eliezer",
+      "aliases": [],
+      "explanation": "The name Eliezer recalled God’s help."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2018%3A4&version=KJV"
+  },
+  {
+    "id": "hard-ot-117",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "sinai-under-feet-sapphire",
+    "reference": {
+      "book": 2,
+      "chapter": 24,
+      "verse": 10
+    },
+    "fr": {
+      "question": "À quelle pierre précieuse le pavement sous les pieds du Dieu d’Israël est-il comparé en Exode 24 ?",
+      "answer": "Le saphir",
+      "aliases": [
+        "saphir"
+      ],
+      "explanation": "La vision évoque un pavement de saphir d’une grande pureté."
+    },
+    "en": {
+      "question": "To which gemstone is the pavement under the God of Israel’s feet compared in Exodus 24?",
+      "answer": "Sapphire",
+      "aliases": [],
+      "explanation": "The vision describes a clear pavement like sapphire."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2024%3A10&version=KJV"
+  },
+  {
+    "id": "hard-ot-118",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "tabernacle-court-length-100",
+    "reference": {
+      "book": 2,
+      "chapter": 27,
+      "verse": 18
+    },
+    "fr": {
+      "question": "Quelle longueur, en coudées, devait avoir le parvis du tabernacle ?",
+      "answer": "Cent",
+      "aliases": [
+        "100"
+      ],
+      "explanation": "Le parvis devait avoir cent coudées de longueur."
+    },
+    "en": {
+      "question": "What length in cubits was the tabernacle courtyard to have?",
+      "answer": "One hundred",
+      "aliases": [
+        "100"
+      ],
+      "explanation": "The courtyard was to be one hundred cubits long."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2027%3A18&version=KJV"
+  },
+  {
+    "id": "hard-ot-119",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "ephod-robe-entirely-blue",
+    "reference": {
+      "book": 2,
+      "chapter": 28,
+      "verse": 31
+    },
+    "fr": {
+      "question": "De quelle couleur devait être entièrement la robe de l’éphod ?",
+      "answer": "Bleue",
+      "aliases": [],
+      "explanation": "La robe était prescrite tout entière en étoffe bleue."
+    },
+    "en": {
+      "question": "What colour was the entire robe of the ephod to be?",
+      "answer": "Blue",
+      "aliases": [],
+      "explanation": "The robe was prescribed entirely in blue material."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2028%3A31&version=KJV"
+  },
+  {
+    "id": "hard-ot-120",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "incense-altar-acacia-wood",
+    "reference": {
+      "book": 2,
+      "chapter": 30,
+      "verse": 1
+    },
+    "fr": {
+      "question": "De quel bois devait être fabriqué l’autel destiné aux parfums ?",
+      "answer": "Le bois d’acacia",
+      "aliases": [
+        "bois d’acacia",
+        "Acacia",
+        "Bois de sittim"
+      ],
+      "explanation": "L’autel des parfums devait être en bois d’acacia."
+    },
+    "en": {
+      "question": "Of what wood was the altar for burning incense to be made?",
+      "answer": "Acacia wood",
+      "aliases": [
+        "Shittim wood",
+        "Shittim",
+        "Acacia"
+      ],
+      "explanation": "The incense altar was to be made of acacia wood."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2030%3A1&version=KJV"
+  },
+  {
+    "id": "hard-ot-121",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "incense-resin-galbanum",
+    "reference": {
+      "book": 2,
+      "chapter": 30,
+      "verse": 34
+    },
+    "fr": {
+      "question": "Quelle résine est citée avec le stacté, l’ongle odorant et l’encens pur pour le parfum sacré ?",
+      "answer": "Le galbanum",
+      "aliases": [
+        "galbanum"
+      ],
+      "explanation": "Le mélange sacré comprenait du galbanum."
+    },
+    "en": {
+      "question": "Which resin is listed with stacte, onycha and pure frankincense for the sacred incense?",
+      "answer": "Galbanum",
+      "aliases": [],
+      "explanation": "The sacred mixture included galbanum."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2030%3A34&version=KJV"
+  },
+  {
+    "id": "hard-ot-122",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "grain-offering-no-honey",
+    "reference": {
+      "book": 3,
+      "chapter": 2,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Outre le levain, quel aliment sucré ne devait pas être brûlé comme offrande sur l’autel ?",
+      "answer": "Le miel",
+      "aliases": [
+        "miel"
+      ],
+      "explanation": "Les offrandes consumées ne devaient pas contenir de miel."
+    },
+    "en": {
+      "question": "Besides leaven, what sweet food was not to be burned as an offering on the altar?",
+      "answer": "Honey",
+      "aliases": [],
+      "explanation": "The offerings burned on the altar were not to include honey."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Leviticus%202%3A11&version=KJV"
+  },
+  {
+    "id": "hard-ot-123",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "ordination-blood-right-ear",
+    "reference": {
+      "book": 3,
+      "chapter": 8,
+      "verse": 23
+    },
+    "fr": {
+      "question": "Sur quel lobe d’oreille Moïse mit-il du sang lors de la consécration d’Aaron ?",
+      "answer": "Le lobe droit",
+      "aliases": [
+        "lobe droit",
+        "L’oreille droite",
+        "Oreille droite"
+      ],
+      "explanation": "Le sang fut appliqué au lobe de l’oreille droite."
+    },
+    "en": {
+      "question": "On which earlobe did Moses put blood during Aaron’s consecration?",
+      "answer": "The right earlobe",
+      "aliases": [
+        "right earlobe",
+        "Right ear",
+        "Tip of the right ear"
+      ],
+      "explanation": "Blood was applied to the right earlobe."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Leviticus%208%3A23&version=KJV"
+  },
+  {
+    "id": "hard-ot-124",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "tabernacles-boughs-willows",
+    "reference": {
+      "book": 3,
+      "chapter": 23,
+      "verse": 40
+    },
+    "fr": {
+      "question": "Quels arbres des rivières sont cités avec les palmiers dans les prescriptions pour la fête des tabernacles ?",
+      "answer": "Les saules",
+      "aliases": [
+        "saules"
+      ],
+      "explanation": "Le texte mentionne les saules des rivières."
+    },
+    "en": {
+      "question": "Which riverside trees are listed with palms in the instructions for the Feast of Tabernacles?",
+      "answer": "Willows",
+      "aliases": [],
+      "explanation": "The text mentions willows of the brook."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Leviticus%2023%3A40&version=KJV"
+  },
+  {
+    "id": "hard-ot-125",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "levites-census-22000",
+    "reference": {
+      "book": 4,
+      "chapter": 3,
+      "verse": 39
+    },
+    "fr": {
+      "question": "Combien de Lévites mâles d’un mois et plus sont comptés dans le total de Nombres 3:39 ?",
+      "answer": "Vingt-deux mille",
+      "aliases": [
+        "22000"
+      ],
+      "explanation": "Le total donné est de vingt-deux mille."
+    },
+    "en": {
+      "question": "How many male Levites aged one month and older are counted in the total of Numbers 3:39?",
+      "answer": "Twenty-two thousand",
+      "aliases": [
+        "22000"
+      ],
+      "explanation": "The stated total is twenty-two thousand."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%203%3A39&version=KJV"
+  },
+  {
+    "id": "hard-ot-126",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "moses-voice-between-cherubim",
+    "reference": {
+      "book": 4,
+      "chapter": 7,
+      "verse": 89
+    },
+    "fr": {
+      "question": "D’entre quelles deux figures Moïse entendait-il la voix lui parler au-dessus du propitiatoire ?",
+      "answer": "Les chérubins",
+      "aliases": [
+        "chérubins",
+        "Chérubins"
+      ],
+      "explanation": "La voix venait d’entre les deux chérubins."
+    },
+    "en": {
+      "question": "From between which two figures did Moses hear the voice speaking above the mercy seat?",
+      "answer": "The cherubim",
+      "aliases": [
+        "cherubim",
+        "Cherubims"
+      ],
+      "explanation": "The voice came from between the two cherubim."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%207%3A89&version=KJV"
+  },
+  {
+    "id": "hard-ot-127",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "egypt-food-garlic",
+    "reference": {
+      "book": 4,
+      "chapter": 11,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Quel condiment est cité en dernier après les oignons dans le souvenir des aliments d’Égypte en Nombres 11 ?",
+      "answer": "L’ail",
+      "aliases": [
+        "ail",
+        "Ail",
+        "Aulx"
+      ],
+      "explanation": "La liste se termine par les oignons et l’ail."
+    },
+    "en": {
+      "question": "Which seasoning is listed last after onions in the recollection of Egypt’s foods in Numbers 11?",
+      "answer": "Garlic",
+      "aliases": [
+        "Garlick"
+      ],
+      "explanation": "The list ends with onions and garlic."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2011%3A5&version=KJV"
+  },
+  {
+    "id": "hard-ot-128",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "levitical-cities-refuge-six",
+    "reference": {
+      "book": 4,
+      "chapter": 35,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Combien de villes de refuge devaient être prises parmi les villes données aux Lévites ?",
+      "answer": "Six",
+      "aliases": [
+        "6"
+      ],
+      "explanation": "Six villes de refuge sont prescrites."
+    },
+    "en": {
+      "question": "How many cities of refuge were to be included among the towns given to the Levites?",
+      "answer": "Six",
+      "aliases": [
+        "6"
+      ],
+      "explanation": "Six cities of refuge are prescribed."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2035%3A6&version=KJV"
+  },
+  {
+    "id": "hard-ot-129",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "wilderness-feet-not-swollen",
+    "reference": {
+      "book": 5,
+      "chapter": 8,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Quel trouble des pieds les Israélites n’eurent-ils pas durant les quarante ans rappelés en Deutéronome 8 ?",
+      "answer": "Les pieds enflés",
+      "aliases": [
+        "pieds enflés",
+        "Le gonflement",
+        "L’enflure des pieds"
+      ],
+      "explanation": "Moïse rappelle que leurs pieds n’avaient pas enflé."
+    },
+    "en": {
+      "question": "What foot problem did the Israelites not experience during the forty years recalled in Deuteronomy 8?",
+      "answer": "Swollen feet",
+      "aliases": [
+        "Swelling",
+        "Foot swelling"
+      ],
+      "explanation": "Moses recalls that their feet had not swollen."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Deuteronomy%208%3A4&version=KJV"
+  },
+  {
+    "id": "hard-ot-130",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "unsolved-murder-no-cultivation-sowing",
+    "reference": {
+      "book": 5,
+      "chapter": 21,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Quels deux travaux agricoles ne devaient pas avoir été faits au lieu choisi pour le rite de la génisse après un meurtre non élucidé ?",
+      "answer": "La culture et les semailles",
+      "aliases": [
+        "culture et les semailles",
+        "Cultiver et semer",
+        "Le labour et les semailles"
+      ],
+      "explanation": "Le lieu ne devait avoir été ni cultivé ni ensemencé."
+    },
+    "en": {
+      "question": "What two agricultural activities must not have taken place at the site chosen for the heifer rite after an unsolved murder?",
+      "answer": "Tilling and sowing",
+      "aliases": [
+        "Ploughing and sowing",
+        "Cultivation and sowing"
+      ],
+      "explanation": "The site was to be neither tilled nor sown."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Deuteronomy%2021%3A4&version=KJV"
+  },
+  {
+    "id": "hard-ot-131",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "achan-gold-bar-fifty-shekels",
+    "reference": {
+      "book": 6,
+      "chapter": 7,
+      "verse": 21
+    },
+    "fr": {
+      "question": "Quel poids, en sicles, avait le lingot d’or dérobé par Acan ?",
+      "answer": "Cinquante",
+      "aliases": [
+        "50"
+      ],
+      "explanation": "Acan déclara avoir pris un lingot de cinquante sicles."
+    },
+    "en": {
+      "question": "What weight in shekels was the gold bar stolen by Achan?",
+      "answer": "Fifty",
+      "aliases": [
+        "50"
+      ],
+      "explanation": "Achan admitted taking a bar weighing fifty shekels."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%207%3A21&version=KJV"
+  },
+  {
+    "id": "hard-ot-132",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "joshua-altar-mount-ebal",
+    "reference": {
+      "book": 6,
+      "chapter": 8,
+      "verse": 30
+    },
+    "fr": {
+      "question": "Sur quelle montagne Josué bâtit-il un autel après la prise d’Aï ?",
+      "answer": "Le mont Ébal",
+      "aliases": [
+        "mont Ébal",
+        "Ébal",
+        "Ebal"
+      ],
+      "explanation": "Josué bâtit un autel à Dieu sur le mont Ébal."
+    },
+    "en": {
+      "question": "On which mountain did Joshua build an altar after the capture of Ai?",
+      "answer": "Mount Ebal",
+      "aliases": [
+        "Ebal"
+      ],
+      "explanation": "Joshua built an altar to God on Mount Ebal."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%208%3A30&version=KJV"
+  },
+  {
+    "id": "hard-ot-133",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "joseph-bones-buried-shechem",
+    "reference": {
+      "book": 6,
+      "chapter": 24,
+      "verse": 32
+    },
+    "fr": {
+      "question": "Dans quelle ville les Israélites enterrèrent-ils les os de Joseph rapportés d’Égypte ?",
+      "answer": "Sichem",
+      "aliases": [],
+      "explanation": "Les os de Joseph furent enterrés à Sichem."
+    },
+    "en": {
+      "question": "In which city did the Israelites bury Joseph’s bones brought from Egypt?",
+      "answer": "Shechem",
+      "aliases": [],
+      "explanation": "Joseph’s bones were buried at Shechem."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%2024%3A32&version=KJV"
+  },
+  {
+    "id": "hard-ot-134",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "heber-kenite-encampment",
+    "reference": {
+      "book": 7,
+      "chapter": 4,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Quel Kénien, mari de Jaël, avait dressé sa tente près de Kédesch ?",
+      "answer": "Héber",
+      "aliases": [
+        "Heber le Kénien"
+      ],
+      "explanation": "Héber s’était séparé des autres Kéniens."
+    },
+    "en": {
+      "question": "Which Kenite, Jael’s husband, had pitched his tent near Kedesh?",
+      "answer": "Heber",
+      "aliases": [
+        "Heber the Kenite"
+      ],
+      "explanation": "Heber had separated from the other Kenites."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%204%3A11&version=KJV"
+  },
+  {
+    "id": "hard-ot-135",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "gideon-other-name-jerubbaal",
+    "reference": {
+      "book": 7,
+      "chapter": 6,
+      "verse": 32
+    },
+    "fr": {
+      "question": "Quel nom Gédéon reçut-il après avoir renversé l’autel de Baal ?",
+      "answer": "Jerubbaal",
+      "aliases": [
+        "Jerubaal",
+        "Yeroubbaal"
+      ],
+      "explanation": "Ce nom rappelle le défi lancé à Baal de défendre sa cause."
+    },
+    "en": {
+      "question": "What name did Gideon receive after tearing down Baal’s altar?",
+      "answer": "Jerubbaal",
+      "aliases": [
+        "Jerub-baal"
+      ],
+      "explanation": "The name recalls the challenge for Baal to plead his own cause."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%206%3A32&version=KJV"
+  },
+  {
+    "id": "hard-ot-136",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "gideon-gold-ephod",
+    "reference": {
+      "book": 7,
+      "chapter": 8,
+      "verse": 27
+    },
+    "fr": {
+      "question": "Quel objet religieux Gédéon fabriqua-t-il avec l’or reçu après la victoire sur Madian ?",
+      "answer": "Un éphod",
+      "aliases": [
+        "éphod"
+      ],
+      "explanation": "Gédéon fit un éphod et le plaça à Ophra."
+    },
+    "en": {
+      "question": "What religious object did Gideon make from the gold received after defeating Midian?",
+      "answer": "An ephod",
+      "aliases": [
+        "ephod"
+      ],
+      "explanation": "Gideon made an ephod and placed it in Ophrah."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%208%3A27&version=KJV"
+  },
+  {
+    "id": "hard-ot-137",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "abimelech-skull-millstone",
+    "reference": {
+      "book": 7,
+      "chapter": 9,
+      "verse": 53
+    },
+    "fr": {
+      "question": "Quel objet une femme jeta-t-elle de la tour sur la tête d’Abimélec ?",
+      "answer": "Une meule",
+      "aliases": [
+        "meule",
+        "Un morceau de meule",
+        "Une meule de moulin"
+      ],
+      "explanation": "Le fragment de meule lui brisa le crâne."
+    },
+    "en": {
+      "question": "What object did a woman throw from the tower onto Abimelech’s head?",
+      "answer": "A millstone",
+      "aliases": [
+        "millstone",
+        "A piece of a millstone",
+        "Millstone fragment"
+      ],
+      "explanation": "The millstone fragment fractured his skull."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%209%3A53&version=KJV"
+  },
+  {
+    "id": "hard-ot-138",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "ichabod-name-departed-glory",
+    "reference": {
+      "book": 9,
+      "chapter": 4,
+      "verse": 21
+    },
+    "fr": {
+      "question": "Quel nom reçut le fils de Phinées pour évoquer le départ de la gloire d’Israël ?",
+      "answer": "I-Kabod",
+      "aliases": [
+        "Ikabod",
+        "Ichabod"
+      ],
+      "explanation": "Le nom accompagne l’annonce de la capture de l’arche."
+    },
+    "en": {
+      "question": "What name was given to Phinehas’s son to express the departure of Israel’s glory?",
+      "answer": "Ichabod",
+      "aliases": [
+        "I-chabod"
+      ],
+      "explanation": "The name accompanies the news that the ark was captured."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%204%3A21&version=KJV"
+  },
+  {
+    "id": "hard-ot-139",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "samuel-firstborn-joel",
+    "reference": {
+      "book": 9,
+      "chapter": 8,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Comment s’appelait le fils aîné de Samuel, établi juge avec son frère ?",
+      "answer": "Joël",
+      "aliases": [],
+      "explanation": "Samuel avait deux fils, Joël et Abija."
+    },
+    "en": {
+      "question": "What was the name of Samuel’s firstborn son, appointed as a judge with his brother?",
+      "answer": "Joel",
+      "aliases": [],
+      "explanation": "Samuel had two sons, Joel and Abiah."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%208%3A2&version=KJV"
+  },
+  {
+    "id": "hard-ot-140",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "saul-rachel-tomb-two-men",
+    "reference": {
+      "book": 9,
+      "chapter": 10,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Combien d’hommes Saül devait-il rencontrer près du sépulcre de Rachel, selon le premier signe de Samuel ?",
+      "answer": "Deux",
+      "aliases": [
+        "2"
+      ],
+      "explanation": "Samuel annonça la rencontre de deux hommes."
+    },
+    "en": {
+      "question": "How many men was Saul to meet near Rachel’s tomb in Samuel’s first sign?",
+      "answer": "Two",
+      "aliases": [
+        "2"
+      ],
+      "explanation": "Samuel foretold a meeting with two men."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2010%3A2&version=KJV"
+  },
+  {
+    "id": "hard-ot-141",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "asahel-swift-gazelle",
+    "reference": {
+      "book": 10,
+      "chapter": 2,
+      "verse": 18
+    },
+    "fr": {
+      "question": "À quel animal rapide Asaël est-il comparé ?",
+      "answer": "Une gazelle",
+      "aliases": [
+        "gazelle",
+        "Une biche",
+        "Gazelle des champs"
+      ],
+      "explanation": "Asaël était aussi léger à la course qu’une gazelle."
+    },
+    "en": {
+      "question": "To what swift animal is Asahel compared?",
+      "answer": "A gazelle",
+      "aliases": [
+        "gazelle",
+        "A wild roe",
+        "Roe",
+        "Roe deer"
+      ],
+      "explanation": "Asahel was as swift-footed as a gazelle."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%202%3A18&version=KJV"
+  },
+  {
+    "id": "hard-ot-142",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "david-friend-hushai",
+    "reference": {
+      "book": 10,
+      "chapter": 15,
+      "verse": 32
+    },
+    "fr": {
+      "question": "Quel ami rejoignit David avec sa tunique déchirée et de la terre sur la tête pendant la fuite devant Absalom ?",
+      "answer": "Huschaï",
+      "aliases": [
+        "Hushaï",
+        "Houshaï",
+        "Hushai"
+      ],
+      "explanation": "Huschaï l’Arkien vint rencontrer David."
+    },
+    "en": {
+      "question": "Which friend met David with a torn coat and earth on his head during the flight from Absalom?",
+      "answer": "Hushai",
+      "aliases": [
+        "Hushai the Archite"
+      ],
+      "explanation": "Hushai the Archite came to meet David."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%2015%3A32&version=KJV"
+  },
+  {
+    "id": "hard-ot-143",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "joab-refuge-altar-horns",
+    "reference": {
+      "book": 11,
+      "chapter": 2,
+      "verse": 28
+    },
+    "fr": {
+      "question": "À quelle partie de l’autel Joab se saisit-il en cherchant refuge ?",
+      "answer": "Les cornes",
+      "aliases": [
+        "cornes",
+        "Les cornes de l’autel"
+      ],
+      "explanation": "Joab se réfugia dans la tente et saisit les cornes de l’autel."
+    },
+    "en": {
+      "question": "What part of the altar did Joab grasp while seeking refuge?",
+      "answer": "The horns",
+      "aliases": [
+        "horns",
+        "Altar horns"
+      ],
+      "explanation": "Joab fled to the tent and grasped the altar’s horns."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%202%3A28&version=KJV"
+  },
+  {
+    "id": "hard-ot-144",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "bronze-sea-diameter-ten",
+    "reference": {
+      "book": 11,
+      "chapter": 7,
+      "verse": 23
+    },
+    "fr": {
+      "question": "Quel diamètre, en coudées, avait la mer de fonte du temple de Salomon ?",
+      "answer": "Dix",
+      "aliases": [
+        "10"
+      ],
+      "explanation": "La mer mesurait dix coudées d’un bord à l’autre."
+    },
+    "en": {
+      "question": "What diameter in cubits did Solomon’s temple’s cast bronze sea have?",
+      "answer": "Ten",
+      "aliases": [
+        "10"
+      ],
+      "explanation": "The sea measured ten cubits from rim to rim."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%207%3A23&version=KJV"
+  },
+  {
+    "id": "hard-ot-145",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "elijah-water-four-jars",
+    "reference": {
+      "book": 11,
+      "chapter": 18,
+      "verse": 33
+    },
+    "fr": {
+      "question": "Combien de cruches d’eau Élie demanda-t-il de remplir à chaque versement sur son sacrifice au Carmel ?",
+      "answer": "Quatre",
+      "aliases": [
+        "4"
+      ],
+      "explanation": "Élie demanda quatre cruches à chaque versement."
+    },
+    "en": {
+      "question": "How many jars of water did Elijah ask to be filled for each pouring over his sacrifice on Carmel?",
+      "answer": "Four",
+      "aliases": [
+        "4"
+      ],
+      "explanation": "Elijah requested four jars for each pouring."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2018%3A33&version=KJV"
+  },
+  {
+    "id": "hard-ot-146",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "elisha-asks-musician",
+    "reference": {
+      "book": 12,
+      "chapter": 3,
+      "verse": 15
+    },
+    "fr": {
+      "question": "Quel professionnel Élisée demanda-t-il de faire venir avant de prophétiser devant les trois rois ?",
+      "answer": "Un joueur de harpe",
+      "aliases": [
+        "joueur de harpe",
+        "Un musicien",
+        "Un harpiste"
+      ],
+      "explanation": "Élisée demanda un joueur d’instrument."
+    },
+    "en": {
+      "question": "What performer did Elisha ask to be brought before prophesying to the three kings?",
+      "answer": "A musician",
+      "aliases": [
+        "musician",
+        "A minstrel",
+        "Minstrel",
+        "A harpist"
+      ],
+      "explanation": "Elisha requested a player of a musical instrument."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%203%3A15&version=KJV"
+  },
+  {
+    "id": "hard-ot-147",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "benhadad-envoy-hazael",
+    "reference": {
+      "book": 12,
+      "chapter": 8,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Quel homme Ben-Hadad envoya-t-il consulter Élisée au sujet de sa maladie ?",
+      "answer": "Hazaël",
+      "aliases": [],
+      "explanation": "Le roi chargea Hazaël de rencontrer Élisée."
+    },
+    "en": {
+      "question": "Whom did Ben-hadad send to consult Elisha about his illness?",
+      "answer": "Hazael",
+      "aliases": [],
+      "explanation": "The king commissioned Hazael to meet Elisha."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%208%3A8&version=KJV"
+  },
+  {
+    "id": "hard-ot-148",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "joash-rescuer-jehosheba",
+    "reference": {
+      "book": 12,
+      "chapter": 11,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Quelle femme cacha le jeune Joas pour le soustraire au massacre ordonné par Athalie ?",
+      "answer": "Joschéba",
+      "aliases": [
+        "Josheba",
+        "Yehoshéba",
+        "Jehosheba"
+      ],
+      "explanation": "Joschéba mit Joas et sa nourrice à l’abri."
+    },
+    "en": {
+      "question": "Which woman hid young Joash to save him from Athaliah’s massacre?",
+      "answer": "Jehosheba",
+      "aliases": [],
+      "explanation": "Jehosheba sheltered Joash and his nurse."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%2011%3A2&version=KJV"
+  },
+  {
+    "id": "hard-ot-149",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "chenaniah-music-leader",
+    "reference": {
+      "book": 13,
+      "chapter": 15,
+      "verse": 22
+    },
+    "fr": {
+      "question": "Quel chef des Lévites dirigeait le chant lors du transport de l’arche parce qu’il était compétent ?",
+      "answer": "Kenania",
+      "aliases": [
+        "Kenaniah",
+        "Chenaniah"
+      ],
+      "explanation": "Kenania était chargé de diriger les chants."
+    },
+    "en": {
+      "question": "Which Levite leader directed the music during the ark’s transport because he was skilled?",
+      "answer": "Chenaniah",
+      "aliases": [
+        "Kenaniah"
+      ],
+      "explanation": "Chenaniah was entrusted with directing the singing."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Chronicles%2015%3A22&version=KJV"
+  },
+  {
+    "id": "hard-ot-150",
+    "difficulty": "hard",
+    "testament": "old",
+    "factKey": "josiah-accession-age-eight",
+    "reference": {
+      "book": 14,
+      "chapter": 34,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Quel âge Josias avait-il lorsqu’il devint roi ?",
+      "answer": "Huit ans",
+      "aliases": [
+        "8"
+      ],
+      "explanation": "Josias monta sur le trône à huit ans."
+    },
+    "en": {
+      "question": "How old was Josiah when he became king?",
+      "answer": "Eight years",
+      "aliases": [
+        "8"
+      ],
+      "explanation": "Josiah came to the throne at eight years old."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Chronicles%2034%3A1&version=KJV"
+  },
+  {
+    "id": "hard-nt-101",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "magi-house-entry",
+    "reference": {
+      "book": 40,
+      "chapter": 2,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Dans quel type de lieu les mages entrèrent-ils pour voir l’enfant et Marie, selon Matthieu 2 ?",
+      "answer": "Une maison",
+      "aliases": [
+        "maison"
+      ],
+      "explanation": "Matthieu les décrit entrant dans une maison."
+    },
+    "en": {
+      "question": "What kind of place did the wise men enter to see the child and Mary in Matthew 2?",
+      "answer": "A house",
+      "aliases": [
+        "house"
+      ],
+      "explanation": "Matthew describes them entering a house."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%202%3A11&version=KJV"
+  },
+  {
+    "id": "hard-nt-102",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "jesus-twelve-legions-angels",
+    "reference": {
+      "book": 40,
+      "chapter": 26,
+      "verse": 53
+    },
+    "fr": {
+      "question": "Jésus dit pouvoir demander au Père plus de combien de légions d’anges lors de son arrestation ?",
+      "answer": "Douze",
+      "aliases": [
+        "12"
+      ],
+      "explanation": "Il évoque plus de douze légions d’anges disponibles."
+    },
+    "en": {
+      "question": "At his arrest, Jesus says he could ask the Father for more than how many legions of angels?",
+      "answer": "Twelve",
+      "aliases": [
+        "12"
+      ],
+      "explanation": "He speaks of more than twelve legions of angels being available."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2026%3A53&version=KJV"
+  },
+  {
+    "id": "hard-nt-103",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "apostle-simon-canaanite",
+    "reference": {
+      "book": 40,
+      "chapter": 10,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Quel autre Simon, distinct de Pierre, figure dans la liste des Douze de Matthieu ?",
+      "answer": "Simon le Cananite",
+      "aliases": [
+        "Simon le Zélote",
+        "Simon Cananéen"
+      ],
+      "explanation": "Matthieu distingue ce Simon de Simon Pierre."
+    },
+    "en": {
+      "question": "Which other Simon, distinct from Peter, appears in Matthew’s list of the Twelve?",
+      "answer": "Simon the Canaanite",
+      "aliases": [
+        "Simon the Zealot",
+        "Simon Zelotes"
+      ],
+      "explanation": "Matthew distinguishes this Simon from Simon Peter."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2010%3A4&version=KJV"
+  },
+  {
+    "id": "hard-nt-104",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "good-soil-hundred-sixty-thirty",
+    "reference": {
+      "book": 40,
+      "chapter": 13,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Quels trois rendements la bonne terre produit-elle dans la parabole du semeur de Matthieu 13 ?",
+      "answer": "Cent, soixante et trente",
+      "aliases": [
+        "100, 60 et 30",
+        "30, 60 et 100"
+      ],
+      "explanation": "Matthieu énumère les rendements de cent, soixante et trente."
+    },
+    "en": {
+      "question": "What three yields does good soil produce in the sower parable in Matthew 13?",
+      "answer": "A hundred, sixty and thirty",
+      "aliases": [
+        "hundred, sixty and thirty",
+        "100, 60 and 30",
+        "30, 60 and 100"
+      ],
+      "explanation": "Matthew lists yields of a hundred, sixty and thirty."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2013%3A8&version=KJV"
+  },
+  {
+    "id": "hard-nt-105",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "scribe-householder-new-old",
+    "reference": {
+      "book": 40,
+      "chapter": 13,
+      "verse": 52
+    },
+    "fr": {
+      "question": "Quelles deux catégories de choses le maître de maison tire-t-il de son trésor dans l’image du scribe instruit ?",
+      "answer": "Des choses nouvelles et anciennes",
+      "aliases": [
+        "choses nouvelles et anciennes",
+        "Du nouveau et de l’ancien"
+      ],
+      "explanation": "L’image réunit ce qui est nouveau et ce qui est ancien."
+    },
+    "en": {
+      "question": "What two kinds of things does the householder bring from his treasure in the image of the instructed scribe?",
+      "answer": "New and old things",
+      "aliases": [
+        "Things new and old",
+        "Old and new things"
+      ],
+      "explanation": "The image brings together what is new and what is old."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2013%3A52&version=KJV"
+  },
+  {
+    "id": "hard-nt-106",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "jericho-two-blind-men",
+    "reference": {
+      "book": 40,
+      "chapter": 20,
+      "verse": 30
+    },
+    "fr": {
+      "question": "Combien d’aveugles Matthieu décrit-il assis au bord du chemin à la sortie de Jéricho ?",
+      "answer": "Deux",
+      "aliases": [
+        "2"
+      ],
+      "explanation": "Matthieu rapporte la demande de deux aveugles."
+    },
+    "en": {
+      "question": "How many blind men does Matthew describe sitting by the road as Jesus leaves Jericho?",
+      "answer": "Two",
+      "aliases": [
+        "2"
+      ],
+      "explanation": "Matthew records the appeal of two blind men."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2020%3A30&version=KJV"
+  },
+  {
+    "id": "hard-nt-107",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "bethany-host-simon-leper",
+    "reference": {
+      "book": 40,
+      "chapter": 26,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Chez quel Simon Jésus se trouvait-il à Béthanie lorsqu’une femme versa du parfum sur sa tête ?",
+      "answer": "Simon le lépreux",
+      "aliases": [],
+      "explanation": "Le repas se déroulait chez Simon le lépreux."
+    },
+    "en": {
+      "question": "At which Simon’s house was Jesus in Bethany when a woman poured perfume on his head?",
+      "answer": "Simon the leper",
+      "aliases": [
+        "Simon"
+      ],
+      "explanation": "The meal took place at Simon the leper’s house."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2026%3A6&version=KJV"
+  },
+  {
+    "id": "hard-nt-108",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "john-baptist-belt-leather",
+    "reference": {
+      "book": 41,
+      "chapter": 1,
+      "verse": 6
+    },
+    "fr": {
+      "question": "En quelle matière était la ceinture de Jean-Baptiste ?",
+      "answer": "Le cuir",
+      "aliases": [
+        "cuir",
+        "Une peau",
+        "Peau"
+      ],
+      "explanation": "Jean portait une ceinture de cuir."
+    },
+    "en": {
+      "question": "Of what material was John the Baptist’s belt made?",
+      "answer": "Leather",
+      "aliases": [
+        "Skin",
+        "Animal skin"
+      ],
+      "explanation": "John wore a leather belt."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%201%3A6&version=KJV"
+  },
+  {
+    "id": "hard-nt-109",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "disciples-bread-two-hundred-denarii",
+    "reference": {
+      "book": 41,
+      "chapter": 6,
+      "verse": 37
+    },
+    "fr": {
+      "question": "Quel montant, en deniers, les disciples évoquent-ils pour acheter du pain à la foule en Marc 6 ?",
+      "answer": "Deux cents",
+      "aliases": [
+        "200"
+      ],
+      "explanation": "Les disciples parlent de deux cents deniers de pain."
+    },
+    "en": {
+      "question": "What amount in denarii do the disciples mention for buying bread for the crowd in Mark 6?",
+      "answer": "Two hundred",
+      "aliases": [
+        "200"
+      ],
+      "explanation": "The disciples speak of two hundred denarii worth of bread."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%206%3A37&version=KJV"
+  },
+  {
+    "id": "hard-nt-110",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "disciples-travel-staff",
+    "reference": {
+      "book": 41,
+      "chapter": 6,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Quel objet de marche Marc autorise-t-il expressément aux Douze pour leur voyage ?",
+      "answer": "Un bâton",
+      "aliases": [
+        "bâton",
+        "Un bâton de marche"
+      ],
+      "explanation": "Dans Marc, l’instruction permet un bâton."
+    },
+    "en": {
+      "question": "What walking aid does Mark expressly allow the Twelve to take on their journey?",
+      "answer": "A staff",
+      "aliases": [
+        "staff",
+        "Walking stick"
+      ],
+      "explanation": "In Mark, the instruction permits a staff."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%206%3A8&version=KJV"
+  },
+  {
+    "id": "hard-nt-111",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "woman-syrophoenician-origin",
+    "reference": {
+      "book": 41,
+      "chapter": 7,
+      "verse": 26
+    },
+    "fr": {
+      "question": "De quelle origine la femme qui supplia Jésus de délivrer sa fille est-elle dite en Marc 7 ?",
+      "answer": "Syro-phénicienne",
+      "aliases": [
+        "Syrophénicienne",
+        "Phénicienne de Syrie"
+      ],
+      "explanation": "Marc décrit une femme syro-phénicienne de naissance."
+    },
+    "en": {
+      "question": "What origin is given for the woman begging Jesus to deliver her daughter in Mark 7?",
+      "answer": "Syrophoenician",
+      "aliases": [
+        "Syrophenician",
+        "Syro-Phoenician"
+      ],
+      "explanation": "Mark describes a woman who was Syrophoenician by birth."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%207%3A26&version=KJV"
+  },
+  {
+    "id": "hard-nt-112",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "jesus-dalmanutha",
+    "reference": {
+      "book": 41,
+      "chapter": 8,
+      "verse": 10
+    },
+    "fr": {
+      "question": "Vers quelle contrée Jésus se rendit-il en barque après le repas des quatre mille, selon Marc ?",
+      "answer": "Dalmanutha",
+      "aliases": [],
+      "explanation": "Marc situe l’arrivée dans la contrée de Dalmanutha."
+    },
+    "en": {
+      "question": "To which district did Jesus go by boat after feeding the four thousand, according to Mark?",
+      "answer": "Dalmanutha",
+      "aliases": [],
+      "explanation": "Mark places the arrival in the district of Dalmanutha."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%208%3A10&version=KJV"
+  },
+  {
+    "id": "hard-nt-113",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "mary-elizabeth-three-months",
+    "reference": {
+      "book": 42,
+      "chapter": 1,
+      "verse": 56
+    },
+    "fr": {
+      "question": "Environ combien de mois Marie demeura-t-elle auprès d’Élisabeth ?",
+      "answer": "Trois",
+      "aliases": [
+        "3"
+      ],
+      "explanation": "Luc donne une durée d’environ trois mois."
+    },
+    "en": {
+      "question": "About how many months did Mary stay with Elizabeth?",
+      "answer": "Three",
+      "aliases": [
+        "3"
+      ],
+      "explanation": "Luke gives a duration of about three months."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%201%3A56&version=KJV"
+  },
+  {
+    "id": "hard-nt-114",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "census-governor-quirinius",
+    "reference": {
+      "book": 42,
+      "chapter": 2,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Quel gouverneur de Syrie Luc nomme-t-il dans sa mention du recensement ?",
+      "answer": "Quirinius",
+      "aliases": [
+        "Cyrénius",
+        "Cyrenius"
+      ],
+      "explanation": "Luc situe ce recensement sous Quirinius."
+    },
+    "en": {
+      "question": "Which governor of Syria does Luke name in his mention of the census?",
+      "answer": "Quirinius",
+      "aliases": [
+        "Cyrenius"
+      ],
+      "explanation": "Luke places this census under Quirinius."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%202%3A2&version=KJV"
+  },
+  {
+    "id": "hard-nt-115",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "nathanael-home-cana",
+    "reference": {
+      "book": 43,
+      "chapter": 21,
+      "verse": 2
+    },
+    "fr": {
+      "question": "De quelle ville de Galilée Nathanaël était-il originaire, selon Jean 21 ?",
+      "answer": "Cana",
+      "aliases": [
+        "Cana en Galilée"
+      ],
+      "explanation": "Jean présente Nathanaël comme originaire de Cana en Galilée."
+    },
+    "en": {
+      "question": "From which town in Galilee did Nathanael come, according to John 21?",
+      "answer": "Cana",
+      "aliases": [
+        "Cana of Galilee"
+      ],
+      "explanation": "John identifies Nathanael as coming from Cana in Galilee."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2021%3A2&version=KJV"
+  },
+  {
+    "id": "hard-nt-116",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "mary-magdalene-seven-demons",
+    "reference": {
+      "book": 42,
+      "chapter": 8,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Combien de démons étaient sortis de Marie appelée la Magdaléenne ?",
+      "answer": "Sept",
+      "aliases": [
+        "7"
+      ],
+      "explanation": "Luc mentionne sept démons délivrés de Marie."
+    },
+    "en": {
+      "question": "How many demons had gone out of Mary called Magdalene?",
+      "answer": "Seven",
+      "aliases": [
+        "7"
+      ],
+      "explanation": "Luke mentions seven demons having gone out of Mary."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%208%3A2&version=KJV"
+  },
+  {
+    "id": "hard-nt-117",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "transfiguration-discussion-departure",
+    "reference": {
+      "book": 42,
+      "chapter": 9,
+      "verse": 31
+    },
+    "fr": {
+      "question": "De quel événement à accomplir à Jérusalem Moïse et Élie parlaient-ils avec Jésus lors de la transfiguration ?",
+      "answer": "Son départ",
+      "aliases": [
+        "Sa mort",
+        "Le départ de Jésus"
+      ],
+      "explanation": "Luc dit qu’ils parlaient de son départ à accomplir à Jérusalem."
+    },
+    "en": {
+      "question": "What event to be accomplished at Jerusalem were Moses and Elijah discussing with Jesus at the transfiguration?",
+      "answer": "His departure",
+      "aliases": [
+        "His death",
+        "His decease",
+        "Decease",
+        "Departure"
+      ],
+      "explanation": "Luke says they spoke of his departure to be accomplished at Jerusalem."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%209%3A31&version=KJV"
+  },
+  {
+    "id": "hard-nt-118",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "pharisees-tithe-rue",
+    "reference": {
+      "book": 42,
+      "chapter": 11,
+      "verse": 42
+    },
+    "fr": {
+      "question": "Quelle herbe Luc cite-t-il avec la menthe parmi les dîmes minutieuses des pharisiens ?",
+      "answer": "La rue",
+      "aliases": [
+        "rue"
+      ],
+      "explanation": "Luc mentionne la menthe et la rue."
+    },
+    "en": {
+      "question": "Which herb does Luke name with mint among the Pharisees’ meticulous tithes?",
+      "answer": "Rue",
+      "aliases": [],
+      "explanation": "Luke mentions mint and rue."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2011%3A42&version=KJV"
+  },
+  {
+    "id": "hard-nt-119",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "banquet-excuse-five-oxen-pairs",
+    "reference": {
+      "book": 42,
+      "chapter": 14,
+      "verse": 19
+    },
+    "fr": {
+      "question": "Combien de paires de bœufs un invité venait-il d’acheter dans son excuse au grand repas ?",
+      "answer": "Cinq",
+      "aliases": [
+        "5"
+      ],
+      "explanation": "L’invité prétexta l’essai de cinq paires de bœufs."
+    },
+    "en": {
+      "question": "How many pairs of oxen had an invited guest bought in his excuse for missing the great supper?",
+      "answer": "Five",
+      "aliases": [
+        "5"
+      ],
+      "explanation": "The guest used testing five pairs of oxen as his excuse."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2014%3A19&version=KJV"
+  },
+  {
+    "id": "hard-nt-120",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "rich-man-beggar-lazarus",
+    "reference": {
+      "book": 42,
+      "chapter": 16,
+      "verse": 20
+    },
+    "fr": {
+      "question": "Quel pauvre nommé était couché à la porte du riche dans Luc 16 ?",
+      "answer": "Lazare",
+      "aliases": [
+        "Lazare le pauvre"
+      ],
+      "explanation": "Luc nomme le pauvre Lazare."
+    },
+    "en": {
+      "question": "Which named poor man lay at the rich man’s gate in Luke 16?",
+      "answer": "Lazarus",
+      "aliases": [
+        "Lazarus the beggar"
+      ],
+      "explanation": "Luke names the poor man Lazarus."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2016%3A20&version=KJV"
+  },
+  {
+    "id": "hard-nt-121",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "john-baptism-bethany-beyond-jordan",
+    "reference": {
+      "book": 43,
+      "chapter": 1,
+      "verse": 28
+    },
+    "fr": {
+      "question": "Quel lieu au-delà du Jourdain Jean 1:28 associe-t-il au baptême de Jean ?",
+      "answer": "Béthanie",
+      "aliases": [
+        "Béthabara",
+        "Bethabara",
+        "Béthanie au-delà du Jourdain"
+      ],
+      "explanation": "La LSG donne Béthanie ; la KJV emploie Béthabara."
+    },
+    "en": {
+      "question": "Which place beyond the Jordan does John 1:28 associate with John’s baptizing in the KJV?",
+      "answer": "Bethabara",
+      "aliases": [
+        "Bethany",
+        "Bethany beyond the Jordan"
+      ],
+      "explanation": "LSG reads Bethany; the KJV uses Bethabara."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%201%3A28&version=KJV"
+  },
+  {
+    "id": "hard-nt-122",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "disciples-rowed-twenty-five-thirty-stadia",
+    "reference": {
+      "book": 43,
+      "chapter": 6,
+      "verse": 19
+    },
+    "fr": {
+      "question": "Environ combien de stades les disciples avaient-ils ramé quand ils virent Jésus marcher sur la mer en Jean 6 ?",
+      "answer": "Vingt-cinq ou trente",
+      "aliases": [
+        "25 ou 30",
+        "25 à 30",
+        "Vingt-cinq à trente"
+      ],
+      "explanation": "Jean situe la rencontre après environ vingt-cinq ou trente stades."
+    },
+    "en": {
+      "question": "About how many stadia had the disciples rowed when they saw Jesus walking on the sea in John 6?",
+      "answer": "Twenty-five or thirty",
+      "aliases": [
+        "25 or 30",
+        "25–30",
+        "25 to 30"
+      ],
+      "explanation": "John places the encounter after about twenty-five or thirty stadia."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%206%3A19&version=KJV"
+  },
+  {
+    "id": "hard-nt-123",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "bethany-jerusalem-fifteen-stadia",
+    "reference": {
+      "book": 43,
+      "chapter": 11,
+      "verse": 18
+    },
+    "fr": {
+      "question": "À environ combien de stades de Jérusalem Béthanie se trouvait-elle, selon Jean 11 ?",
+      "answer": "Quinze",
+      "aliases": [
+        "15"
+      ],
+      "explanation": "Jean donne une distance d’environ quinze stades."
+    },
+    "en": {
+      "question": "About how many stadia from Jerusalem was Bethany, according to John 11?",
+      "answer": "Fifteen",
+      "aliases": [
+        "15"
+      ],
+      "explanation": "John gives a distance of about fifteen stadia."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2011%3A18&version=KJV"
+  },
+  {
+    "id": "hard-nt-124",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "greeks-approach-philip",
+    "reference": {
+      "book": 43,
+      "chapter": 12,
+      "verse": 21
+    },
+    "fr": {
+      "question": "Quel disciple des Grecs abordèrent-ils pour demander à voir Jésus ?",
+      "answer": "Philippe",
+      "aliases": [],
+      "explanation": "Les Grecs adressèrent leur demande à Philippe."
+    },
+    "en": {
+      "question": "Which disciple did some Greeks approach to ask to see Jesus?",
+      "answer": "Philip",
+      "aliases": [],
+      "explanation": "The Greeks addressed their request to Philip."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2012%3A21&version=KJV"
+  },
+  {
+    "id": "hard-nt-125",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "judas-held-money-bag",
+    "reference": {
+      "book": 43,
+      "chapter": 13,
+      "verse": 29
+    },
+    "fr": {
+      "question": "Pourquoi certains disciples pensaient-ils que Jésus demandait à Judas d’acheter quelque chose pour la fête ?",
+      "answer": "Il gardait la bourse",
+      "aliases": [
+        "Il tenait la bourse",
+        "Il était le trésorier"
+      ],
+      "explanation": "Judas était chargé de la bourse du groupe."
+    },
+    "en": {
+      "question": "Why did some disciples think Jesus was asking Judas to buy something for the feast?",
+      "answer": "He kept the money bag",
+      "aliases": [
+        "He was the treasurer",
+        "He had the bag",
+        "He kept the money"
+      ],
+      "explanation": "Judas was responsible for the group’s money bag."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2013%3A29&version=KJV"
+  },
+  {
+    "id": "hard-nt-126",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "cross-inscription-three-languages",
+    "reference": {
+      "book": 43,
+      "chapter": 19,
+      "verse": 20
+    },
+    "fr": {
+      "question": "En quelles trois langues l’inscription de la croix était-elle rédigée selon Jean 19 ?",
+      "answer": "Hébreu, latin et grec",
+      "aliases": [
+        "Hébreu grec latin",
+        "Grec latin hébreu"
+      ],
+      "explanation": "Jean énumère ces trois langues."
+    },
+    "en": {
+      "question": "In which three languages was the inscription on the cross written according to John 19?",
+      "answer": "Hebrew, Latin and Greek",
+      "aliases": [
+        "Hebrew Greek Latin",
+        "Greek Latin Hebrew"
+      ],
+      "explanation": "John lists these three languages."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2019%3A20&version=KJV"
+  },
+  {
+    "id": "hard-nt-127",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "disciples-upper-room-120",
+    "reference": {
+      "book": 44,
+      "chapter": 1,
+      "verse": 15
+    },
+    "fr": {
+      "question": "Environ combien de personnes formaient le groupe devant lequel Pierre se leva avant le choix de Matthias ?",
+      "answer": "Cent vingt",
+      "aliases": [
+        "120"
+      ],
+      "explanation": "Le groupe comptait environ cent vingt personnes."
+    },
+    "en": {
+      "question": "About how many people formed the group before whom Peter stood before Matthias was chosen?",
+      "answer": "One hundred and twenty",
+      "aliases": [
+        "120"
+      ],
+      "explanation": "The group numbered about one hundred and twenty."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%201%3A15&version=KJV"
+  },
+  {
+    "id": "hard-nt-128",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "peter-john-prayer-ninth-hour",
+    "reference": {
+      "book": 44,
+      "chapter": 3,
+      "verse": 1
+    },
+    "fr": {
+      "question": "À quelle heure du jour Pierre et Jean montaient-ils au temple pour la prière en Actes 3 ?",
+      "answer": "La neuvième heure",
+      "aliases": [
+        "neuvième heure",
+        "Neuvième",
+        "9",
+        "15 heures"
+      ],
+      "explanation": "Le récit situe la prière à la neuvième heure."
+    },
+    "en": {
+      "question": "At what hour were Peter and John going up to the temple for prayer in Acts 3?",
+      "answer": "The ninth hour",
+      "aliases": [
+        "ninth hour",
+        "Ninth",
+        "9",
+        "3 pm"
+      ],
+      "explanation": "The account places the prayer at the ninth hour."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%203%3A1&version=KJV"
+  },
+  {
+    "id": "hard-nt-129",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "stephen-opponents-libertines",
+    "reference": {
+      "book": 44,
+      "chapter": 6,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Quel nom de synagogue figure en premier parmi les adversaires d’Étienne en Actes 6:9 ?",
+      "answer": "La synagogue des Affranchis",
+      "aliases": [
+        "synagogue des Affranchis",
+        "Les Affranchis",
+        "Synagogue des Affranchis"
+      ],
+      "explanation": "Le texte cite d’abord la synagogue des Affranchis."
+    },
+    "en": {
+      "question": "Which synagogue name appears first among Stephen’s opponents in Acts 6:9?",
+      "answer": "The synagogue of the Libertines",
+      "aliases": [
+        "synagogue of the Libertines",
+        "Libertines",
+        "Freedmen",
+        "The synagogue of the Freedmen"
+      ],
+      "explanation": "The text first names the synagogue of the Libertines."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%206%3A9&version=KJV"
+  },
+  {
+    "id": "hard-nt-130",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "ethiopian-queen-candace",
+    "reference": {
+      "book": 44,
+      "chapter": 8,
+      "verse": 27
+    },
+    "fr": {
+      "question": "Quel titre ou nom porte la reine dont le fonctionnaire éthiopien administrait les trésors ?",
+      "answer": "Candace",
+      "aliases": [
+        "Kandaké",
+        "Kandake"
+      ],
+      "explanation": "L’homme était responsable des trésors de Candace."
+    },
+    "en": {
+      "question": "What title or name is given to the queen whose treasury the Ethiopian official managed?",
+      "answer": "Candace",
+      "aliases": [
+        "Kandake"
+      ],
+      "explanation": "The man was in charge of Candace’s treasury."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%208%3A27&version=KJV"
+  },
+  {
+    "id": "hard-nt-131",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "aeneas-eight-years-bed",
+    "reference": {
+      "book": 44,
+      "chapter": 9,
+      "verse": 33
+    },
+    "fr": {
+      "question": "Depuis combien d’années Énée était-il couché sur un lit avant sa guérison par Pierre ?",
+      "answer": "Huit",
+      "aliases": [
+        "8"
+      ],
+      "explanation": "Énée était paralysé et alité depuis huit ans."
+    },
+    "en": {
+      "question": "For how many years had Aeneas been bedridden before Peter healed him?",
+      "answer": "Eight",
+      "aliases": [
+        "8"
+      ],
+      "explanation": "Aeneas had been paralysed and bedridden for eight years."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%209%3A33&version=KJV"
+  },
+  {
+    "id": "hard-nt-132",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "peter-roof-sixth-hour",
+    "reference": {
+      "book": 44,
+      "chapter": 10,
+      "verse": 9
+    },
+    "fr": {
+      "question": "À quelle heure Pierre monta-t-il sur le toit pour prier avant sa vision de la nappe ?",
+      "answer": "La sixième heure",
+      "aliases": [
+        "sixième heure",
+        "Sixième",
+        "6",
+        "Midi"
+      ],
+      "explanation": "Pierre monta prier vers la sixième heure."
+    },
+    "en": {
+      "question": "At what hour did Peter go onto the roof to pray before his vision of the sheet?",
+      "answer": "The sixth hour",
+      "aliases": [
+        "sixth hour",
+        "Sixth",
+        "6",
+        "Noon"
+      ],
+      "explanation": "Peter went up to pray at about the sixth hour."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2010%3A9&version=KJV"
+  },
+  {
+    "id": "hard-nt-133",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "peter-guard-four-squads",
+    "reference": {
+      "book": 44,
+      "chapter": 12,
+      "verse": 4
+    },
+    "fr": {
+      "question": "À combien d’escouades de quatre soldats Hérode confia-t-il Pierre ?",
+      "answer": "Quatre",
+      "aliases": [
+        "4"
+      ],
+      "explanation": "Quatre escouades étaient chargées de sa garde."
+    },
+    "en": {
+      "question": "To how many squads of four soldiers did Herod entrust Peter?",
+      "answer": "Four",
+      "aliases": [
+        "4"
+      ],
+      "explanation": "Four squads were assigned to guard him."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2012%3A4&version=KJV"
+  },
+  {
+    "id": "hard-nt-134",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "lystra-derbe-region-lycaonia",
+    "reference": {
+      "book": 44,
+      "chapter": 14,
+      "verse": 6
+    },
+    "fr": {
+      "question": "De quelle région Lystre et Derbe sont-elles dites villes en Actes 14 ?",
+      "answer": "La Lycaonie",
+      "aliases": [
+        "Lycaonie"
+      ],
+      "explanation": "Paul et Barnabas se réfugièrent dans ces villes de Lycaonie."
+    },
+    "en": {
+      "question": "Of which region are Lystra and Derbe said to be cities in Acts 14?",
+      "answer": "Lycaonia",
+      "aliases": [],
+      "explanation": "Paul and Barnabas fled to these cities of Lycaonia."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2014%3A6&version=KJV"
+  },
+  {
+    "id": "hard-nt-135",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "philippi-roman-colony",
+    "reference": {
+      "book": 44,
+      "chapter": 16,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Quel statut romain Actes 16 attribue-t-il à Philippes ?",
+      "answer": "Une colonie",
+      "aliases": [
+        "colonie",
+        "Une colonie romaine"
+      ],
+      "explanation": "Philippes est présentée comme une colonie romaine."
+    },
+    "en": {
+      "question": "What Roman status does Acts 16 assign to Philippi?",
+      "answer": "A colony",
+      "aliases": [
+        "colony",
+        "Roman colony"
+      ],
+      "explanation": "Philippi is described as a Roman colony."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A12&version=KJV"
+  },
+  {
+    "id": "hard-nt-136",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "athens-philosophers-epicureans-stoics",
+    "reference": {
+      "book": 44,
+      "chapter": 17,
+      "verse": 18
+    },
+    "fr": {
+      "question": "Quels deux courants philosophiques discutèrent avec Paul à Athènes ?",
+      "answer": "Les épicuriens et les stoïciens",
+      "aliases": [
+        "épicuriens et les stoïciens",
+        "Stoïciens et épicuriens"
+      ],
+      "explanation": "Des philosophes des deux courants rencontrèrent Paul."
+    },
+    "en": {
+      "question": "Which two philosophical schools debated with Paul in Athens?",
+      "answer": "Epicureans and Stoics",
+      "aliases": [
+        "Stoics and Epicureans",
+        "Epicureans and Stoicks"
+      ],
+      "explanation": "Philosophers from both schools encountered Paul."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2017%3A18&version=KJV"
+  },
+  {
+    "id": "hard-nt-137",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "ephesus-silversmith-demetrius",
+    "reference": {
+      "book": 44,
+      "chapter": 19,
+      "verse": 24
+    },
+    "fr": {
+      "question": "Quel orfèvre fabriquant des temples d’Artémis en argent provoqua une agitation contre Paul ?",
+      "answer": "Démétrius",
+      "aliases": [],
+      "explanation": "Démétrius mobilisa les artisans de son métier."
+    },
+    "en": {
+      "question": "Which silversmith making silver shrines of Artemis stirred up opposition to Paul?",
+      "answer": "Demetrius",
+      "aliases": [],
+      "explanation": "Demetrius rallied craftsmen of his trade."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2019%3A24&version=KJV"
+  },
+  {
+    "id": "hard-nt-138",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "eutychus-third-floor",
+    "reference": {
+      "book": 44,
+      "chapter": 20,
+      "verse": 9
+    },
+    "fr": {
+      "question": "De quel étage Eutychus tomba-t-il pendant le discours de Paul ?",
+      "answer": "Le troisième",
+      "aliases": [
+        "troisième",
+        "3",
+        "Troisième étage",
+        "3e"
+      ],
+      "explanation": "Le jeune homme tomba du troisième étage."
+    },
+    "en": {
+      "question": "From which storey did Eutychus fall during Paul’s speech?",
+      "answer": "The third",
+      "aliases": [
+        "third",
+        "3",
+        "Third storey",
+        "Third loft",
+        "3rd"
+      ],
+      "explanation": "The young man fell from the third storey."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2020%3A9&version=KJV"
+  },
+  {
+    "id": "hard-nt-139",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "commander-egyptian-four-thousand",
+    "reference": {
+      "book": 44,
+      "chapter": 21,
+      "verse": 38
+    },
+    "fr": {
+      "question": "Combien d’hommes le tribun associa-t-il à l’Égyptien pour lequel il prenait Paul ?",
+      "answer": "Quatre mille",
+      "aliases": [
+        "4000"
+      ],
+      "explanation": "Le tribun évoqua quatre mille hommes conduits au désert."
+    },
+    "en": {
+      "question": "How many men did the commander associate with the Egyptian for whom he mistook Paul?",
+      "answer": "Four thousand",
+      "aliases": [
+        "4000"
+      ],
+      "explanation": "The commander mentioned four thousand men led into the wilderness."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2021%3A38&version=KJV"
+  },
+  {
+    "id": "hard-nt-140",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "paul-high-priest-ananias",
+    "reference": {
+      "book": 44,
+      "chapter": 23,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Quel souverain sacrificateur ordonna de frapper Paul sur la bouche ?",
+      "answer": "Ananias",
+      "aliases": [],
+      "explanation": "Ananias donna cet ordre pendant l’audience."
+    },
+    "en": {
+      "question": "Which high priest ordered Paul to be struck on the mouth?",
+      "answer": "Ananias",
+      "aliases": [],
+      "explanation": "Ananias gave this order during the hearing."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2023%3A2&version=KJV"
+  },
+  {
+    "id": "hard-nt-141",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "felix-wife-drusilla",
+    "reference": {
+      "book": 44,
+      "chapter": 24,
+      "verse": 24
+    },
+    "fr": {
+      "question": "Comment s’appelait l’épouse juive de Félix qui écouta Paul avec lui ?",
+      "answer": "Drusille",
+      "aliases": [],
+      "explanation": "Félix vint avec sa femme Drusille."
+    },
+    "en": {
+      "question": "What was the name of Felix’s Jewish wife who listened to Paul with him?",
+      "answer": "Drusilla",
+      "aliases": [],
+      "explanation": "Felix came with his wife Drusilla."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2024%3A24&version=KJV"
+  },
+  {
+    "id": "hard-nt-142",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "paul-storm-euroclydon",
+    "reference": {
+      "book": 44,
+      "chapter": 27,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Quel nom le récit donne-t-il au vent violent qui frappa le navire de Paul ?",
+      "answer": "Euraquilon",
+      "aliases": [
+        "Euroclydon",
+        "Euroaquilon"
+      ],
+      "explanation": "La LSG nomme Euraquilon ce vent ; la KJV écrit Euroclydon."
+    },
+    "en": {
+      "question": "What name does the account give the violent wind that struck Paul’s ship?",
+      "answer": "Euroclydon",
+      "aliases": [
+        "Euraquilo",
+        "Euraquilon",
+        "Euroaquilo"
+      ],
+      "explanation": "LSG names the wind Euraquilon; KJV calls it Euroclydon."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2027%3A14&version=KJV"
+  },
+  {
+    "id": "hard-nt-143",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "alexandrian-ship-twin-gods",
+    "reference": {
+      "book": 44,
+      "chapter": 28,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Quelle enseigne portait le navire alexandrin pris par Paul après l’hiver à Malte ?",
+      "answer": "Les Dioscures",
+      "aliases": [
+        "Dioscures",
+        "Castor et Pollux"
+      ],
+      "explanation": "Le navire portait l’enseigne des Dioscures."
+    },
+    "en": {
+      "question": "What figurehead did the Alexandrian ship Paul took after wintering on Malta bear?",
+      "answer": "Castor and Pollux",
+      "aliases": [
+        "The Dioscuri",
+        "Dioscuri",
+        "The twin gods"
+      ],
+      "explanation": "The ship bore the figurehead of the twin gods."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2028%3A11&version=KJV"
+  },
+  {
+    "id": "hard-nt-144",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "epaenetus-firstfruits",
+    "reference": {
+      "book": 45,
+      "chapter": 16,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Quel croyant Paul salue-t-il comme prémices pour Christ en Romains 16:5 ?",
+      "answer": "Épaïnète",
+      "aliases": [
+        "Épénète",
+        "Epenetus"
+      ],
+      "explanation": "Paul adresse une salutation particulière à Épaïnète."
+    },
+    "en": {
+      "question": "Which believer does Paul greet as firstfruits for Christ in Romans 16:5?",
+      "answer": "Epaenetus",
+      "aliases": [
+        "Epenetus"
+      ],
+      "explanation": "Paul sends a special greeting to Epaenetus."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%2016%3A5&version=KJV"
+  },
+  {
+    "id": "hard-nt-145",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "aquila-priscilla-house-church",
+    "reference": {
+      "book": 46,
+      "chapter": 16,
+      "verse": 19
+    },
+    "fr": {
+      "question": "Quel couple abritait chez lui l’Église qui salue les Corinthiens à la fin de 1 Corinthiens ?",
+      "answer": "Aquilas et Priscille",
+      "aliases": [
+        "Priscille et Aquilas",
+        "Prisca et Aquilas"
+      ],
+      "explanation": "L’Église se réunissait dans leur maison."
+    },
+    "en": {
+      "question": "Which couple hosted the church that greets the Corinthians at the end of 1 Corinthians?",
+      "answer": "Aquila and Priscilla",
+      "aliases": [
+        "Priscilla and Aquila",
+        "Aquila and Prisca"
+      ],
+      "explanation": "The church met in their house."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Corinthians%2016%3A19&version=KJV"
+  },
+  {
+    "id": "hard-nt-146",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "paul-open-door-troas",
+    "reference": {
+      "book": 47,
+      "chapter": 2,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Dans quelle ville Paul trouva-t-il une porte ouverte pour l’Évangile, selon 2 Corinthiens 2 ?",
+      "answer": "Troas",
+      "aliases": [],
+      "explanation": "Paul décrit une occasion favorable à Troas."
+    },
+    "en": {
+      "question": "In which city did Paul find an open door for the gospel, according to 2 Corinthians 2?",
+      "answer": "Troas",
+      "aliases": [],
+      "explanation": "Paul describes an opportunity in Troas."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Corinthians%202%3A12&version=KJV"
+  },
+  {
+    "id": "hard-nt-147",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "paul-arabia-before-damascus",
+    "reference": {
+      "book": 48,
+      "chapter": 1,
+      "verse": 17
+    },
+    "fr": {
+      "question": "Dans quelle région Paul dit-il être parti avant de retourner à Damas ?",
+      "answer": "L’Arabie",
+      "aliases": [
+        "Arabie"
+      ],
+      "explanation": "Paul rapporte un séjour en Arabie."
+    },
+    "en": {
+      "question": "To which region does Paul say he went before returning to Damascus?",
+      "answer": "Arabia",
+      "aliases": [],
+      "explanation": "Paul reports going to Arabia."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Galatians%201%3A17&version=KJV"
+  },
+  {
+    "id": "hard-nt-148",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "ephesians-messenger-tychicus",
+    "reference": {
+      "book": 49,
+      "chapter": 6,
+      "verse": 21
+    },
+    "fr": {
+      "question": "Quel fidèle serviteur Paul envoie-t-il pour donner de ses nouvelles aux Éphésiens ?",
+      "answer": "Tychique",
+      "aliases": [
+        "Tychicus"
+      ],
+      "explanation": "Tychique devait informer les destinataires de sa situation."
+    },
+    "en": {
+      "question": "Which faithful minister does Paul send to bring his news to the Ephesians?",
+      "answer": "Tychicus",
+      "aliases": [],
+      "explanation": "Tychicus was to inform the recipients about his circumstances."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ephesians%206%3A21&version=KJV"
+  },
+  {
+    "id": "hard-nt-149",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "philippians-coworker-clement",
+    "reference": {
+      "book": 50,
+      "chapter": 4,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Quel collaborateur est nommé avec les femmes ayant combattu pour l’Évangile en Philippiens 4:3 ?",
+      "answer": "Clément",
+      "aliases": [],
+      "explanation": "Paul cite Clément parmi ses compagnons d’œuvre."
+    },
+    "en": {
+      "question": "Which co-worker is named with the women who laboured in the gospel in Philippians 4:3?",
+      "answer": "Clement",
+      "aliases": [],
+      "explanation": "Paul names Clement among his fellow workers."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Philippians%204%3A3&version=KJV"
+  },
+  {
+    "id": "hard-nt-150",
+    "difficulty": "hard",
+    "testament": "new",
+    "factKey": "archippus-ministry-fulfill",
+    "reference": {
+      "book": 51,
+      "chapter": 4,
+      "verse": 17
+    },
+    "fr": {
+      "question": "À quel homme les Colossiens doivent-ils dire de bien remplir le ministère reçu dans le Seigneur ?",
+      "answer": "Archippe",
+      "aliases": [],
+      "explanation": "Paul adresse cette exhortation à Archippe."
+    },
+    "en": {
+      "question": "Which man are the Colossians to tell to fulfil the ministry received in the Lord?",
+      "answer": "Archippus",
+      "aliases": [],
+      "explanation": "Paul addresses this exhortation to Archippus."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Colossians%204%3A17&version=KJV"
+  }
+]
