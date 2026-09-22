@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import navigationJson from '../public/navigation/archipelago.json'
 import { parseNavigation } from './navigation-document'
-import { canStand, defaultNavigation, inPolygon, type Point } from './world'
-import { centralSpawnCandidates, chooseCentralSpawn, spawnOverlaps } from './multiplayer-spawn'
+import { canStand, defaultNavigation, inPolygon } from './world'
+import { centralSpawnCandidates, chooseCentralSpawn } from './multiplayer-spawn'
 const navigation = parseNavigation(navigationJson)
 
 describe('central island arrivals', () => {
@@ -16,8 +16,8 @@ describe('central island arrivals', () => {
     }
   })
   it('randomizes the position rather than always selecting the same arrival', () => {
-    expect(chooseCentralSpawn(navigation, [], () => 0)).not.toEqual(
-      chooseCentralSpawn(navigation, [], () => 0.9)
+    expect(chooseCentralSpawn(navigation, () => 0)).not.toEqual(
+      chooseCentralSpawn(navigation, () => 0.9)
     )
   })
   it('keeps arrivals inside the paving circle and off the table in both navigation sources', () => {
@@ -33,27 +33,19 @@ describe('central island arrivals', () => {
       expect(candidates.some(point => point.y < 410)).toBe(true)
     }
   })
-  it('never overlaps existing avatar footprints, even when crowded', () => {
-    const occupied: Point[] = []
+  it('allows 100 arrivals at the same position', () => {
+    const first = chooseCentralSpawn(navigation, () => 0.37)
+    expect(first).not.toBeNull()
     for (let i = 0; i < 100; i++) {
-      const spawn = chooseCentralSpawn(navigation, occupied, () => 0.37)
-      if (!spawn) break
-      expect(occupied.every(other => !spawnOverlaps(spawn, other))).toBe(true)
-      occupied.push(spawn)
+      expect(chooseCentralSpawn(navigation, () => 0.37)).toEqual(first)
     }
-    expect(occupied.length).toBeGreaterThan(5)
-    expect(chooseCentralSpawn(navigation, occupied)).toBeNull()
-    const free = occupied.pop()!
-    expect(chooseCentralSpawn(navigation, occupied)).not.toBeNull()
-    expect(canStand(free, navigation)).toBe(true)
   })
   it('returns no spawn if the central island is missing or fully blocked', () => {
-    expect(chooseCentralSpawn({ ...navigation, zones: [] }, [])).toBeNull()
+    expect(chooseCentralSpawn({ ...navigation, zones: [] })).toBeNull()
     const island = navigation.zones.find(z => z.id === 'land-0')!
     expect(
       chooseCentralSpawn(
-        { ...navigation, zones: [island, { ...island, id: 'blocked', kind: 'blocked' }] },
-        []
+        { ...navigation, zones: [island, { ...island, id: 'blocked', kind: 'blocked' }] }
       )
     ).toBeNull()
   })

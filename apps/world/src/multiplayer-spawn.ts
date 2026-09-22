@@ -1,16 +1,9 @@
 import { canStand, inPolygon, RADIUS, type NavigationDocument, type Point } from './world'
 
-// The widest avatar is 65px. Separate their full visual footprints, not just their feet.
-export const SPAWN_GAP_X = 70
-export const SPAWN_GAP_Y = 56
 const candidatesByNavigation = new WeakMap<NavigationDocument, Point[]>()
 
 // The outer paving circle in source-image coordinates, seen in perspective.
 const ARRIVAL_CIRCLE = { x: 835, y: 458, rx: 143, ry: 81 }
-
-export function spawnOverlaps(a: Point, b: Point): boolean {
-  return Math.abs(a.x - b.x) < SPAWN_GAP_X && Math.abs(a.y - b.y) < SPAWN_GAP_Y
-}
 
 export function centralSpawnCandidates(navigation: NavigationDocument): readonly Point[] {
   const cached = candidatesByNavigation.get(navigation)
@@ -35,15 +28,12 @@ export function centralSpawnCandidates(navigation: NavigationDocument): readonly
   return candidates
 }
 
-/** Called synchronously before the server publishes the new visitor: simultaneous joins reserve distinct places. */
+/** Pick a walkable arrival position; visitors may overlap. */
 export function chooseCentralSpawn(
   navigation: NavigationDocument,
-  occupied: readonly Point[],
   random = Math.random
 ): Point | null {
-  const available = centralSpawnCandidates(navigation).filter(
-    point => !occupied.some(other => spawnOverlaps(point, other))
-  )
+  const available = centralSpawnCandidates(navigation)
   if (!available.length) return null
   return {
     ...available[

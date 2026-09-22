@@ -228,7 +228,7 @@ export function createWorld(
       this.events.once(Phaser.Scenes.Events.SHUTDOWN, stopResize)
       this.events.once(Phaser.Scenes.Events.DESTROY, stopResize)
       resizeCanvas()
-      this.position = chooseCentralSpawn(controls.navigation, []) ??
+      this.position = chooseCentralSpawn(controls.navigation) ??
         findSafePosition(SPAWN, controls.navigation) ?? { ...SPAWN }
       this.background = new WorldBackground(this)
       this.ambience = new WorldAmbience(this, controls.ambientEditor)

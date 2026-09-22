@@ -181,7 +181,7 @@ export class WorldRoom extends Server<Env> {
           connection.close(4008, 'Room full')
           return
         }
-        const spawn = restored?.pose ?? chooseCentralSpawn(navigation, occupied)
+        const spawn = restored?.pose ?? chooseCentralSpawn(navigation)
         if (!spawn) {
           connection.send(JSON.stringify({ type: 'full' } satisfies ServerMessage))
           connection.close(4008, 'No free arrival position')

@@ -50,12 +50,6 @@ try {
     b = await connect()
   await until(() => a.id && b.id, 'initial snapshots')
   assert.notEqual(a.id, b.id)
-  const spawnA = a.messages.find(m => m.type === 'welcome').spawn
-  const spawnB = b.messages.find(m => m.type === 'welcome').spawn
-  assert(
-    Math.abs(spawnA.x - spawnB.x) >= 70 || Math.abs(spawnA.y - spawnB.y) >= 56,
-    'arrival footprints never overlap'
-  )
   await until(
     () => a.messages.some(m => m.type === 'player' && m.player.id === b.id),
     'join broadcast'
@@ -116,25 +110,12 @@ try {
 
   const arrivals = await Promise.all(Array.from({ length: 30 }, () => connect()))
   await until(
-    () => arrivals.every(c => c.id || c.messages.some(m => m.type === 'full')),
-    'simultaneous spawn reservations'
+    () => arrivals.every(c => c.id),
+    'all simultaneous arrivals admitted'
   )
-  const spawns = arrivals.flatMap(c =>
-    c.messages.filter(m => m.type === 'welcome').map(m => m.spawn)
-  )
-  assert(spawns.length > 5)
-  for (let i = 0; i < spawns.length; i++)
-    for (let j = i + 1; j < spawns.length; j++) {
-      assert(
-        Math.abs(spawns[i].x - spawns[j].x) >= 70 || Math.abs(spawns[i].y - spawns[j].y) >= 56,
-        'simultaneous arrivals do not overlap'
-      )
-    }
   for (const c of arrivals) c.ws.close()
   await delay(200)
-  console.log(
-    `PASS: ${spawns.length} simultaneous arrivals without overlap; crowded island rejects excess arrivals`
-  )
+  console.log('PASS: 30 simultaneous arrivals admitted without clearing the island')
 
   const load = []
   for (let i = 0; i < 30; i++) {
@@ -183,8 +164,6 @@ try {
   for (let i = 0; i < 100; i++) {
     const c = await connect()
     await until(() => c.id, 'capacity arrival')
-    c.send({ type: 'move', seq: 1, pose: { ...pose, x: 200, y: 250 } })
-    await delay(20)
     capacity.push(c)
   }
   await until(() => capacity.every(c => c.id), 'room capacity')

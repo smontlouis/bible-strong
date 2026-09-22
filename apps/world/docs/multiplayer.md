@@ -14,7 +14,7 @@ To keep a separate frontend host such as Vercel, set `VITE_WORLD_MULTIPLAYER_HOS
 
 ## Behavior
 
-- Each arrival receives a server-reserved random, walkable position inside the central island's large paving circle, excluding the table and other navigation obstacles. The same bounds apply to local solo arrivals. Avatar visual footprints stay at least 70 px apart horizontally or 56 px vertically. Reservation and publication are synchronous, so concurrent arrivals cannot select overlapping positions. If the circle has no free position, joining returns the full status until space is available; existing visitors can still move freely.
+- Each arrival receives a random, walkable position inside the central island's large paving circle, excluding the table and other navigation obstacles. The same bounds apply to local solo arrivals. Avatars may appear at the same position: existing visitors never block new arrivals. The room still admits at most 100 participants.
 - Movement/collisions stay local for immediate joystick response. Publish changed positions at up to 15 Hz, with immediate final stops.
 - The server validates profiles, finite map coordinates, directions, sequence numbers, message sizes and message rates. It assigns participant IDs and never accepts a claimed player ID. It does not simulate navigation or prevent a modified client from moving through scenery; no shared rewards or competitive state relies on these positions.
 - The server batches changed participants every 50 ms. Browsers interpolate buffered snapshots with a 100 ms delay. Teleports snap; packet loss holds the last position instead of extrapolating through obstacles.
@@ -45,7 +45,15 @@ The script checks joins/snapshots, movement, profile edits, stale sequence rejec
 - Immutable Yarn installation, root typecheck and root build pass. Root tests stop in Expo: `StrongCard-test.tsx`, `sources-test.ts`, and `pickerSelection-test.ts` fail outside this feature. Root lint was interrupted after more than seven minutes in Expo ESLint; World lint passes.
 - No production deployment was performed. Physical phones and the event network still need an on-site smoke test.
 
-Arrival-position follow-up: 91 World tests pass. A live burst of 30 join attempts reserved 15 non-overlapping central-island positions and rejected the remaining arrivals until space was available. The 100-connection test moves each visitor off the central island before admitting the next one.
+Historical arrival-position check (before overlap was allowed): 91 World tests pass. A live burst of 30 join attempts reserved 15 non-overlapping central-island positions and rejected the remaining arrivals until space was available. The 100-connection test moves each visitor off the central island before admitting the next one.
+
+## Arrival overlap verification — 2026-09-22
+
+Occupied arrival positions no longer block admission. All 327 World tests, typecheck
+and production build pass. An isolated local Worker admitted 30 simultaneous arrivals
+and 100 visitors without moving them off the island; the 101st received `full`.
+The 30-moving-client check at 15 Hz also passes. This change has not been deployed
+as part of this verification.
 
 ## Avatar reactions
 
