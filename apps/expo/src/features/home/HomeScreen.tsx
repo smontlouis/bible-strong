@@ -16,6 +16,7 @@ import Text from '~common/ui/Text'
 import DonationWidget from './DonationWidget'
 import NaveOfTheDay from './NaveOfTheDay'
 import PlanHome from './PlanHome'
+import MeditationsHome from './MeditationsHome'
 import StrongOfTheDay from './StrongOfTheDay'
 import TheBibleProject from './TheBibleProjectPlan'
 import TimelineWidget from './TimelineWidget'
@@ -100,6 +101,9 @@ export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
           </Text>
         </Box>
         <VStack className="overflow-hidden border-continuous gap-[10px]">
+          <Box className="px-[20px] pt-[20px]">
+            <MeditationsHome />
+          </Box>
           <PlanHome />
           <TryAudibibleWidget />
         </VStack>

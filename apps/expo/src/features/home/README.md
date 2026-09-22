@@ -6,7 +6,9 @@ home inside the existing workspace navigation. Its illustrations are bundled in
 `src/assets/images/home/illustrations/`. Surface colors derive from the active
 theme; personal library counters keep neutral icons. The main column contains the
 daily verse, counters, three learning cards. The right
-column contains bookmark resume, the current plan and Audibible. A 2 × 2 resource
+column contains bookmark resume, direct access to meditation collections, the current plan and Audibible.
+The compact home exposes the same meditation access in its “Méditer” section, separately from reading plans.
+Both use `/daily-reading` to browse collections without changing the selected daily-reading source. A 2 × 2 resource
 discovery grid sits below the learning cards in the main column. The reference is
 `output/imagegen/expo-web-home-2026-09-10/01-tableau-de-bord.png`.
 

@@ -25,6 +25,7 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { Events } from './Events'
 import OfflineNotice from './OfflineNotice'
 import PlanHome from './PlanHome'
+import MeditationsHome from './MeditationsHome'
 import ResumeBookmark from './ResumeBookmark'
 import { LoginPrompt } from './UserWidget'
 import VerseOfTheDay from './VerseOfTheDay'
@@ -232,6 +233,7 @@ export default function DesktopHome() {
             </div>
             <div className="bs-home-aside">
               <ResumeBookmark card />
+              <MeditationsHome />
               <Box className="bg-reverse rounded-[20px] p-[16px] shadow-[0_2px_7px_rgba(89,131,240,0.1)]">
                 <PlanHome compact />
               </Box>
