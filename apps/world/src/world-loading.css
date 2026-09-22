@@ -1,0 +1,241 @@
+.loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(28px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+  overflow: auto;
+  background: radial-gradient(ellipse at 50% 42%, #f6f9e9 0%, #deefea 42%, #b8dedf 100%);
+  backdrop-filter: none;
+  color: #244e57;
+  text-align: center;
+  z-index: 100;
+  opacity: 1;
+  transition: opacity 500ms ease-out;
+}
+.loading.is-revealing {
+  opacity: 0;
+}
+.loading-brand {
+  flex-shrink: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.loading-brand span {
+  display: inline-block;
+  margin-left: 7px;
+  padding: 4px 9px;
+  border: 1px solid #244e5726;
+  border-radius: 7px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.loading-content {
+  width: min(100%, 540px);
+  margin: auto;
+  padding: 12px 0 24px;
+}
+.loading-scene {
+  position: relative;
+  width: 320px;
+  max-width: 100%;
+  height: 224px;
+  margin: 0 auto 12px;
+}
+.loading-island {
+  position: absolute;
+  width: 100%;
+  height: 180px;
+  left: 0;
+  bottom: 10px;
+}
+.loading-slime {
+  position: absolute;
+  width: 96px;
+  height: 96px;
+  left: calc(50% - 48px);
+  bottom: 93px;
+  background: var(--loading-avatar) url('/assets/avatars/short-slime/idle-down.png') no-repeat
+    center / contain;
+  background-blend-mode: multiply;
+  mask: url('/assets/avatars/short-slime/idle-down.png') no-repeat center / contain;
+  animation: slime-bob 900ms ease-in-out infinite alternate;
+}
+.loading-ripple {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  border: 1px solid #5a9ba044;
+  border-radius: 50%;
+  transform: translateX(-50%);
+}
+.loading-ripple-outer {
+  width: 100%;
+  height: 63px;
+}
+.loading-ripple-inner {
+  width: 84%;
+  height: 44px;
+  bottom: 27px;
+}
+.loading-cloud {
+  position: absolute;
+  width: 66px;
+  height: 17px;
+  background: #ffffffb3;
+  border-radius: 50px;
+}
+.loading-cloud::before,
+.loading-cloud::after {
+  content: '';
+  position: absolute;
+  background: inherit;
+  border-radius: 50%;
+  bottom: 5px;
+  width: 28px;
+  height: 28px;
+  left: 11px;
+}
+.loading-cloud::after {
+  width: 21px;
+  height: 21px;
+  left: 33px;
+}
+.loading-cloud-left {
+  top: 42px;
+  left: 2px;
+  transform: rotate(-5deg);
+}
+.loading-cloud-right {
+  top: 18px;
+  right: 5px;
+  transform: scale(0.7);
+  opacity: 0.8;
+}
+.loading-spark {
+  position: absolute;
+  color: #bc9246;
+  font-size: 20px;
+}
+.loading-spark-one {
+  top: 20px;
+  left: 95px;
+}
+.loading-spark-two {
+  top: 91px;
+  right: 47px;
+  font-size: 13px;
+}
+.loading-content h1 {
+  margin: 0;
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -1.4px;
+  text-wrap: balance;
+}
+.loading-subtitle {
+  margin: 12px 0 0;
+  color: #51747b;
+  font-size: 15px;
+  line-height: 1.6;
+  text-wrap: balance;
+}
+.loading-status {
+  margin: 32px auto 0;
+  max-width: 320px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.loading-status p {
+  margin: 10px 0 0;
+}
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  height: 9px;
+}
+.loading-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #548e8b;
+  animation: loading-pulse 1.4s ease-in-out infinite;
+}
+.loading-dots i:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.loading-dots i:nth-child(3) {
+  animation-delay: 0.36s;
+}
+.loading-footer {
+  flex-shrink: 0;
+  margin: 0;
+  color: #51747b;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+}
+.loading-retry {
+  margin-top: 16px;
+  padding: 10px 22px;
+  border: 1px solid #527b79;
+  border-radius: 12px;
+  background: #fff9e8;
+  color: #244e57;
+  font: inherit;
+  cursor: pointer;
+}
+.loading-retry:focus-visible {
+  outline: 3px solid #315fcf;
+  outline-offset: 4px;
+}
+@keyframes slime-bob {
+  to {
+    transform: translateY(-6px);
+  }
+}
+@keyframes loading-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+@media (max-height: 560px) {
+  .loading {
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+  .loading-scene {
+    height: 180px;
+    margin-bottom: 0;
+  }
+  .loading-content {
+    padding: 0 0 12px;
+  }
+  .loading-status {
+    margin-top: 16px;
+  }
+  .loading-cloud-right {
+    top: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-slime,
+  .loading-dots i {
+    animation: none;
+  }
+  .loading {
+    transition: none;
+  }
+}

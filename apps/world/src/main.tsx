@@ -1,3 +1,4 @@
+import { WorldLoading } from './WorldLoading'
 import { StoryDialog } from './StoryDialog'
 import { BibleGames } from './BibleGames'
 import { ExplorationJournal, JournalIcon, journalCopy } from './ExplorationJournal'
@@ -12,7 +13,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import nipplejs from 'nipplejs'
 import { clampCameraZoom } from './camera-zoom'
-import { ARRIVAL_FADE_MS } from './world-arrival'
+import { ARRIVAL_FADE_MS, MINIMUM_LOADING_MS } from './world-arrival'
 import { ControlIcon } from './ControlIcon'
 import { Modal } from './Modal'
 import { DiscoveryBoundary } from './DiscoveryBoundary'
@@ -66,7 +67,6 @@ const copy = {
     here: 'Place de la Bible',
     prototype: 'Prototype · ASI Europe',
     loading: 'Préparation de ton voyage…',
-    error: 'Impossible de charger la carte. Recharge la page.',
     visit: 'Approche-toi des lieux pour les découvrir.',
     keyboard: 'Flèches / ZQSD / WASD',
     debug: 'Diagnostic',
@@ -98,7 +98,6 @@ const copy = {
     here: 'Bible plaza',
     prototype: 'Prototype · ASI Europe',
     loading: 'Preparing your journey…',
-    error: 'Unable to load the map. Reload the page.',
     visit: 'Approach each place to discover it.',
     keyboard: 'Arrow keys / WASD / ZQSD',
     debug: 'Diagnostics',
@@ -229,6 +228,8 @@ function App() {
   const [loadingColor] = useState(
     () => AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)]
   )
+  const [minimumLoadingElapsed, setMinimumLoadingElapsed] = useState(false)
+  const [sceneLoaded, setSceneLoaded] = useState(false)
   const [ready, setReady] = useState(false)
   const [revealing, setRevealing] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -275,14 +276,22 @@ function App() {
       host.current!,
       controls.current,
       setState,
-      () => {
-        controls.current.arrivalStartedAt = performance.now()
-        setRevealing(true)
-      },
+      () => setSceneLoaded(true),
       () => setFailed(true)
     )
     return () => game.destroy(true)
   }, [navigationLoaded])
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMinimumLoadingElapsed(true), MINIMUM_LOADING_MS)
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    if (!sceneLoaded || !minimumLoadingElapsed || failed) return
+    controls.current.arrivalStartedAt = performance.now()
+    setRevealing(true)
+  }, [sceneLoaded, minimumLoadingElapsed, failed])
 
   useEffect(() => {
     if (!revealing || failed) return
@@ -463,18 +472,12 @@ function App() {
         </button>
       </header>
       {!ready && (
-        <div
-          className={`loading ${revealing && !failed ? 'is-revealing' : ''}`}
-          role="status"
-          style={{ transitionDuration: `${ARRIVAL_FADE_MS}ms` }}
-        >
-          <span
-            className="loading-slime"
-            style={{ backgroundColor: loadingColor }}
-            aria-hidden="true"
-          />
-          {failed ? t.error : t.loading}
-        </div>
+        <WorldLoading
+          language={language}
+          color={loadingColor}
+          revealing={revealing}
+          failed={failed}
+        />
       )}
       {islandActions.map(action => {
         const station = stations.find(station => station.id === action.id)

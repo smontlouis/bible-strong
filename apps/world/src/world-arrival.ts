@@ -1,3 +1,4 @@
+export const MINIMUM_LOADING_MS = 1000
 export const ARRIVAL_ZOOM_DELAY_MS = 500
 export const ARRIVAL_FADE_MS = 500
 export const ARRIVAL_DURATION_MS = 2500

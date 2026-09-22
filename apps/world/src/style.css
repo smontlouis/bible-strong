@@ -323,7 +323,6 @@ select {
   overflow: hidden;
   clip-path: inset(50%);
 }
-.loading,
 .modal-scrim {
   position: absolute;
   inset: 0;
@@ -333,40 +332,8 @@ select {
   backdrop-filter: blur(6px);
   z-index: 10;
 }
-.loading {
-  background: var(--bs-bg);
-  backdrop-filter: none;
-  color: var(--bs-navy);
-  gap: 16px;
-  text-align: center;
-  z-index: 100;
-  opacity: 1;
-  transition: opacity 1s ease-out;
-}
-.loading.is-revealing {
-  opacity: 0;
-}
 .world-shell.is-loading > :not(.world-canvas):not(.loading) {
   visibility: hidden;
-}
-.loading-slime {
-  width: 96px;
-  height: 96px;
-  margin: auto;
-  background: url('/assets/avatars/short-slime/idle-down.png') no-repeat center / contain;
-  background-blend-mode: multiply;
-  mask: url('/assets/avatars/short-slime/idle-down.png') no-repeat center / contain;
-  animation: slime-bob 900ms ease-in-out infinite alternate;
-}
-@keyframes slime-bob {
-  to {
-    transform: translateY(-6px);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .loading-slime {
-    animation: none;
-  }
 }
 .resource-card {
   background: var(--bs-bg);
