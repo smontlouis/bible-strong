@@ -10,6 +10,7 @@ export function BibleGames({
   onOpen,
   onClose,
   disabled = false,
+  preferredMode = null,
 }: {
   network: WorldMultiplayer
   language: 'fr' | 'en'
@@ -17,6 +18,8 @@ export function BibleGames({
   onOpen: () => void
   onClose: () => void
   disabled?: boolean
+  /** Tab to select when the dialog opens: solo from the station, together near a visitor. */
+  preferredMode?: 'solo' | 'together' | null
 }) {
   const state = useSyncExternalStore(network.games.subscribe, network.games.getSnapshot)
   const { game, invitations } = state.snapshot
@@ -32,6 +35,14 @@ export function BibleGames({
     testament: 'both',
     language,
   })
+  useEffect(() => {
+    if (!open || !preferredMode) return
+    setOptions(current =>
+      preferredMode === 'solo'
+        ? { ...current, mode: 'solo', kind: 'quiz' }
+        : { ...current, mode: 'together', kind: current.mode === 'solo' ? 'who' : current.kind }
+    )
+  }, [open, preferredMode])
   const [selectedInvitation, setSelectedInvitation] = useState<GameInvitation | null>(null)
   const [invitationIssue, setInvitationIssue] = useState<GameError | null>(null)
   const [invitationAction, setInvitationAction] = useState<{

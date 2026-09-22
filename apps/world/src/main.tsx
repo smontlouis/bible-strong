@@ -1,5 +1,6 @@
 import { currentActivity } from './avatar-activity'
-import { ReactionPicker } from './ReactionPicker'
+import { ReactionIcon, ReactionPicker } from './ReactionPicker'
+import { StarIcon } from './game-juice'
 import { WorldLoading } from './WorldLoading'
 import { StoryDialog } from './StoryDialog'
 import { BibleGames } from './BibleGames'
@@ -17,6 +18,7 @@ import nipplejs from 'nipplejs'
 import { clampCameraZoom } from './camera-zoom'
 import { ARRIVAL_FADE_MS, MINIMUM_LOADING_MS } from './world-arrival'
 import { ControlIcon } from './ControlIcon'
+import { installButtonHaptics } from './haptics'
 import { Modal } from './Modal'
 import { DiscoveryBoundary } from './DiscoveryBoundary'
 import { createWorld, type Controls, type WorldState } from './game'
@@ -244,6 +246,8 @@ function App() {
   const [storyOpen, setStoryOpen] = useState(false)
   const [guestbookOpen, setGuestbookOpen] = useState(false)
   const [gamesOpen, setGamesOpen] = useState(false)
+  const [gamesMode, setGamesMode] = useState<'solo' | 'together' | null>(null)
+  const [reactionRequest, setReactionRequest] = useState(0)
   const atGuestbook = nearIslandAction(state, 'guestbook', navigation)
   const [opened, setOpened] = useState<WorldState['station']>(null)
   const [visited, setVisited] = useState(loadVisitedPlaces)
@@ -424,6 +428,7 @@ function App() {
     if (id === 'games' && nearIslandAction(state, id, navigation)) {
       controls.current.paused = true
       controls.current.direction = { x: 0, y: 0 }
+      setGamesMode('solo')
       setGamesOpen(true)
       return
     }
@@ -482,6 +487,45 @@ function App() {
           failed={failed}
         />
       )}
+      <div
+        ref={element => {
+          controls.current.contactActions = element
+          // The scene toggles `disabled` itself; React must not own that attribute, or its
+          // event delegation keeps treating the buttons as disabled. Prime it once only:
+          // this callback runs on every render and would otherwise re-disable them.
+          if (element && !element.dataset.primed) {
+            element.dataset.primed = 'true'
+            element.querySelectorAll('button').forEach(button => (button.disabled = true))
+          }
+        }}
+        className="contact-actions"
+        data-visible="false"
+        aria-hidden="true"
+      >
+        <button
+          type="button"
+          className="contact-action"
+          aria-label={language === 'fr' ? 'Proposer une partie' : 'Invite to play'}
+          aria-haspopup="dialog"
+          onClick={() => {
+            if (!ready || controls.current.paused) return
+            controls.current.paused = true
+            controls.current.direction = { x: 0, y: 0 }
+            setGamesMode('together')
+            setGamesOpen(true)
+          }}
+        >
+          <StarIcon />
+        </button>
+        <button
+          type="button"
+          className="contact-action"
+          aria-label={language === 'fr' ? 'Envoyer une réaction' : 'Send a reaction'}
+          onClick={() => setReactionRequest(n => n + 1)}
+        >
+          <ReactionIcon reaction="hello" color={profile.color} />
+        </button>
+      </div>
       {islandActions.map(action => {
         const station = stations.find(station => station.id === action.id)
         const label =
@@ -571,6 +615,7 @@ function App() {
               color={profile.color}
               language={language}
               online={state.multiplayer?.state === 'online'}
+              openRequest={reactionRequest}
             />
           )}
         {ready && !editorMode && controls.current.network && (
@@ -578,8 +623,15 @@ function App() {
             network={controls.current.network}
             language={language}
             open={gamesOpen}
-            onOpen={() => setGamesOpen(true)}
-            onClose={() => setGamesOpen(false)}
+            preferredMode={gamesMode}
+            onOpen={() => {
+              setGamesMode(null)
+              setGamesOpen(true)
+            }}
+            onClose={() => {
+              setGamesMode(null)
+              setGamesOpen(false)
+            }}
             disabled={menuOpen || profileOpen || !!opened || guestbookOpen || storyOpen}
           />
         )}
@@ -662,6 +714,7 @@ function App() {
           }}
           onGames={() => {
             setMenuOpen(false)
+            setGamesMode(null)
             setGamesOpen(true)
           }}
           onBoard={() => {
@@ -813,6 +866,8 @@ function App() {
 }
 
 const root: Root = import.meta.hot?.data.root ?? createRoot(document.getElementById('root')!)
+if (!import.meta.hot?.data.haptics) installButtonHaptics()
+if (import.meta.hot) import.meta.hot.data.haptics = true
 if (import.meta.hot) import.meta.hot.data.root = root
 root.render(
   ['/admin', '/admin/', '/admin-guestbook'].includes(location.pathname) ? (

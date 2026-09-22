@@ -2,9 +2,17 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { AvatarPreview } from './AvatarEditor'
 import type { GameView } from './games-protocol'
 import { gameStandings, roundOutcome } from './game-presentation'
+import { Burst, Confetti, PunchNumber, SparkleIcon, StarIcon, flyTo } from './game-juice'
+import { haptic } from './haptics'
 
 // A repeated snapshot or reopening the widget must not celebrate the same points twice.
 const celebrated = new Set<string>()
+function remember(key: string) {
+  if (celebrated.has(key)) return false
+  celebrated.add(key)
+  if (celebrated.size > 100) celebrated.delete(celebrated.values().next().value!)
+  return true
+}
 function useCelebration(game: GameView) {
   const previous = useRef(game.phase)
   const [burst, setBurst] = useState(false)
@@ -16,27 +24,60 @@ function useCelebration(game: GameView) {
       setBurst(false)
       return
     }
-    if (!arrived || celebrated.has(key) || game.result?.void) return
-    celebrated.add(key)
-    if (celebrated.size > 100) celebrated.delete(celebrated.values().next().value!)
+    if (!arrived || game.result?.void || !remember(key)) return
     setBurst(true)
-    const timer = setTimeout(() => setBurst(false), 2000)
+    const timer = setTimeout(() => setBurst(false), 2600)
     return () => clearTimeout(timer)
   }, [game.id, game.phase, game.round, game.result?.void])
   return burst
 }
 
-export function GameFeedback({ game, me }: { game: GameView; me: string | null }) {
+export function GameFeedback({
+  game,
+  me,
+  onShake,
+}: {
+  game: GameView
+  me: string | null
+  onShake?: () => void
+}) {
   const animate = useCelebration(game)
   const panel = useRef<HTMLElement>(null)
+  const pop = useRef<HTMLElement>(null)
+  const outcome = game.phase === 'reveal' && game.result ? roundOutcome(game, me) : null
+  const points = game.who?.awarded ?? 1
+  const winnerId = game.who ? game.who.winner : me
   useEffect(() => {
     if (game.phase === 'reveal') panel.current?.scrollIntoView({ block: 'nearest' })
   }, [game.phase])
-  if (game.phase !== 'reveal' || !game.result) return null
+  useEffect(() => {
+    // The room already awarded the points; the interface only shows them travelling.
+    if (!animate || !outcome) return
+    if (outcome === 'win') {
+      haptic(points >= 3 ? 'win' : 'success')
+      const target = panel.current
+        ?.closest('.games-shell')
+        ?.querySelector<HTMLElement>(`[data-score-for="${winnerId}"]`)
+      const timer = setTimeout(() => flyTo(pop.current, target ?? null, `+${points}`), 500)
+      return () => clearTimeout(timer)
+    }
+    if (outcome === 'other') {
+      haptic('nudge')
+      const target = panel.current
+        ?.closest('.games-shell')
+        ?.querySelector<HTMLElement>(`[data-score-for="${winnerId}"]`)
+      const timer = setTimeout(() => flyTo(pop.current, target ?? null, `+${points}`), 500)
+      return () => clearTimeout(timer)
+    }
+    if (outcome === 'missed') {
+      haptic('error')
+      onShake?.()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [animate, outcome])
+  if (game.phase !== 'reveal' || !game.result || !outcome) return null
   const fr = game.options.language === 'fr'
-  const outcome = roundOutcome(game, me)
   const winner = game.players.find(p => p.id === game.who?.winner)
-  const points = game.who?.awarded ?? 1
   const title =
     outcome === 'void'
       ? fr
@@ -57,6 +98,7 @@ export function GameFeedback({ game, me }: { game: GameView; me: string | null }
             : fr
               ? 'Pas cette fois !'
               : 'Not this time!'
+  const scored = outcome === 'win' || outcome === 'other'
   return (
     <section
       ref={panel}
@@ -65,17 +107,12 @@ export function GameFeedback({ game, me }: { game: GameView; me: string | null }
       data-burst={animate}
       role="status"
     >
-      {animate && (outcome === 'win' || outcome === 'other') && (
-        <div className="game-sparkles" aria-hidden="true">
-          {Array.from({ length: 12 }, (_, i) => (
-            <i key={i} style={{ '--i': i } as CSSProperties}>
-              ✦
-            </i>
-          ))}
-        </div>
+      {animate && outcome === 'win' && <Confetti seed={`${game.id}:${game.round}`} count={80} />}
+      {animate && scored && (
+        <Burst seed={`${game.id}:${game.round}`} count={outcome === 'win' ? 30 : 16} spread={150} />
       )}
       <span className="game-outcome-icon" aria-hidden="true">
-        {outcome === 'void' ? 'Ⅱ' : outcome === 'win' || outcome === 'other' ? '★' : '✦'}
+        {outcome === 'void' ? 'Ⅱ' : scored ? <StarIcon /> : <SparkleIcon />}
       </span>
       <div>
         <strong>{title}</strong>
@@ -84,7 +121,7 @@ export function GameFeedback({ game, me }: { game: GameView; me: string | null }
             ? fr
               ? 'Aucun point perdu. On continue ensemble.'
               : 'No points lost. Let’s keep going.'
-            : outcome === 'win' || outcome === 'other'
+            : scored
               ? fr
                 ? 'Les points rejoignent le score !'
                 : 'Points added to the score!'
@@ -93,8 +130,8 @@ export function GameFeedback({ game, me }: { game: GameView; me: string | null }
                 : 'One more discovery to share.'}
         </p>
       </div>
-      {(outcome === 'win' || outcome === 'other') && (
-        <b className="game-points-pop">
+      {scored && (
+        <b className="game-points-pop" ref={pop}>
           +{points}
           <small>PTS</small>
         </b>
@@ -105,20 +142,40 @@ export function GameFeedback({ game, me }: { game: GameView; me: string | null }
 
 export function GameFinale({ game, me }: { game: GameView; me: string | null }) {
   const panel = useRef<HTMLElement>(null)
-  useEffect(() => {
-    panel.current?.scrollIntoView({ block: 'start' })
-  }, [])
+  const [celebrate, setCelebrate] = useState(false)
   const fr = game.options.language === 'fr'
   const standings = gameStandings(game)
   const leaders = standings.filter(p => p.rank === 1)
   const interrupted = !!game.reason
   const noPoints = standings.every(p => p.score === 0)
+  const podium = !interrupted && !noPoints
+  const iWin = podium && leaders.some(p => p.id === me)
+  const total = standings.length
+  useEffect(() => {
+    panel.current?.scrollIntoView({ block: 'start' })
+  }, [])
+  useEffect(() => {
+    if (!remember(`${game.id}:finale`)) return
+    // The podium reveals last place first; the leader lands with the celebration.
+    const delay = 400 + total * 320
+    const timer = setTimeout(() => {
+      haptic(iWin ? 'win' : podium ? 'success' : 'nudge')
+      if (podium) setCelebrate(true)
+    }, delay)
+    const stop = setTimeout(() => setCelebrate(false), delay + 4500)
+    return () => {
+      clearTimeout(timer)
+      clearTimeout(stop)
+    }
+  }, [game.id, iWin, podium, total])
   return (
-    <section ref={panel} className="game-finale">
-      <div className="game-trophy" aria-hidden="true">
-        {interrupted ? 'Ⅱ' : noPoints ? '✦' : '★'}
+    <section ref={panel} className="game-finale" data-podium={podium}>
+      {celebrate && <Confetti seed={`${game.id}:finale`} count={110} />}
+      <div className="game-trophy juice-bounce-in" aria-hidden="true">
+        {interrupted ? 'Ⅱ' : noPoints ? <SparkleIcon /> : <StarIcon />}
+        {podium && <Burst seed={`${game.id}:trophy`} count={20} spread={110} />}
       </div>
-      <h2>
+      <h2 className="juice-stamp">
         {interrupted
           ? fr
             ? 'Partie interrompue'
@@ -145,8 +202,13 @@ export function GameFinale({ game, me }: { game: GameView; me: string | null }) 
           : 'Every discovery counts. Thanks for playing together!'}
       </p>
       <ol className="game-ranking">
-        {standings.map(p => (
-          <li key={p.id} data-leader={!interrupted && !noPoints && p.rank === 1}>
+        {standings.map((p, index) => (
+          <li
+            key={p.id}
+            data-leader={podium && p.rank === 1}
+            data-me={p.id === me}
+            style={{ '--i': total - 1 - index } as CSSProperties}
+          >
             <span className="game-rank">{p.rank}</span>
             <AvatarPreview avatar={p.profile.avatar} color={p.profile.color} />
             <strong>
@@ -154,7 +216,12 @@ export function GameFinale({ game, me }: { game: GameView; me: string | null }) 
               {p.id === me ? (fr ? ' · Toi' : ' · You') : ''}
             </strong>
             <b>
-              {p.score}
+              <PunchNumber
+                value={p.score}
+                from={0}
+                duration={700}
+                delay={300 + (total - 1 - index) * 320}
+              />
               <small>PTS</small>
             </b>
           </li>
@@ -165,28 +232,5 @@ export function GameFinale({ game, me }: { game: GameView; me: string | null }) 
 }
 
 export function GameScore({ value }: { value: number }) {
-  const previous = useRef(value)
-  const [shown, setShown] = useState(value)
-  useEffect(() => {
-    const from = previous.current
-    previous.current = value
-    if (value <= from || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setShown(value)
-      return
-    }
-    let frame = 0
-    const start = performance.now()
-    const tick = (now: number) => {
-      const progress = Math.min(1, (now - start) / 550)
-      setShown(Math.round(from + (value - from) * progress))
-      if (progress < 1) frame = requestAnimationFrame(tick)
-    }
-    frame = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(frame)
-  }, [value])
-  return (
-    <span aria-label={String(value)} className="game-score-counter">
-      <span aria-hidden="true">{shown}</span>
-    </span>
-  )
+  return <PunchNumber value={value} />
 }

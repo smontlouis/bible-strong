@@ -1,0 +1,687 @@
+/* Juice layer: springy keyframes, particles and screen transitions shared by the games.
+   Only transform and opacity animate, so phones on the stand keep 60 fps.
+   Reduced motion removes every animation at the end of this file. */
+:root {
+  --juice-spring: linear(
+    0,
+    0.009,
+    0.035 2.1%,
+    0.141 4.4%,
+    0.723 12.9%,
+    0.938 16.7%,
+    1.017,
+    1.077,
+    1.121,
+    1.149 24.3%,
+    1.159,
+    1.163,
+    1.161,
+    1.154 29.9%,
+    1.129 32.8%,
+    1.051 39.6%,
+    1.017 43.1%,
+    0.991,
+    0.977 51%,
+    0.974 53.8%,
+    0.975 57.1%,
+    0.997 69.8%,
+    1.003 76.9%,
+    1.004 83.8%,
+    1
+  );
+  --juice-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --juice-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --juice-snap: cubic-bezier(0.2, 0.9, 0.1, 1);
+}
+
+/* Screen enter cascade: alternating names restart the animation on every screen change. */
+.games-shell[data-enter='0'] > :not(.juice-curtain-clip, .juice-confetti, .juice-countdown, .games-cards, .games-options, .games-notice, .game-turn-banner, .who-riddle, .who-history),
+.games-shell[data-enter='0'] > .solo-game > :not(.juice-curtain-clip, .juice-confetti, .juice-countdown, .games-cards, .games-options, .games-notice, .game-turn-banner, .who-riddle, .who-history) {
+  animation: juice-enter-a 520ms var(--juice-out) both;
+}
+.games-shell[data-enter='1'] > :not(.juice-curtain-clip, .juice-confetti, .juice-countdown, .games-cards, .games-options, .games-notice, .game-turn-banner, .who-riddle, .who-history),
+.games-shell[data-enter='1'] > .solo-game > :not(.juice-curtain-clip, .juice-confetti, .juice-countdown, .games-cards, .games-options, .games-notice, .game-turn-banner, .who-riddle, .who-history) {
+  animation: juice-enter-b 520ms var(--juice-out) both;
+}
+.games-shell[data-enter] > .solo-game,
+.games-shell[data-enter] > .games-actions,
+.games-shell[data-enter] > .solo-game > .games-actions,
+.games-shell[data-enter] > .who-round > .who-answer {
+  animation: none;
+}
+.games-shell[data-enter] > :nth-child(1),
+.games-shell[data-enter] > .solo-game > :nth-child(1) {
+  animation-delay: 0ms;
+}
+.games-shell[data-enter] > :nth-child(2),
+.games-shell[data-enter] > .solo-game > :nth-child(2) {
+  animation-delay: 55ms;
+}
+.games-shell[data-enter] > :nth-child(3),
+.games-shell[data-enter] > .solo-game > :nth-child(3) {
+  animation-delay: 110ms;
+}
+.games-shell[data-enter] > :nth-child(4),
+.games-shell[data-enter] > .solo-game > :nth-child(4) {
+  animation-delay: 165ms;
+}
+.games-shell[data-enter] > :nth-child(5),
+.games-shell[data-enter] > .solo-game > :nth-child(5) {
+  animation-delay: 220ms;
+}
+.games-shell[data-enter] > :nth-child(6),
+.games-shell[data-enter] > .solo-game > :nth-child(6) {
+  animation-delay: 275ms;
+}
+.games-shell[data-enter] > :nth-child(n + 7),
+.games-shell[data-enter] > .solo-game > :nth-child(n + 7) {
+  animation-delay: 320ms;
+}
+@keyframes juice-enter-a {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes juice-enter-b {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Shell shakes on a wrong answer. */
+.games-shell[data-shake='true'] {
+  animation: juice-screen-shake 420ms var(--juice-out);
+}
+@keyframes juice-screen-shake {
+  10% {
+    transform: translate(-7px, 0) rotate(-0.4deg);
+  }
+  30% {
+    transform: translate(6px, 1px) rotate(0.3deg);
+  }
+  50% {
+    transform: translate(-4px, -1px);
+  }
+  70% {
+    transform: translate(3px, 0);
+  }
+  90% {
+    transform: translate(-1px, 0);
+  }
+}
+
+/* Generic single-shot animations, applied through data attributes or classes. */
+.juice-pop {
+  animation: juice-pop 520ms var(--juice-spring) both;
+}
+.juice-slam {
+  animation: juice-slam 380ms var(--juice-out) both;
+}
+.juice-shake {
+  animation: juice-shake 480ms var(--juice-out);
+}
+.juice-stamp {
+  animation: juice-stamp 560ms var(--juice-spring) both;
+}
+.juice-bounce-in {
+  animation: juice-bounce-in 720ms var(--juice-spring) both;
+}
+.juice-slide-in {
+  animation: juice-slide-in 460ms var(--juice-out) both;
+}
+.juice-wobble {
+  animation: juice-wobble 900ms ease-in-out;
+}
+@keyframes juice-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes juice-slam {
+  from {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.97);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes juice-shake {
+  10%,
+  50% {
+    transform: translateX(-9px);
+  }
+  30%,
+  70% {
+    transform: translateX(8px);
+  }
+  90% {
+    transform: translateX(-3px);
+  }
+}
+@keyframes juice-stamp {
+  from {
+    opacity: 0;
+    transform: scale(1.9) rotate(-8deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.94) rotate(1deg);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes juice-bounce-in {
+  from {
+    opacity: 0;
+    transform: translateY(-70px) scale(0.7);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(8px) scale(1.06, 0.92);
+  }
+  70% {
+    transform: translateY(-6px) scale(0.98, 1.03);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes juice-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(46px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes juice-wobble {
+  15% {
+    transform: rotate(-9deg);
+  }
+  30% {
+    transform: rotate(8deg);
+  }
+  45% {
+    transform: rotate(-6deg);
+  }
+  60% {
+    transform: rotate(4deg);
+  }
+  75% {
+    transform: rotate(-2deg);
+  }
+}
+@keyframes juice-heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.14);
+  }
+  45% {
+    transform: scale(1.02);
+  }
+  60% {
+    transform: scale(1.1);
+  }
+}
+@keyframes juice-ring {
+  from {
+    opacity: 0.8;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+@keyframes juice-shine {
+  from {
+    transform: translateX(-130%) skewX(-18deg);
+  }
+  to {
+    transform: translateX(230%) skewX(-18deg);
+  }
+}
+@keyframes juice-breathe {
+  50% {
+    transform: scale(1.035);
+  }
+}
+@keyframes juice-float {
+  50% {
+    transform: translateY(-9px) rotate(2deg);
+  }
+}
+@keyframes juice-nudge {
+  0%,
+  80%,
+  100% {
+    transform: none;
+  }
+  85% {
+    transform: rotate(-4deg) scale(1.04);
+  }
+  90% {
+    transform: rotate(4deg) scale(1.04);
+  }
+  95% {
+    transform: rotate(-2deg);
+  }
+}
+
+/* Shine sweep on primary calls to action. */
+.juice-shine-host {
+  position: relative;
+  overflow: hidden;
+}
+.juice-shine-host::after {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 40%;
+  height: 140%;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 80%
+  );
+  pointer-events: none;
+  animation: juice-shine 2.8s var(--juice-out) infinite;
+  animation-delay: 1.2s;
+}
+
+/* Inline star and sparkle icons: sized by the parent's font-size, coloured by tokens. */
+.star-icon,
+.sparkle-icon {
+  display: block;
+  width: 1em;
+  height: 1em;
+  overflow: visible;
+}
+.star-icon path {
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-width: 3.2;
+}
+.star-icon .star-body {
+  fill: var(--star-fill, var(--bs-yellow));
+  stroke: var(--star-fill, var(--bs-yellow));
+}
+/* Raised edge under the star, like the buttons; hidden on empty stars. */
+.star-icon .star-depth {
+  fill: var(--star-edge, var(--bs-button-edge-yellow));
+  stroke: var(--star-edge, var(--bs-button-edge-yellow));
+  opacity: var(--star-depth, 1);
+}
+.star-icon .star-shine {
+  fill: #fff;
+  stroke: none;
+  opacity: var(--star-shine, 0.75);
+}
+.sparkle-icon path {
+  fill: currentColor;
+}
+.juice-burst i .sparkle-icon {
+  width: 100%;
+  height: 100%;
+}
+
+/* Radial burst */
+.juice-burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 3;
+}
+.juice-burst i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--size);
+  height: var(--size);
+  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+  font-size: var(--size);
+  line-height: 1;
+  font-style: normal;
+  text-align: center;
+  color: var(--bs-yellow);
+  opacity: 0;
+  animation: juice-burst 900ms var(--juice-out) forwards;
+  animation-delay: var(--delay);
+  will-change: transform, opacity;
+}
+.juice-burst[data-kind='confetti'] i,
+.juice-burst[data-kind='dots'] i {
+  border-radius: 3px;
+  background: var(--bs-yellow);
+}
+.juice-burst[data-kind='dots'] i {
+  border-radius: 50%;
+}
+.juice-burst i[data-hue='1'] {
+  color: var(--bs-blue);
+  background-color: var(--bs-blue);
+}
+.juice-burst i[data-hue='2'] {
+  color: #ff7a59;
+  background-color: #ff7a59;
+}
+.juice-burst i[data-hue='3'] {
+  color: #7ad7c7;
+  background-color: #7ad7c7;
+}
+.juice-burst i[data-hue='4'] {
+  color: #fff;
+  background-color: #fff;
+}
+.juice-burst[data-kind='stars'] i {
+  background: none;
+}
+@keyframes juice-burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.2) rotate(0deg);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(calc(var(--dx) * 0.7), calc(var(--dy) * 0.7)) scale(1.15)
+      rotate(calc(var(--rot) * 0.5));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), calc(var(--dy) + 40px)) scale(0.4) rotate(var(--rot));
+  }
+}
+
+/* Confetti rain over the viewport */
+.juice-confetti {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 60;
+}
+.juice-confetti i {
+  position: absolute;
+  top: -20px;
+  left: var(--x);
+  width: var(--w);
+  height: var(--h);
+  border-radius: 2px;
+  background: var(--bs-yellow);
+  opacity: 0;
+  animation: juice-confetti var(--duration) linear forwards;
+  animation-delay: var(--delay);
+  will-change: transform, opacity;
+}
+.juice-confetti i[data-shape='1'] {
+  border-radius: 50%;
+}
+.juice-confetti i[data-shape='2'] {
+  width: calc(var(--w) * 0.6);
+}
+.juice-confetti i[data-hue='1'] {
+  background: var(--bs-blue);
+}
+.juice-confetti i[data-hue='2'] {
+  background: #ff7a59;
+}
+.juice-confetti i[data-hue='3'] {
+  background: #7ad7c7;
+}
+.juice-confetti i[data-hue='4'] {
+  background: var(--bs-navy);
+}
+@keyframes juice-confetti {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(calc(var(--sway) * 0.5), 28vh) rotate(calc(var(--rot) * 0.3));
+  }
+  50% {
+    transform: translate(var(--sway), 55vh) rotate(calc(var(--rot) * 0.6));
+  }
+  75% {
+    transform: translate(calc(var(--sway) * 0.4), 82vh) rotate(calc(var(--rot) * 0.85));
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, 112vh) rotate(var(--rot));
+  }
+}
+
+/* Curtain wipe between screens: the clip stays put, only the panel inside travels. */
+.juice-curtain-clip {
+  position: fixed;
+  z-index: 50;
+  overflow: hidden;
+  border-radius: 28px;
+  pointer-events: none;
+}
+.juice-curtain {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  /* Same soft blue as the neutral card edge: a gentle wipe, never a flash. */
+  background: var(--bs-button-edge-neutral);
+  color: var(--bs-navy);
+  animation: juice-curtain 620ms var(--juice-snap) both;
+}
+.juice-curtain[data-tone='yellow'] {
+  background: color-mix(in srgb, var(--bs-yellow) 35%, var(--bs-yellow-soft));
+}
+.juice-curtain[data-tone='navy'] {
+  background: var(--bs-navy);
+  color: #fff;
+}
+.juice-curtain strong {
+  font:
+    500 clamp(32px, 6vw, 48px) Pulp,
+    sans-serif;
+  letter-spacing: -0.01em;
+  animation: juice-curtain-label 620ms var(--juice-out) both;
+}
+@keyframes juice-curtain {
+  0% {
+    transform: translateY(100%);
+  }
+  38% {
+    transform: translateY(0);
+  }
+  62% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-101%);
+  }
+}
+@keyframes juice-curtain-label {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: none;
+  }
+  65% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px) scale(1.1);
+  }
+}
+
+/* Countdown overlay */
+.juice-countdown {
+  position: fixed;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  border-radius: 28px;
+  background: rgba(16, 27, 53, 0.72);
+  backdrop-filter: blur(3px);
+  color: #fff;
+  pointer-events: none;
+}
+.juice-countdown-screen {
+  position: relative;
+  z-index: auto;
+  min-height: min(72dvh, 620px);
+  margin: -24px calc(-1 * var(--g-pad, 24px)) 0;
+  padding: 24px;
+  border-radius: 0;
+  background: var(--bs-navy);
+  backdrop-filter: none;
+  grid-template-rows: 1fr auto;
+}
+.juice-countdown-screen small {
+  align-self: end;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+  text-align: center;
+}
+.juice-countdown strong {
+  font:
+    500 clamp(96px, 26vw, 160px) Pulp,
+    sans-serif;
+  line-height: 1;
+  color: var(--bs-yellow);
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  animation: juice-count 780ms var(--juice-out) both;
+}
+.juice-countdown[data-waiting='true'] strong {
+  animation: juice-breathe 900ms ease-in-out infinite;
+  opacity: 1;
+}
+.juice-countdown[data-final='true'] strong {
+  color: #fff;
+  font-size: clamp(64px, 18vw, 120px);
+  animation: juice-count-go 620ms var(--juice-spring) both;
+}
+@keyframes juice-count {
+  0% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+}
+@keyframes juice-count-go {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-10deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Flying points and punching numbers */
+.juice-fly {
+  position: fixed;
+  z-index: 55;
+  padding: 4px 12px;
+  border-radius: 14px;
+  background: var(--bs-yellow);
+  color: var(--bs-navy);
+  font:
+    500 20px Pulp,
+    sans-serif;
+  box-shadow: 0 8px 20px rgba(255, 188, 0, 0.45);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.juice-number {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+}
+.juice-number[data-bump='true'] {
+  animation: juice-heartbeat 420ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .games-shell[data-enter] > *,
+  .games-shell[data-enter] > .solo-game > *,
+  .games-shell[data-shake='true'],
+  .juice-pop,
+  .juice-slam,
+  .juice-shake,
+  .juice-stamp,
+  .juice-bounce-in,
+  .juice-slide-in,
+  .juice-wobble,
+  .juice-shine-host::after,
+  .juice-number[data-bump='true'],
+  .juice-countdown strong {
+    animation: none !important;
+  }
+  .juice-burst,
+  .juice-confetti,
+  .juice-curtain-clip {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Cover the sheet's top padding and grab handle so the count fills the screen. */
+  .juice-countdown-screen {
+    margin-top: -40px;
+    padding-top: 40px;
+    min-height: calc(100dvh - 24px);
+  }
+}

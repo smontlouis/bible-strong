@@ -258,3 +258,50 @@ WORLD_TEST_URL=ws://127.0.0.1:8792/parties/world-room/asi-europe node apps/world
 
 Le script vérifie chargement, confidentialité des réponses, pause, reconnexion,
 score et question suivante, puis quitte sa propre partie.
+
+## Juice, transitions and haptics — 2026-09-22
+
+Game screens now react to every event, Candy Crush style, without touching game
+timing or authority. `src/game-juice.tsx` and `game-juice.css` hold the shared layer:
+screen enter cascade (a parity flip on `.games-shell[data-enter]` restarts CSS
+animations without remounting, so inputs keep the mobile keyboard), a coloured
+`Curtain` wipe on every phase change (round label in multiplayer), `Burst` sparks,
+viewport `Confetti`, the `Countdown` screen (solo and shared: `start` is sent at once, the
+3 · 2 · 1 screen covers preparation and "Go!" waits for the first question),
+`flyTo` (+N travelling from the outcome to the winner's score badge) and
+`PunchNumber` counters. Wrong answers shake the shell (`data-shake`), the answer
+card and the input; solo streak stars burst when lit and fall when broken; reveal,
+podium (last place first, leader lands with confetti) and finale are sequenced.
+
+Haptics use `web-haptics` (`src/haptics.ts`): a light tap on every enabled control
+press app-wide (`installButtonHaptics` in `main.tsx` and the lab), plus named
+patterns for select, success, star, error, win, tick and nudge. Android uses the
+Vibration API; iOS Safari relies on the library's hidden switch toggle, which only
+responds inside a user gesture, so asynchronous outcomes may stay silent there.
+No sound is played. Reduced motion removes every animation and particle.
+
+Blocks that appear, disappear or move use `motion` (`src/game-motion.tsx`: `pop`,
+`collapse`, `swap`, staggered `item`, `Appear`/`AppearP`, `GameMotion` with
+`reducedMotion="user"`): the Difficulty field when switching Who am I? / Bible
+challenge, solo and together cards, notices and errors, lobby seats and nearby
+explorers, the Who am I? turn banner, clue and previous-clues panel, the solo
+feedback pill and question, reveal rows. Particles, shakes and curtains stay CSS.
+After adding a dependency, restart `yarn dev:world` so Vite's pre-bundle keeps a
+single React copy (stale hashes otherwise throw "Invalid hook call").
+
+Validation: typecheck, 326 World tests and the production build pass. Game Lab
+checks at 390×844 and 1100×900 covered solo start countdown, wrong/correct/skipped
+feedback, win and timeout reviews, Who am I? turn/wrong/win, quiz question and
+reveal, lobby, finale and the curtain between fixtures. Not verified on a physical
+phone: haptic strength and iOS switch behaviour inside the modal dialog.
+
+## Contact actions and opening mode — 2026-09-22
+
+While another visitor is within 50 world units (65 to leave, against flicker), two raised
+buttons appear under the visitor's own avatar with a staggered pop: **Invite to play**
+opens the games dialog on the *Play together* tab, **Send a reaction** opens the existing
+reaction picker. The station opens the dialog on the *Solo* tab; the menu and *My game*
+keep the last choice (`preferredMode` on `BibleGames`). The scene projects the buttons
+each frame through `controls.contactActions`, like the island discovery buttons, and
+owns their `disabled` state: React must not render that attribute, or its event delegation
+keeps ignoring the clicks. The bottom-right reaction button stays permanent.

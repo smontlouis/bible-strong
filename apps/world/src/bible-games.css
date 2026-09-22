@@ -11,6 +11,7 @@
   --g-bg: var(--bs-bg);
   --g-card: var(--bs-card);
   --g-line: var(--bs-line);
+  --g-line-strong: var(--bs-line-strong);
   --g-muted: var(--bs-muted);
   --g-faint: var(--bs-faint);
   --g-grey: var(--bs-grey);
@@ -89,6 +90,8 @@
   background: var(--g-bg);
   color: var(--g-navy);
   overflow-y: auto;
+  /* Sliding blocks (motion swap) must never summon a horizontal scrollbar. */
+  overflow-x: hidden;
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: rgba(16, 27, 53, 0.25) transparent;
@@ -116,6 +119,7 @@
   touch-action: manipulation;
 }
 .games-shell {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -243,9 +247,12 @@
 .games-launch:disabled {
   cursor: default;
 }
-.games-dialog .games-primary:disabled {
-  background: #d9dfeb;
-  color: #7a8497;
+.games-dialog .games-primary:disabled,
+:root .games-shell[data-kind='quiz'] .games-primary:disabled {
+  --button-edge: var(--g-line-strong);
+  background: var(--g-grey);
+  color: var(--g-muted);
+  box-shadow: none;
 }
 .games-dialog .games-secondary:disabled,
 .games-dialog .games-text:disabled {
@@ -367,6 +374,7 @@
   width: calc(50% - 6px);
 }
 .games-options {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
@@ -402,6 +410,7 @@
 
 /* Lobby */
 .games-players {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
@@ -470,10 +479,18 @@
   border-radius: 50%;
   background: var(--g-grey);
   color: var(--g-muted);
-  font-size: 22px;
-  line-height: 1;
+}
+.games-empty span svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
 }
 .games-nearby {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -482,17 +499,36 @@
   border-radius: var(--g-radius);
   background: var(--g-card);
 }
-.games-nearby h2,
 .games-invitations h2 {
   margin: 0;
   font-size: 15px;
   font-weight: 500;
 }
+.games-nearby h2 {
+  margin: 0 0 2px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--g-muted);
+}
 .games-nearby > div {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
+}
+.games-nearby > div > .avatar-art {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 34px;
+}
+.games-nearby > div > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
 }
 .games-nearby > p {
   margin: 0;
@@ -538,6 +574,7 @@
 
 /* Question (quiz) */
 .games-round {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -639,6 +676,7 @@
   min-height: 40px;
 }
 .games-answer-form {
+  position: relative;
   display: grid;
   gap: 10px;
 }
@@ -698,7 +736,6 @@
   border-radius: 16px;
   background: var(--g-blue-soft);
   color: var(--g-blue-dark);
-  animation: game-pop 240ms ease-out;
 }
 .game-answer-sent > span {
   display: grid;
@@ -762,6 +799,8 @@
   opacity: 0.9;
 }
 .game-outcome-icon {
+  --star-fill: var(--g-yellow);
+  --star-depth: 0;
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -796,23 +835,6 @@
 }
 .game-outcome[data-burst='true'] .game-outcome-icon {
   animation: game-reward 550ms ease-out;
-}
-.game-sparkles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-.game-sparkles i {
-  position: absolute;
-  left: calc(var(--i) * 8.5%);
-  top: 70%;
-  font-size: 18px;
-  font-style: normal;
-  color: var(--g-yellow);
-  opacity: 0;
-  animation: game-spark 1500ms ease-out forwards;
-  animation-delay: calc(var(--i) * 35ms);
 }
 .games-reveal {
   display: flex;
@@ -936,6 +958,9 @@
   text-align: center;
 }
 .game-trophy {
+  --star-fill: #fff;
+  --star-depth: 0;
+  --star-shine: 0;
   display: grid;
   place-items: center;
   width: 84px;
@@ -1060,10 +1085,18 @@
   width: 40px;
   height: 46px;
 }
-.who-contestant[data-active='true'][data-me='true'] .who-portrait {
+/* Thick edge drawn inside the card (no overflow in the grid), plus a soft drop shadow. */
+.who-contestant[data-active='true'] {
+  border-color: var(--g-blue);
   box-shadow:
-    0 0 0 2px #fff,
-    0 0 0 4px var(--g-blue);
+    inset 0 0 0 3px var(--g-blue),
+    0 10px 24px rgba(89, 131, 240, 0.35);
+}
+.who-contestant[data-active='true'][data-me='false'] {
+  border-color: var(--g-yellow);
+  box-shadow:
+    inset 0 0 0 3px var(--g-yellow),
+    0 10px 24px rgba(255, 188, 0, 0.3);
 }
 .who-contestant[data-winner='true'] .who-portrait {
   box-shadow:
@@ -1130,7 +1163,6 @@
   border-radius: 16px;
   background: var(--g-grey);
   color: var(--g-navy);
-  animation: game-pop 260ms ease-out;
 }
 .game-turn-banner strong {
   display: block;
@@ -1194,6 +1226,7 @@
   color: var(--g-blue-dark);
 }
 .who-round {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -1244,23 +1277,35 @@
 .who-track small {
   display: none;
 }
+.who-track li > strong,
+.who-track li > span:not(.who-track-fill) {
+  position: relative;
+  z-index: 1;
+}
+/* The active zone is larger; its whole background is the progress bar. It is blue only
+   when this visitor can answer, night blue otherwise. */
 .who-track li[data-current='true'] {
-  background: var(--g-navy);
-  color: rgba(255, 255, 255, 0.8);
+  /* Dark track under the bright blue fill, so the remaining time reads at a glance. */
+  background: color-mix(in srgb, var(--g-blue) 40%, var(--g-navy));
+  color: rgba(255, 255, 255, 0.85);
 }
 .who-track li[data-current='true'] strong {
-  color: var(--g-yellow);
+  color: #fff;
+}
+.who-round:not([data-turn='ready']):not([data-turn='race']) .who-track li[data-current='true'] {
+  background: var(--g-navy);
+}
+.who-round:not([data-turn='ready']):not([data-turn='race']) .who-track-fill {
+  background: color-mix(in srgb, var(--g-navy) 55%, var(--g-blue));
 }
 .who-track li[data-past='true'] {
   opacity: 0.45;
 }
-.who-track-fill {
+.who-track li > .who-track-fill {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 4px;
-  width: 100%;
-  background: var(--g-yellow);
+  inset: 0;
+  z-index: 0;
+  background: var(--g-blue);
   transform-origin: left;
   transition: transform 1s linear;
 }
@@ -1273,7 +1318,6 @@
   border: 1px solid var(--g-line);
   border-radius: var(--g-radius);
   background: var(--g-card);
-  animation: who-reveal 240ms ease-out;
 }
 .who-riddle > img {
   position: absolute;
@@ -1317,11 +1361,6 @@
   font-size: 18px;
   line-height: 1;
   font-weight: 500;
-}
-.who-timer small {
-  margin-top: 2px;
-  font-size: 9px;
-  font-weight: 400;
 }
 .who-timer[data-urgent='true'] {
   background: conic-gradient(var(--g-red) var(--remaining), var(--g-red-soft) 0);
@@ -1500,15 +1539,6 @@
     transform: none;
   }
 }
-@keyframes game-spark {
-  15% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-140px) rotate(160deg);
-    opacity: 0;
-  }
-}
 @keyframes game-tick {
   50% {
     transform: scale(1.07);
@@ -1671,9 +1701,6 @@
     animation: none !important;
     transition: none !important;
   }
-  .game-sparkles {
-    display: none;
-  }
 }
 
 /* Tablet and desktop: players on the left, the round on the right */
@@ -1738,5 +1765,402 @@
   }
   .games-shell[data-who-phase='question'] .games-header h1 {
     font-size: 28px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Juice: reactions layered on top of the screens above. Transform/opacity only. */
+
+/* Launcher breathes and nudges to invite play */
+.games-launch {
+  animation: juice-nudge 6s ease-in-out infinite;
+}
+.games-launch::after {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 40%;
+  height: 140%;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.45) 50%, transparent 80%);
+  pointer-events: none;
+  animation: juice-shine 3.4s var(--juice-out) infinite;
+}
+.games-launch {
+  overflow: hidden;
+}
+
+/* Choose screen: cards pop when selected */
+.games-card[aria-pressed='true'],
+.games-card[data-selected='true'] {
+  animation: game-card-select 320ms var(--juice-out);
+}
+@keyframes game-card-select {
+  35% {
+    transform: scale(1.025);
+  }
+  100% {
+    transform: none;
+  }
+}
+.games-card img {
+  transition: transform 260ms var(--juice-back);
+}
+.games-card[aria-pressed='true'] img,
+.games-card:not(:disabled):hover img {
+  transform: translateY(-4px) scale(1.06) rotate(-2deg);
+}
+.games-selection[data-selected='true'] {
+  animation: juice-pop 420ms var(--juice-spring);
+}
+
+/* Lobby: each explorer pops in, empty seats breathe */
+.games-player .avatar-art {
+  transition: transform 200ms var(--juice-back);
+}
+.games-player[data-answered='true'] .avatar-art {
+  transform: translateY(-3px) scale(1.08);
+}
+.games-player[data-answered='true'] .game-player-reply {
+  animation: juice-slam 380ms var(--juice-out);
+}
+.games-empty {
+  animation: juice-breathe 2.4s ease-in-out infinite;
+}
+.games-empty span {
+  animation: juice-heartbeat 2.4s ease-in-out infinite;
+}
+
+/* Preparing screen */
+.games-preparing img {
+  animation: juice-float 3s ease-in-out infinite;
+}
+.games-loading {
+  animation: juice-breathe 1.6s ease-in-out infinite;
+}
+
+/* Quiz round */
+.games-progress span {
+  transition: background 300ms, transform 300ms;
+}
+.games-progress span[data-current='true'] {
+  animation: juice-breathe 1.4s ease-in-out infinite;
+  transform-origin: center;
+}
+.games-progress span[data-done='true'] {
+  animation: juice-slam 400ms var(--juice-out);
+}
+.games-question {
+  transform-origin: center top;
+}
+.games-shell[data-enter] .games-question {
+  animation: juice-slide-in 480ms var(--juice-out) both;
+  animation-delay: 120ms;
+}
+.games-clock {
+  transform-origin: center;
+}
+.games-choice {
+  transition:
+    border-color 120ms,
+    background 120ms,
+    transform 160ms var(--juice-back);
+}
+.games-choice:not(:disabled):hover {
+  transform: translateY(-2px) scale(1.01);
+}
+.games-choice > span {
+  transition: transform 160ms var(--juice-back);
+}
+.games-choice:not(:disabled):hover > span {
+  transform: rotate(-8deg) scale(1.1);
+}
+.games-choices .games-choice {
+  animation: juice-pop 460ms var(--juice-spring) both;
+}
+.games-choices .games-choice:nth-child(2) {
+  animation-delay: 60ms;
+}
+.games-choices .games-choice:nth-child(3) {
+  animation-delay: 120ms;
+}
+.games-choices .games-choice:nth-child(4) {
+  animation-delay: 180ms;
+}
+.game-quiz-status strong {
+  display: inline-block;
+}
+
+/* Reveal: the answer stamps, then rows cascade in */
+.games-reveal > * {
+  animation: juice-enter-a 480ms var(--juice-out) both;
+}
+.games-reveal > :nth-child(1) {
+  animation-delay: 0ms;
+}
+.games-reveal > :nth-child(2) {
+  animation: none;
+}
+.games-reveal > :nth-child(3) {
+  animation-delay: 380ms;
+}
+.games-reveal > :nth-child(4) {
+  animation-delay: 480ms;
+}
+.games-reveal > :nth-child(5) {
+  animation-delay: 560ms;
+}
+.games-reveal > :nth-child(n + 6) {
+  animation-delay: 640ms;
+}
+.games-reveal h2 {
+  transform-origin: left center;
+}
+.game-revealed-choices > div:nth-child(2) {
+  --i: 1;
+}
+.game-revealed-choices > div:nth-child(3) {
+  --i: 2;
+}
+.game-revealed-choices > div:nth-child(4) {
+  --i: 3;
+}
+.game-revealed-choices [data-correct='true'] {
+  box-shadow: 0 0 0 3px var(--g-blue-soft);
+}
+.game-revealed-choices [data-correct='true'] > span:first-child {
+  animation: juice-heartbeat 700ms ease-out calc(760ms + var(--i, 0) * 110ms);
+}
+.game-revealed-choices [data-chosen='true']:not([data-correct='true']) > span:first-child {
+  animation: juice-wobble 700ms ease-in-out calc(900ms + var(--i, 0) * 110ms);
+}
+.games-answer-list > div[data-status='wrong'] small,
+.game-revealed-choices [data-chosen='true'] > span:first-child {
+  display: inline-block;
+}
+.games-answer-list > div[data-status='correct'] small {
+  display: inline-block;
+  animation: juice-heartbeat 600ms ease-out calc(900ms + var(--i, 0) * 110ms);
+}
+
+/* Outcome banner */
+.game-outcome {
+  transform-origin: center;
+}
+.game-outcome[data-burst='true'] {
+  animation: juice-slam 460ms var(--juice-out);
+}
+.game-outcome[data-burst='true'] .game-points-pop {
+  animation: game-reward 800ms var(--juice-spring);
+}
+.game-outcome[data-burst='true'] .game-outcome-icon {
+  animation: game-reward 700ms var(--juice-spring);
+}
+.game-outcome[data-outcome='missed'] .game-outcome-icon {
+  animation: juice-wobble 800ms ease-in-out;
+}
+.game-outcome[data-outcome='win'] {
+  box-shadow: 0 12px 30px rgba(89, 131, 240, 0.4);
+}
+.game-outcome .juice-burst {
+  z-index: 0;
+}
+.game-outcome > .game-outcome-icon,
+.game-outcome > .game-points-pop {
+  position: relative;
+  z-index: 1;
+}
+
+/* Finale: podium reveals last place first, leader lands last */
+.game-trophy {
+  position: relative;
+}
+.game-finale[data-podium='true'] .game-trophy {
+  animation:
+    juice-bounce-in 720ms var(--juice-spring) both,
+    juice-float 3s ease-in-out 900ms infinite;
+}
+.game-finale > h2 {
+  animation-delay: 200ms;
+}
+.game-finale > p {
+  animation: juice-enter-a 480ms var(--juice-out) 420ms both;
+}
+.game-ranking li {
+  animation: juice-bounce-in 620ms var(--juice-spring) both;
+  animation-delay: calc(400ms + var(--i, 0) * 320ms);
+  transform-origin: center;
+}
+.game-ranking li[data-leader='true'] {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(16, 27, 53, 0.35);
+}
+.game-ranking li[data-leader='true']::after {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 40%;
+  height: 140%;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.28) 50%, transparent 80%);
+  pointer-events: none;
+  animation: juice-shine 2.6s var(--juice-out) infinite;
+  animation-delay: calc(900ms + var(--i, 0) * 320ms);
+}
+.game-ranking li[data-leader='true'] .game-rank {
+  animation: juice-heartbeat 700ms ease-out calc(1000ms + var(--i, 0) * 320ms);
+}
+.game-ranking .avatar-art {
+  transition: transform 200ms var(--juice-back);
+}
+.game-ranking li[data-leader='true'] .avatar-art {
+  transform: scale(1.12);
+}
+
+/* Who am I?: turn ring, portrait bounce, clue reveal, urgent clock */
+.who-contestant {
+  transition:
+    border-color 180ms,
+    box-shadow 180ms,
+    transform 220ms var(--juice-back);
+}
+.who-contestant[data-active='true'] {
+  transform: translateY(-3px);
+}
+.who-contestant[data-active='true'] .who-portrait {
+  animation: juice-heartbeat 620ms ease-out;
+}
+.who-contestant[data-winner='true'] .who-portrait {
+  animation: game-reward 700ms var(--juice-spring);
+}
+.who-contestant[data-winner='true'] {
+  animation: juice-heartbeat 700ms ease-out 150ms;
+}
+.who-contestant[data-checking='true'] .who-portrait {
+  animation: juice-breathe 1s ease-in-out infinite;
+}
+.who-turn-ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 3px solid var(--g-blue);
+  opacity: 0;
+  pointer-events: none;
+  animation: juice-ring 800ms var(--juice-out) forwards;
+}
+.who-contestant[data-me='false'] .who-turn-ring {
+  border-color: var(--g-yellow);
+}
+.who-score {
+  transform-origin: center;
+}
+.who-player-state {
+  transition: background 200ms, color 200ms;
+}
+.who-contestant[data-active='true'] .who-player-state {
+  animation: juice-slam 380ms var(--juice-out);
+}
+.game-turn-banner {
+  transform-origin: center;
+}
+.game-turn-banner[data-state='wrong'] {
+  animation: juice-shake 480ms var(--juice-out) 120ms;
+}
+.game-turn-banner[data-state='ready'],
+.game-turn-banner[data-state='race'] {
+  box-shadow: 0 10px 26px rgba(89, 131, 240, 0.4);
+}
+.game-turn-banner[data-state='ready'] .game-turn-icon,
+.game-turn-banner[data-state='race'] .game-turn-icon {
+  animation: juice-heartbeat 1.2s ease-out 400ms 2;
+}
+.game-turn-banner[data-state='wrong'] .game-turn-icon {
+  animation: juice-wobble 800ms ease-in-out;
+}
+.who-track li {
+  transition: background 250ms, opacity 300ms, transform 300ms var(--juice-back);
+}
+.who-track li[data-current='true'] {
+  transform: scale(1.12);
+  z-index: 1;
+  animation: juice-slam 420ms var(--juice-out);
+  box-shadow: 0 8px 18px rgba(16, 27, 53, 0.3);
+}
+.who-track li[data-current='true'] strong {
+  display: inline-block;
+  animation: juice-heartbeat 600ms ease-out 200ms;
+}
+.who-track li[data-past='true'] {
+  transform: scale(0.94);
+}
+.who-riddle > img {
+  animation: juice-float 3s ease-in-out infinite;
+}
+.who-clue-text {
+  clip-path: inset(0 0 0 0);
+  animation: who-clue-wipe 700ms var(--juice-out) 180ms both;
+}
+@keyframes who-clue-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0.4;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+.who-timer > span {
+  transform-origin: center;
+}
+.who-timer[data-urgent='true'] > span {
+  color: var(--g-red-dark);
+  animation: juice-heartbeat 900ms ease-out;
+}
+.who-timer[data-urgent='true'] {
+  box-shadow: 0 0 0 4px var(--g-red-soft);
+}
+.who-round[data-urgent='true'] .who-riddle {
+  border-color: var(--g-red);
+}
+.who-round[data-turn='wrong'] .who-input-row {
+  animation: juice-shake 480ms var(--juice-out);
+}
+.who-round[data-turn='wrong'] .who-input-row input {
+  border-color: var(--g-red);
+  box-shadow: 0 0 0 3px var(--g-red-soft);
+}
+.who-round[data-turn='clarify'] .who-input-row input {
+  border-color: var(--g-yellow);
+  box-shadow: 0 0 0 3px var(--g-yellow-soft);
+}
+.who-round[data-turn='ready'] .who-input-row input,
+.who-round[data-turn='race'] .who-input-row input {
+  border-color: var(--g-blue);
+  box-shadow: 0 0 0 3px var(--g-blue-soft);
+}
+.who-input-row input {
+  transition: border-color 200ms, box-shadow 200ms;
+}
+.who-submit-icon {
+  transition: transform 200ms var(--juice-back);
+}
+.who-submit:not(:disabled):hover .who-submit-icon {
+  transform: translateX(3px);
+}
+.who-history summary > span {
+  animation: juice-pop 400ms var(--juice-spring);
+}
+
+/* Notices enter through motion; an error still shakes once it is in. */
+.games-error {
+  animation: juice-shake 480ms var(--juice-out) 200ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .games-launch::after,
+  .game-ranking li[data-leader='true']::after {
+    display: none;
   }
 }

@@ -171,6 +171,15 @@ describe('round authority and privacy', () => {
     expect(g.players.map(p => p.score)).toEqual([1, 1])
     fails('not_ready', () => answer('a', 'Pierre0'))
   })
+  it('reveals as soon as every player has answered or run out of attempts', () => {
+    const g = start()
+    for (let i = 0; i < 3; i++) engine.evaluated(answer('a', `vague ${i}`), 'clarify')
+    expect(engine.snapshot('a').game?.ownAnswer?.retriesLeft).toBe(0)
+    expect(g.phase).toBe('question')
+    answer('b', 'Pierre0')
+    expect(g.phase).toBe('reveal')
+    expect(g.players.map(p => p.score)).toEqual([0, 1])
+  })
   it('ignores stale generation results after departure or timeout', () => {
     lobby()
     const e = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>

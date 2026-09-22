@@ -183,7 +183,19 @@ export class GameEngine {
     g.updated = this.now()
   }
   private completed(g: Game) {
-    return !g.who && g.players.every(p => ['correct', 'wrong'].includes(g.answers[p.id]?.status))
+    // A player with no attempt left (three clarifications or failed checks) is done too;
+    // otherwise the round would idle until its deadline with nothing left to submit.
+    return (
+      !g.who &&
+      g.players.every(p => {
+        const a = g.answers[p.id]
+        return (
+          !!a &&
+          a.status !== 'pending' &&
+          (['correct', 'wrong', 'skipped'].includes(a.status) || a.attempts >= 3)
+        )
+      })
+    )
   }
   private remove(id: string) {
     const g = this.current(id)

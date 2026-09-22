@@ -124,3 +124,96 @@
     bottom: 68px;
   }
 }
+
+/* Floating actions under the nearest visitor: same raised look as the reaction trigger,
+   entering and leaving one after the other. */
+.contact-actions {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  display: flex;
+  gap: 8px;
+  pointer-events: none;
+}
+.contact-actions[data-visible='true'] {
+  pointer-events: auto;
+}
+.contact-action {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 3px;
+  border: 2px solid #bfd4d4;
+  border-radius: 16px;
+  background: #fffdf4;
+  color: var(--bs-navy);
+  box-shadow:
+    0 4px 0 #8daeb0,
+    0 8px 20px #244e5726;
+  cursor: pointer;
+  opacity: 0;
+  scale: 0.4;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.contact-action .star-icon {
+  width: 26px;
+  height: 28px;
+}
+.contact-action .reaction-icon {
+  width: 34px;
+  height: 34px;
+}
+.contact-action:not(:disabled):active {
+  translate: 0 3px;
+  box-shadow:
+    0 1px 0 #8daeb0,
+    0 4px 10px #244e5726;
+}
+.contact-actions[data-visible='true'] .contact-action {
+  animation: contact-action-in 480ms var(--juice-spring) both;
+}
+.contact-actions[data-visible='true'] .contact-action:nth-child(2) {
+  animation-delay: 90ms;
+}
+.contact-actions[data-visible='false'] .contact-action {
+  animation: contact-action-out 220ms var(--juice-out) both;
+  animation-delay: 70ms;
+}
+.contact-actions[data-visible='false'] .contact-action:nth-child(2) {
+  animation-delay: 0ms;
+}
+@keyframes contact-action-in {
+  from {
+    opacity: 0;
+    scale: 0.4;
+    translate: 0 -10px;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+  }
+}
+@keyframes contact-action-out {
+  from {
+    opacity: 1;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 0.5;
+    translate: 0 -8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .contact-actions .contact-action {
+    animation: none;
+  }
+  .contact-actions[data-visible='true'] .contact-action {
+    opacity: 1;
+    scale: 1;
+  }
+}

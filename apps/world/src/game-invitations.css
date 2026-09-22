@@ -128,10 +128,6 @@
   font-weight: 500;
   line-height: 1;
 }
-.game-invite-seconds small {
-  font-size: 9px;
-  margin-left: 1px;
-}
 
 /* Invitation sheet */
 .games-dialog.games-invite-dialog {

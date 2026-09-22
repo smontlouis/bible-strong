@@ -2,6 +2,7 @@ import { tickSolo, pauseSolo, resumeSolo } from '../solo-game'
 import React, { useEffect, useRef, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { BibleGamesView } from '../BibleGamesView'
+import { installButtonHaptics } from '../haptics'
 import type { GameAction } from '../games-protocol'
 import {
   act,
@@ -562,6 +563,8 @@ function Gallery() {
 }
 if (import.meta.env.DEV) {
   const root: Root = import.meta.hot?.data.root ?? createRoot(document.getElementById('root')!)
+  if (!import.meta.hot?.data.haptics) installButtonHaptics()
+  if (import.meta.hot) import.meta.hot.data.haptics = true
   if (import.meta.hot) import.meta.hot.data.root = root
   root.render(params.get('preview') === '1' ? <Frame /> : <Gallery />)
 }

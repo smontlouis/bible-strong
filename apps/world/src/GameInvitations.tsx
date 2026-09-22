@@ -107,7 +107,6 @@ export function InvitationNotifications({
           </span>
           <span className="game-invite-seconds" aria-hidden="true">
             {Math.max(0, Math.ceil((invite.expires - now) / 1000))}
-            <small>s</small>
           </span>
         </button>
       ))}

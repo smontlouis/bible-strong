@@ -1,4 +1,5 @@
 .solo-game {
+  position: relative;
   color: var(--bs-navy);
 }
 .solo-scoreboard {
@@ -10,6 +11,13 @@
   background: var(--bs-card);
   border: 1px solid var(--bs-line);
   border-radius: var(--bs-radius);
+  transition:
+    background 300ms,
+    border-color 300ms;
+}
+.solo-scoreboard[data-urgent='true'] {
+  border-color: var(--bs-red);
+  background: var(--bs-red-soft);
 }
 .solo-stars {
   display: flex;
@@ -17,16 +25,73 @@
   font-size: clamp(30px, 7vw, 48px);
   color: var(--bs-grey);
 }
-.solo-stars [data-lit='true'] {
-  color: var(--bs-yellow);
-  animation: solo-star 0.45s ease-out both;
+.solo-stars > span {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  transform-origin: 50% 60%;
+  transition: color 200ms;
+}
+.solo-stars > span {
+  --star-fill: var(--bs-grey);
+  --star-depth: 0;
+  --star-shine: 0;
+}
+.solo-stars > [data-lit='true'] {
+  --star-fill: var(--bs-yellow);
+  --star-edge: var(--bs-button-edge-yellow);
+  --star-depth: 1;
+  --star-shine: 0.75;
+  filter: drop-shadow(0 4px 10px rgba(255, 188, 0, 0.45));
+}
+.solo-stars > [data-fresh='true'] {
+  animation: solo-star-light 720ms var(--juice-spring) both;
+}
+.solo-stars > [data-fresh='true']::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 3px solid var(--bs-yellow);
+  animation: juice-ring 700ms var(--juice-out) forwards;
+}
+.solo-stars > [data-falling='true'] {
+  animation: solo-star-fall 700ms cubic-bezier(0.5, 0, 0.9, 0.4) both;
+  animation-delay: calc((4 - var(--n)) * 70ms);
+}
+@keyframes solo-star-light {
+  0% {
+    transform: scale(0.3) rotate(-40deg);
+  }
+  60% {
+    transform: scale(1.45) rotate(8deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+@keyframes solo-star-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  20% {
+    transform: translateY(-10px) rotate(-12deg) scale(1.15);
+  }
+  100% {
+    transform: translateY(58px) rotate(50deg) scale(0.4);
+    opacity: 0;
+  }
 }
 .solo-clock {
+  display: inline-block;
   font-size: 30px;
   font-variant-numeric: tabular-nums;
+  transform-origin: 70% 50%;
 }
 .solo-clock[data-urgent='true'] {
   color: var(--bs-red);
+  animation: juice-heartbeat 900ms ease-out;
 }
 .solo-scoreboard small {
   grid-column: 1 / -1;
@@ -42,21 +107,106 @@
 .solo-intro img {
   object-fit: contain;
 }
-.solo-result-icon,
-.solo-loading {
+.solo-intro-art {
+  animation: juice-float 3.2s ease-in-out infinite;
+}
+.solo-result-icon {
   font-size: 64px;
   color: var(--bs-yellow);
 }
 .solo-loading {
-  animation: solo-star 1.2s ease-in-out infinite alternate;
+  display: inline-flex;
+  gap: 8px;
+  font-size: 40px;
+  color: var(--bs-yellow);
+}
+.solo-loading i {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  font-style: normal;
+  animation: solo-loading-bounce 1s var(--juice-back) infinite;
+}
+.solo-loading i:nth-child(2) {
+  animation-delay: 120ms;
+  color: var(--bs-blue);
+}
+.solo-loading i:nth-child(3) {
+  animation-delay: 240ms;
+}
+.solo-loading-small {
+  font-size: 16px;
+  gap: 3px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+@keyframes solo-loading-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translateY(-14px) scale(1.2);
+  }
+  55% {
+    transform: translateY(0) scale(0.9, 1.1);
+  }
+}
+.solo-checking {
+  display: flex;
+  align-items: center;
 }
 .solo-question {
+  position: relative;
   padding: 20px 0;
+  border-radius: var(--bs-radius);
+  transition: background 200ms;
+}
+.solo-question[data-flash='wrong'] {
+  animation: juice-shake 480ms var(--juice-out);
+}
+.solo-question[data-flash='wrong']::before,
+.solo-question[data-flash='correct']::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: calc(var(--bs-radius) + 6px);
+  pointer-events: none;
+  animation: solo-flash 700ms ease-out forwards;
+  background: var(--bs-red-soft);
+  box-shadow: 0 0 0 3px var(--bs-red);
+}
+.solo-question[data-flash='correct']::before {
+  background: var(--bs-blue-soft);
+  box-shadow: 0 0 0 3px var(--bs-blue);
+}
+@keyframes solo-flash {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.solo-question > * {
+  position: relative;
+}
+.solo-question-text {
+  margin-bottom: 20px;
+}
+.solo-question-number {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--bs-blue-dark);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
 }
 .solo-question h2 {
+  margin: 0;
   font-size: clamp(22px, 5vw, 30px);
   line-height: 1.3;
-  margin-bottom: 20px;
 }
 .solo-mode-picker {
   display: grid;
@@ -73,30 +223,13 @@
   color: var(--bs-blue-dark);
   border-color: var(--bs-blue);
 }
-@keyframes solo-star {
-  from {
-    transform: scale(0.85);
-  }
-  to {
-    transform: scale(1);
-  }
-}
 @media (max-width: 380px) {
   .solo-question .games-choices {
     grid-template-columns: 1fr;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .solo-stars span,
-  .solo-loading {
-    animation: none !important;
-  }
-}
 .discover-button[data-island='games'][data-visible='true'] {
   animation: terminal-beacon 2s ease-in-out infinite;
-}
-.solo-result-icon {
-  animation: solo-star 0.55s cubic-bezier(0.2, 1.6, 0.3, 1);
 }
 .solo-game[data-outcome='won'] .solo-scoreboard {
   background: var(--bs-yellow-soft);
@@ -109,25 +242,45 @@
       0 6px 22px color-mix(in srgb, var(--bs-blue) 45%, transparent);
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .discover-button[data-island='games'],
-  .solo-result-icon {
-    animation: none !important;
-  }
-}
 
 .solo-live-feedback {
-  min-height: 32px;
+  position: relative;
+  min-height: 44px;
   margin-bottom: 8px;
-  font-weight: 700;
 }
 .solo-live-feedback span {
-  display: inline-block;
-  color: var(--bs-blue-dark);
-  animation: solo-star 0.25s ease-out;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 16px 0 6px;
+  border-radius: 20px;
+  background: var(--bs-blue);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 8px 20px rgba(89, 131, 240, 0.35);
+}
+.solo-live-feedback span i {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  font-style: normal;
+  font-size: 16px;
 }
 .solo-live-feedback [data-status='wrong'] {
-  color: var(--bs-red);
+  background: var(--bs-red);
+  box-shadow: 0 8px 20px rgba(230, 70, 88, 0.35);
+}
+.solo-live-feedback [data-status='wrong'] i {
+  animation: juice-wobble 700ms ease-in-out;
+}
+.solo-live-feedback [data-status='skipped'] {
+  background: var(--bs-navy);
+  box-shadow: none;
 }
 .solo-review {
   padding-bottom: 20px;
@@ -142,6 +295,10 @@
   list-style: none;
   padding: 0;
   margin: 0;
+}
+.solo-review ol > li {
+  animation: juice-enter-a 520ms var(--juice-out) both;
+  animation-delay: calc(400ms + var(--i, 0) * 60ms);
 }
 .solo-review-item {
   background: var(--bs-card);
@@ -162,6 +319,9 @@
   font-weight: 700;
   color: var(--bs-blue-dark);
 }
+.solo-review-item[data-status='wrong'] {
+  border-color: var(--bs-red-soft);
+}
 .solo-review-item[data-status='wrong'] .solo-review-status {
   color: var(--bs-red);
 }
@@ -176,13 +336,9 @@
 .solo-review-detail a {
   color: var(--bs-blue-dark);
 }
-@media (prefers-reduced-motion: reduce) {
-  .solo-live-feedback span {
-    animation: none;
-  }
-}
 
 .solo-result {
+  position: relative;
   padding: 18px 0;
   gap: 8px;
 }
@@ -191,9 +347,97 @@
   margin: 0;
 }
 .solo-result-icon {
-  font-size: 40px;
+  position: relative;
+  font-size: 56px;
   line-height: 1.1;
+}
+.solo-result[data-outcome='timeout'] .solo-result-icon {
+  animation: juice-wobble 900ms ease-in-out 300ms;
+}
+.solo-result-stars {
+  display: flex;
+  gap: 4px;
+  font-size: 34px;
+  line-height: 1;
+  color: var(--bs-grey);
+}
+.solo-result-stars > span {
+  display: inline-block;
+  animation: solo-star-light 600ms var(--juice-spring) both;
+  animation-delay: calc(350ms + var(--n) * 110ms);
+}
+.solo-result-stars > span {
+  --star-fill: var(--bs-grey);
+  --star-depth: 0;
+  --star-shine: 0;
+}
+.solo-result-stars > [data-lit='true'] {
+  --star-fill: var(--bs-yellow);
+  --star-edge: var(--bs-button-edge-yellow);
+  --star-depth: 1;
+  --star-shine: 0.75;
+  filter: drop-shadow(0 4px 10px rgba(255, 188, 0, 0.45));
+}
+.solo-result-stats {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+.solo-result-stats > div {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 120px;
+  padding: 10px 16px;
+  border: 1px solid var(--bs-line);
+  border-radius: 16px;
+  background: var(--bs-card);
+  animation: juice-pop 520ms var(--juice-spring) both;
+  animation-delay: 600ms;
+}
+.solo-result-stats > div:last-child {
+  animation-delay: 720ms;
+}
+.solo-result-stats b {
+  font-size: 26px;
+  line-height: 1;
+  font-weight: 500;
+}
+.solo-result-stats small {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bs-muted);
 }
 .solo-review > h2 {
   margin-top: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .solo-stars > span,
+  .solo-stars > span::after,
+  .solo-loading i,
+  .solo-intro-art,
+  .solo-clock,
+  .solo-question,
+  .solo-question::before,
+  .solo-live-feedback span,
+  .solo-live-feedback span i,
+  .solo-review ol > li,
+  .solo-result-icon,
+  .solo-result-stars > span,
+  .solo-result-stats > div,
+  .discover-button[data-island='games'] {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .solo-question .games-answer-form > button,
+  .solo-game > .games-secondary,
+  .solo-game > .games-actions > .games-secondary,
+  .solo-intro > .games-primary {
+    width: 100%;
+    justify-self: stretch;
+  }
 }

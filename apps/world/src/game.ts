@@ -63,6 +63,8 @@ export type Controls = {
   multiplayerEnabled?: boolean
   retryMultiplayer?: () => void
   discoveryActions?: Partial<Record<IslandActionId, HTMLButtonElement | null>>
+  /** Floating actions under the visitor's avatar while another visitor is within reach. */
+  contactActions?: HTMLDivElement | null
   ambientEditor?: AmbientEditorModel
   shoreEditor?: ShoreEditorModel
   shoreZoom?: number
@@ -603,6 +605,44 @@ export function createWorld(
           action.dataset.visible = value
           action.disabled = !visible
           action.setAttribute('aria-hidden', String(!visible))
+        }
+      }
+      const contact = controls.contactActions
+      if (contact) {
+        // Track the closest visitor; a wider leave radius avoids flicker at the edge.
+        let best: { id: string; name: string; x: number; y: number; d: number } | null = null
+        const at = performance.now()
+        for (const [id, track] of this.network.remotes) {
+          const pose = track.sample(at)
+          const d = Math.hypot(pose.x - next.x, pose.y - next.y)
+          if (!best || d < best.d)
+            best = { id, name: track.player.profile.name, x: pose.x, y: pose.y, d }
+        }
+        const shown = contact.dataset.visible === 'true'
+        // Close contact only (the invite list itself still reaches 180 units).
+        const visible = !!best && best.d <= (shown ? 65 : 50) && !controls.paused
+        if (visible && best) {
+          // Shown under the visitor's own avatar, since it is their action to take.
+          const x =
+            (((next.x - camera.scrollX - screenWidth / 2) * zoom + screenWidth / 2) *
+              parent.clientWidth) /
+            screenWidth
+          const y =
+            (((next.y + 26 * labelScaleY - camera.scrollY - screenHeight / 2) * zoom +
+              screenHeight / 2) *
+              parent.clientHeight) /
+            screenHeight
+          contact.style.translate = `${x - contact.offsetWidth / 2}px ${y}px`
+          if (contact.dataset.contact !== best.id) {
+            contact.dataset.contact = best.id
+            contact.dataset.name = best.name
+          }
+        }
+        const value = String(visible)
+        if (contact.dataset.visible !== value) {
+          contact.dataset.visible = value
+          contact.setAttribute('aria-hidden', String(!visible))
+          for (const button of contact.querySelectorAll('button')) button.disabled = !visible
         }
       }
       this.shoreWaves?.update(

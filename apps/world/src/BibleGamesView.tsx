@@ -1,5 +1,5 @@
 import { SoloGameView } from './SoloGameView'
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react'
 import type {
   GameAction,
   GameOptions,
@@ -14,6 +14,20 @@ import { Modal } from './Modal'
 import { awardedPoints } from './game-presentation'
 import { GameFeedback, GameFinale } from './GameFeedback'
 import { WhoRound, WhoPlayers } from './WhoRound'
+import { Countdown, Curtain, PunchNumber, useScreenTransition, useTransient } from './game-juice'
+import { haptic } from './haptics'
+import {
+  AnimatePresence,
+  Appear,
+  AppearP,
+  GameMotion,
+  collapse,
+  item,
+  motion,
+  pop,
+  staggerAfter,
+  swap,
+} from './game-motion'
 import './bible-games.css'
 
 const copy = {
@@ -195,10 +209,11 @@ const copy = {
 }
 
 function GameSelectionIcon({ selected }: { selected: boolean }) {
+  if (!selected) return null
   return (
-    <span className="games-selection" data-selected={selected} aria-hidden="true">
+    <span className="games-selection" data-selected="true" aria-hidden="true">
       <svg viewBox="0 0 24 24" focusable="false">
-        {selected ? <path d="m6.5 12.5 3.5 3.5 7.5-8" /> : <path d="M12 7v10M7 12h10" />}
+        <path d="m6.5 12.5 3.5 3.5 7.5-8" />
       </svg>
     </span>
   )
@@ -255,6 +270,41 @@ export function BibleGamesView({
   const t = copy[game?.options.language ?? language]
   const host = game?.host === me
   const canReceive = !game || game.phase === 'finished'
+  // Screen transitions and shakes are pure presentation keyed on the snapshot.
+  const shell = useRef<HTMLDivElement>(null)
+  const screenKey = selectedInvitation
+    ? `invite:${selectedInvitation.id}`
+    : game
+      ? `${game.id}:${game.phase === 'generating' ? 'question' : game.phase}`
+      : 'choose'
+  const screen = useScreenTransition(screenKey)
+  const [shake, setShake] = useState(0)
+  const shaking = useTransient(shake, 450, shake > 0)
+  const onShake = () => setShake(n => n + 1)
+  // Shared games count 3 · 2 · 1 while the catalogue prepares, exactly like solo.
+  const multiGenerating = !!game && !game.solo && game.phase === 'generating'
+  const [counting, setCounting] = useState(multiGenerating)
+  const [countCurtain, setCountCurtain] = useState(0)
+  useEffect(() => {
+    if (multiGenerating) setCounting(true)
+    if (!game || game.phase === 'lobby' || game.phase === 'finished' || game.phase === 'reveal')
+      setCounting(false)
+  }, [multiGenerating, game?.phase, game?.id])
+  const curtainTone =
+    game?.phase === 'generating'
+      ? 'navy'
+      : game && !game.solo && game.options.kind === 'quiz'
+        ? 'yellow'
+        : 'blue'
+  const curtainLabel = !game
+    ? null
+    : game.phase === 'question' && !game.solo
+      ? `${t.round} ${game.round + 1} / ${game.total}`
+      : game.phase === 'question' || game.phase === 'finished'
+        ? '★'
+        : game.phase === 'generating'
+          ? '✦'
+          : null
   return (
     <>
       {!open && !disabled && canReceive && (
@@ -283,12 +333,18 @@ export function BibleGamesView({
           closeLabel={t.close}
           onClose={close}
         >
+          <GameMotion>
           <div
+            ref={shell}
             className="games-shell"
             data-kind={selectedInvitation?.options.kind ?? game?.options.kind ?? options.kind}
             data-who-phase={game?.who ? game.phase : undefined}
             data-phase={game?.phase ?? 'choose'}
+            data-enter={screen.parity}
+            data-shake={shaking}
           >
+            <Curtain token={screen.count} anchor={shell} tone={curtainTone} label={curtainLabel} />
+            <Curtain token={countCurtain} anchor={shell} tone={curtainTone} label="★" />
             {selectedInvitation ? (
               <InvitationDetail
                 invitation={selectedInvitation}
@@ -312,7 +368,28 @@ export function BibleGamesView({
                 error={error}
                 titleId={id}
                 send={send}
+                onShake={onShake}
               />
+            ) : game && counting ? (
+              <>
+                <Countdown
+                  screen
+                  anchor={shell}
+                  steps={['3', '2', '1', game.options.language === 'fr' ? 'Partez !' : 'Go!']}
+                  ready={game.phase === 'question'}
+                  onTick={index => haptic(index === 3 ? 'success' : 'tick')}
+                  onDone={() => {
+                    setCounting(false)
+                    setCountCurtain(n => n + 1)
+                  }}
+                >
+                  <small>
+                    {game.phase === 'generating'
+                      ? t.generatingDescription
+                      : `${t[game.options.kind]} · ${t.rules}`}
+                  </small>
+                </Countdown>
+              </>
             ) : (
               <>
                 {canReceive && (
@@ -352,27 +429,29 @@ export function BibleGamesView({
                             : `${t.round} ${game.round + 1} / ${game.total}`}
                   </p>
                 </header>
-                {!state.online && (
-                  <p className="games-notice" role="status">
-                    {t.offline}
-                  </p>
-                )}
-                {state.error && (
-                  <p className="games-notice games-error" role="alert">
-                    {t.errors[state.error]}
-                  </p>
-                )}
-                {game?.pausedUntil != null && (
-                  <p className="games-notice game-pause" role="status">
-                    <span aria-hidden="true">Ⅱ </span>
-                    {game.players
-                      .filter(p => p.absentSince !== null)
-                      .map(p => p.profile.name)
-                      .join(', ')}{' '}
-                    · {t.paused}{' '}
-                    <strong>{Math.max(0, Math.ceil((game.pausedUntil - now) / 1000))} s</strong>
-                  </p>
-                )}
+                <AnimatePresence initial={false} mode="popLayout">
+                  {!state.online && (
+                    <AppearP key="offline" className="games-notice" role="status">
+                      {t.offline}
+                    </AppearP>
+                  )}
+                  {state.error && (
+                    <AppearP key="error" className="games-notice games-error" role="alert">
+                      {t.errors[state.error]}
+                    </AppearP>
+                  )}
+                  {game?.pausedUntil != null && (
+                    <AppearP key="pause" className="games-notice game-pause" role="status">
+                      <span aria-hidden="true">Ⅱ </span>
+                      {game.players
+                        .filter(p => p.absentSince !== null)
+                        .map(p => p.profile.name)
+                        .join(', ')}{' '}
+                      · {t.paused}{' '}
+                      <strong>{Math.max(0, Math.ceil((game.pausedUntil - now) / 1000))} s</strong>
+                    </AppearP>
+                  )}
+                </AnimatePresence>
                 {!game && (
                   <>
                     <div
@@ -382,20 +461,27 @@ export function BibleGamesView({
                       <button
                         className="games-secondary"
                         aria-pressed={options.mode === 'solo'}
-                        onClick={() => setOptions({ ...options, mode: 'solo', kind: 'quiz' })}
+                        onClick={() => {
+                          haptic('select')
+                          setOptions({ ...options, mode: 'solo', kind: 'quiz' })
+                        }}
                       >
                         ★ {language === 'fr' ? 'Solo' : 'Solo'}
                       </button>
                       <button
                         className="games-secondary"
                         aria-pressed={options.mode !== 'solo'}
-                        onClick={() => setOptions({ ...options, mode: 'together' })}
+                        onClick={() => {
+                          haptic('select')
+                          setOptions({ ...options, mode: 'together' })
+                        }}
                       >
                         ✦ {language === 'fr' ? 'Jouer ensemble' : 'Play together'}
                       </button>
                     </div>
+                    <AnimatePresence mode="wait" initial={false}>
                     {options.mode === 'solo' ? (
-                      <div className="games-cards games-cards-solo">
+                      <motion.div key="solo" className="games-cards games-cards-solo" {...swap}>
                         <div className="games-card" data-selected="true">
                           <GameSelectionIcon selected />
                           <img src="./assets/games/solo.webp" alt="" width="220" height="220" />
@@ -406,16 +492,19 @@ export function BibleGamesView({
                               : 'Four correct answers in a row to win.'}
                           </span>
                         </div>
-                      </div>
+                      </motion.div>
                     ) : (
-                      <div className="games-cards">
+                      <motion.div key="together" className="games-cards" {...swap}>
                         {(['who', 'quiz'] as const).map(kind => (
                           <button
                             key={kind}
                             className="games-card"
                             data-kind={kind}
                             aria-pressed={options.kind === kind}
-                            onClick={() => setOptions({ ...options, kind })}
+                            onClick={() => {
+                              haptic('select')
+                              setOptions({ ...options, kind })
+                            }}
                           >
                             <GameSelectionIcon selected={options.kind === kind} />
                             <img
@@ -428,9 +517,11 @@ export function BibleGamesView({
                             <span>{kind === 'who' ? t.whoDescription : t.quizDescription}</span>
                           </button>
                         ))}
-                      </div>
+                      </motion.div>
                     )}
-                    <div className="games-options">
+                    </AnimatePresence>
+                    <motion.div className="games-options" layout>
+                      <AnimatePresence initial={false} mode="popLayout">
                       {(
                         [
                           ['testament', ['both', 'old', 'new']],
@@ -444,7 +535,7 @@ export function BibleGamesView({
                             options.kind !== 'who'
                         )
                         .map(([key, values]) => (
-                          <label key={key}>
+                          <motion.label key={key} layout {...collapse}>
                             {t[key]}
                             <select
                               value={options[key]}
@@ -458,19 +549,20 @@ export function BibleGamesView({
                                 </option>
                               ))}
                             </select>
-                          </label>
+                          </motion.label>
                         ))}
-                    </div>
+                      </AnimatePresence>
+                    </motion.div>
                     <footer className="games-actions">
                       <small>
                         {options.mode === 'solo'
                           ? language === 'fr'
-                            ? '1 joueur · chrono adapté à la saisie'
-                            : '1 player · time to type'
+                            ? '1 joueur'
+                            : '1 player'
                           : t.rules}
                       </small>
                       <button
-                        className="games-primary"
+                        className="games-primary juice-shine-host"
                         disabled={!state.online || invitationAction !== null}
                         onClick={() =>
                           send({ action: 'create', options: { ...options, language } })
@@ -488,15 +580,16 @@ export function BibleGamesView({
                 )}
                 {game && (
                   <>
-                    <GameFeedback game={game} me={state.me} />
+                    <GameFeedback game={game} me={state.me} onShake={onShake} />
                     {game.phase === 'finished' ? (
                       <GameFinale game={game} me={state.me} />
                     ) : game.who ? (
                       <WhoPlayers game={game} me={state.me} />
                     ) : (
                       <div className="games-players" aria-label={t.rules}>
+                        <AnimatePresence initial={false} mode="popLayout">
                         {game.players.map(p => (
-                          <div
+                          <Appear
                             className="games-player"
                             key={p.id}
                             data-absent={p.absentSince !== null}
@@ -510,14 +603,21 @@ export function BibleGamesView({
                               {p.profile.name}
                               {p.id === state.me ? ` · ${t.you}` : ''}
                             </strong>
-                            <small>
-                              {p.absentSince !== null
-                                ? t.absent
-                                : game.phase === 'lobby'
-                                  ? p.id === game.host
-                                    ? t.host
-                                    : '✓'
-                                  : `${p.score} ${p.score === 1 ? t.point : t.points}`}
+                            <small data-score-for={p.id}>
+                              {p.absentSince !== null ? (
+                                t.absent
+                              ) : game.phase === 'lobby' ? (
+                                p.id === game.host ? (
+                                  t.host
+                                ) : (
+                                  '✓'
+                                )
+                              ) : (
+                                <>
+                                  <PunchNumber value={p.score} />{' '}
+                                  {p.score === 1 ? t.point : t.points}
+                                </>
+                              )}
                             </small>
                             {game.phase === 'question' && p.absentSince === null && (
                               <span className="game-player-reply">
@@ -530,44 +630,53 @@ export function BibleGamesView({
                                     : 'Thinking…'}
                               </span>
                             )}
-                          </div>
+                          </Appear>
                         ))}
                         {game.phase === 'lobby' &&
                           Array.from({ length: 4 - game.players.length }, (_, i) => (
-                            <div
+                            <Appear
                               className="games-player games-empty"
                               key={`empty${i}`}
                               aria-hidden="true"
                             >
-                              <span>+</span>
-                            </div>
+                              <span>
+                                <svg viewBox="0 0 24 24" focusable="false">
+                                  <path d="M12 6v12M6 12h12" />
+                                </svg>
+                              </span>
+                            </Appear>
                           ))}
+                        </AnimatePresence>
                       </div>
                     )}
-                    {game.reason && game.phase !== 'finished' && (
-                      <p className="games-notice" role="status">
-                        {t[game.reason]}
-                      </p>
-                    )}
+                    <AnimatePresence initial={false} mode="popLayout">
+                      {game.reason && game.phase !== 'finished' && (
+                        <AppearP key="reason" className="games-notice" role="status">
+                          {t[game.reason]}
+                        </AppearP>
+                      )}
+                    </AnimatePresence>
                     {game.phase === 'lobby' && (
                       <>
                         {game.options.kind === 'who' && (
-                          <p className="games-notice">
+                          <AppearP className="games-notice" layout>
                             {game.players.length <= 2
                               ? game.options.language === 'fr'
-                                ? 'À deux : duel, chacun prend la main. 4 → 3 → 2 → 1 points.'
-                                : 'Two players: take turns in a duel. 4 → 3 → 2 → 1 points.'
+                                ? 'En duel, vous répondez chacun votre tour. Trouver dès le premier indice rapporte 4 points, puis 3, 2 et 1.'
+                                : 'In a duel you take turns answering. Finding it on the first clue earns 4 points, then 3, 2 and 1.'
                               : game.options.language === 'fr'
-                                ? 'À trois ou quatre : course aux indices. Tout le monde peut répondre, une tentative par indice.'
-                                : 'Three or four players: a clue race. Everyone can answer once per clue.'}
-                          </p>
+                                ? 'À trois ou quatre, tout le monde peut répondre à chaque indice, avec une seule tentative.'
+                                : 'With three or four players, everyone can answer each clue, with a single attempt.'}
+                          </AppearP>
                         )}
                         {host && (
-                          <section className="games-nearby">
+                          <motion.section className="games-nearby" layout>
                             <h2>{t.nearby}</h2>
+                            <AnimatePresence initial={false} mode="popLayout">
                             {nearby.length ? (
                               nearby.map(p => (
-                                <div key={p.id}>
+                                <Appear key={p.id}>
+                                  <AvatarPreview avatar={p.profile.avatar} color={p.profile.color} />
                                   <span>{p.profile.name}</span>
                                   <button
                                     className="games-secondary"
@@ -580,13 +689,14 @@ export function BibleGamesView({
                                   >
                                     {game.invited.includes(p.id) ? t.invited : t.invite}
                                   </button>
-                                </div>
+                                </Appear>
                               ))
                             ) : (
-                              <p>{t.noNearby}</p>
+                              <AppearP key="nobody">{t.noNearby}</AppearP>
                             )}
+                            </AnimatePresence>
                             <small>{t.invitationExpiry}</small>
-                          </section>
+                          </motion.section>
                         )}
                         <footer className="games-actions">
                           <button
@@ -598,7 +708,7 @@ export function BibleGamesView({
                           </button>
                           {host ? (
                             <button
-                              className="games-primary"
+                              className="games-primary juice-shine-host"
                               disabled={
                                 !state.online ||
                                 game.players.length < 2 ||
@@ -614,19 +724,6 @@ export function BibleGamesView({
                         </footer>
                       </>
                     )}
-                    {game.phase === 'generating' && (
-                      <div className="games-preparing">
-                        <img
-                          src={`./assets/games/${game.options.kind}.webp`}
-                          alt=""
-                          width="260"
-                          height="260"
-                        />
-                        <span className="games-loading" role="status">
-                          {t.generating}
-                        </span>
-                      </div>
-                    )}
                     {game.phase === 'question' && game.who && (
                       <WhoRound
                         key={game.id}
@@ -637,6 +734,7 @@ export function BibleGamesView({
                         onAnswer={(text, zone) =>
                           send({ action: 'answer', gameId: game.id, round: game.round, zone, text })
                         }
+                        onShake={onShake}
                       />
                     )}
                     {game.phase === 'question' && !game.who && (
@@ -652,7 +750,7 @@ export function BibleGamesView({
                                 : 'Everyone can answer!'}
                           </strong>
                           <span>
-                            {game.answered.length} / {game.players.length}{' '}
+                            <PunchNumber value={game.answered.length} /> / {game.players.length}{' '}
                             {game.options.language === 'fr' ? 'réponses envoyées' : 'answers sent'}
                           </span>
                         </div>
@@ -717,23 +815,28 @@ export function BibleGamesView({
                         <span className="games-answer-label">
                           {game.options.language === 'fr' ? 'La réponse' : 'The answer'}
                         </span>
-                        <h2>{game.result.answer}</h2>
+                        <h2 className="juice-stamp">{game.result.answer}</h2>
                         {game.choices && !game.result.void && (
-                          <div className="game-revealed-choices">
+                          <motion.div className="game-revealed-choices" {...staggerAfter(0.55)}>
                             {game.choices.map(choice => {
                               const correct = choice === game.result?.answer
                               const chosen = choice === game.ownAnswer?.text
                               return (
-                                <div key={choice} data-correct={correct} data-chosen={chosen}>
+                                <motion.div
+                                  key={choice}
+                                  data-correct={correct}
+                                  data-chosen={chosen}
+                                  {...item}
+                                >
                                   <span aria-hidden="true">
                                     {correct ? '✓' : chosen ? '×' : '·'}
                                   </span>
                                   <strong>{choice}</strong>
                                   {chosen && <small>{t.you}</small>}
-                                </div>
+                                </motion.div>
                               )
                             })}
-                          </div>
+                          </motion.div>
                         )}
                         <p>{game.result.explanation}</p>
                         {(
@@ -755,9 +858,14 @@ export function BibleGamesView({
                             </a>
                           ))}
                         {game.result.void && <p className="games-notice">{t.void}</p>}
-                        <div className="games-answer-list">
-                          {game.result.answers.map(a => (
-                            <div key={a.id} data-status={game.result?.void ? 'void' : a.status}>
+                        <motion.div className="games-answer-list" {...staggerAfter(0.7)}>
+                          {game.result.answers.map((a, index) => (
+                            <motion.div
+                              key={a.id}
+                              data-status={game.result?.void ? 'void' : a.status}
+                              style={{ '--i': index } as CSSProperties}
+                              {...item}
+                            >
                               <strong>{game.players.find(p => p.id === a.id)?.profile.name}</strong>
                               <span>{a.text || t.skipped}</span>
                               <small>
@@ -771,9 +879,9 @@ export function BibleGamesView({
                                       ? '×'
                                       : '—'}
                               </small>
-                            </div>
+                            </motion.div>
                           ))}
-                        </div>
+                        </motion.div>
                       </section>
                     )}
                     {game.phase === 'reveal' && (
@@ -787,7 +895,7 @@ export function BibleGamesView({
                         </button>
                         {host ? (
                           <button
-                            className="games-primary"
+                            className="games-primary juice-shine-host"
                             disabled={!state.online || game.pausedUntil !== null}
                             onClick={() => send({ action: 'next' })}
                           >
@@ -827,6 +935,7 @@ export function BibleGamesView({
               </>
             )}
           </div>
+          </GameMotion>
         </Modal>
       )}
     </>
@@ -860,6 +969,7 @@ function AnswerForm({
   }, [flight])
   const submit = (answer: string) => {
     if (onAnswer(answer)) {
+      haptic('select')
       setSent(answer)
       setFlight(acknowledged)
     }
@@ -873,19 +983,19 @@ function AnswerForm({
     status === 'wrong'
   if (flight === acknowledged || status === 'pending' || status === 'correct' || status === 'wrong')
     return (
-      <div className="game-answer-sent" role="status">
+      <Appear className="game-answer-sent" role="status">
         <span aria-hidden="true">✓</span>
         <div>
           <strong>{sent ?? initialText}</strong>
           <p>{t.received}</p>
         </div>
-      </div>
+      </Appear>
     )
   if (retriesLeft === 0)
     return (
-      <p className="games-notice" role="status">
+      <AppearP className="games-notice" role="status">
         {t.attemptsEnded} {status === 'unavailable' ? t.void : ''}
-      </p>
+      </AppearP>
     )
   return (
     <form
@@ -895,16 +1005,18 @@ function AnswerForm({
         if (text.trim() && !locked) submit(text)
       }}
     >
-      {status === 'clarify' && (
-        <p className="games-notice" role="status">
-          {t.clarify}
-        </p>
-      )}
-      {status === 'unavailable' && (
-        <p className="games-notice" role="status">
-          {t.unavailable}
-        </p>
-      )}
+      <AnimatePresence initial={false} mode="popLayout">
+        {status === 'clarify' && (
+          <AppearP key="clarify" className="games-notice" role="status">
+            {t.clarify}
+          </AppearP>
+        )}
+        {status === 'unavailable' && (
+          <AppearP key="unavailable" className="games-notice" role="status">
+            {t.unavailable}
+          </AppearP>
+        )}
+      </AnimatePresence>
       {choices ? (
         <div className="games-choices">
           {choices.map((choice, i) => (

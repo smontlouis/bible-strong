@@ -238,6 +238,7 @@ select {
   height: 100%;
   object-fit: contain;
 }
+/* Raised rounded square, like the reaction and contact buttons, kept blue. */
 .discover-button {
   position: absolute;
   top: 0;
@@ -248,13 +249,13 @@ select {
   width: 54px;
   height: 54px;
   padding: 0;
-  border: 2px solid #ffffffcc;
-  border-radius: 50%;
+  border: 2px solid var(--bs-button-edge-blue);
+  border-radius: 18px;
   background: var(--bs-blue);
   color: #fff;
   box-shadow:
-    0 8px 22px rgba(89, 131, 240, 0.45),
-    0 0 0 5px rgba(255, 255, 255, 0.25);
+    0 4px 0 var(--bs-button-edge-blue),
+    0 8px 20px rgba(89, 131, 240, 0.35);
   opacity: 0;
   scale: 0.65;
   visibility: hidden;
@@ -276,11 +277,15 @@ select {
   height: 25px;
 }
 .discover-button[data-visible='true']:hover {
-  scale: 1.08;
-  background: var(--bs-blue-dark);
+  scale: 1.06;
 }
 .discover-button[data-visible='true']:active {
-  scale: 0.94;
+  /* `translate` positions the button from the scene; press through `transform` instead. */
+  scale: 1;
+  transform: translateY(3px);
+  box-shadow:
+    0 1px 0 var(--bs-button-edge-blue),
+    0 4px 10px rgba(89, 131, 240, 0.35);
 }
 .discover-button:focus-visible {
   outline: 3px solid var(--bs-yellow);

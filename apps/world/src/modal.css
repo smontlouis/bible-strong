@@ -12,7 +12,8 @@
   scrollbar-width: thin;
   scrollbar-color: var(--bs-line-strong) transparent;
   opacity: 1;
-  transform: translateY(0) scale(1);
+  /* No transform at rest: fixed overlays (confetti, curtain) must stay pinned. */
+  transform: none;
   transition:
     opacity 260ms ease-out,
     transform 360ms cubic-bezier(0.16, 1, 0.3, 1);

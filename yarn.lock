@@ -2818,6 +2818,7 @@ __metadata:
     "@types/react-dom": "npm:^19.2.3"
     "@vitejs/plugin-react": "npm:^6.0.2"
     leaflet: "npm:1.9.4"
+    motion: "npm:^13.4.1"
     nipplejs: "npm:1.0.4"
     partyserver: "npm:^0.5.10"
     partysocket: "npm:^1.3.0"
@@ -2828,6 +2829,7 @@ __metadata:
     typescript: "npm:~6.0.3"
     vite: "npm:^8.0.13"
     vitest: "npm:^4.1.10"
+    web-haptics: "npm:^0.0.6"
     wrangler: "npm:^4.135.0"
   languageName: unknown
   linkType: soft
@@ -19937,6 +19939,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"framer-motion@npm:^13.4.1":
+  version: 13.4.1
+  resolution: "framer-motion@npm:13.4.1"
+  dependencies:
+    motion-dom: "npm:^13.4.1"
+    motion-utils: "npm:^13.3.0"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/c9e49d235521776ab8a9421ef4872d81cb089fcc37885bd678b8e8739294c3508eec284917b6fb1172b206781d8565653edaa57684babaecec4d85d947465cd7
+  languageName: node
+  linkType: hard
+
 "freeport-async@npm:^2.0.0":
   version: 2.0.0
   resolution: "freeport-async@npm:2.0.0"
@@ -25476,6 +25497,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"motion-dom@npm:^13.4.1":
+  version: 13.4.1
+  resolution: "motion-dom@npm:13.4.1"
+  dependencies:
+    motion-utils: "npm:^13.3.0"
+  checksum: 10c0/d8dd881322069315c9737cf8cdc0467e0ed6d389633c66b447c269139c4d1c3b0bab341062bfdc0951e43ab52ede4f4abb855cea72144c2078292e24f3f94078
+  languageName: node
+  linkType: hard
+
 "motion-utils@npm:^11.18.1":
   version: 11.18.1
   resolution: "motion-utils@npm:11.18.1"
@@ -25494,6 +25524,13 @@ __metadata:
   version: 13.0.0
   resolution: "motion-utils@npm:13.0.0"
   checksum: 10c0/4b279ce85f71926d668ff5966feb898b174541d16952a61c7150982388553266602ecd2a76e057530076ff8f38d06672e585639ddc73c41dd1a67d04aaa3662d
+  languageName: node
+  linkType: hard
+
+"motion-utils@npm:^13.3.0":
+  version: 13.3.0
+  resolution: "motion-utils@npm:13.3.0"
+  checksum: 10c0/9efb8388cc43501d1d6d1f2997fdd3a9e4c2bd42c57c3979586fdbcc83969a3b9aae7e3108cfb53312db0a46d945ad1b4d54ad388a6585f2eb5f5e742a58d927
   languageName: node
   linkType: hard
 
@@ -25530,6 +25567,24 @@ __metadata:
     react-dom:
       optional: true
   checksum: 10c0/3943e36a0848f39a3633fb822bc2230966cf8e215fd243d0cd39a62b1799c89ca75fdc07f964b9633b962a3ace845525f4c4b2f63860a7268e9d13cc1667ad4a
+  languageName: node
+  linkType: hard
+
+"motion@npm:^13.4.1":
+  version: 13.4.1
+  resolution: "motion@npm:13.4.1"
+  dependencies:
+    framer-motion: "npm:^13.4.1"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/98392743006cef81c03fd55fb4fbf1c4ddbecccc8a22ebb123f6d36b68de364bdb293ee9b611a39c79f110b05bc09ce88544b49d09a24315fcc2e0e0b0a901df
   languageName: node
   linkType: hard
 
@@ -33174,6 +33229,27 @@ multer@emadalam/multer:
   dependencies:
     defaults: "npm:^1.0.3"
   checksum: 10c0/5b61ca583a95e2dd85d7078400190efd452e05751a64accb8c06ce4db65d7e0b0cde9917d705e826a2e05cc2548f61efde115ffa374c3e436d04be45c889e5b4
+  languageName: node
+  linkType: hard
+
+"web-haptics@npm:^0.0.6":
+  version: 0.0.6
+  resolution: "web-haptics@npm:0.0.6"
+  peerDependencies:
+    react: ">=18"
+    react-dom: ">=18"
+    svelte: ">=4"
+    vue: ">=3"
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+    svelte:
+      optional: true
+    vue:
+      optional: true
+  checksum: 10c0/71d3bfb0299469362e23ef177337f2cf665ed66aa49b6d5e7afc9d97fc05af9a2056263c17766eb929eb86ec1f526fba21502e926ea3cc39175f251c5c9374db
   languageName: node
   linkType: hard
 

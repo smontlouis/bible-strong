@@ -9,7 +9,7 @@ import {
 } from './reactions'
 import './reactions.css'
 
-function ReactionIcon({ reaction, color }: { reaction: ReactionId; color: string }) {
+export function ReactionIcon({ reaction, color }: { reaction: ReactionId; color: string }) {
   return (
     <span className="reaction-icon" aria-hidden="true">
       <span
@@ -32,13 +32,19 @@ export function ReactionPicker({
   color,
   language,
   online,
+  openRequest = 0,
 }: {
   network?: WorldMultiplayer
   color: string
   language: 'fr' | 'en'
   online: boolean
+  /** Increment to open the panel from elsewhere (the floating action under a visitor). */
+  openRequest?: number
 }) {
   const [open, setOpen] = useState(false)
+  useEffect(() => {
+    if (openRequest > 0) setOpen(true)
+  }, [openRequest])
   const [cooldown, setCooldown] = useState(false)
   const [feedback, setFeedback] = useState('')
   const root = useRef<HTMLDivElement>(null)

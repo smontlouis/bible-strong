@@ -1,6 +1,9 @@
 import { useEffect, useId, useState, type CSSProperties } from 'react'
 import { AvatarPreview } from './AvatarEditor'
 import { GameScore } from './GameFeedback'
+import { Burst } from './game-juice'
+import { haptic } from './haptics'
+import { AnimatePresence, motion, pop, swap, collapse } from './game-motion'
 import { turnPresentation } from './game-presentation'
 import { WHO_ZONE_MS, type GameView } from './games-protocol'
 
@@ -87,8 +90,16 @@ export function WhoPlayers({ game, me }: { game: GameView; me: string | null }) 
             data-absent={p.absentSince !== null}
           >
             <div className="who-portrait">
+              {ready && game.phase === 'question' && (
+                <i key={`${w.zone}:${w.active}`} className="who-turn-ring" aria-hidden="true" />
+              )}
               <AvatarPreview avatar={p.profile.avatar} color={p.profile.color} />
-              <span className="who-score" aria-label={`${p.score} ${t.points}`}>
+              {winner && <Burst seed={`${game.id}:${game.round}:${p.id}`} count={12} spread={60} />}
+              <span
+                className="who-score"
+                data-score-for={p.id}
+                aria-label={`${p.score} ${t.points}`}
+              >
                 <GameScore value={p.score} />
               </span>
             </div>
@@ -130,12 +141,14 @@ export function WhoRound({
   online,
   now,
   onAnswer,
+  onShake,
 }: {
   game: GameView
   me: string | null
   online: boolean
   now: number
   onAnswer: (text: string, zone: number) => boolean
+  onShake?: () => void
 }) {
   const w = game.who!
   const t = copy[game.options.language]
@@ -157,6 +170,19 @@ export function WhoRound({
     !online || game.pausedAt !== null || !eligible || seconds === 0 || sent === acknowledgement
   const own = game.ownAnswer?.zone === w.zone ? game.ownAnswer : undefined
   const state = turnPresentation(game, me, online)
+  const urgent = seconds <= 5 && w.frozenAt === null && game.pausedAt === null
+  useEffect(() => {
+    // Reactions to room decisions: never award, only feel.
+    if (state === 'wrong') {
+      haptic('error')
+      onShake?.()
+    } else if (state === 'ready' || state === 'race') haptic('nudge')
+    else if (state === 'clarify' || state === 'unavailable') haptic('nudge')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, w.zone])
+  useEffect(() => {
+    if (urgent && eligible && seconds > 0) haptic('tick')
+  }, [urgent, eligible, seconds])
   const fr = game.options.language === 'fr'
   const activeName = game.players.find(p => p.id === w.active)?.profile.name ?? ''
   const titles = {
@@ -215,21 +241,24 @@ export function WhoRound({
           ? '?'
           : 'Ⅱ'
   return (
-    <section className="who-round" data-turn={state}>
-      <div
-        className="game-turn-banner"
-        key={`${w.zone}:${state}:${w.active}`}
-        data-state={state}
-        role="status"
-      >
-        <span className="game-turn-icon" aria-hidden="true">
-          {icon}
-        </span>
-        <div>
-          <strong>{titles[state]}</strong>
-          <p>{detail}</p>
-        </div>
-      </div>
+    <section className="who-round" data-turn={state} data-urgent={urgent}>
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.div
+          className="game-turn-banner"
+          key={`${w.zone}:${state}:${w.active}`}
+          data-state={state}
+          role="status"
+          {...pop}
+        >
+          <span className="game-turn-icon" aria-hidden="true">
+            {icon}
+          </span>
+          <div>
+            <strong>{titles[state]}</strong>
+            <p>{detail}</p>
+          </div>
+        </motion.div>
+      </AnimatePresence>
       <div className="who-mode">
         <span>{w.mode === 'duel' ? t.duel : t.race}</span>
         <span>
@@ -253,7 +282,8 @@ export function WhoRound({
           </li>
         ))}
       </ol>
-      <div className="who-riddle" key={w.zone}>
+      <AnimatePresence mode="popLayout" initial={false}>
+      <motion.div className="who-riddle" key={w.zone} {...swap}>
         <img src="./assets/games/who.webp" alt="" width="140" height="140" />
         <div className="who-clue-heading">
           <span>
@@ -263,19 +293,26 @@ export function WhoRound({
             className="who-timer"
             style={{ '--remaining': `${progress * 100}%` } as CSSProperties}
             role="timer"
-            data-urgent={seconds <= 5 && w.frozenAt === null && game.pausedAt === null}
+            data-urgent={urgent}
+            key={urgent ? seconds : 'calm'}
             aria-label={`${seconds} s`}
           >
-            <span>
-              {w.frozenAt !== null || game.pausedAt !== null ? 'Ⅱ' : seconds}
-              <small>{w.frozenAt !== null || game.pausedAt !== null ? `${seconds} s` : 's'}</small>
-            </span>
+            <span>{w.frozenAt !== null || game.pausedAt !== null ? 'Ⅱ' : seconds}</span>
           </div>
         </div>
-        <p aria-live="polite">{game.clues?.[w.zone]}</p>
-      </div>
+        <p aria-live="polite" className="who-clue-text">
+          {game.clues?.[w.zone]}
+        </p>
+      </motion.div>
+      </AnimatePresence>
+      <AnimatePresence initial={false} mode="popLayout">
       {w.zone > 0 && (
-        <details className="who-history">
+        <motion.details
+          className="who-history"
+          key="history"
+          {...collapse}
+          style={{ overflow: 'hidden' }}
+        >
           <summary>
             {t.previous} <span>{w.zone}</span>
           </summary>
@@ -287,13 +324,17 @@ export function WhoRound({
               </li>
             ))}
           </ol>
-        </details>
+        </motion.details>
       )}
+      </AnimatePresence>
       <form
         className="who-answer"
         onSubmit={event => {
           event.preventDefault()
-          if (!locked && text.trim() && onAnswer(text.trim(), w.zone)) setSent(acknowledgement)
+          if (!locked && text.trim() && onAnswer(text.trim(), w.zone)) {
+            haptic('select')
+            setSent(acknowledgement)
+          }
         }}
       >
         <label htmlFor={inputId}>{eligible ? t.answer : t.prepare}</label>
