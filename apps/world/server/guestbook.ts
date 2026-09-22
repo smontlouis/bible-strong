@@ -54,12 +54,13 @@ export class Guestbook extends DurableObject<GuestbookEnv> {
       const entry = JSON.parse(existing.payload) as GuestbookEntry
       if (
         entry.message !== submission.message ||
-        JSON.stringify(entry.profile) !== JSON.stringify(submission.profile)
+        JSON.stringify(entry.profile) !== JSON.stringify(submission.profile) ||
+        (entry.noteColor ?? 'butter') !== (submission.noteColor ?? 'butter')
       )
         return json({ error: 'conflict' }, 409)
       if (this.store.removed(entry.id)) return json({ error: 'removed' }, 410)
       await this.scheduleNotifications()
-      return json({ entry })
+      return json({ entry: this.store.place(entry) })
     }
     const active = this.pending.get(submission.id)
     if (active) return json({ error: 'retry' }, 409)
@@ -83,7 +84,7 @@ export class Guestbook extends DurableObject<GuestbookEnv> {
     const operation = (async () => {
       const result = await moderateGuestbook(submission, this.env.AI_GATEWAY_API_KEY)
       if (result !== 'accepted') return json({ error: result }, result === 'rejected' ? 422 : 503)
-      const entry: GuestbookEntry = { ...submission, createdAt: Date.now() }
+      let entry: GuestbookEntry = { ...submission, createdAt: Date.now() }
       // Reserve a durable wake-up before committing the entry and its outbox row.
       // There is no external email I/O on this publication path.
       const alarm = await this.ctx.storage.getAlarm()
@@ -96,6 +97,7 @@ export class Guestbook extends DurableObject<GuestbookEnv> {
           JSON.stringify(entry),
           GUESTBOOK_POLICY_VERSION
         )
+        entry = this.store.place(entry)
         this.store.enqueue(entry.id)
       })
       return json({ entry }, 201)

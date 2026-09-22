@@ -66,7 +66,7 @@ describe('guestbook administration storage', () => {
   it('preserves existing messages, hides them publicly and restores them without data loss', () => {
     const { db, store } = database()
     try {
-      expect(store.list(Number.MAX_SAFE_INTEGER).entries).toEqual([entry])
+      expect(store.list(Number.MAX_SAFE_INTEGER).entries).toEqual([expect.objectContaining(entry)])
       expect(store.setVisibility(entry.id, true, 'admin@example.com')).toBe(true)
       expect(store.list(Number.MAX_SAFE_INTEGER).entries).toEqual([])
       expect(store.removed(entry.id)).toBe(true)
@@ -76,8 +76,35 @@ describe('guestbook administration storage', () => {
         notification: 'legacy',
       })
       expect(store.setVisibility(entry.id, false, 'admin@example.com')).toBe(true)
-      expect(store.list(Number.MAX_SAFE_INTEGER).entries).toEqual([entry])
+      expect(store.list(Number.MAX_SAFE_INTEGER).entries).toEqual([expect.objectContaining(entry)])
       expect(store.setVisibility('missing', true, 'admin@example.com')).toBe(false)
+    } finally {
+      db.close()
+    }
+  }, 15_000)
+  it('migrates old notes once and preserves their positions through new notes and visibility changes', () => {
+    const { db, store, sql } = database()
+    try {
+      const first = store.list(Number.MAX_SAFE_INTEGER).entries[0]
+      expect(first.placement).toMatchObject({ x: 0, y: 0 })
+      const second = {
+        ...entry,
+        id: 'another-note',
+        message: 'A longer message to fill another note.',
+      }
+      sql.exec(
+        'INSERT INTO entries (id, payload, policy) VALUES (?, ?, ?)',
+        second.id,
+        JSON.stringify(second),
+        'test'
+      )
+      const placed = store.place(second)
+      expect(placed.placement).not.toEqual(first.placement)
+      store.setVisibility(entry.id, true, 'owner')
+      store.setVisibility(entry.id, false, 'owner')
+      const reopened = new GuestbookStore(sql)
+      expect(reopened.place(entry).placement).toEqual(first.placement)
+      expect(reopened.place(second).placement).toEqual(placed.placement)
     } finally {
       db.close()
     }

@@ -32,3 +32,13 @@ against the Sent folder before retrying. Hostinger does not document idempotent 
 so ambiguous failures can still produce duplicates when the Sent copy is unavailable.
 Unconfigured notifications remain queued and the admin page says so explicitly. No SMTP provider or credentials are inferred from the sender
 address. Existing messages are not retroactively queued.
+
+## Growing spatial guestbook
+
+Persist automatic centre-outward note placement in a separate `note_placements`
+table, including dimensions and rotation. Clients cannot submit coordinates.
+Migrate legacy notes in publication order and retain placements when a signature
+is hidden so restoration cannot collide with newer signatures. Optional validated
+paper colors extend the existing submission payload without breaking old clients.
+The canvas envelope and minimum zoom derive from occupied bounds rather than a
+fixed maximum world size; viewport changes never alter stored placements.

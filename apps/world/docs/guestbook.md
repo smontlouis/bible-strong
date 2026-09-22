@@ -117,3 +117,30 @@ invented URL or assume local configuration has been deployed.
 
 The alarm design follows the [Cloudflare alarm API](https://developers.cloudflare.com/durable-objects/api/alarms/).
 Access verification follows the [application token contract](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/application-token/).
+
+## Post-it wall
+
+The guestbook opens as a large desktop canvas and an edge-to-edge mobile dialog.
+Visitors choose their message and paper color; the name and appearance come from
+their current avatar and cannot be edited in the guestbook. A localStorage marker
+remembers successful publication and prevents another post from this local avatar,
+including after reopening or refreshing. Changing its name or appearance does not
+reset the marker. This temporary-event limit is deliberately client-side; clearing
+localStorage allows another post. Paper color is independent of avatar color and defaults
+to butter yellow for older clients. The existing 500-character admission limit and
+moderation remain unchanged.
+
+The server places notes automatically from the centre outwards. `note_placements`
+stores centre coordinates, dimensions and a stable rotation; the layout includes
+rotated corners and tape clearance. Existing entries are assigned positions in
+publication order when the store first opens after the upgrade. Removed notes keep
+their reserved positions so restoring them never overlaps newer notes. Note text
+wraps into deterministic columns so geometry is independent of viewport size.
+
+There is no maximum canvas size. Its invisible envelope follows the occupied note
+bounds plus a 64-unit margin. The minimum zoom fits that envelope; panning is
+constrained to it, and adding notes preserves the current reading camera. The view
+initially fits the loaded wall and focuses a newly published note. Pointer drag,
+two-finger pinch, wheel zoom, arrow keys and labelled zoom/fit buttons are supported.
+The client loads all pages before initial framing; large archives will eventually
+benefit from spatial fetching and viewport culling.

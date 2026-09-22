@@ -1,9 +1,16 @@
 import { defaultNavigation, inPolygon, type NavigationDocument } from './world'
 import { parseProfile, type AvatarProfile } from './avatar-profile'
 
+import { isNoteColor, type NoteColor, type NotePlacement } from './guestbook-layout'
+
 export const MESSAGE_LIMIT = 500
-export type GuestbookSubmission = { id: string; profile: AvatarProfile; message: string }
-export type GuestbookEntry = GuestbookSubmission & { createdAt: number }
+export type GuestbookSubmission = {
+  id: string
+  profile: AvatarProfile
+  message: string
+  noteColor?: NoteColor
+}
+export type GuestbookEntry = GuestbookSubmission & { createdAt: number; placement?: NotePlacement }
 export type GuestbookPage = { entries: GuestbookEntry[]; cursor: number | null }
 
 /** The whole central island activates the book; connecting bridges stay separate. */
@@ -34,5 +41,11 @@ export function parseSubmission(value: unknown): GuestbookSubmission | null {
     /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(message)
   )
     return null
-  return { id: data.id, profile, message }
+  if (data.noteColor !== undefined && !isNoteColor(data.noteColor)) return null
+  return {
+    id: data.id,
+    profile,
+    message,
+    ...(data.noteColor ? { noteColor: data.noteColor as NoteColor } : {}),
+  }
 }

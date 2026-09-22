@@ -54,6 +54,10 @@ describe('guestbook admission', () => {
       parseSubmission({ ...submission, profile: { ...submission.profile, color: 'url(evil)' } })
     ).toBeNull()
   })
+  it('validates note colors independently of avatar colors', () => {
+    expect(parseSubmission({ ...submission, noteColor: 'mint' })?.noteColor).toBe('mint')
+    expect(parseSubmission({ ...submission, noteColor: 'url(evil)' })).toBeNull()
+  })
   it('sends both the name and message to Jev without exposing the key in the body', async () => {
     const mock: typeof fetch = async (_, init) => {
       const body = JSON.parse(String(init?.body))
