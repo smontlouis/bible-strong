@@ -91,6 +91,11 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
+.journal-activities-title {
+  margin: 24px 0 12px;
+  font-size: 16px;
+  color: var(--bs-navy);
+}
 .journal-island {
   position: relative;
   padding: 8px 10px 12px;
@@ -277,6 +282,12 @@
 .journal-site svg {
   color: var(--bs-blue);
   flex-shrink: 0;
+}
+button.journal-site {
+  width: 100%;
+  text-align: left;
+  margin-top: 12px;
+  cursor: pointer;
 }
 .journal-site:hover {
   border-color: var(--bs-blue);

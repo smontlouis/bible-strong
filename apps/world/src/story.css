@@ -1,0 +1,324 @@
+.world-modal.story-dialog {
+  width: min(1080px, calc(100vw - 40px));
+  max-width: none;
+  height: min(820px, calc(100dvh - 48px));
+  max-height: none;
+  overflow: hidden;
+  background: #fffdf7;
+  margin: auto;
+}
+.story-dialog[open] {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+}
+.story-sidebar {
+  background: linear-gradient(145deg, #e9f2ff, #f3f7ff);
+  padding: 34px 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.story-brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 0 8px 30px;
+}
+.story-brand > svg {
+  width: 32px;
+  height: 32px;
+  color: var(--bs-blue);
+  flex-shrink: 0;
+}
+.story-brand strong {
+  display: block;
+  font-family: var(--bs-font);
+  font-size: 19px;
+}
+.story-brand small {
+  display: block;
+  color: #4c6793;
+  font-size: 11px;
+  margin-top: 6px;
+}
+.story-nav {
+  display: grid;
+  gap: 8px;
+  overflow-y: auto;
+}
+.story-nav a {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 54px;
+  padding: 8px 12px;
+  color: var(--bs-navy);
+  text-decoration: none;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.35;
+}
+.story-nav a[aria-current] {
+  background: #d9e8ff;
+  color: #174fa6;
+}
+.story-nav a:hover {
+  background: #e0ecfd;
+}
+.story-number {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 50%;
+  border: 1px solid white;
+  background: #d2e2fa;
+}
+.story-nav a[aria-current] .story-number {
+  background: var(--bs-blue);
+  color: white;
+}
+.story-sidebar-note {
+  margin: auto 12px 0;
+  padding-top: 28px;
+  font-family: var(--bs-font);
+  font-style: normal;
+  line-height: 1.6;
+  color: #4c6793;
+}
+.story-sidebar-note span {
+  display: block;
+  font: 11px var(--bs-font);
+  margin-top: 15px;
+}
+.story-content {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #c8d7ee transparent;
+}
+.story-section {
+  padding: 52px 56px;
+  border-bottom: 1px solid #e9e5da;
+  scroll-margin-top: 0;
+}
+.story-section:focus {
+  outline: none;
+}
+.story-eyebrow {
+  display: block;
+  color: #56729c;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.story-section h1,
+.story-section h2 {
+  font-family: var(--bs-font);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: #102c56;
+}
+.story-section h1 {
+  font-size: clamp(36px, 4.5vw, 60px);
+  max-width: 560px;
+}
+.story-section h2 {
+  font-size: clamp(30px, 3vw, 40px);
+}
+.story-rule {
+  width: 48px;
+  height: 5px;
+  background: #f8c647;
+  border-radius: 8px;
+  margin: 26px 0;
+}
+.story-section p {
+  font-size: 17px;
+  line-height: 1.8;
+  color: #304462;
+  margin: 0 0 20px;
+}
+.story-section .story-motto {
+  color: #5574a4;
+  font-family: var(--bs-font);
+  font-style: normal;
+  font-size: 22px;
+}
+.story-section-welcome {
+  min-height: 76%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.story-actions {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+.story-dialog .story-primary {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--bs-blue);
+  color: white;
+  padding: 15px 22px;
+  text-decoration: none;
+  font-size: 14px;
+  min-height: 48px;
+  cursor: pointer;
+}
+.story-dialog .story-primary:hover {
+  background: var(--bs-blue-dark);
+}
+.story-dialog .story-link {
+  background: none;
+  border: 0;
+  padding: 10px 0;
+  color: #235eae;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.story-portrait {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  margin: 32px 0 0;
+  padding: 22px;
+  border: 1px solid #dbe5f4;
+  border-radius: 22px;
+  background: #f2f6fc;
+}
+.story-photo-placeholder {
+  flex: 0 0 150px;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  border-radius: 14px;
+  background: #e4ecf8;
+  color: #6b82a4;
+  border: 1px dashed #b2c4df;
+}
+.story-photo-placeholder svg {
+  width: 64px;
+  height: 64px;
+}
+.story-photo-placeholder span {
+  font-size: 11px;
+  text-align: center;
+  padding: 0 8px;
+}
+.story-portrait figcaption {
+  display: grid;
+  gap: 8px;
+  line-height: 1.5;
+}
+.story-portrait strong {
+  font-family: var(--bs-font);
+  font-size: 26px;
+  font-weight: 500;
+  color: #102c56;
+}
+.story-portrait span,
+.story-portrait small {
+  color: #56729c;
+}
+.story-signature {
+  padding: 28px;
+  text-align: center;
+  color: #56729c;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+@media (max-width: 760px) {
+  .world-modal.story-dialog {
+    width: calc(100vw - 20px);
+    height: calc(100dvh - 20px);
+    border-radius: 22px;
+  }
+  .story-dialog[open] {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .story-sidebar {
+    padding: 20px 16px 12px;
+  }
+  .story-brand {
+    margin: 0 44px 16px 2px;
+  }
+  .story-brand strong {
+    font-size: 17px;
+  }
+  .story-sidebar-note {
+    display: none;
+  }
+  .story-nav {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 2px;
+    overflow: visible;
+  }
+  .story-nav a {
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px 2px;
+    font-size: 9px;
+    text-align: center;
+    border-radius: 10px;
+  }
+  .story-nav a > span:last-child {
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  .story-number {
+    width: 29px;
+    height: 29px;
+    flex-basis: 29px;
+    font-size: 13px;
+  }
+  .story-section {
+    padding: 32px 24px;
+  }
+  .story-section h1 {
+    font-size: 39px;
+  }
+  .story-section p {
+    font-size: 16px;
+    line-height: 1.7;
+  }
+  .story-section-welcome {
+    min-height: 0;
+  }
+  .story-actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .story-link {
+    text-align: center;
+  }
+  .story-portrait {
+    gap: 16px;
+    padding: 16px;
+  }
+  .story-photo-placeholder {
+    flex-basis: 112px;
+    height: 145px;
+  }
+}

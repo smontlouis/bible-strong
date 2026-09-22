@@ -11,6 +11,11 @@ export const journalCopy = {
     title: 'Carnet d’exploration',
     explorer: 'Explorer',
     intro: 'Six îles, autant de découvertes.',
+    activities: 'À partager',
+    games: 'Jeux bibliques',
+    gamesHint: 'Jouer en solo ou ensemble',
+    board: 'Tableau des petits mots',
+    boardHint: 'Lire et laisser un post-it',
     voyage: 'Mon voyage',
     companion: 'Un petit compagnon pour une grande aventure.',
     avatar: 'Mon avatar',
@@ -38,6 +43,11 @@ export const journalCopy = {
     title: 'Exploration journal',
     explorer: 'Explore',
     intro: 'Six islands, a world of discoveries.',
+    activities: 'Share a moment',
+    games: 'Bible games',
+    gamesHint: 'Play solo or together',
+    board: 'Community board',
+    boardHint: 'Read and leave a note',
     voyage: 'My journey',
     companion: 'A little companion for a great adventure.',
     avatar: 'My avatar',
@@ -87,6 +97,9 @@ export function ExplorationJournal({
   onAvatar,
   visited,
   onTravel,
+  onStory,
+  onGames,
+  onBoard,
   onClose,
   camera,
   status,
@@ -98,6 +111,9 @@ export function ExplorationJournal({
   onAvatar: () => void
   visited: string[]
   onTravel: (station: Station) => void
+  onStory: () => void
+  onGames: () => void
+  onBoard: () => void
   onClose: () => void
   camera: ReactNode
   status: ReactNode
@@ -178,6 +194,50 @@ export function ExplorationJournal({
               {t.travelError}
             </p>
           )}
+          <h3 className="journal-activities-title">{t.activities}</h3>
+          <nav className="journal-islands" aria-label={t.activities}>
+            {[
+              {
+                label: t.games,
+                hint: t.gamesHint,
+                image: '/assets/games/terminal.webp',
+                open: onGames,
+                color: '#f6c344',
+              },
+              {
+                label: t.board,
+                hint: t.boardHint,
+                image: '/assets/journal/community-board.webp',
+                open: onBoard,
+                color: '#73cdd0',
+              },
+            ].map(activity => (
+              <button
+                key={activity.label}
+                type="button"
+                className="journal-island"
+                onClick={activity.open}
+                aria-haspopup="dialog"
+                style={{ '--island-color': activity.color } as CSSProperties}
+              >
+                <img
+                  className="journal-island-art"
+                  src={activity.image}
+                  alt=""
+                  width={160}
+                  height={160}
+                  draggable={false}
+                />
+                <span className="journal-island-copy">
+                  <strong>{activity.label}</strong>
+                  <small>{activity.hint}</small>
+                </span>
+                <span className="journal-island-arrow" aria-hidden="true">
+                  ↗
+                </span>
+              </button>
+            ))}
+          </nav>
         </section>
         <section className="journal-page journal-personal" aria-labelledby="journal-voyage">
           <span className="journal-bookmark" aria-hidden="true" />
@@ -225,6 +285,20 @@ export function ExplorationJournal({
             </span>
             <span aria-hidden="true">↗</span>
           </a>
+          <button type="button" className="journal-site" onClick={onStory} aria-haspopup="dialog">
+            <JournalIcon />
+            <span>
+              <strong>
+                Bible Strong x ASI Europe
+              </strong>
+              <small>
+                {language === 'fr'
+                  ? 'Le créateur, le projet et son avenir'
+                  : 'The creator, the project and its future'}
+              </small>
+            </span>
+            <span aria-hidden="true">↗</span>
+          </button>
           <div className="journal-camera">{camera}</div>
           <div className="journal-status">{status}</div>
         </section>

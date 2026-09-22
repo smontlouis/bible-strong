@@ -87,7 +87,7 @@ This command preserves the logical 1671 × 941 coordinate system, writes the lig
 
 The generator applies the reviewed central-table and community-board patches to
 the original source. The board replaces the plaza's east bench and opens visitor
-notes within 70 map units; the central Bible is decorative. Its foreground cutout
+notes within 70 map units; the central Bible opens the project story. Its foreground cutout
 and navigation footprint follow the board. See
 [`community-board.prompt.md`](public/assets/map/edits/community-board.prompt.md)
 for the imagegen prompt and placement.
@@ -144,3 +144,13 @@ Open [Question Lab](http://localhost:5186/question-lab.html) for the bilingual
 review notes locally, export decisions and try a written-answer series.
 See [catalogue notes](question-bank/README.md). Draft questions are not yet used by
 live games or included in the production client.
+
+### The central story book
+
+The central Bible now opens the bilingual story of Bible Strong, also available
+from the exploration menu. Six anchors scroll one continuous article; the active
+chapter follows scrolling. On mobile the chapter navigation stays above the
+scrolling content. The About section intentionally contains a photo placeholder
+in `StoryDialog.tsx`, ready to be replaced by Stéphane's portrait. No generated
+illustration is required. Donation, contact and source links reuse the public
+project destinations; the final note action opens the community board.

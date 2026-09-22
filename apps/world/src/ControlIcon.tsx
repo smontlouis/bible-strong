@@ -8,6 +8,7 @@ type ControlIconName =
   | 'search'
   | 'edit'
   | 'star'
+  | 'book'
 
 export function ControlIcon({ name }: { name: ControlIconName }) {
   return (
@@ -23,6 +24,9 @@ export function ControlIcon({ name }: { name: ControlIconName }) {
       aria-hidden="true"
       focusable="false"
     >
+      {name === 'book' && (
+        <path d="M12 5C8 2 3 3 2 4v15c3-2 7-1 10 1 3-2 7-3 10-1V4c-3-2-7-1-10 1Zm0 0v15" />
+      )}
       {name === 'plus' && <path d="M5 12h14M12 5v14" />}
       {name === 'minus' && <path d="M5 12h14" />}
       {name === 'close' && <path d="m6 6 12 12M18 6 6 18" />}

@@ -17,7 +17,7 @@ describe('map action proximity', () => {
     expect(nearIslandAction(dictionary, 'references')).toBe(false)
   })
 
-  it('opens the board from the former east bench, leaving the central Bible inactive', () => {
+  it('keeps visitor notes at the east board rather than the central Bible', () => {
     expect(nearIslandAction({ x: 950, y: 420 }, 'guestbook')).toBe(true)
     for (const point of [
       { x: 836, y: 455 },
@@ -35,5 +35,11 @@ describe('map action proximity', () => {
         zones: [],
       })
     ).toBe(false)
+  })
+
+  it('opens the story at the central book but not from the northern bridge', () => {
+    expect(nearIslandAction({ x: 836, y: 495 }, 'story')).toBe(true)
+    expect(nearIslandAction({ x: 836, y: 315 }, 'story')).toBe(false)
+    expect(nearIslandAction({ x: 950, y: 420 }, 'story')).toBe(false)
   })
 })

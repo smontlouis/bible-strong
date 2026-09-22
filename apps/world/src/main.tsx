@@ -1,3 +1,4 @@
+import { StoryDialog } from './StoryDialog'
 import { BibleGames } from './BibleGames'
 import { ExplorationJournal, JournalIcon, journalCopy } from './ExplorationJournal'
 import { findTravelDestination } from './world-travel'
@@ -237,6 +238,7 @@ function App() {
   )
   const [diagnosticFilters, setDiagnosticFilters] = useState(() => makeDiagnosticFilters())
   const [language, setLanguage] = useState<Language>('fr')
+  const [storyOpen, setStoryOpen] = useState(false)
   const [guestbookOpen, setGuestbookOpen] = useState(false)
   const [gamesOpen, setGamesOpen] = useState(false)
   const atGuestbook = nearIslandAction(state, 'guestbook', navigation)
@@ -332,6 +334,7 @@ function App() {
       !ready ||
       menuOpen ||
       Boolean(opened) ||
+      storyOpen ||
       guestbookOpen ||
       gamesOpen ||
       Boolean(editorMode) ||
@@ -348,6 +351,7 @@ function App() {
     debug,
     diagnosticFilters,
     opened,
+    storyOpen,
     guestbookOpen,
     gamesOpen,
     editorMode,
@@ -386,13 +390,25 @@ function App() {
       ambientEditor.notify()
     }
     controls.current.paused =
-      Boolean(mode) || menuOpen || Boolean(opened) || guestbookOpen || gamesOpen || profileOpen
+      Boolean(mode) ||
+      menuOpen ||
+      Boolean(opened) ||
+      storyOpen ||
+      guestbookOpen ||
+      gamesOpen ||
+      profileOpen
     controls.current.direction = { x: 0, y: 0 }
     setEditorMode(mode)
   }
 
   function discover(id: IslandActionId) {
     if (!ready || controls.current.paused) return
+    if (id === 'story' && nearIslandAction(state, id, navigation)) {
+      controls.current.paused = true
+      controls.current.direction = { x: 0, y: 0 }
+      setStoryOpen(true)
+      return
+    }
     if (id === 'games' && nearIslandAction(state, id, navigation)) {
       controls.current.paused = true
       controls.current.direction = { x: 0, y: 0 }
@@ -463,15 +479,17 @@ function App() {
       {islandActions.map(action => {
         const station = stations.find(station => station.id === action.id)
         const label =
-          action.id === 'games'
-            ? language === 'fr'
-              ? 'Jouer · Solo ou ensemble'
-              : 'Play · Solo or together'
-            : action.id === 'guestbook'
+          action.id === 'story'
+            ? 'Bible Strong x ASI Europe'
+            : action.id === 'games'
               ? language === 'fr'
-                ? 'Ouvrir le tableau des petits mots'
-                : 'Open the community board'
-              : `${t.explore} · ${station ? name(station) : ''}`
+                ? 'Jouer · Solo ou ensemble'
+                : 'Play · Solo or together'
+              : action.id === 'guestbook'
+                ? language === 'fr'
+                  ? 'Ouvrir le tableau des petits mots'
+                  : 'Open the community board'
+                : `${t.explore} · ${station ? name(station) : ''}`
         return (
           <button
             key={action.id}
@@ -485,6 +503,7 @@ function App() {
               !ready ||
               !nearIslandAction(state, action.id, navigation) ||
               Boolean(opened) ||
+              storyOpen ||
               guestbookOpen ||
               Boolean(editorMode) ||
               profileOpen ||
@@ -495,7 +514,15 @@ function App() {
             onClick={() => discover(action.id)}
           >
             <ControlIcon
-              name={action.id === 'games' ? 'star' : action.id === 'guestbook' ? 'edit' : 'search'}
+              name={
+                action.id === 'story'
+                  ? 'book'
+                  : action.id === 'games'
+                    ? 'star'
+                    : action.id === 'guestbook'
+                      ? 'edit'
+                      : 'search'
+              }
             />
           </button>
         )
@@ -595,6 +622,18 @@ function App() {
           onAvatar={() => setProfileOpen(true)}
           visited={visited}
           onTravel={travel}
+          onStory={() => {
+            setMenuOpen(false)
+            setStoryOpen(true)
+          }}
+          onGames={() => {
+            setMenuOpen(false)
+            setGamesOpen(true)
+          }}
+          onBoard={() => {
+            setMenuOpen(false)
+            setGuestbookOpen(true)
+          }}
           onClose={() => setMenuOpen(false)}
           travelError={travelError}
           camera={
@@ -639,7 +678,17 @@ function App() {
           open={gamesOpen}
           onOpen={() => setGamesOpen(true)}
           onClose={() => setGamesOpen(false)}
-          disabled={menuOpen || profileOpen || !!opened || guestbookOpen}
+          disabled={menuOpen || profileOpen || !!opened || guestbookOpen || storyOpen}
+        />
+      )}
+      {storyOpen && (
+        <StoryDialog
+          language={language}
+          onClose={() => setStoryOpen(false)}
+          onBoard={() => {
+            setStoryOpen(false)
+            setGuestbookOpen(true)
+          }}
         />
       )}
       {guestbookOpen && (

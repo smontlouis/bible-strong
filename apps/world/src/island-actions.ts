@@ -4,6 +4,7 @@ import { defaultNavigation, stationAt, type NavigationDocument, type Point } fro
 
 /** Fixed visual centers in the map's original 1671 × 941 coordinate system. */
 export const islandActions = [
+  { id: 'story', x: 836, y: 455 },
   { id: 'games', x: 760, y: 340 },
   { id: 'guestbook', x: 950, y: 375 },
   { id: 'dictionary', x: 350, y: 275 },
@@ -29,6 +30,6 @@ export function nearIslandAction(
   if (!anchor || Math.hypot(point.x - anchor.x, point.y - anchor.y) > radius) {
     return false
   }
-  if (id === 'guestbook') return nearGuestbook(point, navigation)
+  if (id === 'guestbook' || id === 'story') return nearGuestbook(point, navigation)
   return stationAt(point, navigation)?.id === id
 }
