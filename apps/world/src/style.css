@@ -1,3 +1,4 @@
+@import './tokens.css';
 @font-face {
   font-family: Pulp;
   src: url('/assets/pulp-regular.otf');
@@ -9,8 +10,8 @@
   font-weight: 500 800;
 }
 :root {
-  font-family: Pulp, sans-serif;
-  color: #193d49;
+  font-family: var(--bs-font);
+  color: var(--bs-navy);
   background: #fff;
   font-synthesis: none;
 }
@@ -32,7 +33,7 @@ button {
 }
 button:focus-visible,
 select:focus-visible {
-  outline: 3px solid #497fe8;
+  outline: 3px solid var(--bs-blue);
   outline-offset: 3px;
 }
 .world-shell {
@@ -65,11 +66,11 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #fff9eaf0;
-  border: 1px solid #ffffff9c;
+  background: var(--bs-card);
+  border: 1px solid var(--bs-line);
   padding: 12px 18px;
   border-radius: 18px;
-  box-shadow: 0 4px 24px #17435216;
+  box-shadow: var(--bs-shadow-float);
 }
 .world-brand strong {
   display: block;
@@ -87,9 +88,9 @@ select:focus-visible {
   place-items: center;
   width: 30px;
   height: 30px;
-  border: 2px solid #708994;
+  border: 2px solid var(--bs-line-strong);
   border-radius: 50%;
-  color: #497fe8;
+  color: var(--bs-blue);
   font-size: 22px;
 }
 .brand-mark::before {
@@ -101,8 +102,8 @@ select:focus-visible {
 }
 select {
   pointer-events: auto;
-  border: 1px solid #ffffff9c;
-  background: #fff9eaf0;
+  border: 1px solid var(--bs-line);
+  background: var(--bs-card);
   border-radius: 12px;
   padding: 10px;
 }
@@ -111,8 +112,8 @@ select {
   top: max(24px, env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%);
-  background: #163f51ef;
-  color: #fff9ea;
+  background: var(--bs-navy);
+  color: #fff;
   display: flex;
   gap: 10px;
   align-items: center;
@@ -125,7 +126,7 @@ select {
 .live-dot {
   width: 6px;
   height: 6px;
-  background: #a4dbb6;
+  background: var(--bs-yellow);
   border-radius: 50%;
 }
 .journey-count {
@@ -148,15 +149,15 @@ select {
   line-height: 1;
   width: 42px;
   height: 42px;
-  border: 1px solid #ffffffb0;
+  border: 1px solid var(--bs-line);
   border-radius: 13px;
   font-size: 23px;
-  background: #fff9eaef;
-  box-shadow: 0 2px 10px #183e4818;
+  background: var(--bs-card);
+  box-shadow: var(--bs-shadow-float);
 }
 .camera-controls button[aria-pressed='true'] {
-  background: #163f51;
-  color: #fff9ea;
+  background: var(--bs-navy);
+  color: #fff;
 }
 .world-bottom {
   position: absolute;
@@ -192,7 +193,7 @@ select {
   transform: translateX(-50%);
   white-space: nowrap;
   font-size: 10px;
-  background: #fff9eae8;
+  background: var(--bs-card);
   border-radius: 20px;
   padding: 4px 8px;
   pointer-events: none;
@@ -208,7 +209,7 @@ select {
   display: flex;
   gap: 4px;
   padding: 5px;
-  background: #fff9eaef;
+  background: var(--bs-card);
   border-radius: 28px;
 }
 .avatar-choices button {
@@ -220,8 +221,8 @@ select {
   background: transparent;
 }
 .avatar-choices button[aria-pressed='true'] {
-  background: #dceef0;
-  border-color: #6399a6;
+  background: var(--bs-blue-soft);
+  border-color: var(--bs-blue);
 }
 .avatar-choices img {
   width: 100%;
@@ -238,13 +239,13 @@ select {
   width: 54px;
   height: 54px;
   padding: 0;
-  border: 2px solid #fff9eabf;
+  border: 2px solid #ffffffcc;
   border-radius: 50%;
-  background: #163f51;
-  color: #fff9ea;
+  background: var(--bs-blue);
+  color: #fff;
   box-shadow:
-    0 5px 18px #163f5140,
-    0 0 0 5px #fff9ea35;
+    0 8px 22px rgba(89, 131, 240, 0.45),
+    0 0 0 5px rgba(255, 255, 255, 0.25);
   opacity: 0;
   scale: 0.65;
   visibility: hidden;
@@ -267,13 +268,13 @@ select {
 }
 .discover-button[data-visible='true']:hover {
   scale: 1.08;
-  background: #21566a;
+  background: var(--bs-blue-dark);
 }
 .discover-button[data-visible='true']:active {
   scale: 0.94;
 }
 .discover-button:focus-visible {
-  outline: 3px solid #f4b932;
+  outline: 3px solid var(--bs-yellow);
   outline-offset: 7px;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -297,9 +298,10 @@ select {
 }
 .world-footer span,
 .world-footer button {
-  background: #fff9eadc;
-  border: 0;
-  border-radius: 6px;
+  background: var(--bs-card);
+  border: 1px solid var(--bs-line);
+  border-radius: 8px;
+  color: var(--bs-muted);
   padding: 4px 7px;
 }
 .world-debug {
@@ -326,14 +328,14 @@ select {
   inset: 0;
   display: grid;
   place-content: center;
-  background: #173a4980;
+  background: var(--bs-backdrop);
   backdrop-filter: blur(6px);
   z-index: 10;
 }
 .loading {
-  background: #fff;
+  background: var(--bs-bg);
   backdrop-filter: none;
-  color: #193d49;
+  color: var(--bs-navy);
   gap: 16px;
   text-align: center;
   z-index: 100;
@@ -364,7 +366,7 @@ select {
   }
 }
 .resource-card {
-  background: #fff9ec;
+  background: var(--bs-bg);
   border-radius: 28px;
   width: min(380px, calc(100vw - 36px));
   padding: 30px;
@@ -394,10 +396,10 @@ select {
   line-height: 1.6;
 }
 .resource-card button {
-  background: #163f51;
-  color: #fff9ea;
+  background: var(--bs-blue);
+  color: #fff;
   border: 0;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 12px 28px;
   margin-top: 12px;
 }
@@ -526,10 +528,11 @@ select {
   max-width: 240px;
   margin-top: 8px;
   padding: 7px 10px;
-  border-radius: 12px;
-  background: #fff9eae8;
-  color: #193d49;
-  font-size: 11px;
+  border: 1px solid var(--bs-line);
+  border-radius: 14px;
+  background: var(--bs-card);
+  color: var(--bs-navy);
+  font-size: 12px;
   line-height: 1.4;
 }
 .presence-dot {
@@ -537,10 +540,10 @@ select {
   height: 6px;
   flex: 0 0 6px;
   border-radius: 50%;
-  background: #c38937;
+  background: var(--bs-yellow);
 }
 .world-presence[data-state='online'] .presence-dot {
-  background: #23826d;
+  background: var(--bs-teal);
 }
 .world-presence button {
   border: 0;

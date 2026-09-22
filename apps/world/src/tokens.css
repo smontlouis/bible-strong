@@ -1,0 +1,28 @@
+/* Bible Strong design tokens for the World: colours from apps/expo/src/themes/colors.ts
+   and bible-strong.app. Every dialog, HUD element and game reads these. */
+:root {
+  --bs-navy: #101b35;
+  --bs-blue: #5983f0;
+  --bs-blue-dark: #315fcf;
+  --bs-blue-soft: #e9f1ff;
+  --bs-bg: #f3f6ff;
+  --bs-card: #ffffff;
+  --bs-line: rgba(16, 27, 53, 0.1);
+  --bs-line-strong: rgba(16, 27, 53, 0.18);
+  --bs-muted: #5c6678;
+  --bs-faint: #8b94a6;
+  --bs-grey: #e7ebf3;
+  --bs-yellow: #ffbc00;
+  --bs-yellow-soft: #fff1cc;
+  --bs-yellow-dark: #6b4a00;
+  --bs-red: #e64658;
+  --bs-red-soft: #fde8eb;
+  --bs-red-dark: #a5202f;
+  --bs-teal: #23826d;
+  --bs-radius: 18px;
+  --bs-radius-lg: 28px;
+  --bs-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+  --bs-shadow-float: 0 10px 30px rgba(16, 27, 53, 0.22);
+  --bs-backdrop: rgba(11, 18, 32, 0.6);
+  --bs-font: Pulp, sans-serif;
+}

@@ -4,22 +4,22 @@
 .games-dialog,
 .games-launch,
 .game-invite-notifications {
-  --g-navy: #101b35;
-  --g-blue: #5983f0;
-  --g-blue-dark: #315fcf;
-  --g-blue-soft: #e9f1ff;
-  --g-bg: #f3f6ff;
-  --g-card: #ffffff;
-  --g-line: rgba(16, 27, 53, 0.1);
-  --g-muted: #5c6678;
-  --g-faint: #8b94a6;
-  --g-grey: #e7ebf3;
-  --g-yellow: #ffbc00;
-  --g-yellow-soft: #fff1cc;
-  --g-yellow-dark: #6b4a00;
-  --g-red: #e64658;
-  --g-red-soft: #fde8eb;
-  --g-red-dark: #a5202f;
+  --g-navy: var(--bs-navy);
+  --g-blue: var(--bs-blue);
+  --g-blue-dark: var(--bs-blue-dark);
+  --g-blue-soft: var(--bs-blue-soft);
+  --g-bg: var(--bs-bg);
+  --g-card: var(--bs-card);
+  --g-line: var(--bs-line);
+  --g-muted: var(--bs-muted);
+  --g-faint: var(--bs-faint);
+  --g-grey: var(--bs-grey);
+  --g-yellow: var(--bs-yellow);
+  --g-yellow-soft: var(--bs-yellow-soft);
+  --g-yellow-dark: var(--bs-yellow-dark);
+  --g-red: var(--bs-red);
+  --g-red-soft: var(--bs-red-soft);
+  --g-red-dark: var(--bs-red-dark);
   --g-radius: 18px;
   --g-pad: 24px;
   --game-accent: var(--g-blue);
