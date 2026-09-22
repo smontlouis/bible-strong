@@ -33,6 +33,7 @@ const source = await sharp(input, { limitInputPixels: false })
   .resize(WORLD_WIDTH * 4, WORLD_HEIGHT * 4, { fit: 'fill' })
   .composite([
     { input: resolve(mapRoot, 'edits/central-table-half.webp'), left: 736 * 4, top: 388 * 4 },
+    { input: resolve(mapRoot, 'edits/community-board.webp'), left: 880 * 4, top: 325 * 4 },
   ])
   .png()
   .toBuffer()

@@ -62,11 +62,10 @@ player names and visitor identifiers are not included in AI requests.
 ## Generated content
 
 Generation calls **Gloo Grounded** directly, using auto-routing and the shared
-`GlooGrounded` publisher. Gloo first proposes identities, passages and focused research questions based on
-language, Testament, subject and difficulty. Each subject is then researched and
-turned into its final round in a separate Grounded call. Retrieval queries are
-short English Bible questions; game instructions remain in the system message,
-and displayed content uses the requested French or English language. There is no fixed chapter pool, `get_passage`
+`GlooGrounded` publisher. A single request retrieves sources and generates the five
+playable rounds according to the language, Testament, subject and difficulty.
+Game instructions remain in the system message, and displayed content uses the
+requested French or English language. There is no fixed chapter pool, `get_passage`
 tool, Resource API fetch or local database dependency for these games.
 
 The difficulty instructions cover both identity familiarity and clue specificity:
@@ -74,11 +73,10 @@ widely known identities and accessible clues for Discovery, less obvious subject
 and details for Intermediate, less familiar identities and subtle but fair clues
 for Advanced. These are model instructions, not an independently measured rating.
 
-For every final round, request citations and require `sources_returned: true` with
-usable citation metadata and snippets. The initial plan is never playable until
-these individual checks succeed; it may be proposed without retrieved sources. Validate the JSON shape, five distinct answers, four clues, choices,
-name leakage and canonical book/chapter ranges. Allow one shared correction request across preparation.
-An unavailable provider, missing grounding or exhausted repairs return to the
+The single generation response must include `sources_returned: true` with usable
+citation metadata and snippets. Validate the JSON shape, five distinct answers,
+four clues, choices, name leakage and canonical book/chapter ranges. The request is
+not retried. An unavailable provider, missing grounding or invalid content returns to the
 lobby. No silent fallback to another provider or prewritten questions.
 
 Gloo grounding supplies retrieved context; it is not independent verification that
@@ -101,11 +99,11 @@ Provider errors return `unavailable`, never `wrong`.
 - 50 retained games per event room; 4 participants per game.
 - Lobby/final summary retention: 10 minutes. Absent participants: 90 seconds.
 - Creation cooldown: 10 seconds. Re-invite cooldown: 60 seconds; at most 3 incoming invites.
-- Generation: host cooldown 60 seconds, at most 3 concurrent preparations and 60 starts/hour/room.
-- Generation overall timeout: 170 seconds; persisted recovery deadline: 180 seconds.
-- Gloo: six calls normally, seven maximum; three concurrent research calls, 50 seconds per call. Jev answer calls: 10 seconds, persisted expiry: 12 seconds.
+- Generation: no per-player retry delay; at most 3 concurrent preparations and 60 starts/hour/room.
+- Generation overall timeout: 55 seconds; persisted recovery deadline: 180 seconds.
+- Gloo: one Grounded call per five-question batch, with a 50-second request timeout. Jev answer calls: 10 seconds, persisted expiry: 12 seconds.
 - Answers: 160 characters, at most 3 submissions per participant/round in Bible challenge, or per clue in Who am I?.
-- Transport: existing 40 messages/second; game commands at most 4/second/connection.
+- Transport: existing 40 messages/second; game commands at most 4/second/connection. Solo dialog pause/resume uses only the global transport limit, like presence updates.
 - Provider response bodies: 96 KB. Content validation rejects malformed output.
 
 These budgets bound the public guest experience; they are not account-based abuse
@@ -211,7 +209,7 @@ and invitation acknowledgement lifecycle. The view receives plain snapshots,
 controlled options, a clock and callbacks. Small input drafts and animation state
 remain local to presentation components.
 
-The lab contains 40 fixtures and five guided sequences, rendered inside an iframe
+The lab contains 55 fixtures and six guided sequences, rendered inside an iframe
 so device breakpoints and native dialogs behave independently of the gallery.
 Commands operate on an isolated simulation; no multiplayer connection, Worker key,
 Resource request or AI provider is used. The simulation is intentionally not a
@@ -223,3 +221,36 @@ acceptance, decline and expiry. Browser checks covered mobile preview, response
 submission, viewpoint changes, multiple invitations and guided state transitions.
 267 World tests and production build passed. The artifact check excludes the lab
 entry and simulation marker from production. See the World README for controls.
+
+## Borne et défi solo
+
+La borne se trouve à gauche du pont nord de l’île centrale (760,359). L’action dorée
+« Jouer » apparaît à moins de 105 unités sur l’île. Elle ouvre les modes Solo / Jouer
+ensemble. « Ma partie » reste accessible pendant une session, et les invitations
+conservent leur notification indépendante.
+
+Solo propose un « 4 à la suite » biblique, avec 120 secondes de temps actif et les
+catégories/niveaux existants. La meilleure série reste visible après une erreur ou
+un passage. Le chrono s’arrête pendant les explications, vérifications, générations,
+clarifications et interruptions. Fermer le panneau conserve la partie en pause ; la
+reprise est possible avec la même identité jusqu’à 24 heures. Quitter le défi termine
+volontairement cette session. Les questions sont préparées par cinq ; un lot suivant
+peut donc demander une attente supplémentaire. Aucun service Resources nécessaire.
+Le contrat Gloo du solo contient uniquement question, réponse, alias, explication et
+référence biblique : ni indices ni choix multiples. Toutes les difficultés utilisent
+une réponse écrite, comparée d’abord localement puis confiée à Jev si elle n’est pas exacte.
+
+Game Lab : `http://localhost:5186/game-lab.html?state=station` puis catégorie Solo,
+ou parcours « Un défi solo ». Les états solo ignorent le nombre de joueurs choisi
+pour la galerie et ne connectent aucun autre avatar.
+
+Test réel Gloo, sur une salle locale disponible :
+
+```sh
+node apps/world/scripts/test-solo.mjs
+# Pour une instance Worker locale isolée :
+WORLD_TEST_URL=ws://127.0.0.1:8792/parties/world-room/asi-europe node apps/world/scripts/test-solo.mjs
+```
+
+Le script vérifie génération, confidentialité des réponses, pause, reconnexion,
+score et question suivante, puis quitte sa propre partie.

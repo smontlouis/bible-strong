@@ -70,3 +70,14 @@ describe('Game Lab fixtures and interactions', () => {
     expect(result.game).toBeNull()
   })
 })
+
+it('runs a solo streak and resets it on a wrong answer without needing other players', () => {
+  let m = makeStory('solo-question', config, 1000)
+  expect(m.game!.players).toHaveLength(1)
+  m = settle(act(m, { action: 'answer', gameId: m.game!.id, round: m.game!.round, text: 'Moïse' }))
+  expect(m.game!.solo!.streak).toBe(3)
+  m = act(m, { action: 'next' })
+  m = settle(act(m, { action: 'answer', gameId: m.game!.id, round: m.game!.round, text: 'David' }))
+  expect(m.game!.solo!.streak).toBe(0)
+  expect(m.game!.solo!.best).toBe(3)
+})

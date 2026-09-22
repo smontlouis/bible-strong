@@ -1,10 +1,10 @@
+import { GAME_STATION } from './game-station'
 import { cameraZoomBounds, clampCameraZoom } from './camera-zoom'
 import { arrivalZoom } from './world-arrival'
 import { Pathfinder } from './pathfinding'
 import { WalkingRoute } from './walking-route'
 import { isPointerSteering, pointerDirection, type PointerPress } from './pointer-steering'
-import { islandActions, type IslandActionId } from './island-actions'
-import { nearGuestbook } from './guestbook'
+import { islandActions, nearIslandAction, type IslandActionId } from './island-actions'
 import { chooseCentralSpawn } from './multiplayer-spawn'
 import { WorldMultiplayer } from './multiplayer'
 import { RemoteAvatars } from './remote-avatars'
@@ -185,6 +185,8 @@ export function createWorld(
     }
 
     preload() {
+      this.load.image('game-terminal', './assets/games/terminal.webp')
+      this.load.image('game-terminal-ground', './assets/games/terminal-ground.webp')
       this.load.image('navigation-destination', './assets/navigation/destination-arrow.webp')
       this.load.image('navigation-blocked', './assets/navigation/blocked-cross.webp')
       loadBlobAvatar(this)
@@ -202,7 +204,9 @@ export function createWorld(
       this.load.off('loaderror', onError)
       // RESIZE replaces the backing buffer with CSS dimensions, losing Retina detail.
       // NONE lets us keep physical pixels while displaying the canvas at CSS size.
+      let sceneAlive = true
       const resizeCanvas = () => {
+        if (!sceneAlive) return
         this.scale.resize(
           Math.max(1, Math.round(parent.clientWidth * rendererResolution)),
           Math.max(1, Math.round(parent.clientHeight * rendererResolution))
@@ -210,7 +214,12 @@ export function createWorld(
       }
       const resizeObserver = new ResizeObserver(resizeCanvas)
       resizeObserver.observe(parent)
-      this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => resizeObserver.disconnect())
+      const stopResize = () => {
+        sceneAlive = false
+        resizeObserver.disconnect()
+      }
+      this.events.once(Phaser.Scenes.Events.SHUTDOWN, stopResize)
+      this.events.once(Phaser.Scenes.Events.DESTROY, stopResize)
       resizeCanvas()
       this.position = chooseCentralSpawn(controls.navigation, []) ??
         findSafePosition(SPAWN, controls.navigation) ?? { ...SPAWN }
@@ -227,6 +236,18 @@ export function createWorld(
       this.animations = new LazyWorldAnimations(this)
       this.add.image(0, 0, 'map-preview').setOrigin(0).setDisplaySize(WIDTH, HEIGHT).setDepth(-110)
       this.mapTiles = new MapTileStreamer(this)
+      this.add
+        .image(726, 294, 'game-terminal-ground')
+        .setOrigin(0)
+        .setDisplaySize(68, 64)
+        .setDepth(-80)
+      this.add
+        .image(GAME_STATION.x, GAME_STATION.y, 'game-terminal')
+        .setOrigin(0.5, 1)
+        .setFlipX(true)
+        .setDisplaySize(GAME_STATION.width, GAME_STATION.height)
+        .setDepth(GAME_STATION.y)
+
       if (controls.shoreEditor) this.shoreWaves = new ShoreWaves(this, controls.shoreEditor)
       this.bushes = new BushRustle(this, [])
       this.lazyOccluders = new LazyOccluders(this, this.bushes)
@@ -274,15 +295,22 @@ export function createWorld(
       this.cameras.main.setBackgroundColor('#59bdd5')
       window.addEventListener('blur', this.blur)
       window.addEventListener('focus', this.focusWindow)
-      this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      let disposed = false
+      const disposeScene = () => {
+        if (disposed) return
+        disposed = true
         window.removeEventListener('blur', this.blur)
         window.removeEventListener('focus', this.focusWindow)
         this.input.keyboard?.off('keydown', this.cancelWalkOnKey)
         this.mapTiles.destroy()
         this.network.destroy()
-        controls.network = undefined
-        controls.retryMultiplayer = undefined
-      })
+        if (controls.network === this.network) {
+          controls.network = undefined
+          controls.retryMultiplayer = undefined
+        }
+      }
+      this.events.once(Phaser.Scenes.Events.SHUTDOWN, disposeScene)
+      this.events.once(Phaser.Scenes.Events.DESTROY, disposeScene)
       this.cameras.main.centerOn(SPAWN.x, SPAWN.y)
       onReady()
     }
@@ -541,7 +569,6 @@ export function createWorld(
         camera.scrollX += (centerX - screenWidth / 2 - camera.scrollX) * smoothing
         camera.scrollY += (centerY - screenHeight / 2 - camera.scrollY) * smoothing
       }
-      const activeAction = nearGuestbook(next, controls.navigation) ? 'guestbook' : station?.id
       for (const anchor of islandActions) {
         const action = controls.discoveryActions?.[anchor.id]
         if (!action) continue
@@ -555,7 +582,7 @@ export function createWorld(
             parent.clientHeight) /
           screenHeight
         action.style.translate = `${x - action.offsetWidth / 2}px ${y - action.offsetHeight / 2}px`
-        const visible = anchor.id === activeAction && !controls.paused
+        const visible = nearIslandAction(next, anchor.id, controls.navigation) && !controls.paused
         const value = String(visible)
         if (action.dataset.visible !== value) {
           action.dataset.visible = value

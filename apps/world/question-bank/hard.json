@@ -1,0 +1,2739 @@
+[
+  {
+    "reference": {
+      "book": 1,
+      "chapter": 14,
+      "verse": 13
+    },
+    "factKey": "abram-ally-mamre",
+    "fr": {
+      "question": "Chez quel Amoréen, frère d’Eschcol et d’Aner, Abram demeurait-il quand il apprit la capture de Lot ?",
+      "answer": "Mamré",
+      "aliases": [],
+      "explanation": "Abram habitait près des chênes de Mamré, un allié amoréen."
+    },
+    "en": {
+      "question": "At whose oaks was Abram living when he learned of Lot’s capture, an Amorite whose brothers were Eshcol and Aner?",
+      "answer": "Mamre",
+      "aliases": [],
+      "explanation": "Abram lived by the oaks of Mamre, an Amorite ally."
+    },
+    "id": "hard-ot-001",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2014%3A13&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 1,
+      "chapter": 24,
+      "verse": 59
+    },
+    "factKey": "rebekah-travel-companion-nurse",
+    "fr": {
+      "question": "Quelle personne qui avait pris soin de Rebecca enfant partit avec elle lorsqu’elle quitta sa famille pour rejoindre Isaac ?",
+      "answer": "Sa nourrice",
+      "aliases": [
+        "La nourrice de Rebecca",
+        "Une nourrice"
+      ],
+      "explanation": "La famille de Rebecca la laissa partir avec sa nourrice et le serviteur d’Abraham."
+    },
+    "en": {
+      "question": "Which person who had cared for Rebekah as a child accompanied her when she left her family to join Isaac?",
+      "answer": "Her nurse",
+      "aliases": [
+        "Rebekah’s nurse",
+        "Nurse"
+      ],
+      "explanation": "Rebekah’s family sent her away with her nurse and Abraham’s servant."
+    },
+    "id": "hard-ot-002",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2024%3A59&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 1,
+      "chapter": 35,
+      "verse": 8
+    },
+    "factKey": "rebekah-nurse-deborah",
+    "fr": {
+      "question": "Comment s’appelait la nourrice de Rebecca, enterrée près de Béthel ?",
+      "answer": "Débora",
+      "aliases": [
+        "Deborah"
+      ],
+      "explanation": "Débora fut enterrée au-dessous de Béthel, sous un chêne."
+    },
+    "en": {
+      "question": "What was the name of Rebekah’s nurse, buried near Bethel?",
+      "answer": "Deborah",
+      "aliases": [],
+      "explanation": "Deborah was buried below Bethel under an oak."
+    },
+    "id": "hard-ot-003",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2035%3A8&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 1,
+      "chapter": 41,
+      "verse": 45
+    },
+    "factKey": "joseph-wife-asenath",
+    "fr": {
+      "question": "Quelle fille de Poti-Phéra, prêtre d’On, devint l’épouse de Joseph ?",
+      "answer": "Asnath",
+      "aliases": [
+        "Asénath",
+        "Asenath"
+      ],
+      "explanation": "Pharaon donna Asnath pour femme à Joseph."
+    },
+    "en": {
+      "question": "Which daughter of Potiphera, priest of On, became Joseph’s wife?",
+      "answer": "Asenath",
+      "aliases": [],
+      "explanation": "Pharaoh gave Asenath to Joseph as his wife."
+    },
+    "id": "hard-ot-004",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2041%3A45&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 1,
+      "chapter": 46,
+      "verse": 27
+    },
+    "factKey": "jacob-household-egypt-seventy",
+    "fr": {
+      "question": "Selon Genèse 46, quel nombre total de personnes compose la famille de Jacob venue en Égypte ?",
+      "answer": "Soixante-dix",
+      "aliases": [
+        "70"
+      ],
+      "explanation": "Genèse 46:27 donne un total de soixante-dix pour la maison de Jacob."
+    },
+    "en": {
+      "question": "According to Genesis 46, what total is given for Jacob’s household that came into Egypt?",
+      "answer": "Seventy",
+      "aliases": [
+        "70"
+      ],
+      "explanation": "Genesis 46:27 gives a total of seventy for Jacob’s household."
+    },
+    "id": "hard-ot-005",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2046%3A27&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 2,
+      "chapter": 1,
+      "verse": 15
+    },
+    "factKey": "hebrew-midwife-puah",
+    "fr": {
+      "question": "Quelle sage-femme hébreue est nommée aux côtés de Schiphra dans Exode 1 ?",
+      "answer": "Pua",
+      "aliases": [
+        "Poua",
+        "Puah"
+      ],
+      "explanation": "Le texte nomme deux sages-femmes : Schiphra et Pua."
+    },
+    "en": {
+      "question": "Which Hebrew midwife is named alongside Shiphrah in Exodus 1?",
+      "answer": "Puah",
+      "aliases": [],
+      "explanation": "The text names two midwives: Shiphrah and Puah."
+    },
+    "id": "hard-ot-006",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%201%3A15&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 2,
+      "chapter": 6,
+      "verse": 23
+    },
+    "factKey": "aaron-wife-elisheba",
+    "fr": {
+      "question": "Comment s’appelait l’épouse d’Aaron, fille d’Amminadab ?",
+      "answer": "Élischéba",
+      "aliases": [
+        "Elischeba",
+        "Élishéba",
+        "Elisheba"
+      ],
+      "explanation": "Aaron épousa Élischéba, fille d’Amminadab et sœur de Nachschon."
+    },
+    "en": {
+      "question": "What was the name of Aaron’s wife, the daughter of Amminadab?",
+      "answer": "Elisheba",
+      "aliases": [],
+      "explanation": "Aaron married Elisheba, daughter of Amminadab and sister of Naashon."
+    },
+    "id": "hard-ot-007",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%206%3A23&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 2,
+      "chapter": 15,
+      "verse": 27
+    },
+    "factKey": "elim-palm-trees-seventy",
+    "fr": {
+      "question": "Combien de palmiers les Israélites trouvèrent-ils à Élim, selon Exode 15 ?",
+      "answer": "Soixante-dix",
+      "aliases": [
+        "70"
+      ],
+      "explanation": "Élim possédait douze sources d’eau et soixante-dix palmiers."
+    },
+    "en": {
+      "question": "How many palm trees did the Israelites find at Elim, according to Exodus 15?",
+      "answer": "Seventy",
+      "aliases": [
+        "70"
+      ],
+      "explanation": "Elim had twelve springs of water and seventy palm trees."
+    },
+    "id": "hard-ot-008",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2015%3A27&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 2,
+      "chapter": 38,
+      "verse": 8
+    },
+    "factKey": "tabernacle-basin-mirrors",
+    "fr": {
+      "question": "Quels objets appartenant aux femmes qui servaient à l’entrée de la tente furent utilisés pour fabriquer la cuve d’airain ?",
+      "answer": "Des miroirs",
+      "aliases": [
+        "Miroirs",
+        "Leurs miroirs"
+      ],
+      "explanation": "La cuve et sa base furent fabriquées avec les miroirs métalliques de ces femmes."
+    },
+    "en": {
+      "question": "What objects belonging to the women serving at the tent entrance were used to make the bronze basin?",
+      "answer": "Mirrors",
+      "aliases": [
+        "Their mirrors",
+        "Looking glasses"
+      ],
+      "explanation": "The basin and its base were made from the women’s metal mirrors."
+    },
+    "id": "hard-ot-009",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2038%3A8&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 2,
+      "chapter": 31,
+      "verse": 6
+    },
+    "factKey": "tabernacle-helper-oholiab",
+    "fr": {
+      "question": "Quel artisan de la tribu de Dan fut associé à Betsaleel pour réaliser le tabernacle ?",
+      "answer": "Oholiab",
+      "aliases": [
+        "Aholiab"
+      ],
+      "explanation": "Oholiab, fils d’Ahisamac, fut donné comme collaborateur à Betsaleel."
+    },
+    "en": {
+      "question": "Which craftsman from the tribe of Dan was appointed to work with Bezalel on the tabernacle?",
+      "answer": "Oholiab",
+      "aliases": [
+        "Aholiab"
+      ],
+      "explanation": "Oholiab, son of Ahisamach, was appointed to assist Bezalel."
+    },
+    "id": "hard-ot-010",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2031%3A6&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 3,
+      "chapter": 10,
+      "verse": 4
+    },
+    "factKey": "aaron-cousin-mishael-removes-bodies",
+    "fr": {
+      "question": "Quel cousin d’Aaron fut appelé avec Eltsaphan pour emporter les corps de Nadab et d’Abihu ?",
+      "answer": "Mischaël",
+      "aliases": [
+        "Mischael",
+        "Mishaël",
+        "Mishael"
+      ],
+      "explanation": "Moïse appela Mischaël et Eltsaphan, fils d’Uziel, pour enlever les corps."
+    },
+    "en": {
+      "question": "Which cousin of Aaron was summoned with Elzaphan to carry away the bodies of Nadab and Abihu?",
+      "answer": "Mishael",
+      "aliases": [],
+      "explanation": "Moses called Mishael and Elzaphan, sons of Uzziel, to remove the bodies."
+    },
+    "id": "hard-ot-011",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Leviticus%2010%3A4&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 4,
+      "chapter": 13,
+      "verse": 8
+    },
+    "factKey": "joshua-father-nun",
+    "fr": {
+      "question": "Comment s’appelait le père de Josué, l’explorateur de la tribu d’Éphraïm ?",
+      "answer": "Nun",
+      "aliases": [
+        "Noun"
+      ],
+      "explanation": "La liste des explorateurs désigne Hosée, futur Josué, comme fils de Nun."
+    },
+    "en": {
+      "question": "What was the name of Joshua’s father, whose son represented Ephraim among the spies?",
+      "answer": "Nun",
+      "aliases": [],
+      "explanation": "The list of spies identifies Hoshea, later called Joshua, as the son of Nun."
+    },
+    "id": "hard-ot-012",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2013%3A8&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 4,
+      "chapter": 25,
+      "verse": 7
+    },
+    "factKey": "phinehas-father-eleazar",
+    "fr": {
+      "question": "De quel fils d’Aaron Phinées était-il le fils ?",
+      "answer": "Éléazar",
+      "aliases": [
+        "Eleazar"
+      ],
+      "explanation": "Phinées est présenté comme le fils d’Éléazar et le petit-fils d’Aaron."
+    },
+    "en": {
+      "question": "Which son of Aaron was the father of Phinehas?",
+      "answer": "Eleazar",
+      "aliases": [],
+      "explanation": "Phinehas is identified as Eleazar’s son and Aaron’s grandson."
+    },
+    "id": "hard-ot-013",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2025%3A7&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 4,
+      "chapter": 27,
+      "verse": 1
+    },
+    "factKey": "zelophehad-daughter-tirzah",
+    "fr": {
+      "question": "Quelle cinquième fille de Tselophchad est nommée après Machla, Noa, Hogla et Milca ?",
+      "answer": "Thirtsa",
+      "aliases": [
+        "Tirtsa",
+        "Tirza",
+        "Tirzah"
+      ],
+      "explanation": "Nombres 27 nomme les cinq filles qui demandèrent un héritage pour leur famille."
+    },
+    "en": {
+      "question": "Which fifth daughter of Zelophehad is named after Mahlah, Noah, Hoglah and Milcah?",
+      "answer": "Tirzah",
+      "aliases": [],
+      "explanation": "Numbers 27 lists the five daughters who requested an inheritance for their family."
+    },
+    "id": "hard-ot-014",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2027%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 5,
+      "chapter": 34,
+      "verse": 1
+    },
+    "factKey": "moses-mountain-nebo",
+    "fr": {
+      "question": "Sur quelle montagne Moïse monta-t-il depuis les plaines de Moab pour contempler le pays promis ?",
+      "answer": "Le mont Nebo",
+      "aliases": [
+        "Nebo",
+        "Nébo",
+        "Mont Nébo"
+      ],
+      "explanation": "Moïse monta sur le mont Nebo, au sommet du Pisga, en face de Jéricho."
+    },
+    "en": {
+      "question": "Which mountain did Moses climb from the plains of Moab to view the promised land?",
+      "answer": "Mount Nebo",
+      "aliases": [
+        "Nebo"
+      ],
+      "explanation": "Moses climbed Mount Nebo to the top of Pisgah, opposite Jericho."
+    },
+    "id": "hard-ot-015",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Deuteronomy%2034%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 6,
+      "chapter": 7,
+      "verse": 1
+    },
+    "factKey": "achan-tribe-judah",
+    "fr": {
+      "question": "À quelle tribu appartenait Acan, qui prit des objets voués à l’interdit à Jéricho ?",
+      "answer": "Juda",
+      "aliases": [
+        "La tribu de Juda"
+      ],
+      "explanation": "Josué 7 situe Acan dans la tribu de Juda."
+    },
+    "en": {
+      "question": "To which tribe did Achan belong when he took forbidden spoils from Jericho?",
+      "answer": "Judah",
+      "aliases": [
+        "The tribe of Judah"
+      ],
+      "explanation": "Joshua 7 identifies Achan as a member of the tribe of Judah."
+    },
+    "id": "hard-ot-016",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%207%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 6,
+      "chapter": 14,
+      "verse": 13
+    },
+    "factKey": "caleb-inheritance-hebron",
+    "fr": {
+      "question": "Quelle ville Josué donna-t-il en héritage à Caleb ?",
+      "answer": "Hébron",
+      "aliases": [
+        "Hebron"
+      ],
+      "explanation": "Josué bénit Caleb et lui donna Hébron en héritage."
+    },
+    "en": {
+      "question": "Which city did Joshua give Caleb as his inheritance?",
+      "answer": "Hebron",
+      "aliases": [],
+      "explanation": "Joshua blessed Caleb and gave him Hebron as his inheritance."
+    },
+    "id": "hard-ot-017",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%2014%3A13&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 6,
+      "chapter": 15,
+      "verse": 17
+    },
+    "factKey": "achsah-husband-othniel",
+    "fr": {
+      "question": "Qui épousa Acsa, la fille de Caleb, après avoir conquis Kirjath-Sépher ?",
+      "answer": "Othniel",
+      "aliases": [
+        "Otniel"
+      ],
+      "explanation": "Othniel prit la ville et Caleb lui donna sa fille Acsa pour femme."
+    },
+    "en": {
+      "question": "Who married Caleb’s daughter Achsah after capturing Kirjath-sepher?",
+      "answer": "Othniel",
+      "aliases": [],
+      "explanation": "Othniel captured the city, and Caleb gave him Achsah as his wife."
+    },
+    "id": "hard-ot-018",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%2015%3A17&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 7,
+      "chapter": 3,
+      "verse": 31
+    },
+    "factKey": "shamgar-weapon-oxgoad",
+    "fr": {
+      "question": "Avec quel outil Schamgar tua-t-il six cents Philistins ?",
+      "answer": "Un aiguillon à bœufs",
+      "aliases": [
+        "Aiguillon",
+        "Un aiguillon",
+        "Aiguillon à boeufs"
+      ],
+      "explanation": "Schamgar se servit d’un aiguillon à bœufs pour délivrer Israël."
+    },
+    "en": {
+      "question": "With what farming tool did Shamgar kill six hundred Philistines?",
+      "answer": "An ox goad",
+      "aliases": [
+        "Oxgoad",
+        "Goad",
+        "Ox goad"
+      ],
+      "explanation": "Shamgar used an ox goad in delivering Israel."
+    },
+    "id": "hard-ot-019",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%203%3A31&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 7,
+      "chapter": 10,
+      "verse": 1
+    },
+    "factKey": "minor-judge-tola",
+    "fr": {
+      "question": "Quel juge, fils de Pua et issu d’Issacar, se leva après Abimélec ?",
+      "answer": "Thola",
+      "aliases": [
+        "Tola"
+      ],
+      "explanation": "Thola se leva pour délivrer Israël et habitait à Schamir."
+    },
+    "en": {
+      "question": "Which judge, son of Puah and from Issachar, arose after Abimelech?",
+      "answer": "Tola",
+      "aliases": [],
+      "explanation": "Tola arose to deliver Israel and lived in Shamir."
+    },
+    "id": "hard-ot-020",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%2010%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 7,
+      "chapter": 12,
+      "verse": 13
+    },
+    "factKey": "minor-judge-abdon",
+    "fr": {
+      "question": "Quel juge d’Israël était fils d’Hillel et originaire de Pirathon ?",
+      "answer": "Abdon",
+      "aliases": [],
+      "explanation": "Abdon, fils d’Hillel, est présenté comme le juge qui succéda à Élon."
+    },
+    "en": {
+      "question": "Which judge of Israel was the son of Hillel and came from Pirathon?",
+      "answer": "Abdon",
+      "aliases": [],
+      "explanation": "Abdon son of Hillel is named as the judge who followed Elon."
+    },
+    "id": "hard-ot-021",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%2012%3A13&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 8,
+      "chapter": 1,
+      "verse": 2
+    },
+    "factKey": "naomi-husband-elimelech",
+    "fr": {
+      "question": "Comment s’appelait le mari de Naomi, parti avec sa famille au pays de Moab ?",
+      "answer": "Élimélec",
+      "aliases": [
+        "Elimelec",
+        "Élimélek",
+        "Elimelech"
+      ],
+      "explanation": "Élimélec était originaire de Bethléhem et partit en Moab avec Naomi et leurs fils."
+    },
+    "en": {
+      "question": "What was the name of Naomi’s husband, who moved with his family to Moab?",
+      "answer": "Elimelech",
+      "aliases": [],
+      "explanation": "Elimelech was from Bethlehem and moved to Moab with Naomi and their sons."
+    },
+    "id": "hard-ot-022",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ruth%201%3A2&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 9,
+      "chapter": 1,
+      "verse": 1
+    },
+    "factKey": "samuel-grandfather-jeroham",
+    "fr": {
+      "question": "Comment s’appelait le père d’Elkana, donc le grand-père paternel de Samuel ?",
+      "answer": "Jéroham",
+      "aliases": [
+        "Jeroham"
+      ],
+      "explanation": "La généalogie d’Elkana le présente comme le fils de Jéroham."
+    },
+    "en": {
+      "question": "What was the name of Elkanah’s father, Samuel’s paternal grandfather?",
+      "answer": "Jeroham",
+      "aliases": [],
+      "explanation": "Elkanah’s genealogy identifies him as the son of Jeroham."
+    },
+    "id": "hard-ot-023",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%201%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 9,
+      "chapter": 14,
+      "verse": 50
+    },
+    "factKey": "saul-wife-ahinoam",
+    "fr": {
+      "question": "Quelle fille d’Achimaats était l’épouse du roi Saül ?",
+      "answer": "Achinoam",
+      "aliases": [
+        "Ahinoam"
+      ],
+      "explanation": "Le texte nomme Achinoam, fille d’Achimaats, comme femme de Saül."
+    },
+    "en": {
+      "question": "Which daughter of Ahimaaz was the wife of King Saul?",
+      "answer": "Ahinoam",
+      "aliases": [],
+      "explanation": "The text names Ahinoam, daughter of Ahimaaz, as Saul’s wife."
+    },
+    "id": "hard-ot-024",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2014%3A50&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 9,
+      "chapter": 21,
+      "verse": 1
+    },
+    "factKey": "david-nob-priest-ahimelech",
+    "fr": {
+      "question": "Quel sacrificateur accueillit David à Nob lorsqu’il fuyait Saül ?",
+      "answer": "Achimélec",
+      "aliases": [
+        "Ahimélec",
+        "Ahimelech",
+        "Achimelec"
+      ],
+      "explanation": "David se rendit à Nob auprès du sacrificateur Achimélec."
+    },
+    "en": {
+      "question": "Which priest met David at Nob when he was fleeing from Saul?",
+      "answer": "Ahimelech",
+      "aliases": [],
+      "explanation": "David went to Nob to see Ahimelech the priest."
+    },
+    "id": "hard-ot-025",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2021%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 10,
+      "chapter": 18,
+      "verse": 18
+    },
+    "factKey": "absalom-monument-kings-valley",
+    "fr": {
+      "question": "Dans quelle vallée Absalom avait-il élevé un monument pour perpétuer son nom ?",
+      "answer": "La vallée du roi",
+      "aliases": [
+        "Vallée du roi",
+        "Schavé",
+        "La vallée de Schavé"
+      ],
+      "explanation": "Absalom avait dressé un monument dans la vallée du roi et lui avait donné son nom."
+    },
+    "en": {
+      "question": "In which valley had Absalom erected a monument to preserve his name?",
+      "answer": "The king’s valley",
+      "aliases": [
+        "King’s valley",
+        "Kings valley",
+        "The king’s dale",
+        "King’s dale",
+        "Shaveh",
+        "The valley of Shaveh"
+      ],
+      "explanation": "Absalom had erected a monument in the king’s valley and named it after himself."
+    },
+    "id": "hard-ot-026",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%2018%3A18&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 10,
+      "chapter": 9,
+      "verse": 2
+    },
+    "factKey": "saul-servant-ziba",
+    "fr": {
+      "question": "Quel ancien serviteur de la maison de Saül informa David au sujet du fils survivant de Jonathan ?",
+      "answer": "Tsiba",
+      "aliases": [
+        "Siba",
+        "Ziba"
+      ],
+      "explanation": "Tsiba fut amené devant David et lui parla du fils de Jonathan."
+    },
+    "en": {
+      "question": "Which former servant of Saul’s household informed David about Jonathan’s surviving son?",
+      "answer": "Ziba",
+      "aliases": [],
+      "explanation": "Ziba was brought before David and told him about Jonathan’s son."
+    },
+    "id": "hard-ot-027",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%209%3A2&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 10,
+      "chapter": 17,
+      "verse": 27
+    },
+    "factKey": "david-supporter-barzillai",
+    "fr": {
+      "question": "Quel Galaadite de Roguelim apporta des provisions à David pendant la révolte d’Absalom ?",
+      "answer": "Barzillaï",
+      "aliases": [
+        "Barzillai",
+        "Barzillaï le Galaadite"
+      ],
+      "explanation": "Barzillaï figure parmi les hommes venus soutenir David à Mahanaïm."
+    },
+    "en": {
+      "question": "Which Gileadite from Rogelim brought provisions to David during Absalom’s rebellion?",
+      "answer": "Barzillai",
+      "aliases": [],
+      "explanation": "Barzillai was among the men who came to support David at Mahanaim."
+    },
+    "id": "hard-ot-028",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%2017%3A27&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 11,
+      "chapter": 4,
+      "verse": 6
+    },
+    "factKey": "solomon-household-ahishar",
+    "fr": {
+      "question": "Quel responsable était préposé à la maison de Salomon, selon la liste de ses officiers ?",
+      "answer": "Achischar",
+      "aliases": [
+        "Ahishar",
+        "Achishar"
+      ],
+      "explanation": "Achischar est désigné comme chef de la maison du roi."
+    },
+    "en": {
+      "question": "Which official was in charge of Solomon’s household in the list of his officers?",
+      "answer": "Ahishar",
+      "aliases": [],
+      "explanation": "Ahishar is listed as the officer over the king’s household."
+    },
+    "id": "hard-ot-029",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%204%3A6&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 11,
+      "chapter": 11,
+      "verse": 29
+    },
+    "factKey": "jeroboam-prophet-ahijah",
+    "fr": {
+      "question": "Quel prophète de Silo déchira son manteau neuf pour annoncer à Jéroboam la division du royaume ?",
+      "answer": "Achija",
+      "aliases": [
+        "Ahija",
+        "Ahijah"
+      ],
+      "explanation": "Achija rencontra Jéroboam et déchira son manteau en douze morceaux."
+    },
+    "en": {
+      "question": "Which prophet from Shiloh tore his new garment to announce the divided kingdom to Jeroboam?",
+      "answer": "Ahijah",
+      "aliases": [],
+      "explanation": "Ahijah met Jeroboam and tore his garment into twelve pieces."
+    },
+    "id": "hard-ot-030",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2011%3A29&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 11,
+      "chapter": 16,
+      "verse": 24
+    },
+    "factKey": "samaria-hill-shemer",
+    "fr": {
+      "question": "À quel homme Omri acheta-t-il la colline sur laquelle il construisit Samarie ?",
+      "answer": "Schémer",
+      "aliases": [
+        "Schemer",
+        "Shémer",
+        "Shemer"
+      ],
+      "explanation": "Omri acheta la colline à Schémer et donna à sa ville un nom lié à celui du propriétaire."
+    },
+    "en": {
+      "question": "From whom did Omri buy the hill on which he built Samaria?",
+      "answer": "Shemer",
+      "aliases": [],
+      "explanation": "Omri bought the hill from Shemer and named the city after its former owner."
+    },
+    "id": "hard-ot-031",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2016%3A24&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 12,
+      "chapter": 4,
+      "verse": 38
+    },
+    "factKey": "elisha-prophets-gilgal",
+    "fr": {
+      "question": "À quel endroit Élisée se trouvait-il avec les fils des prophètes lors de l’épisode du potage empoisonné ?",
+      "answer": "Guilgal",
+      "aliases": [
+        "Gilgal"
+      ],
+      "explanation": "Élisée était revenu à Guilgal pendant une famine."
+    },
+    "en": {
+      "question": "Where was Elisha with the sons of the prophets during the incident of the poisonous stew?",
+      "answer": "Gilgal",
+      "aliases": [],
+      "explanation": "Elisha had returned to Gilgal during a famine."
+    },
+    "id": "hard-ot-032",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%204%3A38&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 12,
+      "chapter": 5,
+      "verse": 26
+    },
+    "factKey": "gehazi-punishment-olives-vineyards",
+    "fr": {
+      "question": "Quel serviteur Élisée réprimanda-t-il pour avoir accepté secrètement des présents de Naaman ?",
+      "answer": "Guéhazi",
+      "aliases": [
+        "Gehazi",
+        "Géhazi"
+      ],
+      "explanation": "Guéhazi avait poursuivi Naaman et obtenu de l’argent et des vêtements."
+    },
+    "en": {
+      "question": "Which servant did Elisha rebuke for secretly accepting gifts from Naaman?",
+      "answer": "Gehazi",
+      "aliases": [],
+      "explanation": "Gehazi had pursued Naaman and obtained silver and clothing."
+    },
+    "id": "hard-ot-033",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%205%3A26&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 12,
+      "chapter": 22,
+      "verse": 14
+    },
+    "factKey": "josiah-prophetess-huldah",
+    "fr": {
+      "question": "Quelle prophétesse les envoyés de Josias consultèrent-ils après la découverte du livre de la loi ?",
+      "answer": "Hulda",
+      "aliases": [
+        "Houlda",
+        "Huldah"
+      ],
+      "explanation": "La délégation alla consulter Hulda, qui habitait à Jérusalem."
+    },
+    "en": {
+      "question": "Which prophetess did Josiah’s messengers consult after the book of the law was found?",
+      "answer": "Huldah",
+      "aliases": [],
+      "explanation": "The delegation consulted Huldah, who lived in Jerusalem."
+    },
+    "id": "hard-ot-034",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%2022%3A14&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 13,
+      "chapter": 4,
+      "verse": 10
+    },
+    "factKey": "jabez-request-enlarge-territory",
+    "fr": {
+      "question": "Quel homme demanda à Dieu de le bénir et d’étendre ses limites dans 1 Chroniques 4 ?",
+      "answer": "Jaebets",
+      "aliases": [
+        "Jabets",
+        "Jabez",
+        "Yaebets"
+      ],
+      "explanation": "Jaebets adressa cette prière au Dieu d’Israël, qui lui accorda sa demande."
+    },
+    "en": {
+      "question": "Which man asked God to bless him and enlarge his territory in 1 Chronicles 4?",
+      "answer": "Jabez",
+      "aliases": [],
+      "explanation": "Jabez prayed to the God of Israel, who granted his request."
+    },
+    "id": "hard-ot-035",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Chronicles%204%3A10&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 14,
+      "chapter": 26,
+      "verse": 20
+    },
+    "factKey": "uzziah-priest-azariah",
+    "fr": {
+      "question": "Quel souverain sacrificateur constata la lèpre du roi Ozias lorsqu’il voulut brûler de l’encens ?",
+      "answer": "Azaria",
+      "aliases": [
+        "Azarias",
+        "Azariah"
+      ],
+      "explanation": "Azaria et les autres sacrificateurs virent la lèpre sur le front d’Ozias."
+    },
+    "en": {
+      "question": "Which chief priest saw the leprosy on King Uzziah when the king attempted to burn incense?",
+      "answer": "Azariah",
+      "aliases": [],
+      "explanation": "Azariah and the other priests saw leprosy on Uzziah’s forehead."
+    },
+    "id": "hard-ot-036",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Chronicles%2026%3A20&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 15,
+      "chapter": 8,
+      "verse": 21
+    },
+    "factKey": "ezra-fast-ahava",
+    "fr": {
+      "question": "Près de quel fleuve Esdras publia-t-il un jeûne pour demander un voyage sûr ?",
+      "answer": "Ahava",
+      "aliases": [
+        "Le fleuve Ahava"
+      ],
+      "explanation": "Esdras proclama un jeûne près du fleuve Ahava avant le départ."
+    },
+    "en": {
+      "question": "By which river did Ezra proclaim a fast to ask for a safe journey?",
+      "answer": "Ahava",
+      "aliases": [
+        "The river Ahava"
+      ],
+      "explanation": "Ezra proclaimed a fast by the river Ahava before setting out."
+    },
+    "id": "hard-ot-037",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ezra%208%3A21&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 16,
+      "chapter": 2,
+      "verse": 10
+    },
+    "factKey": "nehemiah-opponent-tobiah",
+    "fr": {
+      "question": "Quel serviteur ammonite s’opposa à Néhémie aux côtés de Sanballat ?",
+      "answer": "Tobija",
+      "aliases": [
+        "Tobia",
+        "Tobias",
+        "Tobiah"
+      ],
+      "explanation": "Sanballat et Tobija s’irritèrent de voir quelqu’un chercher le bien d’Israël."
+    },
+    "en": {
+      "question": "Which Ammonite official opposed Nehemiah alongside Sanballat?",
+      "answer": "Tobiah",
+      "aliases": [],
+      "explanation": "Sanballat and Tobiah were upset that someone sought Israel’s welfare."
+    },
+    "id": "hard-ot-038",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Nehemiah%202%3A10&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 17,
+      "chapter": 2,
+      "verse": 7
+    },
+    "factKey": "esther-hebrew-name-hadassah",
+    "fr": {
+      "question": "Quel autre nom Esther portait-elle avant de devenir reine ?",
+      "answer": "Hadassa",
+      "aliases": [
+        "Hadassah"
+      ],
+      "explanation": "Le récit présente la jeune femme comme Hadassa, c’est-à-dire Esther."
+    },
+    "en": {
+      "question": "What other name did Esther have before becoming queen?",
+      "answer": "Hadassah",
+      "aliases": [],
+      "explanation": "The narrative introduces the young woman as Hadassah, also called Esther."
+    },
+    "id": "hard-ot-039",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%202%3A7&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 18,
+      "chapter": 42,
+      "verse": 14
+    },
+    "factKey": "job-daughter-keren-happuch",
+    "fr": {
+      "question": "Comment s’appelait la troisième fille née à Job à la fin du récit ?",
+      "answer": "Kéren-Happuc",
+      "aliases": [
+        "Keren-Happuc",
+        "Keren Happuch",
+        "Kéren-Happuch"
+      ],
+      "explanation": "Les trois filles sont nommées Jemima, Ketsia et Kéren-Happuc."
+    },
+    "en": {
+      "question": "What was the name of the third daughter born to Job at the end of the account?",
+      "answer": "Keren-happuch",
+      "aliases": [],
+      "explanation": "The three daughters are named Jemima, Kezia and Keren-happuch."
+    },
+    "id": "hard-ot-040",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%2042%3A14&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 33,
+      "chapter": 1,
+      "verse": 1
+    },
+    "factKey": "micah-origin-moresheth",
+    "fr": {
+      "question": "De quelle localité le prophète Michée était-il originaire selon le début de son livre ?",
+      "answer": "Moréscheth",
+      "aliases": [
+        "Moresheth",
+        "Morésheth",
+        "Morescheth",
+        "Moréschet-Gath"
+      ],
+      "explanation": "Le premier verset présente Michée comme originaire de Moréscheth."
+    },
+    "en": {
+      "question": "From which locality did the prophet Micah come, according to the opening of his book?",
+      "answer": "Moresheth",
+      "aliases": [
+        "Moresheth-gath",
+        "Morasheth"
+      ],
+      "explanation": "The opening verse identifies Micah as a Morasthite, a man from Moresheth."
+    },
+    "id": "hard-ot-041",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Micah%201%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 20,
+      "chapter": 30,
+      "verse": 1
+    },
+    "factKey": "proverbs-agur-father-jakeh",
+    "fr": {
+      "question": "De qui Agur est-il présenté comme le fils au début de Proverbes 30 ?",
+      "answer": "Jaké",
+      "aliases": [
+        "Jake",
+        "Yaqé",
+        "Jakeh"
+      ],
+      "explanation": "L’introduction du chapitre attribue les paroles à Agur, fils de Jaké."
+    },
+    "en": {
+      "question": "Whose son is Agur said to be at the beginning of Proverbs 30?",
+      "answer": "Jakeh",
+      "aliases": [],
+      "explanation": "The chapter introduction attributes the sayings to Agur, son of Jakeh."
+    },
+    "id": "hard-ot-042",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%2030%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 23,
+      "chapter": 7,
+      "verse": 3
+    },
+    "factKey": "isaiah-son-shear-jashub",
+    "fr": {
+      "question": "Quel fils Ésaïe devait-il emmener pour aller rencontrer le roi Achaz ?",
+      "answer": "Schear-Jaschub",
+      "aliases": [
+        "Shear-Jashub",
+        "Chear-Yachoub",
+        "Schéar-Jaschub"
+      ],
+      "explanation": "Dieu demanda à Ésaïe de rencontrer Achaz avec son fils Schear-Jaschub."
+    },
+    "en": {
+      "question": "Which son was Isaiah told to take with him to meet King Ahaz?",
+      "answer": "Shear-jashub",
+      "aliases": [],
+      "explanation": "God told Isaiah to meet Ahaz with his son Shear-jashub."
+    },
+    "id": "hard-ot-043",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Isaiah%207%3A3&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 24,
+      "chapter": 32,
+      "verse": 9
+    },
+    "factKey": "jeremiah-field-price-seventeen",
+    "fr": {
+      "question": "Combien de sicles d’argent Jérémie pesa-t-il pour acheter le champ de son cousin Hanameel ?",
+      "answer": "Dix-sept",
+      "aliases": [
+        "17",
+        "Dix-sept sicles",
+        "17 sicles"
+      ],
+      "explanation": "Jérémie acheta le champ d’Anathoth pour dix-sept sicles d’argent."
+    },
+    "en": {
+      "question": "How many shekels of silver did Jeremiah weigh out to buy his cousin Hanameel’s field?",
+      "answer": "Seventeen",
+      "aliases": [
+        "17",
+        "Seventeen shekels",
+        "17 shekels"
+      ],
+      "explanation": "Jeremiah bought the field at Anathoth for seventeen shekels of silver."
+    },
+    "id": "hard-ot-044",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jeremiah%2032%3A9&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 24,
+      "chapter": 38,
+      "verse": 7
+    },
+    "factKey": "jeremiah-rescuer-ebed-melech",
+    "fr": {
+      "question": "Quel Éthiopien de la maison du roi intervint pour faire sortir Jérémie de la citerne ?",
+      "answer": "Ébed-Mélec",
+      "aliases": [
+        "Ebed-Melec",
+        "Ebed-Mélek",
+        "Ebed-Melech"
+      ],
+      "explanation": "Ébed-Mélec plaida auprès du roi et organisa le sauvetage de Jérémie."
+    },
+    "en": {
+      "question": "Which Ethiopian in the king’s household intervened to rescue Jeremiah from the cistern?",
+      "answer": "Ebed-melech",
+      "aliases": [],
+      "explanation": "Ebed-melech appealed to the king and arranged Jeremiah’s rescue."
+    },
+    "id": "hard-ot-045",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jeremiah%2038%3A7&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 26,
+      "chapter": 1,
+      "verse": 3
+    },
+    "factKey": "ezekiel-river-chebar",
+    "fr": {
+      "question": "Près de quel fleuve Ézéchiel reçut-il la parole de Dieu au pays des Chaldéens ?",
+      "answer": "Le Kebar",
+      "aliases": [
+        "Kebar",
+        "Chebar",
+        "Kébar"
+      ],
+      "explanation": "Ézéchiel se trouvait près du fleuve Kebar parmi les déportés."
+    },
+    "en": {
+      "question": "By which river did Ezekiel receive the word of God in the land of the Chaldeans?",
+      "answer": "Chebar",
+      "aliases": [
+        "The river Chebar",
+        "Kebar"
+      ],
+      "explanation": "Ezekiel was by the river Chebar among the exiles."
+    },
+    "id": "hard-ot-046",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ezekiel%201%3A3&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 27,
+      "chapter": 1,
+      "verse": 7
+    },
+    "factKey": "daniel-babylonian-name-belteshazzar",
+    "fr": {
+      "question": "Quel nom babylonien le chef des eunuques donna-t-il à Daniel ?",
+      "answer": "Beltschatsar",
+      "aliases": [
+        "Beltshatsar",
+        "Belteshazzar"
+      ],
+      "explanation": "Daniel reçut le nom de Beltschatsar lors du changement de noms des jeunes exilés."
+    },
+    "en": {
+      "question": "What Babylonian name did the chief of the eunuchs give Daniel?",
+      "answer": "Belteshazzar",
+      "aliases": [],
+      "explanation": "Daniel was given the name Belteshazzar when the young exiles were renamed."
+    },
+    "id": "hard-ot-047",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Daniel%201%3A7&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 28,
+      "chapter": 1,
+      "verse": 3
+    },
+    "factKey": "hosea-wife-gomer",
+    "fr": {
+      "question": "Quelle fille de Diblaïm Osée prit-il pour femme ?",
+      "answer": "Gomer",
+      "aliases": [],
+      "explanation": "Osée épousa Gomer, fille de Diblaïm."
+    },
+    "en": {
+      "question": "Which daughter of Diblaim did Hosea take as his wife?",
+      "answer": "Gomer",
+      "aliases": [],
+      "explanation": "Hosea married Gomer, the daughter of Diblaim."
+    },
+    "id": "hard-ot-048",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Hosea%201%3A3&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 30,
+      "chapter": 7,
+      "verse": 14
+    },
+    "factKey": "amos-work-sycamore-figs",
+    "fr": {
+      "question": "Outre son activité de berger, de quels arbres Amos s’occupait-il ?",
+      "answer": "Des sycomores",
+      "aliases": [
+        "Sycomores",
+        "Sycomore",
+        "Figuiers sycomores"
+      ],
+      "explanation": "Amos se décrit comme berger et cultivateur de sycomores."
+    },
+    "en": {
+      "question": "Besides tending livestock, what kind of trees did Amos tend?",
+      "answer": "Sycamore fig trees",
+      "aliases": [
+        "Sycamores",
+        "Sycamore trees",
+        "Sycomore trees",
+        "Sycamore"
+      ],
+      "explanation": "Amos describes himself as a herdsman and a dresser of sycamore figs."
+    },
+    "id": "hard-ot-049",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Amos%207%3A14&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 37,
+      "chapter": 1,
+      "verse": 1
+    },
+    "factKey": "haggai-governor-zerubbabel",
+    "fr": {
+      "question": "Quel gouverneur de Juda, fils de Schealthiel, reçoit le message initial du livre d’Aggée ?",
+      "answer": "Zorobabel",
+      "aliases": [
+        "Zerubbabel"
+      ],
+      "explanation": "Le message s’adresse à Zorobabel et au souverain sacrificateur Josué."
+    },
+    "en": {
+      "question": "Which governor of Judah, son of Shealtiel, receives the opening message of Haggai?",
+      "answer": "Zerubbabel",
+      "aliases": [],
+      "explanation": "The message is addressed to Zerubbabel and Joshua the high priest."
+    },
+    "id": "hard-ot-050",
+    "difficulty": "hard",
+    "testament": "old",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Haggai%201%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 40,
+      "chapter": 1,
+      "verse": 5
+    },
+    "factKey": "boaz-mother-rahab",
+    "fr": {
+      "question": "Selon la généalogie de Matthieu, qui était la mère de Boaz ?",
+      "answer": "Rahab",
+      "aliases": [],
+      "explanation": "Matthieu présente Boaz comme le fils de Salmon et de Rahab."
+    },
+    "en": {
+      "question": "According to Matthew’s genealogy, who was Boaz’s mother?",
+      "answer": "Rahab",
+      "aliases": [
+        "Rachab"
+      ],
+      "explanation": "Matthew identifies Boaz as the son of Salmon and Rahab."
+    },
+    "id": "hard-nt-001",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%201%3A5&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 40,
+      "chapter": 2,
+      "verse": 22
+    },
+    "factKey": "judea-ruler-archelaus",
+    "fr": {
+      "question": "Quel fils d’Hérode régnait en Judée lorsque Joseph revint d’Égypte avec sa famille ?",
+      "answer": "Archélaüs",
+      "aliases": [
+        "Archelaus",
+        "Archélaos"
+      ],
+      "explanation": "Apprenant qu’Archélaüs régnait en Judée, Joseph craignit de s’y rendre."
+    },
+    "en": {
+      "question": "Which son of Herod ruled Judea when Joseph returned from Egypt with his family?",
+      "answer": "Archelaus",
+      "aliases": [],
+      "explanation": "Hearing that Archelaus ruled Judea, Joseph was afraid to go there."
+    },
+    "id": "hard-nt-002",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%202%3A22&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 40,
+      "chapter": 27,
+      "verse": 56
+    },
+    "factKey": "zebedee-sons-mother-cross",
+    "fr": {
+      "question": "La mère de quels deux frères est mentionnée parmi les femmes qui observaient la crucifixion en Matthieu 27 ?",
+      "answer": "Jacques et Jean",
+      "aliases": [
+        "Les fils de Zébédée",
+        "Jean et Jacques"
+      ],
+      "explanation": "Matthieu cite la mère des fils de Zébédée, Jacques et Jean."
+    },
+    "en": {
+      "question": "The mother of which two brothers is mentioned among the women watching the crucifixion in Matthew 27?",
+      "answer": "James and John",
+      "aliases": [
+        "The sons of Zebedee",
+        "John and James"
+      ],
+      "explanation": "Matthew names the mother of Zebedee’s sons, James and John."
+    },
+    "id": "hard-nt-003",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2027%3A56&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 41,
+      "chapter": 3,
+      "verse": 17
+    },
+    "factKey": "boanerges-meaning-sons-thunder",
+    "fr": {
+      "question": "Que signifie le surnom Boanergès donné par Jésus à Jacques et Jean ?",
+      "answer": "Fils du tonnerre",
+      "aliases": [
+        "Les fils du tonnerre"
+      ],
+      "explanation": "Marc explique ce surnom en le traduisant par fils du tonnerre."
+    },
+    "en": {
+      "question": "What does the nickname Boanerges, given by Jesus to James and John, mean?",
+      "answer": "Sons of thunder",
+      "aliases": [],
+      "explanation": "Mark explains the nickname as meaning sons of thunder."
+    },
+    "id": "hard-nt-004",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%203%3A17&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 41,
+      "chapter": 7,
+      "verse": 34
+    },
+    "factKey": "ephphatha-meaning-open",
+    "fr": {
+      "question": "Quel sens Marc donne-t-il au mot « Ephphatha », prononcé lors de la guérison d’un homme sourd ?",
+      "answer": "Ouvre-toi",
+      "aliases": [
+        "Ouvre toi",
+        "Sois ouvert"
+      ],
+      "explanation": "Marc traduit le mot araméen par un ordre de s’ouvrir."
+    },
+    "en": {
+      "question": "What meaning does Mark give to the word “Ephphatha,” spoken when Jesus healed a deaf man?",
+      "answer": "Be opened",
+      "aliases": [
+        "Open"
+      ],
+      "explanation": "Mark translates the Aramaic word as a command to be opened."
+    },
+    "id": "hard-nt-005",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%207%3A34&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 41,
+      "chapter": 10,
+      "verse": 46
+    },
+    "factKey": "bartimaeus-father-timaeus",
+    "fr": {
+      "question": "Comment s’appelait le père de Bartimée, le mendiant aveugle de Jéricho ?",
+      "answer": "Timée",
+      "aliases": [
+        "Timee",
+        "Timaeus"
+      ],
+      "explanation": "Marc présente Bartimée comme le fils de Timée."
+    },
+    "en": {
+      "question": "What was the name of Bartimaeus’s father, whose blind son begged at Jericho?",
+      "answer": "Timaeus",
+      "aliases": [
+        "Timeus"
+      ],
+      "explanation": "Mark identifies Bartimaeus as the son of Timaeus."
+    },
+    "id": "hard-nt-006",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%2010%3A46&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 41,
+      "chapter": 15,
+      "verse": 21
+    },
+    "factKey": "simon-cyrene-sons-alexander-rufus",
+    "fr": {
+      "question": "Quels sont les deux fils de Simon de Cyrène nommés par Marc ?",
+      "answer": "Alexandre et Rufus",
+      "aliases": [
+        "Rufus et Alexandre"
+      ],
+      "explanation": "Marc identifie Simon comme le père d’Alexandre et de Rufus."
+    },
+    "en": {
+      "question": "What are the names of Simon of Cyrene’s two sons named by Mark?",
+      "answer": "Alexander and Rufus",
+      "aliases": [
+        "Rufus and Alexander"
+      ],
+      "explanation": "Mark identifies Simon as the father of Alexander and Rufus."
+    },
+    "id": "hard-nt-007",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%2015%3A21&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 42,
+      "chapter": 1,
+      "verse": 5
+    },
+    "factKey": "zechariah-priestly-division-abijah",
+    "fr": {
+      "question": "À quelle classe sacerdotale appartenait Zacharie, le père de Jean-Baptiste ?",
+      "answer": "La classe d’Abia",
+      "aliases": [
+        "Abia",
+        "Abija"
+      ],
+      "explanation": "Luc situe Zacharie dans la classe d’Abia."
+    },
+    "en": {
+      "question": "To which priestly division did Zechariah, the father of John the Baptist, belong?",
+      "answer": "The division of Abijah",
+      "aliases": [
+        "Abijah",
+        "Abia",
+        "The course of Abia"
+      ],
+      "explanation": "Luke places Zechariah in the division of Abijah."
+    },
+    "id": "hard-nt-008",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%201%3A5&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 42,
+      "chapter": 2,
+      "verse": 36
+    },
+    "factKey": "anna-father-phanuel",
+    "fr": {
+      "question": "Comment s’appelait le père d’Anne, la prophétesse qui vit l’enfant Jésus au temple ?",
+      "answer": "Phanuel",
+      "aliases": [],
+      "explanation": "Anne est présentée comme fille de Phanuel, de la tribu d’Aser."
+    },
+    "en": {
+      "question": "What was the name of Anna’s father, whose daughter saw the infant Jesus in the temple?",
+      "answer": "Phanuel",
+      "aliases": [],
+      "explanation": "Anna is identified as the daughter of Phanuel, from the tribe of Asher."
+    },
+    "id": "hard-nt-009",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%202%3A36&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 42,
+      "chapter": 8,
+      "verse": 3
+    },
+    "factKey": "joanna-husband-chuza",
+    "fr": {
+      "question": "Quel intendant d’Hérode était le mari de Jeanne, qui soutenait le ministère de Jésus ?",
+      "answer": "Chuza",
+      "aliases": [
+        "Chouza"
+      ],
+      "explanation": "Luc nomme Jeanne comme la femme de Chuza, intendant d’Hérode."
+    },
+    "en": {
+      "question": "Which steward of Herod was the husband of Joanna, who supported Jesus’s ministry?",
+      "answer": "Chuza",
+      "aliases": [
+        "Chuzas"
+      ],
+      "explanation": "Luke names Joanna as the wife of Chuza, Herod’s steward."
+    },
+    "id": "hard-nt-010",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%208%3A3&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 42,
+      "chapter": 3,
+      "verse": 1
+    },
+    "factKey": "abilene-tetrarch-lysanias",
+    "fr": {
+      "question": "Quel tétrarque gouvernait l’Abilène au début du ministère de Jean-Baptiste ?",
+      "answer": "Lysanias",
+      "aliases": [],
+      "explanation": "Luc cite Lysanias comme tétrarque de l’Abilène dans son cadre historique."
+    },
+    "en": {
+      "question": "Which tetrarch governed Abilene at the beginning of John the Baptist’s ministry?",
+      "answer": "Lysanias",
+      "aliases": [],
+      "explanation": "Luke names Lysanias as tetrarch of Abilene in his historical setting."
+    },
+    "id": "hard-nt-011",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%203%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 43,
+      "chapter": 1,
+      "verse": 44
+    },
+    "factKey": "philip-hometown-bethsaida",
+    "fr": {
+      "question": "De quelle ville Philippe était-il originaire, comme André et Pierre ?",
+      "answer": "Bethsaïda",
+      "aliases": [
+        "Bethsaida"
+      ],
+      "explanation": "Jean indique que Philippe était de Bethsaïda."
+    },
+    "en": {
+      "question": "Which town was Philip from, also the town of Andrew and Peter?",
+      "answer": "Bethsaida",
+      "aliases": [],
+      "explanation": "John states that Philip was from Bethsaida."
+    },
+    "id": "hard-nt-012",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%201%3A44&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 43,
+      "chapter": 4,
+      "verse": 5
+    },
+    "factKey": "samaritan-town-sychar",
+    "fr": {
+      "question": "Près de quelle ville de Samarie se trouvait le puits où Jésus parla à la Samaritaine ?",
+      "answer": "Sychar",
+      "aliases": [],
+      "explanation": "Jean situe la rencontre près de Sychar, sur la terre donnée par Jacob à Joseph."
+    },
+    "en": {
+      "question": "Near which Samaritan town was the well where Jesus spoke to the Samaritan woman?",
+      "answer": "Sychar",
+      "aliases": [],
+      "explanation": "John locates the meeting near Sychar, by the land Jacob gave Joseph."
+    },
+    "id": "hard-nt-013",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%204%3A5&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 43,
+      "chapter": 11,
+      "verse": 16
+    },
+    "factKey": "thomas-greek-name-didymus",
+    "fr": {
+      "question": "Quel autre nom, signifiant jumeau, Jean donne-t-il à Thomas ?",
+      "answer": "Didyme",
+      "aliases": [
+        "Didymus"
+      ],
+      "explanation": "Jean appelle Thomas par le nom de Didyme."
+    },
+    "en": {
+      "question": "What other name, meaning twin, does John give Thomas?",
+      "answer": "Didymus",
+      "aliases": [],
+      "explanation": "John refers to Thomas by the name Didymus."
+    },
+    "id": "hard-nt-014",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2011%3A16&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 43,
+      "chapter": 19,
+      "verse": 13
+    },
+    "factKey": "pilate-pavement-gabbatha",
+    "fr": {
+      "question": "Quel nom hébreu Jean donne-t-il au lieu appelé le Pavé, où Pilate s’assit pour juger Jésus ?",
+      "answer": "Gabbatha",
+      "aliases": [],
+      "explanation": "Jean précise que ce lieu du tribunal était appelé Gabbatha en hébreu."
+    },
+    "en": {
+      "question": "What Hebrew name does John give to the place called the Pavement, where Pilate sat to judge Jesus?",
+      "answer": "Gabbatha",
+      "aliases": [],
+      "explanation": "John explains that this place of judgment was called Gabbatha in Hebrew."
+    },
+    "id": "hard-nt-015",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2019%3A13&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 1,
+      "verse": 23
+    },
+    "factKey": "matthias-other-candidate-justus",
+    "fr": {
+      "question": "Quel candidat, surnommé Justus, fut présenté avec Matthias pour remplacer Judas ?",
+      "answer": "Joseph Barsabbas",
+      "aliases": [
+        "Barsabbas",
+        "Joseph"
+      ],
+      "explanation": "Les deux candidats étaient Joseph appelé Barsabbas, surnommé Justus, et Matthias."
+    },
+    "en": {
+      "question": "Which candidate, surnamed Justus, was put forward with Matthias to replace Judas?",
+      "answer": "Joseph Barsabbas",
+      "aliases": [
+        "Barsabbas",
+        "Joseph",
+        "Barsabas",
+        "Joseph Barsabas"
+      ],
+      "explanation": "The two candidates were Joseph called Barsabbas, surnamed Justus, and Matthias."
+    },
+    "id": "hard-nt-016",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%201%3A23&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 6,
+      "verse": 5
+    },
+    "factKey": "seven-servant-proselyte-nicolas",
+    "fr": {
+      "question": "Lequel des sept hommes choisis en Actes 6 est présenté comme un prosélyte d’Antioche ?",
+      "answer": "Nicolas",
+      "aliases": [
+        "Nicolas d’Antioche"
+      ],
+      "explanation": "La liste des sept se termine par Nicolas, prosélyte d’Antioche."
+    },
+    "en": {
+      "question": "Which of the seven men chosen in Acts 6 is described as a proselyte from Antioch?",
+      "answer": "Nicolas",
+      "aliases": [
+        "Nicholas",
+        "Nicolaus"
+      ],
+      "explanation": "The list of the seven ends with Nicolas, a proselyte from Antioch."
+    },
+    "id": "hard-nt-017",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%206%3A5&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 9,
+      "verse": 43
+    },
+    "factKey": "peter-joppa-tanner-simon",
+    "fr": {
+      "question": "Chez quel tanneur Pierre séjourna-t-il à Joppé ?",
+      "answer": "Simon",
+      "aliases": [
+        "Simon le tanneur"
+      ],
+      "explanation": "Pierre resta plusieurs jours à Joppé chez Simon, un tanneur."
+    },
+    "en": {
+      "question": "With which tanner did Peter stay in Joppa?",
+      "answer": "Simon",
+      "aliases": [
+        "Simon the tanner"
+      ],
+      "explanation": "Peter stayed many days in Joppa with Simon, a tanner."
+    },
+    "id": "hard-nt-018",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%209%3A43&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 10,
+      "verse": 1
+    },
+    "factKey": "cornelius-cohort-italian",
+    "fr": {
+      "question": "De quelle cohorte Corneille était-il centenier à Césarée ?",
+      "answer": "La cohorte italienne",
+      "aliases": [
+        "Italienne",
+        "La cohorte appelée italienne"
+      ],
+      "explanation": "Actes présente Corneille comme centenier de la cohorte dite italienne."
+    },
+    "en": {
+      "question": "Of which cohort was Cornelius a centurion in Caesarea?",
+      "answer": "The Italian cohort",
+      "aliases": [
+        "Italian band",
+        "Italian regiment",
+        "Italian"
+      ],
+      "explanation": "Acts identifies Cornelius as a centurion of the unit called the Italian cohort."
+    },
+    "id": "hard-nt-019",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2010%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 12,
+      "verse": 20
+    },
+    "factKey": "herod-chamberlain-blastus",
+    "fr": {
+      "question": "Quel chambellan d’Hérode les habitants de Tyr et de Sidon gagnèrent-ils à leur cause pour demander la paix ?",
+      "answer": "Blaste",
+      "aliases": [
+        "Blastus"
+      ],
+      "explanation": "Les habitants obtinrent l’appui de Blaste avant de solliciter la paix auprès d’Hérode."
+    },
+    "en": {
+      "question": "Which chamberlain of Herod did the people of Tyre and Sidon win over when seeking peace?",
+      "answer": "Blastus",
+      "aliases": [],
+      "explanation": "The people secured Blastus’s support before seeking peace with Herod."
+    },
+    "id": "hard-nt-020",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2012%3A20&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 13,
+      "verse": 7
+    },
+    "factKey": "cyprus-proconsul-sergius-paulus",
+    "fr": {
+      "question": "Quel proconsul de Chypre fit appeler Barnabas et Saul pour entendre la parole de Dieu ?",
+      "answer": "Sergius Paulus",
+      "aliases": [
+        "Sergius Paul",
+        "Serge Paul",
+        "Sergius"
+      ],
+      "explanation": "Sergius Paulus désirait entendre leur message malgré l’opposition d’Élymas."
+    },
+    "en": {
+      "question": "Which proconsul of Cyprus summoned Barnabas and Saul to hear the word of God?",
+      "answer": "Sergius Paulus",
+      "aliases": [],
+      "explanation": "Sergius Paulus wanted to hear their message despite Elymas’s opposition."
+    },
+    "id": "hard-nt-021",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2013%3A7&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 13,
+      "verse": 13
+    },
+    "factKey": "john-mark-departure-perga",
+    "fr": {
+      "question": "Dans quelle ville Jean, appelé aussi Marc, quitta-t-il Paul et ses compagnons pour retourner à Jérusalem ?",
+      "answer": "Perge",
+      "aliases": [
+        "Pergé",
+        "Perge en Pamphylie"
+      ],
+      "explanation": "Après leur arrivée à Perge en Pamphylie, Jean se sépara du groupe."
+    },
+    "en": {
+      "question": "At which city did John, also called Mark, leave Paul and his companions to return to Jerusalem?",
+      "answer": "Perga",
+      "aliases": [],
+      "explanation": "After they reached Perga in Pamphylia, John left the group."
+    },
+    "id": "hard-nt-022",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2013%3A13&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 16,
+      "verse": 14
+    },
+    "factKey": "lydia-hometown-thyatira",
+    "fr": {
+      "question": "De quelle ville Lydie, marchande de pourpre rencontrée à Philippes, était-elle originaire ?",
+      "answer": "Thyatire",
+      "aliases": [
+        "Thyatira"
+      ],
+      "explanation": "Luc précise que Lydie était originaire de Thyatire."
+    },
+    "en": {
+      "question": "Which city was Lydia, the seller of purple met in Philippi, originally from?",
+      "answer": "Thyatira",
+      "aliases": [],
+      "explanation": "Luke specifies that Lydia came from Thyatira."
+    },
+    "id": "hard-nt-023",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A14&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 17,
+      "verse": 34
+    },
+    "factKey": "athens-believer-damaris",
+    "fr": {
+      "question": "Quelle femme est nommée parmi les personnes qui crurent après le discours de Paul à Athènes ?",
+      "answer": "Damaris",
+      "aliases": [],
+      "explanation": "Actes nomme Denys l’Aréopagite et une femme appelée Damaris."
+    },
+    "en": {
+      "question": "Which woman is named among those who believed after Paul’s speech in Athens?",
+      "answer": "Damaris",
+      "aliases": [],
+      "explanation": "Acts names Dionysius the Areopagite and a woman named Damaris."
+    },
+    "id": "hard-nt-024",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2017%3A34&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 18,
+      "verse": 7
+    },
+    "factKey": "corinth-host-titius-justus",
+    "fr": {
+      "question": "Chez quel homme, dont la maison touchait la synagogue de Corinthe, Paul se rendit-il ?",
+      "answer": "Titius Justus",
+      "aliases": [
+        "Justus",
+        "Titus Justus"
+      ],
+      "explanation": "Paul entra dans la maison d’un adorateur de Dieu nommé Justus."
+    },
+    "en": {
+      "question": "Whose house, adjoining the synagogue in Corinth, did Paul enter?",
+      "answer": "Titius Justus",
+      "aliases": [
+        "Justus",
+        "Titus Justus"
+      ],
+      "explanation": "Paul entered the house of a worshipper of God named Justus."
+    },
+    "id": "hard-nt-025",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2018%3A7&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 18,
+      "verse": 12
+    },
+    "factKey": "achaia-proconsul-gallio",
+    "fr": {
+      "question": "Quel proconsul d’Achaïe refusa de juger Paul sur des questions de loi religieuse ?",
+      "answer": "Gallion",
+      "aliases": [
+        "Gallio"
+      ],
+      "explanation": "Sous le proconsulat de Gallion, des Juifs amenèrent Paul au tribunal."
+    },
+    "en": {
+      "question": "Which proconsul of Achaia refused to judge Paul over questions of religious law?",
+      "answer": "Gallio",
+      "aliases": [],
+      "explanation": "During Gallio’s proconsulship, Jews brought Paul before the tribunal."
+    },
+    "id": "hard-nt-026",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2018%3A12&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 18,
+      "verse": 24
+    },
+    "factKey": "apollos-birthplace-alexandria",
+    "fr": {
+      "question": "Dans quelle ville Apollos, homme éloquent et versé dans les Écritures, était-il né ?",
+      "answer": "Alexandrie",
+      "aliases": [],
+      "explanation": "Actes présente Apollos comme un Juif originaire d’Alexandrie."
+    },
+    "en": {
+      "question": "In which city was Apollos, an eloquent man well versed in the Scriptures, born?",
+      "answer": "Alexandria",
+      "aliases": [],
+      "explanation": "Acts introduces Apollos as a Jew born in Alexandria."
+    },
+    "id": "hard-nt-027",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2018%3A24&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 19,
+      "verse": 9
+    },
+    "factKey": "paul-school-tyrannus",
+    "fr": {
+      "question": "Dans l’école de quel homme Paul enseigna-t-il chaque jour à Éphèse ?",
+      "answer": "Tyrannus",
+      "aliases": [
+        "Tyrannos",
+        "Tyrannus"
+      ],
+      "explanation": "Paul sépara les disciples et enseigna dans l’école de Tyrannus."
+    },
+    "en": {
+      "question": "In whose school did Paul teach daily in Ephesus?",
+      "answer": "Tyrannus",
+      "aliases": [],
+      "explanation": "Paul took the disciples aside and taught in the school of Tyrannus."
+    },
+    "id": "hard-nt-028",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2019%3A9&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 20,
+      "verse": 4
+    },
+    "factKey": "berean-companion-sopater",
+    "fr": {
+      "question": "Quel compagnon de Paul était originaire de Bérée, selon la liste d’Actes 20 ?",
+      "answer": "Sopater",
+      "aliases": [
+        "Sopatros"
+      ],
+      "explanation": "Sopater de Bérée figure dans la liste des compagnons de voyage de Paul."
+    },
+    "en": {
+      "question": "Which companion of Paul came from Berea, according to the list in Acts 20?",
+      "answer": "Sopater",
+      "aliases": [],
+      "explanation": "Sopater of Berea appears in the list of Paul’s travelling companions."
+    },
+    "id": "hard-nt-029",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2020%3A4&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 21,
+      "verse": 16
+    },
+    "factKey": "cypriot-host-mnason",
+    "fr": {
+      "question": "Quel disciple de longue date, originaire de Chypre, devait héberger Paul à Jérusalem ?",
+      "answer": "Mnason",
+      "aliases": [],
+      "explanation": "Des disciples de Césarée accompagnèrent le groupe chez Mnason."
+    },
+    "en": {
+      "question": "Which long-standing disciple from Cyprus was to host Paul in Jerusalem?",
+      "answer": "Mnason",
+      "aliases": [],
+      "explanation": "Disciples from Caesarea accompanied the group to Mnason’s home."
+    },
+    "id": "hard-nt-030",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2021%3A16&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 23,
+      "verse": 26
+    },
+    "factKey": "commander-claudius-lysias",
+    "fr": {
+      "question": "Quel tribun écrivit au gouverneur Félix pour lui envoyer Paul sous escorte ?",
+      "answer": "Claude Lysias",
+      "aliases": [
+        "Claudius Lysias",
+        "Lysias"
+      ],
+      "explanation": "La lettre adressée à Félix porte le nom de Claude Lysias."
+    },
+    "en": {
+      "question": "Which military commander wrote to Governor Felix when sending Paul under escort?",
+      "answer": "Claudius Lysias",
+      "aliases": [
+        "Lysias"
+      ],
+      "explanation": "The letter addressed to Felix bears the name Claudius Lysias."
+    },
+    "id": "hard-nt-031",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2023%3A26&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 24,
+      "verse": 1
+    },
+    "factKey": "paul-accuser-tertullus",
+    "fr": {
+      "question": "Quel orateur présenta les accusations contre Paul devant Félix ?",
+      "answer": "Tertulle",
+      "aliases": [
+        "Tertullus"
+      ],
+      "explanation": "Le souverain sacrificateur Ananias vint avec des anciens et l’orateur Tertulle."
+    },
+    "en": {
+      "question": "Which orator presented the accusations against Paul before Felix?",
+      "answer": "Tertullus",
+      "aliases": [],
+      "explanation": "The high priest Ananias came with elders and the orator Tertullus."
+    },
+    "id": "hard-nt-032",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2024%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 27,
+      "verse": 1
+    },
+    "factKey": "paul-centurion-julius",
+    "fr": {
+      "question": "Quel centenier fut chargé de conduire Paul vers l’Italie ?",
+      "answer": "Julius",
+      "aliases": [],
+      "explanation": "Paul fut confié à Julius, centenier de la cohorte Auguste."
+    },
+    "en": {
+      "question": "Which centurion was put in charge of taking Paul to Italy?",
+      "answer": "Julius",
+      "aliases": [],
+      "explanation": "Paul was entrusted to Julius, a centurion of the Augustan cohort."
+    },
+    "id": "hard-nt-033",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2027%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 27,
+      "verse": 37
+    },
+    "factKey": "paul-ship-persons-276",
+    "fr": {
+      "question": "Combien de personnes se trouvaient sur le navire de Paul avant le naufrage, selon Actes 27 ?",
+      "answer": "Deux cent soixante-seize",
+      "aliases": [
+        "276"
+      ],
+      "explanation": "Le récit indique un total de deux cent soixante-seize personnes à bord."
+    },
+    "en": {
+      "question": "How many people were aboard Paul’s ship before the wreck, according to Acts 27?",
+      "answer": "Two hundred and seventy-six",
+      "aliases": [
+        "276",
+        "Two hundred seventy-six"
+      ],
+      "explanation": "The account gives a total of two hundred and seventy-six people aboard."
+    },
+    "id": "hard-nt-034",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2027%3A37&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 44,
+      "chapter": 28,
+      "verse": 7
+    },
+    "factKey": "malta-chief-publius",
+    "fr": {
+      "question": "Quel premier magistrat de Malte accueillit Paul et ses compagnons pendant trois jours ?",
+      "answer": "Publius",
+      "aliases": [],
+      "explanation": "Publius possédait des terres près du lieu du naufrage et leur offrit l’hospitalité."
+    },
+    "en": {
+      "question": "Which chief official of Malta welcomed Paul and his companions for three days?",
+      "answer": "Publius",
+      "aliases": [],
+      "explanation": "Publius owned land near the shipwreck site and offered them hospitality."
+    },
+    "id": "hard-nt-035",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2028%3A7&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 45,
+      "chapter": 16,
+      "verse": 1
+    },
+    "factKey": "phoebe-church-cenchreae",
+    "fr": {
+      "question": "De quelle Église Phœbé était-elle servante, selon la recommandation de Paul aux Romains ?",
+      "answer": "Cenchrées",
+      "aliases": [
+        "Cenchree",
+        "Cenchrées",
+        "Kenchrées"
+      ],
+      "explanation": "Paul recommande Phœbé, servante de l’Église de Cenchrées."
+    },
+    "en": {
+      "question": "Of which church was Phoebe a servant, according to Paul’s recommendation to the Romans?",
+      "answer": "Cenchreae",
+      "aliases": [
+        "Cenchrea",
+        "Cenchreae",
+        "Kenchreae"
+      ],
+      "explanation": "Paul commends Phoebe, a servant of the church at Cenchreae."
+    },
+    "id": "hard-nt-036",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%2016%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 45,
+      "chapter": 16,
+      "verse": 22
+    },
+    "factKey": "romans-scribe-tertius",
+    "fr": {
+      "question": "Quel secrétaire ayant écrit la lettre aux Romains y ajoute sa propre salutation ?",
+      "answer": "Tertius",
+      "aliases": [],
+      "explanation": "Tertius se présente comme celui qui a écrit la lettre et salue les destinataires."
+    },
+    "en": {
+      "question": "Which scribe who wrote down Romans adds his own greeting in the letter?",
+      "answer": "Tertius",
+      "aliases": [],
+      "explanation": "Tertius identifies himself as the one who wrote the letter and greets its recipients."
+    },
+    "id": "hard-nt-037",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%2016%3A22&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 46,
+      "chapter": 1,
+      "verse": 11
+    },
+    "factKey": "corinth-quarrels-chloe",
+    "fr": {
+      "question": "Les gens de quelle personne informèrent Paul des divisions dans l’Église de Corinthe ?",
+      "answer": "Chloé",
+      "aliases": [
+        "Chloe"
+      ],
+      "explanation": "Paul dit avoir appris les disputes par les gens de Chloé."
+    },
+    "en": {
+      "question": "Whose people informed Paul about divisions in the Corinthian church?",
+      "answer": "Chloe",
+      "aliases": [],
+      "explanation": "Paul says he learned about the quarrels from Chloe’s people."
+    },
+    "id": "hard-nt-038",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Corinthians%201%3A11&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 46,
+      "chapter": 16,
+      "verse": 17
+    },
+    "factKey": "corinth-visitors-fortunatus",
+    "fr": {
+      "question": "Quel visiteur Paul nomme-t-il entre Stéphanas et Achaïcus à la fin de 1 Corinthiens ?",
+      "answer": "Fortunatus",
+      "aliases": [],
+      "explanation": "Paul se réjouit de la venue de Stéphanas, Fortunatus et Achaïcus."
+    },
+    "en": {
+      "question": "Which visitor does Paul name between Stephanas and Achaicus near the end of 1 Corinthians?",
+      "answer": "Fortunatus",
+      "aliases": [],
+      "explanation": "Paul rejoices at the arrival of Stephanas, Fortunatus and Achaicus."
+    },
+    "id": "hard-nt-039",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Corinthians%2016%3A17&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 47,
+      "chapter": 11,
+      "verse": 32
+    },
+    "factKey": "damascus-king-aretas",
+    "fr": {
+      "question": "Quel roi avait un gouverneur qui gardait Damas pour arrêter Paul ?",
+      "answer": "Arétas",
+      "aliases": [
+        "Aretas"
+      ],
+      "explanation": "Paul rapporte que le gouverneur du roi Arétas faisait garder la ville."
+    },
+    "en": {
+      "question": "Which king had a governor guarding Damascus to arrest Paul?",
+      "answer": "Aretas",
+      "aliases": [],
+      "explanation": "Paul reports that the governor under King Aretas had the city guarded."
+    },
+    "id": "hard-nt-040",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Corinthians%2011%3A32&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 50,
+      "chapter": 2,
+      "verse": 25
+    },
+    "factKey": "philippi-messenger-epaphroditus",
+    "fr": {
+      "question": "Quel envoyé des Philippiens Paul appelle-t-il son frère, son compagnon d’œuvre et de combat ?",
+      "answer": "Épaphrodite",
+      "aliases": [
+        "Epaphrodite",
+        "Epaphroditus"
+      ],
+      "explanation": "Paul présente Épaphrodite comme l’envoyé des Philippiens venu l’aider."
+    },
+    "en": {
+      "question": "Which messenger from the Philippians does Paul call his brother, fellow worker and fellow soldier?",
+      "answer": "Epaphroditus",
+      "aliases": [],
+      "explanation": "Paul identifies Epaphroditus as the Philippians’ messenger sent to help him."
+    },
+    "id": "hard-nt-041",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Philippians%202%3A25&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 50,
+      "chapter": 4,
+      "verse": 2
+    },
+    "factKey": "philippi-women-euodia-syntyche",
+    "fr": {
+      "question": "Quelles deux femmes Paul exhorte-t-il à avoir un même sentiment dans le Seigneur en Philippiens 4 ?",
+      "answer": "Évodie et Syntyche",
+      "aliases": [
+        "Evodie et Syntyche",
+        "Syntyche et Évodie",
+        "Euodie et Syntyche"
+      ],
+      "explanation": "Paul adresse cette exhortation à Évodie et à Syntyche."
+    },
+    "en": {
+      "question": "Which two women does Paul urge to agree in the Lord in Philippians 4?",
+      "answer": "Euodia and Syntyche",
+      "aliases": [
+        "Syntyche and Euodia",
+        "Euodias and Syntyche"
+      ],
+      "explanation": "Paul addresses this appeal to Euodia and Syntyche."
+    },
+    "id": "hard-nt-042",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Philippians%204%3A2&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 51,
+      "chapter": 4,
+      "verse": 14
+    },
+    "factKey": "luke-profession-physician",
+    "fr": {
+      "question": "Quel métier Luc exerçait-il, selon la salutation de Paul en Colossiens 4 ?",
+      "answer": "Médecin",
+      "aliases": [
+        "Un médecin",
+        "Docteur"
+      ],
+      "explanation": "Paul appelle Luc le médecin bien-aimé."
+    },
+    "en": {
+      "question": "What profession did Luke practise, according to Paul’s greeting in Colossians 4?",
+      "answer": "Physician",
+      "aliases": [
+        "Doctor",
+        "Medical doctor"
+      ],
+      "explanation": "Paul calls Luke the beloved physician."
+    },
+    "id": "hard-nt-043",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Colossians%204%3A14&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 55,
+      "chapter": 1,
+      "verse": 16
+    },
+    "factKey": "paul-refreshed-onesiphorus",
+    "fr": {
+      "question": "Quel homme Paul remercie-t-il de l’avoir souvent réconforté sans avoir honte de ses chaînes ?",
+      "answer": "Onésiphore",
+      "aliases": [
+        "Onesiphore",
+        "Onesiphorus"
+      ],
+      "explanation": "Paul demande la miséricorde pour la maison d’Onésiphore, qui l’a soutenu."
+    },
+    "en": {
+      "question": "Whom does Paul thank for often refreshing him and not being ashamed of his chains?",
+      "answer": "Onesiphorus",
+      "aliases": [],
+      "explanation": "Paul asks mercy for the household of Onesiphorus, who supported him."
+    },
+    "id": "hard-nt-044",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Timothy%201%3A16&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 55,
+      "chapter": 4,
+      "verse": 13
+    },
+    "factKey": "paul-cloak-carpus",
+    "fr": {
+      "question": "Chez qui Paul avait-il laissé son manteau à Troas ?",
+      "answer": "Carpus",
+      "aliases": [],
+      "explanation": "Paul demande à Timothée de rapporter le manteau laissé chez Carpus."
+    },
+    "en": {
+      "question": "With whom had Paul left his cloak at Troas?",
+      "answer": "Carpus",
+      "aliases": [],
+      "explanation": "Paul asks Timothy to bring the cloak left with Carpus."
+    },
+    "id": "hard-nt-045",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Timothy%204%3A13&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 55,
+      "chapter": 4,
+      "verse": 20
+    },
+    "factKey": "trophimus-left-miletus",
+    "fr": {
+      "question": "Dans quelle ville Paul avait-il laissé Trophime malade ?",
+      "answer": "Milet",
+      "aliases": [
+        "Miletus"
+      ],
+      "explanation": "Paul précise à Timothée avoir laissé Trophime malade à Milet."
+    },
+    "en": {
+      "question": "In which city had Paul left Trophimus sick?",
+      "answer": "Miletus",
+      "aliases": [
+        "Miletum"
+      ],
+      "explanation": "Paul tells Timothy that he left Trophimus sick at Miletus."
+    },
+    "id": "hard-nt-046",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Timothy%204%3A20&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 56,
+      "chapter": 3,
+      "verse": 13
+    },
+    "factKey": "zenas-profession-lawyer",
+    "fr": {
+      "question": "Quel spécialiste de la loi Tite devait-il aider à voyager avec Apollos ?",
+      "answer": "Zénas",
+      "aliases": [
+        "Zenas"
+      ],
+      "explanation": "Paul demande à Tite de pourvoir aux besoins de Zénas et d’Apollos."
+    },
+    "en": {
+      "question": "Which lawyer was Titus instructed to help on his journey with Apollos?",
+      "answer": "Zenas",
+      "aliases": [],
+      "explanation": "Paul asks Titus to supply the needs of Zenas and Apollos."
+    },
+    "id": "hard-nt-047",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Titus%203%3A13&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 58,
+      "chapter": 7,
+      "verse": 2
+    },
+    "factKey": "melchizedek-salem-king-peace",
+    "fr": {
+      "question": "Selon Hébreux 7, que signifie le titre « roi de Salem » donné à Melchisédek ?",
+      "answer": "Roi de paix",
+      "aliases": [
+        "Le roi de paix"
+      ],
+      "explanation": "Hébreux explique le titre en l’associant à la paix."
+    },
+    "en": {
+      "question": "According to Hebrews 7, what does Melchizedek’s title “king of Salem” mean?",
+      "answer": "King of peace",
+      "aliases": [],
+      "explanation": "Hebrews explains the title by associating it with peace."
+    },
+    "id": "hard-nt-048",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Hebrews%207%3A2&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 63,
+      "chapter": 1,
+      "verse": 1
+    },
+    "factKey": "second-john-addressed-elect-lady",
+    "fr": {
+      "question": "À qui l’ancien adresse-t-il sa deuxième épître de Jean, avec ses enfants ?",
+      "answer": "À la dame élue",
+      "aliases": [
+        "La dame élue",
+        "Dame élue",
+        "La dame choisie"
+      ],
+      "explanation": "La salutation s’adresse à une dame élue et à ses enfants, sans donner de nom personnel."
+    },
+    "en": {
+      "question": "To whom, together with her children, does the elder address the second letter of John?",
+      "answer": "The elect lady",
+      "aliases": [
+        "Elect lady",
+        "The chosen lady"
+      ],
+      "explanation": "The greeting addresses an elect lady and her children without giving a personal name."
+    },
+    "id": "hard-nt-049",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20John%201%3A1&version=KJV"
+  },
+  {
+    "reference": {
+      "book": 66,
+      "chapter": 2,
+      "verse": 13
+    },
+    "factKey": "pergamum-martyr-antipas",
+    "fr": {
+      "question": "Quel témoin fidèle est nommé comme ayant été mis à mort à Pergame ?",
+      "answer": "Antipas",
+      "aliases": [],
+      "explanation": "Le message à Pergame mentionne le témoignage et la mort d’Antipas."
+    },
+    "en": {
+      "question": "Which faithful witness is named as having been killed in Pergamum?",
+      "answer": "Antipas",
+      "aliases": [],
+      "explanation": "The message to Pergamum mentions Antipas’s witness and death."
+    },
+    "id": "hard-nt-050",
+    "difficulty": "hard",
+    "testament": "new",
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Revelation%202%3A13&version=KJV"
+  }
+]

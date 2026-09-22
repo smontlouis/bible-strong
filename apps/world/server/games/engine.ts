@@ -1,3 +1,13 @@
+import {
+  createSoloRun,
+  pauseSolo,
+  resumeSolo,
+  submitSolo,
+  settleSolo,
+  tickSolo,
+  soloRemaining,
+  type SoloRun,
+} from '../../src/solo-game'
 import { WHO_ZONE_MS } from '../../src/games-protocol'
 import type { AvatarProfile } from '../../src/avatar-profile'
 import type {
@@ -14,7 +24,6 @@ export const INVITE_MS = 60_000
 export const REJOIN_MS = 90_000
 const ROUND_MS = 60_000
 export type Round = {
-  researchQuestion?: string
   question: string
   clues: string[]
   choices: string[]
@@ -46,6 +55,7 @@ type WhoRound = {
   awarded?: number
 }
 export type Game = {
+  solo?: SoloRun
   who?: WhoRound
   id: string
   host: string
@@ -67,7 +77,13 @@ type Invitation = { id: string; gameId: string; from: string; to: string; expire
 export type GameData = { games: Game[]; invitations: Invitation[]; limits: Record<string, number> }
 export type Visitor = { id: string; profile: AvatarProfile; x: number; y: number; present: boolean }
 export type Effect =
-  | { type: 'generate'; gameId: string; operation: string; options: GameOptions }
+  | {
+      type: 'generate'
+      gameId: string
+      operation: string
+      options: GameOptions
+      exclude?: string[]
+    }
   | {
       type: 'evaluate'
       gameId: string
@@ -185,6 +201,12 @@ export class GameEngine {
     const g = this.current(id),
       p = g?.players.find(p => p.id === id)
     if (!g || !p || g.phase === 'finished') return
+    if (g.solo) {
+      p.absentSince = present ? null : (p.absentSince ?? this.now())
+      if (present) resumeSolo(g.solo, 'away', this.now())
+      else pauseSolo(g.solo, 'away', this.now())
+      return
+    }
     if (present) {
       p.absentSince = null
       this.unpause(g)
@@ -217,13 +239,14 @@ export class GameEngine {
         id: this.uuid(),
         host: id,
         options: { ...action.options },
+        ...(action.options.mode === 'solo' ? { solo: createSoloRun() } : {}),
         phase: 'lobby',
         players: [{ id, profile: visitor.profile, score: 0, absentSince: null }],
         rounds: [],
         round: 0,
         answers: {},
         started: now,
-        deadline: now + 10 * 60_000,
+        deadline: now + (action.options.mode === 'solo' ? 24 * 60 * 60_000 : 10 * 60_000),
         pausedAt: null,
         updated: now,
       })
@@ -249,6 +272,7 @@ export class GameEngine {
       return
     }
     if (!g) return fail('expired')
+    if (g.solo) return this.soloCommand(g, id, action)
     if (action.action === 'invite') {
       if (g.phase !== 'lobby' || g.host !== id) return fail('not_host')
       if (g.players.length >= 4) return fail('full')
@@ -284,12 +308,10 @@ export class GameEngine {
       )
         return fail('not_ready')
       if (
-        (this.data.limits[`generate:${id}`] ?? 0) > now ||
         this.data.games.filter(g => g.phase === 'generating').length >= 3 ||
         Object.keys(this.data.limits).filter(key => key.startsWith('budget:')).length >= 60
       )
         return fail('rate_limited')
-      this.data.limits[`generate:${id}`] = now + 60_000
       g.phase = 'generating'
       g.operation = this.uuid()
       this.data.limits[`budget:${g.operation}`] = now + 60 * 60_000
@@ -359,6 +381,125 @@ export class GameEngine {
         }
     }
   }
+  private soloVerdict(
+    g: Game,
+    a: Answer,
+    status: 'correct' | 'wrong' | 'clarify' | 'unavailable' | 'skipped'
+  ) {
+    if (!g.solo || !settleSolo(g.solo, a.operation, status, this.now())) return
+    g.players[0].score = g.solo.best
+    if (status === 'correct' || status === 'wrong' || status === 'skipped') {
+      g.phase = g.solo.outcome ? 'finished' : 'reveal'
+      g.deadline = this.now() + 24 * 60 * 60_000
+    }
+  }
+  private prepareSolo(g: Game): Effect {
+    const now = this.now()
+    if (
+      this.data.games.filter(item => item.phase === 'generating').length >= 3 ||
+      Object.keys(this.data.limits).filter(key => key.startsWith('budget:')).length >= 60
+    )
+      return fail('rate_limited')
+    pauseSolo(g.solo!, 'preparing', now)
+    g.phase = 'generating'
+    g.operation = this.uuid()
+    this.data.limits[`budget:${g.operation}`] = now + 60 * 60_000
+    g.deadline = now + 180_000
+    delete g.reason
+    return {
+      type: 'generate',
+      gameId: g.id,
+      operation: g.operation,
+      options: g.options,
+      exclude: g.rounds.map(r => r.answer),
+    }
+  }
+  private soloCommand(g: Game, id: string, action: GameAction): Effect | undefined {
+    const run = g.solo!,
+      now = this.now()
+    if (id !== g.host) return fail('not_host')
+    if (action.action === 'pause-solo') {
+      pauseSolo(run, 'menu', now)
+      return
+    }
+    if (action.action === 'resume-solo') {
+      resumeSolo(run, 'menu', now)
+      return
+    }
+    if (action.action === 'invite') return fail('not_ready')
+    if (action.action === 'start') {
+      if (g.phase !== 'lobby') return fail('not_ready')
+      return this.prepareSolo(g)
+    }
+    if (action.action === 'next') {
+      if (run.outcome || run.pauses.includes('away')) return fail('not_ready')
+      if (g.phase === 'reveal') {
+        if (g.round + 1 >= 50) {
+          run.outcome = 'exhausted'
+          this.finish(g)
+          return
+        }
+        // Preparation can fail its rate limit; do not advance the index until accepted.
+        if (g.round + 1 >= g.rounds.length) {
+          const effect = this.prepareSolo(g)
+          g.round++
+          g.answers = {}
+          resumeSolo(run, 'feedback', now)
+          return effect
+        }
+        g.round++
+        g.answers = {}
+        g.phase = 'question'
+      } else if (
+        g.phase !== 'question' ||
+        !['clarify', 'unavailable'].includes(g.answers[id]?.status)
+      )
+        return fail('not_ready')
+      resumeSolo(run, 'feedback', now)
+      resumeSolo(run, 'technical', now)
+      delete g.answers[id]
+      return
+    }
+    if (action.action === 'pass') {
+      if (g.phase !== 'question' || action.gameId !== g.id || action.round !== g.round)
+        return fail('not_ready')
+      const operation = this.uuid()
+      if (!submitSolo(run, operation, now)) return fail('not_ready')
+      const a: Answer = { text: '', status: 'skipped', operation, attempts: 1, expires: now }
+      g.answers[id] = a
+      this.soloVerdict(g, a, 'skipped')
+      return
+    }
+    if (action.action === 'answer') {
+      if (g.phase !== 'question' || action.gameId !== g.id || action.round !== g.round)
+        return fail('not_ready')
+      const r = g.rounds[g.round]
+      const operation = this.uuid()
+      if (!submitSolo(run, operation, now)) return fail('not_ready')
+      const exact = [r.answer, ...r.aliases].some(
+        a => normalizeAnswer(a) === normalizeAnswer(action.text)
+      )
+      const a: Answer = {
+        text: action.text,
+        status: exact ? 'correct' : 'pending',
+        operation,
+        attempts: 1,
+        expires: now + 12_000,
+      }
+      g.answers[id] = a
+      if (a.status === 'pending')
+        return {
+          type: 'evaluate',
+          gameId: g.id,
+          round: g.round,
+          player: id,
+          operation,
+          text: a.text,
+          content: r,
+        }
+      this.soloVerdict(g, a, a.status as 'correct' | 'wrong')
+    }
+  }
   generated(effect: Extract<Effect, { type: 'generate' }>, rounds: Round[] | null) {
     const g = this.data.games.find(g => g.id === effect.gameId)
     if (
@@ -371,7 +512,22 @@ export class GameEngine {
     if (!rounds || rounds.length !== 5) {
       g.phase = 'lobby'
       g.reason = 'generation_failed'
-      g.deadline = this.now() + 10 * 60_000
+      g.deadline = this.now() + (g.solo ? 24 * 60 * 60_000 : 10 * 60_000)
+      return
+    }
+    if (g.solo) {
+      const previous = new Set(g.rounds.map(r => normalizeAnswer(r.answer)))
+      const fresh = rounds.filter(r => !previous.has(normalizeAnswer(r.answer)))
+      if (!fresh.length) {
+        g.phase = 'lobby'
+        g.reason = 'generation_failed'
+        return
+      }
+      g.rounds.push(...fresh)
+      g.phase = 'question'
+      g.answers = {}
+      g.deadline = this.now() + 24 * 60 * 60_000
+      resumeSolo(g.solo, 'preparing', this.now())
       return
     }
     g.rounds = rounds
@@ -395,6 +551,10 @@ export class GameEngine {
     )
       return
     a.status = status
+    if (g.solo) {
+      this.soloVerdict(g, a, status)
+      return
+    }
     this.settleWho(g)
     if (g.pausedAt === null && this.completed(g)) this.reveal(g)
   }
@@ -458,6 +618,21 @@ export class GameEngine {
     for (const [key, until] of Object.entries(this.data.limits))
       if (until <= now) delete this.data.limits[key]
     for (const g of [...this.data.games]) {
+      if (g.solo) {
+        const a = g.answers[g.host]
+        if (a?.status === 'pending' && a.expires <= now) {
+          a.status = 'unavailable'
+          this.soloVerdict(g, a, 'unavailable')
+        }
+        tickSolo(g.solo, now)
+        if (g.solo.outcome && g.phase !== 'finished') this.finish(g)
+        if (g.phase === 'generating' && g.deadline <= now) {
+          g.phase = 'lobby'
+          g.reason = 'generation_failed'
+          g.deadline = now + 24 * 60 * 60_000
+        } else if (g.deadline <= now) this.data.games = this.data.games.filter(item => item !== g)
+        continue
+      }
       for (const p of [...g.players])
         if (p.absentSince !== null && p.absentSince + REJOIN_MS <= now) this.remove(p.id)
       for (const a of Object.values(g.answers))
@@ -486,6 +661,12 @@ export class GameEngine {
     const now = this.now(),
       times = this.data.invitations.map(i => i.expires)
     for (const g of this.data.games) {
+      if (g.solo) {
+        times.push(Math.max(now + 1000, g.deadline))
+        if (g.solo.runningSince !== null) times.push(now + soloRemaining(g.solo, now))
+        for (const a of Object.values(g.answers)) if (a.status === 'pending') times.push(a.expires)
+        continue
+      }
       if (g.pausedAt === null && !(g.phase === 'question' && g.who?.frozenAt != null)) {
         times.push(Math.max(now + 1000, g.deadline))
         if (g.phase === 'question' && !g.who)
@@ -519,13 +700,14 @@ export class GameEngine {
       })
     if (!g) return { game: null, invitations, now }
     const view: GameView = {
+      ...(g.solo ? { solo: structuredClone(g.solo) } : {}),
       id: g.id,
       host: g.host,
       options: g.options,
       phase: g.phase,
       players: g.players.map(p => ({ ...p })),
       round: g.round,
-      total: 5,
+      total: g.solo ? g.rounds.length : 5,
       deadline: g.deadline,
       pausedAt: g.pausedAt,
       pausedUntil:
@@ -551,7 +733,8 @@ export class GameEngine {
             ? 4
             : 3
       )
-      if (g.options.kind === 'quiz' && g.options.difficulty === 'easy') view.choices = r.choices
+      if (!g.solo && g.options.kind === 'quiz' && g.options.difficulty === 'easy')
+        view.choices = r.choices
       if (g.who)
         view.who = {
           mode: g.who.mode,
@@ -576,7 +759,7 @@ export class GameEngine {
           text: a.text,
           retriesLeft: Math.max(0, 3 - (g.who && a.zone !== g.who.zone ? 0 : a.attempts)),
           status:
-            a.status === 'correct' || (!g.who && a.status === 'wrong')
+            !g.solo && (a.status === 'correct' || (!g.who && a.status === 'wrong'))
               ? g.phase === 'question'
                 ? 'pending'
                 : a.status

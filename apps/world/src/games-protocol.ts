@@ -1,6 +1,8 @@
+import type { SoloRun } from './solo-game'
 import type { AvatarProfile } from './avatar-profile'
 
 export type GameOptions = {
+  mode?: 'solo' | 'together'
   kind: 'who' | 'quiz'
   difficulty: 'easy' | 'medium' | 'hard'
   subject: 'people' | 'places' | 'objects' | 'mixed'
@@ -11,7 +13,8 @@ export type GameAction =
   | { action: 'create'; options: GameOptions }
   | { action: 'invite'; target: string }
   | { action: 'accept' | 'decline'; invitation: string }
-  | { action: 'start' | 'leave' | 'next' | 'sync' }
+  | { action: 'start' | 'leave' | 'next' | 'sync' | 'pause-solo' | 'resume-solo' }
+  | { action: 'pass'; gameId: string; round: number }
   | { action: 'answer'; gameId: string; round: number; zone?: number; text: string }
 export type GameError =
   | 'busy'
@@ -50,6 +53,7 @@ export type WhoView = {
   awarded?: number
 }
 export type GameView = {
+  solo?: SoloRun
   who?: WhoView
   id: string
   host: string
@@ -88,6 +92,8 @@ export function parseGameAction(value: unknown): GameAction | null {
     if (
       !o ||
       !['who', 'quiz'].includes(o.kind) ||
+      (o.mode !== undefined && !['solo', 'together'].includes(o.mode)) ||
+      (o.mode === 'solo' && o.kind !== 'quiz') ||
       !['easy', 'medium', 'hard'].includes(o.difficulty) ||
       !['people', 'places', 'objects', 'mixed'].includes(o.subject) ||
       !['old', 'new', 'both'].includes(o.testament) ||
@@ -97,6 +103,7 @@ export function parseGameAction(value: unknown): GameAction | null {
     return {
       action: 'create',
       options: {
+        ...(o.mode ? { mode: o.mode } : {}),
         kind: o.kind,
         difficulty: o.difficulty,
         subject: o.subject,
@@ -108,14 +115,29 @@ export function parseGameAction(value: unknown): GameAction | null {
   if (m.action === 'invite' && id(m.target)) return { action: 'invite', target: m.target }
   if ((m.action === 'accept' || m.action === 'decline') && id(m.invitation))
     return { action: m.action, invitation: m.invitation }
-  if (m.action === 'start' || m.action === 'leave' || m.action === 'next' || m.action === 'sync')
+  if (
+    m.action === 'start' ||
+    m.action === 'leave' ||
+    m.action === 'next' ||
+    m.action === 'sync' ||
+    m.action === 'pause-solo' ||
+    m.action === 'resume-solo'
+  )
     return { action: m.action }
+  if (
+    m.action === 'pass' &&
+    id(m.gameId) &&
+    Number.isInteger(m.round) &&
+    Number(m.round) >= 0 &&
+    Number(m.round) < 50
+  )
+    return { action: 'pass', gameId: m.gameId, round: Number(m.round) }
   if (
     m.action === 'answer' &&
     id(m.gameId) &&
     Number.isInteger(m.round) &&
     Number(m.round) >= 0 &&
-    Number(m.round) < 5 &&
+    Number(m.round) < 50 &&
     typeof m.text === 'string' &&
     m.text.trim().length > 0 &&
     m.text.length <= 160 &&

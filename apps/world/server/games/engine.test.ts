@@ -532,3 +532,119 @@ it('finishes legacy three-clue games with their existing scoring rules', () => {
   command('a', { action: 'next' })
   expect(g.who).toBeUndefined()
 })
+
+describe('solo four in a row under room authority', () => {
+  function solo() {
+    command('a', { action: 'create', options: { ...options, mode: 'solo' } })
+    const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
+    engine.generated(effect, structuredClone(rounds))
+    return engine.data.games[0]
+  }
+  it('starts alone, keeps answers private, and wins after four consecutive answers', () => {
+    const g = solo()
+    expect(engine.snapshot('a').game?.result).toBeUndefined()
+    expect(engine.snapshot('a').game?.choices).toBeUndefined()
+    fails('not_ready', () => command('a', { action: 'invite', target: 'b' }))
+    for (let i = 0; i < 4; i++) {
+      answer('a', `Pierre${i}`)
+      expect(g.solo?.streak).toBe(i + 1)
+      if (i < 3) command('a', { action: 'next' })
+    }
+    expect(g.phase).toBe('finished')
+    expect(g.solo?.outcome).toBe('won')
+    expect(engine.snapshot('a').game?.result?.answer).toBe('Pierre3')
+  })
+  it('preserves a paused run beyond the multiplayer rejoin window', () => {
+    const g = solo()
+    now += 10000
+    engine.presence('a', false)
+    now += REJOIN_MS + 50000
+    engine.tick()
+    expect(engine.data.games).toContain(g)
+    expect(g.solo?.remainingMs).toBe(110000)
+    engine.presence('a', true)
+    answer('a', 'Pierre0')
+    expect(g.solo?.streak).toBe(1)
+  })
+  it('can retry an unavailable check without losing the series or charging verification time', () => {
+    const g = solo()
+    answer('a', 'Pierre0')
+    command('a', { action: 'next' })
+    const effect = answer('a', 'petre')
+    now += 12001
+    engine.tick()
+    expect(g.solo?.streak).toBe(1)
+    expect(g.solo?.remainingMs).toBe(120000)
+    command('a', { action: 'next' })
+    engine.evaluated(effect, 'wrong')
+    expect(g.solo?.streak).toBe(1)
+    answer('a', 'Pierre1')
+    expect(g.solo?.streak).toBe(2)
+  })
+  it('refills questions without recycling round IDs, answers, or charging preparation time', () => {
+    const g = solo()
+    for (let i = 0; i < 5; i++) {
+      engine.evaluated(answer('a', 'wrong'), 'wrong')
+      if (i < 4) command('a', { action: 'next' })
+    }
+    const effect = command('a', { action: 'next' }) as Extract<Effect, { type: 'generate' }>
+    expect(effect.exclude).toHaveLength(5)
+    expect(g.round).toBe(5)
+    now += 90000
+    engine.generated(
+      effect,
+      rounds.map((r, i) => ({ ...r, answer: `New${i}`, aliases: [] }))
+    )
+    expect(g.solo?.remainingMs).toBe(120000)
+    expect(engine.snapshot('a').game?.result).toBeUndefined()
+    fails('not_ready', () =>
+      command('a', { action: 'answer', gameId: g.id, round: 0, text: 'Pierre0' })
+    )
+    answer('a', 'New0')
+    expect(g.solo?.streak).toBe(1)
+  })
+})
+
+it('passes a solo question without AI and guards duplicate and stale passes', () => {
+  command('a', { action: 'create', options: { ...options, mode: 'solo' } })
+  const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
+  engine.generated(effect, structuredClone(rounds))
+  const g = engine.data.games[0]
+  answer('a', 'Pierre0')
+  command('a', { action: 'next' })
+  expect(command('a', { action: 'pass', gameId: g.id, round: 1 })).toBeUndefined()
+  expect(g.solo?.streak).toBe(0)
+  expect(g.solo?.best).toBe(1)
+  expect(engine.snapshot('a').game?.ownAnswer?.status).toBe('skipped')
+  fails('not_ready', () => command('a', { action: 'pass', gameId: g.id, round: 1 }))
+})
+
+it('holds the solo clock until both the game dialog and presence resume', () => {
+  command('a', { action: 'create', options: { ...options, mode: 'solo' } })
+  const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
+  engine.generated(effect, structuredClone(rounds))
+  now += 10000
+  command('a', { action: 'pause-solo' })
+  engine.presence('a', false)
+  now += 100000
+  engine.presence('a', true)
+  const g = engine.data.games[0]
+  expect(g.solo?.remainingMs).toBe(110000)
+  expect(g.solo?.runningSince).toBeNull()
+  command('a', { action: 'resume-solo' })
+  now += 10000
+  engine.tick()
+  expect(g.solo?.remainingMs).toBe(100000)
+})
+
+it('validates solo options and long-running round identifiers at the protocol boundary', () => {
+  expect(
+    parseGameAction({ action: 'create', options: { ...options, mode: 'solo' } })
+  ).not.toBeNull()
+  expect(
+    parseGameAction({ action: 'create', options: { ...options, mode: 'solo', kind: 'who' } })
+  ).toBeNull()
+  expect(parseGameAction({ action: 'create', options: { ...options, mode: 'invalid' } })).toBeNull()
+  expect(parseGameAction({ action: 'pass', gameId: 'test', round: 49 })).not.toBeNull()
+  expect(parseGameAction({ action: 'pass', gameId: 'test', round: 50 })).toBeNull()
+})

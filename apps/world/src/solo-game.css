@@ -1,0 +1,117 @@
+.solo-game {
+  color: var(--bs-navy);
+}
+.solo-scoreboard {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  background: var(--bs-card);
+  border: 1px solid var(--bs-line);
+  border-radius: var(--bs-radius);
+}
+.solo-stars {
+  display: flex;
+  gap: 6px;
+  font-size: clamp(30px, 7vw, 48px);
+  color: var(--bs-grey);
+}
+.solo-stars [data-lit='true'] {
+  color: var(--bs-yellow);
+  animation: solo-star 0.45s ease-out both;
+}
+.solo-clock {
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+}
+.solo-clock[data-urgent='true'] {
+  color: var(--bs-red);
+}
+.solo-scoreboard small {
+  grid-column: 1 / -1;
+}
+.solo-intro,
+.solo-result {
+  text-align: center;
+  padding: 20px 4px;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+.solo-intro img {
+  object-fit: contain;
+}
+.solo-result-icon,
+.solo-loading {
+  font-size: 64px;
+  color: var(--bs-yellow);
+}
+.solo-loading {
+  animation: solo-star 1.2s ease-in-out infinite alternate;
+}
+.solo-question {
+  padding: 20px 0;
+}
+.solo-question h2 {
+  font-size: clamp(22px, 5vw, 30px);
+  line-height: 1.3;
+  margin-bottom: 20px;
+}
+.solo-mode-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.solo-mode-picker button {
+  min-height: 52px;
+  padding: 12px;
+}
+.solo-mode-picker button[aria-pressed='true'] {
+  background: var(--bs-blue-soft);
+  color: var(--bs-blue-dark);
+  border-color: var(--bs-blue);
+}
+@keyframes solo-star {
+  from {
+    transform: scale(0.85);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@media (max-width: 380px) {
+  .solo-question .games-choices {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .solo-stars span,
+  .solo-loading {
+    animation: none !important;
+  }
+}
+.discover-button[data-island='games'][data-visible='true'] {
+  animation: terminal-beacon 2s ease-in-out infinite;
+}
+.solo-result-icon {
+  animation: solo-star 0.55s cubic-bezier(0.2, 1.6, 0.3, 1);
+}
+.solo-game[data-outcome='won'] .solo-scoreboard {
+  background: var(--bs-yellow-soft);
+  border-color: var(--bs-yellow);
+}
+@keyframes terminal-beacon {
+  50% {
+    box-shadow:
+      0 0 0 10px color-mix(in srgb, var(--bs-blue) 20%, transparent),
+      0 6px 22px color-mix(in srgb, var(--bs-blue) 45%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .discover-button[data-island='games'],
+  .solo-result-icon {
+    animation: none !important;
+  }
+}

@@ -116,13 +116,15 @@ export class WorldRoom extends Server<Env> {
       messages,
     }
     if (message.type === 'game' && session.player) {
-      if (now - (session.lastGameAction ?? 0) < 250) {
+      const presenceOnly =
+        message.command.action === 'pause-solo' || message.command.action === 'resume-solo'
+      if (!presenceOnly && now - (session.lastGameAction ?? 0) < 250) {
         connection.send(
           JSON.stringify({ type: 'game-error', error: 'rate_limited' } satisfies ServerMessage)
         )
         return
       }
-      connection.setState({ ...next, lastGameAction: now })
+      connection.setState({ ...next, lastGameAction: presenceOnly ? session.lastGameAction : now })
       this.games.command(session.player.id, message.command)
       return
     }

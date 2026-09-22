@@ -13,7 +13,7 @@ export type GuestbookSubmission = {
 export type GuestbookEntry = GuestbookSubmission & { createdAt: number; placement?: NotePlacement }
 export type GuestbookPage = { entries: GuestbookEntry[]; cursor: number | null }
 
-/** The whole central island activates the book; connecting bridges stay separate. */
+/** Central-island membership; each map action applies its own proximity limit. */
 export function nearGuestbook(
   point: { x: number; y: number },
   navigation: NavigationDocument = defaultNavigation

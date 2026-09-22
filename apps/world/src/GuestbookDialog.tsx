@@ -15,7 +15,7 @@ import './guestbook.css'
 
 const copy = {
   fr: {
-    title: 'Le livre d’or',
+    title: 'Le tableau des petits mots',
     eyebrow: 'UNE TRACE DE TON PASSAGE',
     subtitle: 'Un monde à explorer. Des souvenirs à partager.',
     read: 'Vos petits mots',
@@ -39,7 +39,7 @@ const copy = {
     unavailable:
       'Impossible d’envoyer pour le moment. Ton texte est conservé, réessaie dans un instant.',
     rejected:
-      'Ce mot ne peut pas être publié tel quel. Vérifie le message pour garder ce livre accueillant pour tous.',
+      'Ce mot ne peut pas être publié tel quel. Vérifie le message pour garder ce tableau accueillant pour tous.',
     rate_limited: 'Un petit instant… Réessaie dans une minute.',
     invalid: 'Écris un message de 500 caractères maximum.',
     loadError: 'Le mur est momentanément indisponible.',
@@ -48,7 +48,7 @@ const copy = {
     back: 'Revenir au monde',
   },
   en: {
-    title: 'The guestbook',
+    title: 'The community board',
     eyebrow: 'LEAVE A LITTLE MEMORY',
     subtitle: 'A world to explore. Memories to share.',
     read: 'Your little notes',
@@ -71,7 +71,7 @@ const copy = {
     retry: 'Try again',
     unavailable: 'Unable to send right now. Your text is saved; please try again shortly.',
     rejected:
-      'This note cannot be published as it is. Please check your message to keep this book welcoming for everyone.',
+      'This note cannot be published as it is. Please check your message to keep this board welcoming for everyone.',
     rate_limited: 'Just a moment… Please try again in a minute.',
     invalid: 'Enter a message of up to 500 characters.',
     loadError: 'The wall is temporarily unavailable.',

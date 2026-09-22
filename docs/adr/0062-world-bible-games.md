@@ -52,3 +52,54 @@ and answer checks use separate server-only keys. Game deadlines, operation IDs,
 scoring and presence rules remain under the existing Durable Object authority.
 
 See [game operation and validation](../../apps/world/docs/bible-games.md).
+
+## Solo and in-world game terminal — 2026-09-22
+
+The terminal beside the central island's north bridge is the shared entry point
+for solo and multiplayer. It replaces the idle floating game launcher; an active
+session retains a resume button and invitations retain their dedicated notification.
+The terminal uses reviewed generated sprites and a small ground repair overlay at
+source coordinates (726,294), preserving the map's coordinate system and existing
+navigation. Its base sits at the edge of the northern walking lane. The nearby interaction also requires
+central-island membership, so the adjacent bridge cannot activate it.
+
+Solo is a Bible adaptation of “4 à la suite”: four consecutive correct answers,
+a mistake or deliberate pass resets the current streak, and the best streak remains.
+[France TV describes the original 40-second challenge](https://www.france.tv/france-3/questions-pour-un-champion/6845875-emission-du-lundi-27-janvier-2025.html).
+Our adaptation gives 120 seconds of **active question time**, suitable for written
+answers. Explanations, generation, answer checks, technical errors, clarification,
+background/disconnection and closing the game dialog pause that timer. Overlapping
+pause reasons are independent and may only resume when all have cleared.
+
+Reuse the room's persisted game collection, identity and operation guards. Solo
+membership cannot receive invitees; its paused session is retained for up to 24
+hours, independently of multiplayer's 90-second rejoin window. No answer key is
+sent before reveal. Easy questions use four choices; medium/hard accept free text
+and reuse exact aliases and Jev adjudication. A technical failure preserves the
+question, streak and clock, and offers explicit retry. Clarification is also free.
+
+Gloo generates a batch of five grounded questions using the existing bounded
+pipeline. Once exhausted, prepare another batch while the timer is paused, supply
+previous answer identities as exclusions, and discard returned duplicates. Round
+indices never recycle during a run, so delayed submissions cannot target a new
+question. Keep the existing rate/concurrency/hourly generation limits. Cap a run
+at 50 questions; this is a technical bound, with a distinct completed outcome.
+The Lab uses the same pure solo rules with local fixtures, not a second connection.
+
+## Curated catalogue prototype — 2026-09-22
+
+Prepare a draft catalogue for written-answer solo questions before switching live
+round preparation away from Gloo. The first catalogue contains 300 distinct facts:
+100 per difficulty, split equally between the Old and New Testaments. Each record
+has one stable ID with French and English question, answer, aliases and explanation,
+plus canonical Bible coordinates and a source link. Remove the people/place/object
+selector from the game setup UI. Keep Testament and difficulty.
+
+The development-only Question Lab allows bilingual review, local review status and
+notes, JSON export and a written-answer trial with independent simulated profiles.
+Prefer unseen question IDs; recycle oldest seen questions only after exhaustion.
+These local histories demonstrate the selection policy, not durable account history.
+Review is an explicit editorial phase: draft data is not shipped in the public
+client or connected to live games. Server-side catalogue selection and per-player
+history are a subsequent step after approval. Jev remains suitable for live free
+text adjudication; the prototype uses aliases and explicit self-assessment.

@@ -85,6 +85,13 @@ yarn workspace @bible-strong/world tiles /absolute/path/to/upscale.png
 
 This command preserves the logical 1671 × 941 coordinate system, writes the lightweight preview and 2×/4× tiles under `public/assets/map`, and updates `src/generated/map-tiles.json`. The high-resolution source remains outside the repository.
 
+The generator applies the reviewed central-table and community-board patches to
+the original source. The board replaces the plaza's east bench and opens visitor
+notes within 70 map units; the central Bible is decorative. Its foreground cutout
+and navigation footprint follow the board. See
+[`community-board.prompt.md`](public/assets/map/edits/community-board.prompt.md)
+for the imagegen prompt and placement.
+
 The world also has a repeating water background and generated perimeter completions. See [background artwork](docs/background-assets.md) for asset provenance, prompts, layer placement and the offline rebuild command. These decorations keep the original map and navigation coordinates intact.
 
 The high-resolution source can be kept locally under the ignored `art-workbench/sources/` directory. [Character experiments](docs/character-experiments.md) documents the first crop → illustrated reader → MiniMax video experiment; these files are not part of the web build.
@@ -114,7 +121,7 @@ Open **http://localhost:5186/game-lab.html** while `yarn dev:world` is running.
 For UI-only work, `yarn workspace @bible-strong/world dev:client` is sufficient:
 no Worker, second player, credentials, Resources or AI calls are needed.
 
-The gallery renders the production presentation components with 40 selectable
+The gallery renders the production presentation components with 55 selectable
 states and five guided journeys. Switch French/English, player count, viewpoint
 and mobile/keyboard/tablet/desktop sizes. The clock starts paused; controls advance
 time, switch turns, simulate connection loss, resolve pending operations and replay
@@ -129,3 +136,11 @@ an interface workshop, not a replacement for multiplayer or provider integration
 snapshots, a clock and callbacks; the lab supplies these without creating a network
 client. Fixtures and simulations live under `src/game-lab/`. The separate HTML entry
 is not included in production; the build check rejects leaked lab markers or pages.
+
+### Draft question catalogue
+
+Open [Question Lab](http://localhost:5186/question-lab.html) for the bilingual
+1,200-question editorial prototype. Filter by batch/Testament/level, compare FR/EN, save
+review notes locally, export decisions and try a written-answer series.
+See [catalogue notes](question-bank/README.md). Draft questions are not yet used by
+live games or included in the production client.

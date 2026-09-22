@@ -24,11 +24,16 @@ for (const marker of [
   'zone-editor',
   'world-state',
   'bible-strong-game-lab',
+  'bible-strong-question-review-v1',
 ]) {
   assert(!scripts.includes(marker), `Development capability leaked into production: ${marker}`)
 }
 assert(
   !(await readdir(new URL('../dist/', import.meta.url))).includes('game-lab.html'),
   'Game Lab page in production'
+)
+assert(
+  !(await readdir(new URL('../dist/', import.meta.url))).includes('question-lab.html'),
+  'Question review page in production'
 )
 console.log('Production artifact: no editor chunks, save URLs or diagnostic controls')

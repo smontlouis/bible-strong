@@ -1,3 +1,4 @@
+import { createSoloRun, resumeSolo, pauseSolo, submitSolo, settleSolo } from '../solo-game'
 import type {
   GameView,
   GameOptions,
@@ -7,6 +8,21 @@ import type {
 } from '../games-protocol'
 
 export const stories = [
+  ['station', 'Solo', 'Borne · entrée dans les jeux'],
+  ['solo-choose', 'Solo', 'Choisir solo / ensemble'],
+  ['solo-lobby', 'Solo', 'Prêt à jouer'],
+  ['solo-generating', 'Solo', 'Préparation Gloo'],
+  ['solo-text', 'Solo', 'Réponse libre · clavier'],
+  ['solo-clarify', 'Solo', 'Précision sans pénalité'],
+  ['solo-generation-error', 'Solo', 'Préparation échouée · réessayer'],
+  ['solo-question', 'Solo', 'Quatre étoiles · question'],
+  ['solo-checking', 'Solo', 'Vérification · chrono suspendu'],
+  ['solo-correct', 'Solo', 'Bonne réponse · série de 3'],
+  ['solo-wrong', 'Solo', 'Erreur · nouvelle série'],
+  ['solo-technical', 'Solo', 'Erreur technique · aucune pénalité'],
+  ['solo-paused', 'Solo', 'Déconnexion · progression conservée'],
+  ['solo-win', 'Solo', 'Quatre étoiles gagnées'],
+  ['solo-timeout', 'Solo', 'Fin du chrono'],
   ['choose', 'Accueil', 'Choisir un jeu'],
   ['lobby', 'Accueil', 'Salon · hôte'],
   ['guest', 'Accueil', 'Salon · invité'],
@@ -50,6 +66,20 @@ export const stories = [
 ] as const
 export type StoryId = (typeof stories)[number][0]
 export const flows = {
+  solo: {
+    name: 'Un défi solo',
+    steps: [
+      'solo-choose',
+      'solo-lobby',
+      'solo-generating',
+      'solo-question',
+      'solo-checking',
+      'solo-correct',
+      'solo-wrong',
+      'solo-paused',
+      'solo-win',
+    ],
+  },
   duel: {
     name: 'Un duel complet',
     steps: [
@@ -107,7 +137,7 @@ export const people = ['Stéphane', 'Léa', 'Samuel', 'Miriam'].map((name, i) =>
 }))
 export function makeStory(id: StoryId, config: LabConfig, now = Date.now()): LabModel {
   const fr = config.language === 'fr'
-  const quiz = id.startsWith('quiz')
+  const quiz = id.startsWith('quiz') || id.startsWith('solo-')
   const count =
     id === 'full'
       ? 4
@@ -120,7 +150,7 @@ export function makeStory(id: StoryId, config: LabConfig, now = Date.now()): Lab
   const actor = players[0].id
   const options: GameOptions = {
     kind: quiz ? 'quiz' : 'who',
-    difficulty: id === 'quiz-text' ? 'medium' : 'easy',
+    difficulty: ['quiz-text', 'solo-text', 'solo-clarify'].includes(id) ? 'medium' : 'easy',
     subject: 'people',
     testament: 'both',
     language: config.language,
@@ -196,6 +226,72 @@ export function makeStory(id: StoryId, config: LabConfig, now = Date.now()): Lab
     error: null,
     invitationIssue: null,
     invitationAction: null,
+  }
+  if (id === 'station') {
+    model.game = null
+    model.open = false
+    return model
+  }
+  if (id.startsWith('solo-')) {
+    options.mode = 'solo'
+    game.players = [structuredClone(players.find(p => p.id === me)!)]
+    game.host = me
+    game.round = 0
+    game.solo = createSoloRun()
+    if (id === 'solo-choose') {
+      model.game = null
+      return model
+    }
+    if (id === 'solo-generation-error') {
+      game.phase = 'lobby'
+      game.reason = 'generation_failed'
+      return model
+    }
+    if (id === 'solo-lobby' || id === 'solo-generating') {
+      game.phase = id === 'solo-lobby' ? 'lobby' : 'generating'
+      return model
+    }
+    resumeSolo(game.solo, 'preparing', now)
+    game.solo.streak = game.solo.best = game.solo.answered = 2
+    if (id === 'solo-paused') {
+      model.online = false
+      pauseSolo(game.solo, 'away', now)
+    }
+    if (
+      [
+        'solo-checking',
+        'solo-correct',
+        'solo-wrong',
+        'solo-technical',
+        'solo-win',
+        'solo-clarify',
+      ].includes(id)
+    ) {
+      if (id === 'solo-win') game.solo.streak = game.solo.best = game.solo.answered = 3
+      submitSolo(game.solo, 'lab-answer', now)
+      game.ownAnswer = { text: 'Moïse', status: 'pending', retriesLeft: 2 }
+      if (id !== 'solo-checking') {
+        const status =
+          id === 'solo-technical'
+            ? 'unavailable'
+            : id === 'solo-clarify'
+              ? 'clarify'
+              : id === 'solo-wrong'
+                ? 'wrong'
+                : 'correct'
+        settleSolo(game.solo, 'lab-answer', status, now)
+        if (status === 'correct' || status === 'wrong') reveal(model, status === 'correct')
+        else game.ownAnswer.status = status
+        if (game.solo.outcome) game.phase = 'finished'
+      }
+    }
+    if (id === 'solo-timeout') {
+      game.solo.remainingMs = 0
+      game.solo.runningSince = null
+      game.solo.outcome = 'timeout'
+      game.phase = 'finished'
+    }
+    return model
   }
   if (['choose', 'notification', 'notifications'].includes(id) || id.startsWith('invitation')) {
     model.game = null
@@ -307,7 +403,7 @@ export function reveal(model: LabModel, correct: boolean, actor = model.me) {
   if (!g) return
   const fr = g.options.language === 'fr',
     answer = fr ? 'Moïse' : 'Moses'
-  const winner = correct ? actor : g.players.find(p => p.id !== actor)!.id
+  const winner = correct ? actor : (g.players.find(p => p.id !== actor)?.id ?? '')
   g.phase = 'reveal'
   g.result = {
     answer,
@@ -322,6 +418,13 @@ export function reveal(model: LabModel, correct: boolean, actor = model.me) {
       text: p.id === winner ? answer : 'David',
       status: p.id === winner ? 'correct' : 'wrong',
     })),
+  }
+  if (g.options.kind === 'quiz') {
+    g.result.explanation = fr
+      ? 'Dieu envoie Moïse auprès du pharaon pour faire sortir son peuple d’Égypte.'
+      : 'God sends Moses to Pharaoh to bring his people out of Egypt.'
+    g.result.reference = fr ? 'Exode 3:10' : 'Exodus 3:10'
+    g.result.url = `https://web.bible-strong.app/bible-view?book=2&chapter=3&verse=10&version=${fr ? 'LSG' : 'KJV'}`
   }
   g.ownAnswer = {
     text: winner === model.me ? answer : 'David',
@@ -341,7 +444,7 @@ export function act(current: LabModel, action: GameAction): LabModel {
     g = m.game
   if (action.action === 'create') {
     const next = makeStory(
-      'lobby',
+      action.options.mode === 'solo' ? 'solo-lobby' : 'lobby',
       {
         language: action.options.language,
         players: Math.max(2, people.findIndex(p => p.id === m.me) + 1),
@@ -368,6 +471,27 @@ export function act(current: LabModel, action: GameAction): LabModel {
     return m
   }
   if (!g) return m
+  if (g.solo) {
+    if (action.action === 'start') g.phase = 'generating'
+    if (action.action === 'next') {
+      if (g.phase === 'reveal') {
+        g.round++
+        g.phase = 'question'
+        delete g.result
+      }
+      resumeSolo(g.solo, 'feedback', m.now)
+      resumeSolo(g.solo, 'technical', m.now)
+      delete g.ownAnswer
+    }
+    if (action.action === 'pass' && submitSolo(g.solo, 'lab-pass', m.now)) {
+      settleSolo(g.solo, 'lab-pass', 'skipped', m.now)
+      reveal(m, false)
+      if (g.ownAnswer) g.ownAnswer.status = 'skipped'
+    }
+    if (action.action === 'answer' && submitSolo(g.solo, 'lab-answer', m.now))
+      g.ownAnswer = { text: action.text, status: 'pending', retriesLeft: 2 }
+    return m
+  }
   if (action.action === 'start') {
     g.phase = 'generating'
     return m
@@ -442,6 +566,29 @@ export function settle(current: LabModel): LabModel {
       return next
     }
     m.invitationAction = null
+    return m
+  }
+  if (g?.solo) {
+    if (g.phase === 'generating') {
+      g.phase = 'question'
+      resumeSolo(g.solo, 'preparing', m.now)
+    }
+    if (g.ownAnswer?.status === 'pending') {
+      const answer = g.ownAnswer.text
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+      const status = ['moise', 'moses'].includes(answer)
+        ? 'correct'
+        : ['prophete', 'prophet'].includes(answer)
+          ? 'clarify'
+          : 'wrong'
+      settleSolo(g.solo, 'lab-answer', status, m.now)
+      if (status === 'clarify') g.ownAnswer.status = status
+      else reveal(m, status === 'correct')
+      if (g.solo.outcome) g.phase = 'finished'
+    }
     return m
   }
   if (g?.phase === 'generating') {

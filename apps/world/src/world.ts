@@ -189,7 +189,7 @@ export const obstacles = [
   { name: 'Panneau gauche', x: 647, y: 469, rx: 13, ry: 10 },
   { name: 'Panneau droit', x: 1029, y: 469, rx: 13, ry: 10 },
   { name: 'Banc ouest', x: 706, y: 400, rx: 35, ry: 9 },
-  { name: 'Banc nord-est', x: 956, y: 385, rx: 33, ry: 10 },
+  { name: 'Tableau des petits mots', x: 951, y: 399, rx: 25, ry: 12 },
   { name: 'Bureau dictionnaire', x: 325, y: 291, rx: 84, ry: 33 },
   { name: 'Table lexique', x: 876, y: 247, rx: 62, ry: 23 },
   { name: 'Banc références', x: 1354, y: 286, rx: 49, ry: 15 },

@@ -6,5 +6,25 @@
     "apps/site/public/images/landing/dictionary-universe.webp"
   ],
   "who": "Use case: illustration-story. Project asset for Bible Strong's new 'Who am I?' multiplayer Bible game selection card. Style bible-strong-univers-v1. Attached comparisons-universe.webp is a drawing reference only; dictionary-universe.webp is a gesture reference only. Create a NEW square editorial illustration: one curious adult reader in monochromatic lavender and violet, seen waist-up, holding a large cream card showing only a simple anonymous ancient robed-person silhouette, examining it with a small magnifying glass. An open book rests in foreground. One clear playful deduction gesture, warm simple expression, large rounded flat-color shapes, fine midnight-violet internal lines for face hands book. No systematic outer outline. Restrained violet palette chosen for this game brief, pale paper and tiny warm gold accent. Genuinely transparent background, generous margins, clean alpha. Readable at 200px. No letters, text, question-mark typography, logos, watermark, scenery, realistic skin, gradients, 3D, texture, or heavy outlines. Do not copy the scenes or add extra people. Save as a project illustration.",
-  "quiz": "Use case: illustration-story. Asset: Bible Strong multiplayer 'Bible challenge' selection card. Style bible-strong-univers-v1. Attached dictionary-universe.webp is drawing and warm palette reference; comparisons-universe.webp is simple flat-color shape reference. NEW square illustration of two cheerful adult readers in monochromatic golden-yellow and warm orange sharing one large open cream Bible, one pointing at a passage, the other holding up a small cream answer card with a single simple gold star (no text). Show waist-up, one readable collaborative quiz gesture. Large rounded organic flat fills, fine dark ochre internal lines for faces hands and pages, no uniform outer outline, expressive coherent hands, symbolic monochrome skin/clothing, clean surface. Warm gold palette selected specifically for this game. Genuinely transparent background, isolated figures, generous margins, no table or scenery, legible at 200px. No lettering, logos, watermarks, faux transparency, 3D, photoreal skin, heavy texture, strong shadows or gradients. Keep only one shared book and one answer card."
+  "quiz": "Use case: illustration-story. Asset: Bible Strong multiplayer 'Bible challenge' selection card. Style bible-strong-univers-v1. Attached dictionary-universe.webp is drawing and warm palette reference; comparisons-universe.webp is simple flat-color shape reference. NEW square illustration of two cheerful adult readers in monochromatic golden-yellow and warm orange sharing one large open cream Bible, one pointing at a passage, the other holding up a small cream answer card with a single simple gold star (no text). Show waist-up, one readable collaborative quiz gesture. Large rounded organic flat fills, fine dark ochre internal lines for faces hands and pages, no uniform outer outline, expressive coherent hands, symbolic monochrome skin/clothing, clean surface. Warm gold palette selected specifically for this game. Genuinely transparent background, isolated figures, generous margins, no table or scenery, legible at 200px. No lettering, logos, watermarks, faux transparency, 3D, photoreal skin, heavy texture, strong shadows or gradients. Keep only one shared book and one answer card.",
+  "terminal": {
+    "tool": "built-in imagegen",
+    "reference": "user screenshot of the fern west of the north central bridge",
+    "prompt": "Isolated transparent small outdoor arcade terminal, dark teal outlines, flat pastel shapes, three-quarter top-down view facing lower-left. Turquoise wood, honey wooden accents, amber buttons, screen with open book and gold stars. No text or surrounding scenery. Match the supplied illustrated map.",
+    "master": "terminal.png",
+    "runtime": "terminal.webp",
+    "world": {
+      "x": 760,
+      "baseY": 359,
+      "width": 52,
+      "height": 72,
+      "flipX": true
+    }
+  },
+  "terminal-ground": {
+    "tool": "built-in imagegen edit",
+    "reference": "Map crop x726 y294 width68 height64 at 4x resolution",
+    "prompt": "Remove only the central large fern and shadow. Restore turquoise water and olive grassy shoreline. Preserve surrounding dock post, tree slice, top stone wall and cream paving exactly.",
+    "runtime": "terminal-ground.webp"
+  }
 }

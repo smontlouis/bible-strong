@@ -10,7 +10,6 @@ const options: GameOptions = {
 }
 const data = () => ({
   rounds: Array.from({ length: 5 }, (_, i) => ({
-    researchQuestion: `Who was Peter${i} in the Bible?`,
     question: 'Qui suis-je ?',
     clues: ['Premier indice', 'Autre indice', 'Encore un indice', 'Dernier indice'],
     choices: [`Pierre${i}`, 'Paul', 'Jean', 'Marc'],
@@ -20,6 +19,17 @@ const data = () => ({
     book: 27,
     chapter: i + 1,
     verse: 1,
+  })),
+})
+const soloData = () => ({
+  rounds: data().rounds.map((round, i) => ({
+    question: `Quel personnage biblique correspond à la question ${i + 1} ?`,
+    answer: round.answer,
+    aliases: round.aliases,
+    explanation: round.explanation,
+    book: round.book,
+    chapter: round.chapter,
+    verse: round.verse,
   })),
 })
 const grounded = (content = JSON.stringify(data())) =>
@@ -48,6 +58,23 @@ it('validates canonical reference coordinates and creates reading links without 
   expect(rounds[0].url).toContain('book=27&chapter=1&verse=1&version=LSG')
   expect(rounds[0].reference).toBe('Daniel 1:1')
   expect(rounds[0].evidence).toContain('Le récit le précise.')
+})
+it('rejects a generic Who am I label as a quiz question', () => {
+  expect(() => validateRounds(data(), { ...options, kind: 'quiz' })).toThrow(
+    'Quiz question must be specific'
+  )
+})
+it('accepts the compact written-answer contract for solo without clues or choices', async () => {
+  const soloOptions: GameOptions = { ...options, mode: 'solo', kind: 'quiz' }
+  const rounds = await generateRounds(soloOptions, { GLOO_API_KEY: 'test' }, async (_url, init) => {
+    const body = JSON.parse(String(init?.body))
+    expect(body.max_tokens).toBe(4000)
+    expect(body.messages[0].content).toContain('Do not generate clues or multiple-choice options')
+    return grounded(JSON.stringify(soloData()))
+  })
+  expect(rounds).toHaveLength(5)
+  expect(rounds?.[0].choices).toEqual([])
+  expect(rounds?.[0].clues).toEqual([])
 })
 it('rejects invalid coordinates, duplicate answers, name leaks and invalid choices', () => {
   for (const mutate of [
@@ -127,9 +154,8 @@ it('rejects multiple guesses even if an identity match is confident', async () =
   ).toBe('wrong')
 })
 
-it('uses Gloo for planning and individually grounded rounds without Resource, tools or Jev calls', async () => {
-  let calls = 0,
-    researched = 0
+it('generates all five rounds in one grounded Gloo request without Resource, tools or Jev calls', async () => {
+  let calls = 0
   const rounds = await generateRounds(options, { GLOO_API_KEY: 'secret' }, async (url, init) => {
     calls++
     expect(String(url)).toBe('https://platform.ai.gloo.com/ai/v2/grounded/chat/completions')
@@ -143,43 +169,31 @@ it('uses Gloo for planning and individually grounded rounds without Resource, to
     expect(body.model).toBeUndefined()
     expect(body.tools).toBeUndefined()
     expect(body.messages[0].content).toContain(JSON.stringify(options))
-    expect(body.messages[0].content).toContain('Difficulty governs BOTH')
+    expect(body.messages[0].content).toContain('Difficulty governs the familiarity')
     expect(body.messages[0].content).toContain('no preset chapter pool')
     expect(String(init?.body)).not.toContain('secret')
-    if (calls === 1) return grounded()
-    const round = data().rounds[researched++]
-    expect(body.messages[1].content).toBe(round.researchQuestion)
-    return grounded(JSON.stringify({ rounds: [round] }))
+    expect(body.messages[1].content).toContain('Using your grounded Bible sources')
+    return grounded()
   })
-  expect(calls).toBe(6)
-  expect(researched).toBe(5)
+  expect(calls).toBe(1)
   expect(rounds).toHaveLength(5)
 })
-it('uses at most one shared repair and accepts a JSON fence', async () => {
-  let calls = 0,
-    researched = 0
-  const rounds = await generateRounds(options, { GLOO_API_KEY: 'test' }, async (_url, init) => {
+it('accepts a JSON fence without making a second request', async () => {
+  let calls = 0
+  const rounds = await generateRounds(options, { GLOO_API_KEY: 'test' }, async () => {
     calls++
-    if (calls === 1) return grounded('not JSON')
-    if (calls === 2) {
-      expect(JSON.parse(String(init?.body)).messages[0].content).toContain('"repair":true')
-      return grounded()
-    }
-    return grounded(
-      '```json\n' + JSON.stringify({ rounds: [data().rounds[researched++]] }) + '\n```'
-    )
+    return grounded('```json\n' + JSON.stringify(data()) + '\n```')
   })
-  expect(calls).toBe(7)
+  expect(calls).toBe(1)
   expect(rounds).toHaveLength(5)
 })
-it('requires grounding for every published round, even if planning was grounded', async () => {
+it('requires grounded sources on the single generation response', async () => {
   const log = vi.spyOn(console, 'warn').mockImplementation(() => {})
   try {
     for (const kind of ['missing', 'unsafe', 'unavailable']) {
       let calls = 0
       const result = await generateRounds(options, { GLOO_API_KEY: 'secret' }, async () => {
         calls++
-        if (calls === 1) return grounded()
         if (kind === 'unavailable') return new Response('private provider failure', { status: 503 })
         return Response.json({
           sources_returned: kind !== 'missing',
@@ -190,13 +204,13 @@ it('requires grounding for every published round, even if planning was grounded'
           choices: [
             {
               finish_reason: 'stop',
-              message: { content: JSON.stringify({ rounds: [data().rounds[0]] }) },
+              message: { content: JSON.stringify(data()) },
             },
           ],
         })
       })
       expect(result).toBeNull()
-      expect(calls).toBeLessThanOrEqual(7)
+      expect(calls).toBe(1)
     }
     expect(JSON.stringify(log.mock.calls)).not.toContain('secret')
     expect(JSON.stringify(log.mock.calls)).not.toContain('private provider failure')
@@ -204,7 +218,7 @@ it('requires grounding for every published round, even if planning was grounded'
     log.mockRestore()
   }
 })
-it('bounds invalid planning retries and rejects truncation or unsolicited tool calls', async () => {
+it('does not retry invalid, truncated or unsolicited tool responses', async () => {
   const log = vi.spyOn(console, 'warn').mockImplementation(() => {})
   try {
     for (const kind of ['invalid', 'truncated', 'tools']) {
@@ -227,25 +241,23 @@ it('bounds invalid planning retries and rejects truncation or unsolicited tool c
         })
       })
       expect(result).toBeNull()
-      expect(calls).toBe(2)
+      expect(calls).toBe(1)
     }
   } finally {
     log.mockRestore()
   }
 })
-it('does not require planning citations but never exposes an ungrounded plan as playable rounds', async () => {
+it('never exposes an ungrounded generation as playable rounds', async () => {
   let calls = 0
   const result = await generateRounds(options, { GLOO_API_KEY: 'test' }, async () => {
     calls++
-    if (calls === 1)
-      return Response.json({
-        sources_returned: false,
-        choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(data()) } }],
-      })
-    return grounded(JSON.stringify({ rounds: [data().rounds[calls - 2]] }))
+    return Response.json({
+      sources_returned: false,
+      choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(data()) } }],
+    })
   })
-  expect(result).toHaveLength(5)
-  expect(calls).toBe(6)
+  expect(result).toBeNull()
+  expect(calls).toBe(1)
 })
 it('requires the Gloo key and enforces the requested Testament', async () => {
   const fetcher = vi.fn()

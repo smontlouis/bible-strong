@@ -25,16 +25,25 @@ The visitor's visual companion and controllable character in the Exploration wor
 _Avoid_: Player unit
 
 **Guestbook**:
-The shared collection of public visitor notes, opened from the central island.
+The shared collection of public visitor notes, opened from the Community board.
+
+**Community board**:
+The wooden post-it board on the northeast side of the central plaza, where visitors read and leave notes.
 
 **Signature**:
 A visitor's note and chosen public name, published after automatic admission.
 
 **Bible game**:
-An optional shared biblical discovery activity between nearby visitors.
+An optional biblical discovery activity, played solo or shared between nearby visitors.
 
 **Lobby**:
 The group of invited visitors preparing to play one Bible game.
 
 **Round**:
 One shared question or identity to discover, followed by its answer and biblical source.
+
+**Game terminal**:
+The illustrated meeting point on the central island that opens solo and shared games.
+
+**Solo streak**:
+Consecutive correct answers in the solo biblical challenge, aiming for four.

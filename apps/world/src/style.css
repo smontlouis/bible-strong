@@ -1,4 +1,5 @@
 @import './tokens.css';
+@import './buttons.css';
 @font-face {
   font-family: Pulp;
   src: url('/assets/pulp-regular.otf');
@@ -358,7 +359,9 @@ select {
   animation: slime-bob 900ms ease-in-out infinite alternate;
 }
 @keyframes slime-bob {
-  to { transform: translateY(-6px); }
+  to {
+    transform: translateY(-6px);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .loading-slime {

@@ -19,6 +19,10 @@
   --bs-red-soft: #fde8eb;
   --bs-red-dark: #a5202f;
   --bs-teal: #23826d;
+  --bs-button-depth: 4px;
+  --bs-button-edge-blue: color-mix(in srgb, var(--bs-blue-dark) 80%, var(--bs-navy));
+  --bs-button-edge-yellow: color-mix(in srgb, var(--bs-yellow) 65%, var(--bs-yellow-dark));
+  --bs-button-edge-neutral: color-mix(in srgb, var(--bs-blue) 25%, var(--bs-grey));
   --bs-radius: 18px;
   --bs-radius-lg: 28px;
   --bs-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);

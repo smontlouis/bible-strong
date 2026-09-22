@@ -1,15 +1,14 @@
 import { BibleGames } from './BibleGames'
 import { ExplorationJournal, JournalIcon, journalCopy } from './ExplorationJournal'
 import { findTravelDestination } from './world-travel'
-import { islandActions, type IslandActionId } from './island-actions'
+import { islandActions, nearIslandAction, type IslandActionId } from './island-actions'
 import { GuestbookDialog } from './GuestbookDialog'
-import { nearGuestbook } from './guestbook'
 import { createAmbientEditor, ambientKinds } from './ambient-zones'
 import { AmbientEditorPanel, EditorNavigation, editorCopy, type EditorMode } from './WorldEditor'
 import { createShoreEditor } from './shorelines'
 import { ShoreEditor } from './ShoreEditor'
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, type Root } from 'react-dom/client'
 import nipplejs from 'nipplejs'
 import { clampCameraZoom } from './camera-zoom'
 import { ARRIVAL_FADE_MS } from './world-arrival'
@@ -240,7 +239,7 @@ function App() {
   const [language, setLanguage] = useState<Language>('fr')
   const [guestbookOpen, setGuestbookOpen] = useState(false)
   const [gamesOpen, setGamesOpen] = useState(false)
-  const atGuestbook = nearGuestbook(state, navigation)
+  const atGuestbook = nearIslandAction(state, 'guestbook', navigation)
   const [opened, setOpened] = useState<WorldState['station']>(null)
   const [visited, setVisited] = useState(loadVisitedPlaces)
   useEffect(() => {
@@ -394,13 +393,19 @@ function App() {
 
   function discover(id: IslandActionId) {
     if (!ready || controls.current.paused) return
+    if (id === 'games' && nearIslandAction(state, id, navigation)) {
+      controls.current.paused = true
+      controls.current.direction = { x: 0, y: 0 }
+      setGamesOpen(true)
+      return
+    }
     if (id === 'guestbook' && atGuestbook) {
       controls.current.paused = true
       controls.current.direction = { x: 0, y: 0 }
       setGuestbookOpen(true)
       return
     }
-    if (!state.station || state.station.id !== id) return
+    if (!nearIslandAction(state, id, navigation) || !state.station) return
     controls.current.paused = true
     controls.current.direction = { x: 0, y: 0 }
     setOpened(state.station)
@@ -458,11 +463,15 @@ function App() {
       {islandActions.map(action => {
         const station = stations.find(station => station.id === action.id)
         const label =
-          action.id === 'guestbook'
+          action.id === 'games'
             ? language === 'fr'
-              ? 'Signer le livre d’or'
-              : 'Sign the guestbook'
-            : `${t.explore} · ${station ? name(station) : ''}`
+              ? 'Jouer · Solo ou ensemble'
+              : 'Play · Solo or together'
+            : action.id === 'guestbook'
+              ? language === 'fr'
+                ? 'Ouvrir le tableau des petits mots'
+                : 'Open the community board'
+              : `${t.explore} · ${station ? name(station) : ''}`
         return (
           <button
             key={action.id}
@@ -474,7 +483,7 @@ function App() {
             data-island={action.id}
             disabled={
               !ready ||
-              (action.id === 'guestbook' ? !atGuestbook : state.station?.id !== action.id) ||
+              !nearIslandAction(state, action.id, navigation) ||
               Boolean(opened) ||
               guestbookOpen ||
               Boolean(editorMode) ||
@@ -485,7 +494,9 @@ function App() {
             aria-haspopup="dialog"
             onClick={() => discover(action.id)}
           >
-            <ControlIcon name="plus" />
+            <ControlIcon
+              name={action.id === 'games' ? 'star' : action.id === 'guestbook' ? 'edit' : 'search'}
+            />
           </button>
         )
       })}
@@ -728,7 +739,8 @@ function App() {
   )
 }
 
-const root = createRoot(document.getElementById('root')!)
+const root: Root = import.meta.hot?.data.root ?? createRoot(document.getElementById('root')!)
+if (import.meta.hot) import.meta.hot.data.root = root
 root.render(
   ['/admin', '/admin/', '/admin-guestbook'].includes(location.pathname) ? (
     <Suspense fallback={<p>…</p>}>
@@ -738,4 +750,3 @@ root.render(
     <App />
   )
 )
-if (import.meta.hot) import.meta.hot.dispose(() => root.unmount())

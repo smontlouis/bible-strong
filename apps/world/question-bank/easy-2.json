@@ -1,0 +1,2928 @@
+[
+  {
+    "id": "easy-ot-051",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "adam-formed-dust",
+    "reference": {
+      "book": 1,
+      "chapter": 2,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Avec quelle matière du sol Dieu forme-t-il l'homme ?",
+      "answer": "La poussière",
+      "aliases": [
+        "poussière"
+      ],
+      "explanation": "Dieu forme l'homme avec la poussière du sol."
+    },
+    "en": {
+      "question": "What material from the ground does God use to form man?",
+      "answer": "Dust",
+      "aliases": [],
+      "explanation": "God forms man from the dust of the ground."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%202%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-052",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "humanity-created-sixth-day",
+    "reference": {
+      "book": 1,
+      "chapter": 1,
+      "verse": 31
+    },
+    "fr": {
+      "question": "Quel jour de la création s'achève après que Dieu a créé les êtres humains ?",
+      "answer": "Le sixième jour",
+      "aliases": [
+        "6",
+        "6e jour",
+        "sixième",
+        "six",
+        "sixième jour"
+      ],
+      "explanation": "La création des êtres humains fait partie du sixième jour."
+    },
+    "en": {
+      "question": "Which day of creation ends after God has created human beings?",
+      "answer": "The sixth day",
+      "aliases": [
+        "6",
+        "sixth",
+        "6th day",
+        "six",
+        "sixth day"
+      ],
+      "explanation": "The creation of human beings takes place on the sixth day."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%201%3A31&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-053",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "woman-created-rib",
+    "reference": {
+      "book": 1,
+      "chapter": 2,
+      "verse": 22
+    },
+    "fr": {
+      "question": "Quelle partie du corps de l'homme Dieu utilise-t-il pour former la femme ?",
+      "answer": "Une côte",
+      "aliases": [
+        "côte"
+      ],
+      "explanation": "Dieu forme la femme à partir d'une côte prise à l'homme."
+    },
+    "en": {
+      "question": "Which part of the man's body does God use to form the woman?",
+      "answer": "A rib",
+      "aliases": [
+        "rib"
+      ],
+      "explanation": "God forms the woman from a rib taken from the man."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%202%3A22&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-054",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "cain-occupation-farmer",
+    "reference": {
+      "book": 1,
+      "chapter": 4,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Quel travail Caïn exerce-t-il, tandis qu'Abel garde les troupeaux ?",
+      "answer": "Cultivateur",
+      "aliases": [
+        "Agriculteur",
+        "Il cultive la terre"
+      ],
+      "explanation": "Caïn cultive la terre, alors qu'Abel est berger."
+    },
+    "en": {
+      "question": "What work does Cain do while Abel keeps sheep?",
+      "answer": "Farmer",
+      "aliases": [
+        "Tiller of the ground",
+        "He works the ground"
+      ],
+      "explanation": "Cain works the ground, whereas Abel keeps sheep."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%204%3A2&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-055",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "noah-three-sons",
+    "reference": {
+      "book": 1,
+      "chapter": 6,
+      "verse": 10
+    },
+    "fr": {
+      "question": "Combien de fils Noé a-t-il ?",
+      "answer": "Trois",
+      "aliases": [
+        "3"
+      ],
+      "explanation": "Le récit nomme les trois fils de Noé : Sem, Cham et Japhet."
+    },
+    "en": {
+      "question": "How many sons does Noah have?",
+      "answer": "Three",
+      "aliases": [
+        "3"
+      ],
+      "explanation": "The account names Noah's three sons: Shem, Ham and Japheth."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%206%3A10&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-056",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "noah-first-bird-raven",
+    "reference": {
+      "book": 1,
+      "chapter": 8,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Quel oiseau Noé envoie-t-il hors de l'arche avant la colombe ?",
+      "answer": "Un corbeau",
+      "aliases": [
+        "corbeau"
+      ],
+      "explanation": "Noé laisse d'abord partir un corbeau."
+    },
+    "en": {
+      "question": "Which bird does Noah send out of the ark before the dove?",
+      "answer": "A raven",
+      "aliases": [
+        "raven"
+      ],
+      "explanation": "Noah first sends out a raven."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%208%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-057",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "abram-departs-canaan",
+    "reference": {
+      "book": 1,
+      "chapter": 12,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Vers quel pays Abram part-il avec Saraï et Lot après l'appel de Dieu ?",
+      "answer": "Canaan",
+      "aliases": [],
+      "explanation": "Abram et les siens se mettent en route pour Canaan."
+    },
+    "en": {
+      "question": "Toward which land does Abram set out with Sarai and Lot after God's call?",
+      "answer": "Canaan",
+      "aliases": [],
+      "explanation": "Abram and his household set out for Canaan."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2012%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-058",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "lot-abram-nephew",
+    "reference": {
+      "book": 1,
+      "chapter": 12,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Quel neveu accompagne Abram lorsqu'il part pour Canaan ?",
+      "answer": "Lot",
+      "aliases": [],
+      "explanation": "Lot est le fils du frère d'Abram et voyage avec lui."
+    },
+    "en": {
+      "question": "Which nephew accompanies Abram when he leaves for Canaan?",
+      "answer": "Lot",
+      "aliases": [],
+      "explanation": "Lot is Abram's brother's son and travels with him."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2012%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-059",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "hagar-son-ishmael",
+    "reference": {
+      "book": 1,
+      "chapter": 16,
+      "verse": 15
+    },
+    "fr": {
+      "question": "Comment s'appelle le fils qu'Agar donne à Abram ?",
+      "answer": "Ismaël",
+      "aliases": [
+        "Ismael",
+        "Ishmael"
+      ],
+      "explanation": "Abram donne au fils d'Agar le nom d'Ismaël."
+    },
+    "en": {
+      "question": "What is the name of the son Hagar bears to Abram?",
+      "answer": "Ishmael",
+      "aliases": [
+        "Ismael"
+      ],
+      "explanation": "Abram names Hagar's son Ishmael."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2016%3A15&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-060",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "abraham-age-isaac-birth",
+    "reference": {
+      "book": 1,
+      "chapter": 21,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Quel âge Abraham a-t-il à la naissance d'Isaac ?",
+      "answer": "Cent ans",
+      "aliases": [
+        "100",
+        "100 ans",
+        "cent"
+      ],
+      "explanation": "Abraham a cent ans lorsque Sara donne naissance à Isaac."
+    },
+    "en": {
+      "question": "How old is Abraham when Isaac is born?",
+      "answer": "One hundred years old",
+      "aliases": [
+        "100",
+        "one hundred",
+        "100 years"
+      ],
+      "explanation": "Abraham is one hundred when Sarah gives birth to Isaac."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2021%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-061",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "jacob-dream-ladder",
+    "reference": {
+      "book": 1,
+      "chapter": 28,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Dans le songe de Jacob, quel objet relie la terre au ciel avec des anges qui montent et descendent ?",
+      "answer": "Une échelle",
+      "aliases": [
+        "Un escalier",
+        "Échelle",
+        "échelle"
+      ],
+      "explanation": "Jacob voit une échelle dressée entre la terre et le ciel."
+    },
+    "en": {
+      "question": "In Jacob's dream, what connects earth and heaven with angels going up and down?",
+      "answer": "A ladder",
+      "aliases": [
+        "Stairway",
+        "Staircase",
+        "ladder"
+      ],
+      "explanation": "Jacob sees a ladder reaching from earth to heaven."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2028%3A12&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-062",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "benjamin-youngest-brother",
+    "reference": {
+      "book": 1,
+      "chapter": 42,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Quel jeune frère de Joseph Jacob garde-t-il auprès de lui lors du premier voyage des autres fils en Égypte ?",
+      "answer": "Benjamin",
+      "aliases": [],
+      "explanation": "Jacob n'envoie pas Benjamin, car il craint qu'il lui arrive malheur."
+    },
+    "en": {
+      "question": "Which younger brother of Joseph does Jacob keep with him when the other sons first travel to Egypt?",
+      "answer": "Benjamin",
+      "aliases": [],
+      "explanation": "Jacob does not send Benjamin because he fears harm may come to him."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2042%3A4&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-063",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "joseph-dream-sheaves",
+    "reference": {
+      "book": 1,
+      "chapter": 37,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Dans le premier songe que Joseph raconte à ses frères, quels objets se prosternent devant le sien ?",
+      "answer": "Des gerbes",
+      "aliases": [
+        "Des bottes de blé",
+        "Des gerbes de blé",
+        "gerbes"
+      ],
+      "explanation": "Les gerbes des frères entourent celle de Joseph et s'inclinent."
+    },
+    "en": {
+      "question": "In the first dream Joseph tells his brothers, what objects bow down to his own?",
+      "answer": "Sheaves",
+      "aliases": [
+        "Bundles of grain",
+        "Sheaves of wheat"
+      ],
+      "explanation": "The brothers' sheaves surround Joseph's and bow down."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2037%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-064",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "pharaoh-appoints-joseph",
+    "reference": {
+      "book": 1,
+      "chapter": 41,
+      "verse": 41
+    },
+    "fr": {
+      "question": "Quel homme Pharaon établit-il à la tête de tout le pays d'Égypte après l'interprétation de ses rêves ?",
+      "answer": "Joseph",
+      "aliases": [],
+      "explanation": "Pharaon confie à Joseph l'administration de l'Égypte."
+    },
+    "en": {
+      "question": "Whom does Pharaoh appoint over all Egypt after his dreams are interpreted?",
+      "answer": "Joseph",
+      "aliases": [],
+      "explanation": "Pharaoh puts Joseph in charge of Egypt."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2041%3A41&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-065",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "moses-hidden-three-months",
+    "reference": {
+      "book": 2,
+      "chapter": 2,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Pendant combien de mois la mère de Moïse cache-t-elle son bébé avant de le déposer dans une corbeille ?",
+      "answer": "Trois mois",
+      "aliases": [
+        "3",
+        "3 mois",
+        "trois"
+      ],
+      "explanation": "La mère de Moïse le cache pendant trois mois."
+    },
+    "en": {
+      "question": "For how many months does Moses' mother hide her baby before placing him in a basket?",
+      "answer": "Three months",
+      "aliases": [
+        "3",
+        "three",
+        "3 months"
+      ],
+      "explanation": "Moses' mother hides him for three months."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%202%3A2&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-066",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "egypt-first-plague-blood",
+    "reference": {
+      "book": 2,
+      "chapter": 7,
+      "verse": 20
+    },
+    "fr": {
+      "question": "En quoi l'eau du fleuve est-elle changée lors de la première plaie d'Égypte ?",
+      "answer": "Du sang",
+      "aliases": [
+        "sang"
+      ],
+      "explanation": "L'eau du fleuve se transforme en sang."
+    },
+    "en": {
+      "question": "What does the river water become in the first plague of Egypt?",
+      "answer": "Blood",
+      "aliases": [],
+      "explanation": "The river water turns into blood."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%207%3A20&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-067",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "passover-doorposts-blood",
+    "reference": {
+      "book": 2,
+      "chapter": 12,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Que les Israélites doivent-ils mettre sur les montants et le linteau de leur porte pour la Pâque ?",
+      "answer": "Du sang",
+      "aliases": [
+        "sang"
+      ],
+      "explanation": "Le sang de l'animal de la Pâque est appliqué autour de la porte."
+    },
+    "en": {
+      "question": "What must the Israelites put on their doorposts and lintel for Passover?",
+      "answer": "Blood",
+      "aliases": [],
+      "explanation": "The blood of the Passover animal is applied around the doorway."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2012%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-068",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "wilderness-night-fire",
+    "reference": {
+      "book": 2,
+      "chapter": 13,
+      "verse": 21
+    },
+    "fr": {
+      "question": "Quelle colonne éclaire les Israélites pour les guider pendant la nuit dans le désert ?",
+      "answer": "Une colonne de feu",
+      "aliases": [
+        "Du feu",
+        "Feu",
+        "colonne de feu"
+      ],
+      "explanation": "Le Seigneur les guide de nuit par une colonne de feu."
+    },
+    "en": {
+      "question": "What pillar gives the Israelites light and guides them at night in the wilderness?",
+      "answer": "A pillar of fire",
+      "aliases": [
+        "Fire",
+        "Pillar of fire",
+        "pillar of fire"
+      ],
+      "explanation": "The Lord guides them at night with a pillar of fire."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2013%3A21&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-069",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "commandments-number-ten",
+    "reference": {
+      "book": 2,
+      "chapter": 34,
+      "verse": 28
+    },
+    "fr": {
+      "question": "Combien de commandements le texte nomme-t-il sur les tables de l'alliance ?",
+      "answer": "Dix",
+      "aliases": [
+        "10"
+      ],
+      "explanation": "Le récit parle des dix commandements inscrits sur les tables."
+    },
+    "en": {
+      "question": "How many commandments does the text name on the covenant tablets?",
+      "answer": "Ten",
+      "aliases": [
+        "10"
+      ],
+      "explanation": "The account speaks of ten commandments written on the tablets."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2034%3A28&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-070",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "commandment-false-witness",
+    "reference": {
+      "book": 2,
+      "chapter": 20,
+      "verse": 16
+    },
+    "fr": {
+      "question": "Quel type de témoignage un commandement interdit-il de porter contre son prochain ?",
+      "answer": "Un faux témoignage",
+      "aliases": [
+        "Le mensonge",
+        "Un mensonge",
+        "Mentir",
+        "faux témoignage"
+      ],
+      "explanation": "Il est interdit de témoigner faussement contre son prochain."
+    },
+    "en": {
+      "question": "What kind of testimony does a commandment forbid giving against one's neighbour?",
+      "answer": "False witness",
+      "aliases": [
+        "False testimony",
+        "Lying",
+        "A lie"
+      ],
+      "explanation": "Giving false testimony against one's neighbour is forbidden."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2020%3A16&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-071",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "passover-unleavened-bread",
+    "reference": {
+      "book": 2,
+      "chapter": 12,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Le pain du repas de la Pâque doit-il être avec ou sans levain ?",
+      "answer": "Sans levain",
+      "aliases": [
+        "Pain sans levain",
+        "Azyme"
+      ],
+      "explanation": "Le repas comprend du pain sans levain."
+    },
+    "en": {
+      "question": "Must the bread at the Passover meal be made with or without leaven?",
+      "answer": "Without leaven",
+      "aliases": [
+        "Unleavened",
+        "Unleavened bread",
+        "No yeast"
+      ],
+      "explanation": "The meal includes unleavened bread."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2012%3A8&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-072",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "joshua-succeeds-moses",
+    "reference": {
+      "book": 6,
+      "chapter": 1,
+      "verse": 2
+    },
+    "fr": {
+      "question": "Qui reçoit la mission de conduire le peuple après la mort de Moïse ?",
+      "answer": "Josué",
+      "aliases": [
+        "Joshua"
+      ],
+      "explanation": "Dieu charge Josué de faire traverser le Jourdain au peuple."
+    },
+    "en": {
+      "question": "Who receives the mission to lead the people after Moses dies?",
+      "answer": "Joshua",
+      "aliases": [
+        "Josue"
+      ],
+      "explanation": "God commissions Joshua to lead the people across the Jordan."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%201%3A2&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-073",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "samson-delilah-secret",
+    "reference": {
+      "book": 7,
+      "chapter": 16,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Quelle femme demande à Samson le secret de sa grande force ?",
+      "answer": "Delila",
+      "aliases": [
+        "Dalila",
+        "Delilah"
+      ],
+      "explanation": "Delila cherche à connaître l'origine de la force de Samson."
+    },
+    "en": {
+      "question": "Which woman asks Samson for the secret of his great strength?",
+      "answer": "Delilah",
+      "aliases": [
+        "Delila"
+      ],
+      "explanation": "Delilah seeks to discover the source of Samson's strength."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%2016%3A6&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-074",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "david-shepherd-before-king",
+    "reference": {
+      "book": 9,
+      "chapter": 17,
+      "verse": 34
+    },
+    "fr": {
+      "question": "Quel travail David fait-il pour son père avant de devenir roi ?",
+      "answer": "Berger",
+      "aliases": [
+        "Il garde les brebis",
+        "Gardien de brebis"
+      ],
+      "explanation": "David raconte qu'il garde les brebis de son père."
+    },
+    "en": {
+      "question": "What work does David do for his father before becoming king?",
+      "answer": "Shepherd",
+      "aliases": [
+        "He keeps sheep",
+        "Sheep keeper"
+      ],
+      "explanation": "David explains that he keeps his father's sheep."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2017%3A34&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-075",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "david-harp-saul",
+    "reference": {
+      "book": 9,
+      "chapter": 16,
+      "verse": 23
+    },
+    "fr": {
+      "question": "De quel instrument David joue-t-il pour soulager Saül ?",
+      "answer": "La harpe",
+      "aliases": [
+        "Une lyre",
+        "Lyre",
+        "harpe"
+      ],
+      "explanation": "David joue de la harpe et Saül retrouve du soulagement."
+    },
+    "en": {
+      "question": "Which instrument does David play to soothe Saul?",
+      "answer": "A harp",
+      "aliases": [
+        "Lyre",
+        "harp"
+      ],
+      "explanation": "David plays the harp and Saul finds relief."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Samuel%2016%3A23&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-076",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "bathsheba-solomon-mother",
+    "reference": {
+      "book": 10,
+      "chapter": 12,
+      "verse": 24
+    },
+    "fr": {
+      "question": "Quelle femme de David est la mère de Salomon ?",
+      "answer": "Bath-Schéba",
+      "aliases": [
+        "Bathsheba",
+        "Bethsabée",
+        "Bath Schéba"
+      ],
+      "explanation": "Bath-Schéba donne naissance à Salomon."
+    },
+    "en": {
+      "question": "Which wife of David is Solomon's mother?",
+      "answer": "Bathsheba",
+      "aliases": [
+        "Bath-sheba"
+      ],
+      "explanation": "Bathsheba gives birth to Solomon."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%2012%3A24&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-077",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "solomon-true-mother-mercy",
+    "reference": {
+      "book": 11,
+      "chapter": 3,
+      "verse": 26
+    },
+    "fr": {
+      "question": "Lors du jugement de Salomon, quelle mère préfère renoncer au bébé plutôt que de le voir tuer ?",
+      "answer": "La vraie mère",
+      "aliases": [
+        "Sa mère",
+        "La mère de l’enfant",
+        "Sa vraie mère",
+        "vraie mère"
+      ],
+      "explanation": "La vraie mère veut préserver la vie de son enfant."
+    },
+    "en": {
+      "question": "At Solomon's judgment, which mother would rather give up the baby than see him killed?",
+      "answer": "The real mother",
+      "aliases": [
+        "His mother",
+        "The biological mother",
+        "The child’s mother",
+        "real mother"
+      ],
+      "explanation": "The real mother wants to preserve her child's life."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%203%3A26&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-078",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "elisha-elijah-successor",
+    "reference": {
+      "book": 11,
+      "chapter": 19,
+      "verse": 16
+    },
+    "fr": {
+      "question": "Quel prophète Dieu désigne-t-il pour succéder à Élie ?",
+      "answer": "Élisée",
+      "aliases": [
+        "Elisha"
+      ],
+      "explanation": "Dieu demande à Élie d'établir Élisée comme prophète à sa place."
+    },
+    "en": {
+      "question": "Which prophet does God appoint to succeed Elijah?",
+      "answer": "Elisha",
+      "aliases": [
+        "Eliseus"
+      ],
+      "explanation": "God tells Elijah to appoint Elisha as prophet in his place."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%2019%3A16&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-079",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "naaman-leprosy",
+    "reference": {
+      "book": 12,
+      "chapter": 5,
+      "verse": 1
+    },
+    "fr": {
+      "question": "De quelle maladie Naaman souffre-t-il avant d'aller voir Élisée ?",
+      "answer": "La lèpre",
+      "aliases": [
+        "lèpre"
+      ],
+      "explanation": "Malgré sa position de chef militaire, Naaman est lépreux."
+    },
+    "en": {
+      "question": "What disease does Naaman have before going to see Elisha?",
+      "answer": "Leprosy",
+      "aliases": [],
+      "explanation": "Despite his position as a military commander, Naaman has leprosy."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Kings%205%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-080",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "esther-enemy-haman",
+    "reference": {
+      "book": 17,
+      "chapter": 7,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Quel ennemi Esther dénonce-t-elle devant le roi ?",
+      "answer": "Haman",
+      "aliases": [],
+      "explanation": "Esther désigne Haman comme l'adversaire qui menace son peuple."
+    },
+    "en": {
+      "question": "Which enemy does Esther expose before the king?",
+      "answer": "Haman",
+      "aliases": [],
+      "explanation": "Esther identifies Haman as the adversary threatening her people."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Esther%207%3A6&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-081",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "job-wife-curse-die",
+    "reference": {
+      "book": 18,
+      "chapter": 2,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Qui pousse Job à maudire Dieu et à mourir au milieu de ses souffrances ?",
+      "answer": "Sa femme",
+      "aliases": [
+        "La femme de Job",
+        "Son épouse"
+      ],
+      "explanation": "La femme de Job lui tient ces propos, mais il refuse de les suivre."
+    },
+    "en": {
+      "question": "Who urges Job to curse God and die during his suffering?",
+      "answer": "His wife",
+      "aliases": [
+        "Job’s wife",
+        "His spouse"
+      ],
+      "explanation": "Job's wife says this to him, but he refuses to follow her advice."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Job%202%3A9&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-082",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "furnace-king-nebuchadnezzar",
+    "reference": {
+      "book": 27,
+      "chapter": 3,
+      "verse": 19
+    },
+    "fr": {
+      "question": "Quel roi fait jeter les trois jeunes Hébreux dans une fournaise ?",
+      "answer": "Nebucadnetsar",
+      "aliases": [
+        "Nabuchodonosor",
+        "Nebuchadnezzar"
+      ],
+      "explanation": "Le roi Nebucadnetsar ordonne de chauffer la fournaise pour les punir."
+    },
+    "en": {
+      "question": "Which king has the three young Hebrews thrown into a furnace?",
+      "answer": "Nebuchadnezzar",
+      "aliases": [
+        "Nebuchadrezzar",
+        "Nabuchodonosor"
+      ],
+      "explanation": "King Nebuchadnezzar orders the furnace heated to punish them."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Daniel%203%3A19&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-083",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "jonah-sailors-lots",
+    "reference": {
+      "book": 32,
+      "chapter": 1,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Quel procédé les marins utilisent-ils pour savoir à cause de qui la tempête les frappe ?",
+      "answer": "Le tirage au sort",
+      "aliases": [
+        "Ils tirent au sort",
+        "Tirer au sort",
+        "tirage au sort"
+      ],
+      "explanation": "Les marins tirent au sort et le sort désigne Jonas."
+    },
+    "en": {
+      "question": "What method do the sailors use to find out who is responsible for the storm?",
+      "answer": "Casting lots",
+      "aliases": [
+        "Drawing lots",
+        "They cast lots"
+      ],
+      "explanation": "The sailors cast lots and the lot falls on Jonah."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jonah%201%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-084",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "nineveh-fast-response",
+    "reference": {
+      "book": 32,
+      "chapter": 3,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Quelle privation de nourriture les habitants de Ninive proclament-ils après le message de Jonas ?",
+      "answer": "Un jeûne",
+      "aliases": [
+        "Jeûner",
+        "jeûne"
+      ],
+      "explanation": "Les habitants croient à l'avertissement et proclament un jeûne."
+    },
+    "en": {
+      "question": "What abstention from food do the people of Nineveh proclaim after Jonah's message?",
+      "answer": "A fast",
+      "aliases": [
+        "Fasting",
+        "fast"
+      ],
+      "explanation": "The people believe the warning and proclaim a fast."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jonah%203%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-085",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "wisdom-begins-fear-lord",
+    "reference": {
+      "book": 20,
+      "chapter": 9,
+      "verse": 10
+    },
+    "fr": {
+      "question": "Selon les Proverbes, par quelle attitude envers le Seigneur commence la sagesse ?",
+      "answer": "La crainte de Dieu",
+      "aliases": [
+        "La crainte de l’Éternel",
+        "La crainte du Seigneur",
+        "Le respect de Dieu",
+        "crainte de Dieu"
+      ],
+      "explanation": "Le proverbe présente la crainte du Seigneur comme le commencement de la sagesse."
+    },
+    "en": {
+      "question": "According to Proverbs, what attitude toward the Lord begins wisdom?",
+      "answer": "The fear of the Lord",
+      "aliases": [
+        "Fear of God",
+        "Reverence for God",
+        "Reverence for the Lord",
+        "fear of the Lord"
+      ],
+      "explanation": "The proverb presents fear of the Lord as the beginning of wisdom."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Proverbs%209%3A10&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-086",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "ecclesiastes-time-everything",
+    "reference": {
+      "book": 21,
+      "chapter": 3,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Selon l'Ecclésiaste, y a-t-il un temps pour toute chose ou seulement pour quelques activités ?",
+      "answer": "Pour toute chose",
+      "aliases": [
+        "Toute chose",
+        "Tout"
+      ],
+      "explanation": "L'Ecclésiaste affirme qu'il existe un temps pour toute chose."
+    },
+    "en": {
+      "question": "According to Ecclesiastes, is there a time for everything or only for a few activities?",
+      "answer": "For everything",
+      "aliases": [
+        "Everything",
+        "All things"
+      ],
+      "explanation": "Ecclesiastes states that there is a time for everything."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ecclesiastes%203%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-087",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "isaiah-child-emmanuel",
+    "reference": {
+      "book": 23,
+      "chapter": 7,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Quel nom Ésaïe annonce-t-il pour l'enfant dont la naissance doit servir de signe ?",
+      "answer": "Emmanuel",
+      "aliases": [
+        "Immanuel"
+      ],
+      "explanation": "Le signe annoncé comprend un fils nommé Emmanuel."
+    },
+    "en": {
+      "question": "What name does Isaiah announce for the child whose birth is to be a sign?",
+      "answer": "Immanuel",
+      "aliases": [
+        "Emmanuel"
+      ],
+      "explanation": "The announced sign includes a son named Immanuel."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Isaiah%207%3A14&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-088",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "ezekiel-dry-bones",
+    "reference": {
+      "book": 26,
+      "chapter": 37,
+      "verse": 1
+    },
+    "fr": {
+      "question": "De quoi la vallée montrée à Ézéchiel est-elle remplie ?",
+      "answer": "D'ossements",
+      "aliases": [
+        "Des os",
+        "Des ossements",
+        "Ossements"
+      ],
+      "explanation": "Ézéchiel voit une vallée remplie d'ossements."
+    },
+    "en": {
+      "question": "What fills the valley shown to Ezekiel?",
+      "answer": "Bones",
+      "aliases": [
+        "Dry bones"
+      ],
+      "explanation": "Ezekiel sees a valley filled with bones."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ezekiel%2037%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-089",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "jeremiah-law-heart",
+    "reference": {
+      "book": 24,
+      "chapter": 31,
+      "verse": 33
+    },
+    "fr": {
+      "question": "Où Dieu promet-il d'écrire sa loi dans l'annonce de la nouvelle alliance ?",
+      "answer": "Dans le cœur",
+      "aliases": [
+        "Le cœur",
+        "Nos cœurs",
+        "Les cœurs"
+      ],
+      "explanation": "Dieu promet d'inscrire sa loi dans le cœur de son peuple."
+    },
+    "en": {
+      "question": "Where does God promise to write his law when announcing the new covenant?",
+      "answer": "In the heart",
+      "aliases": [
+        "Their hearts",
+        "Hearts",
+        "The heart"
+      ],
+      "explanation": "God promises to write his law in his people's hearts."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Jeremiah%2031%3A33&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-090",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "psalm150-every-breath-praise",
+    "reference": {
+      "book": 19,
+      "chapter": 150,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Que le dernier verset du psaume 150 invite-t-il tout ce qui respire à faire ?",
+      "answer": "Louer Dieu",
+      "aliases": [
+        "Louer l’Éternel",
+        "Louer le Seigneur",
+        "La louange"
+      ],
+      "explanation": "Le psaume s'achève par un appel universel à louer le Seigneur."
+    },
+    "en": {
+      "question": "What does the last verse of Psalm 150 invite everything that breathes to do?",
+      "answer": "Praise the Lord",
+      "aliases": [
+        "Praise God",
+        "Praise"
+      ],
+      "explanation": "The psalm ends with a call for all that breathes to praise the Lord."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Psalm%20150%3A6&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-091",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "ark-testimony-inside",
+    "reference": {
+      "book": 2,
+      "chapter": 25,
+      "verse": 16
+    },
+    "fr": {
+      "question": "Dans quel coffre sacré Moïse doit-il placer le témoignage que Dieu lui donne ?",
+      "answer": "L'arche de l'alliance",
+      "aliases": [
+        "L’arche",
+        "Arche",
+        "Arche du témoignage",
+        "arche de l'alliance"
+      ],
+      "explanation": "Dieu demande que le témoignage soit placé dans l'arche."
+    },
+    "en": {
+      "question": "In which sacred chest must Moses place the testimony God gives him?",
+      "answer": "The ark of the covenant",
+      "aliases": [
+        "The ark",
+        "Ark",
+        "Ark of the testimony",
+        "ark of the covenant"
+      ],
+      "explanation": "God instructs that the testimony be placed in the ark."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%2025%3A16&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-092",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "ruth-moab-origin",
+    "reference": {
+      "book": 8,
+      "chapter": 1,
+      "verse": 22
+    },
+    "fr": {
+      "question": "De quel pays Ruth est-elle originaire ?",
+      "answer": "Moab",
+      "aliases": [],
+      "explanation": "Ruth est présentée comme une Moabite qui accompagne Naomi."
+    },
+    "en": {
+      "question": "From which country does Ruth come?",
+      "answer": "Moab",
+      "aliases": [],
+      "explanation": "Ruth is described as a Moabite accompanying Naomi."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Ruth%201%3A22&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-093",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "gideon-torches-pitchers",
+    "reference": {
+      "book": 7,
+      "chapter": 7,
+      "verse": 16
+    },
+    "fr": {
+      "question": "Que les hommes de Gédéon cachent-ils dans leurs cruches avant l'attaque nocturne ?",
+      "answer": "Des flambeaux",
+      "aliases": [
+        "Des torches",
+        "Des lampes",
+        "flambeaux"
+      ],
+      "explanation": "Gédéon place des flambeaux à l'intérieur des cruches de ses hommes."
+    },
+    "en": {
+      "question": "What do Gideon's men hide in their pitchers before the night attack?",
+      "answer": "Torches",
+      "aliases": [
+        "Lamps",
+        "Firebrands"
+      ],
+      "explanation": "Gideon places torches inside his men's pitchers."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Judges%207%3A16&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-094",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "moses-sister-miriam",
+    "reference": {
+      "book": 4,
+      "chapter": 26,
+      "verse": 59
+    },
+    "fr": {
+      "question": "Comment s'appelle la sœur de Moïse et d'Aaron ?",
+      "answer": "Marie",
+      "aliases": [
+        "Myriam",
+        "Miriam"
+      ],
+      "explanation": "Le texte nomme Moïse, Aaron et leur sœur Marie."
+    },
+    "en": {
+      "question": "What is the name of Moses and Aaron's sister?",
+      "answer": "Miriam",
+      "aliases": [
+        "Miryam"
+      ],
+      "explanation": "The text names Moses, Aaron and their sister Miriam."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Numbers%2026%3A59&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-095",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "david-captures-jerusalem",
+    "reference": {
+      "book": 10,
+      "chapter": 5,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Dans quelle ville David et ses hommes affrontent-ils les Jébusiens pour y établir son pouvoir ?",
+      "answer": "Jérusalem",
+      "aliases": [],
+      "explanation": "David marche contre les Jébusiens qui habitent Jérusalem."
+    },
+    "en": {
+      "question": "In which city do David and his men confront the Jebusites to establish his rule?",
+      "answer": "Jerusalem",
+      "aliases": [],
+      "explanation": "David advances against the Jebusites living in Jerusalem."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=2%20Samuel%205%3A6&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-096",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "solomon-father-david",
+    "reference": {
+      "book": 11,
+      "chapter": 2,
+      "verse": 12
+    },
+    "fr": {
+      "question": "À quel père Salomon succède-t-il sur le trône d'Israël ?",
+      "answer": "David",
+      "aliases": [],
+      "explanation": "Salomon s'assied sur le trône de David, son père."
+    },
+    "en": {
+      "question": "Which father does Solomon succeed on Israel's throne?",
+      "answer": "David",
+      "aliases": [],
+      "explanation": "Solomon sits on the throne of his father David."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=1%20Kings%202%3A12&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-097",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "ark-rests-ararat",
+    "reference": {
+      "book": 1,
+      "chapter": 8,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Sur quelles montagnes l'arche s'arrête-t-elle après le déluge ?",
+      "answer": "Les montagnes d'Ararat",
+      "aliases": [
+        "Ararat",
+        "Le mont Ararat",
+        "montagnes d'Ararat"
+      ],
+      "explanation": "L'arche se pose sur les montagnes d'Ararat."
+    },
+    "en": {
+      "question": "On which mountains does the ark come to rest after the flood?",
+      "answer": "The mountains of Ararat",
+      "aliases": [
+        "Ararat",
+        "Mount Ararat",
+        "mountains of Ararat"
+      ],
+      "explanation": "The ark comes to rest on the mountains of Ararat."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%208%3A4&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-098",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "abraham-descendants-stars",
+    "reference": {
+      "book": 1,
+      "chapter": 15,
+      "verse": 5
+    },
+    "fr": {
+      "question": "À quels astres Dieu compare-t-il le nombre des descendants d'Abram ?",
+      "answer": "Les étoiles",
+      "aliases": [
+        "étoiles"
+      ],
+      "explanation": "Dieu invite Abram à regarder les étoiles pour illustrer sa promesse."
+    },
+    "en": {
+      "question": "To which heavenly objects does God compare the number of Abram's descendants?",
+      "answer": "The stars",
+      "aliases": [
+        "stars"
+      ],
+      "explanation": "God invites Abram to look at the stars to illustrate his promise."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Genesis%2015%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-099",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "moses-removes-sandals",
+    "reference": {
+      "book": 2,
+      "chapter": 3,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Que Moïse doit-il retirer parce qu'il se trouve sur une terre sainte ?",
+      "answer": "Ses sandales",
+      "aliases": [
+        "Ses chaussures",
+        "Chaussures",
+        "Sandales",
+        "Ses souliers"
+      ],
+      "explanation": "Dieu demande à Moïse d'enlever ses chaussures."
+    },
+    "en": {
+      "question": "What must Moses remove because he is standing on holy ground?",
+      "answer": "His sandals",
+      "aliases": [
+        "His shoes",
+        "Shoes",
+        "Sandals"
+      ],
+      "explanation": "God tells Moses to remove his footwear."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Exodus%203%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-ot-100",
+    "difficulty": "easy",
+    "testament": "old",
+    "factKey": "rahab-hides-spies-roof",
+    "reference": {
+      "book": 6,
+      "chapter": 2,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Dans quelle partie haute de sa maison Rahab cache-t-elle les espions ?",
+      "answer": "Sur le toit",
+      "aliases": [
+        "Le toit",
+        "Toit",
+        "La terrasse"
+      ],
+      "explanation": "Rahab cache les hommes sur le toit sous des tiges de lin."
+    },
+    "en": {
+      "question": "On which high part of her house does Rahab hide the spies?",
+      "answer": "On the roof",
+      "aliases": [
+        "The roof",
+        "Roof",
+        "Rooftop"
+      ],
+      "explanation": "Rahab hides the men on the roof beneath flax stalks."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Joshua%202%3A6&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-051",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "john-baptist-father-zechariah",
+    "reference": {
+      "book": 42,
+      "chapter": 1,
+      "verse": 13
+    },
+    "fr": {
+      "question": "Quel prêtre est le père de Jean-Baptiste ?",
+      "answer": "Zacharie",
+      "aliases": [
+        "Zacharias"
+      ],
+      "explanation": "L'ange annonce à Zacharie qu'Élisabeth lui donnera un fils nommé Jean."
+    },
+    "en": {
+      "question": "Which priest is John the Baptist's father?",
+      "answer": "Zechariah",
+      "aliases": [
+        "Zacharias",
+        "Zachariah"
+      ],
+      "explanation": "The angel tells Zechariah that Elizabeth will bear him a son named John."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%201%3A13&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-052",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "jesus-temple-age-twelve",
+    "reference": {
+      "book": 42,
+      "chapter": 2,
+      "verse": 42
+    },
+    "fr": {
+      "question": "Quel âge Jésus a-t-il lorsqu'il reste au temple et que ses parents le cherchent ?",
+      "answer": "Douze ans",
+      "aliases": [
+        "12",
+        "12 ans",
+        "douze"
+      ],
+      "explanation": "Ce voyage à Jérusalem a lieu lorsque Jésus a douze ans."
+    },
+    "en": {
+      "question": "How old is Jesus when he stays at the temple and his parents look for him?",
+      "answer": "Twelve years old",
+      "aliases": [
+        "12",
+        "twelve",
+        "12 years"
+      ],
+      "explanation": "This visit to Jerusalem takes place when Jesus is twelve."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%202%3A42&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-053",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "john-baptist-food",
+    "reference": {
+      "book": 40,
+      "chapter": 3,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Quels insectes Jean-Baptiste mange-t-il avec du miel sauvage ?",
+      "answer": "Des sauterelles",
+      "aliases": [
+        "sauterelles"
+      ],
+      "explanation": "Jean se nourrit de sauterelles et de miel sauvage."
+    },
+    "en": {
+      "question": "Which insects does John the Baptist eat with wild honey?",
+      "answer": "Locusts",
+      "aliases": [],
+      "explanation": "John eats locusts and wild honey."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%203%3A4&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-054",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "temptation-stones-bread",
+    "reference": {
+      "book": 40,
+      "chapter": 4,
+      "verse": 3
+    },
+    "fr": {
+      "question": "En quel aliment le tentateur propose-t-il à Jésus de changer des pierres ?",
+      "answer": "Du pain",
+      "aliases": [
+        "pain"
+      ],
+      "explanation": "Le tentateur invite Jésus à transformer les pierres en pains."
+    },
+    "en": {
+      "question": "Into what food does the tempter suggest Jesus turn stones?",
+      "answer": "Bread",
+      "aliases": [],
+      "explanation": "The tempter invites Jesus to turn stones into loaves of bread."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%204%3A3&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-055",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "meek-inherit-earth",
+    "reference": {
+      "book": 40,
+      "chapter": 5,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Que Jésus promet-il en héritage à ceux qui sont doux ?",
+      "answer": "La terre",
+      "aliases": [
+        "terre"
+      ],
+      "explanation": "Dans les béatitudes, Jésus annonce que les doux hériteront la terre."
+    },
+    "en": {
+      "question": "What does Jesus promise the meek will inherit?",
+      "answer": "The earth",
+      "aliases": [
+        "earth"
+      ],
+      "explanation": "In the Beatitudes, Jesus says the meek will inherit the earth."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%205%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-056",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "love-enemies-command",
+    "reference": {
+      "book": 40,
+      "chapter": 5,
+      "verse": 44
+    },
+    "fr": {
+      "question": "Qui Jésus demande-t-il d'aimer, même lorsqu'ils sont nos adversaires ?",
+      "answer": "Nos ennemis",
+      "aliases": [
+        "Les ennemis",
+        "Ennemis",
+        "Ses ennemis"
+      ],
+      "explanation": "Jésus appelle ses auditeurs à aimer leurs ennemis."
+    },
+    "en": {
+      "question": "Whom does Jesus tell us to love even when they oppose us?",
+      "answer": "Our enemies",
+      "aliases": [
+        "Enemies",
+        "Our foes"
+      ],
+      "explanation": "Jesus calls his listeners to love their enemies."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%205%3A44&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-057",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "disciples-salt-earth",
+    "reference": {
+      "book": 40,
+      "chapter": 5,
+      "verse": 13
+    },
+    "fr": {
+      "question": "À quel condiment Jésus compare-t-il ses disciples pour la terre ?",
+      "answer": "Le sel",
+      "aliases": [
+        "sel"
+      ],
+      "explanation": "Jésus présente ses disciples comme le sel de la terre."
+    },
+    "en": {
+      "question": "To which seasoning does Jesus compare his disciples for the earth?",
+      "answer": "Salt",
+      "aliases": [],
+      "explanation": "Jesus describes his disciples as the salt of the earth."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%205%3A13&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-058",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "disciples-light-world",
+    "reference": {
+      "book": 40,
+      "chapter": 5,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Selon Jésus, que ses disciples sont-ils pour éclairer le monde ?",
+      "answer": "La lumière",
+      "aliases": [
+        "lumière"
+      ],
+      "explanation": "Jésus présente ses disciples comme la lumière du monde."
+    },
+    "en": {
+      "question": "According to Jesus, what are his disciples to illuminate the world?",
+      "answer": "The light",
+      "aliases": [
+        "light"
+      ],
+      "explanation": "Jesus describes his disciples as the light of the world."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%205%3A14&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-059",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "golden-rule-others",
+    "reference": {
+      "book": 40,
+      "chapter": 7,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Selon la règle enseignée par Jésus, comment devons-nous traiter les autres ?",
+      "answer": "Comme nous voulons être traités",
+      "aliases": [
+        "Comme soi-même",
+        "Comme on aimerait qu’ils nous traitent",
+        "Comme je veux être traité"
+      ],
+      "explanation": "Jésus invite à faire aux autres ce que nous souhaitons qu'ils fassent pour nous."
+    },
+    "en": {
+      "question": "According to the rule Jesus teaches, how should we treat others?",
+      "answer": "As we want to be treated",
+      "aliases": [
+        "As we would like them to treat us",
+        "The way we want them to treat us"
+      ],
+      "explanation": "Jesus calls us to do to others what we would want them to do for us."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%207%3A12&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-060",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "lords-prayer-daily-bread",
+    "reference": {
+      "book": 40,
+      "chapter": 6,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Quel aliment demande-t-on pour chaque jour dans la prière enseignée par Jésus ?",
+      "answer": "Le pain",
+      "aliases": [
+        "pain"
+      ],
+      "explanation": "La prière comprend une demande pour le pain quotidien."
+    },
+    "en": {
+      "question": "What food is requested for each day in the prayer Jesus teaches?",
+      "answer": "Bread",
+      "aliases": [],
+      "explanation": "The prayer includes a request for daily bread."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%206%3A11&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-061",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "ten-lepers-count",
+    "reference": {
+      "book": 42,
+      "chapter": 17,
+      "verse": 12
+    },
+    "fr": {
+      "question": "Combien de lépreux viennent à la rencontre de Jésus avant leur guérison ?",
+      "answer": "Dix",
+      "aliases": [
+        "10"
+      ],
+      "explanation": "Dix hommes lépreux s'arrêtent à distance pour appeler Jésus."
+    },
+    "en": {
+      "question": "How many lepers meet Jesus before being healed?",
+      "answer": "Ten",
+      "aliases": [
+        "10"
+      ],
+      "explanation": "Ten men with leprosy stand at a distance and call to Jesus."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2017%3A12&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-062",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "paralytic-four-bearers",
+    "reference": {
+      "book": 41,
+      "chapter": 2,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Combien d'hommes portent le paralytique amené à Jésus dans une maison bondée ?",
+      "answer": "Quatre",
+      "aliases": [
+        "4"
+      ],
+      "explanation": "Le paralytique est porté par quatre personnes."
+    },
+    "en": {
+      "question": "How many men carry the paralysed man brought to Jesus in a crowded house?",
+      "answer": "Four",
+      "aliases": [
+        "4"
+      ],
+      "explanation": "The paralysed man is carried by four people."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%202%3A3&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-063",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "bleeding-woman-touches-cloak",
+    "reference": {
+      "book": 41,
+      "chapter": 5,
+      "verse": 27
+    },
+    "fr": {
+      "question": "Que la femme souffrant de pertes de sang touche-t-elle pour être guérie auprès de Jésus ?",
+      "answer": "Son vêtement",
+      "aliases": [
+        "Le vêtement de Jésus",
+        "Son manteau",
+        "Son habit",
+        "Le bord de son vêtement"
+      ],
+      "explanation": "La femme s'approche par derrière et touche le vêtement de Jésus."
+    },
+    "en": {
+      "question": "What does the woman suffering from bleeding touch to be healed by Jesus?",
+      "answer": "His garment",
+      "aliases": [
+        "His cloak",
+        "His clothes",
+        "The hem of his garment",
+        "His robe"
+      ],
+      "explanation": "The woman comes up behind Jesus and touches his garment."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%205%3A27&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-064",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "jairus-daughter-age-twelve",
+    "reference": {
+      "book": 41,
+      "chapter": 5,
+      "verse": 42
+    },
+    "fr": {
+      "question": "Quel âge a la fille de Jaïrus lorsque Jésus la relève ?",
+      "answer": "Douze ans",
+      "aliases": [
+        "12",
+        "12 ans",
+        "douze"
+      ],
+      "explanation": "Marc précise que la jeune fille a douze ans."
+    },
+    "en": {
+      "question": "How old is Jairus's daughter when Jesus raises her?",
+      "answer": "Twelve years old",
+      "aliases": [
+        "12",
+        "twelve",
+        "12 years"
+      ],
+      "explanation": "Mark states that the girl is twelve years old."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%205%3A42&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-065",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "jesus-touches-leper",
+    "reference": {
+      "book": 41,
+      "chapter": 1,
+      "verse": 41
+    },
+    "fr": {
+      "question": "Quel geste de la main Jésus fait-il envers un lépreux en déclarant vouloir le guérir ?",
+      "answer": "Il le touche",
+      "aliases": [
+        "Il touche le lépreux",
+        "Le toucher"
+      ],
+      "explanation": "Jésus étend la main et touche le malade."
+    },
+    "en": {
+      "question": "What does Jesus do with his hand to a man with leprosy while saying he wants to heal him?",
+      "answer": "He touches him",
+      "aliases": [
+        "He touches the leper",
+        "Touch"
+      ],
+      "explanation": "Jesus stretches out his hand and touches the man."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%201%3A41&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-066",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "canaanite-woman-crumbs",
+    "reference": {
+      "book": 40,
+      "chapter": 15,
+      "verse": 27
+    },
+    "fr": {
+      "question": "Que la femme cananéenne rappelle-t-elle que les petits chiens mangent sous la table de leurs maîtres ?",
+      "answer": "Les miettes",
+      "aliases": [
+        "miettes"
+      ],
+      "explanation": "La femme répond en évoquant les miettes qui tombent de la table."
+    },
+    "en": {
+      "question": "What does the Canaanite woman say little dogs eat beneath their masters' table?",
+      "answer": "Crumbs",
+      "aliases": [],
+      "explanation": "The woman responds by mentioning crumbs falling from the table."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2015%3A27&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-067",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "mustard-seed-kingdom",
+    "reference": {
+      "book": 40,
+      "chapter": 13,
+      "verse": 31
+    },
+    "fr": {
+      "question": "À quelle petite graine Jésus compare-t-il le royaume des cieux avant qu'elle devienne une grande plante ?",
+      "answer": "Une graine de moutarde",
+      "aliases": [
+        "Un grain de sénevé",
+        "Sénevé",
+        "Moutarde",
+        "Un grain de moutarde",
+        "graine de moutarde"
+      ],
+      "explanation": "Jésus illustre la croissance du royaume avec un grain de sénevé, ou moutarde."
+    },
+    "en": {
+      "question": "To which small seed does Jesus compare the kingdom of heaven before it becomes a large plant?",
+      "answer": "A mustard seed",
+      "aliases": [
+        "Mustard",
+        "Grain of mustard",
+        "mustard seed"
+      ],
+      "explanation": "Jesus illustrates the kingdom's growth with a mustard seed."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2013%3A31&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-068",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "sower-good-soil",
+    "reference": {
+      "book": 40,
+      "chapter": 13,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Dans la parabole du semeur, quelle terre permet aux graines de porter du fruit ?",
+      "answer": "La bonne terre",
+      "aliases": [
+        "Un bon sol",
+        "Terre fertile",
+        "bonne terre"
+      ],
+      "explanation": "Les graines tombées dans la bonne terre produisent une récolte."
+    },
+    "en": {
+      "question": "In the parable of the sower, which soil allows the seeds to bear fruit?",
+      "answer": "Good soil",
+      "aliases": [
+        "Good ground",
+        "Fertile soil"
+      ],
+      "explanation": "The seeds falling on good soil produce a harvest."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2013%3A8&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-069",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "prodigal-feeds-pigs",
+    "reference": {
+      "book": 42,
+      "chapter": 15,
+      "verse": 15
+    },
+    "fr": {
+      "question": "Quels animaux le fils perdu doit-il garder après avoir dépensé ses biens ?",
+      "answer": "Des pourceaux",
+      "aliases": [
+        "Des porcs",
+        "Des cochons",
+        "Porcs",
+        "Cochons",
+        "pourceaux"
+      ],
+      "explanation": "Le jeune homme est envoyé dans les champs pour garder des porcs."
+    },
+    "en": {
+      "question": "Which animals must the lost son tend after spending his possessions?",
+      "answer": "Pigs",
+      "aliases": [
+        "Swine",
+        "Hogs"
+      ],
+      "explanation": "The young man is sent into the fields to feed pigs."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2015%3A15&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-070",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "jesus-good-shepherd",
+    "reference": {
+      "book": 43,
+      "chapter": 10,
+      "verse": 11
+    },
+    "fr": {
+      "question": "Qui se présente comme le bon berger qui donne sa vie pour ses brebis ?",
+      "answer": "Jésus",
+      "aliases": [
+        "Jésus-Christ"
+      ],
+      "explanation": "Jésus se désigne comme le bon berger."
+    },
+    "en": {
+      "question": "Who describes himself as the good shepherd who gives his life for the sheep?",
+      "answer": "Jesus",
+      "aliases": [
+        "Jesus Christ"
+      ],
+      "explanation": "Jesus calls himself the good shepherd."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2010%3A11&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-071",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "vine-disciples-branches",
+    "reference": {
+      "book": 43,
+      "chapter": 15,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Dans l'image où Jésus est le cep, que représentent ses disciples ?",
+      "answer": "Les sarments",
+      "aliases": [
+        "Les branches",
+        "Branches",
+        "Sarments",
+        "sarments"
+      ],
+      "explanation": "Jésus compare ses disciples aux branches attachées à la vigne."
+    },
+    "en": {
+      "question": "In the image where Jesus is the vine, what are his disciples?",
+      "answer": "The branches",
+      "aliases": [
+        "Branches",
+        "branches"
+      ],
+      "explanation": "Jesus compares his disciples to branches connected to the vine."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2015%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-072",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "jesus-bread-life",
+    "reference": {
+      "book": 43,
+      "chapter": 6,
+      "verse": 35
+    },
+    "fr": {
+      "question": "Qui se présente comme le pain de vie dans l'Évangile de Jean ?",
+      "answer": "Jésus",
+      "aliases": [
+        "Jésus-Christ"
+      ],
+      "explanation": "Jésus utilise l'image du pain de vie pour parler de lui-même."
+    },
+    "en": {
+      "question": "Who describes himself as the bread of life in John's Gospel?",
+      "answer": "Jesus",
+      "aliases": [
+        "Jesus Christ"
+      ],
+      "explanation": "Jesus uses the image of the bread of life to speak about himself."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%206%3A35&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-073",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "knock-door-opened",
+    "reference": {
+      "book": 40,
+      "chapter": 7,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Que Jésus promet-il à celui qui frappe à la porte dans son enseignement sur la prière ?",
+      "answer": "On lui ouvrira",
+      "aliases": [
+        "La porte s’ouvrira",
+        "On ouvre",
+        "L’ouverture de la porte"
+      ],
+      "explanation": "Jésus encourage à demander, chercher et frapper avec confiance."
+    },
+    "en": {
+      "question": "What does Jesus promise the person who knocks in his teaching about prayer?",
+      "answer": "The door will be opened",
+      "aliases": [
+        "It will be opened",
+        "The door opens",
+        "door will be opened"
+      ],
+      "explanation": "Jesus encourages asking, seeking and knocking with confidence."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%207%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-074",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "lost-coin-lamp",
+    "reference": {
+      "book": 42,
+      "chapter": 15,
+      "verse": 8
+    },
+    "fr": {
+      "question": "Que la femme de la parabole allume-t-elle pour chercher sa pièce perdue ?",
+      "answer": "Une lampe",
+      "aliases": [
+        "Une lumière",
+        "lampe"
+      ],
+      "explanation": "La femme allume une lampe et balaie sa maison."
+    },
+    "en": {
+      "question": "What does the woman in the parable light to search for her lost coin?",
+      "answer": "A lamp",
+      "aliases": [
+        "Candle",
+        "A candle",
+        "lamp"
+      ],
+      "explanation": "The woman lights a lamp and sweeps her house."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Luke%2015%3A8&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-075",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "jesus-welcomes-children",
+    "reference": {
+      "book": 41,
+      "chapter": 10,
+      "verse": 14
+    },
+    "fr": {
+      "question": "Qui Jésus demande-t-il de laisser venir à lui alors que les disciples veulent les repousser ?",
+      "answer": "Les petits enfants",
+      "aliases": [
+        "Les enfants",
+        "Enfants",
+        "petits enfants"
+      ],
+      "explanation": "Jésus accueille les enfants et demande qu'on ne les empêche pas de venir."
+    },
+    "en": {
+      "question": "Whom does Jesus say to let come to him when the disciples try to turn them away?",
+      "answer": "The little children",
+      "aliases": [
+        "Children",
+        "The children",
+        "little children"
+      ],
+      "explanation": "Jesus welcomes the children and asks that they not be prevented from coming."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%2010%3A14&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-076",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "greatest-command-love-god",
+    "reference": {
+      "book": 40,
+      "chapter": 22,
+      "verse": 37
+    },
+    "fr": {
+      "question": "Qui faut-il aimer de tout son cœur, de toute son âme et de toute sa pensée selon Jésus ?",
+      "answer": "Dieu",
+      "aliases": [
+        "Le Seigneur",
+        "L’Éternel"
+      ],
+      "explanation": "Jésus présente l'amour du Seigneur comme le premier commandement."
+    },
+    "en": {
+      "question": "Whom should we love with all our heart, soul and mind according to Jesus?",
+      "answer": "God",
+      "aliases": [
+        "The Lord"
+      ],
+      "explanation": "Jesus presents love for the Lord as the first commandment."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2022%3A37&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-077",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "neighbor-love-as-self",
+    "reference": {
+      "book": 40,
+      "chapter": 22,
+      "verse": 39
+    },
+    "fr": {
+      "question": "Selon Jésus, comme qui devons-nous aimer notre prochain ?",
+      "answer": "Comme nous-mêmes",
+      "aliases": [
+        "Soi-même",
+        "Nous-mêmes",
+        "Comme soi-même"
+      ],
+      "explanation": "Jésus demande d'aimer son prochain comme soi-même."
+    },
+    "en": {
+      "question": "According to Jesus, as whom should we love our neighbour?",
+      "answer": "As ourselves",
+      "aliases": [
+        "Ourselves",
+        "Yourself"
+      ],
+      "explanation": "Jesus calls us to love our neighbour as ourselves."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2022%3A39&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-078",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "mary-magdalene-announces-risen",
+    "reference": {
+      "book": 43,
+      "chapter": 20,
+      "verse": 18
+    },
+    "fr": {
+      "question": "Quelle femme annonce aux disciples qu'elle a vu le Seigneur ressuscité ?",
+      "answer": "Marie de Magdala",
+      "aliases": [
+        "Marie-Madeleine",
+        "Marie Madeleine",
+        "Marie de Magdalà"
+      ],
+      "explanation": "Marie de Magdala apporte aux disciples la nouvelle de sa rencontre."
+    },
+    "en": {
+      "question": "Which woman tells the disciples that she has seen the risen Lord?",
+      "answer": "Mary Magdalene",
+      "aliases": [
+        "Mary of Magdala"
+      ],
+      "explanation": "Mary Magdalene brings the disciples news of her encounter."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2020%3A18&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-079",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "tomb-stone-rolled",
+    "reference": {
+      "book": 41,
+      "chapter": 16,
+      "verse": 4
+    },
+    "fr": {
+      "question": "Quel obstacle à l'entrée du tombeau les femmes trouvent-elles déjà roulé ?",
+      "answer": "La pierre",
+      "aliases": [
+        "pierre"
+      ],
+      "explanation": "En arrivant, les femmes voient que la grande pierre a été déplacée."
+    },
+    "en": {
+      "question": "What obstacle at the tomb entrance do the women find already rolled away?",
+      "answer": "The stone",
+      "aliases": [
+        "stone"
+      ],
+      "explanation": "On arriving, the women see that the large stone has been moved."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Mark%2016%3A4&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-080",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "joseph-arimathea-burial",
+    "reference": {
+      "book": 40,
+      "chapter": 27,
+      "verse": 59
+    },
+    "fr": {
+      "question": "Quel homme d'Arimathée prend le corps de Jésus pour le mettre au tombeau ?",
+      "answer": "Joseph",
+      "aliases": [
+        "Joseph d’Arimathée"
+      ],
+      "explanation": "Joseph enveloppe le corps de Jésus avant de le déposer dans son tombeau."
+    },
+    "en": {
+      "question": "Which man from Arimathea takes Jesus' body to lay it in a tomb?",
+      "answer": "Joseph",
+      "aliases": [
+        "Joseph of Arimathea"
+      ],
+      "explanation": "Joseph wraps Jesus' body before placing it in his tomb."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2027%3A59&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-081",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "temple-curtain-torn",
+    "reference": {
+      "book": 40,
+      "chapter": 27,
+      "verse": 51
+    },
+    "fr": {
+      "question": "Quel tissu du temple se déchire de haut en bas à la mort de Jésus ?",
+      "answer": "Le voile",
+      "aliases": [
+        "Le rideau",
+        "Le voile du temple",
+        "voile"
+      ],
+      "explanation": "Le voile du temple se déchire en deux."
+    },
+    "en": {
+      "question": "Which fabric in the temple is torn from top to bottom at Jesus' death?",
+      "answer": "The curtain",
+      "aliases": [
+        "Veil",
+        "The veil",
+        "The temple veil",
+        "curtain"
+      ],
+      "explanation": "The temple curtain is torn in two."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2027%3A51&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-082",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "crucifixion-darkness-three-hours",
+    "reference": {
+      "book": 40,
+      "chapter": 27,
+      "verse": 45
+    },
+    "fr": {
+      "question": "Combien d'heures durent les ténèbres pendant la crucifixion, de la sixième à la neuvième heure ?",
+      "answer": "Trois heures",
+      "aliases": [
+        "3",
+        "3 heures",
+        "trois"
+      ],
+      "explanation": "Le texte situe les ténèbres entre la sixième et la neuvième heure."
+    },
+    "en": {
+      "question": "How many hours does the darkness last during the crucifixion, from the sixth to the ninth hour?",
+      "answer": "Three hours",
+      "aliases": [
+        "3",
+        "three",
+        "3 hours"
+      ],
+      "explanation": "The text places the darkness between the sixth and ninth hours."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2027%3A45&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-083",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "cross-inscription-king-jews",
+    "reference": {
+      "book": 43,
+      "chapter": 19,
+      "verse": 19
+    },
+    "fr": {
+      "question": "Quel titre royal figure dans l'inscription placée sur la croix de Jésus ?",
+      "answer": "Le roi des Juifs",
+      "aliases": [
+        "Roi des Juifs",
+        "roi des Juifs"
+      ],
+      "explanation": "Pilate fait inscrire une mention de Jésus comme roi des Juifs."
+    },
+    "en": {
+      "question": "What royal title appears in the inscription on Jesus' cross?",
+      "answer": "The King of the Jews",
+      "aliases": [
+        "King of the Jews"
+      ],
+      "explanation": "Pilate has an inscription identifying Jesus as King of the Jews placed there."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2019%3A19&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-084",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "jesus-mocking-scarlet-robe",
+    "reference": {
+      "book": 40,
+      "chapter": 27,
+      "verse": 28
+    },
+    "fr": {
+      "question": "Selon Matthieu, de quelle couleur est le manteau dont les soldats revêtent Jésus pour se moquer de lui ?",
+      "answer": "Écarlate",
+      "aliases": [
+        "Rouge",
+        "Rouge écarlate"
+      ],
+      "explanation": "Matthieu décrit un manteau écarlate posé sur Jésus."
+    },
+    "en": {
+      "question": "According to Matthew, what colour is the robe the soldiers put on Jesus to mock him?",
+      "answer": "Scarlet",
+      "aliases": [
+        "Red"
+      ],
+      "explanation": "Matthew describes a scarlet robe placed on Jesus."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2027%3A28&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-085",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "gethsemane-sleeping-disciples",
+    "reference": {
+      "book": 40,
+      "chapter": 26,
+      "verse": 40
+    },
+    "fr": {
+      "question": "Que font les disciples lorsque Jésus revient les trouver après avoir prié à Gethsémané ?",
+      "answer": "Ils dorment",
+      "aliases": [
+        "Dormir",
+        "Ils sont endormis"
+      ],
+      "explanation": "Jésus trouve les disciples endormis."
+    },
+    "en": {
+      "question": "What are the disciples doing when Jesus returns to them after praying in Gethsemane?",
+      "answer": "Sleeping",
+      "aliases": [
+        "They are asleep",
+        "They sleep",
+        "Asleep"
+      ],
+      "explanation": "Jesus finds the disciples asleep."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2026%3A40&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-086",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "thomas-confession-lord-god",
+    "reference": {
+      "book": 43,
+      "chapter": 20,
+      "verse": 28
+    },
+    "fr": {
+      "question": "Quel mot complète les paroles de Thomas à Jésus ressuscité : mon Seigneur et mon… ?",
+      "answer": "Dieu",
+      "aliases": [],
+      "explanation": "Thomas reconnaît Jésus en l'appelant son Seigneur et son Dieu."
+    },
+    "en": {
+      "question": "Which word completes Thomas's words to the risen Jesus: my Lord and my…?",
+      "answer": "God",
+      "aliases": [],
+      "explanation": "Thomas acknowledges Jesus as his Lord and his God."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=John%2020%3A28&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-087",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "great-commission-all-nations",
+    "reference": {
+      "book": 40,
+      "chapter": 28,
+      "verse": 19
+    },
+    "fr": {
+      "question": "Selon l'envoi de Jésus, les disciples doivent-ils former des disciples parmi une seule nation ou toutes les nations ?",
+      "answer": "Toutes les nations",
+      "aliases": [
+        "Tous les peuples",
+        "Toutes"
+      ],
+      "explanation": "Jésus envoie les disciples vers toutes les nations."
+    },
+    "en": {
+      "question": "In Jesus' commission, are the disciples to make disciples of one nation or all nations?",
+      "answer": "All nations",
+      "aliases": [
+        "Every nation",
+        "All peoples"
+      ],
+      "explanation": "Jesus sends the disciples to all nations."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Matthew%2028%3A19&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-088",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "ascension-cloud",
+    "reference": {
+      "book": 44,
+      "chapter": 1,
+      "verse": 9
+    },
+    "fr": {
+      "question": "Qu'est-ce qui dérobe Jésus aux yeux des disciples lors de son ascension ?",
+      "answer": "Une nuée",
+      "aliases": [
+        "Un nuage",
+        "Nuage",
+        "nuée"
+      ],
+      "explanation": "Une nuée reçoit Jésus et le soustrait à leurs regards."
+    },
+    "en": {
+      "question": "What hides Jesus from the disciples' sight during his ascension?",
+      "answer": "A cloud",
+      "aliases": [
+        "Cloud",
+        "cloud"
+      ],
+      "explanation": "A cloud takes Jesus out of their sight."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%201%3A9&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-089",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "pentecost-tongues-fire",
+    "reference": {
+      "book": 44,
+      "chapter": 2,
+      "verse": 3
+    },
+    "fr": {
+      "question": "À quel élément ressemblent les langues qui apparaissent sur les disciples à la Pentecôte ?",
+      "answer": "Du feu",
+      "aliases": [
+        "feu"
+      ],
+      "explanation": "Les disciples voient des langues semblables à du feu."
+    },
+    "en": {
+      "question": "What element do the tongues appearing over the disciples at Pentecost resemble?",
+      "answer": "Fire",
+      "aliases": [],
+      "explanation": "The disciples see tongues resembling fire."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%202%3A3&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-090",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "early-church-shared-goods",
+    "reference": {
+      "book": 44,
+      "chapter": 2,
+      "verse": 44
+    },
+    "fr": {
+      "question": "Comment les premiers croyants disposent-ils de leurs biens dans le récit des Actes ?",
+      "answer": "Ils les mettent en commun",
+      "aliases": [
+        "Ils partagent",
+        "Ils partagent leurs biens",
+        "Tout en commun"
+      ],
+      "explanation": "Les croyants vivent ensemble et mettent leurs biens en commun."
+    },
+    "en": {
+      "question": "What do the first believers do with their possessions in Acts?",
+      "answer": "They share them",
+      "aliases": [
+        "They share their possessions",
+        "They hold everything in common",
+        "Sharing"
+      ],
+      "explanation": "The believers gather together and hold their possessions in common."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%202%3A44&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-091",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "ananias-sapphira-couple",
+    "reference": {
+      "book": 44,
+      "chapter": 5,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Quelle femme agit avec son mari Ananias lors de la vente d'une propriété ?",
+      "answer": "Saphira",
+      "aliases": [
+        "Sapphira",
+        "Saphire"
+      ],
+      "explanation": "Ananias vend une propriété avec sa femme Saphira."
+    },
+    "en": {
+      "question": "Which woman acts with her husband Ananias when selling a property?",
+      "answer": "Sapphira",
+      "aliases": [
+        "Saphira"
+      ],
+      "explanation": "Ananias sells a property together with his wife Sapphira."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%205%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-092",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "paul-silas-earthquake",
+    "reference": {
+      "book": 44,
+      "chapter": 16,
+      "verse": 26
+    },
+    "fr": {
+      "question": "Quel événement secoue la prison où Paul et Silas chantent, ouvrant les portes ?",
+      "answer": "Un tremblement de terre",
+      "aliases": [
+        "Un séisme",
+        "Séisme",
+        "tremblement de terre"
+      ],
+      "explanation": "Un tremblement de terre ébranle les fondations de la prison."
+    },
+    "en": {
+      "question": "What shakes the prison where Paul and Silas are singing and opens its doors?",
+      "answer": "An earthquake",
+      "aliases": [
+        "Earthquake",
+        "earthquake"
+      ],
+      "explanation": "An earthquake shakes the prison's foundations."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A26&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-093",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "jailer-believe-jesus",
+    "reference": {
+      "book": 44,
+      "chapter": 16,
+      "verse": 31
+    },
+    "fr": {
+      "question": "En qui Paul et Silas invitent-ils le geôlier à croire pour être sauvé ?",
+      "answer": "Le Seigneur Jésus",
+      "aliases": [
+        "Jésus",
+        "Jésus-Christ",
+        "Seigneur Jésus"
+      ],
+      "explanation": "Ils invitent le geôlier à placer sa foi dans le Seigneur Jésus."
+    },
+    "en": {
+      "question": "In whom do Paul and Silas tell the jailer to believe to be saved?",
+      "answer": "The Lord Jesus",
+      "aliases": [
+        "Jesus",
+        "Jesus Christ",
+        "Lord Jesus"
+      ],
+      "explanation": "They invite the jailer to put his faith in the Lord Jesus."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2016%3A31&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-094",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "peter-prison-angel",
+    "reference": {
+      "book": 44,
+      "chapter": 12,
+      "verse": 7
+    },
+    "fr": {
+      "question": "Quel messager réveille Pierre dans sa prison avant sa délivrance ?",
+      "answer": "Un ange",
+      "aliases": [
+        "ange"
+      ],
+      "explanation": "Un ange du Seigneur apparaît et réveille Pierre."
+    },
+    "en": {
+      "question": "Which messenger wakes Peter in prison before his deliverance?",
+      "answer": "An angel",
+      "aliases": [
+        "angel"
+      ],
+      "explanation": "An angel of the Lord appears and wakes Peter."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%2012%3A7&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-095",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "seven-chosen-service",
+    "reference": {
+      "book": 44,
+      "chapter": 6,
+      "verse": 3
+    },
+    "fr": {
+      "question": "Combien d'hommes les apôtres demandent-ils de choisir pour le service quotidien ?",
+      "answer": "Sept",
+      "aliases": [
+        "7"
+      ],
+      "explanation": "Les apôtres demandent de choisir sept hommes de bonne réputation."
+    },
+    "en": {
+      "question": "How many men do the apostles ask the believers to choose for the daily service?",
+      "answer": "Seven",
+      "aliases": [
+        "7"
+      ],
+      "explanation": "The apostles ask for seven men of good reputation to be chosen."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%206%3A3&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-096",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "stephen-jesus-right-hand",
+    "reference": {
+      "book": 44,
+      "chapter": 7,
+      "verse": 55
+    },
+    "fr": {
+      "question": "À la droite de qui Étienne voit-il Jésus avant sa mort ?",
+      "answer": "Dieu",
+      "aliases": [],
+      "explanation": "Étienne voit Jésus debout à la droite de Dieu."
+    },
+    "en": {
+      "question": "At whose right hand does Stephen see Jesus before his death?",
+      "answer": "God",
+      "aliases": [],
+      "explanation": "Stephen sees Jesus standing at God's right hand."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%207%3A55&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-097",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "saul-road-voice-jesus",
+    "reference": {
+      "book": 44,
+      "chapter": 9,
+      "verse": 5
+    },
+    "fr": {
+      "question": "Qui se présente à Saul en lui disant qu'il le persécute sur la route de Damas ?",
+      "answer": "Jésus",
+      "aliases": [
+        "Jésus-Christ"
+      ],
+      "explanation": "La voix révèle à Saul qu'il persécute Jésus."
+    },
+    "en": {
+      "question": "Who identifies himself to Saul as the one he is persecuting on the Damascus road?",
+      "answer": "Jesus",
+      "aliases": [
+        "Jesus Christ"
+      ],
+      "explanation": "The voice reveals to Saul that he is persecuting Jesus."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Acts%209%3A5&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-098",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "romans-wages-sin-death",
+    "reference": {
+      "book": 45,
+      "chapter": 6,
+      "verse": 23
+    },
+    "fr": {
+      "question": "Selon Paul, quel est le salaire du péché ?",
+      "answer": "La mort",
+      "aliases": [
+        "mort"
+      ],
+      "explanation": "Paul oppose la mort liée au péché au don de la vie éternelle."
+    },
+    "en": {
+      "question": "According to Paul, what are the wages of sin?",
+      "answer": "Death",
+      "aliases": [],
+      "explanation": "Paul contrasts the death associated with sin with the gift of eternal life."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Romans%206%3A23&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-099",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "hebrews-faith-unseen",
+    "reference": {
+      "book": 58,
+      "chapter": 11,
+      "verse": 1
+    },
+    "fr": {
+      "question": "Quelle disposition est décrite comme une assurance des choses espérées et une conviction de celles qu'on ne voit pas ?",
+      "answer": "La foi",
+      "aliases": [
+        "foi"
+      ],
+      "explanation": "Le passage décrit la foi à l'aide de l'espérance et de l'invisible."
+    },
+    "en": {
+      "question": "What is described as confidence in things hoped for and conviction about things not seen?",
+      "answer": "Faith",
+      "aliases": [],
+      "explanation": "The passage describes faith in relation to hope and what is unseen."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=Hebrews%2011%3A1&version=LSG%3BKJV"
+  },
+  {
+    "id": "easy-nt-100",
+    "difficulty": "easy",
+    "testament": "new",
+    "factKey": "james-tongue-fire",
+    "reference": {
+      "book": 59,
+      "chapter": 3,
+      "verse": 6
+    },
+    "fr": {
+      "question": "Quel petit organe Jacques compare-t-il à un feu à cause du pouvoir des paroles ?",
+      "answer": "La langue",
+      "aliases": [
+        "langue"
+      ],
+      "explanation": "Jacques utilise le feu pour montrer le danger que peuvent représenter les paroles."
+    },
+    "en": {
+      "question": "Which small organ does James compare to a fire because of the power of words?",
+      "answer": "The tongue",
+      "aliases": [
+        "tongue"
+      ],
+      "explanation": "James uses fire to illustrate the danger words can pose."
+    },
+    "sourceUrl": "https://www.biblegateway.com/passage/?search=James%203%3A6&version=LSG%3BKJV"
+  }
+]

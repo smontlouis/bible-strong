@@ -1,0 +1,186 @@
+/* Shared raised controls. Keep component colours, sizing and focus rings.
+   Individual translate leaves positioning transforms on floating controls intact. */
+:root
+  :is(
+    .bs-primary,
+    .games-primary,
+    .games-secondary,
+    .games-choice,
+    .games-card,
+    .game-invite-toast,
+    .games-launch,
+    .guestbook-submit,
+    .avatar-save,
+    .lexicon-next,
+    .comparisons-action,
+    .journal-resume,
+    .journal-island,
+    .journal-avatar,
+    .journal-site,
+    .resource-card button,
+    .dictionary-facts button,
+    .references-choices button,
+    .references-steps button,
+    .themes-choices button,
+    .commentaries-choices button,
+    .comparisons-path button,
+    .lexicon-passages button
+  ) {
+  --button-edge: var(--bs-button-edge-blue);
+  border: 2px solid var(--button-edge);
+  box-shadow: 0 var(--bs-button-depth) 0 var(--button-edge);
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    translate 120ms ease;
+}
+:root
+  :is(
+    .games-secondary,
+    .games-choice,
+    .games-card,
+    .game-invite-toast,
+    .journal-island,
+    .journal-avatar,
+    .journal-site,
+    .dictionary-facts button,
+    .references-choices button,
+    .references-steps button,
+    .themes-choices button,
+    .commentaries-choices button,
+    .comparisons-path button,
+    .lexicon-passages button
+  ) {
+  --button-edge: var(--bs-button-edge-neutral);
+}
+:root
+  :is(
+    .bs-primary,
+    .games-primary,
+    .games-launch,
+    .guestbook-submit,
+    .avatar-save,
+    .lexicon-next,
+    .comparisons-action,
+    .journal-resume,
+    .resource-card button
+  ) {
+  color: #fff;
+}
+:root
+  :is(
+    .bs-primary,
+    .games-primary,
+    .games-launch,
+    .guestbook-submit,
+    .avatar-save,
+    .lexicon-next,
+    .comparisons-action,
+    .journal-resume,
+    .resource-card button
+  )
+  svg {
+  color: currentColor;
+}
+:root .games-shell[data-kind='quiz'] .games-primary {
+  --button-edge: var(--bs-button-edge-yellow);
+  color: var(--bs-navy);
+}
+:root .solo-mode-picker button[aria-pressed='true'] {
+  --button-edge: var(--bs-button-edge-blue);
+  background: var(--bs-blue);
+  color: var(--bs-card);
+  border-color: var(--button-edge);
+}
+:root
+  :is(
+    .bs-primary,
+    .games-primary,
+    .games-secondary,
+    .games-choice,
+    .games-card,
+    .game-invite-toast,
+    .games-launch,
+    .guestbook-submit,
+    .avatar-save,
+    .lexicon-next,
+    .comparisons-action,
+    .journal-resume,
+    .journal-island,
+    .journal-avatar,
+    .journal-site,
+    .resource-card button,
+    .dictionary-facts button,
+    .references-choices button,
+    .references-steps button,
+    .themes-choices button,
+    .commentaries-choices button,
+    .comparisons-path button,
+    .lexicon-passages button
+  ):not(:disabled):active {
+  translate: 0 3px;
+  transform: none;
+  box-shadow: 0 1px 0 var(--button-edge);
+}
+:root
+  :is(
+    .bs-primary,
+    .games-primary,
+    .games-secondary,
+    .games-choice,
+    .games-card,
+    .game-invite-toast,
+    .games-launch,
+    .guestbook-submit,
+    .avatar-save,
+    .lexicon-next,
+    .comparisons-action,
+    .journal-resume,
+    .journal-island,
+    .journal-avatar,
+    .journal-site,
+    .resource-card button,
+    .dictionary-facts button,
+    .references-choices button,
+    .references-steps button,
+    .themes-choices button,
+    .commentaries-choices button,
+    .comparisons-path button,
+    .lexicon-passages button
+  ):disabled {
+  --button-edge: var(--bs-grey);
+  border-color: var(--button-edge);
+  box-shadow: none;
+  translate: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root
+    :is(
+      .bs-primary,
+      .games-primary,
+      .games-secondary,
+      .games-choice,
+      .games-card,
+      .game-invite-toast,
+      .games-launch,
+      .guestbook-submit,
+      .avatar-save,
+      .lexicon-next,
+      .comparisons-action,
+      .journal-resume,
+      .journal-island,
+      .journal-avatar,
+      .journal-site,
+      .resource-card button,
+      .dictionary-facts button,
+      .references-choices button,
+      .references-steps button,
+      .themes-choices button,
+      .commentaries-choices button,
+      .comparisons-path button,
+      .lexicon-passages button
+    ) {
+    transition: none;
+  }
+}

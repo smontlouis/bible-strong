@@ -1,3 +1,4 @@
+import { tickSolo, pauseSolo, resumeSolo } from '../solo-game'
 import React, { useEffect, useRef, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { BibleGamesView } from '../BibleGamesView'
@@ -48,6 +49,11 @@ function Frame() {
     next.now += ms
     next.invitations = next.invitations.filter(i => i.expires > next.now)
     const g = next.game
+    if (g?.solo) {
+      tickSolo(g.solo, next.now)
+      if (g.solo.outcome) g.phase = 'finished'
+      return next
+    }
     if (
       g?.phase === 'question' &&
       g.pausedAt === null &&
@@ -132,6 +138,10 @@ function Frame() {
         setModel(m => {
           const next = structuredClone(m)
           next.online = !m.online
+          if (next.game?.solo) {
+            if (next.online) resumeSolo(next.game.solo, 'away', next.now)
+            else pauseSolo(next.game.solo, 'away', next.now)
+          }
           if (next.game) {
             if (next.online) {
               next.game.deadline += next.game.pausedAt === null ? 0 : next.now - next.game.pausedAt
@@ -183,10 +193,34 @@ function Frame() {
     if (['start', 'answer', 'accept', 'decline'].includes(action.action)) setJob(n => n + 1)
     return true
   }
+  function setOpen(open: boolean) {
+    setModel(model => {
+      const next = structuredClone(model)
+      next.open = open
+      next.selected = null
+      if (next.game?.solo) {
+        if (open) resumeSolo(next.game.solo, 'menu', next.now)
+        else pauseSolo(next.game.solo, 'menu', next.now)
+      }
+      return next
+    })
+  }
   return (
     <div className="lab-world">
       <div className="lab-world-label">MONDE SIMULÉ · SANS MULTIJOUEUR</div>
+      {!model.open && (
+        <button className="lab-game-station" onClick={() => setOpen(true)}>
+          <img src="./assets/games/terminal.webp" alt="" width="140" height="194" />
+          <strong>
+            ★{' '}
+            {initialConfig.language === 'fr'
+              ? 'Jouer · Solo ou ensemble'
+              : 'Play · Solo or together'}
+          </strong>
+        </button>
+      )}
       <BibleGamesView
+        stationOnly
         snapshot={{ game: model.game, invitations: model.invitations, now: model.now }}
         me={model.me}
         online={model.online}
@@ -200,8 +234,8 @@ function Frame() {
         invitationIssue={model.invitationIssue}
         invitationAction={model.invitationAction}
         nearby={people.filter(p => !model.game?.players.some(member => member.id === p.id))}
-        onOpen={() => setModel(m => ({ ...m, open: true, selected: null }))}
-        close={() => setModel(m => ({ ...m, open: false, selected: null }))}
+        onOpen={() => setOpen(true)}
+        close={() => setOpen(false)}
         selectInvitation={selected => {
           setModel(m => ({ ...m, selected, open: true }))
           log('Invitation ouverte')
@@ -212,9 +246,7 @@ function Frame() {
         send={send}
       />
       {!model.open && (
-        <div className="lab-world-hint">
-          Les notifications et le bouton de jeu restent interactifs.
-        </div>
+        <div className="lab-world-hint">La borne et les notifications restent interactives.</div>
       )}
     </div>
   )

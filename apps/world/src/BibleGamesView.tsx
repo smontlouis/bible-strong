@@ -1,3 +1,4 @@
+import { SoloGameView } from './SoloGameView'
 import { useEffect, useId, useState } from 'react'
 import type {
   GameAction,
@@ -19,9 +20,9 @@ const copy = {
   fr: {
     button: 'Jouer ensemble',
     resume: 'Ma partie',
-    title: 'La Bible se découvre ensemble.',
-    eyebrow: 'UNE RENCONTRE, CINQ DÉCOUVERTES',
-    intro: 'Choisis une aventure et invite les explorateurs près de toi.',
+    title: 'À toi de jouer.',
+    eyebrow: 'LE COIN DES JEUX',
+    intro: 'Relève un défi en solo ou joue avec les explorateurs près de toi.',
     who: 'Qui suis-je ?',
     quiz: 'Défi biblique',
     whoDescription: 'Quatre indices. Trouvez avant les autres.',
@@ -107,9 +108,9 @@ const copy = {
   en: {
     button: 'Play together',
     resume: 'My game',
-    title: 'Discover the Bible together.',
-    eyebrow: 'ONE ENCOUNTER, FIVE DISCOVERIES',
-    intro: 'Choose an adventure and invite nearby explorers.',
+    title: 'Your turn to play.',
+    eyebrow: 'THE GAMES CORNER',
+    intro: 'Take on a solo challenge or play with nearby explorers.',
     who: 'Who am I?',
     quiz: 'Bible challenge',
     whoDescription: 'Four clues. Be the first to discover.',
@@ -192,6 +193,16 @@ const copy = {
     } satisfies Record<GameError, string>,
   },
 }
+
+function GameSelectionIcon({ selected }: { selected: boolean }) {
+  return (
+    <span className="games-selection" data-selected={selected} aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false">
+        {selected ? <path d="m6.5 12.5 3.5 3.5 7.5-8" /> : <path d="M12 7v10M7 12h10" />}
+      </svg>
+    </span>
+  )
+}
 /** Pure application boundary: plain snapshots, a supplied clock and user-action callbacks.
  * Local input drafts and visual animation are owned by the presentation components. */
 export type BibleGamesViewProps = {
@@ -203,6 +214,7 @@ export type BibleGamesViewProps = {
   language: 'fr' | 'en'
   open: boolean
   disabled?: boolean
+  stationOnly?: boolean
   options: GameOptions
   setOptions: (options: GameOptions) => void
   selectedInvitation: GameInvitation | null
@@ -224,6 +236,7 @@ export function BibleGamesView({
   language,
   open,
   disabled = false,
+  stationOnly = false,
   options,
   setOptions,
   selectedInvitation,
@@ -253,9 +266,16 @@ export function BibleGamesView({
           onSelect={selectInvitation}
         />
       )}
-      <button className="games-launch" onClick={onOpen} disabled={disabled} aria-haspopup="dialog">
-        <span aria-hidden="true">✦</span> {game ? t.resume : t.button}
-      </button>
+      {(!stationOnly || game) && (
+        <button
+          className="games-launch"
+          onClick={onOpen}
+          disabled={disabled}
+          aria-haspopup="dialog"
+        >
+          <span aria-hidden="true">✦</span> {game ? t.resume : t.button}
+        </button>
+      )}
       {open && (
         <Modal
           className={`games-dialog${selectedInvitation ? ' games-invite-dialog' : ''}`}
@@ -282,6 +302,16 @@ export function BibleGamesView({
                 onAccept={() => answerInvitation('accept')}
                 onDecline={() => answerInvitation('decline')}
                 onBack={close}
+              />
+            ) : game?.solo ? (
+              <SoloGameView
+                key={`${game.id}:${game.round}`}
+                game={game}
+                now={online ? now : snapshot.now}
+                online={online}
+                error={error}
+                titleId={id}
+                send={send}
               />
             ) : (
               <>
@@ -345,33 +375,64 @@ export function BibleGamesView({
                 )}
                 {!game && (
                   <>
-                    <div className="games-cards">
-                      {(['who', 'quiz'] as const).map(kind => (
-                        <button
-                          key={kind}
-                          className="games-card"
-                          data-kind={kind}
-                          aria-pressed={options.kind === kind}
-                          onClick={() => setOptions({ ...options, kind })}
-                        >
-                          <span className="games-selection" aria-hidden="true">
-                            {options.kind === kind ? '✓' : '+'}
-                          </span>
-                          <img
-                            src={`./assets/games/${kind}.webp`}
-                            alt=""
-                            width="220"
-                            height="220"
-                          />
-                          <strong>{t[kind]}</strong>
-                          <span>{kind === 'who' ? t.whoDescription : t.quizDescription}</span>
-                        </button>
-                      ))}
+                    <div
+                      className="solo-mode-picker"
+                      aria-label={language === 'fr' ? 'Mode de jeu' : 'Game mode'}
+                    >
+                      <button
+                        className="games-secondary"
+                        aria-pressed={options.mode === 'solo'}
+                        onClick={() => setOptions({ ...options, mode: 'solo', kind: 'quiz' })}
+                      >
+                        ★ {language === 'fr' ? 'Solo' : 'Solo'}
+                      </button>
+                      <button
+                        className="games-secondary"
+                        aria-pressed={options.mode !== 'solo'}
+                        onClick={() => setOptions({ ...options, mode: 'together' })}
+                      >
+                        ✦ {language === 'fr' ? 'Jouer ensemble' : 'Play together'}
+                      </button>
                     </div>
+                    {options.mode === 'solo' ? (
+                      <div className="games-cards games-cards-solo">
+                        <div className="games-card" data-selected="true">
+                          <GameSelectionIcon selected />
+                          <img src="./assets/games/solo.webp" alt="" width="220" height="220" />
+                          <strong>{language === 'fr' ? '4 à la suite' : 'Four in a row'}</strong>
+                          <span>
+                            {language === 'fr'
+                              ? 'Quatre bonnes réponses d’affilée pour gagner.'
+                              : 'Four correct answers in a row to win.'}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="games-cards">
+                        {(['who', 'quiz'] as const).map(kind => (
+                          <button
+                            key={kind}
+                            className="games-card"
+                            data-kind={kind}
+                            aria-pressed={options.kind === kind}
+                            onClick={() => setOptions({ ...options, kind })}
+                          >
+                            <GameSelectionIcon selected={options.kind === kind} />
+                            <img
+                              src={`./assets/games/${kind}.webp`}
+                              alt=""
+                              width="220"
+                              height="220"
+                            />
+                            <strong>{t[kind]}</strong>
+                            <span>{kind === 'who' ? t.whoDescription : t.quizDescription}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <div className="games-options">
                       {(
                         [
-                          ['subject', ['mixed', 'people', 'places', 'objects']],
                           ['testament', ['both', 'old', 'new']],
                           ['difficulty', ['easy', 'medium', 'hard']],
                         ] as const
@@ -394,7 +455,13 @@ export function BibleGamesView({
                       ))}
                     </div>
                     <footer className="games-actions">
-                      <small>{t.rules}</small>
+                      <small>
+                        {options.mode === 'solo'
+                          ? language === 'fr'
+                            ? '1 joueur · chrono adapté à la saisie'
+                            : '1 player · time to type'
+                          : t.rules}
+                      </small>
                       <button
                         className="games-primary"
                         disabled={!state.online || invitationAction !== null}
@@ -402,7 +469,12 @@ export function BibleGamesView({
                           send({ action: 'create', options: { ...options, language } })
                         }
                       >
-                        {t.create} <span aria-hidden="true">→</span>
+                        {options.mode === 'solo'
+                          ? language === 'fr'
+                            ? 'Préparer mon défi'
+                            : 'Prepare my challenge'
+                          : t.create}{' '}
+                        <span aria-hidden="true">→</span>
                       </button>
                     </footer>
                   </>

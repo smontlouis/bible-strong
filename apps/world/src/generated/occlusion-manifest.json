@@ -756,16 +756,16 @@
     "url": "./assets/occlusion/plaza-left-bench.webp"
   },
   {
-    "id": "plaza-right-bench",
-    "name": "Place · banc est",
-    "x": 918,
-    "y": 374,
-    "width": 59,
-    "height": 40,
-    "pixelRatio": 2,
-    "baseY": 403,
+    "id": "community-board",
+    "name": "Place · tableau des petits mots",
+    "x": 880,
+    "y": 325,
+    "width": 125,
+    "height": 105,
+    "pixelRatio": 4,
+    "baseY": 407,
     "always": false,
-    "url": "./assets/occlusion/plaza-right-bench.webp"
+    "url": "./assets/occlusion/community-board.webp"
   },
   {
     "id": "plaza-west-shrub",

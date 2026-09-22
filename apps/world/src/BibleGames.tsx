@@ -20,6 +20,11 @@ export function BibleGames({
 }) {
   const state = useSyncExternalStore(network.games.subscribe, network.games.getSnapshot)
   const { game, invitations } = state.snapshot
+  const menuPaused = game?.solo?.pauses.includes('menu')
+  useEffect(() => {
+    if (game?.solo && state.online && menuPaused === open)
+      network.games.command({ action: open ? 'resume-solo' : 'pause-solo' })
+  }, [game?.id, Boolean(game?.solo), menuPaused, open, state.online, network])
   const [options, setOptions] = useState<GameOptions>({
     kind: 'who',
     difficulty: 'easy',
@@ -100,6 +105,7 @@ export function BibleGames({
   const nearby = network.nearby().filter(p => !game?.players.some(member => member.id === p.id))
   return (
     <BibleGamesView
+      stationOnly
       snapshot={state.snapshot}
       me={state.me}
       online={state.online}

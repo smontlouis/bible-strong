@@ -68,7 +68,7 @@ export class WorldGames {
   }
   private async execute(effect: Effect) {
     if (effect.type === 'generate') {
-      const rounds = await generateRounds(effect.options, this.env)
+      const rounds = await generateRounds(effect.options, this.env, fetch, effect.exclude)
       const engine = this.read()
       engine.tick()
       engine.generated(effect, rounds)
