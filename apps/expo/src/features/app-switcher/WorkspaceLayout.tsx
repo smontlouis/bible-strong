@@ -3,6 +3,7 @@ import GlobalCommandPalette from './commandPalette/GlobalCommandPalette'
 import { finishPageTransition, navigateWithPageTransition } from '~navigation/pageTransition'
 import { usePathname, useRouter } from 'expo-router'
 import type { ReactNode } from 'react'
+import type { PublicShellMode } from '~features/app/publicShellPolicy'
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { Platform } from 'react-native'
@@ -21,15 +22,24 @@ import { TabContextProvider } from './context/TabContext'
 import { useResponsiveWorkspace, WORKSPACE_SIDEBAR_WIDTH } from './utils/useResponsiveWorkspace'
 import { getWorkspacePageForPath, workspacePagePath } from './workspaceRoutes'
 
-export default function WorkspaceLayout({ children }: { children: ReactNode }) {
+export default function WorkspaceLayout({
+  children,
+  mode = 'workspace',
+}: {
+  children: ReactNode
+  mode?: PublicShellMode
+}) {
+  const workspaceActive = mode === 'workspace'
   const { t } = useTranslation()
   const router = useRouter()
   const pathname = usePathname()
   useLayoutEffect(() => {
     finishPageTransition()
   }, [pathname])
-  const isWide = useResponsiveWorkspace()
+  const wideViewport = useResponsiveWorkspace()
+  const isWide = workspaceActive && wideViewport
   const panel = useWorkspaceRoutePanel()
+  const showsStudy = workspaceActive && panel.showsStudy
   const [sidebarHidden, setSidebarHidden] = useAtom(workspaceSidebarHiddenAtom)
   const [overlayOpen, setOverlayOpen] = useState(false)
   const setSidebarDocked = useSetAtom(workspaceSidebarDockedAtom)
@@ -68,16 +78,27 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <HStack className="flex-1 bg-light-grey overflow-hidden">
-      <GlobalCommandPalette />
-      <WorkspaceKeyboardShortcuts
-        toggleSidebar={() => {
-          if (isWide) {
-            if (overlayMode) setOverlayOpen(value => !value)
-            else setSidebarHidden(value => !value)
-          }
-        }}
-      />
+    // Keep the route slot at the same React position through auth resolution and
+    // legacy URL redirects. Replacing the shell would remount Expo Router's Stack.
+    <HStack
+      className={
+        workspaceActive
+          ? 'flex-1 bg-light-grey overflow-hidden'
+          : 'flex-1 bg-reverse overflow-hidden'
+      }
+      style={{ display: mode === 'pending' ? 'none' : 'flex' }}
+    >
+      {workspaceActive && <GlobalCommandPalette />}
+      {workspaceActive && (
+        <WorkspaceKeyboardShortcuts
+          toggleSidebar={() => {
+            if (isWide) {
+              if (overlayMode) setOverlayOpen(value => !value)
+              else setSidebarHidden(value => !value)
+            }
+          }}
+        />
+      )}
       {isWide && (
         <Box
           testID="workspace-sidebar-motion"
@@ -114,7 +135,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
               openHome={() => visitPage('home')}
               openMenu={() => visitPage('settings')}
               activePage={getWorkspacePageForPath(pathname)}
-              isContentActive={isWorkspace || panel.showsStudy}
+              isContentActive={isWorkspace || showsStudy}
               onSelectContent={() => {
                 setOverlayOpen(false)
                 if (!isWorkspace) router.push('/')
@@ -155,7 +176,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
               dataSet={Platform.OS === 'web' ? { assistantSurface: 'reader' } : undefined}
               className="absolute inset-0"
               style={{
-                display: isWorkspace || panel.showsStudy ? 'flex' : 'none',
+                display: isWorkspace || showsStudy ? 'flex' : 'none',
                 right: panel.open ? panel.reservedWidth : 0,
               }}
             >
@@ -166,16 +187,16 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
             </Box>
           )}
           <Box
-            testID={panel.showsStudy ? 'workspace-panel-slot' : undefined}
+            testID={showsStudy ? 'workspace-panel-slot' : undefined}
             dataSet={
               Platform.OS === 'web'
-                ? { assistantSurface: panel.showsStudy ? 'panel' : 'reader' }
+                ? { assistantSurface: showsStudy ? 'panel' : 'reader' }
                 : undefined
             }
             className="flex-1 overflow-hidden"
             style={{
               display: isWide && isWorkspace ? 'none' : 'flex',
-              ...(panel.showsStudy
+              ...(showsStudy
                 ? {
                     position: 'absolute',
                     top: 0,

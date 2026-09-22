@@ -4,8 +4,7 @@
 // https://www.biblegateway.com/passage/?search=Psalm+39:5&version=LSG;KJV
 export const lexiconCopy = {
   fr: {
-    // The deployed app still uses query-based Strong routes (ADR-0053 is not deployed).
-    lexiconUrl: 'https://web.bible-strong.app/strong?book=1&reference=1892&bibleVersion=LSG',
+    lexiconUrl: 'https://web.bible-strong.app/strong/h1892?bibleVersion=LSG',
     label: 'LE LEXIQUE',
     close: 'Fermer',
     next: 'Suivant',
@@ -55,7 +54,7 @@ export const lexiconCopy = {
     illustration: 'Un lecteur explore les mots hébreux et grecs avec une loupe',
   },
   en: {
-    lexiconUrl: 'https://web.bible-strong.app/strong?book=1&reference=1892&bibleVersion=KJV',
+    lexiconUrl: 'https://web.bible-strong.app/strong/h1892?bibleVersion=KJV',
     label: 'THE LEXICON',
     close: 'Close',
     next: 'Next',

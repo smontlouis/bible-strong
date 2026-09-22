@@ -78,3 +78,57 @@ it('does not highlight a tab when the panel belongs to a standalone page', () =>
   mockShowsStudy = false
   expect(sidebarIsActive()).toBe(false)
 })
+
+it('preserves the mounted route and its state across guest shell transitions', () => {
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
+  const originalDocument = Object.getOwnPropertyDescriptor(globalThis, 'document')
+  Object.defineProperty(globalThis, 'document', {
+    configurable: true,
+    value: { documentElement: { style: { setProperty: jest.fn(), removeProperty: jest.fn() } } },
+  })
+  const mounted = jest.fn()
+  const unmounted = jest.fn()
+  const Route = () => {
+    const [value, setValue] = React.useState(0)
+    React.useEffect(() => {
+      mounted()
+      return unmounted
+    }, [])
+    return <button onClick={() => setValue(value + 1)}>{value}</button>
+  }
+  let view: ReactTestRenderer | undefined
+  mockPath = '/strong'
+  mockShowsStudy = true
+  try {
+    act(() => {
+      view = create(
+        <WorkspaceLayout>
+          <Route />
+        </WorkspaceLayout>
+      )
+    })
+    act(() => view!.root.findByType('button').props.onClick())
+    mockPath = '/strong/h1892'
+    for (const mode of ['pending', 'public', 'workspace', 'public'] as const) {
+      act(() =>
+        view!.update(
+          <WorkspaceLayout mode={mode}>
+            <Route />
+          </WorkspaceLayout>
+        )
+      )
+      expect(mounted).toHaveBeenCalledTimes(1)
+      expect(unmounted).not.toHaveBeenCalled()
+      expect(view!.root.findByType('button').children).toEqual(['1'])
+      expect(view!.root.findAllByType(WorkspaceSidebar)).toHaveLength(mode === 'workspace' ? 1 : 0)
+      if (mode === 'public') {
+        expect(view!.root.findAllByProps({ testID: 'workspace-reader-motion' })).toHaveLength(0)
+        expect(view!.root.findAllByProps({ testID: 'workspace-panel-slot' })).toHaveLength(0)
+      }
+    }
+  } finally {
+    act(() => view?.unmount())
+    if (originalDocument) Object.defineProperty(globalThis, 'document', originalDocument)
+    else Reflect.deleteProperty(globalThis, 'document')
+  }
+})

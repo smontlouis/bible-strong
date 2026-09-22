@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { batches, catalogue } from './catalogue'
+import { referenceUrl } from '../game-catalogue'
 import {
   type Language,
   type Reviews,
@@ -368,11 +369,7 @@ function App() {
                         <p className="aliases">
                           {t('Variantes', 'Aliases')} : {q[lang].aliases.join(', ') || '—'}
                         </p>
-                        <a
-                          href={`https://web.bible-strong.app/bible-view?book=${q.reference.book}&chapter=${q.reference.chapter}&verse=${q.reference.verse}&version=${lang === 'fr' ? 'LSG' : 'KJV'}`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
+                        <a href={referenceUrl(q.reference, lang)} target="_blank" rel="noreferrer">
                           {referenceLabel(q, lang)} ↗
                         </a>
                       </>

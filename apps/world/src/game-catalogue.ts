@@ -31,3 +31,15 @@ const books = {
 export function referenceLabel(q: { reference: BibleReference }, language: Language) {
   return `${books[language][q.reference.book - 1]} ${q.reference.chapter}:${q.reference.verse}`
 }
+
+// Public Bible URLs use lowercase OSIS book IDs, independently of the UI language.
+const publicBookSlugs =
+  'gen|exod|lev|num|deut|josh|judg|ruth|1sam|2sam|1kgs|2kgs|1chr|2chr|ezra|neh|esth|job|ps|prov|eccl|song|isa|jer|lam|ezek|dan|hos|joel|amos|obad|jonah|mic|nah|hab|zeph|hag|zech|mal|matt|mark|luke|john|acts|rom|1cor|2cor|gal|eph|phil|col|1thess|2thess|1tim|2tim|titus|phlm|heb|jas|1pet|2pet|1john|2john|3john|jude|rev'.split(
+    '|'
+  )
+
+export function referenceUrl(reference: BibleReference, language: Language) {
+  const book = publicBookSlugs[reference.book - 1]
+  if (!book) throw new Error(`Unknown Bible book: ${reference.book}`)
+  return `https://web.bible-strong.app/bible/${language === 'fr' ? 'lsg' : 'kjv'}/${book}/${reference.chapter}/${reference.verse}`
+}

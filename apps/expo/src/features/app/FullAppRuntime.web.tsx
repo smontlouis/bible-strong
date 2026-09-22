@@ -25,7 +25,6 @@ import { appLogger } from '~helpers/agentObservability'
 import { createFormSheetOptions } from '~navigation/formSheetOptions'
 import type { Theme } from '~themes/index'
 import { PlaybackService } from '../../../playbackService'
-import PublicContentLayout, { PublicContentLoading } from './PublicContentLayout'
 import { useWebAuthStatus } from './useWebAuthStatus'
 import { isPublicContentPath } from '~navigation/publicContentRoutes'
 import { PublicShellProvider } from '~navigation/PublicShellContext'
@@ -117,13 +116,7 @@ const FullAppRuntime = ({ theme }: { theme: Theme }) => {
                 active={publicShellActive}
                 openWorkspace={() => setGuestWorkspaceRequested(true)}
               >
-                {authPending ? (
-                  <PublicContentLoading />
-                ) : publicShellActive ? (
-                  <PublicContentLayout>{stack}</PublicContentLayout>
-                ) : (
-                  <WorkspaceLayout>{stack}</WorkspaceLayout>
-                )}
+                <WorkspaceLayout mode={publicShellMode}>{stack}</WorkspaceLayout>
               </PublicShellProvider>
               {!publicShellActive && !authPending && <WorkspaceAnalytics />}
               {!publicShellActive && !authPending && <AssistantLauncher />}

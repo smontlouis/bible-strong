@@ -181,7 +181,7 @@ function soloLabItem(
     sources: [
       {
         reference: `${fr ? 'Exode' : 'Exodus'} ${q.chapter}:${q.verse}`,
-        url: `https://web.bible-strong.app/bible-view?book=2&chapter=${q.chapter}&verse=${q.verse}&version=${fr ? 'LSG' : 'KJV'}`,
+        url: `https://web.bible-strong.app/bible/${fr ? 'lsg' : 'kjv'}/exod/${q.chapter}/${q.verse}`,
       },
     ],
   }
@@ -508,7 +508,7 @@ export function reveal(model: LabModel, correct: boolean, actor = model.me) {
       ? 'Dieu envoie Moïse auprès du pharaon pour faire sortir son peuple d’Égypte.'
       : 'God sends Moses to Pharaoh to bring his people out of Egypt.'
     g.result.reference = fr ? 'Exode 3:10' : 'Exodus 3:10'
-    g.result.url = `https://web.bible-strong.app/bible-view?book=2&chapter=3&verse=10&version=${fr ? 'LSG' : 'KJV'}`
+    g.result.url = `https://web.bible-strong.app/bible/${fr ? 'lsg' : 'kjv'}/exod/3/10`
   }
   g.ownAnswer = {
     text: winner === model.me ? answer : 'David',

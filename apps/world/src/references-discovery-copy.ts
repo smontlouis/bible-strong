@@ -56,7 +56,7 @@ export const referencesCopy = {
     more: 'À toi de suivre le fil.',
     possibilities: 'Commence avec le Psaume 23 dans Bible Strong.',
     open: 'Ouvrir la Bible',
-    url: 'https://web.bible-strong.app/bible-view?book=19&chapter=23&version=LSG',
+    url: 'https://web.bible-strong.app/bible/lsg/ps/23',
   },
   en: {
     label: 'CROSS REFERENCES',
@@ -108,6 +108,6 @@ export const referencesCopy = {
     more: 'Your turn to follow the thread.',
     possibilities: 'Start with Psalm 23 in Bible Strong.',
     open: 'Open the Bible',
-    url: 'https://web.bible-strong.app/bible-view?book=19&chapter=23&version=KJV',
+    url: 'https://web.bible-strong.app/bible/kjv/ps/23',
   },
 }
