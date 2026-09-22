@@ -14,7 +14,6 @@ import { awardedPoints } from './game-presentation'
 import { GameFeedback, GameFinale } from './GameFeedback'
 import { WhoRound, WhoPlayers } from './WhoRound'
 import './bible-games.css'
-import './game-arcade.css'
 
 const copy = {
   fr: {
