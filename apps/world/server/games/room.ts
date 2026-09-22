@@ -22,18 +22,52 @@ export class WorldGames {
     ctx.storage.sql.exec(
       'CREATE TABLE IF NOT EXISTS world_games (id INTEGER PRIMARY KEY CHECK (id = 1), payload TEXT NOT NULL)'
     )
+    // One row per game: a solo run reserves 50 questions, so a single shared row would
+    // approach the 2 MB SQLite value limit. Row 1 keeps invitations and rate limits only.
+    ctx.storage.sql.exec(
+      'CREATE TABLE IF NOT EXISTS world_game_rows (id TEXT PRIMARY KEY, payload TEXT NOT NULL)'
+    )
   }
+  /** Serialized rows as read, so a save only rewrites the games that changed. */
+  private loaded = new WeakMap<GameEngine, Map<string, string>>()
   private read() {
-    const row = this.ctx.storage.sql
+    const meta = this.ctx.storage.sql
       .exec<{ payload: string }>('SELECT payload FROM world_games WHERE id = 1')
       .toArray()[0]
-    return new GameEngine(row ? (JSON.parse(row.payload) as GameData) : emptyGames(), this.visitors)
+    const shared = meta ? (JSON.parse(meta.payload) as Partial<GameData>) : {}
+    const rows = this.ctx.storage.sql
+      .exec<{ id: string; payload: string }>('SELECT id, payload FROM world_game_rows')
+      .toArray()
+    const data: GameData = {
+      ...emptyGames(),
+      invitations: shared.invitations ?? [],
+      limits: shared.limits ?? {},
+      // Games of the former single-row format migrate on the next save.
+      games: [...(shared.games ?? []), ...rows.map(row => JSON.parse(row.payload))],
+    }
+    const engine = new GameEngine(data, this.visitors)
+    this.loaded.set(engine, new Map(rows.map(row => [row.id, row.payload])))
+    return engine
   }
   private save(engine: GameEngine) {
+    const { games, invitations, limits } = engine.data
+    const before = this.loaded.get(engine) ?? new Map<string, string>()
     this.ctx.storage.sql.exec(
       'INSERT INTO world_games (id, payload) VALUES (1, ?) ON CONFLICT(id) DO UPDATE SET payload = excluded.payload',
-      JSON.stringify(engine.data)
+      JSON.stringify({ invitations, limits })
     )
+    for (const game of games) {
+      const payload = JSON.stringify(game)
+      if (before.get(game.id) !== payload)
+        this.ctx.storage.sql.exec(
+          'INSERT INTO world_game_rows (id, payload) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET payload = excluded.payload',
+          game.id,
+          payload
+        )
+      before.delete(game.id)
+    }
+    for (const id of before.keys())
+      this.ctx.storage.sql.exec('DELETE FROM world_game_rows WHERE id = ?', id)
     for (const visitor of this.visitors()) this.deliver(visitor.id, engine.snapshot(visitor.id))
     const next = engine.nextWake()
     if (next !== null) this.ctx.waitUntil(this.schedule(next))

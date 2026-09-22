@@ -680,8 +680,16 @@
   display: grid;
   gap: 10px;
 }
-.games-answer-form > button {
+.games-answer-form > button,
+.games-answer-fields > button {
   justify-self: end;
+}
+.games-answer-fields {
+  display: grid;
+  gap: 10px;
+}
+.games-answer-fields[hidden] {
+  display: none;
 }
 .games-choices {
   display: grid;

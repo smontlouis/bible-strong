@@ -40,7 +40,22 @@ export type ServerMessage =
   | { type: 'leave'; id: string }
   | { type: 'pong' }
   | { type: 'full' }
-export type PresenceStatus = { state: 'connecting' | 'online' | 'offline' | 'full'; count: number }
+  /** The page speaks another protocol version and must reload. */
+  | { type: 'outdated' }
+export type PresenceStatus = {
+  state: 'connecting' | 'online' | 'offline' | 'full' | 'outdated'
+  count: number
+}
+/** A join from another protocol version, reported instead of treated as garbage. */
+export function isOutdatedJoin(raw: string) {
+  if (raw.length > 4096) return false
+  try {
+    const m = JSON.parse(raw)
+    return !!m && m.type === 'join' && m.version !== PROTOCOL_VERSION
+  } catch {
+    return false
+  }
+}
 
 export function parsePose(value: unknown): Pose | null {
   if (!value || typeof value !== 'object') return null

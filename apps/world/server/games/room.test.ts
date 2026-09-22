@@ -7,13 +7,14 @@ import { CatalogueStore, type CatalogueRequest } from './catalogue-store'
 import { questionSeed, identitySeed, catalogueRevision } from './catalogue-seed.generated'
 import { sqliteStorage } from './sqlite-test'
 import type { GamesSnapshot } from '../../src/games-protocol'
-import type { Round } from './engine'
+import { START_DELAY_MS, type Round } from './engine'
 
 let database: ReturnType<typeof sqliteStorage>, catalogue: ReturnType<typeof sqliteStorage>
 let service: WorldGames, snapshot: GamesSnapshot, allocated: Round[], tasks: Promise<unknown>[]
 let allocate: ReturnType<typeof vi.fn<(request: CatalogueRequest) => Promise<Round[]>>>
 beforeEach(() => {
   vi.clearAllMocks()
+  vi.useFakeTimers({ toFake: ['Date'] })
   database = sqliteStorage()
   catalogue = sqliteStorage()
   const store = new CatalogueStore(catalogue.storage)
@@ -53,15 +54,21 @@ beforeEach(() => {
   })
 })
 afterEach(() => {
+  vi.useRealTimers()
   database.db.close()
   catalogue.db.close()
 })
+/** Start the solo run and let the 3 · 2 · 1 countdown elapse before answering. */
+async function startSolo() {
+  service.command('avatar', { action: 'start' })
+  await settle()
+  vi.setSystemTime(Date.now() + START_DELAY_MS)
+}
 async function settle() {
   while (tasks.length) await Promise.all(tasks.splice(0))
 }
 it('loads from SQLite and scores an exact answer without any evaluator call', async () => {
-  service.command('avatar', { action: 'start' })
-  await settle()
+  await startSolo()
   expect(allocate.mock.calls[0][0].players).toEqual(['history'])
   expect(snapshot.game?.question).toBe(allocated[0].question)
   expect(snapshot.game?.choices).toBeUndefined()
@@ -84,8 +91,7 @@ it('loads from SQLite and scores an exact answer without any evaluator call', as
   expect(allocate.mock.calls[0][0].count).toBe(50)
 })
 it('sends only unmatched answers to Jev and preserves the question/timer on an outage', async () => {
-  service.command('avatar', { action: 'start' })
-  await settle()
+  await startSolo()
   vi.mocked(judgeAnswer).mockResolvedValue('unavailable')
   const game = snapshot.game!
   service.command('avatar', {
@@ -120,13 +126,11 @@ it('sends only unmatched answers to Jev and preserves the question/timer on an o
 it('returns a retryable paused lobby on SQLite failure and recovers without generation', async () => {
   const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
   allocate.mockRejectedValueOnce(new Error('Database unavailable'))
-  service.command('avatar', { action: 'start' })
-  await settle()
+  await startSolo()
   expect(snapshot.game?.phase).toBe('lobby')
   expect(snapshot.game?.reason).toBe('generation_failed')
   expect(snapshot.game?.solo?.remainingMs).toBe(120_000)
-  service.command('avatar', { action: 'start' })
-  await settle()
+  await startSolo()
   expect(snapshot.game?.phase).toBe('question')
   expect(judgeAnswer).not.toHaveBeenCalled()
   warning.mockRestore()
@@ -146,4 +150,23 @@ it('does not restore an abandoned game when a delayed allocation completes', asy
   resolve(allocated)
   await settle()
   expect(snapshot.game).toBeNull()
+})
+it('stores one row per game and migrates the former single-row format', async () => {
+  const rows = () =>
+    database.db.prepare('SELECT id FROM world_game_rows').all() as { id: string }[]
+  expect(rows()).toHaveLength(1)
+  const meta = database.db.prepare('SELECT payload FROM world_games WHERE id = 1').get() as {
+    payload: string
+  }
+  expect(JSON.parse(meta.payload).games).toBeUndefined()
+  // Rewrite as the legacy layout: every game inside row 1, no per-game rows.
+  const legacy = { games: [JSON.parse((database.db.prepare('SELECT payload FROM world_game_rows').get() as { payload: string }).payload)], invitations: [], limits: {} }
+  database.db.exec('DELETE FROM world_game_rows')
+  database.db
+    .prepare('UPDATE world_games SET payload = ? WHERE id = 1')
+    .run(JSON.stringify(legacy))
+  await startSolo()
+  expect(snapshot.game?.phase).toBe('question')
+  expect(rows()).toHaveLength(1)
+  expect(JSON.parse((database.db.prepare('SELECT payload FROM world_games WHERE id = 1').get() as { payload: string }).payload).games).toBeUndefined()
 })

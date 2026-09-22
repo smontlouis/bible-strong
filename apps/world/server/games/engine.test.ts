@@ -3,7 +3,9 @@ import {
   emptyGames,
   GameEngine,
   GameFault,
+  MAX_GAMES,
   REJOIN_MS,
+  START_DELAY_MS,
   type Effect,
   type Round,
   type Visitor,
@@ -44,6 +46,12 @@ beforeEach(() => {
   )
 })
 const command = (id: string, action: GameAction) => engine.command(id, action)
+/** Generation completes, then the 3 · 2 · 1 countdown elapses before the first question opens. */
+function launch(...args: Parameters<GameEngine['generated']>) {
+  const g = engine.data.games.find(item => item.id === args[0].gameId)
+  engine.generated(...args)
+  if (g?.startsAt !== undefined && g.startsAt > now) now = g.startsAt
+}
 function join(id: string) {
   command('a', { action: 'invite', target: id })
   const invitation = engine.snapshot(id).invitations[0].id
@@ -56,7 +64,7 @@ function lobby(size = 2) {
 function start(size = 2) {
   lobby(size)
   const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
-  engine.generated(effect, structuredClone(rounds))
+  launch(effect, structuredClone(rounds))
   return engine.data.games[0]
 }
 function answer(id: string, text: string) {
@@ -184,7 +192,7 @@ describe('round authority and privacy', () => {
     lobby()
     const e = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
     command('b', { action: 'leave' })
-    engine.generated(e, rounds)
+    launch(e, rounds)
     expect(engine.data.games[0].phase).toBe('finished')
   })
   it('rejects answers from a previous round and non-host next requests', () => {
@@ -203,7 +211,7 @@ describe('round authority and privacy', () => {
     g.options.kind = 'quiz'
     g.options.difficulty = 'easy'
     const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
-    engine.generated(effect, rounds)
+    launch(effect, rounds)
     fails('invalid', () => answer('a', 'Unknown'))
     expect(answer('a', 'Paul')).toBeUndefined()
     expect(g.answers.a.status).toBe('wrong')
@@ -333,7 +341,7 @@ describe('Who am I: duel and clue race', () => {
     lobby(size)
     engine.data.games[0].options.kind = 'who'
     const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
-    engine.generated(
+    launch(
       effect,
       rounds.map(r => ({ ...r, clues: ['one', 'two', 'three', 'four'] }))
     )
@@ -531,7 +539,7 @@ it('finishes legacy three-clue games with their existing scoring rules', () => {
   const g = engine.data.games[0]
   g.options.kind = 'who'
   const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
-  engine.generated(effect, rounds)
+  launch(effect, rounds)
   expect(g.who).toBeUndefined()
   answer('a', 'Pierre0')
   answer('b', 'Pierre0')
@@ -544,7 +552,7 @@ describe('solo four in a row under room authority', () => {
   function solo() {
     command('a', { action: 'create', options: { ...options, mode: 'solo' } })
     const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
-    engine.generated(effect, structuredClone(rounds))
+    launch(effect, structuredClone(rounds))
     return engine.data.games[0]
   }
   it('starts alone, keeps answers private, and wins after four consecutive answers', () => {
@@ -606,7 +614,7 @@ describe('solo four in a row under room authority', () => {
     expect(effect.exclude).toHaveLength(5)
     expect(g.round).toBe(5)
     now += 10000
-    engine.generated(
+    launch(
       effect,
       rounds.map((r, i) => ({ ...r, answer: `New${i}`, aliases: [] }))
     )
@@ -623,7 +631,7 @@ describe('solo four in a row under room authority', () => {
 it('passes a solo question without AI and guards duplicate and stale passes', () => {
   command('a', { action: 'create', options: { ...options, mode: 'solo' } })
   const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
-  engine.generated(effect, structuredClone(rounds))
+  launch(effect, structuredClone(rounds))
   const g = engine.data.games[0]
   answer('a', 'Pierre0')
   expect(command('a', { action: 'pass', gameId: g.id, round: 1 })).toBeUndefined()
@@ -638,7 +646,7 @@ it('passes a solo question without AI and guards duplicate and stale passes', ()
 it('holds the solo clock until both the game dialog and presence resume', () => {
   command('a', { action: 'create', options: { ...options, mode: 'solo' } })
   const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
-  engine.generated(effect, structuredClone(rounds))
+  launch(effect, structuredClone(rounds))
   now += 10000
   command('a', { action: 'pause-solo' })
   engine.presence('a', false)
@@ -674,7 +682,7 @@ it('keeps solo time running after success, failure and pass, with a private pers
     answer: `R${i}`,
     catalogueId: `q-${i}`,
   }))
-  engine.generated(effect, reserve)
+  launch(effect, reserve)
   let g = engine.data.games[0]
   now += 1000
   answer('a', 'R0')
@@ -725,7 +733,7 @@ it('keeps solo time running after success, failure and pass, with a private pers
 
 it('does not reopen a solo round when an old verdict or submission arrives after auto-advance', () => {
   command('a', { action: 'create', options: { ...options, mode: 'solo' } })
-  engine.generated(
+  launch(
     command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>,
     rounds
   )
@@ -739,4 +747,145 @@ it('does not reopen a solo round when an old verdict or submission arrives after
   fails('not_ready', () =>
     command('a', { action: 'answer', gameId: g.id, round: 0, text: rounds[0].answer })
   )
+})
+
+describe('audit fixes', () => {
+  function duel() {
+    lobby()
+    engine.data.games[0].options.kind = 'who'
+    const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
+    engine.generated(
+      effect,
+      rounds.map(r => ({ ...r, clues: ['one', 'two', 'three', 'four'] }))
+    )
+    return engine.data.games[0]
+  }
+  it('opens the first question after the countdown, with its full clock', () => {
+    const g = duel()
+    expect(g.startsAt).toBe(now + START_DELAY_MS)
+    expect(engine.snapshot('a').game?.startsAt).toBe(g.startsAt)
+    const early = { action: 'answer', gameId: g.id, round: 0, zone: 0, text: 'Pierre0' } as const
+    fails('not_ready', () => command('a', early))
+    now = g.startsAt!
+    expect(g.deadline - now).toBe(20_000)
+    command('a', early)
+    expect(g.phase).toBe('reveal')
+    command('a', { action: 'next' })
+    expect(g.startsAt).toBeUndefined()
+  })
+  it('starts the solo clock only after the countdown', () => {
+    command('a', { action: 'create', options: { ...options, mode: 'solo' } })
+    const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
+    engine.generated(effect, structuredClone(rounds))
+    const g = engine.data.games[0]
+    fails('not_ready', () => answer('a', 'Pierre0'))
+    now += START_DELAY_MS
+    engine.tick()
+    expect(g.solo?.remainingMs).toBe(120_000)
+    now += 1_000
+    engine.tick()
+    expect(g.solo?.remainingMs).toBe(119_000)
+  })
+  it('limits the total pause a player can impose by hiding and showing again', () => {
+    const g = start()
+    for (let i = 0; i < 3; i++) {
+      engine.presence('b', false)
+      now += 40_000
+      engine.presence('b', true)
+    }
+    // 90 s of pause spent: a further absence no longer stops the clock.
+    engine.presence('b', false)
+    expect(g.pausedAt).toBeNull()
+    const deadline = g.deadline
+    now += 10_000
+    engine.tick()
+    expect(g.deadline).toBe(deadline)
+  })
+  it('applies a verdict received during a pause before ending a two-player game', () => {
+    const g = duel()
+    now = g.startsAt!
+    const check = command('a', {
+      action: 'answer',
+      gameId: g.id,
+      round: 0,
+      zone: 0,
+      text: 'Pierr',
+    }) as Extract<Effect, { type: 'evaluate' }>
+    engine.presence('b', false)
+    engine.evaluated(check, 'correct')
+    now += REJOIN_MS
+    engine.tick()
+    expect(g.phase).toBe('finished')
+    expect(g.players.find(p => p.id === 'a')?.score).toBe(4)
+  })
+  it('keeps the final podium when players leave the summary', () => {
+    const g = start()
+    g.players[0].score = 5
+    g.round = 4
+    g.phase = 'reveal'
+    command('a', { action: 'next' })
+    expect(g.phase).toBe('finished')
+    command('a', { action: 'leave' })
+    const view = engine.snapshot('b').game!
+    expect(view.standings?.map(p => [p.id, p.score])).toEqual([
+      ['a', 5],
+      ['b', 0],
+    ])
+  })
+  it('keeps invitations received by a player who leaves a finished game', () => {
+    const g = start()
+    engine.data.games[0].phase = 'finished'
+    command('c', { action: 'create', options })
+    command('c', { action: 'invite', target: 'b' })
+    command('b', { action: 'leave' })
+    expect(engine.snapshot('b').invitations).toHaveLength(1)
+    expect(g.players.map(p => p.id)).toEqual(['a'])
+  })
+  it('cancels the removal of a player who comes back to the summary', () => {
+    const g = start()
+    engine.presence('b', false)
+    g.phase = 'finished'
+    now += 10_000
+    engine.presence('b', true)
+    now += REJOIN_MS
+    engine.tick()
+    expect(g.players.map(p => p.id)).toEqual(['a', 'b'])
+  })
+  it('does not turn a slower pending answer into a provider error after a race is won', () => {
+    lobby(3)
+    engine.data.games[0].options.kind = 'who'
+    const effect = command('a', { action: 'start' }) as Extract<Effect, { type: 'generate' }>
+    launch(
+      effect,
+      rounds.map(r => ({ ...r, clues: ['one', 'two', 'three', 'four'] }))
+    )
+    const g = engine.data.games[0]
+    const first = command('a', {
+      action: 'answer',
+      gameId: g.id,
+      round: 0,
+      zone: 0,
+      text: 'Pierr',
+    }) as Extract<Effect, { type: 'evaluate' }>
+    command('b', { action: 'answer', gameId: g.id, round: 0, zone: 0, text: 'Pier' })
+    engine.evaluated(first, 'correct')
+    expect(g.phase).toBe('reveal')
+    now += 13_000
+    engine.tick()
+    expect(g.answers.b.status).not.toBe('unavailable')
+    expect(g.void).toBe(false)
+  })
+  it('evicts abandoned solo runs instead of refusing every new game', () => {
+    for (let i = 0; i < MAX_GAMES; i++) {
+      const id = `ghost-${i}`
+      visitors.push({ ...visitors[0], id, present: true })
+      command(id, { action: 'create', options: { ...options, mode: 'solo' } })
+      visitors = visitors.filter(v => v.id !== id)
+      now += 11_000
+    }
+    expect(engine.data.games).toHaveLength(MAX_GAMES)
+    command('a', { action: 'create', options })
+    expect(engine.data.games).toHaveLength(MAX_GAMES)
+    expect(engine.snapshot('a').game?.host).toBe('a')
+  })
 })

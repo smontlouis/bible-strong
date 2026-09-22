@@ -74,8 +74,9 @@ beforeEach(() => {
         alarm = value
       },
       get: async (key: string) => saved.get(key),
-      put: async (key: string, value: unknown) => {
-        saved.set(key, structuredClone(value))
+      put: async (key: string | Record<string, unknown>, value?: unknown) => {
+        const entries = typeof key === 'string' ? { [key]: value } : key
+        for (const [k, v] of Object.entries(entries)) saved.set(k, structuredClone(v))
       },
       delete: async (key: string | string[]) => {
         for (const k of [key].flat()) saved.delete(k)
@@ -110,7 +111,8 @@ it('restores identity, position and movement sequence after a disconnect and roo
   room = new WorldRoom((room as any).ctx, { connections } as never)
   const next = await join(token)
   expect(next.state.player).toMatchObject({ id, pose, seq: 43 })
-  expect(saved.has(`resume:${token}`)).toBe(false)
+  // The snapshot is kept while connected, so an unclean shutdown still resumes this identity.
+  expect(saved.get(`resume:${token}`).player).toMatchObject({ id, seq: 43 })
   await send(next, { type: 'move', pose: { ...pose, x: 220 }, seq: 44 })
   expect(next.state.player.pose.x).toBe(220)
 })
@@ -125,7 +127,7 @@ it('replaces a still-open transport without duplicate avatars or leaking the res
   expect([...connections.values()].filter(c => c.state.player?.id === id)).toHaveLength(1)
   expect(JSON.stringify(observer.messages)).not.toContain(token)
   expect(observer.messages.some((m: any) => m.type === 'leave' && m.id === id)).toBe(false)
-  expect(saved.has(`resume:${token}`)).toBe(false)
+  expect(saved.get(`resume:${token}`).player.id).toBe(id)
 })
 it('expires abandoned sessions after 24 hours and refuses to restore expired credentials', async () => {
   const c = await join()
@@ -178,4 +180,109 @@ it('shares current activity with newcomers and clears it for existing visitors',
   await send(a, { type: 'activity', activity: null })
   await vi.advanceTimersByTimeAsync(100)
   expect(b.messages.filter((m: any) => m.type === 'frame').at(-1).players.find((p: any) => p.id === a.state.player.id).activity).toBeNull()
+})
+
+it('counts refused game commands toward the message rate limit', async () => {
+  const c = await join()
+  for (let i = 0; i < 45; i++) await send(c, { type: 'game', command: { action: 'sync' } })
+  expect(c.code).toBe(4009)
+})
+
+it('tells an outdated page to reload instead of letting it reconnect forever', async () => {
+  const c: any = await join()
+  const stale: any = {
+    ...c,
+    id: crypto.randomUUID(),
+    readyState: 1,
+    state: null,
+    messages: [],
+    code: undefined,
+  }
+  connections.set(stale.id, stale)
+  await room.onConnect(stale)
+  await send(stale, { type: 'join', version: 1, profile, pose })
+  expect(stale.messages.at(-1)).toEqual({ type: 'outdated' })
+  expect(stale.code).toBe(4003)
+})
+
+it('expires sockets that never join even while they keep pinging', async () => {
+  const c: any = {
+    id: crypto.randomUUID(),
+    readyState: 1,
+    state: null,
+    messages: [],
+    setState(state: unknown) {
+      this.state = structuredClone(state)
+    },
+    send(raw: string) {
+      this.messages.push(JSON.parse(raw))
+    },
+    close(code: number) {
+      this.readyState = 3
+      this.code = code
+      room.onClose(this)
+      connections.delete(this.id)
+    },
+  }
+  connections.set(c.id, c)
+  await room.onConnect(c)
+  for (let i = 0; i < 3; i++) {
+    vi.advanceTimersByTime(5_000)
+    await send(c, { type: 'ping' })
+  }
+  await room.onAlarm()
+  expect(c.code).toBe(4000)
+})
+
+it('releases a hidden avatar after 30 minutes without news and keeps its identity resumable', async () => {
+  const c = await join()
+  const id = c.state.player.id
+  const token = c.state.resumeToken
+  await send(c, { type: 'visibility', hidden: true })
+  vi.advanceTimersByTime(30 * 60_000 + 1)
+  await room.onAlarm()
+  expect(c.code).toBe(4000)
+  const next = await join(token)
+  expect(next.state.player.id).toBe(id)
+})
+
+it('refreshes resume snapshots of moving visitors on each alarm', async () => {
+  const c = await join()
+  const token = c.state.resumeToken
+  await send(c, { type: 'move', pose: { ...pose, x: 300 }, seq: 5 })
+  await room.onAlarm()
+  expect(saved.get(`resume:${token}`).player.pose.x).toBe(300)
+})
+
+it('keeps the reaction cooldown across a resumed connection', async () => {
+  const sender = await join()
+  const observer = await join()
+  const token = sender.state.resumeToken
+  await send(sender, { type: 'reaction', reaction: 'love' })
+  sender.close(1000)
+  const again = await join(token)
+  await send(again, { type: 'reaction', reaction: 'laugh' })
+  expect(observer.messages.filter((m: any) => m.type === 'reaction')).toHaveLength(1)
+})
+
+it('never sends presence to sockets that have not joined', async () => {
+  const lurker: any = {
+    id: crypto.randomUUID(),
+    readyState: 1,
+    state: null,
+    messages: [],
+    setState(state: unknown) {
+      this.state = structuredClone(state)
+    },
+    send(raw: string) {
+      this.messages.push(JSON.parse(raw))
+    },
+    close() {},
+  }
+  connections.set(lurker.id, lurker)
+  await room.onConnect(lurker)
+  const c = await join()
+  await send(c, { type: 'move', pose: { ...pose, x: 320 }, seq: 2 })
+  vi.advanceTimersByTime(60)
+  expect(lurker.messages).toEqual([])
 })

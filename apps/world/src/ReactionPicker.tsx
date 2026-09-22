@@ -42,8 +42,13 @@ export function ReactionPicker({
   openRequest?: number
 }) {
   const [open, setOpen] = useState(false)
+  // Only a new request opens the panel: the picker remounts whenever a dialog closes, and
+  // must not reopen for a request that was already served before that dialog.
+  const served = useRef(openRequest)
   useEffect(() => {
-    if (openRequest > 0) setOpen(true)
+    if (openRequest === served.current) return
+    served.current = openRequest
+    setOpen(true)
   }, [openRequest])
   const [cooldown, setCooldown] = useState(false)
   const [feedback, setFeedback] = useState('')

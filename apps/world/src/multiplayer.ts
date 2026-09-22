@@ -80,6 +80,15 @@ export class WorldMultiplayer {
   private seq = 0
   private destroyed = false
   private superseded = false
+  /** The page speaks another protocol version: stop reconnecting and ask for a reload. */
+  private outdated = false
+  /** Identity welcomed earlier in this page: a reconnect keeps the live position. */
+  private knownId: string | null = null
+  /** Visibility last acknowledged by a successful send, retried by the heartbeat. */
+  private reportedHidden: boolean | null = null
+  private reportVisibility() {
+    if (this.send({ type: 'visibility', hidden: document.hidden })) this.reportedHidden = document.hidden
+  }
   // Anonymous repetition history only: never used to authenticate or resume an avatar.
   private gameHistoryId = this.readGameHistoryId()
   private readGameHistoryId() {
@@ -114,6 +123,7 @@ export class WorldMultiplayer {
   private enabled = false
   private heartbeat = window.setInterval(() => {
     if (!this.socket || document.hidden) return
+    if (this.id && this.reportedHidden !== document.hidden) this.reportVisibility()
     if (
       this.socket.readyState === WebSocket.OPEN &&
       performance.now() - this.lastReceived > 20_000
@@ -128,12 +138,13 @@ export class WorldMultiplayer {
     this.pose = { ...this.pose, moving: false }
     if (document.hidden && this.id && !this.pendingSpawn)
       this.send({ type: 'move', pose: this.pose, seq: ++this.seq })
-    this.send({ type: 'visibility', hidden: document.hidden })
+    this.reportVisibility()
     if (!document.hidden) {
       // Give the connection a heartbeat round trip before treating it as stale.
       this.lastReceived = performance.now()
       this.send({ type: 'ping' })
-      if (!this.socket && this.profile && this.status.state !== 'full') this.connect()
+      if (!this.socket && this.profile && this.status.state !== 'full' && !this.outdated)
+        this.connect()
     }
   }
   constructor() {
@@ -148,7 +159,8 @@ export class WorldMultiplayer {
       if (this.socket) this.disconnect()
       return
     }
-    if (!this.socket && !this.destroyed && this.status.state !== 'full') this.connect()
+    if (!this.socket && !this.destroyed && this.status.state !== 'full' && !this.outdated)
+      this.connect()
     if (!this.id || this.pendingSpawn || document.hidden) return
     const profileKey = JSON.stringify(this.profile)
     if (profileKey !== this.lastProfile) {
@@ -172,7 +184,7 @@ export class WorldMultiplayer {
     return false
   }
   private connect() {
-    if (this.destroyed || this.superseded || !this.profile || this.socket) return
+    if (this.destroyed || this.superseded || this.outdated || !this.profile || this.socket) return
     const host = import.meta.env.VITE_WORLD_MULTIPLAYER_HOST || location.host
     const socket = new PartySocket({
       host,
@@ -239,10 +251,20 @@ export class WorldMultiplayer {
           /* In-memory resumption still works when storage is unavailable. */
         }
         this.seq = message.players.find(player => player.id === message.id)?.seq ?? 0
-        this.send({ type: 'visibility', hidden: document.hidden })
-        this.pendingSpawn = message.spawn
-        this.pose = message.spawn
+        this.reportVisibility()
+        const resumedLive = this.knownId === message.id
+        this.knownId = message.id
         this.id = message.id
+        if (resumedLive) {
+          // Same page, same identity: the visitor kept walking during the outage, so the
+          // server's last known position is stale. Publish where the avatar really is.
+          this.pendingSpawn = null
+          if (this.send({ type: 'move', pose: { ...this.pose }, seq: ++this.seq }))
+            this.lastPose = JSON.stringify(this.pose)
+        } else {
+          this.pendingSpawn = message.spawn
+          this.pose = message.spawn
+        }
         this.remotes.clear()
         for (const player of message.players)
           if (player.id !== this.id) this.remotes.set(player.id, new RemoteTrack(player, now))
@@ -262,7 +284,7 @@ export class WorldMultiplayer {
       } else if (message.type === 'full') {
         this.disconnect()
         this.status = { state: 'full', count: 0 }
-      }
+      } else if (message.type === 'outdated') this.markOutdated()
     })
     socket.addEventListener('close', event => {
       if (this.socket !== socket) return
@@ -276,13 +298,26 @@ export class WorldMultiplayer {
           /* Storage may be unavailable. */
         }
         this.disconnect()
+      } else if (event.code === 4002 || event.code === 4003) {
+        // The server rejected this page's messages: a reload fixes a version mismatch,
+        // reconnecting would only fail the same way again.
+        this.markOutdated()
+      } else if (event.code === 4000 && document.hidden) {
+        // A hidden tab was released; reconnect when the visitor comes back, not in the background.
+        this.disconnect()
       } else this.disconnected()
     })
     socket.addEventListener('error', () => {
       if (this.socket === socket) this.disconnected()
     })
   }
+  private markOutdated() {
+    this.outdated = true
+    this.disconnect()
+    this.status = { state: 'outdated', count: 0 }
+  }
   private disconnected() {
+    this.reportedHidden = null
     this.reactions.clear()
     this.games.disconnect()
     this.pendingSpawn = null
@@ -297,6 +332,10 @@ export class WorldMultiplayer {
     this.disconnected()
   }
   retry() {
+    if (this.outdated) {
+      location.reload()
+      return
+    }
     this.superseded = false
     this.disconnect()
     this.connect()

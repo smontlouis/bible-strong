@@ -1,4 +1,10 @@
-import { AnimatePresence, MotionConfig, motion, type HTMLMotionProps } from 'motion/react'
+import {
+  AnimatePresence,
+  MotionConfig,
+  motion,
+  useIsPresent,
+  type HTMLMotionProps,
+} from 'motion/react'
 import type { ReactNode } from 'react'
 
 /* Motion presets for the games: enter, exit and layout moves of blocks that appear
@@ -57,14 +63,33 @@ export function GameMotion({ children }: { children: ReactNode }) {
 type DivProps = HTMLMotionProps<'div'>
 type PProps = HTMLMotionProps<'p'>
 
-/** Block that pops in and fades out; wrap it in an AnimatePresence to get the exit. */
-export function Appear({ layout = true, ...props }: DivProps) {
-  return <motion.div layout={layout} {...pop} {...props} />
+/** A block that is animating out is inert: its buttons must not send a second command. */
+function useLeaving() {
+  const present = useIsPresent()
+  return present ? {} : { inert: true, style: { pointerEvents: 'none' as const } }
 }
-export function AppearP({ layout = true, ...props }: PProps) {
-  return <motion.p layout={layout} {...pop} {...props} />
+/** Block that pops in and fades out; wrap it in an AnimatePresence to get the exit. */
+export function Appear({ layout = true, style, ...props }: DivProps) {
+  const leaving = useLeaving()
+  return (
+    <motion.div layout={layout} {...pop} {...props} {...leaving} style={{ ...style, ...leaving.style }} />
+  )
+}
+export function AppearP({ layout = true, style, ...props }: PProps) {
+  const leaving = useLeaving()
+  return (
+    <motion.p layout={layout} {...pop} {...props} {...leaving} style={{ ...style, ...leaving.style }} />
+  )
 }
 /** Block that grows and collapses; keeps overflow hidden while moving. */
 export function Collapse({ style, ...props }: DivProps) {
-  return <motion.div {...collapse} style={{ overflow: 'hidden', ...style }} {...props} />
+  const leaving = useLeaving()
+  return (
+    <motion.div
+      {...collapse}
+      {...props}
+      {...leaving}
+      style={{ overflow: 'hidden', ...style, ...leaving.style }}
+    />
+  )
 }

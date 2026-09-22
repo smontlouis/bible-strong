@@ -38,7 +38,8 @@ export function soloRemaining(run: SoloRun, now: number): number {
 export function tickSolo(run: SoloRun, now: number): void {
   if (run.outcome) return
   run.remainingMs = soloRemaining(run, now)
-  if (run.runningSince !== null) run.runningSince = now
+  // A start scheduled after the countdown stays in the future until it is reached.
+  if (run.runningSince !== null) run.runningSince = Math.max(now, run.runningSince)
   if (run.remainingMs === 0) {
     run.outcome = 'timeout'
     run.runningSince = null

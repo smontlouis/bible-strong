@@ -59,6 +59,8 @@ const copy = {
     connecting: 'Connexion au monde…',
     offline: 'Reconnexion… Tu peux continuer à explorer.',
     full: 'Le monde est complet pour le moment.',
+    outdated: 'Une nouvelle version du monde est disponible.',
+    reload: 'Recharger',
     retry: 'Réessayer',
     title: 'Un monde à explorer',
     brand: 'Bible Strong',
@@ -90,6 +92,8 @@ const copy = {
     connecting: 'Connecting to the world…',
     offline: 'Reconnecting… You can keep exploring.',
     full: 'The world is full at the moment.',
+    outdated: 'A new version of the world is available.',
+    reload: 'Reload',
     retry: 'Try again',
     title: 'A world to explore',
     brand: 'Bible Strong',
@@ -628,6 +632,9 @@ function App() {
               </span>
               {state.multiplayer?.state === 'full' && (
                 <button onClick={() => controls.current.retryMultiplayer?.()}>{t.retry}</button>
+              )}
+              {state.multiplayer?.state === 'outdated' && (
+                <button onClick={() => location.reload()}>{t.reload}</button>
               )}
             </div>
           )}

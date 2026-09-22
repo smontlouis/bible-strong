@@ -13,6 +13,7 @@ import { Server, routePartykitRequest, type Connection } from 'partyserver'
 import {
   MAX_PLAYERS,
   ROOM,
+  isOutdatedJoin,
   parseClientMessage,
   type Player,
   type ServerMessage,
@@ -21,10 +22,16 @@ import {
 const navigation = parseNavigation(navigationJson)
 
 const RESUME_TTL = 24 * 60 * 60 * 1000
-type SavedSession = { player: Player; expires: number }
+/** A hidden tab stops sending heartbeats; its avatar leaves after this, and resumes later. */
+const HIDDEN_TTL = 30 * 60 * 1000
+type SavedSession = { player: Player; expires: number; lastReaction?: number }
 type Session = {
   player: Player | null
   lastSeen: number
+  /** Connection time: a socket that never joins expires even if it keeps pinging. */
+  since?: number
+  /** Movement sequence last written to the resume snapshot. */
+  savedSeq?: number
   window: number
   messages: number
   resumeToken?: string
@@ -85,8 +92,20 @@ export class WorldRoom extends Server<Env> {
       const players = [...this.pending.values()]
       this.pending.clear()
       if (players.length)
-        this.broadcast(JSON.stringify({ type: 'frame', players } satisfies ServerMessage))
+        this.publish(JSON.stringify({ type: 'frame', players } satisfies ServerMessage))
     }, 50)
+  }
+  /** Presence goes to admitted visitors only, never to sockets that have not joined. */
+  private publish(message: string, except?: string) {
+    for (const peer of this.getConnections<Session>())
+      if (peer.id !== except && peer.readyState === 1 && peer.state?.player) peer.send(message)
+  }
+  private saved(player: Player, lastReaction?: number): SavedSession {
+    return {
+      player: { ...player, pose: { ...player.pose, moving: false } },
+      expires: Date.now() + RESUME_TTL,
+      ...(lastReaction !== undefined ? { lastReaction } : {}),
+    }
   }
   async onConnect(connection: Connection<Session>) {
     if ([...this.getConnections()].filter(c => c.readyState === 1).length > MAX_PLAYERS + 16) {
@@ -95,7 +114,7 @@ export class WorldRoom extends Server<Env> {
       return
     }
     const now = Date.now()
-    connection.setState({ player: null, lastSeen: now, window: now, messages: 0 })
+    connection.setState({ player: null, lastSeen: now, since: now, window: now, messages: 0 })
     const alarm = await this.ctx.storage.getAlarm()
     if (alarm === null || alarm > now + 30_000) await this.ctx.storage.setAlarm(now + 30_000)
   }
@@ -112,7 +131,11 @@ export class WorldRoom extends Server<Env> {
     const message = typeof raw === 'string' ? parseClientMessage(raw) : null
     if (!message) {
       this.remove(connection)
-      connection.close(4002, 'Invalid message')
+      if (typeof raw === 'string' && isOutdatedJoin(raw)) {
+        // Tell the page to reload instead of letting it reconnect forever.
+        connection.send(JSON.stringify({ type: 'outdated' } satisfies ServerMessage))
+        connection.close(4003, 'Outdated client')
+      } else connection.close(4002, 'Invalid message')
       return
     }
     const next: Session = {
@@ -143,6 +166,8 @@ export class WorldRoom extends Server<Env> {
       const presenceOnly =
         message.command.action === 'pause-solo' || message.command.action === 'resume-solo'
       if (!presenceOnly && now - (session.lastGameAction ?? 0) < 250) {
+        // Refused commands still count toward the 40 messages per second limit.
+        connection.setState(next)
         connection.send(
           JSON.stringify({ type: 'game-error', error: 'rate_limited' } satisfies ServerMessage)
         )
@@ -189,6 +214,9 @@ export class WorldRoom extends Server<Env> {
         }
         next.resumeToken = restored ? message.resumeToken! : crypto.randomUUID()
         next.gameHistoryId = message.gameHistoryId ?? previous?.state?.gameHistoryId
+        // The reaction cooldown follows the identity, not the transport.
+        const lastReaction = previous?.state?.lastReaction ?? (restored ? saved?.lastReaction : undefined)
+        if (lastReaction !== undefined) next.lastReaction = lastReaction
         next.player = {
           id: restored?.id ?? crypto.randomUUID(),
           profile: message.profile,
@@ -200,8 +228,14 @@ export class WorldRoom extends Server<Env> {
           previous.setState({ ...previous.state, player: null })
           previous.close(4001, 'Session resumed')
         }
+        next.savedSeq = next.player.seq
         connection.setState(next)
-        if (message.resumeToken) await this.ctx.storage.delete(`resume:${message.resumeToken}`)
+        // Keep a resume snapshot while connected: a deploy or eviction may drop sockets
+        // without running the close handler, and visitors must keep their identity.
+        await this.ctx.storage.put(
+          `resume:${next.resumeToken}`,
+          this.saved(next.player, next.lastReaction)
+        )
         const players = [...this.getConnections<Session>()].flatMap(c =>
           c.state?.player ? [c.state.player] : []
         )
@@ -216,9 +250,9 @@ export class WorldRoom extends Server<Env> {
         )
         this.games.presence(next.player.id, true)
         this.pending.delete(next.player.id)
-        this.broadcast(
+        this.publish(
           JSON.stringify({ type: 'player', player: next.player } satisfies ServerMessage),
-          [connection.id]
+          connection.id
         )
       })
       return
@@ -249,20 +283,18 @@ export class WorldRoom extends Server<Env> {
   private remove(connection: Connection<Session>) {
     const session = connection.state
     if (!session?.player) return
-    if (session.resumeToken) {
-      // Attachments survive hibernation; persist only when the transport actually leaves.
+    if (session.resumeToken)
       this.ctx.waitUntil(
-        this.ctx.storage.put(`resume:${session.resumeToken}`, {
-          player: { ...session.player, pose: { ...session.player.pose, moving: false } },
-          expires: Date.now() + RESUME_TTL,
-        } satisfies SavedSession)
+        this.ctx.storage.put(
+          `resume:${session.resumeToken}`,
+          this.saved(session.player, session.lastReaction)
+        )
       )
-    }
     const id = session.player.id
     this.games.presence(id, false)
     this.pending.delete(id)
     connection.setState({ ...session, player: null })
-    this.broadcast(JSON.stringify({ type: 'leave', id } satisfies ServerMessage), [connection.id])
+    this.publish(JSON.stringify({ type: 'leave', id } satisfies ServerMessage), connection.id)
   }
   onClose(connection: Connection<Session>) {
     this.remove(connection)
@@ -273,21 +305,34 @@ export class WorldRoom extends Server<Env> {
   }
   async onAlarm() {
     let active = false
+    const now = Date.now()
+    const snapshots: Record<string, SavedSession> = {}
     for (const connection of this.getConnections<Session>()) {
       const session = connection.state
       if (
         !session ||
-        Date.now() - session.lastSeen >
-          (session.player ? (session.hidden ? RESUME_TTL : 45_000) : 10_000)
+        (!session.player && now - (session.since ?? session.lastSeen) > 10_000) ||
+        now - session.lastSeen > (session.player ? (session.hidden ? HIDDEN_TTL : 45_000) : 10_000)
       ) {
         this.remove(connection)
         connection.close(4000, 'Session expired')
-      } else active = true
+        continue
+      }
+      active = true
+      const { player, resumeToken } = session
+      if (player && resumeToken && session.savedSeq !== player.seq) {
+        snapshots[`resume:${resumeToken}`] = this.saved(player, session.lastReaction)
+        connection.setState({ ...session, savedSeq: player.seq })
+      }
     }
-    const saved = await this.ctx.storage.list<SavedSession>({ prefix: 'resume:' })
-    const expired = [...saved]
-      .filter(([, value]) => value.expires <= Date.now())
-      .map(([key]) => key)
+    const keys = Object.keys(snapshots)
+    for (let i = 0; i < keys.length; i += 128)
+      await this.ctx.storage.put(
+        Object.fromEntries(keys.slice(i, i + 128).map(key => [key, snapshots[key]]))
+      )
+    // Bounded sweep: expired snapshots are removed a batch at a time.
+    const saved = await this.ctx.storage.list<SavedSession>({ prefix: 'resume:', limit: 512 })
+    const expired = [...saved].filter(([, value]) => value.expires <= now).map(([key]) => key)
     for (let i = 0; i < expired.length; i += 128)
       await this.ctx.storage.delete(expired.slice(i, i + 128))
     const gameWake = this.games.tick()

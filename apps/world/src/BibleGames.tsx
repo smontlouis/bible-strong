@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { WorldMultiplayer } from './multiplayer'
 import type { GameAction, GameOptions, GameError, GameInvitation } from './games-protocol'
 import { BibleGamesView } from './BibleGamesView'
@@ -28,21 +28,40 @@ export function BibleGames({
     if (game?.solo && state.online && menuPaused === open)
       network.games.command({ action: open ? 'resume-solo' : 'pause-solo' })
   }, [game?.id, Boolean(game?.solo), menuPaused, open, state.online, network])
-  const [options, setOptions] = useState<GameOptions>({
+  const [options, setOptionsState] = useState<GameOptions>({
     kind: 'who',
     difficulty: 'easy',
     subject: 'mixed',
     testament: 'both',
     language,
   })
-  useEffect(() => {
-    if (!open || !preferredMode) return
-    setOptions(current =>
-      preferredMode === 'solo'
-        ? { ...current, mode: 'solo', kind: 'quiz' }
-        : { ...current, mode: 'together', kind: current.mode === 'solo' ? 'who' : current.kind }
-    )
-  }, [open, preferredMode])
+  // Solo only exists as a Bible challenge; coming back to Together restores the last
+  // shared game the visitor picked instead of keeping the kind solo imposed.
+  const togetherKind = useRef<GameOptions['kind']>('who')
+  const withMode = (current: GameOptions, mode: 'solo' | 'together'): GameOptions => {
+    if (mode === 'solo') return { ...current, mode: 'solo', kind: 'quiz' }
+    return {
+      ...current,
+      mode: 'together',
+      kind: current.mode === 'solo' ? togetherKind.current : current.kind,
+    }
+  }
+  const setOptions = (next: GameOptions) => {
+    const value =
+      next.mode === 'together' && options.mode === 'solo'
+        ? { ...next, kind: togetherKind.current }
+        : next
+    if (value.mode !== 'solo') togetherKind.current = value.kind
+    setOptionsState(value)
+  }
+  // Apply the requested tab while rendering, so the dialog never paints the other one first.
+  const request = open && preferredMode ? preferredMode : null
+  const [appliedRequest, setAppliedRequest] = useState<typeof request>(null)
+  if (request !== appliedRequest) {
+    setAppliedRequest(request)
+    if (request && (options.mode ?? 'together') !== request)
+      setOptionsState(current => withMode(current, request))
+  }
   const [selectedInvitation, setSelectedInvitation] = useState<GameInvitation | null>(null)
   const [invitationIssue, setInvitationIssue] = useState<GameError | null>(null)
   const [invitationAction, setInvitationAction] = useState<{

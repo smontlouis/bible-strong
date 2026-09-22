@@ -14,7 +14,14 @@ import { Modal } from './Modal'
 import { awardedPoints } from './game-presentation'
 import { GameFeedback, GameFinale } from './GameFeedback'
 import { WhoRound, WhoPlayers } from './WhoRound'
-import { Countdown, Curtain, PunchNumber, useScreenTransition, useTransient } from './game-juice'
+import {
+  Countdown,
+  Curtain,
+  PunchNumber,
+  inCountdown,
+  useScreenTransition,
+  useTransient,
+} from './game-juice'
 import { haptic } from './haptics'
 import {
   AnimatePresence,
@@ -281,15 +288,16 @@ export function BibleGamesView({
   const [shake, setShake] = useState(0)
   const shaking = useTransient(shake, 450, shake > 0)
   const onShake = () => setShake(n => n + 1)
-  // Shared games count 3 · 2 · 1 while the catalogue prepares, exactly like solo.
-  const multiGenerating = !!game && !game.solo && game.phase === 'generating'
-  const [counting, setCounting] = useState(multiGenerating)
+  // Shared games count 3 · 2 · 1 while the catalogue prepares, then until the server opens
+  // the first question. Derived from the snapshot, so reopening mid-round never replays it.
+  const countKey = game ? `${game.id}:${game.startsAt ?? 'preparing'}` : ''
+  const [countDone, setCountDone] = useState('')
   const [countCurtain, setCountCurtain] = useState(0)
-  useEffect(() => {
-    if (multiGenerating) setCounting(true)
-    if (!game || game.phase === 'lobby' || game.phase === 'finished' || game.phase === 'reveal')
-      setCounting(false)
-  }, [multiGenerating, game?.phase, game?.id])
+  const counting =
+    !!game &&
+    !game.solo &&
+    countDone !== countKey &&
+    inCountdown(game.phase, game.round, game.startsAt, now)
   const curtainTone =
     game?.phase === 'generating'
       ? 'navy'
@@ -376,18 +384,32 @@ export function BibleGamesView({
                   screen
                   anchor={shell}
                   steps={['3', '2', '1', game.options.language === 'fr' ? 'Partez !' : 'Go!']}
-                  ready={game.phase === 'question'}
+                  until={game.phase === 'question' ? game.startsAt : undefined}
+                  now={now}
+                  paused={!state.online || game.pausedUntil !== null}
                   onTick={index => haptic(index === 3 ? 'success' : 'tick')}
                   onDone={() => {
-                    setCounting(false)
+                    setCountDone(countKey)
                     setCountCurtain(n => n + 1)
                   }}
                 >
-                  <small>
-                    {game.phase === 'generating'
-                      ? t.generatingDescription
-                      : `${t[game.options.kind]} · ${t.rules}`}
+                  <small role={!state.online || game.pausedUntil !== null ? 'status' : undefined}>
+                    {!state.online
+                      ? t.offline
+                      : game.pausedUntil !== null
+                        ? t.paused
+                        : game.phase === 'generating'
+                          ? t.generatingDescription
+                          : `${t[game.options.kind]} · ${t.rules}`}
                   </small>
+                  <button
+                    type="button"
+                    className="games-text juice-countdown-leave"
+                    disabled={!state.online}
+                    onClick={() => send({ action: 'leave' })}
+                  >
+                    {t.leave}
+                  </button>
                 </Countdown>
               </>
             ) : (
@@ -803,6 +825,7 @@ export function BibleGamesView({
                           disabled={
                             !state.online || game.pausedUntil !== null || now >= game.deadline
                           }
+                          error={state.error}
                           t={t}
                           onAnswer={text =>
                             send({ action: 'answer', gameId: game.id, round: game.round, text })
@@ -947,6 +970,7 @@ function AnswerForm({
   status,
   retriesLeft,
   disabled,
+  error,
   t,
   onAnswer,
 }: {
@@ -955,11 +979,13 @@ function AnswerForm({
   status?: string
   retriesLeft: number
   disabled: boolean
+  error: GameError | null
   t: typeof copy.fr | typeof copy.en
   onAnswer: (text: string) => boolean
 }) {
   const [text, setText] = useState(initialText)
   const [sent, setSent] = useState<string | null>(null)
+  const input = useRef<HTMLInputElement>(null)
   const acknowledged = `${status}:${retriesLeft}:${initialText}`
   const [flight, setFlight] = useState<string | null>(null)
   useEffect(() => {
@@ -967,31 +993,26 @@ function AnswerForm({
     const timer = setTimeout(() => setFlight(null), 5000)
     return () => clearTimeout(timer)
   }, [flight])
+  // A refused command leaves the answer unchanged: unlock the form instead of "received".
+  useEffect(() => {
+    if (error) setFlight(null)
+  }, [error])
+  // Clarification brings the same field back, with the draft, ready to complete.
+  useEffect(() => {
+    if (status === 'clarify' || status === 'unavailable') input.current?.focus()
+  }, [status, retriesLeft])
   const submit = (answer: string) => {
     if (onAnswer(answer)) {
       haptic('select')
+      input.current?.blur()
       setSent(answer)
       setFlight(acknowledged)
     }
   }
-  const locked =
-    disabled ||
-    flight === acknowledged ||
-    retriesLeft === 0 ||
-    status === 'pending' ||
-    status === 'correct' ||
-    status === 'wrong'
-  if (flight === acknowledged || status === 'pending' || status === 'correct' || status === 'wrong')
-    return (
-      <Appear className="game-answer-sent" role="status">
-        <span aria-hidden="true">✓</span>
-        <div>
-          <strong>{sent ?? initialText}</strong>
-          <p>{t.received}</p>
-        </div>
-      </Appear>
-    )
-  if (retriesLeft === 0)
+  const waiting =
+    flight === acknowledged || status === 'pending' || status === 'correct' || status === 'wrong'
+  const locked = disabled || waiting || retriesLeft === 0
+  if (retriesLeft === 0 && !waiting)
     return (
       <AppearP className="games-notice" role="status">
         {t.attemptsEnded} {status === 'unavailable' ? t.void : ''}
@@ -1006,53 +1027,67 @@ function AnswerForm({
       }}
     >
       <AnimatePresence initial={false} mode="popLayout">
-        {status === 'clarify' && (
+        {waiting && (
+          <Appear key="sent" className="game-answer-sent" role="status">
+            <span aria-hidden="true">✓</span>
+            <div>
+              <strong>{sent ?? initialText}</strong>
+              <p>{t.received}</p>
+            </div>
+          </Appear>
+        )}
+        {!waiting && status === 'clarify' && (
           <AppearP key="clarify" className="games-notice" role="status">
             {t.clarify}
           </AppearP>
         )}
-        {status === 'unavailable' && (
+        {!waiting && status === 'unavailable' && (
           <AppearP key="unavailable" className="games-notice" role="status">
             {t.unavailable}
           </AppearP>
         )}
       </AnimatePresence>
-      {choices ? (
-        <div className="games-choices">
-          {choices.map((choice, i) => (
-            <button
-              type="button"
-              className="games-choice"
-              key={choice}
-              disabled={locked}
-              onClick={() => {
-                if (!locked) submit(choice)
-              }}
-            >
-              <span>{String.fromCharCode(65 + i)}</span>
-              {choice}
+      {/* Stays mounted while waiting, so a clarification reuses the same field and draft. */}
+      <div className="games-answer-fields" hidden={waiting}>
+        {choices ? (
+          <div className="games-choices">
+            {choices.map((choice, i) => (
+              <button
+                type="button"
+                className="games-choice"
+                key={choice}
+                disabled={locked}
+                onClick={() => {
+                  if (!locked) submit(choice)
+                }}
+              >
+                <span>{String.fromCharCode(65 + i)}</span>
+                {choice}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <>
+            <label>
+              {t.answer}
+              <input
+                ref={input}
+                maxLength={160}
+                value={text}
+                onChange={event => setText(event.target.value)}
+                placeholder={t.placeholder}
+                readOnly={locked}
+                aria-disabled={locked}
+                autoComplete="off"
+                autoCapitalize="sentences"
+              />
+            </label>
+            <button className="games-primary" type="submit" disabled={locked || !text.trim()}>
+              {t.submit} →
             </button>
-          ))}
-        </div>
-      ) : (
-        <>
-          <label>
-            {t.answer}
-            <input
-              maxLength={160}
-              value={text}
-              onChange={event => setText(event.target.value)}
-              placeholder={t.placeholder}
-              disabled={locked}
-              autoComplete="off"
-              autoCapitalize="sentences"
-            />
-          </label>
-          <button className="games-primary" type="submit" disabled={locked || !text.trim()}>
-            {t.submit} →
-          </button>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </form>
   )
 }

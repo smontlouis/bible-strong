@@ -144,7 +144,8 @@ export function GameFinale({ game, me }: { game: GameView; me: string | null }) 
   const panel = useRef<HTMLElement>(null)
   const [celebrate, setCelebrate] = useState(false)
   const fr = game.options.language === 'fr'
-  const standings = gameStandings(game)
+  // Final scores are frozen by the room: players leaving the summary do not rewrite them.
+  const standings = gameStandings({ ...game, players: game.standings ?? game.players })
   const leaders = standings.filter(p => p.rank === 1)
   const interrupted = !!game.reason
   const noPoints = standings.every(p => p.score === 0)
@@ -167,7 +168,9 @@ export function GameFinale({ game, me }: { game: GameView; me: string | null }) 
       clearTimeout(timer)
       clearTimeout(stop)
     }
-  }, [game.id, iWin, podium, total])
+    // Keyed on the game only: a later snapshot must not cancel a celebration in flight.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game.id])
   return (
     <section ref={panel} className="game-finale" data-podium={podium}>
       {celebrate && <Confetti seed={`${game.id}:finale`} count={110} />}

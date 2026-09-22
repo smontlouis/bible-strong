@@ -1,4 +1,5 @@
 import { createSoloRun, resumeSolo, pauseSolo, submitSolo, settleSolo } from '../solo-game'
+import { START_DELAY_MS } from '../games-protocol'
 import type {
   GameView,
   SoloReviewItem,
@@ -403,6 +404,8 @@ export function makeStory(id: StoryId, config: LabConfig, now = Date.now()): Lab
   }
   if (['lobby', 'guest', 'full', 'generation-error', 'generating'].includes(id)) {
     game.phase = id === 'generating' ? 'generating' : 'lobby'
+    // A lobby and its preparation always precede the first round.
+    game.round = 0
     delete game.who
     game.players.forEach(p => (p.score = 0))
     if (id === 'guest') game.host = players.find(p => p.id !== me)!.id
@@ -660,8 +663,15 @@ export function settle(current: LabModel): LabModel {
   }
   if (g?.solo) {
     if (g.phase === 'generating') {
+      // The simulated catalogue answered after 1.2 s: let the room clock move with it.
+      m.now += 1200
       g.phase = 'question'
       resumeSolo(g.solo, 'preparing', m.now)
+      // Mirror the room: the first question opens after the 3 · 2 · 1 countdown.
+      if (g.round === 0) {
+        g.startsAt = m.now + START_DELAY_MS
+        if (g.solo.runningSince !== null) g.solo.runningSince = g.startsAt
+      }
     }
     if (g.ownAnswer?.status === 'pending') {
       const answer = g.ownAnswer.text
@@ -682,6 +692,7 @@ export function settle(current: LabModel): LabModel {
     return m
   }
   if (g?.phase === 'generating') {
+    m.now += 1200
     const next = makeStory(
       g.options.kind === 'quiz' ? 'quiz' : 'your-turn',
       {
@@ -694,6 +705,8 @@ export function settle(current: LabModel): LabModel {
     next.game!.id = g.id
     next.game!.round = 0
     next.game!.options = g.options
+    next.game!.startsAt = m.now + START_DELAY_MS
+    next.game!.deadline += START_DELAY_MS
     next.options = g.options
     if (g.options.difficulty !== 'easy') delete next.game!.choices
     return next

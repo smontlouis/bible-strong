@@ -155,9 +155,11 @@ it('resumes with the private token and continues the server movement sequence', 
     resumeToken,
     players: [{ id: 'local', profile, pose, seq: 20 }],
   })
-  network.takeSpawn()
-  network.update({ ...pose, x: 840 }, profile, true, 100)
+  // Same identity again in this page: the live position is published, continuing seq 20.
+  expect(network.takeSpawn()).toBeNull()
   expect(socket.sent.at(-1)).toMatchObject({ type: 'move', seq: 21 })
+  network.update({ ...pose, x: 840 }, profile, true, 100)
+  expect(socket.sent.at(-1)).toMatchObject({ type: 'move', seq: 22 })
   socket.close()
   socket.open()
   expect(socket.sent.at(-1)).toMatchObject({ type: 'join', resumeToken })
@@ -258,4 +260,29 @@ it('sends activity changes once and restores the current activity after reconnec
   network.setActivity('book')
   network.setActivity(null)
   expect(socket.sent.filter((m: any) => m.type === 'activity').slice(-2)).toEqual([{ type: 'activity', activity: 'book' }, { type: 'activity', activity: null }])
+})
+
+it('keeps walking through a reconnect instead of snapping back to the last server position', () => {
+  const socket = join()
+  network.update({ ...pose, x: 900, moving: true }, profile, true, 100)
+  socket.close()
+  // The visitor kept moving while offline.
+  network.update({ ...pose, x: 960, moving: false }, profile, true, 5_000)
+  socket.open()
+  socket.receive({
+    type: 'welcome',
+    id: 'local',
+    spawn: { ...pose, x: 900 },
+    players: [{ id: 'local', profile, pose: { ...pose, x: 900 }, seq: 3 }],
+  })
+  expect(network.takeSpawn()).toBeNull()
+  expect(socket.sent.at(-1)).toMatchObject({ type: 'move', seq: 4, pose: { x: 960 } })
+})
+
+it('stops reconnecting and asks for a reload when the room reports another protocol version', () => {
+  const socket = join()
+  socket.receive({ type: 'outdated' })
+  expect(network.status.state).toBe('outdated')
+  network.update(pose, profile, true, 1_000)
+  expect(sockets).toHaveLength(1)
 })

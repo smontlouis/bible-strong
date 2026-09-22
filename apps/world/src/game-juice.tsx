@@ -245,67 +245,113 @@ export function Curtain({
   )
 }
 
-/** 3 · 2 · 1 · Go! overlay. The last step only fires once `ready` is true, so the
- * count covers loading and "Go!" never shows before the first question exists. */
+/** "Go!" is the last 620 ms before the server opens the first question. */
+export const GO_MS = 620
+
+/** Whether a game opening at `startsAt` is still inside its 3 · 2 · 1 · Go! window. */
+export function inCountdown(phase: string, round: number, startsAt: number | undefined, now: number) {
+  if (round !== 0) return false
+  if (phase === 'generating') return true
+  return phase === 'question' && startsAt !== undefined && now < startsAt
+}
+
+/** Countdown cadence, `remaining` ms before the question opens: which step to show and
+ * how long until the next change. `done` once the question is open. */
+export function countdownStep(remaining: number, last: number) {
+  if (remaining <= 0) return { done: true as const }
+  if (remaining <= GO_MS) return { done: false as const, index: last, wait: remaining }
+  const counting = remaining - GO_MS
+  const seconds = Math.ceil(counting / 1000)
+  return {
+    done: false as const,
+    index: Math.max(0, last - seconds),
+    wait: counting - (seconds - 1) * 1000,
+  }
+}
+
+/** 3 · 2 · 1 · Go! screen synced to the server: "Go!" ends exactly when the first question
+ * opens (`until`), each number is the second before it. Without `until` (still preparing)
+ * it holds the first number. */
 export function Countdown({
   anchor,
   steps,
-  ready = true,
+  until,
+  now,
+  paused = false,
   screen = false,
   children,
   onTick,
   onDone,
 }: {
   anchor: RefObject<HTMLElement | null>
+  /** Numbers then the final "Go!" label. */
   steps: string[]
-  ready?: boolean
+  /** Server time when the question opens; undefined while the catalogue prepares it. */
+  until: number | undefined
+  /** Current server time, used to derive this page's clock offset. */
+  now: number
+  paused?: boolean
   /** Render as a full screen inside the dialog instead of a fixed overlay. */
   screen?: boolean
   children?: ReactNode
   onTick?: (index: number) => void
   onDone: () => void
 }) {
-  const [index, setIndex] = useState(0)
-  const [counted, setCounted] = useState(false)
-  const [rect, setRect] = useState<DOMRect | null>(null)
-  const quick = reducedMotion()
   const last = steps.length - 1
+  // `now` is sampled about once a second, so it lags the real server clock; the largest
+  // offset observed is the closest one and must never move the count backwards.
+  const offset = useRef(now - Date.now())
+  offset.current = Math.max(offset.current, now - Date.now())
+  const done = useRef(onDone)
+  done.current = onDone
+  const compute = () => {
+    if (until === undefined) return 0
+    const step = countdownStep(until - (Date.now() + offset.current), last)
+    return step.done ? last : step.index
+  }
+  const [index, setIndex] = useState(compute)
+  const [rect, setRect] = useState<DOMRect | null>(null)
   useLayoutEffect(() => {
     if (!screen) setRect(dialogRect(anchor))
   }, [anchor, screen])
   useEffect(() => {
     onTick?.(index)
-    if (index === last) {
-      const timer = setTimeout(onDone, quick ? 250 : 620)
-      return () => clearTimeout(timer)
-    }
-    const timer = setTimeout(
-      () => {
-        if (index + 1 === last) setCounted(true)
-        else setIndex(index + 1)
-      },
-      quick ? 250 : 780
-    )
-    return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index])
   useEffect(() => {
-    if (counted && ready && index !== last) setIndex(last)
-  }, [counted, ready, index, last])
+    if (paused || until === undefined) {
+      setIndex(compute())
+      return
+    }
+    let timer: ReturnType<typeof setTimeout>
+    const step = () => {
+      const next = countdownStep(until - (Date.now() + offset.current), last)
+      if (next.done) {
+        // The question is open (or a late timer caught up): never hold it back further.
+        done.current()
+        return
+      }
+      setIndex(next.index)
+      timer = setTimeout(step, Math.max(16, next.wait + 8))
+    }
+    step()
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [until, paused])
   return (
     <div
       className={screen ? 'juice-countdown juice-countdown-screen' : 'juice-countdown'}
-      role="status"
-      aria-live="assertive"
       data-final={index === last}
-      data-waiting={counted && !ready}
+      data-waiting={until === undefined || paused}
       style={
         rect && !screen
           ? { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
           : {}
       }
     >
-      <strong key={index}>{steps[index]}</strong>
+      <strong key={index} role="status" aria-live="assertive">
+        {steps[index]}
+      </strong>
       {children}
     </div>
   )

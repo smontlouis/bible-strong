@@ -102,7 +102,8 @@ otherwise marks incorrect. These thresholds are heuristics. A provider error ret
 
 ## Bounds
 
-- 50 retained games per event room; 4 participants per game.
+- 50 retained games per event room (finished games, then absent solo runs and lobbies are
+  evicted when a new game needs a slot); 4 participants per game.
 - Lobby/final summary retention: 10 minutes. Absent participants: 90 seconds.
 - Creation cooldown: 10 seconds. Re-invite cooldown: 60 seconds; at most 3 incoming invites.
 - Catalogue: 1–5 records per multiplayer RPC, up to 50 for solo; 15-second persisted preparation recovery deadline.
@@ -267,7 +268,7 @@ screen enter cascade (a parity flip on `.games-shell[data-enter]` restarts CSS
 animations without remounting, so inputs keep the mobile keyboard), a coloured
 `Curtain` wipe on every phase change (round label in multiplayer), `Burst` sparks,
 viewport `Confetti`, the `Countdown` screen (solo and shared: `start` is sent at once, the
-3 · 2 · 1 screen covers preparation and "Go!" waits for the first question),
+3 · 2 · 1 screen covers preparation, then follows the room's `startsAt`; see below),
 `flyTo` (+N travelling from the outcome to the winner's score badge) and
 `PunchNumber` counters. Wrong answers shake the shell (`data-shake`), the answer
 card and the input; solo streak stars burst when lit and fall when broken; reveal,
@@ -305,3 +306,28 @@ keep the last choice (`preferredMode` on `BibleGames`). The scene projects the b
 each frame through `controls.contactActions`, like the island discovery buttons, and
 owns their `disabled` state: React must not render that attribute, or its event delegation
 keeps ignoring the clicks. The bottom-right reaction button stays permanent.
+
+## Multiplayer audit fixes — 2026-09-22
+
+- **Countdown in the room clock.** When the catalogue answers, the room opens the first question
+  at `startsAt = now + START_DELAY_MS` (4 s) and shifts the zone, quiz and solo clocks by the same
+  amount. Answers and passes before `startsAt` are refused. Clients count 3 · 2 · 1 against that
+  time so "Go!" ends exactly when the question opens; reopening the dialog later never replays it.
+  The countdown screen keeps the offline or pause notice and a Leave action.
+- **Pause budget.** Each player can pause a shared game for 90 s in total per game. Hiding and
+  showing the tab again no longer renews it; once spent, their absence stops holding the others.
+  Removal still happens after 90 s of continuous absence.
+- **Departures.** Verdicts received during a pause are applied before a two-player game ends for
+  lack of players. Final scores are frozen in `standings` when a game ends, so leaving the summary
+  does not rewrite the podium. Leaving a finished game keeps the invitations that player received.
+  Returning to a finished summary cancels a pending absence removal.
+- **Storage.** Each game is its own SQLite row (`world_game_rows`); row 1 keeps invitations and
+  limits. The former single-row layout migrates on the next save. A slot-hungry room evicts idle
+  games before refusing a new one.
+- **Presence.** Refused game commands count toward the 40 messages/s limit. Resume snapshots are
+  written at join and refreshed by the alarm, so a deploy or eviction without clean closes keeps
+  identities. Hidden tabs leave after 30 min without news and resume on return. Sockets that never
+  join expire after 10 s even while pinging and never receive presence. The reaction cooldown
+  follows the identity across reconnects. A join from another protocol version gets `outdated`
+  and close 4003; the page stops reconnecting and offers a reload. A reconnect in the same page
+  keeps the avatar where the visitor walked instead of snapping back.

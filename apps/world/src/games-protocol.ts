@@ -41,6 +41,8 @@ export type GameInvitation = {
   expires: number
 }
 export const WHO_ZONE_MS = [20_000, 20_000, 12_000, 8_000] as const
+/** Room for the 3 · 2 · 1 · Go! countdown: the first question's clock starts after it. */
+export const START_DELAY_MS = 4_000
 export type WhoView = {
   mode: 'duel' | 'race'
   zone: number
@@ -76,6 +78,10 @@ export type GameView = {
   total: number
   pausedAt: number | null
   pausedUntil: number | null
+  /** Server time when the first question opens (after the 3 · 2 · 1 countdown). */
+  startsAt?: number
+  /** Final scores, frozen when the game ends. */
+  standings?: GameMember[]
   deadline: number
   question?: string
   clues?: string[]

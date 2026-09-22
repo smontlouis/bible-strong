@@ -572,7 +572,13 @@
   border-radius: 0;
   background: var(--bs-navy);
   backdrop-filter: none;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: 1fr auto auto;
+  gap: 10px;
+  pointer-events: auto;
+}
+.juice-countdown-screen .juice-countdown-leave {
+  justify-self: center;
+  color: rgba(255, 255, 255, 0.7);
 }
 .juice-countdown-screen small {
   align-self: end;

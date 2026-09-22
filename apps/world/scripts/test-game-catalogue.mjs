@@ -98,6 +98,10 @@ async function start(client) {
   )
   assert.equal(client.snapshot.game.phase, 'question', client.error || client.snapshot.game.reason)
   console.log(`Catalogue batch ready in ${Date.now() - began}ms`)
+  // The first question opens after the 3 · 2 · 1 countdown; earlier answers are refused.
+  const opens = client.snapshot.game.startsAt
+  assert(opens > Date.now(), 'The first question waits for the countdown')
+  await new Promise(resolve => setTimeout(resolve, opens - Date.now() + 50))
 }
 async function close(client) {
   clearInterval(client.heartbeat)

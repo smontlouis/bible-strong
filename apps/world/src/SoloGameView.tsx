@@ -6,6 +6,7 @@ import {
   Confetti,
   Countdown,
   Curtain,
+  inCountdown,
   PunchNumber,
   SparkleIcon,
   StarIcon,
@@ -37,8 +38,13 @@ export function SoloGameView({
   onShake?: () => void
 }) {
   const [draft, setDraft] = useState('')
+  // A second tap on "Try again" before the room answers would only earn a false error.
+  const [retrying, setRetrying] = useState(false)
   const [sending, setSending] = useState(false)
-  const [counting, setCounting] = useState(game.phase === 'generating')
+  // The countdown covers preparation and the server's 3 s before the first question.
+  const countKey = `${game.id}:${game.startsAt ?? 'preparing'}`
+  const [countDone, setCountDone] = useState('')
+  const counting = countDone !== countKey && inCountdown(game.phase, game.round, game.startsAt, now)
   const [curtain, setCurtain] = useState(0)
   const [falling, setFalling] = useState(0)
   const [celebrate, setCelebrate] = useState(false)
@@ -50,6 +56,9 @@ export function SoloGameView({
   useEffect(() => {
     if (game.ownAnswer || error) setSending(false)
   }, [game.ownAnswer, error])
+  useEffect(() => {
+    setRetrying(false)
+  }, [game.ownAnswer?.status, game.round, error])
   useEffect(() => {
     // An old persisted solo may still be waiting on its former reveal screen.
     if (game.phase === 'reveal' && online && !game.solo?.pauses.includes('away'))
@@ -110,11 +119,6 @@ export function SoloGameView({
     if (urgent && seconds <= 5 && seconds > 0) haptic('tick')
   }, [urgent, seconds])
   useEffect(() => {
-    // The count covers preparation; a failed preparation or a finished run ends it.
-    if (game.phase === 'generating') setCounting(true)
-    if (game.phase === 'lobby' || game.phase === 'finished') setCounting(false)
-  }, [game.phase])
-  useEffect(() => {
     if (game.phase !== 'finished' || celebrated.has(game.id)) return
     celebrated.add(game.id)
     if (run.outcome === 'won') {
@@ -135,8 +139,9 @@ export function SoloGameView({
   }
   // Keep the same input mounted through automatic transitions to retain the mobile keyboard.
   const retry = () => {
+    if (retrying) return
     setSending(false)
-    send({ action: 'next' })
+    if (send({ action: 'next' })) setRetrying(true)
   }
   const stars = [1, 2, 3, 4]
   return (
@@ -152,18 +157,33 @@ export function SoloGameView({
           screen
           anchor={shell}
           steps={['3', '2', '1', choose('Partez !', 'Go!')]}
-          ready={question}
+          until={question ? game.startsAt : undefined}
+          now={now}
+          paused={blocked}
           onTick={index => haptic(index === 3 ? 'success' : 'tick')}
           onDone={() => {
-            setCounting(false)
+            setCountDone(countKey)
             setCurtain(n => n + 1)
           }}
         >
-          <small>
-            {game.phase === 'generating'
-              ? choose('Les questions arrivent du catalogue…', 'Questions are on their way…')
-              : choose('Quatre bonnes réponses d’affilée !', 'Four correct answers in a row!')}
+          <small role={blocked ? 'status' : undefined}>
+            {blocked
+              ? choose(
+                  'En pause. Ta série et ton temps sont conservés.',
+                  'Paused. Your streak and remaining time are saved.'
+                )
+              : game.phase === 'generating'
+                ? choose('Les questions arrivent du catalogue…', 'Questions are on their way…')
+                : choose('Quatre bonnes réponses d’affilée !', 'Four correct answers in a row!')}
           </small>
+          <button
+            type="button"
+            className="games-text juice-countdown-leave"
+            disabled={!online}
+            onClick={() => send({ action: 'leave' })}
+          >
+            {choose('Quitter le défi', 'Leave challenge')}
+          </button>
         </Countdown>
       )}
       {counting ? null : (
@@ -280,6 +300,14 @@ export function SoloGameView({
           </button>
         </div>
       )}
+      {game.phase === 'generating' && (
+        <p className="games-notice" role="status">
+          {choose(
+            'De nouvelles questions arrivent… Ton chrono est en pause.',
+            'More questions are on their way… Your timer is paused.'
+          )}
+        </p>
+      )}
       {question && (
         <div className="solo-question" data-flash={flash ? feedbackStatus : undefined}>
           <div className="solo-live-feedback" aria-live="polite" aria-atomic="true">
@@ -339,7 +367,7 @@ export function SoloGameView({
                       'Answer checking failed. No penalty.'
                     )}
               </p>
-              <button className="games-primary" disabled={blocked} onClick={retry}>
+              <button className="games-primary" disabled={blocked || retrying} onClick={retry}>
                 {choose('Réessayer', 'Try again')}
               </button>
             </Appear>

@@ -9,7 +9,7 @@ import {
   soloRemaining,
   type SoloRun,
 } from '../../src/solo-game'
-import { WHO_ZONE_MS } from '../../src/games-protocol'
+import { START_DELAY_MS, WHO_ZONE_MS } from '../../src/games-protocol'
 import type { AvatarProfile } from '../../src/avatar-profile'
 import type {
   AnswerStatus,
@@ -23,6 +23,8 @@ import type {
 
 export const INVITE_MS = 60_000
 export const REJOIN_MS = 90_000
+export { START_DELAY_MS }
+export const MAX_GAMES = 50
 const ROUND_MS = 60_000
 export type Round = {
   catalogueId?: string
@@ -77,6 +79,12 @@ export type Game = {
   updated: number
   reason?: GameView['reason']
   void?: boolean
+  /** The first question opens at this time; answers and clocks wait for it. */
+  startsAt?: number
+  /** Absence time each player has already spent pausing this game (at most REJOIN_MS). */
+  pauseUsed?: Record<string, number>
+  /** Scores frozen when the game ends, so later departures do not rewrite the podium. */
+  standings?: GameMember[]
 }
 type Invitation = { id: string; gameId: string; from: string; to: string; expires: number }
 export type GameData = { games: Game[]; invitations: Invitation[]; limits: Record<string, number> }
@@ -142,6 +150,7 @@ export class GameEngine {
     g.phase = 'finished'
     g.reason = reason
     g.pausedAt = null
+    g.standings = g.players.map(p => ({ ...p, absentSince: null }))
     g.deadline = this.now() + 10 * 60_000
     g.updated = this.now()
   }
@@ -149,6 +158,7 @@ export class GameEngine {
     g.phase = 'question'
     g.answers = {}
     g.void = false
+    delete g.startsAt
     g.started = this.now()
     g.deadline = this.now() + ROUND_MS
     if (g.options.kind === 'who' && g.rounds[g.round]?.clues.length === 4) {
@@ -173,6 +183,13 @@ export class GameEngine {
     g.void =
       !g.who?.winner &&
       Object.values(g.answers).some(a => a.status === 'unavailable' || a.status === 'pending')
+    // A race was already won: slower answers still being checked no longer matter.
+    if (g.who?.winner)
+      for (const a of Object.values(g.answers))
+        if (a.status === 'pending') {
+          a.status = 'skipped'
+          a.processed = true
+        }
     if (!g.void)
       for (const p of g.players) {
         if (g.who ? g.who.winner === p.id : g.answers[p.id]?.status === 'correct')
@@ -204,44 +221,96 @@ export class GameEngine {
     delete g.answers[id]
     if (g.host === id)
       g.host = g.players.find(p => p.absentSince === null)?.id ?? g.players[0]?.id ?? ''
-    if (!g.players.length) this.data.games = this.data.games.filter(item => item !== g)
-    else if (g.phase !== 'lobby' && g.phase !== 'finished' && g.players.length < 2)
-      this.finish(g, 'not_enough_players')
-    this.data.invitations = this.data.invitations.filter(i => i.from !== id && i.to !== id)
+    // Only this player's own lobby invitations become meaningless; invitations they received
+    // stay valid, since leaving a finished game is exactly how a visitor accepts a new one.
+    this.data.invitations = this.data.invitations.filter(i => !(i.from === id && i.gameId === g.id))
+    if (!g.players.length) {
+      this.data.games = this.data.games.filter(item => item !== g)
+      return
+    }
+    // Apply verdicts that arrived during a pause before the game may end for lack of players.
     this.unpause(g)
     if (g.phase === 'question' && g.pausedAt === null && this.completed(g)) this.reveal(g)
+    if (g.phase !== 'lobby' && g.phase !== 'finished' && g.players.length < 2)
+      this.finish(g, 'not_enough_players')
+  }
+  /** Pause time a player may still hold: REJOIN_MS in total per game, never renewed. */
+  private pauseLeft(g: Game, p: GameMember, now = this.now()) {
+    const used = g.pauseUsed?.[p.id] ?? 0
+    return Math.max(0, REJOIN_MS - used - (p.absentSince === null ? 0 : now - p.absentSince))
+  }
+  private pausing(g: Game, now = this.now()) {
+    return g.players.some(p => p.absentSince !== null && this.pauseLeft(g, p, now) > 0)
   }
   private unpause(g: Game) {
-    if (g.pausedAt !== null && g.players.every(p => p.absentSince === null)) {
-      const duration = this.now() - g.pausedAt
+    const now = this.now()
+    if (g.pausedAt !== null && !this.pausing(g, now)) {
+      // A player who used up their pause no longer holds the others back.
+      const end = Math.min(
+        now,
+        ...g.players
+          .filter(p => p.absentSince !== null)
+          .map(p => p.absentSince! + REJOIN_MS - (g.pauseUsed?.[p.id] ?? 0))
+      )
+      const duration = Math.max(0, end - g.pausedAt)
       if (!g.who || g.phase !== 'question') {
         g.deadline += duration
         g.started += duration
       }
+      if (g.startsAt !== undefined && g.startsAt > g.pausedAt) g.startsAt += duration
       g.pausedAt = null
     }
     this.settleWho(g)
   }
   presence(id: string, present: boolean) {
     this.tick()
+    const now = this.now()
     const g = this.current(id),
       p = g?.players.find(p => p.id === id)
-    if (!g || !p || g.phase === 'finished') return
+    if (!g || !p) return
+    if (g.phase === 'finished') {
+      // Coming back to the summary must cancel the pending removal of an absent player.
+      if (present) p.absentSince = null
+      return
+    }
     if (g.solo) {
-      p.absentSince = present ? null : (p.absentSince ?? this.now())
-      if (present) resumeSolo(g.solo, 'away', this.now())
-      else pauseSolo(g.solo, 'away', this.now())
+      p.absentSince = present ? null : (p.absentSince ?? now)
+      if (present) resumeSolo(g.solo, 'away', now)
+      else pauseSolo(g.solo, 'away', now)
       return
     }
     if (present) {
+      if (p.absentSince !== null && (g.phase === 'question' || g.phase === 'reveal')) {
+        const used = g.pauseUsed?.[p.id] ?? 0
+        ;(g.pauseUsed ??= {})[p.id] = Math.min(REJOIN_MS, used + now - p.absentSince)
+      }
       p.absentSince = null
       this.unpause(g)
       if (g.phase === 'question' && g.pausedAt === null && this.completed(g)) this.reveal(g)
     } else if (p.absentSince === null) {
-      p.absentSince = this.now()
-      if (g.phase === 'question' || g.phase === 'reveal') g.pausedAt ??= this.now()
+      p.absentSince = now
+      if ((g.phase === 'question' || g.phase === 'reveal') && this.pauseLeft(g, p, now) > 0)
+        g.pausedAt ??= now
       this.settleWho(g)
     }
+  }
+  /** Free a slot from games nobody is playing: finished ones, then absent solo runs and lobbies. */
+  private evictIdle() {
+    const present = (id: string) => this.visitor(id)?.present === true
+    const candidates = this.data.games
+      .filter(
+        g =>
+          g.phase === 'finished' ||
+          ((g.solo || g.phase === 'lobby') && !g.players.some(p => present(p.id)))
+      )
+      .sort(
+        (a, b) =>
+          Number(b.phase === 'finished') - Number(a.phase === 'finished') || a.updated - b.updated
+      )
+    const victim = candidates[0]
+    if (!victim) return
+    this.data.games = this.data.games.filter(g => g !== victim)
+    this.data.invitations = this.data.invitations.filter(i => i.gameId !== victim.id)
   }
   command(id: string, action: GameAction): Effect | undefined {
     const now = this.now()
@@ -258,7 +327,8 @@ export class GameEngine {
     if (action.action === 'create') {
       if (g && g.phase !== 'finished') return fail('busy')
       if ((this.data.limits[`create:${id}`] ?? 0) > now) return fail('rate_limited')
-      if (this.data.games.length >= 50 && !g) return fail('full')
+      if (!g && this.data.games.length >= MAX_GAMES) this.evictIdle()
+      if (!g && this.data.games.length >= MAX_GAMES) return fail('full')
       if (g) this.remove(id)
       this.data.limits[`create:${id}`] = now + 10_000
       this.data.games.push({
@@ -362,6 +432,7 @@ export class GameEngine {
         g.round !== action.round ||
         g.phase !== 'question' ||
         g.pausedAt !== null ||
+        (g.startsAt ?? 0) > now ||
         (g.who?.frozenAt ?? now) >= g.deadline
       )
         return fail('not_ready')
@@ -483,7 +554,12 @@ export class GameEngine {
       return
     }
     if (action.action === 'pass') {
-      if (g.phase !== 'question' || action.gameId !== g.id || action.round !== g.round)
+      if (
+        g.phase !== 'question' ||
+        action.gameId !== g.id ||
+        action.round !== g.round ||
+        (g.startsAt ?? 0) > now
+      )
         return fail('not_ready')
       const operation = this.uuid()
       if (!submitSolo(run, operation, now)) return fail('not_ready')
@@ -492,7 +568,12 @@ export class GameEngine {
       return this.soloVerdict(g, a, 'skipped')
     }
     if (action.action === 'answer') {
-      if (g.phase !== 'question' || action.gameId !== g.id || action.round !== g.round)
+      if (
+        g.phase !== 'question' ||
+        action.gameId !== g.id ||
+        action.round !== g.round ||
+        (g.startsAt ?? 0) > now
+      )
         return fail('not_ready')
       const r = g.rounds[g.round]
       const operation = this.uuid()
@@ -548,18 +629,28 @@ export class GameEngine {
       if (!fresh.length) {
         g.phase = 'lobby'
         g.reason = 'generation_failed'
+        g.deadline = this.now() + 24 * 60 * 60_000
         return
       }
+      const first = g.rounds.length === 0
       g.rounds.push(...fresh)
       g.phase = 'question'
       g.answers = {}
       g.deadline = this.now() + 24 * 60 * 60_000
       resumeSolo(g.solo, 'preparing', this.now())
+      if (first) {
+        // The 120 s clock starts after the countdown, not while it plays.
+        g.startsAt = this.now() + START_DELAY_MS
+        if (g.solo.runningSince !== null) g.solo.runningSince = g.startsAt
+      }
       return
     }
     g.rounds = rounds
     this.begin(g)
-    if (g.players.some(p => p.absentSince !== null)) g.pausedAt = this.now()
+    g.startsAt = this.now() + START_DELAY_MS
+    g.deadline += START_DELAY_MS
+    g.started += START_DELAY_MS
+    if (this.pausing(g)) g.pausedAt = this.now()
     this.settleWho(g)
   }
   evaluated(
@@ -661,9 +752,11 @@ export class GameEngine {
       }
       for (const p of [...g.players])
         if (p.absentSince !== null && p.absentSince + REJOIN_MS <= now) this.remove(p.id)
-      for (const a of Object.values(g.answers))
-        if (a.status === 'pending' && a.expires <= now) a.status = 'unavailable'
-      this.settleWho(g)
+      if (!this.data.games.includes(g)) continue
+      if (g.phase === 'question')
+        for (const a of Object.values(g.answers))
+          if (a.status === 'pending' && a.expires <= now) a.status = 'unavailable'
+      this.unpause(g)
       if (g.pausedAt !== null || (g.phase === 'question' && g.who?.frozenAt != null)) continue
       if (g.phase === 'question' && g.pausedAt === null && this.completed(g)) this.reveal(g)
       if (g.deadline > now) continue
@@ -699,7 +792,12 @@ export class GameEngine {
           for (const offset of [15_000, 30_000])
             if (g.started + offset > now) times.push(g.started + offset)
       }
-      for (const p of g.players) if (p.absentSince !== null) times.push(p.absentSince + REJOIN_MS)
+      for (const p of g.players)
+        if (p.absentSince !== null) {
+          times.push(p.absentSince + REJOIN_MS)
+          const left = this.pauseLeft(g, p, now)
+          if (left > 0 && g.pausedAt !== null) times.push(now + left)
+        }
       for (const a of Object.values(g.answers)) if (a.status === 'pending') times.push(a.expires)
     }
     return times.length ? Math.min(...times) : null
@@ -739,9 +837,14 @@ export class GameEngine {
       pausedUntil:
         g.pausedAt === null
           ? null
-          : Math.min(
-              ...g.players.filter(p => p.absentSince !== null).map(p => p.absentSince! + REJOIN_MS)
+          : Math.max(
+              now,
+              ...g.players
+                .filter(p => p.absentSince !== null && this.pauseLeft(g, p, now) > 0)
+                .map(p => now + this.pauseLeft(g, p, now))
             ),
+      ...(g.startsAt !== undefined ? { startsAt: g.startsAt } : {}),
+      ...(g.standings ? { standings: g.standings.map(p => ({ ...p })) } : {}),
       invited: this.data.invitations.filter(i => i.gameId === g.id).map(i => i.to),
       answered: Object.keys(g.answers),
       reason: g.reason,
@@ -754,7 +857,7 @@ export class GameEngine {
         g.phase === 'question'
           ? g.who
             ? g.who.zone + 1
-            : Math.min(3, 1 + Math.floor(((g.pausedAt ?? now) - g.started) / 15_000))
+            : Math.min(3, 1 + Math.floor(Math.max(0, (g.pausedAt ?? now) - g.started) / 15_000))
           : g.who
             ? 4
             : 3
