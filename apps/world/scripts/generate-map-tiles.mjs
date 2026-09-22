@@ -27,6 +27,16 @@ const generatedDirectory = resolve(root, 'src/generated')
 await mkdir(temporaryTiles, { recursive: true })
 await mkdir(generatedDirectory, { recursive: true })
 
+// Reviewed ground repair and original table/book at half size, anchored at (836, 460).
+// Apply to the normalized original so future tile rebuilds retain the art change.
+const source = await sharp(input, { limitInputPixels: false })
+  .resize(WORLD_WIDTH * 4, WORLD_HEIGHT * 4, { fit: 'fill' })
+  .composite([
+    { input: resolve(mapRoot, 'edits/central-table-half.webp'), left: 736 * 4, top: 388 * 4 },
+  ])
+  .png()
+  .toBuffer()
+
 async function inBatches(tasks, size = 8) {
   for (let index = 0; index < tasks.length; index += size) {
     await Promise.all(tasks.slice(index, index + size).map(task => task()))
@@ -44,7 +54,7 @@ for (const scale of SCALES) {
   const levelDirectory = resolve(temporaryTiles, String(scale))
   await mkdir(levelDirectory, { recursive: true })
 
-  const { data, info } = await sharp(input, { limitInputPixels: false })
+  const { data, info } = await sharp(source, { limitInputPixels: false })
     .resize(width, height, { fit: 'fill', kernel: sharp.kernel.lanczos3 })
     .removeAlpha()
     .raw()
@@ -75,7 +85,7 @@ for (const scale of SCALES) {
   levels.push({ scale, width, height, columns, rows })
 }
 
-await sharp(input, { limitInputPixels: false })
+await sharp(source, { limitInputPixels: false })
   .resize(WORLD_WIDTH, WORLD_HEIGHT, { fit: 'fill', kernel: sharp.kernel.lanczos3 })
   .webp({ quality: 84, smartSubsample: true })
   .toFile(resolve(mapRoot, 'preview.webp'))

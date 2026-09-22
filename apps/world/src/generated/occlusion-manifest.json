@@ -890,12 +890,12 @@
   {
     "id": "central-table",
     "name": "Table et Bible",
-    "x": 747,
-    "y": 396,
-    "width": 178,
-    "height": 119,
-    "pixelRatio": 2,
-    "baseY": 489,
+    "x": 791.5,
+    "y": 423,
+    "width": 89,
+    "height": 59.5,
+    "pixelRatio": 4,
+    "baseY": 469.5,
     "always": false,
     "url": "./assets/occlusion/central-table.webp"
   },

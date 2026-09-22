@@ -182,7 +182,7 @@ export const walkable: { name: string; points: Polygon }[] = [
 ]
 
 export const obstacles = [
-  { name: 'Table centrale', x: 836, y: 470, rx: 94, ry: 41 },
+  { name: 'Table centrale', x: 836, y: 460, rx: 47, ry: 20.5 },
   { name: 'Arbre central gauche', x: 705, y: 378, rx: 20, ry: 13 },
   { name: 'Arbre central droit', x: 906, y: 365, rx: 19, ry: 12 },
   { name: 'Arbre entrée commentaires', x: 1072, y: 422, rx: 20, ry: 12 },

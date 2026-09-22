@@ -84,10 +84,10 @@ for (let offset = 0; offset < count; offset += capacity) {
   pages.push({ key, firstFrame: offset, frameCount })
 }
 const manifest = { frameCount: count, frameRate,
-  x: worldRegion.x + left / width * worldRegion.width,
-  y: worldRegion.y + top / height * worldRegion.height,
-  width: crop.width / width * worldRegion.width, height: crop.height / height * worldRegion.height,
-  depth: 489.1, pages,
+  x: 836 + (worldRegion.x + left / width * worldRegion.width - 836) / 2,
+  y: 460 + (worldRegion.y + top / height * worldRegion.height - 470) / 2,
+  width: crop.width / width * worldRegion.width / 2, height: crop.height / height * worldRegion.height / 2,
+  depth: 469.6, pages,
   sourceCrop: { ...crop, videoWidth: width, videoHeight: height },
 }
 await writeFile(resolve(root, 'src/generated/central-book.json'), JSON.stringify(manifest, null, 2) + '\n')

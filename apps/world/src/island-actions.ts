@@ -1,6 +1,6 @@
 /** Fixed visual centers in the map's original 1671 × 941 coordinate system. */
 export const islandActions = [
-  { id: 'guestbook', x: 836, y: 465 },
+  { id: 'guestbook', x: 836, y: 455 },
   { id: 'dictionary', x: 300, y: 275 },
   { id: 'lexicon', x: 836, y: 220 },
   { id: 'references', x: 1380, y: 275 },

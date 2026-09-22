@@ -14,7 +14,7 @@ To keep a separate frontend host such as Vercel, set `VITE_WORLD_MULTIPLAYER_HOS
 
 ## Behavior
 
-- Each arrival receives a server-reserved random, walkable position on the saved central island. Avatar visual footprints stay at least 70 px apart horizontally or 56 px vertically. Reservation and publication are synchronous, so concurrent arrivals cannot select overlapping positions. If the island has no free position, joining returns the full status until space is available; existing visitors can still move freely.
+- Each arrival receives a server-reserved random, walkable position inside the central island's large paving circle, excluding the table and other navigation obstacles. The same bounds apply to local solo arrivals. Avatar visual footprints stay at least 70 px apart horizontally or 56 px vertically. Reservation and publication are synchronous, so concurrent arrivals cannot select overlapping positions. If the circle has no free position, joining returns the full status until space is available; existing visitors can still move freely.
 - Movement/collisions stay local for immediate joystick response. Publish changed positions at up to 15 Hz, with immediate final stops.
 - The server validates profiles, finite map coordinates, directions, sequence numbers, message sizes and message rates. It assigns participant IDs and never accepts a claimed player ID. It does not simulate navigation or prevent a modified client from moving through scenery; no shared rewards or competitive state relies on these positions.
 - The server batches changed participants every 50 ms. Browsers interpolate buffered snapshots with a 100 ms delay. Teleports snap; packet loss holds the last position instead of extrapolating through obstacles.

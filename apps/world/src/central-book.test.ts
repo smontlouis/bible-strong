@@ -163,6 +163,6 @@ describe('central book', () => {
       endpointDifference += Math.abs(sprites[0][i] - sprites.at(-1)![i])
     expect(endpointDifference / sprites[0].length).toBeLessThan(2)
     expect(sprites[0].equals(sprites[18])).toBe(false)
-    expect(book.depth).toBe(489.1)
+    expect(book.depth).toBe(469.6)
   })
 })

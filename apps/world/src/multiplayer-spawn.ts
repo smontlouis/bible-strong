@@ -1,9 +1,12 @@
-import { canStand, inPolygon, segmentDistance, type NavigationDocument, type Point } from './world'
+import { canStand, inPolygon, RADIUS, type NavigationDocument, type Point } from './world'
 
 // The widest avatar is 65px. Separate their full visual footprints, not just their feet.
 export const SPAWN_GAP_X = 70
 export const SPAWN_GAP_Y = 56
 const candidatesByNavigation = new WeakMap<NavigationDocument, Point[]>()
+
+// The outer paving circle in source-image coordinates, seen in perspective.
+const ARRIVAL_CIRCLE = { x: 835, y: 458, rx: 143, ry: 81 }
 
 export function spawnOverlaps(a: Point, b: Point): boolean {
   return Math.abs(a.x - b.x) < SPAWN_GAP_X && Math.abs(a.y - b.y) < SPAWN_GAP_Y
@@ -15,17 +18,14 @@ export function centralSpawnCandidates(navigation: NavigationDocument): readonly
   const island = navigation.zones.find(zone => zone.id === 'land-0' && zone.kind === 'allowed')
   const candidates: Point[] = []
   if (island) {
-    const xs = island.points.map(p => p[0]),
-      ys = island.points.map(p => p[1])
-    for (let y = Math.ceil(Math.min(...ys)); y <= Math.max(...ys); y += 8) {
-      for (let x = Math.ceil(Math.min(...xs)); x <= Math.max(...xs); x += 8) {
+    const { x: cx, y: cy, rx, ry } = ARRIVAL_CIRCLE
+    for (let y = cy - ry + RADIUS; y <= cy + ry - RADIUS; y += 8) {
+      for (let x = cx - rx + RADIUS; x <= cx + rx - RADIUS; x += 8) {
         const point = { x, y }
         if (
+          ((x - cx) / (rx - RADIUS)) ** 2 + ((y - cy) / (ry - RADIUS)) ** 2 <= 1 &&
           inPolygon(point, island.points) &&
-          canStand(point, navigation) &&
-          island.points.every(
-            (a, i) => segmentDistance(point, a, island.points[(i + 1) % island.points.length]) >= 18
-          )
+          canStand(point, navigation)
         )
           candidates.push(point)
       }

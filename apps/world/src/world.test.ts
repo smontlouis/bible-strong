@@ -11,6 +11,16 @@ describe('archipelago navigation', () => {
     expect(canStand({ x: 500, y: 450 })).toBe(false)
   })
 
+  it('opens the ground around the half-sized table in default and saved navigation', () => {
+    for (const navigation of [defaultNavigation, parseNavigation(savedNavigation)]) {
+      expect(canStand({ x: 836, y: 470 }, navigation)).toBe(false)
+      for (const point of [{ x: 770, y: 470 }, { x: 900, y: 470 }, { x: 836, y: 506 }])
+        expect(canStand(point, navigation)).toBe(true)
+    }
+    const table = occluders.find(object => object.id === 'central-table')!
+    expect([table.width, table.height]).toEqual([89, 59.5])
+  })
+
   it('keeps diagonal speed bounded and stops when input is released', () => {
     const origin = { x: 810, y: 545 }
     const straight = move(origin, { x: 1, y: 0 }, 1 / 60)
@@ -24,7 +34,8 @@ describe('archipelago navigation', () => {
   it('does not cross the central table even after a long frame', () => {
     let p = { ...SPAWN }
     for (let i = 0; i < 200; i++) p = move(p, { x: 0, y: -1 }, 0.5)
-    expect(p.y).toBeGreaterThan(510)
+    expect(p.y).toBeGreaterThan(480)
+    expect(p.y).toBeLessThan(500)
     expect(canStand(p)).toBe(true)
   })
 

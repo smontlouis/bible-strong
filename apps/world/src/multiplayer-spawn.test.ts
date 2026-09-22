@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import navigationJson from '../public/navigation/archipelago.json'
 import { parseNavigation } from './navigation-document'
-import { canStand, inPolygon, type Point } from './world'
+import { canStand, defaultNavigation, inPolygon, type Point } from './world'
 import { centralSpawnCandidates, chooseCentralSpawn, spawnOverlaps } from './multiplayer-spawn'
 const navigation = parseNavigation(navigationJson)
 
@@ -19,6 +19,19 @@ describe('central island arrivals', () => {
     expect(chooseCentralSpawn(navigation, [], () => 0)).not.toEqual(
       chooseCentralSpawn(navigation, [], () => 0.9)
     )
+  })
+  it('keeps arrivals inside the paving circle and off the table in both navigation sources', () => {
+    for (const document of [navigation, defaultNavigation]) {
+      const candidates = centralSpawnCandidates(document)
+      expect(candidates.length).toBeGreaterThan(100)
+      for (const point of candidates) {
+        expect(((point.x - 835) / 136) ** 2 + ((point.y - 458) / 74) ** 2).toBeLessThanOrEqual(1)
+        expect(canStand(point, document)).toBe(true)
+        expect(Math.abs(point.x - 836) < 35 && Math.abs(point.y - 460) < 15).toBe(false)
+      }
+      expect(candidates.some(point => point.y > 520)).toBe(true)
+      expect(candidates.some(point => point.y < 410)).toBe(true)
+    }
   })
   it('never overlaps existing avatar footprints, even when crowded', () => {
     const occupied: Point[] = []
