@@ -1622,6 +1622,10 @@
   .games-shell[data-phase='question'] .games-header {
     display: none;
   }
+  .games-shell[data-phase='question'] .who-contestants,
+  .games-shell[data-phase='question'] .games-players {
+    margin-right: 52px;
+  }
   .games-shell[data-who-phase='question'] .who-portrait {
     width: 36px;
     height: 36px;
