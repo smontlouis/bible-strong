@@ -611,7 +611,7 @@ export function createWorld(
         ? arrivalTileTarget(camera, bounds.base * controls.zoom, next, rendererResolution)
         : undefined
       this.mapTiles.update(camera, time, 1, canStream, arrivalTarget)
-      this.lazyOccluders.update(camera, delta, canStream, arrivalTarget?.view)
+      this.lazyOccluders.update(camera, delta, canStream, next.x, arrivalTarget?.view)
       // Scene.create has already completed the essential preload. Download nearby artwork
       // immediately, independently of the intro/menu pause that controls animation playback.
       this.animations.update(camera, delta, !canStream || controls.paused, next.x, {

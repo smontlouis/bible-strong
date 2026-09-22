@@ -3,6 +3,7 @@ import { AssetReveal } from './asset-reveal'
 import { BushRustle } from './bush-rustle'
 import { isInView, LazySceneAssets, type VisibleBounds } from './lazy-scene-assets'
 import { maskSignGround } from './occluder-masks'
+import { occlusionDepth } from './occlusion-depth'
 import { occluders } from './world'
 
 type Entry = {
@@ -63,14 +64,18 @@ export class LazyOccluders {
     camera: Phaser.Cameras.Scene2D.Camera,
     delta: number,
     enabled: boolean,
+    avatarX: number,
     loadView?: VisibleBounds
   ) {
     this.assets.update(
       camera,
       enabled,
       entries => {
-        for (const { object, image, reveal } of entries)
+        for (const { object, image, reveal } of entries) {
+          // Match animated readers as the avatar moves along the desk's sloping edge.
+          image.setDepth(object.always ? 2000 : occlusionDepth(object.id, object.baseY, avatarX))
           image.setAlpha(reveal.update(delta, isInView(object, camera), this.reducedMotion.matches))
+        }
       },
       { view: loadView, concurrent: true }
     )
