@@ -1,5 +1,5 @@
 .references-highlight {
-  background: #ffe172;
+  background: var(--bs-yellow-soft);
   color: var(--lex-ink);
   border-radius: 4px;
   padding: 2px 4px;
@@ -23,7 +23,7 @@
   border-left: 2px solid var(--lex-blue);
   padding: 10px 14px;
   margin: 8px 0;
-  color: #59627c;
+  color: var(--bs-muted);
   font-size: 13px;
   line-height: 1.6;
   animation: lex-enter 300ms ease-out both;
@@ -35,7 +35,7 @@
   margin: 24px 0 16px;
   padding: 15px;
   border-radius: 16px;
-  background: #ffeadf;
+  background: var(--bs-yellow-soft);
   font-size: 15px;
 }
 .references-thread svg {
@@ -43,7 +43,7 @@
 }
 .references-hint {
   font-size: 12px;
-  color: #59627c;
+  color: var(--bs-muted);
 }
 .references-choices {
   display: flex;
@@ -55,13 +55,13 @@
   padding: 12px;
   min-height: 44px;
   border-radius: 12px;
-  border: 1px solid #d9deec;
-  background: #fffefa;
+  border: 1px solid var(--bs-line);
+  background: var(--bs-card);
   color: var(--lex-ink);
   font-size: 12px;
 }
 .references-choices button[aria-pressed='true'] {
-  background: #edf2ff;
+  background: var(--bs-blue-soft);
   border-color: var(--lex-blue);
 }
 .references-card {
@@ -69,15 +69,16 @@
   overflow: hidden;
   padding: 22px;
   margin-top: 16px;
-  background: #fffefa;
-  border: 1px solid #dfd9c9;
+  background: var(--bs-card);
+  border: 1px solid var(--bs-line);
   border-radius: 18px;
   animation: lex-enter 300ms ease-out both;
 }
 .references-card-number {
   display: block;
-  color: #63708d;
-  letter-spacing: 3px;
+  color: var(--bs-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   font-size: 11px;
 }
 .references-card h2 {
@@ -87,21 +88,21 @@
   margin: 12px 0;
 }
 .references-card blockquote {
-  font:
-    19px/1.6 Georgia,
-    serif;
+  font-size: 19px;
+  line-height: 1.6;
+  font-weight: 500;
   margin: 0 0 12px;
 }
 .references-card small {
   font-size: 11px;
-  color: #63708d;
+  color: var(--bs-muted);
 }
 .references-card p {
-  border-top: 1px solid #e5e7ee;
+  border-top: 1px solid var(--bs-line);
   padding-top: 16px;
   font-size: 13px;
   line-height: 1.6;
-  color: #59627c;
+  color: var(--bs-muted);
 }
 .references-steps {
   display: grid;
@@ -114,13 +115,13 @@
   gap: 12px;
   padding: 16px;
   text-align: left;
-  border: 1px solid #dfd9c9;
+  border: 1px solid var(--bs-line);
   border-radius: 14px;
-  background: #fffefa;
+  background: var(--bs-card);
   color: var(--lex-ink);
 }
 .references-steps button[aria-expanded='true'] {
-  background: #edf2ff;
+  background: var(--bs-blue-soft);
   border-color: var(--lex-blue);
 }
 .references-step-number {
@@ -129,7 +130,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #ffdd78;
+  background: var(--bs-yellow);
   flex-shrink: 0;
   font-size: 13px;
 }

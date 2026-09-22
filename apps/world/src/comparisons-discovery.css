@@ -5,14 +5,14 @@
 }
 .comparisons-card {
   padding: 17px 20px;
-  background: #fffefa;
-  border: 1px solid #dfd9c9;
+  background: var(--bs-card);
+  border: 1px solid var(--bs-line);
   border-radius: 18px;
   animation: lex-enter 320ms ease-out both;
 }
 .comparisons-card:nth-child(2) {
-  border-color: #cbd8fa;
-  background: #f0f4ff;
+  border-color: var(--bs-blue);
+  background: var(--bs-blue-soft);
 }
 .comparisons-version {
   display: flex;
@@ -22,22 +22,23 @@
 }
 .comparisons-version strong {
   font-size: 11px;
-  background: #e6edff;
+  background: var(--bs-blue-soft);
   padding: 5px 8px;
   border-radius: 6px;
 }
 .comparisons-version span,
 .comparisons-card small {
   font-size: 10px;
-  color: #59627c;
+  color: var(--bs-muted);
 }
 .comparisons-card small {
-  letter-spacing: 1px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 .comparisons-card p {
-  font:
-    19px/1.55 Georgia,
-    serif;
+  font-size: 19px;
+  line-height: 1.55;
+  font-weight: 500;
   margin: 8px 0 0;
 }
 .comparisons-card mark {
@@ -49,8 +50,8 @@
     box-shadow 250ms ease;
 }
 .comparisons-card mark.is-lit {
-  background: #ffe172;
-  box-shadow: 0 2px 0 #d7aa24;
+  background: var(--bs-yellow-soft);
+  box-shadow: 0 2px 0 var(--bs-yellow);
 }
 .comparisons-action {
   width: 100%;
@@ -72,7 +73,7 @@
 }
 .comparisons-note {
   font-size: 11px;
-  color: #59627c;
+  color: var(--bs-muted);
   line-height: 1.6;
   margin: 12px 0 0;
 }
@@ -81,7 +82,7 @@
   line-height: 1.6;
   padding: 17px;
   border-radius: 14px;
-  background: #fff0bd;
+  background: var(--bs-yellow-soft);
   animation: lex-enter 250ms ease-out;
 }
 .comparisons-path {
@@ -90,15 +91,15 @@
   margin: 28px 0;
 }
 .comparisons-path button {
-  border: 1px solid #dfd9c9;
-  background: #fffefa;
+  border: 1px solid var(--bs-line);
+  background: var(--bs-card);
   color: var(--lex-ink);
   border-radius: 16px;
   padding: 18px;
   text-align: left;
 }
 .comparisons-path button[aria-expanded='true'] {
-  background: #f0f4ff;
+  background: var(--bs-blue-soft);
   border-color: var(--lex-blue);
 }
 .comparisons-step-title {
@@ -114,7 +115,7 @@
   height: 30px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: #f8d852;
+  background: var(--bs-yellow);
 }
 .comparisons-step-title > span:last-child {
   margin-left: auto;

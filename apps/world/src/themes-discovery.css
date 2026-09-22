@@ -1,13 +1,13 @@
 .themes-map {
   margin-top: 8px;
   padding: 20px 18px 12px;
-  border: 1px solid #dfd9c9;
+  border: 1px solid var(--bs-line);
   border-radius: 20px;
-  background: #fffefa;
+  background: var(--bs-card);
   text-align: center;
 }
 .themes-map > small {
-  color: #63708d;
+  color: var(--bs-muted);
   font-size: 12px;
 }
 .themes-seed {
@@ -20,7 +20,7 @@
   padding: 12px 24px;
   border: 0;
   border-radius: 30px;
-  background: #ffe172;
+  background: var(--bs-yellow-soft);
   color: var(--lex-ink);
   font: inherit;
 }
@@ -37,9 +37,9 @@
 .themes-branches > div > span {
   position: relative;
   flex: 1;
-  border: 1px solid #ccd8f4;
+  border: 1px solid var(--bs-line);
   border-radius: 12px;
-  background: #edf2ff;
+  background: var(--bs-blue-soft);
   padding: 10px 6px;
   font-size: 12px;
 }
@@ -50,12 +50,12 @@
   height: 20px;
   left: 50%;
   width: 1px;
-  background: #b4c8f5;
+  background: var(--bs-line-strong);
 }
 .themes-branches p,
 .themes-hint,
 .themes-note {
-  color: #63708d;
+  color: var(--bs-muted);
   font-size: 12px;
   line-height: 1.6;
 }
@@ -78,16 +78,16 @@
 }
 .themes-choices button {
   min-height: 44px;
-  border: 1px solid #d5dcef;
+  border: 1px solid var(--bs-line);
   border-radius: 24px;
   padding: 10px 14px;
-  background: #fffefa;
+  background: var(--bs-card);
   color: var(--lex-ink);
   font: inherit;
   font-size: 13px;
 }
 .themes-choices button[aria-pressed='true'] {
-  background: #e7eeff;
+  background: var(--bs-blue-soft);
   border-color: var(--lex-blue);
   box-shadow: inset 0 0 0 1px var(--lex-blue);
 }
@@ -107,7 +107,7 @@
   gap: 14px;
   border-radius: 18px;
   padding: 22px;
-  background: #edf2ff;
+  background: var(--bs-blue-soft);
   min-height: 110px;
 }
 .themes-preview > span {

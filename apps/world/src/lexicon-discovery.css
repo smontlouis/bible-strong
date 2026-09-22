@@ -1,22 +1,12 @@
+/* Discovery dialogs (six islands): one tall sheet with slides. Colours from tokens.css. */
 .lexicon-dialog {
-  /* Bible Strong default theme: apps/expo/src/themes/colors.ts */
-  --lex-blue: #5983f0;
-  --lex-ink: #182b60;
-  color: var(--lex-ink);
-  background: #fffaf0;
-  border: 0;
-  border-radius: 30px;
-  padding: 0;
+  --lex-blue: var(--bs-blue);
+  --lex-ink: var(--bs-navy);
   width: min(440px, calc(100vw - 40px));
   height: min(780px, calc(100dvh - 40px));
   max-width: none;
   max-height: none;
   overflow: hidden;
-  box-shadow: 0 24px 100px #10285455;
-}
-.lexicon-dialog::backdrop {
-  background: #14334799;
-  backdrop-filter: blur(9px);
 }
 .lexicon-shell {
   height: 100%;
@@ -41,18 +31,19 @@
 }
 .lexicon-header > span {
   font-size: 11px;
-  letter-spacing: 2px;
-  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--bs-blue-dark);
   display: flex;
   align-items: center;
   gap: 10px;
 }
 .lexicon-header > span > span {
-  background: #f8d852;
+  background: var(--bs-yellow);
   color: var(--lex-ink);
-  font:
-    25px Georgia,
-    serif;
+  font-size: 25px;
+  font-weight: 500;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -72,22 +63,24 @@
   animation: lex-enter 320ms ease-out both;
 }
 .lexicon-step {
-  color: #6373a0;
-  font-size: 10px;
-  letter-spacing: 2px;
+  color: var(--bs-blue-dark);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
 }
 .lexicon-heading h1 {
   font-size: clamp(30px, 4.5vh, 39px);
   line-height: 1.08;
   font-weight: 500;
-  letter-spacing: -1.5px;
+  letter-spacing: -0.01em;
   white-space: pre-line;
   margin: 10px 0 12px;
 }
 .lexicon-heading > p {
   font-size: 14px;
   line-height: 1.55;
-  color: #59627c;
+  color: var(--bs-muted);
   margin: 0;
   max-width: 340px;
 }
@@ -100,8 +93,8 @@
   animation: lex-enter 600ms ease-out both;
 }
 .lexicon-verse {
-  border: 1px solid #dfd9c9;
-  background: #fffefa;
+  border: 1px solid var(--bs-line);
+  background: var(--bs-card);
   border-radius: 18px;
   padding: 18px 20px;
   position: relative;
@@ -109,12 +102,14 @@
 .lexicon-verse > small,
 .lexicon-entry-meta,
 .lexicon-passages small {
-  font-size: 10px;
-  letter-spacing: 1px;
-  color: #63708d;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--bs-muted);
 }
 .lexicon-verse > p {
-  font-family: Georgia, serif;
+  font-weight: 500;
   font-size: 21px;
   line-height: 1.7;
   margin: 9px 0;
@@ -122,11 +117,11 @@
 .lexicon-word {
   font: inherit;
   color: var(--lex-ink);
-  background: #ffe172;
+  background: var(--bs-yellow-soft);
   border: 0;
   border-radius: 5px;
   padding: 0 5px;
-  border-bottom: 2px solid #d7aa24;
+  border-bottom: 2px solid var(--bs-yellow);
 }
 .lexicon-reveal {
   min-height: 48px;
@@ -137,9 +132,8 @@
   color: var(--lex-blue);
 }
 .lexicon-reveal strong {
-  font:
-    36px Georgia,
-    serif;
+  font-size: 36px;
+  font-weight: 500;
 }
 .lexicon-reveal > span {
   line-height: 1.6;
@@ -149,10 +143,10 @@
   margin-top: 8px;
 }
 .lexicon-entry {
-  background: #fffefa;
-  border: 1px solid #d5dcef;
+  background: var(--bs-card);
+  border: 1px solid var(--bs-line);
   border-radius: 22px;
-  box-shadow: 6px 8px 0 #e1e8fa;
+  box-shadow: none;
   padding: 24px;
   margin: 28px 0 22px;
   text-align: center;
@@ -164,22 +158,20 @@
   font-size: 9px;
 }
 .lexicon-hebrew {
-  font:
-    78px Georgia,
-    serif;
+  font: 78px Georgia, serif;
   margin: 20px 0 3px;
   color: var(--lex-blue);
 }
 .lexicon-transliteration {
-  font:
-    italic 25px Georgia,
-    serif;
-  color: #647199;
+  font-size: 25px;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--bs-muted);
 }
 .lexicon-listen {
   border: 0;
   border-radius: 25px;
-  background: #eaf0ff;
+  background: var(--bs-blue-soft);
   color: var(--lex-blue);
   padding: 12px 18px;
   min-height: 46px;
@@ -215,7 +207,7 @@
 }
 .lexicon-entry hr {
   border: 0;
-  border-top: 1px solid #e5e7ee;
+  border-top: 1px solid var(--bs-line);
   margin: 24px 0 18px;
 }
 .lexicon-entry h2 {
@@ -227,20 +219,20 @@
 .lexicon-more p {
   font-size: 13px;
   line-height: 1.65;
-  color: #59627c;
+  color: var(--bs-muted);
   margin: 0;
 }
 .lexicon-entry .lexicon-audio-error {
   margin-top: 10px;
-  color: #9b3c25;
+  color: var(--bs-red-dark);
 }
 .lexicon-handnote {
   display: block;
   text-align: center;
-  color: #6a789d;
-  font:
-    italic 18px Georgia,
-    serif;
+  color: var(--bs-muted);
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 500;
 }
 .lexicon-source {
   display: flex;
@@ -252,18 +244,19 @@
   color: var(--lex-blue);
 }
 .lexicon-source > span:first-child {
-  font:
-    44px Georgia,
-    serif;
+  font-size: 44px;
+  font-weight: 500;
 }
 .lexicon-source small {
   display: block;
   margin-top: 4px;
-  font-size: 10px;
-  letter-spacing: 1px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
 }
 .lexicon-passages {
-  border-left: 2px solid #c8d3ef;
+  border-left: 2px solid var(--bs-line-strong);
   padding-left: 15px;
   margin-left: 12px;
   display: grid;
@@ -271,9 +264,9 @@
 }
 .lexicon-passages button {
   position: relative;
-  border: 1px solid #d9deec;
+  border: 1px solid var(--bs-line);
   border-radius: 14px;
-  background: #fffefa;
+  background: var(--bs-card);
   padding: 14px 16px;
   text-align: left;
   color: var(--lex-ink);
@@ -285,11 +278,11 @@
   height: 2px;
   left: -17px;
   top: 24px;
-  background: #c8d3ef;
+  background: var(--bs-line-strong);
 }
 .lexicon-passages button[aria-expanded='true'] {
   border-color: var(--lex-blue);
-  background: #edf2ff;
+  background: var(--bs-blue-soft);
 }
 .lexicon-passage-top {
   display: flex;
@@ -297,9 +290,9 @@
   margin-bottom: 5px;
 }
 .lexicon-passages p {
-  font:
-    17px/1.5 Georgia,
-    serif;
+  font-size: 17px;
+  line-height: 1.5;
+  font-weight: 500;
   margin: 12px 0 0;
   animation: lex-enter 220ms ease-out;
 }
@@ -321,8 +314,8 @@
 .lexicon-footer {
   flex-shrink: 0;
   padding: 8px 28px 24px;
-  background: #fffaf0;
-  border-top: 1px solid #e8e3d6;
+  background: var(--bs-card);
+  border-top: 1px solid var(--bs-line);
 }
 .lexicon-navigation {
   display: flex;
@@ -332,7 +325,7 @@
 }
 .lexicon-navigation > span {
   font-size: 11px;
-  color: #63708d;
+  color: var(--bs-muted);
   width: 44px;
   text-align: right;
 }
@@ -365,7 +358,7 @@
   width: 7px;
   height: 7px;
   border-radius: 8px;
-  background: #cdd2e0;
+  background: #dce2ee;
   transition: width 200ms ease;
 }
 .lexicon-navigation nav button[aria-current]::after {
@@ -380,13 +373,14 @@
   min-height: 50px;
   padding: 14px 20px;
   border: 0;
-  border-radius: 15px;
+  border-radius: 16px;
   background: var(--lex-blue);
   color: white;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 500;
 }
 .lexicon-next:hover {
-  background: color-mix(in srgb, var(--lex-blue) 88%, #182b60);
+  background: var(--bs-blue-dark);
 }
 @keyframes lex-enter {
   from {
@@ -406,9 +400,7 @@
 @media (max-width: 600px) {
   .lexicon-dialog {
     width: 100vw;
-    height: 100dvh;
-    border-radius: 0;
-    margin: 0;
+    height: calc(100dvh - 24px);
   }
   .lexicon-header {
     padding-top: max(12px, env(safe-area-inset-top));

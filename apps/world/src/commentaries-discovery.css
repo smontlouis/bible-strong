@@ -13,7 +13,7 @@
   color: var(--lex-blue);
   text-align: left;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
 }
 .commentaries-reveal > span {
   margin-left: auto;
@@ -21,8 +21,8 @@
 .commentaries-insight {
   margin-top: 18px;
   padding: 22px;
-  background: #edf2ff;
-  border: 1px solid #cbd8fb;
+  background: var(--bs-blue-soft);
+  border: 1px solid transparent;
   border-radius: 18px;
   animation: lex-enter 240ms ease-out;
 }
@@ -32,16 +32,15 @@
   margin: 12px 0;
 }
 .commentaries-insight h2 {
-  font:
-    26px Georgia,
-    serif;
+  font-size: 26px;
+  font-weight: 500;
   margin: 0;
 }
 .commentaries-insight small,
 .commentaries-source {
   font-size: 11px;
   line-height: 1.6;
-  color: #59627c;
+  color: var(--bs-muted);
 }
 .commentaries-author {
   display: flex;
@@ -55,10 +54,9 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #f8d852;
-  font:
-    22px Georgia,
-    serif;
+  background: var(--bs-yellow);
+  font-size: 22px;
+  font-weight: 500;
 }
 .commentaries-author small {
   display: block;
@@ -69,7 +67,7 @@
   font-size: 12px;
   line-height: 1.5;
   margin-top: 24px;
-  color: #59627c;
+  color: var(--bs-muted);
 }
 .commentaries-choices {
   display: flex;
@@ -80,18 +78,19 @@
   flex: 1;
   padding: 13px 10px;
   min-width: 88px;
-  border: 1px solid #dfd9c9;
+  border: 1px solid var(--bs-line);
   border-radius: 13px;
-  background: #fffefa;
+  background: var(--bs-card);
   color: var(--lex-ink);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
 }
 .commentaries-choices button span {
   display: block;
   margin-bottom: 8px;
   font-size: 10px;
-  letter-spacing: 2px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 .commentaries-choices button[aria-pressed='true'] {
   background: var(--lex-blue);
@@ -108,15 +107,14 @@
   align-items: center;
   margin-top: 18px;
   padding: 20px;
-  background: #fff0bd;
+  background: var(--bs-yellow-soft);
   border-radius: 18px;
   animation: lex-enter 240ms ease-out;
 }
 .commentaries-question > span {
-  font:
-    46px Georgia,
-    serif;
-  color: #957220;
+  font-size: 46px;
+  font-weight: 500;
+  color: var(--bs-yellow-dark);
 }
 .commentaries-question p {
   font-size: 16px;
