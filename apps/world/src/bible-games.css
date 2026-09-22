@@ -1650,3 +1650,68 @@
     display: none;
   }
 }
+
+/* Tablet and desktop: players on the left, the round on the right */
+@media (min-width: 700px) {
+  .games-shell[data-phase='question'] {
+    display: grid;
+    grid-template-columns: 208px minmax(0, 1fr);
+    grid-auto-rows: max-content;
+    column-gap: 16px;
+    align-items: start;
+  }
+  .games-shell[data-phase='question'] > * {
+    grid-column: 1 / -1;
+  }
+  .games-shell[data-phase='question'] .who-contestants,
+  .games-shell[data-phase='question'] .games-players {
+    grid-column: 1;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .games-shell[data-phase='question'] .who-round,
+  .games-shell[data-phase='question'] .games-round {
+    grid-column: 2;
+  }
+  .games-shell[data-phase='question'] .who-contestant,
+  .games-shell[data-phase='question'] .games-player {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 4px 12px;
+    padding: 10px 12px;
+    text-align: left;
+  }
+  .games-shell[data-phase='question'] .who-contestant > strong,
+  .games-shell[data-phase='question'] .games-player strong {
+    flex: 1;
+    margin: 0;
+    font-size: 14px;
+  }
+  .games-shell[data-phase='question'] .games-player > .avatar-art {
+    margin: 0;
+  }
+  .games-shell[data-phase='question'] .who-player-state,
+  .games-shell[data-phase='question'] .games-player small,
+  .games-shell[data-phase='question'] .game-player-reply {
+    flex-basis: 100%;
+    margin-left: 56px;
+    justify-content: flex-start;
+    padding: 0;
+    background: transparent !important;
+    color: var(--g-muted) !important;
+    font-weight: 400 !important;
+  }
+  .games-shell[data-phase='question'] .who-riddle > p {
+    font-size: 26px;
+  }
+  .games-shell[data-phase='question'] .who-answer {
+    margin-left: 0;
+    margin-right: calc(-1 * var(--g-pad));
+    padding-left: 0;
+  }
+  .games-shell[data-who-phase='question'] .games-header h1 {
+    font-size: 28px;
+  }
+}
