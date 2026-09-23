@@ -2,6 +2,7 @@ import { currentActivity } from './avatar-activity'
 import { ReactionIcon, ReactionPicker } from './ReactionPicker'
 import { StarIcon } from './game-juice'
 import { WorldLoading } from './WorldLoading'
+import { StandBanner } from './StandBanner'
 import { StoryDialog } from './StoryDialog'
 import { BibleGames } from './BibleGames'
 import { ExplorationJournal, JournalIcon, journalCopy } from './ExplorationJournal'
@@ -642,24 +643,9 @@ function App() {
               )}
             </div>
           )}
-          {stand && (
-            <a
-              className="stand-qr"
-              href="https://world.bible-strong.app"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <img
-                src="/assets/world-qr.svg"
-                width="172"
-                height="172"
-                alt="QR code — world.bible-strong.app"
-              />
-              <span>{t.stand}</span>
-            </a>
-          )}
         </div>
       </aside>
+      {stand && <StandBanner invitation={t.stand} language={language} />}
       <div className="world-action-stack">
         {ready &&
           !editorMode &&

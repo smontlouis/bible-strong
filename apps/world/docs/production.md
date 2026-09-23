@@ -6,11 +6,14 @@ root-relative asset URLs so the trailing slash also loads correctly.
 
 ## Stand display
 
-Open `https://world.bible-strong.app/?stand` to display a QR code in the bottom-left
-corner, with a French or English invitation to explore on a phone. The presence of
+Open `https://world.bible-strong.app/?stand` to display a prominent banner centered at
+the bottom, with a QR code, the ASI Europe logo, and a French or English invitation
+to explore on a phone. On touchscreens it sits above the movement controls. The presence of
 the `stand` parameter enables it (including `?stand=true`); remove the parameter to
 hide it. The QR code links to `https://world.bible-strong.app` without the parameter.
 Its static SVG is served with the app, without an external QR service.
+The ASI Europe logo is bundled from the [official website](https://asi-europe.org/)
+([original asset](https://asi-europe.org/wp-content/uploads/2015/02/admin-ajax1.png)).
 
 Stand mode also keeps the visible world's animations running when the browser
 window loses focus, while cancelling movement input. Normal mode still pauses
