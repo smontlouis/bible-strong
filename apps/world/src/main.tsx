@@ -85,6 +85,7 @@ const copy = {
     zoomOut: 'Zoom arrière',
     choose: 'Choisir mon avatar',
     walked: 'lieux visités',
+    stand: 'Scanne pour explorer\nsur ton téléphone',
   },
   en: {
     camera: 'Camera',
@@ -118,6 +119,7 @@ const copy = {
     zoomOut: 'Zoom out',
     choose: 'Choose my avatar',
     walked: 'places visited',
+    stand: 'Scan to explore\non your phone',
   },
 }
 type Language = keyof typeof copy
@@ -188,6 +190,7 @@ function CameraControls({
 }
 
 function App() {
+  const [stand] = useState(() => new URLSearchParams(location.search).has('stand'))
   const [savedProfile] = useState(loadProfile)
   const [profile, setProfile] = useState(() => savedProfile ?? generateExplorerProfile())
   const [onboarding, setOnboarding] = useState(!savedProfile)
@@ -210,6 +213,7 @@ function App() {
   const host = useRef<HTMLDivElement>(null)
   const joystick = useRef<HTMLDivElement>(null)
   const controls = useRef<Controls>({
+    stand,
     shoreEditor,
     ambientEditor,
     discoveryActions: {},
@@ -496,7 +500,7 @@ function App() {
 
   return (
     <main
-      className={`world-shell ${!ready ? 'is-loading' : ''} ${editing ? 'is-editing' : ''} ${editorMode ? 'is-world-editing' : ''}`}
+      className={`world-shell ${stand ? 'is-stand' : ''} ${!ready ? 'is-loading' : ''} ${editing ? 'is-editing' : ''} ${editorMode ? 'is-world-editing' : ''}`}
     >
       <div className="world-canvas" ref={host} aria-label="Bible Strong — archipel" />
       <header className="world-header">
@@ -637,6 +641,22 @@ function App() {
                 <button onClick={() => location.reload()}>{t.reload}</button>
               )}
             </div>
+          )}
+          {stand && (
+            <a
+              className="stand-qr"
+              href="https://world.bible-strong.app"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <img
+                src="/assets/world-qr.svg"
+                width="172"
+                height="172"
+                alt="QR code — world.bible-strong.app"
+              />
+              <span>{t.stand}</span>
+            </a>
           )}
         </div>
       </aside>

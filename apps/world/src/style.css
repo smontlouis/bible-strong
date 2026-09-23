@@ -214,6 +214,54 @@ select {
   flex-direction: column;
   gap: 10px;
 }
+.is-stand {
+  --stand-qr-size: 172px;
+}
+.stand-qr {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 18px;
+  background: #fff;
+  color: var(--bs-navy);
+  box-shadow: var(--bs-shadow-float);
+  text-align: center;
+  text-decoration: none;
+}
+.stand-qr img {
+  display: block;
+  width: var(--stand-qr-size);
+  height: var(--stand-qr-size);
+}
+.stand-qr span {
+  font-size: 13px;
+  line-height: 18px;
+  white-space: pre-line;
+}
+.stand-qr:focus-visible {
+  outline: 3px solid var(--bs-blue);
+  outline-offset: 3px;
+}
+@media (hover: none) and (pointer: coarse) {
+  .stand-qr {
+    bottom: 160px;
+  }
+}
+@media (max-width: 600px) {
+  .is-stand {
+    --stand-qr-size: 136px;
+  }
+}
+@media (max-height: 500px) {
+  .is-stand {
+    --stand-qr-size: 136px;
+  }
+}
 .avatar-choices {
   display: flex;
   gap: 4px;

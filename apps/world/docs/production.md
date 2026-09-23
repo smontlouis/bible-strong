@@ -4,6 +4,26 @@ The Worker and its built assets share `world.bible-strong.app`. The guestbook ad
 is `/admin` (`/admin/` and the old `/admin-guestbook` remain compatible). Vite uses
 root-relative asset URLs so the trailing slash also loads correctly.
 
+## Stand display
+
+Open `https://world.bible-strong.app/?stand` to display a QR code in the bottom-left
+corner, with a French or English invitation to explore on a phone. The presence of
+the `stand` parameter enables it (including `?stand=true`); remove the parameter to
+hide it. The QR code links to `https://world.bible-strong.app` without the parameter.
+Its static SVG is served with the app, without an external QR service.
+
+Stand mode also keeps the visible world's animations running when the browser
+window loses focus, while cancelling movement input. Normal mode still pauses
+animations on blur. Hidden tabs and minimized windows remain paused; browsers
+may suspend rendering there. Dialog pauses and reduced-motion preferences still
+apply in both modes.
+
+Regenerate the asset when changing the destination:
+
+```bash
+npx --yes --package qrcode qrcode -t svg -o apps/world/public/assets/world-qr.svg 'https://world.bible-strong.app'
+```
+
 ## Development tools
 
 Editor controls, panels, the navigation editor chunk, the diagnostic UI and `?debug`

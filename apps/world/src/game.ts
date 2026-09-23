@@ -1,4 +1,5 @@
 import type { AvatarActivity } from './avatar-activity'
+import { canAnimateWorld } from './world-activity'
 import { AvatarReactions, loadReactions } from './avatar-reactions'
 import { GAME_STATION } from './game-station'
 import { cameraZoomBounds, clampCameraZoom } from './camera-zoom'
@@ -54,6 +55,7 @@ export type WorldState = {
   multiplayer?: PresenceStatus
 }
 export type Controls = {
+  stand?: boolean
   activity?: AvatarActivity | null
   network?: WorldMultiplayer
   pointerPress?: PointerPress
@@ -325,6 +327,7 @@ export function createWorld(
 
     update(time: number, delta: number) {
       if (!this.blob) return
+      const animationActive = canAnimateWorld(controls.stand === true, this.active, document.hidden)
       if (this.input.keyboard) this.input.keyboard.enabled = !controls.paused
       if (this.previousNavigation !== controls.navigation) {
         this.pathfinder = new Pathfinder(controls.navigation)
@@ -438,7 +441,7 @@ export function createWorld(
         reducedMotion,
         delta,
         controls.avatar,
-        !controls.paused && this.active && !document.hidden
+        !controls.paused && animationActive
       )
       this.blob
         .setTint(Number.parseInt(controls.avatarColor.slice(1), 16))
@@ -555,7 +558,7 @@ export function createWorld(
         labelScaleX,
         labelScaleY,
         fade * fade * (3 - 2 * fade),
-        !controls.paused && this.active && !document.hidden
+        !controls.paused && animationActive
       )
       this.reactions.update(
         this.network,
@@ -568,7 +571,7 @@ export function createWorld(
       this.bushes.update(
         delta,
         [{ ...next, moving }, ...this.remoteAvatars.contacts],
-        reducedMotion || controls.paused || !this.active || document.hidden
+        reducedMotion || controls.paused || !animationActive
       )
       const targetX = controls.overview ? WIDTH / 2 : next.x
       const targetY = controls.overview ? HEIGHT / 2 : next.y - (38 * rendererResolution) / zoom
@@ -647,21 +650,21 @@ export function createWorld(
       }
       this.shoreWaves?.update(
         delta,
-        !this.active || document.hidden || (controls.paused && !shoreEditing),
+        !animationActive || (controls.paused && !shoreEditing),
         import.meta.env.DEV && controls.debug && controls.diagnosticFilters?.shorelines !== false
       )
       this.ambientZoneEditor?.update()
       this.background.update(camera)
-      this.clouds.update(camera, delta, controls.paused || !this.active || document.hidden)
+      this.clouds.update(camera, delta, controls.paused || !animationActive)
       this.ambience.update(
         camera,
         delta,
         next,
-        (controls.paused && !shoreEditing) || !this.active || document.hidden
+        (controls.paused && !shoreEditing) || !animationActive
       )
       // Camera zoom already includes the physical-pixel density.
       const arrivalSettled = cameraArrival === undefined || reducedMotion
-      const canStream = this.active && !document.hidden
+      const canStream = animationActive
       const arrivalTarget = !arrivalSettled
         ? arrivalTileTarget(camera, bounds.base * controls.zoom, next, rendererResolution)
         : undefined
