@@ -1,11 +1,19 @@
+@font-face {
+  font-family: 'Stand Pulp';
+  src: url('/assets/pulp-extra-bold.otf') format('opentype');
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+}
 .stand-banner-dock {
-  --stand-bottom: max(32px, calc(env(safe-area-inset-bottom) + 20px));
+  --stand-bottom: max(36px, calc(env(safe-area-inset-bottom) + 24px));
   position: absolute;
   z-index: 6;
   inset-inline: 0;
   bottom: var(--stand-bottom);
   margin-inline: auto;
-  width: min(1120px, calc(100% - 240px));
+  width: min(1440px, calc(100% - 180px));
+  container-type: inline-size;
   transition: transform 240ms ease;
 }
 .stand-banner-dock[data-collapsed='true'] {
@@ -13,52 +21,146 @@
 }
 .stand-banner-toggle {
   position: absolute;
-  bottom: 100%;
+  bottom: calc(100% - 4px);
   left: 50%;
   transform: translateX(-50%);
   display: grid;
   place-items: center;
-  width: 64px;
-  height: 42px;
+  width: 80px;
+  height: 44px;
   padding: 0;
-  border: 2px solid #ffffffcc;
-  border-bottom: 0;
-  border-radius: 14px 14px 0 0;
+  border: 0;
+  border-radius: 24px 24px 0 0;
   background: var(--bs-navy);
   color: #fff;
+  cursor: pointer;
+}
+.stand-banner-toggle svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 3;
 }
 .stand-banner {
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr) 240px;
+  grid-template-columns: 21% minmax(0, 1fr) 17%;
   align-items: center;
-  gap: 32px;
-  padding: 24px 32px 24px 24px;
-  border: 2px solid #ffffffcc;
-  border-radius: 28px;
-  background: var(--bs-navy);
-  color: #fff;
-  box-shadow: 0 12px 40px #10293455;
+  gap: 3%;
+  padding: 14px 0 14px 3%;
+  border: 5px solid var(--bs-navy);
+  border-radius: 76px;
+  background: linear-gradient(115deg, #ffda20, #ffce00 55%, var(--bs-yellow));
+  color: var(--bs-navy);
+  box-shadow:
+    inset 0 4px 0 #fff8,
+    inset 0 -5px 0 #eaa100,
+    0 12px 0 var(--bs-navy),
+    0 24px 40px #10293455;
   text-decoration: none;
+}
+.stand-banner-scan {
+  position: relative;
+  display: block;
+  align-self: start;
+  padding: 8px;
+  margin-top: -26px;
+  margin-bottom: -8px;
+  border: 5px solid var(--bs-navy);
+  border-radius: 32px;
+  background: #fff;
+  box-shadow:
+    0 7px 0 #10203544,
+    8px 12px 18px #9a670038;
+}
+.stand-banner-rays {
+  position: absolute;
+  left: -64px;
+  top: -46px;
+  width: 72px;
+  height: 92px;
+  overflow: visible;
+  stroke: var(--bs-yellow);
+  stroke-width: 13;
+  stroke-linecap: round;
+  filter: drop-shadow(0 3px 0 var(--bs-navy)) drop-shadow(0 -3px 0 var(--bs-navy));
+  pointer-events: none;
 }
 .stand-banner-qr {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 12px;
+  border-radius: 20px;
   background: #fff;
 }
 .stand-banner-copy {
+  position: relative;
   display: grid;
-  gap: 12px;
+  justify-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding-left: 26px;
+  text-align: center;
 }
-.stand-banner-copy strong {
-  font-size: clamp(24px, 2.2vw, 34px);
-  line-height: 1.3;
-  white-space: pre-line;
+.stand-banner-arrow {
+  position: absolute;
+  left: -38px;
+  top: 29%;
+  width: 90px;
+  height: 90px;
+  stroke: var(--bs-navy);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
-.stand-banner-copy > span {
-  font-size: 18px;
-  color: #dce8ff;
+.stand-banner-title {
+  display: grid;
+  font-family: 'Stand Pulp', Pulp, sans-serif;
+  font-size: clamp(48px, 6.9cqw, 100px);
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.055em;
+}
+.stand-banner-title > span {
+  white-space: nowrap;
+}
+.stand-banner-spark {
+  position: absolute;
+  right: -14px;
+  top: 20%;
+  width: 52px;
+  height: 64px;
+  stroke: #fff;
+  stroke-width: 9;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+.stand-banner-invitation {
+  font-family: 'Stand Pulp', Pulp, sans-serif;
+  font-size: clamp(15px, 1.65cqw, 24px);
+  font-weight: 800;
+  line-height: 1.25;
+  margin-top: 4px;
+  text-wrap: balance;
+}
+.stand-banner-url {
+  display: block;
+  width: 88%;
+  max-width: 100%;
+  padding: 4px 16px 5px;
+  border-radius: 999px;
+  background: #fff;
+  font-family: 'Stand Pulp', Pulp, sans-serif;
+  font-size: clamp(17px, 2.1cqw, 30px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+.stand-banner-partner {
+  position: relative;
+  display: block;
+  margin-right: -22px;
+  padding: 22px 24px;
+  border-radius: 999px;
+  background: var(--bs-navy);
 }
 .stand-banner-logo {
   display: block;
@@ -67,61 +169,104 @@
 }
 .stand-banner:focus-visible,
 .stand-banner-toggle:focus-visible {
-  outline: 3px solid var(--bs-yellow);
-  outline-offset: 4px;
+  outline: 3px solid #fff;
+  outline-offset: 6px;
 }
 @media (max-width: 1100px) {
   .stand-banner-dock {
-    width: min(820px, calc(100% - 32px));
+    width: calc(100% - 72px);
     --stand-bottom: max(180px, calc(env(safe-area-inset-bottom) + 168px));
   }
   .stand-banner {
-    grid-template-columns: 184px minmax(0, 1fr) 180px;
-    gap: 16px;
+    border-radius: 52px;
+  }
+  .stand-banner-copy {
+    padding-left: 14px;
+  }
+  .stand-banner-arrow {
+    left: -24px;
+    width: 52px;
+    height: 60px;
+  }
+  .stand-banner-scan {
+    padding: 4px;
+    border-width: 4px;
+    border-radius: 24px;
+    margin-top: -24px;
+  }
+  .stand-banner-rays {
+    width: 50px;
+    height: 64px;
+    left: -40px;
+    top: -32px;
+  }
+  .stand-banner-partner {
+    padding: 16px;
+    margin-right: -18px;
+  }
+  .stand-banner-spark {
+    width: 36px;
+    right: -16px;
   }
   .is-stand .world-action-stack {
     flex-direction: row;
   }
 }
-@media (min-width: 601px) and (max-width: 800px) {
+@media (max-width: 700px) {
+  .stand-banner-dock {
+    width: calc(100% - 40px);
+  }
   .stand-banner {
-    grid-template-columns: 160px minmax(0, 1fr) 140px;
-    padding: 16px;
+    grid-template-columns: minmax(100px, 36%) minmax(0, 1fr);
+    gap: 12px;
+    padding: 18px 16px;
+    border-width: 4px;
+    border-radius: 34px;
+    box-shadow:
+      inset 0 3px 0 #fff8,
+      inset 0 -4px 0 #eaa100,
+      0 8px 0 var(--bs-navy),
+      0 18px 28px #10293444;
   }
-  .stand-banner-copy strong {
-    font-size: 22px;
-  }
-  .stand-banner-copy > span {
-    font-size: 14px;
-  }
-}
-@media (max-width: 600px) {
-  .stand-banner {
-    grid-template-columns: minmax(120px, 46%) minmax(0, 1fr);
-    gap: 8px 16px;
-    padding: 12px;
-    border-radius: 20px;
-  }
-  .stand-banner-qr {
+  .stand-banner-scan {
     grid-row: 1 / 3;
-  }
-  .stand-banner-logo {
-    grid-column: 2;
-    grid-row: 1;
-    width: 150px;
-    max-width: 100%;
+    align-self: center;
+    margin-top: -16px;
+    margin-bottom: 0;
   }
   .stand-banner-copy {
-    grid-column: 2;
-    grid-row: 2;
     gap: 6px;
+    padding-left: 0;
   }
-  .stand-banner-copy strong {
-    font-size: 18px;
+  .stand-banner-title {
+    font-size: 8.5cqw;
+    line-height: 0.95;
   }
-  .stand-banner-copy > span {
-    font-size: 12px;
-    overflow-wrap: anywhere;
+  .stand-banner-arrow,
+  .stand-banner-spark {
+    display: none;
+  }
+  .stand-banner-invitation {
+    font-size: clamp(12px, 2.9cqw, 17px);
+  }
+  .stand-banner-url {
+    width: 100%;
+    font-size: clamp(12px, 3.2cqw, 19px);
+    padding: 5px 6px;
+  }
+  .stand-banner-partner {
+    grid-column: 2;
+    justify-self: center;
+    width: 116px;
+    max-width: 100%;
+    margin-right: 0;
+    padding: 8px 16px;
+  }
+  .stand-banner-rays {
+    width: 38px;
+    height: 48px;
+    left: -27px;
+    top: -27px;
   }
 }
 @media (hover: none) and (pointer: coarse) {
@@ -129,7 +274,6 @@
     --stand-bottom: max(200px, calc(env(safe-area-inset-bottom) + 188px));
   }
 }
-
 @media (prefers-reduced-motion: reduce) {
   .stand-banner-dock {
     transition: none;

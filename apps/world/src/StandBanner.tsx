@@ -43,24 +43,41 @@ export function StandBanner({ invitation, language }: { invitation: string; lang
         target="_blank"
         rel="noreferrer"
       >
-        <img
-          className="stand-banner-qr"
-          src="/assets/world-qr.svg"
-          width="184"
-          height="184"
-          alt="QR code — world.bible-strong.app"
-        />
-        <span className="stand-banner-copy">
-          <strong>{invitation}</strong>
-          <span>world.bible-strong.app</span>
+        <span className="stand-banner-scan">
+          <svg className="stand-banner-rays" viewBox="0 0 72 92" fill="none" aria-hidden="true">
+            <path d="m48 25-8-18M29 44 9 34m18 33L7 73" />
+          </svg>
+          <img
+            className="stand-banner-qr"
+            src="/assets/world-qr.svg"
+            width="184"
+            height="184"
+            alt="QR code — world.bible-strong.app"
+          />
         </span>
-        <img
-          className="stand-banner-logo"
-          src="/assets/asi-europe.png"
-          width="308"
-          height="150"
-          alt="ASI Europe"
-        />
+        <span className="stand-banner-copy">
+          <svg className="stand-banner-arrow" viewBox="0 0 72 64" fill="none" aria-hidden="true">
+            <path d="M65 55C61 28 42 20 10 23m17-16L9 23l19 13" />
+          </svg>
+          <strong className="stand-banner-title">
+            <span>{language === 'fr' ? 'Entre dans' : 'Step into'}</span>
+            <span>{language === 'fr' ? 'le monde !' : 'the world!'}</span>
+          </strong>
+          <svg className="stand-banner-spark" viewBox="0 0 60 72" fill="none" aria-hidden="true">
+            <path d="m14 32 16-23m-4 43 25-11" />
+          </svg>
+          <span className="stand-banner-invitation">{invitation}</span>
+          <span className="stand-banner-url">world.bible-strong.app</span>
+        </span>
+        <span className="stand-banner-partner">
+          <img
+            className="stand-banner-logo"
+            src="/assets/asi-europe.png"
+            width="308"
+            height="150"
+            alt="ASI Europe"
+          />
+        </span>
       </a>
     </div>
   )
