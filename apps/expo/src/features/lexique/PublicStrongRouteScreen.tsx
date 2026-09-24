@@ -12,7 +12,7 @@ import {
   buildPublicStrongEntityPath,
   buildPublicStrongPath,
   parsePublicStrongCode,
-  publicStrongContext,
+  resolvePublicStrongContext,
   type PublicStrongEntryPage,
 } from './publicStrongRoutes'
 import { parseStrongDetailRouteParams } from './strongDetailRoutes'
@@ -21,6 +21,7 @@ import PublicPage from '~features/app/PublicPage'
 type PublicStrongRouteParams = {
   code?: string | string[]
   uniqueName?: string | string[]
+  book?: string
   strongBibleVersionId?: string
   bibleVersion?: string
   clickedWord?: string
@@ -53,7 +54,7 @@ export const PublicStrongEntryRouteScreen = ({ page }: { page: PublicStrongEntry
   }
 
   const { context: contextualParams } = parseStrongDetailRouteParams(params)
-  const context = { ...contextualParams, ...publicStrongContext(identity) }
+  const context = resolvePublicStrongContext(identity, contextualParams)
   const title = identity.code
   let content: ReactNode
   if (page === 'dictionary') {

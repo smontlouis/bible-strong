@@ -40,3 +40,15 @@ export const publicStrongContext = (identity: StrongIdentity): StrongDetailRoute
   identityKind: identity.kind,
   identityCode: identity.code,
 })
+
+export const resolvePublicStrongContext = (
+  identity: StrongIdentity,
+  routeContext: StrongDetailRouteContext
+): StrongDetailRouteContext => {
+  const context = { ...routeContext, ...publicStrongContext(identity) }
+  const hasVerseContext =
+    routeContext.book != null &&
+    routeContext.bibleChapter != null &&
+    routeContext.bibleVerse != null
+  return hasVerseContext ? { ...context, book: routeContext.book } : context
+}

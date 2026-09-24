@@ -3,6 +3,7 @@ import {
   buildPublicStrongPath,
   parsePublicStrongCode,
   publicStrongContext,
+  resolvePublicStrongContext,
 } from '../publicStrongRoutes'
 
 describe('public Strong routes', () => {
@@ -33,6 +34,32 @@ describe('public Strong routes', () => {
       reference: 'G4074G',
       identityKind: 'dstrong',
       identityCode: 'G4074G',
+    })
+  })
+
+  it('keeps the context verse book instead of the lexical placeholder', () => {
+    expect(
+      resolvePublicStrongContext(
+        { kind: 'dstrong', code: 'G0266' },
+        { book: 45, bibleVersion: 'KJV', bibleChapter: 6, bibleVerse: 23 }
+      )
+    ).toEqual({
+      book: 45,
+      reference: 'G0266',
+      identityKind: 'dstrong',
+      identityCode: 'G0266',
+      bibleVersion: 'KJV',
+      bibleChapter: 6,
+      bibleVerse: 23,
+    })
+  })
+
+  it('falls back to the lexical placeholder book without a context verse', () => {
+    expect(resolvePublicStrongContext({ kind: 'dstrong', code: 'H0430' }, { book: 45 })).toEqual({
+      book: 1,
+      reference: 'H0430',
+      identityKind: 'dstrong',
+      identityCode: 'H0430',
     })
   })
 })

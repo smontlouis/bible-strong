@@ -49,9 +49,13 @@ export const createStrongDetailRoute = (
       ? buildPublicStrongEntityPath(options.entityKey)
       : undefined
   const pathname = publicEntryPath ?? publicEntityPath ?? STRONG_DETAIL_PATHNAMES[page]
+  const hasVerseContext = context.bibleChapter != null && context.bibleVerse != null
   const identityParams =
     publicEntryPath || publicEntityPath
-      ? {}
+      ? {
+          // The path carries the identity, but the context verse still needs its book.
+          book: hasVerseContext && context.book != null ? String(context.book) : undefined,
+        }
       : {
           book: context.book == null ? undefined : String(context.book),
           reference: context.reference,
