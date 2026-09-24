@@ -547,6 +547,7 @@ function App() {
         <button
           type="button"
           className="contact-action"
+          data-invite
           aria-label={language === 'fr' ? 'Proposer une partie' : 'Invite to play'}
           aria-haspopup="dialog"
           onClick={() => {
@@ -660,7 +661,8 @@ function App() {
               network={controls.current.network}
               color={profile.color}
               language={language}
-              online={state.multiplayer?.state === 'online'}
+              online={stand || state.multiplayer?.state === 'online'}
+              onSend={reaction => controls.current.sendReaction?.(reaction) ?? false}
               openRequest={reactionRequest}
             />
           )}

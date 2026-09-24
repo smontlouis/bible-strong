@@ -53,3 +53,10 @@ The shared bilingual collection of biblical questions and identities available t
 
 **Question history**:
 The record of questions offered to an anonymous visitor, used to prioritize unfamiliar questions.
+
+**Ambient avatar**:
+A local companion that wanders the central island and responds to nearby emojis
+on a Stand display, without being a connected visitor or a Bible game participant.
+
+**Stand display**:
+The World opened with the `stand` URL parameter for an event screen.

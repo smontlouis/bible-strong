@@ -1,7 +1,14 @@
 import type Phaser from 'phaser'
 import type { BushContact } from './bush-rustle'
 import { BlobAvatar } from './blob-avatar'
-import type { WorldMultiplayer } from './multiplayer'
+import type { AvatarProfile } from './avatar-profile'
+import type { Pose } from './multiplayer-protocol'
+
+export type AvatarTrack = {
+  player: { profile: AvatarProfile }
+  sample: (now: number) => Pose
+  opacity?: number
+}
 
 type Visual = {
   sprite: Phaser.GameObjects.Image
@@ -18,7 +25,7 @@ export class RemoteAvatars {
     private resolution: number
   ) {}
   update(
-    network: WorldMultiplayer,
+    network: { remotes: ReadonlyMap<string, AvatarTrack> },
     now: number,
     delta: number,
     reducedMotion: boolean,
@@ -90,12 +97,13 @@ export class RemoteAvatars {
         .setPosition(pose.x, pose.y)
         .setDepth(pose.y)
         .setTint(Number.parseInt(profile.color.slice(1), 16))
-      visual.shadow.setPosition(pose.x, pose.y)
+        .setAlpha(track.opacity ?? 1)
+      visual.shadow.setPosition(pose.x, pose.y).setAlpha(track.opacity ?? 1)
       if (visual.label.text !== profile.name) visual.label.setText(profile.name)
       visual.label
         .setPosition(pose.x, pose.y + 5 * labelScaleY)
         .setScale(labelScaleX, labelScaleY)
-        .setAlpha(labelAlpha)
+        .setAlpha(labelAlpha * (track.opacity ?? 1))
         .setVisible(labelAlpha > 0.01)
     }
   }

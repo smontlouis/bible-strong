@@ -1,3 +1,5 @@
+import { StandCrowd } from './stand-crowd'
+import type { ReactionId } from './reactions'
 import type { AvatarActivity } from './avatar-activity'
 import { canAnimateWorld } from './world-activity'
 import { AvatarReactions, loadReactions } from './avatar-reactions'
@@ -56,6 +58,7 @@ export type WorldState = {
 }
 export type Controls = {
   stand?: boolean
+  sendReaction?: (reaction: ReactionId) => boolean
   activity?: AvatarActivity | null
   network?: WorldMultiplayer
   pointerPress?: PointerPress
@@ -96,6 +99,9 @@ export function createWorld(
   class StudyScene extends Phaser.Scene {
     network!: WorldMultiplayer
     remoteAvatars!: RemoteAvatars
+    standCrowd?: StandCrowd
+    standAvatars?: RemoteAvatars
+    standReactions?: AvatarReactions
     reactions!: AvatarReactions
     facing = { x: 0, y: 1 }
     position = { ...SPAWN }
@@ -264,6 +270,18 @@ export function createWorld(
       controls.network = this.network
       this.remoteAvatars = new RemoteAvatars(this, rendererResolution)
       this.reactions = new AvatarReactions(this)
+      if (controls.stand) {
+        this.standCrowd = new StandCrowd(controls.navigation)
+        this.standAvatars = new RemoteAvatars(this, rendererResolution)
+        this.standReactions = new AvatarReactions(this)
+      }
+      controls.sendReaction = reaction => {
+        if (controls.paused || !this.active || document.hidden) return false
+        const sent = this.network.sendReaction(reaction)
+        const local =
+          this.standCrowd?.react(reaction, this.position, performance.now(), !sent) ?? false
+        return sent || local
+      }
       controls.retryMultiplayer = () => this.network.retry()
       this.shadow = this.add.ellipse(SPAWN.x, SPAWN.y, 30, 10, 0x183c45, 0.25).setDepth(-1)
       this.blob = this.add
@@ -317,6 +335,7 @@ export function createWorld(
         if (controls.network === this.network) {
           controls.network = undefined
           controls.retryMultiplayer = undefined
+          controls.sendReaction = undefined
         }
       }
       this.events.once(Phaser.Scenes.Events.SHUTDOWN, disposeScene)
@@ -560,6 +579,44 @@ export function createWorld(
         fade * fade * (3 - 2 * fade),
         !controls.paused && animationActive
       )
+      if (this.standCrowd) {
+        const now = performance.now()
+        const active = !controls.paused && animationActive
+        const view = camera.worldView
+        this.standCrowd.update({
+          navigation: controls.navigation,
+          realCount: this.network.status.state === 'online' ? this.network.remotes.size : null,
+          local: next,
+          delta,
+          now,
+          active,
+          visible: point => view.contains(point.x, point.y),
+        })
+        if (active)
+          this.standCrowd.observeReactions(
+            this.network.reactions,
+            id => this.network.remotes.get(id)?.sample(now),
+            now
+          )
+        this.standAvatars?.update(
+          this.standCrowd,
+          now,
+          active ? delta : 0,
+          reducedMotion,
+          labelScaleX,
+          labelScaleY,
+          fade * fade * (3 - 2 * fade),
+          active
+        )
+        this.standReactions?.update(
+          this.standCrowd,
+          { ...next, color: controls.avatarColor },
+          now,
+          labelScaleX,
+          labelScaleY,
+          reducedMotion
+        )
+      }
       this.reactions.update(
         this.network,
         { ...next, color: controls.avatarColor },
@@ -570,7 +627,11 @@ export function createWorld(
       )
       this.bushes.update(
         delta,
-        [{ ...next, moving }, ...this.remoteAvatars.contacts],
+        [
+          { ...next, moving },
+          ...this.remoteAvatars.contacts,
+          ...(this.standAvatars?.contacts ?? []),
+        ],
         reducedMotion || controls.paused || !animationActive
       )
       const targetX = controls.overview ? WIDTH / 2 : next.x
@@ -613,14 +674,30 @@ export function createWorld(
       const contact = controls.contactActions
       if (contact) {
         // Track the closest visitor; a wider leave radius avoids flicker at the edge.
-        let best: { id: string; name: string; x: number; y: number; d: number } | null = null
+        let best: {
+          id: string
+          name: string
+          x: number
+          y: number
+          d: number
+          bot: boolean
+        } | null = null
         const at = performance.now()
         for (const [id, track] of this.network.remotes) {
           const pose = track.sample(at)
           const d = Math.hypot(pose.x - next.x, pose.y - next.y)
           if (!best || d < best.d)
-            best = { id, name: track.player.profile.name, x: pose.x, y: pose.y, d }
+            best = { id, name: track.player.profile.name, x: pose.x, y: pose.y, d, bot: false }
         }
+        for (const [id, bot] of this.standCrowd?.remotes ?? []) {
+          if (bot.leaving || bot.opacity < 0.5) continue
+          const pose = bot.sample(at)
+          const d = Math.hypot(pose.x - next.x, pose.y - next.y)
+          if (!best || d < best.d)
+            best = { id, name: bot.player.profile.name, x: pose.x, y: pose.y, d, bot: true }
+        }
+        const invite = contact.querySelector<HTMLButtonElement>('[data-invite]')
+        if (invite) invite.hidden = best?.bot === true
         const shown = contact.dataset.visible === 'true'
         // Close contact only (the invite list itself still reaches 180 units).
         const visible = !!best && best.d <= (shown ? 65 : 50) && !controls.paused
@@ -645,9 +722,10 @@ export function createWorld(
         if (contact.dataset.visible !== value) {
           contact.dataset.visible = value
           contact.setAttribute('aria-hidden', String(!visible))
-          for (const button of contact.querySelectorAll('button')) button.disabled = !visible
         }
       }
+      for (const button of contact?.querySelectorAll('button') ?? [])
+        button.disabled = contact?.dataset.visible !== 'true' || Boolean(button.hidden)
       this.shoreWaves?.update(
         delta,
         !animationActive || (controls.paused && !shoreEditing),

@@ -20,3 +20,13 @@ Use hibernating WebSocket attachments for session state, plus alarms to clean up
 The experience remains usable alone during network failure. Room capacity and connection state are visible in French and English. The frontend can remain separately hosted, with an explicit Worker endpoint and origin allowlist, or deploy with the Worker assets. The code introduces no external multiplayer subscription; usage remains subject to Cloudflare billing.
 
 Gameplay requiring trusted positions would need server-owned simulation before building on this presence protocol. See `apps/world/docs/multiplayer.md` for operation and verification.
+
+## Local stand ambience — 2026-09-24
+
+Stand displays may render up to five local ambient avatars to populate the central
+island. Each other real visitor replaces one ambient avatar. Keep this simulation
+outside `WorldMultiplayer`: reuse only the avatar/reaction rendering contracts,
+never network IDs, invitation lists, presence counts, or game authority. Ambient
+avatars respond to nearby visitor reactions but never publish their own events.
+Navigation is restricted to the central island; bridge and outer-island allowed
+polygons are excluded from both pathfinding and movement collision checks.

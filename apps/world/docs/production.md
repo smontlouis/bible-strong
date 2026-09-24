@@ -86,3 +86,19 @@ push to `master` (and supports manual dispatch). It uses the existing repository
 secret `CLOUDFLARE_WEB_API_TOKEN`, then checks `/health`. Production build validation
 rejects editor chunks, diagnostic controls and editor write URLs. Worker secrets
 are configured separately and preserved by deployment.
+
+### Stand ambient avatars
+
+Stand mode fills the central plaza with up to five local ambient avatars, minus
+other real visitors in the room (the stand's own avatar is excluded). Bots appear
+one at a time and fade out as visitors arrive, preferring off-screen departures.
+They gradually return when visitors leave. A temporary connection failure keeps
+the last known population target until presence is synchronized again.
+
+Their walkable navigation contains only the central island (`land-0`) and its
+obstacles: no bridges or outer islands. They choose varied short walks around
+the plaza, at different speeds, interspersed with pauses. Nearby emojis receive
+up to two delayed replies, with a cooldown. Local emoji interaction also works
+offline. Bots never join the multiplayer room, count as connected people, appear
+in invitation lists, or participate in games. Only the emoji action is shown
+when the closest avatar is a bot. They are absent outside `?stand`.

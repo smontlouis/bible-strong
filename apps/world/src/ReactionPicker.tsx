@@ -33,7 +33,9 @@ export function ReactionPicker({
   language,
   online,
   openRequest = 0,
+  onSend,
 }: {
+  onSend?: (reaction: ReactionId) => boolean
   network?: WorldMultiplayer
   color: string
   language: 'fr' | 'en'
@@ -82,7 +84,7 @@ export function ReactionPicker({
     }
   }, [open])
   function send(reaction: ReactionId) {
-    if (!network?.sendReaction(reaction)) {
+    if (!(onSend ? onSend(reaction) : network?.sendReaction(reaction))) {
       setFeedback(t.unavailable)
       return
     }

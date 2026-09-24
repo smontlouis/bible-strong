@@ -217,3 +217,7 @@
     scale: 1;
   }
 }
+
+.contact-action[hidden] {
+  display: none;
+}
