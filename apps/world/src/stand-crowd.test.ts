@@ -77,7 +77,8 @@ describe('stand crowd', () => {
     }
     expect(moving).toBeGreaterThan(100)
     expect(idle).toBeGreaterThan(100)
-  })
+    // Simulating 90 seconds of collision-checked walks takes longer on shared CI runners.
+  }, 30000)
 
   it('responds once with a delay to nearby emojis, with cooldown and expiry', () => {
     const { crowd, advance, now } = setup()
