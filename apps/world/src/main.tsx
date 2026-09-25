@@ -3,6 +3,7 @@ import { ReactionIcon, ReactionPicker } from './ReactionPicker'
 import { StarIcon } from './game-juice'
 import { WorldLoading } from './WorldLoading'
 import { StandBanner } from './StandBanner'
+import { AppDownloadShortcut, AppDownloadStation } from './AppDownload'
 import { StoryDialog } from './StoryDialog'
 import { BibleGames } from './BibleGames'
 import { ExplorationJournal, JournalIcon, journalCopy } from './ExplorationJournal'
@@ -265,6 +266,16 @@ function App() {
     saveVisitedPlaces(visited)
   }, [visited])
   const t = copy[language]
+  const worldActionsVisible =
+    ready &&
+    !editorMode &&
+    !editing &&
+    !menuOpen &&
+    !profileOpen &&
+    !opened &&
+    !guestbookOpen &&
+    !storyOpen &&
+    !gamesOpen
   const name = (station: (typeof stations)[number]) =>
     language === 'fr' ? station.name : station[language]
 
@@ -647,25 +658,30 @@ function App() {
         </div>
       </aside>
       {stand && <StandBanner invitation={t.stand} language={language} />}
-      <div className="world-action-stack">
-        {ready &&
-          !editorMode &&
-          !editing &&
-          !menuOpen &&
-          !profileOpen &&
-          !opened &&
-          !guestbookOpen &&
-          !storyOpen &&
-          !gamesOpen && (
-            <ReactionPicker
-              network={controls.current.network}
-              color={profile.color}
-              language={language}
-              online={stand || state.multiplayer?.state === 'online'}
-              onSend={reaction => controls.current.sendReaction?.(reaction) ?? false}
-              openRequest={reactionRequest}
-            />
-          )}
+      {worldActionsVisible && (
+        <AppDownloadStation
+          language={language}
+          ref={element => {
+            controls.current.appDownloadLink = element
+          }}
+        />
+      )}
+      <div
+        className="world-action-stack"
+        ref={element => {
+          controls.current.actionStack = element
+        }}
+      >
+        {worldActionsVisible && (
+          <ReactionPicker
+            network={controls.current.network}
+            color={profile.color}
+            language={language}
+            online={stand || state.multiplayer?.state === 'online'}
+            onSend={reaction => controls.current.sendReaction?.(reaction) ?? false}
+            openRequest={reactionRequest}
+          />
+        )}
         {ready && !editorMode && controls.current.network && (
           <BibleGames
             network={controls.current.network}
@@ -683,6 +699,7 @@ function App() {
             disabled={menuOpen || profileOpen || !!opened || guestbookOpen || storyOpen}
           />
         )}
+        {worldActionsVisible && !stand && <AppDownloadShortcut language={language} />}
       </div>
       <footer className="world-footer">
         {initial.error && <span title={t.draftError}>{t.draftError}</span>}

@@ -27,7 +27,7 @@ describe('editable navigation documents', () => {
     expect(doc).toEqual(defaultNavigation)
     expect(navigationFingerprint(doc)).toBe(navigationFingerprint(defaultNavigation))
     expect(doc.zones[0]).not.toBe(defaultNavigation.zones[0])
-    expect(doc.zones.filter(z => z.kind === 'blocked')).toHaveLength(20 + detailObstacles.length)
+    expect(doc.zones.filter(z => z.kind === 'blocked')).toHaveLength(21 + detailObstacles.length)
   })
 
   it('rejects incompatible maps, duplicate IDs, crossing and off-image polygons', () => {

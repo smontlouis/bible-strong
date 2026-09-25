@@ -4,6 +4,7 @@ import type { AvatarActivity } from './avatar-activity'
 import { canAnimateWorld } from './world-activity'
 import { AvatarReactions, loadReactions } from './avatar-reactions'
 import { GAME_STATION } from './game-station'
+import { APP_DOWNLOAD_STATION } from './app-download'
 import { cameraZoomBounds, clampCameraZoom } from './camera-zoom'
 import { arrivalZoom } from './world-arrival'
 import { Pathfinder } from './pathfinding'
@@ -68,6 +69,8 @@ export type Controls = {
   multiplayerEnabled?: boolean
   retryMultiplayer?: () => void
   discoveryActions?: Partial<Record<IslandActionId, HTMLButtonElement | null>>
+  appDownloadLink?: HTMLAnchorElement | null
+  actionStack?: HTMLDivElement | null
   /** Floating actions under the visitor's avatar while another visitor is within reach. */
   contactActions?: HTMLDivElement | null
   ambientEditor?: AmbientEditorModel
@@ -201,6 +204,7 @@ export function createWorld(
     preload() {
       loadReactions(this)
       this.load.image('game-terminal', './assets/games/terminal.webp')
+      this.load.image('app-download-phone', './assets/app-download/phone.webp')
       this.load.image('game-terminal-ground', './assets/games/terminal-ground.webp')
       this.load.image('navigation-destination', './assets/navigation/destination-arrow.webp')
       this.load.image('navigation-blocked', './assets/navigation/blocked-cross.webp')
@@ -262,6 +266,12 @@ export function createWorld(
         .setFlipX(true)
         .setDisplaySize(GAME_STATION.width, GAME_STATION.height)
         .setDepth(GAME_STATION.y)
+
+      this.add
+        .image(APP_DOWNLOAD_STATION.x, APP_DOWNLOAD_STATION.y, 'app-download-phone')
+        .setOrigin(0.5, 1)
+        .setDisplaySize(APP_DOWNLOAD_STATION.width, APP_DOWNLOAD_STATION.height)
+        .setDepth(APP_DOWNLOAD_STATION.y)
 
       if (controls.shoreEditor) this.shoreWaves = new ShoreWaves(this, controls.shoreEditor)
       this.bushes = new BushRustle(this, [])
@@ -669,6 +679,48 @@ export function createWorld(
           action.dataset.visible = value
           action.disabled = !visible
           action.setAttribute('aria-hidden', String(!visible))
+        }
+      }
+      const download = controls.appDownloadLink
+      if (download) {
+        // A real link over the full prop: no proximity gate and no click-to-walk.
+        const scaleX = (zoom * parent.clientWidth) / screenWidth
+        const scaleY = (zoom * parent.clientHeight) / screenHeight
+        const x =
+          (APP_DOWNLOAD_STATION.x - camera.scrollX - screenWidth / 2) * scaleX +
+          parent.clientWidth / 2
+        const y =
+          (APP_DOWNLOAD_STATION.y - camera.scrollY - screenHeight / 2) * scaleY +
+          parent.clientHeight / 2
+        const width = APP_DOWNLOAD_STATION.width * scaleX
+        const height = APP_DOWNLOAD_STATION.height * scaleY
+        download.style.translate = `${x - width / 2}px ${y - height}px`
+        download.style.width = `${width}px`
+        download.style.height = `${height}px`
+        const visible =
+          !controls.paused &&
+          x + width / 2 > 0 &&
+          x - width / 2 < parent.clientWidth &&
+          y > 0 &&
+          y - height < parent.clientHeight
+        if (download.dataset.visible !== String(visible)) {
+          download.dataset.visible = String(visible)
+          download.inert = !visible
+          download.setAttribute('aria-hidden', String(!visible))
+        }
+        // The fixed shortcut remains readable when the camera puts the exhibit under the HUD.
+        const caption = download.firstElementChild?.getBoundingClientRect()
+        const hud = controls.actionStack?.getBoundingClientRect()
+        if (visible && caption && hud) {
+          download.dataset.captionHidden = String(
+            caption.left < 8 ||
+              caption.right > parent.clientWidth - 8 ||
+              caption.bottom > parent.clientHeight - 8 ||
+              (caption.left < hud.right &&
+                caption.right > hud.left &&
+                caption.top < hud.bottom &&
+                caption.bottom > hud.top)
+          )
         }
       }
       const contact = controls.contactActions

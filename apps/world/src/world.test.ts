@@ -14,7 +14,11 @@ describe('archipelago navigation', () => {
   it('opens the ground around the half-sized table in default and saved navigation', () => {
     for (const navigation of [defaultNavigation, parseNavigation(savedNavigation)]) {
       expect(canStand({ x: 836, y: 470 }, navigation)).toBe(false)
-      for (const point of [{ x: 770, y: 470 }, { x: 900, y: 470 }, { x: 836, y: 506 }])
+      for (const point of [
+        { x: 770, y: 470 },
+        { x: 900, y: 470 },
+        { x: 836, y: 506 },
+      ])
         expect(canStand(point, navigation)).toBe(true)
     }
     const table = occluders.find(object => object.id === 'central-table')!
@@ -29,6 +33,18 @@ describe('archipelago navigation', () => {
       straight.x - origin.x
     )
     expect(move(origin, { x: 0, y: 0 }, 1)).toEqual(origin)
+  })
+
+  it('blocks the app pedestal while leaving the path behind the phone open', () => {
+    for (const navigation of [defaultNavigation, parseNavigation(savedNavigation)]) {
+      expect(canStand({ x: 725, y: 510 }, navigation)).toBe(false)
+      expect(canStand({ x: 725, y: 477 }, navigation)).toBe(true)
+      expect(canStand({ x: 685, y: 510 }, navigation)).toBe(true)
+      let position = { x: 685, y: 510 }
+      for (let i = 0; i < 40; i++) position = move(position, { x: 1, y: 0 }, 1 / 60, navigation)
+      expect(position.x).toBeLessThan(695)
+      expect(canStand(position, navigation)).toBe(true)
+    }
   })
 
   it('does not cross the central table even after a long frame', () => {
@@ -83,7 +99,6 @@ describe('archipelago navigation', () => {
   })
 })
 
-
 describe('island discovery', () => {
   it.each([defaultNavigation, parseNavigation(savedNavigation)])(
     'makes discovery available throughout every island, including its entrance',
@@ -107,9 +122,22 @@ describe('island discovery', () => {
   )
 
   it('uses the current edited island contour', () => {
-    const navigation: NavigationDocument = { ...defaultNavigation, zones: [
-      { id: 'land-1', name: 'Renamed island', kind: 'allowed', points: [[0, 0], [100, 0], [100, 100], [0, 100]] },
-    ] }
+    const navigation: NavigationDocument = {
+      ...defaultNavigation,
+      zones: [
+        {
+          id: 'land-1',
+          name: 'Renamed island',
+          kind: 'allowed',
+          points: [
+            [0, 0],
+            [100, 0],
+            [100, 100],
+            [0, 100],
+          ],
+        },
+      ],
+    }
     expect(stationAt({ x: 50, y: 50 }, navigation)?.id).toBe('dictionary')
     expect(stationAt(stations[0], navigation)).toBeNull()
   })

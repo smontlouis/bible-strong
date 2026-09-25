@@ -1,0 +1,125 @@
+.app-download-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 8px 18px 8px 10px;
+  border: 2px solid var(--bs-navy);
+  border-radius: 20px;
+  background: var(--bs-yellow);
+  box-shadow:
+    0 4px 0 var(--bs-navy),
+    0 8px 20px #244e5726;
+  color: var(--bs-navy);
+  font-size: 16px;
+  font-family: 'Stand Pulp', Pulp, sans-serif;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
+}
+.app-download-shortcut-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 38px;
+  border-radius: 10px;
+  background: #fff7;
+}
+.app-download-shortcut-icon svg {
+  width: 26px;
+  height: 26px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.app-download-external {
+  font-size: 20px;
+}
+.app-download-shortcut:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--bs-navy);
+}
+.app-download-shortcut:focus-visible,
+.app-download-station:focus-visible {
+  outline: 3px solid var(--bs-blue-dark);
+  outline-offset: 5px;
+}
+.app-download-station {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  display: block;
+  visibility: hidden;
+  border-radius: 20px;
+  color: var(--bs-navy);
+  text-decoration: none;
+  cursor: pointer;
+}
+.app-download-station[data-visible='true'] {
+  visibility: visible;
+}
+.app-download-station-copy {
+  position: absolute;
+  top: calc(100% - 4px);
+  left: 50%;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: max-content;
+  transform: translateX(-50%);
+  text-align: center;
+}
+.app-download-station-copy strong {
+  padding: 8px 14px;
+  border: 2px solid var(--bs-navy);
+  border-radius: 12px;
+  background: var(--bs-yellow);
+  box-shadow: 0 3px 0 var(--bs-navy);
+  font-size: 14px;
+  font-family: 'Stand Pulp', Pulp, sans-serif;
+  line-height: 1.2;
+}
+.app-download-station[data-caption-hidden='true'] .app-download-station-copy {
+  visibility: hidden;
+}
+.is-stand .app-download-station-copy {
+  display: none;
+}
+@media (hover: hover) {
+  .app-download-shortcut:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 6px 0 var(--bs-navy),
+      0 10px 24px #244e5738;
+  }
+  .app-download-station:hover strong {
+    background: #ffdb42;
+  }
+}
+@media (max-width: 600px) {
+  .app-download-shortcut {
+    gap: 8px;
+    min-height: 50px;
+    padding: 6px 12px 6px 8px;
+    font-size: 14px;
+    border-radius: 16px;
+  }
+  .app-download-shortcut-icon {
+    width: 30px;
+    height: 32px;
+  }
+  .app-download-station-copy strong {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-download-shortcut {
+    transition: none;
+  }
+}

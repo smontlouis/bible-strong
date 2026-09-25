@@ -1,6 +1,7 @@
 // PROTOTYPE: hand-annotated screen-space navigation on the supplied fixed illustration.
 // Geometry uses the 1671 × 941 source image. It is not an isometric tile grid.
 import detailFootprints from './generated/detail-footprints.json'
+import { APP_DOWNLOAD_OBSTACLE } from './app-download'
 export type Point = { x: number; y: number }
 export type Polygon = readonly (readonly [number, number])[]
 export const WIDTH = 1671
@@ -238,20 +239,23 @@ export const defaultNavigation: NavigationDocument = {
   obstacleRevision: DETAIL_OBSTACLE_REVISION,
   zones: [
     ...walkable.map((zone, i): Zone => ({ ...zone, id: `land-${i}`, kind: 'allowed' })),
-    ...obstacles.map((o, i): Zone => ({
-      id: `obstacle-${i}`,
-      name: o.name,
-      kind: 'blocked',
-      points: Array.from(
-        { length: 24 },
-        (_, j) =>
-          [
-            o.x + o.rx * Math.cos((j * Math.PI) / 12),
-            o.y + o.ry * Math.sin((j * Math.PI) / 12),
-          ] as const
-      ),
-    })),
+    ...obstacles.map(
+      (o, i): Zone => ({
+        id: `obstacle-${i}`,
+        name: o.name,
+        kind: 'blocked',
+        points: Array.from(
+          { length: 24 },
+          (_, j) =>
+            [
+              o.x + o.rx * Math.cos((j * Math.PI) / 12),
+              o.y + o.ry * Math.sin((j * Math.PI) / 12),
+            ] as const
+        ),
+      })
+    ),
     ...detailObstacles,
+    APP_DOWNLOAD_OBSTACLE,
   ],
 }
 
@@ -389,8 +393,11 @@ export type Station = (typeof stations)[number]
 export function stationAt(point: Point, navigation = defaultNavigation): Station | null {
   return (
     stations.find(station =>
-      navigation.zones.some(zone =>
-        zone.id === station.islandZoneId && zone.kind === 'allowed' && inPolygon(point, zone.points)
+      navigation.zones.some(
+        zone =>
+          zone.id === station.islandZoneId &&
+          zone.kind === 'allowed' &&
+          inPolygon(point, zone.points)
       )
     ) ?? null
   )
