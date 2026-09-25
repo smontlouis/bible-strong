@@ -3,7 +3,12 @@ const mockInitialize = jest.fn()
 const mockCaptureError = jest.fn()
 const mockFetch = jest.fn()
 
+jest.mock('react-native', () => ({ Platform: { OS: 'android' } }))
 jest.mock('@react-native-firebase/app', () => ({ getApp: jest.fn(() => ({})) }))
+jest.mock('../../../modules/bible-strong-app-check/src/BibleStrongAppCheckModule', () => ({
+  __esModule: true,
+  default: null,
+}))
 jest.mock('@react-native-firebase/app-check', () => ({
   getToken: (...args: unknown[]) => mockGetToken(...args),
   initializeAppCheck: (...args: unknown[]) => mockInitialize(...args),

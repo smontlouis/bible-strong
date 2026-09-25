@@ -11,6 +11,7 @@
     "build:android:staging": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c staging -- eas build -p android --local --profile staging --non-interactive",
     "build:android:prod": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c production -- eas build -p android --local --profile production --non-interactive",
     "build:android:prod:apk": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c production -- eas build -p android --local --profile production-apk --non-interactive",
+    "build:android:app-check-beta": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c production -- eas build -p android --local --profile app-check-beta --non-interactive",
     "build:ios:dev": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c development -- eas build -p ios --local --profile development --non-interactive",
     "build:ios:dev-sim": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c development -- eas build -p ios --local --profile development-simulator --non-interactive",
     "build:ios:staging": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c staging -- eas build -p ios --local --profile staging --non-interactive",

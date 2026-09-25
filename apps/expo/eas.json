@@ -33,6 +33,21 @@
       "android": {
         "buildType": "apk"
       }
+    },
+    "app-check-beta": {
+      "extends": "production",
+      "channel": "app-check-beta",
+      "environment": "production",
+      "distribution": "store",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "ANDROID_APP_CHECK_BETA": "true",
+        "ANDROID_GOOGLE_SERVICES_FILE": "firebase/prod/google-services.json",
+        "APP_NAME": "Bible Strong",
+        "EAS_BUILD_CHANNEL": "app-check-beta"
+      }
     }
   },
   "submit": {

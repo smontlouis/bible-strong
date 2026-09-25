@@ -1,10 +1,8 @@
-import { getApp } from '@react-native-firebase/app'
 import {
-  getToken,
-  initializeAppCheck,
-  ReactNativeFirebaseAppCheckProvider,
-  type FirebaseAppCheckTypes,
-} from '@react-native-firebase/app-check'
+  getResourceAppCheckProviderName,
+  initializeResourceAppCheckClient,
+  type ResourceAppCheckClient,
+} from './resourceAppCheckNativeProvider'
 
 import {
   createResourceAppCheckFetch,
@@ -12,20 +10,12 @@ import {
 } from './resourceAppCheckRequest'
 import { appLogger } from './agentObservability'
 
-let appCheckInitialization: Promise<FirebaseAppCheckTypes.Module> | undefined
+let appCheckInitialization: Promise<ResourceAppCheckClient> | undefined
 
-export const initializeResourceAppCheck = (): Promise<FirebaseAppCheckTypes.Module> => {
+export const initializeResourceAppCheck = (): Promise<ResourceAppCheckClient> => {
   if (appCheckInitialization) return appCheckInitialization
 
-  const provider = new ReactNativeFirebaseAppCheckProvider()
-  provider.configure({
-    android: { provider: __DEV__ ? 'debug' : 'playIntegrity' },
-    apple: { provider: __DEV__ ? 'debug' : 'appAttestWithDeviceCheckFallback' },
-  })
-  appCheckInitialization = initializeAppCheck(getApp(), {
-    provider,
-    isTokenAutoRefreshEnabled: true,
-  }).catch(error => {
+  appCheckInitialization = initializeResourceAppCheckClient().catch(error => {
     // A transient initialization failure must not poison the rest of the session.
     appCheckInitialization = undefined
     throw error
@@ -62,7 +52,7 @@ let consecutiveFailures = 0
 
 const acquireResourceAppCheckToken = async (forceRefresh: boolean): Promise<string> => {
   try {
-    const result = await getToken(await initializeResourceAppCheck(), forceRefresh)
+    const result = await (await initializeResourceAppCheck()).getToken(forceRefresh)
     if (!result.token) throw new Error('RESOURCE_APP_CHECK_TOKEN_MISSING')
     lastFailure = undefined
     initialFailure = undefined
@@ -80,6 +70,7 @@ const acquireResourceAppCheckToken = async (forceRefresh: boolean): Promise<stri
     const retryAfterMs = Math.min(2_000 * 2 ** Math.min(consecutiveFailures - 1, 4), 30_000)
     lastFailure = { error: failure, retryAt: Date.now() + retryAfterMs }
     appLogger.captureError('download', 'resource_app_check.token_failed', error, {
+      appCheckProvider: getResourceAppCheckProviderName(),
       forceRefresh,
       errorCode,
       consecutiveFailures,

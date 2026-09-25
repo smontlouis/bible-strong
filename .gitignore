@@ -137,6 +137,10 @@ RNTester/Pods/*
 android/
 ios/
 
+# Checked-in local Expo modules (generated app projects remain ignored).
+!apps/expo/modules/*/android/
+apps/expo/modules/*/android/build/
+
 .env
 .env.resource-publication.local
 

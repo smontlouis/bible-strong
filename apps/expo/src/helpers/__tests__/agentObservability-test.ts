@@ -26,6 +26,18 @@ describe('agent observability', () => {
     jest.clearAllMocks()
   })
 
+  it('indexes the selected App Check provider without exposing credentials', () => {
+    appLogger.captureError('download', 'resource_app_check.token_failed', new Error('refused'), {
+      appCheckProvider: 'recaptchaEnterprise',
+      token: 'private-attestation-token',
+    })
+    expect(mockSetTag).toHaveBeenCalledWith('diagnostic.app_check_provider', 'recaptchaEnterprise')
+    expect(mockSetContext).toHaveBeenCalledWith(
+      'diagnostic',
+      expect.objectContaining({ appCheckProvider: 'recaptchaEnterprise', token: '[REDACTED]' })
+    )
+  })
+
   it('propagates cancelled requests without reporting an exception', async () => {
     const controller = new AbortController()
     const error = new Error('RESOURCE_REQUEST_ABORTED')

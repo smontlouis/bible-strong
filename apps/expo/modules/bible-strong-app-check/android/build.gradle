@@ -1,0 +1,31 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'expo.modules.biblestrongappcheck'
+version = '0.1.0'
+
+def recaptchaEnabled = findProperty('bibleStrong.appCheckRecaptcha') == 'true'
+
+android {
+  namespace "expo.modules.biblestrongappcheck"
+  sourceSets {
+    main.java.srcDirs += recaptchaEnabled ? 'src/recaptcha/java' : 'src/standard/java'
+  }
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+  }
+  lintOptions {
+    abortOnError false
+  }
+}
+
+// Standard builds keep RNFirebase's existing dependency graph.
+if (recaptchaEnabled) {
+  dependencies {
+    implementation platform('com.google.firebase:firebase-bom:34.19.0')
+    implementation 'com.google.firebase:firebase-appcheck-recaptcha'
+  }
+}

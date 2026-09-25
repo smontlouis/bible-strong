@@ -1,5 +1,21 @@
 import { ExpoConfig, ConfigContext } from 'expo/config'
 
+const isAppCheckBeta = process.env.ANDROID_APP_CHECK_BETA === 'true'
+const betaVersionCode = Number(process.env.ANDROID_APP_CHECK_BETA_VERSION_CODE ?? '505')
+if (
+  isAppCheckBeta &&
+  process.env.EAS_BUILD_PROFILE &&
+  process.env.EAS_BUILD_PROFILE !== 'app-check-beta'
+) {
+  throw new Error('ANDROID_APP_CHECK_BETA is reserved for the app-check-beta build profile.')
+}
+if (isAppCheckBeta && (!Number.isSafeInteger(betaVersionCode) || betaVersionCode <= 504)) {
+  throw new Error('ANDROID_APP_CHECK_BETA_VERSION_CODE must be an integer greater than 504.')
+}
+if (isAppCheckBeta && process.env.EAS_BUILD_PLATFORM === 'ios') {
+  throw new Error('The App Check beta profile is Android-only.')
+}
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: process.env.APP_NAME ?? 'dev - Bible Strong',
@@ -9,13 +25,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   primaryColor: '#ffffff',
   githubUrl: 'https://github.com/bulby97/bible-strong',
   platforms: ['ios', 'android', 'web'],
-  version: '27.0.17',
+  version: isAppCheckBeta ? '27.0.18-beta.1' : '27.0.17',
   orientation: 'default',
   icon: './assets/images/icon-2.png',
   userInterfaceStyle: 'automatic',
 
   android: {
-    versionCode: 504,
+    versionCode: isAppCheckBeta ? betaVersionCode : 505,
+    // Isolate this native pilot without changing the runtime of standard releases.
+    // Bump this identifier whenever the beta's native dependencies/configuration change.
+    runtimeVersion: isAppCheckBeta ? 'android-app-check-recaptcha-beta-v1' : undefined,
     package: 'com.smontlouis.biblestrong',
     googleServicesFile:
       process.env.ANDROID_GOOGLE_SERVICES_FILE ?? 'firebase/dev/google-services.json',
@@ -84,6 +103,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     '@react-native-firebase/app',
     './plugins/withFirebaseAppCheckSwiftBridge.js',
     '@react-native-firebase/app-check',
+    [
+      './plugins/withAndroidAppCheckBeta.js',
+      {
+        enabled: isAppCheckBeta,
+        siteKey: isAppCheckBeta ? process.env.ANDROID_APP_CHECK_RECAPTCHA_SITE_KEY : undefined,
+      },
+    ],
     '@react-native-firebase/auth',
     [
       'expo-build-properties',

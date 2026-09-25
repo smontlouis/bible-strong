@@ -213,6 +213,12 @@ export const appLogger = {
               ? normalizedError.code
               : undefined) ?? undefined
         if (errorCode) scope.setTag('diagnostic.error_code', sanitizeString(errorCode, 'errorCode'))
+        if (typeof payload?.appCheckProvider === 'string') {
+          scope.setTag(
+            'diagnostic.app_check_provider',
+            sanitizeString(payload.appCheckProvider, 'appCheckProvider')
+          )
+        }
         if (context) scope.setContext('diagnostic', context)
         Sentry.captureException(normalizedError)
       })
