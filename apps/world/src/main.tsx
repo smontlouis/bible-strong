@@ -677,7 +677,7 @@ function App() {
             network={controls.current.network}
             color={profile.color}
             language={language}
-            online={stand || state.multiplayer?.state === 'online'}
+            online={Boolean(controls.current.sendReaction)}
             onSend={reaction => controls.current.sendReaction?.(reaction) ?? false}
             openRequest={reactionRequest}
           />

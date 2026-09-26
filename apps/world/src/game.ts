@@ -280,11 +280,9 @@ export function createWorld(
       controls.network = this.network
       this.remoteAvatars = new RemoteAvatars(this, rendererResolution)
       this.reactions = new AvatarReactions(this)
-      if (controls.stand) {
-        this.standCrowd = new StandCrowd(controls.navigation)
-        this.standAvatars = new RemoteAvatars(this, rendererResolution)
-        this.standReactions = new AvatarReactions(this)
-      }
+      this.standCrowd = new StandCrowd(controls.navigation)
+      this.standAvatars = new RemoteAvatars(this, rendererResolution)
+      this.standReactions = new AvatarReactions(this)
       controls.sendReaction = reaction => {
         if (controls.paused || !this.active || document.hidden) return false
         const sent = this.network.sendReaction(reaction)

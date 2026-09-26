@@ -30,3 +30,10 @@ never network IDs, invitation lists, presence counts, or game authority. Ambient
 avatars respond to nearby visitor reactions but never publish their own events.
 Navigation is restricted to the central island; bridge and outer-island allowed
 polygons are excluded from both pathfinding and movement collision checks.
+
+## Ambient avatars in normal mode — 2026-09-26
+
+Normal mode now uses the same local ambient avatars and offline emoji interaction
+as stand mode. Population replacement, navigation limits and separation from
+multiplayer presence and games remain unchanged. The stand parameter controls
+the event display and animation-on-blur behavior, not ambient avatar availability.
