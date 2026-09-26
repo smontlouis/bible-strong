@@ -44,7 +44,13 @@ const residualPublicationMarkup = new RegExp(
  * commentary bundle. Textual commentary and normalized Bible links are kept.
  */
 export const sanitizeCommentaryPublicationHtml = (html: string): string => {
-  let sanitized = html;
+  // Legacy commentary prose (notably French Matthew Henry) contains escaped
+  // NBSP references. Repair only those text entities, leaving tags, attributes
+  // and other escaped content intact.
+  let sanitized = html.replace(
+    /<!--[\s\S]*?-->|<[^>]*>|&amp;(?:nbsp|#0*160|#x0*a0);/giu,
+    (token) => (token.startsWith("&") ? "&nbsp;" : token)
+  );
 
   for (const tag of REMOVED_BLOCK_TAGS) {
     sanitized = sanitized.replace(

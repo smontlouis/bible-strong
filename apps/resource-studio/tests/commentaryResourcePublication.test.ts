@@ -14,6 +14,44 @@ import {
 const sha256 = (value: string): string =>
   createHash("sha256").update(value).digest("hex");
 
+test("publishes Matthew Henry's Micah context with real non-breaking spaces", () => {
+  const canonical = buildCanonicalCommentary(
+    {
+      id: "mhy-fr",
+      title: "Commentaire concis de Matthew Henry",
+      author: "Matthew Henry",
+      languages: ["fr"],
+      rights: "fixture",
+      source: "fixture"
+    },
+    "fr",
+    {
+      generatedAt: "2026-09-26T00:00:00.000Z",
+      sourceRevision: "fixture",
+      resources: { "mhy-fr": {} },
+      chapters: [{ book: 33, chapter: 7, passages: ["33-7-14"], resources: {} }]
+    },
+    [
+      {
+        id: "mhy-fr:33-7-14",
+        passage: "33-7-14",
+        source: { language: "en", html: "" },
+        translation: {
+          language: "fr",
+          html: "<p>Son église&amp;nbsp;; Il est le Bon Berger qui prend soin de Ses brebis&amp;nbsp;; Il marche devant elles.</p>"
+        }
+      }
+    ]
+  );
+  assert.deepEqual(canonical.verses, [
+    {
+      verseKey: "33-7-14",
+      content:
+        "<p>Son église&nbsp;; Il est le Bon Berger qui prend soin de Ses brebis&nbsp;; Il marche devant elles.</p>"
+    }
+  ]);
+});
+
 test("targeted rebuilds accept a partial library without weakening exhaustive publication", () => {
   const catalog = ["barnes", "bible-annotee"].map((id) => ({
     id,

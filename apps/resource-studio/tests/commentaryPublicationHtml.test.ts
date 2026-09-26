@@ -6,6 +6,21 @@ import {
   sanitizeCommentaryPublicationHtml
 } from "../src/commentaryPublicationHtml.js";
 
+test("repairs double-encoded non-breaking spaces in commentary prose", () => {
+  const html =
+    "<p>Son église&amp;nbsp;; Ses brebis&amp;#160;; devant elles&amp;#xA0;!</p>";
+  const expected =
+    "<p>Son église&nbsp;; Ses brebis&nbsp;; devant elles&nbsp;!</p>";
+  assert.equal(sanitizeCommentaryPublicationHtml(html), expected);
+  assert.equal(sanitizeCommentaryPublicationHtml(expected), expected);
+});
+
+test("preserves other escaped text, attributes and existing non-breaking spaces", () => {
+  const html =
+    '<p title="literal &amp;nbsp;">&lt;em&gt;A &amp; B&lt;/em&gt;&nbsp;! &#160; &#xA0; \u00a0</p>';
+  assert.equal(sanitizeCommentaryPublicationHtml(html), html);
+});
+
 test("materializes normalized commentary references as autonomous OSIS links", () => {
   assert.equal(
     materializeCommentaryBibleLinks({
