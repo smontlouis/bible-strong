@@ -36,7 +36,8 @@ const languageDetector = {
   init: () => {},
   detect: () => {
     try {
-      return storage.getString('lang') || languageTag
+      const cachedLanguage = storage.getString('lang')
+      return cachedLanguage && isActiveLanguage(cachedLanguage) ? cachedLanguage : languageTag
     } catch (error) {
       console.warn('[i18n] Failed to read cached language from MMKV:', error)
       return languageTag
@@ -61,7 +62,7 @@ const initPromise = i18n
   .use(languageDetector)
   .init({
     resources,
-    fallbackLng: 'fr',
+    fallbackLng: DEFAULT_LANGUAGE,
     returnEmptyString: false,
     keySeparator: false,
     interpolation: {
