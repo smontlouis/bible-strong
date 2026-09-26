@@ -87,18 +87,10 @@ const StrongMainScreen = ({
         allBooks: true,
         lexemeId: selectedLemmaId,
       }
-      const versesResult = await resources.lexiconBible.loadFoundVersesByBook(request)
-      return {
-        verses: versesResult.status === 'available' ? versesResult.verses : [],
-        version:
-          versesResult.status === 'available'
-            ? versesResult.provenance.versionId
-            : currentStrongBibleVersionId,
-      }
+      return resources.lexiconBible.loadFoundVersesByBook(request)
     },
     enabled: Boolean(entry),
     networkMode: 'always',
-    placeholderData: previousData => previousData,
   })
   const concordanceTotalQuery = useQuery({
     queryKey: resourceQueryKeys.lexiconBibleCounts(concordanceRequest),
@@ -189,7 +181,7 @@ const StrongMainScreen = ({
   }, [entry, onTitleChange])
 
   const openConcordanceVerse = (verse: Verse, version?: string) => {
-    const resolvedVersion = version ?? concordanceQuery.data?.version
+    const resolvedVersion = version ?? concordanceVersion
     routeNavigation.openConcordanceVerse(verse, resolvedVersion)
   }
 
@@ -203,24 +195,47 @@ const StrongMainScreen = ({
           verses: [activeContext.bibleVerse],
         })
       : undefined
-  const concordanceVersion = concordanceQuery.data?.version
+  const countsResult = concordanceTotalQuery.data
+  const previewResult = concordanceQuery.data
+  const availableCounts =
+    countsResult?.status === 'available'
+      ? { counts: countsResult.counts, provenance: countsResult.provenance }
+      : undefined
+  const availablePreview =
+    previewResult?.status === 'available'
+      ? { verses: previewResult.verses, provenance: previewResult.provenance }
+      : undefined
+  const concordanceVersion =
+    availableCounts?.provenance.versionId ??
+    availablePreview?.provenance.versionId ??
+    currentStrongBibleVersionId
+  const previewMatchesVersion = availablePreview?.provenance.versionId === concordanceVersion
+  const concordanceError = Boolean(
+    concordanceQuery.isError ||
+    concordanceTotalQuery.isError ||
+    (concordanceQuery.data && !availablePreview) ||
+    (concordanceTotalQuery.data && !availableCounts) ||
+    (availablePreview && !previewMatchesVersion)
+  )
+  const concordanceLoading = concordanceQuery.isPending || concordanceTotalQuery.isPending
+  const retryConcordance = () => {
+    void concordanceQuery.refetch()
+    void concordanceTotalQuery.refetch()
+    void lemmaStatsQuery.refetch()
+  }
   const lemmaStats =
     lemmaStatsQuery.data?.status === 'available' &&
     lemmaStatsQuery.data.provenance.versionId === concordanceVersion
       ? lemmaStatsQuery.data.lemmas
       : []
-  const concordanceTotalCount =
-    concordanceTotalQuery.data?.status === 'available' &&
-    concordanceTotalQuery.data.provenance.versionId === concordanceVersion
-      ? concordanceTotalQuery.data.counts.reduce(
-          (total, current) => total + Number(current.versesCountByBook),
-          0
-        )
-      : 0
+  const concordanceTotalCount = availableCounts?.counts.reduce(
+    (total, current) => total + Number(current.versesCountByBook),
+    0
+  )
   const concordanceCount =
     selectedLemmaId == null
       ? concordanceTotalCount
-      : (lemmaStats.find(lemma => lemma.id === selectedLemmaId)?.occurrenceCount ?? 0)
+      : lemmaStats.find(lemma => lemma.id === selectedLemmaId)?.occurrenceCount
   const passageMedia = entry
     ? getPassageMediaForStrong({ strongCode: entry.stepCode, language: resourceLanguage })
     : []
@@ -254,9 +269,12 @@ const StrongMainScreen = ({
           contextMorphologies={contextMorphologiesQuery.data}
           concordanceCount={concordanceCount}
           concordanceTotalCount={concordanceTotalCount}
-          concordanceVersion={concordanceQuery.data?.version ?? currentStrongBibleVersionId}
-          concordanceVerses={concordanceQuery.data?.verses ?? []}
-          concordanceLoading={concordanceQuery.isPending}
+          concordanceVersion={concordanceVersion}
+          concordanceVerses={previewMatchesVersion ? (availablePreview?.verses ?? []) : []}
+          concordanceLoading={concordanceLoading}
+          concordanceError={concordanceError}
+          concordanceRetrying={concordanceQuery.isFetching || concordanceTotalQuery.isFetching}
+          onRetryConcordance={retryConcordance}
           lemmaStats={lemmaStats}
           selectedLemmaId={selectedLemmaId}
           readingTypography={readingTypography}

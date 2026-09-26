@@ -6,7 +6,8 @@ import { useQuery } from '@tanstack/react-query'
 import Empty from '~common/Empty'
 import Link from '~common/Link'
 import { VerseRefContent } from '~common/types'
-import Box from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
+import verseToReference from '~helpers/verseToReference'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import getVersesContent from '~helpers/getVersesContent'
@@ -28,21 +29,46 @@ const ReferenceItem = ({ reference, version }: { reference: string; version: Ver
   const stylingTheme = useStylingTheme()
 
   const resources = useResourceAccess()
-  const { data: Verse } = useQuery<VerseRefContent>({
+  const { t } = useTranslation()
+  const verseQuery = useQuery<VerseRefContent>({
     queryKey: resourceQueryKeys.bibleVerseSelection(version, [reference]),
     queryFn: () =>
       getVersesContent({
         verses: reference,
         version,
-        loadVerseTexts: (versionId, verseKeys) =>
-          loadBibleVerseTexts(resources, versionId, verseKeys),
+        loadVerseTexts: async (versionId, verseKeys) => {
+          const texts = await loadBibleVerseTexts(resources, versionId, verseKeys)
+          if (verseKeys.some(key => !texts[key])) throw new Error('REFERENCE_VERSE_UNAVAILABLE')
+          return texts
+        },
       }),
     networkMode: 'always',
     staleTime: Infinity,
   })
 
+  const Verse = verseQuery.data
   if (!Verse) {
-    return null
+    return (
+      <Box className="mb-[30px] gap-[10px]">
+        <Text>{verseToReference([reference])}</Text>
+        {verseQuery.isPending ? (
+          <ActivityIndicator />
+        ) : (
+          <>
+            <Text accessibilityRole="alert">{t('resource.crossReferences.verseLoadError')}</Text>
+            <TouchableBox
+              accessibilityRole="button"
+              disabled={verseQuery.isFetching}
+              onPress={() => void verseQuery.refetch()}
+            >
+              <Text className="text-primary">
+                {t(verseQuery.isFetching ? 'Chargement...' : 'Réessayer')}
+              </Text>
+            </TouchableBox>
+          </>
+        )}
+      </Box>
+    )
   }
 
   const [book, chapter, verse] = reference.split('-').map(Number)
@@ -95,9 +121,11 @@ export const ReferenceCard = ({
 
   const referencesQuery = useQuery({
     queryKey: resourceQueryKeys.bibleReferences(selectedVerse),
+    enabled: Boolean(selectedVerse),
+    networkMode: 'always',
     queryFn: async () => (await resources.bibleReading.loadTresorReferences(selectedVerse)) ?? null,
   })
-  const { isLoading, error, data } = referencesQuery
+  const { isPending: isLoading, error, data } = referencesQuery
 
   if (availabilityQuery.data?.status === 'unavailable') {
     return (
@@ -134,16 +162,14 @@ export const ReferenceCard = ({
     )
   }
 
-  if (isLoading) {
+  if (!selectedVerse) return null
+
+  if (isLoading || availabilityQuery.isPending) {
     return (
       <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center min-h-[200px]">
         <ActivityIndicator color={theme.colors.grey} />
       </Box>
     )
-  }
-
-  if (!selectedVerse) {
-    return null
   }
 
   if (!data) {
@@ -166,8 +192,10 @@ const References = ({
 }) => {
   const stylingTheme = useStylingTheme()
 
+  const { t } = useTranslation()
+
   if (!references.length) {
-    return <Empty message="Aucune référence pour ce verset..." />
+    return <Empty message={t('resource.crossReferences.noneForVerse')} />
   }
 
   return (

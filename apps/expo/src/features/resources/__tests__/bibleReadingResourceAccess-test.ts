@@ -156,3 +156,45 @@ describe('Bible reading secondary-resource availability', () => {
     await expect(hybrid.loadPericope('LSG')).resolves.toEqual({ remote: {} })
   })
 })
+
+describe('shared cross-reference availability', () => {
+  it.each(['fr', 'en'] as const)(
+    'allows online access with a %s interface and no Offline copy',
+    async language => {
+      const online = createHttpBibleReadingResourceAccess({
+        baseUrl: 'https://example.test',
+        isOnline: async () => true,
+      })
+      const access = createHybridBibleReadingResourceAccess({
+        local: {
+          ...localBibleReadingResourceAccess,
+          getTresorAvailability: async () => ({
+            status: 'unavailable',
+            reason: 'offline-copy-required',
+            recoveries: ['acquire-offline-copy'],
+          }),
+        },
+        online,
+        remotelyReadableVersions: new Set(),
+        isOnline: async () => true,
+      })
+      await expect(online.getTresorAvailability?.(language)).resolves.toEqual({
+        status: 'available',
+      })
+      await expect(access.getTresorAvailability?.(language)).resolves.toEqual({
+        status: 'available',
+      })
+    }
+  )
+
+  it('still requires an Offline copy when disconnected', async () => {
+    const online = createHttpBibleReadingResourceAccess({
+      baseUrl: 'https://example.test',
+      isOnline: async () => false,
+    })
+    await expect(online.getTresorAvailability?.('en')).resolves.toMatchObject({
+      status: 'unavailable',
+      reason: 'offline-copy-required',
+    })
+  })
+})

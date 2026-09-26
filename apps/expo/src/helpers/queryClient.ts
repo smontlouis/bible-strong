@@ -3,6 +3,8 @@ import { focusManager, onlineManager, QueryClient } from '@tanstack/react-query'
 import { AppState, Platform } from 'react-native'
 import { connectionStatusFromNetInfo } from './useConnection'
 import { isOfflineModeForced } from './runtimeConfig'
+import { resourceQueryKeys } from './resourceQueryKeys'
+import { refetchResourceOnReconnect } from './resourceQueryRecovery'
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,6 +16,12 @@ export const queryClient = new QueryClient({
       networkMode: 'online',
     },
   },
+})
+
+queryClient.setQueryDefaults(resourceQueryKeys.all(), {
+  refetchOnReconnect: refetchResourceOnReconnect,
+  // An inactive screen may miss the reconnect event while its failure stays cached.
+  refetchOnMount: refetchResourceOnReconnect,
 })
 
 let managersConfigured = false
