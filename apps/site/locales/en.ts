@@ -143,6 +143,7 @@ export default {
   'home.offline.local.alt': 'A reader packs Bibles into an offline library bag',
   'home.download.title': 'Read simply. Explore further.',
   'home.download.body': 'Bible Strong is available free on iPhone, iPad, and Android.',
+  'home.download.apk': 'Download the Android APK — v26.0.10',
   'home.store.apple.kicker': 'Download on the',
   'home.store.google.kicker': 'Get it on',
   'home.footer.line': 'Free Bible study tools, built to last.',

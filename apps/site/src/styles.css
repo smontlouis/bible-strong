@@ -3211,6 +3211,22 @@ input {
 .store-links {
   margin-top: 34px;
 }
+.apk-download-link {
+  display: inline-block;
+  margin-top: 20px;
+  padding-block: 8px;
+  color: inherit;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.apk-download-link:hover {
+  text-decoration-thickness: 2px;
+}
+.apk-download-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
 .store-link {
   min-width: 0;
   flex: 1 1 0;
