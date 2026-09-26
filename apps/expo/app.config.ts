@@ -15,7 +15,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   userInterfaceStyle: 'automatic',
 
   android: {
-    versionCode: 505,
+    versionCode: 506,
     package: 'com.smontlouis.biblestrong',
     googleServicesFile:
       process.env.ANDROID_GOOGLE_SERVICES_FILE ?? 'firebase/dev/google-services.json',
