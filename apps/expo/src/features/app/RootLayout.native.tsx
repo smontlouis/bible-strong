@@ -1,3 +1,4 @@
+import { filterAppCheckLog } from '~helpers/resourceAppCheckTelemetry'
 import { ThemeProvider } from '~themes/ThemeProvider'
 import * as Sentry from '@sentry/react-native'
 import * as SplashScreen from 'expo-splash-screen'
@@ -89,6 +90,9 @@ const initSentry = () => {
     // Error events are low-volume and operationally critical. Do not sample them,
     // especially during startup where a single failed migration can block the app.
     sampleRate: 1,
+    enableLogs: true,
+    logsOrigin: 'js',
+    beforeSendLog: filterAppCheckLog,
     sendDefaultPii: false,
     maxBreadcrumbs: 100,
     ignoreErrors: ignoreSentryErrors,

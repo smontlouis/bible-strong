@@ -62,12 +62,15 @@ const sanitizeString = (value: string, key: string, maxLength = MAX_STRING_LENGT
   return redacted.length > maxLength ? `${redacted.slice(0, maxLength)}…` : redacted
 }
 
-const errorSummary = (error: Error): AgentLogPayload => {
+const errorSummary = (error: Error, depth = 0): AgentLogPayload => {
   const code = 'code' in error && typeof error.code === 'string' ? error.code : undefined
   return {
     name: error.name,
     message: sanitizeString(error.message, 'errorMessage'),
     ...(code ? { code: sanitizeString(code, 'errorCode') } : {}),
+    ...(depth < 3 && 'cause' in error && error.cause instanceof Error
+      ? { cause: errorSummary(error.cause, depth + 1) }
+      : {}),
   }
 }
 
@@ -199,7 +202,10 @@ export const appLogger = {
   ) => {
     writeAgentLog(level, area, event, { ...payload, error })
     const normalizedError = normalizeError(error, event)
-    const context = sanitizeDiagnosticPayload({ ...payload, error: errorSummary(normalizedError) })
+    const context = sanitizeDiagnosticPayload({
+      ...payload,
+      error: errorSummary(error instanceof Error ? error : normalizedError),
+    })
 
     try {
       Sentry.withScope(scope => {

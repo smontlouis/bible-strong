@@ -10,7 +10,7 @@ const { resolveRuntimeVersionAsync } = require(
   path.join(updatesRoot, 'utils/build/resolveRuntimeVersionAsync.js')
 )
 const legacyRuntime = 'a170e84b5290228c1fc1a7d1b850784dc093085c'
-const betaRuntime = 'android-app-check-recaptcha-beta-v1'
+const betaRuntime = 'android-app-check-recaptcha-beta-v2'
 
 // Exercise the resolver called by both EAS CLI and its build worker. A relocated
 // fixture keeps machine paths and build-only environment variables in the test.

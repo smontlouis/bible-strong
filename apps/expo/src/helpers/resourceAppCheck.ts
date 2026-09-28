@@ -1,3 +1,4 @@
+import { recordAppCheckObservation } from './resourceAppCheckTelemetry'
 import {
   getResourceAppCheckProviderName,
   initializeResourceAppCheckClient,
@@ -51,9 +52,45 @@ let initialFailure: ResourceAppCheckError | undefined
 let consecutiveFailures = 0
 
 const acquireResourceAppCheckToken = async (forceRefresh: boolean): Promise<string> => {
+  const startedAt = Date.now()
+  const provider = getResourceAppCheckProviderName()
+  let phase: 'initialize' | 'acquire' = 'initialize'
   try {
-    const result = await (await initializeResourceAppCheck()).getToken(forceRefresh)
+    const client = await initializeResourceAppCheck()
+    phase = 'acquire'
+    const result = await client.getToken(forceRefresh)
     if (!result.token) throw new Error('RESOURCE_APP_CHECK_TOKEN_MISSING')
+    recordAppCheckObservation({
+      provider,
+      outcome: 'success',
+      phase,
+      forceRefresh,
+      durationMs: Date.now() - startedAt,
+    })
+    appLogger.info('download', 'resource_app_check.acquired', {
+      appCheckProvider: provider,
+      forceRefresh,
+      durationMs: Date.now() - startedAt,
+      // Remaining validity is not proof of a fresh assessment or of the issuing provider.
+      remainingValidityMs:
+        result.expiresAtMillis === undefined
+          ? undefined
+          : Math.max(0, result.expiresAtMillis - Date.now()),
+    })
+    if (consecutiveFailures > 0) {
+      recordAppCheckObservation({
+        provider,
+        outcome: 'recovered',
+        phase,
+        forceRefresh,
+        durationMs: Date.now() - startedAt,
+      })
+      appLogger.info('download', 'resource_app_check.recovered', {
+        appCheckProvider: provider,
+        consecutiveFailures,
+        durationMs: Date.now() - startedAt,
+      })
+    }
     lastFailure = undefined
     initialFailure = undefined
     consecutiveFailures = 0
@@ -69,7 +106,16 @@ const acquireResourceAppCheckToken = async (forceRefresh: boolean): Promise<stri
     // The native SDK remains responsible for token expiry and its own, possibly longer backoff.
     const retryAfterMs = Math.min(2_000 * 2 ** Math.min(consecutiveFailures - 1, 4), 30_000)
     lastFailure = { error: failure, retryAt: Date.now() + retryAfterMs }
+    recordAppCheckObservation({
+      provider,
+      outcome: 'failure',
+      phase,
+      forceRefresh,
+      durationMs: Date.now() - startedAt,
+    })
     appLogger.captureError('download', 'resource_app_check.token_failed', error, {
+      phase,
+      durationMs: Date.now() - startedAt,
       appCheckProvider: getResourceAppCheckProviderName(),
       forceRefresh,
       errorCode,
@@ -84,13 +130,29 @@ const acquireResourceAppCheckToken = async (forceRefresh: boolean): Promise<stri
 export const getResourceAppCheckToken = async (forceRefresh = false): Promise<string> => {
   const pending = pendingAcquisition
   if (pending) {
+    recordAppCheckObservation({
+      provider: getResourceAppCheckProviderName(),
+      outcome: 'coalesced',
+      phase: 'caller',
+      forceRefresh,
+      durationMs: 0,
+    })
     const token = await pending.promise
     if (!forceRefresh || pending.forceRefresh) return token
     // A non-forced lookup may return the very token the server just rejected.
     // Queue one shared forced refresh after it succeeds; never retry its failure immediately.
     return getResourceAppCheckToken(true)
   }
-  if (lastFailure && Date.now() < lastFailure.retryAt) throw lastFailure.error
+  if (lastFailure && Date.now() < lastFailure.retryAt) {
+    recordAppCheckObservation({
+      provider: getResourceAppCheckProviderName(),
+      outcome: 'cooldown',
+      phase: 'caller',
+      forceRefresh,
+      durationMs: 0,
+    })
+    throw lastFailure.error
+  }
 
   const promise = acquireResourceAppCheckToken(forceRefresh).finally(() => {
     pendingAcquisition = undefined
@@ -116,7 +178,25 @@ const requestDiagnostics = (input: RequestInfo | URL, init?: RequestInit) => {
 }
 
 export const resourceApiFetch: typeof fetch = async (input, init) => {
-  const response = await guardedResourceApiFetch(input, init)
+  const startedAt = Date.now()
+  let response: Response
+  try {
+    response = await guardedResourceApiFetch(input, init)
+  } catch (error) {
+    if (
+      isResourceAppCheckProtectedUrl(input) &&
+      !(error instanceof ResourceAppCheckError) &&
+      !(error instanceof Error && error.message === 'RESOURCE_REQUEST_ABORTED')
+    ) {
+      appLogger.captureError('download', 'resource_api.request_failed', error, {
+        ...requestDiagnostics(input, init),
+        appCheckProvider: getResourceAppCheckProviderName(),
+        phase: 'request_boundary',
+        durationMs: Date.now() - startedAt,
+      })
+    }
+    throw error
+  }
   if (
     isResourceAppCheckProtectedUrl(input) &&
     (response.status === 401 ||
@@ -130,6 +210,9 @@ export const resourceApiFetch: typeof fetch = async (input, init) => {
       new Error(`RESOURCE_API_HTTP_${response.status}`),
       {
         ...requestDiagnostics(input, init),
+        appCheckProvider: getResourceAppCheckProviderName(),
+        phase: 'response',
+        durationMs: Date.now() - startedAt,
         httpStatus: response.status,
         requestId: response.headers.get('x-request-id') ?? undefined,
         retryAfter: response.headers.get('retry-after') ?? undefined,

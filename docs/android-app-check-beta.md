@@ -22,7 +22,7 @@ From the repository root, with the Android key available to the build:
 yarn workspace @bible-strong/expo build:android:app-check-beta
 ```
 
-The script loads the existing production environment and invokes a local EAS Android build using `app-check-beta`. The profile generates an AAB with package `com.smontlouis.biblestrong`, version name `27.0.18-beta.2`, channel `app-check-beta`, and the explicit Android runtime `android-app-check-recaptcha-beta-v1`. It does not submit or publish automatically. Standard Android and Apple builds retain the existing published runtime.
+The script loads the existing production environment and invokes a local EAS Android build using `app-check-beta`. The profile generates an AAB with package `com.smontlouis.biblestrong`, version name `27.0.18-beta.2`, channel `app-check-beta`, and the explicit Android runtime `android-app-check-recaptcha-beta-v2`. It does not submit or publish automatically. Standard Android and Apple builds retain the existing published runtime.
 
 Use the established production upload identity and a Google Play testing track for the same application. Start with internal testing, then the intended closed/open beta once device checks pass. Google Play signs distributed builds with the existing app-signing key. An APK signed only with an upload key or a different local key cannot necessarily replace the Play-installed application.
 

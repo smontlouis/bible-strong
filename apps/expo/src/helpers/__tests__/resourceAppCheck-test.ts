@@ -2,6 +2,11 @@ const mockGetToken = jest.fn()
 const mockInitialize = jest.fn()
 const mockCaptureError = jest.fn()
 const mockFetch = jest.fn()
+const mockObserve = jest.fn()
+const mockInfo = jest.fn()
+jest.mock('../resourceAppCheckTelemetry', () => ({
+  recordAppCheckObservation: (...args: unknown[]) => mockObserve(...args),
+}))
 
 jest.mock('react-native', () => ({ Platform: { OS: 'android' } }))
 jest.mock('@react-native-firebase/app', () => ({ getApp: jest.fn(() => ({})) }))
@@ -17,7 +22,10 @@ jest.mock('@react-native-firebase/app-check', () => ({
   },
 }))
 jest.mock('../agentObservability', () => ({
-  appLogger: { captureError: (...args: unknown[]) => mockCaptureError(...args) },
+  appLogger: {
+    info: (...args: unknown[]) => mockInfo(...args),
+    captureError: (...args: unknown[]) => mockCaptureError(...args),
+  },
 }))
 
 const apiUrl = 'https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1'
@@ -45,6 +53,8 @@ describe('Native Resource App Check token acquisition', () => {
     mockGetToken.mockReset().mockResolvedValue({ token: 'valid-token' })
     mockInitialize.mockReset().mockResolvedValue({})
     mockCaptureError.mockReset()
+    mockObserve.mockReset()
+    mockInfo.mockReset()
     mockFetch.mockReset().mockImplementation(async () => new Response('{}', { status: 200 }))
     globalThis.fetch = mockFetch
     Object.defineProperty(globalThis, '__DEV__', { configurable: true, value: false })
@@ -202,5 +212,49 @@ describe('Native Resource App Check token acquisition', () => {
       'RESOURCE_APP_CHECK_TOKEN_FAILED'
     )
     expect(mockFetch).not.toHaveBeenCalled()
+  })
+  it('counts the shared acquisition once and keeps cooldown separate from provider failures', async () => {
+    mockGetToken.mockRejectedValueOnce(nativeError('refused'))
+    await Promise.allSettled(Array.from({ length: 10 }, () => appCheck.getResourceAppCheckToken()))
+    await expect(appCheck.getResourceAppCheckToken()).rejects.toThrow()
+    expect(mockObserve.mock.calls.filter(([v]) => v.outcome === 'failure')).toHaveLength(1)
+    expect(mockObserve.mock.calls.filter(([v]) => v.outcome === 'coalesced')).toHaveLength(9)
+    expect(mockObserve.mock.calls.filter(([v]) => v.outcome === 'cooldown')).toHaveLength(1)
+    await jest.advanceTimersByTimeAsync(2000)
+    await appCheck.getResourceAppCheckToken()
+    expect(mockObserve).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: 'success', phase: 'acquire' })
+    )
+    expect(mockObserve).toHaveBeenCalledWith(expect.objectContaining({ outcome: 'recovered' }))
+    expect(JSON.stringify(mockObserve.mock.calls)).not.toContain('valid-token')
+  })
+
+  it('distinguishes initialization failure from provider acquisition', async () => {
+    mockInitialize.mockRejectedValueOnce(new Error('init failed'))
+    await expect(appCheck.getResourceAppCheckToken()).rejects.toThrow()
+    expect(mockCaptureError).toHaveBeenCalledWith(
+      'download',
+      'resource_app_check.token_failed',
+      expect.any(Error),
+      expect.objectContaining({ phase: 'initialize', durationMs: 0 })
+    )
+  })
+
+  it('captures network errors without duplicating App Check errors or cancellations', async () => {
+    mockFetch.mockRejectedValueOnce(new TypeError('Network request failed'))
+    await expect(appCheck.resourceApiFetch(apiUrl)).rejects.toThrow('Network request failed')
+    expect(mockCaptureError).toHaveBeenCalledWith(
+      'download',
+      'resource_api.request_failed',
+      expect.any(Error),
+      expect.objectContaining({ phase: 'request_boundary', appCheckProvider: 'playIntegrity' })
+    )
+    mockCaptureError.mockClear()
+    const controller = new AbortController()
+    controller.abort()
+    await expect(appCheck.resourceApiFetch(apiUrl, { signal: controller.signal })).rejects.toThrow(
+      'RESOURCE_REQUEST_ABORTED'
+    )
+    expect(mockCaptureError).not.toHaveBeenCalled()
   })
 })

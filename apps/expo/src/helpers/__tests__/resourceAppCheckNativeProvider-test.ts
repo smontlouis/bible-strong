@@ -9,6 +9,7 @@ const mockNativeGetToken = jest.fn()
 const mockConfigure = jest.fn()
 const mockInitializeAppCheck = jest.fn()
 const mockGetToken = jest.fn()
+let mockDiagnostics: jest.Mock | undefined
 let mockProvider: 'recaptchaEnterprise' | 'playIntegrity' | undefined
 
 jest.mock('react-native', () => ({ Platform: { OS: 'android' } }))
@@ -26,7 +27,12 @@ jest.mock('../../../modules/bible-strong-app-check/src/BibleStrongAppCheckModule
   __esModule: true,
   get default() {
     return mockProvider
-      ? { provider: mockProvider, initialize: mockNativeInitialize, getToken: mockNativeGetToken }
+      ? {
+          provider: mockProvider,
+          initialize: mockNativeInitialize,
+          getToken: mockNativeGetToken,
+          getTokenWithDiagnostics: mockDiagnostics,
+        }
       : null
   },
 }))
@@ -37,6 +43,7 @@ describe('Build-selected native App Check provider', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockDiagnostics = undefined
     Platform.OS = 'android'
     Object.defineProperty(globalThis, '__DEV__', { configurable: true, value: false })
     mockProvider = 'recaptchaEnterprise'
@@ -104,5 +111,28 @@ describe('Build-selected native App Check provider', () => {
     mockNativeGetToken.mockRejectedValueOnce(refusal)
     await expect(client.getToken(false)).rejects.toBe(refusal)
     expect(mockInitializeAppCheck).not.toHaveBeenCalled()
+  })
+  it('preserves native causes from the additive diagnostics bridge', async () => {
+    mockDiagnostics = jest.fn().mockResolvedValue({
+      error: {
+        code: 'appCheck/token-error',
+        causes: [
+          { name: 'FirebaseException', message: 'outer refusal' },
+          { name: 'RecaptchaException', message: 'network unavailable' },
+        ],
+      },
+    })
+    const client = await initializeResourceAppCheckClient()
+    await expect(client.getToken(false)).rejects.toMatchObject({
+      name: 'FirebaseException',
+      code: 'appCheck/token-error',
+      cause: { name: 'RecaptchaException', message: 'network unavailable' },
+    })
+    expect(mockNativeGetToken).not.toHaveBeenCalled()
+    mockDiagnostics.mockResolvedValueOnce({ token: 'valid', expiresAtMillis: 10000 })
+    await expect(client.getToken(false)).resolves.toEqual({
+      token: 'valid',
+      expiresAtMillis: 10000,
+    })
   })
 })

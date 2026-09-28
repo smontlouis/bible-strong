@@ -34,7 +34,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     versionCode: isAppCheckBeta ? betaVersionCode : 505,
     // Isolate this native pilot without changing the runtime of standard releases.
     // Bump this identifier whenever the beta's native dependencies/configuration change.
-    runtimeVersion: isAppCheckBeta ? 'android-app-check-recaptcha-beta-v1' : undefined,
+    runtimeVersion: isAppCheckBeta ? 'android-app-check-recaptcha-beta-v2' : undefined,
     package: 'com.smontlouis.biblestrong',
     googleServicesFile:
       process.env.ANDROID_GOOGLE_SERVICES_FILE ?? 'firebase/dev/google-services.json',
