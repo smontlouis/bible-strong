@@ -50,6 +50,7 @@ let pendingAcquisition: { promise: Promise<string>; forceRefresh: boolean } | un
 let lastFailure: { error: ResourceAppCheckError; retryAt: number } | undefined
 let initialFailure: ResourceAppCheckError | undefined
 let consecutiveFailures = 0
+let failureStartedAt: number | undefined
 
 const acquireResourceAppCheckToken = async (forceRefresh: boolean): Promise<string> => {
   const startedAt = Date.now()
@@ -83,16 +84,19 @@ const acquireResourceAppCheckToken = async (forceRefresh: boolean): Promise<stri
         outcome: 'recovered',
         phase,
         forceRefresh,
-        durationMs: Date.now() - startedAt,
+        durationMs: Date.now() - (failureStartedAt ?? startedAt),
       })
       appLogger.info('download', 'resource_app_check.recovered', {
         appCheckProvider: provider,
         consecutiveFailures,
+        recoveryDurationMs:
+          failureStartedAt === undefined ? undefined : Date.now() - failureStartedAt,
         durationMs: Date.now() - startedAt,
       })
     }
     lastFailure = undefined
     initialFailure = undefined
+    failureStartedAt = undefined
     consecutiveFailures = 0
     return result.token
   } catch (error) {
@@ -101,6 +105,7 @@ const acquireResourceAppCheckToken = async (forceRefresh: boolean): Promise<stri
     const failure =
       error instanceof ResourceAppCheckError ? error : new ResourceAppCheckError(errorCode, error)
     initialFailure ??= failure
+    failureStartedAt ??= startedAt
     consecutiveFailures++
     // Suppress repeated callers, without scheduling unattended retries or caching tokens.
     // The native SDK remains responsible for token expiry and its own, possibly longer backoff.
@@ -161,7 +166,14 @@ export const getResourceAppCheckToken = async (forceRefresh = false): Promise<st
   return promise
 }
 
-const guardedResourceApiFetch = createResourceAppCheckFetch(fetch, getResourceAppCheckToken)
+const guardedResourceApiFetch = createResourceAppCheckFetch(fetch, getResourceAppCheckToken, {
+  onUnauthorizedRetry: response =>
+    appLogger.info('download', 'resource_api.refresh_after_401', {
+      appCheckProvider: getResourceAppCheckProviderName(),
+      httpStatus: 401,
+      requestId: response.headers.get('x-request-id') ?? undefined,
+    }),
+})
 
 const requestDiagnostics = (input: RequestInfo | URL, init?: RequestInit) => {
   const requestUrl = input instanceof Request ? input.url : input.toString()

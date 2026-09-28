@@ -56,7 +56,9 @@
     "web:export": "expo export --platform web",
     "web:build": "EXPO_NO_DOTENV=1 dotenv -e .env.production -- expo export --platform web",
     "themes:generate": "node scripts/generate-theme-css.cjs",
-    "themes:check": "node scripts/generate-theme-css.cjs --check"
+    "themes:check": "node scripts/generate-theme-css.cjs --check",
+    "build:android:app-check-production": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c production -- eas build -p android --local --profile app-check-production --non-interactive",
+    "update:app-check-production": "dotenv -c production -- env ANDROID_APP_CHECK_PRODUCTION=true eas update --channel app-check-production --environment production --platform android"
   },
   "dependencies": {
     "@alloc/moti": "^54.0.0-beta.8",

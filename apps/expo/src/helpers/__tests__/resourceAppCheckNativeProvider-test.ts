@@ -118,7 +118,11 @@ describe('Build-selected native App Check provider', () => {
         code: 'appCheck/token-error',
         causes: [
           { name: 'FirebaseException', message: 'outer refusal' },
-          { name: 'RecaptchaException', message: 'network unavailable' },
+          {
+            name: 'RecaptchaException',
+            message: 'network unavailable',
+            nativeCode: 'NETWORK_ERROR',
+          },
         ],
       },
     })
@@ -126,7 +130,11 @@ describe('Build-selected native App Check provider', () => {
     await expect(client.getToken(false)).rejects.toMatchObject({
       name: 'FirebaseException',
       code: 'appCheck/token-error',
-      cause: { name: 'RecaptchaException', message: 'network unavailable' },
+      cause: {
+        name: 'RecaptchaException',
+        message: 'network unavailable',
+        nativeCode: 'NETWORK_ERROR',
+      },
     })
     expect(mockNativeGetToken).not.toHaveBeenCalled()
     mockDiagnostics.mockResolvedValueOnce({ token: 'valid', expiresAtMillis: 10000 })

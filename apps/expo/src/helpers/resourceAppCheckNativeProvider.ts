@@ -31,7 +31,11 @@ export const initializeResourceAppCheckClient = async (): Promise<ResourceAppChe
         if (result.error) {
           let cause: Error | undefined
           for (const item of result.error.causes.slice(0, 4).reverse()) {
-            cause = Object.assign(new Error(item.message), { name: item.name, cause })
+            cause = Object.assign(new Error(item.message), {
+              name: item.name,
+              nativeCode: item.nativeCode,
+              cause,
+            })
           }
           throw Object.assign(cause ?? new Error('App Check failed'), { code: result.error.code })
         }

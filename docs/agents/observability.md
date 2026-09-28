@@ -120,3 +120,43 @@ The default minimum is `5/10`, which catches newly very-low-readiness domains wi
 ```bash
 yarn agents:quality:check --min-score=7
 ```
+
+## Android App Check rollout diagnostics
+
+Native Sentry Logs are enabled for JS-origin `resource_app_check.summary` only. The
+`beforeSendLog` allowlist removes unrelated log messages, user attributes and arbitrary
+fields. Each summary holds exact local `count` and `durationTotalMs` for a bounded
+(provider, outcome, phase, forceRefresh) bucket, flushed every 60 seconds and on
+background. No extra attestation request is made for telemetry. The SDK handles
+transport; abrupt termination, offline transport, quotas or server-side filtering can
+lose observations. These are best-effort operational rates, not an audit ledger.
+
+In **Sentry → Logs**, select message `resource_app_check.summary`, group by
+`buildNumber`, `provider` and `outcome`, and aggregate **sum(count)** (not row count).
+For SDK lookup availability use `success / (success + failure)`; compare forced and
+non-forced lookups separately. Exclude `coalesced`, `cooldown` and `recovered` from
+that denominator. Average acquisition latency is `sum(durationTotalMs) / sum(count)`
+for the same success/failure buckets. `recovered` records a success following failures;
+its `durationTotalMs` sums elapsed outage time, and its breadcrumb retains the failure count. Counts describe SDK
+lookups including cache hits, never Google assessments or unique affected users.
+`coalesced` includes callers joining an in-flight lookup, including a forced caller
+that may subsequently need its own refresh. Release/build and OS attributes support
+cohort comparison; device details remain available on Sentry error events.
+
+Failures distinguish `initialize` from `acquire`, with duration, original refusal and
+bounded sanitized native causes. The v2 bridge includes the native reCAPTCHA error
+code when the SDK supplies a `RecaptchaException`; Firebase may still return only a
+generic rejection. It does not expose the risk score, assessment ID or Google's
+internal verdict reasons. Existing v1 binaries use the compatible older bridge.
+Success breadcrumbs expose remaining validity when available, never the token.
+The provider tag remains the configured provider, not proof of the cached token's issuer.
+
+`resource_api.protected_request_failed` includes configured provider, status,
+request ID and total duration. The first 401 before a refresh is preserved as a `resource_api.refresh_after_401` breadcrumb with its request ID. `resource_api.request_failed` covers network/deadline
+errors at the overall request boundary (which includes token acquisition); cancellations
+and already-reported App Check errors are not reported again there.
+
+Use the Android key's Google Cloud reCAPTCHA metrics to inspect the aggregate score
+distribution. It cannot be joined to an individual Sentry event using this integration.
+Do not classify `App attestation failed` as a confirmed low score, or throttling as
+proof of exhausted project quota. See the release runbook for verification steps.

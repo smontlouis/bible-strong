@@ -65,9 +65,12 @@ const sanitizeString = (value: string, key: string, maxLength = MAX_STRING_LENGT
 const errorSummary = (error: Error, depth = 0): AgentLogPayload => {
   const code = 'code' in error && typeof error.code === 'string' ? error.code : undefined
   return {
-    name: error.name,
+    name: sanitizeString(error.name, 'errorName'),
     message: sanitizeString(error.message, 'errorMessage'),
     ...(code ? { code: sanitizeString(code, 'errorCode') } : {}),
+    ...('nativeCode' in error && typeof error.nativeCode === 'string'
+      ? { nativeCode: sanitizeString(error.nativeCode, 'nativeCode') }
+      : {}),
     ...(depth < 3 && 'cause' in error && error.cause instanceof Error
       ? { cause: errorSummary(error.cause, depth + 1) }
       : {}),
@@ -218,6 +221,8 @@ export const appLogger = {
             : 'code' in normalizedError && typeof normalizedError.code === 'string'
               ? normalizedError.code
               : undefined) ?? undefined
+        if (typeof payload?.phase === 'string')
+          scope.setTag('diagnostic.phase', sanitizeString(payload.phase, 'phase'))
         if (errorCode) scope.setTag('diagnostic.error_code', sanitizeString(errorCode, 'errorCode'))
         if (typeof payload?.appCheckProvider === 'string') {
           scope.setTag(

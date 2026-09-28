@@ -28,3 +28,15 @@ The API contract does not require migration for this pilot. Enabling the new pro
 The native provider is in preview, requires Android-key configuration for off-Play distribution when applicable, and may still reject devices based on risk score. Costs, SDK sunset dates, and actual device acceptance must be validated before generalization. The [beta runbook](../android-app-check-beta.md) defines setup and acceptance checks. Successful local compilation does not demonstrate successful reCAPTCHA attestation.
 
 No data migration, installation reset, resource deletion, new API session type, or server-side weakening is part of this pilot.
+
+## Production candidate preparation (2026-09-28)
+
+An explicit Android-only `app-check-production` profile prepares the stable candidate
+without changing existing standard profiles. It shares the reCAPTCHA provider with the
+pilot and has a separate production update channel. Native v2 adds a backward-compatible
+diagnostics method, bounded native error causes and expiration metadata. The runtime
+identifier is incremented to prevent sending incompatible updates to installed v1 builds.
+Aggregated, allowlisted Sentry Logs measure SDK lookup outcomes, concurrency/cooldown and
+recovery without logging credentials or causing extra assessments. Risk scores remain
+server-side. The runbook specifies physical-device and telemetry-ingestion checks before
+production promotion; code validation alone does not establish device acceptance.

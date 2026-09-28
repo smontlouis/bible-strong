@@ -4,7 +4,10 @@ const RESOURCE_API_PATH_PREFIX = '/v1/'
 const PUBLIC_RESOURCE_CATALOG_PATH = '/v1/offline-catalog'
 
 export type ResourceAppCheckTokenProvider = (forceRefresh?: boolean) => Promise<string>
-type ResourceAppCheckFetchOptions = { timeoutMs?: number }
+type ResourceAppCheckFetchOptions = {
+  timeoutMs?: number
+  onUnauthorizedRetry?: (response: Response) => void
+}
 
 const isRequestInstance = (input: RequestInfo | URL): input is Request =>
   typeof Request !== 'undefined' && input instanceof Request
@@ -82,7 +85,7 @@ export const runWithRequestDeadline = <T>(
 export const createResourceAppCheckFetch = (
   fetcher: typeof fetch,
   getToken: ResourceAppCheckTokenProvider,
-  { timeoutMs = 10_000 }: ResourceAppCheckFetchOptions = {}
+  { timeoutMs = 10_000, onUnauthorizedRetry }: ResourceAppCheckFetchOptions = {}
 ): typeof fetch => {
   const appCheckFetch: typeof fetch = async (input, init) => {
     if (!isResourceAppCheckProtectedUrl(input)) return fetcher(input, init)
@@ -100,9 +103,15 @@ export const createResourceAppCheckFetch = (
         const method = (
           init?.method ?? (isRequestInstance(input) ? input.method : 'GET')
         ).toUpperCase()
-        return response.status === 401 && (method === 'GET' || method === 'HEAD')
-          ? send(true)
-          : response
+        if (response.status === 401 && (method === 'GET' || method === 'HEAD')) {
+          try {
+            onUnauthorizedRetry?.(response)
+          } catch {
+            /* Diagnostics cannot prevent recovery. */
+          }
+          return send(true)
+        }
+        return response
       },
       sourceSignal,
       timeoutMs

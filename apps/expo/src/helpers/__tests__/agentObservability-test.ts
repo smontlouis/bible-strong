@@ -152,12 +152,14 @@ describe('agent observability', () => {
   it('retains bounded causes and redacts their messages without sending raw linked exceptions', () => {
     const inner = Object.assign(new Error('Bearer abc.def.ghi for reader@example.com'), {
       name: 'RecaptchaException',
+      nativeCode: 'NETWORK_ERROR',
     })
     const outer = Object.assign(new Error('attestation failed'), { cause: inner })
     Object.assign(inner, { cause: outer })
     appLogger.captureError('download', 'resource_app_check.token_failed', outer)
     const context = mockSetContext.mock.calls[0][1]
     expect(context.error.cause.name).toBe('RecaptchaException')
+    expect(context.error.cause.nativeCode).toBe('NETWORK_ERROR')
     expect(JSON.stringify(context)).not.toContain('abc.def.ghi')
     expect(JSON.stringify(context)).not.toContain('reader@example.com')
     expect(mockCaptureException.mock.calls[0][0].cause).toBeUndefined()

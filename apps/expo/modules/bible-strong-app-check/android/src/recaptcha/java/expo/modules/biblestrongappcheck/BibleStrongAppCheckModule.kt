@@ -1,6 +1,7 @@
 package expo.modules.biblestrongappcheck
 
 import android.content.pm.PackageManager
+import com.google.android.recaptcha.RecaptchaException
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.recaptcha.RecaptchaAppCheckProviderFactory
@@ -10,6 +11,13 @@ import expo.modules.kotlin.modules.ModuleDefinition
 
 class BibleStrongAppCheckModule : Module() {
   private var appCheck: FirebaseAppCheck? = null
+
+  // Redact before truncating so a long JWT cannot become an unrecognizable fragment.
+  private fun safeMessage(error: Throwable): String = (error.message ?: "App Check failed")
+    .replace(Regex("\\beyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\b"), "[REDACTED_TOKEN]")
+    .replace(Regex("\\bBearer\\s+[A-Za-z0-9._~+/-]+=*", RegexOption.IGNORE_CASE), "Bearer [REDACTED]")
+    .replace(Regex("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b", RegexOption.IGNORE_CASE), "[REDACTED_EMAIL]")
+    .take(500)
 
   override fun definition() = ModuleDefinition {
     Name("BibleStrongAppCheck")
@@ -45,7 +53,9 @@ class BibleStrongAppCheckModule : Module() {
             var current: Throwable? = error
             while (current != null && causes.size < 4) {
               val cause = current
-              causes.add(mapOf("name" to cause.javaClass.simpleName, "message" to (cause.message ?: "App Check failed").take(500)))
+              val diagnostic = mutableMapOf("name" to cause.javaClass.simpleName, "message" to safeMessage(cause))
+              if (cause is RecaptchaException) diagnostic["nativeCode"] = cause.errorCode.name
+              causes.add(diagnostic)
               current = cause.cause
               if (current === cause) break
             }

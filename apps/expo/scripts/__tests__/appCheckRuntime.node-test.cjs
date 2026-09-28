@@ -19,6 +19,8 @@ async function resolveInBuildDirectory(platform, overrides) {
   const env = {
     EXPO_NO_DOTENV: '1',
     ANDROID_APP_CHECK_BETA: undefined,
+    ANDROID_APP_CHECK_PRODUCTION: undefined,
+    ANDROID_APP_CHECK_VERSION_CODE: undefined,
     ANDROID_APP_CHECK_BETA_VERSION_CODE: undefined,
     ANDROID_APP_CHECK_RECAPTCHA_SITE_KEY: 'validation_key_runtime_test_only',
     EAS_BUILD_PROFILE: undefined,
@@ -36,6 +38,17 @@ async function resolveInBuildDirectory(platform, overrides) {
     for (const [key, value] of Object.entries(env)) {
       if (value === undefined) delete process.env[key]
       else process.env[key] = value
+    }
+    const { getConfig } = require('expo/config')
+    const { exp } = getConfig(fixture)
+    if (overrides.ANDROID_APP_CHECK_PRODUCTION === 'true' && platform === 'android') {
+      assert.equal(exp.version, '27.0.19')
+      assert.equal(exp.android.versionCode, Number(overrides.ANDROID_APP_CHECK_VERSION_CODE ?? 508))
+      assert.equal(exp.android.package, 'com.smontlouis.biblestrong')
+      const plugin = exp.plugins.find(
+        item => Array.isArray(item) && item[0].includes('withAndroidAppCheckBeta')
+      )
+      assert.equal(plugin[1].enabled, true)
     }
     return await resolveRuntimeVersionAsync(fixture, platform, {}, { workflowOverride: 'managed' })
   } finally {
@@ -79,5 +92,34 @@ test('beta cannot select its native runtime through the production build profile
       EAS_BUILD_PROFILE: 'production',
     }),
     /reserved for the app-check-beta build profile/
+  )
+})
+
+test('production reCAPTCHA uses its native runtime and rejects wrong profiles/platforms', async () => {
+  const production = await resolveInBuildDirectory('android', {
+    ANDROID_APP_CHECK_PRODUCTION: 'true',
+    EAS_BUILD_PROFILE: 'app-check-production',
+  })
+  assert.equal(production.runtimeVersion, betaRuntime)
+  await assert.rejects(
+    resolveInBuildDirectory('android', {
+      ANDROID_APP_CHECK_PRODUCTION: 'true',
+      EAS_BUILD_PROFILE: 'production',
+    }),
+    /reserved for the app-check-production/
+  )
+  await assert.rejects(
+    resolveInBuildDirectory('ios', {
+      ANDROID_APP_CHECK_PRODUCTION: 'true',
+      EAS_BUILD_PLATFORM: 'ios',
+    }),
+    /Android-only/
+  )
+  await assert.rejects(
+    resolveInBuildDirectory('android', {
+      ANDROID_APP_CHECK_PRODUCTION: 'true',
+      ANDROID_APP_CHECK_VERSION_CODE: '507',
+    }),
+    /greater than 507/
   )
 })

@@ -8,7 +8,7 @@ This pilot tests native reCAPTCHA Enterprise (also labelled Fraud Defense in Goo
 2. Register that key as the additional reCAPTCHA Enterprise App Check provider for Android production, App ID `1:204116128917:android:3ae4e716f079e5a002579c`. Preserve the existing Play Integrity provider. Start with the documented score threshold 0.5 and TTL 1 hour; these are initial test settings, not established acceptance guarantees.
 3. Review the shared trust boundary before registration: all backends accepting this App ID can accept its tokens, including the assistant. Registration is not restricted to legitimate beta testers by the build profile.
 4. Set `ANDROID_APP_CHECK_RECAPTCHA_SITE_KEY` in the production EAS environment used by the beta build, or in the local build environment. This is the public Android site key, not a secret or a token. Never put a debug token or service-account credential in this value.
-5. Check the highest version code already uploaded to Google Play. The beta defaults to `507`; set `ANDROID_APP_CHECK_BETA_VERSION_CODE` to a higher available integer if needed. Keep the subsequent stable build above the beta code if testers should return to stable without uninstalling.
+5. Check the highest version code already uploaded to Google Play. The beta defaults to `508`; set `ANDROID_APP_CHECK_VERSION_CODE` to a higher available integer if needed. Keep the subsequent stable build above the beta code if testers should return to stable without uninstalling.
 
 No API enforcement switch needs to be disabled. Provider registration and distribution are separate steps; code presence or a compiled module alone does not make attestation work.
 
@@ -22,7 +22,7 @@ From the repository root, with the Android key available to the build:
 yarn workspace @bible-strong/expo build:android:app-check-beta
 ```
 
-The script loads the existing production environment and invokes a local EAS Android build using `app-check-beta`. The profile generates an AAB with package `com.smontlouis.biblestrong`, version name `27.0.18-beta.2`, channel `app-check-beta`, and the explicit Android runtime `android-app-check-recaptcha-beta-v2`. It does not submit or publish automatically. Standard Android and Apple builds retain the existing published runtime.
+The script loads the existing production environment and invokes a local EAS Android build using `app-check-beta`. The profile generates an AAB with package `com.smontlouis.biblestrong`, version name `27.0.19-beta.1`, channel `app-check-beta`, and the explicit Android runtime `android-app-check-recaptcha-beta-v2`. It does not submit or publish automatically. Standard Android and Apple builds retain the existing published runtime.
 
 Use the established production upload identity and a Google Play testing track for the same application. Start with internal testing, then the intended closed/open beta once device checks pass. Google Play signs distributed builds with the existing app-signing key. An APK signed only with an upload key or a different local key cannot necessarily replace the Play-installed application.
 
@@ -69,3 +69,54 @@ Local tests/compilation do not substitute for these physical-device checks.
 The beta adds Firebase BoM 34.19.0 to its dependency graph, satisfying the provider's minimum BoM 34.17.0. Inspect the final Gradle runtime graph when changing dependencies. The current reCAPTCHA SDK family has a provider-controlled shutdown schedule, documented in the audit; plan maintained native builds rather than assuming old beta binaries work indefinitely.
 
 To stop rollout, stop admitting new beta testers/releases while retaining the providers needed by installed clients. Removing the reCAPTCHA configuration can strand existing beta installations when tokens renew; switching affected devices back to Play Integrity may restore the original refusal. A security incident may justify that tradeoff, but it is not a transparent rollback.
+
+## Production candidate with diagnostics (v2)
+
+The production candidate has its own explicit build command:
+
+```sh
+yarn workspace @bible-strong/expo build:android:app-check-production
+```
+
+This selects `app-check-production`, Android version `27.0.19`, default version code
+`508`, and update channel `app-check-production`. It uses the same production package,
+Firebase App ID, signing workflow and reCAPTCHA provider as the pilot, with runtime
+`android-app-check-recaptcha-beta-v2` (the historical name is a compatibility ID).
+The standard `production` profile retains Play Integrity for existing release workflows.
+Do not use that standard profile to build this reCAPTCHA candidate.
+
+The next beta is `27.0.19-beta.1`, also default code `508`. These are alternative build
+profiles, not two releases to upload with the same code. Set `ANDROID_APP_CHECK_VERSION_CODE`
+to the next unused code greater than 507 before building; if the beta is uploaded first,
+production must use a higher code. The Android public site key must be supplied to the
+production EAS environment or local build environment as described above. Neither
+command submits automatically. The existing submit profile targets internal testing;
+production track promotion remains a separate Play Console action.
+
+For subsequent JS-only updates to this candidate, use
+`yarn workspace @bible-strong/expo update:app-check-production`. It resolves the
+reCAPTCHA runtime and targets Android on the dedicated channel. The ordinary
+`update:production` command targets the standard runtime, not these installations.
+Native module, dependency or key changes require a new binary and runtime bump.
+
+Before promotion:
+
+1. Install the **new candidate** in place from Play; 507 does not contain these diagnostics.
+2. Read a remote chapter and download a resource; background the app to flush aggregates.
+   Verify `resource_app_check.summary` arrives in **Sentry Logs**, tagged with the correct
+   build and provider, and shows success counts. Check Sentry plan/ingestion limits if absent.
+3. Exercise offline/reconnect and an affected physical device. Verify failure stage,
+   native cause when available, and recovery. Recheck after SDK token renewal: a cached
+   token inherited from the previous build can initially hide an attestation failure.
+4. In Google Cloud → reCAPTCHA/Fraud Defense → the **Android key**, inspect assessment
+   volume and score distribution for the same time window. Keep the Firebase threshold
+   and TTL unchanged while comparing builds. No client-side score is expected in Sentry.
+5. Follow the acceptance checks above, including login/sync, assistant and existing clients.
+   For a staged production rollout compare failure rates, latency and support reports
+   against the preceding release before widening. Low sample volume is inconclusive.
+
+See [observability](./agents/observability.md#android-app-check-rollout-diagnostics)
+for denominators, queries and collection limits. Halting a Play rollout does not revert
+installed clients. Retain both providers; any replacement native build needs a higher
+version code and must preserve local user data. No Firebase or Play acceptance setting
+is changed by this PR.

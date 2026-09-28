@@ -1,19 +1,31 @@
 import { ExpoConfig, ConfigContext } from 'expo/config'
 
 const isAppCheckBeta = process.env.ANDROID_APP_CHECK_BETA === 'true'
-const betaVersionCode = Number(process.env.ANDROID_APP_CHECK_BETA_VERSION_CODE ?? '507')
+const isAppCheckProduction = process.env.ANDROID_APP_CHECK_PRODUCTION === 'true'
+const isRecaptchaBuild = isAppCheckBeta || isAppCheckProduction
+const recaptchaVersionCode = Number(
+  process.env.ANDROID_APP_CHECK_VERSION_CODE ??
+    process.env.ANDROID_APP_CHECK_BETA_VERSION_CODE ??
+    '508'
+)
+const expectedProfile = isAppCheckProduction ? 'app-check-production' : 'app-check-beta'
+if (isAppCheckBeta && isAppCheckProduction)
+  throw new Error('Select only one App Check release profile.')
 if (
-  isAppCheckBeta &&
+  isRecaptchaBuild &&
   process.env.EAS_BUILD_PROFILE &&
-  process.env.EAS_BUILD_PROFILE !== 'app-check-beta'
+  process.env.EAS_BUILD_PROFILE !== expectedProfile
 ) {
-  throw new Error('ANDROID_APP_CHECK_BETA is reserved for the app-check-beta build profile.')
+  throw new Error(`App Check configuration is reserved for the ${expectedProfile} build profile.`)
 }
-if (isAppCheckBeta && (!Number.isSafeInteger(betaVersionCode) || betaVersionCode <= 506)) {
-  throw new Error('ANDROID_APP_CHECK_BETA_VERSION_CODE must be an integer greater than 506.')
+if (
+  isRecaptchaBuild &&
+  (!Number.isSafeInteger(recaptchaVersionCode) || recaptchaVersionCode <= 507)
+) {
+  throw new Error('ANDROID_APP_CHECK_VERSION_CODE must be an integer greater than 507.')
 }
-if (isAppCheckBeta && process.env.EAS_BUILD_PLATFORM === 'ios') {
-  throw new Error('The App Check beta profile is Android-only.')
+if (isRecaptchaBuild && process.env.EAS_BUILD_PLATFORM === 'ios') {
+  throw new Error('The App Check release profiles are Android-only.')
 }
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
@@ -25,15 +37,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   primaryColor: '#ffffff',
   githubUrl: 'https://github.com/bulby97/bible-strong',
   platforms: ['ios', 'android', 'web'],
-  version: isAppCheckBeta ? '27.0.18-beta.2' : '27.0.18',
+  version: isAppCheckBeta ? '27.0.19-beta.1' : isAppCheckProduction ? '27.0.19' : '27.0.18',
   orientation: 'default',
   icon: './assets/images/icon-2.png',
   userInterfaceStyle: 'automatic',
 
   android: {
-    versionCode: isAppCheckBeta ? betaVersionCode : 506,
+    versionCode: isRecaptchaBuild ? recaptchaVersionCode : 506,
     // Native reCAPTCHA has a separate update compatibility boundary.
-    runtimeVersion: isAppCheckBeta ? 'android-app-check-recaptcha-beta-v2' : undefined,
+    runtimeVersion: isRecaptchaBuild ? 'android-app-check-recaptcha-beta-v2' : undefined,
     package: 'com.smontlouis.biblestrong',
     googleServicesFile:
       process.env.ANDROID_GOOGLE_SERVICES_FILE ?? 'firebase/dev/google-services.json',
@@ -105,8 +117,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       './plugins/withAndroidAppCheckBeta.js',
       {
-        enabled: isAppCheckBeta,
-        siteKey: isAppCheckBeta ? process.env.ANDROID_APP_CHECK_RECAPTCHA_SITE_KEY : undefined,
+        enabled: isRecaptchaBuild,
+        siteKey: isRecaptchaBuild ? process.env.ANDROID_APP_CHECK_RECAPTCHA_SITE_KEY : undefined,
       },
     ],
     '@react-native-firebase/auth',

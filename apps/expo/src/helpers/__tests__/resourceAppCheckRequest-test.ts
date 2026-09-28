@@ -154,4 +154,24 @@ describe('Resource App Check requests', () => {
     await expect(request).rejects.toThrow('RESOURCE_REQUEST_ABORTED')
     expect(fetcher).not.toHaveBeenCalled()
   })
+  it('preserves the initial 401 for diagnostics without letting telemetry block refresh', async () => {
+    const first = new Response(null, {
+      status: 401,
+      headers: { 'x-request-id': 'initial-refusal' },
+    })
+    const fetcher = jest
+      .fn()
+      .mockResolvedValueOnce(first)
+      .mockResolvedValueOnce(new Response(null, { status: 200 }))
+    const onUnauthorizedRetry = jest.fn(() => {
+      throw new Error('logging unavailable')
+    })
+    const getToken = jest.fn().mockResolvedValue('valid')
+    const guardedFetch = createResourceAppCheckFetch(fetcher, getToken, { onUnauthorizedRetry })
+    await expect(
+      guardedFetch('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1')
+    ).resolves.toMatchObject({ status: 200 })
+    expect(onUnauthorizedRetry).toHaveBeenCalledWith(first)
+    expect(getToken.mock.calls).toEqual([[false], [true]])
+  })
 })

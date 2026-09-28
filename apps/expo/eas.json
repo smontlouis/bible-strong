@@ -16,7 +16,9 @@
       "android": {
         "image": "latest"
       },
-      "ios": { "simulator": true }
+      "ios": {
+        "simulator": true
+      }
     },
     "staging": {
       "channel": "staging",
@@ -47,6 +49,21 @@
         "ANDROID_GOOGLE_SERVICES_FILE": "firebase/prod/google-services.json",
         "APP_NAME": "Bible Strong",
         "EAS_BUILD_CHANNEL": "app-check-beta"
+      }
+    },
+    "app-check-production": {
+      "extends": "production",
+      "channel": "app-check-production",
+      "environment": "production",
+      "distribution": "store",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "ANDROID_APP_CHECK_PRODUCTION": "true",
+        "ANDROID_GOOGLE_SERVICES_FILE": "firebase/prod/google-services.json",
+        "APP_NAME": "Bible Strong",
+        "EAS_BUILD_CHANNEL": "app-check-production"
       }
     }
   },
