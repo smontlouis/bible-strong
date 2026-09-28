@@ -26,6 +26,7 @@ import {
 } from './r2ArtifactPublisher'
 import { validatePublicationBundle } from './publicationBundle'
 import { WranglerR2ArtifactStore } from './wranglerR2ArtifactStore'
+import { isNativeFirebaseAppId } from '../runtime/firebaseAppCheck'
 
 const EXPECTED_RESOURCE_COUNT = 114
 const PRODUCTION_PUBLICATION_LOCK_ID = '204116128917'
@@ -111,6 +112,11 @@ export const mintResourceAppCheckToken = async (
   }
   const projectId = required('RESOURCE_FIREBASE_PROJECT_ID')
   const appId = required('RESOURCE_FIREBASE_APP_ID')
+  // Smoke checks download Offline copies, which the Worker only serves to native App IDs.
+  // Failing here keeps the mistake in preflight, before any production write.
+  if (!isNativeFirebaseAppId(appId)) {
+    throw new Error('BIBLE_PUBLICATION_ENV_NATIVE_APP_ID_REQUIRED:RESOURCE_FIREBASE_APP_ID')
+  }
   const apiKey = required('RESOURCE_FIREBASE_API_KEY')
   const debugToken = required('RESOURCE_APP_CHECK_DEBUG_TOKEN')
   const endpoint = new URL(

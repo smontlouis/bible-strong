@@ -134,6 +134,17 @@ export default {
           : bindings.SEARCH_RATE_LIMITER,
         artifact: bindings.ARTIFACT_RATE_LIMITER,
       },
+      reportForbidden: (category, requestId, appId) => {
+        console.warn(
+          JSON.stringify({
+            message: 'resource request forbidden for attested application',
+            category,
+            requestId,
+            appId,
+            path: new URL(request.url).pathname,
+          })
+        )
+      },
       reportLimited: (category, requestId) => {
         console.warn(
           JSON.stringify({

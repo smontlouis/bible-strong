@@ -223,7 +223,9 @@ The bucket remains private. Every production `/v1` resource request is protected
 Check. The Worker verifies the Firebase JWT signature, project, expiration, audience, and
 allow-listed native App ID before opening Hyperdrive or reading R2. The artifact route accepts only
 `GET` and `HEAD` for exact stable paths in the checked-in mobile catalog, then streams bodies and
-byte ranges through the binding. Missing or invalid attestation returns `401`. `/health` and the
+byte ranges through the binding. Missing or invalid attestation returns `401`. Offline copies are
+served only to Android and iOS App IDs; a valid Web attestation returns `403` on
+`/v1/offline-artifacts/` and remains valid for Online reading (ADR-0063). `/health` and the
 non-sensitive `/v1/offline-catalog` remain public. Publishing does not expose
 an R2 custom domain. The mobile catalog and all resource artifact URLs use the Worker route
 `/v1/offline-artifacts/`; the application has no Firebase Storage fallback for resources. Keep

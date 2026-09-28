@@ -1,6 +1,6 @@
 import { resourceRequestIdFrom } from '../http/requestId'
 import { ResourceRateLimitedProblem } from '../http/problems'
-import { FIREBASE_APP_CHECK_HEADER } from './firebaseAppCheck'
+import { FIREBASE_APP_CHECK_HEADER, isNativeFirebaseAppId } from './firebaseAppCheck'
 import { resourceRequestClassFrom } from './resourceRoutePolicy'
 
 export type ResourceRateLimitCategory = 'reading' | 'search' | 'artifact'
@@ -24,12 +24,12 @@ const tokenFingerprint = async (request: Request): Promise<string> => {
   return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('')
 }
 
-const protectedFailure = (requestId: string, status: 401 | 429): Response => {
+const protectedFailure = (requestId: string, status: 401 | 403 | 429): Response => {
   const headers = new Headers({
     'cache-control': 'private, no-store',
     'x-request-id': requestId,
   })
-  if (status === 401) return new Response(null, { status, headers })
+  if (status !== 429) return new Response(null, { status, headers })
   headers.set('retry-after', '60')
   return Response.json(
     new ResourceRateLimitedProblem({
@@ -49,19 +49,29 @@ export const protectResourceRequest = async ({
   request,
   authorize,
   limiters,
+  reportForbidden = () => undefined,
   reportLimited = () => undefined,
   reportFailure = () => undefined,
 }: {
   request: Request
-  authorize: (request: Request) => Promise<boolean>
+  /** Resolves to the verified App ID of the attested client, or `undefined`. */
+  authorize: (request: Request) => Promise<string | undefined>
   limiters: ResourceRateLimitBindings
+  reportForbidden?: (category: ResourceRateLimitCategory, requestId: string, appId: string) => void
   reportLimited?: (category: ResourceRateLimitCategory, requestId: string) => void
   reportFailure?: (category: ResourceRateLimitCategory, requestId: string, cause: unknown) => void
 }): Promise<Response | undefined> => {
   const category = resourceCategoryFrom(request)
   if (!category) return undefined
   const requestId = resourceRequestIdFrom(request.headers.get('x-request-id') ?? undefined)
-  if (!(await authorize(request))) return protectedFailure(requestId, 401)
+  const appId = await authorize(request)
+  if (!appId) return protectedFailure(requestId, 401)
+  // An Offline copy is a complete resource. Only native clients install them, and their
+  // attestation is far harder to obtain than a Web token copied from a browser session.
+  if (category === 'artifact' && !isNativeFirebaseAppId(appId)) {
+    reportForbidden(category, requestId, appId)
+    return protectedFailure(requestId, 403)
+  }
 
   try {
     const { success } = await limiters[category].limit({ key: await tokenFingerprint(request) })
