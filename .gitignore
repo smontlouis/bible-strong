@@ -178,3 +178,5 @@ scripts/google-service-account.json
 # Server implementation lives in a separate private repository.
 /packages/ai-service/
 /scripts/gloo-prototype/
+
+/videos/
