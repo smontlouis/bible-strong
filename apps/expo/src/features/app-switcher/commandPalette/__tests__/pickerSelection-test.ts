@@ -2,6 +2,9 @@ import { getPickerAllowedSources, getPickerResultTab } from '../pickerSelection'
 import type { SearchEntityResult } from '~features/search/shared/searchResultTypes'
 
 jest.mock('~helpers/generateUUID', () => ({ __esModule: true, default: () => 'created-tab' }))
+// The real modules load i18n and resource availability, which Jest cannot parse here.
+jest.mock('~helpers/bibleVersions', () => ({ versions: { KJV: {}, LSG: {} } }))
+jest.mock('~helpers/verseToReference', () => ({ __esModule: true, default: () => 'Jean 3:16-17' }))
 jest.mock('~helpers/bibleBookCatalog', () => ({
   getBook: () => ({ Numero: 43, Nom: 'Jean', Chapitres: 21 }),
 }))

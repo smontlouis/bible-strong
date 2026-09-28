@@ -12,7 +12,7 @@ This report is a directional agent-readability score, not a product quality verd
 | `app-rating` | 5/10 | 5 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 3 eslint-disable markers |
 | `app-switcher` | 7/10 | 95 | 13 | no | no | no mapped smoke path; no feature README; 8 eslint-disable markers |
 | `audio` | 9/10 | 1 | 1 | no | no | no mapped smoke path |
-| `bible` | 8/10 | 277 | 69 | yes | no | 45 console calls; 15 eslint-disable markers |
+| `bible` | 8/10 | 277 | 70 | yes | no | 45 console calls; 15 eslint-disable markers |
 | `bibleReferencePreview` | 9/10 | 12 | 5 | no | no | no mapped smoke path |
 | `bookmarks` | 8/10 | 8 | 2 | no | no | no mapped smoke path; no feature README |
 | `commentaries` | 7/10 | 48 | 18 | no | no | no mapped smoke path; no feature README; 4 eslint-disable markers |
@@ -21,8 +21,8 @@ This report is a directional agent-readability score, not a product quality verd
 | `entityListQuery` | 8/10 | 6 | 5 | no | no | no mapped smoke path; no feature README |
 | `feature-onboarding` | 6/10 | 9 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README |
 | `history` | 8/10 | 1 | 1 | no | no | no mapped smoke path; no feature README |
-| `home` | 8/10 | 35 | 5 | no | no | no mapped smoke path; 2 eslint-disable markers |
-| `lexique` | 8/10 | 44 | 17 | yes | no | no feature README; 1 eslint-disable markers |
+| `home` | 8/10 | 36 | 5 | no | no | no mapped smoke path; 2 eslint-disable markers |
+| `lexique` | 8/10 | 44 | 20 | yes | no | no feature README; 1 eslint-disable markers |
 | `migrations` | 8/10 | 2 | 2 | no | no | no mapped smoke path; no feature README |
 | `nave` | 9/10 | 12 | 1 | yes | no | 2 eslint-disable markers |
 | `notes` | 7/10 | 9 | 1 | no | no | no mapped smoke path; no feature README; 1 eslint-disable markers |

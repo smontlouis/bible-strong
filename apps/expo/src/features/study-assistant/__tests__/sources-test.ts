@@ -121,8 +121,8 @@ it('preserves precise lexicon identity and dictionary work when navigating', () 
       title: 'H7050A',
       excerpt: '',
       params: { code: 'H7050A', identityKind: 'dstrong' },
-    }).params
-  ).toMatchObject({ identityCode: 'H7050A', identityKind: 'dstrong' })
+    }).pathname
+  ).toBe('/strong/h7050a')
   expect(
     sourceRoute({
       id: 's2',
