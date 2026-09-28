@@ -42,6 +42,27 @@ describe('Bible publication workflow', () => {
     })
   })
 
+  it('requires a native App ID before minting the smoke-check App Check JWT', async () => {
+    let fetches = 0
+    await assert.rejects(
+      mintResourceAppCheckToken(
+        {
+          NODE_ENV: 'test',
+          RESOURCE_FIREBASE_PROJECT_ID: 'bible-strong-app',
+          RESOURCE_FIREBASE_APP_ID: '1:123:web:abc',
+          RESOURCE_FIREBASE_API_KEY: 'public-api-key',
+          RESOURCE_APP_CHECK_DEBUG_TOKEN: 'registered-debug-token',
+        },
+        async () => {
+          fetches += 1
+          return new Response(JSON.stringify({ token: 'fresh-app-check-jwt' }))
+        }
+      ),
+      /BIBLE_PUBLICATION_ENV_NATIVE_APP_ID_REQUIRED:RESOURCE_FIREBASE_APP_ID/
+    )
+    assert.equal(fetches, 0)
+  })
+
   it('plans a complete candidate build without production writes by default', () => {
     const options = parseBiblePublicationWorkflowArgs([
       '--version',

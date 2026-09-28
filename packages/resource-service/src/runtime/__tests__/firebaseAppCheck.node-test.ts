@@ -5,6 +5,7 @@ import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from 'jose'
 import {
   FIREBASE_APP_CHECK_HEADER,
   createFirebaseAppCheckConfig,
+  isNativeFirebaseAppId,
   verifyFirebaseAppCheckRequest,
   verifyFirebaseAppCheckToken,
 } from '../firebaseAppCheck'
@@ -43,18 +44,18 @@ describe('Firebase App Check verification', () => {
     const { keys, sign } = await createFixture()
     const config = createFirebaseAppCheckConfig({ projectNumber, allowedAppIds: appId })
 
-    assert.equal(await verifyFirebaseAppCheckToken(await sign(), config, keys), true)
+    assert.equal(await verifyFirebaseAppCheckToken(await sign(), config, keys), appId)
     assert.equal(
       await verifyFirebaseAppCheckToken(
         await sign({ issuer: 'https://firebaseappcheck.googleapis.com/999' }),
         config,
         keys
       ),
-      false
+      undefined
     )
     assert.equal(
       await verifyFirebaseAppCheckToken(await sign({ audience: 'projects/999' }), config, keys),
-      false
+      undefined
     )
     assert.equal(
       await verifyFirebaseAppCheckToken(
@@ -62,11 +63,11 @@ describe('Firebase App Check verification', () => {
         config,
         keys
       ),
-      false
+      undefined
     )
     assert.equal(
       await verifyFirebaseAppCheckToken(await sign({ expiresIn: '-10s' }), config, keys),
-      false
+      undefined
     )
   })
 
@@ -78,16 +79,25 @@ describe('Firebase App Check verification', () => {
       headers: { [FIREBASE_APP_CHECK_HEADER]: token },
     })
 
-    assert.equal(await verifyFirebaseAppCheckRequest(request, config, keys), true)
+    assert.equal(await verifyFirebaseAppCheckRequest(request, config, keys), appId)
     assert.equal(
       await verifyFirebaseAppCheckRequest(
         new Request('https://api.bible-strong.app/v1/offline-artifacts/file.zip'),
         config
       ),
-      false
+      undefined
     )
-    assert.equal(await verifyFirebaseAppCheckToken(`${token}tampered`, config, keys), false)
-    assert.equal(await verifyFirebaseAppCheckToken('not-a-jwt', config, keys), false)
+    assert.equal(await verifyFirebaseAppCheckToken(`${token}tampered`, config, keys), undefined)
+    assert.equal(await verifyFirebaseAppCheckToken('not-a-jwt', config, keys), undefined)
+  })
+
+  it('recognizes native App IDs from the platform encoded by Firebase', () => {
+    assert.equal(isNativeFirebaseAppId('1:204116128917:android:3ae4e716f079e5a002579c'), true)
+    assert.equal(isNativeFirebaseAppId('1:204116128917:ios:116748d319a72c8c02579c'), true)
+    assert.equal(isNativeFirebaseAppId('1:204116128917:web:6ec6a6562ad7957402579c'), false)
+    assert.equal(isNativeFirebaseAppId('1:204116128917:androidx:3ae4e716f079e5a002579c'), false)
+    assert.equal(isNativeFirebaseAppId('android'), false)
+    assert.equal(isNativeFirebaseAppId(''), false)
   })
 
   it('rejects invalid Worker configuration before serving requests', () => {
