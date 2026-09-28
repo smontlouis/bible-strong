@@ -77,7 +77,14 @@ export function createLayeredStrongLexiconAccess(
       )
     },
     async loadPreview(identities, language) {
-      return access.loadEntryCards(identities, language)
+      return preferSimple(
+        () => simple.loadPreview(identities, language),
+        async () =>
+          (await detailed.loadPreview(identities, language)).map(entry => ({
+            ...entry,
+            definitionHtml: undefined,
+          }))
+      )
     },
     listEntries: request =>
       preferSimple(

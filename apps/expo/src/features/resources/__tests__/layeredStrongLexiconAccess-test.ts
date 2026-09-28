@@ -40,7 +40,10 @@ const source = (value?: StrongLexiconEntry): StrongLexiconAccess => ({
     if (!value) throw new ResourceAccessError('NETWORK_OFFLINE')
     return [value]
   },
-  loadPreview: async () => (value ? [value] : []),
+  loadPreview: async () => {
+    if (!value) throw new ResourceAccessError('NETWORK_OFFLINE')
+    return [value]
+  },
   loadMorphologies: async () => [],
   loadEntity: async () => undefined,
   loadChapterEntities: async () => [],
@@ -77,4 +80,15 @@ it('keeps an existing detailed copy readable without calling it a simple definit
 it('preserves offline recovery when neither level is readable', async () => {
   const access = createLayeredStrongLexiconAccess(source(), source())
   await expect(access.loadEntry(identity, 'fr')).rejects.toMatchObject({ code: 'NETWORK_OFFLINE' })
+})
+
+it('preserves the preview source identity filtering and deduplication', async () => {
+  const simple = source(entry('Simple'))
+  const preview = jest.spyOn(simple, 'loadPreview')
+  const cards = jest.spyOn(simple, 'loadEntryCards')
+  const access = createLayeredStrongLexiconAccess(simple, source(entry('STEP')))
+  const identities = [identity, { kind: 'ustrong' as const, code: 'G2495' }, identity]
+  expect(await access.loadPreview(identities, 'fr')).toEqual([entry('Simple')])
+  expect(preview).toHaveBeenCalledWith(identities, 'fr')
+  expect(cards).not.toHaveBeenCalled()
 })
