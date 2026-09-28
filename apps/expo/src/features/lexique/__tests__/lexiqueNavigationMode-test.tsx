@@ -53,7 +53,7 @@ describe('lexicon navigation mode', () => {
     act(() => list.props.onStrongSelect(1, 'H0310A'))
 
     expect(mockPushRouteOnce).toHaveBeenNthCalledWith(1, {
-      pathname: '/strong/h0310a',
+      pathname: '/strong/h0310A',
       params: {},
     })
 

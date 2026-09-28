@@ -112,6 +112,56 @@ const request = (path: string) =>
   })
 
 describe('v1 Strong lexicon API', () => {
+  it('forwards the simple level and locale across every lexical read', async () => {
+    const calls: { language: string; level?: string }[] = []
+    const simpleRepository: StrongLexiconRepositoryService = {
+      ...repository,
+      findEntry: input => {
+        calls.push(input)
+        return repository.findEntry(input)
+      },
+      findEntryCards: input => {
+        calls.push(input)
+        return Effect.succeed([])
+      },
+      listEntries: input => {
+        calls.push(input)
+        return repository.listEntries(input)
+      },
+      findRandom: input => {
+        calls.push(input)
+        return repository.findRandom(input)
+      },
+      findMorphologies: input => {
+        calls.push(input)
+        return repository.findMorphologies(input)
+      },
+    }
+    const web = makeResourceWebHandler(undefined, undefined, { strongLexicon: simpleRepository })
+    try {
+      for (const language of ['fr', 'en']) {
+        const paths = [
+          `entries/G3056?language=${language}`,
+          `entries/batch?language=${language}&identities=strong%3AG3056`,
+          `entries?language=${language}&search=love`,
+          `random?language=${language}&lexicalLanguage=greek`,
+          `morphologies?language=${language}&codes=G%3AN-M`,
+        ]
+        for (const path of paths) {
+          const response = await web.handler(request(`/v1/strong-lexicon/${path}&level=simple`))
+          assert.equal(response.status, 200, await response.clone().text())
+          assert.equal(calls.at(-1)?.level, 'simple')
+          assert.equal(calls.at(-1)?.language, language)
+        }
+        const module = await web.handler(request(`/v1/strong-lexicon/modules/simple-${language}`))
+        assert.equal(module.status, 200)
+      }
+      assert.equal(calls.length, 10)
+    } finally {
+      await web.dispose()
+    }
+  })
+
   it('loads multiple identities through one batch endpoint', async () => {
     entryReads = 0
     let batchReads = 0

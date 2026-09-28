@@ -1,3 +1,4 @@
+import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -156,12 +157,35 @@ function buildCommentaryItems(lang: ResourceLanguage): UnifiedItem[] {
 }
 
 function buildStrongLexiconItems(
+  lang: ResourceLanguage,
   t: (key: string, options?: Record<string, unknown>) => string
 ): UnifiedItem[] {
   return [
+    ...(['fr', 'en'] as const).map(locale => ({
+      id: createOfflineCopyId({
+        kind: 'strong-lexicon-module',
+        moduleId: getSimpleStrongModuleId(locale),
+      }),
+      name: t(
+        locale === 'fr'
+          ? 'offlineSetup.resources.simpleLexiconFr'
+          : 'offlineSetup.resources.simpleLexiconEn'
+      ),
+      subtitle: t('offlineSetup.option.simpleLexiconDescription'),
+      estimatedSize: createOfflineCopyDownloadItem({
+        kind: 'strong-lexicon-module',
+        moduleId: getSimpleStrongModuleId(locale),
+      }).estimatedSize,
+      lang: locale,
+      searchText: 'strong lexique simple grec hébreu français anglais',
+    })),
     {
       id: createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' }),
-      name: t('offlineSetup.resources.strongLexicon'),
+      name: t('offlineSetup.resources.detailedLexicon'),
+      parentItemId: createOfflineCopyId({
+        kind: 'strong-lexicon-module',
+        moduleId: getSimpleStrongModuleId(lang),
+      }),
       subtitle: t('offlineSetup.option.strongLexiconDescription'),
       estimatedSize: createOfflineCopyDownloadItem({
         kind: 'strong-lexicon-module',
@@ -228,7 +252,10 @@ function buildAllSections(
   )
   const frenchDictionaries = dictionaryWorks.filter(work => work.resource.language === 'fr')
   const englishDictionaries = dictionaryWorks.filter(work => work.resource.language === 'en')
-  const sharedStudyTools = [...buildStrongLexiconItems(t), ...buildSharedDatabaseItems()]
+  const sharedStudyTools = [
+    ...buildStrongLexiconItems(appLang === 'fr' ? 'fr' : 'en', t),
+    ...buildSharedDatabaseItems(),
+  ]
   const sections = buildDownloadResourceSections({
     titles: {
       french: t('versionCatalog.language.fr'),

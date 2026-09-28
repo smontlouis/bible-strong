@@ -16,7 +16,7 @@ export const resourceApiCacheEpochFrom = async (catalog: unknown): Promise<strin
 
 export const RESOURCE_API_CACHE_EPOCH = resourceApiCacheEpochFrom(mobileResourceCatalog)
 
-const STRONG_LEXICON_BATCH_RESPONSE_REVISION = 'strong-lexicon-batch-identity-selection-v2'
+const STRONG_LEXICON_BATCH_RESPONSE_REVISION = 'strong-lexicon-batch-case-sensitive-levels-v3'
 const DICTIONARY_PASSAGE_DISCOVERY_RESPONSE_REVISION = 'dictionary-passage-discovery-directory-v1'
 
 type CatalogEntry = { contentSha256?: unknown; archiveSha256?: unknown }
@@ -36,6 +36,13 @@ const catalogResourceIdsFrom = (request: Request): string[] => {
       .map(version => `bible:${version}`)
   }
   if (pathname.startsWith('/v1/strong-lexicon/')) {
+    const simpleModule = pathname.match(/\/modules\/(simple-(?:fr|en))$/)?.[1]
+    if (simpleModule) return [`strong-lexicon:${simpleModule}`]
+    if (
+      /^\/v1\/strong-lexicon\/(?:entries(?:\/[^/]+)?|random|morphologies)$/.test(pathname) &&
+      url.searchParams.get('level') === 'simple'
+    )
+      return [`strong-lexicon:simple-${url.searchParams.get('language')}`]
     return ['strong-lexicon:core', 'strong-lexicon:resources', 'strong-lexicon:entities']
   }
   const bible = match(/^\/v1\/bibles\/([^/]+)\//)

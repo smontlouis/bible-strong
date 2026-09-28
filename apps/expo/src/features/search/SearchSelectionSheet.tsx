@@ -1,3 +1,5 @@
+import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
+import { getPrimaryStrongLexiconAvailability } from '~features/resources/layeredStrongLexiconAccess'
 import PassageBrowser from './PassageBrowser'
 import { usePassageFilterChoices } from './usePassageFilterChoices'
 import { createSearchExperienceController } from './searchExperience'
@@ -463,13 +465,16 @@ const SearchSelectionSheet = ({
       strongLetter,
     ],
     queryFn: async ({ pageParam }) => {
-      const availability = await resources.strongLexicon.getModuleAvailability('core')
+      const availability = await getPrimaryStrongLexiconAvailability(
+        resources.strongLexicon,
+        resourcesLanguage.STRONG
+      )
       if (availability.status !== 'available') {
         throw new ResourceAccessError(
           availability.status === 'corrupt' ? 'INVALID_OFFLINE_COPY' : 'UNKNOWN',
-          (await resources.strongLexicon.getModuleRecoveryActions?.('core')) ?? [
-            'acquire-offline-copy',
-          ]
+          (await resources.strongLexicon.getModuleRecoveryActions?.(
+            getSimpleStrongModuleId(resourcesLanguage.STRONG)
+          )) ?? ['acquire-offline-copy']
         )
       }
       return resources.strongLexicon.listEntries({
@@ -740,7 +745,10 @@ const SearchSelectionSheet = ({
   const resourceFailures: (RelationResourceFailure | undefined)[] = [
     shouldLoadStrongTargets && strongQuery.isError
       ? {
-          identity: { kind: 'strong-lexicon-module', moduleId: 'core' } as const,
+          identity: {
+            kind: 'strong-lexicon-module',
+            moduleId: getSimpleStrongModuleId(resourcesLanguage.STRONG),
+          } as const,
           title: t('resource.strong.temporarilyUnavailable'),
           error: strongQuery.error,
           retry: strongQuery.refetch,

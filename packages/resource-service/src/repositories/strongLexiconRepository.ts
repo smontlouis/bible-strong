@@ -1,3 +1,7 @@
+import {
+  getSimpleStrongModuleId,
+  isStandaloneStrongModule,
+} from '@bible-strong/resource-domain/strong-lexicon'
 import { Effect } from 'effect'
 import { sql, type Kysely } from 'kysely'
 import { normalizeBibleSearchText } from '@bible-strong/resource-domain/bible-search-input'
@@ -61,7 +65,8 @@ const text = (row: Payload, key: string): string =>
 const number = (row: Payload, key: string): number => Number(row[key] ?? 0)
 const localized = (language: StrongLexiconLanguage, translated: string, fallback: string) =>
   language === 'fr' && translated.trim() ? translated : fallback
-const normalizeCode = (value: string) => value.trim().toUpperCase()
+const normalizeCode = (value: string) =>
+  createStrongIdentity(value, value.trim().toUpperCase().startsWith('H') ? 'hebrew' : 'greek').code
 const normalizeText = (value: string): string =>
   value
     .normalize('NFKD')
@@ -117,7 +122,7 @@ const moduleStateFrom = (
     Array.isArray(dependencies) && dependencies[0] && typeof dependencies[0] === 'object'
       ? String((dependencies[0] as Record<string, unknown>).revision ?? '')
       : undefined
-  if (moduleId !== 'core' && dependencyRevision !== coreRevision) {
+  if (!isStandaloneStrongModule(moduleId) && dependencyRevision !== coreRevision) {
     return {
       moduleId,
       status: 'incompatible',
@@ -192,14 +197,18 @@ export const makeKyselyStrongLexiconRepository = (
   const getState = async (moduleId: StrongLexiconModuleId) => {
     const [publication, core] = await Promise.all([
       activePublication(moduleId),
-      moduleId === 'core' ? Promise.resolve(undefined) : activePublication('core'),
+      isStandaloneStrongModule(moduleId) ? Promise.resolve(undefined) : activePublication('core'),
     ])
     return moduleStateFrom(moduleId, publication, core?.revision)
   }
 
-  const requiredCore = async (): Promise<Publication> => {
-    const core = await activePublication('core')
-    if (!core) throw new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'core' })
+  const requiredCore = async (
+    language: StrongLexiconLanguage,
+    level?: 'simple' | 'detailed'
+  ): Promise<Publication> => {
+    const moduleId = level === 'simple' ? getSimpleStrongModuleId(language) : 'core'
+    const core = await activePublication(moduleId)
+    if (!core) throw new ActiveStrongLexiconPublicationUnavailable({ moduleId })
     return core
   }
 
@@ -232,7 +241,7 @@ export const makeKyselyStrongLexiconRepository = (
 
   const findCoreEntry = async (core: Publication, reference: string, kind?: StrongIdentityKind) => {
     const normalized = normalizeCode(reference)
-    const identity =
+    let identity =
       kind === 'ustrong'
         ? undefined
         : (
@@ -240,6 +249,12 @@ export const makeKyselyStrongLexiconRepository = (
               query.where('code', '=', normalized)
             )
           )[0]
+    if (!identity && kind === 'dstrong') {
+      const legacyMatches = await records(core.id, 'StepEntryIdentities', query =>
+        query.where(sql<boolean>`lower(code) = ${normalized.toLowerCase()}`).limit(2)
+      )
+      if (legacyMatches.length === 1) identity = legacyMatches[0]
+    }
     const base = Number(normalized.replace(/^[HG]/u, '').replace(/^0+/u, ''))
     const identityEntry = identity
       ? (
@@ -253,25 +268,25 @@ export const makeKyselyStrongLexiconRepository = (
       (kind === 'dstrong'
         ? (
             await records(core.id, 'StepEntries', query =>
-              query.where(sql<boolean>`upper(payload->>'dStrong') LIKE ${`${normalized}%`}`)
+              query.where(sql<boolean>`(payload->>'dStrong') LIKE ${`${normalized}%`}`)
             )
           )[0]
         : kind === 'estrong'
           ? (
               await records(core.id, 'StepEntries', query =>
-                query.where(sql<boolean>`upper(payload->>'eStrong') = ${normalized}`)
+                query.where(sql<boolean>`(payload->>'eStrong') = ${normalized}`)
               )
             )[0]
           : kind === 'ustrong'
             ? (
                 await records(core.id, 'StepEntries', query =>
-                  query.where(sql<boolean>`upper(payload->>'uStrong') = ${normalized}`)
+                  query.where(sql<boolean>`(payload->>'uStrong') = ${normalized}`)
                 )
               )[0]
             : (
                 await records(core.id, 'StepEntries', query =>
                   query.where(
-                    sql<boolean>`(upper(payload->>'eStrong') = ${normalized} OR upper(payload->>'dStrong') = ${normalized} OR upper(payload->>'uStrong') = ${normalized} OR ((payload->>'baseCode')::integer = ${Number.isFinite(base) ? base : -1} AND payload->>'language' = ${normalized.startsWith('G') ? 'greek' : 'hebrew'}))`
+                    sql<boolean>`((payload->>'eStrong') = ${normalized} OR (payload->>'dStrong') = ${normalized} OR (payload->>'uStrong') = ${normalized} OR ((payload->>'baseCode')::integer = ${Number.isFinite(base) ? base : -1} AND payload->>'language' = ${normalized.startsWith('G') ? 'greek' : 'hebrew'}))`
                   )
                 )
               )[0])
@@ -290,9 +305,10 @@ export const makeKyselyStrongLexiconRepository = (
   const findEntryCardsBatch = async (input: {
     identities: { reference: string; kind: StrongIdentityKind }[]
     language: StrongLexiconLanguage
+    level?: 'simple' | 'detailed'
   }): Promise<ActiveStrongLexiconValue<StrongLexiconEntryCard>[]> => {
     if (!input.identities.length) return []
-    const core = await requiredCore()
+    const core = await requiredCore(input.language, input.level)
     const references = [
       ...new Set(input.identities.map(identity => normalizeCode(identity.reference))),
     ]
@@ -305,6 +321,30 @@ export const makeKyselyStrongLexiconRepository = (
         .orderBy('step_entry_id')
         .execute()
     ).map(row => ({ stepEntryId: row.step_entry_id, stepCode: row.step_code }))
+    const missingLegacyCodes = input.identities
+      .filter(
+        identity =>
+          identity.kind === 'dstrong' &&
+          !requestedIdentityRows.some(row => row.stepCode === normalizeCode(identity.reference))
+      )
+      .map(identity => normalizeCode(identity.reference))
+    if (missingLegacyCodes.length) {
+      const legacyRows = await database
+        .selectFrom('strong_lexicon_entry_identities')
+        .select(['step_entry_id', 'step_code'])
+        .where('publication_id', '=', core.id)
+        .where(
+          sql<boolean>`lower(step_code) IN (${sql.join(missingLegacyCodes.map(code => sql`${code.toLowerCase()}`))})`
+        )
+        .execute()
+      for (const code of new Set(missingLegacyCodes)) {
+        const matches = legacyRows.filter(row => row.step_code.toLowerCase() === code.toLowerCase())
+        if (matches.length === 1) {
+          // Retain the requested spelling for selection; load canonical spelling below.
+          requestedIdentityRows.push({ stepEntryId: matches[0].step_entry_id, stepCode: code })
+        }
+      }
+    }
     const requestedEntryIds = requestedIdentityRows.map(row => number(row, 'stepEntryId'))
     const indexedEntries = requestedEntryIds.length
       ? await database
@@ -717,7 +757,27 @@ export const makeKyselyStrongLexiconRepository = (
 
     findEntry: input =>
       tryDatabasePromise('strong-lexicon.entry', async () => {
-        const core = await requiredCore()
+        if (input.level === 'simple') {
+          const [card] = await findEntryCardsBatch({
+            ...input,
+            identities: [{ reference: input.reference, kind: input.kind ?? 'strong' }],
+          })
+          if (!card) throw new StrongLexiconEntryNotFound({ reference: input.reference })
+          return {
+            revision: card.revision,
+            value: {
+              ...card.value,
+              relations: [],
+              resources: [],
+              lsjAbsent: true,
+              modules: {
+                resources: { status: 'missing' as const, moduleId: 'resources' as const },
+                entities: { status: 'missing' as const, moduleId: 'entities' as const },
+              },
+            },
+          }
+        }
+        const core = await requiredCore(input.language, input.level)
         const found = await findCoreEntry(core, input.reference, input.kind)
         if (!found) throw new StrongLexiconEntryNotFound({ reference: input.reference })
         const { entry, identity } = found
@@ -864,7 +924,7 @@ export const makeKyselyStrongLexiconRepository = (
             entityCandidates = (
               await records(entityPublication.id, 'Entities', query =>
                 query.where(
-                  sql<boolean>`upper(payload->>'uStrong') ~ ${`^${prefix}0*${baseCode}(?:[^0-9]|$)`}`
+                  sql<boolean>`(payload->>'uStrong') ~ ${`^${prefix}0*${baseCode}(?:[^0-9]|$)`}`
                 )
               )
             ).filter(row => {
@@ -1061,7 +1121,7 @@ export const makeKyselyStrongLexiconRepository = (
 
     listEntries: input =>
       tryDatabasePromise('strong-lexicon.entries', async () => {
-        const core = await requiredCore()
+        const core = await requiredCore(input.language, input.level)
         const search = input.search?.trim()
         const prefix = input.prefix?.trim()
         const cursor = decodeStrongLexiconPageCursor(input.cursor)
@@ -1172,7 +1232,7 @@ export const makeKyselyStrongLexiconRepository = (
 
     findRandom: input =>
       tryDatabasePromise('strong-lexicon.random', async () => {
-        const core = await requiredCore()
+        const core = await requiredCore(input.language, input.level)
         type RandomRow = { payload: Payload; step_code: string; translation: Payload | null }
         const randomResult = await sql<RandomRow>`
           WITH bounds AS (
@@ -1180,6 +1240,7 @@ export const makeKyselyStrongLexiconRepository = (
               FROM strong_lexicon_entries
              WHERE publication_id=${core.id} AND language=${input.lexicalLanguage}
                AND payload->>'gloss' <> ''
+               AND (${input.level !== 'simple'} OR payload->>'meaning' <> '')
           )
           SELECT e.payload, i.step_code, tr.payload AS translation
             FROM bounds
@@ -1187,6 +1248,7 @@ export const makeKyselyStrongLexiconRepository = (
               SELECT * FROM strong_lexicon_entries
                WHERE publication_id=${core.id} AND language=${input.lexicalLanguage}
                  AND payload->>'gloss' <> ''
+               AND (${input.level !== 'simple'} OR payload->>'meaning' <> '')
                  AND entry_id >= floor(random() * (bounds.maximum - bounds.minimum + 1) + bounds.minimum)
                ORDER BY entry_id
                LIMIT 1
@@ -1214,7 +1276,7 @@ export const makeKyselyStrongLexiconRepository = (
 
     findMorphologies: input =>
       tryDatabasePromise('strong-lexicon.morphologies', async () => {
-        const core = await requiredCore()
+        const core = await requiredCore(input.language, input.level)
         const normalizedCodes = [
           ...new Set(input.codes.map(code => code.trim().toLocaleLowerCase()).filter(Boolean)),
         ]
@@ -1284,7 +1346,7 @@ export const makeKyselyStrongLexiconRepository = (
 
     findEntity: input =>
       tryDatabasePromise('strong-lexicon.entity', async () => {
-        const core = await requiredCore()
+        const core = await requiredCore(input.language)
         const entityPublication = await activePublication('entities')
         const state = moduleStateFrom('entities', entityPublication, core.revision)
         if (!entityPublication || state.status !== 'available') {
@@ -1304,7 +1366,7 @@ export const makeKyselyStrongLexiconRepository = (
 
     findChapterEntities: input =>
       tryDatabasePromise('strong-lexicon.chapter-entities', async () => {
-        const core = await requiredCore()
+        const core = await requiredCore(input.language)
         const entityPublication = await activePublication('entities')
         const state = moduleStateFrom('entities', entityPublication, core.revision)
         if (!entityPublication || state.status !== 'available') {

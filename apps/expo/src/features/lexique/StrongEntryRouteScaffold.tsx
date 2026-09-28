@@ -1,3 +1,5 @@
+import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
+import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import Empty from '~common/Empty'
@@ -47,6 +49,7 @@ const StrongEntryRouteScaffold = ({
   title,
 }: Props) => {
   const { t } = useTranslation()
+  const { language } = useStrongLexiconLanguage()
   const canGoBackInStack = useCanGoBackInStack()
   const header = (
     <Header
@@ -107,7 +110,10 @@ const StrongEntryRouteScaffold = ({
         <Box className="overflow-hidden border-continuous flex-[1]">
           {header}
           <ResourceUnavailableView
-            identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+            identity={{
+              kind: 'strong-lexicon-module',
+              moduleId: getSimpleStrongModuleId(language),
+            }}
             title={t('resource.strong.coreUnavailable')}
             offlineTitle={t('resource.strong.temporarilyUnavailable')}
             fileSize={35}

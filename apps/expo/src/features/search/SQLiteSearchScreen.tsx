@@ -1,3 +1,5 @@
+import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
+import { getPrimaryStrongLexiconAvailability } from '~features/resources/layeredStrongLexiconAccess'
 import { usePassageFilterChoices } from './usePassageFilterChoices'
 import { getSearchRateLimitNotice, searchRateLimitQueryOptions } from './searchRateLimit'
 import { getTabForSearchResult } from '~features/app-switcher/commandPalette/searchResultTab'
@@ -191,10 +193,20 @@ const SQLiteSearchScreen = ({
       sectionId === 'nave')
 
   const strongAvailabilityQuery = useQuery({
-    queryKey: [...resourceQueryKeys.strongLexiconAvailability('core'), isConnected],
+    queryKey: [
+      ...resourceQueryKeys.strongLexiconAvailability(
+        getSimpleStrongModuleId(resourcesLanguage.STRONG)
+      ),
+      isConnected,
+    ],
     queryFn: async () => ({
-      availability: await resources.strongLexicon.getModuleAvailability('core'),
-      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.('core'),
+      availability: await getPrimaryStrongLexiconAvailability(
+        resources.strongLexicon,
+        resourcesLanguage.STRONG
+      ),
+      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.(
+        getSimpleStrongModuleId(resourcesLanguage.STRONG)
+      ),
     }),
     networkMode: 'always',
     staleTime: Infinity,
@@ -795,7 +807,10 @@ const SQLiteSearchScreen = ({
     if (browseItemType === 'strong' && (strongAvailabilityQuery.isError || strongQuery.isError)) {
       return (
         <ResourceUnavailableView
-          identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+          identity={{
+            kind: 'strong-lexicon-module',
+            moduleId: getSimpleStrongModuleId(resourcesLanguage.STRONG),
+          }}
           title={t('resource.strong.temporarilyUnavailable')}
           fileSize={35}
           failure={resourceFailureFromAccessError(
@@ -858,7 +873,10 @@ const SQLiteSearchScreen = ({
     ) {
       return (
         <ResourceUnavailableView
-          identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+          identity={{
+            kind: 'strong-lexicon-module',
+            moduleId: getSimpleStrongModuleId(resourcesLanguage.STRONG),
+          }}
           title={t('resource.strong.offlineCopyNeeded')}
           offlineTitle={t('resource.strong.temporarilyUnavailable')}
           fileSize={35}

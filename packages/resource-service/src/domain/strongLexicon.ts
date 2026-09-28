@@ -30,9 +30,10 @@ import type { StrongIdentityKind } from '@bible-strong/resource-domain/strong-id
 
 export type StrongLexiconLanguage = 'fr' | 'en'
 export type StrongLexicalLanguage = 'greek' | 'hebrew'
-export type StrongLexiconModuleId = 'core' | 'resources' | 'entities'
+export type StrongLexiconModuleId = 'core' | 'resources' | 'entities' | 'simple-fr' | 'simple-en'
 
-export const STRONG_LEXICON_ENTRY_RESPONSE_REVISION = 'strong-lexicon-classic-relation-expansion-v1'
+export const STRONG_LEXICON_ENTRY_RESPONSE_REVISION =
+  'strong-lexicon-case-sensitive-definition-levels-v2'
 
 export type ActiveStrongLexiconValue<T> = { revision: string; value: T }
 export type StrongLexiconModuleState = {
@@ -68,17 +69,20 @@ export type StrongLexiconRepositoryService = {
   findEntry: (input: {
     reference: string
     language: StrongLexiconLanguage
+    level?: 'simple' | 'detailed'
     kind?: StrongIdentityKind
   }) => Effect.Effect<ActiveStrongLexiconValue<StrongLexiconEntry>, StrongLexiconRepositoryError>
   findEntryCards?: (input: {
     identities: { reference: string; kind: StrongIdentityKind }[]
     language: StrongLexiconLanguage
+    level?: 'simple' | 'detailed'
   }) => Effect.Effect<
     ActiveStrongLexiconValue<StrongLexiconEntryCard>[],
     StrongLexiconRepositoryError
   >
   listEntries: (input: {
     language: StrongLexiconLanguage
+    level?: 'simple' | 'detailed'
     lexicalLanguage?: StrongLexicalLanguage
     search?: string
     prefix?: string
@@ -87,6 +91,7 @@ export type StrongLexiconRepositoryService = {
   }) => Effect.Effect<ActiveStrongLexiconValue<StrongLexiconPage>, StrongLexiconRepositoryError>
   findRandom: (input: {
     language: StrongLexiconLanguage
+    level?: 'simple' | 'detailed'
     lexicalLanguage: StrongLexicalLanguage
   }) => Effect.Effect<
     ActiveStrongLexiconValue<StrongLexiconSearchResult[]>,
@@ -94,6 +99,7 @@ export type StrongLexiconRepositoryService = {
   >
   findMorphologies: (input: {
     language: StrongLexiconLanguage
+    level?: 'simple' | 'detailed'
     codes: string[]
   }) => Effect.Effect<
     ActiveStrongLexiconValue<StrongLexiconMorphology[]>,
@@ -165,6 +171,7 @@ const strongLexiconEntryDto = (active: ActiveStrongLexiconValue<StrongLexiconEnt
 export const readStrongLexiconEntry = (input: {
   reference: string
   language: StrongLexiconLanguage
+  level?: 'simple' | 'detailed'
   kind?: StrongIdentityKind
 }) =>
   Effect.gen(function* () {
@@ -175,6 +182,7 @@ export const readStrongLexiconEntry = (input: {
 export const readStrongLexiconEntryCards = (input: {
   identities: { reference: string; kind: StrongIdentityKind }[]
   language: StrongLexiconLanguage
+  level?: 'simple' | 'detailed'
 }) =>
   Effect.gen(function* () {
     const repository = yield* StrongLexiconRepository
@@ -182,12 +190,14 @@ export const readStrongLexiconEntryCards = (input: {
       ? yield* repository.findEntryCards(input)
       : yield* Effect.all(
           input.identities.map(identity =>
-            repository.findEntry({ ...identity, language: input.language }).pipe(
-              Effect.catchIf(
-                cause => cause instanceof StrongLexiconEntryNotFound,
-                () => Effect.succeed(undefined)
+            repository
+              .findEntry({ ...identity, language: input.language, level: input.level })
+              .pipe(
+                Effect.catchIf(
+                  cause => cause instanceof StrongLexiconEntryNotFound,
+                  () => Effect.succeed(undefined)
+                )
               )
-            )
           ),
           { concurrency: 8 }
         )
@@ -211,6 +221,7 @@ export const readStrongLexiconEntryCards = (input: {
 
 export const browseStrongLexicon = (input: {
   language: StrongLexiconLanguage
+  level?: 'simple' | 'detailed'
   lexicalLanguage?: StrongLexicalLanguage
   search?: string
   prefix?: string
@@ -228,6 +239,7 @@ export const browseStrongLexicon = (input: {
 
 export const readRandomStrongLexiconEntry = (input: {
   language: StrongLexiconLanguage
+  level?: 'simple' | 'detailed'
   lexicalLanguage: StrongLexicalLanguage
 }) =>
   Effect.gen(function* () {
@@ -240,6 +252,7 @@ export const readRandomStrongLexiconEntry = (input: {
 
 export const readStrongLexiconMorphologies = (input: {
   language: StrongLexiconLanguage
+  level?: 'simple' | 'detailed'
   codes: string[]
 }) =>
   Effect.gen(function* () {

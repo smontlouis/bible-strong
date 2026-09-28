@@ -5,7 +5,13 @@ export { decodeStrongLexiconPageCursor, encodeStrongLexiconPageCursor }
 
 export const StrongLexiconLanguage = Schema.Literal('fr', 'en')
 export const StrongLexicalLanguage = Schema.Literal('greek', 'hebrew')
-export const StrongLexiconModuleIdSchema = Schema.Literal('core', 'resources', 'entities')
+export const StrongLexiconModuleIdSchema = Schema.Literal(
+  'core',
+  'resources',
+  'entities',
+  'simple-fr',
+  'simple-en'
+)
 export const StrongLexiconIdentityKind = Schema.Literal('strong', 'estrong', 'dstrong', 'ustrong')
 
 export class StrongLexiconEntryPath extends Schema.Class<StrongLexiconEntryPath>(
@@ -35,6 +41,7 @@ export class StrongLexiconEntryQuery extends Schema.Class<StrongLexiconEntryQuer
   'StrongLexiconEntryQuery'
 )({
   language: StrongLexiconLanguage,
+  level: Schema.optional(Schema.Literal('simple', 'detailed')),
   kind: Schema.optional(StrongLexiconIdentityKind),
 }) {}
 
@@ -42,6 +49,7 @@ export class StrongLexiconEntriesQuery extends Schema.Class<StrongLexiconEntries
   'StrongLexiconEntriesQuery'
 )({
   language: StrongLexiconLanguage,
+  level: Schema.optional(Schema.Literal('simple', 'detailed')),
   identities: Schema.NonEmptyString.pipe(
     Schema.filter(
       value =>
@@ -57,6 +65,7 @@ export class StrongLexiconBrowseQuery extends Schema.Class<StrongLexiconBrowseQu
   'StrongLexiconBrowseQuery'
 )({
   language: StrongLexiconLanguage,
+  level: Schema.optional(Schema.Literal('simple', 'detailed')),
   lexicalLanguage: Schema.optional(StrongLexicalLanguage),
   search: Schema.optional(Schema.String),
   prefix: Schema.optional(Schema.String),
@@ -70,11 +79,19 @@ export class StrongLexiconBrowseQuery extends Schema.Class<StrongLexiconBrowseQu
 
 export class StrongLexiconRandomQuery extends Schema.Class<StrongLexiconRandomQuery>(
   'StrongLexiconRandomQuery'
-)({ language: StrongLexiconLanguage, lexicalLanguage: StrongLexicalLanguage }) {}
+)({
+  language: StrongLexiconLanguage,
+  level: Schema.optional(Schema.Literal('simple', 'detailed')),
+  lexicalLanguage: StrongLexicalLanguage,
+}) {}
 
 export class StrongLexiconMorphologyQuery extends Schema.Class<StrongLexiconMorphologyQuery>(
   'StrongLexiconMorphologyQuery'
-)({ language: StrongLexiconLanguage, codes: Schema.NonEmptyString }) {}
+)({
+  language: StrongLexiconLanguage,
+  level: Schema.optional(Schema.Literal('simple', 'detailed')),
+  codes: Schema.NonEmptyString,
+}) {}
 
 export class StrongLexiconChapterEntitiesQuery extends Schema.Class<StrongLexiconChapterEntitiesQuery>(
   'StrongLexiconChapterEntitiesQuery'

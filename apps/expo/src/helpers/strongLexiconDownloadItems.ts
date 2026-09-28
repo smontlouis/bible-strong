@@ -1,3 +1,4 @@
+import { isStandaloneStrongModule } from '@bible-strong/resource-domain/strong-lexicon'
 import type { DownloadItem } from '~state/downloadQueue'
 import {
   getStrongLexiconPublication,
@@ -30,7 +31,9 @@ export function createStrongLexiconModuleDownloadItem(
       : {}),
   }
   const names: Record<StrongLexiconModuleId, string> = {
-    core: 'Lexique Strong',
+    core: 'Lexique détaillé',
+    'simple-fr': 'Lexique Strong français',
+    'simple-en': 'Lexique Strong anglais',
     resources: 'Dictionnaire grec détaillé',
     entities: 'Entités bibliques',
   }
@@ -53,7 +56,7 @@ export const createStrongLexiconModuleDownloadPlan = (
   isCoreAvailable: boolean
 ): DownloadItem[] => {
   const moduleItem = createStrongLexiconModuleDownloadItem(moduleId)
-  if (moduleId === 'core' || isCoreAvailable) return [moduleItem]
+  if (isStandaloneStrongModule(moduleId) || isCoreAvailable) return [moduleItem]
   const core = createStrongLexiconModuleDownloadItem('core')
   return [core, { ...moduleItem, dependsOnId: core.id }]
 }

@@ -1,3 +1,4 @@
+import { isStandaloneStrongModule } from '@bible-strong/resource-domain/strong-lexicon'
 import {
   buildCommentaryReadingSections,
   createCommentaryReadingIndex,
@@ -185,7 +186,7 @@ const importStrongLexiconDomainProjection = async (
   signal: AbortSignal
 ) => {
   const rows = canonical.tables
-  if (canonical.moduleId === 'core') {
+  if (isStandaloneStrongModule(canonical.moduleId)) {
     const nameMeanings = new Map(
       (rows.LexiconNameMeanings ?? []).map(row => [
         `${rowNumber(row, 'stepEntryId')}:${rowString(row, 'language')}`,
@@ -654,7 +655,7 @@ export const importPublicationBundle = (
             let activeStrongCoreId: number | undefined
             if (
               isStrongLexiconPublicationBundleManifest(manifest) &&
-              manifest.identity.moduleId !== 'core'
+              !isStandaloneStrongModule(manifest.identity.moduleId)
             ) {
               const dependency = manifest.dependencies[0]
               const activeCore = await transaction

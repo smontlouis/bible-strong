@@ -1,3 +1,7 @@
+import {
+  getStrongModuleSchema,
+  isStandaloneStrongModule,
+} from '@bible-strong/resource-domain/strong-lexicon'
 import { COMMENTARY_READING_INDEX_VERSION } from '@bible-strong/resource-domain/contracts/commentaryReadingContract'
 import {
   buildCommentaryReadingSections,
@@ -345,8 +349,16 @@ const InterlinearBiblePublicationBundleManifestSchema = Schema.Struct({
   }),
 })
 
-const StrongLexiconModuleId = Schema.Literal('core', 'resources', 'entities')
+const StrongLexiconModuleId = Schema.Literal(
+  'core',
+  'resources',
+  'entities',
+  'simple-fr',
+  'simple-en'
+)
 const STRONG_LEXICON_MODULE_ENTRIES = {
+  'simple-fr': 'strong_lexicon.simple-fr.sqlite',
+  'simple-en': 'strong_lexicon.simple-en.sqlite',
   core: 'strong_lexicon.core.sqlite',
   resources: 'strong_lexicon.resources.sqlite',
   entities: 'bible_entities.production.sqlite',
@@ -361,6 +373,8 @@ const StrongLexiconPublicationBundleManifestSchema = Schema.Struct({
     kind: Schema.Literal('strong-lexicon-module'),
     moduleId: StrongLexiconModuleId,
     resourceId: Schema.Literal(
+      'strong-lexicon:simple-fr',
+      'strong-lexicon:simple-en',
       'strong-lexicon:core',
       'strong-lexicon:resources',
       'strong-lexicon:entities'
@@ -720,7 +734,7 @@ export type CanonicalPublication =
 export type CanonicalStrongLexiconModulePublication = {
   format: 'bible-strong-canonical-strong-lexicon-module'
   schemaVersion: 1 | 2
-  moduleId: 'core' | 'resources' | 'entities'
+  moduleId: 'core' | 'resources' | 'entities' | 'simple-fr' | 'simple-en'
   revision: string
   dependencies: { resourceIdentity: 'strong-lexicon:core'; revision: string }[]
   tables: Record<string, Record<string, string | number | null>[]>
@@ -906,7 +920,7 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
     const dependency = manifest.dependencies[0]
     if (
       manifest.identity.resourceId !== expectedResourceId ||
-      (manifest.identity.moduleId === 'core'
+      (isStandaloneStrongModule(manifest.identity.moduleId)
         ? manifest.dependencies.length !== 0
         : manifest.dependencies.length !== 1 ||
           dependency?.resourceIdentity !== 'strong-lexicon:core')
@@ -2692,9 +2706,9 @@ const strongLexiconTables = (
   moduleId: CanonicalStrongLexiconModulePublication['moduleId'],
   schemaVersion: CanonicalStrongLexiconModulePublication['schemaVersion']
 ): readonly string[] =>
-  moduleId === 'core' && schemaVersion >= 2
+  isStandaloneStrongModule(moduleId) && schemaVersion >= 2
     ? [...STRONG_LEXICON_TABLES.core, 'LexiconNameMeanings']
-    : STRONG_LEXICON_TABLES[moduleId]
+    : STRONG_LEXICON_TABLES[getStrongModuleSchema(moduleId)]
 
 const STRONG_LEXICON_TABLE_COLUMNS: Record<
   keyof typeof STRONG_LEXICON_TABLES,
@@ -2981,14 +2995,23 @@ const validateStrongLexiconRows = (
 ) => {
   const ids = new Map<string, Set<number>>()
   for (const table of strongLexiconTables(moduleId, schemaVersion)) {
-    const expectedColumns = STRONG_LEXICON_TABLE_COLUMNS[moduleId][table]
+    const expectedColumns = STRONG_LEXICON_TABLE_COLUMNS[getStrongModuleSchema(moduleId)][table]
     const rows = tables[table] ?? []
-    const required = new Set(STRONG_LEXICON_REQUIRED_COLUMNS[moduleId][table] ?? [])
-    const primary = STRONG_LEXICON_TABLE_PRIMARY_KEYS[moduleId][table] ?? []
-    const uniqueKey = STRONG_LEXICON_TABLE_UNIQUE_KEYS[moduleId][table] ?? []
+    const required = new Set(
+      STRONG_LEXICON_REQUIRED_COLUMNS[getStrongModuleSchema(moduleId)][table] ?? []
+    )
+    const primary = STRONG_LEXICON_TABLE_PRIMARY_KEYS[getStrongModuleSchema(moduleId)][table] ?? []
+    const uniqueKey = STRONG_LEXICON_TABLE_UNIQUE_KEYS[getStrongModuleSchema(moduleId)][table] ?? []
     const seen = new Set<string>()
     const seenUnique = new Set<string>()
-    if (rows.length === 0) throw new Error('CANONICAL_STRONG_LEXICON_TABLE_EMPTY')
+    if (
+      rows.length === 0 &&
+      !(
+        moduleId.startsWith('simple-') &&
+        !['StepEntries', 'StepEntryIdentities', 'LexiconTranslations'].includes(table)
+      )
+    )
+      throw new Error('CANONICAL_STRONG_LEXICON_TABLE_EMPTY')
     for (const row of rows) {
       const keys = Object.keys(row).sort()
       if (keys.join('|') !== [...expectedColumns].sort().join('|')) {
@@ -3004,7 +3027,9 @@ const validateStrongLexiconRows = (
           }
         }
         if (
-          STRONG_LEXICON_REQUIRED_INTEGER_COLUMNS[moduleId][table]?.includes(key) &&
+          STRONG_LEXICON_REQUIRED_INTEGER_COLUMNS[getStrongModuleSchema(moduleId)][table]?.includes(
+            key
+          ) &&
           !isPositiveInteger(value)
         ) {
           throw new Error('CANONICAL_STRONG_LEXICON_ROW_REQUIRED_IDENTITY_INVALID')
@@ -3047,7 +3072,7 @@ const validateStrongLexiconRows = (
       }
     }
   }
-  if (moduleId === 'core') {
+  if (isStandaloneStrongModule(moduleId)) {
     const entryById = new Map((tables.StepEntries ?? []).map(row => [Number(row.id), row]))
     for (const row of tables.StepEntryIdentities ?? []) {
       const entry = entryById.get(Number(row.stepEntryId))
@@ -3115,7 +3140,7 @@ const validateStrongLexiconSqliteTableSchema = (
   table: string
 ) => {
   const columns = rowsFromSqlJs(database, `PRAGMA table_info("${table}")`)
-  const expected = STRONG_LEXICON_TABLE_COLUMNS[moduleId][table]
+  const expected = STRONG_LEXICON_TABLE_COLUMNS[getStrongModuleSchema(moduleId)][table]
   if (
     columns
       .map(column => String(column.name))
@@ -3146,10 +3171,14 @@ const validateStrongLexiconSqliteTableSchema = (
     .filter(column => Number(column.pk) > 0)
     .sort((left, right) => Number(left.pk) - Number(right.pk))
     .map(column => String(column.name))
-  if (primary.join('|') !== (STRONG_LEXICON_TABLE_PRIMARY_KEYS[moduleId][table] ?? []).join('|')) {
+  if (
+    primary.join('|') !==
+    (STRONG_LEXICON_TABLE_PRIMARY_KEYS[getStrongModuleSchema(moduleId)][table] ?? []).join('|')
+  ) {
     throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
   }
-  const uniqueColumns = STRONG_LEXICON_SQLITE_UNIQUE_COLUMNS[moduleId][table] ?? []
+  const uniqueColumns =
+    STRONG_LEXICON_SQLITE_UNIQUE_COLUMNS[getStrongModuleSchema(moduleId)][table] ?? []
   if (uniqueColumns.length) {
     const quoted = uniqueColumns.map(column => `"${column}"`).join(',')
     const duplicate = rowsFromSqlJs(
@@ -3169,7 +3198,7 @@ export const decodeCanonicalStrongLexiconModule = (
     candidate.format !== 'bible-strong-canonical-strong-lexicon-module' ||
     ![1, 2].includes(candidate.schemaVersion ?? 0) ||
     !candidate.moduleId ||
-    !Object.hasOwn(STRONG_LEXICON_TABLES, candidate.moduleId) ||
+    !Object.hasOwn(STRONG_LEXICON_MODULE_ENTRIES, candidate.moduleId) ||
     typeof candidate.revision !== 'string' ||
     !candidate.revision ||
     !Array.isArray(candidate.dependencies) ||
@@ -3212,8 +3241,8 @@ export const decodeCanonicalStrongLexiconModule = (
     throw new Error('CANONICAL_STRONG_LEXICON_INVALID')
   }
   if (
-    (candidate.moduleId === 'core' && candidate.dependencies.length !== 0) ||
-    (candidate.moduleId !== 'core' &&
+    (isStandaloneStrongModule(candidate.moduleId) && candidate.dependencies.length !== 0) ||
+    (!isStandaloneStrongModule(candidate.moduleId) &&
       (candidate.dependencies.length !== 1 ||
         candidate.dependencies[0]?.resourceIdentity !== 'strong-lexicon:core' ||
         !candidate.dependencies[0]?.revision))
@@ -3314,7 +3343,7 @@ const validateStrongLexiconOfflineParity = async (
       metadata.resourceRevision !== canonical.revision ||
       metadata.moduleKind !== canonical.moduleId ||
       metadata.moduleSchemaVersion !== String(canonical.schemaVersion + 1) ||
-      (canonical.moduleId !== 'core' &&
+      (!isStandaloneStrongModule(canonical.moduleId) &&
         metadata.coreRevision !== canonical.dependencies[0]?.revision)
     ) {
       throw new Error('OFFLINE_ARTIFACT_METADATA_MISMATCH')

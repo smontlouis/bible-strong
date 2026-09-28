@@ -913,11 +913,18 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
         readStrongLexiconEntry({
           reference: path.reference,
           language: urlParams.language,
+          level: urlParams.level,
           ...(urlParams.kind ? { kind: urlParams.kind } : {}),
         }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
         requestId,
         request.headers['if-none-match'],
-        ['strong-lexicon', path.reference, urlParams.language, urlParams.kind ?? 'strong']
+        [
+          'strong-lexicon',
+          path.reference,
+          urlParams.language,
+          urlParams.kind ?? 'strong',
+          urlParams.level ?? 'detailed',
+        ]
       )
     })
     .handle('getStrongLexiconEntries', ({ urlParams, request }) => {
@@ -933,7 +940,11 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
             ]
           : []
       })
-      return readStrongLexiconEntryCards({ identities, language: urlParams.language }).pipe(
+      return readStrongLexiconEntryCards({
+        identities,
+        language: urlParams.language,
+        level: urlParams.level,
+      }).pipe(
         Effect.tap(() => addResponseHeaders({ 'x-request-id': requestId })),
         Effect.mapError(cause => toHttpProblem(cause, requestId))
       )
@@ -943,6 +954,7 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
       return serveRevisionedResponse(
         browseStrongLexicon({
           language: urlParams.language,
+          level: urlParams.level,
           lexicalLanguage: urlParams.lexicalLanguage,
           search: urlParams.search,
           prefix: urlParams.prefix,
@@ -968,6 +980,7 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
       return serveRevisionedResponse(
         readStrongLexiconMorphologies({
           language: urlParams.language,
+          level: urlParams.level,
           codes: urlParams.codes
             .split(',')
             .map(code => code.trim())
@@ -995,6 +1008,7 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
           bookCode: path.bookCode,
           chapter: path.chapter,
           language: urlParams.language,
+          level: urlParams.level,
           strongCodes: (urlParams.strongCodes ?? '').split(',').filter(Boolean),
         }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
         requestId,

@@ -11,15 +11,15 @@ export const createStrongIdentity = (
   reference: string | number,
   lexicalLanguage: 'greek' | 'hebrew'
 ): StrongIdentity => {
-  const normalized = String(reference).trim().toUpperCase()
-  const match = normalized.match(/^([HG])?0*(\d+)([A-Z]+)?$/u)
+  const normalized = String(reference).trim()
+  const match = normalized.match(/^([HGhg])?0*(\d+)([A-Za-z]+)?$/u)
   const code = match
-    ? `${match[1] ?? (lexicalLanguage === 'hebrew' ? 'H' : 'G')}${match[2].padStart(4, '0')}${
+    ? `${match[1]?.toUpperCase() ?? (lexicalLanguage === 'hebrew' ? 'H' : 'G')}${match[2].padStart(4, '0')}${
         match[3] ?? ''
       }`
     : normalized
   return {
-    kind: /^[HG]\d+[A-Z]+$/u.test(code) ? 'dstrong' : 'strong',
+    kind: /^[HG]\d+[A-Za-z]+$/u.test(code) ? 'dstrong' : 'strong',
     code,
   }
 }

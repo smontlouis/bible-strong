@@ -1,3 +1,5 @@
+import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
+import { getPrimaryStrongLexiconAvailability } from '~features/resources/layeredStrongLexiconAccess'
 import ResourceDiscoveryEntry from './ResourceDiscoveryEntry'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
@@ -49,10 +51,18 @@ const StrongOfTheDay = ({
 
   const [randomSeed, setRandomSeed] = useState(0)
   const availabilityQuery = useQuery({
-    queryKey: [...resourceQueryKeys.strongLexiconAvailability('core'), isConnected],
+    queryKey: [
+      ...resourceQueryKeys.strongLexiconAvailability(getSimpleStrongModuleId(resourceLanguage)),
+      isConnected,
+    ],
     queryFn: async () => ({
-      availability: await resources.strongLexicon.getModuleAvailability('core'),
-      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.('core'),
+      availability: await getPrimaryStrongLexiconAvailability(
+        resources.strongLexicon,
+        resourceLanguage
+      ),
+      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.(
+        getSimpleStrongModuleId(resourceLanguage)
+      ),
     }),
     networkMode: 'always',
     staleTime: Infinity,
@@ -85,7 +95,10 @@ const StrongOfTheDay = ({
   ) {
     return (
       <ResourceDownloadWidget
-        identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+        identity={{
+          kind: 'strong-lexicon-module',
+          moduleId: getSimpleStrongModuleId(resourceLanguage),
+        }}
         title={resourceTitle}
         fileSize={35}
         onRetry={() => {
@@ -99,7 +112,10 @@ const StrongOfTheDay = ({
     return (
       <WidgetContainer>
         <ResourceUnavailableView
-          identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+          identity={{
+            kind: 'strong-lexicon-module',
+            moduleId: getSimpleStrongModuleId(resourceLanguage),
+          }}
           title={resourceTitle}
           fileSize={35}
           failure={resourceFailureFromStrongModuleAvailability(
@@ -121,7 +137,10 @@ const StrongOfTheDay = ({
     return (
       <WidgetContainer>
         <ResourceUnavailableView
-          identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+          identity={{
+            kind: 'strong-lexicon-module',
+            moduleId: getSimpleStrongModuleId(resourceLanguage),
+          }}
           title={resourceTitle}
           fileSize={35}
           failure={

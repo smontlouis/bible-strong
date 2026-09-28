@@ -1,3 +1,4 @@
+import { createLayeredStrongLexiconAccess } from './layeredStrongLexiconAccess'
 import {
   createCommentaryReadingAccess,
   type CommentaryReadingAccess,
@@ -96,7 +97,9 @@ const unavailableAccess = <Access extends object>(): Access =>
 const bibleVersions = new Set(resourceApiBaseUrl ? ONLINE_BIBLE_VERSION_IDS : [])
 const strongBibleVersions = new Set(resourceApiBaseUrl ? STRONG_BIBLE_FALLBACK_PRIORITY : [])
 const languages = new Set<ResourceLanguage>(resourceApiBaseUrl ? ['fr', 'en'] : [])
-const strongLexiconModules = new Set(resourceApiBaseUrl ? ['core', 'resources', 'entities'] : [])
+const strongLexiconModules = new Set(
+  resourceApiBaseUrl ? ['core', 'resources', 'entities', 'simple-fr', 'simple-en'] : []
+)
 const commentaryCollections = new Set(resourceApiBaseUrl ? ['MHY'] : [])
 
 const bibleChapter = resourceApiBaseUrl
@@ -107,13 +110,25 @@ const bibleChapter = resourceApiBaseUrl
     })
   : unavailableHttpBibleChapterAdapter
 
-const strongLexicon = resourceApiBaseUrl
+const detailedStrongLexicon = resourceApiBaseUrl
   ? createHttpStrongLexiconAccess({
       baseUrl: resourceApiBaseUrl,
       fetcher: resourceApiFetch,
       isOnline,
     })
   : unavailableAccess<StrongLexiconAccess>()
+
+const strongLexicon = createLayeredStrongLexiconAccess(
+  resourceApiBaseUrl
+    ? createHttpStrongLexiconAccess({
+        baseUrl: resourceApiBaseUrl,
+        fetcher: resourceApiFetch,
+        isOnline,
+        level: 'simple',
+      })
+    : unavailableAccess<StrongLexiconAccess>(),
+  detailedStrongLexicon
+)
 
 const strongBibleAdapter = resourceApiBaseUrl
   ? createHttpStrongBibleResourceAdapter({

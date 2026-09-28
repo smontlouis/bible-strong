@@ -1,6 +1,6 @@
 import { resourceArtifactUrl } from './mobileResourceCatalog'
 
-export type StrongLexiconModuleId = 'core' | 'resources' | 'entities'
+export type StrongLexiconModuleId = 'core' | 'resources' | 'entities' | 'simple-fr' | 'simple-en'
 
 export type StrongLexiconPublicationArtifact = {
   id: StrongLexiconModuleId
@@ -19,6 +19,28 @@ export const STRONG_LEXICON_PUBLICATIONS: Record<
   StrongLexiconModuleId,
   StrongLexiconPublicationArtifact
 > = {
+  'simple-fr': {
+    id: 'simple-fr',
+    required: true,
+    url: resourceArtifactUrl('databases/strong_lexicon.simple-fr.sqlite.zip'),
+    entry: 'strong_lexicon.simple-fr.sqlite',
+    archiveBytes: 3482614,
+    archiveSha256: '0f0dd7545a43b732760ac49be7ca789a7787e3e9b02c39929b99cb102a84aaae',
+    contentBytes: 22970368,
+    contentSha256: '3b07deead67516e370043d5afc01ed0413e0db9d95c8d56355fcac89511e7f06',
+    resourceRevision: 'strong-lexicon-simple-fr-944bd06dc903ffaf83df9b51',
+  },
+  'simple-en': {
+    id: 'simple-en',
+    required: true,
+    url: resourceArtifactUrl('databases/strong_lexicon.simple-en.sqlite.zip'),
+    entry: 'strong_lexicon.simple-en.sqlite',
+    archiveBytes: 3269402,
+    archiveSha256: 'a3007c4054b1dc461dd5d2deb4e94a2859224e633ee3becb806329b263a9e0db',
+    contentBytes: 16015360,
+    contentSha256: 'dfb47bb9d77076195f7227a094c523cf2bf6bd817e108de9e0146adc233aeac3',
+    resourceRevision: 'strong-lexicon-simple-en-784af9ff9fc29bf892cb0b55',
+  },
   core: {
     id: 'core',
     required: true,

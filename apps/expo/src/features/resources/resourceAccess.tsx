@@ -1,3 +1,5 @@
+import { createLayeredStrongLexiconAccess } from './layeredStrongLexiconAccess'
+import { createLocalStrongLexiconAccess } from './strongLexiconAccess'
 import { localCommentaryReading } from './commentaryReadingLocal'
 import {
   createCommentaryReadingAccess,
@@ -258,7 +260,7 @@ const lexiconBibleAccess = createLexiconBibleResourceAccess({
   strongBible: strongBibleAccess,
   interlinear: createHybridInterlinearLexiconAdapter(interlinearBibleAccess, bibleChapterAdapter),
 })
-const strongLexiconAccess = createHybridStrongLexiconAccess({
+const detailedStrongLexiconAccess = createHybridStrongLexiconAccess({
   offline: offlineSource('Strong lexicon', localStrongLexiconAccess),
   online: resourceApiBaseUrl
     ? onlineSource(
@@ -273,8 +275,30 @@ const strongLexiconAccess = createHybridStrongLexiconAccess({
   remotelyReadable: Boolean(resourceApiBaseUrl),
   isOnline: async () => onlineManager.isOnline(),
 })
+const simpleOfflineLexicon = createLocalStrongLexiconAccess('simple')
+const simpleStrongLexiconAccess = createHybridStrongLexiconAccess({
+  offline: offlineSource('Simple Strong lexicon', simpleOfflineLexicon),
+  online: resourceApiBaseUrl
+    ? onlineSource(
+        'Simple Strong lexicon',
+        createHttpStrongLexiconAccess({
+          baseUrl: resourceApiBaseUrl,
+          fetcher: resourceApiFetch,
+          isOnline: async () => onlineManager.isOnline(),
+          level: 'simple',
+        })
+      )
+    : simpleOfflineLexicon,
+  remotelyReadable: Boolean(resourceApiBaseUrl),
+  isOnline: async () => onlineManager.isOnline(),
+  level: 'simple',
+})
+const strongLexiconAccess = createLayeredStrongLexiconAccess(
+  simpleStrongLexiconAccess,
+  detailedStrongLexiconAccess
+)
 const remotelyReadableStrongLexiconModules = new Set(
-  resourceApiBaseUrl ? ['core', 'resources', 'entities'] : []
+  resourceApiBaseUrl ? ['core', 'resources', 'entities', 'simple-fr', 'simple-en'] : []
 )
 const onlineBibleSearchAccess = resourceApiBaseUrl
   ? onlineSource(

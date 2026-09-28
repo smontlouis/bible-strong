@@ -337,7 +337,7 @@ describe('Home resource download widgets', () => {
     expect(downloadManager.enqueue).toHaveBeenCalledWith([
       {
         id: 'offline-copy-id',
-        identity: { kind: 'strong-lexicon-module', moduleId: 'core' },
+        identity: { kind: 'strong-lexicon-module', moduleId: 'simple-fr' },
       },
     ])
   })

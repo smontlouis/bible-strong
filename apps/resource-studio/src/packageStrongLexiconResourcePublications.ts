@@ -32,9 +32,24 @@ import {
 } from "./resourcePublicationEnvelope.js";
 import { commitResourcePublicationBundle } from "./resourcePublicationCommit.js";
 
-export type StrongLexiconModuleId = "core" | "resources" | "entities";
+type DetailedModuleId = "core" | "resources" | "entities";
+export type StrongLexiconModuleId =
+  | DetailedModuleId
+  | "simple-fr"
+  | "simple-en";
+const schemaModule = (id: StrongLexiconModuleId): DetailedModuleId =>
+  id === "simple-fr" || id === "simple-en" ? "core" : id;
+const standaloneModule = (id: StrongLexiconModuleId) =>
+  schemaModule(id) === "core";
+const ALL_MODULE_IDS: readonly StrongLexiconModuleId[] = [
+  "core",
+  "resources",
+  "entities",
+  "simple-fr",
+  "simple-en"
+];
 
-const MODULE_IDS: readonly StrongLexiconModuleId[] = [
+const MODULE_IDS: readonly DetailedModuleId[] = [
   "core",
   "resources",
   "entities"
@@ -45,12 +60,14 @@ const MAX_SQLITE_BYTES = 256 * 1024 * 1024;
 const ZIP_TIME = new Date("1980-01-01T00:00:00.000Z");
 
 const MODULE_FILES: Record<StrongLexiconModuleId, string> = {
+  "simple-fr": "strong_lexicon.simple-fr.sqlite",
+  "simple-en": "strong_lexicon.simple-en.sqlite",
   core: "strong_lexicon.core.sqlite",
   resources: "strong_lexicon.resources.sqlite",
   entities: "bible_entities.production.sqlite"
 };
 
-const TABLES: Record<StrongLexiconModuleId, readonly string[]> = {
+const TABLES: Record<DetailedModuleId, readonly string[]> = {
   core: [
     "StepEntries",
     "StepEntryIdentities",
@@ -72,7 +89,7 @@ const TABLES: Record<StrongLexiconModuleId, readonly string[]> = {
 };
 
 const TABLE_COLUMNS: Record<
-  StrongLexiconModuleId,
+  DetailedModuleId,
   Record<string, readonly string[]>
 > = {
   core: {
@@ -187,7 +204,7 @@ const TABLE_COLUMNS: Record<
 };
 
 const TABLE_PRIMARY_KEYS: Record<
-  StrongLexiconModuleId,
+  DetailedModuleId,
   Record<string, readonly string[]>
 > = {
   core: {
@@ -214,7 +231,7 @@ const TABLE_PRIMARY_KEYS: Record<
 };
 
 const TABLE_UNIQUE_KEYS: Record<
-  StrongLexiconModuleId,
+  DetailedModuleId,
   Record<string, readonly string[]>
 > = {
   core: {
@@ -229,7 +246,7 @@ const TABLE_UNIQUE_KEYS: Record<
 };
 
 const NON_EMPTY_COLUMNS: Record<
-  StrongLexiconModuleId,
+  DetailedModuleId,
   Record<string, readonly string[]>
 > = {
   core: {
@@ -281,7 +298,7 @@ const POSITIVE_INTEGER_COLUMNS = new Set([
 ]);
 
 const REQUIRED_INTEGER_COLUMNS: Record<
-  StrongLexiconModuleId,
+  DetailedModuleId,
   Record<string, readonly string[]>
 > = {
   core: {
@@ -331,7 +348,7 @@ const SQLITE_OPTIONAL_COLUMNS = new Set([
   "longitude"
 ]);
 const SQLITE_UNIQUE_COLUMNS: Record<
-  StrongLexiconModuleId,
+  DetailedModuleId,
   Record<string, readonly string[]>
 > = {
   core: {
@@ -404,14 +421,25 @@ const validateRows = (
   tables: Record<string, JsonRow[]>
 ): void => {
   const ids = new Map<string, Set<number>>();
-  for (const table of TABLES[moduleId]) {
-    const expectedColumns = TABLE_COLUMNS[moduleId][table]!;
+  for (const table of TABLES[schemaModule(moduleId)]) {
+    const expectedColumns = TABLE_COLUMNS[schemaModule(moduleId)][table]!;
     const rows = tables[table]!;
     const seenKeys = new Set<string>();
-    const uniqueColumns = TABLE_UNIQUE_KEYS[moduleId][table] ?? [];
+    const uniqueColumns =
+      TABLE_UNIQUE_KEYS[schemaModule(moduleId)][table] ?? [];
     const seenUniqueKeys = new Set<string>();
-    const nonEmpty = new Set(NON_EMPTY_COLUMNS[moduleId][table] ?? []);
-    if (rows.length === 0) {
+    const nonEmpty = new Set(
+      NON_EMPTY_COLUMNS[schemaModule(moduleId)][table] ?? []
+    );
+    if (
+      rows.length === 0 &&
+      !(
+        moduleId.startsWith("simple-") &&
+        !["StepEntries", "StepEntryIdentities", "LexiconTranslations"].includes(
+          table
+        )
+      )
+    ) {
       throw new Error(
         `strong-lexicon-publication-table-empty:${moduleId}:${table}`
       );
@@ -441,7 +469,9 @@ const validateRows = (
           }
         }
         if (
-          REQUIRED_INTEGER_COLUMNS[moduleId][table]?.includes(key) &&
+          REQUIRED_INTEGER_COLUMNS[schemaModule(moduleId)][table]?.includes(
+            key
+          ) &&
           (!isNonNegativeInteger(value) || value < 1)
         ) {
           throw new Error(
@@ -454,11 +484,12 @@ const validateRows = (
           );
         }
       }
-      const primaryColumns = TABLE_PRIMARY_KEYS[moduleId][table] ?? [];
+      const primaryColumns =
+        TABLE_PRIMARY_KEYS[schemaModule(moduleId)][table] ?? [];
       const keyColumns =
         primaryColumns.length > 0
           ? primaryColumns
-          : (TABLE_UNIQUE_KEYS[moduleId][table] ?? []);
+          : (TABLE_UNIQUE_KEYS[schemaModule(moduleId)][table] ?? []);
       const key = keyColumns
         .map((column) => String(row[column] ?? ""))
         .join("\u001f");
@@ -502,7 +533,7 @@ const validateRows = (
       }
     }
   };
-  if (moduleId === "core") {
+  if (standaloneModule(moduleId)) {
     const entryById = new Map(
       (tables.StepEntries ?? []).map((row) => [Number(row.id), row])
     );
@@ -585,7 +616,7 @@ const validateRows = (
 };
 
 const validateCrossModuleTables = (
-  tablesByModule: Record<StrongLexiconModuleId, Record<string, JsonRow[]>>
+  tablesByModule: Record<DetailedModuleId, Record<string, JsonRow[]>>
 ): void => {
   const coreEntries = tablesByModule.core.StepEntries ?? [];
   const coreEntryIds = new Set(coreEntries.map((row) => Number(row.id)));
@@ -633,7 +664,7 @@ const validateSqliteTableSchema = (
     notnull: number;
     pk: number;
   }>;
-  const expected = TABLE_COLUMNS[moduleId][table] ?? [];
+  const expected = TABLE_COLUMNS[schemaModule(moduleId)][table] ?? [];
   if (
     columns
       .map((column) => column.name)
@@ -671,13 +702,15 @@ const validateSqliteTableSchema = (
     .sort((left, right) => left.pk - right.pk)
     .map((column) => column.name);
   if (
-    primary.join("|") !== (TABLE_PRIMARY_KEYS[moduleId][table] ?? []).join("|")
+    primary.join("|") !==
+    (TABLE_PRIMARY_KEYS[schemaModule(moduleId)][table] ?? []).join("|")
   ) {
     throw new Error(
       `strong-lexicon-publication-table-primary-key:${moduleId}:${table}`
     );
   }
-  const uniqueColumns = SQLITE_UNIQUE_COLUMNS[moduleId][table] ?? [];
+  const uniqueColumns =
+    SQLITE_UNIQUE_COLUMNS[schemaModule(moduleId)][table] ?? [];
   if (uniqueColumns.length) {
     const quoted = uniqueColumns.map((column) => `"${column}"`).join(",");
     const duplicate = database
@@ -703,7 +736,7 @@ export const deriveStrongLexiconModuleRevision = (
     .digest("hex")
     .slice(0, 24)}`;
 
-const readTables = (
+export const readTables = (
   sqlitePath: string,
   moduleId: StrongLexiconModuleId
 ): Record<string, JsonRow[]> => {
@@ -733,7 +766,7 @@ const readTables = (
       )
       .all() as Array<{ name: string }>;
     const allowedTables = new Set([
-      ...TABLES[moduleId],
+      ...TABLES[schemaModule(moduleId)],
       metadataTable,
       ...(moduleId === "entities"
         ? ["EntityNames", "EntityTranslationProvenance"]
@@ -764,7 +797,7 @@ const readTables = (
       throw new Error(`strong-lexicon-publication-metadata-schema:${moduleId}`);
     }
     const tables = Object.fromEntries(
-      TABLES[moduleId].map((table) => {
+      TABLES[schemaModule(moduleId)].map((table) => {
         validateSqliteTableSchema(database, moduleId, table);
         const columns = database
           .prepare(`PRAGMA table_info(${table})`)
@@ -789,7 +822,7 @@ const readTables = (
   }
 };
 
-const bindRevision = (
+export const bindRevision = (
   sqlitePath: string,
   moduleId: StrongLexiconModuleId,
   revision: string,
@@ -806,7 +839,7 @@ const bindRevision = (
     insert.run("resourceRevision", revision);
     insert.run("moduleKind", moduleId);
     insert.run("moduleSchemaVersion", String(SQLITE_SCHEMA_VERSION));
-    if (moduleId !== "core") insert.run("coreRevision", coreRevision);
+    if (!standaloneModule(moduleId)) insert.run("coreRevision", coreRevision);
     database.exec("COMMIT; VACUUM");
   } catch (cause) {
     try {
@@ -818,7 +851,7 @@ const bindRevision = (
   }
 };
 
-const createZip = (sqlitePath: string, archivePath: string): void => {
+export const createZip = (sqlitePath: string, archivePath: string): void => {
   utimesSync(sqlitePath, ZIP_TIME, ZIP_TIME);
   execFileSync("zip", ["-X", "-q", "-j", archivePath, sqlitePath]);
 };
@@ -906,7 +939,7 @@ export async function buildAllStrongLexiconResourcePublications(
             moduleId,
             readTables(path.join(projection, MODULE_FILES[moduleId]), moduleId)
           ])
-        ) as Record<StrongLexiconModuleId, Record<string, JsonRow[]>>;
+        ) as Record<DetailedModuleId, Record<string, JsonRow[]>>;
         validateCrossModuleTables(tablesByModule);
         const coreRevision = deriveStrongLexiconModuleRevision(
           "core",
@@ -931,7 +964,7 @@ export async function buildAllStrongLexiconResourcePublications(
             tablesByModule.entities,
             coreDependency
           )
-        } as Record<StrongLexiconModuleId, string>;
+        } as Record<DetailedModuleId, string>;
         const manifests: StrongLexiconResourcePublicationManifest[] = [];
 
         for (const moduleId of MODULE_IDS) {
@@ -940,15 +973,14 @@ export async function buildAllStrongLexiconResourcePublications(
           const offlineDir = path.join(bundleDir, "offline");
           mkdirSync(canonicalDir, { recursive: true });
           mkdirSync(offlineDir, { recursive: true });
-          const dependencies =
-            moduleId === "core"
-              ? []
-              : [
-                  {
-                    resourceIdentity: "strong-lexicon:core" as const,
-                    revision: revisions.core
-                  }
-                ];
+          const dependencies = standaloneModule(moduleId)
+            ? []
+            : [
+                {
+                  resourceIdentity: "strong-lexicon:core" as const,
+                  revision: revisions.core
+                }
+              ];
           const tables = tablesByModule[moduleId];
           const counts = Object.fromEntries(
             Object.entries(tables).map(([table, rows]) => [table, rows.length])
@@ -1155,7 +1187,7 @@ export async function validateStrongLexiconResourcePublication(
         metadata.resourceRevision !== canonical.revision ||
         metadata.moduleKind !== canonical.moduleId ||
         metadata.moduleSchemaVersion !== String(SQLITE_SCHEMA_VERSION) ||
-        (canonical.moduleId !== "core" &&
+        (!standaloneModule(canonical.moduleId) &&
           metadata.coreRevision !== canonical.dependencies[0]?.revision)
       ) {
         throw new Error("strong-lexicon-publication-offline-metadata-mismatch");
@@ -1178,7 +1210,7 @@ const decodeCanonical = (value: unknown): CanonicalStrongLexiconModule => {
     !isRecord(value) ||
     value.format !== "bible-strong-canonical-strong-lexicon-module" ||
     value.schemaVersion !== CANONICAL_SCHEMA_VERSION ||
-    !MODULE_IDS.includes(value.moduleId as StrongLexiconModuleId) ||
+    !ALL_MODULE_IDS.includes(value.moduleId as StrongLexiconModuleId) ||
     !isNonEmptyString(value.revision) ||
     !Array.isArray(value.dependencies) ||
     !tables ||
@@ -1189,10 +1221,10 @@ const decodeCanonical = (value: unknown): CanonicalStrongLexiconModule => {
   const moduleId = value.moduleId as StrongLexiconModuleId;
   if (
     Object.keys(tables).sort().join("|") !==
-      [...TABLES[moduleId]].sort().join("|") ||
+      [...TABLES[schemaModule(moduleId)]].sort().join("|") ||
     Object.keys(counts).sort().join("|") !==
-      [...TABLES[moduleId]].sort().join("|") ||
-    TABLES[moduleId].some(
+      [...TABLES[schemaModule(moduleId)]].sort().join("|") ||
+    TABLES[schemaModule(moduleId)].some(
       (table) =>
         !Array.isArray(tables[table]) ||
         !isNonNegativeInteger(counts[table]) ||
@@ -1202,8 +1234,8 @@ const decodeCanonical = (value: unknown): CanonicalStrongLexiconModule => {
     throw new Error("strong-lexicon-publication-canonical-invalid");
   }
   if (
-    (moduleId === "core" && value.dependencies.length !== 0) ||
-    (moduleId !== "core" &&
+    (standaloneModule(moduleId) && value.dependencies.length !== 0) ||
+    (!standaloneModule(moduleId) &&
       (value.dependencies.length !== 1 ||
         !isRecord(value.dependencies[0]) ||
         value.dependencies[0].resourceIdentity !== "strong-lexicon:core" ||
@@ -1225,14 +1257,14 @@ const decodeManifest = (
   const moduleId = value.identity.moduleId as StrongLexiconModuleId;
   if (
     value.identity.kind !== "strong-lexicon-module" ||
-    !MODULE_IDS.includes(moduleId) ||
+    !ALL_MODULE_IDS.includes(moduleId) ||
     value.identity.resourceId !== `strong-lexicon:${moduleId}` ||
     value.identity.language !== "mul" ||
     envelope.canonical.schemaVersion !== CANONICAL_SCHEMA_VERSION ||
     !Array.isArray(value.dependencies) ||
     !isRecord(value.counts) ||
     Object.values(value.counts).some((count) => !isNonNegativeInteger(count)) ||
-    (moduleId === "core"
+    (standaloneModule(moduleId)
       ? value.dependencies.length !== 0
       : value.dependencies.length !== 1)
   ) {
@@ -1241,7 +1273,7 @@ const decodeManifest = (
   if (envelope.offlineArtifact.entry !== MODULE_FILES[moduleId]) {
     throw new Error("strong-lexicon-publication-offline-entry-invalid");
   }
-  if (moduleId !== "core") {
+  if (!standaloneModule(moduleId)) {
     const dependency = value.dependencies[0];
     if (
       !isRecord(dependency) ||
@@ -1254,7 +1286,7 @@ const decodeManifest = (
   return value as unknown as StrongLexiconResourcePublicationManifest;
 };
 
-const sha256ZipEntry = async (
+export const sha256ZipEntry = async (
   archivePath: string,
   entry: string
 ): Promise<string> => {

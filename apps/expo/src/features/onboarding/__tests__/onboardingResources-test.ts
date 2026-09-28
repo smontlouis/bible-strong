@@ -250,6 +250,7 @@ describe('onboardingResources', () => {
   it('localizes technical resource names for the English review', () => {
     const labels: Record<string, string> = {
       'offlineSetup.resources.strongLexicon': 'Strong lexicon',
+      'offlineSetup.resources.detailedLexicon': 'Detailed lexicon',
       'offlineSetup.resources.entities': 'Biblical entities',
       'offlineSetup.resources.greekDictionary': 'Detailed Greek dictionary',
     }
@@ -261,7 +262,7 @@ describe('onboardingResources', () => {
         'en',
         translate
       )
-    ).toBe('Strong lexicon')
+    ).toBe('Detailed lexicon')
     expect(
       getOnboardingResourceDisplayName(
         { kind: 'strong-lexicon', moduleId: 'entities' },

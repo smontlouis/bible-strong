@@ -176,6 +176,7 @@ const StrongDetailMainPage = ({
 
   const { t, i18n } = useTranslation()
   const scrollRef = useRef<ScrollViewType>(null)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [anchorOffsets, setAnchorOffsets] = useState<Partial<Record<Anchor, number>>>({})
   const [dictionaryPreview, setDictionaryPreview] = useState<{
     resourceId: number
@@ -344,78 +345,102 @@ const StrongDetailMainPage = ({
       )}
 
       <StrongEditorialSection
-        title={t('strongDetail.definition.title')}
+        title={t('strongDetail.definition.simple')}
         onLayout={event => setAnchor('definition', event.nativeEvent.layout.y)}
       >
-        {entry.nameMeaningHtml && (
-          <VStack
-            className="overflow-hidden border-continuous gap-[8px]"
-            style={{ marginBottom: entry.definitionHtml ? 18 : 0 }}
-          >
-            <StrongEditorialHtml
-              value={entry.nameMeaningHtml}
-              onOpenBibleReference={onOpenBibleReference}
-              onOpenStrong={onOpenStrong}
-            />
-          </VStack>
-        )}
         {entry.definitionHtml ? (
           <StrongEditorialHtml
             value={entry.definitionHtml}
             onOpenBibleReference={onOpenBibleReference}
             onOpenStrong={onOpenStrong}
           />
-        ) : !entry.nameMeaningHtml ? (
-          <Text className="text-tertiary">
-            {t('strongLexicon.definitionUnavailable', {
-              language: entry.language,
-            })}
-          </Text>
-        ) : null}
-        {lexicalRelations.alternateSenses.length > 0 && (
-          <VStack className="border-continuous overflow-hidden mt-[10px] pt-[18px] border-t-[1px] border-border gap-[9px]">
-            <StrongEyebrow>{t('strongLexicon.otherMeanings')}</StrongEyebrow>
-            {lexicalRelations.alternateSenses.map(relation => (
-              <StrongLexicalRelationCard
-                key={relation.stepCode}
-                relation={relation}
-                readingTypography={readingTypography}
-                onPress={() => onOpenStrong(relation.stepCode)}
-              />
-            ))}
-          </VStack>
+        ) : (
+          <Text className="text-tertiary">{t('strongDetail.definition.simpleUnavailable')}</Text>
         )}
+        <StrongPreviewLink
+          label={t(
+            showAdvanced
+              ? 'strongDetail.definition.hideAdvanced'
+              : 'strongDetail.definition.showAdvanced'
+          )}
+          onPress={() => setShowAdvanced(value => !value)}
+        />
       </StrongEditorialSection>
-
-      {!isOriginalUnnamed &&
-        (dictionaryResource ? (
-          <StrongEditorialSection title={t('strongDetail.dictionary.light')}>
-            <Text className="text-tertiary text-[12px]">
-              {dictionaryResource.source} · {dictionaryResource.title}
-            </Text>
-            <StrongEditorialPreview
-              value={dictionaryResource.contentHtml}
-              readingTypography={readingTypography}
-              numberOfLines={5}
-              onOpenBibleReference={onOpenBibleReference}
-              onOpenStrong={onOpenStrong}
-              onOverflowChange={overflows =>
-                setDictionaryPreview(current =>
-                  current?.resourceId === dictionaryResource.id && current.overflows === overflows
-                    ? current
-                    : { resourceId: dictionaryResource.id, overflows }
-                )
-              }
-            />
-            {dictionaryPreview?.resourceId === dictionaryResource.id &&
-              dictionaryPreview.overflows && (
-                <StrongPreviewLink
-                  label={t('strongDetail.dictionary.open')}
-                  onPress={() => onOpenPage('dictionary')}
+      {showAdvanced && (
+        <>
+          <StrongEditorialSection title={t('strongDetail.definition.advanced')}>
+            {entry.nameMeaningHtml && (
+              <VStack
+                className="overflow-hidden border-continuous gap-[8px]"
+                style={{ marginBottom: entry.detailedDefinitionHtml ? 18 : 0 }}
+              >
+                <StrongEditorialHtml
+                  value={entry.nameMeaningHtml}
+                  onOpenBibleReference={onOpenBibleReference}
+                  onOpenStrong={onOpenStrong}
                 />
-              )}
+              </VStack>
+            )}
+            {entry.detailedDefinitionHtml ? (
+              <StrongEditorialHtml
+                value={entry.detailedDefinitionHtml}
+                onOpenBibleReference={onOpenBibleReference}
+                onOpenStrong={onOpenStrong}
+              />
+            ) : !entry.nameMeaningHtml ? (
+              <Text className="text-tertiary">
+                {t('strongLexicon.definitionUnavailable', {
+                  language: entry.language,
+                })}
+              </Text>
+            ) : null}
+            {lexicalRelations.alternateSenses.length > 0 && (
+              <VStack className="border-continuous overflow-hidden mt-[10px] pt-[18px] border-t-[1px] border-border gap-[9px]">
+                <StrongEyebrow>{t('strongLexicon.otherMeanings')}</StrongEyebrow>
+                {lexicalRelations.alternateSenses.map(relation => (
+                  <StrongLexicalRelationCard
+                    key={relation.stepCode}
+                    relation={relation}
+                    readingTypography={readingTypography}
+                    onPress={() => onOpenStrong(relation.stepCode)}
+                  />
+                ))}
+              </VStack>
+            )}
           </StrongEditorialSection>
-        ) : null)}
+
+          {!isOriginalUnnamed &&
+            (dictionaryResource ? (
+              <StrongEditorialSection title={t('strongDetail.dictionary.light')}>
+                <Text className="text-tertiary text-[12px]">
+                  {dictionaryResource.source} · {dictionaryResource.title}
+                </Text>
+                <StrongEditorialPreview
+                  value={dictionaryResource.contentHtml}
+                  readingTypography={readingTypography}
+                  numberOfLines={5}
+                  onOpenBibleReference={onOpenBibleReference}
+                  onOpenStrong={onOpenStrong}
+                  onOverflowChange={overflows =>
+                    setDictionaryPreview(current =>
+                      current?.resourceId === dictionaryResource.id &&
+                      current.overflows === overflows
+                        ? current
+                        : { resourceId: dictionaryResource.id, overflows }
+                    )
+                  }
+                />
+                {dictionaryPreview?.resourceId === dictionaryResource.id &&
+                  dictionaryPreview.overflows && (
+                    <StrongPreviewLink
+                      label={t('strongDetail.dictionary.open')}
+                      onPress={() => onOpenPage('dictionary')}
+                    />
+                  )}
+              </StrongEditorialSection>
+            ) : null)}
+        </>
+      )}
 
       {passageMedia.length > 0 && (
         <StrongPassageMediaSection

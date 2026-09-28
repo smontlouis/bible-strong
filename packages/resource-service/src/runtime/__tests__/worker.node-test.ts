@@ -77,9 +77,7 @@ describe('Resource Worker binding', () => {
         load: async () => Response.json({ resource: { revision: 'lsg-r1' } }),
       })
 
-    await route(
-      new Request('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1')
-    )
+    await route(new Request('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1'))
     await Promise.all(backgroundWrites)
     const browserResponse = await route(
       new Request('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1', {
@@ -367,6 +365,33 @@ describe('Resource Worker binding', () => {
 
     assert.notEqual(batch, entry)
     assert.notEqual(entry, module)
+  })
+
+  it('invalidates a simple lexicon only when its own language publication changes', async () => {
+    const catalog = (fr: string, en: string, core: string) => ({
+      resources: {
+        'strong-lexicon:simple-fr': { contentSha256: fr },
+        'strong-lexicon:simple-en': { contentSha256: en },
+        'strong-lexicon:core': { contentSha256: core },
+      },
+    })
+    for (const path of [
+      'entries/G0026?language=fr&level=simple',
+      'entries/batch?language=fr&level=simple&identities=strong%3AG0026',
+      'random?language=fr&lexicalLanguage=greek&level=simple',
+      'modules/simple-fr',
+    ]) {
+      const request = new Request(`https://api.bible-strong.app/v1/strong-lexicon/${path}`)
+      const initial = await resourceApiCacheRevisionFrom(request, catalog('fr-1', 'en-1', 'core-1'))
+      assert.equal(
+        initial,
+        await resourceApiCacheRevisionFrom(request, catalog('fr-1', 'en-2', 'core-2'))
+      )
+      assert.notEqual(
+        initial,
+        await resourceApiCacheRevisionFrom(request, catalog('fr-2', 'en-1', 'core-1'))
+      )
+    }
   })
 
   it('invalidates dictionary passage discovery independently from generic dictionary reads', async () => {

@@ -1,3 +1,4 @@
+import { isStandaloneStrongModule } from '@bible-strong/resource-domain/strong-lexicon'
 import type { DownloadItem } from '~state/downloadQueue'
 import {
   createBibleDownloadItem,
@@ -71,7 +72,9 @@ const DATABASE_RESOURCE_NAME_KEYS: Record<Exclude<DatabaseId, 'BIBLES'>, string>
 }
 
 const STRONG_LEXICON_RESOURCE_NAME_KEYS: Record<StrongLexiconModuleId, string> = {
-  core: 'offlineSetup.resources.strongLexicon',
+  core: 'offlineSetup.resources.detailedLexicon',
+  'simple-fr': 'offlineSetup.resources.simpleLexiconFr',
+  'simple-en': 'offlineSetup.resources.simpleLexiconEn',
   resources: 'offlineSetup.resources.greekDictionary',
   entities: 'offlineSetup.resources.entities',
 }
@@ -198,7 +201,7 @@ export const createDownloadItemFromOnboardingSelection = (
   if (resource.kind === 'strong-lexicon') {
     const moduleId = resource.moduleId ?? 'core'
     const item = createStrongLexiconModuleDownloadItem(moduleId)
-    return moduleId === 'core'
+    return isStandaloneStrongModule(moduleId)
       ? item
       : {
           ...item,

@@ -27,3 +27,10 @@ describe('createStrongIdentity', () => {
     })
   })
 })
+
+it('preserves case-sensitive STEP suffixes while normalizing the language prefix', () => {
+  expect(createStrongIdentity('h2148v', 'hebrew')).toEqual({ kind: 'dstrong', code: 'H2148v' })
+  expect(createStrongIdentity('H2148V', 'hebrew').code).not.toBe(
+    createStrongIdentity('H2148v', 'hebrew').code
+  )
+})

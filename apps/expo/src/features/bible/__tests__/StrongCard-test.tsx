@@ -246,9 +246,9 @@ describe('StrongCard', () => {
 
     act(() => renderer.root.find(node => String(node.type) === 'TouchableBox').props.onPress())
 
-    // The public path carries the identity: `h3651c` resolves to the dStrong H3651C.
+    // The public path carries the identity: `h3651C` resolves to the dStrong H3651C.
     expect(mockPushRouteOnce).toHaveBeenCalledWith(
-      expect.objectContaining({ pathname: '/strong/h3651c' })
+      expect.objectContaining({ pathname: '/strong/h3651C' })
     )
   })
 })

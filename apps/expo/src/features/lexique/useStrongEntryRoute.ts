@@ -1,3 +1,5 @@
+import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
+import { getPrimaryStrongLexiconAvailability } from '~features/resources/layeredStrongLexiconAccess'
 import { useQuery } from '@tanstack/react-query'
 
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -10,8 +12,9 @@ export const useStrongEntryRoute = (context: StrongDetailRouteContext) => {
   const languageState = useStrongLexiconLanguage()
   const identity = normalizeStrongRouteIdentity(context)
   const coreAvailability = useQuery({
-    queryKey: ['strong-lexicon', 'availability', 'core'],
-    queryFn: () => resources.strongLexicon.getModuleAvailability('core'),
+    queryKey: ['strong-lexicon', 'availability', getSimpleStrongModuleId(languageState.language)],
+    queryFn: () =>
+      getPrimaryStrongLexiconAvailability(resources.strongLexicon, languageState.language),
     networkMode: 'always',
   })
   const entryQuery = useQuery({

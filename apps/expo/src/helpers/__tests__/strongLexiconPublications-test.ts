@@ -55,3 +55,12 @@ describe('Strong lexicon modular publications', () => {
     expect(item).not.toHaveProperty('dependsOnId')
   })
 })
+
+describe('Standalone simple lexicons', () => {
+  it.each(['simple-fr', 'simple-en'] as const)('downloads %s without detailed core', moduleId => {
+    const plan = createStrongLexiconModuleDownloadPlan(moduleId, false)
+    expect(plan.map(item => item.id)).toEqual([`strong-lexicon:${moduleId}`])
+    expect(plan[0]).not.toHaveProperty('dependsOnId')
+    expect(getStrongLexiconPublication(moduleId)).not.toHaveProperty('coreRevision')
+  })
+})

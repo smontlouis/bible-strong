@@ -24,7 +24,13 @@ export { createOfflineCopyId, type OfflineCopyId, type OfflineCopyIdentity } fro
 
 const DATABASE_IDS = new Set<DatabaseId>([...LANGUAGE_SPECIFIC_DBS, ...SHARED_DBS])
 const RESOURCE_LANGUAGES = new Set<ResourceLanguage>(['fr', 'en'])
-const STRONG_LEXICON_MODULE_IDS = new Set<StrongLexiconModuleId>(['core', 'resources', 'entities'])
+const STRONG_LEXICON_MODULE_IDS = new Set<StrongLexiconModuleId>([
+  'core',
+  'resources',
+  'entities',
+  'simple-fr',
+  'simple-en',
+])
 const COMMENTARY_PUBLICATION_IDS = new Set(COMMENTARY_CATALOG.map(entry => entry.publicationId))
 const DATABASE_DOMAIN_QUERY_KEYS: Record<Exclude<DatabaseId, 'BIBLES'>, QueryKey[]> = {
   DICTIONNAIRE: [

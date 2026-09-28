@@ -18,11 +18,11 @@ const context: StrongDetailRouteContext = {
 
 describe('Strong detail routes', () => {
   it.each([
-    ['index', '/strong/g4074g'],
+    ['index', '/strong/g4074G'],
     ['entity', '/strong/entity/Peter%40Matt.4.18'],
-    ['dictionary', '/strong/g4074g/dictionary'],
-    ['related', '/strong/g4074g/related'],
-    ['concordance', '/strong/g4074g/concordance'],
+    ['dictionary', '/strong/g4074G/dictionary'],
+    ['related', '/strong/g4074G/related'],
+    ['concordance', '/strong/g4074G/concordance'],
   ] as const)('creates the %s route with the complete Strong context', (page, pathname) => {
     const route = createStrongDetailRoute(page, context, {
       entityKey: page === 'entity' ? 'Peter@Matt.4.18' : undefined,

@@ -122,7 +122,7 @@ it('preserves precise lexicon identity and dictionary work when navigating', () 
       excerpt: '',
       params: { code: 'H7050A', identityKind: 'dstrong' },
     }).pathname
-  ).toBe('/strong/h7050a')
+  ).toBe('/strong/h7050A')
   expect(
     sourceRoute({
       id: 's2',

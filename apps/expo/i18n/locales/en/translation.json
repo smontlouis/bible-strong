@@ -2577,5 +2577,14 @@
   "assistant.debug.context": "Context",
   "assistant.debug.copy": "Copy JSON",
   "assistant.debug.copied": "Copied",
-  "assistant.debug.nextRequest": "Send a new question to inspect its execution. Previous answers are not replayed."
+  "assistant.debug.nextRequest": "Send a new question to inspect its execution. Previous answers are not replayed.",
+  "strongDetail.definition.simple": "Simple definition",
+  "strongDetail.definition.simpleUnavailable": "No simple definition is available for this entry.",
+  "strongDetail.definition.advanced": "Advanced definition · STEP Bible",
+  "offlineSetup.resources.detailedLexicon": "Detailed lexicon",
+  "offlineSetup.resources.simpleLexiconFr": "French Strong lexicon",
+  "offlineSetup.resources.simpleLexiconEn": "English Strong lexicon",
+  "strongDetail.definition.showAdvanced": "Show advanced definition and detailed Greek dictionary",
+  "strongDetail.definition.hideAdvanced": "Hide advanced level",
+  "offlineSetup.option.simpleLexiconDescription": "Familiar, easy-to-read historical Strong definitions."
 }

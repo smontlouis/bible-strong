@@ -99,6 +99,52 @@ const render = (overrides: Partial<Props> = {}) => {
   })
   return tree.root
 }
+it('starts with the historical definition and reveals STEP only on request', () => {
+  const simple = '<p>Historical definition</p>'
+  const detailed = '<p>STEP definition</p>'
+  const root = render({
+    entry: { ...props.entry, definitionHtml: simple, detailedDefinitionHtml: detailed },
+  })
+  const definitions = () =>
+    root.findAll(node => String(node.type) === 'StrongEditorialHtml').map(node => node.props.value)
+  expect(definitions()).toContain(simple)
+  expect(definitions()).not.toContain(detailed)
+  act(() =>
+    root
+      .find(
+        node =>
+          String(node.type) === 'StrongPreviewLink' &&
+          node.props.label === 'strongDetail.definition.showAdvanced'
+      )
+      .props.onPress()
+  )
+  expect(definitions()).toEqual(expect.arrayContaining([simple, detailed]))
+  act(() =>
+    root
+      .find(
+        node =>
+          String(node.type) === 'StrongPreviewLink' &&
+          node.props.label === 'strongDetail.definition.hideAdvanced'
+      )
+      .props.onPress()
+  )
+  expect(definitions()).not.toContain(detailed)
+})
+
+it('does not relabel a detailed-only offline definition as simple', () => {
+  const root = render({
+    entry: { ...props.entry, detailedDefinitionHtml: '<p>STEP definition</p>' },
+  })
+  expect(
+    root.findAll(
+      node =>
+        String(node.type) === 'Text' &&
+        node.props.children === 'strongDetail.definition.simpleUnavailable'
+    )
+  ).toHaveLength(1)
+  expect(root.findAll(node => String(node.type) === 'StrongEditorialHtml')).toHaveLength(0)
+})
+
 it('shows the concordance section and jump link while loading, without a false zero', () => {
   const root = render()
   expect(

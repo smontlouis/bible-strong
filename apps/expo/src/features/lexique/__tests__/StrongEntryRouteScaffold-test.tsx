@@ -6,6 +6,10 @@ import { ResourceAccessError } from '~features/resources/resourceAccessError'
 const mockOpenEntityRelations = jest.fn()
 const tags = { tag1: { id: 'tag1', name: 'À revoir' } }
 
+jest.mock('../useStrongLexiconLanguage', () => ({
+  useStrongLexiconLanguage: () => ({ language: 'fr' }),
+}))
+
 jest.mock('react-native', () => ({
   Alert: { alert: jest.fn() },
 }))

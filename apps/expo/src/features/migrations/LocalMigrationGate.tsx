@@ -131,6 +131,13 @@ const getLocalizedResourceLabel = (
       : resourceId.startsWith('strong-lexicon:')
         ? resourceId.split(':').at(-1)
         : undefined
+  if (lexiconModule === 'simple-fr' || lexiconModule === 'simple-en') {
+    return t(
+      lexiconModule === 'simple-fr'
+        ? 'offlineSetup.resources.simpleLexiconFr'
+        : 'offlineSetup.resources.simpleLexiconEn'
+    )
+  }
   if (lexiconModule && ['core', 'resources', 'entities'].includes(lexiconModule)) {
     return t(`migration.resource.strongLexicon.${lexiconModule}`)
   }

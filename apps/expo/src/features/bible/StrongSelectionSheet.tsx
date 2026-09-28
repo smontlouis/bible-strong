@@ -1,3 +1,5 @@
+import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
+import { getPrimaryStrongLexiconAvailability } from '~features/resources/layeredStrongLexiconAccess'
 import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import StrongSelectionContainer from './StrongSelectionContainer'
 import { twMerge } from '~common/ui/classNames'
@@ -106,11 +108,14 @@ const StrongSelectionSheet = ({
   const carouselHorizontalPadding = 20
   const previewSkeletonHeight = morphologies.length ? 178 : 153
   const coreDownload = useDownloadItemStatus(
-    createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' })
+    createOfflineCopyId({
+      kind: 'strong-lexicon-module',
+      moduleId: getSimpleStrongModuleId(resourceLanguage),
+    })
   )
   const availabilityQuery = useQuery({
-    queryKey: ['strong-lexicon', 'availability', 'core'],
-    queryFn: () => resources.strongLexicon.getModuleAvailability('core'),
+    queryKey: ['strong-lexicon', 'availability', getSimpleStrongModuleId(resourceLanguage)],
+    queryFn: () => getPrimaryStrongLexiconAvailability(resources.strongLexicon, resourceLanguage),
     networkMode: 'always',
   })
   const coreAvailable = availabilityQuery.data?.status === 'available'
@@ -226,7 +231,10 @@ const StrongSelectionSheet = ({
             style={{ paddingHorizontal: carouselHorizontalPadding }}
           >
             <ResourceUnavailableView
-              identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+              identity={{
+                kind: 'strong-lexicon-module',
+                moduleId: getSimpleStrongModuleId(resourceLanguage),
+              }}
               title={t('resource.strong.offlineCopyNeeded')}
               offlineTitle={t('resource.strong.temporarilyUnavailable')}
               fileSize={35}
@@ -239,7 +247,10 @@ const StrongSelectionSheet = ({
 
         {(availabilityQuery.isError || previewQuery.isError) && (
           <ResourceUnavailableView
-            identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+            identity={{
+              kind: 'strong-lexicon-module',
+              moduleId: getSimpleStrongModuleId(resourceLanguage),
+            }}
             title={t('resource.strong.temporarilyUnavailable')}
             fileSize={35}
             failure={resourceFailureFromAccessError(previewQuery.error ?? availabilityQuery.error)}

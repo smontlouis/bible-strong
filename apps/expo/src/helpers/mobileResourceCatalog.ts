@@ -85,6 +85,8 @@ const isCatalogEntry = (value: unknown): value is MobileResourceCatalogEntry => 
       (typeof entry.resourceRevision === 'string' &&
         entry.resourceRevision.length > 0 &&
         (entry.id === 'strong-lexicon:core' ||
+          entry.id === 'strong-lexicon:simple-fr' ||
+          entry.id === 'strong-lexicon:simple-en' ||
           (typeof entry.coreRevision === 'string' && entry.coreRevision.length > 0)))) &&
     isPositiveByteCount(entry.installedBytes) &&
     isPositiveByteCount(entry.peakInstallationBytes) &&

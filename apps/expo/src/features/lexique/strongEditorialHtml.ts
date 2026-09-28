@@ -17,7 +17,13 @@ const LEGACY_STRONG_CODE_TAG_PATTERN = /^<([HG]\d+[A-Z]?)>$/u
 const LEGACY_EMPHASIS_TAG_PATTERN = /^<(?:strong|s\s+trong)="[HG]\d+[A-Z]?">$/iu
 
 const normalizeLegacyEditorialHtml = (html: string): string => {
-  const normalizedInput = html.replace(ESCAPED_LEGACY_REFERENCE_TAG_PATTERN, '')
+  const normalizedInput = html
+    .replace(ESCAPED_LEGACY_REFERENCE_TAG_PATTERN, '')
+    .replace(
+      /href=(['"])(?:\/)?Strong-(Grec|Hebreu)-(\d+)\.htm\1/giu,
+      (_match, quote: string, language: string, number: string) =>
+        `href=${quote}strong://${language.toLowerCase() === 'grec' ? 'G' : 'H'}${number.padStart(4, '0')}${quote}`
+    )
   let cursor = 0
   let result = ''
 

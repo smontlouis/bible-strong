@@ -10,10 +10,14 @@ describe('public Strong routes', () => {
   it.each([
     ['g3056', { kind: 'strong', code: 'G3056' }],
     ['H430', { kind: 'strong', code: 'H0430' }],
-    ['h3651c', { kind: 'dstrong', code: 'H3651C' }],
+    ['h3651c', { kind: 'dstrong', code: 'H3651c' }],
+    ['H2148V', { kind: 'dstrong', code: 'H2148V' }],
+    ['h2148v', { kind: 'dstrong', code: 'H2148v' }],
   ] as const)('normalizes %s', (value, expected) => {
     expect(parsePublicStrongCode(value)).toEqual(expected)
-    expect(buildPublicStrongPath(value)).toBe(`/strong/${expected.code.toLocaleLowerCase()}`)
+    expect(buildPublicStrongPath(value)).toBe(
+      `/strong/${expected.code[0].toLowerCase() + expected.code.slice(1)}`
+    )
   })
 
   it('rejects codes without a lexical-language prefix', () => {

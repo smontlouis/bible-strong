@@ -1,3 +1,4 @@
+import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
 import { versions } from '~helpers/bibleVersions'
 import { databases } from '~helpers/databases'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
@@ -79,11 +80,11 @@ const createStrongBibleOption = (
   label,
   labelKey: 'offlineSetup.option.strongBible',
   language: versions[versionId].language,
-  requires: [`bible:${versionId}`, 'strong-lexicon:core'],
+  requires: [`bible:${versionId}`, `strong-lexicon:${getSimpleStrongModuleId(lang)}`],
   selections: [
     { kind: 'bible', versionId },
     { kind: 'bible-strong', versionId },
-    { kind: 'strong-lexicon', moduleId: 'core' },
+    { kind: 'strong-lexicon', moduleId: getSimpleStrongModuleId(lang) },
   ],
 })
 
@@ -245,12 +246,32 @@ const getStrongSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
       titleKey: 'offlineSetup.section.sharedTools',
       options: [
         {
-          id: 'strong-lexicon:core',
+          id: `strong-lexicon:${getSimpleStrongModuleId(lang)}`,
           label: '',
           labelKey: 'offlineSetup.resources.strongLexicon',
+          descriptionKey: 'offlineSetup.option.simpleLexiconDescription',
+          selections: [{ kind: 'strong-lexicon', moduleId: getSimpleStrongModuleId(lang) }],
+        },
+        {
+          id: 'strong-lexicon:core',
+          label: '',
+          labelKey: 'offlineSetup.resources.detailedLexicon',
           descriptionKey: 'offlineSetup.option.strongLexiconDescription',
           selections: [{ kind: 'strong-lexicon', moduleId: 'core' }],
         },
+        ...(['resources', 'entities'] as const).map(moduleId => ({
+          id: `strong-lexicon:${moduleId}`,
+          label: '',
+          labelKey:
+            moduleId === 'resources'
+              ? 'offlineSetup.resources.greekDictionary'
+              : 'offlineSetup.resources.entities',
+          requires: ['strong-lexicon:core'],
+          selections: [
+            { kind: 'strong-lexicon' as const, moduleId: 'core' as const },
+            { kind: 'strong-lexicon' as const, moduleId },
+          ],
+        })),
       ],
     },
     ...getBibleFolderCatalogSections('strong', lang).map(section => ({
@@ -354,7 +375,7 @@ const getOriginalLanguageSections = (lang: ResourceLanguage): OfflineSetupSectio
       {
         id: 'strong-lexicon:core',
         label: '',
-        labelKey: 'offlineSetup.resources.strongLexicon',
+        labelKey: 'offlineSetup.resources.detailedLexicon',
         descriptionKey: 'offlineSetup.option.strongLexiconDescription',
         selections: [{ kind: 'strong-lexicon', moduleId: 'core' }],
       },

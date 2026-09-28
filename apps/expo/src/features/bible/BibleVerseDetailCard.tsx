@@ -1,3 +1,5 @@
+import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
+import { getPrimaryStrongLexiconAvailability } from '~features/resources/layeredStrongLexiconAccess'
 import { getUniverseColor } from '~themes/universeColors'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
@@ -229,10 +231,17 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     return () => cancelAnimationFrame(frame)
   }, [isWeb, modalContentWidth, carouselStep])
   const coreAvailabilityQuery = useQuery({
-    queryKey: resourceQueryKeys.strongLexiconAvailability('core'),
+    queryKey: resourceQueryKeys.strongLexiconAvailability(
+      getSimpleStrongModuleId(strongResourceLanguage)
+    ),
     queryFn: async () => ({
-      availability: await resources.strongLexicon.getModuleAvailability('core'),
-      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.('core'),
+      availability: await getPrimaryStrongLexiconAvailability(
+        resources.strongLexicon,
+        strongResourceLanguage
+      ),
+      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.(
+        getSimpleStrongModuleId(strongResourceLanguage)
+      ),
     }),
     networkMode: 'always',
     staleTime: Infinity,
@@ -468,7 +477,10 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   ) {
     return (
       <ResourceUnavailableView
-        identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+        identity={{
+          kind: 'strong-lexicon-module',
+          moduleId: getSimpleStrongModuleId(strongResourceLanguage),
+        }}
         title={t('resource.strong.offlineCopyNeeded')}
         offlineTitle={t('resource.strong.temporarilyUnavailable')}
         fileSize={35}
@@ -521,7 +533,10 @@ const BibleVerseDetailCard: React.FC<Props> = ({
 
     return (
       <ResourceUnavailableView
-        identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+        identity={{
+          kind: 'strong-lexicon-module',
+          moduleId: getSimpleStrongModuleId(strongResourceLanguage),
+        }}
         title={t('resource.strong.temporarilyUnavailable')}
         fileSize={35}
         failure={resourceFailureFromAccessError(
@@ -606,7 +621,10 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       <Box className="overflow-hidden border-continuous bg-light-grey flex-[1]">
         {strongCardsQuery.isError ? (
           <ResourceUnavailableView
-            identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+            identity={{
+              kind: 'strong-lexicon-module',
+              moduleId: getSimpleStrongModuleId(strongResourceLanguage),
+            }}
             title={t('resource.strong.temporarilyUnavailable')}
             fileSize={35}
             failure={resourceFailureFromAccessError(strongCardsQuery.error)}

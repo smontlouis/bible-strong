@@ -195,17 +195,17 @@ describe('offline setup folders', () => {
       'offlineSetup.section.otherLanguages',
     ])
     expect(sections[0]?.options.slice(0, 4).map(option => option.id)).toEqual([
+      'strong-lexicon:simple-en',
       'strong-lexicon:core',
-      'bible-strong:ASV',
-      'bible-strong:DARBY',
-      'bible-strong:KJV',
+      'strong-lexicon:resources',
+      'strong-lexicon:entities',
     ])
     expect(sections.at(-1)?.collapsedByDefault).toBe(true)
   })
 
   it('expands a Strong Bible into its base, index, and shared lexicon without duplicates', () => {
     const ids = getDefaultOfflineSetupFolderOptionIds('fr')
-    ids['understand-words'] = ['bible-strong:LSG', 'strong-lexicon:core']
+    ids['understand-words'] = ['bible-strong:LSG', 'strong-lexicon:simple-fr']
     const resolved = resolveOfflineSetupFolderOptionIds(ids, 'fr')
     const resolvedIds = resolved.map(selection => {
       if (selection.kind === 'bible') return `bible:${selection.versionId}`
@@ -218,7 +218,7 @@ describe('offline setup folders', () => {
 
     expect(resolvedIds).toHaveLength(3)
     expect(resolvedIds).toEqual(
-      expect.arrayContaining(['bible:LSG', 'bible-strong:LSG', 'strong-lexicon:core'])
+      expect.arrayContaining(['bible:LSG', 'bible-strong:LSG', 'strong-lexicon:simple-fr'])
     )
   })
 
@@ -235,7 +235,7 @@ describe('offline setup folders', () => {
     expect(getOfflineSetupLockedOptionIds(selected, 'fr').has('strong-lexicon:core')).toBe(false)
   })
 
-  it('removes shared dependencies and all their dependents across folders', () => {
+  it('removes detailed dependencies without removing a Strong Bible using the simple lexicon', () => {
     const folderOptionIds = getDefaultOfflineSetupFolderOptionIds('fr')
     folderOptionIds['understand-words'] = ['strong-lexicon:core', 'bible-strong:LSG']
     folderOptionIds['explore-bible'] = ['strong-lexicon:entities']
@@ -248,7 +248,7 @@ describe('offline setup folders', () => {
 
     expect(selected).toEqual({
       'read-bible': ['bible:LSG'],
-      'understand-words': [],
+      'understand-words': ['bible-strong:LSG'],
       'explore-bible': [],
       'original-languages': [],
     })
@@ -269,10 +269,10 @@ describe('offline setup folders', () => {
 
     expect(selected['read-bible']).toContain('bible:ASV')
     expect(selected['understand-words']).toContain('bible-strong:ASV')
-    expect(selected['original-languages']).toContain('strong-lexicon:core')
+    expect(selected['understand-words']).toContain('strong-lexicon:simple-fr')
     const lockedOptionIds = getOfflineSetupLockedOptionIds(selected, 'fr')
     expect(lockedOptionIds.has('bible:ASV')).toBe(true)
-    expect(lockedOptionIds.has('strong-lexicon:core')).toBe(true)
+    expect(lockedOptionIds.has('strong-lexicon:simple-fr')).toBe(true)
 
     const readingBible = getOfflineSetupFolderSections('read-bible', 'fr')
       .flatMap(section => section.options)
@@ -303,7 +303,7 @@ describe('offline setup folders', () => {
   it('resolves only the physical resources represented by one folder', () => {
     const selections = resolveOfflineSetupFolderSelections(
       'understand-words',
-      ['strong-lexicon:core', 'bible-strong:LSG'],
+      ['strong-lexicon:simple-fr', 'bible-strong:LSG'],
       'fr'
     )
     const selectionKinds = selections.map(selection => selection.kind)

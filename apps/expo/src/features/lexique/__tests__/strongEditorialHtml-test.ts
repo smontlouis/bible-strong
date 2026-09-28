@@ -137,3 +137,11 @@ describe('Strong editorial HTML', () => {
     ).toBe('before <strong>Teraphim</strong> after')
   })
 })
+
+it('routes historical French Greek and Hebrew definition links inside the app', () => {
+  expect(
+    linkifyStrongEditorialBibleReferences(
+      '<a href="Strong-Grec-25.htm">25</a> <a href="/Strong-Hebreu-1.htm">1</a>'
+    )
+  ).toBe('<a href="strong://G0025">25</a> <a href="strong://H0001">1</a>')
+})

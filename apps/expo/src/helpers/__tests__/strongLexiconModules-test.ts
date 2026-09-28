@@ -17,14 +17,16 @@ import { createOfflineCopyId } from '../offlineCopyId'
 import { getMobileResourceCatalogEntry } from '../mobileResourceCatalog'
 import { validateStrongLexiconModuleDatabase } from '../strongLexiconModules'
 
-const getCatalogPublication = (moduleId: 'core' | 'resources') =>
+const getCatalogPublication = (moduleId: 'core' | 'resources' | 'simple-fr' | 'simple-en') =>
   getMobileResourceCatalogEntry(createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId }))
 
 const createCoreDatabase = ({
+  moduleId = 'core',
   schemaVersion = 3,
   additionalTables = [],
   additionalStepEntryColumns = [],
 }: {
+  moduleId?: 'core' | 'simple-fr' | 'simple-en'
   schemaVersion?: number
   additionalTables?: string[]
   additionalStepEntryColumns?: string[]
@@ -122,10 +124,10 @@ const createCoreDatabase = ({
       }
 
       return [
-        { key: 'moduleKind', value: 'core' },
+        { key: 'moduleKind', value: moduleId },
         { key: 'moduleSchemaVersion', value: String(schemaVersion) },
-        { key: 'resourceIdentity', value: 'strong-lexicon:core' },
-        { key: 'resourceRevision', value: getCatalogPublication('core').resourceRevision },
+        { key: 'resourceIdentity', value: `strong-lexicon:${moduleId}` },
+        { key: 'resourceRevision', value: getCatalogPublication(moduleId).resourceRevision },
       ]
     }),
   }) as unknown as SQLiteDatabase
@@ -186,6 +188,17 @@ const createResourcesDatabase = (
   }) as unknown as SQLiteDatabase
 
 describe('Strong lexicon module validation', () => {
+  it.each(['simple-fr', 'simple-en'] as const)(
+    'accepts %s independently of the detailed lexicon',
+    async moduleId => {
+      const getCore = jest.fn()
+      await expect(
+        validateStrongLexiconModuleDatabase(moduleId, createCoreDatabase({ moduleId }), getCore)
+      ).resolves.toMatchObject({ status: 'available', moduleId })
+      expect(getCore).not.toHaveBeenCalled()
+    }
+  )
+
   it('accepts the published schema 3 core with structured name meanings', async () => {
     await expect(
       validateStrongLexiconModuleDatabase('core', createCoreDatabase())

@@ -24,7 +24,7 @@ export const buildPublicStrongPath = (
 ): string => {
   const identity = parsePublicStrongCode(code)
   if (!identity) throw new Error('PUBLIC_STRONG_ROUTE_INVALID')
-  const root = `/strong/${identity.code.toLocaleLowerCase()}`
+  const root = `/strong/${identity.code[0].toLowerCase() + identity.code.slice(1)}`
   return page === 'index' ? root : `${root}/${PAGE_SUFFIXES[page]}`
 }
 

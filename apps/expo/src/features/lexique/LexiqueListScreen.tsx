@@ -1,3 +1,5 @@
+import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
+import { getPrimaryStrongLexiconAvailability } from '~features/resources/layeredStrongLexiconAccess'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useState } from 'react'
@@ -88,10 +90,17 @@ const LexiqueListScreen = ({
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
   const coreAvailabilityQuery = useQuery({
-    queryKey: resourceQueryKeys.strongLexiconAvailability('core'),
+    queryKey: resourceQueryKeys.strongLexiconAvailability(
+      getSimpleStrongModuleId(strongResourceLanguage)
+    ),
     queryFn: async () => ({
-      availability: await resources.strongLexicon.getModuleAvailability('core'),
-      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.('core'),
+      availability: await getPrimaryStrongLexiconAvailability(
+        resources.strongLexicon,
+        strongResourceLanguage
+      ),
+      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.(
+        getSimpleStrongModuleId(strongResourceLanguage)
+      ),
     }),
     networkMode: 'always',
     staleTime: Infinity,
@@ -157,7 +166,10 @@ const LexiqueListScreen = ({
         headerTitle={t('Désolé...')}
         hasBackButton={showBackButton}
         isFormSheet={isFormSheet}
-        identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+        identity={{
+          kind: 'strong-lexicon-module',
+          moduleId: getSimpleStrongModuleId(strongResourceLanguage),
+        }}
         title={t(
           isOffline ? 'resource.strong.temporarilyUnavailable' : 'resource.strong.offlineCopyNeeded'
         )}
@@ -188,7 +200,10 @@ const LexiqueListScreen = ({
         headerTitle={t('Désolé...')}
         hasBackButton={showBackButton}
         isFormSheet={isFormSheet}
-        identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+        identity={{
+          kind: 'strong-lexicon-module',
+          moduleId: getSimpleStrongModuleId(strongResourceLanguage),
+        }}
         title={t('resource.strong.temporarilyUnavailable')}
         fileSize={35}
         failure={
