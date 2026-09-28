@@ -56,7 +56,7 @@ The record of questions offered to an anonymous visitor, used to prioritize unfa
 
 **Ambient avatar**:
 A local companion that wanders the central island and responds to nearby emojis
-on a Stand display, without being a connected visitor or a Bible game participant.
+in the Exploration world, without being a connected visitor or a Bible game participant.
 
 **Stand display**:
 The World opened with the `stand` URL parameter for an event screen.

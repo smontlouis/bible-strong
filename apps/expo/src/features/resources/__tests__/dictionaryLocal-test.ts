@@ -8,6 +8,7 @@ import {
 jest.mock('expo-file-system/legacy', () => ({ getInfoAsync: jest.fn() }))
 jest.mock('~helpers/databases', () => ({
   getDictionaryDbPath: jest.fn(),
+  getDbPath: (_id: string, language: string) => `/documents/${language}/dictionnaire.sqlite`,
   getDictionaryDirectoryDbPath: () => '/documents/dictionary-directory.sqlite',
 }))
 jest.mock('~helpers/sqlite', () => ({ openSQLiteDatabase: jest.fn() }))
@@ -30,9 +31,11 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import { openSQLiteDatabase } from '~helpers/sqlite'
-import { offlineResourceRegistry } from '../resourceAvailability'
+import { getDictionaryDbPath } from '~helpers/databases'
+import { getLocalResourceAvailability, offlineResourceRegistry } from '../resourceAvailability'
 
 it('discovers entries offline with only Bost and Calmet installed using the published directory schema', async () => {
+  jest.mocked(getLocalResourceAvailability).mockResolvedValue({ status: 'missing' } as never)
   const schemaSource = readFileSync(
     resolve(
       __dirname,
@@ -106,4 +109,186 @@ it('discovers entries offline with only Bost and Calmet installed using the publ
   } finally {
     database.close()
   }
+})
+
+describe('downloaded dictionaries without network access', () => {
+  let database: DatabaseSync
+  const resource = {
+    kind: 'dictionary',
+    work: 'westphal',
+    resourceId: 'WESTPHAL',
+    language: 'fr',
+  } as const
+  const online = {
+    listByLetterPage: jest.fn(),
+    loadItem: jest.fn(),
+    browseDirectoryPage: jest.fn(),
+  } as unknown as DictionaryAccess
+  const access = createHybridDictionaryAccess({
+    offline: localDictionaryAccess,
+    online,
+    remotelyReadableLanguages: new Set(['fr', 'en']),
+    isOnline: async () => false,
+  })
+  beforeEach(() => {
+    jest.clearAllMocks()
+    database = new DatabaseSync(':memory:')
+    database.exec(
+      "CREATE TABLE dictionnaire (id INTEGER PRIMARY KEY, word TEXT, sanitized_word TEXT, definition TEXT); INSERT INTO dictionnaire VALUES (1,'Aaron','aaron','First'),(2,'Abel','abel','Second'),(3,'Adam','adam','Third')"
+    )
+    jest.mocked(offlineResourceRegistry.getSnapshot).mockReturnValue({
+      resources: new Map([['westphal', { resource, availability: { status: 'available' } }]]),
+    } as never)
+    jest.mocked(offlineResourceRegistry.getAvailability).mockImplementation(
+      async identity =>
+        ({
+          status: identity.kind === 'dictionary' ? 'available' : 'missing',
+          resource: identity,
+        }) as never
+    )
+    jest.mocked(getLocalResourceAvailability).mockResolvedValue({ status: 'missing' } as never)
+    jest
+      .mocked(getDictionaryDbPath)
+      .mockImplementation((work, language) => `/documents/${language}/${work}.sqlite`)
+    jest.mocked(openSQLiteDatabase).mockResolvedValue({
+      getAllAsync: async (sql: string, ...params: string[]) => database.prepare(sql).all(...params),
+      getFirstAsync: async (sql: string, ...params: string[]) =>
+        database.prepare(sql).get(...params),
+      closeAsync: async () => {},
+    } as never)
+  })
+  afterEach(() => database.close())
+  it('reads the installed default dictionary without an explicit work', async () => {
+    expect(await access.getAvailability!('fr')).toEqual({ status: 'available' })
+    expect(await access.loadItem('Aaron', 'fr')).toMatchObject({ definition: 'First' })
+    expect((await access.listByLetterPage('a', {}, 'fr')).entries).toHaveLength(3)
+    expect(online.loadItem).not.toHaveBeenCalled()
+  })
+  it('reads a legacy download in the requested language even with modern catalog entries', async () => {
+    jest
+      .mocked(offlineResourceRegistry.getAvailability)
+      .mockResolvedValue({ status: 'missing' } as never)
+    jest.mocked(getLocalResourceAvailability).mockImplementation(
+      async identity =>
+        ({
+          status: 'language' in identity && identity.language === 'fr' ? 'available' : 'missing',
+          resource: identity,
+        }) as never
+    )
+    expect(await access.getAvailability!('fr', 'westphal')).toEqual({ status: 'available' })
+    expect(await access.loadItem('Aaron', 'fr', 'westphal')).toMatchObject({ definition: 'First' })
+    expect(openSQLiteDatabase).toHaveBeenCalledWith(
+      'dictionnaire.sqlite',
+      { useNewConnection: true },
+      '/documents/fr'
+    )
+  })
+  it('browses and searches installed works without the directory, with stable pagination', async () => {
+    expect(await access.getDirectoryAvailability!()).toEqual({ status: 'available' })
+    const first = await access.browseDirectoryPage('a', { limit: 2 }, 'fr')
+    expect(first.entries.map(item => item.label)).toEqual(['Aaron', 'Abel'])
+    expect(first.nextCursor).toBeDefined()
+    const second = await access.browseDirectoryPage(
+      'a',
+      { limit: 2, cursor: first.nextCursor },
+      'fr'
+    )
+    expect(second.entries.map(item => item.label)).toEqual(['Adam'])
+    expect(second.nextCursor).toBeUndefined()
+    expect(
+      (await access.searchDirectoryPage('abel', {}, 'fr')).entries.map(item => item.label)
+    ).toEqual(['Abel'])
+    expect(online.browseDirectoryPage).not.toHaveBeenCalled()
+  })
+  it('browses a legacy copy even when the shared index exists', async () => {
+    jest.mocked(offlineResourceRegistry.getAvailability).mockImplementation(
+      async identity =>
+        ({
+          status: identity.kind === 'dictionary-directory' ? 'available' : 'missing',
+          resource: identity,
+        }) as never
+    )
+    jest.mocked(getLocalResourceAvailability).mockImplementation(
+      async identity =>
+        ({
+          status:
+            'language' in identity && 'language' in identity && identity.language === 'fr'
+              ? 'available'
+              : 'missing',
+          resource: identity,
+        }) as never
+    )
+    const page = await access.browseDirectoryPage('a', {}, 'fr')
+    expect(page.entries.map(item => item.label)).toEqual(['Aaron', 'Abel', 'Adam'])
+    expect(openSQLiteDatabase).toHaveBeenCalledWith(
+      'dictionnaire.sqlite',
+      { useNewConnection: true },
+      '/documents/fr'
+    )
+  })
+  it('paginates across identical words in several installed dictionaries without duplicates', async () => {
+    const resources = ['bost', 'westphal'].map(work => ({
+      resource: { ...resource, work },
+      availability: { status: 'available' },
+    }))
+    jest.mocked(offlineResourceRegistry.getSnapshot).mockReturnValue({
+      resources: new Map(resources.map(item => [item.resource.work, item])),
+    } as never)
+    const collected: string[] = []
+    let cursor: string | undefined
+    for (let page = 0; page < 10; page++) {
+      const result = await access.browseDirectoryPage('a', { limit: 1, cursor }, 'fr')
+      collected.push(
+        ...result.entries.map(item => `${item.label}:${item.sources[0].resource.work}`)
+      )
+      cursor = result.nextCursor
+      if (!cursor) break
+    }
+    expect(collected).toEqual([
+      'Aaron:bost',
+      'Aaron:westphal',
+      'Abel:bost',
+      'Abel:westphal',
+      'Adam:bost',
+      'Adam:westphal',
+    ])
+  })
+  it('uses the English default copy and does not fall back to a French download', async () => {
+    jest
+      .mocked(offlineResourceRegistry.getAvailability)
+      .mockResolvedValue({ status: 'missing' } as never)
+    jest.mocked(getLocalResourceAvailability).mockImplementation(
+      async identity =>
+        ({
+          status: 'language' in identity && identity.language === 'en' ? 'available' : 'missing',
+          resource: identity,
+        }) as never
+    )
+    expect(await access.loadItem('Aaron', 'en')).toMatchObject({ definition: 'First' })
+    expect(openSQLiteDatabase).toHaveBeenCalledWith(
+      'dictionnaire.sqlite',
+      { useNewConnection: true },
+      '/documents/en'
+    )
+    expect(await access.getAvailability!('fr')).toMatchObject({ status: 'unavailable' })
+  })
+  it('prefers the modern installed copy over the legacy file', async () => {
+    jest.mocked(getLocalResourceAvailability).mockResolvedValue({ status: 'available' } as never)
+    expect(await access.loadEntryById(1, 'fr')).toMatchObject({ definition: 'First' })
+    expect(openSQLiteDatabase).toHaveBeenCalledWith(
+      'westphal.sqlite',
+      { useNewConnection: true },
+      '/documents/fr'
+    )
+    expect(getLocalResourceAvailability).not.toHaveBeenCalled()
+  })
+  it('reports corrupt copies explicitly instead of pretending they are missing', async () => {
+    jest
+      .mocked(offlineResourceRegistry.getAvailability)
+      .mockResolvedValue({ status: 'corrupt' } as never)
+    expect(await access.getAvailability!('fr')).toMatchObject({
+      status: 'unavailable',
+      reason: 'invalid-offline-copy',
+    })
+  })
 })

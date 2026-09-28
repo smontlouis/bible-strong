@@ -25,15 +25,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   primaryColor: '#ffffff',
   githubUrl: 'https://github.com/bulby97/bible-strong',
   platforms: ['ios', 'android', 'web'],
-  version: isAppCheckBeta ? '27.0.18-beta.2' : '27.0.17',
+  version: isAppCheckBeta ? '27.0.18-beta.2' : '27.0.18',
   orientation: 'default',
   icon: './assets/images/icon-2.png',
   userInterfaceStyle: 'automatic',
 
   android: {
-    versionCode: isAppCheckBeta ? betaVersionCode : 505,
-    // Isolate this native pilot without changing the runtime of standard releases.
-    // Bump this identifier whenever the beta's native dependencies/configuration change.
+    versionCode: isAppCheckBeta ? betaVersionCode : 506,
+    // Native reCAPTCHA has a separate update compatibility boundary.
     runtimeVersion: isAppCheckBeta ? 'android-app-check-recaptcha-beta-v2' : undefined,
     package: 'com.smontlouis.biblestrong',
     googleServicesFile:
@@ -61,7 +60,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   ios: {
     bundleIdentifier: process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
-    buildNumber: '293',
+    buildNumber: '294',
     googleServicesFile:
       process.env.IOS_GOOGLE_SERVICES_FILE ?? './firebase/dev/GoogleService-Info.plist',
     userInterfaceStyle: 'automatic',

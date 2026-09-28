@@ -53,3 +53,15 @@ Toutes les surfaces passent par `useResourceAccess().dictionary`. Le contrat fou
 - Transporter l’identité complète lorsqu’un article est ouvert.
 - Présenter les liens depuis un verset comme des citations d’articles, pas comme une concordance exhaustive.
 - Rendre toute dégradation hors ligne visible pour l’utilisateur.
+
+## Lecture hors ligne sans index partagé
+
+Le lecteur choisit la copie effectivement disponible, et non la présence d’un ouvrage dans le
+catalogue. Il préfère le fichier propre à l’ouvrage ; pour Westphal en français et Easton–Webster
+en anglais, il accepte aussi l’ancien `dictionnaire.sqlite` de la langue demandée. La liste, la
+recherche et les articles utilisent le même choix de fichier.
+
+Si le répertoire partagé manque, ou si une ancienne copie doit être incluse, le mode « Tous »
+interroge directement les ouvrages installés par pages bornées. Les articles restent séparés par
+source, sans regroupement par correspondance. Le curseur conserve l’ordre par mot, ouvrage et
+identifiant, y compris lorsque plusieurs ouvrages contiennent le même mot.

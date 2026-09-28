@@ -448,6 +448,52 @@ describe('Strong Bible HTTP resource access', () => {
     )
   })
 
+  it('preserves scope, lemma filters and pagination when URLSearchParams.size is unavailable on native', async () => {
+    const descriptor = Object.getOwnPropertyDescriptor(URLSearchParams.prototype, 'size')
+    Object.defineProperty(URLSearchParams.prototype, 'size', {
+      configurable: true,
+      get: () => undefined,
+    })
+    try {
+      const fetcher = jest.fn((_url: unknown) => jsonResponse({ resource, verses: [] }))
+      const online = createHttpStrongBibleResourceAdapter({
+        baseUrl: 'https://resources.example',
+        fetcher,
+        isOnline: async () => true,
+        bibleChapterAdapter: {
+          loadChapter: async () => ({ status: 'unavailable', reason: 'chapter-not-available' }),
+          loadCoverage: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+          loadVerseTexts: async () => ({
+            status: 'available',
+            texts: {},
+            textRevision: resource.textRevision,
+            textSha256: resource.textSha256,
+          }),
+        },
+      })
+      await online.loadFoundVersesByBook('LSG', {
+        currentVersionId: 'LSG',
+        defaultVersionId: 'LSG',
+        book: 1,
+        reference: 'H5521',
+        allBooks: true,
+        lexemeId: 379,
+        limit: 60,
+        cursor: 'next+page=',
+      })
+      const url = new URL(String(fetcher.mock.calls[0][0]))
+      expect(Object.fromEntries(url.searchParams)).toEqual({
+        allBooks: 'true',
+        lexemeId: '379',
+        limit: '60',
+        cursor: 'next+page=',
+      })
+    } finally {
+      if (descriptor) Object.defineProperty(URLSearchParams.prototype, 'size', descriptor)
+      else Reflect.deleteProperty(URLSearchParams.prototype, 'size')
+    }
+  })
+
   it('keeps displayable HTTP Strong occurrences when another verse text is missing', async () => {
     const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
     const fetcher: typeof fetch = () =>

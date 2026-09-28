@@ -162,15 +162,10 @@ export const createHttpBibleReadingResourceAccess = ({
       clearTimeout(timeout)
     }
   },
-  getTresorAvailability: async language =>
-    language === 'fr'
-      ? (await isOnline())
-        ? { status: 'available' }
-        : {
-            status: 'unavailable',
-            reason: 'offline-copy-required',
-            recoveries: ['acquire-offline-copy'],
-          }
+  // Cross-reference verse keys use one shared corpus, regardless of UI language.
+  getTresorAvailability: async () =>
+    (await isOnline())
+      ? { status: 'available' }
       : {
           status: 'unavailable',
           reason: 'offline-copy-required',
@@ -225,7 +220,7 @@ export const createHybridBibleReadingResourceAccess = (options: {
   getTresorAvailability: async language => {
     const local = await options.local.getTresorAvailability?.(language)
     if (local?.status === 'available') return local
-    if (language === 'fr' && (await options.isOnline()) && options.online.getTresorAvailability) {
+    if ((await options.isOnline()) && options.online.getTresorAvailability) {
       return options.online.getTresorAvailability(language)
     }
     return (

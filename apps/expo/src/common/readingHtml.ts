@@ -1,5 +1,5 @@
 import { DomUtils, parseDocument } from 'htmlparser2'
-import { hasChildren, isTag, type AnyNode } from 'domhandler'
+import { hasChildren, isTag, isText, type AnyNode } from 'domhandler'
 import type { MixedStyleDeclaration } from '@native-html/render'
 import { scaleFontSize } from '~features/bible/BibleDOM/scaleFontSize'
 import { scaleLineHeight } from '~features/bible/BibleDOM/scaleLineHeight'
@@ -37,6 +37,11 @@ export function cleanReadingHTML(html: string): string {
   const document = parseDocument(html)
   const clean = (nodes: AnyNode[]) => {
     for (const node of [...nodes]) {
+      // Compatibility with published commentary containing double-encoded NBSPs.
+      // The parser has decoded one layer; repair only spaces in text nodes.
+      if (isText(node)) {
+        node.data = node.data.replace(/&(?:nbsp|#0*160|#x0*a0);/giu, '\u00a0')
+      }
       if (isTag(node)) {
         if (blockedTags.has(node.name)) {
           DomUtils.removeElement(node)

@@ -1,3 +1,4 @@
+import { DomUtils, parseDocument } from 'htmlparser2'
 import {
   cleanReadingHTML,
   getReadingTypography,
@@ -6,6 +7,33 @@ import {
 } from '../readingHtml'
 
 const colors = { background: '#fff', text: '#111', link: '#5890ff', emphasis: '#c00' }
+
+it.each(['&amp;nbsp;', '&amp;#160;', '&amp;#xA0;', '&nbsp;', '&#160;', '&#xA0;', '\u00a0'])(
+  'renders %s as a non-breaking space in existing commentary content',
+  space => {
+    const html = cleanReadingHTML(
+      `<p>Son église${space}; Il est le Bon Berger qui prend soin de Ses brebis${space};</p>`
+    )
+    expect(DomUtils.textContent(parseDocument(html))).toBe(
+      'Son église\u00a0; Il est le Bon Berger qui prend soin de Ses brebis\u00a0;'
+    )
+    expect(cleanReadingHTML(html)).toBe(html)
+  }
+)
+
+it('repairs prose without decoding attributes or turning escaped text into markup', () => {
+  const html = cleanReadingHTML(
+    '<p><a href="https://example.com/?q=&amp;nbsp;">Texte&amp;nbsp;!</a>&amp;lt;script&amp;gt; &lt;em&gt; A &amp; B</p>'
+  )
+  const document = parseDocument(html)
+  const link = DomUtils.findOne(node => node.name === 'a', document.children, true)
+  expect(link?.attribs.href).toBe('https://example.com/?q=&nbsp;')
+  expect(DomUtils.textContent(document)).toBe('Texte\u00a0!&lt;script&gt; <em> A & B')
+  expect(
+    DomUtils.findOne(node => ['script', 'em'].includes(node.name), document.children, true)
+  ).toBeNull()
+})
+
 it('uses Bible font sizing and line spacing', () => {
   expect(getReadingTypography('Avenir', 0, 'normal')).toEqual({
     fontFamily: 'Avenir',

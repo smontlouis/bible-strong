@@ -143,6 +143,7 @@ export default {
   'home.offline.local.alt': 'Une lectrice range des Bibles dans sa bibliothèque hors ligne',
   'home.download.title': 'Lisez simplement. Explorez plus loin.',
   'home.download.body': 'Bible Strong est disponible gratuitement sur iPhone, iPad et Android.',
+  'home.download.apk': 'Télécharger l’APK Android — v26.0.10',
   'home.store.apple.kicker': 'Télécharger dans',
   'home.store.google.kicker': 'Disponible sur',
   'home.footer.line': 'Des outils d’étude biblique gratuits, construits pour durer.',

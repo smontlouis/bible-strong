@@ -53,11 +53,14 @@ type Props = {
   contextVersion?: string
   clickedWord?: string
   contextMorphologies?: StrongLexiconMorphology[]
-  concordanceCount: number
-  concordanceTotalCount: number
+  concordanceCount?: number
+  concordanceTotalCount?: number
   concordanceVersion: string
   concordanceVerses: Verse[]
   concordanceLoading: boolean
+  concordanceError: boolean
+  concordanceRetrying: boolean
+  onRetryConcordance: () => void
   lemmaStats: StrongBibleLemmaStat[]
   selectedLemmaId?: number
   readingTypography: StrongReadingTypography
@@ -155,6 +158,9 @@ const StrongDetailMainPage = ({
   concordanceVersion,
   concordanceVerses,
   concordanceLoading,
+  concordanceError,
+  concordanceRetrying,
+  onRetryConcordance,
   lemmaStats,
   selectedLemmaId,
   readingTypography,
@@ -292,7 +298,7 @@ const StrongDetailMainPage = ({
               {
                 id: 'concordance',
                 label: t('Concordance'),
-                visible: concordanceCount > 0,
+                visible: true,
               },
             ]}
             onPress={scrollToAnchor}
@@ -489,100 +495,117 @@ const StrongDetailMainPage = ({
         </StrongEditorialSection>
       )}
 
-      {concordanceCount > 0 && (
-        <StrongEditorialSection
-          title={t('Concordance')}
-          onLayout={event => setAnchor('concordance', event.nativeEvent.layout.y)}
-        >
-          <HStack className="overflow-hidden border-continuous items-baseline gap-[8px]">
-            <Text className="font-bold text-[26px]">{concordanceCount}</Text>
-            <Text className="text-tertiary text-[14px]">
-              {t('strongDetail.concordance.usesIn', { version: concordanceVersion })}
-            </Text>
-          </HStack>
-          {lemmaStats.length > 0 && (
-            <HorizontalControlScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{ marginHorizontal: -20 }}
-              contentContainerStyle={{ paddingHorizontal: 20, gap: 7 }}
+      <StrongEditorialSection
+        title={t('Concordance')}
+        onLayout={event => setAnchor('concordance', event.nativeEvent.layout.y)}
+      >
+        <HStack className="overflow-hidden border-continuous items-baseline gap-[8px]">
+          <Text className="font-bold text-[26px]">{concordanceCount ?? '—'}</Text>
+          <Text className="text-tertiary text-[14px]">
+            {t('strongDetail.concordance.usesIn', { version: concordanceVersion })}
+          </Text>
+        </HStack>
+        {lemmaStats.length > 0 && (
+          <HorizontalControlScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ marginHorizontal: -20 }}
+            contentContainerStyle={{ paddingHorizontal: 20, gap: 7 }}
+          >
+            <TouchableBox
+              className="overflow-hidden border-continuous"
+              onPress={() => onSelectLemma(undefined)}
             >
+              <Box
+                className={twMerge(
+                  'overflow-hidden border-continuous',
+                  twMerge(
+                    selectedLemmaId == null ? 'bg-primary' : 'bg-light-grey',
+                    'overflow-hidden border-continuous rounded-[16px] px-[10px] py-[7px]'
+                  )
+                )}
+              >
+                <Text
+                  className={twMerge(
+                    selectedLemmaId == null ? 'text-reverse' : 'text-default',
+                    'text-[12px]'
+                  )}
+                >
+                  {t('Tous')} · {concordanceTotalCount ?? '—'}
+                </Text>
+              </Box>
+            </TouchableBox>
+            {lemmaStats.map(lemma => (
               <TouchableBox
                 className="overflow-hidden border-continuous"
-                onPress={() => onSelectLemma(undefined)}
+                key={lemma.id}
+                onPress={() => onSelectLemma(lemma.id)}
               >
                 <Box
                   className={twMerge(
                     'overflow-hidden border-continuous',
                     twMerge(
-                      selectedLemmaId == null ? 'bg-primary' : 'bg-light-grey',
+                      selectedLemmaId === lemma.id ? 'bg-primary' : 'bg-light-grey',
                       'overflow-hidden border-continuous rounded-[16px] px-[10px] py-[7px]'
                     )
                   )}
                 >
                   <Text
                     className={twMerge(
-                      selectedLemmaId == null ? 'text-reverse' : 'text-default',
+                      selectedLemmaId === lemma.id ? 'text-reverse' : 'text-default',
                       'text-[12px]'
                     )}
                   >
-                    {t('Tous')} · {concordanceTotalCount}
+                    {lemma.lemma} {formatStrongLemmaPartOfSpeech(lemma.partOfSpeech, i18n.language)}{' '}
+                    · {lemma.occurrenceCount}
                   </Text>
                 </Box>
               </TouchableBox>
-              {lemmaStats.map(lemma => (
-                <TouchableBox
-                  className="overflow-hidden border-continuous"
-                  key={lemma.id}
-                  onPress={() => onSelectLemma(lemma.id)}
-                >
-                  <Box
-                    className={twMerge(
-                      'overflow-hidden border-continuous',
-                      twMerge(
-                        selectedLemmaId === lemma.id ? 'bg-primary' : 'bg-light-grey',
-                        'overflow-hidden border-continuous rounded-[16px] px-[10px] py-[7px]'
-                      )
-                    )}
-                  >
-                    <Text
-                      className={twMerge(
-                        selectedLemmaId === lemma.id ? 'text-reverse' : 'text-default',
-                        'text-[12px]'
-                      )}
-                    >
-                      {lemma.lemma}{' '}
-                      {formatStrongLemmaPartOfSpeech(lemma.partOfSpeech, i18n.language)} ·{' '}
-                      {lemma.occurrenceCount}
-                    </Text>
-                  </Box>
-                </TouchableBox>
-              ))}
-            </HorizontalControlScrollView>
-          )}
-          {concordanceLoading ? (
-            <Loading />
-          ) : (
-            <VStack className="overflow-hidden border-continuous">
-              {concordanceVerses.slice(0, displayedConcordanceCount).map(verse => (
-                <ConcordanceVerse
-                  key={`${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
-                  onOpenVerse={onOpenConcordanceVerse}
-                  t={t}
-                  concordanceFor={String(entry.baseCode)}
-                  verse={verse}
-                />
-              ))}
-            </VStack>
-          )}
-          {hasHiddenStrongPreviewItems(concordanceTotalCount, displayedConcordanceCount) && (
-            <StrongPreviewLink
-              label={t('strongDetail.concordance.open')}
-              onPress={() => onOpenPage('concordance')}
-            />
-          )}
-        </StrongEditorialSection>
-      )}
+            ))}
+          </HorizontalControlScrollView>
+        )}
+        {concordanceLoading && <Loading />}
+        {concordanceError && (
+          <VStack className="gap-2 py-3">
+            <Text accessibilityRole="alert" className="text-tertiary">
+              {t('strongDetail.concordance.loadError')}
+            </Text>
+            <TouchableBox
+              accessibilityRole="button"
+              disabled={concordanceRetrying}
+              onPress={onRetryConcordance}
+            >
+              <Text className="text-primary font-semibold">
+                {t(concordanceRetrying ? 'Chargement...' : 'bible.error.retry')}
+              </Text>
+            </TouchableBox>
+          </VStack>
+        )}
+        {!concordanceLoading && !concordanceError && concordanceCount === 0 && (
+          <Text className="text-tertiary">{t('strongDetail.concordance.empty')}</Text>
+        )}
+        {concordanceVerses.length > 0 && (
+          <VStack className="overflow-hidden border-continuous">
+            {concordanceVerses.slice(0, displayedConcordanceCount).map(verse => (
+              <ConcordanceVerse
+                key={`${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
+                onOpenVerse={onOpenConcordanceVerse}
+                t={t}
+                concordanceFor={String(entry.baseCode)}
+                verse={verse}
+              />
+            ))}
+          </VStack>
+        )}
+        {(concordanceTotalCount == null ||
+          concordanceError ||
+          hasHiddenStrongPreviewItems(concordanceTotalCount, displayedConcordanceCount)) && (
+          <StrongPreviewLink
+            label={t('strongDetail.concordance.open')}
+            onPress={() => onOpenPage('concordance')}
+          />
+        )}
+      </StrongEditorialSection>
     </ScrollView>
   )
 }

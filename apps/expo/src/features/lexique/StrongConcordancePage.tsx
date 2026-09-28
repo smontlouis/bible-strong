@@ -90,13 +90,17 @@ const StrongConcordancePage = ({
       lexemeId: selectedLemmaId,
       limit: PAGE_SIZE,
     }),
-    queryFn: ({ pageParam }) =>
-      resources.lexiconBible.loadFoundVersesByBook({
+    queryFn: async ({ pageParam }) => {
+      const result = await resources.lexiconBible.loadFoundVersesByBook({
         ...request,
         limit: PAGE_SIZE,
         pageToken: pageParam ?? undefined,
         lexemeId: selectedLemmaId,
-      }),
+      })
+      // Keep the last successful page and its cursor when the next read fails.
+      if (result.status !== 'available') throw new Error('CONCORDANCE_UNAVAILABLE')
+      return result
+    },
     initialPageParam: null as string | null,
     getNextPageParam: lastPage =>
       lastPage.status === 'available' ? lastPage.nextPageToken : undefined,
@@ -110,7 +114,11 @@ const StrongConcordancePage = ({
     ) ?? []
   const availablePage = concordanceQuery.data?.pages.find(page => page.status === 'available')
   const version =
-    availablePage?.status === 'available' ? availablePage.provenance.versionId : currentVersionId
+    availablePage?.status === 'available'
+      ? availablePage.provenance.versionId
+      : countsQuery.data?.status === 'available'
+        ? countsQuery.data.provenance.versionId
+        : currentVersionId
   const counts = getMatchingAvailableResult<LexiconBibleCountsResult>(countsQuery.data, version)
   const lemmaStats = getMatchingAvailableResult<LexiconBibleLemmaStatsResult>(
     lemmaQuery.data,
@@ -120,9 +128,35 @@ const StrongConcordancePage = ({
     selectedLemmaId == null
       ? counts
         ? counts.counts.reduce((total, current) => total + Number(current.versesCountByBook), 0)
-        : verses.length
-      : (lemmaStats?.lemmas.find(lemma => lemma.id === selectedLemmaId)?.occurrenceCount ??
-        verses.length)
+        : undefined
+      : lemmaStats?.lemmas.find(lemma => lemma.id === selectedLemmaId)?.occurrenceCount
+
+  const hasError =
+    concordanceQuery.isError ||
+    countsQuery.isError ||
+    lemmaQuery.isError ||
+    countsQuery.data?.status === 'unavailable' ||
+    lemmaQuery.data?.status === 'unavailable'
+  const retrying = concordanceQuery.isFetching || countsQuery.isFetching || lemmaQuery.isFetching
+  const errorNotice = hasError ? (
+    <VStack className="gap-[10px] py-[16px]">
+      <Text accessibilityRole="alert">{t('strongDetail.concordance.loadError')}</Text>
+      <TouchableBox
+        accessibilityRole="button"
+        disabled={retrying}
+        onPress={() => {
+          if (concordanceQuery.isFetchNextPageError) void concordanceQuery.fetchNextPage()
+          else if (concordanceQuery.isError) void concordanceQuery.refetch()
+          if (countsQuery.isError || countsQuery.data?.status === 'unavailable')
+            void countsQuery.refetch()
+          if (lemmaQuery.isError || lemmaQuery.data?.status === 'unavailable')
+            void lemmaQuery.refetch()
+        }}
+      >
+        <Text className="text-primary">{t(retrying ? 'Chargement...' : 'Réessayer')}</Text>
+      </TouchableBox>
+    </VStack>
+  ) : null
 
   const placeholders = (
     <VStack className="overflow-hidden border-continuous">
@@ -144,7 +178,11 @@ const StrongConcordancePage = ({
       ]}
       keyExtractor={verse => `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
       onEndReached={() => {
-        if (concordanceQuery.hasNextPage && !concordanceQuery.isFetchingNextPage) {
+        if (
+          concordanceQuery.hasNextPage &&
+          !concordanceQuery.isFetching &&
+          !concordanceQuery.isError
+        ) {
           concordanceQuery.fetchNextPage()
         }
       }}
@@ -152,7 +190,7 @@ const StrongConcordancePage = ({
       ListHeaderComponent={
         <>
           <HStack className="overflow-hidden border-continuous items-baseline gap-[8px]">
-            <Text className="font-bold text-[32px]">{count}</Text>
+            <Text className="font-bold text-[32px]">{count ?? '—'}</Text>
             <Text className="text-tertiary text-[12px]">
               {t('strongDetail.concordance.usesIn', { version })}
             </Text>
@@ -190,7 +228,7 @@ const StrongConcordancePage = ({
                           (total, current) => total + Number(current.versesCountByBook),
                           0
                         )
-                      : 0}
+                      : '—'}
                   </Text>
                 </Box>
               </TouchableBox>
@@ -227,8 +265,19 @@ const StrongConcordancePage = ({
         </>
       }
       ListHeaderComponentStyle={{ paddingBottom: 15 }}
-      ListEmptyComponent={concordanceQuery.isPending ? placeholders : null}
-      ListFooterComponent={concordanceQuery.isFetchingNextPage ? placeholders : null}
+      ListEmptyComponent={
+        concordanceQuery.isPending ? (
+          placeholders
+        ) : !concordanceQuery.isError ? (
+          <Text>{t('strongDetail.concordance.empty')}</Text>
+        ) : null
+      }
+      ListFooterComponent={
+        <>
+          {errorNotice}
+          {concordanceQuery.isFetchingNextPage ? placeholders : null}
+        </>
+      }
       renderItem={({ item }) => (
         <ConcordanceVerse
           onOpenVerse={verse => onOpenVerse(verse, version)}

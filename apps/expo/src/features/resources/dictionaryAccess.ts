@@ -1,17 +1,7 @@
-import loadDictionnaireByLetter from '~helpers/loadDictionnaireByLetter'
-import loadDictionnaireBySearch from '~helpers/loadDictionnaireBySearch'
-import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
-import loadDictionnaireItemByRowId from '~helpers/loadDictionnaireItemByRowId'
-import loadDictionnaireWords from '~helpers/loadDictionnaireWords'
-import loadDictionnaireItems from '~helpers/loadDictionnaireItems'
-import {
-  mapLocalResourceError,
-  ResourceAccessError,
-  unwrapLocalResourceResult,
-} from './resourceAccessError'
+import { ResourceAccessError } from './resourceAccessError'
 import { getLocalResourceAvailability, offlineResourceRegistry } from './resourceAvailability'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import { getDictionaryDbPath, getDictionaryDirectoryDbPath } from '~helpers/databases'
+import { getDbPath, getDictionaryDbPath, getDictionaryDirectoryDbPath } from '~helpers/databases'
 import { openSQLiteDatabase } from '~helpers/sqlite'
 import type { ResourceAvailability } from './resourceModel'
 import * as Schema from 'effect/Schema'
@@ -245,20 +235,43 @@ const getDictionaryResource = (work: DictionaryWorkId, language: ResourceLanguag
       entry.resource.language === language
   )?.resource
 
+// Catalog membership is not proof that the newer per-work copy is installed.
+const resolveInstalledDictionary = async (work: DictionaryWorkId, language: ResourceLanguage) => {
+  const resource = getDictionaryResource(work, language)
+  const modern = resource ? await offlineResourceRegistry.getAvailability(resource) : undefined
+  if (modern?.status === 'available')
+    return { resource: resource!, path: getDictionaryDbPath(work, language), legacy: false }
+  if (work === getDefaultDictionaryWork(language)) {
+    const legacyResource = {
+      kind: 'database' as const,
+      databaseId: 'DICTIONNAIRE' as const,
+      language,
+    }
+    const legacy = await getLocalResourceAvailability(legacyResource)
+    if (legacy.status === 'available')
+      return { resource: legacyResource, path: getDbPath('DICTIONNAIRE', language), legacy: true }
+    if (legacy.status === 'corrupt')
+      throw new ResourceAccessError('INVALID_OFFLINE_COPY', [
+        'acquire-offline-copy',
+        'manage-offline-copies',
+      ])
+  }
+  if (modern?.status === 'corrupt')
+    throw new ResourceAccessError('INVALID_OFFLINE_COPY', [
+      'acquire-offline-copy',
+      'manage-offline-copies',
+    ])
+  return undefined
+}
+
 const withInstalledDictionary = async <T>(
   work: DictionaryWorkId,
   language: ResourceLanguage,
   query: (database: Awaited<ReturnType<typeof openSQLiteDatabase>>) => Promise<T>
 ): Promise<T> => {
-  const resource = getDictionaryResource(work, language)
-  if (!resource) {
-    throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
-  }
-  const availability = await offlineResourceRegistry.getAvailability(resource)
-  if (availability?.status !== 'available') {
-    throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
-  }
-  const databasePath = getDictionaryDbPath(work, language)
+  const installed = await resolveInstalledDictionary(work, language)
+  if (!installed) throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+  const { resource, path: databasePath } = installed
   const fileName = databasePath.split('/').pop()!
   const directory = databasePath.slice(0, -(fileName.length + 1))
   let database: Awaited<ReturnType<typeof openSQLiteDatabase>> | undefined
@@ -310,52 +323,52 @@ const getInstalledDictionaryEntries = () =>
     entry => entry.resource.kind === 'dictionary' && entry.availability.status === 'available'
   )
 
-const isLegacyDictionaryWork = (language: ResourceLanguage, work?: DictionaryWorkId) => {
-  const resolvedWork = work ?? getDefaultDictionaryWork(language)
-  return (
-    resolvedWork === getDefaultDictionaryWork(language) &&
-    getDictionaryResource(resolvedWork, language) === undefined
+const getReadableDictionaryWorks = async (language?: ResourceLanguage) => {
+  const works = await Promise.all(
+    KNOWN_DICTIONARY_WORKS.filter(work => !language || work.resource.language === language).map(
+      async work => {
+        try {
+          const installed = await resolveInstalledDictionary(
+            work.resource.work,
+            work.resource.language
+          )
+          return installed ? { work, installed } : undefined
+        } catch (error) {
+          if (error instanceof ResourceAccessError && error.code === 'INVALID_OFFLINE_COPY')
+            return undefined
+          throw error
+        }
+      }
+    )
   )
+  return works.filter(work => work !== undefined)
 }
 
 export const localDictionaryAccess: DictionaryAccess = {
   listWorks: async language =>
     KNOWN_DICTIONARY_WORKS.filter(work => !language || work.resource.language === language),
-  getAvailability: async (language, work) => {
-    if (!isLegacyDictionaryWork(language, work)) {
-      const resource = getDictionaryResource(work!, language)
-      const availability = resource
-        ? await offlineResourceRegistry.getAvailability(resource)
-        : undefined
-      return availability?.status === 'available'
+  getAvailability: async (language, work = getDefaultDictionaryWork(language)) => {
+    try {
+      return (await resolveInstalledDictionary(work, language))
         ? { status: 'available' }
         : {
             status: 'unavailable',
             reason: 'offline-copy-required',
             recoveries: ['acquire-offline-copy'],
           }
+    } catch (error) {
+      if (!(error instanceof ResourceAccessError) || error.code !== 'INVALID_OFFLINE_COPY')
+        throw error
+      return {
+        status: 'unavailable',
+        reason: 'invalid-offline-copy',
+        recoveries: ['acquire-offline-copy', 'manage-offline-copies'],
+      }
     }
-    const availability = await getLocalResourceAvailability({
-      kind: 'database',
-      databaseId: 'DICTIONNAIRE',
-      language,
-    })
-    return availability.status === 'available'
-      ? { status: 'available' }
-      : availability.status === 'corrupt'
-        ? {
-            status: 'unavailable',
-            reason: 'invalid-offline-copy',
-            recoveries: ['acquire-offline-copy', 'manage-offline-copies'],
-          }
-        : {
-            status: 'unavailable',
-            reason: 'offline-copy-required',
-            recoveries: ['acquire-offline-copy'],
-          }
   },
   getDirectoryAvailability: async () => {
     const availability = await offlineResourceRegistry.getAvailability(dictionaryDirectoryIdentity)
+    if ((await getReadableDictionaryWorks()).length > 0) return { status: 'available' }
     return availability.status === 'available'
       ? { status: 'available' }
       : availability.status === 'corrupt'
@@ -370,117 +383,87 @@ export const localDictionaryAccess: DictionaryAccess = {
             recoveries: ['acquire-offline-copy'],
           }
   },
-  listByLetter: async (letter, language = 'fr', work) =>
+  listByLetter: async (letter, language = 'fr', work = getDefaultDictionaryWork(language)) =>
     (await localDictionaryAccess.listByLetterPage(letter, { limit: 50 }, language, work)).entries,
-  search: async (searchValue, language = 'fr', work) =>
+  search: async (searchValue, language = 'fr', work = getDefaultDictionaryWork(language)) =>
     (await localDictionaryAccess.searchPage(searchValue, { limit: 50 }, language, work)).entries,
-  listByLetterPage: async (letter, options = {}, language = 'fr', work) => {
+  listByLetterPage: async (
+    letter,
+    options = {},
+    language = 'fr',
+    work = getDefaultDictionaryWork(language)
+  ) => {
     const limit = options.limit ?? 50
-    if (!isLegacyDictionaryWork(language, work)) {
-      const cursor = options.cursor ? decodeDictionaryPageCursor(options.cursor) : undefined
-      const rows = await withInstalledDictionary(work!, language, database =>
-        database.getAllAsync<{ id: number; word: string; sanitized_word: string }>(
-          `SELECT id, word, sanitized_word FROM dictionnaire
+
+    const cursor = options.cursor ? decodeDictionaryPageCursor(options.cursor) : undefined
+    const rows = await withInstalledDictionary(work, language, database =>
+      database.getAllAsync<{ id: number; word: string; sanitized_word: string }>(
+        `SELECT id, word, sanitized_word FROM dictionnaire
            WHERE sanitized_word >= ? AND sanitized_word < ?
              AND (? IS NULL OR sanitized_word > ? OR (sanitized_word = ? AND id > ?))
            ORDER BY sanitized_word, id LIMIT ?`,
-          letter,
-          `${letter}\uffff`,
-          cursor?.[0] ?? null,
-          cursor?.[0] ?? '',
-          cursor?.[0] ?? '',
-          cursor?.[1] ?? 0,
-          limit + 1
-        )
+        letter,
+        `${letter}\uffff`,
+        cursor?.[0] ?? null,
+        cursor?.[0] ?? '',
+        cursor?.[0] ?? '',
+        cursor?.[1] ?? 0,
+        limit + 1
       )
-      const pageRows = rows.slice(0, limit)
-      return {
-        entries: pageRows.map(row => ({
-          id: row.id,
-          word: row.word,
-          normalizedWord: row.sanitized_word,
-        })),
-        ...(rows.length > limit && pageRows.length
-          ? {
-              nextCursor: encodeDictionaryPageCursor([
-                pageRows.at(-1)!.sanitized_word,
-                pageRows.at(-1)!.id,
-              ]),
-            }
-          : {}),
-      }
-    }
-    const rows = unwrapLocalResourceResult(
-      await loadDictionnaireByLetter(letter, { ...options, limit })
     )
     const pageRows = rows.slice(0, limit)
     return {
-      entries: pageRows.map(item => ({
-        id: item.rowid,
-        word: item.word,
-        normalizedWord: item.sanitized_word,
+      entries: pageRows.map(row => ({
+        id: row.id,
+        word: row.word,
+        normalizedWord: row.sanitized_word,
       })),
       ...(rows.length > limit && pageRows.length
         ? {
             nextCursor: encodeDictionaryPageCursor([
               pageRows.at(-1)!.sanitized_word,
-              pageRows.at(-1)!.rowid,
+              pageRows.at(-1)!.id,
             ]),
           }
         : {}),
     }
   },
-  searchPage: async (searchValue, options = {}, language = 'fr', work) => {
+  searchPage: async (
+    searchValue,
+    options = {},
+    language = 'fr',
+    work = getDefaultDictionaryWork(language)
+  ) => {
     const limit = options.limit ?? 50
-    if (!isLegacyDictionaryWork(language, work)) {
-      const cursor = options.cursor ? decodeDictionaryPageCursor(options.cursor) : undefined
-      const rows = await withInstalledDictionary(work!, language, database =>
-        database.getAllAsync<{ id: number; word: string; sanitized_word: string }>(
-          `SELECT id, word, sanitized_word FROM dictionnaire
+
+    const cursor = options.cursor ? decodeDictionaryPageCursor(options.cursor) : undefined
+    const rows = await withInstalledDictionary(work, language, database =>
+      database.getAllAsync<{ id: number; word: string; sanitized_word: string }>(
+        `SELECT id, word, sanitized_word FROM dictionnaire
            WHERE (word LIKE ? OR sanitized_word LIKE ?)
              AND (? IS NULL OR sanitized_word > ? OR (sanitized_word = ? AND id > ?))
            ORDER BY sanitized_word, id LIMIT ?`,
-          `%${searchValue}%`,
-          `%${searchValue.toLocaleLowerCase()}%`,
-          cursor?.[0] ?? null,
-          cursor?.[0] ?? '',
-          cursor?.[0] ?? '',
-          cursor?.[1] ?? 0,
-          limit + 1
-        )
+        `%${searchValue}%`,
+        `%${searchValue.toLocaleLowerCase()}%`,
+        cursor?.[0] ?? null,
+        cursor?.[0] ?? '',
+        cursor?.[0] ?? '',
+        cursor?.[1] ?? 0,
+        limit + 1
       )
-      const pageRows = rows.slice(0, limit)
-      return {
-        entries: pageRows.map(row => ({
-          id: row.id,
-          word: row.word,
-          normalizedWord: row.sanitized_word,
-        })),
-        ...(rows.length > limit && pageRows.length
-          ? {
-              nextCursor: encodeDictionaryPageCursor([
-                pageRows.at(-1)!.sanitized_word,
-                pageRows.at(-1)!.id,
-              ]),
-            }
-          : {}),
-      }
-    }
-    const rows = unwrapLocalResourceResult(
-      await loadDictionnaireBySearch(searchValue, { ...options, limit })
     )
     const pageRows = rows.slice(0, limit)
     return {
-      entries: pageRows.map(item => ({
-        id: item.rowid,
-        word: item.word,
-        normalizedWord: item.sanitized_word,
+      entries: pageRows.map(row => ({
+        id: row.id,
+        word: row.word,
+        normalizedWord: row.sanitized_word,
       })),
       ...(rows.length > limit && pageRows.length
         ? {
             nextCursor: encodeDictionaryPageCursor([
               pageRows.at(-1)!.sanitized_word,
-              pageRows.at(-1)!.rowid,
+              pageRows.at(-1)!.id,
             ]),
           }
         : {}),
@@ -490,86 +473,67 @@ export const localDictionaryAccess: DictionaryAccess = {
     loadLocalDirectoryPage({ initial, options, language }),
   searchDirectoryPage: (search, options = {}, language = 'fr') =>
     loadLocalDirectoryPage({ search, options, language }),
-  loadItem: async (word, language = 'fr', work) => {
-    if (!isLegacyDictionaryWork(language, work)) {
-      return withInstalledDictionary(work!, language, database =>
-        database.getFirstAsync<DictionaryEntry>(
-          `SELECT id, word, definition FROM dictionnaire
+  loadItem: async (word, language = 'fr', work = getDefaultDictionaryWork(language)) => {
+    return withInstalledDictionary(work, language, database =>
+      database.getFirstAsync<DictionaryEntry>(
+        `SELECT id, word, definition FROM dictionnaire
            WHERE word = ? COLLATE NOCASE OR sanitized_word = ?
            ORDER BY id LIMIT 1`,
-          word,
-          word.trim().toLocaleLowerCase()
-        )
-      ).then(entry => entry ?? undefined)
-    }
-    try {
-      return await loadDictionnaireItem(word)
-    } catch (error) {
-      throw mapLocalResourceError(error)
-    }
+        word,
+        word.trim().toLocaleLowerCase()
+      )
+    ).then(entry => entry ?? undefined)
   },
-  loadEntryById: async (id, language = 'fr', work) => {
-    if (!isLegacyDictionaryWork(language, work)) {
-      return withInstalledDictionary(work!, language, database =>
-        database.getFirstAsync<DictionaryEntry>(
-          'SELECT id, word, definition FROM dictionnaire WHERE id = ?',
-          id
-        )
-      ).then(entry => entry ?? undefined)
-    }
-    const reference = unwrapLocalResourceResult(await loadDictionnaireItemByRowId(id))
-    return reference ? localDictionaryAccess.loadItem(reference.word, language, work) : undefined
+  loadEntryById: async (id, language = 'fr', work = getDefaultDictionaryWork(language)) => {
+    return withInstalledDictionary(work, language, database =>
+      database.getFirstAsync<DictionaryEntry>(
+        'SELECT id, word, definition FROM dictionnaire WHERE id = ?',
+        id
+      )
+    ).then(entry => entry ?? undefined)
   },
-  loadItems: async (words, language = 'fr', work) => {
-    if (!isLegacyDictionaryWork(language, work)) {
-      const normalized = [...new Set(words.map(word => word.trim().toLocaleLowerCase()))]
-      if (normalized.length === 0) return []
-      const placeholders = normalized.map(() => '?').join(',')
-      return withInstalledDictionary(work!, language, database =>
-        database.getAllAsync<DictionaryEntry>(
-          `SELECT id, word, definition FROM dictionnaire
+  loadItems: async (words, language = 'fr', work = getDefaultDictionaryWork(language)) => {
+    const normalized = [...new Set(words.map(word => word.trim().toLocaleLowerCase()))]
+    if (normalized.length === 0) return []
+    const placeholders = normalized.map(() => '?').join(',')
+    return withInstalledDictionary(work, language, database =>
+      database.getAllAsync<DictionaryEntry>(
+        `SELECT id, word, definition FROM dictionnaire
            WHERE sanitized_word IN (${placeholders}) ORDER BY id`,
-          ...normalized
-        )
+        ...normalized
       )
-    }
-    return (await loadDictionnaireItems(words)).map(({ word, definition }) => ({
-      word,
-      definition,
-    }))
+    )
   },
-  loadItemByRowId: async (id, language = 'fr', work) => {
-    if (!isLegacyDictionaryWork(language, work)) {
-      return withInstalledDictionary(work!, language, database =>
-        database.getFirstAsync<DictionaryWordReference>(
-          'SELECT word FROM dictionnaire WHERE id = ?',
-          Number(id)
-        )
-      ).then(entry => entry ?? undefined)
-    }
-    return unwrapLocalResourceResult(await loadDictionnaireItemByRowId(id))
-  },
-  loadWordsForVerse: async (verseId, language = 'fr', work) => {
-    if (!isLegacyDictionaryWork(language, work)) {
-      const row = await withInstalledDictionary(work!, language, database =>
-        database.getFirstAsync<{ ref: string }>('SELECT ref FROM verses WHERE id = ?', verseId)
+  loadItemByRowId: async (id, language = 'fr', work = getDefaultDictionaryWork(language)) => {
+    return withInstalledDictionary(work, language, database =>
+      database.getFirstAsync<DictionaryWordReference>(
+        'SELECT word FROM dictionnaire WHERE id = ?',
+        Number(id)
       )
-      if (!row) return []
-      const words: unknown = JSON.parse(row.ref)
-      if (!Array.isArray(words) || words.some(word => typeof word !== 'string')) {
-        throw new ResourceAccessError('INTEGRITY_FAILURE')
-      }
-      return words
-    }
-    try {
-      return await loadDictionnaireWords(verseId)
-    } catch (error) {
-      throw mapLocalResourceError(error)
-    }
+    ).then(entry => entry ?? undefined)
   },
-  loadPassageAnchors: async (verseId, language = 'fr', work) => {
-    if (isLegacyDictionaryWork(language, work)) return []
-    return withInstalledDictionary(work!, language, database =>
+  loadWordsForVerse: async (
+    verseId,
+    language = 'fr',
+    work = getDefaultDictionaryWork(language)
+  ) => {
+    const row = await withInstalledDictionary(work, language, database =>
+      database.getFirstAsync<{ ref: string }>('SELECT ref FROM verses WHERE id = ?', verseId)
+    )
+    if (!row) return []
+    const words: unknown = JSON.parse(row.ref)
+    if (!Array.isArray(words) || words.some(word => typeof word !== 'string')) {
+      throw new ResourceAccessError('INTEGRITY_FAILURE')
+    }
+    return words
+  },
+  loadPassageAnchors: async (
+    verseId,
+    language = 'fr',
+    work = getDefaultDictionaryWork(language)
+  ) => {
+    if ((await resolveInstalledDictionary(work, language))?.legacy) return []
+    return withInstalledDictionary(work, language, database =>
       database.getAllAsync<{
         id: number
         word: string
@@ -660,6 +624,79 @@ export const localDictionaryAccess: DictionaryAccess = {
   },
 }
 
+// Without the shared index, read bounded pages from the installed dictionaries.
+// Correspondences are unavailable, so each source remains a separate result.
+const loadDictionaryDirectoryFallback = async (
+  works: Awaited<ReturnType<typeof getReadableDictionaryWorks>>,
+  initial: string | undefined,
+  search: string | undefined,
+  options: DictionaryPageOptions
+): Promise<DictionaryDirectoryPage> => {
+  const limit = options.limit ?? 50
+  const cursor = options.cursor ? decodeDictionaryDirectoryPageCursor(options.cursor) : undefined
+  const [, cursorWork, cursorId] = cursor?.[1].split(':') ?? []
+  const pages = await Promise.all(
+    works.map(async ({ work }) => {
+      const workId = work.resource.work
+      const pageOptions = {
+        limit: limit + 1,
+        ...(cursor
+          ? {
+              cursor: encodeDictionaryPageCursor([
+                cursor[0],
+                workId === cursorWork
+                  ? Number(cursorId)
+                  : workId < cursorWork
+                    ? Number.MAX_SAFE_INTEGER
+                    : -1,
+              ]),
+            }
+          : {}),
+      }
+      const page =
+        search !== undefined
+          ? await localDictionaryAccess.searchPage(
+              search,
+              pageOptions,
+              work.resource.language,
+              workId
+            )
+          : await localDictionaryAccess.listByLetterPage(
+              initial ?? '',
+              pageOptions,
+              work.resource.language,
+              workId
+            )
+      return page.entries.map(entry => ({
+        key: `offline:${workId}:${String(entry.id).padStart(16, '0')}`,
+        label: entry.word,
+        normalizedLabel: entry.normalizedWord,
+        sources: [
+          {
+            resource: { ...work.resource, revision: 'offline' },
+            resourceId: work.resourceId,
+            title: work.title,
+            abbreviation: work.abbreviation,
+            ...entry,
+          },
+        ],
+      }))
+    })
+  )
+  const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0)
+  const entries = pages
+    .flat()
+    .sort((a, b) => compare(a.normalizedLabel, b.normalizedLabel) || compare(a.key, b.key))
+  const page = entries.slice(0, limit)
+  const last = page.at(-1)
+  return {
+    entries: page,
+    ...(entries.length > limit && last
+      ? { nextCursor: encodeDictionaryDirectoryPageCursor([last.normalizedLabel, last.key]) }
+      : {}),
+  }
+}
+
 const loadLocalDirectoryPage = async ({
   initial,
   search,
@@ -671,6 +708,21 @@ const loadLocalDirectoryPage = async ({
   options: DictionaryPageOptions
   language: ResourceLanguage
 }): Promise<DictionaryDirectoryPage> => {
+  const readable = await getReadableDictionaryWorks(language)
+  const directory = await offlineResourceRegistry.getAvailability(dictionaryDirectoryIdentity)
+  if (
+    directory.status !== 'available' ||
+    readable.some(item => item.installed.legacy) ||
+    (options.cursor &&
+      decodeDictionaryDirectoryPageCursor(options.cursor)?.[1].startsWith('offline:'))
+  ) {
+    return loadDictionaryDirectoryFallback(
+      readable,
+      initial?.trim().toLocaleLowerCase(),
+      search?.trim().toLocaleLowerCase(),
+      options
+    )
+  }
   const installed = getInstalledDictionaryEntries()
   if (installed.length === 0) return { entries: [] }
   const installedByWork = new Map(
@@ -1273,28 +1325,33 @@ export const createHybridDictionaryAccess = ({
       if (await isOnline()) return { status: 'available' }
       return local
     },
-    listByLetter: (letter, language = 'fr', work) =>
+    listByLetter: (letter, language = 'fr', work = getDefaultDictionaryWork(language)) =>
       runSearch(
         language,
         work,
         () => offline.listByLetter(letter, language, work),
         () => online.listByLetter(letter, language, work)
       ),
-    search: (value, language = 'fr', work) =>
+    search: (value, language = 'fr', work = getDefaultDictionaryWork(language)) =>
       runSearch(
         language,
         work,
         () => offline.search(value, language, work),
         () => online.search(value, language, work)
       ),
-    listByLetterPage: (letter, options, language = 'fr', work) =>
+    listByLetterPage: (
+      letter,
+      options,
+      language = 'fr',
+      work = getDefaultDictionaryWork(language)
+    ) =>
       runSearch(
         language,
         work,
         () => offline.listByLetterPage(letter, options, language, work),
         () => online.listByLetterPage(letter, options, language, work)
       ),
-    searchPage: (value, options, language = 'fr', work) =>
+    searchPage: (value, options, language = 'fr', work = getDefaultDictionaryWork(language)) =>
       runSearch(
         language,
         work,
@@ -1311,42 +1368,42 @@ export const createHybridDictionaryAccess = ({
         () => offline.searchDirectoryPage(value, options, language),
         () => online.searchDirectoryPage(value, options, language)
       ),
-    loadItem: (word, language = 'fr', work) =>
+    loadItem: (word, language = 'fr', work = getDefaultDictionaryWork(language)) =>
       runRead(
         language,
         work,
         () => offline.loadItem(word, language, work),
         () => online.loadItem(word, language, work)
       ),
-    loadEntryById: (id, language = 'fr', work) =>
+    loadEntryById: (id, language = 'fr', work = getDefaultDictionaryWork(language)) =>
       runRead(
         language,
         work,
         () => offline.loadEntryById(id, language, work),
         () => online.loadEntryById(id, language, work)
       ),
-    loadItems: (words, language = 'fr', work) =>
+    loadItems: (words, language = 'fr', work = getDefaultDictionaryWork(language)) =>
       runRead(
         language,
         work,
         () => offline.loadItems(words, language, work),
         () => online.loadItems(words, language, work)
       ),
-    loadItemByRowId: (id, language = 'fr', work) =>
+    loadItemByRowId: (id, language = 'fr', work = getDefaultDictionaryWork(language)) =>
       runRead(
         language,
         work,
         () => offline.loadItemByRowId(id, language, work),
         () => online.loadItemByRowId(id, language, work)
       ),
-    loadWordsForVerse: (verse, language = 'fr', work) =>
+    loadWordsForVerse: (verse, language = 'fr', work = getDefaultDictionaryWork(language)) =>
       runRead(
         language,
         work,
         () => offline.loadWordsForVerse(verse, language, work),
         () => online.loadWordsForVerse(verse, language, work)
       ),
-    loadPassageAnchors: (verse, language = 'fr', work) =>
+    loadPassageAnchors: (verse, language = 'fr', work = getDefaultDictionaryWork(language)) =>
       runRead(
         language,
         work,

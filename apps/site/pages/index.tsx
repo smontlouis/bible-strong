@@ -8,7 +8,7 @@ import { useCurrentLocale, useI18n } from '../locales'
 import LandingBibleViewerDemo from '../components/LandingBibleViewerDemo'
 import { TextReveal } from '../components/ui/text-reveal'
 import { MobileDownloadLink } from '../components/MobileAppPromotion'
-import { appStoreUrl, playStoreUrl, webAppUrl } from '../lib/app-links'
+import { androidApkUrl, appStoreUrl, playStoreUrl, webAppUrl } from '../lib/app-links'
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
 
@@ -1228,6 +1228,9 @@ export default function Home({ initialTheme }: HomeProps) {
               label="Google Play"
             />
           </div>
+          <a className="apk-download-link" href={androidApkUrl} target="_blank" rel="noreferrer">
+            {t('home.download.apk')}
+          </a>
         </Reveal>
         <div className="download-word" aria-hidden="true">
           Strong

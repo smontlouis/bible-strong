@@ -585,8 +585,10 @@ export const createHttpStrongBibleResourceAdapter = ({
       if (request.cursor !== undefined) query.set('cursor', request.cursor)
       if (request.allBooks !== undefined) query.set('allBooks', String(request.allBooks))
       if (request.lexemeId !== undefined) query.set('lexemeId', String(request.lexemeId))
+      // React Native's URLSearchParams does not expose `size` on every runtime.
+      const queryString = query.toString()
       const response = await get(
-        `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${request.book}/identities/${encodeURIComponent(String(request.reference))}/occurrences${query.size ? `?${query}` : ''}`,
+        `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${request.book}/identities/${encodeURIComponent(String(request.reference))}/occurrences${queryString ? `?${queryString}` : ''}`,
         StrongBibleOccurrencesDto
       )
       assertPublicationIdentity(response.resource, versionId)
