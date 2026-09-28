@@ -1,7 +1,7 @@
 import { ExpoConfig, ConfigContext } from 'expo/config'
 
 const isAppCheckBeta = process.env.ANDROID_APP_CHECK_BETA === 'true'
-const betaVersionCode = Number(process.env.ANDROID_APP_CHECK_BETA_VERSION_CODE ?? '505')
+const betaVersionCode = Number(process.env.ANDROID_APP_CHECK_BETA_VERSION_CODE ?? '507')
 if (
   isAppCheckBeta &&
   process.env.EAS_BUILD_PROFILE &&
@@ -9,8 +9,8 @@ if (
 ) {
   throw new Error('ANDROID_APP_CHECK_BETA is reserved for the app-check-beta build profile.')
 }
-if (isAppCheckBeta && (!Number.isSafeInteger(betaVersionCode) || betaVersionCode <= 504)) {
-  throw new Error('ANDROID_APP_CHECK_BETA_VERSION_CODE must be an integer greater than 504.')
+if (isAppCheckBeta && (!Number.isSafeInteger(betaVersionCode) || betaVersionCode <= 506)) {
+  throw new Error('ANDROID_APP_CHECK_BETA_VERSION_CODE must be an integer greater than 506.')
 }
 if (isAppCheckBeta && process.env.EAS_BUILD_PLATFORM === 'ios') {
   throw new Error('The App Check beta profile is Android-only.')
@@ -25,7 +25,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   primaryColor: '#ffffff',
   githubUrl: 'https://github.com/bulby97/bible-strong',
   platforms: ['ios', 'android', 'web'],
-  version: isAppCheckBeta ? '27.0.18-beta.1' : '27.0.17',
+  version: isAppCheckBeta ? '27.0.18-beta.2' : '27.0.17',
   orientation: 'default',
   icon: './assets/images/icon-2.png',
   userInterfaceStyle: 'automatic',

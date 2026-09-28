@@ -8,7 +8,7 @@ This pilot tests native reCAPTCHA Enterprise (also labelled Fraud Defense in Goo
 2. Register that key as the additional reCAPTCHA Enterprise App Check provider for Android production, App ID `1:204116128917:android:3ae4e716f079e5a002579c`. Preserve the existing Play Integrity provider. Start with the documented score threshold 0.5 and TTL 1 hour; these are initial test settings, not established acceptance guarantees.
 3. Review the shared trust boundary before registration: all backends accepting this App ID can accept its tokens, including the assistant. Registration is not restricted to legitimate beta testers by the build profile.
 4. Set `ANDROID_APP_CHECK_RECAPTCHA_SITE_KEY` in the production EAS environment used by the beta build, or in the local build environment. This is the public Android site key, not a secret or a token. Never put a debug token or service-account credential in this value.
-5. Check the highest version code already uploaded to Google Play. The beta defaults to `505`; set `ANDROID_APP_CHECK_BETA_VERSION_CODE` to a higher available integer if needed. Keep the subsequent stable build above the beta code if testers should return to stable without uninstalling.
+5. Check the highest version code already uploaded to Google Play. The beta defaults to `507`; set `ANDROID_APP_CHECK_BETA_VERSION_CODE` to a higher available integer if needed. Keep the subsequent stable build above the beta code if testers should return to stable without uninstalling.
 
 No API enforcement switch needs to be disabled. Provider registration and distribution are separate steps; code presence or a compiled module alone does not make attestation work.
 
@@ -22,7 +22,7 @@ From the repository root, with the Android key available to the build:
 yarn workspace @bible-strong/expo build:android:app-check-beta
 ```
 
-The script loads the existing production environment and invokes a local EAS Android build using `app-check-beta`. The profile generates an AAB with package `com.smontlouis.biblestrong`, version name `27.0.18-beta.1`, channel `app-check-beta`, and the explicit Android runtime `android-app-check-recaptcha-beta-v1`. It does not submit or publish automatically. Standard Android and Apple builds retain the existing published runtime.
+The script loads the existing production environment and invokes a local EAS Android build using `app-check-beta`. The profile generates an AAB with package `com.smontlouis.biblestrong`, version name `27.0.18-beta.2`, channel `app-check-beta`, and the explicit Android runtime `android-app-check-recaptcha-beta-v1`. It does not submit or publish automatically. Standard Android and Apple builds retain the existing published runtime.
 
 Use the established production upload identity and a Google Play testing track for the same application. Start with internal testing, then the intended closed/open beta once device checks pass. Google Play signs distributed builds with the existing app-signing key. An APK signed only with an upload key or a different local key cannot necessarily replace the Play-installed application.
 
