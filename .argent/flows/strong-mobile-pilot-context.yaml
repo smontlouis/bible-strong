@@ -1,0 +1,31 @@
+steps:
+  - tool: gesture-tap
+    args:
+      x: 0.2995
+      y: 0.3785
+    delayMs: 3500
+  - tool: gesture-swipe
+    args:
+      fromX: 0.65
+      fromY: 0.72
+      toX: 0.65
+      toY: 0.4
+      durationMs: 1300
+      momentum: false
+    delayMs: 4000
+  - tool: gesture-tap
+    args:
+      x: 0.5035
+      y: 0.1625
+    delayMs: 2500
+  - tool: gesture-swipe
+    args:
+      fromX: 0.65
+      fromY: 0.72
+      toX: 0.65
+      toY: 0.48
+      durationMs: 1200
+      momentum: false
+    delayMs: 3000
+executionPrerequisite: Safari mobile public H1254A entry opened from Genèse 1:1
+  LSG; context header visible; word popover dismissed. French UI.

@@ -1,0 +1,12 @@
+steps:
+  - tool: launch-app
+    args:
+      bundleId: com.smontlouis.biblestrong.dev
+  - tool: open-url
+    args:
+      url: biblestrong://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081
+  - tool: open-url
+    args:
+      url: https://web.bible-strong.app
+executionPrerequisite: iPhone 17 Pro booted; Bible Strong development app
+  installed; Metro available at port 8081.

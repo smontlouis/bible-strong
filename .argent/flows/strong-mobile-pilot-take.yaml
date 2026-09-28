@@ -1,0 +1,9 @@
+steps:
+  - tool: gesture-tap
+    args:
+      x: 0.5285
+      y: 0.335
+    delayMs: 2200
+executionPrerequisite: Safari on iPhone 17 Pro, web.bible-strong.app reader
+  Genèse 1 LSG at top with Strong text + numbers enabled. H1254A button center
+  0.5285,0.335. French UI. Demo fragment.

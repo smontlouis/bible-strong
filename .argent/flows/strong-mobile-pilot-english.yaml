@@ -1,0 +1,25 @@
+steps:
+  - tool: gesture-tap
+    args:
+      x: 0.3085
+      y: 0.3785
+    delayMs: 3000
+  - tool: run-sequence
+    args:
+      steps:
+        - tool: gesture-swipe
+          args:
+            fromX: 0.65
+            fromY: 0.7
+            toX: 0.65
+            toY: 0.54
+            durationMs: 1300
+            momentum: false
+          delayMs: 3000
+        - tool: gesture-tap
+          args:
+            x: 0.5405
+            y: 0.1625
+          delayMs: 4500
+    delayMs: 3000
+executionPrerequisite: Safari on iPhone17Pro; English app and resource settings; public H1254A entry opened from Genesis 1:1 KJV, top of entry visible and word popover dismissed.

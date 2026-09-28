@@ -154,6 +154,12 @@ ios/
 /.playwright-cli/
 /output/playwright/
 
+# Local generated outputs (images, videos, imports). Files already tracked stay tracked.
+/output/
+
+# Argent screen recordings; saved flows under .argent/flows/ remain versioned.
+/.argent/recordings/
+
 # Local Resource service publications and imported artifacts
 /packages/resource-service/.local/
 /packages/resource-service/.wrangler/
