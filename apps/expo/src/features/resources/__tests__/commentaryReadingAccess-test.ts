@@ -2,6 +2,17 @@ import { createCommentaryReadingAccess } from '../commentaryReadingAccess'
 import * as Schema from 'effect/Schema'
 import { CommentaryReadingResourceIndex } from '@bible-strong/resource-domain/contracts/commentaryReadingContract'
 
+const originalDev = Object.getOwnPropertyDescriptor(globalThis, '__DEV__')
+beforeAll(() => Object.defineProperty(globalThis, '__DEV__', { value: true, configurable: true }))
+afterAll(() => {
+  if (originalDev) Object.defineProperty(globalThis, '__DEV__', originalDev)
+  else Reflect.deleteProperty(globalThis, '__DEV__')
+})
+
+const consoleLog = jest.spyOn(console, 'log').mockImplementation()
+beforeEach(() => consoleLog.mockClear())
+afterAll(() => consoleLog.mockRestore())
+
 const resource = { kind: 'commentary', resourceId: 'barnes', language: 'fr', revision: 'r1' }
 const index = {
   resource,
@@ -58,6 +69,14 @@ it('preserves selected order when some resources are installed and others are on
     resources: [...request.resources, { resourceId: 'acbc', language: 'fr' }],
   })
   expect(result.indexes.map(value => value.resource.resourceId)).toEqual(['barnes', 'acbc'])
+  expect(consoleLog.mock.calls).toEqual([
+    [
+      '[ResourceSource] Commentary · OFFLINE · loadIndex · resourceId=acbc book=1 chapter=1 language=fr',
+    ],
+    [
+      '[ResourceSource] Commentary · ONLINE · loadIndex · resourceId=barnes book=1 chapter=1 language=fr',
+    ],
+  ])
 })
 
 it('batches online indexes, keeps a revision cache and uses excerpts offline without full downloads', async () => {
@@ -72,6 +91,9 @@ it('batches online indexes, keeps a revision cache and uses excerpts offline wit
   h.isOnline.mockResolvedValue(false)
   const cached = await access.loadIndex(request)
   expect(cached.cached).toBe(true)
+  expect(consoleLog).toHaveBeenLastCalledWith(
+    '[ResourceSource] Commentary · CACHE · loadIndex · resourceId=barnes book=1 chapter=1 language=fr'
+  )
   expect(cached.indexes[0].resource.revision).toBe('r1')
   expect(h.fetcher).toHaveBeenCalledTimes(1)
   await expect(
@@ -93,6 +115,7 @@ it('rejects an index for a different chapter or resource', async () => {
   )
   const access = createCommentaryReadingAccess({ ...h, baseUrl: 'https://resources.test' })
   await expect(access.loadIndex(request)).rejects.toMatchObject({ code: 'INTEGRITY_FAILURE' })
+  expect(consoleLog).not.toHaveBeenCalled()
 })
 
 it('rejects full content from a different revision', async () => {
@@ -124,3 +147,44 @@ it('rejects full content from a different revision', async () => {
     })
   ).rejects.toMatchObject({ code: 'INTEGRITY_FAILURE' })
 })
+
+it.each(['offline', 'online'] as const)(
+  'logs a section from %s without its content',
+  async source => {
+    const h = harness()
+    const sectionRequest = {
+      resourceId: 'barnes',
+      language: 'fr' as const,
+      revision: 'r1',
+      book: 1,
+      chapter: 1,
+      sectionId: 'section',
+    }
+    const response = {
+      resource: { ...resource, kind: 'commentary' as const, language: 'fr' as const },
+      book: 1,
+      chapter: 1,
+      section: {
+        id: 'section',
+        rangeStartVerse: 1,
+        rangeEndVerse: 2,
+        content: '<p>Private content</p>',
+      },
+    }
+    h.fetcher.mockResolvedValue(new Response(JSON.stringify(response)))
+    const access = createCommentaryReadingAccess({
+      ...h,
+      baseUrl: 'https://resources.test',
+      local: {
+        index: async () => undefined,
+        section: async () => (source === 'offline' ? response : undefined),
+      },
+    })
+    await expect(access.loadSection(sectionRequest)).resolves.toEqual(response)
+    expect(consoleLog.mock.calls).toEqual([
+      [
+        `[ResourceSource] Commentary · ${source.toUpperCase()} · loadSection · resourceId=barnes sectionId=section book=1 chapter=1 language=fr`,
+      ],
+    ])
+  }
+)

@@ -1,3 +1,4 @@
+import { withResourceSourceLogging } from './resourceSourceLogger'
 import {
   buildCommentaryResourceSections,
   createCommentaryPreview,
@@ -403,14 +404,21 @@ const getCommentarySectionsByVerse = (sections: readonly CommentaryResourceSecti
 }
 
 export const createCommentaryAccess = ({
-  local = localCommentaryChapterSource,
-  remote,
+  local: localSource = localCommentaryChapterSource,
+  remote: remoteSource,
   isOnline,
 }: {
   local?: CommentaryChapterSource
   remote?: CommentaryChapterSource
   isOnline: () => Promise<boolean>
 }): CommentaryAccess => {
+  const local = withResourceSourceLogging(localSource, {
+    resource: 'Commentary',
+    source: 'offline',
+  })
+  const remote = remoteSource
+    ? withResourceSourceLogging(remoteSource, { resource: 'Commentary', source: 'online' })
+    : undefined
   const loadResourceComments = async ({
     resourceId,
     language,

@@ -46,6 +46,16 @@ Useful startup log prefixes include:
 
 Current structured `[AgentLog]` areas include startup, navigation, Redux, ErrorBoundary crashes, SQLite/database operations, Bible DOM WebView mount/dispatch, and SQLite search.
 
+## Resource Source Logs
+
+Development builds emit `[ResourceSource]` after successful resource reads. Bible, dictionaries,
+Strong, Nave, interlinear, timeline, reading resources, and commentaries use the same format:
+`[ResourceSource] Commentary · ONLINE · loadResourceChapter · barnes · fr · 1 · 1`.
+`OFFLINE` identifies an installed copy, `ONLINE` a remote read, and `CACHE` a persistent commentary
+index cache. Mixed commentary selections report each resource's actual source separately. Failed
+reads do not emit a success log, and commentary content is never included. Logs describe reads;
+reopening content already held in the UI query cache may not trigger another read or log.
+
 ## Error Capture
 
 - Sentry is initialized in `app/_layout.tsx` with `EXPO_PUBLIC_SENTRY_DSN`.

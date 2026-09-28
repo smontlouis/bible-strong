@@ -180,7 +180,7 @@ This is a repo-specific architecture scan for agent work. It is intentionally co
 - WARNING `raw-console` apps/expo/src/features/resources/bibleContentAccess.ts:323 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` apps/expo/src/features/resources/bibleContentAccess.ts:324 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` apps/expo/src/features/resources/recoverableIntegrity.ts:10 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` apps/expo/src/features/resources/resourceSourceLogger.ts:72 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/expo/src/features/resources/resourceSourceLogger.ts:77 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` apps/expo/src/features/settings/AutomaticBackupsScreen.tsx:61 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` apps/expo/src/features/settings/AutomaticBackupsScreen.tsx:109 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` apps/expo/src/features/settings/AutomaticBackupsScreen.tsx:113 - Prefer appLogger for app-owned diagnostic events that agents should query.

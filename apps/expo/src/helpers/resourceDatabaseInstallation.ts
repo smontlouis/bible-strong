@@ -5,7 +5,10 @@ import { downloadAndInsertBible } from '~helpers/downloadBibleToSqlite'
 import { downloadResourceArtifact } from '~helpers/downloadResourceArtifact'
 import { dbManager, openSQLiteDatabase } from '~helpers/sqlite'
 import type { DatabaseId } from '~helpers/databaseTypes'
-import { resourceDatabaseRequiredTables } from '~helpers/resourceDatabaseSchema'
+import {
+  getCommentaryRequiredTables,
+  resourceDatabaseRequiredTables,
+} from '~helpers/resourceDatabaseSchema'
 import type { DownloadItem } from '~state/downloadQueue'
 import type {
   BibleDownloadItem,
@@ -166,7 +169,7 @@ const installDatabase = async (
             : item.type === 'dictionary'
               ? ['dictionnaire']
               : item.type === 'commentary'
-                ? ['commentaires']
+                ? getCommentaryRequiredTables(tableNames)
                 : resourceDatabaseRequiredTables[dbId as DatabaseId]
           )?.some(table => !tableNames.has(table.toLowerCase()))
         ) {

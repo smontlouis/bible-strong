@@ -209,12 +209,8 @@ const readSqlite = async (
     sqlitePath,
     "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
   );
-  const tableNames = tables.map((row) => row.name);
-  if (
-    JSON.stringify(tableNames) !== JSON.stringify(["COMMENTAIRES"]) &&
-    JSON.stringify(tableNames) !==
-      JSON.stringify(["COMMENTAIRES", "RESOURCE_METADATA"])
-  ) {
+  const tableNames = new Set(tables.map((row) => row.name.toLowerCase()));
+  if (!tableNames.has("commentaires")) {
     throw new Error("supplementary-publication-sqlite-tables-invalid");
   }
   const rows = await queryJson<SqliteRow>(

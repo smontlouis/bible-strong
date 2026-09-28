@@ -1,3 +1,4 @@
+import { logResourceSource } from './resourceSourceLogger'
 import * as Schema from 'effect/Schema'
 import {
   CommentaryReadingIndexRequest,
@@ -82,8 +83,15 @@ export function createCommentaryReadingAccess({
         const installed = await local
           ?.index(resource.resourceId, resource.language, request.book, request.chapter)
           .catch(() => undefined)
-        if (installed) indexes.push(installed)
-        else missing.push(resource)
+        if (installed) {
+          indexes.push(installed)
+          logResourceSource(
+            { resource: 'Commentary', source: 'offline' },
+            'loadIndex',
+            [{ ...resource, book: request.book, chapter: request.chapter }],
+            installed
+          )
+        } else missing.push(resource)
       }
       if (missing.length) {
         try {
@@ -113,6 +121,14 @@ export function createCommentaryReadingAccess({
             await cache.write(`${base}:${index.resource.revision}`, index)
             await cache.write(`${base}:latest`, index.resource.revision)
           }
+          for (const index of response.indexes) {
+            logResourceSource(
+              { resource: 'Commentary', source: 'online' },
+              'loadIndex',
+              [{ ...index.resource, book: request.book, chapter: request.chapter }],
+              index
+            )
+          }
           for (const resource of missing) {
             if (
               !seen.has(`${resource.resourceId}:${resource.language}`) &&
@@ -139,6 +155,12 @@ export function createCommentaryReadingAccess({
             ) {
               indexes.push(parsed.value)
               cached = true
+              logResourceSource(
+                { resource: 'Commentary', source: 'cache' },
+                'loadIndex',
+                [{ ...resource, book: request.book, chapter: request.chapter }],
+                parsed.value
+              )
             } else
               unavailable.push({
                 ...resource,
@@ -159,7 +181,15 @@ export function createCommentaryReadingAccess({
     async loadSection(input) {
       const request = Schema.decodeUnknownSync(CommentaryReadingSectionRequest)(input)
       const installed = await local?.section(request)
-      if (installed) return installed
+      if (installed) {
+        logResourceSource(
+          { resource: 'Commentary', source: 'offline' },
+          'loadSection',
+          [request],
+          installed
+        )
+        return installed
+      }
       const response = Schema.decodeUnknownSync(CommentaryReadingSectionResponse)(
         await post('reading-section', request)
       )
@@ -173,6 +203,12 @@ export function createCommentaryReadingAccess({
         response.section.id !== request.sectionId
       )
         throw new ResourceAccessError('INTEGRITY_FAILURE')
+      logResourceSource(
+        { resource: 'Commentary', source: 'online' },
+        'loadSection',
+        [request],
+        response
+      )
       return response
     },
   }

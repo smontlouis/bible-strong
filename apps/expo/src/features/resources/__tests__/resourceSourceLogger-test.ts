@@ -1,4 +1,4 @@
-import { withResourceSourceLogging } from '../resourceSourceLogger'
+import { logResourceSource, withResourceSourceLogging } from '../resourceSourceLogger'
 import {
   createHybridBibleChapterAdapter,
   isUsableBibleCoverage,
@@ -45,6 +45,16 @@ describe('resource source development logger', () => {
     await unavailable.loadItem()
     await production.loadItem()
 
+    expect(consoleLog).not.toHaveBeenCalled()
+  })
+
+  it('keeps direct source logs disabled outside development', () => {
+    logResourceSource(
+      { resource: 'Commentary', source: 'online', enabled: false },
+      'loadSection',
+      [{ resourceId: 'barnes', sectionId: 'section' }],
+      {}
+    )
     expect(consoleLog).not.toHaveBeenCalled()
   })
 

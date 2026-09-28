@@ -15,7 +15,10 @@ import {
   type DatabaseId,
   type ResourceLanguage,
 } from '~helpers/databaseTypes'
-import { resourceDatabaseRequiredTables } from '~helpers/resourceDatabaseSchema'
+import {
+  getCommentaryRequiredTables,
+  resourceDatabaseRequiredTables,
+} from '~helpers/resourceDatabaseSchema'
 import { restoreOrphanedResourceBackup } from '~helpers/atomicResourceFile'
 import {
   createOfflineCopyId,
@@ -150,8 +153,7 @@ const validateStandaloneResource = async (
     const tableNames = new Set(tables.map(table => table.name.toLowerCase()))
     return kind === 'dictionary'
       ? tableNames.has('dictionnaire')
-      : tableNames.has('commentaires') ||
-          (tableNames.has('commentary_documents') && tableNames.has('commentary_verse_documents'))
+      : getCommentaryRequiredTables(tableNames).every(table => tableNames.has(table))
   } catch {
     return false
   } finally {

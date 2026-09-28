@@ -77,6 +77,7 @@ jest.mock('~i18n', () => ({
 }))
 
 import {
+  probeLocalResourceAvailability,
   getIfLocalResourceNeedsDownload,
   getLocalResourceAvailability,
   isLocalResourceAvailable,
@@ -137,6 +138,47 @@ const createDependencies = ({
 
 describe('resourceAvailability', () => {
   beforeEach(() => jest.clearAllMocks())
+
+  it.each([
+    { tables: ['COMMENTAIRES'], status: 'available' },
+    { tables: ['COMMENTARY_DOCUMENTS', 'COMMENTARY_VERSE_DOCUMENTS'], status: 'available' },
+    {
+      tables: ['COMMENTAIRES', 'COMMENTARY_DOCUMENTS', 'COMMENTARY_VERSE_DOCUMENTS', 'EXTRA'],
+      status: 'available',
+    },
+    { tables: ['COMMENTAIRES', 'COMMENTARY_DOCUMENTS'], status: 'corrupt' },
+    { tables: ['COMMENTARY_DOCUMENTS'], status: 'corrupt' },
+    { tables: ['COMMENTARY_VERSE_DOCUMENTS'], status: 'corrupt' },
+    { tables: [], status: 'corrupt' },
+  ])('reports $status for commentary tables $tables', async ({ tables, status }) => {
+    const database = new DatabaseSync(':memory:')
+    for (const table of tables) database.exec(`CREATE TABLE ${table} (id TEXT)`)
+    const closeAsync = jest.fn(async () => {})
+    jest.mocked(openSQLiteDatabase).mockResolvedValue({
+      getFirstAsync: async (sql: string) => database.prepare(sql).get(),
+      getAllAsync: async (sql: string) => database.prepare(sql).all(),
+      closeAsync,
+    } as never)
+    mockGetInfoAsync.mockResolvedValue({
+      exists: true,
+      uri: 'file:///docs/SQLite/en/commentaries/egw-writings.sqlite',
+      isDirectory: false,
+      size: 1,
+      modificationTime: 0,
+    })
+    try {
+      await expect(
+        probeLocalResourceAvailability({
+          kind: 'commentary',
+          resourceId: 'egw-writings',
+          language: 'en',
+        })
+      ).resolves.toMatchObject({ status })
+      expect(closeAsync).toHaveBeenCalledTimes(1)
+    } finally {
+      database.close()
+    }
+  })
 
   it('recognizes a healthy dictionary directory using the actual SQLite quick_check result', async () => {
     const database = new DatabaseSync(':memory:')

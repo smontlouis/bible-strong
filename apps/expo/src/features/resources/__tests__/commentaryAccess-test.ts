@@ -19,6 +19,13 @@ import { getCommentaryDbPath } from '~helpers/databases'
 import { openSQLiteDatabase } from '~helpers/sqlite'
 import { getLocalResourceAvailability } from '../resourceAvailability'
 
+const originalDev = Object.getOwnPropertyDescriptor(globalThis, '__DEV__')
+beforeAll(() => Object.defineProperty(globalThis, '__DEV__', { value: true, configurable: true }))
+afterAll(() => {
+  if (originalDev) Object.defineProperty(globalThis, '__DEV__', originalDev)
+  else Reflect.deleteProperty(globalThis, '__DEV__')
+})
+
 const request = {
   book: 1,
   chapter: 1,
@@ -40,6 +47,9 @@ const source = (
 })
 
 describe('commentary access', () => {
+  const consoleLog = jest.spyOn(console, 'log').mockImplementation()
+  beforeEach(() => consoleLog.mockClear())
+  afterAll(() => consoleLog.mockRestore())
   it('reads normalized EGW documents from the offline SQLite artifact', async () => {
     jest.mocked(getLocalResourceAvailability).mockResolvedValue({ status: 'available' } as never)
     jest.mocked(getCommentaryDbPath).mockReturnValue('/documents/commentary-egw-writings-en.sqlite')
@@ -117,6 +127,10 @@ describe('commentary access', () => {
       'acbc remote',
     ])
     expect(remote.loadResourceChapter).toHaveBeenCalledTimes(1)
+    expect(consoleLog.mock.calls).toEqual([
+      ['[ResourceSource] Commentary · OFFLINE · loadResourceChapter · barnes · fr · 1 · 1'],
+      ['[ResourceSource] Commentary · ONLINE · loadResourceChapter · acbc · fr · 1 · 1'],
+    ])
   })
 
   it('keeps installed comments available offline and reports missing selected resources', async () => {

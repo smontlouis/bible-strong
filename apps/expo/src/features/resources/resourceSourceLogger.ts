@@ -1,4 +1,4 @@
-export type ResourceLoadSource = 'offline' | 'online'
+export type ResourceLoadSource = 'offline' | 'online' | 'cache'
 
 type ResourceSourceLoggerOptions = {
   resource: string
@@ -27,6 +27,9 @@ const describeArgument = (value: unknown): string | undefined => {
 
   const record = value as Record<string, unknown>
   const selected = [
+    'resourceId',
+    'work',
+    'sectionId',
     'version',
     'versionId',
     'book',
@@ -40,7 +43,7 @@ const describeArgument = (value: unknown): string | undefined => {
       const item = describeArgument(record[key])
       return item === undefined ? [] : [`${key}=${item}`]
     })
-    .slice(0, 4)
+    .slice(0, 7)
 
   return selected.length > 0 ? selected.join(' ') : undefined
 }
@@ -53,12 +56,14 @@ const didLoadResource = (value: unknown) => {
   return typeof status !== 'string' || status === 'available'
 }
 
-const logResourceSource = (
+export const logResourceSource = (
   options: ResourceSourceLoggerOptions,
   operation: string,
   args: unknown[],
   result: unknown
 ) => {
+  if (!(options.enabled ?? (typeof __DEV__ !== 'undefined' && __DEV__))) return
+
   const details = args
     .map((argument, index) => {
       if (Array.isArray(argument)) {
@@ -86,7 +91,7 @@ export const withResourceSourceLogging = <Adapter extends object>(
   adapter: Adapter,
   options: ResourceSourceLoggerOptions
 ): Adapter => {
-  const enabled = options.enabled ?? __DEV__
+  const enabled = options.enabled ?? (typeof __DEV__ !== 'undefined' && __DEV__)
   if (!enabled) return adapter
 
   return new Proxy(adapter, {
