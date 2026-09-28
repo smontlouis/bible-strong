@@ -38,8 +38,9 @@ it('rejects malformed or expanded open-tab capabilities', () => {
 })
 
 it('accepts only explicitly supported client capabilities', () => {
-  expect(parseStudyRequest({ question: 'Ouvre un onglet', clientCapabilities: ['open_tab'] }))
-    .toMatchObject({ clientCapabilities: ['open_tab'] })
+  expect(
+    parseStudyRequest({ question: 'Ouvre un onglet', clientCapabilities: ['open_tab'] })
+  ).toMatchObject({ clientCapabilities: ['open_tab'] })
   expect(() =>
     parseStudyRequest({ question: 'Écris une note', clientCapabilities: ['write_note'] })
   ).toThrow('INVALID_CLIENT_CAPABILITIES')
