@@ -248,10 +248,7 @@ describe('StrongCard', () => {
 
     expect(mockPushRouteOnce).toHaveBeenCalledWith(
       expect.objectContaining({
-        params: expect.objectContaining({
-          identityKind: 'dstrong',
-          identityCode: 'H3651C',
-        }),
+        pathname: '/strong/h3651c',
       })
     )
   })

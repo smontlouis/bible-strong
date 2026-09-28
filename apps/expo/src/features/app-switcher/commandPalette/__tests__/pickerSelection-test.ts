@@ -1,6 +1,9 @@
 import { getPickerAllowedSources, getPickerResultTab } from '../pickerSelection'
 import type { SearchEntityResult } from '~features/search/shared/searchResultTypes'
 
+jest.mock('~i18n', () => ({ __esModule: true, default: { t: (key: string) => key } }))
+jest.mock('~helpers/bibleVersions', () => ({ versions: { LSG: {}, KJV: {} } }))
+
 jest.mock('~helpers/generateUUID', () => ({ __esModule: true, default: () => 'created-tab' }))
 jest.mock('~helpers/bibleBookCatalog', () => ({
   getBook: () => ({ Numero: 43, Nom: 'Jean', Chapitres: 21 }),
