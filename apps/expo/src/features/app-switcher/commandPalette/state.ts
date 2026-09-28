@@ -1,3 +1,5 @@
+import type { TabItem } from '~state/tabs'
+import type { PrimitiveAtom } from 'jotai/vanilla'
 import { atom } from 'jotai/vanilla'
 
 // Navigation history is independent of the renderer's cache, which can be evicted.
@@ -11,3 +13,6 @@ export const commandPaletteReturnFocusAtom = atom<HTMLElement | null>(null)
 export const commandPaletteScopeAtom = atom<string | undefined>(undefined)
 
 export const TAB_ACTIONS_SCOPE = 'tab-actions'
+
+// Native category selection replaces the blank tab that launched it.
+export const commandPaletteTargetAtom = atom<PrimitiveAtom<TabItem> | undefined>(undefined)

@@ -6,7 +6,8 @@
 
 The New tab presentation remains intact. Selecting a content category opens a
 scoped search: the command palette on Web, a search sheet on native. Selecting a
-result creates a new content tab; cancelling creates nothing. Existing list tabs
+result on native replaces the originating New tab, preserving its identity and position.
+Other search entry points create a new content tab; cancelling leaves existing tabs unchanged. Existing list tabs
 and library navigation remain supported.
 
 Passage and Comparison are separate command-palette modes using the same

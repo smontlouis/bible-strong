@@ -24,7 +24,7 @@ const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
   const launchSearch = useLaunchSearch()
   const [tab, setTab] = useAtom(newAtom)
   const onPress = () => {
-    if (launchSearch(type)) return
+    if (launchSearch(type, Platform.OS === 'web' ? undefined : newAtom)) return
     setTab({ ...tab, base64Preview: '', type, ...getDefaultData(type) } as TabItem)
   }
 

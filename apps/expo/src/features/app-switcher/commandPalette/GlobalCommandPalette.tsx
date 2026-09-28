@@ -1,16 +1,18 @@
 import { useEffect, useRef } from 'react'
-import { useAtom, useAtomValue } from 'jotai/react'
+import { useAtom, useAtomValue, useStore } from 'jotai/react'
 import { Keyboard } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import type { SheetRef } from '~common/sheet'
 import SearchSelectionSheet from '~features/search/SearchSelectionSheet'
 import { useSelectCatalogResult } from '~features/search/discovery/useSelectCatalogResult'
-import { commandPaletteOpenAtom, commandPaletteScopeAtom } from './state'
+import { commandPaletteOpenAtom, commandPaletteScopeAtom, commandPaletteTargetAtom } from './state'
 import { getPickerAllowedSources, getPickerResultTab } from './pickerSelection'
 import { useOpenInNewTab } from '../utils/useOpenInNewTab'
 
 export default function GlobalCommandPalette() {
   const [open, setOpen] = useAtom(commandPaletteOpenAtom)
+  const store = useStore()
+  const [target, setTarget] = useAtom(commandPaletteTargetAtom)
   const scope = useAtomValue(commandPaletteScopeAtom)
   const sheet = useRef<SheetRef>(null)
   const openTab = useOpenInNewTab()
@@ -22,8 +24,23 @@ export default function GlobalCommandPalette() {
   const close = () => {
     Keyboard.dismiss()
     setOpen(false)
+    setTarget(undefined)
   }
   const selection = useSelectCatalogResult(tab => {
+    if (!store.get(commandPaletteOpenAtom) || store.get(commandPaletteTargetAtom) !== target) return
+    if (target) {
+      const previous = store.get(target)
+      if (previous.type === 'new') {
+        store.set(target, {
+          ...tab,
+          id: previous.id,
+          isRemovable: previous.isRemovable,
+          base64Preview: '',
+        })
+      }
+      close()
+      return
+    }
     close()
     openTab(tab, { autoRedirect: true })
   })
