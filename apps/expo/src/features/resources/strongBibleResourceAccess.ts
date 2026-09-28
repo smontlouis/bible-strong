@@ -438,6 +438,16 @@ export const createHttpStrongBibleResourceAdapter = ({
     if (!matchesRequest) throw new ResourceAccessError('INTEGRITY_FAILURE')
   }
 
+  // Older API deployments add padding but do not try the inverse spelling.
+  // Send the unpadded alias so both padded and unpadded publications resolve.
+  const concordanceReference = (reference: string | number) =>
+    encodeURIComponent(
+      String(reference)
+        .trim()
+        .toUpperCase()
+        .replace(/^([HG])0+(?=\d)/u, '$1')
+    )
+
   const loadChapter = async (versionId: StrongBibleVersionId, book: number, chapter: number) => {
     const response = await get(
       `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${book}/chapters/${chapter}`,
@@ -564,7 +574,7 @@ export const createHttpStrongBibleResourceAdapter = ({
     },
     async loadCountsByBook(versionId, request) {
       const response = await get(
-        `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${request.book}/identities/${encodeURIComponent(String(request.reference))}/counts`,
+        `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${request.book}/identities/${concordanceReference(request.reference)}/counts`,
         StrongBibleCountsDto
       )
       assertPublicationIdentity(response.resource, versionId)
@@ -588,7 +598,7 @@ export const createHttpStrongBibleResourceAdapter = ({
       // React Native's URLSearchParams does not expose `size` on every runtime.
       const queryString = query.toString()
       const response = await get(
-        `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${request.book}/identities/${encodeURIComponent(String(request.reference))}/occurrences${queryString ? `?${queryString}` : ''}`,
+        `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${request.book}/identities/${concordanceReference(request.reference)}/occurrences${queryString ? `?${queryString}` : ''}`,
         StrongBibleOccurrencesDto
       )
       assertPublicationIdentity(response.resource, versionId)
@@ -653,7 +663,7 @@ export const createHttpStrongBibleResourceAdapter = ({
     },
     async loadLemmaStats(versionId, request) {
       const response = await get(
-        `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${request.book}/identities/${encodeURIComponent(String(request.reference))}/lemmas`,
+        `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${request.book}/identities/${concordanceReference(request.reference)}/lemmas`,
         StrongBibleLemmaStatsDto
       )
       assertPublicationIdentity(response.resource, versionId)

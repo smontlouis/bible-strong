@@ -7,7 +7,8 @@ export const getStrongBibleConcordanceCandidates = (
   const match = prefixed.match(/^([HG])0*(\d+)([A-Z]*)$/u)
   if (!match) return []
   const normalized = `${match[1]}${match[2].padStart(4, '0')}${match[3]}`
-  const codes = [...new Set([prefixed, normalized])]
+  const unpadded = `${match[1]}${Number(match[2])}${match[3]}`
+  const codes = [...new Set([prefixed, normalized, unpadded])]
   const kinds = match[3] ? [2, 1] : [0]
   return kinds.flatMap(kind => codes.map(code => ({ kind, code })))
 }

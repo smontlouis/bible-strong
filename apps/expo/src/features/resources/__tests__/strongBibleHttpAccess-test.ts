@@ -67,6 +67,42 @@ const unavailableAdapter = (): jest.Mocked<StrongBibleResourceAdapter> => ({
 })
 
 describe('Strong Bible HTTP resource access', () => {
+  it('resolves a padded lexicon reference through unpadded KJV concordance endpoints', async () => {
+    const identity = { kind: 'dstrong', code: 'H430G' }
+    const fetcher = jest.fn((url: string) => {
+      expect(url).toContain('/identities/H430G/')
+      return jsonResponse({
+        resource: { ...resource, versionId: 'KJV', datasetId: 'KJV' },
+        identity,
+        counts: [{ book: 1, verseCount: 1 }],
+        verses: [],
+        lemmas: [],
+      })
+    })
+    const adapter = createHttpStrongBibleResourceAdapter({
+      baseUrl: 'https://resources.test',
+      fetcher: fetcher as typeof fetch,
+      isOnline: async () => true,
+      bibleChapterAdapter: {
+        loadChapter: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+        loadCoverage: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+      },
+    })
+    const request: Parameters<StrongBibleResourceAdapter['loadCountsByBook']>[1] = {
+      currentVersionId: 'KJV',
+      defaultVersionId: 'KJV',
+      book: 1,
+      reference: 'H0430G',
+    }
+    await expect(adapter.loadCountsByBook('KJV', request)).resolves.toEqual({
+      identity,
+      counts: [{ Livre: 1, versesCountByBook: 1 }],
+    })
+    await expect(adapter.loadFoundVersesByBook('KJV', request)).resolves.toMatchObject({ identity })
+    await expect(adapter.loadLemmaStats('KJV', request)).resolves.toMatchObject({ identity })
+    expect(fetcher).toHaveBeenCalledTimes(3)
+  })
+
   afterEach(() => {
     jest.restoreAllMocks()
   })

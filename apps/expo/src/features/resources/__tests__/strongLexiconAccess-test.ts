@@ -107,6 +107,62 @@ describe('strongLexiconAccess', () => {
     )
   })
 
+  it('normalizes unpadded KJV identities for HTTP cards while preserving occurrence matching', async () => {
+    const identities = [
+      { kind: 'dstrong' as const, code: 'H430G' },
+      { kind: 'dstrong' as const, code: 'H776G' },
+    ]
+    const fetcher = jest.fn(async (url: string) => {
+      const requested = new URL(url).searchParams.get('identities')?.split(',') ?? []
+      return new Response(
+        JSON.stringify({
+          entries: requested.flatMap(identity => {
+            if (!['dstrong:H0430G', 'dstrong:H0776G'].includes(identity)) return []
+            const code = identity.split(':')[1]
+            return [
+              {
+                resource: { revision: 'core-r1' },
+                id: code === 'H0430G' ? 430 : 776,
+                selectedIdentity: { kind: 'dstrong', code },
+                stepCode: code,
+                classicStrong: code.slice(0, -1),
+                eStrong: code.slice(0, -1),
+                dStrong: code,
+                language: 'hebrew',
+                baseCode: code === 'H0430G' ? 430 : 776,
+                original: '',
+                transliteration: '',
+                gloss: code === 'H0430G' ? 'God' : 'earth',
+              },
+            ]
+          }),
+        }),
+        { status: 200 }
+      )
+    })
+    const access = createHttpStrongLexiconAccess({
+      baseUrl: 'https://resources.test',
+      fetcher: fetcher as typeof fetch,
+      isOnline: async () => true,
+    })
+    const cards = await access.loadEntryCards(identities, 'fr')
+    expect(cards.map(card => card.selectedIdentity)).toEqual(identities)
+    expect(cards.map(card => card.stepCode)).toEqual(['H0430G', 'H0776G'])
+  })
+
+  it('normalizes unpadded identities for offline cards', async () => {
+    const cards = await localStrongLexiconAccess.loadEntryCards(
+      [{ kind: 'strong', code: 'H413' }],
+      'fr'
+    )
+    expect(cards).toEqual([
+      expect.objectContaining({
+        selectedIdentity: { kind: 'strong', code: 'H413' },
+        stepCode: 'H0413',
+      }),
+    ])
+  })
+
   it('loads bounded Strong lexicon pages and carries the keyset cursor', async () => {
     const fetcher = jest.fn(
       async () =>

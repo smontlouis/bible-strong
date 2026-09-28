@@ -191,7 +191,7 @@ const resolveCoreEntry = async (
   identity: StrongIdentity,
   language: ResourceLanguage
 ): Promise<CoreEntryRow | null> => {
-  const code = identity.code.trim().toUpperCase()
+  const code = createStrongIdentity(identity.code, inferLanguage(identity.code)).code
   const baseCode = getBaseCode(code)
   const lexicalLanguage = inferLanguage(code)
   const sharedSelect = `
@@ -1270,8 +1270,9 @@ export const createHttpStrongLexiconAccess = ({
     getModuleRecoveryActions: async () => [],
     async loadEntry(identity, language) {
       try {
+        const code = createStrongIdentity(identity.code, inferLanguage(identity.code)).code
         const response = await get(
-          `/v1/strong-lexicon/entries/${encodeURIComponent(identity.code)}?${languageQuery(language, identity.kind)}`,
+          `/v1/strong-lexicon/entries/${encodeURIComponent(code)}?${languageQuery(language, identity.kind)}`,
           StrongLexiconEntryDto
         )
         return toEntry(response)
@@ -1288,15 +1289,32 @@ export const createHttpStrongLexiconAccess = ({
     },
     async loadEntryCards(identities, language) {
       if (identities.length === 0) return []
+      const normalizedIdentities = identities.map(identity => ({
+        ...identity,
+        code: createStrongIdentity(identity.code, inferLanguage(identity.code)).code,
+      }))
       const params = new URLSearchParams({
         language,
-        identities: identities.map(identity => `${identity.kind}:${identity.code}`).join(','),
+        identities: normalizedIdentities
+          .map(identity => `${identity.kind}:${identity.code}`)
+          .join(','),
       })
       const response = await get(
         `/v1/strong-lexicon/entries/batch?${params}`,
         StrongLexiconEntryCardsDto
       )
-      return response.entries.map(({ resource: _resource, ...entry }) => entry)
+      // Keep the source identity so callers can match cards to the original verse spans.
+      return identities.flatMap((identity, index) => {
+        const normalized = normalizedIdentities[index]
+        const result = response.entries.find(
+          entry =>
+            entry.selectedIdentity.kind === normalized.kind &&
+            entry.selectedIdentity.code === normalized.code
+        )
+        if (!result) return []
+        const { resource: _resource, ...entry } = result
+        return [{ ...entry, selectedIdentity: identity }]
+      })
     },
     async loadPreview(identities, language) {
       const entries = await this.loadEntryCards(identities, language)
