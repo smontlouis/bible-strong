@@ -99,17 +99,24 @@ const r2KeyForRequest = (url: URL): string | undefined => {
 }
 
 const contentRangeFrom = (range: ArtifactRange, totalSize: number): string | undefined => {
-  if ('suffix' in range) {
+  if ('suffix' in range && typeof range.suffix === 'number') {
     const length = Math.min(range.suffix, totalSize)
     return `bytes ${totalSize - length}-${totalSize - 1}/${totalSize}`
   }
-  const offset = range.offset ?? 0
-  const length = range.length ?? totalSize - offset
-  if (length <= 0 || offset < 0 || offset + length > totalSize) return undefined
+  const offset = 'offset' in range ? (range.offset ?? 0) : 0
+  const length = 'length' in range ? (range.length ?? totalSize - offset) : totalSize - offset
+  if (
+    !Number.isSafeInteger(offset) ||
+    !Number.isSafeInteger(length) ||
+    length <= 0 ||
+    offset < 0 ||
+    offset + length > totalSize
+  )
+    return undefined
   return `bytes ${offset}-${offset + length - 1}/${totalSize}`
 }
 
-const artifactHeaders = (object: R2ArtifactObject): Headers => {
+const artifactHeaders = (object: R2ArtifactObject, includeRange = true): Headers => {
   const headers = new Headers()
   object.writeHttpMetadata(headers)
   headers.set('accept-ranges', 'bytes')
@@ -117,7 +124,7 @@ const artifactHeaders = (object: R2ArtifactObject): Headers => {
   headers.set('etag', object.httpEtag)
   headers.set('last-modified', object.uploaded.toUTCString())
   headers.set('x-content-type-options', 'nosniff')
-  if (object.range) {
+  if (includeRange && object.range) {
     const contentRange = contentRangeFrom(object.range, object.size)
     if (contentRange) {
       headers.set('content-range', contentRange)
@@ -389,7 +396,9 @@ export const routeR2ArtifactRequest = async ({
       cache ? 'MISS' : undefined
     )
   }
-  const headers = artifactHeaders(object)
+  // R2 may expose range metadata even for a full read. Only an effective Range
+  // request can produce a partial HTTP response (If-Range may have removed it).
+  const headers = artifactHeaders(object, r2RequestHeaders.has('range'))
   if (!('body' in object)) {
     return artifactResponseForClient(
       new Response(null, { status: preconditionStatus(request, headers) ?? 412, headers }),
@@ -398,7 +407,7 @@ export const routeR2ArtifactRequest = async ({
     )
   }
   const response = new Response(object.body, {
-    status: object.range ? 206 : 200,
+    status: headers.has('content-range') ? 206 : 200,
     headers,
   })
   if (cache && response.status === 200) {

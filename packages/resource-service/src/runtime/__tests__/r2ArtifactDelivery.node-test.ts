@@ -88,6 +88,34 @@ class MemoryArtifactCache {
 }
 
 describe('R2 artifact delivery', () => {
+  it('serves a full download as 200 when R2 includes unused range properties', async () => {
+    const range = { offset: undefined, length: 7, suffix: undefined }
+    const { bucket } = makeBucket(makeObject({ range }))
+    const response = await routeR2ArtifactRequest({
+      request: artifactRequest(),
+      bucket,
+      authorize: async () => true,
+    })
+    assert.equal(response?.status, 200)
+    assert.equal(response?.headers.get('content-range'), null)
+    assert.equal(response?.headers.get('content-length'), '7')
+    assert.equal(await response?.text(), 'archive')
+  })
+
+  it('ignores an undefined suffix property for a real byte range', async () => {
+    const range = { offset: 2, length: 3, suffix: undefined }
+    const { bucket } = makeBucket(makeObject({ body: 'chi', range }))
+    const response = await routeR2ArtifactRequest({
+      request: artifactRequest(artifactKey, { headers: { range: 'bytes=2-4' } }),
+      bucket,
+      authorize: async () => true,
+    })
+    assert.equal(response?.status, 206)
+    assert.equal(response?.headers.get('content-range'), 'bytes 2-4/7')
+    assert.equal(response?.headers.get('content-length'), '3')
+    assert.equal(await response?.text(), 'chi')
+  })
+
   it('serves the provider-neutral mobile catalog without touching R2', async () => {
     const { bucket, reads } = makeBucket()
 
