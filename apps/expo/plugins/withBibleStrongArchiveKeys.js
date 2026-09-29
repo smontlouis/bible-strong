@@ -80,6 +80,10 @@ const writeGenerated = async (projectRoot, relativePath, contents) => {
 // Without keys the files still exist, so the module compiles and reports keys as unavailable.
 const withBibleStrongArchiveKeys = config => {
   const keys = parseArchiveKeys(process.env[ARCHIVE_KEYS_ENV])
+  // Versions only, never key material: lets a build log prove the binary can decrypt archives.
+  console.log(
+    `[bible-strong-archive] Offline-copy key versions: ${keys.map(({ version }) => version).join(', ') || 'none'}`
+  )
   config = withDangerousMod(config, [
     'ios',
     async config => {
