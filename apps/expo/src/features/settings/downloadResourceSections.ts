@@ -36,12 +36,14 @@ export interface DownloadResourceSectionInput {
     bibles: UnifiedDownloadItem[]
     commentaries: UnifiedDownloadItem[]
     dictionaries: UnifiedDownloadItem[]
+    studyTools?: UnifiedDownloadItem[]
     otherResources: UnifiedDownloadItem[]
   }
   english: {
     bibles: UnifiedDownloadItem[]
     commentaries: UnifiedDownloadItem[]
     dictionaries: UnifiedDownloadItem[]
+    studyTools?: UnifiedDownloadItem[]
     otherResources: UnifiedDownloadItem[]
   }
   originalBibles: UnifiedDownloadItem[]
@@ -71,7 +73,11 @@ export const buildDownloadResourceSections = ({
       { key: 'bibles', title: titles.bibles, data: french.bibles },
       { key: 'commentaries', title: titles.commentaries, data: french.commentaries },
       { key: 'dictionaries', title: titles.dictionaries, data: french.dictionaries },
-      { key: 'study-tools', title: titles.studyTools, data: sharedStudyTools },
+      {
+        key: 'study-tools',
+        title: titles.studyTools,
+        data: [...(french.studyTools ?? []), ...sharedStudyTools],
+      },
       { key: 'other-resources', title: titles.otherResources, data: french.otherResources },
     ]),
   },
@@ -82,7 +88,11 @@ export const buildDownloadResourceSections = ({
       { key: 'bibles', title: titles.bibles, data: english.bibles },
       { key: 'commentaries', title: titles.commentaries, data: english.commentaries },
       { key: 'dictionaries', title: titles.dictionaries, data: english.dictionaries },
-      { key: 'study-tools', title: titles.studyTools, data: sharedStudyTools },
+      {
+        key: 'study-tools',
+        title: titles.studyTools,
+        data: [...(english.studyTools ?? []), ...sharedStudyTools],
+      },
       { key: 'other-resources', title: titles.otherResources, data: english.otherResources },
     ]),
   },

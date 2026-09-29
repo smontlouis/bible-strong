@@ -24,6 +24,25 @@ const titles = {
 }
 
 describe('download resource sections', () => {
+  it('keeps localized lexicons in their language section alongside shared tools', () => {
+    const empty = { bibles: [], commentaries: [], dictionaries: [], otherResources: [] }
+    const sections = buildDownloadResourceSections({
+      titles,
+      french: { ...empty, studyTools: [item('strong-lexicon:simple-fr', 'fr')] },
+      english: { ...empty, studyTools: [item('strong-lexicon:simple-en', 'en')] },
+      originalBibles: [],
+      sharedStudyTools: [item('strong-lexicon:core', 'other')],
+    })
+    expect(flattenDownloadSubsections('fr', sections[0].subsections).map(row => row.id)).toEqual([
+      'strong-lexicon:simple-fr',
+      'strong-lexicon:core',
+    ])
+    expect(flattenDownloadSubsections('en', sections[1].subsections).map(row => row.id)).toEqual([
+      'strong-lexicon:simple-en',
+      'strong-lexicon:core',
+    ])
+  })
+
   it('shows shared resources in French and English with one resource identity', () => {
     const sharedCrossReferences = item('database:TRESOR:fr', 'fr')
     const sections = buildDownloadResourceSections({

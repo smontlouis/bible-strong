@@ -161,7 +161,7 @@ function buildStrongLexiconItems(
   t: (key: string, options?: Record<string, unknown>) => string
 ): UnifiedItem[] {
   return [
-    ...(['fr', 'en'] as const).map(locale => ({
+    ...[lang].map(locale => ({
       id: createOfflineCopyId({
         kind: 'strong-lexicon-module',
         moduleId: getSimpleStrongModuleId(locale),
@@ -252,10 +252,7 @@ function buildAllSections(
   )
   const frenchDictionaries = dictionaryWorks.filter(work => work.resource.language === 'fr')
   const englishDictionaries = dictionaryWorks.filter(work => work.resource.language === 'en')
-  const sharedStudyTools = [
-    ...buildStrongLexiconItems(appLang === 'fr' ? 'fr' : 'en', t),
-    ...buildSharedDatabaseItems(),
-  ]
+  const sharedStudyTools = buildSharedDatabaseItems()
   const sections = buildDownloadResourceSections({
     titles: {
       french: t('versionCatalog.language.fr'),
@@ -268,12 +265,14 @@ function buildAllSections(
       otherResources: t('downloads.subsection.otherResources'),
     },
     french: {
+      studyTools: buildStrongLexiconItems('fr', t),
       bibles: bibleGroups.get('bible-fr') ?? [],
       commentaries: buildCommentaryItems('fr'),
       dictionaries: buildDictionaryItems(frenchDictionaries),
       otherResources: buildDatabaseItems('fr', frenchDictionaries.length === 0),
     },
     english: {
+      studyTools: buildStrongLexiconItems('en', t),
       bibles: bibleGroups.get('bible-en') ?? [],
       commentaries: buildCommentaryItems('en'),
       dictionaries: buildDictionaryItems(englishDictionaries),
