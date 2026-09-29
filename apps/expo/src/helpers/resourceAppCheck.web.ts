@@ -8,6 +8,7 @@ import {
 import { firebaseApp } from './firebaseApp.web'
 import {
   createResourceAppCheckFetch,
+  isResourceApiRequestUrl,
   isResourceAppCheckProtectedUrl,
 } from './resourceAppCheckRequest'
 import { appLogger } from './agentObservability'
@@ -30,7 +31,9 @@ export const initializeResourceAppCheck = (): Promise<AppCheck> => {
   appCheckInitialization = Promise.resolve(
     initializeAppCheck(firebaseApp, {
       provider: new ReCaptchaEnterpriseProvider(siteKey),
-      isTokenAutoRefreshEnabled: true,
+      // Tokens are acquired on demand for Offline copies and the assistant only (ADR-0065).
+      // Background refresh would spend an attestation per TTL on every running app.
+      isTokenAutoRefreshEnabled: false,
     })
   )
   return appCheckInitialization
@@ -96,7 +99,7 @@ export const resourceApiFetch: typeof fetch = async (input, init) => {
   const response = await guardedResourceApiFetch(input, init)
   const diagnostics = requestDiagnostics(input, init)
   if (
-    isResourceAppCheckProtectedUrl(input) &&
+    isResourceApiRequestUrl(input) &&
     (response.status === 401 ||
       response.status === 403 ||
       response.status === 429 ||

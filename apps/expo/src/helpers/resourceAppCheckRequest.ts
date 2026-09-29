@@ -2,6 +2,7 @@ export const FIREBASE_APP_CHECK_HEADER = 'X-Firebase-AppCheck'
 const RESOURCE_API_ORIGIN = 'https://api.bible-strong.app'
 const RESOURCE_API_PATH_PREFIX = '/v1/'
 const PUBLIC_RESOURCE_CATALOG_PATH = '/v1/offline-catalog'
+const RESOURCE_ARTIFACT_PATH_PREFIX = '/v1/offline-artifacts/'
 
 export type ResourceAppCheckTokenProvider = (forceRefresh?: boolean) => Promise<string>
 type ResourceAppCheckFetchOptions = { timeoutMs?: number }
@@ -18,17 +19,29 @@ const resourceApiPathname = (value: string): string | undefined => {
   return value.slice(RESOURCE_API_ORIGIN.length, endIndex)
 }
 
-export const isResourceAppCheckProtectedUrl = (input: RequestInfo | URL): boolean => {
+const resourceApiPathnameFrom = (input: RequestInfo | URL): string | undefined => {
   try {
     const value = isRequestInstance(input) ? input.url : String(input)
-    const pathname = resourceApiPathname(value)
-    return Boolean(
-      pathname?.startsWith(RESOURCE_API_PATH_PREFIX) && pathname !== PUBLIC_RESOURCE_CATALOG_PATH
-    )
+    return resourceApiPathname(value)
   } catch {
-    return false
+    return undefined
   }
 }
+
+/** A Resource API call that receives the request deadline and failure diagnostics. */
+export const isResourceApiRequestUrl = (input: RequestInfo | URL): boolean => {
+  const pathname = resourceApiPathnameFrom(input)
+  return Boolean(
+    pathname?.startsWith(RESOURCE_API_PATH_PREFIX) && pathname !== PUBLIC_RESOURCE_CATALOG_PATH
+  )
+}
+
+/**
+ * Only Offline-copy downloads still require App Check (ADR-0065). Online reading and search
+ * are public, so they never acquire an attestation and never wait for one.
+ */
+export const isResourceAppCheckProtectedUrl = (input: RequestInfo | URL): boolean =>
+  Boolean(resourceApiPathnameFrom(input)?.startsWith(RESOURCE_ARTIFACT_PATH_PREFIX))
 
 const requestHeaders = (input: RequestInfo | URL, init?: RequestInit): Headers => {
   const headers = new Headers(isRequestInstance(input) ? input.headers : undefined)
@@ -85,11 +98,13 @@ export const createResourceAppCheckFetch = (
   { timeoutMs = 10_000 }: ResourceAppCheckFetchOptions = {}
 ): typeof fetch => {
   const appCheckFetch: typeof fetch = async (input, init) => {
-    if (!isResourceAppCheckProtectedUrl(input)) return fetcher(input, init)
+    if (!isResourceApiRequestUrl(input)) return fetcher(input, init)
 
     const sourceSignal = init?.signal ?? (isRequestInstance(input) ? input.signal : undefined)
     return runWithRequestDeadline(
       async signal => {
+        if (!isResourceAppCheckProtectedUrl(input)) return fetcher(input, { ...init, signal })
+
         const send = async (forceRefresh: boolean) => {
           const headers = requestHeaders(input, init)
           headers.set(FIREBASE_APP_CHECK_HEADER, await getToken(forceRefresh))

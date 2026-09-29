@@ -15,7 +15,8 @@ jest.mock('../agentObservability', () => ({
   appLogger: { captureError: (...args: unknown[]) => mockCaptureError(...args) },
 }))
 
-const apiUrl = 'https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1'
+// Only Offline-copy requests acquire App Check (ADR-0065).
+const apiUrl = 'https://api.bible-strong.app/v1/offline-artifacts/databases/nave-fr.sqlite.zip'
 const artifactUrl = 'https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-lsg.json.zip'
 const nativeError = (message: string) =>
   Object.assign(new Error(message), { code: 'appCheck/token-error' })

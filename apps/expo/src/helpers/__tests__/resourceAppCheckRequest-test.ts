@@ -5,7 +5,7 @@ import {
 } from '../resourceAppCheckRequest'
 
 describe('Resource App Check requests', () => {
-  it('attaches an App Check token to every protected production Resource API request', async () => {
+  it('attaches an App Check token to Offline-copy downloads only', async () => {
     const fetcher = jest.fn<Promise<Response>, [RequestInfo | URL, RequestInit?]>(() =>
       Promise.resolve(new Response('{}', { status: 200 }))
     )
@@ -27,16 +27,32 @@ describe('Resource App Check requests', () => {
     const guardedHeaders = fetcher.mock.calls[0]?.[1]?.headers
     expect(new Headers(guardedHeaders).get(FIREBASE_APP_CHECK_HEADER)).toBe('attestation-token')
     expect(new Headers(guardedHeaders).get('accept')).toBe('application/zip')
-    expect(new Headers(fetcher.mock.calls[1]?.[1]?.headers).get(FIREBASE_APP_CHECK_HEADER)).toBe(
-      'attestation-token'
-    )
+    expect(
+      new Headers(fetcher.mock.calls[1]?.[1]?.headers).get(FIREBASE_APP_CHECK_HEADER)
+    ).toBeNull()
     expect(new Headers(fetcher.mock.calls[1]?.[1]?.headers).get('accept')).toBe('application/json')
+    expect(fetcher.mock.calls[1]?.[1]?.signal).toBeInstanceOf(AbortSignal)
     expect(fetcher.mock.calls[2]).toEqual([
       'https://api.bible-strong.app/v1/offline-catalog',
       undefined,
     ])
     expect(fetcher.mock.calls[3]).toEqual(['http://127.0.0.1:8787/health', undefined])
-    expect(getToken).toHaveBeenCalledTimes(2)
+    expect(getToken).toHaveBeenCalledTimes(1)
+  })
+
+  it('reads online without waiting for an App Check token that cannot be acquired', async () => {
+    const fetcher = jest.fn<Promise<Response>, [RequestInfo | URL, RequestInit?]>(() =>
+      Promise.resolve(new Response('{}', { status: 200 }))
+    )
+    const getToken = jest.fn(() => Promise.reject(new Error('TOO_MANY_REQUESTS')))
+
+    const response = await createResourceAppCheckFetch(
+      fetcher,
+      getToken
+    )('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1')
+
+    expect(response.status).toBe(200)
+    expect(getToken).not.toHaveBeenCalled()
   })
 
   it('refreshes the token once after an authenticated GET is rejected', async () => {
@@ -60,7 +76,7 @@ describe('Resource App Check requests', () => {
     )
   })
 
-  it('provides App Check headers for protected API and artifact URLs only', async () => {
+  it('provides App Check headers for artifact URLs only', async () => {
     const getToken = jest.fn(async () => 'download-token')
 
     await expect(
@@ -74,7 +90,7 @@ describe('Resource App Check requests', () => {
         'https://api.bible-strong.app/v1/bibles/LSG/chapters/1/1',
         getToken
       )
-    ).resolves.toEqual({ [FIREBASE_APP_CHECK_HEADER]: 'download-token' })
+    ).resolves.toEqual({})
     await expect(
       getResourceAppCheckHeaders('https://api.bible-strong.app/v1/offline-catalog', getToken)
     ).resolves.toEqual({})
@@ -135,7 +151,7 @@ describe('Resource App Check requests', () => {
     const guardedFetch = createResourceAppCheckFetch(fetcher, getToken, { timeoutMs: 5 })
 
     await expect(
-      guardedFetch('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1')
+      guardedFetch('https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-lsg.json.zip')
     ).rejects.toThrow('RESOURCE_REQUEST_TIMEOUT')
     expect(fetcher).not.toHaveBeenCalled()
   })
@@ -146,12 +162,24 @@ describe('Resource App Check requests', () => {
     const controller = new AbortController()
     const guardedFetch = createResourceAppCheckFetch(fetcher, getToken, { timeoutMs: 60_000 })
 
-    const request = guardedFetch('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1', {
-      signal: controller.signal,
-    })
+    const request = guardedFetch(
+      'https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-lsg.json.zip',
+      { signal: controller.signal }
+    )
     controller.abort()
 
     await expect(request).rejects.toThrow('RESOURCE_REQUEST_ABORTED')
     expect(fetcher).not.toHaveBeenCalled()
+  })
+
+  it('still applies the request deadline to public Resource API reads', async () => {
+    const fetcher = jest.fn<Promise<Response>, [RequestInfo | URL, RequestInit?]>(
+      () => new Promise<Response>(() => undefined)
+    )
+    const guardedFetch = createResourceAppCheckFetch(fetcher, jest.fn(), { timeoutMs: 5 })
+
+    await expect(
+      guardedFetch('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1')
+    ).rejects.toThrow('RESOURCE_REQUEST_TIMEOUT')
   })
 })
