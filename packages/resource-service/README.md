@@ -289,7 +289,8 @@ the production Worker.
 
 Production mode runs every preflight gate before its first production write, then publishes only the
 changed validated Offline copies to immutable, content-addressed private R2 keys, imports and activates only the changed publications in
-Neon, atomically replaces the checked-in Worker catalog, deploys the Worker, and checks health,
+Neon, atomically replaces the checked-in Worker catalog, restores or creates its encrypted Offline
+copies (see below), deploys the Worker, and checks health,
 catalog parity, App Check rejection for an unattested artifact request, and an authenticated
 immutable-artifact checksum plus revision reads through Worker/Hyperdrive. The preflight first
 proves that the checked-out catalog, live Worker catalog, baseline bundles, live Neon revisions, and

@@ -20,6 +20,7 @@ export type BiblePublicationWorkflowStep =
   | 'publish-r2-artifacts'
   | 'activate-neon-publications'
   | 'activate-offline-catalog'
+  | 'encrypt-offline-copies'
   | 'deploy-resource-worker'
   | 'smoke-production'
 
@@ -36,6 +37,7 @@ export type BiblePublicationWorkflowOperations = {
   publishR2Artifacts: BiblePublicationWorkflowOperation
   activateNeonPublications: BiblePublicationWorkflowOperation
   activateOfflineCatalog: BiblePublicationWorkflowOperation
+  encryptOfflineCopies: BiblePublicationWorkflowOperation
   deployResourceWorker: BiblePublicationWorkflowOperation
   smokeProduction: BiblePublicationWorkflowOperation
   compensateProductionActivation: (
@@ -132,6 +134,8 @@ export const createBiblePublicationPlan = (options: BiblePublicationWorkflowOpti
     'publish-r2-artifacts',
     'activate-neon-publications',
     'activate-offline-catalog',
+    // Catalog activation drops encryptedArchive; the R2 index restores it before deployment.
+    'encrypt-offline-copies',
     'deploy-resource-worker',
     'smoke-production',
   ]
@@ -159,6 +163,7 @@ export const executeBiblePublicationWorkflow = async (
     'publish-r2-artifacts': operations.publishR2Artifacts,
     'activate-neon-publications': operations.activateNeonPublications,
     'activate-offline-catalog': operations.activateOfflineCatalog,
+    'encrypt-offline-copies': operations.encryptOfflineCopies,
     'deploy-resource-worker': operations.deployResourceWorker,
     'smoke-production': operations.smokeProduction,
   }

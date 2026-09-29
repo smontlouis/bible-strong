@@ -552,6 +552,11 @@ const createOperations = (
     state.catalogActivated = true
   },
 
+  encryptOfflineCopies: async () => {
+    // Re-encrypts only changed archives; unchanged ones are restored from the R2 index.
+    await runCommand('yarn', ['resources:offline:encrypt'], state.appRoot, cloudflareEnvironment())
+  },
+
   deployResourceWorker: async () => {
     state.workerDeploymentAttempted = true
     await runCommand('yarn', ['resources:worker:deploy'], state.appRoot, cloudflareEnvironment())

@@ -103,6 +103,7 @@ describe('Bible publication workflow', () => {
       publishR2Artifacts: operation('r2-publish'),
       activateNeonPublications: operation('neon'),
       activateOfflineCatalog: operation('catalog-activate'),
+      encryptOfflineCopies: operation('encrypt'),
       deployResourceWorker: operation('worker'),
       smokeProduction: operation('smoke'),
       compensateProductionActivation: operation('compensate'),
@@ -148,6 +149,7 @@ describe('Bible publication workflow', () => {
         calls.push('catalog-activate')
         throw new Error('activation-failed')
       },
+      encryptOfflineCopies: operation('encrypt'),
       deployResourceWorker: operation('worker'),
       smokeProduction: operation('smoke'),
       compensateProductionActivation: async (_options, cause, completed) => {
@@ -226,6 +228,7 @@ describe('Bible publication workflow', () => {
       'publish-r2-artifacts',
       'activate-neon-publications',
       'activate-offline-catalog',
+      'encrypt-offline-copies',
       'deploy-resource-worker',
       'smoke-production',
     ])
