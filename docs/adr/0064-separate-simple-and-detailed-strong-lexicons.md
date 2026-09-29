@@ -43,7 +43,12 @@ Essential shows one best summary. In depth adds, in order: the other definition
 (“Detailed definition” or “General definition”), a distinct name meaning, alternate
 senses, and classical Greek when the dictionary resource is installed (nothing is
 shown otherwise). The switch appears only when In depth has content. The
-verse-context section is always open.
+level switch sits below the jump navigation and before the verse context, retaining
+its compact styling. Essential keeps context collapsed with its passage
+reference visible; the reader can open it manually. In depth opens context and
+shows morphology. Explicit level changes reset the context disclosure to that
+level’s default; a different entry or passage also resets it. The switch is useful
+whenever either contextual or lexical detail is available.
 
 During the client-side trial, use a reversible reading-order policy. Identical
 normalized text and references appear only once. Near duplicates (at least 70%

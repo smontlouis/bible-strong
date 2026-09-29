@@ -44,12 +44,14 @@ export const StrongEditorialSection = ({
   children,
   onLayout,
   separated = false,
+  subtitle,
   expanded,
   onToggle,
 }: {
   title: string
   children: React.ReactNode
   onLayout?: (event: LayoutChangeEvent) => void
+  subtitle?: string
   separated?: boolean
   expanded?: boolean
   onToggle?: () => void
@@ -75,6 +77,7 @@ export const StrongEditorialSection = ({
       ) : (
         <StrongEyebrow>{title}</StrongEyebrow>
       )}
+      {subtitle ? <Text className="text-tertiary text-[12px]">{subtitle}</Text> : null}
       {(!onToggle || expanded) && children}
     </PageContent>
   </VStack>

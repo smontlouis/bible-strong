@@ -187,6 +187,7 @@ const StrongDetailMainPage = ({
   const { t, i18n } = useTranslation()
   const scrollRef = useRef<ScrollViewType>(null)
   const [storedLevel, setStoredLevel] = useAtom(strongDefinitionLevelAtom)
+  const [contextDisclosure, setContextDisclosure] = useState<{ key: string; expanded: boolean }>()
   const [anchorOffsets, setAnchorOffsets] = useState<Partial<Record<Anchor, number>>>({})
   const [dictionaryPreview, setDictionaryPreview] = useState<{
     resourceId: number
@@ -236,7 +237,17 @@ const StrongDetailMainPage = ({
   const hasDeepContent =
     Boolean(definition.deep || nameMeaningHtml || dictionaryResource) ||
     lexicalRelations.alternateSenses.length > 0
-  const level = hasDeepContent ? storedLevel : 'essential'
+  const hasLevelChoice = hasDeepContent || Boolean(contextVerse)
+  const level = hasLevelChoice ? storedLevel : 'essential'
+  const contextKey = JSON.stringify([
+    entry.stepCode,
+    contextReference,
+    contextVersion,
+    contextText,
+    level,
+  ])
+  const contextExpanded =
+    contextDisclosure?.key === contextKey ? contextDisclosure.expanded : level === 'deep'
 
   return (
     <ScrollView
@@ -331,9 +342,28 @@ const StrongDetailMainPage = ({
         </PageContent>
       </Box>
 
+      {hasLevelChoice && (
+        <PageContent className="mt-4" style={{ maxWidth: 600 }}>
+          <StrongLevelSwitch
+            options={[
+              { value: 'essential', label: t('strongDetail.definition.level.essential') },
+              { value: 'deep', label: t('strongDetail.definition.level.deep') },
+            ]}
+            value={level}
+            onChange={nextLevel => {
+              setStoredLevel(nextLevel)
+              setContextDisclosure(undefined)
+            }}
+          />
+        </PageContent>
+      )}
+
       {!!contextVerse && (
         <StrongEditorialSection
           title={t('strongDetail.context.title')}
+          subtitle={[contextReference, contextVersion].filter(Boolean).join(' · ')}
+          expanded={contextExpanded}
+          onToggle={() => setContextDisclosure({ key: contextKey, expanded: !contextExpanded })}
           onLayout={event => setAnchor('context', event.nativeEvent.layout.y)}
         >
           <VStack className="overflow-hidden border-continuous border-l-[3px] pl-[17px] py-[5px] gap-[10px]">
@@ -344,15 +374,13 @@ const StrongDetailMainPage = ({
               readingTypography={readingTypography}
             />
             <VStack className="overflow-hidden border-continuous gap-[4px]">
-              <Text className="text-tertiary text-[12px]">
-                {[contextReference, contextVersion].filter(Boolean).join(' · ')}
-              </Text>
-              {contextMorphologies.map(morphology => (
-                <Text className="text-tertiary text-[12px]" key={morphology.code}>
-                  {formatStrongContextMorphology(morphology)}
-                </Text>
-              ))}
-              {!contextMorphologies.length && entry.morphology && (
+              {level === 'deep' &&
+                contextMorphologies.map(morphology => (
+                  <Text className="text-tertiary text-[12px]" key={morphology.code}>
+                    {formatStrongContextMorphology(morphology)}
+                  </Text>
+                ))}
+              {level === 'deep' && !contextMorphologies.length && entry.morphology && (
                 <Text className="text-tertiary text-[12px]">
                   {formatStrongContextMorphology(entry.morphology)}
                 </Text>
@@ -366,16 +394,6 @@ const StrongDetailMainPage = ({
         title={t('strongDetail.definition.title')}
         onLayout={event => setAnchor('definition', event.nativeEvent.layout.y)}
       >
-        {hasDeepContent && (
-          <StrongLevelSwitch
-            options={[
-              { value: 'essential', label: t('strongDetail.definition.level.essential') },
-              { value: 'deep', label: t('strongDetail.definition.level.deep') },
-            ]}
-            value={level}
-            onChange={setStoredLevel}
-          />
-        )}
         {definition.essentialHtml ? (
           <StrongEditorialHtml
             value={definition.essentialHtml}
@@ -479,13 +497,11 @@ const StrongDetailMainPage = ({
             />
             {!!entityRelations?.graph.length && (
               <VStack className="overflow-hidden border-continuous mt-[7px] gap-[10px]">
-                <Text className="font-bold text-[17px]">
-                  {t(
-                    entry.entity.category === 'person'
-                      ? 'strongDetail.entity.personalRelationships'
-                      : 'strongDetail.entity.relationships'
-                  )}
-                </Text>
+                {entry.entity.category !== 'person' && (
+                  <Text className="font-bold text-[17px]">
+                    {t('strongDetail.entity.relationships')}
+                  </Text>
+                )}
                 <StrongEntityRelationGraph
                   entity={entry.entity}
                   onOpenProfile={onOpenEntityProfile}

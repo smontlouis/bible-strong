@@ -321,21 +321,47 @@ it('does not offer a deep level for a name meaning already in the definition', (
   expect(levelSwitch(root)).toHaveLength(0)
 })
 
-it('shows the verse context immediately, without a disclosure control', () => {
-  const root = render({
+it('places the level switch before context and lets the level control grammar and disclosure', () => {
+  const context = {
     contextVerse: { Livre: 1, Chapitre: 3, Verset: 2, Texte: 'Context passage' },
     contextReference: 'Genèse 3:2',
-  })
-  expect(
-    root.findAll(node => String(node.type) === 'Text' && node.props.children === 'Genèse 3:2')
-  ).toHaveLength(1)
-  expect(
-    root.findAll(
+    contextMorphologies: [{ code: 'N', meaning: 'Nom' }],
+  }
+  const root = render(context)
+  const section = () =>
+    root.find(
+      node =>
+        String(node.type) === 'StrongEditorialSection' &&
+        node.props.title === 'strongDetail.context.title'
+    )
+  const toggle = () =>
+    root.find(
       node =>
         String(node.type) === 'TouchableBox' &&
         node.props.accessibilityLabel === 'strongDetail.context.title'
     )
-  ).toHaveLength(0)
+  const grammar = () =>
+    root.findAll(node => String(node.type) === 'Text' && node.props.children === 'nom · N')
+  const controls = root.findAll(node =>
+    ['StrongLevelSwitch', 'StrongEditorialSection'].includes(String(node.type))
+  )
+  expect(controls.indexOf(levelSwitch(root)[0])).toBeLessThan(controls.indexOf(section()))
+  expect(section().props.subtitle).toBe('Genèse 3:2')
+  expect(toggle().props.accessibilityState.expanded).toBe(false)
+  act(() => toggle().props.onPress())
+  expect(toggle().props.accessibilityState.expanded).toBe(true)
+  expect(grammar()).toHaveLength(0)
+  selectLevel(root, 'deep')
+  expect(toggle().props.accessibilityState.expanded).toBe(true)
+  expect(grammar()).toHaveLength(1)
+  selectLevel(root, 'essential')
+  expect(toggle().props.accessibilityState.expanded).toBe(false)
+  expect(grammar()).toHaveLength(0)
+  act(() => toggle().props.onPress())
+  act(() =>
+    tree.update(<StrongDetailMainPage {...props} {...context} contextReference="Genèse 3:3" />)
+  )
+  expect(toggle().props.accessibilityState.expanded).toBe(false)
 })
 
 it('shows a specific sense first and keeps the general definition at the deep level', () => {
