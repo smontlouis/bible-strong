@@ -48,8 +48,8 @@ npx wrangler@4.124.0 deploy --config apps/expo/wrangler.jsonc --dry-run
 ```
 
 After a production build, open `/home`, refresh a nested route, read a Bible
-chapter, and verify that App Check-protected resource requests succeed. A request
-without an App Check token must still be rejected. Inspect the GitHub Actions run
+chapter, and verify that resource requests succeed without an App Check token
+(ADR-0065); only Offline-copy downloads still require one. Inspect the GitHub Actions run
 commit and the Vercel production deployment to confirm both track `master`.
 
 Vercel project `bible-strong-landing` uses root directory `apps/site` and its existing

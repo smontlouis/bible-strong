@@ -364,13 +364,19 @@ responses sent to the application remain `private, no-store`, and cache failures
 
 ### Resource API rate limits
 
-After App Check succeeds and before any cache, Hyperdrive, or R2 access, the Worker fingerprints the
-short-lived attestation token with SHA-256 and applies a Cloudflare-local counter. The raw token is
-never used as a counter key or written to logs. Deterministic and bounded reads allow 300 requests
-per minute per attested client, dynamic search and random routes allow 300, and artifact requests
-including byte ranges allow 120. A rejected request returns `429`, `Retry-After: 60`, and
-`private, no-store`; the protected origin is not opened. Counter failures fail open and emit a
-structured error so a Cloudflare limiter incident does not make resources unavailable.
+Online reading and search are public ([ADR-0065](../../docs/adr/0065-protect-resources-without-mandatory-attestation.md)):
+the Worker ignores any App Check token they carry and counts them per client address
+(`CF-Connecting-IP`) before any cache, Hyperdrive, or AI access. Deterministic and bounded reads
+allow 1,000 requests per minute per address, dynamic search and random routes allow 300, and
+semantic search, which calls Workers AI, allows 60. Limits are generous because many readers share
+carrier NAT addresses.
+
+Offline-copy artifact requests still require a native App Check attestation (ADR-0063). After it
+succeeds, the Worker fingerprints the short-lived token with SHA-256 and applies a counter of 120
+requests per minute, including byte ranges. The raw token is never used as a counter key or written
+to logs. A rejected request returns `429`, `Retry-After: 60`, and `private, no-store`; the origin is
+not opened. Counter failures fail open and emit a structured error so a Cloudflare limiter incident
+does not make resources unavailable.
 
 `/v1/offline-catalog` remains public and outside the application counters because it is a small
 shared CDN-cached manifest with no trustworthy per-client identity. Cloudflare's network-level DDoS

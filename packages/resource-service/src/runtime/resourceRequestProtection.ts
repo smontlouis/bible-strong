@@ -3,7 +3,7 @@ import { ResourceRateLimitedProblem } from '../http/problems'
 import { FIREBASE_APP_CHECK_HEADER, isNativeFirebaseAppId } from './firebaseAppCheck'
 import { resourceRequestClassFrom } from './resourceRoutePolicy'
 
-export type ResourceRateLimitCategory = 'reading' | 'search' | 'artifact'
+export type ResourceRateLimitCategory = 'reading' | 'search' | 'semantic-search' | 'artifact'
 
 export type ResourceRateLimitBinding = {
   limit(options: { key: string }): Promise<{ success: boolean }>
@@ -13,10 +13,17 @@ export type ResourceRateLimitBindings = Record<ResourceRateLimitCategory, Resour
 
 const resourceCategoryFrom = (request: Request): ResourceRateLimitCategory | undefined => {
   const requestClass = resourceRequestClassFrom(request)
+  if (requestClass === 'search' && new URL(request.url).pathname.endsWith('/semantic-search')) {
+    return 'semantic-search'
+  }
   return requestClass === 'reading' || requestClass === 'search' || requestClass === 'artifact'
     ? requestClass
     : undefined
 }
+
+// Public routes are counted per client address. Cloudflare always sets this header in production.
+const clientAddressKey = (request: Request): string =>
+  `address:${request.headers.get('cf-connecting-ip') ?? 'unknown'}`
 
 const tokenFingerprint = async (request: Request): Promise<string> => {
   const token = request.headers.get(FIREBASE_APP_CHECK_HEADER) ?? ''
@@ -54,7 +61,7 @@ export const protectResourceRequest = async ({
   reportFailure = () => undefined,
 }: {
   request: Request
-  /** Resolves to the verified App ID of the attested client, or `undefined`. */
+  /** Resolves to the verified App ID of the attested client, or `undefined`. Offline copies only. */
   authorize: (request: Request) => Promise<string | undefined>
   limiters: ResourceRateLimitBindings
   reportForbidden?: (category: ResourceRateLimitCategory, requestId: string, appId: string) => void
@@ -64,17 +71,22 @@ export const protectResourceRequest = async ({
   const category = resourceCategoryFrom(request)
   if (!category) return undefined
   const requestId = resourceRequestIdFrom(request.headers.get('x-request-id') ?? undefined)
-  const appId = await authorize(request)
-  if (!appId) return protectedFailure(requestId, 401)
-  // An Offline copy is a complete resource. Only native clients install them, and their
+  let limitKey = clientAddressKey(request)
+  // Online reading and search are public (ADR-0065); App Check tokens they carry are ignored.
+  // A plain Offline copy is a complete resource. Only native clients install them, and their
   // attestation is far harder to obtain than a Web token copied from a browser session.
-  if (category === 'artifact' && !isNativeFirebaseAppId(appId)) {
-    reportForbidden(category, requestId, appId)
-    return protectedFailure(requestId, 403)
+  if (category === 'artifact') {
+    const appId = await authorize(request)
+    if (!appId) return protectedFailure(requestId, 401)
+    if (!isNativeFirebaseAppId(appId)) {
+      reportForbidden(category, requestId, appId)
+      return protectedFailure(requestId, 403)
+    }
+    limitKey = await tokenFingerprint(request)
   }
 
   try {
-    const { success } = await limiters[category].limit({ key: await tokenFingerprint(request) })
+    const { success } = await limiters[category].limit({ key: limitKey })
     if (success) return undefined
   } catch (cause) {
     reportFailure(category, requestId, cause)

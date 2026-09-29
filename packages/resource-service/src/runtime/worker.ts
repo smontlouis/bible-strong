@@ -132,6 +132,7 @@ export default {
         search: isSearchAnalyticsRequest
           ? bindings.SEARCH_ANALYTICS_RATE_LIMITER
           : bindings.SEARCH_RATE_LIMITER,
+        'semantic-search': bindings.SEMANTIC_SEARCH_RATE_LIMITER,
         artifact: bindings.ARTIFACT_RATE_LIMITER,
       },
       reportForbidden: (category, requestId, appId) => {

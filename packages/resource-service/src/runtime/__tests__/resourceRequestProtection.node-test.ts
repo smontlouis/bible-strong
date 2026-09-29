@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { protectResourceRequest, type ResourceRateLimitBinding } from '../resourceRequestProtection'
+import {
+  protectResourceRequest,
+  type ResourceRateLimitBinding,
+  type ResourceRateLimitCategory,
+} from '../resourceRequestProtection'
 
 const androidAppId = '1:204116128917:android:3ae4e716f079e5a002579c'
 const webAppId = '1:204116128917:web:6ec6a6562ad7957402579c'
@@ -20,13 +24,25 @@ const acceptedLimiter = (calls: string[], name: string): ResourceRateLimitBindin
   },
 })
 
+const limitersFrom = (
+  overrides: Partial<Record<ResourceRateLimitCategory, ResourceRateLimitBinding>>,
+  calls: string[] = []
+): Record<ResourceRateLimitCategory, ResourceRateLimitBinding> => ({
+  reading: acceptedLimiter(calls, 'reading'),
+  search: acceptedLimiter(calls, 'search'),
+  'semantic-search': acceptedLimiter(calls, 'semantic-search'),
+  artifact: acceptedLimiter(calls, 'artifact'),
+  ...overrides,
+})
+
 describe('Resource request protection', () => {
-  it('rejects an attested Bible-reading burst before protected work', async () => {
+  it('rejects a Bible-reading burst per client address without consulting App Check', async () => {
     const events: string[] = []
     const keys: string[] = []
     const request = new Request('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1', {
       headers: {
-        'x-firebase-appcheck': 'verified-app-check-token',
+        'cf-connecting-ip': '203.0.113.7',
+        'x-firebase-appcheck': 'ignored-app-check-token',
         'x-request-id': 'reading_burst',
       },
     })
@@ -37,11 +53,7 @@ describe('Resource request protection', () => {
         events.push('authorized')
         return androidAppId
       },
-      limiters: {
-        reading: rejectedLimiter(keys),
-        search: rejectedLimiter([]),
-        artifact: rejectedLimiter([]),
-      },
+      limiters: limitersFrom({ reading: rejectedLimiter(keys) }),
       reportLimited: category => events.push(`limited:${category}`),
     })
 
@@ -60,19 +72,13 @@ describe('Resource request protection', () => {
       code: 'RESOURCE_RATE_LIMITED',
       retryAfterSeconds: 60,
     })
-    assert.deepEqual(events, ['authorized', 'limited:reading'])
-    assert.equal(keys.length, 1)
-    assert.match(keys[0], /^[a-f0-9]{64}$/)
-    assert.equal(keys[0].includes('verified-app-check-token'), false)
+    assert.deepEqual(events, ['limited:reading'])
+    assert.deepEqual(keys, ['address:203.0.113.7'])
   })
 
   it('uses the dedicated search counter for search and random routes', async () => {
     const calls: string[] = []
-    const limiters = {
-      reading: acceptedLimiter(calls, 'reading'),
-      search: acceptedLimiter(calls, 'search'),
-      artifact: acceptedLimiter(calls, 'artifact'),
-    }
+    const limiters = limitersFrom({}, calls)
 
     const search = await protectResourceRequest({
       request: new Request('https://api.bible-strong.app/v1/bibles/LSG/search?q=grace', {
@@ -103,6 +109,26 @@ describe('Resource request protection', () => {
     assert.deepEqual(calls, ['search', 'search', 'search'])
   })
 
+  it('uses the dedicated semantic-search counter for routes that call Workers AI', async () => {
+    const calls: string[] = []
+    const limiters = limitersFrom({}, calls)
+
+    const one = await protectResourceRequest({
+      request: new Request('https://api.bible-strong.app/v1/bibles/LSG/semantic-search?q=grace'),
+      authorize: async () => undefined,
+      limiters,
+    })
+    const many = await protectResourceRequest({
+      request: new Request('https://api.bible-strong.app/v1/bibles/semantic-search?q=grace'),
+      authorize: async () => undefined,
+      limiters,
+    })
+
+    assert.equal(one, undefined)
+    assert.equal(many, undefined)
+    assert.deepEqual(calls, ['semantic-search', 'semantic-search'])
+  })
+
   it('limits an attested R2 range request with the artifact counter', async () => {
     const calls: string[] = []
     const response = await protectResourceRequest({
@@ -116,11 +142,7 @@ describe('Resource request protection', () => {
         }
       ),
       authorize: async () => androidAppId,
-      limiters: {
-        reading: acceptedLimiter(calls, 'reading'),
-        search: acceptedLimiter(calls, 'search'),
-        artifact: rejectedLimiter(calls),
-      },
+      limiters: limitersFrom({ artifact: rejectedLimiter(calls) }, calls),
     })
 
     assert.equal(response?.status, 429)
@@ -138,11 +160,7 @@ describe('Resource request protection', () => {
         { headers: { 'x-firebase-appcheck': 'web-token', 'x-request-id': 'web_artifact' } }
       ),
       authorize: async () => webAppId,
-      limiters: {
-        reading: acceptedLimiter(calls, 'reading'),
-        search: acceptedLimiter(calls, 'search'),
-        artifact: acceptedLimiter(calls, 'artifact'),
-      },
+      limiters: limitersFrom({}, calls),
       reportForbidden: (category, requestId, appId) =>
         forbidden.push(`${category}:${requestId}:${appId}`),
     })
@@ -155,44 +173,42 @@ describe('Resource request protection', () => {
     assert.deepEqual(forbidden, [`artifact:web_artifact:${webAppId}`])
   })
 
-  it('keeps Web attestation valid for Online reading and search', async () => {
+  it('serves Online reading and search without an App Check token', async () => {
     const calls: string[] = []
-    const limiters = {
-      reading: acceptedLimiter(calls, 'reading'),
-      search: acceptedLimiter(calls, 'search'),
-      artifact: acceptedLimiter(calls, 'artifact'),
+    let authorizationCalls = 0
+    const limiters = limitersFrom({}, calls)
+    const authorize = async () => {
+      authorizationCalls += 1
+      return undefined
     }
 
     const reading = await protectResourceRequest({
-      request: new Request('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1', {
-        headers: { 'x-firebase-appcheck': 'web-token' },
-      }),
-      authorize: async () => webAppId,
+      request: new Request('https://api.bible-strong.app/v1/naves/fr/topics'),
+      authorize,
       limiters,
     })
     const search = await protectResourceRequest({
       request: new Request('https://api.bible-strong.app/v1/bibles/LSG/search?q=grace', {
-        headers: { 'x-firebase-appcheck': 'web-token' },
+        headers: { 'x-firebase-appcheck': 'expired-or-invalid-token' },
       }),
-      authorize: async () => webAppId,
+      authorize,
       limiters,
     })
 
     assert.equal(reading, undefined)
     assert.equal(search, undefined)
+    assert.equal(authorizationCalls, 0)
     assert.deepEqual(calls, ['reading', 'search'])
   })
 
-  it('rejects missing attestation before every limiter', async () => {
+  it('rejects an Offline-copy download without attestation before every limiter', async () => {
     const calls: string[] = []
     const response = await protectResourceRequest({
-      request: new Request('https://api.bible-strong.app/v1/naves/fr/topics'),
+      request: new Request(
+        'https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-lsg.json.zip'
+      ),
       authorize: async () => undefined,
-      limiters: {
-        reading: acceptedLimiter(calls, 'reading'),
-        search: acceptedLimiter(calls, 'search'),
-        artifact: acceptedLimiter(calls, 'artifact'),
-      },
+      limiters: limitersFrom({}, calls),
     })
 
     assert.equal(response?.status, 401)
@@ -208,11 +224,7 @@ describe('Resource request protection', () => {
         authorizationCalls += 1
         return undefined
       },
-      limiters: {
-        reading: acceptedLimiter(limiterCalls, 'reading'),
-        search: acceptedLimiter(limiterCalls, 'search'),
-        artifact: acceptedLimiter(limiterCalls, 'artifact'),
-      },
+      limiters: limitersFrom({}, limiterCalls),
     })
 
     assert.equal(response, undefined)
@@ -227,15 +239,13 @@ describe('Resource request protection', () => {
         headers: { 'x-firebase-appcheck': 'dictionary-token' },
       }),
       authorize: async () => androidAppId,
-      limiters: {
+      limiters: limitersFrom({
         reading: {
           async limit() {
             throw new Error('RATE_LIMIT_BINDING_UNAVAILABLE')
           },
         },
-        search: acceptedLimiter([], 'search'),
-        artifact: acceptedLimiter([], 'artifact'),
-      },
+      }),
       reportFailure: (category, _requestId, cause) =>
         failures.push({
           category,

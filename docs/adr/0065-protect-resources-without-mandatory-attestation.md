@@ -16,13 +16,14 @@ The protection goal is deterrence of bulk reuse, not prevented extraction (ADR-0
 
 The Resource service never requires an App Check token to serve editorial content.
 
-| Surface | Protection |
-|---|---|
-| Online reading and text search | Public. Cloudflare rate limits sized so that normal reading and searching never reach them. |
-| Semantic search and the study assistant | Require an authenticated account. A semantic search request without an account receives `200` with an empty result set, never `401`, so older clients neither show an error nor force an App Check refresh. |
-| Encrypted Offline copies | Public, with download-specific rate limits by count and bytes. |
-| Plain Offline copies | Remain behind native App Check (ADR-0063) for clients that cannot decrypt archives. Removed once those clients are marginal. |
-| Web | Still receives no Offline copies. |
+| Surface                           | Protection                                                                                                                   |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Online reading                    | Public. Cloudflare rate limits per client address, sized so that normal reading never reaches them.                          |
+| Search, including semantic search | Public. Searches that may call Workers AI have their own lower limit per client address, and Workers AI spend is monitored.  |
+| Study assistant                   | Unchanged: its private backend keeps its own authentication.                                                                 |
+| Encrypted Offline copies          | Public, with download-specific rate limits by count and bytes.                                                               |
+| Plain Offline copies              | Remain behind native App Check (ADR-0063) for clients that cannot decrypt archives. Removed once those clients are marginal. |
+| Web                               | Still receives no Offline copies.                                                                                            |
 
 Offline copies are encrypted as AES ZIP archives. Each archive key is derived from a master key, the resource identity, and the archive SHA, so resources published after a client release remain installable without a new key. The master key lives in native code, not in the JavaScript bundle. This is obfuscation: it raises extraction effort to reverse-engineering the application, comparable to defeating App Check today, without refusing any legitimate device. Extracted databases stay unencrypted on the device.
 
@@ -34,7 +35,7 @@ A client-declared header, User-Agent, or Origin is never treated as proof of the
 
 1. The Worker accepts requests without App Check on public routes while older clients keep sending tokens, which it ignores.
 2. Publication produces encrypted archives alongside plain ones. The catalog exposes encrypted archives through an additive field that only new clients read (ADR-0034).
-3. A new client release decrypts archives, stops requiring tokens for reading, and gates semantic search behind an account.
+3. A client update stops requiring tokens for public routes. A later native release decrypts archives.
 4. Plain archives and their App Check route are removed after the older population declines.
 
 Older clients that fail to acquire a token remain blocked until they update, because they do not send the request. OTA updates are not checked automatically, so this population declines slowly.
@@ -47,4 +48,4 @@ Rate limits become the primary abuse control for public routes. They are per loc
 
 A leaked master key exposes every encrypted archive. Rotation requires a new native release and republication, and the Worker must serve every key version still used by installed clients.
 
-Visitors without an account lose semantic search and the assistant. Costly Workers AI and assistant usage is bounded by account creation instead of attestation.
+Workers AI usage behind semantic search is bounded only by per-address limits. Gating it behind an account remains possible if spend or abuse requires it.
