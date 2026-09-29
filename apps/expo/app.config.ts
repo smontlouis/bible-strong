@@ -87,7 +87,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-image',
     'expo-sqlite',
     'expo-audio',
-    '@react-native-firebase/app',
+    // CocoaPods, not SPM: RNFirebase 26 rejects SPM with our static frameworks linkage.
+    ['@react-native-firebase/app', { ios: { disableSPM: true } }],
     './plugins/withFirebaseAppCheckSwiftBridge.js',
     '@react-native-firebase/app-check',
     '@react-native-firebase/auth',
