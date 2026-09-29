@@ -791,7 +791,8 @@ const toEntry = async (
   core: SQLiteDatabase,
   row: CoreEntryRow,
   identity: StrongIdentity,
-  language: ResourceLanguage
+  language: ResourceLanguage,
+  options?: StrongEntryLoadOptions
 ): Promise<StrongLexiconEntry> => {
   const card = await toEntryCard(core, row, identity, language)
   const [resourcesAvailability, entitiesAvailability, relations] = await Promise.all([
@@ -799,6 +800,15 @@ const toEntry = async (
     getRegisteredStrongLexiconAvailability('entities'),
     loadRelations(core, row.id, language),
   ])
+  if (options?.content === 'definitions') {
+    return {
+      ...card,
+      relations,
+      resources: [],
+      lsjAbsent: false,
+      modules: { resources: resourcesAvailability, entities: entitiesAvailability },
+    }
+  }
   const [resourceResult, entity] = await Promise.all([
     resourcesAvailability.status === 'available'
       ? withOptionalStrongLexiconDatabase('resources', database =>
@@ -824,6 +834,14 @@ const toEntry = async (
   }
 }
 
+export type StrongEntryLoadOptions = { content?: 'definitions' | 'full' }
+// Client-only read metadata: a simple-only result cannot provide detailed addons.
+export type StrongEntryRead = StrongLexiconEntry & { detailedEntryAvailable?: boolean }
+export type StrongEntryExtras = Pick<
+  StrongLexiconEntry,
+  'resources' | 'lsjAbsent' | 'entity' | 'modules'
+>
+
 export type StrongLexiconAccess = {
   getModuleAvailability: (
     moduleId: StrongLexiconModuleId
@@ -835,8 +853,13 @@ export type StrongLexiconAccess = {
   ) => Promise<StrongLexiconPreview[]>
   loadEntry: (
     identity: StrongIdentity,
+    language: ResourceLanguage,
+    options?: StrongEntryLoadOptions
+  ) => Promise<StrongEntryRead | undefined>
+  loadEntryExtras?: (
+    identity: StrongIdentity,
     language: ResourceLanguage
-  ) => Promise<StrongLexiconEntry | undefined>
+  ) => Promise<StrongEntryExtras | null>
   loadEntries: (
     identities: StrongIdentity[],
     language: ResourceLanguage
@@ -1008,7 +1031,7 @@ export const createLocalStrongLexiconAccess = (
       }).then(entities => entities ?? [])
     },
 
-    async loadEntry(identity, language) {
+    async loadEntry(identity, language, options) {
       return withStrongLexiconDatabase(coreModule(language), async core => {
         const row = await resolveCoreEntry(core, identity, language)
         if (!row) return undefined
@@ -1023,7 +1046,7 @@ export const createLocalStrongLexiconAccess = (
               entities: { status: 'missing', moduleId: 'entities' },
             },
           }
-        return toEntry(core, row, identity, language)
+        return toEntry(core, row, identity, language, options)
       })
     },
 
@@ -1306,11 +1329,11 @@ export const createHttpStrongLexiconAccess = ({
       return { status: 'missing', moduleId }
     },
     getModuleRecoveryActions: async () => [],
-    async loadEntry(identity, language) {
+    async loadEntry(identity, language, options) {
       try {
         const code = createStrongIdentity(identity.code, inferLanguage(identity.code)).code
         const response = await get(
-          `/v1/strong-lexicon/entries/${encodeURIComponent(code)}?${languageQuery(language, identity.kind)}`,
+          `/v1/strong-lexicon/entries/${encodeURIComponent(code)}?${languageQuery(language, identity.kind)}${options?.content === 'definitions' ? '&content=definitions' : ''}`,
           StrongLexiconEntryDto
         )
         return toEntry(response)
@@ -1483,20 +1506,30 @@ export const createHybridStrongLexiconAccess = ({
     if (await localAvailable(coreModule(language))) return localOperation()
     throw new ResourceAccessError(remotelyReadable ? 'NETWORK_OFFLINE' : 'OFFLINE_COPY_REQUIRED')
   }
-  const loadEntry = async (identity: StrongIdentity, language: ResourceLanguage) => {
+  const loadEntry = async (
+    identity: StrongIdentity,
+    language: ResourceLanguage,
+    options?: StrongEntryLoadOptions
+  ) => {
     const source = await resolveHybridResourceSource({
       localAvailable: await localAvailable(coreModule(language)),
       remotelyReadable,
       isOnline,
     })
     if (source !== 'local') {
-      if (source === 'remote') return online.loadEntry(identity, language)
+      if (source === 'remote') return online.loadEntry(identity, language, options)
       if (source === 'offline') throw new ResourceAccessError('NETWORK_OFFLINE')
       throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
     }
 
-    const localEntry = await offline.loadEntry(identity, language)
-    if (!localEntry || !remotelyReadable || level === 'simple') return localEntry
+    const localEntry = await offline.loadEntry(identity, language, options)
+    if (
+      !localEntry ||
+      !remotelyReadable ||
+      level === 'simple' ||
+      options?.content === 'definitions'
+    )
+      return localEntry
 
     const needsRemoteResources = localEntry.modules.resources.status !== 'available'
     const needsRemoteEntities = localEntry.modules.entities.status !== 'available'

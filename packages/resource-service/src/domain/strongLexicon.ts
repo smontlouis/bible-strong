@@ -70,6 +70,7 @@ export type StrongLexiconRepositoryService = {
     reference: string
     language: StrongLexiconLanguage
     level?: 'simple' | 'detailed'
+    content?: 'definitions' | 'full'
     kind?: StrongIdentityKind
   }) => Effect.Effect<ActiveStrongLexiconValue<StrongLexiconEntry>, StrongLexiconRepositoryError>
   findEntryCards?: (input: {
@@ -173,6 +174,7 @@ export const readStrongLexiconEntry = (input: {
   language: StrongLexiconLanguage
   level?: 'simple' | 'detailed'
   kind?: StrongIdentityKind
+  content?: 'definitions' | 'full'
 }) =>
   Effect.gen(function* () {
     const active = yield* (yield* StrongLexiconRepository).findEntry(input)

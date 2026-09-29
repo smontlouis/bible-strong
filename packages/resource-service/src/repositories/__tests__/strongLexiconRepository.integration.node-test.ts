@@ -275,6 +275,85 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
           { label: 'dérivé de', stepCode: 'H8138B', gloss: 'répéter' },
         ]
       )
+
+      // Installed addons must not be read on the critical definition path.
+      const addonIds: Record<string, number> = {}
+      for (const moduleId of ['resources', 'entities']) {
+        const addon = await database
+          .insertInto('resource_publications')
+          .values({
+            resource_identity: `strong-lexicon:${moduleId}`,
+            resource_kind: 'strong-lexicon',
+            revision: `${moduleId}-r1`,
+            language: 'mul',
+            status: 'active',
+            canonical_sha256: '3'.repeat(64),
+            offline_artifact_sha256: '4'.repeat(64),
+            provenance: { source: 'integration-test', imported_at: new Date(0).toISOString() },
+            rights: { holder: 'integration-test', online: true, offline: true },
+            metadata: { dependencies: [{ revision: 'core-r1' }] },
+          })
+          .returning('id')
+          .executeTakeFirstOrThrow()
+        addonIds[moduleId] = addon.id
+      }
+      await database
+        .insertInto('strong_lexicon_resources')
+        .values({
+          publication_id: addonIds.resources,
+          resource_id: 1,
+          step_entry_id: 8,
+          source: 'TFLSJ',
+          kind: 'dictionary',
+          payload: {
+            id: 1,
+            source: 'TFLSJ',
+            kind: 'dictionary',
+            contentHtml: '<p>Long dictionary article</p>',
+          },
+        })
+        .execute()
+      await database
+        .insertInto('strong_lexicon_entities')
+        .values({
+          publication_id: addonIds.entities,
+          entity_id: 1,
+          unique_name: 'fixture',
+          u_strong: 'H8141',
+          payload: {
+            id: 1,
+            uniqueName: 'fixture',
+            uStrong: 'H8141',
+            displayName: 'Fixture',
+            category: 'person',
+            type: 'Male',
+          },
+        })
+        .execute()
+      statementCount = 0
+      const definitions = await Effect.runPromise(
+        repository.findEntry({
+          reference: 'H8141',
+          language: 'fr',
+          content: 'definitions',
+        })
+      )
+      const definitionStatements = statementCount
+      statementCount = 0
+      const full = await Effect.runPromise(
+        repository.findEntry({ reference: 'H8141', language: 'fr' })
+      )
+      assert.ok(statementCount > definitionStatements, 'definitions skip addon queries')
+      assert.deepEqual(definitions.value.resources, [])
+      assert.equal(definitions.value.entity, undefined)
+      assert.equal(full.value.resources.length, 1)
+      assert.equal(full.value.entity?.uniqueName, 'fixture')
+      const lexicalContent = ({ resources, entity, lsjAbsent, ...lexical }: typeof full.value) =>
+        lexical
+      assert.deepEqual(lexicalContent(definitions.value), lexicalContent(full.value))
+      console.log(
+        `Strong fixture: ${definitionStatements} initial statements vs ${statementCount} full statements`
+      )
     } finally {
       await isolated.dispose()
     }

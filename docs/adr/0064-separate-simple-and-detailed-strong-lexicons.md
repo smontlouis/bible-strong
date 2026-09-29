@@ -95,3 +95,24 @@ existing publication pipeline. Renewing the directory requires rebuilding the
 simple bundle, but does not require republishing the detailed core or its addons.
 The two new publications are uploaded and imported differentially; unrelated
 catalog entries and existing lexicon publications remain unchanged.
+
+## Progressive detail loading
+
+The main word-study view requests both definition texts and lexical relations first.
+They remain necessary to choose Essential without changing its text after first paint.
+The entry API accepts `content=definitions` to omit dictionary articles and entity
+hydration; the omitted option preserves the full response for released clients.
+Projection-specific ETags keep these representations separate. The SQLite adapter
+uses the same projection and the hybrid adapter does not wait for remote addons
+when the definitions are installed locally.
+
+After the essential view has painted, the client automatically loads detailed addons,
+verse context, morphology and concordance. No scroll or disclosure action is required.
+Addon results merge only addon fields; they never replace definitions, lexical relations
+or identity. Background failures preserve the essential view and expose retry. Leaving
+an entry cancels scheduled work and query keys isolate late responses by identity and
+language. Other detail routes keep the full-entry behavior.
+
+This changes delivery and scheduling only: no R2 artifact or database migration is needed.
+Deploy the Worker projection before distributing the client to obtain the online benefit;
+an older Worker remains compatible but still returns a full initial entry.

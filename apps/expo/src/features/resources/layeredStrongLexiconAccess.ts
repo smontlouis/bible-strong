@@ -74,15 +74,26 @@ export function createLayeredStrongLexiconAccess(
   }
   const access: StrongLexiconAccess = {
     ...detailed,
-    async loadEntry(identity, language) {
+    async loadEntry(identity, language, options) {
       const [basic, advanced] = await Promise.all([
-        optional(() => simple.loadEntry(identity, language)),
-        optional(() => detailed.loadEntry(identity, language)),
+        optional(() => simple.loadEntry(identity, language, options)),
+        optional(() => detailed.loadEntry(identity, language, options)),
       ])
       const merged = mergeStrongDefinitionLevels(basic, advanced)
-      if (merged) return merged
+      if (merged)
+        return options?.content === 'definitions'
+          ? { ...merged, detailedEntryAvailable: Boolean(advanced) }
+          : merged
       // Preserve the normal recovery error if neither resource can be read.
-      return simple.loadEntry(identity, language)
+      return simple.loadEntry(identity, language, options)
+    },
+    async loadEntryExtras(identity, language) {
+      // The historical text has already been read. Only enrich the detailed entry;
+      // never replace the definitions or identity used by the initial presentation.
+      const entry = await detailed.loadEntry(identity, language)
+      if (!entry) return null
+      const { resources, lsjAbsent, entity, modules } = entry
+      return { resources, lsjAbsent, entity, modules }
     },
     async loadEntries(identities, language) {
       const entries = await Promise.all(

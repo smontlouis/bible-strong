@@ -8,14 +8,19 @@ const mockQueries: Record<
   { data?: unknown; isPending?: boolean; isFetching?: boolean; isError?: boolean }
 > = {}
 const mockRefetch = jest.fn()
+let mockBackgroundReady = true
+const mockEnabled: boolean[] = []
 jest.mock('@tanstack/react-query', () => ({
-  useQuery: ({ queryKey }: { queryKey: string[] }) => ({
-    isPending: false,
-    isFetching: false,
-    isError: false,
-    refetch: mockRefetch,
-    ...mockQueries[queryKey[2]],
-  }),
+  useQuery: ({ queryKey, enabled }: { queryKey: string[]; enabled: boolean }) => {
+    mockEnabled.push(enabled)
+    return {
+      isPending: false,
+      isFetching: false,
+      isError: false,
+      refetch: mockRefetch,
+      ...mockQueries[queryKey[2]],
+    }
+  },
 }))
 jest.mock('jotai/react', () => ({ useSetAtom: () => jest.fn() }))
 jest.mock('~state/app', () => ({ historyAtom: {} }))
@@ -31,6 +36,7 @@ jest.mock('../useStrongEntryRoute', () => ({
     resources: {},
     identity: { kind: 'dstrong', code: 'G0266' },
     coreAvailability: {},
+    backgroundReady: mockBackgroundReady,
     entry: { stepCode: 'G0266', language: 'greek', gloss: 'sin' },
     languageState: { language: 'en' },
   }),
@@ -72,6 +78,8 @@ beforeAll(() => {
 beforeEach(() => {
   for (const key of Object.keys(mockQueries)) delete mockQueries[key]
   mockRefetch.mockClear()
+  mockBackgroundReady = true
+  mockEnabled.length = 0
   mockQueries.counts = availableCounts
   mockQueries['concordance-preview'] = availablePreview
 })
@@ -132,4 +140,20 @@ it('keeps available preview verses when loading the total fails', () => {
   expect(props.concordanceCount).toBeUndefined()
   expect(props.concordanceVerses).toEqual([verse])
   expect(props.concordanceError).toBe(true)
+})
+
+it('starts context and concordance automatically only after the essential view is ready', () => {
+  mockBackgroundReady = false
+  render()
+  expect(mockEnabled.every(enabled => !enabled)).toBe(true)
+  mockBackgroundReady = true
+  mockEnabled.length = 0
+  act(() => {
+    tree.update(
+      <StrongMainScreen
+        context={{ book: 45, bibleChapter: 6, bibleVerse: 23, bibleVersion: 'KJV' }}
+      />
+    )
+  })
+  expect(mockEnabled.slice(0, 4)).toEqual([true, true, true, true])
 })

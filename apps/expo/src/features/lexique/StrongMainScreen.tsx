@@ -37,12 +37,13 @@ const StrongMainScreen = ({
 }: StrongMainScreenProps) => {
   const pushRouteOnce = usePushRouteOnce()
   const activeContext = context
-  const entryState = useStrongEntryRoute(activeContext)
+  const entryState = useStrongEntryRoute(activeContext, true)
   const {
     resources,
     identity,
     coreAvailability,
     entry,
+    backgroundReady,
     languageState: { language: resourceLanguage },
   } = entryState
   const navigationKey = identity ? `${identity.kind}:${identity.code}` : 'unknown'
@@ -89,7 +90,7 @@ const StrongMainScreen = ({
       }
       return resources.lexiconBible.loadFoundVersesByBook(request)
     },
-    enabled: Boolean(entry),
+    enabled: Boolean(entry) && backgroundReady,
     networkMode: 'always',
   })
   const concordanceTotalQuery = useQuery({
@@ -103,7 +104,7 @@ const StrongMainScreen = ({
         reference: entry!.stepCode,
         allBooks: true,
       }),
-    enabled: Boolean(entry),
+    enabled: Boolean(entry) && backgroundReady,
     networkMode: 'always',
   })
   const lemmaStatsQuery = useQuery({
@@ -116,7 +117,7 @@ const StrongMainScreen = ({
         book: entry?.language === 'hebrew' ? 1 : 40,
         reference: entry!.stepCode,
       }),
-    enabled: Boolean(entry),
+    enabled: Boolean(entry) && backgroundReady,
     networkMode: 'always',
   })
   const contextVerseQuery = useQuery({
@@ -138,6 +139,7 @@ const StrongMainScreen = ({
         verse: activeContext.bibleVerse!,
       }),
     enabled: Boolean(
+      backgroundReady &&
       activeContext.bibleVersion &&
       activeContext.book &&
       activeContext.bibleChapter &&
@@ -158,7 +160,9 @@ const StrongMainScreen = ({
         resourceLanguage
       ),
     enabled: Boolean(
-      activeContext.morphologyCodes?.length && coreAvailability.data?.status === 'available'
+      backgroundReady &&
+      activeContext.morphologyCodes?.length &&
+      coreAvailability.data?.status === 'available'
     ),
     networkMode: 'always',
   })
@@ -257,8 +261,16 @@ const StrongMainScreen = ({
       {entry && (
         <StrongDetailMainPage
           entry={entry}
+          extrasLoading={entryState.extrasLoading}
+          extrasError={entryState.extrasError}
+          onRetryExtras={() => void entryState.retryExtras()}
           passageMedia={passageMedia}
           contextVerse={contextVerse}
+          contextLoading={contextVerseQuery.isPending}
+          contextError={
+            contextVerseQuery.isError || Boolean(contextVerseQuery.data && !contextVerse)
+          }
+          onRetryContext={() => void contextVerseQuery.refetch()}
           contextReference={contextReference}
           contextVersion={
             contextVerseQuery.data?.status === 'available'

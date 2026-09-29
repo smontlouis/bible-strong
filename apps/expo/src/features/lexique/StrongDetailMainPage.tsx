@@ -52,8 +52,14 @@ type Anchor = 'context' | 'definition' | 'media' | 'entity' | 'related' | 'conco
 
 type Props = {
   entry: StrongLexiconEntry
+  extrasLoading?: boolean
+  extrasError?: boolean
+  onRetryExtras?: () => void
   passageMedia: ResolvedPassageMedia[]
   contextVerse?: Verse
+  contextLoading?: boolean
+  contextError?: boolean
+  onRetryContext?: () => void
   contextReference?: string
   contextVersion?: string
   clickedWord?: string
@@ -158,7 +164,13 @@ const JumpNavigationContent = ({
 const StrongDetailMainPage = ({
   entry,
   passageMedia,
+  extrasLoading = false,
+  extrasError = false,
+  onRetryExtras,
   contextVerse,
+  contextLoading = false,
+  contextError = false,
+  onRetryContext,
   contextReference,
   contextVersion,
   clickedWord,
@@ -237,15 +249,14 @@ const StrongDetailMainPage = ({
   const hasDeepContent =
     Boolean(definition.deep || nameMeaningHtml || dictionaryResource) ||
     lexicalRelations.alternateSenses.length > 0
-  const hasLevelChoice = hasDeepContent || Boolean(contextVerse)
+  const hasLevelChoice =
+    hasDeepContent ||
+    Boolean(contextReference) ||
+    Boolean(contextVerse) ||
+    extrasLoading ||
+    extrasError
   const level = hasLevelChoice ? storedLevel : 'essential'
-  const contextKey = JSON.stringify([
-    entry.stepCode,
-    contextReference,
-    contextVersion,
-    contextText,
-    level,
-  ])
+  const contextKey = JSON.stringify([entry.stepCode, contextReference, contextVersion, level])
   const contextExpanded =
     contextDisclosure?.key === contextKey ? contextDisclosure.expanded : level === 'deep'
 
@@ -358,7 +369,7 @@ const StrongDetailMainPage = ({
         </PageContent>
       )}
 
-      {!!contextVerse && (
+      {(!!contextVerse || !!contextReference) && (
         <StrongEditorialSection
           title={t('strongDetail.context.title')}
           subtitle={[contextReference, contextVersion].filter(Boolean).join(' · ')}
@@ -367,12 +378,24 @@ const StrongDetailMainPage = ({
           onLayout={event => setAnchor('context', event.nativeEvent.layout.y)}
         >
           <VStack className="overflow-hidden border-continuous border-l-[3px] pl-[17px] py-[5px] gap-[10px]">
-            <HighlightedVerse
-              text={contextText ?? ''}
-              highlight={getStrongContextHighlight(contextVerse, entry, clickedWord || entry.gloss)}
-              untranslatedOffset={untranslatedContextOffset}
-              readingTypography={readingTypography}
-            />
+            {contextVerse ? (
+              <HighlightedVerse
+                text={contextText ?? ''}
+                highlight={getStrongContextHighlight(
+                  contextVerse,
+                  entry,
+                  clickedWord || entry.gloss
+                )}
+                untranslatedOffset={untranslatedContextOffset}
+                readingTypography={readingTypography}
+              />
+            ) : contextLoading ? (
+              <Loading message={t('Chargement...')} />
+            ) : contextError ? (
+              <TouchableBox onPress={onRetryContext} accessibilityRole="button" className="py-3">
+                <Text className="text-primary">{t('Réessayer')}</Text>
+              </TouchableBox>
+            ) : null}
             <VStack className="overflow-hidden border-continuous gap-[4px]">
               {level === 'deep' &&
                 contextMorphologies.map(morphology => (
@@ -438,6 +461,12 @@ const StrongDetailMainPage = ({
                   ))}
                 </VStack>
               </DefinitionBlock>
+            )}
+            {extrasLoading && <Loading message={t('Chargement...')} />}
+            {extrasError && (
+              <TouchableBox onPress={onRetryExtras} accessibilityRole="button" className="py-3">
+                <Text className="text-primary">{t('Réessayer')}</Text>
+              </TouchableBox>
             )}
             {dictionaryResource && (
               <DefinitionBlock title={t('strongDetail.definition.classicalGreek')}>

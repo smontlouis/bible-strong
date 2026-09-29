@@ -43,6 +43,7 @@ export class StrongLexiconEntryQuery extends Schema.Class<StrongLexiconEntryQuer
   language: StrongLexiconLanguage,
   level: Schema.optional(Schema.Literal('simple', 'detailed')),
   kind: Schema.optional(StrongLexiconIdentityKind),
+  content: Schema.optional(Schema.Literal('definitions', 'full')),
 }) {}
 
 export class StrongLexiconEntriesQuery extends Schema.Class<StrongLexiconEntriesQuery>(

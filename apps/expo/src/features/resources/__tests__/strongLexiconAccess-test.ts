@@ -107,6 +107,24 @@ describe('strongLexiconAccess', () => {
     )
   })
 
+  it('reads definitions and lexical relations without opening installed addons', async () => {
+    mockGetStrongLexiconModuleAvailability.mockImplementation(async moduleId => ({
+      status: 'available',
+      moduleId,
+    }))
+    const identity = { kind: 'dstrong' as const, code: 'H3068G' }
+    const definitions = await localStrongLexiconAccess.loadEntry(identity, 'fr', {
+      content: 'definitions',
+    })
+    expect(definitions?.definitionHtml).toBe('<p>celui qui existe</p>')
+    expect(definitions?.nameMeaningHtml).toBe('YHWH = « celui qui est »')
+    expect(mockWithOptionalStrongLexiconDatabase).not.toHaveBeenCalled()
+    const full = await localStrongLexiconAccess.loadEntry(identity, 'fr')
+    expect(full?.definitionHtml).toBe(definitions?.definitionHtml)
+    expect(full?.relations).toEqual(definitions?.relations)
+    expect(mockWithOptionalStrongLexiconDatabase).toHaveBeenCalledTimes(2)
+  })
+
   it('normalizes unpadded KJV identities for HTTP cards while preserving occurrence matching', async () => {
     const identities = [
       { kind: 'dstrong' as const, code: 'H430G' },
@@ -1152,6 +1170,23 @@ const createHybridStub = (
 })
 
 describe('hybrid Strong lexicon routing', () => {
+  it('does not wait for remote addons when definitions are installed', async () => {
+    const offline = createHybridStub({ core: 'available' }, 'offline')
+    const online = createHybridStub('available', 'online')
+    const access = createHybridStrongLexiconAccess({
+      offline,
+      online,
+      remotelyReadable: true,
+      isOnline: async () => true,
+    })
+    const identity = { kind: 'strong' as const, code: 'G3056' }
+    await access.loadEntry(identity, 'fr', { content: 'definitions' })
+    expect(offline.loadEntry).toHaveBeenCalledWith(identity, 'fr', { content: 'definitions' })
+    expect(online.loadEntry).not.toHaveBeenCalled()
+    await access.loadEntry(identity, 'fr')
+    expect(online.loadEntry).toHaveBeenCalledTimes(1)
+  })
+
   it('prefers an installed entry over HTTP', async () => {
     const offline = createHybridStub('available', 'offline')
     const online = createHybridStub('available', 'online')

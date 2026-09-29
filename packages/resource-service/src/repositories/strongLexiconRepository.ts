@@ -887,7 +887,9 @@ export const makeKyselyStrongLexiconRepository = (
           }
         }
         const resourcePublication =
-          resourcesState.status === 'available' ? await activePublication('resources') : undefined
+          input.content !== 'definitions' && resourcesState.status === 'available'
+            ? await activePublication('resources')
+            : undefined
         const resourceRows = resourcePublication
           ? (
               await records(resourcePublication.id, 'LexiconResources', query =>
@@ -908,7 +910,7 @@ export const makeKyselyStrongLexiconRepository = (
               )
             : []
         let entity: StrongLexiconEntity | undefined
-        if (entitiesState.status === 'available') {
+        if (input.content !== 'definitions' && entitiesState.status === 'available') {
           const entityPublication = await activePublication('entities')
           let entityCandidates = entityPublication
             ? await records(entityPublication.id, 'Entities', query =>

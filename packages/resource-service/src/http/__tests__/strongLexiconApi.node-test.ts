@@ -112,6 +112,32 @@ const request = (path: string) =>
   })
 
 describe('v1 Strong lexicon API', () => {
+  it('forwards the lightweight projection and isolates its ETag from full entries', async () => {
+    const contents: (string | undefined)[] = []
+    const web = makeResourceWebHandler(undefined, undefined, {
+      strongLexicon: {
+        ...repository,
+        findEntry: input => {
+          contents.push(input.content)
+          return repository.findEntry(input)
+        },
+      },
+    })
+    try {
+      const full = await web.handler(request('/v1/strong-lexicon/entries/G3056?language=fr'))
+      const definitions = await web.handler(
+        request('/v1/strong-lexicon/entries/G3056?language=fr&content=definitions')
+      )
+      assert.equal(full.status, 200)
+      assert.equal(definitions.status, 200)
+      assert.deepEqual(contents, [undefined, 'definitions'])
+      assert.ok(full.headers.get('etag'))
+      assert.notEqual(full.headers.get('etag'), definitions.headers.get('etag'))
+    } finally {
+      await web.dispose()
+    }
+  })
+
   it('forwards the simple level and locale across every lexical read', async () => {
     const calls: { language: string; level?: string }[] = []
     const simpleRepository: StrongLexiconRepositoryService = {

@@ -914,6 +914,7 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
           reference: path.reference,
           language: urlParams.language,
           level: urlParams.level,
+          content: urlParams.content,
           ...(urlParams.kind ? { kind: urlParams.kind } : {}),
         }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
         requestId,
@@ -924,6 +925,7 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
           urlParams.language,
           urlParams.kind ?? 'strong',
           urlParams.level ?? 'detailed',
+          urlParams.content ?? 'full',
         ]
       )
     })

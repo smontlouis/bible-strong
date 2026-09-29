@@ -134,3 +134,23 @@ it('preserves an empty result from the preview source identity filter', async ()
   const access = createLayeredStrongLexiconAccess(simple, source())
   expect(await access.loadPreview([identity], 'fr')).toEqual([])
 })
+
+it('loads both definition texts first, then only detailed extras without replacing either text', async () => {
+  const simple = source(entry('Simple'))
+  const detailed = source(entry('STEP'))
+  const basicRead = jest.spyOn(simple, 'loadEntry')
+  const detailedRead = jest.spyOn(detailed, 'loadEntry')
+  const access = createLayeredStrongLexiconAccess(simple, detailed)
+  const first = await access.loadEntry(identity, 'fr', { content: 'definitions' })
+  expect(basicRead).toHaveBeenCalledWith(identity, 'fr', { content: 'definitions' })
+  expect(detailedRead).toHaveBeenCalledWith(identity, 'fr', { content: 'definitions' })
+  const extras = await access.loadEntryExtras!(identity, 'fr')
+  expect(basicRead).toHaveBeenCalledTimes(1)
+  expect(detailedRead).toHaveBeenCalledTimes(2)
+  expect(extras).not.toHaveProperty('definitionHtml')
+  expect(extras).not.toHaveProperty('relations')
+  expect({ ...first, ...extras }).toMatchObject({
+    definitionHtml: 'Simple',
+    detailedDefinitionHtml: 'STEP',
+  })
+})
