@@ -369,7 +369,7 @@ const executeFirestoreSyncOutboxEntry = async ({
     return
   }
 
-  const reference = doc(firebaseDb, ...intent.path)
+  const reference = doc(firebaseDb, intent.path.join('/'))
   if (intent.kind === 'document-delete') {
     await deleteDoc(reference)
     return

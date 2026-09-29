@@ -1,4 +1,4 @@
-import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
+import type { QueryDocumentSnapshot } from '@react-native-firebase/firestore'
 
 import { firebaseDb, doc, getDoc, getDocs, setDoc } from '~helpers/firebase'
 import {
@@ -50,7 +50,7 @@ const persistence: LegacyFirestoreReferencesPersistence = {
   async readSubcollection(userId, collection) {
     const snapshot = await withInspectionTimeout(getDocs(getSubcollectionRef(userId, collection)))
     const documents: Record<string, unknown> = {}
-    snapshot.docs.forEach((document: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
+    snapshot.docs.forEach((document: QueryDocumentSnapshot) => {
       documents[decodeDocumentId(document.id)] = document.data()
     })
     return documents

@@ -1,18 +1,15 @@
 import { useEffect } from 'react'
-import {
-  getRemoteConfig,
-  setDefaults,
-  fetchAndActivate,
-} from '@react-native-firebase/remote-config'
+import { getRemoteConfig, fetchAndActivate } from '@react-native-firebase/remote-config'
 
 export const useRemoteConfig = (enabled = true) => {
   useEffect(() => {
     if (!enabled) return
     ;(async () => {
       const rc = getRemoteConfig()
-      await setDefaults(rc, {
+      // Queued before fetchAndActivate, which waits for pending native mutations.
+      rc.defaultConfig = {
         apple_reviewing: false,
-      })
+      }
       const fetchedRemotely = await fetchAndActivate(rc)
 
       if (fetchedRemotely) {

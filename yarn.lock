@@ -2487,13 +2487,13 @@ __metadata:
     "@react-native-clipboard/clipboard": "npm:^1.14.0"
     "@react-native-community/cli-config": "npm:^13.6.4"
     "@react-native-community/netinfo": "npm:12.0.1"
-    "@react-native-firebase/analytics": "npm:23.7.0"
-    "@react-native-firebase/app": "npm:23.7.0"
-    "@react-native-firebase/app-check": "npm:23.7.0"
-    "@react-native-firebase/auth": "npm:23.7.0"
-    "@react-native-firebase/firestore": "npm:23.7.0"
-    "@react-native-firebase/remote-config": "npm:23.7.0"
-    "@react-native-firebase/storage": "npm:23.7.0"
+    "@react-native-firebase/analytics": "npm:26.4.0"
+    "@react-native-firebase/app": "npm:26.4.0"
+    "@react-native-firebase/app-check": "npm:26.4.0"
+    "@react-native-firebase/auth": "npm:26.4.0"
+    "@react-native-firebase/firestore": "npm:26.4.0"
+    "@react-native-firebase/remote-config": "npm:26.4.0"
+    "@react-native-firebase/storage": "npm:26.4.0"
     "@react-native-google-signin/google-signin": "npm:^16.0.0"
     "@react-native-masked-view/masked-view": "patch:@react-native-masked-view/masked-view@npm%3A0.3.2#~/.yarn/patches/@react-native-masked-view-masked-view-npm-0.3.2-7e49df0087.patch"
     "@react-native/metro-config": "npm:0.85.3"
@@ -4661,6 +4661,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@expo/plist@npm:^0.8.1":
+  version: 0.8.1
+  resolution: "@expo/plist@npm:0.8.1"
+  dependencies:
+    "@xmldom/xmldom": "npm:^0.8.8"
+    base64-js: "npm:^1.5.1"
+    xmlbuilder: "npm:^15.1.1"
+  checksum: 10c0/45f130f3d5155d46dc415ab61b97449d5cc7bf47e41ed37965f12e50cc9728aa7c4da83fc958a8d7113e31e4342baebc1b2517de7e20186f3e64d53be378a9ce
+  languageName: node
+  linkType: hard
+
 "@expo/prebuild-config@npm:^56.0.16":
   version: 56.0.16
   resolution: "@expo/prebuild-config@npm:56.0.16"
@@ -4877,6 +4888,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/ai@npm:2.14.0":
+  version: 2.14.0
+  resolution: "@firebase/ai@npm:2.14.0"
+  dependencies:
+    "@firebase/app-check-interop-types": "npm:0.3.4"
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+    "@firebase/app-types": 0.x
+  checksum: 10c0/c2c28638097dfa36301e7393970477f497eb58a767c9c0dfb947a5986229ea0549d981130edad21abde23dcf21e60178ff5aa90f7b5876d755902a2fc2a3c318
+  languageName: node
+  linkType: hard
+
 "@firebase/ai@npm:2.6.0":
   version: 2.6.0
   resolution: "@firebase/ai@npm:2.6.0"
@@ -4908,6 +4935,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/analytics-compat@npm:0.2.29":
+  version: 0.2.29
+  resolution: "@firebase/analytics-compat@npm:0.2.29"
+  dependencies:
+    "@firebase/analytics": "npm:0.10.23"
+    "@firebase/analytics-types": "npm:0.8.4"
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+    "@firebase/app-compat": 0.x
+  checksum: 10c0/6a2f5b1445e116958c0df8591329c70999b4a492708be7ac07b7fac383c72fa24de701458abdf1f8f0e453566f74cde8fee7c55e635583b4c3726b6255115813
+  languageName: node
+  linkType: hard
+
 "@firebase/analytics-types@npm:0.6.0":
   version: 0.6.0
   resolution: "@firebase/analytics-types@npm:0.6.0"
@@ -4919,6 +4962,13 @@ __metadata:
   version: 0.8.3
   resolution: "@firebase/analytics-types@npm:0.8.3"
   checksum: 10c0/2cbc5fe8425bc01c7ba03579cdc5ca6b23de51b08edb62927be610a33bbc961bae97aa48ee12dcdb039b752c158d095f234ed20f1f4d2bd7a5c39f44d82cdf22
+  languageName: node
+  linkType: hard
+
+"@firebase/analytics-types@npm:0.8.4":
+  version: 0.8.4
+  resolution: "@firebase/analytics-types@npm:0.8.4"
+  checksum: 10c0/5dd5929eab551855c8338ed97c1a4ef18713501611ea9226f391410800f9736490500d6decdda777c8dc37ac615b59fd50127559e486dfac91690a07394a0fb6
   languageName: node
   linkType: hard
 
@@ -4934,6 +4984,21 @@ __metadata:
   peerDependencies:
     "@firebase/app": 0.x
   checksum: 10c0/9af9b74ad285df0b3fa04abf4653dfed436e698193f28b50bf309948b1288de21d91114fab94d7ae29a3c9950d6cbebd7355a5a752a2e936d9375fa71f26728f
+  languageName: node
+  linkType: hard
+
+"@firebase/analytics@npm:0.10.23":
+  version: 0.10.23
+  resolution: "@firebase/analytics@npm:0.10.23"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/installations": "npm:0.6.23"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+  checksum: 10c0/c066d9c24db6875818f63f574ae8bc742083da6f461cebba2e1ba288db0a0db8c28f9ef7c5eee2638121e7468801c917305bacd9111020adbf7cff1d57297f45
   languageName: node
   linkType: hard
 
@@ -4970,6 +5035,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/app-check-compat@npm:0.4.6":
+  version: 0.4.6
+  resolution: "@firebase/app-check-compat@npm:0.4.6"
+  dependencies:
+    "@firebase/app-check": "npm:0.13.0"
+    "@firebase/app-check-types": "npm:0.5.4"
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+    "@firebase/app-compat": 0.x
+  checksum: 10c0/b34cef9bb851b5f0f103168aa7b9c8c65518350d00048d7e152f94e959f638a1daa3a5f202bf0a0d93d28d00df068e858727f510fc855c6e8c48073093cc5c83
+  languageName: node
+  linkType: hard
+
 "@firebase/app-check-interop-types@npm:0.1.0":
   version: 0.1.0
   resolution: "@firebase/app-check-interop-types@npm:0.1.0"
@@ -4981,6 +5063,13 @@ __metadata:
   version: 0.3.3
   resolution: "@firebase/app-check-interop-types@npm:0.3.3"
   checksum: 10c0/4a887ef5e30ee1a407b569603c433a9f21244d50a19d97a5f1f17d8f5caea83096852b39e67d599f3238f1f7e2a369b02d184a184986a649ed1f8fed12fbd6be
+  languageName: node
+  linkType: hard
+
+"@firebase/app-check-interop-types@npm:0.3.4":
+  version: 0.3.4
+  resolution: "@firebase/app-check-interop-types@npm:0.3.4"
+  checksum: 10c0/1861470d0e3f4fcff5e46bd9e9cc9c2408988eb01d661bac791e0dd511dde20e148503c923c8808f6921a70c523740f102c55615e0393158277d643fcec21c1c
   languageName: node
   linkType: hard
 
@@ -5005,6 +5094,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/app-check-types@npm:0.5.4":
+  version: 0.5.4
+  resolution: "@firebase/app-check-types@npm:0.5.4"
+  checksum: 10c0/945edf0f14a8e432893a36594028b78c728e56ebbf41543019b0b5319b987e38b7b374268589905b8827bb16af06cbb2682218d9b0bb50efd7d2cab13e40e825
+  languageName: node
+  linkType: hard
+
 "@firebase/app-check@npm:0.11.0":
   version: 0.11.0
   resolution: "@firebase/app-check@npm:0.11.0"
@@ -5016,6 +5112,20 @@ __metadata:
   peerDependencies:
     "@firebase/app": 0.x
   checksum: 10c0/3229c02c2496d8bca9893f4dcc67fd3e97d833ca84a86de38768f3e46cde183415201683ed7d73672c720f0047e960e5855ca9dfbc4aba358b40348fa1b72833
+  languageName: node
+  linkType: hard
+
+"@firebase/app-check@npm:0.13.0":
+  version: 0.13.0
+  resolution: "@firebase/app-check@npm:0.13.0"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+  checksum: 10c0/e115c0f45c7e67f541d4a0ff8ac6058b5d521ed5779582c0e333aca37d44ebd41a904a94b6027129578d651bd6e45873591fda4f993158161091bd60ce760618
   languageName: node
   linkType: hard
 
@@ -5033,6 +5143,19 @@ __metadata:
     "@firebase/app": 0.x
     "@firebase/app-types": 0.x
   checksum: 10c0/eefc2407debcbb4e6dcf52c6b09c814fe52621b40e9c181d8c4f886b1c0a278f721ab64262a6ffe2d4166d3392c887b7c57bad1db514901200a2d1f48b0d1808
+  languageName: node
+  linkType: hard
+
+"@firebase/app-compat@npm:0.5.16":
+  version: 0.5.16
+  resolution: "@firebase/app-compat@npm:0.5.16"
+  dependencies:
+    "@firebase/app": "npm:0.16.0"
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  checksum: 10c0/b8cc9a10a1ee9c8a94fc8fcec387d21d03a5f23bced02f8c3a40902024adf7cb7a3609fa2d1fdc57fd7ecd7cd64aac9b6c8ba95aff2a552387874776d55a2398
   languageName: node
   linkType: hard
 
@@ -5063,6 +5186,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/app-types@npm:0.9.5":
+  version: 0.9.5
+  resolution: "@firebase/app-types@npm:0.9.5"
+  dependencies:
+    "@firebase/logger": "npm:0.5.1"
+  checksum: 10c0/997c2deab31ac1666b10dd9fbcf6198266581ac9d1228c90969331edf1c94554312f3c828748322a444d00dcbf88e06071926c2ba565228f128d7af3e70811bd
+  languageName: node
+  linkType: hard
+
 "@firebase/app-types@npm:0.9.6":
   version: 0.9.6
   resolution: "@firebase/app-types@npm:0.9.6"
@@ -5082,6 +5214,19 @@ __metadata:
     idb: "npm:7.1.1"
     tslib: "npm:^2.1.0"
   checksum: 10c0/bc79488a20ec065929a7de8c39560c507b80e85bc892a784b1a3ba44e4f57c203b27755c6b2cb1699f13ac1f7fca7ecc7bad3de1673d4788c1f7063037ced9f9
+  languageName: node
+  linkType: hard
+
+"@firebase/app@npm:0.16.0":
+  version: 0.16.0
+  resolution: "@firebase/app@npm:0.16.0"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/util": "npm:1.15.2"
+    idb: "npm:7.1.1"
+    tslib: "npm:^2.1.0"
+  checksum: 10c0/98c9bc55a0e5a6f6c307f756c082b61b688e8eddc78d76f44042b0d0d9452bd3640bd7cd8aeda12bb4cc5bcd355bd42e73a538158e4778e6fe762ce032ee0bf0
   languageName: node
   linkType: hard
 
@@ -5115,6 +5260,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/auth-compat@npm:0.6.9":
+  version: 0.6.9
+  resolution: "@firebase/auth-compat@npm:0.6.9"
+  dependencies:
+    "@firebase/auth": "npm:1.13.4"
+    "@firebase/auth-types": "npm:0.13.1"
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+    "@firebase/app-compat": 0.x
+  checksum: 10c0/dc31cfef021c2e36c97e91f6a545907752282b9111bc28caef4a2488a80ef9cd24478b71e6ea772b68dd171b97aaf6e69ef8488672d2bb773c440c0949e25ada
+  languageName: node
+  linkType: hard
+
 "@firebase/auth-interop-types@npm:0.1.6":
   version: 0.1.6
   resolution: "@firebase/auth-interop-types@npm:0.1.6"
@@ -5129,6 +5290,13 @@ __metadata:
   version: 0.2.4
   resolution: "@firebase/auth-interop-types@npm:0.2.4"
   checksum: 10c0/ff833bcbb472992c6061847309e338dac736c616522c5fd808526d6dc13b9788458a8c9677d91c33c1288ee38f42896c2b4b8fe10ee74f1569d11f3f3c4f53b5
+  languageName: node
+  linkType: hard
+
+"@firebase/auth-interop-types@npm:0.2.5":
+  version: 0.2.5
+  resolution: "@firebase/auth-interop-types@npm:0.2.5"
+  checksum: 10c0/1a0a72935b2809f1b9c57e1fda2eb53b741cf4f2e78b295d45bf4d14829d51ce3b6f86b6d4ce6b867b5878c223c10032d11fdf82d0ab4a10b30dd4803fa287ae
   languageName: node
   linkType: hard
 
@@ -5156,6 +5324,16 @@ __metadata:
     "@firebase/app-types": 0.x
     "@firebase/util": 1.x
   checksum: 10c0/a844c4a083ade9ae946337ec7d7fca8b0a384439be455d6d60d1ba01671c34b2b5162b7b8c1341a699fa70f78948c145c3bbe4723ca444f3b2f17cace40a4fd9
+  languageName: node
+  linkType: hard
+
+"@firebase/auth-types@npm:0.13.1":
+  version: 0.13.1
+  resolution: "@firebase/auth-types@npm:0.13.1"
+  peerDependencies:
+    "@firebase/app-types": 0.x
+    "@firebase/util": 1.x
+  checksum: 10c0/598273dfccb4d112fd9e6026433ac8ce4716b7ac466e80c0f9b1f6d892c44a575f52f7e43341fe5bdae863f59f5532816f2acd13479e88db6650d421c17839e2
   languageName: node
   linkType: hard
 
@@ -5188,6 +5366,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/auth@npm:1.13.4":
+  version: 1.13.4
+  resolution: "@firebase/auth@npm:1.13.4"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+    "@react-native-async-storage/async-storage": ^2.2.0 || ^3.0.0
+  peerDependenciesMeta:
+    "@react-native-async-storage/async-storage":
+      optional: true
+  checksum: 10c0/a4534443e05147a7d16cd62eeb3613c8f0c72d5f4abfe098a451c833833c3fad33c8dad5484956036be554e614e51e79fc2c63bf619b038f5c50d0a52a1f947f
+  languageName: node
+  linkType: hard
+
 "@firebase/component@npm:0.5.6":
   version: 0.5.6
   resolution: "@firebase/component@npm:0.5.6"
@@ -5205,6 +5401,16 @@ __metadata:
     "@firebase/util": "npm:1.13.0"
     tslib: "npm:^2.1.0"
   checksum: 10c0/10e78f51a0c6764dbfe3863eda05b8d6e8ec431430bec165891b0b9c0eca06faf7851c5ec6a6b669f3e0cfab5d997a6f0510b1920c0424e83162a53812220e1a
+  languageName: node
+  linkType: hard
+
+"@firebase/component@npm:0.7.4":
+  version: 0.7.4
+  resolution: "@firebase/component@npm:0.7.4"
+  dependencies:
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  checksum: 10c0/1a06eaf1fe8be03df2af8b28c0963fbbb6f52b18cc9e1e80c2f90d3b686ce13903c9b197400352baa83a3a6e12f17fc39c4b9d24a1fb728ae7d97db5c2a0dfe3
   languageName: node
   linkType: hard
 
@@ -5233,6 +5439,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/data-connect@npm:0.7.3":
+  version: 0.7.3
+  resolution: "@firebase/data-connect@npm:0.7.3"
+  dependencies:
+    "@firebase/auth-interop-types": "npm:0.2.5"
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+  checksum: 10c0/acb3fdcf60390f0edc9465ac87e3efcf29a37776909f3547871a75bffda06573af52fd50ff855e501d509aeae4ca36e8db3fae46e6169098a3587ed474b5637e
+  languageName: node
+  linkType: hard
+
 "@firebase/database-compat@npm:2.1.0":
   version: 2.1.0
   resolution: "@firebase/database-compat@npm:2.1.0"
@@ -5244,6 +5465,28 @@ __metadata:
     "@firebase/util": "npm:1.13.0"
     tslib: "npm:^2.1.0"
   checksum: 10c0/f9b29c27b08915ba3310efafb5dee4fb024a9f20c66560740d1a9a8569a72a2479163a353c6ae0559f5fcab165518348f749a7bb07a5c22e446bc93826f34b8a
+  languageName: node
+  linkType: hard
+
+"@firebase/database-compat@npm:2.1.6":
+  version: 2.1.6
+  resolution: "@firebase/database-compat@npm:2.1.6"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/database": "npm:1.1.4"
+    "@firebase/database-types": "npm:1.0.21"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+    "@firebase/app-compat": 0.x
+  peerDependenciesMeta:
+    "@firebase/app":
+      optional: true
+    "@firebase/app-compat":
+      optional: true
+  checksum: 10c0/3d2c5dd5bae6bb8fe968f6f215fd8c2f79be67b38da5d90123806d49295004689da39dbd37424aeea6cfd023137d7b42374d0aae4637a3d65aa7bea8898be1ac
   languageName: node
   linkType: hard
 
@@ -5289,6 +5532,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/database-types@npm:1.0.21":
+  version: 1.0.21
+  resolution: "@firebase/database-types@npm:1.0.21"
+  dependencies:
+    "@firebase/app-types": "npm:0.9.5"
+    "@firebase/util": "npm:1.15.2"
+  checksum: 10c0/dd23b2868916d287ee96638a826758e26e6f9ad250a5d1abead5416942bcfc1ec013fb796fa480f8dffc15d9ce30a9f0381464574885e3e856f75e80faccc675
+  languageName: node
+  linkType: hard
+
 "@firebase/database-types@npm:1.0.22, @firebase/database-types@npm:^1.0.6":
   version: 1.0.22
   resolution: "@firebase/database-types@npm:1.0.22"
@@ -5329,6 +5582,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/database@npm:1.1.4":
+  version: 1.1.4
+  resolution: "@firebase/database@npm:1.1.4"
+  dependencies:
+    "@firebase/app-check-interop-types": "npm:0.3.4"
+    "@firebase/auth-interop-types": "npm:0.2.5"
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/util": "npm:1.15.2"
+    faye-websocket: "npm:0.11.4"
+    tslib: "npm:^2.1.0"
+  checksum: 10c0/dd50ad9dbf8e662df377bcc7d9f8f8b36c7c0e7269923747cb555805f370ca9cb37f58dc370055960ec9ee596857c22b4308729669de5a14022e92b4057fe7f5
+  languageName: node
+  linkType: hard
+
 "@firebase/database@npm:1.1.5":
   version: 1.1.5
   resolution: "@firebase/database@npm:1.1.5"
@@ -5341,6 +5609,22 @@ __metadata:
     faye-websocket: "npm:0.11.4"
     tslib: "npm:^2.1.0"
   checksum: 10c0/a844b69ab0e60eb5e3e599c3f4229c107c3582b592f0eb7b08e4dd7785e49c4aeb574f2b1e426cfbab71f89ee9b4aaca359f6b170b78877c6de452ceab917f77
+  languageName: node
+  linkType: hard
+
+"@firebase/firestore-compat@npm:0.4.12":
+  version: 0.4.12
+  resolution: "@firebase/firestore-compat@npm:0.4.12"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/firestore": "npm:4.17.0"
+    "@firebase/firestore-types": "npm:3.0.4"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+    "@firebase/app-compat": 0.x
+  checksum: 10c0/5e4947ec736df8b5f11265a7b4a8c39956e00f9013d2db89bb96f6286d796ab63b49b993ad234293843725e53a25a91c3935d17b891f00a01f49efb4a0a76945
   languageName: node
   linkType: hard
 
@@ -5379,6 +5663,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/firestore-types@npm:3.0.4":
+  version: 3.0.4
+  resolution: "@firebase/firestore-types@npm:3.0.4"
+  peerDependencies:
+    "@firebase/app-types": 0.x
+    "@firebase/util": 1.x
+  checksum: 10c0/8370f76b9ed06e8a6982af70d077b4b369ebcb322e334180c74d5c581d6487353f1bdf64a5ba0d62cac64dfc5973f4697d81257cf2927e305fa4e54fad3d9e6d
+  languageName: node
+  linkType: hard
+
 "@firebase/firestore@npm:2.4.1":
   version: 2.4.1
   resolution: "@firebase/firestore@npm:2.4.1"
@@ -5396,6 +5690,24 @@ __metadata:
     "@firebase/app": 0.x
     "@firebase/app-types": 0.x
   checksum: 10c0/65bc8e8a87a374e80f7a560af7de2b51f306df7c32bb6b7ec84ca9a29503e09569c6f2ff608a787553f52d0be3723bbadb0ebba88d6203c80b37acf7a30299e6
+  languageName: node
+  linkType: hard
+
+"@firebase/firestore@npm:4.17.0":
+  version: 4.17.0
+  resolution: "@firebase/firestore@npm:4.17.0"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/util": "npm:1.15.2"
+    "@firebase/webchannel-wrapper": "npm:1.0.6"
+    "@grpc/grpc-js": "npm:~1.9.0"
+    "@grpc/proto-loader": "npm:^0.7.8"
+    re2js: "npm:^2.8.3"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+  checksum: 10c0/4979c0447c0aeba264445b08b94e0bbd902e51459e3b5b6b290816640a41df329e04fb44e0c3335689aab95fe0200e3732b27986d8f9be97ce4ac832cb817249
   languageName: node
   linkType: hard
 
@@ -5431,6 +5743,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/functions-compat@npm:0.4.6":
+  version: 0.4.6
+  resolution: "@firebase/functions-compat@npm:0.4.6"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/functions": "npm:0.13.6"
+    "@firebase/functions-types": "npm:0.6.4"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+    "@firebase/app-compat": 0.x
+  checksum: 10c0/73c07b70ded522d871a189bdc875464954cb55ad711a8160b61a092ad441c4a9aee218c848ebd05b3c257cdf58eeab4e719b149cd4e8c01558556256adcdb1f4
+  languageName: node
+  linkType: hard
+
 "@firebase/functions-types@npm:0.4.0":
   version: 0.4.0
   resolution: "@firebase/functions-types@npm:0.4.0"
@@ -5442,6 +5770,13 @@ __metadata:
   version: 0.6.3
   resolution: "@firebase/functions-types@npm:0.6.3"
   checksum: 10c0/aabd7bdd8c479323a419bba9ad275d96cd44229bd2213c87be08a9978af5ff0c1306279229a358c77280ce54fa6f42c91a6fd6c947808b1103174db0261b86e1
+  languageName: node
+  linkType: hard
+
+"@firebase/functions-types@npm:0.6.4":
+  version: 0.6.4
+  resolution: "@firebase/functions-types@npm:0.6.4"
+  checksum: 10c0/50f1e50fc58f9a297e05c888a555b7bf085be5f5c4284e035cf3ebfc63016fa2b6dbf8de5e4a343b04f98e357525968e6254eabd271eb3b2548fa297770c7f68
   languageName: node
   linkType: hard
 
@@ -5458,6 +5793,22 @@ __metadata:
   peerDependencies:
     "@firebase/app": 0.x
   checksum: 10c0/cf2436708142c1b6aee5808dd76cbc7ed66b1448e806f3c1b8793f24b9bfc6963039eaf1fe84c3d1e0d121cee95d23e646dee4f92fe1d94f9ee73973b12c36dc
+  languageName: node
+  linkType: hard
+
+"@firebase/functions@npm:0.13.6":
+  version: 0.13.6
+  resolution: "@firebase/functions@npm:0.13.6"
+  dependencies:
+    "@firebase/app-check-interop-types": "npm:0.3.4"
+    "@firebase/auth-interop-types": "npm:0.2.5"
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/messaging-interop-types": "npm:0.2.5"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+  checksum: 10c0/722540c76a1b5ef9b7725d520767fd8a4bc2a302ec058c8a6056c96c575451ce5a9f4c3e995d26ce541dc8a5d37f41c17f19f511ace4682e015aa781d2fd794b
   languageName: node
   linkType: hard
 
@@ -5492,6 +5843,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/installations-compat@npm:0.2.23":
+  version: 0.2.23
+  resolution: "@firebase/installations-compat@npm:0.2.23"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/installations": "npm:0.6.23"
+    "@firebase/installations-types": "npm:0.5.4"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+    "@firebase/app-compat": 0.x
+  checksum: 10c0/b2a120890f85a6921b595970fd39070334611f5400ed1266eeb98c8dc47544e0de957ce11cfae4a73be62fe7823fcfa94103fe73073f19b7dcd3c4446f9a82a4
+  languageName: node
+  linkType: hard
+
 "@firebase/installations-types@npm:0.3.4":
   version: 0.3.4
   resolution: "@firebase/installations-types@npm:0.3.4"
@@ -5507,6 +5874,15 @@ __metadata:
   peerDependencies:
     "@firebase/app-types": 0.x
   checksum: 10c0/f8af07a17e9c0cd1738009b880579b57d112f991ac99e4a17f327d89ad9f8f633fd50757bfd97f470edcc62045526dc59432fb7fcb1f76daa3c72c975519af62
+  languageName: node
+  linkType: hard
+
+"@firebase/installations-types@npm:0.5.4":
+  version: 0.5.4
+  resolution: "@firebase/installations-types@npm:0.5.4"
+  peerDependencies:
+    "@firebase/app-types": 0.x
+  checksum: 10c0/56148089894be055fa3b98b666bc2e75c6f6c679f79a6fc9b1d65e6f58e2d545df283149c990ae56910e39487a5cd65b4d753dd3b4eeea30b61e1691e7c5f134
   languageName: node
   linkType: hard
 
@@ -5540,6 +5916,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/installations@npm:0.6.23":
+  version: 0.6.23
+  resolution: "@firebase/installations@npm:0.6.23"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/util": "npm:1.15.2"
+    idb: "npm:7.1.1"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+  checksum: 10c0/f37e5c75d1c4d733f5eada386c3c879fba552c4bd212a96aec0fc428a942ad9e79cbd4ba142008d0fac4886adedca3ab6144c8771f05a4ad5db5fbf129b15796
+  languageName: node
+  linkType: hard
+
 "@firebase/logger@npm:0.2.6":
   version: 0.2.6
   resolution: "@firebase/logger@npm:0.2.6"
@@ -5553,6 +5943,15 @@ __metadata:
   dependencies:
     tslib: "npm:^2.1.0"
   checksum: 10c0/c9bfa2381b89b7dc674aeaaa497b73076041c56d6d65cbebcb3227c264b737394528d7f94658a7acb169bd14793cfcb33865207b2d32a7a6ac858e68c5c61b7e
+  languageName: node
+  linkType: hard
+
+"@firebase/logger@npm:0.5.1":
+  version: 0.5.1
+  resolution: "@firebase/logger@npm:0.5.1"
+  dependencies:
+    tslib: "npm:^2.1.0"
+  checksum: 10c0/ce8644943452e2e1cc00fe4eab2d63c8a0ba6767beb0e57d2ea11f609b5ffa6956c2ec8d6a01efae07a4932b70180c8a07540c53e1ddd876b2baa5858185c247
   languageName: node
   linkType: hard
 
@@ -5579,10 +5978,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/messaging-compat@npm:0.2.28":
+  version: 0.2.28
+  resolution: "@firebase/messaging-compat@npm:0.2.28"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/messaging": "npm:0.13.1"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+    "@firebase/app-compat": 0.x
+  checksum: 10c0/ab68386d67fbc898e9d32c31705b27eff2b4c175954266ff04e802e054c1b5e73c41dc60bd29df29b6baa4db7a9018f33c3801e56936ea1224264bfe4abff24c
+  languageName: node
+  linkType: hard
+
 "@firebase/messaging-interop-types@npm:0.2.3":
   version: 0.2.3
   resolution: "@firebase/messaging-interop-types@npm:0.2.3"
   checksum: 10c0/a6fb8f02db6a93f277cb5bd530934509e49465f775f2b5ed159116d9ce30b6255213781639b98984ff8b424a8fc36a8e5779e0cc3f0cf5e1bdbd41ae938d6c39
+  languageName: node
+  linkType: hard
+
+"@firebase/messaging-interop-types@npm:0.2.5":
+  version: 0.2.5
+  resolution: "@firebase/messaging-interop-types@npm:0.2.5"
+  checksum: 10c0/edffb0e4e5b630ee05f65ab3bbcf71657f05f67da645ec4c1f2d3e7a4abf5d541ef38348599ae5fb584ae9b341a74abab9a162be01695f4181e02b234c549159
   languageName: node
   linkType: hard
 
@@ -5608,6 +6029,22 @@ __metadata:
   peerDependencies:
     "@firebase/app": 0.x
   checksum: 10c0/6c0ca7bc41149261420ac4385921d421656be8a388be5caa0bfb28ba16093aa8e7df30707ab0e5ddeadc2778e81beb2e945d72a2908248b2a1ae7c2bd6711592
+  languageName: node
+  linkType: hard
+
+"@firebase/messaging@npm:0.13.1":
+  version: 0.13.1
+  resolution: "@firebase/messaging@npm:0.13.1"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/installations": "npm:0.6.23"
+    "@firebase/messaging-interop-types": "npm:0.2.5"
+    "@firebase/util": "npm:1.15.2"
+    idb: "npm:7.1.1"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+  checksum: 10c0/cdcb463a782298a217831cfd14aa74393256d6dbffc2e8296e365dea6e68c93a17dd151015e7bee79b69a878120c3164e5f27320dd9fdcd6488867275199ed69
   languageName: node
   linkType: hard
 
@@ -5644,6 +6081,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/performance-compat@npm:0.2.26":
+  version: 0.2.26
+  resolution: "@firebase/performance-compat@npm:0.2.26"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/performance": "npm:0.7.13"
+    "@firebase/performance-types": "npm:0.2.4"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+    "@firebase/app-compat": 0.x
+  checksum: 10c0/371b4079f5aed36a56eda1228909b18e3c0178ec0aefef464f98c1c10250380f255d085cbe43eaa0e10e13d01e7d1eb8aa29b67065c50b42b3743dd85d61e037
+  languageName: node
+  linkType: hard
+
 "@firebase/performance-types@npm:0.0.13":
   version: 0.0.13
   resolution: "@firebase/performance-types@npm:0.0.13"
@@ -5655,6 +6109,13 @@ __metadata:
   version: 0.2.3
   resolution: "@firebase/performance-types@npm:0.2.3"
   checksum: 10c0/971d6bff448481dd5e8ff9d643e14b364ed4d619aca1d8d64105555c7f4566c9c05bca3cd0c027b3f879cccf8c7bc0e31579f7f0d7b8b1de182af804572b2374
+  languageName: node
+  linkType: hard
+
+"@firebase/performance-types@npm:0.2.4":
+  version: 0.2.4
+  resolution: "@firebase/performance-types@npm:0.2.4"
+  checksum: 10c0/5a823641e637d2b51cda6865804a5f05dba1d0f14b8664f396b5a0c029f5bb74c421240d3bd3fadf307dd9b71571ffcb32d04f5058c65eadbde1bfe4b85ab6c8
   languageName: node
   linkType: hard
 
@@ -5672,6 +6133,22 @@ __metadata:
     "@firebase/app": 0.x
     "@firebase/app-types": 0.x
   checksum: 10c0/90c3600d83a7563e2f1c10ccc603471ec146731253c1176aade8ac02a330776f8578316c69b3d57535360bf98581d36e9139e2bf075aa6773822eebdeb2aa843
+  languageName: node
+  linkType: hard
+
+"@firebase/performance@npm:0.7.13":
+  version: 0.7.13
+  resolution: "@firebase/performance@npm:0.7.13"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/installations": "npm:0.6.23"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+    web-vitals: "npm:^4.2.4"
+  peerDependencies:
+    "@firebase/app": 0.x
+  checksum: 10c0/669d46e291864ab896a7c0c60f22b5103f8548a210ec5c8f425e157ce11ba713aa80c45a69ef4cf7a0f63258c0c9a0eb394fc4a58b1a287c8a011781a70ed26e
   languageName: node
   linkType: hard
 
@@ -5718,6 +6195,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/remote-config-compat@npm:0.2.28":
+  version: 0.2.28
+  resolution: "@firebase/remote-config-compat@npm:0.2.28"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/remote-config": "npm:0.9.1"
+    "@firebase/remote-config-types": "npm:0.5.1"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+    "@firebase/app-compat": 0.x
+  checksum: 10c0/261f6ea868db0e267cf60a9fdc19b914ede1c0d28899581c4e305b22e9c3e8074ae5a18ad9eee8f509c509b9ec8e198522fd36e86794136e481fdc3b15dc0c41
+  languageName: node
+  linkType: hard
+
 "@firebase/remote-config-types@npm:0.1.9":
   version: 0.1.9
   resolution: "@firebase/remote-config-types@npm:0.1.9"
@@ -5729,6 +6223,13 @@ __metadata:
   version: 0.5.0
   resolution: "@firebase/remote-config-types@npm:0.5.0"
   checksum: 10c0/350f9b1b5bc7bd294fe64fbd6b29f09f8aad7142e1c6fd4093a4136719cc3e89993f54daf6418b1e94bab5cc4b5b3d0fd1985f1e904d0813b18757184bbeaca0
+  languageName: node
+  linkType: hard
+
+"@firebase/remote-config-types@npm:0.5.1":
+  version: 0.5.1
+  resolution: "@firebase/remote-config-types@npm:0.5.1"
+  checksum: 10c0/0882c2d9015bcb55a6e460ec3e2807c060984c1a394bf430ba6fa5ef25db53e6baf1d569539ed662e04b431b7e6122ca817437521ecf8be60c31a79a18845b0e
   languageName: node
   linkType: hard
 
@@ -5764,6 +6265,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/remote-config@npm:0.9.1":
+  version: 0.9.1
+  resolution: "@firebase/remote-config@npm:0.9.1"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/installations": "npm:0.6.23"
+    "@firebase/logger": "npm:0.5.1"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+  checksum: 10c0/151a0d22ac106ac18f1276d59b01a83636dcc811e932307a8a43dddfa578873ff7713076a29cd9f22f74ba27f704c9e41a257aa02c4b506cbc0b628392f02f2b
+  languageName: node
+  linkType: hard
+
 "@firebase/storage-compat@npm:0.4.0":
   version: 0.4.0
   resolution: "@firebase/storage-compat@npm:0.4.0"
@@ -5776,6 +6292,22 @@ __metadata:
   peerDependencies:
     "@firebase/app-compat": 0.x
   checksum: 10c0/16e868afdfd67c89919e69a4d2916899f6807e03a33b5bf03a563942ee35a7858929df846d6be8d3d712ea4482683a31dbf9c48979352d3ef87962f7e1dc3705
+  languageName: node
+  linkType: hard
+
+"@firebase/storage-compat@npm:0.4.4":
+  version: 0.4.4
+  resolution: "@firebase/storage-compat@npm:0.4.4"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/storage": "npm:0.14.4"
+    "@firebase/storage-types": "npm:0.8.4"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+    "@firebase/app-compat": 0.x
+  checksum: 10c0/89ae012b5bc4be2687d3ff6a7345e18f1c3d19974374b2f8b99d619d5fdb56abb56552ca125482744ece6d61e1f096cf3269281402711b4fba4ab1c3f1a074cd
   languageName: node
   linkType: hard
 
@@ -5799,6 +6331,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@firebase/storage-types@npm:0.8.4":
+  version: 0.8.4
+  resolution: "@firebase/storage-types@npm:0.8.4"
+  peerDependencies:
+    "@firebase/app-types": 0.x
+    "@firebase/util": 1.x
+  checksum: 10c0/66ec5b6c6a703c4eb0fb99761d741148d9ae2b5d06c4d5d6efcfbea368fb80480fb037378e3e5ec2aa8adcfe97bb64016eb263220f7d1a91439e46f23254d5b6
+  languageName: node
+  linkType: hard
+
 "@firebase/storage@npm:0.14.0":
   version: 0.14.0
   resolution: "@firebase/storage@npm:0.14.0"
@@ -5809,6 +6351,19 @@ __metadata:
   peerDependencies:
     "@firebase/app": 0.x
   checksum: 10c0/7a210db11c698dfeff57bdf8c883d0d595a8ddef25eadd144d7501747d1f0e429c073beb9d1e871e5bad8e6dc1eda10f3fb2288290349e6058b5bad7e042e7f1
+  languageName: node
+  linkType: hard
+
+"@firebase/storage@npm:0.14.4":
+  version: 0.14.4
+  resolution: "@firebase/storage@npm:0.14.4"
+  dependencies:
+    "@firebase/component": "npm:0.7.4"
+    "@firebase/util": "npm:1.15.2"
+    tslib: "npm:^2.1.0"
+  peerDependencies:
+    "@firebase/app": 0.x
+  checksum: 10c0/8f3e27668c26758845e12d74a865411606f66e51d524fdabdffd7b63ee88371d03d5ea8db59dee9f1f23a10f827af4739df7eeb0abd6a80e4f67d7a724fa78b9
   languageName: node
   linkType: hard
 
@@ -5834,6 +6389,15 @@ __metadata:
   dependencies:
     tslib: "npm:^2.1.0"
   checksum: 10c0/2e0c19dffdf69a1d1f8d786de551268d6af804de857eb195f4af50b732fe9e696cb73c52abc5f0bc98b34527225fb97a81ec380e89bd47a1d8448fc66536845c
+  languageName: node
+  linkType: hard
+
+"@firebase/util@npm:1.15.2":
+  version: 1.15.2
+  resolution: "@firebase/util@npm:1.15.2"
+  dependencies:
+    tslib: "npm:^2.1.0"
+  checksum: 10c0/49ff992a2e55781b52c819a4f20ba1b4f97ca6ff49c7739f3144df62d88cf5707fef3945a131ac6a8720ac613574c6e668fc221b4e0c3f23623037ea89cfa65e
   languageName: node
   linkType: hard
 
@@ -5866,6 +6430,13 @@ __metadata:
   version: 1.0.5
   resolution: "@firebase/webchannel-wrapper@npm:1.0.5"
   checksum: 10c0/d48c452cd690894ab67b34f8e22d0e48cf238e6643c7850aefa25145e2c268aaa5e3b5aa1cb779efc240d1b0d001e5748c3db52cc1620b0f3b2f55695de5fcca
+  languageName: node
+  linkType: hard
+
+"@firebase/webchannel-wrapper@npm:1.0.6":
+  version: 1.0.6
+  resolution: "@firebase/webchannel-wrapper@npm:1.0.6"
+  checksum: 10c0/2597e8a9482b47266a8ac2f6dea80062391c90170ad602c315154e1cddeb5eb6b8e609055f26cf31d4a231baa6cd94b628c9d5d26e5b0e44d645833d5b763a5f
   languageName: node
   linkType: hard
 
@@ -9885,35 +10456,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-firebase/analytics@npm:23.7.0":
-  version: 23.7.0
-  resolution: "@react-native-firebase/analytics@npm:23.7.0"
+"@react-native-firebase/analytics@npm:26.4.0":
+  version: 26.4.0
+  resolution: "@react-native-firebase/analytics@npm:26.4.0"
   dependencies:
     superstruct: "npm:^2.0.2"
   peerDependencies:
-    "@react-native-firebase/app": 23.7.0
-  checksum: 10c0/e0c435b828841e2870ae7331975068a8bf32d2c3e120efb209c4da9ecb0929780a8a240c43aa5e4cc5afa9fff9ca63b54fc7dbe2c8a2a4665e10e3f17e9def06
-  languageName: node
-  linkType: hard
-
-"@react-native-firebase/app-check@npm:23.7.0":
-  version: 23.7.0
-  resolution: "@react-native-firebase/app-check@npm:23.7.0"
-  peerDependencies:
-    "@react-native-firebase/app": 23.7.0
+    "@react-native-firebase/app": 26.4.0
     expo: ">=47.0.0"
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10c0/d3b4274a6f105609e71b6bb2b8af7a552819281c0d3d8c5afaee5c475f5093d34dd3ab7b168fb31012f6e3f3503b1dc4f999aeb4c2f870e3e4c16c908cb07f2b
+  checksum: 10c0/635ad0909c594090127e152fb47c406b879a2e6984221a45003b5d175c14a502df6fa5e7b505847f62c380c9a10c9f328b8117f6fba3dbd6636de9bb83a63ca0
   languageName: node
   linkType: hard
 
-"@react-native-firebase/app@npm:23.7.0":
-  version: 23.7.0
-  resolution: "@react-native-firebase/app@npm:23.7.0"
+"@react-native-firebase/app-check@npm:26.4.0":
+  version: 26.4.0
+  resolution: "@react-native-firebase/app-check@npm:26.4.0"
+  peerDependencies:
+    "@react-native-firebase/app": 26.4.0
+    expo: ">=47.0.0"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: 10c0/96857b86bf58abfc50d96a366624abb4a61fec293406b7cb2c9c3358f50fdfc9c1d009df65d8304c9a604a0a3905dc1b98232021d9c7583724681cf3e1f80daa
+  languageName: node
+  linkType: hard
+
+"@react-native-firebase/app@npm:26.4.0":
+  version: 26.4.0
+  resolution: "@react-native-firebase/app@npm:26.4.0"
   dependencies:
-    firebase: "npm:12.6.0"
+    firebase: "npm:12.17.1"
   peerDependencies:
     expo: ">=47.0.0"
     react: "*"
@@ -9921,56 +10496,56 @@ __metadata:
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10c0/d7badfc3926a4bd1e629d277f95372d4b64ab9eb72490c97cf1d5f440575187c68fe2387da8fe98ce2ec340c8ef21ba28a6b547e6ddfec00022d9012416ce010
+  checksum: 10c0/da5efa6546ab953499c94ab263470a781f97351f23d361b6068a224f349f24a87d8e9c6fe88381ceffc293d75c35b79c065ddae3ceb00c92c52a825d441bdfe9
   languageName: node
   linkType: hard
 
-"@react-native-firebase/auth@npm:23.7.0":
-  version: 23.7.0
-  resolution: "@react-native-firebase/auth@npm:23.7.0"
+"@react-native-firebase/auth@npm:26.4.0":
+  version: 26.4.0
+  resolution: "@react-native-firebase/auth@npm:26.4.0"
   dependencies:
-    plist: "npm:^3.1.0"
+    "@expo/plist": "npm:^0.8.1"
   peerDependencies:
-    "@react-native-firebase/app": 23.7.0
+    "@react-native-firebase/app": 26.4.0
     expo: ">=47.0.0"
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10c0/7db754b0f3fe993c6bdfb5ef4a3dec85f0bc5553653eaaffd01f412dfb01327fd7a87ada3a2bd74829bae340a19a090718b6f0241c710c1290365d7c16f394fc
+  checksum: 10c0/23f52c65f6578ba096e865fba479d132847f7845e29aa9ff4d10476e2ee9de273d56941af1d9de5efd5f896b0abb23847772acd203a8cd4accd7b711abc16300
   languageName: node
   linkType: hard
 
-"@react-native-firebase/firestore@npm:23.7.0":
-  version: 23.7.0
-  resolution: "@react-native-firebase/firestore@npm:23.7.0"
+"@react-native-firebase/firestore@npm:26.4.0":
+  version: 26.4.0
+  resolution: "@react-native-firebase/firestore@npm:26.4.0"
   dependencies:
-    react-native-url-polyfill: "npm:3.0.0"
+    react-native-url-polyfill: "npm:4.0.0"
   peerDependencies:
-    "@react-native-firebase/app": 23.7.0
-  checksum: 10c0/e3592b787ed4260a15d3670731974e414a6dbe79f31a34d8db31391c298f6dc1c87e8559f69b4066ef620334a2747aa6c4e274078c64ae9fc226213b37a08003
+    "@react-native-firebase/app": 26.4.0
+  checksum: 10c0/873ebb6201af3655820a9897cbe39904a8d76b942d8a4b02ececaab0e04cd967d7d010d55571bf3e06623ca3fd2f04246bbab3ffbb7e6a4a865d64a0ebba21f3
   languageName: node
   linkType: hard
 
-"@react-native-firebase/remote-config@npm:23.7.0":
-  version: 23.7.0
-  resolution: "@react-native-firebase/remote-config@npm:23.7.0"
+"@react-native-firebase/remote-config@npm:26.4.0":
+  version: 26.4.0
+  resolution: "@react-native-firebase/remote-config@npm:26.4.0"
   dependencies:
     react-native-fetch-api: "npm:^3.0.0"
     text-encoding: "npm:^0.7.0"
     web-streams-polyfill: "npm:^4.2.0"
   peerDependencies:
-    "@react-native-firebase/analytics": 23.7.0
-    "@react-native-firebase/app": 23.7.0
-  checksum: 10c0/ebebdbccb8cafee7ba71ce19f9dec8d23d7266c67c229bf1d4b0b58d63201630c9f6c7877899561e53d8c198b02f03db4cae9056689df200f51026a9bc362a6a
+    "@react-native-firebase/analytics": 26.4.0
+    "@react-native-firebase/app": 26.4.0
+  checksum: 10c0/140cdd8ae7011e3741aaae309605440cab0ec03eb07993d1371b95f85113e4d6a0e7a41157374ccde82d2bf9059d8da2189b10bbf1b4d680d15b792a3c0b6923
   languageName: node
   linkType: hard
 
-"@react-native-firebase/storage@npm:23.7.0":
-  version: 23.7.0
-  resolution: "@react-native-firebase/storage@npm:23.7.0"
+"@react-native-firebase/storage@npm:26.4.0":
+  version: 26.4.0
+  resolution: "@react-native-firebase/storage@npm:26.4.0"
   peerDependencies:
-    "@react-native-firebase/app": 23.7.0
-  checksum: 10c0/043474707f4cf94541593731d3302b07338ac7f8da3c0c29562da3a0fd41a977424651cb4172874cbd1840331be902f01f90470cd5d41974e3eb0db952fd9c59
+    "@react-native-firebase/app": 26.4.0
+  checksum: 10c0/5ddaad0b872b1f4dcd43e1d3238943554e76484b0dc36c43e4976024f0304879d8b5992feea98663449c605140b8097b4ae5e4a1403e95a3f9e2fc653ee12301
   languageName: node
   linkType: hard
 
@@ -19675,6 +20250,42 @@ __metadata:
   languageName: node
   linkType: hard
 
+"firebase@npm:12.17.1":
+  version: 12.17.1
+  resolution: "firebase@npm:12.17.1"
+  dependencies:
+    "@firebase/ai": "npm:2.14.0"
+    "@firebase/analytics": "npm:0.10.23"
+    "@firebase/analytics-compat": "npm:0.2.29"
+    "@firebase/app": "npm:0.16.0"
+    "@firebase/app-check": "npm:0.13.0"
+    "@firebase/app-check-compat": "npm:0.4.6"
+    "@firebase/app-compat": "npm:0.5.16"
+    "@firebase/app-types": "npm:0.9.5"
+    "@firebase/auth": "npm:1.13.4"
+    "@firebase/auth-compat": "npm:0.6.9"
+    "@firebase/data-connect": "npm:0.7.3"
+    "@firebase/database": "npm:1.1.4"
+    "@firebase/database-compat": "npm:2.1.6"
+    "@firebase/firestore": "npm:4.17.0"
+    "@firebase/firestore-compat": "npm:0.4.12"
+    "@firebase/functions": "npm:0.13.6"
+    "@firebase/functions-compat": "npm:0.4.6"
+    "@firebase/installations": "npm:0.6.23"
+    "@firebase/installations-compat": "npm:0.2.23"
+    "@firebase/messaging": "npm:0.13.1"
+    "@firebase/messaging-compat": "npm:0.2.28"
+    "@firebase/performance": "npm:0.7.13"
+    "@firebase/performance-compat": "npm:0.2.26"
+    "@firebase/remote-config": "npm:0.9.1"
+    "@firebase/remote-config-compat": "npm:0.2.28"
+    "@firebase/storage": "npm:0.14.4"
+    "@firebase/storage-compat": "npm:0.4.4"
+    "@firebase/util": "npm:1.15.2"
+  checksum: 10c0/f8b89a933833cf741faefbb1a69cad09a3ce29baea0069a408f5b4a518be1f88c292c9b81c74d1680e6a82aa20163915fa40bfff44eb1c435ab9bd13ca977921
+  languageName: node
+  linkType: hard
+
 "firebase@npm:12.6.0":
   version: 12.6.0
   resolution: "firebase@npm:12.6.0"
@@ -26941,7 +27552,7 @@ multer@emadalam/multer:
   languageName: node
   linkType: hard
 
-"plist@npm:^3.0.5, plist@npm:^3.1.0":
+"plist@npm:^3.0.5":
   version: 3.1.0
   resolution: "plist@npm:3.1.0"
   dependencies:
@@ -27715,6 +28326,13 @@ multer@emadalam/multer:
   languageName: node
   linkType: hard
 
+"re2js@npm:^2.8.3":
+  version: 2.8.6
+  resolution: "re2js@npm:2.8.6"
+  checksum: 10c0/70a7ae4778429ddd8dfef6af3ee65e152999e31a894f19f3eb4820f5267d2ac0c5797b60f988139a5d72a9f06bb5c0b7fd05c4aaa6272970b006772aa956fb51
+  languageName: node
+  linkType: hard
+
 "react-aria-components@npm:1.21.1, react-aria-components@npm:^1.20.0":
   version: 1.21.1
   resolution: "react-aria-components@npm:1.21.1"
@@ -28231,14 +28849,12 @@ multer@emadalam/multer:
   languageName: node
   linkType: hard
 
-"react-native-url-polyfill@npm:3.0.0":
-  version: 3.0.0
-  resolution: "react-native-url-polyfill@npm:3.0.0"
-  dependencies:
-    whatwg-url-without-unicode: "npm:8.0.0-3"
+"react-native-url-polyfill@npm:4.0.0":
+  version: 4.0.0
+  resolution: "react-native-url-polyfill@npm:4.0.0"
   peerDependencies:
     react-native: "*"
-  checksum: 10c0/a1e539c2a28dc48125ada8bf29f3536ee2c149e4a5e3d205858755783afafe7f871ce1de8b66cb1c4cc05e15e212c74c49e93ddde856cda63fcf660cf943522a
+  checksum: 10c0/77985560495f71bdb1e78fe3d030f249608ae65fb48d55d8ae34f91119409ac493193d2c4e16456c5068e421df74fa2d1d430c54740a074e2d3aabc4f3cbed21
   languageName: node
   linkType: hard
 

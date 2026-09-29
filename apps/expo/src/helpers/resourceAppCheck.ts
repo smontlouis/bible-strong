@@ -3,7 +3,7 @@ import {
   getToken,
   initializeAppCheck,
   ReactNativeFirebaseAppCheckProvider,
-  type FirebaseAppCheckTypes,
+  type AppCheck,
 } from '@react-native-firebase/app-check'
 
 import {
@@ -13,27 +13,24 @@ import {
 } from './resourceAppCheckRequest'
 import { appLogger } from './agentObservability'
 
-let appCheckInitialization: Promise<FirebaseAppCheckTypes.Module> | undefined
+let appCheckInstance: AppCheck | undefined
 
-export const initializeResourceAppCheck = (): Promise<FirebaseAppCheckTypes.Module> => {
-  if (appCheckInitialization) return appCheckInitialization
+export const initializeResourceAppCheck = async (): Promise<AppCheck> => {
+  // A failed initialization throws before caching, so the next caller retries it.
+  if (appCheckInstance) return appCheckInstance
 
   const provider = new ReactNativeFirebaseAppCheckProvider()
   provider.configure({
     android: { provider: __DEV__ ? 'debug' : 'playIntegrity' },
     apple: { provider: __DEV__ ? 'debug' : 'appAttestWithDeviceCheckFallback' },
   })
-  appCheckInitialization = initializeAppCheck(getApp(), {
+  appCheckInstance = initializeAppCheck(getApp(), {
     provider,
     // Tokens are acquired on demand for Offline copies and the assistant only (ADR-0065).
     // Background refresh would spend an attestation per TTL on every running app.
     isTokenAutoRefreshEnabled: false,
-  }).catch(error => {
-    // A transient initialization failure must not poison the rest of the session.
-    appCheckInitialization = undefined
-    throw error
   })
-  return appCheckInitialization
+  return appCheckInstance
 }
 
 const getAppCheckFailureCode = (error: unknown): string => {

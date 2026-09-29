@@ -15,7 +15,7 @@ import {
   type UserDataSyncCollection,
   updateStudy,
 } from '~redux/modules/user'
-import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
+import type { QueryDocumentSnapshot, DocumentChange } from '@react-native-firebase/firestore'
 import { firebaseDb, doc, collection, query, where, onSnapshot, updateDoc } from './firebase'
 import { registerCleanup } from './cleanupRegistry'
 import useLogin from './useLogin'
@@ -298,7 +298,7 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
 
           if (isNewlyLogged || !hasStudies) {
             const studies = {} as { [key: string]: Study }
-            querySnapshot.forEach((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
+            querySnapshot.forEach((docSnap: QueryDocumentSnapshot) => {
               const study = docSnap.data() as Study
               studies[study.id] = study
             })
@@ -306,7 +306,7 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
             console.log('[LiveUpdates] Add all studies')
             dispatch(addStudies(studies))
           } else {
-            querySnapshot.docChanges().forEach((change: FirebaseFirestoreTypes.DocumentChange) => {
+            querySnapshot.docChanges().forEach((change: DocumentChange) => {
               // Ignore first listener adding all documents
               if (isFirstSnapshotListener) return
 

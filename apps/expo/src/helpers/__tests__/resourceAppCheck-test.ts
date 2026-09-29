@@ -39,7 +39,7 @@ describe('Native Resource App Check token acquisition', () => {
     jest.resetModules()
     jest.useFakeTimers({ now: 1_000 })
     mockGetToken.mockReset().mockResolvedValue({ token: 'valid-token' })
-    mockInitialize.mockReset().mockResolvedValue({})
+    mockInitialize.mockReset().mockReturnValue({})
     mockCaptureError.mockReset()
     mockFetch.mockReset().mockImplementation(async () => new Response('{}', { status: 200 }))
     globalThis.fetch = mockFetch
@@ -181,7 +181,9 @@ describe('Native Resource App Check token acquisition', () => {
   })
 
   it('can recover from a rejected initialization after cooldown', async () => {
-    mockInitialize.mockRejectedValueOnce(new Error('Initialization failed'))
+    mockInitialize.mockImplementationOnce(() => {
+      throw new Error('Initialization failed')
+    })
     await expect(appCheck.getResourceAppCheckToken()).rejects.toThrow()
     expect(mockGetToken).not.toHaveBeenCalled()
     await jest.advanceTimersByTimeAsync(2_000)

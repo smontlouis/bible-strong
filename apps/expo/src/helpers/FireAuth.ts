@@ -1,7 +1,8 @@
 import { identifyAnalyticsUser, trackAnalyticsEvent } from './analytics'
 import { appleAuth } from '@invertase/react-native-apple-authentication'
 import {
-  FirebaseAuthTypes,
+  type AuthCredential,
+  type User,
   getAuth,
   onAuthStateChanged,
   signInWithCredential,
@@ -16,6 +17,7 @@ import {
   updatePassword,
   reauthenticateWithCredential,
   EmailAuthProvider,
+  sendEmailVerification,
 } from '@react-native-firebase/auth'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import * as Sentry from '@sentry/react-native'
@@ -69,7 +71,7 @@ const getErrorCode = (error: unknown): string | undefined => {
 const FireAuth = class {
   authFlag = false
 
-  user: FirebaseAuthTypes.User | null = null
+  user: User | null = null
 
   profile: FireAuthProfile | null = null
 
@@ -333,7 +335,7 @@ const FireAuth = class {
     })
 
   onCredentialSuccess = async (
-    credential: FirebaseAuthTypes.AuthCredential,
+    credential: AuthCredential,
     resolve: (value: boolean) => void,
     accountEntryAttempt: ClassifiedAuthAttempt
   ) => {
@@ -389,7 +391,7 @@ const FireAuth = class {
   sendEmailVerification = async () => {
     const user = getAuth().currentUser
     try {
-      await user?.sendEmailVerification()
+      if (user) await sendEmailVerification(user)
       toast.success(i18n.t('Email envoyé'))
     } catch (e) {
       if (getErrorCode(e) === 'auth/too-many-requests') {
@@ -435,7 +437,7 @@ const FireAuth = class {
             })
             setDoc(doc(firebaseDb, 'users', user.uid), { displayName: username }, { merge: true })
 
-            user.sendEmailVerification()
+            sendEmailVerification(user)
             return resolve(true)
           })
           .catch(err => {

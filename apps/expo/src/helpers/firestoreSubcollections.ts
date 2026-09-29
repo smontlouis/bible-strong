@@ -1,5 +1,9 @@
 import { tokenManager } from './TokenManager'
-import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
+import type {
+  DocumentData,
+  QueryDocumentSnapshot,
+  DocumentChange,
+} from '@react-native-firebase/firestore'
 import {
   firebaseDb,
   collection,
@@ -30,7 +34,7 @@ export const USER_DATA_SUBCOLLECTION_NAMES: UserDataSubcollectionName[] =
  */
 const BATCH_CHUNK_SIZE = 400
 
-export type SubcollectionDocument = FirebaseFirestoreTypes.DocumentData
+export type SubcollectionDocument = DocumentData
 export type SubcollectionData = Record<string, SubcollectionDocument>
 type BatchOperation =
   | { type: 'set'; docId: string; data: SubcollectionDocument }
@@ -364,9 +368,7 @@ export async function clearSubcollection(
       return
     }
 
-    const docIds = snapshot.docs.map(
-      (docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => docSnap.id
-    )
+    const docIds = snapshot.docs.map((docSnap: QueryDocumentSnapshot) => docSnap.id)
 
     await batchWriteSubcollection(
       userId,
@@ -410,7 +412,7 @@ export function fetchSubcollection(
       collectionRef,
       snapshot => {
         const result: SubcollectionData = {}
-        snapshot.forEach((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
+        snapshot.forEach((docSnap: QueryDocumentSnapshot) => {
           result[decodeDocumentId(docSnap.id)] = docSnap.data()
         })
 
@@ -482,7 +484,7 @@ export function subscribeToSubcollection(
 
         // Construire l'objet complet (avec décodage des IDs)
         const data: SubcollectionData = {}
-        snapshot.forEach((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
+        snapshot.forEach((docSnap: QueryDocumentSnapshot) => {
           data[decodeDocumentId(docSnap.id)] = docSnap.data()
         })
 
@@ -504,7 +506,7 @@ export function subscribeToSubcollection(
         const modified: SubcollectionData = {}
         const removed: string[] = []
 
-        snapshot.docChanges().forEach((change: FirebaseFirestoreTypes.DocumentChange) => {
+        snapshot.docChanges().forEach((change: DocumentChange) => {
           const docData = change.doc.data()
           const docId = decodeDocumentId(change.doc.id)
 

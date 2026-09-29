@@ -3,7 +3,7 @@ const path = require('path')
 
 const { IOSConfig, withDangerousMod } = require('expo/config-plugins')
 
-const APP_CHECK_IMPORT = '#import <RNFBAppCheckModule.h>'
+const APP_CHECK_IMPORT = '#import "RNFBAppCheckModule.h"'
 const FIREBASE_INITIALIZATION = `// @generated begin bible-strong-firebase-app-check
     RNFBAppCheckModule.sharedInstance()
     FirebaseApp.configure()

@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { OngoingPlan, OnlinePlan, Plan, Section, Status } from '~common/types'
-import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
+import type { QueryDocumentSnapshot } from '@react-native-firebase/firestore'
 import {
   firebaseDb,
   increment,
@@ -36,7 +36,7 @@ const initialState: PlanModel = {
 const docsArr = async (collectionName: string) => {
   const snapshot = await getDocs(collection(firebaseDb, collectionName))
 
-  return snapshot.docs.map((x: FirebaseFirestoreTypes.QueryDocumentSnapshot) => x.data())
+  return snapshot.docs.map((x: QueryDocumentSnapshot) => x.data())
 }
 
 export const fetchPlans = createAsyncThunk('plan/fetchPlans', async () => {
@@ -62,9 +62,7 @@ export const fetchPlan = createAsyncThunk(
     if (snapshot.empty && snapshot.metadata.fromCache) {
       throw new Error('Reading content is not available offline')
     }
-    const sections = snapshot.docs.map((x: FirebaseFirestoreTypes.QueryDocumentSnapshot) =>
-      x.data()
-    ) as Section[]
+    const sections = snapshot.docs.map((x: QueryDocumentSnapshot) => x.data()) as Section[]
 
     return { ...plan, sections }
   }
