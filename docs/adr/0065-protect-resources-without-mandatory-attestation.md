@@ -16,16 +16,22 @@ The protection goal is deterrence of bulk reuse, not prevented extraction (ADR-0
 
 The Resource service never requires an App Check token to serve editorial content.
 
-| Surface                           | Protection                                                                                                                   |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Online reading                    | Public. Cloudflare rate limits per client address, sized so that normal reading never reaches them.                          |
-| Search, including semantic search | Public. Searches that may call Workers AI have their own lower limit per client address, and Workers AI spend is monitored.  |
-| Study assistant                   | Unchanged: its private backend keeps its own authentication.                                                                 |
-| Encrypted Offline copies          | Public, with download-specific rate limits by count and bytes.                                                               |
-| Plain Offline copies              | Remain behind native App Check (ADR-0063) for clients that cannot decrypt archives. Removed once those clients are marginal. |
-| Web                               | Still receives no Offline copies.                                                                                            |
+| Surface                           | Protection                                                                                                                                    |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Online reading                    | Public. Cloudflare rate limits per client address, sized so that normal reading never reaches them.                                           |
+| Search, including semantic search | Public. Searches that may call Workers AI have their own lower limit per client address, and Workers AI spend is monitored.                   |
+| Study assistant                   | Unchanged: its private backend keeps its own authentication.                                                                                  |
+| Encrypted Offline copies          | Public, with a request-count limit per client address. Downloaded volume is logged per address; a byte budget is added only if abuse appears. |
+| Plain Offline copies              | Remain behind native App Check (ADR-0063) for clients that cannot decrypt archives. Removed once those clients are marginal.                  |
+| Web                               | Still receives no Offline copies.                                                                                                             |
 
-Offline copies are encrypted as AES ZIP archives. Each archive key is derived from a master key, the resource identity, and the archive SHA, so resources published after a client release remain installable without a new key. The master key lives in native code, not in the JavaScript bundle. This is obfuscation: it raises extraction effort to reverse-engineering the application, comparable to defeating App Check today, without refusing any legitimate device. Extracted databases stay unencrypted on the device.
+Offline copies are encrypted as AES-256 ZIP archives. This is obfuscation: it raises extraction effort to reverse-engineering the application, comparable to defeating App Check today, without refusing any legitimate device. Extracted databases stay unencrypted on the device.
+
+- **Key derivation.** Each archive password is `HKDF-SHA256(masterKey, salt = "bible-strong-offline-archive", info = "<catalog id>\n<plain archiveSha256>")`, encoded as lowercase hex. The catalog id (for example `bible:LSG`) and the plain archive SHA are what the client already holds, so resources published after a client release stay installable without a new key.
+- **Master key.** It never enters the repository or the JavaScript bundle. A config plugin reads `BIBLE_STRONG_ARCHIVE_KEYS` (`<version>:<base64 key>` pairs) from the build environment, `apps/expo/.env.local` for local builds, and generates obfuscated native source inside the ignored generated folders of the `bible-strong-archive` module. Publication reads the same variable. A build without keys still works: the module reports the key as unavailable and the client keeps using plain archives.
+- **Native extraction.** The `bible-strong-archive` Expo module derives the password and extracts the archive in one native call, with SSZipArchive on iOS and zip4j on Android. The password never crosses into JavaScript. The module refuses archives whose entries are not encrypted.
+- **Stable encrypted artifacts.** AES ZIP uses random salts, so publication encrypts each plain archive once per key version and reuses the result while the plain SHA is unchanged. Encrypted objects live under immutable `revisions/<encrypted sha256>/` keys.
+- **Catalog.** An optional `encryptedArchive` field (`url`, `file`, `sha256`, `bytes`, `keyVersion`) is additive. A client with the module and the key version verifies the encrypted SHA before extraction, but still records the plain `archiveSha256` as the installed revision.
 
 Clients never block a request on App Check acquisition. They send the request without a token when acquisition fails, and acquire a token only for routes that still use one (the assistant and plain Offline copies). Online reading no longer consumes attestations.
 

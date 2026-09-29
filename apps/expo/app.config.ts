@@ -90,6 +90,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // CocoaPods, not SPM: RNFirebase 26 rejects SPM with our static frameworks linkage.
     ['@react-native-firebase/app', { ios: { disableSPM: true } }],
     './plugins/withFirebaseAppCheckSwiftBridge.js',
+    // Offline-copy keys come from BIBLE_STRONG_ARCHIVE_KEYS in the build environment (ADR-0065).
+    './plugins/withBibleStrongArchiveKeys.js',
     '@react-native-firebase/app-check',
     '@react-native-firebase/auth',
     [

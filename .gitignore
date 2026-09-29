@@ -136,8 +136,17 @@ RNTester/Pods/*
 
 android/
 ios/
+# Local Expo modules keep their native sources in the repository.
+!apps/expo/modules/*/android/
+!apps/expo/modules/*/ios/
+apps/expo/modules/*/android/build/
+apps/expo/modules/*/android/.gradle/
+# Generated at prebuild from the build environment; contains key material.
+apps/expo/modules/bible-strong-archive/ios/Generated/
+apps/expo/modules/bible-strong-archive/android/src/main/java/expo/modules/biblestrongarchive/generated/
 
 .env
+.env*.local
 .env.resource-publication.local
 
 

@@ -1,0 +1,23 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'expo.modules.biblestrongarchive'
+version = '1.0.0'
+
+android {
+  namespace "expo.modules.biblestrongarchive"
+  defaultConfig {
+    versionCode 1
+    versionName "1.0.0"
+  }
+  lintOptions {
+    abortOnError false
+  }
+}
+
+dependencies {
+  // Same version as react-native-zip-archive, which already ships zip4j.
+  implementation 'net.lingala.zip4j:zip4j:2.11.5'
+}
