@@ -362,6 +362,30 @@ without reopening R2. A range request that misses the cache streams only the req
 R2 and is not cached because Cloudflare rejects `206 Partial Content` in `cache.put()`. Artifact
 responses sent to the application remain `private, no-store`, and cache failures fall back to R2.
 
+### Encrypted Offline copies
+
+Encrypted Offline copies ([ADR-0065](../../docs/adr/0065-protect-resources-without-mandatory-attestation.md))
+are AES-256 ZIP re-encodings of the plain archives, published by an operator command after the
+plain publication:
+
+```bash
+yarn resources:offline:encrypt:prod --dry-run --resource bible:LSG
+yarn resources:offline:encrypt:prod
+```
+
+The command reads `BIBLE_STRONG_ARCHIVE_KEYS` from `.env.resource-publication.local`, the same value
+as `apps/expo/.env.local`, and encrypts with the latest key version. For each catalog resource it
+looks up the private R2 index `encrypted-archives/v<key version>/<plain sha256>.json`. Without an
+index entry it reads the plain archive from R2, derives the per-archive password, encrypts, decrypts
+again to verify every entry against the plain content, uploads the copy under
+`revisions/<encrypted sha256>/<file>.encrypted.zip`, and writes the index last. It then records
+`encryptedArchive` in the checked-in catalog, keeping `generatedAt`.
+
+Catalog regeneration drops `encryptedArchive`. Run the command again after every publication: it
+restores the fields from the index without re-encrypting unchanged archives, so encrypted objects
+stay stable. `--dry-run` only reads R2 and never writes the catalog. Deploy the Worker afterwards so
+it serves the updated catalog.
+
 ### Resource API rate limits
 
 Online reading and search are public ([ADR-0065](../../docs/adr/0065-protect-resources-without-mandatory-attestation.md)):

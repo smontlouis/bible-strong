@@ -9,6 +9,15 @@ export type MobileResourceCatalogFileEntry = {
   bytes: number
 }
 
+/** AES copy of the archive, served without App Check (ADR-0065). Additive: older apps ignore it. */
+export type MobileResourceEncryptedArchive = {
+  url: string
+  file: string
+  sha256: string
+  bytes: number
+  keyVersion: number
+}
+
 export type MobileResourceCatalogEntry = {
   id: string
   url: string
@@ -24,6 +33,7 @@ export type MobileResourceCatalogEntry = {
   installedBytes: number
   peakInstallationBytes: number
   strategy: MobileResourceInstallationStrategy
+  encryptedArchive?: MobileResourceEncryptedArchive
 }
 
 export type MobileResourceCatalog = {

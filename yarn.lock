@@ -2682,6 +2682,7 @@ __metadata:
     "@types/pg": "npm:8.20.0"
     "@types/snowball-stemmers": "npm:^0"
     "@types/sql.js": "npm:^1.4.11"
+    "@zip.js/zip.js": "npm:2.18.2"
     dotenv-cli: "npm:^11.0.0"
     drizzle-kit: "npm:0.31.10"
     drizzle-orm: "npm:0.45.2"
@@ -14435,6 +14436,13 @@ __metadata:
     d3-selection: "npm:^3.0.0"
     d3-zoom: "npm:^3.0.0"
   checksum: 10c0/e8df5712c9eba4eeee29476686b416d24e014ccb95ebdcb46b7f60707ba5150ec51ff1e8b5d3983c4739a9b890e7458813d802149340e615fa1b528a88268539
+  languageName: node
+  linkType: hard
+
+"@zip.js/zip.js@npm:2.18.2":
+  version: 2.18.2
+  resolution: "@zip.js/zip.js@npm:2.18.2"
+  checksum: 10c0/2b5437036dfee60e7c249677c4c5db3fb0314dcbbb507f31cd1526370c2ea1f0d7e9f9e56ed1bc6f671da8b5228757f7424b293aba34f4786f492dfee0e43c57
   languageName: node
   linkType: hard
 
