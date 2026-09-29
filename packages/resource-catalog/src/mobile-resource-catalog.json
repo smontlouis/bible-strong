@@ -22,7 +22,14 @@
       "contentBytes": 55119872,
       "installedBytes": 55119872,
       "peakInstallationBytes": 89775344,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-step-interlinear-en.sqlite.encrypted.zip?sha256=b504db86bca7a96b3753e775b5380078a8a217b20232bd5e9ac41f5ef9e5cf93",
+        "file": "bibles/bible-step-interlinear-en.sqlite.encrypted.zip",
+        "sha256": "b504db86bca7a96b3753e775b5380078a8a217b20232bd5e9ac41f5ef9e5cf93",
+        "bytes": 22647648,
+        "keyVersion": 1
+      }
     },
     "bible-interlinear:BHG:fr": {
       "id": "bible-interlinear:BHG:fr",
@@ -42,7 +49,14 @@
       "contentBytes": 54296576,
       "installedBytes": 54296576,
       "peakInstallationBytes": 88358116,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-step-interlinear-fr.sqlite.encrypted.zip?sha256=b580dbed617e666923cbc6f4cf5da54d3fcf9b89b1ada02ff3b463a0e140b8ab",
+        "file": "bibles/bible-step-interlinear-fr.sqlite.encrypted.zip",
+        "sha256": "b580dbed617e666923cbc6f4cf5da54d3fcf9b89b1ada02ff3b463a0e140b8ab",
+        "bytes": 22253986,
+        "keyVersion": 1
+      }
     },
     "bible-strong:ASV": {
       "id": "bible-strong:ASV",
@@ -62,7 +76,14 @@
       "contentBytes": 25235456,
       "installedBytes": 25235456,
       "peakInstallationBytes": 41446265,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-asv-strong.sqlite.encrypted.zip?sha256=5ac3f732fc33be00a0f6cad974c3d06a264bf00b1ba5d8f70182795a23bd0444",
+        "file": "bibles/bible-asv-strong.sqlite.encrypted.zip",
+        "sha256": "5ac3f732fc33be00a0f6cad974c3d06a264bf00b1ba5d8f70182795a23bd0444",
+        "bytes": 10786967,
+        "keyVersion": 1
+      }
     },
     "bible-strong:BSB": {
       "id": "bible-strong:BSB",
@@ -82,7 +103,14 @@
       "contentBytes": 30302208,
       "installedBytes": 30302208,
       "peakInstallationBytes": 50139578,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-bsb-strong.sqlite.encrypted.zip?sha256=2be10b9abf1d3337677388b70a9f4bd28daa8d33bfed427b6dee09e4087d81d3",
+        "file": "bibles/bible-bsb-strong.sqlite.encrypted.zip",
+        "sha256": "2be10b9abf1d3337677388b70a9f4bd28daa8d33bfed427b6dee09e4087d81d3",
+        "bytes": 13277984,
+        "keyVersion": 1
+      }
     },
     "bible-strong:DARBY": {
       "id": "bible-strong:DARBY",
@@ -102,7 +130,14 @@
       "contentBytes": 24993792,
       "installedBytes": 24993792,
       "peakInstallationBytes": 40954809,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-darby-strong.sqlite.encrypted.zip?sha256=39a81cbc16f0a7e3f954d0ce2906d6faa6a0209c0f8eb52817fce8f9b3eb2427",
+        "file": "bibles/bible-darby-strong.sqlite.encrypted.zip",
+        "sha256": "39a81cbc16f0a7e3f954d0ce2906d6faa6a0209c0f8eb52817fce8f9b3eb2427",
+        "bytes": 10600784,
+        "keyVersion": 1
+      }
     },
     "bible-strong:DBR": {
       "id": "bible-strong:DBR",
@@ -122,7 +157,14 @@
       "contentBytes": 30068736,
       "installedBytes": 30068736,
       "peakInstallationBytes": 49597762,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-dbr-strong.sqlite.encrypted.zip?sha256=bac3bf0cec434fa17cd99fe8617c2ca4d7b6f3452acecc16d724f36d344b7246",
+        "file": "bibles/bible-dbr-strong.sqlite.encrypted.zip",
+        "sha256": "bac3bf0cec434fa17cd99fe8617c2ca4d7b6f3452acecc16d724f36d344b7246",
+        "bytes": 13047282,
+        "keyVersion": 1
+      }
     },
     "bible-strong:DBY": {
       "id": "bible-strong:DBY",
@@ -142,7 +184,14 @@
       "contentBytes": 30113792,
       "installedBytes": 30113792,
       "peakInstallationBytes": 49641380,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-dby-strong.sqlite.encrypted.zip?sha256=0344c0f9f920bfbb36ac67ff5baa451bf46bad2427088c446827f217d65237d2",
+        "file": "bibles/bible-dby-strong.sqlite.encrypted.zip",
+        "sha256": "0344c0f9f920bfbb36ac67ff5baa451bf46bad2427088c446827f217d65237d2",
+        "bytes": 13040753,
+        "keyVersion": 1
+      }
     },
     "bible-strong:KJV": {
       "id": "bible-strong:KJV",
@@ -162,7 +211,14 @@
       "contentBytes": 26411008,
       "installedBytes": 26411008,
       "peakInstallationBytes": 43446735,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-kjv-strong.sqlite.encrypted.zip?sha256=49ee3d85fb696db7f4d2950ee0621b256d1709d160ea3a2af0da34fbb45621b7",
+        "file": "bibles/bible-kjv-strong.sqlite.encrypted.zip",
+        "sha256": "49ee3d85fb696db7f4d2950ee0621b256d1709d160ea3a2af0da34fbb45621b7",
+        "bytes": 11358339,
+        "keyVersion": 1
+      }
     },
     "bible-strong:LSG": {
       "id": "bible-strong:LSG",
@@ -182,7 +238,14 @@
       "contentBytes": 29999104,
       "installedBytes": 29999104,
       "peakInstallationBytes": 49447328,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-lsg-strong.sqlite.encrypted.zip?sha256=aec22812b31beee0e63576da37d8740034e1529c265a1087804350e9cf06d8db",
+        "file": "bibles/bible-lsg-strong.sqlite.encrypted.zip",
+        "sha256": "aec22812b31beee0e63576da37d8740034e1529c265a1087804350e9cf06d8db",
+        "bytes": 12983908,
+        "keyVersion": 1
+      }
     },
     "bible-strong:NASB1995": {
       "id": "bible-strong:NASB1995",
@@ -202,7 +265,14 @@
       "contentBytes": 26009600,
       "installedBytes": 26009600,
       "peakInstallationBytes": 43046139,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-nasb1995-strong.sqlite.encrypted.zip?sha256=8a3c97942ad23530b43c231d1e3114dea350b5a6ffba69c5e8a866aa657da8ee",
+        "file": "bibles/bible-nasb1995-strong.sqlite.encrypted.zip",
+        "sha256": "8a3c97942ad23530b43c231d1e3114dea350b5a6ffba69c5e8a866aa657da8ee",
+        "bytes": 11404614,
+        "keyVersion": 1
+      }
     },
     "bible-strong:NASB2020": {
       "id": "bible-strong:NASB2020",
@@ -222,7 +292,14 @@
       "contentBytes": 26746880,
       "installedBytes": 26746880,
       "peakInstallationBytes": 44229348,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-nasb2020-strong.sqlite.encrypted.zip?sha256=da6f9aaf9155f13d2206f49ea7783a69204ae3c71106961fc40e2d3771b16dae",
+        "file": "bibles/bible-nasb2020-strong.sqlite.encrypted.zip",
+        "sha256": "da6f9aaf9155f13d2206f49ea7783a69204ae3c71106961fc40e2d3771b16dae",
+        "bytes": 11696718,
+        "keyVersion": 1
+      }
     },
     "bible-strong:RLT": {
       "id": "bible-strong:RLT",
@@ -242,7 +319,14 @@
       "contentBytes": 26386432,
       "installedBytes": 26386432,
       "peakInstallationBytes": 43408753,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-rlt-strong.sqlite.encrypted.zip?sha256=aa5dec8a2df6aa5d2c86116c712103b1945b183232409ba3dc682304660cd4b2",
+        "file": "bibles/bible-rlt-strong.sqlite.encrypted.zip",
+        "sha256": "aa5dec8a2df6aa5d2c86116c712103b1945b183232409ba3dc682304660cd4b2",
+        "bytes": 11352224,
+        "keyVersion": 1
+      }
     },
     "bible-strong:RV1895": {
       "id": "bible-strong:RV1895",
@@ -262,7 +346,14 @@
       "contentBytes": 26120192,
       "installedBytes": 26120192,
       "peakInstallationBytes": 42675390,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-rv1895-strong.sqlite.encrypted.zip?sha256=70f0c00c9628af610fa9f9e08d4e68f285d479c66dd2d865d65996ee3b6b261e",
+        "file": "bibles/bible-rv1895-strong.sqlite.encrypted.zip",
+        "sha256": "70f0c00c9628af610fa9f9e08d4e68f285d479c66dd2d865d65996ee3b6b261e",
+        "bytes": 10981962,
+        "keyVersion": 1
+      }
     },
     "bible-strong:RWEBSTER": {
       "id": "bible-strong:RWEBSTER",
@@ -282,7 +373,14 @@
       "contentBytes": 25235456,
       "installedBytes": 25235456,
       "peakInstallationBytes": 41511205,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-rwebster-strong.sqlite.encrypted.zip?sha256=873f2fc673241cfa004709c3b26f621dfbc34c941b97439abac7d0fc7ae4929a",
+        "file": "bibles/bible-rwebster-strong.sqlite.encrypted.zip",
+        "sha256": "873f2fc673241cfa004709c3b26f621dfbc34c941b97439abac7d0fc7ae4929a",
+        "bytes": 10848318,
+        "keyVersion": 1
+      }
     },
     "bible:AMP": {
       "id": "bible:AMP",
@@ -312,7 +410,14 @@
       "contentBytes": 5204111,
       "installedBytes": 6505139,
       "peakInstallationBytes": 17585413,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-amp.json.encrypted.zip?sha256=ebeb31026dcb648d48a3f2bcdf4aa35657127c9e5a08f4cff7baf650a0fb184d",
+        "file": "bibles/bible-amp.json.encrypted.zip",
+        "sha256": "ebeb31026dcb648d48a3f2bcdf4aa35657127c9e5a08f4cff7baf650a0fb184d",
+        "bytes": 1632487,
+        "keyVersion": 1
+      }
     },
     "bible:ASV": {
       "id": "bible:ASV",
@@ -332,7 +437,14 @@
       "contentBytes": 9768444,
       "installedBytes": 12210555,
       "peakInstallationBytes": 31470090,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-asv.json.encrypted.zip?sha256=c11f3f92e8b3f6bafc31eda90749288db3b70c305911df56c6ac0641271b1c57",
+        "file": "bibles/bible-asv.json.encrypted.zip",
+        "sha256": "c11f3f92e8b3f6bafc31eda90749288db3b70c305911df56c6ac0641271b1c57",
+        "bytes": 1724086,
+        "keyVersion": 1
+      }
     },
     "bible:BCC1923": {
       "id": "bible:BCC1923",
@@ -362,7 +474,14 @@
       "contentBytes": 5275172,
       "installedBytes": 6593965,
       "peakInstallationBytes": 17807696,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-bcc1923.json.encrypted.zip?sha256=22a0768303c7aa64600d09acd8774423ff77e8fee4e92827d320ff6900b24a16",
+        "file": "bibles/bible-bcc1923.json.encrypted.zip",
+        "sha256": "22a0768303c7aa64600d09acd8774423ff77e8fee4e92827d320ff6900b24a16",
+        "bytes": 1639394,
+        "keyVersion": 1
+      }
     },
     "bible:BDS": {
       "id": "bible:BDS",
@@ -392,7 +511,14 @@
       "contentBytes": 5172908,
       "installedBytes": 6466135,
       "peakInstallationBytes": 17486095,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-bds.json.encrypted.zip?sha256=ad320c031daf396de17e3eff2d8787384f14c8c94ec2168d540104d0bf6eee56",
+        "file": "bibles/bible-bds.json.encrypted.zip",
+        "sha256": "ad320c031daf396de17e3eff2d8787384f14c8c94ec2168d540104d0bf6eee56",
+        "bytes": 1628103,
+        "keyVersion": 1
+      }
     },
     "bible:BFC": {
       "id": "bible:BFC",
@@ -422,7 +548,14 @@
       "contentBytes": 5612680,
       "installedBytes": 7015850,
       "peakInstallationBytes": 19011842,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-bfc.json.encrypted.zip?sha256=bd5612e5511fff120f7811108c3c15c64cbcc1548f652ea9b758b6a077059bcf",
+        "file": "bibles/bible-bfc.json.encrypted.zip",
+        "sha256": "bd5612e5511fff120f7811108c3c15c64cbcc1548f652ea9b758b6a077059bcf",
+        "bytes": 1800896,
+        "keyVersion": 1
+      }
     },
     "bible:BHG": {
       "id": "bible:BHG",
@@ -442,7 +575,14 @@
       "contentBytes": 7305397,
       "installedBytes": 9131747,
       "peakInstallationBytes": 24104710,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-step.json.encrypted.zip?sha256=4134a28abfe274a435a782ff6dc8a9f8ef294ca558e8746848249a3bb16305eb",
+        "file": "bibles/bible-step.json.encrypted.zip",
+        "sha256": "4134a28abfe274a435a782ff6dc8a9f8ef294ca558e8746848249a3bb16305eb",
+        "bytes": 1785005,
+        "keyVersion": 1
+      }
     },
     "bible:BHS": {
       "id": "bible:BHS",
@@ -462,7 +602,14 @@
       "contentBytes": 5566623,
       "installedBytes": 6958279,
       "peakInstallationBytes": 18392609,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-hebrew.json.encrypted.zip?sha256=af3a45bd196677373fd8b0a4f6ba0062fbfe9c6f3f65350a90c686dc26ea047c",
+        "file": "bibles/bible-hebrew.json.encrypted.zip",
+        "sha256": "af3a45bd196677373fd8b0a4f6ba0062fbfe9c6f3f65350a90c686dc26ea047c",
+        "bytes": 1382139,
+        "keyVersion": 1
+      }
     },
     "bible:BSB": {
       "id": "bible:BSB",
@@ -482,7 +629,14 @@
       "contentBytes": 14459769,
       "installedBytes": 18074712,
       "peakInstallationBytes": 46374506,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-bsb.json.encrypted.zip?sha256=938d179e70d96fd901ab7b467d53756a571d0d7be54255cb9c5fed8e32ce1e0e",
+        "file": "bibles/bible-bsb.json.encrypted.zip",
+        "sha256": "938d179e70d96fd901ab7b467d53756a571d0d7be54255cb9c5fed8e32ce1e0e",
+        "bytes": 2370525,
+        "keyVersion": 1
+      }
     },
     "bible:CHU": {
       "id": "bible:CHU",
@@ -507,7 +661,14 @@
       "contentBytes": 4421010,
       "installedBytes": 5526263,
       "peakInstallationBytes": 14861876,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-chu.json.encrypted.zip?sha256=1666f5403067da66b23c0555aeb0241050d1379c1fe53e2c50765ab3da90c39e",
+        "file": "bibles/bible-chu.json.encrypted.zip",
+        "sha256": "1666f5403067da66b23c0555aeb0241050d1379c1fe53e2c50765ab3da90c39e",
+        "bytes": 1319584,
+        "keyVersion": 1
+      }
     },
     "bible:CSB": {
       "id": "bible:CSB",
@@ -537,7 +698,14 @@
       "contentBytes": 4383010,
       "installedBytes": 5478763,
       "peakInstallationBytes": 14760539,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-csb.json.encrypted.zip?sha256=4bb62455bf27c0c97218f52dcd5e339ec37497ebf7293a7bb8a9855774eb819d",
+        "file": "bibles/bible-csb.json.encrypted.zip",
+        "sha256": "4bb62455bf27c0c97218f52dcd5e339ec37497ebf7293a7bb8a9855774eb819d",
+        "bytes": 1330996,
+        "keyVersion": 1
+      }
     },
     "bible:DARBY": {
       "id": "bible:DARBY",
@@ -557,7 +725,14 @@
       "contentBytes": 7548450,
       "installedBytes": 9435563,
       "peakInstallationBytes": 24527836,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-darby.json.encrypted.zip?sha256=441fc585971ccaede5262f6bdd3d99a4b6d4c05e3544d6a72cbdc1a915b24ad4",
+        "file": "bibles/bible-darby.json.encrypted.zip",
+        "sha256": "441fc585971ccaede5262f6bdd3d99a4b6d4c05e3544d6a72cbdc1a915b24ad4",
+        "bytes": 1514727,
+        "keyVersion": 1
+      }
     },
     "bible:DBR": {
       "id": "bible:DBR",
@@ -577,7 +752,14 @@
       "contentBytes": 10304872,
       "installedBytes": 12881090,
       "peakInstallationBytes": 33437374,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-dbr.json.encrypted.zip?sha256=580a15ebe29fc9d63e6653b3a4785ab9dc76cf29e0654b31ee25a8e1ddc2dbae",
+        "file": "bibles/bible-dbr.json.encrypted.zip",
+        "sha256": "580a15ebe29fc9d63e6653b3a4785ab9dc76cf29e0654b31ee25a8e1ddc2dbae",
+        "bytes": 2027743,
+        "keyVersion": 1
+      }
     },
     "bible:DBY": {
       "id": "bible:DBY",
@@ -597,7 +779,14 @@
       "contentBytes": 9907553,
       "installedBytes": 12384442,
       "peakInstallationBytes": 32108261,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-dby.json.encrypted.zip?sha256=f9f9cfae420758b62e0aee5df8b6d633216d3038ee38a0d6dece4ef4a9c5f1ed",
+        "file": "bibles/bible-dby.json.encrypted.zip",
+        "sha256": "f9f9cfae420758b62e0aee5df8b6d633216d3038ee38a0d6dece4ef4a9c5f1ed",
+        "bytes": 1914973,
+        "keyVersion": 1
+      }
     },
     "bible:DEL": {
       "id": "bible:DEL",
@@ -617,7 +806,14 @@
       "contentBytes": 7415456,
       "installedBytes": 9269320,
       "peakInstallationBytes": 24465198,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-del.json.encrypted.zip?sha256=a1087d1456315476b0c01a6c705aeba83094952329a891c0126b71de2587dd0e",
+        "file": "bibles/bible-del.json.encrypted.zip",
+        "sha256": "a1087d1456315476b0c01a6c705aeba83094952329a891c0126b71de2587dd0e",
+        "bytes": 1809759,
+        "keyVersion": 1
+      }
     },
     "bible:EASY": {
       "id": "bible:EASY",
@@ -647,7 +843,14 @@
       "contentBytes": 5391351,
       "installedBytes": 6739189,
       "peakInstallationBytes": 18014820,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-easy.json.encrypted.zip?sha256=77311526eb676dcda02720e76277f34704ea1ef27199de51d77d2e70b213d589",
+        "file": "bibles/bible-easy.json.encrypted.zip",
+        "sha256": "77311526eb676dcda02720e76277f34704ea1ef27199de51d77d2e70b213d589",
+        "bytes": 1514134,
+        "keyVersion": 1
+      }
     },
     "bible:ESV": {
       "id": "bible:ESV",
@@ -677,7 +880,14 @@
       "contentBytes": 4329558,
       "installedBytes": 5411948,
       "peakInstallationBytes": 14556668,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-esv.json.encrypted.zip?sha256=3898b97e07ea504d460a9323112e574c4a6b4c38359a0b4875da2736d1a9458b",
+        "file": "bibles/bible-esv.json.encrypted.zip",
+        "sha256": "3898b97e07ea504d460a9323112e574c4a6b4c38359a0b4875da2736d1a9458b",
+        "bytes": 1294059,
+        "keyVersion": 1
+      }
     },
     "bible:FMAR": {
       "id": "bible:FMAR",
@@ -707,7 +917,14 @@
       "contentBytes": 4912893,
       "installedBytes": 6141117,
       "peakInstallationBytes": 16513404,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-fmar.json.encrypted.zip?sha256=dec1d32d55b3238b098e0dc8e232752b4713be7a7f262624efdcda34d570b0b1",
+        "file": "bibles/bible-fmar.json.encrypted.zip",
+        "sha256": "dec1d32d55b3238b098e0dc8e232752b4713be7a7f262624efdcda34d570b0b1",
+        "bytes": 1464556,
+        "keyVersion": 1
+      }
     },
     "bible:FRC97": {
       "id": "bible:FRC97",
@@ -737,7 +954,14 @@
       "contentBytes": 5546351,
       "installedBytes": 6932939,
       "peakInstallationBytes": 18792865,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-frc97.json.encrypted.zip?sha256=f9b51ba1cb4f87316466defa11952017e3d7e4107db6ce43e367a142a9559552",
+        "file": "bibles/bible-frc97.json.encrypted.zip",
+        "sha256": "f9b51ba1cb4f87316466defa11952017e3d7e4107db6ce43e367a142a9559552",
+        "bytes": 1784555,
+        "keyVersion": 1
+      }
     },
     "bible:GW": {
       "id": "bible:GW",
@@ -767,7 +991,14 @@
       "contentBytes": 4449378,
       "installedBytes": 5561723,
       "peakInstallationBytes": 14975361,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-gw.json.encrypted.zip?sha256=a6d7ccd42e4503c9761514eea6de345aa00e790b88dec794e86a0dbf97d695f6",
+        "file": "bibles/bible-gw.json.encrypted.zip",
+        "sha256": "a6d7ccd42e4503c9761514eea6de345aa00e790b88dec794e86a0dbf97d695f6",
+        "bytes": 1343721,
+        "keyVersion": 1
+      }
     },
     "bible:KJF": {
       "id": "bible:KJF",
@@ -792,7 +1023,14 @@
       "contentBytes": 4698673,
       "installedBytes": 5873342,
       "peakInstallationBytes": 15793400,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-kjf.json.encrypted.zip?sha256=cf7afa107f750b29e4df50474eead7a635e2bffc70e8fe4153faf8146e91fdaa",
+        "file": "bibles/bible-kjf.json.encrypted.zip",
+        "sha256": "cf7afa107f750b29e4df50474eead7a635e2bffc70e8fe4153faf8146e91fdaa",
+        "bytes": 1400691,
+        "keyVersion": 1
+      }
     },
     "bible:KJV": {
       "id": "bible:KJV",
@@ -812,7 +1050,14 @@
       "contentBytes": 12459817,
       "installedBytes": 15574772,
       "peakInstallationBytes": 39876605,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-kjv.json.encrypted.zip?sha256=b6acb1f13d84946683f2270787213d3c01a22d589c49820f2fbc5576fffaa023",
+        "file": "bibles/bible-kjv.json.encrypted.zip",
+        "sha256": "b6acb1f13d84946683f2270787213d3c01a22d589c49820f2fbc5576fffaa023",
+        "bytes": 1969990,
+        "keyVersion": 1
+      }
     },
     "bible:LAU": {
       "id": "bible:LAU",
@@ -832,7 +1077,14 @@
       "contentBytes": 4768656,
       "installedBytes": 5960820,
       "peakInstallationBytes": 16070544,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-lau.json.encrypted.zip?sha256=f215dd0e791ee139c68247be053c55bed405e438f588331c558cb36512e34bc0",
+        "file": "bibles/bible-lau.json.encrypted.zip",
+        "sha256": "f215dd0e791ee139c68247be053c55bed405e438f588331c558cb36512e34bc0",
+        "bytes": 1457997,
+        "keyVersion": 1
+      }
     },
     "bible:LSG": {
       "id": "bible:LSG",
@@ -852,7 +1104,14 @@
       "contentBytes": 6502332,
       "installedBytes": 8127915,
       "peakInstallationBytes": 21322169,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-lsg.json.encrypted.zip?sha256=7ef2f8a1932f44678cc9af954734111311d92f3a71f824b0661c9c632bf4dd43",
+        "file": "bibles/bible-lsg.json.encrypted.zip",
+        "sha256": "7ef2f8a1932f44678cc9af954734111311d92f3a71f824b0661c9c632bf4dd43",
+        "bytes": 1473675,
+        "keyVersion": 1
+      }
     },
     "bible:LXX": {
       "id": "bible:LXX",
@@ -872,7 +1131,14 @@
       "contentBytes": 7321171,
       "installedBytes": 9151464,
       "peakInstallationBytes": 23920064,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-lxx.json.encrypted.zip?sha256=ef4d937d25a28ee51bcd889b7906b0ffcf42e9114678d1c6727b8faa0fcca45f",
+        "file": "bibles/bible-lxx.json.encrypted.zip",
+        "sha256": "ef4d937d25a28ee51bcd889b7906b0ffcf42e9114678d1c6727b8faa0fcca45f",
+        "bytes": 1583152,
+        "keyVersion": 1
+      }
     },
     "bible:LXX_FR": {
       "id": "bible:LXX_FR",
@@ -892,7 +1158,14 @@
       "contentBytes": 3692798,
       "installedBytes": 4615998,
       "peakInstallationBytes": 12404271,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-lxx-french.json.encrypted.zip?sha256=38e0a675d41c21496d9d33ce31e07d34f31dd26ba0f9417457b51d9528b182e0",
+        "file": "bibles/bible-lxx-french.json.encrypted.zip",
+        "sha256": "38e0a675d41c21496d9d33ce31e07d34f31dd26ba0f9417457b51d9528b182e0",
+        "bytes": 1093680,
+        "keyVersion": 1
+      }
     },
     "bible:NASB1995": {
       "id": "bible:NASB1995",
@@ -912,7 +1185,14 @@
       "contentBytes": 28865428,
       "installedBytes": 36081785,
       "peakInstallationBytes": 91669882,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-nasb1995.json.encrypted.zip?sha256=7c83802c488fdd7dcd39272531026fe1136f9360ac600babc73d2b0cf5615d97",
+        "file": "bibles/bible-nasb1995.json.encrypted.zip",
+        "sha256": "7c83802c488fdd7dcd39272531026fe1136f9360ac600babc73d2b0cf5615d97",
+        "bytes": 3945061,
+        "keyVersion": 1
+      }
     },
     "bible:NASB2020": {
       "id": "bible:NASB2020",
@@ -932,7 +1212,14 @@
       "contentBytes": 29500427,
       "installedBytes": 36875534,
       "peakInstallationBytes": 93687046,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-nasb2020.json.encrypted.zip?sha256=66fada30e466adc416b58e72ef0f0b6997c0df48749844f31457fb25d0299aad",
+        "file": "bibles/bible-nasb2020.json.encrypted.zip",
+        "sha256": "66fada30e466adc416b58e72ef0f0b6997c0df48749844f31457fb25d0299aad",
+        "bytes": 4032479,
+        "keyVersion": 1
+      }
     },
     "bible:NBS": {
       "id": "bible:NBS",
@@ -962,7 +1249,14 @@
       "contentBytes": 4732569,
       "installedBytes": 5915712,
       "peakInstallationBytes": 15918453,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-nbs.json.encrypted.zip?sha256=ffc698a7aa05955d14c94cb062708aebf329f686cc7dfd0191105d3f02f1a205",
+        "file": "bibles/bible-nbs.json.encrypted.zip",
+        "sha256": "ffc698a7aa05955d14c94cb062708aebf329f686cc7dfd0191105d3f02f1a205",
+        "bytes": 1420570,
+        "keyVersion": 1
+      }
     },
     "bible:NEG79": {
       "id": "bible:NEG79",
@@ -992,7 +1286,14 @@
       "contentBytes": 4604265,
       "installedBytes": 5755332,
       "peakInstallationBytes": 15492996,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-neg79.json.encrypted.zip?sha256=45d99fd41d726fc2f45ef19465481c4ce11d8db346edadc44239e4df6f949bae",
+        "file": "bibles/bible-neg79.json.encrypted.zip",
+        "sha256": "45d99fd41d726fc2f45ef19465481c4ce11d8db346edadc44239e4df6f949bae",
+        "bytes": 1387483,
+        "keyVersion": 1
+      }
     },
     "bible:NET": {
       "id": "bible:NET",
@@ -1022,7 +1323,14 @@
       "contentBytes": 4601791,
       "installedBytes": 5752239,
       "peakInstallationBytes": 15509250,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-net.json.encrypted.zip?sha256=92bccdac3d116f62d9c6fb7a0d9596c67706a096e04a3727966311dce394d997",
+        "file": "bibles/bible-net.json.encrypted.zip",
+        "sha256": "92bccdac3d116f62d9c6fb7a0d9596c67706a096e04a3727966311dce394d997",
+        "bytes": 1407939,
+        "keyVersion": 1
+      }
     },
     "bible:NFC": {
       "id": "bible:NFC",
@@ -1052,7 +1360,14 @@
       "contentBytes": 5635235,
       "installedBytes": 7044044,
       "peakInstallationBytes": 19072453,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-nfc.json.encrypted.zip?sha256=541f0882667962c41194789670d8a257f43e75b7234a1308360e09d8a569b232",
+        "file": "bibles/bible-nfc.json.encrypted.zip",
+        "sha256": "541f0882667962c41194789670d8a257f43e75b7234a1308360e09d8a569b232",
+        "bytes": 1794247,
+        "keyVersion": 1
+      }
     },
     "bible:NIV": {
       "id": "bible:NIV",
@@ -1082,7 +1397,14 @@
       "contentBytes": 4334502,
       "installedBytes": 5418128,
       "peakInstallationBytes": 14610567,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-niv.json.encrypted.zip?sha256=2b4bf02cfddc0387787b78437dd5d6748776d6e4440ac39c05bce335ae565745",
+        "file": "bibles/bible-niv.json.encrypted.zip",
+        "sha256": "2b4bf02cfddc0387787b78437dd5d6748776d6e4440ac39c05bce335ae565745",
+        "bytes": 1328035,
+        "keyVersion": 1
+      }
     },
     "bible:NKJV": {
       "id": "bible:NKJV",
@@ -1112,7 +1434,14 @@
       "contentBytes": 4472213,
       "installedBytes": 5590267,
       "peakInstallationBytes": 15027205,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-nkjv.json.encrypted.zip?sha256=5dc0c05b6fa065766827cec82d10d5ee23943f4e820cc9cb436359a3ff2fa118",
+        "file": "bibles/bible-nkjv.json.encrypted.zip",
+        "sha256": "5dc0c05b6fa065766827cec82d10d5ee23943f4e820cc9cb436359a3ff2fa118",
+        "bytes": 1328879,
+        "keyVersion": 1
+      }
     },
     "bible:NLT": {
       "id": "bible:NLT",
@@ -1142,7 +1471,14 @@
       "contentBytes": 4517022,
       "installedBytes": 5646278,
       "peakInstallationBytes": 15251250,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-nlt.json.encrypted.zip?sha256=bc4bcc3f0ef2b29422134fec71412062baa2cd8f1a6bb648e3e0a035e251d41e",
+        "file": "bibles/bible-nlt.json.encrypted.zip",
+        "sha256": "bc4bcc3f0ef2b29422134fec71412062baa2cd8f1a6bb648e3e0a035e251d41e",
+        "bytes": 1406191,
+        "keyVersion": 1
+      }
     },
     "bible:NVS78P": {
       "id": "bible:NVS78P",
@@ -1172,7 +1508,14 @@
       "contentBytes": 4640864,
       "installedBytes": 5801080,
       "peakInstallationBytes": 15652903,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-nvs78p.json.encrypted.zip?sha256=06d7f3eb6a52d172d1fe18d11d97be8a9db56a75c972a23647638270bff56325",
+        "file": "bibles/bible-nvs78p.json.encrypted.zip",
+        "sha256": "06d7f3eb6a52d172d1fe18d11d97be8a9db56a75c972a23647638270bff56325",
+        "bytes": 1430575,
+        "keyVersion": 1
+      }
     },
     "bible:OST": {
       "id": "bible:OST",
@@ -1197,7 +1540,14 @@
       "contentBytes": 5071357,
       "installedBytes": 6339197,
       "peakInstallationBytes": 16949731,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-ost.json.encrypted.zip?sha256=7a53faae214339ab42c10ef97b5831d6bce0cdc79768273c559c70f742a331ea",
+        "file": "bibles/bible-ost.json.encrypted.zip",
+        "sha256": "7a53faae214339ab42c10ef97b5831d6bce0cdc79768273c559c70f742a331ea",
+        "bytes": 1427577,
+        "keyVersion": 1
+      }
     },
     "bible:PDV2017": {
       "id": "bible:PDV2017",
@@ -1227,7 +1577,14 @@
       "contentBytes": 5768634,
       "installedBytes": 7210793,
       "peakInstallationBytes": 19382710,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-pdv2017.json.encrypted.zip?sha256=46dc2611a3ca09cc11b62c2b1af1871f38bc42202687899b36841b5716e6c5b2",
+        "file": "bibles/bible-pdv2017.json.encrypted.zip",
+        "sha256": "46dc2611a3ca09cc11b62c2b1af1871f38bc42202687899b36841b5716e6c5b2",
+        "bytes": 1713690,
+        "keyVersion": 1
+      }
     },
     "bible:POV": {
       "id": "bible:POV",
@@ -1252,7 +1609,14 @@
       "contentBytes": 1621139,
       "installedBytes": 2026424,
       "peakInstallationBytes": 5493977,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-pov.json.encrypted.zip?sha256=943bc3ba30ad3cacecaa0f44270b2b6d001a4c1673ff81aea3a319177b8fab92",
+        "file": "bibles/bible-pov.json.encrypted.zip",
+        "sha256": "943bc3ba30ad3cacecaa0f44270b2b6d001a4c1673ff81aea3a319177b8fab92",
+        "bytes": 522574,
+        "keyVersion": 1
+      }
     },
     "bible:RLT": {
       "id": "bible:RLT",
@@ -1272,7 +1636,14 @@
       "contentBytes": 12724834,
       "installedBytes": 15906043,
       "peakInstallationBytes": 40691124,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-rlt.json.encrypted.zip?sha256=a48f8161dfed017bec2119e509f7911ca92ccec0a8fbfc6a5abd5643a53a060e",
+        "file": "bibles/bible-rlt.json.encrypted.zip",
+        "sha256": "a48f8161dfed017bec2119e509f7911ca92ccec0a8fbfc6a5abd5643a53a060e",
+        "bytes": 1982674,
+        "keyVersion": 1
+      }
     },
     "bible:RV1895": {
       "id": "bible:RV1895",
@@ -1292,7 +1663,14 @@
       "contentBytes": 7884754,
       "installedBytes": 9855943,
       "peakInstallationBytes": 25557879,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-rv1895.json.encrypted.zip?sha256=1b4fa5ffff53f17e0cf7ebb9d70c417572b73577051c5da4c0c649e90454c1e8",
+        "file": "bibles/bible-rv1895.json.encrypted.zip",
+        "sha256": "1b4fa5ffff53f17e0cf7ebb9d70c417572b73577051c5da4c0c649e90454c1e8",
+        "bytes": 1527833,
+        "keyVersion": 1
+      }
     },
     "bible:RWEBSTER": {
       "id": "bible:RWEBSTER",
@@ -1312,7 +1690,14 @@
       "contentBytes": 11148277,
       "installedBytes": 13935347,
       "peakInstallationBytes": 35821807,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-rwebster.json.encrypted.zip?sha256=1be287f1a3aa9535bf0e73f206c3e3b04ab063b2ad80554c0a27db1861ade88d",
+        "file": "bibles/bible-rwebster.json.encrypted.zip",
+        "sha256": "1be287f1a3aa9535bf0e73f206c3e3b04ab063b2ad80554c0a27db1861ade88d",
+        "bytes": 1886825,
+        "keyVersion": 1
+      }
     },
     "bible:S21": {
       "id": "bible:S21",
@@ -1342,7 +1727,14 @@
       "contentBytes": 4721717,
       "installedBytes": 5902147,
       "peakInstallationBytes": 15922538,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-s21.json.encrypted.zip?sha256=23d2937bddcab1be2fb01cba33072c7c3cdc3520b292efcc89ddbe99748ea8ca",
+        "file": "bibles/bible-s21.json.encrypted.zip",
+        "sha256": "23d2937bddcab1be2fb01cba33072c7c3cdc3520b292efcc89ddbe99748ea8ca",
+        "bytes": 1452830,
+        "keyVersion": 1
+      }
     },
     "bible:SBLGNT": {
       "id": "bible:SBLGNT",
@@ -1362,7 +1754,14 @@
       "contentBytes": 1735842,
       "installedBytes": 2169803,
       "peakInstallationBytes": 5733846,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-greek.json.encrypted.zip?sha256=74414b9c4daf89f7296d754cb43537a3191f5d215f076e9f3c2d61b48c41f986",
+        "file": "bibles/bible-greek.json.encrypted.zip",
+        "sha256": "74414b9c4daf89f7296d754cb43537a3191f5d215f076e9f3c2d61b48c41f986",
+        "bytes": 429721,
+        "keyVersion": 1
+      }
     },
     "bible:TLV": {
       "id": "bible:TLV",
@@ -1387,7 +1786,14 @@
       "contentBytes": 4290233,
       "installedBytes": 5362792,
       "peakInstallationBytes": 14464751,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-tlv.json.encrypted.zip?sha256=927900ccbd163cbbb3e0d248d2067866f2fe6b12ad62cc6e1bda2ad1ae362178",
+        "file": "bibles/bible-tlv.json.encrypted.zip",
+        "sha256": "927900ccbd163cbbb3e0d248d2067866f2fe6b12ad62cc6e1bda2ad1ae362178",
+        "bytes": 1317323,
+        "keyVersion": 1
+      }
     },
     "bible:TR1624": {
       "id": "bible:TR1624",
@@ -1407,7 +1813,14 @@
       "contentBytes": 1581364,
       "installedBytes": 1976705,
       "peakInstallationBytes": 5171802,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-TR1624.json.encrypted.zip?sha256=557f51f6ea69a07ccfd11896dbf40f2086b2da2e71fe2ebe938c614adf09c0f1",
+        "file": "bibles/bible-TR1624.json.encrypted.zip",
+        "sha256": "557f51f6ea69a07ccfd11896dbf40f2086b2da2e71fe2ebe938c614adf09c0f1",
+        "bytes": 346336,
+        "keyVersion": 1
+      }
     },
     "bible:TR1894": {
       "id": "bible:TR1894",
@@ -1427,7 +1840,14 @@
       "contentBytes": 1742040,
       "installedBytes": 2177550,
       "peakInstallationBytes": 5742116,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-TR1894.json.encrypted.zip?sha256=81d1f94fd55f1e4a18d49ae0d3f6432860ad4e2945f6220f49255c621c524472",
+        "file": "bibles/bible-TR1894.json.encrypted.zip",
+        "sha256": "81d1f94fd55f1e4a18d49ae0d3f6432860ad4e2945f6220f49255c621c524472",
+        "bytes": 420635,
+        "keyVersion": 1
+      }
     },
     "bible:VUL": {
       "id": "bible:VUL",
@@ -1447,7 +1867,14 @@
       "contentBytes": 4321077,
       "installedBytes": 5401347,
       "peakInstallationBytes": 14714697,
-      "strategy": "sqlite-import"
+      "strategy": "sqlite-import",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-vul.json.encrypted.zip?sha256=cf07d262c64f5a822ecb1286516d8347dfcbb5539a75ebc76e8dda80de314fa7",
+        "file": "bibles/bible-vul.json.encrypted.zip",
+        "sha256": "cf07d262c64f5a822ecb1286516d8347dfcbb5539a75ebc76e8dda80de314fa7",
+        "bytes": 1453675,
+        "keyVersion": 1
+      }
     },
     "database:abbott:en": {
       "id": "database:abbott:en",
@@ -1468,7 +1895,14 @@
       "resourceRevision": "abbott-en-d7caff0a9e881ac8153c",
       "installedBytes": 1880064,
       "peakInstallationBytes": 2822257,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-abbott-en.sqlite.encrypted.zip?sha256=b9071f6f50f70c019c13d6ae1015b20c230b05844edc86f189e517626fcc9f7b",
+        "file": "commentaries/commentary-abbott-en.sqlite.encrypted.zip",
+        "sha256": "b9071f6f50f70c019c13d6ae1015b20c230b05844edc86f189e517626fcc9f7b",
+        "bytes": 571308,
+        "keyVersion": 1
+      }
     },
     "database:acbc:en": {
       "id": "database:acbc:en",
@@ -1489,7 +1923,14 @@
       "resourceRevision": "acbc-en-2cc740b3a01ad8015e70",
       "installedBytes": 28692480,
       "peakInstallationBytes": 43723454,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-acbc-en.sqlite.encrypted.zip?sha256=83ccc00ee5146cafc51f060de19b889f75effb3a1a19ae2137cb958ee044eb7e",
+        "file": "commentaries/commentary-acbc-en.sqlite.encrypted.zip",
+        "sha256": "83ccc00ee5146cafc51f060de19b889f75effb3a1a19ae2137cb958ee044eb7e",
+        "bytes": 9287506,
+        "keyVersion": 1
+      }
     },
     "database:acbc:fr": {
       "id": "database:acbc:fr",
@@ -1510,7 +1951,14 @@
       "resourceRevision": "acbc-fr-279d188d0459a1b82755",
       "installedBytes": 30195712,
       "peakInstallationBytes": 46082096,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-acbc-fr.sqlite.encrypted.zip?sha256=bce77a481d524ac474a083e989754f0159fc6201cf2b63e20930202907b64c3c",
+        "file": "commentaries/commentary-acbc-fr.sqlite.encrypted.zip",
+        "sha256": "bce77a481d524ac474a083e989754f0159fc6201cf2b63e20930202907b64c3c",
+        "bytes": 9862240,
+        "keyVersion": 1
+      }
     },
     "database:aquifer-fr:en": {
       "id": "database:aquifer-fr:en",
@@ -1531,7 +1979,14 @@
       "resourceRevision": "aquifer-fr-en-958ac7bb5b6dd60ecaa8",
       "installedBytes": 39624704,
       "peakInstallationBytes": 50740884,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-aquifer-fr-en.sqlite.encrypted.zip?sha256=5b41887e4e3cdf2735866b3cc7dcfc295f5f097e122dcb5cbd4f238d300b8cb5",
+        "file": "commentaries/commentary-aquifer-fr-en.sqlite.encrypted.zip",
+        "sha256": "5b41887e4e3cdf2735866b3cc7dcfc295f5f097e122dcb5cbd4f238d300b8cb5",
+        "bytes": 4459560,
+        "keyVersion": 1
+      }
     },
     "database:aquifer-fr:fr": {
       "id": "database:aquifer-fr:fr",
@@ -1552,7 +2007,14 @@
       "resourceRevision": "aquifer-fr-fr-3f149e17916768ed6ba3",
       "installedBytes": 41279488,
       "peakInstallationBytes": 52865420,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-aquifer-fr-fr.sqlite.encrypted.zip?sha256=7705024e082f31c4da9da25a5f7744e8d2a6ddbfec5eb94766b9b75a775e4533",
+        "file": "commentaries/commentary-aquifer-fr-fr.sqlite.encrypted.zip",
+        "sha256": "7705024e082f31c4da9da25a5f7744e8d2a6ddbfec5eb94766b9b75a775e4533",
+        "bytes": 4656165,
+        "keyVersion": 1
+      }
     },
     "database:barnes:en": {
       "id": "database:barnes:en",
@@ -1573,7 +2035,14 @@
       "resourceRevision": "barnes-en-f43e9cee160451cadcc8",
       "installedBytes": 89370624,
       "peakInstallationBytes": 121157045,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-barnes-en.sqlite.encrypted.zip?sha256=0cda2d1264b16be15f8d093b253144bd1517b34b73d29de5aa63a30514c286ed",
+        "file": "commentaries/commentary-barnes-en.sqlite.encrypted.zip",
+        "sha256": "0cda2d1264b16be15f8d093b253144bd1517b34b73d29de5aa63a30514c286ed",
+        "bytes": 15867631,
+        "keyVersion": 1
+      }
     },
     "database:barnes:fr": {
       "id": "database:barnes:fr",
@@ -1594,7 +2063,14 @@
       "resourceRevision": "barnes-fr-56082eee89615d9fa233",
       "installedBytes": 92323840,
       "peakInstallationBytes": 125707509,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-barnes-fr.sqlite.encrypted.zip?sha256=d94197cc557562f935cb9a6014b23b6bf8fc54a4a5680cf5ed966a583e832715",
+        "file": "commentaries/commentary-barnes-fr.sqlite.encrypted.zip",
+        "sha256": "d94197cc557562f935cb9a6014b23b6bf8fc54a4a5680cf5ed966a583e832715",
+        "bytes": 16922115,
+        "keyVersion": 1
+      }
     },
     "database:bible-annotee:fr": {
       "id": "database:bible-annotee:fr",
@@ -1615,7 +2091,14 @@
       "resourceRevision": "bible-annotee-fr-8dd7f948b4c255c8ee6b",
       "installedBytes": 29360128,
       "peakInstallationBytes": 43853335,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-bible-annotee-fr.sqlite.encrypted.zip?sha256=f1ab095b98d2759636d8c613a1f7071608534df6296b19d8c8dbfe7784dd34c2",
+        "file": "commentaries/commentary-bible-annotee-fr.sqlite.encrypted.zip",
+        "sha256": "f1ab095b98d2759636d8c613a1f7071608534df6296b19d8c8dbfe7784dd34c2",
+        "bytes": 8746821,
+        "keyVersion": 1
+      }
     },
     "database:BOST:fr": {
       "id": "database:BOST:fr",
@@ -1636,7 +2119,14 @@
       "resourceRevision": "dictionary-bost-fr-6aab80e0a06bb152e43d",
       "installedBytes": 16232448,
       "peakInstallationBytes": 23489693,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/dictionaries/dictionary-bost-fr.sqlite.encrypted.zip?sha256=4de9394b10f93db588fed42bdc26d6c807753491942837c5882b8b267fc01c51",
+        "file": "dictionaries/dictionary-bost-fr.sqlite.encrypted.zip",
+        "sha256": "4de9394b10f93db588fed42bdc26d6c807753491942837c5882b8b267fc01c51",
+        "bytes": 4197605,
+        "keyVersion": 1
+      }
     },
     "database:burkitt:en": {
       "id": "database:burkitt:en",
@@ -1657,7 +2147,14 @@
       "resourceRevision": "burkitt-en-972338770310ff4ae686",
       "installedBytes": 7524352,
       "peakInstallationBytes": 11456897,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-burkitt-en.sqlite.encrypted.zip?sha256=603fe205809bcf68cf0a0aed3731c05a39146963ea951046b826a85e450db46b",
+        "file": "commentaries/commentary-burkitt-en.sqlite.encrypted.zip",
+        "sha256": "603fe205809bcf68cf0a0aed3731c05a39146963ea951046b826a85e450db46b",
+        "bytes": 2422642,
+        "keyVersion": 1
+      }
     },
     "database:CALMET:fr": {
       "id": "database:CALMET:fr",
@@ -1678,7 +2175,14 @@
       "resourceRevision": "dictionary-calmet-fr-8c62871c189f48162551",
       "installedBytes": 29667328,
       "peakInstallationBytes": 43284070,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/dictionaries/dictionary-calmet-fr.sqlite.encrypted.zip?sha256=277d1900a57f969fd367eae6ac5f810dc66937f582fd0f811440171f551ff17d",
+        "file": "dictionaries/dictionary-calmet-fr.sqlite.encrypted.zip",
+        "sha256": "277d1900a57f969fd367eae6ac5f810dc66937f582fd0f811440171f551ff17d",
+        "bytes": 7975844,
+        "keyVersion": 1
+      }
     },
     "database:calvin:en": {
       "id": "database:calvin:en",
@@ -1699,7 +2203,14 @@
       "resourceRevision": "calvin-en-21a0ee1716d93ab92325",
       "installedBytes": 47636480,
       "peakInstallationBytes": 72647610,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-calvin-en.sqlite.encrypted.zip?sha256=c405096ee87861fa6feb4fd68fd9da929c71eb9d6844dc4d344c2f468bd19c7a",
+        "file": "commentaries/commentary-calvin-en.sqlite.encrypted.zip",
+        "sha256": "c405096ee87861fa6feb4fd68fd9da929c71eb9d6844dc4d344c2f468bd19c7a",
+        "bytes": 15455281,
+        "keyVersion": 1
+      }
     },
     "database:catena-aurea:en": {
       "id": "database:catena-aurea:en",
@@ -1720,7 +2231,14 @@
       "resourceRevision": "catena-aurea-en-3a835b1c38b92c3c260c",
       "installedBytes": 6610944,
       "peakInstallationBytes": 9997777,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-catena-aurea-en.sqlite.encrypted.zip?sha256=a51e496f2f3d6de23af2ae1a00cafff2151d06d418da2ba25f2e2671aa237389",
+        "file": "commentaries/commentary-catena-aurea-en.sqlite.encrypted.zip",
+        "sha256": "a51e496f2f3d6de23af2ae1a00cafff2151d06d418da2ba25f2e2671aa237389",
+        "bytes": 2070414,
+        "keyVersion": 1
+      }
     },
     "database:darby-notes:en": {
       "id": "database:darby-notes:en",
@@ -1741,7 +2259,14 @@
       "resourceRevision": "darby-notes-en-04b8498a650fb1ec5cb2",
       "installedBytes": 3375104,
       "peakInstallationBytes": 4923619,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-darby-notes-en.sqlite.encrypted.zip?sha256=c81e1621a3d3b35f8e9a21b4be858ad230a5fffd03752f92b277e0259dab22f0",
+        "file": "commentaries/commentary-darby-notes-en.sqlite.encrypted.zip",
+        "sha256": "c81e1621a3d3b35f8e9a21b4be858ad230a5fffd03752f92b277e0259dab22f0",
+        "bytes": 892327,
+        "keyVersion": 1
+      }
     },
     "database:DICTIONNAIRE:en": {
       "id": "database:DICTIONNAIRE:en",
@@ -1761,7 +2286,14 @@
       "contentBytes": 22532096,
       "installedBytes": 22532096,
       "peakInstallationBytes": 33754795,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/en/dictionnaire.sqlite.encrypted.zip?sha256=679061fd882fac5b6d28487bf2a2c87021e84d249107cc83403abf9185fbc25d",
+        "file": "databases/en/dictionnaire.sqlite.encrypted.zip",
+        "sha256": "679061fd882fac5b6d28487bf2a2c87021e84d249107cc83403abf9185fbc25d",
+        "bytes": 6818252,
+        "keyVersion": 1
+      }
     },
     "database:DICTIONNAIRE:fr": {
       "id": "database:DICTIONNAIRE:fr",
@@ -1781,7 +2313,14 @@
       "contentBytes": 24456192,
       "installedBytes": 24456192,
       "peakInstallationBytes": 35717486,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/dictionnaire.sqlite.encrypted.zip?sha256=0ecd0a7ff3ee78fc039c92de4dd1ed8f54bf12344b94ee32cc10e0ff5f5f3e49",
+        "file": "databases/dictionnaire.sqlite.encrypted.zip",
+        "sha256": "0ecd0a7ff3ee78fc039c92de4dd1ed8f54bf12344b94ee32cc10e0ff5f5f3e49",
+        "bytes": 6608194,
+        "keyVersion": 1
+      }
     },
     "database:douay-rheims-notes:en": {
       "id": "database:douay-rheims-notes:en",
@@ -1802,7 +2341,14 @@
       "resourceRevision": "douay-rheims-notes-en-c9c21659014ff979732c",
       "installedBytes": 2785280,
       "peakInstallationBytes": 4169536,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-douay-rheims-notes-en.sqlite.encrypted.zip?sha256=f15ea4bda470d32aeb010d873e63b424fa0bf8b4802250a14688b4a41fc2f755",
+        "file": "commentaries/commentary-douay-rheims-notes-en.sqlite.encrypted.zip",
+        "sha256": "f15ea4bda470d32aeb010d873e63b424fa0bf8b4802250a14688b4a41fc2f755",
+        "bytes": 838506,
+        "keyVersion": 1
+      }
     },
     "database:EASTON_WEBSTER:en": {
       "id": "database:EASTON_WEBSTER:en",
@@ -1823,7 +2369,14 @@
       "resourceRevision": "dictionary-easton-webster-en-a30602d83b4a84e776d9",
       "installedBytes": 35986432,
       "peakInstallationBytes": 51245247,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/dictionaries/dictionary-easton-webster-en.sqlite.encrypted.zip?sha256=2417d2b26d0601b63ceff5f2ae85e39499528bf5cdbf67c8af3b32b43d98aa12",
+        "file": "dictionaries/dictionary-easton-webster-en.sqlite.encrypted.zip",
+        "sha256": "2417d2b26d0601b63ceff5f2ae85e39499528bf5cdbf67c8af3b32b43d98aa12",
+        "bytes": 8562504,
+        "keyVersion": 1
+      }
     },
     "database:egw-writings:en": {
       "id": "database:egw-writings:en",
@@ -1844,7 +2397,14 @@
       "resourceRevision": "egw-writings-en-d6a3c4a1fdfdba1b9eaa",
       "installedBytes": 183607296,
       "peakInstallationBytes": 265640688,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-egw-writings-en.sqlite.encrypted.zip?sha256=46d970d53a0373d72d7620ad72fbeb27203aa6319471d8aeef71551aa5b3d61b",
+        "file": "commentaries/commentary-egw-writings-en.sqlite.encrypted.zip",
+        "sha256": "46d970d53a0373d72d7620ad72fbeb27203aa6319471d8aeef71551aa5b3d61b",
+        "bytes": 47413691,
+        "keyVersion": 1
+      }
     },
     "database:family-notes:en": {
       "id": "database:family-notes:en",
@@ -1865,7 +2425,14 @@
       "resourceRevision": "family-notes-en-aef67f2db7e1e7b7743a",
       "installedBytes": 3358720,
       "peakInstallationBytes": 5047574,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-family-notes-en.sqlite.encrypted.zip?sha256=3262f2607431b4eaa182ef88af8a873f22fd6e24d671ab8d2ce5b4fdd3952a48",
+        "file": "commentaries/commentary-family-notes-en.sqlite.encrypted.zip",
+        "sha256": "3262f2607431b4eaa182ef88af8a873f22fd6e24d671ab8d2ce5b4fdd3952a48",
+        "bytes": 1020924,
+        "keyVersion": 1
+      }
     },
     "database:fourfold-gospel:en": {
       "id": "database:fourfold-gospel:en",
@@ -1886,7 +2453,14 @@
       "resourceRevision": "fourfold-gospel-en-3f3a25af7abf4c9114d1",
       "installedBytes": 5722112,
       "peakInstallationBytes": 8347910,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-fourfold-gospel-en.sqlite.encrypted.zip?sha256=a88817e930308625bc34327361c7653a60fb09d19df8ccb4ad9b577d1d3c9dde",
+        "file": "commentaries/commentary-fourfold-gospel-en.sqlite.encrypted.zip",
+        "sha256": "a88817e930308625bc34327361c7653a60fb09d19df8ccb4ad9b577d1d3c9dde",
+        "bytes": 1527487,
+        "keyVersion": 1
+      }
     },
     "database:fre-aug:fr": {
       "id": "database:fre-aug:fr",
@@ -1907,7 +2481,14 @@
       "resourceRevision": "fre-aug-fr-7576a02d9f06ef7bc721",
       "installedBytes": 21581824,
       "peakInstallationBytes": 31985404,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-fre-aug-fr.sqlite.encrypted.zip?sha256=93d25b35a168bcd45bb84cdb6af3cbb365866bcfbcb5e12df302d7916af3b4bd",
+        "file": "commentaries/commentary-fre-aug-fr.sqlite.encrypted.zip",
+        "sha256": "93d25b35a168bcd45bb84cdb6af3cbb365866bcfbcb5e12df302d7916af3b4bd",
+        "bytes": 6217831,
+        "keyVersion": 1
+      }
     },
     "database:fre-chry:fr": {
       "id": "database:fre-chry:fr",
@@ -1928,7 +2509,14 @@
       "resourceRevision": "fre-chry-fr-c390dfd5844ba71e0358",
       "installedBytes": 22421504,
       "peakInstallationBytes": 34060309,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-fre-chry-fr.sqlite.encrypted.zip?sha256=bbfc6c08d0f521134487d7340d831776a184e1c11d43aedeb8d998b9e665cff0",
+        "file": "commentaries/commentary-fre-chry-fr.sqlite.encrypted.zip",
+        "sha256": "bbfc6c08d0f521134487d7340d831776a184e1c11d43aedeb8d998b9e665cff0",
+        "bytes": 7175649,
+        "keyVersion": 1
+      }
     },
     "database:geneva-notes:en": {
       "id": "database:geneva-notes:en",
@@ -1949,7 +2537,14 @@
       "resourceRevision": "geneva-notes-en-d4039d5aaaadf9639312",
       "installedBytes": 9994240,
       "peakInstallationBytes": 14964998,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-geneva-notes-en.sqlite.encrypted.zip?sha256=8bbac4db80064ff629e2a66dcf99671c0191ffa1c8f3360a482958276c4d03e5",
+        "file": "commentaries/commentary-geneva-notes-en.sqlite.encrypted.zip",
+        "sha256": "8bbac4db80064ff629e2a66dcf99671c0191ffa1c8f3360a482958276c4d03e5",
+        "bytes": 2988344,
+        "keyVersion": 1
+      }
     },
     "database:ISBE:en": {
       "id": "database:ISBE:en",
@@ -1970,7 +2565,14 @@
       "resourceRevision": "dictionary-isbe-en-fbaaa93d38286457cfa8",
       "installedBytes": 74260480,
       "peakInstallationBytes": 107627347,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/dictionaries/dictionary-isbe-en.sqlite.encrypted.zip?sha256=2eba2f7dc57c196f14485c816e2c94bf289f3d5167ac3f2d6cc07fe0711943dc",
+        "file": "dictionaries/dictionary-isbe-en.sqlite.encrypted.zip",
+        "sha256": "2eba2f7dc57c196f14485c816e2c94bf289f3d5167ac3f2d6cc07fe0711943dc",
+        "bytes": 19322430,
+        "keyVersion": 1
+      }
     },
     "database:jfb:en": {
       "id": "database:jfb:en",
@@ -1991,7 +2593,14 @@
       "resourceRevision": "jfb-en-26091c1ed3898ec1fbc9",
       "installedBytes": 56774656,
       "peakInstallationBytes": 73657664,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-jfb-en.sqlite.encrypted.zip?sha256=697d71b7e14ee4c7d33d0858ef87a810fda8067ae71cf0fb8bad027e3a5465ad",
+        "file": "commentaries/commentary-jfb-en.sqlite.encrypted.zip",
+        "sha256": "697d71b7e14ee4c7d33d0858ef87a810fda8067ae71cf0fb8bad027e3a5465ad",
+        "bytes": 7241193,
+        "keyVersion": 1
+      }
     },
     "database:kd:en": {
       "id": "database:kd:en",
@@ -2012,7 +2621,14 @@
       "resourceRevision": "kd-en-f958ec6b51ebe6237ad2",
       "installedBytes": 119627776,
       "peakInstallationBytes": 155053202,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-kd-en.sqlite.encrypted.zip?sha256=cd131b0c43460744442a5b1d09d066724610c3bf94494ceef6a2c4662e3130f3",
+        "file": "commentaries/commentary-kd-en.sqlite.encrypted.zip",
+        "sha256": "cd131b0c43460744442a5b1d09d066724610c3bf94494ceef6a2c4662e3130f3",
+        "bytes": 15105252,
+        "keyVersion": 1
+      }
     },
     "database:king-comments:en": {
       "id": "database:king-comments:en",
@@ -2033,7 +2649,14 @@
       "resourceRevision": "king-comments-en-52bf050ec07328457f52",
       "installedBytes": 30552064,
       "peakInstallationBytes": 45653464,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-king-comments-en.sqlite.encrypted.zip?sha256=066493f204e280dd19fa0fb17ccb3a24447442611b8fa44ae149bd46ff73c58f",
+        "file": "commentaries/commentary-king-comments-en.sqlite.encrypted.zip",
+        "sha256": "066493f204e280dd19fa0fb17ccb3a24447442611b8fa44ae149bd46ff73c58f",
+        "bytes": 9102849,
+        "keyVersion": 1
+      }
     },
     "database:LELIEVRE:fr": {
       "id": "database:LELIEVRE:fr",
@@ -2054,7 +2677,14 @@
       "resourceRevision": "dictionary-lelievre-fr-2dbdf9b5e684dd81a797",
       "installedBytes": 1236992,
       "peakInstallationBytes": 1795644,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/dictionaries/dictionary-lelievre-fr.sqlite.encrypted.zip?sha256=9a2f6a5fd834f833d14b1855eed1c19fe9448cabf4267aee650fd538cc6ec2ec",
+        "file": "dictionaries/dictionary-lelievre-fr.sqlite.encrypted.zip",
+        "sha256": "9a2f6a5fd834f833d14b1855eed1c19fe9448cabf4267aee650fd538cc6ec2ec",
+        "bytes": 325269,
+        "keyVersion": 1
+      }
     },
     "database:lightfoot:en": {
       "id": "database:lightfoot:en",
@@ -2075,7 +2705,14 @@
       "resourceRevision": "lightfoot-en-a68aa1be42ebe971010e",
       "installedBytes": 2289664,
       "peakInstallationBytes": 3500911,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-lightfoot-en.sqlite.encrypted.zip?sha256=948ec902cf588a5b6672a1f35c284877559dec22339e6cbff80770ce140f1d95",
+        "file": "commentaries/commentary-lightfoot-en.sqlite.encrypted.zip",
+        "sha256": "948ec902cf588a5b6672a1f35c284877559dec22339e6cbff80770ce140f1d95",
+        "bytes": 751684,
+        "keyVersion": 1
+      }
     },
     "database:luther:en": {
       "id": "database:luther:en",
@@ -2096,7 +2733,14 @@
       "resourceRevision": "luther-en-7d77d393614584221c21",
       "installedBytes": 15216640,
       "peakInstallationBytes": 22457031,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-luther-en.sqlite.encrypted.zip?sha256=f693cb469b1050a430c8c0de2d2f69eddfce233335dd8c2ff55e33cba127d5e3",
+        "file": "commentaries/commentary-luther-en.sqlite.encrypted.zip",
+        "sha256": "f693cb469b1050a430c8c0de2d2f69eddfce233335dd8c2ff55e33cba127d5e3",
+        "bytes": 4292650,
+        "keyVersion": 1
+      }
     },
     "database:mhc:en": {
       "id": "database:mhc:en",
@@ -2117,7 +2761,14 @@
       "resourceRevision": "mhc-en-867b788eb7df744a7eeb",
       "installedBytes": 47005696,
       "peakInstallationBytes": 71255517,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-mhc-en.sqlite.encrypted.zip?sha256=cf2792580693f77451edac2794ce5a843425ee1aa607bfb4d823fd43ca4f763b",
+        "file": "commentaries/commentary-mhc-en.sqlite.encrypted.zip",
+        "sha256": "cf2792580693f77451edac2794ce5a843425ee1aa607bfb4d823fd43ca4f763b",
+        "bytes": 14874875,
+        "keyVersion": 1
+      }
     },
     "database:mhcc:en": {
       "id": "database:mhcc:en",
@@ -2138,7 +2789,14 @@
       "resourceRevision": "mhcc-en-1cc6b00b8e3ccc4984bc",
       "installedBytes": 25460736,
       "peakInstallationBytes": 32109053,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-mhcc-en.sqlite.encrypted.zip?sha256=ffc87054a9cab451bf8fe7a1667dc07eb78ee5a8d72ab2cf9467ea49ed3fcacd",
+        "file": "commentaries/commentary-mhcc-en.sqlite.encrypted.zip",
+        "sha256": "ffc87054a9cab451bf8fe7a1667dc07eb78ee5a8d72ab2cf9467ea49ed3fcacd",
+        "bytes": 2428951,
+        "keyVersion": 1
+      }
     },
     "database:mhm:en": {
       "id": "database:mhm:en",
@@ -2159,7 +2817,14 @@
       "resourceRevision": "mhm-en-97b92eddc01c632eaae1",
       "installedBytes": 22564864,
       "peakInstallationBytes": 32245079,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-mhm-en.sqlite.encrypted.zip?sha256=2bf9be8f7124d0340ce3eaecf1c8882de095272ac2a4d4eec2092385181688db",
+        "file": "commentaries/commentary-mhm-en.sqlite.encrypted.zip",
+        "sha256": "2bf9be8f7124d0340ce3eaecf1c8882de095272ac2a4d4eec2092385181688db",
+        "bytes": 5454055,
+        "keyVersion": 1
+      }
     },
     "database:MHY:fr": {
       "id": "database:MHY:fr",
@@ -2180,7 +2845,14 @@
       "resourceRevision": "mhy-fr-4015a53f64acdc87d37e",
       "installedBytes": 53567488,
       "peakInstallationBytes": 65581080,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/commentaires-mhy.sqlite.encrypted.zip?sha256=f0addd20f0ea9c59b3d0e888937d778b99efcf636ec074841e77725d0288ed3f",
+        "file": "databases/commentaires-mhy.sqlite.encrypted.zip",
+        "sha256": "f0addd20f0ea9c59b3d0e888937d778b99efcf636ec074841e77725d0288ed3f",
+        "bytes": 3437803,
+        "keyVersion": 1
+      }
     },
     "database:NAVE:en": {
       "id": "database:NAVE:en",
@@ -2200,7 +2872,14 @@
       "contentBytes": 7402496,
       "installedBytes": 7402496,
       "peakInstallationBytes": 10825308,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/en/nave.sqlite.encrypted.zip?sha256=9e457cf49d2da638099041f28911caec459421b4366eb27bc0d46d37ec864cf8",
+        "file": "databases/en/nave.sqlite.encrypted.zip",
+        "sha256": "9e457cf49d2da638099041f28911caec459421b4366eb27bc0d46d37ec864cf8",
+        "bytes": 2008904,
+        "keyVersion": 1
+      }
     },
     "database:NAVE:fr": {
       "id": "database:NAVE:fr",
@@ -2220,7 +2899,14 @@
       "contentBytes": 7791616,
       "installedBytes": 7791616,
       "peakInstallationBytes": 11339677,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/nave-fr.sqlite.encrypted.zip?sha256=b50989cc10edb5e9f97c25d3e30aaef8a68cf848a6ba975fa9c5c7fcf6ca9bd8",
+        "file": "databases/nave-fr.sqlite.encrypted.zip",
+        "sha256": "b50989cc10edb5e9f97c25d3e30aaef8a68cf848a6ba975fa9c5c7fcf6ca9bd8",
+        "bytes": 2066971,
+        "keyVersion": 1
+      }
     },
     "database:pnt:en": {
       "id": "database:pnt:en",
@@ -2241,7 +2927,14 @@
       "resourceRevision": "pnt-en-21b90b750a3d0bb7a1ee",
       "installedBytes": 4550656,
       "peakInstallationBytes": 6921450,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-pnt-en.sqlite.encrypted.zip?sha256=a3e857db5c26bdb164307bcece6afafb8377842715222a570d1fb0c96122d8e3",
+        "file": "commentaries/commentary-pnt-en.sqlite.encrypted.zip",
+        "sha256": "a3e857db5c26bdb164307bcece6afafb8377842715222a570d1fb0c96122d8e3",
+        "bytes": 1463957,
+        "keyVersion": 1
+      }
     },
     "database:rashi-en:en": {
       "id": "database:rashi-en:en",
@@ -2262,7 +2955,14 @@
       "resourceRevision": "rashi-en-en-17355a5fb881c0f453e3",
       "installedBytes": 13987840,
       "peakInstallationBytes": 21213170,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-rashi-en-en.sqlite.encrypted.zip?sha256=35d1da97502f6f1238b3c9732582651297a5ca52d39e13d599ab2030748b5ce9",
+        "file": "commentaries/commentary-rashi-en-en.sqlite.encrypted.zip",
+        "sha256": "35d1da97502f6f1238b3c9732582651297a5ca52d39e13d599ab2030748b5ce9",
+        "bytes": 4423981,
+        "keyVersion": 1
+      }
     },
     "database:rwp:en": {
       "id": "database:rwp:en",
@@ -2283,7 +2983,14 @@
       "resourceRevision": "rwp-en-77983d3ebaf62873bed6",
       "installedBytes": 12636160,
       "peakInstallationBytes": 18497058,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-rwp-en.sqlite.encrypted.zip?sha256=b878f232aaeb5f26b1c2ad452ee185cdcec79b9034137870af585e1c69aa9f95",
+        "file": "commentaries/commentary-rwp-en.sqlite.encrypted.zip",
+        "sha256": "b878f232aaeb5f26b1c2ad452ee185cdcec79b9034137870af585e1c69aa9f95",
+        "bytes": 3441215,
+        "keyVersion": 1
+      }
     },
     "database:scofield:en": {
       "id": "database:scofield:en",
@@ -2304,7 +3011,14 @@
       "resourceRevision": "scofield-en-76e78bafe5966b32c2b4",
       "installedBytes": 2830336,
       "peakInstallationBytes": 3987659,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-scofield-en.sqlite.encrypted.zip?sha256=489d840eff482e46bfcc4633e5297cd77fdb77ae9980abf85c0bb5ca85f1c4b9",
+        "file": "commentaries/commentary-scofield-en.sqlite.encrypted.zip",
+        "sha256": "489d840eff482e46bfcc4633e5297cd77fdb77ae9980abf85c0bb5ca85f1c4b9",
+        "bytes": 633566,
+        "keyVersion": 1
+      }
     },
     "database:sdabc:en": {
       "id": "database:sdabc:en",
@@ -2325,7 +3039,14 @@
       "resourceRevision": "sdabc-en-fd98bc9a1715b5bd9280",
       "installedBytes": 36638720,
       "peakInstallationBytes": 55417875,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-sdabc-en.sqlite.encrypted.zip?sha256=4a03f2d2e370d5f3b45489b33b1007e12cd2795e37cd1c0bf78b012b59116609",
+        "file": "commentaries/commentary-sdabc-en.sqlite.encrypted.zip",
+        "sha256": "4a03f2d2e370d5f3b45489b33b1007e12cd2795e37cd1c0bf78b012b59116609",
+        "bytes": 11513248,
+        "keyVersion": 1
+      }
     },
     "database:sdabc:fr": {
       "id": "database:sdabc:fr",
@@ -2346,7 +3067,14 @@
       "resourceRevision": "sdabc-fr-94d373a9f24871402b6e",
       "installedBytes": 45023232,
       "peakInstallationBytes": 66547885,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-sdabc-fr.sqlite.encrypted.zip?sha256=1ee53de1f113481d96fa55bc10f7cba0d8bded6f447ecc9cd7287f54f7d7530a",
+        "file": "commentaries/commentary-sdabc-fr.sqlite.encrypted.zip",
+        "sha256": "1ee53de1f113481d96fa55bc10f7cba0d8bded6f447ecc9cd7287f54f7d7530a",
+        "bytes": 12818963,
+        "keyVersion": 1
+      }
     },
     "database:SMITH:en": {
       "id": "database:SMITH:en",
@@ -2367,7 +3095,14 @@
       "resourceRevision": "dictionary-smith-en-1116731be2ed4d9d7fde",
       "installedBytes": 12128256,
       "peakInstallationBytes": 17571011,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/dictionaries/dictionary-smith-en.sqlite.encrypted.zip?sha256=dad73c2fa46fa720d079228624f47ca782b484ef7785cf0d2bd2bf3ee406a157",
+        "file": "dictionaries/dictionary-smith-en.sqlite.encrypted.zip",
+        "sha256": "dad73c2fa46fa720d079228624f47ca782b484ef7785cf0d2bd2bf3ee406a157",
+        "bytes": 3151536,
+        "keyVersion": 1
+      }
     },
     "database:TIMELINE:en": {
       "id": "database:TIMELINE:en",
@@ -2387,7 +3122,14 @@
       "contentBytes": 1397921,
       "installedBytes": 1397921,
       "peakInstallationBytes": 2168840,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/en/bible-timeline-events.json.encrypted.zip?sha256=c438d3f82435c283a305ff8747fd3f5c698514c5968f50984af4ef74f809e76e",
+        "file": "databases/en/bible-timeline-events.json.encrypted.zip",
+        "sha256": "c438d3f82435c283a305ff8747fd3f5c698514c5968f50984af4ef74f809e76e",
+        "bytes": 486670,
+        "keyVersion": 1
+      }
     },
     "database:TIMELINE:fr": {
       "id": "database:TIMELINE:fr",
@@ -2407,7 +3149,14 @@
       "contentBytes": 1520517,
       "installedBytes": 1520517,
       "peakInstallationBytes": 2361132,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/bible-timeline-events.json.encrypted.zip?sha256=47c7ee73284f21b703c67e20f31713d9b62ce692a729eb02729836d832de02b3",
+        "file": "databases/bible-timeline-events.json.encrypted.zip",
+        "sha256": "47c7ee73284f21b703c67e20f31713d9b62ce692a729eb02729836d832de02b3",
+        "bytes": 532154,
+        "keyVersion": 1
+      }
     },
     "database:treasury-david:en": {
       "id": "database:treasury-david:en",
@@ -2428,7 +3177,14 @@
       "resourceRevision": "treasury-david-en-95c6e44a33a692ac47c7",
       "installedBytes": 13217792,
       "peakInstallationBytes": 20577866,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-treasury-david-en.sqlite.encrypted.zip?sha256=5bb79ae27865248d3bd01a32ab7db29ee219af629999754f6492b8fda520af9d",
+        "file": "commentaries/commentary-treasury-david-en.sqlite.encrypted.zip",
+        "sha256": "5bb79ae27865248d3bd01a32ab7db29ee219af629999754f6492b8fda520af9d",
+        "bytes": 4657834,
+        "keyVersion": 1
+      }
     },
     "database:TRESOR:fr": {
       "id": "database:TRESOR:fr",
@@ -2448,7 +3204,14 @@
       "contentBytes": 5435392,
       "installedBytes": 5435392,
       "peakInstallationBytes": 8420857,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/commentaires-tresor.sqlite.encrypted.zip?sha256=6099eedff1c6aae03af11b72af4a6bcb518fb734a061711c175b1e78df606554",
+        "file": "databases/commentaires-tresor.sqlite.encrypted.zip",
+        "sha256": "6099eedff1c6aae03af11b72af4a6bcb518fb734a061711c175b1e78df606554",
+        "bytes": 1852577,
+        "keyVersion": 1
+      }
     },
     "database:UNFOLDINGWORD_TW:en": {
       "id": "database:UNFOLDINGWORD_TW:en",
@@ -2469,7 +3232,14 @@
       "resourceRevision": "dictionary-unfoldingword-translation-words-en-61f474304e5c228ce37e",
       "installedBytes": 5726208,
       "peakInstallationBytes": 7907455,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/dictionaries/dictionary-unfoldingword-translation-words-en.sqlite.encrypted.zip?sha256=fec3190e841569079dcf2ca4d4ee285280147d8672fd3154fdfd8e0b45201b00",
+        "file": "dictionaries/dictionary-unfoldingword-translation-words-en.sqlite.encrypted.zip",
+        "sha256": "fec3190e841569079dcf2ca4d4ee285280147d8672fd3154fdfd8e0b45201b00",
+        "bytes": 1150956,
+        "keyVersion": 1
+      }
     },
     "database:wesley:en": {
       "id": "database:wesley:en",
@@ -2490,7 +3260,14 @@
       "resourceRevision": "wesley-en-f31c2f1527686a1593ed",
       "installedBytes": 10190848,
       "peakInstallationBytes": 15592441,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-wesley-en.sqlite.encrypted.zip?sha256=8da1e9dbeb8de43a4012c9bdfab7115dd16c3600aa021910c5aa6922f7f84f28",
+        "file": "commentaries/commentary-wesley-en.sqlite.encrypted.zip",
+        "sha256": "8da1e9dbeb8de43a4012c9bdfab7115dd16c3600aa021910c5aa6922f7f84f28",
+        "bytes": 3339219,
+        "keyVersion": 1
+      }
     },
     "database:WESTPHAL:fr": {
       "id": "database:WESTPHAL:fr",
@@ -2511,7 +3288,14 @@
       "resourceRevision": "dictionary-westphal-fr-1b193470a5d75f75a72d",
       "installedBytes": 51221504,
       "peakInstallationBytes": 72627596,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/dictionaries/dictionary-westphal-fr.sqlite.encrypted.zip?sha256=d0474a9d0ddd1c6f96f13421d9ac49077ce13c8046d642cd2800964049f1fe57",
+        "file": "dictionaries/dictionary-westphal-fr.sqlite.encrypted.zip",
+        "sha256": "d0474a9d0ddd1c6f96f13421d9ac49077ce13c8046d642cd2800964049f1fe57",
+        "bytes": 11923079,
+        "keyVersion": 1
+      }
     },
     "dictionary-directory": {
       "id": "dictionary-directory",
@@ -2532,7 +3316,14 @@
       "resourceRevision": "dictionary-directory-1731e1bc9c4b6676be23",
       "installedBytes": 23240704,
       "peakInstallationBytes": 35175330,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/dictionaries/dictionary-directory.sqlite.encrypted.zip?sha256=4636eea83c765d0e045c607894241e02c8ddbe9317c0209f38c0e0a5ef23b6a4",
+        "file": "dictionaries/dictionary-directory.sqlite.encrypted.zip",
+        "sha256": "4636eea83c765d0e045c607894241e02c8ddbe9317c0209f38c0e0a5ef23b6a4",
+        "bytes": 7307570,
+        "keyVersion": 1
+      }
     },
     "strong-lexicon:core": {
       "id": "strong-lexicon:core",
@@ -2553,7 +3344,14 @@
       "installedBytes": 32182272,
       "peakInstallationBytes": 44954464,
       "strategy": "archive-extract",
-      "resourceRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833"
+      "resourceRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/strong_lexicon.core.sqlite.encrypted.zip?sha256=fc95b7e7ce04f1bcaab8422bd06ac85d1b24abeef04a22fce150e566b6799a20",
+        "file": "databases/strong_lexicon.core.sqlite.encrypted.zip",
+        "sha256": "fc95b7e7ce04f1bcaab8422bd06ac85d1b24abeef04a22fce150e566b6799a20",
+        "bytes": 6891693,
+        "keyVersion": 1
+      }
     },
     "strong-lexicon:entities": {
       "id": "strong-lexicon:entities",
@@ -2575,7 +3373,14 @@
       "peakInstallationBytes": 29030241,
       "strategy": "archive-extract",
       "resourceRevision": "strong-lexicon-entities-98e0d81b2004d9073eb51d6f",
-      "coreRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833"
+      "coreRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/bible_entities.production.sqlite.encrypted.zip?sha256=66ce44dc2828163bb2fd0d07093d081aee959dc759af55a62504863f9ed4c208",
+        "file": "databases/bible_entities.production.sqlite.encrypted.zip",
+        "sha256": "66ce44dc2828163bb2fd0d07093d081aee959dc759af55a62504863f9ed4c208",
+        "bytes": 5342932,
+        "keyVersion": 1
+      }
     },
     "strong-lexicon:resources": {
       "id": "strong-lexicon:resources",
@@ -2597,7 +3402,14 @@
       "peakInstallationBytes": 73099693,
       "strategy": "archive-extract",
       "resourceRevision": "strong-lexicon-resources-4ad1a07442692f44a6babcfe",
-      "coreRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833"
+      "coreRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/strong_lexicon.resources.sqlite.encrypted.zip?sha256=dc75280924fb8a7903ed33a88764f704775e6659638ba3e51475e1798b958e43",
+        "file": "databases/strong_lexicon.resources.sqlite.encrypted.zip",
+        "sha256": "dc75280924fb8a7903ed33a88764f704775e6659638ba3e51475e1798b958e43",
+        "bytes": 11435183,
+        "keyVersion": 1
+      }
     },
     "strong-lexicon:simple-fr": {
       "id": "strong-lexicon:simple-fr",
@@ -2618,7 +3430,14 @@
       "installedBytes": 22970368,
       "peakInstallationBytes": 49423350,
       "strategy": "archive-extract",
-      "resourceRevision": "strong-lexicon-simple-fr-944bd06dc903ffaf83df9b51"
+      "resourceRevision": "strong-lexicon-simple-fr-944bd06dc903ffaf83df9b51",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/strong_lexicon.simple-fr.sqlite.encrypted.zip?sha256=067afbe74c65b695bef34f7670859ad6f396058b073233cd3228d599872a3996",
+        "file": "databases/strong_lexicon.simple-fr.sqlite.encrypted.zip",
+        "sha256": "067afbe74c65b695bef34f7670859ad6f396058b073233cd3228d599872a3996",
+        "bytes": 3464092,
+        "keyVersion": 1
+      }
     },
     "strong-lexicon:simple-en": {
       "id": "strong-lexicon:simple-en",
@@ -2639,7 +3458,14 @@
       "installedBytes": 16015360,
       "peakInstallationBytes": 35300122,
       "strategy": "archive-extract",
-      "resourceRevision": "strong-lexicon-simple-en-784af9ff9fc29bf892cb0b55"
+      "resourceRevision": "strong-lexicon-simple-en-784af9ff9fc29bf892cb0b55",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/strong_lexicon.simple-en.sqlite.encrypted.zip?sha256=88ac56a8782abbfc22d7e9a67c4b3819ede2e7ca6500853c84be04afd6497140",
+        "file": "databases/strong_lexicon.simple-en.sqlite.encrypted.zip",
+        "sha256": "88ac56a8782abbfc22d7e9a67c4b3819ede2e7ca6500853c84be04afd6497140",
+        "bytes": 3226408,
+        "keyVersion": 1
+      }
     }
   }
 }
