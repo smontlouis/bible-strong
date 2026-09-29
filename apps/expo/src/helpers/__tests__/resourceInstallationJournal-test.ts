@@ -46,6 +46,7 @@ const downloadResult = {
   },
   publication: { revision: '2', size: 20 },
   sourceUrl: 'https://example.com/new',
+  archive: { kind: 'plain' as const, url: 'https://example.com/new', archiveSha256: '2' },
 }
 
 describe('resource installation journal', () => {

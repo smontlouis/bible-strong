@@ -1,5 +1,4 @@
 import * as FileSystem from 'expo-file-system/legacy'
-import { unzip } from 'react-native-zip-archive'
 import type {
   InterlinearChapterTokens,
   InterlinearToken,
@@ -8,7 +7,8 @@ import type {
 import { getBibleVersionMetadata } from './biblesDb'
 import { getSharedSqliteDirPath, type ResourceLanguage } from './databaseTypes'
 import { downloadResourceArtifact } from './downloadResourceArtifact'
-import { toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
+import { verifyFileSha256 } from './fileIntegrity'
+import { unzipOfflineArchive } from './offlineArchiveSource'
 import {
   BHG_INTERLINEAR_PUBLICATION,
   type InterlinearBibleVersionId,
@@ -183,7 +183,7 @@ export const installInterlinearSidecar = async (
     if (callbacks.isCancelled?.()) throw new Error('CANCELLED')
     await verifyFileSha256(
       archivePath,
-      artifact.archiveSha256,
+      downloadResult.archive.archiveSha256,
       `INTERLINEAR_ARCHIVE_CHECKSUM_MISMATCH:${locale}`
     )
     await callbacks.installationLifecycle?.prepare(downloadResult)
@@ -191,7 +191,7 @@ export const installInterlinearSidecar = async (
     callbacks.onInsertProgress?.(0)
     await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
     await FileSystem.makeDirectoryAsync(extractionDirectory, { intermediates: true })
-    await unzip(toNativeFilePath(archivePath), toNativeFilePath(extractionDirectory), 'UTF-8')
+    await unzipOfflineArchive(archivePath, extractionDirectory, downloadResult.archive)
     callbacks.onInsertProgress?.(0.5)
     const candidate = await openSQLiteDatabase(
       artifact.entry,

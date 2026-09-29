@@ -3,14 +3,14 @@ import {
   isStandaloneStrongModule,
 } from '@bible-strong/resource-domain/strong-lexicon'
 import * as FileSystem from 'expo-file-system/legacy'
-import { unzip } from 'react-native-zip-archive'
 import type { StrongLexiconModuleAvailability } from '@bible-strong/resource-domain/strong-lexicon'
 
 import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atomicResourceFile'
 import { AsyncConnectionRegistry } from './asyncConnectionRegistry'
 import { getSharedSqliteDirPath } from './databaseTypes'
 import { downloadResourceArtifact } from './downloadResourceArtifact'
-import { toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
+import { verifyFileSha256 } from './fileIntegrity'
+import { unzipOfflineArchive } from './offlineArchiveSource'
 import { createOfflineCopyId } from './offlineCopyId'
 import { getMobileResourceCatalogEntry } from './mobileResourceCatalog'
 import {
@@ -537,15 +537,18 @@ export const installStrongLexiconModule = async (
       isCancelled: callbacks.isCancelled,
     })
     if (callbacks.isCancelled?.()) throw new Error('CANCELLED')
-    await readBoundedArchive(archivePath, {
-      entry: publication.entry,
-      archiveBytes: publication.archiveBytes,
-      contentBytes: publication.contentBytes,
-    })
+    // An encrypted copy is pinned by its catalog SHA-256, and the extracted entry is checked below.
+    if (result.archive.kind === 'plain') {
+      await readBoundedArchive(archivePath, {
+        entry: publication.entry,
+        archiveBytes: publication.archiveBytes,
+        contentBytes: publication.contentBytes,
+      })
+    }
     if (publication.archiveSha256) {
       await verifyFileSha256(
         archivePath,
-        publication.archiveSha256,
+        result.archive.archiveSha256,
         `STRONG_LEXICON_ARCHIVE_CHECKSUM_MISMATCH:${moduleId}`
       )
     }
@@ -556,7 +559,7 @@ export const installStrongLexiconModule = async (
     await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
     await FileSystem.makeDirectoryAsync(extractionDirectory, { intermediates: true })
     callbacks.onInsertProgress?.(0.15)
-    await unzip(toNativeFilePath(archivePath), toNativeFilePath(extractionDirectory), 'UTF-8')
+    await unzipOfflineArchive(archivePath, extractionDirectory, result.archive)
     const extractedEntries = await FileSystem.readDirectoryAsync(extractionDirectory)
     if (extractedEntries.length !== 1 || extractedEntries[0] !== publication.entry) {
       throw new Error(`STRONG_LEXICON_ARCHIVE_ENTRIES_INVALID:${moduleId}`)

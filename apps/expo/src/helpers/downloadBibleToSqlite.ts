@@ -1,5 +1,4 @@
 import * as FileSystem from 'expo-file-system/legacy'
-import { unzip } from 'react-native-zip-archive'
 
 import {
   getMultipleVerses,
@@ -20,6 +19,7 @@ import { planWordAnnotationRealignment } from '~helpers/wordAnnotationRealignmen
 import { realignWordAnnotationsAction } from '~redux/modules/user'
 import { persistor, store } from '~redux/store'
 import { getFileSha256, toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
+import { unzipOfflineArchive, type OfflineArchiveSource } from './offlineArchiveSource'
 import {
   clearAnnotationMigrationJournal,
   persistAnnotationMigrationJournal,
@@ -98,7 +98,7 @@ export async function downloadAndInsertBible(
     if (opts.expectedArchiveSha256) {
       await verifyFileSha256(
         tempPath,
-        opts.expectedArchiveSha256,
+        downloadResult.archive.archiveSha256,
         `BIBLE_ARCHIVE_CHECKSUM_MISMATCH:${versionId}`
       )
     }
@@ -107,6 +107,7 @@ export async function downloadAndInsertBible(
       downloadedPath: tempPath,
       extractionDirectory,
       archiveEntry,
+      archive: downloadResult.archive,
     })
     const data = await FileSystem.readAsStringAsync(jsonPath)
     const jsonData = JSON.parse(data) as BibleJsonData
@@ -324,16 +325,18 @@ const resolveDownloadedBibleJson = async ({
   downloadedPath,
   extractionDirectory,
   archiveEntry,
+  archive,
 }: {
   downloadedPath: string
   extractionDirectory: string
   archiveEntry?: string
+  archive: OfflineArchiveSource
 }): Promise<string> => {
   if (!archiveEntry) return downloadedPath
 
   await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
   await FileSystem.makeDirectoryAsync(extractionDirectory, { intermediates: true })
-  await unzip(toNativeFilePath(downloadedPath), toNativeFilePath(extractionDirectory), 'UTF-8')
+  await unzipOfflineArchive(downloadedPath, extractionDirectory, archive)
   const jsonPath = `${extractionDirectory}${archiveEntry}`
   const info = await FileSystem.getInfoAsync(jsonPath)
   if (!info.exists) {

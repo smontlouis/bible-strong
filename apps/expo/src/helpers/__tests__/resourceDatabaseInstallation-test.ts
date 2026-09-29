@@ -52,6 +52,9 @@ const getTables = jest.fn()
 
 beforeEach(() => {
   jest.clearAllMocks()
+  jest.mocked(downloadResourceArtifact).mockResolvedValue({
+    archive: { kind: 'plain', url: 'https://example.com/egw.sqlite.zip', archiveSha256: 'sha' },
+  } as Awaited<ReturnType<typeof downloadResourceArtifact>>)
   jest.mocked(FileSystem.getInfoAsync).mockResolvedValue({
     exists: true,
     isDirectory: false,

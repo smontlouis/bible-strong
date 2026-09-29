@@ -1,10 +1,10 @@
 import * as FileSystem from 'expo-file-system/legacy'
-import { unzip } from 'react-native-zip-archive'
 
 import { getBibleVersionMetadata } from './biblesDb'
 import { getSharedSqliteDirPath } from './databaseTypes'
 import { downloadResourceArtifact } from './downloadResourceArtifact'
-import { toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
+import { verifyFileSha256 } from './fileIntegrity'
+import { unzipOfflineArchive } from './offlineArchiveSource'
 import { AsyncConnectionRegistry } from './asyncConnectionRegistry'
 import { openSQLiteDatabase, type SQLiteDatabase } from './sqlite'
 import {
@@ -175,7 +175,7 @@ export const installStrongBibleSidecar = async (
     if (callbacks.isCancelled?.()) throw new Error('CANCELLED')
     await verifyFileSha256(
       archivePath,
-      artifact.archiveSha256,
+      downloadResult.archive.archiveSha256,
       `STRONG_BIBLE_ARCHIVE_CHECKSUM_MISMATCH:${versionId}`
     )
     await callbacks.installationLifecycle?.prepare(downloadResult)
@@ -185,7 +185,7 @@ export const installStrongBibleSidecar = async (
     await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
     await FileSystem.makeDirectoryAsync(extractionDirectory, { intermediates: true })
     callbacks.onInsertProgress?.(0.1)
-    await unzip(toNativeFilePath(archivePath), toNativeFilePath(extractionDirectory), 'UTF-8')
+    await unzipOfflineArchive(archivePath, extractionDirectory, downloadResult.archive)
     callbacks.onInsertProgress?.(0.55)
     callbacks.onInsertProgress?.(0.7)
     await verifyExtractedStrongBibleSidecar(versionId, extractionDirectory, {

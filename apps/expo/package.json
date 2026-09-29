@@ -263,7 +263,8 @@
   "jest": {
     "testPathIgnorePatterns": [],
     "moduleNameMapper": {
-      "^@sentry/react-native$": "<rootDir>/test/jestSentryMock.js"
+      "^@sentry/react-native$": "<rootDir>/test/jestSentryMock.js",
+      "/modules/bible-strong-archive$": "<rootDir>/test/jestBibleStrongArchiveMock.js"
     },
     "transformIgnorePatterns": [
       "/node_modules/(?!@bible-strong/bible-reference-parser/)"

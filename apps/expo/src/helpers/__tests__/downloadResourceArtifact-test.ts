@@ -14,6 +14,11 @@ const mockCreateDownloadResumable = jest.fn(
 const mockGetResourceDownloadAppCheckToken = jest.fn((_url: unknown, _forceRefresh?: unknown) =>
   Promise.resolve('token')
 )
+const mockResolveOfflineArchiveSource = jest.fn((url: string, archiveSha256: string): unknown => ({
+  kind: 'plain',
+  url,
+  archiveSha256,
+}))
 
 jest.mock('expo-file-system/legacy', () => ({
   createDownloadResumable: (url: unknown, fileUri: unknown, options: unknown, callback: unknown) =>
@@ -31,6 +36,11 @@ jest.mock('../agentObservability', () => ({
 jest.mock('../resourceAppCheck', () => ({
   getResourceDownloadAppCheckToken: (url: unknown, forceRefresh: unknown) =>
     mockGetResourceDownloadAppCheckToken(url, forceRefresh),
+}))
+
+jest.mock('../offlineArchiveSource', () => ({
+  resolveOfflineArchiveSource: (url: string, archiveSha256: string) =>
+    mockResolveOfflineArchiveSource(url, archiveSha256),
 }))
 
 jest.mock('../storage', () => ({
@@ -53,6 +63,64 @@ describe('R2 resource artifact download', () => {
     mockCreateDownloadResumable.mockClear()
     mockGetResourceDownloadAppCheckToken.mockReset()
     mockGetResourceDownloadAppCheckToken.mockResolvedValue('token')
+    mockResolveOfflineArchiveSource.mockClear()
+  })
+
+  const encryptedSource = {
+    kind: 'encrypted',
+    url: `https://api.bible-strong.app/v1/offline-archives/bibles/bible-lsg.json.encrypted.zip?sha256=${'e'.repeat(64)}`,
+    archiveSha256: 'e'.repeat(64),
+    plainArchiveSha256: 'a'.repeat(64),
+    resourceId: 'bible:LSG',
+    keyVersion: 1,
+  }
+  const plainUrl = 'https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-lsg.json.zip'
+  const okResponse = { uri: '/tmp/lsg.zip', status: 200, headers: {}, mimeType: 'application/zip' }
+
+  it('downloads the encrypted copy without requesting an App Check token', async () => {
+    mockResolveOfflineArchiveSource.mockReturnValueOnce(encryptedSource)
+    mockDownloadAsync.mockResolvedValue(okResponse)
+
+    const result = await downloadResourceArtifact({
+      url: plainUrl,
+      archiveSha256: 'a'.repeat(64),
+      destinationPath: '/tmp/lsg.zip',
+    })
+
+    expect(mockGetResourceDownloadAppCheckToken).not.toHaveBeenCalled()
+    expect(mockCreateDownloadResumable).toHaveBeenCalledWith(
+      encryptedSource.url,
+      '/tmp/lsg.zip',
+      { headers: {} },
+      undefined
+    )
+    expect(result.archive).toEqual(encryptedSource)
+    expect(result.publication.revision).toBe('a'.repeat(64))
+  })
+
+  it('falls back to the attested plain archive when the encrypted copy is missing', async () => {
+    mockResolveOfflineArchiveSource.mockReturnValueOnce(encryptedSource)
+    mockDownloadAsync
+      .mockResolvedValueOnce({ ...okResponse, status: 404 })
+      .mockResolvedValueOnce(okResponse)
+
+    const result = await downloadResourceArtifact({
+      url: plainUrl,
+      archiveSha256: 'a'.repeat(64),
+      destinationPath: '/tmp/lsg.zip',
+    })
+
+    expect(mockCreateDownloadResumable.mock.calls.map(call => call[0])).toEqual([
+      encryptedSource.url,
+      plainUrl,
+    ])
+    expect(mockGetResourceDownloadAppCheckToken).toHaveBeenCalledTimes(1)
+    expect(result.archive).toEqual({ kind: 'plain', url: plainUrl, archiveSha256: 'a'.repeat(64) })
+    expect(mockWarn).toHaveBeenCalledWith(
+      'download',
+      'resource_artifact.encrypted_fallback',
+      expect.objectContaining({ httpStatus: 404 })
+    )
   })
 
   it('accepts standard R2 headers and records the catalog SHA-256 revision', async () => {
@@ -77,6 +145,11 @@ describe('R2 resource artifact download', () => {
       result: expect.objectContaining({ status: 200 }),
       sourceUrl:
         'https://api.bible-strong.app/v1/offline-artifacts/databases/dictionnaire.sqlite.zip',
+      archive: {
+        kind: 'plain',
+        url: 'https://api.bible-strong.app/v1/offline-artifacts/databases/dictionnaire.sqlite.zip',
+        archiveSha256,
+      },
       publication: {
         revision: archiveSha256,
         size: 420,

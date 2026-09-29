@@ -1,5 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy'
 
+import { resolveOfflineArchiveSource, type OfflineArchiveSource } from './offlineArchiveSource'
 import { publicationFromArtifactResponse, type ResourcePublication } from './resourcePublication'
 import { getResourceDownloadAppCheckToken } from './resourceAppCheck'
 import { FIREBASE_APP_CHECK_HEADER } from './resourceAppCheckRequest'
@@ -20,6 +21,8 @@ export interface DownloadResourceArtifactResult {
   result: FileSystem.FileSystemDownloadResult
   sourceUrl: string
   publication: ResourcePublication
+  /** How to verify and extract the downloaded file: plain or encrypted (ADR-0065). */
+  archive: OfflineArchiveSource
 }
 
 export class ResourceDownloadHttpError extends Error {
@@ -49,10 +52,17 @@ export const downloadResourceArtifact = async ({
   let resumable: FileSystem.DownloadResumable | undefined
   let timeout: ReturnType<typeof setTimeout> | undefined
   const downloadAttempt = async (
+    source: OfflineArchiveSource,
     forceAppCheckRefresh: boolean
   ): Promise<DownloadResourceArtifactResult> => {
-    const appCheckToken = await getResourceDownloadAppCheckToken(url, forceAppCheckRefresh)
-    const appCheckHeaders = { [FIREBASE_APP_CHECK_HEADER]: appCheckToken }
+    // Encrypted copies are public; only plain archives still need an attestation.
+    const appCheckToken =
+      source.kind === 'plain'
+        ? await getResourceDownloadAppCheckToken(source.url, forceAppCheckRefresh)
+        : undefined
+    const appCheckHeaders: Record<string, string> = appCheckToken
+      ? { [FIREBASE_APP_CHECK_HEADER]: appCheckToken }
+      : {}
     const appCheckDiagnostics = {
       appCheckHeaderPresent: Boolean(appCheckToken),
       appCheckProofFormat: appCheckToken
@@ -63,7 +73,7 @@ export const downloadResourceArtifact = async ({
       appCheckProofLength: appCheckToken?.length,
     }
     resumable = FileSystem.createDownloadResumable(
-      url,
+      source.url,
       destinationPath,
       {
         ...downloadOptions,
@@ -86,15 +96,25 @@ export const downloadResourceArtifact = async ({
           httpStatus: result.status,
         })
       })
-      if (result.status === 401 && !forceAppCheckRefresh) {
+      if (source.kind === 'encrypted' && result.status === 404) {
+        // A catalog ahead of the Worker must not block installation: keep the plain archive.
+        appLogger.warn('download', 'resource_artifact.encrypted_fallback', {
+          httpStatus: result.status,
+          requestId,
+          artifactUrl: source.url,
+        })
+        if (isCancelled?.()) throw new Error('CANCELLED')
+        return downloadAttempt({ kind: 'plain', url, archiveSha256 }, false)
+      }
+      if (source.kind === 'plain' && result.status === 401 && !forceAppCheckRefresh) {
         appLogger.warn('download', 'resource_artifact.auth_retry', {
           httpStatus: result.status,
           requestId,
-          artifactUrl: url,
+          artifactUrl: source.url,
           ...appCheckDiagnostics,
         })
         if (isCancelled?.()) throw new Error('CANCELLED')
-        return downloadAttempt(true)
+        return downloadAttempt(source, true)
       }
       appLogger.captureError('download', 'resource_artifact.http_failed', error, {
         errorCode: error.code,
@@ -102,7 +122,8 @@ export const downloadResourceArtifact = async ({
         requestId,
         contentType: getHeader('content-type') ?? result.mimeType ?? undefined,
         contentLength: getHeader('content-length'),
-        artifactUrl: url,
+        artifactUrl: source.url,
+        archiveKind: source.kind,
         appCheckRefreshAttempted: forceAppCheckRefresh,
         ...appCheckDiagnostics,
       })
@@ -111,7 +132,8 @@ export const downloadResourceArtifact = async ({
     if (isCancelled?.()) throw new Error('CANCELLED')
     return {
       result,
-      sourceUrl: url,
+      sourceUrl: source.url,
+      archive: source,
       publication: publicationFromArtifactResponse(
         {
           get: name => result.headers[name] ?? result.headers[name.toLowerCase()] ?? null,
@@ -120,7 +142,7 @@ export const downloadResourceArtifact = async ({
       ),
     }
   }
-  const download = () => downloadAttempt(false)
+  const download = () => downloadAttempt(resolveOfflineArchiveSource(url, archiveSha256), false)
   const deadline = new Promise<never>((_, reject) => {
     timeout = setTimeout(() => {
       resumable?.cancelAsync().catch(() => undefined)
