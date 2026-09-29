@@ -1,5 +1,11 @@
 import { ExpoConfig, ConfigContext } from 'expo/config'
 
+const APP_VERSION = '27.1.0'
+// Patch releases share a runtime and receive the same OTA updates. Any native change must
+// ship in a new major or minor version, which creates a new runtime.
+const [majorVersion, minorVersion] = APP_VERSION.split('.')
+const RUNTIME_VERSION = `${majorVersion}.${minorVersion}`
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: process.env.APP_NAME ?? 'dev - Bible Strong',
@@ -9,7 +15,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   primaryColor: '#ffffff',
   githubUrl: 'https://github.com/bulby97/bible-strong',
   platforms: ['ios', 'android', 'web'],
-  version: '27.0.18',
+  version: APP_VERSION,
   orientation: 'default',
   icon: './assets/images/icon-2.png',
   userInterfaceStyle: 'automatic',
@@ -175,8 +181,5 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   experiments: {
     reactCompiler: true,
   },
-  runtimeVersion: 'a170e84b5290228c1fc1a7d1b850784dc093085c',
-  // runtimeVersion: {
-  //   policy: 'fingerprint',
-  // },
+  runtimeVersion: RUNTIME_VERSION,
 })
