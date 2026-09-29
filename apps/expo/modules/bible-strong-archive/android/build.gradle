@@ -20,4 +20,5 @@ android {
 dependencies {
   // Same version as react-native-zip-archive, which already ships zip4j.
   implementation 'net.lingala.zip4j:zip4j:2.11.5'
+  testImplementation 'junit:junit:4.13.2'
 }
