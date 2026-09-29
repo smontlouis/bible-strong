@@ -2585,5 +2585,20 @@
   "strongDetail.definition.level.deep": "In depth",
   "strongDetail.definition.detailed": "Detailed definition",
   "strongDetail.definition.generalEntry": "General definition",
-  "strongDetail.definition.classicalGreek": "Classical Greek"
+  "strongDetail.definition.classicalGreek": "Classical Greek",
+  "contact.feedback": "Share feedback",
+  "contact.feedbackBody": "Hello,\n\nMy feedback on Bible Strong:\n\n",
+  "contact.bug": "Report a bug",
+  "contact.bugBody": "Hello,\n\nProblem encountered:\n\nSteps to reproduce:\n1. \n2. \n\nExpected result:\n\nActual result:\n\nYou can attach a screenshot.",
+  "contact.suggestion": "Suggest an idea",
+  "contact.suggestionBody": "Hello,\n\nMy idea:\n\nWhat this would help me do:\n\n",
+  "contact.other": "Other enquiry",
+  "contact.otherBody": "Hello,\n\nMy enquiry:\n\n",
+  "contact.diagnostics": "Diagnostic information",
+  "contact.mailUnavailable": "Unable to open your email app. You can copy the message below.",
+  "contact.intro": "Choose a topic. Your email app will open a draft for you to complete.",
+  "contact.diagnosticNotice": "The draft includes your user ID and app and device versions to help with troubleshooting. You can edit them before sending.",
+  "contact.copied": "Message and email address copied",
+  "contact.copyFailed": "Unable to copy the message.",
+  "contact.copyEmail": "Copy message and email address"
 }

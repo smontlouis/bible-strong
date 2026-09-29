@@ -1,3 +1,4 @@
+import ContactDeveloperSheet from './ContactDeveloperSheet'
 import { goBackOrHome } from '~navigation/goBackOrHome'
 import { resolveUniverseColors } from '~themes/universeColors'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
@@ -88,6 +89,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
   const { isLogged, user, logout } = useLogin()
   const theme = useTheme()
   const deleteAccountModalRef = useRef<SheetRef>(null)
+  const contactDeveloperRef = useRef<SheetRef>(null)
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false)
   const openChangelogModal = useSetAtom(changelogModalAtom)
 
@@ -365,7 +367,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
             <Text className="flex-[1] text-[15px]">{t('Foire aux questions')}</Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
-          <CardLinkItem href="mailto:stephane@lestudio316.com" isLast>
+          <CardLinkItem onPress={() => contactDeveloperRef.current?.present()} isLast>
             <IconCircle bg="rgba(147, 51, 234, 0.1)">
               <FeatherIcon name="send" size={20} color="quint" />
             </IconCircle>
@@ -495,6 +497,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
 
         <Infos />
       </ScrollView>
+      <ContactDeveloperSheet modalRef={contactDeveloperRef} />
       {isLogged && <DeleteAccountModal modalRef={deleteAccountModalRef} />}
     </SafeAreaBox>
   )

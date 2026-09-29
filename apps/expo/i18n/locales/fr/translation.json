@@ -2613,5 +2613,20 @@
   "strongDetail.definition.level.deep": "Approfondi",
   "strongDetail.definition.detailed": "Définition détaillée",
   "strongDetail.definition.generalEntry": "Définition générale",
-  "strongDetail.definition.classicalGreek": "Grec classique"
+  "strongDetail.definition.classicalGreek": "Grec classique",
+  "contact.feedback": "Partager un retour",
+  "contact.feedbackBody": "Bonjour,\n\nVoici mon retour sur Bible Strong :\n\n",
+  "contact.bug": "Signaler un bug",
+  "contact.bugBody": "Bonjour,\n\nProblème rencontré :\n\nÉtapes pour le reproduire :\n1. \n2. \n\nRésultat attendu :\n\nRésultat obtenu :\n\nVous pouvez joindre une capture d’écran.",
+  "contact.suggestion": "Proposer une idée",
+  "contact.suggestionBody": "Bonjour,\n\nMon idée :\n\nCe que cela me permettrait de faire :\n\n",
+  "contact.other": "Autre demande",
+  "contact.otherBody": "Bonjour,\n\nMa demande :\n\n",
+  "contact.diagnostics": "Informations de diagnostic",
+  "contact.mailUnavailable": "Impossible d’ouvrir votre application mail. Vous pouvez copier le message ci-dessous.",
+  "contact.intro": "Choisissez le motif de votre message. Votre application mail ouvrira un brouillon à compléter.",
+  "contact.diagnosticNotice": "Le brouillon inclut votre identifiant utilisateur et les versions de l’app et du téléphone pour faciliter le diagnostic. Vous pouvez les modifier avant l’envoi.",
+  "contact.copied": "Message et adresse copiés",
+  "contact.copyFailed": "Impossible de copier le message.",
+  "contact.copyEmail": "Copier le message et l’adresse"
 }
