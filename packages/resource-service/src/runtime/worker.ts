@@ -110,6 +110,24 @@ const writeRuntimeSafely = (
   }
 }
 
+// Downloaded volume per client address, so a byte budget can be sized if abuse appears
+// (ADR-0065). The address is hashed; logs are sampled.
+const reportEncryptedArchiveDelivery = async (request: Request, response: Response) => {
+  const address = request.headers.get('cf-connecting-ip') ?? 'unknown'
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(address))
+  console.log(
+    JSON.stringify({
+      message: 'encrypted offline archive delivered',
+      path: new URL(request.url).pathname,
+      status: response.status,
+      bytes: Number(response.headers.get('content-length') ?? 0),
+      client: Array.from(new Uint8Array(digest).slice(0, 8), byte =>
+        byte.toString(16).padStart(2, '0')
+      ).join(''),
+    })
+  )
+}
+
 export default {
   async fetch(request: Request, bindings: Env, ctx: ExecutionContext): Promise<Response> {
     const corsAllowedOrigins = parseResourceCorsOrigins(bindings.RESOURCE_WEB_ORIGINS)
@@ -133,6 +151,7 @@ export default {
           ? bindings.SEARCH_ANALYTICS_RATE_LIMITER
           : bindings.SEARCH_RATE_LIMITER,
         'semantic-search': bindings.SEMANTIC_SEARCH_RATE_LIMITER,
+        'encrypted-artifact': bindings.ENCRYPTED_ARCHIVE_RATE_LIMITER,
         artifact: bindings.ARTIFACT_RATE_LIMITER,
       },
       reportForbidden: (category, requestId, appId) => {
@@ -217,7 +236,12 @@ export default {
         )
       },
     })
-    if (artifactResponse) return respond(artifactResponse)
+    if (artifactResponse) {
+      if (resourceRequestClassFrom(request) === 'encrypted-artifact') {
+        await reportEncryptedArchiveDelivery(request, artifactResponse)
+      }
+      return respond(artifactResponse)
+    }
 
     const startedAt = Date.now()
     let sqlStatements = 0

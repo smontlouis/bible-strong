@@ -3,7 +3,12 @@ import { ResourceRateLimitedProblem } from '../http/problems'
 import { FIREBASE_APP_CHECK_HEADER, isNativeFirebaseAppId } from './firebaseAppCheck'
 import { resourceRequestClassFrom } from './resourceRoutePolicy'
 
-export type ResourceRateLimitCategory = 'reading' | 'search' | 'semantic-search' | 'artifact'
+export type ResourceRateLimitCategory =
+  | 'reading'
+  | 'search'
+  | 'semantic-search'
+  | 'artifact'
+  | 'encrypted-artifact'
 
 export type ResourceRateLimitBinding = {
   limit(options: { key: string }): Promise<{ success: boolean }>
@@ -16,7 +21,10 @@ const resourceCategoryFrom = (request: Request): ResourceRateLimitCategory | und
   if (requestClass === 'search' && new URL(request.url).pathname.endsWith('/semantic-search')) {
     return 'semantic-search'
   }
-  return requestClass === 'reading' || requestClass === 'search' || requestClass === 'artifact'
+  return requestClass === 'reading' ||
+    requestClass === 'search' ||
+    requestClass === 'artifact' ||
+    requestClass === 'encrypted-artifact'
     ? requestClass
     : undefined
 }
@@ -72,7 +80,8 @@ export const protectResourceRequest = async ({
   if (!category) return undefined
   const requestId = resourceRequestIdFrom(request.headers.get('x-request-id') ?? undefined)
   let limitKey = clientAddressKey(request)
-  // Online reading and search are public (ADR-0065); App Check tokens they carry are ignored.
+  // Online reading, search and encrypted Offline copies are public (ADR-0065); App Check tokens
+  // they carry are ignored.
   // A plain Offline copy is a complete resource. Only native clients install them, and their
   // attestation is far harder to obtain than a Web token copied from a browser session.
   if (category === 'artifact') {

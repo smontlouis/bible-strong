@@ -1,9 +1,16 @@
-export type ResourceRequestClass = 'public-catalog' | 'artifact' | 'search' | 'reading' | 'other'
+export type ResourceRequestClass =
+  | 'public-catalog'
+  | 'artifact'
+  | 'encrypted-artifact'
+  | 'search'
+  | 'reading'
+  | 'other'
 
 export const resourceRequestClassFrom = (request: Request): ResourceRequestClass => {
   const url = new URL(request.url)
   if (url.pathname === '/v1/offline-catalog') return 'public-catalog'
   if (url.pathname.startsWith('/v1/offline-artifacts/')) return 'artifact'
+  if (url.pathname.startsWith('/v1/offline-archives/')) return 'encrypted-artifact'
   if (!url.pathname.startsWith('/v1/')) return 'other'
   if (url.pathname === '/v1/search-events') return 'search'
   if (

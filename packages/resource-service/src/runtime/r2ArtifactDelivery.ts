@@ -2,6 +2,8 @@ import mobileResourceCatalog from '@bible-strong/resource-catalog/catalog'
 import { resourceRequestIdFrom } from '../http/requestId'
 
 export const R2_ARTIFACT_ROUTE_PREFIX = '/v1/offline-artifacts/'
+/** Public AES copies of Offline copies (ADR-0065). */
+export const ENCRYPTED_ARCHIVE_ROUTE_PREFIX = '/v1/offline-archives/'
 export const MOBILE_RESOURCE_CATALOG_ROUTE = '/v1/offline-catalog'
 
 export type ArtifactRange =
@@ -36,12 +38,47 @@ export type ArtifactEdgeCache = {
   put(request: Request, response: Response): Promise<void>
 }
 
-const mobileArtifacts = new Map(
-  Object.values(mobileResourceCatalog.resources).map(resource => [
-    resource.file,
-    resource.archiveSha256,
-  ])
-)
+type ArtifactCatalog = {
+  resources: Record<
+    string,
+    { file: string; archiveSha256: string; encryptedArchive?: { file: string; sha256: string } }
+  >
+}
+
+export type ArtifactKeyResolver = (url: URL) => string | undefined
+
+const SHA256_PATTERN = /^[a-f0-9]{64}$/
+
+/** Maps a request to its R2 key, accepting only files the catalog declares. */
+export const createArtifactKeyResolver = (catalog: ArtifactCatalog): ArtifactKeyResolver => {
+  const plainArtifacts = new Map(
+    Object.values(catalog.resources).map(resource => [resource.file, resource.archiveSha256])
+  )
+  const encryptedArchives = new Map(
+    Object.values(catalog.resources).flatMap(resource =>
+      resource.encryptedArchive
+        ? [[resource.encryptedArchive.file, resource.encryptedArchive.sha256] as const]
+        : []
+    )
+  )
+  return url => {
+    const requestedSha256 = url.searchParams.get('sha256')
+    if (url.pathname.startsWith(ENCRYPTED_ARCHIVE_ROUTE_PREFIX)) {
+      // Encrypted copies exist only under their immutable key, for the published SHA.
+      const file = url.pathname.slice(ENCRYPTED_ARCHIVE_ROUTE_PREFIX.length)
+      const publishedSha256 = encryptedArchives.get(file)
+      if (!publishedSha256 || requestedSha256 !== publishedSha256) return undefined
+      return `revisions/${publishedSha256}/${file}`
+    }
+    const stableKey = url.pathname.slice(R2_ARTIFACT_ROUTE_PREFIX.length)
+    if (!plainArtifacts.has(stableKey)) return undefined
+    if (!requestedSha256) return stableKey
+    if (!SHA256_PATTERN.test(requestedSha256)) return undefined
+    return `revisions/${requestedSha256}/${stableKey}`
+  }
+}
+
+const resolveBundledArtifactKey = createArtifactKeyResolver(mobileResourceCatalog)
 
 const mobileResourceCatalogJson = JSON.stringify(mobileResourceCatalog)
 
@@ -87,15 +124,6 @@ const mobileResourceCatalogResponseForClient = (
     statusText: conditionalStatus ? undefined : response.statusText,
     headers,
   })
-}
-
-const r2KeyForRequest = (url: URL): string | undefined => {
-  const stableKey = url.pathname.slice(R2_ARTIFACT_ROUTE_PREFIX.length)
-  if (!mobileArtifacts.has(stableKey)) return undefined
-  const requestedSha256 = url.searchParams.get('sha256')
-  if (!requestedSha256) return stableKey
-  if (!/^[a-f0-9]{64}$/.test(requestedSha256)) return undefined
-  return `revisions/${requestedSha256}/${stableKey}`
 }
 
 const contentRangeFrom = (range: ArtifactRange, totalSize: number): string | undefined => {
@@ -263,6 +291,7 @@ export const routeR2ArtifactRequest = async ({
   cache,
   waitUntil = () => undefined,
   reportCacheFailure = () => undefined,
+  resolveKey = resolveBundledArtifactKey,
 }: {
   request: Request
   bucket: R2ArtifactBucket
@@ -270,6 +299,7 @@ export const routeR2ArtifactRequest = async ({
   cache?: ArtifactEdgeCache
   waitUntil?: (promise: Promise<unknown>) => void
   reportCacheFailure?: (operation: 'match' | 'put', cause: unknown) => void
+  resolveKey?: ArtifactKeyResolver
 }): Promise<Response | undefined> => {
   const url = new URL(request.url)
   const pathname = url.pathname
@@ -296,9 +326,14 @@ export const routeR2ArtifactRequest = async ({
     }
     return mobileResourceCatalogResponseForClient(response, request, cache ? 'MISS' : undefined)
   }
-  if (!pathname.startsWith(R2_ARTIFACT_ROUTE_PREFIX)) return undefined
+  if (
+    !pathname.startsWith(R2_ARTIFACT_ROUTE_PREFIX) &&
+    !pathname.startsWith(ENCRYPTED_ARCHIVE_ROUTE_PREFIX)
+  ) {
+    return undefined
+  }
 
-  const key = r2KeyForRequest(url)
+  const key = resolveKey(url)
   if (!key) return artifactResponseForClient(new Response(null, { status: 404 }), request)
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     return artifactResponseForClient(

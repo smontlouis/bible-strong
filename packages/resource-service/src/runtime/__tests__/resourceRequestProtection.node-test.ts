@@ -32,6 +32,7 @@ const limitersFrom = (
   search: acceptedLimiter(calls, 'search'),
   'semantic-search': acceptedLimiter(calls, 'semantic-search'),
   artifact: acceptedLimiter(calls, 'artifact'),
+  'encrypted-artifact': acceptedLimiter(calls, 'encrypted-artifact'),
   ...overrides,
 })
 
@@ -199,6 +200,27 @@ describe('Resource request protection', () => {
     assert.equal(search, undefined)
     assert.equal(authorizationCalls, 0)
     assert.deepEqual(calls, ['reading', 'search'])
+  })
+
+  it('serves encrypted Offline copies without App Check, counted per client address', async () => {
+    const keys: string[] = []
+    let authorizationCalls = 0
+    const response = await protectResourceRequest({
+      request: new Request(
+        'https://api.bible-strong.app/v1/offline-archives/bibles/bible-lsg.json.encrypted.zip?sha256=' +
+          'a'.repeat(64),
+        { headers: { 'cf-connecting-ip': '198.51.100.4', range: 'bytes=0-99' } }
+      ),
+      authorize: async () => {
+        authorizationCalls += 1
+        return undefined
+      },
+      limiters: limitersFrom({ 'encrypted-artifact': rejectedLimiter(keys) }),
+    })
+
+    assert.equal(response?.status, 429)
+    assert.equal(authorizationCalls, 0)
+    assert.deepEqual(keys, ['address:198.51.100.4'])
   })
 
   it('rejects an Offline-copy download without attestation before every limiter', async () => {

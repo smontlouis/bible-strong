@@ -45,6 +45,11 @@
       "namespace_id": "2041161289173",
       "simple": { "limit": 120, "period": 60 },
     },
+    {
+      "name": "ENCRYPTED_ARCHIVE_RATE_LIMITER",
+      "namespace_id": "2041161289176",
+      "simple": { "limit": 240, "period": 60 },
+    },
   ],
   "observability": {
     "enabled": true,

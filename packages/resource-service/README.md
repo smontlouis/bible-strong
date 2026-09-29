@@ -393,8 +393,10 @@ Online reading and search are public ([ADR-0065](../../docs/adr/0065-protect-res
 the Worker ignores any App Check token they carry and counts them per client address
 (`CF-Connecting-IP`) before any cache, Hyperdrive, or AI access. Deterministic and bounded reads
 allow 1,000 requests per minute per address, dynamic search and random routes allow 300, and
-semantic search, which calls Workers AI, allows 60. Limits are generous because many readers share
-carrier NAT addresses.
+semantic search, which calls Workers AI, allows 60. Encrypted Offline copies under
+`/v1/offline-archives/` are public too and allow 240 requests per minute per address, including byte
+ranges; each delivery logs its size with a hashed client address. Limits are generous because many
+readers share carrier NAT addresses.
 
 Offline-copy artifact requests still require a native App Check attestation (ADR-0063). After it
 succeeds, the Worker fingerprints the short-lived token with SHA-256 and applies a counter of 120

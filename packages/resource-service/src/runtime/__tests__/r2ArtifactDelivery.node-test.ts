@@ -2,6 +2,8 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
 import {
+  createArtifactKeyResolver,
+  ENCRYPTED_ARCHIVE_ROUTE_PREFIX,
   MOBILE_RESOURCE_CATALOG_ROUTE,
   R2_ARTIFACT_ROUTE_PREFIX,
   routeR2ArtifactRequest,
@@ -617,6 +619,88 @@ describe('R2 artifact delivery', () => {
 
     assert.equal(response?.status, 405)
     assert.equal(response?.headers.get('allow'), 'GET, HEAD')
+    assert.deepEqual(reads, [])
+  })
+})
+
+describe('Encrypted Offline-copy delivery', () => {
+  const encryptedFile = 'bibles/bible-lsg.json.encrypted.zip'
+  const encryptedSha256 = 'b'.repeat(64)
+  const resolveKey = createArtifactKeyResolver({
+    resources: {
+      'bible:LSG': {
+        file: artifactKey,
+        archiveSha256: artifactSha256,
+        encryptedArchive: { file: encryptedFile, sha256: encryptedSha256 },
+      },
+    },
+  })
+  const encryptedUrl = (file: string, sha256?: string) =>
+    new URL(
+      `https://api.bible-strong.app${ENCRYPTED_ARCHIVE_ROUTE_PREFIX}${file}${sha256 ? `?sha256=${sha256}` : ''}`
+    )
+
+  it('resolves only the published encrypted SHA to its immutable key', () => {
+    assert.equal(
+      resolveKey(encryptedUrl(encryptedFile, encryptedSha256)),
+      `revisions/${encryptedSha256}/${encryptedFile}`
+    )
+    assert.equal(resolveKey(encryptedUrl(encryptedFile)), undefined)
+    assert.equal(resolveKey(encryptedUrl(encryptedFile, 'c'.repeat(64))), undefined)
+    assert.equal(resolveKey(encryptedUrl(artifactKey, artifactSha256)), undefined)
+    assert.equal(
+      resolveKey(encryptedUrl('bibles/unknown.encrypted.zip', encryptedSha256)),
+      undefined
+    )
+  })
+
+  it('keeps plain Offline-copy keys unchanged', () => {
+    const plainUrl = new URL(
+      `https://api.bible-strong.app${R2_ARTIFACT_ROUTE_PREFIX}${artifactKey}`
+    )
+    assert.equal(resolveKey(plainUrl), artifactKey)
+    plainUrl.searchParams.set('sha256', artifactSha256)
+    assert.equal(resolveKey(plainUrl), `revisions/${artifactSha256}/${artifactKey}`)
+    assert.equal(
+      resolveKey(
+        new URL(`https://api.bible-strong.app${R2_ARTIFACT_ROUTE_PREFIX}${encryptedFile}`)
+      ),
+      undefined
+    )
+  })
+
+  it('streams an encrypted copy from R2 without authorization', async () => {
+    const { bucket, reads } = makeBucket()
+    let authorizationCalls = 0
+    const response = await routeR2ArtifactRequest({
+      request: new Request(encryptedUrl(encryptedFile, encryptedSha256)),
+      bucket,
+      authorize: async () => {
+        authorizationCalls += 1
+        return true
+      },
+      resolveKey,
+    })
+
+    assert.equal(response?.status, 200)
+    assert.equal(await response?.text(), 'archive')
+    assert.equal(response?.headers.get('cache-control'), 'private, no-store')
+    assert.deepEqual(reads, [
+      { operation: 'get', key: `revisions/${encryptedSha256}/${encryptedFile}` },
+    ])
+    assert.equal(authorizationCalls, 1)
+  })
+
+  it('answers 404 for an undeclared encrypted file before reading R2', async () => {
+    const { bucket, reads } = makeBucket()
+    const response = await routeR2ArtifactRequest({
+      request: new Request(encryptedUrl('bibles/other.encrypted.zip', encryptedSha256)),
+      bucket,
+      authorize: async () => true,
+      resolveKey,
+    })
+
+    assert.equal(response?.status, 404)
     assert.deepEqual(reads, [])
   })
 })
