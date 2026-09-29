@@ -1,0 +1,247 @@
+[
+  {
+    "stepCode": "H0570",
+    "locale": "fr",
+    "simple": "1)hier,la nuit dernière 2)récemment(figuré)",
+    "detailed": "1)hier,la nuit dernière 2)récemment(fig.)",
+    "reason": "« Figuré » abrégé en « fig. », sans autre apport."
+  },
+  {
+    "stepCode": "H0802G",
+    "locale": "fr",
+    "simple": "1)femme,épouse,femelle 1a)femme(contraire de l'homme)1b)épouse(mariée à un homme)1c)femelle(des animaux)1d)chaque,chacun(pronom)",
+    "detailed": "1)femme,épouse,femelle 1a)femme(contraire de l'homme)1b)épouse(femme mariée à un homme)1c)femelle(pour les animaux)1d)chacune,toute(pronom)",
+    "reason": "Même liste femme/épouse/femelle et pronom distributif ; reformulation des explications, aucun sens nouveau."
+  },
+  {
+    "stepCode": "H1377",
+    "locale": "fr",
+    "simple": "1)reine,dame 2)reine-mère",
+    "detailed": "1)reine,dame 2)reine mère",
+    "reason": "Variation de nombre ou de trait d’union, sans sens supplémentaire."
+  },
+  {
+    "stepCode": "H1965G",
+    "locale": "fr",
+    "simple": "1)palais,temple 1a)palais 1b)temple(de Jérusalem)1c)temple(païen)",
+    "detailed": "1)palais,temple 1a)palais 1b)temple(à Jérusalem)1c)temple(païen)",
+    "reason": "Articles ou prépositions reformulés, mêmes sens et mêmes restrictions."
+  },
+  {
+    "stepCode": "H1965H",
+    "locale": "fr",
+    "simple": "1)palais,temple 1a)palais 1b)temple(de Jérusalem)1c)temple(païen)",
+    "detailed": ":palais 1)palais,temple 1a)palais 1b)temple(à Jérusalem)1c)temple(païen)",
+    "reason": "Articles ou prépositions reformulés, mêmes sens et mêmes restrictions."
+  },
+  {
+    "stepCode": "H2320G",
+    "locale": "fr",
+    "simple": "1)la nouvelle lune,mois,mensuel 1a)le premier jour du mois 1b)le mois lunaire",
+    "detailed": "1)la nouvelle lune,le mois,mensuel 1a)le premier jour du mois 1b)le mois lunaire",
+    "reason": "Articles ou prépositions reformulés, mêmes sens et mêmes restrictions."
+  },
+  {
+    "stepCode": "H2940",
+    "locale": "fr",
+    "simple": "1)goût,jugement 1a)goût 1b)jugement(figuré)1c)décision,décret",
+    "detailed": "1)goût,jugement 1a)goût 1b)jugement(fig.)1c)décision,décret",
+    "reason": "« Figuré » abrégé en « fig. », sans autre apport."
+  },
+  {
+    "stepCode": "H3848",
+    "locale": "fr",
+    "simple": "1)être vêtu 1a)(P'al)être revêtu 1b)(Aphel)revêtir quelqu'un",
+    "detailed": "1)être vêtu 1a)(P'al)être vêtu 1b)(Aphel)vêtir quelqu'un",
+    "reason": "Vêtu/revêtu et vêtir/revêtir : mêmes sens et mêmes conjugaisons."
+  },
+  {
+    "stepCode": "H4251",
+    "locale": "fr",
+    "simple": "1)maladie,souffrance 1a)causée par blessures",
+    "detailed": "1)maladie,souffrance 1a)causée par des blessures",
+    "reason": "Articles ou prépositions reformulés, mêmes sens et mêmes restrictions."
+  },
+  {
+    "stepCode": "H5107",
+    "locale": "fr",
+    "simple": "1)porter du fruit 1a)(Qal)porter du fruit 1b)(Pilel)faire prospérer(figuré)",
+    "detailed": "1)porter du fruit 1a)(Qal)porter du fruit 1b)(Pilel)faire prospérer(fig.)",
+    "reason": "« Figuré » abrégé en « fig. », sans autre apport."
+  },
+  {
+    "stepCode": "H5256",
+    "locale": "fr",
+    "simple": "1)tirer ou arracher 1a)(Itpal)être arraché",
+    "detailed": "1)tirer ou arracher 1a)(Ithp'al)être arraché",
+    "reason": "Même forme grammaticale et mêmes sens ; variante de translittération du nom de conjugaison."
+  },
+  {
+    "stepCode": "H5380",
+    "locale": "fr",
+    "simple": "1)souffler 1a)(Qal)souffler 1b)(Hifil)1b1)faire souffler 1b2)disperser,chasser",
+    "detailed": "1)souffler 1a)(Qal)souffler 1b)(Hiphil)1b1)faire souffler 1b2)disperser,chasser",
+    "reason": "Même forme grammaticale et mêmes sens ; variante de translittération du nom de conjugaison."
+  },
+  {
+    "stepCode": "H5400",
+    "locale": "fr",
+    "simple": "1)allumer,brûler 1a)(Nifal)être allumé 1b)(Hifil)faire un feu,brûler",
+    "detailed": "1)allumer,brûler 1a)(Niphal)être allumé 1b)(Hiphil)faire un feu,brûler",
+    "reason": "Même forme grammaticale et mêmes sens ; variante de translittération du nom de conjugaison."
+  },
+  {
+    "stepCode": "H5787",
+    "locale": "fr",
+    "simple": "1)aveugle 1a)aveugle(physiquement)1b)aveugle(figuré)",
+    "detailed": "1)aveugle 1a)aveugle(physiquement)1b)aveugle(fig.)",
+    "reason": "« Figuré » abrégé en « fig. », sans autre apport."
+  },
+  {
+    "stepCode": "H5797",
+    "locale": "fr",
+    "simple": "1)puissance,force 1a)matérielle ou physique 1b)personnelle ou sociale ou politique",
+    "detailed": "1)puissance,force 1a)matérielle ou physique 1b)personnelle,sociale ou politique",
+    "reason": "Même énumération personnelle/sociale/politique, coordination reformulée."
+  },
+  {
+    "stepCode": "H5826",
+    "locale": "fr",
+    "simple": "1)aider,secourir,soutenir 1a)(Qal)aider 1b)(Nifal)être aidé 1c)(Hifil)aider",
+    "detailed": "1)aider,secourir,soutenir 1a)(Qal)aider 1b)(Niphal)être aidé 1c)(Hiphil)aider",
+    "reason": "Même forme grammaticale et mêmes sens ; variante de translittération du nom de conjugaison."
+  },
+  {
+    "stepCode": "H6357",
+    "locale": "fr",
+    "simple": "1)topaze ou chrysolithe 1a)une pierre précieuse",
+    "detailed": "1)topaze ou chrysolithe 1a)pierre précieuse",
+    "reason": "Articles ou prépositions reformulés, mêmes sens et mêmes restrictions."
+  },
+  {
+    "stepCode": "H6415",
+    "locale": "fr",
+    "simple": "1)fonction du juge ou de l'arbitre 2)(CLBL)jugement,décision",
+    "detailed": "1)fonction de juge ou d'arbitre 2)(CLBL)jugement,décision",
+    "reason": "Articles ou prépositions reformulés, mêmes sens et mêmes restrictions."
+  },
+  {
+    "stepCode": "H6491",
+    "locale": "fr",
+    "simple": "ouvrir(les yeux)1a)(Qal)1a1)ouvrir(les yeux)1a2)ouvrir(les oreilles)1b)(Nifal)être ouvert",
+    "detailed": "ouvrir(les yeux)1a)(Qal)1a1)ouvrir(les yeux)1a2)ouvrir(les oreilles)1b)(Niphal)être ouvert",
+    "reason": "Même forme grammaticale et mêmes sens ; variante de translittération du nom de conjugaison."
+  },
+  {
+    "stepCode": "H6668",
+    "locale": "fr",
+    "simple": "1)luire,briller 1a)(Hofal)luire",
+    "detailed": "1)luire,briller 1a)(Hophal)luire",
+    "reason": "Même forme grammaticale et mêmes sens ; variante de translittération du nom de conjugaison."
+  },
+  {
+    "stepCode": "H6866",
+    "locale": "fr",
+    "simple": "1)brûler,roussir 1a)(Nifal)être roussi",
+    "detailed": "1)brûler,roussir 1a)(Niphal)être roussi",
+    "reason": "Même forme grammaticale et mêmes sens ; variante de translittération du nom de conjugaison."
+  },
+  {
+    "stepCode": "H6992",
+    "locale": "fr",
+    "simple": "1)tuer,mettre à mort 1a)(P'al)être tué 1b)(Pael)tuer 1c)(Ithp'al)être tué 1d)(Itpael)être tué",
+    "detailed": "1)tuer,mettre à mort 1a)(P'al)être tué 1b)(Pael)tuer 1c)(Ithp'al)être tué 1d)(Ithpael)être tué",
+    "reason": "Même forme grammaticale et mêmes sens ; variante de translittération du nom de conjugaison."
+  },
+  {
+    "stepCode": "H7162",
+    "locale": "fr",
+    "simple": "1)corne 1a)comme instrument de musique 1b)symbolique(dans des visions)1c)d'un animal",
+    "detailed": "1)corne 1a)comme instrument de musique 1b)symbolique(dans les visions)1c)d'un animal",
+    "reason": "Articles ou prépositions reformulés, mêmes sens et mêmes restrictions."
+  },
+  {
+    "stepCode": "H7616",
+    "locale": "fr",
+    "simple": "1)éclat,fragment 1a)sens probable",
+    "detailed": "1)éclats,fragment 1a)sens probable",
+    "reason": "Variation de nombre ou de trait d’union, sans sens supplémentaire."
+  },
+  {
+    "stepCode": "H7713",
+    "locale": "fr",
+    "simple": "1)rang,rangée(de soldats)1a)rangées,rangs 1b)terme technique de construction 1b1)sens inconnu",
+    "detailed": "1)rangée,rang(de soldats)1a)rangées,rangs 1b)terme technique de construction 1b1)sens inconnu",
+    "reason": "Les deux synonymes rang/rangée sont permutés, subdivisions identiques."
+  },
+  {
+    "stepCode": "H7783",
+    "locale": "fr",
+    "simple": "1)être abondant(sens probable)1a)(Polel)donner de l'abondance à 1b)(Hifil)déborder",
+    "detailed": "1)être abondant(sens probable)1a)(Polel)donner en abondance à 1b)(Hiphil)déborder",
+    "reason": "Donner de l’abondance/donner en abondance ; Hifil/Hiphil : même sens et même conjugaison."
+  },
+  {
+    "stepCode": "H7912",
+    "locale": "fr",
+    "simple": "1)trouver 1a)(Afel)trouver 1b)(Itp'al)être trouvé",
+    "detailed": "1)trouver 1a)(Aphel)trouver 1b)(Ithp'al)être trouvé",
+    "reason": "Même forme grammaticale et mêmes sens ; variante de translittération du nom de conjugaison."
+  },
+  {
+    "stepCode": "H8086",
+    "locale": "fr",
+    "simple": "1)entendre 1a)(Pal)entendre,avoir le sens de l'ouïe 1b)(Itpael)se montrer obéissant",
+    "detailed": "1)entendre 1a)(P'al)entendre,avoir le sens de l'ouïe 1b)(Ithpael)se montrer obéissant",
+    "reason": "Même forme grammaticale et mêmes sens ; variante de translittération du nom de conjugaison."
+  },
+  {
+    "stepCode": "H8131",
+    "locale": "fr",
+    "simple": "1)(Pal)haïr 1a)ennemi(participe)",
+    "detailed": "1)(P'al)haïr 1a)ennemi(participe)",
+    "reason": "Même forme grammaticale et mêmes sens ; variante de translittération du nom de conjugaison."
+  },
+  {
+    "stepCode": "H8276",
+    "locale": "fr",
+    "simple": "1)être entrelacé 1a)(Pual)être entrelacé 1b)(Hitpael)s'entrelacer",
+    "detailed": "1)être entrelacé 1a)(Pual)être entrelacé 1b)(Hithpael)s'entrelacer",
+    "reason": "Même forme grammaticale et mêmes sens ; variante de translittération du nom de conjugaison."
+  },
+  {
+    "stepCode": "H8401",
+    "locale": "fr",
+    "simple": "1)paille,chaume 1a)comme matériau de construction 1b)comme fourrage pour bétail",
+    "detailed": "1)paille,chaume 1a)comme matériau de construction 1b)comme fourrage pour le bétail",
+    "reason": "Articles ou prépositions reformulés, mêmes sens et mêmes restrictions."
+  },
+  {
+    "stepCode": "H8410",
+    "locale": "fr",
+    "simple": "1)une espèce d'arbre au bois dur 1a)peut-être le buis,l'orme",
+    "detailed": "1)une espèce d'arbre à bois dur 1a)peut-être le buis,l'orme",
+    "reason": "Articles ou prépositions reformulés, mêmes sens et mêmes restrictions."
+  },
+  {
+    "stepCode": "H8420",
+    "locale": "fr",
+    "simple": "1)désir,marque 1a)marque(comme un signe d'exemption du jugement)",
+    "detailed": "1)désir,marque 1a)marque(comme signe d'exemption du jugement)",
+    "reason": "Articles ou prépositions reformulés, mêmes sens et mêmes restrictions."
+  },
+  {
+    "stepCode": "H8437",
+    "locale": "fr",
+    "simple": "1)tourmenteur,pillards 1a)sens douteux",
+    "detailed": "1)tourmenteur,pillard 1a)sens douteux",
+    "reason": "Variation de nombre ou de trait d’union, sans sens supplémentaire."
+  },
+  {
+    "stepCode": "H8627",
+    "locale": "fr",
+    "simple": "1)être en ordre 1a)(Hofal)être établi,être rétabli,confirmer",
+    "detailed": "1)être en ordre 1a)(Hophal)être établi,être rétabli,confirmer",
+    "reason": "Même forme grammaticale et mêmes sens ; variante de translittération du nom de conjugaison."
+  }
+]

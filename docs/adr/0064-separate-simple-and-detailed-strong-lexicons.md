@@ -34,9 +34,49 @@ the separately resolved detailed entry.
 Keep the API's existing default detailed behavior for released clients. An explicit
 `level=simple` selects the language-specific publication for entry, batch, browse,
 random and morphology reads. Cache revisions include that publication. The new
-client independently selects online/offline access for each level, displays the
-simple definition first, and reveals STEP and the Greek dictionary in the advanced
-section. An existing detailed-only offline installation remains readable.
+client independently selects online/offline access for each level.
+
+The detail page presents a single “Meaning” section with two reading levels,
+“Essential” and “In depth”, chosen with a switch and remembered across entries.
+Levels name a depth, never a source, and blocks carry no source attribution.
+Essential shows one best summary. In depth adds, in order: the other definition
+(“Detailed definition” or “General definition”), a distinct name meaning, alternate
+senses, and classical Greek when the dictionary resource is installed (nothing is
+shown otherwise). The switch appears only when In depth has content. The
+verse-context section is always open.
+
+During the client-side trial, use a reversible reading-order policy. Identical
+normalized text and references appear only once. Near duplicates (at least 70%
+word similarity, with the guards below) appear once, in the detailed wording.
+Similarity does not establish semantic equivalence.
+
+For non-redundant Hebrew notices, explicit sibling-sense relations (`subentry` or
+`same_estrong`) or an expanded `eStrong` distinct from `classicStrong` identify a
+specific sense: its detailed text becomes the essential summary and the historical
+family notice moves to In depth as “General definition”, provided the detailed
+notice has at least six words. Shorter notices mostly restate the gloss (H0349A,
+H7819B) and keep the historical definition first. Greek entries never apply
+this rule: their detailed text is the Abbott-Smith article for the whole lemma,
+published identically for every sibling (G3972G and G3972H), not a sense notice. A `dStrong` suffix alone is
+insufficient. Entity-addon availability does not affect this policy. Otherwise the
+historical definition is essential and STEP is the In-depth “Detailed definition”;
+a missing level falls back to the other one as the essential summary.
+
+Comparison uses Dice over the longest common subsequence of normalized words.
+Ignore HTML, punctuation, nested list numbering and the repeated gloss. Keep
+complementary definitions more than 20% longer than the simple text, or containing
+changed references/media. Work is bounded to 250,000 token pairs and 32,000 combined
+HTML characters; over-budget inputs remain available. A 32-entry cache uses both
+complete texts and the gloss. No dependency or publication change is required.
+
+Independent name meanings are deduplicated only when their normalized text and
+references are identical. Cards/previews retain their existing historical-first
+fallback.
+
+After reviewing this trial in French and English, consider moving decisions to
+publication generation. No source definitions are deleted during the trial.
+Future storage reduction must preserve independent advanced-only installations,
+revision compatibility and language-specific decisions.
 
 Strong onboarding defaults to the simple lexicon in the chosen resource language.
 Detailed enrichments retain their normal dependency ordering and independent

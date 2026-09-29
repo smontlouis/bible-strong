@@ -73,7 +73,7 @@ it('keeps an existing detailed copy readable without calling it a simple definit
   const result = await access.loadEntry(identity, 'fr')
   expect(result?.definitionHtml).toBeUndefined()
   expect(result?.detailedDefinitionHtml).toBe('STEP')
-  expect((await access.loadPreview([identity], 'fr'))[0]?.definitionHtml).toBeUndefined()
+  expect((await access.loadPreview([identity], 'fr'))[0]?.definitionHtml).toBe('STEP')
   expect((await getPrimaryStrongLexiconAvailability(access, 'fr')).status).toBe('available')
 })
 
@@ -91,4 +91,46 @@ it('preserves the preview source identity filtering and deduplication', async ()
   expect(await access.loadPreview(identities, 'fr')).toEqual([entry('Simple')])
   expect(preview).toHaveBeenCalledWith(identities, 'fr')
   expect(cards).not.toHaveBeenCalled()
+})
+
+it('uses STEP for a missing historical definition in both cards and previews', async () => {
+  const simple = source(entry(''))
+  const detailed = source({ ...entry('STEP'), id: 999 })
+  const access = createLayeredStrongLexiconAccess(simple, detailed)
+  expect((await access.loadPreview([identity], 'fr'))[0]).toMatchObject({
+    id: 1,
+    definitionHtml: 'STEP',
+  })
+  expect((await access.loadEntryCards([identity], 'fr'))[0]).toMatchObject({
+    id: 1,
+    definitionHtml: 'STEP',
+  })
+})
+it('does not replace a preview with a different suffix identity', async () => {
+  const access = createLayeredStrongLexiconAccess(
+    source(entry('')),
+    source({ ...entry('Other sense'), stepCode: 'G2491k' })
+  )
+  expect((await access.loadPreview([identity], 'fr'))[0]?.definitionHtml).toBe('')
+})
+it('keeps simple-only previews usable when the optional detailed resource is unavailable', async () => {
+  const access = createLayeredStrongLexiconAccess(source(entry('')), source())
+  expect(await access.loadPreview([identity], 'fr')).toEqual([entry('')])
+})
+it('does not request STEP when historical cards already have definitions', async () => {
+  const detailed = source(entry('STEP'))
+  const preview = jest.spyOn(detailed, 'loadPreview')
+  const cards = jest.spyOn(detailed, 'loadEntryCards')
+  const access = createLayeredStrongLexiconAccess(source(entry('Simple')), detailed)
+  await access.loadPreview([identity], 'fr')
+  await access.loadEntryCards([identity], 'fr')
+  expect(preview).not.toHaveBeenCalled()
+  expect(cards).not.toHaveBeenCalled()
+})
+
+it('preserves an empty result from the preview source identity filter', async () => {
+  const simple = source(entry('Simple'))
+  simple.loadPreview = async () => []
+  const access = createLayeredStrongLexiconAccess(simple, source())
+  expect(await access.loadPreview([identity], 'fr')).toEqual([])
 })

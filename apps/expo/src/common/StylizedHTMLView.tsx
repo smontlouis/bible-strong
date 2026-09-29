@@ -12,6 +12,7 @@ import {
   LINK_TEXT_ATTRIBUTE,
   linkifyStrongReferences,
   normalizeExternalContextLinks,
+  removeLegacySpacerImages,
 } from './stylizedHtmlUtils'
 export { linkifyStrongReferences } from './stylizedHtmlUtils'
 
@@ -135,7 +136,7 @@ const StylizedHTMLView = ({
     },
   }
 
-  const normalizedValue = normalizeExternalContextLinks(value ?? '')
+  const normalizedValue = normalizeExternalContextLinks(removeLegacySpacerImages(value ?? ''))
   const html =
     normalizedValue && onLinkPress ? linkifyStrongReferences(normalizedValue) : normalizedValue
   const needsMeasuredContentWidth = hasWidthSensitiveHtmlContent(html)

@@ -48,7 +48,8 @@ export const PublicStrongEntryRouteScreen = ({ page }: { page: PublicStrongEntry
 
   const rawCode = firstString(params.code)
   const canonicalPath = buildPublicStrongPath(identity.code, page)
-  if (rawCode !== identity.code.toLocaleLowerCase()) {
+  const requestedPath = `/strong/${rawCode}${page === 'index' ? '' : `/${page}`}`
+  if (requestedPath !== canonicalPath) {
     const { code: _code, ...contextParams } = params
     return <Redirect href={{ pathname: canonicalPath, params: contextParams } as Href} />
   }

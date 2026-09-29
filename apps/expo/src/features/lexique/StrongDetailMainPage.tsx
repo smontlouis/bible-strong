@@ -4,6 +4,7 @@ import { twMerge } from '~common/ui/classNames'
 import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import PageContent from '~common/ui/PageContent'
+import { useAtom } from 'jotai/react'
 import React, { useRef, useState } from 'react'
 import { ScrollView, type ScrollView as ScrollViewType } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -25,16 +26,19 @@ import {
   StrongEditorialHtml,
   StrongEditorialPreview,
   StrongEditorialSection,
-  StrongEyebrow,
   StrongEntityRelationList,
   StrongEntitySummaryCard,
+  StrongLevelSwitch,
   StrongLexicalRelationCard,
   StrongPreviewLink,
 } from './StrongDetailUI'
+import { strongDefinitionLevelAtom } from './atoms'
 import { StrongEntityRelationGraph } from './StrongEntityRelationGraph'
 import {
   formatStrongContextMorphology,
+  getStrongContextHighlight,
   getStrongContextVerseText,
+  type StrongContextHighlight,
 } from './strongContextPresentation'
 import { splitStrongEntityRelations } from './strongEntityPresentation'
 import { splitStrongLexicalRelations } from './strongLexiconRelations'
@@ -43,6 +47,7 @@ import { getScaledStrongTextStyle, type StrongReadingTypography } from './strong
 import { formatStrongLemmaPartOfSpeech } from './strongLemmaPartOfSpeech'
 import { isStrongOriginalUnnamed } from './strongOriginalPresentation'
 import StrongPassageMediaSection from './StrongPassageMediaSection'
+import { isSameStrongDefinition, presentStrongDefinitions } from './strongDefinitionPresentation'
 type Anchor = 'context' | 'definition' | 'media' | 'entity' | 'related' | 'concordance'
 
 type Props = {
@@ -75,12 +80,12 @@ type Props = {
 
 const HighlightedVerse = ({
   text,
-  word,
+  highlight,
   untranslatedOffset,
   readingTypography,
 }: {
   text: string
-  word?: string
+  highlight?: StrongContextHighlight
   untranslatedOffset?: number
   readingTypography: StrongReadingTypography
 }) => {
@@ -97,24 +102,29 @@ const HighlightedVerse = ({
         {text.slice(untranslatedOffset)}
       </Text>
     )
-  if (!word) return <Text style={getScaledStrongTextStyle(18, 28, readingTypography)}>{text}</Text>
-  const index = text.toLocaleLowerCase().indexOf(word.toLocaleLowerCase())
-  if (index < 0)
+  if (!highlight)
     return <Text style={getScaledStrongTextStyle(18, 28, readingTypography)}>{text}</Text>
 
   return (
     <Text style={getScaledStrongTextStyle(20, 30, readingTypography)}>
-      {text.slice(0, index)}
+      {text.slice(0, highlight.start)}
       <Text
         className="bg-light-primary text-primary font-bold rounded-[5px] px-[3px]"
         style={getScaledStrongTextStyle(20, 30, readingTypography)}
       >
-        {text.slice(index, index + word.length)}
+        {text.slice(highlight.start, highlight.end)}
       </Text>
-      {text.slice(index + word.length)}
+      {text.slice(highlight.end)}
     </Text>
   )
 }
+
+const DefinitionBlock = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <VStack className="overflow-hidden border-continuous gap-[8px] pt-[16px] mt-[4px] border-t-[1px] border-border">
+    <Text className="font-bold text-[15px]">{title}</Text>
+    {children}
+  </VStack>
+)
 
 const JumpNavigationContent = ({
   anchors,
@@ -176,7 +186,7 @@ const StrongDetailMainPage = ({
 
   const { t, i18n } = useTranslation()
   const scrollRef = useRef<ScrollViewType>(null)
-  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [storedLevel, setStoredLevel] = useAtom(strongDefinitionLevelAtom)
   const [anchorOffsets, setAnchorOffsets] = useState<Partial<Record<Anchor, number>>>({})
   const [dictionaryPreview, setDictionaryPreview] = useState<{
     resourceId: number
@@ -207,12 +217,26 @@ const StrongDetailMainPage = ({
           getStrongReferenceNumber(identity.code) === getStrongReferenceNumber(entry.baseCode)
       )
   )?.startOffset
-  const dictionaryResource = entry.resources[0]
+  const definition = presentStrongDefinitions(entry)
   const lexicalRelations = splitStrongLexicalRelations(entry.relations)
   const displayedRelationCount = Math.min(lexicalRelations.relatedWords.length, 4)
   const displayedConcordanceCount = Math.min(concordanceVerses.length, 3)
   const isOriginalUnnamed = isStrongOriginalUnnamed(entry.original)
   const originalLabel = isOriginalUnnamed ? t('strongDetail.unnamedPerson') : entry.original
+  const dictionaryResource = isOriginalUnnamed ? undefined : entry.resources[0]
+  const nameMeaningHtml = [definition.essentialHtml, definition.deep?.html].some(html =>
+    isSameStrongDefinition(html, entry.nameMeaningHtml)
+  )
+    ? undefined
+    : entry.nameMeaningHtml
+  const deepDefinitionTitle =
+    definition.deep?.kind === 'general'
+      ? t('strongDetail.definition.generalEntry')
+      : t('strongDetail.definition.detailed')
+  const hasDeepContent =
+    Boolean(definition.deep || nameMeaningHtml || dictionaryResource) ||
+    lexicalRelations.alternateSenses.length > 0
+  const level = hasDeepContent ? storedLevel : 'essential'
 
   return (
     <ScrollView
@@ -315,7 +339,7 @@ const StrongDetailMainPage = ({
           <VStack className="overflow-hidden border-continuous border-l-[3px] pl-[17px] py-[5px] gap-[10px]">
             <HighlightedVerse
               text={contextText ?? ''}
-              word={clickedWord || entry.gloss}
+              highlight={getStrongContextHighlight(contextVerse, entry, clickedWord || entry.gloss)}
               untranslatedOffset={untranslatedContextOffset}
               readingTypography={readingTypography}
             />
@@ -338,83 +362,67 @@ const StrongDetailMainPage = ({
         </StrongEditorialSection>
       )}
 
-      {!!contextVerse && (
-        <PageContent style={{ maxWidth: 600 }}>
-          <Box className="overflow-hidden border-continuous w-[42px] h-[3px] bg-default mt-[34px] mb-[2px]" />
-        </PageContent>
-      )}
-
       <StrongEditorialSection
-        title={t('strongDetail.definition.simple')}
+        title={t('strongDetail.definition.title')}
         onLayout={event => setAnchor('definition', event.nativeEvent.layout.y)}
       >
-        {entry.definitionHtml ? (
+        {hasDeepContent && (
+          <StrongLevelSwitch
+            options={[
+              { value: 'essential', label: t('strongDetail.definition.level.essential') },
+              { value: 'deep', label: t('strongDetail.definition.level.deep') },
+            ]}
+            value={level}
+            onChange={setStoredLevel}
+          />
+        )}
+        {definition.essentialHtml ? (
           <StrongEditorialHtml
-            value={entry.definitionHtml}
+            value={definition.essentialHtml}
             onOpenBibleReference={onOpenBibleReference}
             onOpenStrong={onOpenStrong}
           />
         ) : (
-          <Text className="text-tertiary">{t('strongDetail.definition.simpleUnavailable')}</Text>
+          <Text className="text-tertiary">
+            {t('strongLexicon.definitionUnavailable', { language: entry.language })}
+          </Text>
         )}
-        <StrongPreviewLink
-          label={t(
-            showAdvanced
-              ? 'strongDetail.definition.hideAdvanced'
-              : 'strongDetail.definition.showAdvanced'
-          )}
-          onPress={() => setShowAdvanced(value => !value)}
-        />
-      </StrongEditorialSection>
-      {showAdvanced && (
-        <>
-          <StrongEditorialSection title={t('strongDetail.definition.advanced')}>
-            {entry.nameMeaningHtml && (
-              <VStack
-                className="overflow-hidden border-continuous gap-[8px]"
-                style={{ marginBottom: entry.detailedDefinitionHtml ? 18 : 0 }}
-              >
+        {level === 'deep' && (
+          <>
+            {definition.deep && (
+              <DefinitionBlock title={deepDefinitionTitle}>
                 <StrongEditorialHtml
-                  value={entry.nameMeaningHtml}
+                  value={definition.deep.html}
                   onOpenBibleReference={onOpenBibleReference}
                   onOpenStrong={onOpenStrong}
                 />
-              </VStack>
+              </DefinitionBlock>
             )}
-            {entry.detailedDefinitionHtml ? (
-              <StrongEditorialHtml
-                value={entry.detailedDefinitionHtml}
-                onOpenBibleReference={onOpenBibleReference}
-                onOpenStrong={onOpenStrong}
-              />
-            ) : !entry.nameMeaningHtml ? (
-              <Text className="text-tertiary">
-                {t('strongLexicon.definitionUnavailable', {
-                  language: entry.language,
-                })}
-              </Text>
-            ) : null}
+            {nameMeaningHtml && (
+              <DefinitionBlock title={t('strongDetail.definition.nameMeaning')}>
+                <StrongEditorialHtml
+                  value={nameMeaningHtml}
+                  onOpenBibleReference={onOpenBibleReference}
+                  onOpenStrong={onOpenStrong}
+                />
+              </DefinitionBlock>
+            )}
             {lexicalRelations.alternateSenses.length > 0 && (
-              <VStack className="border-continuous overflow-hidden mt-[10px] pt-[18px] border-t-[1px] border-border gap-[9px]">
-                <StrongEyebrow>{t('strongLexicon.otherMeanings')}</StrongEyebrow>
-                {lexicalRelations.alternateSenses.map(relation => (
-                  <StrongLexicalRelationCard
-                    key={relation.stepCode}
-                    relation={relation}
-                    readingTypography={readingTypography}
-                    onPress={() => onOpenStrong(relation.stepCode)}
-                  />
-                ))}
-              </VStack>
+              <DefinitionBlock title={t('strongLexicon.otherMeanings')}>
+                <VStack className="gap-[9px]">
+                  {lexicalRelations.alternateSenses.map(relation => (
+                    <StrongLexicalRelationCard
+                      key={relation.stepCode}
+                      relation={relation}
+                      readingTypography={readingTypography}
+                      onPress={() => onOpenStrong(relation.stepCode)}
+                    />
+                  ))}
+                </VStack>
+              </DefinitionBlock>
             )}
-          </StrongEditorialSection>
-
-          {!isOriginalUnnamed &&
-            (dictionaryResource ? (
-              <StrongEditorialSection title={t('strongDetail.dictionary.light')}>
-                <Text className="text-tertiary text-[12px]">
-                  {dictionaryResource.source} · {dictionaryResource.title}
-                </Text>
+            {dictionaryResource && (
+              <DefinitionBlock title={t('strongDetail.definition.classicalGreek')}>
                 <StrongEditorialPreview
                   value={dictionaryResource.contentHtml}
                   readingTypography={readingTypography}
@@ -437,10 +445,11 @@ const StrongDetailMainPage = ({
                       onPress={() => onOpenPage('dictionary')}
                     />
                   )}
-              </StrongEditorialSection>
-            ) : null)}
-        </>
-      )}
+              </DefinitionBlock>
+            )}
+          </>
+        )}
+      </StrongEditorialSection>
 
       {passageMedia.length > 0 && (
         <StrongPassageMediaSection
@@ -459,6 +468,7 @@ const StrongDetailMainPage = ({
             <StrongEntitySummaryCard
               entity={entry.entity}
               plain
+              previewLines={4}
               readingTypography={readingTypography}
               onOpenBibleReference={onOpenBibleReference}
               onOpenStrong={onOpenStrong}

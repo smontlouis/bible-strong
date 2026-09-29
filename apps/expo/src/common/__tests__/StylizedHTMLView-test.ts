@@ -4,6 +4,7 @@ import {
   LINK_TEXT_ATTRIBUTE,
   linkifyStrongReferences,
   normalizeExternalContextLinks,
+  removeLegacySpacerImages,
 } from '../stylizedHtmlUtils'
 
 describe('linkifyStrongReferences', () => {
@@ -95,5 +96,20 @@ describe('getLegacyLinkPressArguments', () => {
         'data-strong-book': '1',
       })
     ).toEqual(['0549H', 1])
+  })
+})
+
+describe('removeLegacySpacerImages', () => {
+  it('removes historical transparent spacers without removing text or real images', () => {
+    expect(
+      removeLegacySpacerImages(
+        `<p>1) femme<br /><img src="/Design/ClearPix.gif" width="10" height="5" alt="" />1a) épouse<img src="https://example.org/illustration.png" /></p>`
+      )
+    ).toBe('<p>1) femme<br />1a) épouse<img src="https://example.org/illustration.png" /></p>')
+  })
+  it('recognizes quoted and unquoted legacy paths', () => {
+    expect(
+      removeLegacySpacerImages(`<img src='/Design/ClearPix.gif'><img src=/Design/ClearPix.gif>`)
+    ).toBe('')
   })
 })

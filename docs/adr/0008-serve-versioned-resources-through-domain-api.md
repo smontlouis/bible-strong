@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted. Its App Check requirement is superseded by [ADR-0065](./0065-protect-resources-without-mandatory-attestation.md).
 
 ## Context
 

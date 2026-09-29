@@ -1,6 +1,6 @@
 # ADR-0063: Serve Offline copies only to native App Check attestations
 
-- Status: Accepted
+- Status: Accepted; superseded by [ADR-0065](./0065-protect-resources-without-mandatory-attestation.md) once plain Offline copies are removed
 - Date: 2026-09-28
 
 ## Context

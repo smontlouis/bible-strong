@@ -35,6 +35,30 @@ export const mergeStrongDefinitionLevels = (
   }
 }
 
+// Previews contain the definition to display, while full entries retain both levels.
+// Match exact STEP identities, never numeric IDs from independent publications.
+const loadCardsWithDefinitionFallback = async <
+  T extends { stepCode: string; language: string; definitionHtml?: string },
+>(
+  loadSimple: () => Promise<T[]>,
+  loadDetailed: () => Promise<T[]>
+): Promise<T[]> => {
+  const basic = await optional(loadSimple)
+  if (!basic) return loadDetailed()
+  if (basic.every(entry => entry.definitionHtml?.trim())) return basic
+  const detailed = await optional(loadDetailed)
+  if (!detailed) return basic
+  return basic.map(entry => {
+    if (entry.definitionHtml?.trim()) return entry
+    const replacement = detailed.find(
+      candidate => candidate.stepCode === entry.stepCode && candidate.language === entry.language
+    )
+    return replacement?.definitionHtml
+      ? { ...entry, definitionHtml: replacement.definitionHtml }
+      : entry
+  })
+}
+
 /** Select each level independently: downloading the simple lexicon never requires STEP. */
 export function createLayeredStrongLexiconAccess(
   simple: StrongLexiconAccess,
@@ -67,23 +91,15 @@ export function createLayeredStrongLexiconAccess(
       return entries.filter((entry): entry is StrongLexiconEntry => Boolean(entry))
     },
     async loadEntryCards(identities, language) {
-      return preferSimple(
+      return loadCardsWithDefinitionFallback(
         () => simple.loadEntryCards(identities, language),
-        async () =>
-          (await detailed.loadEntryCards(identities, language)).map(entry => ({
-            ...entry,
-            definitionHtml: undefined,
-          }))
+        () => detailed.loadEntryCards(identities, language)
       )
     },
     async loadPreview(identities, language) {
-      return preferSimple(
+      return loadCardsWithDefinitionFallback(
         () => simple.loadPreview(identities, language),
-        async () =>
-          (await detailed.loadPreview(identities, language)).map(entry => ({
-            ...entry,
-            definitionHtml: undefined,
-          }))
+        () => detailed.loadPreview(identities, language)
       )
     },
     listEntries: request =>

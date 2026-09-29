@@ -1,0 +1,437 @@
+[
+  {
+    "locale": "fr",
+    "entry": {
+      "stepCode": "H0030",
+      "classicStrong": "H0030",
+      "eStrong": "H0030",
+      "gloss": "Abihu",
+      "definitionHtml": "<p>Abihu = \"Dieu est père\", \"il est mon père\"<br />1) fils d'Aaron, partagea les privilèges, le péché, la destinée de Nadab son aîné, et mourut sans postérité</p>",
+      "detailedDefinitionHtml": "Un homme de la tribu de Lévi vivant à l’époque de l’Égypte et du désert, mentionné pour la première fois en Exode 6.23 ; <br> fils de : Aaron (H0175) et Élishéba (H0472) ; <br> frère de : Nadab (H5070), Éléazar (H0499) et Ithamar (H0385)",
+      "relations": []
+    }
+  },
+  {
+    "locale": "fr",
+    "entry": {
+      "stepCode": "H3605",
+      "classicStrong": "H3605",
+      "eStrong": "H3605",
+      "gloss": "tout",
+      "definitionHtml": "<p>1) tout, l'entier<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />1a) le tout<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />1b) n'importe quel, chaque, chacun, toute chose<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />1c) totalité</p>",
+      "detailedDefinitionHtml": "1) tout, le tout<br>1a) tout, la totalité de<br>1b) n’importe lequel, chacun, chaque, quoi que ce soit<br>1c) totalité, tout<br>Équivalent araméen : <i>kol</i> (כֹּל « tout » H3606)",
+      "relations": []
+    }
+  },
+  {
+    "locale": "fr",
+    "entry": {
+      "stepCode": "H4191",
+      "classicStrong": "H4191",
+      "eStrong": "H4191",
+      "gloss": "mourir",
+      "definitionHtml": "<p>1) mourir, tuer, être exécuté<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />1a) (Qal)<br /><img src=\"/Design/ClearPix.gif\" width=\"20\" height=\"5\" alt=\"\" />1a1) mourir<br /><img src=\"/Design/ClearPix.gif\" width=\"20\" height=\"5\" alt=\"\" />1a2) mourir (en châtiment), être mis à mort<br /><img src=\"/Design/ClearPix.gif\" width=\"20\" height=\"5\" alt=\"\" />1a3) périr (d'une nation)<br /><img src=\"/Design/ClearPix.gif\" width=\"20\" height=\"5\" alt=\"\" />1a4) mourir prématurément (par négligence d'une conduite morale sage)<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />1b) (Polel) tuer, mettre à mort, exécuter<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />1c) être tué, être mis à mort<br /><img src=\"/Design/ClearPix.gif\" width=\"30\" height=\"5\" alt=\"\" />1d1a) mourir prématurément</p>",
+      "detailedDefinitionHtml": "1) mourir, tuer, faire exécuter quelqu'un<br>1a)(Qal)<br>1a1) mourir<br>1a2) mourir (comme châtiment), être mis à mort<br>1a3) mourir, périr (à propos d'une nation)<br>1a4) mourir prématurément (pour avoir négligé une conduite morale sage)<br>1b) (Polel) tuer, mettre à mort, expédier<br>1c) (Hiphil) tuer, mettre à mort<br>1d) (Hophal)<br>1d1) être tué, être mis à mort<br>1d1a) mourir prématurément",
+      "relations": []
+    }
+  },
+  {
+    "locale": "fr",
+    "entry": {
+      "stepCode": "H4601K",
+      "classicStrong": "H4601",
+      "eStrong": "H4601",
+      "gloss": "Maaca",
+      "definitionHtml": "<p>Maaca = \"oppression\"<br />1) père d'Akisch, roi de Gath au début du règne de Salomon<br />2) père de Hanan, un des héros de David<br />3) un Siméonite, père de Schephatia, sous le règne de David<br />4) fils de Nachor par sa concubine Réuma<br />n pr f 5) fille du roi Talmaï, épouse de David, et mère d'Absalom<br />6) fille d'Absalom, épouse de Roboam de Juda, et mère d'Abijam<br />7) concubine de Caleb le fils de Hetsron<br />8) épouse de Makir de la tribu de Manassé<br />9) épouse de Jeïel, père de Gabaon</p>",
+      "detailedDefinitionHtml": "Une femme de la tribu de Juda ayant vécu à l’époque de la monarchie unifiée, mentionnée pour la première fois en 1R.15.2 ; <br> fille de : Uriel (H0222I) et Tamar (H8559I) ; mariée à Roboam (H7346) ; <br> mère de : Abija (H0029I), Attaï (H6262I), Ziza (H2124H) et Schélomith (H8019G) ; également appelée Micaïa (KJV : Michaiah) en 2Ch.13.2 ;",
+      "relations": [
+        {
+          "stepCode": "H4601G",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H4601H",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H4601I",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H4601L",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H4601M",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H4601N",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H4601O",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H4601P",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H4601Q",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H4601R",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        }
+      ]
+    }
+  },
+  {
+    "locale": "fr",
+    "entry": {
+      "stepCode": "H5175",
+      "classicStrong": "H5175",
+      "eStrong": "H5175",
+      "gloss": "serpent",
+      "definitionHtml": "<p>1) serpent, reptile<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />1a) serpent<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />1b) image (du serpent)<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />1c) serpent volant (mythologique)</p>",
+      "detailedDefinitionHtml": "1) serpent<br>1a) serpent<br>1b) image (de serpent)<br>1c) serpent fuyard (mythologique)",
+      "relations": []
+    }
+  },
+  {
+    "locale": "fr",
+    "entry": {
+      "stepCode": "H5662H",
+      "classicStrong": "H5662",
+      "eStrong": "H5662",
+      "gloss": "Abdias",
+      "definitionHtml": "<p>Abdias = \"adorateur, ou serviteur de l'Eternel\"<br />1) 4ème petit prophète; on ne sait rien sur lui, mais il étaitprobablement contemporain de Jérémie, Ezéchiel, et Daniel<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />1a) son livre prophétique: prophéties contre Edom<br />2) chef de maisonnée du roi Achab: adorateur de l'éternel qui risquasa vie en cachant plus de 100 prophètes pendant la persécution de Jézabel<br />3) un descendant de David<br />4) un chef de la tribu d'Issacar<br />5) Benjamite, un des 6 fils d'Atsel et descendant du roi Saïl<br />6) Lévite, fils de Schemaeja et descendant de Jeduthun<br />7) chef de Gad, qui rejoint David à Tsiklag<br />8) un prince de Juda au temps du roi Josaphat de Juda<br />9) sacrificateur fils de Jeïel des fils de Joab qui revinrent del'exil avec Esdras<br/>10) un portier au temps de Néhémie<br/>11) un de ceux qui scella le pacte avec Néhémie</p>",
+      "detailedDefinitionHtml": "Un homme de la tribu de Juda vivant à l'époque de la monarchie divisée, mentionné seulement en 1Ch.3.21 ; <br> fils de : Hanania (H2608L) ; <br> frère de : Pelatiah (H6410), Jeshaiah (H3470B), Rephaiah (H7509), Arnan (H0770) et Shecaniah (H7935)",
+      "relations": [
+        {
+          "stepCode": "H5662G",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662I",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662J",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662K",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662L",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662M",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662N",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662O",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662P",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662Q",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662R",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        }
+      ]
+    }
+  },
+  {
+    "locale": "fr",
+    "entry": {
+      "stepCode": "H7819B",
+      "classicStrong": "H7819",
+      "eStrong": "H7819b",
+      "gloss": "abattage",
+      "definitionHtml": "<p>1) tuer, abattre, battre<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />1a) (Qal)<br /><img src=\"/Design/ClearPix.gif\" width=\"20\" height=\"5\" alt=\"\" />1a1) abattre<br /><img src=\"/Design/ClearPix.gif\" width=\"30\" height=\"5\" alt=\"\" />1a1a) une bête pour la nourriture<br /><img src=\"/Design/ClearPix.gif\" width=\"30\" height=\"5\" alt=\"\" />1a1b) pour un sacrifice<br /><img src=\"/Design/ClearPix.gif\" width=\"30\" height=\"5\" alt=\"\" />1a1c) une personne pour un sacrifice humain<br /><img src=\"/Design/ClearPix.gif\" width=\"30\" height=\"5\" alt=\"\" />1a1d) battu, martelé (de sicles)<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />1b) (Nifal) être abattu, être tué (nourriture ou sacrifice)<br />2) (BDB) abattage, massacre<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />2a) mot douteux</p>",
+      "detailedDefinitionHtml": "1) (BDB) abattage<br>1a) mot douteux",
+      "relations": []
+    }
+  },
+  {
+    "locale": "fr",
+    "entry": {
+      "stepCode": "H8064",
+      "classicStrong": "H8064",
+      "eStrong": "H8064",
+      "gloss": "ciel",
+      "definitionHtml": "<p>1) ciel, cieux<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />1a) les cieux visibles, le ciel<br /><img src=\"/Design/ClearPix.gif\" width=\"20\" height=\"5\" alt=\"\" />1a1) la demeure des étoiles<br /><img src=\"/Design/ClearPix.gif\" width=\"20\" height=\"5\" alt=\"\" />1a2) l'univers visible, le ciel, l'atmosphère, etc<br /><img src=\"/Design/ClearPix.gif\" width=\"10\" height=\"5\" alt=\"\" />1b) les Cieux (la demeure de Dieu)</p>",
+      "detailedDefinitionHtml": "1) ciel, cieux, firmament<br>1a) cieux visibles, ciel<br>1a1) comme demeure des étoiles<br>1a2) comme univers visible, ciel, atmosphère, etc.<br>1b) Ciel (comme demeure de Dieu)<br>Équivalent araméen : <i>sha.ma.yin</i> (שָׁמַ֫יִן &quot;ciel&quot; H8065)",
+      "relations": []
+    }
+  },
+  {
+    "locale": "en",
+    "entry": {
+      "stepCode": "G0026",
+      "classicStrong": "G0026",
+      "eStrong": "G0026",
+      "gloss": "love",
+      "definitionHtml": "From <strong>G25</strong>; <i>love</i> that is <i>affection</i> or <i>benevolence</i>; specifically (plural) a <i>love</i> <strong><i>feast:</i> </strong> - (feast of) charity ([-ably]) dear love.",
+      "detailedDefinitionHtml": "<b>ἀγάπη</b>, -ης, ἡ <br /> [in LXX for אַהֲבָה, which is also rendered by ἀγάπησις and φιλία;] <br /> <b>love, goodwill, esteem</b>. Outside of bibl. and eccl. books, there is no clear instance (with Deiss., <i>LAE</i>, 18:4, 70:2, cf. the same writer in <i>Constr. Quar.</i>, ii, 4; and with MM, <i>VGT</i>, see word, cf. Dr. Moulton in <i>Exp. Times</i>, xxvi, 3, 139). In NT, like ἀγαπάω, -ῶ, <br />1. <b>Of men's love</b>: <br />__(a) to one another, Jhn.13:35; <br /> __(b) to God, 1Jn.2:5.<br /><br />2. <b>Of divine love</b>; <br />__(a) <b>God's love</b>: to men, Rom.5:8; to Christ, Jhn.17:26; <br /> __(b) <b>Christ's love to men</b>: Rom.8:35. <br /><br />3. In pl., <b>love feasts</b>: Ju 12 (<i>DB</i>, iii, 157).<br /> <re><i>SYN.</i>: φιλία. ἀ., signifying properly (see: ἀγαπάω) love which chooses its object, is taken over from LXX, where its connotation is more general, into NT, and there used exclusively to express that spiritual bond of love between God and man and between man and man, in Christ, which is characteristic of Christianity. It is thusdistinct from φιλία, <b>friendship</b> (Jas.4:4 only), στοργή, <b>natural affection</b> (in NT only in compounds, see: ἄστοργος) and ἔρως, <b>sexual love</b>, which is not used in NT, its place being taken by ἐπιθυμία. (Cf. ἀγαπάω; and see Abbott, <i>Essays</i>, 70f.; <i>DB</i>, vol. i., 555; Cremer, 13, 593; MM, <i>VGT</i>, see word).</re> (AS)",
+      "relations": []
+    }
+  },
+  {
+    "locale": "en",
+    "entry": {
+      "stepCode": "H5175",
+      "classicStrong": "H5175",
+      "eStrong": "H5175",
+      "gloss": "serpent",
+      "definitionHtml": "From <strong>H5172</strong>; a <i>snake</i> (from its <i>hiss</i>): - serpent.",
+      "detailedDefinitionHtml": "1) serpent, snake<br />1a) serpent<br />1b) image (of serpent)<br />1c) fleeing serpent (mythological)",
+      "relations": []
+    }
+  },
+  {
+    "locale": "en",
+    "entry": {
+      "stepCode": "H5662H",
+      "classicStrong": "H5662",
+      "eStrong": "H5662",
+      "gloss": "Obadiah",
+      "definitionHtml": "Active participle of <strong>H5647</strong> and <strong>H3050</strong>; <i>serving Jah</i>;<br /><i>{Obadjah}</i> the name of thirteen <strong>Israelites:</strong> - Obadiah.",
+      "detailedDefinitionHtml": "A man of the tribe of Judah living at the time of Divided Monarchy, only mentioned at 1Ch.3.21; <br /> son of: Hananiah (H2608L); <br /> brother of: Pelatiah (H6410), Jeshaiah (H3470B), Rephaiah (H7509), Arnan (H0770) and Shecaniah (H7935)",
+      "relations": [
+        {
+          "stepCode": "H5662G",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662I",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662J",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662K",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662L",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662M",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662N",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662O",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662P",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662Q",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        },
+        {
+          "stepCode": "H5662R",
+          "group": "subentry",
+          "relationKind": "same_estrong",
+          "label": "",
+          "gloss": "",
+          "original": "",
+          "transliteration": ""
+        }
+      ]
+    }
+  },
+  {
+    "locale": "en",
+    "entry": {
+      "stepCode": "H7819B",
+      "classicStrong": "H7819",
+      "eStrong": "H7819b",
+      "gloss": "slaughtering",
+      "definitionHtml": "A primitive root; to <i>slaughter</i> (in sacrifice or massacre): - {kill} {offer} shoot {out} {slay} slaughter.",
+      "detailedDefinitionHtml": "1) (BDB) slaughtering<br />1a) word doubtful",
+      "relations": []
+    }
+  }
+]
