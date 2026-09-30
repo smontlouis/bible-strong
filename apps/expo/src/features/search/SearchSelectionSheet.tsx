@@ -25,7 +25,15 @@ import HeaderContent from '~common/ContextualPanel/HeaderContent'
 import { useTheme } from '~themes/ThemeProvider'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
-import { Fragment, type PropsWithChildren, Ref, useDeferredValue, useState, useRef } from 'react'
+import {
+  Fragment,
+  type PropsWithChildren,
+  type ReactNode,
+  Ref,
+  useDeferredValue,
+  useState,
+  useRef,
+} from 'react'
 import { ActivityIndicator, FlatList, Platform, TextInput } from 'react-native'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
@@ -122,6 +130,7 @@ export type SearchSelectionSheetProps = {
   initialSource?: SearchItemType
   onDismiss?: () => void
   onSelectItem: (item: SearchEntityResult, version: VersionCode) => void | Promise<void>
+  searchAccessory?: ReactNode
 }
 
 const browseModeLabelKeys: Record<BrowseMode, string> = {
@@ -309,6 +318,7 @@ const SearchSelectionSheet = ({
   inline = false,
   browsePassages = false,
   requirePassageVerse = false,
+  searchAccessory,
 }: SearchSelectionSheetProps) => {
   const { t } = useTranslation()
   const filtersRef = useRef<SheetRef>(null)
@@ -897,15 +907,18 @@ const SearchSelectionSheet = ({
   }
 
   const searchHeader = (
-    <Box className="overflow-hidden border-continuous px-[20px] pt-[8px] pb-[12px]">
-      <SheetSearchInput
-        value={searchValue}
-        onChangeText={handleSearch}
-        onDelete={() => handleSearch('')}
-        placeholder={placeholder}
-        ref={searchInputRef}
-        autoFocus={Platform.OS === 'web'}
-      />
+    <Box className="overflow-hidden border-continuous flex-row items-start gap-[8px] px-[20px] pt-[8px] pb-[12px]">
+      <Box className="overflow-visible border-continuous flex-[1]">
+        <SheetSearchInput
+          value={searchValue}
+          onChangeText={handleSearch}
+          onDelete={() => handleSearch('')}
+          placeholder={placeholder}
+          ref={searchInputRef}
+          autoFocus={Platform.OS === 'web'}
+        />
+      </Box>
+      {searchAccessory}
     </Box>
   )
 

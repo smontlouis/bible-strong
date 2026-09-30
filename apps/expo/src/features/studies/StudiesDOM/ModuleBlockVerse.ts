@@ -8,6 +8,7 @@ import type {
   VerseBlockPayload,
 } from './quill-types'
 import { getPersistedStudyStrongReference } from '../strongStudyReference'
+import { scrollSelectionIntoView } from './scrollSelectionIntoView'
 
 const Module = Quill.import('core/module') as QuillModuleConstructor
 
@@ -59,6 +60,7 @@ class ModuleBlockVerse extends Module {
     )
     this.quill.insertText(cursorPosition + 1, ' ', Quill.sources.API)
     this.quill.setSelection(cursorPosition + 2, Quill.sources.API)
+    scrollSelectionIntoView(this.quill, { index: cursorPosition, length: 2 })
   }
 
   openStrongBlock = (_value?: unknown) => {
@@ -84,6 +86,7 @@ class ModuleBlockVerse extends Module {
     )
     this.quill.insertText(cursorPosition + 1, ' ', Quill.sources.API)
     this.quill.setSelection(cursorPosition + 2, Quill.sources.API)
+    scrollSelectionIntoView(this.quill, { index: cursorPosition, length: 2 })
   }
 }
 

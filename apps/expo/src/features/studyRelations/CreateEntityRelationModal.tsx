@@ -1,6 +1,6 @@
 import { resolvePassageTarget } from '~features/search/passageSelection'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import type { Ref } from 'react'
+import type { ReactNode, Ref } from 'react'
 import { useDispatch } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import type { SheetRef } from '~common/sheet'
@@ -35,6 +35,7 @@ type Props = {
   onCreated?: () => void
   onSelectTarget?: (target: RelationTargetResult) => void | Promise<void>
   allowedTypes?: RelationEndpoint['type'][]
+  searchAccessory?: ReactNode
 }
 
 export default function CreateEntityRelationModal({

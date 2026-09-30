@@ -8,6 +8,7 @@ import type {
   QuillRange,
 } from './quill-types'
 import { getPersistedStudyStrongReference } from '../strongStudyReference'
+import { scrollSelectionIntoView } from './scrollSelectionIntoView'
 
 const Module = Quill.import('core/module') as QuillModuleConstructor
 
@@ -61,6 +62,7 @@ class ModuleInlineVerse extends Module {
       })
       this.quill.insertText(range.index, ' ', 'inline-verse', false)
     }
+    scrollSelectionIntoView(this.quill)
   }
 
   receiveStrongLink = (data: InlineStrongPayload) => {
@@ -87,6 +89,7 @@ class ModuleInlineVerse extends Module {
       })
       this.quill.insertText(range.index, ' ', 'inline-strong', false)
     }
+    scrollSelectionIntoView(this.quill)
   }
 }
 

@@ -108,6 +108,8 @@ const useVerseActions = ({
         content,
         version,
         verses: JSON.stringify(Object.keys(selectedVerses)),
+        // Makes each return unique so picking the same verse again still inserts it.
+        insertionId: Date.now(),
       },
     })
     onClose()

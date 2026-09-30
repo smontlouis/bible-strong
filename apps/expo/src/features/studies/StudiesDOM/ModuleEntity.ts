@@ -1,6 +1,7 @@
 import type { StudyEntityEmbedPayload } from '../studyEntityEmbeds'
 import Quill from './quill'
 import type { QuillInstance, QuillModuleConstructor, QuillRange } from './quill-types'
+import { scrollSelectionIntoView } from './scrollSelectionIntoView'
 
 const Module = Quill.import('core/module') as QuillModuleConstructor
 
@@ -34,6 +35,7 @@ class ModuleEntity extends Module {
       this.quill.format('inline-strong', false, Quill.sources.USER)
       this.quill.format('inline-entity', data, Quill.sources.USER)
       this.quill.setSelection(range.index + range.length, Quill.sources.SILENT)
+      scrollSelectionIntoView(this.quill)
       return
     }
 
@@ -47,6 +49,7 @@ class ModuleEntity extends Module {
       Quill.sources.USER
     )
     this.quill.setSelection(range.index + label.length + 1, Quill.sources.SILENT)
+    scrollSelectionIntoView(this.quill)
   }
 
   receiveEntityBlock = (data: StudyEntityEmbedPayload) => {
@@ -56,6 +59,7 @@ class ModuleEntity extends Module {
     this.quill.insertEmbed(range.index, 'block-entity', data, Quill.sources.USER)
     this.quill.insertText(range.index + 1, ' ', Quill.sources.USER)
     this.quill.setSelection(range.index + 2, Quill.sources.SILENT)
+    scrollSelectionIntoView(this.quill, { index: range.index, length: 2 })
   }
 }
 

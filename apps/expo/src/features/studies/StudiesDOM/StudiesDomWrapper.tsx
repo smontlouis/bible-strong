@@ -16,8 +16,9 @@ import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import i18n from '~i18n'
 import { EditStudyScreenProps } from '~navigation/type'
 import { Study } from '~redux/modules/user'
-import Box from '~common/ui/Box'
-import { currentStudyIdAtom } from '../atom'
+import Box, { TouchableBox } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import { currentStudyIdAtom, pendingStudyVerseEntityAtom } from '../atom'
 import StudyFooter from '../StudyFooter'
 import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
@@ -25,6 +26,7 @@ import { getBibleViewParamsForVerseKeys } from '~features/studyRelations/openabl
 import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRelationModal'
 import { useOpenStudyObject } from '~features/studyRelations/useOpenStudyObject'
 import type { RelationTargetResult } from '~features/studyRelations/targetSearch'
+import { createPassageSelectionTarget } from '~features/search/passageSelection'
 import { useSheet } from '~helpers/useSheet'
 import { createStudyEntityEmbedPayload } from '../studyEntityEmbeds'
 import {
@@ -138,10 +140,17 @@ export default function StudiesDomWrapper({
     }
   }
 
-  async function navigateToSelectionMode(selectionMode: StudyNavigateBibleType): Promise<void> {
+  async function navigateToSelectionMode(
+    selectionMode: StudyNavigateBibleType,
+    entityMode?: 'link' | 'block'
+  ): Promise<void> {
     dispatchToWebView('BLUR_EDITOR')
     await timeout(300)
     getDefaultStore().set(currentStudyIdAtom, studyId)
+    getDefaultStore().set(
+      pendingStudyVerseEntityAtom,
+      entityMode ? { studyId, mode: entityMode } : null
+    )
     pushRouteOnce({
       pathname: '/bible-view',
       params: { isSelectionMode: selectionMode },
@@ -153,7 +162,18 @@ export default function StudiesDomWrapper({
     entityPicker.open()
   }
 
-  async function insertEntity(target: RelationTargetResult): Promise<void> {
+  function openBibleVersePicker(): void {
+    entityPicker.close()
+    navigateToSelectionMode(
+      entityInsertionMode === 'link' ? 'verse' : 'verse-block',
+      entityInsertionMode
+    )
+  }
+
+  async function insertEntity(
+    target: RelationTargetResult,
+    mode: 'link' | 'block' = entityInsertionMode
+  ): Promise<void> {
     const payload = await refreshStudyEntityEmbedPayload(createStudyEntityEmbedPayload(target), {
       resources,
       defaultBibleVersion,
@@ -164,20 +184,38 @@ export default function StudiesDomWrapper({
       wordAnnotations,
     })
     dispatchToWebView(
-      entityInsertionMode === 'link' ? 'INSERT_ENTITY_LINK' : 'INSERT_ENTITY_BLOCK',
+      mode === 'link' ? 'INSERT_ENTITY_LINK' : 'INSERT_ENTITY_BLOCK',
       payload as unknown as JSONValue
     )
     entityPicker.close()
   }
 
   useEffect(() => {
-    const paramsWithType = params as EditStudyScreenProps & { type?: string }
+    const paramsWithType = params as EditStudyScreenProps & {
+      type?: string
+      verses?: string
+      version?: string
+    }
     if (!paramsWithType.type) return
 
     const isVerse = paramsWithType.type.includes('verse')
     const isBlock = paramsWithType.type.includes('block')
 
     dispatchToWebView('FOCUS_EDITOR')
+
+    const store = getDefaultStore()
+    const pendingEntity = store.get(pendingStudyVerseEntityAtom)
+    if (isVerse && pendingEntity?.studyId === studyId) {
+      store.set(pendingStudyVerseEntityAtom, null)
+      const verseKeys = JSON.parse(paramsWithType.verses || '[]') as string[]
+      if (verseKeys.length && paramsWithType.version) {
+        void insertEntity(
+          createPassageSelectionTarget(verseKeys, paramsWithType.version),
+          pendingEntity.mode
+        )
+      }
+      return
+    }
 
     if (isVerse) {
       dispatchToWebView(isBlock ? 'GET_BIBLE_VERSES_BLOCK' : 'GET_BIBLE_VERSES', params)
@@ -343,7 +381,17 @@ export default function StudiesDomWrapper({
             entityInsertionMode === 'link' ? i18n.t('Ajouter un lien') : i18n.t('Ajouter un bloc')
           }
           sourceEndpoint={null}
-          onSelectTarget={insertEntity}
+          onSelectTarget={target => insertEntity(target)}
+          searchAccessory={
+            <TouchableBox
+              accessibilityRole="button"
+              accessibilityLabel={i18n.t('Choisir dans la Bible')}
+              onPress={openBibleVersePicker}
+              className="overflow-hidden border-continuous items-center justify-center w-[44px] h-[44px] rounded-[14px] bg-[rgba(0,0,0,0.1)]"
+            >
+              <FeatherIcon name="book-open" size={20} />
+            </TouchableBox>
+          }
         />
       </Box>
     </KeyboardAvoidingView>

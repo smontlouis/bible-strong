@@ -145,6 +145,8 @@ const StrongCard = (props: Props) => {
           translatedBy: '',
           original,
           book,
+          // Makes each return unique so picking the same Strong again still inserts it.
+          insertionId: Date.now(),
         },
       })
     } else {

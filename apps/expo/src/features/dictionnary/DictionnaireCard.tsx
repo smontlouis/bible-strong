@@ -176,6 +176,8 @@ const DictionnaireCard = ({
           studyId: currentStudyId,
           type: isSelectionMode,
           title: word,
+          // Makes each return unique so picking the same word again still inserts it.
+          insertionId: Date.now(),
         },
       })
     } else {
