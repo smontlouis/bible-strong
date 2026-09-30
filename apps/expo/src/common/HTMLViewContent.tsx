@@ -6,10 +6,12 @@ import SwitchableHTMLView from './SwitchableHTMLView'
 export default function HTMLViewContent({
   html,
   previewSource,
+  selectable,
   onLinkClicked,
 }: {
   html: string
   previewSource?: PreviewSource
+  selectable?: boolean
   onLinkClicked: (payload: HTMLViewLinkPayload) => void
 }) {
   return (
@@ -17,6 +19,7 @@ export default function HTMLViewContent({
       previewSource={previewSource}
       value={html}
       padded
+      selectable={selectable}
       onLinkClicked={onLinkClicked}
     />
   )

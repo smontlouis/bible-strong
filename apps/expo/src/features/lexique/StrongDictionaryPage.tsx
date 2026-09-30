@@ -30,6 +30,7 @@ const StrongDictionaryPage = ({ entry, onOpenBibleReference, onOpenStrong }: Pro
       <VStack className="overflow-hidden border-continuous gap-[14px]">
         <StrongEyebrow>{resource.source}</StrongEyebrow>
         <StrongEditorialHtml
+          selectable
           value={resource.contentHtml}
           onOpenBibleReference={onOpenBibleReference}
           onOpenStrong={onOpenStrong}

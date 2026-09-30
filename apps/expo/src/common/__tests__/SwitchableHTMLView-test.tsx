@@ -4,6 +4,7 @@ import { create, type ReactTestRenderer } from 'react-test-renderer'
 import SwitchableHTMLView from '../SwitchableHTMLView'
 import Native from '../StylizedHTMLViewNative'
 import DOM from '../HTMLContentDOM'
+import { estimateReadingHtmlHeight } from '../readingHtml'
 
 beforeEach(() => {
   Platform.OS = 'ios'
@@ -17,6 +18,10 @@ jest.mock('../useReadingTypography', () => ({ useReadingTypography: () => mockTy
 jest.mock('../StylizedHTMLViewNative', () => ({ __esModule: true, default: 'NativeReader' }))
 jest.mock('../HTMLContentDOM', () => ({ __esModule: true, default: 'DOMReader' }))
 jest.mock('react-native', () => ({ View: 'View', Platform: { OS: 'ios' } }))
+jest.mock('react-native-reanimated', () => ({
+  __esModule: true,
+  default: { View: 'AnimatedView' },
+}))
 jest.mock('~themes/ThemeProvider', () => ({
   useTheme: () => ({
     colors: { reverse: '#fff', default: '#111', primary: '#5890ff', quart: '#c00' },
@@ -43,7 +48,10 @@ it('switches engines without changing content or link payload and follows Bible 
   const dom = view.root.findByType(DOM)
   expect(dom.props.html).toBe(html)
   expect(dom.props.typography).toEqual(mockTypography)
-  expect(dom.props.dom.containerStyle).toMatchObject({ height: 200, flex: 0 })
+  expect(dom.props.dom.containerStyle).toMatchObject({
+    height: estimateReadingHtmlHeight(html, mockTypography, 360),
+    flex: 0,
+  })
   for (const height of [1400, 320]) {
     await act(async () => {
       await view.root.findByType(DOM).props.onSizeChange(height)
@@ -113,3 +121,54 @@ const mockPreview = jest.fn(() => false)
 jest.mock('~features/bibleReferencePreview/state', () => ({
   useReferencePreview: () => mockPreview,
 }))
+
+const opacityOf = (view: ReactTestRenderer) =>
+  (view.root.findByType('AnimatedView' as never).props.style as { opacity: number }).opacity
+
+it('uses the DOM reader for selectable text on iOS only', () => {
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
+  let view!: ReactTestRenderer
+  act(() => {
+    view = create(<SwitchableHTMLView value="<p>Lecture</p>" selectable />)
+  })
+  expect(view.root.findAllByType(Native)).toHaveLength(0)
+  expect(view.root.findByType(DOM).props.html).toBe('<p>Lecture</p>')
+  Platform.OS = 'android'
+  act(() => view.update(<SwitchableHTMLView value="<p>Lecture</p>" selectable />))
+  expect(view.root.findAllByType(DOM)).toHaveLength(0)
+  expect(view.root.findByType(Native).props.html).toBe('<p>Lecture</p>')
+  act(() => view.unmount())
+})
+
+it('fades the DOM reader in once its first height is measured', async () => {
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
+  let view!: ReactTestRenderer
+  act(() => {
+    view = create(<SwitchableHTMLView value="<p>Lecture</p>" engine="dom" />)
+  })
+  expect(opacityOf(view)).toBe(0)
+  await act(async () => {
+    await view.root.findByType(DOM).props.onSizeChange(0)
+  })
+  expect(opacityOf(view)).toBe(0)
+  await act(async () => {
+    await view.root.findByType(DOM).props.onSizeChange(240)
+  })
+  expect(opacityOf(view)).toBe(1)
+  expect(view.root.findByType(DOM).props.dom.containerStyle.height).toBe(240)
+  act(() => view.unmount())
+})
+
+it('reveals the DOM reader even if it never reports a height', () => {
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
+  jest.useFakeTimers()
+  let view!: ReactTestRenderer
+  act(() => {
+    view = create(<SwitchableHTMLView value="<p>Lecture</p>" engine="dom" />)
+  })
+  expect(opacityOf(view)).toBe(0)
+  act(() => jest.advanceTimersByTime(2000))
+  expect(opacityOf(view)).toBe(1)
+  act(() => view.unmount())
+  jest.useRealTimers()
+})

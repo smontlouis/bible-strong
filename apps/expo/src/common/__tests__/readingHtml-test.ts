@@ -1,6 +1,7 @@
 import { DomUtils, parseDocument } from 'htmlparser2'
 import {
   cleanReadingHTML,
+  estimateReadingHtmlHeight,
   getReadingTypography,
   readingHtmlCSS,
   readingHtmlStyles,
@@ -90,4 +91,18 @@ it('scopes compact preview styles independently from the article', () => {
   expect(article).toContain('font-size: 46px; line-height: 80px')
   expect(preview).toContain('font-size: 32px; line-height: 48px')
   expect(preview).not.toContain(articleSelector)
+})
+
+it('estimates rendered HTML height from text length, blocks and paragraph spacing', () => {
+  const typography = { fontFamily: 'Arial', fontSize: 20, lineHeight: 30 }
+  // 200px wide at 20px holds 20 characters per line.
+  expect(estimateReadingHtmlHeight('<p>Court</p>', typography, 200)).toBe(30 + 20)
+  expect(
+    estimateReadingHtmlHeight(
+      `<p>${'a'.repeat(45)}</p><ul><li>un</li><li>deux&nbsp;trois</li></ul>`,
+      typography,
+      200
+    )
+  ).toBe((3 + 1 + 1) * 30 + 20)
+  expect(estimateReadingHtmlHeight('', typography, 200)).toBe(0)
 })

@@ -419,6 +419,7 @@ const StrongDetailMainPage = ({
       >
         {definition.essentialHtml ? (
           <StrongEditorialHtml
+            selectable
             value={definition.essentialHtml}
             onOpenBibleReference={onOpenBibleReference}
             onOpenStrong={onOpenStrong}
@@ -433,6 +434,7 @@ const StrongDetailMainPage = ({
             {definition.deep && (
               <DefinitionBlock title={deepDefinitionTitle}>
                 <StrongEditorialHtml
+                  selectable
                   value={definition.deep.html}
                   onOpenBibleReference={onOpenBibleReference}
                   onOpenStrong={onOpenStrong}
@@ -442,6 +444,7 @@ const StrongDetailMainPage = ({
             {nameMeaningHtml && (
               <DefinitionBlock title={t('strongDetail.definition.nameMeaning')}>
                 <StrongEditorialHtml
+                  selectable
                   value={nameMeaningHtml}
                   onOpenBibleReference={onOpenBibleReference}
                   onOpenStrong={onOpenStrong}

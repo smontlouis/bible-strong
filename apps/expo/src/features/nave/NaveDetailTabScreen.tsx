@@ -344,6 +344,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
         )}
         {naveItem?.description && (
           <HTMLViewContent
+            selectable
             previewSource={{ kind: 'nave', language: naveResourceLanguage }}
             html={naveItem.description}
             onLinkClicked={openLink}

@@ -217,6 +217,7 @@ const CommentaryEntryScreen = ({
               />
               <Box className="overflow-hidden border-continuous mt-[14px]">
                 <StylizedHTMLView
+                  selectable
                   value={section.content}
                   onLinkPress={href => {
                     const osis = commentaryHrefToOsis(href)

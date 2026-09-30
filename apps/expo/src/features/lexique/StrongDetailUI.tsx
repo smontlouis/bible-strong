@@ -166,6 +166,7 @@ export const StrongLexicalRelationCard = ({
 type StrongEditorialHtmlProps = {
   typography?: ReadingTypography
   value?: string
+  selectable?: boolean
   onOpenBibleReference: (osis: string) => void
   onOpenStrong: (stepCode: string) => void
 }
@@ -173,6 +174,7 @@ type StrongEditorialHtmlProps = {
 export const StrongEditorialHtml = ({
   value,
   typography,
+  selectable,
   onOpenBibleReference,
   onOpenStrong,
 }: StrongEditorialHtmlProps) => {
@@ -182,6 +184,7 @@ export const StrongEditorialHtml = ({
   return (
     <SwitchableHTMLView
       typography={typography}
+      selectable={selectable}
       value={linkifyStrongReferences(
         normalizeExternalContextLinks(
           linkifyStrongEditorialBibleReferences(

@@ -541,6 +541,7 @@ const DictionnaryDetailScreen = ({
         ) : (
           dictionnaireItem?.definition && (
             <SwitchableHTMLView
+              selectable
               previewSource={{
                 kind: 'dictionary',
                 work,

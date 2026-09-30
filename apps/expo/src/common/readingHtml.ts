@@ -103,6 +103,31 @@ export function readingHtmlStyles(
   }
 }
 
+// Average glyph width of the reading fonts, relative to the font size.
+const AVERAGE_CHAR_WIDTH_RATIO = 0.5
+
+/** Rough height of rendered HTML, reserved before the DOM engine reports its measured size. */
+export function estimateReadingHtmlHeight(
+  html: string,
+  typography: ReadingTypography,
+  width: number
+): number {
+  const charsPerLine = Math.max(
+    1,
+    Math.floor(width / (typography.fontSize * AVERAGE_CHAR_WIDTH_RATIO))
+  )
+  const lines = html
+    .replace(/<\/(p|li|h[1-6]|div|blockquote)>|<br\s*\/?>/giu, '\n')
+    .replace(/<[^>]*>/gu, '')
+    .replace(/&[a-z0-9#]+;/giu, ' ')
+    .split('\n')
+    .map(block => block.trim())
+    .filter(Boolean)
+    .reduce((total, block) => total + Math.ceil(block.length / charsPerLine), 0)
+  const paragraphs = html.match(/<p[\s>]/giu)?.length ?? 0
+  return Math.ceil(lines * typography.lineHeight + paragraphs * typography.fontSize)
+}
+
 export function readingHtmlCSS(
   typography: ReadingTypography,
   colors: ReadingColors,
