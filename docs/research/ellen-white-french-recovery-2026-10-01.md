@@ -2,7 +2,7 @@
 
 ## Conclusion
 
-Les anciennes traductions françaises ont été récupérées depuis Firestore et une édition française de `egw-writings` est reconstruite : 34 227 paragraphes pour 21 674 versets, sans nouvelle traduction. Le bundle et le catalogue local sont prêts et validés ; cette édition n’est pas encore activée en production.
+Les anciennes traductions françaises ont été récupérées depuis Firestore et une édition française de `egw-writings` est reconstruite : 34 227 paragraphes pour 21 674 versets, sans nouvelle traduction. La ressource et son catalogue sont publiés en production depuis le 1er octobre 2026. Les tests de lecture et de téléchargement chiffré passent.
 
 ## Pourquoi le français a disparu
 
@@ -143,9 +143,7 @@ Le catalogue local, son inventaire et ses identités requises incluent désormai
 Les **118 entrées préexistantes sont identiques**, y compris l’anglais. Le générateur général reconnaît
 la source française restaurée ; une commande dédiée permet de ne reconstruire que ce bundle.
 
-La validation du bundle par le Resource service et sa correspondance avec le catalogue complet (119 identités, une seule sélectionnée) ont réussi. Le texte des 34 227 paragraphes et les 21 674 listes de versets sont identiques avant et après la composition finale du HTML. Les tests du monorepo, les 96 tests de commentaires, les deux tests du convertisseur canonique, le contrôle TypeScript et les frontières du Resource service passent. La publication R2, l’import Neon et le
-déploiement du catalogue restent à effectuer depuis une révision intégrée et propre conformément
-aux règles de publication. À ce stade, cette restauration n’est **pas encore accessible en production**.
+La validation du bundle par le Resource service et sa correspondance avec le catalogue complet (119 identités, une seule sélectionnée) ont réussi. Le texte des 34 227 paragraphes et les 21 674 listes de versets sont identiques avant et après la composition finale du HTML. Les tests du monorepo, les 96 tests de commentaires, les deux tests du convertisseur canonique, le contrôle TypeScript et les frontières du Resource service passent. La publication ciblée R2, l’import Neon et le déploiement du catalogue ont ensuite été effectués depuis `master` propre et synchronisé, avec verrou de publication et sauvegarde des états précédents.
 
 
 ### Bilan des contrôles locaux
@@ -161,5 +159,25 @@ aux règles de publication. À ce stade, cette restauration n’est **pas encore
 - Contrôle du texte final : les 34 227 corps français et les 21 674 listes de versets sont préservés.
 - Validation Resource service du bundle et de sa concordance avec le catalogue : succès.
 
-La publication de production reste à effectuer après intégration des changements. L’archive Firestore et les gros artefacts produits
+L’archive Firestore et les gros artefacts produits
 sont ignorés par Git et doivent être conservés pour l’étape de publication.
+
+
+## Publication du 1er octobre 2026
+
+Le commit de restauration `504e90447` a été poussé sur `master`. Une seule identité a été publiée :
+`commentary:egw-writings:fr` / `database:egw-writings:fr`. Les 118 entrées précédentes du catalogue et
+les autres publications Neon sont inchangées.
+
+- Révision active : `egw-writings-fr-79738c095e74ca428cf2`.
+- Worker : `1806f47d-30e2-4acd-a13c-3dfd4c766850`.
+- Archive chiffrée : 19 259 390 octets, SHA-256
+  `bb06bf53cc39bbcb22416716071c41a8be69a559b27608005efb61e4ca4626be`.
+- Santé du service et parité du catalogue : succès.
+- Index de Genèse 1 : 162 sections françaises ; lecture d’une section à la révision exacte : succès.
+- Téléchargement public de l’archive chiffrée, hash, déchiffrement et hash du SQLite : succès.
+- Archive non chiffrée sans attestation : refus `401`, attendu.
+
+Les fichiers de contrôle et l’état précédent sont conservés dans
+`apps/resource-studio/outputs/egw-fr-publication/` (ignoré par Git).
+La visibilité dans l’application nécessite aussi la distribution du code incluant la projection française.

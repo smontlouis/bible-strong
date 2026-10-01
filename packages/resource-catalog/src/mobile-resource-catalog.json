@@ -2425,7 +2425,14 @@
       "resourceRevision": "egw-writings-fr-79738c095e74ca428cf2",
       "installedBytes": 68087808,
       "peakInstallationBytes": 100516852,
-      "strategy": "archive-extract"
+      "strategy": "archive-extract",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/commentaries/commentary-egw-writings-fr.sqlite.encrypted.zip?sha256=bb06bf53cc39bbcb22416716071c41a8be69a559b27608005efb61e4ca4626be",
+        "file": "commentaries/commentary-egw-writings-fr.sqlite.encrypted.zip",
+        "sha256": "bb06bf53cc39bbcb22416716071c41a8be69a559b27608005efb61e4ca4626be",
+        "bytes": 19259390,
+        "keyVersion": 1
+      }
     },
     "database:family-notes:en": {
       "id": "database:family-notes:en",
