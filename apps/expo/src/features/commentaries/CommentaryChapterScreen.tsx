@@ -29,6 +29,7 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { getDefaultBibleTab, useBibleTabActions } from '~state/tabs'
 import { openCommentaryBookSelector } from './commentaryBookSelector'
 import CommentaryResourceHeaderActions from './CommentaryResourceHeaderActions'
+import { shareCommentary } from './shareCommentary'
 import CommentaryRoomIntro from './CommentaryRoomIntro'
 import {
   getCommentarySectionsForVerse,
@@ -254,6 +255,26 @@ const CommentaryChapterScreen = ({
                 book={book}
                 chapter={chapter}
                 showAvatar={false}
+                onShare={
+                  query.data?.sections.length
+                    ? () =>
+                        void shareCommentary({
+                          entry,
+                          passage: `${bookLabel} ${chapter}`,
+                          sections: query.data.sections.map(section => ({
+                            reference:
+                              section.rangeStartVerse === 0
+                                ? t('commentaries.resource.introduction')
+                                : `${bookLabel} ${chapter}:${section.rangeStartVerse}${
+                                    section.rangeEndVerse !== section.rangeStartVerse
+                                      ? `–${section.rangeEndVerse}`
+                                      : ''
+                                  }`,
+                            content: section.content,
+                          })),
+                        })
+                    : undefined
+                }
               />
             </Box>
           }

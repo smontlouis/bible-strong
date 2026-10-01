@@ -31,6 +31,8 @@ jest.mock('~common/ui/Box', () => ({
   TouchableBox: 'TouchableBox',
 }))
 jest.mock('~common/ui/Text', () => 'Text')
+jest.mock('~common/ui/Icon', () => ({ FeatherIcon: 'FeatherIcon' }))
+jest.mock('../shareCommentary', () => ({ shareCommentary: jest.fn() }))
 jest.mock('../CommentarySectionCard', () => 'CommentaryCard')
 jest.mock('~features/resources/ResourceUnavailableView', () => 'Unavailable')
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))

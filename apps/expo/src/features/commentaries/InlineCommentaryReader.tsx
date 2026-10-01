@@ -4,9 +4,12 @@ import { useTranslation } from 'react-i18next'
 import { getCommentaryByPublicationId } from '@bible-strong/resource-catalog/commentaries'
 import ContextualSheet from '~common/ContextualPanel/ContextualSheet'
 import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
-import Box from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { getBook } from '~helpers/bibleBookCatalog'
 import CommentarySectionCard from './CommentarySectionCard'
+import { shareCommentary } from './shareCommentary'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { ReadingSectionRequest } from '~features/resources/commentaryReadingAccess'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
@@ -147,7 +150,34 @@ export default function InlineCommentaryReader({
       snapPoints={[0.85]}
       onDismiss={close}
       onClose={close}
-      header={<SheetHeader title={entry?.shortName || t('Commentaires')} />}
+      header={
+        <SheetHeader
+          title={entry?.shortName || t('Commentaires')}
+          rightComponent={
+            query.data && entry && request ? (
+              <TouchableBox
+                accessibilityRole="button"
+                accessibilityLabel={t('Partager')}
+                onPress={() => {
+                  const { section } = query.data
+                  const start = section.rangeStartVerse
+                  const end = section.rangeEndVerse
+                  void shareCommentary({
+                    entry,
+                    passage: `${getBook(request.book)?.Nom ?? request.book} ${request.chapter}:${start}${
+                      end !== start ? `–${end}` : ''
+                    }`,
+                    sections: [section],
+                  })
+                }}
+                className="min-w-[44px] min-h-[44px] items-center justify-center"
+              >
+                <FeatherIcon name="share-2" size={18} />
+              </TouchableBox>
+            ) : undefined
+          }
+        />
+      }
     >
       <SheetScrollView key={selectedId} contentContainerStyle={{ padding: 16 }}>
         {content}

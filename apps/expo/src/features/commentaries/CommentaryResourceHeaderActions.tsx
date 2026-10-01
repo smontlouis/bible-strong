@@ -3,7 +3,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
-import { MenuView } from '~common/ui/MenuView'
+import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import type { CommentaryProjectionId } from './commentarySelection'
@@ -16,6 +16,8 @@ const CommentaryResourceHeaderActions = ({
   chapter,
   sectionId,
   showAvatar = true,
+  canOpenInNewTab = true,
+  onShare,
 }: {
   entry: CommentaryCatalogEntry
   projectionId: CommentaryProjectionId
@@ -24,9 +26,25 @@ const CommentaryResourceHeaderActions = ({
   chapter: number
   sectionId?: string
   showAvatar?: boolean
+  canOpenInNewTab?: boolean
+  onShare?: () => void
 }) => {
   const { t } = useTranslation()
   const openInNewTab = useOpenInNewTab()
+  const actions: MenuAction[] = [
+    ...(onShare
+      ? [{ id: 'share', title: t('Partager'), image: 'square.and.arrow.up' as const }]
+      : []),
+    ...(canOpenInNewTab
+      ? [
+          {
+            id: 'open-tab',
+            title: t('tab.openInNewTab'),
+            image: 'arrow.up.forward.square' as const,
+          },
+        ]
+      : []),
+  ]
 
   return (
     <Box className="overflow-hidden border-continuous flex-row items-center">
@@ -40,14 +58,9 @@ const CommentaryResourceHeaderActions = ({
       ) : null}
       <MenuView
         tabActions
-        actions={[
-          {
-            id: 'open-tab',
-            title: t('tab.openInNewTab'),
-            image: 'arrow.up.forward.square',
-          },
-        ]}
+        actions={actions}
         onPressAction={({ nativeEvent }) => {
+          if (nativeEvent.event === 'share') onShare?.()
           if (nativeEvent.event !== 'open-tab') return
           openInNewTab({
             id: `commentary-resource-${generateUUID()}`,

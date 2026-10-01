@@ -25,6 +25,8 @@ import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { getDefaultBibleTab, type CommentaryResourceTab, useBibleTabActions } from '~state/tabs'
 import { openCommentaryBookSelector } from './commentaryBookSelector'
 import CommentarySectionCard from './CommentarySectionCard'
+import CommentaryResourceHeaderActions from './CommentaryResourceHeaderActions'
+import { shareCommentary } from './shareCommentary'
 import CommentaryRoomIntro from './CommentaryRoomIntro'
 import { getCoveredCommentaryLocation } from './commentaryResourceNavigation'
 import {
@@ -197,7 +199,28 @@ const CommentaryResourceTabScreen = ({
   return (
     <FormSheetScreen isFormSheet={false}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
-        <Header background title={entry.author} subTitle={passage} />
+        <Header
+          background
+          title={entry.author}
+          subTitle={passage}
+          rightComponent={
+            section && passage ? (
+              <Box className="overflow-hidden border-continuous mr-[4px]">
+                <CommentaryResourceHeaderActions
+                  entry={entry}
+                  projectionId={projection.projectionId}
+                  language={projection.language}
+                  book={book}
+                  chapter={chapter}
+                  sectionId={tab.data.sectionId}
+                  showAvatar={false}
+                  canOpenInNewTab={false}
+                  onShare={() => void shareCommentary({ entry, passage, sections: [section] })}
+                />
+              </Box>
+            ) : undefined
+          }
+        />
 
         {tab.data.sectionId ? (
           query.isPending ? (
