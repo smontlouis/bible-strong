@@ -44,6 +44,24 @@ annotations réellement présentes. Une page déjà en cache n'est jamais
 redemandée ; un cache altéré est refusé. Les mentions légales du site réservent
 la réutilisation de ses données : le cache reste local et non publié.
 
+### Pages des témoins réutilisables
+
+LSG, Darby et DarbyR sont réutilisables : leurs pages complètes portent la
+position du mot source (`data-pa`), absente des exports CSV et OSIS. Elles sont
+rangées hors de la zone de l'évaluateur, pour que la prédiction puisse les lire.
+La commande refuse toute autre édition et tout dossier sous
+`outputs/strong-concordance-night/`.
+
+```sh
+yarn exec tsx scripts/strong-concordance-rebuild/run.ts acquire-witness \
+  --edition Sg1910 \
+  --chapters-from data/external/concordance-bible/exports-2026-09-28/Sg1910-csv/Sg1910.csv \
+  --root data/external/concordance-bible/pages-2026-10-02 --delay-ms 5500
+```
+
+Une commande par édition, lancées en parallèle : une page toutes les 6 s
+environ par flux, chaque page mise en cache et jamais redemandée.
+
 ## Prédiction, gel et évaluation
 
 ```sh

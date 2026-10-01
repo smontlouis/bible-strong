@@ -17,6 +17,7 @@ import {
   summaryRow
 } from "./report.js";
 import { buildReviewPackets } from "./review.js";
+import { readStrongCsv } from "../../src/strongCsv.js";
 import type { OccurrenceRecord } from "./score.js";
 import {
   compareWitnessSnapshot,
@@ -38,6 +39,7 @@ const USAGE = `Usage (from apps/resource-studio):
   tsx scripts/strong-concordance-rebuild/run.ts plan --seed <text> --prior <file>... --consulted <Chapter,...> --forced-development <Chapter,...>
   tsx scripts/strong-concordance-rebuild/run.ts acquire --editions SG21,NEG --splits development,test [--extra Edition:Chapter,...] [--delay-ms 6000]
   tsx scripts/strong-concordance-rebuild/run.ts seal-acquisition --output <file>
+  tsx scripts/strong-concordance-rebuild/run.ts acquire-witness --edition Sg1910|Darby|DarbyR --chapters-from <export.csv> --root <dir> [--delay-ms 6000]
   tsx scripts/strong-concordance-rebuild/run.ts predict --edition SG21 --scenario target-excluded --split development [--chapters A.1,B.2] [--policy ABCD] [--profile s21] [--output-dir <dir>]
   tsx scripts/strong-concordance-rebuild/run.ts freeze --policy ABCD --acquisition-seal <file> --evidence <file> --output <file>
   tsx scripts/strong-concordance-rebuild/run.ts score --run <prediction-dir> [--freeze <file>] [--output-dir <dir>]
@@ -80,7 +82,70 @@ function flagValue(args: string[], name: string): string | undefined {
 
 const [command, ...args] = process.argv.slice(2);
 
+/** Reusable witnesses only: their pages may feed predictions, never a target's. */
+const REUSABLE_WITNESSES = new Set(["Sg1910", "Darby", "DarbyR"]);
+
 switch (command) {
+  case "acquire-witness": {
+    // Every chapter of one reusable witness, for its source word positions.
+    // Pages live outside the evaluator-only acquisition root.
+    const edition = flagValue(args, "--edition");
+    const chaptersFrom = flagValue(args, "--chapters-from");
+    const root = flagValue(args, "--root");
+    if (!edition || !chaptersFrom || !root) throw new Error(USAGE);
+    if (!REUSABLE_WITNESSES.has(edition))
+      throw new Error(`not-a-reusable-witness:${edition}`);
+    if (path.resolve(root).startsWith(path.resolve(OUT_ROOT)))
+      throw new Error("witness-pages-must-stay-outside-the-experiment-root");
+    const chapters = [
+      ...new Set(
+        (await readStrongCsv(chaptersFrom)).map(
+          (row) => `${row.bookId}.${row.chapter}`
+        )
+      )
+    ];
+    const startedAt = new Date().toISOString();
+    const result = await acquireChapters({
+      requests: chapters.map((chapter) => ({ edition, chapter })),
+      root,
+      delayMs: Number(flagValue(args, "--delay-ms") ?? 6000),
+      log: (line) => console.log(`${new Date().toISOString()} ${line}`)
+    });
+    const withoutPositions = [...result.fetched, ...result.cached]
+      .filter(
+        (receipt) => receipt.annotationCounts.wordsWithSourcePosition === 0
+      )
+      .map((receipt) => receipt.chapter);
+    await writeJsonOnce(
+      path.join(
+        root,
+        "runs",
+        `${edition}-${startedAt.replace(/[:.]/gu, "-")}.json`
+      ),
+      {
+        edition,
+        chaptersFrom,
+        startedAt,
+        finishedAt: new Date().toISOString(),
+        chapters: chapters.length,
+        fetched: result.fetched.length,
+        cached: result.cached.length,
+        failed: result.failed,
+        withoutPositions
+      }
+    );
+    console.log(
+      JSON.stringify({
+        edition,
+        chapters: chapters.length,
+        fetched: result.fetched.length,
+        cached: result.cached.length,
+        failed: result.failed.length,
+        withoutPositions: withoutPositions.length
+      })
+    );
+    break;
+  }
   case "plan": {
     const seed = flagValue(args, "--seed");
     if (!seed) throw new Error(USAGE);
