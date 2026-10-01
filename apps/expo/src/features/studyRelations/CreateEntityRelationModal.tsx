@@ -36,6 +36,7 @@ type Props = {
   onSelectTarget?: (target: RelationTargetResult) => void | Promise<void>
   allowedTypes?: RelationEndpoint['type'][]
   searchAccessory?: ReactNode
+  onDismiss?: () => void
 }
 
 export default function CreateEntityRelationModal({
