@@ -437,7 +437,8 @@ const BibleViewer = ({
     staleTime: Infinity,
     ...localQueryOptions,
   })
-  const redWords = redWordsQuery.data ?? null
+  // Canonical chapters carry their own red words; ignore results cached for a legacy copy.
+  const redWords = usesCanonicalPresentation ? null : (redWordsQuery.data ?? null)
   const setCommentaryPreview = useSetAtom(previewHistoryAtom)
   const readingCommentaries = getInlineCommentaryResources(
     settings.inlineCommentaries,
@@ -502,13 +503,14 @@ const BibleViewer = ({
   }
 
   const redWordsUnavailable =
-    redWordsAvailabilityQuery.data?.status === 'unavailable'
+    !usesCanonicalPresentation && redWordsAvailabilityQuery.data?.status === 'unavailable'
       ? (redWordsAvailabilityQuery.data as Extract<
           BibleReadingAvailability,
           { status: 'unavailable' }
         >)
       : undefined
-  const redWordsFailureIsTemporary = redWordsAvailabilityQuery.isError || redWordsQuery.isError
+  const redWordsFailureIsTemporary =
+    !usesCanonicalPresentation && (redWordsAvailabilityQuery.isError || redWordsQuery.isError)
   const displayedChapterEntityStrongCodes = getDisplayedChapterEntityStrongCodes(verses)
   const chapterStrongCodeSourcePlan = getChapterEntityQueryPlan({
     chapterReady: extrasEnabled,

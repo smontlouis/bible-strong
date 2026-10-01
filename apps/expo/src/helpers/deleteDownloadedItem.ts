@@ -2,8 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 
 import { isVersionInstalled, removeBibleVersion } from './biblesDb'
 import { type DatabaseId, type ResourceLanguage } from './databaseTypes'
-import { deletePericopeFile } from './pericopes'
-import { deleteRedWordsFile } from './redWords'
+import { removeLegacyBibleSideFiles } from './legacyBibleSideFiles'
 import { dbManager } from './sqlite'
 import { isStrongCapableBibleVersion, type StrongBibleVersionId } from './strongBiblePublications'
 import { removeStrongBibleSidecar } from './strongBibleSidecar'
@@ -181,7 +180,7 @@ export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Pr
       await FileSystem.deleteAsync(legacyFile.uri)
     }
 
-    await Promise.all([deleteRedWordsFile(versionId), deletePericopeFile(versionId)])
+    await removeLegacyBibleSideFiles(versionId)
     await Promise.all([
       invalidateAndForgetPublication({ kind: 'bible-red-words', versionId }),
       invalidateAndForgetPublication({ kind: 'bible-pericope', versionId }),

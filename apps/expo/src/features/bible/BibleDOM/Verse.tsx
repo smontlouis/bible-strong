@@ -253,6 +253,7 @@ const getVerseText = ({
       notes: verse.Notes,
       strongSpans: hasVisibleStrong ? verse.StrongSpans : [],
       redWordRanges: !annotationMode && !hasVisibleStrong ? (redWords?.[verseKey] ?? []) : [],
+      wordsOfJesusDisplay: !annotationMode && settings.redWordsDisplay,
     })
     return renderCanonicalPresentation(presentation, {
       book: verse.Livre,
@@ -397,7 +398,6 @@ const renderCanonicalPresentation = (
             {children}
           </span>
         )
-      case 'red':
       case 'red-word':
         return (
           <span key={key} style={{ color: options.redColor }}>

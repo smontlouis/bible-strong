@@ -345,7 +345,7 @@ describe('canonicalVersePresentation', () => {
     expect(getCanonicalPresentationText(presentation)).toBe('Au commencement Jésus parla.')
   })
 
-  it('preserves canonical V4 red tags as presentation elements', () => {
+  it('presents canonical V4 red tags as red words', () => {
     const presentation = buildCanonicalVersePresentation({
       text: 'Jesus said',
       layout: [
@@ -357,7 +357,7 @@ describe('canonicalVersePresentation', () => {
     expect(presentation).toEqual([
       {
         kind: 'element',
-        tag: 'red',
+        tag: 'red-word',
         attributes: undefined,
         children: [{ kind: 'text', text: 'Jesus said' }],
       },
@@ -384,5 +384,54 @@ describe('canonicalVersePresentation', () => {
       },
     ])
     expect(getCanonicalPresentationText(presentation)).toBe('First item')
+  })
+
+  it('renders the words of Jesus published as wj or red markup as red words', () => {
+    const fromLayout = buildCanonicalVersePresentation({
+      text: 'Jésus dit : Suis-moi.',
+      layout: [
+        { offset: 12, order: 0, type: 'open', tag: 'wj' },
+        { offset: 21, order: 1, type: 'close', tag: 'wj' },
+      ],
+    })
+    const fromStartTag = buildCanonicalVersePresentation({
+      text: 'Follow me.',
+      startTags: [{ tag: 'red' }],
+      layout: [{ offset: 10, order: 0, type: 'close', tag: 'red' }],
+    })
+
+    expect(fromLayout).toEqual([
+      { kind: 'text', text: 'Jésus dit : ' },
+      {
+        kind: 'element',
+        tag: 'red-word',
+        attributes: undefined,
+        children: [{ kind: 'text', text: 'Suis-moi.' }],
+      },
+    ])
+    expect(fromStartTag).toEqual([
+      {
+        kind: 'element',
+        tag: 'red-word',
+        attributes: undefined,
+        children: [{ kind: 'text', text: 'Follow me.' }],
+      },
+    ])
+  })
+
+  it('drops the words of Jesus markup without changing the text when red letters are off', () => {
+    const presentation = buildCanonicalVersePresentation({
+      text: 'Jésus dit : Suis-moi.',
+      startTags: [{ tag: 'p' }],
+      layout: [
+        { offset: 12, order: 0, type: 'open', tag: 'wj' },
+        { offset: 21, order: 1, type: 'close', tag: 'wj' },
+      ],
+      wordsOfJesusDisplay: false,
+    })
+
+    expect(JSON.stringify(presentation)).not.toContain('red-word')
+    expect(JSON.stringify(presentation)).not.toContain('"wj"')
+    expect(getCanonicalPresentationText(presentation)).toBe('Jésus dit : Suis-moi.')
   })
 })

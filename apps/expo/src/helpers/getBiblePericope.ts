@@ -4,9 +4,10 @@ import { loadPericope } from './loadPericope'
 import { usesCanonicalBibleExtras } from './strongBiblePublications'
 import { getBibleCanonicalHeadingVerses } from './biblesDb'
 import { getCanonicalChapterPericope } from './canonicalBibleHeadings'
+import { isInstalledBibleCanonical } from './canonicalBibleInstallation'
 
 async function getBiblePericope(version: VersionCode): Promise<Pericope> {
-  if (usesCanonicalBibleExtras(version)) {
+  if (usesCanonicalBibleExtras(version) || (await isInstalledBibleCanonical(version))) {
     return getCanonicalChapterPericope(await getBibleCanonicalHeadingVerses(version))
   }
   const pericope = await loadPericope(version)

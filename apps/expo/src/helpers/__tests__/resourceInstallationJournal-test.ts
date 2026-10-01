@@ -5,6 +5,7 @@ const mockGetInfoAsync = jest.fn()
 const mockMoveAsync = jest.fn()
 const mockDeleteAsync = jest.fn()
 const mockGetBibleVersionMetadata = jest.fn()
+const mockRemoveLegacyBibleSideFiles = jest.fn()
 
 jest.mock('../storage', () => ({
   storage: {
@@ -22,6 +23,10 @@ jest.mock('expo-file-system/legacy', () => ({
 
 jest.mock('../biblesDb', () => ({
   getBibleVersionMetadata: (...args: unknown[]) => mockGetBibleVersionMetadata(...args),
+}))
+
+jest.mock('../legacyBibleSideFiles', () => ({
+  removeLegacyBibleSideFiles: (...args: unknown[]) => mockRemoveLegacyBibleSideFiles(...args),
 }))
 
 import { resourcePublicationStore } from '../resourcePublication'
@@ -164,6 +169,37 @@ describe('resource installation journal', () => {
     expect(mockDeleteAsync).toHaveBeenCalledWith('/red-words.json.bundle-backup', {
       idempotent: true,
     })
+  })
+
+  it('finishes removing stale legacy side files after a committed canonical install', async () => {
+    const journal = beginResourceInstallation('bible:NBS', downloadResult, {
+      kind: 'bible-sqlite',
+      versionId: 'NBS',
+      bundleFiles: [{ destinationPath: '/red-words.json', previousCopyExisted: true }],
+    })
+    commitResourceInstallation(journal)
+    mockGetBibleVersionMetadata.mockResolvedValue({ resourceGeneration: '2', schemaVersion: 4 })
+
+    await reconcileResourceInstallationJournal()
+
+    expect(mockRemoveLegacyBibleSideFiles).toHaveBeenCalledWith('NBS', ['/red-words.json'])
+  })
+
+  it.each([
+    ['a committed legacy install', { resourceGeneration: '2', schemaVersion: 0 }],
+    ['an uncommitted canonical install', { resourceGeneration: '1', schemaVersion: 4 }],
+  ])('keeps legacy side files after %s', async (_label, metadata) => {
+    const journal = beginResourceInstallation('bible:NBS', downloadResult, {
+      kind: 'bible-sqlite',
+      versionId: 'NBS',
+    })
+    commitResourceInstallation(journal)
+    mockGetBibleVersionMetadata.mockResolvedValue(metadata)
+    mockGetInfoAsync.mockResolvedValue({ exists: false })
+
+    await reconcileResourceInstallationJournal()
+
+    expect(mockRemoveLegacyBibleSideFiles).not.toHaveBeenCalled()
   })
 
   it('restores every Bible bundle file when SQLite did not commit', async () => {

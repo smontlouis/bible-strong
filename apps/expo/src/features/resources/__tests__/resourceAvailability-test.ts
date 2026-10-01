@@ -298,6 +298,18 @@ describe('resourceAvailability', () => {
     ).resolves.toBe(true)
   })
 
+  it('does not require legacy side files listed by an older catalog for a canonical install', async () => {
+    const dependencies = {
+      ...createDependencies({ installedVersions: new Set(['NBS']) }),
+      isInstalledBibleCanonical: jest.fn(async () => true),
+    }
+
+    await expect(
+      getLocalResourceAvailability({ kind: 'bible', versionId: 'NBS' }, dependencies)
+    ).resolves.toEqual({ status: 'available', resource: { kind: 'bible', versionId: 'NBS' } })
+    expect(dependencies.getFileInfo).not.toHaveBeenCalled()
+  })
+
   it('does not require child files that are absent from the Bible archive contract', async () => {
     const dependencies = createDependencies({
       installedVersions: new Set(['DBY']),

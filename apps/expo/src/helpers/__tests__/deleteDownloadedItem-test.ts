@@ -42,11 +42,22 @@ jest.mock('~features/resources/resourceAvailability', () => ({
 }))
 
 jest.mock('~helpers/redWords', () => ({
+  requireRedWordsPath: (versionId: string) => `file:///documents/red-words-${versionId}.json`,
   deleteRedWordsFile: jest.fn(),
 }))
 
 jest.mock('~helpers/pericopes', () => ({
+  requirePericopePath: (versionId: string) =>
+    `file:///documents/bible-${versionId.toLowerCase()}-pericope.json`,
   deletePericopeFile: jest.fn(),
+}))
+
+jest.mock('~helpers/loadPericope', () => ({
+  clearPericopeCache: jest.fn(),
+}))
+
+jest.mock('~helpers/loadRedWords', () => ({
+  clearRedWordsCache: jest.fn(),
 }))
 
 jest.mock('~helpers/strongBiblePublications', () => ({
@@ -89,6 +100,8 @@ import { removeStrongLexiconModule } from '../strongLexiconModules'
 import { queryClient } from '../queryClient'
 import { deletePericopeFile } from '../pericopes'
 import { deleteRedWordsFile } from '../redWords'
+import { clearPericopeCache } from '../loadPericope'
+import { clearRedWordsCache } from '../loadRedWords'
 import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 
 const mockGetInfoAsync = jest.mocked(FileSystem.getInfoAsync)
@@ -142,6 +155,8 @@ describe('deleteDownloadedItem', () => {
 
       expect(mockDeletePericopeFile).toHaveBeenCalledWith('LSG')
       expect(mockDeleteRedWordsFile).toHaveBeenCalledWith('LSG')
+      expect(jest.mocked(clearPericopeCache)).toHaveBeenCalledWith('LSG')
+      expect(jest.mocked(clearRedWordsCache)).toHaveBeenCalledWith('LSG')
     }
   )
 

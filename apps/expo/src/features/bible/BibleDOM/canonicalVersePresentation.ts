@@ -34,6 +34,7 @@ interface CanonicalVersePresentationInput {
   notes?: Verse['Notes']
   strongSpans?: Verse['StrongSpans']
   redWordRanges?: Array<{ start: number; end: number }>
+  wordsOfJesusDisplay?: boolean
 }
 
 interface PresentationContainer {
@@ -48,10 +49,11 @@ export const buildCanonicalVersePresentation = ({
   notes = [],
   strongSpans = [],
   redWordRanges = [],
+  wordsOfJesusDisplay = true,
 }: CanonicalVersePresentationInput): CanonicalVersePresentationNode[] => {
   const root: PresentationContainer = { children: [] }
   const stack: PresentationContainer[] = [root]
-  for (const activeTag of startTags) {
+  for (const activeTag of presentWordsOfJesusTags(startTags, wordsOfJesusDisplay)) {
     openElement(stack, activeTag.tag, activeTag.attributes)
   }
 
@@ -59,7 +61,7 @@ export const buildCanonicalVersePresentation = ({
     | { kind: 'layout'; order: number; event: NonNullable<Verse['Layout']>[number] }
     | { kind: 'note'; order: number; note: CanonicalBibleNote }
   const eventsByOffset = new Map<number, PresentationEvent[]>()
-  for (const event of layout) {
+  for (const event of presentWordsOfJesusTags(layout, wordsOfJesusDisplay)) {
     const offset = clampOffset(event.offset, text.length)
     const events = eventsByOffset.get(offset) ?? []
     events.push({ kind: 'layout', order: event.order, event })
@@ -288,6 +290,19 @@ const isLineBreakSpan = (tag: string, attributes?: Record<string, string>) =>
 const isBlockStartEvent = (event: NonNullable<Verse['Layout']>[number]) =>
   (event.type === 'open' && isBlockStartTag(event.tag)) ||
   (event.type === 'self' && isLineBreakSpan(event.tag, event.attributes))
+
+// Publications mark the words of Jesus as `wj` (OSIS) or `red` (rich sources); the renderer
+// only knows `red-word`, and drops the markup when the reader turned red letters off.
+const WORDS_OF_JESUS_TAGS = new Set(['wj', 'red', 'red-word'])
+
+const presentWordsOfJesusTags = <Item extends { tag: string }>(
+  items: readonly Item[],
+  display: boolean
+): Item[] =>
+  items.flatMap(item => {
+    if (!WORDS_OF_JESUS_TAGS.has(item.tag.toLocaleLowerCase())) return [item]
+    return display ? [{ ...item, tag: 'red-word' }] : []
+  })
 
 const openElement = (
   stack: PresentationContainer[],

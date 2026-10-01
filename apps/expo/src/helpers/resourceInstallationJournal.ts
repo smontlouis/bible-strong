@@ -5,6 +5,8 @@ import type { DownloadResourceArtifactResult } from './downloadResourceArtifact'
 import { resourcePublicationStore, type InstalledResourcePublication } from './resourcePublication'
 import { storage } from './storage'
 import { appLogger } from './agentObservability'
+import { isCanonicalBibleSchemaVersion } from './canonicalBibleInstallation'
+import { removeLegacyBibleSideFiles } from './legacyBibleSideFiles'
 
 const JOURNAL_KEY = 'resource-installation-journal'
 
@@ -115,12 +117,19 @@ const reconcileBibleInstallation = async (journal: ResourceInstallationJournal) 
   if (journal.recoveryTarget.kind !== 'bible-sqlite') return
   const metadata = await getBibleVersionMetadata(journal.recoveryTarget.versionId)
   if (metadata?.resourceGeneration === journal.nextPublication.revision) {
+    const bundleFiles = journal.recoveryTarget.bundleFiles ?? []
     resourcePublicationStore.write(journal.resourceId, journal.nextPublication)
     await Promise.all(
-      (journal.recoveryTarget.bundleFiles ?? []).map(file =>
+      bundleFiles.map(file =>
         FileSystem.deleteAsync(`${file.destinationPath}.bundle-backup`, { idempotent: true })
       )
     )
+    if (isCanonicalBibleSchemaVersion(metadata.schemaVersion)) {
+      await removeLegacyBibleSideFiles(
+        journal.recoveryTarget.versionId,
+        bundleFiles.map(file => file.destinationPath)
+      )
+    }
   } else {
     for (const file of journal.recoveryTarget.bundleFiles ?? []) {
       const { destinationPath, previousCopyExisted } = file

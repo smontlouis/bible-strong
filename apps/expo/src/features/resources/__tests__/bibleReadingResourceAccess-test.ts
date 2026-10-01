@@ -4,6 +4,7 @@ const mockGetLocalResourceAvailability = jest.fn()
 const mockUsesCanonicalBibleExtras = jest.fn()
 const mockVersionHasPericope = jest.fn()
 const mockVersionHasRedWords = jest.fn()
+const mockGetBibleVersionMetadata = jest.fn()
 
 jest.mock('../resourceAvailability', () => ({
   getLocalResourceAvailability: (...args: unknown[]) => mockGetLocalResourceAvailability(...args),
@@ -16,6 +17,9 @@ jest.mock('~helpers/pericopes', () => ({
 }))
 jest.mock('~helpers/redWords', () => ({
   versionHasRedWords: (...args: unknown[]) => mockVersionHasRedWords(...args),
+}))
+jest.mock('~helpers/biblesDb', () => ({
+  getBibleVersionMetadata: (...args: unknown[]) => mockGetBibleVersionMetadata(...args),
 }))
 jest.mock('~helpers/getBiblePericope', () => jest.fn())
 jest.mock('~helpers/loadRedWords', () => ({ loadRedWords: jest.fn() }))
@@ -33,6 +37,45 @@ describe('Bible reading secondary-resource availability', () => {
     mockUsesCanonicalBibleExtras.mockReturnValue(false)
     mockVersionHasPericope.mockReturnValue(true)
     mockVersionHasRedWords.mockReturnValue(true)
+    mockGetBibleVersionMetadata.mockResolvedValue({ version: 'NBS', schemaVersion: 0 })
+  })
+
+  it.each([4, 5])(
+    'reads pericopes and red words from a schema %i canonical install without side files',
+    async schemaVersion => {
+      mockGetBibleVersionMetadata.mockResolvedValue({ version: 'NBS', schemaVersion })
+      mockGetLocalResourceAvailability.mockResolvedValue({
+        status: 'available',
+        resource: { kind: 'bible', versionId: 'NBS' },
+      })
+
+      await expect(
+        localBibleReadingResourceAccess.getPericopeAvailability?.('NBS')
+      ).resolves.toEqual({ status: 'available' })
+      await expect(
+        localBibleReadingResourceAccess.getRedWordsAvailability?.('NBS')
+      ).resolves.toEqual({ status: 'available' })
+      expect(mockGetLocalResourceAvailability).toHaveBeenCalledTimes(1)
+      expect(mockGetLocalResourceAvailability).toHaveBeenCalledWith({
+        kind: 'bible',
+        versionId: 'NBS',
+      })
+    }
+  )
+
+  it('keeps probing the legacy pericope file of a legacy install', async () => {
+    mockGetLocalResourceAvailability.mockResolvedValue({
+      status: 'available',
+      resource: { kind: 'bible-pericope', versionId: 'NBS' },
+    })
+
+    await expect(localBibleReadingResourceAccess.getPericopeAvailability?.('NBS')).resolves.toEqual(
+      { status: 'available' }
+    )
+    expect(mockGetLocalResourceAvailability).toHaveBeenCalledWith({
+      kind: 'bible-pericope',
+      versionId: 'NBS',
+    })
   })
 
   it('recovers a missing canonical pericope index through the parent Bible Offline copy', async () => {

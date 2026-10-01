@@ -8,6 +8,7 @@ import { getLocalResourceAvailability } from './resourceAvailability'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { ResourceAvailability } from './resourceModel'
 import { usesCanonicalBibleExtras } from '~helpers/strongBiblePublications'
+import { isInstalledBibleCanonical } from '~helpers/canonicalBibleInstallation'
 import { versionHasPericope } from '~helpers/pericopes'
 import { versionHasRedWords } from '~helpers/redWords'
 import type { OfflineCopyIdentity } from '~helpers/offlineCopyId'
@@ -51,12 +52,16 @@ const mapReadingAvailability = async (
   }
 }
 
+// Canonical copies embed headings and red words; legacy side files only serve legacy installs.
+const usesCanonicalExtras = async (version: VersionCode): Promise<boolean> =>
+  usesCanonicalBibleExtras(version) || (await isInstalledBibleCanonical(version))
+
 export const localBibleReadingResourceAccess: BibleReadingResourceAccess = {
-  getPericopeAvailability: version => {
-    if (usesCanonicalBibleExtras(version)) {
+  getPericopeAvailability: async version => {
+    if (await usesCanonicalExtras(version)) {
       return mapReadingAvailability({ kind: 'bible', versionId: version })
     }
-    if (!versionHasPericope(version)) return Promise.resolve({ status: 'unsupported' })
+    if (!versionHasPericope(version)) return { status: 'unsupported' }
     return getLocalResourceAvailability({ kind: 'bible-pericope', versionId: version }).then(
       availability =>
         availability.status === 'available'
@@ -71,9 +76,9 @@ export const localBibleReadingResourceAccess: BibleReadingResourceAccess = {
             }
     )
   },
-  getRedWordsAvailability: version => {
-    if (usesCanonicalBibleExtras(version)) return Promise.resolve({ status: 'available' })
-    if (!versionHasRedWords(version)) return Promise.resolve({ status: 'unsupported' })
+  getRedWordsAvailability: async version => {
+    if (await usesCanonicalExtras(version)) return { status: 'available' }
+    if (!versionHasRedWords(version)) return { status: 'unsupported' }
     return getLocalResourceAvailability({ kind: 'bible-red-words', versionId: version }).then(
       availability =>
         availability.status === 'available'

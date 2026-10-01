@@ -33,6 +33,10 @@ import {
 } from './bibleResourceValidation'
 import { rollbackActivatedResourceFiles, type ActivatedResourceFile } from './atomicResourceFile'
 import { appLogger } from './agentObservability'
+import { isCanonicalBibleSchemaVersion } from './canonicalBibleInstallation'
+import { clearLegacyBibleSideFileCaches, removeLegacyBibleSideFiles } from './legacyBibleSideFiles'
+import { requirePericopePath } from './pericopes'
+import { requireRedWordsPath } from './redWords'
 
 export type BibleArchiveEntries = {
   canonical: string
@@ -194,6 +198,17 @@ export async function downloadAndInsertBible(
       throw error
     }
     await completeOptionalBibleBundleFiles(bundleActivation)
+    if (
+      isCanonicalBibleJsonData(jsonData) &&
+      isCanonicalBibleSchemaVersion(jsonData.schemaVersion)
+    ) {
+      await removeLegacyBibleSideFiles(
+        versionId,
+        optionalFiles.map(file => file.destinationPath)
+      )
+    } else {
+      clearLegacyBibleSideFileCaches(versionId)
+    }
     if (realignmentPlan && Object.keys(realignmentPlan.updates).length > 0) {
       try {
         store.dispatch(realignWordAnnotationsAction(realignmentPlan.updates))
@@ -250,14 +265,14 @@ const validateOptionalBibleBundleEntries = async ({
     entries?.pericope
       ? {
           entry: entries.pericope,
-          destinationPath: `${FileSystem.documentDirectory}bible-${versionId.toLowerCase()}-pericope.json`,
+          destinationPath: requirePericopePath(versionId),
           validate: validatePericopeResource,
         }
       : undefined,
     entries?.redWords
       ? {
           entry: entries.redWords,
-          destinationPath: `${FileSystem.documentDirectory}red-words-${versionId}.json`,
+          destinationPath: requireRedWordsPath(versionId),
           validate: validateRedWordsResource,
         }
       : undefined,

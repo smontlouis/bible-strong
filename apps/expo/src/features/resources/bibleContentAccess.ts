@@ -21,6 +21,7 @@ import {
   getIfVersionNeedsDownload,
 } from '~helpers/bibleVersions'
 import { getBook, getBooksForCanon } from '~helpers/bibleBookCatalog'
+import { isCanonicalBibleSchemaVersion } from '~helpers/canonicalBibleInstallation'
 import {
   isStrongCapableBibleVersion,
   type StrongBibleVersionId,
@@ -199,7 +200,9 @@ export const localBibleChapterAdapter: BibleChapterAdapter = {
         return {
           status: 'available',
           verses,
-          presentation: metadata?.schemaVersion === 4 ? 'canonical' : 'legacy-sidecars',
+          presentation: isCanonicalBibleSchemaVersion(metadata?.schemaVersion)
+            ? 'canonical'
+            : 'legacy-sidecars',
           ...(metadata?.textRevision ? { textRevision: metadata.textRevision } : {}),
           ...(metadata?.textSha256 ? { textSha256: metadata.textSha256 } : {}),
         }

@@ -125,6 +125,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
         kind: 'bible-pericope',
         versionId: version,
       }),
+      getOfflineResourceQuerySignal(resourceRegistry, { kind: 'bible', versionId: version }),
     ],
     queryFn: () =>
       resources.bibleReading.getPericopeAvailability?.(version) ??

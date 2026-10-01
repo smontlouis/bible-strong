@@ -8,6 +8,7 @@ jest.mock('../resourceAvailability', () => ({
 jest.mock('~helpers/biblesDb', () => ({
   getChapterVerses: jest.fn(),
   getVerseText: jest.fn(),
+  getBibleVersionMetadata: jest.fn(),
 }))
 
 jest.mock('~helpers/firebase', () => ({
@@ -33,7 +34,7 @@ jest.mock('~state/resourcesLanguage', () => ({
 }))
 
 import { BibleLoadingError } from '~helpers/bibleErrors'
-import { getChapterVerses } from '~helpers/biblesDb'
+import { getBibleVersionMetadata, getChapterVerses } from '~helpers/biblesDb'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import {
   createBibleContentAccess,
@@ -203,6 +204,28 @@ describe('BibleContentAccess', () => {
       recoveries: ['manage-offline-copies', 'reset-offline-store'],
     })
   })
+
+  it.each([
+    [0, 'legacy-sidecars'],
+    [3, 'legacy-sidecars'],
+    [4, 'canonical'],
+    [5, 'canonical'],
+  ] as const)(
+    'presents a chapter installed from schema %i as %s',
+    async (schemaVersion, presentation) => {
+      const verses = [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'Au commencement' }]
+      ;(getChapterVerses as jest.MockedFunction<typeof getChapterVerses>).mockResolvedValue(verses)
+      ;(
+        getBibleVersionMetadata as jest.MockedFunction<typeof getBibleVersionMetadata>
+      ).mockResolvedValue({ version: 'NBS', installedAt: 1, verseCount: 1, schemaVersion })
+
+      await expect(localBibleChapterAdapter.loadChapter('NBS', 1, 1)).resolves.toEqual({
+        status: 'available',
+        verses,
+        presentation,
+      })
+    }
+  )
 
   it('keeps a chapter outside the declared canon as a genuine domain absence', async () => {
     ;(getChapterVerses as jest.MockedFunction<typeof getChapterVerses>).mockResolvedValue([])
