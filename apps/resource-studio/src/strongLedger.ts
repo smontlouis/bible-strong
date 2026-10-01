@@ -921,12 +921,15 @@ export async function generateStrongLedgerWithDictionary(
   )
     for (const verse of ledgerVerses) {
       const input = resolutionInputs.get(verse.ref);
-      if (input)
+      if (
+        input &&
         demoteAlternativeIdentityCarriers(
           verse.annotations,
           sourceIdentityGroups(input.occurrences),
           new Set(Object.values(verse.inventories.references).flat())
-        );
+        ) > 0
+      )
+        refreshLedgerVerse(verse);
     }
   const resolutionBaselineMetrics =
     options.resolveOccurrences === false
@@ -2306,52 +2309,57 @@ function rebuildLedgerVerses(verses: StrongLedgerVerse[]): void {
       if (annotation.placement === "word" || annotation.placement === "phrase")
         annotation.emptyEvidence = undefined;
     }
-    verse.inventories = {
-      ...verse.inventories,
-      reader: verse.annotations
-        .filter((annotation) => annotation.visibility === "reader")
-        .map((annotation) => annotation.strong),
-      advanced: verse.annotations
-        .filter((annotation) =>
-          ["reader", "advanced"].includes(annotation.visibility)
-        )
-        .map((annotation) => annotation.strong)
-    };
-    verse.metrics = calculateVerseMetrics(
-      verse.tokens.length,
-      verse.annotations,
-      {
-        references: collapseReferenceInventories(verse.inventories.references),
-        original: verse.inventories.original,
-        originalCount: verse.metrics.originalStrongOccurrenceCount,
-        originalRepresentedCount:
-          verse.metrics.originalRepresentedStrongOccurrenceCount
-      }
-    );
-    verse.views = {
-      readerHtml: renderStrongTaggedText(
-        tokenizeText(verse.text),
-        verse.annotations,
-        "reader"
-      ),
-      advancedHtml: renderStrongTaggedText(
-        tokenizeText(verse.text),
-        verse.annotations,
-        "advanced"
-      ),
-      debugHtml: renderStrongTaggedText(
-        tokenizeText(verse.text),
-        verse.annotations,
-        "debug"
-      )
-    };
-    assertRenderedStrongInventory({
-      ref: verse.ref,
-      wordCount: verse.tokens.length,
-      annotations: verse.annotations,
-      views: verse.views
-    });
+    refreshLedgerVerse(verse);
   }
+}
+
+/** Recomputes the inventories, metrics and views derived from annotations. */
+function refreshLedgerVerse(verse: StrongLedgerVerse): void {
+  verse.inventories = {
+    ...verse.inventories,
+    reader: verse.annotations
+      .filter((annotation) => annotation.visibility === "reader")
+      .map((annotation) => annotation.strong),
+    advanced: verse.annotations
+      .filter((annotation) =>
+        ["reader", "advanced"].includes(annotation.visibility)
+      )
+      .map((annotation) => annotation.strong)
+  };
+  verse.metrics = calculateVerseMetrics(
+    verse.tokens.length,
+    verse.annotations,
+    {
+      references: collapseReferenceInventories(verse.inventories.references),
+      original: verse.inventories.original,
+      originalCount: verse.metrics.originalStrongOccurrenceCount,
+      originalRepresentedCount:
+        verse.metrics.originalRepresentedStrongOccurrenceCount
+    }
+  );
+  verse.views = {
+    readerHtml: renderStrongTaggedText(
+      tokenizeText(verse.text),
+      verse.annotations,
+      "reader"
+    ),
+    advancedHtml: renderStrongTaggedText(
+      tokenizeText(verse.text),
+      verse.annotations,
+      "advanced"
+    ),
+    debugHtml: renderStrongTaggedText(
+      tokenizeText(verse.text),
+      verse.annotations,
+      "debug"
+    )
+  };
+  assertRenderedStrongInventory({
+    ref: verse.ref,
+    wordCount: verse.tokens.length,
+    annotations: verse.annotations,
+    views: verse.views
+  });
 }
 
 function parseRefreshScopes(onlyRef: string): string[] {

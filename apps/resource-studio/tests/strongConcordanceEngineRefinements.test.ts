@@ -3,8 +3,10 @@ import test from "node:test";
 import { alignVerse, encliticHost, spelledFrenchNumber } from "../src/align.js";
 import type { OriginalStrongOccurrence } from "../src/completeAlignment.js";
 import {
+  demoteAlternativeIdentityCarriers,
   identityInvariantReading,
-  resolveCanonicalVerse
+  resolveCanonicalVerse,
+  sourceIdentityGroups
 } from "../src/strongCanonicalResolution.js";
 import { parseStrongTokens } from "../src/strongCsv.js";
 import {
@@ -256,8 +258,24 @@ test("alternative identifiers of one source word keep a single best-evidenced ca
       "alternative-identifier-demoted"
     )
   );
+  // The ledger refreshes a verse's metrics only when carriers were demoted.
+  const direct = make();
+  assert.equal(
+    demoteAlternativeIdentityCarriers(
+      direct.verse.annotations,
+      sourceIdentityGroups(direct.input.occurrences)
+    ),
+    1
+  );
   // Equal evidence is not arbitrated: the competition stays explicit.
   const tie = make("reference-transfer", "exact", 0.99);
+  assert.equal(
+    demoteAlternativeIdentityCarriers(
+      make("reference-transfer", "exact", 0.99).verse.annotations,
+      sourceIdentityGroups(tie.input.occurrences)
+    ),
+    0
+  );
   const tied = resolveCanonicalVerse({
     ...tie,
     policy: { singleCarrierPerSourceIdentity: true }

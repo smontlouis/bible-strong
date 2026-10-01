@@ -135,7 +135,8 @@ export function demoteAlternativeIdentityCarriers(
   annotations: StrongLedgerAnnotation[],
   groups: Map<string, OriginalStrongOccurrence[]>,
   attestedStrongs: ReadonlySet<string> = new Set()
-): void {
+): number {
+  let demoted = 0;
   const attested = (a: StrongLedgerAnnotation) =>
     a.strong.split(/\s+/u).some((code) => attestedStrongs.has(code)) ? 1 : 0;
   for (const occurrences of groups.values()) {
@@ -182,8 +183,10 @@ export function demoteAlternativeIdentityCarriers(
           "alternative-identifier-demoted"
         ])
       ];
+      demoted += 1;
     }
   }
+  return demoted;
 }
 export interface CanonicalResolutionInput {
   mapping?: VerseCorrespondenceBlock;

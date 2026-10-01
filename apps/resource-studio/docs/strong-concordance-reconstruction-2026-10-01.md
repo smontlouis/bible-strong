@@ -470,7 +470,11 @@ S21 de Concordance servent seulement de comparaison.
   modifiait le lecteur après sa mesure de référence et violait l'invariant
   `reader-regression` de la génération autonome. Elle s'applique désormais
   avant cette mesure, comme une correction d'affichage. Les prédictions SG21,
-  Darby et NEG sont identiques à l'octet.
+  Darby et NEG sont identiques à l'octet. La première génération intégrale de
+  NBS a pourtant échoué sur cet invariant : les métriques des versets touchés
+  par B n'étaient pas recalculées, et la mesure de référence comptait encore
+  les 1 192 porteurs masqués. Elles le sont désormais ; prédictions et audit
+  10×5 restent identiques à l'octet.
 - **Retouche de B.** Avec A–D, l'audit NBS 10×5 a révélé 3 rétrogradations
   fautives sur 75. B gardait le porteur le plus confiant même quand les trois
   témoins utilisent l'autre identifiant : 1 Tm 2.1 (G4412, « premier lieu »),
@@ -511,6 +515,37 @@ La retouche corrige les trois autres et Jn 5.17, où « moi » portait à la foi
 G2504 et G1473. La référence versionnée de l'audit datait d'avant dec602f8d
 (15 850 Strong lecteur, 3 964 vides, 325 risques, qualité 0,978). Elle est
 remplacée par celle du moteur par défaut, et le test qui la fige est mis à jour.
+
+**Régénération intégrale de NBS** (`outputs/strong-autonomous/v3`), avec les
+contrôles structurels habituels et l'invariant `reader-regression` vérifiés. Le
+lot v2 de référence vient d'un code et d'une politique de résolution plus
+anciens : l'écart cumule toutes les évolutions depuis, pas seulement A–D.
+
+| Mesure (31 169 versets, 441 276 unités source) |              v2 |     v3 (défaut) |
+| ---------------------------------------------- | --------------: | --------------: |
+| Unités visibles                                |         345 064 |         348 999 |
+| Vides établis                                  |           1 589 |           1 596 |
+| Unités incertaines                             | 94 623 (21,4 %) | 90 681 (20,5 %) |
+| Versets entièrement comptabilisés              |           3 372 |           3 585 |
+| Strong lecteur                                 |         360 091 |         359 785 |
+| Risques de placement                           |           6 147 |           6 063 |
+| Couverture des porteurs de référence           |          0,8557 |          0,8576 |
+| Strong de référence absents                    |              73 |              90 |
+
+Les versets signalés pour la source passent de 49 à 95 à cause d'un diagnostic
+ajouté par dec602f8d (46 versets où la correspondance retombe sur la
+numérotation native) ; les blocs de correspondance sont identiques.
+
+Les 17 Strong de référence absents en plus viennent tous de B, dans 16 versets :
+B masque un identifiant que les témoins attendent, soit une partie d'un composé
+(Lc 2.48, κἀγώ : « moi » perd G2504 ; Lc 15.8, « jusqu'à » perd G2193), soit
+le bon identifiant quand les deux sont attestés (Lv 24.10, H3482). Une variante
+qui garde tout identifiant encore attendu par les témoins corrige ces cas, mais
+elle masque sur le développement S21 des porteurs justes transférés exactement
+(Ec 11.8, Ac 28.4, Ap 4.11) et n'améliore pas les mesures S21 : elle n'est pas
+retenue (`replay/b-need/`). La correction de fond est en amont : rattacher un
+porteur transféré au mot source dont l'identité principale correspond, avant
+l'identifiant alternatif d'un autre mot.
 
 ## Limites
 
@@ -573,11 +608,12 @@ remplacée par celle du moteur par défaut, et le test qui la fige est mis à jo
 
 ## Validation logicielle
 
-- 20 nouveaux tests : outil (parseur, alignement, plan, garde de fuite, graphe
-  d'import, classement des occurrences, renumérotation) et moteur (enclitiques,
+- 24 nouveaux tests : outil (parseur, alignement, plan, garde de fuite, graphe
+  d'import, classement des occurrences, renumérotation), moteur (enclitiques,
   numéraux, variantes invariantes, identifiants alternatifs, préférence des
-  témoins, options par défaut).
-- Suite du workspace : **1 131 tests, 1 108 réussis, 22 échecs, 1 ignoré**. Les
+  témoins, options par défaut) et réparation NEG79 (sauts de ligne, plages des
+  paroles de Jésus).
+- Suite du workspace : **1 135 tests, 1 112 réussis, 22 échecs, 1 ignoré**. Les
   22 échecs sont exactement les échecs préexistants du lexique V3 consignés au
   checkpoint ; aucun nouvel échec.
 - `yarn typecheck` réussi ; typage strict des nouveaux scripts et tests réussi ;
