@@ -49,12 +49,19 @@ reads this file, does **one** unchecked item, validates it, updates this file an
       browser Resource Timing on `/home` = 37 same-origin requests, 27.56 MB decoded,
       `navigator.serviceWorker.controller` null, no `link[rel=manifest]`. Budget set to
       ≤ 30 MB decoded / ≤ 6 MB transfer (see Baseline).
-- [ ] **2. HTML template.** `npx expo customize public/index.html` (single output), keep Expo's
+- [x] **2. HTML template.** `npx expo customize public/index.html` (single output), keep Expo's
       reset styles, then: `lang="en"`, fix `http-equiv`, viewport with `viewport-fit=cover`,
       `theme-color` for light and dark (from the default theme palettes), `description`,
       `mobile-web-app-capable`, `apple-mobile-web-app-capable`, `apple-mobile-web-app-title`,
       `apple-mobile-web-app-status-bar-style`, `apple-touch-icon`, manifest link. Verify the
       exported `dist/index.html`.
+      **Evidence**: `apps/expo/public/index.html`; `web:export` exit 0, `dist/index.html` carries
+      every tag, Expo still injects favicon/CSS/JS; `check-web-assets` OK; `/home` renders on
+      `localhost:9090` with 26/26 Resource API calls 200. `theme-color` = default theme `reverse`
+      (`#ffffff` / `#122d42`). No `color-scheme` meta: it would darken native controls for users
+      who chose the light theme on a dark system. Status bar style `default` until item 8 checks
+      safe areas (`black-translucent` always uses white text, unreadable on the light theme).
+      Item 8: keep `theme-color` in sync with the selected in-app theme at runtime.
 - [ ] **3. Icons.** Reproducible script generating `public/icons/` from the app icon: 192 and
       512 (`any`), 512 maskable (80 % safe zone, opaque background), 180 apple-touch-icon
       (opaque), favicon. Inspect the source icon (transparency, rounded corners) first.
@@ -135,6 +142,9 @@ Measured 2026-10-01 on `master` @ `992a95d14` (`web:export`, 53 s).
   (`api.bible-strong.app`), and **`cdn.jsdelivr.net/npm/@lottiefiles/dotlottie-web@0.44.0/dist/dotlottie-player.wasm`**
   (Lottie runtime fetched from a CDN, so it fails offline: item 7 should self-host it or
   tolerate its absence).
+- **Other startup facts for later items**: the app sends `HEAD /` connectivity probes
+  (NetInfo-style reachability; the SW must not answer them from cache, item 7), and
+  `shaka-player-*.js` is actually fetched at startup, so it is not lazy in practice (item 4b).
 - **Today in production**: no manifest (`/manifest.json` returns the SPA `index.html`), no
   service worker, `lang="en"`, `httpEquiv` typo. Every asset, hashed or not, is served with
   `Cache-Control: public, max-age=0, must-revalidate`.
@@ -151,14 +161,19 @@ Measured 2026-10-01 on `master` @ `992a95d14` (`web:export`, 53 s).
 ```bash
 # from the repository root, after web:export / web:build
 yarn workspace @bible-strong/resource-service exec wrangler dev \
-  --config ../../apps/expo/wrangler.jsonc --port 8788 --ip 127.0.0.1 \
+  --config ../../apps/expo/wrangler.jsonc --port 9090 --ip localhost \
   --compatibility-date 2026-08-22
 ```
+
+Open **`http://localhost:9090`** (not `127.0.0.1`): the Resource API CORS allowlist
+(`RESOURCE_WEB_ORIGINS` in `packages/resource-service/wrangler.jsonc`) only accepts
+`http://localhost:9090` locally, so any other origin gets CORS errors on every content
+request. Do not run `yarn web` (same port) at the same time.
 
 The local workerd binary (wrangler 4.124.0) supports dates up to 2026-08-22; the config's
 `2026-09-16` makes it refuse to start, hence the CLI override (config file unchanged).
 It honours the SPA fallback (`/home`, `/bible/LSG` give 200 `text/html`) and serves `br`.
-Before starting it, check whether it is already up: `curl -sI http://127.0.0.1:8788/`.
+Before starting it, check whether it is already up: `curl -sI http://localhost:9090/`.
 `localhost`/`127.0.0.1` is a secure context, so service workers work there.
 
 ## Blockers
