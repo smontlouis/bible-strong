@@ -183,6 +183,7 @@ scripts/google-service-account.json
 /packages/ai-service/dist/
 
 /apps/expo/.scratch/
+/apps/expo/.wrangler/
 
 # Server implementation lives in a separate private repository.
 /packages/ai-service/
