@@ -18,6 +18,9 @@ data/external/
 !workflows/commentaries/
 !workflows/commentaries/data/
 !workflows/commentaries/data/**
+!workflows/words-of-jesus/
+!workflows/words-of-jesus/data/
+!workflows/words-of-jesus/data/**
 reports/
 viewer/app/
 .env
