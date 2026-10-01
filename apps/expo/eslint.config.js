@@ -14,6 +14,12 @@ module.exports = [
     },
   },
   {
+    files: ['plugins/**/*.js'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
+  {
     plugins: {
       prettier: prettierPlugin,
     },
