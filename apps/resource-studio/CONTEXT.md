@@ -24,6 +24,14 @@ _Avoid_: Output directory, database dump
 Proof that canonical import data and its matching Offline-copy artifact represent the same complete Resource revision.
 _Avoid_: Similar output, best-effort validation
 
+**Words-of-Jesus decision**:
+A reviewed choice of which characters of one Bible verse Jesus speaks, anchored to the exact verse text it was made for. An empty decision records a reviewed verse without words of Jesus.
+_Avoid_: Red-words file, word-index range
+
+**Self-contained canonical Bible**:
+A canonical Bible publication whose verses carry their own headings and words of Jesus, delivered online and offline without side files.
+_Avoid_: Bible with pericope and red-word bundle
+
 **Dictionary entry correspondence**:
 An evidenced relationship between independently authored dictionary entries that address the same headword or named subject.
 _Avoid_: Merged definition, duplicate article

@@ -1,21 +1,41 @@
-import { execFile } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
-import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { promisify } from "node:util";
-
-import { buildCanonicalBibleFromLegacy } from "./legacyBiblePublication.js";
 import {
-  buildMobileResourceCatalog,
-  type MobileResourceCatalog,
-  type MobileResourceInventoryEntry
+  copyFile,
+  mkdir,
+  readFile,
+  rename,
+  rm,
+  writeFile
+} from "node:fs/promises";
+import path from "node:path";
+
+import {
+  applyLegacyPericope,
+  buildCanonicalBibleFromLegacy
+} from "./legacyBiblePublication.js";
+import {
+  createDeterministicZip,
+  type MobileResourceCatalogEntry
 } from "./packageMobileResourceCatalog.js";
-import { buildBibleResourcePublication } from "./packageResourcePublication.js";
+import {
+  buildBibleResourcePublication,
+  type BibleResourcePublicationManifest
+} from "./packageResourcePublication.js";
 import { verifyCanonicalBiblePublication } from "./strongBibleMobilePublication.js";
 import type { CanonicalBiblePublication } from "./strongBibleMobilePublication.js";
+import { applyWordsOfJesus } from "./wordsOfJesus.js";
+import {
+  loadBiblePericope,
+  loadBibleText,
+  readOrdinaryBibleSources,
+  readWordsOfJesusDataset,
+  wordsOfJesusDatasetPath
+} from "./wordsOfJesusSources.js";
 
-const execFileAsync = promisify(execFile);
+type BibleProvenanceSource = NonNullable<
+  BibleResourcePublicationManifest["provenance"]["sources"]
+>[number];
 const PROTESTANT_BOOKS = Array.from({ length: 66 }, (_, index) => index + 1);
 const CATHOLIC_BOOKS = [
   ...Array.from({ length: 16 }, (_, index) => index + 1),
@@ -70,13 +90,6 @@ type PublicationConfig = {
 
 const sha256 = (value: string) =>
   createHash("sha256").update(value).digest("hex");
-
-const readZipEntry = async (archivePath: string, entry: string) => {
-  const result = await execFileAsync("unzip", ["-p", archivePath, entry], {
-    maxBuffer: 128 * 1024 * 1024
-  });
-  return result.stdout;
-};
 
 export const getOrdinaryBibleCanon = (versionId: string) => {
   if (["BFC", "FRC97", "NFC", "PDV2017"].includes(versionId)) {
@@ -158,87 +171,122 @@ export async function buildOrdinaryBiblePublications(options: {
   ) {
     throw new Error("ordinary-bible-publications-version-invalid");
   }
-  const inventory = JSON.parse(
-    await readFile(
-      path.join(root, "config/mobile-resource-inventory.json"),
-      "utf8"
-    )
-  ) as MobileResourceInventoryEntry[];
-  const ids = selectedBibles.map((bible) => `bible:${bible.id}`);
-  const ordinaryInventory = inventory.filter((resource) =>
-    ids.includes(resource.id)
-  );
-  if (
-    ordinaryInventory.length !== selectedBibles.length ||
-    new Set(ids).size !== selectedBibles.length
-  ) {
-    throw new Error("ordinary-bible-publications-catalog-mismatch");
+  const sourceOverrides = options.sourceOverridesPath
+    ? (JSON.parse(
+        await readFile(path.resolve(root, options.sourceOverridesPath), "utf8")
+      ) as Record<string, Record<string, string>>)
+    : {};
+  const textOverrides: Record<string, string> = {};
+  for (const [resourceId, roles] of Object.entries(sourceOverrides)) {
+    for (const [role, overridePath] of Object.entries(roles ?? {})) {
+      if (!resourceId.startsWith("bible:") || role !== "canonical") {
+        throw new Error(
+          `ordinary-bible-publications-source-override-unsupported:${resourceId}:${role}`
+        );
+      }
+      textOverrides[resourceId.slice("bible:".length)] = path.resolve(
+        root,
+        overridePath
+      );
+    }
   }
-  const requiredBundleRoles = Object.fromEntries(
-    ordinaryInventory.flatMap((resource) => {
-      const roles = resource.sources
-        .map((source) => source.role)
-        .filter((role) => role !== "canonical")
-        .sort();
-      return roles.length > 0 ? [[resource.id, roles]] : [];
-    })
-  );
+  const sourceOptions = { root, textOverrides };
+  const configuredSources = (await readOrdinaryBibleSources(root)).bibles;
   const stagingDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
-  const mobileDir = `${stagingDir}-mobile`;
   const canonicalDir = `${stagingDir}-canonical`;
 
   try {
-    const mobileResult = await buildMobileResourceCatalog({
-      root,
-      outputDir: mobileDir,
-      inventory: ordinaryInventory,
-      requiredIds: ids,
-      requiredBundleRoles,
-      generatedAt: options.generatedAt,
-      sourceOverridesPath: options.sourceOverridesPath
-    });
-    const mobileCatalog = JSON.parse(
-      await readFile(mobileResult.catalogPath, "utf8")
-    ) as MobileResourceCatalog;
     await mkdir(canonicalDir, { recursive: true });
     const publications = [];
 
     for (const metadata of selectedBibles) {
       const resourceId = `bible:${metadata.id}`;
-      const artifact = mobileCatalog.resources[resourceId];
-      const inventoryEntry = ordinaryInventory.find(
-        (resource) => resource.id === resourceId
-      );
-      const canonicalEntry = artifact?.entries.canonical;
-      if (!artifact || !inventoryEntry || !canonicalEntry)
+      const configured = configuredSources[metadata.id];
+      if (!configured)
         throw new Error(`ordinary-bible-publication-missing:${resourceId}`);
-      const archivePath = path.join(mobileDir, artifact.file);
-      const legacyBible = await readZipEntry(archivePath, canonicalEntry.entry);
-      const bibleValue: unknown = JSON.parse(legacyBible);
-      const pericopeEntry = artifact.entries.pericope;
-      const redWordsEntry = artifact.entries.redWords;
-      const pericope = pericopeEntry
-        ? JSON.parse(await readZipEntry(archivePath, pericopeEntry.entry))
-        : undefined;
-      const redWords = redWordsEntry
-        ? JSON.parse(await readZipEntry(archivePath, redWordsEntry.entry))
-        : undefined;
       let canonical: CanonicalBiblePublication;
+      let offlineArtifact:
+        { path: string; catalogEntry: MobileResourceCatalogEntry } | undefined;
+      const provenanceSources: BibleProvenanceSource[] = [];
       try {
-        canonical =
-          (bibleValue as Partial<CanonicalBiblePublication>).format ===
-          "bible-strong-canonical-bible"
-            ? (bibleValue as CanonicalBiblePublication)
-            : buildCanonicalBibleFromLegacy({
-                versionId: metadata.id,
-                sourceVersion: inventoryEntry.sources.find(
-                  (source) => source.role === "canonical"
-                )!.sourceUrl,
-                sourceSha256: sha256(legacyBible),
-                bible: bibleValue,
-                ...(pericope ? { pericope } : {}),
-                ...(redWords ? { redWords } : {})
-              });
+        const [text, pericope, wordsOfJesus] = await Promise.all([
+          loadBibleText(metadata.id, sourceOptions),
+          loadBiblePericope(metadata.id, sourceOptions),
+          readWordsOfJesusDataset(root, metadata.id)
+        ]);
+        provenanceSources.push({
+          role: "canonical",
+          sourceUrl: configured.text.sourceUrl,
+          sha256: text.sourceSha256
+        });
+        // Pericopes complete legacy text, and canonical sources without headings.
+        const appliesPericope =
+          pericope !== undefined &&
+          (!text.canonicalSource || text.publication.headingCount === 0);
+        if (pericope && appliesPericope) {
+          provenanceSources.push({
+            role: "pericope",
+            sourceUrl: pericope.location,
+            sha256: pericope.sha256
+          });
+        }
+        canonical = text.canonicalSource
+          ? appliesPericope
+            ? applyLegacyPericope(text.publication, pericope!.pericope)
+            : text.publication
+          : buildCanonicalBibleFromLegacy({
+              versionId: metadata.id,
+              sourceVersion: configured.text.sourceUrl,
+              sourceSha256: text.sourceSha256,
+              bible: text.legacyBible,
+              ...(pericope ? { pericope: pericope.pericope } : {})
+            });
+        if (wordsOfJesus) {
+          canonical = applyWordsOfJesus(canonical, wordsOfJesus).publication;
+          const datasetPath = wordsOfJesusDatasetPath(root, metadata.id);
+          provenanceSources.push({
+            role: "redWords",
+            sourceUrl: path.relative(root, datasetPath),
+            sha256: sha256(await readFile(datasetPath, "utf8"))
+          });
+        }
+        // A Bible that gains no presentation keeps its delivered archive byte
+        // for byte: readers are not offered an empty update, and archives
+        // other resources depend on (the BHG text of interlinear indexes) stay
+        // identical. Such Bibles never had side files.
+        if (!wordsOfJesus && !appliesPericope) {
+          const archivePath = path.join(
+            canonicalDir,
+            `bible-${metadata.id.toLowerCase()}.json.zip`
+          );
+          if (text.sourceFilePath.endsWith(".zip")) {
+            await copyFile(text.sourceFilePath, archivePath);
+          } else {
+            await createDeterministicZip({
+              inputs: [
+                { inputPath: text.sourceFilePath, entryName: text.sourceEntry }
+              ],
+              archivePath,
+              stagingRoot: path.join(
+                canonicalDir,
+                `.zip-${metadata.id.toLowerCase()}`
+              )
+            });
+          }
+          offlineArtifact = {
+            path: archivePath,
+            catalogEntry: {
+              entry: text.sourceEntry,
+              entries: {
+                canonical: {
+                  entry: text.sourceEntry,
+                  sha256: text.sourceSha256,
+                  bytes: text.sourceEntryBytes
+                }
+              }
+            } as MobileResourceCatalogEntry
+          };
+        }
       } catch (cause) {
         throw new Error(
           `ordinary-bible-canonical-build-failed:${metadata.id}:${cause instanceof Error ? cause.message : String(cause)}`,
@@ -259,23 +307,13 @@ export async function buildOrdinaryBiblePublications(options: {
       );
       await writeFile(canonicalPath, `${JSON.stringify(canonical)}\n`);
       const canon = getOrdinaryBibleCanon(metadata.id);
+      // Without an existing artifact, the bundle zips the canonical JSON alone:
+      // headings and words of Jesus travel inside it, never as side files.
       const result = await buildBibleResourcePublication({
         canonicalPath,
         outputDir: path.join(stagingDir, metadata.id.toLowerCase()),
         generatedAt: options.generatedAt,
-        provenanceSources: inventoryEntry.sources.map((source) => {
-          const entry = artifact.entries[source.role];
-          if (!entry) {
-            throw new Error(
-              `ordinary-bible-publication-provenance-entry-missing:${resourceId}:${source.role}`
-            );
-          }
-          return {
-            role: source.role,
-            sourceUrl: source.sourceUrl,
-            sha256: entry.sha256
-          };
-        }),
+        provenanceSources,
         identity: { versionId: metadata.id, language: metadata.language },
         rights: {
           holder: metadata.attribution,
@@ -292,7 +330,7 @@ export async function buildOrdinaryBiblePublications(options: {
         },
         canon: { id: canon.id, orderedBooks: canon.orderedBooks },
         versification: canon.versification,
-        offlineArtifact: { path: archivePath, catalogEntry: artifact }
+        ...(offlineArtifact ? { offlineArtifact } : {})
       }).catch((cause: unknown) => {
         throw new Error(
           `ordinary-bible-publication-build-failed:${metadata.id}:${cause instanceof Error ? cause.message : String(cause)}`,
@@ -320,7 +358,6 @@ export async function buildOrdinaryBiblePublications(options: {
     await rm(stagingDir, { recursive: true, force: true });
     throw error;
   } finally {
-    await rm(mobileDir, { recursive: true, force: true });
     await rm(canonicalDir, { recursive: true, force: true });
   }
 }

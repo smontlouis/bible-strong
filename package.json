@@ -39,6 +39,7 @@
     "resources:offline:encrypt": "yarn workspace @bible-strong/resource-service encrypt:offline",
     "resources:offline:encrypt:prod": "RESOURCE_R2_BUCKET=bible-strong-resource-artifacts-prod yarn resources:offline:encrypt",
     "resources:commentaries:package-publications": "yarn workspace @bible-strong/resource-studio resources:publication:commentaries",
+    "resources:words-of-jesus": "yarn workspace @bible-strong/resource-studio words-of-jesus",
     "resources:serve": "yarn workspace @bible-strong/resource-service serve",
     "resources:worker:types": "yarn workspace @bible-strong/resource-service worker:types",
     "resources:worker:check": "yarn workspace @bible-strong/resource-service worker:check",

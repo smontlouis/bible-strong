@@ -52,36 +52,44 @@ describe("mobile resource catalog", () => {
       required.resourceIds,
       required.bundleRoles
     );
-    assert.equal(inventory.length, 114);
+    const catalog = JSON.parse(
+      await readFile(
+        path.resolve(
+          "../../packages/resource-catalog/src/mobile-resource-catalog.json"
+        ),
+        "utf8"
+      )
+    );
+    assert.deepEqual(
+      inventory.map((item: { id: string }) => item.id).sort(),
+      Object.keys(catalog.resources).sort()
+    );
+    assert.equal(inventory.length, required.resourceIds.length);
     assert.equal(
       inventory.filter((item: { id: string }) => item.id.startsWith("bible:"))
         .length,
       47
-    );
-    assert.equal(
-      inventory.filter((item: { id: string }) =>
-        item.id.startsWith("database:")
-      ).length,
-      49
     );
     assert.ok(
       inventory.some(
         (item: { id: string }) => item.id === "dictionary-directory"
       )
     );
-    assert.equal(
-      inventory.filter(
-        (item: { sources: unknown[] }) => item.sources.length > 1
-      ).length,
-      25
-    );
-    const nbs = inventory.find(
-      (item: { id: string }) => item.id === "bible:NBS"
-    );
-    assert.deepEqual(
-      nbs.sources.map((source: { role: string }) => source.role).sort(),
-      ["canonical", "pericope", "redWords"]
-    );
+    // Only Bibles not yet republished as self-contained canonical archives
+    // still carry pericope and red-word side files (ADR-0066).
+    for (const item of inventory as Array<{
+      id: string;
+      sources: Array<{ role: string }>;
+    }>) {
+      if (item.sources.length === 1) continue;
+      assert.ok(item.id.startsWith("bible:"), item.id);
+      assert.deepEqual(
+        item.sources
+          .map((source) => source.role)
+          .filter((role) => role === "canonical"),
+        ["canonical"]
+      );
+    }
     assert.ok(
       inventory.every((item: { artifactUrl: string }) =>
         item.artifactUrl.endsWith(".zip")
@@ -100,6 +108,17 @@ describe("mobile resource catalog", () => {
         new RegExp(`^strong-lexicon-${moduleId}-`)
       );
       assert.equal(module.coreRevision, strongCore.resourceRevision);
+    }
+    for (const language of ["en", "fr"]) {
+      const simple = inventory.find(
+        (item: { id: string }) =>
+          item.id === `strong-lexicon:simple-${language}`
+      );
+      assert.match(
+        simple.resourceRevision,
+        new RegExp(`^strong-lexicon-simple-${language}-`)
+      );
+      assert.equal(simple.coreRevision, undefined);
     }
   });
 

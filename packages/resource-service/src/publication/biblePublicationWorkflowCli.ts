@@ -28,7 +28,7 @@ import { validatePublicationBundle } from './publicationBundle'
 import { WranglerR2ArtifactStore } from './wranglerR2ArtifactStore'
 import { isNativeFirebaseAppId } from '../runtime/firebaseAppCheck'
 
-const EXPECTED_RESOURCE_COUNT = 114
+const EXPECTED_RESOURCE_COUNT = 119
 const PRODUCTION_PUBLICATION_LOCK_ID = '204116128917'
 
 const runCommand = async (
@@ -287,12 +287,11 @@ const createOperations = (
 
   generateOfflineCatalog: async () => {
     if (!state.overlay) throw new Error('BIBLE_PUBLICATION_OVERLAY_MISSING')
-    const overrides: Record<string, { canonical: string }> = {
-      [`bible:${options.versionId}`]: { canonical: options.sourcePath },
-    }
+    // Every changed Bible, the target included, is cataloged from its bundle's
+    // archive: the canonical JSON alone, with headings and words of Jesus inside.
+    const overrides: Record<string, { canonical: string }> = {}
     for (const bundlePath of state.overlay.changedBundlePaths) {
       const description = await describeBiblePublicationBundle(bundlePath)
-      if (description.catalogId === `bible:${options.versionId}`) continue
       const validated = await validatePublicationBundle(bundlePath)
       overrides[description.catalogId] = { canonical: validated.offlineArtifactPath }
     }

@@ -14,6 +14,7 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { DatabaseSync } from "node:sqlite";
 import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
@@ -29,9 +30,13 @@ import {
   sha256ResourcePublicationFile,
   type ResourcePublicationEnvelope
 } from "./resourcePublicationEnvelope.js";
+import { createDeterministicZip } from "./packageMobileResourceCatalog.js";
+import { downloadR2Object, isR2Location } from "./r2ArtifactSources.js";
 import { validateBibleResourcePublication } from "./packageResourcePublication.js";
 import { commitResourcePublicationBundle } from "./resourcePublicationCommit.js";
 import { STRONG_IDENTITY_KINDS as STRONG_KINDS } from "./strongIdentityKinds.js";
+import type { CanonicalBiblePublication } from "./strongBibleMobilePublication.js";
+import { loadBibleText } from "./wordsOfJesusSources.js";
 
 const execFileAsync = promisify(execFile);
 const BASE_BUILDER_VERSION = "strong-bible-mobile-publication@2";
@@ -115,6 +120,124 @@ type Metadata = Record<string, string>;
 const sha256 = (value: string | Buffer) =>
   createHash("sha256").update(value).digest("hex");
 
+const SANITIZED_REVERSE_BUILDER_VERSION =
+  "reverse-interlinear-mobile-sanitized@9";
+
+const assertSameVerseTexts = (
+  paired: Pick<CanonicalBiblePublication, "verses">,
+  current: Pick<CanonicalBiblePublication, "verses">
+) => {
+  const texts = (publication: Pick<CanonicalBiblePublication, "verses">) =>
+    new Map(
+      Object.entries(publication.verses).flatMap(([book, chapters]) =>
+        Object.entries(chapters).flatMap(([chapter, verses]) =>
+          Object.entries(verses).map(
+            ([verse, value]) =>
+              [`${book}-${chapter}-${verse}`, value.text] as const
+          )
+        )
+      )
+    );
+  const pairedTexts = texts(paired);
+  const currentTexts = texts(current);
+  if (pairedTexts.size !== currentTexts.size) {
+    throw new Error("strong-publication-restamp-verse-count-changed");
+  }
+  for (const [ref, text] of pairedTexts) {
+    if (currentTexts.get(ref) !== text) {
+      throw new Error(`strong-publication-restamp-text-changed:${ref}`);
+    }
+  }
+};
+
+/**
+ * Re-pairs a text-free Strong sidecar with a new revision of its Bible whose
+ * verse texts are unchanged and only presentation (headings, words of Jesus)
+ * was added. Word offsets stay valid, so only the text identity and the
+ * revisions derived from it are rewritten. Returns the previous text revision,
+ * or `undefined` when the sidecar already matches.
+ */
+export async function restampStrongSidecarText(options: {
+  sqlitePath: string;
+  pairedCanonical: Pick<
+    CanonicalBiblePublication,
+    "verses" | "textSha256" | "textRevision"
+  >;
+  canonical: Pick<
+    CanonicalBiblePublication,
+    "verses" | "textSha256" | "textRevision"
+  >;
+}): Promise<string | undefined> {
+  const metadata = await readMetadata(options.sqlitePath);
+  if (
+    metadata.textRevision === options.canonical.textRevision &&
+    metadata.textSha256 === options.canonical.textSha256
+  ) {
+    return undefined;
+  }
+  // Either the sidecar was built against the paired text, or it was already
+  // re-paired from that text for an earlier presentation.
+  if (
+    metadata.textSha256 !== options.pairedCanonical.textSha256 &&
+    metadata.presentationRestampedFromTextRevision !==
+      options.pairedCanonical.textRevision
+  ) {
+    throw new Error("strong-publication-restamp-source-mismatch");
+  }
+  validateStrongRevision(metadata);
+  assertSameVerseTexts(options.pairedCanonical, options.canonical);
+
+  const textSha256 = options.canonical.textSha256;
+  const baseStrongRevision = sha256(
+    `${BASE_BUILDER_VERSION}\0${metadata.sourceSha256}\0${textSha256}`
+  );
+  const reverseBuilder = metadata.reverseInterlinearBuilderVersion;
+  const strongRevision = !reverseBuilder
+    ? baseStrongRevision
+    : reverseBuilder === SANITIZED_REVERSE_BUILDER_VERSION
+      ? // Its digest is attested by a later lexical refinement, not derived here.
+        sha256(`${metadata.strongRevision}\0${textSha256}`)
+      : sha256(
+          `${baseStrongRevision}\0${reverseBuilder}\0${metadata.reverseInterlinearStepRevision}\0${JSON.parse(metadata.reverseInterlinearCompatibleRuntimeSha256s ?? "[]").join(",")}\0${metadata.reverseInterlinearMetrics}`
+        );
+  const updates: Record<string, string> = {
+    textRevision: options.canonical.textRevision,
+    textSha256,
+    strongRevision,
+    presentationRestampedFromTextRevision:
+      metadata.presentationRestampedFromTextRevision ?? metadata.textRevision!
+  };
+  if (metadata.baseStrongRevision)
+    updates.baseStrongRevision = baseStrongRevision;
+  const database = new DatabaseSync(options.sqlitePath);
+  try {
+    database.exec("BEGIN");
+    const upsert = database.prepare(
+      "INSERT INTO ResourceMetadata(key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
+    );
+    for (const [key, value] of Object.entries(updates)) upsert.run(key, value);
+    database.exec("COMMIT");
+  } catch (error) {
+    database.exec("ROLLBACK");
+    throw error;
+  } finally {
+    database.close();
+  }
+  return metadata.textRevision;
+}
+
+async function readBibleCanonical(
+  bundleDir: string
+): Promise<CanonicalBiblePublication> {
+  const value = await validateBibleResourcePublication(bundleDir);
+  return JSON.parse(
+    await readFile(
+      resolveResourcePublicationPath(bundleDir, value.canonical.path),
+      "utf8"
+    )
+  ) as CanonicalBiblePublication;
+}
+
 export async function buildStrongBibleResourcePublication(options: {
   sourceArchivePath: string;
   sourceUrl: string;
@@ -127,6 +250,11 @@ export async function buildStrongBibleResourcePublication(options: {
   attribution: string;
   rightsReviewedAt: string;
   generatedAt: string;
+  /** The canonical text the sidecar was built against, to re-pair it when needed. */
+  pairedCanonical?: Pick<
+    CanonicalBiblePublication,
+    "verses" | "textSha256" | "textRevision"
+  >;
 }): Promise<{ outputDir: string; manifest: StrongBibleManifest }> {
   const archivePath = path.resolve(options.sourceArchivePath);
   const bibleBundleDir = path.resolve(options.bibleBundleDir);
@@ -147,6 +275,22 @@ export async function buildStrongBibleResourcePublication(options: {
     const sqlitePath = path.join(extractedDir, options.sourceEntry);
     if (!(await lstat(sqlitePath)).isFile()) {
       throw new Error("strong-publication-source-entry-invalid");
+    }
+    let offlineArchivePath = archivePath;
+    if (options.pairedCanonical) {
+      const restampedFrom = await restampStrongSidecarText({
+        sqlitePath,
+        pairedCanonical: options.pairedCanonical,
+        canonical: await readBibleCanonical(bibleBundleDir)
+      });
+      if (restampedFrom) {
+        offlineArchivePath = path.join(extractedDir, "restamped.zip");
+        await createDeterministicZip({
+          inputs: [{ inputPath: sqlitePath, entryName: options.sourceEntry }],
+          archivePath: offlineArchivePath,
+          stagingRoot: path.join(extractedDir, "restamp-staging")
+        });
+      }
     }
     const canonical = await readStrongSqlite(sqlitePath);
     if (
@@ -184,7 +328,7 @@ export async function buildStrongBibleResourcePublication(options: {
           `${JSON.stringify(canonical)}\n`,
           "utf8"
         );
-        await copyFile(archivePath, offlinePath);
+        await copyFile(offlineArchivePath, offlinePath);
         const [canonicalStat, offlineStat] = await Promise.all([
           stat(canonicalPath),
           stat(offlinePath)
@@ -271,6 +415,8 @@ export async function buildAllStrongBibleResourcePublications(options: {
   outputDir?: string;
   bibleBundlesDir?: string;
   generatedAt: string;
+  /** Local sidecar archives replacing the inventory source, by version. */
+  sidecarOverrides?: Record<string, string>;
 }): Promise<{ outputDir: string; manifests: StrongBibleManifest[] }> {
   const root = path.resolve(options.root ?? process.cwd());
   const outputDir = path.resolve(
@@ -315,9 +461,19 @@ export async function buildAllStrongBibleResourcePublications(options: {
         downloadDir,
         `${resource.versionId.toLowerCase()}.zip`
       );
-      await download(source.sourceUrl, archivePath);
+      const sidecarOverride = options.sidecarOverrides?.[resource.versionId];
+      await download(
+        sidecarOverride
+          ? path.resolve(root, sidecarOverride)
+          : source.sourceUrl,
+        archivePath
+      );
+      const pairedCanonical = (
+        await loadBibleText(resource.versionId, { root })
+      ).publication;
       const result = await buildStrongBibleResourcePublication({
         ...resource,
+        pairedCanonical,
         sourceArchivePath: archivePath,
         sourceUrl: source.sourceUrl,
         sourceEntry: source.entry,
@@ -869,6 +1025,11 @@ async function assertSingleBoundedZipEntry(
 }
 
 async function download(url: string, destination: string): Promise<void> {
+  if (isR2Location(url)) return downloadR2Object(url, destination);
+  if (!/^https?:\/\//u.test(url)) {
+    await copyFile(url, destination);
+    return;
+  }
   const response = await fetch(url);
   if (!response.ok || !response.body)
     throw new Error(`strong-publication-download-failed:${url}`);
@@ -895,7 +1056,8 @@ async function main(): Promise<void> {
   const allowed = new Set([
     "--output-dir",
     "--bible-bundles-dir",
-    "--generated-at"
+    "--generated-at",
+    "--sidecar-overrides"
   ]);
   for (let index = 0; index < rawArgs.length; index += 2) {
     const key = rawArgs[index];
@@ -913,7 +1075,17 @@ async function main(): Promise<void> {
   const result = await buildAllStrongBibleResourcePublications({
     outputDir: args.get("--output-dir"),
     bibleBundlesDir: args.get("--bible-bundles-dir"),
-    generatedAt: args.get("--generated-at") ?? new Date().toISOString()
+    generatedAt: args.get("--generated-at") ?? new Date().toISOString(),
+    ...(args.get("--sidecar-overrides")
+      ? {
+          sidecarOverrides: JSON.parse(
+            await readFile(
+              path.resolve(args.get("--sidecar-overrides")!),
+              "utf8"
+            )
+          ) as Record<string, string>
+        }
+      : {})
   });
   console.log(
     JSON.stringify(

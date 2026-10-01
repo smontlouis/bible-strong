@@ -67,6 +67,69 @@ const toRedWordLayout = (
   ]);
 };
 
+const legacyPericopeHeadings = (
+  pericope: LegacyPericope,
+  book: string,
+  chapter: string,
+  verse: string
+) =>
+  Object.entries(pericope[book]?.[chapter]?.[verse] ?? {})
+    .filter(
+      (entry): entry is [keyof typeof HEADING_TYPES, string] =>
+        entry[0] in HEADING_TYPES &&
+        typeof entry[1] === "string" &&
+        entry[1].length > 0
+    )
+    .map(([level, headingText], order) => ({
+      offset: 0,
+      order,
+      kind: "pericope" as const,
+      type: HEADING_TYPES[level],
+      text: headingText,
+      markup: `<${level}>${escapeMarkup(headingText)}</${level}>`
+    }));
+
+/**
+ * Adds historical pericopes to a canonical publication whose source carries no
+ * headings, and recomputes its text identity. Sources with their own headings
+ * are left untouched rather than mixing two editorial apparatuses.
+ */
+export function applyLegacyPericope(
+  publication: CanonicalBiblePublication,
+  pericope: unknown
+): CanonicalBiblePublication {
+  if (publication.headingCount > 0) return publication;
+  const verses = structuredClone(publication.verses);
+  let headingCount = 0;
+  for (const [book, chapters] of Object.entries(verses)) {
+    for (const [chapter, chapterVerses] of Object.entries(chapters)) {
+      for (const [verse, value] of Object.entries(chapterVerses)) {
+        const headings = legacyPericopeHeadings(
+          pericope as LegacyPericope,
+          book,
+          chapter,
+          verse
+        );
+        if (headings.length === 0) continue;
+        value.headings = headings;
+        headingCount += headings.length;
+      }
+    }
+  }
+  if (headingCount === 0) return publication;
+  const textSha256 = hashCanonicalBibleVerses(verses);
+  return {
+    ...publication,
+    textRevision: buildCanonicalBibleTextRevision(
+      publication.applicationVersionId,
+      textSha256
+    ),
+    textSha256,
+    headingCount,
+    verses
+  };
+}
+
 export function buildCanonicalBibleFromLegacy(options: {
   versionId: string;
   sourceVersion: string;
@@ -95,23 +158,7 @@ export function buildCanonicalBibleFromLegacy(options: {
         if (!/^\d+$/.test(verse)) continue;
         if (typeof text !== "string")
           throw new Error("legacy-bible-verse-invalid");
-        const headings = Object.entries(
-          pericope[book]?.[chapter]?.[verse] ?? {}
-        )
-          .filter(
-            (entry): entry is [keyof typeof HEADING_TYPES, string] =>
-              entry[0] in HEADING_TYPES &&
-              typeof entry[1] === "string" &&
-              entry[1].length > 0
-          )
-          .map(([level, headingText], order) => ({
-            offset: 0,
-            order,
-            kind: "pericope" as const,
-            type: HEADING_TYPES[level],
-            text: headingText,
-            markup: `<${level}>${escapeMarkup(headingText)}</${level}>`
-          }));
+        const headings = legacyPericopeHeadings(pericope, book, chapter, verse);
         headingCount += headings.length;
         outputVerses[verse] = {
           text,

@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted, with automatic cross-index fallback clauses superseded by ADR-0028.
+Accepted, with automatic cross-index fallback clauses superseded by ADR-0028. Schema V4
+presentation is extended to every Bible, and Strong sidecars are re-paired after presentation-only
+changes, by [ADR-0066](./0066-author-words-of-jesus-and-deliver-self-contained-canonical-bibles.md).
 
 ## Context
 

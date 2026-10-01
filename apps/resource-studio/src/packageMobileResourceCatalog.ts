@@ -16,6 +16,13 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 
+import {
+  downloadR2Object,
+  isR2Location,
+  keySha256,
+  parseR2Location
+} from "./r2ArtifactSources.js";
+
 const execFileAsync = promisify(execFile);
 const REPRODUCIBLE_ZIP_TIME = new Date("1980-01-01T00:00:00.000Z");
 
@@ -115,9 +122,11 @@ export function validateMobileResourceInventory(
     ) {
       throw new Error(`mobile-resource-revision-missing:${resource.id}`);
     }
+    // Detailed modules extend the core; simple lexicons are independent (ADR-0064).
     if (
       resource.id.startsWith("strong-lexicon:") &&
       resource.id !== "strong-lexicon:core" &&
+      !resource.id.startsWith("strong-lexicon:simple-") &&
       !resource.coreRevision?.trim()
     ) {
       throw new Error(`mobile-resource-core-revision-missing:${resource.id}`);
@@ -174,7 +183,11 @@ export function validateMobileResourceInventory(
         );
       }
       entries.add(source.entry);
-      if (!source.sourceUrl.startsWith("https://")) {
+      // R2 sources must be content-addressed so their bytes are verifiable.
+      if (
+        !source.sourceUrl.startsWith("https://") &&
+        !(isR2Location(source.sourceUrl) && keySha256(parseR2Location(source.sourceUrl).key))
+      ) {
         throw new Error(`mobile-resource-source-invalid:${resource.id}`);
       }
       if (source.sourcePath && !existsSync(source.sourcePath)) {
@@ -287,10 +300,25 @@ export async function buildMobileResourceCatalog(
           options.requiredIdsPath ?? DEFAULT_MOBILE_RESOURCE_REQUIRED_IDS
         )
       );
+  // Resources replaced by a built archive no longer carry side-file roles.
+  const collapsedIds = new Set(
+    inventory
+      .filter(
+        (resource) =>
+          resource.sources.length === 1 &&
+          baseInventory.find((entry) => entry.id === resource.id)!.sources.length > 1
+      )
+      .map((resource) => resource.id)
+  );
   validateMobileResourceInventory(
     inventory,
     requiredContract.resourceIds,
-    requiredContract.bundleRoles
+    requiredContract.bundleRoles &&
+      Object.fromEntries(
+        Object.entries(requiredContract.bundleRoles).filter(
+          ([resourceId]) => !collapsedIds.has(resourceId)
+        )
+      )
   );
 
   const temporaryDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
@@ -369,6 +397,8 @@ async function packageResource(options: {
       );
       if (source.sourcePath) {
         await copyFile(source.sourcePath, sourcePath);
+      } else if (isR2Location(source.sourceUrl)) {
+        await downloadR2Object(source.sourceUrl, sourcePath);
       } else {
         const response = await options.fetcher(source.sourceUrl);
         if (!response.ok) {
@@ -488,7 +518,7 @@ async function packageResource(options: {
   };
 }
 
-async function createDeterministicZip(options: {
+export async function createDeterministicZip(options: {
   inputs: readonly { inputPath: string; entryName: string }[];
   archivePath: string;
   stagingRoot: string;
@@ -605,6 +635,25 @@ function applySourceOverrides(
           `mobile-resource-source-override-role-unknown:${resource.id}:${role}`
         );
       }
+    }
+    // A built archive replaces the whole resource: its side-file roles are
+    // dropped and the archive is copied as the only, canonical source.
+    const archiveOverride = resourceOverrides.canonical;
+    if (archiveOverride?.endsWith(".zip")) {
+      const canonical = resource.sources.find((source) => source.role === "canonical")!;
+      return {
+        ...resource,
+        sources: [{ ...canonical, sourcePath: path.resolve(root, archiveOverride) }]
+      };
+    }
+    if (
+      Object.values(resourceOverrides).some((overridePath) =>
+        overridePath?.endsWith(".zip")
+      )
+    ) {
+      throw new Error(
+        `mobile-resource-source-override-archive-not-canonical:${resource.id}`
+      );
     }
     return {
       ...resource,

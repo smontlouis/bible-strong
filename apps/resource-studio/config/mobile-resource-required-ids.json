@@ -117,7 +117,9 @@
     "strong-lexicon:core",
     "strong-lexicon:entities",
     "strong-lexicon:resources",
-    "database:egw-writings:fr"
+    "database:egw-writings:fr",
+    "strong-lexicon:simple-en",
+    "strong-lexicon:simple-fr"
   ],
   "bundleRoles": {
     "bible:AMP": [

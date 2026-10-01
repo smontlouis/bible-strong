@@ -1,0 +1,371 @@
+{
+  "schemaVersion": 1,
+  "bibles": {
+    "AMP": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-amp.json",
+        "entry": "bible-amp.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-amp-pericope.json",
+        "entry": "bible-amp-pericope.json"
+      }
+    },
+    "ASV": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-asv.json.zip",
+        "entry": "bible-asv.json"
+      }
+    },
+    "BCC1923": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-bcc1923.json",
+        "entry": "bible-bcc1923.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-bcc1923-pericope.json",
+        "entry": "bible-bcc1923-pericope.json"
+      }
+    },
+    "BDS": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-bds.json",
+        "entry": "bible-bds.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-bds-pericope.json",
+        "entry": "bible-bds-pericope.json"
+      }
+    },
+    "BFC": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-bfc.json",
+        "entry": "bible-bfc.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-bfc-pericope.json",
+        "entry": "bible-bfc-pericope.json"
+      }
+    },
+    "BHG": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-step.json.zip",
+        "entry": "bible-step.json"
+      }
+    },
+    "BHS": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-hebrew.json",
+        "entry": "bible-hebrew.json"
+      }
+    },
+    "BSB": {
+      "text": {
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/59307362bd4b970ff05ed509675c01bcf40788c3e2fa0a9de06bba86934daeb4/bible-bsb.json.zip",
+        "entry": "bible-bsb.json"
+      }
+    },
+    "CHU": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-chu.json",
+        "entry": "bible-chu.json"
+      }
+    },
+    "CSB": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-csb.json",
+        "entry": "bible-csb.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-csb-pericope.json",
+        "entry": "bible-csb-pericope.json"
+      }
+    },
+    "DARBY": {
+      "text": {
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/c8e07f2e2da68b69bfab6a215d77a51bb977e24864156185a3d0290113da4d8e/bible-darby.json.zip",
+        "entry": "bible-darby.json"
+      }
+    },
+    "DBR": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-dbr.json.zip",
+        "entry": "bible-dbr.json"
+      }
+    },
+    "DBY": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-dby.json.zip",
+        "entry": "bible-dby.json"
+      }
+    },
+    "DEL": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-del.json",
+        "entry": "bible-del.json"
+      }
+    },
+    "EASY": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-easy.json",
+        "entry": "bible-easy.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-easy-pericope.json",
+        "entry": "bible-easy-pericope.json"
+      }
+    },
+    "ESV": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-esv.json",
+        "entry": "bible-esv.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-esv-pericope.json",
+        "entry": "bible-esv-pericope.json"
+      }
+    },
+    "FMAR": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-fmar.json",
+        "entry": "bible-fmar.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-fmar-pericope.json",
+        "entry": "bible-fmar-pericope.json"
+      }
+    },
+    "FRC97": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-frc97.json",
+        "entry": "bible-frc97.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-frc97-pericope.json",
+        "entry": "bible-frc97-pericope.json"
+      }
+    },
+    "GW": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-gw.json",
+        "entry": "bible-gw.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-gw-pericope.json",
+        "entry": "bible-gw-pericope.json"
+      }
+    },
+    "KJF": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-kjf.json",
+        "entry": "bible-kjf.json"
+      }
+    },
+    "KJV": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-kjv.json.zip",
+        "entry": "bible-kjv.json"
+      }
+    },
+    "LAU": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-lau.json",
+        "entry": "bible-lau.json"
+      }
+    },
+    "LSG": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-lsg.json.zip",
+        "entry": "bible-lsg.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-lsg-pericope.json",
+        "entry": "bible-lsg-pericope.json"
+      }
+    },
+    "LXX": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-lxx.json",
+        "entry": "bible-lxx.json"
+      }
+    },
+    "LXX_FR": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-lxx-french.json",
+        "entry": "bible-lxx-french.json"
+      }
+    },
+    "NASB1995": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nasb1995.json.zip",
+        "entry": "bible-nasb1995.json"
+      }
+    },
+    "NASB2020": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nasb2020.json.zip",
+        "entry": "bible-nasb2020.json"
+      }
+    },
+    "NBS": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nbs.json",
+        "entry": "bible-nbs.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nbs-pericope.json",
+        "entry": "bible-nbs-pericope.json"
+      }
+    },
+    "NEG79": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-neg79.json",
+        "entry": "bible-neg79.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-neg79-pericope.json",
+        "entry": "bible-neg79-pericope.json"
+      }
+    },
+    "NET": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-net.json",
+        "entry": "bible-net.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-net-pericope.json",
+        "entry": "bible-net-pericope.json"
+      }
+    },
+    "NFC": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nfc.json",
+        "entry": "bible-nfc.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nfc-pericope.json",
+        "entry": "bible-nfc-pericope.json"
+      }
+    },
+    "NIV": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-niv.json",
+        "entry": "bible-niv.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-niv-pericope.json",
+        "entry": "bible-niv-pericope.json"
+      }
+    },
+    "NKJV": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nkjv.json",
+        "entry": "bible-nkjv.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nkjv-pericope.json",
+        "entry": "bible-nkjv-pericope.json"
+      }
+    },
+    "NLT": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nlt.json",
+        "entry": "bible-nlt.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nlt-pericope.json",
+        "entry": "bible-nlt-pericope.json"
+      }
+    },
+    "NVS78P": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nvs78p.json",
+        "entry": "bible-nvs78p.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nvs78p-pericope.json",
+        "entry": "bible-nvs78p-pericope.json"
+      }
+    },
+    "OST": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-ost.json",
+        "entry": "bible-ost.json"
+      }
+    },
+    "PDV2017": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-pdv2017.json",
+        "entry": "bible-pdv2017.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-pdv2017-pericope.json",
+        "entry": "bible-pdv2017-pericope.json"
+      }
+    },
+    "POV": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-pov.json",
+        "entry": "bible-pov.json"
+      }
+    },
+    "RLT": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-rlt.json.zip",
+        "entry": "bible-rlt.json"
+      }
+    },
+    "RV1895": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-rv1895.json.zip",
+        "entry": "bible-rv1895.json"
+      }
+    },
+    "RWEBSTER": {
+      "text": {
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/dff2d6fd01b3750564c5a9206304709109fea899598126cc9185af301d8cbdd3/bible-rwebster.json.zip",
+        "entry": "bible-rwebster.json"
+      }
+    },
+    "S21": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-s21.json",
+        "entry": "bible-s21.json"
+      },
+      "pericope": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-s21-pericope.json",
+        "entry": "bible-s21-pericope.json"
+      }
+    },
+    "SBLGNT": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-greek.json",
+        "entry": "bible-greek.json"
+      }
+    },
+    "TLV": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-tlv.json",
+        "entry": "bible-tlv.json"
+      }
+    },
+    "TR1624": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-TR1624.json",
+        "entry": "bible-TR1624.json"
+      }
+    },
+    "TR1894": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-TR1894.json",
+        "entry": "bible-TR1894.json"
+      }
+    },
+    "VUL": {
+      "text": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-vul.json",
+        "entry": "bible-vul.json"
+      }
+    }
+  }
+}

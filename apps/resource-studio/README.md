@@ -25,18 +25,51 @@ canonical import JSON and the exact matching ZIP Offline copy under one
 immutable, content-derived revision. Rights and Online/Offline delivery
 capabilities remain independent and are validated before a bundle is written.
 
-Build the exhaustive ordinary-Bible handoff directly from the current mobile inventory:
+Build the exhaustive ordinary-Bible handoff from the authoring inputs declared in
+`config/ordinary-bible-sources.json` (verse text, historical pericopes) and the words-of-Jesus
+decisions of [`workflows/words-of-jesus`](./workflows/words-of-jesus/README.md):
 
 ```sh
-npm run resources:publication:bibles -- \
+NODE_OPTIONS=--max-old-space-size=8192 npm run resources:publication:bibles -- \
   --output outputs/releases/ordinary-bible-publications-current \
   --generated-at 2026-08-16T00:00:00.000Z
 ```
 
-This produces exactly 47 version directories. Each contains canonical import JSON plus the current
-mobile ZIP byte-for-byte; legacy pericope and red-word entries are projected into canonical
-presentation and verified for complete parity. Restricted publications declare local-development
-access without enabling public Online delivery.
+This produces exactly 47 version directories. Each contains canonical import JSON whose verses embed
+their headings and words of Jesus, and an Offline copy that zips that canonical JSON alone: no
+pericope or red-word side file is delivered (ADR-0066). The build fails when a words-of-Jesus
+decision no longer matches its verse text. Restricted publications declare local-development access
+without enabling public Online delivery.
+
+Sources may be `https://` URLs, local paths or content-addressed R2 locations
+(`r2://<bucket>/revisions/<sha256>/<path>` for published archives, `r2://<bucket>/sources/<sha256>/<path>`
+for authoring inputs). R2 locations are read with the operator's `wrangler` session and their bytes
+are checked against the SHA-256 in the key. `assets.bible-strong.app` remains a read-only store of
+historical inputs; nothing new is uploaded there.
+
+#### Republishing Bibles with their Strong sidecars
+
+1. Check the decisions still anchor to the published texts:
+   `yarn resources:words-of-jesus verify-sources` and `yarn resources:words-of-jesus check`.
+2. Build the ordinary Bibles as above into `<ordinary>`.
+3. Build the Strong sidecar index publications against them:
+   `npm run resources:publication:strong-bibles -- --bible-bundles-dir <ordinary> --output-dir
+   <strong> --generated-at <same timestamp> [--sidecar-overrides overrides.json]`. A sidecar whose
+   Bible only gained presentation (headings, words of Jesus) is re-paired with the new text revision;
+   a changed verse text aborts. When a text only gained spaces (restored note separators),
+   `npm run strong:sidecar:rebase-offsets` first carries the released sidecar to it from an oracle
+   compiled out of the corrected projection, checking every word.
+4. Patch the delivered catalog with the changed archives only:
+   `MOBILE_CATALOG_GENERATED_AT=<newer timestamp> npm run resources:publication:r2 -- catalog-patch
+   --bundles <ordinary> --bundles <strong>`. Each changed entry is computed by the catalog builder
+   from its local archive; every other entry, encrypted copies included, stays untouched. A full
+   `resources:release:mobile` needs every inventory source to be reachable, which commentaries and
+   dictionaries published only to R2 currently are not.
+5. Run the Resource service steps (R2 upload, Neon import, encrypted Offline copies, Worker deploy).
+6. Point the inventory at the published copies:
+   `npm run resources:publication:r2 -- adopt --bundles <ordinary> --bundles <strong>`. Adoption reads
+   each archive back from R2, checks its SHA-256, then rewrites `config/mobile-resource-inventory.json`
+   and drops the obsolete side-file roles from `config/mobile-resource-required-ids.json`.
 
 After generating a canonical Bible JSON, build the LSG bundle with:
 
@@ -171,8 +204,9 @@ The mobile release inventory is owned by
 `config/mobile-resource-inventory.json`. It lists every downloadable Bible,
 SQLite database, timeline JSON, Strong sidecar, interlinear index, and modular
 lexicon resource. Every published artifact is a ZIP containing its declared
-entries. Legacy Bible artifacts group the canonical text with their optional
-pericope and red-word JSON files.
+entries. Republished Bible artifacts contain the canonical JSON alone and are
+sourced from their R2 copy; artifacts not yet republished still group legacy
+text with pericope and red-word JSON files.
 
 Build a complete candidate and its global catalog with:
 
@@ -193,8 +227,9 @@ npm run resources:release:mobile -- \
   --app-root ../..
 ```
 
-The override shape is `{ "bible:NBS": { "canonical": "path/to/new.json",
-"pericope": "path/to/pericope.json", "redWords": "path/to/red-words.json" } }`.
+The override shape is `{ "bible:NBS": { "canonical": "path/to/bible-nbs.json.zip" } }`.
+A built archive replaces the whole resource: its pericope and red-word roles
+are dropped from that release.
 Every resource-producing release must finish through this global command.
 
 The command downloads the current sources, wraps historical plain JSON/SQLite
