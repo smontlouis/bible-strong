@@ -189,3 +189,6 @@ scripts/google-service-account.json
 /scripts/gloo-prototype/
 
 /videos/
+
+# Generated video exports
+*.mp4
