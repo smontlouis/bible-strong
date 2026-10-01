@@ -639,6 +639,11 @@ Scripts de lot conservés sous `outputs/strong-concordance-night/` :
 `rescore-development.sh`, `run-test.sh`, `run-canary.sh`, puis pour la section
 11 `run-b-witness.sh`, `run-test-v2.sh` et `run-canary-v3.sh`.
 
+Les générations intégrales (`src/strongAutonomous.ts <racine> <bible>`)
+demandent un tas Node d'environ 12 Go
+(`NODE_OPTIONS="--max-old-space-size=12288"`) : avec les 4 Go par défaut, NBS
+échoue faute de mémoire pendant la génération.
+
 | Artefact (sous `outputs/strong-concordance-night/`)            | Contenu                                             |
 | -------------------------------------------------------------- | --------------------------------------------------- |
 | `plan.json`                                                    | découpage figé et sélections antérieures exclues    |
