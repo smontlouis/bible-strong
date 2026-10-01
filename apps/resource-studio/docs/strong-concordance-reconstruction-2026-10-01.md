@@ -30,10 +30,12 @@ code et analyses propres, aucun de ses résultats consulté).
   F1 porteur**, **+1 point de F1 par occurrence**, **−1,5 à −1,8 point
   d'incertitude** et **+2,4 points de versets entièrement comptabilisés** pour
   S21, sans régression sur NEG, LSG, Darby, DarbyR ni sur les canaris historiques.
+  Elles sont actives par défaut depuis, B départageant d'abord par l'identifiant
+  des témoins (section 11).
 - **Pas d'adaptation de moteur par Bible.** Le profil S21 est identique au profil
   commun ; les calibrations formelle et dynamique ne font pas mieux. L'adaptation
-  nécessaire pour NEG79 porte sur son texte local (environ 201 mots soudés,
-  limites de versets).
+  nécessaire pour NEG79 porte sur son texte local (sauts de ligne perdus : 201
+  mots soudés et environ 4 900 ponctuations collées ; limites de versets).
 - **Limites principales.** Identité des occurrences répétées (articles grecs),
   convention de locution de Concordance, absence de vides justifiés, vocabulaire
   moderne sans candidat. L'accord mesure une compatibilité éditoriale : la revue
@@ -317,7 +319,8 @@ d'ablation (`adoption-criteria.json`) : aucune baisse de précision porteur de p
 de 0,002 ni de F1 de plus de 0,001 sur aucune configuration, aucune baisse du F1
 d'occurrence ni hausse de l'incertitude pour SG21 et NEG, et un gain réel sur
 SG21. Chaque famille est une option explicite du moteur commun
-(`experimentalPolicy`), désactivée par défaut ; options désactivées, le code
+(`experimentalPolicy`), désactivée par défaut pendant l'expérience (elles sont
+actives par défaut depuis, voir section 11) ; options désactivées, le code
 modifié reproduit à l'octet près les prédictions initiales scellées.
 
 - **A — variante de lecture sans effet sur l'identité.** Une variante STEP
@@ -450,6 +453,65 @@ reproduit exactement les valeurs du checkpoint, et le moteur figé les améliore
 | Darby                                |     0,8428 |  0,8455 |             0,9064 |          0,9093 |
 | DarbyR                               |     0,8376 |  0,8403 |             0,9037 |          0,9066 |
 
+## 11. Activation par défaut (suite du 1er octobre)
+
+Après ce rapport, deux décisions ont été appliquées. Les quatre options deviennent
+le comportement par défaut du générateur canonique. Les deux corrections
+éditoriales S21 tirées de Concordance (`Gen.1.4`) sont retirées : les annotations
+S21 de Concordance servent seulement de comparaison.
+
+- **Activation.** `generateStrongLedger` applique A, B, C et D sauf avis contraire
+  (`enginePolicy`). `--engine-policy initial` rejoue l'ancien moteur dans
+  `strong:evaluate` et `strong:audit:run`. Les canaris masqués du moteur par
+  défaut sont ceux d'ABCD (tableau ci-dessus) et `--engine-policy initial` redonne
+  exactement les valeurs initiales. L'outil de reconstruction garde ses options
+  explicites : sans `--policy`, il rejoue toujours le moteur initial.
+- **B avant la mesure de référence du lecteur.** Placée dans la résolution, B
+  modifiait le lecteur après sa mesure de référence et violait l'invariant
+  `reader-regression` de la génération autonome. Elle s'applique désormais
+  avant cette mesure, comme une correction d'affichage. Les prédictions SG21,
+  Darby et NEG sont identiques à l'octet.
+- **Retouche de B.** Avec A–D, l'audit NBS 10×5 a révélé 3 rétrogradations
+  fautives sur 75. B gardait le porteur le plus confiant même quand les trois
+  témoins utilisent l'autre identifiant : 1 Tm 2.1 (G4412, « premier lieu »),
+  Ap 2.6 (G2504, « moi-même ») et Ap 3.3 (G4571, « te », un « tu » appris
+  l'emportait). Entre porteurs d'identifiants alternatifs d'un même mot source,
+  l'ordre est désormais : identifiant utilisé par les témoins réutilisables du
+  verset (LSG, Darby, DarbyR), puis rang de preuve, puis confiance. Une égalité
+  sur les trois critères n'est toujours pas arbitrée.
+
+La retouche est postérieure au gel. Elle a été décidée sur le développement
+(`development-decision-v4.json`) et figée (`freeze-v2.json`). Le réservé n'a été
+rouvert qu'une fois, en addendum, sans réglage ultérieur.
+
+| Mesure (ABCD, B première version → retouchée) | Développement                   | Réservé (addendum)          |
+| --------------------------------------------- | ------------------------------- | --------------------------- |
+| SG21 cible exclue, F1 exact                   | 0,8396 → 0,8397                 | 0,8521 → 0,8521             |
+| SG21 famille exclue, F1 exact                 | 0,7694 → 0,7694                 | 0,7897 → 0,7897             |
+| NEG cible / famille exclue, F1 exact          | inchangés (0,9315 ; 0,8261)     | inchangés (0,9297 ; 0,8370) |
+| Précision par occurrence SG21 et NEG          | −0,0002 au plus                 | −0,0002 au plus             |
+| Témoins Sg1910, Darby, DarbyR, F1 exact       | inchangés                       | +0,0001 à +0,0002           |
+| Occurrences modifiées                         | 1 S 28.8 gagnée, Mt 5.33 perdue | —                           |
+
+En Mt 5.33 (famille exclue), le porteur retenu pour σου est « ton » (« ton
+serment ») alors que S21 rend « tes serments » par « ce que tu as promis » : la
+préférence pour l'identifiant des témoins n'indique pas la position.
+
+**Audit NBS 10×5** (1 227 versets, dictionnaire en-fr de production) :
+
+| Moteur                    | Strong lecteur | Vides | Risques de placement | Qualité | Couverture des porteurs de réf. | Strong de réf. absents |
+| ------------------------- | -------------: | ----: | -------------------: | ------: | ------------------------------: | ---------------------: |
+| initial (dec602f8d)       |         15 669 | 3 018 |                  277 |  0,9807 |                          0,8606 |                      2 |
+| A–D, B première version   |         15 644 | 2 965 |                  276 |  0,9807 |                          0,8628 |                      5 |
+| A–D, B retouchée (défaut) |         15 642 | 2 965 |                  275 |  0,9808 |                          0,8629 |                      2 |
+
+Sur les 75 porteurs que B masque, 72 sont des doublons, surtout des « tu »
+étiquetés σύ par traduction apprise alors que le grec n'a que la forme verbale.
+La retouche corrige les trois autres et Jn 5.17, où « moi » portait à la fois
+G2504 et G1473. La référence versionnée de l'audit datait d'avant dec602f8d
+(15 850 Strong lecteur, 3 964 vides, 325 risques, qualité 0,978). Elle est
+remplacée par celle du moteur par défaut, et le test qui la fige est mis à jour.
+
 ## Limites
 
 - **Accord éditorial, pas vérité.** Concordance est une référence humaine
@@ -482,14 +544,13 @@ reproduit exactement les valeurs du checkpoint, et le moteur figé les améliore
 
 ## Recommandations
 
-1. **Moteur commun.** Activer A, B, C et D dans le générateur canonique pour
-   toutes les Bibles, sans branchement par édition, après les portes structurelles
-   habituelles (audit 10×5, canaris masqués, intégrité SQLite) sur une génération
-   intégrale. Elles ne sont pas encore activées par défaut : la génération des neuf
-   Bibles n'a pas été relancée.
+1. **Moteur commun.** Fait : A, B (retouchée) C et D sont actives par défaut
+   pour toutes les Bibles, sans branchement par édition (section 11). La
+   génération des neuf Bibles n'a pas été relancée.
 2. **Adaptations par Bible.** Aucune adaptation de moteur n'est justifiée pour
    S21 ni, au vu de ses résultats, pour NEG79. L'adaptation nécessaire pour NEG79
-   concerne **les données** : corriger les ~201 mots soudés et vérifier les limites
+   concerne **les données** : rétablir les sauts de ligne perdus (201 mots soudés
+   et environ 4 900 ponctuations collées au mot suivant) et vérifier les limites
    de versets du texte local avant toute génération.
 3. **Identité des occurrences répétées.** C'est la principale source d'erreurs
    visibles restantes (articles grecs, occurrences inversées) et d'une partie des
@@ -497,24 +558,26 @@ reproduit exactement les valeurs du checkpoint, et le moteur figé les améliore
    Concordance actuelles de LSG et Darby en portent. Un export autorisé des témoins
    avec positions BHS/NA permettrait de transférer l'identité de l'occurrence, pas
    seulement le Strong, et d'actualiser des instantanés déjà dérivés d'environ 2,4 %.
-4. **Locutions.** Décider de la convention produit : tête de locution (actuelle)
-   ou locution complète (convention Concordance 2026). Si la seconde est choisie,
-   elle doit venir de témoins autorisés qui la portent, jamais de la cible évaluée.
+4. **Locutions.** Décision : locution complète. Elle doit venir des témoins
+   autorisés qui la portent (groupes de l'export OSIS de Concordance), jamais de
+   la cible évaluée.
 5. **Candidats lexicaux modernes.** Les abstentions sans candidat
    (« recouvriront », « végétation », « monstruosités », « pièges ») demandent un
    apport lexical validé (gloses françaises vérifiées, morphologie) plutôt qu'un
    classement par modèle local, qui n'a rien à classer dans ces cas.
 6. **Évaluations futures.** Garder les corrections éditoriales désactivées dans
-   toute évaluation S21 ou NEG (deux entrées S21 viennent de Concordance), et ne
-   plus présenter les chapitres de développement ni de test de cette expérience
-   comme une réserve vierge.
+   toute évaluation S21 ou NEG (les deux entrées S21 venues de Concordance sont
+   retirées), et ne plus présenter les chapitres de développement ni de test de
+   cette expérience comme une réserve vierge : le test a été rouvert une seconde
+   fois pour l'addendum de la section 11.
 
 ## Validation logicielle
 
-- 18 nouveaux tests : outil (parseur, alignement, plan, garde de fuite, graphe
+- 20 nouveaux tests : outil (parseur, alignement, plan, garde de fuite, graphe
   d'import, classement des occurrences, renumérotation) et moteur (enclitiques,
-  numéraux, variantes invariantes, identifiants alternatifs).
-- Suite du workspace : **1 129 tests, 1 106 réussis, 22 échecs, 1 ignoré**. Les
+  numéraux, variantes invariantes, identifiants alternatifs, préférence des
+  témoins, options par défaut).
+- Suite du workspace : **1 131 tests, 1 108 réussis, 22 échecs, 1 ignoré**. Les
   22 échecs sont exactement les échecs préexistants du lexique V3 consignés au
   checkpoint ; aucun nouvel échec.
 - `yarn typecheck` réussi ; typage strict des nouveaux scripts et tests réussi ;
@@ -528,7 +591,8 @@ reproduit exactement les valeurs du checkpoint, et le moteur figé les améliore
 Commandes complètes : [README de l'outil](../scripts/strong-concordance-rebuild/README.md).
 Scripts de lot conservés sous `outputs/strong-concordance-night/` :
 `run-initial-predictions.sh`, `run-development-ablation.sh`,
-`rescore-development.sh`, `run-test.sh`, `run-canary.sh`.
+`rescore-development.sh`, `run-test.sh`, `run-canary.sh`, puis pour la section
+11 `run-b-witness.sh`, `run-test-v2.sh` et `run-canary-v3.sh`.
 
 | Artefact (sous `outputs/strong-concordance-night/`)            | Contenu                                             |
 | -------------------------------------------------------------- | --------------------------------------------------- |
@@ -542,3 +606,6 @@ Scripts de lot conservés sous `outputs/strong-concordance-night/` :
 | `provenance/`                                                  | instantanés des témoins, proximité, transférabilité |
 | `evaluator-only/review/`                                       | dossiers et verdicts de la revue assistée           |
 | `replay/`, `canary/`, `logs/`                                  | rejeux, canaris historiques, journaux               |
+| `development-decision-v4.json`, `freeze-v2.json`               | retouche de B : décision et gel                     |
+| `replay/b-witness/`                                            | B retouchée : développement et addendum du réservé  |
+| `../strong-audit/nbs-initial`, `nbs-default`, `nbs-default-b2` | audits NBS 10×5 de la section 11                    |

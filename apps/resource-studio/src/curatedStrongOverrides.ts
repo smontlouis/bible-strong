@@ -121,28 +121,6 @@ export const CURATED_STRONG_OVERRIDES: CuratedStrongOverride[] = [
     reason: "Matches the first hayah occurrence in the verse."
   },
   {
-    bible: "s21",
-    ref: "Gen.1.4",
-    wordIndex: 8,
-    normalized: "il",
-    strong: ["H0430"],
-    confidence: 0.86,
-    source: "llm-transfer:Darby+concordance.bible",
-    reason:
-      "Matches SG21 concordance.bible handling for the repeated Elohim subject."
-  },
-  {
-    bible: "s21",
-    ref: "Gen.1.4",
-    wordIndex: 12,
-    normalized: "des",
-    strong: ["H0996"],
-    confidence: 0.86,
-    source: "llm-transfer:Darby+concordance.bible",
-    reason:
-      "Matches SG21 concordance.bible handling for the separation preposition."
-  },
-  {
     bible: "fixture-empty",
     ref: "Gen.1.4",
     target: "empty",

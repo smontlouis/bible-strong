@@ -18,6 +18,7 @@ import {
   type SourceRow
 } from "./strongSourceUnits.js";
 import { extractGoldCarrierPlacements } from "./strongCarriers.js";
+import { parseStrongOccurrences } from "./strongCsv.js";
 import { withoutPublisherNotes } from "./strongReaderText.js";
 import {
   resolveDossier,
@@ -29,9 +30,9 @@ import {
 } from "./strongResolution.js";
 import { stripTags, tokenizeText } from "./tokenize.js";
 
-export const CANONICAL_RESOLUTION_POLICY = "autonomous-fr-occurrences-v1";
+export const CANONICAL_RESOLUTION_POLICY = "autonomous-fr-occurrences-v2";
 
-/** Opt-in resolution refinements measured against Concordance.bible (2026-10-01). */
+/** Resolution refinements measured against Concordance.bible (2026-10-01). */
 export interface CanonicalResolutionOptions {
   /**
    * A reading variant blocks the Strong decision only when it can change the
@@ -40,7 +41,8 @@ export interface CanonicalResolutionOptions {
   readingInvariantVariants?: boolean;
   /**
    * Alternative identifiers of one source word never create two display
-   * carriers: the best-evidenced carrier is kept, the others are hidden.
+   * carriers: the carrier whose identifier the witnesses use is kept, then the
+   * best-evidenced one; the others are hidden.
    */
   singleCarrierPerSourceIdentity?: boolean;
 }
@@ -95,15 +97,47 @@ function carrierEvidenceRank(a: StrongLedgerAnnotation): number {
   );
 }
 
+/** Source occurrences grouped by physical STEP word (unresolved ones alone). */
+export function sourceIdentityGroups(
+  occurrences: OriginalStrongOccurrence[]
+): Map<string, OriginalStrongOccurrence[]> {
+  const groups = new Map<string, OriginalStrongOccurrence[]>();
+  for (const o of occurrences) {
+    const id = o.sourceIdentity ?? `unresolved:${o.occurrenceId}`;
+    const values = groups.get(id) ?? [];
+    values.push(o);
+    groups.set(id, values);
+  }
+  return groups;
+}
+
+/** Strong identifiers that the reusable witnesses use anywhere in the verse. */
+export function witnessAttestedStrongs(
+  references: ReferenceSource[]
+): Set<string> {
+  return new Set(
+    references.flatMap((reference) =>
+      parseStrongOccurrences(reference.verse?.row.text ?? "").map((strong) =>
+        strong.toUpperCase()
+      )
+    )
+  );
+}
+
 /**
  * Keep one reader carrier per physical source word whose alternative Strong
- * identifiers were placed on different target words. Ties stay untouched so
- * the resolver keeps reporting the competition.
+ * identifiers were placed on different target words. The identifier used by
+ * the witnesses of the verse wins first (it is the display convention for that
+ * form), then the evidence rank and the confidence. Ties stay untouched so the
+ * resolver keeps reporting the competition.
  */
-function demoteAlternativeIdentityCarriers(
+export function demoteAlternativeIdentityCarriers(
   annotations: StrongLedgerAnnotation[],
-  groups: Map<string, OriginalStrongOccurrence[]>
+  groups: Map<string, OriginalStrongOccurrence[]>,
+  attestedStrongs: ReadonlySet<string> = new Set()
 ): void {
+  const attested = (a: StrongLedgerAnnotation) =>
+    a.strong.split(/\s+/u).some((code) => attestedStrongs.has(code)) ? 1 : 0;
   for (const occurrences of groups.values()) {
     const ids = new Set(occurrences.map((o) => o.occurrenceId));
     if (new Set(occurrences.map((o) => o.strong)).size < 2) continue;
@@ -124,6 +158,7 @@ function demoteAlternativeIdentityCarriers(
       continue;
     const ranked = [...carriers].sort(
       (left, right) =>
+        attested(right) - attested(left) ||
         carrierEvidenceRank(right) - carrierEvidenceRank(left) ||
         right.confidence - left.confidence
     );
@@ -131,7 +166,8 @@ function demoteAlternativeIdentityCarriers(
     if (
       !best ||
       !second ||
-      (carrierEvidenceRank(best) === carrierEvidenceRank(second) &&
+      (attested(best) === attested(second) &&
+        carrierEvidenceRank(best) === carrierEvidenceRank(second) &&
         Math.abs(best.confidence - second.confidence) < 0.01)
     )
       continue;
@@ -139,7 +175,7 @@ function demoteAlternativeIdentityCarriers(
       annotation.visibility = "hidden";
       annotation.placement = "duplicate";
       annotation.reason =
-        "Another identifier of the same source word already has a better-evidenced reader carrier; alternative identifiers do not create a second occurrence.";
+        "Another identifier of the same source word already has a reader carrier that the witnesses or the evidence favour; alternative identifiers do not create a second occurrence.";
       annotation.diagnostics = [
         ...new Set([
           ...annotation.diagnostics,
@@ -317,15 +353,13 @@ export function resolveCanonicalVerse(options: {
   const issues = [...input.issues];
   if (input.mapping?.reason?.includes("fallback-after-ambiguous"))
     issues.push("native-coordinate-used-after-ambiguous-text-alignment");
-  const groups = new Map<string, OriginalStrongOccurrence[]>();
-  for (const o of input.occurrences) {
-    const id = o.sourceIdentity ?? `unresolved:${o.occurrenceId}`;
-    const values = groups.get(id) ?? [];
-    values.push(o);
-    groups.set(id, values);
-  }
+  const groups = sourceIdentityGroups(input.occurrences);
   if (options.policy?.singleCarrierPerSourceIdentity)
-    demoteAlternativeIdentityCarriers(verse.annotations, groups);
+    demoteAlternativeIdentityCarriers(
+      verse.annotations,
+      groups,
+      witnessAttestedStrongs(input.references)
+    );
   const invariantReadings = new Set<string>();
   const units: ResolutionDossier["units"] = [...groups].map(
     ([id, occurrences]) => {

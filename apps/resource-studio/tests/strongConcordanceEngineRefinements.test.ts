@@ -7,7 +7,10 @@ import {
   resolveCanonicalVerse
 } from "../src/strongCanonicalResolution.js";
 import { parseStrongTokens } from "../src/strongCsv.js";
-import type { StrongLedgerAnnotation } from "../src/strongLedger.js";
+import {
+  resolveEnginePolicy,
+  type StrongLedgerAnnotation
+} from "../src/strongLedger.js";
 import { parseSourceRow } from "../src/strongSourceUnits.js";
 
 const witness = (tagged: string) => ({
@@ -261,4 +264,67 @@ test("alternative identifiers of one source word keep a single best-evidenced ca
   });
   assert.equal(tied.decisions[0]!.state, "unresolved");
   assert.equal(tie.verse.annotations[0]!.visibility, "reader");
+});
+
+test("the identifier used by the witnesses wins between alternative carriers", () => {
+  // Rev.3.3 pattern: a learned "tu" claims σέ through the lemma identifier
+  // while "te" carries the form identifier that every witness uses.
+  const row =
+    "Exo.10.7#13=L\tהָ֣/אֲנָשִׁ֔ים\tha./'a.na.Shim\tthe/ people\tH9009/{H0582}\tHTd/Ncmpa\t\t\tH0582\tH0376\t\t";
+  const make = () =>
+    resolutionFixture({
+      rows: [row],
+      strongs: [["H0582", "H0376"]],
+      carriers: [
+        {
+          occurrence: [0, 0],
+          wordIndex: 0,
+          source: "reference-learned",
+          diagnostic: "learned-translation",
+          confidence: 0.73
+        },
+        {
+          occurrence: [0, 1],
+          wordIndex: 3,
+          source: "reference-learned",
+          diagnostic: "learned-translation",
+          confidence: 0.7
+        }
+      ],
+      words: ["gens", "laisse", "partir", "hommes"]
+    });
+  const unattested = make();
+  resolveCanonicalVerse({
+    ...unattested,
+    policy: { singleCarrierPerSourceIdentity: true }
+  });
+  assert.equal(unattested.verse.annotations[0]!.visibility, "reader");
+  assert.equal(unattested.verse.annotations[1]!.visibility, "hidden");
+  const attested = make();
+  const resolution = resolveCanonicalVerse({
+    ...attested,
+    input: {
+      ...attested.input,
+      references: [witness('les <w strong="H0376">hommes</w> partent')]
+    },
+    policy: { singleCarrierPerSourceIdentity: true }
+  });
+  assert.equal(attested.verse.annotations[0]!.visibility, "hidden");
+  assert.equal(attested.verse.annotations[1]!.visibility, "reader");
+  assert.deepEqual(resolution.decisions[0]!.targetWordIndices, [3]);
+});
+
+test("the engine enables every measured refinement by default and allows a full opt-out", () => {
+  assert.deepEqual(resolveEnginePolicy(), {
+    readingInvariantVariants: true,
+    singleCarrierPerSourceIdentity: true,
+    encliticHostTransfer: true,
+    digitNumeralTransfer: true
+  });
+  assert.deepEqual(resolveEnginePolicy({ encliticHostTransfer: false }), {
+    readingInvariantVariants: true,
+    singleCarrierPerSourceIdentity: true,
+    encliticHostTransfer: false,
+    digitNumeralTransfer: true
+  });
 });

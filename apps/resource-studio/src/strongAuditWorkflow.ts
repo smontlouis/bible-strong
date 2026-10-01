@@ -8,7 +8,9 @@ import { BOOK_IDS } from "./books.js";
 import {
   generateStrongLedger,
   type StrongLedger,
-  type StrongLedgerMetrics
+  type StrongLedgerMetrics,
+  parseEnginePolicyOption,
+  type StrongEnginePolicy
 } from "./strongLedger.js";
 import {
   readStrongLedgerSqlite,
@@ -40,6 +42,10 @@ export interface StrongAuditOptions {
   chaptersPerBook: number;
   outputDir: string;
   resume: boolean;
+  /** Explicit Strong dictionary, e.g. the attested en-fr production lexicon. */
+  dictionaryPath?: string;
+  /** Engine refinement overrides (`initial` replays the dec602f8d engine). */
+  enginePolicy?: Partial<StrongEnginePolicy>;
 }
 
 interface EligibleBook {
@@ -292,7 +298,13 @@ export async function runStrongAudit(
           bible: options.bible,
           biblePath: biblePath(options.bible),
           outputDir: scopeOutputDir,
-          onlyRef: scope
+          onlyRef: scope,
+          ...(options.dictionaryPath
+            ? { dictionaryPath: options.dictionaryPath }
+            : {}),
+          ...(options.enginePolicy
+            ? { enginePolicy: options.enginePolicy }
+            : {})
         });
     scopes.push(scopeReport(ledger, scopeOutputDir));
   }
@@ -1054,7 +1066,9 @@ function parseOptions(argv: string[]): {
         readOption(argv, "--chapters") ?? DEFAULT_CHAPTERS_PER_BOOK
       ),
       outputDir,
-      resume: !hasFlag(argv, "--no-resume")
+      resume: !hasFlag(argv, "--no-resume"),
+      dictionaryPath: readOption(argv, "--dictionary"),
+      enginePolicy: parseEnginePolicyOption(readOption(argv, "--engine-policy"))
     },
     manifestPath: readOption(argv, "--manifest"),
     snapshotPath: readOption(argv, "--snapshot"),

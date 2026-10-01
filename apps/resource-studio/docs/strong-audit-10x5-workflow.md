@@ -14,8 +14,12 @@ npm run strong:audit:plan
 Generate or resume the full audit:
 
 ```sh
-npm run strong:audit:run
+npm run strong:audit:run -- --dictionary data/dictionaries/strong_lexicon.en-fr.full.production.sqlite
 ```
+
+The default lexicon is refused since the V3 attestation guard, so pass the
+attested en-fr production lexicon explicitly. The engine refinements A–D are
+on by default; `--engine-policy initial` replays the engine without them.
 
 The run writes isolated generated ledgers under:
 
@@ -107,6 +111,10 @@ Rev, Prov, Dan, 2Sam, Amos, 1Sam, 1Tim, Heb, Ezek, John
 ```
 
 ## Accepted Deterministic Findings
+
+- 2026-10-01: the committed baseline is refreshed on the default engine
+  (refinements A–D, see `docs/strong-concordance-reconstruction-2026-10-01.md`,
+  section 11). The previous baseline predated `dec602f8d`.
 
 - French auxiliary-plus-participle phrases can be auto-safe when the phrase has
   direct lexical evidence and any high-confidence outside competitor is

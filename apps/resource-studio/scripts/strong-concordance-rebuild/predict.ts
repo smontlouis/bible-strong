@@ -10,7 +10,7 @@ import path from "node:path";
 import { BOOK_IDS } from "../../src/books.js";
 import {
   generateStrongLedger,
-  type StrongExperimentalPolicy,
+  type StrongEnginePolicy,
   type StrongLedgerVerse
 } from "../../src/strongLedger.js";
 import { readStrongCsv } from "../../src/strongCsv.js";
@@ -32,13 +32,11 @@ export const PREDICTION_VERSION = "strong-concordance-rebuild-prediction-v1";
 export const DICTIONARY_PATH =
   "data/dictionaries/strong_lexicon.en-fr.full.production.sqlite";
 
-/** Experimental engine switches; an empty object is the initial engine. */
-export type EnginePolicy = Partial<
-  Record<keyof StrongExperimentalPolicy, boolean>
->;
+/** Enabled engine refinements; an empty object is the initial engine. */
+export type EnginePolicy = Partial<Record<keyof StrongEnginePolicy, boolean>>;
 
 /** Short labels used in run identifiers and reports. */
-export const POLICY_LABELS: Record<keyof StrongExperimentalPolicy, string> = {
+export const POLICY_LABELS: Record<keyof StrongEnginePolicy, string> = {
   readingInvariantVariants: "A",
   singleCarrierPerSourceIdentity: "B",
   encliticHostTransfer: "C",
@@ -52,13 +50,13 @@ export function policyFromLabels(labels: string[]): EnginePolicy {
       ([, value]) => value === label
     );
     if (!entry) throw new Error(`unknown-policy-label:${label}`);
-    policy[entry[0] as keyof StrongExperimentalPolicy] = true;
+    policy[entry[0] as keyof StrongEnginePolicy] = true;
   }
   return policy;
 }
 
 export function policyId(policy: EnginePolicy): string {
-  const labels = (Object.keys(policy) as Array<keyof StrongExperimentalPolicy>)
+  const labels = (Object.keys(policy) as Array<keyof StrongEnginePolicy>)
     .filter((key) => policy[key])
     .map((key) => POLICY_LABELS[key])
     .sort();
@@ -322,9 +320,16 @@ export async function predict(options: {
         edition.localText.kind === "bible-json"
           ? edition.localText.verseCorrespondencePath
           : undefined,
-      ...(policyId(options.policy) === "initial"
-        ? {}
-        : { experimentalPolicy: options.policy })
+      // The engine enables every refinement by default: pass the complete
+      // switch set so that an empty policy still replays the initial engine.
+      enginePolicy: {
+        readingInvariantVariants:
+          options.policy.readingInvariantVariants === true,
+        singleCarrierPerSourceIdentity:
+          options.policy.singleCarrierPerSourceIdentity === true,
+        encliticHostTransfer: options.policy.encliticHostTransfer === true,
+        digitNumeralTransfer: options.policy.digitNumeralTransfer === true
+      }
     });
     const verses: PredictedVerse[] = ledger.verses.map((verse) => {
       const mapping = canonicalByNative.get(verse.ref);

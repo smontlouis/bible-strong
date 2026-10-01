@@ -81,9 +81,9 @@ test("committed 10x5 audit baseline uses the stable sample", () => {
     "John"
   ]);
   assert.equal(baseline.totals.lexicalAutoSafeItems, 0);
-  assert.equal(baseline.totals.emptyStrongCount, 3964);
-  assert.equal(baseline.totals.placementRiskCount, 325);
-  assert.equal(baseline.totals.placementQuality, 0.978);
+  assert.equal(baseline.totals.emptyStrongCount, 2965);
+  assert.equal(baseline.totals.placementRiskCount, 275);
+  assert.equal(baseline.totals.placementQuality, 0.9808);
   assert.equal(baseline.totals.originalRepresentationRate, 1);
 });
 

@@ -61,5 +61,9 @@ Bibles. Laya local n’est retenu que si son apport est mesuré.
 7. Outil, tests (18 nouveaux, aucun nouvel échec), code compilé (erreurs de build
    préexistantes inchangées), sorties sous `outputs/strong-concordance-night/`.
 
-Non relancé, conformément au protocole : la génération des neuf Bibles. Les
-options A–D restent désactivées par défaut en attendant cette génération.
+Non relancé, conformément au protocole : la génération des neuf Bibles.
+
+Suite décidée ensuite (section 11 du rapport) : A–D actives par défaut, B
+retouchée (identifiant des témoins d'abord) et vérifiée en addendum du réservé,
+corrections S21 tirées de Concordance retirées, référence de l'audit NBS 10×5
+mise à jour.

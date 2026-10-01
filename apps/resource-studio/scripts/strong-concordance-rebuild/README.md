@@ -63,14 +63,17 @@ yarn exec tsx scripts/strong-concordance-rebuild/run.ts score \
 
 Scénarios : `target-excluded` retire la cible si elle est un témoin et toujours
 Darby et DarbyR ensemble ; `family-excluded` retire aussi toute la famille
-éditoriale de la cible (Segond pour S21 et NEG). Les options du moteur sont
-désactivées par défaut :
+éditoriale de la cible (Segond pour S21 et NEG). Dans cet outil, une prédiction
+sans `--policy` rejoue le moteur initial, toutes options désactivées. Le
+générateur canonique les applique en revanche par défaut depuis le 1er octobre
+(`--engine-policy initial` pour s'en passer) :
 
 - `A` `readingInvariantVariants` : une variante de lecture ne bloque plus une
   décision quand le mot appartient au texte de base et que toutes ses lectures
   gardent la même identité Strong ;
 - `B` `singleCarrierPerSourceIdentity` : les identifiants alternatifs d'un même
-  mot source ne créent pas deux porteurs ; le mieux étayé est conservé ;
+  mot source ne créent pas deux porteurs ; est conservé celui dont l'identifiant
+  est utilisé par les témoins du verset, puis le mieux étayé ;
 - `C` `encliticHostTransfer` : un mot témoin peut porter l'hôte d'un enclitique
   soudé par trait d'union (« dit-il ») ;
 - `D` `digitNumeralTransfer` : un numéral d'un mot peut correspondre au même

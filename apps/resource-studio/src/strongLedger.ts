@@ -1,8 +1,10 @@
 import { withoutPublisherNotes } from "./strongReaderText.js";
 import {
   CANONICAL_RESOLUTION_POLICY,
+  demoteAlternativeIdentityCarriers,
   readCanonicalSourceRows,
   resolveCanonicalVerse,
+  sourceIdentityGroups,
   aggregateResolutionMetrics,
   type CanonicalVerseResolution,
   type CanonicalResolutionInput
@@ -340,33 +342,73 @@ export interface StrongLedgerOptions {
   allowUnknownProfile?: boolean;
   /** Frozen full-Bible native-to-canonical versification manifest. */
   verseCorrespondencePath?: string;
-  /** Opt-in engine refinements; absent keeps the established behaviour. */
-  experimentalPolicy?: StrongExperimentalPolicy;
+  /**
+   * Overrides of the engine refinements, all enabled by default. An all-false
+   * policy replays the engine of commit dec602f8d for masked comparisons.
+   */
+  enginePolicy?: Partial<StrongEnginePolicy>;
 }
 
 /**
- * Engine refinements evaluated by the Concordance.bible reconstruction
- * experiment (2026-10-01). Each switch is independent and off by default.
+ * Engine refinements measured against Concordance.bible on 2026-10-01
+ * (`docs/strong-concordance-reconstruction-2026-10-01.md`).
  */
-export interface StrongExperimentalPolicy {
-  readingInvariantVariants?: boolean;
-  singleCarrierPerSourceIdentity?: boolean;
-  encliticHostTransfer?: boolean;
-  digitNumeralTransfer?: boolean;
+export interface StrongEnginePolicy {
+  /** A reading variant that cannot change the Strong identity does not block a decision. */
+  readingInvariantVariants: boolean;
+  /** Alternative identifiers of one source word keep a single display carrier. */
+  singleCarrierPerSourceIdentity: boolean;
+  /** A witness word may carry the host of a hyphenated French enclitic. */
+  encliticHostTransfer: boolean;
+  /** A one-word French numeral may match the same number written in digits. */
+  digitNumeralTransfer: boolean;
 }
 
-function readerPolicyWithExperiments(
+export const DEFAULT_ENGINE_POLICY: Readonly<StrongEnginePolicy> = {
+  readingInvariantVariants: true,
+  singleCarrierPerSourceIdentity: true,
+  encliticHostTransfer: true,
+  digitNumeralTransfer: true
+};
+
+export function resolveEnginePolicy(
+  overrides?: Partial<StrongEnginePolicy>
+): StrongEnginePolicy {
+  return { ...DEFAULT_ENGINE_POLICY, ...overrides };
+}
+
+/**
+ * CLI value of an engine policy: `initial` disables every refinement (engine of
+ * dec602f8d); a comma-separated list enables only the named refinements.
+ */
+export function parseEnginePolicyOption(
+  value: string | undefined
+): Partial<StrongEnginePolicy> | undefined {
+  if (!value) return undefined;
+  const known = Object.keys(DEFAULT_ENGINE_POLICY) as Array<
+    keyof StrongEnginePolicy
+  >;
+  const enabled = value === "initial" ? [] : value.split(",").filter(Boolean);
+  for (const name of enabled)
+    if (!known.includes(name as keyof StrongEnginePolicy))
+      throw new Error(`unknown-engine-policy:${name}`);
+  return Object.fromEntries(
+    known.map((name) => [name, enabled.includes(name)])
+  );
+}
+
+function readerPolicyWithEngine(
   policy: ReaderAlignmentPolicy,
-  experiments: StrongExperimentalPolicy | undefined
+  engine: StrongEnginePolicy
 ): ReaderAlignmentPolicy {
-  if (!experiments?.encliticHostTransfer && !experiments?.digitNumeralTransfer)
+  if (!engine.encliticHostTransfer && !engine.digitNumeralTransfer)
     return policy;
   return {
     ...policy,
     transferMatching: {
       ...policy.transferMatching,
-      ...(experiments.encliticHostTransfer ? { encliticHosts: true } : {}),
-      ...(experiments.digitNumeralTransfer ? { digitNumerals: true } : {})
+      ...(engine.encliticHostTransfer ? { encliticHosts: true } : {}),
+      ...(engine.digitNumeralTransfer ? { digitNumerals: true } : {})
     }
   };
 }
@@ -527,7 +569,7 @@ export function strongLedgerInputFingerprint(
       profileBible: options.profileBible ?? options.bible,
       applyCuratedOverrides: options.applyCuratedOverrides !== false,
       excludedReferenceNames: [...excludedReferences].sort(),
-      experimentalPolicy: options.experimentalPolicy ?? null,
+      enginePolicy: resolveEnginePolicy(options.enginePolicy),
       strongDictionaryActivation: strongDictionaryInput.activation,
       verseCorrespondencePath: verseCorrespondencePath ?? null,
       translationProfile
@@ -618,6 +660,7 @@ export async function generateStrongLedgerWithDictionary(
     );
   }
   const translationProfile = getTranslationProfile(profileBible);
+  const enginePolicy = resolveEnginePolicy(options.enginePolicy);
   const inputFingerprint = measureSync("fingerprint ledger inputs", () =>
     strongLedgerInputFingerprint(
       options,
@@ -733,9 +776,9 @@ export async function generateStrongLedgerWithDictionary(
       lexicon,
       translationLexicon,
       phraseLexicon,
-      readerPolicy: readerPolicyWithExperiments(
+      readerPolicy: readerPolicyWithEngine(
         translationProfile.readerAlignment,
-        options.experimentalPolicy
+        enginePolicy
       )
     });
     const elapsed = perfElapsed(alignStart);
@@ -869,6 +912,22 @@ export async function generateStrongLedgerWithDictionary(
       `Lexical auto-safe reached pass limit after applying ${lexicalAutoSafeLastApplied} placement(s) in the final pass; inspect the residual lexical report for remaining auto-safe candidates.`
     );
   }
+  // Alternative identifiers of one source word must not keep two reader
+  // carriers. This is a display correction, applied before the reader
+  // baseline so that occurrence resolution itself never changes the reader.
+  if (
+    options.resolveOccurrences !== false &&
+    enginePolicy.singleCarrierPerSourceIdentity
+  )
+    for (const verse of ledgerVerses) {
+      const input = resolutionInputs.get(verse.ref);
+      if (input)
+        demoteAlternativeIdentityCarriers(
+          verse.annotations,
+          sourceIdentityGroups(input.occurrences),
+          new Set(Object.values(verse.inventories.references).flat())
+        );
+    }
   const resolutionBaselineMetrics =
     options.resolveOccurrences === false
       ? undefined
@@ -894,11 +953,9 @@ export async function generateStrongLedgerWithDictionary(
         input: resolutionInputs.get(verse.ref)!,
         sourceRows: rows,
         lexicalItems: items.get(verse.ref) ?? [],
+        // Alternative-identifier carriers were already reduced above.
         policy: {
-          readingInvariantVariants:
-            options.experimentalPolicy?.readingInvariantVariants,
-          singleCarrierPerSourceIdentity:
-            options.experimentalPolicy?.singleCarrierPerSourceIdentity
+          readingInvariantVariants: enginePolicy.readingInvariantVariants
         }
       });
     }
