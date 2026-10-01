@@ -102,6 +102,7 @@ export default function StudiesDomWrapper({
   const theme = useTheme()
   const [activeFormats, setActiveFormats] = useState({})
   const [entityInsertionMode, setEntityInsertionMode] = useState<'link' | 'block'>('link')
+  const pendingBiblePickerModeRef = useRef<'link' | 'block' | null>(null)
   const isIPadFormSheet = isFormSheet && Platform.OS === 'ios' && Platform.isPad
   const { colorScheme } = useCurrentThemeSelector()
   const encodedContentToDisplay = encodeDeltaContent(contentToDisplay)
@@ -163,11 +164,17 @@ export default function StudiesDomWrapper({
   }
 
   function openBibleVersePicker(): void {
+    // The native sheet swallows navigation while it is still dismissing:
+    // open the Bible once it is fully closed.
+    pendingBiblePickerModeRef.current = entityInsertionMode
     entityPicker.close()
-    navigateToSelectionMode(
-      entityInsertionMode === 'link' ? 'verse' : 'verse-block',
-      entityInsertionMode
-    )
+  }
+
+  function handleEntityPickerDismiss(): void {
+    const mode = pendingBiblePickerModeRef.current
+    if (!mode) return
+    pendingBiblePickerModeRef.current = null
+    navigateToSelectionMode(mode === 'link' ? 'verse' : 'verse-block', mode)
   }
 
   async function insertEntity(
@@ -382,6 +389,7 @@ export default function StudiesDomWrapper({
           }
           sourceEndpoint={null}
           onSelectTarget={target => insertEntity(target)}
+          onDismiss={handleEntityPickerDismiss}
           searchAccessory={
             <TouchableBox
               accessibilityRole="button"
