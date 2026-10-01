@@ -1,14 +1,16 @@
 name: PR Preview
 
+# Manual only: publishing an EAS Update on every PR push is not wanted.
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to publish a preview for
+        required: true
+        type: number
 
 concurrency:
-  group: pr-preview-${{ github.event.pull_request.number }}
+  group: pr-preview-${{ inputs.pr_number }}
   cancel-in-progress: true
 
 permissions:
@@ -29,10 +31,18 @@ jobs:
             exit 1
           fi
 
+      - name: Resolve PR branch
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          head_ref=$(gh pr view "${{ inputs.pr_number }}" --repo "${{ github.repository }}" --json headRefName --jq .headRefName)
+          echo "head_ref=$head_ref" >> "$GITHUB_OUTPUT"
+
       - name: Checkout PR
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ steps.pr.outputs.head_ref }}
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -68,7 +78,16 @@ jobs:
           '
 
       - name: Publish preview update
+        id: preview
         uses: expo/expo-github-action/preview@v8
         with:
           command: eas update --auto
           working-directory: apps/expo
+          # The action can only comment on pull_request events; comment below instead.
+          comment: false
+
+      - name: Comment preview on PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIEW_COMMENT: ${{ steps.preview.outputs.comment }}
+        run: gh pr comment "${{ inputs.pr_number }}" --repo "${{ github.repository }}" --body "$PREVIEW_COMMENT"
