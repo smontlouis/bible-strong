@@ -1,0 +1,62 @@
+name: Publish Expo Production Update
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - apps/expo/**
+      - packages/**
+      - package.json
+      - yarn.lock
+      - .yarn/**
+      - .github/workflows/expo-update-production.yml
+  workflow_dispatch:
+
+concurrency:
+  group: expo-update-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish-update:
+    name: Publish EAS Update (production)
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check for secrets
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ] || [ -z "${{ secrets.SENTRY_AUTH_TOKEN }}" ]; then
+            echo "Add EXPO_TOKEN and SENTRY_AUTH_TOKEN repository secrets before publishing production updates."
+            exit 1
+          fi
+
+      - name: Check out production source
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Publish production update and upload sourcemaps
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          message="$(git log -1 --pretty=%s) (${GITHUB_SHA::7})"
+          yarn workspace @bible-strong/expo update:production --message "$message" --non-interactive
