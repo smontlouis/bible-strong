@@ -31,6 +31,10 @@ import {
   type StrongTranslationLexicon
 } from "./translationLexicon.js";
 import { type ReaderAlignmentPolicy } from "./translationProfiles.js";
+import {
+  witnessEmptyEvidence,
+  type EmptyStrongEvidence
+} from "./strongResolution.js";
 
 export interface ReaderEmptyAssignment {
   strong: string;
@@ -38,6 +42,7 @@ export interface ReaderEmptyAssignment {
   method: "editorial-empty" | "curated-empty";
   source: string;
   insertAfterWordIndex: number;
+  emptyEvidence?: EmptyStrongEvidence;
 }
 
 export interface ReaderPhraseAssignment {
@@ -1113,19 +1118,25 @@ function buildEditorialEmptyAssignments(
         (occurrence) => occurrence.afterWordIndex < 0
       );
 
+      const insertAfterWordIndex = unanimouslyLeading
+        ? -1
+        : targetWordCount <= 0
+          ? -1
+          : Math.min(
+              targetWordCount - 1,
+              Math.max(-1, Math.round(ratio * (targetWordCount - 1)))
+            );
+
       assignments.push({
         strong,
         confidence: Math.min(0.82, 0.58 + bySource.size * 0.08),
         method: "editorial-empty",
         source: [...bySource.keys()].sort().join("+"),
-        insertAfterWordIndex: unanimouslyLeading
-          ? -1
-          : targetWordCount <= 0
-            ? -1
-            : Math.min(
-                targetWordCount - 1,
-                Math.max(-1, Math.round(ratio * (targetWordCount - 1)))
-              )
+        insertAfterWordIndex,
+        emptyEvidence: witnessEmptyEvidence(
+          [...bySource.keys()],
+          insertAfterWordIndex
+        )
       });
     }
   }

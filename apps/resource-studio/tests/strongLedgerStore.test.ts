@@ -3,6 +3,12 @@ import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import {
+  CANONICAL_RESOLUTION_POLICY,
+  aggregateResolutionMetrics,
+  type CanonicalVerseResolution
+} from "../src/strongCanonicalResolution.js";
+import { unresolvedEmptyEvidence } from "../src/strongResolution.js";
 
 import type { StrongLedger, StrongLedgerVerse } from "../src/strongLedger.js";
 import {
@@ -11,7 +17,8 @@ import {
   readStrongLedgerVersesByRefsSqlite,
   readStrongLedgerVersesSqlite,
   strongLedgerSqlitePath,
-  writeStrongLedgerSqlite
+  writeStrongLedgerSqlite,
+  replaceStrongLedgerSqliteVerses
 } from "../src/strongLedgerStore.js";
 
 test("stores and reads Strong ledger verses by SQLite scope", async () => {
@@ -55,6 +62,75 @@ test("stores and reads Strong ledger verses by SQLite scope", async () => {
   const exported = await readFile(readerTsv, "utf8");
   assert.match(exported, /Gen\t1\t1\t<w strong="H0001">Dieu<\/w>/);
   assert.match(exported, /Lev\t1\t1\t<w strong="H0003">Il<\/w>/);
+});
+
+test("persists absence evidence independently from empty anchor evidence", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "strong-empty-evidence-"));
+  const input = ledger(dir);
+  const emptyEvidence = unresolvedEmptyEvidence(0);
+  input.verses[0].annotations.push({
+    id: "empty",
+    strong: "H0996",
+    visibility: "advanced",
+    placement: "empty",
+    source: "original-complete",
+    confidence: 0.35,
+    reason: "unresolved source",
+    diagnostics: [],
+    insertAfterWordIndex: 0,
+    emptyEvidence
+  });
+  const sqlitePath = strongLedgerSqlitePath(dir, "test");
+  await writeStrongLedgerSqlite(input, sqlitePath);
+  const saved = readStrongLedgerSqlite({ sqlitePath, onlyRef: "Gen.1.1" });
+  assert.deepEqual(
+    saved.verses[0].annotations.find((a) => a.id === "empty")?.emptyEvidence,
+    emptyEvidence
+  );
+});
+
+test("persists occurrence resolutions and recomputes their totals on scoped replacement", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "canonical-resolution-store-"));
+  const input = ledger(dir);
+  const resolution: CanonicalVerseResolution = {
+    policy: CANONICAL_RESOLUTION_POLICY,
+    targetTextSha256: "fixture",
+    issues: ["no-source-occurrences-for-native-verse"],
+    unownedAnnotationIds: [],
+    decisions: [],
+    metrics: {
+      verses: 1,
+      units: 0,
+      visible: 0,
+      empty: 0,
+      unresolved: 0,
+      grammaticalEmpties: 0,
+      examinedLexicalCandidates: 0,
+      fullyAccountedVerses: 0,
+      policySupportedVerses: 0,
+      sourceIssueVerses: 1
+    }
+  };
+  input.verses[0].resolution = resolution;
+  input.resolutionPolicy = CANONICAL_RESOLUTION_POLICY;
+  input.resolutionSummary = aggregateResolutionMetrics(input.verses);
+  const sqlitePath = strongLedgerSqlitePath(dir, "test");
+  await writeStrongLedgerSqlite(input, sqlitePath);
+  assert.deepEqual(
+    readStrongLedgerSqlite({ sqlitePath, onlyRef: "Gen.1.1" }).verses[0]
+      .resolution,
+    resolution
+  );
+  input.verses[1].resolution = structuredClone(resolution);
+  await replaceStrongLedgerSqliteVerses({
+    sqlitePath,
+    bible: "test",
+    verses: [input.verses[1]],
+    method: "fixture"
+  });
+  const saved = readStrongLedgerSqlite({ sqlitePath, includeVerses: false });
+  assert.equal(saved.resolutionSummary?.verses, 2);
+  assert.equal(saved.resolutionSummary?.books.Gen.sourceIssueVerses, 2);
 });
 
 function ledger(inputPath: string): StrongLedger {

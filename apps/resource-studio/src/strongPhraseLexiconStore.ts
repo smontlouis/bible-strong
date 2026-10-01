@@ -12,7 +12,7 @@ import { contentFingerprint } from "./contentAddressedCache.js";
 
 const SCHEMA_VERSION = 2;
 const PHRASE_LEXICON_ALGORITHM_VERSION =
-  "phrase-specificity-and-independent-family-support-v2";
+  "phrase-specificity-independent-families-reader-text-v3";
 export const DEFAULT_STRONG_PHRASE_LEXICON_SQLITE =
   "data/derived/strong-phrase-lexicon.sqlite";
 

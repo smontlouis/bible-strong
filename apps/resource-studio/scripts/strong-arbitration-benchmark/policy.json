@@ -1,0 +1,14 @@
+{
+  "version": "strong-arbitration-v1",
+  "variants": ["lexical", "enriched", "context"],
+  "casesPerEditionSplitCategory": 75,
+  "sourceNeighborRadius": 3,
+  "thresholds": [0, 0.8, 0.9, 0.95, 0.98, 0.99, 1],
+  "minimumChangedPlacements": 30,
+  "minimumObservedEditPrecision": 0.98,
+  "maximumFalsePositiveIncrease": 0,
+  "stabilityCases": 100,
+  "nonePolicy": "abstain-preserve-baseline",
+  "selection": "Most TP gained on calibration, then fewer FP, then variant/threshold name. Baseline if nothing qualifies.",
+  "testStatus": "Exploratory reuse of prior Eflomal test chapters. The 100 reserved passages are untouched. No production promotion."
+}

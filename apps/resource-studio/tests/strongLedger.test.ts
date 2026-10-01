@@ -21,6 +21,7 @@ import type { CuratedStrongOverride } from "../src/curatedStrongOverrides.js";
 import type { LexicalAutoSafePlacement } from "../src/lexicalCandidateReport.js";
 import { parseStrongOccurrences } from "../src/strongCsv.js";
 import { stripTags, tokenizeText } from "../src/tokenize.js";
+import { unresolvedEmptyEvidence } from "../src/strongResolution.js";
 
 test("uses the maximum source occurrence count as the placement budget", () => {
   assert.deepEqual(
@@ -59,6 +60,7 @@ test("collapses lexical auto-safe duplicates of an already visible STEP occurren
     visibility: "advanced",
     placement: "empty",
     insertAfterWordIndex: 4,
+    emptyEvidence: unresolvedEmptyEvidence(4),
     originalTokenId: "TAHOT.Exod.26.21.9.L.main",
     originalOccurrenceId: "TAHOT.Exod.26.21.9.L.main:0"
   });
@@ -110,6 +112,7 @@ test("collapses lexical auto-safe duplicates of an already visible STEP occurren
   assert.equal(existing.visibility, "reader");
   assert.equal(duplicate.visibility, "hidden");
   assert.equal(duplicate.placement, "duplicate");
+  assert.equal(duplicate.emptyEvidence, undefined);
   assert.equal(duplicate.wordIndex, 5);
   assert.equal(duplicate.normalizedWord, "deux");
   assert.ok(duplicate.diagnostics.includes("duplicate-reader-occurrence"));

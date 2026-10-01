@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 
 import {
   type OriginalToken,
@@ -9,6 +10,9 @@ import { referenceKey } from "./strongCsv.js";
 import { normalizeStepStrongCode } from "./lexiconV3/identity.js";
 
 export interface StepOriginalToken {
+  sourceReference?: string;
+  sourceLineNumber?: number;
+  identitySuffix?: string;
   ref: string;
   alternateRefs: string[];
   source: "TAHOT" | "TAGNT";
@@ -339,18 +343,14 @@ export function selectStepOriginalTokensForRefs(
   for (const ref of selectedRefs) {
     const verse = verseMap.get(ref);
     if (!verse) continue;
-    const hasAlternateProjection =
-      options.preferAlternateRef &&
-      verse.tokens.some((token) =>
-        (token as StepBackedOriginalToken).stepAlternateRefs.includes(ref)
-      );
 
     for (const token of verse.tokens) {
       const sourceIdentity = getStepSourceIdentity(token);
       if (!sourceIdentity || seenSourceIdentities.has(sourceIdentity)) continue;
       const stepToken = token as StepBackedOriginalToken;
       if (
-        hasAlternateProjection &&
+        options.preferAlternateRef &&
+        stepToken.stepAlternateRefs.length > 0 &&
         !stepToken.stepAlternateRefs.includes(ref)
       ) {
         continue;
@@ -392,15 +392,14 @@ export function selectStepEvidenceForRefs(
   for (const ref of selectedRefs) {
     const byStrong = evidenceIndex.get(ref);
     if (!byStrong) continue;
-    const hasAlternateProjection =
-      options.preferAlternateRef &&
-      [...byStrong.values()].some((evidence) =>
-        evidence.some((item) => item.stepAlternateRefs?.includes(ref))
-      );
     for (const [strong, evidence] of byStrong) {
       const target = selected.get(strong) ?? [];
       for (const item of evidence) {
-        if (hasAlternateProjection && !item.stepAlternateRefs?.includes(ref)) {
+        if (
+          options.preferAlternateRef &&
+          (item.stepAlternateRefs?.length ?? 0) > 0 &&
+          !item.stepAlternateRefs?.includes(ref)
+        ) {
           continue;
         }
         if (
@@ -460,7 +459,7 @@ export async function readStepOriginalTokens(
   const source = filePath.includes("TAGNT") ? "TAGNT" : "TAHOT";
   const tokens: StepOriginalToken[] = [];
 
-  for (const line of content.split(/\r?\n/u)) {
+  for (const [lineIndex, line] of content.split(/\r?\n/u).entries()) {
     const parts = line.split("\t");
     const ref = parseStepRef(parts[0] ?? "");
     if (!ref) continue;
@@ -470,12 +469,41 @@ export async function readStepOriginalTokens(
       source === "TAGNT"
         ? parseTagntToken(ref, parts)
         : parseTahotToken(ref, parts);
+    token.sourceLineNumber = lineIndex + 1;
+    token.sourceReference = parts[0]?.replace(/^\uFEFF/u, "");
     if (token.strongByBase.size > 0) {
       tokens.push(token);
     }
   }
 
+  // STEP occasionally restarts #NN within the same main verse at an alternate
+  // verse boundary (Num 26.1/25.19). These are different physical words, not
+  // duplicate projections. Keep existing identities except at real collisions.
+  const groups = new Map<string, StepOriginalToken[]>();
+  for (const token of tokens) {
+    const key = stepSourceIdentityForToken(token);
+    const group = groups.get(key) ?? [];
+    group.push(token);
+    groups.set(key, group);
+  }
+  for (const group of groups.values()) {
+    if (group.length < 2) continue;
+    const signature = (t: StepOriginalToken) =>
+      JSON.stringify([
+        t.sourceReference,
+        t.surface,
+        t.morphology,
+        [...t.strongByBase].map(([k, v]) => [k, [...v].sort()])
+      ]);
+    if (new Set(group.map(signature)).size < 2) continue;
+    for (const token of group)
+      token.identitySuffix = `~${createHash("sha256").update(signature(token)).digest("hex").slice(0, 12)}`;
+  }
   return tokens;
+}
+
+export function stepSourceIdentityForToken(token: StepOriginalToken): string {
+  return `${token.source}.${token.ref}.${token.tokenIndex}.${token.type}${token.identitySuffix ?? ""}`;
 }
 
 function stepRefMatchesBooks(
@@ -515,14 +543,9 @@ function addTokenToOriginalVerseMap(
     } satisfies OriginalVerse);
 
   const suffix = key === token.ref ? "main" : "alt";
-  const stepSourceIdentity = [
-    token.source,
-    token.ref,
-    token.tokenIndex,
-    token.type
-  ].join(".");
+  const stepSourceIdentity = stepSourceIdentityForToken(token);
   const originalToken: StepBackedOriginalToken = {
-    id: `${token.source}.${key}.${token.tokenIndex}.${token.type}.${suffix}`,
+    id: `${token.source}.${key}.${token.tokenIndex}.${token.type}${token.identitySuffix ?? ""}.${suffix}`,
     sourceTokenIndex: token.tokenIndex,
     stepSourceIdentity,
     stepMainRef: token.ref,
@@ -705,12 +728,7 @@ function addTokenEvidence(
         gloss: token.gloss,
         morphology: token.morphology,
         editions: token.editions,
-        stepSourceIdentity: [
-          token.source,
-          token.ref,
-          token.tokenIndex,
-          token.type
-        ].join("."),
+        stepSourceIdentity: stepSourceIdentityForToken(token),
         stepMainRef: token.ref,
         stepAlternateRefs: [...token.alternateRefs]
       });

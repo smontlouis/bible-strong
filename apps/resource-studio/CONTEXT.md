@@ -16,6 +16,50 @@ _Avoid_: Draft release
 Editorial content that has passed the declared validation and review gates for its release workflow.
 _Avoid_: Generated text
 
+**Source occurrence**:
+One word or segment at a specific position in an original-language textual reading. Repeated words remain distinct occurrences, and alternative Strong identifiers do not by themselves create additional occurrences.
+_Avoid_: Strong number, dictionary entry
+
+**Strong tagging alternative**:
+One possible assignment of lexical identifiers to a source occurrence. A tagging may contain several component identifiers; a different manuscript reading is distinct from an equivalent identifier for the same reading.
+_Avoid_: Synonym, interchangeable Strong list
+
+**Translation relation**:
+An evidenced association between one or more source occurrences and the words that express them in a translation. An unresolved relation is distinct from a reviewed absence of an explicit translation.
+_Avoid_: Strong placement, missing number
+
+**Strong display carrier**:
+The translated word or expression that carries a chosen Strong identifier for the reader. Its boundaries and identifier are editorial choices distinct from the full translation relation.
+_Avoid_: Source occurrence, semantic equivalent
+
+**Grammatical realization**:
+A source occurrence's syntactic function expressed by the construction of the translated sentence. This relation can coexist with an empty lexical display carrier when no distinct translated word realizes the occurrence.
+_Avoid_: Lost meaning, untranslated grammar, failed lexical match
+
+**Established empty Strong**:
+A source occurrence whose lack of an explicit translated equivalent has been established for the target verse. Its absence justification is separate from the justification of its display position.
+_Avoid_: Unmatched word, missing annotation, failed search
+
+**Empty Strong anchor**:
+A position for an empty Strong relative to translated carriers or a verse boundary, supported by source order or reference witnesses. A plausible anchor does not establish that the occurrence lacks an explicit translation.
+_Avoid_: Translation, absence proof
+
+**Unresolved Strong occurrence**:
+A source occurrence for which the available evidence does not establish a translated carrier or an explicit absence. Lack of a candidate, a missing reference tag, and disagreement between witnesses may all leave an occurrence unresolved.
+_Avoid_: Established empty Strong, omitted source word
+
+**Strong resolution dossier**:
+The target verse, source occurrences, witness evidence, proposed relations and review decisions needed to account for every Strong-bearing source occurrence in that verse.
+_Avoid_: Confidence score, completed Bible
+
+**Assisted translation review**:
+A model-authored judgment about a particular source occurrence and translation, with its evidence and uncertainty retained. It is distinct from human review and independent adjudication.
+_Avoid_: Gold label, independently validated relation
+
+**Reviewed display choice**:
+An explicit editorial decision selecting a visible carrier or empty anchor for an established translation relation. Establishing the relation does not by itself settle this choice.
+_Avoid_: Translation proof, automatic absence
+
 **Resource publication bundle**:
 An immutable, validated handoff for exactly one Resource identity and Resource revision.
 _Avoid_: Output directory, database dump

@@ -4,10 +4,19 @@ Date: 2026-07-10
 
 ## Objective
 
-The production objective is not to maximize the number of visible Strong codes.
-It is to maximize correct French carrier placement while preserving complete
-original-language provenance in a separate advanced view. A lower reader
-density is an improvement when it removes unsupported carriers.
+The objective, clarified on 2026-10-01, is to account for each source occurrence
+with a justified French carrier, an established absence of an explicit French
+equivalent with a separately justified empty anchor, or an explicitly unresolved
+decision. Correct empty decisions are successful outcomes. Failed placement,
+missing witness tags, and agreement about an empty in another translation do not
+by themselves establish absence in the target text.
+
+The existing production defaults still separate calibrated reader carriers from
+advanced provenance. A lower reader density is an improvement when it removes
+unsupported carriers. Exact carrier metrics remain useful reference-agreement
+canaries; they are not the sole objective or a measure of semantic certainty.
+See the [bounded resolution experiment](./strong-resolution-experiment-2026-10-01.md)
+for separate absence/anchor evidence and conditional anchoring results.
 
 The canonical ledger therefore has two explicit contracts:
 
@@ -233,3 +242,21 @@ Manual review should focus on disagreements, generic carriers, same-target
 stacking, inferred-only evidence, and high-impact relocation. Deterministic
 rejects and exact high-confidence consensus do not need repetitive manual
 review.
+
+## Cycle étendu du 1er octobre 2026
+
+Le [flux de résolution et de revue](./strong-resolution-extended-experiment-2026-10-01.md)
+ajoute un dossier par occurrence et une prévisualisation réutilisable depuis un
+ledger. Sa référence de travail contient 120 jugements assistés exposés ; elle
+ne remplace pas une adjudication indépendante. Les 100 passages précédemment
+réservés ont désormais été évalués après gel de la politique. Les rapports des
+cycles antérieurs décrivent leur statut historique ; ils ne sont plus une réserve
+vierge pour une nouvelle méthode. Les nouvelles propositions automatiques restent
+désactivées après échec de la porte de qualité.
+
+Le [traitement autonome des vides grammaticaux](./strong-autonomous-grammar-2026-10-01.md)
+introduit ensuite une règle locale distincte pour H0853/HTo nu en français. Elle
+conserve la relation grammaticale malgré un porteur lexical vide. Sa validation
+sur 200 nouvelles références est séparée du test des transferts exacts : les CSV
+n’offrent pas d’ancrages de référence pour les cas retenus, donc aucune précision
+sémantique indépendante n’est déduite de leur absence de tags.

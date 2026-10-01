@@ -1,3 +1,4 @@
+import { withoutPublisherNotes } from "./strongReaderText.js";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -25,7 +26,7 @@ import {
   type StrongVerseMap
 } from "./strongCsv.js";
 import { readStrongDictionaryTranslationCandidates } from "./strongDictionaryLexicon.js";
-import { stripTags, tokenizeText } from "./tokenize.js";
+import { stripTags } from "./tokenize.js";
 import { buildStrongTranslationLexicon } from "./translationLexicon.js";
 import { readStepOriginalData } from "./stepOriginals.js";
 import { getTranslationProfile } from "./translationProfiles.js";
@@ -35,6 +36,7 @@ import {
 } from "./strongLedger.js";
 
 export interface EvaluationOptions {
+  dictionaryPath?: string;
   gold: string;
   onlyRef?: string;
   limit?: number;
@@ -62,22 +64,10 @@ interface OriginalBundleVerse {
   sourceNames: string[];
 }
 
-export type CarrierKind = "word" | "phrase" | "empty";
-
-/**
- * One Strong occurrence and its French carrier. Word indexes are zero-based.
- * Empty placements are anchored immediately after `insertAfterWordIndex` (-1
- * means before the first word).
- */
-export interface CarrierPlacement {
-  strong: string;
-  kind: CarrierKind;
-  startWordIndex?: number;
-  endWordIndex?: number;
-  insertAfterWordIndex?: number;
-  confidence?: number;
-  source?: string;
-}
+import type { CarrierPlacement } from "./strongCarriers.js";
+export type { CarrierKind, CarrierPlacement } from "./strongCarriers.js";
+export { extractGoldCarrierPlacements } from "./strongCarriers.js";
+import { extractGoldCarrierPlacements } from "./strongCarriers.js";
 
 export interface PredictionSourceMetrics {
   source: string;
@@ -299,7 +289,9 @@ const RISK_COVERAGE_THRESHOLDS = [0.95, 0.9, 0.84, 0.7, 0.55, 0];
 export async function evaluateStrongGold(
   options: EvaluationOptions
 ): Promise<EvaluationReport> {
-  const goldRows = await readStrongCsv(`data/strongs/${options.gold}.csv`);
+  const goldRows = (
+    await readStrongCsv(`data/strongs/${options.gold}.csv`)
+  ).map((row) => ({ ...row, text: withoutPublisherNotes(row.text) }));
   const goldMap = buildStrongVerseMap(goldRows);
   const excludedReferenceNames = new Set(
     excludedReferenceNamesForGold(options.gold, options.includeGoldReference)
@@ -320,12 +312,18 @@ export async function evaluateStrongGold(
           gold: options.gold,
           goldMap,
           selectedRefs,
+          dictionaryPath: options.dictionaryPath,
           includeGoldReference: options.includeGoldReference
         })
       : undefined;
   const diagnostic =
     backend === "diagnostic"
-      ? buildDiagnosticEvaluationContext(references, originals, options.gold)
+      ? buildDiagnosticEvaluationContext(
+          references,
+          originals,
+          options.gold,
+          options.dictionaryPath
+        )
       : undefined;
 
   for (const ref of selectedRefs) {
@@ -429,9 +427,11 @@ interface DiagnosticEvaluationContext {
 function buildDiagnosticEvaluationContext(
   references: ReferenceMap[],
   originals: OriginalBundle[],
-  gold: string
+  gold: string,
+  dictionaryPath?: string
 ): DiagnosticEvaluationContext {
-  const dictionaryCandidates = readStrongDictionaryTranslationCandidates();
+  const dictionaryCandidates =
+    readStrongDictionaryTranslationCandidates(dictionaryPath);
   return {
     originalByRef: mergeOriginalSources(originals),
     lexicon: buildStrongLexicon(references),
@@ -478,6 +478,7 @@ async function maskedCanonicalPredictions(options: {
   goldMap: StrongVerseMap;
   selectedRefs: string[];
   includeGoldReference: boolean;
+  dictionaryPath?: string;
 }): Promise<Map<string, CarrierPlacement[]>> {
   const directory = await mkdtemp(
     path.join(tmpdir(), "strong-gold-canonical-")
@@ -500,6 +501,7 @@ async function maskedCanonicalPredictions(options: {
     }
     await writeFile(biblePath, `${JSON.stringify(bible)}\n`, "utf8");
     const ledger = await generateStrongLedger({
+      dictionaryPath: options.dictionaryPath,
       bible: `gold-eval-${options.gold.toLowerCase()}`,
       profileBible: options.gold === "Sg1910" ? "nbs" : "fmar",
       biblePath,
@@ -557,57 +559,6 @@ export function placementsFromLedgerVerse(
         source: `${annotation.source}:${annotation.diagnostics[0] ?? annotation.placement}`
       };
     });
-}
-
-/** Parse the gold markup into word, phrase, and empty Strong occurrences. */
-export function extractGoldCarrierPlacements(
-  taggedText: string
-): CarrierPlacement[] {
-  const placements: CarrierPlacement[] = [];
-  const wordTagPattern = /<w\b([^>]*)>([\s\S]*?)<\/w>/giu;
-  const plainText = stripTags(taggedText);
-  const wordRanges = getWordRanges(plainText);
-  let taggedCursor = 0;
-  let plainOffset = 0;
-
-  for (const match of taggedText.matchAll(wordTagPattern)) {
-    const matchIndex = match.index ?? 0;
-    plainOffset += stripTags(taggedText.slice(taggedCursor, matchIndex)).length;
-
-    const strong = parseStrongAttribute(match[1] ?? "");
-    const innerText = stripTags(match[2] ?? "");
-    const carrierStart = plainOffset;
-    const carrierEnd = carrierStart + innerText.length;
-    const coveredWordIndexes = wordRanges.flatMap((range, wordIndex) =>
-      rangesOverlap(carrierStart, carrierEnd, range.start, range.end)
-        ? [wordIndex]
-        : []
-    );
-
-    for (const strongCode of strong) {
-      if (coveredWordIndexes.length === 0) {
-        placements.push({
-          strong: strongCode,
-          kind: "empty",
-          insertAfterWordIndex: findPrecedingWordIndex(wordRanges, carrierStart)
-        });
-      } else {
-        const startWordIndex = coveredWordIndexes[0]!;
-        const endWordIndex = coveredWordIndexes.at(-1)!;
-        placements.push({
-          strong: strongCode,
-          kind: startWordIndex === endWordIndex ? "word" : "phrase",
-          startWordIndex,
-          endWordIndex
-        });
-      }
-    }
-
-    plainOffset = carrierEnd;
-    taggedCursor = matchIndex + match[0].length;
-  }
-
-  return placements;
 }
 
 /** Convert every reader assignment, including phrases, to scored occurrences. */
@@ -1398,48 +1349,6 @@ function categorizeVerse(options: {
   return "mixed-density-mismatch";
 }
 
-function getWordRanges(text: string): Array<{ start: number; end: number }> {
-  const ranges: Array<{ start: number; end: number }> = [];
-  let offset = 0;
-
-  for (const segment of tokenizeText(text)) {
-    const start = offset;
-    offset += segment.text.length;
-    if (segment.kind === "word") ranges.push({ start, end: offset });
-  }
-
-  return ranges;
-}
-
-function rangesOverlap(
-  leftStart: number,
-  leftEnd: number,
-  rightStart: number,
-  rightEnd: number
-): boolean {
-  return leftStart < rightEnd && rightStart < leftEnd;
-}
-
-function findPrecedingWordIndex(
-  ranges: Array<{ start: number; end: number }>,
-  offset: number
-): number {
-  let preceding = -1;
-  for (let index = 0; index < ranges.length; index += 1) {
-    if (ranges[index]!.end > offset) break;
-    preceding = index;
-  }
-  return preceding;
-}
-
-function parseStrongAttribute(attributes: string): string[] {
-  const match = attributes.match(/\bstrong=(["'])(.*?)\1/i);
-  return (match?.[2] ?? "")
-    .split(/\s+/)
-    .map((strong) => strong.trim())
-    .filter(Boolean);
-}
-
 function isVisiblePlacement(
   placement: CarrierPlacement
 ): placement is CarrierPlacement & {
@@ -1502,7 +1411,10 @@ function countRefsByBook(
 async function loadReferences(): Promise<ReferenceMap[]> {
   return Promise.all(
     REFERENCES.map(async (reference) => {
-      const rows = await readStrongCsv(reference.path);
+      const rows = (await readStrongCsv(reference.path)).map((row) => ({
+        ...row,
+        text: withoutPublisherNotes(row.text)
+      }));
       return { ...reference, rows, map: buildStrongVerseMap(rows) };
     })
   );
@@ -1625,6 +1537,7 @@ function parseCliOptions(argv: string[]): EvaluationOptions {
       : undefined,
     outputDir: args.get("output-dir") ?? "outputs",
     includeGoldReference: args.get("include-gold-reference") !== undefined,
+    dictionaryPath: args.get("dictionary"),
     backend: args.get("backend") === "canonical" ? "canonical" : "diagnostic"
   };
 }

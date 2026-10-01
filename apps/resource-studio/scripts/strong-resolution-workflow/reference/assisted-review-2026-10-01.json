@@ -1,0 +1,2572 @@
+[
+  {
+    "edition": "Sg1910",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.1.L",
+    "sourceUnitSha256": "f9bd91224e2837af90cfb8c18ead4e72c65daa30deee4c95de9bb5a55c98ab6e",
+    "targetTextSha256": "7021c55fbb2bdf876a2640f4219813acbd50ed7a5273f8b948e90c5cca995713",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [1],
+    "carrierWordIndices": [1],
+    "rationale": "La forme source 'and/ he spoke' correspond à « parla » ; Darby rend aussi la conjonction par « Et », séparée du verbe par le sujet. Le porteur lexical reste le verbe.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44762",
+      "Sg1910 Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.2.L",
+    "sourceUnitSha256": "9ce7e654c065d4a1c3abccdb8a6e3d9495c0668f574a85ea40c0c6021f75feba",
+    "targetTextSha256": "7021c55fbb2bdf876a2640f4219813acbd50ed7a5273f8b948e90c5cca995713",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0],
+    "carrierWordIndices": [0],
+    "rationale": "Le nom source Yahweh est rendu par « l’Éternel » dans cette édition.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44763",
+      "Sg1910 Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.3.L",
+    "sourceUnitSha256": "054f803c154c363d18321ffb69110f8d3dbc23d0175857bd114c445dda13f765",
+    "targetTextSha256": "7021c55fbb2bdf876a2640f4219813acbd50ed7a5273f8b948e90c5cca995713",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [2],
+    "carrierWordIndices": [2],
+    "rationale": "La préposition source 'to' est explicitement rendue par « à », devant Moïse.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44764",
+      "Sg1910 Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.4.L",
+    "sourceUnitSha256": "5e39285b892310ef755e070fd6ffeb9336b6d4f2de26f27084638a235b341973",
+    "targetTextSha256": "7021c55fbb2bdf876a2640f4219813acbd50ed7a5273f8b948e90c5cca995713",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [3],
+    "carrierWordIndices": [3],
+    "rationale": "Le nom propre Moses correspond à « Moïse ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44765",
+      "Sg1910 Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.5.L",
+    "sourceUnitSha256": "579c28803edf21400d9e2938513359844e3d599af17dde1b8a6cdab6e101830d",
+    "targetTextSha256": "7021c55fbb2bdf876a2640f4219813acbd50ed7a5273f8b948e90c5cca995713",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [4, 5],
+    "carrierWordIndices": [5],
+    "rationale": "Le second verbe source 'saying' a un équivalent explicite : « et dit » dans LSG, « disant » dans Darby. Le porteur lexical est « dit » ou « disant ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44766",
+      "Sg1910 Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.1.L",
+    "sourceUnitSha256": "a9f2901ea2e95c89ed844091a4fb051ba2a9c85a8f06299e7617f94b52c517b2",
+    "targetTextSha256": "2c8d3412830d6c213e6710ee22e73c18c4e3943c3eba1623ad4883d25bb5a02b",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [4],
+    "carrierWordIndices": [4],
+    "rationale": "Le nom source 'length of', construit avec 'days', est rendu par l’adjectif « longs » : changement de catégorie, sans absence lexicale.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40450",
+      "Sg1910 Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.2.L",
+    "sourceUnitSha256": "eca86bb1285d725556e1fd116ca9227bb0b32d645f97b83479793cb95c626f91",
+    "targetTextSha256": "2c8d3412830d6c213e6710ee22e73c18c4e3943c3eba1623ad4883d25bb5a02b",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [5],
+    "carrierWordIndices": [5],
+    "rationale": "Le nom pluriel 'days' correspond à « jours ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40451",
+      "Sg1910 Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.3.L",
+    "sourceUnitSha256": "2f7193dd7df7c6ca82ca5f010c5ce1583a6a0e8435b0be72ab0592854466f155",
+    "targetTextSha256": "2c8d3412830d6c213e6710ee22e73c18c4e3943c3eba1623ad4883d25bb5a02b",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0, 1, 2],
+    "carrierWordIndices": [2],
+    "rationale": "La morphologie et la glose 'I will satisfy/ him' sont explicites dans « Je le rassasierai ». La relation inclut les pronoms ; le numéro est porté par le verbe.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40452",
+      "Sg1910 Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.4.L",
+    "sourceUnitSha256": "938fe3ed33786f5b48188a32a0d0aff07922c6f9ee987e8c904b89e262123055",
+    "targetTextSha256": "2c8d3412830d6c213e6710ee22e73c18c4e3943c3eba1623ad4883d25bb5a02b",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [6, 7, 8, 9, 10],
+    "carrierWordIndices": [9, 10],
+    "rationale": "La forme causative 'and/ I will let look/ him' est rendue par « et je lui ferai voir ». Le porteur verbal est l’expression causative « ferai voir », pas seulement une proximité lexicale.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40453",
+      "Sg1910 Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.5.L",
+    "sourceUnitSha256": "dc0322203ec68691dfb18c7c9fa8f21d85b222975ec08a871c18a466c9cc1f2e",
+    "targetTextSha256": "2c8d3412830d6c213e6710ee22e73c18c4e3943c3eba1623ad4883d25bb5a02b",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [11, 12],
+    "carrierWordIndices": [12],
+    "rationale": "La source contient 'salvation/ my' ; « mon salut » rend le nom et le possessif. Le porteur du numéro est « salut ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40454",
+      "Sg1910 Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.1.L",
+    "sourceUnitSha256": "36231267e392d8c7e714f531294e366a91f725c85233032dfb92b1b33608c7af",
+    "targetTextSha256": "3c52a647d24a6d2c3f674c6bb79e652811b19d6a2037944611ef67a4bf920296",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0],
+    "carrierWordIndices": [0],
+    "rationale": "La préposition locative source 'on' est rendue par « Aux », devant le nom d’arbre.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52355",
+      "Sg1910 Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.2.L",
+    "sourceUnitSha256": "4f50a2f97b8e45264c5bf6164cffa966986f59b82d94d1b02504e1b3ee95dd16",
+    "targetTextSha256": "3c52a647d24a6d2c3f674c6bb79e652811b19d6a2037944611ef67a4bf920296",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [1],
+    "carrierWordIndices": [1],
+    "rationale": "La source désigne l’arbre (glose STEP 'poplars') et la traduction choisit « saules ». Relation de nom d’arbre explicitement réalisée ; cette revue ne tranche pas l’identification botanique.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52356",
+      "Sg1910 Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.3.L",
+    "sourceUnitSha256": "ba4b31cd220fe899d1124896b6ec7a0b87ab431dc81e9bbe4ae65e2bad310425",
+    "targetTextSha256": "3c52a647d24a6d2c3f674c6bb79e652811b19d6a2037944611ef67a4bf920296",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La source porte 'in/ [the] midst of/ it' ; LSG écrit « de la contrée ». Il existe une reformulation locative, mais la frontière entre réalisation idiomatique et omission de 'midst' mérite une revue philologique. Ne pas déclarer automatiquement un vide.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52357",
+      "Sg1910 Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.4.L",
+    "sourceUnitSha256": "687cccca7fbac5136b9dbf302917f3d846b0fcad7fbe60aaf00a72ab50f10b42",
+    "targetTextSha256": "3c52a647d24a6d2c3f674c6bb79e652811b19d6a2037944611ef67a4bf920296",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [5, 6, 7],
+    "carrierWordIndices": [7],
+    "rationale": "La forme verbale 'we hung up' est rendue par le sujet, l’auxiliaire et « suspendu ». Le porteur lexical est le participe.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52358",
+      "Sg1910 Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.5.L",
+    "sourceUnitSha256": "d0b1827f5c7d381335784ab58b5643a454ef85ad4c85d182c04642f7272e6d47",
+    "targetTextSha256": "3c52a647d24a6d2c3f674c6bb79e652811b19d6a2037944611ef67a4bf920296",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [8, 9],
+    "carrierWordIndices": [9],
+    "rationale": "Le nom avec suffixe 'harps/ our' correspond à « nos harpes ». Le numéro est porté par « harpes ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52359",
+      "Sg1910 Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.1.L",
+    "sourceUnitSha256": "ba33eff708ab0f2fa52955517bca8fe59720e1b0c77181a0b53ff39749bc1ee2",
+    "targetTextSha256": "227b8968c6415ccbdf1a013cc3ba22a71ba177044754a2f531ef1e1196e96aa0",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0, 1],
+    "carrierWordIndices": [1],
+    "rationale": "La source 'I have sprinkled' est rendue ici par « j’ai parfumé », dans la liste des substances odorantes. La glose source est plus littérale ; le porteur est « parfumé ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57948",
+      "Sg1910 Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.2.L",
+    "sourceUnitSha256": "d2d8020dfd3f3f82def474b2fc2baea7004428826c0b5e4b3eb7f52c4af64b5d",
+    "targetTextSha256": "227b8968c6415ccbdf1a013cc3ba22a71ba177044754a2f531ef1e1196e96aa0",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [2, 3],
+    "carrierWordIndices": [3],
+    "rationale": "Le nom avec suffixe 'bed/ my' correspond à « ma couche ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57949",
+      "Sg1910 Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.3.L",
+    "sourceUnitSha256": "2e03281d7c18b1cae0e019be588ed43fea1b97709db9dfcfb5b6684a5bc97a47",
+    "targetTextSha256": "227b8968c6415ccbdf1a013cc3ba22a71ba177044754a2f531ef1e1196e96aa0",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [5],
+    "carrierWordIndices": [5],
+    "rationale": "Le nom de substance 'myrrh' correspond à « myrrhe ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57950",
+      "Sg1910 Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.4.L",
+    "sourceUnitSha256": "50ddfa61c372809fe42b956e7625bb346bb49c8936bca6f49d141601805bb750",
+    "targetTextSha256": "227b8968c6415ccbdf1a013cc3ba22a71ba177044754a2f531ef1e1196e96aa0",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [6],
+    "carrierWordIndices": [6],
+    "rationale": "Le nom 'aloes' est explicite dans le token français élidé « d’aloès » ; le tokenizer ne sépare pas la préposition du nom.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57951",
+      "Sg1910 Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.5.L",
+    "sourceUnitSha256": "30b9a8b499486e9ee34c5fca69e96f70b5938f9076123ac56a40c4f96b6e46f7",
+    "targetTextSha256": "227b8968c6415ccbdf1a013cc3ba22a71ba177044754a2f531ef1e1196e96aa0",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [7, 8, 9],
+    "carrierWordIndices": [9],
+    "rationale": "La source 'and/ cinnamon' est exprimée par « et de cinnamome » ; le porteur lexical est « cinnamome ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57952",
+      "Sg1910 Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.1.NKO",
+    "sourceUnitSha256": "9b4285ad176fa1e50ab0577f68da6cfcdd6570b5fd44b20614fa7e61bea4cfb5",
+    "targetTextSha256": "78f59b6daaa3cc8fa0bc4aafa223346e93c05142bc45a6355790899c6aa69817",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0],
+    "carrierWordIndices": [0],
+    "rationale": "L’impératif source 'do produce' correspond à « Produisez ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1803",
+      "Sg1910 Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.2.NKO",
+    "sourceUnitSha256": "54e6fcbdc6d9ee44fcdaa73bdbde5f669b1b5bae44f8c17e864fdcbec42399b7",
+    "targetTextSha256": "78f59b6daaa3cc8fa0bc4aafa223346e93c05142bc45a6355790899c6aa69817",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [1],
+    "carrierWordIndices": [1],
+    "rationale": "La conjonction source 'therefore' correspond à « donc ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1804",
+      "Sg1910 Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.3.N(k)O",
+    "sourceUnitSha256": "a8d3e4f25e89fa276af97d1883c050bb5043e488ae8e0e88330290d9141919b6",
+    "targetTextSha256": "78f59b6daaa3cc8fa0bc4aafa223346e93c05142bc45a6355790899c6aa69817",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La ligne source est marquée N(k)O, avec une variante de lecture. Le français suggère un support lexical, mais le choix de lecture n’est pas établi par ce dossier ; conserver l’incertitude d’identité plutôt que valider implicitement la variante.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1805",
+      "Sg1910 Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.4.N(k)O",
+    "sourceUnitSha256": "c484a3de3c9064b1f67d24d802941a61204abfb5560fe0827f8c28735b8f9fee",
+    "targetTextSha256": "78f59b6daaa3cc8fa0bc4aafa223346e93c05142bc45a6355790899c6aa69817",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La ligne source est marquée N(k)O, avec une variante de lecture. Le français suggère un support lexical, mais le choix de lecture n’est pas établi par ce dossier ; conserver l’incertitude d’identité plutôt que valider implicitement la variante.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1806",
+      "Sg1910 Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.5.NKO",
+    "sourceUnitSha256": "cb518406a67b618f860566091312fe6421f6fbd6f5d48d53b797a025479c868c",
+    "targetTextSha256": "78f59b6daaa3cc8fa0bc4aafa223346e93c05142bc45a6355790899c6aa69817",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [6],
+    "carrierWordIndices": [6],
+    "rationale": "L’article génitif féminin source est explicitement réalisé par l’article français « la », devant « repentance ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1807",
+      "Sg1910 Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.6.NKO",
+    "sourceUnitSha256": "417e4e2350ff120a6871f6724534d03383ddee4d852743ae46cb84f929c77308",
+    "targetTextSha256": "78f59b6daaa3cc8fa0bc4aafa223346e93c05142bc45a6355790899c6aa69817",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [5, 6, 7],
+    "carrierWordIndices": [7],
+    "rationale": "Le nom au génitif 'of repentance' est rendu par « de la repentance » dans LSG, « à la repentance » dans Darby et DarbyR après « convienne ». La relation inclut la construction ; le porteur lexical est « repentance ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1808",
+      "Sg1910 Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.1.L",
+    "sourceUnitSha256": "f9bd91224e2837af90cfb8c18ead4e72c65daa30deee4c95de9bb5a55c98ab6e",
+    "targetTextSha256": "4f5c2483000b726b451d9e8f4b73b394002d14088229d430f8e211045a8b8e6b",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0, 2],
+    "carrierWordIndices": [2],
+    "rationale": "La forme source 'and/ he spoke' correspond à « parla » ; Darby rend aussi la conjonction par « Et », séparée du verbe par le sujet. Le porteur lexical reste le verbe.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44762",
+      "Darby Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.2.L",
+    "sourceUnitSha256": "9ce7e654c065d4a1c3abccdb8a6e3d9495c0668f574a85ea40c0c6021f75feba",
+    "targetTextSha256": "4f5c2483000b726b451d9e8f4b73b394002d14088229d430f8e211045a8b8e6b",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [1],
+    "carrierWordIndices": [1],
+    "rationale": "Le nom source Yahweh est rendu par « l’Éternel » dans cette édition.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44763",
+      "Darby Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.3.L",
+    "sourceUnitSha256": "054f803c154c363d18321ffb69110f8d3dbc23d0175857bd114c445dda13f765",
+    "targetTextSha256": "4f5c2483000b726b451d9e8f4b73b394002d14088229d430f8e211045a8b8e6b",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [3],
+    "carrierWordIndices": [3],
+    "rationale": "La préposition source 'to' est explicitement rendue par « à », devant Moïse.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44764",
+      "Darby Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.4.L",
+    "sourceUnitSha256": "5e39285b892310ef755e070fd6ffeb9336b6d4f2de26f27084638a235b341973",
+    "targetTextSha256": "4f5c2483000b726b451d9e8f4b73b394002d14088229d430f8e211045a8b8e6b",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [4],
+    "carrierWordIndices": [4],
+    "rationale": "Le nom propre Moses correspond à « Moïse ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44765",
+      "Darby Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.5.L",
+    "sourceUnitSha256": "579c28803edf21400d9e2938513359844e3d599af17dde1b8a6cdab6e101830d",
+    "targetTextSha256": "4f5c2483000b726b451d9e8f4b73b394002d14088229d430f8e211045a8b8e6b",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [5],
+    "carrierWordIndices": [5],
+    "rationale": "Le second verbe source 'saying' a un équivalent explicite : « et dit » dans LSG, « disant » dans Darby. Le porteur lexical est « dit » ou « disant ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44766",
+      "Darby Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.1.L",
+    "sourceUnitSha256": "a9f2901ea2e95c89ed844091a4fb051ba2a9c85a8f06299e7617f94b52c517b2",
+    "targetTextSha256": "c8afc8e9fe6caed6f2dedc7fbe179699695b3c9f82854045564222a747a73240",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [4],
+    "carrierWordIndices": [4],
+    "rationale": "Le nom source 'length of', construit avec 'days', est rendu par l’adjectif « longs » : changement de catégorie, sans absence lexicale.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40450",
+      "Darby Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.2.L",
+    "sourceUnitSha256": "eca86bb1285d725556e1fd116ca9227bb0b32d645f97b83479793cb95c626f91",
+    "targetTextSha256": "c8afc8e9fe6caed6f2dedc7fbe179699695b3c9f82854045564222a747a73240",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [5],
+    "carrierWordIndices": [5],
+    "rationale": "Le nom pluriel 'days' correspond à « jours ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40451",
+      "Darby Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.3.L",
+    "sourceUnitSha256": "2f7193dd7df7c6ca82ca5f010c5ce1583a6a0e8435b0be72ab0592854466f155",
+    "targetTextSha256": "c8afc8e9fe6caed6f2dedc7fbe179699695b3c9f82854045564222a747a73240",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0, 1, 2],
+    "carrierWordIndices": [2],
+    "rationale": "La morphologie et la glose 'I will satisfy/ him' sont explicites dans « Je le rassasierai ». La relation inclut les pronoms ; le numéro est porté par le verbe.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40452",
+      "Darby Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.4.L",
+    "sourceUnitSha256": "938fe3ed33786f5b48188a32a0d0aff07922c6f9ee987e8c904b89e262123055",
+    "targetTextSha256": "c8afc8e9fe6caed6f2dedc7fbe179699695b3c9f82854045564222a747a73240",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [6, 7, 8, 9, 10],
+    "carrierWordIndices": [9, 10],
+    "rationale": "La forme causative 'and/ I will let look/ him' est rendue par « et je lui ferai voir ». Le porteur verbal est l’expression causative « ferai voir », pas seulement une proximité lexicale.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40453",
+      "Darby Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.5.L",
+    "sourceUnitSha256": "dc0322203ec68691dfb18c7c9fa8f21d85b222975ec08a871c18a466c9cc1f2e",
+    "targetTextSha256": "c8afc8e9fe6caed6f2dedc7fbe179699695b3c9f82854045564222a747a73240",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [11, 12],
+    "carrierWordIndices": [12],
+    "rationale": "La source contient 'salvation/ my' ; « mon salut » rend le nom et le possessif. Le porteur du numéro est « salut ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40454",
+      "Darby Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.1.L",
+    "sourceUnitSha256": "36231267e392d8c7e714f531294e366a91f725c85233032dfb92b1b33608c7af",
+    "targetTextSha256": "8f143c63ed6da1e645770c407f657b99b22853c5ca6dee1a8ddb6614de260117",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0],
+    "carrierWordIndices": [0],
+    "rationale": "La préposition locative source 'on' est rendue par « Aux », devant le nom d’arbre.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52355",
+      "Darby Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.2.L",
+    "sourceUnitSha256": "4f50a2f97b8e45264c5bf6164cffa966986f59b82d94d1b02504e1b3ee95dd16",
+    "targetTextSha256": "8f143c63ed6da1e645770c407f657b99b22853c5ca6dee1a8ddb6614de260117",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [1],
+    "carrierWordIndices": [1],
+    "rationale": "La source désigne l’arbre (glose STEP 'poplars') et la traduction choisit « saules ». Relation de nom d’arbre explicitement réalisée ; cette revue ne tranche pas l’identification botanique.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52356",
+      "Darby Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.3.L",
+    "sourceUnitSha256": "ba4b31cd220fe899d1124896b6ec7a0b87ab431dc81e9bbe4ae65e2bad310425",
+    "targetTextSha256": "8f143c63ed6da1e645770c407f657b99b22853c5ca6dee1a8ddb6614de260117",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [4, 5, 6],
+    "carrierWordIndices": [5],
+    "rationale": "Le groupe source 'in/ [the] midst of/ it' correspond explicitement à « au milieu d’elle ». Le numéro lexical est porté par « milieu ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52357",
+      "Darby Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.4.L",
+    "sourceUnitSha256": "687cccca7fbac5136b9dbf302917f3d846b0fcad7fbe60aaf00a72ab50f10b42",
+    "targetTextSha256": "8f143c63ed6da1e645770c407f657b99b22853c5ca6dee1a8ddb6614de260117",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [7, 8, 9],
+    "carrierWordIndices": [9],
+    "rationale": "La forme verbale 'we hung up' est rendue par le sujet, l’auxiliaire et « suspendu ». Le porteur lexical est le participe.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52358",
+      "Darby Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.5.L",
+    "sourceUnitSha256": "d0b1827f5c7d381335784ab58b5643a454ef85ad4c85d182c04642f7272e6d47",
+    "targetTextSha256": "8f143c63ed6da1e645770c407f657b99b22853c5ca6dee1a8ddb6614de260117",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [10, 11],
+    "carrierWordIndices": [11],
+    "rationale": "Le nom avec suffixe 'harps/ our' correspond à « nos harpes ». Le numéro est porté par « harpes ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52359",
+      "Darby Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.1.L",
+    "sourceUnitSha256": "ba33eff708ab0f2fa52955517bca8fe59720e1b0c77181a0b53ff39749bc1ee2",
+    "targetTextSha256": "a1f4e2ed6e748c825fc54b83b8d3e00dcb7f8fdaa53bc9314608ca7b78fd10d3",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0, 1],
+    "carrierWordIndices": [1],
+    "rationale": "La source 'I have sprinkled' est rendue ici par « j’ai parfumé », dans la liste des substances odorantes. La glose source est plus littérale ; le porteur est « parfumé ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57948",
+      "Darby Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.2.L",
+    "sourceUnitSha256": "d2d8020dfd3f3f82def474b2fc2baea7004428826c0b5e4b3eb7f52c4af64b5d",
+    "targetTextSha256": "a1f4e2ed6e748c825fc54b83b8d3e00dcb7f8fdaa53bc9314608ca7b78fd10d3",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [2, 3],
+    "carrierWordIndices": [3],
+    "rationale": "Le nom avec suffixe 'bed/ my' correspond à « ma couche ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57949",
+      "Darby Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.3.L",
+    "sourceUnitSha256": "2e03281d7c18b1cae0e019be588ed43fea1b97709db9dfcfb5b6684a5bc97a47",
+    "targetTextSha256": "a1f4e2ed6e748c825fc54b83b8d3e00dcb7f8fdaa53bc9314608ca7b78fd10d3",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [5],
+    "carrierWordIndices": [5],
+    "rationale": "Le nom de substance 'myrrh' correspond à « myrrhe ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57950",
+      "Darby Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.4.L",
+    "sourceUnitSha256": "50ddfa61c372809fe42b956e7625bb346bb49c8936bca6f49d141601805bb750",
+    "targetTextSha256": "a1f4e2ed6e748c825fc54b83b8d3e00dcb7f8fdaa53bc9314608ca7b78fd10d3",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [6],
+    "carrierWordIndices": [6],
+    "rationale": "Le nom 'aloes' est explicite dans le token français élidé « d’aloès » ; le tokenizer ne sépare pas la préposition du nom.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57951",
+      "Darby Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.5.L",
+    "sourceUnitSha256": "30b9a8b499486e9ee34c5fca69e96f70b5938f9076123ac56a40c4f96b6e46f7",
+    "targetTextSha256": "a1f4e2ed6e748c825fc54b83b8d3e00dcb7f8fdaa53bc9314608ca7b78fd10d3",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [7, 8, 9],
+    "carrierWordIndices": [9],
+    "rationale": "La source 'and/ cinnamon' est exprimée par « et de cinnamome » ; le porteur lexical est « cinnamome ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57952",
+      "Darby Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.1.NKO",
+    "sourceUnitSha256": "9b4285ad176fa1e50ab0577f68da6cfcdd6570b5fd44b20614fa7e61bea4cfb5",
+    "targetTextSha256": "0ec70fff9852cbbd07562e295aa82c3a8e4658f5d6cb6e53356eb35922a9bd2d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0],
+    "carrierWordIndices": [0],
+    "rationale": "L’impératif source 'do produce' correspond à « Produisez ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1803",
+      "Darby Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.2.NKO",
+    "sourceUnitSha256": "54e6fcbdc6d9ee44fcdaa73bdbde5f669b1b5bae44f8c17e864fdcbec42399b7",
+    "targetTextSha256": "0ec70fff9852cbbd07562e295aa82c3a8e4658f5d6cb6e53356eb35922a9bd2d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [1],
+    "carrierWordIndices": [1],
+    "rationale": "La conjonction source 'therefore' correspond à « donc ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1804",
+      "Darby Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.3.N(k)O",
+    "sourceUnitSha256": "a8d3e4f25e89fa276af97d1883c050bb5043e488ae8e0e88330290d9141919b6",
+    "targetTextSha256": "0ec70fff9852cbbd07562e295aa82c3a8e4658f5d6cb6e53356eb35922a9bd2d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La ligne source est marquée N(k)O, avec une variante de lecture. Le français suggère un support lexical, mais le choix de lecture n’est pas établi par ce dossier ; conserver l’incertitude d’identité plutôt que valider implicitement la variante.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1805",
+      "Darby Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.4.N(k)O",
+    "sourceUnitSha256": "c484a3de3c9064b1f67d24d802941a61204abfb5560fe0827f8c28735b8f9fee",
+    "targetTextSha256": "0ec70fff9852cbbd07562e295aa82c3a8e4658f5d6cb6e53356eb35922a9bd2d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La ligne source est marquée N(k)O, avec une variante de lecture. Le français suggère un support lexical, mais le choix de lecture n’est pas établi par ce dossier ; conserver l’incertitude d’identité plutôt que valider implicitement la variante.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1806",
+      "Darby Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.5.NKO",
+    "sourceUnitSha256": "cb518406a67b618f860566091312fe6421f6fbd6f5d48d53b797a025479c868c",
+    "targetTextSha256": "0ec70fff9852cbbd07562e295aa82c3a8e4658f5d6cb6e53356eb35922a9bd2d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [7],
+    "carrierWordIndices": [7],
+    "rationale": "L’article génitif féminin source est explicitement réalisé par l’article français « la », devant « repentance ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1807",
+      "Darby Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.6.NKO",
+    "sourceUnitSha256": "417e4e2350ff120a6871f6724534d03383ddee4d852743ae46cb84f929c77308",
+    "targetTextSha256": "0ec70fff9852cbbd07562e295aa82c3a8e4658f5d6cb6e53356eb35922a9bd2d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [6, 7, 8],
+    "carrierWordIndices": [8],
+    "rationale": "Le nom au génitif 'of repentance' est rendu par « de la repentance » dans LSG, « à la repentance » dans Darby et DarbyR après « convienne ». La relation inclut la construction ; le porteur lexical est « repentance ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1808",
+      "Darby Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.1.L",
+    "sourceUnitSha256": "f9bd91224e2837af90cfb8c18ead4e72c65daa30deee4c95de9bb5a55c98ab6e",
+    "targetTextSha256": "659d0b54bbf52bb42c0d200fbb363bb59cbccf5d5da0130a87fe664388caa38d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [1],
+    "carrierWordIndices": [1],
+    "rationale": "La forme source 'and/ he spoke' correspond à « parla » ; Darby rend aussi la conjonction par « Et », séparée du verbe par le sujet. Le porteur lexical reste le verbe.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44762",
+      "DarbyR Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.2.L",
+    "sourceUnitSha256": "9ce7e654c065d4a1c3abccdb8a6e3d9495c0668f574a85ea40c0c6021f75feba",
+    "targetTextSha256": "659d0b54bbf52bb42c0d200fbb363bb59cbccf5d5da0130a87fe664388caa38d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0],
+    "carrierWordIndices": [0],
+    "rationale": "Le nom source Yahweh est rendu par « l’Éternel » dans cette édition.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44763",
+      "DarbyR Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.3.L",
+    "sourceUnitSha256": "054f803c154c363d18321ffb69110f8d3dbc23d0175857bd114c445dda13f765",
+    "targetTextSha256": "659d0b54bbf52bb42c0d200fbb363bb59cbccf5d5da0130a87fe664388caa38d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [2],
+    "carrierWordIndices": [2],
+    "rationale": "La préposition source 'to' est explicitement rendue par « à », devant Moïse.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44764",
+      "DarbyR Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.4.L",
+    "sourceUnitSha256": "5e39285b892310ef755e070fd6ffeb9336b6d4f2de26f27084638a235b341973",
+    "targetTextSha256": "659d0b54bbf52bb42c0d200fbb363bb59cbccf5d5da0130a87fe664388caa38d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [3],
+    "carrierWordIndices": [3],
+    "rationale": "Le nom propre Moses correspond à « Moïse ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44765",
+      "DarbyR Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Exod.13.1",
+    "sourceUnitId": "TAHOT.Exod.13.1.5.L",
+    "sourceUnitSha256": "579c28803edf21400d9e2938513359844e3d599af17dde1b8a6cdab6e101830d",
+    "targetTextSha256": "659d0b54bbf52bb42c0d200fbb363bb59cbccf5d5da0130a87fe664388caa38d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "empty",
+    "relation": "no-explicit-equivalent",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La source porte un second verbe, '<to>/ saying', après 'he spoke'. DarbyR s’arrête à « L’Éternel parla à Moïse : » : aucun mot distinct ne réalise ce second verbe. La parole est déjà annoncée par « parla » et les deux-points. Proposition assistée d’absence d’équivalent explicite séparé, sans prétendre que l’information de discours disparaît.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:44766",
+      "DarbyR Exod.13.1 — texte exact du dossier, sans notes éditoriales"
+    ],
+    "anchor": {
+      "insertAfterWordIndex": 1,
+      "rationale": "Rattacher le second verbe de parole non réalisé au porteur H1696 « parla », après l’indice 1. Choix éditorial explicite : proximité du verbe associé plutôt que fin mécanique de la séquence source.",
+      "contextSha256": "94ea00108882557e7f18f7d661ad59e619025cad909192da40a1f061f0c08e68"
+    }
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.1.L",
+    "sourceUnitSha256": "a9f2901ea2e95c89ed844091a4fb051ba2a9c85a8f06299e7617f94b52c517b2",
+    "targetTextSha256": "c8afc8e9fe6caed6f2dedc7fbe179699695b3c9f82854045564222a747a73240",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [4],
+    "carrierWordIndices": [4],
+    "rationale": "Le nom source 'length of', construit avec 'days', est rendu par l’adjectif « longs » : changement de catégorie, sans absence lexicale.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40450",
+      "DarbyR Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.2.L",
+    "sourceUnitSha256": "eca86bb1285d725556e1fd116ca9227bb0b32d645f97b83479793cb95c626f91",
+    "targetTextSha256": "c8afc8e9fe6caed6f2dedc7fbe179699695b3c9f82854045564222a747a73240",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [5],
+    "carrierWordIndices": [5],
+    "rationale": "Le nom pluriel 'days' correspond à « jours ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40451",
+      "DarbyR Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.3.L",
+    "sourceUnitSha256": "2f7193dd7df7c6ca82ca5f010c5ce1583a6a0e8435b0be72ab0592854466f155",
+    "targetTextSha256": "c8afc8e9fe6caed6f2dedc7fbe179699695b3c9f82854045564222a747a73240",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0, 1, 2],
+    "carrierWordIndices": [2],
+    "rationale": "La morphologie et la glose 'I will satisfy/ him' sont explicites dans « Je le rassasierai ». La relation inclut les pronoms ; le numéro est porté par le verbe.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40452",
+      "DarbyR Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.4.L",
+    "sourceUnitSha256": "938fe3ed33786f5b48188a32a0d0aff07922c6f9ee987e8c904b89e262123055",
+    "targetTextSha256": "c8afc8e9fe6caed6f2dedc7fbe179699695b3c9f82854045564222a747a73240",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [6, 7, 8, 9, 10],
+    "carrierWordIndices": [9, 10],
+    "rationale": "La forme causative 'and/ I will let look/ him' est rendue par « et je lui ferai voir ». Le porteur verbal est l’expression causative « ferai voir », pas seulement une proximité lexicale.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40453",
+      "DarbyR Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Ps.91.16",
+    "sourceUnitId": "TAHOT.Ps.91.16.5.L",
+    "sourceUnitSha256": "dc0322203ec68691dfb18c7c9fa8f21d85b222975ec08a871c18a466c9cc1f2e",
+    "targetTextSha256": "c8afc8e9fe6caed6f2dedc7fbe179699695b3c9f82854045564222a747a73240",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [11, 12],
+    "carrierWordIndices": [12],
+    "rationale": "La source contient 'salvation/ my' ; « mon salut » rend le nom et le possessif. Le porteur du numéro est « salut ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:40454",
+      "DarbyR Ps.91.16 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.1.L",
+    "sourceUnitSha256": "36231267e392d8c7e714f531294e366a91f725c85233032dfb92b1b33608c7af",
+    "targetTextSha256": "8f143c63ed6da1e645770c407f657b99b22853c5ca6dee1a8ddb6614de260117",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0],
+    "carrierWordIndices": [0],
+    "rationale": "La préposition locative source 'on' est rendue par « Aux », devant le nom d’arbre.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52355",
+      "DarbyR Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.2.L",
+    "sourceUnitSha256": "4f50a2f97b8e45264c5bf6164cffa966986f59b82d94d1b02504e1b3ee95dd16",
+    "targetTextSha256": "8f143c63ed6da1e645770c407f657b99b22853c5ca6dee1a8ddb6614de260117",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [1],
+    "carrierWordIndices": [1],
+    "rationale": "La source désigne l’arbre (glose STEP 'poplars') et la traduction choisit « saules ». Relation de nom d’arbre explicitement réalisée ; cette revue ne tranche pas l’identification botanique.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52356",
+      "DarbyR Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.3.L",
+    "sourceUnitSha256": "ba4b31cd220fe899d1124896b6ec7a0b87ab431dc81e9bbe4ae65e2bad310425",
+    "targetTextSha256": "8f143c63ed6da1e645770c407f657b99b22853c5ca6dee1a8ddb6614de260117",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [4, 5, 6],
+    "carrierWordIndices": [5],
+    "rationale": "Le groupe source 'in/ [the] midst of/ it' correspond explicitement à « au milieu d’elle ». Le numéro lexical est porté par « milieu ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52357",
+      "DarbyR Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.4.L",
+    "sourceUnitSha256": "687cccca7fbac5136b9dbf302917f3d846b0fcad7fbe60aaf00a72ab50f10b42",
+    "targetTextSha256": "8f143c63ed6da1e645770c407f657b99b22853c5ca6dee1a8ddb6614de260117",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [7, 8, 9],
+    "carrierWordIndices": [9],
+    "rationale": "La forme verbale 'we hung up' est rendue par le sujet, l’auxiliaire et « suspendu ». Le porteur lexical est le participe.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52358",
+      "DarbyR Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Ps.137.2",
+    "sourceUnitId": "TAHOT.Ps.137.2.5.L",
+    "sourceUnitSha256": "d0b1827f5c7d381335784ab58b5643a454ef85ad4c85d182c04642f7272e6d47",
+    "targetTextSha256": "8f143c63ed6da1e645770c407f657b99b22853c5ca6dee1a8ddb6614de260117",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [10, 11],
+    "carrierWordIndices": [11],
+    "rationale": "Le nom avec suffixe 'harps/ our' correspond à « nos harpes ». Le numéro est porté par « harpes ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:52359",
+      "DarbyR Ps.137.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.1.L",
+    "sourceUnitSha256": "ba33eff708ab0f2fa52955517bca8fe59720e1b0c77181a0b53ff39749bc1ee2",
+    "targetTextSha256": "a1f4e2ed6e748c825fc54b83b8d3e00dcb7f8fdaa53bc9314608ca7b78fd10d3",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0, 1],
+    "carrierWordIndices": [1],
+    "rationale": "La source 'I have sprinkled' est rendue ici par « j’ai parfumé », dans la liste des substances odorantes. La glose source est plus littérale ; le porteur est « parfumé ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57948",
+      "DarbyR Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.2.L",
+    "sourceUnitSha256": "d2d8020dfd3f3f82def474b2fc2baea7004428826c0b5e4b3eb7f52c4af64b5d",
+    "targetTextSha256": "a1f4e2ed6e748c825fc54b83b8d3e00dcb7f8fdaa53bc9314608ca7b78fd10d3",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [2, 3],
+    "carrierWordIndices": [3],
+    "rationale": "Le nom avec suffixe 'bed/ my' correspond à « ma couche ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57949",
+      "DarbyR Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.3.L",
+    "sourceUnitSha256": "2e03281d7c18b1cae0e019be588ed43fea1b97709db9dfcfb5b6684a5bc97a47",
+    "targetTextSha256": "a1f4e2ed6e748c825fc54b83b8d3e00dcb7f8fdaa53bc9314608ca7b78fd10d3",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [5],
+    "carrierWordIndices": [5],
+    "rationale": "Le nom de substance 'myrrh' correspond à « myrrhe ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57950",
+      "DarbyR Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.4.L",
+    "sourceUnitSha256": "50ddfa61c372809fe42b956e7625bb346bb49c8936bca6f49d141601805bb750",
+    "targetTextSha256": "a1f4e2ed6e748c825fc54b83b8d3e00dcb7f8fdaa53bc9314608ca7b78fd10d3",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [6],
+    "carrierWordIndices": [6],
+    "rationale": "Le nom 'aloes' est explicite dans le token français élidé « d’aloès » ; le tokenizer ne sépare pas la préposition du nom.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57951",
+      "DarbyR Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Prov.7.17",
+    "sourceUnitId": "TAHOT.Prov.7.17.5.L",
+    "sourceUnitSha256": "30b9a8b499486e9ee34c5fca69e96f70b5938f9076123ac56a40c4f96b6e46f7",
+    "targetTextSha256": "a1f4e2ed6e748c825fc54b83b8d3e00dcb7f8fdaa53bc9314608ca7b78fd10d3",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [7, 8, 9],
+    "carrierWordIndices": [9],
+    "rationale": "La source 'and/ cinnamon' est exprimée par « et de cinnamome » ; le porteur lexical est « cinnamome ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:57952",
+      "DarbyR Prov.7.17 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.1.NKO",
+    "sourceUnitSha256": "9b4285ad176fa1e50ab0577f68da6cfcdd6570b5fd44b20614fa7e61bea4cfb5",
+    "targetTextSha256": "0ec70fff9852cbbd07562e295aa82c3a8e4658f5d6cb6e53356eb35922a9bd2d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [0],
+    "carrierWordIndices": [0],
+    "rationale": "L’impératif source 'do produce' correspond à « Produisez ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1803",
+      "DarbyR Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.2.NKO",
+    "sourceUnitSha256": "54e6fcbdc6d9ee44fcdaa73bdbde5f669b1b5bae44f8c17e864fdcbec42399b7",
+    "targetTextSha256": "0ec70fff9852cbbd07562e295aa82c3a8e4658f5d6cb6e53356eb35922a9bd2d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [1],
+    "carrierWordIndices": [1],
+    "rationale": "La conjonction source 'therefore' correspond à « donc ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1804",
+      "DarbyR Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.3.N(k)O",
+    "sourceUnitSha256": "a8d3e4f25e89fa276af97d1883c050bb5043e488ae8e0e88330290d9141919b6",
+    "targetTextSha256": "0ec70fff9852cbbd07562e295aa82c3a8e4658f5d6cb6e53356eb35922a9bd2d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La ligne source est marquée N(k)O, avec une variante de lecture. Le français suggère un support lexical, mais le choix de lecture n’est pas établi par ce dossier ; conserver l’incertitude d’identité plutôt que valider implicitement la variante.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1805",
+      "DarbyR Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.4.N(k)O",
+    "sourceUnitSha256": "c484a3de3c9064b1f67d24d802941a61204abfb5560fe0827f8c28735b8f9fee",
+    "targetTextSha256": "0ec70fff9852cbbd07562e295aa82c3a8e4658f5d6cb6e53356eb35922a9bd2d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La ligne source est marquée N(k)O, avec une variante de lecture. Le français suggère un support lexical, mais le choix de lecture n’est pas établi par ce dossier ; conserver l’incertitude d’identité plutôt que valider implicitement la variante.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1806",
+      "DarbyR Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.5.NKO",
+    "sourceUnitSha256": "cb518406a67b618f860566091312fe6421f6fbd6f5d48d53b797a025479c868c",
+    "targetTextSha256": "0ec70fff9852cbbd07562e295aa82c3a8e4658f5d6cb6e53356eb35922a9bd2d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [7],
+    "carrierWordIndices": [7],
+    "rationale": "L’article génitif féminin source est explicitement réalisé par l’article français « la », devant « repentance ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1807",
+      "DarbyR Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Matt.3.8",
+    "sourceUnitId": "TAGNT.Matt.3.8.6.NKO",
+    "sourceUnitSha256": "417e4e2350ff120a6871f6724534d03383ddee4d852743ae46cb84f929c77308",
+    "targetTextSha256": "0ec70fff9852cbbd07562e295aa82c3a8e4658f5d6cb6e53356eb35922a9bd2d",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "lexical",
+    "targetWordIndices": [6, 7, 8],
+    "carrierWordIndices": [8],
+    "rationale": "Le nom au génitif 'of repentance' est rendu par « de la repentance » dans LSG, « à la repentance » dans Darby et DarbyR après « convienne ». La relation inclut la construction ; le porteur lexical est « repentance ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:1808",
+      "DarbyR Matt.3.8 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Gen.44.15",
+    "sourceUnitId": "TAHOT.Gen.44.15.6.L",
+    "sourceUnitSha256": "e4faa2c020ae3efb36fddc650cc556a7c3cb9889616a93e930ed87f2368ddd2b",
+    "targetTextSha256": "4834d37dfdd06fbf059f6cc472be27ff67e0dfb78768fc349f9ffdff9f726e5e",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "empty",
+    "relation": "no-explicit-equivalent",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "Le démonstratif source '<the>/ this' détermine 'deed'. Dans « Quelle action avez-vous faite ? », aucun démonstratif (« cette », « ceci ») n’est exprimé. « Quelle » réalise déjà l’interrogatif H4100. Proposition assistée d’absence du démonstratif explicite.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:31574",
+      "Sg1910 Gen.44.15 — texte exact du dossier, sans notes éditoriales"
+    ],
+    "anchor": {
+      "insertAfterWordIndex": 4,
+      "rationale": "Placer le démonstratif vide immédiatement après son nom associé H4639 « action » (indice 4), avant le groupe verbal. Cette décision d’affichage est distincte de la justification d’absence.",
+      "contextSha256": "3a19251f0bf11d507195728a0e49751844420230ffbb7936b7a1b0a5d3445f32"
+    }
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Lev.17.10",
+    "sourceUnitId": "TAHOT.Lev.17.10.9.L",
+    "sourceUnitSha256": "fa02b6bea9d819511fbb3e0bc0f59f88541ff857b55744d48d9555c7d69375dd",
+    "targetTextSha256": "1c74685614d6f9624f11238c6c47ba27cca171d3dabbf003c08da920812ea837",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "Le relatif source 'who' devant 'he will eat' apparaît dans une construction rendue par « Si un homme … mange ». La restructuration conditionnelle peut exprimer sa fonction grammaticalement. Ne pas conclure à une absence sur le seul manque d’un « qui » à cet endroit.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:78025",
+      "Sg1910 Lev.17.10 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Deut.22.2",
+    "sourceUnitId": "TAHOT.Deut.22.2.10.L",
+    "sourceUnitSha256": "e9ccb334ef9128004be2dd823200ddfeeaaeba5d392db5e6b425eb876b9528c0",
+    "targetTextSha256": "0f107d245305f3dbf026c280199fb72c9b8d0877a5b7711f5b6341c879fc54ce",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "Le groupe source 'into' + 'the middle of' est traduit « dans [ta maison] ». « Dans » peut réaliser conjointement les deux occurrences ; ni un vide certain ni un second porteur autonome ne sont établis sans décision de groupe.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:130587",
+      "Sg1910 Deut.22.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "2Pet.1.20",
+    "sourceUnitId": "TAGNT.2Pet.1.20.11.NKO",
+    "sourceUnitSha256": "7cc8c2addd9cbe5007588dc8b696de900405cef72310d4a87dddc49a64a83b36",
+    "targetTextSha256": "44b7e488afb042d8a40321033a2539f56cc41b5c844800c0ebb25493009ecea4",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "idiomatic",
+    "targetWordIndices": [9, 10, 11, 12],
+    "carrierWordIndices": [10],
+    "rationale": "La forme source ginētai, glosée 'is', participe à la paraphrase « peut être un objet [d’interprétation] ». Le verbe « être » est explicite et constitue un porteur lexical ; ne pas transférer un vide témoin.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Act-Rev.txt:102654",
+      "Sg1910 2Pet.1.20 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Lev.22.12",
+    "sourceUnitId": "TAHOT.Lev.22.12.3.L",
+    "sourceUnitSha256": "d68a16cfcd7bcd6d6a5e094e97ffd352313d5eafb9fc78650f26ae23944e18ae",
+    "targetTextSha256": "22b9de2666c456b66b756faa73c31b5f5b854926ab6cc4c509bab83724c8a17b",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [5],
+    "carrierWordIndices": [5],
+    "rationale": "La glose source 'if' est explicitement rendue par « si ». Un témoin qui omet ce mot ne justifie aucune absence dans cette cible.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:81197",
+      "Darby Lev.22.12 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Josh.3.8",
+    "sourceUnitId": "TAHOT.Josh.3.8.8.L",
+    "sourceUnitSha256": "c4b8019b16ef0274f941c8d547266a4d98c17c373605fd3c1370d2ffb73d0c7d",
+    "targetTextSha256": "23ef005b0b780aae105b89a21adc036744178afea1ead7ec4e24544436ba3bf9",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "empty",
+    "relation": "no-explicit-equivalent",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "Le verbe source 'saying' suit l’ordre adressé aux prêtres. Le français passe de « donner cet ordre … de l’alliance : » à la citation « Lorsque… », sans « dire » ou « disant ». L’acte de parole est conservé par « ordre » ; le second verbe n’a pas d’équivalent explicite séparé.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Jos-Est.txt:1499",
+      "Sg1910 Josh.3.8 — texte exact du dossier, sans notes éditoriales"
+    ],
+    "anchor": {
+      "insertAfterWordIndex": 3,
+      "rationale": "Rattacher ce verbe de parole vide à l’expression « donner/donne cet ordre », immédiatement après « ordre ». Choix éditorial d’association sémantique, distinct de l’ordre linéaire source.",
+      "contextSha256": "c2052f6c5ffa5b833c877d0d7cde40cae88b88827c0b282e85e79b45c29ed738"
+    }
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "2Chr.18.30",
+    "sourceUnitId": "TAHOT.2Chr.18.30.9.L",
+    "sourceUnitSha256": "6eba3928f34028e327460d31348380b5fb8e3137e16fb7b518452e7800b676b0",
+    "targetTextSha256": "ee7d3f0df5227e84f1938b854e641790c74beab803066ce5ddcaad0667fa419c",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "empty",
+    "relation": "no-explicit-equivalent",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "Le verbe 'saying' introduit la citation de l’ordre. La cible emploie « avait donné cet ordre » ou « commanda », puis la citation, sans second verbe de parole. Proposition assistée d’absence d’équivalent explicite distinct, et non d’absence de l’acte de parole.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Jos-Est.txt:150358",
+      "Sg1910 2Chr.18.30 — texte exact du dossier, sans notes éditoriales"
+    ],
+    "anchor": {
+      "insertAfterWordIndex": 7,
+      "rationale": "Rattacher le vide au porteur associé de l’ordre : après « ordre » pour LSG, après « commanda » pour DarbyR.",
+      "contextSha256": "505feb769443e6908d440b6a3d5a3eb8806628f3c9eee15a6d54c65559ed8f86"
+    }
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Eccl.9.10",
+    "sourceUnitId": "TAHOT.Eccl.9.10.18.L",
+    "sourceUnitSha256": "d1f643ac85413857656a795f864ed4e3ebebc9c8c9f10c6e18ea9b0bf8d5e4ba",
+    "targetTextSha256": "4651091f9a2b8b1ae8fac576da4b9da3a21dd69f56cebe1ecffded3f1c4f07e9",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La source utilise un locatif de reprise 'there/ towards' après le verbe 'going'. Le français dit « où tu vas ». « Où » peut absorber le relatif et la reprise locative ; l’absence d’un « là » séparé ne suffit pas à exclure une relation grammaticale commune.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:72756",
+      "Sg1910 Eccl.9.10 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Jer.50.26",
+    "sourceUnitId": "TAHOT.Jer.50.26.11.L",
+    "sourceUnitSha256": "e7e04385c37d31059ba6387596b533cd70b255fcd261ef1c8750e82f7b53485a",
+    "targetTextSha256": "428c61594b858ee28cc57c6221e919c83d5f98bd74c4554de04db4d50253c83b",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "idiomatic",
+    "targetWordIndices": [21],
+    "carrierWordIndices": [21],
+    "rationale": "La forme verbale source H1961, dans 'may not … a remnant', participe au prédicat existentiel français « ne reste plus rien ». « Reste » est un verbe explicite correspondant à ce prédicat ; un vide témoin ne démontre pas une absence.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Isa-Mal.txt:64061",
+      "Sg1910 Jer.50.26 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Jonah.3.3",
+    "sourceUnitId": "TAHOT.Jonah.3.3.12.L",
+    "sourceUnitSha256": "2b128deb8a716d4fbbdc8a864398fce0d420e839078d4427e878e0befbf8be98",
+    "targetTextSha256": "7dbd410f8f5ef02cb2413de61dbb643f538610cc0242837855fc0f18b153621f",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La source 'to/ God' fait partie de la qualification de la grandeur de Ninive. La cible utilise « très/fort grande ». Une relation idiomatique d’intensité est possible ; il faut examiner cette expression en groupe avant de conclure à l’absence du mot ou à un porteur autonome.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Isa-Mal.txt:123049",
+      "Sg1910 Jonah.3.3 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Sg1910",
+    "ref": "Acts.8.2",
+    "sourceUnitId": "TAGNT.Acts.8.2.2.NKO",
+    "sourceUnitSha256": "4ebde56b8ac4a0b1a859da1784782ddff68bc055ee838a2342955e94af3c28db",
+    "targetTextSha256": "6be6b63fd524d7416ceb861ba382ddab461e7e7a62724a9eb43f8b7b037f25e1",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "empty",
+    "relation": "no-explicit-equivalent",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "Le connecteur discursif de introduit la première proposition, mais la cible commence directement par « Des hommes pieux… ». Le « et » plus loin relie les deux actions et ne réalise pas cette occurrence initiale. Proposition assistée d’absence d’un connecteur explicite pour cette occurrence.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Act-Rev.txt:8080",
+      "Sg1910 Acts.8.2 — texte exact du dossier, sans notes éditoriales"
+    ],
+    "anchor": {
+      "insertAfterWordIndex": -1,
+      "rationale": "Placer la liaison discursive vide avant le premier mot, puisqu’elle porte sur l’ouverture de la proposition. L’ordre postpositif grec ne doit pas imposer un point après le verbe français déplacé.",
+      "contextSha256": "0f62c82a431e629684c3619bdc720d4ea2093280e3e03773e8ace0cb938c3a87"
+    }
+  },
+  {
+    "edition": "Darby",
+    "ref": "Gen.44.15",
+    "sourceUnitId": "TAHOT.Gen.44.15.6.L",
+    "sourceUnitSha256": "e4faa2c020ae3efb36fddc650cc556a7c3cb9889616a93e930ed87f2368ddd2b",
+    "targetTextSha256": "dac0c625feb2a28b164b7a77282bc3a02f0e5ffe1e563b16d23073cfaaf81b2e",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "empty",
+    "relation": "no-explicit-equivalent",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "Le démonstratif source 'this' détermine 'deed'. Le texte « Quelle action avez-vous faite ? » n’exprime ni « cette » ni « ceci ». « Quelle » relève de l’interrogatif voisin, pas d’un démonstratif. Proposition assistée d’absence explicite.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:31574",
+      "Darby Gen.44.15 — texte exact du dossier, sans notes éditoriales"
+    ],
+    "anchor": {
+      "insertAfterWordIndex": 5,
+      "rationale": "Rattacher le démonstratif vide au nom « action », dont il est le déterminant source, immédiatement après ce nom.",
+      "contextSha256": "23d7215a8c1ac962964f914b499c9549fb84a7133f6248b4455ef3cfb3c0b57d"
+    }
+  },
+  {
+    "edition": "Darby",
+    "ref": "Lev.17.10",
+    "sourceUnitId": "TAHOT.Lev.17.10.9.L",
+    "sourceUnitSha256": "fa02b6bea9d819511fbb3e0bc0f59f88541ff857b55744d48d9555c7d69375dd",
+    "targetTextSha256": "142a2cfdff8a2e15fa7a8e07dedfdcf358995ef7065c95554f36da9661af33d9",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "Le relatif source devant 'aura mangé' est restructuré dans le français « quiconque … aura mangé ». « Quiconque » peut réaliser une relation de groupe qui inclut ce relatif et les occurrences initiales 'person'. Il faut statuer sur ce groupe avant de déclarer une absence.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:78025",
+      "Darby Lev.17.10 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Deut.22.2",
+    "sourceUnitId": "TAHOT.Deut.22.2.10.L",
+    "sourceUnitSha256": "e9ccb334ef9128004be2dd823200ddfeeaaeba5d392db5e6b425eb876b9528c0",
+    "targetTextSha256": "462344089d4f31b1d5ab19fd8ac7d8b5c66a463f7990b03f0cd43aa36c6ca948",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La combinaison source 'into' + 'middle of' peut être rendue conjointement par « dans ». Il manque une décision de groupe, pas nécessairement une traduction. Ni un vide certain ni un porteur autonome ne sont établis.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:130587",
+      "Darby Deut.22.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "1Sam.29.4",
+    "sourceUnitId": "TAHOT.1Sam.29.4.35.L",
+    "sourceUnitSha256": "bde3e421687e0bea0e9c433301b6a4fe4ada330b535a77bf53731bdd042d5324",
+    "targetTextSha256": "3be5cb4d9663a80b2f430a7a6975a3ef501a4e38f547ae3986b8a9ff734ed787",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [66, 67],
+    "carrierWordIndices": [66],
+    "rationale": "Le démonstratif pluriel source 'those' est explicitement rendu dans « ces hommes-ci » ; le déterminant « ces » est un porteur possible. Le suffixe démonstratif « -ci » reste inclus dans la relation, sans découpage artificiel du token.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Jos-Est.txt:57514",
+      "Darby 1Sam.29.4 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "2Sam.2.28",
+    "sourceUnitId": "TAHOT.2Sam.2.28.10.L",
+    "sourceUnitSha256": "3a204ce7d4494976dfe19b5246c84b1795f62873b9de4688968ad50589769368",
+    "targetTextSha256": "97163bb3c95c80cfdd47abdf574a32d330ae65ea588584132c5b2113b7d0ec78",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La source combine le verbe de poursuite et 'after'. Le français « poursuivre Israël » peut réaliser la relation verbale entière sans préposition autonome. Une décision sur cette expression partagée est nécessaire ; le seul manque d’un « après » ne justifie pas un vide certain.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Jos-Est.txt:60326",
+      "Darby 2Sam.2.28 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Eccl.9.10",
+    "sourceUnitId": "TAHOT.Eccl.9.10.18.L",
+    "sourceUnitSha256": "d1f643ac85413857656a795f864ed4e3ebebc9c8c9f10c6e18ea9b0bf8d5e4ba",
+    "targetTextSha256": "583f14e4c0cbec774dd3686cdddc345193f592fb4571620845718719864736bc",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La source utilise un locatif de reprise 'there/ towards' après le verbe 'going'. Le français dit « où tu vas ». « Où » peut absorber le relatif et la reprise locative ; l’absence d’un « là » séparé ne suffit pas à exclure une relation grammaticale commune.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:72756",
+      "Darby Eccl.9.10 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Ezek.20.2",
+    "sourceUnitId": "TAHOT.Ezek.20.2.4.L",
+    "sourceUnitSha256": "1229ebf9e876b8738c30b8f7d7b3a32e45b06e568a2b0de9dca80ec93cae6cda",
+    "targetTextSha256": "b1bb1f55ce195c7c743c0d52037d8a0f410d388c43014d6f5a4c2be9ed94b8f5",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [6, 7],
+    "carrierWordIndices": [6],
+    "rationale": "La préposition avec suffixe 'to/ me' est explicitement exprimée par « à moi ». Le porteur H0413 est « à » ; le pronom appartient à la relation complète.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Isa-Mal.txt:80940",
+      "Darby Ezek.20.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Ezek.22.23",
+    "sourceUnitId": "TAHOT.Ezek.22.23.4.L",
+    "sourceUnitSha256": "007afada976ce2d14179964369f2769b6f3d65c026619122f70faee0c6c452d4",
+    "targetTextSha256": "b1bb1f55ce195c7c743c0d52037d8a0f410d388c43014d6f5a4c2be9ed94b8f5",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [6, 7],
+    "carrierWordIndices": [6],
+    "rationale": "La préposition avec suffixe 'to/ me' est explicitement exprimée par « à moi ». Le porteur H0413 est « à » ; le pronom appartient à la relation complète.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Isa-Mal.txt:83558",
+      "Darby Ezek.22.23 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Jonah.3.3",
+    "sourceUnitId": "TAHOT.Jonah.3.3.12.L",
+    "sourceUnitSha256": "2b128deb8a716d4fbbdc8a864398fce0d420e839078d4427e878e0befbf8be98",
+    "targetTextSha256": "be3c01f306dcc2acb3aff53ba5d0a825a494cb084ad0626aaab44af54fd11c31",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La source 'to/ God' fait partie de la qualification de la grandeur de Ninive. La cible utilise « très/fort grande ». Une relation idiomatique d’intensité est possible ; il faut examiner cette expression en groupe avant de conclure à l’absence du mot ou à un porteur autonome.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Isa-Mal.txt:123049",
+      "Darby Jonah.3.3 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Matt.19.15",
+    "sourceUnitId": "TAGNT.Matt.19.15.1.NKO",
+    "sourceUnitSha256": "7be2f9333c01981ab4e01ce45b752c1002eae9ce6ba51e8a1e81d5e0c1500a99",
+    "targetTextSha256": "61f369f2ce78dcfc0dba7012e5e9adc233b6ae363d48a67e3fc245023b12fe91",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [0],
+    "carrierWordIndices": [0],
+    "rationale": "Le connecteur grec kai ('And') est explicite au début du français : « Et ».",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:19192",
+      "Darby Matt.19.15 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Mark.15.7",
+    "sourceUnitId": "TAGNT.Mark.15.7.2.NKO",
+    "sourceUnitSha256": "8aa7ef1b90aeb193c2f3d6651d7fa7af05bc1e5be8102235de3b6fe483ec8c38",
+    "targetTextSha256": "c70f4026be99e8e653d158009737b11cf01a12667c9f691545475d604ef54588",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [0],
+    "carrierWordIndices": [0],
+    "rationale": "La particule de liaison de ouvre la proposition. Le français la rend par « Et » au début du verset ; la glose anglaise 'then' n’impose pas un adverbe temporel français.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:49943",
+      "Darby Mark.15.7 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Acts.8.2",
+    "sourceUnitId": "TAGNT.Acts.8.2.2.NKO",
+    "sourceUnitSha256": "4ebde56b8ac4a0b1a859da1784782ddff68bc055ee838a2342955e94af3c28db",
+    "targetTextSha256": "a2295e4a2c24b0df540af803b6a12ea61ad6e164ccad94014e0c45531082bba2",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [0],
+    "carrierWordIndices": [0],
+    "rationale": "La particule de liaison de est rendue par le « Et » initial. Le second « et » relie l’action funèbre à la lamentation et relève d’une autre liaison.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Act-Rev.txt:8080",
+      "Darby Acts.8.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "Darby",
+    "ref": "Rom.8.32",
+    "sourceUnitId": "TAGNT.Rom.8.32.2.NKO",
+    "sourceUnitSha256": "4fa6defe1413541039fd86270fc6b470bddd1d98e00be0d52fff49372187d8de",
+    "targetTextSha256": "80887151257acb58fb82d0fba7e99e1e9a86d57f1fa6736984a5ea5ea3e31cc4",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [1],
+    "carrierWordIndices": [1],
+    "rationale": "La particule emphatique ge ('indeed') renforce le relatif initial. « Celui même qui » exprime cette emphase par « même » : il existe un porteur explicite.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Act-Rev.txt:37675",
+      "Darby Rom.8.32 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Gen.44.15",
+    "sourceUnitId": "TAHOT.Gen.44.15.6.L",
+    "sourceUnitSha256": "e4faa2c020ae3efb36fddc650cc556a7c3cb9889616a93e930ed87f2368ddd2b",
+    "targetTextSha256": "f4640843a28735fd5cf54fe341591e3a9fc170bdf2eada54e6d9c82a8d2b30c3",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "empty",
+    "relation": "no-explicit-equivalent",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "Le démonstratif source 'this' détermine 'deed'. Le texte « Quelle action avez-vous faite ? » n’exprime ni « cette » ni « ceci ». « Quelle » relève de l’interrogatif voisin, pas d’un démonstratif. Proposition assistée d’absence explicite.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:31574",
+      "DarbyR Gen.44.15 — texte exact du dossier, sans notes éditoriales"
+    ],
+    "anchor": {
+      "insertAfterWordIndex": 4,
+      "rationale": "Rattacher le démonstratif vide au nom « action », dont il est le déterminant source, immédiatement après ce nom.",
+      "contextSha256": "be82ff8635b6fbd7dd6e359d00687699ed9364e6d81bf54da65ea5f1927fbe36"
+    }
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Lev.17.10",
+    "sourceUnitId": "TAHOT.Lev.17.10.9.L",
+    "sourceUnitSha256": "fa02b6bea9d819511fbb3e0bc0f59f88541ff857b55744d48d9555c7d69375dd",
+    "targetTextSha256": "142a2cfdff8a2e15fa7a8e07dedfdcf358995ef7065c95554f36da9661af33d9",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "Le relatif source devant 'aura mangé' est restructuré dans le français « quiconque … aura mangé ». « Quiconque » peut réaliser une relation de groupe qui inclut ce relatif et les occurrences initiales 'person'. Il faut statuer sur ce groupe avant de déclarer une absence.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:78025",
+      "DarbyR Lev.17.10 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Lev.22.12",
+    "sourceUnitId": "TAHOT.Lev.22.12.3.L",
+    "sourceUnitSha256": "d68a16cfcd7bcd6d6a5e094e97ffd352313d5eafb9fc78650f26ae23944e18ae",
+    "targetTextSha256": "22b9de2666c456b66b756faa73c31b5f5b854926ab6cc4c509bab83724c8a17b",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [5],
+    "carrierWordIndices": [5],
+    "rationale": "Le conditionnel source 'if' est explicitement rendu par « si ». Le vide du témoin LSG ne se transfère pas à DarbyR.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:81197",
+      "DarbyR Lev.22.12 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Deut.22.2",
+    "sourceUnitId": "TAHOT.Deut.22.2.10.L",
+    "sourceUnitSha256": "e9ccb334ef9128004be2dd823200ddfeeaaeba5d392db5e6b425eb876b9528c0",
+    "targetTextSha256": "462344089d4f31b1d5ab19fd8ac7d8b5c66a463f7990b03f0cd43aa36c6ca948",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La combinaison source 'into' + 'middle of' peut être rendue conjointement par « dans ». Il manque une décision de groupe, pas nécessairement une traduction. Ni un vide certain ni un porteur autonome ne sont établis.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt:130587",
+      "DarbyR Deut.22.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Josh.3.8",
+    "sourceUnitId": "TAHOT.Josh.3.8.8.L",
+    "sourceUnitSha256": "c4b8019b16ef0274f941c8d547266a4d98c17c373605fd3c1370d2ffb73d0c7d",
+    "targetTextSha256": "aa7bef2a3f4a8ff238dad4fe56d36b0d6ef1953fdbf38318789a70a9fbbf9d48",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "empty",
+    "relation": "no-explicit-equivalent",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "Le verbe source 'saying' suit l’ordre adressé aux prêtres. Le français passe de « donner cet ordre … de l’alliance : » à la citation « Lorsque… », sans « dire » ou « disant ». L’acte de parole est conservé par « ordre » ; le second verbe n’a pas d’équivalent explicite séparé.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Jos-Est.txt:1499",
+      "DarbyR Josh.3.8 — texte exact du dossier, sans notes éditoriales"
+    ],
+    "anchor": {
+      "insertAfterWordIndex": 4,
+      "rationale": "Rattacher ce verbe de parole vide à l’expression « donner/donne cet ordre », immédiatement après « ordre ». Choix éditorial d’association sémantique, distinct de l’ordre linéaire source.",
+      "contextSha256": "0abd6fbedbe51b70f28c5ff1eb7f8bcf08d0c0ac483b267b8858c1b5abe23cc5"
+    }
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "1Sam.29.4",
+    "sourceUnitId": "TAHOT.1Sam.29.4.35.L",
+    "sourceUnitSha256": "bde3e421687e0bea0e9c433301b6a4fe4ada330b535a77bf53731bdd042d5324",
+    "targetTextSha256": "4a5ccb20c584ddcbe8c0fa413157e99b71fec2da949697c9ab75643780750a2f",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [65, 66],
+    "carrierWordIndices": [65],
+    "rationale": "Le démonstratif pluriel source 'those' est explicitement rendu dans « ces hommes-ci » ; le déterminant « ces » est un porteur possible. Le suffixe démonstratif « -ci » reste inclus dans la relation, sans découpage artificiel du token.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Jos-Est.txt:57514",
+      "DarbyR 1Sam.29.4 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "2Sam.2.28",
+    "sourceUnitId": "TAHOT.2Sam.2.28.10.L",
+    "sourceUnitSha256": "3a204ce7d4494976dfe19b5246c84b1795f62873b9de4688968ad50589769368",
+    "targetTextSha256": "e1eb1d895acd5b265141f46de2711b83cc2b73672f5040dcab92ab05ef02cc82",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La source combine le verbe de poursuite et 'after'. Le français « poursuivre Israël » peut réaliser la relation verbale entière sans préposition autonome. Une décision sur cette expression partagée est nécessaire ; le seul manque d’un « après » ne justifie pas un vide certain.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Jos-Est.txt:60326",
+      "DarbyR 2Sam.2.28 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "2Chr.18.30",
+    "sourceUnitId": "TAHOT.2Chr.18.30.9.L",
+    "sourceUnitSha256": "6eba3928f34028e327460d31348380b5fb8e3137e16fb7b518452e7800b676b0",
+    "targetTextSha256": "17d825b0cfc0a9836a9166edb959602b8208d7f9a9cb878b9f72de56774627a0",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "empty",
+    "relation": "no-explicit-equivalent",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "Le verbe 'saying' introduit la citation de l’ordre. La cible emploie « avait donné cet ordre » ou « commanda », puis la citation, sans second verbe de parole. Proposition assistée d’absence d’équivalent explicite distinct, et non d’absence de l’acte de parole.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Jos-Est.txt:150358",
+      "DarbyR 2Chr.18.30 — texte exact du dossier, sans notes éditoriales"
+    ],
+    "anchor": {
+      "insertAfterWordIndex": 4,
+      "rationale": "Rattacher le vide au porteur associé de l’ordre : après « ordre » pour LSG, après « commanda » pour DarbyR.",
+      "contextSha256": "0d87f7591b356397f25d5b9897abd044774c6119aaac1bf09191fe6e2d531e8c"
+    }
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Eccl.9.10",
+    "sourceUnitId": "TAHOT.Eccl.9.10.18.L",
+    "sourceUnitSha256": "d1f643ac85413857656a795f864ed4e3ebebc9c8c9f10c6e18ea9b0bf8d5e4ba",
+    "targetTextSha256": "583f14e4c0cbec774dd3686cdddc345193f592fb4571620845718719864736bc",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La source utilise un locatif de reprise 'there/ towards' après le verbe 'going'. Le français dit « où tu vas ». « Où » peut absorber le relatif et la reprise locative ; l’absence d’un « là » séparé ne suffit pas à exclure une relation grammaticale commune.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt:72756",
+      "DarbyR Eccl.9.10 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Ezek.20.2",
+    "sourceUnitId": "TAHOT.Ezek.20.2.4.L",
+    "sourceUnitSha256": "1229ebf9e876b8738c30b8f7d7b3a32e45b06e568a2b0de9dca80ec93cae6cda",
+    "targetTextSha256": "b1bb1f55ce195c7c743c0d52037d8a0f410d388c43014d6f5a4c2be9ed94b8f5",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [6, 7],
+    "carrierWordIndices": [6],
+    "rationale": "La préposition avec suffixe 'to/ me' est explicitement exprimée par « à moi ». Le porteur H0413 est « à » ; le pronom appartient à la relation complète.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Isa-Mal.txt:80940",
+      "DarbyR Ezek.20.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Ezek.22.23",
+    "sourceUnitId": "TAHOT.Ezek.22.23.4.L",
+    "sourceUnitSha256": "007afada976ce2d14179964369f2769b6f3d65c026619122f70faee0c6c452d4",
+    "targetTextSha256": "b1bb1f55ce195c7c743c0d52037d8a0f410d388c43014d6f5a4c2be9ed94b8f5",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [6, 7],
+    "carrierWordIndices": [6],
+    "rationale": "La préposition avec suffixe 'to/ me' est explicitement exprimée par « à moi ». Le porteur H0413 est « à » ; le pronom appartient à la relation complète.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Isa-Mal.txt:83558",
+      "DarbyR Ezek.22.23 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Jonah.3.3",
+    "sourceUnitId": "TAHOT.Jonah.3.3.12.L",
+    "sourceUnitSha256": "2b128deb8a716d4fbbdc8a864398fce0d420e839078d4427e878e0befbf8be98",
+    "targetTextSha256": "9247e6029fb0e32ee4241f0e2d8d7fe24f4da42265cdf13afe4facb2956b5a78",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La source 'to/ God' fait partie de la qualification de la grandeur de Ninive. La cible utilise « très/fort grande ». Une relation idiomatique d’intensité est possible ; il faut examiner cette expression en groupe avant de conclure à l’absence du mot ou à un porteur autonome.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAHOT Isa-Mal.txt:123049",
+      "DarbyR Jonah.3.3 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Mark.15.7",
+    "sourceUnitId": "TAGNT.Mark.15.7.2.NKO",
+    "sourceUnitSha256": "8aa7ef1b90aeb193c2f3d6651d7fa7af05bc1e5be8102235de3b6fe483ec8c38",
+    "targetTextSha256": "51c36b0ad6123fea7dad7099536f1936b024be1c1d560933d3edd46a173f2c41",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [0],
+    "carrierWordIndices": [0],
+    "rationale": "La particule de liaison de ouvre la proposition. Le français la rend par « Et » au début du verset ; la glose anglaise 'then' n’impose pas un adverbe temporel français.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:49943",
+      "DarbyR Mark.15.7 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "John.20.2",
+    "sourceUnitId": "TAGNT.John.20.2.2.NKO",
+    "sourceUnitSha256": "75ad6eb6e66236c0355561f3ee5ba707d351d3c73aa43289fa4c10841cebe830",
+    "targetTextSha256": "cb788ae36a73321a06691d7954eff232ded8b4167e6ce6aab4658457ece5487f",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [0],
+    "carrierWordIndices": [0],
+    "rationale": "La conjonction oun ('therefore') est rendue par le connecteur narratif « Alors » au début de la phrase.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt:110142",
+      "DarbyR John.20.2 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Acts.8.2",
+    "sourceUnitId": "TAGNT.Acts.8.2.2.NKO",
+    "sourceUnitSha256": "4ebde56b8ac4a0b1a859da1784782ddff68bc055ee838a2342955e94af3c28db",
+    "targetTextSha256": "ab0319318802a2a430f160bc1838232cd01ef81f309a3817b0daab56c45be188",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "empty",
+    "relation": "no-explicit-equivalent",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "Le connecteur discursif de introduit la première proposition, mais la cible commence directement par « Des hommes pieux… ». Le « et » plus loin relie les deux actions et ne réalise pas cette occurrence initiale. Proposition assistée d’absence d’un connecteur explicite pour cette occurrence.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Act-Rev.txt:8080",
+      "DarbyR Acts.8.2 — texte exact du dossier, sans notes éditoriales"
+    ],
+    "anchor": {
+      "insertAfterWordIndex": -1,
+      "rationale": "Placer la liaison discursive vide avant le premier mot, puisqu’elle porte sur l’ouverture de la proposition. L’ordre postpositif grec ne doit pas imposer un point après le verbe français déplacé.",
+      "contextSha256": "01503a7737e89824585135f84d84e050b10cb5a62ef874d32acfc77b48188653"
+    }
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Acts.27.20",
+    "sourceUnitId": "TAGNT.Acts.27.20.2.NKO",
+    "sourceUnitSha256": "136044a82cec7ce5373a2967dba1640a99edd8189f420458f2ab8ed923e90c82",
+    "targetTextSha256": "1dcf8eb5599a20412ceb5eed3c4308dda19403a2ad32fa30552159c18a41b581",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "unresolved",
+    "relation": "uncertain",
+    "targetWordIndices": [],
+    "carrierWordIndices": [],
+    "rationale": "La particule de participe à une longue construction temporelle et causale. La cible réorganise le passage avec « Durant… dès lors… ». Le dossier ne permet pas de décider si la liaison est omise ou réalisée dans cette structure globale ; garder l’incertitude.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Act-Rev.txt:29732",
+      "DarbyR Acts.27.20 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "Rom.8.32",
+    "sourceUnitId": "TAGNT.Rom.8.32.2.NKO",
+    "sourceUnitSha256": "4fa6defe1413541039fd86270fc6b470bddd1d98e00be0d52fff49372187d8de",
+    "targetTextSha256": "80887151257acb58fb82d0fba7e99e1e9a86d57f1fa6736984a5ea5ea3e31cc4",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [1],
+    "carrierWordIndices": [1],
+    "rationale": "La particule emphatique ge ('indeed') renforce le relatif initial. « Celui même qui » exprime cette emphase par « même » : il existe un porteur explicite.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Act-Rev.txt:37675",
+      "DarbyR Rom.8.32 — texte exact du dossier, sans notes éditoriales"
+    ]
+  },
+  {
+    "edition": "DarbyR",
+    "ref": "2Thess.3.4",
+    "sourceUnitId": "TAGNT.2Thess.3.4.2.NKO",
+    "sourceUnitSha256": "9746a4345ba2a5b5f120438fc35760f9430b2b9658c095b4f62bad599c6f0e50",
+    "targetTextSha256": "6b1e1c00f70b8753aad8a4b070680c95ee64eabd4f94074abc1839b79270d00a",
+    "reviewer": {
+      "id": "codex-assistant-2026-10-01",
+      "kind": "assistant",
+      "exposure": "exposed"
+    },
+    "state": "visible",
+    "relation": "grammatical",
+    "targetWordIndices": [0],
+    "carrierWordIndices": [0],
+    "rationale": "La particule de relie cette déclaration à la précédente et est explicitement rendue par « Et » au début du français.",
+    "sources": [
+      "data/external/stepbible/amalgamated/TAGNT Act-Rev.txt:80396",
+      "DarbyR 2Thess.3.4 — texte exact du dossier, sans notes éditoriales"
+    ]
+  }
+]

@@ -19,6 +19,10 @@ import {
 } from "./translationLexicon.js";
 import { type ReaderAlignmentPolicy } from "./translationProfiles.js";
 import { maximumWeightMatching } from "./maximumWeightMatching.js";
+import {
+  unresolvedEmptyEvidence,
+  type EmptyStrongEvidence
+} from "./strongResolution.js";
 
 export interface OriginalStrongOccurrence {
   occurrenceId: string;
@@ -58,6 +62,7 @@ export interface EmptyStrongAssignment {
   confidence: number;
   method: "empty-original";
   insertAfterWordIndex: number;
+  emptyEvidence?: EmptyStrongEvidence;
 }
 
 export interface CompleteAlignmentResult {
@@ -153,19 +158,23 @@ export function alignCompleteVerse(options: {
 
   const emptyAssignments = originalOccurrences
     .filter((occurrence) => !usedOccurrences.has(occurrence.occurrenceId))
-    .map((occurrence) => ({
-      strong: occurrence.strong,
-      originalTokenId: occurrence.tokenId,
-      originalOccurrenceId: occurrence.occurrenceId,
-      sourceStrong: occurrence.sourceStrong,
-      confidence: 0.35,
-      method: "empty-original" as const,
-      insertAfterWordIndex: findPreviousAssignedWordIndex(
+    .map((occurrence) => {
+      const insertAfterWordIndex = findPreviousAssignedWordIndex(
         occurrence,
         wordAssignments,
         originalOccurrences
-      )
-    }));
+      );
+      return {
+        strong: occurrence.strong,
+        originalTokenId: occurrence.tokenId,
+        originalOccurrenceId: occurrence.occurrenceId,
+        sourceStrong: occurrence.sourceStrong,
+        confidence: 0.35,
+        method: "empty-original" as const,
+        insertAfterWordIndex,
+        emptyEvidence: unresolvedEmptyEvidence(insertAfterWordIndex)
+      };
+    });
 
   const realWordStrongOccurrenceCount = [...wordAssignments.values()].reduce(
     (sum, assignment) => sum + assignment.strong.length,

@@ -54,6 +54,18 @@ test("adds editorial empty tags when at least two references agree", () => {
   });
 
   assert.equal(result.emptyStrongOccurrenceCount, 1);
+  assert.equal(
+    result.emptyAssignments[0]?.emptyEvidence?.absence.status,
+    "witness-supported"
+  );
+  assert.deepEqual(
+    result.emptyAssignments[0]?.emptyEvidence?.absence.families,
+    ["Darby-family", "Sg1910"]
+  );
+  assert.equal(
+    result.emptyAssignments[0]?.emptyEvidence?.anchor.status,
+    "heuristic"
+  );
   assert.match(renderReaderTaggedText(result), /data-method="editorial-empty"/);
 });
 

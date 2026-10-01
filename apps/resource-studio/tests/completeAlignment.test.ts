@@ -42,6 +42,14 @@ test("represents unaligned original Strong occurrences as empty tags", () => {
   assert.equal(result.representedStrongOccurrenceCount, 3);
   assert.equal(result.realWordStrongOccurrenceCount, 2);
   assert.equal(result.emptyStrongOccurrenceCount, 1);
+  assert.equal(
+    result.emptyAssignments[0]?.emptyEvidence?.absence.status,
+    "unresolved"
+  );
+  assert.equal(
+    result.emptyAssignments[0]?.emptyEvidence?.anchor.status,
+    "heuristic"
+  );
   assert.match(renderCompleteTaggedText(result), /data-empty="true"/);
   assert.match(renderCompleteTaggedText(result), /strong="H0996"/);
 });

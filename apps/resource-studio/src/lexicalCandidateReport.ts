@@ -186,6 +186,8 @@ interface PhraseSynonym {
 }
 
 interface BuildOptions extends CliOptions {
+  /** Offline evaluation: also propose alternatives for established reader carriers. */
+  includeAllReaderAnnotations?: boolean;
   dictionaryCandidates?: StrongTranslationCandidate[];
   ledger?: Pick<StrongLedger, "verses">;
   sourceCache?: LexicalCandidateSourceCache;
@@ -272,7 +274,15 @@ export async function buildLexicalCandidateReport(
     }))
   );
   const relocationItems = verses.flatMap((verse) =>
-    relocationCandidateAnnotations(verse).map((annotation) => ({
+    (options.includeAllReaderAnnotations
+      ? verse.annotations.filter(
+          (annotation) =>
+            annotation.visibility === "reader" &&
+            ["word", "phrase"].includes(annotation.placement) &&
+            annotation.lexiconLookup !== false
+        )
+      : relocationCandidateAnnotations(verse)
+    ).map((annotation) => ({
       kind: "relocation" as const,
       verse,
       annotation
@@ -633,7 +643,9 @@ function buildCandidateItem(options: {
     text: options.verse.text,
     strong: options.annotation.strong,
     sourceStrong: options.annotation.sourceStrong,
-    insertAfterWordIndex: options.annotation.insertAfterWordIndex,
+    insertAfterWordIndex:
+      options.annotation.lexicalSearchAnchorWordIndex ??
+      options.annotation.insertAfterWordIndex,
     currentTarget: currentTargetForAnnotation(
       options.verse,
       options.annotation
@@ -739,7 +751,8 @@ function scoreTargetToken(options: {
 
   const occupied = isWordOccupied(options.verse, options.token.wordIndex);
   const position = positionScore(
-    options.annotation.insertAfterWordIndex,
+    options.annotation.lexicalSearchAnchorWordIndex ??
+      options.annotation.insertAfterWordIndex,
     options.token.wordIndex,
     options.verse.tokens.length
   );
@@ -1534,7 +1547,8 @@ function scorePhraseCandidates(options: {
           endWordIndex
         );
         const position = positionScore(
-          options.annotation.insertAfterWordIndex,
+          options.annotation.lexicalSearchAnchorWordIndex ??
+            options.annotation.insertAfterWordIndex,
           startWordIndex,
           options.verse.tokens.length
         );
@@ -1619,7 +1633,8 @@ function scoreAuxiliaryVerbPhraseCandidates(options: {
       endWordIndex
     );
     const position = positionScore(
-      options.annotation.insertAfterWordIndex,
+      options.annotation.lexicalSearchAnchorWordIndex ??
+        options.annotation.insertAfterWordIndex,
       startWordIndex,
       options.verse.tokens.length
     );
@@ -2029,7 +2044,7 @@ function readOpenOfficeSynonymData(
   const synonyms = new Map<string, Map<string, number>>();
   const phraseSynonyms = new Map<string, Map<string, PhraseSynonym>>();
 
-  for (let index = 1; index < lines.length; ) {
+  for (let index = 1; index < lines.length;) {
     const [word, countRaw] = (lines[index++] ?? "").split("|");
     const normalizedWord = normalizeWord(word ?? "");
     const count = Number(countRaw ?? 0);
@@ -2430,6 +2445,7 @@ function isCandidateEmptyAnnotation(
     (annotation.visibility === "reader" ||
       annotation.visibility === "advanced") &&
     annotation.placement === "empty" &&
+    annotation.emptyEvidence?.absence.status !== "linguistic-rule" &&
     annotation.lexiconLookup !== false
   );
 }

@@ -6,7 +6,7 @@ import path from "node:path";
 import readline from "node:readline";
 import { DatabaseSync } from "node:sqlite";
 
-import { BOOK_IDS } from "./books.js";
+import { ALL_BOOK_IDS as BOOK_IDS } from "./books.js";
 import { contentFingerprint } from "./contentAddressedCache.js";
 import { getCuratedStrongOverrides } from "./curatedStrongOverrides.js";
 import { writeJsonFileImmutable } from "./immutableFile.js";
@@ -142,12 +142,17 @@ export async function writeGeneratedStrongJsonl(options: {
     promotionPlanPath: options.promotionPlanPath
   });
   if (!options.only) {
-    const currentInputFingerprint = strongLedgerInputFingerprint({
-      bible: options.bible,
-      biblePath: ledger.inputPath,
-      outputDir: path.dirname(options.sqlitePath),
-      profileBible: ledger.translationProfile.bible
-    });
+    const currentInputFingerprint = strongLedgerInputFingerprint(
+      {
+        bible: options.bible,
+        biblePath: ledger.inputPath,
+        outputDir: path.dirname(options.sqlitePath),
+        profileBible: ledger.translationProfile.bible,
+        verseCorrespondencePath: ledger.verseCorrespondencePath
+      },
+      ledger.translationProfile,
+      ledger.dictionaryInput
+    );
     if (currentInputFingerprint !== ledger.inputFingerprint) {
       throw new Error(
         `generated-jsonl-stale-input-fingerprint:${ledger.inputFingerprint ?? "missing"}:${currentInputFingerprint}`
@@ -331,6 +336,9 @@ export async function writeGeneratedStrongJsonl(options: {
           ? "lossless-reader-inline-markup-with-compact-step-identities"
           : "lossless-permissive-reader-plus-advanced-with-deterministic-carrier-promotions-and-compact-step-identities",
       compactAttributes: ["estrong", "dstrong", "ustrong"],
+      resolution: ledger.resolutionSummary ?? null,
+      resolutionAssurance:
+        "Policy-supported decisions, existing placements and explicitly unresolved occurrences remain distinct. Full-artifact validation is structural, not independent semantic certification.",
       identityPolicy:
         "exact ledger originalOccurrenceId and STEP evidence first; TBESH/TBESG only extend that exact dStrong; ambiguous or missing evidence emits no guessed STEP identity",
       source: {

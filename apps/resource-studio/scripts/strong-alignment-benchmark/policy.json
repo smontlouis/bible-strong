@@ -1,0 +1,20 @@
+{
+  "version": "alignment-v1-policy",
+  "representations": ["strong", "surface"],
+  "hybridPolicies": [
+    "stable-intersection",
+    "stable-intersection-lexical",
+    "stable-union-lexical"
+  ],
+  "calibrationSelection": {
+    "minimumChangedPlacements": 30,
+    "minimumObservedChangedPlacementPrecision": 0.98,
+    "maximumFalsePositiveIncrease": 0,
+    "objective": "highest visible exact true-positive gain; then fewer false positives; then stable name order",
+    "fallback": "baseline",
+    "scope": "exploratory choice only; not a statistical certification or production approval"
+  },
+  "candidateLimits": [5, 10, 100],
+  "candidateExpansion": "union of lexical choices/current carriers and seed-17 Eflomal union projections; no gold-based candidate generation",
+  "evaluation": "CSV carrier agreement, not independently reviewed semantic ground truth"
+}

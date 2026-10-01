@@ -1,3 +1,12 @@
+import { withoutPublisherNotes } from "./strongReaderText.js";
+import {
+  CANONICAL_RESOLUTION_POLICY,
+  readCanonicalSourceRows,
+  resolveCanonicalVerse,
+  aggregateResolutionMetrics,
+  type CanonicalVerseResolution,
+  type CanonicalResolutionInput
+} from "./strongCanonicalResolution.js";
 import { createWriteStream, existsSync } from "node:fs";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -5,7 +14,7 @@ import { performance } from "node:perf_hooks";
 
 import { type AssignedStrong, type ReferenceSource } from "./align.js";
 import { readBibleJson, type BibleVerse } from "./bibleJson.js";
-import { BOOK_IDS } from "./books.js";
+import { BOOK_IDS, ALL_BOOK_IDS } from "./books.js";
 import {
   type CompleteAlignmentResult,
   type CompleteWordAssignment,
@@ -28,7 +37,8 @@ import {
   lexicalAutoSafePlacements,
   writeLexicalCandidateReport,
   type LexicalAutoSafePlacement,
-  type LexicalCandidate
+  type LexicalCandidate,
+  type LexicalCandidateReport
 } from "./lexicalCandidateReport.js";
 import {
   buildPermissivePromotionPlan,
@@ -107,18 +117,9 @@ import {
 } from "./strongLedgerStore.js";
 
 export type StrongVisibility =
-  | "reader"
-  | "advanced"
-  | "hidden"
-  | "pending"
-  | "rejected";
+  "reader" | "advanced" | "hidden" | "pending" | "rejected";
 export type StrongPlacement =
-  | "word"
-  | "phrase"
-  | "empty"
-  | "duplicate"
-  | "not-rendered"
-  | "technical";
+  "word" | "phrase" | "empty" | "duplicate" | "not-rendered" | "technical";
 export type StrongSource =
   | "reference-transfer"
   | "phrase-transfer"
@@ -160,6 +161,11 @@ export interface StrongLedgerAnnotation {
   startWordIndex?: number;
   endWordIndex?: number;
   insertAfterWordIndex?: number;
+  emptyEvidence?: import("./strongResolution.js").EmptyStrongEvidence;
+  lexicalSearchAnchorWordIndex?: number;
+  resolutionUnitId?: string;
+  resolutionState?: "visible" | "empty" | "unresolved";
+  resolutionAssurance?: string;
   normalizedWord?: string;
   normalizedPhrase?: string;
   originalLemma?: string;
@@ -175,6 +181,7 @@ export interface StrongLedgerAnnotation {
 }
 
 export interface StrongLedgerVerse {
+  resolution?: CanonicalVerseResolution;
   ref: string;
   bookId: string;
   chapter: number;
@@ -203,6 +210,18 @@ export interface StrongLedgerToken {
 }
 
 export interface StrongLedger {
+  resolutionSummary?: ReturnType<typeof aggregateResolutionMetrics>;
+  unassignedCanonicalSource?: Array<{
+    canonicalRefs: string[];
+    reason: string;
+    status: "unresolved-correspondence";
+    occurrences: OriginalStrongOccurrence[];
+  }>;
+  dictionaryInput?: ResolvedDefaultStrongDictionaryInput;
+  resolutionPolicy?: string;
+  verseCorrespondencePath?: string;
+  resolutionBaselineMetrics?: StrongLedgerMetrics;
+  lexicalResolutionMetrics?: LexicalCandidateReport["metrics"];
   bible: string;
   generatedAt: string;
   inputPath: string;
@@ -304,6 +323,10 @@ export interface StrongLedgerVerseMetrics {
 }
 
 export interface StrongLedgerOptions {
+  /** False is retained for masked baseline comparisons. Normal generation resolves all occurrences. */
+  resolveOccurrences?: boolean;
+  dictionaryPath?: string;
+  lexicalReportOutputDir?: string;
   bible: string;
   biblePath: string;
   outputDir: string;
@@ -393,6 +416,13 @@ const STRONG_LEDGER_PIPELINE_SOURCES = [
   "src/permissiveStrongProjection.ts",
   "src/phraseTranslationLexicon.ts",
   "src/readerAlignment.ts",
+  "src/strongResolution.ts",
+  "src/strongResolutionWorkflow.ts",
+  "src/strongGrammaticalEmpty.ts",
+  "src/strongCanonicalResolution.ts",
+  "src/strongSourceUnits.ts",
+  "src/strongCarriers.ts",
+  "src/strongReaderText.ts",
   "src/render.ts",
   "src/stepOriginals.ts",
   "src/strongCsv.ts",
@@ -428,7 +458,12 @@ export function strongLedgerInputFingerprint(
   translationProfile = getTranslationProfile(
     options.profileBible ?? options.bible
   ),
-  strongDictionaryInput = resolveDefaultStrongDictionaryInput()
+  strongDictionaryInput = options.dictionaryPath
+    ? {
+        path: options.dictionaryPath,
+        activation: { mode: "legacy" as const, path: options.dictionaryPath }
+      }
+    : resolveDefaultStrongDictionaryInput()
 ): string {
   const excludedReferences = new Set(options.excludedReferenceNames ?? []);
   const verseCorrespondencePath = resolveVerseCorrespondencePath(options);
@@ -455,6 +490,10 @@ export function strongLedgerInputFingerprint(
     inputPaths,
     values: {
       bible: options.bible,
+      resolutionPolicy:
+        options.resolveOccurrences === false
+          ? null
+          : CANONICAL_RESOLUTION_POLICY,
       profileBible: options.profileBible ?? options.bible,
       applyCuratedOverrides: options.applyCuratedOverrides !== false,
       excludedReferenceNames: [...excludedReferences].sort(),
@@ -525,11 +564,18 @@ export async function generateStrongLedger(
 ): Promise<StrongLedger> {
   return generateStrongLedgerWithDictionary(
     options,
-    resolveDefaultStrongDictionaryInput()
+    options.dictionaryPath
+      ? {
+          path: options.dictionaryPath,
+          activation: { mode: "legacy", path: options.dictionaryPath }
+        }
+      : resolveDefaultStrongDictionaryInput()
   );
 }
 
-async function generateStrongLedgerWithDictionary(
+/** Explicit dictionary input for reproducible offline evaluations. The same strict
+ * dictionary validation and fingerprinting as normal generation still apply. */
+export async function generateStrongLedgerWithDictionary(
   options: StrongLedgerOptions,
   strongDictionaryInput: ResolvedDefaultStrongDictionaryInput
 ): Promise<StrongLedger> {
@@ -615,6 +661,7 @@ async function generateStrongLedgerWithDictionary(
 
   const paths = outputPaths(options);
   const ledgerVerses: StrongLedgerVerse[] = [];
+  const resolutionInputs = new Map<string, CanonicalResolutionInput>();
   let readerAlignMs = 0;
   let completeAlignMs = 0;
   let ledgerBuildMs = 0;
@@ -674,6 +721,21 @@ async function generateStrongLedgerWithDictionary(
           overrideIndex: curatedOverrideIndex
         });
       }
+      if (options.resolveOccurrences !== false)
+        resolutionInputs.set(formatRef(item.verse), {
+          mapping: block,
+          occurrences: item.original
+            ? getOriginalStrongOccurrences(item.original)
+            : [],
+          // Projected reference inventories are synthetic empty tags, not evidence
+          // that every witness word is untranslated. Use real text for a single
+          // native target; defer cross-verse witness anchoring for split blocks.
+          references: projected.length === 1 ? verseReferences : [],
+          issues:
+            projected.length === 1
+              ? []
+              : ["witness-text-spans-multiple-native-verses"]
+        });
       const ledgerBuildStart = perfStart();
       ledgerVerses.push(
         buildStrongLedgerVerse({
@@ -702,7 +764,9 @@ async function generateStrongLedgerWithDictionary(
     bible: options.bible,
     onlyRef: options.onlyRef,
     inputDir: options.outputDir,
-    outputDir: lexicalCandidateOutputDir(options.bible),
+    outputDir:
+      options.lexicalReportOutputDir ??
+      lexicalCandidateOutputDir(options.bible),
     dictionaryCandidates,
     fetchJdm: false,
     fetchJdmLimit: 0,
@@ -712,8 +776,7 @@ async function generateStrongLedgerWithDictionary(
   };
   let lexicalAutoSafeCount = 0;
   let residualLexicalReport:
-    | Awaited<ReturnType<typeof buildLexicalCandidateReport>>
-    | undefined;
+    Awaited<ReturnType<typeof buildLexicalCandidateReport>> | undefined;
   let incrementalLexicalPassRefs: Set<string> | undefined;
   let lexicalAutoSafeReachedPassLimit = false;
   let lexicalAutoSafeLastApplied = 0;
@@ -772,6 +835,40 @@ async function generateStrongLedgerWithDictionary(
       `Lexical auto-safe reached pass limit after applying ${lexicalAutoSafeLastApplied} placement(s) in the final pass; inspect the residual lexical report for remaining auto-safe candidates.`
     );
   }
+  const resolutionBaselineMetrics =
+    options.resolveOccurrences === false
+      ? undefined
+      : aggregateMetrics(options.bible, options.onlyRef, ledgerVerses);
+  if (options.resolveOccurrences !== false) {
+    residualLexicalReport ??= await buildLexicalCandidateReport({
+      ...lexicalReportOptions,
+      ledger: { verses: ledgerVerses }
+    });
+    if (lexicalAutoSafePlacements(residualLexicalReport).length)
+      throw new Error("autonomous-resolution-requires-lexical-fixed-point");
+    const rows = await readCanonicalSourceRows(STEP_ORIGINAL_SOURCES);
+    const items = new Map<string, typeof residualLexicalReport.items>();
+    for (const item of residualLexicalReport.items) {
+      const values = items.get(item.ref) ?? [];
+      values.push(item);
+      items.set(item.ref, values);
+    }
+    for (const verse of ledgerVerses) {
+      verse.resolution = resolveCanonicalVerse({
+        bible: options.bible,
+        verse,
+        input: resolutionInputs.get(verse.ref)!,
+        sourceRows: rows,
+        lexicalItems: items.get(verse.ref) ?? []
+      });
+    }
+    rebuildLedgerVerses(ledgerVerses);
+    rows.clear();
+    items.clear();
+    resolutionInputs.clear();
+  }
+
+  const lexicalResolutionMetrics = residualLexicalReport?.metrics;
   if (options.writeLexicalReport !== false) {
     residualLexicalReport ??= await measureAsync(
       "build residual lexical report",
@@ -790,7 +887,8 @@ async function generateStrongLedgerWithDictionary(
       measureAsync("write lexical candidate report", () =>
         writeLexicalCandidateReport(
           lexicalReportToWrite,
-          lexicalCandidateOutputDir(options.bible)
+          options.lexicalReportOutputDir ??
+            lexicalCandidateOutputDir(options.bible)
         )
       ),
       measureAsync("write permissive promotion plan", () =>
@@ -802,6 +900,35 @@ async function generateStrongLedgerWithDictionary(
     ]);
     residualLexicalReport = undefined;
   }
+
+  const unassignedCanonicalSource =
+    options.resolveOccurrences === false
+      ? undefined
+      : correspondenceBlocks
+          .filter(
+            (b) => b.targetRefs.length === 0 && b.canonicalRefs.length > 0
+          )
+          .map((block) => {
+            const [bookId, c, v] = block.canonicalRefs[0].split(".");
+            const tokens = selectOriginalTokensForRefs(
+              originals,
+              block.canonicalRefs
+            );
+            return {
+              canonicalRefs: block.canonicalRefs,
+              reason:
+                block.reason ??
+                "Canonical source has no assigned native verse; absence of translation has not been established.",
+              status: "unresolved-correspondence" as const,
+              occurrences: getOriginalStrongOccurrences({
+                bookId,
+                chapter: Number(c),
+                verse: Number(v),
+                tokens,
+                strongSet: new Set(tokens.flatMap((t) => t.strong))
+              })
+            };
+          });
 
   // Full-Bible inputs and lexical caches are substantially larger than the
   // final in-memory ledger. Release them before SQLite serialization so V8
@@ -832,6 +959,19 @@ async function generateStrongLedgerWithDictionary(
   );
   const bible: StrongLedger = {
     bible: options.bible,
+    dictionaryInput: strongDictionaryInput,
+    unassignedCanonicalSource,
+    verseCorrespondencePath: resolveVerseCorrespondencePath(options),
+    resolutionBaselineMetrics,
+    lexicalResolutionMetrics,
+    resolutionPolicy:
+      options.resolveOccurrences === false
+        ? undefined
+        : CANONICAL_RESOLUTION_POLICY,
+    resolutionSummary:
+      options.resolveOccurrences === false
+        ? undefined
+        : aggregateResolutionMetrics(ledgerVerses),
     generatedAt: metrics.generatedAt,
     inputPath: options.biblePath,
     scope: options.onlyRef ?? "all",
@@ -893,7 +1033,12 @@ export async function refreshStrongLedger(
   if (!options.allowUnknownProfile && !hasTranslationProfile(profileBible)) {
     throw new Error(`missing-translation-profile:${profileBible}`);
   }
-  const strongDictionaryInput = resolveDefaultStrongDictionaryInput();
+  const strongDictionaryInput = options.dictionaryPath
+    ? {
+        path: options.dictionaryPath,
+        activation: { mode: "legacy" as const, path: options.dictionaryPath }
+      }
+    : (existing.dictionaryInput ?? resolveDefaultStrongDictionaryInput());
   const inputFingerprint = strongLedgerInputFingerprint(
     options,
     getTranslationProfile(profileBible),
@@ -1600,6 +1745,7 @@ function readerEmptyAnnotations(options: {
       "Visible as an empty reader Strong because multiple French reference Strong Bibles agree on an empty placement.",
     diagnostics: [assignment.method, assignment.source],
     insertAfterWordIndex: assignment.insertAfterWordIndex,
+    emptyEvidence: assignment.emptyEvidence,
     referenceSupport:
       options.referenceSupport.get(assignment.strong.toUpperCase()) ?? [],
     profile: options.profile.bible
@@ -1727,6 +1873,7 @@ function completeEmptyAnnotation(options: {
           : "STEP original Strong has no reliable French word carrier; exposed as an empty Strong only in advanced/debug mode.",
     diagnostics: [options.assignment.method],
     insertAfterWordIndex: options.assignment.insertAfterWordIndex,
+    emptyEvidence: options.assignment.emptyEvidence,
     originalTokenId: options.assignment.originalTokenId,
     originalOccurrenceId: options.assignment.originalOccurrenceId,
     sourceStrong: options.assignment.sourceStrong,
@@ -1857,6 +2004,7 @@ function collapseLexicalAutoSafeDuplicate(
     ])
   ];
   annotation.insertAfterWordIndex = undefined;
+  annotation.emptyEvidence = undefined;
   annotation.wordIndex = existingReader.wordIndex;
   annotation.normalizedWord = existingReader.normalizedWord;
   annotation.startWordIndex = existingReader.startWordIndex;
@@ -1937,6 +2085,7 @@ function applyLexicalAutoSafePlacement(
     ])
   ];
   annotation.insertAfterWordIndex = undefined;
+  annotation.emptyEvidence = undefined;
 
   if (
     candidate.target === "phrase" &&
@@ -2056,6 +2205,10 @@ function canStackLexicalAutoSafe(placement: LexicalAutoSafePlacement): boolean {
 
 function rebuildLedgerVerses(verses: StrongLedgerVerse[]): void {
   for (const verse of verses) {
+    for (const annotation of verse.annotations) {
+      if (annotation.placement === "word" || annotation.placement === "phrase")
+        annotation.emptyEvidence = undefined;
+    }
     verse.inventories = {
       ...verse.inventories,
       reader: verse.annotations
@@ -3208,7 +3361,10 @@ async function loadReferences(
 
   for (const reference of REFERENCES) {
     if (excluded.has(reference.name)) continue;
-    const rows = await readStrongCsv(reference.path);
+    const rows = (await readStrongCsv(reference.path)).map((row) => ({
+      ...row,
+      text: withoutPublisherNotes(row.text)
+    }));
     references.push({
       ...reference,
       rows,
@@ -3376,8 +3532,10 @@ async function loadVerseCorrespondenceBlocks(options: {
       .map((row) => referenceKey(row.bookId, row.chapter, row.verse))
   });
 
-  return manifest.blocks.filter((block) =>
-    block.targetRefs.some((ref) => selectedRefs.has(ref))
+  return manifest.blocks.filter(
+    (block) =>
+      block.targetRefs.some((ref) => selectedRefs.has(ref)) ||
+      (!options.options.onlyRef && block.targetRefs.length === 0)
   );
 }
 
@@ -3523,7 +3681,7 @@ function compareStrongLedgerVerseRef(
 }
 
 function bookOrderIndex(bookId: string): number {
-  const index = BOOK_IDS.indexOf(bookId as (typeof BOOK_IDS)[number]);
+  const index = ALL_BOOK_IDS.indexOf(bookId as (typeof ALL_BOOK_IDS)[number]);
   return index === -1 ? Number.MAX_SAFE_INTEGER : index;
 }
 
@@ -3544,6 +3702,7 @@ function parseArgs(argv: string[]): {
   mode: "reader" | "advanced";
   allowUnknownProfile: boolean;
   verseCorrespondencePath?: string;
+  dictionaryPath?: string;
 } {
   const args = new Map<string, string>();
   const command = ["export", "refresh", "migrate", "phrase-index"].includes(
@@ -3576,6 +3735,7 @@ function parseArgs(argv: string[]): {
     outputDir: args.get("output-dir") ?? path.join("outputs", "strong", bible),
     mode,
     allowUnknownProfile: args.get("allow-unknown-profile") === "true",
+    dictionaryPath: args.get("dictionary"),
     verseCorrespondencePath: args.get("verse-correspondence")
   };
 }
@@ -3605,6 +3765,7 @@ async function main(): Promise<void> {
       outputDir: args.outputDir,
       onlyRef: args.onlyRef,
       allowUnknownProfile: args.allowUnknownProfile,
+      dictionaryPath: args.dictionaryPath,
       verseCorrespondencePath: args.verseCorrespondencePath
     });
     console.log(
@@ -3645,6 +3806,7 @@ async function main(): Promise<void> {
     outputDir: args.outputDir,
     onlyRef: args.onlyRef,
     allowUnknownProfile: args.allowUnknownProfile,
+    dictionaryPath: args.dictionaryPath,
     verseCorrespondencePath: args.verseCorrespondencePath
   });
 

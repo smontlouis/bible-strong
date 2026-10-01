@@ -1,0 +1,245 @@
+[
+  {
+    "gold": "Darby",
+    "ref": "Luke.4.33",
+    "category": "forme fléchie et identité absente",
+    "focusStrong": ["G1510", "G2258"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAGNT.Luke.4.33.5.NKO"],
+        "targetWordIndices": [3],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "La source ἦν et le premier « avait » correspondent. TBESG rattache explicitement G2258 à G1510. Le choix archivé porte sur le bon mot français, mais n'a pas arbitré le numéro. La référence attend G1510. Le deuxième « avait » est une autre relation, à ne pas confondre."
+  },
+  {
+    "gold": "DarbyR",
+    "ref": "Acts.2.31",
+    "category": "identité non résolue",
+    "focusStrong": ["G4308", "G4275"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAGNT.Acts.2.31.1.NKO"],
+        "targetWordIndices": [10],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "προϊδών s'associe à « prévoyant ». STEP privilégie G4308, le CSV G4275. TBESG donne à G4275 une relation « Combination » vers G4308 sans liste de composants : ce libellé ne suffit pas pour inventer une décomposition ni trancher le numéro d'affichage."
+  },
+  {
+    "gold": "DarbyR",
+    "ref": "Acts.8.2",
+    "category": "correspondance locale et faux synonyme global",
+    "focusStrong": ["G0846", "G3778"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAGNT.Acts.8.2.12.NKO"],
+        "targetWordIndices": [13],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "αὐτῷ vise « lui ». Le CSV attend G0846. G3778 figure parmi les alternatives STEP de cette occurrence, mais TBESG le décrit comme une entrée distincte, non comme une forme de G0846. La correspondance de placement ne prouve pas une équivalence globale des deux identifiants."
+  },
+  {
+    "gold": "Sg1910",
+    "ref": "Eccl.9.10",
+    "category": "expression et porteur éditorial",
+    "focusStrong": ["H7585"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAHOT.Eccl.9.10.14.L"],
+        "targetWordIndices": [26, 27, 28],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "La relation lexicale de shéol est portée par « séjour des morts » ; « morts » est le porteur retenu par le CSV. Cette distinction explique la divergence de frontières sans modifier la métrique existante. Le préfixe hébreu « dans » appelle une analyse grammaticale distincte ; le groupe proposé ici est lexical."
+  },
+  {
+    "gold": "Sg1910",
+    "ref": "Rom.8.32",
+    "category": "construction pronominale",
+    "focusStrong": ["G3739"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAGNT.Rom.8.32.1.NKO"],
+        "targetWordIndices": [0, 1],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "ὅς est rendu par la construction « Lui, qui ». Le CSV porte le numéro sur « Lui ». Ce cas demande une règle éditoriale sur les pronoms et leurs expansions ; le regroupement des identifiants Strong ne le résout pas."
+  },
+  {
+    "gold": "DarbyR",
+    "ref": "1Chr.26.26",
+    "category": "expression relationnelle",
+    "focusStrong": ["H5921"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAHOT.1Chr.26.26.4.L"],
+        "targetWordIndices": [6, 7],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "La préposition עַל, glossée « over », participe à « responsables de ». Le CSV choisit « responsables ». La bonne unité sémantique et le porteur minimal ne sont pas nécessairement de mêmes dimensions. Validation philologique indépendante encore requise."
+  },
+  {
+    "gold": "Sg1910",
+    "ref": "Matt.26.40",
+    "category": "doublon identique et perte du bon numéro",
+    "focusStrong": ["G1473", "G1700"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAGNT.Matt.26.40.21.NKO"],
+        "targetWordIndices": [22],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "Une occurrence ἐμοῦ, un « moi », deux annotations de départ. TBESG documente G1700 comme forme de G1473. Garder automatiquement le code principal G1473 supprime G1700, pourtant attendu par cette édition de référence. La relation peut être unique en conservant explicitement les alternatives de numérotation."
+  },
+  {
+    "gold": "Sg1910",
+    "ref": "John.2.4",
+    "category": "deux occurrences et frontières concurrentes",
+    "focusStrong": ["G1473", "G1698", "G4771", "G4671"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAGNT.John.2.4.7.NKO"],
+        "targetWordIndices": [7],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      },
+      {
+        "sourceUnitIds": ["TAGNT.John.2.4.9.NKO"],
+        "targetWordIndices": [9],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "« moi » porte un doublon exact G1473/G1698 ; « toi » et « et toi » sont deux frontières concurrentes G4671/G4771. Les deux pronoms sont des occurrences distinctes. La seconde concurrence ne doit pas être effacée par la règle de suppression des seuls doublons identiques."
+  },
+  {
+    "gold": "Sg1910",
+    "ref": "Luke.14.5",
+    "category": "variante manuscrite",
+    "focusStrong": ["G5207", "G3688"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAGNT.Luke.14.5.8.N(K)O"],
+        "targetWordIndices": [9],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "La traduction a « fils » ; STEP donne υἱός/G5207 dans la lecture principale et ὄνος/G3688 (« âne ») dans le TR. G3688 n'est ni un deuxième fils manquant ni un synonyme. Le prototype conserve la provenance de la variante et exclut ce groupe de la normalisation expérimentale."
+  },
+  {
+    "gold": "Sg1910",
+    "ref": "Luke.7.41",
+    "category": "plusieurs formes et arbitrages divergents",
+    "focusStrong": ["G1510", "G2258", "G2252"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAGNT.Luke.7.41.3.NKO"],
+        "targetWordIndices": [2],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "Une occurrence ἦσαν et trois numéros proposés par STEP. G1510 est déjà sur « avait » ; les décisions archivées pour les alternatives divergent, jusqu'à NONE pour G2252. TBESG permet de documenter leur famille de formes. Les probabilités de questions différentes ne doivent pas être additionnées comme votes indépendants."
+  },
+  {
+    "gold": "Sg1910",
+    "ref": "Jonah.3.3",
+    "category": "double emploi d'une occurrence",
+    "focusStrong": ["H1980", "H3212", "H4109"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAHOT.Jonah.3.3.3.L"],
+        "targetWordIndices": [5],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      },
+      {
+        "sourceUnitIds": ["TAHOT.Jonah.3.3.13.L"],
+        "targetWordIndices": [24],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "La même occurrence « il alla » fournit H3212 sur « alla » et H1980 sur « marche ». Or la source possède une autre occurrence, H4109, glossée « journey », pour « marche ». Le graphe révèle une attribution suspecte que la similarité lexicale masque. Elle est signalée, pas corrigée sans nouvelle décision."
+  },
+  {
+    "gold": "Sg1910",
+    "ref": "Gen.40.21",
+    "category": "répétition légitime",
+    "focusStrong": ["H4945", "H8248"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAHOT.Gen.40.21.4.L"],
+        "targetWordIndices": [5],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      },
+      {
+        "sourceUnitIds": ["TAHOT.Gen.40.21.6.L"],
+        "targetWordIndices": [9],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "Deux occurrences source distinctes de H4945 correspondent à « échansons » et « d'échanson ». Elles restent deux relations malgré le Strong commun. Dédupliquer par numéro dans le verset détruirait un placement légitime. Les décisions JEV antérieures excluaient ces répétitions ; aucun score nouveau n'est inventé."
+  },
+  {
+    "gold": "Sg1910",
+    "ref": "Num.7.89",
+    "category": "absence lexicale et fonction grammaticale",
+    "focusStrong": ["H0853"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAHOT.Num.7.89.9.L"],
+        "targetWordIndices": [],
+        "status": "unresolved",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "STEP décrit אֶת comme marqueur d'objet. Une absence de mot français autonome est plausible, tandis que sa fonction grammaticale subsiste dans la construction. L'absence de tag dans le CSV ne prouve rien à elle seule ; le NONE archivé (0,56) ne constitue pas une validation. Le statut reste non résolu en attente d'une revue indépendante."
+  },
+  {
+    "gold": "Sg1910",
+    "ref": "Gen.2.24",
+    "category": "groupe de plusieurs mots source",
+    "focusStrong": ["H5921", "H3651"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAHOT.Gen.2.24.1.L", "TAHOT.Gen.2.24.2.L"],
+        "targetWordIndices": [0, 1],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "עַל־כֵּן est glossé en deux morceaux « there- » / « -fore » ; la traduction offre « C'est pourquoi ». La relation peut réunir les deux occurrences et l'expression, en conservant les deux porteurs éditoriaux existants. Ce regroupement sémantique ne fusionne pas les occurrences physiques."
+  },
+  {
+    "gold": "Sg1910",
+    "ref": "Rev.20.3",
+    "category": "identifiant composé sur plusieurs occurrences",
+    "focusStrong": ["G2443", "G3363", "G3361"],
+    "relations": [
+      {
+        "sourceUnitIds": ["TAGNT.Rev.20.3.14.NKO", "TAGNT.Rev.20.3.15.NKO"],
+        "targetWordIndices": [12, 13, 14],
+        "status": "proposed",
+        "evidenceIds": ["assistant-inspection"]
+      }
+    ],
+    "assessment": "TBESG décompose explicitement G3363 en G2443+G3361 : ἵνα μή, présent dans deux lignes consécutives. Ce n'est donc pas un alias simple de G2443. Le transfert du choix archivé vers G2443 élargit « afin » en « afin qu'il » et perd un porteur exact. Le groupe proposé « afin qu'il ne » doit encore être validé avec la négation discontinue « ne…plus » ; aucune correction automatique n'en découle."
+  }
+]

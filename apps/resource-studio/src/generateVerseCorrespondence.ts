@@ -3,7 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { readBibleJson } from "./bibleJson.js";
-import { BOOK_IDS } from "./books.js";
+import { BOOK_IDS, ALL_BOOK_IDS } from "./books.js";
 import { readStrongCsv } from "./strongCsv.js";
 import {
   detectVerseCorrespondence,
@@ -22,6 +22,7 @@ interface CliOptions {
   report: string;
   minimumBlockScore: number;
   ambiguityMargin: number;
+  partitionByChapter?: boolean;
 }
 
 const WITNESSES = [
@@ -46,7 +47,7 @@ export async function generateVerseCorrespondenceManifest(
     }))
   );
   const targetBooks = new Set(target.map((verse) => verse.bookId));
-  const books = BOOK_IDS.filter((bookId) => targetBooks.has(bookId));
+  const books = ALL_BOOK_IDS.filter((bookId) => targetBooks.has(bookId));
   const accepted: Array<{
     bookId: string;
     score: number;
@@ -83,13 +84,32 @@ export async function generateVerseCorrespondenceManifest(
           text: row.text
         }))
     }));
+    if (!BOOK_IDS.some((b) => b === bookId)) {
+      accepted.push({
+        bookId,
+        score: 0,
+        margin: 1,
+        resolution: "detector-chapter-partitioned",
+        blocks: targetVerses.map((v) => ({
+          kind: "added",
+          targetRefs: [v.ref],
+          canonicalRefs: [],
+          reason:
+            "outside-STEP-witness-canon; text retained without invented Strong annotations"
+        }))
+      });
+      continue;
+    }
     // Psalms have stable psalm boundaries but can accumulate many verse-number
     // differences inside them (especially numbered superscriptions). Detecting
     // each Psalm avoids a huge, artificial book-wide drift window. Do not apply
     // this to Job: FMAR moves material across the Job 40–41 boundary.
-    const chapterPartitioned = bookId === "Ps";
+    const chapterPartitioned =
+      bookId === "Ps" || options.partitionByChapter === true;
     const scopeKeys: Array<number | undefined> = chapterPartitioned
-      ? [...new Set(targetVerses.map((verse) => refChapter(verse.ref)))]
+      ? [...new Set(targetVerses.map((verse) => refChapter(verse.ref)))].filter(
+          (c) => !(bookId === "Job" && c === 41)
+        )
       : [undefined];
     const bookBlocks: VerseCorrespondenceBlock[] = [];
     const bookResolutions: Array<
@@ -107,7 +127,9 @@ export async function generateVerseCorrespondenceManifest(
     // the lower gate admits the verified Job.40.19 -> Job.40.24 shift (0.243)
     // without changing the default threshold for any other book.
     const scopeMinimumBlockScore =
-      bookId === "Job" ? Math.min(options.minimumBlockScore, 0.24) : options.minimumBlockScore;
+      bookId === "Job"
+        ? Math.min(options.minimumBlockScore, 0.24)
+        : options.minimumBlockScore;
     const structuralPenalty = bookId === "Job" ? 0.35 : 0.3;
 
     for (const scopeChapter of scopeKeys) {
@@ -115,7 +137,11 @@ export async function generateVerseCorrespondenceManifest(
         scopeChapter === undefined
           ? targetVerses
           : targetVerses.filter(
-              (verse) => refChapter(verse.ref) === scopeChapter
+              (verse) =>
+                refChapter(verse.ref) === scopeChapter ||
+                (bookId === "Job" &&
+                  scopeChapter === 40 &&
+                  refChapter(verse.ref) === 41)
             );
       const scopedWitnesses = witnesses.map((witness) => ({
         ...witness,
@@ -123,7 +149,11 @@ export async function generateVerseCorrespondenceManifest(
           scopeChapter === undefined
             ? witness.verses
             : witness.verses.filter(
-                (verse) => refChapter(verse.ref) === scopeChapter
+                (verse) =>
+                  refChapter(verse.ref) === scopeChapter ||
+                  (bookId === "Job" &&
+                    scopeChapter === 40 &&
+                    refChapter(verse.ref) === 41)
               )
       }));
       const result = detectVerseCorrespondence(
@@ -140,7 +170,13 @@ export async function generateVerseCorrespondenceManifest(
           // FMAR Job 39.30 concatenates the end of canonical Job 39 with the
           // opening dialogue of Job 40 (nine canonical verses in one target
           // verse). Keep the broader transition local to this known book.
-          maxCanonicalSpan: bookId === "Job" ? 10 : 3,
+          maxCanonicalSpan: Math.max(
+            bookId === "Job" ? 10 : 3,
+            detectorRequiredCanonicalSpan(
+              scopedTargets.map((v) => v.ref),
+              scopedWitnesses[0]!.verses.map((v) => v.ref)
+            )
+          ),
           // STEP/French numbering can differ by more than four verse slots
           // across chapter boundaries (notably Nehemiah 3–4). Derive the
           // necessary window from shared coordinates so identity scopes keep
@@ -176,9 +212,7 @@ export async function generateVerseCorrespondenceManifest(
         issues: result.issues,
         alternatives: result.alternatives.slice(0, 2) as unknown,
         scope:
-          scopeChapter === undefined
-            ? undefined
-            : `${bookId}.${scopeChapter}`,
+          scopeChapter === undefined ? undefined : `${bookId}.${scopeChapter}`,
         conservativeIssue: undefined as string | undefined
       };
       try {
@@ -193,24 +227,24 @@ export async function generateVerseCorrespondenceManifest(
               (block.evidence?.score ?? 0) >= scopeMinimumBlockScore
           );
         const resolvedBlocks = allStructuralBlocksAreHigh
-            ? best.blocks.map((block) =>
-                block.kind === "identity"
-                  ? block
-                  : {
-                      ...block,
-                      reason: [block.reason, "detector-best-structural-high"]
-                        .filter(Boolean)
-                        .join("; ")
-                    }
-              )
-            : conservativeTopPathIntersection({
-                targetRefs: scopedTargets.map((verse) => verse.ref),
-                canonicalRefs: scopedWitnesses[0]!.verses.map(
-                  (verse) => verse.ref
-                ),
-                alternatives: result.alternatives,
-                minimumBlockScore: scopeMinimumBlockScore
-              });
+          ? best.blocks.map((block) =>
+              block.kind === "identity"
+                ? block
+                : {
+                    ...block,
+                    reason: [block.reason, "detector-best-structural-high"]
+                      .filter(Boolean)
+                      .join("; ")
+                  }
+            )
+          : conservativeTopPathIntersection({
+              targetRefs: scopedTargets.map((verse) => verse.ref),
+              canonicalRefs: scopedWitnesses[0]!.verses.map(
+                (verse) => verse.ref
+              ),
+              alternatives: result.alternatives,
+              minimumBlockScore: scopeMinimumBlockScore
+            });
         bookBlocks.push(
           ...calibrateDetectedBookBlocks({
             bible: options.bible,
@@ -342,6 +376,24 @@ export async function generateVerseCorrespondenceManifest(
   };
 }
 
+/** Bound long merge proposals by actual gaps in retained native coordinates. */
+export function detectorRequiredCanonicalSpan(
+  targetRefs: readonly string[],
+  canonicalRefs: readonly string[]
+): number {
+  const indexes = new Map(canonicalRefs.map((r, i) => [r, i]));
+  const anchors = targetRefs.flatMap((r) =>
+    indexes.has(r) ? [indexes.get(r)!] : []
+  );
+  let maximum = 1;
+  for (let i = 0; i < anchors.length; i++)
+    maximum = Math.max(
+      maximum,
+      (anchors[i + 1] ?? canonicalRefs.length) - anchors[i]
+    );
+  return Math.min(100, maximum);
+}
+
 export function detectorMaxIndexDrift(
   targetRefs: readonly string[],
   canonicalRefs: readonly string[]
@@ -364,7 +416,7 @@ export function detectorMaxIndexDrift(
   return Math.min(96, Math.max(4, observed + 3));
 }
 
-function conservativeTopPathIntersection(options: {
+export function conservativeTopPathIntersection(options: {
   targetRefs: string[];
   canonicalRefs: string[];
   alternatives: VerseCorrespondenceAlternative[];
@@ -375,13 +427,22 @@ function conservativeTopPathIntersection(options: {
     throw new Error("fewer-than-two-alignment-paths");
   }
   const runnerSignatures = new Set(runnerUp.blocks.map(blockSignature));
+  const shared = new Set(
+    options.targetRefs.filter((r) => options.canonicalRefs.includes(r))
+  );
   const stable = best.blocks.filter(
     (block) =>
       block.kind !== "identity" &&
       (block.kind === "omitted" ||
         block.kind === "added" ||
         (block.evidence?.score ?? 0) >= options.minimumBlockScore) &&
-      runnerSignatures.has(blockSignature(block))
+      runnerSignatures.has(blockSignature(block)) &&
+      block.targetRefs.every(
+        (r) => !shared.has(r) || block.canonicalRefs.includes(r)
+      ) &&
+      block.canonicalRefs.every(
+        (r) => !shared.has(r) || block.targetRefs.includes(r)
+      )
   );
   const stableByCoordinate = new Map<string, VerseCorrespondenceBlock>();
   for (const block of stable) {
@@ -417,7 +478,8 @@ function conservativeTopPathIntersection(options: {
       blocks.push({
         kind: "identity",
         targetRefs: [targetRef],
-        canonicalRefs: [canonicalRef]
+        canonicalRefs: [canonicalRef],
+        reason: "native-coordinate-fallback-after-ambiguous-text-alignment"
       });
       targetIndex += 1;
       canonicalIndex += 1;
@@ -428,7 +490,7 @@ function conservativeTopPathIntersection(options: {
         kind: "omitted",
         targetRefs: [],
         canonicalRefs: [canonicalRef],
-        reason: "Canonical verse absent from the target reference set."
+        reason: "unresolved-native-gap-not-proof-of-omitted-translation"
       });
       canonicalIndex += 1;
       continue;
@@ -587,7 +649,8 @@ function parseArgs(argv: string[]): CliOptions {
       args.get("report") ??
       `outputs/verse-correspondence/${bible}/detection-report.json`,
     minimumBlockScore: parseNumber(args.get("minimum-block-score"), 0.34),
-    ambiguityMargin: parseNumber(args.get("ambiguity-margin"), 0.06)
+    ambiguityMargin: parseNumber(args.get("ambiguity-margin"), 0.06),
+    partitionByChapter: args.get("partition-by-chapter") === "true"
   };
 }
 

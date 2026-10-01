@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   detectVerseCorrespondence,
+  normalizeVerseText,
   validateVerseCorrespondenceManifest,
   VerseCorrespondenceValidationError,
   type VerseCorrespondenceBlock,
@@ -13,6 +14,75 @@ import {
   calibrateDetectedBookBlocks,
   detectorMaxIndexDrift
 } from "../src/generateVerseCorrespondence.js";
+
+test("correspondence scoring excludes publisher notes and does not count a Darby sister twice", () => {
+  assert.equal(
+    normalizeVerseText("parole <note>commentaire étranger</note> sûre"),
+    normalizeVerseText("parole sûre")
+  );
+  const targetVerses = [{ ref: "Gen.1.1", text: "un texte proche" }];
+  const base = {
+    bible: "fixture",
+    canonicalVersification: "fixture",
+    targetVerses,
+    canonicalWitnesses: [
+      {
+        name: "Sg1910",
+        verses: [{ ref: "Gen.1.1", text: "une autre phrase" }]
+      },
+      { name: "Darby", verses: targetVerses }
+    ]
+  };
+  const options = { minimumBlockScore: 0, ambiguityMargin: 0 };
+  const one = detectVerseCorrespondence(base, options);
+  const sisters = detectVerseCorrespondence(
+    {
+      ...base,
+      canonicalWitnesses: [
+        ...base.canonicalWitnesses,
+        { name: "DarbyR", verses: targetVerses }
+      ]
+    },
+    options
+  );
+  assert.equal(one.score, sisters.score);
+});
+
+test("a punctuation-only native verse remains a coordinate in the correspondence", () => {
+  const targetVerses = [
+    { ref: "Gen.1.1", text: "première phrase" },
+    { ref: "Gen.1.2", text: "—" },
+    { ref: "Gen.1.3", text: "dernière phrase" }
+  ];
+  const result = detectVerseCorrespondence(
+    {
+      bible: "fixture",
+      canonicalVersification: "fixture",
+      targetVerses,
+      canonicalWitnesses: [
+        {
+          name: "Sg1910",
+          verses: targetVerses.map((v) => ({
+            ...v,
+            text: v.ref === "Gen.1.2" ? "un passage omis" : v.text
+          }))
+        }
+      ]
+    },
+    {
+      minimumBlockScore: 0,
+      ambiguityMargin: 0,
+      maxTargetSpan: 1,
+      maxCanonicalSpan: 1
+    }
+  );
+  assert.equal(result.status, "accepted");
+  if (result.status === "accepted")
+    assert.deepEqual(
+      result.manifest.blocks.flatMap((b) => b.targetRefs),
+      targetVerses.map((v) => v.ref)
+    );
+});
 
 test("expands detector drift for a shifted chapter without slowing identity books", () => {
   assert.equal(

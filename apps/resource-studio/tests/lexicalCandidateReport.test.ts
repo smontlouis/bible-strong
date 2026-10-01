@@ -17,6 +17,122 @@ import {
 import { type StrongLedgerVerse } from "../src/strongLedger.js";
 import { type StrongTranslationCandidate } from "../src/translationLexicon.js";
 
+test("display-only empty anchoring preserves the lexical scoring prior", async () => {
+  const annotation = empty("e", "H0251", "brother", 0);
+  const v = verse(
+    "Gen.1.1",
+    "frère et sœur et frère",
+    [
+      token(0, "frère"),
+      token(1, "et"),
+      token(2, "sœur"),
+      token(3, "et"),
+      token(4, "frère")
+    ],
+    annotation
+  );
+  const options = {
+    bible: "fixture",
+    inputDir: ".",
+    outputDir: ".",
+    ledger: { verses: [v] },
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    dictionaryCandidates: [candidate("H0251", "frere", 0.9)],
+    maxCandidatesPerEmpty: 8
+  };
+  const before = await buildLexicalCandidateReport(options);
+  v.annotations[0].lexicalSearchAnchorWordIndex = 0;
+  v.annotations[0].insertAfterWordIndex = 4;
+  const after = await buildLexicalCandidateReport(options);
+  assert.deepEqual(after.items, before.items);
+});
+
+test("a linguistically supported lexical absence is not reopened as a missing word", async () => {
+  const v = verse(
+    "Gen.1.1",
+    "frère",
+    [token(0, "frère")],
+    empty("e", "H0251", "brother", 0)
+  );
+  v.annotations[0].emptyEvidence = {
+    absence: {
+      status: "linguistic-rule",
+      families: [],
+      reason: "synthetic fixture"
+    },
+    anchor: {
+      status: "editorial-convention",
+      method: "occurrence-neighbors",
+      insertAfterWordIndex: 0,
+      reason: "fixture"
+    }
+  };
+  const r = await buildLexicalCandidateReport({
+    bible: "fixture",
+    inputDir: ".",
+    outputDir: ".",
+    ledger: { verses: [v] },
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    dictionaryCandidates: [candidate("H0251", "frere", 0.9)],
+    maxCandidatesPerEmpty: 8
+  });
+  assert.equal(r.items.length, 0);
+});
+
+test("offline audit includes established word and phrase carriers without changing default scope", async () => {
+  const established = word("established", "H0251", "brother", 0, "", "frere");
+  const phrase = {
+    ...word("phrase", "H0251", "brother", 0),
+    placement: "phrase",
+    wordIndex: undefined,
+    startWordIndex: 0,
+    endWordIndex: 1
+  };
+  const ignored = {
+    ...word("technical", "H0251", "brother", 1),
+    lexiconLookup: false
+  };
+  const ledger = {
+    verses: [
+      verse(
+        "Gen.1.1",
+        "frère aimé",
+        [token(0, "frère"), token(1, "aimé")],
+        [established, phrase, ignored]
+      )
+    ]
+  };
+  const before = JSON.stringify(ledger);
+  const options = {
+    bible: "fixture",
+    inputDir: ".",
+    outputDir: ".",
+    ledger,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 100,
+    dictionaryCandidates: [candidate("H0251", "frere", 0.9)]
+  };
+  const normal = await buildLexicalCandidateReport(options);
+  const expanded = await buildLexicalCandidateReport({
+    ...options,
+    includeAllReaderAnnotations: true
+  });
+  assert.equal(normal.items.length, 0);
+  assert.deepEqual(
+    expanded.items.map((item) => item.annotationId),
+    ["established", "phrase"]
+  );
+  assert(
+    expanded.items.every((item) =>
+      item.candidates.some((c) => c.wordIndex === 0)
+    )
+  );
+  assert.equal(JSON.stringify(ledger), before);
+});
+
 test("streams a lexical report to valid equivalent JSON", async () => {
   const directory = mkdtempSync(path.join(tmpdir(), "lexical-report-stream-"));
   const report: LexicalCandidateReport = {

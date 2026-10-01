@@ -1,9 +1,13 @@
+import {
+  aggregateResolutionRecords,
+  type CanonicalResolutionMetrics
+} from "./strongCanonicalResolution.js";
 import { createWriteStream } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
-import { BOOK_IDS } from "./books.js";
+import { ALL_BOOK_IDS as BOOK_IDS } from "./books.js";
 import { tsvEscape } from "./render.js";
 import type {
   StrongLedger,
@@ -30,6 +34,7 @@ interface SqliteRow {
   reader_html: string;
   advanced_html: string;
   debug_html: string;
+  resolution_json?: string | null;
 }
 
 interface MetricRow {
@@ -113,6 +118,25 @@ export async function replaceStrongLedgerSqliteVerses(options: {
     writeMetadata(db, {
       ...ledger,
       ...options.metadata,
+      ...(ledger.resolutionPolicy
+        ? {
+            resolutionSummary: aggregateResolutionRecords(
+              (
+                db
+                  .prepare(
+                    "select book_id, json_extract(resolution_json, '$.metrics') as metrics from verses where bible = ? and resolution_json is not null"
+                  )
+                  .all(options.bible) as Array<{
+                  book_id: string;
+                  metrics: string;
+                }>
+              ).map((r) => ({
+                bookId: r.book_id,
+                metrics: JSON.parse(r.metrics) as CanonicalResolutionMetrics
+              }))
+            )
+          }
+        : {}),
       generatedAt: metrics.generatedAt,
       scope: "all",
       method: options.method,
@@ -195,7 +219,7 @@ export function readStrongLedgerVersesByRefsSqlite(options: {
       .prepare(
         `select v.ref, v.book_id, v.chapter, v.verse, v.text,
                 v.tokens_json, v.annotations_json, v.inventories_json,
-                v.metrics_json, v.reader_html, v.advanced_html, v.debug_html
+                v.metrics_json, v.reader_html, v.advanced_html, v.debug_html, v.resolution_json
          from verses v
          inner join requested_refs requested on requested.ref = v.ref
          where v.bible = ?
@@ -276,6 +300,7 @@ function openLedgerDatabase(sqlitePath: string): DatabaseSync {
       reader_html text not null,
       advanced_html text not null,
       debug_html text not null,
+      resolution_json text,
       primary key (bible, ref)
     );
     create index if not exists idx_strong_verses_scope
@@ -290,6 +315,11 @@ function openLedgerDatabase(sqlitePath: string): DatabaseSync {
       primary key (bible, book_id)
     );
   `);
+  const columns = db.prepare("pragma table_info(verses)").all() as Array<{
+    name: string;
+  }>;
+  if (!columns.some((c) => c.name === "resolution_json"))
+    db.exec("alter table verses add column resolution_json text");
   return db;
 }
 
@@ -348,8 +378,8 @@ function insertVerses(
     `insert into verses (
        bible, ref, book_id, book_order, chapter, verse, text,
        tokens_json, annotations_json, inventories_json, metrics_json,
-       reader_html, advanced_html, debug_html
-     ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       reader_html, advanced_html, debug_html, resolution_json
+     ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      on conflict(bible, ref) do update set
        book_id = excluded.book_id,
        book_order = excluded.book_order,
@@ -362,7 +392,8 @@ function insertVerses(
        metrics_json = excluded.metrics_json,
        reader_html = excluded.reader_html,
        advanced_html = excluded.advanced_html,
-       debug_html = excluded.debug_html`
+       debug_html = excluded.debug_html,
+       resolution_json = excluded.resolution_json`
   );
 
   for (const verse of verses) {
@@ -380,7 +411,8 @@ function insertVerses(
       JSON.stringify(verse.metrics),
       verse.views.readerHtml,
       verse.views.advancedHtml,
-      verse.views.debugHtml
+      verse.views.debugHtml,
+      verse.resolution ? JSON.stringify(verse.resolution) : null
     );
   }
 }
@@ -417,7 +449,7 @@ function readVersesFromOpenDatabase(
     .prepare(
       `select ref, book_id, chapter, verse, text,
               tokens_json, annotations_json, inventories_json, metrics_json,
-              reader_html, advanced_html, debug_html
+              reader_html, advanced_html, debug_html, resolution_json
        from verses
        where bible = ?${predicate.sql}
        order by book_order, chapter, verse`
@@ -436,7 +468,7 @@ function readBooksFromOpenDatabase(
     .prepare(
       `select ref, book_id, chapter, verse, text,
               tokens_json, annotations_json, inventories_json, metrics_json,
-              reader_html, advanced_html, debug_html
+              reader_html, advanced_html, debug_html, resolution_json
        from verses
        where bible = ? and book_id in (${placeholders})
        order by book_order, chapter, verse`
@@ -447,6 +479,13 @@ function readBooksFromOpenDatabase(
 
 function rowToVerse(row: SqliteRow): StrongLedgerVerse {
   return {
+    ...(row.resolution_json
+      ? {
+          resolution: JSON.parse(
+            row.resolution_json
+          ) as StrongLedgerVerse["resolution"]
+        }
+      : {}),
     ref: row.ref,
     bookId: row.book_id,
     chapter: row.chapter,

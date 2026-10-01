@@ -452,6 +452,91 @@ async function writeTempStepFile(
   return filePath;
 }
 
+test("keeps different physical words when STEP restarts numbering at an alternate verse boundary", async () => {
+  const file = await writeTempStepFile("TAHOT Num.txt", [
+    tahotLine("Num.26.1(25.19)#01=L", "was", "H1961"),
+    tahotLine("Num.26.1#01=L", "said", "H0559")
+  ]);
+  const data = await readStepOriginalData([file]);
+  const combined = selectStepOriginalTokensForRefs(
+    data.verseMap,
+    ["Num.25.19", "Num.26.1"],
+    { preferAlternateRef: true }
+  );
+  assert.equal(combined.tokens.length, 2);
+  assert.equal(
+    new Set(combined.tokens.map((t) => t.stepSourceIdentity)).size,
+    2
+  );
+  assert.equal(new Set(combined.tokens.map((t) => t.id)).size, 2);
+  assert.deepEqual(
+    selectStepOriginalTokensForRefs(data.verseMap, ["Num.25.19"], {
+      preferAlternateRef: true
+    }).tokens.map((t) => t.strong[0]),
+    ["H1961"]
+  );
+  assert.deepEqual(
+    selectStepOriginalTokensForRefs(data.verseMap, ["Num.26.1"], {
+      preferAlternateRef: true
+    }).tokens.map((t) => t.strong[0]),
+    ["H0559"]
+  );
+  const evidence = selectStepEvidenceForRefs(data.evidenceIndex, ["Num.26.1"], {
+    preferAlternateRef: true
+  });
+  assert.deepEqual([...evidence.keys()], ["H0559"]);
+  assert.equal(
+    evidence.get("H0559")![0].stepSourceIdentity,
+    combined.tokens[1].stepSourceIdentity
+  );
+  const again = await readStepOriginalData([file]);
+  assert.deepEqual(
+    selectStepOriginalTokensForRefs(again.verseMap, ["Num.25.19", "Num.26.1"], {
+      preferAlternateRef: true
+    }).tokens.map((t) => t.stepSourceIdentity),
+    combined.tokens.map((t) => t.stepSourceIdentity)
+  );
+});
+
+test("a relocated source token is not also retained in its old main coordinate", async () => {
+  const file = await writeTempStepFile("TAGNT Rom.txt", [
+    [
+      "Rom.3.25(3.26)#01=NKO",
+      "δικαιοσύνης",
+      "righteousness",
+      "G1343A=N-GSF",
+      "",
+      "NA28",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "G1343",
+      ""
+    ].join("\t")
+  ]);
+  const d = await readStepOriginalData([file]);
+  assert.equal(
+    selectStepOriginalTokensForRefs(d.verseMap, ["Rom.3.25"], {
+      preferAlternateRef: true
+    }).tokens.length,
+    0
+  );
+  assert.equal(
+    selectStepOriginalTokensForRefs(d.verseMap, ["Rom.3.26"], {
+      preferAlternateRef: true
+    }).tokens.length,
+    1
+  );
+  assert.equal(
+    selectStepEvidenceForRefs(d.evidenceIndex, ["Rom.3.25"], {
+      preferAlternateRef: true
+    }).size,
+    0
+  );
+});
+
 function tahotSenseLine(
   tokenIndex: number,
   gloss: string,

@@ -1,10 +1,13 @@
-import { BOOK_IDS } from "./books.js";
+import { withoutPublisherNotes } from "./strongReaderText.js";
+import { ALL_BOOK_IDS as BOOK_IDS } from "./books.js";
 
 export const VERSE_CORRESPONDENCE_MANIFEST_VERSION = 2 as const;
 export const VERSE_CORRESPONDENCE_DETECTOR_VERSION =
-  "deterministic-book-alignment-v3" as const;
+  "deterministic-book-alignment-v5" as const;
 export const LEGACY_VERSE_CORRESPONDENCE_DETECTOR_VERSIONS = [
-  "deterministic-book-alignment-v2"
+  "deterministic-book-alignment-v2",
+  "deterministic-book-alignment-v3",
+  "deterministic-book-alignment-v4"
 ] as const;
 type VerseCorrespondenceDetectorVersion =
   | typeof VERSE_CORRESPONDENCE_DETECTOR_VERSION
@@ -295,7 +298,7 @@ export function detectVerseCorrespondence(
     input.targetVerses,
     "target verses",
     inputIssues,
-    false
+    true
   );
   if (input.canonicalWitnesses.length === 0) {
     inputIssues.push("at least one canonical witness is required");
@@ -414,7 +417,7 @@ export function detectVerseCorrespondence(
 
 /** Removes markup and normalizes punctuation/diacritics for witness scoring. */
 export function normalizeVerseText(text: string): string {
-  return text
+  return withoutPublisherNotes(text)
     .replace(/<[^>]*>/gu, " ")
     .replace(/&(?:nbsp|#160);/giu, " ")
     .replace(/&(?:amp|#38);/giu, "&")
@@ -436,6 +439,7 @@ function bestAlignmentPaths(
   settings: DetectorSettings
 ): PathCandidate[] {
   const width = canonical.length + 1;
+  const nativeRefs = new Set(targets.map((t) => t.ref));
   const states: PathCandidate[][] = Array.from(
     { length: (targets.length + 1) * width },
     () => []
@@ -479,7 +483,7 @@ function bestAlignmentPaths(
             const cacheKey = `${targetIndex}:${targetSpan}:${canonicalIndex}:${canonicalSpan}`;
             const block =
               blockCache.get(cacheKey) ??
-              scoredBlock(targetSlice, canonicalSlice, witnesses);
+              scoredBlock(targetSlice, canonicalSlice, witnesses, nativeRefs);
             blockCache.set(cacheKey, block);
             const contribution =
               (block.evidence?.score ?? 0) *
@@ -597,15 +601,42 @@ function addPathCandidate(
 function scoredBlock(
   targets: readonly NormalizedVerse[],
   canonical: readonly NormalizedVerse[],
-  witnesses: readonly { name: string; map: Map<string, string> }[]
+  witnesses: readonly { name: string; map: Map<string, string> }[],
+  nativeRefs: ReadonlySet<string>
 ): VerseCorrespondenceBlock {
   const targetText = targets.map((verse) => verse.normalizedText).join(" ");
-  const scores = witnesses.flatMap((witness) => {
+  const families = new Map<string, number[]>();
+  for (const witness of witnesses) {
     const texts = canonical.map((verse) => witness.map.get(verse.ref));
-    return texts.some((text) => text === undefined)
-      ? []
-      : [normalizedTextSimilarity(targetText, texts.join(" "))];
-  });
+    if (texts.some((text) => text === undefined)) continue;
+    const family =
+      witness.name === "Darby" || witness.name === "DarbyR"
+        ? "Darby-family"
+        : witness.name;
+    const values = families.get(family) ?? [];
+    const sourceText = texts.join(" ");
+    let similarity = normalizedTextSimilarity(targetText, sourceText);
+    // Long explicit native-number gaps can compress repeated list formulae.
+    // Use a repetition-insensitive signal only within that bounded gap, never
+    // across another retained native coordinate or for ordinary short omissions.
+    if (
+      targets.length === 1 &&
+      canonical.length > 3 &&
+      targets[0].ref === canonical[0].ref &&
+      canonical.slice(1).every((v) => !nativeRefs.has(v.ref))
+    ) {
+      const unique = (s: string) => [...new Set(s.split(" "))].join(" ");
+      similarity =
+        (similarity +
+          normalizedTextSimilarity(unique(targetText), unique(sourceText))) /
+        2;
+    }
+    values.push(similarity);
+    families.set(family, values);
+  }
+  const scores = [...families.values()].map(
+    (values) => values.reduce((a, b) => a + b, 0) / values.length
+  );
   const score =
     scores.length === 0
       ? 0

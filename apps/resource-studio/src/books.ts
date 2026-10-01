@@ -67,9 +67,21 @@ export const BOOK_IDS = [
   "Rev"
 ] as const;
 
+/** Additional native books used by the local Catholic publications; STEP still covers BOOK_IDS only. */
+export const ALL_BOOK_IDS = [
+  ...BOOK_IDS,
+  "Tob",
+  "Jdt",
+  "Wis",
+  "Sir",
+  "Bar",
+  "1Macc",
+  "2Macc"
+] as const;
+
 export function bookNumberToId(bookNumber: string): string {
   const index = Number.parseInt(bookNumber, 10) - 1;
-  const bookId = BOOK_IDS[index];
+  const bookId = ALL_BOOK_IDS[index];
 
   if (!bookId) {
     throw new Error(`Unknown Bible book number: ${bookNumber}`);
