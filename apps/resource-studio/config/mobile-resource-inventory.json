@@ -1202,6 +1202,19 @@
     "resourceRevision": "egw-writings-en-d6a3c4a1fdfdba1b9eaa"
   },
   {
+    "id": "database:egw-writings:fr",
+    "artifactUrl": "https://assets.bible-strong.app/commentaries/commentary-egw-writings-fr.sqlite.zip",
+    "sources": [
+      {
+        "role": "canonical",
+        "sourceUrl": "https://assets.bible-strong.app/commentaries/commentary-egw-writings-fr.sqlite",
+        "entry": "commentary-egw-writings-fr.sqlite"
+      }
+    ],
+    "strategy": "archive-extract",
+    "resourceRevision": "egw-writings-fr-79738c095e74ca428cf2"
+  },
+  {
     "id": "database:family-notes:en",
     "artifactUrl": "https://assets.bible-strong.app/commentaries/commentary-family-notes-en.sqlite.zip",
     "sources": [
@@ -1667,19 +1680,6 @@
     "strategy": "archive-extract"
   },
   {
-    "id": "strong-lexicon:simple-fr",
-    "resourceRevision": "strong-lexicon-simple-fr-944bd06dc903ffaf83df9b51",
-    "artifactUrl": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.simple-fr.sqlite.zip?sha256=0f0dd7545a43b732760ac49be7ca789a7787e3e9b02c39929b99cb102a84aaae",
-    "sources": [
-      {
-        "role": "canonical",
-        "sourceUrl": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.simple-fr.sqlite.zip?sha256=0f0dd7545a43b732760ac49be7ca789a7787e3e9b02c39929b99cb102a84aaae",
-        "entry": "strong_lexicon.simple-fr.sqlite"
-      }
-    ],
-    "strategy": "archive-extract"
-  },
-  {
     "id": "strong-lexicon:simple-en",
     "resourceRevision": "strong-lexicon-simple-en-784af9ff9fc29bf892cb0b55",
     "artifactUrl": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.simple-en.sqlite.zip?sha256=a3007c4054b1dc461dd5d2deb4e94a2859224e633ee3becb806329b263a9e0db",
@@ -1688,6 +1688,19 @@
         "role": "canonical",
         "sourceUrl": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.simple-en.sqlite.zip?sha256=a3007c4054b1dc461dd5d2deb4e94a2859224e633ee3becb806329b263a9e0db",
         "entry": "strong_lexicon.simple-en.sqlite"
+      }
+    ],
+    "strategy": "archive-extract"
+  },
+  {
+    "id": "strong-lexicon:simple-fr",
+    "resourceRevision": "strong-lexicon-simple-fr-944bd06dc903ffaf83df9b51",
+    "artifactUrl": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.simple-fr.sqlite.zip?sha256=0f0dd7545a43b732760ac49be7ca789a7787e3e9b02c39929b99cb102a84aaae",
+    "sources": [
+      {
+        "role": "canonical",
+        "sourceUrl": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.simple-fr.sqlite.zip?sha256=0f0dd7545a43b732760ac49be7ca789a7787e3e9b02c39929b99cb102a84aaae",
+        "entry": "strong_lexicon.simple-fr.sqlite"
       }
     ],
     "strategy": "archive-extract"

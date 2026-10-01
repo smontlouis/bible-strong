@@ -314,3 +314,71 @@ Ce second script ne fabrique que le petit jeu de repli versionné ; il ne rempla
 - Les 39 alertes HTML Barnes proviennent notamment de balises de style présentes dans le corpus. L'interface applique une liste blanche et supprime scripts, styles, formulaires, objets, iframes et SVG.
 - Les corps de traduction répétés ne sont pas automatiquement des doublons erronés : un même commentaire peut légitimement couvrir plusieurs versets.
 - Les erreurs remontées par les utilisateurs sont corrigées au niveau du segment, puis les JSON sont régénérés et validés.
+
+## Récupérer le français historique d’Ellen White
+
+La récupération utilise un export Firestore local vérifié et le SQLite anglais dont le hash et la
+révision correspondent au catalogue de ressources. Elle ne télécharge rien, ne traduit rien et
+n’écrit ni dans Firebase ni dans le catalogue. Depuis la racine du monorepo, avec Node 22 ou plus :
+
+```bash
+node apps/resource-studio/workflows/commentaries/scripts/prepare-egw-french-recovery.mjs \
+  --source-sqlite apps/resource-studio/outputs/published-commentaries/sqlite/commentary-egw-writings-en.sqlite \
+  --recovery-root apps/resource-studio/workflows/commentaries/.local/egw-firestore-recovery-2026-10-01 \
+  --output apps/resource-studio/workflows/commentaries/.local/egw-french-current-candidate
+```
+
+Le dossier de récupération doit contenir `recovered-paragraphs.sqlite` et `checksums.json` issus de
+l’audit décrit dans `docs/research/ellen-white-french-recovery-2026-10-01.md`. Le fichier
+`--catalog` est optionnel ; il désigne par défaut le catalogue versionné du monorepo. Les entrées
+SQLite de récupération gardent les variantes françaises et leurs associations historiques, ce qui
+permet de compter leurs utilisations sans contacter Firestore.
+
+Le résultat est un **candidat de récupération**, pas un bundle de publication :
+
+- `egw-french-candidates.sqlite` conserve tous les paragraphes de la révision anglaise, leur état
+  de récupération, leur provenance et ses associations aux passages ;
+- `recovered.jsonl` contient les traductions dont l’identité et le texte anglais correspondent,
+  dont le nettoyage conserve le texte et dont les références OSIS correspondent au document anglais ;
+- `missing.jsonl` décrit les tâches de traduction liées au hash de la source ;
+- `review.jsonl` conserve les désaccords de source, les égalités entre variantes, les alertes
+  linguistiques et les correspondances textuelles exactes sous un autre identifiant ;
+- `metadata-translation-tasks.json` déduplique les titres de livres et de sections à localiser ;
+- `summary.json` porte les hashes des deux SQLite d’entrée et `publicationReady: false`.
+
+Le rapprochement normalise les entités HTML, les espaces et les guillemets typographiques, mais
+conserve les mots, les nombres, les accents et la ponctuation. Il ne fait pas de rapprochement flou.
+Une variante française éligible plus fréquemment utilisée dans l’ancien cache est préférée ; une
+égalité entre textes différents reste à examiner. Cette règle n’équivaut pas à une validation
+éditoriale. Aucune entrée anglaise ne devient silencieusement du français.
+
+Le candidat est écrit dans un dossier temporaire puis installé après contrôle de l’intégrité SQLite
+et de ses clés étrangères. Une destination déjà présente n’est jamais écrasée : utiliser un nouveau
+chemin pour une nouvelle exécution. Les tests du workflow incluent la correspondance des textes, les
+variantes, les références bibliques, les hashes d’entrée et la conservation des associations.
+
+
+### Restaurer uniquement le français historique
+
+Pour le périmètre retenu le 1er octobre 2026, utiliser directement l’ancien fonds plutôt que le
+candidat de rapprochement avec la nouvelle collection anglaise :
+
+```bash
+node apps/resource-studio/workflows/commentaries/scripts/restore-egw-french.mjs
+
+yarn workspace @bible-strong/resource-studio exec tsx src/packageEgwFrenchRestoration.ts --update-catalog
+
+yarn workspace @bible-strong/resource-service bundle:validate \
+  --bundle "$PWD/apps/resource-studio/outputs/resource-publications/commentaries/egw-writings-fr"
+```
+
+Le premier script vérifie les hashes de `entries.jsonl` et `recovered-paragraphs.sqlite`, conserve
+uniquement les paragraphes déjà traduits et leurs associations historiques, puis écrit `corpus.json`,
+`provenance.json` et `manifest.json` dans `.local/egw-french-restoration/`. Une destination complète
+n’est pas écrasée. Les variantes sont choisies par fréquence historique, puis hash stable à égalité ;
+les titres d’origine sont conservés et aucune traduction n’est lancée.
+
+Le second script génère uniquement `egw-writings-fr`, avec JSON canonique, SQLite, index de lecture et
+provenance. Sans `--update-catalog`, il ne modifie pas les catalogues versionnés. Il accepte
+`--restoration-root` et `--output-root` pour des chemins alternatifs. Il n’effectue aucune publication
+R2 ni activation Neon. La mise en production suit le skill `resource-publication` et l’ADR-0027.

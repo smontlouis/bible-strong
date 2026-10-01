@@ -342,7 +342,7 @@ export const COMMENTARY_CATALOG = [
     shortName: 'EGW Writings',
     title: 'EGW Writings',
     author: 'Ellen G. White',
-    languages: ['en'],
+    languages: ['en', 'fr'],
     tradition: 'Protestantisme',
     tags: ['Adventiste'],
     rights: 'Ellen G. White Estate · tous droits réservés',

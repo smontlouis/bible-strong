@@ -575,12 +575,12 @@
       "era": "XIXe–XXe siècle",
       "tradition": "Protestantisme",
       "tags": ["Adventiste"],
-      "languages": ["en"],
-      "coverage": "66 livres : 14 042 associations ECSI donnant accès à 79 885 paragraphes EGW indexés",
+      "languages": ["en", "fr"],
+      "coverage": "Anglais : écrits indexés par ECSI ; français : paragraphes déjà traduits du fonds historique de Bible Strong",
       "rights": "Ellen G. White Estate · tous droits réservés",
       "licenseId": "CustomPermission",
       "status": "available",
-      "source": "EGW Writings Complete Scripture Index et textes anglais associés"
+      "source": "EGW Writings Complete Scripture Index et textes anglais associés ; français historique récupéré de Firestore"
     }
   ]
 }

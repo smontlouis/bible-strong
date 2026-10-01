@@ -98,5 +98,6 @@ export const COMMENTARY_DESCRIPTIONS = {
   },
   'egw-writings': {
     en: 'Ellen G. White writings associated with Bible passages by the Complete Scripture Index. Each entry includes the indexed paragraphs, their book and section headings, Bible-reference links, and links back to the original context.',
+    fr: 'Extraits des écrits d’Ellen G. White issus de l’ancien fonds de Bible Strong, avec les traductions françaises automatiques déjà disponibles et leurs rattachements bibliques historiques. Cette édition partielle conserve les citations et les liens vers le contexte original.',
   },
 } as const

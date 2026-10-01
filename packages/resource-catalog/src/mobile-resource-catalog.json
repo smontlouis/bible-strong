@@ -1,8 +1,8 @@
 {
   "format": "bible-strong-mobile-resource-catalog",
   "schemaVersion": 1,
-  "generatedAt": "2026-09-28T18:43:25.170997+00:00",
-  "resourceCount": 118,
+  "generatedAt": "2026-10-01T05:34:48.234Z",
+  "resourceCount": 119,
   "resources": {
     "bible-interlinear:BHG:en": {
       "id": "bible-interlinear:BHG:en",
@@ -2406,6 +2406,27 @@
         "keyVersion": 1
       }
     },
+    "database:egw-writings:fr": {
+      "id": "database:egw-writings:fr",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/commentaries/commentary-egw-writings-fr.sqlite.zip?sha256=2fb3053bd40180fb80fdd97f13ef3cb7728e678fcfa8d2cc054c4f294f4cde77",
+      "file": "commentaries/commentary-egw-writings-fr.sqlite.zip",
+      "entry": "commentary-egw-writings-fr.sqlite",
+      "entries": {
+        "canonical": {
+          "entry": "commentary-egw-writings-fr.sqlite",
+          "sha256": "3fcf2eb4343fc8de51f2063004211f50cfddb8fa6a6473d23adbadebe68370d4",
+          "bytes": 68087808
+        }
+      },
+      "archiveSha256": "2fb3053bd40180fb80fdd97f13ef3cb7728e678fcfa8d2cc054c4f294f4cde77",
+      "archiveBytes": 19318150,
+      "contentSha256": "3fcf2eb4343fc8de51f2063004211f50cfddb8fa6a6473d23adbadebe68370d4",
+      "contentBytes": 68087808,
+      "resourceRevision": "egw-writings-fr-79738c095e74ca428cf2",
+      "installedBytes": 68087808,
+      "peakInstallationBytes": 100516852,
+      "strategy": "archive-extract"
+    },
     "database:family-notes:en": {
       "id": "database:family-notes:en",
       "url": "https://api.bible-strong.app/v1/offline-artifacts/commentaries/commentary-family-notes-en.sqlite.zip?sha256=aae182195cdb0fcbff0e4fbd6b2bc0e85050768ade2ce26cdb9f085a12607b19",
@@ -3411,34 +3432,6 @@
         "keyVersion": 1
       }
     },
-    "strong-lexicon:simple-fr": {
-      "id": "strong-lexicon:simple-fr",
-      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.simple-fr.sqlite.zip?sha256=0f0dd7545a43b732760ac49be7ca789a7787e3e9b02c39929b99cb102a84aaae",
-      "file": "databases/strong_lexicon.simple-fr.sqlite.zip",
-      "entry": "strong_lexicon.simple-fr.sqlite",
-      "entries": {
-        "canonical": {
-          "entry": "strong_lexicon.simple-fr.sqlite",
-          "sha256": "3b07deead67516e370043d5afc01ed0413e0db9d95c8d56355fcac89511e7f06",
-          "bytes": 22970368
-        }
-      },
-      "archiveSha256": "0f0dd7545a43b732760ac49be7ca789a7787e3e9b02c39929b99cb102a84aaae",
-      "archiveBytes": 3482614,
-      "contentSha256": "3b07deead67516e370043d5afc01ed0413e0db9d95c8d56355fcac89511e7f06",
-      "contentBytes": 22970368,
-      "installedBytes": 22970368,
-      "peakInstallationBytes": 49423350,
-      "strategy": "archive-extract",
-      "resourceRevision": "strong-lexicon-simple-fr-944bd06dc903ffaf83df9b51",
-      "encryptedArchive": {
-        "url": "https://api.bible-strong.app/v1/offline-archives/databases/strong_lexicon.simple-fr.sqlite.encrypted.zip?sha256=067afbe74c65b695bef34f7670859ad6f396058b073233cd3228d599872a3996",
-        "file": "databases/strong_lexicon.simple-fr.sqlite.encrypted.zip",
-        "sha256": "067afbe74c65b695bef34f7670859ad6f396058b073233cd3228d599872a3996",
-        "bytes": 3464092,
-        "keyVersion": 1
-      }
-    },
     "strong-lexicon:simple-en": {
       "id": "strong-lexicon:simple-en",
       "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.simple-en.sqlite.zip?sha256=a3007c4054b1dc461dd5d2deb4e94a2859224e633ee3becb806329b263a9e0db",
@@ -3464,6 +3457,34 @@
         "file": "databases/strong_lexicon.simple-en.sqlite.encrypted.zip",
         "sha256": "88ac56a8782abbfc22d7e9a67c4b3819ede2e7ca6500853c84be04afd6497140",
         "bytes": 3226408,
+        "keyVersion": 1
+      }
+    },
+    "strong-lexicon:simple-fr": {
+      "id": "strong-lexicon:simple-fr",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.simple-fr.sqlite.zip?sha256=0f0dd7545a43b732760ac49be7ca789a7787e3e9b02c39929b99cb102a84aaae",
+      "file": "databases/strong_lexicon.simple-fr.sqlite.zip",
+      "entry": "strong_lexicon.simple-fr.sqlite",
+      "entries": {
+        "canonical": {
+          "entry": "strong_lexicon.simple-fr.sqlite",
+          "sha256": "3b07deead67516e370043d5afc01ed0413e0db9d95c8d56355fcac89511e7f06",
+          "bytes": 22970368
+        }
+      },
+      "archiveSha256": "0f0dd7545a43b732760ac49be7ca789a7787e3e9b02c39929b99cb102a84aaae",
+      "archiveBytes": 3482614,
+      "contentSha256": "3b07deead67516e370043d5afc01ed0413e0db9d95c8d56355fcac89511e7f06",
+      "contentBytes": 22970368,
+      "installedBytes": 22970368,
+      "peakInstallationBytes": 49423350,
+      "strategy": "archive-extract",
+      "resourceRevision": "strong-lexicon-simple-fr-944bd06dc903ffaf83df9b51",
+      "encryptedArchive": {
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/strong_lexicon.simple-fr.sqlite.encrypted.zip?sha256=067afbe74c65b695bef34f7670859ad6f396058b073233cd3228d599872a3996",
+        "file": "databases/strong_lexicon.simple-fr.sqlite.encrypted.zip",
+        "sha256": "067afbe74c65b695bef34f7670859ad6f396058b073233cd3228d599872a3996",
+        "bytes": 3464092,
         "keyVersion": 1
       }
     }

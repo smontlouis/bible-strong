@@ -22,6 +22,7 @@ import {
   sanitizeCommentaryPublicationHtml
 } from "./commentaryPublicationHtml.js";
 import { projectSdabcContent } from "./commentaryPresentation.js";
+import { loadRestoredEgwFrenchCanonical } from "./egwFrenchRestoration.js";
 import {
   commitResourcePublicationTransaction,
   type ResourcePublicationReplacement
@@ -136,8 +137,7 @@ type CanonicalNormalizedCommentary = {
 };
 
 export type AnyCanonicalCommentary =
-  | CanonicalCommentary
-  | CanonicalNormalizedCommentary;
+  CanonicalCommentary | CanonicalNormalizedCommentary;
 
 type CommentaryManifest = {
   format: "bible-strong-resource-publication";
@@ -456,8 +456,14 @@ export const buildCanonicalCommentary = (
 const buildCanonicalEgwWritings = async (
   catalogResource: CatalogResource,
   index: LibraryIndex,
-  entries: readonly LibraryEntry[]
+  entries: readonly LibraryEntry[],
+  language: Language
 ): Promise<CanonicalNormalizedCommentary> => {
+  if (language === "fr") {
+    return loadRestoredEgwFrenchCanonical(
+      path.join(workflowRoot, ".local/egw-french-restoration")
+    );
+  }
   const artifactPath = path.join(
     workflowRoot,
     ".local/egw-export/egw-indexed-writings.json"
@@ -538,7 +544,6 @@ const buildCanonicalEgwWritings = async (
       )
     }));
   const resourceId = publicationResourceId(catalogResource.id);
-  const language = "en" as const;
   const sourceVersion = `${sourceRevisionToken(index.sourceRevision)}:${catalogResource.id}:${language}`;
   const sourceHash = createHash("sha256");
   sourceHash.update(
@@ -1033,7 +1038,12 @@ const main = async (): Promise<void> => {
       for (const language of catalogResource.languages) {
         const canonical =
           catalogResource.id === "egw-writings"
-            ? await buildCanonicalEgwWritings(catalogResource, index, entries)
+            ? await buildCanonicalEgwWritings(
+                catalogResource,
+                index,
+                entries,
+                language
+              )
             : buildCanonicalCommentary(
                 catalogResource,
                 language,
