@@ -61,6 +61,7 @@ export interface EnglishStrongJsonlProjectionSummary {
   pericopeCount: number;
   redLetterSpanCount: number;
   noteCount: number;
+  restoredSeparatorCount: number;
   strongOccurrenceCount: number;
   lexemeAssignmentCount: number;
   lexemeCount: number;
@@ -143,6 +144,7 @@ async function projectSource(
   let pericopeCount = 0;
   let redLetterSpanCount = 0;
   let noteCount = 0;
+  let restoredSeparatorCount = 0;
   let strongOccurrenceCount = 0;
   let lexemeAssignmentCount = 0;
   const lexemes = new Set<string>();
@@ -194,6 +196,7 @@ async function projectSource(
       ).length;
       redLetterSpanCount += projection.redLetterSpanCount;
       noteCount += projection.noteCount;
+      restoredSeparatorCount += projection.restoredSeparatorCount;
       strongOccurrenceCount += projection.strongOccurrenceCount;
       lexemeAssignmentCount += lemmaProjection.lexemeAssignmentCount;
       for (const lexeme of lemmaProjection.lexemes) lexemes.add(lexeme);
@@ -221,6 +224,7 @@ async function projectSource(
     pericopeCount,
     redLetterSpanCount,
     noteCount,
+    restoredSeparatorCount,
     strongOccurrenceCount,
     lexemeAssignmentCount,
     lexemeCount: lexemes.size
@@ -301,6 +305,7 @@ export function projectSwordOsisMarkup(
   redLetterSpanCount: number;
   noteCount: number;
   strongOccurrenceCount: number;
+  restoredSeparatorCount: number;
 } {
   let text = "";
   let noteDepth = 0;
@@ -444,12 +449,89 @@ export function projectSwordOsisMarkup(
   if (noteDepth !== 0 || titleDepth !== 0 || wordStack.length !== 0) {
     throw new Error("english-strong-unclosed-osis-markup");
   }
+  const separated = restoreSeparatorsBeforeExcludedMarkup(text);
   return {
-    text: trimVisibleBoundaryWhitespace(text),
+    text: trimVisibleBoundaryWhitespace(separated.markup),
     redLetterSpanCount,
     noteCount,
-    strongOccurrenceCount
+    strongOccurrenceCount,
+    restoredSeparatorCount: separated.restoredSeparatorCount
   };
+}
+
+/**
+ * Notes and references are lifted out of the canonical verse text. Some SWORD
+ * modules attach them to both neighbouring words without any whitespace
+ * (CrossWire Darby 2.0: `beginning<note>Elohim</note>God`, while its eBible
+ * source reads `beginning °God`), which would glue the visible words together.
+ * Restore one separator before such a note so it stays attached to the text it
+ * precedes, as in the source.
+ */
+function restoreSeparatorsBeforeExcludedMarkup(markup: string): {
+  markup: string;
+  restoredSeparatorCount: number;
+} {
+  const tokens = markup.match(/<[^>]*>|[^<]+/gu) ?? [];
+  const visibleAt = new Array<boolean>(tokens.length).fill(false);
+  const excludedStartAt = new Array<boolean>(tokens.length).fill(false);
+  let excludedDepth = 0;
+  for (const [index, token] of tokens.entries()) {
+    if (!token.startsWith("<")) {
+      visibleAt[index] = excludedDepth === 0;
+      continue;
+    }
+    const tag = parseTag(token);
+    if (!tag || (tag.name !== "note" && tag.name !== "ref")) continue;
+    if (tag.type !== "close") excludedStartAt[index] = excludedDepth === 0;
+    if (tag.type === "open") excludedDepth += 1;
+    if (tag.type === "close") excludedDepth = Math.max(0, excludedDepth - 1);
+  }
+  const nextVisibleCharacter = new Array<string>(tokens.length + 1).fill("");
+  for (let index = tokens.length - 1; index >= 0; index -= 1) {
+    nextVisibleCharacter[index] = visibleAt[index]
+      ? decodeTextEntities(tokens[index]!).charAt(0)
+      : nextVisibleCharacter[index + 1]!;
+  }
+  let previousVisibleText = "";
+  let restoredSeparatorCount = 0;
+  let output = "";
+  for (const [index, token] of tokens.entries()) {
+    if (
+      excludedStartAt[index] &&
+      needsSeparatorAcrossExcludedMarkup(
+        previousVisibleText,
+        nextVisibleCharacter[index + 1]!
+      )
+    ) {
+      output += " ";
+      previousVisibleText = `${previousVisibleText} `.slice(-2);
+      restoredSeparatorCount += 1;
+    }
+    output += token;
+    if (visibleAt[index]) {
+      previousVisibleText = `${previousVisibleText}${decodeTextEntities(
+        token
+      )}`.slice(-2);
+    }
+  }
+  return { markup: output, restoredSeparatorCount };
+}
+
+function needsSeparatorAcrossExcludedMarkup(
+  previousText: string,
+  nextCharacter: string
+): boolean {
+  const previous = previousText.at(-1);
+  if (!previous || !/[\p{L}\p{N}]/u.test(nextCharacter)) return false;
+  if (/[\p{L}\p{N}\p{M}]/u.test(previous)) return true;
+  if (!/\p{L}/u.test(nextCharacter)) return false;
+  if (/[.,;:!?\p{Pe}\p{Pf}]/u.test(previous)) return true;
+  const beforePrevious = previousText.at(-2) ?? " ";
+  // A straight quote after a word closes it (`fathers'`); after a space it opens.
+  if (previous === "'" || previous === '"') return /\S/u.test(beforePrevious);
+  // Spaced dashes separate words (`me, — God`); closed dashes join them.
+  if (/\p{Pd}/u.test(previous)) return /\s/u.test(beforePrevious);
+  return false;
 }
 
 function canonicalStrongIdentity(value: string): string {

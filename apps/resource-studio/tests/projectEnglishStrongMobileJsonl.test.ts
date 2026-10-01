@@ -9,6 +9,18 @@ import {
   projectSwordOsisMarkup
 } from "../src/projectEnglishStrongMobileJsonl.js";
 import { enrichEnglishStrongMarkup } from "../src/englishStrongLemmas.js";
+import { parseStrongBibleMarkup } from "../src/strongBibleSqlite.js";
+
+function canonicalTextAndNoteOffsets(source: string): {
+  text: string;
+  noteOffsets: number[];
+} {
+  const parsed = parseStrongBibleMarkup(projectSwordOsisMarkup(source).text);
+  return {
+    text: parsed.canonicalText,
+    noteOffsets: parsed.notes.map(({ offset }) => offset)
+  };
+}
 
 test("projects SWORD OSIS into supported canonical markup without losing notes", () => {
   const result = projectSwordOsisMarkup(
@@ -44,6 +56,78 @@ test("removes only technical whitespace outside visible verse text", () => {
     result.text,
     '<note n="a">note</note><w strong="H1">In text</w><p></p>'
   );
+});
+
+test("keeps words apart when a Darby note sits between them without whitespace", () => {
+  // CrossWire Darby 2.0, Gen 1:1, byte-for-byte.
+  const source =
+    '<w lemma="strong:H430">In</w> <w lemma="strong:H853">the</w> ' +
+    '<w lemma="strong:H7225">beginning</w><note placement="foot">' +
+    '<reference type="annotateRef">1.1 </reference>' +
+    '<w lemma="strong:H430">Elohim</w></note><w lemma="strong:H430">God</w> ' +
+    '<w lemma="strong:H1254">created</w> <w lemma="strong:H853">the</w> ' +
+    '<w lemma="strong:H8064">heavens</w> <w lemma="strong:H430">and</w> ' +
+    '<w lemma="strong:H853">the</w> <w lemma="strong:H776">earth</w>. ';
+  const projection = projectSwordOsisMarkup(source);
+  assert.match(
+    projection.text,
+    /<w strong="H7225">beginning<\/w> <note placement="foot">.*<\/note><w strong="H430">God<\/w>/u
+  );
+  assert.equal(projection.restoredSeparatorCount, 1);
+  assert.deepEqual(canonicalTextAndNoteOffsets(source), {
+    text: "In the beginning God created the heavens and the earth.",
+    noteOffsets: ["In the beginning ".length]
+  });
+});
+
+test("restores note separators after closing punctuation, quotes and spaced dashes", () => {
+  const note = '<note placement="foot">Elohim</note>';
+  for (const [source, expected] of [
+    [
+      `midst of the garden,${note}God has said`,
+      "midst of the garden, God has said"
+    ],
+    [
+      `What is this [that]${note}God has done`,
+      "What is this [that] God has done"
+    ],
+    [
+      `into the web.${note}Then she tightened`,
+      "into the web. Then she tightened"
+    ],
+    [
+      `I serve my fathers'${note}God, believing`,
+      "I serve my fathers' God, believing"
+    ],
+    [
+      `to meet me, —${note}God shall let me see`,
+      "to meet me, — God shall let me see"
+    ],
+    [`In the${note}<w lemma="strong:H7225">beginning</w>`, "In the beginning"],
+    [`And${note}${note}God said`, "And God said"]
+  ] as const) {
+    assert.equal(canonicalTextAndNoteOffsets(source).text, expected, source);
+  }
+});
+
+test("leaves notes alone where the source spacing is already correct", () => {
+  const note = '<note placement="foot">x</note>';
+  for (const source of [
+    `In the beginning ${note}God created`,
+    `Then God said, “${note}Let there be light”;`,
+    `saying, ‘${note}To your descendants`,
+    `two of Jacob’s sons--${note}Simeon and Levi`,
+    `of the sanctuary (${note}the shekel`,
+    `Most High${note}—`,
+    `let there be no escape${note}. Repay her`,
+    `life that he lived, ${note}175 years.`,
+    `${note}God is not a man`,
+    `from the darkness.${note}`
+  ]) {
+    const projection = projectSwordOsisMarkup(source);
+    assert.equal(projection.restoredSeparatorCount, 0, source);
+    assert.equal(projection.text, source.trim(), source);
+  }
 });
 
 test("canonicalizes zero-padded Strong numbers and preserves NASB eStrong suffixes", () => {
