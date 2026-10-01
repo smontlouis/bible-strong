@@ -32,6 +32,7 @@ import { readStepOriginalData } from "./stepOriginals.js";
 import { getTranslationProfile } from "./translationProfiles.js";
 import {
   generateStrongLedger,
+  type StrongExperimentalPolicy,
   type StrongLedgerVerse
 } from "./strongLedger.js";
 
@@ -43,6 +44,8 @@ export interface EvaluationOptions {
   outputDir: string;
   includeGoldReference: boolean;
   backend?: "diagnostic" | "canonical";
+  /** Canonical backend only: opt-in engine refinements to evaluate. */
+  experimentalPolicy?: StrongExperimentalPolicy;
 }
 
 interface ReferenceMap {
@@ -313,7 +316,8 @@ export async function evaluateStrongGold(
           goldMap,
           selectedRefs,
           dictionaryPath: options.dictionaryPath,
-          includeGoldReference: options.includeGoldReference
+          includeGoldReference: options.includeGoldReference,
+          experimentalPolicy: options.experimentalPolicy
         })
       : undefined;
   const diagnostic =
@@ -479,6 +483,7 @@ async function maskedCanonicalPredictions(options: {
   selectedRefs: string[];
   includeGoldReference: boolean;
   dictionaryPath?: string;
+  experimentalPolicy?: StrongExperimentalPolicy;
 }): Promise<Map<string, CarrierPlacement[]>> {
   const directory = await mkdtemp(
     path.join(tmpdir(), "strong-gold-canonical-")
@@ -512,7 +517,10 @@ async function maskedCanonicalPredictions(options: {
       excludedReferenceNames: excludedReferenceNamesForGold(
         options.gold,
         options.includeGoldReference
-      )
+      ),
+      ...(options.experimentalPolicy
+        ? { experimentalPolicy: options.experimentalPolicy }
+        : {})
     });
     return new Map(
       ledger.verses.map((verse) => [
@@ -1538,8 +1546,29 @@ function parseCliOptions(argv: string[]): EvaluationOptions {
     outputDir: args.get("output-dir") ?? "outputs",
     includeGoldReference: args.get("include-gold-reference") !== undefined,
     dictionaryPath: args.get("dictionary"),
-    backend: args.get("backend") === "canonical" ? "canonical" : "diagnostic"
+    backend: args.get("backend") === "canonical" ? "canonical" : "diagnostic",
+    experimentalPolicy: parseExperimentalPolicy(args.get("experimental-policy"))
   };
+}
+
+/** `--experimental-policy readingInvariantVariants,singleCarrierPerSourceIdentity` */
+function parseExperimentalPolicy(
+  value: string | undefined
+): StrongExperimentalPolicy | undefined {
+  if (!value) return undefined;
+  const known: Array<keyof StrongExperimentalPolicy> = [
+    "readingInvariantVariants",
+    "singleCarrierPerSourceIdentity",
+    "encliticHostTransfer",
+    "digitNumeralTransfer"
+  ];
+  const policy: StrongExperimentalPolicy = {};
+  for (const name of value.split(",").filter(Boolean)) {
+    if (!known.includes(name as keyof StrongExperimentalPolicy))
+      throw new Error(`unknown-experimental-policy:${name}`);
+    policy[name as keyof StrongExperimentalPolicy] = true;
+  }
+  return policy;
 }
 
 function normalizedConfidence(placement: CarrierPlacement): number {

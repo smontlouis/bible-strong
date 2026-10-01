@@ -1,19 +1,24 @@
 export type TranslationFamily =
-  | "formal"
-  | "formal-readable"
-  | "dynamic"
-  | "paraphrase"
-  | "unknown";
+  "formal" | "formal-readable" | "dynamic" | "paraphrase" | "unknown";
 
 export type StrongDensityPolicy = "high" | "medium" | "semantic";
 
 export type LearnedFunctionWordMode = "restricted" | "reference-only";
+
+/** Opt-in refinements of witness transfer matching; absent means disabled. */
+export interface TransferMatchingPolicy {
+  /** Match a witness word with the host of a hyphenated French enclitic (« dit-il »). */
+  encliticHosts?: boolean;
+  /** Match a one-word French numeral with the same number written in digits. */
+  digitNumerals?: boolean;
+}
 
 export interface ReaderAlignmentPolicy {
   maxStrongPerWord: number;
   minEmptySourceAgreement: number;
   learnedTranslationMinScore: number;
   learnedFunctionWordMode: LearnedFunctionWordMode;
+  transferMatching?: TransferMatchingPolicy;
 }
 
 export interface TranslationProfile {

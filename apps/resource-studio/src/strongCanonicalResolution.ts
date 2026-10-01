@@ -30,6 +30,125 @@ import {
 import { stripTags, tokenizeText } from "./tokenize.js";
 
 export const CANONICAL_RESOLUTION_POLICY = "autonomous-fr-occurrences-v1";
+
+/** Opt-in resolution refinements measured against Concordance.bible (2026-10-01). */
+export interface CanonicalResolutionOptions {
+  /**
+   * A reading variant blocks the Strong decision only when it can change the
+   * Strong identity or the word's presence in the base critical text.
+   */
+  readingInvariantVariants?: boolean;
+  /**
+   * Alternative identifiers of one source word never create two display
+   * carriers: the best-evidenced carrier is kept, the others are hidden.
+   */
+  singleCarrierPerSourceIdentity?: boolean;
+}
+
+const strongBase = (code: string) => code.match(/^[GH]\d+/u)?.[0] ?? code;
+
+/**
+ * True when every reading recorded for this STEP word keeps the same Strong
+ * identity and the word belongs to the base text (NA for TAGNT, the
+ * Leningrad text or its Qere for TAHOT). Words absent from that base, or whose
+ * variants name another Strong, remain unresolved.
+ */
+export function identityInvariantReading(row: SourceRow): boolean {
+  const attested =
+    row.source === "TAGNT"
+      ? /N/u.test(row.reading)
+      : /^[LQ]/u.test(row.reading);
+  if (!attested || row.alternatives.length > 0) return false;
+  const primary = new Set(row.primary.map(strongBase));
+  if (primary.size !== 1) return false;
+  const variantCodes = [
+    ...`${row.evidence.meaningVariants} ${row.evidence.spellingVariants}`.matchAll(
+      /[GH]\d{1,5}/gu
+    )
+  ].map((match) =>
+    strongBase(match[0].replace(/^([GH])0*(\d)/u, (_, l, d) => `${l}${d}`))
+  );
+  const primaryLoose = new Set(
+    [...primary].map((code) =>
+      code.replace(/^([GH])0*(\d)/u, (_, l, d) => `${l}${d}`)
+    )
+  );
+  return variantCodes.every((code) => primaryLoose.has(code));
+}
+
+const CARRIER_EVIDENCE_RANK: Record<string, number> = {
+  "reference-transfer:exact": 6,
+  "semantic-lexicon": 5,
+  "reference-transfer:lexicon": 4,
+  "reference-transfer:window": 4,
+  "reference-transfer:stem": 3,
+  "reference-learned:learned-translation": 2,
+  "reference-learned:learned-translation-stem": 1,
+  "phrase-transfer:learned-phrase": 1
+};
+
+function carrierEvidenceRank(a: StrongLedgerAnnotation): number {
+  return (
+    CARRIER_EVIDENCE_RANK[`${a.source}:${a.diagnostics[0] ?? ""}`] ??
+    CARRIER_EVIDENCE_RANK[a.source] ??
+    0
+  );
+}
+
+/**
+ * Keep one reader carrier per physical source word whose alternative Strong
+ * identifiers were placed on different target words. Ties stay untouched so
+ * the resolver keeps reporting the competition.
+ */
+function demoteAlternativeIdentityCarriers(
+  annotations: StrongLedgerAnnotation[],
+  groups: Map<string, OriginalStrongOccurrence[]>
+): void {
+  for (const occurrences of groups.values()) {
+    const ids = new Set(occurrences.map((o) => o.occurrenceId));
+    if (new Set(occurrences.map((o) => o.strong)).size < 2) continue;
+    const carriers = annotations.filter(
+      (a) =>
+        a.visibility === "reader" &&
+        a.originalOccurrenceId !== undefined &&
+        ids.has(a.originalOccurrenceId) &&
+        (a.placement === "word" || a.placement === "phrase")
+    );
+    const spans = new Set(
+      carriers.map(
+        (a) =>
+          `${a.startWordIndex ?? a.wordIndex}:${a.endWordIndex ?? a.wordIndex}`
+      )
+    );
+    if (spans.size < 2 || new Set(carriers.map((a) => a.strong)).size < 2)
+      continue;
+    const ranked = [...carriers].sort(
+      (left, right) =>
+        carrierEvidenceRank(right) - carrierEvidenceRank(left) ||
+        right.confidence - left.confidence
+    );
+    const [best, second] = ranked;
+    if (
+      !best ||
+      !second ||
+      (carrierEvidenceRank(best) === carrierEvidenceRank(second) &&
+        Math.abs(best.confidence - second.confidence) < 0.01)
+    )
+      continue;
+    for (const annotation of ranked.slice(1)) {
+      annotation.visibility = "hidden";
+      annotation.placement = "duplicate";
+      annotation.reason =
+        "Another identifier of the same source word already has a better-evidenced reader carrier; alternative identifiers do not create a second occurrence.";
+      annotation.diagnostics = [
+        ...new Set([
+          ...annotation.diagnostics,
+          "alternative-identifier-demoted"
+        ])
+      ];
+    }
+  }
+}
 export interface CanonicalResolutionInput {
   mapping?: VerseCorrespondenceBlock;
   occurrences: OriginalStrongOccurrence[];
@@ -61,6 +180,8 @@ export interface CanonicalOccurrenceDecision {
     morphology: string;
     evidenceSha256: string;
     readingUnresolved: boolean;
+    /** The reading varies but cannot change this Strong identity. */
+    readingVariant?: "identity-invariant";
   };
   state: WorkflowDecision["state"];
   assurance: string;
@@ -190,6 +311,7 @@ export function resolveCanonicalVerse(options: {
   input: CanonicalResolutionInput;
   sourceRows: Map<string, SourceRow>;
   lexicalItems: LexicalCandidateItem[];
+  policy?: CanonicalResolutionOptions;
 }): CanonicalVerseResolution {
   const { verse, input, sourceRows } = options;
   const issues = [...input.issues];
@@ -202,6 +324,9 @@ export function resolveCanonicalVerse(options: {
     values.push(o);
     groups.set(id, values);
   }
+  if (options.policy?.singleCarrierPerSourceIdentity)
+    demoteAlternativeIdentityCarriers(verse.annotations, groups);
+  const invariantReadings = new Set<string>();
   const units: ResolutionDossier["units"] = [...groups].map(
     ([id, occurrences]) => {
       const row = sourceRows.get(id);
@@ -210,6 +335,15 @@ export function resolveCanonicalVerse(options: {
         readingUnresolved =
           makeUnits({ source: occurrences }, sourceRows)[0].structure ===
           "variant-conditioned";
+        if (
+          readingUnresolved &&
+          options.policy?.readingInvariantVariants &&
+          row &&
+          identityInvariantReading(row)
+        ) {
+          readingUnresolved = false;
+          invariantReadings.add(id);
+        }
       } catch (error) {
         issues.push(
           `source-model:${id}:${error instanceof Error ? error.message : String(error)}`
@@ -485,7 +619,10 @@ export function resolveCanonicalVerse(options: {
         gloss: entry.gloss,
         morphology: entry.morphology,
         evidenceSha256: entry.unit.sourceEvidenceSha256,
-        readingUnresolved: entry.unit.readingUnresolved
+        readingUnresolved: entry.unit.readingUnresolved,
+        ...(invariantReadings.has(d.sourceUnitId)
+          ? { readingVariant: "identity-invariant" as const }
+          : {})
       },
       state: d.state,
       assurance,

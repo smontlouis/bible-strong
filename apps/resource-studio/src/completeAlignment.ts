@@ -97,7 +97,8 @@ export function alignCompleteVerse(options: {
     options.lexicon,
     options.original
       ? { strongSet: options.original.strongSet, source: "original" }
-      : undefined
+      : undefined,
+    options.readerPolicy?.transferMatching
   );
   const originalOccurrences = options.original
     ? getOriginalStrongOccurrences(options.original)

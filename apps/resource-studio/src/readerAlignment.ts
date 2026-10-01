@@ -95,7 +95,8 @@ export function alignReaderVerse(options: {
     options.targetText,
     options.references,
     options.lexicon,
-    options.original
+    options.original,
+    readerPolicy.transferMatching
   );
   const phraseAssignments: ReaderPhraseAssignment[] = [];
   enrichAssignmentsFromOriginal({

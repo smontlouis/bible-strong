@@ -6,6 +6,7 @@ import {
 } from "./strongCsv.js";
 import { normalizeOriginalStrong } from "./originalSource.js";
 import { maximumWeightMatching } from "./maximumWeightMatching.js";
+import type { TransferMatchingPolicy } from "./translationProfiles.js";
 
 export interface ReferenceSource {
   name: string;
@@ -77,13 +78,14 @@ export function alignVerse(
   targetText: string,
   references: ReferenceSource[],
   lexicon?: StrongLexicon,
-  original?: OriginalConstraint
+  original?: OriginalConstraint,
+  matching?: TransferMatchingPolicy
 ): AlignmentResult {
   const segments = tokenizeText(targetText);
   const assignments = new Map<number, AssignedStrong>();
   const words = getTargetWords(segments);
   const matchedByReference = references.map((reference) =>
-    matchReferenceOccurrences(words, reference)
+    matchReferenceOccurrences(words, reference, matching)
   );
 
   for (const word of words) {
@@ -151,13 +153,19 @@ export function alignVerse(
 
 function matchReferenceOccurrences(
   words: TargetWord[],
-  reference: ReferenceSource
+  reference: ReferenceSource,
+  matching?: TransferMatchingPolicy
 ): Map<number, Candidate> {
   const tokens = reference.verse?.tokens ?? [];
   const strongTokens = referenceStrongTokens(reference);
   const edges = strongTokens.flatMap(({ token, sourceIndex }, left) =>
     words.flatMap((word) => {
-      const candidate = candidateForToken(word.normalized, token, reference);
+      const candidate = candidateForToken(
+        word.normalized,
+        token,
+        reference,
+        matching
+      );
       if (!candidate) return [];
       const position = positionSimilarity(
         sourceIndex,
@@ -241,7 +249,8 @@ function countStrings(values: string[]): Map<string, number> {
 function candidateForToken(
   normalizedWord: string,
   token: StrongToken,
-  reference: ReferenceSource
+  reference: ReferenceSource,
+  matching?: TransferMatchingPolicy
 ): Candidate | undefined {
   const base = {
     strong: token.strong,
@@ -250,6 +259,32 @@ function candidateForToken(
   };
   if (token.normalized === normalizedWord) {
     return { ...base, score: 0.95, method: "exact" };
+  }
+  // The same word form with an attached clitic pronoun or written in digits:
+  // only the spelling of the target token differs from the witness carrier.
+  if (
+    matching?.encliticHosts &&
+    token.normalized &&
+    encliticHost(normalizedWord) === token.normalized
+  ) {
+    return {
+      ...base,
+      source: `${reference.name}~enclitic-host`,
+      score: 0.93,
+      method: "exact"
+    };
+  }
+  if (
+    matching?.digitNumerals &&
+    token.normalized &&
+    spelledFrenchNumber(normalizedWord) === token.normalized
+  ) {
+    return {
+      ...base,
+      source: `${reference.name}~digit-numeral`,
+      score: 0.93,
+      method: "exact"
+    };
   }
 
   const stem = stemWord(normalizedWord);
@@ -439,4 +474,102 @@ export function stemWord(word: string): string {
       ""
     )
     .replace(/(?:eront|erais|erait|aient|asses|ions|iez|ees|ee|es|s)$/u, "");
+}
+
+const FRENCH_ENCLITICS = new Set([
+  "je",
+  "tu",
+  "il",
+  "elle",
+  "on",
+  "nous",
+  "vous",
+  "ils",
+  "elles",
+  "moi",
+  "toi",
+  "le",
+  "la",
+  "les",
+  "lui",
+  "leur",
+  "en",
+  "y",
+  "ce",
+  "ci",
+  "t"
+]);
+
+/**
+ * Host of a hyphenated French enclitic sequence in a normalized token
+ * (« dit-il » → « dit », « va-t-il » → « va », « jour-là » → « jour »).
+ * Returns undefined when no trailing clitic is attached.
+ */
+export function encliticHost(normalizedWord: string): string | undefined {
+  const parts = normalizedWord.split("-");
+  let end = parts.length;
+  while (end > 1 && FRENCH_ENCLITICS.has(parts[end - 1]!)) end -= 1;
+  if (end === parts.length || end === 0) return undefined;
+  const host = parts.slice(0, end).join("-");
+  return host || undefined;
+}
+
+const UNITS = [
+  "zero",
+  "un",
+  "deux",
+  "trois",
+  "quatre",
+  "cinq",
+  "six",
+  "sept",
+  "huit",
+  "neuf",
+  "dix",
+  "onze",
+  "douze",
+  "treize",
+  "quatorze",
+  "quinze",
+  "seize"
+];
+const TENS: Record<number, string> = {
+  2: "vingt",
+  3: "trente",
+  4: "quarante",
+  5: "cinquante",
+  6: "soixante"
+};
+
+/**
+ * Traditional French spelling of a number written in digits, only when it is
+ * a single hyphenated token (« 3 » → « trois », « 22 » → « vingt-deux »).
+ * Forms with « et » or separate words (« vingt et un », « deux cents »)
+ * return undefined because they cover several witness tokens.
+ */
+export function spelledFrenchNumber(
+  normalizedWord: string
+): string | undefined {
+  if (!/^\d{1,4}$/u.test(normalizedWord)) return undefined;
+  const value = Number(normalizedWord);
+  if (value === 100) return "cent";
+  if (value === 1000) return "mille";
+  if (value < 1 || value > 99) return undefined;
+  if (value <= 16) return UNITS[value];
+  if (value < 20) return `dix-${UNITS[value - 10]}`;
+  const tens = Math.floor(value / 10);
+  const unit = value % 10;
+  if (tens <= 6) {
+    if (unit === 0) return TENS[tens];
+    if (unit === 1) return undefined;
+    return `${TENS[tens]}-${UNITS[unit]}`;
+  }
+  if (tens === 7) {
+    if (unit === 1) return undefined;
+    return `soixante-${unit === 0 ? "dix" : unit <= 6 ? UNITS[10 + unit] : `dix-${UNITS[unit]}`}`;
+  }
+  if (value === 80) return "quatre-vingts";
+  const rest = value - 80;
+  if (rest <= 16) return `quatre-vingt-${UNITS[rest]}`;
+  return `quatre-vingt-dix-${UNITS[rest - 10]}`;
 }

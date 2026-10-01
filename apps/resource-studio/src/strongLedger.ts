@@ -100,6 +100,7 @@ import { buildStrongTranslationLexicon } from "./translationLexicon.js";
 import {
   getTranslationProfile,
   hasTranslationProfile,
+  type ReaderAlignmentPolicy,
   type TranslationProfile
 } from "./translationProfiles.js";
 import {
@@ -339,6 +340,35 @@ export interface StrongLedgerOptions {
   allowUnknownProfile?: boolean;
   /** Frozen full-Bible native-to-canonical versification manifest. */
   verseCorrespondencePath?: string;
+  /** Opt-in engine refinements; absent keeps the established behaviour. */
+  experimentalPolicy?: StrongExperimentalPolicy;
+}
+
+/**
+ * Engine refinements evaluated by the Concordance.bible reconstruction
+ * experiment (2026-10-01). Each switch is independent and off by default.
+ */
+export interface StrongExperimentalPolicy {
+  readingInvariantVariants?: boolean;
+  singleCarrierPerSourceIdentity?: boolean;
+  encliticHostTransfer?: boolean;
+  digitNumeralTransfer?: boolean;
+}
+
+function readerPolicyWithExperiments(
+  policy: ReaderAlignmentPolicy,
+  experiments: StrongExperimentalPolicy | undefined
+): ReaderAlignmentPolicy {
+  if (!experiments?.encliticHostTransfer && !experiments?.digitNumeralTransfer)
+    return policy;
+  return {
+    ...policy,
+    transferMatching: {
+      ...policy.transferMatching,
+      ...(experiments.encliticHostTransfer ? { encliticHosts: true } : {}),
+      ...(experiments.digitNumeralTransfer ? { digitNumerals: true } : {})
+    }
+  };
 }
 
 interface StrongLedgerRefreshOptions extends StrongLedgerOptions {
@@ -497,6 +527,7 @@ export function strongLedgerInputFingerprint(
       profileBible: options.profileBible ?? options.bible,
       applyCuratedOverrides: options.applyCuratedOverrides !== false,
       excludedReferenceNames: [...excludedReferences].sort(),
+      experimentalPolicy: options.experimentalPolicy ?? null,
       strongDictionaryActivation: strongDictionaryInput.activation,
       verseCorrespondencePath: verseCorrespondencePath ?? null,
       translationProfile
@@ -702,7 +733,10 @@ export async function generateStrongLedgerWithDictionary(
       lexicon,
       translationLexicon,
       phraseLexicon,
-      readerPolicy: translationProfile.readerAlignment
+      readerPolicy: readerPolicyWithExperiments(
+        translationProfile.readerAlignment,
+        options.experimentalPolicy
+      )
     });
     const elapsed = perfElapsed(alignStart);
     readerAlignMs += elapsed;
@@ -859,7 +893,13 @@ export async function generateStrongLedgerWithDictionary(
         verse,
         input: resolutionInputs.get(verse.ref)!,
         sourceRows: rows,
-        lexicalItems: items.get(verse.ref) ?? []
+        lexicalItems: items.get(verse.ref) ?? [],
+        policy: {
+          readingInvariantVariants:
+            options.experimentalPolicy?.readingInvariantVariants,
+          singleCarrierPerSourceIdentity:
+            options.experimentalPolicy?.singleCarrierPerSourceIdentity
+        }
       });
     }
     rebuildLedgerVerses(ledgerVerses);
