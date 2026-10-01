@@ -53,9 +53,9 @@ const replaceRequired = (source, pattern, replacement, label) => {
 
 config = replaceRequired(
   config,
-  /version: '\d+\.\d+\.\d+'/,
-  `version: '${newVersion}'`,
-  'version'
+  /const APP_VERSION = '\d+\.\d+\.\d+'/,
+  `const APP_VERSION = '${newVersion}'`,
+  'APP_VERSION'
 );
 config = replaceRequired(
   config,
