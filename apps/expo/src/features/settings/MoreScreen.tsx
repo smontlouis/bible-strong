@@ -23,11 +23,13 @@ import Box, { SafeAreaBox } from '~common/ui/Box'
 import CardLinkItem from '~common/ui/CardLinkItem'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import IconCircle from '~common/ui/IconCircle'
+import NotificationDot from '~common/ui/NotificationDot'
 import ScrollView from '~common/ui/ScrollView'
 import SectionCard, { SectionCardHeader } from '~common/ui/SectionCard'
 import Text from '~common/ui/Text'
 import UserAvatar from '~common/ui/UserAvatar'
 import DeleteAccountModal from '~features/profile/components/DeleteAccountModal'
+import { useAvailableUpdatesIndicator } from '~features/resources/useAvailableUpdates'
 import { assistantAccessible } from '~features/study-assistant/assistantConfig'
 import extractFirstName from '~helpers/extractFirstName'
 import { nukeApp } from '~helpers/nukeApp'
@@ -92,6 +94,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
   const contactDeveloperRef = useRef<SheetRef>(null)
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false)
   const openChangelogModal = useSetAtom(changelogModalAtom)
+  const { hasUpdates } = useAvailableUpdatesIndicator()
 
   const lang = useLanguage()
   const { t } = useTranslation()
@@ -320,12 +323,25 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
           </CardLinkItem>
           {Platform.OS !== 'web' && (
             <>
-              <CardLinkItem route="Downloads">
-                <IconCircle bg="rgba(107, 114, 128, 0.1)">
-                  <Box className="overflow-hidden border-continuous">
-                    <FeatherIcon name="download" size={20} color="grey" />
-                  </Box>
-                </IconCircle>
+              <CardLinkItem
+                route="Downloads"
+                accessibilityLabel={
+                  hasUpdates ? t('accessibility.downloadsWithUpdates') : undefined
+                }
+              >
+                <Box>
+                  <IconCircle bg="rgba(107, 114, 128, 0.1)">
+                    <Box className="overflow-hidden border-continuous">
+                      <FeatherIcon name="download" size={20} color="grey" />
+                    </Box>
+                  </IconCircle>
+                  {hasUpdates && (
+                    <NotificationDot
+                      size={12}
+                      style={{ position: 'absolute', top: -3, right: -3 }}
+                    />
+                  )}
+                </Box>
                 <Text className="flex-[1] text-[15px]">{t('Gestion des téléchargements')}</Text>
                 <FeatherIcon name="chevron-right" size={20} color="grey" />
               </CardLinkItem>

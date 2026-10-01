@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { SheetRef } from '~common/sheet'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import NotificationDot from '~common/ui/NotificationDot'
 import Text from '~common/ui/Text'
 import SidebarHoverActions from '~common/ui/HoverActionsRow'
 import Color from 'color'
@@ -37,6 +38,7 @@ import GroupActionsPopover from '~features/app-switcher/BottomTabBar/GroupAction
 import ViewGroupsModal from './BottomTabBar/ViewGroupsModal'
 import TabIcon, { tabIconColorConfig } from './utils/getIconByTabType'
 import { useOpenInNewTab } from './utils/useOpenInNewTab'
+import { useAvailableUpdatesIndicator } from '~features/resources/useAvailableUpdates'
 import { WORKSPACE_SIDEBAR_WIDTH } from './utils/useResponsiveWorkspace'
 interface WorkspaceSidebarProps {
   onCollapse: () => void
@@ -58,6 +60,7 @@ const WorkspaceSidebar = ({
   const stylingTheme = useStylingTheme()
 
   const { t } = useTranslation()
+  const { hasUnseenUpdates } = useAvailableUpdatesIndicator()
   const insets = useSafeAreaInsets()
   const { colorScheme } = useCurrentThemeSelector()
   const rowHeight = Platform.OS === 'web' ? 32 : 44
@@ -464,7 +467,9 @@ const WorkspaceSidebar = ({
                 className="overflow-hidden border-continuous flex-row items-center px-[10px]"
                 onPress={openMenu}
                 accessibilityRole="button"
-                accessibilityLabel={t('settings.settings')}
+                accessibilityLabel={
+                  hasUnseenUpdates ? t('accessibility.settingsWithUpdates') : t('settings.settings')
+                }
                 accessibilityState={{ selected: activePage === 'settings' }}
                 style={{
                   minHeight: rowHeight,
@@ -477,6 +482,7 @@ const WorkspaceSidebar = ({
                 <Text className="ml-[8px] text-[13px]" style={labelStyle}>
                   {t('settings.settings')}
                 </Text>
+                {hasUnseenUpdates && <NotificationDot size={8} style={{ marginLeft: 6 }} />}
               </TouchableBox>
             )}
           </Box>
