@@ -547,6 +547,15 @@ retenue (`replay/b-need/`). La correction de fond est en amont : rattacher un
 porteur transféré au mot source dont l'identité principale correspond, avant
 l'identifiant alternatif d'un autre mot.
 
+**Régénération intégrale de NFC**, Bible libre choisie pour ce premier passage,
+depuis sa publication canonique complète (73 livres) et vérifiée de la même
+façon. Sur 441 053 unités source : 267 388 visibles, 642 vides établis et
+173 023 incertaines (39,2 %, contre 20,5 % pour NBS). Comme prévu pour une
+traduction dynamique, le moteur s'abstient deux fois plus souvent plutôt que de
+placer au hasard : qualité de placement 0,979, couverture des porteurs de
+référence 0,686. Sur les 4 325 versets signalés pour la source, 4 048 sont
+deutérocanoniques, hors du corpus source STEP : aucun Strong n'y est inventé.
+
 ## Limites
 
 - **Accord éditorial, pas vérité.** Concordance est une référence humaine
