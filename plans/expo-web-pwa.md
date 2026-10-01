@@ -16,6 +16,8 @@ reads this file, does **one** unchecked item, validates it, updates this file an
   is TypeScript bundled with esbuild (add `esbuild` as an explicit devDependency).
 - **Git**: branch `feat/expo-pwa`, one Conventional Commit per iteration, **never push**
   (a push to `master` deploys production). Never stage `apps/expo/.sim-fleet/`.
+- **Bundle splitting allowed** (2026-10-01): the web entry may be split (item 4b). Native
+  bundles must not change behaviour.
 
 ## Loop protocol
 
@@ -61,6 +63,20 @@ reads this file, does **one** unchecked item, validates it, updates this file an
       icons, lang `en`, categories). `public/_headers`: no-cache for `/sw.js` and HTML
       navigations, immutable for `/_expo/static/*`, manifest content type. Verify with `curl -I`
       on the local server, including the SPA fallback path `/home`.
+- [ ] **4b. Split the web bundle.** Analyse first: export with `EXPO_ATLAS=true` (Expo Atlas)
+      or a source map explorer and record in **Baseline** the 15 heaviest packages/modules in
+      the entry and what pulls them into startup (root layout, `FullAppRuntime`, workspace).
+      Then pick the smallest set of changes with the biggest gain, likely a mix of: Expo Router
+      `asyncRoutes: { web: true, default: 'development' }` (Suspense fallbacks must look right),
+      and `import()`/`React.lazy` of heavy, non-startup dependencies (editor, markdown/mermaid,
+      assistant UI, media players, drag and drop, Lottie…), with `.web.tsx` variants when native
+      must keep static imports. This item may span several iterations: commit each step, keep it
+      unticked until done. Done when: the startup JS of `/home` drops significantly (record
+      before/after decoded and compressed bytes), the entry is well under the 25 MiB Cloudflare
+      limit, navigating to every top-level route works in the browser with no console errors,
+      native typecheck/lint unchanged, `web:export` + `check-web-assets` pass. Revise the
+      precache budget in **Baseline**: precache all JS/CSS chunks (downloaded in the background
+      after first paint, so routes keep working offline) except heavyweight optional ones.
 - [ ] **5. Service worker.** Worker source + its own tsconfig (WebWorker lib), outside the app
       typecheck if needed. `scripts/build-web-sw.mjs`: esbuild bundle, then `injectManifest`
       over `dist` (hashed `_expo/static` assets not cache-busted, startup fonts, icons, manifest,
@@ -122,8 +138,9 @@ Measured 2026-10-01 on `master` @ `992a95d14` (`web:export`, 53 s).
 - **Today in production**: no manifest (`/manifest.json` returns the SPA `index.html`), no
   service worker, `lang="en"`, `httpEquiv` typo. Every asset, hashed or not, is served with
   `Cache-Control: public, max-age=0, must-revalidate`.
-- **Precache budget**: the entry is the application and cannot shrink without code
-  splitting (out of scope), so the ≤ 15 MB target is not reachable. Budget: **≤ 30 MB decoded
+- **Precache budget** (provisional, to be revised by item 4b now that splitting is allowed):
+  the entry is the application and cannot shrink without code splitting, so the ≤ 15 MB target
+  is not reachable as-is. Budget: **≤ 30 MB decoded
   and ≤ 6 MB compressed transfer**, limited to `index.html`, `_expo/static/**/*.{js,css}`
   except lazy heavyweight chunks (`shaka-player`), the startup fonts listed above, the PWA
   icons and the manifest. Other same-origin `/assets/**` files (hashed) are runtime-cached
