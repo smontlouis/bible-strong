@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import { normalizeStepStrongCode } from "./lexiconV3/identity.js";
 import { STEP_TO_OSIS_BOOK } from "./stepOriginals.js";
 import type { OriginalStrongOccurrence } from "./completeAlignment.js";
+import {
+  assessSourceReading,
+  type SourceReadingAssessment
+} from "./strongSourceReading.js";
 type SourceVerse = { source: OriginalStrongOccurrence[] };
 
 export interface SourceRow {
@@ -98,6 +102,7 @@ export type Structure =
   | "multiple-components"
   | "unresolved-alternatives";
 export interface SourceUnit {
+  readingAssessment?: SourceReadingAssessment;
   id: string;
   row: SourceRow;
   occurrenceIds: string[];
@@ -127,9 +132,8 @@ export function makeUnits(verse: SourceVerse, rows: Map<string, SourceRow>) {
       logicalStrong.every((s) => [...primary, ...row.alternatives].includes(s))
     );
     assert(members.every((s) => s.text === row.surface));
-    const variant =
-      Boolean(row.evidence.meaningVariants.trim()) ||
-      row.reading !== (row.source === "TAGNT" ? "NKO" : "L");
+    const readingAssessment = assessSourceReading(row, members[0]?.morph);
+    const variant = readingAssessment.lexicalReadingUnresolved;
     // A deliberately narrow operational rule, not a global synonym assertion.
     // Hebrew alternative roots and comma-separated Greek lists need adjudication.
     const structure: Structure = variant
@@ -142,6 +146,7 @@ export function makeUnits(verse: SourceVerse, rows: Map<string, SourceRow>) {
             ? "single-row-alternatives"
             : "unresolved-alternatives";
     return {
+      readingAssessment,
       id,
       row,
       occurrenceIds: members.map((s) => s.occurrenceId),

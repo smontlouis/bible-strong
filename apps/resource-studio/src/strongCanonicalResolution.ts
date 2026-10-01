@@ -28,8 +28,9 @@ import {
   type ResolutionCarrier
 } from "./strongResolution.js";
 import { stripTags, tokenizeText } from "./tokenize.js";
+import type { SourceReadingAssessment } from "./strongSourceReading.js";
 
-export const CANONICAL_RESOLUTION_POLICY = "autonomous-fr-occurrences-v1";
+export const CANONICAL_RESOLUTION_POLICY = "autonomous-fr-occurrences-v2";
 export interface CanonicalResolutionInput {
   mapping?: VerseCorrespondenceBlock;
   occurrences: OriginalStrongOccurrence[];
@@ -61,6 +62,7 @@ export interface CanonicalOccurrenceDecision {
     morphology: string;
     evidenceSha256: string;
     readingUnresolved: boolean;
+    readingAssessment?: SourceReadingAssessment;
   };
   state: WorkflowDecision["state"];
   assurance: string;
@@ -196,6 +198,7 @@ export function resolveCanonicalVerse(options: {
   if (input.mapping?.reason?.includes("fallback-after-ambiguous"))
     issues.push("native-coordinate-used-after-ambiguous-text-alignment");
   const groups = new Map<string, OriginalStrongOccurrence[]>();
+  const readingAssessments = new Map<string, SourceReadingAssessment>();
   for (const o of input.occurrences) {
     const id = o.sourceIdentity ?? `unresolved:${o.occurrenceId}`;
     const values = groups.get(id) ?? [];
@@ -207,9 +210,10 @@ export function resolveCanonicalVerse(options: {
       const row = sourceRows.get(id);
       let readingUnresolved = true;
       try {
-        readingUnresolved =
-          makeUnits({ source: occurrences }, sourceRows)[0].structure ===
-          "variant-conditioned";
+        const model = makeUnits({ source: occurrences }, sourceRows)[0];
+        readingUnresolved = model.structure === "variant-conditioned";
+        if (model.readingAssessment)
+          readingAssessments.set(id, model.readingAssessment);
       } catch (error) {
         issues.push(
           `source-model:${id}:${error instanceof Error ? error.message : String(error)}`
@@ -485,7 +489,8 @@ export function resolveCanonicalVerse(options: {
         gloss: entry.gloss,
         morphology: entry.morphology,
         evidenceSha256: entry.unit.sourceEvidenceSha256,
-        readingUnresolved: entry.unit.readingUnresolved
+        readingUnresolved: entry.unit.readingUnresolved,
+        readingAssessment: readingAssessments.get(d.sourceUnitId)
       },
       state: d.state,
       assurance,

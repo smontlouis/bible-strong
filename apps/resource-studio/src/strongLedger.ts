@@ -421,6 +421,7 @@ const STRONG_LEDGER_PIPELINE_SOURCES = [
   "src/strongGrammaticalEmpty.ts",
   "src/strongCanonicalResolution.ts",
   "src/strongSourceUnits.ts",
+  "src/strongSourceReading.ts",
   "src/strongCarriers.ts",
   "src/strongReaderText.ts",
   "src/render.ts",
