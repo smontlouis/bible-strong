@@ -38,11 +38,15 @@ reads this file, does **one** unchecked item, validates it, updates this file an
 
 ## Checklist
 
-- [ ] **1. Baseline.** Run `web:export`; record dist total size, file count, the 10 largest
+- [x] **1. Baseline.** Run `web:export`; record dist total size, file count, the 10 largest
       files and the JS/CSS/font weight needed for the first paint of `/home`. Find and record a
       working local serving recipe that honours `wrangler.jsonc` (SPA fallback, `_headers`), e.g.
       `wrangler dev` from `packages/resource-service`. Confirm no manifest / SW today. Set the
       precache budget from the numbers (target ≤ 15 MB, justify otherwise).
+      **Evidence**: `web:export` exit 0; `wrangler dev` (recipe below) serves `/home` 200;
+      browser Resource Timing on `/home` = 37 same-origin requests, 27.56 MB decoded,
+      `navigator.serviceWorker.controller` null, no `link[rel=manifest]`. Budget set to
+      ≤ 30 MB decoded / ≤ 6 MB transfer (see Baseline).
 - [ ] **2. HTML template.** `npx expo customize public/index.html` (single output), keep Expo's
       reset styles, then: `lang="en"`, fix `http-equiv`, viewport with `viewport-fit=cover`,
       `theme-color` for light and dark (from the default theme palettes), `description`,
@@ -94,7 +98,51 @@ reads this file, does **one** unchecked item, validates it, updates this file an
 
 ## Baseline
 
-_(filled by item 1)_
+Measured 2026-10-01 on `master` @ `992a95d14` (`web:export`, 53 s).
+
+- **dist**: 38 MB, 194 files. `_expo/static`: 9 JS + 22 CSS (0.21 MB). `assets/`: 12 MB
+  (5.1 MB `node_modules` icon fonts/images, 6.6 MB `src` images/fonts/json).
+- **Largest files**: `entry-*.js` 24.04 MiB raw (5.38 MB gzip, 3.59 MB brotli; Cloudflare
+  serves `br`), MaterialCommunityIcons.ttf 1.25 MB, `shaka-player-*.js` 0.93 MB (lazy),
+  `audibible-reader.png` 0.68 MB, onboarding PNGs 0.30–0.45 MB, FontAwesome6_Solid.ttf
+  0.40 MB, Ionicons.ttf 0.37 MB, MaterialIcons.ttf 0.34 MB, `passage-media.json` 0.32 MB,
+  `eina-03-bold.otf` 0.32 MB.
+- **Entry vs Cloudflare limit**: 24.04 MiB against the 25 MiB per-file limit
+  (`check-web-assets.mjs`). Pre-existing risk, out of scope here, but the PWA work must not grow it.
+- **First load of `/home`** (same-origin, 37 requests): 27.56 MB decoded, 7.09 MB transferred
+  locally (gzip). The entry is 25.2 MB of it. Startup also loads `__common`, `__expo-metro-runtime`,
+  one `index-*.js`, all CSS, the icon fonts MaterialCommunityIcons / Ionicons / MaterialIcons /
+  Feather, the fonts `eina-03-bold`, `FiraCode-Regular`, `LiterataBook-Regular`,
+  `audibible-icon.png` and `plans/bible-project-plan.txt`. i18n JSON is bundled, not fetched.
+- **Cross-origin at startup**: reCAPTCHA Enterprise (google.com/gstatic), Firebase (webConfig,
+  installations, Firestore Listen), GA4 (googletagmanager, google-analytics), Resource API
+  (`api.bible-strong.app`), and **`cdn.jsdelivr.net/npm/@lottiefiles/dotlottie-web@0.44.0/dist/dotlottie-player.wasm`**
+  (Lottie runtime fetched from a CDN, so it fails offline: item 7 should self-host it or
+  tolerate its absence).
+- **Today in production**: no manifest (`/manifest.json` returns the SPA `index.html`), no
+  service worker, `lang="en"`, `httpEquiv` typo. Every asset, hashed or not, is served with
+  `Cache-Control: public, max-age=0, must-revalidate`.
+- **Precache budget**: the entry is the application and cannot shrink without code
+  splitting (out of scope), so the ≤ 15 MB target is not reachable. Budget: **≤ 30 MB decoded
+  and ≤ 6 MB compressed transfer**, limited to `index.html`, `_expo/static/**/*.{js,css}`
+  except lazy heavyweight chunks (`shaka-player`), the startup fonts listed above, the PWA
+  icons and the manifest. Other same-origin `/assets/**` files (hashed) are runtime-cached
+  cache-first with an entry cap. Cross-origin requests are never cached.
+
+### Local serving recipe
+
+```bash
+# from the repository root, after web:export / web:build
+yarn workspace @bible-strong/resource-service exec wrangler dev \
+  --config ../../apps/expo/wrangler.jsonc --port 8788 --ip 127.0.0.1 \
+  --compatibility-date 2026-08-22
+```
+
+The local workerd binary (wrangler 4.124.0) supports dates up to 2026-08-22; the config's
+`2026-09-16` makes it refuse to start, hence the CLI override (config file unchanged).
+It honours the SPA fallback (`/home`, `/bible/LSG` give 200 `text/html`) and serves `br`.
+Before starting it, check whether it is already up: `curl -sI http://127.0.0.1:8788/`.
+`localhost`/`127.0.0.1` is a secure context, so service workers work there.
 
 ## Blockers
 
