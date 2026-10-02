@@ -460,11 +460,26 @@ describe("comparison sample and sealed reserve", () => {
       first.comparison.filter((entry) => entry.genre === "law").length,
       6
     );
-    assert.equal(first.freshPool.law, 34);
+    assert.equal(first.pool.law, 34);
     assert.throws(
       () =>
         selectComparisonChapters({ ...options, reserve: 60, comparison: 60 }),
-      /not-enough-fresh-chapters:law/u
+      /not-enough-chapters:law/u
+    );
+    // Once fresh chapters run out, earlier benchmark chapters may be admitted.
+    const wider = selectComparisonChapters({
+      ...options,
+      allowPrior: true,
+      excluded: new Set([
+        ...excluded,
+        ...first.reserve.map((entry) => entry.chapter),
+        ...first.comparison.map((entry) => entry.chapter)
+      ])
+    });
+    // 36 law chapters, minus Gen.1 and the 9 already drawn; Gen.2 is back.
+    assert.equal(wider.pool.law, 26);
+    assert.ok(
+      wider.reserve.every((entry) => entry.fresh === !prior.has(entry.chapter))
     );
   });
 

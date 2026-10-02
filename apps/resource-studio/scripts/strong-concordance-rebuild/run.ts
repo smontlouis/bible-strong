@@ -45,7 +45,7 @@ import {
 
 const USAGE = `Usage (from apps/resource-studio):
   tsx scripts/strong-concordance-rebuild/run.ts plan --seed <text> --prior <file>... --consulted <Chapter,...> --forced-development <Chapter,...>
-  tsx scripts/strong-concordance-rebuild/run.ts plan-comparison --seed <text> --comparison 150 --reserve 120 [--base <plan.json>] [--output <file>]
+  tsx scripts/strong-concordance-rebuild/run.ts plan-comparison --seed <text> --comparison 150 --reserve 120 [--base <plan.json>] [--exclude-plan <file>...] [--allow-prior] [--output <file>]
   tsx scripts/strong-concordance-rebuild/run.ts acquire --editions SG21,NEG --splits development,test [--plan <file>] [--extra Edition:Chapter,...] [--delay-ms 6000]
   tsx scripts/strong-concordance-rebuild/run.ts seal-acquisition --output <file>
   tsx scripts/strong-concordance-rebuild/run.ts acquire-witness --edition Sg1910|Darby|DarbyR --chapters-from <export.csv> --root <dir> [--delay-ms 6000]
@@ -195,13 +195,15 @@ switch (command) {
     const seed = flagValue(args, "--seed");
     const comparison = Number(flagValue(args, "--comparison"));
     const reserve = Number(flagValue(args, "--reserve"));
-    if (!seed || !(comparison > 0) || !(reserve > 0)) throw new Error(USAGE);
+    if (!seed || !(comparison >= 0) || !(reserve > 0)) throw new Error(USAGE);
     const plan = await buildComparisonPlan({
       basePlanPath:
         flagValue(args, "--base") ?? path.join(OUT_ROOT, "plan.json"),
       seed,
       reserve,
-      comparison
+      comparison,
+      excludePlans: flagValues(args, "--exclude-plan"),
+      allowPrior: args.includes("--allow-prior")
     });
     const output =
       flagValue(args, "--output") ??
@@ -211,7 +213,7 @@ switch (command) {
       JSON.stringify(
         {
           output,
-          freshPool: plan.freshPool,
+          pool: plan.pool,
           reserve: plan.reserve.length,
           reserveSha256: plan.reserveSha256,
           comparison: plan.comparison.map((entry) => entry.chapter),

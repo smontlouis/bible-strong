@@ -1,5 +1,6 @@
 import {
   alignVerse,
+  gluedClitics,
   type AssignedStrong,
   type AlignmentResult,
   type OriginalConstraint,
@@ -31,6 +32,10 @@ import {
   type StrongTranslationLexicon
 } from "./translationLexicon.js";
 import { type ReaderAlignmentPolicy } from "./translationProfiles.js";
+import {
+  witnessForm,
+  type WitnessLocutionLexicon
+} from "./witnessLocutionLexicon.js";
 import {
   witnessEmptyEvidence,
   type EmptyStrongEvidence
@@ -127,6 +132,16 @@ export function alignReaderVerse(options: {
     phraseLexicon: options.phraseLexicon,
     readerPolicy
   });
+  const locutionLexicon = readerPolicy.transferMatching?.locutionLexicon;
+  if (locutionLexicon && readerPolicy.transferMatching?.witnessLocutions)
+    phraseAssignments.push(
+      ...lexiconLocutionAssignments({
+        assignments: base.assignments,
+        phraseAssignments,
+        segments: base.segments,
+        lexicon: locutionLexicon
+      })
+    );
   const emptyAssignments = buildEditorialEmptyAssignments(
     base,
     phraseAssignments,
@@ -169,6 +184,79 @@ export function alignReaderVerse(options: {
       (assignment) => assignment.strong.length > 1
     ).length
   };
+}
+
+/**
+ * A word carrying the number that the witnesses give a locution elsewhere in
+ * the Bible stretches over that locution when the target spells it out and
+ * no other word of it carries a number (L): « effet » of « En effet »,
+ * « lieux » of « hauts lieux », « parce » of « parce qu'il ».
+ */
+function lexiconLocutionAssignments(options: {
+  assignments: Map<number, AssignedStrong>;
+  phraseAssignments: ReaderPhraseAssignment[];
+  segments: TextSegment[];
+  lexicon: WitnessLocutionLexicon;
+}): ReaderPhraseAssignment[] {
+  const words = options.segments.flatMap((segment) =>
+    segment.kind === "word" ? [segment] : []
+  );
+  const forms = words.map(
+    (word) =>
+      new Set([witnessForm(word.normalized), ...gluedClitics(word.text)])
+  );
+  const added: ReaderPhraseAssignment[] = [];
+  const overlaps = (start: number, end: number) =>
+    [...options.phraseAssignments, ...added].some(
+      (phrase) => phrase.startWordIndex <= end && start <= phrase.endWordIndex
+    );
+  for (let start = 0; start < words.length; start += 1) {
+    const candidates = [...forms[start]!]
+      .flatMap((form) => options.lexicon.get(form) ?? [])
+      .sort((left, right) => right.words.length - left.words.length);
+    for (const locution of candidates) {
+      const end = start + locution.words.length - 1;
+      if (
+        end >= words.length ||
+        !locution.words.every((word, offset) =>
+          forms[start + offset]!.has(word)
+        ) ||
+        overlaps(start, end)
+      )
+        continue;
+      const carried: AssignedStrong[] = [];
+      for (let index = start; index <= end; index += 1) {
+        const assignment = options.assignments.get(index);
+        if (assignment) carried.push(assignment);
+      }
+      // One occurrence only: two carriers may be two occurrences.
+      const [only] = carried;
+      if (
+        carried.length !== 1 ||
+        only!.strong.length !== 1 ||
+        !locution.strongs.has(only!.strong[0]!.toUpperCase())
+      )
+        continue;
+      for (let index = start; index <= end; index += 1)
+        options.assignments.delete(index);
+      added.push({
+        strong: [...only!.strong],
+        confidence: only!.confidence,
+        method: "witness-locution",
+        source: `${only!.source}~locution-lexicon`,
+        startWordIndex: start,
+        endWordIndex: end,
+        originalConfirmed: only!.originalConfirmed,
+        transferMethod: only!.method,
+        ...(only!.sourcePositions
+          ? { sourcePositions: only!.sourcePositions }
+          : {})
+      });
+      start = end;
+      break;
+    }
+  }
+  return added;
 }
 
 function enrichAssignmentsFromOriginal(options: {

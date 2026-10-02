@@ -114,7 +114,18 @@ générateur canonique les applique en revanche par défaut depuis le 1er octobr
   `scripts/strong-identifier-families/derive.ts` ;
 - `J` `cliticHosts` : un pronom ou un mot élidé que les témoins étiquettent à
   part (« m’ », « qu’ », « -le ») est porté par le mot de la cible auquel il
-  est soudé (« m'avez », « Coupe-le »).
+  est soudé (« m'avez », « Coupe-le ») ;
+- `K` `openingConjunctions` : une conjonction qui ouvre le verset du témoin
+  (« Et », « Or », « Mais ») n'est portée que par le premier cinquième du
+  verset cible, jamais par un « et » que la cible ajoute plus loin ;
+- `L` `witnessLocutionLexicon` : un mot portant le numéro qu'un témoin donne
+  ailleurs à une locution entière (« en effet », « hauts lieux », plus de
+  trois emplois) s'étend à cette locution quand la cible l'écrit et qu'aucun
+  autre de ses mots ne porte de numéro.
+
+`B` garde aussi un seul porteur quand deux identifiants d'un même mot source
+tombent sur les mêmes mots : celui des témoins, puis le mieux étayé, puis le
+premier identifiant de STEP.
 
 Les témoins viennent de `scripts/concordance-witnesses/build.ts` : le CSV
 exporté par Concordance, dont chaque étiquette de locution est élargie d'après

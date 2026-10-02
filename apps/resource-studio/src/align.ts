@@ -97,6 +97,18 @@ interface GluedCliticCandidate {
 /** A target word carries at most this many Strong numbers with its clitics. */
 const MAX_GLUED_STRONGS = 3;
 
+/** Conjunctions that open a verse (« Et », « Or », « Mais ») (K). */
+const OPENING_CONJUNCTIONS = new Set([
+  "et",
+  "or",
+  "mais",
+  "car",
+  "donc",
+  "puis"
+]);
+/** Share of the target verse in which an opening conjunction may be carried. */
+const OPENING_SHARE = 0.2;
+
 interface TargetWord {
   wordIndex: number;
   normalized: string;
@@ -311,8 +323,19 @@ function matchReferenceOccurrences(
           })
     };
   };
+  // A conjunction opening the witness verse (« Et », « Or ») renders the source
+  // word that opens it, not a conjunction the target adds further on (K).
+  const opensVerse = (token: StrongToken, sourceIndex: number) =>
+    matching?.openingConjunctions === true &&
+    sourceIndex === 0 &&
+    OPENING_CONJUNCTIONS.has(token.normalized);
   const edges = strongTokens.flatMap(({ token, sourceIndex }, left) =>
     words.flatMap((word) => {
+      if (
+        opensVerse(token, sourceIndex) &&
+        word.wordIndex > OPENING_SHARE * (words.length - 1)
+      )
+        return [];
       const candidate = candidateForToken(
         word.normalized,
         token,

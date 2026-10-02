@@ -9,7 +9,9 @@ import {
   gluedClitics,
   spelledFrenchNumber
 } from "../src/align.js";
+import { alignReaderVerse } from "../src/readerAlignment.js";
 import { readStepOriginalTokens } from "../src/stepOriginals.js";
+import { buildWitnessLocutionLexicon } from "../src/witnessLocutionLexicon.js";
 import {
   isFamily,
   type FamilyCandidate
@@ -382,6 +384,36 @@ test("alternative identifiers of one source word keep a single best-evidenced ca
   });
   assert.equal(tied.decisions[0]!.state, "unresolved");
   assert.equal(tie.verse.annotations[0]!.visibility, "reader");
+  // On the same word there is no competition: one identifier stays, even on
+  // a tie, STEP's first one.
+  const sameWord = resolutionFixture({
+    rows: [row],
+    strongs: [["H0582", "H0376"]],
+    carriers: [0, 1].map((index) => ({
+      occurrence: [0, index] as [number, number],
+      wordIndex: 3,
+      source: "reference-transfer",
+      diagnostic: "exact",
+      confidence: 0.99
+    })),
+    words: ["gens", "laisse", "partir", "hommes"]
+  });
+  const resolved = resolveCanonicalVerse({
+    ...sameWord,
+    policy: { singleCarrierPerSourceIdentity: true }
+  });
+  assert.deepEqual(
+    sameWord.verse.annotations.map((annotation) => [
+      annotation.strong,
+      annotation.visibility
+    ]),
+    [
+      ["H0582", "reader"],
+      ["H0376", "hidden"]
+    ]
+  );
+  assert.equal(resolved.decisions[0]!.state, "visible");
+  assert.deepEqual(resolved.decisions[0]!.targetWordIndices, [3]);
 });
 
 test("the identifier used by the witnesses wins between alternative carriers", () => {
@@ -443,7 +475,9 @@ test("the engine enables every measured refinement by default and allows a full 
     witnessEmpties: true,
     typographicApostrophes: true,
     strongIdentifierFamilies: true,
-    cliticHosts: true
+    cliticHosts: true,
+    openingConjunctions: true,
+    witnessLocutionLexicon: true
   });
   assert.deepEqual(resolveEnginePolicy({ encliticHostTransfer: false }), {
     readingInvariantVariants: true,
@@ -455,7 +489,9 @@ test("the engine enables every measured refinement by default and allows a full 
     witnessEmpties: true,
     typographicApostrophes: true,
     strongIdentifierFamilies: true,
-    cliticHosts: true
+    cliticHosts: true,
+    openingConjunctions: true,
+    witnessLocutionLexicon: true
   });
 });
 
@@ -684,4 +720,99 @@ test("a family identifier is a name of the word, not a STEP reading of it", () =
   assert.equal(after.decisions[0]!.state, "visible");
   assert.deepEqual(after.decisions[0]!.targetWordIndices, [2]);
   assert.deepEqual(after.decisions[0]!.strong, ["H7122", "H7125"]);
+});
+
+test("a conjunction opening the witness verse is carried only by the opening of the target", () => {
+  const references = [
+    witness(
+      '<w strong="G2532">Et</w> il <w strong="G0450">se leva</w> et <w strong="G2064">vint</w> vers eux.'
+    )
+  ];
+  // The target adds its own « et » further on: « Et » renders nothing there.
+  const added = "Après avoir prié, il se releva et vint vers eux.";
+  assert.deepEqual(alignVerse(added, references).assignments.get(6)?.strong, [
+    "G2532"
+  ]);
+  const on = alignVerse(added, references, undefined, undefined, {
+    openingConjunctions: true
+  });
+  assert.equal(on.assignments.get(6), undefined);
+  // A target opening with the conjunction still receives it.
+  const opening = alignVerse(
+    "Et il se releva et vint vers eux.",
+    references,
+    undefined,
+    undefined,
+    { openingConjunctions: true }
+  );
+  assert.deepEqual(opening.assignments.get(0)?.strong, ["G2532"]);
+});
+
+test("the witness locution lexicon keeps locutions the witnesses tag repeatedly", () => {
+  const verse = (tagged: string) => ({ tokens: parseStrongTokens(tagged) });
+  const lexicon = buildWitnessLocutionLexicon([
+    verse('<w strong="G1063">En effet</w>, il vint.'),
+    verse('<w strong="G1063">En effet</w>, il partit.'),
+    verse('<w strong="H5704">jusqu’à ce que</w> le jour vienne.'),
+    verse('<w strong="G1063">en effet</w> nous savons.'),
+    verse('<w strong="H5704">jusqu’à ce que</w> tu viennes.')
+  ]);
+  assert.deepEqual(
+    lexicon
+      .get("en")
+      ?.map((locution) => [
+        locution.words.join(" "),
+        [...locution.strongs],
+        locution.count
+      ]),
+    [["en effet", ["G1063"], 3]]
+  );
+  // Two uses are not enough.
+  assert.equal(lexicon.get("jusqu’a"), undefined);
+});
+
+test("a word carrying a locution's number covers the locution the witnesses tag elsewhere", () => {
+  const elsewhere = {
+    tokens: parseStrongTokens('<w strong="G1063">En effet</w>, il vint.')
+  };
+  const lexicon = buildWitnessLocutionLexicon([
+    elsewhere,
+    elsewhere,
+    elsewhere
+  ]);
+  const references = [
+    witness('En <w strong="G1063">effet</w>, il <w strong="G2064">vint</w>.')
+  ];
+  const policy = (locutionLexicon?: typeof lexicon) => ({
+    maxStrongPerWord: 3,
+    minEmptySourceAgreement: 2,
+    learnedTranslationMinScore: 0.38,
+    learnedFunctionWordMode: "restricted" as const,
+    transferMatching: {
+      witnessLocutions: true,
+      ...(locutionLexicon ? { locutionLexicon } : {})
+    }
+  });
+  const target = "En effet, il vint.";
+  const off = alignReaderVerse({
+    targetText: target,
+    references,
+    readerPolicy: policy()
+  });
+  assert.deepEqual(off.assignments.get(1)?.strong, ["G1063"]);
+  assert.deepEqual(off.phraseAssignments, []);
+  const on = alignReaderVerse({
+    targetText: target,
+    references,
+    readerPolicy: policy(lexicon)
+  });
+  assert.equal(on.assignments.has(1), false);
+  assert.deepEqual(
+    on.phraseAssignments.map((phrase) => [
+      phrase.startWordIndex,
+      phrase.endWordIndex,
+      phrase.strong
+    ]),
+    [[0, 1, ["G1063"]]]
+  );
 });

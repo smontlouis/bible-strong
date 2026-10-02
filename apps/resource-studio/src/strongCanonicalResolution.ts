@@ -137,10 +137,11 @@ export function witnessAttestedStrongs(
 
 /**
  * Keep one reader carrier per physical source word whose alternative Strong
- * identifiers were placed on different target words. The identifier used by
- * the witnesses of the verse wins first (it is the display convention for that
- * form), then the evidence rank and the confidence. Ties stay untouched so the
- * resolver keeps reporting the competition.
+ * identifiers were placed. The identifier used by the witnesses of the verse
+ * wins first (it is the display convention for that form), then the evidence
+ * rank and the confidence. On the same target words one carrier always stays;
+ * on different words, ties stay untouched so the resolver keeps reporting the
+ * competition.
  */
 export function demoteAlternativeIdentityCarriers(
   annotations: StrongLedgerAnnotation[],
@@ -150,30 +151,64 @@ export function demoteAlternativeIdentityCarriers(
   let demoted = 0;
   const attested = (a: StrongLedgerAnnotation) =>
     a.strong.split(/\s+/u).some((code) => attestedStrongs.has(code)) ? 1 : 0;
+  const demote = (annotation: StrongLedgerAnnotation) => {
+    annotation.visibility = "hidden";
+    annotation.placement = "duplicate";
+    annotation.reason =
+      "Another identifier of the same source word already has a reader carrier that the witnesses or the evidence favour; alternative identifiers do not create a second occurrence.";
+    annotation.diagnostics = [
+      ...new Set([...annotation.diagnostics, "alternative-identifier-demoted"])
+    ];
+    demoted += 1;
+  };
+  const spanOf = (a: StrongLedgerAnnotation) =>
+    `${a.startWordIndex ?? a.wordIndex}:${a.endWordIndex ?? a.wordIndex}`;
   for (const occurrences of groups.values()) {
     const ids = new Set(occurrences.map((o) => o.occurrenceId));
     if (new Set(occurrences.map((o) => o.strong)).size < 2) continue;
-    const carriers = annotations.filter(
-      (a) =>
-        a.visibility === "reader" &&
-        a.originalOccurrenceId !== undefined &&
-        ids.has(a.originalOccurrenceId) &&
-        (a.placement === "word" || a.placement === "phrase")
+    const order = new Map(
+      occurrences.map((o, index) => [o.occurrenceId, index])
     );
-    const spans = new Set(
-      carriers.map(
+    const rank = (
+      left: StrongLedgerAnnotation,
+      right: StrongLedgerAnnotation
+    ) =>
+      attested(right) - attested(left) ||
+      carrierEvidenceRank(right) - carrierEvidenceRank(left) ||
+      right.confidence - left.confidence;
+    const readerCarriers = () =>
+      annotations.filter(
         (a) =>
-          `${a.startWordIndex ?? a.wordIndex}:${a.endWordIndex ?? a.wordIndex}`
-      )
-    );
+          a.visibility === "reader" &&
+          a.originalOccurrenceId !== undefined &&
+          ids.has(a.originalOccurrenceId) &&
+          (a.placement === "word" || a.placement === "phrase")
+      );
+    // Two identifiers of one source word on the same words name it twice: one
+    // carrier stays even on a tie (the witnesses' identifier, then the best
+    // evidenced, then STEP's first identifier).
+    const bySpan = new Map<string, StrongLedgerAnnotation[]>();
+    for (const carrier of readerCarriers())
+      bySpan.set(spanOf(carrier), [
+        ...(bySpan.get(spanOf(carrier)) ?? []),
+        carrier
+      ]);
+    for (const same of bySpan.values()) {
+      if (new Set(same.map((a) => a.strong)).size < 2) continue;
+      const [kept] = [...same].sort(
+        (left, right) =>
+          rank(left, right) ||
+          (order.get(left.originalOccurrenceId!) ?? 0) -
+            (order.get(right.originalOccurrenceId!) ?? 0)
+      );
+      for (const annotation of same)
+        if (annotation.strong !== kept!.strong) demote(annotation);
+    }
+    const carriers = readerCarriers();
+    const spans = new Set(carriers.map(spanOf));
     if (spans.size < 2 || new Set(carriers.map((a) => a.strong)).size < 2)
       continue;
-    const ranked = [...carriers].sort(
-      (left, right) =>
-        attested(right) - attested(left) ||
-        carrierEvidenceRank(right) - carrierEvidenceRank(left) ||
-        right.confidence - left.confidence
-    );
+    const ranked = [...carriers].sort(rank);
     const [best, second] = ranked;
     if (
       !best ||
@@ -183,19 +218,7 @@ export function demoteAlternativeIdentityCarriers(
         Math.abs(best.confidence - second.confidence) < 0.01)
     )
       continue;
-    for (const annotation of ranked.slice(1)) {
-      annotation.visibility = "hidden";
-      annotation.placement = "duplicate";
-      annotation.reason =
-        "Another identifier of the same source word already has a reader carrier that the witnesses or the evidence favour; alternative identifiers do not create a second occurrence.";
-      annotation.diagnostics = [
-        ...new Set([
-          ...annotation.diagnostics,
-          "alternative-identifier-demoted"
-        ])
-      ];
-      demoted += 1;
-    }
+    for (const annotation of ranked.slice(1)) demote(annotation);
   }
   return demoted;
 }

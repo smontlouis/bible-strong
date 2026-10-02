@@ -280,10 +280,12 @@ export async function buildPlan(options: {
 export const COMPARISON_PLAN_VERSION = "strong-concordance-comparison-plan-v1";
 
 /**
- * Second sample, drawn after the experiment from chapters that no earlier
- * selection touched: a comparison sample examined now, and a reserve sealed
- * for later measurements. The reserve is neither acquired nor scored before a
- * freeze opens it.
+ * Sample drawn after the experiment from chapters never compared with the
+ * targets: a comparison sample examined now, and a reserve sealed for later
+ * measurements. The reserve is neither acquired nor scored before a freeze
+ * opens it. A later plan excludes the chapters of earlier ones, and may
+ * admit chapters of the earlier benchmarks (never compared with the targets)
+ * once fresh ones run out.
  */
 export interface ComparisonPlan {
   version: typeof COMPARISON_PLAN_VERSION;
@@ -291,15 +293,17 @@ export interface ComparisonPlan {
   seed: string;
   basePlan: { path: string; sha256: string };
   chapterSource: { path: string; sha256: string };
+  /** Earlier comparison plans whose chapters were excluded. */
+  excludedPlans?: Array<{ path: string; sha256: string }>;
   policy: {
     comparisonChapters: number;
     reserveChapters: number;
     allocation: "genre share of all chapters, largest remainder";
     ranking: "sha256(seed|chapter) ascending within genre, reserve first";
-    requiresFreshChapters: true;
+    requiresFreshChapters: boolean;
   };
-  /** Fresh chapters available per genre before drawing. */
-  freshPool: Record<string, number>;
+  /** Chapters available per genre before drawing. */
+  pool: Record<string, number>;
   reserveSha256: string;
   reserve: PlannedChapter[];
   comparison: PlannedChapter[];
@@ -334,16 +338,18 @@ export function allocateByShare(
 /** Deterministic, genre-proportional reserve and comparison sample. */
 export function selectComparisonChapters(options: {
   inventory: ChapterInventoryEntry[];
-  /** Chapters of the experiment plan: never drawn again. */
+  /** Chapters already compared with the targets: never drawn again. */
   excluded: Set<string>;
   prior: Set<string>;
+  /** Admit chapters of earlier benchmarks, never compared with the targets. */
+  allowPrior?: boolean;
   seed: string;
   reserve: number;
   comparison: number;
 }): {
   reserve: PlannedChapter[];
   comparison: PlannedChapter[];
-  freshPool: Record<string, number>;
+  pool: Record<string, number>;
 } {
   const chaptersPerGenre = Object.fromEntries(
     GENRE_GROUPS.map((group) => [
@@ -359,14 +365,14 @@ export function selectComparisonChapters(options: {
   );
   const reserve: PlannedChapter[] = [];
   const comparison: PlannedChapter[] = [];
-  const freshPool: Record<string, number> = {};
+  const pool: Record<string, number> = {};
   for (const group of GENRE_GROUPS) {
     const ranked = options.inventory
       .filter(
         (entry) =>
           group.books.includes(entry.bookId) &&
           !options.excluded.has(entry.chapter) &&
-          !options.prior.has(entry.chapter)
+          (options.allowPrior || !options.prior.has(entry.chapter))
       )
       .map((entry): PlannedChapter => ({
         chapter: entry.chapter,
@@ -374,7 +380,7 @@ export function selectComparisonChapters(options: {
         genre: group.id,
         testament: testamentOfBook(entry.bookId),
         verses: entry.verses,
-        fresh: true
+        fresh: !options.prior.has(entry.chapter)
       }))
       .sort(
         (left, right) =>
@@ -382,11 +388,11 @@ export function selectComparisonChapters(options: {
             sha256(`${options.seed}|${right.chapter}`)
           ) || left.chapter.localeCompare(right.chapter)
       );
-    freshPool[group.id] = ranked.length;
+    pool[group.id] = ranked.length;
     const reserved = reserveCounts[group.id] ?? 0;
     const compared = comparisonCounts[group.id] ?? 0;
     if (ranked.length < reserved + compared)
-      throw new Error(`not-enough-fresh-chapters:${group.id}`);
+      throw new Error(`not-enough-chapters:${group.id}`);
     reserve.push(...ranked.slice(0, reserved));
     comparison.push(...ranked.slice(reserved, reserved + compared));
   }
@@ -397,7 +403,7 @@ export function selectComparisonChapters(options: {
   return {
     reserve: reserve.sort(order),
     comparison: comparison.sort(order),
-    freshPool
+    pool
   };
 }
 
@@ -406,6 +412,8 @@ export async function buildComparisonPlan(options: {
   seed: string;
   reserve: number;
   comparison: number;
+  excludePlans?: string[];
+  allowPrior?: boolean;
 }): Promise<ComparisonPlan> {
   const base = await readJson<ExperimentPlan>(options.basePlanPath);
   const chapterSource = base.chapterSource.path;
@@ -417,15 +425,26 @@ export async function buildComparisonPlan(options: {
   for (const [index, selection] of priorSelections.entries())
     if (selection.sha256 !== base.priorSelections[index]!.sha256)
       throw new Error(`prior-selection-changed:${selection.path}`);
+  const earlier = await Promise.all(
+    (options.excludePlans ?? []).map(async (file) => ({
+      path: file,
+      sha256: await fileSha256(file),
+      plan: await readJson<ComparisonPlan>(file)
+    }))
+  );
   const drawn = selectComparisonChapters({
     inventory: await chapterInventoryFromBibleJson(chapterSource),
     excluded: new Set([
       ...base.development.map((entry) => entry.chapter),
       ...base.test.map((entry) => entry.chapter),
       ...base.consultedBeforeSplit,
-      ...base.forcedDevelopment
+      ...base.forcedDevelopment,
+      ...earlier.flatMap(({ plan }) =>
+        [...plan.comparison, ...plan.reserve].map((entry) => entry.chapter)
+      )
     ]),
     prior,
+    allowPrior: options.allowPrior,
     seed: options.seed,
     reserve: options.reserve,
     comparison: options.comparison
@@ -439,14 +458,19 @@ export async function buildComparisonPlan(options: {
       sha256: await fileSha256(options.basePlanPath)
     },
     chapterSource: base.chapterSource,
+    ...(earlier.length
+      ? {
+          excludedPlans: earlier.map(({ path, sha256 }) => ({ path, sha256 }))
+        }
+      : {}),
     policy: {
       comparisonChapters: options.comparison,
       reserveChapters: options.reserve,
       allocation: "genre share of all chapters, largest remainder",
       ranking: "sha256(seed|chapter) ascending within genre, reserve first",
-      requiresFreshChapters: true
+      requiresFreshChapters: !options.allowPrior
     },
-    freshPool: drawn.freshPool,
+    pool: drawn.pool,
     reserveSha256: sha256(
       stableStringify(drawn.reserve.map((entry) => entry.chapter))
     ),

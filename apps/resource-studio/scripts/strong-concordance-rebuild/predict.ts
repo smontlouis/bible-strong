@@ -46,7 +46,9 @@ export const POLICY_LABELS: Record<keyof StrongEnginePolicy, string> = {
   witnessEmpties: "G",
   typographicApostrophes: "H",
   strongIdentifierFamilies: "I",
-  cliticHosts: "J"
+  cliticHosts: "J",
+  openingConjunctions: "K",
+  witnessLocutionLexicon: "L"
 };
 
 export function policyFromLabels(labels: string[]): EnginePolicy {
@@ -341,7 +343,9 @@ export async function predict(options: {
         typographicApostrophes: options.policy.typographicApostrophes === true,
         strongIdentifierFamilies:
           options.policy.strongIdentifierFamilies === true,
-        cliticHosts: options.policy.cliticHosts === true
+        cliticHosts: options.policy.cliticHosts === true,
+        openingConjunctions: options.policy.openingConjunctions === true,
+        witnessLocutionLexicon: options.policy.witnessLocutionLexicon === true
       }
     });
     const verses: PredictedVerse[] = ledger.verses.map((verse) => {

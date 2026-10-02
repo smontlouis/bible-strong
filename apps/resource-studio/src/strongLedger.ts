@@ -74,6 +74,10 @@ import {
 } from "./strongDictionaryLexicon.js";
 import { STRONG_IDENTIFIER_ALIASES } from "./strongIdentifierFamilies.js";
 import {
+  buildWitnessLocutionLexicon,
+  type WitnessLocutionLexicon
+} from "./witnessLocutionLexicon.js";
+import {
   defaultKaikkiSqlitePath,
   DEFAULT_KAIKKI_JSONL
 } from "./kaikkiSqliteIndex.js";
@@ -377,6 +381,10 @@ export interface StrongEnginePolicy {
   strongIdentifierFamilies: boolean;
   /** An elided or hyphen-joined witness clitic is carried by the target word it is glued to. */
   cliticHosts: boolean;
+  /** A conjunction opening the witness verse is carried only by the opening of the target verse. */
+  openingConjunctions: boolean;
+  /** A locution that the witnesses tag as one element anywhere in the Bible covers its whole span. */
+  witnessLocutionLexicon: boolean;
 }
 
 export const DEFAULT_ENGINE_POLICY: Readonly<StrongEnginePolicy> = {
@@ -389,7 +397,9 @@ export const DEFAULT_ENGINE_POLICY: Readonly<StrongEnginePolicy> = {
   witnessEmpties: true,
   typographicApostrophes: true,
   strongIdentifierFamilies: true,
-  cliticHosts: true
+  cliticHosts: true,
+  openingConjunctions: true,
+  witnessLocutionLexicon: true
 };
 
 export function resolveEnginePolicy(
@@ -420,7 +430,8 @@ export function parseEnginePolicyOption(
 
 function readerPolicyWithEngine(
   policy: ReaderAlignmentPolicy,
-  engine: StrongEnginePolicy
+  engine: StrongEnginePolicy,
+  locutionLexicon?: WitnessLocutionLexicon
 ): ReaderAlignmentPolicy {
   if (
     !engine.encliticHostTransfer &&
@@ -428,7 +439,9 @@ function readerPolicyWithEngine(
     !engine.witnessLocutions &&
     !engine.witnessSourcePositions &&
     !engine.typographicApostrophes &&
-    !engine.cliticHosts
+    !engine.cliticHosts &&
+    !engine.openingConjunctions &&
+    !locutionLexicon
   )
     return policy;
   return {
@@ -442,7 +455,9 @@ function readerPolicyWithEngine(
       ...(engine.typographicApostrophes
         ? { typographicApostrophes: true }
         : {}),
-      ...(engine.cliticHosts ? { cliticHosts: true } : {})
+      ...(engine.cliticHosts ? { cliticHosts: true } : {}),
+      ...(engine.openingConjunctions ? { openingConjunctions: true } : {}),
+      ...(locutionLexicon ? { locutionLexicon } : {})
     }
   };
 }
@@ -778,6 +793,15 @@ export async function generateStrongLedgerWithDictionary(
   const phraseLexicon = await measureAsync("load phrase lexicon", () =>
     loadStrongPhraseLexicon(references)
   );
+  // Locutions are transferred as wholes (E); the lexicon needs E (L).
+  const locutionLexicon =
+    enginePolicy.witnessLocutionLexicon && enginePolicy.witnessLocutions
+      ? measureSync("build witness locution lexicon", () =>
+          buildWitnessLocutionLexicon(
+            references.flatMap((reference) => [...reference.map.values()])
+          )
+        )
+      : undefined;
   const lexicalSourceCache =
     createLexicalCandidateSourceCache(dictionaryCandidates);
   await mkdir(options.outputDir, { recursive: true });
@@ -827,7 +851,8 @@ export async function generateStrongLedgerWithDictionary(
       phraseLexicon,
       readerPolicy: readerPolicyWithEngine(
         translationProfile.readerAlignment,
-        enginePolicy
+        enginePolicy,
+        locutionLexicon
       )
     });
     const elapsed = perfElapsed(alignStart);

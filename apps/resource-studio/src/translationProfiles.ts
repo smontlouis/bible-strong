@@ -1,3 +1,4 @@
+import type { WitnessLocutionLexicon } from "./witnessLocutionLexicon.js";
 export type TranslationFamily =
   "formal" | "formal-readable" | "dynamic" | "paraphrase" | "unknown";
 
@@ -19,6 +20,10 @@ export interface TransferMatchingPolicy {
   typographicApostrophes?: boolean;
   /** A witness clitic (« m’ », « qu’ », « -le ») may be carried by the target word it is glued to. */
   cliticHosts?: boolean;
+  /** A conjunction opening the witness verse is carried only by the opening of the target verse. */
+  openingConjunctions?: boolean;
+  /** Locutions that the witnesses tag as one element anywhere in the Bible. */
+  locutionLexicon?: WitnessLocutionLexicon;
 }
 
 export interface ReaderAlignmentPolicy {
