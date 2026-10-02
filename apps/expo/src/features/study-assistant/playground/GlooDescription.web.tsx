@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { RefreshCw, Code2 } from '../lucideIcons'
+import { RefreshCw, Code2 } from '~features/study-assistant/lucideIcons'
 type Catalog = {
   source: 'private-local'
   promptVersion: string

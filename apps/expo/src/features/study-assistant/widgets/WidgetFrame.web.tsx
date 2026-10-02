@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, type ReactNode, type CSSProperties } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
-import { ExpandIcon, XIcon, BookOpenIcon } from '../lucideIcons'
+import { ExpandIcon, XIcon, BookOpenIcon } from '~features/study-assistant/lucideIcons'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'

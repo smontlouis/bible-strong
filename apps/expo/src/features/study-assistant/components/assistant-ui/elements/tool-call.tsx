@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckIcon, CircleAlertIcon, ChevronRightIcon } from '../../../lucideIcons'
+import { CheckIcon, CircleAlertIcon, ChevronRightIcon } from '~features/study-assistant/lucideIcons'
 import {
   Collapsible,
   CollapsibleContent,

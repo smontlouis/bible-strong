@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronRightIcon } from '../../../lucideIcons'
+import { ChevronRightIcon } from '~features/study-assistant/lucideIcons'
 import type { LucideIcon } from 'lucide-react'
 import {
   Collapsible,

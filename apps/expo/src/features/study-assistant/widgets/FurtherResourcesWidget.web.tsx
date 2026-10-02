@@ -1,5 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import { ArrowUpRightIcon, BookOpenIcon, VideoIcon, LibraryIcon } from '../lucideIcons'
+import {
+  ArrowUpRightIcon,
+  BookOpenIcon,
+  VideoIcon,
+  LibraryIcon,
+} from '~features/study-assistant/lucideIcons'
 import type {
   FurtherResourcesWidget as Descriptor,
   ResourceSuggestion,
