@@ -184,6 +184,7 @@
       <div class="bar">
         <h1>Strong — face à Concordance</h1>
         <select id="edition" aria-label="Bible"></select>
+        <select id="engine" aria-label="Moteur"></select>
         <button id="prev" aria-label="Chapitre précédent">‹</button>
         <select id="book" aria-label="Livre"></select>
         <select id="chapter" aria-label="Chapitre"></select>
@@ -220,6 +221,7 @@
       const state = {
         catalog: [],
         edition: "SG21",
+        engine: "A–J",
         book: "Gen",
         chapter: 0,
         mode: "compare",
@@ -346,7 +348,11 @@
         if (!response.ok) throw new Error(await response.text());
         return response.json();
       }
-      const edition = () => state.catalog.find((e) => e.id === state.edition);
+      const edition = () =>
+        state.catalog.find(
+          (e) => e.id === state.edition && e.engine === state.engine
+        );
+      const engines = () => state.catalog.filter((e) => e.id === state.edition);
       const annotated = (t) =>
         Object.entries(t.groups)
           .filter(([g]) => g !== "ours-only" && g !== "uncertain-silent")
@@ -367,14 +373,22 @@
 
       function renderHeader() {
         const e = edition();
+        const others = engines()
+          .filter((other) => other.engine !== e.engine)
+          .map(
+            (other) =>
+              `<span>moteur ${esc(other.engine)} : identiques <b>${pct(other.tally.groups.same || 0, annotated(other.tally))}</b></span>`
+          )
+          .join("");
         $("stats").innerHTML =
-          `<span><b>${esc(e.label)}</b> · ${fmt(e.books.reduce((n, b) => n + b.chapters.length, 0))} chapitres · ${fmt(e.tally.verses)} versets</span>` +
+          `<span><b>${esc(e.label)}</b> · moteur ${esc(e.engine)} · ${fmt(e.books.reduce((n, b) => n + b.chapters.length, 0))} chapitres · ${fmt(e.tally.verses)} versets</span>` +
           tallyLine(e.tally) +
+          others +
           (state.tally
             ? `<span>· ce chapitre : identiques <b>${pct(state.tally.groups.same || 0, annotated(state.tally))}</b></span>`
             : "");
         $("about").innerHTML =
-          "Échantillon de 150 chapitres tirés au hasard (par genre) parmi ceux qui n'ont jamais servi à régler le moteur ; 120 autres restent scellés pour les mesures futures. « Nous » : le moteur actuel (A–G) sur notre propre texte, sans jamais voir les annotations de Concordance. Concordance n'est pas infaillible : un désaccord n'est pas forcément une erreur de notre part.";
+          "Échantillon de 150 chapitres tirés au hasard (par genre) parmi ceux qui n'ont jamais servi à régler le moteur ; 120 autres restent scellés pour les mesures futures. « Nous » : le moteur choisi (A–J : apostrophes, familles d'identifiants et pronoms collés en plus de A–G) sur notre propre texte, sans jamais voir les annotations de Concordance. Concordance n'est pas infaillible : un désaccord n'est pas forcément une erreur de notre part.";
         $("books").innerHTML =
           `<summary>Accord par livre</summary><div class="table-wrap"><table><thead><tr><th>Livre</th><th>Chapitres</th><th>Mots annotés</th><th>Identiques</th><th>Autre mot</th><th>Incertains</th><th>Nous seuls</th></tr></thead><tbody>` +
           e.books
@@ -779,7 +793,11 @@
       async function load(scrollTo) {
         $("verses").innerHTML = `<div class="empty-state">Chargement…</div>`;
         const chapter = `${state.book}.${state.chapter}`;
-        const params = new URLSearchParams({ edition: state.edition, chapter });
+        const params = new URLSearchParams({
+          edition: state.edition,
+          engine: state.engine,
+          chapter
+        });
         history.replaceState(
           null,
           "",
@@ -825,15 +843,21 @@
         state.edition = state.catalog.some((e) => e.id === q.get("edition"))
           ? q.get("edition")
           : state.catalog[0].id;
+        state.engine = engines().some((e) => e.engine === q.get("engine"))
+          ? q.get("engine")
+          : engines()[0].engine;
         const [book, chapter] = (q.get("chapter") || "").split(".");
         state.book = book || edition().books[0].book;
         state.chapter = Number(chapter) || 0;
-        $("edition").innerHTML = state.catalog
+        $("edition").innerHTML = [
+          ...new Map(state.catalog.map((e) => [e.id, e.label]))
+        ]
           .map(
-            (e) =>
-              `<option value="${e.id}" ${e.id === state.edition ? "selected" : ""}>${esc(e.label)}</option>`
+            ([id, label]) =>
+              `<option value="${id}" ${id === state.edition ? "selected" : ""}>${esc(label)}</option>`
           )
           .join("");
+        fillEngines();
         $("category").innerHTML =
           `<option value="">tous les types de désaccord</option>` +
           Object.entries(CATEGORY_LABEL)
@@ -843,9 +867,24 @@
         await load(location.hash ? Number(location.hash.slice(2)) : undefined);
       }
 
+      function fillEngines() {
+        if (!engines().some((e) => e.engine === state.engine))
+          state.engine = engines()[0].engine;
+        $("engine").innerHTML = engines()
+          .map(
+            (e) =>
+              `<option value="${e.engine}" ${e.engine === state.engine ? "selected" : ""}>moteur ${esc(e.engine)}</option>`
+          )
+          .join("");
+      }
       $("edition").addEventListener("change", (e) => {
         state.edition = e.target.value;
+        fillEngines();
         fillBooks();
+        load();
+      });
+      $("engine").addEventListener("change", (e) => {
+        state.engine = e.target.value;
         load();
       });
       $("book").addEventListener("change", (e) => {

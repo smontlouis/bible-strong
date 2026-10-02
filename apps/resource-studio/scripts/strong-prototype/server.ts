@@ -7,7 +7,7 @@
  *
  *   yarn exec tsx scripts/strong-prototype/server.ts [--port 4321]
  *     [--before outputs/strong-autonomous/v3] [--after outputs/strong-autonomous/v4]
- *     [--concordance <compare-view.json>,<compare-view.json>]
+ *     [--concordance <compare-view.json>,...]  (one view per Bible and engine)
  */
 import { existsSync, readFileSync } from "node:fs";
 import http from "node:http";
@@ -211,12 +211,19 @@ const COMPARISON_DIR = "outputs/strong-concordance-night/comparison";
 const COMPARISONS = flag(
   "--concordance",
   ["SG21", "NEG"]
-    .map(
-      (edition) =>
-        `${COMPARISON_DIR}/${edition}__target-excluded__comparison__policy-ABCDEFG.json`
+    .flatMap((edition) =>
+      ["ABCDEFGHIJ", "ABCDEFG"].map(
+        (policy) =>
+          `${COMPARISON_DIR}/${edition}__target-excluded__comparison__policy-${policy}.json`
+      )
     )
     .join(",")
 ).split(",");
+/** `…__policy-ABCDEFGHIJ` is engine « A–J ». */
+const engineOf = (runId: string) => {
+  const letters = /__policy-([A-Z]+)$/u.exec(runId)?.[1];
+  return letters ? `A–${letters.at(-1)}` : "initial";
+};
 const EDITION_LABELS: Record<string, string> = {
   SG21: "Segond 21",
   NEG: "Nouvelle Édition de Genève 1979"
@@ -250,13 +257,14 @@ interface CompareView {
   >;
 }
 
+/** Views by `<edition>|<engine>`, in the order given (latest engine first). */
 const views = new Map<string, CompareView>();
 function comparisonViews(): Map<string, CompareView> {
   if (views.size) return views;
   for (const file of COMPARISONS)
     if (existsSync(file)) {
       const view = JSON.parse(readFileSync(file, "utf8")) as CompareView;
-      views.set(view.edition, view);
+      views.set(`${view.edition}|${engineOf(view.runId)}`, view);
     }
   return views;
 }
@@ -287,6 +295,7 @@ function concordanceCatalog() {
     }
     return {
       id: view.edition,
+      engine: engineOf(view.runId),
       label: EDITION_LABELS[view.edition] ?? view.edition,
       runId: view.runId,
       books: [...books].map(([book, chapters]) => ({
@@ -329,7 +338,7 @@ http
         json(concordanceCatalog());
       else if (url.pathname === "/api/concordance/chapter") {
         const view = comparisonViews().get(
-          url.searchParams.get("edition") ?? "SG21"
+          `${url.searchParams.get("edition") ?? "SG21"}|${url.searchParams.get("engine") ?? "A–J"}`
         );
         const verses = view?.chapters[url.searchParams.get("chapter") ?? ""];
         if (!verses) json({ error: "not-in-comparison-sample" }, 404);

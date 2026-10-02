@@ -7,7 +7,7 @@ porte sur le placement des Strong, pas sur le texte. Rien n'a été publié.
 ## En bref
 
 Sur 150 chapitres tirés au hasard qui n'ont jamais servi à régler le moteur,
-pour 100 mots hébreux ou grecs que Concordance annote :
+pour 100 mots hébreux ou grecs que Concordance annote (moteur A–G) :
 
 |                                                |      S21 |    NEG79 |
 | ---------------------------------------------- | -------: | -------: |
@@ -26,6 +26,10 @@ pour 100 mots hébreux ou grecs que Concordance annote :
   s'éloigne de LSG et Darby.
 - Les chiffres du test réservé tiennent sur un échantillon six fois plus grand
   et neuf, et le gain du moteur A–G sur le moteur initial se confirme.
+- Les pistes 1 à 3 ont ensuite été appliquées (moteur A–J). Mesurées sur la
+  réserve scellée, elles portent les mots identiques à Concordance de 77,0 à
+  78,5 % pour S21 et de 91,3 à 93,0 % pour NEG79, sans perte de précision
+  ([détail](#pistes-1-à-3-appliquées-moteur-aj)).
 
 ## Ce qui est comparé
 
@@ -168,7 +172,9 @@ Dans les 12 cas examinés, le placement de Concordance est juste. Les causes :
 
 ## Pistes d'amélioration
 
-Repérées ici, non appliquées : le moteur est resté figé pour la comparaison.
+Repérées ici. Les pistes 1 à 3 ont ensuite été appliquées
+([section suivante](#pistes-1-à-3-appliquées-moteur-aj)) ; les pistes 4 et 5
+restent à faire.
 
 1. **Apostrophes.** Notre normalisation unifie les élisions (« l' »), pas
    « aujourd'hui ». Concordance place 44 « aujourd'hui » dans l'échantillon
@@ -187,6 +193,109 @@ Repérées ici, non appliquées : le moteur est resté figé pour la comparaison
 Ces pistes viennent de l'échantillon de comparaison, désormais vu : leur effet
 devra être mesuré sur la réserve scellée.
 
+## Pistes 1 à 3 appliquées (moteur A–J)
+
+Trois options s'ajoutent au moteur, actives par défaut comme A à G :
+
+- **H, apostrophes** (`typographicApostrophes`) : un mot de la cible écrit
+  avec « ' » se compare comme les témoins l'écrivent, avec « ’ ». Le texte
+  affiché ne change pas.
+- **I, familles d'identifiants** (`strongIdentifierFamilies`) : un mot source
+  porte aussi le numéro que les témoins lui donnent quand STEP le numérote
+  autrement. Les 21 familles viennent des seuls témoins réutilisables
+  (`scripts/strong-identifier-families/derive.ts`). Une paire est retenue si :
+  - les témoins l'utilisent dans au moins 5 versets ;
+  - le lexique STEP relie les deux numéros (même entrée, forme, dérivé) ;
+  - ils ne nomment presque jamais deux mots distincts d'un même verset.
+
+  Ce dernier critère écarte Jésus/Christ (G2424/G5547) et les deux אֵת
+  (H0853/H0854). Il garde notamment εἶδον (G1492/G3708), εἶναι (G1510/G1511),
+  μόνον (G3440/G3441), πλείων (G4119/G4183) et Jérusalem (G2414/G2419).
+
+- **J, pronoms collés** (`cliticHosts`) : un pronom ou un mot élidé que les
+  témoins étiquettent à part (« m’ », « qu’ », « s’ », « -le ») est porté par
+  le mot de la cible auquel il est soudé (« m'avez », « s'il », « Coupe-le »).
+  Le mot garde son propre numéro et reçoit celui du pronom.
+
+En implémentant J, une erreur de G est apparue. G rapprochait une marque
+« non traduit » d'un témoin et notre mot source par la seule position, alors
+que les témoins numérotent parfois le verset autrement que STEP. En Mt 14.18,
+la marque de ὧδε (« ici ») s'appliquait ainsi à αὐτούς (« les »). G exige
+désormais que la marque porte aussi l'un des numéros du mot. Les mots « non
+traduits à tort » de la revue (4 versets : Mt 14.18, Lc 6.7, Lc 13.7,
+Hé 9.19) venaient tous de là : ils sont maintenant placés ou laissés
+incertains.
+
+### En développement (échantillon de comparaison)
+
+| Moteur             | S21 identiques |     S21 F1 | S21 incertains | NEG79 identiques |   NEG79 F1 | NEG79 incertains |
+| ------------------ | -------------: | ---------: | -------------: | ---------------: | ---------: | ---------------: |
+| A–G (G corrigé)    |        78,02 % |     0,8598 |         18,6 % |          91,78 % |     0,9458 |            7,4 % |
+| + H apostrophes    |        78,12 % |     0,8605 |         18,5 % |          91,89 % |     0,9464 |            7,3 % |
+| + I familles       |        78,19 % |     0,8597 |         18,4 % |          91,98 % |     0,9456 |            7,3 % |
+| + J pronoms collés |        79,32 % |     0,8685 |         17,3 % |          93,24 % |     0,9546 |            6,2 % |
+| **A–J**            |    **79,59 %** | **0,8690** |     **17,2 %** |      **93,55 %** | **0,9551** |        **5,9 %** |
+
+F1 : mesure porteur des canaris. Incertains : part des mots source laissés
+« non localisé ».
+
+- J porte l'essentiel : environ 600 incertitudes deviennent des placements
+  identiques à Concordance dans chaque Bible.
+- I fait passer les « numéros Strong différents » de 253 à 160 (S21) et de 234
+  à 141 (NEG79).
+- H est faible, juste sous le seuil d'adoption de l'expérience (+0,0007 F1),
+  mais positif partout et sans régression.
+- Coût : une trentaine de pronoms placés là où Concordance les dit non
+  traduits.
+
+Contrôles, de A–G à A–J, sans aucune baisse de précision :
+
+| Configuration                       | F1 A–G | F1 A–J |
+| ----------------------------------- | -----: | -----: |
+| S21 sans la famille Segond          | 0,7836 | 0,7922 |
+| NEG79 sans la famille Segond        | 0,8346 | 0,8428 |
+| LSG (chapitres de développement)    | 0,8426 | 0,8523 |
+| Darby (chapitres de développement)  | 0,8352 | 0,8429 |
+| DarbyR (chapitres de développement) | 0,8345 | 0,8424 |
+| canari LSG (200 versets)            | 0,8488 | 0,8566 |
+| canari Darby                        | 0,8426 | 0,8475 |
+| canari DarbyR                       | 0,8376 | 0,8440 |
+
+Les familles sont tirées des annotations des témoins, y compris celui qui sert
+de cible dans un contrôle. Elles ne voient jamais S21 ni NEG79.
+
+### Sur la réserve scellée
+
+Le moteur a été figé (`freeze-v4.json` : code, options, plan, cache scellé)
+avant toute récupération de la réserve. Les prédictions du moteur remplacé
+avaient été faites et scellées avant toute modification du code. La réserve
+compte 120 chapitres jamais vus : 2 598 versets S21 et 2 555 NEG79 comparés.
+
+|                                         | S21 initial | S21 A–G |    S21 A–J | NEG79 initial | NEG79 A–G |  NEG79 A–J |
+| --------------------------------------- | ----------: | ------: | ---------: | ------------: | --------: | ---------: |
+| identiques                              |      73,8 % |  77,0 % | **78,5 %** |        86,9 % |    91,3 % | **93,0 %** |
+| F1 par occurrence                       |      83,8 % |  86,1 % | **87,1 %** |        92,1 % |    94,7 % | **95,7 %** |
+| porteurs : même mot que Concordance     |      91,1 % |  92,8 % |     93,0 % |        94,0 % |    96,0 % |     96,3 % |
+| laissés incertains où Concordance place |      18,7 % |  16,5 % |     15,4 % |         7,5 % |     4,8 % |      3,4 % |
+| versets entièrement identiques          |       9,1 % |  11,6 % |     12,9 % |        30,7 % |    40,6 % |     49,1 % |
+
+De A–G à A–J, les intervalles à 95 % sont appariés par chapitre :
+
+- mots identiques : +1,5 pt pour S21 (1,3 à 1,7), +1,8 pt pour NEG79 (1,6 à
+  2,0) ;
+- F1 par occurrence : +1,0 pt pour les deux.
+
+Le gain mesuré en développement se retrouve donc sur des chapitres neufs.
+
+Ce qui reste :
+
+- Les incertitudes de S21 (15,4 %) viennent surtout de son vocabulaire,
+  différent de celui de LSG et Darby. Les trois pistes n'y touchaient pas.
+- La réserve est désormais ouverte. Pour mesurer les pistes 4 et 5, il
+  faudra une nouvelle réserve : 127 chapitres frais restent inutilisés.
+- Les Bibles générées (NBS, NFC et les sept autres) ne sont pas régénérées
+  avec A–J.
+
 ## Limites
 
 - Concordance n'est pas une vérité de référence, et la revue porte sur 106 cas
@@ -204,7 +313,8 @@ devra être mesuré sur la réserve scellée.
 
 Le prototype local montre chaque verset avec nos placements et ceux de
 Concordance, en trois modes (Comparer, Nous, Concordance), avec un filtre par
-type de désaccord et un tableau d'accord par livre :
+type de désaccord, un tableau d'accord par livre et un choix de moteur (A–G ou
+A–J) :
 
 ```sh
 yarn exec tsx scripts/strong-prototype/server.ts   # http://localhost:4321/concordance
