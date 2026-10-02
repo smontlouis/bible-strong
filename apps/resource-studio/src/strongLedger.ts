@@ -463,6 +463,7 @@ function readerPolicyWithEngine(
     !engine.typographicApostrophes &&
     !engine.cliticHosts &&
     !engine.openingConjunctions &&
+    !engine.numeralValues &&
     !locutionLexicon
   )
     return policy;
@@ -479,7 +480,8 @@ function readerPolicyWithEngine(
         : {}),
       ...(engine.cliticHosts ? { cliticHosts: true } : {}),
       ...(engine.openingConjunctions ? { openingConjunctions: true } : {}),
-      ...(locutionLexicon ? { locutionLexicon } : {})
+      ...(locutionLexicon ? { locutionLexicon } : {}),
+      ...(engine.numeralValues ? { numeralValues: true } : {})
     }
   };
 }

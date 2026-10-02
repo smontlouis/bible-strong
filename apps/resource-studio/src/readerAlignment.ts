@@ -11,6 +11,7 @@ import {
   getOriginalStrongOccurrences,
   type OriginalStrongOccurrence
 } from "./completeAlignment.js";
+import { addNumeralValueCarriers } from "./numeralValues.js";
 import { type OriginalVerse } from "./originalSource.js";
 import {
   buildPhraseMatchIndex,
@@ -106,6 +107,17 @@ export function alignReaderVerse(options: {
     options.original,
     readerPolicy.transferMatching
   );
+  // Numbers matched by value (O), before locutions become phrase carriers.
+  if (readerPolicy.transferMatching?.numeralValues)
+    addNumeralValueCarriers({
+      result: base,
+      references: options.references,
+      original: options.original,
+      originalOccurrences: options.originalVerse
+        ? getOriginalStrongOccurrences(options.originalVerse)
+        : undefined,
+      witnessPositions: readerPolicy.transferMatching.witnessPositions === true
+    });
   // A witness locution matched on consecutive words is one carrier.
   const phraseAssignments: ReaderPhraseAssignment[] = (
     base.locutions ?? []

@@ -7,6 +7,12 @@ import {
 } from "./strongCsv.js";
 import { normalizeOriginalStrong } from "./originalSource.js";
 import { maximumWeightMatching } from "./maximumWeightMatching.js";
+import {
+  targetNumberContexts,
+  witnessTokenNumberContexts,
+  writtenNumbersDiffer,
+  type NumberContext
+} from "./frenchNumerals.js";
 import type { TransferMatchingPolicy } from "./translationProfiles.js";
 
 export interface ReferenceSource {
@@ -130,8 +136,15 @@ export function alignVerse(
     : tokenizeText(targetText);
   const assignments = new Map<number, AssignedStrong>();
   const words = getTargetWords(segments);
+  // A number word matches only inside the same written number (O).
+  const numbers = matching?.numeralValues
+    ? {
+        target: targetNumberContexts(segments),
+        words: new Set(words.map((word) => word.normalized))
+      }
+    : undefined;
   const matchedByReference = references.map((reference) =>
-    matchReferenceOccurrences(words, reference, matching)
+    matchReferenceOccurrences(words, reference, matching, numbers)
   );
 
   for (const word of words) {
@@ -292,9 +305,22 @@ function collectLocutions(
 function matchReferenceOccurrences(
   words: TargetWord[],
   reference: ReferenceSource,
-  matching?: TransferMatchingPolicy
+  matching?: TransferMatchingPolicy,
+  numbers?: { target: Array<NumberContext | undefined>; words: Set<string> }
 ): { byWord: Map<number, Candidate>; clitics: GluedCliticCandidate[] } {
   const tokens = reference.verse?.tokens ?? [];
+  const witnessNumbers =
+    numbers && reference.verse
+      ? witnessTokenNumberContexts(reference.verse.row.text)
+      : undefined;
+  const numbersDiffer = (sourceIndex: number, wordIndex: number) =>
+    numbers !== undefined &&
+    witnessNumbers?.length === tokens.length &&
+    writtenNumbersDiffer(
+      numbers.target[wordIndex],
+      witnessNumbers[sourceIndex],
+      numbers.words
+    );
   const row = reference.verse?.row;
   const sourcePositionsOf = (token: StrongToken) =>
     matching?.witnessPositions && row && token.positions
@@ -336,6 +362,7 @@ function matchReferenceOccurrences(
         word.wordIndex > OPENING_SHARE * (words.length - 1)
       )
         return [];
+      if (numbersDiffer(sourceIndex, word.wordIndex)) return [];
       const candidate = candidateForToken(
         word.normalized,
         token,
@@ -578,7 +605,7 @@ function findLexiconCandidate(
   return undefined;
 }
 
-function isConfirmedByOriginal(
+export function isConfirmedByOriginal(
   strong: string[],
   original?: OriginalConstraint
 ): boolean {
@@ -598,7 +625,7 @@ function isConfirmedByOriginal(
   });
 }
 
-function scoreWithOriginal(
+export function scoreWithOriginal(
   score: number,
   strong: string[],
   original?: OriginalConstraint
@@ -614,7 +641,7 @@ function scoreWithOriginal(
   return Math.min(score, 0.58);
 }
 
-function sourceWithOriginal(
+export function sourceWithOriginal(
   source: string,
   strong: string[],
   original?: OriginalConstraint
