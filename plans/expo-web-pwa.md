@@ -71,11 +71,18 @@ reads this file, does **one** unchecked item, validates it, updates this file an
       cut out of the icon at 76 % (source disc is 83 %, beyond the 80 % safe zone); forced sRGB
       because the gradient source is Gray. `identify`: all opaque sRGB, right sizes. The favicon
       stays Expo's `favicon.ico` from `web.favicon`.
-- [ ] **4. Manifest + headers.** `public/manifest.webmanifest` (id, name, short_name,
+- [x] **4. Manifest + headers.** `public/manifest.webmanifest` (id, name, short_name,
       description, start_url `/home`, scope `/`, display `standalone`, theme/background colors,
       icons, lang `en`, categories). `public/_headers`: no-cache for `/sw.js` and HTML
       navigations, immutable for `/_expo/static/*`, manifest content type. Verify with `curl -I`
       on the local server, including the SPA fallback path `/home`.
+      **Evidence**: `curl -I` on `localhost:9090`: manifest `application/manifest+json` +
+      `no-cache`; `/_expo/static/*` and `/assets/*` (all content-hashed, checked) `immutable`;
+      `/sw.js` `no-cache`; `/home` keeps `max-age=0, must-revalidate`; `_headers` itself is not
+      served. Browser: manifest parsed, 4 icons decode at their declared sizes, apple icon
+      180x180, no manifest console warning. **Kill-switch note for item 9**: a missing `/sw.js`
+      falls back to `index.html` (HTML), so the browser keeps the old worker; retiring the SW
+      must ship a self-unregistering `sw.js`, never just delete it.
 - [ ] **4b. Split the web bundle.** Analyse first: export with `EXPO_ATLAS=true` (Expo Atlas)
       or a source map explorer and record in **Baseline** the 15 heaviest packages/modules in
       the entry and what pulls them into startup (root layout, `FullAppRuntime`, workspace).
