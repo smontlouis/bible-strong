@@ -570,14 +570,23 @@ function addPathCandidate(
   block: VerseCorrespondenceBlock,
   contribution: number
 ): void {
+  const state = states[targetIndex * width + canonicalIndex];
+  if (!state) return;
+  const rawScore = previous.rawScore + contribution;
+  // States are sorted and retain only the best K paths. A strictly worse score
+  // cannot enter that set. Preserve ties for the existing signature ordering.
+  // Avoid copying an entire book-long path for every already-losing transition.
+  if (
+    state.length === KEPT_PATHS_PER_STATE &&
+    rawScore < state[state.length - 1].rawScore
+  )
+    return;
   const signature = `${previous.signature}|${block.kind}:${block.targetRefs.join(",")}=${block.canonicalRefs.join(",")}`;
   const next: PathCandidate = {
-    rawScore: previous.rawScore + contribution,
+    rawScore,
     blocks: [...previous.blocks, block],
     signature
   };
-  const state = states[targetIndex * width + canonicalIndex];
-  if (!state) return;
   const bySignature = new Map(
     state.map((candidate) => [candidate.signature, candidate])
   );

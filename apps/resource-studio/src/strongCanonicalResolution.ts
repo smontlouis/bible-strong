@@ -106,6 +106,7 @@ export interface CanonicalOccurrenceDecision {
   };
 }
 export interface CanonicalVerseResolution {
+  concordance?: import("./strongConcordanceGeneration.js").ConcordanceTrace;
   mapping?: VerseCorrespondenceBlock;
   policy: typeof CANONICAL_RESOLUTION_POLICY;
   targetTextSha256: string;
@@ -197,6 +198,12 @@ export function resolveCanonicalVerse(options: {
   const issues = [...input.issues];
   if (input.mapping?.reason?.includes("fallback-after-ambiguous"))
     issues.push("native-coordinate-used-after-ambiguous-text-alignment");
+  if (
+    input.mapping?.reason?.includes(
+      "unresolved-exact-text-witness-correspondence"
+    )
+  )
+    issues.push("unresolved-exact-text-witness-correspondence");
   const groups = new Map<string, OriginalStrongOccurrence[]>();
   const readingAssessments = new Map<string, SourceReadingAssessment>();
   for (const o of input.occurrences) {

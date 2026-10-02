@@ -144,6 +144,8 @@ export async function writeGeneratedStrongJsonl(options: {
   if (!options.only) {
     const currentInputFingerprint = strongLedgerInputFingerprint(
       {
+        ...ledger.generationOptions,
+        concordanceDisplay: ledger.concordanceDisplay,
         bible: options.bible,
         biblePath: ledger.inputPath,
         outputDir: path.dirname(options.sqlitePath),
@@ -160,10 +162,13 @@ export async function writeGeneratedStrongJsonl(options: {
     }
     const currentOverrideFingerprint = contentFingerprint({
       namespace: "curated-strong-overrides-v1",
-      values: curatedOverrideFingerprints(
-        options.bible,
-        getCuratedStrongOverrides()
-      )
+      values:
+        ledger.generationOptions?.applyCuratedOverrides === false
+          ? {}
+          : curatedOverrideFingerprints(
+              options.bible,
+              getCuratedStrongOverrides()
+            )
     });
     if (currentOverrideFingerprint !== ledger.overrideFingerprint) {
       throw new Error(
@@ -269,6 +274,13 @@ export async function writeGeneratedStrongJsonl(options: {
       };
       await writeStreamLine(output, `${JSON.stringify(record)}\n`);
     }
+    // An actual use after the last drain keeps the native statement alive;
+    // declaring it outside the loop alone is insufficient on Node 23.
+    if (
+      expectedVerseCount &&
+      !verseStatement.get(options.bible, ...selection.params)
+    )
+      throw new Error("generated-jsonl-source-disappeared-during-export");
     output.end();
     await once(output, "finish");
   } catch (error) {
@@ -933,6 +945,11 @@ async function verifyGeneratedJsonl(options: {
       count += 1;
     }
     if (!rows.next().done) throw new Error("generated-jsonl-missing-lines");
+    if (
+      options.expectedVerseCount &&
+      !verseStatement.get(options.bible, ...selection.params)
+    )
+      throw new Error("generated-jsonl-source-disappeared-during-verification");
   } finally {
     database.close();
   }
