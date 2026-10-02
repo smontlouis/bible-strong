@@ -129,17 +129,13 @@ describe('mobile resource catalog', () => {
     expect(fetcher).toHaveBeenCalledTimes(1)
   })
 
-  it('bundles optional pericope and red-word JSON files with legacy Bibles', () => {
+  it('ships Bibles as canonical JSON alone, headings and words of Jesus included (ADR-0066)', () => {
     const nbs = getMobileResourceCatalogEntry('bible:NBS')
     expect(new URL(nbs.url).pathname).toBe('/v1/offline-artifacts/bibles/bible-nbs.json.zip')
     expect(nbs).toEqual(
       expect.objectContaining({
         entry: 'bible-nbs.json',
-        entries: expect.objectContaining({
-          canonical: expect.objectContaining({ entry: 'bible-nbs.json' }),
-          pericope: expect.objectContaining({ entry: 'bible-nbs-pericope.json' }),
-          redWords: expect.objectContaining({ entry: 'red-words-nbs.json' }),
-        }),
+        entries: { canonical: expect.objectContaining({ entry: 'bible-nbs.json' }) },
       })
     )
     expect(() => getMobileResourceCatalogEntry('bible-pericope:NBS')).toThrow(
@@ -176,7 +172,7 @@ describe('mobile resource catalog', () => {
     expect(resolveMobileResourceArtifactUrl(entry, 'not-a-url')).toBe(entry.url)
     expect(
       resolveMobileResourceArtifactUrl(
-        { ...entry, url: `${entry.url}?sha256=${'a'.repeat(64)}` },
+        { ...entry, url: `${entry.url.split('?')[0]}?sha256=${'a'.repeat(64)}` },
         'http://10.0.2.2:8788'
       )
     ).toBe(`http://10.0.2.2:8788/bibles/bible-lsg.json.zip?sha256=${'a'.repeat(64)}`)

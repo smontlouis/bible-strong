@@ -87,22 +87,20 @@ describe('Strong Bible download planning', () => {
   it('uses the global ZIP catalog for a historical Bible', () => {
     expect(createBibleDownloadItem('OST')).toEqual(
       expect.objectContaining({
-        url: 'https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-ost.json.zip',
+        url: expect.stringMatching(
+          /^https:\/\/api\.bible-strong\.app\/v1\/offline-artifacts\/bibles\/bible-ost\.json\.zip\?sha256=[a-f0-9]{64}$/
+        ),
         archiveEntry: 'bible-ost.json',
         expectedArchiveSha256: expect.stringMatching(/^[a-f0-9]{64}$/),
       })
     )
   })
 
-  it('installs legacy display metadata from the same Bible archive', () => {
+  it('installs the canonical text alone from the Bible archive (ADR-0066)', () => {
     expect(createBibleDownloadItem('NBS')).toEqual(
       expect.objectContaining({
         id: 'bible:NBS',
-        archiveEntries: {
-          canonical: 'bible-nbs.json',
-          pericope: 'bible-nbs-pericope.json',
-          redWords: 'red-words-nbs.json',
-        },
+        archiveEntries: { canonical: 'bible-nbs.json' },
       })
     )
   })
