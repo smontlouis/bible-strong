@@ -641,6 +641,25 @@ sur la même nouvelle référence : Sg1910 0,8488, Darby 0,8426, DarbyR 0,8376.
 Audit NBS 10×5 : qualité de placement 0,9806, couverture du lecteur 52,9 %
 (52,1 % avant E), un seul Strong de référence absent.
 
+**Régénérations intégrales** (`outputs/strong-autonomous/v4`), toutes
+vérifications passées, comparées à celles de la section 11 :
+
+| Mesure                            | NBS avant | NBS étape 3 | NFC avant | NFC étape 3 |
+| --------------------------------- | --------: | ----------: | --------: | ----------: |
+| Unités visibles                   |   348 999 |     349 606 |   267 388 |     267 842 |
+| Mots non traduits établis         |     1 596 |       4 245 |       642 |       2 008 |
+| dont par les témoins (G)          |         — |       2 624 |         — |       1 361 |
+| Unités incertaines                |    20,5 % |      19,8 % |    39,2 % |      38,8 % |
+| Versets entièrement comptabilisés |     3 585 |       3 825 |       485 |         536 |
+| Risques de placement              |     6 063 |       5 473 |     5 814 |       4 538 |
+| Qualité de placement              |    0,9828 |      0,9847 |    0,9786 |      0,9834 |
+| Mots du lecteur portant un Strong |    48,7 % |      49,5 % |    31,5 % |      31,8 % |
+
+Les vides établis par G dans NFC sont surtout des conjonctions grecques que le
+français ne rend pas (καί 502, δέ 334, οὖν 55, γάρ 34) ; un échantillon de 18 est
+plausible, mais NFC n'a pas de référence externe : leur justesse n'y est pas
+mesurée.
+
 **Limites.** Une locution qui finit par une élision (« parce qu’ », environ
 9 %) ne se transfère que par son mot principal, le mot cible soudé
 (« qu’en ») ne correspondant pas. G ne couvre qu’une partie des mots non
