@@ -650,7 +650,7 @@ export function resolveDossier(
       review,
       reviewApplied,
       ...(grammaticalDecision ? { grammaticalDecision } : {}),
-      ...(witnessEmpty && state === "empty" && !grammaticalDecision
+      ...(witnessEmpty && assurance === "witness-empty-transfer"
         ? { witnessEmpty }
         : {}),
       display

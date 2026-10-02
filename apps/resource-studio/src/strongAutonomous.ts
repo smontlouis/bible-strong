@@ -178,6 +178,8 @@ export async function verifyAutonomousBible(options: {
     stream.end();
     await once(stream, "finish");
   } catch (error) {
+    // Writes still queued must not turn the reported failure into a crash.
+    stream.on("error", () => undefined);
     stream.destroy();
     throw error;
   } finally {

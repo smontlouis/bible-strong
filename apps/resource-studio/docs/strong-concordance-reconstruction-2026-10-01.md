@@ -629,7 +629,11 @@ une autre prenait pour une absence un Strong porté par une ponctuation
 Sur le réservé, G établit 96 mots non traduits pour S21 (cible exclue) : 89
 au même emplacement, 3 ailleurs, 1 faux et 3 hors évaluation. Les deux autres
 faux vides de S21 viennent de la règle grammaticale déjà en place. Pour NEG,
-G en établit 140, dont 133 au même emplacement, et aucun faux.
+G en établit 140, dont 134 au même emplacement, et aucun faux. Ces chiffres
+sont ceux du gel `freeze-v3b` : la première génération intégrale de NBS a
+révélé que G ne transmettait pas son ancrage quand l'unité avait aussi une
+règle grammaticale non retenue (7 vides sur toute la NBS). Une fois corrigé, le
+réservé, rejoué à politique identique, ne change que par cet ancrage NEG.
 Les témoins de contrôle se mesurent désormais sur leur nouvelle annotation,
 locutions entières comprises : leur F1 n'est plus comparable à l'ancien
 (Sg1910 0,8529, Darby 0,8564, DarbyR 0,8542 sur le réservé). Canaris masqués,
@@ -751,6 +755,7 @@ demandent un tas Node d'environ 12 Go
 | `replay/`, `canary/`, `logs/`                                  | rejeux, canaris historiques, journaux               |
 | `development-decision-v4.json`, `freeze-v2.json`               | retouche de B : décision et gel                     |
 | `development-decision-v5.json`, `freeze-v3.json`               | étape 3 (témoins, E, F, G) : décision et gel        |
+| `freeze-v3b.json`, `replay/step3-test-v3b/`                    | gel et réservé après correction de l'ancrage de G   |
 | `replay/witness-2026-09-28/`, `replay/witness-positions*/`     | mesures de l'étape 3 (développement)                |
 | `replay/step3-test/`, `canary/step3/`                          | réservé et canaris de l'étape 3                     |
 | `replay/b-witness/`                                            | B retouchée : développement et addendum du réservé  |
