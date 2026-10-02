@@ -30,6 +30,10 @@ import {
   type ResolutionCarrier
 } from "./strongResolution.js";
 import { stripTags, tokenizeText } from "./tokenize.js";
+import {
+  witnessAttestedReading,
+  type WitnessAttestedReading
+} from "./strongWitnessAttestedReading.js";
 
 export const CANONICAL_RESOLUTION_POLICY = "autonomous-fr-occurrences-v2";
 
@@ -56,6 +60,12 @@ export interface CanonicalResolutionOptions {
    * (identifier families); STEP's reading model ignores those identifiers.
    */
   strongIdentifierFamilies?: boolean;
+  /**
+   * A base-text word whose reading stays open is decided visible when its
+   * exact witness carrier is attested by two witness families naming that
+   * very source word (M, `strongWitnessAttestedReading.ts`).
+   */
+  witnessAttestedReadings?: boolean;
 }
 
 const strongBase = (code: string) => code.match(/^[GH]\d+/u)?.[0] ?? code;
@@ -253,8 +263,11 @@ export interface CanonicalOccurrenceDecision {
     morphology: string;
     evidenceSha256: string;
     readingUnresolved: boolean;
-    /** The reading varies but cannot change this Strong identity. */
-    readingVariant?: "identity-invariant";
+    /**
+     * The reading varies but cannot change this Strong identity, or it stays
+     * open and two witness families attest the word in the target (M).
+     */
+    readingVariant?: "identity-invariant" | "witness-attested";
   };
   state: WorkflowDecision["state"];
   assurance: string;
@@ -401,6 +414,7 @@ export function resolveCanonicalVerse(options: {
       witnessAttestedStrongs(input.references)
     );
   const invariantReadings = new Set<string>();
+  const attestedReadings = new Map<string, WitnessAttestedReading>();
   const units: ResolutionDossier["units"] = [...groups].map(
     ([id, occurrences]) => {
       const row = sourceRows.get(id);
@@ -426,6 +440,22 @@ export function resolveCanonicalVerse(options: {
         ) {
           readingUnresolved = false;
           invariantReadings.add(id);
+        }
+        const attested =
+          readingUnresolved && options.policy?.witnessAttestedReadings && row
+            ? witnessAttestedReading({
+                row,
+                occurrences,
+                verseOccurrences: input.occurrences,
+                annotations: verse.annotations,
+                tokens: verse.tokens,
+                references: input.references,
+                canonicalRefs: input.mapping?.canonicalRefs ?? [verse.ref]
+              })
+            : undefined;
+        if (attested) {
+          readingUnresolved = false;
+          attestedReadings.set(id, attested);
         }
       } catch (error) {
         issues.push(
@@ -520,7 +550,18 @@ export function resolveCanonicalVerse(options: {
         diagnostics: a.diagnostics
       }));
     let assurance = d.assurance;
-    if (d.state === "visible") {
+    let reasons = d.reasons;
+    const attested = attestedReadings.get(d.sourceUnitId);
+    if (d.state === "visible" && attested) {
+      // The reading stays recorded: the placement rests on the witnesses.
+      assurance = "witness-attested-reading";
+      reasons = [
+        "witness-attested-reading",
+        `source-reading:${attested.reading}`,
+        `identifier:${attested.identifier}`,
+        `witnesses:${attested.witnesses.join("+")}`
+      ];
+    } else if (d.state === "visible") {
       if (
         linked.some(
           (a) =>
@@ -723,12 +764,14 @@ export function resolveCanonicalVerse(options: {
         readingUnresolved: entry.unit.readingUnresolved,
         ...(invariantReadings.has(d.sourceUnitId)
           ? { readingVariant: "identity-invariant" as const }
-          : {})
+          : attested
+            ? { readingVariant: "witness-attested" as const }
+            : {})
       },
       state: d.state,
       assurance,
       targetWordIndices: d.targetWordIndices,
-      reasons: d.reasons,
+      reasons,
       annotationIds: [...annotationIds],
       placementEvidence,
       anchor,
@@ -745,7 +788,7 @@ export function resolveCanonicalVerse(options: {
         ],
         exactWitnessProposal: d.proposal ?? null,
         lexicalCandidates,
-        remainingReason: d.state === "unresolved" ? d.reasons.join("; ") : null
+        remainingReason: d.state === "unresolved" ? reasons.join("; ") : null
       }
     };
   });
