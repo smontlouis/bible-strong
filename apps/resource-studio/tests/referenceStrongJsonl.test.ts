@@ -4,7 +4,10 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { writeReferenceStrongJsonl } from "../src/referenceStrongJsonl.js";
+import {
+  withoutEngineAttributes,
+  writeReferenceStrongJsonl
+} from "../src/referenceStrongJsonl.js";
 
 test("writes lossless one-verse-per-line Strong JSONL", async () => {
   const directory = await mkdtemp(
@@ -51,4 +54,13 @@ test("writes lossless one-verse-per-line Strong JSONL", async () => {
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
+});
+
+test("published reference markup drops the generator's witness attributes", () => {
+  assert.equal(
+    withoutEngineAttributes(
+      '<w strong="H6435" head="peur" pos="12">de peur que</w> le <w strong="H4428" pos="13">roi</w>'
+    ),
+    '<w strong="H6435">de peur que</w> le <w strong="H4428">roi</w>'
+  );
 });

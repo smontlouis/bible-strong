@@ -55,6 +55,7 @@ export interface ReaderPhraseAssignment {
   originalConfirmed: boolean;
   /** How a witness locution was matched on the target words. */
   transferMethod?: AssignedStrong["method"];
+  sourcePositions?: string[];
 }
 
 export interface ReaderAlignmentResult extends AlignmentResult {
@@ -111,7 +112,10 @@ export function alignReaderVerse(options: {
     startWordIndex: locution.startWordIndex,
     endWordIndex: locution.endWordIndex,
     originalConfirmed: locution.assignment.originalConfirmed,
-    transferMethod: locution.assignment.method
+    transferMethod: locution.assignment.method,
+    ...(locution.assignment.sourcePositions
+      ? { sourcePositions: locution.assignment.sourcePositions }
+      : {})
   }));
   enrichAssignmentsFromOriginal({
     result: base,

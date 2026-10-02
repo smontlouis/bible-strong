@@ -10,10 +10,15 @@ import {
 } from "../src/strongCanonicalResolution.js";
 import { parseStrongTokens } from "../src/strongCsv.js";
 import {
+  linkReaderAnnotationsToOriginalOccurrences,
   resolveEnginePolicy,
   type StrongLedgerAnnotation
 } from "../src/strongLedger.js";
 import { parseSourceRow } from "../src/strongSourceUnits.js";
+import {
+  proposeWitnessEmpties,
+  type ResolutionDossier
+} from "../src/strongResolutionWorkflow.js";
 
 const witness = (tagged: string) => ({
   name: "Sg1910",
@@ -103,6 +108,48 @@ test("a witness locution transfers as one multi-word carrier only when enabled",
   assert.deepEqual(partial.locutions, []);
   assert.equal(partial.assignments.has(2), false);
   assert.equal(partial.assignments.has(4), false);
+});
+
+test("a witness source position decides which repeated source word a carrier owns", () => {
+  const tagged = parseStrongTokens(
+    '<w strong="G3588" pos="5">le</w> <w strong="G3588">la</w>'
+  );
+  assert.deepEqual(tagged[0]!.positions, [5]);
+  assert.equal(tagged[1]!.positions, undefined);
+  const occurrence = (word: number): OriginalStrongOccurrence => ({
+    occurrenceId: `TAGNT.Matt.1.1.${word}.NKO.main:0`,
+    tokenId: `TAGNT.Matt.1.1.${word}.NKO.main`,
+    tokenIndex: word,
+    sourceTokenIndex: word,
+    strong: "G3588",
+    sourceStrong: "G3588",
+    text: "ὁ",
+    gloss: "the",
+    lemma: "ὁ",
+    morph: "T-NSM",
+    pos: ""
+  });
+  const carrier = (sourcePositions?: string[]): StrongLedgerAnnotation => ({
+    id: "",
+    strong: "G3588",
+    visibility: "reader",
+    placement: "word",
+    source: "reference-transfer",
+    confidence: 0.99,
+    reason: "fixture",
+    diagnostics: ["exact"],
+    wordIndex: 0,
+    ...(sourcePositions ? { sourcePositions } : {})
+  });
+  const link = (annotation: StrongLedgerAnnotation) =>
+    linkReaderAnnotationsToOriginalOccurrences({
+      annotations: [annotation],
+      originalOccurrences: [occurrence(1), occurrence(5)],
+      wordCount: 6
+    })[0]!.originalOccurrenceId;
+  // Proximity alone links the first word to the first article.
+  assert.equal(link(carrier()), "TAGNT.Matt.1.1.1.NKO.main:0");
+  assert.equal(link(carrier(["Matt.1.1#5"])), "TAGNT.Matt.1.1.5.NKO.main:0");
 });
 
 const tagnt = (
@@ -378,13 +425,114 @@ test("the engine enables every measured refinement by default and allows a full 
     singleCarrierPerSourceIdentity: true,
     encliticHostTransfer: true,
     digitNumeralTransfer: true,
-    witnessLocutions: true
+    witnessLocutions: true,
+    witnessSourcePositions: false,
+    witnessEmpties: false
   });
   assert.deepEqual(resolveEnginePolicy({ encliticHostTransfer: false }), {
     readingInvariantVariants: true,
     singleCarrierPerSourceIdentity: true,
     encliticHostTransfer: false,
     digitNumeralTransfer: true,
-    witnessLocutions: true
+    witnessLocutions: true,
+    witnessSourcePositions: false,
+    witnessEmpties: false
   });
+});
+
+test("an untranslated witness word is established only where its context recurs", () => {
+  const dossier = (
+    target: string[],
+    secondWitness?: "visible"
+  ): ResolutionDossier => ({
+    edition: "s21",
+    ref: "Gen.2.3",
+    split: "authoring",
+    text: target.join(" "),
+    words: target,
+    units: [
+      {
+        unit: {
+          id: "TAHOT.Gen.2.3.7.L",
+          occurrenceIds: ["TAHOT.Gen.2.3.7.L.main:0"],
+          strong: ["H0853"],
+          readingUnresolved: false,
+          sourceEvidenceSha256: "fixture"
+        },
+        surface: "אֶת",
+        gloss: "[obj]",
+        morphology: "HTo",
+        sourceFile: "fixture",
+        sourceLine: 1
+      }
+    ],
+    placements: [],
+    witnesses: [
+      {
+        name: "Sg1910",
+        family: "Sg1910",
+        ref: "Gen.2.3",
+        text: "il le sanctifia, parce qu’en ce jour",
+        words: ["il", "le", "sanctifia", "parce", "qu’en", "ce", "jour"],
+        placements: [
+          {
+            id: "w:0",
+            strong: "H0853",
+            kind: "empty",
+            insertAfterWordIndex: 2,
+            positions: [7]
+          }
+        ]
+      },
+      ...(secondWitness
+        ? [
+            {
+              name: "Darby",
+              family: "Darby-family",
+              ref: "Gen.2.3",
+              text: "il le sanctifia",
+              words: ["il", "le", "sanctifia"],
+              placements: [
+                {
+                  id: "w:1",
+                  strong: "H0853",
+                  kind: "word" as const,
+                  startWordIndex: 1,
+                  endWordIndex: 1,
+                  positions: [7]
+                }
+              ]
+            }
+          ]
+        : [])
+    ]
+  });
+  assert.deepEqual(
+    proposeWitnessEmpties(
+      dossier(["et", "il", "le", "sanctifia", "parce", "qu'en", "ce", "jour"])
+    ),
+    [
+      {
+        sourceUnitId: "TAHOT.Gen.2.3.7.L",
+        insertAfterWordIndex: 3,
+        witnesses: ["Sg1910"],
+        families: ["Sg1910"]
+      }
+    ]
+  );
+  // A witness that translates the same source word contradicts the absence.
+  assert.deepEqual(
+    proposeWitnessEmpties(
+      dossier(
+        ["et", "il", "le", "sanctifia", "parce", "qu'en", "ce", "jour"],
+        "visible"
+      )
+    ),
+    []
+  );
+  // Another context proves nothing.
+  assert.deepEqual(
+    proposeWitnessEmpties(dossier(["il", "le", "bénit", "parce", "qu'en"])),
+    []
+  );
 });

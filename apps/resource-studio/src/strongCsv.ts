@@ -20,6 +20,8 @@ export interface StrongToken {
   element?: number;
   /** The word of a locution element that represents its occurrence. */
   elementHead?: boolean;
+  /** Source word numbers (BHS/NA, STEP `#NN`) of the witness tag, if known. */
+  positions?: number[];
 }
 
 /**
@@ -102,11 +104,16 @@ export function parseStrongTokens(text: string): StrongToken[] {
       0,
       words.findIndex((segment) => segment.normalized === headWord)
     );
+    const positions = (/\bpos="([^"]*)"/u.exec(attributes)?.[1] ?? "")
+      .split("+")
+      .filter((value) => /^\d+$/u.test(value))
+      .map(Number);
     for (const [index, segment] of words.entries()) {
       tokens.push({
         text: segment.text,
         normalized: segment.normalized,
         strong,
+        ...(positions.length ? { positions } : {}),
         ...(words.length > 1
           ? { element, ...(index === headIndex ? { elementHead: true } : {}) }
           : {})

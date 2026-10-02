@@ -45,6 +45,11 @@ export interface CanonicalResolutionOptions {
    * best-evidenced one; the others are hidden.
    */
   singleCarrierPerSourceIdentity?: boolean;
+  /**
+   * A word the witnesses leave untranslated, identified by its source
+   * position, is established untranslated when its context recurs verbatim.
+   */
+  witnessEmpties?: boolean;
 }
 
 const strongBase = (code: string) => code.match(/^[GH]\d+/u)?.[0] ?? code;
@@ -238,7 +243,10 @@ export interface CanonicalOccurrenceDecision {
     insertAfterWordIndex: number;
     method: string;
     assurance:
-      "editorial-convention" | "neighbor-supported" | "existing-fallback";
+      | "editorial-convention"
+      | "neighbor-supported"
+      | "witness-context"
+      | "existing-fallback";
     absenceEstablished: boolean;
     reasons: string[];
     relatedSourceUnits: string[];
@@ -436,6 +444,7 @@ export function resolveCanonicalVerse(options: {
         {
           name: r.name,
           family: r.family ?? (r.name === "Sg1910" ? "Sg1910" : "Darby-family"),
+          ref: `${r.verse.row.bookId}.${r.verse.row.chapter}.${r.verse.row.verse}`,
           text,
           words: tokenizeText(text)
             .filter((t) => t.kind === "word")
@@ -452,6 +461,7 @@ export function resolveCanonicalVerse(options: {
     applyExactWitness: false,
     applyAssistedReviews: false,
     applyGrammaticalEmpties: true,
+    applyWitnessEmpties: options.policy?.witnessEmpties === true,
     targetLanguage: "fr"
   });
   const decisions: CanonicalOccurrenceDecision[] = result.decisions.map((d) => {
@@ -534,6 +544,7 @@ export function resolveCanonicalVerse(options: {
         d.grammaticalDecision?.status === "supported"
           ? d.grammaticalDecision
           : undefined;
+      const transferred = d.state === "empty" ? d.witnessEmpty : undefined;
       const evidence = d.anchor.interval
         ? d.anchor
         : d.sourceAnchor.interval
@@ -549,6 +560,15 @@ export function resolveCanonicalVerse(options: {
           absenceEstablished: true,
           reasons: [supported.anchor!.rationale],
           relatedSourceUnits: [supported.grammaticalRelation!.objectUnitId]
+        };
+      else if (transferred)
+        anchor = {
+          insertAfterWordIndex: transferred.insertAfterWordIndex,
+          method: "witness-empty-context",
+          assurance: "witness-context",
+          absenceEstablished: true,
+          reasons: [...d.reasons],
+          relatedSourceUnits: []
         };
       else if (evidence?.interval)
         anchor = {
@@ -578,7 +598,7 @@ export function resolveCanonicalVerse(options: {
           ],
           relatedSourceUnits: []
         };
-      if (supported && !existingEmpty) {
+      if ((supported || transferred) && !existingEmpty) {
         const weak = linked.find(
           (a) =>
             a.source === "original-complete" &&
@@ -600,7 +620,9 @@ export function resolveCanonicalVerse(options: {
           existingEmpty = weak;
         }
       }
+      // An anchor established by the witnesses' context is kept.
       if (
+        !transferred &&
         existingEmpty &&
         (existingEmpty.source !== "original-complete" ||
           existingEmpty.visibility === "reader")
@@ -627,7 +649,11 @@ export function resolveCanonicalVerse(options: {
         existingEmpty.insertAfterWordIndex = anchor.insertAfterWordIndex;
         existingEmpty.emptyEvidence = {
           absence: {
-            status: supported ? "linguistic-rule" : "unresolved",
+            status: supported
+              ? "linguistic-rule"
+              : transferred
+                ? "witness-supported"
+                : "unresolved",
             families: d.baseline.emptyWitnessFamilies,
             reason: supported?.absence?.rationale ?? d.reasons.join("; ")
           },
@@ -714,6 +740,7 @@ export function resolveCanonicalVerse(options: {
         decisions.every((d) =>
           [
             "linguistic-rule",
+            "witness-empty-transfer",
             "validated-deterministic-lexical",
             "durable-reviewed-placement",
             "exact-witness-families-and-source"

@@ -41,7 +41,9 @@ export const POLICY_LABELS: Record<keyof StrongEnginePolicy, string> = {
   singleCarrierPerSourceIdentity: "B",
   encliticHostTransfer: "C",
   digitNumeralTransfer: "D",
-  witnessLocutions: "E"
+  witnessLocutions: "E",
+  witnessSourcePositions: "F",
+  witnessEmpties: "G"
 };
 
 export function policyFromLabels(labels: string[]): EnginePolicy {
@@ -330,7 +332,9 @@ export async function predict(options: {
           options.policy.singleCarrierPerSourceIdentity === true,
         encliticHostTransfer: options.policy.encliticHostTransfer === true,
         digitNumeralTransfer: options.policy.digitNumeralTransfer === true,
-        witnessLocutions: options.policy.witnessLocutions === true
+        witnessLocutions: options.policy.witnessLocutions === true,
+        witnessSourcePositions: options.policy.witnessSourcePositions === true,
+        witnessEmpties: options.policy.witnessEmpties === true
       }
     });
     const verses: PredictedVerse[] = ledger.verses.map((verse) => {

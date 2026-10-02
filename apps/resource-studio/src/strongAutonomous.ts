@@ -147,7 +147,9 @@ export async function verifyAutonomousBible(options: {
         assert.equal(d.exploration.status, "completed-locally");
         if (d.state === "empty")
           assert(
-            d.assurance === "linguistic-rule" && d.anchor?.absenceEstablished,
+            ["linguistic-rule", "witness-empty-transfer"].includes(
+              d.assurance
+            ) && d.anchor?.absenceEstablished,
             "unsupported-established-empty"
           );
         if (d.state === "unresolved")

@@ -177,6 +177,8 @@ export interface StrongLedgerAnnotation {
   originalTokenId?: string;
   originalOccurrenceId?: string;
   sourceStrong?: string;
+  /** Source words (`<ref>#<word number>`) named by the witnesses' positions. */
+  sourcePositions?: string[];
   lexiconLookup?: boolean;
   step?: StrongStepEvidence[];
   referenceSupport?: ReferenceName[];
@@ -364,6 +366,10 @@ export interface StrongEnginePolicy {
   digitNumeralTransfer: boolean;
   /** A witness tag spanning a locution transfers as one multi-word carrier. */
   witnessLocutions: boolean;
+  /** Witness source positions decide which source word a carrier belongs to. */
+  witnessSourcePositions: boolean;
+  /** Untranslated words of the witnesses are established when their context recurs. */
+  witnessEmpties: boolean;
 }
 
 export const DEFAULT_ENGINE_POLICY: Readonly<StrongEnginePolicy> = {
@@ -371,7 +377,9 @@ export const DEFAULT_ENGINE_POLICY: Readonly<StrongEnginePolicy> = {
   singleCarrierPerSourceIdentity: true,
   encliticHostTransfer: true,
   digitNumeralTransfer: true,
-  witnessLocutions: true
+  witnessLocutions: true,
+  witnessSourcePositions: false,
+  witnessEmpties: false
 };
 
 export function resolveEnginePolicy(
@@ -407,7 +415,8 @@ function readerPolicyWithEngine(
   if (
     !engine.encliticHostTransfer &&
     !engine.digitNumeralTransfer &&
-    !engine.witnessLocutions
+    !engine.witnessLocutions &&
+    !engine.witnessSourcePositions
   )
     return policy;
   return {
@@ -416,7 +425,8 @@ function readerPolicyWithEngine(
       ...policy.transferMatching,
       ...(engine.encliticHostTransfer ? { encliticHosts: true } : {}),
       ...(engine.digitNumeralTransfer ? { digitNumerals: true } : {}),
-      ...(engine.witnessLocutions ? { witnessLocutions: true } : {})
+      ...(engine.witnessLocutions ? { witnessLocutions: true } : {}),
+      ...(engine.witnessSourcePositions ? { witnessPositions: true } : {})
     }
   };
 }
@@ -966,7 +976,8 @@ export async function generateStrongLedgerWithDictionary(
         lexicalItems: items.get(verse.ref) ?? [],
         // Alternative-identifier carriers were already reduced above.
         policy: {
-          readingInvariantVariants: enginePolicy.readingInvariantVariants
+          readingInvariantVariants: enginePolicy.readingInvariantVariants,
+          witnessEmpties: enginePolicy.witnessEmpties
         }
       });
     }
@@ -1795,6 +1806,9 @@ function readerPhraseAnnotations(options: {
         : [assignment.method, assignment.source],
       startWordIndex: assignment.startWordIndex,
       endWordIndex: assignment.endWordIndex,
+      ...(assignment.sourcePositions
+        ? { sourcePositions: assignment.sourcePositions }
+        : {}),
       normalizedPhrase: normalizedPhrase(
         options.tokens,
         assignment.startWordIndex,
@@ -1832,6 +1846,9 @@ function readerWordAnnotations(options: {
         diagnostics: [assignment.method, assignment.source],
         wordIndex,
         normalizedWord: options.tokens[wordIndex]?.normalized,
+        ...(assignment.sourcePositions
+          ? { sourcePositions: assignment.sourcePositions }
+          : {}),
         referenceSupport: options.referenceSupport.get(normalizedStrong) ?? [],
         profile: options.profile.bible
       });
@@ -3370,6 +3387,13 @@ export function linkReaderAnnotationsToOriginalOccurrences(options: {
     )
   );
   const readerDenominator = Math.max(1, options.wordCount - 1);
+  // `TAHOT.2Sam.1.9.4.L.main:0` is word 4 of 2Sam.1.9.
+  const sourcePosition = (occurrence: OriginalStrongOccurrence) => {
+    const match = /^TA(?:HOT|GNT)\.([^.]+\.\d+\.\d+)\.(\d+)\./u.exec(
+      occurrence.occurrenceId
+    );
+    return match ? `${match[1]}#${Number(match[2])}` : undefined;
+  };
 
   for (const [strong, annotationIndexes] of annotationIndexesByStrong) {
     const occurrences = occurrencesByStrong.get(strong) ?? [];
@@ -3387,12 +3411,19 @@ export function linkReaderAnnotationsToOriginalOccurrences(options: {
             readerPosition / readerDenominator -
               ordinalTokenIndex / originalDenominator
           );
+          // A witness position naming this very source word outweighs any
+          // proximity estimate.
+          const named = annotation.sourcePositions?.includes(
+            sourcePosition(occurrence) ?? ""
+          )
+            ? 2
+            : 0;
           return {
             left,
             right,
             // The tiny order term makes equal-distance repeated carriers
             // deterministic without overriding the positional objective.
-            weight: 2 - distance - Math.abs(left - right) * 1e-6,
+            weight: 2 + named - distance - Math.abs(left - right) * 1e-6,
             value: { annotationIndex, occurrence }
           };
         });

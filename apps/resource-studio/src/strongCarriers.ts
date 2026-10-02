@@ -15,6 +15,8 @@ export interface CarrierPlacement {
   insertAfterWordIndex?: number;
   confidence?: number;
   source?: string;
+  /** Source word numbers (BHS/NA, STEP `#NN`) given by the witness tag. */
+  positions?: number[];
 }
 
 /** Parse the gold markup into word, phrase, and empty Strong occurrences. */
@@ -33,6 +35,11 @@ export function extractGoldCarrierPlacements(
     plainOffset += stripTags(taggedText.slice(taggedCursor, matchIndex)).length;
 
     const strong = parseStrongAttribute(match[1] ?? "");
+    const positions = (/\bpos="([^"]*)"/u.exec(match[1] ?? "")?.[1] ?? "")
+      .split("+")
+      .filter((value) => /^\d+$/u.test(value))
+      .map(Number);
+    const located = positions.length ? { positions } : {};
     const innerText = stripTags(match[2] ?? "");
     const carrierStart = plainOffset;
     const carrierEnd = carrierStart + innerText.length;
@@ -47,7 +54,11 @@ export function extractGoldCarrierPlacements(
         placements.push({
           strong: strongCode,
           kind: "empty",
-          insertAfterWordIndex: findPrecedingWordIndex(wordRanges, carrierStart)
+          insertAfterWordIndex: findPrecedingWordIndex(
+            wordRanges,
+            carrierStart
+          ),
+          ...located
         });
       } else {
         const startWordIndex = coveredWordIndexes[0]!;
@@ -56,7 +67,8 @@ export function extractGoldCarrierPlacements(
           strong: strongCode,
           kind: startWordIndex === endWordIndex ? "word" : "phrase",
           startWordIndex,
-          endWordIndex
+          endWordIndex,
+          ...located
         });
       }
     }

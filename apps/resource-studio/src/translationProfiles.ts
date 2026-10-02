@@ -13,6 +13,8 @@ export interface TransferMatchingPolicy {
   digitNumerals?: boolean;
   /** A witness tag spanning a locution transfers as one multi-word carrier. */
   witnessLocutions?: boolean;
+  /** A transferred carrier keeps the source word positions of its witness tag. */
+  witnessPositions?: boolean;
 }
 
 export interface ReaderAlignmentPolicy {

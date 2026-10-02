@@ -28,7 +28,9 @@ export interface ResolutionDossier {
     sourceLine: number;
   }>;
   placements: ResolutionCarrier[];
-  witnesses: Array<ResolutionWitness & { words: string[]; text: string }>;
+  witnesses: Array<
+    ResolutionWitness & { words: string[]; text: string; ref?: string }
+  >;
 }
 
 export interface ResolutionReview {
@@ -353,10 +355,104 @@ export function proposeExactWitnessCarriers(
   );
 }
 
+export interface WitnessEmptyProposal {
+  sourceUnitId: string;
+  insertAfterWordIndex: number;
+  witnesses: string[];
+  families: string[];
+}
+
+/** `TAHOT.2Sam.1.9.4.L.main:0` names word 4 of 2Sam.1.9. */
+function sourceWord(occurrenceId: string) {
+  const match = /^TA(?:HOT|GNT)\.([^.]+\.\d+\.\d+)\.(\d+)\./u.exec(
+    occurrenceId
+  );
+  return match ? { ref: match[1]!, position: Number(match[2]) } : undefined;
+}
+
+/**
+ * Untranslated words carried over from the witnesses. A witness marks this
+ * very source word (by its position) as untranslated, no witness translates
+ * it, and the two words on each side of the witness's mark appear once, the
+ * same, in the target: the target leaves the same word untranslated at the
+ * same place. Anything less stays unresolved.
+ */
+export function proposeWitnessEmpties(
+  d: ResolutionDossier
+): WitnessEmptyProposal[] {
+  const target = d.words.map(exactToken);
+  const proposals: WitnessEmptyProposal[] = [];
+  for (const { unit } of d.units) {
+    if (
+      unit.readingUnresolved ||
+      d.placements.some((p) => owns(unit, p) && p.kind !== "empty")
+    )
+      continue;
+    const words = unit.occurrenceIds.flatMap((id) => {
+      const word = sourceWord(id);
+      return word ? [word] : [];
+    });
+    if (!words.length) continue;
+    const named = (w: (typeof d.witnesses)[number], p: ResolutionCarrier) =>
+      w.ref !== undefined &&
+      words.some(
+        (word) => word.ref === w.ref && p.positions?.includes(word.position)
+      );
+    const votes: Array<{ name: string; family: string; anchor: number }> = [];
+    let contradiction = false;
+    for (const w of d.witnesses) {
+      const marks = w.placements.filter((p) => named(w, p));
+      if (!marks.length) continue;
+      if (marks.some((p) => p.kind !== "empty")) {
+        contradiction = true;
+        continue;
+      }
+      const at = marks[0]!.insertAfterWordIndex!;
+      const left = w.words.slice(Math.max(0, at - 1), at + 1).map(exactToken);
+      const right = w.words.slice(at + 1, at + 3).map(exactToken);
+      if (left.length + right.length < 2) continue;
+      // A mark at a verse edge keeps that edge as context.
+      const hits: number[] = [];
+      for (let anchor = -1; anchor < target.length; anchor += 1) {
+        const leftStart = anchor - left.length + 1;
+        if (
+          leftStart < 0 ||
+          anchor + right.length >= target.length ||
+          (left.length === 0 && anchor !== -1) ||
+          (right.length === 0 && anchor !== target.length - 1)
+        )
+          continue;
+        if (
+          left.every((t, j) => target[leftStart + j] === t) &&
+          right.every((t, j) => target[anchor + 1 + j] === t)
+        )
+          hits.push(anchor);
+      }
+      if (hits.length !== 1) continue;
+      votes.push({ name: w.name, family: w.family, anchor: hits[0]! });
+    }
+    if (
+      contradiction ||
+      !votes.length ||
+      new Set(votes.map((v) => v.anchor)).size !== 1
+    )
+      continue;
+    proposals.push({
+      sourceUnitId: unit.id,
+      insertAfterWordIndex: votes[0]!.anchor,
+      witnesses: votes.map((v) => v.name),
+      families: [...new Set(votes.map((v) => v.family))].sort()
+    });
+  }
+  return proposals;
+}
+
 export interface ResolutionOptions {
   applyExactWitness: boolean;
   applyAssistedReviews: boolean;
   applyGrammaticalEmpties?: boolean;
+  /** Establish untranslated words carried over from the witnesses. */
+  applyWitnessEmpties?: boolean;
   targetLanguage?: string;
 }
 
@@ -377,6 +473,9 @@ export function resolveDossier(
     "conflicting-review-records"
   );
   const proposals = proposeExactWitnessCarriers(d);
+  const witnessEmpties = options.applyWitnessEmpties
+    ? proposeWitnessEmpties(d)
+    : [];
   const grammar = options.applyGrammaticalEmpties
     ? grammaticalEmptyDecisions(d, options.targetLanguage ?? "")
     : [];
@@ -413,6 +512,7 @@ export function resolveDossier(
     const review = reviews.find((r) => r.sourceUnitId === unit.id);
     const proposal = proposals.find((p) => p.sourceUnitId === unit.id);
     const grammaticalDecision = grammar.find((p) => p.sourceUnitId === unit.id);
+    const witnessEmpty = witnessEmpties.find((p) => p.sourceUnitId === unit.id);
     const reviewApplied = Boolean(
       review &&
       (review.reviewer.kind === "human" || options.applyAssistedReviews)
@@ -475,6 +575,27 @@ export function resolveDossier(
         insertAfterWordIndex: grammaticalDecision.anchor!.insertAfterWordIndex
       };
       reasons.splice(0, reasons.length, grammaticalDecision.absence!.rationale);
+    } else if (
+      !review &&
+      witnessEmpty &&
+      baseline.state === "unresolved" &&
+      unit.strong.length >= 1
+    ) {
+      state = "empty";
+      assurance = "witness-empty-transfer";
+      targetWordIndices = [];
+      display = {
+        id: `witness-empty:${unit.id}`,
+        strong: unit.strong[0]!,
+        originalOccurrenceId: unit.occurrenceIds[0],
+        kind: "empty",
+        insertAfterWordIndex: witnessEmpty.insertAfterWordIndex
+      };
+      reasons.splice(
+        0,
+        reasons.length,
+        `witness-empty-same-context:${witnessEmpty.witnesses.join("+")}`
+      );
     } else if (!review && proposal && options.applyExactWitness) {
       state = "visible";
       assurance = "exact-witness-transfer";
@@ -513,6 +634,9 @@ export function resolveDossier(
       review,
       reviewApplied,
       ...(grammaticalDecision ? { grammaticalDecision } : {}),
+      ...(witnessEmpty && state === "empty" && !grammaticalDecision
+        ? { witnessEmpty }
+        : {}),
       display
     };
   });

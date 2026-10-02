@@ -26,6 +26,16 @@ export interface ReferenceStrongJsonlResult {
   version: string;
 }
 
+/**
+ * `head` and `pos` annotate witness tags for the generator (locution head
+ * word, source word positions); the published markup keeps the tags only.
+ */
+export function withoutEngineAttributes(text: string): string {
+  return text.replace(/<w\b[^>]*>/gu, (tag) =>
+    tag.replace(/\s(?:head|pos)="[^"]*"/gu, "")
+  );
+}
+
 export async function writeReferenceStrongJsonl(options: {
   inputPath: string;
   outputPath: string;
@@ -49,7 +59,7 @@ export async function writeReferenceStrongJsonl(options: {
       bookId: row.bookId,
       chapter: row.chapter,
       verse: row.verse,
-      text: row.text
+      text: withoutEngineAttributes(row.text)
     });
   }
 

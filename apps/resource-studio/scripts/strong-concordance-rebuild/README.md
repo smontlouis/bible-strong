@@ -96,6 +96,20 @@ générateur canonique les applique en revanche par défaut depuis le 1er octobr
   soudé par trait d'union (« dit-il ») ;
 - `D` `digitNumeralTransfer` : un numéral d'un mot peut correspondre au même
   nombre écrit en chiffres.
+- `E` `witnessLocutions` : une étiquette témoin couvrant une locution entière
+  (« de peur que ») se transfère en un seul porteur sur plusieurs mots ;
+  ailleurs, la locution compte une fois, par son mot principal (`head`) ;
+- `F` `witnessSourcePositions` : la position source d'une étiquette témoin
+  (`pos`, tirée des pages Concordance) désigne le mot source du porteur
+  transféré ;
+- `G` `witnessEmpties` : un mot que les témoins laissent non traduit,
+  identifié par sa position, est établi non traduit dans la cible quand les
+  deux mots de part et d'autre s'y retrouvent à l'identique, une seule fois.
+
+Les témoins viennent de `scripts/concordance-witnesses/build.ts` : le CSV
+exporté par Concordance, dont chaque étiquette de locution est élargie d'après
+l'OSIS, puis complétée par les positions des pages acquises
+(`acquire-witness`).
 
 ## Mesures
 

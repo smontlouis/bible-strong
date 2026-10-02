@@ -12,6 +12,7 @@ export interface EmptyStrongEvidence {
       | "heuristic"
       | "editorial-convention"
       | "neighbor-supported"
+      | "witness-context"
       | "existing-fallback";
     method:
       | "witness-relative-position"
@@ -69,6 +70,8 @@ export interface ResolutionCarrier {
   endWordIndex?: number;
   insertAfterWordIndex?: number;
   originalOccurrenceId?: string;
+  /** Witness placements: source word numbers given by the witness tag. */
+  positions?: number[];
 }
 export interface ResolutionUnit {
   id: string;

@@ -54,6 +54,8 @@ export interface AssignedStrong {
   locutions?: string[];
   /** Supported only by secondary words of witness locutions. */
   locutionMemberOnly?: boolean;
+  /** Source words (`<ref>#<word number>`) of the supporting witness tags. */
+  sourcePositions?: string[];
 }
 
 /** Consecutive target words carrying one witness locution as one occurrence. */
@@ -82,6 +84,7 @@ interface Candidate {
   locution?: string;
   /** Matched through a locution word other than its head. */
   locutionMember?: boolean;
+  sourcePositions?: string[];
 }
 
 interface TargetWord {
@@ -125,6 +128,11 @@ export function alignVerse(
       const locutions = agreeing.flatMap((candidate) =>
         candidate.locution ? [candidate.locution] : []
       );
+      const sourcePositions = [
+        ...new Set(
+          agreeing.flatMap((candidate) => candidate.sourcePositions ?? [])
+        )
+      ];
       assignments.set(word.wordIndex, {
         strong: chosen.strong,
         confidence: scoreWithOriginal(chosen.score, chosen.strong, original),
@@ -136,7 +144,8 @@ export function alignVerse(
           : {}),
         ...(agreeing.every((candidate) => candidate.locutionMember)
           ? { locutionMemberOnly: true }
-          : {})
+          : {}),
+        ...(sourcePositions.length ? { sourcePositions } : {})
       });
       continue;
     }
@@ -213,6 +222,15 @@ function collectLocutions(
         endWordIndex: run.at(-1)!,
         assignment: {
           ...head,
+          ...(members.some((member) => member.sourcePositions)
+            ? {
+                sourcePositions: [
+                  ...new Set(
+                    members.flatMap((member) => member.sourcePositions ?? [])
+                  )
+                ]
+              }
+            : {}),
           confidence: Math.min(...members.map((member) => member.confidence)),
           originalConfirmed: members.every((member) => member.originalConfirmed)
         }
@@ -244,6 +262,13 @@ function matchReferenceOccurrences(
   matching?: TransferMatchingPolicy
 ): Map<number, Candidate> {
   const tokens = reference.verse?.tokens ?? [];
+  const row = reference.verse?.row;
+  const sourcePositionsOf = (token: StrongToken) =>
+    matching?.witnessPositions && row && token.positions
+      ? token.positions.map(
+          (position) => `${row.bookId}.${row.chapter}.${row.verse}#${position}`
+        )
+      : undefined;
   // Without locution transfer, a locution is matched through its head word
   // only, exactly as when the witness tagged that word alone.
   const strongTokens = referenceStrongTokens(reference).filter(
@@ -264,6 +289,7 @@ function matchReferenceOccurrences(
         word.wordIndex,
         words.length
       );
+      const sourcePositions = sourcePositionsOf(token);
       return [
         {
           left,
@@ -271,14 +297,16 @@ function matchReferenceOccurrences(
           // Position is used only to resolve the global occurrence mapping;
           // it does not inflate the reported lexical confidence.
           weight: candidate.score + position * 0.03,
-          value:
-            token.element === undefined
-              ? candidate
+          value: {
+            ...candidate,
+            ...(sourcePositions ? { sourcePositions } : {}),
+            ...(token.element === undefined
+              ? {}
               : {
-                  ...candidate,
                   locution: `${reference.name}#${token.element}`,
                   ...(token.elementHead ? {} : { locutionMember: true })
-                }
+                })
+          }
         }
       ];
     })
