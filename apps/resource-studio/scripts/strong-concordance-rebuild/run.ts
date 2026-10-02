@@ -7,7 +7,14 @@ import {
   acquireChapters,
   sealAcquisition
 } from "./acquire.js";
-import { buildPlan, type ExperimentPlan } from "./plan.js";
+import {
+  SEALED_SPLITS,
+  buildComparisonPlan,
+  buildPlan,
+  splitChapters,
+  type ComparisonPlan,
+  type ExperimentPlan
+} from "./plan.js";
 import { policyFromLabels, predict, predictionCodeHashes } from "./predict.js";
 import { SCORE_VERSION, readRun, scoreRun } from "./score.js";
 import {
@@ -16,7 +23,8 @@ import {
   readReports,
   summaryRow
 } from "./report.js";
-import { buildReviewPackets } from "./review.js";
+import { buildCompareView } from "./compareView.js";
+import { buildReviewPackets, stepRows } from "./review.js";
 import { readStrongCsv } from "../../src/strongCsv.js";
 import type { OccurrenceRecord } from "./score.js";
 import {
@@ -37,15 +45,17 @@ import {
 
 const USAGE = `Usage (from apps/resource-studio):
   tsx scripts/strong-concordance-rebuild/run.ts plan --seed <text> --prior <file>... --consulted <Chapter,...> --forced-development <Chapter,...>
-  tsx scripts/strong-concordance-rebuild/run.ts acquire --editions SG21,NEG --splits development,test [--extra Edition:Chapter,...] [--delay-ms 6000]
+  tsx scripts/strong-concordance-rebuild/run.ts plan-comparison --seed <text> --comparison 150 --reserve 120 [--base <plan.json>] [--output <file>]
+  tsx scripts/strong-concordance-rebuild/run.ts acquire --editions SG21,NEG --splits development,test [--plan <file>] [--extra Edition:Chapter,...] [--delay-ms 6000]
   tsx scripts/strong-concordance-rebuild/run.ts seal-acquisition --output <file>
   tsx scripts/strong-concordance-rebuild/run.ts acquire-witness --edition Sg1910|Darby|DarbyR --chapters-from <export.csv> --root <dir> [--delay-ms 6000]
-  tsx scripts/strong-concordance-rebuild/run.ts predict --edition SG21 --scenario target-excluded --split development [--chapters A.1,B.2] [--policy ABCD] [--profile s21] [--output-dir <dir>]
+  tsx scripts/strong-concordance-rebuild/run.ts predict --edition SG21 --scenario target-excluded --split development|test|comparison [--plan <file>] [--chapters A.1,B.2] [--policy ABCD] [--profile s21] [--output-dir <dir>]
   tsx scripts/strong-concordance-rebuild/run.ts freeze --policy ABCD --acquisition-seal <file> --evidence <file> --output <file>
   tsx scripts/strong-concordance-rebuild/run.ts score --run <prediction-dir> [--freeze <file>] [--output-dir <dir>]
   tsx scripts/strong-concordance-rebuild/run.ts provenance --split development --output <file>
   tsx scripts/strong-concordance-rebuild/run.ts report --split development --output-dir <dir>
   tsx scripts/strong-concordance-rebuild/run.ts sample --run <prediction-dir> --per-category 8 --output <file>
+  tsx scripts/strong-concordance-rebuild/run.ts compare-view --run <prediction-dir> [--output <file>]
 `;
 
 const EVALUATOR_CODE = [
@@ -181,16 +191,54 @@ switch (command) {
     );
     break;
   }
+  case "plan-comparison": {
+    const seed = flagValue(args, "--seed");
+    const comparison = Number(flagValue(args, "--comparison"));
+    const reserve = Number(flagValue(args, "--reserve"));
+    if (!seed || !(comparison > 0) || !(reserve > 0)) throw new Error(USAGE);
+    const plan = await buildComparisonPlan({
+      basePlanPath:
+        flagValue(args, "--base") ?? path.join(OUT_ROOT, "plan.json"),
+      seed,
+      reserve,
+      comparison
+    });
+    const output =
+      flagValue(args, "--output") ??
+      path.join(OUT_ROOT, "plan-comparison-v1.json");
+    await writeJsonOnce(output, plan);
+    console.log(
+      JSON.stringify(
+        {
+          output,
+          freshPool: plan.freshPool,
+          reserve: plan.reserve.length,
+          reserveSha256: plan.reserveSha256,
+          comparison: plan.comparison.map((entry) => entry.chapter),
+          comparisonVerses: plan.comparison.reduce(
+            (n, entry) => n + entry.verses,
+            0
+          )
+        },
+        null,
+        1
+      )
+    );
+    break;
+  }
   case "acquire": {
-    const plan = await readJson<ExperimentPlan>(
+    const plan = await readJson<ExperimentPlan | ComparisonPlan>(
       flagValue(args, "--plan") ?? path.join(OUT_ROOT, "plan.json")
     );
     const editions = (flagValue(args, "--editions") ?? "SG21").split(",");
     const splits = (flagValue(args, "--splits") ?? "development").split(",");
-    const chapters = splits.flatMap((split) => {
-      if (split !== "development" && split !== "test") throw new Error(USAGE);
-      return plan[split].map((entry) => entry.chapter);
-    });
+    // The reserve stays unseen: its pages are fetched only once a freeze opens it.
+    if (splits.includes("reserve")) {
+      const freezePath = flagValue(args, "--freeze");
+      if (!freezePath) throw new Error("reserve-split-requires-freeze");
+      await readJson<FreezeRecord>(freezePath);
+    }
+    const chapters = splits.flatMap((split) => splitChapters(plan, split));
     const requests = [
       ...editions.flatMap((edition) =>
         chapters.map((chapter) => ({ edition, chapter }))
@@ -227,7 +275,7 @@ switch (command) {
       path.join(
         ACQUISITION_ROOT,
         "runs",
-        `${startedAt.replace(/[:.]/gu, "-")}.json`
+        `${startedAt.replace(/[:.]/gu, "-")}-${editions.join("+")}.json`
       ),
       {
         startedAt,
@@ -266,7 +314,7 @@ switch (command) {
     break;
   }
   case "predict": {
-    const plan = await readJson<ExperimentPlan>(
+    const plan = await readJson<ExperimentPlan | ComparisonPlan>(
       flagValue(args, "--plan") ?? path.join(OUT_ROOT, "plan.json")
     );
     const editionId = flagValue(args, "--edition") as
@@ -274,15 +322,9 @@ switch (command) {
     const scenario = flagValue(args, "--scenario") as
       "target-excluded" | "family-excluded" | undefined;
     const split = flagValue(args, "--split");
-    if (
-      !editionId ||
-      !scenario ||
-      (split !== "development" && split !== "test")
-    )
-      throw new Error(USAGE);
+    if (!editionId || !scenario || !split) throw new Error(USAGE);
     const chapters =
-      flagValue(args, "--chapters")?.split(",") ??
-      plan[split].map((entry) => entry.chapter);
+      flagValue(args, "--chapters")?.split(",") ?? splitChapters(plan, split);
     const policy = policyFromLabels(
       (flagValue(args, "--policy") ?? "")
         .split("")
@@ -354,7 +396,7 @@ switch (command) {
     const runDir = flagValue(args, "--run");
     if (!runDir) throw new Error(USAGE);
     const { run, sha256: expected } = await readRun(runDir);
-    if (run.split === "test") {
+    if (SEALED_SPLITS.has(run.split)) {
       // The reserved test is opened only for a run made with frozen rules.
       const freezePath = flagValue(args, "--freeze");
       if (!freezePath) throw new Error("test-split-requires-freeze");
@@ -508,7 +550,7 @@ switch (command) {
     const { run } = await readRun(runDir);
     // Test disagreements are only examined after the freeze, to interpret the
     // final result; the engine is no longer changed afterwards.
-    if (run.split !== "development") {
+    if (SEALED_SPLITS.has(run.split)) {
       const freezePath = flagValue(args, "--freeze");
       if (!freezePath) throw new Error("review-sample-test-requires-freeze");
       await readJson<FreezeRecord>(freezePath);
@@ -530,6 +572,36 @@ switch (command) {
     });
     await writeJsonOnce(output, { runId: run.runId, packets });
     console.log(JSON.stringify({ output, packets: packets.length }));
+    break;
+  }
+  case "compare-view": {
+    const runDir = flagValue(args, "--run");
+    if (!runDir) throw new Error(USAGE);
+    const { run, sha256: expected } = await readRun(runDir);
+    if (sha256(stableStringify(run)) !== expected)
+      throw new Error(`prediction-hash-mismatch:${run.runId}`);
+    // A sealed split is only looked at once a freeze has opened it.
+    if (SEALED_SPLITS.has(run.split)) {
+      const freezePath = flagValue(args, "--freeze");
+      if (!freezePath)
+        throw new Error("compare-view-sealed-split-requires-freeze");
+      await readJson<FreezeRecord>(freezePath);
+    }
+    const view = await buildCompareView({ run, stepRows: await stepRows() });
+    const output =
+      flagValue(args, "--output") ??
+      path.join(OUT_ROOT, "comparison", `${run.runId}.json`);
+    await writeTextOnce(output, JSON.stringify(view));
+    console.log(
+      JSON.stringify({
+        output,
+        chapters: Object.keys(view.chapters).length,
+        verses: Object.values(view.chapters).reduce(
+          (n, verses) => n + verses.length,
+          0
+        )
+      })
+    );
     break;
   }
   default:

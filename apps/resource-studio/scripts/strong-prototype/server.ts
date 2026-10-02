@@ -1,10 +1,13 @@
 /**
  * Local prototype: shows what the Strong generator does to a Bible, chapter by
- * chapter, before and after a change of engine. It only reads the canonical
- * SQLite ledgers of two autonomous runs; Bible text never leaves this machine.
+ * chapter, before and after a change of engine (`/`), and our S21 and NEG79
+ * placements beside Concordance's on the comparison sample (`/concordance`).
+ * It only reads local ledgers and comparison views; Bible text and Concordance
+ * annotations never leave this machine.
  *
  *   yarn exec tsx scripts/strong-prototype/server.ts [--port 4321]
  *     [--before outputs/strong-autonomous/v3] [--after outputs/strong-autonomous/v4]
+ *     [--concordance <compare-view.json>,<compare-view.json>]
  */
 import { existsSync, readFileSync } from "node:fs";
 import http from "node:http";
@@ -204,10 +207,108 @@ function chapter(bible: string, book: string, number: number) {
   }));
 }
 
-const page = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "index.html"
-);
+const COMPARISON_DIR = "outputs/strong-concordance-night/comparison";
+const COMPARISONS = flag(
+  "--concordance",
+  ["SG21", "NEG"]
+    .map(
+      (edition) =>
+        `${COMPARISON_DIR}/${edition}__target-excluded__comparison__policy-ABCDEFG.json`
+    )
+    .join(",")
+).split(",");
+const EDITION_LABELS: Record<string, string> = {
+  SG21: "Segond 21",
+  NEG: "Nouvelle Édition de Genève 1979"
+};
+
+/** Outcomes of one source word, grouped as the page shows them. */
+const OUTCOME_GROUPS: Record<string, string> = {
+  "visible-exact": "same",
+  "empty-anchor-exact": "same",
+  "visible-overlap": "span",
+  "visible-wrong-carrier": "other-word",
+  "visible-swapped-occurrence": "other-word",
+  "empty-anchor-different": "other-word",
+  "gold-visible-pred-unresolved": "ours-uncertain",
+  "gold-empty-pred-unresolved": "ours-uncertain",
+  "gold-visible-pred-empty": "ours-untranslated",
+  "gold-empty-pred-visible": "theirs-untranslated",
+  "source-strong-differs": "strong-differs",
+  "gold-occurrence-without-source-unit": "strong-differs",
+  "gold-silent-pred-visible": "ours-only",
+  "gold-silent-pred-empty": "ours-only",
+  "gold-silent-pred-unresolved": "uncertain-silent"
+};
+
+interface CompareView {
+  runId: string;
+  edition: string;
+  chapters: Record<
+    string,
+    Array<{ comparability: string; outcomes: Array<{ outcome: string }> }>
+  >;
+}
+
+const views = new Map<string, CompareView>();
+function comparisonViews(): Map<string, CompareView> {
+  if (views.size) return views;
+  for (const file of COMPARISONS)
+    if (existsSync(file)) {
+      const view = JSON.parse(readFileSync(file, "utf8")) as CompareView;
+      views.set(view.edition, view);
+    }
+  return views;
+}
+
+function tally(
+  verses: Array<{ comparability: string; outcomes: Array<{ outcome: string }> }>
+) {
+  const groups: Record<string, number> = {};
+  let compared = 0;
+  for (const verse of verses) {
+    if (verse.outcomes.length) compared += 1;
+    for (const { outcome } of verse.outcomes) {
+      const group = OUTCOME_GROUPS[outcome] ?? "other";
+      groups[group] = (groups[group] ?? 0) + 1;
+    }
+  }
+  return { verses: verses.length, compared, groups };
+}
+
+function concordanceCatalog() {
+  return [...comparisonViews().values()].map((view) => {
+    const books = new Map<string, number[]>();
+    const byBook = new Map<string, CompareView["chapters"][string]>();
+    for (const [chapter, verses] of Object.entries(view.chapters)) {
+      const [book, number] = chapter.split(".");
+      books.set(book!, [...(books.get(book!) ?? []), Number(number)]);
+      byBook.set(book!, [...(byBook.get(book!) ?? []), ...verses]);
+    }
+    return {
+      id: view.edition,
+      label: EDITION_LABELS[view.edition] ?? view.edition,
+      runId: view.runId,
+      books: [...books].map(([book, chapters]) => ({
+        book,
+        chapters: chapters.sort((a, b) => a - b),
+        tally: tally(byBook.get(book)!)
+      })),
+      tally: tally(Object.values(view.chapters).flat())
+    };
+  });
+}
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const page = path.join(here, "index.html");
+const PAGES: Record<string, [string, string]> = {
+  "/": [page, "text/html; charset=utf-8"],
+  "/concordance": [
+    path.join(here, "concordance.html"),
+    "text/html; charset=utf-8"
+  ],
+  "/style.css": [path.join(here, "style.css"), "text/css; charset=utf-8"]
+};
 
 http
   .createServer((request, response) => {
@@ -219,11 +320,21 @@ http
       response.end(JSON.stringify(value));
     };
     try {
-      if (url.pathname === "/") {
-        response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-        response.end(readFileSync(page));
+      const known = PAGES[url.pathname];
+      if (known) {
+        response.writeHead(200, { "content-type": known[1] });
+        response.end(readFileSync(known[0]));
       } else if (url.pathname === "/api/catalog") json(catalog());
-      else if (url.pathname === "/api/chapter")
+      else if (url.pathname === "/api/concordance/catalog")
+        json(concordanceCatalog());
+      else if (url.pathname === "/api/concordance/chapter") {
+        const view = comparisonViews().get(
+          url.searchParams.get("edition") ?? "SG21"
+        );
+        const verses = view?.chapters[url.searchParams.get("chapter") ?? ""];
+        if (!verses) json({ error: "not-in-comparison-sample" }, 404);
+        else json({ verses, tally: tally(verses) });
+      } else if (url.pathname === "/api/chapter")
         json(
           chapter(
             url.searchParams.get("bible") ?? "nbs",

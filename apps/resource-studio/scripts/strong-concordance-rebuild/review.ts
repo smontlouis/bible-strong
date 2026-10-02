@@ -20,7 +20,7 @@ const STEP_FILES = [
 ];
 
 /** STEP rows indexed by `Book.C.V#NN` with the OSIS book used by the ledger. */
-async function stepRows(): Promise<Map<string, string>> {
+export async function stepRows(): Promise<Map<string, string>> {
   const { STEP_TO_OSIS_BOOK } = await import("../../src/stepOriginals.js");
   const rows = new Map<string, string>();
   for (const file of STEP_FILES) {

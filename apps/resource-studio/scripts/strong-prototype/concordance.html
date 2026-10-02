@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Strong face à Concordance</title>
+    <link rel="stylesheet" href="/style.css" />
+    <style>
+      :root {
+        --same: #16a34a;
+        --span: #ca8a04;
+        --other: #dc2626;
+        --diff: #c026d3;
+        --ours: #2563eb;
+        --theirs: #9a3412;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --same: #4ade80;
+          --span: #facc15;
+          --other: #f87171;
+          --diff: #e879f9;
+          --ours: #6aa1ff;
+          --theirs: #fb923c;
+        }
+      }
+      .w.k {
+        cursor: pointer;
+      }
+      /* Later rules win: the most serious disagreement shows on a word. */
+      .t-same {
+        border-bottom: 2px solid var(--same);
+      }
+      .t-ours-only {
+        border-bottom: 2px solid var(--ours);
+      }
+      .t-span {
+        border-bottom: 2px solid var(--span);
+      }
+      .t-theirs-uncertain {
+        outline: 1.5px dashed var(--uncertain);
+        outline-offset: 1px;
+      }
+      .t-theirs-only {
+        outline: 1.5px dashed var(--theirs);
+        outline-offset: 1px;
+      }
+      .t-ours-placed {
+        border-bottom: 2px solid var(--theirs);
+      }
+      .t-diff {
+        border-bottom: 2px solid var(--diff);
+      }
+      .t-other-ours {
+        border-bottom: 2px solid var(--other);
+      }
+      .t-other-theirs {
+        outline: 1.5px dashed var(--other);
+        outline-offset: 1px;
+      }
+      .t-mine {
+        border-bottom: 2px solid var(--ours);
+      }
+      .t-mine.loc {
+        background: color-mix(in srgb, var(--locution) 16%, transparent);
+        border-bottom-color: var(--locution);
+      }
+      .t-their {
+        border-bottom: 2px solid var(--theirs);
+      }
+      .t-their.loc {
+        background: color-mix(in srgb, var(--theirs) 14%, transparent);
+      }
+      .s.theirs {
+        border: 1px dashed currentColor;
+        border-radius: 3px;
+        padding: 0 2px;
+      }
+      .s.same {
+        color: var(--same);
+      }
+      .m {
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 0 2px;
+      }
+      .m.same {
+        color: var(--same);
+      }
+      .m.ours {
+        color: var(--ours);
+      }
+      .m.theirs {
+        color: var(--theirs);
+      }
+      .m.other {
+        color: var(--other);
+      }
+      .m.uncertain {
+        color: var(--uncertain);
+      }
+      .m.rule {
+        color: var(--empty-rule);
+      }
+      .badge.same {
+        color: var(--same);
+      }
+      .badge.span {
+        color: var(--span);
+      }
+      .badge.other-word {
+        color: var(--other);
+      }
+      .badge.strong-differs {
+        color: var(--diff);
+      }
+      .badge.ours-only {
+        color: var(--ours);
+      }
+      .badge.ours-uncertain {
+        color: var(--uncertain);
+      }
+      .badge.ours-untranslated,
+      .badge.theirs-untranslated {
+        color: var(--theirs);
+      }
+      .diffs {
+        font-size: 12.5px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      details.books {
+        margin: 0 0 12px;
+        font-size: 13.5px;
+      }
+      details.books summary {
+        cursor: pointer;
+        color: var(--muted);
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        margin-top: 6px;
+        width: 100%;
+      }
+      th,
+      td {
+        text-align: right;
+        padding: 2px 8px;
+        border-bottom: 1px solid var(--line);
+        white-space: nowrap;
+      }
+      th:first-child,
+      td:first-child {
+        text-align: left;
+      }
+      td:nth-child(2) {
+        white-space: normal;
+        min-width: 160px;
+      }
+      td button {
+        font-size: 12px;
+        padding: 0 6px;
+      }
+      #detail {
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+      #detail .occ + .occ {
+        border-top: 1px solid var(--line);
+        margin-top: 10px;
+        padding-top: 8px;
+      }
+      #detail .verdict {
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="bar">
+        <h1>Strong — face à Concordance</h1>
+        <select id="edition" aria-label="Bible"></select>
+        <button id="prev" aria-label="Chapitre précédent">‹</button>
+        <select id="book" aria-label="Livre"></select>
+        <select id="chapter" aria-label="Chapitre"></select>
+        <button id="next" aria-label="Chapitre suivant">›</button>
+        <span class="seg" role="tablist">
+          <button data-mode="compare" class="on">Comparer</button>
+          <button data-mode="ours">Nous</button>
+          <button data-mode="theirs">Concordance</button>
+        </span>
+        <label class="check"
+          ><input type="checkbox" id="numbers" checked /> numéros</label
+        >
+        <label class="check"
+          ><input type="checkbox" id="disagreeOnly" /> désaccords
+          seulement</label
+        >
+        <select id="category" aria-label="Type de désaccord"></select>
+        <a href="/">avant / après ›</a>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="legend" id="legend"></div>
+    </header>
+    <main>
+      <p class="note" id="about"></p>
+      <details class="books" id="books"></details>
+      <div id="verses"><div class="empty-state">Chargement…</div></div>
+    </main>
+    <aside id="detail" aria-live="polite">
+      <button class="close" aria-label="Fermer">×</button>
+      <div id="detailBody"></div>
+    </aside>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const state = {
+        catalog: [],
+        edition: "SG21",
+        book: "Gen",
+        chapter: 0,
+        mode: "compare",
+        verses: [],
+        tally: null
+      };
+      const esc = (s) =>
+        String(s).replace(
+          /[&<>"]/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]
+        );
+      const fmt = (n) => Number(n || 0).toLocaleString("fr-FR");
+      const pct = (a, b) =>
+        b
+          ? ((100 * a) / b).toLocaleString("fr-FR", {
+              maximumFractionDigits: 1
+            }) + " %"
+          : "—";
+
+      /** Same grouping as the server; every outcome of the evaluator. */
+      const GROUP = {
+        "visible-exact": "same",
+        "empty-anchor-exact": "same",
+        "visible-overlap": "span",
+        "visible-wrong-carrier": "other-word",
+        "visible-swapped-occurrence": "other-word",
+        "empty-anchor-different": "other-word",
+        "gold-visible-pred-unresolved": "ours-uncertain",
+        "gold-empty-pred-unresolved": "ours-uncertain",
+        "gold-visible-pred-empty": "ours-untranslated",
+        "gold-empty-pred-visible": "theirs-untranslated",
+        "source-strong-differs": "strong-differs",
+        "gold-occurrence-without-source-unit": "strong-differs",
+        "gold-silent-pred-visible": "ours-only",
+        "gold-silent-pred-empty": "ours-only",
+        "gold-silent-pred-unresolved": "uncertain-silent"
+      };
+      const GROUP_LABEL = {
+        same: "identiques",
+        span: "portée différente",
+        "other-word": "autre mot",
+        "ours-uncertain": "incertains chez nous",
+        "ours-untranslated": "non traduits chez nous, placés chez eux",
+        "theirs-untranslated": "placés chez nous, non traduits chez eux",
+        "strong-differs": "Strong différent",
+        "ours-only": "chez nous seulement"
+      };
+      const OUTCOME_LABEL = {
+        "visible-exact": "même placement",
+        "empty-anchor-exact": "non traduit des deux côtés, même endroit",
+        "visible-overlap": "même Strong, portée différente",
+        "visible-wrong-carrier": "même Strong, autre mot",
+        "visible-swapped-occurrence":
+          "occurrences répétées d'un même Strong inversées",
+        "empty-anchor-different": "non traduit des deux côtés, ancré ailleurs",
+        "gold-visible-pred-unresolved":
+          "Concordance le place ; nous le laissons incertain",
+        "gold-empty-pred-unresolved":
+          "Concordance le marque non traduit ; nous le laissons incertain",
+        "gold-visible-pred-empty":
+          "Concordance le place ; nous le disons non traduit",
+        "gold-empty-pred-visible":
+          "Concordance le marque non traduit ; nous le plaçons",
+        "source-strong-differs":
+          "même mot source, numéro Strong différent (identifiant alternatif ou variante)",
+        "gold-occurrence-without-source-unit":
+          "position source absente de notre texte original",
+        "gold-silent-pred-visible":
+          "nous le plaçons ; Concordance ne marque pas ce mot source",
+        "gold-silent-pred-empty":
+          "nous le disons non traduit ; Concordance ne marque pas ce mot source",
+        "gold-silent-pred-unresolved":
+          "incertain chez nous ; Concordance ne marque pas ce mot source"
+      };
+      const CATEGORY_LABEL = {
+        "mauvais-porteur": "autre mot",
+        "mauvaise-occurrence-repetee": "occurrence répétée",
+        expression: "portée différente",
+        "vide-injustifie": "non traduit chez nous, placé chez eux",
+        "porteur-sur-mot-non-traduit": "placé chez nous, non traduit chez eux",
+        ancrage: "◎ ancré ailleurs",
+        "variante-source": "Strong différent",
+        "convention-editoriale": "chez nous seulement",
+        abstention: "incertain chez nous"
+      };
+      const METHOD = {
+        exact: "transfert exact d'un témoin",
+        window: "transfert par voisinage",
+        stem: "transfert par radical",
+        lexicon: "lexique des témoins",
+        "learned-translation": "traduction apprise",
+        "learned-translation-stem": "traduction apprise (radical)",
+        "learned-phrase": "locution apprise",
+        phrase: "locution sur plusieurs mots",
+        "witness-empty-transfer": "non traduit, établi par les témoins",
+        "linguistic-rule": "non traduit, règle grammaticale",
+        word: "un mot",
+        discontinuous: "plusieurs mots disjoints",
+        marker: "marqueur « non traduit »",
+        punctuation: "porté par la ponctuation"
+      };
+      const NOT_COMPARED = {
+        "text-divergent-unmapped": "texte différent de celui de Concordance",
+        "missing-concordance-verse":
+          "absent de cette page Concordance (numérotation différente)",
+        "versification-block": "versification différente",
+        "missing-local-verse": "absent de notre texte",
+        "empty-local-verse": "vide dans notre texte"
+      };
+      const notCompared = (reason) =>
+        NOT_COMPARED[reason] || NOT_COMPARED[reason.split(":")[0]] || reason;
+      const DISAGREEMENTS = new Set([
+        "span",
+        "other-word",
+        "ours-uncertain",
+        "ours-untranslated",
+        "theirs-untranslated",
+        "strong-differs",
+        "ours-only"
+      ]);
+
+      async function api(path) {
+        const response = await fetch(path);
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+      }
+      const edition = () => state.catalog.find((e) => e.id === state.edition);
+      const annotated = (t) =>
+        Object.entries(t.groups)
+          .filter(([g]) => g !== "ours-only" && g !== "uncertain-silent")
+          .reduce((n, [, c]) => n + c, 0);
+      function tallyLine(t) {
+        const total = annotated(t);
+        const parts = Object.keys(GROUP_LABEL)
+          .filter((g) => g !== "same" && t.groups[g])
+          .map(
+            (g) =>
+              `<span>${esc(GROUP_LABEL[g])} <b>${fmt(t.groups[g])}</b></span>`
+          );
+        return (
+          `<span>mots source annotés par Concordance <b>${fmt(total)}</b> · identiques <b>${fmt(t.groups.same)}</b> (<b>${pct(t.groups.same || 0, total)}</b>)</span>` +
+          parts.join("")
+        );
+      }
+
+      function renderHeader() {
+        const e = edition();
+        $("stats").innerHTML =
+          `<span><b>${esc(e.label)}</b> · ${fmt(e.books.reduce((n, b) => n + b.chapters.length, 0))} chapitres · ${fmt(e.tally.verses)} versets</span>` +
+          tallyLine(e.tally) +
+          (state.tally
+            ? `<span>· ce chapitre : identiques <b>${pct(state.tally.groups.same || 0, annotated(state.tally))}</b></span>`
+            : "");
+        $("about").innerHTML =
+          "Échantillon de 150 chapitres tirés au hasard (par genre) parmi ceux qui n'ont jamais servi à régler le moteur ; 120 autres restent scellés pour les mesures futures. « Nous » : le moteur actuel (A–G) sur notre propre texte, sans jamais voir les annotations de Concordance. Concordance n'est pas infaillible : un désaccord n'est pas forcément une erreur de notre part.";
+        $("books").innerHTML =
+          `<summary>Accord par livre</summary><div class="table-wrap"><table><thead><tr><th>Livre</th><th>Chapitres</th><th>Mots annotés</th><th>Identiques</th><th>Autre mot</th><th>Incertains</th><th>Nous seuls</th></tr></thead><tbody>` +
+          e.books
+            .map((b) => {
+              const t = b.tally;
+              return `<tr><td>${esc(b.book)}</td><td>${b.chapters.map((c) => `<button data-goto="${b.book}.${c}">${c}</button>`).join(" ")}</td><td>${fmt(annotated(t))}</td><td>${pct(t.groups.same || 0, annotated(t))}</td><td>${fmt(t.groups["other-word"])}</td><td>${fmt(t.groups["ours-uncertain"])}</td><td>${fmt(t.groups["ours-only"])}</td></tr>`;
+            })
+            .join("") +
+          `</tbody></table></div>`;
+        const legend = {
+          compare: [
+            ["border-bottom:2px solid var(--same)", "même placement"],
+            ["border-bottom:2px solid var(--span)", "portée différente"],
+            [
+              "border-bottom:2px solid var(--other)",
+              "autre mot : le nôtre (souligné)"
+            ],
+            [
+              "outline:1.5px dashed var(--other)",
+              "et celui de Concordance (pointillé)"
+            ],
+            ["border-bottom:2px solid var(--diff)", "Strong différent"],
+            [
+              "outline:1.5px dashed var(--uncertain)",
+              "placé chez eux, incertain chez nous"
+            ],
+            [
+              "outline:1.5px dashed var(--theirs)",
+              "placé chez eux, non traduit chez nous"
+            ],
+            [
+              "border-bottom:2px solid var(--theirs)",
+              "placé chez nous, non traduit chez eux"
+            ],
+            [
+              "border-bottom:2px solid var(--ours)",
+              "chez nous seulement (Concordance silencieux)"
+            ]
+          ],
+          ours: [
+            ["border-bottom:2px solid var(--ours)", "porteur"],
+            [
+              "background:color-mix(in srgb, var(--locution) 30%, transparent)",
+              "locution"
+            ],
+            ["border:1px dashed var(--uncertain)", "incertain, non localisé"]
+          ],
+          theirs: [
+            ["border-bottom:2px solid var(--theirs)", "porteur"],
+            [
+              "background:color-mix(in srgb, var(--theirs) 28%, transparent)",
+              "plusieurs mots"
+            ]
+          ]
+        }[state.mode];
+        const marks = {
+          compare:
+            '<span><b style="color:var(--same)">◎</b> non traduit des deux côtés</span><span><b style="color:var(--other)">◎ ○</b> ancré ailleurs (nous ◎, eux ○)</span>',
+          ours: '<span><b style="color:var(--ours)">◎</b> non traduit</span>',
+          theirs:
+            '<span><b style="color:var(--theirs)">○</b> non traduit</span>'
+        }[state.mode];
+        $("legend").innerHTML =
+          legend
+            .map(
+              ([style, label]) =>
+                `<span><i class="sw" style="${style}"></i>${esc(label)}</span>`
+            )
+            .join("") + marks;
+      }
+
+      /** Classes, labels and markers of one verse for the current mode. */
+      function layout(v) {
+        const classes = new Map();
+        const labels = new Map();
+        const markers = new Map();
+        const add = (map, key, value) => {
+          if (!map.has(key)) map.set(key, []);
+          map.get(key).push(value);
+        };
+        const mark = (tokens, cls) =>
+          tokens.forEach((t) => add(classes, t, cls));
+        const label = (tokens, strong, cls) =>
+          tokens.length && add(labels, tokens.at(-1), [strong, cls]);
+        const marker = (after, symbol, cls, k) =>
+          add(markers, after ?? -1, [symbol, cls, k]);
+        if (state.mode === "ours") {
+          v.ours.carriers.forEach((c) => {
+            mark(c.tokens, c.tokens.length > 1 ? "t-mine loc" : "t-mine");
+            label(c.tokens, c.strong, "");
+          });
+          v.ours.empties.forEach((e) =>
+            marker(
+              e.after,
+              "◎",
+              e.method === "linguistic-rule" ? "rule" : "ours",
+              `p${e.position}`
+            )
+          );
+        } else if (state.mode === "theirs") {
+          (v.theirs?.carriers || []).forEach((c) => {
+            mark(c.tokens, c.tokens.length > 1 ? "t-their loc" : "t-their");
+            label(c.tokens, c.strong, "");
+          });
+          (v.theirs?.empties || []).forEach((e) =>
+            marker(e.after, "○", "theirs", `p${e.position}`)
+          );
+        } else {
+          const covered = new Set();
+          v.outcomes.forEach((o, k) => {
+            const group = GROUP[o.outcome];
+            o.ourTokens.forEach((t) => covered.add(t));
+            if (group === "same") {
+              if (o.theirTokens.length) {
+                mark(o.theirTokens, "t-same", k);
+                label(o.theirTokens, o.strong, "same");
+              } else marker(o.theirAnchor, "◎", "same", k);
+            } else if (group === "span") {
+              mark(
+                [...new Set([...o.ourTokens, ...o.theirTokens])],
+                "t-span",
+                k
+              );
+              label(o.ourTokens, o.strong, "");
+              label(o.theirTokens, o.strong, "theirs");
+            } else if (group === "other-word") {
+              if (o.outcome === "empty-anchor-different") {
+                marker(o.ourAnchor, "◎", "other", k);
+                marker(o.theirAnchor, "○", "other", k);
+              } else {
+                mark(o.ourTokens, "t-other-ours", k);
+                mark(o.theirTokens, "t-other-theirs", k);
+                label(o.ourTokens, o.strong, "");
+                label(o.theirTokens, o.strong, "theirs");
+              }
+            } else if (group === "ours-uncertain") {
+              if (o.theirTokens.length) {
+                mark(o.theirTokens, "t-theirs-uncertain", k);
+                label(o.theirTokens, o.strong, "theirs");
+              } else marker(o.theirAnchor, "○", "uncertain", k);
+            } else if (group === "ours-untranslated") {
+              mark(o.theirTokens, "t-theirs-only", k);
+              label(o.theirTokens, o.strong, "theirs");
+              marker(o.ourAnchor, "◎", "theirs", k);
+            } else if (group === "theirs-untranslated") {
+              mark(o.ourTokens, "t-ours-placed", k);
+              label(o.ourTokens, o.strong, "");
+              marker(o.theirAnchor, "○", "theirs", k);
+            } else if (group === "strong-differs") {
+              mark(o.theirTokens, "t-diff", k);
+              mark(o.ourTokens, "t-diff", k);
+              label(o.theirTokens, o.strong, "theirs");
+              label(o.ourTokens, o.ours.join(" "), "");
+            } else if (group === "ours-only") {
+              if (o.ourTokens.length) {
+                mark(o.ourTokens, "t-ours-only", k);
+                label(o.ourTokens, o.ours.join(" "), "");
+              } else marker(o.ourAnchor, "◎", "ours", k);
+            }
+          });
+          // Our carriers without a scored source word (not linked to a unit).
+          v.ours.carriers.forEach((c) => {
+            if (c.tokens.some((t) => covered.has(t))) return;
+            mark(c.tokens, "t-ours-only");
+            label(c.tokens, c.strong, "");
+          });
+        }
+        return { classes, labels, markers };
+      }
+
+      function renderVerse(v, i) {
+        const { classes, labels, markers } = layout(v);
+        const markersAfter = (after) =>
+          (markers.get(after) || [])
+            .map(
+              ([symbol, cls, k]) =>
+                `<span class="m ${cls}" data-v="${i}" data-k="${k}">${symbol}</span>`
+            )
+            .join("");
+        let html = markersAfter(-1);
+        for (const seg of v.segments) {
+          if (seg.w === undefined) {
+            html += esc(seg.t);
+            continue;
+          }
+          const cls = classes.get(seg.w);
+          html += cls
+            ? `<span class="w k ${[...new Set(cls.join(" ").split(" "))].join(" ")}" data-v="${i}" data-w="${seg.w}">${esc(seg.t)}</span>`
+            : `<span class="w">${esc(seg.t)}</span>`;
+          html += (labels.get(seg.w) || [])
+            .map(
+              ([strong, cls]) =>
+                `<span class="s ${cls}" data-v="${i}" data-w="${seg.w}">${esc(strong)}</span>`
+            )
+            .join("");
+          html += markersAfter(seg.w);
+        }
+        let chips = "";
+        if (state.mode !== "theirs")
+          chips = v.ours.uncertain
+            .map((u) => {
+              const src = v.sources[u.position] || {};
+              return `<span class="chip" data-v="${i}" data-k="p${u.position}">non localisé · ${esc(u.strong)} ${esc(src.surface || "")}</span>`;
+            })
+            .join("");
+        const counts = {};
+        v.outcomes.forEach((o) => {
+          const g = GROUP[o.outcome];
+          if (g !== "uncertain-silent") counts[g] = (counts[g] || 0) + 1;
+        });
+        const badges =
+          state.mode === "compare"
+            ? Object.keys(GROUP_LABEL)
+                .filter((g) => counts[g])
+                .map(
+                  (g) =>
+                    `<span class="badge ${g}">${fmt(counts[g])} ${esc(GROUP_LABEL[g])}</span>`
+                )
+                .join("")
+            : "";
+        const notComparable = !v.theirs
+          ? `<span class="badge oth">non comparé : ${esc(notCompared(v.comparability))}</span>`
+          : "";
+        const text = v.textDifferences.length
+          ? `<div class="diffs">Texte différent de Concordance : ${v.textDifferences
+              .map(
+                (d) =>
+                  `${d.local ? `nous « ${esc(d.local)} »` : "—"} / ${d.concordance ? `eux « ${esc(d.concordance)} »` : "—"}`
+              )
+              .join(" · ")}</div>`
+          : "";
+        return `<section class="verse" id="v${v.verse}"><div class="vhead"><span class="vnum">${esc(v.ref)}</span>${badges}${notComparable}</div><div class="line">${html}</div>${chips ? `<div class="unc">${chips}</div>` : ""}${text}</section>`;
+      }
+
+      function render() {
+        document.body.classList.toggle("hide-numbers", !$("numbers").checked);
+        const only = $("disagreeOnly").checked;
+        const category = $("category").value;
+        const parts = state.verses
+          .map((v, i) => [v, i])
+          .filter(([v]) => {
+            if (category)
+              return v.outcomes.some((o) => o.category === category);
+            if (only)
+              return v.outcomes.some((o) =>
+                DISAGREEMENTS.has(GROUP[o.outcome])
+              );
+            return true;
+          })
+          .map(([v, i]) => renderVerse(v, i));
+        $("verses").innerHTML =
+          parts.join("") ||
+          `<div class="empty-state">Aucun verset ne correspond au filtre dans ce chapitre.</div>`;
+      }
+
+      const words = (v, tokens) =>
+        v.segments
+          .filter((s) => s.w !== undefined && tokens.includes(s.w))
+          .map((s) => s.t)
+          .join(" ");
+      const wordAt = (v, after) =>
+        after < 0 ? "début du verset" : `après « ${words(v, [after])} »`;
+      function sideText(v, tokens, anchor, state) {
+        if (state === "unresolved") return "incertain, non localisé";
+        if (tokens.length) return `sur « ${words(v, tokens)} »`;
+        if (anchor !== undefined) return `non traduit, ${wordAt(v, anchor)}`;
+        return "rien";
+      }
+
+      function outcomeBlock(v, o) {
+        const src = v.sources[o.position] || {};
+        const ours =
+          o.ourState === "absent"
+            ? "rien"
+            : sideText(v, o.ourTokens, o.ourAnchor, o.ourState);
+        const theirs = o.outcome.startsWith("gold-silent")
+          ? "rien"
+          : sideText(v, o.theirTokens, o.theirAnchor);
+        const ourStrong =
+          o.ours.length && o.ours.join(" ") !== o.strong
+            ? ` (nous : ${o.ours.join(" ")})`
+            : "";
+        return (
+          `<div class="occ"><h2>${esc(o.strong)}${esc(ourStrong)}</h2>` +
+          (src.surface ? `<div class="src">${esc(src.surface)}</div>` : "") +
+          `<dl>` +
+          (o.position != null
+            ? `<dt>Mot source</dt><dd>n° ${o.position} du verset</dd>`
+            : "") +
+          (src.gloss ? `<dt>Glose</dt><dd>${esc(src.gloss)}</dd>` : "") +
+          (src.morphology
+            ? `<dt>Morphologie</dt><dd>${esc(src.morphology)}</dd>`
+            : "") +
+          `<dt>Concordance</dt><dd>${esc(theirs)}</dd>` +
+          `<dt>Nous</dt><dd>${esc(ours)}</dd>` +
+          `<dt>Bilan</dt><dd class="verdict">${esc(OUTCOME_LABEL[o.outcome] || o.outcome)}</dd>` +
+          `</dl></div>`
+        );
+      }
+
+      function carrierBlock(v, side, c) {
+        const src = v.sources[c.position] || {};
+        return (
+          `<div class="occ"><h2>${esc(c.strong)}</h2>` +
+          (src.surface ? `<div class="src">${esc(src.surface)}</div>` : "") +
+          `<dl>` +
+          (c.position != null
+            ? `<dt>Mot source</dt><dd>n° ${c.position} du verset</dd>`
+            : "") +
+          (src.gloss ? `<dt>Glose</dt><dd>${esc(src.gloss)}</dd>` : "") +
+          `<dt>${side}</dt><dd>sur « ${esc(words(v, c.tokens))} »</dd>` +
+          `<dt>Méthode</dt><dd>${esc(METHOD[c.method] || c.method)}</dd>` +
+          `</dl></div>`
+        );
+      }
+
+      function showDetail(target) {
+        const v = state.verses[Number(target.dataset.v)];
+        const blocks = [];
+        const k = target.dataset.k;
+        if (state.mode === "compare") {
+          let ks = [];
+          if (target.dataset.w !== undefined) {
+            const w = Number(target.dataset.w);
+            v.outcomes.forEach((o, index) => {
+              if (o.ourTokens.includes(w) || o.theirTokens.includes(w))
+                ks.push(index);
+            });
+          } else if (k?.startsWith("p")) {
+            const position = Number(k.slice(1));
+            v.outcomes.forEach((o, index) => {
+              if (o.position === position) ks.push(index);
+            });
+          } else if (k !== undefined) ks = [Number(k)];
+          ks.forEach((index) =>
+            blocks.push(outcomeBlock(v, v.outcomes[index]))
+          );
+          if (!blocks.length && target.dataset.w !== undefined) {
+            const w = Number(target.dataset.w);
+            v.ours.carriers
+              .filter((c) => c.tokens.includes(w))
+              .forEach((c) =>
+                blocks.push(carrierBlock(v, "Nous (non comparé)", c))
+              );
+          }
+        } else {
+          const side =
+            state.mode === "ours"
+              ? v.ours
+              : v.theirs || { carriers: [], empties: [] };
+          const name = state.mode === "ours" ? "Nous" : "Concordance";
+          if (target.dataset.w !== undefined) {
+            const w = Number(target.dataset.w);
+            side.carriers
+              .filter((c) => c.tokens.includes(w))
+              .forEach((c) => blocks.push(carrierBlock(v, name, c)));
+          } else if (k?.startsWith("p")) {
+            const position = Number(k.slice(1));
+            const empty = side.empties.find((e) => e.position === position);
+            const unc = v.ours.uncertain.find((u) => u.position === position);
+            const src = v.sources[position] || {};
+            const what = empty
+              ? `non traduit, ${wordAt(v, empty.after)} · ${METHOD[empty.method] || empty.method}`
+              : unc
+                ? "incertain, non localisé : aucune preuve suffisante d'un porteur ni d'une absence"
+                : "";
+            blocks.push(
+              `<div class="occ"><h2>${esc((empty || unc || {}).strong || "")}</h2>${src.surface ? `<div class="src">${esc(src.surface)}</div>` : ""}<dl><dt>Mot source</dt><dd>n° ${position} du verset</dd>${src.gloss ? `<dt>Glose</dt><dd>${esc(src.gloss)}</dd>` : ""}<dt>${name}</dt><dd>${esc(what)}</dd></dl></div>`
+            );
+          }
+        }
+        if (!blocks.length) return;
+        $("detailBody").innerHTML = blocks.join("");
+        $("detail").classList.add("open");
+      }
+
+      function fillBooks() {
+        const e = edition();
+        if (!e.books.some((b) => b.book === state.book))
+          state.book = e.books[0].book;
+        $("book").innerHTML = e.books
+          .map(
+            (b) =>
+              `<option ${b.book === state.book ? "selected" : ""}>${b.book}</option>`
+          )
+          .join("");
+        fillChapters();
+      }
+      function fillChapters() {
+        const chapters = edition().books.find(
+          (b) => b.book === state.book
+        ).chapters;
+        if (!chapters.includes(state.chapter)) state.chapter = chapters[0];
+        $("chapter").innerHTML = chapters
+          .map(
+            (c) =>
+              `<option ${c === state.chapter ? "selected" : ""}>${c}</option>`
+          )
+          .join("");
+      }
+
+      async function load(scrollTo) {
+        $("verses").innerHTML = `<div class="empty-state">Chargement…</div>`;
+        const chapter = `${state.book}.${state.chapter}`;
+        const params = new URLSearchParams({ edition: state.edition, chapter });
+        history.replaceState(
+          null,
+          "",
+          `?${params}${scrollTo ? `#v${scrollTo}` : ""}`
+        );
+        const data = await api(`/api/concordance/chapter?${params}`);
+        state.verses = data.verses;
+        state.tally = data.tally;
+        renderHeader();
+        render();
+        if (scrollTo) {
+          const el = document.getElementById(`v${scrollTo}`);
+          if (el) {
+            el.scrollIntoView({ block: "center" });
+            el.classList.add("flash");
+            setTimeout(() => el.classList.remove("flash"), 2500);
+          }
+        } else window.scrollTo(0, 0);
+      }
+
+      function step(delta) {
+        const all = edition().books.flatMap((b) =>
+          b.chapters.map((c) => [b.book, c])
+        );
+        const index = all.findIndex(
+          ([b, c]) => b === state.book && c === state.chapter
+        );
+        const next = all[index + delta];
+        if (!next) return;
+        [state.book, state.chapter] = next;
+        fillBooks();
+        load();
+      }
+
+      async function init() {
+        state.catalog = await api("/api/concordance/catalog");
+        if (!state.catalog.length) {
+          $("verses").innerHTML =
+            `<div class="empty-state">Aucune vue de comparaison trouvée (lancer « run.ts compare-view »).</div>`;
+          return;
+        }
+        const q = new URLSearchParams(location.search);
+        state.edition = state.catalog.some((e) => e.id === q.get("edition"))
+          ? q.get("edition")
+          : state.catalog[0].id;
+        const [book, chapter] = (q.get("chapter") || "").split(".");
+        state.book = book || edition().books[0].book;
+        state.chapter = Number(chapter) || 0;
+        $("edition").innerHTML = state.catalog
+          .map(
+            (e) =>
+              `<option value="${e.id}" ${e.id === state.edition ? "selected" : ""}>${esc(e.label)}</option>`
+          )
+          .join("");
+        $("category").innerHTML =
+          `<option value="">tous les types de désaccord</option>` +
+          Object.entries(CATEGORY_LABEL)
+            .map(([k, label]) => `<option value="${k}">${esc(label)}</option>`)
+            .join("");
+        fillBooks();
+        await load(location.hash ? Number(location.hash.slice(2)) : undefined);
+      }
+
+      $("edition").addEventListener("change", (e) => {
+        state.edition = e.target.value;
+        fillBooks();
+        load();
+      });
+      $("book").addEventListener("change", (e) => {
+        state.book = e.target.value;
+        state.chapter = 0;
+        fillChapters();
+        load();
+      });
+      $("chapter").addEventListener("change", (e) => {
+        state.chapter = Number(e.target.value);
+        load();
+      });
+      $("prev").addEventListener("click", () => step(-1));
+      $("next").addEventListener("click", () => step(1));
+      for (const id of ["numbers", "disagreeOnly", "category"])
+        $(id).addEventListener("change", render);
+      document.querySelectorAll(".seg button").forEach((button) =>
+        button.addEventListener("click", () => {
+          document
+            .querySelectorAll(".seg button")
+            .forEach((b) => b.classList.toggle("on", b === button));
+          state.mode = button.dataset.mode;
+          renderHeader();
+          render();
+        })
+      );
+      $("books").addEventListener("click", (e) => {
+        const button = e.target.closest("button[data-goto]");
+        if (!button) return;
+        const [book, chapter] = button.dataset.goto.split(".");
+        state.book = book;
+        state.chapter = Number(chapter);
+        fillBooks();
+        load();
+      });
+      document.addEventListener("click", (e) => {
+        const target = e.target.closest("[data-v]");
+        if (target) {
+          showDetail(target);
+          return;
+        }
+        if (!e.target.closest("#detail")) $("detail").classList.remove("open");
+      });
+      document
+        .querySelector("#detail .close")
+        .addEventListener("click", () => $("detail").classList.remove("open"));
+      init().catch((error) => {
+        $("verses").innerHTML =
+          `<div class="empty-state">Erreur : ${esc(error.message)}</div>`;
+      });
+    </script>
+  </body>
+</html>

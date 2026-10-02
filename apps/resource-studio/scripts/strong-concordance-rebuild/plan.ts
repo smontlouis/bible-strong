@@ -7,7 +7,9 @@ import {
   chapterOfRef,
   fileSha256,
   genreOfBook,
+  readJson,
   sha256,
+  stableStringify,
   testamentOfBook,
   type Testament
 } from "./shared.js";
@@ -200,17 +202,15 @@ export async function chapterInventoryFromBibleJson(
   return inventory;
 }
 
-export async function buildPlan(options: {
-  chapterSource: string;
-  priorFiles: string[];
-  seed: string;
-  consulted: string[];
-  forcedDevelopment: string[];
-}): Promise<ExperimentPlan> {
-  const inventory = await chapterInventoryFromBibleJson(options.chapterSource);
+/** Chapters touched by earlier evaluations: selection files and canary samples. */
+async function earlierSelections(priorFiles: string[]): Promise<{
+  prior: Set<string>;
+  priorSelections: ExperimentPlan["priorSelections"];
+  canarySamples: ExperimentPlan["canarySamples"];
+}> {
   const prior = new Set<string>();
   const priorSelections: ExperimentPlan["priorSelections"] = [];
-  for (const file of options.priorFiles) {
+  for (const file of priorFiles) {
     const chapters = chaptersNamedIn(JSON.parse(await readFile(file, "utf8")));
     chapters.forEach((chapter) => prior.add(chapter));
     priorSelections.push({
@@ -232,6 +232,20 @@ export async function buildPlan(options: {
     chapters.forEach((chapter) => prior.add(chapter));
     canarySamples.push({ witness, limit: 200, chapters: chapters.size });
   }
+  return { prior, priorSelections, canarySamples };
+}
+
+export async function buildPlan(options: {
+  chapterSource: string;
+  priorFiles: string[];
+  seed: string;
+  consulted: string[];
+  forcedDevelopment: string[];
+}): Promise<ExperimentPlan> {
+  const inventory = await chapterInventoryFromBibleJson(options.chapterSource);
+  const { prior, priorSelections, canarySamples } = await earlierSelections(
+    options.priorFiles
+  );
   const split = selectChapters({
     inventory,
     prior,
@@ -261,4 +275,204 @@ export async function buildPlan(options: {
     forcedDevelopment: [...options.forcedDevelopment].sort(),
     ...split
   };
+}
+
+export const COMPARISON_PLAN_VERSION = "strong-concordance-comparison-plan-v1";
+
+/**
+ * Second sample, drawn after the experiment from chapters that no earlier
+ * selection touched: a comparison sample examined now, and a reserve sealed
+ * for later measurements. The reserve is neither acquired nor scored before a
+ * freeze opens it.
+ */
+export interface ComparisonPlan {
+  version: typeof COMPARISON_PLAN_VERSION;
+  createdAt: string;
+  seed: string;
+  basePlan: { path: string; sha256: string };
+  chapterSource: { path: string; sha256: string };
+  policy: {
+    comparisonChapters: number;
+    reserveChapters: number;
+    allocation: "genre share of all chapters, largest remainder";
+    ranking: "sha256(seed|chapter) ascending within genre, reserve first";
+    requiresFreshChapters: true;
+  };
+  /** Fresh chapters available per genre before drawing. */
+  freshPool: Record<string, number>;
+  reserveSha256: string;
+  reserve: PlannedChapter[];
+  comparison: PlannedChapter[];
+}
+
+/** Split `total` across keys in proportion to their weights (largest remainder). */
+export function allocateByShare(
+  total: number,
+  weights: Record<string, number>
+): Record<string, number> {
+  const sum = Object.values(weights).reduce((n, weight) => n + weight, 0);
+  const exact = Object.entries(weights).map(([key, weight]) => ({
+    key,
+    exact: sum === 0 ? 0 : (total * weight) / sum
+  }));
+  const counts = Object.fromEntries(
+    exact.map(({ key, exact }) => [key, Math.floor(exact)])
+  );
+  let remaining =
+    total - Object.values(counts).reduce((n, count) => n + count, 0);
+  for (const { key } of [...exact].sort(
+    (left, right) =>
+      (right.exact % 1) - (left.exact % 1) || left.key.localeCompare(right.key)
+  )) {
+    if (remaining === 0) break;
+    counts[key] = counts[key]! + 1;
+    remaining -= 1;
+  }
+  return counts;
+}
+
+/** Deterministic, genre-proportional reserve and comparison sample. */
+export function selectComparisonChapters(options: {
+  inventory: ChapterInventoryEntry[];
+  /** Chapters of the experiment plan: never drawn again. */
+  excluded: Set<string>;
+  prior: Set<string>;
+  seed: string;
+  reserve: number;
+  comparison: number;
+}): {
+  reserve: PlannedChapter[];
+  comparison: PlannedChapter[];
+  freshPool: Record<string, number>;
+} {
+  const chaptersPerGenre = Object.fromEntries(
+    GENRE_GROUPS.map((group) => [
+      group.id,
+      options.inventory.filter((entry) => group.books.includes(entry.bookId))
+        .length
+    ])
+  );
+  const reserveCounts = allocateByShare(options.reserve, chaptersPerGenre);
+  const comparisonCounts = allocateByShare(
+    options.comparison,
+    chaptersPerGenre
+  );
+  const reserve: PlannedChapter[] = [];
+  const comparison: PlannedChapter[] = [];
+  const freshPool: Record<string, number> = {};
+  for (const group of GENRE_GROUPS) {
+    const ranked = options.inventory
+      .filter(
+        (entry) =>
+          group.books.includes(entry.bookId) &&
+          !options.excluded.has(entry.chapter) &&
+          !options.prior.has(entry.chapter)
+      )
+      .map((entry): PlannedChapter => ({
+        chapter: entry.chapter,
+        bookId: entry.bookId,
+        genre: group.id,
+        testament: testamentOfBook(entry.bookId),
+        verses: entry.verses,
+        fresh: true
+      }))
+      .sort(
+        (left, right) =>
+          sha256(`${options.seed}|${left.chapter}`).localeCompare(
+            sha256(`${options.seed}|${right.chapter}`)
+          ) || left.chapter.localeCompare(right.chapter)
+      );
+    freshPool[group.id] = ranked.length;
+    const reserved = reserveCounts[group.id] ?? 0;
+    const compared = comparisonCounts[group.id] ?? 0;
+    if (ranked.length < reserved + compared)
+      throw new Error(`not-enough-fresh-chapters:${group.id}`);
+    reserve.push(...ranked.slice(0, reserved));
+    comparison.push(...ranked.slice(reserved, reserved + compared));
+  }
+  const order = (left: PlannedChapter, right: PlannedChapter) =>
+    BOOK_IDS.indexOf(left.bookId as never) -
+      BOOK_IDS.indexOf(right.bookId as never) ||
+    Number(left.chapter.split(".")[1]) - Number(right.chapter.split(".")[1]);
+  return {
+    reserve: reserve.sort(order),
+    comparison: comparison.sort(order),
+    freshPool
+  };
+}
+
+export async function buildComparisonPlan(options: {
+  basePlanPath: string;
+  seed: string;
+  reserve: number;
+  comparison: number;
+}): Promise<ComparisonPlan> {
+  const base = await readJson<ExperimentPlan>(options.basePlanPath);
+  const chapterSource = base.chapterSource.path;
+  if ((await fileSha256(chapterSource)) !== base.chapterSource.sha256)
+    throw new Error(`chapter-source-changed:${chapterSource}`);
+  const { prior, priorSelections } = await earlierSelections(
+    base.priorSelections.map((selection) => selection.path)
+  );
+  for (const [index, selection] of priorSelections.entries())
+    if (selection.sha256 !== base.priorSelections[index]!.sha256)
+      throw new Error(`prior-selection-changed:${selection.path}`);
+  const drawn = selectComparisonChapters({
+    inventory: await chapterInventoryFromBibleJson(chapterSource),
+    excluded: new Set([
+      ...base.development.map((entry) => entry.chapter),
+      ...base.test.map((entry) => entry.chapter),
+      ...base.consultedBeforeSplit,
+      ...base.forcedDevelopment
+    ]),
+    prior,
+    seed: options.seed,
+    reserve: options.reserve,
+    comparison: options.comparison
+  });
+  return {
+    version: COMPARISON_PLAN_VERSION,
+    createdAt: new Date().toISOString(),
+    seed: options.seed,
+    basePlan: {
+      path: options.basePlanPath,
+      sha256: await fileSha256(options.basePlanPath)
+    },
+    chapterSource: base.chapterSource,
+    policy: {
+      comparisonChapters: options.comparison,
+      reserveChapters: options.reserve,
+      allocation: "genre share of all chapters, largest remainder",
+      ranking: "sha256(seed|chapter) ascending within genre, reserve first",
+      requiresFreshChapters: true
+    },
+    freshPool: drawn.freshPool,
+    reserveSha256: sha256(
+      stableStringify(drawn.reserve.map((entry) => entry.chapter))
+    ),
+    reserve: drawn.reserve,
+    comparison: drawn.comparison
+  };
+}
+
+/** Splits a prediction or an acquisition may name, in either plan. */
+export const PLAN_SPLITS = [
+  "development",
+  "test",
+  "comparison",
+  "reserve"
+] as const;
+export type PlanSplit = (typeof PLAN_SPLITS)[number];
+
+/** Splits opened only by a freeze: the experiment test and the sealed reserve. */
+export const SEALED_SPLITS = new Set<string>(["test", "reserve"]);
+
+export function splitChapters(
+  plan: ExperimentPlan | ComparisonPlan,
+  split: string
+): string[] {
+  const entries = (plan as unknown as Record<string, unknown>)[split];
+  if (!PLAN_SPLITS.includes(split as PlanSplit) || !Array.isArray(entries))
+    throw new Error(`unknown-split:${split}`);
+  return (entries as PlannedChapter[]).map((entry) => entry.chapter);
 }

@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
+import { promisify } from "node:util";
 import {
   countAnnotations,
   concordanceChapterUrl
@@ -15,7 +18,15 @@ import {
   alignTokenSequences,
   goldVerseFromConcordance
 } from "../scripts/strong-concordance-rebuild/gold.js";
-import { selectChapters } from "../scripts/strong-concordance-rebuild/plan.js";
+import { sourceWordOfStepRow } from "../scripts/strong-concordance-rebuild/compareView.js";
+import {
+  SEALED_SPLITS,
+  allocateByShare,
+  selectChapters,
+  selectComparisonChapters,
+  splitChapters,
+  type ComparisonPlan
+} from "../scripts/strong-concordance-rebuild/plan.js";
 import { assertNoEvaluatorInput } from "../scripts/strong-concordance-rebuild/predict.js";
 import type { PredictedVerse } from "../scripts/strong-concordance-rebuild/predict.js";
 import {
@@ -387,5 +398,130 @@ describe("occurrence-level scoring", () => {
     assert.equal(record?.outcome, "visible-overlap");
     assert.ok(record?.difficulty.includes("source-position-shift"));
     assert.ok(!records.some((candidate) => candidate.position === 30));
+  });
+});
+
+describe("comparison sample and sealed reserve", () => {
+  const inventory = [
+    "Gen",
+    "Exod",
+    "Lev",
+    "Ps",
+    "Prov",
+    "Matt",
+    "Mark",
+    "Rom"
+  ].flatMap((bookId) =>
+    Array.from({ length: 12 }, (_, index) => ({
+      chapter: `${bookId}.${index + 1}`,
+      bookId,
+      verses: 20
+    }))
+  );
+
+  it("splits a total in proportion, largest remainder first", () => {
+    assert.deepEqual(allocateByShare(10, { a: 1, b: 1, c: 1 }), {
+      a: 4,
+      b: 3,
+      c: 3
+    });
+    assert.deepEqual(allocateByShare(5, { law: 187, minor: 67 }), {
+      law: 4,
+      minor: 1
+    });
+    assert.deepEqual(allocateByShare(0, { a: 1 }), { a: 0 });
+  });
+
+  it("draws a disjoint, deterministic reserve and sample from fresh chapters", () => {
+    const excluded = new Set(["Gen.1", "Ps.2"]);
+    const prior = new Set(["Gen.2", "Matt.3"]);
+    const options = {
+      inventory,
+      excluded,
+      prior,
+      seed: "seed",
+      reserve: 8,
+      comparison: 16
+    };
+    const first = selectComparisonChapters(options);
+    assert.deepEqual(selectComparisonChapters(options), first);
+    assert.equal(first.reserve.length, 8);
+    assert.equal(first.comparison.length, 16);
+    const reserved = new Set(first.reserve.map((entry) => entry.chapter));
+    assert.ok(first.comparison.every((entry) => !reserved.has(entry.chapter)));
+    for (const entry of [...first.reserve, ...first.comparison])
+      assert.ok(!excluded.has(entry.chapter) && !prior.has(entry.chapter));
+    // The law holds 36 of the 96 chapters: 3 of 8 reserved, 6 of 16 compared.
+    assert.equal(
+      first.reserve.filter((entry) => entry.genre === "law").length,
+      3
+    );
+    assert.equal(
+      first.comparison.filter((entry) => entry.genre === "law").length,
+      6
+    );
+    assert.equal(first.freshPool.law, 34);
+    assert.throws(
+      () =>
+        selectComparisonChapters({ ...options, reserve: 60, comparison: 60 }),
+      /not-enough-fresh-chapters:law/u
+    );
+  });
+
+  it("names plan splits and keeps the test and the reserve behind a freeze", () => {
+    assert.ok(SEALED_SPLITS.has("test") && SEALED_SPLITS.has("reserve"));
+    assert.ok(!SEALED_SPLITS.has("comparison"));
+    const plan = {
+      comparison: [{ chapter: "Gen.3" }],
+      reserve: [{ chapter: "Gen.4" }]
+    } as unknown as ComparisonPlan;
+    assert.deepEqual(splitChapters(plan, "comparison"), ["Gen.3"]);
+    assert.throws(() => splitChapters(plan, "development"), /unknown-split/u);
+    assert.throws(() => splitChapters(plan, "seed"), /unknown-split/u);
+  });
+
+  it("refuses to acquire the reserve without a freeze", async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "comparison-plan-"));
+    const planPath = path.join(dir, "plan.json");
+    await writeFile(
+      planPath,
+      JSON.stringify({ comparison: [], reserve: [{ chapter: "Gen.4" }] })
+    );
+    await assert.rejects(
+      promisify(execFile)(process.execPath, [
+        "--import",
+        "tsx",
+        "scripts/strong-concordance-rebuild/run.ts",
+        "acquire",
+        "--plan",
+        planPath,
+        "--editions",
+        "SG21",
+        "--splits",
+        "reserve"
+      ]),
+      (error: { stderr?: string }) =>
+        /reserve-split-requires-freeze/u.test(error.stderr ?? "")
+    );
+  });
+
+  it("reads a STEP source word as the reader sees it", () => {
+    const hebrew = "וְ/הַ/נָּחָשׁ";
+    assert.deepEqual(
+      sourceWordOfStepRow(
+        `Gen.3.1#01=L | ${hebrew} | ve./ha./na.Chash | and/ the/ snake | H9002/H9009/{H5175} | HC/Td/Ncmsa`
+      ),
+      {
+        surface: hebrew.replace(/\//gu, ""),
+        gloss: "and/ the/ snake",
+        morphology: "HC/Td/Ncmsa"
+      }
+    );
+    assert.deepEqual(
+      sourceWordOfStepRow(
+        "Mat.1.1#01=NKO | Βίβλος (Biblos) | [The] book | G0976=N-NSF | βίβλος=book | NA28+NA27"
+      ),
+      { surface: "Βίβλος", gloss: "[The] book", morphology: "N-NSF" }
+    );
   });
 });

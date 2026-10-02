@@ -122,3 +122,32 @@ non, ancrage, abstention, silence de la référence, variante source. Les verset
 non comparables (versification, texte divergent) sont comptés avec leur raison.
 `sample` tire un échantillon déterministe et stratifié des désaccords de
 développement pour une revue assistée, conservée hors Git.
+
+## Échantillon de comparaison et réserve scellée
+
+Après l'expérience, `plan-comparison` tire d'un coup, parmi les chapitres
+qu'aucune sélection passée n'a touchés, un échantillon de comparaison et une
+réserve, au prorata des genres de la Bible. Le rapport est
+[`docs/strong-concordance-comparison-2026-10-02.md`](../../docs/strong-concordance-comparison-2026-10-02.md).
+
+```sh
+yarn exec tsx scripts/strong-concordance-rebuild/run.ts plan-comparison \
+  --seed strong-concordance-comparison-2026-10-02 --comparison 150 --reserve 120
+yarn exec tsx scripts/strong-concordance-rebuild/run.ts acquire \
+  --plan outputs/strong-concordance-night/plan-comparison-v1.json \
+  --editions SG21 --splits comparison
+yarn exec tsx scripts/strong-concordance-rebuild/run.ts predict \
+  --plan outputs/strong-concordance-night/plan-comparison-v1.json \
+  --edition SG21 --scenario target-excluded --split comparison --policy ABCDEFG
+```
+
+L'échantillon se mesure et s'examine librement. La réserve, comme le test de
+l'expérience, ne s'ouvre qu'avec un gel : `acquire`, `score`, `sample` et
+`compare-view` la refusent sans `--freeze`. Son empreinte est inscrite dans le
+plan.
+
+`compare-view` écrit, pour une prédiction évaluée, chaque verset avec nos
+placements, ceux de Concordance et le bilan de chaque mot source. Le prototype
+local les affiche (`yarn exec tsx scripts/strong-prototype/server.ts`, page
+`/concordance`). Ces vues citent le texte et les annotations de référence :
+elles restent sous `outputs/`.
