@@ -1,3 +1,9 @@
+import {
+  parseStepReference,
+  type ParsedStepReference,
+  type StepReferenceVariant
+} from "./stepReference.js";
+export { STEP_TO_OSIS_BOOK } from "./stepReference.js";
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 
@@ -6,11 +12,11 @@ import {
   type OriginalVerse,
   type OriginalVerseMap
 } from "./originalSource.js";
-import { referenceKey } from "./strongCsv.js";
 import { normalizeStepStrongCode } from "./lexiconV3/identity.js";
 
 export interface StepOriginalToken {
   sourceReference?: string;
+  referenceVariants?: StepReferenceVariant[];
   sourceLineNumber?: number;
   identitySuffix?: string;
   ref: string;
@@ -74,9 +80,11 @@ export type StepBackedOriginalToken = OriginalToken & {
   stepSourceIdentity: string;
   /** Canonical ref written before parentheses in the STEP source. */
   stepMainRef: string;
-  /** Alternate refs written between parentheses in the STEP source. */
+  /** Round-bracket coordinates used by the French projection. Other conventions
+   * remain in stepReferenceVariants and are not additional French occurrences. */
   stepAlternateRefs: string[];
-  /** Complete source provenance; aliases are not additional occurrences. */
+  stepReferenceVariants?: StepReferenceVariant[];
+  /** Provenance of the projected refs; all declared variants are kept separately. */
   stepReferenceProvenance: StepReferenceProvenance[];
 };
 
@@ -174,82 +182,6 @@ export function selectStepEvidenceForOccurrence(
 interface StepOriginalReadOptions {
   bookIds?: Set<string>;
 }
-
-export const STEP_TO_OSIS_BOOK = new Map<string, string>([
-  ["Gen", "Gen"],
-  ["Exo", "Exod"],
-  ["Lev", "Lev"],
-  ["Num", "Num"],
-  ["Deu", "Deut"],
-  ["Jos", "Josh"],
-  ["Jdg", "Judg"],
-  ["Rut", "Ruth"],
-  ["1Sa", "1Sam"],
-  ["2Sa", "2Sam"],
-  ["1Ki", "1Kgs"],
-  ["2Ki", "2Kgs"],
-  ["1Ch", "1Chr"],
-  ["2Ch", "2Chr"],
-  ["Ezr", "Ezra"],
-  ["Neh", "Neh"],
-  ["Est", "Esth"],
-  ["Job", "Job"],
-  ["Psa", "Ps"],
-  ["Pro", "Prov"],
-  ["Ecc", "Eccl"],
-  ["Sng", "Song"],
-  ["Isa", "Isa"],
-  ["Jer", "Jer"],
-  ["Lam", "Lam"],
-  ["Eze", "Ezek"],
-  ["Ezk", "Ezek"],
-  ["Dan", "Dan"],
-  ["Hos", "Hos"],
-  ["Joe", "Joel"],
-  ["Jol", "Joel"],
-  ["Amo", "Amos"],
-  ["Oba", "Obad"],
-  ["Jon", "Jonah"],
-  ["Mic", "Mic"],
-  ["Nah", "Nah"],
-  ["Nam", "Nah"],
-  ["Hab", "Hab"],
-  ["Zep", "Zeph"],
-  ["Hag", "Hag"],
-  ["Zec", "Zech"],
-  ["Mal", "Mal"],
-  ["Mat", "Matt"],
-  ["Mrk", "Mark"],
-  ["Mar", "Mark"],
-  ["Luk", "Luke"],
-  ["Jhn", "John"],
-  ["Joh", "John"],
-  ["Act", "Acts"],
-  ["Rom", "Rom"],
-  ["1Co", "1Cor"],
-  ["2Co", "2Cor"],
-  ["Gal", "Gal"],
-  ["Eph", "Eph"],
-  ["Php", "Phil"],
-  ["Phi", "Phil"],
-  ["Col", "Col"],
-  ["1Th", "1Thess"],
-  ["2Th", "2Thess"],
-  ["1Ti", "1Tim"],
-  ["2Ti", "2Tim"],
-  ["Tit", "Titus"],
-  ["Phm", "Phlm"],
-  ["Heb", "Heb"],
-  ["Jas", "Jas"],
-  ["Jam", "Jas"],
-  ["1Pe", "1Pet"],
-  ["2Pe", "2Pet"],
-  ["1Jn", "1John"],
-  ["2Jn", "2John"],
-  ["3Jn", "3John"],
-  ["Jud", "Jude"],
-  ["Rev", "Rev"]
-]);
 
 const STEP_CODE_PATTERN = /\b[HG]\d{4,5}[A-Za-z]?(?:_[A-Za-z])?\b/gu;
 
@@ -469,6 +401,7 @@ export async function readStepOriginalTokens(
       source === "TAGNT"
         ? parseTagntToken(ref, parts)
         : parseTahotToken(ref, parts);
+    if (ref.variants.length) token.referenceVariants = ref.variants;
     token.sourceLineNumber = lineIndex + 1;
     token.sourceReference = parts[0]?.replace(/^\uFEFF/u, "");
     if (token.strongByBase.size > 0) {
@@ -550,6 +483,9 @@ function addTokenToOriginalVerseMap(
     stepSourceIdentity,
     stepMainRef: token.ref,
     stepAlternateRefs: [...token.alternateRefs],
+    ...(token.referenceVariants
+      ? { stepReferenceVariants: token.referenceVariants }
+      : {}),
     stepReferenceProvenance: [
       { ref: token.ref, role: "main" },
       ...token.alternateRefs.map((ref) => ({
@@ -665,34 +601,8 @@ function parseTagntToken(
   };
 }
 
-interface ParsedStepRef {
-  key: string;
-  alternateKeys: string[];
-  tokenIndex: number;
-  type: string;
-}
-
-function parseStepRef(input: string): ParsedStepRef | undefined {
-  const match = input
-    .replace(/^\uFEFF/u, "")
-    .match(
-      /^([1-3]?[A-Za-z]{2,3})\.(\d+)\.(\d+)(?:\((\d+)\.(\d+)\))?#(\d+)=([^\t]+)$/u
-    );
-  if (!match) return undefined;
-
-  const bookId = STEP_TO_OSIS_BOOK.get(match[1] ?? "");
-  if (!bookId) return undefined;
-
-  const alternateKeys =
-    match[4] && match[5] ? [referenceKey(bookId, match[4], match[5])] : [];
-
-  return {
-    key: referenceKey(bookId, match[2] ?? "", match[3] ?? ""),
-    alternateKeys,
-    tokenIndex: Number.parseInt(match[6] ?? "0", 10),
-    type: match[7] ?? ""
-  };
-}
+type ParsedStepRef = ParsedStepReference;
+const parseStepRef = parseStepReference;
 
 function addTokenStrongSets(
   verse: Map<string, StepStrongCandidates>,

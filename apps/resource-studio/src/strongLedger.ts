@@ -8,6 +8,10 @@ import {
 } from "./strongConcordanceGeneration.js";
 import { learnWitnessDisplayHeads } from "./strongConcordanceRefinement.js";
 import {
+  learnCarrierLexicon,
+  CONCORDANCE_CONTEXT_POLICY
+} from "./strongConcordanceContext.js";
+import {
   readUnparsedSourceRows,
   type UnparsedSourceRow
 } from "./strongSourceCoverage.js";
@@ -226,7 +230,10 @@ export interface StrongLedger {
   concordanceDisplay?: ConcordanceDisplay;
   generationOptions?: Pick<
     StrongLedgerOptions,
-    "applyCuratedOverrides" | "excludedReferenceNames" | "resolveOccurrences"
+    | "applyCuratedOverrides"
+    | "excludedReferenceNames"
+    | "resolveOccurrences"
+    | "concordanceContext"
   >;
   resolutionSummary?: ReturnType<typeof aggregateResolutionMetrics>;
   unassignedCanonicalSource?: Array<{
@@ -341,6 +348,7 @@ export interface StrongLedgerVerseMetrics {
 }
 
 export interface StrongLedgerOptions {
+  concordanceContext?: boolean;
   /** Opt-in local candidate projection evaluated by the Concordance experiment. */
   concordanceDisplay?: ConcordanceDisplay;
   /** False is retained for masked baseline comparisons. Normal generation resolves all occurrences. */
@@ -443,6 +451,7 @@ const STRONG_LEDGER_PIPELINE_SOURCES = [
   "src/strongSourceUnits.ts",
   "src/strongSourceReading.ts",
   "src/strongConcordanceGeneration.ts",
+  "src/strongConcordanceContext.ts",
   "src/strongConcordanceFollowup.ts",
   "src/strongConcordanceRefinement.ts",
   "src/strongSourceCoverage.ts",
@@ -450,6 +459,7 @@ const STRONG_LEDGER_PIPELINE_SOURCES = [
   "src/strongReaderText.ts",
   "src/render.ts",
   "src/stepOriginals.ts",
+  "src/stepReference.ts",
   "src/strongCsv.ts",
   "src/strongDictionaryLexicon.ts",
   "src/strongLedger.ts",
@@ -515,6 +525,9 @@ export function strongLedgerInputFingerprint(
     inputPaths,
     values: {
       bible: options.bible,
+      concordanceContext: options.concordanceContext
+        ? CONCORDANCE_CONTEXT_POLICY
+        : null,
       concordance: options.concordanceDisplay
         ? {
             policy: CONCORDANCE_GENERATION_POLICY,
@@ -611,6 +624,8 @@ export async function generateStrongLedgerWithDictionary(
   strongDictionaryInput: ResolvedDefaultStrongDictionaryInput
 ): Promise<StrongLedger> {
   const generateStart = perfStart();
+  if (options.concordanceContext && !options.concordanceDisplay)
+    throw new Error("context-refinement-requires-concordance-projection");
   if (
     options.concordanceDisplay &&
     (!["expressions", "heads"].includes(options.concordanceDisplay) ||
@@ -934,12 +949,16 @@ export async function generateStrongLedgerWithDictionary(
             };
       }
       const displayEvidence = learnWitnessDisplayHeads(requests, corpus());
+      const contextLexicon = options.concordanceContext
+        ? learnCarrierLexicon(corpus())
+        : undefined;
       for (const verse of ledgerVerses) {
         const input = resolutionInputs.get(verse.ref)!;
         applyConcordanceGeneration({
           verse,
           sourceRows: rows,
           displayEvidence,
+          contextLexicon,
           display: options.concordanceDisplay,
           witnesses: input.references.flatMap((r) =>
             r.verse ? [concordanceWitness(r.name, r.verse.row.text)] : []
@@ -1046,6 +1065,7 @@ export async function generateStrongLedgerWithDictionary(
     unparsedCanonicalSource,
     concordanceDisplay: options.concordanceDisplay,
     generationOptions: {
+      concordanceContext: options.concordanceContext === true,
       applyCuratedOverrides: options.applyCuratedOverrides !== false,
       excludedReferenceNames: options.excludedReferenceNames ?? [],
       resolveOccurrences: options.resolveOccurrences !== false

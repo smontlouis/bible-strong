@@ -15,10 +15,19 @@ import type { SourceRow } from "./strongSourceUnits.js";
 import { extractGoldCarrierPlacements } from "./strongCarriers.js";
 import { stripTags, tokenizeText } from "./tokenize.js";
 import { withoutPublisherNotes } from "./strongReaderText.js";
+import {
+  refineConcordanceContext,
+  CONCORDANCE_CONTEXT_POLICY,
+  type CarrierLexicon
+} from "./strongConcordanceContext.js";
 
 export const CONCORDANCE_GENERATION_POLICY = "concordance-candidate-v1";
 export type ConcordanceDisplay = "expressions" | "heads";
 export type ConcordanceTrace = {
+  context?: {
+    policy: typeof CONCORDANCE_CONTEXT_POLICY;
+    changes: ReturnType<typeof refineConcordanceContext>["changes"];
+  };
   policy: typeof CONCORDANCE_GENERATION_POLICY;
   refinementPolicy: typeof CONCORDANCE_FOLLOWUP_POLICY;
   display: ConcordanceDisplay;
@@ -78,6 +87,7 @@ export function applyConcordanceGeneration(options: {
   witnesses: ReconstructionWitness[];
   displayEvidence: PhraseHeadEvidence[];
   display: ConcordanceDisplay;
+  contextLexicon?: CarrierLexicon;
 }): void {
   const { verse, display } = options;
   const initial = reconstructionFromLedger(verse);
@@ -91,7 +101,15 @@ export function applyConcordanceGeneration(options: {
       minimumHeadFamilies: 1
     }
   });
-  const { prediction } = result;
+  const context = options.contextLexicon
+    ? refineConcordanceContext({
+        initial: result.prediction,
+        witnesses: options.witnesses,
+        lexicon: options.contextLexicon,
+        display
+      })
+    : undefined;
+  const prediction = context?.prediction ?? result.prediction;
   // A coordinate fallback or a split with no aligned witness text does not
   // establish which native verse owns the proposed translation relation.
   const mappingIssues = prediction.issues.filter(
@@ -174,6 +192,25 @@ export function applyConcordanceGeneration(options: {
     ] as const)
       delete annotation[key];
     annotation.visibility = "reader";
+    const contextChange = context?.changes.find((change) =>
+      change.after.some((after) => after.id === p.id)
+    );
+    if (
+      contextChange &&
+      contextChange.before.some(
+        (before) =>
+          before.startWordIndex !== p.startWordIndex ||
+          before.endWordIndex !== p.endWordIndex
+      )
+    ) {
+      annotation.source = "reference-backed-original";
+      annotation.confidence = 0; // No calibrated probability is assigned to a new rule.
+      annotation.reason = contextChange.rule;
+      annotation.diagnostics = [
+        ...annotation.diagnostics,
+        ...contextChange.evidence
+      ];
+    }
     annotation.placement = p.kind;
     if (p.kind === "empty") {
       assert(
@@ -234,6 +271,9 @@ export function applyConcordanceGeneration(options: {
   resolution.decisions = prediction.units;
   resolution.unownedAnnotationIds = prediction.unownedAnnotationIds;
   resolution.concordance = {
+    context: context
+      ? { policy: CONCORDANCE_CONTEXT_POLICY, changes: context.changes }
+      : undefined,
     policy: CONCORDANCE_GENERATION_POLICY,
     refinementPolicy: CONCORDANCE_FOLLOWUP_POLICY,
     display,
@@ -248,9 +288,10 @@ export function applyConcordanceGeneration(options: {
     visible: count("visible"),
     empty: count("empty"),
     unresolved: count("unresolved"),
-    policySupportedVerses: mappingIssues.length
-      ? 0
-      : resolution.metrics.policySupportedVerses,
+    policySupportedVerses:
+      mappingIssues.length || context?.changes.length
+        ? 0
+        : resolution.metrics.policySupportedVerses,
     grammaticalEmpties: prediction.units.filter(
       (u) => u.state === "empty" && u.assurance === "linguistic-rule"
     ).length,

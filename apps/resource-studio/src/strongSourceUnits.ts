@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { normalizeStepStrongCode } from "./lexiconV3/identity.js";
-import { STEP_TO_OSIS_BOOK } from "./stepOriginals.js";
+import {
+  parseStepReference,
+  type StepReferenceVariant
+} from "./stepReference.js";
 import type { OriginalStrongOccurrence } from "./completeAlignment.js";
 import {
   assessSourceReading,
@@ -12,6 +15,7 @@ export interface SourceRow {
   id: string;
   source: "TAGNT" | "TAHOT";
   reference: string;
+  referenceVariants?: StepReferenceVariant[];
   tokenIndex: number;
   reading: string;
   file: string;
@@ -50,14 +54,8 @@ export function parseSourceRow(
   lineNumber: number
 ): SourceRow | undefined {
   const p = line.split("\t");
-  const m = p[0]
-    ?.replace(/^\uFEFF/u, "")
-    .match(
-      /^([1-3]?[A-Za-z]{2,3})\.(\d+)\.(\d+)(?:\((\d+)\.(\d+)\))?#(\d+)=([^\t]+)$/u
-    );
-  if (!m) return;
-  const book = STEP_TO_OSIS_BOOK.get(m[1]);
-  assert(book, `unknown-book:${m[1]}`);
+  const parsed = parseStepReference(p[0] ?? "");
+  if (!parsed) return;
   const source = file.includes("TAGNT") ? "TAGNT" : "TAHOT";
   const greek = source === "TAGNT";
   const primary = greek ? p[3].split("=")[0] : p[4];
@@ -73,13 +71,14 @@ export function parseSourceRow(
   };
   const primaryCodes = codes(`${primary} ${evidence.expanded}`);
   const primaryBases = new Set(primaryCodes.map(baseStrong));
-  const reference = `${book}.${Number(m[2])}.${Number(m[3])}`;
+  const reference = parsed.key;
   return {
-    id: `${source}.${reference}.${Number(m[6])}.${m[7]}`,
+    id: `${source}.${reference}.${parsed.tokenIndex}.${parsed.type}`,
     source,
     reference,
-    tokenIndex: Number(m[6]),
-    reading: m[7],
+    ...(parsed.variants.length ? { referenceVariants: parsed.variants } : {}),
+    tokenIndex: parsed.tokenIndex,
+    reading: parsed.type,
     file,
     line: lineNumber,
     surface: p[1],

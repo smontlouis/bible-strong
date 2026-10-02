@@ -63,6 +63,7 @@ export interface CanonicalOccurrenceDecision {
     evidenceSha256: string;
     readingUnresolved: boolean;
     readingAssessment?: SourceReadingAssessment;
+    referenceVariants?: import("./stepReference.js").StepReferenceVariant[];
   };
   state: WorkflowDecision["state"];
   assurance: string;
@@ -497,7 +498,8 @@ export function resolveCanonicalVerse(options: {
         morphology: entry.morphology,
         evidenceSha256: entry.unit.sourceEvidenceSha256,
         readingUnresolved: entry.unit.readingUnresolved,
-        readingAssessment: readingAssessments.get(d.sourceUnitId)
+        readingAssessment: readingAssessments.get(d.sourceUnitId),
+        referenceVariants: sourceRows.get(d.sourceUnitId)?.referenceVariants
       },
       state: d.state,
       assurance,

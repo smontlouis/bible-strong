@@ -84,6 +84,7 @@ const ledger = await generateStrongLedger({
   applyCuratedOverrides: false,
   excludedReferenceNames,
   concordanceDisplay: display,
+  concordanceContext: manifest.concordanceContext === true,
   writeLexicalReport: false,
   writeArtifacts: !benchmark
 });
