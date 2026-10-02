@@ -137,11 +137,25 @@ reads this file, does **one** unchecked item, validates it, updates this file an
       registration): manual `register('/sw.js')` → activated, controls the page, 48 precached;
       offline reload of `/plans` renders the shell with icon fonts (screenshot), only the
       `HEAD /` probes fail. typecheck, eslint, prettier OK.
-- [ ] **6. Registration + update prompt.** Register only in production web builds with
+- [x] **6. Registration + update prompt.** Register only in production web builds with
       `@serwist/window`. When a new worker is waiting, show a non-blocking prompt
       ("A new version is available" / reload, fr + en via i18n extraction); reload once the new
       worker controls the page. Check for updates on focus/visibility and periodically. Unit
       test any extracted state logic.
+      **Evidence**: `src/features/app/ServiceWorkerUpdates.web.tsx`, mounted next to
+      `ThemedToaster` in `FullAppRuntime.web`. Production only; in development it unregisters
+      any worker left by a local export (same `localhost:9090` origin as `yarn web`). Update
+      checks on `visibilitychange` (visible) and hourly; failures logged at debug (normal
+      offline). Prompt = own bottom banner with `Button` + close (`role="status"`, both exposed
+      as buttons), keys `app.webUpdateAvailable` / `app.webUpdateReload` added by hand (fr/en):
+      `yarn i18n` reorders the whole catalogue, so it was not committed. A sonner-native toast was
+      tried first and rejected: v0.22.2 turns `duration: Infinity` into an immediate dismissal
+      after any gesture (`setTimeout(…, Infinity)`), and its RNGH tap gesture swallows the action
+      `Pressable` on web (no `SKIP_WAITING` was ever posted; existing toast actions on web may be
+      affected too). Chrome, fresh profile: automatic registration, 48 precached; simulated
+      deploy (changed precached file + `build-web-sw`) → `waiting` → banner; « Recharger » →
+      `SKIP_WAITING`, reload, new revision active, no waiting worker. No extracted pure logic,
+      so no unit test. typecheck, eslint, prettier OK.
 - [ ] **7. Offline startup.** With the SW active and the network offline, reloading `/home`
       must render the shell. Audit `RootLayout.web.tsx` startup (`initializeResourceAppCheck`,
       `loadWebFonts`, `setI18n`, Sentry, Firebase) for awaits that hang or throw offline and
