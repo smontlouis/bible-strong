@@ -32,6 +32,11 @@ code et analyses propres, aucun de ses résultats consulté).
   S21, sans régression sur NEG, LSG, Darby, DarbyR ni sur les canaris historiques.
   Elles sont actives par défaut depuis, B départageant d'abord par l'identifiant
   des témoins (section 11).
+- **Étape 3.** Avec les témoins exportés par Concordance le 28 septembre, la
+  locution entière (E), la position source (F) et les mots non traduits
+  établis par les témoins (G), le test réservé S21 passe à **0,867 de F1
+  porteur** et **0,875 de F1 par occurrence**, l'incertitude à 17,8 %, et 89
+  mots non traduits sont reproduits au bon endroit (section 12).
 - **Pas d'adaptation de moteur par Bible.** Le profil S21 est identique au profil
   commun ; les calibrations formelle et dynamique ne font pas mieux. L'adaptation
   nécessaire pour NEG79 porte sur son texte local (sauts de ligne perdus : 201
@@ -556,6 +561,90 @@ placer au hasard : qualité de placement 0,979, couverture des porteurs de
 référence 0,686. Sur les 4 325 versets signalés pour la source, 4 048 sont
 deutérocanoniques, hors du corpus source STEP : aucun Strong n'y est inventé.
 
+## 12. Nouveaux témoins, locution entière et mots non traduits (2 octobre)
+
+Décisions prises ensuite : les seuls témoins réutilisables sont LSG, Darby et
+DarbyR, pris dans les exports de Concordance.bible du 28 septembre ; un Strong
+de locution couvre la locution entière ; les positions source des pages
+publiques de ces trois Bibles peuvent servir.
+
+**Témoins.** Le CSV exporté n'étiquette qu'un mot d'une locution (« peur »
+dans « de peur que ») ; l'OSIS étiquette tous ses mots en un groupe.
+`scripts/concordance-witnesses/build.ts` part du CSV, élargit l'étiquette à la
+locution quand elle est d'un seul tenant (environ 94 % : 4 981 locutions LSG,
+6 322 Darby, 6 555 DarbyR) en notant le mot étiqueté (`head`), puis ajoute la
+position source (`pos`) lue dans les pages de chapitre. Les 3 × 1 189 pages ont
+été acquises en deux heures, trois flux à une page toutes les six secondes
+environ, sans paramètre de requête ; 99,85 % des étiquettes reçoivent leur
+position. Texte et inventaire Strong restent identiques à l'export, ce que
+l'outil vérifie verset par verset. Les anciens CSV sont archivés sous
+`data/strongs/archive/before-2026-09-28/`.
+
+**Trois options nouvelles, actives par défaut :**
+
+- **E — locution entière.** Une étiquette témoin sur plusieurs mots se
+  transfère en un seul porteur. Ailleurs, la locution compte une fois, par son
+  mot `head` : décomptes, budgets et lexiques appris sont inchangés, et sans E le
+  moteur se comporte exactement comme avec des étiquettes d'un mot.
+- **F — position source.** Un porteur transféré est rattaché au mot source que
+  désigne la position de son étiquette témoin, avant toute estimation par
+  proximité. Les Strong affichés ne changent pas ; leur mot source, oui.
+- **G — mots non traduits.** Un mot source qu'un témoin laisse non traduit
+  (repéré par sa position) est établi non traduit dans la cible quand les deux
+  mots de part et d'autre de la marque s'y retrouvent à l'identique, une seule
+  fois. Un témoin qui traduit ce mot ne l'empêche que si sa traduction figure
+  près de l'emplacement proposé ; une étiquette portée par une ponctuation est
+  une traduction, pas une absence. Sinon le mot reste incertain.
+
+Développement, S21 et NEG avec la cible exclue :
+
+| Moteur                  | SG21 F1 exact | SG21 F1 occ. | SG21 incertitude | NEG F1 exact | NEG F1 occ. | NEG incertitude | NEG versets comptabilisés |
+| ----------------------- | ------------: | -----------: | ---------------: | -----------: | ----------: | --------------: | ------------------------: |
+| ABCD, anciens témoins   |        0,8397 |       0,8351 |           20,0 % |       0,9315 |      0,9228 |           9,3 % |                    38,5 % |
+| ABCD, nouveaux témoins  |        0,8419 |       0,8373 |           20,0 % |       0,9335 |      0,9241 |           9,2 % |                    38,2 % |
+| + E (locution entière)  |        0,8524 |       0,8480 |           19,9 % |       0,9465 |      0,9368 |           9,2 % |                    38,2 % |
+| + F (position source)   |        0,8524 |       0,8572 |           19,9 % |       0,9465 |      0,9469 |           9,1 % |                    38,2 % |
+| + G (mots non traduits) |        0,8524 |       0,8572 |           19,3 % |       0,9465 |      0,9469 |           7,9 % |                    42,9 % |
+
+E fait passer les locutions reproduites exactement de 11 à 93 sur 169 pour
+S21 et de 0 à 100 sur 132 pour NEG. G établit 51 mots non traduits pour S21 :
+49 au même emplacement que Concordance, 1 ailleurs (convention d'affichage) et
+1 faux (Rm 1.27, où S21 rend le καί par « et » plus loin). Pour NEG, il en
+établit 102 : 94 au même emplacement, 4 ailleurs, 1 que Concordance n'annote
+pas, 3 hors évaluation et aucun faux. Une première version de G, qui exigeait
+qu'aucun témoin ne traduise le mot, n'en établissait que 4 sur 351 pour S21 ;
+une autre prenait pour une absence un Strong porté par une ponctuation
+(Jb 30.10).
+
+**Réservé, troisième et dernière ouverture** (`development-decision-v5.json`,
+`freeze-v3.json`, politique ABCDEFG) :
+
+| Édition | Scénario       | F1 exact (v2 → étape 3) | P exact         | F1 occurrence   | Incertitude     | Locutions exactes |
+| ------- | -------------- | ----------------------- | --------------- | --------------- | --------------- | ----------------- |
+| SG21    | cible exclue   | 0,8521 → 0,8666         | 0,9188 → 0,9334 | 0,8468 → 0,8745 | 19,2 % → 17,8 % | 11 → 92 sur 162   |
+| SG21    | famille exclue | 0,7897 → 0,8010         | 0,9128 → 0,9246 | 0,7865 → 0,8084 | 27,8 % → 27,2 % | 18 → 76 sur 162   |
+| NEG     | cible exclue   | 0,9297 → 0,9448         | 0,9475 → 0,9622 | 0,9228 → 0,9502 | 10,0 % → 8,0 %  | 0 → 95 sur 116    |
+| NEG     | famille exclue | 0,8370 → 0,8479         | 0,9278 → 0,9394 | 0,8334 → 0,8539 | 21,9 % → 21,5 % | 9 → 73 sur 116    |
+
+Sur le réservé, G établit 96 mots non traduits pour S21 (cible exclue) : 89
+au même emplacement, 3 ailleurs, 1 faux et 3 hors évaluation. Les deux autres
+faux vides de S21 viennent de la règle grammaticale déjà en place. Pour NEG,
+G en établit 140, dont 133 au même emplacement, et aucun faux.
+Les témoins de contrôle se mesurent désormais sur leur nouvelle annotation,
+locutions entières comprises : leur F1 n'est plus comparable à l'ancien
+(Sg1910 0,8529, Darby 0,8564, DarbyR 0,8542 sur le réservé). Canaris masqués,
+sur la même nouvelle référence : Sg1910 0,8488, Darby 0,8426, DarbyR 0,8376.
+Audit NBS 10×5 : qualité de placement 0,9806, couverture du lecteur 52,9 %
+(52,1 % avant E), un seul Strong de référence absent.
+
+**Limites.** Une locution qui finit par une élision (« parce qu’ », environ
+9 %) ne se transfère que par son mot principal, le mot cible soudé
+(« qu’en ») ne correspondant pas. G ne couvre qu’une partie des mots non
+traduits (51 sur 351 pour S21) : les autres restent incertains, ce qui est
+voulu. Les positions du NT diffèrent parfois entre NA et STEP. Les pages ont
+été lues le 2 octobre, l’export date du 28 septembre : 617 étiquettes LSG,
+183 Darby et 266 DarbyR n’ont pas retrouvé leur position.
+
 ## Limites
 
 - **Accord éditorial, pas vérité.** Concordance est une référence humaine
@@ -588,23 +677,21 @@ deutérocanoniques, hors du corpus source STEP : aucun Strong n'y est inventé.
 
 ## Recommandations
 
-1. **Moteur commun.** Fait : A, B (retouchée) C et D sont actives par défaut
-   pour toutes les Bibles, sans branchement par édition (section 11). La
-   génération des neuf Bibles n'a pas été relancée.
+1. **Moteur commun.** Fait : A à G sont actives par défaut pour toutes les
+   Bibles, sans branchement par édition (sections 11 et 12). Seules NBS et NFC
+   ont été régénérées ; les sept autres Bibles ne l'ont pas encore été.
 2. **Adaptations par Bible.** Aucune adaptation de moteur n'est justifiée pour
    S21 ni, au vu de ses résultats, pour NEG79. L'adaptation nécessaire pour NEG79
    concerne **les données** : rétablir les sauts de ligne perdus (201 mots soudés
    et environ 4 900 ponctuations collées au mot suivant) et vérifier les limites
    de versets du texte local avant toute génération.
-3. **Identité des occurrences répétées.** C'est la principale source d'erreurs
-   visibles restantes (articles grecs, occurrences inversées) et d'une partie des
-   abstentions. Les CSV témoins n'ont pas de positions source, alors que les pages
-   Concordance actuelles de LSG et Darby en portent. Un export autorisé des témoins
-   avec positions BHS/NA permettrait de transférer l'identité de l'occurrence, pas
-   seulement le Strong, et d'actualiser des instantanés déjà dérivés d'environ 2,4 %.
-4. **Locutions.** Décision : locution complète. Elle doit venir des témoins
-   autorisés qui la portent (groupes de l'export OSIS de Concordance), jamais de
-   la cible évaluée.
+3. **Identité des occurrences répétées.** Fait en partie : les témoins portent
+   désormais la position source lue dans les pages publiques, et F rattache chaque
+   porteur transféré au bon mot source (section 12). Un export de Concordance
+   incluant ces positions éviterait de lire les pages.
+4. **Locutions.** Fait : la locution entière vient des groupes de l'export
+   OSIS des témoins (option E, section 12), jamais de la cible évaluée. Reste le
+   cas des locutions terminées par une élision (« parce qu’ »).
 5. **Candidats lexicaux modernes.** Les abstentions sans candidat
    (« recouvriront », « végétation », « monstruosités », « pièges ») demandent un
    apport lexical validé (gloses françaises vérifiées, morphologie) plutôt qu'un
@@ -612,17 +699,19 @@ deutérocanoniques, hors du corpus source STEP : aucun Strong n'y est inventé.
 6. **Évaluations futures.** Garder les corrections éditoriales désactivées dans
    toute évaluation S21 ou NEG (les deux entrées S21 venues de Concordance sont
    retirées), et ne plus présenter les chapitres de développement ni de test de
-   cette expérience comme une réserve vierge : le test a été rouvert une seconde
-   fois pour l'addendum de la section 11.
+   cette expérience comme une réserve vierge : le test a été rouvert pour les
+   addenda des sections 11 et 12. Une prochaine évaluation demande de nouveaux
+   chapitres réservés.
 
 ## Validation logicielle
 
-- 24 nouveaux tests : outil (parseur, alignement, plan, garde de fuite, graphe
+- 30 nouveaux tests : outil (parseur, alignement, plan, garde de fuite, graphe
   d'import, classement des occurrences, renumérotation), moteur (enclitiques,
   numéraux, variantes invariantes, identifiants alternatifs, préférence des
-  témoins, options par défaut) et réparation NEG79 (sauts de ligne, plages des
-  paroles de Jésus).
-- Suite du workspace : **1 135 tests, 1 112 réussis, 22 échecs, 1 ignoré**. Les
+  témoins, options par défaut, locutions, positions, mots non traduits),
+  témoins (élargissement des locutions, balisage publié) et réparation NEG79
+  (sauts de ligne, plages des paroles de Jésus).
+- Suite du workspace : **1 141 tests, 1 118 réussis, 22 échecs, 1 ignoré**. Les
   22 échecs sont exactement les échecs préexistants du lexique V3 consignés au
   checkpoint ; aucun nouvel échec.
 - `yarn typecheck` réussi ; typage strict des nouveaux scripts et tests réussi ;
@@ -637,7 +726,11 @@ Commandes complètes : [README de l'outil](../scripts/strong-concordance-rebuild
 Scripts de lot conservés sous `outputs/strong-concordance-night/` :
 `run-initial-predictions.sh`, `run-development-ablation.sh`,
 `rescore-development.sh`, `run-test.sh`, `run-canary.sh`, puis pour la section
-11 `run-b-witness.sh`, `run-test-v2.sh` et `run-canary-v3.sh`.
+11 `run-b-witness.sh`, `run-test-v2.sh` et `run-canary-v3.sh`, pour la section
+12 `run-witness-locutions.sh`, `run-witness-positions.sh`, `run-test-v3.sh` et
+`run-canary-step3.sh`. Les témoins se reconstruisent avec
+`scripts/concordance-witnesses/build.ts` (exports et pages sous
+`data/external/concordance-bible/`, acquises par `run.ts acquire-witness`).
 
 Les générations intégrales (`src/strongAutonomous.ts <racine> <bible>`)
 demandent un tas Node d'environ 12 Go
@@ -657,5 +750,8 @@ demandent un tas Node d'environ 12 Go
 | `evaluator-only/review/`                                       | dossiers et verdicts de la revue assistée           |
 | `replay/`, `canary/`, `logs/`                                  | rejeux, canaris historiques, journaux               |
 | `development-decision-v4.json`, `freeze-v2.json`               | retouche de B : décision et gel                     |
+| `development-decision-v5.json`, `freeze-v3.json`               | étape 3 (témoins, E, F, G) : décision et gel        |
+| `replay/witness-2026-09-28/`, `replay/witness-positions*/`     | mesures de l'étape 3 (développement)                |
+| `replay/step3-test/`, `canary/step3/`                          | réservé et canaris de l'étape 3                     |
 | `replay/b-witness/`                                            | B retouchée : développement et addendum du réservé  |
 | `../strong-audit/nbs-initial`, `nbs-default`, `nbs-default-b2` | audits NBS 10×5 de la section 11                    |

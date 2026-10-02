@@ -67,3 +67,9 @@ Suite décidée ensuite (section 11 du rapport) : A–D actives par défaut, B
 retouchée (identifiant des témoins d'abord) et vérifiée en addendum du réservé,
 corrections S21 tirées de Concordance retirées, référence de l'audit NBS 10×5
 mise à jour.
+
+Étape 3 (2 octobre, section 12) : témoins repris des exports Concordance du
+28 septembre, locution entière (E), positions source (F) et mots non traduits
+établis par les témoins (G), mesurés sur le développement puis vérifiés une
+dernière fois sur le réservé ; NEG79 et DBR préparés pour publication, rien de
+publié.
