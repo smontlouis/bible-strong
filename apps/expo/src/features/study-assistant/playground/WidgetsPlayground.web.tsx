@@ -14,7 +14,7 @@ import {
   PanelRight,
   Maximize2,
   FlaskConical,
-} from 'lucide-react'
+} from '../lucideIcons'
 import themes from '~themes'
 import { ThemeProvider, useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'

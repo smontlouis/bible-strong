@@ -83,7 +83,7 @@ reads this file, does **one** unchecked item, validates it, updates this file an
       180x180, no manifest console warning. **Kill-switch note for item 9**: a missing `/sw.js`
       falls back to `index.html` (HTML), so the browser keeps the old worker; retiring the SW
       must ship a self-unregistering `sw.js`, never just delete it.
-- [ ] **4b. Split the web bundle.** Analyse first: export with `EXPO_ATLAS=true` (Expo Atlas)
+- [x] **4b. Split the web bundle.** Analyse first: export with `EXPO_ATLAS=true` (Expo Atlas)
       or a source map explorer and record in **Baseline** the 15 heaviest packages/modules in
       the entry and what pulls them into startup (root layout, `FullAppRuntime`, workspace).
       Then pick the smallest set of changes with the biggest gain, likely a mix of: Expo Router
@@ -97,6 +97,25 @@ reads this file, does **one** unchecked item, validates it, updates this file an
       native typecheck/lint unchanged, `web:export` + `check-web-assets` pass. Revise the
       precache budget in **Baseline**: precache all JS/CSS chunks (downloaded in the background
       after first paint, so routes keep working offline) except heavyweight optional ones.
+      **Evidence**: Atlas (`EXPO_ATLAS=true`) top offenders were whole-library imports:
+      `lucide-react` 2.21 MB (barrel, 36 icons used), `effect` 1.83 MB + `fast-check` 0.42 MB
+      (already `effect/Schema`, which itself pulls Arbitrary/fast-check: nothing to gain without
+      tree shaking), `date-fns` 1.12 MB (locale barrel + `format` barrel), HeroUI/React Aria
+      1.23 MB only for the web date picker, assistant UI 1.52 MB exclusive. Tried and rejected:
+      `asyncRoutes` (shared code is hoisted into a 21 MB `__common` loaded at startup, gain
+      ~1–2 MB for 99 chunks) and Expo tree shaking (25.2 → 18.7 MB but still experimental in
+      SDK 56, needs `experimentalImportSupport`, 166 s and 6.8 GB RSS per export). Done instead:
+      per-icon lucide imports (`study-assistant/lucideIcons.ts` + `global.d.ts` typing),
+      per-function/per-locale `date-fns` imports, lazy `ReadingDatePickerField.web` (36 px
+      placeholder, CSS kept in the wrapper), lazy `AssistantLauncher` in `FullAppRuntime.web`.
+      **Result**: entry 25.20 MB → 18.85 MB raw (−25 %, 17.97 MiB vs the 25 MiB limit), new
+      lazy chunks `AssistantLauncher` 1.62 MB and `ReadingDatePickerField` 1.31 MB; all JS+CSS
+      22.6 MB raw / 3.7 MB brotli. Browser: client-side navigation through 72 static routes,
+      0 console errors, 0 failed chunk loads, both lazy chunks load. `/local-search` and
+      `/bible-compare-verses` crash when opened without params: pre-existing, unrelated (flagged
+      as a separate task). typecheck, eslint and prettier on touched files OK; Jest 2925 pass,
+      the same 4 env-dependent failures with and without this change
+      (`mobileResourceCatalog-test`, `strongBibleDownloadPlan-test`).
 - [ ] **5. Service worker.** Worker source + its own tsconfig (WebWorker lib), outside the app
       typecheck if needed. `scripts/build-web-sw.mjs`: esbuild bundle, then `injectManifest`
       over `dist` (hashed `_expo/static` assets not cache-busted, startup fonts, icons, manifest,
@@ -161,7 +180,11 @@ Measured 2026-10-01 on `master` @ `992a95d14` (`web:export`, 53 s).
 - **Today in production**: no manifest (`/manifest.json` returns the SPA `index.html`), no
   service worker, `lang="en"`, `httpEquiv` typo. Every asset, hashed or not, is served with
   `Cache-Control: public, max-age=0, must-revalidate`.
-- **Precache budget** (provisional, to be revised by item 4b now that splitting is allowed):
+- **Precache budget (revised by 4b)**: precache every `_expo/static` JS/CSS chunk (22.6 MB raw,
+  3.7 MB brotli), `index.html`, the startup fonts, icons and manifest: about 25.5 MB decoded and
+  5 MB transferred, fetched in the background after the first paint. Budget kept at ≤ 30 MB
+  decoded / ≤ 6 MB transfer. Other `/assets/**` files stay runtime-cached.
+- **Initial budget (superseded)**:
   the entry is the application and cannot shrink without code splitting, so the ≤ 15 MB target
   is not reachable as-is. Budget: **≤ 30 MB decoded
   and ≤ 6 MB compressed transfer**, limited to `index.html`, `_expo/static/**/*.{js,css}`

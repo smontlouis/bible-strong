@@ -1,6 +1,7 @@
 'use client'
 
-import { ChevronRightIcon, type LucideIcon } from 'lucide-react'
+import { ChevronRightIcon } from '../../../lucideIcons'
+import type { LucideIcon } from 'lucide-react'
 import {
   Collapsible,
   CollapsibleContent,

@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckIcon, CircleAlertIcon, ChevronRightIcon } from 'lucide-react'
+import { CheckIcon, CircleAlertIcon, ChevronRightIcon } from '../../../lucideIcons'
 import {
   Collapsible,
   CollapsibleContent,

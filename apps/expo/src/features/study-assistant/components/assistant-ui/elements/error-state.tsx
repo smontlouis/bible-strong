@@ -1,7 +1,7 @@
 'use client'
 
 import type { ComponentProps } from 'react'
-import { CircleAlertIcon, RefreshCwIcon } from 'lucide-react'
+import { CircleAlertIcon, RefreshCwIcon } from '../../../lucideIcons'
 import { cn } from '~features/study-assistant/components/utils'
 import { ShimmerLabel } from './surfaces'
 

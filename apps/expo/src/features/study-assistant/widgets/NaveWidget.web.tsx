@@ -1,7 +1,7 @@
 import { useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTranslation } from 'react-i18next'
-import { ArrowUpRightIcon } from 'lucide-react'
+import { ArrowUpRightIcon } from '../lucideIcons'
 import type { NaveWidget as Descriptor } from '@bible-strong/ai-contract/contract'
 import ResourcePreviewContent from '~features/bibleReferencePreview/ResourcePreviewContent'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'

@@ -1,7 +1,7 @@
 import AssistantMarkdown from '../AssistantMarkdown.web'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowUpRightIcon } from 'lucide-react'
+import { ArrowUpRightIcon } from '../lucideIcons'
 import { useTranslation } from 'react-i18next'
 import { useSetAtom } from 'jotai'
 import type { PassageTarget, PassageWidget as Descriptor } from '@bible-strong/ai-contract/contract'

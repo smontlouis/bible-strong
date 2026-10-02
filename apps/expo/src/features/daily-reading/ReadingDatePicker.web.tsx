@@ -1,78 +1,15 @@
-import { DatePicker } from '@heroui/react/date-picker'
-import { DateField } from '@heroui/react/date-field'
-import { Calendar } from '@heroui/react/calendar'
-import { parseDate } from '@internationalized/date'
-import { I18nProvider } from 'react-aria-components'
-import { useTranslation } from 'react-i18next'
-import { webFontFamily } from '~helpers/webFontFamily'
-import { isCivilDate } from '~features/plans/readingCalendar'
-import themes from '~themes'
-import { useTheme } from '~themes/ThemeProvider'
+import { lazy, Suspense } from 'react'
+import Box from '~common/ui/Box'
 import './reading-datepicker.generated.web.css'
 import type { ReadingDatePickerProps } from './ReadingDatePicker'
 
-const ReadingDatePicker = ({
-  value,
-  label,
-  onChange,
-  minimum,
-  maximum,
-}: ReadingDatePickerProps) => {
-  const theme = useTheme()
-  const { i18n } = useTranslation()
-  const fontFamily = webFontFamily(theme.fontFamily.text)
-  const dark = ['black', 'dark', 'mauve', 'night'].some(
-    name => themes[name].colors === theme.colors
-  )
-  const themeClass = `reading-datepicker-theme${dark ? ' dark' : ''}`
-  return (
-    <I18nProvider locale={i18n.language}>
-      <DatePicker
-        className={themeClass}
-        aria-label={label}
-        value={isCivilDate(value) ? parseDate(value) : null}
-        minValue={minimum && isCivilDate(minimum) ? parseDate(minimum) : undefined}
-        maxValue={maximum && isCivilDate(maximum) ? parseDate(maximum) : undefined}
-        onChange={date => {
-          if (date) onChange(date.toString())
-        }}
-        granularity="day"
-        shouldForceLeadingZeros
-        style={{ fontFamily }}
-      >
-        <DateField.Group>
-          <DateField.Input>{segment => <DateField.Segment segment={segment} />}</DateField.Input>
-          <DateField.Suffix>
-            <DatePicker.Trigger aria-label={label}>
-              <DatePicker.TriggerIndicator />
-            </DatePicker.Trigger>
-          </DateField.Suffix>
-        </DateField.Group>
-        <DatePicker.Popover className={themeClass} style={{ fontFamily }}>
-          <Calendar aria-label={label}>
-            <Calendar.Header>
-              <Calendar.YearPickerTrigger>
-                <Calendar.YearPickerTriggerHeading />
-                <Calendar.YearPickerTriggerIndicator />
-              </Calendar.YearPickerTrigger>
-              <Calendar.NavButton slot="previous" />
-              <Calendar.NavButton slot="next" />
-            </Calendar.Header>
-            <Calendar.Grid>
-              <Calendar.GridHeader>
-                {day => <Calendar.HeaderCell>{day}</Calendar.HeaderCell>}
-              </Calendar.GridHeader>
-              <Calendar.GridBody>{date => <Calendar.Cell date={date} />}</Calendar.GridBody>
-            </Calendar.Grid>
-            <Calendar.YearPickerGrid>
-              <Calendar.YearPickerGridBody>
-                {({ year }) => <Calendar.YearPickerCell year={year} />}
-              </Calendar.YearPickerGridBody>
-            </Calendar.YearPickerGrid>
-          </Calendar>
-        </DatePicker.Popover>
-      </DatePicker>
-    </I18nProvider>
-  )
-}
+// HeroUI and React Aria weigh ~1.2 MB on web: load them only when a date picker renders.
+const ReadingDatePickerField = lazy(() => import('./ReadingDatePickerField.web'))
+
+const ReadingDatePicker = (props: ReadingDatePickerProps) => (
+  <Suspense fallback={<Box className="h-9 min-w-36" />}>
+    <ReadingDatePickerField {...props} />
+  </Suspense>
+)
+
 export default ReadingDatePicker

@@ -1,4 +1,3 @@
-import AssistantLauncher from '~features/study-assistant/AssistantLauncher.web'
 import { trackAnalyticsScreen } from '~helpers/analytics'
 import WorkspaceAnalytics from '~features/app-switcher/WorkspaceAnalytics.web'
 import ReferencePreviewHost from '~features/bibleReferencePreview/ReferencePreviewHost'
@@ -7,7 +6,7 @@ import { useWorkspaceRoutePanel } from '~navigation/useWorkspaceRoutePanel'
 import WorkspaceLayout from '~features/app-switcher/WorkspaceLayout'
 import * as Sentry from '@sentry/react-native'
 import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-router'
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { RootSiblingParent } from 'react-native-root-siblings'
 import TrackPlayer from 'react-native-track-player'
 
@@ -29,6 +28,9 @@ import { useWebAuthStatus } from './useWebAuthStatus'
 import { isPublicContentPath } from '~navigation/publicContentRoutes'
 import { PublicShellProvider } from '~navigation/PublicShellContext'
 import { resolvePublicShellMode } from './publicShellPolicy'
+
+// The assistant UI (~1.5 MB) is not needed for the first paint.
+const AssistantLauncher = lazy(() => import('~features/study-assistant/AssistantLauncher.web'))
 
 const NavigationTracking = () => {
   const pathname = usePathname()
@@ -119,7 +121,11 @@ const FullAppRuntime = ({ theme }: { theme: Theme }) => {
                 <WorkspaceLayout mode={publicShellMode}>{stack}</WorkspaceLayout>
               </PublicShellProvider>
               {!publicShellActive && !authPending && <WorkspaceAnalytics />}
-              {!publicShellActive && !authPending && <AssistantLauncher />}
+              {!publicShellActive && !authPending && (
+                <Suspense fallback={null}>
+                  <AssistantLauncher />
+                </Suspense>
+              )}
               {!publicShellActive && !authPending && <ConfirmDialogHost />}
               <ThemedToaster />
               {!publicShellActive && !authPending && <ChangelogModal />}
