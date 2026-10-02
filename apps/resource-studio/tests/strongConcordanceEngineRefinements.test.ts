@@ -426,8 +426,8 @@ test("the engine enables every measured refinement by default and allows a full 
     encliticHostTransfer: true,
     digitNumeralTransfer: true,
     witnessLocutions: true,
-    witnessSourcePositions: false,
-    witnessEmpties: false
+    witnessSourcePositions: true,
+    witnessEmpties: true
   });
   assert.deepEqual(resolveEnginePolicy({ encliticHostTransfer: false }), {
     readingInvariantVariants: true,
@@ -435,8 +435,8 @@ test("the engine enables every measured refinement by default and allows a full 
     encliticHostTransfer: false,
     digitNumeralTransfer: true,
     witnessLocutions: true,
-    witnessSourcePositions: false,
-    witnessEmpties: false
+    witnessSourcePositions: true,
+    witnessEmpties: true
   });
 });
 

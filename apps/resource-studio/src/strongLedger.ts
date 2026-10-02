@@ -378,8 +378,8 @@ export const DEFAULT_ENGINE_POLICY: Readonly<StrongEnginePolicy> = {
   encliticHostTransfer: true,
   digitNumeralTransfer: true,
   witnessLocutions: true,
-  witnessSourcePositions: false,
-  witnessEmpties: false
+  witnessSourcePositions: true,
+  witnessEmpties: true
 };
 
 export function resolveEnginePolicy(

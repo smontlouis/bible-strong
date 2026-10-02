@@ -17,6 +17,8 @@ export interface CarrierPlacement {
   source?: string;
   /** Source word numbers (BHS/NA, STEP `#NN`) given by the witness tag. */
   positions?: number[];
+  /** An empty placement whose tag holds punctuation rather than nothing. */
+  punctuation?: boolean;
 }
 
 /** Parse the gold markup into word, phrase, and empty Strong occurrences. */
@@ -58,7 +60,8 @@ export function extractGoldCarrierPlacements(
             wordRanges,
             carrierStart
           ),
-          ...located
+          ...located,
+          ...(innerText.trim() ? { punctuation: true } : {})
         });
       } else {
         const startWordIndex = coveredWordIndexes[0]!;

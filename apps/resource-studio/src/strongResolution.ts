@@ -72,6 +72,8 @@ export interface ResolutionCarrier {
   originalOccurrenceId?: string;
   /** Witness placements: source word numbers given by the witness tag. */
   positions?: number[];
+  /** Witness empty placements carried by punctuation (« visage[.] »). */
+  punctuation?: boolean;
 }
 export interface ResolutionUnit {
   id: string;

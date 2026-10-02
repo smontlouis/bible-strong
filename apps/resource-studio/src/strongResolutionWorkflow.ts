@@ -372,10 +372,11 @@ function sourceWord(occurrenceId: string) {
 
 /**
  * Untranslated words carried over from the witnesses. A witness marks this
- * very source word (by its position) as untranslated, no witness translates
- * it, and the two words on each side of the witness's mark appear once, the
- * same, in the target: the target leaves the same word untranslated at the
- * same place. Anything less stays unresolved.
+ * very source word (by its position) as untranslated, and the two words on
+ * each side of its mark appear once, the same, in the target: the target
+ * leaves the same word untranslated at the same place. A witness translating
+ * the word contradicts this only when its rendering appears in the target near
+ * that place. Anything less stays unresolved.
  */
 export function proposeWitnessEmpties(
   d: ResolutionDossier
@@ -399,12 +400,19 @@ export function proposeWitnessEmpties(
         (word) => word.ref === w.ref && p.positions?.includes(word.position)
       );
     const votes: Array<{ name: string; family: string; anchor: number }> = [];
-    let contradiction = false;
+    const renderings: string[][] = [];
     for (const w of d.witnesses) {
       const marks = w.placements.filter((p) => named(w, p));
       if (!marks.length) continue;
-      if (marks.some((p) => p.kind !== "empty")) {
-        contradiction = true;
+      // Punctuation carrying the Strong is a rendering, not an absence.
+      if (marks.some((p) => p.punctuation)) continue;
+      const rendered = marks.find((p) => p.kind !== "empty");
+      if (rendered) {
+        renderings.push(
+          w.words
+            .slice(rendered.startWordIndex!, rendered.endWordIndex! + 1)
+            .map(exactToken)
+        );
         continue;
       }
       const at = marks[0]!.insertAfterWordIndex!;
@@ -431,10 +439,18 @@ export function proposeWitnessEmpties(
       if (hits.length !== 1) continue;
       votes.push({ name: w.name, family: w.family, anchor: hits[0]! });
     }
+    if (!votes.length || new Set(votes.map((v) => v.anchor)).size !== 1)
+      continue;
+    const anchor = votes[0]!.anchor;
+    const near = target.slice(Math.max(0, anchor - 2), anchor + 4);
     if (
-      contradiction ||
-      !votes.length ||
-      new Set(votes.map((v) => v.anchor)).size !== 1
+      renderings.some(
+        (rendering) =>
+          rendering.length > 0 &&
+          near.some((_, start) =>
+            rendering.every((t, j) => near[start + j] === t)
+          )
+      )
     )
       continue;
     proposals.push({
