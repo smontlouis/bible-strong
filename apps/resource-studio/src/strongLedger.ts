@@ -82,6 +82,12 @@ import {
   DEFAULT_KAIKKI_JSONL
 } from "./kaikkiSqliteIndex.js";
 import {
+  buildLexicalGapLexicon,
+  lexicalGapFillPass,
+  readKaikkiFormLemmas,
+  readOpenOfficeSynonyms
+} from "./lexicalGapFill.js";
+import {
   readStepOriginalData,
   getStepSourceIdentity,
   selectStepEvidenceForRefs,
@@ -139,7 +145,8 @@ export type StrongSource =
   | "reference-only"
   | "manual-review"
   | "llm-review"
-  | "curated-override";
+  | "curated-override"
+  | "lexical-gap-fill";
 
 export interface StrongStepEvidence {
   source: "TAHOT" | "TAGNT";
@@ -553,6 +560,7 @@ const STRONG_LEDGER_PIPELINE_SOURCES = [
   "src/frenchLexicalSafety.ts",
   "src/kaikkiSqliteIndex.ts",
   "src/lexicalCandidateReport.ts",
+  "src/lexicalGapFill.ts",
   "src/lexicon.ts",
   "src/maximumWeightMatching.ts",
   "src/originalSource.ts",
@@ -1045,7 +1053,7 @@ export async function generateStrongLedgerWithDictionary(
       values.push(item);
       items.set(item.ref, values);
     }
-    for (const verse of ledgerVerses) {
+    const resolveVerse = (verse: StrongLedgerVerse) => {
       verse.resolution = resolveCanonicalVerse({
         bible: options.bible,
         verse,
@@ -1059,6 +1067,51 @@ export async function generateStrongLedgerWithDictionary(
           strongIdentifierFamilies: enginePolicy.strongIdentifierFamilies
         }
       });
+    };
+    for (const verse of ledgerVerses) resolveVerse(verse);
+    // Q: a free word between placed source neighbours carries a word it is
+    // known to render; changed verses are resolved again.
+    if (enginePolicy.lexicalGapFill) {
+      const openOfficePath = existingPath(FRENCH_LEXICAL_SOURCES.openOffice);
+      const formLemmas = measureSync("load Kaikki form lemmas", () =>
+        readKaikkiFormLemmas(defaultKaikkiSqlitePath(DEFAULT_KAIKKI_JSONL))
+      );
+      const gapLexicon = measureSync("build lexical gap lexicon", () =>
+        buildLexicalGapLexicon({
+          witnessVerses: references.flatMap((reference) => [
+            ...reference.map.values()
+          ]),
+          formLemmas,
+          dictionary: dictionaryCandidates,
+          synonyms: openOfficePath
+            ? readOpenOfficeSynonyms(openOfficePath)
+            : undefined
+        })
+      );
+      measureSync("lexical gap fill", () =>
+        lexicalGapFillPass({
+          verses: ledgerVerses,
+          lexicon: gapLexicon,
+          witnessesOf: (verse) =>
+            (resolutionInputs.get(verse.ref)?.references ?? []).flatMap(
+              (reference) =>
+                reference.verse
+                  ? [
+                      {
+                        name: reference.name,
+                        ref: referenceKey(
+                          reference.verse.row.bookId,
+                          reference.verse.row.chapter,
+                          reference.verse.row.verse
+                        ),
+                        tokens: reference.verse.tokens
+                      }
+                    ]
+                  : []
+            ),
+          resolve: resolveVerse
+        })
+      );
     }
     rebuildLedgerVerses(ledgerVerses);
     rows.clear();
