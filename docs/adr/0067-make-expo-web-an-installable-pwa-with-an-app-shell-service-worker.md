@@ -43,13 +43,22 @@ Make the Web client an installable PWA whose service worker caches the applicati
   18.9 MB. Expo Router async routes and Metro tree shaking were measured and not adopted: the
   first moves shared code into an equally large common chunk, the second is still experimental
   in SDK 56 and needs about 7 GB of memory per export.
+- **Computers install, phones get the native apps.** The installable PWA targets computers.
+  On phones and tablets, an inline script in `index.html` cancels `beforeinstallprompt`, iOS Safari
+  shows Apple's Smart App Banner (`apple-itunes-app`, `app-argument=biblestrong://<route>` so an
+  installed app opens the same screen), and other mobile browsers and home-screen web apps show a
+  dismissible in-app banner linking to the App Store or Google Play, snoozed for 30 days once
+  closed. The manifest and service worker stay on every device: manual installs keep working,
+  they are just no longer promoted. `prefer_related_applications` was not used because Chrome
+  would then refuse to install the PWA on computers too.
 - **Gate.** `scripts/check-pwa.mjs` validates the export (manifest, icons, HTML links, headers,
   same-origin precache within budget) before every production deployment.
 
 ## Consequences
 
-The Web client can be installed on desktop and mobile, starts offline, and shows the existing
-offline states instead of failing. Content stays online-only and no API response is cached, so
+The Web client can be installed on computers, starts offline on every device, and shows the
+existing offline states instead of failing. Mobile visitors are steered to the native apps, which
+remain the full offline experience. Content stays online-only and no API response is cached, so
 the protections of ADR-0065 are unaffected.
 
 A service worker can keep users on a stale build. Network-first navigations, a revalidated

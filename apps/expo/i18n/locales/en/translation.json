@@ -73,6 +73,8 @@
   "app.updateReady": "Update complete. Please restart the application.",
   "app.webUpdateAvailable": "A new version of Bible Strong is available.",
   "app.webUpdateReload": "Reload",
+  "app.nativeAppPrompt": "Bible Strong is better in the app: offline reading and more.",
+  "app.nativeAppPromptAction": "Get the app",
   "app.errorDetails": "Error details",
   "Copier": "Copy",
   "app.errorReset": "Reset application",

@@ -38,6 +38,7 @@ for (const [label, pattern] of [
   ['manifest link', /<link rel="manifest" href="\/manifest\.webmanifest"/],
   ['theme-color', /<meta name="theme-color"/],
   ['apple-touch-icon', /<link rel="apple-touch-icon" href="\/icons\/apple-touch-icon\.png"/],
+  ['Smart App Banner', /<meta name="apple-itunes-app" content="app-id=1454738221"/],
 ]) {
   assert.match(html, pattern, `index.html is missing ${label}`)
 }

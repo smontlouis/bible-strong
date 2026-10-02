@@ -314,3 +314,29 @@ served by `wrangler dev` on `localhost:9090`.
 - **Pre-existing issues found**: `/local-search` and `/bible-compare-verses` crash when opened
   without params (separate task suggested); sonner-native 0.22 toast actions are swallowed on web
   and `duration: Infinity` dismisses on first gesture.
+
+## Follow-up: computers install, phones get the native apps (2026-10-02)
+
+Requested after the final report: the PWA is only meant for computers; phones and tablets should
+be offered the native apps (agreed: Smart App Banner on iOS, same-route deep link, Android and other
+mobile browsers get an in-app banner, manifest and service worker kept everywhere).
+
+- **Done**: `apple-itunes-app` meta + inline script in `public/index.html` (cancels
+  `beforeinstallprompt` on iOS/Android, sets `app-argument=biblestrong://<route>`); pure logic and
+  tests in `src/features/app/nativeAppPrompt.ts`; `useNativeAppPrompt` (30-day snooze in storage,
+  keeps the banner meta on the current route) and `useServiceWorkerUpdate` hooks; one
+  `WebAppBanners` host stacking the update and native-app banners (`ServiceWorkerUpdates.web.tsx`
+  removed); keys `app.nativeAppPrompt` / `app.nativeAppPromptAction` (fr/en); `check-pwa` asserts
+  the Smart App Banner meta; ADR-0067 and the deployment doc updated.
+- **Evidence**: Jest `nativeAppPrompt-test` 4/4 (+16 suites in `src/features/app`); typecheck,
+  eslint, prettier OK; `web:build` + `check-pwa` valid. Chrome with an Android user agent:
+  `beforeinstallprompt.defaultPrevented === true`, banner shown, "Obtenir l'app" opens the Play
+  Store listing in a new tab, dismissal persisted across reload. Chrome desktop:
+  `defaultPrevented === false` (still installable), no banner. iOS 26.5 Simulator: Safari shows no
+  in-app banner (left to Apple's banner, which the Simulator never renders: no App Store); the
+  home-screen web app shows "Obtenir l'app". First attempt missed that case because iOS keeps
+  Safari's user agent in home-screen apps, fixed by checking `display-mode: standalone` /
+  `navigator.standalone`.
+- **Not verifiable here**: the Smart App Banner itself and its "Open" deep link need a real iPhone
+  with the App Store build after deployment. Expo Router handles `biblestrong://<path>` natively
+  (no custom `+native-intent`), and web and native share the same `app/` routes.

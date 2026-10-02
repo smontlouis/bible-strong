@@ -74,6 +74,8 @@
   "app.updateReady": "Mise à jour effectuée. Merci de redémarrer l’application.",
   "app.webUpdateAvailable": "Une nouvelle version de Bible Strong est disponible.",
   "app.webUpdateReload": "Recharger",
+  "app.nativeAppPrompt": "Bible Strong est plus complète dans l’app : lecture hors ligne et bien plus.",
+  "app.nativeAppPromptAction": "Obtenir l’app",
   "app.errorDetails": "Détails de l'erreur",
   "Copier": "Copier",
   "app.errorReset": "Réinitialiser l'application",

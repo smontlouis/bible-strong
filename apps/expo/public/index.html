@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -18,6 +18,30 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Bible Strong" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- iOS Safari Smart App Banner for the native app (ADR-0067). -->
+    <meta name="apple-itunes-app" content="app-id=1454738221" />
+    <script>
+      // Phones and tablets are pointed to the native apps; computers keep the install prompt.
+      // Mirrors src/features/app/nativeAppPrompt.ts, inline so it runs before the bundle.
+      ;(function () {
+        var ua = navigator.userAgent
+        var ios =
+          /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)
+        if (ios || /Android/i.test(ua)) {
+          window.addEventListener('beforeinstallprompt', function (event) {
+            event.preventDefault()
+          })
+        }
+        document
+          .querySelector('meta[name="apple-itunes-app"]')
+          .setAttribute(
+            'content',
+            'app-id=1454738221, app-argument=biblestrong://' +
+              location.pathname.replace(/^\/+/, '') +
+              location.search
+          )
+      })()
+    </script>
     <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
     <style id="expo-reset">
       /* These styles make the body full-height */
@@ -39,9 +63,7 @@
   </head>
 
   <body>
-    <noscript>
-      You need to enable JavaScript to run this app.
-    </noscript>
+    <noscript> You need to enable JavaScript to run this app. </noscript>
     <!-- The root element for your Expo app. -->
     <div id="root"></div>
   </body>

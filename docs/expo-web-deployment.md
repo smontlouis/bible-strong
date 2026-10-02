@@ -41,8 +41,14 @@ The web app is installable and starts offline (ADR-0067). Its files live in `app
 - `service-worker/sw.ts`, bundled into `dist/sw.js` by `scripts/build-web-sw.mjs` at the end of
   `web:export` and `web:build`. It precaches the shell (HTML, JS/CSS chunks, startup fonts, icons)
   within 30 MiB and never caches Resource API, Firebase or other cross-origin responses.
-- `src/features/app/ServiceWorkerUpdates.web.tsx` registers the worker in production builds and
-  shows a reload banner when a new deployment is waiting.
+- `src/features/app/WebAppBanners.web.tsx` registers the worker in production builds
+  (`useServiceWorkerUpdate`), shows a reload banner when a new deployment is waiting, and on phones
+  and tablets points to the native apps (`useNativeAppPrompt`, logic in `nativeAppPrompt.ts`).
+- Computers get the PWA install prompt; phones and tablets do not. `index.html` cancels
+  `beforeinstallprompt` on mobile, declares Apple's Smart App Banner for iOS Safari (app
+  `1454738221`, `app-argument` = the current route on the `biblestrong://` scheme), and other mobile
+  browsers show the in-app banner. The Smart App Banner never appears in the iOS Simulator (no App
+  Store); check it on a device after deployment.
 - `scripts/check-pwa.mjs` validates the export; the deploy workflow runs it before `wrangler deploy`.
 
 Test locally with the Resource API's allowed local origin (`http://localhost:9090`), not

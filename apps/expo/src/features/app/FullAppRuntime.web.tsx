@@ -28,7 +28,7 @@ import { useWebAuthStatus } from './useWebAuthStatus'
 import { isPublicContentPath } from '~navigation/publicContentRoutes'
 import { PublicShellProvider } from '~navigation/PublicShellContext'
 import { resolvePublicShellMode } from './publicShellPolicy'
-import ServiceWorkerUpdates from './ServiceWorkerUpdates.web'
+import WebAppBanners from './WebAppBanners.web'
 
 // The assistant UI (~1.5 MB) is not needed for the first paint.
 const AssistantLauncher = lazy(() => import('~features/study-assistant/AssistantLauncher.web'))
@@ -129,7 +129,7 @@ const FullAppRuntime = ({ theme }: { theme: Theme }) => {
               )}
               {!publicShellActive && !authPending && <ConfirmDialogHost />}
               <ThemedToaster />
-              <ServiceWorkerUpdates />
+              <WebAppBanners />
               {!publicShellActive && !authPending && <ChangelogModal />}
               {!publicShellActive && !authPending && <UnifiedTagsModal />}
               <ReferencePreviewHost />

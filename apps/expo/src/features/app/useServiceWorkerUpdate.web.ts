@@ -1,21 +1,12 @@
 import { Serwist } from '@serwist/window'
 import { useEffect, useRef, useState } from 'react'
-import { Pressable } from 'react-native'
-import { useTranslation } from 'react-i18next'
-import Button from '~common/ui/Button'
-import Box from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
-import { HStack } from '~common/ui/Stack'
-import Text from '~common/ui/Text'
 import { appLogger } from '~helpers/agentObservability'
 
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000
 
-// Registers the app-shell service worker (ADR-0067) and offers to reload when a new
-// deployment is waiting. Production web builds only. The prompt is a dedicated banner:
-// sonner-native toasts dismiss on press and swallow their action on web.
-const ServiceWorkerUpdates = () => {
-  const { t } = useTranslation()
+// Registers the app-shell service worker (ADR-0067) and reports when a new deployment is
+// waiting. Production web builds only.
+export const useServiceWorkerUpdate = () => {
   const serwistRef = useRef<Serwist | null>(null)
   const [updateWaiting, setUpdateWaiting] = useState(false)
 
@@ -72,31 +63,5 @@ const ServiceWorkerUpdates = () => {
     serwist.messageSkipWaiting()
   }
 
-  if (!updateWaiting) return null
-
-  return (
-    <Box pointerEvents="box-none" className="absolute bottom-4 left-0 right-0 items-center px-4">
-      <HStack
-        role="status"
-        className="w-full max-w-[420px] items-center gap-3 rounded-2xl border border-border bg-reverse py-2.5 pl-4 pr-2"
-        style={{ boxShadow: '0 8px 24px rgba(0, 0, 0, 0.18)' }}
-      >
-        <Text className="flex-1 text-[14px] text-default">{t('app.webUpdateAvailable')}</Text>
-        <Button small onPress={applyUpdate}>
-          {t('app.webUpdateReload')}
-        </Button>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('Fermer')}
-          hitSlop={8}
-          onPress={() => setUpdateWaiting(false)}
-          className="p-1.5"
-        >
-          <FeatherIcon name="x" size={18} color="tertiary" />
-        </Pressable>
-      </HStack>
-    </Box>
-  )
+  return { updateWaiting, applyUpdate, dismissUpdate: () => setUpdateWaiting(false) }
 }
-
-export default ServiceWorkerUpdates
