@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "projectName": "Bible Strong",
+  "autoSlim": false,
+  "nativeShells": {
+    "debug": {
+      "appName": "dev - Bible Strong",
+      "bundleId": "com.smontlouis.biblestrong.dev",
+      "scheme": "biblestrong"
+    },
+    "release": {
+      "appName": "Bible Strong",
+      "bundleId": "com.smontlouis.biblestrong",
+      "scheme": "biblestrong"
+    }
+  },
+  "environments": {
+    "development": { "envFile": ".env.development", "portRange": [8100, 8199] },
+    "staging": { "envFile": ".env.staging", "portRange": [8200, 8299] },
+    "preprod": { "portRange": [8300, 8399] },
+    "production": { "envFile": ".env.production", "portRange": [8400, 8499] }
+  }
+}
