@@ -4,6 +4,10 @@
  * outcome of each source word. It quotes target text and reference
  * annotations, so it stays under the ignored outputs directory.
  */
+import {
+  uncertainDisplayAnchor,
+  type UncertainDisplayBasis
+} from "../../src/strongResolution.js";
 import { tokenizeText } from "../../src/tokenize.js";
 import type { PredictedVerse, PredictionRun } from "./predict.js";
 import { disagreementCategory, type DisagreementCategory } from "./report.js";
@@ -17,7 +21,7 @@ import {
 } from "./score.js";
 import { chapterOfRef } from "./shared.js";
 
-export const COMPARE_VIEW_VERSION = "strong-concordance-compare-view-v1";
+export const COMPARE_VIEW_VERSION = "strong-concordance-compare-view-v2";
 
 export interface SourceWord {
   surface: string;
@@ -65,7 +69,13 @@ export interface CompareVerse {
   ours: {
     carriers: CompareCarrier[];
     empties: CompareEmpty[];
-    uncertain: Array<{ strong: string; position: number | null }>;
+    /** Shown at an estimated position among its neighbours; not an absence. */
+    uncertain: Array<{
+      after: number;
+      strong: string;
+      position: number | null;
+      basis: UncertainDisplayBasis;
+    }>;
   };
   theirs: { carriers: CompareCarrier[]; empties: CompareEmpty[] } | null;
   outcomes: CompareOutcome[];
@@ -99,26 +109,43 @@ const span = (start: number, end: number) =>
   Array.from({ length: end - start + 1 }, (_, index) => start + index);
 
 function ourSide(verse: PredictedVerse): CompareVerse["ours"] {
+  const readerCarriers = verse.carriers.filter(
+    (carrier) =>
+      carrier.visibility === "reader" &&
+      (carrier.placement === "word" || carrier.placement === "phrase") &&
+      carrier.startWordIndex !== undefined
+  );
+  const order = new Map(
+    verse.decisions.map((decision, index) => [decision.sourceUnitId, index])
+  );
+  const placed = readerCarriers.flatMap((carrier) => {
+    const index = order.get(carrier.resolutionUnitId ?? "");
+    return index === undefined
+      ? []
+      : [
+          {
+            order: index,
+            startWordIndex: carrier.startWordIndex!,
+            endWordIndex: carrier.endWordIndex ?? carrier.startWordIndex!
+          }
+        ];
+  });
+  const carried = new Set(
+    readerCarriers.map((carrier) => carrier.resolutionUnitId)
+  );
   return {
-    carriers: verse.carriers
-      .filter(
-        (carrier) =>
-          carrier.visibility === "reader" &&
-          (carrier.placement === "word" || carrier.placement === "phrase") &&
-          carrier.startWordIndex !== undefined
-      )
-      .map((carrier) => ({
-        tokens: span(
-          carrier.startWordIndex!,
-          carrier.endWordIndex ?? carrier.startWordIndex!
-        ),
-        strong: carrier.strong,
-        position: positionOfUnit(carrier.resolutionUnitId),
-        method:
-          carrier.placement === "phrase"
-            ? "phrase"
-            : (carrier.diagnostic ?? carrier.source)
-      })),
+    carriers: readerCarriers.map((carrier) => ({
+      tokens: span(
+        carrier.startWordIndex!,
+        carrier.endWordIndex ?? carrier.startWordIndex!
+      ),
+      strong: carrier.strong,
+      position: positionOfUnit(carrier.resolutionUnitId),
+      method:
+        carrier.placement === "phrase"
+          ? "phrase"
+          : (carrier.diagnostic ?? carrier.source)
+    })),
     empties: verse.decisions
       .filter((decision) => decision.state === "empty")
       .map((decision) => ({
@@ -127,12 +154,25 @@ function ourSide(verse: PredictedVerse): CompareVerse["ours"] {
         position: positionOfUnit(decision.sourceUnitId),
         method: decision.assurance
       })),
-    uncertain: verse.decisions
-      .filter((decision) => decision.state === "unresolved")
-      .map((decision) => ({
-        strong: decision.strong.join(" "),
-        position: positionOfUnit(decision.sourceUnitId)
-      }))
+    // A word whose source reading is left open may already be shown on one of
+    // our words: it is not drawn a second time.
+    uncertain: verse.decisions.flatMap((decision, index) => {
+      if (decision.state !== "unresolved" || carried.has(decision.sourceUnitId))
+        return [];
+      const shown = uncertainDisplayAnchor({
+        order: index,
+        anchor: decision.anchor,
+        placed
+      });
+      return [
+        {
+          after: shown.insertAfterWordIndex,
+          strong: decision.strong.join(" "),
+          position: positionOfUnit(decision.sourceUnitId),
+          basis: shown.basis
+        }
+      ];
+    })
   };
 }
 

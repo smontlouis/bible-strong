@@ -54,8 +54,8 @@
           grammaticale</span
         >
         <span
-          ><i class="sw" style="border: 1px dashed var(--uncertain)"></i
-          >incertain, non localisé</span
+          ><b class="uncertain-sign" style="color: var(--uncertain)">◌</b>
+          incertain, position estimée</span
         >
         <span
           ><i class="sw" style="background: var(--changed)"></i>changé depuis «
@@ -122,6 +122,15 @@
         "learned-translation": "traduction apprise",
         "learned-translation-stem": "traduction apprise (radical)",
         "learned-phrase": "locution apprise"
+      };
+      const UNCERTAIN_BASIS = {
+        witnesses: "d'après la place que lui donnent les témoins",
+        editorial: "place éditoriale conservée",
+        "next-source-word":
+          "juste avant le mot qui traduit le mot source suivant",
+        "previous-source-word":
+          "juste après le mot qui traduit le mot source précédent",
+        "no-placed-neighbor": "aucun mot voisin placé"
       };
       const kindOf = (c) =>
         c.locution ? "loc" : c.source === "reference-transfer" ? "" : "learned";
@@ -222,26 +231,54 @@
             if (!byWord.has(w)) byWord.set(w, []);
             byWord.get(w).push(i);
           }
-        const emptiesAfter = new Map();
-        for (const [i, e] of view.empties.entries()) {
-          if (!emptiesAfter.has(e.after)) emptiesAfter.set(e.after, []);
-          emptiesAfter.get(e.after).push(i);
-        }
-        const empties = (after) =>
-          (emptiesAfter.get(after) || [])
-            .map((i) => {
+        // Untranslated (◎) and uncertain (◌) source words sit between the
+        // target words, in source order when they share a position. An
+        // uncertain word placed by the next source word leans on that word.
+        const markersAt = new Map();
+        const addMarker = (at, marker) => {
+          if (!markersAt.has(at)) markersAt.set(at, []);
+          markersAt.get(at).push(marker);
+        };
+        view.empties.forEach((e, i) =>
+          addMarker(`after:${e.after}`, {
+            kind: "empty",
+            i,
+            order: view.units[e.unit]?.order ?? 0
+          })
+        );
+        view.uncertain.forEach((u, i) =>
+          addMarker(
+            u.basis === "next-source-word"
+              ? `before:${u.after + 1}`
+              : `after:${u.after}`,
+            {
+              kind: "uncertain",
+              i,
+              order: view.units[u.unit]?.order ?? 0
+            }
+          )
+        );
+        const markers = (at) =>
+          (markersAt.get(at) || [])
+            .sort((left, right) => left.order - right.order)
+            .map(({ kind, i }) => {
+              if (kind === "uncertain") {
+                const u = view.uncertain[i];
+                return `<span class="u" data-kind="uncertain" data-side="${side}" data-v="${verseIndex}" data-i="${i}" title="incertain : position estimée">◌<span class="s">${esc(u.strong)}</span></span>`;
+              }
               const e = view.empties[i];
               const changed =
                 side === "after" && changes?.changedEmpties.has(e.unit);
               return `<span class="e ${e.assurance === "linguistic-rule" ? "rule" : ""} ${changed ? "changed" : ""}" data-kind="empty" data-side="${side}" data-v="${verseIndex}" data-i="${i}" title="non traduit">◎<span class="s">${esc(e.strong)}</span></span>`;
             })
             .join("");
-        let html = empties(-1);
+        let html = markers("after:-1");
         for (const seg of view.segments) {
           if (seg.w === undefined) {
             html += esc(seg.t);
             continue;
           }
+          html += markers(`before:${seg.w}`);
           const ids = byWord.get(seg.w) || [];
           if (!ids.length) html += `<span class="w">${esc(seg.t)}</span>`;
           else {
@@ -260,15 +297,9 @@
               .join("");
             html += `<span class="w c ${kindOf(c)} ${changed ? "changed" : ""}" data-kind="carrier" data-side="${side}" data-v="${verseIndex}" data-i="${ids[0]}">${esc(seg.t)}</span>${labels}`;
           }
-          html += empties(seg.w);
+          html += markers(`after:${seg.w}`);
         }
-        const chips = view.uncertain
-          .map((u, i) => {
-            const unit = view.units[u.unit] || {};
-            return `<span class="chip" data-kind="uncertain" data-side="${side}" data-v="${verseIndex}" data-i="${i}">non localisé · ${esc(u.strong)} ${esc(word(unit.surface))}</span>`;
-          })
-          .join("");
-        return `<div class="line">${html}</div>${chips ? `<div class="unc">${chips}</div>` : ""}`;
+        return `<div class="line">${html}</div>`;
       }
 
       function render() {
@@ -345,12 +376,26 @@
           rows.push(["Établi par", ASSURANCE[e.assurance] || e.assurance]);
         } else {
           const u = view.uncertain[i];
-          title = `${u.strong} incertain (non localisé)`;
+          title = `${u.strong} incertain`;
           unitId = u.unit;
-          rows.push([
-            "Pourquoi",
-            "aucune preuve suffisante d'un porteur ni d'une absence"
-          ]);
+          const previous = view.segments.find((s) => s.w === u.after);
+          const next = view.segments.find((s) => s.w === u.after + 1);
+          const where =
+            u.basis === "next-source-word" && next
+              ? `avant « ${next.t} »`
+              : previous
+                ? `après « ${previous.t} »`
+                : "début du verset";
+          rows.push(
+            [
+              "Position estimée",
+              `${where} · ${UNCERTAIN_BASIS[u.basis] || u.basis}`
+            ],
+            [
+              "Pourquoi",
+              "aucune preuve suffisante d'un porteur ni d'une absence : il peut être rendu par un mot voisin, ou non traduit"
+            ]
+          );
         }
         const unit = unitId ? view.units[unitId] : undefined;
         if (unit) {

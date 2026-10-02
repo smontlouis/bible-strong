@@ -15,6 +15,7 @@ import http from "node:http";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
+import { uncertainDisplayAnchor } from "../../src/strongResolution.js";
 import { tokenizeText } from "../../src/tokenize.js";
 
 function flag(name: string, fallback: string): string {
@@ -93,7 +94,11 @@ interface Decision {
   state: "visible" | "empty" | "unresolved";
   assurance: string;
   targetWordIndices: number[];
-  anchor?: { insertAfterWordIndex: number; absenceEstablished: boolean };
+  anchor?: {
+    insertAfterWordIndex: number;
+    absenceEstablished: boolean;
+    method?: string;
+  };
 }
 
 /** `TAHOT.Gen.2.3.7.L` is word 7 of Gen.2.3. */
@@ -136,10 +141,19 @@ function verseView(row: Record<string, string>) {
         ? unitOf.get(a.originalOccurrenceId)
         : undefined
     }));
+  const order = new Map(decisions.map((d, index) => [d.sourceUnitId, index]));
+  const placed = carriers.flatMap((c) => {
+    const index = order.get(c.unit ?? "");
+    return index === undefined
+      ? []
+      : [{ order: index, startWordIndex: c.start, endWordIndex: c.end }];
+  });
+  const carried = new Set(carriers.map((c) => c.unit));
   const units = Object.fromEntries(
-    decisions.map((d) => [
+    decisions.map((d, index) => [
       d.sourceUnitId,
       {
+        order: index,
         strong: d.strong,
         surface: d.source.surface,
         gloss: d.source.gloss,
@@ -162,9 +176,24 @@ function verseView(row: Record<string, string>) {
         unit: d.sourceUnitId,
         assurance: d.assurance
       })),
-    uncertain: decisions
-      .filter((d) => d.state === "unresolved")
-      .map((d) => ({ strong: d.strong.join(" "), unit: d.sourceUnitId }))
+    // An uncertain source word is shown among its neighbours, without any claim
+    // that it is untranslated; one already shown on a word is not drawn again.
+    uncertain: decisions.flatMap((d, index) => {
+      if (d.state !== "unresolved" || carried.has(d.sourceUnitId)) return [];
+      const shown = uncertainDisplayAnchor({
+        order: index,
+        anchor: d.anchor,
+        placed
+      });
+      return [
+        {
+          after: shown.insertAfterWordIndex,
+          basis: shown.basis,
+          strong: d.strong.join(" "),
+          unit: d.sourceUnitId
+        }
+      ];
+    })
   };
 }
 

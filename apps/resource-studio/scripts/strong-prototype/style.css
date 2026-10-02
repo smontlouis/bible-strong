@@ -234,6 +234,7 @@ main {
 }
 .e {
   cursor: pointer;
+  white-space: nowrap;
   font-size: 14px;
   padding: 0 2px;
   color: var(--empty-witness);
@@ -246,21 +247,29 @@ main {
   background: color-mix(in srgb, var(--changed) 45%, transparent);
   border-radius: 3px;
 }
-.unc {
-  margin-top: 4px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-.chip {
-  font-size: 12px;
-  border: 1px dashed var(--uncertain);
-  color: var(--uncertain);
-  border-radius: 10px;
-  padding: 0 7px;
+/* An uncertain source word at its estimated position: not « untranslated ». */
+.u {
   cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  padding: 0 2px;
+  color: var(--uncertain);
+  font-weight: 700;
 }
-.hide-uncertain .unc {
+/* The system font draws « ◌ » about half the size of « ◎ ». */
+.u,
+.m.uncertain,
+.uncertain-sign {
+  font-family:
+    "Hiragino Sans", "PingFang SC", "Apple Symbols", "Segoe UI Symbol",
+    sans-serif;
+}
+.u .s {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.hide-uncertain .u,
+.hide-uncertain .m.uncertain {
   display: none;
 }
 #detail {

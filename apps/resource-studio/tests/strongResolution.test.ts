@@ -6,6 +6,7 @@ import {
   resolutionSourceHash,
   resolutionTextHash,
   sourceNeighborAnchor,
+  uncertainDisplayAnchor,
   witnessNeighborAnchor,
   type AnchorProposal,
   type ResolutionCarrier,
@@ -272,4 +273,41 @@ test("existing carriers keep their limited assurance and uncertain readings stay
       .state,
     "unresolved"
   );
+});
+
+test("an uncertain word is shown before the next placed source word unless witnesses place it", () => {
+  // Source words 0 and 2 are carried by target words 4 and 1–2: the order differs.
+  const placed = [
+    { order: 0, startWordIndex: 4, endWordIndex: 4 },
+    { order: 2, startWordIndex: 1, endWordIndex: 2 }
+  ];
+  assert.deepEqual(uncertainDisplayAnchor({ order: 1, placed }), {
+    insertAfterWordIndex: 0,
+    basis: "next-source-word"
+  });
+  assert.deepEqual(uncertainDisplayAnchor({ order: 3, placed }), {
+    insertAfterWordIndex: 2,
+    basis: "previous-source-word"
+  });
+  assert.deepEqual(
+    uncertainDisplayAnchor({
+      order: 1,
+      anchor: { insertAfterWordIndex: 4, method: "witness-neighbors" },
+      placed
+    }),
+    { insertAfterWordIndex: 4, basis: "witnesses" }
+  );
+  // A display fallback of the engine does not count as a position.
+  assert.deepEqual(
+    uncertainDisplayAnchor({
+      order: 1,
+      anchor: { insertAfterWordIndex: -1, method: "existing-fallback" },
+      placed
+    }),
+    { insertAfterWordIndex: 0, basis: "next-source-word" }
+  );
+  assert.deepEqual(uncertainDisplayAnchor({ order: 1, placed: [] }), {
+    insertAfterWordIndex: -1,
+    basis: "no-placed-neighbor"
+  });
 });

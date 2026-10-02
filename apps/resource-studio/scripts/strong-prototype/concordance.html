@@ -433,8 +433,7 @@
             [
               "background:color-mix(in srgb, var(--locution) 30%, transparent)",
               "locution"
-            ],
-            ["border:1px dashed var(--uncertain)", "incertain, non localisé"]
+            ]
           ],
           theirs: [
             ["border-bottom:2px solid var(--theirs)", "porteur"],
@@ -446,8 +445,8 @@
         }[state.mode];
         const marks = {
           compare:
-            '<span><b style="color:var(--same)">◎</b> non traduit des deux côtés</span><span><b style="color:var(--other)">◎ ○</b> ancré ailleurs (nous ◎, eux ○)</span>',
-          ours: '<span><b style="color:var(--ours)">◎</b> non traduit</span>',
+            '<span><b style="color:var(--same)">◎</b> non traduit des deux côtés</span><span><b style="color:var(--other)">◎ ○</b> ancré ailleurs (nous ◎, eux ○)</span><span><b class="uncertain-sign" style="color:var(--uncertain)">◌</b> incertain chez nous, position estimée</span>',
+          ours: '<span><b style="color:var(--ours)">◎</b> non traduit</span><span><b class="uncertain-sign" style="color:var(--uncertain)">◌</b> incertain, position estimée</span>',
           theirs:
             '<span><b style="color:var(--theirs)">○</b> non traduit</span>'
         }[state.mode];
@@ -473,8 +472,18 @@
           tokens.forEach((t) => add(classes, t, cls));
         const label = (tokens, strong, cls) =>
           tokens.length && add(labels, tokens.at(-1), [strong, cls]);
-        const marker = (after, symbol, cls, k) =>
-          add(markers, after ?? -1, [symbol, cls, k]);
+        // Markers sharing a position follow the source order.
+        const marker = (after, symbol, cls, k, position) =>
+          add(markers, `after:${after ?? -1}`, [symbol, cls, k, position ?? 0]);
+        // An uncertain word placed by the next source word leans on that word.
+        const uncertainMarker = (u) =>
+          add(
+            markers,
+            u.basis === "next-source-word"
+              ? `before:${u.after + 1}`
+              : `after:${u.after}`,
+            ["◌", "uncertain", `p${u.position}`, u.position ?? 0]
+          );
         if (state.mode === "ours") {
           v.ours.carriers.forEach((c) => {
             mark(c.tokens, c.tokens.length > 1 ? "t-mine loc" : "t-mine");
@@ -485,16 +494,18 @@
               e.after,
               "◎",
               e.method === "linguistic-rule" ? "rule" : "ours",
-              `p${e.position}`
+              `p${e.position}`,
+              e.position
             )
           );
+          v.ours.uncertain.forEach(uncertainMarker);
         } else if (state.mode === "theirs") {
           (v.theirs?.carriers || []).forEach((c) => {
             mark(c.tokens, c.tokens.length > 1 ? "t-their loc" : "t-their");
             label(c.tokens, c.strong, "");
           });
           (v.theirs?.empties || []).forEach((e) =>
-            marker(e.after, "○", "theirs", `p${e.position}`)
+            marker(e.after, "○", "theirs", `p${e.position}`, e.position)
           );
         } else {
           const covered = new Set();
@@ -505,7 +516,7 @@
               if (o.theirTokens.length) {
                 mark(o.theirTokens, "t-same", k);
                 label(o.theirTokens, o.strong, "same");
-              } else marker(o.theirAnchor, "◎", "same", k);
+              } else marker(o.theirAnchor, "◎", "same", k, o.position);
             } else if (group === "span") {
               mark(
                 [...new Set([...o.ourTokens, ...o.theirTokens])],
@@ -516,8 +527,8 @@
               label(o.theirTokens, o.strong, "theirs");
             } else if (group === "other-word") {
               if (o.outcome === "empty-anchor-different") {
-                marker(o.ourAnchor, "◎", "other", k);
-                marker(o.theirAnchor, "○", "other", k);
+                marker(o.ourAnchor, "◎", "other", k, o.position);
+                marker(o.theirAnchor, "○", "other", k, o.position);
               } else {
                 mark(o.ourTokens, "t-other-ours", k);
                 mark(o.theirTokens, "t-other-theirs", k);
@@ -528,15 +539,15 @@
               if (o.theirTokens.length) {
                 mark(o.theirTokens, "t-theirs-uncertain", k);
                 label(o.theirTokens, o.strong, "theirs");
-              } else marker(o.theirAnchor, "○", "uncertain", k);
+              } else marker(o.theirAnchor, "○", "uncertain", k, o.position);
             } else if (group === "ours-untranslated") {
               mark(o.theirTokens, "t-theirs-only", k);
               label(o.theirTokens, o.strong, "theirs");
-              marker(o.ourAnchor, "◎", "theirs", k);
+              marker(o.ourAnchor, "◎", "theirs", k, o.position);
             } else if (group === "theirs-untranslated") {
               mark(o.ourTokens, "t-ours-placed", k);
               label(o.ourTokens, o.strong, "");
-              marker(o.theirAnchor, "○", "theirs", k);
+              marker(o.theirAnchor, "○", "theirs", k, o.position);
             } else if (group === "strong-differs") {
               mark(o.theirTokens, "t-diff", k);
               mark(o.ourTokens, "t-diff", k);
@@ -546,9 +557,11 @@
               if (o.ourTokens.length) {
                 mark(o.ourTokens, "t-ours-only", k);
                 label(o.ourTokens, o.ours.join(" "), "");
-              } else marker(o.ourAnchor, "◎", "ours", k);
+              } else marker(o.ourAnchor, "◎", "ours", k, o.position);
             }
           });
+          // Our uncertain words, at their estimated position.
+          v.ours.uncertain.forEach(uncertainMarker);
           // Our carriers without a scored source word (not linked to a unit).
           v.ours.carriers.forEach((c) => {
             if (c.tokens.some((t) => covered.has(t))) return;
@@ -561,19 +574,21 @@
 
       function renderVerse(v, i) {
         const { classes, labels, markers } = layout(v);
-        const markersAfter = (after) =>
-          (markers.get(after) || [])
+        const markersAt = (at) =>
+          (markers.get(at) || [])
+            .sort((left, right) => left[3] - right[3])
             .map(
               ([symbol, cls, k]) =>
                 `<span class="m ${cls}" data-v="${i}" data-k="${k}">${symbol}</span>`
             )
             .join("");
-        let html = markersAfter(-1);
+        let html = markersAt("after:-1");
         for (const seg of v.segments) {
           if (seg.w === undefined) {
             html += esc(seg.t);
             continue;
           }
+          html += markersAt(`before:${seg.w}`);
           const cls = classes.get(seg.w);
           html += cls
             ? `<span class="w k ${[...new Set(cls.join(" ").split(" "))].join(" ")}" data-v="${i}" data-w="${seg.w}">${esc(seg.t)}</span>`
@@ -584,16 +599,8 @@
                 `<span class="s ${cls}" data-v="${i}" data-w="${seg.w}">${esc(strong)}</span>`
             )
             .join("");
-          html += markersAfter(seg.w);
+          html += markersAt(`after:${seg.w}`);
         }
-        let chips = "";
-        if (state.mode !== "theirs")
-          chips = v.ours.uncertain
-            .map((u) => {
-              const src = v.sources[u.position] || {};
-              return `<span class="chip" data-v="${i}" data-k="p${u.position}">non localisé · ${esc(u.strong)} ${esc(src.surface || "")}</span>`;
-            })
-            .join("");
         const counts = {};
         v.outcomes.forEach((o) => {
           const g = GROUP[o.outcome];
@@ -620,7 +627,7 @@
               )
               .join(" · ")}</div>`
           : "";
-        return `<section class="verse" id="v${v.verse}"><div class="vhead"><span class="vnum">${esc(v.ref)}</span>${badges}${notComparable}</div><div class="line">${html}</div>${chips ? `<div class="unc">${chips}</div>` : ""}${text}</section>`;
+        return `<section class="verse" id="v${v.verse}"><div class="vhead"><span class="vnum">${esc(v.ref)}</span>${badges}${notComparable}</div><div class="line">${html}</div>${text}</section>`;
       }
 
       function render() {
@@ -651,8 +658,32 @@
           .join(" ");
       const wordAt = (v, after) =>
         after < 0 ? "début du verset" : `après « ${words(v, [after])} »`;
-      function sideText(v, tokens, anchor, state) {
-        if (state === "unresolved") return "incertain, non localisé";
+      const UNCERTAIN_BASIS = {
+        witnesses: "d'après la place que lui donnent les témoins",
+        editorial: "place éditoriale conservée",
+        "next-source-word":
+          "juste avant le mot qui traduit le mot source suivant",
+        "previous-source-word":
+          "juste après le mot qui traduit le mot source précédent",
+        "no-placed-neighbor": "aucun mot voisin placé"
+      };
+      const uncertainText = (v, u) => {
+        const next = words(v, [u.after + 1]);
+        const where =
+          u.basis === "next-source-word" && next
+            ? `avant « ${next} »`
+            : wordAt(v, u.after);
+        return `incertain, position estimée ${where} (${UNCERTAIN_BASIS[u.basis] || u.basis})`;
+      };
+      function sideText(v, tokens, anchor, state, position) {
+        if (state === "unresolved") {
+          const u = v.ours.uncertain.find((u) => u.position === position);
+          if (u) return uncertainText(v, u);
+          const shown = v.ours.carriers.find((c) => c.position === position);
+          return shown
+            ? `lecture source incertaine, affiché sur « ${words(v, shown.tokens)} »`
+            : "incertain";
+        }
         if (tokens.length) return `sur « ${words(v, tokens)} »`;
         if (anchor !== undefined) return `non traduit, ${wordAt(v, anchor)}`;
         return "rien";
@@ -663,7 +694,7 @@
         const ours =
           o.ourState === "absent"
             ? "rien"
-            : sideText(v, o.ourTokens, o.ourAnchor, o.ourState);
+            : sideText(v, o.ourTokens, o.ourAnchor, o.ourState, o.position);
         const theirs = o.outcome.startsWith("gold-silent")
           ? "rien"
           : sideText(v, o.theirTokens, o.theirAnchor);
@@ -705,6 +736,11 @@
         );
       }
 
+      function positionBlock(v, position, strong, name, what) {
+        const src = v.sources[position] || {};
+        return `<div class="occ"><h2>${esc(strong || "")}</h2>${src.surface ? `<div class="src">${esc(src.surface)}</div>` : ""}<dl><dt>Mot source</dt><dd>n° ${position} du verset</dd>${src.gloss ? `<dt>Glose</dt><dd>${esc(src.gloss)}</dd>` : ""}<dt>${name}</dt><dd>${esc(what)}</dd></dl></div>`;
+      }
+
       function showDetail(target) {
         const v = state.verses[Number(target.dataset.v)];
         const blocks = [];
@@ -734,6 +770,20 @@
                 blocks.push(carrierBlock(v, "Nous (non comparé)", c))
               );
           }
+          if (!blocks.length && k?.startsWith("p")) {
+            const position = Number(k.slice(1));
+            const unc = v.ours.uncertain.find((u) => u.position === position);
+            if (unc)
+              blocks.push(
+                positionBlock(
+                  v,
+                  position,
+                  unc.strong,
+                  "Nous (non comparé)",
+                  uncertainText(v, unc)
+                )
+              );
+          }
         } else {
           const side =
             state.mode === "ours"
@@ -749,14 +799,19 @@
             const position = Number(k.slice(1));
             const empty = side.empties.find((e) => e.position === position);
             const unc = v.ours.uncertain.find((u) => u.position === position);
-            const src = v.sources[position] || {};
             const what = empty
               ? `non traduit, ${wordAt(v, empty.after)} · ${METHOD[empty.method] || empty.method}`
               : unc
-                ? "incertain, non localisé : aucune preuve suffisante d'un porteur ni d'une absence"
+                ? `${uncertainText(v, unc)} : aucune preuve suffisante d'un porteur ni d'une absence`
                 : "";
             blocks.push(
-              `<div class="occ"><h2>${esc((empty || unc || {}).strong || "")}</h2>${src.surface ? `<div class="src">${esc(src.surface)}</div>` : ""}<dl><dt>Mot source</dt><dd>n° ${position} du verset</dd>${src.gloss ? `<dt>Glose</dt><dd>${esc(src.gloss)}</dd>` : ""}<dt>${name}</dt><dd>${esc(what)}</dd></dl></div>`
+              positionBlock(
+                v,
+                position,
+                (empty || unc || {}).strong,
+                name,
+                what
+              )
             );
           }
         }

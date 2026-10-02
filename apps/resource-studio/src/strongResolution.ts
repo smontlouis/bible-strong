@@ -327,6 +327,67 @@ export function intersectAnchors(
   };
 }
 
+/** Why an uncertain source word is shown where it is. */
+export type UncertainDisplayBasis =
+  | "witnesses"
+  | "editorial"
+  | "next-source-word"
+  | "previous-source-word"
+  | "no-placed-neighbor";
+
+/**
+ * Where a reader sees an uncertain source word: at the anchor the witnesses or
+ * an editor give, otherwise just before the target word carrying the next
+ * placed source word, or just after the previous one at the end of the verse.
+ * It orders the word among its neighbours; it never says the word is
+ * untranslated.
+ */
+export function uncertainDisplayAnchor(options: {
+  /** Source order of the uncertain word. */
+  order: number;
+  anchor?: { insertAfterWordIndex: number; method?: string };
+  /** Target words carrying the other source words. */
+  placed: Array<{
+    order: number;
+    startWordIndex: number;
+    endWordIndex: number;
+  }>;
+}): { insertAfterWordIndex: number; basis: UncertainDisplayBasis } {
+  const { anchor, order } = options;
+  if (
+    anchor?.method === "witness-neighbors" ||
+    anchor?.method === "witness-and-source"
+  )
+    return {
+      insertAfterWordIndex: anchor.insertAfterWordIndex,
+      basis: "witnesses"
+    };
+  if (anchor?.method === "preserved-existing-editorial-anchor")
+    return {
+      insertAfterWordIndex: anchor.insertAfterWordIndex,
+      basis: "editorial"
+    };
+  const next = options.placed
+    .filter((p) => p.order > order)
+    .sort((a, b) => a.order - b.order || a.startWordIndex - b.startWordIndex)
+    .at(0);
+  if (next)
+    return {
+      insertAfterWordIndex: next.startWordIndex - 1,
+      basis: "next-source-word"
+    };
+  const previous = options.placed
+    .filter((p) => p.order < order)
+    .sort((a, b) => b.order - a.order || b.endWordIndex - a.endWordIndex)
+    .at(0);
+  if (previous)
+    return {
+      insertAfterWordIndex: previous.endWordIndex,
+      basis: "previous-source-word"
+    };
+  return { insertAfterWordIndex: -1, basis: "no-placed-neighbor" };
+}
+
 export const resolutionTextHash = (text: string) =>
   createHash("sha256").update(text).digest("hex");
 export const resolutionSourceHash = (unit: ResolutionUnit) =>
