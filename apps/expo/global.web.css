@@ -234,3 +234,11 @@ a {
   aspect-ratio: 1;
   min-width: 0;
 }
+
+/* Installed app (PWA): no rubber-band overscroll or pull-to-refresh on the document. */
+@media (display-mode: standalone) {
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+}

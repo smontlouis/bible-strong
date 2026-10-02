@@ -173,10 +173,26 @@ reads this file, does **one** unchecked item, validates it, updates this file an
       `/highlights`, `/more`, `/downloads`, `/home`): 0 error boundary, 0 console error, offline
       message on content routes. The CDN-hosted dotlottie wasm simply fails offline (decorative
       animations, no error surfaced), so it is tolerated rather than self-hosted.
-- [ ] **8. Standalone polish.** Safe-area insets with `viewport-fit=cover` (check
+- [x] **8. Standalone polish.** Safe-area insets with `viewport-fit=cover` (check
       `react-native-safe-area-context` on web), no overscroll/pull-to-refresh in standalone,
       external links leave the app correctly, `navigator.storage.persist()` request. Check how
       `Login.web.tsx` signs in (popup vs redirect) and document/fix the standalone iOS behaviour.
+      **Evidence**: `global.web.css` `@media (display-mode: standalone)` sets
+      `overscroll-behavior: none` on html/body (in the exported CSS). `RootLayout.web` keeps
+      every `theme-color` meta on the selected theme's `reverse` colour: Chrome check, dark
+      `rgb(18,45,66)` then light `rgb(255,255,255)` after switching the colour scheme.
+      `ServiceWorkerUpdates.web` calls `navigator.storage.persist()` only in standalone (no
+      Firefox prompt in tabs). Safe areas: `react-native-safe-area-context` reads
+      `env(safe-area-inset-*)` on web, and `BottomTabBar`, sheets and the assistant modal
+      already pad with insets, so `viewport-fit=cover` feeds them real values (to confirm on
+      the iOS Simulator in item 10). External links use `Linking`/`target=_blank`, out of scope
+      URLs leave the app (to confirm in item 10). **Known limitation**: Google/Apple sign-in uses
+      `signInWithPopup` (`FireAuth.web.ts`) with a `*.firebaseapp.com` auth domain; in an iOS
+      home-screen app the popup opens in a separate browser sheet and may not hand the
+      credential back. Email/password is unaffected. The fix (same-origin `/__/auth` proxy on
+      `web.bible-strong.app`, `authDomain` switch, redirect flow in standalone, new OAuth
+      redirect URIs in Google/Apple consoles) needs console access: documented in item 9, not
+      done here.
 - [ ] **9. Gate, CI, docs.** `scripts/check-pwa.mjs` (manifest fields, icon files and sizes,
       `sw.js` present, precache entries count/bytes within budget and same-origin only,
       `index.html` links, `_headers` present). Add it to `.github/workflows/expo-web-production.yml`

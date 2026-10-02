@@ -30,6 +30,13 @@ const ServiceWorkerUpdates = () => {
       return
     }
 
+    // Installed apps keep their shell and local data: ask the browser not to evict them.
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      navigator.storage
+        ?.persist?.()
+        .catch(error => appLogger.debug('startup', 'storage.persist', { error }))
+    }
+
     const serwist = new Serwist('/sw.js', { scope: '/' })
     serwistRef.current = serwist
     const onWaiting = () => setUpdateWaiting(true)
