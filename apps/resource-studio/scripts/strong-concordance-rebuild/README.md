@@ -103,8 +103,18 @@ générateur canonique les applique en revanche par défaut depuis le 1er octobr
   (`pos`, tirée des pages Concordance) désigne le mot source du porteur
   transféré ;
 - `G` `witnessEmpties` : un mot que les témoins laissent non traduit,
-  identifié par sa position, est établi non traduit dans la cible quand les
-  deux mots de part et d'autre s'y retrouvent à l'identique, une seule fois.
+  identifié par sa position et son numéro Strong, est établi non traduit dans
+  la cible quand les deux mots de part et d'autre s'y retrouvent à
+  l'identique, une seule fois ;
+- `H` `typographicApostrophes` : un mot de la cible écrit avec « ' »
+  (« aujourd'hui ») se compare comme les témoins l'écrivent, avec « ’ » ;
+- `I` `strongIdentifierFamilies` : un mot source porte aussi les numéros que
+  les témoins lui donnent quand STEP le numérote autrement (εἶδον : G1492 ou
+  G3708) ; les 21 familles viennent de
+  `scripts/strong-identifier-families/derive.ts` ;
+- `J` `cliticHosts` : un pronom ou un mot élidé que les témoins étiquettent à
+  part (« m’ », « qu’ », « -le ») est porté par le mot de la cible auquel il
+  est soudé (« m'avez », « Coupe-le »).
 
 Les témoins viennent de `scripts/concordance-witnesses/build.ts` : le CSV
 exporté par Concordance, dont chaque étiquette de locution est élargie d'après

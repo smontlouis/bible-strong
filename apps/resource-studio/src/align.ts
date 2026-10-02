@@ -1,4 +1,4 @@
-import { tokenizeText, type TextSegment } from "./tokenize.js";
+import { normalizeWord, tokenizeText, type TextSegment } from "./tokenize.js";
 import {
   parseStrongOccurrences,
   representsOccurrence,
@@ -87,9 +87,21 @@ interface Candidate {
   sourcePositions?: string[];
 }
 
+/** A witness clitic matched with a clitic written inside a target word. */
+interface GluedCliticCandidate {
+  wordIndex: number;
+  clitic: string;
+  candidate: Candidate;
+}
+
+/** A target word carries at most this many Strong numbers with its clitics. */
+const MAX_GLUED_STRONGS = 3;
+
 interface TargetWord {
   wordIndex: number;
   normalized: string;
+  /** Clitics written inside the word, in witness spelling (J). */
+  clitics: string[];
 }
 
 const LOW_CONFIDENCE_THRESHOLD = 0.55;
@@ -101,7 +113,9 @@ export function alignVerse(
   original?: OriginalConstraint,
   matching?: TransferMatchingPolicy
 ): AlignmentResult {
-  const segments = tokenizeText(targetText);
+  const segments = matching?.typographicApostrophes
+    ? withTypographicApostrophes(tokenizeText(targetText))
+    : tokenizeText(targetText);
   const assignments = new Map<number, AssignedStrong>();
   const words = getTargetWords(segments);
   const matchedByReference = references.map((reference) =>
@@ -111,7 +125,7 @@ export function alignVerse(
   for (const word of words) {
     const candidates: Candidate[] = [];
 
-    for (const matched of matchedByReference) {
+    for (const { byWord: matched } of matchedByReference) {
       const candidate = matched.get(word.wordIndex);
       if (candidate) {
         candidates.push(candidate);
@@ -172,6 +186,13 @@ export function alignVerse(
     }
   }
 
+  if (matching?.cliticHosts)
+    addGluedClitics({
+      assignments,
+      clitics: matchedByReference.flatMap(({ clitics }) => clitics),
+      original,
+      witnessLocutions: matching.witnessLocutions === true
+    });
   const locutions = matching?.witnessLocutions
     ? collectLocutions(assignments)
     : undefined;
@@ -260,7 +281,7 @@ function matchReferenceOccurrences(
   words: TargetWord[],
   reference: ReferenceSource,
   matching?: TransferMatchingPolicy
-): Map<number, Candidate> {
+): { byWord: Map<number, Candidate>; clitics: GluedCliticCandidate[] } {
   const tokens = reference.verse?.tokens ?? [];
   const row = reference.verse?.row;
   const sourcePositionsOf = (token: StrongToken) =>
@@ -274,6 +295,22 @@ function matchReferenceOccurrences(
   const strongTokens = referenceStrongTokens(reference).filter(
     ({ token }) => matching?.witnessLocutions || representsOccurrence(token)
   );
+  const withWitnessFields = (
+    candidate: Candidate,
+    token: StrongToken
+  ): Candidate => {
+    const sourcePositions = sourcePositionsOf(token);
+    return {
+      ...candidate,
+      ...(sourcePositions ? { sourcePositions } : {}),
+      ...(token.element === undefined
+        ? {}
+        : {
+            locution: `${reference.name}#${token.element}`,
+            ...(token.elementHead ? {} : { locutionMember: true })
+          })
+    };
+  };
   const edges = strongTokens.flatMap(({ token, sourceIndex }, left) =>
     words.flatMap((word) => {
       const candidate = candidateForToken(
@@ -289,7 +326,6 @@ function matchReferenceOccurrences(
         word.wordIndex,
         words.length
       );
-      const sourcePositions = sourcePositionsOf(token);
       return [
         {
           left,
@@ -297,28 +333,72 @@ function matchReferenceOccurrences(
           // Position is used only to resolve the global occurrence mapping;
           // it does not inflate the reported lexical confidence.
           weight: candidate.score + position * 0.03,
-          value: {
-            ...candidate,
-            ...(sourcePositions ? { sourcePositions } : {}),
-            ...(token.element === undefined
-              ? {}
-              : {
-                  locution: `${reference.name}#${token.element}`,
-                  ...(token.elementHead ? {} : { locutionMember: true })
-                })
-          }
+          value: withWitnessFields(candidate, token)
         }
       ];
     })
   );
 
-  return new Map(
-    maximumWeightMatching({
-      leftCount: strongTokens.length,
-      rightCount: words.length,
-      edges
-    }).map((match) => [match.right, match.value])
+  const matches = maximumWeightMatching({
+    leftCount: strongTokens.length,
+    rightCount: words.length,
+    edges
+  });
+  const byWord = new Map(matches.map((match) => [match.right, match.value]));
+  if (!matching?.cliticHosts) return { byWord, clitics: [] };
+
+  // A witness clitic left over by the word matching (« m’ », « qu’ », « -le »)
+  // may be carried by the target word it is glued to: one clitic per slot.
+  const used = new Set(matches.map((match) => match.left));
+  const slots = words.flatMap((word) =>
+    word.clitics.map((clitic) => ({ word, clitic }))
   );
+  const cliticEdges = strongTokens.flatMap(({ token, sourceIndex }, left) =>
+    used.has(left)
+      ? []
+      : slots.flatMap(({ word, clitic }, right) =>
+          clitic === token.normalized
+            ? [
+                {
+                  left,
+                  right,
+                  weight:
+                    0.9 +
+                    positionSimilarity(
+                      sourceIndex,
+                      tokens.length,
+                      word.wordIndex,
+                      words.length
+                    ) *
+                      0.03,
+                  value: withWitnessFields(
+                    {
+                      strong: token.strong,
+                      score: 0.9,
+                      source: `${reference.name}~glued-clitic`,
+                      witnessFamily:
+                        reference.family ?? inferWitnessFamily(reference.name),
+                      method: "exact"
+                    },
+                    token
+                  )
+                }
+              ]
+            : []
+        )
+  );
+  return {
+    byWord,
+    clitics: maximumWeightMatching({
+      leftCount: strongTokens.length,
+      rightCount: slots.length,
+      edges: cliticEdges
+    }).map((match) => ({
+      wordIndex: slots[match.right]!.word.wordIndex,
+      clitic: slots[match.right]!.clitic,
+      candidate: match.value
+    }))
+  };
 }
 
 function referenceStrongTokens(
@@ -568,13 +648,121 @@ function chooseCandidate(candidates: Candidate[]): Candidate | undefined {
   };
 }
 
+/**
+ * The witnesses write the apostrophe « ’ »: a target word written with « ' »
+ * (« aujourd'hui ») is compared in that form. Only the comparison form changes.
+ */
+export function withTypographicApostrophes(
+  segments: TextSegment[]
+): TextSegment[] {
+  return segments.map((segment) =>
+    segment.kind === "word" && segment.text.includes("'")
+      ? {
+          ...segment,
+          normalized: normalizeWord(segment.text.replace(/'/gu, "’"))
+        }
+      : segment
+  );
+}
+
 function getTargetWords(segments: TextSegment[]): TargetWord[] {
   const words: TargetWord[] = [];
   for (const segment of segments) {
     if (segment.kind !== "word") continue;
-    words.push({ wordIndex: words.length, normalized: segment.normalized });
+    words.push({
+      wordIndex: words.length,
+      normalized: segment.normalized,
+      clitics: gluedClitics(segment.text)
+    });
   }
   return words;
+}
+
+/**
+ * Clitics that the witnesses tag apart and the target glues to another word
+ * (J): « m’ » of « m’avez », « qu’ » of « qu’il », « les » of
+ * « Apportez-les-moi ». The target word carries the clitic's Strong number
+ * besides its own; the witnesses of one clitic agree as for a word.
+ */
+function addGluedClitics(options: {
+  assignments: Map<number, AssignedStrong>;
+  clitics: GluedCliticCandidate[];
+  original?: OriginalConstraint;
+  witnessLocutions: boolean;
+}): void {
+  const bySlot = new Map<
+    string,
+    { wordIndex: number; candidates: Candidate[] }
+  >();
+  for (const { wordIndex, clitic, candidate } of options.clitics) {
+    const key = `${wordIndex}|${clitic}`;
+    const slot = bySlot.get(key) ?? { wordIndex, candidates: [] };
+    slot.candidates.push(candidate);
+    bySlot.set(key, slot);
+  }
+  for (const { wordIndex, candidates } of bySlot.values()) {
+    const chosen = chooseCandidate(candidates);
+    if (!chosen) continue;
+    const agreeing = candidates.filter(
+      (candidate) => candidate.strong.join(" ") === chosen.strong.join(" ")
+    );
+    const locutions = options.witnessLocutions
+      ? agreeing.flatMap((candidate) =>
+          candidate.locution ? [candidate.locution] : []
+        )
+      : [];
+    const sourcePositions = [
+      ...new Set(
+        agreeing.flatMap((candidate) => candidate.sourcePositions ?? [])
+      )
+    ];
+    const existing = options.assignments.get(wordIndex);
+    if (!existing) {
+      options.assignments.set(wordIndex, {
+        strong: chosen.strong,
+        confidence: scoreWithOriginal(
+          chosen.score,
+          chosen.strong,
+          options.original
+        ),
+        source: sourceWithOriginal(
+          chosen.source,
+          chosen.strong,
+          options.original
+        ),
+        method: chosen.method,
+        originalConfirmed: isConfirmedByOriginal(
+          chosen.strong,
+          options.original
+        ),
+        ...(locutions.length ? { locutions } : {}),
+        ...(agreeing.every((candidate) => candidate.locutionMember)
+          ? { locutionMemberOnly: true }
+          : {}),
+        ...(sourcePositions.length ? { sourcePositions } : {})
+      });
+      continue;
+    }
+    // A word kept only for a locution is removed afterwards with its numbers.
+    if (existing.locutionMemberOnly) continue;
+    const added = chosen.strong.filter(
+      (strong) => !existing.strong.includes(strong)
+    );
+    if (
+      !added.length ||
+      existing.strong.length + added.length > MAX_GLUED_STRONGS
+    )
+      continue;
+    existing.strong = [...existing.strong, ...added];
+    if (sourcePositions.length)
+      existing.sourcePositions = [
+        ...new Set([...(existing.sourcePositions ?? []), ...sourcePositions])
+      ];
+    if (locutions.length)
+      existing.locutions = [
+        ...new Set([...(existing.locutions ?? []), ...locutions])
+      ];
+  }
 }
 
 function inferWitnessFamily(name: string): string {
@@ -627,6 +815,48 @@ const FRENCH_ENCLITICS = new Set([
   "ci",
   "t"
 ]);
+
+/** Elided words written glued to the next one (« qu’il », « m’a », « jusqu’à »). */
+const ELIDED_PROCLITICS = new Set([
+  "c",
+  "d",
+  "j",
+  "l",
+  "m",
+  "n",
+  "qu",
+  "s",
+  "t",
+  "jusqu",
+  "lorsqu",
+  "puisqu",
+  "quoiqu"
+]);
+
+/**
+ * Clitics written inside one target word, in witness spelling: an elided word
+ * before the apostrophe (« qu’il » → « qu ») and the pronouns joined by
+ * hyphens after the host (« apportez-les-moi » → « moi », « les »). The
+ * euphonic « t » and « ci » carry nothing.
+ */
+export function gluedClitics(text: string): string[] {
+  const word = text
+    .toLocaleLowerCase("fr-FR")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[‐‑‒–—]/gu, "-");
+  const clitics: string[] = [];
+  const elided = /^(\p{L}+)[’'](?=\p{L})/u.exec(word);
+  if (elided && ELIDED_PROCLITICS.has(elided[1]!)) clitics.push(elided[1]!);
+  const parts = word.split("-");
+  for (
+    let end = parts.length - 1;
+    end > 0 && FRENCH_ENCLITICS.has(parts[end]!);
+    end -= 1
+  )
+    if (parts[end] !== "t" && parts[end] !== "ci") clitics.push(parts[end]!);
+  return clitics;
+}
 
 /**
  * Host of a hyphenated French enclitic sequence in a normalized token

@@ -50,7 +50,7 @@ const USAGE = `Usage (from apps/resource-studio):
   tsx scripts/strong-concordance-rebuild/run.ts seal-acquisition --output <file>
   tsx scripts/strong-concordance-rebuild/run.ts acquire-witness --edition Sg1910|Darby|DarbyR --chapters-from <export.csv> --root <dir> [--delay-ms 6000]
   tsx scripts/strong-concordance-rebuild/run.ts predict --edition SG21 --scenario target-excluded --split development|test|comparison [--plan <file>] [--chapters A.1,B.2] [--policy ABCD] [--profile s21] [--output-dir <dir>]
-  tsx scripts/strong-concordance-rebuild/run.ts freeze --policy ABCD --acquisition-seal <file> --evidence <file> --output <file>
+  tsx scripts/strong-concordance-rebuild/run.ts freeze --policy ABCD --acquisition-seal <file> --evidence <file> --output <file> [--plan <file>] [--baseline-run <prediction-dir>...]
   tsx scripts/strong-concordance-rebuild/run.ts score --run <prediction-dir> [--freeze <file>] [--output-dir <dir>]
   tsx scripts/strong-concordance-rebuild/run.ts provenance --split development --output <file>
   tsx scripts/strong-concordance-rebuild/run.ts report --split development --output-dir <dir>
@@ -373,17 +373,29 @@ switch (command) {
           )
         )
       ),
-      planSha256: await fileSha256(path.join(OUT_ROOT, "plan.json")),
-      acquisitionSeal: { path: seal, sha256: await fileSha256(seal) },
-      baselineRuns: Object.fromEntries(
-        (
-          await readJson<{
-            runs: Array<{ runId: string; predictionsSha256: string }>;
-          }>(path.join(OUT_ROOT, "initial-predictions.json"))
-        ).runs
-          .filter((entry) => entry.runId.includes("__test__"))
-          .map((entry) => [entry.runId, entry.predictionsSha256])
+      planSha256: await fileSha256(
+        flagValue(args, "--plan") ?? path.join(OUT_ROOT, "plan.json")
       ),
+      acquisitionSeal: { path: seal, sha256: await fileSha256(seal) },
+      // Sealed predictions of the engine being replaced, made before the change.
+      baselineRuns: flagValues(args, "--baseline-run").length
+        ? Object.fromEntries(
+            await Promise.all(
+              flagValues(args, "--baseline-run").map(async (directory) => {
+                const { run, sha256: sealed } = await readRun(directory);
+                return [run.runId, sealed] as const;
+              })
+            )
+          )
+        : Object.fromEntries(
+            (
+              await readJson<{
+                runs: Array<{ runId: string; predictionsSha256: string }>;
+              }>(path.join(OUT_ROOT, "initial-predictions.json"))
+            ).runs
+              .filter((entry) => entry.runId.includes("__test__"))
+              .map((entry) => [entry.runId, entry.predictionsSha256])
+          ),
       developmentEvidence: flagValue(args, "--evidence") ?? null
     };
     await writeJsonOnce(output, freeze);

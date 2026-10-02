@@ -1,6 +1,19 @@
 import assert from "node:assert/strict";
+import { mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import test from "node:test";
-import { alignVerse, encliticHost, spelledFrenchNumber } from "../src/align.js";
+import {
+  alignVerse,
+  encliticHost,
+  gluedClitics,
+  spelledFrenchNumber
+} from "../src/align.js";
+import { readStepOriginalTokens } from "../src/stepOriginals.js";
+import {
+  isFamily,
+  type FamilyCandidate
+} from "../scripts/strong-identifier-families/derive.js";
 import type { OriginalStrongOccurrence } from "../src/completeAlignment.js";
 import {
   demoteAlternativeIdentityCarriers,
@@ -427,7 +440,10 @@ test("the engine enables every measured refinement by default and allows a full 
     digitNumeralTransfer: true,
     witnessLocutions: true,
     witnessSourcePositions: true,
-    witnessEmpties: true
+    witnessEmpties: true,
+    typographicApostrophes: true,
+    strongIdentifierFamilies: true,
+    cliticHosts: true
   });
   assert.deepEqual(resolveEnginePolicy({ encliticHostTransfer: false }), {
     readingInvariantVariants: true,
@@ -436,7 +452,10 @@ test("the engine enables every measured refinement by default and allows a full 
     digitNumeralTransfer: true,
     witnessLocutions: true,
     witnessSourcePositions: true,
-    witnessEmpties: true
+    witnessEmpties: true,
+    typographicApostrophes: true,
+    strongIdentifierFamilies: true,
+    cliticHosts: true
   });
 });
 
@@ -535,4 +554,134 @@ test("an untranslated witness word is established only where its context recurs"
     proposeWitnessEmpties(dossier(["il", "le", "bénit", "parce", "qu'en"])),
     []
   );
+  // A witness that numbers the verse otherwise names another word there.
+  const renumbered = dossier([
+    "et",
+    "il",
+    "le",
+    "sanctifia",
+    "parce",
+    "qu'en",
+    "ce",
+    "jour"
+  ]);
+  renumbered.witnesses[0]!.placements[0]!.strong = "H3588";
+  assert.deepEqual(proposeWitnessEmpties(renumbered), []);
+});
+
+test("a target apostrophe matches the witnesses' typographic one only when enabled", () => {
+  const references = [
+    witness('je t’ai engendré <w strong="G4594">aujourd’hui</w>.')
+  ];
+  const target = "je t'ai engendré aujourd'hui.";
+  assert.equal(alignVerse(target, references).assignments.size, 0);
+  const on = alignVerse(target, references, undefined, undefined, {
+    typographicApostrophes: true
+  });
+  assert.deepEqual(
+    [...on.assignments].map(([index, assignment]) => [
+      index,
+      assignment.strong
+    ]),
+    [[3, ["G4594"]]]
+  );
+  // Only the comparison form changes; the target keeps its own spelling.
+  assert.ok(on.segments.some((segment) => segment.text === "aujourd'hui"));
+});
+
+test("clitics glued inside a target word are found in witness spelling", () => {
+  assert.deepEqual(gluedClitics("m'avez"), ["m"]);
+  assert.deepEqual(gluedClitics("Qu’il"), ["qu"]);
+  assert.deepEqual(gluedClitics("jusqu'à"), ["jusqu"]);
+  assert.deepEqual(gluedClitics("Apportez-les-moi"), ["moi", "les"]);
+  assert.deepEqual(gluedClitics("va-t-il"), ["il"]);
+  assert.deepEqual(gluedClitics("celui-ci"), []);
+  assert.deepEqual(gluedClitics("aujourd'hui"), []);
+  assert.deepEqual(gluedClitics("petits-enfants"), []);
+});
+
+test("a witness clitic is carried by the target word it is glued to only when enabled", () => {
+  const pronoun = [
+    witness('vous <w strong="G3165">m</w>’avez <w strong="G4016">vêtu</w>')
+  ];
+  const target = "vous m'avez vêtu";
+  assert.deepEqual([...alignVerse(target, pronoun).assignments.keys()], [2]);
+  const on = alignVerse(target, pronoun, undefined, undefined, {
+    cliticHosts: true
+  });
+  assert.deepEqual(on.assignments.get(1)?.strong, ["G3165"]);
+  // The host keeps its own number and gains the clitic's.
+  const host = [
+    witness('<w strong="G1581">Coupe</w>-<w strong="G0846">le</w> :')
+  ];
+  const both = alignVerse("Coupe-le:", host, undefined, undefined, {
+    encliticHosts: true,
+    cliticHosts: true
+  });
+  assert.deepEqual(both.assignments.get(0)?.strong, ["G1581", "G0846"]);
+});
+
+test("identifier families are conventions the lexicon relates and verses keep apart", () => {
+  const candidate = (overrides: Partial<FamilyCandidate>): FamilyCandidate => ({
+    step: "G1492",
+    witness: "G3708",
+    tags: 40,
+    verses: 12,
+    share: 0.032,
+    relation: "same-ustrong",
+    cooccurrence: 0.012,
+    ...overrides
+  });
+  assert.equal(isFamily(candidate({})), true);
+  // Jésus and Christ: related, but two words of one verse.
+  assert.equal(isFamily(candidate({ cooccurrence: 0.219 })), false);
+  assert.equal(isFamily(candidate({ relation: null })), false);
+  assert.equal(isFamily(candidate({ verses: 4 })), false);
+  assert.equal(isFamily(candidate({ share: 0.01 })), false);
+  assert.equal(isFamily(candidate({ witness: "H3708" })), false);
+});
+
+test("a family identifier joins STEP's identifiers of the source word only when asked", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "step-families-"));
+  const file = path.join(directory, "TAGNT fixture.txt");
+  await writeFile(
+    file,
+    "Luk.13.35#15=NKO\tἴδητέ (idēte)\tshall you see\tG1492H=V-2AAS-2P\tεἴδω=to perceive\tNA28+NA27+Tyn+SBL+WH+Treg+TR+Byz\t\t\t\t\t#15\tG1492\n"
+  );
+  const [plain] = await readStepOriginalTokens(file);
+  assert.deepEqual([...plain!.strongByBase.keys()], ["G1492"]);
+  const [aliased] = await readStepOriginalTokens(file, {
+    identifierAliases: new Map([["G1492", ["G3708"]]])
+  });
+  assert.deepEqual([...aliased!.strongByBase.keys()], ["G1492", "G3708"]);
+  assert.deepEqual([...aliased!.strongByBase.get("G3708")!], ["G1492H"]);
+});
+
+test("a family identifier is a name of the word, not a STEP reading of it", () => {
+  const make = () =>
+    resolutionFixture({
+      rows: [
+        "Gen.14.17#07=L\tלִקְרָאתוֹ\tlik.ra.to\tto meet him\t{H7122}\tHVqc\t\t\tH7122\t\t\t"
+      ],
+      strongs: [["H7122", "H7125"]],
+      carriers: [
+        {
+          occurrence: [0, 1],
+          wordIndex: 2,
+          source: "reference-transfer",
+          diagnostic: "exact",
+          confidence: 0.99
+        }
+      ],
+      words: ["pour", "le", "rencontrer"]
+    });
+  const before = resolveCanonicalVerse(make());
+  assert.equal(before.decisions[0]!.state, "unresolved");
+  const after = resolveCanonicalVerse({
+    ...make(),
+    policy: { strongIdentifierFamilies: true }
+  });
+  assert.equal(after.decisions[0]!.state, "visible");
+  assert.deepEqual(after.decisions[0]!.targetWordIndices, [2]);
+  assert.deepEqual(after.decisions[0]!.strong, ["H7122", "H7125"]);
 });

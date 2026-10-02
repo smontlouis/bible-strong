@@ -15,6 +15,10 @@ export interface TransferMatchingPolicy {
   witnessLocutions?: boolean;
   /** A transferred carrier keeps the source word positions of its witness tag. */
   witnessPositions?: boolean;
+  /** Compare target words written with « ' » as the witnesses write them, with « ’ ». */
+  typographicApostrophes?: boolean;
+  /** A witness clitic (« m’ », « qu’ », « -le ») may be carried by the target word it is glued to. */
+  cliticHosts?: boolean;
 }
 
 export interface ReaderAlignmentPolicy {

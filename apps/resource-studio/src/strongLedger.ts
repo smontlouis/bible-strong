@@ -72,6 +72,7 @@ import {
   resolveDefaultStrongDictionaryInput,
   type ResolvedDefaultStrongDictionaryInput
 } from "./strongDictionaryLexicon.js";
+import { STRONG_IDENTIFIER_ALIASES } from "./strongIdentifierFamilies.js";
 import {
   defaultKaikkiSqlitePath,
   DEFAULT_KAIKKI_JSONL
@@ -370,6 +371,12 @@ export interface StrongEnginePolicy {
   witnessSourcePositions: boolean;
   /** Untranslated words of the witnesses are established when their context recurs. */
   witnessEmpties: boolean;
+  /** Straight and typographic apostrophes are the same character when matching words. */
+  typographicApostrophes: boolean;
+  /** Strong identifiers that witnesses and STEP give to the same source word are equivalent. */
+  strongIdentifierFamilies: boolean;
+  /** An elided or hyphen-joined witness clitic is carried by the target word it is glued to. */
+  cliticHosts: boolean;
 }
 
 export const DEFAULT_ENGINE_POLICY: Readonly<StrongEnginePolicy> = {
@@ -379,7 +386,10 @@ export const DEFAULT_ENGINE_POLICY: Readonly<StrongEnginePolicy> = {
   digitNumeralTransfer: true,
   witnessLocutions: true,
   witnessSourcePositions: true,
-  witnessEmpties: true
+  witnessEmpties: true,
+  typographicApostrophes: true,
+  strongIdentifierFamilies: true,
+  cliticHosts: true
 };
 
 export function resolveEnginePolicy(
@@ -416,7 +426,9 @@ function readerPolicyWithEngine(
     !engine.encliticHostTransfer &&
     !engine.digitNumeralTransfer &&
     !engine.witnessLocutions &&
-    !engine.witnessSourcePositions
+    !engine.witnessSourcePositions &&
+    !engine.typographicApostrophes &&
+    !engine.cliticHosts
   )
     return policy;
   return {
@@ -426,7 +438,11 @@ function readerPolicyWithEngine(
       ...(engine.encliticHostTransfer ? { encliticHosts: true } : {}),
       ...(engine.digitNumeralTransfer ? { digitNumerals: true } : {}),
       ...(engine.witnessLocutions ? { witnessLocutions: true } : {}),
-      ...(engine.witnessSourcePositions ? { witnessPositions: true } : {})
+      ...(engine.witnessSourcePositions ? { witnessPositions: true } : {}),
+      ...(engine.typographicApostrophes
+        ? { typographicApostrophes: true }
+        : {}),
+      ...(engine.cliticHosts ? { cliticHosts: true } : {})
     }
   };
 }
@@ -726,7 +742,12 @@ export async function generateStrongLedgerWithDictionary(
     verses: reference.map.size
   }));
   const originalData = await measureAsync("load STEP originals", () =>
-    loadOriginalData(scopedBooks)
+    loadOriginalData(
+      scopedBooks,
+      enginePolicy.strongIdentifierFamilies
+        ? STRONG_IDENTIFIER_ALIASES
+        : undefined
+    )
   );
   const originals = originalData.bundles;
   const originalSummaries = originals.map((original) => original.summary);
@@ -741,7 +762,17 @@ export async function generateStrongLedgerWithDictionary(
   );
   const translationLexicon = measureSync("build translation lexicon", () =>
     buildStrongTranslationLexicon(references, {
-      dictionaryCandidates
+      // Target words are compared with « ’ » (H): so are dictionary forms.
+      dictionaryCandidates: enginePolicy.typographicApostrophes
+        ? dictionaryCandidates.map((candidate) =>
+            candidate.normalized.includes("'")
+              ? {
+                  ...candidate,
+                  normalized: candidate.normalized.replace(/'/gu, "’")
+                }
+              : candidate
+          )
+        : dictionaryCandidates
     })
   );
   const phraseLexicon = await measureAsync("load phrase lexicon", () =>
@@ -977,7 +1008,8 @@ export async function generateStrongLedgerWithDictionary(
         // Alternative-identifier carriers were already reduced above.
         policy: {
           readingInvariantVariants: enginePolicy.readingInvariantVariants,
-          witnessEmpties: enginePolicy.witnessEmpties
+          witnessEmpties: enginePolicy.witnessEmpties,
+          strongIdentifierFamilies: enginePolicy.strongIdentifierFamilies
         }
       });
     }
@@ -3551,7 +3583,10 @@ async function buildStrongPhraseLexiconIndex(): Promise<string> {
   );
 }
 
-async function loadOriginalData(bookIds?: Set<string>): Promise<{
+async function loadOriginalData(
+  bookIds?: Set<string>,
+  identifierAliases?: ReadonlyMap<string, readonly string[]>
+): Promise<{
   bundles: OriginalBundle[];
   evidence: StepOriginalEvidenceIndex;
 }> {
@@ -3563,7 +3598,10 @@ async function loadOriginalData(bookIds?: Set<string>): Promise<{
       throw new Error(`missing-step-original-source:${sourcePath}`);
     }
 
-    const data = await readStepOriginalData([sourcePath], { bookIds });
+    const data = await readStepOriginalData([sourcePath], {
+      bookIds,
+      identifierAliases
+    });
     const source = stepOriginalSourceMetadata(sourcePath);
     bundles.push({
       name: source.name,

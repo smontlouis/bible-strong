@@ -394,8 +394,14 @@ export function proposeWitnessEmpties(
       return word ? [word] : [];
     });
     if (!words.length) continue;
+    // A witness may number a verse's words otherwise than STEP: its mark must
+    // also carry one of the unit's identifiers to name this word.
+    const identifiers = new Set(unit.strong.map((code) => code.toUpperCase()));
     const named = (w: (typeof d.witnesses)[number], p: ResolutionCarrier) =>
       w.ref !== undefined &&
+      p.strong
+        .split(/\s+/u)
+        .some((code) => identifiers.has(code.toUpperCase())) &&
       words.some(
         (word) => word.ref === w.ref && p.positions?.includes(word.position)
       );

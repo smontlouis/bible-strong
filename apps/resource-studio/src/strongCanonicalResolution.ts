@@ -13,6 +13,7 @@ import type {
   StrongLedgerVerse
 } from "./strongLedger.js";
 import {
+  baseStrong,
   parseSourceRow,
   makeUnits,
   type SourceRow
@@ -50,6 +51,11 @@ export interface CanonicalResolutionOptions {
    * position, is established untranslated when its context recurs verbatim.
    */
   witnessEmpties?: boolean;
+  /**
+   * Source words also carry the identifiers that the witnesses give them
+   * (identifier families); STEP's reading model ignores those identifiers.
+   */
+  strongIdentifierFamilies?: boolean;
 }
 
 const strongBase = (code: string) => code.match(/^[GH]\d+/u)?.[0] ?? code;
@@ -375,10 +381,19 @@ export function resolveCanonicalVerse(options: {
   const units: ResolutionDossier["units"] = [...groups].map(
     ([id, occurrences]) => {
       const row = sourceRows.get(id);
+      // A family identifier is a name of the word, not a STEP reading of it.
+      const modelled =
+        options.policy?.strongIdentifierFamilies && row
+          ? occurrences.filter((o) =>
+              [...row.primary.map(baseStrong), ...row.alternatives].includes(
+                o.strong
+              )
+            )
+          : occurrences;
       let readingUnresolved = true;
       try {
         readingUnresolved =
-          makeUnits({ source: occurrences }, sourceRows)[0].structure ===
+          makeUnits({ source: modelled }, sourceRows)[0].structure ===
           "variant-conditioned";
         if (
           readingUnresolved &&

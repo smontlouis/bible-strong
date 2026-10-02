@@ -173,6 +173,11 @@ export function selectStepEvidenceForOccurrence(
 
 interface StepOriginalReadOptions {
   bookIds?: Set<string>;
+  /**
+   * Further identifiers of a source word (STEP identifier → identifiers the
+   * witnesses give it), added like STEP's own alternative identifiers.
+   */
+  identifierAliases?: ReadonlyMap<string, readonly string[]>;
 }
 
 export const STEP_TO_OSIS_BOOK = new Map<string, string>([
@@ -467,8 +472,8 @@ export async function readStepOriginalTokens(
 
     const token =
       source === "TAGNT"
-        ? parseTagntToken(ref, parts)
-        : parseTahotToken(ref, parts);
+        ? parseTagntToken(ref, parts, options.identifierAliases)
+        : parseTahotToken(ref, parts, options.identifierAliases);
     token.sourceLineNumber = lineIndex + 1;
     token.sourceReference = parts[0]?.replace(/^\uFEFF/u, "");
     if (token.strongByBase.size > 0) {
@@ -620,7 +625,8 @@ export function normalizeClassicalStrong(strong: string): string | undefined {
 
 function parseTahotToken(
   ref: ParsedStepRef,
-  parts: string[]
+  parts: string[],
+  identifierAliases?: ReadonlyMap<string, readonly string[]>
 ): StepOriginalToken {
   return {
     ref: ref.key,
@@ -635,14 +641,16 @@ function parseTahotToken(
     editions: "",
     strongByBase: buildStrongByBase({
       dStrongValues: [parts[4] ?? "", parts[11] ?? ""],
-      aliasValues: [parts[8] ?? "", parts[9] ?? ""]
+      aliasValues: [parts[8] ?? "", parts[9] ?? ""],
+      identifierAliases
     })
   };
 }
 
 function parseTagntToken(
   ref: ParsedStepRef,
-  parts: string[]
+  parts: string[],
+  identifierAliases?: ReadonlyMap<string, readonly string[]>
 ): StepOriginalToken {
   const dStrongAndGrammar = parts[3] ?? "";
   const [dStrong = "", morphology = ""] = dStrongAndGrammar.split("=", 2);
@@ -660,7 +668,8 @@ function parseTagntToken(
     editions: parts[5] ?? "",
     strongByBase: buildStrongByBase({
       dStrongValues: [dStrong],
-      aliasValues: [parts[11] ?? "", parts[12] ?? ""]
+      aliasValues: [parts[11] ?? "", parts[12] ?? ""],
+      identifierAliases
     })
   };
 }
@@ -739,6 +748,7 @@ function addTokenEvidence(
 function buildStrongByBase(options: {
   dStrongValues: string[];
   aliasValues: string[];
+  identifierAliases?: ReadonlyMap<string, readonly string[]>;
 }): Map<string, Set<string>> {
   const result = extractDStrongByBase(options.dStrongValues);
   const dStrongCodes = [...result.values()].flatMap((codes) => [...codes]);
@@ -751,6 +761,10 @@ function buildStrongByBase(options: {
       result.set(aliasBase, new Set(dStrongCodes));
     }
   }
+
+  for (const [base, codes] of [...result])
+    for (const alias of options.identifierAliases?.get(base) ?? [])
+      if (!result.has(alias)) result.set(alias, new Set(codes));
 
   return result;
 }
