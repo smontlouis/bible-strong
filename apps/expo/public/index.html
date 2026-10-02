@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>%WEB_TITLE%</title>
+    <meta
+      name="description"
+      content="Study the Bible with Strong's concordance, dictionaries, commentaries and reading plans."
+    />
+    <!-- Default theme `reverse` colours (src/themes/colors.ts, darkColors.ts). -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#122d42" media="(prefers-color-scheme: dark)" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Bible Strong" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- iOS Safari Smart App Banner for the native app (ADR-0067). -->
+    <meta name="apple-itunes-app" content="app-id=1454738221" />
+    <script>
+      // Phones and tablets are pointed to the native apps; computers keep the install prompt.
+      // Mirrors src/features/app/nativeAppPrompt.ts, inline so it runs before the bundle.
+      ;(function () {
+        var ua = navigator.userAgent
+        var ios =
+          /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)
+        if (ios || /Android/i.test(ua)) {
+          window.addEventListener('beforeinstallprompt', function (event) {
+            event.preventDefault()
+          })
+        }
+        document
+          .querySelector('meta[name="apple-itunes-app"]')
+          .setAttribute(
+            'content',
+            'app-id=1454738221, app-argument=biblestrong://' +
+              location.pathname.replace(/^\/+/, '') +
+              location.search
+          )
+      })()
+    </script>
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      /* These styles make the body full-height */
+      html,
+      body {
+        height: 100%;
+      }
+      /* These styles disable body scrolling if you are using <ScrollView> */
+      body {
+        overflow: hidden;
+      }
+      /* These styles make the root element full-height */
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript> You need to enable JavaScript to run this app. </noscript>
+    <!-- The root element for your Expo app. -->
+    <div id="root"></div>
+  </body>
+</html>

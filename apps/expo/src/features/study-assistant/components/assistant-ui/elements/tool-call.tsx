@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckIcon, CircleAlertIcon, ChevronRightIcon } from 'lucide-react'
+import { CheckIcon, CircleAlertIcon, ChevronRightIcon } from '~features/study-assistant/lucideIcons'
 import {
   Collapsible,
   CollapsibleContent,

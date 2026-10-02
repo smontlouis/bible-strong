@@ -9,7 +9,7 @@ import {
   FileTextIcon,
   WrenchIcon,
   CircleAlertIcon,
-} from 'lucide-react'
+} from '~features/study-assistant/lucideIcons'
 import type { ToolActivity } from '@bible-strong/ai-contract/contract'
 import { ToolTimeline as OfficialToolTimeline } from './components/assistant-ui/elements/tool-timeline'
 

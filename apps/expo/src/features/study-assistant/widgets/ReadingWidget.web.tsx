@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ArrowUpRightIcon, CalendarDaysIcon } from 'lucide-react'
+import { ArrowUpRightIcon, CalendarDaysIcon } from '~features/study-assistant/lucideIcons'
 import type { ReadingWidget as Descriptor } from '@bible-strong/ai-contract/contract'
 import { useReadingContent } from '~features/daily-reading/useDailyMeditation'
 import { getEditorialKind, getMeditationTitle } from '~features/plans/readingCalendar'

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ArrowUpRightIcon, FileTextIcon } from 'lucide-react'
+import { ArrowUpRightIcon, FileTextIcon } from '~features/study-assistant/lucideIcons'
 import { useSetAtom } from 'jotai'
 import type {
   SourceGroupWidget as Descriptor,

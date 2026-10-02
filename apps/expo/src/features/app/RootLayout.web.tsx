@@ -47,6 +47,13 @@ const InnerApp = () => {
     }
   }, [selected.colors.primary])
 
+  // The browser/installed-app chrome follows the in-app theme rather than the OS scheme.
+  useEffect(() => {
+    document
+      .querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
+      .forEach(meta => meta.setAttribute('content', selected.colors.reverse))
+  }, [selected.colors.reverse])
+
   return (
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>

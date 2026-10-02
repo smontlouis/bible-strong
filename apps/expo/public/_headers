@@ -1,0 +1,15 @@
+# Cloudflare Workers Static Assets headers (ADR-0047).
+# Every file under /_expo/static and /assets carries a content hash in its name.
+/_expo/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The service worker and the manifest must always be revalidated.
+/sw.js
+  Cache-Control: no-cache
+
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+  Cache-Control: no-cache

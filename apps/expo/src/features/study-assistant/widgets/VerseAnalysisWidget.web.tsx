@@ -2,7 +2,12 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSetAtom } from 'jotai'
-import { ArrowLeftIcon, ArrowUpRightIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import {
+  ArrowLeftIcon,
+  ArrowUpRightIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from '~features/study-assistant/lucideIcons'
 import { Spinner } from '@heroui/react/spinner'
 import type { PassageWidget } from '@bible-strong/ai-contract/contract'
 import { useResourceAccess } from '~features/resources/resourceAccess'

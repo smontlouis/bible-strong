@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { BookOpenIcon, ArrowUpRightIcon, PlayIcon } from 'lucide-react'
+import { BookOpenIcon, ArrowUpRightIcon, PlayIcon } from '~features/study-assistant/lucideIcons'
 import type { BookWidget as Descriptor } from '@bible-strong/ai-contract/contract'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { getBook } from '~helpers/bibleBookCatalog'

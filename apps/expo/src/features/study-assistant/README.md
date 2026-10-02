@@ -31,7 +31,7 @@ disconnects, timeouts, interim replacement and microphone denial. The microphone
 button was visually checked in the signed-in localhost app. A real microphone session
 through the authenticated app remains a manual check after backend rollout.
 
-Entry: `AssistantLauncher.web.tsx`, mounted only in `FullAppRuntime.web.tsx`. The native screen remains separate. Uses `@assistant-ui/react` 0.15.21 AssistantModal/Thread/Composer primitives with a custom external-store runtime and the existing authenticated Worker SSE client.
+Entry: `AssistantLauncher.web.tsx`, lazy-loaded and mounted only in `FullAppRuntime.web.tsx`. The native screen remains separate. Uses `@assistant-ui/react` 0.15.21 AssistantModal/Thread/Composer primitives with a custom external-store runtime and the existing authenticated Worker SSE client.
 
 Production activation requires both `EXPO_PUBLIC_AI_API_URL` and exact membership in
 `EXPO_PUBLIC_AI_BETA_UIDS`. This public UID list only hides the launcher, settings entry

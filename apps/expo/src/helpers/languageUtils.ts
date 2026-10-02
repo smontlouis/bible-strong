@@ -5,7 +5,15 @@
  * Instead of boolean checks like `isFR`, use language codes and helper functions.
  */
 
-import { fr, enGB, enUS, es, de, pt, it, nl } from 'date-fns/locale'
+// Per-locale imports: the 'date-fns/locale' barrel bundles every locale (~0.9 MB on web).
+import fr from 'date-fns/locale/fr'
+import enGB from 'date-fns/locale/en-GB'
+import enUS from 'date-fns/locale/en-US'
+import es from 'date-fns/locale/es'
+import de from 'date-fns/locale/de'
+import pt from 'date-fns/locale/pt'
+import it from 'date-fns/locale/it'
+import nl from 'date-fns/locale/nl'
 import type { Locale } from 'date-fns'
 
 // Common Bible version codes used as defaults
