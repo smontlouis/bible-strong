@@ -30,6 +30,11 @@ import {
   type ResolutionCarrier
 } from "./strongResolution.js";
 import { stripTags, tokenizeText } from "./tokenize.js";
+import {
+  applyCompoundTargetWords,
+  COMPOUND_TARGET_WORD_METHOD,
+  isCompoundSharedCarrier
+} from "./strongCompoundWords.js";
 
 export const CANONICAL_RESOLUTION_POLICY = "autonomous-fr-occurrences-v2";
 
@@ -56,6 +61,14 @@ export interface CanonicalResolutionOptions {
    * (identifier families); STEP's reading model ignores those identifiers.
    */
   strongIdentifierFamilies?: boolean;
+  /**
+   * A source word that a witness renders together with others by one word
+   * (« Beer-Schéba », « Béthel » 6+7) is carried by that word when the target
+   * writes it (policy N, `strongCompoundWords.ts`).
+   */
+  compoundTargetWords?: boolean;
+  /** Numbers a target word may show (translation profile); default 3. */
+  maxStrongPerWord?: number;
 }
 
 const strongBase = (code: string) => code.match(/^[GH]\d+/u)?.[0] ?? code;
@@ -450,6 +463,35 @@ export function resolveCanonicalVerse(options: {
       };
     }
   );
+  // Policy N: carriers of compound and multi-position witness words. Runs on
+  // the final reader carriers, once source readings are known.
+  if (options.policy?.compoundTargetWords)
+    applyCompoundTargetWords({
+      ref: verse.ref,
+      tokens: verse.tokens,
+      annotations: verse.annotations,
+      units: units.map((entry) => ({
+        id: entry.unit.id,
+        readingUnresolved: entry.unit.readingUnresolved,
+        morphology: entry.morphology,
+        occurrences: (groups.get(entry.unit.id) ?? []).map((o) => ({
+          occurrenceId: o.occurrenceId,
+          strong: o.strong
+        }))
+      })),
+      witnesses: input.references.flatMap((r) =>
+        r.verse
+          ? [
+              {
+                name: r.name,
+                ref: `${r.verse.row.bookId}.${r.verse.row.chapter}.${r.verse.row.verse}`,
+                taggedText: r.verse.row.text
+              }
+            ]
+          : []
+      ),
+      maxStrongPerWord: options.policy.maxStrongPerWord ?? 3
+    });
   if (!units.length) issues.push("no-source-occurrences-for-native-verse");
   if (!verse.tokens.length) issues.push("empty-target-text");
   const knownIds = new Set(units.flatMap((u) => u.unit.occurrenceIds));
@@ -467,7 +509,9 @@ export function resolveCanonicalVerse(options: {
     placements: verse.annotations
       .filter(
         (a) =>
-          a.visibility === "reader" &&
+          (a.visibility === "reader" ||
+            (options.policy?.compoundTargetWords &&
+              isCompoundSharedCarrier(a))) &&
           (!a.originalOccurrenceId || knownIds.has(a.originalOccurrenceId))
       )
       .flatMap((a) => {
@@ -551,6 +595,10 @@ export function resolveCanonicalVerse(options: {
         )
       )
         assurance = "exact-witness-families-and-source";
+      else if (
+        linked.some((a) => a.diagnostics[0] === COMPOUND_TARGET_WORD_METHOD)
+      )
+        assurance = "witness-compound-word";
     }
 
     const lexicalCandidates = options.lexicalItems
