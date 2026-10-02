@@ -156,11 +156,23 @@ reads this file, does **one** unchecked item, validates it, updates this file an
       deploy (changed precached file + `build-web-sw`) → `waiting` → banner; « Recharger » →
       `SKIP_WAITING`, reload, new revision active, no waiting worker. No extracted pure logic,
       so no unit test. typecheck, eslint, prettier OK.
-- [ ] **7. Offline startup.** With the SW active and the network offline, reloading `/home`
+- [x] **7. Offline startup.** With the SW active and the network offline, reloading `/home`
       must render the shell. Audit `RootLayout.web.tsx` startup (`initializeResourceAppCheck`,
       `loadWebFonts`, `setI18n`, Sentry, Firebase) for awaits that hang or throw offline and
       make them resilient. Show a clear offline state in the workspace; online-only content
       must use the existing unavailable views, not the error boundary.
+      **Evidence**: no code change needed. Startup awaits are offline-safe:
+      `initializeAppCheck` is synchronous, fonts come from the precache, i18n is bundled, and
+      NetInfo's `HEAD /` probes reach the network (the SW only routes GET) and report offline.
+      The existing offline UI covers the workspace: `OfflineNotice` ("Vous êtes hors ligne")
+      on `/home`, `resource.web.connectionRequired` / `app.youAreOffline` views elsewhere.
+      Chrome offline cold start of `/home`: shell in 2.3 s (2.0 s online; a first offline load
+      right after activation took 4.1 s, cold code cache), no console errors. Client-side
+      navigation offline through 14 routes (`/bible-view`, `/search`, `/plans`, `/daily-verse`,
+      `/lexique`, `/dictionnaire`, `/nave`, `/timeline`, `/commentaries`, `/studies`,
+      `/highlights`, `/more`, `/downloads`, `/home`): 0 error boundary, 0 console error, offline
+      message on content routes. The CDN-hosted dotlottie wasm simply fails offline (decorative
+      animations, no error surfaced), so it is tolerated rather than self-hosted.
 - [ ] **8. Standalone polish.** Safe-area insets with `viewport-fit=cover` (check
       `react-native-safe-area-context` on web), no overscroll/pull-to-refresh in standalone,
       external links leave the app correctly, `navigator.storage.persist()` request. Check how
