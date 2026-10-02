@@ -48,7 +48,14 @@ export const POLICY_LABELS: Record<keyof StrongEnginePolicy, string> = {
   strongIdentifierFamilies: "I",
   cliticHosts: "J",
   openingConjunctions: "K",
-  witnessLocutionLexicon: "L"
+  witnessLocutionLexicon: "L",
+  witnessAttestedReadings: "M",
+  compoundTargetWords: "N",
+  numeralValues: "O",
+  properNameVariants: "P",
+  lexicalGapFill: "Q",
+  articleDeterminers: "R",
+  witnessEmptyContexts: "S"
 };
 
 export function policyFromLabels(labels: string[]): EnginePolicy {
@@ -330,23 +337,11 @@ export async function predict(options: {
           : undefined,
       // The engine enables every refinement by default: pass the complete
       // switch set so that an empty policy still replays the initial engine.
-      enginePolicy: {
-        readingInvariantVariants:
-          options.policy.readingInvariantVariants === true,
-        singleCarrierPerSourceIdentity:
-          options.policy.singleCarrierPerSourceIdentity === true,
-        encliticHostTransfer: options.policy.encliticHostTransfer === true,
-        digitNumeralTransfer: options.policy.digitNumeralTransfer === true,
-        witnessLocutions: options.policy.witnessLocutions === true,
-        witnessSourcePositions: options.policy.witnessSourcePositions === true,
-        witnessEmpties: options.policy.witnessEmpties === true,
-        typographicApostrophes: options.policy.typographicApostrophes === true,
-        strongIdentifierFamilies:
-          options.policy.strongIdentifierFamilies === true,
-        cliticHosts: options.policy.cliticHosts === true,
-        openingConjunctions: options.policy.openingConjunctions === true,
-        witnessLocutionLexicon: options.policy.witnessLocutionLexicon === true
-      }
+      enginePolicy: Object.fromEntries(
+        (Object.keys(POLICY_LABELS) as Array<keyof StrongEnginePolicy>).map(
+          (key) => [key, options.policy[key] === true]
+        )
+      ) as unknown as StrongEnginePolicy
     });
     const verses: PredictedVerse[] = ledger.verses.map((verse) => {
       const mapping = canonicalByNative.get(verse.ref);

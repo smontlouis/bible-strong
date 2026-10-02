@@ -385,6 +385,20 @@ export interface StrongEnginePolicy {
   openingConjunctions: boolean;
   /** A locution that the witnesses tag as one element anywhere in the Bible covers its whole span. */
   witnessLocutionLexicon: boolean;
+  /** A source word whose reading is open is decided when the witnesses' reading carries it. */
+  witnessAttestedReadings: boolean;
+  /** Compound words and source words spread over several positions keep one carrier. */
+  compoundTargetWords: boolean;
+  /** A number matches the same value however the target writes it. */
+  numeralValues: boolean;
+  /** A proper name matches its spelling variants and derived forms. */
+  properNameVariants: boolean;
+  /** A free word between placed source neighbours carries a word it is known to render. */
+  lexicalGapFill: boolean;
+  /** A Greek article is carried by the French determiner of its placed head. */
+  articleDeterminers: boolean;
+  /** Untranslated words of the witnesses are established from weaker context. */
+  witnessEmptyContexts: boolean;
 }
 
 export const DEFAULT_ENGINE_POLICY: Readonly<StrongEnginePolicy> = {
@@ -399,7 +413,15 @@ export const DEFAULT_ENGINE_POLICY: Readonly<StrongEnginePolicy> = {
   strongIdentifierFamilies: true,
   cliticHosts: true,
   openingConjunctions: true,
-  witnessLocutionLexicon: true
+  witnessLocutionLexicon: true,
+  // M–S: measured on the comparison sample before they are enabled.
+  witnessAttestedReadings: false,
+  compoundTargetWords: false,
+  numeralValues: false,
+  properNameVariants: false,
+  lexicalGapFill: false,
+  articleDeterminers: false,
+  witnessEmptyContexts: false
 };
 
 export function resolveEnginePolicy(
