@@ -74,6 +74,10 @@ import {
 } from "./strongDictionaryLexicon.js";
 import { STRONG_IDENTIFIER_ALIASES } from "./strongIdentifierFamilies.js";
 import {
+  loadProperNameLexicon,
+  PROPER_NAME_LEXICON_SOURCES
+} from "./properNameVariants.js";
+import {
   buildWitnessLocutionLexicon,
   type WitnessLocutionLexicon
 } from "./witnessLocutionLexicon.js";
@@ -558,6 +562,7 @@ const STRONG_LEDGER_PIPELINE_SOURCES = [
   "src/originalSource.ts",
   "src/permissiveStrongProjection.ts",
   "src/phraseTranslationLexicon.ts",
+  "src/properNameVariants.ts",
   "src/readerAlignment.ts",
   "src/strongResolution.ts",
   "src/strongResolutionWorkflow.ts",
@@ -625,6 +630,9 @@ export function strongLedgerInputFingerprint(
     FRENCH_LEXICAL_SOURCES.rezoJdmCache,
     FRENCH_LEXICAL_SOURCES.openOffice,
     FRENCH_LEXICAL_SOURCES.wolf,
+    ...(resolveEnginePolicy(options.enginePolicy).properNameVariants
+      ? PROPER_NAME_LEXICON_SOURCES
+      : []),
     ...STRONG_LEDGER_PIPELINE_SOURCES
   ];
 
@@ -1039,6 +1047,9 @@ export async function generateStrongLedgerWithDictionary(
     if (lexicalAutoSafePlacements(residualLexicalReport).length)
       throw new Error("autonomous-resolution-requires-lexical-fixed-point");
     const rows = await readCanonicalSourceRows(STEP_ORIGINAL_SOURCES);
+    const properNameLexicon = enginePolicy.properNameVariants
+      ? measureSync("load STEP name lexicon", () => loadProperNameLexicon())
+      : undefined;
     const items = new Map<string, typeof residualLexicalReport.items>();
     for (const item of residualLexicalReport.items) {
       const values = items.get(item.ref) ?? [];
@@ -1056,7 +1067,11 @@ export async function generateStrongLedgerWithDictionary(
         policy: {
           readingInvariantVariants: enginePolicy.readingInvariantVariants,
           witnessEmpties: enginePolicy.witnessEmpties,
-          strongIdentifierFamilies: enginePolicy.strongIdentifierFamilies
+          strongIdentifierFamilies: enginePolicy.strongIdentifierFamilies,
+          // P runs here, after the lexical fixed point and the reduction above.
+          ...(properNameLexicon
+            ? { properNameVariants: true, properNameLexicon }
+            : {})
         }
       });
     }
