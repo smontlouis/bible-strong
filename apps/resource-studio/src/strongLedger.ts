@@ -77,6 +77,7 @@ import {
   buildWitnessLocutionLexicon,
   type WitnessLocutionLexicon
 } from "./witnessLocutionLexicon.js";
+import { buildWitnessRenderingLexicon } from "./strongWitnessEmptyContexts.js";
 import {
   defaultKaikkiSqlitePath,
   DEFAULT_KAIKKI_JSONL
@@ -1039,6 +1040,14 @@ export async function generateStrongLedgerWithDictionary(
     if (lexicalAutoSafePlacements(residualLexicalReport).length)
       throw new Error("autonomous-resolution-requires-lexical-fixed-point");
     const rows = await readCanonicalSourceRows(STEP_ORIGINAL_SOURCES);
+    // S: renderings of every Strong number by the allowed witnesses.
+    const witnessRenderingLexicon = enginePolicy.witnessEmptyContexts
+      ? buildWitnessRenderingLexicon(
+          references.flatMap((reference) =>
+            reference.rows.map((row) => row.text)
+          )
+        )
+      : undefined;
     const items = new Map<string, typeof residualLexicalReport.items>();
     for (const item of residualLexicalReport.items) {
       const values = items.get(item.ref) ?? [];
@@ -1056,7 +1065,10 @@ export async function generateStrongLedgerWithDictionary(
         policy: {
           readingInvariantVariants: enginePolicy.readingInvariantVariants,
           witnessEmpties: enginePolicy.witnessEmpties,
-          strongIdentifierFamilies: enginePolicy.strongIdentifierFamilies
+          strongIdentifierFamilies: enginePolicy.strongIdentifierFamilies,
+          ...(witnessRenderingLexicon
+            ? { witnessEmptyContexts: true, witnessRenderingLexicon }
+            : {})
         }
       });
     }
