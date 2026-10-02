@@ -116,7 +116,7 @@ reads this file, does **one** unchecked item, validates it, updates this file an
       as a separate task). typecheck, eslint and prettier on touched files OK; Jest 2925 pass,
       the same 4 env-dependent failures with and without this change
       (`mobileResourceCatalog-test`, `strongBibleDownloadPlan-test`).
-- [ ] **5. Service worker.** Worker source + its own tsconfig (WebWorker lib), outside the app
+- [x] **5. Service worker.** Worker source + its own tsconfig (WebWorker lib), outside the app
       typecheck if needed. `scripts/build-web-sw.mjs`: esbuild bundle, then `injectManifest`
       over `dist` (hashed `_expo/static` assets not cache-busted, startup fonts, icons, manifest,
       `index.html` for the navigation fallback), within the precache budget. Navigations:
@@ -124,6 +124,19 @@ reads this file, does **one** unchecked item, validates it, updates this file an
       of cross-origin requests (Resource API, Firebase, auth, analytics). Outdated precaches
       cleaned up. No `skipWaiting` on install (the update prompt drives it). Hook the script
       into `web:export` and `web:build`.
+      **Evidence**: `service-worker/sw.ts` (own `tsconfig.json`, WebWorker lib, excluded from the
+      app tsconfig, checked by `typecheck`), `scripts/build-web-sw.mjs` (esbuild IIFE +
+      `injectManifest`, fails on warnings or over budget), hooked into `web:export`/`web:build`.
+      Navigations: `NetworkOnly` 4 s timeout + precached `/index.html` fallback;
+      `directoryIndex: null` so `/` is not served cache-first. Same-origin `/assets` and
+      `/_expo/static` misses: `CacheFirst` (300 entries, 60 days). Cross-origin and `HEAD`
+      requests untouched. Two traps fixed: `@serwist/build` ignores `**/node_modules/**` by
+      default (Expo exports icon fonts under `assets/node_modules`) → `globIgnores: []`; and the
+      browser requests `%40expo` → manifest URLs rewrite `@` to `%40`. Result: 48 entries,
+      24.92 MiB. Chrome (chrome-devtools, isolated context; the built-in browser pane refuses SW
+      registration): manual `register('/sw.js')` → activated, controls the page, 48 precached;
+      offline reload of `/plans` renders the shell with icon fonts (screenshot), only the
+      `HEAD /` probes fail. typecheck, eslint, prettier OK.
 - [ ] **6. Registration + update prompt.** Register only in production web builds with
       `@serwist/window`. When a new worker is waiting, show a non-blocking prompt
       ("A new version is available" / reload, fr + en via i18n extraction); reload once the new

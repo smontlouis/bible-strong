@@ -26,6 +26,7 @@
     "node_modules",
     "src/features/timeline/events.old.ts",
     "src/features/bible/bibleWebView",
-    "src/features/studies/studiesWebView"
+    "src/features/studies/studiesWebView",
+    "service-worker"
   ]
 }
