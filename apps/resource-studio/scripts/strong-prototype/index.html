@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Strong — avant / après</title>
+    <style>
+      :root {
+        --bg: #faf8f4;
+        --panel: #ffffff;
+        --ink: #1f2328;
+        --muted: #6a6f76;
+        --line: #e4e0d8;
+        --transfer: #2563eb;
+        --learned: #0d9488;
+        --locution: #7c3aed;
+        --changed: #f5c542;
+        --empty-witness: #16a34a;
+        --empty-rule: #86a98f;
+        --uncertain: #d97706;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #16181c;
+          --panel: #1f2227;
+          --ink: #e8e6e3;
+          --muted: #9aa0a6;
+          --line: #33373e;
+          --transfer: #6aa1ff;
+          --learned: #3cc7b4;
+          --locution: #b18cff;
+          --changed: #d4a21e;
+          --empty-witness: #4ade80;
+          --empty-rule: #7f9c86;
+          --uncertain: #f0a03a;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          16px/1.5 -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background: var(--panel);
+        border-bottom: 1px solid var(--line);
+        padding: 10px 16px;
+      }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+      h1 {
+        font-size: 17px;
+        margin: 0 12px 0 0;
+      }
+      select,
+      button {
+        font: inherit;
+        font-size: 14px;
+        color: var(--ink);
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 4px 8px;
+      }
+      button {
+        cursor: pointer;
+      }
+      .seg {
+        display: inline-flex;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .seg button {
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+      }
+      .seg button.on {
+        background: var(--ink);
+        color: var(--panel);
+      }
+      label.check {
+        font-size: 14px;
+        color: var(--muted);
+        display: inline-flex;
+        gap: 4px;
+        align-items: center;
+      }
+      .stats {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 16px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .stats b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .legend {
+        margin-top: 6px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 14px;
+        font-size: 12.5px;
+        color: var(--muted);
+      }
+      .sw {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        margin-right: 4px;
+        vertical-align: -1px;
+      }
+      main {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 12px 16px 120px;
+      }
+      .examples {
+        font-size: 13px;
+        color: var(--muted);
+        margin: 4px 0 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+      }
+      .examples button {
+        font-size: 12.5px;
+        padding: 2px 8px;
+      }
+      .verse {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+      }
+      .verse.flash {
+        outline: 2px solid var(--changed);
+      }
+      .vhead {
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
+        flex-wrap: wrap;
+        margin-bottom: 2px;
+      }
+      .vnum {
+        font-weight: 700;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .badge {
+        font-size: 11.5px;
+        border-radius: 10px;
+        padding: 0 7px;
+        border: 1px solid currentColor;
+      }
+      .badge.loc {
+        color: var(--locution);
+      }
+      .badge.emp {
+        color: var(--empty-witness);
+      }
+      .badge.id {
+        color: var(--transfer);
+      }
+      .badge.unc {
+        color: var(--uncertain);
+      }
+      .badge.oth {
+        color: var(--muted);
+      }
+      .line {
+        line-height: 2.35;
+      }
+      .side {
+        font-size: 11.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+      .before .line {
+        opacity: 0.72;
+      }
+      .w {
+        border-radius: 2px;
+        padding: 1px 0;
+        cursor: default;
+      }
+      .c {
+        cursor: pointer;
+        border-bottom: 2px solid var(--transfer);
+      }
+      .c.learned {
+        border-bottom-color: var(--learned);
+      }
+      .c.loc {
+        border-bottom: 0;
+        background: color-mix(in srgb, var(--locution) 16%, transparent);
+        box-shadow: inset 0 -2px 0 var(--locution);
+      }
+      .c.changed {
+        background: color-mix(in srgb, var(--changed) 38%, transparent);
+      }
+      .s {
+        font-size: 10.5px;
+        vertical-align: super;
+        color: var(--muted);
+        margin-left: 1px;
+        cursor: pointer;
+      }
+      .hide-numbers .s {
+        display: none;
+      }
+      .e {
+        cursor: pointer;
+        font-size: 14px;
+        padding: 0 2px;
+        color: var(--empty-witness);
+        font-weight: 700;
+      }
+      .e.rule {
+        color: var(--empty-rule);
+      }
+      .e.changed {
+        background: color-mix(in srgb, var(--changed) 45%, transparent);
+        border-radius: 3px;
+      }
+      .unc {
+        margin-top: 4px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .chip {
+        font-size: 12px;
+        border: 1px dashed var(--uncertain);
+        color: var(--uncertain);
+        border-radius: 10px;
+        padding: 0 7px;
+        cursor: pointer;
+      }
+      .hide-uncertain .unc {
+        display: none;
+      }
+      #detail {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        width: min(380px, calc(100vw - 32px));
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+        padding: 12px 14px;
+        display: none;
+        z-index: 10;
+        font-size: 14px;
+      }
+      #detail.open {
+        display: block;
+      }
+      #detail h2 {
+        font-size: 15px;
+        margin: 0 0 6px;
+      }
+      #detail .src {
+        font-size: 22px;
+        font-family: "SBL Hebrew", "SBL Greek", "Times New Roman", serif;
+      }
+      #detail dl {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 2px 10px;
+        margin: 8px 0 0;
+      }
+      #detail dt {
+        color: var(--muted);
+      }
+      #detail dd {
+        margin: 0;
+      }
+      #detail .close {
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        border: 0;
+        background: transparent;
+        font-size: 18px;
+      }
+      .note {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .empty-state {
+        color: var(--muted);
+        padding: 40px 0;
+        text-align: center;
+      }
+      @media (max-width: 640px) {
+        header {
+          position: static;
+        }
+        .legend,
+        .stats {
+          font-size: 11.5px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="bar">
+        <h1>Strong — avant / après</h1>
+        <select id="bible" aria-label="Bible"></select>
+        <button id="prev" aria-label="Chapitre précédent">‹</button>
+        <select id="book" aria-label="Livre"></select>
+        <select id="chapter" aria-label="Chapitre"></select>
+        <button id="next" aria-label="Chapitre suivant">›</button>
+        <span class="seg" role="tablist">
+          <button data-mode="after" class="on">Après</button>
+          <button data-mode="before">Avant</button>
+          <button data-mode="compare">Comparer</button>
+        </span>
+        <label class="check"
+          ><input type="checkbox" id="numbers" checked /> numéros</label
+        >
+        <label class="check"
+          ><input type="checkbox" id="uncertain" checked /> incertains</label
+        >
+        <label class="check"
+          ><input type="checkbox" id="changedOnly" /> versets modifiés</label
+        >
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="legend">
+        <span
+          ><i class="sw" style="background: var(--transfer)"></i>transféré d'un
+          témoin</span
+        >
+        <span
+          ><i class="sw" style="background: var(--learned)"></i>appris ou
+          lexique</span
+        >
+        <span
+          ><i class="sw" style="background: var(--locution)"></i>locution
+          entière (E)</span
+        >
+        <span
+          ><b style="color: var(--empty-witness)">◎</b> non traduit, établi par
+          les témoins (G)</span
+        >
+        <span
+          ><b style="color: var(--empty-rule)">◎</b> non traduit, règle
+          grammaticale</span
+        >
+        <span
+          ><i class="sw" style="border: 1px dashed var(--uncertain)"></i
+          >incertain, non localisé</span
+        >
+        <span
+          ><i class="sw" style="background: var(--changed)"></i>changé depuis «
+          avant »</span
+        >
+      </div>
+    </header>
+    <main>
+      <div class="examples" id="examples"></div>
+      <div id="verses"><div class="empty-state">Chargement…</div></div>
+    </main>
+    <aside id="detail" aria-live="polite">
+      <button class="close" aria-label="Fermer">×</button>
+      <div id="detailBody"></div>
+    </aside>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const state = {
+        catalog: [],
+        bible: "nbs",
+        book: "Gen",
+        chapter: 1,
+        mode: "after",
+        verses: []
+      };
+      const EXAMPLES = [
+        ["nbs", "Gen", 3, 10, "locutions « eu peur », « parce que »"],
+        ["nbs", "Gen", 4, 2, "locution « petit bétail »"],
+        ["nbs", "Gen", 1, 4, "◎ établi par les témoins"],
+        ["nbs", "Gen", 2, 16, "◎ « en disant » non traduit"],
+        ["nbs", "Gen", 6, 4, "rattachements corrigés"],
+        ["nbs", "Luke", 2, 48, "κἀγώ"],
+        ["nfc", "Gen", 2, 21, "NFC : « profond sommeil »"],
+        ["nfc", "Gen", 3, 4, "NFC : infinitif absolu non traduit"],
+        ["nfc", "Gen", 4, 3, "NFC : « et il arriva » non traduit"]
+      ];
+      /** STEP separates morphemes with "/" and "\\"; the reader sees the word. */
+      const word = (s) => String(s || "").replace(/[\/\\]/g, "");
+      const esc = (s) =>
+        String(s).replace(
+          /[&<>"]/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]
+        );
+      const fmt = (n) => (n == null ? "—" : Number(n).toLocaleString("fr-FR"));
+      const pct = (a, b) =>
+        b
+          ? ((100 * a) / b).toLocaleString("fr-FR", {
+              maximumFractionDigits: 1
+            }) + " %"
+          : "—";
+      const ASSURANCE = {
+        "witness-empty-transfer": "établi par les témoins (même contexte)",
+        "linguistic-rule": "règle grammaticale",
+        "existing-generator": "porteur du générateur",
+        "exact-witness-families-and-source":
+          "transfert exact, deux familles de témoins",
+        "validated-deterministic-lexical": "lexique validé",
+        unresolved: "incertain"
+      };
+      const METHOD = {
+        exact: "transfert exact d'un témoin",
+        window: "transfert par voisinage",
+        stem: "transfert par radical",
+        lexicon: "lexique des témoins",
+        "learned-translation": "traduction apprise",
+        "learned-translation-stem": "traduction apprise (radical)",
+        "learned-phrase": "locution apprise"
+      };
+      const kindOf = (c) =>
+        c.locution ? "loc" : c.source === "reference-transfer" ? "" : "learned";
+      const key = (c) => `${c.strong}|${c.start}|${c.end}`;
+
+      async function api(path) {
+        const response = await fetch(path);
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+      }
+
+      function stats() {
+        const b = state.catalog.find((x) => x.id === state.bible);
+        if (!b) return;
+        const s = b.summary,
+          a = s.after || {},
+          p = s.before || {};
+        const row = (label, k) =>
+          `<span>${label} <b>${fmt(p[k])}</b> → <b>${fmt(a[k])}</b></span>`;
+        $("stats").innerHTML =
+          `<span><b>${esc(b.label)}</b> · ${fmt(a.verses)} versets, ${fmt(a.units)} mots source · avant : moteur A–D, anciens témoins · après : A–G, témoins du 28 septembre</span>` +
+          row("placés", "visible") +
+          row("non traduits", "empty") +
+          row("incertains", "unresolved") +
+          `<span>incertitude <b>${pct(p.unresolved, p.units)}</b> → <b>${pct(a.unresolved, a.units)}</b></span>`;
+      }
+
+      function diff(v) {
+        if (!v.before)
+          return {
+            badges: [],
+            changedCarriers: new Set(),
+            changedEmpties: new Set()
+          };
+        const before = new Map(v.before.carriers.map((c) => [key(c), c]));
+        const badges = [];
+        const changedCarriers = new Set();
+        let loc = 0,
+          ident = 0,
+          other = 0;
+        for (const c of v.after.carriers) {
+          const old = before.get(key(c));
+          if (!old) {
+            changedCarriers.add(key(c));
+            c.locution ? loc++ : other++;
+          } else if (old.unit !== c.unit) {
+            changedCarriers.add(key(c));
+            ident++;
+          }
+        }
+        // A word carrier widened into a locution is a change, not a removal.
+        const removed = v.before.carriers.filter(
+          (c) =>
+            !v.after.carriers.some(
+              (n) =>
+                key(n) === key(c) ||
+                (n.locution &&
+                  n.strong === c.strong &&
+                  n.start <= c.start &&
+                  n.end >= c.end)
+            )
+        ).length;
+        const oldEmpties = new Set(v.before.empties.map((e) => e.unit));
+        const changedEmpties = new Set(
+          v.after.empties
+            .filter((e) => !oldEmpties.has(e.unit))
+            .map((e) => e.unit)
+        );
+        const unc = v.after.uncertain.length - v.before.uncertain.length;
+        if (loc) badges.push(["loc", `+${loc} locution${loc > 1 ? "s" : ""}`]);
+        if (changedEmpties.size)
+          badges.push([
+            "emp",
+            `+${changedEmpties.size} non traduit${changedEmpties.size > 1 ? "s" : ""}`
+          ]);
+        if (ident)
+          badges.push([
+            "id",
+            `${ident} rattachement${ident > 1 ? "s" : ""} corrigé${ident > 1 ? "s" : ""}`
+          ]);
+        if (unc)
+          badges.push([
+            "unc",
+            `${unc > 0 ? "+" : ""}${unc} incertain${Math.abs(unc) > 1 ? "s" : ""}`
+          ]);
+        if (other || removed)
+          badges.push([
+            "oth",
+            `${other ? "+" + other : ""}${other && removed ? " / " : ""}${removed ? "−" + removed : ""} porteur${other + removed > 1 ? "s" : ""}`
+          ]);
+        return { badges, changedCarriers, changedEmpties };
+      }
+
+      function renderLine(view, side, verseIndex, changes) {
+        const byWord = new Map();
+        for (const [i, c] of view.carriers.entries())
+          for (let w = c.start; w <= c.end; w++) {
+            if (!byWord.has(w)) byWord.set(w, []);
+            byWord.get(w).push(i);
+          }
+        const emptiesAfter = new Map();
+        for (const [i, e] of view.empties.entries()) {
+          if (!emptiesAfter.has(e.after)) emptiesAfter.set(e.after, []);
+          emptiesAfter.get(e.after).push(i);
+        }
+        const empties = (after) =>
+          (emptiesAfter.get(after) || [])
+            .map((i) => {
+              const e = view.empties[i];
+              const changed =
+                side === "after" && changes?.changedEmpties.has(e.unit);
+              return `<span class="e ${e.assurance === "linguistic-rule" ? "rule" : ""} ${changed ? "changed" : ""}" data-kind="empty" data-side="${side}" data-v="${verseIndex}" data-i="${i}" title="non traduit">◎<span class="s">${esc(e.strong)}</span></span>`;
+            })
+            .join("");
+        let html = empties(-1);
+        for (const seg of view.segments) {
+          if (seg.w === undefined) {
+            html += esc(seg.t);
+            continue;
+          }
+          const ids = byWord.get(seg.w) || [];
+          if (!ids.length) html += `<span class="w">${esc(seg.t)}</span>`;
+          else {
+            const c = view.carriers[ids[0]];
+            const changed =
+              side === "after" &&
+              ids.some((i) =>
+                changes?.changedCarriers.has(key(view.carriers[i]))
+              );
+            const labels = ids
+              .filter((i) => view.carriers[i].end === seg.w)
+              .map(
+                (i) =>
+                  `<span class="s" data-kind="carrier" data-side="${side}" data-v="${verseIndex}" data-i="${i}">${esc(view.carriers[i].strong)}</span>`
+              )
+              .join("");
+            html += `<span class="w c ${kindOf(c)} ${changed ? "changed" : ""}" data-kind="carrier" data-side="${side}" data-v="${verseIndex}" data-i="${ids[0]}">${esc(seg.t)}</span>${labels}`;
+          }
+          html += empties(seg.w);
+        }
+        const chips = view.uncertain
+          .map((u, i) => {
+            const unit = view.units[u.unit] || {};
+            return `<span class="chip" data-kind="uncertain" data-side="${side}" data-v="${verseIndex}" data-i="${i}">non localisé · ${esc(u.strong)} ${esc(word(unit.surface))}</span>`;
+          })
+          .join("");
+        return `<div class="line">${html}</div>${chips ? `<div class="unc">${chips}</div>` : ""}`;
+      }
+
+      function render() {
+        const container = $("verses");
+        document.body.classList.toggle("hide-numbers", !$("numbers").checked);
+        document.body.classList.toggle(
+          "hide-uncertain",
+          !$("uncertain").checked
+        );
+        if (!state.verses.length) {
+          container.innerHTML = `<div class="empty-state">Aucun verset.</div>`;
+          return;
+        }
+        const onlyChanged = $("changedOnly").checked;
+        const parts = [];
+        for (const [i, v] of state.verses.entries()) {
+          const changes = diff(v);
+          if (onlyChanged && !changes.badges.length) continue;
+          const badges = changes.badges
+            .map(([k, t]) => `<span class="badge ${k}">${esc(t)}</span>`)
+            .join("");
+          let body;
+          if (state.mode === "before")
+            body = v.before
+              ? renderLine(v.before, "before", i)
+              : `<div class="note">Absent de la génération « avant ».</div>`;
+          else if (state.mode === "after")
+            body = renderLine(v.after, "after", i, changes);
+          else
+            body =
+              `<div class="before"><div class="side">Avant</div>${v.before ? renderLine(v.before, "before", i) : ""}</div>` +
+              `<div><div class="side">Après</div>${renderLine(v.after, "after", i, changes)}</div>`;
+          parts.push(
+            `<section class="verse" id="v${v.verse}"><div class="vhead"><span class="vnum">${esc(v.ref)}</span>${badges}</div>${body}</section>`
+          );
+        }
+        container.innerHTML =
+          parts.join("") ||
+          `<div class="empty-state">Aucun verset modifié dans ce chapitre.</div>`;
+      }
+
+      function showDetail(target) {
+        const v = state.verses[Number(target.dataset.v)];
+        const view = target.dataset.side === "before" ? v.before : v.after;
+        const i = Number(target.dataset.i);
+        const kind = target.dataset.kind;
+        let title,
+          unitId,
+          rows = [];
+        if (kind === "carrier") {
+          const c = view.carriers[i];
+          const words = view.segments
+            .filter((s) => s.w !== undefined && s.w >= c.start && s.w <= c.end)
+            .map((s) => s.t)
+            .join(" ");
+          title = `${c.strong} sur « ${words} »`;
+          unitId = c.unit;
+          rows.push([
+            "Origine",
+            c.locution
+              ? "locution entière d'un témoin (E)"
+              : METHOD[c.method] || c.method || c.source
+          ]);
+          rows.push([
+            "Rattachement",
+            c.positioned
+              ? "par la position du témoin (F)"
+              : "par proximité dans le verset"
+          ]);
+        } else if (kind === "empty") {
+          const e = view.empties[i];
+          title = `${e.strong} non traduit`;
+          unitId = e.unit;
+          rows.push(["Établi par", ASSURANCE[e.assurance] || e.assurance]);
+        } else {
+          const u = view.uncertain[i];
+          title = `${u.strong} incertain (non localisé)`;
+          unitId = u.unit;
+          rows.push([
+            "Pourquoi",
+            "aucune preuve suffisante d'un porteur ni d'une absence"
+          ]);
+        }
+        const unit = unitId ? view.units[unitId] : undefined;
+        if (unit) {
+          rows.unshift(
+            ["Mot source", `n° ${unit.position} du verset`],
+            ["Glose", unit.gloss],
+            ["Morphologie", unit.morphology]
+          );
+          rows.push([
+            "Décision",
+            `${unit.state === "visible" ? "placé" : unit.state === "empty" ? "non traduit" : "incertain"} · ${ASSURANCE[unit.assurance] || unit.assurance}`
+          ]);
+        }
+        $("detailBody").innerHTML =
+          `<h2>${esc(title)}</h2>${unit ? `<div class="src">${esc(word(unit.surface))}</div>` : ""}` +
+          `<dl>${rows.map(([k, val]) => `<dt>${esc(k)}</dt><dd>${esc(val)}</dd>`).join("")}</dl>`;
+        $("detail").classList.add("open");
+      }
+
+      function fillBooks() {
+        const b = state.catalog.find((x) => x.id === state.bible);
+        $("book").innerHTML = b.books
+          .map(
+            (x) =>
+              `<option ${x.book === state.book ? "selected" : ""}>${x.book}</option>`
+          )
+          .join("");
+        if (!b.books.some((x) => x.book === state.book))
+          state.book = b.books[0].book;
+        fillChapters();
+      }
+      function fillChapters() {
+        const b = state.catalog.find((x) => x.id === state.bible);
+        const n = b.books.find((x) => x.book === state.book).chapters;
+        state.chapter = Math.min(state.chapter, n);
+        $("chapter").innerHTML = Array.from(
+          { length: n },
+          (_, i) =>
+            `<option ${i + 1 === state.chapter ? "selected" : ""}>${i + 1}</option>`
+        ).join("");
+      }
+
+      async function load(scrollTo) {
+        $("verses").innerHTML = `<div class="empty-state">Chargement…</div>`;
+        const params = new URLSearchParams({
+          bible: state.bible,
+          book: state.book,
+          chapter: state.chapter
+        });
+        history.replaceState(
+          null,
+          "",
+          `?${params}${scrollTo ? `#v${scrollTo}` : ""}`
+        );
+        state.verses = await api(`/api/chapter?${params}`);
+        render();
+        if (scrollTo) {
+          const el = document.getElementById(`v${scrollTo}`);
+          if (el) {
+            el.scrollIntoView({ block: "center" });
+            el.classList.add("flash");
+            setTimeout(() => el.classList.remove("flash"), 2500);
+          }
+        } else window.scrollTo(0, 0);
+      }
+
+      function step(delta) {
+        const b = state.catalog.find((x) => x.id === state.bible);
+        let bi = b.books.findIndex((x) => x.book === state.book);
+        let c = state.chapter + delta;
+        if (c < 1) {
+          if (bi === 0) return;
+          bi--;
+          c = b.books[bi].chapters;
+        } else if (c > b.books[bi].chapters) {
+          if (bi === b.books.length - 1) return;
+          bi++;
+          c = 1;
+        }
+        state.book = b.books[bi].book;
+        state.chapter = c;
+        fillBooks();
+        load();
+      }
+
+      async function init() {
+        state.catalog = await api("/api/catalog");
+        if (!state.catalog.length) {
+          $("verses").innerHTML =
+            `<div class="empty-state">Aucune génération vérifiée trouvée.</div>`;
+          return;
+        }
+        const q = new URLSearchParams(location.search);
+        state.bible =
+          q.get("bible") && state.catalog.some((b) => b.id === q.get("bible"))
+            ? q.get("bible")
+            : state.catalog[0].id;
+        state.book = q.get("book") || "Gen";
+        state.chapter = Number(q.get("chapter") || 1);
+        $("bible").innerHTML = state.catalog
+          .map(
+            (b) =>
+              `<option value="${b.id}" ${b.id === state.bible ? "selected" : ""}>${esc(b.label)}</option>`
+          )
+          .join("");
+        $("examples").innerHTML =
+          "Exemples :" +
+          EXAMPLES.filter(([bible]) =>
+            state.catalog.some((b) => b.id === bible)
+          )
+            .map(
+              ([bible, book, chapter, verse, label], i) =>
+                `<button data-example="${i}">${bible.toUpperCase()} ${book} ${chapter}.${verse} — ${esc(label)}</button>`
+            )
+            .join("");
+        fillBooks();
+        stats();
+        await load(location.hash ? Number(location.hash.slice(2)) : undefined);
+      }
+
+      $("bible").addEventListener("change", (e) => {
+        state.bible = e.target.value;
+        fillBooks();
+        stats();
+        load();
+      });
+      $("book").addEventListener("change", (e) => {
+        state.book = e.target.value;
+        state.chapter = 1;
+        fillChapters();
+        load();
+      });
+      $("chapter").addEventListener("change", (e) => {
+        state.chapter = Number(e.target.value);
+        load();
+      });
+      $("prev").addEventListener("click", () => step(-1));
+      $("next").addEventListener("click", () => step(1));
+      for (const id of ["numbers", "uncertain", "changedOnly"])
+        $(id).addEventListener("change", render);
+      document.querySelectorAll(".seg button").forEach((button) =>
+        button.addEventListener("click", () => {
+          document
+            .querySelectorAll(".seg button")
+            .forEach((b) => b.classList.toggle("on", b === button));
+          state.mode = button.dataset.mode;
+          render();
+        })
+      );
+      $("examples").addEventListener("click", (e) => {
+        const button = e.target.closest("button[data-example]");
+        if (!button) return;
+        const [bible, book, chapter, verse] =
+          EXAMPLES[Number(button.dataset.example)];
+        state.bible = bible;
+        state.book = book;
+        state.chapter = chapter;
+        $("bible").value = bible;
+        fillBooks();
+        stats();
+        load(verse);
+      });
+      document.addEventListener("click", (e) => {
+        const target = e.target.closest("[data-kind]");
+        if (target) {
+          showDetail(target);
+          return;
+        }
+        if (!e.target.closest("#detail")) $("detail").classList.remove("open");
+      });
+      document
+        .querySelector("#detail .close")
+        .addEventListener("click", () => $("detail").classList.remove("open"));
+      init().catch((error) => {
+        $("verses").innerHTML =
+          `<div class="empty-state">Erreur : ${esc(error.message)}</div>`;
+      });
+    </script>
+  </body>
+</html>
