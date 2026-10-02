@@ -100,6 +100,10 @@ export function alignCompleteVerse(options: {
       : undefined,
     options.readerPolicy?.transferMatching
   );
+  // The complete inventory keeps one occurrence per witness locution, on its
+  // first word, as it did before locutions became multi-word carriers.
+  for (const locution of base.locutions ?? [])
+    base.assignments.set(locution.startWordIndex, locution.assignment);
   const originalOccurrences = options.original
     ? getOriginalStrongOccurrences(options.original)
     : [];

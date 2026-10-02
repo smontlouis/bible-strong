@@ -1,6 +1,7 @@
 import { tokenizeText, type TextSegment } from "./tokenize.js";
 import {
   parseStrongOccurrences,
+  representsOccurrence,
   type StrongToken,
   type StrongVerse
 } from "./strongCsv.js";
@@ -49,11 +50,24 @@ export interface AssignedStrong {
     | "llm-arbiter"
     | "curated-llm-transfer";
   originalConfirmed: boolean;
+  /** Witness locution tags (`<reference>#<element>`) that support this word. */
+  locutions?: string[];
+  /** Supported only by secondary words of witness locutions. */
+  locutionMemberOnly?: boolean;
+}
+
+/** Consecutive target words carrying one witness locution as one occurrence. */
+export interface LocutionAssignment {
+  startWordIndex: number;
+  endWordIndex: number;
+  assignment: AssignedStrong;
 }
 
 export interface AlignmentResult {
   segments: TextSegment[];
   assignments: Map<number, AssignedStrong>;
+  /** Present when witness locutions are enabled; their words left `assignments`. */
+  locutions?: LocutionAssignment[];
   wordCount: number;
   taggedWordCount: number;
   lowConfidenceWordCount: number;
@@ -65,6 +79,9 @@ interface Candidate {
   source: string;
   witnessFamily: string;
   method: AssignedStrong["method"];
+  locution?: string;
+  /** Matched through a locution word other than its head. */
+  locutionMember?: boolean;
 }
 
 interface TargetWord {
@@ -102,12 +119,24 @@ export function alignVerse(
 
     if (chosen) {
       const originalConfirmed = isConfirmedByOriginal(chosen.strong, original);
+      const agreeing = candidates.filter(
+        (candidate) => candidate.strong.join(" ") === chosen.strong.join(" ")
+      );
+      const locutions = agreeing.flatMap((candidate) =>
+        candidate.locution ? [candidate.locution] : []
+      );
       assignments.set(word.wordIndex, {
         strong: chosen.strong,
         confidence: scoreWithOriginal(chosen.score, chosen.strong, original),
         source: sourceWithOriginal(chosen.source, chosen.strong, original),
         method: chosen.method,
-        originalConfirmed
+        originalConfirmed,
+        ...(matching?.witnessLocutions && locutions.length
+          ? { locutions }
+          : {}),
+        ...(agreeing.every((candidate) => candidate.locutionMember)
+          ? { locutionMemberOnly: true }
+          : {})
       });
       continue;
     }
@@ -134,10 +163,23 @@ export function alignVerse(
     }
   }
 
+  const locutions = matching?.witnessLocutions
+    ? collectLocutions(assignments)
+    : undefined;
+  // Outside a reassembled locution, its secondary words carry nothing: the
+  // occurrence stays with the head word, as with a single-word witness tag.
+  for (const [wordIndex, assignment] of assignments)
+    if (assignment.locutionMemberOnly) assignments.delete(wordIndex);
   const wordCount = segments.filter(
     (segment) => segment.kind === "word"
   ).length;
-  const taggedWordCount = assignments.size;
+  const taggedWordCount =
+    assignments.size +
+    (locutions ?? []).reduce(
+      (sum, locution) =>
+        sum + locution.endWordIndex - locution.startWordIndex + 1,
+      0
+    );
   const lowConfidenceWordCount = [...assignments.values()].filter(
     (assignment) => assignment.confidence < LOW_CONFIDENCE_THRESHOLD
   ).length;
@@ -145,10 +187,55 @@ export function alignVerse(
   return {
     segments,
     assignments,
+    ...(locutions ? { locutions } : {}),
     wordCount,
     taggedWordCount,
     lowConfidenceWordCount
   };
+}
+
+/**
+ * Consecutive words that received the same Strong numbers from one witness
+ * locution tag become one occurrence; a single matched word stays a word.
+ */
+function collectLocutions(
+  assignments: Map<number, AssignedStrong>
+): LocutionAssignment[] {
+  const locutions: LocutionAssignment[] = [];
+  const indexes = [...assignments.keys()].sort((left, right) => left - right);
+  let run: number[] = [];
+  const close = () => {
+    if (run.length > 1) {
+      const members = run.map((index) => assignments.get(index)!);
+      const head = members[0]!;
+      locutions.push({
+        startWordIndex: run[0]!,
+        endWordIndex: run.at(-1)!,
+        assignment: {
+          ...head,
+          confidence: Math.min(...members.map((member) => member.confidence)),
+          originalConfirmed: members.every((member) => member.originalConfirmed)
+        }
+      });
+      for (const index of run) assignments.delete(index);
+    }
+    run = [];
+  };
+  for (const index of indexes) {
+    const current = assignments.get(index)!;
+    const previous = run.length ? assignments.get(run.at(-1)!) : undefined;
+    const joins =
+      previous !== undefined &&
+      run.at(-1) === index - 1 &&
+      previous.strong.join(" ") === current.strong.join(" ") &&
+      (current.locutions ?? []).some((key) =>
+        (previous.locutions ?? []).includes(key)
+      );
+    if (!joins) close();
+    if (current.locutions?.length) run.push(index);
+  }
+  close();
+  return locutions;
 }
 
 function matchReferenceOccurrences(
@@ -157,7 +244,11 @@ function matchReferenceOccurrences(
   matching?: TransferMatchingPolicy
 ): Map<number, Candidate> {
   const tokens = reference.verse?.tokens ?? [];
-  const strongTokens = referenceStrongTokens(reference);
+  // Without locution transfer, a locution is matched through its head word
+  // only, exactly as when the witness tagged that word alone.
+  const strongTokens = referenceStrongTokens(reference).filter(
+    ({ token }) => matching?.witnessLocutions || representsOccurrence(token)
+  );
   const edges = strongTokens.flatMap(({ token, sourceIndex }, left) =>
     words.flatMap((word) => {
       const candidate = candidateForToken(
@@ -180,7 +271,14 @@ function matchReferenceOccurrences(
           // Position is used only to resolve the global occurrence mapping;
           // it does not inflate the reported lexical confidence.
           weight: candidate.score + position * 0.03,
-          value: candidate
+          value:
+            token.element === undefined
+              ? candidate
+              : {
+                  ...candidate,
+                  locution: `${reference.name}#${token.element}`,
+                  ...(token.elementHead ? {} : { locutionMember: true })
+                }
         }
       ];
     })
@@ -208,7 +306,9 @@ function referenceStrongTokens(
     parseStrongOccurrences(reference.verse.row.text)
   );
   const visibleCounts = countStrings(
-    tagged.flatMap(({ token }) => token.strong)
+    tagged.flatMap(({ token }) =>
+      representsOccurrence(token) ? token.strong : []
+    )
   );
 
   for (const [strong, total] of totalCounts) {

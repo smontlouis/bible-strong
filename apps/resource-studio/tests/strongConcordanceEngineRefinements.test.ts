@@ -65,6 +65,46 @@ test("witness transfer reaches enclitic hosts and digits only when enabled", () 
   assert.match(on.assignments.get(2)?.source ?? "", /digit-numeral/u);
 });
 
+test("a witness locution transfers as one multi-word carrier only when enabled", () => {
+  const references = [
+    witness(
+      'Il partit, <w strong="H6435" head="peur">de peur que</w> le <w strong="H4428">roi</w> vienne.'
+    )
+  ];
+  const text = "Il s’en alla de peur que le roi vienne.";
+  // Disabled, the locution is matched through its head word alone.
+  const off = alignVerse(text, references);
+  assert.equal(off.locutions, undefined);
+  assert.deepEqual(
+    [3, 4, 5].map((index) => off.assignments.get(index)?.strong),
+    [undefined, ["H6435"], undefined]
+  );
+  const on = alignVerse(text, references, undefined, undefined, {
+    witnessLocutions: true
+  });
+  assert.deepEqual(
+    on.locutions?.map(({ startWordIndex, endWordIndex, assignment }) => [
+      startWordIndex,
+      endWordIndex,
+      assignment.strong
+    ]),
+    [[3, 5, ["H6435"]]]
+  );
+  assert.equal(on.assignments.has(4), false);
+  assert.deepEqual(on.assignments.get(7)?.strong, ["H4428"]);
+  // Scattered secondary words do not become carriers of their own.
+  const partial = alignVerse(
+    "Il partit de crainte que le roi vienne.",
+    references,
+    undefined,
+    undefined,
+    { witnessLocutions: true }
+  );
+  assert.deepEqual(partial.locutions, []);
+  assert.equal(partial.assignments.has(2), false);
+  assert.equal(partial.assignments.has(4), false);
+});
+
 const tagnt = (
   id: string,
   primary: string,
@@ -337,12 +377,14 @@ test("the engine enables every measured refinement by default and allows a full 
     readingInvariantVariants: true,
     singleCarrierPerSourceIdentity: true,
     encliticHostTransfer: true,
-    digitNumeralTransfer: true
+    digitNumeralTransfer: true,
+    witnessLocutions: true
   });
   assert.deepEqual(resolveEnginePolicy({ encliticHostTransfer: false }), {
     readingInvariantVariants: true,
     singleCarrierPerSourceIdentity: true,
     encliticHostTransfer: false,
-    digitNumeralTransfer: true
+    digitNumeralTransfer: true,
+    witnessLocutions: true
   });
 });

@@ -3,7 +3,7 @@ import {
   type StrongLexicon,
   type StrongLexiconEntry
 } from "./align.js";
-import { type StrongVerseMap } from "./strongCsv.js";
+import { representsOccurrence, type StrongVerseMap } from "./strongCsv.js";
 
 interface LexiconOptions {
   minExactCount: number;
@@ -30,7 +30,11 @@ export function buildStrongLexicon(
   for (const reference of references) {
     for (const verse of reference.map.values()) {
       for (const token of verse.tokens) {
-        if (token.strong.length === 0 || token.normalized.length < 3) {
+        if (
+          token.strong.length === 0 ||
+          token.normalized.length < 3 ||
+          !representsOccurrence(token)
+        ) {
           continue;
         }
 

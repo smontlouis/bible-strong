@@ -362,13 +362,16 @@ export interface StrongEnginePolicy {
   encliticHostTransfer: boolean;
   /** A one-word French numeral may match the same number written in digits. */
   digitNumeralTransfer: boolean;
+  /** A witness tag spanning a locution transfers as one multi-word carrier. */
+  witnessLocutions: boolean;
 }
 
 export const DEFAULT_ENGINE_POLICY: Readonly<StrongEnginePolicy> = {
   readingInvariantVariants: true,
   singleCarrierPerSourceIdentity: true,
   encliticHostTransfer: true,
-  digitNumeralTransfer: true
+  digitNumeralTransfer: true,
+  witnessLocutions: true
 };
 
 export function resolveEnginePolicy(
@@ -401,14 +404,19 @@ function readerPolicyWithEngine(
   policy: ReaderAlignmentPolicy,
   engine: StrongEnginePolicy
 ): ReaderAlignmentPolicy {
-  if (!engine.encliticHostTransfer && !engine.digitNumeralTransfer)
+  if (
+    !engine.encliticHostTransfer &&
+    !engine.digitNumeralTransfer &&
+    !engine.witnessLocutions
+  )
     return policy;
   return {
     ...policy,
     transferMatching: {
       ...policy.transferMatching,
       ...(engine.encliticHostTransfer ? { encliticHosts: true } : {}),
-      ...(engine.digitNumeralTransfer ? { digitNumerals: true } : {})
+      ...(engine.digitNumeralTransfer ? { digitNumerals: true } : {}),
+      ...(engine.witnessLocutions ? { witnessLocutions: true } : {})
     }
   };
 }
@@ -1775,11 +1783,16 @@ function readerPhraseAnnotations(options: {
       strong: strong.toUpperCase(),
       visibility: "reader" as const,
       placement: "phrase" as const,
-      source: "phrase-transfer" as const,
+      // A witness locution is a witness transfer spanning several words.
+      source: assignment.transferMethod
+        ? readerAssignmentSource(assignment.transferMethod)
+        : ("phrase-transfer" as const),
       confidence: assignment.confidence,
       reason:
         "Visible in reader mode because the calibrated reader pipeline found a defensible French phrase carrier.",
-      diagnostics: [assignment.method, assignment.source],
+      diagnostics: assignment.transferMethod
+        ? [assignment.transferMethod, assignment.source, assignment.method]
+        : [assignment.method, assignment.source],
       startWordIndex: assignment.startWordIndex,
       endWordIndex: assignment.endWordIndex,
       normalizedPhrase: normalizedPhrase(

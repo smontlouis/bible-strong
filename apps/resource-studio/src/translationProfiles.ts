@@ -11,6 +11,8 @@ export interface TransferMatchingPolicy {
   encliticHosts?: boolean;
   /** Match a one-word French numeral with the same number written in digits. */
   digitNumerals?: boolean;
+  /** A witness tag spanning a locution transfers as one multi-word carrier. */
+  witnessLocutions?: boolean;
 }
 
 export interface ReaderAlignmentPolicy {

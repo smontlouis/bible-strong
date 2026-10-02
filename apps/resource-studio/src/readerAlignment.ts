@@ -19,7 +19,7 @@ import {
   type StrongPhraseLexicon
 } from "./phraseTranslationLexicon.js";
 import { renderTaggedText } from "./render.js";
-import { parseStrongOccurrences } from "./strongCsv.js";
+import { parseStrongOccurrences, representsOccurrence } from "./strongCsv.js";
 import {
   escapeHtml,
   stripTags,
@@ -48,11 +48,13 @@ export interface ReaderEmptyAssignment {
 export interface ReaderPhraseAssignment {
   strong: string[];
   confidence: number;
-  method: "curated-phrase" | "learned-phrase";
+  method: "curated-phrase" | "learned-phrase" | "witness-locution";
   source: string;
   startWordIndex: number;
   endWordIndex: number;
   originalConfirmed: boolean;
+  /** How a witness locution was matched on the target words. */
+  transferMethod?: AssignedStrong["method"];
 }
 
 export interface ReaderAlignmentResult extends AlignmentResult {
@@ -98,7 +100,19 @@ export function alignReaderVerse(options: {
     options.original,
     readerPolicy.transferMatching
   );
-  const phraseAssignments: ReaderPhraseAssignment[] = [];
+  // A witness locution matched on consecutive words is one carrier.
+  const phraseAssignments: ReaderPhraseAssignment[] = (
+    base.locutions ?? []
+  ).map((locution) => ({
+    strong: [...locution.assignment.strong],
+    confidence: locution.assignment.confidence,
+    method: "witness-locution",
+    source: locution.assignment.source,
+    startWordIndex: locution.startWordIndex,
+    endWordIndex: locution.endWordIndex,
+    originalConfirmed: locution.assignment.originalConfirmed,
+    transferMethod: locution.assignment.method
+  }));
   enrichAssignmentsFromOriginal({
     result: base,
     phraseAssignments,
@@ -178,7 +192,8 @@ function enrichAssignmentsFromOriginal(options: {
   });
   const usedOccurrences = consumeBaseOccurrences(
     occurrences,
-    options.result.assignments
+    options.result.assignments,
+    options.phraseAssignments
   );
   const phraseMatchIndex = options.phraseLexicon
     ? buildPhraseMatchIndex({
@@ -458,11 +473,12 @@ function isRelocatableMorphology(morphology: string): boolean {
 
 function consumeBaseOccurrences(
   occurrences: OriginalStrongOccurrence[],
-  assignments: Map<number, AssignedStrong>
+  assignments: Map<number, AssignedStrong>,
+  phraseAssignments: ReaderPhraseAssignment[] = []
 ): Set<string> {
   const usedOccurrences = new Set<string>();
 
-  for (const assignment of assignments.values()) {
+  for (const assignment of [...assignments.values(), ...phraseAssignments]) {
     for (const strong of assignment.strong) {
       const occurrence = occurrences.find(
         (candidate) =>
@@ -636,6 +652,7 @@ function buildPlacementBudget(
   for (const reference of references) {
     const counts = new Map<string, number>();
     for (const token of reference.verse?.tokens ?? []) {
+      if (!representsOccurrence(token)) continue;
       for (const strong of token.strong) {
         counts.set(strong, (counts.get(strong) ?? 0) + 1);
       }

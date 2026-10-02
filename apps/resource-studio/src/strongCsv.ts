@@ -13,7 +13,21 @@ export interface StrongToken {
   text: string;
   normalized: string;
   strong: string[];
+  /**
+   * Ordinal of the `<w>` element in the verse when that element spans several
+   * words: a whole locution carries one occurrence.
+   */
+  element?: number;
+  /** The word of a locution element that represents its occurrence. */
+  elementHead?: boolean;
 }
+
+/**
+ * Whether a witness token stands for its occurrence when words are counted or
+ * learned one by one: a locution counts once, through its head word.
+ */
+export const representsOccurrence = (token: StrongToken): boolean =>
+  token.element === undefined || token.elementHead === true;
 
 export interface StrongVerse {
   row: StrongRow;
@@ -60,6 +74,7 @@ export function parseStrongTokens(text: string): StrongToken[] {
   const tokens: StrongToken[] = [];
   const wordTagPattern = /<w\b([^>]*)>([\s\S]*?)<\/w>/giu;
   let cursor = 0;
+  let element = 0;
 
   for (const match of text.matchAll(wordTagPattern)) {
     const index = match.index ?? 0;
@@ -71,17 +86,34 @@ export function parseStrongTokens(text: string): StrongToken[] {
     const attributes = match[1] ?? "";
     const innerText = stripTags(match[2] ?? "");
     const strong = parseStrongAttribute(attributes);
+    const words = tokenizeText(innerText).flatMap((segment) =>
+      segment.kind === "word" && segment.normalized ? [segment] : []
+    );
 
-    for (const segment of tokenizeText(innerText)) {
-      if (segment.kind === "word" && segment.normalized) {
-        tokens.push({
-          text: segment.text,
-          normalized: segment.normalized,
-          strong
-        });
-      }
+    // The word the CSV export tagged, or the first word without that mark.
+    const head = /\bhead="([^"]*)"/u.exec(attributes)?.[1];
+    const headWord =
+      head === undefined
+        ? undefined
+        : tokenizeText(head).flatMap((segment) =>
+            segment.kind === "word" ? [segment.normalized] : []
+          )[0];
+    const headIndex = Math.max(
+      0,
+      words.findIndex((segment) => segment.normalized === headWord)
+    );
+    for (const [index, segment] of words.entries()) {
+      tokens.push({
+        text: segment.text,
+        normalized: segment.normalized,
+        strong,
+        ...(words.length > 1
+          ? { element, ...(index === headIndex ? { elementHead: true } : {}) }
+          : {})
+      });
     }
 
+    element += 1;
     cursor = index + match[0].length;
   }
 

@@ -1,6 +1,6 @@
 import { stemWord } from "./align.js";
 import { isGenericFrenchCarrier } from "./frenchLexicalSafety.js";
-import { type StrongVerseMap } from "./strongCsv.js";
+import { representsOccurrence, type StrongVerseMap } from "./strongCsv.js";
 import { normalizeStepStrongCode } from "./lexiconV3/identity.js";
 
 export interface StrongTranslationCandidate {
@@ -60,7 +60,11 @@ export function buildStrongTranslationLexicon(
         const stemEditionVerseCounts = new Map<string, FormCount>();
 
         for (const token of verse.tokens) {
-          if (token.strong.length === 0 || token.normalized.length < 2) {
+          if (
+            token.strong.length === 0 ||
+            token.normalized.length < 2 ||
+            !representsOccurrence(token)
+          ) {
             continue;
           }
 

@@ -1,4 +1,4 @@
-import { type StrongVerseMap } from "./strongCsv.js";
+import { representsOccurrence, type StrongVerseMap } from "./strongCsv.js";
 
 export interface StrongPhraseCandidate {
   strong: string;
@@ -59,7 +59,12 @@ export function buildStrongPhraseLexicon(
 
         for (let index = 0; index < tokens.length; index += 1) {
           const token = tokens[index];
-          if (!token || token.strong.length === 0) continue;
+          if (
+            !token ||
+            token.strong.length === 0 ||
+            !representsOccurrence(token)
+          )
+            continue;
 
           for (const strong of token.strong) {
             for (let length = 2; length <= MAX_PHRASE_LENGTH; length += 1) {
