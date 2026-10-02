@@ -42,6 +42,9 @@ jobs:
       - name: Check Cloudflare asset size limit
         run: node apps/expo/scripts/check-web-assets.mjs
 
+      - name: Check PWA files
+        run: node apps/expo/scripts/check-pwa.mjs
+
       - name: Deploy static assets
         env:
           CLOUDFLARE_ACCOUNT_ID: 412013be38e98e0e90906c8ece4a173f

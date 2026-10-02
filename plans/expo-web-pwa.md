@@ -193,13 +193,23 @@ reads this file, does **one** unchecked item, validates it, updates this file an
       `web.bible-strong.app`, `authDomain` switch, redirect flow in standalone, new OAuth
       redirect URIs in Google/Apple consoles) needs console access: documented in item 9, not
       done here.
-- [ ] **9. Gate, CI, docs.** `scripts/check-pwa.mjs` (manifest fields, icon files and sizes,
+- [x] **9. Gate, CI, docs.** `scripts/check-pwa.mjs` (manifest fields, icon files and sizes,
       `sw.js` present, precache entries count/bytes within budget and same-origin only,
       `index.html` links, `_headers` present). Add it to `.github/workflows/expo-web-production.yml`
       after `check-web-assets.mjs` (and to PR checks if they export web). ADR-0067 (installable
       PWA, app-shell SW, no editorial caching, Serwist, update prompt, kill switch). Update
       `docs/expo-web-deployment.md` (PWA section, kill-switch procedure) and
       `docs/agents/validation.md`.
+      **Evidence**: `apps/expo/scripts/check-pwa.mjs` (manifest fields, any+maskable 192/512
+      icons read from PNG headers, apple icon 180, `lang`/`viewport-fit`/manifest/theme-color/
+      apple links in `index.html`, `_headers` rules, precache entries same-origin and present in
+      `dist`, entry bundle and shell included, ≤ 30 MiB) → "48 files, 24.93 MiB", exit 0.
+      Added to `.github/workflows/expo-web-production.yml` after the asset size check, so a
+      broken PWA blocks the deploy. PR checks and PR previews never export web (PR previews are
+      native EAS updates), so nothing to add there. ADR-0067 written; deployment doc gains a PWA
+      section (files, local recipe on `localhost:9090`, kill-switch worker, iOS sign-in
+      limitation); validation matrix gains an "Expo Web PWA" row. eslint/prettier OK on the
+      script and new docs (`validation.md` was already not Prettier-formatted at HEAD).
 - [ ] **10. Final verification.** Fresh `web:build` (production env) on the local server:
       manifest without errors, installability, SW activated, offline reload, update flow across
       two builds, no SW in `expo start --web`. iOS Simulator Safari via argent: Add to Home
