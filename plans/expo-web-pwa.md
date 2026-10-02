@@ -62,9 +62,15 @@ reads this file, does **one** unchecked item, validates it, updates this file an
       who chose the light theme on a dark system. Status bar style `default` until item 8 checks
       safe areas (`black-translucent` always uses white text, unreadable on the light theme).
       Item 8: keep `theme-color` in sync with the selected in-app theme at runtime.
-- [ ] **3. Icons.** Reproducible script generating `public/icons/` from the app icon: 192 and
+- [x] **3. Icons.** Reproducible script generating `public/icons/` from the app icon: 192 and
       512 (`any`), 512 maskable (80 % safe zone, opaque background), 180 apple-touch-icon
       (opaque), favicon. Inspect the source icon (transparency, rounded corners) first.
+      **Evidence**: `yarn workspace @bible-strong/expo web:icons` (`scripts/generate-web-icons.mjs`,
+      ImageMagick 7, PNGs committed). `icon-2.png` is opaque full-bleed, so `any` + apple icons
+      are plain resizes. Maskable 192/512 = `background-image.png` gradient + the white disc
+      cut out of the icon at 76 % (source disc is 83 %, beyond the 80 % safe zone); forced sRGB
+      because the gradient source is Gray. `identify`: all opaque sRGB, right sizes. The favicon
+      stays Expo's `favicon.ico` from `web.favicon`.
 - [ ] **4. Manifest + headers.** `public/manifest.webmanifest` (id, name, short_name,
       description, start_url `/home`, scope `/`, display `standalone`, theme/background colors,
       icons, lang `en`, categories). `public/_headers`: no-cache for `/sw.js` and HTML
