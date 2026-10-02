@@ -82,15 +82,14 @@
         verses: []
       };
       const EXAMPLES = [
-        ["nbs", "Gen", 3, 10, "locutions « eu peur », « parce que »"],
-        ["nbs", "Gen", 4, 2, "locution « petit bétail »"],
-        ["nbs", "Gen", 1, 4, "◎ établi par les témoins"],
-        ["nbs", "Gen", 2, 16, "◎ « en disant » non traduit"],
-        ["nbs", "Gen", 6, 4, "rattachements corrigés"],
-        ["nbs", "Luke", 2, 48, "κἀγώ"],
-        ["nfc", "Gen", 2, 21, "NFC : « profond sommeil »"],
-        ["nfc", "Gen", 3, 4, "NFC : infinitif absolu non traduit"],
-        ["nfc", "Gen", 4, 3, "NFC : « et il arriva » non traduit"]
+        ["nbs", "Gen", 1, 31, "« qu’il » porte אֲשֶׁר (pronom collé)"],
+        ["nbs", "Gen", 4, 10, "« Qu’as-tu » porte מָה (pronom collé)"],
+        ["nfc", "Gen", 4, 14, "NFC : « aujourd'hui » (apostrophe)"],
+        ["nfc", "Gen", 21, 26, "NFC : « Jusqu'à aujourd'hui »"],
+        ["nfc", "Mark", 2, 5, "NFC : « voit », G3708 (famille)"],
+        ["nfc", "Luke", 2, 6, "NFC : εἶναι, G1511/G1510 (famille)"],
+        ["nbs", "Gen", 7, 4, "« en effet » d'un seul tenant (locution)"],
+        ["nbs", "Matt", 14, 32, "καί initial hors du « et » ajouté"]
       ];
       /** STEP separates morphemes with "/" and "\\"; the reader sees the word. */
       const word = (s) => String(s || "").replace(/[\/\\]/g, "");
@@ -143,7 +142,7 @@
         const row = (label, k) =>
           `<span>${label} <b>${fmt(p[k])}</b> → <b>${fmt(a[k])}</b></span>`;
         $("stats").innerHTML =
-          `<span><b>${esc(b.label)}</b> · ${fmt(a.verses)} versets, ${fmt(a.units)} mots source · avant : moteur A–D, anciens témoins · après : A–G, témoins du 28 septembre</span>` +
+          `<span><b>${esc(b.label)}</b> · ${fmt(a.verses)} versets, ${fmt(a.units)} mots source · avant : ${esc(b.runs.before)} · après : ${esc(b.runs.after)}</span>` +
           row("placés", "visible") +
           row("non traduits", "empty") +
           row("incertains", "unresolved") +

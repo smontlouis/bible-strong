@@ -6,7 +6,8 @@
  * annotations never leave this machine.
  *
  *   yarn exec tsx scripts/strong-prototype/server.ts [--port 4321]
- *     [--before outputs/strong-autonomous/v3] [--after outputs/strong-autonomous/v4]
+ *     [--before outputs/strong-autonomous/v4] [--after outputs/strong-autonomous/v6]
+    [--before-label "moteur A–G"] [--after-label "moteur A–L"]
  *     [--concordance <compare-view.json>,...]  (one view per Bible and engine)
  */
 import { existsSync, readFileSync } from "node:fs";
@@ -23,8 +24,12 @@ function flag(name: string, fallback: string): string {
 
 const PORT = Number(flag("--port", "4321"));
 const RUNS = {
-  before: flag("--before", "outputs/strong-autonomous/v3"),
-  after: flag("--after", "outputs/strong-autonomous/v4")
+  before: flag("--before", "outputs/strong-autonomous/v4"),
+  after: flag("--after", "outputs/strong-autonomous/v6")
+} as const;
+const RUN_LABELS = {
+  before: flag("--before-label", "moteur A–G"),
+  after: flag("--after-label", "moteur A–L")
 } as const;
 type Side = keyof typeof RUNS;
 const LABELS: Record<string, string> = {
@@ -178,6 +183,7 @@ function catalog() {
         id: bible,
         label: LABELS[bible] ?? bible.toUpperCase(),
         books,
+        runs: RUN_LABELS,
         summary: {
           before: before[bible]?.summary,
           after: after[bible]?.summary
@@ -212,7 +218,7 @@ const COMPARISONS = flag(
   "--concordance",
   ["SG21", "NEG"]
     .flatMap((edition) =>
-      ["ABCDEFGHIJ", "ABCDEFG"].map(
+      ["ABCDEFGHIJKL", "ABCDEFGHIJ", "ABCDEFG"].map(
         (policy) =>
           `${COMPARISON_DIR}/${edition}__target-excluded__comparison__policy-${policy}.json`
       )
@@ -338,7 +344,7 @@ http
         json(concordanceCatalog());
       else if (url.pathname === "/api/concordance/chapter") {
         const view = comparisonViews().get(
-          `${url.searchParams.get("edition") ?? "SG21"}|${url.searchParams.get("engine") ?? "A–J"}`
+          `${url.searchParams.get("edition") ?? "SG21"}|${url.searchParams.get("engine") ?? "A–L"}`
         );
         const verses = view?.chapters[url.searchParams.get("chapter") ?? ""];
         if (!verses) json({ error: "not-in-comparison-sample" }, 404);

@@ -30,6 +30,10 @@ pour 100 mots hébreux ou grecs que Concordance annote (moteur A–G) :
   réserve scellée, elles portent les mots identiques à Concordance de 77,0 à
   78,5 % pour S21 et de 91,3 à 93,0 % pour NEG79, sans perte de précision
   ([détail](#pistes-1-à-3-appliquées-moteur-aj)).
+- Les pistes 4 et 5 (moteur A–L), mesurées sur une seconde réserve, ajoutent
+  peu à l'accord (+0,2 pt pour S21) mais retirent des erreurs : la précision
+  des porteurs passe de 93,5 à 93,9 % (S21) et de 96,5 à 96,8 % (NEG79)
+  ([détail](#pistes-4-et-5-appliquées-moteur-al)).
 
 ## Ce qui est comparé
 
@@ -172,9 +176,9 @@ Dans les 12 cas examinés, le placement de Concordance est juste. Les causes :
 
 ## Pistes d'amélioration
 
-Repérées ici. Les pistes 1 à 3 ont ensuite été appliquées
-([section suivante](#pistes-1-à-3-appliquées-moteur-aj)) ; les pistes 4 et 5
-restent à faire.
+Repérées ici, puis appliquées : les pistes 1 à 3 d'abord
+([moteur A–J](#pistes-1-à-3-appliquées-moteur-aj)), les pistes 4 et 5 ensuite
+([moteur A–L](#pistes-4-et-5-appliquées-moteur-al)).
 
 1. **Apostrophes.** Notre normalisation unifie les élisions (« l' »), pas
    « aujourd'hui ». Concordance place 44 « aujourd'hui » dans l'échantillon
@@ -291,10 +295,129 @@ Ce qui reste :
 
 - Les incertitudes de S21 (15,4 %) viennent surtout de son vocabulaire,
   différent de celui de LSG et Darby. Les trois pistes n'y touchaient pas.
-- La réserve est désormais ouverte. Pour mesurer les pistes 4 et 5, il
-  faudra une nouvelle réserve : 127 chapitres frais restent inutilisés.
-- Les Bibles générées (NBS, NFC et les sept autres) ne sont pas régénérées
-  avec A–J.
+- La réserve est désormais ouverte : les pistes 4 et 5 ont été mesurées sur
+  une seconde réserve (section suivante).
+
+## Pistes 4 et 5 appliquées (moteur A–L)
+
+Deux options s'ajoutent, actives par défaut :
+
+- **K, conjonction initiale** (`openingConjunctions`) : une conjonction qui
+  ouvre le verset du témoin (« Et », « Or », « Mais ») n'est portée que par le
+  premier cinquième du verset cible. Elle ne va plus sur un « et » que la
+  traduction ajoute plus loin, devant un verbe (Mt 25.20, Lc 22.45).
+- **L, locutions des témoins** (`witnessLocutionLexicon`) : les témoins
+  étiquettent d'un tenant 1 607 locutions (« parce que », « afin que »,
+  « en effet », « hauts lieux »…). Celles employées au moins trois fois
+  forment un lexique. Un mot qui porte le numéro d'une de ces locutions
+  s'étend à toute la locution quand la cible l'écrit et qu'aucun autre de ses
+  mots ne porte de numéro. Le cas typique est « En effet » dans S21, là où les
+  témoins écrivent « car ». Le lexique vient des seuls témoins réutilisables.
+
+La régénération de NFC a aussi montré un défaut de B, aggravé par I. Deux
+identifiants d'un même mot source pouvaient rester sur le même mot (« vu »
+portait G1492 et G3708 en Lc 2.26). B n'arbitrait que les porteurs posés sur
+des mots différents ; NBS comptait déjà 794 de ces doublons avec A–G, et 1 001
+avec A–J. Désormais, sur les mêmes mots, un seul porteur reste : celui des
+témoins, puis le mieux étayé, puis le premier identifiant de STEP.
+
+### En développement (échantillon de comparaison)
+
+| Moteur                 |     S21 F1 | S21 précision |   NEG79 F1 | NEG79 précision |
+| ---------------------- | ---------: | ------------: | ---------: | --------------: |
+| A–J                    |     0,8690 |        0,9309 |     0,9551 |          0,9615 |
+| + K                    |     0,8696 |        0,9316 |     0,9556 |          0,9620 |
+| + L                    |     0,8712 |        0,9332 |     0,9551 |          0,9615 |
+| A–L                    |     0,8717 |        0,9339 |     0,9557 |          0,9621 |
+| A–L, B sur un même mot | **0,8731** |    **0,9372** | **0,9572** |      **0,9654** |
+
+F1 et précision : mesure porteur.
+
+- K retire environ quatre conjonctions mal placées pour une juste perdue,
+  qui devient incertaine. Son gain reste sous le seuil d'adoption ; elle est
+  adoptée pour la précision, comme demandé.
+- L aide S21 (+0,0022 F1) et ne change rien à NEG79, dont le texte suit les
+  témoins.
+- La correction de B fait gagner +0,003 de précision dans les deux Bibles.
+
+Contrôles, de A–J à A–L avec B corrigé : tous progressent, en F1 et en
+précision.
+
+| Configuration                | F1 A–J | F1 A–L | Précision A–J | Précision A–L |
+| ---------------------------- | -----: | -----: | ------------: | ------------: |
+| S21 sans la famille Segond   | 0,7922 | 0,7965 |        0,9170 |        0,9246 |
+| NEG79 sans la famille Segond | 0,8428 | 0,8454 |        0,9316 |        0,9371 |
+| LSG (développement)          | 0,8523 | 0,8564 |        0,9357 |        0,9439 |
+| Darby (développement)        | 0,8429 | 0,8463 |        0,8959 |        0,9011 |
+| DarbyR (développement)       | 0,8424 | 0,8459 |        0,8994 |        0,9045 |
+| canari LSG                   | 0,8566 | 0,8577 |        0,9450 |        0,9483 |
+| canari Darby                 | 0,8475 | 0,8483 |        0,9045 |        0,9064 |
+| canari DarbyR                | 0,8440 | 0,8451 |        0,9034 |        0,9053 |
+
+### Sur une seconde réserve scellée
+
+La première réserve était ouverte, et il ne restait qu'un chapitre de la Loi
+jamais utilisé. La seconde réserve (`plan-comparison-v2.json`) tire donc
+120 chapitres, au prorata des genres :
+
+- parmi ceux qui n'ont jamais été comparés à S21 ni NEG79 ;
+- en admettant ceux des anciens bancs d'essai, qui ont servi à régler le
+  moteur contre LSG et Darby.
+
+Elle compte 15 chapitres frais et 105 de ces bancs, soit 3 473 versets S21 et
+3 425 NEG79 comparés. Elle a été scellée avant toute modification du code.
+Le moteur A–J l'a prédite d'abord, puis le moteur A–L a été figé
+(`freeze-v5.json`) avant de récupérer ses 240 pages.
+
+|                                          | S21 A–J |    S21 A–L | NEG79 A–J |  NEG79 A–L |
+| ---------------------------------------- | ------: | ---------: | --------: | ---------: |
+| identiques                               |  79,5 % | **79,7 %** |    93,8 % | **93,8 %** |
+| F1 par occurrence                        |  87,9 % | **88,1 %** |    96,3 % | **96,3 %** |
+| porteurs, précision (mesure des canaris) |  93,5 % | **93,9 %** |    96,5 % | **96,8 %** |
+| portée plus courte que Concordance       |     358 |        282 |        65 |         64 |
+| placés chez nous, non traduits chez eux  |     603 |        584 |       568 |        550 |
+| laissés incertains où Concordance place  |  15,1 % |     15,2 % |     3,1 % |      3,1 % |
+
+De A–J à A–L, intervalles à 95 % appariés par chapitre :
+
+- mots identiques : +0,1 à +0,2 pt pour S21, +0,0 à +0,1 pt pour NEG79 ;
+- F1 par occurrence : +0,1 à +0,2 pt pour S21, pas de changement mesurable
+  pour NEG79.
+
+Les deux pistes visaient des erreurs rares : l'accord bouge peu, mais les
+erreurs reculent. L corrige 76 portées trop courtes dans S21. K retire une
+vingtaine de conjonctions mal placées dans chaque Bible. La précision des
+porteurs, surtout grâce à B, gagne 0,3 à 0,5 pt.
+
+## NBS et NFC régénérées
+
+NBS et NFC ont été régénérées en entier avec chaque moteur
+(`outputs/strong-autonomous/v4` à `v6`), toutes vérifications passées.
+
+| Mesure                            | NBS A–G | NBS A–J | NBS A–L | NFC A–G | NFC A–J | NFC A–L |
+| --------------------------------- | ------: | ------: | ------: | ------: | ------: | ------: |
+| Mots source placés                | 349 606 | 354 653 | 354 539 | 267 842 | 272 358 | 272 148 |
+| Mots non traduits établis         |   4 245 |   4 204 |   4 268 |   2 008 |   1 990 |   2 050 |
+| dont par les témoins (G)          |   2 624 |   2 595 |   2 656 |   1 361 |   1 346 |   1 406 |
+| Mots source incertains            |  19,8 % |  18,7 % |  18,7 % |  38,8 % |  37,8 % |  37,8 % |
+| Versets entièrement comptabilisés |   3 825 |   4 240 |   4 237 |     536 |     601 |     598 |
+| Mots du lecteur portant un Strong |  49,5 % |  49,8 % |  49,9 % |  31,8 % |  32,1 % |  32,1 % |
+| Mots portant plusieurs Strong     |   5 273 |   7 932 |   6 948 |   4 412 |   6 431 |   5 705 |
+
+- A–J place environ 5 000 mots source de plus dans NBS et 4 500 dans NFC.
+  NFC, écrite avec l'apostrophe droite, gagne notamment « aujourd'hui » dans
+  251 des 320 versets qui le contiennent.
+- Le diagnostic « risques de placement » du générateur compte tout mot
+  portant plusieurs Strong. Il monte donc avec J, par construction. Sur un
+  échantillon de 16 de ces mots dans NBS, 13 sont justes : « temps-là »
+  (עֵת + הוּא), « l'amenez-vous », « n'eut ». Un est un doublon d'identifiants,
+  que B retire désormais, et deux sont faux.
+- A–L retire environ un millier de doublons d'identifiants par Bible (B). Une
+  partie des conjonctions qu'il ne place plus (K) devient « non traduite »
+  d'après les témoins.
+
+NBS et NFC n'ont pas de référence externe : ces chiffres décrivent ce qui
+change, pas sa justesse, mesurée seulement sur S21 et NEG79.
 
 ## Limites
 
@@ -337,3 +460,23 @@ yarn exec tsx $R sample --run outputs/strong-concordance-night/predictions/SG21_
 
 Les mêmes commandes valent pour NEG79 avec `--edition NEG`, et sans `--policy`
 pour le moteur initial.
+
+Les étapes suivantes se rejouent avec les scripts rangés sous
+`outputs/strong-concordance-night/` :
+
+- pistes 1 à 3 : `run-step4-dev.sh`, `run-step4-dev-controls.sh`,
+  `run-canary-step4.sh`, puis le gel `freeze-v4.json` ;
+- pistes 4 et 5 : `run-step5-dev.sh`, `run-step5b-dev.sh` (B sur un même
+  mot), `run-step5-dev-controls.sh`, `run-canary-step5.sh`, puis le gel
+  `freeze-v5.json`.
+
+La seconde réserve se tire ainsi :
+
+```sh
+yarn exec tsx $R plan-comparison --seed strong-concordance-reserve-2026-10-02 --comparison 0 --reserve 120 \
+  --exclude-plan outputs/strong-concordance-night/plan-comparison-v1.json --allow-prior \
+  --output outputs/strong-concordance-night/plan-comparison-v2.json
+```
+
+Les familles d'identifiants se régénèrent avec
+`yarn exec tsx scripts/strong-identifier-families/derive.ts --write`.

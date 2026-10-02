@@ -221,7 +221,7 @@
       const state = {
         catalog: [],
         edition: "SG21",
-        engine: "A–J",
+        engine: "A–L",
         book: "Gen",
         chapter: 0,
         mode: "compare",
@@ -388,7 +388,7 @@
             ? `<span>· ce chapitre : identiques <b>${pct(state.tally.groups.same || 0, annotated(state.tally))}</b></span>`
             : "");
         $("about").innerHTML =
-          "Échantillon de 150 chapitres tirés au hasard (par genre) parmi ceux qui n'ont jamais servi à régler le moteur ; 120 autres restent scellés pour les mesures futures. « Nous » : le moteur choisi (A–J : apostrophes, familles d'identifiants et pronoms collés en plus de A–G) sur notre propre texte, sans jamais voir les annotations de Concordance. Concordance n'est pas infaillible : un désaccord n'est pas forcément une erreur de notre part.";
+          "Échantillon de 150 chapitres tirés au hasard (par genre) parmi ceux qui n'ont jamais servi à régler le moteur ; 120 autres restent scellés pour les mesures futures. « Nous » : le moteur choisi (A–J ajoute à A–G les apostrophes, les familles d'identifiants et les pronoms collés ; A–L y ajoute la conjonction initiale et les locutions des témoins) sur notre propre texte, sans jamais voir les annotations de Concordance. Concordance n'est pas infaillible : un désaccord n'est pas forcément une erreur de notre part.";
         $("books").innerHTML =
           `<summary>Accord par livre</summary><div class="table-wrap"><table><thead><tr><th>Livre</th><th>Chapitres</th><th>Mots annotés</th><th>Identiques</th><th>Autre mot</th><th>Incertains</th><th>Nous seuls</th></tr></thead><tbody>` +
           e.books
