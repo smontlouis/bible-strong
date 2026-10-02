@@ -80,6 +80,11 @@ self.addEventListener('activate', event => {
 export {}
 ```
 
+Known limitation: on iOS 26 the home-screen app's status bar keeps the colour it had at launch
+(`apple-mobile-web-app-status-bar-style: default`, light) and only follows `theme-color` after the
+app is switched away and back, so dark themes can start with a light status bar. `black-translucent`
+would make the status bar unreadable on light themes.
+
 Known limitation: Google and Apple sign-in use `signInWithPopup` with the `firebaseapp.com` auth
 domain. In an iOS home-screen app the popup may not return the credential; email and password
 sign-in works. The fix needs Firebase's `/__/auth` handler served from `web.bible-strong.app`, the

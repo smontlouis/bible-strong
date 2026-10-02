@@ -210,11 +210,12 @@ reads this file, does **one** unchecked item, validates it, updates this file an
       section (files, local recipe on `localhost:9090`, kill-switch worker, iOS sign-in
       limitation); validation matrix gains an "Expo Web PWA" row. eslint/prettier OK on the
       script and new docs (`validation.md` was already not Prettier-formatted at HEAD).
-- [ ] **10. Final verification.** Fresh `web:build` (production env) on the local server:
+- [x] **10. Final verification.** Fresh `web:build` (production env) on the local server:
       manifest without errors, installability, SW activated, offline reload, update flow across
       two builds, no SW in `expo start --web`. iOS Simulator Safari via argent: Add to Home
       Screen, standalone launch, safe areas. Full checks: typecheck, lint, test,
       `agents:styles:check`, `agents:architecture:check`. Write the final report.
+      **Evidence**: see Final report.
 
 ## Baseline
 
@@ -283,4 +284,33 @@ _(none)_
 
 ## Final report
 
-_(filled by item 10)_
+Done on `feat/expo-pwa` (not pushed), verified 2026-10-02 on a fresh production `web:build`
+served by `wrangler dev` on `localhost:9090`.
+
+- **Build gate**: `web:build` → `sw: precached 48 files, 24.93 MiB`; `check-web-assets` largest
+  17.99 MiB (was 24.04); `check-pwa` valid.
+- **Chrome 154** (chrome-devtools): `beforeinstallprompt` fires (`platforms: ["web"]`) in a
+  normal profile (isolated/incognito contexts never fire it); worker activated and controlling;
+  offline cold start renders the shell with the offline notice; update banner → reload → new
+  worker (item 6); `yarn web` (development, same origin) unregisters the production worker and
+  registers none.
+- **iOS 26.5 Simulator** (iPhone 17 Pro, argent): Safari share sheet shows the 180 px icon and
+  "Bible Strong"; "Sur l'écran d'accueil" offers "Ouvrir comme app web" (manifest recognised);
+  the home-screen icon launches standalone (no Safari UI), content below the status bar, bottom
+  floating button clear of the home indicator; an out-of-scope link opens Safari's in-app view
+  with "Fermer" / "Ouvrir dans Safari". Status bar: stays light at launch with
+  `status-bar-style: default` and only follows `theme-color` after an app switch (iOS quirk,
+  documented; `black-translucent` would be unreadable on light themes).
+- **Checks**: `yarn typecheck` 0; `format:check` 0; `agents:styles:check` 0;
+  `agents:architecture:check` 0; `agents:quality:check` 0; site/api-functions/world lint 0;
+  resource-domain, resource-catalog, site, resource-service, world tests 0. Expo Jest: 2925 pass,
+  the same 4 env-dependent failures as on `master` (`mobileResourceCatalog-test`,
+  `strongBibleDownloadPlan-test`). Expo `eslint .`: never finished locally because it lints the
+  git-ignored `apps/expo/.scratch/` minified bundles; with `--ignore-pattern '.scratch/**'` it
+  reports 183 errors, none in files changed on this branch (all touched files lint clean).
+- **Known limitations** (documented in ADR-0067 and `docs/expo-web-deployment.md`): Google/Apple
+  sign-in popup in an iOS home-screen app; iOS launch status-bar colour; the dotlottie wasm comes
+  from a CDN and is unavailable offline (decorative).
+- **Pre-existing issues found**: `/local-search` and `/bible-compare-verses` crash when opened
+  without params (separate task suggested); sonner-native 0.22 toast actions are swallowed on web
+  and `duration: Infinity` dismisses on first gesture.
