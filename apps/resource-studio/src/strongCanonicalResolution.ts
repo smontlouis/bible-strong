@@ -31,6 +31,7 @@ import {
   resolveDossier,
   type ResolutionDossier
 } from "./strongResolutionWorkflow.js";
+import type { WitnessRenderingLexicon } from "./strongWitnessEmptyContexts.js";
 import {
   resolutionTextHash,
   type ResolutionCarrier
@@ -61,6 +62,13 @@ export interface CanonicalResolutionOptions {
    * position, is established untranslated when its context recurs verbatim.
    */
   witnessEmpties?: boolean;
+  /**
+   * The same witness evidence placed from weaker context (option S): a
+   * nearby rendering carried by another word, our own placed neighbours.
+   */
+  witnessEmptyContexts?: boolean;
+  /** Renderings the witnesses give each Strong number across the Bible (S). */
+  witnessRenderingLexicon?: WitnessRenderingLexicon;
   /**
    * Source words also carry the identifiers that the witnesses give them
    * (identifier families); STEP's reading model ignores those identifiers.
@@ -557,6 +565,12 @@ export function resolveCanonicalVerse(options: {
     applyGrammaticalEmpties: true,
     applyWitnessEmpties: options.policy?.witnessEmpties === true,
     ...(articleWitness ? { articleDeterminers: articleWitness } : {}),
+    ...(options.policy?.witnessEmptyContexts
+      ? {
+          applyWitnessEmptyContexts: true,
+          witnessRenderingLexicon: options.policy.witnessRenderingLexicon
+        }
+      : {}),
     targetLanguage: "fr"
   });
   const articles = new Map(
@@ -578,6 +592,18 @@ export function resolveCanonicalVerse(options: {
         a.originalOccurrenceId &&
         entry.unit.occurrenceIds.includes(a.originalOccurrenceId)
     );
+    // S: the witnesses only leave this word untranslated; its carrier goes.
+    if (d.state === "empty" && d.witnessEmpty?.overridesCarrier)
+      for (const a of linked)
+        if (
+          a.visibility === "reader" &&
+          (a.placement === "word" || a.placement === "phrase")
+        ) {
+          a.visibility = "hidden";
+          a.diagnostics = [
+            ...new Set([...a.diagnostics, "witness-empty-overrides-carrier"])
+          ];
+        }
     const annotationIds = new Set(linked.map((a) => a.id));
     const placementEvidence = linked
       .filter((a) => a.visibility === "reader")
@@ -682,7 +708,7 @@ export function resolveCanonicalVerse(options: {
       else if (transferred)
         anchor = {
           insertAfterWordIndex: transferred.insertAfterWordIndex,
-          method: "witness-empty-context",
+          method: transferred.method ?? "witness-empty-context",
           assurance: "witness-context",
           absenceEstablished: true,
           reasons: [...d.reasons],

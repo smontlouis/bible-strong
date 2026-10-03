@@ -3,6 +3,10 @@ import {
   type ArticleWitness
 } from "./strongArticleDeterminers.js";
 import { grammaticalEmptyDecisions } from "./strongGrammaticalEmpty.js";
+import {
+  proposeWitnessEmptyContexts,
+  type WitnessRenderingLexicon
+} from "./strongWitnessEmptyContexts.js";
 import assert from "node:assert/strict";
 import {
   intersectAnchors,
@@ -364,6 +368,10 @@ export interface WitnessEmptyProposal {
   insertAfterWordIndex: number;
   witnesses: string[];
   families: string[];
+  /** How a weaker witness context placed it (option S); absent for G. */
+  method?: string;
+  /** The witnesses only leave untranslated a word that had a visible carrier. */
+  overridesCarrier?: boolean;
 }
 
 /** `TAHOT.2Sam.1.9.4.L.main:0` names word 4 of 2Sam.1.9. */
@@ -481,6 +489,10 @@ export interface ResolutionOptions {
   applyWitnessEmpties?: boolean;
   /** Place Greek articles on the determiner of their head (option R). */
   articleDeterminers?: ArticleWitness;
+  /** Also from weaker witness context (option S, strongWitnessEmptyContexts). */
+  applyWitnessEmptyContexts?: boolean;
+  /** Renderings the witnesses give each Strong number across the Bible. */
+  witnessRenderingLexicon?: WitnessRenderingLexicon;
   targetLanguage?: string;
 }
 
@@ -504,6 +516,15 @@ export function resolveDossier(
   const witnessEmpties = options.applyWitnessEmpties
     ? proposeWitnessEmpties(d)
     : [];
+  if (options.applyWitnessEmptyContexts) {
+    witnessEmpties.push(
+      ...proposeWitnessEmptyContexts(
+        d,
+        new Set(witnessEmpties.map((p) => p.sourceUnitId)),
+        { lexicon: options.witnessRenderingLexicon }
+      )
+    );
+  }
   const grammar = options.applyGrammaticalEmpties
     ? grammaticalEmptyDecisions(d, options.targetLanguage ?? "")
     : [];
@@ -606,7 +627,8 @@ export function resolveDossier(
     } else if (
       !review &&
       witnessEmpty &&
-      baseline.state === "unresolved" &&
+      (baseline.state === "unresolved" ||
+        (witnessEmpty.overridesCarrier && baseline.state === "visible")) &&
       unit.strong.length >= 1
     ) {
       state = "empty";
@@ -622,7 +644,7 @@ export function resolveDossier(
       reasons.splice(
         0,
         reasons.length,
-        `witness-empty-same-context:${witnessEmpty.witnesses.join("+")}`
+        `${witnessEmpty.method ?? "witness-empty-same-context"}:${witnessEmpty.witnesses.join("+")}`
       );
     } else if (!review && proposal && options.applyExactWitness) {
       state = "visible";
