@@ -1056,7 +1056,8 @@ export async function generateStrongLedgerWithDictionary(
         policy: {
           readingInvariantVariants: enginePolicy.readingInvariantVariants,
           witnessEmpties: enginePolicy.witnessEmpties,
-          strongIdentifierFamilies: enginePolicy.strongIdentifierFamilies
+          strongIdentifierFamilies: enginePolicy.strongIdentifierFamilies,
+          witnessAttestedReadings: enginePolicy.witnessAttestedReadings
         }
       });
     }
