@@ -18,33 +18,52 @@
  * single-word STEP gloss of the name. The source word must be the only one of
  * its number in the verse, so that a repeated name is never paired by guess,
  * and two source words claiming the same target word are both left uncertain.
+ * The STEP sense of the word decides whether it is a name: `H1166G` is a
+ * name, `H1166I` (« to marry ») is not.
  *
- * Then « fils de Lévi » → « Lévites »: when the target renders « sons of
- * <Name> » (H1121 then the name) by the one gentilic word already carrying the
+ * Then « fils d'Israël » → « Israélites »: when the target renders « sons of
+ * Israel » (H1121 then H3478) by the one gentilic word already carrying the
  * name, that word also carries « sons », provided the witnesses tag both
- * source words and the word begins as the witnesses write the name.
+ * source words and the word begins as the witnesses write the name. Other
+ * peoples (« Ammonites », « Benjaminites ») stay uncertain: Concordance does
+ * not mark their « sons » consistently.
  *
+ * The pass changes the reader, so the ledger runs it before the reader
+ * baseline (`properNameVariantsPass`), never during occurrence resolution.
  * A failed search proves nothing: the source word simply stays uncertain.
  */
 import { readFileSync } from "node:fs";
 import type { ReferenceSource } from "./align.js";
+import type { OriginalStrongOccurrence } from "./completeAlignment.js";
+import {
+  identityInvariantReading,
+  sourceIdentityGroups
+} from "./strongCanonicalResolution.js";
 import type {
   StrongLedgerAnnotation,
   StrongLedgerToken
 } from "./strongLedger.js";
 import type { ResolutionUnit } from "./strongResolution.js";
+import {
+  baseStrong as stepBaseStrong,
+  makeUnits,
+  type SourceRow
+} from "./strongSourceUnits.js";
 import { withoutPublisherNotes } from "./strongReaderText.js";
 import { stripTags } from "./tokenize.js";
 
-/** STEP lexicon of names: the first entry's type and the one-word glosses. */
+/** STEP lexicon of names: the entry's type and the one-word glosses. */
 export interface ProperNameEntry {
-  /** TBESH/TBESG type of the Strong's first entry (`N:N-M-P`, `N:N--LG`…). */
+  /** TBESH/TBESG type (`N:N-M-P`, `N:N--LG`, `H:V`…). */
   type: string;
   /** Capitalised single-word English glosses of every entry (« Michael »). */
   glosses: string[];
 }
 
-/** Keyed by base Strong (`H7744`, `G2424`). */
+/**
+ * Keyed by base Strong (`H7744`, `G2424`: the first entry's type, the glosses
+ * of every entry) and by disambiguated sense (`H1166I`: that sense's type).
+ */
 export type ProperNameLexicon = ReadonlyMap<string, ProperNameEntry>;
 
 export const PROPER_NAME_LEXICON_SOURCES = [
@@ -59,16 +78,26 @@ export function parseProperNameLexicon(
   for (const text of texts)
     for (const line of text.split(/\r?\n/u)) {
       const columns = line.split("\t");
-      if (columns.length < 7 || !/^[HG]\d{4}/u.test(columns[0]!)) continue;
-      const base = columns[0]!.slice(0, 5).toUpperCase();
+      if (columns.length < 7) continue;
+      // `H1121a` belongs to H1121; `G20746` is an extended id, not G2074.
+      const id = /^([HG])(\d{4})(?!\d)/u.exec(columns[0]!.trim());
+      if (!id) continue;
+      const base = `${id[1]}${id[2]}`;
+      const type = columns[5]!.trim();
       let entry = lexicon.get(base);
       if (!entry) {
-        entry = { type: columns[5]!.trim(), glosses: [] };
+        entry = { type, glosses: [] };
         lexicon.set(base, entry);
       }
       const gloss = columns[6]!.trim();
       if (/^\p{Lu}/u.test(gloss) && !/\s/u.test(gloss))
         if (!entry.glosses.includes(gloss)) entry.glosses.push(gloss);
+      // The disambiguated sense (`H1166I =`) keeps its own type.
+      const sense = /^([HG]\d{4}[A-Za-z])(?![\p{L}\d])/u.exec(
+        columns[1]!.trim()
+      )?.[1];
+      if (sense && !lexicon.has(sense))
+        lexicon.set(sense, { type, glosses: [] });
     }
   return lexicon;
 }
@@ -95,9 +124,25 @@ const baseStrong = (code: string) => {
     : code.toUpperCase();
 };
 
-const nameEntry = (lexicon: ProperNameLexicon, strong: string) => {
+/**
+ * The name entry of a source word: the type of its STEP sense when the
+ * lexicon has one (`H5984H`), else of the base's first entry; the glosses of
+ * the base.
+ */
+const nameEntry = (
+  lexicon: ProperNameLexicon,
+  strong: string,
+  sourceStrong?: string
+): ProperNameEntry | undefined => {
   const entry = lexicon.get(baseStrong(strong));
-  return entry?.type.startsWith("N:") ? entry : undefined;
+  if (!entry) return undefined;
+  const senseKey = sourceStrong?.trim().replace(/_.*$/u, "");
+  const sense =
+    senseKey && /^[HG]\d{4}[A-Za-z]$/u.test(senseKey)
+      ? lexicon.get(senseKey)
+      : undefined;
+  const type = sense?.type ?? entry.type;
+  return type.startsWith("N:") ? { type, glosses: entry.glosses } : undefined;
 };
 
 /** A people's name (`N:N--LG`, « Chaldean »), not a person's or a place's. */
@@ -309,9 +354,15 @@ export interface ProperNameProposal {
   evidence: string[];
 }
 
+/** A source word as the pass sees it; `sourceStrong` is its STEP sense. */
+export type ProperNameUnit = Pick<
+  ResolutionUnit,
+  "id" | "occurrenceIds" | "strong" | "readingUnresolved"
+> & { sourceStrong?: string };
+
 export interface ProperNameVerse {
   words: string[];
-  units: ResolutionUnit[];
+  units: ProperNameUnit[];
   /** Reader carriers already placed (word or phrase). */
   carriers: Array<{
     strong: string;
@@ -319,17 +370,30 @@ export interface ProperNameVerse {
     endWordIndex: number;
     originalOccurrenceId?: string;
   }>;
+  /**
+   * Reader annotations of any placement (editorial empties included) per
+   * source occurrence: a word already accounted for is left alone.
+   */
+  readerOccurrences?: ReadonlyMap<string, number>;
   tags: WitnessNameTag[];
 }
 
-function relationOf(
+const readerAnnotationCount = (verse: ProperNameVerse, unit: ProperNameUnit) =>
+  unit.occurrenceIds.reduce(
+    (sum, id) => sum + (verse.readerOccurrences?.get(id) ?? 0),
+    0
+  );
+
+/** Every way the target word may write the name, strongest first. */
+export function relationsOf(
   word: string,
   rendering: string
-): ProperNameRelation | undefined {
+): ProperNameRelation[] {
   const target = nameKey(word);
   const name = nameKey(rendering);
-  if (target.length < 3 || name.length < 3) return undefined;
-  if (target === name) return "name-key";
+  if (target.length < 3 || name.length < 3) return [];
+  const relations: ProperNameRelation[] = [];
+  if (target === name) relations.push("name-key");
   const distance =
     levenshtein(target, name) / Math.max(target.length, name.length);
   if (
@@ -338,16 +402,16 @@ function relationOf(
     name.length >= 5 &&
     target[0] === name[0]
   )
-    return "name-near-key";
-  if (target === `${name}s`) return "name-plural";
+    relations.push("name-near-key");
+  if (target === `${name}s`) relations.push("name-plural");
   const folded = foldName(word);
   const foldedName = foldName(rendering);
   if (
     GENTILIC.test(folded) &&
     commonPrefix(folded, foldedName) >= Math.max(3, foldedName.length - 2)
   )
-    return "name-gentilic";
-  return undefined;
+    relations.push("name-gentilic");
+  return relations;
 }
 
 const RELATION_ORDER: ProperNameRelation[] = [
@@ -384,7 +448,8 @@ export function proposeProperNameVariants(
     for (const strong of tag.strongs) strongs.add(strong);
     witnessWords.set(key, strongs);
   }
-  const owns = (unit: ResolutionUnit) =>
+  const owns = (unit: ProperNameUnit) =>
+    readerAnnotationCount(verse, unit) > 0 ||
     verse.carriers.some(
       (carrier) =>
         carrier.originalOccurrenceId !== undefined &&
@@ -394,7 +459,7 @@ export function proposeProperNameVariants(
   const openPeoples = verse.units.filter((unit) => {
     const entry =
       unit.strong.length === 1
-        ? nameEntry(lexicon, unit.strong[0]!)
+        ? nameEntry(lexicon, unit.strong[0]!, unit.sourceStrong)
         : undefined;
     return entry && isGentilicEntry(entry) && !owns(unit);
   });
@@ -403,7 +468,7 @@ export function proposeProperNameVariants(
     const strong = baseStrong(unit.strong[0] ?? "");
     const occurrenceId = unit.occurrenceIds[0]!;
     const word = sourceWordOf(occurrenceId);
-    const entry = nameEntry(lexicon, strong);
+    const entry = nameEntry(lexicon, strong, unit.sourceStrong);
     if (
       !entry ||
       !word ||
@@ -445,14 +510,15 @@ export function proposeProperNameVariants(
       const others = witnessWords.get(folded);
       if (others && !others.has(strong)) continue;
       const matches = renderings.flatMap((rendering) => {
-        const relation = relationOf(text, rendering.text);
-        // An adjective in lower case is only a gentilic (« cananéenne »).
-        return relation &&
-          (upper ||
-            (relation === "name-gentilic" &&
-              foldName(rendering.text).length >= 4))
-          ? [{ relation, evidence: rendering.evidence }]
-          : [];
+        // An adjective in lower case is only a gentilic (« cananéenne »,
+        // « lévites »), even when it also reads as the name's plural.
+        const relation = relationsOf(text, rendering.text).find(
+          (candidate) =>
+            upper ||
+            (candidate === "name-gentilic" &&
+              foldName(rendering.text).length >= 4)
+        );
+        return relation ? [{ relation, evidence: rendering.evidence }] : [];
       });
       if (!matches.length) continue;
       if (
@@ -493,24 +559,30 @@ export function proposeProperNameVariants(
 }
 
 const SONS = new Set(["H1121"]);
+/**
+ * Names whose « sons of » Concordance consistently carries on the gentilic
+ * (« Israélites »). « Ammonites », « Benjaminites »… are not marked
+ * consistently: they stay uncertain until measured on more chapters.
+ */
+const SONS_OF_NAMES = new Set(["H3478"]);
 
 /**
- * « fils de Lévi » rendered « Lévites »: « sons » (H1121) joins the one
- * gentilic word that carries the next source word, a name. The witnesses must
- * tag both source words, must not write that very word for the name, and the
- * target must not keep their « sons » just before it.
+ * « fils d'Israël » rendered « Israélites »: « sons » (H1121) joins the one
+ * gentilic word that carries the next source word, the name. The witnesses
+ * must tag both source words, must not write that very word for the name, and
+ * the target must not keep their « sons » just before it.
  */
 export function proposeSonsOfNameGentilics(
   verse: ProperNameVerse,
   lexicon: ProperNameLexicon
 ): ProperNameProposal[] {
-  const unitAt = new Map<string, ResolutionUnit>();
+  const unitAt = new Map<string, ProperNameUnit>();
   for (const unit of verse.units) {
     if (unit.occurrenceIds.length !== 1) continue;
     const word = sourceWordOf(unit.occurrenceIds[0]!);
     if (word) unitAt.set(`${word.ref}#${word.position}`, unit);
   }
-  const owned = (unit: ResolutionUnit) =>
+  const owned = (unit: ProperNameUnit) =>
     verse.carriers.filter(
       (carrier) =>
         carrier.originalOccurrenceId !== undefined &&
@@ -527,7 +599,8 @@ export function proposeSonsOfNameGentilics(
       unit.readingUnresolved ||
       unit.strong.length !== 1 ||
       unit.occurrenceIds.length !== 1 ||
-      owned(unit).length
+      owned(unit).length ||
+      readerAnnotationCount(verse, unit) > 0
     )
       continue;
     const name = unitAt.get(`${word.ref}#${word.position + 1}`);
@@ -535,14 +608,18 @@ export function proposeSonsOfNameGentilics(
       !name ||
       name.readingUnresolved ||
       name.strong.length !== 1 ||
-      !nameEntry(lexicon, name.strong[0]!)
+      !SONS_OF_NAMES.has(baseStrong(name.strong[0]!)) ||
+      !nameEntry(lexicon, name.strong[0]!, name.sourceStrong)
     )
       continue;
     const nameStrong = baseStrong(name.strong[0]!);
     const nameCarriers = owned(name);
+    // The name has one reader annotation: this one-word carrier.
     if (
       nameCarriers.length !== 1 ||
-      nameCarriers[0]!.startWordIndex !== nameCarriers[0]!.endWordIndex
+      nameCarriers[0]!.startWordIndex !== nameCarriers[0]!.endWordIndex ||
+      (verse.readerOccurrences !== undefined &&
+        readerAnnotationCount(verse, name) !== 1)
     )
       continue;
     const wordIndex = nameCarriers[0]!.startWordIndex;
@@ -563,7 +640,9 @@ export function proposeSonsOfNameGentilics(
           tag.ref === nameWord.ref && tag.positions.includes(nameWord.position)
       )
       .flatMap((tag) => tag.text.split(/\s+/u))
-      .map(foldName);
+      .map(foldName)
+      .filter(Boolean);
+    // Content words only: an article inside the witness's tag says nothing.
     const sonWords = new Set(
       witnessRenderings(verse.tags, strong, word)
         .filter(
@@ -571,6 +650,7 @@ export function proposeSonsOfNameGentilics(
         )
         .flatMap((tag) => tag.text.split(/\s+/u))
         .map(foldName)
+        .filter((written) => written && !FUNCTION_WORDS.has(written))
     );
     // Positive witness evidence for both source words.
     if (!nameWords.length || !sonWords.size) continue;
@@ -633,33 +713,34 @@ function readerCarriers(
   });
 }
 
+function readerOccurrences(
+  annotations: StrongLedgerAnnotation[]
+): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const annotation of annotations)
+    if (annotation.visibility === "reader" && annotation.originalOccurrenceId)
+      counts.set(
+        annotation.originalOccurrenceId,
+        (counts.get(annotation.originalOccurrenceId) ?? 0) + 1
+      );
+  return counts;
+}
+
+/** False when the occurrence has no STEP annotation of its own to promote. */
 function placeProposal(
-  ref: string,
   tokens: StrongLedgerToken[],
   annotations: StrongLedgerAnnotation[],
   proposal: ProperNameProposal
-): void {
+): boolean {
   // The STEP occurrence's own complete-alignment annotation becomes its
   // reader carrier, so the source word is still counted once.
-  let annotation = annotations.find(
+  const annotation = annotations.find(
     (candidate) =>
       candidate.originalOccurrenceId === proposal.occurrenceId &&
-      candidate.source === "original-complete"
+      candidate.source === "original-complete" &&
+      candidate.visibility !== "reader"
   );
-  if (!annotation) {
-    annotation = {
-      id: `${ref}:${annotations.length}:${proposal.strong}`,
-      strong: proposal.strong,
-      visibility: "reader",
-      placement: "word",
-      source: "reference-transfer",
-      confidence: 0,
-      reason: "",
-      diagnostics: [],
-      originalOccurrenceId: proposal.occurrenceId
-    };
-    annotations.push(annotation);
-  }
+  if (!annotation) return false;
   const witnessed = proposal.evidence.some(
     (evidence) => !evidence.startsWith("step-gloss=")
   );
@@ -689,13 +770,12 @@ function placeProposal(
   annotation.normalizedPhrase = undefined;
   annotation.insertAfterWordIndex = undefined;
   annotation.emptyEvidence = undefined;
+  return true;
 }
 
 /**
- * Engine pass P, on one verse. It runs on the reader carriers once the
- * transfer, the lexical fixed point and the alternative-identifier reduction
- * are done, just before the occurrence decisions: names first, then « sons of
- * <name> » on the words the names now carry. Returns the carriers it placed.
+ * Pass P on one verse's reader: names first, then « sons of <name> » on the
+ * words the names now carry. Returns the carriers it placed.
  */
 export function applyProperNameVariants(options: {
   verse: {
@@ -703,7 +783,7 @@ export function applyProperNameVariants(options: {
     tokens: StrongLedgerToken[];
     annotations: StrongLedgerAnnotation[];
   };
-  units: ResolutionUnit[];
+  units: ProperNameUnit[];
   references: ReferenceSource[];
   lexicon: ProperNameLexicon;
 }): ProperNameProposal[] {
@@ -711,27 +791,110 @@ export function applyProperNameVariants(options: {
   const tags = witnessNameTags(options.references);
   if (!tags.length) return [];
   const words = verse.tokens.map((token) => token.text);
-  const names = proposeProperNameVariants(
-    {
-      words,
-      units: options.units,
-      carriers: readerCarriers(verse.annotations),
-      tags
-    },
-    options.lexicon
+  const state = (): ProperNameVerse => ({
+    words,
+    units: options.units,
+    carriers: readerCarriers(verse.annotations),
+    readerOccurrences: readerOccurrences(verse.annotations),
+    tags
+  });
+  const names = proposeProperNameVariants(state(), options.lexicon).filter(
+    (proposal) => placeProposal(verse.tokens, verse.annotations, proposal)
   );
-  for (const proposal of names)
-    placeProposal(verse.ref, verse.tokens, verse.annotations, proposal);
-  const sons = proposeSonsOfNameGentilics(
-    {
-      words,
-      units: options.units,
-      carriers: readerCarriers(verse.annotations),
-      tags
-    },
-    options.lexicon
+  const sons = proposeSonsOfNameGentilics(state(), options.lexicon).filter(
+    (proposal) => placeProposal(verse.tokens, verse.annotations, proposal)
   );
-  for (const proposal of sons)
-    placeProposal(verse.ref, verse.tokens, verse.annotations, proposal);
   return [...names, ...sons];
+}
+
+/**
+ * The source words of a verse as occurrence resolution sees them: one unit
+ * per physical STEP word, with the same open-reading test as
+ * resolveCanonicalVerse (STEP's reading model, then A and I).
+ */
+export function properNameSourceUnits(
+  occurrences: OriginalStrongOccurrence[],
+  sourceRows: Map<string, SourceRow>,
+  policy: {
+    readingInvariantVariants?: boolean;
+    strongIdentifierFamilies?: boolean;
+  }
+): ProperNameUnit[] {
+  return [...sourceIdentityGroups(occurrences)].map(([id, group]) => {
+    const row = sourceRows.get(id);
+    const modelled =
+      policy.strongIdentifierFamilies && row
+        ? group.filter((o) =>
+            [...row.primary.map(stepBaseStrong), ...row.alternatives].includes(
+              o.strong
+            )
+          )
+        : group;
+    let readingUnresolved = true;
+    try {
+      readingUnresolved =
+        makeUnits({ source: modelled }, sourceRows)[0]!.structure ===
+        "variant-conditioned";
+      if (
+        readingUnresolved &&
+        policy.readingInvariantVariants &&
+        row &&
+        identityInvariantReading(row)
+      )
+        readingUnresolved = false;
+    } catch {
+      // An unmodelled word stays open, as in occurrence resolution.
+    }
+    return {
+      id,
+      occurrenceIds: group.map((o) => o.occurrenceId),
+      strong: [...new Set(group.map((o) => o.strong))],
+      readingUnresolved,
+      ...(group.length === 1 ? { sourceStrong: group[0]!.sourceStrong } : {})
+    };
+  });
+}
+
+/**
+ * Engine pass P over the ledger. It changes the reader, so it runs before the
+ * reader baseline, once the transfer, the lexical fixed point and B's
+ * alternative-identifier reduction are done. Returns the verses it changed;
+ * the caller refreshes them and reaches the lexical fixed point again.
+ */
+export function properNameVariantsPass<
+  Verse extends {
+    ref: string;
+    tokens: StrongLedgerToken[];
+    annotations: StrongLedgerAnnotation[];
+  }
+>(options: {
+  verses: Verse[];
+  inputOf: (
+    verse: Verse
+  ) =>
+    | { occurrences: OriginalStrongOccurrence[]; references: ReferenceSource[] }
+    | undefined;
+  sourceRows: Map<string, SourceRow>;
+  readingPolicy: {
+    readingInvariantVariants?: boolean;
+    strongIdentifierFamilies?: boolean;
+  };
+  lexicon: ProperNameLexicon;
+}): Verse[] {
+  return options.verses.filter((verse) => {
+    const input = options.inputOf(verse);
+    if (!input?.references.length || !input.occurrences.length) return false;
+    return (
+      applyProperNameVariants({
+        verse,
+        units: properNameSourceUnits(
+          input.occurrences,
+          options.sourceRows,
+          options.readingPolicy
+        ),
+        references: input.references,
+        lexicon: options.lexicon
+      }).length > 0
+    );
+  });
 }

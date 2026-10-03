@@ -19,11 +19,6 @@ import {
   type SourceRow
 } from "./strongSourceUnits.js";
 import { extractGoldCarrierPlacements } from "./strongCarriers.js";
-import {
-  applyProperNameVariants,
-  loadProperNameLexicon,
-  type ProperNameLexicon
-} from "./properNameVariants.js";
 import { parseStrongOccurrences } from "./strongCsv.js";
 import { withoutPublisherNotes } from "./strongReaderText.js";
 import {
@@ -61,14 +56,6 @@ export interface CanonicalResolutionOptions {
    * (identifier families); STEP's reading model ignores those identifiers.
    */
   strongIdentifierFamilies?: boolean;
-  /**
-   * A source name that nothing carries yet is placed on the only free target
-   * word that spells it otherwise or derives a gentilic from it, and « sons
-   * of <name> » joins that gentilic (« fils de Lévi » → « Lévites »).
-   */
-  properNameVariants?: boolean;
-  /** STEP name lexicon of properNameVariants; read from TBESH/TBESG when absent. */
-  properNameLexicon?: ProperNameLexicon;
 }
 
 const strongBase = (code: string) => code.match(/^[GH]\d+/u)?.[0] ?? code;
@@ -465,14 +452,6 @@ export function resolveCanonicalVerse(options: {
   );
   if (!units.length) issues.push("no-source-occurrences-for-native-verse");
   if (!verse.tokens.length) issues.push("empty-target-text");
-  // P: new reader carriers, seen below as existing placements.
-  if (options.policy?.properNameVariants)
-    applyProperNameVariants({
-      verse,
-      units: units.map((entry) => entry.unit),
-      references: input.references,
-      lexicon: options.policy.properNameLexicon ?? loadProperNameLexicon()
-    });
   const knownIds = new Set(units.flatMap((u) => u.unit.occurrenceIds));
   const orphan = verse.annotations.filter(
     (a) => a.originalOccurrenceId && !knownIds.has(a.originalOccurrenceId)

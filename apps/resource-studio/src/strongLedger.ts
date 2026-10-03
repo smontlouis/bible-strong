@@ -75,6 +75,7 @@ import {
 import { STRONG_IDENTIFIER_ALIASES } from "./strongIdentifierFamilies.js";
 import {
   loadProperNameLexicon,
+  properNameVariantsPass,
   PROPER_NAME_LEXICON_SOURCES
 } from "./properNameVariants.js";
 import {
@@ -958,71 +959,82 @@ export async function generateStrongLedgerWithDictionary(
   let lexicalAutoSafeCount = 0;
   let residualLexicalReport:
     Awaited<ReturnType<typeof buildLexicalCandidateReport>> | undefined;
-  let incrementalLexicalPassRefs: Set<string> | undefined;
-  let lexicalAutoSafeReachedPassLimit = false;
-  let lexicalAutoSafeLastApplied = 0;
-  for (let pass = 0; pass < MAX_LEXICAL_AUTOSAFE_PASSES; pass += 1) {
-    const fullScopePass = incrementalLexicalPassRefs === undefined;
-    const passVerses = fullScopePass
-      ? ledgerVerses
-      : ledgerVerses.filter((verse) =>
-          incrementalLexicalPassRefs?.has(verse.ref)
-        );
-    if (passVerses.length === 0) break;
-    const passStart = perfStart();
-    const lexicalReport = await buildLexicalCandidateReport({
-      ...lexicalReportOptions,
-      ledger: { verses: passVerses }
-    });
-    const autoSafePlacements = lexicalAutoSafePlacements(lexicalReport);
-    const autoSafePlacementRefs =
-      lexicalAutoSafePlacementRefs(autoSafePlacements);
-    const result = measureSync("apply lexical auto-safe placements", () =>
-      applyLexicalAutoSafePlacementsToLedger({
-        verses: ledgerVerses,
-        placements: autoSafePlacements
-      })
-    );
-    perfLog(
-      `lexical auto-safe pass ${pass + 1}: ${formatPerfMs(
-        perfElapsed(passStart)
-      )}; verses=${passVerses.length}; applied=${result.applied}; changedRefs=${
-        result.changedRefs.size
-      }${formatChangedRefSample(result.changedRefs)}`
-    );
-    if (result.applied === 0) {
-      if (fullScopePass) {
-        residualLexicalReport = lexicalReport;
-        break;
+  // Lexical auto-safe passes until none applies; the last one covers the
+  // whole scope and leaves the residual report. `startRefs` starts from the
+  // verses that a later reader pass changed. Returns the placements applied.
+  const reachLexicalFixedPoint = async (startRefs?: Set<string>) => {
+    let incrementalLexicalPassRefs = startRefs;
+    let lexicalAutoSafeReachedPassLimit = false;
+    let lexicalAutoSafeLastApplied = 0;
+    let applied = 0;
+    for (let pass = 0; pass < MAX_LEXICAL_AUTOSAFE_PASSES; pass += 1) {
+      const fullScopePass = incrementalLexicalPassRefs === undefined;
+      const passVerses = fullScopePass
+        ? ledgerVerses
+        : ledgerVerses.filter((verse) =>
+            incrementalLexicalPassRefs?.has(verse.ref)
+          );
+      if (passVerses.length === 0) break;
+      const passStart = perfStart();
+      const lexicalReport = await buildLexicalCandidateReport({
+        ...lexicalReportOptions,
+        ledger: { verses: passVerses }
+      });
+      const autoSafePlacements = lexicalAutoSafePlacements(lexicalReport);
+      const autoSafePlacementRefs =
+        lexicalAutoSafePlacementRefs(autoSafePlacements);
+      const result = measureSync("apply lexical auto-safe placements", () =>
+        applyLexicalAutoSafePlacementsToLedger({
+          verses: ledgerVerses,
+          placements: autoSafePlacements
+        })
+      );
+      perfLog(
+        `lexical auto-safe pass ${pass + 1}: ${formatPerfMs(
+          perfElapsed(passStart)
+        )}; verses=${passVerses.length}; applied=${result.applied}; changedRefs=${
+          result.changedRefs.size
+        }${formatChangedRefSample(result.changedRefs)}`
+      );
+      if (result.applied === 0) {
+        if (fullScopePass) {
+          residualLexicalReport = lexicalReport;
+          break;
+        }
+        incrementalLexicalPassRefs = undefined;
+        continue;
       }
-      incrementalLexicalPassRefs = undefined;
-      continue;
+      lexicalAutoSafeLastApplied = result.applied;
+      lexicalAutoSafeCount += result.applied;
+      applied += result.applied;
+      rebuildLedgerVerses(
+        ledgerVerses.filter((verse) => result.changedRefs.has(verse.ref))
+      );
+      incrementalLexicalPassRefs = new Set([
+        ...result.changedRefs,
+        ...autoSafePlacementRefs
+      ]);
+      if (pass === MAX_LEXICAL_AUTOSAFE_PASSES - 1) {
+        lexicalAutoSafeReachedPassLimit = true;
+      }
     }
-    lexicalAutoSafeLastApplied = result.applied;
-    lexicalAutoSafeCount += result.applied;
-    rebuildLedgerVerses(
-      ledgerVerses.filter((verse) => result.changedRefs.has(verse.ref))
-    );
-    incrementalLexicalPassRefs = new Set([
-      ...result.changedRefs,
-      ...autoSafePlacementRefs
-    ]);
-    if (pass === MAX_LEXICAL_AUTOSAFE_PASSES - 1) {
-      lexicalAutoSafeReachedPassLimit = true;
+    if (lexicalAutoSafeReachedPassLimit) {
+      console.warn(
+        `Lexical auto-safe reached pass limit after applying ${lexicalAutoSafeLastApplied} placement(s) in the final pass; inspect the residual lexical report for remaining auto-safe candidates.`
+      );
     }
-  }
-  if (lexicalAutoSafeReachedPassLimit) {
-    console.warn(
-      `Lexical auto-safe reached pass limit after applying ${lexicalAutoSafeLastApplied} placement(s) in the final pass; inspect the residual lexical report for remaining auto-safe candidates.`
-    );
-  }
+    return applied;
+  };
+  await reachLexicalFixedPoint();
   // Alternative identifiers of one source word must not keep two reader
   // carriers. This is a display correction, applied before the reader
   // baseline so that occurrence resolution itself never changes the reader.
-  if (
-    options.resolveOccurrences !== false &&
-    enginePolicy.singleCarrierPerSourceIdentity
-  )
+  const reduceAlternativeIdentityCarriers = () => {
+    if (
+      options.resolveOccurrences === false ||
+      !enginePolicy.singleCarrierPerSourceIdentity
+    )
+      return;
     for (const verse of ledgerVerses) {
       const input = resolutionInputs.get(verse.ref);
       if (
@@ -1035,6 +1047,43 @@ export async function generateStrongLedgerWithDictionary(
       )
         refreshLedgerVerse(verse);
     }
+  };
+  reduceAlternativeIdentityCarriers();
+  // P places reader carriers, so it too runs before the reader baseline; the
+  // lexical fixed point is then reached again from the verses it changed.
+  let canonicalSourceRows:
+    Awaited<ReturnType<typeof readCanonicalSourceRows>> | undefined;
+  if (options.resolveOccurrences !== false && enginePolicy.properNameVariants) {
+    const sourceRows = (canonicalSourceRows = await readCanonicalSourceRows(
+      STEP_ORIGINAL_SOURCES
+    ));
+    const nameLexicon = measureSync("load STEP name lexicon", () =>
+      loadProperNameLexicon()
+    );
+    const changed = measureSync("place proper name variants", () =>
+      properNameVariantsPass({
+        verses: ledgerVerses,
+        inputOf: (verse) => resolutionInputs.get(verse.ref),
+        sourceRows,
+        readingPolicy: {
+          readingInvariantVariants: enginePolicy.readingInvariantVariants,
+          strongIdentifierFamilies: enginePolicy.strongIdentifierFamilies
+        },
+        lexicon: nameLexicon
+      })
+    );
+    for (const verse of changed) refreshLedgerVerse(verse);
+    if (changed.length) {
+      residualLexicalReport = undefined;
+      const relexed = await reachLexicalFixedPoint(
+        new Set(changed.map((verse) => verse.ref))
+      );
+      perfLog(
+        `proper name variants: verses=${changed.length}; lexical placements after=${relexed}`
+      );
+      if (relexed > 0) reduceAlternativeIdentityCarriers();
+    }
+  }
   const resolutionBaselineMetrics =
     options.resolveOccurrences === false
       ? undefined
@@ -1046,10 +1095,9 @@ export async function generateStrongLedgerWithDictionary(
     });
     if (lexicalAutoSafePlacements(residualLexicalReport).length)
       throw new Error("autonomous-resolution-requires-lexical-fixed-point");
-    const rows = await readCanonicalSourceRows(STEP_ORIGINAL_SOURCES);
-    const properNameLexicon = enginePolicy.properNameVariants
-      ? measureSync("load STEP name lexicon", () => loadProperNameLexicon())
-      : undefined;
+    const rows =
+      canonicalSourceRows ??
+      (await readCanonicalSourceRows(STEP_ORIGINAL_SOURCES));
     const items = new Map<string, typeof residualLexicalReport.items>();
     for (const item of residualLexicalReport.items) {
       const values = items.get(item.ref) ?? [];
@@ -1067,11 +1115,7 @@ export async function generateStrongLedgerWithDictionary(
         policy: {
           readingInvariantVariants: enginePolicy.readingInvariantVariants,
           witnessEmpties: enginePolicy.witnessEmpties,
-          strongIdentifierFamilies: enginePolicy.strongIdentifierFamilies,
-          // P runs here, after the lexical fixed point and the reduction above.
-          ...(properNameLexicon
-            ? { properNameVariants: true, properNameLexicon }
-            : {})
+          strongIdentifierFamilies: enginePolicy.strongIdentifierFamilies
         }
       });
     }
@@ -1163,7 +1207,6 @@ export async function generateStrongLedgerWithDictionary(
   lexicalSourceCache.dictionaryCandidates = undefined;
   lexicalSourceCache.kaikki.clear();
   lexicalSourceCache.synonymSources.clear();
-  incrementalLexicalPassRefs = undefined;
 
   const metrics = aggregateMetrics(
     options.bible,

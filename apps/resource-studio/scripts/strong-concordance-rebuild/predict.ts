@@ -8,6 +8,7 @@ import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { BOOK_IDS } from "../../src/books.js";
+import { PROPER_NAME_LEXICON_SOURCES } from "../../src/properNameVariants.js";
 import {
   generateStrongLedger,
   type StrongEnginePolicy,
@@ -290,6 +291,9 @@ export async function predict(options: {
     inputPaths.push(
       ...usedWitnesses.map((witness) => `data/strongs/${witness}.csv`)
     );
+    // Engine option P reads STEP's name lexicon.
+    if (options.policy.properNameVariants)
+      inputPaths.push(...PROPER_NAME_LEXICON_SOURCES);
     if (edition.localText.kind === "bible-json") {
       biblePath = edition.localText.path;
       inputPaths.push(biblePath);
