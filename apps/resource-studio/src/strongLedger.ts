@@ -460,14 +460,14 @@ export const DEFAULT_ENGINE_POLICY: Readonly<StrongEnginePolicy> = {
   cliticHosts: true,
   openingConjunctions: true,
   witnessLocutionLexicon: true,
-  // M–S: measured on the comparison sample before they are enabled.
-  witnessAttestedReadings: false,
-  compoundTargetWords: false,
-  numeralValues: false,
-  properNameVariants: false,
-  lexicalGapFill: false,
-  articleDeterminers: false,
-  witnessEmptyContexts: false
+  // M–S: confirmed on the sealed reserve v3 (freeze v7, 2026-10-03).
+  witnessAttestedReadings: true,
+  compoundTargetWords: true,
+  numeralValues: true,
+  properNameVariants: true,
+  lexicalGapFill: true,
+  articleDeterminers: true,
+  witnessEmptyContexts: true
 };
 
 export function resolveEnginePolicy(

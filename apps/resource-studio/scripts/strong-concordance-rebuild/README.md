@@ -150,8 +150,8 @@ générateur canonique les applique en revanche par défaut depuis le 1er octobr
   du témoin portée ailleurs dans le verset, début de verset, voisins
   adjacents), avec son ancre.
 
-`M` à `S` restent désactivées par défaut dans `StrongEnginePolicy` tant que
-la réserve scellée ne les a pas confirmées. `Q`, `R` et `S` sont les seules
+`M` à `S` sont actives par défaut dans `StrongEnginePolicy` depuis leur
+confirmation sur la réserve scellée v3 (gel v7, 3 octobre 2026). `Q`, `R` et `S` sont les seules
 options qui changent le mode lecteur après la mesure de référence de la
 résolution des occurrences (`resolutionBaselineMetrics`) : le registre compte
 leurs changements (`lexicalGapFill`, `articleDeterminers`,

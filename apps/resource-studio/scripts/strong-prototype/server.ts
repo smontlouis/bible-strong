@@ -247,7 +247,7 @@ const COMPARISONS = flag(
   "--concordance",
   ["SG21", "NEG"]
     .flatMap((edition) =>
-      ["ABCDEFGHIJKL", "ABCDEFGHIJ", "ABCDEFG"].map(
+      ["ABCDEFGHIJKLMNOPQRS", "ABCDEFGHIJKL", "ABCDEFGHIJ", "ABCDEFG"].map(
         (policy) =>
           `${COMPARISON_DIR}/${edition}__target-excluded__comparison__policy-${policy}.json`
       )
@@ -373,7 +373,7 @@ http
         json(concordanceCatalog());
       else if (url.pathname === "/api/concordance/chapter") {
         const view = comparisonViews().get(
-          `${url.searchParams.get("edition") ?? "SG21"}|${url.searchParams.get("engine") ?? "A–L"}`
+          `${url.searchParams.get("edition") ?? "SG21"}|${url.searchParams.get("engine") ?? "A–S"}`
         );
         const verses = view?.chapters[url.searchParams.get("chapter") ?? ""];
         if (!verses) json({ error: "not-in-comparison-sample" }, 404);

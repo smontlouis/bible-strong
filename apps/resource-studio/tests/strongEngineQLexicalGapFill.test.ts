@@ -882,10 +882,10 @@ test("the autonomous reader check accepts exactly the counted Q placements", () 
   );
 });
 
-test("policy Q stays off by default until measured", () => {
-  assert.equal(resolveEnginePolicy().lexicalGapFill, false);
+test("policy Q is on by default and can be turned off", () => {
+  assert.equal(resolveEnginePolicy().lexicalGapFill, true);
   assert.equal(
-    resolveEnginePolicy({ lexicalGapFill: true }).lexicalGapFill,
-    true
+    resolveEnginePolicy({ lexicalGapFill: false }).lexicalGapFill,
+    false
   );
 });

@@ -159,8 +159,8 @@ const articleDecision = (r: ReturnType<typeof resolveCanonicalVerse>) =>
   r.decisions.find((d) => d.strong.includes("G3588"))!;
 const on = { articleDeterminers: true };
 
-test("option R is declared and off by default", () => {
-  assert.equal(resolveEnginePolicy().articleDeterminers, false);
+test("option R is declared and on by default", () => {
+  assert.equal(resolveEnginePolicy().articleDeterminers, true);
 });
 
 test("witness marks keep their gaps and pair Strong numbers with positions", () => {
