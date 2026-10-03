@@ -24,6 +24,8 @@ export interface TransferMatchingPolicy {
   openingConjunctions?: boolean;
   /** Locutions that the witnesses tag as one element anywhere in the Bible. */
   locutionLexicon?: WitnessLocutionLexicon;
+  /** A witness number matches the target word writing the same value (« 4 600 » = « 4600 »). */
+  numeralValues?: boolean;
 }
 
 export interface ReaderAlignmentPolicy {
