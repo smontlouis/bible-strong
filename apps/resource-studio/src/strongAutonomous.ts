@@ -11,9 +11,11 @@ import { pathToFileURL } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { readBibleJson } from "./bibleJson.js";
 import { CANONICAL_RESOLUTION_POLICY } from "./strongCanonicalResolution.js";
+import { lexicalGapFillReaderCounts } from "./lexicalGapFill.js";
 import {
   generateStrongLedger,
-  strongLedgerInputFingerprint
+  strongLedgerInputFingerprint,
+  type StrongLedger
 } from "./strongLedger.js";
 import { readStrongLedgerSqlite } from "./strongLedgerStore.js";
 import {
@@ -65,6 +67,42 @@ const plain = (s: string) =>
       /&(amp|lt|gt|quot);/gu,
       (_, key: string) => ({ amp: "&", lt: "<", gt: ">", quot: '"' })[key]!
     );
+
+/**
+ * Occurrence resolution leaves the reader as the baseline measured before it,
+ * except for the carriers of policy Q (lexical gap fill). Those are recounted
+ * from the verses: their number must be the one the ledger reports, and they
+ * must explain the whole change of reader Strongs and tagged words.
+ */
+export function assertResolutionKeptReader(
+  bible: string,
+  ledger: Pick<
+    StrongLedger,
+    "metrics" | "resolutionBaselineMetrics" | "lexicalGapFill" | "verses"
+  >
+): void {
+  const baseline = ledger.resolutionBaselineMetrics;
+  assert(baseline, `reader-regression:${bible}:missing-baseline`);
+  const filled = lexicalGapFillReaderCounts(ledger.verses);
+  assert.equal(
+    filled.readerVisibleStrongCount,
+    ledger.lexicalGapFill?.placed ?? 0,
+    `reader-regression:${bible}:lexical-gap-fill`
+  );
+  const added: Record<string, number> = filled;
+  for (const key of [
+    "verseCount",
+    "wordCount",
+    "readerVisibleStrongCount",
+    "readerTaggedTokenCount",
+    "readerOverBudgetStrongCount"
+  ] as const)
+    assert.equal(
+      ledger.metrics[key],
+      baseline[key] + (added[key] ?? 0),
+      `reader-regression:${bible}:${key}`
+    );
+}
 
 /** Independent read-back from the canonical SQLite, bounded to one verse at a time. */
 export async function verifyAutonomousBible(options: {
@@ -317,19 +355,8 @@ export async function runAutonomousBibles(
         ledger.resolutionSummary &&
           ledger.resolutionSummary.verses === ledger.metrics.verseCount
       );
+      assertResolutionKeptReader(bible, ledger);
       const baseline = ledger.resolutionBaselineMetrics!;
-      for (const key of [
-        "verseCount",
-        "wordCount",
-        "readerVisibleStrongCount",
-        "readerTaggedTokenCount",
-        "readerOverBudgetStrongCount"
-      ] as const)
-        assert.equal(
-          ledger.metrics[key],
-          baseline[key],
-          `reader-regression:${bible}:${key}`
-        );
       const sqlitePath = ledger.outputPaths.sqlite;
       const summary = {
         bible,
@@ -338,6 +365,7 @@ export async function runAutonomousBibles(
         resolution: ledger.resolutionSummary,
         metrics: ledger.metrics,
         baselineMetrics: baseline,
+        lexicalGapFill: ledger.lexicalGapFill,
         lexicalMetrics: ledger.lexicalResolutionMetrics
       };
       ledger.verses.length = 0;

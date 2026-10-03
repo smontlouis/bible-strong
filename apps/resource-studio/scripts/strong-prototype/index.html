@@ -112,6 +112,7 @@
         "exact-witness-families-and-source":
           "transfert exact, deux familles de témoins",
         "validated-deterministic-lexical": "lexique validé",
+        "lexical-gap-fill": "seul mot libre entre voisins placés, lexique (Q)",
         unresolved: "incertain"
       };
       const METHOD = {
@@ -361,7 +362,12 @@
             "Origine",
             c.locution
               ? "locution entière d'un témoin (E)"
-              : METHOD[c.method] || c.method || c.source
+              : METHOD[c.method] ||
+                (c.method.startsWith("lexical-gap-fill:")
+                  ? `mot libre entre voisins placés (Q) : ${c.method.slice("lexical-gap-fill:".length)}`
+                  : "") ||
+                c.method ||
+                c.source
           ]);
           rows.push([
             "Rattachement",

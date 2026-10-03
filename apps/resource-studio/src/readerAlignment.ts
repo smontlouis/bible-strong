@@ -884,7 +884,7 @@ function isAllowedLearnedTranslation(
   return !FRENCH_FUNCTION_WORDS.has(normalized);
 }
 
-const FRENCH_FUNCTION_WORDS = new Set([
+export const FRENCH_FUNCTION_WORDS: ReadonlySet<string> = new Set([
   "a",
   "au",
   "aux",

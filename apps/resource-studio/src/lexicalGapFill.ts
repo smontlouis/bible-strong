@@ -23,23 +23,39 @@
  * W. the witnesses' own word for this very source word (its tag carries the
  *    source position) is an inflection or a derivation of the target word
  *    (« priai » / « priant », two witnesses for « expliquer » /
- *    « explication »), the only such free word up to three words beyond the
- *    neighbours, while no carried word relates to it;
+ *    « explication »), while no carried word relates to it. W needs no
+ *    ordered interval: its pool is the free content words within three words
+ *    of the neighbours' carriers, up to the verse edge on a side with no
+ *    placed neighbour, and crossed neighbours do not stop it; the word must be
+ *    the only one of that pool related to the witnesses' word;
  * A. witness lemma or dictionary gloss, alone in the interval (two free
  *    content words at most);
  * B. synonym of a main witness rendering, confirmed by the dictionary;
  * C. synonym of a main witness rendering, when it is the only free word of an
- *    interval placed on both sides.
+ *    interval placed on both sides. OpenOffice alone carries no sense: the
+ *    ledger turns C off for dynamic and paraphrase translations.
  *
  * Only content source words (noun, verb, adjective, name) are filled, tiers
  * A–C only for a Strong of limited vocabulary; the others, and every failed
  * search, stay uncertain: a failed search never proves an absence.
+ *
+ * Q is the one step after occurrence resolution that adds reader carriers.
+ * Each fill is a word carrier on a word no reader carrier tags, within the
+ * Strong's occurrence budget of the verse: it adds exactly one reader Strong
+ * and one tagged word, which `lexicalGapFillReaderCounts` recounts for the
+ * autonomous reader check.
  */
 import { DatabaseSync } from "node:sqlite";
 import { readFileSync } from "node:fs";
 
 import { encliticHost } from "./align.js";
 import { isGenericFrenchCarrier } from "./frenchLexicalSafety.js";
+import { FRENCH_FUNCTION_WORDS } from "./readerAlignment.js";
+import {
+  lexicalCandidateItemMetrics,
+  type LexicalCandidateItem,
+  type LexicalCandidateReport
+} from "./lexicalCandidateReport.js";
 import { representsOccurrence, type StrongToken } from "./strongCsv.js";
 import type {
   StrongLedgerAnnotation,
@@ -48,11 +64,8 @@ import type {
 import { normalizeWord } from "./tokenize.js";
 
 /** Function words of the reader alignment: never a lexical carrier. */
-export const LEXICAL_GAP_FUNCTION_WORDS: ReadonlySet<string> = new Set(
-  "a au aux avec ce ces cet cette de des du en et il ils la le les leur leurs lui nous on ou par pour qu que qui sa se ses son sur un une y".split(
-    " "
-  )
-);
+export const LEXICAL_GAP_FUNCTION_WORDS: ReadonlySet<string> =
+  FRENCH_FUNCTION_WORDS;
 
 /**
  * Further closed-class French words (pronouns, negation, conjunctions,
@@ -401,7 +414,13 @@ export interface LexicalGapOptions {
   claimedCopies?: boolean;
   /** Abstain when the word is as known a rendering of another source word. */
   rivalRenderings?: boolean;
+  /** Tiers allowed to place (all by default). */
+  tiers?: readonly LexicalGapTier[];
 }
+
+/** Every tier but C, whose evidence is an OpenOffice synonym alone. */
+export const LEXICAL_GAP_TIERS_WITHOUT_SYNONYM_ONLY: readonly LexicalGapTier[] =
+  ["W", "A", "B"];
 
 /** One witness verse: its words with their tags (Strong, source positions). */
 export interface LexicalGapWitness {
@@ -819,10 +838,14 @@ export function proposeLexicalGapFills(options: {
     }
   ];
 
+  const allowedTiers = new Set(
+    options.options?.tiers ?? tiers.map(({ tier }) => tier)
+  );
   const fills: LexicalGapFill[] = [];
   const taken = new Set<number>();
   const filled = new Set<string>();
   for (const { tier, near, choose } of tiers) {
+    if (!allowedTiers.has(tier)) continue;
     const proposals: LexicalGapFill[] = [];
     for (const candidate of candidates) {
       if (filled.has(candidate.unit.id)) continue;
@@ -867,16 +890,23 @@ function stepWordOfUnit(
 export const LEXICAL_GAP_FILL_REASON =
   "Visible in reader mode because the only free content word between the placed neighbouring source words is a known French rendering of this Strong (an inflection of the witnesses' word for it, a witness lemma, a dictionary gloss or a synonym of a witness rendering).";
 
+/** An annotation a gap fill changed, with its visibility before the fill. */
+export interface LexicalGapTouchedAnnotation {
+  id: string;
+  visibility: StrongLedgerAnnotation["visibility"];
+}
+
 /**
  * Turns the source word's own annotation into a reader carrier on the chosen
  * word. Other identifiers of the same source word become hidden duplicates of
- * that carrier. Returns false when the source word has no annotation.
+ * that carrier. Returns the annotations it changed, none when the source word
+ * has no annotation of that Strong.
  */
 export function applyLexicalGapFill(
   verse: Pick<StrongLedgerVerse, "tokens" | "annotations">,
   occurrenceIds: readonly string[],
   fill: LexicalGapFill
-): boolean {
+): LexicalGapTouchedAnnotation[] {
   const owned = verse.annotations.filter(
     (annotation) =>
       annotation.originalOccurrenceId !== undefined &&
@@ -886,7 +916,10 @@ export function applyLexicalGapFill(
   const same = (annotation: StrongLedgerAnnotation) =>
     annotation.strong.toUpperCase() === fill.strong.toUpperCase();
   const carrier = owned.find(same);
-  if (!carrier) return false;
+  if (!carrier) return [];
+  const touched = owned
+    .filter((annotation) => annotation === carrier || !same(annotation))
+    .map(({ id, visibility }) => ({ id, visibility }));
   const token = verse.tokens[fill.wordIndex];
   const onWord = (annotation: StrongLedgerAnnotation) => {
     annotation.insertAfterWordIndex = undefined;
@@ -919,7 +952,31 @@ export function applyLexicalGapFill(
       ];
       onWord(other);
     }
-  return true;
+  return touched;
+}
+
+/**
+ * Whether one more reader carrier of the Strong stays within the verse's
+ * occurrence budget (the largest count in a witness or in the source), so that
+ * a fill never puts a Strong over budget.
+ */
+export function withinReaderBudget(
+  verse: Pick<StrongLedgerVerse, "annotations" | "inventories">,
+  strong: string
+): boolean {
+  const key = strong.toUpperCase();
+  const count = (codes: readonly string[]) =>
+    codes.filter((code) => code.toUpperCase() === key).length;
+  const budget = Math.max(
+    count(verse.inventories.original),
+    ...Object.values(verse.inventories.references).map(count)
+  );
+  const carried = verse.annotations.filter(
+    (annotation) =>
+      annotation.visibility === "reader" &&
+      annotation.strong.toUpperCase() === key
+  ).length;
+  return carried + 1 <= budget;
 }
 
 /** The verse view of `proposeLexicalGapFills` built from a resolved verse. */
@@ -982,40 +1039,183 @@ export function proposeLexicalGapFillsForVerse(
 }
 
 /**
+ * The residual lexical report without the items of the annotations that gap
+ * fills changed: the carrier is no longer an empty to search, and a demoted
+ * identifier is hidden. A stale item would otherwise let the permissive view
+ * move a Q carrier back to an old candidate word. The other items are kept as
+ * they were, so the report still describes the lexical fixed point.
+ */
+export function withoutLexicalGapFilledItems(
+  report: LexicalCandidateReport,
+  touched: ReadonlyArray<LexicalGapTouchedAnnotation & { ref: string }>
+): LexicalCandidateReport {
+  const key = (ref: string, id: string) => `${ref}\u0000${id}`;
+  const prior = new Map(touched.map((t) => [key(t.ref, t.id), t.visibility]));
+  const isTouched = (item: LexicalCandidateItem) =>
+    prior.has(key(item.ref, item.annotationId));
+  const dropped = report.items.filter(isTouched);
+  if (!dropped.length) return report;
+  const items = report.items.filter((item) => !isTouched(item));
+  const droppedEmpty = (visibility: StrongLedgerAnnotation["visibility"]) =>
+    dropped.filter(
+      (item) =>
+        item.auditKind === "empty" &&
+        prior.get(key(item.ref, item.annotationId)) === visibility
+    ).length;
+  return {
+    ...report,
+    metrics: {
+      verses: report.metrics.verses,
+      auditItems: items.length,
+      emptyAnnotations: items.filter((item) => item.auditKind === "empty")
+        .length,
+      readerEmptyAnnotations:
+        report.metrics.readerEmptyAnnotations - droppedEmpty("reader"),
+      advancedEmptyAnnotations:
+        report.metrics.advancedEmptyAnnotations - droppedEmpty("advanced"),
+      relocationAnnotations: items.filter(
+        (item) => item.auditKind === "relocation"
+      ).length,
+      ...lexicalCandidateItemMetrics(items)
+    },
+    items
+  };
+}
+
+/**
+ * What gap fills add to the reader, recounted from the verses alone: one
+ * reader Strong per carrier, and the words that only a gap-fill carrier tags.
+ */
+export function lexicalGapFillReaderCounts(
+  verses: Iterable<Pick<StrongLedgerVerse, "annotations">>
+): { readerVisibleStrongCount: number; readerTaggedTokenCount: number } {
+  let readerVisibleStrongCount = 0;
+  let readerTaggedTokenCount = 0;
+  for (const verse of verses) {
+    const filled = new Set<number>();
+    const tagged = new Set<number>();
+    for (const annotation of verse.annotations) {
+      if (annotation.visibility !== "reader") continue;
+      const words =
+        annotation.placement === "word" && annotation.wordIndex !== undefined
+          ? [annotation.wordIndex]
+          : annotation.placement === "phrase" &&
+              annotation.startWordIndex !== undefined &&
+              annotation.endWordIndex !== undefined
+            ? Array.from(
+                {
+                  length:
+                    annotation.endWordIndex - annotation.startWordIndex + 1
+                },
+                (_, offset) => annotation.startWordIndex! + offset
+              )
+            : [];
+      if (annotation.source === "lexical-gap-fill") {
+        readerVisibleStrongCount += 1;
+        for (const word of words) filled.add(word);
+      } else for (const word of words) tagged.add(word);
+    }
+    for (const word of filled)
+      if (!tagged.has(word)) readerTaggedTokenCount += 1;
+  }
+  return { readerVisibleStrongCount, readerTaggedTokenCount };
+}
+
+export interface LexicalGapFillResult {
+  /** Source words given a carrier. */
+  placed: number;
+  /** Verses with at least one carrier. */
+  changedRefs: Set<string>;
+  /** Fills left out: the Strong already had as many reader carriers as its budget. */
+  overBudget: number;
+  /** The residual lexical report given, without the items Q made stale. */
+  residualReport?: LexicalCandidateReport;
+  /** Items of that report withdrawn because Q changed their annotation. */
+  withdrawnLexicalItems: number;
+}
+
+/**
  * Policy Q pass over resolved ledger verses. It runs after canonical
- * resolution (it reads the decisions) and re-resolves every verse it changes
- * through `resolve`, so that the new carriers become visible decisions and
- * the anchors of the words still uncertain account for them.
+ * resolution (it reads the decisions) and after every pass that adds reader
+ * carriers (they are its neighbours and its occupied words). Once every fill
+ * is applied, it drops the stale items of the residual lexical report and
+ * resolves each changed verse again through `resolve`, with the verse's
+ * remaining lexical items, so that the new carriers become visible decisions
+ * and the anchors of the words still uncertain account for them.
  */
 export function lexicalGapFillPass(options: {
   verses: StrongLedgerVerse[];
   lexicon: LexicalGapLexicon;
   /** Witness verses of a target verse (none when its text spans several). */
   witnessesOf: (verse: StrongLedgerVerse) => LexicalGapWitness[];
-  resolve: (verse: StrongLedgerVerse) => void;
-}): { placed: number; changedRefs: Set<string> } {
+  /** Resolves a changed verse again; its lexical items when a report is given. */
+  resolve: (
+    verse: StrongLedgerVerse,
+    lexicalItems?: LexicalCandidateItem[]
+  ) => void;
+  /** The run's residual lexical report (built before resolution). */
+  residualReport?: LexicalCandidateReport;
+  options?: LexicalGapOptions;
+}): LexicalGapFillResult {
   let placed = 0;
-  const changedRefs = new Set<string>();
+  let overBudget = 0;
+  const changed: StrongLedgerVerse[] = [];
+  const touched: Array<LexicalGapTouchedAnnotation & { ref: string }> = [];
   for (const verse of options.verses) {
     const resolution = verse.resolution;
     // A verse whose source correspondence is in doubt is left as it is.
     if (!resolution || resolution.issues.length) continue;
-    let changed = 0;
+    let filled = 0;
     for (const fill of proposeLexicalGapFillsForVerse(
       verse,
       options.lexicon,
-      options.witnessesOf(verse)
+      options.witnessesOf(verse),
+      options.options
     )) {
+      if (!withinReaderBudget(verse, fill.strong)) {
+        overBudget += 1;
+        continue;
+      }
       const decision = resolution.decisions.find(
         (candidate) => candidate.sourceUnitId === fill.unitId
       )!;
-      if (applyLexicalGapFill(verse, decision.occurrenceIds, fill))
-        changed += 1;
+      const annotations = applyLexicalGapFill(
+        verse,
+        decision.occurrenceIds,
+        fill
+      );
+      if (!annotations.length) continue;
+      for (const annotation of annotations)
+        touched.push({ ref: verse.ref, ...annotation });
+      filled += 1;
     }
-    if (!changed) continue;
-    placed += changed;
-    changedRefs.add(verse.ref);
-    options.resolve(verse);
+    if (!filled) continue;
+    placed += filled;
+    changed.push(verse);
   }
-  return { placed, changedRefs };
+  const residualReport = options.residualReport
+    ? withoutLexicalGapFilledItems(options.residualReport, touched)
+    : undefined;
+  const changedRefs = new Set(changed.map((verse) => verse.ref));
+  const itemsOf = new Map<string, LexicalCandidateItem[]>();
+  for (const item of residualReport?.items ?? []) {
+    if (!changedRefs.has(item.ref)) continue;
+    const values = itemsOf.get(item.ref) ?? [];
+    values.push(item);
+    itemsOf.set(item.ref, values);
+  }
+  for (const verse of changed)
+    options.resolve(
+      verse,
+      residualReport ? (itemsOf.get(verse.ref) ?? []) : undefined
+    );
+  return {
+    placed,
+    changedRefs,
+    overBudget,
+    residualReport,
+    withdrawnLexicalItems:
+      (options.residualReport?.items.length ?? 0) -
+      (residualReport?.items.length ?? 0)
+  };
 }
