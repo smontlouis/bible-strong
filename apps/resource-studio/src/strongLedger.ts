@@ -76,6 +76,11 @@ import {
 import { STRONG_IDENTIFIER_ALIASES } from "./strongIdentifierFamilies.js";
 import type { SourceRow } from "./strongSourceUnits.js";
 import {
+  loadProperNameLexicon,
+  properNameVariantsPass,
+  PROPER_NAME_LEXICON_SOURCES
+} from "./properNameVariants.js";
+import {
   buildWitnessLocutionLexicon,
   type WitnessLocutionLexicon
 } from "./witnessLocutionLexicon.js";
@@ -563,6 +568,7 @@ const STRONG_LEDGER_PIPELINE_SOURCES = [
   "src/originalSource.ts",
   "src/permissiveStrongProjection.ts",
   "src/phraseTranslationLexicon.ts",
+  "src/properNameVariants.ts",
   "src/readerAlignment.ts",
   "src/strongResolution.ts",
   "src/strongResolutionWorkflow.ts",
@@ -631,6 +637,9 @@ export function strongLedgerInputFingerprint(
     FRENCH_LEXICAL_SOURCES.rezoJdmCache,
     FRENCH_LEXICAL_SOURCES.openOffice,
     FRENCH_LEXICAL_SOURCES.wolf,
+    ...(resolveEnginePolicy(options.enginePolicy).properNameVariants
+      ? PROPER_NAME_LEXICON_SOURCES
+      : []),
     ...STRONG_LEDGER_PIPELINE_SOURCES
   ];
 
@@ -1074,6 +1083,39 @@ export async function generateStrongLedgerWithDictionary(
       residualLexicalReport = undefined;
       if ((await reachLexicalFixedPoint(changedRefs)) > 0)
         reduceAlternativeIdentityCarriers();
+    }
+  }
+  // P places reader carriers, so it too runs before the reader baseline; the
+  // lexical fixed point is then reached again from the verses it changed.
+  if (options.resolveOccurrences !== false && enginePolicy.properNameVariants) {
+    const sourceRows = (canonicalSourceRows ??= await readCanonicalSourceRows(
+      STEP_ORIGINAL_SOURCES
+    ));
+    const nameLexicon = measureSync("load STEP name lexicon", () =>
+      loadProperNameLexicon()
+    );
+    const changed = measureSync("place proper name variants", () =>
+      properNameVariantsPass({
+        verses: ledgerVerses,
+        inputOf: (verse) => resolutionInputs.get(verse.ref),
+        sourceRows,
+        readingPolicy: {
+          readingInvariantVariants: enginePolicy.readingInvariantVariants,
+          strongIdentifierFamilies: enginePolicy.strongIdentifierFamilies
+        },
+        lexicon: nameLexicon
+      })
+    );
+    for (const verse of changed) refreshLedgerVerse(verse);
+    if (changed.length) {
+      residualLexicalReport = undefined;
+      const relexed = await reachLexicalFixedPoint(
+        new Set(changed.map((verse) => verse.ref))
+      );
+      perfLog(
+        `proper name variants: verses=${changed.length}; lexical placements after=${relexed}`
+      );
+      if (relexed > 0) reduceAlternativeIdentityCarriers();
     }
   }
   const resolutionBaselineMetrics =
