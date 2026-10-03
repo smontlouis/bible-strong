@@ -1,5 +1,6 @@
 import { withoutPublisherNotes } from "./strongReaderText.js";
 import {
+  applyCompoundTargetWordsToVerse,
   CANONICAL_RESOLUTION_POLICY,
   demoteAlternativeIdentityCarriers,
   readCanonicalSourceRows,
@@ -73,6 +74,7 @@ import {
   type ResolvedDefaultStrongDictionaryInput
 } from "./strongDictionaryLexicon.js";
 import { STRONG_IDENTIFIER_ALIASES } from "./strongIdentifierFamilies.js";
+import type { SourceRow } from "./strongSourceUnits.js";
 import {
   buildWitnessLocutionLexicon,
   type WitnessLocutionLexicon
@@ -566,6 +568,7 @@ const STRONG_LEDGER_PIPELINE_SOURCES = [
   "src/strongResolutionWorkflow.ts",
   "src/strongGrammaticalEmpty.ts",
   "src/strongCanonicalResolution.ts",
+  "src/strongCompoundWords.ts",
   "src/strongSourceUnits.ts",
   "src/strongCarriers.ts",
   "src/strongReaderText.ts",
@@ -953,83 +956,126 @@ export async function generateStrongLedgerWithDictionary(
   let lexicalAutoSafeCount = 0;
   let residualLexicalReport:
     Awaited<ReturnType<typeof buildLexicalCandidateReport>> | undefined;
-  let incrementalLexicalPassRefs: Set<string> | undefined;
-  let lexicalAutoSafeReachedPassLimit = false;
-  let lexicalAutoSafeLastApplied = 0;
-  for (let pass = 0; pass < MAX_LEXICAL_AUTOSAFE_PASSES; pass += 1) {
-    const fullScopePass = incrementalLexicalPassRefs === undefined;
-    const passVerses = fullScopePass
-      ? ledgerVerses
-      : ledgerVerses.filter((verse) =>
-          incrementalLexicalPassRefs?.has(verse.ref)
-        );
-    if (passVerses.length === 0) break;
-    const passStart = perfStart();
-    const lexicalReport = await buildLexicalCandidateReport({
-      ...lexicalReportOptions,
-      ledger: { verses: passVerses }
-    });
-    const autoSafePlacements = lexicalAutoSafePlacements(lexicalReport);
-    const autoSafePlacementRefs =
-      lexicalAutoSafePlacementRefs(autoSafePlacements);
-    const result = measureSync("apply lexical auto-safe placements", () =>
-      applyLexicalAutoSafePlacementsToLedger({
-        verses: ledgerVerses,
-        placements: autoSafePlacements
-      })
-    );
-    perfLog(
-      `lexical auto-safe pass ${pass + 1}: ${formatPerfMs(
-        perfElapsed(passStart)
-      )}; verses=${passVerses.length}; applied=${result.applied}; changedRefs=${
-        result.changedRefs.size
-      }${formatChangedRefSample(result.changedRefs)}`
-    );
-    if (result.applied === 0) {
-      if (fullScopePass) {
-        residualLexicalReport = lexicalReport;
-        break;
+  // Lexical auto-safe fixed point: passes over the verses the previous pass
+  // changed, closed by a full-scope pass that applies nothing (its report is
+  // the residual one). `startRefs` resumes it on verses changed since.
+  const reachLexicalFixedPoint = async (startRefs?: Set<string>) => {
+    let incrementalLexicalPassRefs = startRefs;
+    let lexicalAutoSafeReachedPassLimit = false;
+    let lexicalAutoSafeLastApplied = 0;
+    let applied = 0;
+    for (let pass = 0; pass < MAX_LEXICAL_AUTOSAFE_PASSES; pass += 1) {
+      const fullScopePass = incrementalLexicalPassRefs === undefined;
+      const passVerses = fullScopePass
+        ? ledgerVerses
+        : ledgerVerses.filter((verse) =>
+            incrementalLexicalPassRefs?.has(verse.ref)
+          );
+      if (passVerses.length === 0) break;
+      const passStart = perfStart();
+      const lexicalReport = await buildLexicalCandidateReport({
+        ...lexicalReportOptions,
+        ledger: { verses: passVerses }
+      });
+      const autoSafePlacements = lexicalAutoSafePlacements(lexicalReport);
+      const autoSafePlacementRefs =
+        lexicalAutoSafePlacementRefs(autoSafePlacements);
+      const result = measureSync("apply lexical auto-safe placements", () =>
+        applyLexicalAutoSafePlacementsToLedger({
+          verses: ledgerVerses,
+          placements: autoSafePlacements
+        })
+      );
+      perfLog(
+        `lexical auto-safe pass ${pass + 1}: ${formatPerfMs(
+          perfElapsed(passStart)
+        )}; verses=${passVerses.length}; applied=${result.applied}; changedRefs=${
+          result.changedRefs.size
+        }${formatChangedRefSample(result.changedRefs)}`
+      );
+      if (result.applied === 0) {
+        if (fullScopePass) {
+          residualLexicalReport = lexicalReport;
+          break;
+        }
+        incrementalLexicalPassRefs = undefined;
+        continue;
       }
-      incrementalLexicalPassRefs = undefined;
-      continue;
+      lexicalAutoSafeLastApplied = result.applied;
+      lexicalAutoSafeCount += result.applied;
+      applied += result.applied;
+      rebuildLedgerVerses(
+        ledgerVerses.filter((verse) => result.changedRefs.has(verse.ref))
+      );
+      incrementalLexicalPassRefs = new Set([
+        ...result.changedRefs,
+        ...autoSafePlacementRefs
+      ]);
+      if (pass === MAX_LEXICAL_AUTOSAFE_PASSES - 1) {
+        lexicalAutoSafeReachedPassLimit = true;
+      }
     }
-    lexicalAutoSafeLastApplied = result.applied;
-    lexicalAutoSafeCount += result.applied;
-    rebuildLedgerVerses(
-      ledgerVerses.filter((verse) => result.changedRefs.has(verse.ref))
-    );
-    incrementalLexicalPassRefs = new Set([
-      ...result.changedRefs,
-      ...autoSafePlacementRefs
-    ]);
-    if (pass === MAX_LEXICAL_AUTOSAFE_PASSES - 1) {
-      lexicalAutoSafeReachedPassLimit = true;
+    if (lexicalAutoSafeReachedPassLimit) {
+      console.warn(
+        `Lexical auto-safe reached pass limit after applying ${lexicalAutoSafeLastApplied} placement(s) in the final pass; inspect the residual lexical report for remaining auto-safe candidates.`
+      );
     }
-  }
-  if (lexicalAutoSafeReachedPassLimit) {
-    console.warn(
-      `Lexical auto-safe reached pass limit after applying ${lexicalAutoSafeLastApplied} placement(s) in the final pass; inspect the residual lexical report for remaining auto-safe candidates.`
-    );
-  }
+    return applied;
+  };
+  await reachLexicalFixedPoint();
   // Alternative identifiers of one source word must not keep two reader
   // carriers. This is a display correction, applied before the reader
   // baseline so that occurrence resolution itself never changes the reader.
+  const reduceAlternativeIdentityCarriers = () => {
+    if (
+      options.resolveOccurrences !== false &&
+      enginePolicy.singleCarrierPerSourceIdentity
+    )
+      for (const verse of ledgerVerses) {
+        const input = resolutionInputs.get(verse.ref);
+        if (
+          input &&
+          demoteAlternativeIdentityCarriers(
+            verse.annotations,
+            sourceIdentityGroups(input.occurrences),
+            new Set(Object.values(verse.inventories.references).flat())
+          ) > 0
+        )
+          refreshLedgerVerse(verse);
+      }
+  };
+  reduceAlternativeIdentityCarriers();
+  // N: compound witness words carry their source words. It adds reader
+  // carriers, so it also runs before the reader baseline; the lexical fixed
+  // point resumes on the verses it changed (their candidates changed), and B
+  // runs again if that placed anything.
+  let canonicalSourceRows: Map<string, SourceRow> | undefined;
   if (
     options.resolveOccurrences !== false &&
-    enginePolicy.singleCarrierPerSourceIdentity
-  )
-    for (const verse of ledgerVerses) {
-      const input = resolutionInputs.get(verse.ref);
-      if (
-        input &&
-        demoteAlternativeIdentityCarriers(
-          verse.annotations,
-          sourceIdentityGroups(input.occurrences),
-          new Set(Object.values(verse.inventories.references).flat())
-        ) > 0
-      )
-        refreshLedgerVerse(verse);
+    enginePolicy.compoundTargetWords
+  ) {
+    canonicalSourceRows = await readCanonicalSourceRows(STEP_ORIGINAL_SOURCES);
+    const sourceRows = canonicalSourceRows;
+    const changedRefs = measureSync("compound target words", () =>
+      applyCompoundTargetWordsToLedger({
+        verses: ledgerVerses,
+        inputs: resolutionInputs,
+        sourceRows,
+        enginePolicy,
+        maxStrongPerWord: translationProfile.readerAlignment.maxStrongPerWord
+      })
+    );
+    perfLog(
+      `compound target words: changedRefs=${changedRefs.size}${formatChangedRefSample(
+        changedRefs
+      )}`
+    );
+    if (changedRefs.size) {
+      residualLexicalReport = undefined;
+      if ((await reachLexicalFixedPoint(changedRefs)) > 0)
+        reduceAlternativeIdentityCarriers();
     }
+  }
   const resolutionBaselineMetrics =
     options.resolveOccurrences === false
       ? undefined
@@ -1041,7 +1087,9 @@ export async function generateStrongLedgerWithDictionary(
     });
     if (lexicalAutoSafePlacements(residualLexicalReport).length)
       throw new Error("autonomous-resolution-requires-lexical-fixed-point");
-    const rows = await readCanonicalSourceRows(STEP_ORIGINAL_SOURCES);
+    const rows =
+      canonicalSourceRows ??
+      (await readCanonicalSourceRows(STEP_ORIGINAL_SOURCES));
     // S: renderings of every Strong number by the allowed witnesses.
     const witnessRenderingLexicon = enginePolicy.witnessEmptyContexts
       ? buildWitnessRenderingLexicon(
@@ -1072,6 +1120,10 @@ export async function generateStrongLedgerWithDictionary(
           articleDeterminers: enginePolicy.articleDeterminers,
           ...(witnessRenderingLexicon
             ? { witnessEmptyContexts: true, witnessRenderingLexicon }
+            : {}),
+          // N placed its carriers above; the resolver counts shared ones.
+          ...(enginePolicy.compoundTargetWords
+            ? { compoundTargetWords: true }
             : {})
         }
       });
@@ -1164,7 +1216,6 @@ export async function generateStrongLedgerWithDictionary(
   lexicalSourceCache.dictionaryCandidates = undefined;
   lexicalSourceCache.kaikki.clear();
   lexicalSourceCache.synonymSources.clear();
-  incrementalLexicalPassRefs = undefined;
 
   const metrics = aggregateMetrics(
     options.bible,
@@ -2110,6 +2161,53 @@ function completeEmptyAnnotation(options: {
 
 export function completeEmptyVisibility(duplicate: boolean): StrongVisibility {
   return duplicate ? "hidden" : "advanced";
+}
+
+/**
+ * Engine option N over the ledger (`strongCompoundWords.ts`): compound and
+ * multi-position witness words (« Béthel » 6+7, « Beer-Schéba ») carry the
+ * source words they render. It adds reader carriers, so the ledger runs it
+ * before the reader baseline, after the lexical fixed point and the reduction
+ * of alternative identifiers (B). Changed verses are refreshed (inventories,
+ * metrics, views); their refs are returned. Without the option nothing moves.
+ */
+export function applyCompoundTargetWordsToLedger(options: {
+  verses: StrongLedgerVerse[];
+  inputs: Map<string, CanonicalResolutionInput>;
+  sourceRows: Map<string, SourceRow>;
+  enginePolicy: Pick<
+    StrongEnginePolicy,
+    | "compoundTargetWords"
+    | "readingInvariantVariants"
+    | "strongIdentifierFamilies"
+  >;
+  /** The translation profile's limit of numbers per reader word. */
+  maxStrongPerWord: number;
+}): Set<string> {
+  const changedRefs = new Set<string>();
+  if (!options.enginePolicy.compoundTargetWords) return changedRefs;
+  for (const verse of options.verses) {
+    const input = options.inputs.get(verse.ref);
+    if (
+      input &&
+      applyCompoundTargetWordsToVerse({
+        verse,
+        input,
+        sourceRows: options.sourceRows,
+        policy: {
+          readingInvariantVariants:
+            options.enginePolicy.readingInvariantVariants,
+          strongIdentifierFamilies:
+            options.enginePolicy.strongIdentifierFamilies
+        },
+        maxStrongPerWord: options.maxStrongPerWord
+      }).length
+    ) {
+      refreshLedgerVerse(verse);
+      changedRefs.add(verse.ref);
+    }
+  }
+  return changedRefs;
 }
 
 export function applyLexicalAutoSafePlacementsToLedger(options: {
