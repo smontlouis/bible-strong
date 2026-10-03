@@ -18,6 +18,12 @@ import {
   makeUnits,
   type SourceRow
 } from "./strongSourceUnits.js";
+import {
+  ARTICLE_WITNESS,
+  carryArticleOnDeterminer,
+  readArticleWitnessMarks,
+  type ArticleWitness
+} from "./strongArticleDeterminers.js";
 import { extractGoldCarrierPlacements } from "./strongCarriers.js";
 import { parseStrongOccurrences } from "./strongCsv.js";
 import { withoutPublisherNotes } from "./strongReaderText.js";
@@ -66,6 +72,11 @@ export interface CanonicalResolutionOptions {
    * very source word (M, `strongWitnessAttestedReading.ts`).
    */
   witnessAttestedReadings?: boolean;
+  /**
+   * A Greek article that the Segond witness renders on the determiner of its
+   * head is carried by the target's determiner of our carrier of that head.
+   */
+  articleDeterminers?: boolean;
 }
 
 const strongBase = (code: string) => code.match(/^[GH]\d+/u)?.[0] ?? code;
@@ -525,15 +536,43 @@ export function resolveCanonicalVerse(options: {
       ];
     })
   };
+  const articleWitness: ArticleWitness | undefined = (() => {
+    if (!options.policy?.articleDeterminers) return undefined;
+    const reference = input.references.find(
+      (r) => r.name === ARTICLE_WITNESS && r.verse
+    );
+    // A witness row joined from several verses numbers several verses' words.
+    if (!reference?.verse || (input.mapping?.canonicalRefs.length ?? 1) !== 1)
+      return undefined;
+    const row = reference.verse.row;
+    return {
+      name: reference.name,
+      ref: `${row.bookId}.${row.chapter}.${row.verse}`,
+      marks: readArticleWitnessMarks(withoutPublisherNotes(row.text))
+    };
+  })();
   const result = resolveDossier(dossier, [], {
     applyExactWitness: false,
     applyAssistedReviews: false,
     applyGrammaticalEmpties: true,
     applyWitnessEmpties: options.policy?.witnessEmpties === true,
+    ...(articleWitness ? { articleDeterminers: articleWitness } : {}),
     targetLanguage: "fr"
   });
+  const articles = new Map(
+    (result.articleDeterminers ?? []).map((p) => [p.sourceUnitId, p])
+  );
   const decisions: CanonicalOccurrenceDecision[] = result.decisions.map((d) => {
     const entry = units.find((u) => u.unit.id === d.sourceUnitId)!;
+    const article = articles.get(d.sourceUnitId);
+    if (article && d.state === "visible")
+      carryArticleOnDeterminer({
+        ref: verse.ref,
+        annotations: verse.annotations,
+        occurrenceIds: entry.unit.occurrenceIds,
+        proposal: article,
+        normalizedWord: verse.tokens[article.wordIndex]?.normalized
+      });
     const linked = verse.annotations.filter(
       (a) =>
         a.originalOccurrenceId &&

@@ -1,3 +1,7 @@
+import {
+  applyArticleDeterminers,
+  type ArticleWitness
+} from "./strongArticleDeterminers.js";
 import { grammaticalEmptyDecisions } from "./strongGrammaticalEmpty.js";
 import assert from "node:assert/strict";
 import {
@@ -475,6 +479,8 @@ export interface ResolutionOptions {
   applyGrammaticalEmpties?: boolean;
   /** Establish untranslated words carried over from the witnesses. */
   applyWitnessEmpties?: boolean;
+  /** Place Greek articles on the determiner of their head (option R). */
+  articleDeterminers?: ArticleWitness;
   targetLanguage?: string;
 }
 
@@ -662,6 +668,15 @@ export function resolveDossier(
       display
     };
   });
+  // Second pass: articles follow the heads decided above.
+  const articleDeterminers = options.articleDeterminers
+    ? applyArticleDeterminers(
+        d,
+        decisions,
+        projected,
+        options.articleDeterminers
+      )
+    : undefined;
   assert.equal(JSON.stringify(d), before, "dossier-mutated");
   return {
     edition: d.edition,
@@ -669,6 +684,7 @@ export function resolveDossier(
     split: d.split,
     text: d.text,
     decisions,
+    ...(articleDeterminers ? { articleDeterminers } : {}),
     placements: projected,
     summary: {
       units: decisions.length,
