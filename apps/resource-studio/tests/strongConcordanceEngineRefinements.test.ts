@@ -464,7 +464,16 @@ test("the identifier used by the witnesses wins between alternative carriers", (
   assert.deepEqual(resolution.decisions[0]!.targetWordIndices, [3]);
 });
 
-test("the engine enables every measured refinement by default and allows a full opt-out", () => {
+test("the engine enables refinements A–L by default, keeps M–S off until measured, and allows an opt-out", () => {
+  const offUntilMeasured = {
+    witnessAttestedReadings: false,
+    compoundTargetWords: false,
+    numeralValues: false,
+    properNameVariants: false,
+    lexicalGapFill: false,
+    articleDeterminers: false,
+    witnessEmptyContexts: false
+  };
   assert.deepEqual(resolveEnginePolicy(), {
     readingInvariantVariants: true,
     singleCarrierPerSourceIdentity: true,
@@ -477,7 +486,8 @@ test("the engine enables every measured refinement by default and allows a full 
     strongIdentifierFamilies: true,
     cliticHosts: true,
     openingConjunctions: true,
-    witnessLocutionLexicon: true
+    witnessLocutionLexicon: true,
+    ...offUntilMeasured
   });
   assert.deepEqual(resolveEnginePolicy({ encliticHostTransfer: false }), {
     readingInvariantVariants: true,
@@ -491,7 +501,8 @@ test("the engine enables every measured refinement by default and allows a full 
     strongIdentifierFamilies: true,
     cliticHosts: true,
     openingConjunctions: true,
-    witnessLocutionLexicon: true
+    witnessLocutionLexicon: true,
+    ...offUntilMeasured
   });
 });
 

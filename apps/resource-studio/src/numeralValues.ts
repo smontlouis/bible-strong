@@ -14,6 +14,12 @@
  * numbers next to a modern unit (« 25 mètres ») or to an ancient measure the
  * target drops (« vingt coudées ») are left alone, as S21 converts them; and
  * a target word or witness word already carried elsewhere is never moved.
+ *
+ * The carrier shows numbers as option N does: each Strong number once (the
+ * second « six » of « 666 » stays without a carrier, or shares N's hidden
+ * duplicate), and no more numbers than the profile allows on a word, a digit
+ * group included (« 6800 » shows its first numbers, the ones its word already
+ * shows kept first); the source words left out stay as they were.
  */
 import {
   isConfirmedByOriginal,
@@ -260,6 +266,8 @@ export function addNumeralValueCarriers(options: {
   /** STEP words of the verse: which Strong numbers are numerals, and how many. */
   originalOccurrences?: OriginalStrongOccurrence[];
   witnessPositions?: boolean;
+  /** Numbers a target word (or digit group) may show (translation profile). */
+  maxStrongPerWord?: number;
 }): void {
   const { result } = options;
   const words = textWords(
@@ -402,9 +410,19 @@ export function addNumeralValueCarriers(options: {
       originalConfirmed: isConfirmedByOriginal(values, options.original),
       ...(positions.length ? { sourcePositions: positions } : {})
     });
+    const shown = (values: string[], span: WordSpan) =>
+      shownNumeralStrongs(
+        values,
+        heldStrongs(result, span),
+        options.maxStrongPerWord ?? Infinity
+      );
     if (!target.spelledWords) {
       if (placeable(result, target, strongSet))
-        placeNumeral(result, target, carrier(strong, sourcePositions));
+        placeNumeral(
+          result,
+          target,
+          carrier(shown(strong, target), sourcePositions)
+        );
       continue;
     }
     // « cent trente-sept » in the target and in a witness: word by word.
@@ -418,7 +436,11 @@ export function addNumeralValueCarriers(options: {
       words?.every((word) => placeable(result, word.span, new Set(word.strong)))
     )
       for (const word of words)
-        placeNumeral(result, word.span, carrier(word.strong, word.positions));
+        placeNumeral(
+          result,
+          word.span,
+          carrier(shown(word.strong, word.span), word.positions)
+        );
   }
 }
 
@@ -505,9 +527,10 @@ function wordByWordCarriers(options: {
 }
 
 /**
- * Strong numbers of the carrier: those of the most detailed witness, each as
+ * Strong numbers of the numeral: those of the most detailed witness, each as
  * many times as a witness tags it (« sept mille sept cents »: H7651 twice),
- * at most as many times as the source verse has it.
+ * at most as many times as the source verse has it. The carrier shows each
+ * once (`shownNumeralStrongs`).
  */
 function numeralStrongList(
   votes: NumeralVote[],
@@ -541,6 +564,40 @@ function numeralStrongList(
   for (const [value, count] of wanted)
     for (let index = 0; index < count; index += 1) add(value);
   return strong;
+}
+
+/** Strong numbers the words of a span already show. */
+function heldStrongs(result: AlignmentResult, span: WordSpan): string[] {
+  const held: string[] = [];
+  for (let index = span.startWordIndex; index <= span.endWordIndex; index += 1)
+    held.push(...(result.assignments.get(index)?.strong ?? []));
+  return held;
+}
+
+/**
+ * The numbers a numeral carrier shows, as N shows them: each Strong once, and
+ * at most `maxStrongPerWord`: those its words already show first (a carrier
+ * is never taken away), then in the witness's order.
+ */
+export function shownNumeralStrongs(
+  strong: readonly string[],
+  held: readonly string[],
+  maxStrongPerWord: number
+): string[] {
+  const key = (value: string) => value.toUpperCase();
+  const distinct = strong.filter(
+    (value, index) =>
+      strong.findIndex((other) => key(other) === key(value)) === index
+  );
+  const heldKeys = new Set(held.map(key));
+  const kept = new Set(
+    distinct.filter((value) => heldKeys.has(key(value))).map(key)
+  );
+  for (const value of distinct) {
+    if (kept.size >= maxStrongPerWord) break;
+    kept.add(key(value));
+  }
+  return distinct.filter((value) => kept.has(key(value)));
 }
 
 /** Whether a source word of the numeral is already carried by another word. */

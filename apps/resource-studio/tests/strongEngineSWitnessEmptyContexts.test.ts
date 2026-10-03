@@ -1,6 +1,20 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import type { OriginalStrongOccurrence } from "../src/completeAlignment.js";
+import { assertResolutionKeptReader } from "../src/strongAutonomous.js";
+import {
+  emptyResolutionReaderChanges,
+  resolveCanonicalVerse
+} from "../src/strongCanonicalResolution.js";
 import { extractGoldCarrierPlacements } from "../src/strongCarriers.js";
+import { parseStrongTokens } from "../src/strongCsv.js";
+import type {
+  StrongLedger,
+  StrongLedgerAnnotation,
+  StrongLedgerMetrics,
+  StrongLedgerVerse
+} from "../src/strongLedger.js";
+import { parseSourceRow } from "../src/strongSourceUnits.js";
 import type { ResolutionCarrier } from "../src/strongResolution.js";
 import {
   proposeWitnessEmpties,
@@ -9,7 +23,9 @@ import {
 } from "../src/strongResolutionWorkflow.js";
 import {
   buildWitnessRenderingLexicon,
-  proposeWitnessEmptyContexts
+  overriddenWords,
+  proposeWitnessEmptyContexts,
+  WITNESS_EMPTY_OVERRIDES_CARRIER
 } from "../src/strongWitnessEmptyContexts.js";
 import { stripTags, tokenizeText } from "../src/tokenize.js";
 
@@ -425,5 +441,169 @@ test("option S leaves the dossier untouched when it is off and G's own cases to 
       new Set(proposeWitnessEmpties(g).map((p) => p.sourceUnitId))
     ),
     []
+  );
+});
+
+/**
+ * Gen.15.2 as the ledger resolves it: בֵּן has a learned reader carrier on
+ * « biens », and two witnesses only leave it untranslated.
+ */
+function heirVerse() {
+  const ref = "Gen.15.2";
+  const rows = [
+    "Gen.15.2#09=L\tעֲרִירִי\t\tchildless\t{H6185}\tHAamsa\t\t\t\t\t\t",
+    "Gen.15.2#11=L\tבֶן\t\tson\t{H1121}\tHNcmsc\t\t\t\t\t\t"
+  ].map((line, i) => parseSourceRow(line, "TAHOT fixture.txt", i + 1)!);
+  const occurrences: OriginalStrongOccurrence[] = rows.map((row, i) => ({
+    occurrenceId: `${row.id}.main:0`,
+    tokenId: `${row.id}.main`,
+    tokenIndex: i + 1,
+    sourceIdentity: row.id,
+    strong: row.primary[0]!,
+    sourceStrong: row.primary[0]!,
+    text: row.surface,
+    gloss: row.gloss,
+    lemma: row.surface,
+    morph: i === 0 ? "HAamsa" : "HNcmsc",
+    pos: ""
+  }));
+  const text = "Je m'en vais sans enfants, et l'héritier de mes biens";
+  const tokens = words(text).map((word, wordIndex) => ({
+    wordIndex,
+    text: word,
+    normalized: word.toLowerCase()
+  }));
+  const at = (word: string) => tokens.findIndex((t) => t.text === word);
+  const annotation = (
+    i: number,
+    wordIndex: number,
+    source: StrongLedgerAnnotation["source"]
+  ): StrongLedgerAnnotation => ({
+    id: `${ref}:${i}:${occurrences[i]!.strong}`,
+    strong: occurrences[i]!.strong,
+    visibility: "reader",
+    placement: "word",
+    source,
+    confidence: 0.9,
+    reason: "fixture",
+    diagnostics: [source === "reference-transfer" ? "exact" : "learned"],
+    wordIndex,
+    originalOccurrenceId: occurrences[i]!.occurrenceId
+  });
+  const tagged =
+    'je m’en vais sans <w strong="H6185" pos="9">enfants</w>, et <w strong="H1121" pos="11"></w><w strong="H4943" pos="12">l’héritier</w> de ma maison';
+  const reference = (name: string) => ({
+    name,
+    family: name === "Sg1910" ? "Sg1910" : "Darby-family",
+    verse: {
+      row: { bookId: "Gen", chapter: 15, verse: 2, text: tagged },
+      tokens: parseStrongTokens(tagged)
+    }
+  });
+  const verse = {
+    ref,
+    text,
+    tokens,
+    annotations: [
+      annotation(0, at("enfants"), "reference-transfer"),
+      annotation(1, at("biens"), "reference-learned")
+    ],
+    inventories: {
+      references: {},
+      original: occurrences.map((o) => o.strong),
+      reader: [],
+      advanced: []
+    }
+  } as unknown as StrongLedgerVerse;
+  return {
+    bible: "s21",
+    verse,
+    input: {
+      occurrences,
+      references: [reference("Sg1910"), reference("DarbyR")],
+      issues: []
+    },
+    sourceRows: new Map(rows.map((row) => [row.id, row])),
+    lexicalItems: [],
+    policy: { witnessEmpties: true, witnessEmptyContexts: true }
+  };
+}
+
+test("a verse resolved again keeps S's override and its labels", () => {
+  const f = heirVerse();
+  const first = resolveCanonicalVerse(f);
+  const son = (r: typeof first) =>
+    r.decisions.find((d) => d.strong.includes("H1121"))!;
+  assert.equal(son(first).state, "empty");
+  assert.equal(son(first).assurance, "witness-empty-transfer");
+  assert.deepEqual(son(first).reasons, [
+    "witness-empty-overrides-carrier:same-context:Sg1910+DarbyR"
+  ]);
+  assert.equal(
+    son(first).anchor?.method,
+    "witness-empty-overrides-carrier:same-context"
+  );
+  const carrier = f.verse.annotations[1]!;
+  assert.equal(carrier.visibility, "hidden");
+  assert.ok(carrier.diagnostics.includes(WITNESS_EMPTY_OVERRIDES_CARRIER));
+  // The words it tagged stay recorded.
+  assert.deepEqual(overriddenWords(carrier.diagnostics), [carrier.wordIndex]);
+  // Resolved again (as Q does), the carrier is hidden and G could take the
+  // word: S's override and its labels stay.
+  const annotations = structuredClone(f.verse.annotations);
+  const second = resolveCanonicalVerse(f);
+  assert.deepEqual(second.decisions, first.decisions);
+  assert.deepEqual(f.verse.annotations, annotations);
+});
+
+test("the autonomous reader check accepts exactly the counted S overrides", () => {
+  const f = heirVerse();
+  const changes = emptyResolutionReaderChanges();
+  resolveCanonicalVerse({ ...f, readerChanges: changes });
+  assert.equal(changes.witnessEmptyHiddenCarriers, 1);
+  // A second resolution hides nothing more.
+  resolveCanonicalVerse({ ...f, readerChanges: changes });
+  assert.equal(changes.witnessEmptyHiddenCarriers, 1);
+  const metrics = (
+    readerVisibleStrongCount: number,
+    readerTaggedTokenCount: number
+  ) =>
+    ({
+      verseCount: 1,
+      wordCount: f.verse.tokens.length,
+      readerVisibleStrongCount,
+      readerTaggedTokenCount,
+      readerOverBudgetStrongCount: 0
+    }) as unknown as StrongLedgerMetrics;
+  // « biens » loses its carrier: one reader Strong and one tagged word less.
+  const ledger: Pick<
+    StrongLedger,
+    | "metrics"
+    | "resolutionBaselineMetrics"
+    | "lexicalGapFill"
+    | "articleDeterminers"
+    | "witnessEmptyContexts"
+    | "verses"
+  > = {
+    verses: [f.verse],
+    resolutionBaselineMetrics: metrics(2, 2),
+    metrics: metrics(1, 1),
+    witnessEmptyContexts: {
+      hiddenCarriers: changes.witnessEmptyHiddenCarriers
+    }
+  };
+  assert.doesNotThrow(() => assertResolutionKeptReader("s21", ledger));
+  // Overrides the ledger does not report, or reports otherwise.
+  for (const witnessEmptyContexts of [undefined, { hiddenCarriers: 2 }])
+    assert.throws(
+      () =>
+        assertResolutionKeptReader("s21", { ...ledger, witnessEmptyContexts }),
+      /reader-regression:s21:witness-empty-contexts/
+    );
+  // Any other change of the reader is still a regression.
+  assert.throws(
+    () =>
+      assertResolutionKeptReader("s21", { ...ledger, metrics: metrics(1, 0) }),
+    /reader-regression:s21:readerTaggedTokenCount/
   );
 });

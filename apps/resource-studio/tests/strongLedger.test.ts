@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 
 import {
   assertRenderedStrongInventory,
@@ -12,6 +14,7 @@ import {
   mergeStrongOccurrenceBudgets,
   mergeStrongLedgerVerseScopes,
   renderStrongTaggedText,
+  STRONG_LEDGER_PIPELINE_SOURCES,
   validateStrongLedgerAnnotation,
   type StrongLedgerAnnotation,
   type StrongLedgerVerse
@@ -587,3 +590,28 @@ function verse(
     ...partial
   };
 }
+
+test("the ledger input fingerprint covers every module the ledger imports", () => {
+  // Runtime import closure of the ledger (type-only imports carry no code).
+  const seen = new Set<string>();
+  const stack = ["src/strongLedger.ts"];
+  while (stack.length) {
+    const file = stack.pop()!;
+    if (seen.has(file)) continue;
+    seen.add(file);
+    const source = readFileSync(file, "utf8");
+    for (const match of source.matchAll(
+      /^(?:import|export)\s+(type\s+)?[^;]*?\s+from\s+"(\.[^"]+)"/gmsu
+    )) {
+      if (match[1]) continue;
+      const imported = path
+        .join(path.dirname(file), match[2]!)
+        .replace(/\.js$/u, ".ts");
+      if (existsSync(imported)) stack.push(imported);
+    }
+  }
+  assert.deepEqual(
+    [...seen].filter((file) => !STRONG_LEDGER_PIPELINE_SOURCES.includes(file)),
+    []
+  );
+});

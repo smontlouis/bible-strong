@@ -493,6 +493,12 @@ export interface ResolutionOptions {
   applyWitnessEmptyContexts?: boolean;
   /** Renderings the witnesses give each Strong number across the Bible. */
   witnessRenderingLexicon?: WitnessRenderingLexicon;
+  /**
+   * Units whose visible carrier option S already withdrew in an earlier
+   * resolution of the verse: S decides them again as overrides, and G, which
+   * never sees a unit with a carrier, leaves them to S.
+   */
+  witnessEmptyOverriddenUnits?: ReadonlySet<string>;
   targetLanguage?: string;
 }
 
@@ -513,15 +519,21 @@ export function resolveDossier(
     "conflicting-review-records"
   );
   const proposals = proposeExactWitnessCarriers(d);
+  const overridden = options.applyWitnessEmptyContexts
+    ? options.witnessEmptyOverriddenUnits
+    : undefined;
   const witnessEmpties = options.applyWitnessEmpties
-    ? proposeWitnessEmpties(d)
+    ? proposeWitnessEmpties(d).filter((p) => !overridden?.has(p.sourceUnitId))
     : [];
   if (options.applyWitnessEmptyContexts) {
     witnessEmpties.push(
       ...proposeWitnessEmptyContexts(
         d,
         new Set(witnessEmpties.map((p) => p.sourceUnitId)),
-        { lexicon: options.witnessRenderingLexicon }
+        {
+          lexicon: options.witnessRenderingLexicon,
+          ...(overridden?.size ? { overriddenCarrierUnits: overridden } : {})
+        }
       )
     );
   }

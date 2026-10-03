@@ -11,11 +11,22 @@ import { pathToFileURL } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { readBibleJson } from "./bibleJson.js";
 import { CANONICAL_RESOLUTION_POLICY } from "./strongCanonicalResolution.js";
-import { lexicalGapFillReaderCounts } from "./lexicalGapFill.js";
+import {
+  ARTICLE_CARRIER_FROM_READER,
+  ARTICLE_DETERMINER_ASSURANCE,
+  ARTICLE_DETERMINER_DUPLICATE
+} from "./strongArticleDeterminers.js";
+import {
+  overriddenWords,
+  WITNESS_EMPTY_OVERRIDES_CARRIER
+} from "./strongWitnessEmptyContexts.js";
 import {
   generateStrongLedger,
+  readerOverBudgetStrongCount,
   strongLedgerInputFingerprint,
-  type StrongLedger
+  type StrongLedger,
+  type StrongLedgerAnnotation,
+  type StrongLedgerVerse
 } from "./strongLedger.js";
 import { readStrongLedgerSqlite } from "./strongLedgerStore.js";
 import {
@@ -68,28 +79,178 @@ const plain = (s: string) =>
       (_, key: string) => ({ amp: "&", lt: "<", gt: ">", quot: '"' })[key]!
     );
 
+/** Words a reader annotation tags, as the verse metrics count them. */
+function taggedWords(annotation: StrongLedgerAnnotation): number[] {
+  if (annotation.placement === "word")
+    return annotation.wordIndex === undefined ? [] : [annotation.wordIndex];
+  if (
+    annotation.placement === "phrase" &&
+    annotation.startWordIndex !== undefined &&
+    annotation.endWordIndex !== undefined
+  )
+    return Array.from(
+      { length: annotation.endWordIndex - annotation.startWordIndex + 1 },
+      (_, offset) => annotation.startWordIndex! + offset
+    );
+  return [];
+}
+
+/** What options Q, R and S changed in the reader, recounted from the verses. */
+export interface ResolutionReaderChangeCounts {
+  /** Q: gap-fill carriers (an S override may have hidden one since). */
+  lexicalGapFill: number;
+  /** R: article carriers, those that were reader empties, hidden empties. */
+  articleCarriers: number;
+  articleFromReaderEmpties: number;
+  articleHiddenDuplicates: number;
+  /** S: reader carriers hidden by an override. */
+  witnessEmptyHiddenCarriers: number;
+  /** Final reader minus the baseline reader rebuilt by undoing the above. */
+  delta: {
+    readerVisibleStrongCount: number;
+    readerTaggedTokenCount: number;
+    readerOverBudgetStrongCount: number;
+  };
+}
+
+/**
+ * Recounts the reader changes of Q, R and S from the final verses alone, and
+ * what they changed in the reader: each verse's baseline reader is rebuilt by
+ * undoing exactly those changes (a Q or new R carrier was not a reader
+ * annotation; an R carrier taken from a reader empty, or a reader empty R hid,
+ * was a reader annotation tagging no word; an S-hidden carrier tagged the
+ * words it records), and compared with its final reader as the verse metrics
+ * count them. Any other change stays in both and is left to the caller's
+ * comparison with the baseline metrics.
+ */
+export function resolutionReaderChanges(
+  verses: Iterable<Pick<StrongLedgerVerse, "annotations" | "inventories">>
+): ResolutionReaderChangeCounts {
+  const counts: ResolutionReaderChangeCounts = {
+    lexicalGapFill: 0,
+    articleCarriers: 0,
+    articleFromReaderEmpties: 0,
+    articleHiddenDuplicates: 0,
+    witnessEmptyHiddenCarriers: 0,
+    delta: {
+      readerVisibleStrongCount: 0,
+      readerTaggedTokenCount: 0,
+      readerOverBudgetStrongCount: 0
+    }
+  };
+  for (const verse of verses) {
+    let changed = false;
+    const finalReader: Array<{ strong: string; words: number[] }> = [];
+    const baselineReader: Array<{ strong: string; words: number[] }> = [];
+    for (const annotation of verse.annotations) {
+      const reader = annotation.visibility === "reader";
+      if (reader)
+        finalReader.push({
+          strong: annotation.strong,
+          words: taggedWords(annotation)
+        });
+      const hiddenByS =
+        !reader &&
+        annotation.diagnostics.includes(WITNESS_EMPTY_OVERRIDES_CARRIER);
+      if (hiddenByS) counts.witnessEmptyHiddenCarriers += 1;
+      if (annotation.source === "lexical-gap-fill" && (reader || hiddenByS)) {
+        counts.lexicalGapFill += 1;
+        changed = true;
+      } else if (
+        annotation.diagnostics[0] === ARTICLE_DETERMINER_ASSURANCE &&
+        (reader || hiddenByS)
+      ) {
+        counts.articleCarriers += 1;
+        changed = true;
+        if (annotation.diagnostics.includes(ARTICLE_CARRIER_FROM_READER)) {
+          counts.articleFromReaderEmpties += 1;
+          baselineReader.push({ strong: annotation.strong, words: [] });
+        }
+      } else if (
+        annotation.visibility === "hidden" &&
+        annotation.diagnostics.includes(ARTICLE_DETERMINER_DUPLICATE)
+      ) {
+        counts.articleHiddenDuplicates += 1;
+        changed = true;
+        baselineReader.push({ strong: annotation.strong, words: [] });
+      } else if (hiddenByS) {
+        changed = true;
+        baselineReader.push({
+          strong: annotation.strong,
+          words: overriddenWords(annotation.diagnostics)
+        });
+      } else if (reader)
+        baselineReader.push({
+          strong: annotation.strong,
+          words: taggedWords(annotation)
+        });
+    }
+    if (!changed) continue;
+    const tagged = (reader: typeof finalReader) =>
+      new Set(reader.flatMap((entry) => entry.words)).size;
+    const overBudget = (reader: typeof finalReader) =>
+      readerOverBudgetStrongCount(
+        reader.map((entry) => entry.strong),
+        verse.inventories
+      );
+    counts.delta.readerVisibleStrongCount +=
+      finalReader.length - baselineReader.length;
+    counts.delta.readerTaggedTokenCount +=
+      tagged(finalReader) - tagged(baselineReader);
+    counts.delta.readerOverBudgetStrongCount +=
+      overBudget(finalReader) - overBudget(baselineReader);
+  }
+  return counts;
+}
+
 /**
  * Occurrence resolution leaves the reader as the baseline measured before it,
- * except for the carriers of policy Q (lexical gap fill). Those are recounted
- * from the verses: their number must be the one the ledger reports, and they
- * must explain the whole change of reader Strongs and tagged words.
+ * except for the changes of options Q (lexical gap-fill carriers), R (articles
+ * carried by their determiner) and S (carriers the witnesses only leave
+ * untranslated, hidden). Those are recounted from the verses: their numbers
+ * must be the ones the ledger reports, and undoing them must give back the
+ * baseline's reader Strongs, tagged words and Strongs over budget. Any other
+ * change of the reader is a regression.
  */
 export function assertResolutionKeptReader(
   bible: string,
   ledger: Pick<
     StrongLedger,
-    "metrics" | "resolutionBaselineMetrics" | "lexicalGapFill" | "verses"
+    | "metrics"
+    | "resolutionBaselineMetrics"
+    | "lexicalGapFill"
+    | "articleDeterminers"
+    | "witnessEmptyContexts"
+    | "verses"
   >
 ): void {
   const baseline = ledger.resolutionBaselineMetrics;
   assert(baseline, `reader-regression:${bible}:missing-baseline`);
-  const filled = lexicalGapFillReaderCounts(ledger.verses);
+  const changes = resolutionReaderChanges(ledger.verses);
   assert.equal(
-    filled.readerVisibleStrongCount,
+    changes.lexicalGapFill,
     ledger.lexicalGapFill?.placed ?? 0,
     `reader-regression:${bible}:lexical-gap-fill`
   );
-  const added: Record<string, number> = filled;
+  assert.deepEqual(
+    {
+      carriers: changes.articleCarriers,
+      fromReaderEmpties: changes.articleFromReaderEmpties,
+      hiddenDuplicates: changes.articleHiddenDuplicates
+    },
+    {
+      carriers: ledger.articleDeterminers?.carriers ?? 0,
+      fromReaderEmpties: ledger.articleDeterminers?.fromReaderEmpties ?? 0,
+      hiddenDuplicates: ledger.articleDeterminers?.hiddenDuplicates ?? 0
+    },
+    `reader-regression:${bible}:article-determiners`
+  );
+  assert.equal(
+    changes.witnessEmptyHiddenCarriers,
+    ledger.witnessEmptyContexts?.hiddenCarriers ?? 0,
+    `reader-regression:${bible}:witness-empty-contexts`
+  );
+  const added: Record<string, number> = changes.delta;
   for (const key of [
     "verseCount",
     "wordCount",
@@ -366,6 +527,8 @@ export async function runAutonomousBibles(
         metrics: ledger.metrics,
         baselineMetrics: baseline,
         lexicalGapFill: ledger.lexicalGapFill,
+        articleDeterminers: ledger.articleDeterminers,
+        witnessEmptyContexts: ledger.witnessEmptyContexts,
         lexicalMetrics: ledger.lexicalResolutionMetrics
       };
       ledger.verses.length = 0;

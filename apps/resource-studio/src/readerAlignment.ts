@@ -116,7 +116,8 @@ export function alignReaderVerse(options: {
       originalOccurrences: options.originalVerse
         ? getOriginalStrongOccurrences(options.originalVerse)
         : undefined,
-      witnessPositions: readerPolicy.transferMatching.witnessPositions === true
+      witnessPositions: readerPolicy.transferMatching.witnessPositions === true,
+      maxStrongPerWord: readerPolicy.maxStrongPerWord
     });
   // A witness locution matched on consecutive words is one carrier.
   const phraseAssignments: ReaderPhraseAssignment[] = (

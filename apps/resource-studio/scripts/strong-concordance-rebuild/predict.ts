@@ -4,6 +4,8 @@
  * evaluator modules (gold, Concordance parser, acquisition) nor read their
  * directories; `assertNoEvaluatorInput` enforces the path side of that rule.
  */
+import { createHash } from "node:crypto";
+import { createReadStream, existsSync, statSync } from "node:fs";
 import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -11,6 +13,7 @@ import { BOOK_IDS } from "../../src/books.js";
 import { PROPER_NAME_LEXICON_SOURCES } from "../../src/properNameVariants.js";
 import {
   generateStrongLedger,
+  strongLedgerLexicalInputPaths,
   type StrongEnginePolicy,
   type StrongLedgerVerse
 } from "../../src/strongLedger.js";
@@ -182,6 +185,29 @@ export async function predictionCodeHashes(): Promise<Record<string, string>> {
   );
 }
 
+/**
+ * Hash of a lexical input of the ledger, streamed (Kaikki is hundreds of
+ * megabytes): a directory hashes its files in path order, and a missing input
+ * is recorded as absent, since the ledger then runs without it.
+ */
+async function lexicalInputHash(input: string): Promise<string> {
+  if (!existsSync(input)) return "absent";
+  const streamHash = async (file: string) => {
+    const hash = createHash("sha256");
+    for await (const chunk of createReadStream(file)) hash.update(chunk);
+    return hash.digest("hex");
+  };
+  if (!statSync(input).isDirectory()) return streamHash(input);
+  const files = (await readdir(input, { recursive: true }))
+    .map((file) => path.join(input, file))
+    .filter((file) => statSync(file).isFile())
+    .sort();
+  const hash = createHash("sha256");
+  for (const file of files)
+    hash.update(`${path.relative(input, file)}\0${await streamHash(file)}\0`);
+  return `directory:${hash.digest("hex")}`;
+}
+
 const STEP_FILES = [
   "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt",
   "data/external/stepbible/amalgamated/TAHOT Jos-Est.txt",
@@ -323,7 +349,11 @@ export async function predict(options: {
       biblePath = path.join(workDir, "masked-target.json");
       await writeFile(biblePath, `${JSON.stringify(bible)}\n`, "utf8");
     }
-    assertNoEvaluatorInput([...inputPaths, biblePath]);
+    assertNoEvaluatorInput([
+      ...inputPaths,
+      biblePath,
+      ...strongLedgerLexicalInputPaths()
+    ]);
     const ledger = await generateStrongLedger({
       dictionaryPath: DICTIONARY_PATH,
       bible: edition.ledgerBible,
@@ -339,8 +369,8 @@ export async function predict(options: {
         edition.localText.kind === "bible-json"
           ? edition.localText.verseCorrespondencePath
           : undefined,
-      // The engine enables every refinement by default: pass the complete
-      // switch set so that an empty policy still replays the initial engine.
+      // The engine's defaults enable refinements: pass the complete switch
+      // set so that an empty policy still replays the initial engine.
       enginePolicy: Object.fromEntries(
         (Object.keys(POLICY_LABELS) as Array<keyof StrongEnginePolicy>).map(
           (key) => [key, options.policy[key] === true]
@@ -394,6 +424,10 @@ export async function predict(options: {
     const inputs: Record<string, string> = {};
     for (const file of [...new Set(inputPaths)].sort())
       inputs[file] = await fileSha256(file);
+    // Every run reads the French lexical resources (the lexical fixed point,
+    // and Q's Kaikki index and synonyms), whatever the policy.
+    for (const file of strongLedgerLexicalInputPaths())
+      inputs[file] = await lexicalInputHash(file);
     if (edition.localText.kind === "witness-csv")
       inputs["masked-target.json"] = await fileSha256(biblePath);
     const manifest: PredictionManifest = {

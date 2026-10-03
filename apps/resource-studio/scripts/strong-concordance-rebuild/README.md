@@ -122,6 +122,41 @@ générateur canonique les applique en revanche par défaut depuis le 1er octobr
   ailleurs à une locution entière (« en effet », « hauts lieux », plus de
   trois emplois) s'étend à cette locution quand la cible l'écrit et qu'aucun
   autre de ses mots ne porte de numéro.
+- `M` `witnessAttestedReadings` : un mot du texte de base dont la lecture
+  reste ouverte (variante manuscrite, ketiv et qere) est placé quand son
+  porteur vient d'un transfert exact et que deux familles de témoins
+  (Segond ; Darby et DarbyR) donnent le même identifiant au même mot ;
+- `N` `compoundTargetWords` : un mot que les témoins rendent avec d'autres
+  par un seul mot (« Béthel », « Beer-Schéba ») ou un nom écrit en deux mots
+  porte chacun de ces mots source quand la cible l'écrit (jamais à travers des
+  versets fusionnés) ;
+- `O` `numeralValues` : un nombre se compare par sa valeur, quelle que soit
+  son écriture (« 12 000 », « 12'000 », « douze mille », « vingt-quatre »,
+  ordinaux) ; deux nombres de valeurs différentes ne s'apparient plus ; comme
+  avec `N`, le mot montre chaque numéro une fois (« 666 ») et pas plus de
+  numéros que le profil n'en permet ;
+- `P` `properNameVariants` : un nom propre se retrouve sous ses variantes
+  d'orthographe (accents, traits d'union, clé consonantique), ses dérivés et
+  « Israélites » pour « fils d'Israël » ;
+- `Q` `lexicalGapFill` : un mot source resté incertain est placé sur le seul
+  mot libre, entre les porteurs de ses voisins source, qu'un lexique désigne
+  comme sa traduction (lemmes des témoins, gloses françaises du dictionnaire
+  Strong, synonymes d'une traduction principale des témoins ; pas de synonyme
+  seul pour une traduction dynamique) ;
+- `R` `articleDeterminers` : un article grec que LSG rend par le déterminant
+  de son nom est porté par le déterminant de notre porteur de ce nom ;
+- `S` `witnessEmptyContexts` : un mot que les témoins laissent non traduit
+  est établi non traduit dans des contextes plus faibles que `G` (traduction
+  du témoin portée ailleurs dans le verset, début de verset, voisins
+  adjacents), avec son ancre.
+
+`M` à `S` restent désactivées par défaut dans `StrongEnginePolicy` tant que
+la réserve scellée ne les a pas confirmées. `Q`, `R` et `S` sont les seules
+options qui changent le mode lecteur après la mesure de référence de la
+résolution des occurrences (`resolutionBaselineMetrics`) : le registre compte
+leurs changements (`lexicalGapFill`, `articleDeterminers`,
+`witnessEmptyContexts`) et la vérification autonome les recompte dans les
+versets, en défaisant exactement ces changements pour retrouver la référence.
 
 `B` garde aussi un seul porteur quand deux identifiants d'un même mot source
 tombent sur les mêmes mots : celui des témoins, puis le mieux étayé, puis le

@@ -2,14 +2,23 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { OriginalStrongOccurrence } from "../src/completeAlignment.js";
 import {
+  ARTICLE_CARRIER_FROM_READER,
   ARTICLE_DETERMINER_ASSURANCE,
+  ARTICLE_DETERMINER_DUPLICATE,
   readArticleWitnessMarks
 } from "../src/strongArticleDeterminers.js";
-import { resolveCanonicalVerse } from "../src/strongCanonicalResolution.js";
+import { assertResolutionKeptReader } from "../src/strongAutonomous.js";
+import {
+  emptyResolutionReaderChanges,
+  resolveCanonicalVerse
+} from "../src/strongCanonicalResolution.js";
 import { parseStrongTokens } from "../src/strongCsv.js";
 import {
   resolveEnginePolicy,
-  type StrongLedgerAnnotation
+  type StrongLedger,
+  type StrongLedgerAnnotation,
+  type StrongLedgerMetrics,
+  type StrongLedgerVerse
 } from "../src/strongLedger.js";
 import { parseSourceRow } from "../src/strongSourceUnits.js";
 import type { VerseCorrespondenceBlock } from "../src/verseCorrespondence.js";
@@ -393,5 +402,173 @@ test("two articles claiming one determiner are both left unresolved", () => {
   assert.deepEqual(
     r.decisions.filter((d) => d.strong.includes("G3588")).map((d) => d.state),
     ["unresolved", "unresolved"]
+  );
+});
+
+test("a verse resolved again keeps R's decision and carrier", () => {
+  const f = house();
+  const first = resolveCanonicalVerse({ ...f, policy: on });
+  const carrier = structuredClone(f.verse.annotations[2]!);
+  // Q resolves the verses it changed a second time: the article's carrier is
+  // then an existing placement, still R's.
+  const second = resolveCanonicalVerse({ ...f, policy: on });
+  // Decisions and their provenance are the same; only the exploration record
+  // differs (« la » is now occupied, so no exact witness proposal is left).
+  const provenance = (r: typeof first) =>
+    r.decisions.map((decision) => ({ ...decision, exploration: undefined }));
+  assert.deepEqual(provenance(second), provenance(first));
+  assert.equal(articleDecision(second).assurance, ARTICLE_DETERMINER_ASSURANCE);
+  assert.deepEqual(articleDecision(second).reasons, [
+    "article-on-head-determiner:Sg1910:la:G3614@5:determiner"
+  ]);
+  assert.deepEqual(f.verse.annotations[2], carrier);
+});
+
+/** Ledger metrics with only the reader counts the autonomous check reads. */
+const readerMetrics = (
+  readerVisibleStrongCount: number,
+  readerTaggedTokenCount: number,
+  readerOverBudgetStrongCount = 0
+) =>
+  ({
+    verseCount: 1,
+    wordCount: 5,
+    readerVisibleStrongCount,
+    readerTaggedTokenCount,
+    readerOverBudgetStrongCount
+  }) as unknown as StrongLedgerMetrics;
+
+/** A fixture verse as a ledger verse, with its source budget. */
+const ledgerVerse = (f: ReturnType<typeof fixture>) =>
+  ({
+    ...f.verse,
+    inventories: {
+      references: {},
+      original: f.input.occurrences.map((o) => o.strong),
+      reader: [],
+      advanced: []
+    }
+  }) as unknown as StrongLedgerVerse;
+
+type ReaderLedger = Pick<
+  StrongLedger,
+  | "metrics"
+  | "resolutionBaselineMetrics"
+  | "articleDeterminers"
+  | "lexicalGapFill"
+  | "witnessEmptyContexts"
+  | "verses"
+>;
+
+test("the autonomous reader check accepts exactly the counted R carriers", () => {
+  // The complete alignment's guess (advanced) becomes a reader carrier on
+  // « la »: one more reader Strong, one more tagged word.
+  const f = house();
+  const changes = emptyResolutionReaderChanges();
+  resolveCanonicalVerse({ ...f, policy: on, readerChanges: changes });
+  assert.deepEqual(changes.articleDeterminers, {
+    carriers: 1,
+    fromReaderEmpties: 0,
+    hiddenDuplicates: 0
+  });
+  const placed: ReaderLedger = {
+    verses: [ledgerVerse(f)],
+    resolutionBaselineMetrics: readerMetrics(2, 2),
+    metrics: readerMetrics(3, 3),
+    articleDeterminers: changes.articleDeterminers
+  };
+  assert.doesNotThrow(() => assertResolutionKeptReader("s21", placed));
+  // R carriers the ledger does not report, or reports otherwise.
+  assert.throws(
+    () =>
+      assertResolutionKeptReader("s21", {
+        ...placed,
+        articleDeterminers: undefined
+      }),
+    /reader-regression:s21:article-determiners/
+  );
+  assert.throws(
+    () =>
+      assertResolutionKeptReader("s21", {
+        ...placed,
+        articleDeterminers: { ...changes.articleDeterminers, carriers: 2 }
+      }),
+    /reader-regression:s21:article-determiners/
+  );
+  // Any other change of the reader is still a regression.
+  assert.throws(
+    () =>
+      assertResolutionKeptReader("s21", {
+        ...placed,
+        metrics: readerMetrics(4, 3)
+      }),
+    /reader-regression:s21:readerVisibleStrongCount/
+  );
+  const hidden = ledgerVerse(f);
+  hidden.annotations = hidden.annotations.map((a) =>
+    a.strong === "G1519" ? { ...a, visibility: "hidden" } : a
+  );
+  assert.throws(
+    () =>
+      assertResolutionKeptReader("s21", {
+        ...placed,
+        verses: [hidden],
+        // What the ledger would count for that verse.
+        metrics: readerMetrics(2, 2)
+      }),
+    /reader-regression:s21:readerVisibleStrongCount/
+  );
+});
+
+test("an R carrier taken from a reader empty only tags its word", () => {
+  // The article had two reader empties: one becomes the carrier, the other
+  // its hidden duplicate.
+  const f = house();
+  const article = f.verse.annotations[2]!;
+  const empty = (id: string): StrongLedgerAnnotation => ({
+    ...article,
+    id,
+    visibility: "reader",
+    placement: "empty",
+    source: "reference-transfer",
+    diagnostics: ["empty-reference"],
+    wordIndex: undefined,
+    insertAfterWordIndex: 2
+  });
+  f.verse.annotations.splice(2, 1, empty("empty:a"), empty("empty:b"));
+  const changes = emptyResolutionReaderChanges();
+  const decision = articleDecision(
+    resolveCanonicalVerse({ ...f, policy: on, readerChanges: changes })
+  );
+  assert.equal(decision.state, "visible");
+  assert.deepEqual(changes.articleDeterminers, {
+    carriers: 1,
+    fromReaderEmpties: 1,
+    hiddenDuplicates: 1
+  });
+  const [carrier, duplicate] = f.verse.annotations.slice(2);
+  assert.equal(carrier!.visibility, "reader");
+  assert.ok(carrier!.diagnostics.includes(ARTICLE_CARRIER_FROM_READER));
+  assert.equal(duplicate!.visibility, "hidden");
+  assert.ok(duplicate!.diagnostics.includes(ARTICLE_DETERMINER_DUPLICATE));
+  // Baseline: four reader Strongs (two of them empties), two tagged words.
+  // Final: three reader Strongs, three tagged words.
+  const ledger: ReaderLedger = {
+    verses: [ledgerVerse(f)],
+    resolutionBaselineMetrics: readerMetrics(4, 2, 1),
+    metrics: readerMetrics(3, 3),
+    articleDeterminers: changes.articleDeterminers
+  };
+  assert.doesNotThrow(() => assertResolutionKeptReader("s21", ledger));
+  assert.throws(
+    () =>
+      assertResolutionKeptReader("s21", {
+        ...ledger,
+        articleDeterminers: {
+          ...changes.articleDeterminers,
+          fromReaderEmpties: 0
+        }
+      }),
+    /reader-regression:s21:article-determiners/
   );
 });

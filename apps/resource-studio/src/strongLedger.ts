@@ -3,6 +3,7 @@ import {
   applyCompoundTargetWordsToVerse,
   CANONICAL_RESOLUTION_POLICY,
   demoteAlternativeIdentityCarriers,
+  emptyResolutionReaderChanges,
   readCanonicalSourceRows,
   resolveCanonicalVerse,
   sourceIdentityGroups,
@@ -87,7 +88,8 @@ import {
 import { buildWitnessRenderingLexicon } from "./strongWitnessEmptyContexts.js";
 import {
   defaultKaikkiSqlitePath,
-  DEFAULT_KAIKKI_JSONL
+  DEFAULT_KAIKKI_JSONL,
+  hasKaikkiSqliteIndex
 } from "./kaikkiSqliteIndex.js";
 import {
   buildLexicalGapLexicon,
@@ -249,13 +251,31 @@ export interface StrongLedger {
   resolutionBaselineMetrics?: StrongLedgerMetrics;
   /**
    * Policy Q placements made after the baseline above (present only when the
-   * policy is on): the only reader carriers occurrence resolution adds.
+   * policy is on). With R and S below, the only reader changes occurrence
+   * resolution makes; the autonomous reader check recounts all three.
    */
   lexicalGapFill?: {
     placed: number;
     verses: number;
     overBudget: number;
     withdrawnLexicalItems: number;
+  };
+  /**
+   * Option R after the baseline (present only when it is on): articles made
+   * reader carriers on a determiner, those that were already reader empties,
+   * and the article's other reader empties hidden behind them.
+   */
+  articleDeterminers?: {
+    carriers: number;
+    fromReaderEmpties: number;
+    hiddenDuplicates: number;
+  };
+  /**
+   * Option S after the baseline (present only when it is on): reader carriers
+   * hidden because the witnesses only leave their word untranslated.
+   */
+  witnessEmptyContexts?: {
+    hiddenCarriers: number;
   };
   lexicalResolutionMetrics?: LexicalCandidateReport["metrics"];
   bible: string;
@@ -558,7 +578,8 @@ const STEP_SOURCE_BOOK_RANGES = new Map<string, { start: string; end: string }>(
   ]
 );
 
-const FRENCH_LEXICAL_SOURCES = {
+/** French lexical resources the ledger reads when they are present. */
+export const FRENCH_LEXICAL_SOURCES = {
   kaikki:
     "data/external/french-lexical/kaikki/kaikki.org-dictionary-French.jsonl",
   rezoJdmCache: "data/external/french-lexical/rezojdm-cache",
@@ -567,10 +588,31 @@ const FRENCH_LEXICAL_SOURCES = {
   wolf: "data/external/french-lexical/wolf/wolf-1.0b4.xml.bz2"
 };
 
+/**
+ * French lexical files every ledger run reads when they exist: the lexical
+ * fixed point reads Kaikki (its SQLite index when it matches the JSONL), the
+ * JeuxDeMots cache, OpenOffice and WOLF synonyms; policy Q reads the Kaikki
+ * index and the OpenOffice synonyms.
+ */
+export function strongLedgerLexicalInputPaths(): string[] {
+  return [
+    DEFAULT_KAIKKI_JSONL,
+    defaultKaikkiSqlitePath(DEFAULT_KAIKKI_JSONL),
+    FRENCH_LEXICAL_SOURCES.rezoJdmCache,
+    FRENCH_LEXICAL_SOURCES.openOffice,
+    FRENCH_LEXICAL_SOURCES.wolf
+  ];
+}
+
 const MAX_LEXICAL_AUTOSAFE_PASSES = 32;
 const STRONG_PERF_ENABLED = process.env.STRONG_PERF === "1";
 const STRONG_LEDGER_INPUT_VERSION = "canonical-ledger-input-v5";
-const STRONG_LEDGER_PIPELINE_SOURCES = [
+/**
+ * Every module the ledger runs (the runtime import closure of this file): a
+ * change to any of them changes the input fingerprint. A test keeps the list
+ * complete.
+ */
+export const STRONG_LEDGER_PIPELINE_SOURCES = [
   "src/align.ts",
   "src/atomicFile.ts",
   "src/bibleJson.ts",
@@ -579,21 +621,28 @@ const STRONG_LEDGER_PIPELINE_SOURCES = [
   "src/contentAddressedCache.ts",
   "src/curatedStrongOverrides.ts",
   "src/frenchLexicalSafety.ts",
+  "src/frenchNumerals.ts",
   "src/kaikkiSqliteIndex.ts",
   "src/lexicalCandidateReport.ts",
   "src/lexicalGapFill.ts",
   "src/lexicon.ts",
+  "src/lexiconV3/contracts.ts",
+  "src/lexiconV3/identity.ts",
+  "src/lexiconV3/productionPointer.ts",
   "src/maximumWeightMatching.ts",
+  "src/numeralValues.ts",
   "src/originalSource.ts",
   "src/permissiveStrongProjection.ts",
   "src/phraseTranslationLexicon.ts",
   "src/properNameVariants.ts",
   "src/readerAlignment.ts",
+  "src/strongArticleDeterminers.ts",
   "src/strongResolution.ts",
   "src/strongResolutionWorkflow.ts",
   "src/strongGrammaticalEmpty.ts",
   "src/strongCanonicalResolution.ts",
   "src/strongCompoundWords.ts",
+  "src/strongIdentifierFamilies.ts",
   "src/strongSourceUnits.ts",
   "src/strongCarriers.ts",
   "src/strongReaderText.ts",
@@ -604,11 +653,14 @@ const STRONG_LEDGER_PIPELINE_SOURCES = [
   "src/strongLedger.ts",
   "src/strongLedgerStore.ts",
   "src/strongPhraseLexiconStore.ts",
+  "src/strongWitnessAttestedReading.ts",
+  "src/strongWitnessEmptyContexts.ts",
   "src/tokenize.ts",
   "src/translationLexicon.ts",
   "src/translationProfiles.ts",
   "src/verseBlockAlignment.ts",
-  "src/verseCorrespondence.ts"
+  "src/verseCorrespondence.ts",
+  "src/witnessLocutionLexicon.ts"
 ];
 
 const TECHNICAL_STRONG = new Set([
@@ -641,7 +693,6 @@ export function strongLedgerInputFingerprint(
 ): string {
   const excludedReferences = new Set(options.excludedReferenceNames ?? []);
   const verseCorrespondencePath = resolveVerseCorrespondencePath(options);
-  const kaikkSqlite = defaultKaikkiSqlitePath(DEFAULT_KAIKKI_JSONL);
   const inputPaths = [
     options.biblePath,
     ...REFERENCES.filter(
@@ -650,12 +701,8 @@ export function strongLedgerInputFingerprint(
     ...STEP_ORIGINAL_SOURCES,
     ...(verseCorrespondencePath ? [verseCorrespondencePath] : []),
     strongDictionaryInput.path,
-    DEFAULT_KAIKKI_JSONL,
-    kaikkSqlite,
+    ...strongLedgerLexicalInputPaths(),
     DEFAULT_STRONG_PHRASE_LEXICON_SQLITE,
-    FRENCH_LEXICAL_SOURCES.rezoJdmCache,
-    FRENCH_LEXICAL_SOURCES.openOffice,
-    FRENCH_LEXICAL_SOURCES.wolf,
     ...(resolveEnginePolicy(options.enginePolicy).properNameVariants
       ? PROPER_NAME_LEXICON_SOURCES
       : []),
@@ -987,7 +1034,14 @@ export async function generateStrongLedgerWithDictionary(
   // Lexical auto-safe fixed point: passes over the verses the previous pass
   // changed, closed by a full-scope pass that applies nothing (its report is
   // the residual one). `startRefs` resumes it on verses changed since.
-  const reachLexicalFixedPoint = async (startRefs?: Set<string>) => {
+  // `close: false` stops once the verses of `startRefs` are at the fixed
+  // point, without the closing pass over every verse: N and P re-enter on the
+  // verses they change, and one closing pass before the reader baseline
+  // confirms the fixed point for all of them.
+  const reachLexicalFixedPoint = async (
+    startRefs?: Set<string>,
+    close = true
+  ) => {
     let incrementalLexicalPassRefs = startRefs;
     let lexicalAutoSafeReachedPassLimit = false;
     let lexicalAutoSafeLastApplied = 0;
@@ -1026,6 +1080,7 @@ export async function generateStrongLedgerWithDictionary(
           residualLexicalReport = lexicalReport;
           break;
         }
+        if (!close) break;
         incrementalLexicalPassRefs = undefined;
         continue;
       }
@@ -1050,13 +1105,20 @@ export async function generateStrongLedgerWithDictionary(
     }
     return applied;
   };
-  await reachLexicalFixedPoint();
+  // With N or P on, the closing pass waits until they have re-entered.
+  const reentersLexicalFixedPoint =
+    options.resolveOccurrences !== false &&
+    (enginePolicy.compoundTargetWords || enginePolicy.properNameVariants);
+  await reachLexicalFixedPoint(undefined, !reentersLexicalFixedPoint);
   // Alternative identifiers of one source word must not keep two reader
   // carriers. This is a display correction, applied before the reader
   // baseline so that occurrence resolution itself never changes the reader.
-  // Policy Q (lexical gap fill) is the one exception: its carriers come after
-  // the baseline, and the ledger counts them (`lexicalGapFill`) so that the
-  // autonomous reader check accepts exactly those.
+  // Three options change it there: Q adds lexical gap-fill carriers, R makes
+  // articles reader carriers on their determiner, S hides carriers the
+  // witnesses only leave untranslated. The ledger counts each of them
+  // (`lexicalGapFill`, `articleDeterminers`, `witnessEmptyContexts`) and the
+  // autonomous reader check recounts them from the verses, measured against
+  // the baseline, and accepts exactly those changes.
   const reduceAlternativeIdentityCarriers = () => {
     if (
       options.resolveOccurrences !== false &&
@@ -1103,7 +1165,7 @@ export async function generateStrongLedgerWithDictionary(
     );
     if (changedRefs.size) {
       residualLexicalReport = undefined;
-      if ((await reachLexicalFixedPoint(changedRefs)) > 0)
+      if ((await reachLexicalFixedPoint(changedRefs, false)) > 0)
         reduceAlternativeIdentityCarriers();
     }
   }
@@ -1132,7 +1194,8 @@ export async function generateStrongLedgerWithDictionary(
     if (changed.length) {
       residualLexicalReport = undefined;
       const relexed = await reachLexicalFixedPoint(
-        new Set(changed.map((verse) => verse.ref))
+        new Set(changed.map((verse) => verse.ref)),
+        false
       );
       perfLog(
         `proper name variants: verses=${changed.length}; lexical placements after=${relexed}`
@@ -1140,11 +1203,21 @@ export async function generateStrongLedgerWithDictionary(
       if (relexed > 0) reduceAlternativeIdentityCarriers();
     }
   }
+  // The one closing pass over every verse after N and P (a full pass that
+  // places nothing; anything it places is reduced as above).
+  if (
+    reentersLexicalFixedPoint &&
+    !residualLexicalReport &&
+    (await reachLexicalFixedPoint()) > 0
+  )
+    reduceAlternativeIdentityCarriers();
   const resolutionBaselineMetrics =
     options.resolveOccurrences === false
       ? undefined
       : aggregateMetrics(options.bible, options.onlyRef, ledgerVerses);
   let lexicalGapFillSummary: StrongLedger["lexicalGapFill"];
+  let articleDeterminersSummary: StrongLedger["articleDeterminers"];
+  let witnessEmptyContextsSummary: StrongLedger["witnessEmptyContexts"];
   if (enginePolicy.lexicalGapFill && options.resolveOccurrences === false)
     console.warn(
       "Policy Q (lexical gap fill) needs occurrence resolution: it does not run when resolveOccurrences is false."
@@ -1173,6 +1246,10 @@ export async function generateStrongLedgerWithDictionary(
       values.push(item);
       items.set(item.ref, values);
     }
+    // R and S change the reader after the baseline: counted on every
+    // resolution of a verse, Q's second one included (a head Q placed may
+    // give an article its determiner).
+    const readerChanges = emptyResolutionReaderChanges();
     const resolveVerse = (
       verse: StrongLedgerVerse,
       lexicalItems = items.get(verse.ref) ?? []
@@ -1183,6 +1260,7 @@ export async function generateStrongLedgerWithDictionary(
         input: resolutionInputs.get(verse.ref)!,
         sourceRows: rows,
         lexicalItems,
+        readerChanges,
         // Alternative-identifier carriers were already reduced above.
         policy: {
           readingInvariantVariants: enginePolicy.readingInvariantVariants,
@@ -1207,8 +1285,15 @@ export async function generateStrongLedgerWithDictionary(
     // after every pass that adds reader carriers.
     if (enginePolicy.lexicalGapFill) {
       const openOfficePath = existingPath(FRENCH_LEXICAL_SOURCES.openOffice);
+      // Q reads the derived index directly: it must be the index of the
+      // Kaikki file the ledger pins, as the lexical report requires.
+      const kaikkiSqlite = defaultKaikkiSqlitePath(DEFAULT_KAIKKI_JSONL);
+      if (!hasKaikkiSqliteIndex(kaikkiSqlite, DEFAULT_KAIKKI_JSONL))
+        throw new Error(
+          `lexical-gap-fill:kaikki-sqlite-index-missing-or-stale:${kaikkiSqlite} (rebuild it from ${DEFAULT_KAIKKI_JSONL} with yarn strong:kaikki:index)`
+        );
       const formLemmas = measureSync("load Kaikki form lemmas", () =>
-        readKaikkiFormLemmas(defaultKaikkiSqlitePath(DEFAULT_KAIKKI_JSONL))
+        readKaikkiFormLemmas(kaikkiSqlite)
       );
       const gapLexicon = measureSync("build lexical gap lexicon", () =>
         buildLexicalGapLexicon({
@@ -1260,6 +1345,12 @@ export async function generateStrongLedgerWithDictionary(
         withdrawnLexicalItems: gapFill.withdrawnLexicalItems
       };
     }
+    if (enginePolicy.articleDeterminers)
+      articleDeterminersSummary = { ...readerChanges.articleDeterminers };
+    if (enginePolicy.witnessEmptyContexts)
+      witnessEmptyContextsSummary = {
+        hiddenCarriers: readerChanges.witnessEmptyHiddenCarriers
+      };
     rebuildLedgerVerses(ledgerVerses);
     rows.clear();
     items.clear();
@@ -1361,6 +1452,8 @@ export async function generateStrongLedgerWithDictionary(
     verseCorrespondencePath: resolveVerseCorrespondencePath(options),
     resolutionBaselineMetrics,
     lexicalGapFill: lexicalGapFillSummary,
+    articleDeterminers: articleDeterminersSummary,
+    witnessEmptyContexts: witnessEmptyContextsSummary,
     lexicalResolutionMetrics,
     resolutionPolicy:
       options.resolveOccurrences === false
@@ -3268,6 +3361,27 @@ function countByStrong(strongCodes: string[]): Map<string, number> {
     counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
   }
   return counts;
+}
+
+/**
+ * Reader Strongs over the verse's occurrence budget (the larger count of a
+ * witness or of the source), counted as the verse metrics count them, for
+ * any list of reader Strong numbers of the verse.
+ */
+export function readerOverBudgetStrongCount(
+  readerStrongs: readonly string[],
+  inventories: Pick<StrongLedgerVerse["inventories"], "references" | "original">
+): number {
+  const budget = countByStrong(
+    mergeStrongOccurrenceBudgets(
+      collapseReferenceInventories(inventories.references),
+      inventories.original
+    )
+  );
+  let overBudget = 0;
+  for (const [strong, count] of countByStrong([...readerStrongs]))
+    overBudget += Math.max(0, count - (budget.get(strong) ?? 0));
+  return overBudget;
 }
 
 export function mergeStrongOccurrenceBudgets(

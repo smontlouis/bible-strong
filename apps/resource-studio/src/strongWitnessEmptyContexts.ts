@@ -31,6 +31,32 @@ import type {
  * Each step runs only when the previous one gave no witness a vote.
  */
 
+/** Diagnostic of a reader carrier that an override of option S hid. */
+export const WITNESS_EMPTY_OVERRIDES_CARRIER =
+  "witness-empty-overrides-carrier";
+
+/**
+ * Diagnostic recording the words a carrier tagged when S hid it (`3-5`), so
+ * that the reader it had at the baseline can be recounted from the verse.
+ */
+export function overriddenWordsDiagnostic(
+  startWordIndex: number,
+  endWordIndex: number
+): string {
+  return `witness-empty-overridden-words:${startWordIndex}-${endWordIndex}`;
+}
+
+/** The words an S-hidden carrier tagged, read back from its diagnostics. */
+export function overriddenWords(diagnostics: readonly string[]): number[] {
+  const match = diagnostics
+    .map((d) => /^witness-empty-overridden-words:(\d+)-(\d+)$/u.exec(d))
+    .find(Boolean);
+  if (!match) return [];
+  const start = Number(match[1]),
+    end = Number(match[2]);
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
 export type WitnessRenderingLexicon = ReadonlyMap<
   string,
   ReadonlyMap<string, number>
@@ -456,6 +482,12 @@ function neighbourStep(ctx: StepContext): StepResult {
 
 export interface WitnessEmptyContextOptions {
   lexicon?: WitnessRenderingLexicon;
+  /**
+   * Units whose visible carrier an earlier resolution of the verse withdrew
+   * (option S): they are decided as overrides again, so that resolving a
+   * verse twice gives the same decision.
+   */
+  overriddenCarrierUnits?: ReadonlySet<string>;
 }
 
 /**
@@ -475,9 +507,9 @@ export function proposeWitnessEmptyContexts(
     if (unit.readingUnresolved || established.has(unit.id)) continue;
     const treatment = witnessTreatment(d, unit);
     if (!treatment?.empties.length) continue;
-    const overridesCarrier = d.placements.some(
-      (p) => owns(unit, p) && visible(p)
-    );
+    const overridesCarrier =
+      options.overriddenCarrierUnits?.has(unit.id) === true ||
+      d.placements.some((p) => owns(unit, p) && visible(p));
     // A visible carrier gives way only to witnesses that all leave the word
     // untranslated, at least two of them, and only when no other source word
     // of the verse has its number: that carrier may then be the other's

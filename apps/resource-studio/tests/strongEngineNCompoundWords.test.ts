@@ -25,6 +25,7 @@ import {
 } from "../src/strongLedger.js";
 import { parseSourceRow } from "../src/strongSourceUnits.js";
 import { tokenizeText } from "../src/tokenize.js";
+import type { VerseCorrespondenceBlock } from "../src/verseCorrespondence.js";
 
 const unit = (
   ref: string,
@@ -706,6 +707,46 @@ test("resolution: the split name becomes visible on the shared carrier, shown on
     match[1]!.split(" ")
   );
   assert.deepEqual(shown, ["H7121", "H1008"]);
+});
+
+test("a merged block's joined witness row maps no compound", () => {
+  // The joined row numbers the words of both verses under the first one's
+  // reference: N abstains, as M and R do.
+  const merged = bethelFixture();
+  const before = JSON.stringify(merged.verse.annotations);
+  assert.deepEqual(
+    applyCompoundTargetWordsToVerse({
+      ...merged,
+      input: {
+        ...merged.input,
+        mapping: {
+          targetRefs: ["Gen.28.19"],
+          canonicalRefs: ["Gen.28.19", "Gen.28.20"],
+          kind: "merge"
+        } as VerseCorrespondenceBlock
+      },
+      maxStrongPerWord: 3
+    }),
+    []
+  );
+  assert.equal(JSON.stringify(merged.verse.annotations), before);
+  // The same verse with its own canonical reference is mapped.
+  const single = bethelFixture();
+  assert.equal(
+    applyCompoundTargetWordsToVerse({
+      ...single,
+      input: {
+        ...single.input,
+        mapping: {
+          targetRefs: ["Gen.28.19"],
+          canonicalRefs: ["Gen.28.19"],
+          kind: "identity"
+        } as VerseCorrespondenceBlock
+      },
+      maxStrongPerWord: 3
+    }).length,
+    1
+  );
 });
 
 /** The Béthel fixture as a ledger verse, both halves still uncarried. */

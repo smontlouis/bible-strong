@@ -19,9 +19,12 @@ import {
   type SourceRow
 } from "./strongSourceUnits.js";
 import {
+  ARTICLE_DETERMINER_ASSURANCE,
   ARTICLE_WITNESS,
+  articleDeterminerReasonOfCarrier,
   carryArticleOnDeterminer,
   readArticleWitnessMarks,
+  type ArticleDeterminerReaderChanges,
   type ArticleWitness
 } from "./strongArticleDeterminers.js";
 import { extractGoldCarrierPlacements } from "./strongCarriers.js";
@@ -31,7 +34,11 @@ import {
   resolveDossier,
   type ResolutionDossier
 } from "./strongResolutionWorkflow.js";
-import type { WitnessRenderingLexicon } from "./strongWitnessEmptyContexts.js";
+import {
+  overriddenWordsDiagnostic,
+  WITNESS_EMPTY_OVERRIDES_CARRIER,
+  type WitnessRenderingLexicon
+} from "./strongWitnessEmptyContexts.js";
 import {
   resolutionTextHash,
   type ResolutionCarrier
@@ -49,6 +56,29 @@ import {
 } from "./strongCompoundWords.js";
 
 export const CANONICAL_RESOLUTION_POLICY = "autonomous-fr-occurrences-v2";
+
+/**
+ * Reader changes that occurrence resolution makes after the ledger's reader
+ * baseline (options R and S), counted as they are made; the autonomous reader
+ * check recounts them from the final verses.
+ */
+export interface ResolutionReaderChanges {
+  /** R: articles carried by a determiner. */
+  articleDeterminers: ArticleDeterminerReaderChanges;
+  /** S: reader carriers hidden because the witnesses leave their word out. */
+  witnessEmptyHiddenCarriers: number;
+}
+
+export function emptyResolutionReaderChanges(): ResolutionReaderChanges {
+  return {
+    articleDeterminers: {
+      carriers: 0,
+      fromReaderEmpties: 0,
+      hiddenDuplicates: 0
+    },
+    witnessEmptyHiddenCarriers: 0
+  };
+}
 
 /** Resolution refinements measured against Concordance.bible (2026-10-01). */
 export interface CanonicalResolutionOptions {
@@ -534,7 +564,10 @@ export function canonicalVerseUnits(options: {
  */
 export function applyCompoundTargetWordsToVerse(options: {
   verse: Pick<StrongLedgerVerse, "ref" | "tokens" | "annotations">;
-  input: Pick<CanonicalResolutionInput, "occurrences" | "references">;
+  input: Pick<
+    CanonicalResolutionInput,
+    "occurrences" | "references" | "mapping"
+  >;
   sourceRows: Map<string, SourceRow>;
   policy?: CanonicalResolutionOptions;
   /** Numbers a target word may show (translation profile). */
@@ -542,6 +575,9 @@ export function applyCompoundTargetWordsToVerse(options: {
 }): CompoundTargetProposal[] {
   const { verse, input } = options;
   if (!input.references.length || !input.occurrences.length) return [];
+  // A witness row joined from several verses numbers several verses' words
+  // under the first one's reference (as for M and R).
+  if ((input.mapping?.canonicalRefs.length ?? 1) !== 1) return [];
   const groups = sourceIdentityGroups(input.occurrences);
   const { units } = canonicalVerseUnits({
     groups,
@@ -586,6 +622,8 @@ export function resolveCanonicalVerse(options: {
   sourceRows: Map<string, SourceRow>;
   lexicalItems: LexicalCandidateItem[];
   policy?: CanonicalResolutionOptions;
+  /** Counts the reader changes R and S make (the ledger reports them). */
+  readerChanges?: ResolutionReaderChanges;
 }): CanonicalVerseResolution {
   const { verse, input, sourceRows } = options;
   const issues = [...input.issues];
@@ -667,6 +705,22 @@ export function resolveCanonicalVerse(options: {
       marks: readArticleWitnessMarks(withoutPublisherNotes(row.text))
     };
   })();
+  // S withdrew these units' carriers in an earlier resolution of the verse.
+  const witnessEmptyOverriddenUnits = options.policy?.witnessEmptyContexts
+    ? new Set(
+        units
+          .filter((entry) =>
+            verse.annotations.some(
+              (a) =>
+                a.visibility !== "reader" &&
+                a.originalOccurrenceId !== undefined &&
+                entry.unit.occurrenceIds.includes(a.originalOccurrenceId) &&
+                a.diagnostics.includes(WITNESS_EMPTY_OVERRIDES_CARRIER)
+            )
+          )
+          .map((entry) => entry.unit.id)
+      )
+    : undefined;
   const result = resolveDossier(dossier, [], {
     applyExactWitness: false,
     applyAssistedReviews: false,
@@ -676,7 +730,10 @@ export function resolveCanonicalVerse(options: {
     ...(options.policy?.witnessEmptyContexts
       ? {
           applyWitnessEmptyContexts: true,
-          witnessRenderingLexicon: options.policy.witnessRenderingLexicon
+          witnessRenderingLexicon: options.policy.witnessRenderingLexicon,
+          ...(witnessEmptyOverriddenUnits?.size
+            ? { witnessEmptyOverriddenUnits }
+            : {})
         }
       : {}),
     targetLanguage: "fr"
@@ -693,7 +750,8 @@ export function resolveCanonicalVerse(options: {
         annotations: verse.annotations,
         occurrenceIds: entry.unit.occurrenceIds,
         proposal: article,
-        normalizedWord: verse.tokens[article.wordIndex]?.normalized
+        normalizedWord: verse.tokens[article.wordIndex]?.normalized,
+        changes: options.readerChanges?.articleDeterminers
       });
     const linked = verse.annotations.filter(
       (a) =>
@@ -701,16 +759,27 @@ export function resolveCanonicalVerse(options: {
         entry.unit.occurrenceIds.includes(a.originalOccurrenceId)
     );
     // S: the witnesses only leave this word untranslated; its carrier goes.
+    // The words it tagged stay recorded for the autonomous reader check.
     if (d.state === "empty" && d.witnessEmpty?.overridesCarrier)
       for (const a of linked)
         if (
           a.visibility === "reader" &&
           (a.placement === "word" || a.placement === "phrase")
         ) {
+          const start = a.placement === "word" ? a.wordIndex : a.startWordIndex;
+          const end = a.placement === "word" ? a.wordIndex : a.endWordIndex;
           a.visibility = "hidden";
           a.diagnostics = [
-            ...new Set([...a.diagnostics, "witness-empty-overrides-carrier"])
+            ...new Set([
+              ...a.diagnostics,
+              WITNESS_EMPTY_OVERRIDES_CARRIER,
+              ...(start !== undefined && end !== undefined
+                ? [overriddenWordsDiagnostic(start, end)]
+                : [])
+            ])
           ];
+          if (options.readerChanges)
+            options.readerChanges.witnessEmptyHiddenCarriers += 1;
         }
     const annotationIds = new Set(linked.map((a) => a.id));
     const placementEvidence = linked
@@ -739,7 +808,31 @@ export function resolveCanonicalVerse(options: {
         `witnesses:${attested.witnesses.join("+")}`
       ];
     } else if (d.state === "visible") {
-      if (
+      // R: the article's carrier keeps R's provenance when the verse is
+      // resolved again (the carrier is then an existing placement).
+      const articleCarrier = options.policy?.articleDeterminers
+        ? linked.find(
+            (a) =>
+              a.visibility === "reader" &&
+              a.diagnostics[0] === ARTICLE_DETERMINER_ASSURANCE
+          )
+        : undefined;
+      const articleReason =
+        articleCarrier && articleDeterminerReasonOfCarrier(articleCarrier);
+      if (articleReason) {
+        assurance = ARTICLE_DETERMINER_ASSURANCE;
+        reasons = [articleReason];
+      }
+      // Q: a carrier chosen by its position and the lexicon, not a witness,
+      // whatever the annotation it reuses said before. A Q unit has no other
+      // reader carrier.
+      else if (
+        linked.some(
+          (a) => a.visibility === "reader" && a.source === "lexical-gap-fill"
+        )
+      )
+        assurance = "lexical-gap-fill";
+      else if (
         linked.some(
           (a) =>
             a.visibility === "reader" &&
@@ -773,13 +866,6 @@ export function resolveCanonicalVerse(options: {
         linked.some((a) => a.diagnostics[0] === COMPOUND_TARGET_WORD_METHOD)
       )
         assurance = "witness-compound-word";
-      // Q: a carrier chosen by its position and the lexicon, not a witness.
-      else if (
-        linked.some(
-          (a) => a.visibility === "reader" && a.source === "lexical-gap-fill"
-        )
-      )
-        assurance = "lexical-gap-fill";
     }
 
     const lexicalCandidates = options.lexicalItems

@@ -5,7 +5,8 @@ import type { OriginalStrongOccurrence } from "../src/completeAlignment.js";
 import { parseFrenchNumeral } from "../src/frenchNumerals.js";
 import {
   addNumeralValueCarriers,
-  isNumeralGloss
+  isNumeralGloss,
+  shownNumeralStrongs
 } from "../src/numeralValues.js";
 import { alignReaderVerse } from "../src/readerAlignment.js";
 import { parseStrongTokens } from "../src/strongCsv.js";
@@ -19,8 +20,11 @@ const witness = (name: string, tagged: string): ReferenceSource => ({
   }
 });
 
-const policy = (numeralValues: boolean): ReaderAlignmentPolicy => ({
-  maxStrongPerWord: 3,
+const policy = (
+  numeralValues: boolean,
+  maxStrongPerWord = 3
+): ReaderAlignmentPolicy => ({
+  maxStrongPerWord,
   minEmptySourceAgreement: 2,
   learnedTranslationMinScore: 0.36,
   learnedFunctionWordMode: "restricted",
@@ -35,12 +39,13 @@ const policy = (numeralValues: boolean): ReaderAlignmentPolicy => ({
 const align = (
   targetText: string,
   references: ReferenceSource[],
-  numeralValues = true
+  numeralValues = true,
+  maxStrongPerWord = 3
 ) =>
   alignReaderVerse({
     targetText,
     references,
-    readerPolicy: policy(numeralValues)
+    readerPolicy: policy(numeralValues, maxStrongPerWord)
   });
 
 const carried = (result: ReturnType<typeof align>, wordIndex: number) =>
@@ -90,7 +95,8 @@ test("a witness number gives all its source words to the target word of the same
   ];
   const target = "Des Lévites: 4600";
   assert.equal(carried(align(target, references, false), 2), undefined);
-  const on = align(target, references);
+  // A profile that shows four numbers on a word.
+  const on = align(target, references, true, 4);
   assert.deepEqual(carried(on, 2), ["H0702", "H0505", "H8337", "H3967"]);
   const carrier = on.assignments.get(2)!;
   assert.equal(carrier.method, "exact");
@@ -128,7 +134,8 @@ test("repeated digit values pair in order, each source word once", () => {
     )
   ];
   const on = align("du bétail: 7700 béliers et 7700 boucs.", references);
-  assert.deepEqual(carried(on, 2), ["H7651", "H0505", "H7651", "H3967"]);
+  // The word shows « sept » once; both source words remain named.
+  assert.deepEqual(carried(on, 2), ["H7651", "H0505", "H3967"]);
   assert.deepEqual(on.assignments.get(2)!.sourcePositions, [
     "1Chr.12.27#14",
     "1Chr.12.27#15",
@@ -240,7 +247,7 @@ test("a target digit group is one phrase carrier", () => {
       '<w strong="H0702" pos="4">quatre</w> <w strong="H0505" pos="5">mille</w> <w strong="H8337" pos="6">six</w> <w strong="H3967" pos="7">cents</w> ;'
     )
   ];
-  const on = align("Des Lévites: 4 600", references);
+  const on = align("Des Lévites: 4 600", references, true, 4);
   assert.deepEqual(
     on.phraseAssignments.map((phrase) => [
       phrase.startWordIndex,
@@ -326,4 +333,39 @@ test("a number word matches only inside the same written number", () => {
     witness("Darby", 'le <w strong="H7992" pos="1">troisième</w> jour')
   ]);
   assert.deepEqual(carried(third, 0), ["H7992"]);
+});
+
+test("a numeral carrier shows each number once and no more than the profile allows", () => {
+  // Ezra.2.13 « 666 » : Segond writes it word by word.
+  const references = [
+    witness(
+      "Sg1910",
+      'les fils d’Adonikam, <w strong="H8337" pos="3">six</w> <w strong="H3967" pos="4">cent</w> <w strong="H8346" pos="5">soixante</w>-<w strong="H8337" pos="6">six</w> ;'
+    )
+  ];
+  const target = "descendants d'Adonikam: 666";
+  // Without O, nothing reaches « 666 ».
+  assert.equal(carried(align(target, references, false), 2), undefined);
+  // H8337 once, not « H8337 H3967 H8346 H8337 »: the second « six » keeps
+  // no carrier here (option N may share this one with it).
+  assert.deepEqual(carried(align(target, references), 2), [
+    "H8337",
+    "H3967",
+    "H8346"
+  ]);
+  // A profile of two numbers per word shows the first two.
+  assert.deepEqual(carried(align(target, references, true, 2), 2), [
+    "H8337",
+    "H3967"
+  ]);
+  // « 6800 » with a profile of three: the first three numbers.
+  assert.deepEqual(
+    shownNumeralStrongs(["H8337", "H0505", "H8083", "H3967"], [], 3),
+    ["H8337", "H0505", "H8083"]
+  );
+  // The numbers the word already shows are never taken away.
+  assert.deepEqual(
+    shownNumeralStrongs(["H8337", "H0505", "H8083", "H3967"], ["H3967"], 2),
+    ["H8337", "H3967"]
+  );
 });

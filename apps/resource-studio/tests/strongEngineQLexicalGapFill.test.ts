@@ -12,6 +12,7 @@ import {
   buildLexicalGapLexicon,
   isContentMorphology,
   isLightStrong,
+  LEXICAL_GAP_FILL_CONFIDENCE,
   LEXICAL_GAP_TIERS_WITHOUT_SYNONYM_ONLY,
   lexicalGapEvidence,
   lexicalGapFillPass,
@@ -557,6 +558,42 @@ test("the gap fill becomes a visible decision of its own assurance", () => {
   // Nothing else moved.
   assert.equal(ledgerVerse.annotations[0]!.wordIndex, 1);
   assert.equal(ledgerVerse.annotations[2]!.wordIndex, 6);
+});
+
+test("a fill keeps only Q's evidence, whatever annotation it reuses", () => {
+  // The only annotation of the source word is a hidden exact duplicate on
+  // another word, with a witness transfer's evidence and confidence.
+  const { ledgerVerse, resolve } = gapFixture();
+  Object.assign(ledgerVerse.annotations[1]!, {
+    visibility: "hidden",
+    placement: "duplicate",
+    source: "original-complete",
+    confidence: 0.995,
+    diagnostics: ["exact", "Sg1910+Darby~exact"],
+    wordIndex: 6,
+    insertAfterWordIndex: undefined
+  });
+  resolve(ledgerVerse);
+  assert.equal(ledgerVerse.resolution!.decisions[1]!.state, "unresolved");
+  const result = lexicalGapFillPass({
+    verses: [ledgerVerse],
+    lexicon: fixtureLexicon(),
+    witnessesOf: () => [],
+    resolve
+  });
+  assert.equal(result.placed, 1);
+  const carried = ledgerVerse.annotations[1]!;
+  assert.equal(carried.wordIndex, 4);
+  assert.equal(carried.confidence, LEXICAL_GAP_FILL_CONFIDENCE);
+  assert.deepEqual(carried.diagnostics, [
+    "lexical-gap-fill:A:gloss:grotte",
+    "lexical-gap-fill-pool:1"
+  ]);
+  // Not « exact-witness-families-and-source »: the decision says Q.
+  const decision = ledgerVerse.resolution!.decisions[1]!;
+  assert.equal(decision.state, "visible");
+  assert.equal(decision.assurance, "lexical-gap-fill");
+  assert.equal(carried.resolutionAssurance, "lexical-gap-fill");
 });
 
 test("the pass leaves alone verses in doubt, open readings and other reasons", () => {

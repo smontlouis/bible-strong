@@ -39,11 +39,12 @@
  * A–C only for a Strong of limited vocabulary; the others, and every failed
  * search, stay uncertain: a failed search never proves an absence.
  *
- * Q is the one step after occurrence resolution that adds reader carriers.
- * Each fill is a word carrier on a word no reader carrier tags, within the
- * Strong's occurrence budget of the verse: it adds exactly one reader Strong
- * and one tagged word, which `lexicalGapFillReaderCounts` recounts for the
- * autonomous reader check.
+ * Q runs after occurrence resolution, so after the ledger's reader baseline
+ * (with R and S, the other options that change the reader there). Each fill is
+ * a word carrier on a word no reader carrier tags, within the Strong's
+ * occurrence budget of the verse: it adds exactly one reader Strong and one
+ * tagged word, which the autonomous reader check recounts from the verses
+ * (`resolutionReaderChanges` in strongAutonomous.ts).
  */
 import { DatabaseSync } from "node:sqlite";
 import { readFileSync } from "node:fs";
@@ -887,6 +888,13 @@ function stepWordOfUnit(
   return match ? { ref: match[1]!, position: Number(match[2]) } : undefined;
 }
 
+/**
+ * Confidence of a gap-fill carrier: a lexical guess placed by position, never
+ * the confidence of the annotation it reuses (a hidden exact duplicate of
+ * another word keeps 0.995).
+ */
+export const LEXICAL_GAP_FILL_CONFIDENCE = 0.7;
+
 export const LEXICAL_GAP_FILL_REASON =
   "Visible in reader mode because the only free content word between the placed neighbouring source words is a known French rendering of this Strong (an inflection of the witnesses' word for it, a witness lemma, a dictionary gloss or a synonym of a witness rendering).";
 
@@ -933,12 +941,13 @@ export function applyLexicalGapFill(
   carrier.visibility = "reader";
   carrier.placement = "word";
   carrier.source = "lexical-gap-fill";
-  carrier.confidence = Math.max(carrier.confidence, 0.7);
+  // The reused annotation's evidence (« exact », a witness transfer on another
+  // word) does not support this word: only Q's own evidence is kept.
+  carrier.confidence = LEXICAL_GAP_FILL_CONFIDENCE;
   carrier.reason = LEXICAL_GAP_FILL_REASON;
   carrier.diagnostics = [
     `lexical-gap-fill:${fill.tier}:${fill.evidence}`,
-    `lexical-gap-fill-pool:${fill.poolSize}`,
-    ...carrier.diagnostics.filter((d) => !d.startsWith("lexical-gap-fill"))
+    `lexical-gap-fill-pool:${fill.poolSize}`
   ];
   onWord(carrier);
   for (const other of owned)

@@ -27,6 +27,25 @@ export const ARTICLE_STRONG = "G3588";
 /** The witness whose article tags the rule follows. */
 export const ARTICLE_WITNESS = "Sg1910";
 export const ARTICLE_DETERMINER_ASSURANCE = "witness-article-determiner";
+/**
+ * Diagnostic of an article carrier that was already a reader annotation (a
+ * reader empty) before R moved it: the reader keeps its number of Strongs and
+ * only gains the determiner as a tagged word.
+ */
+export const ARTICLE_CARRIER_FROM_READER = "article-carrier-was-reader";
+/** Diagnostic of a reader empty of the article that R hid behind its carrier. */
+export const ARTICLE_DETERMINER_DUPLICATE =
+  "witness-article-determiner-duplicate";
+
+/** What R changed in the reader of a verse (the autonomous reader check counts it). */
+export interface ArticleDeterminerReaderChanges {
+  /** Article carriers made reader-visible on a determiner. */
+  carriers: number;
+  /** Those of them that were already reader annotations (reader empties). */
+  fromReaderEmpties: number;
+  /** Other reader annotations of the article hidden behind its carrier. */
+  hiddenDuplicates: number;
+}
 
 const DETERMINERS = new Set(
   "le la les du des au aux son sa ses mon ma mes ton ta tes notre nos votre vos leur leurs ce cet cette ces".split(
@@ -264,7 +283,12 @@ export function applyArticleDeterminers(
     decision.reasons.splice(
       0,
       decision.reasons.length,
-      `article-on-head-determiner:${witness.name}:${proposal.witnessDeterminer}:${proposal.head}:${proposal.how}`
+      articleDeterminerReason(
+        witness.name,
+        proposal.witnessDeterminer,
+        proposal.head,
+        proposal.how
+      )
     );
     decision.display = {
       id: `article:${unit.id}`,
@@ -279,10 +303,46 @@ export function applyArticleDeterminers(
   return proposals;
 }
 
+/** The decision reason of a placed article. */
+export function articleDeterminerReason(
+  witness: string,
+  determiner: string,
+  head: string,
+  how: string
+): string {
+  return `article-on-head-determiner:${witness}:${determiner}:${head}:${how}`;
+}
+
+/**
+ * The decision reason of an article already carried by R, read back from its
+ * carrier's diagnostics (a verse resolved again keeps R's provenance).
+ */
+export function articleDeterminerReasonOfCarrier(
+  carrier: Pick<StrongLedgerAnnotation, "diagnostics">
+): string | undefined {
+  const [assurance, how, head, witness] = carrier.diagnostics;
+  const headMatch = /^head:(.+)$/u.exec(head ?? "");
+  const witnessMatch = /^witness:([^:]+):(.+)$/u.exec(witness ?? "");
+  if (
+    assurance !== ARTICLE_DETERMINER_ASSURANCE ||
+    !how ||
+    !headMatch ||
+    !witnessMatch
+  )
+    return undefined;
+  return articleDeterminerReason(
+    witnessMatch[1]!,
+    witnessMatch[2]!,
+    headMatch[1]!,
+    how
+  );
+}
+
 /**
  * The reader carrier of a placed article. The unit's own weak carrier (the
  * complete alignment's guess, or a reader empty) moves onto the determiner;
- * without one, a carrier is added. Returns the carrier.
+ * without one, a carrier is added. Returns the carrier; `changes` counts what
+ * the reader gained.
  */
 export function carryArticleOnDeterminer(options: {
   ref: string;
@@ -290,6 +350,7 @@ export function carryArticleOnDeterminer(options: {
   occurrenceIds: string[];
   proposal: ArticleDeterminerProposal;
   normalizedWord?: string;
+  changes?: ArticleDeterminerReaderChanges;
 }): StrongLedgerAnnotation {
   const { annotations, proposal } = options;
   const linked = annotations.filter(
@@ -306,6 +367,9 @@ export function carryArticleOnDeterminer(options: {
           ? 2
           : 3;
   let carrier = [...linked].sort((a, b) => rank(a) - rank(b))[0];
+  // The unit owns no visible reader carrier (R's precondition): a reader
+  // annotation of it is an empty, which tags no word.
+  const fromReader = carrier?.visibility === "reader";
   if (!carrier) {
     carrier = {
       id: `${options.ref}:${annotations.length}:${ARTICLE_STRONG}`,
@@ -321,10 +385,15 @@ export function carryArticleOnDeterminer(options: {
     annotations.push(carrier);
   }
   // One reader carrier per source word.
+  let hiddenDuplicates = 0;
   for (const other of linked)
     if (other !== carrier && other.visibility === "reader") {
       other.visibility = "hidden";
       other.placement = "duplicate";
+      other.diagnostics = [
+        ...new Set([...other.diagnostics, ARTICLE_DETERMINER_DUPLICATE])
+      ];
+      hiddenDuplicates += 1;
     }
   carrier.visibility = "reader";
   carrier.placement = "word";
@@ -335,7 +404,8 @@ export function carryArticleOnDeterminer(options: {
     ARTICLE_DETERMINER_ASSURANCE,
     proposal.how,
     `head:${proposal.head}`,
-    `witness:${ARTICLE_WITNESS}:${proposal.witnessDeterminer}`
+    `witness:${ARTICLE_WITNESS}:${proposal.witnessDeterminer}`,
+    ...(fromReader ? [ARTICLE_CARRIER_FROM_READER] : [])
   ];
   carrier.wordIndex = proposal.wordIndex;
   carrier.normalizedWord = options.normalizedWord;
@@ -344,5 +414,10 @@ export function carryArticleOnDeterminer(options: {
   carrier.normalizedPhrase = undefined;
   carrier.insertAfterWordIndex = undefined;
   carrier.emptyEvidence = undefined;
+  if (options.changes) {
+    options.changes.carriers += 1;
+    if (fromReader) options.changes.fromReaderEmpties += 1;
+    options.changes.hiddenDuplicates += hiddenDuplicates;
+  }
   return carrier;
 }
