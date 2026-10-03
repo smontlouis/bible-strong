@@ -33,7 +33,8 @@ import { stripTags, tokenizeText } from "./tokenize.js";
 import {
   applyCompoundTargetWords,
   COMPOUND_TARGET_WORD_METHOD,
-  isCompoundSharedCarrier
+  isCompoundSharedCarrier,
+  type CompoundTargetProposal
 } from "./strongCompoundWords.js";
 
 export const CANONICAL_RESOLUTION_POLICY = "autonomous-fr-occurrences-v2";
@@ -64,11 +65,12 @@ export interface CanonicalResolutionOptions {
   /**
    * A source word that a witness renders together with others by one word
    * (« Beer-Schéba », « Béthel » 6+7) is carried by that word when the target
-   * writes it (policy N, `strongCompoundWords.ts`).
+   * writes it (policy N, `strongCompoundWords.ts`). The carriers are placed
+   * before the reader baseline (`applyCompoundTargetWordsToVerse`); here the
+   * resolver counts the hidden carriers a source word shares with the visible
+   * number of its word.
    */
   compoundTargetWords?: boolean;
-  /** Numbers a target word may show (translation profile); default 3. */
-  maxStrongPerWord?: number;
 }
 
 const strongBase = (code: string) => code.match(/^[GH]\d+/u)?.[0] ?? code;
@@ -393,26 +395,21 @@ export function canonicalCarrier(
   return undefined;
 }
 
-/** Resolve against actual projected source occurrences, never synthetic inventory-only witness tags. */
-export function resolveCanonicalVerse(options: {
-  bible: string;
-  verse: Pick<StrongLedgerVerse, "ref" | "text" | "tokens" | "annotations">;
-  input: CanonicalResolutionInput;
+/**
+ * Source units of one verse (physical STEP words) and the state of their
+ * reading. Shared by the resolver and by the passes that place carriers
+ * before the reader baseline (N), so that both see the same readings.
+ */
+export function canonicalVerseUnits(options: {
+  groups: Map<string, OriginalStrongOccurrence[]>;
   sourceRows: Map<string, SourceRow>;
-  lexicalItems: LexicalCandidateItem[];
   policy?: CanonicalResolutionOptions;
-}): CanonicalVerseResolution {
-  const { verse, input, sourceRows } = options;
-  const issues = [...input.issues];
-  if (input.mapping?.reason?.includes("fallback-after-ambiguous"))
-    issues.push("native-coordinate-used-after-ambiguous-text-alignment");
-  const groups = sourceIdentityGroups(input.occurrences);
-  if (options.policy?.singleCarrierPerSourceIdentity)
-    demoteAlternativeIdentityCarriers(
-      verse.annotations,
-      groups,
-      witnessAttestedStrongs(input.references)
-    );
+  issues: string[];
+}): {
+  units: ResolutionDossier["units"];
+  invariantReadings: Set<string>;
+} {
+  const { groups, sourceRows, issues } = options;
   const invariantReadings = new Set<string>();
   const units: ResolutionDossier["units"] = [...groups].map(
     ([id, occurrences]) => {
@@ -463,35 +460,89 @@ export function resolveCanonicalVerse(options: {
       };
     }
   );
-  // Policy N: carriers of compound and multi-position witness words. Runs on
-  // the final reader carriers, once source readings are known.
-  if (options.policy?.compoundTargetWords)
-    applyCompoundTargetWords({
-      ref: verse.ref,
-      tokens: verse.tokens,
-      annotations: verse.annotations,
-      units: units.map((entry) => ({
-        id: entry.unit.id,
-        readingUnresolved: entry.unit.readingUnresolved,
-        morphology: entry.morphology,
-        occurrences: (groups.get(entry.unit.id) ?? []).map((o) => ({
-          occurrenceId: o.occurrenceId,
-          strong: o.strong
-        }))
-      })),
-      witnesses: input.references.flatMap((r) =>
-        r.verse
-          ? [
-              {
-                name: r.name,
-                ref: `${r.verse.row.bookId}.${r.verse.row.chapter}.${r.verse.row.verse}`,
-                taggedText: r.verse.row.text
-              }
-            ]
-          : []
-      ),
-      maxStrongPerWord: options.policy.maxStrongPerWord ?? 3
-    });
+  return { units, invariantReadings };
+}
+
+/**
+ * Policy N over one target verse (`strongCompoundWords.ts`): compound and
+ * multi-position witness words carry the source words they render
+ * (« Béthel » 6+7, « Beer-Schéba »). It adds reader carriers, so the ledger
+ * runs it before the reader baseline, once the lexical fixed point is reached
+ * and alternative identifiers are reduced (B), on the source units and
+ * readings the resolver sees. Returns the proposals applied to `annotations`.
+ */
+export function applyCompoundTargetWordsToVerse(options: {
+  verse: Pick<StrongLedgerVerse, "ref" | "tokens" | "annotations">;
+  input: Pick<CanonicalResolutionInput, "occurrences" | "references">;
+  sourceRows: Map<string, SourceRow>;
+  policy?: CanonicalResolutionOptions;
+  /** Numbers a target word may show (translation profile). */
+  maxStrongPerWord: number;
+}): CompoundTargetProposal[] {
+  const { verse, input } = options;
+  if (!input.references.length || !input.occurrences.length) return [];
+  const groups = sourceIdentityGroups(input.occurrences);
+  const { units } = canonicalVerseUnits({
+    groups,
+    sourceRows: options.sourceRows,
+    policy: options.policy,
+    // The resolver reports source-model issues itself.
+    issues: []
+  });
+  return applyCompoundTargetWords({
+    ref: verse.ref,
+    tokens: verse.tokens,
+    annotations: verse.annotations,
+    units: units.map((entry) => ({
+      id: entry.unit.id,
+      readingUnresolved: entry.unit.readingUnresolved,
+      morphology: entry.morphology,
+      occurrences: (groups.get(entry.unit.id) ?? []).map((o) => ({
+        occurrenceId: o.occurrenceId,
+        strong: o.strong
+      }))
+    })),
+    witnesses: input.references.flatMap((r) =>
+      r.verse
+        ? [
+            {
+              name: r.name,
+              ref: `${r.verse.row.bookId}.${r.verse.row.chapter}.${r.verse.row.verse}`,
+              taggedText: r.verse.row.text
+            }
+          ]
+        : []
+    ),
+    maxStrongPerWord: options.maxStrongPerWord
+  });
+}
+
+/** Resolve against actual projected source occurrences, never synthetic inventory-only witness tags. */
+export function resolveCanonicalVerse(options: {
+  bible: string;
+  verse: Pick<StrongLedgerVerse, "ref" | "text" | "tokens" | "annotations">;
+  input: CanonicalResolutionInput;
+  sourceRows: Map<string, SourceRow>;
+  lexicalItems: LexicalCandidateItem[];
+  policy?: CanonicalResolutionOptions;
+}): CanonicalVerseResolution {
+  const { verse, input, sourceRows } = options;
+  const issues = [...input.issues];
+  if (input.mapping?.reason?.includes("fallback-after-ambiguous"))
+    issues.push("native-coordinate-used-after-ambiguous-text-alignment");
+  const groups = sourceIdentityGroups(input.occurrences);
+  if (options.policy?.singleCarrierPerSourceIdentity)
+    demoteAlternativeIdentityCarriers(
+      verse.annotations,
+      groups,
+      witnessAttestedStrongs(input.references)
+    );
+  const { units, invariantReadings } = canonicalVerseUnits({
+    groups,
+    sourceRows,
+    policy: options.policy,
+    issues
+  });
   if (!units.length) issues.push("no-source-occurrences-for-native-verse");
   if (!verse.tokens.length) issues.push("empty-target-text");
   const knownIds = new Set(units.flatMap((u) => u.unit.occurrenceIds));
@@ -555,7 +606,11 @@ export function resolveCanonicalVerse(options: {
     );
     const annotationIds = new Set(linked.map((a) => a.id));
     const placementEvidence = linked
-      .filter((a) => a.visibility === "reader")
+      .filter(
+        (a) =>
+          a.visibility === "reader" ||
+          (options.policy?.compoundTargetWords && isCompoundSharedCarrier(a))
+      )
       .map((a) => ({
         annotationId: a.id,
         method: a.source,
@@ -789,7 +844,10 @@ export function resolveCanonicalVerse(options: {
           "deterministic-lexical-fixed-point",
           "exact-witness-expression-candidate",
           "grammatical-empty-rule",
-          "source-and-witness-neighbor-anchors"
+          "source-and-witness-neighbor-anchors",
+          ...(options.policy?.compoundTargetWords
+            ? [COMPOUND_TARGET_WORD_METHOD]
+            : [])
         ],
         exactWitnessProposal: d.proposal ?? null,
         lexicalCandidates,

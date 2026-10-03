@@ -19,8 +19,10 @@
  * repeats more often than the target is the one already carrying another of
  * its source words, or none. A source word whose number the target word
  * already shows shares that carrier instead of repeating the number
- * (`shared`): the reader sees one « H1008 » on « Béthel », as the witnesses
- * tag it, and both source words are placed.
+ * (`shared`, a hidden duplicate the resolver counts as a placement): the
+ * reader sees one « H1008 » on « Béthel », as the witnesses tag it, and both
+ * source words are placed. A word never shows more numbers than the profile
+ * allows, a number in digits included (« 6800 »).
  *
  * Only content words are placed (nouns, names, adjectives and numerals,
  * verbs): an article, pronoun, particle or conjunction pooled into one French
@@ -56,8 +58,8 @@ export interface CompoundCarrier {
 
 export interface CompoundWitness {
   name: string;
-  /** Witness verse reference (`Gen.28.19`). */
-  ref?: string;
+  /** Witness verse reference (`Gen.28.19`): its positions name STEP words of that verse. */
+  ref: string;
   /** Tagged witness text, notes included. */
   taggedText: string;
 }
@@ -335,16 +337,17 @@ type MappedOccurrence = {
 
 /**
  * Source occurrences named by a witness, by Strong. A witness names a source
- * word by its position; when one of its positions for a Strong names no STEP
- * word of that Strong (another numbering of the verse: « Saint-Esprit » in the
- * Textus Receptus order, a verse STEP divides otherwise), its positions and
- * STEP's occurrences of that Strong pair in order, provided both count alike.
+ * word by its verse and position, and only STEP words of that very verse are
+ * named (another verse numbering never pairs positions). When one of its
+ * positions for a Strong names no STEP word of that Strong (another numbering
+ * of the words: « Saint-Esprit » in the Textus Receptus order, a verse STEP
+ * divides otherwise), its positions and STEP's occurrences of that Strong in
+ * the verse pair in order, provided both count alike.
  */
 function witnessOccurrenceMap(
   units: CompoundUnit[],
   witness: CompoundWitness,
-  reading: WitnessCompoundReading,
-  positionsOnly: boolean
+  reading: WitnessCompoundReading
 ): (member: {
   strong: string;
   position: number;
@@ -356,7 +359,7 @@ function witnessOccurrenceMap(
   for (const unit of units)
     for (const occurrence of unit.occurrences) {
       const word = compoundSourceWord(occurrence.occurrenceId);
-      if (!word || (!positionsOnly && word.ref !== witness.ref)) continue;
+      if (!word || word.ref !== witness.ref) continue;
       const strong = looseStrong(occurrence.strong);
       const list = byStrong.get(strong) ?? [];
       list.push({
@@ -412,6 +415,8 @@ export function proposeCompoundTargetWords(input: {
   carriers: CompoundCarrier[];
   witnesses: CompoundWitness[];
   maxStrongPerWord: number;
+  /** Occurrences whose state the ledger fixed (reviewed, not rendered). */
+  fixedOccurrences?: ReadonlySet<string>;
 }): CompoundTargetProposal[] {
   const target = input.words.map(foldWord);
   const targetKeys = input.words.map(properNameKey);
@@ -436,18 +441,6 @@ export function proposeCompoundTargetWords(input: {
     )
       carriedWords.set(carrier.originalOccurrenceId!, carrier.startWordIndex);
   }
-  const stepRefs = new Set(
-    input.units.flatMap((unit) =>
-      unit.occurrences.flatMap((occurrence) => {
-        const word = compoundSourceWord(occurrence.occurrenceId);
-        return word ? [word.ref] : [];
-      })
-    )
-  );
-  const witnessRefs = new Set(input.witnesses.map((witness) => witness.ref));
-  // One STEP verse against one witness verse: positions name the same words
-  // even when STEP labels the verse otherwise (psalm titles, offsets).
-  const positionsOnly = stepRefs.size === 1 && witnessRefs.size === 1;
 
   const votes = new Map<
     string,
@@ -461,12 +454,7 @@ export function proposeCompoundTargetWords(input: {
   const contradicted = new Set<string>();
   for (const witness of input.witnesses) {
     const reading = readWitnessCompounds(witness.taggedText);
-    const occurrenceOf = witnessOccurrenceMap(
-      input.units,
-      witness,
-      reading,
-      positionsOnly
-    );
+    const occurrenceOf = witnessOccurrenceMap(input.units, witness, reading);
     // A witness leaving a source word untranslated contradicts any carrier.
     for (const key of reading.untranslated) {
       const [strong, position] = key.split("#");
@@ -574,20 +562,17 @@ export function proposeCompoundTargetWords(input: {
       vote.words.size !== 1 ||
       unit.readingUnresolved ||
       carried.has(unit.id) ||
-      !contentMorphology(unit.morphology)
+      !contentMorphology(unit.morphology) ||
+      input.fixedOccurrences?.has(vote.occurrenceId)
     )
       continue;
     const wordIndex = [...vote.words][0]!;
     if (insidePhrase.has(wordIndex)) continue;
     const strongs = visibleStrongs.get(wordIndex) ?? new Set<string>();
     const shared = strongs.has(looseStrong(vote.strong));
-    // A number written in digits carries all its numbers (« 6800 »).
-    if (
-      !shared &&
-      strongs.size >= input.maxStrongPerWord &&
-      !/^\d+$/u.test(input.words[wordIndex]!)
-    )
-      continue;
+    // The profile's limit holds for every word, numbers in digits included
+    // (« 6800 » shows at most that many of its numbers).
+    if (!shared && strongs.size >= input.maxStrongPerWord) continue;
     strongs.add(looseStrong(vote.strong));
     visibleStrongs.set(wordIndex, strongs);
     proposals.push({
@@ -625,12 +610,14 @@ export function isCompoundSharedCarrier(
 }
 
 /**
- * Policy N pass over one verse of the ledger. Runs once the reader carriers
- * are final (lexical fixed point, alternative identifiers reduced) and the
- * source readings are known, before the occurrences are resolved. The
- * annotation the alignment keeps for the source occurrence (an advanced or
- * hidden original-complete annotation) becomes its carrier, so the advanced
- * view keeps one annotation per occurrence.
+ * Policy N pass over one verse of the ledger. It adds reader carriers, so the
+ * ledger runs it before its reader baseline, once the lexical fixed point is
+ * reached and alternative identifiers are reduced, with the source readings
+ * the resolver will see (`applyCompoundTargetWordsToVerse`). The annotation
+ * the alignment kept for the source occurrence (advanced or hidden) becomes
+ * its carrier: no occurrence gains a second annotation. A shared carrier is a
+ * hidden duplicate, as the engine hides any repeat of a number on its word:
+ * reader and advanced views show « H1008 » once on « Béthel ».
  */
 export function applyCompoundTargetWords(options: {
   ref: string;
@@ -642,6 +629,17 @@ export function applyCompoundTargetWords(options: {
 }): CompoundTargetProposal[] {
   const carriers: CompoundCarrier[] = options.annotations.flatMap(
     (annotation): CompoundCarrier[] => {
+      // A shared carrier of an earlier run carries its source word too.
+      if (isCompoundSharedCarrier(annotation))
+        return [
+          {
+            strong: annotation.strong,
+            kind: "word",
+            originalOccurrenceId: annotation.originalOccurrenceId,
+            startWordIndex: annotation.wordIndex,
+            endWordIndex: annotation.wordIndex
+          }
+        ];
       if (annotation.visibility !== "reader") return [];
       if (annotation.placement === "word" && annotation.wordIndex !== undefined)
         return [
@@ -677,22 +675,42 @@ export function applyCompoundTargetWords(options: {
       return [];
     }
   );
+  // The occurrence's own advanced or hidden annotation becomes its carrier
+  // (the alignment's estimate: a word, an empty or a duplicate first, else a
+  // phrase). An occurrence in a reviewed state (pending, rejected) or that the
+  // ledger does not render (technical, not-rendered) keeps it.
+  const convertibleOf = new Map<string, StrongLedgerAnnotation[]>();
+  const annotated = new Set<string>();
+  for (const annotation of options.annotations) {
+    if (!annotation.originalOccurrenceId) continue;
+    annotated.add(annotation.originalOccurrenceId);
+    if (
+      (annotation.visibility === "advanced" ||
+        annotation.visibility === "hidden") &&
+      ["word", "empty", "duplicate", "phrase"].includes(annotation.placement)
+    )
+      convertibleOf.set(annotation.originalOccurrenceId, [
+        ...(convertibleOf.get(annotation.originalOccurrenceId) ?? []),
+        annotation
+      ]);
+  }
   const proposals = proposeCompoundTargetWords({
     words: options.tokens.map((token) => token.text),
     units: options.units,
     carriers,
     witnesses: options.witnesses,
-    maxStrongPerWord: options.maxStrongPerWord
+    maxStrongPerWord: options.maxStrongPerWord,
+    fixedOccurrences: new Set(
+      [...annotated].filter((id) => !convertibleOf.has(id))
+    )
   });
   const ids = new Set(options.annotations.map((annotation) => annotation.id));
   for (const proposal of proposals) {
     const shared = proposal.carrier === "shared";
-    let annotation = options.annotations.find(
-      (candidate) =>
-        candidate.originalOccurrenceId === proposal.occurrenceId &&
-        candidate.visibility !== "reader" &&
-        ["word", "empty", "duplicate"].includes(candidate.placement)
-    );
+    const convertible = convertibleOf.get(proposal.occurrenceId) ?? [];
+    let annotation =
+      convertible.find((candidate) => candidate.placement !== "phrase") ??
+      convertible[0];
     if (!annotation) {
       let index = options.annotations.length;
       while (ids.has(`${options.ref}:${index}:${proposal.strong}`)) index += 1;

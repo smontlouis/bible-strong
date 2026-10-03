@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { OriginalStrongOccurrence } from "../src/completeAlignment.js";
-import { resolveCanonicalVerse } from "../src/strongCanonicalResolution.js";
 import {
+  applyCompoundTargetWordsToVerse,
+  resolveCanonicalVerse
+} from "../src/strongCanonicalResolution.js";
+import {
+  applyCompoundTargetWords,
   contentMorphology,
   isCompoundSharedCarrier,
   properNameKey,
@@ -13,8 +17,11 @@ import {
   type CompoundUnit
 } from "../src/strongCompoundWords.js";
 import {
+  applyCompoundTargetWordsToLedger,
   renderStrongTaggedText,
-  type StrongLedgerAnnotation
+  type StrongLedgerAnnotation,
+  type StrongLedgerVerse,
+  type StrongLedgerVerseMetrics
 } from "../src/strongLedger.js";
 import { parseSourceRow } from "../src/strongSourceUnits.js";
 import { tokenizeText } from "../src/tokenize.js";
@@ -48,6 +55,26 @@ const sg1910 = (ref: string, taggedText: string) => ({
   ref,
   taggedText
 });
+const darby = (ref: string, taggedText: string) => ({
+  name: "Darby",
+  ref,
+  taggedText
+});
+/** What the reader shows: the numbers, their words and their visibility. */
+const readerView = (annotations: StrongLedgerAnnotation[]) =>
+  JSON.stringify(
+    annotations
+      .filter((a) => a.visibility === "reader")
+      .map((a) => [
+        a.id,
+        a.strong,
+        a.placement,
+        a.wordIndex,
+        a.startWordIndex,
+        a.endWordIndex,
+        a.insertAfterWordIndex
+      ])
+  );
 
 test("witness compound words: hyphen runs, multi-position tags and digit groups", () => {
   assert.deepEqual(
@@ -160,13 +187,13 @@ test("a repeated witness word goes to the target word its other half already car
   const ref = "1Kgs.12.32";
   const witness = sg1910(
     ref,
-    'fit à <w strong="H1008" pos="18+19">Béthel</w> afin. Il plaça à <w strong="H1008" pos="25+26">Béthel</w> les'
+    'à <w strong="H1008" pos="18+19">Béthel</w> ; à <w strong="H1008" pos="25+26">Béthel</w>'
   );
   const units = [18, 19, 25, 26].map((p) => unit(ref, p, "H1008"));
   const proposals = proposeCompoundTargetWords({
-    words: ["agit", "à", "Béthel", "et", "il", "y", "plaça"],
+    words: ["à", "Béthel", "et", "y"],
     units,
-    carriers: [carrier(ref, 18, "H1008", 2)],
+    carriers: [carrier(ref, 18, "H1008", 1)],
     witnesses: [witness],
     maxStrongPerWord: 3
   });
@@ -177,7 +204,7 @@ test("a repeated witness word goes to the target word its other half already car
   // Without that anchor, two witness words for one target word say nothing.
   assert.deepEqual(
     proposeCompoundTargetWords({
-      words: ["agit", "à", "Béthel", "et", "il", "y", "plaça"],
+      words: ["à", "Béthel", "et", "y"],
       units,
       carriers: [],
       witnesses: [witness],
@@ -275,7 +302,7 @@ test("function words, open readings, carried words and contradictions stay as th
       witnesses: [
         sg1910(
           dan,
-          'ce <w strong="H6256" pos="1">temps</w>-<w strong="H1931" pos="2">là</w> ; ce <w strong="H6256" pos="20">temps</w>-<w strong="H1931" pos="21">là</w>. Et en ce <w strong="H6256" pos="22">temps</w>-<w strong="H1931" pos="23">là</w>'
+          '<w strong="H6256" pos="1">temps</w>-<w strong="H1931" pos="2">là</w> ; <w strong="H6256" pos="20">temps</w>-<w strong="H1931" pos="21">là</w> ; <w strong="H6256" pos="22">temps</w>-<w strong="H1931" pos="23">là</w>'
         )
       ],
       maxStrongPerWord: 3
@@ -319,37 +346,41 @@ test("function words, open readings, carried words and contradictions stay as th
   assert.deepEqual(contradicted, []);
 });
 
-test("a number written in digits carries all its numbers", () => {
+test("the profile's limit holds for every word, numbers in digits included", () => {
   const ref = "1Chr.12.25";
-  const proposals = proposeCompoundTargetWords({
-    words: ["6800", "hommes"],
-    units: [
-      unit(ref, 6, "H8337", "HNcbsc"),
-      unit(ref, 7, "H0505", "HNcbpa"),
-      unit(ref, 8, "H8083", "HC/Ncbsa"),
-      unit(ref, 9, "H3967", "HNcfpa")
-    ],
-    carriers: [],
-    witnesses: [
-      sg1910(
-        ref,
-        '<w strong="H8337 H0505 H8083 H3967" pos="6+7+8+9">6 800</w> hommes'
-      )
-    ],
-    maxStrongPerWord: 3
-  });
-  assert.equal(proposals.length, 4);
-  assert.ok(proposals.every((p) => p.wordIndex === 0 && p.carrier === "new"));
-  // A spelled word keeps the profile's limit.
+  const units = [
+    unit(ref, 6, "H8337", "HNcbsc"),
+    unit(ref, 7, "H0505", "HNcbpa"),
+    unit(ref, 8, "H8083", "HC/Ncbsa"),
+    unit(ref, 9, "H3967", "HNcfpa")
+  ];
+  const digits = (maxStrongPerWord: number) =>
+    proposeCompoundTargetWords({
+      words: ["6800", "hommes"],
+      units,
+      carriers: [],
+      witnesses: [
+        sg1910(
+          ref,
+          '<w strong="H8337 H0505 H8083 H3967" pos="6+7+8+9">6 800</w> hommes'
+        )
+      ],
+      maxStrongPerWord
+    });
+  assert.deepEqual(
+    digits(3).map((p) => [p.strong, p.wordIndex, p.carrier]),
+    [
+      ["H8337", 0, "new"],
+      ["H0505", 0, "new"],
+      ["H8083", 0, "new"]
+    ]
+  );
+  assert.equal(digits(4).length, 4);
+  // A spelled word keeps the same limit.
   assert.equal(
     proposeCompoundTargetWords({
       words: ["six-mille-huit-cents"],
-      units: [
-        unit(ref, 6, "H8337", "HNcbsc"),
-        unit(ref, 7, "H0505", "HNcbpa"),
-        unit(ref, 8, "H8083", "HC/Ncbsa"),
-        unit(ref, 9, "H3967", "HNcfpa")
-      ],
+      units,
       carriers: [],
       witnesses: [
         sg1910(
@@ -361,6 +392,173 @@ test("a number written in digits carries all its numbers", () => {
     }).length,
     3
   );
+  // A word that already shows as many numbers as allowed takes no new one,
+  // but a source word whose number it shows still shares that carrier.
+  const gen = "Gen.36.2";
+  assert.deepEqual(
+    proposeCompoundTargetWords({
+      words: ["Oholibama-Ana"],
+      units: [1, 2, 3, 7, 8].map((p) =>
+        unit(gen, p, p === 7 ? "H0001" : p === 8 ? "H0004" : `H000${p}`)
+      ),
+      carriers: [1, 2, 3].map((p) => carrier(gen, p, `H000${p}`, 0)),
+      witnesses: [
+        sg1910(
+          gen,
+          '<w strong="H0001" pos="7">Oholibama</w>-<w strong="H0004" pos="8">Ana</w>'
+        )
+      ],
+      maxStrongPerWord: 3
+    }).map((p) => [p.sourceUnitId, p.carrier]),
+    [["TAHOT.Gen.36.2.7.L", "shared"]]
+  );
+});
+
+test("nothing is proposed inside a phrase, on split votes or from another verse", () => {
+  const ref = "Gen.28.19";
+  const units = [unit(ref, 6, "H1008"), unit(ref, 7, "H1008")];
+  const bethel = 'de <w strong="H1008" pos="6+7">Béthel</w>';
+  const placed = (input: {
+    words: string[];
+    carriers?: CompoundCarrier[];
+    witnesses: Array<{ name: string; ref: string; taggedText: string }>;
+  }) =>
+    proposeCompoundTargetWords({
+      units,
+      carriers: [],
+      maxStrongPerWord: 3,
+      ...input
+    }).map((p) => [p.sourceUnitId, p.wordIndex, p.carrier]);
+  assert.deepEqual(
+    placed({ words: ["appela", "Béthel"], witnesses: [sg1910(ref, bethel)] }),
+    [
+      ["TAHOT.Gen.28.19.6.L", 1, "new"],
+      ["TAHOT.Gen.28.19.7.L", 1, "shared"]
+    ]
+  );
+  // The target word lies inside a phrase carrier of another source word.
+  assert.deepEqual(
+    placed({
+      words: ["appela", "Béthel"],
+      carriers: [
+        {
+          strong: "H7121",
+          kind: "phrase",
+          originalOccurrenceId: "TAHOT.Gen.28.19.1.L.main:0",
+          startWordIndex: 0,
+          endWordIndex: 1
+        }
+      ],
+      witnesses: [sg1910(ref, bethel)]
+    }),
+    []
+  );
+  // Two witnesses pair the word with different target words.
+  assert.deepEqual(
+    placed({
+      words: ["Béthel", "et", "Béthel"],
+      witnesses: [
+        sg1910(ref, `${bethel} et Béthel`),
+        darby(ref, 'de Béthel et <w strong="H1008" pos="6+7">Béthel</w>')
+      ]
+    }),
+    []
+  );
+  // Positions of another verse never name these source words.
+  assert.deepEqual(
+    placed({
+      words: ["appela", "Béthel"],
+      witnesses: [sg1910("Gen.28.18", bethel)]
+    }),
+    []
+  );
+});
+
+test("the occurrence's own annotation becomes its carrier, reviewed states stay", () => {
+  const ref = "Gen.28.19";
+  const tokens = ["appela", "Béthel"].map((text) => ({
+    text,
+    normalized: text.toLowerCase()
+  }));
+  const annotation = (
+    position: number,
+    fields: Partial<StrongLedgerAnnotation>
+  ): StrongLedgerAnnotation => ({
+    id: `${ref}:${position}:H1008`,
+    strong: "H1008",
+    visibility: "advanced",
+    placement: "empty",
+    source: "original-complete",
+    confidence: 0.3,
+    reason: "fixture",
+    diagnostics: [],
+    insertAfterWordIndex: 1,
+    originalOccurrenceId: `TAHOT.${ref}.${position}.L.main:0`,
+    ...fields
+  });
+  const run = (second?: Partial<StrongLedgerAnnotation>) => {
+    const annotations = [
+      annotation(6, {
+        visibility: "reader",
+        placement: "word",
+        source: "reference-transfer",
+        wordIndex: 1,
+        insertAfterWordIndex: undefined
+      }),
+      ...(second ? [annotation(7, second)] : [])
+    ];
+    const proposals = applyCompoundTargetWords({
+      ref,
+      tokens,
+      annotations,
+      units: [unit(ref, 6, "H1008"), unit(ref, 7, "H1008")],
+      witnesses: [sg1910(ref, 'de <w strong="H1008" pos="6+7">Béthel</w>')],
+      maxStrongPerWord: 3
+    });
+    return { proposals, annotations };
+  };
+  // An advanced phrase estimate is converted, not doubled.
+  const phrase = run({
+    placement: "phrase",
+    startWordIndex: 0,
+    endWordIndex: 1,
+    insertAfterWordIndex: undefined
+  });
+  assert.equal(phrase.proposals.length, 1);
+  assert.equal(phrase.annotations.length, 2);
+  assert.ok(isCompoundSharedCarrier(phrase.annotations[1]!));
+  assert.equal(phrase.annotations[1]!.startWordIndex, undefined);
+  assert.equal(phrase.annotations[1]!.wordIndex, 1);
+  // A reviewed or not-rendered occurrence keeps its state.
+  for (const fixed of [
+    { visibility: "pending" as const },
+    { visibility: "rejected" as const },
+    { placement: "not-rendered" as const },
+    { placement: "technical" as const }
+  ]) {
+    const result = run(fixed);
+    assert.deepEqual(result.proposals, []);
+    assert.equal(result.annotations[1]!.diagnostics.length, 0);
+  }
+  // An occurrence without any annotation gets one.
+  const bare = run();
+  assert.equal(bare.proposals.length, 1);
+  assert.equal(bare.annotations.length, 2);
+  assert.ok(isCompoundSharedCarrier(bare.annotations[1]!));
+  // A second run sees the shared carrier as a carrier: nothing moves.
+  const before = JSON.stringify(bare.annotations);
+  assert.deepEqual(
+    applyCompoundTargetWords({
+      ref,
+      tokens,
+      annotations: bare.annotations,
+      units: [unit(ref, 6, "H1008"), unit(ref, 7, "H1008")],
+      witnesses: [sg1910(ref, 'de <w strong="H1008" pos="6+7">Béthel</w>')],
+      maxStrongPerWord: 3
+    }),
+    []
+  );
+  assert.equal(JSON.stringify(bare.annotations), before);
 });
 
 function bethelFixture() {
@@ -465,14 +663,35 @@ test("resolution: the split name becomes visible on the shared carrier, shown on
   assert.equal(off.verse.annotations[2]!.placement, "empty");
 
   const on = bethelFixture();
+  const applied = applyCompoundTargetWordsToVerse({
+    ...on,
+    maxStrongPerWord: 3
+  });
+  assert.deepEqual(
+    applied.map((p) => p.carrier),
+    ["shared"]
+  );
+  // Resolution itself never changes the reader.
+  const reader = readerView(on.verse.annotations);
   const after = resolveCanonicalVerse({
     ...on,
-    policy: { compoundTargetWords: true, maxStrongPerWord: 3 }
+    policy: { compoundTargetWords: true }
   });
+  assert.equal(readerView(on.verse.annotations), reader);
   assert.equal(after.decisions[1]!.state, "visible");
   assert.equal(after.decisions[2]!.state, "visible");
   assert.deepEqual(after.decisions[2]!.targetWordIndices, [2]);
   assert.equal(after.decisions[2]!.assurance, "witness-compound-word");
+  assert.deepEqual(
+    after.decisions[2]!.placementEvidence.map((e) => e.diagnostics[0]),
+    ["compound-target-word"]
+  );
+  assert.ok(
+    after.decisions[2]!.exploration.methods.includes("compound-target-word")
+  );
+  assert.ok(
+    !before.decisions[2]!.exploration.methods.includes("compound-target-word")
+  );
   const shared = on.verse.annotations[2]!;
   assert.ok(isCompoundSharedCarrier(shared));
   assert.equal(shared.visibility, "hidden");
@@ -487,4 +706,117 @@ test("resolution: the split name becomes visible on the shared carrier, shown on
     match[1]!.split(" ")
   );
   assert.deepEqual(shown, ["H7121", "H1008"]);
+});
+
+/** The Béthel fixture as a ledger verse, both halves still uncarried. */
+function bethelLedgerVerse() {
+  const fixture = bethelFixture();
+  // The first half too is only an advanced estimate here.
+  Object.assign(fixture.verse.annotations[1]!, {
+    visibility: "advanced",
+    placement: "empty",
+    source: "original-complete",
+    wordIndex: undefined,
+    insertAfterWordIndex: 2
+  });
+  const metrics = Object.fromEntries(
+    [
+      "wordCount",
+      "readerVisibleStrongCount",
+      "advancedStrongCount",
+      "emptyStrongCount",
+      "phraseStrongCount",
+      "technicalStrongCount",
+      "pendingHumanCount",
+      "rejectedCount",
+      "referenceStrongOccurrenceCount",
+      "referenceStrongRepresentedCount",
+      "referenceStrongCoverage",
+      "referenceStrongCarrierCount",
+      "referenceStrongCarrierCoverage",
+      "originalStrongOccurrenceCount",
+      "originalRepresentedStrongOccurrenceCount",
+      "originalRepresentationRate",
+      "originalStrongCarrierCount",
+      "originalStrongCarrierRate",
+      "semanticMissingCount",
+      "readerMultiStrongWordCount",
+      "readerOverBudgetStrongCount",
+      "placementRiskCount",
+      "placementQuality",
+      "readerTaggedTokenCount",
+      "advancedTaggedTokenCount",
+      "readerTokenCoverage",
+      "advancedTokenCoverage"
+    ].map((key) => [key, 0])
+  ) as unknown as StrongLedgerVerseMetrics;
+  const verse: StrongLedgerVerse = {
+    ref: "Gen.28.19",
+    bookId: "Gen",
+    chapter: 28,
+    verse: 19,
+    text: fixture.verse.text,
+    tokens: fixture.verse.tokens,
+    annotations: fixture.verse.annotations,
+    views: { readerHtml: "", advancedHtml: "", debugHtml: "" },
+    inventories: {
+      references: { Sg1910: ["H7121", "H1008"], Darby: [], DarbyR: [] },
+      original: ["H7121", "H1008", "H1008"],
+      reader: ["H7121"],
+      advanced: ["H7121", "H1008", "H1008"]
+    },
+    metrics: { ...metrics, wordCount: 3, readerVisibleStrongCount: 1 }
+  };
+  return { ...fixture, verse };
+}
+
+test("ledger: option N runs before the reader baseline and only when enabled", () => {
+  const policy = {
+    readingInvariantVariants: true,
+    strongIdentifierFamilies: true
+  };
+  const off = bethelLedgerVerse();
+  const untouched = JSON.stringify(off.verse);
+  const run = (
+    fixture: ReturnType<typeof bethelLedgerVerse>,
+    compoundTargetWords: boolean,
+    maxStrongPerWord = 3
+  ) =>
+    applyCompoundTargetWordsToLedger({
+      verses: [fixture.verse],
+      inputs: new Map([[fixture.verse.ref, fixture.input]]),
+      sourceRows: fixture.sourceRows,
+      enginePolicy: { ...policy, compoundTargetWords },
+      maxStrongPerWord
+    });
+  assert.deepEqual([...run(off, false)], []);
+  assert.equal(JSON.stringify(off.verse), untouched);
+  // The profile's limit reaches the pass.
+  const closed = bethelLedgerVerse();
+  assert.deepEqual([...run(closed, true, 0)], []);
+  assert.equal(JSON.stringify(closed.verse), untouched);
+
+  const on = bethelLedgerVerse();
+  assert.deepEqual([...run(on, true)], ["Gen.28.19"]);
+  // The verse is refreshed: the reader now shows « H1008 » once on « Béthel ».
+  assert.deepEqual(on.verse.inventories.reader, ["H7121", "H1008"]);
+  assert.equal(on.verse.metrics.readerVisibleStrongCount, 2);
+  assert.match(on.verse.views.readerHtml, /H1008/u);
+  const reader = readerView(on.verse.annotations);
+  const metrics = JSON.stringify(on.verse.metrics);
+  const resolution = resolveCanonicalVerse({
+    bible: on.bible,
+    verse: on.verse,
+    input: on.input,
+    sourceRows: on.sourceRows,
+    lexicalItems: [],
+    policy: { ...policy, compoundTargetWords: true }
+  });
+  // Occurrence resolution leaves the reader as the baseline measured it.
+  assert.equal(readerView(on.verse.annotations), reader);
+  assert.equal(JSON.stringify(on.verse.metrics), metrics);
+  assert.deepEqual(
+    resolution.decisions.map((d) => d.state),
+    ["visible", "visible", "visible"]
+  );
 });
