@@ -250,6 +250,11 @@ export function assertResolutionKeptReader(
     ledger.witnessEmptyContexts?.hiddenCarriers ?? 0,
     `reader-regression:${bible}:witness-empty-contexts`
   );
+  // The accounted options never push a word over its display budget.
+  assert(
+    changes.delta.readerOverBudgetStrongCount <= 0,
+    `reader-regression:${bible}:readerOverBudgetStrongCount`
+  );
   const added: Record<string, number> = changes.delta;
   for (const key of [
     "verseCount",
