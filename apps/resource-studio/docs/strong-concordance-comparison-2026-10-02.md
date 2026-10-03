@@ -34,6 +34,11 @@ pour 100 mots hébreux ou grecs que Concordance annote (moteur A–G) :
   peu à l'accord (+0,2 pt pour S21) mais retirent des erreurs : la précision
   des porteurs passe de 93,5 à 93,9 % (S21) et de 96,5 à 96,8 % (NEG79)
   ([détail](#pistes-4-et-5-appliquées-moteur-al)).
+- Sept nouvelles options (moteur A–S), trouvées et vérifiées sur l'échantillon
+  puis mesurées sur une troisième réserve, portent les mots identiques de
+  79,4 à 81,9 % pour S21 et de 94,3 à 95,1 % pour NEG79, avec une précision
+  un peu plus haute. Aucun placement juste n'est perdu
+  ([détail](#pistes-m-à-s-moteur-as)).
 
 ## Ce qui est comparé
 
@@ -389,6 +394,115 @@ erreurs reculent. L corrige 76 portées trop courtes dans S21. K retire une
 vingtaine de conjonctions mal placées dans chaque Bible. La précision des
 porteurs, surtout grâce à B, gagne 0,3 à 0,5 pt.
 
+## Pistes M à S (moteur A–S)
+
+Nuit du 2 au 3 octobre. Les plus grosses pertes de S21 sont les mots que nous
+laissons incertains alors que Concordance les place (15 % des mots annotés).
+Neuf analyses indépendantes ont cherché sur l'échantillon de comparaison, déjà
+ouvert, des règles qui les placeraient sans perdre en précision :
+
+- vocabulaire, flexions, trous entre voisins placés ;
+- mots grammaticaux, noms propres et nombres ;
+- usage des trois témoins, mots non traduits ;
+- une exploration libre de 200 cas.
+
+Chaque règle candidate a été simulée hors moteur, puis vérifiée par deux
+contradicteurs. L'un cherchait une fuite des annotations de Concordance ou un
+réglage sur l'échantillon ; l'autre refaisait la mesure. Sept familles ont été
+retenues. Chacune est implémentée derrière son option, sur sa propre branche,
+mesurée, relue, puis fusionnée. Une relecture de l'intégration a corrigé
+ensuite :
+
+- le contrôle du générateur autonome, que R et S auraient déclenché à tort ;
+- la provenance des porteurs de Q ;
+- quelques cas limites.
+
+- **M, lectures attestées** (`witnessAttestedReadings`) : un mot du texte de
+  base dont la lecture reste ouverte (variante manuscrite, ketiv et qere) est
+  placé quand son porteur vient d'un transfert exact et que les deux familles
+  de témoins donnent ce même identifiant au même mot. Les lectures absentes du
+  texte de base (TR seul) en sont exclues : NBS et NFC suivent NA.
+- **N, mots composés** (`compoundTargetWords`) : un mot que les témoins
+  rendent par un seul mot avec d'autres (« Béthel », « Beer-Schéba ») ou un nom
+  écrit en deux mots porte chacun de ces mots source.
+- **O, nombres** (`numeralValues`) : un nombre se compare par sa valeur, quelle
+  que soit son écriture (« 12 000 », « 12'000 », « douze mille »,
+  « vingt-quatre », ordinaux). Deux nombres de valeurs différentes ne
+  s'apparient plus (« 5 mètres » n'est plus « 5 coudées »).
+- **P, noms propres** (`properNameVariants`) : un nom se retrouve sous ses
+  variantes (accents, traits d'union, clé consonantique, dérivés) et
+  « Israélites » rend « fils d'Israël ». Les autres « fils de… » (Lévites,
+  Ammonites) ont été écartés : 12 justes sur 16 seulement en développement.
+- **Q, lexique entre voisins** (`lexicalGapFill`) : un mot source incertain
+  est placé sur le seul mot libre, entre les porteurs de ses voisins source,
+  qu'un lexique désigne comme sa traduction. Trois sources servent, par paliers :
+  - les lemmes des témoins (Kaikki) ;
+  - les gloses françaises du dictionnaire Strong ;
+  - les synonymes d'une traduction principale des témoins (OpenOffice).
+
+  Un synonyme seul ne suffit pas pour une traduction dynamique comme NFC.
+
+- **R, articles** (`articleDeterminers`) : un article grec que LSG rend par le
+  déterminant de son nom est porté par le déterminant de notre porteur de ce
+  nom.
+- **S, non-traduits de contexte plus faible** (`witnessEmptyContexts`) : un
+  mot que les témoins laissent non traduit est établi non traduit, avec son
+  ancre, dans des contextes plus faibles que G (traduction du témoin portée
+  ailleurs dans le verset, début de verset, voisins adjacents).
+
+### En développement (échantillon de comparaison)
+
+| Configuration              | identiques A–L | identiques A–S | précision A–L | précision A–S |
+| -------------------------- | -------------: | -------------: | ------------: | ------------: |
+| S21                        |         79,8 % |     **82,3 %** |        93,7 % |        93,8 % |
+| NEG79                      |         93,6 % |     **94,5 %** |        96,5 % |        96,6 % |
+| S21 sans la famille Segond |         68,5 % |     **72,0 %** |        92,5 % |        92,6 % |
+| NEG79 sans la famille      |         75,5 % |     **78,6 %** |        93,7 % |        93,8 % |
+
+Précision : porteurs, mesure des canaris. Sur les bancs de développement des
+témoins, le F1 porteur passe de 0,856 à 0,868 (LSG), de 0,846 à 0,859 (Darby)
+et de 0,846 à 0,858 (DarbyR).
+
+En retirant une option à la fois, S21 perd entre 0,08 pt (R) et 1,2 pt (Q) :
+chacune apporte quelque chose. Toutes options désactivées, la prédiction reste
+identique octet pour octet à celle du moteur A–L.
+
+### Sur une troisième réserve scellée
+
+La troisième réserve (`plan-comparison-v3.json`, empreinte `dd0f55ba4c10…`)
+compte 120 chapitres que ni l'échantillon ni les deux premières réserves
+n'avaient touchés. Elle a été tirée et prédite avec le moteur A–L avant tout
+développement, puis récupérée sous gel sans être lue. Le moteur A–S a été figé
+(`freeze-v7.json`) avant d'être mesuré une seule fois sur cette réserve.
+
+| Réserve v3                 |    A–L |        A–S | écart, intervalle à 95 % |
+| -------------------------- | -----: | ---------: | ------------------------ |
+| S21, identiques            | 79,4 % | **81,9 %** | +2,5 pt (+2,1 à +3,0)    |
+| S21, précision des placés  | 94,0 % |     94,1 % | +0,1 pt (+0,04 à +0,2)   |
+| NEG79, identiques          | 94,3 % | **95,1 %** | +0,8 pt (+0,7 à +1,0)    |
+| NEG79, précision           | 97,1 % |     97,1 % | +0,04 pt (+0,02 à +0,06) |
+| S21 sans la famille Segond | 68,2 % | **71,9 %** | +3,7 pt (+3,3 à +4,3)    |
+| NEG79 sans la famille      | 76,1 % | **79,4 %** | +3,3 pt (+2,9 à +4,0)    |
+
+Intervalles appariés par chapitre. Les mots S21 laissés incertains là où
+Concordance tranche passent de 15,3 % à 12,7 %. Aucun mot placé exactement
+comme Concordance par A–L ne l'est plus par A–S.
+
+Ce que chaque option a changé sur la réserve, pour S21 :
+
+| Option               | exacts gagnés | autres changements                                       |
+| -------------------- | ------------: | -------------------------------------------------------- |
+| Q lexique            |           549 | 26 sur un autre mot, 4 placés là où Concordance n'a rien |
+| N mots composés      |           119 | 0                                                        |
+| O nombres            |           114 | 0                                                        |
+| P noms propres       |           110 | 0                                                        |
+| M lectures attestées |            89 | 2 sur un autre mot                                       |
+| S non-traduits       |            71 | 4 non traduits que Concordance place, 5 ancres autres    |
+| R articles           |            19 | 2 sur un autre mot                                       |
+
+Q, la plus grosse option, est juste dans 95 % des cas où elle tranche. Pour
+NEG79, M (121) et N (123) font l'essentiel du gain.
+
 ## NBS et NFC régénérées
 
 NBS et NFC ont été régénérées en entier avec chaque moteur
@@ -416,6 +530,34 @@ NBS et NFC ont été régénérées en entier avec chaque moteur
   partie des conjonctions qu'il ne place plus (K) devient « non traduite »
   d'après les témoins.
 
+Avec le moteur A–S (`outputs/strong-autonomous/v7`), les deux Bibles passent
+toutes les vérifications du générateur. Cela inclut le contrôle « la
+résolution ne change pas le mode lecteur ». Ce contrôle compte désormais les
+seuls changements attendus de Q, R et S, et refuse tout autre changement.
+
+| Mesure                            | NBS A–L |     NBS A–S | NFC A–L |     NFC A–S |
+| --------------------------------- | ------: | ----------: | ------: | ----------: |
+| Mots source placés                | 354 539 | **368 441** | 272 148 | **284 695** |
+| Mots non traduits établis         |   4 268 |       5 367 |   2 050 |       3 210 |
+| dont par les témoins (G, S)       |   2 656 |       3 525 |   1 406 |       2 430 |
+| Mots source incertains            |  18,7 % |  **15,3 %** |  37,8 % |  **34,7 %** |
+| Versets entièrement comptabilisés |   4 245 |       6 502 |     602 |       1 001 |
+| Mots du lecteur portant un Strong |  49,9 % |      51,4 % |  32,1 % |      33,4 % |
+| Mots portant plusieurs Strong     |   6 948 |       8 044 |   5 705 |       6 321 |
+
+Versets comptés ici sans unité incertaine : les A–L diffèrent de quelques
+versets du tableau précédent, compté autrement.
+
+Les nouvelles options décident, dans NBS puis dans NFC :
+
+- Q (lexique) : 8 838 et 7 239 mots ;
+- N (mots composés) : 1 209 et 691 ;
+- M (lectures attestées) : 1 101 et 885 ;
+- R (articles) : 342 et 520.
+
+NFC, traduction dynamique, n'utilise pas le palier « synonyme seul » de Q. Elle
+gagne surtout par les lemmes et le dictionnaire.
+
 NBS et NFC n'ont pas de référence externe : ces chiffres décrivent ce qui
 change, pas sa justesse, mesurée seulement sur S21 et NEG79.
 
@@ -436,8 +578,8 @@ change, pas sa justesse, mesurée seulement sur S21 et NEG79.
 
 Le prototype local montre chaque verset avec nos placements et ceux de
 Concordance, en trois modes (Comparer, Nous, Concordance), avec un filtre par
-type de désaccord, un tableau d'accord par livre et un choix de moteur (A–G ou
-A–J) :
+type de désaccord, un tableau d'accord par livre et un choix de moteur (A–G, A–J, A–L ou
+A–S) :
 
 ```sh
 yarn exec tsx scripts/strong-prototype/server.ts   # http://localhost:4321/concordance
@@ -468,14 +610,22 @@ Les étapes suivantes se rejouent avec les scripts rangés sous
   `run-canary-step4.sh`, puis le gel `freeze-v4.json` ;
 - pistes 4 et 5 : `run-step5-dev.sh`, `run-step5b-dev.sh` (B sur un même
   mot), `run-step5-dev-controls.sh`, `run-canary-step5.sh`, puis le gel
-  `freeze-v5.json`.
+  `freeze-v5.json` ;
+- pistes M à S : `run-step6-dev.sh` (moteur complet, scénarios, canaris,
+  retrait d'une option à la fois), `run-step7-dev.sh` (moteur final et vues
+  du prototype), puis `run-reserve-v3.sh` (gel `freeze-v7.json` et mesure de
+  la réserve).
 
-La seconde réserve se tire ainsi :
+Les deuxième et troisième réserves se tirent ainsi :
 
 ```sh
 yarn exec tsx $R plan-comparison --seed strong-concordance-reserve-2026-10-02 --comparison 0 --reserve 120 \
   --exclude-plan outputs/strong-concordance-night/plan-comparison-v1.json --allow-prior \
   --output outputs/strong-concordance-night/plan-comparison-v2.json
+yarn exec tsx $R plan-comparison --seed strong-concordance-reserve-2026-10-03 --comparison 0 --reserve 120 \
+  --exclude-plan outputs/strong-concordance-night/plan-comparison-v1.json \
+  --exclude-plan outputs/strong-concordance-night/plan-comparison-v2.json --allow-prior \
+  --output outputs/strong-concordance-night/plan-comparison-v3.json
 ```
 
 Les familles d'identifiants se régénèrent avec

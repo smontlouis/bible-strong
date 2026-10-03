@@ -6,8 +6,8 @@
  * annotations never leave this machine.
  *
  *   yarn exec tsx scripts/strong-prototype/server.ts [--port 4321]
- *     [--before outputs/strong-autonomous/v4] [--after outputs/strong-autonomous/v6]
-    [--before-label "moteur A–G"] [--after-label "moteur A–L"]
+ *     [--before outputs/strong-autonomous/v6] [--after outputs/strong-autonomous/v7]
+    [--before-label "moteur A–L"] [--after-label "moteur A–S"]
  *     [--concordance <compare-view.json>,...]  (one view per Bible and engine)
  */
 import { existsSync, readFileSync } from "node:fs";
@@ -25,12 +25,12 @@ function flag(name: string, fallback: string): string {
 
 const PORT = Number(flag("--port", "4321"));
 const RUNS = {
-  before: flag("--before", "outputs/strong-autonomous/v4"),
-  after: flag("--after", "outputs/strong-autonomous/v6")
+  before: flag("--before", "outputs/strong-autonomous/v6"),
+  after: flag("--after", "outputs/strong-autonomous/v7")
 } as const;
 const RUN_LABELS = {
-  before: flag("--before-label", "moteur A–G"),
-  after: flag("--after-label", "moteur A–L")
+  before: flag("--before-label", "moteur A–L"),
+  after: flag("--after-label", "moteur A–S")
 } as const;
 type Side = keyof typeof RUNS;
 const LABELS: Record<string, string> = {

@@ -82,14 +82,15 @@
         verses: []
       };
       const EXAMPLES = [
-        ["nbs", "Gen", 1, 31, "« qu’il » porte אֲשֶׁר (pronom collé)"],
-        ["nbs", "Gen", 4, 10, "« Qu’as-tu » porte מָה (pronom collé)"],
-        ["nfc", "Gen", 4, 14, "NFC : « aujourd'hui » (apostrophe)"],
-        ["nfc", "Gen", 21, 26, "NFC : « Jusqu'à aujourd'hui »"],
-        ["nfc", "Mark", 2, 5, "NFC : « voit », G3708 (famille)"],
-        ["nfc", "Luke", 2, 6, "NFC : εἶναι, G1511/G1510 (famille)"],
-        ["nbs", "Gen", 7, 4, "« en effet » d'un seul tenant (locution)"],
-        ["nbs", "Matt", 14, 32, "καί initial hors du « et » ajouté"]
+        ["nbs", "Gen", 12, 8, "N : « Beth-El » porte les deux mots source"],
+        ["nbs", "Gen", 9, 21, "M : « tente », ketiv et qere attestés"],
+        ["nbs", "Gen", 5, 15, "O : « soixante-cinq » par sa valeur"],
+        ["nfc", "Gen", 7, 11, "NFC, O : « dix-septième », « deuxième »"],
+        ["nfc", "Gen", 4, 19, "NFC, P : « Silla » pour Tsilla"],
+        ["nbs", "Gen", 2, 4, "Q : « généalogie » entre ses voisins"],
+        ["nfc", "Gen", 1, 2, "NFC, Q : « obscurité » (lexique)"],
+        ["nbs", "Matt", 1, 12, "R : l'article sur le déterminant"],
+        ["nbs", "Gen", 1, 4, "S : le second « entre » non traduit"]
       ];
       /** STEP separates morphemes with "/" and "\\"; the reader sees the word. */
       const word = (s) => String(s || "").replace(/[\/\\]/g, "");
@@ -106,13 +107,19 @@
             }) + " %"
           : "—";
       const ASSURANCE = {
-        "witness-empty-transfer": "établi par les témoins (même contexte)",
+        "witness-empty-transfer":
+          "établi par les témoins (G, ou S en contexte plus faible)",
         "linguistic-rule": "règle grammaticale",
         "existing-generator": "porteur du générateur",
         "exact-witness-families-and-source":
           "transfert exact, deux familles de témoins",
         "validated-deterministic-lexical": "lexique validé",
         "lexical-gap-fill": "seul mot libre entre voisins placés, lexique (Q)",
+        "witness-attested-reading":
+          "lecture ouverte attestée par deux familles de témoins (M)",
+        "witness-compound-word": "mot composé des témoins (N)",
+        "witness-article-determiner":
+          "article sur le déterminant de son nom (R)",
         unresolved: "incertain"
       };
       const METHOD = {
