@@ -90,6 +90,13 @@ import {
   DEFAULT_KAIKKI_JSONL
 } from "./kaikkiSqliteIndex.js";
 import {
+  buildLexicalGapLexicon,
+  LEXICAL_GAP_TIERS_WITHOUT_SYNONYM_ONLY,
+  lexicalGapFillPass,
+  readKaikkiFormLemmas,
+  readOpenOfficeSynonyms
+} from "./lexicalGapFill.js";
+import {
   readStepOriginalData,
   getStepSourceIdentity,
   selectStepEvidenceForRefs,
@@ -147,7 +154,8 @@ export type StrongSource =
   | "reference-only"
   | "manual-review"
   | "llm-review"
-  | "curated-override";
+  | "curated-override"
+  | "lexical-gap-fill";
 
 export interface StrongStepEvidence {
   source: "TAHOT" | "TAGNT";
@@ -239,6 +247,16 @@ export interface StrongLedger {
   resolutionPolicy?: string;
   verseCorrespondencePath?: string;
   resolutionBaselineMetrics?: StrongLedgerMetrics;
+  /**
+   * Policy Q placements made after the baseline above (present only when the
+   * policy is on): the only reader carriers occurrence resolution adds.
+   */
+  lexicalGapFill?: {
+    placed: number;
+    verses: number;
+    overBudget: number;
+    withdrawnLexicalItems: number;
+  };
   lexicalResolutionMetrics?: LexicalCandidateReport["metrics"];
   bible: string;
   generatedAt: string;
@@ -563,6 +581,7 @@ const STRONG_LEDGER_PIPELINE_SOURCES = [
   "src/frenchLexicalSafety.ts",
   "src/kaikkiSqliteIndex.ts",
   "src/lexicalCandidateReport.ts",
+  "src/lexicalGapFill.ts",
   "src/lexicon.ts",
   "src/maximumWeightMatching.ts",
   "src/originalSource.ts",
@@ -1035,6 +1054,9 @@ export async function generateStrongLedgerWithDictionary(
   // Alternative identifiers of one source word must not keep two reader
   // carriers. This is a display correction, applied before the reader
   // baseline so that occurrence resolution itself never changes the reader.
+  // Policy Q (lexical gap fill) is the one exception: its carriers come after
+  // the baseline, and the ledger counts them (`lexicalGapFill`) so that the
+  // autonomous reader check accepts exactly those.
   const reduceAlternativeIdentityCarriers = () => {
     if (
       options.resolveOccurrences !== false &&
@@ -1122,6 +1144,11 @@ export async function generateStrongLedgerWithDictionary(
     options.resolveOccurrences === false
       ? undefined
       : aggregateMetrics(options.bible, options.onlyRef, ledgerVerses);
+  let lexicalGapFillSummary: StrongLedger["lexicalGapFill"];
+  if (enginePolicy.lexicalGapFill && options.resolveOccurrences === false)
+    console.warn(
+      "Policy Q (lexical gap fill) needs occurrence resolution: it does not run when resolveOccurrences is false."
+    );
   if (options.resolveOccurrences !== false) {
     residualLexicalReport ??= await buildLexicalCandidateReport({
       ...lexicalReportOptions,
@@ -1146,13 +1173,16 @@ export async function generateStrongLedgerWithDictionary(
       values.push(item);
       items.set(item.ref, values);
     }
-    for (const verse of ledgerVerses) {
+    const resolveVerse = (
+      verse: StrongLedgerVerse,
+      lexicalItems = items.get(verse.ref) ?? []
+    ) => {
       verse.resolution = resolveCanonicalVerse({
         bible: options.bible,
         verse,
         input: resolutionInputs.get(verse.ref)!,
         sourceRows: rows,
-        lexicalItems: items.get(verse.ref) ?? [],
+        lexicalItems,
         // Alternative-identifier carriers were already reduced above.
         policy: {
           readingInvariantVariants: enginePolicy.readingInvariantVariants,
@@ -1169,6 +1199,66 @@ export async function generateStrongLedgerWithDictionary(
             : {})
         }
       });
+    };
+    for (const verse of ledgerVerses) resolveVerse(verse);
+    // Q: a free word between placed source neighbours carries a word it is
+    // known to render; changed verses are resolved again, and the residual
+    // lexical report loses the items of the annotations Q filled. Q must run
+    // after every pass that adds reader carriers.
+    if (enginePolicy.lexicalGapFill) {
+      const openOfficePath = existingPath(FRENCH_LEXICAL_SOURCES.openOffice);
+      const formLemmas = measureSync("load Kaikki form lemmas", () =>
+        readKaikkiFormLemmas(defaultKaikkiSqlitePath(DEFAULT_KAIKKI_JSONL))
+      );
+      const gapLexicon = measureSync("build lexical gap lexicon", () =>
+        buildLexicalGapLexicon({
+          witnessVerses: references.flatMap((reference) => [
+            ...reference.map.values()
+          ]),
+          formLemmas,
+          dictionary: dictionaryCandidates,
+          synonyms: openOfficePath
+            ? readOpenOfficeSynonyms(openOfficePath)
+            : undefined
+        })
+      );
+      const gapFill = measureSync("lexical gap fill", () =>
+        lexicalGapFillPass({
+          verses: ledgerVerses,
+          lexicon: gapLexicon,
+          residualReport: residualLexicalReport,
+          // OpenOffice synonyms alone carry no sense: no tier C for a free
+          // translation.
+          options: ["dynamic", "paraphrase"].includes(translationProfile.family)
+            ? { tiers: LEXICAL_GAP_TIERS_WITHOUT_SYNONYM_ONLY }
+            : undefined,
+          witnessesOf: (verse) =>
+            (resolutionInputs.get(verse.ref)?.references ?? []).flatMap(
+              (reference) =>
+                reference.verse
+                  ? [
+                      {
+                        name: reference.name,
+                        ref: referenceKey(
+                          reference.verse.row.bookId,
+                          reference.verse.row.chapter,
+                          reference.verse.row.verse
+                        ),
+                        tokens: reference.verse.tokens
+                      }
+                    ]
+                  : []
+            ),
+          resolve: resolveVerse
+        })
+      );
+      residualLexicalReport = gapFill.residualReport;
+      lexicalGapFillSummary = {
+        placed: gapFill.placed,
+        verses: gapFill.changedRefs.size,
+        overBudget: gapFill.overBudget,
+        withdrawnLexicalItems: gapFill.withdrawnLexicalItems
+      };
     }
     rebuildLedgerVerses(ledgerVerses);
     rows.clear();
@@ -1270,6 +1360,7 @@ export async function generateStrongLedgerWithDictionary(
     unassignedCanonicalSource,
     verseCorrespondencePath: resolveVerseCorrespondencePath(options),
     resolutionBaselineMetrics,
+    lexicalGapFill: lexicalGapFillSummary,
     lexicalResolutionMetrics,
     resolutionPolicy:
       options.resolveOccurrences === false

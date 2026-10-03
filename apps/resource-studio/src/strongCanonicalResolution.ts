@@ -773,6 +773,13 @@ export function resolveCanonicalVerse(options: {
         linked.some((a) => a.diagnostics[0] === COMPOUND_TARGET_WORD_METHOD)
       )
         assurance = "witness-compound-word";
+      // Q: a carrier chosen by its position and the lexicon, not a witness.
+      else if (
+        linked.some(
+          (a) => a.visibility === "reader" && a.source === "lexical-gap-fill"
+        )
+      )
+        assurance = "lexical-gap-fill";
     }
 
     const lexicalCandidates = options.lexicalItems

@@ -357,7 +357,44 @@ export async function buildLexicalCandidateReport(
   applyProperNameGroupAutoSafe(items);
   applyProperNameSequenceAutoSafe(items);
   applyLexicalDuplicateGroupAutoSafe(items);
+  const emptyAnnotations = emptyItems.length;
+  const relocationAnnotations = relocationItems.length;
 
+  return {
+    bible: options.bible,
+    generatedAt: new Date().toISOString(),
+    inputPath,
+    scope: options.onlyRef ?? "all",
+    sources: {
+      strongDictionary: true,
+      kaikki: options.kaikkiPath,
+      rezoJdmCache: options.jdmCacheDir,
+      rezoJdmFetch: options.fetchJdm,
+      openOffice: options.openOfficePath,
+      wolf: options.wolfPath
+    },
+    metrics: {
+      verses: verses.length,
+      auditItems: auditItems.length,
+      emptyAnnotations,
+      readerEmptyAnnotations: emptyItems.filter(
+        (item) => item.annotation.visibility === "reader"
+      ).length,
+      advancedEmptyAnnotations: emptyItems.filter(
+        (item) => item.annotation.visibility === "advanced"
+      ).length,
+      relocationAnnotations,
+      ...lexicalCandidateItemMetrics(items)
+    },
+    items
+  };
+}
+
+/**
+ * The metrics of a lexical candidate report that its items determine alone:
+ * every count but the verses and the audited annotations.
+ */
+export function lexicalCandidateItemMetrics(items: LexicalCandidateItem[]) {
   const candidateCount = items.reduce(
     (sum, item) => sum + item.candidates.length,
     0
@@ -429,57 +466,30 @@ export async function buildLexicalCandidateReport(
       bestOpenCandidate(item)!.score >= currentTargetScore(item) + 0.12
   ).length;
   const evidenceSourceCounts = countEvidenceSources(items);
-  const emptyAnnotations = emptyItems.length;
-  const relocationAnnotations = relocationItems.length;
 
   return {
-    bible: options.bible,
-    generatedAt: new Date().toISOString(),
-    inputPath,
-    scope: options.onlyRef ?? "all",
-    sources: {
-      strongDictionary: true,
-      kaikki: options.kaikkiPath,
-      rezoJdmCache: options.jdmCacheDir,
-      rezoJdmFetch: options.fetchJdm,
-      openOffice: options.openOfficePath,
-      wolf: options.wolfPath
-    },
-    metrics: {
-      verses: verses.length,
-      auditItems: auditItems.length,
-      emptyAnnotations,
-      readerEmptyAnnotations: emptyItems.filter(
-        (item) => item.annotation.visibility === "reader"
-      ).length,
-      advancedEmptyAnnotations: emptyItems.filter(
-        (item) => item.annotation.visibility === "advanced"
-      ).length,
-      relocationAnnotations,
-      itemsWithCandidates: items.filter((item) => item.candidates.length > 0)
-        .length,
-      emptyWithCandidates: items.filter(
-        (item) => item.auditKind === "empty" && item.candidates.length > 0
-      ).length,
-      relocationWithCandidates: items.filter(
-        (item) => item.auditKind === "relocation" && item.candidates.length > 0
-      ).length,
-      candidateCount,
-      highConfidenceCandidates,
-      mediumConfidenceCandidates,
-      lowConfidenceCandidates,
-      occupiedCandidates,
-      openCandidates,
-      reviewableCandidates,
-      autoSafeCandidates,
-      autoSafeItems,
-      groupAutoSafeItems,
-      ambiguousHighItems,
-      openHighItems,
-      relocationBetterOpenItems,
-      evidenceSourceCounts
-    },
-    items
+    itemsWithCandidates: items.filter((item) => item.candidates.length > 0)
+      .length,
+    emptyWithCandidates: items.filter(
+      (item) => item.auditKind === "empty" && item.candidates.length > 0
+    ).length,
+    relocationWithCandidates: items.filter(
+      (item) => item.auditKind === "relocation" && item.candidates.length > 0
+    ).length,
+    candidateCount,
+    highConfidenceCandidates,
+    mediumConfidenceCandidates,
+    lowConfidenceCandidates,
+    occupiedCandidates,
+    openCandidates,
+    reviewableCandidates,
+    autoSafeCandidates,
+    autoSafeItems,
+    groupAutoSafeItems,
+    ambiguousHighItems,
+    openHighItems,
+    relocationBetterOpenItems,
+    evidenceSourceCounts
   };
 }
 

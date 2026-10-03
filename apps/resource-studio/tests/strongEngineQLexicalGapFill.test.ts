@@ -1,0 +1,854 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import type { OriginalStrongOccurrence } from "../src/completeAlignment.js";
+import {
+  lexicalCandidateItemMetrics,
+  type LexicalCandidateItem,
+  type LexicalCandidateReport
+} from "../src/lexicalCandidateReport.js";
+import {
+  applyLexicalGapFill,
+  buildLexicalGapLexicon,
+  isContentMorphology,
+  isLightStrong,
+  LEXICAL_GAP_TIERS_WITHOUT_SYNONYM_ONLY,
+  lexicalGapEvidence,
+  lexicalGapFillPass,
+  lexicalGapFillReaderCounts,
+  proposeLexicalGapFills,
+  proposeLexicalGapFillsForVerse,
+  surfaceRelation,
+  withinReaderBudget,
+  type LexicalGapCarrier,
+  type LexicalGapTier,
+  type LexicalGapUnit
+} from "../src/lexicalGapFill.js";
+import { assertResolutionKeptReader } from "../src/strongAutonomous.js";
+import { resolveCanonicalVerse } from "../src/strongCanonicalResolution.js";
+import { parseStrongTokens } from "../src/strongCsv.js";
+import {
+  resolveEnginePolicy,
+  type StrongLedger,
+  type StrongLedgerAnnotation,
+  type StrongLedgerMetrics,
+  type StrongLedgerVerse
+} from "../src/strongLedger.js";
+import { parseSourceRow } from "../src/strongSourceUnits.js";
+import { normalizeWord } from "../src/tokenize.js";
+
+const verse = (tagged: string) => ({ tokens: parseStrongTokens(tagged) });
+
+/** A small whole-Bible lexicon: witnesses, Kaikki forms, dictionary, synonyms. */
+function fixtureLexicon() {
+  return buildLexicalGapLexicon({
+    witnessVerses: [
+      verse('il <w strong="H5493">enleva</w> la pierre'),
+      verse('on <w strong="H5493">enlèvera</w> le jabot'),
+      verse('la <w strong="H4631">caverne</w> du champ'),
+      verse('une <w strong="H4631">caverne</w> au désert'),
+      verse('ta <w strong="H2233">postérité</w> sera grande'),
+      verse('sa <w strong="H2233">postérité</w> après lui'),
+      verse('la <w strong="H2233">postérité</w> du juste'),
+      verse('le <w strong="H6419">priai</w> et il <w strong="H6419">pria</w>')
+    ],
+    formLemmas: new Map([
+      ["enleva", ["enlever"]],
+      ["enlevera", ["enlever"]],
+      ["enleve", ["enlever"]],
+      ["priai", ["prier"]],
+      ["pria", ["prier"]],
+      ["priant", ["prier"]],
+      ["fit", ["faire"]],
+      ["faites", ["faire"]],
+      ["terrasse", ["terrer"]],
+      ["terre", ["terrer"]],
+      ["terres", ["terre", "terrer"]],
+      ["terrasses", ["terrasse"]]
+    ]),
+    dictionary: [
+      {
+        strong: "H4631",
+        normalized: "grotte",
+        source: "strong-lexicon-sqlite:fr-gloss"
+      },
+      {
+        strong: "H4631",
+        normalized: "grotte",
+        source: "strong-lexicon-sqlite:fr-gloss:stem"
+      },
+      {
+        strong: "H4692",
+        normalized: "grotte",
+        source: "strong-lexicon-sqlite:fr-gloss"
+      },
+      {
+        strong: "H2233",
+        normalized: "descendance",
+        source: "strong-lexicon-sqlite:fr-meaning"
+      }
+    ],
+    synonyms: new Map([
+      ["posterite", new Set(["lignee", "descendance"])],
+      ["lignee", new Set(["posterite"])]
+    ])
+  });
+}
+
+const unit = (
+  position: number,
+  strong: string,
+  open = false,
+  morphology = "HNcfsa"
+): LexicalGapUnit => ({
+  id: `TAHOT.Gen.50.13.${position}.L`,
+  ref: "Gen.50.13",
+  position,
+  strong: [strong],
+  morphology,
+  open
+});
+const carrier = (position: number, wordIndex: number): LexicalGapCarrier => ({
+  unitId: `TAHOT.Gen.50.13.${position}.L`,
+  startWordIndex: wordIndex,
+  endWordIndex: wordIndex
+});
+const words = (text: string) => text.split(" ").map((w) => normalizeWord(w));
+
+test("the lexicon learns witness lemmas, dictionary glosses and synonyms of main renderings", () => {
+  const lexicon = fixtureLexicon();
+  assert.equal(lexicon.witnessLemmaCounts.get("H5493")?.get("enlever"), 2);
+  assert.equal(lexicon.witnessStrongTotals.get("H2233"), 3);
+  assert.ok(lexicon.dictionaryGlosses.get("H4631")?.has("grotte"));
+  // Stems of dictionary forms are not glosses.
+  assert.equal(lexicon.dictionaryWords.get("H4631")?.size, 1);
+  assert.ok(lexicon.mainLemmas.get("H2233")?.has("posterite"));
+  assert.ok(lexicon.synonymsOfMain.get("lignee")?.has("posterite"));
+  assert.ok(isLightStrong(lexicon, "H5493"));
+
+  assert.equal(
+    lexicalGapEvidence(lexicon, "H5493", "enleve").witness,
+    "enlever"
+  );
+  assert.equal(lexicalGapEvidence(lexicon, "H4631", "grotte").gloss, "grotte");
+  assert.equal(
+    lexicalGapEvidence(lexicon, "H2233", "lignee").synonym,
+    "lignee~posterite"
+  );
+  assert.equal(lexicalGapEvidence(lexicon, "H4631", "champ").any, false);
+});
+
+test("STEP content morphology: nouns, verbs, adjectives and names only", () => {
+  assert.ok(isContentMorphology("HTd/Ncmsa"));
+  assert.ok(isContentMorphology("Hc/Vqw3mp"));
+  assert.ok(isContentMorphology("V-AAI-3S"));
+  assert.ok(isContentMorphology("ANcmpd/Ta"));
+  assert.ok(!isContentMorphology("HTo"));
+  assert.ok(!isContentMorphology("HC/Td"));
+  assert.ok(!isContentMorphology("T-APM"));
+  assert.ok(!isContentMorphology("CONJ"));
+});
+
+test("tier A: the only free word with lexical evidence between placed neighbours", () => {
+  const lexicon = fixtureLexicon();
+  const target = words("ils l'enterrèrent dans la grotte du champ");
+  const units = [unit(1, "H6912"), unit(2, "H4631", true), unit(3, "H7704")];
+  const fills = proposeLexicalGapFills({
+    words: target,
+    units,
+    carriers: [carrier(1, 1), carrier(3, 6)],
+    lexicon
+  });
+  assert.deepEqual(
+    fills.map((f) => [f.unitId, f.wordIndex, f.tier, f.evidence]),
+    [["TAHOT.Gen.50.13.2.L", 4, "A", "gloss:grotte"]]
+  );
+
+  // A word whose search failed stays open: no evidence, no carrier.
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: words("ils l'enterrèrent dans la tombe du champ"),
+      units,
+      carriers: [carrier(1, 1), carrier(3, 6)],
+      lexicon
+    }),
+    []
+  );
+  // Crossed neighbours, or no placed neighbour, give no interval.
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: target,
+      units,
+      carriers: [carrier(1, 6), carrier(3, 1)],
+      lexicon
+    }),
+    []
+  );
+  assert.deepEqual(
+    proposeLexicalGapFills({ words: target, units, carriers: [], lexicon }),
+    []
+  );
+  // A function source word (« HTo ») is never filled.
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: target,
+      units: [
+        unit(1, "H6912"),
+        unit(2, "H4631", true, "HTo"),
+        unit(3, "H7704")
+      ],
+      carriers: [carrier(1, 1), carrier(3, 6)],
+      lexicon
+    }),
+    []
+  );
+});
+
+test("tier A abstains when another free word has evidence, or the pool is wide", () => {
+  const lexicon = fixtureLexicon();
+  const units = [unit(1, "H6912"), unit(2, "H4631", true), unit(3, "H7704")];
+  // « caverne » is a witness rendering too: two candidates, no choice.
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: words("ils l'enterrèrent grotte caverne du champ"),
+      units,
+      carriers: [carrier(1, 1), carrier(3, 5)],
+      lexicon
+    }),
+    []
+  );
+  // Three free content words: beyond the pool of two.
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: words("ils l'enterrèrent profonde grotte obscure du champ"),
+      units,
+      carriers: [carrier(1, 1), carrier(3, 6)],
+      lexicon
+    }),
+    []
+  );
+});
+
+test("tier C needs an interval placed on both sides", () => {
+  const lexicon = fixtureLexicon();
+  const units = [unit(1, "H5414"), unit(2, "H2233", true), unit(3, "H1931")];
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: words("donnée à ta lignée pour toujours"),
+      units,
+      carriers: [carrier(1, 0), carrier(3, 4)],
+      lexicon
+    }).map((f) => [f.wordIndex, f.tier, f.evidence]),
+    [[3, "C", "synonym:lignee~posterite"]]
+  );
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: words("donnée à ta lignée pour toujours"),
+      units,
+      carriers: [carrier(1, 0)],
+      lexicon
+    }),
+    []
+  );
+});
+
+test("tier B: a synonym of a main rendering that the dictionary confirms", () => {
+  const lexicon = fixtureLexicon();
+  const units = [unit(1, "H5414"), unit(2, "H2233", true)];
+  // Placed on one side only: tier C would not fire, tier B does.
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: words("donnée à ta descendance pour toujours"),
+      units,
+      carriers: [carrier(1, 0)],
+      lexicon
+    }).map((f) => [f.wordIndex, f.tier, f.evidence]),
+    [[3, "B", "synonym:descendance~posterite+dictionary:descendance"]]
+  );
+  // « lignée » is a synonym the dictionary does not confirm.
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: words("donnée à ta lignée pour toujours"),
+      units,
+      carriers: [carrier(1, 0)],
+      lexicon
+    }),
+    []
+  );
+});
+
+test("the tiers option turns the synonym-only tier off", () => {
+  const lexicon = fixtureLexicon();
+  const units = [unit(1, "H5414"), unit(2, "H2233", true), unit(3, "H1931")];
+  const propose = (tiers?: readonly LexicalGapTier[]) =>
+    proposeLexicalGapFills({
+      words: words("donnée à ta lignée pour toujours"),
+      units,
+      carriers: [carrier(1, 0), carrier(3, 4)],
+      lexicon,
+      options: { tiers }
+    });
+  assert.equal(propose().length, 1);
+  assert.deepEqual(propose(LEXICAL_GAP_TIERS_WITHOUT_SYNONYM_ONLY), []);
+});
+
+test("a target verse fed by several STEP verses is left as it is", () => {
+  const lexicon = fixtureLexicon();
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: words("ils l'enterrèrent dans la grotte du champ"),
+      units: [
+        unit(1, "H6912"),
+        unit(2, "H4631", true),
+        { ...unit(3, "H7704"), id: "TAHOT.Gen.50.14.3.L", ref: "Gen.50.14" }
+      ],
+      carriers: [carrier(1, 1), carrier(3, 6)],
+      lexicon
+    }),
+    []
+  );
+});
+
+test("a Strong of wide vocabulary is not filled from its lexicon", () => {
+  const lexicon = buildLexicalGapLexicon({
+    witnessVerses: Array.from({ length: 200 }, (_, i) =>
+      verse(`<w strong="H4631">mot${i}</w>`)
+    ),
+    formLemmas: new Map(),
+    dictionary: [
+      {
+        strong: "H4631",
+        normalized: "grotte",
+        source: "strong-lexicon-sqlite:fr-gloss"
+      }
+    ]
+  });
+  assert.ok(!isLightStrong(lexicon, "H4631"));
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: words("ils l'enterrèrent dans la grotte du champ"),
+      units: [unit(1, "H6912"), unit(2, "H4631", true), unit(3, "H7704")],
+      carriers: [carrier(1, 1), carrier(3, 6)],
+      lexicon
+    }),
+    []
+  );
+});
+
+test("two source words on one target word both stay open", () => {
+  const lexicon = fixtureLexicon();
+  const units = [
+    unit(1, "H6912"),
+    unit(2, "H4631", true),
+    unit(3, "H4631", true),
+    unit(4, "H7704")
+  ];
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: words("ils l'enterrèrent dans la grotte du champ"),
+      units,
+      carriers: [carrier(1, 1), carrier(4, 6)],
+      lexicon
+    }),
+    []
+  );
+});
+
+test("a word known to render another source word of the verse stays open", () => {
+  const lexicon = fixtureLexicon();
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: words("ils l'enterrèrent dans la grotte du champ forteresse"),
+      units: [
+        unit(1, "H6912"),
+        unit(2, "H4631", true),
+        unit(3, "H7704"),
+        unit(4, "H4692")
+      ],
+      carriers: [carrier(1, 1), carrier(3, 6), carrier(4, 7)],
+      lexicon
+    }),
+    []
+  );
+});
+
+test("a copy of the word carrying another source word blocks the fill", () => {
+  const lexicon = fixtureLexicon();
+  const units = [
+    unit(1, "H6912"),
+    unit(2, "H4631", true),
+    unit(3, "H7704"),
+    unit(4, "H0001")
+  ];
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: words("ils l'enterrèrent dans la grotte du champ grotte"),
+      units,
+      carriers: [carrier(1, 1), carrier(3, 6), carrier(4, 7)],
+      lexicon
+    }),
+    []
+  );
+});
+
+test("tier W: an inflection of the witnesses' word for this very source word", () => {
+  const lexicon = fixtureLexicon();
+  const witnesses = [
+    {
+      name: "Sg1910",
+      ref: "Gen.50.13",
+      tokens: parseStrongTokens(
+        'je <w strong="H3427" pos="1">restai</w> et je <w strong="H6419" pos="2">priai</w> le <w strong="H0430" pos="3">Dieu</w>'
+      )
+    }
+  ];
+  const units = [
+    unit(1, "H3427"),
+    { ...unit(2, "H6419", true), morphology: "Hc/Vtw1cs" },
+    unit(3, "H0430")
+  ];
+  const fills = proposeLexicalGapFills({
+    words: words("je restai longtemps priant le Dieu"),
+    units,
+    carriers: [carrier(1, 1), carrier(3, 5)],
+    lexicon,
+    witnesses
+  });
+  assert.deepEqual(
+    fills.map((f) => [f.wordIndex, f.tier, f.evidence, f.strong]),
+    [[3, "W", "surface-lemma:Sg1910:priai", "H6419"]]
+  );
+  // A copy of the word carried by another source word makes it ambiguous.
+  assert.deepEqual(
+    proposeLexicalGapFills({
+      words: words("je restai priant priant le Dieu"),
+      units: [...units, unit(4, "H0002")],
+      carriers: [carrier(1, 1), carrier(3, 5), carrier(4, 2)],
+      lexicon,
+      witnesses
+    }),
+    []
+  );
+});
+
+test("surface relations: inflection, guarded homographs, generic lemmas, stems", () => {
+  const lexicon = fixtureLexicon();
+  assert.equal(surfaceRelation(lexicon, "priant", "priai"), "lemma");
+  assert.equal(surfaceRelation(lexicon, "priai", "priai"), "exact");
+  // « terrasse » and « terre » are both headwords: « terrer » links nothing.
+  assert.equal(surfaceRelation(lexicon, "terrasse", "terre"), undefined);
+  assert.equal(surfaceRelation(lexicon, "fit", "faites"), undefined);
+  assert.equal(surfaceRelation(lexicon, "explication", "expliquer"), "prefix");
+});
+
+/**
+ * « ils l'enterrèrent dans la grotte du champ »: the cave (H4631) has no
+ * carrier; its neighbours are placed on « enterrèrent » and « champ ».
+ */
+function gapFixture() {
+  const rows = [
+    "Gen.50.13#01=L\tw1\tw1\tthey buried\t{H6912}\tHVqw3mp\t\t\t\t\t\t",
+    "Gen.50.13#02=L\tw2\tw2\tthe cave\t{H4631}\tHNcfsa\t\t\t\t\t\t",
+    "Gen.50.13#03=L\tw3\tw3\tthe field\t{H7704}\tHNcmsa\t\t\t\t\t\t"
+  ].map((line, i) => parseSourceRow(line, "TAHOT fixture.txt", i + 1)!);
+  const occurrences: OriginalStrongOccurrence[] = rows.map((row, i) => ({
+    occurrenceId: `${row.id}.main:0`,
+    tokenId: `${row.id}.main`,
+    tokenIndex: i + 1,
+    sourceIdentity: row.id,
+    strong: row.primary[0]!,
+    sourceStrong: row.primary[0]!,
+    text: row.surface,
+    gloss: row.gloss,
+    lemma: row.surface,
+    morph: i === 0 ? "HVqw3mp" : "HNcfsa",
+    pos: ""
+  }));
+  const text = "ils l'enterrèrent dans la grotte du champ";
+  const tokens = text.split(" ").map((word, wordIndex) => ({
+    wordIndex,
+    text: word,
+    normalized: normalizeWord(word)
+  }));
+  const annotation = (
+    i: number,
+    fields: Partial<StrongLedgerAnnotation>
+  ): StrongLedgerAnnotation => ({
+    id: `a${i}`,
+    strong: occurrences[i]!.strong,
+    visibility: "reader",
+    placement: "word",
+    source: "reference-transfer",
+    confidence: 0.99,
+    reason: "fixture",
+    diagnostics: ["exact"],
+    originalOccurrenceId: occurrences[i]!.occurrenceId,
+    ...fields
+  });
+  const ledgerVerse = {
+    ref: "Gen.50.13",
+    text,
+    tokens,
+    annotations: [
+      annotation(0, { wordIndex: 1 }),
+      annotation(1, {
+        visibility: "advanced",
+        placement: "empty",
+        source: "original-complete",
+        confidence: 0.35,
+        diagnostics: ["empty-original"],
+        insertAfterWordIndex: 1
+      }),
+      annotation(2, { wordIndex: 6 })
+    ],
+    inventories: {
+      references: {},
+      original: occurrences.map((occurrence) => occurrence.strong),
+      reader: [],
+      advanced: []
+    }
+  } as unknown as StrongLedgerVerse;
+  const resolved: Array<LexicalCandidateItem[] | undefined> = [];
+  const resolve = (
+    v: StrongLedgerVerse,
+    lexicalItems?: LexicalCandidateItem[]
+  ) => {
+    resolved.push(lexicalItems);
+    v.resolution = resolveCanonicalVerse({
+      bible: "s21",
+      verse: v,
+      input: { occurrences, references: [], issues: [] },
+      sourceRows: new Map(rows.map((row) => [row.id, row])),
+      lexicalItems: lexicalItems ?? []
+    });
+  };
+  resolve(ledgerVerse);
+  resolved.length = 0;
+  return { ledgerVerse, resolve, resolved };
+}
+
+test("the gap fill becomes a visible decision of its own assurance", () => {
+  const { ledgerVerse, resolve } = gapFixture();
+  const before = ledgerVerse.resolution!.decisions[1]!;
+  assert.equal(before.state, "unresolved");
+  assert.ok(
+    before.reasons.includes("missing-carrier-is-not-absent-translation")
+  );
+
+  const result = lexicalGapFillPass({
+    verses: [ledgerVerse],
+    lexicon: fixtureLexicon(),
+    witnessesOf: () => [],
+    resolve
+  });
+  assert.equal(result.placed, 1);
+  assert.deepEqual([...result.changedRefs], ["Gen.50.13"]);
+  const after = ledgerVerse.resolution!.decisions[1]!;
+  assert.equal(after.state, "visible");
+  assert.equal(after.assurance, "lexical-gap-fill");
+  assert.deepEqual(after.targetWordIndices, [4]);
+  const carried = ledgerVerse.annotations[1]!;
+  assert.equal(carried.visibility, "reader");
+  assert.equal(carried.placement, "word");
+  assert.equal(carried.source, "lexical-gap-fill");
+  assert.equal(carried.wordIndex, 4);
+  assert.equal(carried.insertAfterWordIndex, undefined);
+  assert.equal(carried.diagnostics[0], "lexical-gap-fill:A:gloss:grotte");
+  // Nothing else moved.
+  assert.equal(ledgerVerse.annotations[0]!.wordIndex, 1);
+  assert.equal(ledgerVerse.annotations[2]!.wordIndex, 6);
+});
+
+test("the pass leaves alone verses in doubt, open readings and other reasons", () => {
+  const lexicon = fixtureLexicon();
+  // Resolution issues: the source correspondence is in doubt.
+  const issues = gapFixture();
+  issues.ledgerVerse.resolution!.issues.push("fixture-issue");
+  assert.equal(
+    lexicalGapFillPass({
+      verses: [issues.ledgerVerse],
+      lexicon,
+      witnessesOf: () => [],
+      resolve: issues.resolve
+    }).placed,
+    0
+  );
+  assert.equal(issues.ledgerVerse.annotations[1]!.visibility, "advanced");
+  // A source reading still open.
+  const reading = gapFixture();
+  reading.ledgerVerse.resolution!.decisions[1]!.source.readingUnresolved = true;
+  assert.deepEqual(
+    proposeLexicalGapFillsForVerse(reading.ledgerVerse, lexicon),
+    []
+  );
+  // Any reason but a missing carrier whose absence is not shown.
+  const reason = gapFixture();
+  reason.ledgerVerse.resolution!.decisions[1]!.reasons = ["fixture-reason"];
+  assert.deepEqual(
+    proposeLexicalGapFillsForVerse(reason.ledgerVerse, lexicon),
+    []
+  );
+  assert.equal(
+    proposeLexicalGapFillsForVerse(gapFixture().ledgerVerse, lexicon).length,
+    1
+  );
+});
+
+test("a fill never puts its Strong over the verse's occurrence budget", () => {
+  const { ledgerVerse, resolve } = gapFixture();
+  assert.ok(withinReaderBudget(ledgerVerse, "H4631"));
+  // A reader annotation of the same Strong already uses the one occurrence.
+  ledgerVerse.annotations.push({
+    id: "extra",
+    strong: "H4631",
+    visibility: "reader",
+    placement: "empty",
+    source: "reference-transfer",
+    confidence: 0.9,
+    reason: "fixture",
+    diagnostics: [],
+    insertAfterWordIndex: 2
+  });
+  assert.ok(!withinReaderBudget(ledgerVerse, "H4631"));
+  const result = lexicalGapFillPass({
+    verses: [ledgerVerse],
+    lexicon: fixtureLexicon(),
+    witnessesOf: () => [],
+    resolve
+  });
+  assert.equal(result.placed, 0);
+  assert.equal(result.overBudget, 1);
+  assert.equal(ledgerVerse.annotations[1]!.visibility, "advanced");
+});
+
+/** A residual lexical report item for annotation `annotationId` of `ref`. */
+const reportItem = (
+  ref: string,
+  annotationId: string
+): LexicalCandidateItem => ({
+  auditKind: "empty",
+  annotationId,
+  ref,
+  text: "",
+  strong: "H4631",
+  stepGlosses: [],
+  dictionaryTerms: [],
+  inferredTerms: [],
+  candidates: [
+    {
+      target: "word",
+      wordIndex: 4,
+      text: "grotte",
+      normalized: "grotte",
+      lemma: "grotte",
+      score: 0.6,
+      confidence: "medium",
+      occupied: false,
+      evidence: [{ source: "strong-dictionary", detail: "grotte", weight: 1 }]
+    }
+  ]
+});
+
+test("the residual lexical report drops the items of the annotations Q filled", () => {
+  const { ledgerVerse, resolve, resolved } = gapFixture();
+  // The same annotation id in another verse is another annotation.
+  const items = [reportItem("Gen.50.13", "a1"), reportItem("Gen.50.14", "a1")];
+  const report = {
+    bible: "s21",
+    generatedAt: "",
+    inputPath: "",
+    scope: "all",
+    sources: {},
+    metrics: {
+      verses: 2,
+      auditItems: 2,
+      emptyAnnotations: 2,
+      readerEmptyAnnotations: 0,
+      advancedEmptyAnnotations: 2,
+      relocationAnnotations: 0,
+      ...lexicalCandidateItemMetrics(items)
+    },
+    items
+  } as unknown as LexicalCandidateReport;
+  const result = lexicalGapFillPass({
+    verses: [ledgerVerse],
+    lexicon: fixtureLexicon(),
+    witnessesOf: () => [],
+    resolve,
+    residualReport: report
+  });
+  assert.equal(result.placed, 1);
+  assert.equal(result.withdrawnLexicalItems, 1);
+  const residual = result.residualReport!;
+  assert.deepEqual(
+    residual.items.map((item) => [item.ref, item.annotationId]),
+    [["Gen.50.14", "a1"]]
+  );
+  assert.deepEqual(residual.metrics, {
+    verses: 2,
+    auditItems: 1,
+    emptyAnnotations: 1,
+    readerEmptyAnnotations: 0,
+    advancedEmptyAnnotations: 1,
+    relocationAnnotations: 0,
+    ...lexicalCandidateItemMetrics([items[1]!])
+  });
+  assert.equal(residual.metrics.candidateCount, 1);
+  // The original report is not modified, and the changed verse is resolved
+  // again with its remaining items: none.
+  assert.equal(report.items.length, 2);
+  assert.deepEqual(resolved, [[]]);
+  assert.deepEqual(
+    ledgerVerse.resolution!.decisions[1]!.exploration.lexicalCandidates,
+    []
+  );
+});
+
+test("an annotation of another identifier becomes a hidden duplicate", () => {
+  const annotations: StrongLedgerAnnotation[] = [
+    {
+      id: "x",
+      strong: "H1980",
+      visibility: "advanced",
+      placement: "empty",
+      source: "original-complete",
+      confidence: 0.35,
+      reason: "fixture",
+      diagnostics: ["empty-original"],
+      insertAfterWordIndex: 0,
+      originalOccurrenceId: "o:0"
+    },
+    {
+      id: "y",
+      strong: "H3212",
+      visibility: "advanced",
+      placement: "empty",
+      source: "original-complete",
+      confidence: 0.35,
+      reason: "fixture",
+      diagnostics: ["empty-original"],
+      insertAfterWordIndex: 0,
+      originalOccurrenceId: "o:1"
+    }
+  ];
+  const v = {
+    tokens: [
+      { wordIndex: 0, text: "il", normalized: "il" },
+      { wordIndex: 1, text: "partit", normalized: "partit" }
+    ],
+    annotations
+  };
+  const fill = {
+    unitId: "u",
+    strong: "H3212",
+    wordIndex: 1,
+    tier: "A" as const,
+    evidence: "witness:partir",
+    poolSize: 1
+  };
+  assert.deepEqual(applyLexicalGapFill(v, ["o:0", "o:1"], fill), [
+    { id: "x", visibility: "advanced" },
+    { id: "y", visibility: "advanced" }
+  ]);
+  assert.equal(annotations[1]!.visibility, "reader");
+  assert.equal(annotations[1]!.wordIndex, 1);
+  assert.equal(annotations[0]!.visibility, "hidden");
+  assert.equal(annotations[0]!.placement, "duplicate");
+  assert.equal(annotations[0]!.wordIndex, 1);
+  // Nothing left to fill: no annotation of that Strong outside the reader.
+  assert.deepEqual(applyLexicalGapFill(v, ["o:0", "o:1"], fill), []);
+});
+
+/** Ledger metrics with only the reader counts the autonomous check reads. */
+const readerMetrics = (
+  readerVisibleStrongCount: number,
+  readerTaggedTokenCount: number,
+  readerOverBudgetStrongCount = 0
+) =>
+  ({
+    verseCount: 1,
+    wordCount: 7,
+    readerVisibleStrongCount,
+    readerTaggedTokenCount,
+    readerOverBudgetStrongCount
+  }) as unknown as StrongLedgerMetrics;
+
+test("the autonomous reader check accepts exactly the counted Q placements", () => {
+  const { ledgerVerse, resolve } = gapFixture();
+  const baseline = readerMetrics(2, 2);
+  // Without Q, resolution must leave the reader as it was.
+  const unchanged = {
+    verses: [ledgerVerse],
+    resolutionBaselineMetrics: baseline,
+    metrics: readerMetrics(2, 2)
+  };
+  assert.doesNotThrow(() => assertResolutionKeptReader("s21", unchanged));
+  assert.throws(
+    () =>
+      assertResolutionKeptReader("s21", {
+        ...unchanged,
+        metrics: readerMetrics(3, 3)
+      }),
+    /reader-regression:s21:readerVisibleStrongCount/
+  );
+
+  const result = lexicalGapFillPass({
+    verses: [ledgerVerse],
+    lexicon: fixtureLexicon(),
+    witnessesOf: () => [],
+    resolve
+  });
+  assert.deepEqual(lexicalGapFillReaderCounts([ledgerVerse]), {
+    readerVisibleStrongCount: 1,
+    readerTaggedTokenCount: 1
+  });
+  const filled: Pick<
+    StrongLedger,
+    "metrics" | "resolutionBaselineMetrics" | "lexicalGapFill" | "verses"
+  > = {
+    verses: [ledgerVerse],
+    resolutionBaselineMetrics: baseline,
+    metrics: readerMetrics(3, 3),
+    lexicalGapFill: {
+      placed: result.placed,
+      verses: result.changedRefs.size,
+      overBudget: result.overBudget,
+      withdrawnLexicalItems: result.withdrawnLexicalItems
+    }
+  };
+  assert.doesNotThrow(() => assertResolutionKeptReader("s21", filled));
+  // Q carriers the ledger does not report are a regression.
+  assert.throws(
+    () =>
+      assertResolutionKeptReader("s21", {
+        ...filled,
+        lexicalGapFill: undefined
+      }),
+    /reader-regression:s21:lexical-gap-fill/
+  );
+  // So is any other change of the reader, or a Strong over budget.
+  assert.throws(
+    () =>
+      assertResolutionKeptReader("s21", {
+        ...filled,
+        metrics: readerMetrics(4, 4)
+      }),
+    /reader-regression:s21:readerVisibleStrongCount/
+  );
+  assert.throws(
+    () =>
+      assertResolutionKeptReader("s21", {
+        ...filled,
+        metrics: readerMetrics(3, 3, 1)
+      }),
+    /reader-regression:s21:readerOverBudgetStrongCount/
+  );
+});
+
+test("policy Q stays off by default until measured", () => {
+  assert.equal(resolveEnginePolicy().lexicalGapFill, false);
+  assert.equal(
+    resolveEnginePolicy({ lexicalGapFill: true }).lexicalGapFill,
+    true
+  );
+});
