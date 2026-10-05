@@ -28,6 +28,7 @@ jest.mock('../resourceAccess', () => ({
 jest.mock('../useOfflineResourceRegistry', () => ({
   useOfflineResourceRegistry: () => ({ resources: new Map() }),
 }))
+jest.mock('../useStrongIndexLexicon', () => ({ useStrongIndexLexiconModuleId: () => undefined }))
 jest.mock('~common/Loading', () => () => null)
 jest.mock('~common/ui/Progress', () => () => null)
 jest.mock('~common/DownloadRequired', () => {

@@ -23,6 +23,7 @@ import {
 } from '~helpers/downloadItemFactory'
 import { VersionCode } from 'src/state/tabs'
 import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
+import { useStrongIndexLexiconModuleId } from '~features/resources/useStrongIndexLexicon'
 import {
   getStrongBibleAttributionKey,
   isStrongCapableBibleVersion,
@@ -356,6 +357,7 @@ const VersionSelectorItem = ({
   const strongOfflineAvailability = strongResourceState?.availability as
     | StrongBibleSidecarAvailability
     | undefined
+  const lexiconModuleId = useStrongIndexLexiconModuleId()
   const requiresStrong = selectionRequirement === 'strong' && Boolean(strongVersionId)
   const { data: strongUsageAvailability } = useQuery({
     queryKey: ['strong-selection-availability', strongVersionId, strongOfflineAvailability?.status],
@@ -441,7 +443,9 @@ const VersionSelectorItem = ({
       const availability = strongSelectionAvailability
       if (!availability) return
       onDownloadStart?.(version.id)
-      downloadManager.enqueue(createStrongSidecarDownloadPlan(strongVersionId, availability.status))
+      downloadManager.enqueue(
+        createStrongSidecarDownloadPlan(strongVersionId, availability.status, lexiconModuleId)
+      )
       return
     }
 

@@ -16,6 +16,7 @@ import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { getDownloadItemProgress } from '~state/downloadQueue'
 import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
+import { useStrongIndexLexiconModuleId } from '~features/resources/useStrongIndexLexicon'
 import useConnection from '~helpers/useConnection'
 interface Props {
   versionId: StrongBibleVersionId
@@ -37,6 +38,7 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
     createOfflineCopyId({ kind: 'strong-bible-index', versionId })
   )
   const availability = resourceState?.availability as StrongBibleSidecarAvailability | undefined
+  const lexiconModuleId = useStrongIndexLexiconModuleId()
 
   React.useEffect(() => {
     onAvailabilityChange(availability?.status === 'available')
@@ -51,7 +53,7 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
     if (isAvailable || strongActiveDownload) return
     if (!isConnected) return
     downloadManager.enqueue(
-      createStrongSidecarDownloadPlan(versionId, availability?.status ?? 'missing')
+      createStrongSidecarDownloadPlan(versionId, availability?.status ?? 'missing', lexiconModuleId)
     )
   }
 

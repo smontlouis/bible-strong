@@ -133,6 +133,22 @@ describe('Strong Bible download planning', () => {
     }
   )
 
+  it('acquires the named Strong lexicon with the index, independently of it', () => {
+    const plan = createStrongSidecarDownloadPlan('DBY', 'missing', 'simple-fr')
+
+    expect(plan.map(item => item.id)).toEqual(['bible-strong:DBY', 'strong-lexicon:simple-fr'])
+    expect(plan[1]?.dependsOnId).toBeUndefined()
+  })
+
+  it('keeps the canonical Bible first when the lexicon comes with a missing base', () => {
+    expect(
+      createOfflineCopyDownloadPlan(
+        { kind: 'strong-bible-index', versionId: 'DBY' },
+        { availabilityStatus: 'base-missing', strongIndexLexiconModuleId: 'simple-en' }
+      ).map(item => item.id)
+    ).toEqual(['bible:DBY', 'bible-strong:DBY', 'strong-lexicon:simple-en'])
+  })
+
   it('deduplicates a base selected explicitly and added as a sidecar dependency', () => {
     const plan = createStrongSidecarDownloadPlan('DBY', 'base-missing')
     expect(dedupeDownloadItems([plan[0]!, ...plan]).map(item => item.id)).toEqual([

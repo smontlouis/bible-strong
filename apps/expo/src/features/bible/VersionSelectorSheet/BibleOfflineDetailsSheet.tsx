@@ -33,6 +33,7 @@ import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { getDownloadItemProgress } from '~state/downloadQueue'
 import { bibleDataRefreshSignalAtom } from '~state/app'
 import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
+import { useStrongIndexLexiconModuleId } from '~features/resources/useStrongIndexLexicon'
 import useConnection from '~helpers/useConnection'
 import { getLanguage } from '~i18n'
 const megabyteFormatters = new Map<string, Intl.NumberFormat>()
@@ -79,6 +80,7 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
   const interlinearQueue = useDownloadItemStatus(interlinearId)
   const bibleResourceState = useOfflineResourceState(bibleId)
   const strongResourceState = useOfflineResourceState(strongId)
+  const lexiconModuleId = useStrongIndexLexiconModuleId()
   const interlinearResourceState = useOfflineResourceState(interlinearId)
   const [indexChoice, setIndexChoice] = React.useState({
     versionId,
@@ -113,6 +115,12 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
     ? getMobileResourceCatalogEntry(interlinearId)
     : undefined
   const indexArtifact = strongArtifact ?? interlinearArtifact
+  const lexiconArtifact =
+    strongVersionId && lexiconModuleId
+      ? getMobileResourceCatalogEntry(
+          createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: lexiconModuleId })
+        )
+      : undefined
   const indexId = strongId ?? interlinearId
   const activeQueue = [bibleQueue, strongQueue, interlinearQueue].find(state =>
     state ? ['queued', 'downloading', 'inserting'].includes(state.status) : false
@@ -133,7 +141,10 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
       value: formatMegabyteValue(bytes, i18n.language),
     })
   const selectedArchiveBytes =
-    bibleArtifact.archiveBytes + (includeIndex && indexArtifact ? indexArtifact.archiveBytes : 0)
+    bibleArtifact.archiveBytes +
+    (includeIndex && indexArtifact
+      ? indexArtifact.archiveBytes + (lexiconArtifact?.archiveBytes ?? 0)
+      : 0)
   const shouldDownloadIndex =
     bibleInstalled === true &&
     Boolean(strongVersionId || hasInterlinearIndex) &&
@@ -162,7 +173,8 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
             ? 'base-missing'
             : strongResourceState?.availability.status === 'core-missing'
               ? 'missing'
-              : (strongResourceState?.availability.status ?? 'base-missing')
+              : (strongResourceState?.availability.status ?? 'base-missing'),
+          lexiconModuleId
         )
       )
       return
@@ -341,7 +353,9 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
                   </Text>
                   <Text className="text-tertiary text-[11px]">
                     {t('bibleOfflineDetails.indexOptionSubtitle', {
-                      size: formatSize(indexArtifact.installedBytes),
+                      size: formatSize(
+                        indexArtifact.installedBytes + (lexiconArtifact?.installedBytes ?? 0)
+                      ),
                     })}
                   </Text>
                 </Box>

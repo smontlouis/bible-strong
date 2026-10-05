@@ -29,6 +29,7 @@ import {
   createStrongLexiconModuleDownloadItem,
   createStrongLexiconModuleDownloadPlan,
 } from './strongLexiconDownloadItems'
+import type { StrongLexiconModuleId } from './strongLexiconPublications'
 export {
   createStrongLexiconModuleDownloadItem,
   createStrongLexiconModuleDownloadPlan,
@@ -159,17 +160,23 @@ export function createStrongSidecarDownloadItem(versionId: StrongBibleVersionId)
   }
 }
 
+/**
+ * `lexiconModuleId` names the Strong lexicon to acquire with the index when the reader has
+ * none installed: Strong numbers open their entry without a connection only with a lexicon.
+ */
 export const createStrongSidecarDownloadPlan = (
   versionId: StrongBibleVersionId,
-  availabilityStatus: StrongBibleSidecarAvailability['status']
+  availabilityStatus: StrongBibleSidecarAvailability['status'],
+  lexiconModuleId?: StrongLexiconModuleId
 ): DownloadItem[] => {
   const sidecar = createStrongSidecarDownloadItem(versionId)
+  const lexicon = lexiconModuleId ? [createStrongLexiconModuleDownloadItem(lexiconModuleId)] : []
   if (availabilityStatus !== 'base-missing' && availabilityStatus !== 'base-incompatible') {
-    return [sidecar]
+    return [sidecar, ...lexicon]
   }
 
   const bible = createBibleDownloadItem(versionId)
-  return [bible, { ...sidecar, dependsOnId: bible.id }]
+  return [bible, { ...sidecar, dependsOnId: bible.id }, ...lexicon]
 }
 
 export const dedupeDownloadItems = (items: DownloadItem[]): DownloadItem[] => [
@@ -182,6 +189,7 @@ type OfflineCopyDownloadPlanContext = {
     | InterlinearSidecarAvailability['status']
   isStrongLexiconCoreAvailable?: boolean
   isDictionaryDirectoryAvailable?: boolean
+  strongIndexLexiconModuleId?: StrongLexiconModuleId
 }
 
 export const createOfflineCopyDownloadItem = (identity: OfflineCopyIdentity): DownloadItem => {
@@ -219,7 +227,8 @@ export const createOfflineCopyDownloadPlan = (
       return createStrongSidecarDownloadPlan(
         identity.versionId,
         (context.availabilityStatus as StrongBibleSidecarAvailability['status'] | undefined) ??
-          'base-missing'
+          'base-missing',
+        context.strongIndexLexiconModuleId
       )
     case 'interlinear-index':
       return createInterlinearSidecarDownloadPlan(

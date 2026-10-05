@@ -84,6 +84,9 @@ Future storage reduction must preserve independent advanced-only installations,
 revision compatibility and language-specific decisions.
 
 Strong onboarding defaults to the simple lexicon in the chosen resource language.
+Acquiring a Strong Bible index later also acquires the simple lexicon in the Strong
+language when neither it nor the detailed core is installed: Strong numbers open their
+entry offline only with a lexicon. The lexicon remains an independent Offline copy.
 Detailed enrichments retain their normal dependency ordering and independent
 installation, update and deletion lifecycle.
 

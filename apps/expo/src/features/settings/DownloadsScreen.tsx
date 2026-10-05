@@ -29,6 +29,7 @@ import {
 } from '~helpers/databaseTypes'
 import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
+import { useStrongIndexLexiconModuleId } from '~features/resources/useStrongIndexLexicon'
 import { resourceNeedsUpdate } from '~features/resources/availableUpdates'
 import { useMarkAvailableUpdatesSeen } from '~features/resources/useAvailableUpdates'
 import {
@@ -392,6 +393,7 @@ const DownloadsScreen = () => {
     retry: false,
   })
   const { enqueue, clearCompleted } = useDownloadQueue()
+  const strongIndexLexiconModuleId = useStrongIndexLexiconModuleId()
   useMarkAvailableUpdatesSeen()
 
   // Local state
@@ -548,6 +550,7 @@ const DownloadsScreen = () => {
       case 'strong-bible-index':
         return createOfflineCopyDownloadPlan(identity, {
           availabilityStatus: strongAvailability.get(identity.versionId)?.status ?? 'base-missing',
+          strongIndexLexiconModuleId,
         })
       case 'interlinear-index':
         return createOfflineCopyDownloadPlan(identity, {
