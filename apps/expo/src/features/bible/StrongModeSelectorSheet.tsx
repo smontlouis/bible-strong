@@ -12,6 +12,7 @@ import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { downloadManager } from '~helpers/downloadManager'
+import { createStrongLexiconModuleDownloadItem } from '~helpers/downloadItemFactory'
 import { createStrongModeDownloadPlan } from '~helpers/strongModeDownloadPlan'
 import {
   isStrongCapableBibleVersion,
@@ -35,6 +36,7 @@ import {
   getOfflineResourceQuerySignal,
   useOfflineResourceRegistry,
 } from '~features/resources/useOfflineResourceRegistry'
+import { useStrongIndexLexiconModuleId } from '~features/resources/useStrongIndexLexicon'
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
   sheetRef?: RefObject<SheetRef | null>
@@ -50,6 +52,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onClose 
   const resources = useResourceAccess()
   const isConnected = useConnection()
   const resourceRegistry = useOfflineResourceRegistry()
+  const lexiconModuleId = useStrongIndexLexiconModuleId()
   const downloadStates = useAtomValue(downloadItemStatesAtom)
   const selectedMode = bible.data.strongMode ?? 'hidden'
   const version = bible.data.selectedVersion
@@ -173,7 +176,13 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onClose 
           mode === 'reverse-interlinear' ? plan.preferredInterlinearLocale : undefined,
         planIds: plan.items.map(item => item.id),
       })
-      downloadManager.enqueue(plan.items)
+      // The lexicon comes with a Strong index, without holding back the display mode.
+      downloadManager.enqueue([
+        ...plan.items,
+        ...(lexiconModuleId && strong.status !== 'available'
+          ? [createStrongLexiconModuleDownloadItem(lexiconModuleId)]
+          : []),
+      ])
     } catch {
       toast.error(t('resource.action.temporarilyUnavailable'))
     }

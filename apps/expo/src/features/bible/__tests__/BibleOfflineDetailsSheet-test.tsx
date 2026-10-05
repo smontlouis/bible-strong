@@ -1,6 +1,7 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import BibleOfflineDetailsSheet from '../VersionSelectorSheet/BibleOfflineDetailsSheet'
+import { createStrongSidecarDownloadPlan } from '~helpers/downloadItemFactory'
 const mockLocalAvailability = jest.fn()
 const mockHybridStrongAvailability = jest.fn()
 
@@ -102,6 +103,10 @@ jest.mock('~features/resources/useOfflineResourceRegistry', () => ({
       : undefined,
 }))
 
+jest.mock('~features/resources/useStrongIndexLexicon', () => ({
+  useStrongIndexLexiconModuleId: () => 'simple-fr',
+}))
+
 jest.mock('~helpers/bibleBookCatalog', () => ({ getBooksForCanon: () => [] }))
 jest.mock('~helpers/downloadItemFactory', () => ({
   createBibleDownloadItem: () => ({ id: 'bible:LSG' }),
@@ -174,5 +179,25 @@ describe('BibleOfflineDetailsSheet', () => {
     })
 
     expect(renderer.root.findByType('Switch' as never)).toBeTruthy()
+  })
+
+  it('acquires the Strong lexicon with the index when none is installed', async () => {
+    await act(async () => {
+      renderer = create(
+        <BibleOfflineDetailsSheet
+          sheetRef={{ current: null }}
+          version={{
+            id: 'LSG',
+            name: 'Louis Segond',
+            language: 'fr',
+            readingProfile: 'word-for-word',
+          }}
+        />
+      )
+    })
+
+    act(() => renderer.root.findAllByType('Button' as never)[0]!.props.onPress())
+
+    expect(createStrongSidecarDownloadPlan).toHaveBeenCalledWith('LSG', 'missing', 'simple-fr')
   })
 })

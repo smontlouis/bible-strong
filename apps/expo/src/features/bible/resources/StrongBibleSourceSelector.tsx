@@ -43,6 +43,7 @@ import {
   getOfflineResourceQuerySignal,
   useOfflineResourceRegistry,
 } from '~features/resources/useOfflineResourceRegistry'
+import { useStrongIndexLexiconModuleId } from '~features/resources/useStrongIndexLexicon'
 type SharedProps = {
   bibleAtom: PrimitiveAtom<BibleTab>
   resolvedProvenance: LexiconBibleProvenance | null
@@ -384,6 +385,7 @@ export const StrongBibleSourceSheet = ({
   const bible = useAtomValue(bibleAtom)
   const setBible = useSetAtom(bibleAtom)
   const resourceRegistry = useOfflineResourceRegistry()
+  const lexiconModuleId = useStrongIndexLexiconModuleId()
   const { enqueue } = useDownloadQueue()
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [pendingSelectionVersionId, setPendingSelectionVersionId] = useState<StrongBibleVersionId>()
@@ -499,7 +501,7 @@ export const StrongBibleSourceSheet = ({
         availabilityByVersion.get(versionId) ??
         (await resources.strongBible.getAvailability(versionId))
       setPendingSelectionVersionId(versionId)
-      enqueue(createStrongSidecarDownloadPlan(versionId, availability.status))
+      enqueue(createStrongSidecarDownloadPlan(versionId, availability.status, lexiconModuleId))
     } catch {
       toast.error(t('resource.action.temporarilyUnavailable'))
     }

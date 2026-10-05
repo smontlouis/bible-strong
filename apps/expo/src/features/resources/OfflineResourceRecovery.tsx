@@ -9,6 +9,7 @@ import { useResourceAccess } from './resourceAccess'
 import { getResourceActions, resourceIdentityFromOfflineCopy } from './resourceModel'
 import useConnection from '~helpers/useConnection'
 import { useOfflineResourceRegistry } from './useOfflineResourceRegistry'
+import { useStrongIndexLexiconModuleId } from './useStrongIndexLexicon'
 import { useTranslation } from 'react-i18next'
 import type { ResourceFailureIcon } from './resourceFailure'
 
@@ -34,6 +35,7 @@ const OfflineResourceRecovery = ({
   const resources = useResourceAccess()
   const isConnected = useConnection()
   const registry = useOfflineResourceRegistry()
+  const strongIndexLexiconModuleId = useStrongIndexLexiconModuleId()
   const { t } = useTranslation()
   const queue = useDownloadItemStatus(createOfflineCopyId(identity))
   const isActive =
@@ -92,6 +94,7 @@ const OfflineResourceRecovery = ({
             createOfflineCopyDownloadPlan(identity, {
               isDictionaryDirectoryAvailable:
                 registry.resources.get('dictionary-directory')?.availability.status === 'available',
+              strongIndexLexiconModuleId,
             })
           )
         }
