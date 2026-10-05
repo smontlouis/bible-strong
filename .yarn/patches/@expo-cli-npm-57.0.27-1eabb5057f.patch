@@ -1,5 +1,5 @@
 diff --git a/build/src/export/exportDomComponents.js b/build/src/export/exportDomComponents.js
-index cee1be17099f215f9a5e8c3010dc5dae14d79999..7495823ed5036eeb2c4c03d01913997ccd65d037 100644
+index cee1be17099f215f9a5e8c3010dc5dae14d79999..16160bfeb047a12ba984f3f7389d3ff46c3b10fe 100644
 --- a/build/src/export/exportDomComponents.js
 +++ b/build/src/export/exportDomComponents.js
 @@ -75,6 +75,20 @@ function _interop_require_default(obj) {
@@ -23,7 +23,7 @@ index cee1be17099f215f9a5e8c3010dc5dae14d79999..7495823ed5036eeb2c4c03d01913997c
  async function exportDomComponentAsync({ filePath, projectRoot, dev, devServer, isHermes, includeSourceMaps, exp, files, useMd5Filename = false }) {
      var _exp_experiments;
      const virtualEntry = (0, _resolvefrom().default)(projectRoot, 'expo/dom/entry.js');
-@@ -103,10 +120,7 @@ async function exportDomComponentAsync({ filePath, projectRoot, dev, devServer,
+@@ -103,10 +117,7 @@ async function exportDomComponentAsync({ filePath, projectRoot, dev, devServer,
          minify: true
      });
      if (useMd5Filename) {
@@ -36,7 +36,7 @@ index cee1be17099f215f9a5e8c3010dc5dae14d79999..7495823ed5036eeb2c4c03d01913997c
      const html = await (0, _serializeHtml.serializeHtmlWithAssets)({
          isExporting: true,
 diff --git a/build/src/start/server/middleware/DomComponentsMiddleware.js b/build/src/start/server/middleware/DomComponentsMiddleware.js
-index 9354bedfc84d53efd54e089ad3e9e23c4d026123..55d8eb166ff1cfa17aa2a34623b01ca9e97dd583 100644
+index 9354bedfc84d53efd54e089ad3e9e23c4d026123..06c74c525a0aaa933089044625e3edece8517efc 100644
 --- a/build/src/start/server/middleware/DomComponentsMiddleware.js
 +++ b/build/src/start/server/middleware/DomComponentsMiddleware.js
 @@ -132,13 +132,22 @@ function getDomComponentHtml(src, { title } = {}) {

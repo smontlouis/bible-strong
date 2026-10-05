@@ -15,7 +15,7 @@ Evidence: the repo has a full Expo/React Native app, `package.json` scripts, `ap
 
 ### Detected Stack
 
-- Expo SDK 54, React Native 0.81, React 19, TypeScript.
+- Expo SDK 57, React Native 0.86, React 19, TypeScript.
 - Expo Router entrypoint via `expo-router/entry`; routes live under `app/`.
 - Redux Toolkit, Redux Persist, Jotai, MMKV, SQLite, Firebase, Sentry.
 - Emotion Native for styling and feature-based modules under `src/features/`.

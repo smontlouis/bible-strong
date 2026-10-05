@@ -1,5 +1,5 @@
 diff --git a/build/community/bottom-sheet/types.d.ts b/build/community/bottom-sheet/types.d.ts
-index 72fc6becbc414c318799e28103d15484ed86f703..1e3301e1818f9c23e22ec966b3614bbb30c84ea4 100644
+index 72fc6becbc414c318799e28103d15484ed86f703..2a4a4c7198648dfddafd40418149d0fa4392165e 100644
 --- a/build/community/bottom-sheet/types.d.ts
 +++ b/build/community/bottom-sheet/types.d.ts
 @@ -112,6 +112,10 @@ export interface BottomSheetFooterProps {

@@ -1,8 +1,8 @@
 diff --git a/src/dom/base.ts b/src/dom/base.ts
-index 14191c347..b5fb64447 100644
+index 2288c0af0f669b573b7e13315619c541c3f548c2..53390bacf19a82debcb046784670a95d2408b794 100644
 --- a/src/dom/base.ts
 +++ b/src/dom/base.ts
-@@ -1 +1,22 @@
+@@ -1,4 +1,25 @@
  let cachedBaseUrl: string | null = null;
 +/**
 + * Resolve a DOM component to its exact local update asset when possible.
@@ -25,8 +25,11 @@ index 14191c347..b5fb64447 100644
 +  return `${getBaseURL()}/${filePath}`;
 +}
 +
+ 
+ /**
+  * Get the base URL for the DOM Components HTML
 diff --git a/src/dom/dom-entry.tsx b/src/dom/dom-entry.tsx
-index 46f25f77f998a67a3b560afad7eca2dfc35c8185..2ff61462cf984b3b50a4d8548f7d15cfc5f695ea 100644
+index 859ba0f501ab725ce1f6e2f4e46636bf8066e546..72b50ff60eabb9744990f2e99ac2483d06994c22 100644
 --- a/src/dom/dom-entry.tsx
 +++ b/src/dom/dom-entry.tsx
 @@ -67,18 +67,22 @@ export function registerDOMComponent(AppModule: any) {
@@ -53,7 +56,7 @@ index 46f25f77f998a67a3b560afad7eca2dfc35c8185..2ff61462cf984b3b50a4d8548f7d15cf
            setProps(msg.data as MarshalledProps);
          }
        });
-@@ -88,14 +92,18 @@ export function registerDOMComponent(AppModule: any) {
+@@ -90,14 +94,18 @@ export function registerDOMComponent(AppModule: any) {
      }, [setProps]);
  
      const proxyActions = React.useMemo(() => {
@@ -75,16 +78,28 @@ index 46f25f77f998a67a3b560afad7eca2dfc35c8185..2ff61462cf984b3b50a4d8548f7d15cf
      return <AppModule {...props} {...(marshalledProps.props || {})} {...proxyActions} />;
    }
 diff --git a/src/dom/webview-wrapper.tsx b/src/dom/webview-wrapper.tsx
-index 1695ebcf983f50949f4b7dce2845669f6b159383..8f0110084 100644
+index c9d79a41e43da2e7e5f668bf0e2ab665bdbf5182..868ff56c41ee37e43cd6924dfd285ff018ad3c80 100644
 --- a/src/dom/webview-wrapper.tsx
 +++ b/src/dom/webview-wrapper.tsx
-@@ -7 +7 @@
+@@ -6,7 +6,7 @@
+ import React from 'react';
+ import { AppState } from 'react-native';
+ 
 -import { getBaseURL } from './base';
 +import { getDOMComponentURL } from './base';
-@@ -76 +76 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+ import type { DOMPropsInternal } from './dom-internal.types';
+ import type { BridgeMessage, WebViewProps, WebViewRef } from './dom.types';
+ import { _emitGlobalEvent } from './global-events';
+@@ -74,7 +74,7 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+   const webView = resolveWebView(useExpoDOMWebView);
+   const webviewRef = React.useRef<WebViewRef>(null);
+   const domImperativeHandlePropsRef = React.useRef<string[]>([]);
 -  const source = { uri: overrideUri ?? `${getBaseURL()}/${filePath}` };
 +  const source = { uri: overrideUri ?? getDOMComponentURL(filePath) };
-@@ -106,6 +106,16 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+   const [containerStyle, setContainerStyle] = React.useState<WebViewProps['containerStyle']>(null);
+ 
+   const { debugZeroHeightStyle, debugOnLayout } = useDebugZeroHeight(dom);
+@@ -107,6 +107,16 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
    // Keep `initialProps` stable to prevent webview reloads when
    // `injectedJavaScriptObject` changes.
    const initialPropsRef = React.useRef(smartActions);
@@ -101,7 +116,7 @@ index 1695ebcf983f50949f4b7dce2845669f6b159383..8f0110084 100644
  
    // When the `marshalProps` change, emit them to the webview.
    React.useEffect(() => {
-@@ -144,12 +154,23 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+@@ -145,12 +155,23 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
      ...(useExpoDOMWebView ? { useExpoModulesBridge } : null),
      containerStyle: [containerStyle, debugZeroHeightStyle, dom?.containerStyle],
      onLayout: (__DEV__ ? debugOnLayout : dom?.onLayout) as RawWebViewProps['onLayout'],

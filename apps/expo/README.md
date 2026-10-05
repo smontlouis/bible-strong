@@ -355,7 +355,7 @@ Pour plus de details techniques, consultez [l'index de la documentation](./docs/
 
 | Categorie | Technologies |
 |-----------|--------------|
-| Framework | React Native 0.81, Expo SDK 54 |
+| Framework | React Native 0.86, Expo SDK 57 |
 | Langage | TypeScript 5.9 |
 | Etat | Redux Toolkit, Jotai, Redux Persist |
 | Styling | Emotion |

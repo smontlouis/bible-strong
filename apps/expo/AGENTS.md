@@ -15,7 +15,7 @@ Bible Strong is a React Native application for Bible study, primarily targeting 
 - **Timeline**: Biblical history visualization
 - **Offline support**: Core functionality works without internet
 
-**Tech Stack**: Expo SDK 54, React Native 0.81, TypeScript, Redux Toolkit, Jotai, Uniwind, SQLite
+**Tech Stack**: Expo SDK 57, React Native 0.86, TypeScript, Redux Toolkit, Jotai, Uniwind, SQLite
 
 ## Documentation Reference
 

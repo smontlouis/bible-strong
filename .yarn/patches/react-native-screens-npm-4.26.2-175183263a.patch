@@ -1,8 +1,8 @@
 diff --git a/ios/RNSScreenStack.mm b/ios/RNSScreenStack.mm
-index bfd0a519a09eb346dfd687fe2feb0b5489d34c32..2190f948015dbb5967da06e7c4b49de0b5694708 100644
+index 192f5d2c77192f323844b0d11ee179081891e7a4..4d77b376b3e47d42bfc1781612aeb4ad4ac1cacc 100644
 --- a/ios/RNSScreenStack.mm
 +++ b/ios/RNSScreenStack.mm
-@@ -522,8 +522,10 @@ RNS_IGNORE_SUPER_CALL_END
+@@ -509,8 +509,10 @@ RNS_IGNORE_SUPER_CALL_END
  
    // This check is for external modals that are not owned by this stack. They can prevent the dismissal of the modal by
    // extending RNSDismissibleModalProtocol and returning NO from isDismissible method.
@@ -15,7 +15,7 @@ index bfd0a519a09eb346dfd687fe2feb0b5489d34c32..2190f948015dbb5967da06e7c4b49de0
      if (firstModalToBeDismissed != nil) {
        const BOOL firstModalToBeDismissedIsOwned = [firstModalToBeDismissed isKindOfClass:RNSScreen.class];
        const BOOL firstModalToBeDismissedIsOwnedByThisStack =
-@@ -581,6 +583,28 @@ RNS_IGNORE_SUPER_CALL_END
+@@ -568,6 +570,28 @@ RNS_IGNORE_SUPER_CALL_END
          return;
        }
      }
