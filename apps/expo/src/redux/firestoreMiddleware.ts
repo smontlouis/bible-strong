@@ -54,6 +54,7 @@ import {
   changeColor,
   decreaseSettingsFontSizeScale,
   increaseSettingsFontSizeScale,
+  isSyncedDefaultBibleVersionAction,
   setDefaultColorName,
   setDefaultColorType,
   setDefaultStrongBibleVersion,
@@ -71,6 +72,7 @@ import {
   setSettingsPreferredDarkTheme,
   setSettingsPreferredLightTheme,
   setSettingsPress,
+  setSettingsRedWordsDisplay,
   setSettingsRelationsDisplay,
   setSettingsTagsDisplay,
   setSettingsTextDisplay,
@@ -512,7 +514,9 @@ const isSettingsAction = isAnyOf(
   saveAllLogsAsSeen,
   setDefaultColorName,
   setDefaultColorType,
-  setDefaultStrongBibleVersion
+  isSyncedDefaultBibleVersionAction,
+  setDefaultStrongBibleVersion,
+  setSettingsRedWordsDisplay
 )
 
 const isCustomColorAction = isAnyOf(addCustomColor, updateCustomColor, deleteCustomColor)

@@ -74,6 +74,7 @@ jest.mock('~features/resources/useOfflineResourceRegistry', () => ({
 }))
 jest.mock('../versionCatalogState', () => ({
   bibleVersionGroupingAtom: Symbol('bibleVersionGroupingAtom'),
+  bibleVersionAvailabilityAtom: Symbol('bibleVersionAvailabilityAtom'),
 }))
 jest.mock('../versionAvailability', () => ({
   getDownloadedBibleVersionIds: async () => new Set(),

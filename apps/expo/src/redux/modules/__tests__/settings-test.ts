@@ -26,6 +26,7 @@ import {
   setDefaultColorName,
   setDefaultColorType,
   setDefaultBibleVersion,
+  isSyncedDefaultBibleVersionAction,
   changeColor,
 } from '../user/settings'
 
@@ -517,6 +518,14 @@ describe('Settings Reducer', () => {
     it('should set default Bible version', () => {
       const newState = userReducer(initialState, setDefaultBibleVersion('KJV'))
       expect(newState.bible.settings.defaultBibleVersion).toBe('KJV')
+    })
+
+    it('syncs an explicit choice but keeps onboarding language defaults local', () => {
+      expect(isSyncedDefaultBibleVersionAction(setDefaultBibleVersion('BDS'))).toBe(true)
+      expect(
+        isSyncedDefaultBibleVersionAction(setDefaultBibleVersion('LSG', { localOnly: true }))
+      ).toBe(false)
+      expect(isSyncedDefaultBibleVersionAction({ type: 'UNKNOWN_ACTION' })).toBe(false)
     })
   })
 

@@ -1,5 +1,5 @@
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
-import type { BibleVersionGrouping } from './versionCatalog'
+import type { BibleVersionAvailability, BibleVersionGrouping } from './versionCatalog'
 
 const BIBLE_VERSION_GROUPINGS: BibleVersionGrouping[] = ['alphabetical', 'language', 'style']
 
@@ -12,4 +12,18 @@ export const bibleVersionGroupingAtom = atomWithAsyncStorage<BibleVersionGroupin
   'bibleVersionGrouping.v1',
   'language',
   { migrate: migrateBibleVersionGrouping }
+)
+
+const BIBLE_VERSION_AVAILABILITIES: BibleVersionAvailability[] = ['all', 'downloaded']
+
+export const migrateBibleVersionAvailability = (value: unknown): BibleVersionAvailability =>
+  BIBLE_VERSION_AVAILABILITIES.includes(value as BibleVersionAvailability)
+    ? (value as BibleVersionAvailability)
+    : 'all'
+
+// Device-local on purpose: downloads differ per device.
+export const bibleVersionAvailabilityAtom = atomWithAsyncStorage<BibleVersionAvailability>(
+  'bibleVersionAvailability.v1',
+  'all',
+  { migrate: migrateBibleVersionAvailability }
 )
