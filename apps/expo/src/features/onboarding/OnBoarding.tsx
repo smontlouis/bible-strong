@@ -34,7 +34,7 @@ const useOptionalOnboarding = () => {
     }
 
     const defaultVersion = getDefaultBibleVersion(lang)
-    dispatch(setDefaultBibleVersion(defaultVersion))
+    dispatch(setDefaultBibleVersion(defaultVersion, { localOnly: true }))
     setShowOnboarding(true)
   }, [lang, dispatch, isOnboardingCompleted])
 

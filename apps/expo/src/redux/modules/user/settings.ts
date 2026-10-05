@@ -137,10 +137,20 @@ export const setDefaultColorType = createAction(
   })
 )
 
+// `localOnly` keeps language-derived defaults (onboarding) from overwriting the
+// reading version the account already synced from another install.
 export const setDefaultBibleVersion = createAction(
   SET_DEFAULT_BIBLE_VERSION,
-  (payload: string) => ({ payload })
+  (payload: string, options?: { localOnly?: boolean }) => ({
+    payload,
+    meta: { localOnly: options?.localOnly ?? false },
+  })
 )
+
+export const isSyncedDefaultBibleVersionAction = (action: {
+  type: string
+}): action is ReturnType<typeof setDefaultBibleVersion> =>
+  setDefaultBibleVersion.match(action) && !action.meta.localOnly
 
 export const setDefaultStrongBibleVersion = createAction(
   SET_DEFAULT_STRONG_BIBLE_VERSION,

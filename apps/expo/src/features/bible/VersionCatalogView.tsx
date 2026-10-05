@@ -20,7 +20,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { type TranslationReadingProfile, type Version } from '~helpers/bibleVersions'
 import useLanguage from '~helpers/useLanguage'
-import { bibleVersionGroupingAtom } from './versionCatalogState'
+import { bibleVersionAvailabilityAtom, bibleVersionGroupingAtom } from './versionCatalogState'
 import {
   filterVersionCatalogByAvailability,
   getVersionCatalogLocation,
@@ -53,7 +53,7 @@ export const useVersionCatalog = (
   const uiLanguage = useLanguage()
   const [grouping, setGrouping] = useAtom(bibleVersionGroupingAtom)
   const [query, setQuery] = React.useState('')
-  const [availability, setAvailability] = React.useState<BibleVersionAvailability>('all')
+  const [storedAvailability, setAvailability] = useAtom(bibleVersionAvailabilityAtom)
   const downloadedVersionIds = new Set(
     [...resourceRegistry.resources.values()].flatMap(entry =>
       entry.resource.kind === 'bible' &&
@@ -62,6 +62,14 @@ export const useVersionCatalog = (
         : []
     )
   )
+  // A remembered "downloaded" filter must not open an empty selector once every
+  // offline Bible has been removed.
+  const availability: BibleVersionAvailability =
+    storedAvailability === 'downloaded' &&
+    resourceRegistry.phase === 'ready' &&
+    downloadedVersionIds.size === 0
+      ? 'all'
+      : storedAvailability
   const [activeStyleInfo, setActiveStyleInfo] = React.useState<TranslationReadingProfile | null>(
     null
   )

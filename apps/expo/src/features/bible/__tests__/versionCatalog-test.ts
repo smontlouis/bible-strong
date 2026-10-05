@@ -5,7 +5,10 @@ import {
   getVersionCatalogSections,
   type VersionCatalogLabels,
 } from '../versionCatalog'
-import { migrateBibleVersionGrouping } from '../versionCatalogState'
+import {
+  migrateBibleVersionAvailability,
+  migrateBibleVersionGrouping,
+} from '../versionCatalogState'
 
 jest.mock('~i18n', () => ({
   getLanguage: () => 'fr',
@@ -314,5 +317,26 @@ describe('Bible version grouping preference', () => {
     expect(migrateBibleVersionGrouping('style')).toBe('style')
     expect(migrateBibleVersionGrouping('unknown')).toBe('language')
     expect(migrateBibleVersionGrouping(null)).toBe('language')
+  })
+})
+
+describe('Bible version availability preference', () => {
+  it('persists the availability filter locally with all versions as its initial value', () => {
+    const atomWithAsyncStorageMock = jest.requireMock(
+      '../../../helpers/atomWithAsyncStorage'
+    ) as jest.Mock
+
+    expect(atomWithAsyncStorageMock).toHaveBeenCalledWith(
+      'bibleVersionAvailability.v1',
+      'all',
+      expect.objectContaining({ migrate: migrateBibleVersionAvailability })
+    )
+  })
+
+  it('preserves valid persisted filters and repairs invalid values to all', () => {
+    expect(migrateBibleVersionAvailability('downloaded')).toBe('downloaded')
+    expect(migrateBibleVersionAvailability('all')).toBe('all')
+    expect(migrateBibleVersionAvailability('unknown')).toBe('all')
+    expect(migrateBibleVersionAvailability(null)).toBe('all')
   })
 })
