@@ -403,7 +403,7 @@ et le [contexte du domaine mobile](./apps/expo/CONTEXT.md).
 
 | Categorie | Technologies |
 |-----------|--------------|
-| Framework | React Native 0.81, Expo SDK 54 |
+| Framework | React Native 0.86, Expo SDK 57 |
 | Langage | TypeScript 5.9 |
 | Etat | Redux Toolkit, Jotai, Redux Persist |
 | Styling | Emotion |

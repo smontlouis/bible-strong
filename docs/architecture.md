@@ -1,6 +1,6 @@
 # Architecture
 
-Bible Strong is an Expo SDK 56 / React Native 0.85 app using Expo Router, TypeScript, Redux Toolkit, Jotai, Uniwind, SQLite, Firebase, Sentry, Reanimated 4, WebView-backed DOM rendering, and a custom Expo development client.
+Bible Strong is an Expo SDK 57 / React Native 0.86 app using Expo Router, TypeScript, Redux Toolkit, Jotai, Uniwind, SQLite, Firebase, Sentry, Reanimated 4, WebView-backed DOM rendering, and a custom Expo development client.
 
 ## Runtime Shape
 

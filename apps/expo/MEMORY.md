@@ -1,6 +1,6 @@
 # Project Environment
 
-- React Native: yes — Expo development client, Expo SDK 56.0.12, React Native 0.85.3.
+- React Native: yes — Expo development client, Expo SDK 57.0.26, React Native 0.86.3.
 - Package manager: Yarn 4.12.0.
 - Metro: `yarn start`, default port 8081.
 - iOS: `yarn ios`; development bundle ID `com.smontlouis.biblestrong.dev`.
