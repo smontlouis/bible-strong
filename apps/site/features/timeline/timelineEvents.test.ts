@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { TIMELINE_MESSAGES } from './messages'
-import { compareTimelineEvents, timelineImageUrl, timelineParagraphs } from './timelineEvents'
+import { compareTimelineEvents, timelineImageUrl, timelineParagraphs, timelineThumbnailUrl } from './timelineEvents'
 import { findTimelinePeriod, TIMELINE_PERIODS, timelinePeriodRank } from './timelinePeriods'
 import {
   fitTimelinePassage,
@@ -99,6 +99,9 @@ describe('Timeline images', () => {
       'https://timeline.biblehistory.com/media/images/original/Adam_4-4-2013%2010-22-05%20AM.jpg'
     )
     expect(timelineImageUrl('map.PNG')).toMatch(/\/map\.PNG$/u)
+    expect(timelineThumbnailUrl('Adam 1.jpg')).toBe(
+      'https://timeline.biblehistory.com/media/images/t/Adam%201.jpg'
+    )
   })
 
   it('has no address for anything but a plain image file name', () => {

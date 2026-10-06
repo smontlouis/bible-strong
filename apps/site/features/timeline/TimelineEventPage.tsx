@@ -12,6 +12,7 @@ import TimelineEventList from './TimelineEventList'
 import { findTimelinePeriod } from './timelinePeriods'
 import {
   buildTimelineEventPath,
+  buildTimelineEventPlacePath,
   buildTimelinePeriodPath,
   buildWebAppTimelineUrl,
   timelineEventBreadcrumbs,
@@ -141,6 +142,12 @@ export default function TimelineEventPage({ event }: { event: TimelineEventPageD
             <dt className="sr-only">{messages.dates}</dt>
             <dd className="text-xl font-medium">{formatTimelineDates(event.dates, language)}</dd>
           </dl>
+          <a
+            className="resource-link mt-3 inline-block text-sm font-semibold"
+            href={buildTimelineEventPlacePath(language, slug)}
+          >
+            {messages.locate}
+          </a>
         </header>
 
         {event.summary && <p className="resource-prose timeline-lead mt-6">{event.summary}</p>}

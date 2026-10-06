@@ -14,9 +14,21 @@ import { buildBibleReferencePath } from '../resources/editorialLinks'
 import { isResourceLanguage, type ResourceLanguage } from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
 import { TIMELINE_MESSAGES } from './messages'
-import { formatTimelineDates } from './timelineDates'
-import { compareTimelineEvents, timelineImageUrl, timelineParagraphs } from './timelineEvents'
-import { findTimelinePeriod } from './timelinePeriods'
+import { formatTimelineDates, timelineYearSpan } from './timelineDates'
+import {
+  compareTimelineEvents,
+  timelineImageUrl,
+  timelineParagraphs,
+  timelineThumbnailUrl,
+} from './timelineEvents'
+import {
+  buildTimelineBands,
+  estimateTimelinePillWidth,
+  placeTimelineEvents,
+  timelineWidth,
+} from './timelineGeometry'
+import { LAYOUT_CARD, LAYOUT_FIXED_WIDTH, TIMELINE_LAYOUT } from './timelineLayout'
+import { findTimelinePeriod, TIMELINE_SCALES } from './timelinePeriods'
 import { isTimelineSlug } from './timelineRoutes'
 import {
   fitTimelinePassage,
@@ -32,7 +44,21 @@ const CACHE_TTL_MS = 60 * 60 * 1000
 export type TimelineEventLink = { slug: string; title: string; dates: string }
 
 /** An event of the publication, with what places it on the timeline. */
-export type TimelineListedEvent = TimelineEventLink & { id: string; period: string }
+export type TimelineListedEvent = TimelineEventLink & {
+  id: string
+  period: string
+  /** The file of its first image. */
+  image?: string
+}
+
+/** An event of the timeline page: listed under its period and, when placed, drawn. */
+export type TimelineIndexEvent = TimelineEventLink & {
+  /** Left, top and width on the drawn timeline. */
+  box?: [left: number, top: number, width: number]
+  /** Drawn as a card over the years it lasts rather than as a pill. */
+  card?: boolean
+  thumbnail?: string
+}
 
 const otherLanguage = (language: ResourceLanguage): ResourceLanguage =>
   language === 'fr' ? 'en' : 'fr'
@@ -62,12 +88,13 @@ export const listTimelineEvents = async (
   const events = (response?.events ?? [])
     // An event whose slug is outside the route grammar has no page to link to.
     .filter(event => isTimelineSlug(event.slug))
-    .map(({ id, slug, title, dates, period }) => ({
+    .map(({ id, slug, title, dates, period, images }) => ({
       id,
       slug,
       title: singleLine(title),
       dates,
       period,
+      image: images[0]?.file,
     }))
     .sort(compareTimelineEvents)
   if (response) eventsCache.set(language, { at: Date.now(), events })
@@ -78,7 +105,9 @@ export type TimelineIndexPageData = {
   language: ResourceLanguage
   eventCount: number
   /** The events of each period, in order; an empty id gathers events of unknown periods. */
-  periods: { id: string; events: TimelineEventLink[] }[]
+  periods: { id: string; events: TimelineIndexEvent[] }[]
+  /** The size of the drawn timeline, and where its axis runs. */
+  canvas: { width: number; height: number; axisTop: number }
   /** Whether the timeline is also published in the other language. */
   translated: boolean
 }
@@ -94,14 +123,55 @@ export const loadTimelineIndexPage = createServerFn({ method: 'GET' })
     ])
     if (!events.length) throw notFound()
 
+    const bands = buildTimelineBands(TIMELINE_SCALES)
+    const { placements, height, axisTop } = placeTimelineEvents(
+      bands,
+      events.flatMap(event => {
+        const drawn = TIMELINE_LAYOUT[event.slug]
+        const span = drawn
+          ? { startYear: drawn[0], endYear: drawn[1] }
+          : timelineYearSpan(event.dates)
+        // An event without years stays in the list of its period.
+        if (!span) return []
+        const flags = drawn?.[2] ?? 0
+        return [
+          {
+            key: event.slug,
+            ...span,
+            card: (flags & LAYOUT_CARD) !== 0,
+            fixedWidth: (flags & LAYOUT_FIXED_WIDTH) !== 0,
+            pillWidth: estimateTimelinePillWidth(event.title),
+          },
+        ]
+      })
+    )
+
     const periods: TimelineIndexPageData['periods'] = []
     for (const event of events) {
       const id = findTimelinePeriod(event.period)?.id ?? ''
+      const placement = placements.get(event.slug)
+      const card = ((TIMELINE_LAYOUT[event.slug]?.[2] ?? 0) & LAYOUT_CARD) !== 0
+      const listed: TimelineIndexEvent = {
+        ...toLink(event),
+        ...(placement
+          ? {
+              box: [placement.left, placement.top, placement.width],
+              ...(card ? { card } : {}),
+              ...(card && event.image ? { thumbnail: timelineThumbnailUrl(event.image) } : {}),
+            }
+          : {}),
+      }
       const current = periods.at(-1)
-      if (current?.id === id) current.events.push(toLink(event))
-      else periods.push({ id, events: [toLink(event)] })
+      if (current?.id === id) current.events.push(listed)
+      else periods.push({ id, events: [listed] })
     }
-    return { language, eventCount: events.length, periods, translated: otherEvents.length > 0 }
+    return {
+      language,
+      eventCount: events.length,
+      periods,
+      canvas: { width: timelineWidth(bands), height, axisTop },
+      translated: otherEvents.length > 0,
+    }
   })
 
 const verseCountsCache = new Map<string, { at: number; counts: Record<string, number> }>()

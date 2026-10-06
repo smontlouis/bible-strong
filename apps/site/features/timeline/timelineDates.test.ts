@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { formatTimelineDates, parseTimelineDates, timelineDatesRank } from './timelineDates'
+import {
+  formatTimelineDates,
+  formatTimelineYear,
+  parseTimelineDates,
+  timelineDatesRank,
+  timelineYearSpan,
+} from './timelineDates'
 
 describe('Timeline datings', () => {
   it('reads years and spans of one era', () => {
@@ -76,5 +82,19 @@ describe('Timeline datings', () => {
 
   it('shows a dating outside the grammar as written', () => {
     expect(formatTimelineDates(' c. 1444 BC ', 'fr')).toBe('c. 1444 BC')
+  })
+
+  it('gives the years an event is drawn over, when it has some', () => {
+    expect(timelineYearSpan('3954-3024 BC')).toEqual({ startYear: -3954, endYear: -3024 })
+    expect(timelineYearSpan('1559-')).toEqual({ startYear: 1559, endYear: 1559 })
+    expect(timelineYearSpan('Future')).toBeUndefined()
+    expect(timelineYearSpan('long ago')).toBeUndefined()
+  })
+
+  it('names a year of the drawn timeline', () => {
+    expect(formatTimelineYear(-1050, 'fr')).toBe('1050 av. J.-C.')
+    expect(formatTimelineYear(31, 'en')).toBe('31 AD')
+    expect(formatTimelineYear(0, 'en')).toBe('1 AD')
+    expect(formatTimelineYear(2500, 'fr')).toBe('Futur')
   })
 })

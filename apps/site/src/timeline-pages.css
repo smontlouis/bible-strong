@@ -9,27 +9,347 @@
   background: var(--timeline-period, var(--resource-accent));
 }
 
-.timeline-periods {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-  gap: 8px;
+/*
+ * The drawn timeline: one long axis that scrolls sideways, out of the reading column and
+ * across the whole window. The page keeps scrolling up and down as usual.
+ */
+.timeline-stage {
+  width: 100vw;
+  margin-block-start: 36px;
+  margin-inline: calc(50% - 50vw);
 }
 
-.timeline-periods__period {
+/* The periods, as a strip: where the view is, and a way to jump. */
+.timeline-strip ol {
   display: flex;
-  height: 100%;
-  min-height: 56px;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 14px;
-  border: 1px solid var(--resource-line);
-  border-radius: 16px;
-  background: var(--resource-surface);
-  line-height: 1.3;
+  gap: 6px;
+  padding: 0 20px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
-.timeline-periods__period:hover {
+.timeline-strip li {
+  flex: 1 0 0;
+  min-width: 104px;
+}
+
+.timeline-strip a {
+  display: block;
+  height: 100%;
+  padding: 9px 10px;
+  border-top: 4px solid var(--timeline-period, var(--resource-accent));
+  border-radius: 4px 4px 12px 12px;
+  background: var(--resource-surface);
+  color: var(--resource-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.25;
+  transition: background-color 0.15s;
+}
+
+.timeline-strip a:hover,
+.timeline-strip a[aria-current] {
+  background: color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 16%, var(--resource-surface));
+  color: var(--resource-ink);
+}
+
+.timeline-frame {
+  position: relative;
+  overflow: hidden;
+  border-block: 1px solid var(--resource-line);
+}
+
+.timeline-scroller {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  cursor: grab;
+}
+
+.timeline-scroller:focus-visible {
+  outline: 2px solid var(--resource-accent);
+  outline-offset: -2px;
+}
+
+.timeline-scroller[data-dragging] {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.timeline-scroller[data-dragging] .timeline-item {
+  pointer-events: none;
+}
+
+.timeline-canvas {
+  position: relative;
+}
+
+/* A period: a tint fading under its name, and its stretch of the axis in its colour. */
+.timeline-period {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-inline-start: 1px dashed
+    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 50%, transparent);
+  background: linear-gradient(
+    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 11%, transparent),
+    transparent 60%
+  );
+}
+
+/* The name follows the view for as long as its period is on screen. */
+.timeline-period__label {
+  position: sticky;
+  left: 0;
+  display: flex;
+  width: max-content;
+  max-width: min(360px, 88vw);
+  flex-direction: column;
+  padding: 14px 20px;
+  line-height: 1.25;
+  pointer-events: none;
+}
+
+.timeline-period__era {
+  color: var(--resource-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.timeline-period__title {
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+  font-size: 1.3rem;
+}
+
+.timeline-period__span {
+  color: var(--resource-muted);
+  font-size: 0.8rem;
+}
+
+.timeline-period__axis {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: var(--timeline-period, var(--resource-accent));
+}
+
+/* The ruler runs under the axis: a tick every hundred pixels, named by its year. */
+.timeline-ruler {
+  position: absolute;
+  right: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.timeline-tick {
+  position: absolute;
+  top: 3px;
+  padding-top: 13px;
+  color: var(--resource-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.timeline-tick::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 8px;
+  background: currentColor;
+  opacity: 0.55;
+  content: '';
+}
+
+/* An event: a card over the years it lasts, or a pill at the year it happens. */
+.timeline-item {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--resource-line);
+  background: var(--resource-surface-raised);
+  box-shadow:
+    0 1px 2px rgb(16 27 53 / 5%),
+    0 5px 14px rgb(16 27 53 / 6%);
+  /* A located event arrives near the middle of the view, clear of the header. */
+  scroll-margin: 30vh 35vw;
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
+}
+
+.timeline-item:hover,
+.timeline-item:focus-visible {
+  z-index: 2;
+  border-color: var(--timeline-period, var(--resource-accent));
+  transform: translateY(-1px);
+}
+
+/* The event a link asked to locate. */
+.timeline-item:target {
+  z-index: 2;
+  outline: 2px solid var(--resource-accent);
+  outline-offset: 3px;
+}
+
+.timeline-item--card {
+  height: 56px;
+  border-inline-start: 4px solid var(--timeline-period, var(--resource-accent));
+  border-radius: 14px;
+}
+
+/* The text of a long card follows the view, so a lifetime keeps its name while it passes. */
+.timeline-item--card .timeline-item__text {
+  position: sticky;
+  left: 12px;
+  display: flex;
+  min-width: 0;
+  flex: 0 1 138px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 8px 0 10px;
+}
+
+.timeline-item--card .timeline-item__title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.timeline-item__dates {
+  overflow: hidden;
+  color: var(--resource-muted);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timeline-item--card img {
+  width: 56px;
+  height: 54px;
+  flex: none;
+  margin-inline-start: auto;
+  border-radius: 0 13px 13px 0;
+  object-fit: cover;
+}
+
+.timeline-item--pill {
+  width: max-content;
+  height: 24px;
+  gap: 6px;
+  padding: 0 10px 0 8px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.timeline-item--pill::before {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--timeline-period, var(--resource-accent));
+  content: '';
+}
+
+.timeline-item--pill .timeline-item__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The year under the middle of the view, on the ruler. */
+.timeline-cursor {
+  position: absolute;
+  left: 50%;
+  z-index: 3;
+  margin-top: 28px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--resource-ink);
+  color: var(--resource-canvas);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.timeline-cursor::before {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  width: 2px;
+  height: 16px;
+  background: var(--resource-ink);
+  content: '';
+  transform: translateX(-50%);
+}
+
+/* Stepping buttons, for a mouse without a sideways wheel. */
+.timeline-step {
+  position: absolute;
+  top: 16px;
+  z-index: 3;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid var(--resource-line);
+  border-radius: 50%;
+  background: var(--resource-surface-raised);
+  box-shadow: 0 6px 20px rgb(16 27 53 / 14%);
+  color: var(--resource-ink);
+  cursor: pointer;
+}
+
+.timeline-step:hover {
   border-color: var(--resource-accent);
+  color: var(--resource-accent-ink);
+}
+
+/* The stage is as wide as the window, so its right edge may lie under the page scrollbar. */
+.timeline-step--earlier {
+  right: 84px;
+}
+
+.timeline-step--later {
+  right: 32px;
+}
+
+.timeline-step svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+/* Revealed by the script that makes them work. */
+.timeline-cursor[hidden],
+.timeline-step[hidden] {
+  display: none;
+}
+
+/* A finger already scrolls the timeline: the stepping buttons would only cover it. */
+@media (pointer: coarse) {
+  .timeline-step {
+    display: none;
+  }
 }
 
 /* Events hang on a rail, in chronological order. */

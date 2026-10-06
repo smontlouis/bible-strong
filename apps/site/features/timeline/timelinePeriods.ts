@@ -1,10 +1,20 @@
 import type { ResourceLanguage } from '../resources/publicSite'
+import { timelinePeriodScales, type TimelineScale } from './timelineGeometry'
 
 type Localized = Record<ResourceLanguage, string>
 
 export type TimelinePeriod = {
   /** The `period` an event of the publication is filed under. */
   id: string
+  /**
+   * The stretch of the timeline the period is drawn on. Each period has its own scale: a
+   * tick of the ruler, a hundred pixels apart, stands for this many years.
+   */
+  startYear: number
+  endYear: number
+  yearsPerTick: number
+  /** Years of the period drawn at a finer scale, because they hold many events. */
+  detail?: { startYear: number; endYear: number; yearsPerTick: number }
   /** The age the period belongs to; three ages cover the thirteen periods. */
   era: Localized
   title: Localized
@@ -21,10 +31,15 @@ const CHRIST: Localized = { fr: 'L’ère de Christ', en: 'Age of Christ' }
 
 // The Timeline publication only names the period of an event by its number. Names, spans
 // and summaries mirror the timeline bundled with the study workspace
-// (apps/expo/src/assets/timeline/events.txt), in the order of the periods.
+// (apps/expo/src/assets/timeline/events.txt), in the order of the periods. Scales start
+// from the workspace's and are finer where its events would otherwise pile up: the site
+// draws the whole timeline at once and keeps it close to its axis.
 export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
   {
     id: '1',
+    startYear: -4100,
+    endYear: -2900,
+    yearsPerTick: 100,
     era: PATRIARCHS,
     title: { fr: 'Première génération', en: 'First Generation' },
     span: { fr: 'Création – v. 2500 av. J.-C.', en: 'Creation – c. 2500 BC' },
@@ -36,6 +51,9 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
   },
   {
     id: '2',
+    startYear: -2900,
+    endYear: -1950,
+    yearsPerTick: 25,
     era: PATRIARCHS,
     title: { fr: 'Noé et le déluge', en: 'Noah & the Flood' },
     span: { fr: 'v. 2500 – v. 2166 av. J.-C.', en: 'c. 2500 – c. 2166 BC' },
@@ -47,6 +65,9 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
   },
   {
     id: '3',
+    startYear: -1950,
+    endYear: -1650,
+    yearsPerTick: 5,
     era: PATRIARCHS,
     title: { fr: 'Les patriarches', en: 'The Patriarchs' },
     span: { fr: 'v. 2166 – v. 1660 av. J.-C.', en: 'c. 2166 – c. 1660 BC' },
@@ -58,6 +79,9 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
   },
   {
     id: '4',
+    startYear: -1650,
+    endYear: -1450,
+    yearsPerTick: 25,
     era: ISRAEL,
     title: { fr: 'Israël en Égypte', en: 'Israel in Egypt' },
     span: { fr: 'v. 1660 – v. 1445 av. J.-C.', en: 'c. 1660 – c. 1445 BC' },
@@ -69,6 +93,9 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
   },
   {
     id: '5',
+    startYear: -1450,
+    endYear: -1100,
+    yearsPerTick: 10,
     era: ISRAEL,
     title: { fr: 'Les Juges', en: 'The Judges' },
     span: { fr: 'v. 1445 – v. 1050 av. J.-C.', en: 'c. 1445 – c. 1050 BC' },
@@ -80,6 +107,9 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
   },
   {
     id: '6',
+    startYear: -1100,
+    endYear: -930,
+    yearsPerTick: 2,
     era: ISRAEL,
     title: { fr: 'Le royaume uni', en: 'United Kingdom' },
     span: { fr: 'v. 1050 – v. 930 av. J.-C.', en: 'c. 1050 – c. 930 BC' },
@@ -91,6 +121,9 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
   },
   {
     id: '7',
+    startYear: -930,
+    endYear: -620,
+    yearsPerTick: 2,
     era: ISRAEL,
     title: { fr: 'Le royaume divisé', en: 'Divided Kingdom' },
     span: { fr: 'v. 930 – v. 586 av. J.-C.', en: 'c. 930 – c. 586 BC' },
@@ -102,6 +135,9 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
   },
   {
     id: '8',
+    startYear: -620,
+    endYear: -100,
+    yearsPerTick: 5,
     era: ISRAEL,
     // The bundled timeline reads « L’Exode » in French, a slip for the exile its summary describes.
     title: { fr: 'L’Exil', en: 'The Exile' },
@@ -114,6 +150,12 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
   },
   {
     id: '9',
+    startYear: -100,
+    endYear: 35,
+    yearsPerTick: 1,
+    // The ministry of Jesus holds more events than any other stretch of the timeline:
+    // a tick is two months there, so they can be read one after the other.
+    detail: { startYear: 27, endYear: 32, yearsPerTick: 1 / 6 },
     era: CHRIST,
     title: { fr: 'La vie de Christ', en: 'Life of Christ' },
     span: { fr: 'v. 4 av. J.-C. – v. 34 ap. J.-C.', en: 'c. 4 BC – c. 34 AD' },
@@ -125,6 +167,9 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
   },
   {
     id: '10',
+    startYear: 35,
+    endYear: 350,
+    yearsPerTick: 5,
     era: CHRIST,
     title: { fr: 'L’Église primitive', en: 'Early Church' },
     span: { fr: 'v. 34 – v. 330 ap. J.-C.', en: 'c. 34 – c. 330 AD' },
@@ -136,6 +181,9 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
   },
   {
     id: '11',
+    startYear: 350,
+    endYear: 1520,
+    yearsPerTick: 20,
     era: CHRIST,
     title: { fr: 'Le Moyen Âge', en: 'Middle Ages' },
     span: { fr: 'v. 450 – v. 1517 ap. J.-C.', en: 'c. 450 – c. 1517 AD' },
@@ -147,6 +195,9 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
   },
   {
     id: '12',
+    startYear: 1520,
+    endYear: 1840,
+    yearsPerTick: 2,
     era: CHRIST,
     title: { fr: 'Réformation', en: 'Reformation' },
     span: { fr: 'v. 1517 – v. 1840 ap. J.-C.', en: 'c. 1517 – c. 1840 AD' },
@@ -158,6 +209,9 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
   },
   {
     id: '13',
+    startYear: 1840,
+    endYear: 3100,
+    yearsPerTick: 25,
     era: CHRIST,
     // The bundled timeline spreads these prophecies from Creation to the present; the
     // publication files the events of the last centuries and those still to come here.
@@ -169,6 +223,9 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
     color: '#ed7c2c',
   },
 ]
+
+/** The scales of the whole timeline, in order. */
+export const TIMELINE_SCALES: readonly TimelineScale[] = TIMELINE_PERIODS.flatMap(timelinePeriodScales)
 
 export const findTimelinePeriod = (id: string): TimelinePeriod | undefined =>
   TIMELINE_PERIODS.find(period => period.id === id)

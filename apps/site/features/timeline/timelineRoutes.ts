@@ -35,6 +35,13 @@ export const buildTimelineEventPath = (language: ResourceLanguage, slug: string)
   return `${buildTimelineIndexPath(language)}/${slug}`
 }
 
+/** Where an event is drawn on the timeline page. */
+export const timelineEventAnchor = (slug: string): string => `on-${slug}`
+
+/** The timeline page, scrolled to where an event is drawn. */
+export const buildTimelineEventPlacePath = (language: ResourceLanguage, slug: string): string =>
+  `${buildTimelineIndexPath(language)}#${timelineEventAnchor(slug)}`
+
 /** Where a period starts on the timeline page; a period has no page of its own. */
 export const timelinePeriodAnchor = (period: string): string => `period-${period}`
 

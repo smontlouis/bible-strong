@@ -44,6 +44,21 @@ export const parseTimelineDates = (value: string): TimelineDates | undefined => 
   return years(toYear(sameEra[1], era), toYear(sameEra[2] ?? sameEra[1], era))
 }
 
+/**
+ * The years an event is drawn over. An open span is drawn at its first year, and what is
+ * only dated as still to come has no place on the axis.
+ */
+export const timelineYearSpan = (
+  value: string
+): { startYear: number; endYear: number } | undefined => {
+  const dates = parseTimelineDates(value)
+  if (dates?.kind !== 'years') return undefined
+  return {
+    startYear: dates.start,
+    endYear: typeof dates.end === 'number' ? dates.end : dates.start,
+  }
+}
+
 // Undated events close their period: what is still to come, what follows the millennium,
 // then any dating the grammar does not read. A year never has more than four digits.
 const FUTURE_RANK = 10_000
@@ -77,6 +92,17 @@ const LABELS = {
     from: 'From {year}',
   },
 } as const
+
+/** The first of the years the drawn timeline gives to what is still to come. */
+export const TIMELINE_FUTURE_YEAR = 2020
+
+/** Names a year of the drawn timeline. There is no year zero: it reads as the first year. */
+export const formatTimelineYear = (year: number, language: ResourceLanguage): string => {
+  const labels = LABELS[language]
+  if (year >= TIMELINE_FUTURE_YEAR) return labels.future
+  const named = year === 0 ? 1 : year
+  return `${Math.abs(named)} ${named < 0 ? labels.BC : labels.AD}`
+}
 
 /**
  * Writes a dating in the language of the page. The publication carries English era marks

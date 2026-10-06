@@ -53,6 +53,8 @@
   --landing-accent: var(--resource-accent);
   --landing-accent-ink: var(--resource-accent-ink);
   min-height: 100vh;
+  /* A full-width block is sized on the window, scrollbar included: it never widens the page. */
+  overflow-x: clip;
   background: var(--resource-canvas);
   color: var(--resource-ink);
   font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;

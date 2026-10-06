@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 import ResourceShell from '../resources/ResourceShell'
 import { TIMELINE_MESSAGES } from './messages'
 import type { TimelineIndexPageData } from './timeline.functions'
+import TimelineCanvas from './TimelineCanvas'
 import TimelineEventList from './TimelineEventList'
 import { findTimelinePeriod } from './timelinePeriods'
 import {
@@ -48,29 +49,14 @@ export default function TimelineIndexPage({ page }: { page: TimelineIndexPageDat
           </p>
         </header>
 
-        <nav className="mt-8" aria-label={messages.periods}>
-          <ol className="timeline-periods">
-            {periods.map(({ id, period, anchor, title }) => (
-              <li key={id} style={periodColor(period?.color)}>
-                <a className="timeline-periods__period" href={`#${anchor}`}>
-                  <span className="timeline-marker" aria-hidden="true" />
-                  <span className="min-w-0">
-                    <span className="block font-semibold">{title}</span>{' '}
-                    {period?.span && (
-                      <span className="resource-muted block text-sm">{period.span[language]}</span>
-                    )}
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ol>
-        </nav>
+        <TimelineCanvas language={language} periods={page.periods} canvas={page.canvas} />
 
+        <h2 className="mt-16 font-serif text-3xl leading-tight">{messages.allEvents}</h2>
         {periods.map(({ id, period, anchor, title, count, events }) => (
           <section
             key={id}
             id={anchor}
-            className="mt-14 scroll-mt-24"
+            className="mt-12 scroll-mt-24"
             style={periodColor(period?.color)}
           >
             {period && (
@@ -78,7 +64,7 @@ export default function TimelineIndexPage({ page }: { page: TimelineIndexPageDat
                 {period.era[language]}
               </p>
             )}
-            <h2 className="mt-2 text-2xl font-semibold">{title}</h2>
+            <h3 className="mt-2 text-2xl font-semibold">{title}</h3>
             <p className="resource-muted mt-1 text-sm">
               {period?.span ? `${period.span[language]} · ${count}` : count}
             </p>

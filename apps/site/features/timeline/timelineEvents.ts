@@ -34,10 +34,18 @@ export const timelineParagraphs = (text: string): string[] =>
     )
     .filter(Boolean)
 
-// The publication names its image files; the source of the timeline serves them.
-const IMAGE_BASE_URL = 'https://timeline.biblehistory.com/media/images/original/'
+// The publication names its image files; the source of the timeline serves them, each as
+// an original and as a small square.
+const IMAGE_BASE_URL = 'https://timeline.biblehistory.com/media/images/'
 const IMAGE_FILE_PATTERN = /^[^/\\]+\.(?:jpe?g|png|gif|webp)$/iu
 
+const imageUrl = (folder: string, file: string): string | undefined =>
+  IMAGE_FILE_PATTERN.test(file)
+    ? `${IMAGE_BASE_URL}${folder}/${encodeURIComponent(file)}`
+    : undefined
+
 /** The public address of an image of the publication; anything but a plain file name has none. */
-export const timelineImageUrl = (file: string): string | undefined =>
-  IMAGE_FILE_PATTERN.test(file) ? `${IMAGE_BASE_URL}${encodeURIComponent(file)}` : undefined
+export const timelineImageUrl = (file: string): string | undefined => imageUrl('original', file)
+
+/** The small square of an image, for the cards of the drawn timeline. */
+export const timelineThumbnailUrl = (file: string): string | undefined => imageUrl('t', file)

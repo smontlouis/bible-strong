@@ -154,7 +154,17 @@ its own before the shared sanitizer, which rebuilds the markup from an allowlist
 a link only when it resolves to a site page.
 
 Some presentation data is not in the Resource API and is mirrored from the workspace: the
-names and spans of the timeline periods, and the English names of commentary authors.
+names, spans and scales of the timeline periods, the years an event is drawn over and
+whether it is a card or a pill, and the English names of commentary authors.
+
+The timeline page draws every event on one axis that scrolls sideways, where the workspace
+shows one period at a time. Periods follow one another, each at its own scale, finer than
+the workspace's where events would pile up; the years of the ministry of Jesus are drawn
+wider still, and the events of one of those years are spread over it in their order. The
+site computes the lane of each event, nearest to the axis first, instead of mirroring the
+rows of the workspace, which overlap. Every event stays a plain link, listed again under
+its period below the drawing; the script only adds dragging, stepping and the year under
+the middle of the view.
 Timeline images are served by the source of the timeline, as in the workspace; the site
 only names them. The French topics are a machine translation of Nave's
 English text; their pages say so.
