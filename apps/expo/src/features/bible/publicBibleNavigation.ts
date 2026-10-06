@@ -1,3 +1,5 @@
+import type { ResourceLanguage } from '~helpers/databaseTypes'
+import type { InterlinearMode } from '~helpers/interlinearDisplayMode'
 import type { StrongMode } from '~helpers/strongBiblePublications'
 import type { BibleRouteNavigationAdapter } from '~state/bibleRouteNavigation'
 import { getDefaultBibleTab, type BibleTab, type VersionCode } from '~state/tabs'
@@ -44,6 +46,7 @@ export const createPublicBibleTab = (route: PublicBibleRoute, title: string): Bi
   tab.data.focusVerses = focusVerses
   tab.data.contextDisplayMode = route.passage ? 'focused' : 'fullChapter'
   tab.data.strongMode = strongModeForPresentation(route.presentation)
+  if (route.presentation === 'interlinear') tab.data.interlinearMode = 'interlinear'
   tab.data.interlinearLocale = route.glossLanguage
   return tab
 }
@@ -67,5 +70,26 @@ export const createPublicBibleNavigation = (
   changeStrongMode: mode => {
     const presentation = presentationForStrongMode(mode)
     router.replace(buildPublicBiblePath({ ...current, presentation }))
+  },
+  // Only the interlinear display has a route; transliteration and Strong stay in the tab.
+  changeInterlinearMode: (mode: InterlinearMode, locale?: ResourceLanguage) => {
+    if (!isPublicBiblePresentationSupported(current.version, 'interlinear')) return false
+    if (mode === 'interlinear') {
+      router.replace(
+        buildPublicBiblePath({
+          ...current,
+          presentation: 'interlinear',
+          glossLanguage: locale ?? current.glossLanguage,
+        })
+      )
+      return true
+    }
+    if (mode === 'hidden' && current.presentation === 'interlinear') {
+      router.replace(
+        buildPublicBiblePath({ ...current, presentation: 'text', glossLanguage: undefined })
+      )
+      return true
+    }
+    return false
   },
 })

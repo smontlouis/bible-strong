@@ -22,6 +22,7 @@ Add normalized public routes for the first Bible and lexical-reading slice:
 - `/bible/:version/:book/:chapter/:passage`
 - `/bible/:version/strong/:book/:chapter[/:passage]`
 - `/bible/:version/reverse-interlinear/:book/:chapter[/:passage]`
+- `/bible/:version/interlinear/:language/:book/:chapter[/:passage]`
 - `/strong/:code`
 - `/strong/:code/dictionary`
 - `/strong/:code/related`
@@ -37,6 +38,13 @@ one same-chapter inclusive range.
 Treat `text`, `strong`, and `reverse-interlinear` as Bible presentations. The route adapter maps
 them to the existing Bible-tab state and renders the existing reader. A reverse-interlinear route
 may select a French or English gloss index through the `gloss` query parameter.
+
+`interlinear` is the direct interlinear reading of the original-language Bible (`BHG`): the
+original text word by word with its glosses. Its French and English glosses are two
+distinct readings, so the gloss language is a path segment rather than a query parameter,
+and it cannot be left out. Selecting the interlinear display on a public route replaces the
+path, like a Strong presentation. The transliteration and Strong displays of that Bible
+have no route and stay in the tab.
 
 Keep `/bible-view` and `/strong` as compatibility adapters. Existing application links can migrate
 incrementally; no persisted tab migration is required. Static rendering, server rendering,

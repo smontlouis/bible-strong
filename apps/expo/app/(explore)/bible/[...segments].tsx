@@ -83,6 +83,7 @@ const PublicBibleRoute = () => {
           focusVerses,
           contextDisplayMode: passage ? 'focused' : 'fullChapter',
           strongMode,
+          interlinearMode: route.presentation === 'interlinear' ? 'interlinear' : undefined,
           interlinearLocale: route.glossLanguage,
         }}
         routeNavigation={routeNavigation}

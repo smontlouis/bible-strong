@@ -24,6 +24,7 @@ import {
 import Box from '~common/ui/Box'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import type { InterlinearMode } from '~helpers/interlinearDisplayMode'
 import type { StrongMode } from '~helpers/strongBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { selectBibleReferenceVersion } from '~helpers/bibleReferenceVersion'
@@ -41,6 +42,7 @@ export type BibleRouteInput = {
   verse?: number
   version: string
   strongMode?: StrongMode
+  interlinearMode?: InterlinearMode
   interlinearLocale?: ResourceLanguage
   annotationId?: string
 }
@@ -60,6 +62,7 @@ const BibleScreenContent = ({
   verse,
   version,
   strongMode,
+  interlinearMode,
   interlinearLocale,
   annotationId,
   routeNavigation,
@@ -79,6 +82,7 @@ const BibleScreenContent = ({
       draft.data.contextDisplayMode = contextDisplayMode
     }
     if (strongMode) draft.data.strongMode = strongMode
+    if (interlinearMode) draft.data.interlinearMode = interlinearMode
     if (interlinearLocale) draft.data.interlinearLocale = interlinearLocale
   })
 
@@ -113,6 +117,7 @@ export const BibleRouteScreen = ({
     verse,
     version: requestedVersion,
     strongMode,
+    interlinearMode,
     interlinearLocale,
     annotationId,
   } = input
@@ -175,6 +180,7 @@ export const BibleRouteScreen = ({
     focusVerses,
     contextDisplayMode,
     strongMode,
+    interlinearMode,
     interlinearLocale,
     annotationId,
   ])
@@ -195,6 +201,7 @@ export const BibleRouteScreen = ({
       verse={verse}
       version={resolvedVersion}
       strongMode={strongMode}
+      interlinearMode={interlinearMode}
       interlinearLocale={interlinearLocale}
       annotationId={annotationId}
       routeNavigation={routeNavigation}

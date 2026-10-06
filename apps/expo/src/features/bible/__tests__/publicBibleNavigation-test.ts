@@ -27,6 +27,7 @@ jest.mock('~helpers/bibleVersions', () => ({
   versions: {
     LSG: { id: 'LSG' },
     NBS: { id: 'NBS' },
+    BHG: { id: 'BHG' },
   },
 }))
 
@@ -63,6 +64,37 @@ describe('public Bible navigation', () => {
   ] as const)('replaces the %s Strong presentation', (mode, path) => {
     createPublicBibleNavigation(current, { push, replace }).changeStrongMode(mode)
     expect(replace).toHaveBeenCalledWith(path)
+  })
+
+  it('routes the interlinear display of the original-language Bible', () => {
+    const original = { ...current, version: 'BHG', presentation: 'text' as const }
+    const navigation = createPublicBibleNavigation(original, { push, replace })
+
+    expect(navigation.changeInterlinearMode?.('interlinear', 'en')).toBe(true)
+    expect(replace).toHaveBeenLastCalledWith('/bible/bhg/interlinear/en/john/3/16')
+
+    const interlinear = {
+      ...original,
+      presentation: 'interlinear' as const,
+      glossLanguage: 'en' as const,
+    }
+    const reading = createPublicBibleNavigation(interlinear, { push, replace })
+    expect(reading.changeInterlinearMode?.('hidden')).toBe(true)
+    expect(replace).toHaveBeenLastCalledWith('/bible/bhg/john/3/16')
+
+    // A display without a route stays in the tab, as does any display of a translation.
+    replace.mockClear()
+    expect(reading.changeInterlinearMode?.('transliteration')).toBe(false)
+    expect(
+      createPublicBibleNavigation(current, { push, replace }).changeInterlinearMode?.('interlinear')
+    ).toBe(false)
+    expect(replace).not.toHaveBeenCalled()
+
+    expect(createPublicBibleTab(interlinear, 'Jean 3:16 · BHG').data).toMatchObject({
+      interlinearMode: 'interlinear',
+      interlinearLocale: 'en',
+      strongMode: 'hidden',
+    })
   })
 
   it('creates an active Bible tab from the public passage', () => {

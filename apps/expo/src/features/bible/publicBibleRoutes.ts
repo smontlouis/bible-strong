@@ -1,11 +1,12 @@
 import books, { type Book } from '~assets/bible_versions/books-desc'
 import legacyBookAliases from '~assets/bible_versions/books.json'
 import { versions } from '~helpers/bibleVersions'
+import { BHG_INTERLINEAR_PUBLICATION_CATALOG } from '~helpers/interlinearBiblePublicationCatalog'
 import { STRONG_BIBLE_REVERSE_INTERLINEAR_CANDIDATES } from '~helpers/strongBibleReverseInterlinearCandidate'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
 import { getSupportedOsisBookId } from '~helpers/osisReference'
 
-export type PublicBiblePresentation = 'text' | 'strong' | 'reverse-interlinear'
+export type PublicBiblePresentation = 'text' | 'strong' | 'reverse-interlinear' | 'interlinear'
 
 export type PublicBiblePassage = {
   startVerse: number
@@ -20,6 +21,9 @@ export type PublicBibleRoute = {
   passage?: PublicBiblePassage
   glossLanguage?: 'fr' | 'en'
 }
+
+// The direct interlinear names the language of its glosses in the path (ADR-0053).
+const DEFAULT_INTERLINEAR_LANGUAGE = 'fr'
 
 const MAX_PUBLIC_VERSE_NUMBER = 250
 const MAX_PUBLIC_PASSAGE_LENGTH = 250
@@ -98,6 +102,9 @@ export const isPublicBiblePresentationSupported = (
   presentation: PublicBiblePresentation
 ): boolean => {
   if (presentation === 'text') return true
+  if (presentation === 'interlinear') {
+    return version === BHG_INTERLINEAR_PUBLICATION_CATALOG.applicationVersionId
+  }
   if (presentation === 'strong') return isStrongCapableBibleVersion(version)
   return Object.prototype.hasOwnProperty.call(STRONG_BIBLE_REVERSE_INTERLINEAR_CANDIDATES, version)
 }
@@ -113,12 +120,24 @@ export const parsePublicBibleRoute = (
   let presentation: PublicBiblePresentation = 'text'
   let position = 1
   const presentationSegment = segments[position]
-  if (presentationSegment === 'strong' || presentationSegment === 'reverse-interlinear') {
+  if (
+    presentationSegment === 'strong' ||
+    presentationSegment === 'reverse-interlinear' ||
+    presentationSegment === 'interlinear'
+  ) {
     presentation = presentationSegment
     position += 1
   }
 
   if (!isPublicBiblePresentationSupported(version, presentation)) return undefined
+
+  let interlinearLanguage: 'fr' | 'en' | undefined
+  if (presentation === 'interlinear') {
+    const language = segments[position]?.toLocaleLowerCase()
+    if (language !== 'fr' && language !== 'en') return undefined
+    interlinearLanguage = language
+    position += 1
+  }
   if (segments.length < position + 2 || segments.length > position + 3) return undefined
 
   const book = booksByAlias.get(normalizeSlug(segments[position] ?? ''))
@@ -130,9 +149,10 @@ export const parsePublicBibleRoute = (
   if (passageSegment && !passage) return undefined
 
   const normalizedGlossLanguage =
-    presentation === 'reverse-interlinear' && (glossLanguage === 'fr' || glossLanguage === 'en')
+    interlinearLanguage ??
+    (presentation === 'reverse-interlinear' && (glossLanguage === 'fr' || glossLanguage === 'en')
       ? glossLanguage
-      : undefined
+      : undefined)
 
   return {
     version,
@@ -168,6 +188,7 @@ export const buildPublicBiblePath = ({
     'bible',
     versionSlug(version),
     ...(presentation === 'text' ? [] : [presentation]),
+    ...(presentation === 'interlinear' ? [glossLanguage ?? DEFAULT_INTERLINEAR_LANGUAGE] : []),
     bookSlug,
     String(chapter),
   ]
