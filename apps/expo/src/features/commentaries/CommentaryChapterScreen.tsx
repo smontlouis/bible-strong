@@ -272,6 +272,7 @@ const CommentaryChapterScreen = ({
                                   }`,
                             content: section.content,
                           })),
+                          location: { language: projection.language, book, chapter },
                         })
                     : undefined
                 }

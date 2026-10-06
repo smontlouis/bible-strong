@@ -215,7 +215,14 @@ const CommentaryResourceTabScreen = ({
                   sectionId={tab.data.sectionId}
                   showAvatar={false}
                   canOpenInNewTab={false}
-                  onShare={() => void shareCommentary({ entry, passage, sections: [section] })}
+                  onShare={() =>
+                    void shareCommentary({
+                      entry,
+                      passage,
+                      sections: [section],
+                      location: { language: projection.language, book, chapter },
+                    })
+                  }
                 />
               </Box>
             ) : undefined

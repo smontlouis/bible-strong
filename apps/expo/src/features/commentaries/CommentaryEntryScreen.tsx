@@ -134,7 +134,13 @@ const CommentaryEntryScreen = ({
                 showAvatar={false}
                 onShare={
                   section
-                    ? () => void shareCommentary({ entry, passage, sections: [section] })
+                    ? () =>
+                        void shareCommentary({
+                          entry,
+                          passage,
+                          sections: [section],
+                          location: { language: projection.language, book, chapter },
+                        })
                     : undefined
                 }
               />
