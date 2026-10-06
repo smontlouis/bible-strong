@@ -70,13 +70,13 @@ export const isBiblePresentationSupported = (
   return isStrongBibleVersionId(versionId)
 }
 
-/** The study aids a version offers beyond its text. */
+/**
+ * The study aids a version is labelled with beyond its text. The interlinear is the
+ * original-language Bible: a translation aligned on it is labelled by its Strong numbers.
+ */
 export const bibleVersionAids = (versionId: string): ('strong' | 'interlinear')[] => [
   ...(isBiblePresentationSupported(versionId, 'strong') ? (['strong'] as const) : []),
-  ...(isBiblePresentationSupported(versionId, 'reverse-interlinear') ||
-  isBiblePresentationSupported(versionId, 'interlinear')
-    ? (['interlinear'] as const)
-    : []),
+  ...(isBiblePresentationSupported(versionId, 'interlinear') ? (['interlinear'] as const) : []),
 ]
 
 export const supportedBiblePresentations = (versionId: string): BiblePresentation[] =>

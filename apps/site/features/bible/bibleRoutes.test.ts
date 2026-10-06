@@ -2,6 +2,7 @@ import { ONLINE_BIBLE_VERSION_IDS } from '@bible-strong/resource-catalog/ordinar
 import { describe, expect, it } from 'vitest'
 import { bibleBookName, bibleBookSlug, findBibleBook } from './bibleBooks'
 import {
+  bibleVersionAids,
   buildBiblePath,
   buildWebAppBibleUrl,
   closestBiblePresentation,
@@ -62,6 +63,10 @@ describe('Bible public routes', () => {
     expect(supportedBiblePresentations('LSG')).toEqual(['text', 'strong', 'reverse-interlinear'])
     expect(supportedBiblePresentations('S21')).toEqual(['text'])
     expect(supportedBiblePresentations('BHG')).toEqual(['text', 'interlinear'])
+    // Only the original-language Bible is labelled as the interlinear.
+    expect(bibleVersionAids('LSG')).toEqual(['strong'])
+    expect(bibleVersionAids('BHG')).toEqual(['interlinear'])
+    expect(bibleVersionAids('S21')).toEqual([])
     expect(parseBibleRoute('lsg/strong/gen/1')?.presentation).toBe('strong')
     expect(parseBibleRoute('kjv/reverse-interlinear/john/3/16')?.presentation).toBe(
       'reverse-interlinear'
