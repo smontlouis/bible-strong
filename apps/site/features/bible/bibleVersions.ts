@@ -94,3 +94,7 @@ export const bibleVersionCoversBook = (version: BibleVersion, book: number): boo
   if (/\(NT\)/u.test(version.name)) return book >= 40
   return true
 }
+
+/** The Bible a reference opens in when no version is asked for. */
+export const defaultBibleVersionId = (language: ResourceLanguage): string =>
+  language === 'en' ? 'KJV' : 'LSG'

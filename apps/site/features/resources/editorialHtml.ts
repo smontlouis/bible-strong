@@ -1,20 +1,41 @@
+// Inline and block formatting kept from editorial content. Headings start at the third
+// level: the page title and its sections are the first two.
 const ALLOWED_TAGS = new Set([
   'b',
   'strong',
   'i',
   'em',
   'u',
+  'small',
+  'cite',
   'br',
+  'hr',
   'p',
   'ul',
   'ol',
   'li',
+  'dl',
+  'dt',
+  'dd',
   'sup',
   'sub',
   'blockquote',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'table',
+  'thead',
+  'tbody',
+  'tr',
+  'th',
+  'td',
 ])
-const VOID_TAGS = new Set(['br'])
+// Source headings are shifted under the page title and its section titles.
+const TAG_ALIASES: Record<string, string> = { h1: 'h3', h2: 'h3' }
+const VOID_TAGS = new Set(['br', 'hr'])
 const TAG_PATTERN = /<(\/?)([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/gu
+const HREF_PATTERN = /\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/iu
 
 export const escapeHtml = (text: string): string =>
   text
@@ -26,15 +47,27 @@ export const escapeHtml = (text: string): string =>
 // Source text already carries HTML entities; only stray angle brackets need neutralizing.
 const neutralizeText = (text: string): string => text.replace(/</gu, '&lt;').replace(/>/gu, '&gt;')
 
+export type EditorialHtmlOptions = {
+  /** Rewrites the text between tags, already safe to inject; it may add trusted markup. */
+  transformText?: (text: string) => string
+  /**
+   * Turns the target of a source link into a site URL. A link whose target is not
+   * resolved is dropped and its text kept: no source `href` is ever emitted as written.
+   */
+  resolveHref?: (href: string) => string | undefined
+}
+
 /**
  * Rebuilds editorial HTML from an allowlist. Tags are re-emitted by name without any
- * attribute, unknown tags are dropped, and unbalanced markup is closed, so the result is
- * safe to inject whatever the source contained.
+ * attribute, unknown tags are dropped, links only survive through `resolveHref`, and
+ * unbalanced markup is closed, so the result is safe to inject whatever the source held.
  */
 export const sanitizeEditorialHtml = (
   html: string,
-  transformText: (text: string) => string = text => text
+  options: EditorialHtmlOptions | NonNullable<EditorialHtmlOptions['transformText']> = {}
 ): string => {
+  const { transformText = (text: string) => text, resolveHref } =
+    typeof options === 'function' ? { transformText: options } : options
   const output: string[] = []
   const open: string[] = []
   let position = 0
@@ -42,13 +75,36 @@ export const sanitizeEditorialHtml = (
   const pushText = (text: string) => {
     if (text) output.push(transformText(neutralizeText(text)))
   }
+  const closeDownTo = (tag: string) => {
+    const openedAt = open.lastIndexOf(tag)
+    if (openedAt === -1) return
+    while (open.length > openedAt) output.push(`</${open.pop()}>`)
+  }
 
   for (const match of html.matchAll(TAG_PATTERN)) {
     pushText(html.slice(position, match.index))
     position = match.index + match[0].length
 
     const closing = match[1] === '/'
-    const tag = match[2]?.toLowerCase() ?? ''
+    const name = match[2]?.toLowerCase() ?? ''
+    const tag = TAG_ALIASES[name] ?? name
+
+    if (tag === 'a') {
+      if (closing) {
+        closeDownTo('a')
+        continue
+      }
+      const source = HREF_PATTERN.exec(match[0])
+      const href = (source?.[1] ?? source?.[2] ?? source?.[3] ?? '').replace(/&amp;/gu, '&')
+      const resolved = href && resolveHref ? resolveHref(href) : undefined
+      if (!resolved) continue
+      // A link cannot hold another one.
+      closeDownTo('a')
+      open.push('a')
+      output.push(`<a href="${escapeHtml(resolved)}">`)
+      continue
+    }
+
     if (!ALLOWED_TAGS.has(tag)) continue
     if (VOID_TAGS.has(tag)) {
       if (!closing) output.push(`<${tag}>`)
@@ -59,9 +115,7 @@ export const sanitizeEditorialHtml = (
       output.push(`<${tag}>`)
       continue
     }
-    const openedAt = open.lastIndexOf(tag)
-    if (openedAt === -1) continue
-    while (open.length > openedAt) output.push(`</${open.pop()}>`)
+    closeDownTo(tag)
   }
   pushText(html.slice(position))
   while (open.length) output.push(`</${open.pop()}>`)

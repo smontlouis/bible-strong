@@ -31,3 +31,17 @@ export async function readResource<T>(path: string, query: ResourceQuery = {}): 
   if (!response.ok) throw new ResourceApiError(response.status, path)
   return (await response.json()) as T
 }
+
+/** Posts a JSON request to a public Resource API route; an absent resource is `undefined`. */
+export async function postResource<T>(path: string, body: unknown): Promise<T | undefined> {
+  const baseUrl = (process.env.RESOURCE_API_URL ?? DEFAULT_RESOURCE_API_URL).replace(/\/+$/u, '')
+  const response = await fetch(`${baseUrl}${path}`, {
+    method: 'POST',
+    headers: { accept: 'application/json', 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  })
+  if (response.status === 404) return undefined
+  if (!response.ok) throw new ResourceApiError(response.status, path)
+  return (await response.json()) as T
+}

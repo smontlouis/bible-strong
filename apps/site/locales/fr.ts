@@ -216,4 +216,5 @@ export default {
   'pagination.previous': 'Précédent',
   'pagination.next': 'Suivant',
   'pagination.page': 'Page {page}',
+  'resource.breadcrumbs': 'Fil d’Ariane',
 } as const

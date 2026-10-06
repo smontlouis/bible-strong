@@ -749,3 +749,92 @@ a.strong-letters__letter:hover,
   font-size: 0.92rem;
   font-weight: 600;
 }
+
+/* The menu of the sections of the site, in the header of every resource page. */
+.resource-menu__trigger {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: var(--resource-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.resource-menu__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.resource-menu__trigger:hover,
+.resource-menu[open] > .resource-menu__trigger {
+  background: var(--resource-accent-soft);
+  color: var(--resource-accent-ink);
+}
+
+.resource-menu__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 20px;
+  z-index: 30;
+  width: min(360px, calc(100vw - 40px));
+  padding: 8px;
+  border: 1px solid var(--resource-line);
+  border-radius: 20px;
+  background: var(--resource-surface-raised);
+  box-shadow: 0 24px 60px rgb(8 14 28 / 22%);
+}
+
+.resource-menu__item {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.resource-menu__item:hover,
+.resource-menu__item[aria-current] {
+  background: var(--resource-accent-soft);
+}
+
+/* The path leading to a page. */
+.resource-breadcrumbs {
+  margin-bottom: 28px;
+  color: var(--resource-muted);
+  font-size: 0.85rem;
+}
+
+.resource-breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 0;
+}
+
+.resource-breadcrumbs li + li::before {
+  margin: 0 8px;
+  content: '›';
+}
+
+.resource-breadcrumbs a:hover {
+  color: var(--resource-accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.resource-footer {
+  border-top: 1px solid var(--resource-line);
+}
+
+.resource-footer__sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  font-weight: 600;
+}
+
+.resource-footer__sections a:hover {
+  color: var(--resource-accent-ink);
+}

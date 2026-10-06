@@ -4,6 +4,10 @@
 @import '../lib/quill/strong.css';
 @import '../lib/quill/verse.css';
 @import './resource-pages.css';
+@import './dictionary-pages.css';
+@import './nave-pages.css';
+@import './commentary-pages.css';
+@import './timeline-pages.css';
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

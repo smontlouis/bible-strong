@@ -216,4 +216,5 @@ export default {
   'pagination.previous': 'Previous',
   'pagination.next': 'Next',
   'pagination.page': 'Page {page}',
+  'resource.breadcrumbs': 'Breadcrumb',
 } as const
