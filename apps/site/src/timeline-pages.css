@@ -10,60 +10,34 @@
 }
 
 /*
- * The drawn timeline: one long axis that scrolls sideways, out of the reading column and
- * across the whole window. The page keeps scrolling up and down as usual.
+ * The timeline stage: a window on one long drawing that is travelled like a map. It fills
+ * the window under the header; the strip of periods runs along its bottom.
  */
+.resource-stage {
+  height: calc(100dvh - 65px);
+}
+
 .timeline-stage {
-  width: 100vw;
-  margin-block-start: 36px;
-  margin-inline: calc(50% - 50vw);
-}
-
-/* The periods, as a strip: where the view is, and a way to jump. */
-.timeline-strip ol {
-  display: flex;
-  gap: 6px;
-  padding: 0 20px 14px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.timeline-strip li {
-  flex: 1 0 0;
-  min-width: 104px;
-}
-
-.timeline-strip a {
-  display: block;
-  height: 100%;
-  padding: 9px 10px;
-  border-top: 4px solid var(--timeline-period, var(--resource-accent));
-  border-radius: 4px 4px 12px 12px;
-  background: var(--resource-surface);
-  color: var(--resource-muted);
-  font-size: 0.78rem;
-  font-weight: 600;
-  line-height: 1.25;
-  transition: background-color 0.15s;
-}
-
-.timeline-strip a:hover,
-.timeline-strip a[aria-current] {
-  background: color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 16%, var(--resource-surface));
-  color: var(--resource-ink);
-}
-
-.timeline-frame {
+  --timeline-map-height: 58px;
+  --timeline-view-height: calc(100dvh - 65px - var(--timeline-map-height));
   position: relative;
+  height: 100%;
   overflow: hidden;
-  border-block: 1px solid var(--resource-line);
+  background: var(--resource-canvas);
 }
 
 .timeline-scroller {
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-x: contain;
+  position: absolute;
+  inset: 0 0 var(--timeline-map-height);
+  z-index: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
   cursor: grab;
+}
+
+.timeline-scroller::-webkit-scrollbar {
+  display: none;
 }
 
 .timeline-scroller:focus-visible {
@@ -76,78 +50,276 @@
   user-select: none;
 }
 
-.timeline-scroller[data-dragging] .timeline-item {
+.timeline-scroller[data-dragging] a {
   pointer-events: none;
 }
 
+/*
+ * As tall as its drawing, or as the view when the window is taller. The ruler is its only
+ * child in the flow, and rests on its bottom edge.
+ */
 .timeline-canvas {
   position: relative;
+  display: flex;
+  height: max(var(--timeline-drawing-height), 100%);
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
-/* A period: a tint fading under its name, and its stretch of the axis in its colour. */
+/* Before the first year: what the stage is, and the way in. */
+.timeline-intro {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 18px;
+  padding-inline: clamp(24px, 6vw, 72px);
+}
+
+.timeline-intro > * {
+  max-width: min(100%, calc(100vw - 48px));
+}
+
+.timeline-intro__eyebrow,
+.timeline-period__era {
+  color: var(--resource-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.timeline-intro h1 {
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+  font-size: clamp(2.6rem, 6vw, 4.2rem);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+}
+
+.timeline-intro__lead {
+  color: var(--resource-muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.timeline-intro .resource-cta,
+.timeline-panel .resource-cta {
+  gap: 10px;
+}
+
+.timeline-stage .resource-cta svg,
+.timeline-panel__steps svg,
+.timeline-panel__close svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+/* A period: its tint, its scene pinned to the left of the view, and its name over it. */
 .timeline-period {
   position: absolute;
   top: 0;
   bottom: 0;
-  border-inline-start: 1px dashed
-    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 50%, transparent);
+  border-inline-start: 1px solid
+    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 35%, transparent);
   background: linear-gradient(
-    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 11%, transparent),
-    transparent 60%
+    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 12%, transparent),
+    transparent 45%,
+    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 7%, transparent)
   );
 }
 
-/* The name follows the view for as long as its period is on screen. */
-.timeline-period__label {
-  position: sticky;
+.timeline-period__anchor {
+  position: absolute;
+  bottom: 0;
   left: 0;
-  display: flex;
-  width: max-content;
-  max-width: min(360px, 88vw);
-  flex-direction: column;
-  padding: 14px 20px;
-  line-height: 1.25;
+  width: 1px;
+  height: 1px;
+  /* A link brings the start of the period to the left of the view, not just into it. */
+  scroll-margin-inline-end: 100vw;
+}
+
+/*
+ * The scene stays in the view for as long as its period does, then the next one pushes it
+ * out. It takes no room of its own, so the name of the period starts at the same corner.
+ */
+.timeline-period__scene {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: min(100vw, 720px);
+  height: 0;
   pointer-events: none;
 }
 
-.timeline-period__era {
-  color: var(--resource-muted);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.timeline-period__scene img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--timeline-view-height);
+  opacity: 0.55;
+  object-fit: cover;
+  object-position: center 30%;
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 34%, transparent);
 }
 
-.timeline-period__title {
+.resource-shell[data-theme='dark'] .timeline-period__scene img {
+  opacity: 0.38;
+}
+
+@media (prefers-color-scheme: dark) {
+  .resource-shell:not([data-theme='light']) .timeline-period__scene img {
+    opacity: 0.38;
+  }
+}
+
+.timeline-period__name {
+  position: sticky;
+  top: 20px;
+  left: 20px;
+  z-index: 3;
+  display: flex;
+  width: max-content;
+  max-width: min(400px, calc(100vw - 40px));
+  flex-direction: column;
+  gap: 4px;
+  margin: 20px 0 0 20px;
+  padding: 16px 20px 18px;
+  border: 1px solid var(--resource-line);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--resource-surface) 74%, transparent);
+  box-shadow: 0 18px 50px rgb(16 27 53 / 10%);
+  pointer-events: none;
+  backdrop-filter: blur(16px) saturate(1.3);
+}
+
+.timeline-period__era {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Period colours are picked for the drawing, not for text: the number is only ringed with one. */
+.timeline-period__number {
+  padding: 1px 8px;
+  border: 2px solid var(--timeline-period, var(--resource-accent));
+  border-radius: 999px;
+  color: var(--resource-ink);
+  letter-spacing: 0.06em;
+}
+
+.timeline-period__name h2 {
   font-family: 'Literata Reading', ui-serif, Georgia, serif;
-  font-size: 1.3rem;
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  line-height: 1.1;
 }
 
 .timeline-period__span {
   color: var(--resource-muted);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
-.timeline-period__axis {
-  position: absolute;
-  right: 0;
-  left: 0;
-  height: 3px;
-  background: var(--timeline-period, var(--resource-accent));
+.timeline-period__summary {
+  margin-top: 6px;
+  color: var(--resource-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
 }
 
-/* The ruler runs under the axis: a tick every hundred pixels, named by its year. */
-.timeline-ruler {
+/* After the last year: the way back, and the other sections of the site. */
+.timeline-outro {
   position: absolute;
-  right: 0;
-  left: 0;
+  inset-block: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 14px;
+  padding-inline: clamp(24px, 5vw, 64px);
+  border-inline-start: 1px solid var(--resource-line);
+}
+
+.timeline-outro h2 {
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.timeline-outro p {
+  color: var(--resource-muted);
+  line-height: 1.6;
+}
+
+.timeline-outro ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+.timeline-outro li a {
+  display: inline-block;
+  padding-block: 4px;
+  color: var(--resource-accent-ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--resource-accent) 45%, transparent);
+  text-underline-offset: 3px;
+}
+
+/* The world: every event, on lanes resting on the ruler. */
+.timeline-world {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 60px;
+  z-index: 1;
   pointer-events: none;
+}
+
+.timeline-world > * {
+  pointer-events: auto;
+}
+
+/* The ruler stays at the bottom of the view, however high the lanes are explored. */
+.timeline-ruler {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  flex: none;
+  pointer-events: none;
+}
+
+/* The axis and its ticks are laid over the whole ruler; the cursor alone is in its flow. */
+.timeline-ruler > div {
+  position: absolute;
+  inset: 0;
+}
+
+/* The stretch of the axis of a period, in its colour, over a strip that keeps the years readable. */
+.timeline-ruler__axis {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-top: 3px solid var(--timeline-period, var(--resource-accent));
+  background: color-mix(in srgb, var(--resource-canvas) 66%, transparent);
+  backdrop-filter: blur(10px);
 }
 
 .timeline-tick {
   position: absolute;
   top: 3px;
-  padding-top: 13px;
+  padding-top: 14px;
   color: var(--resource-muted);
   font-size: 0.7rem;
   font-weight: 600;
@@ -167,124 +339,21 @@
   content: '';
 }
 
-/* An event: a card over the years it lasts, or a pill at the year it happens. */
-.timeline-item {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  border: 1px solid var(--resource-line);
-  background: var(--resource-surface-raised);
-  box-shadow:
-    0 1px 2px rgb(16 27 53 / 5%),
-    0 5px 14px rgb(16 27 53 / 6%);
-  /* A located event arrives near the middle of the view, clear of the header. */
-  scroll-margin: 30vh 35vw;
-  transition:
-    transform 0.15s,
-    border-color 0.15s;
-}
-
-.timeline-item:hover,
-.timeline-item:focus-visible {
-  z-index: 2;
-  border-color: var(--timeline-period, var(--resource-accent));
-  transform: translateY(-1px);
-}
-
-/* The event a link asked to locate. */
-.timeline-item:target {
-  z-index: 2;
-  outline: 2px solid var(--resource-accent);
-  outline-offset: 3px;
-}
-
-.timeline-item--card {
-  height: 56px;
-  border-inline-start: 4px solid var(--timeline-period, var(--resource-accent));
-  border-radius: 14px;
-}
-
-/* The text of a long card follows the view, so a lifetime keeps its name while it passes. */
-.timeline-item--card .timeline-item__text {
-  position: sticky;
-  left: 12px;
-  display: flex;
-  min-width: 0;
-  flex: 0 1 138px;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-  padding: 0 8px 0 10px;
-}
-
-.timeline-item--card .timeline-item__title {
-  display: -webkit-box;
-  overflow: hidden;
-  font-size: 0.8rem;
-  font-weight: 600;
-  line-height: 1.2;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.timeline-item__dates {
-  overflow: hidden;
-  color: var(--resource-muted);
-  font-size: 0.68rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.timeline-item--card img {
-  width: 56px;
-  height: 54px;
-  flex: none;
-  margin-inline-start: auto;
-  border-radius: 0 13px 13px 0;
-  object-fit: cover;
-}
-
-.timeline-item--pill {
-  width: max-content;
-  height: 24px;
-  gap: 6px;
-  padding: 0 10px 0 8px;
-  border-radius: 999px;
-  font-size: 0.74rem;
-  font-weight: 600;
-}
-
-.timeline-item--pill::before {
-  width: 7px;
-  height: 7px;
-  flex: none;
-  border-radius: 50%;
-  background: var(--timeline-period, var(--resource-accent));
-  content: '';
-}
-
-.timeline-item--pill .timeline-item__title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* The year under the middle of the view, on the ruler. */
+/* The year under the middle of the view rides the axis. */
 .timeline-cursor {
-  position: absolute;
+  position: sticky;
   left: 50%;
-  z-index: 3;
-  margin-top: 28px;
-  padding: 4px 12px;
+  width: max-content;
+  padding: 5px 13px;
   border-radius: 999px;
   background: var(--resource-ink);
+  box-shadow: 0 8px 24px rgb(16 27 53 / 22%);
   color: var(--resource-canvas);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, 20px);
 }
 
 .timeline-cursor::before {
@@ -292,63 +361,580 @@
   bottom: 100%;
   left: 50%;
   width: 2px;
-  height: 16px;
+  height: 18px;
   background: var(--resource-ink);
   content: '';
   transform: translateX(-50%);
 }
 
-/* Stepping buttons, for a mouse without a sideways wheel. */
-.timeline-step {
+/* The same year, very large, behind the drawing: the lanes fill from the bottom, the sky is free. */
+.timeline-year {
   position: absolute;
-  top: 16px;
-  z-index: 3;
-  display: grid;
-  width: 44px;
-  height: 44px;
-  place-items: center;
-  border: 1px solid var(--resource-line);
-  border-radius: 50%;
-  background: var(--resource-surface-raised);
-  box-shadow: 0 6px 20px rgb(16 27 53 / 14%);
+  /* Under the band where the names of the periods pass. */
+  top: clamp(120px, 20vh, 190px);
+  right: clamp(16px, 3vw, 44px);
+  z-index: 0;
   color: var(--resource-ink);
-  cursor: pointer;
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+  font-size: clamp(4.5rem, 15vw, 13rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+  opacity: 0.08;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 0.4s;
 }
 
-.timeline-step:hover {
-  border-color: var(--resource-accent);
+.timeline-year::after {
+  content: attr(data-year);
+}
+
+.timeline-stage[data-in-time='false'] .timeline-year,
+.timeline-stage[data-in-time='false'] .timeline-cursor {
+  opacity: 0;
+}
+
+/* An event: a card, with a ribbon over the years it lasts, or a pill at the year it happens. */
+.timeline-item {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  scroll-margin: 30vh 35vw;
+}
+
+.timeline-item:focus-visible {
+  outline: none;
+}
+
+.timeline-item--card {
+  height: 64px;
+}
+
+/* The ribbon: from the first year to the last, ending on a ring. */
+.timeline-item--card::before {
+  position: absolute;
+  inset-inline: 24px 5px;
+  top: 50%;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 70%, transparent),
+    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 30%, transparent)
+  );
+  content: '';
+}
+
+.timeline-item--card::after {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border: 3px solid var(--timeline-period, var(--resource-accent));
+  border-radius: 50%;
+  background: var(--resource-canvas);
+  content: '';
+}
+
+/* The card follows the view along its ribbon, so a life keeps its face while it passes. */
+.timeline-card {
+  position: sticky;
+  left: 16px;
+  z-index: 1;
+  display: flex;
+  width: 224px;
+  height: 64px;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid var(--resource-line);
+  border-radius: 18px;
+  background: var(--resource-surface-raised);
+  box-shadow:
+    0 1px 2px rgb(16 27 53 / 6%),
+    0 10px 26px rgb(16 27 53 / 10%);
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.2s,
+    border-color 0.2s;
+}
+
+.timeline-card img {
+  width: 64px;
+  height: 100%;
+  flex: none;
+  /* The colour of the period holds the place of a picture on its way. */
+  background: color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 22%, var(--resource-surface));
+  object-fit: cover;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.timeline-card__text {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding: 0 12px;
+  /* A card without a picture is marked by the colour of its period instead. */
+  border-inline-start: 4px solid var(--timeline-period, var(--resource-accent));
+}
+
+.timeline-card img + .timeline-card__text {
+  border-inline-start: 0;
+}
+
+.timeline-card__title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.timeline-card__dates {
+  overflow: hidden;
+  color: var(--resource-muted);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timeline-item--pill {
+  width: max-content;
+  height: 26px;
+  gap: 7px;
+  padding: 0 12px 0 9px;
+  border: 1px solid var(--resource-line);
+  border-radius: 999px;
+  background: var(--resource-surface-raised);
+  box-shadow: 0 4px 12px rgb(16 27 53 / 7%);
+  font-size: 0.76rem;
+  font-weight: 600;
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s;
+}
+
+.timeline-item--pill::before {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--timeline-period, var(--resource-accent));
+  content: '';
+}
+
+.timeline-item--pill span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timeline-item--card:hover .timeline-card,
+.timeline-item--card:focus-visible .timeline-card,
+.timeline-item--pill:hover,
+.timeline-item--pill:focus-visible {
+  border-color: var(--timeline-period, var(--resource-accent));
+  transform: translateY(-2px);
+}
+
+.timeline-item--card:hover .timeline-card {
+  box-shadow:
+    0 2px 4px rgb(16 27 53 / 8%),
+    0 18px 40px rgb(16 27 53 / 16%);
+}
+
+.timeline-item--card:hover img {
+  transform: scale(1.08);
+}
+
+.timeline-item:hover,
+.timeline-item:focus-visible,
+.timeline-item[aria-current] {
+  z-index: 2;
+}
+
+/* The event that is open, or that a link asked to locate. */
+.timeline-item--card[aria-current] .timeline-card,
+.timeline-item--card:target .timeline-card,
+.timeline-item--pill[aria-current],
+.timeline-item--pill:target {
+  border-color: var(--timeline-period, var(--resource-accent));
+  outline: 3px solid
+    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 45%, transparent);
+  outline-offset: 2px;
+}
+
+/* Events arrive as the view reaches them, where the browser can tie that to scrolling. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .timeline-item {
+      animation: timeline-arrive linear both;
+      animation-range: entry 0 entry 180px;
+      animation-timeline: view(inline);
+    }
+  }
+}
+
+@keyframes timeline-arrive {
+  from {
+    opacity: 0;
+    scale: 0.94;
+    translate: 0 14px;
+  }
+}
+
+/* The strip of periods: where the view is in the whole of time, and a way to go anywhere. */
+.timeline-map {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 5;
+  height: var(--timeline-map-height);
+  border-top: 1px solid var(--resource-line);
+  background: var(--resource-surface);
+  touch-action: none;
+  user-select: none;
+}
+
+.timeline-map ol {
+  display: flex;
+  height: 100%;
+}
+
+/* A period takes the share of the strip it takes of the drawing, with room for its number. */
+.timeline-map li {
+  min-width: 26px;
+  flex: 1 1 0;
+  container-type: inline-size;
+}
+
+.timeline-map a {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  padding-inline: 10px;
+  border-top: 4px solid var(--timeline-period, var(--resource-accent));
+  color: var(--resource-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+.timeline-map a b {
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+
+.timeline-map a span {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* A period too short for its name keeps its number. */
+@container (max-width: 96px) {
+  .timeline-map a {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .timeline-map a span {
+    display: none;
+  }
+}
+
+.timeline-map a:hover,
+.timeline-map a[aria-current] {
+  background: color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 15%, var(--resource-surface));
+  color: var(--resource-ink);
+}
+
+.timeline-map__window {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  min-width: 6px;
+  border: 2px solid var(--resource-ink);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--resource-ink) 9%, transparent);
+  pointer-events: none;
+}
+
+/* An opened event: a panel beside the journey, or a sheet under it on a narrow window. */
+.timeline-panel {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  bottom: calc(var(--timeline-map-height) + 16px);
+  z-index: 6;
+  display: flex;
+  width: min(400px, calc(100vw - 32px));
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--resource-line);
+  border-radius: 26px;
+  background: var(--resource-surface-raised);
+  box-shadow: 0 30px 90px rgb(8 14 28 / 30%);
+  animation: timeline-panel-in 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes timeline-panel-in {
+  from {
+    opacity: 0;
+    translate: 40px 0;
+  }
+}
+
+.timeline-panel__scroll {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.timeline-panel__content {
+  animation: timeline-content-in 0.3s ease-out;
+}
+
+@keyframes timeline-content-in {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+
+/* The small picture of the card stands in, blurred, until the full one has arrived. */
+.timeline-panel__media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 22%, var(--resource-surface))
+    center / cover;
+}
+
+.timeline-panel__media::before {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(14px);
+  content: '';
+}
+
+.timeline-panel__media img {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: timeline-content-in 0.4s ease-out;
+}
+
+.timeline-panel__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 20px 24px 26px;
+}
+
+.timeline-panel__period {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--resource-muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.timeline-panel__period span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--timeline-period, var(--resource-accent));
+}
+
+.timeline-panel h2 {
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+  font-size: 1.75rem;
+  line-height: 1.12;
+  outline: none;
+}
+
+.timeline-panel__dates {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.timeline-panel__summary {
+  margin-top: 8px;
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+  font-size: 1.04rem;
+  line-height: 1.6;
+}
+
+.timeline-panel__excerpt {
+  color: var(--resource-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.timeline-panel .resource-cta {
+  margin-top: 14px;
+}
+
+/* Lines standing for the text that is on its way. */
+.timeline-panel__loading {
+  display: grid;
+  width: 100%;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.timeline-panel__loading i {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--resource-accent-soft);
+  animation: timeline-wait 1.2s ease-in-out infinite alternate;
+}
+
+.timeline-panel__loading i:last-child {
+  width: 60%;
+}
+
+@keyframes timeline-wait {
+  to {
+    opacity: 0.45;
+  }
+}
+
+.timeline-panel__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--resource-surface) 82%, transparent);
+  box-shadow: 0 4px 14px rgb(8 14 28 / 18%);
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+/* The events before and after, one step away. */
+.timeline-panel__steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--resource-line);
+}
+
+.timeline-panel__steps button {
+  display: flex;
+  min-width: 0;
+  min-height: 52px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  color: var(--resource-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+.timeline-panel__steps button:last-child {
+  justify-content: flex-end;
+  border-inline-start: 1px solid var(--resource-line);
+  text-align: end;
+}
+
+.timeline-panel__steps button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timeline-panel__steps button:hover:not(:disabled) {
+  background: var(--resource-accent-soft);
   color: var(--resource-accent-ink);
 }
 
-/* The stage is as wide as the window, so its right edge may lie under the page scrollbar. */
-.timeline-step--earlier {
-  right: 84px;
+.timeline-panel__steps button:disabled {
+  cursor: default;
+  opacity: 0.4;
 }
 
-.timeline-step--later {
-  right: 32px;
-}
+@media (max-width: 720px) {
+  .timeline-stage {
+    --timeline-map-height: 44px;
+  }
 
-.timeline-step svg {
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2;
-}
+  .timeline-period__name {
+    top: 12px;
+    left: 12px;
+    margin: 12px 0 0 12px;
+    padding: 12px 16px 14px;
+  }
 
-/* Revealed by the script that makes them work. */
-.timeline-cursor[hidden],
-.timeline-step[hidden] {
-  display: none;
-}
-
-/* A finger already scrolls the timeline: the stepping buttons would only cover it. */
-@media (pointer: coarse) {
-  .timeline-step {
+  .timeline-period__summary {
     display: none;
+  }
+
+  .timeline-panel {
+    top: auto;
+    right: 8px;
+    bottom: calc(var(--timeline-map-height) + 8px);
+    left: 8px;
+    width: auto;
+    max-height: 64%;
+    animation-name: timeline-sheet-in;
+  }
+
+  .timeline-panel__media {
+    aspect-ratio: 16 / 7;
+  }
+}
+
+@keyframes timeline-sheet-in {
+  from {
+    opacity: 0;
+    translate: 0 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline-panel,
+  .timeline-panel__content,
+  .timeline-panel__media img,
+  .timeline-panel__loading i {
+    animation: none;
+  }
+
+  .timeline-card,
+  .timeline-card img,
+  .timeline-item--pill {
+    transition: none;
   }
 }
 

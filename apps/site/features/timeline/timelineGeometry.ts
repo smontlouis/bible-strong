@@ -1,21 +1,22 @@
 // The geometry of the drawn timeline: periods follow one another on a single axis, each at
-// its own scale, and events sit on lanes above and under it.
+// its own scale, and events sit on lanes above it.
 
 /** The distance between two ticks of the ruler, whatever the scale. */
 export const TIMELINE_TICK_WIDTH = 100
-export const TIMELINE_LANE_HEIGHT = 30
+export const TIMELINE_LANE_HEIGHT = 34
 /** A card with a picture takes two lanes; a pill takes one. */
-export const TIMELINE_CARD_HEIGHT = 56
-export const TIMELINE_PILL_HEIGHT = 24
-/** The room the axis takes between the lanes above it and those under it. */
-export const TIMELINE_AXIS_HEIGHT = 52
-/** The room kept at the top for the name of the period. */
-const TIMELINE_TOP = 76
-const TIMELINE_BOTTOM = 28
-/** The lanes kept on each side of the axis, however few events a timeline holds. */
-const MIN_LANES_PER_SIDE = 6
+export const TIMELINE_CARD_HEIGHT = 64
+export const TIMELINE_PILL_HEIGHT = 26
+/** The height of the ruler the lanes rest on. */
+export const TIMELINE_RULER_HEIGHT = 60
+const TIMELINE_TOP = 24
+/** What separates the lowest lane from the axis. */
+const TIMELINE_BOTTOM = 14
+/** The lanes kept above the axis, however few events a timeline holds. */
+const MIN_LANES = 8
 
-const CARD_MIN_WIDTH = 200
+/** A card is this wide; an event lasting longer draws a ribbon beyond it. */
+export const TIMELINE_CARD_WIDTH = 224
 const PILL_MIN_WIDTH = 72
 const PILL_MAX_WIDTH = 240
 /** What separates two events sharing a lane. */
@@ -65,9 +66,12 @@ export const timelinePeriodScales = ({
   ].filter(part => part.endYear > part.startYear)
 }
 
-/** Lays scales end to end. */
-export const buildTimelineBands = (scales: readonly TimelineScale[]): TimelineBand[] => {
-  let left = 0
+/** Lays scales end to end, from where the axis starts on the drawing. */
+export const buildTimelineBands = (
+  scales: readonly TimelineScale[],
+  origin = 0
+): TimelineBand[] => {
+  let left = origin
   return scales.map(scale => {
     const band = {
       ...scale,
@@ -155,9 +159,9 @@ export type TimelinePlacementInput = {
   key: string
   startYear: number
   endYear: number
-  /** A card with a picture, drawn over the years it lasts; otherwise a pill. */
+  /** A card with a picture, and a ribbon over the years it lasts; otherwise a pill. */
   card: boolean
-  /** A card that keeps its minimum width however long the event lasts. */
+  /** A card without a ribbon, however long the event lasts. */
   fixedWidth?: boolean
   /** The width of a pill, from its title. */
   pillWidth?: number
@@ -181,21 +185,21 @@ const startsWithinYear = (
   const starts = new Map<string, number>()
   for (const [year, group] of sameYear) {
     const yearWidth = timelineYearToX(bands, year + 1) - timelineYearToX(bands, year)
-    if (group.length < 2 || yearWidth < CARD_MIN_WIDTH * 2) continue
+    if (group.length < 2 || yearWidth < TIMELINE_CARD_WIDTH * 2) continue
     group.forEach((input, rank) => starts.set(input.key, year + rank / group.length))
   }
   return starts
 }
 
 /**
- * Places events on lanes around the axis so that none covers another. Events are taken
- * from left to right and each takes the free lane nearest to the axis, above or under it,
- * so the timeline stays as close to its axis as its most crowded years allow.
+ * Places events on lanes above the axis so that none covers another. Events are taken from
+ * left to right and each takes the lowest free lane, so the timeline rests on its axis and
+ * only rises where its years are crowded.
  */
 export const placeTimelineEvents = (
   bands: readonly TimelineBand[],
   inputs: readonly TimelinePlacementInput[]
-): { placements: Map<string, TimelinePlacement>; height: number; axisTop: number } => {
+): { placements: Map<string, TimelinePlacement>; height: number } => {
   const spread = startsWithinYear(bands, inputs)
   const measured = inputs
     .map((input, order) => {
@@ -203,8 +207,8 @@ export const placeTimelineEvents = (
       const span = timelineYearToX(bands, input.endYear) - left
       const width = input.card
         ? input.fixedWidth
-          ? CARD_MIN_WIDTH
-          : Math.max(span, CARD_MIN_WIDTH)
+          ? TIMELINE_CARD_WIDTH
+          : Math.max(span, TIMELINE_CARD_WIDTH)
         : (input.pillWidth ?? PILL_MIN_WIDTH)
       return { input, order, left, width, lanes: input.card ? 2 : 1 }
     })
@@ -213,52 +217,33 @@ export const placeTimelineEvents = (
     // Left to right, so a lane is free as soon as its last event has ended.
     .sort((a, b) => a.left - b.left || a.order - b.order)
 
-  // Lanes are counted from the axis outwards on each side.
-  const laneEnds = { above: [] as number[], under: [] as number[] }
-  const isFree = (side: number[], lane: number, lanes: number, left: number) =>
-    Array.from({ length: lanes }, (_, offset) => side[lane + offset] ?? -Infinity).every(
-      end => end + LANE_GAP <= left
-    )
-
-  const placed = measured.map(({ input, left, width, lanes }, index) => {
-    // Sides take turns going first, which keeps the two halves balanced.
-    const sides = index % 2 === 0 ? (['above', 'under'] as const) : (['under', 'above'] as const)
+  // Lanes are counted from the axis upwards; each remembers where its last event ends.
+  const laneEnds: number[] = []
+  const placed = measured.map(({ input, left, width, lanes }) => {
     let lane = 0
-    let side: 'above' | 'under' = sides[0]
-    search: for (;; lane += 1) {
-      for (const candidate of sides) {
-        if (isFree(laneEnds[candidate], lane, lanes, left)) {
-          side = candidate
-          break search
-        }
-      }
+    while (
+      Array.from({ length: lanes }, (_, offset) => laneEnds[lane + offset] ?? -Infinity).some(
+        end => end + LANE_GAP > left
+      )
+    ) {
+      lane += 1
     }
-    for (let offset = 0; offset < lanes; offset += 1) laneEnds[side][lane + offset] = left + width
-    return { input, left, width, lanes, side, lane }
+    for (let offset = 0; offset < lanes; offset += 1) laneEnds[lane + offset] = left + width
+    return { input, left, width, lanes, lane }
   })
 
-  const lanesAbove = Math.max(laneEnds.above.length, MIN_LANES_PER_SIDE)
-  const lanesUnder = Math.max(laneEnds.under.length, MIN_LANES_PER_SIDE)
-  const axisTop = TIMELINE_TOP + lanesAbove * TIMELINE_LANE_HEIGHT
-  const underTop = axisTop + TIMELINE_AXIS_HEIGHT
-
+  const laneCount = Math.max(laneEnds.length, MIN_LANES)
   const placements = new Map<string, TimelinePlacement>()
-  for (const { input, left, width, lanes, side, lane } of placed) {
+  for (const { input, left, width, lanes, lane } of placed) {
     const height = input.card ? TIMELINE_CARD_HEIGHT : TIMELINE_PILL_HEIGHT
     const slack = Math.floor((TIMELINE_LANE_HEIGHT * lanes - height) / 2)
     placements.set(input.key, {
       left,
       width,
-      top:
-        side === 'under'
-          ? underTop + lane * TIMELINE_LANE_HEIGHT + slack
-          : axisTop - (lane + lanes) * TIMELINE_LANE_HEIGHT + slack,
+      // The first lane is the lowest: it sits right above the axis.
+      top: TIMELINE_TOP + (laneCount - lane - lanes) * TIMELINE_LANE_HEIGHT + slack,
     })
   }
 
-  return {
-    placements,
-    axisTop,
-    height: underTop + lanesUnder * TIMELINE_LANE_HEIGHT + TIMELINE_BOTTOM,
-  }
+  return { placements, height: TIMELINE_TOP + laneCount * TIMELINE_LANE_HEIGHT + TIMELINE_BOTTOM }
 }

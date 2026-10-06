@@ -8,10 +8,15 @@ import type {
 } from '@bible-strong/resource-domain/contracts/timelineContract'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { setResponseHeader } from '@tanstack/react-start/server'
 import { defaultBibleVersionId } from '../bible/bibleVersions'
 import { truncateText } from '../resources/editorialHtml'
 import { buildBibleReferencePath } from '../resources/editorialLinks'
-import { isResourceLanguage, type ResourceLanguage } from '../resources/publicSite'
+import {
+  isResourceLanguage,
+  RESOURCE_PAGE_CACHE_CONTROL,
+  type ResourceLanguage,
+} from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
 import { TIMELINE_MESSAGES } from './messages'
 import { formatTimelineDates, timelineYearSpan } from './timelineDates'
@@ -21,14 +26,9 @@ import {
   timelineParagraphs,
   timelineThumbnailUrl,
 } from './timelineEvents'
-import {
-  buildTimelineBands,
-  estimateTimelinePillWidth,
-  placeTimelineEvents,
-  timelineWidth,
-} from './timelineGeometry'
+import { estimateTimelinePillWidth, placeTimelineEvents } from './timelineGeometry'
 import { LAYOUT_CARD, LAYOUT_FIXED_WIDTH, TIMELINE_LAYOUT } from './timelineLayout'
-import { findTimelinePeriod, TIMELINE_SCALES } from './timelinePeriods'
+import { findTimelinePeriod, TIMELINE_BANDS, TIMELINE_CANVAS_WIDTH } from './timelinePeriods'
 import { isTimelineSlug } from './timelineRoutes'
 import {
   fitTimelinePassage,
@@ -106,8 +106,8 @@ export type TimelineIndexPageData = {
   eventCount: number
   /** The events of each period, in order; an empty id gathers events of unknown periods. */
   periods: { id: string; events: TimelineIndexEvent[] }[]
-  /** The size of the drawn timeline, and where its axis runs. */
-  canvas: { width: number; height: number; axisTop: number }
+  /** The size of the drawn timeline, above its axis. */
+  canvas: { width: number; height: number }
   /** Whether the timeline is also published in the other language. */
   translated: boolean
 }
@@ -123,9 +123,8 @@ export const loadTimelineIndexPage = createServerFn({ method: 'GET' })
     ])
     if (!events.length) throw notFound()
 
-    const bands = buildTimelineBands(TIMELINE_SCALES)
-    const { placements, height, axisTop } = placeTimelineEvents(
-      bands,
+    const { placements, height } = placeTimelineEvents(
+      TIMELINE_BANDS,
       events.flatMap(event => {
         const drawn = TIMELINE_LAYOUT[event.slug]
         const span = drawn
@@ -169,7 +168,7 @@ export const loadTimelineIndexPage = createServerFn({ method: 'GET' })
       language,
       eventCount: events.length,
       periods,
-      canvas: { width: timelineWidth(bands), height, axisTop },
+      canvas: { width: TIMELINE_CANVAS_WIDTH, height },
       translated: otherEvents.length > 0,
     }
   })
@@ -245,6 +244,48 @@ const loadPassages = async (
     }
   })
 }
+
+/** What the panel of the drawn timeline shows of an event, before its page is opened. */
+export type TimelinePreviewData = {
+  slug: string
+  title: string
+  /** The dating as the publication writes it. */
+  dates: string
+  period: string
+  summary: string
+  /** The opening of the article. */
+  excerpt: string
+  image?: string
+}
+
+const PREVIEW_EXCERPT_LENGTH = 420
+
+export const loadTimelinePreview = createServerFn({ method: 'GET' })
+  .validator((data: { language: string; slug: string }) => data)
+  .handler(async ({ data }): Promise<TimelinePreviewData> => {
+    const { slug } = data
+    if (!isResourceLanguage(data.language) || !isTimelineSlug(slug)) throw notFound()
+    const response = await readResource<TimelineEventResponseDto>(
+      `/v1/timelines/${data.language}/events/${slug}`
+    )
+    if (!response) throw notFound()
+    const { event } = response
+    const summary = singleLine(event.description)
+    const opening = singleLine(timelineParagraphs(event.article)[0] ?? '')
+
+    // A preview is as stable as the page of the event, so the CDN may keep it as long.
+    setResponseHeader('Cache-Control', RESOURCE_PAGE_CACHE_CONTROL)
+    return {
+      slug,
+      title: singleLine(event.title),
+      dates: event.dates,
+      period: event.period,
+      summary,
+      // An article opening on its own summary would say it twice.
+      excerpt: opening === summary ? '' : truncateText(opening, PREVIEW_EXCERPT_LENGTH),
+      image: event.images[0] && timelineImageUrl(event.images[0].file),
+    }
+  })
 
 export type TimelineEventPageData = {
   language: ResourceLanguage

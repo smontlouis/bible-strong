@@ -1,5 +1,10 @@
 import type { ResourceLanguage } from '../resources/publicSite'
-import { timelinePeriodScales, type TimelineScale } from './timelineGeometry'
+import {
+  buildTimelineBands,
+  timelinePeriodScales,
+  timelineWidth,
+  type TimelineBand,
+} from './timelineGeometry'
 
 type Localized = Record<ResourceLanguage, string>
 
@@ -224,8 +229,19 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
   },
 ]
 
-/** The scales of the whole timeline, in order. */
-export const TIMELINE_SCALES: readonly TimelineScale[] = TIMELINE_PERIODS.flatMap(timelinePeriodScales)
+/** The room the drawing keeps before its first year, for its title. */
+export const TIMELINE_INTRO_WIDTH = 600
+/** The room it keeps after its last year, for what follows the timeline. */
+export const TIMELINE_OUTRO_WIDTH = 520
+
+/** The whole timeline on its axis, every period at its scale. */
+export const TIMELINE_BANDS: readonly TimelineBand[] = buildTimelineBands(
+  TIMELINE_PERIODS.flatMap(timelinePeriodScales),
+  TIMELINE_INTRO_WIDTH
+)
+
+/** The width of the drawing, from its title to what follows the last year. */
+export const TIMELINE_CANVAS_WIDTH = timelineWidth(TIMELINE_BANDS) + TIMELINE_OUTRO_WIDTH
 
 export const findTimelinePeriod = (id: string): TimelinePeriod | undefined =>
   TIMELINE_PERIODS.find(period => period.id === id)

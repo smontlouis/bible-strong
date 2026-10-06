@@ -4,6 +4,7 @@ import {
   estimateTimelinePillWidth,
   placeTimelineEvents,
   TIMELINE_CARD_HEIGHT,
+  TIMELINE_CARD_WIDTH,
   TIMELINE_PILL_HEIGHT,
   timelineBandAt,
   timelinePeriodExtents,
@@ -15,7 +16,7 @@ import {
   type TimelinePlacementInput,
 } from './timelineGeometry'
 import { LAYOUT_CARD, LAYOUT_FIXED_WIDTH, TIMELINE_LAYOUT } from './timelineLayout'
-import { TIMELINE_SCALES } from './timelinePeriods'
+import { TIMELINE_BANDS } from './timelinePeriods'
 
 const scales = [
   ...timelinePeriodScales({ id: 'a', startYear: -200, endYear: 0, yearsPerTick: 100 }),
@@ -24,38 +25,42 @@ const scales = [
     startYear: 0,
     endYear: 20,
     yearsPerTick: 1,
-    detail: { startYear: 10, endYear: 12, yearsPerTick: 0.25 },
+    detail: { startYear: 10, endYear: 12, yearsPerTick: 0.2 },
   }),
 ]
 const bands = buildTimelineBands(scales)
 
 describe('timeline axis', () => {
+  it('starts the axis where the drawing says', () => {
+    expect(buildTimelineBands(scales, 600)[0]).toMatchObject({ left: 600, width: 200 })
+  })
+
   it('lays scales end to end, a detailed stretch splitting its period in three', () => {
     expect(bands.map(({ id, left, width }) => [id, left, width])).toEqual([
       ['a', 0, 200],
       ['b', 200, 1000],
-      ['b', 1200, 800],
-      ['b', 2000, 800],
+      ['b', 1200, 1000],
+      ['b', 2200, 800],
     ])
-    expect(timelineWidth(bands)).toBe(2800)
+    expect(timelineWidth(bands)).toBe(3000)
     expect(timelinePeriodExtents(bands)).toEqual([
       { id: 'a', left: 0, width: 200 },
-      { id: 'b', left: 200, width: 2600 },
+      { id: 'b', left: 200, width: 2800 },
     ])
   })
 
   it('maps a year to its position and back', () => {
     expect(timelineYearToX(bands, -100)).toBe(100)
     expect(timelineYearToX(bands, 5)).toBe(700)
-    expect(timelineYearToX(bands, 11)).toBe(1600)
+    expect(timelineYearToX(bands, 11)).toBe(1700)
     expect(timelineXToYear(bands, 100)).toBe(-100)
-    expect(timelineXToYear(bands, 1599)).toBe(10)
-    expect(timelineXToYear(bands, 1600)).toBe(11)
+    expect(timelineXToYear(bands, 1699)).toBe(10)
+    expect(timelineXToYear(bands, 1700)).toBe(11)
   })
 
   it('keeps a year outside the timeline at its nearest end', () => {
     expect(timelineYearToX(bands, -5000)).toBe(0)
-    expect(timelineYearToX(bands, 3000)).toBe(2800)
+    expect(timelineYearToX(bands, 3000)).toBe(3000)
     expect(timelineXToYear(bands, 99_999)).toBe(20)
   })
 
@@ -71,8 +76,9 @@ describe('timeline axis', () => {
       { left: 1300 },
       { left: 1400 },
       { left: 1500 },
-      { left: 1600, year: 11 },
+      { left: 1600 },
     ])
+    expect(timelineTicks(bands[2]!)[5]).toEqual({ left: 1700, year: 11 })
   })
 })
 
@@ -93,16 +99,16 @@ const overlapping = (
 }
 
 describe('placeTimelineEvents', () => {
-  it('fills the lanes nearest to the axis first, on both sides', () => {
-    const { placements, axisTop } = placeTimelineEvents(bands, [
+  it('fills the lowest lane first and rises only where events meet', () => {
+    const { placements } = placeTimelineEvents(bands, [
       { key: 'first', startYear: 1, endYear: 1, card: false, pillWidth: 150 },
       { key: 'second', startYear: 2, endYear: 2, card: false, pillWidth: 150 },
       { key: 'later', startYear: 8, endYear: 8, card: false, pillWidth: 150 },
     ])
-    const side = (key: string) => ((placements.get(key)?.top ?? 0) < axisTop ? 'above' : 'under')
-    expect(side('first')).not.toBe(side('second'))
+    const top = (key: string) => placements.get(key)?.top ?? 0
+    expect(top('second')).toBeLessThan(top('first'))
     // The lane of the first event is free again further on.
-    expect(Math.abs((placements.get('later')?.top ?? 0) - axisTop)).toBeLessThan(60)
+    expect(top('later')).toBe(top('first'))
   })
 
   it('leaves out an event the axis cannot place', () => {
@@ -120,8 +126,8 @@ describe('placeTimelineEvents', () => {
       { key: 'short', startYear: -150, endYear: -140, card: true },
     ])
     expect(placements.get('life')).toMatchObject({ left: 400, width: 600 })
-    expect(placements.get('day')?.width).toBe(200)
-    expect(placements.get('short')?.width).toBe(200)
+    expect(placements.get('day')?.width).toBe(TIMELINE_CARD_WIDTH)
+    expect(placements.get('short')?.width).toBe(TIMELINE_CARD_WIDTH)
   })
 
   it('spreads the events of one year over it where the year is drawn wide', () => {
@@ -136,7 +142,6 @@ describe('placeTimelineEvents', () => {
   })
 
   it('places every event drawn by the study workspace without any overlap', () => {
-    const realBands = buildTimelineBands(TIMELINE_SCALES)
     const inputs: TimelinePlacementInput[] = Object.entries(TIMELINE_LAYOUT).map(
       ([key, [startYear, endYear, flags]]) => ({
         key,
@@ -148,14 +153,14 @@ describe('placeTimelineEvents', () => {
         pillWidth: estimateTimelinePillWidth(key),
       })
     )
-    const { placements, height } = placeTimelineEvents(realBands, inputs)
+    const { placements, height } = placeTimelineEvents(TIMELINE_BANDS, inputs)
     expect(placements.size).toBe(inputs.length)
     const boxes = inputs.map(input => ({
       ...placements.get(input.key)!,
       height: input.card ? TIMELINE_CARD_HEIGHT : TIMELINE_PILL_HEIGHT,
     }))
     expect(overlapping(boxes)).toBe(0)
-    // The whole timeline stays within reach of its axis.
-    expect(height).toBeLessThan(960)
+    // The whole timeline rests on its axis without rising out of reach.
+    expect(height).toBeLessThan(900)
   })
 })

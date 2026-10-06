@@ -35,6 +35,7 @@ export default function ResourceShell({
   section,
   breadcrumbs,
   subHeader,
+  immersive = false,
   children,
 }: {
   /** The same resource in the other language, when it exists. */
@@ -47,6 +48,11 @@ export default function ResourceShell({
   breadcrumbs?: Breadcrumb[]
   /** Controls specific to the resource, kept under the main bar while scrolling. */
   subHeader?: ReactNode
+  /**
+   * The page is an experience of its own: it takes the whole window under the header,
+   * without the reading column, the invitation or the footer.
+   */
+  immersive?: boolean
   children: ReactNode
 }) {
   const t = useI18n()
@@ -164,45 +170,51 @@ export default function ResourceShell({
           <div className="relative mx-auto max-w-[760px] px-5 pb-3">{subHeader}</div>
         )}
       </header>
-      <main className="mx-auto max-w-[760px] px-5 pb-20 pt-8 md:pt-10">
-        {breadcrumbs && breadcrumbs.length > 1 && (
-          <nav className="resource-breadcrumbs" aria-label={t('resource.breadcrumbs')}>
-            <ol>
-              {breadcrumbs.map((breadcrumb, index) => (
-                <li key={`${index}-${breadcrumb.label}`}>
-                  {breadcrumb.path && index < breadcrumbs.length - 1 ? (
-                    <a href={breadcrumb.path}>{breadcrumb.label}</a>
-                  ) : (
-                    <span aria-current="page">{breadcrumb.label}</span>
-                  )}
+      {immersive ? (
+        <main className="resource-stage">{children}</main>
+      ) : (
+        <>
+          <main className="mx-auto max-w-[760px] px-5 pb-20 pt-8 md:pt-10">
+            {breadcrumbs && breadcrumbs.length > 1 && (
+              <nav className="resource-breadcrumbs" aria-label={t('resource.breadcrumbs')}>
+                <ol>
+                  {breadcrumbs.map((breadcrumb, index) => (
+                    <li key={`${index}-${breadcrumb.label}`}>
+                      {breadcrumb.path && index < breadcrumbs.length - 1 ? (
+                        <a href={breadcrumb.path}>{breadcrumb.label}</a>
+                      ) : (
+                        <span aria-current="page">{breadcrumb.label}</span>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            )}
+            {children}
+            {section && (
+              <AppInvitation
+                section={section}
+                language={locale}
+                appUrl={appUrl}
+                downloadPath={`${homePath}#telecharger`}
+              />
+            )}
+          </main>
+          <footer className="resource-footer mx-auto max-w-[760px] px-5 py-10 text-sm">
+            <ul className="resource-footer__sections">
+              {RESOURCE_SECTIONS.map(entry => (
+                <li key={entry.key}>
+                  <a href={entry.path(locale)}>{entry.label[locale]}</a>
                 </li>
               ))}
-            </ol>
-          </nav>
-        )}
-        {children}
-        {section && (
-          <AppInvitation
-            section={section}
-            language={locale}
-            appUrl={appUrl}
-            downloadPath={`${homePath}#telecharger`}
-          />
-        )}
-      </main>
-      <footer className="resource-footer mx-auto max-w-[760px] px-5 py-10 text-sm">
-        <ul className="resource-footer__sections">
-          {RESOURCE_SECTIONS.map(entry => (
-            <li key={entry.key}>
-              <a href={entry.path(locale)}>{entry.label[locale]}</a>
-            </li>
-          ))}
-        </ul>
-        <p className="resource-muted mt-6">{t('resource.footer.tagline')}</p>
-        <a className="resource-link mt-2 inline-block" href={homePath}>
-          {t('resource.footer.getApp')}
-        </a>
-      </footer>
+            </ul>
+            <p className="resource-muted mt-6">{t('resource.footer.tagline')}</p>
+            <a className="resource-link mt-2 inline-block" href={homePath}>
+              {t('resource.footer.getApp')}
+            </a>
+          </footer>
+        </>
+      )}
     </div>
   )
 }

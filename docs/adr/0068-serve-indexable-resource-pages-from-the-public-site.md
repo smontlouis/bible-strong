@@ -61,7 +61,7 @@ Site routes reuse the grammar of ADR-0053 to ADR-0056 and add the lists that lea
 - `/commentary/:language`, the commentaries; `/commentary/:language/:resource`, a
   commentary and the chapters it covers
 - `/commentary/:language/:resource/:book/:chapter`, the commentary of a chapter (ADR-0054)
-- `/timeline/:language`, every event by period, and `/timeline/:language/:slug`, an event
+- `/timeline/:language`, the drawn timeline, and `/timeline/:language/:slug`, an event
   (ADR-0056)
 
 A commentary section has no page of its own: every section of a chapter is on the chapter
@@ -157,17 +157,21 @@ Some presentation data is not in the Resource API and is mirrored from the works
 names, spans and scales of the timeline periods, the years an event is drawn over and
 whether it is a card or a pill, and the English names of commentary authors.
 
-The timeline page draws every event on one axis that scrolls sideways, where the workspace
-shows one period at a time. Periods follow one another, each at its own scale, finer than
-the workspace's where events would pile up; the years of the ministry of Jesus are drawn
-wider still, and the events of one of those years are spread over it in their order. The
-site computes the lane of each event, nearest to the axis first, instead of mirroring the
-rows of the workspace, which overlap. Every event stays a plain link, listed again under
-its period below the drawing; the script only adds dragging, stepping and the year under
-the middle of the view.
-Timeline images are served by the source of the timeline, as in the workspace; the site
-only names them. The French topics are a machine translation of Nave's
-English text; their pages say so.
+The timeline page is a stage that fills the window, where the workspace shows one period
+at a time: one axis runs along its bottom through every period, each at its own scale,
+finer than the workspace's where events would pile up. The years of the ministry of Jesus
+are drawn wider still, and the events of one of those years are spread over it in their
+order. Each period has its scene, the illustration of the workspace, pinned behind its
+events for as long as it is in view. Events rest on lanes above the axis; the site
+computes the lane of each one, lowest first, instead of mirroring the rows of the
+workspace, which overlap. An event lasting years is a card that follows the view along a
+ribbon.
+
+Every event stays a plain link to its page. With the script, the stage moves like a map
+(a thrown drag glides, a wheel travels through time, a strip of the periods scrubs
+through the whole of it) and an event opens in a panel loaded on demand and cached like a
+page, so the journey is not interrupted. The page has no list of events and no footer: the
+drawing is the page.
 
 A page that needs a whole list to place its resource (the neighbours of a topic or of an
 event, the letters of a lexicon) keeps that list for an hour in each server instance.
