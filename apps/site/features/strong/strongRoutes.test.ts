@@ -6,6 +6,8 @@ import {
   buildStrongPath,
   buildWebAppStrongUrl,
   displayStrongCode,
+  displayStrongNumber,
+  displayStrongTitleCode,
   parseStrongCode,
   strongCodeSlug,
   strongGlossLetter,
@@ -15,6 +17,18 @@ describe('Strong public routes', () => {
   it('normalizes a classical code to its padded identity', () => {
     expect(parseStrongCode('h430')?.code).toBe('H0430')
     expect(parseStrongCode('G26')?.code).toBe('G0026')
+  })
+
+  it('reads a sense as the classical number it is filed under', () => {
+    expect(displayStrongNumber('H1254B')).toBe('H1254')
+    expect(displayStrongNumber('H0430G')).toBe('H430')
+    expect(displayStrongNumber('G0026')).toBe('G26')
+  })
+
+  it('names a sense in a title after its classical number', () => {
+    expect(displayStrongTitleCode('H1254B')).toBe('H1254 (H1254B)')
+    expect(displayStrongTitleCode('G2424H')).toBe('G2424 (G2424H)')
+    expect(displayStrongTitleCode('H8064')).toBe('H8064')
   })
 
   it('keeps the suffix case, which distinguishes two entries', () => {

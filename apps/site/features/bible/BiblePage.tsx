@@ -2,7 +2,6 @@ import { useRef } from 'react'
 import { useI18n } from '@/locales'
 import ResourceShell from '../resources/ResourceShell'
 import StrongPreviewPopover from '../strong/StrongPreviewPopover'
-import { displayStrongCode } from '../strong/strongRoutes'
 import type { BibleChapterRef, BibleInterlinearWord, BiblePageData } from './bible.functions'
 import { bibleBookName } from './bibleBooks'
 import { bibleBreadcrumbs } from './bibleBreadcrumbs'
@@ -48,7 +47,7 @@ const InterlinearWord = ({
       <span className="interlinear__strong">
         {word.strong.map(link => (
           <a key={link.code} href={link.path} data-strong={link.code}>
-            {displayStrongCode(link.code)}
+            {link.label}
           </a>
         ))}
       </span>

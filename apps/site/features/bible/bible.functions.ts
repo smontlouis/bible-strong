@@ -11,9 +11,9 @@ import { truncateText } from '../resources/editorialHtml'
 import { parseOsisReference } from '../resources/editorialLinks'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
-import { buildStrongPath, displayStrongCode, parseStrongCode } from '../strong/strongRoutes'
 import { bibleBookName } from './bibleBooks'
 import { renderBibleText, type BibleNote, type BibleTextMarker } from './bibleLayout'
+import { bibleStrongLinks, type BibleStrongLink } from './bibleStrongLinks'
 import {
   buildBiblePath,
   INTERLINEAR_VERSION_ID,
@@ -33,11 +33,10 @@ const COVERAGE_TTL_MS = 60 * 60 * 1000
 
 type StrongSpans = StrongBibleChapterDto['verses'][number]['spans']
 type InterlinearToken = InterlinearBibleChapterDto['verses'][number]['tokens'][number]
-type Identity = { kind: string; code: string }
 
 export type BibleChapterRef = { book: number; chapter: number }
 
-export type BibleStrongLink = { code: string; path: string }
+export type { BibleStrongLink }
 
 /** One aligned unit of an interlinear reading, in the order of the Bible being read. */
 export type BibleInterlinearWord = {
@@ -132,26 +131,13 @@ const listVersionsCarrying = async (
   return BIBLE_VERSIONS.filter((_, index) => carried[index]).map(version => version.id)
 }
 
-/** The classical Strong numbers behind a word; a compound word may carry several. */
-const strongLinks = (
-  identities: readonly Identity[],
-  language: ResourceLanguage
-): BibleStrongLink[] => {
-  const classical = identities.filter(identity => identity.kind === 'strong')
-  const codes = (classical.length ? classical : identities.slice(0, 1)).flatMap(
-    identity => parseStrongCode(identity.code)?.code ?? []
-  )
-  return [...new Set(codes)].map(code => ({ code, path: buildStrongPath(language, code) }))
-}
-
 /**
  * The Strong numbers printed after a tagged word, as in the study workspace. An original
  * word the translation left out has no text to follow and shows as a dot.
  */
 const strongReferencesHtml = (links: readonly BibleStrongLink[], untranslated: boolean): string =>
   links
-    .map(({ code, path }) => {
-      const label = displayStrongCode(code)
+    .map(({ code, path, label }) => {
       return untranslated
         ? `<a class="strong-ref strong-ref--untranslated" href="${path}" data-strong="${code}" aria-label="${label}" title="${label}"></a>`
         : `<a class="strong-ref" href="${path}" data-strong="${code}">${label}</a>`
@@ -173,7 +159,7 @@ const directInterlinearWords = (
         .map(segment => segment.gloss)
         .filter(Boolean)
         .join(' '),
-      strong: token.segments.flatMap(segment => strongLinks(segment.identities, language)),
+      strong: token.segments.flatMap(segment => bibleStrongLinks(segment.identities, language)),
     }))
 
 type OriginalToken = { form: string; transliteration: string }
@@ -200,7 +186,7 @@ const reverseInterlinearWords = (
       text: text.slice(span.startOffset, end),
       original: aligned.map(token => token.form).join(' ') || undefined,
       transliteration: aligned.map(token => token.transliteration).join(' ') || undefined,
-      strong: strongLinks(span.identities, language),
+      strong: bibleStrongLinks(span.identities, language),
     })
     position = end
   }
@@ -336,8 +322,7 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
             })),
           }
         : renderBibleText(selected, {
-            verseHref: verse =>
-              buildBiblePath({ ...location, passage: { startVerse: verse } }),
+            verseHref: verse => buildBiblePath({ ...location, passage: { startVerse: verse } }),
             verseLabel: verse => `${bibleBookName(book, language)} ${chapter}:${verse}`,
             // A cross-reference stays in the version being read, when it carries the passage.
             referenceHref: osisReference => {
@@ -363,15 +348,13 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
                 ? new Map(
                     [...spansByVerse].map(([verse, { spans }]) => [
                       verse,
-                      spans.map(
-                        (span): BibleTextMarker => ({
-                          offset: span.startOffset + span.length,
-                          html: strongReferencesHtml(
-                            strongLinks(span.identities, language),
-                            span.length === 0
-                          ),
-                        })
-                      ),
+                      spans.map((span): BibleTextMarker => ({
+                        offset: span.startOffset + span.length,
+                        html: strongReferencesHtml(
+                          bibleStrongLinks(span.identities, language),
+                          span.length === 0
+                        ),
+                      })),
                     ])
                   )
                 : undefined,

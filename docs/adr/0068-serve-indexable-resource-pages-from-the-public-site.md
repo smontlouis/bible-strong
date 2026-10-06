@@ -47,8 +47,8 @@ Site routes reuse the grammar of ADR-0053 to ADR-0056 and add the lists that lea
 - `/bible/:version`, the books and chapters of a version
 - `/bible/:version[/:presentation]/:book/:chapter[/:passage]`
 - `/strong/:language`, the lexicon, and `/strong/:language/:lexicon/:letter`, its Hebrew or
-  Greek entries filed under the first letter of their gloss
-- `/strong/:language/:code`
+  Greek senses filed under the first letter of their gloss
+- `/strong/:language/:code`, one sense of the lexicon
 - `/strong/:language/:code/concordance[/:page]`, the occurrences fifty verses to a numbered
   page, with an optional `book` filter
 - `/strong/:code` redirects permanently to the default language, `fr`.
@@ -95,6 +95,20 @@ gathers what the workspace spreads over several Strong subpages: both definition
 [ADR-0064](./0064-separate-simple-and-detailed-strong-lexicons.md), related entries and a
 concordance sample in the Bible matching the page language.
 
+A Strong page is one sense of the lexicon, as in the workspace. Where the lexicon tells the
+senses of a classical number apart (`H1254A` “to create”, `H1254B` “to fatten”), each sense
+has its page, named by its sense code, with its own definitions and its own concordance. A
+classical number (`h1254`) or an expanded spelling (`h1254a`) is an address, not a page: it
+redirects permanently to the sense the lexicon resolves it to, and so do the concordance
+paths under it. A number the lexicon does not split keeps its classical code. The reader
+still sees the classical number: a page and its title carry it first and add the sense code
+only where it differs, and the sibling senses of a number are listed with its related
+entries.
+
+A word of a Bible page opens the most precise identity it is tagged with, the sense it has
+in that verse, under its classical number. The definitions follow the reading order of
+ADR-0064, applied by the rule the workspace uses.
+
 Bible pages accept only the canonical lowercase OSIS book identity; any other spelling of
 a valid path redirects to it. Their interface language follows the version: English for an
 English Bible, French otherwise.
@@ -107,9 +121,8 @@ timeline event and the lists leading to them are indexable. Verse ranges and con
 book filters are served with `noindex, follow`.
 
 Sitemaps are generated from the Resource API: one per Bible and reading mode listing its
-chapters, the classical Strong numbers, one per dictionary, per language of the topics and
-per commentary, and the timeline. Verses and disambiguated senses are reached
-through links.
+chapters, the senses of the Strong lexicons, one per dictionary, per language of the topics
+and per commentary, and the timeline. Verses are reached through links.
 
 The CDN keeps a rendered page for a day and may serve it stale while revalidating. Only a
 successfully rendered resource is cacheable. Because a cached page is identical for every
@@ -118,8 +131,8 @@ landing page, never rendered on the server.
 
 ### Boundaries
 
-The site depends on `@bible-strong/resource-domain` for wire contracts and Strong
-identities, on `@bible-strong/resource-catalog` for Bible, Strong-Bible and interlinear
+The site depends on `@bible-strong/resource-domain` for wire contracts, Strong identities
+and the reading order of Strong definitions, on `@bible-strong/resource-catalog` for Bible, Strong-Bible and interlinear
 identities, and on `@bible-strong/bible-reference-parser` for OSIS book identities. It
 never imports Expo sources. Its route parsers are written over those shared identities;
 the Expo parsers keep their own input aliases.
@@ -134,9 +147,11 @@ Public pages are fast and indexable without changing the workspace or the native
 applications.
 
 Each resource has two renderings, a site document and a workspace screen. Sharing the wire
-contracts and the identities limits drift, but the route grammar is implemented twice, and
-the site applies a simpler reading order than the workspace: the historical definition
-first, the detailed one second.
+contracts, the identities and the reading order of the definitions limits drift, but the
+route grammar is implemented twice.
+
+Sibling senses of a Greek number share one lexicon article and may share a gloss: their
+pages differ by their concordance and their sense code only.
 
 Bible display names, languages and copyright notices are not in the shared catalog. The
 site mirrors them from the workspace; a test keeps the list of versions aligned with the

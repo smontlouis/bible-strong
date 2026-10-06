@@ -36,15 +36,27 @@ export const Route = createFileRoute('/strong/$language/$code_/concordance_/$pag
     }
   },
   loaderDeps: ({ search }) => search,
-  loader: ({ params, deps }) =>
-    loadStrongConcordancePage({
+  loader: async ({ params, deps }) => {
+    // The numbering of the pages is the one of a sense: another code starts from its first.
+    const identity = parseStrongCode(params.code)
+    const page = await loadStrongConcordancePage({
       data: {
         language: params.language,
         code: params.code,
         book: deps.book,
         page: parseConcordancePage(params.page),
       },
-    }),
+    })
+    if (identity?.code !== page.code) {
+      throw redirect({
+        to: '/strong/$language/$code/concordance',
+        params: { language: params.language, code: strongCodeSlug(page.code) },
+        search: deps,
+        statusCode: 301,
+      })
+    }
+    return page
+  },
   head: ({ loaderData }) => (loaderData ? buildConcordanceHead(loaderData) : {}),
   // Only a rendered page is cacheable: a failed load must not be kept by the CDN.
   headers: ({ loaderData }) =>

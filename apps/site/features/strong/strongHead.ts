@@ -6,7 +6,7 @@ import {
 import { breadcrumbScripts } from '../resources/resourceHead'
 import type { StrongPageData } from './strong.functions'
 import { strongEntryBreadcrumbs } from './strongBreadcrumbs'
-import { buildStrongPath, displayStrongCode } from './strongRoutes'
+import { buildStrongPath, displayStrongCode, displayStrongTitleCode } from './strongRoutes'
 
 const LABELS = {
   fr: {
@@ -31,7 +31,7 @@ export const buildStrongHead = (entry: StrongPageData) => {
   const lexicon = labels[entry.lexicalLanguage]
   const displayCode = displayStrongCode(entry.code)
   const url = absoluteSiteUrl(buildStrongPath(entry.language, entry.code))
-  const title = `${entry.original} (${entry.transliteration}) – ${labels.strong} ${displayCode}${labels.separator}${entry.gloss} | ${lexicon}`
+  const title = `${entry.original} (${entry.transliteration}) – ${labels.strong} ${displayStrongTitleCode(entry.code)}${labels.separator}${entry.gloss} | ${lexicon}`
 
   const structuredData = {
     '@context': 'https://schema.org',

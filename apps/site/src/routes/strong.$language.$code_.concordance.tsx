@@ -25,10 +25,22 @@ export const Route = createFileRoute('/strong/$language/$code_/concordance')({
     }
   },
   loaderDeps: ({ search }) => search,
-  loader: ({ params, deps }) =>
-    loadStrongConcordancePage({
+  loader: async ({ params, deps }) => {
+    const page = await loadStrongConcordancePage({
       data: { language: params.language, code: params.code, book: deps.book, page: 1 },
-    }),
+    })
+    // The concordance is the one of a sense, at the address of that sense.
+    const code = strongCodeSlug(page.code)
+    if (params.code !== code) {
+      throw redirect({
+        to: '/strong/$language/$code/concordance',
+        params: { language: params.language, code },
+        search: deps,
+        statusCode: 301,
+      })
+    }
+    return page
+  },
   head: ({ loaderData }) => (loaderData ? buildConcordanceHead(loaderData) : {}),
   // Only a rendered page is cacheable: a failed load must not be kept by the CDN.
   headers: ({ loaderData }) =>

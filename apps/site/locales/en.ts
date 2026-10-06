@@ -231,4 +231,5 @@ export default {
   'bible.note': 'Note',
   'bible.commentaries': 'Commentaries on {chapter}',
   'bible.note.back': 'Back to {verse}',
+  'strong.generalDefinition': 'General definition',
 } as const

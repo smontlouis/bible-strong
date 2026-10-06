@@ -6,7 +6,7 @@ import {
 import { breadcrumbScripts } from '../resources/resourceHead'
 import type { StrongConcordancePageData } from './strong.functions'
 import { strongConcordanceBreadcrumbs } from './strongBreadcrumbs'
-import { buildStrongConcordancePath, displayStrongCode } from './strongRoutes'
+import { buildStrongConcordancePath, displayStrongTitleCode } from './strongRoutes'
 
 export type ConcordanceSearch = { book?: string }
 
@@ -35,7 +35,7 @@ export const buildConcordanceHead = (page: StrongConcordancePageData) => {
   const url = absoluteSiteUrl(pagePath(filtered ? 1 : page.page))
   const numbered = !filtered && page.page > 1
   const title = `${TITLES[language](
-    displayStrongCode(code),
+    displayStrongTitleCode(code),
     `${page.original} (${page.gloss})`,
     page.version
   )}${numbered ? ` – page ${page.page}` : ''}`

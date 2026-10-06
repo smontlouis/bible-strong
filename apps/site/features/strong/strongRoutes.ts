@@ -30,6 +30,22 @@ export const displayStrongCode = (code: string): string => {
   return `${code[0]?.toUpperCase()}${number}${code.replace(/^[HGhg]\d+/u, '')}`
 }
 
+/** The classical number a code belongs to: `H1254B` reads as `H1254`. */
+export const displayStrongNumber = (code: string): string => {
+  const number = getStrongReferenceNumber(code)
+  return number ? `${code[0]?.toUpperCase()}${number}` : code
+}
+
+/**
+ * How a title names an entry: the classical number readers search for, then the sense where
+ * the lexicon tells several apart, so that two senses of one number never share a title.
+ */
+export const displayStrongTitleCode = (code: string): string => {
+  const number = displayStrongNumber(code)
+  const sense = displayStrongCode(code)
+  return sense === number ? number : `${number} (${sense})`
+}
+
 export const buildStrongPath = (language: ResourceLanguage, code: string): string => {
   const identity = parseStrongCode(code)
   if (!identity) throw new Error('STRONG_ROUTE_INVALID')

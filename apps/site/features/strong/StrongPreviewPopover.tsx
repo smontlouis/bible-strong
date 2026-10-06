@@ -3,7 +3,7 @@ import { useI18n } from '@/locales'
 import { hideAnchoredPopoverOnScroll, placePopover } from '../resources/popoverPlacement'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { loadStrongPreview, type StrongPreviewData } from './strong.functions'
-import { buildStrongConcordancePath, buildStrongPath, displayStrongCode } from './strongRoutes'
+import { buildStrongConcordancePath, buildStrongPath, displayStrongNumber } from './strongRoutes'
 
 type PreviewState = {
   code: string
@@ -82,7 +82,7 @@ export default function StrongPreviewPopover({
         <>
           <div className="flex items-center justify-between gap-3">
             <span className="resource-chip font-semibold">
-              Strong {displayStrongCode(state.code)}
+              Strong {displayStrongNumber(state.code)}
             </span>
             {preview && (
               <span className="font-serif text-2xl" lang={hebrew ? 'he' : 'grc'} dir="auto">
@@ -116,12 +116,12 @@ export default function StrongPreviewPopover({
           )}
 
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-            <a className="resource-cta" href={buildStrongPath(language, state.code)}>
+            <a className="resource-cta" href={buildStrongPath(language, preview?.code ?? state.code)}>
               {t('strong.preview.open')}
             </a>
             <a
               className="resource-link text-sm font-semibold"
-              href={buildStrongConcordancePath(language, state.code)}
+              href={buildStrongConcordancePath(language, preview?.code ?? state.code)}
             >
               {t('strong.preview.concordance')}
             </a>

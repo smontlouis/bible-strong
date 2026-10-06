@@ -17,8 +17,8 @@ const PAGE_SIZE = 500
 const MAX_PAGES = 200
 
 /**
- * Lists one page per classical Strong number and language. Disambiguated senses stay
- * reachable through the "other senses" links of their family page.
+ * Lists one page per sense and language: a sense is the entry of the lexicon, and the
+ * classical number of its family only redirects to it.
  */
 export const listStrongSitemapUrls = async (
   lexicalLanguage: StrongLexicalLanguage
@@ -31,7 +31,7 @@ export const listStrongSitemapUrls = async (
       { language: 'fr', lexicalLanguage, limit: PAGE_SIZE, cursor }
     )
     for (const entry of response?.entries ?? []) {
-      const identity = parseStrongCode(entry.classicStrong)
+      const identity = parseStrongCode(entry.stepCode)
       if (identity) codes.add(identity.code)
     }
     cursor = response?.nextCursor

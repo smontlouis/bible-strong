@@ -11,6 +11,7 @@ import {
   buildStrongPath,
   buildWebAppStrongUrl,
   displayStrongCode,
+  displayStrongNumber,
   strongCodeSlug,
 } from './strongRoutes'
 
@@ -64,7 +65,8 @@ const RelationList = ({
 export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
   const t = useI18n()
   const { language, concordance } = entry
-  const displayCode = displayStrongCode(entry.code)
+  const senseCode = displayStrongCode(entry.code)
+  const number = displayStrongNumber(entry.code)
   const hebrew = entry.lexicalLanguage === 'hebrew'
   const appUrl = buildWebAppStrongUrl(entry.code)
 
@@ -78,7 +80,11 @@ export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
       <article>
         <header>
           <h1>
-            <span className="resource-chip font-semibold">Strong {displayCode}</span>
+            <span className="resource-chip font-semibold">Strong {number}</span>
+            {/* The sense the lexicon tells apart under that number, as the app names it. */}
+            {senseCode !== number && (
+              <span className="resource-muted ml-3 text-sm font-medium">{senseCode}</span>
+            )}
             <span
               className="mt-4 block text-left font-serif text-5xl leading-tight md:text-6xl"
               lang={hebrew ? 'he' : 'grc'}
@@ -120,9 +126,15 @@ export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
           </Section>
         )}
 
-        {entry.detailedDefinitionHtml && (
-          <Section title={t('strong.detailedDefinition')}>
-            <Prose html={entry.detailedDefinitionHtml} />
+        {entry.deepDefinition && (
+          <Section
+            title={t(
+              entry.deepDefinition.kind === 'general'
+                ? 'strong.generalDefinition'
+                : 'strong.detailedDefinition'
+            )}
+          >
+            <Prose html={entry.deepDefinition.html} />
           </Section>
         )}
 
@@ -142,7 +154,7 @@ export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
           <Section title={t('strong.concordance')}>
             <p>
               {t('strong.concordance.summary')
-                .replace('{code}', `Strong ${displayStrongCode(entry.classicCode)}`)
+                .replace('{code}', `Strong ${senseCode}`)
                 .replace('{count}', concordance.verseCount.toLocaleString(language))
                 .replace('{version}', concordance.version)}
             </p>
