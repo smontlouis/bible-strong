@@ -31,6 +31,25 @@ The Worker serves `apps/expo/dist` without a server script. Unknown navigation
 paths fall back to `index.html`, including direct links and browser refreshes.
 The custom domain is declared in Wrangler; DNS and TLS are managed by Cloudflare.
 
+## Indexing
+
+The workspace is not indexed (ADR-0069); public reading lives on the site.
+`apps/expo/public/_headers` declares the response header for every path:
+
+```txt
+/*
+  X-Robots-Tag: noindex
+```
+
+Expo copies `apps/expo/public/` into `apps/expo/dist` on export. Workers Static
+Assets reads `_headers` from the asset directory, applies its rules to every
+response it serves, including the `index.html` fallback of client routes, and
+never serves the file itself. Rules that match the same request are combined, so
+path-specific headers can be added to the same file.
+
+Do not publish a `robots.txt` that disallows crawling: a crawler that cannot
+fetch a page never sees its `noindex` header.
+
 ## Firebase and Resource API
 
 - Firebase Auth must authorize `web.bible-strong.app`.
@@ -47,10 +66,18 @@ Run `yarn workspace @bible-strong/expo web:build`, then validate the assets/conf
 npx wrangler@4.124.0 deploy --config apps/expo/wrangler.jsonc --dry-run
 ```
 
+The export must contain `apps/expo/dist/_headers`.
+
 After a production build, open `/home`, refresh a nested route, read a Bible
 chapter, and verify that resource requests succeed without an App Check token
 (ADR-0065); only Offline-copy downloads still require one. Inspect the GitHub Actions run
 commit and the Vercel production deployment to confirm both track `master`.
+
+Check that a client route is served with `x-robots-tag: noindex`:
+
+```sh
+curl -sI https://web.bible-strong.app/bible/lsg/john/3/16 | grep -i x-robots-tag
+```
 
 Vercel project `bible-strong-landing` uses root directory `apps/site` and its existing
 Git integration. No second Vercel project is needed for Expo.

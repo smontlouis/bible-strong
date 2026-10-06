@@ -1,6 +1,6 @@
 # ADR-0057: Render public routes outside the workspace for guests
 
-- Status: Accepted
+- Status: Superseded by [ADR-0069](./0069-remove-the-public-shell-from-the-web-workspace.md)
 - Date: 2026-09-20
 
 ## Context

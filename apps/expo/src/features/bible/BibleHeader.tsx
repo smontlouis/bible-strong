@@ -46,7 +46,6 @@ import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
 import verseToReference from '~helpers/verseToReference'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
-import { usePublicShell } from '~navigation/PublicShellContext'
 import { RootState } from '~redux/modules/reducer'
 import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
 import { useBookAndVersionSelector } from './BookSelectorSheet/BookSelectorSheetProvider'
@@ -104,14 +103,11 @@ const Header = ({
   const displayMode = useAtomValue(parallelDisplayModeAtom)
   const setDisplayMode = useSetAtom(parallelDisplayModeAtom)
   const canGoBackInStack = useCanGoBackInStack()
-  const publicShell = usePublicShell()
-  const hasBackButton =
-    !publicShell.active &&
-    shouldShowBibleBackButton({
-      isFormSheet,
-      isInTab,
-      canGoBackInStack,
-    })
+  const hasBackButton = shouldShowBibleBackButton({
+    isFormSheet,
+    isInTab,
+    canGoBackInStack,
+  })
   const openInNewTab = useOpenInNewTab()
 
   // Bookmark ref
@@ -392,8 +388,6 @@ const Header = ({
       )}
     </DisplayModeTrigger>
   ) : null
-
-  if (publicShell.active) return null
 
   if (annotationModeEnabled) {
     return (

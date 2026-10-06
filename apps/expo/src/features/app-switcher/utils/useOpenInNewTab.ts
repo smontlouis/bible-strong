@@ -17,10 +17,7 @@ export const useOpenInNewTab = () => {
   const switchGroup = useSwitchGroup()
   const { triggerSlideNewTab } = useSlideNewTab()
 
-  const openInNewTab = (
-    data?: TabItem,
-    params: { autoRedirect?: true; groupId?: string; navigation?: 'dismiss' | 'push' } = {}
-  ) => {
+  const openInNewTab = (data?: TabItem, params: { autoRedirect?: true; groupId?: string } = {}) => {
     const groupId = params.groupId ?? store.get(activeGroupIdAtom)
     const newTabId = `new-${generateUUID()}`
     const tab: TabItem = {
@@ -34,8 +31,7 @@ export const useOpenInNewTab = () => {
     addTab({ groupId, tab })
     const goToTab = () => {
       switchGroup(groupId)
-      if (params.navigation === 'push') router.push('/')
-      else router.dismissTo('/')
+      router.dismissTo('/')
       triggerSlideNewTab(tab.id)
     }
 

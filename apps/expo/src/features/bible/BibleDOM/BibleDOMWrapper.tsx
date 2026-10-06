@@ -21,7 +21,6 @@ import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { Linking, Platform, useWindowDimensions, type ViewStyle } from 'react-native'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
-import { usePublicShell } from '~navigation/PublicShellContext'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
@@ -449,7 +448,6 @@ export const BibleDOMWrapper = ({
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const confirm = useConfirmDialog()
-  const publicShell = usePublicShell()
   const router = useRouter()
   const focusedEndpoint =
     personalBibleDataEnabled && focusVerses?.length
@@ -1098,7 +1096,7 @@ export const BibleDOMWrapper = ({
   )
   const TOP_INSET = isFormSheet ? 0 : insets.top
   const headerHeight =
-    (publicShell.active ? 0 : isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT) +
+    (isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT) +
     getPassageContextHeaderHeight(focusVerses, annotationMode)
   const nativeLayerZIndex = Platform.OS === 'web' ? 0 : -1
   const webInlineScrollStyle =

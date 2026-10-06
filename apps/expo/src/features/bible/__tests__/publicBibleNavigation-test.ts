@@ -1,27 +1,5 @@
 import { getBook } from '~helpers/bibleBookCatalog'
-import { createPublicBibleNavigation, createPublicBibleTab } from '../publicBibleNavigation'
-
-jest.mock('~state/tabs', () => ({
-  getDefaultBibleTab: (version: string) => {
-    const firstBook = { Numero: 1, Nom: 'Genèse', Chapitres: 50 }
-    return {
-      id: 'bible-test',
-      title: 'Genèse 1:1',
-      type: 'bible',
-      isRemovable: true,
-      data: {
-        selectedVersion: version,
-        selectedBook: firstBook,
-        selectedChapter: 1,
-        selectedVerse: 1,
-        temp: { selectedBook: firstBook, selectedChapter: 1, selectedVerse: 1 },
-        selectedVerses: {},
-        parallelVersions: [],
-        selectionMode: 'grid',
-      },
-    }
-  },
-}))
+import { createPublicBibleNavigation } from '../publicBibleNavigation'
 
 jest.mock('~helpers/bibleVersions', () => ({
   versions: {
@@ -89,32 +67,5 @@ describe('public Bible navigation', () => {
       createPublicBibleNavigation(current, { push, replace }).changeInterlinearMode?.('interlinear')
     ).toBe(false)
     expect(replace).not.toHaveBeenCalled()
-
-    expect(createPublicBibleTab(interlinear, 'Jean 3:16 · BHG').data).toMatchObject({
-      interlinearMode: 'interlinear',
-      interlinearLocale: 'en',
-      strongMode: 'hidden',
-    })
-  })
-
-  it('creates an active Bible tab from the public passage', () => {
-    const tab = createPublicBibleTab(
-      { ...current, passage: { startVerse: 16, endVerse: 18 } },
-      'Jean 3:16–18 · LSG'
-    )
-
-    expect(tab).toMatchObject({
-      title: 'Jean 3:16–18 · LSG',
-      type: 'bible',
-      data: {
-        selectedVersion: 'LSG',
-        selectedBook: getBook(43),
-        selectedChapter: 3,
-        selectedVerse: 16,
-        focusVerses: [16, 17, 18],
-        contextDisplayMode: 'focused',
-        strongMode: 'visible',
-      },
-    })
   })
 })
