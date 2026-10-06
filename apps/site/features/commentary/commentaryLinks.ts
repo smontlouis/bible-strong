@@ -1,0 +1,36 @@
+import type { ResourceLanguage } from '../resources/publicSite'
+import { listCommentaries } from './commentaryCatalog'
+import {
+  commentaryCovers,
+  readCommentaryCoverage,
+  type CommentaryChapterRef,
+} from './commentaryCoverage'
+import { buildCommentaryChapterPath } from './commentaryRoutes'
+
+export type CommentaryLink = { title: string; author: string; path: string }
+
+/**
+ * The commentaries of a language that comment a chapter, for the pages that send their
+ * reader to them. A commentary whose coverage cannot be read is left out: these links
+ * never keep a page from rendering.
+ */
+export const listCommentaryLinks = async (
+  language: ResourceLanguage,
+  ref: CommentaryChapterRef
+): Promise<CommentaryLink[]> => {
+  const links = await Promise.all(
+    listCommentaries(language).map(async commentary => {
+      const coverage = await readCommentaryCoverage(commentary.publicationId, language).catch(
+        () => undefined
+      )
+      return coverage && commentaryCovers(coverage, ref)
+        ? {
+            title: commentary.title,
+            author: commentary.author,
+            path: buildCommentaryChapterPath({ language, resource: commentary.id, ...ref }),
+          }
+        : undefined
+    })
+  )
+  return links.filter(link => link !== undefined)
+}

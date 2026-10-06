@@ -1,0 +1,91 @@
+import { bibleBookName } from '../bible/bibleBooks'
+import { truncateText } from '../resources/editorialHtml'
+import type { ResourceLanguage } from '../resources/publicSite'
+import { buildResourceHead } from '../resources/resourceHead'
+import type { CommentaryChapterPageData, CommentaryPageData } from './commentary.functions'
+import { commentaryBreadcrumbs, commentaryChapterBreadcrumbs } from './commentaryBreadcrumbs'
+import {
+  buildCommentaryChapterPath,
+  buildCommentaryIndexPath,
+  buildCommentaryPath,
+  otherResourceLanguage,
+} from './commentaryRoutes'
+import { commentaryMessages } from './messages'
+
+const DESCRIPTION_LENGTH = 155
+
+/**
+ * Head of `/commentary/:language`. Each language lists its own commentaries; the two pages
+ * are the same entry of the site in each language.
+ */
+export const buildCommentaryIndexHead = (language: ResourceLanguage) => {
+  const t = commentaryMessages(language)
+  return buildResourceHead({
+    title: t('commentary.index.head.title'),
+    description: t('commentary.index.head.description'),
+    path: buildCommentaryIndexPath(language),
+    language,
+    alternates: { fr: buildCommentaryIndexPath('fr'), en: buildCommentaryIndexPath('en') },
+    ogType: 'website',
+  })
+}
+
+/** Head of `/commentary/:language/:resource`. */
+export const buildCommentaryHead = ({ language, commentary, counterpart }: CommentaryPageData) =>
+  buildResourceHead({
+    title: commentaryMessages(language)('commentary.resource.head.title', {
+      title: commentary.title,
+    }),
+    description: truncateText(
+      commentary.description || `${commentary.title} — ${commentary.author}`,
+      DESCRIPTION_LENGTH
+    ),
+    path: buildCommentaryPath(language, commentary.id),
+    language,
+    indexable: commentary.indexable,
+    // Only a work published in both languages has a counterpart.
+    alternates: counterpart
+      ? {
+          [language]: buildCommentaryPath(language, commentary.id),
+          [otherResourceLanguage(language)]: buildCommentaryPath(
+            otherResourceLanguage(language),
+            counterpart
+          ),
+        }
+      : undefined,
+    breadcrumbs: commentaryBreadcrumbs(language, commentary),
+    ogType: 'website',
+  })
+
+/**
+ * Head of a chapter page. Every numbered page is indexable under its own address; the two
+ * languages of a work only line up on the first one.
+ */
+export const buildCommentaryChapterHead = (page: CommentaryChapterPageData) => {
+  const { language, commentary, book, chapter } = page
+  const t = commentaryMessages(language)
+  const location = { language, resource: commentary.id, book, chapter }
+  const numbered = page.page > 1
+  return buildResourceHead({
+    title: t('commentary.chapter.head.title', {
+      reference: `${bibleBookName(book, language)} ${chapter}`,
+      title: `${commentary.title}${numbered ? ` – ${t('commentary.page', { page: page.page })}` : ''}`,
+    }),
+    description: page.description,
+    path: buildCommentaryChapterPath(location, page.page),
+    language,
+    indexable: commentary.indexable,
+    alternates:
+      page.counterpart && !numbered
+        ? {
+            [language]: buildCommentaryChapterPath(location),
+            [otherResourceLanguage(language)]: buildCommentaryChapterPath({
+              ...location,
+              language: otherResourceLanguage(language),
+              resource: page.counterpart,
+            }),
+          }
+        : undefined,
+    breadcrumbs: commentaryChapterBreadcrumbs(page),
+  })
+}
