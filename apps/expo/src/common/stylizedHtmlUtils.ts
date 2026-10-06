@@ -69,10 +69,4 @@ export const linkifyStrongReferences = (html: string) => {
   return result + linkifyText(html.slice(cursor))
 }
 
-/** Transparent spacer from the historical Strong site, not editorial content. */
-export const removeLegacySpacerImages = (html: string): string =>
-  html.replace(/<img\b[^>]*>/giu, tag => {
-    const source = tag.match(/\ssrc\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/iu)
-    const path = source?.[1] ?? source?.[2] ?? source?.[3]
-    return path && /^\/?Design\/ClearPix\.gif$/iu.test(path) ? '' : tag
-  })
+export { removeLegacySpacerImages } from '@bible-strong/resource-domain/strong-definition-comparison'

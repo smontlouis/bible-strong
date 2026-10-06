@@ -12,6 +12,8 @@
     "./resource-page-cursor": "./src/resourcePageCursor.ts",
     "./strong-bible": "./src/strongBible.ts",
     "./strong-bible-concordance": "./src/strongBibleConcordance.ts",
+    "./strong-definition-comparison": "./src/strongDefinitionComparison.ts",
+    "./strong-definition-presentation": "./src/strongDefinitionPresentation.ts",
     "./strong-identities": "./src/strongIdentities.ts",
     "./strong-lexicon": "./src/strongLexicon.ts"
   },

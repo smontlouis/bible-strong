@@ -78,6 +78,12 @@ Independent name meanings are deduplicated only when their normalized text and
 references are identical. Cards/previews retain their existing historical-first
 fallback.
 
+The policy lives in `@bible-strong/resource-domain` (`strong-definition-presentation`
+and `strong-definition-comparison`), with its tests and published examples. The
+workspace and the public site of
+[ADR-0068](./0068-serve-indexable-resource-pages-from-the-public-site.md) both apply
+it, so a sense reads in the same order on a page and on a screen.
+
 After reviewing this trial in French and English, consider moving decisions to
 publication generation. No source definitions are deleted during the trial.
 Future storage reduction must preserve independent advanced-only installations,
