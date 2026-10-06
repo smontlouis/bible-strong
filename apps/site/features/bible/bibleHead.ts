@@ -45,14 +45,15 @@ export const buildBibleHead = (page: BiblePageData) => {
           href: absoluteSiteUrl(buildBiblePath({ ...location, gloss: alternate })),
         }))
       : []
-  // A chapter and a single verse are indexed; the endless verse ranges are not.
-  const isRange = passage?.endVerse !== undefined
+  // A chapter and a single verse are indexed; the endless verse ranges are not, nor is a
+  // reading with commentaries shown in the text, which only adds to the page it comes from.
+  const isVariant = passage?.endVerse !== undefined || page.inlineCommentaries.length > 0
 
   return {
     meta: [
       { title },
       { name: 'description', content: page.description },
-      ...(isRange ? [{ name: 'robots', content: 'noindex, follow' }] : []),
+      ...(isVariant ? [{ name: 'robots', content: 'noindex, follow' }] : []),
       { property: 'og:title', content: title },
       { property: 'og:description', content: page.description },
       { property: 'og:type', content: 'article' },

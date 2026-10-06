@@ -1,12 +1,15 @@
-import type { CommentaryChapterResponseDto } from '@bible-strong/resource-domain/contracts/supplementaryContract'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { setResponseHeader } from '@tanstack/react-start/server'
 import { bibleBookName } from '../bible/bibleBooks'
 import { BIBLE_VERSIONS, bibleVersionCoversBook, defaultBibleVersionId } from '../bible/bibleVersions'
 import { truncateText } from '../resources/editorialHtml'
 import { buildBibleReferencePath } from '../resources/editorialLinks'
-import { isResourceLanguage, type ResourceLanguage } from '../resources/publicSite'
-import { readResource } from '../resources/resourceApi'
+import {
+  isResourceLanguage,
+  RESOURCE_PAGE_CACHE_CONTROL,
+  type ResourceLanguage,
+} from '../resources/publicSite'
 import {
   findCommentary,
   findCommentaryCounterpart,
@@ -20,13 +23,15 @@ import {
   type CommentaryChapterRef,
   type CommentaryCoverage,
 } from './commentaryCoverage'
+import { readCommentarySections } from './commentaryChapter'
 import { commentaryExcerpt, renderCommentaryHtml } from './commentaryHtml'
-import { otherResourceLanguage, parseCommentaryRoute } from './commentaryRoutes'
 import {
-  buildCommentarySections,
-  decodeCommentaryChapter,
-  paginateCommentarySections,
-} from './commentarySections'
+  buildCommentaryChapterPath,
+  commentarySectionAnchor,
+  otherResourceLanguage,
+  parseCommentaryRoute,
+} from './commentaryRoutes'
+import { paginateCommentarySections } from './commentarySections'
 
 const DESCRIPTION_LENGTH = 155
 // A description opens on the first comments of the page; three are enough to fill it.
@@ -103,12 +108,7 @@ const loadChapter = async (request: CommentaryChapterRequest) => {
   const coverage = await readCommentaryCoverage(commentary.publicationId, route.language)
   if (!coverage || !commentaryCovers(coverage, route)) throw notFound()
 
-  const response = await readResource<CommentaryChapterResponseDto>(
-    `/v1/commentaries/${encodeURIComponent(commentary.publicationId)}/${route.language}/chapters/${route.book}/${route.chapter}`
-  )
-  const sections = response
-    ? buildCommentarySections(commentary.id, decodeCommentaryChapter(response.serializedComments))
-    : []
+  const sections = await readCommentarySections(commentary, route.language, route)
   if (!sections.length) throw notFound()
   return { route, commentary, coverage, pages: paginateCommentarySections(sections) }
 }
@@ -203,4 +203,30 @@ export const locateCommentarySection = createServerFn({ method: 'GET' })
     )
     if (index < 0) throw notFound()
     return { page: index + 1 }
+  })
+
+/** One section of a commentary, read over the Bible passage it comments. */
+export type CommentarySectionData = {
+  html: string
+  /** Where the section is read in its commentary. */
+  path: string
+}
+
+/** A section of a chapter, for the Bible page that shows how it begins. */
+export const loadCommentarySection = createServerFn({ method: 'GET' })
+  .validator((data: CommentaryChapterRequest & { section: string }) => data)
+  .handler(async ({ data }): Promise<CommentarySectionData> => {
+    const { route, pages } = await loadChapter(data)
+    const pageIndex = pages.findIndex(sections =>
+      sections.some(section => section.slug === data.section)
+    )
+    const section = pages[pageIndex]?.find(candidate => candidate.slug === data.section)
+    if (!section) throw notFound()
+
+    // A section is as stable as the page of its chapter, so the CDN may keep it as long.
+    setResponseHeader('Cache-Control', RESOURCE_PAGE_CACHE_CONTROL)
+    return {
+      html: renderCommentaryHtml(section.content, { language: route.language }),
+      path: `${buildCommentaryChapterPath(route, pageIndex + 1)}#${commentarySectionAnchor(section.slug)}`,
+    }
   })

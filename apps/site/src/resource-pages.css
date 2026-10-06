@@ -502,6 +502,168 @@ a.bible-nav__trigger[aria-current] {
   color: var(--resource-canvas);
 }
 
+/* The commentaries shown in the text: a compact trigger and a list of boxes. */
+.bible-nav__comments-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .bible-nav__comments-label {
+    display: none;
+  }
+}
+
+/* On a phone the bar holds four controls: each gives up a little room. */
+@media (max-width: 520px) {
+  .bible-nav {
+    gap: 6px;
+  }
+
+  .bible-nav__trigger {
+    gap: 4px;
+    padding: 0 10px;
+  }
+
+  .bible-nav__comments .bible-nav__badge {
+    padding: 0;
+    border: 0;
+    color: var(--resource-accent-ink);
+    font-size: 0.78rem;
+  }
+}
+
+.bible-nav__check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.bible-nav__check input {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  accent-color: var(--resource-accent);
+}
+
+.bible-nav__check:has(input:disabled) {
+  color: var(--resource-muted);
+  cursor: default;
+}
+
+/* Comments read between the verses: where each comes from and how it begins. */
+.bible-comments {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 22px;
+}
+
+.resource-prose a.bible-comment {
+  display: block;
+  padding: 10px 14px;
+  border: 1px solid var(--resource-line);
+  border-inline-start: 3px solid var(--resource-accent);
+  border-radius: 4px 12px 12px 4px;
+  background: var(--resource-surface);
+  color: var(--resource-ink);
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.resource-prose a.bible-comment:hover {
+  border-color: var(--resource-accent);
+  background: var(--resource-accent-soft);
+}
+
+.bible-comment__source {
+  display: block;
+  color: var(--resource-accent-ink);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* Three lines at most; the whole comment opens from them. */
+.bible-comment__excerpt {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 2px;
+  /* The passage stays the first thing read; a comment is quieter. */
+  color: var(--resource-muted);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+/*
+ * A whole comment, read over the passage: a card on a wide screen, a sheet on a phone.
+ * The sign-in styles the site also loads position every dialog in the page, where opening
+ * one would scroll the reader to the top: this one is held to the window.
+ */
+.bible-comment-dialog {
+  position: fixed;
+  inset: 0;
+  width: min(720px, calc(100vw - 32px));
+  height: fit-content;
+  max-height: min(82vh, 760px);
+  margin: auto;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--resource-line);
+  border-radius: 18px;
+  background: var(--resource-surface-raised);
+  box-shadow: 0 24px 60px rgb(8 14 28 / 26%);
+  color: var(--resource-ink);
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+}
+
+.bible-comment-dialog::backdrop {
+  background: rgb(8 14 28 / 46%);
+}
+
+.bible-comment-dialog__content {
+  padding: 0 22px 22px;
+}
+
+.bible-comment-dialog__header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 -22px 14px;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--resource-line);
+  background: var(--resource-surface-raised);
+}
+
+.bible-comment-dialog__close {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--resource-accent-soft);
+  color: var(--resource-accent-ink);
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .bible-comment-dialog {
+    width: 100%;
+    max-width: none;
+    max-height: 86vh;
+    margin: auto 0 0;
+    border-radius: 20px 20px 0 0;
+  }
+}
+
 /* Words a translation added for the sense, and the divine name in small capitals. */
 .bible-text .bible-added {
   font-style: italic;

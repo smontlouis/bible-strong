@@ -1,10 +1,12 @@
-import { useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useI18n } from '@/locales'
 import ResourceShell from '../resources/ResourceShell'
 import StrongPreviewPopover from '../strong/StrongPreviewPopover'
 import type { BibleChapterRef, BibleInterlinearWord, BiblePageData } from './bible.functions'
 import { bibleBookName } from './bibleBooks'
 import { bibleBreadcrumbs } from './bibleBreadcrumbs'
+import BibleCommentaryDialog from './BibleCommentaryDialog'
+import { withInlineCommentaries } from './bibleCommentaries'
 import BibleNavBar from './BibleNavBar'
 import BibleNotePopover from './BibleNotePopover'
 import {
@@ -16,6 +18,9 @@ import { bibleVersionName, findBibleVersion } from './bibleVersions'
 
 // The language switch opens the same passage in the reference Bible of the other language.
 const ALTERNATE_VERSION = { fr: 'KJV', en: 'LSG' } as const
+
+// A layout effect has nothing to do while the page is rendered on the server.
+const useBrowserLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
 /**
  * One aligned unit. A direct interlinear stacks the original word, its transliteration and
@@ -62,25 +67,45 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
   const version = findBibleVersion(versionId)
   const bookName = bibleBookName(book, language)
   const location = { versionId, presentation, book, chapter, gloss }
+  // The commentaries shown in the text follow the reader along the links of the page.
+  const keep = (path: string) => withInlineCommentaries(path, page.commentaryChoice)
+
+  // Showing or hiding a commentary adds or removes text above what is being read: the
+  // first verse in view is brought back to where it was.
+  const place = useRef<{ id: string; top: number }>()
+  const rememberPlace = () => {
+    const numbers = articleRef.current?.querySelectorAll<HTMLElement>('.bible-verse-number') ?? []
+    const first = [...numbers].find(number => number.getBoundingClientRect().top >= 0)
+    place.current = first && { id: first.id, top: first.getBoundingClientRect().top }
+  }
+  useBrowserLayoutEffect(() => {
+    const kept = place.current
+    place.current = undefined
+    const number = kept && document.getElementById(kept.id)
+    if (kept && number) window.scrollBy(0, number.getBoundingClientRect().top - kept.top)
+  }, [page.html, page.verses])
+
   const otherLanguage = language === 'fr' ? 'en' : 'fr'
   const alternateVersion = ALTERNATE_VERSION[language]
   // The interlinear reading switches its glosses; any other reading switches Bible.
   const alternatePath =
     presentation === 'interlinear'
-      ? buildBiblePath({ ...location, passage, gloss: otherLanguage })
+      ? keep(buildBiblePath({ ...location, passage, gloss: otherLanguage }))
       : page.versionIds.includes(alternateVersion)
-        ? buildBiblePath({
-            ...location,
-            versionId: alternateVersion,
-            presentation: closestBiblePresentation(alternateVersion, presentation),
-            passage,
-            gloss: otherLanguage,
-          })
+        ? keep(
+            buildBiblePath({
+              ...location,
+              versionId: alternateVersion,
+              presentation: closestBiblePresentation(alternateVersion, presentation),
+              passage,
+              gloss: otherLanguage,
+            })
+          )
         : undefined
   const passageLabel = passage
     ? `:${passage.startVerse}${passage.endVerse ? `-${passage.endVerse}` : ''}`
     : ''
-  const chapterPath = (ref: BibleChapterRef) => buildBiblePath({ ...location, ...ref })
+  const chapterPath = (ref: BibleChapterRef) => keep(buildBiblePath({ ...location, ...ref }))
   // Hebrew (and Aramaic) for the Old Testament, Greek for the New.
   const originalLang = book <= 39 ? 'he' : 'grc'
   const textClassName = `resource-prose bible-text bible-text--${presentation} mt-8 ${passage ? 'bible-text--passage' : ''}`
@@ -92,7 +117,7 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
       appUrl={buildWebAppBibleUrl({ ...location, passage })}
       section="bible"
       breadcrumbs={bibleBreadcrumbs(page)}
-      subHeader={<BibleNavBar page={page} />}
+      subHeader={<BibleNavBar page={page} onCommentariesChange={rememberPlace} />}
     >
       <article ref={articleRef}>
         <header>
@@ -113,6 +138,9 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
           />
         ) : (
           <div className={textClassName} lang={textLang}>
+            {page.commentsBeforeHtml && (
+              <div dangerouslySetInnerHTML={{ __html: page.commentsBeforeHtml }} />
+            )}
             {page.verses?.map(verse => (
               <div key={verse.number}>
                 {verse.headings.map(heading => (
@@ -127,7 +155,9 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
                   <a
                     id={`v${verse.number}`}
                     className="bible-verse-number"
-                    href={buildBiblePath({ ...location, passage: { startVerse: verse.number } })}
+                    href={keep(
+                      buildBiblePath({ ...location, passage: { startVerse: verse.number } })
+                    )}
                     aria-label={`${bookName} ${chapter}:${verse.number}`}
                   >
                     {verse.number}
@@ -141,6 +171,9 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
                     />
                   ))}
                 </div>
+                {verse.commentsHtml && (
+                  <div dangerouslySetInnerHTML={{ __html: verse.commentsHtml }} />
+                )}
               </div>
             ))}
           </div>
@@ -149,7 +182,7 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
         {passage && (
           <a
             className="resource-link mt-6 inline-block font-semibold"
-            href={`${buildBiblePath(location)}#v${passage.startVerse}`}
+            href={keep(`${buildBiblePath(location)}#v${passage.startVerse}`)}
           >
             {t('bible.readChapter').replace('{chapter}', `${bookName} ${chapter}`)}
           </a>
@@ -225,6 +258,14 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
       </article>
       {presentation !== 'text' && (
         <StrongPreviewPopover containerRef={articleRef} language={language} />
+      )}
+      {page.inlineCommentaries.length > 0 && (
+        <BibleCommentaryDialog
+          containerRef={articleRef}
+          language={language}
+          book={book}
+          chapter={chapter}
+        />
       )}
       {page.notes && page.notes.length > 0 && (
         <BibleNotePopover

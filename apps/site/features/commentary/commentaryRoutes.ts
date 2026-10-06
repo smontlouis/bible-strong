@@ -89,6 +89,10 @@ export const buildCommentaryChapterPath = (location: CommentaryLocation, page = 
   }`
 }
 
+/** The address of a section, which leads to the page of its chapter that carries it. */
+export const buildCommentarySectionPath = (location: CommentaryLocation, section: string): string =>
+  `${buildCommentaryChapterPath(location)}/${section}`
+
 /**
  * The anchor of a section in its chapter page, which the address of the section resolves
  * to. It is prefixed like the verse anchors of a Bible page.

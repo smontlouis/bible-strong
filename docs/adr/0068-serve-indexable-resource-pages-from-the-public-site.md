@@ -89,6 +89,16 @@ is loaded on demand and cached like a page. A note mark works the same way: a pl
 to the note under the text, and a card next to the mark where popovers are supported. The
 cross-references of a note open in the version being read.
 
+A reader may show commentaries inside the Bible text. The choice is written in the address
+of the page (`?commentary=barnes.mhy-fr`: at most five, in one spelling) and kept by every
+link of the page, so it follows the reader from chapter to chapter and across reading modes
+and versions; a commentary that says nothing on a chapter shows nothing there. Each comment
+is read after the last verse it comments, as the first three lines of its text. It is a
+plain link to its section in the commentary; where the browser has dialogs, a click reads
+the whole comment over the passage instead. The choice is made with checkboxes in a form
+that names the commentaries in the address, so it works without scripting; with scripting,
+a box applies at once and the reader keeps their place.
+
 Strong pages add the resource language, like every other family. The code grammar is
 unchanged: lowercase prefix, four-digit number, suffix case preserved. One site page
 gathers what the workspace spreads over several Strong subpages: both definition levels of
@@ -128,8 +138,9 @@ English Bible, French otherwise.
 
 A Bible chapter and a single verse in every reading mode, a Strong entry, every numbered
 page of its concordance, a dictionary article, a topic, the commentary of a chapter, a
-timeline event and the lists leading to them are indexable. Verse ranges and concordance
-book filters are served with `noindex, follow`.
+timeline event and the lists leading to them are indexable. Verse ranges, concordance book
+filters and Bible readings with commentaries shown in the text are served with
+`noindex, follow`; such a reading names the plain one as its canonical page.
 
 Sitemaps are generated from the Resource API: one per Bible and reading mode listing its
 chapters, the entry page of every number of the Strong lexicons (the number where it is
@@ -165,6 +176,9 @@ route grammar is implemented twice.
 
 Sibling senses of a Greek number share one lexicon article and may share a gloss: their
 pages differ by their concordance, their sense code and, for a person, who that person is.
+
+A Bible page with commentaries shown in the text reads the chapter of each of them from the
+Resource API, and every choice of commentaries is a page the CDN keeps apart.
 
 The page of a number reads each of its senses from the Resource API, entry and verse
 counts: about sixty reads for the largest number, once per cached rendering.

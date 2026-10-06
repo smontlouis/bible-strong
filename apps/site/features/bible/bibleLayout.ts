@@ -19,6 +19,11 @@ type RenderOptions = {
   referenceHref?: (osisReference: string) => string | undefined
   /** Section titles belong to a chapter reading, not to a quoted passage. */
   includeHeadings: boolean
+  /**
+   * Trusted blocks read between the verses, such as the comments of a commentary: each
+   * after the verse it is keyed by, and the one keyed by 0 before the first verse.
+   */
+  blocksAfterVerse?: ReadonlyMap<number, string>
 }
 
 type BlockTag = 'p' | 'lg' | 'l'
@@ -154,7 +159,14 @@ const hasBlockStructure = (verses: readonly ChapterVerse[]): boolean =>
  */
 export const renderBibleText = (
   verses: readonly ChapterVerse[],
-  { verseHref, verseLabel, markersByVerse, referenceHref, includeHeadings }: RenderOptions
+  {
+    verseHref,
+    verseLabel,
+    markersByVerse,
+    referenceHref,
+    includeHeadings,
+    blocksAfterVerse,
+  }: RenderOptions
 ): RenderedBibleText => {
   const out: string[] = []
   const notes: BibleNote[] = []
@@ -165,12 +177,15 @@ export const renderBibleText = (
   let pendingVerse: number | undefined
   // Whether the open block already holds text, so the next verse needs a separating space.
   let blockHasText = false
+  // A stanza interrupted by a block read between two verses goes on after that block.
+  let resumeStanza = false
   const structured = hasBlockStructure(verses)
 
   const suspendInline = () => {
     while (emitted > 0) out.push(inline[--emitted]?.close ?? '')
   }
   const closeBlock = (tag: BlockTag) => {
+    if (tag === 'lg') resumeStanza = false
     const index = blocks.lastIndexOf(tag)
     if (index === -1) return
     suspendInline()
@@ -182,14 +197,23 @@ export const renderBibleText = (
     while (blocks.length) out.push(BLOCK_CLOSE[blocks.pop() as BlockTag])
     blockHasText = false
   }
+  const resumeInterruptedStanza = () => {
+    if (!resumeStanza) return
+    resumeStanza = false
+    if (blocks.length) return
+    out.push('<div class="bible-lg">')
+    blocks.push('lg')
+  }
   const openBlock = (tag: BlockTag, level?: string) => {
     if (tag === 'l') {
+      resumeInterruptedStanza()
       closeBlock('l')
       suspendInline()
       const indent = /^[2-4]$/u.test(level ?? '') ? ` bible-l--${level}` : ''
       out.push(`<span class="bible-l${indent}">`)
     } else {
       // Paragraphs and stanzas are the two top-level blocks of a reading.
+      resumeStanza = false
       closeAllBlocks()
       out.push(tag === 'p' ? '<p class="bible-p">' : '<div class="bible-lg">')
     }
@@ -205,6 +229,7 @@ export const renderBibleText = (
   }
   /** Opens what a piece of content needs around it: a block, then the verse number. */
   const enterContent = () => {
+    resumeInterruptedStanza()
     if (!blocks.length) {
       out.push(structured ? '<p class="bible-p">' : '<p class="bible-p bible-p--verse">')
       blocks.push('p')
@@ -227,9 +252,18 @@ export const renderBibleText = (
     out.push(escapeHtml(text))
     blockHasText = true
   }
+  /** Ends what is being read, prints a block, and lets the reading go on after it. */
+  const emitBlock = (html: string | undefined) => {
+    if (!html) return
+    const inStanza = blocks[0] === 'lg'
+    closeAllBlocks()
+    out.push(html)
+    resumeStanza = inStanza
+  }
 
   verses.forEach((verse, verseIndex) => {
     if (verseIndex === 0) {
+      emitBlock(blocksAfterVerse?.get(0))
       // Whatever was opened before the first verse rendered is still open here.
       for (const tag of verse.presentation.startTags) {
         if (isBlockTag(tag.tag)) openBlock(tag.tag, tag.attributes?.level)
@@ -261,6 +295,7 @@ export const renderBibleText = (
           closeInline(event.key)
           break
         case 'heading':
+          resumeStanza = false
           closeAllBlocks()
           out.push(
             `<h2 class="bible-heading bible-heading--${event.type.replace(/[^a-zA-Z]/gu, '')}">${escapeHtml(
@@ -287,6 +322,7 @@ export const renderBibleText = (
       }
     }
     emitText(verse.text.slice(position))
+    emitBlock(blocksAfterVerse?.get(verse.number))
   })
   closeAllBlocks()
 

@@ -225,6 +225,44 @@ describe('renderBibleText', () => {
     expect(isWellFormed(html)).toBe(true)
   })
 
+  it('reads a block between two verses and starts a new paragraph after it', () => {
+    const aside = (name: string) => `<div class="aside">${name}</div>`
+    const { html } = renderBibleText(
+      [
+        verse(1, 'Un.', { layout: [event(0, 0, 'open', 'p'), event(0, 1, 'open', 'wj')] }),
+        verse(2, 'Deux.', { layout: [event(5, 0, 'close', 'wj'), event(5, 1, 'close', 'p')] }),
+      ],
+      { ...options, blocksAfterVerse: new Map([[0, aside('intro')], [1, aside('one')], [2, aside('two')]]) }
+    )
+    expect(html).toBe(
+      `${aside('intro')}<p class="bible-p">${number(1)}<span class="bible-wj">Un.</span></p>${aside('one')}` +
+        `<p class="bible-p">${number(2)}<span class="bible-wj">Deux.</span></p>${aside('two')}`
+    )
+    expect(isWellFormed(html)).toBe(true)
+  })
+
+  it('goes on with a stanza interrupted by a block', () => {
+    const aside = '<div class="aside">comment</div>'
+    const { html } = renderBibleText(
+      [
+        verse(1, 'Ligne une', {
+          layout: [event(0, 0, 'open', 'lg'), event(0, 1, 'open', 'l'), event(9, 2, 'close', 'l')],
+        }),
+        verse(2, 'Ligne deux', {
+          layout: [event(0, 0, 'open', 'l'), event(10, 1, 'close', 'l'), event(10, 2, 'close', 'lg')],
+        }),
+        verse(3, 'Prose.'),
+      ],
+      { ...options, blocksAfterVerse: new Map([[1, aside], [2, aside]]) }
+    )
+    expect(html).toBe(
+      `<div class="bible-lg"><span class="bible-l">${number(1)}Ligne une</span></div>${aside}` +
+        `<div class="bible-lg"><span class="bible-l">${number(2)}Ligne deux</span></div>${aside}` +
+        `<p class="bible-p">${number(3)}Prose.</p>`
+    )
+    expect(isWellFormed(html)).toBe(true)
+  })
+
   it('escapes the text and ignores layout it does not know', () => {
     const { html } = renderBibleText(
       [

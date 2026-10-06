@@ -6,12 +6,23 @@ import type { InterlinearBibleChapterDto } from '@bible-strong/resource-domain/c
 import type { StrongBibleChapterDto } from '@bible-strong/resource-domain/contracts/strongBibleContract'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { listCommentaries } from '../commentary/commentaryCatalog'
+import { readCommentarySections } from '../commentary/commentaryChapter'
+import { commentaryExcerpt, renderCommentaryHtml } from '../commentary/commentaryHtml'
 import { listCommentaryLinks, type CommentaryLink } from '../commentary/commentaryLinks'
+import { buildCommentarySectionPath } from '../commentary/commentaryRoutes'
 import { truncateText } from '../resources/editorialHtml'
 import { parseOsisReference } from '../resources/editorialLinks'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
 import { bibleBookName } from './bibleBooks'
+import {
+  parseInlineCommentaries,
+  placeCommentarySections,
+  renderInlineComments,
+  withInlineCommentaries,
+  type InlineComment,
+} from './bibleCommentaries'
 import { renderBibleText, type BibleNote, type BibleTextMarker } from './bibleLayout'
 import { bibleStrongLinks, type BibleStrongLink } from './bibleStrongLinks'
 import {
@@ -29,6 +40,8 @@ import {
 } from './bibleVersions'
 
 const DESCRIPTION_LENGTH = 155
+// A comment shown in the text is cut to three lines by the page; this fills them.
+const COMMENT_EXCERPT_LENGTH = 360
 const COVERAGE_TTL_MS = 60 * 60 * 1000
 
 type StrongSpans = StrongBibleChapterDto['verses'][number]['spans']
@@ -56,6 +69,8 @@ export type BiblePageVerse = {
   /** Section titles printed before the verse. */
   headings: string[]
   words: BibleInterlinearWord[]
+  /** The comments read after the verse, when commentaries are shown in the text. */
+  commentsHtml?: string
 }
 
 export type BiblePageData = {
@@ -78,6 +93,12 @@ export type BiblePageData = {
   versionIds: string[]
   /** The commentaries of the page language that comment this chapter. */
   commentaries: CommentaryLink[]
+  /** The commentaries named in the address, which the links of the page keep. */
+  commentaryChoice: string[]
+  /** Those of them the page language has, shown in the text in this order. */
+  inlineCommentaries: { id: string; title: string }[]
+  /** The comments read before the first verse of an aligned reading. */
+  commentsBeforeHtml?: string
   previous?: BibleChapterRef
   next?: BibleChapterRef
   description: string
@@ -223,7 +244,7 @@ const versesByNumber = <Verse extends { number: number }>(
 ): Map<number, Verse> => new Map((verses ?? []).map(verse => [verse.number, verse]))
 
 export const loadBiblePage = createServerFn({ method: 'GET' })
-  .validator((data: { path: string }) => data)
+  .validator((data: { path: string; commentary?: string }) => data)
   .handler(async ({ data }): Promise<BiblePageData> => {
     const route = parseBibleRoute(data.path)
     if (!route) throw notFound()
@@ -237,7 +258,21 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
     const lastVerse = passage?.endVerse ?? passage?.startVerse
     const chapterPath = `/books/${book}/chapters/${chapter}`
     const aligned = presentation === 'reverse-interlinear' || presentation === 'interlinear'
-    const [text, strong, interlinear, originalText, versionIds, commentaries] = await Promise.all([
+    // The reader's choice is kept whole in the links of the page; the text shows the
+    // commentaries of that choice the page language has.
+    const commentaryChoice = parseInlineCommentaries(data.commentary)
+    const inlineCommentaries = listCommentaries(language).filter(commentary =>
+      commentaryChoice.includes(commentary.id)
+    )
+    const [
+      text,
+      strong,
+      interlinear,
+      originalText,
+      versionIds,
+      commentaries,
+      ...commentarySections
+    ] = await Promise.all([
       readResource<BibleChapterDto>(`/v1/bibles/${version.id}${chapterPath}`),
       presentation === 'strong' || presentation === 'reverse-interlinear'
         ? readResource<StrongBibleChapterDto>(`/v1/strong-bibles/${version.id}${chapterPath}`)
@@ -253,6 +288,10 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
         : undefined,
       listVersionsCarrying(book, chapter, lastVerse),
       listCommentaryLinks(language, { book, chapter }),
+      // A commentary that says nothing here, or cannot be read, leaves the text as it is.
+      ...inlineCommentaries.map(commentary =>
+        readCommentarySections(commentary, language, { book, chapter }).catch(() => [])
+      ),
     ])
     if (!text) throw notFound()
 
@@ -288,6 +327,36 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
       })
     )
 
+    const comments = inlineCommentaries.flatMap((commentary, index) =>
+      (commentarySections[index] ?? []).flatMap((section): InlineComment[] => {
+        const excerpt = commentaryExcerpt(
+          renderCommentaryHtml(section.content, { language }),
+          COMMENT_EXCERPT_LENGTH
+        )
+        return excerpt
+          ? [
+              {
+                commentary: commentary.id,
+                title: commentary.title,
+                section: section.slug,
+                startVerse: section.startVerse,
+                endVerse: section.endVerse,
+                path: buildCommentarySectionPath(
+                  { language, resource: commentary.id, book, chapter },
+                  section.slug
+                ),
+                excerpt,
+              },
+            ]
+          : []
+      })
+    )
+    const commentsByVerse = new Map(
+      [...placeCommentarySections(comments, selected.map(verse => verse.number))].map(
+        ([verse, placed]) => [verse, renderInlineComments(placed, language)]
+      )
+    )
+
     const location = { versionId: version.id, presentation, book, chapter, gloss }
     const all = orderedChapters(coverage)
     const index = all.findIndex(ref => ref.book === book && ref.chapter === chapter)
@@ -302,8 +371,10 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
       gloss,
       ...(aligned
         ? {
+            commentsBeforeHtml: commentsByVerse.get(0),
             verses: selected.map(verse => ({
               number: verse.number,
+              commentsHtml: commentsByVerse.get(verse.number),
               // A passage is quoted on its own; section titles belong to the chapter reading.
               headings: passage ? [] : verse.presentation.headings.map(heading => heading.text),
               words:
@@ -322,7 +393,12 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
             })),
           }
         : renderBibleText(selected, {
-            verseHref: verse => buildBiblePath({ ...location, passage: { startVerse: verse } }),
+            blocksAfterVerse: commentsByVerse,
+            verseHref: verse =>
+              withInlineCommentaries(
+                buildBiblePath({ ...location, passage: { startVerse: verse } }),
+                commentaryChoice
+              ),
             verseLabel: verse => `${bibleBookName(book, language)} ${chapter}:${verse}`,
             // A cross-reference stays in the version being read, when it carries the passage.
             referenceHref: osisReference => {
@@ -367,6 +443,8 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
         })),
       versionIds,
       commentaries,
+      commentaryChoice,
+      inlineCommentaries: inlineCommentaries.map(({ id, title }) => ({ id, title })),
       previous: index > 0 ? all[index - 1] : undefined,
       next: index >= 0 ? all[index + 1] : undefined,
       description: truncateText(

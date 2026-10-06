@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useI18n } from '@/locales'
 import type { BiblePageData } from './bible.functions'
 import { bibleBookName } from './bibleBooks'
+import BibleCommentaryPicker from './BibleCommentaryPicker'
+import { withInlineCommentaries } from './bibleCommentaries'
 import {
   bibleVersionAids,
   buildBiblePath,
@@ -26,9 +28,18 @@ const Chevron = () => (
  * workspace. Panels are native disclosures holding plain links, so they work before
  * hydration and every destination stays reachable by a crawler.
  */
-export default function BibleNavBar({ page }: { page: BiblePageData }) {
+export default function BibleNavBar({
+  page,
+  onCommentariesChange,
+}: {
+  page: BiblePageData
+  /** Called before the commentaries shown in the text change. */
+  onCommentariesChange?: () => void
+}) {
   const t = useI18n()
   const { versionId, presentation, language, book, chapter, passage, gloss } = page
+  // The commentaries shown in the text follow the reader to wherever the bar leads.
+  const keep = (path: string) => withInlineCommentaries(path, page.commentaryChoice)
   const barRef = useRef<HTMLDivElement>(null)
   // The book whose chapters are listed; `undefined` shows the list of books.
   const [openBook, setOpenBook] = useState<number | undefined>(book)
@@ -89,7 +100,7 @@ export default function BibleNavBar({ page }: { page: BiblePageData }) {
                       <a
                         className="bible-nav__cell"
                         aria-current={openBook === book && number === chapter ? 'page' : undefined}
-                        href={buildBiblePath({ ...location, book: openBook, chapter: number })}
+                        href={keep(buildBiblePath({ ...location, book: openBook, chapter: number }))}
                       >
                         {number}
                       </a>
@@ -109,7 +120,7 @@ export default function BibleNavBar({ page }: { page: BiblePageData }) {
                       <a
                         className="bible-nav__item"
                         aria-current={entry.book === book ? 'true' : undefined}
-                        href={buildBiblePath({ ...location, book: entry.book, chapter: 1 })}
+                        href={keep(buildBiblePath({ ...location, book: entry.book, chapter: 1 }))}
                         onClick={event => {
                           // With scripting, a book first reveals its chapters.
                           event.preventDefault()
@@ -148,15 +159,17 @@ export default function BibleNavBar({ page }: { page: BiblePageData }) {
                       <a
                         className="bible-nav__item bible-nav__item--version"
                         aria-current={version.id === versionId ? 'true' : undefined}
-                        href={buildBiblePath({
-                          versionId: version.id,
-                          presentation: closestBiblePresentation(version.id, presentation),
-                          book,
-                          chapter,
-                          passage,
-                          // An interlinear reading opened from here speaks the page language.
-                          gloss: language,
-                        })}
+                        href={keep(
+                          buildBiblePath({
+                            versionId: version.id,
+                            presentation: closestBiblePresentation(version.id, presentation),
+                            book,
+                            chapter,
+                            passage,
+                            // An interlinear reading opened from here speaks the page language.
+                            gloss: language,
+                          })
+                        )}
                       >
                         <span className="min-w-0 truncate">
                           <span className="font-semibold">{version.id}</span>
@@ -179,6 +192,10 @@ export default function BibleNavBar({ page }: { page: BiblePageData }) {
         </div>
       </details>
 
+      {(page.commentaries.length > 0 || page.inlineCommentaries.length > 0) && (
+        <BibleCommentaryPicker page={page} onChange={onCommentariesChange} />
+      )}
+
       {modes.length > 1 && (
         <details name="bible-nav" className="bible-nav__mode">
           <summary
@@ -197,7 +214,9 @@ export default function BibleNavBar({ page }: { page: BiblePageData }) {
                   <a
                     className="bible-nav__item bible-nav__item--mode"
                     aria-current={mode === presentation ? 'true' : undefined}
-                    href={buildBiblePath({ ...location, presentation: mode, passage, gloss: language })}
+                    href={keep(
+                      buildBiblePath({ ...location, presentation: mode, passage, gloss: language })
+                    )}
                   >
                     <span className="font-semibold">{t(`bible.mode.${mode}`)}</span>
                     <span className="resource-muted block text-sm">{t(`bible.mode.${mode}.hint`)}</span>

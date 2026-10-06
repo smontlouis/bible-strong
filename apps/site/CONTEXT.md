@@ -28,6 +28,10 @@ _Avoid_: Variant, sub-entry
 The public resource page of a classical Strong number the lexicon splits into several Strong senses, which presents the word once and each sense with what tells it apart.
 _Avoid_: Disambiguation page, family page
 
+**Inline comment**:
+The beginning of a commentary section shown between the verses of a Bible page at the reader's request, which opens the whole section over the passage.
+_Avoid_: Annotation, footnote
+
 **App invitation**:
 What the study workspace adds to a public resource page, offered after its content and never in the way of reading.
 _Avoid_: Paywall, interstitial
