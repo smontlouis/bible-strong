@@ -246,6 +246,35 @@ describe('v1 Strong lexicon API', () => {
     }
   })
 
+  it('lists every entry only when the request asks for all identities', async () => {
+    const web = makeResourceWebHandler(undefined, undefined, { strongLexicon: repository })
+    const identitiesAskedBy = async (query: string) => {
+      lastListInput = undefined
+      const response = await web.handler(request(`/v1/strong-lexicon/entries?language=fr${query}`))
+      return {
+        status: response.status,
+        identities: (lastListInput as { identities?: string } | undefined)?.identities,
+      }
+    }
+    try {
+      assert.deepEqual(await identitiesAskedBy(''), { status: 200, identities: undefined })
+      assert.deepEqual(await identitiesAskedBy('&identities=unified'), {
+        status: 200,
+        identities: 'unified',
+      })
+      assert.deepEqual(await identitiesAskedBy('&identities=all&prefix=d'), {
+        status: 200,
+        identities: 'all',
+      })
+      assert.deepEqual(await identitiesAskedBy('&identities=every'), {
+        status: 400,
+        identities: undefined,
+      })
+    } finally {
+      await web.dispose()
+    }
+  })
+
   it('rejects malformed page cursors before reaching the repository', async () => {
     const web = makeResourceWebHandler(undefined, undefined, { strongLexicon: repository })
     try {

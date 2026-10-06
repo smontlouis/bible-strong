@@ -17,6 +17,8 @@ export const resourceApiCacheEpochFrom = async (catalog: unknown): Promise<strin
 export const RESOURCE_API_CACHE_EPOCH = resourceApiCacheEpochFrom(mobileResourceCatalog)
 
 const STRONG_LEXICON_BATCH_RESPONSE_REVISION = 'strong-lexicon-batch-case-sensitive-levels-v3'
+// A Worker older than the option ignored it and cached the gathered list under the same URL.
+const STRONG_LEXICON_ALL_IDENTITIES_RESPONSE_REVISION = 'strong-lexicon-browse-all-identities-v1'
 const DICTIONARY_PASSAGE_DISCOVERY_RESPONSE_REVISION = 'dictionary-passage-discovery-directory-v1'
 
 type CatalogEntry = { contentSha256?: unknown; archiveSha256?: unknown }
@@ -92,7 +94,7 @@ export const resourceApiCacheRevisionFrom = async (
     catalogRevision = await resourceApiCacheEpochFrom(catalog)
   }
 
-  const pathname = new URL(request.url).pathname
+  const { pathname, searchParams } = new URL(request.url)
   const requestRevision =
     isDynamicResourceRequest(request) && !pathname.endsWith('/random')
       ? await resourceApiCacheEpochFrom([catalogRevision, searchRevision])
@@ -100,6 +102,12 @@ export const resourceApiCacheRevisionFrom = async (
 
   if (pathname === '/v1/strong-lexicon/entries/batch') {
     return resourceApiCacheEpochFrom([requestRevision, STRONG_LEXICON_BATCH_RESPONSE_REVISION])
+  }
+  if (pathname === '/v1/strong-lexicon/entries' && searchParams.get('identities') === 'all') {
+    return resourceApiCacheEpochFrom([
+      requestRevision,
+      STRONG_LEXICON_ALL_IDENTITIES_RESPONSE_REVISION,
+    ])
   }
   if (/^\/v1\/dictionaries\/verses\/[^/]+\/entries$/u.test(pathname)) {
     return resourceApiCacheEpochFrom([

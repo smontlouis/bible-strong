@@ -1127,7 +1127,10 @@ export const makeKyselyStrongLexiconRepository = (
         const search = input.search?.trim()
         const prefix = input.prefix?.trim()
         const cursor = decodeStrongLexiconPageCursor(input.cursor)
-        const filters = [sql<boolean>`representative_rank = 1`]
+        // Entries sharing a unified identity are listed under one of them unless all are asked for.
+        const filters = [
+          input.identities === 'all' ? sql<boolean>`true` : sql<boolean>`representative_rank = 1`,
+        ]
         const candidateFilters = [sql<boolean>`e.publication_id=${core.id}`]
         if (input.lexicalLanguage) {
           candidateFilters.push(sql<boolean>`e.language = ${input.lexicalLanguage}`)

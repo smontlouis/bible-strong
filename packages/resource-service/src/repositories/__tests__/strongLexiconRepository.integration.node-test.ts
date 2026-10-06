@@ -358,4 +358,103 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
       await isolated.dispose()
     }
   })
+
+  it('lists one entry per unified identity unless every entry is asked for', async () => {
+    const isolated = await createIsolatedPostgres(connectionString, 'strong_browse', 1)
+    const { database } = isolated
+
+    try {
+      const publication = await database
+        .insertInto('resource_publications')
+        .values({
+          resource_identity: 'strong-lexicon:core',
+          resource_kind: 'strong-lexicon',
+          revision: 'core-r1',
+          language: 'mul',
+          status: 'active',
+          canonical_sha256: '1'.repeat(64),
+          offline_artifact_sha256: '2'.repeat(64),
+          provenance: { source: 'integration-test', imported_at: new Date(0).toISOString() },
+          rights: { holder: 'integration-test', online: true, offline: true },
+          metadata: { resource_revision: 'core-r1' },
+        })
+        .returning('id')
+        .executeTakeFirstOrThrow()
+
+      // El and Elohim are filed under the unified identity of the divine name. One entry
+      // stands for the three, among those a list keeps: the divine name, or else El.
+      const entries = [
+        { id: 1, code: 'H3068G', uStrong: 'H3068G', baseCode: 3068, gloss: 'Yahweh' },
+        { id: 2, code: 'H0410G', uStrong: 'H3068G', baseCode: 410, gloss: 'Dieu' },
+        { id: 3, code: 'H0430G', uStrong: 'H3068G', baseCode: 430, gloss: 'Dieu' },
+        { id: 4, code: 'H0433', uStrong: 'H0433', baseCode: 433, gloss: 'dieu' },
+      ] as const
+      await database
+        .insertInto('strong_lexicon_entries')
+        .values(
+          entries.map(entry => ({
+            publication_id: publication.id,
+            entry_id: entry.id,
+            language: 'hebrew',
+            e_strong: entry.code,
+            d_strong: entry.code,
+            u_strong: entry.uStrong,
+            payload: {
+              id: entry.id,
+              language: 'hebrew',
+              eStrong: entry.code,
+              dStrong: entry.code,
+              uStrong: entry.uStrong,
+              baseCode: entry.baseCode,
+              original: 'א',
+              transliteration: 'a',
+              classicTransliteration: 'a',
+              gloss: entry.gloss,
+              meaning: '',
+              morph: '',
+            },
+          }))
+        )
+        .execute()
+      await database
+        .insertInto('strong_lexicon_entry_identities')
+        .values(
+          entries.map(entry => ({
+            publication_id: publication.id,
+            step_entry_id: entry.id,
+            step_code: entry.code,
+          }))
+        )
+        .execute()
+
+      const repository = makeKyselyStrongLexiconRepository(database)
+      const codes = async (input: Partial<Parameters<typeof repository.listEntries>[0]>) =>
+        (
+          await Effect.runPromise(repository.listEntries({ language: 'fr', limit: 20, ...input }))
+        ).value.entries.map(entry => entry.stepCode)
+
+      const everyEntry = ['H0410G', 'H0430G', 'H0433', 'H3068G']
+      assert.deepEqual(await codes({}), ['H0433', 'H3068G'])
+      assert.deepEqual(await codes({ identities: 'unified' }), ['H0433', 'H3068G'])
+      assert.deepEqual(await codes({ identities: 'all' }), everyEntry)
+      assert.deepEqual(await codes({ prefix: 'Dieu' }), ['H0410G', 'H0433'])
+      assert.deepEqual(await codes({ prefix: 'Dieu', identities: 'all' }), everyEntry.slice(0, 3))
+      assert.deepEqual(await codes({ search: 'dieu' }), ['H0410G', 'H0433'])
+      assert.deepEqual(await codes({ search: 'dieu', identities: 'all' }), everyEntry.slice(0, 3))
+
+      const paged: string[] = []
+      let cursor: string | undefined
+      for (let page = 0; page < entries.length + 1; page += 1) {
+        const active = await Effect.runPromise(
+          repository.listEntries({ language: 'fr', identities: 'all', limit: 1, cursor })
+        )
+        paged.push(...active.value.entries.map(entry => entry.stepCode))
+        cursor = active.value.nextCursor
+        if (!cursor) break
+      }
+      assert.deepEqual(paged, everyEntry)
+    } finally {
+      await isolated.dispose()
+    }
+  })
 })
