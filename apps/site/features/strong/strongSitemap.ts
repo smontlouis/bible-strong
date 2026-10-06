@@ -10,7 +10,12 @@ import {
   STRONG_LEXICONS,
   type StrongLexicalLanguage,
 } from './strongRoutes'
-import { strongEntryPageCodes, toStrongSenseRef, type StrongSenseRef } from './strongSenses'
+import {
+  EVERY_STRONG_SENSE,
+  strongEntryPageCodes,
+  toStrongSenseRef,
+  type StrongSenseRef,
+} from './strongSenses'
 
 const PAGE_SIZE = 500
 // The lexicon holds about 25,000 senses; the cap only guards against a cursor loop.
@@ -29,7 +34,7 @@ export const listStrongSitemapUrls = async (
   for (let page = 0; page < MAX_PAGES; page += 1) {
     const response = await readResource<StrongLexiconSearchResponseDto>(
       '/v1/strong-lexicon/entries',
-      { language: 'fr', lexicalLanguage, limit: PAGE_SIZE, cursor }
+      { language: 'fr', lexicalLanguage, ...EVERY_STRONG_SENSE, limit: PAGE_SIZE, cursor }
     )
     for (const entry of response?.entries ?? []) {
       const sense = toStrongSenseRef(entry)

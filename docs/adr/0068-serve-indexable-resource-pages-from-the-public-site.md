@@ -185,9 +185,10 @@ counts: about sixty reads for the largest number, once per cached rendering.
 
 The lexicon list of the Resource API gathers the entries that name one person or thing
 under a single representative, as the lexicon list of the workspace shows them. The
-letter lists and the sitemaps of the site are built from it: an entry behind a
-representative (Elohim, `H0430G`, behind `H3068G`) is reached through links only, until the
-API can list every sense.
+letter lists and the sitemaps of the site ask it for every sense instead, with the explicit
+option `identities=all`, so that an entry behind a representative (Elohim, `H0430G`) is
+listed too. A Resource service older than the option ignores it and answers with the
+gathered list: the site then lists what the workspace lists, until the service is deployed.
 
 Bible display names, languages and copyright notices are not in the shared catalog. The
 site mirrors them from the workspace; a test keeps the list of versions aligned with the

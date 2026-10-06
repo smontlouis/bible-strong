@@ -37,6 +37,7 @@ import {
   type StrongLexicalLanguage,
 } from './strongRoutes'
 import {
+  EVERY_STRONG_SENSE,
   groupStrongListLines,
   hasStrongNumberPage,
   strongSenseSummaries,
@@ -351,8 +352,7 @@ const SENSE_SUFFIXES = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 
 /**
  * The senses filed under one classical number. Every code a sense of the number can carry is
- * asked for at once: the lexicon list gathers the entries that name one person or thing, so
- * it cannot tell how many senses a number has.
+ * asked for at once: the lexicon list is read by gloss, not by number.
  */
 const loadSenses = async (
   language: ResourceLanguage,
@@ -760,6 +760,7 @@ const browseSimpleLexicon = (
     language,
     level: 'simple',
     lexicalLanguage: lexicon,
+    ...EVERY_STRONG_SENSE,
     ...query,
   })
 

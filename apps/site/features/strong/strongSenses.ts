@@ -5,6 +5,13 @@ import { parseStrongCode } from './strongRoutes'
 // under it are the precise entries. These rules decide which of the two a page, a list line
 // or a sitemap names.
 
+/**
+ * Asks the lexicon list of the Resource API for every sense. Left to itself it names one
+ * entry for those that share a person or a thing, as the workspace lists them. A service
+ * older than the option ignores it and answers with that shorter list.
+ */
+export const EVERY_STRONG_SENSE = { identities: 'all' } as const
+
 /** A sense as the lexicon lists it. */
 export type StrongSenseRef = {
   code: string
