@@ -7,7 +7,7 @@ import {
 } from './commentaryCoverage'
 import { buildCommentaryChapterPath } from './commentaryRoutes'
 
-export type CommentaryLink = { title: string; author: string; path: string }
+export type CommentaryLink = { title: string; path: string }
 
 /**
  * The commentaries of a language that comment a chapter, for the pages that send their
@@ -26,7 +26,6 @@ export const listCommentaryLinks = async (
       return coverage && commentaryCovers(coverage, ref)
         ? {
             title: commentary.title,
-            author: commentary.author,
             path: buildCommentaryChapterPath({ language, resource: commentary.id, ...ref }),
           }
         : undefined

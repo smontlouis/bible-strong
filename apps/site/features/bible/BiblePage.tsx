@@ -210,7 +210,6 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
                 <li key={commentary.path}>
                   <a className="strong-list__entry" href={commentary.path}>
                     <span className="strong-list__gloss">{commentary.title}</span>
-                    <span className="resource-muted shrink-0 text-sm">{commentary.author}</span>
                   </a>
                 </li>
               ))}
