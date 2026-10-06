@@ -135,12 +135,13 @@ export function BibleHubPage({ language }: { language: ResourceLanguage }) {
   )
 }
 
-/** `/bible/:version` — the reading modes of a version, then its books and chapters. */
+/** `/bible/:version` — the reading modes of a version that has several, then its books and chapters. */
 export function BibleVersionPage({ page }: { page: BibleVersionPageData }) {
   const t = useI18n()
   const { versionId, language, books } = page
   const version = findBibleVersion(versionId)
   const first = books[0]
+  const modes = supportedBiblePresentations(versionId)
   const testaments = [
     // Deuterocanonical books (67 and above) are read within the Old Testament.
     { key: 'oldTestament' as const, books: books.filter(entry => entry.book < 40 || entry.book > 66) },
@@ -171,11 +172,12 @@ export function BibleVersionPage({ page }: { page: BibleVersionPageData }) {
           </p>
         </header>
 
-        {first && (
+        {/* A Bible read as text only has no reading mode to choose. */}
+        {first && modes.length > 1 && (
           <section className="mt-10">
             <h2 className="mb-4 text-xl font-semibold">{t('bible.nav.mode')}</h2>
             <ul className="grid gap-3 sm:grid-cols-3">
-              {supportedBiblePresentations(versionId).map(presentation => (
+              {modes.map(presentation => (
                 <li key={presentation}>
                   <a
                     className="resource-card resource-card--link block h-full p-4"
