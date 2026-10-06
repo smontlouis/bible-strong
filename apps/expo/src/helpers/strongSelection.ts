@@ -51,8 +51,9 @@ const normalizeStrongIdentity = (
   book: number
 ): StrongIdentity | undefined => {
   const code = identity.code.trim()
+  // The letter case of a sense suffix is part of the identity: `H2148v` is not `H2148V`.
   const normalizedCode = /^[HG]\d+[A-Z]*$/iu.test(code)
-    ? code.toUpperCase()
+    ? `${code[0].toUpperCase()}${code.slice(1)}`
     : /^\d+$/u.test(code)
       ? `${book <= 39 ? 'H' : 'G'}${code}`
       : undefined

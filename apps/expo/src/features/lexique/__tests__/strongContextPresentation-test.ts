@@ -85,4 +85,50 @@ describe('getStrongContextHighlight', () => {
   it('does not highlight a word that only appears inside another word', () => {
     expect(highlighted({ ...romans3v8, StrongSpans: undefined }, 'quel')).toBeUndefined()
   })
+
+  describe('with two senses of one number in a verse', () => {
+    // Every Zechariah shares the extended code `H2148a`; two of them only differ by the
+    // letter case of their suffix.
+    const zechariahSpan = (ordinal: number, startOffset: number, dStrong: string) => ({
+      ordinal,
+      startOffset,
+      length: 8,
+      identities: [
+        { kind: 'strong' as const, code: 'H2148' },
+        { kind: 'estrong' as const, code: 'H2148a' },
+        { kind: 'dstrong' as const, code: dStrong },
+      ],
+    })
+    const verse: Verse = {
+      Livre: 16,
+      Chapitre: 11,
+      Verset: 4,
+      Texte: 'Zacharie, fils de Zacharie',
+      StrongSpans: [zechariahSpan(0, 0, 'H2148V'), zechariahSpan(1, 18, 'H2148v')],
+    }
+    const sense = (stepCode: string) => ({
+      stepCode,
+      dStrong: stepCode,
+      eStrong: 'H2148a',
+      baseCode: 2148,
+    })
+
+    it('highlights the span tagged with the sense of the entry', () => {
+      expect(getStrongContextHighlight(verse, sense('H2148V'), 'Zacharie')).toEqual({
+        start: 0,
+        end: 8,
+      })
+      expect(getStrongContextHighlight(verse, sense('H2148v'), 'Zacharie')).toEqual({
+        start: 18,
+        end: 26,
+      })
+    })
+
+    it('falls back to the shared codes when no span carries the sense of the entry', () => {
+      expect(getStrongContextHighlight(verse, sense('H2148B'), 'Zacharie')).toEqual({
+        start: 0,
+        end: 8,
+      })
+    })
+  })
 })
