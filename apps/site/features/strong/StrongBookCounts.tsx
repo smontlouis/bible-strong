@@ -20,7 +20,9 @@ export default function StrongBookCounts({
           <a
             className="resource-chip"
             aria-current={count.book === selectedBook ? 'true' : undefined}
-            href={buildStrongConcordancePath(entry.language, entry.code, bibleBookSlug(count.book))}
+            href={buildStrongConcordancePath(entry.language, entry.code, {
+              book: bibleBookSlug(count.book),
+            })}
           >
             {bibleBookName(count.book, entry.language)}
             <span className="font-semibold">{count.verseCount}</span>

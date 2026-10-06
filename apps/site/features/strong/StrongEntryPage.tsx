@@ -7,10 +7,13 @@ import StrongBookCounts from './StrongBookCounts'
 import StrongVerseList from './StrongVerseList'
 import {
   buildStrongConcordancePath,
+  buildStrongIndexPath,
+  buildStrongLetterPath,
   buildStrongPath,
   buildWebAppStrongUrl,
   displayStrongCode,
   strongCodeSlug,
+  strongGlossLetter,
 } from './strongRoutes'
 
 const RELATION_GROUPS = ['subentry', 'family', 'identity'] as const
@@ -66,6 +69,7 @@ export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
   const displayCode = displayStrongCode(entry.code)
   const hebrew = entry.lexicalLanguage === 'hebrew'
   const appUrl = buildWebAppStrongUrl(entry.code)
+  const glossLetter = strongGlossLetter(entry.gloss)
 
   return (
     <ResourceShell
@@ -74,9 +78,16 @@ export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
     >
       <article>
         <header>
-          <p className="resource-muted text-sm font-medium uppercase tracking-[0.14em]">
-            {t(hebrew ? 'strong.lexicon.hebrew' : 'strong.lexicon.greek')}
-          </p>
+          <a
+            className="resource-muted text-sm font-medium uppercase tracking-[0.14em]"
+            href={
+              glossLetter
+                ? buildStrongLetterPath(language, entry.lexicalLanguage, glossLetter)
+                : buildStrongIndexPath(language)
+            }
+          >
+            ← {t(hebrew ? 'strong.lexicon.hebrew' : 'strong.lexicon.greek')}
+          </a>
           <h1 className="mt-3">
             <span className="resource-chip font-semibold">Strong {displayCode}</span>
             <span

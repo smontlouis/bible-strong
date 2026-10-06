@@ -1,5 +1,6 @@
 import { useI18n } from '@/locales'
 import { bibleBookName, bibleBookSlug } from '../bible/bibleBooks'
+import Pagination from '../resources/Pagination'
 import ResourceShell from '../resources/ResourceShell'
 import type { StrongConcordancePageData } from './strong.functions'
 import StrongBookCounts from './StrongBookCounts'
@@ -16,10 +17,6 @@ export default function StrongConcordancePage({ page }: { page: StrongConcordanc
   const { language, code, book } = page
   const hebrew = page.lexicalLanguage === 'hebrew'
   const bookSlug = book === undefined ? undefined : bibleBookSlug(book)
-  const basePath = buildStrongConcordancePath(language, code)
-  const nextPath = page.nextCursor
-    ? `${buildStrongConcordancePath(language, code, bookSlug)}${bookSlug ? '&' : '?'}cursor=${encodeURIComponent(page.nextCursor)}`
-    : undefined
 
   return (
     <ResourceShell
@@ -60,7 +57,7 @@ export default function StrongConcordancePage({ page }: { page: StrongConcordanc
           <a
             className="resource-chip mb-2"
             aria-current={book === undefined ? 'true' : undefined}
-            href={basePath}
+            href={buildStrongConcordancePath(language, code)}
           >
             {t('strong.concordance.allBooks')}
           </a>
@@ -68,15 +65,19 @@ export default function StrongConcordancePage({ page }: { page: StrongConcordanc
         </nav>
 
         <section className="mt-10">
-          {book !== undefined && (
-            <h2 className="mb-4 text-xl font-semibold">{bibleBookName(book, language)}</h2>
-          )}
+          <h2 className="mb-4 text-xl font-semibold">
+            {book === undefined
+              ? t('pagination.page').replace('{page}', `${page.page} / ${page.pageCount}`)
+              : bibleBookName(book, language)}
+          </h2>
           <StrongVerseList verses={page.verses} version={page.version} language={language} />
-          {nextPath && (
-            <a className="resource-cta mt-8" href={nextPath} rel="next">
-              {t('strong.concordance.next')}
-            </a>
-          )}
+          <Pagination
+            current={page.page}
+            pageCount={page.pageCount}
+            hrefFor={number =>
+              buildStrongConcordancePath(language, code, { book: bookSlug, page: number })
+            }
+          />
         </section>
       </article>
     </ResourceShell>

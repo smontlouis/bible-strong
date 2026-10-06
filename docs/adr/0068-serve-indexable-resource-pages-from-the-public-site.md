@@ -35,8 +35,11 @@ The workspace at `web.bible-strong.app` is not indexed.
 Site routes reuse the grammar of ADR-0053 to ADR-0056:
 
 - `/bible/:version[/:presentation]/:book/:chapter[/:passage]`
+- `/strong/:language`, the lexicon, and `/strong/:language/:lexicon/:letter`, its Hebrew or
+  Greek entries filed under the first letter of their gloss
 - `/strong/:language/:code`
-- `/strong/:language/:code/concordance`, with an optional `book` filter
+- `/strong/:language/:code/concordance[/:page]`, the occurrences fifty verses to a numbered
+  page, with an optional `book` filter
 - `/strong/:code` redirects permanently to the default language, `fr`.
 
 A Bible presentation is a reading mode, each with its own URL:
@@ -68,9 +71,9 @@ English Bible, French otherwise.
 
 ### Indexing
 
-A Bible chapter and a single verse in every reading mode, a Strong entry and the first
-page of its concordance are indexable. Verse ranges, concordance book filters and following
-concordance pages are served with `noindex, follow`. Sitemaps are generated from the
+A Bible chapter and a single verse in every reading mode, a Strong entry, every numbered
+page of its concordance and the lexicon lists are indexable. Verse ranges and concordance
+book filters are served with `noindex, follow`. Sitemaps are generated from the
 Resource API: one per Bible and reading mode listing its chapters, and the classical
 Strong numbers. Verses and disambiguated senses are reached through links.
 

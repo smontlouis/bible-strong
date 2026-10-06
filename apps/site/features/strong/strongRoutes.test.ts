@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { renderStrongDefinitionHtml } from './strongHtml'
 import {
+  buildStrongIndexPath,
+  buildStrongLetterPath,
   buildStrongPath,
   buildWebAppStrongUrl,
   displayStrongCode,
   parseStrongCode,
   strongCodeSlug,
+  strongGlossLetter,
 } from './strongRoutes'
 
 describe('Strong public routes', () => {
@@ -37,6 +40,21 @@ describe('Strong public routes', () => {
     expect(displayStrongCode('H0430')).toBe('H430')
     expect(displayStrongCode('H0430G')).toBe('H430G')
     expect(displayStrongCode('G0026')).toBe('G26')
+  })
+})
+
+describe('Strong lexicon lists', () => {
+  it('files an entry under the plain first letter of its gloss', () => {
+    expect(strongGlossLetter('Dieu')).toBe('d')
+    expect(strongGlossLetter('Éternel')).toBe('e')
+    expect(strongGlossLetter(' âme')).toBe('a')
+    expect(strongGlossLetter('(Beth)-Togarma')).toBeUndefined()
+    expect(strongGlossLetter('12')).toBeUndefined()
+  })
+
+  it('builds the lexicon and letter paths', () => {
+    expect(buildStrongIndexPath('fr')).toBe('/strong/fr')
+    expect(buildStrongLetterPath('en', 'greek', 'l')).toBe('/strong/en/greek/l')
   })
 })
 

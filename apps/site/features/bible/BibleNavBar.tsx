@@ -189,11 +189,12 @@ export default function BibleNavBar({ page }: { page: BiblePageData }) {
       </details>
 
       {modes.length > 1 && (
-        <details name="bible-nav">
+        <details name="bible-nav" className="bible-nav__mode">
           <summary
             className="bible-nav__trigger"
             aria-label={`${t(`bible.mode.${presentation}`)} – ${t('bible.nav.mode')}`}
           >
+            <span className="bible-nav__label">{t('bible.nav.modeLabel')}</span>
             <span className="truncate">{t(`bible.mode.${presentation}`)}</span>
             <Chevron />
           </summary>

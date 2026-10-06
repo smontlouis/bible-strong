@@ -33,6 +33,8 @@ import { Route as StudiesIdRouteImport } from './routes/studies.$id'
 import { Route as FrStudiesIdRouteImport } from './routes/fr.studies.$id'
 import { Route as StrongLanguageCodeRouteImport } from './routes/strong.$language.$code'
 import { Route as StrongLanguageCodeConcordanceRouteImport } from './routes/strong.$language.$code_.concordance'
+import { Route as StrongLanguageLexiconLetterRouteImport } from './routes/strong.$language.$lexicon.$letter'
+import { Route as StrongLanguageCodeConcordancePageRouteImport } from './routes/strong.$language.$code_.concordance_.$page'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -157,6 +159,18 @@ const StrongLanguageCodeConcordanceRoute =
     path: '/strong/$language/$code/concordance',
     getParentRoute: () => rootRouteImport,
   } as any)
+const StrongLanguageLexiconLetterRoute =
+  StrongLanguageLexiconLetterRouteImport.update({
+    id: '/strong/$language/$lexicon/$letter',
+    path: '/strong/$language/$lexicon/$letter',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const StrongLanguageCodeConcordancePageRoute =
+  StrongLanguageCodeConcordancePageRouteImport.update({
+    id: '/strong/$language/$code_/concordance_/$page',
+    path: '/strong/$language/$code/concordance/$page',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -183,6 +197,8 @@ export interface FileRoutesByFullPath {
   '/fr/studies/$id': typeof FrStudiesIdRoute
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
   '/strong/$language/$code/concordance': typeof StrongLanguageCodeConcordanceRoute
+  '/strong/$language/$lexicon/$letter': typeof StrongLanguageLexiconLetterRoute
+  '/strong/$language/$code/concordance/$page': typeof StrongLanguageCodeConcordancePageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -209,6 +225,8 @@ export interface FileRoutesByTo {
   '/fr/studies/$id': typeof FrStudiesIdRoute
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
   '/strong/$language/$code/concordance': typeof StrongLanguageCodeConcordanceRoute
+  '/strong/$language/$lexicon/$letter': typeof StrongLanguageLexiconLetterRoute
+  '/strong/$language/$code/concordance/$page': typeof StrongLanguageCodeConcordancePageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -236,6 +254,8 @@ export interface FileRoutesById {
   '/fr/studies/$id': typeof FrStudiesIdRoute
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
   '/strong/$language/$code_/concordance': typeof StrongLanguageCodeConcordanceRoute
+  '/strong/$language/$lexicon/$letter': typeof StrongLanguageLexiconLetterRoute
+  '/strong/$language/$code_/concordance_/$page': typeof StrongLanguageCodeConcordancePageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -264,6 +284,8 @@ export interface FileRouteTypes {
     | '/fr/studies/$id'
     | '/strong/$language/$code'
     | '/strong/$language/$code/concordance'
+    | '/strong/$language/$lexicon/$letter'
+    | '/strong/$language/$code/concordance/$page'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -290,6 +312,8 @@ export interface FileRouteTypes {
     | '/fr/studies/$id'
     | '/strong/$language/$code'
     | '/strong/$language/$code/concordance'
+    | '/strong/$language/$lexicon/$letter'
+    | '/strong/$language/$code/concordance/$page'
   id:
     | '__root__'
     | '/'
@@ -316,6 +340,8 @@ export interface FileRouteTypes {
     | '/fr/studies/$id'
     | '/strong/$language/$code'
     | '/strong/$language/$code_/concordance'
+    | '/strong/$language/$lexicon/$letter'
+    | '/strong/$language/$code_/concordance_/$page'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -343,6 +369,8 @@ export interface RootRouteChildren {
   FrStudiesIdRoute: typeof FrStudiesIdRoute
   StrongLanguageCodeRoute: typeof StrongLanguageCodeRoute
   StrongLanguageCodeConcordanceRoute: typeof StrongLanguageCodeConcordanceRoute
+  StrongLanguageLexiconLetterRoute: typeof StrongLanguageLexiconLetterRoute
+  StrongLanguageCodeConcordancePageRoute: typeof StrongLanguageCodeConcordancePageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -515,6 +543,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StrongLanguageCodeConcordanceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/strong/$language/$lexicon/$letter': {
+      id: '/strong/$language/$lexicon/$letter'
+      path: '/strong/$language/$lexicon/$letter'
+      fullPath: '/strong/$language/$lexicon/$letter'
+      preLoaderRoute: typeof StrongLanguageLexiconLetterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/strong/$language/$code_/concordance_/$page': {
+      id: '/strong/$language/$code_/concordance_/$page'
+      path: '/strong/$language/$code/concordance/$page'
+      fullPath: '/strong/$language/$code/concordance/$page'
+      preLoaderRoute: typeof StrongLanguageCodeConcordancePageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -543,6 +585,9 @@ const rootRouteChildren: RootRouteChildren = {
   FrStudiesIdRoute: FrStudiesIdRoute,
   StrongLanguageCodeRoute: StrongLanguageCodeRoute,
   StrongLanguageCodeConcordanceRoute: StrongLanguageCodeConcordanceRoute,
+  StrongLanguageLexiconLetterRoute: StrongLanguageLexiconLetterRoute,
+  StrongLanguageCodeConcordancePageRoute:
+    StrongLanguageCodeConcordancePageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

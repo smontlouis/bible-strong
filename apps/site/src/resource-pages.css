@@ -363,6 +363,22 @@ a.resource-chip:hover {
   gap: 8px;
 }
 
+/* The reading mode sits at the far end of the bar, apart from the passage it applies to. */
+.bible-nav > .bible-nav__mode {
+  margin-inline-start: auto;
+}
+
+.bible-nav__label {
+  color: var(--resource-muted);
+  font-weight: 500;
+}
+
+@media (max-width: 520px) {
+  .bible-nav__label {
+    display: none;
+  }
+}
+
 /* On a narrow screen the three controls share the row and shorten their label. */
 .bible-nav > details {
   flex: 0 1 auto;
@@ -613,4 +629,123 @@ a.bible-nav__trigger[aria-current] {
 
 .bible-notes li {
   scroll-margin-top: 140px;
+}
+
+/* Lexicon lists: the alphabet of a lexicon and the entries filed under a letter. */
+.strong-letters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.strong-letters__letter {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--resource-accent-soft);
+  color: var(--resource-accent-ink);
+  font-weight: 600;
+}
+
+span.strong-letters__letter {
+  background: transparent;
+  color: var(--resource-line);
+}
+
+a.strong-letters__letter:hover,
+.strong-letters__letter[aria-current] {
+  background: var(--resource-accent);
+  color: var(--resource-canvas);
+}
+
+.strong-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2px 16px;
+}
+
+.strong-list__entry {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+.strong-list__entry:hover {
+  background: var(--resource-accent-soft);
+}
+
+.strong-list__gloss {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.strong-list__original {
+  flex: none;
+  color: var(--resource-accent-ink);
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+}
+
+.strong-list__code {
+  flex: none;
+  min-width: 3.4em;
+  color: var(--resource-muted);
+  font-size: 0.78rem;
+  text-align: end;
+}
+
+/* Numbered pages of a list. */
+.resource-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 16px;
+  margin-top: 40px;
+}
+
+.resource-pagination__pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.resource-pagination__page {
+  display: grid;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 8px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--resource-accent-soft);
+  color: var(--resource-accent-ink);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.resource-pagination__page:hover,
+.resource-pagination__page[aria-current] {
+  background: var(--resource-accent);
+  color: var(--resource-canvas);
+}
+
+.resource-pagination__gap {
+  color: var(--resource-muted);
+}
+
+.resource-pagination__step {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  color: var(--resource-accent-ink);
+  font-size: 0.92rem;
+  font-weight: 600;
 }

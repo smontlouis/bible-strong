@@ -2,7 +2,15 @@ import type { StrongLexiconSearchResponseDto } from '@bible-strong/resource-doma
 import { absoluteSiteUrl, RESOURCE_LANGUAGES } from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
 import type { SitemapUrl } from '../resources/sitemap'
-import { buildStrongPath, parseStrongCode, type StrongLexicalLanguage } from './strongRoutes'
+import { listStrongLetters } from './strong.functions'
+import {
+  buildStrongIndexPath,
+  buildStrongLetterPath,
+  buildStrongPath,
+  parseStrongCode,
+  STRONG_LEXICONS,
+  type StrongLexicalLanguage,
+} from './strongRoutes'
 
 const PAGE_SIZE = 500
 // The lexicon holds about 25,000 senses; the cap only guards against a cursor loop.
@@ -37,4 +45,22 @@ export const listStrongSitemapUrls = async (
     }))
     return alternates.map(alternate => ({ loc: alternate.href, alternates }))
   })
+}
+
+/** The lexicon of each language and its letter pages. */
+export const listStrongIndexSitemapUrls = async (): Promise<SitemapUrl[]> => {
+  const alternates = RESOURCE_LANGUAGES.map(language => ({
+    hrefLang: language,
+    href: absoluteSiteUrl(buildStrongIndexPath(language)),
+  }))
+  const letterPages = await Promise.all(
+    RESOURCE_LANGUAGES.flatMap(language =>
+      STRONG_LEXICONS.map(async lexicon =>
+        (await listStrongLetters(language, lexicon)).map(letter => ({
+          loc: absoluteSiteUrl(buildStrongLetterPath(language, lexicon, letter)),
+        }))
+      )
+    )
+  )
+  return [...alternates.map(alternate => ({ loc: alternate.href, alternates })), ...letterPages.flat()]
 }
