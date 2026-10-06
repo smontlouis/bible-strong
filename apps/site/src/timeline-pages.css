@@ -1,1 +1,152 @@
 /* Styles specific to the timeline pages. Shared styles live in resource-pages.css. */
+
+/* The mark of a period: its colour on the timeline of the study workspace, as decoration. */
+.timeline-marker {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--timeline-period, var(--resource-accent));
+}
+
+.timeline-periods {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 8px;
+}
+
+.timeline-periods__period {
+  display: flex;
+  height: 100%;
+  min-height: 56px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  border: 1px solid var(--resource-line);
+  border-radius: 16px;
+  background: var(--resource-surface);
+  line-height: 1.3;
+}
+
+.timeline-periods__period:hover {
+  border-color: var(--resource-accent);
+}
+
+/* Events hang on a rail, in chronological order. */
+.timeline-events {
+  margin-inline-start: 5px;
+  border-inline-start: 2px solid var(--resource-line);
+}
+
+.timeline-events__event {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 16px;
+  padding: 8px 10px 8px 20px;
+  border-radius: 0 10px 10px 0;
+}
+
+.timeline-events__event::before {
+  position: absolute;
+  top: 1.05em;
+  inset-inline-start: -7px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--resource-canvas);
+  border-radius: 50%;
+  background: var(--timeline-period, var(--resource-accent));
+  content: '';
+}
+
+.timeline-events__event:hover {
+  background: var(--resource-accent-soft);
+}
+
+.timeline-events__title {
+  min-width: 0;
+  font-weight: 500;
+}
+
+/* A dating is read as a whole; under a long title it takes its own line. */
+.timeline-events__dates {
+  flex: none;
+  color: var(--resource-muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.timeline-lead {
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+/* Articles are plain text: a line break inside a paragraph sets a heading above its text. */
+.timeline-article p {
+  white-space: pre-line;
+}
+
+.timeline-article p + p {
+  margin-top: 1em;
+}
+
+/* Image sizes are not published: a frame of fixed proportions keeps the text in place. */
+.timeline-figure__frame {
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+  border: 1px solid var(--resource-line);
+  border-radius: 20px;
+  background: var(--resource-surface);
+}
+
+.timeline-figure__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: scale-down;
+}
+
+.timeline-figure figcaption {
+  margin-top: 8px;
+  color: var(--resource-muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.timeline-verse-number {
+  color: var(--resource-muted);
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.72em;
+  font-weight: 600;
+  vertical-align: 0.3em;
+}
+
+/* The events before and after on the timeline. */
+.timeline-neighbours {
+  display: grid;
+  gap: 12px;
+}
+
+.timeline-neighbour {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 18px;
+}
+
+.timeline-neighbour:hover {
+  border-color: var(--resource-accent);
+}
+
+@media (min-width: 640px) {
+  .timeline-neighbours {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .timeline-neighbour--next {
+    grid-column: 2;
+    align-items: flex-end;
+    text-align: end;
+  }
+}
