@@ -123,17 +123,21 @@
   stroke-width: 1.8;
 }
 
-/* A period: its tint, its scene pinned to the left of the view, and its name over it. */
+/*
+ * A period: its tint, its scene pinned to the left of the view, and its name over it. The
+ * tint fades out towards both ends, so one period melts into the next without a seam.
+ */
 .timeline-period {
   position: absolute;
   top: 0;
   bottom: 0;
-  border-inline-start: 1px solid
-    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 35%, transparent);
   background: linear-gradient(
-    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 12%, transparent),
-    transparent 45%,
-    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 7%, transparent)
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 10%, transparent) 420px,
+    color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 10%, transparent)
+      calc(100% - 420px),
+    transparent
   );
 }
 
@@ -170,7 +174,7 @@
   opacity: 0.55;
   object-fit: cover;
   object-position: center 30%;
-  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 34%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 22%, #000 38%, transparent);
 }
 
 .resource-shell[data-theme='dark'] .timeline-period__scene img {
@@ -196,7 +200,7 @@
   margin: 20px 0 0 20px;
   padding: 16px 20px 18px;
   border: 1px solid var(--resource-line);
-  border-radius: 22px;
+  border-radius: 12px;
   background: color-mix(in srgb, var(--resource-surface) 74%, transparent);
   box-shadow: 0 18px 50px rgb(16 27 53 / 10%);
   pointer-events: none;
@@ -211,9 +215,9 @@
 
 /* Period colours are picked for the drawing, not for text: the number is only ringed with one. */
 .timeline-period__number {
-  padding: 1px 8px;
+  padding: 1px 7px;
   border: 2px solid var(--timeline-period, var(--resource-accent));
-  border-radius: 999px;
+  border-radius: 6px;
   color: var(--resource-ink);
   letter-spacing: 0.06em;
 }
@@ -247,7 +251,6 @@
   justify-content: center;
   gap: 14px;
   padding-inline: clamp(24px, 5vw, 64px);
-  border-inline-start: 1px solid var(--resource-line);
 }
 
 .timeline-outro h2 {
@@ -344,8 +347,8 @@
   position: sticky;
   left: 50%;
   width: max-content;
-  padding: 5px 13px;
-  border-radius: 999px;
+  padding: 5px 12px;
+  border-radius: 7px;
   background: var(--resource-ink);
   box-shadow: 0 8px 24px rgb(16 27 53 / 22%);
   color: var(--resource-canvas);
@@ -451,15 +454,14 @@
   flex: none;
   overflow: hidden;
   border: 1px solid var(--resource-line);
-  border-radius: 18px;
+  border-radius: 9px;
   background: var(--resource-surface-raised);
   box-shadow:
     0 1px 2px rgb(16 27 53 / 6%),
-    0 10px 26px rgb(16 27 53 / 10%);
+    0 8px 22px rgb(16 27 53 / 9%);
   transition:
-    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.2s,
-    border-color 0.2s;
+    box-shadow 0.25s,
+    border-color 0.25s;
 }
 
 .timeline-card img {
@@ -510,16 +512,17 @@
   width: max-content;
   height: 26px;
   gap: 7px;
-  padding: 0 12px 0 9px;
+  padding: 0 11px 0 9px;
   border: 1px solid var(--resource-line);
-  border-radius: 999px;
+  border-radius: 7px;
   background: var(--resource-surface-raised);
-  box-shadow: 0 4px 12px rgb(16 27 53 / 7%);
+  box-shadow: 0 3px 10px rgb(16 27 53 / 6%);
   font-size: 0.76rem;
   font-weight: 600;
   transition:
-    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.2s;
+    background-color 0.25s,
+    box-shadow 0.25s,
+    border-color 0.25s;
 }
 
 .timeline-item--pill::before {
@@ -537,22 +540,43 @@
   white-space: nowrap;
 }
 
-.timeline-item--card:hover .timeline-card,
-.timeline-item--card:focus-visible .timeline-card,
-.timeline-item--pill:hover,
-.timeline-item--pill:focus-visible {
-  border-color: var(--timeline-period, var(--resource-accent));
-  transform: translateY(-2px);
-}
-
+/* Under the pointer an event deepens and its ribbon lights up; nothing moves. */
 .timeline-item--card:hover .timeline-card {
+  border-color: color-mix(in srgb, var(--resource-ink) 22%, transparent);
   box-shadow:
     0 2px 4px rgb(16 27 53 / 8%),
-    0 18px 40px rgb(16 27 53 / 16%);
+    0 16px 36px rgb(16 27 53 / 17%);
 }
 
 .timeline-item--card:hover img {
-  transform: scale(1.08);
+  transform: scale(1.05);
+}
+
+.timeline-item--card::before {
+  transition: opacity 0.25s;
+  opacity: 0.75;
+}
+
+.timeline-item--card:hover::before,
+.timeline-item--card[aria-current]::before {
+  opacity: 1;
+}
+
+.timeline-item--pill:hover {
+  border-color: color-mix(in srgb, var(--resource-ink) 22%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--timeline-period, var(--resource-accent)) 9%,
+    var(--resource-surface-raised)
+  );
+  box-shadow: 0 8px 20px rgb(16 27 53 / 12%);
+}
+
+/* A keyboard is shown where it stands. */
+.timeline-item--card:focus-visible .timeline-card,
+.timeline-item--pill:focus-visible {
+  outline: 2px solid var(--resource-accent);
+  outline-offset: 2px;
 }
 
 .timeline-item:hover,
@@ -671,7 +695,7 @@
   bottom: 0;
   min-width: 6px;
   border: 2px solid var(--resource-ink);
-  border-radius: 7px;
+  border-radius: 4px;
   background: color-mix(in srgb, var(--resource-ink) 9%, transparent);
   pointer-events: none;
 }
@@ -688,7 +712,7 @@
   flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--resource-line);
-  border-radius: 26px;
+  border-radius: 14px;
   background: var(--resource-surface-raised);
   box-shadow: 0 30px 90px rgb(8 14 28 / 30%);
   animation: timeline-panel-in 0.36s cubic-bezier(0.16, 1, 0.3, 1);
@@ -829,10 +853,10 @@
   right: 12px;
   z-index: 1;
   display: grid;
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 9px;
   background: color-mix(in srgb, var(--resource-surface) 82%, transparent);
   box-shadow: 0 4px 14px rgb(8 14 28 / 18%);
   cursor: pointer;
@@ -933,6 +957,7 @@
 
   .timeline-card,
   .timeline-card img,
+  .timeline-item--card::before,
   .timeline-item--pill {
     transition: none;
   }
