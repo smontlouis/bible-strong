@@ -9,7 +9,12 @@ import {
 import { RESOURCE_SECTIONS } from '../resources/sections'
 import { TIMELINE_MESSAGES } from './messages'
 import type { TimelineIndexEvent, TimelineIndexPageData } from './timeline.functions'
-import { formatTimelineDates, formatTimelineYear, TIMELINE_FUTURE_YEAR } from './timelineDates'
+import {
+  formatTimelineDates,
+  formatTimelineYear,
+  formatTimelineYearNumber,
+  TIMELINE_FUTURE_YEAR,
+} from './timelineDates'
 import TimelineEventPanel from './TimelineEventPanel'
 import {
   TIMELINE_RULER_HEIGHT,
@@ -127,11 +132,8 @@ export default function TimelineStage({ page }: { page: TimelineIndexPageData })
       const middle = scroller.scrollLeft + scroller.clientWidth / 2
       const year = timelineXToYear(TIMELINE_BANDS, middle)
       if (cursorRef.current) cursorRef.current.textContent = formatTimelineYear(year, language)
-      // Behind the drawing the year stands alone: the cursor already names its era.
-      if (yearRef.current) {
-        yearRef.current.dataset.year =
-          year >= TIMELINE_FUTURE_YEAR ? '' : String(Math.abs(year === 0 ? 1 : year))
-      }
+      // Behind the drawing the year stands alone, as a number; the cursor names its era.
+      if (yearRef.current) yearRef.current.dataset.year = formatTimelineYearNumber(year)
       const inTime = middle >= TIMELINE_INTRO_WIDTH && middle <= AXIS_END
       stage.dataset.inTime = String(inTime)
       const period = inTime ? timelineBandAt(TIMELINE_BANDS, middle)?.id : undefined
@@ -160,8 +162,14 @@ export default function TimelineStage({ page }: { page: TimelineIndexPageData })
     const onMapPointerDown = (event: PointerEvent) => {
       if (event.button !== 0) return
       scrubbing = true
-      map.setPointerCapture(event.pointerId)
       scrub(event)
+      // Capture keeps the scrub going when the pointer leaves the strip; a pointer the
+      // browser no longer tracks cannot be captured, and the press has moved the view anyway.
+      try {
+        map.setPointerCapture(event.pointerId)
+      } catch {
+        scrubbing = false
+      }
     }
     const onMapPointerMove = (event: PointerEvent) => {
       if (scrubbing) scrub(event)

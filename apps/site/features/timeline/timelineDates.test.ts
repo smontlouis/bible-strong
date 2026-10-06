@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   formatTimelineDates,
   formatTimelineYear,
+  formatTimelineYearNumber,
   parseTimelineDates,
   timelineDatesRank,
   timelineYearSpan,
@@ -96,5 +97,12 @@ describe('Timeline datings', () => {
     expect(formatTimelineYear(31, 'en')).toBe('31 AD')
     expect(formatTimelineYear(0, 'en')).toBe('1 AD')
     expect(formatTimelineYear(2500, 'fr')).toBe('Futur')
+  })
+
+  it('writes a year as a number, negative before our era', () => {
+    expect(formatTimelineYearNumber(-1050)).toBe('−1050')
+    expect(formatTimelineYearNumber(31)).toBe('31')
+    expect(formatTimelineYearNumber(0)).toBe('1')
+    expect(formatTimelineYearNumber(2500)).toBe('')
   })
 })

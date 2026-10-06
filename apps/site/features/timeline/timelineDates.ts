@@ -105,6 +105,15 @@ export const formatTimelineYear = (year: number, language: ResourceLanguage): st
 }
 
 /**
+ * A year of the drawn timeline as a bare number: negative before our era, and nothing for
+ * what is still to come. There is no year zero: it reads as the first year.
+ */
+export const formatTimelineYearNumber = (year: number): string => {
+  if (year >= TIMELINE_FUTURE_YEAR) return ''
+  return year < 0 ? `−${-year}` : String(year || 1)
+}
+
+/**
  * Writes a dating in the language of the page. The publication carries English era marks
  * in both languages; a dating outside its grammar is shown as written.
  */
