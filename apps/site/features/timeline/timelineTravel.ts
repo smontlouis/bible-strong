@@ -30,10 +30,16 @@ export const createTimelineTravel = (
 ): TimelineTravel => {
   const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   let frame = 0
+  // Where a wheel is taking the view, and how far it has got. The position is kept apart
+  // from the element, which rounds what it is given and would stall the last pixels.
+  let wheel: { target: number; position: number } | undefined
 
+  // Whatever moved the view by itself stops, and forgets where it was going: the next
+  // movement starts from where the view really is.
   const rest = () => {
     cancelAnimationFrame(frame)
     frame = 0
+    wheel = undefined
   }
 
   // A throw: the view keeps the speed of the pointer and slows down by itself.
@@ -55,34 +61,43 @@ export const createTimelineTravel = (
   }
 
   // A wheel names where to go; the view eases there, so notches do not jump.
-  let wheelTarget: number | undefined
   const easeToWheelTarget = () => {
-    if (wheelTarget === undefined) return
-    const remaining = wheelTarget - scroller.scrollLeft
+    if (!wheel) return
+    const remaining = wheel.target - wheel.position
     if (Math.abs(remaining) < 0.5) {
-      wheelTarget = undefined
+      scroller.scrollLeft = wheel.target
+      wheel = undefined
       frame = 0
       return
     }
-    scroller.scrollLeft += remaining * WHEEL_EASE
+    wheel.position += remaining * WHEEL_EASE
+    scroller.scrollLeft = wheel.position
     frame = requestAnimationFrame(easeToWheelTarget)
   }
   const onWheel = (event: WheelEvent) => {
-    // Pinching zooms the page, and a sideways gesture already scrolls the timeline.
+    // Pinching zooms the page.
     if (event.ctrlKey || event.shiftKey || ignore(event.target)) return
-    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return
+    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
+      // A sideways gesture already scrolls the timeline: it takes over from any travel.
+      rest()
+      return
+    }
     event.preventDefault()
     const distance = event.deltaMode === 1 ? event.deltaY * LINE_HEIGHT : event.deltaY
     if (calm) {
       scroller.scrollLeft += distance
       return
     }
+    if (!wheel) {
+      rest()
+      wheel = { target: scroller.scrollLeft, position: scroller.scrollLeft }
+    }
     const limit = scroller.scrollWidth - scroller.clientWidth
-    const from = wheelTarget ?? scroller.scrollLeft
-    if (wheelTarget === undefined) rest()
-    wheelTarget = Math.min(Math.max(from + distance, 0), limit)
+    wheel.target = Math.min(Math.max(wheel.target + distance, 0), limit)
     if (!frame) frame = requestAnimationFrame(easeToWheelTarget)
   }
+  // A finger scrolls the timeline by itself, from where it is.
+  const onTouchStart = () => rest()
 
   let drag:
     | { x: number; y: number; left: number; top: number; moved: boolean }
@@ -91,7 +106,6 @@ export const createTimelineTravel = (
   const onPointerDown = (event: PointerEvent) => {
     if (event.pointerType !== 'mouse' || event.button !== 0 || ignore(event.target)) return
     rest()
-    wheelTarget = undefined
     drag = {
       x: event.clientX,
       y: event.clientY,
@@ -141,6 +155,7 @@ export const createTimelineTravel = (
   const onDragStart = (event: DragEvent) => event.preventDefault()
 
   scroller.addEventListener('wheel', onWheel, { passive: false })
+  scroller.addEventListener('touchstart', onTouchStart, { passive: true })
   scroller.addEventListener('pointerdown', onPointerDown)
   scroller.addEventListener('dragstart', onDragStart)
   window.addEventListener('pointermove', onPointerMove)
@@ -150,12 +165,12 @@ export const createTimelineTravel = (
     rest,
     goTo: (left, top) => {
       rest()
-      wheelTarget = undefined
       scroller.scrollTo({ left, top, behavior: calm ? 'auto' : 'smooth' })
     },
     dispose: () => {
       rest()
       scroller.removeEventListener('wheel', onWheel)
+      scroller.removeEventListener('touchstart', onTouchStart)
       scroller.removeEventListener('pointerdown', onPointerDown)
       scroller.removeEventListener('dragstart', onDragStart)
       window.removeEventListener('pointermove', onPointerMove)
