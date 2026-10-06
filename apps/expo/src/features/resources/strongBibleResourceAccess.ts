@@ -440,12 +440,12 @@ export const createHttpStrongBibleResourceAdapter = ({
 
   // Older API deployments add padding but do not try the inverse spelling.
   // Send the unpadded alias so both padded and unpadded publications resolve.
+  // The suffix keeps its letter case: `H2148v` and `H2148V` are two identities.
   const concordanceReference = (reference: string | number) =>
     encodeURIComponent(
       String(reference)
         .trim()
-        .toUpperCase()
-        .replace(/^([HG])0+(?=\d)/u, '$1')
+        .replace(/^([HGhg])0*(?=\d)/u, (_, prefix: string) => prefix.toUpperCase())
     )
 
   const loadChapter = async (versionId: StrongBibleVersionId, book: number, chapter: number) => {
