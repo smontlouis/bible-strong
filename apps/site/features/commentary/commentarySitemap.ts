@@ -76,12 +76,9 @@ export const COMMENTARY_SITEMAPS: Record<string, () => Promise<SitemapUrl[]> | S
   'commentary-index.xml': () =>
     INDEX_ALTERNATES.map(({ href }) => ({ loc: href, alternates: INDEX_ALTERNATES })),
   ...Object.fromEntries(
-    listCommentaryProjections()
-      // A work kept out of search indexes has no sitemap.
-      .filter(({ commentary }) => commentary.indexable)
-      .map(({ language, commentary }) => [
-        `commentary-${commentary.id}-${language}.xml`,
-        () => listCommentarySitemapUrls(commentary, language),
-      ])
+    listCommentaryProjections().map(({ language, commentary }) => [
+      `commentary-${commentary.id}-${language}.xml`,
+      () => listCommentarySitemapUrls(commentary, language),
+    ])
   ),
 }

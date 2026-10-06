@@ -104,13 +104,11 @@ English Bible, French otherwise.
 A Bible chapter and a single verse in every reading mode, a Strong entry, every numbered
 page of its concordance, a dictionary article, a topic, the commentary of a chapter, a
 timeline event and the lists leading to them are indexable. Verse ranges and concordance
-book filters are served with `noindex, follow`. So is a commentary whose holder reserves
-all rights: it stays readable, as in the workspace, but is kept out of search indexes and
-sitemaps.
+book filters are served with `noindex, follow`.
 
 Sitemaps are generated from the Resource API: one per Bible and reading mode listing its
 chapters, the classical Strong numbers, one per dictionary, per language of the topics and
-per indexable commentary, and the timeline. Verses and disambiguated senses are reached
+per commentary, and the timeline. Verses and disambiguated senses are reached
 through links.
 
 The CDN keeps a rendered page for a day and may serve it stale while revalidating. Only a
@@ -157,8 +155,8 @@ a link only when it resolves to a site page.
 
 Some presentation data is not in the Resource API and is mirrored from the workspace: the
 names and spans of the timeline periods, and the English names of commentary authors.
-Timeline images are not shown: they are originals served by the source of the timeline,
-several from a stock library. The French topics are a machine translation of Nave's
+Timeline images are served by the source of the timeline, as in the workspace; the site
+only names them. The French topics are a machine translation of Nave's
 English text; their pages say so.
 
 A page that needs a whole list to place its resource (the neighbours of a topic or of an

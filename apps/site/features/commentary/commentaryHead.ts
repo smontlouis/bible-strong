@@ -42,7 +42,6 @@ export const buildCommentaryHead = ({ language, commentary, counterpart }: Comme
     ),
     path: buildCommentaryPath(language, commentary.id),
     language,
-    indexable: commentary.indexable,
     // Only a work published in both languages has a counterpart.
     alternates: counterpart
       ? {
@@ -74,7 +73,6 @@ export const buildCommentaryChapterHead = (page: CommentaryChapterPageData) => {
     description: page.description,
     path: buildCommentaryChapterPath(location, page.page),
     language,
-    indexable: commentary.indexable,
     alternates:
       page.counterpart && !numbered
         ? {

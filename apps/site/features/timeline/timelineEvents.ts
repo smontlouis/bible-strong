@@ -34,12 +34,6 @@ export const timelineParagraphs = (text: string): string[] =>
     )
     .filter(Boolean)
 
-/**
- * The images of the publication are originals served by its source, several of them from
- * a stock library. An indexed page shows them only once that use is cleared.
- */
-export const TIMELINE_IMAGES_PUBLISHED = false
-
 // The publication names its image files; the source of the timeline serves them.
 const IMAGE_BASE_URL = 'https://timeline.biblehistory.com/media/images/original/'
 const IMAGE_FILE_PATTERN = /^[^/\\]+\.(?:jpe?g|png|gif|webp)$/iu

@@ -20,11 +20,6 @@ export type Commentary = {
   description: string
   /** The attribution and licence the catalog gives for the commentary. */
   rights: string
-  /**
-   * False for a work whose holder reserves all rights: it stays readable, as in the study
-   * workspace, but is kept out of search indexes and sitemaps.
-   */
-  indexable: boolean
   /** The Resource identity of the same work in the other language, when it has one. */
   counterpartId?: string
 }
@@ -49,8 +44,6 @@ const ENGLISH_AUTHORS: Record<string, string> = {
   sdabc: 'Francis D. Nichol (ed.) and contributors',
 }
 
-const RESERVED_RIGHTS = /tous droits réservés/iu
-
 // The two phrases catalog notices are built with; holders and licence names stay as written.
 const ENGLISH_RIGHTS: readonly (readonly [string, string])[] = [
   ['Domaine public', 'Public domain'],
@@ -70,7 +63,6 @@ const present = (entry: CommentaryCatalogEntry, language: ResourceLanguage): Com
   author: (language === 'en' && ENGLISH_AUTHORS[entry.id]) || entry.author,
   description: entry.description[language] ?? '',
   rights: localizeCommentaryRights(entry.rights, language),
-  indexable: !RESERVED_RIGHTS.test(entry.rights),
   // A work published in both languages under one identity is its own counterpart.
   counterpartId: entry.languages.includes(otherResourceLanguage(language))
     ? entry.id

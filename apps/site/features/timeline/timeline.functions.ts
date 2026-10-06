@@ -15,12 +15,7 @@ import { isResourceLanguage, type ResourceLanguage } from '../resources/publicSi
 import { readResource } from '../resources/resourceApi'
 import { TIMELINE_MESSAGES } from './messages'
 import { formatTimelineDates } from './timelineDates'
-import {
-  compareTimelineEvents,
-  TIMELINE_IMAGES_PUBLISHED,
-  timelineImageUrl,
-  timelineParagraphs,
-} from './timelineEvents'
+import { compareTimelineEvents, timelineImageUrl, timelineParagraphs } from './timelineEvents'
 import { findTimelinePeriod } from './timelinePeriods'
 import { isTimelineSlug } from './timelineRoutes'
 import {
@@ -246,12 +241,10 @@ export const loadTimelineEventPage = createServerFn({ method: 'GET' })
         summary || singleLine(paragraphs[0] ?? '') || fallbackDescription,
         DESCRIPTION_LENGTH
       ),
-      images: TIMELINE_IMAGES_PUBLISHED
-        ? event.images.flatMap(image => {
-            const src = timelineImageUrl(image.file)
-            return src ? [{ src, caption: singleLine(image.caption) }] : []
-          })
-        : [],
+      images: event.images.flatMap(image => {
+        const src = timelineImageUrl(image.file)
+        return src ? [{ src, caption: singleLine(image.caption) }] : []
+      }),
       passages,
       bibleVersionId: defaultBibleVersionId(language),
       related,
