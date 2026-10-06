@@ -18,9 +18,11 @@
 
 - **Resource authoring → Resource delivery**: Resource Studio produces immutable publication bundles; the Resource service validates and activates them.
 - **Resource delivery → Study workspace**: the service exposes online resources and downloadable Offline copies consumed by the Expo app.
-- **Resource domain → Resource delivery / Study workspace**: both use the same platform-neutral wire contracts and invariants.
+- **Resource domain → Resource delivery / Study workspace / Public site**: all use the same platform-neutral wire contracts and invariants.
 - **Resource catalog → Resource delivery / Study workspace**: publisher and client consume the same versioned artifact catalog.
 - **Bible reference parsing → Study workspace**: the parser recognizes inline references used for navigation and study links.
+- **Bible reference parsing → Public site**: the site uses the same OSIS book identities in resource links.
+- **Resource delivery → Public site**: the site renders indexable public resource pages on the server from the Resource API.
 - **Application API → Study workspace / Public site**: Firebase functions provide account-adjacent and content-processing operations to both clients.
 - **Event exploration world → Bible Strong product**: the standalone event experience introduces the six study-resource families without owning their publication data.
 

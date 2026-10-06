@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bible-strong.app/sitemap.xml

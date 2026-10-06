@@ -3,6 +3,7 @@
 @import '../lib/quill/quill.css';
 @import '../lib/quill/strong.css';
 @import '../lib/quill/verse.css';
+@import './resource-pages.css';
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

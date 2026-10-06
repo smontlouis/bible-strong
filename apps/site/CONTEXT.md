@@ -11,3 +11,7 @@ _Avoid_: Mobile clone
 **Shared study content**:
 Bible Strong content intentionally made accessible through a web route.
 _Avoid_: Synced user data
+
+**Public resource page**:
+The indexable, server-rendered page of one editorial resource entry, such as a Strong entry, read without loading the study workspace.
+_Avoid_: App page, landing page

@@ -17,6 +17,8 @@ import { Route as GiveRouteImport } from './routes/give'
 import { Route as HowToDeleteDataRouteImport } from './routes/how-to-delete-data'
 import { Route as PolitiqueDeConfidentialiteRouteImport } from './routes/politique-de-confidentialite'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as BibleSplatRouteImport } from './routes/bible.$'
 import { Route as FrIndexRouteImport } from './routes/fr.index'
 import { Route as FrDataDeletionRouteImport } from './routes/fr.data-deletion'
 import { Route as FrEulaRouteImport } from './routes/fr.eula'
@@ -25,8 +27,12 @@ import { Route as FrGiveRouteImport } from './routes/fr.give'
 import { Route as FrHowToDeleteDataRouteImport } from './routes/fr.how-to-delete-data'
 import { Route as FrPolitiqueDeConfidentialiteRouteImport } from './routes/fr.politique-de-confidentialite'
 import { Route as FrPrivacyPolicyRouteImport } from './routes/fr.privacy-policy'
+import { Route as SitemapsNameRouteImport } from './routes/sitemaps.$name'
+import { Route as StrongCodeRouteImport } from './routes/strong.$code'
 import { Route as StudiesIdRouteImport } from './routes/studies.$id'
 import { Route as FrStudiesIdRouteImport } from './routes/fr.studies.$id'
+import { Route as StrongLanguageCodeRouteImport } from './routes/strong.$language.$code'
+import { Route as StrongLanguageCodeConcordanceRouteImport } from './routes/strong.$language.$code_.concordance'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -67,6 +73,16 @@ const PolitiqueDeConfidentialiteRoute =
 const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
   id: '/privacy-policy',
   path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BibleSplatRoute = BibleSplatRouteImport.update({
+  id: '/bible/$',
+  path: '/bible/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FrIndexRoute = FrIndexRouteImport.update({
@@ -110,6 +126,16 @@ const FrPrivacyPolicyRoute = FrPrivacyPolicyRouteImport.update({
   path: '/fr/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapsNameRoute = SitemapsNameRouteImport.update({
+  id: '/sitemaps/$name',
+  path: '/sitemaps/$name',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StrongCodeRoute = StrongCodeRouteImport.update({
+  id: '/strong/$code',
+  path: '/strong/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudiesIdRoute = StudiesIdRouteImport.update({
   id: '/studies/$id',
   path: '/studies/$id',
@@ -120,6 +146,17 @@ const FrStudiesIdRoute = FrStudiesIdRouteImport.update({
   path: '/fr/studies/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StrongLanguageCodeRoute = StrongLanguageCodeRouteImport.update({
+  id: '/strong/$language/$code',
+  path: '/strong/$language/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StrongLanguageCodeConcordanceRoute =
+  StrongLanguageCodeConcordanceRouteImport.update({
+    id: '/strong/$language/$code_/concordance',
+    path: '/strong/$language/$code/concordance',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -130,6 +167,8 @@ export interface FileRoutesByFullPath {
   '/how-to-delete-data': typeof HowToDeleteDataRoute
   '/politique-de-confidentialite': typeof PolitiqueDeConfidentialiteRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/bible/$': typeof BibleSplatRoute
   '/fr/data-deletion': typeof FrDataDeletionRoute
   '/fr/eula': typeof FrEulaRoute
   '/fr/eula-en': typeof FrEulaEnRoute
@@ -137,9 +176,13 @@ export interface FileRoutesByFullPath {
   '/fr/how-to-delete-data': typeof FrHowToDeleteDataRoute
   '/fr/politique-de-confidentialite': typeof FrPolitiqueDeConfidentialiteRoute
   '/fr/privacy-policy': typeof FrPrivacyPolicyRoute
+  '/sitemaps/$name': typeof SitemapsNameRoute
+  '/strong/$code': typeof StrongCodeRoute
   '/studies/$id': typeof StudiesIdRoute
   '/fr/': typeof FrIndexRoute
   '/fr/studies/$id': typeof FrStudiesIdRoute
+  '/strong/$language/$code': typeof StrongLanguageCodeRoute
+  '/strong/$language/$code/concordance': typeof StrongLanguageCodeConcordanceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -150,6 +193,8 @@ export interface FileRoutesByTo {
   '/how-to-delete-data': typeof HowToDeleteDataRoute
   '/politique-de-confidentialite': typeof PolitiqueDeConfidentialiteRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/bible/$': typeof BibleSplatRoute
   '/fr/data-deletion': typeof FrDataDeletionRoute
   '/fr/eula': typeof FrEulaRoute
   '/fr/eula-en': typeof FrEulaEnRoute
@@ -157,9 +202,13 @@ export interface FileRoutesByTo {
   '/fr/how-to-delete-data': typeof FrHowToDeleteDataRoute
   '/fr/politique-de-confidentialite': typeof FrPolitiqueDeConfidentialiteRoute
   '/fr/privacy-policy': typeof FrPrivacyPolicyRoute
+  '/sitemaps/$name': typeof SitemapsNameRoute
+  '/strong/$code': typeof StrongCodeRoute
   '/studies/$id': typeof StudiesIdRoute
   '/fr': typeof FrIndexRoute
   '/fr/studies/$id': typeof FrStudiesIdRoute
+  '/strong/$language/$code': typeof StrongLanguageCodeRoute
+  '/strong/$language/$code/concordance': typeof StrongLanguageCodeConcordanceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -171,6 +220,8 @@ export interface FileRoutesById {
   '/how-to-delete-data': typeof HowToDeleteDataRoute
   '/politique-de-confidentialite': typeof PolitiqueDeConfidentialiteRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/bible/$': typeof BibleSplatRoute
   '/fr/data-deletion': typeof FrDataDeletionRoute
   '/fr/eula': typeof FrEulaRoute
   '/fr/eula-en': typeof FrEulaEnRoute
@@ -178,9 +229,13 @@ export interface FileRoutesById {
   '/fr/how-to-delete-data': typeof FrHowToDeleteDataRoute
   '/fr/politique-de-confidentialite': typeof FrPolitiqueDeConfidentialiteRoute
   '/fr/privacy-policy': typeof FrPrivacyPolicyRoute
+  '/sitemaps/$name': typeof SitemapsNameRoute
+  '/strong/$code': typeof StrongCodeRoute
   '/studies/$id': typeof StudiesIdRoute
   '/fr/': typeof FrIndexRoute
   '/fr/studies/$id': typeof FrStudiesIdRoute
+  '/strong/$language/$code': typeof StrongLanguageCodeRoute
+  '/strong/$language/$code_/concordance': typeof StrongLanguageCodeConcordanceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -193,6 +248,8 @@ export interface FileRouteTypes {
     | '/how-to-delete-data'
     | '/politique-de-confidentialite'
     | '/privacy-policy'
+    | '/sitemap.xml'
+    | '/bible/$'
     | '/fr/data-deletion'
     | '/fr/eula'
     | '/fr/eula-en'
@@ -200,9 +257,13 @@ export interface FileRouteTypes {
     | '/fr/how-to-delete-data'
     | '/fr/politique-de-confidentialite'
     | '/fr/privacy-policy'
+    | '/sitemaps/$name'
+    | '/strong/$code'
     | '/studies/$id'
     | '/fr/'
     | '/fr/studies/$id'
+    | '/strong/$language/$code'
+    | '/strong/$language/$code/concordance'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -213,6 +274,8 @@ export interface FileRouteTypes {
     | '/how-to-delete-data'
     | '/politique-de-confidentialite'
     | '/privacy-policy'
+    | '/sitemap.xml'
+    | '/bible/$'
     | '/fr/data-deletion'
     | '/fr/eula'
     | '/fr/eula-en'
@@ -220,9 +283,13 @@ export interface FileRouteTypes {
     | '/fr/how-to-delete-data'
     | '/fr/politique-de-confidentialite'
     | '/fr/privacy-policy'
+    | '/sitemaps/$name'
+    | '/strong/$code'
     | '/studies/$id'
     | '/fr'
     | '/fr/studies/$id'
+    | '/strong/$language/$code'
+    | '/strong/$language/$code/concordance'
   id:
     | '__root__'
     | '/'
@@ -233,6 +300,8 @@ export interface FileRouteTypes {
     | '/how-to-delete-data'
     | '/politique-de-confidentialite'
     | '/privacy-policy'
+    | '/sitemap.xml'
+    | '/bible/$'
     | '/fr/data-deletion'
     | '/fr/eula'
     | '/fr/eula-en'
@@ -240,9 +309,13 @@ export interface FileRouteTypes {
     | '/fr/how-to-delete-data'
     | '/fr/politique-de-confidentialite'
     | '/fr/privacy-policy'
+    | '/sitemaps/$name'
+    | '/strong/$code'
     | '/studies/$id'
     | '/fr/'
     | '/fr/studies/$id'
+    | '/strong/$language/$code'
+    | '/strong/$language/$code_/concordance'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -254,6 +327,8 @@ export interface RootRouteChildren {
   HowToDeleteDataRoute: typeof HowToDeleteDataRoute
   PolitiqueDeConfidentialiteRoute: typeof PolitiqueDeConfidentialiteRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  BibleSplatRoute: typeof BibleSplatRoute
   FrDataDeletionRoute: typeof FrDataDeletionRoute
   FrEulaRoute: typeof FrEulaRoute
   FrEulaEnRoute: typeof FrEulaEnRoute
@@ -261,9 +336,13 @@ export interface RootRouteChildren {
   FrHowToDeleteDataRoute: typeof FrHowToDeleteDataRoute
   FrPolitiqueDeConfidentialiteRoute: typeof FrPolitiqueDeConfidentialiteRoute
   FrPrivacyPolicyRoute: typeof FrPrivacyPolicyRoute
+  SitemapsNameRoute: typeof SitemapsNameRoute
+  StrongCodeRoute: typeof StrongCodeRoute
   StudiesIdRoute: typeof StudiesIdRoute
   FrIndexRoute: typeof FrIndexRoute
   FrStudiesIdRoute: typeof FrStudiesIdRoute
+  StrongLanguageCodeRoute: typeof StrongLanguageCodeRoute
+  StrongLanguageCodeConcordanceRoute: typeof StrongLanguageCodeConcordanceRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -324,6 +403,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bible/$': {
+      id: '/bible/$'
+      path: '/bible/$'
+      fullPath: '/bible/$'
+      preLoaderRoute: typeof BibleSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fr/': {
       id: '/fr/'
       path: '/fr'
@@ -380,6 +473,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FrPrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemaps/$name': {
+      id: '/sitemaps/$name'
+      path: '/sitemaps/$name'
+      fullPath: '/sitemaps/$name'
+      preLoaderRoute: typeof SitemapsNameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/strong/$code': {
+      id: '/strong/$code'
+      path: '/strong/$code'
+      fullPath: '/strong/$code'
+      preLoaderRoute: typeof StrongCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/studies/$id': {
       id: '/studies/$id'
       path: '/studies/$id'
@@ -394,6 +501,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FrStudiesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/strong/$language/$code': {
+      id: '/strong/$language/$code'
+      path: '/strong/$language/$code'
+      fullPath: '/strong/$language/$code'
+      preLoaderRoute: typeof StrongLanguageCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/strong/$language/$code_/concordance': {
+      id: '/strong/$language/$code_/concordance'
+      path: '/strong/$language/$code/concordance'
+      fullPath: '/strong/$language/$code/concordance'
+      preLoaderRoute: typeof StrongLanguageCodeConcordanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -406,6 +527,8 @@ const rootRouteChildren: RootRouteChildren = {
   HowToDeleteDataRoute: HowToDeleteDataRoute,
   PolitiqueDeConfidentialiteRoute: PolitiqueDeConfidentialiteRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  BibleSplatRoute: BibleSplatRoute,
   FrDataDeletionRoute: FrDataDeletionRoute,
   FrEulaRoute: FrEulaRoute,
   FrEulaEnRoute: FrEulaEnRoute,
@@ -413,9 +536,13 @@ const rootRouteChildren: RootRouteChildren = {
   FrHowToDeleteDataRoute: FrHowToDeleteDataRoute,
   FrPolitiqueDeConfidentialiteRoute: FrPolitiqueDeConfidentialiteRoute,
   FrPrivacyPolicyRoute: FrPrivacyPolicyRoute,
+  SitemapsNameRoute: SitemapsNameRoute,
+  StrongCodeRoute: StrongCodeRoute,
   StudiesIdRoute: StudiesIdRoute,
   FrIndexRoute: FrIndexRoute,
   FrStudiesIdRoute: FrStudiesIdRoute,
+  StrongLanguageCodeRoute: StrongLanguageCodeRoute,
+  StrongLanguageCodeConcordanceRoute: StrongLanguageCodeConcordanceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
