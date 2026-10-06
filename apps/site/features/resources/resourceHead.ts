@@ -23,6 +23,12 @@ export type ResourceHeadInput = {
   ogType?: 'article' | 'website'
 }
 
+const structuredDataScript = (item: Record<string, unknown>) => ({
+  type: 'application/ld+json',
+  // `<` is escaped so editorial text can never close the script element.
+  children: JSON.stringify(item).replace(/</gu, '\\u003c'),
+})
+
 const breadcrumbList = (breadcrumbs: Breadcrumb[]) => ({
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
@@ -33,6 +39,10 @@ const breadcrumbList = (breadcrumbs: Breadcrumb[]) => ({
     ...(breadcrumb.path ? { item: absoluteSiteUrl(breadcrumb.path) } : {}),
   })),
 })
+
+/** The schema.org path of a page, for a head assembled outside `buildResourceHead`. */
+export const breadcrumbScripts = (breadcrumbs: Breadcrumb[]) =>
+  breadcrumbs.length > 1 ? [structuredDataScript(breadcrumbList(breadcrumbs))] : []
 
 /** Title, description, canonical, language alternates and structured data of a resource page. */
 export const buildResourceHead = ({
@@ -70,10 +80,6 @@ export const buildResourceHead = ({
         href: absoluteSiteUrl(alternatePath),
       })),
     ],
-    scripts: data.map(item => ({
-      type: 'application/ld+json',
-      // `<` is escaped so editorial text can never close the script element.
-      children: JSON.stringify(item).replace(/</gu, '\\u003c'),
-    })),
+    scripts: data.map(structuredDataScript),
   }
 }

@@ -1,12 +1,9 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
-import {
-  absoluteSiteUrl,
-  isResourceLanguage,
-  RESOURCE_FONT_PRELOADS,
-  RESOURCE_PAGE_CACHE_CONTROL,
-} from '@/features/resources/publicSite'
+import { isResourceLanguage, RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { buildResourceHead } from '@/features/resources/resourceHead'
 import { StrongLetterPage } from '@/features/strong/StrongLexiconPages'
 import { loadStrongLetterPage, type StrongLetterPageData } from '@/features/strong/strong.functions'
+import { strongLetterBreadcrumbs } from '@/features/strong/strongBreadcrumbs'
 import {
   buildStrongLetterPath,
   isStrongLexicon,
@@ -20,31 +17,25 @@ const LEXICON_NAMES = {
 
 const buildHead = (page: StrongLetterPageData) => {
   const { language, lexicon, letter, entries } = page
-  const url = absoluteSiteUrl(buildStrongLetterPath(language, lexicon, letter))
   const name = LEXICON_NAMES[language][lexicon]
   const sample = entries
     .slice(0, 6)
     .map(entry => entry.gloss)
     .join(', ')
-  const title =
-    language === 'fr'
-      ? `${name} – mots en ${letter.toUpperCase()}`
-      : `${name} – words in ${letter.toUpperCase()}`
-  const description =
-    language === 'fr'
-      ? `${entries.length.toLocaleString('fr')} mots du ${name.toLowerCase()} commençant par ${letter.toUpperCase()} : ${sample}…`
-      : `${entries.length.toLocaleString('en')} words of ${name} starting with ${letter.toUpperCase()}: ${sample}…`
-  return {
-    meta: [
-      { title },
-      { name: 'description', content: description },
-      { property: 'og:title', content: title },
-      { property: 'og:description', content: description },
-      { property: 'og:url', content: url },
-      { property: 'og:type', content: 'website' },
-    ],
-    links: [...RESOURCE_FONT_PRELOADS, { rel: 'canonical', href: url }],
-  }
+  return buildResourceHead({
+    title:
+      language === 'fr'
+        ? `${name} – mots en ${letter.toUpperCase()}`
+        : `${name} – words in ${letter.toUpperCase()}`,
+    description:
+      language === 'fr'
+        ? `${entries.length.toLocaleString('fr')} mots du ${name.toLowerCase()} commençant par ${letter.toUpperCase()} : ${sample}…`
+        : `${entries.length.toLocaleString('en')} words of ${name} starting with ${letter.toUpperCase()}: ${sample}…`,
+    path: buildStrongLetterPath(language, lexicon, letter),
+    language,
+    breadcrumbs: strongLetterBreadcrumbs(language, lexicon, letter),
+    ogType: 'website',
+  })
 }
 
 export const Route = createFileRoute('/strong/$language/$lexicon/$letter')({

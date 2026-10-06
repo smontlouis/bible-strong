@@ -18,8 +18,13 @@ import { Route as HowToDeleteDataRouteImport } from './routes/how-to-delete-data
 import { Route as PolitiqueDeConfidentialiteRouteImport } from './routes/politique-de-confidentialite'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as BibleIndexRouteImport } from './routes/bible.index'
 import { Route as BibleSplatRouteImport } from './routes/bible.$'
+import { Route as BibleVersionRouteImport } from './routes/bible.$version'
+import { Route as CommentaryLanguageRouteImport } from './routes/commentary.$language'
+import { Route as DictionaryLanguageRouteImport } from './routes/dictionary.$language'
 import { Route as FrIndexRouteImport } from './routes/fr.index'
+import { Route as FrBibleRouteImport } from './routes/fr.bible'
 import { Route as FrDataDeletionRouteImport } from './routes/fr.data-deletion'
 import { Route as FrEulaRouteImport } from './routes/fr.eula'
 import { Route as FrEulaEnRouteImport } from './routes/fr.eula-en'
@@ -27,14 +32,26 @@ import { Route as FrGiveRouteImport } from './routes/fr.give'
 import { Route as FrHowToDeleteDataRouteImport } from './routes/fr.how-to-delete-data'
 import { Route as FrPolitiqueDeConfidentialiteRouteImport } from './routes/fr.politique-de-confidentialite'
 import { Route as FrPrivacyPolicyRouteImport } from './routes/fr.privacy-policy'
+import { Route as NaveLanguageRouteImport } from './routes/nave.$language'
 import { Route as SitemapsNameRouteImport } from './routes/sitemaps.$name'
 import { Route as StrongCodeRouteImport } from './routes/strong.$code'
 import { Route as StudiesIdRouteImport } from './routes/studies.$id'
+import { Route as TimelineLanguageRouteImport } from './routes/timeline.$language'
+import { Route as CommentaryLanguageResourceRouteImport } from './routes/commentary.$language_.$resource'
+import { Route as DictionaryLanguageWorkRouteImport } from './routes/dictionary.$language_.$work'
 import { Route as FrStudiesIdRouteImport } from './routes/fr.studies.$id'
+import { Route as NaveLanguageTopicRouteImport } from './routes/nave.$language_.$topic'
 import { Route as StrongLanguageCodeRouteImport } from './routes/strong.$language.$code'
+import { Route as TimelineLanguageSlugRouteImport } from './routes/timeline.$language_.$slug'
+import { Route as DictionaryLanguageWorkLetterRouteImport } from './routes/dictionary.$language_.$work_.$letter'
+import { Route as NaveLanguageIndexLetterRouteImport } from './routes/nave.$language_.index.$letter'
 import { Route as StrongLanguageCodeConcordanceRouteImport } from './routes/strong.$language.$code_.concordance'
 import { Route as StrongLanguageLexiconLetterRouteImport } from './routes/strong.$language.$lexicon.$letter'
+import { Route as CommentaryLanguageResourceBookChapterRouteImport } from './routes/commentary.$language_.$resource_.$book.$chapter'
+import { Route as DictionaryLanguageWorkEntryIdSlugRouteImport } from './routes/dictionary.$language_.$work_.$entryId.$slug'
+import { Route as NaveLanguageIndexLetterPageRouteImport } from './routes/nave.$language_.index.$letter_.$page'
 import { Route as StrongLanguageCodeConcordancePageRouteImport } from './routes/strong.$language.$code_.concordance_.$page'
+import { Route as CommentaryLanguageResourceBookChapterSectionRouteImport } from './routes/commentary.$language_.$resource_.$book.$chapter_.$section'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -82,14 +99,39 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BibleIndexRoute = BibleIndexRouteImport.update({
+  id: '/bible/',
+  path: '/bible/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BibleSplatRoute = BibleSplatRouteImport.update({
   id: '/bible/$',
   path: '/bible/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BibleVersionRoute = BibleVersionRouteImport.update({
+  id: '/bible/$version',
+  path: '/bible/$version',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommentaryLanguageRoute = CommentaryLanguageRouteImport.update({
+  id: '/commentary/$language',
+  path: '/commentary/$language',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DictionaryLanguageRoute = DictionaryLanguageRouteImport.update({
+  id: '/dictionary/$language',
+  path: '/dictionary/$language',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FrIndexRoute = FrIndexRouteImport.update({
   id: '/fr/',
   path: '/fr/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FrBibleRoute = FrBibleRouteImport.update({
+  id: '/fr/bible',
+  path: '/fr/bible',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FrDataDeletionRoute = FrDataDeletionRouteImport.update({
@@ -128,6 +170,11 @@ const FrPrivacyPolicyRoute = FrPrivacyPolicyRouteImport.update({
   path: '/fr/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NaveLanguageRoute = NaveLanguageRouteImport.update({
+  id: '/nave/$language',
+  path: '/nave/$language',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapsNameRoute = SitemapsNameRouteImport.update({
   id: '/sitemaps/$name',
   path: '/sitemaps/$name',
@@ -143,14 +190,51 @@ const StudiesIdRoute = StudiesIdRouteImport.update({
   path: '/studies/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TimelineLanguageRoute = TimelineLanguageRouteImport.update({
+  id: '/timeline/$language',
+  path: '/timeline/$language',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommentaryLanguageResourceRoute =
+  CommentaryLanguageResourceRouteImport.update({
+    id: '/commentary/$language_/$resource',
+    path: '/commentary/$language/$resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DictionaryLanguageWorkRoute = DictionaryLanguageWorkRouteImport.update({
+  id: '/dictionary/$language_/$work',
+  path: '/dictionary/$language/$work',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FrStudiesIdRoute = FrStudiesIdRouteImport.update({
   id: '/fr/studies/$id',
   path: '/fr/studies/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NaveLanguageTopicRoute = NaveLanguageTopicRouteImport.update({
+  id: '/nave/$language_/$topic',
+  path: '/nave/$language/$topic',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StrongLanguageCodeRoute = StrongLanguageCodeRouteImport.update({
   id: '/strong/$language/$code',
   path: '/strong/$language/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TimelineLanguageSlugRoute = TimelineLanguageSlugRouteImport.update({
+  id: '/timeline/$language_/$slug',
+  path: '/timeline/$language/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DictionaryLanguageWorkLetterRoute =
+  DictionaryLanguageWorkLetterRouteImport.update({
+    id: '/dictionary/$language_/$work_/$letter',
+    path: '/dictionary/$language/$work/$letter',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const NaveLanguageIndexLetterRoute = NaveLanguageIndexLetterRouteImport.update({
+  id: '/nave/$language_/index/$letter',
+  path: '/nave/$language/index/$letter',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StrongLanguageCodeConcordanceRoute =
@@ -165,10 +249,34 @@ const StrongLanguageLexiconLetterRoute =
     path: '/strong/$language/$lexicon/$letter',
     getParentRoute: () => rootRouteImport,
   } as any)
+const CommentaryLanguageResourceBookChapterRoute =
+  CommentaryLanguageResourceBookChapterRouteImport.update({
+    id: '/commentary/$language_/$resource_/$book/$chapter',
+    path: '/commentary/$language/$resource/$book/$chapter',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DictionaryLanguageWorkEntryIdSlugRoute =
+  DictionaryLanguageWorkEntryIdSlugRouteImport.update({
+    id: '/dictionary/$language_/$work_/$entryId/$slug',
+    path: '/dictionary/$language/$work/$entryId/$slug',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const NaveLanguageIndexLetterPageRoute =
+  NaveLanguageIndexLetterPageRouteImport.update({
+    id: '/nave/$language_/index/$letter_/$page',
+    path: '/nave/$language/index/$letter/$page',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const StrongLanguageCodeConcordancePageRoute =
   StrongLanguageCodeConcordancePageRouteImport.update({
     id: '/strong/$language/$code_/concordance_/$page',
     path: '/strong/$language/$code/concordance/$page',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const CommentaryLanguageResourceBookChapterSectionRoute =
+  CommentaryLanguageResourceBookChapterSectionRouteImport.update({
+    id: '/commentary/$language_/$resource_/$book/$chapter_/$section',
+    path: '/commentary/$language/$resource/$book/$chapter/$section',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -183,6 +291,10 @@ export interface FileRoutesByFullPath {
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/bible/$': typeof BibleSplatRoute
+  '/bible/$version': typeof BibleVersionRoute
+  '/commentary/$language': typeof CommentaryLanguageRoute
+  '/dictionary/$language': typeof DictionaryLanguageRoute
+  '/fr/bible': typeof FrBibleRoute
   '/fr/data-deletion': typeof FrDataDeletionRoute
   '/fr/eula': typeof FrEulaRoute
   '/fr/eula-en': typeof FrEulaEnRoute
@@ -190,15 +302,28 @@ export interface FileRoutesByFullPath {
   '/fr/how-to-delete-data': typeof FrHowToDeleteDataRoute
   '/fr/politique-de-confidentialite': typeof FrPolitiqueDeConfidentialiteRoute
   '/fr/privacy-policy': typeof FrPrivacyPolicyRoute
+  '/nave/$language': typeof NaveLanguageRoute
   '/sitemaps/$name': typeof SitemapsNameRoute
   '/strong/$code': typeof StrongCodeRoute
   '/studies/$id': typeof StudiesIdRoute
+  '/timeline/$language': typeof TimelineLanguageRoute
+  '/bible/': typeof BibleIndexRoute
   '/fr/': typeof FrIndexRoute
+  '/commentary/$language/$resource': typeof CommentaryLanguageResourceRoute
+  '/dictionary/$language/$work': typeof DictionaryLanguageWorkRoute
   '/fr/studies/$id': typeof FrStudiesIdRoute
+  '/nave/$language/$topic': typeof NaveLanguageTopicRoute
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
+  '/timeline/$language/$slug': typeof TimelineLanguageSlugRoute
+  '/dictionary/$language/$work/$letter': typeof DictionaryLanguageWorkLetterRoute
   '/strong/$language/$code/concordance': typeof StrongLanguageCodeConcordanceRoute
   '/strong/$language/$lexicon/$letter': typeof StrongLanguageLexiconLetterRoute
+  '/nave/$language/index/$letter': typeof NaveLanguageIndexLetterRoute
+  '/commentary/$language/$resource/$book/$chapter': typeof CommentaryLanguageResourceBookChapterRoute
+  '/dictionary/$language/$work/$entryId/$slug': typeof DictionaryLanguageWorkEntryIdSlugRoute
   '/strong/$language/$code/concordance/$page': typeof StrongLanguageCodeConcordancePageRoute
+  '/nave/$language/index/$letter/$page': typeof NaveLanguageIndexLetterPageRoute
+  '/commentary/$language/$resource/$book/$chapter/$section': typeof CommentaryLanguageResourceBookChapterSectionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -211,6 +336,10 @@ export interface FileRoutesByTo {
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/bible/$': typeof BibleSplatRoute
+  '/bible/$version': typeof BibleVersionRoute
+  '/commentary/$language': typeof CommentaryLanguageRoute
+  '/dictionary/$language': typeof DictionaryLanguageRoute
+  '/fr/bible': typeof FrBibleRoute
   '/fr/data-deletion': typeof FrDataDeletionRoute
   '/fr/eula': typeof FrEulaRoute
   '/fr/eula-en': typeof FrEulaEnRoute
@@ -218,15 +347,28 @@ export interface FileRoutesByTo {
   '/fr/how-to-delete-data': typeof FrHowToDeleteDataRoute
   '/fr/politique-de-confidentialite': typeof FrPolitiqueDeConfidentialiteRoute
   '/fr/privacy-policy': typeof FrPrivacyPolicyRoute
+  '/nave/$language': typeof NaveLanguageRoute
   '/sitemaps/$name': typeof SitemapsNameRoute
   '/strong/$code': typeof StrongCodeRoute
   '/studies/$id': typeof StudiesIdRoute
+  '/timeline/$language': typeof TimelineLanguageRoute
+  '/bible': typeof BibleIndexRoute
   '/fr': typeof FrIndexRoute
+  '/commentary/$language/$resource': typeof CommentaryLanguageResourceRoute
+  '/dictionary/$language/$work': typeof DictionaryLanguageWorkRoute
   '/fr/studies/$id': typeof FrStudiesIdRoute
+  '/nave/$language/$topic': typeof NaveLanguageTopicRoute
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
+  '/timeline/$language/$slug': typeof TimelineLanguageSlugRoute
+  '/dictionary/$language/$work/$letter': typeof DictionaryLanguageWorkLetterRoute
   '/strong/$language/$code/concordance': typeof StrongLanguageCodeConcordanceRoute
   '/strong/$language/$lexicon/$letter': typeof StrongLanguageLexiconLetterRoute
+  '/nave/$language/index/$letter': typeof NaveLanguageIndexLetterRoute
+  '/commentary/$language/$resource/$book/$chapter': typeof CommentaryLanguageResourceBookChapterRoute
+  '/dictionary/$language/$work/$entryId/$slug': typeof DictionaryLanguageWorkEntryIdSlugRoute
   '/strong/$language/$code/concordance/$page': typeof StrongLanguageCodeConcordancePageRoute
+  '/nave/$language/index/$letter/$page': typeof NaveLanguageIndexLetterPageRoute
+  '/commentary/$language/$resource/$book/$chapter/$section': typeof CommentaryLanguageResourceBookChapterSectionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -240,6 +382,10 @@ export interface FileRoutesById {
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/bible/$': typeof BibleSplatRoute
+  '/bible/$version': typeof BibleVersionRoute
+  '/commentary/$language': typeof CommentaryLanguageRoute
+  '/dictionary/$language': typeof DictionaryLanguageRoute
+  '/fr/bible': typeof FrBibleRoute
   '/fr/data-deletion': typeof FrDataDeletionRoute
   '/fr/eula': typeof FrEulaRoute
   '/fr/eula-en': typeof FrEulaEnRoute
@@ -247,15 +393,28 @@ export interface FileRoutesById {
   '/fr/how-to-delete-data': typeof FrHowToDeleteDataRoute
   '/fr/politique-de-confidentialite': typeof FrPolitiqueDeConfidentialiteRoute
   '/fr/privacy-policy': typeof FrPrivacyPolicyRoute
+  '/nave/$language': typeof NaveLanguageRoute
   '/sitemaps/$name': typeof SitemapsNameRoute
   '/strong/$code': typeof StrongCodeRoute
   '/studies/$id': typeof StudiesIdRoute
+  '/timeline/$language': typeof TimelineLanguageRoute
+  '/bible/': typeof BibleIndexRoute
   '/fr/': typeof FrIndexRoute
+  '/commentary/$language_/$resource': typeof CommentaryLanguageResourceRoute
+  '/dictionary/$language_/$work': typeof DictionaryLanguageWorkRoute
   '/fr/studies/$id': typeof FrStudiesIdRoute
+  '/nave/$language_/$topic': typeof NaveLanguageTopicRoute
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
+  '/timeline/$language_/$slug': typeof TimelineLanguageSlugRoute
+  '/dictionary/$language_/$work_/$letter': typeof DictionaryLanguageWorkLetterRoute
   '/strong/$language/$code_/concordance': typeof StrongLanguageCodeConcordanceRoute
   '/strong/$language/$lexicon/$letter': typeof StrongLanguageLexiconLetterRoute
+  '/nave/$language_/index/$letter': typeof NaveLanguageIndexLetterRoute
+  '/commentary/$language_/$resource_/$book/$chapter': typeof CommentaryLanguageResourceBookChapterRoute
+  '/dictionary/$language_/$work_/$entryId/$slug': typeof DictionaryLanguageWorkEntryIdSlugRoute
   '/strong/$language/$code_/concordance_/$page': typeof StrongLanguageCodeConcordancePageRoute
+  '/nave/$language_/index/$letter_/$page': typeof NaveLanguageIndexLetterPageRoute
+  '/commentary/$language_/$resource_/$book/$chapter_/$section': typeof CommentaryLanguageResourceBookChapterSectionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -270,6 +429,10 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/sitemap.xml'
     | '/bible/$'
+    | '/bible/$version'
+    | '/commentary/$language'
+    | '/dictionary/$language'
+    | '/fr/bible'
     | '/fr/data-deletion'
     | '/fr/eula'
     | '/fr/eula-en'
@@ -277,15 +440,28 @@ export interface FileRouteTypes {
     | '/fr/how-to-delete-data'
     | '/fr/politique-de-confidentialite'
     | '/fr/privacy-policy'
+    | '/nave/$language'
     | '/sitemaps/$name'
     | '/strong/$code'
     | '/studies/$id'
+    | '/timeline/$language'
+    | '/bible/'
     | '/fr/'
+    | '/commentary/$language/$resource'
+    | '/dictionary/$language/$work'
     | '/fr/studies/$id'
+    | '/nave/$language/$topic'
     | '/strong/$language/$code'
+    | '/timeline/$language/$slug'
+    | '/dictionary/$language/$work/$letter'
     | '/strong/$language/$code/concordance'
     | '/strong/$language/$lexicon/$letter'
+    | '/nave/$language/index/$letter'
+    | '/commentary/$language/$resource/$book/$chapter'
+    | '/dictionary/$language/$work/$entryId/$slug'
     | '/strong/$language/$code/concordance/$page'
+    | '/nave/$language/index/$letter/$page'
+    | '/commentary/$language/$resource/$book/$chapter/$section'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -298,6 +474,10 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/sitemap.xml'
     | '/bible/$'
+    | '/bible/$version'
+    | '/commentary/$language'
+    | '/dictionary/$language'
+    | '/fr/bible'
     | '/fr/data-deletion'
     | '/fr/eula'
     | '/fr/eula-en'
@@ -305,15 +485,28 @@ export interface FileRouteTypes {
     | '/fr/how-to-delete-data'
     | '/fr/politique-de-confidentialite'
     | '/fr/privacy-policy'
+    | '/nave/$language'
     | '/sitemaps/$name'
     | '/strong/$code'
     | '/studies/$id'
+    | '/timeline/$language'
+    | '/bible'
     | '/fr'
+    | '/commentary/$language/$resource'
+    | '/dictionary/$language/$work'
     | '/fr/studies/$id'
+    | '/nave/$language/$topic'
     | '/strong/$language/$code'
+    | '/timeline/$language/$slug'
+    | '/dictionary/$language/$work/$letter'
     | '/strong/$language/$code/concordance'
     | '/strong/$language/$lexicon/$letter'
+    | '/nave/$language/index/$letter'
+    | '/commentary/$language/$resource/$book/$chapter'
+    | '/dictionary/$language/$work/$entryId/$slug'
     | '/strong/$language/$code/concordance/$page'
+    | '/nave/$language/index/$letter/$page'
+    | '/commentary/$language/$resource/$book/$chapter/$section'
   id:
     | '__root__'
     | '/'
@@ -326,6 +519,10 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/sitemap.xml'
     | '/bible/$'
+    | '/bible/$version'
+    | '/commentary/$language'
+    | '/dictionary/$language'
+    | '/fr/bible'
     | '/fr/data-deletion'
     | '/fr/eula'
     | '/fr/eula-en'
@@ -333,15 +530,28 @@ export interface FileRouteTypes {
     | '/fr/how-to-delete-data'
     | '/fr/politique-de-confidentialite'
     | '/fr/privacy-policy'
+    | '/nave/$language'
     | '/sitemaps/$name'
     | '/strong/$code'
     | '/studies/$id'
+    | '/timeline/$language'
+    | '/bible/'
     | '/fr/'
+    | '/commentary/$language_/$resource'
+    | '/dictionary/$language_/$work'
     | '/fr/studies/$id'
+    | '/nave/$language_/$topic'
     | '/strong/$language/$code'
+    | '/timeline/$language_/$slug'
+    | '/dictionary/$language_/$work_/$letter'
     | '/strong/$language/$code_/concordance'
     | '/strong/$language/$lexicon/$letter'
+    | '/nave/$language_/index/$letter'
+    | '/commentary/$language_/$resource_/$book/$chapter'
+    | '/dictionary/$language_/$work_/$entryId/$slug'
     | '/strong/$language/$code_/concordance_/$page'
+    | '/nave/$language_/index/$letter_/$page'
+    | '/commentary/$language_/$resource_/$book/$chapter_/$section'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -355,6 +565,10 @@ export interface RootRouteChildren {
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   BibleSplatRoute: typeof BibleSplatRoute
+  BibleVersionRoute: typeof BibleVersionRoute
+  CommentaryLanguageRoute: typeof CommentaryLanguageRoute
+  DictionaryLanguageRoute: typeof DictionaryLanguageRoute
+  FrBibleRoute: typeof FrBibleRoute
   FrDataDeletionRoute: typeof FrDataDeletionRoute
   FrEulaRoute: typeof FrEulaRoute
   FrEulaEnRoute: typeof FrEulaEnRoute
@@ -362,15 +576,28 @@ export interface RootRouteChildren {
   FrHowToDeleteDataRoute: typeof FrHowToDeleteDataRoute
   FrPolitiqueDeConfidentialiteRoute: typeof FrPolitiqueDeConfidentialiteRoute
   FrPrivacyPolicyRoute: typeof FrPrivacyPolicyRoute
+  NaveLanguageRoute: typeof NaveLanguageRoute
   SitemapsNameRoute: typeof SitemapsNameRoute
   StrongCodeRoute: typeof StrongCodeRoute
   StudiesIdRoute: typeof StudiesIdRoute
+  TimelineLanguageRoute: typeof TimelineLanguageRoute
+  BibleIndexRoute: typeof BibleIndexRoute
   FrIndexRoute: typeof FrIndexRoute
+  CommentaryLanguageResourceRoute: typeof CommentaryLanguageResourceRoute
+  DictionaryLanguageWorkRoute: typeof DictionaryLanguageWorkRoute
   FrStudiesIdRoute: typeof FrStudiesIdRoute
+  NaveLanguageTopicRoute: typeof NaveLanguageTopicRoute
   StrongLanguageCodeRoute: typeof StrongLanguageCodeRoute
+  TimelineLanguageSlugRoute: typeof TimelineLanguageSlugRoute
+  DictionaryLanguageWorkLetterRoute: typeof DictionaryLanguageWorkLetterRoute
   StrongLanguageCodeConcordanceRoute: typeof StrongLanguageCodeConcordanceRoute
   StrongLanguageLexiconLetterRoute: typeof StrongLanguageLexiconLetterRoute
+  NaveLanguageIndexLetterRoute: typeof NaveLanguageIndexLetterRoute
+  CommentaryLanguageResourceBookChapterRoute: typeof CommentaryLanguageResourceBookChapterRoute
+  DictionaryLanguageWorkEntryIdSlugRoute: typeof DictionaryLanguageWorkEntryIdSlugRoute
   StrongLanguageCodeConcordancePageRoute: typeof StrongLanguageCodeConcordancePageRoute
+  NaveLanguageIndexLetterPageRoute: typeof NaveLanguageIndexLetterPageRoute
+  CommentaryLanguageResourceBookChapterSectionRoute: typeof CommentaryLanguageResourceBookChapterSectionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -438,6 +665,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bible/': {
+      id: '/bible/'
+      path: '/bible'
+      fullPath: '/bible/'
+      preLoaderRoute: typeof BibleIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/bible/$': {
       id: '/bible/$'
       path: '/bible/$'
@@ -445,11 +679,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BibleSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bible/$version': {
+      id: '/bible/$version'
+      path: '/bible/$version'
+      fullPath: '/bible/$version'
+      preLoaderRoute: typeof BibleVersionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/commentary/$language': {
+      id: '/commentary/$language'
+      path: '/commentary/$language'
+      fullPath: '/commentary/$language'
+      preLoaderRoute: typeof CommentaryLanguageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dictionary/$language': {
+      id: '/dictionary/$language'
+      path: '/dictionary/$language'
+      fullPath: '/dictionary/$language'
+      preLoaderRoute: typeof DictionaryLanguageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fr/': {
       id: '/fr/'
       path: '/fr'
       fullPath: '/fr/'
       preLoaderRoute: typeof FrIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fr/bible': {
+      id: '/fr/bible'
+      path: '/fr/bible'
+      fullPath: '/fr/bible'
+      preLoaderRoute: typeof FrBibleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fr/data-deletion': {
@@ -501,6 +763,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FrPrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/nave/$language': {
+      id: '/nave/$language'
+      path: '/nave/$language'
+      fullPath: '/nave/$language'
+      preLoaderRoute: typeof NaveLanguageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemaps/$name': {
       id: '/sitemaps/$name'
       path: '/sitemaps/$name'
@@ -522,6 +791,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudiesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/timeline/$language': {
+      id: '/timeline/$language'
+      path: '/timeline/$language'
+      fullPath: '/timeline/$language'
+      preLoaderRoute: typeof TimelineLanguageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/commentary/$language_/$resource': {
+      id: '/commentary/$language_/$resource'
+      path: '/commentary/$language/$resource'
+      fullPath: '/commentary/$language/$resource'
+      preLoaderRoute: typeof CommentaryLanguageResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dictionary/$language_/$work': {
+      id: '/dictionary/$language_/$work'
+      path: '/dictionary/$language/$work'
+      fullPath: '/dictionary/$language/$work'
+      preLoaderRoute: typeof DictionaryLanguageWorkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fr/studies/$id': {
       id: '/fr/studies/$id'
       path: '/fr/studies/$id'
@@ -529,11 +819,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FrStudiesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/nave/$language_/$topic': {
+      id: '/nave/$language_/$topic'
+      path: '/nave/$language/$topic'
+      fullPath: '/nave/$language/$topic'
+      preLoaderRoute: typeof NaveLanguageTopicRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/strong/$language/$code': {
       id: '/strong/$language/$code'
       path: '/strong/$language/$code'
       fullPath: '/strong/$language/$code'
       preLoaderRoute: typeof StrongLanguageCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/timeline/$language_/$slug': {
+      id: '/timeline/$language_/$slug'
+      path: '/timeline/$language/$slug'
+      fullPath: '/timeline/$language/$slug'
+      preLoaderRoute: typeof TimelineLanguageSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dictionary/$language_/$work_/$letter': {
+      id: '/dictionary/$language_/$work_/$letter'
+      path: '/dictionary/$language/$work/$letter'
+      fullPath: '/dictionary/$language/$work/$letter'
+      preLoaderRoute: typeof DictionaryLanguageWorkLetterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nave/$language_/index/$letter': {
+      id: '/nave/$language_/index/$letter'
+      path: '/nave/$language/index/$letter'
+      fullPath: '/nave/$language/index/$letter'
+      preLoaderRoute: typeof NaveLanguageIndexLetterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/strong/$language/$code_/concordance': {
@@ -550,11 +868,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StrongLanguageLexiconLetterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/commentary/$language_/$resource_/$book/$chapter': {
+      id: '/commentary/$language_/$resource_/$book/$chapter'
+      path: '/commentary/$language/$resource/$book/$chapter'
+      fullPath: '/commentary/$language/$resource/$book/$chapter'
+      preLoaderRoute: typeof CommentaryLanguageResourceBookChapterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dictionary/$language_/$work_/$entryId/$slug': {
+      id: '/dictionary/$language_/$work_/$entryId/$slug'
+      path: '/dictionary/$language/$work/$entryId/$slug'
+      fullPath: '/dictionary/$language/$work/$entryId/$slug'
+      preLoaderRoute: typeof DictionaryLanguageWorkEntryIdSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nave/$language_/index/$letter_/$page': {
+      id: '/nave/$language_/index/$letter_/$page'
+      path: '/nave/$language/index/$letter/$page'
+      fullPath: '/nave/$language/index/$letter/$page'
+      preLoaderRoute: typeof NaveLanguageIndexLetterPageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/strong/$language/$code_/concordance_/$page': {
       id: '/strong/$language/$code_/concordance_/$page'
       path: '/strong/$language/$code/concordance/$page'
       fullPath: '/strong/$language/$code/concordance/$page'
       preLoaderRoute: typeof StrongLanguageCodeConcordancePageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/commentary/$language_/$resource_/$book/$chapter_/$section': {
+      id: '/commentary/$language_/$resource_/$book/$chapter_/$section'
+      path: '/commentary/$language/$resource/$book/$chapter/$section'
+      fullPath: '/commentary/$language/$resource/$book/$chapter/$section'
+      preLoaderRoute: typeof CommentaryLanguageResourceBookChapterSectionRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -571,6 +917,10 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   BibleSplatRoute: BibleSplatRoute,
+  BibleVersionRoute: BibleVersionRoute,
+  CommentaryLanguageRoute: CommentaryLanguageRoute,
+  DictionaryLanguageRoute: DictionaryLanguageRoute,
+  FrBibleRoute: FrBibleRoute,
   FrDataDeletionRoute: FrDataDeletionRoute,
   FrEulaRoute: FrEulaRoute,
   FrEulaEnRoute: FrEulaEnRoute,
@@ -578,16 +928,32 @@ const rootRouteChildren: RootRouteChildren = {
   FrHowToDeleteDataRoute: FrHowToDeleteDataRoute,
   FrPolitiqueDeConfidentialiteRoute: FrPolitiqueDeConfidentialiteRoute,
   FrPrivacyPolicyRoute: FrPrivacyPolicyRoute,
+  NaveLanguageRoute: NaveLanguageRoute,
   SitemapsNameRoute: SitemapsNameRoute,
   StrongCodeRoute: StrongCodeRoute,
   StudiesIdRoute: StudiesIdRoute,
+  TimelineLanguageRoute: TimelineLanguageRoute,
+  BibleIndexRoute: BibleIndexRoute,
   FrIndexRoute: FrIndexRoute,
+  CommentaryLanguageResourceRoute: CommentaryLanguageResourceRoute,
+  DictionaryLanguageWorkRoute: DictionaryLanguageWorkRoute,
   FrStudiesIdRoute: FrStudiesIdRoute,
+  NaveLanguageTopicRoute: NaveLanguageTopicRoute,
   StrongLanguageCodeRoute: StrongLanguageCodeRoute,
+  TimelineLanguageSlugRoute: TimelineLanguageSlugRoute,
+  DictionaryLanguageWorkLetterRoute: DictionaryLanguageWorkLetterRoute,
   StrongLanguageCodeConcordanceRoute: StrongLanguageCodeConcordanceRoute,
   StrongLanguageLexiconLetterRoute: StrongLanguageLexiconLetterRoute,
+  NaveLanguageIndexLetterRoute: NaveLanguageIndexLetterRoute,
+  CommentaryLanguageResourceBookChapterRoute:
+    CommentaryLanguageResourceBookChapterRoute,
+  DictionaryLanguageWorkEntryIdSlugRoute:
+    DictionaryLanguageWorkEntryIdSlugRoute,
   StrongLanguageCodeConcordancePageRoute:
     StrongLanguageCodeConcordancePageRoute,
+  NaveLanguageIndexLetterPageRoute: NaveLanguageIndexLetterPageRoute,
+  CommentaryLanguageResourceBookChapterSectionRoute:
+    CommentaryLanguageResourceBookChapterSectionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -69,8 +69,9 @@ export function bibleVersionSlug(versionId: string): string {
   return versionId.toLowerCase().replaceAll('_', '-')
 }
 
+/** Finds a version by its path slug or by its identity (`lxx-fr`, `LXX_FR`). */
 export const findBibleVersion = (slug: string | undefined): BibleVersion | undefined =>
-  slug ? versionsBySlug.get(slug.toLowerCase()) : undefined
+  slug ? versionsBySlug.get(bibleVersionSlug(slug)) : undefined
 
 /**
  * The interface language of a Bible page: the text language when the site speaks it,

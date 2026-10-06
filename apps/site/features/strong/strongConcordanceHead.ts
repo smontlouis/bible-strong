@@ -3,7 +3,9 @@ import {
   RESOURCE_FONT_PRELOADS,
   RESOURCE_LANGUAGES,
 } from '../resources/publicSite'
+import { breadcrumbScripts } from '../resources/resourceHead'
 import type { StrongConcordancePageData } from './strong.functions'
+import { strongConcordanceBreadcrumbs } from './strongBreadcrumbs'
 import { buildStrongConcordancePath, displayStrongCode } from './strongRoutes'
 
 export type ConcordanceSearch = { book?: string }
@@ -69,5 +71,6 @@ export const buildConcordanceHead = (page: StrongConcordancePageData) => {
           }))
         : []),
     ],
+    scripts: breadcrumbScripts(strongConcordanceBreadcrumbs(page)),
   }
 }

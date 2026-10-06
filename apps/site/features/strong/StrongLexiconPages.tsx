@@ -2,6 +2,7 @@ import { useI18n } from '@/locales'
 import { WEB_APP_ORIGIN, type ResourceLanguage } from '../resources/publicSite'
 import ResourceShell from '../resources/ResourceShell'
 import type { StrongIndexPageData, StrongLetterPageData } from './strong.functions'
+import { strongLetterBreadcrumbs } from './strongBreadcrumbs'
 import {
   buildStrongIndexPath,
   buildStrongLetterPath,
@@ -61,6 +62,7 @@ export function StrongIndexPage({ page }: { page: StrongIndexPageData }) {
     <ResourceShell
       alternatePath={buildStrongIndexPath(language === 'fr' ? 'en' : 'fr')}
       appUrl={WEB_APP_LEXICON_URL}
+      section="strong"
     >
       <article>
         <header>
@@ -92,16 +94,12 @@ export function StrongLetterPage({ page }: { page: StrongLetterPageData }) {
     <ResourceShell
       alternatePath={buildStrongIndexPath(language === 'fr' ? 'en' : 'fr')}
       appUrl={WEB_APP_LEXICON_URL}
+      section="strong"
+      breadcrumbs={strongLetterBreadcrumbs(language, lexicon, letter)}
     >
       <article>
         <header>
-          <a
-            className="resource-muted text-sm font-medium uppercase tracking-[0.14em]"
-            href={buildStrongIndexPath(language)}
-          >
-            ← {t('strong.index.kicker')}
-          </a>
-          <h1 className="mt-3 font-serif text-4xl leading-tight md:text-5xl">
+          <h1 className="font-serif text-4xl leading-tight md:text-5xl">
             {t(`strong.lexicon.${lexicon}`)} — {letter.toUpperCase()}
           </h1>
           <p className="resource-muted mt-3 text-sm">

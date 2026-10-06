@@ -70,6 +70,15 @@ export const isBiblePresentationSupported = (
   return isStrongBibleVersionId(versionId)
 }
 
+/** The study aids a version offers beyond its text. */
+export const bibleVersionAids = (versionId: string): ('strong' | 'interlinear')[] => [
+  ...(isBiblePresentationSupported(versionId, 'strong') ? (['strong'] as const) : []),
+  ...(isBiblePresentationSupported(versionId, 'reverse-interlinear') ||
+  isBiblePresentationSupported(versionId, 'interlinear')
+    ? (['interlinear'] as const)
+    : []),
+]
+
 export const supportedBiblePresentations = (versionId: string): BiblePresentation[] =>
   BIBLE_PRESENTATIONS.filter(presentation => isBiblePresentationSupported(versionId, presentation))
 
@@ -164,6 +173,10 @@ export const buildBiblePath = ({
   }
   return `/${segments.join('/')}`
 }
+
+/** `/bible/:version` — the books and chapters of a version. */
+export const buildBibleVersionPath = (versionId: string): string =>
+  `/bible/${bibleVersionSlug(versionId)}`
 
 /** The study workspace shares this grammar, so the same path opens the same reading. */
 export const buildWebAppBibleUrl = (location: BibleLocation): string =>

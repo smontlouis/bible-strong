@@ -6,11 +6,18 @@ import type { ResourceLanguage } from './publicSite'
 
 export type BibleReference = { book: number; chapter: number; verse?: number; endVerse?: number }
 
-/** The Bible page a reference opens, in the reference Bible of a language. */
+// The reference Bibles carry the 66 books of the Protestant canon.
+const LAST_REFERENCE_BOOK = 66
+
+/**
+ * The Bible page a reference opens, in the reference Bible of a language. A book that
+ * Bible does not carry has no page to open.
+ */
 export const buildBibleReferencePath = (
   language: ResourceLanguage,
   { book, chapter, verse, endVerse }: BibleReference
 ): string | undefined => {
+  if (book > LAST_REFERENCE_BOOK) return undefined
   try {
     return buildBiblePath({
       versionId: defaultBibleVersionId(language),
@@ -57,8 +64,17 @@ export const resolveEditorialHref = (
   }
   const bible = /^bible:(?:\/\/)?(.+)$/u.exec(href)
   if (bible) {
-    const reference = parseOsisReference(decodeURIComponent(bible[1] ?? ''))
+    const reference = parseOsisReference(decodeHrefPart(bible[1] ?? ''))
     return reference ? buildBibleReferencePath(language, reference) : undefined
   }
   return undefined
+}
+
+// Source links are not always well encoded; a stray `%` is read as written.
+const decodeHrefPart = (value: string): string => {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
 }

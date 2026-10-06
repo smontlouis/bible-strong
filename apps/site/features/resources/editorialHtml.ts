@@ -132,10 +132,13 @@ const ENTITIES: Record<string, string> = {
   nbsp: ' ',
 }
 
-/** Plain text for metadata: tags removed, common entities decoded, whitespace collapsed. */
+/**
+ * Plain text for metadata: tags removed, common entities decoded, whitespace collapsed.
+ * The end of a block separates words, as it does on the page.
+ */
 export const editorialHtmlToText = (html: string): string =>
   html
-    .replace(/<br\s*\/?>/giu, ' ')
+    .replace(/<br\s*\/?>|<\/(?:p|div|li|dd|dt|td|th|tr|blockquote|h[1-6])>/giu, ' ')
     .replace(/<[^>]*>/gu, '')
     .replace(/&(#\d+|#x[0-9a-f]+|[a-z]+);/giu, (entity, name: string) => {
       const key = name.toLowerCase()

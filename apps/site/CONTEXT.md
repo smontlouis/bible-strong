@@ -15,3 +15,11 @@ _Avoid_: Synced user data
 **Public resource page**:
 The indexable, server-rendered page of one editorial resource entry, such as a Strong entry, read without loading the study workspace.
 _Avoid_: App page, landing page
+
+**Public section**:
+A resource family offered on the site (Bible, lexicon, dictionary, topics, commentaries, timeline) with its entry page, its lists and its public resource pages.
+_Avoid_: Tab, module
+
+**App invitation**:
+What the study workspace adds to a public resource page, offered after its content and never in the way of reading.
+_Avoid_: Paywall, interstitial

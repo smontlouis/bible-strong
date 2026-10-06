@@ -3,6 +3,7 @@ import { bibleBookName, bibleBookSlug } from '../bible/bibleBooks'
 import Pagination from '../resources/Pagination'
 import ResourceShell from '../resources/ResourceShell'
 import type { StrongConcordancePageData } from './strong.functions'
+import { strongConcordanceBreadcrumbs } from './strongBreadcrumbs'
 import StrongBookCounts from './StrongBookCounts'
 import StrongVerseList from './StrongVerseList'
 import {
@@ -22,6 +23,8 @@ export default function StrongConcordancePage({ page }: { page: StrongConcordanc
     <ResourceShell
       alternatePath={buildStrongConcordancePath(language === 'fr' ? 'en' : 'fr', code)}
       appUrl={buildWebAppStrongUrl(code)}
+      section="strong"
+      breadcrumbs={strongConcordanceBreadcrumbs(page)}
     >
       <article>
         <header>

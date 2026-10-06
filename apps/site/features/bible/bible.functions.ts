@@ -6,7 +6,9 @@ import type { InterlinearBibleChapterDto } from '@bible-strong/resource-domain/c
 import type { StrongBibleChapterDto } from '@bible-strong/resource-domain/contracts/strongBibleContract'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { listCommentaryLinks, type CommentaryLink } from '../commentary/commentaryLinks'
 import { truncateText } from '../resources/editorialHtml'
+import { parseOsisReference } from '../resources/editorialLinks'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
 import { buildStrongPath, displayStrongCode, parseStrongCode } from '../strong/strongRoutes'
@@ -19,7 +21,12 @@ import {
   type BiblePassage,
   type BiblePresentation,
 } from './bibleRoutes'
-import { BIBLE_VERSIONS, bibleVersionCoversBook, bibleVersionPageLanguage } from './bibleVersions'
+import {
+  BIBLE_VERSIONS,
+  bibleVersionCoversBook,
+  bibleVersionPageLanguage,
+  findBibleVersion,
+} from './bibleVersions'
 
 const DESCRIPTION_LENGTH = 155
 const COVERAGE_TTL_MS = 60 * 60 * 1000
@@ -70,6 +77,8 @@ export type BiblePageData = {
   books: { book: number; chapters: number }[]
   /** The versions carrying this passage, which the version selector may link to. */
   versionIds: string[]
+  /** The commentaries of the page language that comment this chapter. */
+  commentaries: CommentaryLink[]
   previous?: BibleChapterRef
   next?: BibleChapterRef
   description: string
@@ -199,6 +208,30 @@ const reverseInterlinearWords = (
   return words
 }
 
+export type BibleVersionPageData = {
+  versionId: string
+  language: ResourceLanguage
+  /** The books of the version, in canon order, with the chapters it carries. */
+  books: { book: number; chapters: number[] }[]
+}
+
+export const loadBibleVersionPage = createServerFn({ method: 'GET' })
+  .validator((data: { version: string }) => data)
+  .handler(async ({ data }): Promise<BibleVersionPageData> => {
+    const version = findBibleVersion(data.version)
+    const coverage = version && (await readCoverage(version.id))
+    if (!version || !coverage) throw notFound()
+    const covered = new Set(coverage.books)
+    return {
+      versionId: version.id,
+      language: bibleVersionPageLanguage(version),
+      books: coverage.canon.orderedBooks
+        .filter(book => covered.has(book))
+        .map(book => ({ book, chapters: [...(coverage.chaptersByBook[String(book)] ?? [])] }))
+        .filter(entry => entry.chapters.length > 0),
+    }
+  })
+
 const versesByNumber = <Verse extends { number: number }>(
   verses: readonly Verse[] | undefined
 ): Map<number, Verse> => new Map((verses ?? []).map(verse => [verse.number, verse]))
@@ -218,7 +251,7 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
     const lastVerse = passage?.endVerse ?? passage?.startVerse
     const chapterPath = `/books/${book}/chapters/${chapter}`
     const aligned = presentation === 'reverse-interlinear' || presentation === 'interlinear'
-    const [text, strong, interlinear, originalText, versionIds] = await Promise.all([
+    const [text, strong, interlinear, originalText, versionIds, commentaries] = await Promise.all([
       readResource<BibleChapterDto>(`/v1/bibles/${version.id}${chapterPath}`),
       presentation === 'strong' || presentation === 'reverse-interlinear'
         ? readResource<StrongBibleChapterDto>(`/v1/strong-bibles/${version.id}${chapterPath}`)
@@ -233,6 +266,7 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
         ? readResource<BibleChapterDto>(`/v1/bibles/${INTERLINEAR_VERSION_ID}${chapterPath}`)
         : undefined,
       listVersionsCarrying(book, chapter, lastVerse),
+      listCommentaryLinks(language, { book, chapter }),
     ])
     if (!text) throw notFound()
 
@@ -305,6 +339,23 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
             verseHref: verse =>
               buildBiblePath({ ...location, passage: { startVerse: verse } }),
             verseLabel: verse => `${bibleBookName(book, language)} ${chapter}:${verse}`,
+            // A cross-reference stays in the version being read, when it carries the passage.
+            referenceHref: osisReference => {
+              const reference = parseOsisReference(osisReference)
+              if (!reference?.chapter) return undefined
+              if (!coverage.chaptersByBook[String(reference.book)]?.includes(reference.chapter)) {
+                return undefined
+              }
+              return buildBiblePath({
+                versionId: version.id,
+                book: reference.book,
+                chapter: reference.chapter,
+                passage:
+                  reference.verse === undefined
+                    ? undefined
+                    : { startVerse: reference.verse, endVerse: reference.endVerse },
+              })
+            },
             includeHeadings: !passage,
             // The Strong presentation prints the Strong numbers of every tagged word.
             markersByVerse:
@@ -332,6 +383,7 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
           chapters: coverage.chaptersByBook[String(orderedBook)]?.length ?? 0,
         })),
       versionIds,
+      commentaries,
       previous: index > 0 ? all[index - 1] : undefined,
       next: index >= 0 ? all[index + 1] : undefined,
       description: truncateText(

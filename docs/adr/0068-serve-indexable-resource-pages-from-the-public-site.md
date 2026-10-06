@@ -4,7 +4,9 @@
 
 Accepted. Settles the server rendering, metadata and indexing questions left open by
 [ADR-0053](./0053-add-canonical-public-bible-and-strong-routes.md) to
-[ADR-0057](./0057-render-public-routes-outside-the-workspace-for-guests.md).
+[ADR-0056](./0056-add-canonical-public-timeline-routes.md).
+[ADR-0069](./0069-remove-the-public-shell-from-the-web-workspace.md) applies it to the
+workspace.
 
 ## Context
 
@@ -25,15 +27,24 @@ The public site already renders shared studies on the server with their own meta
 The public site serves the indexable page of each public resource at `bible-strong.app`.
 A page is a light server-rendered document built from the Resource API; it does not load
 the study workspace. Its content links to other site pages; only the header's "open the
-app" entry leads to the same resource in the workspace, whose canonical routes remain the
-destination of shared and in-app links.
+app" entry and the invitation closing a page lead to the same resource in the workspace.
+Links shared from the applications target the site.
 
-The workspace at `web.bible-strong.app` is not indexed.
+The workspace at `web.bible-strong.app` is not indexed (ADR-0069).
+
+### Sections
+
+The site offers six sections, each with an entry page, lists and resource pages: Bible,
+lexicon, dictionary, topics, commentaries and timeline. Every page carries the same header,
+with a menu of the sections, the path leading to the page, and a footer listing the
+sections again. The landing page links to each of them.
 
 ### Routes
 
-Site routes reuse the grammar of ADR-0053 to ADR-0056:
+Site routes reuse the grammar of ADR-0053 to ADR-0056 and add the lists that lead to it:
 
+- `/bible` and `/fr/bible`, the versions, in each interface language
+- `/bible/:version`, the books and chapters of a version
 - `/bible/:version[/:presentation]/:book/:chapter[/:passage]`
 - `/strong/:language`, the lexicon, and `/strong/:language/:lexicon/:letter`, its Hebrew or
   Greek entries filed under the first letter of their gloss
@@ -41,6 +52,23 @@ Site routes reuse the grammar of ADR-0053 to ADR-0056:
 - `/strong/:language/:code/concordance[/:page]`, the occurrences fifty verses to a numbered
   page, with an optional `book` filter
 - `/strong/:code` redirects permanently to the default language, `fr`.
+- `/dictionary/:language`, the dictionaries; `/dictionary/:language/:work`, a dictionary
+  and its alphabet; `/dictionary/:language/:work/:letter`, its articles under a letter
+- `/dictionary/:language/:work/:entryId/:slug`, an article (ADR-0055)
+- `/nave/:language`, the topics; `/nave/:language/index/:letter[/:page]`, the topics under
+  a letter
+- `/nave/:language/:topic`, a topic (ADR-0054)
+- `/commentary/:language`, the commentaries; `/commentary/:language/:resource`, a
+  commentary and the chapters it covers
+- `/commentary/:language/:resource/:book/:chapter`, the commentary of a chapter (ADR-0054)
+- `/timeline/:language`, every event by period, and `/timeline/:language/:slug`, an event
+  (ADR-0056)
+
+A commentary section has no page of its own: every section of a chapter is on the chapter
+page, so `/commentary/:language/:resource/:book/:chapter/:section` redirects permanently to
+its anchor there. A list or a chapter too long for one document continues on numbered
+pages: a path segment for topics and concordances, a `page` parameter where a segment
+would collide with the route of a resource (dictionary letters, commentary chapters).
 
 A Bible presentation is a reading mode, each with its own URL:
 
@@ -57,7 +85,9 @@ language of its interface. The workspace opens the same paths (ADR-0053).
 
 A Strong number on a Bible page is a plain link to its entry. Where the browser supports
 popovers, a click previews the entry in a card instead of leaving the passage; the preview
-is loaded on demand and cached like a page.
+is loaded on demand and cached like a page. A note mark works the same way: a plain link
+to the note under the text, and a card next to the mark where popovers are supported. The
+cross-references of a note open in the version being read.
 
 Strong pages add the resource language, like every other family. The code grammar is
 unchanged: lowercase prefix, four-digit number, suffix case preserved. One site page
@@ -72,10 +102,16 @@ English Bible, French otherwise.
 ### Indexing
 
 A Bible chapter and a single verse in every reading mode, a Strong entry, every numbered
-page of its concordance and the lexicon lists are indexable. Verse ranges and concordance
-book filters are served with `noindex, follow`. Sitemaps are generated from the
-Resource API: one per Bible and reading mode listing its chapters, and the classical
-Strong numbers. Verses and disambiguated senses are reached through links.
+page of its concordance, a dictionary article, a topic, the commentary of a chapter, a
+timeline event and the lists leading to them are indexable. Verse ranges and concordance
+book filters are served with `noindex, follow`. So is a commentary whose holder reserves
+all rights: it stays readable, as in the workspace, but is kept out of search indexes and
+sitemaps.
+
+Sitemaps are generated from the Resource API: one per Bible and reading mode listing its
+chapters, the classical Strong numbers, one per dictionary, per language of the topics and
+per indexable commentary, and the timeline. Verses and disambiguated senses are reached
+through links.
 
 The CDN keeps a rendered page for a day and may serve it stale while revalidating. Only a
 successfully rendered resource is cacheable. Because a cached page is identical for every
@@ -90,8 +126,9 @@ identities, and on `@bible-strong/bible-reference-parser` for OSIS book identiti
 never imports Expo sources. Its route parsers are written over those shared identities;
 the Expo parsers keep their own input aliases.
 
-Families are delivered one at a time: Strong and Bible first. Dictionary, Nave, Timeline,
-commentary and biblical-entity pages follow the same shape.
+Each family lives in its own folder of the site and shares the header, the head builder,
+the sanitizer and the link resolver of the resource pages. Biblical-entity pages follow the
+same shape.
 
 ## Consequences
 
@@ -112,9 +149,20 @@ reads the coverage of every version; a server instance keeps each coverage for a
 
 The site renders the canonical formatting of a Bible with its own engine: paragraphs,
 poetry stanzas and lines, section titles, words of Jesus, added words, divine names and
-notes. A version without paragraph marks gets one paragraph per verse. Note marks are not
-links, because they would be tiny tap targets next to verse numbers; the list of notes
-under the text links back to each mark.
+notes. A version without paragraph marks gets one paragraph per verse.
+
+Editorial content reaches the site in the dialects of its sources. Each family normalizes
+its own before the shared sanitizer, which rebuilds the markup from an allowlist and keeps
+a link only when it resolves to a site page.
+
+Some presentation data is not in the Resource API and is mirrored from the workspace: the
+names and spans of the timeline periods, and the English names of commentary authors.
+Timeline images are not shown: they are originals served by the source of the timeline,
+several from a stock library. The French topics are a machine translation of Nave's
+English text; their pages say so.
+
+A page that needs a whole list to place its resource (the neighbours of a topic or of an
+event, the letters of a lexicon) keeps that list for an hour in each server instance.
 
 The Resource API limits requests per client address
 ([ADR-0065](./0065-protect-resources-without-mandatory-attestation.md)), and the site

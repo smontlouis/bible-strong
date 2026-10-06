@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { useI18n } from '@/locales'
+import { hideAnchoredPopoverOnScroll, placePopover } from '../resources/popoverPlacement'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { loadStrongPreview, type StrongPreviewData } from './strong.functions'
 import { buildStrongConcordancePath, buildStrongPath, displayStrongCode } from './strongRoutes'
@@ -12,36 +13,6 @@ type PreviewState = {
 
 // One request per entry and language for the life of the page.
 const previews = new Map<string, Promise<StrongPreviewData>>()
-
-const SHEET_BREAKPOINT = 640
-const POPOVER_WIDTH = 360
-const GUTTER = 12
-
-/** Anchors the card under its Strong number, or above when the page ends below it. */
-const placePopover = (popover: HTMLElement, anchor: Element) => {
-  if (window.innerWidth < SHEET_BREAKPOINT) {
-    popover.dataset.placement = 'sheet'
-    popover.removeAttribute('style')
-    return
-  }
-  const rect = anchor.getBoundingClientRect()
-  const width = Math.min(POPOVER_WIDTH, window.innerWidth - GUTTER * 2)
-  const left = Math.min(
-    Math.max(GUTTER, rect.left + rect.width / 2 - width / 2),
-    window.innerWidth - width - GUTTER
-  )
-  const spaceBelow = window.innerHeight - rect.bottom
-  popover.dataset.placement = 'anchored'
-  popover.style.width = `${width}px`
-  popover.style.left = `${left}px`
-  if (spaceBelow < 280 && rect.top > spaceBelow) {
-    popover.style.top = 'auto'
-    popover.style.bottom = `${window.innerHeight - rect.top + 8}px`
-  } else {
-    popover.style.bottom = 'auto'
-    popover.style.top = `${rect.bottom + 8}px`
-  }
-}
 
 /**
  * The card opened by a Strong number, as in the study workspace. Strong numbers are plain
@@ -93,18 +64,11 @@ export default function StrongPreviewPopover({
         () => setState(current => (current?.code === code ? { code, status: 'error' } : current))
       )
     }
-    // An anchored card would drift away from its number while the page scrolls.
-    const onScroll = () => {
-      if (popover.dataset.placement === 'anchored' && popover.matches(':popover-open')) {
-        popover.hidePopover()
-      }
-    }
-
     container.addEventListener('click', onClick)
-    window.addEventListener('scroll', onScroll, { passive: true })
+    const stopHidingOnScroll = hideAnchoredPopoverOnScroll(popover)
     return () => {
       container.removeEventListener('click', onClick)
-      window.removeEventListener('scroll', onScroll)
+      stopHidingOnScroll()
     }
   }, [containerRef, language])
 
@@ -113,7 +77,7 @@ export default function StrongPreviewPopover({
 
   return (
     // `popover` is not typed by React 18; the attribute reaches the DOM as written.
-    <div ref={popoverRef} {...{ popover: 'auto' }} className="strong-popover">
+    <div ref={popoverRef} {...{ popover: 'auto' }} className="resource-popover">
       {state && (
         <>
           <div className="flex items-center justify-between gap-3">

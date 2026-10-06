@@ -8,7 +8,8 @@ import { RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
 // `/bible/:version[/:presentation[/:language]]/:book/:chapter[/:passage]`, the grammar of ADR-0053.
 export const Route = createFileRoute('/bible/$')({
   beforeLoad: ({ params }) => {
-    const route = parseBibleRoute(params._splat)
+    // A book without a chapter opens on its first chapter.
+    const route = parseBibleRoute(params._splat) ?? parseBibleRoute(`${params._splat}/1`)
     if (!route) throw notFound()
     // Any other spelling of a valid passage is redirected to its canonical path.
     const canonical = buildBiblePath({ ...route, versionId: route.version.id })

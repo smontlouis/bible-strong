@@ -3,7 +3,9 @@ import {
   RESOURCE_FONT_PRELOADS,
   RESOURCE_LANGUAGES,
 } from '../resources/publicSite'
+import { breadcrumbScripts } from '../resources/resourceHead'
 import type { StrongPageData } from './strong.functions'
+import { strongEntryBreadcrumbs } from './strongBreadcrumbs'
 import { buildStrongPath, displayStrongCode } from './strongRoutes'
 
 const LABELS = {
@@ -71,6 +73,7 @@ export const buildStrongHead = (entry: StrongPageData) => {
       },
     ],
     scripts: [
+      ...breadcrumbScripts(strongEntryBreadcrumbs(entry)),
       {
         type: 'application/ld+json',
         // `<` is escaped so editorial text can never close the script element.

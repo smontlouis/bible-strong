@@ -153,9 +153,48 @@ describe('renderBibleText', () => {
     )
     expect(html).toBe(
       `<p class="bible-p bible-p--verse">${number(1)}Le Verbe` +
-        `<sup id="note-ref-1" class="bible-note-ref">1</sup> était</p>`
+        `<a id="note-ref-1" class="bible-note-ref" href="#note-1" data-note="1" role="doc-noteref" aria-label="Note 1">1</a> était</p>`
     )
     expect(notes).toEqual([{ id: 1, verse: 1, html: '<i>ou :</i> la Parolex' }])
+  })
+
+  it('links the cross-references of a note the page can resolve', () => {
+    const { notes } = renderBibleText(
+      [
+        verse(1, 'Heureux', {
+          notes: [
+            {
+              offset: 0,
+              order: 0,
+              kind: 'note',
+              markup:
+                '<note type="crossReference"><ref id="Mark.3.13" data-osis-tag="reference">Mark 3:13</ref>; <ref id="Tob.1.1">Tob 1:1</ref></note>',
+            },
+          ],
+        }),
+      ],
+      {
+        ...options,
+        referenceHref: reference => (reference === 'Mark.3.13' ? '/bible/kjv/mark/3/13' : undefined),
+      }
+    )
+    expect(notes[0]?.html).toBe('<a href="/bible/kjv/mark/3/13">Mark 3:13</a>; Tob 1:1')
+  })
+
+  it('prints a section title before the note it shares its position with', () => {
+    const { html } = renderBibleText(
+      [
+        verse(1, 'Voyant la foule', {
+          notes: [{ offset: 0, order: 0, kind: 'note', markup: '<note>Luc 6</note>' }],
+          headings: [
+            { offset: 0, order: 0, kind: 'pericope', type: 'section', text: 'Le sermon', markup: '' },
+          ],
+        }),
+      ],
+      options
+    )
+    expect(html.indexOf('<h2')).toBeLessThan(html.indexOf('bible-verse-number'))
+    expect(html.indexOf('bible-verse-number')).toBeLessThan(html.indexOf('bible-note-ref'))
   })
 
   it('prints markers after their word, inside the formatting open at that position', () => {

@@ -15,6 +15,8 @@ type RenderOptions = {
   verseHref: (verse: number) => string
   verseLabel: (verse: number) => string
   markersByVerse?: ReadonlyMap<number, readonly BibleTextMarker[]>
+  /** The page a cross-reference of a note opens, from its OSIS reference. */
+  referenceHref?: (osisReference: string) => string | undefined
   /** Section titles belong to a chapter reading, not to a quoted passage. */
   includeHeadings: boolean
 }
@@ -109,8 +111,33 @@ const verseEvents = (
     // A marker follows its word: before whatever else happens at that position.
     events.push({ offset: marker.offset, order: -1, kind: 'marker', html: marker.html })
   }
-  return events.sort((left, right) => left.offset - right.offset || left.order - right.order)
+  return events.sort(
+    (left, right) =>
+      left.offset - right.offset ||
+      left.order - right.order ||
+      // A title and its own note share a position: the title is printed first.
+      Number(right.kind === 'heading') - Number(left.kind === 'heading')
+  )
 }
+
+const REFERENCE_SCHEME = 'bible://'
+
+/**
+ * A note keeps its inline formatting; its cross-references (`<ref id="Mark.3.13">`) become
+ * links when the page knows where they lead.
+ */
+const noteHtml = (markup: string, referenceHref: RenderOptions['referenceHref']): string =>
+  sanitizeEditorialHtml(
+    markup
+      .replace(/<ref\b[^>]*?\bid="([^"]*)"[^>]*>/gu, `<a href="${REFERENCE_SCHEME}$1">`)
+      .replace(/<\/ref>/gu, '</a>'),
+    {
+      resolveHref: href =>
+        href.startsWith(REFERENCE_SCHEME)
+          ? referenceHref?.(href.slice(REFERENCE_SCHEME.length))
+          : undefined,
+    }
+  )
 
 const hasBlockStructure = (verses: readonly ChapterVerse[]): boolean =>
   verses.some(
@@ -127,7 +154,7 @@ const hasBlockStructure = (verses: readonly ChapterVerse[]): boolean =>
  */
 export const renderBibleText = (
   verses: readonly ChapterVerse[],
-  { verseHref, verseLabel, markersByVerse, includeHeadings }: RenderOptions
+  { verseHref, verseLabel, markersByVerse, referenceHref, includeHeadings }: RenderOptions
 ): RenderedBibleText => {
   const out: string[] = []
   const notes: BibleNote[] = []
@@ -248,12 +275,12 @@ export const renderBibleText = (
           break
         case 'note': {
           const id = notes.length + 1
-          notes.push({ id, verse: verse.number, html: sanitizeEditorialHtml(event.markup) })
+          notes.push({ id, verse: verse.number, html: noteHtml(event.markup, referenceHref) })
           enterContent()
           out.push(
-            // A mark, not a link: next to a verse number it would be one more tiny tap target.
-            // The list of notes links back to each mark.
-            `<sup id="note-ref-${id}" class="bible-note-ref">${id}</sup>`
+            // A plain link to the note under the text; where the browser supports popovers,
+            // a click shows the note next to its mark instead.
+            `<a id="note-ref-${id}" class="bible-note-ref" href="#note-${id}" data-note="${id}" role="doc-noteref" aria-label="Note ${id}">${id}</a>`
           )
           break
         }

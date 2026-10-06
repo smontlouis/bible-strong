@@ -4,16 +4,14 @@ import { useI18n } from '@/locales'
 import ResourceShell from '../resources/ResourceShell'
 import type { StrongPageData, StrongPageRelation } from './strong.functions'
 import StrongBookCounts from './StrongBookCounts'
+import { strongEntryBreadcrumbs } from './strongBreadcrumbs'
 import StrongVerseList from './StrongVerseList'
 import {
   buildStrongConcordancePath,
-  buildStrongIndexPath,
-  buildStrongLetterPath,
   buildStrongPath,
   buildWebAppStrongUrl,
   displayStrongCode,
   strongCodeSlug,
-  strongGlossLetter,
 } from './strongRoutes'
 
 const RELATION_GROUPS = ['subentry', 'family', 'identity'] as const
@@ -69,26 +67,17 @@ export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
   const displayCode = displayStrongCode(entry.code)
   const hebrew = entry.lexicalLanguage === 'hebrew'
   const appUrl = buildWebAppStrongUrl(entry.code)
-  const glossLetter = strongGlossLetter(entry.gloss)
 
   return (
     <ResourceShell
       alternatePath={buildStrongPath(language === 'fr' ? 'en' : 'fr', entry.code)}
       appUrl={appUrl}
+      section="strong"
+      breadcrumbs={strongEntryBreadcrumbs(entry)}
     >
       <article>
         <header>
-          <a
-            className="resource-muted text-sm font-medium uppercase tracking-[0.14em]"
-            href={
-              glossLetter
-                ? buildStrongLetterPath(language, entry.lexicalLanguage, glossLetter)
-                : buildStrongIndexPath(language)
-            }
-          >
-            ← {t(hebrew ? 'strong.lexicon.hebrew' : 'strong.lexicon.greek')}
-          </a>
-          <h1 className="mt-3">
+          <h1>
             <span className="resource-chip font-semibold">Strong {displayCode}</span>
             <span
               className="mt-4 block text-left font-serif text-5xl leading-tight md:text-6xl"

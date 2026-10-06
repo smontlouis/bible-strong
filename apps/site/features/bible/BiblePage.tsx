@@ -5,7 +5,9 @@ import StrongPreviewPopover from '../strong/StrongPreviewPopover'
 import { displayStrongCode } from '../strong/strongRoutes'
 import type { BibleChapterRef, BibleInterlinearWord, BiblePageData } from './bible.functions'
 import { bibleBookName } from './bibleBooks'
+import { bibleBreadcrumbs } from './bibleBreadcrumbs'
 import BibleNavBar from './BibleNavBar'
+import BibleNotePopover from './BibleNotePopover'
 import {
   buildBiblePath,
   buildWebAppBibleUrl,
@@ -89,6 +91,8 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
     <ResourceShell
       alternatePath={alternatePath}
       appUrl={buildWebAppBibleUrl({ ...location, passage })}
+      section="bible"
+      breadcrumbs={bibleBreadcrumbs(page)}
       subHeader={<BibleNavBar page={page} />}
     >
       <article ref={articleRef}>
@@ -175,13 +179,43 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
             <ol>
               {page.notes.map(note => (
                 <li key={note.id} id={`note-${note.id}`}>
-                  <a className="resource-link" href={`#note-ref-${note.id}`}>
+                  {/* The label is text, so the links of the line stay inline targets. */}
+                  <span className="font-semibold">
                     {note.id}. {bookName} {chapter}:{note.verse}
-                  </a>{' '}
-                  <span dangerouslySetInnerHTML={{ __html: note.html }} />
+                  </span>{' '}
+                  <span dangerouslySetInnerHTML={{ __html: note.html }} />{' '}
+                  <a
+                    className="bible-notes__back"
+                    href={`#note-ref-${note.id}`}
+                    role="doc-backlink"
+                    aria-label={t('bible.note.back').replace(
+                      '{verse}',
+                      `${bookName} ${chapter}:${note.verse}`
+                    )}
+                  >
+                    ↩
+                  </a>
                 </li>
               ))}
             </ol>
+          </section>
+        )}
+
+        {page.commentaries.length > 0 && (
+          <section className="mt-12">
+            <h2 className="mb-3 text-xl font-semibold">
+              {t('bible.commentaries').replace('{chapter}', `${bookName} ${chapter}`)}
+            </h2>
+            <ul className="strong-list">
+              {page.commentaries.map(commentary => (
+                <li key={commentary.path}>
+                  <a className="strong-list__entry" href={commentary.path}>
+                    <span className="strong-list__gloss">{commentary.title}</span>
+                    <span className="resource-muted shrink-0 text-sm">{commentary.author}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 
@@ -193,6 +227,13 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
       </article>
       {presentation !== 'text' && (
         <StrongPreviewPopover containerRef={articleRef} language={language} />
+      )}
+      {page.notes && page.notes.length > 0 && (
+        <BibleNotePopover
+          containerRef={articleRef}
+          notes={page.notes}
+          reference={verse => `${bookName} ${chapter}:${verse}`}
+        />
       )}
     </ResourceShell>
   )

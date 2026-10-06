@@ -4,9 +4,17 @@ import {
   RESOURCE_LANGUAGES,
   type ResourceLanguage,
 } from '../resources/publicSite'
-import type { BiblePageData } from './bible.functions'
+import { breadcrumbScripts, buildResourceHead } from '../resources/resourceHead'
+import { resourceSection } from '../resources/sections'
+import type { BiblePageData, BibleVersionPageData } from './bible.functions'
 import { bibleBookName } from './bibleBooks'
-import { buildBiblePath, type BiblePresentation } from './bibleRoutes'
+import { bibleBreadcrumbs, bibleVersionBreadcrumbs } from './bibleBreadcrumbs'
+import {
+  bibleVersionAids,
+  buildBiblePath,
+  buildBibleVersionPath,
+  type BiblePresentation,
+} from './bibleRoutes'
 import { bibleVersionName, findBibleVersion } from './bibleVersions'
 
 const SUFFIXES: Record<BiblePresentation, Record<ResourceLanguage, string>> = {
@@ -54,5 +62,59 @@ export const buildBibleHead = (page: BiblePageData) => {
       { name: 'twitter:card', content: 'summary' },
     ],
     links: [...RESOURCE_FONT_PRELOADS, { rel: 'canonical', href: url }, ...alternates],
+    scripts: breadcrumbScripts(bibleBreadcrumbs(page)),
   }
+}
+
+const HUB_HEAD = {
+  fr: {
+    title: 'Lire la Bible en ligne – versions, numéros Strong et interlinéaire | Bible Strong',
+    description:
+      'Lisez la Bible en ligne gratuitement dans plus de quarante versions : Segond, Darby, King James, hébreu et grec, avec les numéros Strong et l’interlinéaire.',
+  },
+  en: {
+    title: 'Read the Bible online – versions, Strong’s numbers and interlinear | Bible Strong',
+    description:
+      'Read the Bible online for free in more than forty versions: King James, NASB, Segond, Hebrew and Greek, with Strong’s numbers and the interlinear.',
+  },
+} as const
+
+/** Head of `/bible` and `/fr/bible`, the same page in each interface language. */
+export const buildBibleHubHead = (language: ResourceLanguage) => {
+  const section = resourceSection('bible')
+  return buildResourceHead({
+    ...HUB_HEAD[language],
+    path: section.path(language),
+    language,
+    alternates: { en: section.path('en'), fr: section.path('fr') },
+    ogType: 'website',
+  })
+}
+
+/** Head of `/bible/:version`, the books and chapters of a version. */
+export const buildBibleVersionHead = (page: BibleVersionPageData) => {
+  const { versionId, language, books } = page
+  const version = findBibleVersion(versionId)
+  const name = version ? bibleVersionName(version, language) : versionId
+  const chapters = books.reduce((total, entry) => total + entry.chapters.length, 0)
+  const aids = bibleVersionAids(versionId)
+  const study =
+    language === 'fr'
+      ? [aids.includes('strong') && 'numéros Strong', aids.includes('interlinear') && 'interlinéaire']
+      : [aids.includes('strong') && 'Strong’s numbers', aids.includes('interlinear') && 'interlinear']
+  const studyLabel = study.filter(Boolean).join(language === 'fr' ? ' et ' : ' and ')
+  return buildResourceHead({
+    title:
+      language === 'fr'
+        ? `${name} (${versionId}) – lire en ligne | Bible Strong`
+        : `${name} (${versionId}) – read online | Bible Strong`,
+    description:
+      language === 'fr'
+        ? `Lire la ${name} (${versionId}) en ligne : ${books.length} livres et ${chapters.toLocaleString('fr')} chapitres${studyLabel ? `, avec ${studyLabel}` : ''}.`
+        : `Read the ${name} (${versionId}) online: ${books.length} books and ${chapters.toLocaleString('en')} chapters${studyLabel ? `, with ${studyLabel}` : ''}.`,
+    path: buildBibleVersionPath(versionId),
+    language,
+    breadcrumbs: bibleVersionBreadcrumbs(versionId, language),
+    ogType: 'website',
+  })
 }

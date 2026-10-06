@@ -8,6 +8,7 @@ import {
   type ThemePreference,
 } from '@/components/SiteThemeControls'
 import { useCurrentLocale, useI18n } from '@/locales'
+import AppInvitation from './AppInvitation'
 import type { Breadcrumb } from './resourceHead'
 import { RESOURCE_SECTIONS, type ResourceSectionKey } from './sections'
 
@@ -40,7 +41,7 @@ export default function ResourceShell({
   alternatePath?: string
   /** The same resource in the study workspace. */
   appUrl: string
-  /** The section the page belongs to, marked in the menu. */
+  /** The section the page belongs to: marked in the menu, and invited to in the app. */
   section?: ResourceSectionKey
   /** The path leading to the page; the last step is the page itself. */
   breadcrumbs?: Breadcrumb[]
@@ -84,9 +85,9 @@ export default function ResourceShell({
       <script dangerouslySetInnerHTML={{ __html: applyStoredTheme }} />
       <header className="resource-header sticky top-0 z-10">
         <div className="relative mx-auto flex h-16 max-w-[760px] items-center justify-between gap-3 px-5">
-          <div className="flex min-w-0 items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <a
-              className="flex min-w-0 items-center gap-2.5 font-semibold"
+              className="flex min-w-0 shrink-0 items-center gap-2.5 font-semibold"
               href={homePath}
               aria-label={t('resource.nav.home')}
             >
@@ -95,7 +96,7 @@ export default function ResourceShell({
                 alt=""
                 width={28}
                 height={28}
-                className="size-7 rounded-full"
+                className="size-7 shrink-0 rounded-full"
               />
               <span className="truncate max-[640px]:sr-only">Bible Strong</span>
             </a>
@@ -132,7 +133,7 @@ export default function ResourceShell({
               </nav>
             </details>
           </div>
-          <div className="landing-nav__actions shrink-0">
+          <div className="landing-nav__actions resource-header__actions shrink-0">
             <a className="resource-cta" href={appUrl}>
               {t('home.cta.openApp')}
             </a>
@@ -180,6 +181,14 @@ export default function ResourceShell({
           </nav>
         )}
         {children}
+        {section && (
+          <AppInvitation
+            section={section}
+            language={locale}
+            appUrl={appUrl}
+            downloadPath={`${homePath}#telecharger`}
+          />
+        )}
       </main>
       <footer className="resource-footer mx-auto max-w-[760px] px-5 py-10 text-sm">
         <ul className="resource-footer__sections">

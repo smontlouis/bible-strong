@@ -3,9 +3,9 @@ import { useI18n } from '@/locales'
 import type { BiblePageData } from './bible.functions'
 import { bibleBookName } from './bibleBooks'
 import {
+  bibleVersionAids,
   buildBiblePath,
   closestBiblePresentation,
-  isBiblePresentationSupported,
   supportedBiblePresentations,
 } from './bibleRoutes'
 import { BIBLE_VERSIONS, bibleVersionName, type BibleVersion } from './bibleVersions'
@@ -14,15 +14,6 @@ const VERSION_GROUPS = ['fr', 'en', 'other'] as const
 
 const versionGroup = (version: BibleVersion): (typeof VERSION_GROUPS)[number] =>
   version.language === 'fr' || version.language === 'en' ? version.language : 'other'
-
-/** The study aids a version offers beyond its text, shown as badges in the selector. */
-const versionAids = (versionId: string): ('strong' | 'interlinear')[] => [
-  ...(isBiblePresentationSupported(versionId, 'strong') ? (['strong'] as const) : []),
-  ...(isBiblePresentationSupported(versionId, 'reverse-interlinear') ||
-  isBiblePresentationSupported(versionId, 'interlinear')
-    ? (['interlinear'] as const)
-    : []),
-]
 
 const Chevron = () => (
   <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5 shrink-0">
@@ -173,7 +164,7 @@ export default function BibleNavBar({ page }: { page: BiblePageData }) {
                             {bibleVersionName(version, language)}
                           </span>
                         </span>
-                        {versionAids(version.id).map(aid => (
+                        {bibleVersionAids(version.id).map(aid => (
                           <span key={aid} className="bible-nav__badge">
                             {t(`bible.aid.${aid}`)}
                           </span>

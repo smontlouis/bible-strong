@@ -324,8 +324,8 @@ a.resource-chip:hover {
   vertical-align: -0.12em;
 }
 
-/* The card opened by a Strong number: anchored on large screens, a sheet on small ones. */
-.strong-popover {
+/* The card opened by a Strong number or a note: anchored on large screens, a sheet on small ones. */
+.resource-popover {
   position: fixed;
   inset: auto;
   max-height: min(60vh, 460px);
@@ -340,7 +340,7 @@ a.resource-chip:hover {
   font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
 }
 
-.strong-popover[data-placement='sheet'] {
+.resource-popover[data-placement='sheet'] {
   inset: auto 0 0;
   width: 100%;
   max-width: none;
@@ -612,13 +612,34 @@ a.bible-nav__trigger[aria-current] {
   font-size: 1.2rem;
 }
 
-.bible-note-ref {
-  padding: 0 2px;
+/*
+ * A note mark stays inline so it never changes the line height; its padding only widens
+ * the area that answers a tap.
+ */
+.resource-prose a.bible-note-ref {
+  margin-inline: -2px 1px;
+  padding: 7px 5px;
+  border-radius: 8px;
   color: var(--resource-accent-ink);
   font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
   font-size: 0.68em;
+  font-weight: 600;
   line-height: 0;
+  text-decoration: none;
+  vertical-align: 0.45em;
   scroll-margin-top: 140px;
+}
+
+.resource-prose a.bible-note-ref:hover,
+.resource-prose a.bible-note-ref[aria-expanded='true'] {
+  background: var(--resource-accent-soft);
+}
+
+.bible-note-popover__body {
+  margin-top: 10px;
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 .bible-notes ol {
@@ -837,4 +858,80 @@ a.strong-letters__letter:hover,
 
 .resource-footer__sections a:hover {
   color: var(--resource-accent-ink);
+}
+
+/* Entry pages: a card or a chip that is a link, and the books of a version. */
+.resource-card--link {
+  transition: border-color 0.15s;
+}
+
+.resource-card--link:hover {
+  border-color: var(--resource-accent);
+}
+
+.resource-chip--action {
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.bible-books > li {
+  border-bottom: 1px solid var(--resource-line);
+}
+
+.bible-book > summary {
+  padding: 13px 4px;
+}
+
+.bible-book > summary:hover {
+  color: var(--resource-accent-ink);
+}
+
+.resource-breadcrumbs a,
+.resource-breadcrumbs span {
+  display: inline-block;
+  padding-block: 2px;
+}
+
+.bible-notes__back {
+  padding-inline: 4px;
+  color: var(--resource-accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Cross-references inside a note, in the list under the text and in its card. */
+.bible-notes li span a,
+.bible-note-popover__body a {
+  color: var(--resource-accent-ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--resource-accent) 45%, transparent);
+  text-underline-offset: 3px;
+}
+
+/* A phone keeps the brand, the menu, the app entry, the theme and the language on one row. */
+@media (max-width: 480px) {
+  .resource-header__actions {
+    gap: 8px;
+  }
+
+  .resource-menu__trigger {
+    padding: 0 8px;
+  }
+
+  .resource-cta {
+    padding: 0 14px;
+  }
+}
+
+/* What the app adds to the page, after its content. */
+.resource-invite {
+  margin-top: 72px;
+  padding: 22px 24px;
+  border-radius: 20px;
+  background: var(--resource-accent-soft);
+}
+
+.resource-invite p {
+  color: var(--resource-muted);
 }

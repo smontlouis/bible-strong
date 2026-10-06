@@ -13,6 +13,7 @@ import {
   ThemeToggle,
   type ThemePreference,
 } from '../components/SiteThemeControls'
+import { RESOURCE_SECTIONS, resourceSection } from '../features/resources/sections'
 import { androidApkUrl, appStoreUrl, playStoreUrl, webAppUrl } from '../lib/app-links'
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
@@ -94,6 +95,7 @@ function LandingHeader({
   locale,
   homePath,
   supportPath,
+  readPath,
   alternatePath,
   theme,
   onThemeChange,
@@ -102,6 +104,7 @@ function LandingHeader({
   locale: string
   homePath: string
   supportPath: string
+  readPath: string
   alternatePath: string
   theme: ThemePreference
   onThemeChange: (theme: ThemePreference) => void
@@ -117,6 +120,7 @@ function LandingHeader({
         <div className="landing-nav__links">
           <a href="#parcours">{t('home.nav.journey')}</a>
           <a href="#univers">{t('home.nav.tools')}</a>
+          <a href={readPath}>{t('home.nav.read')}</a>
           <a className="support-link" href={supportPath}>
             {t('support')}
             <svg aria-hidden="true" viewBox="0 0 16 16">
@@ -465,6 +469,8 @@ export default function Home({ initialTheme }: HomeProps) {
   const homePath = locale === 'fr' ? '/fr/' : '/'
   const supportPath = locale === 'fr' ? '/fr/give' : '/give'
   const alternatePath = locale === 'fr' ? '/' : '/fr/'
+  // Reading starts on the public pages of the site; the workspace stays one click away.
+  const readPath = resourceSection('bible').path(locale)
   const changeTheme = (nextTheme: ThemePreference) => {
     setTheme(nextTheme)
     persistThemePreference(nextTheme)
@@ -508,13 +514,22 @@ export default function Home({ initialTheme }: HomeProps) {
     }
   }, [])
 
-  const worlds = [
+  const worlds: {
+    tone: string
+    image: string
+    title: string
+    body: string
+    alt: string
+    /** The public section where the tool can be read without the app. */
+    path?: string
+  }[] = [
     {
       tone: 'blue',
       image: '/images/landing/lexicon-universe.webp',
       title: t('home.worlds.lexicon.title'),
       body: t('home.worlds.lexicon.body'),
       alt: t('home.worlds.lexicon.alt'),
+      path: resourceSection('strong').path(locale),
     },
     {
       tone: 'violet',
@@ -522,6 +537,7 @@ export default function Home({ initialTheme }: HomeProps) {
       title: t('home.worlds.compare.title'),
       body: t('home.worlds.compare.body'),
       alt: t('home.worlds.compare.alt'),
+      path: readPath,
     },
     {
       tone: 'amber',
@@ -529,6 +545,7 @@ export default function Home({ initialTheme }: HomeProps) {
       title: t('home.worlds.dictionary.title'),
       body: t('home.worlds.dictionary.body'),
       alt: t('home.worlds.dictionary.alt'),
+      path: resourceSection('dictionary').path(locale),
     },
     {
       tone: 'coral',
@@ -543,6 +560,7 @@ export default function Home({ initialTheme }: HomeProps) {
       title: t('home.worlds.themes.title'),
       body: t('home.worlds.themes.body'),
       alt: t('home.worlds.themes.alt'),
+      path: resourceSection('nave').path(locale),
     },
     {
       tone: 'mint',
@@ -550,6 +568,7 @@ export default function Home({ initialTheme }: HomeProps) {
       title: t('home.worlds.commentaries.title'),
       body: t('home.worlds.commentaries.body'),
       alt: t('home.worlds.commentaries.alt'),
+      path: resourceSection('commentary').path(locale),
     },
   ]
 
@@ -829,6 +848,7 @@ export default function Home({ initialTheme }: HomeProps) {
         locale={locale}
         homePath={homePath}
         supportPath={supportPath}
+        readPath={readPath}
         alternatePath={alternatePath}
         theme={theme}
         onThemeChange={changeTheme}
@@ -845,7 +865,7 @@ export default function Home({ initialTheme }: HomeProps) {
             <a className="button" href="#telecharger">
               {t('home.cta.download')}
             </a>
-            <a className="text-link text-link--web" href={webAppUrl}>
+            <a className="text-link text-link--web" href={readPath}>
               {t('home.cta.readOnline')} <span aria-hidden="true">→</span>
             </a>
           </div>
@@ -1014,6 +1034,11 @@ export default function Home({ initialTheme }: HomeProps) {
                 <div className="world-card__copy">
                   <h3>{world.title}</h3>
                   <p>{world.body}</p>
+                  {world.path && (
+                    <a className="world-card__link" href={world.path}>
+                      {t('home.worlds.explore')} <span aria-hidden="true">→</span>
+                    </a>
+                  )}
                 </div>
               </li>
             ))}
@@ -1106,13 +1131,20 @@ export default function Home({ initialTheme }: HomeProps) {
       </section>
 
       <footer className="landing-footer">
+        <nav className="landing-footer__sections" aria-label={t('home.footer.sections')}>
+          {RESOURCE_SECTIONS.map(section => (
+            <a key={section.key} href={section.path(locale)}>
+              {section.label[locale]}
+            </a>
+          ))}
+        </nav>
         <a className="brand brand--footer" href={homePath} aria-label="Bible Strong">
           <img src="/images/icon.png" alt="" width="38" height="38" />
           <span>Bible Strong</span>
         </a>
         <p>{t('home.footer.line')}</p>
         <div>
-          <a href={webAppUrl}>{t('home.cta.readOnline')}</a>
+          <a href={webAppUrl}>{t('home.cta.openApp')}</a>
           <a href={supportPath}>{t('support')}</a>
           <a href="https://github.com/smontlouis/bible-strong" target="_blank" rel="noreferrer">
             GitHub

@@ -33,6 +33,12 @@ describe('editorialHtmlToText', () => {
       '1) cr&eacute;er, former 1a) Qal & Niphal'
     )
   })
+
+  it('separates the words of two blocks', () => {
+    expect(editorialHtmlToText('<p>Premier.</p><p>Second</p><ul><li>un</li><li>deux</li></ul>')).toBe(
+      'Premier. Second un deux'
+    )
+  })
 })
 
 describe('truncateText', () => {
