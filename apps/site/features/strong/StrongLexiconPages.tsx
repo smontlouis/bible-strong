@@ -127,13 +127,7 @@ export function StrongLetterPage({ page }: { page: StrongLetterPageData }) {
                 >
                   {entry.original}
                 </span>
-                <span className="strong-list__code">
-                  {displayStrongCode(entry.code)}
-                  {/* The list gathers the entries naming one person, so it cannot count them. */}
-                  {entry.senseCount && (
-                    <span className="strong-list__senses">{t('strong.list.several')}</span>
-                  )}
-                </span>
+                <span className="strong-list__code">{displayStrongCode(entry.code)}</span>
               </a>
             </li>
           ))}

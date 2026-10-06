@@ -722,16 +722,6 @@ a.strong-letters__letter:hover,
   text-align: end;
 }
 
-.strong-list__senses {
-  margin-inline-start: 6px;
-  padding: 1px 7px;
-  border-radius: 999px;
-  background: var(--resource-accent-soft);
-  color: var(--resource-accent-ink);
-  font-weight: 600;
-  white-space: nowrap;
-}
-
 /* The senses of a classical number: a row says what tells a sense apart and opens it. */
 .strong-senses {
   display: grid;

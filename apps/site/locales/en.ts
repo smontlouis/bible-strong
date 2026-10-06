@@ -233,7 +233,6 @@ export default {
   'bible.note.back': 'Back to {verse}',
   'strong.generalDefinition': 'General definition',
   'strong.sense.oneOf': 'One of the {count} senses of {code}',
-  'strong.list.several': 'several senses',
   'strong.number.count': '{count} senses',
   'strong.number.senses': 'The {count} senses of {code}',
   'strong.number.intro': 'The lexicon tells {count} senses apart under this number. In the Bible, each word leads to the one it has in its verse.',

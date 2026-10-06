@@ -233,7 +233,6 @@ export default {
   'bible.note.back': 'Retour à {verse}',
   'strong.generalDefinition': 'Définition générale',
   'strong.sense.oneOf': 'L’un des {count} sens de {code}',
-  'strong.list.several': 'plusieurs sens',
   'strong.number.count': '{count} sens',
   'strong.number.senses': 'Les {count} sens de {code}',
   'strong.number.intro': 'Le lexique distingue {count} sens sous ce numéro. Dans la Bible, chaque mot renvoie à celui qu’il a dans son verset.',
