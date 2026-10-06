@@ -29,6 +29,14 @@ export const Route = createFileRoute('/strong/$language/$code_/concordance')({
     const page = await loadStrongConcordancePage({
       data: { language: params.language, code: params.code, book: deps.book, page: 1 },
     })
+    // The verses of a number that has a page are told apart there, sense by sense.
+    if ('kind' in page) {
+      throw redirect({
+        to: '/strong/$language/$code',
+        params: { language: params.language, code: strongCodeSlug(page.code) },
+        statusCode: 301,
+      })
+    }
     // The concordance is the one of a sense, at the address of that sense.
     const code = strongCodeSlug(page.code)
     if (params.code !== code) {

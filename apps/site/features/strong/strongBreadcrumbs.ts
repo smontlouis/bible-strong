@@ -39,21 +39,44 @@ type StrongEntryRef = {
   code: string
   lexicalLanguage: StrongLexicalLanguage
   gloss: string
+  /** The page of the classical number, where it lists the entry among its senses. */
+  number?: { code: string }
 }
 
-/** Lexicon › the letter the entry is filed under › the entry. */
+const entryCrumb = (language: ResourceLanguage, code: string): Breadcrumb => ({
+  label: `Strong ${displayStrongCode(code)}`,
+  path: buildStrongPath(language, code),
+})
+
+/** Lexicon › the letter the entry is filed under › its number, when it has a page › the entry. */
 export const strongEntryBreadcrumbs = ({
   language,
   code,
   lexicalLanguage,
   gloss,
+  number,
 }: StrongEntryRef): Breadcrumb[] => {
   const letter = strongGlossLetter(gloss)
   return [
     ...(letter ? strongLetterBreadcrumbs(language, lexicalLanguage, letter) : [indexCrumb(language)]),
-    { label: `Strong ${displayStrongCode(code)}`, path: buildStrongPath(language, code) },
+    ...(number ? [entryCrumb(language, number.code)] : []),
+    entryCrumb(language, code),
   ]
 }
+
+/** Lexicon › the letter its first sense is filed under › the number. */
+export const strongNumberBreadcrumbs = ({
+  language,
+  code,
+  lexicalLanguage,
+  glosses,
+}: {
+  language: ResourceLanguage
+  code: string
+  lexicalLanguage: StrongLexicalLanguage
+  glosses: readonly string[]
+}): Breadcrumb[] =>
+  strongEntryBreadcrumbs({ language, code, lexicalLanguage, gloss: glosses[0] ?? '' })
 
 /** Lexicon › the entry › its concordance. */
 export const strongConcordanceBreadcrumbs = ({

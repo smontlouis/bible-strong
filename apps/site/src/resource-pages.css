@@ -722,6 +722,71 @@ a.strong-letters__letter:hover,
   text-align: end;
 }
 
+.strong-list__senses {
+  margin-inline-start: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--resource-accent-soft);
+  color: var(--resource-accent-ink);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* The senses of a classical number: a row says what tells a sense apart and opens it. */
+.strong-senses {
+  display: grid;
+  gap: 10px;
+}
+
+.strong-senses__sense {
+  display: grid;
+  gap: 4px;
+  padding: 14px 18px;
+  border-radius: 14px;
+}
+
+.strong-senses__sense:hover {
+  border-color: var(--resource-accent);
+  background: var(--resource-accent-soft);
+}
+
+.strong-senses__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.strong-senses__gloss {
+  min-width: 0;
+  flex: 1;
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.strong-senses__original {
+  color: var(--resource-accent-ink);
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+}
+
+.strong-senses__code {
+  flex: none;
+  margin-inline-start: auto;
+  color: var(--resource-muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.strong-senses__summary {
+  line-height: 1.55;
+}
+
+.strong-senses__verses {
+  color: var(--resource-muted);
+  font-size: 0.85rem;
+}
+
 /* Numbered pages of a list. */
 .resource-pagination {
   display: flex;

@@ -17,14 +17,14 @@ import {
 
 const RELATION_GROUPS = ['subentry', 'family', 'identity'] as const
 
-const Section = ({ title, children }: { title: string; children: ReactNode }) => (
+export const Section = ({ title, children }: { title: string; children: ReactNode }) => (
   <section className="mt-12">
     <h2 className="mb-4 text-xl font-semibold">{title}</h2>
     {children}
   </section>
 )
 
-const Prose = ({ html }: { html: string }) => (
+export const Prose = ({ html }: { html: string }) => (
   <div className="resource-prose" dangerouslySetInnerHTML={{ __html: html }} />
 )
 
@@ -94,6 +94,15 @@ export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
             </span>
           </h1>
           <p className="mt-4 text-2xl font-medium">{entry.gloss}</p>
+          {entry.number && (
+            <p className="mt-3 text-sm">
+              <a className="resource-link" href={buildStrongPath(language, entry.number.code)}>
+                {t('strong.sense.oneOf')
+                  .replace('{count}', String(entry.number.senseCount))
+                  .replace('{code}', `Strong ${number}`)}
+              </a>
+            </p>
+          )}
           <dl className="resource-muted mt-5 flex flex-wrap gap-x-8 gap-y-2 text-sm">
             <div>
               <dt className="sr-only">{t('strong.transliteration')}</dt>

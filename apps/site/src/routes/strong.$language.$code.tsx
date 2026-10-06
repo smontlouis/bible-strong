@@ -1,8 +1,10 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
 import { isResourceLanguage, RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
 import StrongEntryPage from '@/features/strong/StrongEntryPage'
+import StrongNumberPage from '@/features/strong/StrongNumberPage'
 import { loadStrongPage } from '@/features/strong/strong.functions'
 import { buildStrongHead } from '@/features/strong/strongHead'
+import { buildStrongNumberHead } from '@/features/strong/strongNumberHead'
 import { parseStrongCode, strongCodeSlug } from '@/features/strong/strongRoutes'
 
 export const Route = createFileRoute('/strong/$language/$code')({
@@ -20,8 +22,9 @@ export const Route = createFileRoute('/strong/$language/$code')({
   },
   loader: async ({ params }) => {
     const entry = await loadStrongPage({ data: { language: params.language, code: params.code } })
-    // An entry is a sense: a classical number, or its code in another letter case, leads
-    // to the one address of the sense that answered.
+    // A classical number the lexicon splits into senses has its own page. Any other code is
+    // a sense: a number with one sense, or a code in another letter case, leads to the one
+    // address of the sense that answered.
     const code = strongCodeSlug(entry.code)
     if (params.code !== code) {
       throw redirect({
@@ -32,7 +35,12 @@ export const Route = createFileRoute('/strong/$language/$code')({
     }
     return entry
   },
-  head: ({ loaderData }) => (loaderData ? buildStrongHead(loaderData) : {}),
+  head: ({ loaderData }) => {
+    if (!loaderData) return {}
+    return loaderData.kind === 'number'
+      ? buildStrongNumberHead(loaderData)
+      : buildStrongHead(loaderData)
+  },
   // Only a rendered entry is cacheable: a failed load must not be kept by the CDN.
   headers: ({ loaderData }) =>
     loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
@@ -40,5 +48,6 @@ export const Route = createFileRoute('/strong/$language/$code')({
 })
 
 function StrongRoute() {
-  return <StrongEntryPage entry={Route.useLoaderData()} />
+  const page = Route.useLoaderData()
+  return page.kind === 'number' ? <StrongNumberPage page={page} /> : <StrongEntryPage entry={page} />
 }

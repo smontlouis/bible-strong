@@ -7,23 +7,24 @@ import {
   buildStrongIndexPath,
   buildStrongLetterPath,
   buildStrongPath,
-  parseStrongCode,
   STRONG_LEXICONS,
   type StrongLexicalLanguage,
 } from './strongRoutes'
+import { strongEntryPageCodes, toStrongSenseRef, type StrongSenseRef } from './strongSenses'
 
 const PAGE_SIZE = 500
 // The lexicon holds about 25,000 senses; the cap only guards against a cursor loop.
 const MAX_PAGES = 200
 
 /**
- * Lists one page per sense and language: a sense is the entry of the lexicon, and the
- * classical number of its family only redirects to it.
+ * Lists the entry page of every classical number, in each language: the page of the number
+ * where the lexicon splits it into senses, its one sense otherwise. The senses of a split
+ * number are reached from its page.
  */
 export const listStrongSitemapUrls = async (
   lexicalLanguage: StrongLexicalLanguage
 ): Promise<SitemapUrl[]> => {
-  const codes = new Set<string>()
+  const senses = new Map<string, StrongSenseRef>()
   let cursor: string | undefined
   for (let page = 0; page < MAX_PAGES; page += 1) {
     const response = await readResource<StrongLexiconSearchResponseDto>(
@@ -31,14 +32,14 @@ export const listStrongSitemapUrls = async (
       { language: 'fr', lexicalLanguage, limit: PAGE_SIZE, cursor }
     )
     for (const entry of response?.entries ?? []) {
-      const identity = parseStrongCode(entry.stepCode)
-      if (identity) codes.add(identity.code)
+      const sense = toStrongSenseRef(entry)
+      if (sense) senses.set(sense.code, sense)
     }
     cursor = response?.nextCursor
     if (!cursor) break
   }
 
-  return [...codes].sort().flatMap(code => {
+  return strongEntryPageCodes([...senses.values()]).sort().flatMap(code => {
     const alternates = RESOURCE_LANGUAGES.map(language => ({
       hrefLang: language,
       href: absoluteSiteUrl(buildStrongPath(language, code)),

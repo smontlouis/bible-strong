@@ -4,6 +4,7 @@ import type {
   StrongBibleOccurrencesDto,
 } from '@bible-strong/resource-domain/contracts/strongBibleContract'
 import type {
+  StrongLexiconEntryCardsDto,
   StrongLexiconEntryDto,
   StrongLexiconSearchResponseDto,
 } from '@bible-strong/resource-domain/contracts/strongLexiconContract'
@@ -35,10 +36,20 @@ import {
   strongLexicalLanguage,
   type StrongLexicalLanguage,
 } from './strongRoutes'
+import {
+  groupStrongListLines,
+  hasStrongNumberPage,
+  strongSenseSummaries,
+  toStrongSenseRef,
+  uniqueStrongGlosses,
+  type StrongListLine,
+  type StrongSenseRef,
+} from './strongSenses'
 
 const SAMPLE_VERSE_COUNT = 12
-// A classical number holds a handful of senses; the search may add a few near numbers.
-const SIBLING_SEARCH_LIMIT = 50
+// How many senses of a number are read from the Resource API at once.
+const SENSE_READ_BATCH = 16
+const SENSE_SUMMARY_LENGTH = 170
 const DESCRIPTION_LENGTH = 155
 
 // The Strong-tagged Bible read alongside each lexicon language.
@@ -68,11 +79,14 @@ export type StrongPageConcordance = {
 }
 
 export type StrongPageData = {
+  kind: 'sense'
   language: ResourceLanguage
   /** The code of the sense: the identity of the entry, as in the study workspace. */
   code: string
   /** The classical Strong number the sense is filed under. */
   classicCode: string
+  /** The page of that number, where it lists this sense among the others. */
+  number?: { code: string; senseCount: number }
   lexicalLanguage: StrongLexicalLanguage
   original: string
   transliteration: string
@@ -89,6 +103,41 @@ export type StrongPageData = {
   entity?: { name: string; brief: string; description: string }
   concordance?: StrongPageConcordance
 }
+
+/** One sense of a classical number, as the page of the number lists it. */
+export type StrongNumberSense = {
+  code: string
+  gloss: string
+  original: string
+  transliteration: string
+  /** What tells the sense apart: who a person is, or the start of its own notice. */
+  summary?: string
+  verseCount: number
+  /** The books it is found in, in the order of the Bible. */
+  books: number[]
+}
+
+/** The page of a classical number the lexicon splits into several senses. */
+export type StrongNumberPageData = {
+  kind: 'number'
+  language: ResourceLanguage
+  /** The classical number, which names the page. */
+  code: string
+  lexicalLanguage: StrongLexicalLanguage
+  original: string
+  transliteration: string
+  pronunciation?: string
+  /** The glosses of its senses, each once, the most frequent sense first. */
+  glosses: string[]
+  nameMeaningHtml?: string
+  /** The historical notice of the number, which covers every sense. */
+  definitionHtml?: string
+  senses: StrongNumberSense[]
+  concordance?: { version: string; verseCount: number }
+}
+
+/** Where a request for the verses of a number is sent when the number has its own page. */
+export type StrongNumberAddress = { kind: 'number'; code: string }
 
 const hasContent = (html: string | undefined): html is string => Boolean(html?.trim())
 
@@ -296,39 +345,145 @@ const loadConcordance = async (
   }
 }
 
-/** The other senses filed under one classical number, which the lexicon finds by that number. */
-const loadSiblingSenses = async (
+// A sense adds one letter to its classical number; a number that ran out of capitals goes on
+// with small letters, which name other senses.
+const SENSE_SUFFIXES = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz']
+
+/**
+ * The senses filed under one classical number. Every code a sense of the number can carry is
+ * asked for at once: the lexicon list gathers the entries that name one person or thing, so
+ * it cannot tell how many senses a number has.
+ */
+const loadSenses = async (
   language: ResourceLanguage,
-  lexicalLanguage: StrongLexicalLanguage,
-  classicCode: string,
-  code: string
-): Promise<StrongPageRelation[]> => {
-  const response = await readResource<StrongLexiconSearchResponseDto>(
-    '/v1/strong-lexicon/entries',
-    { language, level: 'simple', lexicalLanguage, search: classicCode, limit: SIBLING_SEARCH_LIMIT }
-  )
-  return (response?.entries ?? []).flatMap(entry => {
-    const sense = parseStrongCode(entry.stepCode)?.code
-    // The search also finds numbers that only contain the one asked for.
-    if (!sense || sense === code || parseStrongCode(entry.classicStrong)?.code !== classicCode) {
-      return []
+  classicCode: string
+): Promise<StrongSenseRef[]> => {
+  const response = await readResource<StrongLexiconEntryCardsDto>(
+    '/v1/strong-lexicon/entries/batch',
+    {
+      language,
+      level: 'simple',
+      identities: ['', ...SENSE_SUFFIXES]
+        .map(suffix => `dstrong:${classicCode}${suffix}`)
+        .join(','),
     }
-    return [
-      {
-        group: 'subentry' as const,
-        label: '',
-        code: sense,
-        gloss: entry.gloss,
-        original: entry.original,
-        transliteration: entry.transliteration,
-      },
-    ]
-  })
+  )
+  const senses = new Map<string, StrongSenseRef>()
+  for (const entry of response?.entries ?? []) {
+    const sense = toStrongSenseRef(entry)
+    if (sense?.classicCode === classicCode) senses.set(sense.code, sense)
+  }
+  return [...senses.values()].sort((left, right) =>
+    left.code < right.code ? -1 : left.code > right.code ? 1 : 0
+  )
 }
 
+const inBatches = async <Item, Result>(
+  items: readonly Item[],
+  size: number,
+  run: (item: Item) => Promise<Result>
+): Promise<Result[]> => {
+  const results: Result[] = []
+  for (let start = 0; start < items.length; start += size) {
+    results.push(...(await Promise.all(items.slice(start, start + size).map(run))))
+  }
+  return results
+}
+
+/**
+ * The page of a classical number: the word once, then each sense with what tells it apart
+ * and where it is read. Every sense is read whole, because who a person is comes with the
+ * entry itself.
+ */
+const loadNumberPage = async ({
+  resolved,
+  language,
+  lexicalLanguage,
+  classicCode,
+  senses,
+}: {
+  resolved: ResolvedStrongEntry
+  language: ResourceLanguage
+  lexicalLanguage: StrongLexicalLanguage
+  classicCode: string
+  senses: readonly StrongSenseRef[]
+}): Promise<StrongNumberPageData> => {
+  const { simple, entry } = resolved
+  const [books, read] = await Promise.all([
+    loadBookCounts(language, classicCode, lexicalLanguage),
+    inBatches(senses, SENSE_READ_BATCH, async sense => {
+      const [detailed, senseBooks] = await Promise.all([
+        sense.code === resolved.code
+          ? resolved.detailed
+          : readResource<StrongLexiconEntryDto>(
+              `/v1/strong-lexicon/entries/${encodeURIComponent(sense.code)}`,
+              { language }
+            ),
+        loadBookCounts(language, sense.code, lexicalLanguage),
+      ])
+      return { sense, detailed, books: senseBooks }
+    }),
+  ])
+
+  const summaries = strongSenseSummaries(
+    read.map(({ sense, detailed }) => ({
+      brief: detailed?.entity?.brief,
+      noticeHtml: detailed?.definitionHtml,
+      gloss: sense.gloss,
+    }))
+  )
+  const listed = read
+    .map(({ sense, books: senseBooks }, index): StrongNumberSense => {
+      const summary = summaries[index]
+      return {
+        code: sense.code,
+        gloss: sense.gloss,
+        original: sense.original,
+        transliteration: sense.transliteration,
+        summary: summary ? truncateText(summary, SENSE_SUMMARY_LENGTH) : undefined,
+        verseCount: senseBooks.reduce((total, count) => total + count.verseCount, 0),
+        books: senseBooks.map(count => count.book),
+      }
+    })
+    // The sense read most often comes first; the others keep the order of the lexicon.
+    .sort((left, right) => right.verseCount - left.verseCount)
+
+  const render = (html: string) =>
+    renderStrongDefinitionHtml(html, { language, currentCode: classicCode })
+  const nameMeaning = entry.nameMeaningHtml ?? simple?.nameMeaningHtml
+  const definition = simple?.definitionHtml
+
+  return {
+    kind: 'number',
+    language,
+    code: classicCode,
+    lexicalLanguage,
+    original: entry.original,
+    transliteration: entry.transliteration,
+    pronunciation: entry.pronunciation ?? simple?.pronunciation,
+    glosses: uniqueStrongGlosses(listed),
+    nameMeaningHtml:
+      hasContent(nameMeaning) && !isSameStrongDefinition(definition, nameMeaning)
+        ? render(nameMeaning)
+        : undefined,
+    definitionHtml: hasContent(definition) ? render(definition) : undefined,
+    senses: listed,
+    concordance: books.length
+      ? {
+          version: CONCORDANCE_VERSION[language],
+          verseCount: books.reduce((total, count) => total + count.verseCount, 0),
+        }
+      : undefined,
+  }
+}
+
+/**
+ * The page a code names. A classical number the lexicon splits into senses has a page that
+ * lists them; any other code names one sense.
+ */
 export const loadStrongPage = createServerFn({ method: 'GET' })
   .validator((data: { language: string; code: string }) => data)
-  .handler(async ({ data }): Promise<StrongPageData> => {
+  .handler(async ({ data }): Promise<StrongPageData | StrongNumberPageData> => {
     const identity = parseStrongCode(data.code)
     if (!isResourceLanguage(data.language) || !identity) throw notFound()
     const language = data.language
@@ -339,11 +494,21 @@ export const loadStrongPage = createServerFn({ method: 'GET' })
     const { simple, detailed, entry, code } = resolved
     const classicCode = parseStrongCode(entry.classicStrong)?.code ?? code
 
-    const [concordance, siblings] = await Promise.all([
+    // A sense named by its classical number alone is the only page of that number.
+    const sensesRequest =
+      code === classicCode ? Promise.resolve([]) : loadSenses(language, classicCode)
+    if (identity.code === classicCode) {
+      const senses = await sensesRequest
+      if (hasStrongNumberPage(classicCode, senses)) {
+        return loadNumberPage({ resolved, language, lexicalLanguage, classicCode, senses })
+      }
+    }
+    const [concordance, senses] = await Promise.all([
       loadConcordance(language, code, lexicalLanguage),
-      // A sense named by its classical number alone has no sibling to look for.
-      code === classicCode ? [] : loadSiblingSenses(language, lexicalLanguage, classicCode, code),
+      sensesRequest,
     ])
+    const numberPage = hasStrongNumberPage(classicCode, senses)
+    const senseCodes = new Set(senses.map(sense => sense.code))
 
     const render = (html: string) =>
       renderStrongDefinitionHtml(html, { language, currentCode: code })
@@ -357,6 +522,8 @@ export const loadStrongPage = createServerFn({ method: 'GET' })
     const related = (detailed?.relations ?? []).flatMap((relation): StrongPageRelation[] => {
       const target = parseStrongCode(relation.stepCode)
       if (!target || target.code === code) return []
+      // The senses of a number are told apart on its page rather than listed again here.
+      if (numberPage && senseCodes.has(target.code)) return []
       return [
         {
           group: relation.group,
@@ -368,6 +535,21 @@ export const loadStrongPage = createServerFn({ method: 'GET' })
         },
       ]
     })
+    // A number without a page of its own leaves its senses to list one another.
+    const siblings = numberPage
+      ? []
+      : senses
+          .filter(sense => sense.code !== code)
+          .map(
+            (sense): StrongPageRelation => ({
+              group: 'subentry',
+              label: '',
+              code: sense.code,
+              gloss: sense.gloss,
+              original: sense.original,
+              transliteration: sense.transliteration,
+            })
+          )
     // One entry can be related in several ways (name of, same identity, derived word), and a
     // sibling sense may already be listed by the lexicon: it is shown once, under what says
     // most about it, as the study workspace does.
@@ -378,9 +560,11 @@ export const loadStrongPage = createServerFn({ method: 'GET' })
       )
 
     return {
+      kind: 'sense',
       language,
       code,
       classicCode,
+      number: numberPage ? { code: classicCode, senseCount: senses.length } : undefined,
       lexicalLanguage,
       original: entry.original,
       transliteration: entry.transliteration,
@@ -441,7 +625,7 @@ export type StrongConcordancePageData = {
 
 export const loadStrongConcordancePage = createServerFn({ method: 'GET' })
   .validator((data: { language: string; code: string; book?: string; page?: number }) => data)
-  .handler(async ({ data }): Promise<StrongConcordancePageData> => {
+  .handler(async ({ data }): Promise<StrongConcordancePageData | StrongNumberAddress> => {
     const identity = parseStrongCode(data.code)
     if (!isResourceLanguage(data.language) || !identity) throw notFound()
     const language = data.language
@@ -455,6 +639,14 @@ export const loadStrongConcordancePage = createServerFn({ method: 'GET' })
     if (!resolved) throw notFound()
     const { simple, entry, code } = resolved
     const classicCode = parseStrongCode(entry.classicStrong)?.code ?? code
+    // The verses of a number that has a page are told apart there, sense by sense.
+    if (
+      identity.code === classicCode &&
+      code !== classicCode &&
+      hasStrongNumberPage(classicCode, await loadSenses(language, classicCode))
+    ) {
+      return { kind: 'number', code: classicCode }
+    }
 
     const books = await loadBookCounts(language, code, lexicalLanguage)
     const listed = book === undefined ? books : books.filter(count => count.book === book)
@@ -609,12 +801,7 @@ export const loadStrongIndexPage = createServerFn({ method: 'GET' })
     return { language: data.language, letters: { hebrew, greek } }
   })
 
-export type StrongListEntry = {
-  code: string
-  gloss: string
-  original: string
-  transliteration: string
-}
+export type StrongListEntry = StrongListLine
 
 export type StrongLetterPageData = {
   language: ResourceLanguage
@@ -624,7 +811,7 @@ export type StrongLetterPageData = {
   entries: StrongListEntry[]
 }
 
-/** The entries of a lexicon whose gloss starts with a letter, one per classical number. */
+/** The entries of a lexicon whose gloss starts with a letter, a line per number and gloss. */
 export const loadStrongLetterPage = createServerFn({ method: 'GET' })
   .validator((data: { language: string; lexicon: string; letter: string }) => data)
   .handler(async ({ data }): Promise<StrongLetterPageData> => {
@@ -652,20 +839,14 @@ export const loadStrongLetterPage = createServerFn({ method: 'GET' })
       ...letterPrefixes(letter, language).map(readAll),
     ])
 
-    // One line per sense, as in the lexicon of the study workspace: the senses of one
-    // classical number have their own glosses, and may be filed under different letters.
-    const byCode = new Map<string, StrongListEntry>()
+    // The senses of one classical number have their own glosses, and may be filed under
+    // different letters; those that read the same are gathered under their number.
+    const byCode = new Map<string, StrongSenseRef>()
     for (const entry of lists.flat()) {
-      const code = parseStrongCode(entry.stepCode)?.code
-      if (!code || byCode.has(code)) continue
-      byCode.set(code, {
-        code,
-        gloss: entry.gloss,
-        original: entry.original,
-        transliteration: entry.transliteration,
-      })
+      const sense = toStrongSenseRef(entry)
+      if (sense && !byCode.has(sense.code)) byCode.set(sense.code, sense)
     }
-    const entries = [...byCode.values()].sort(
+    const entries = groupStrongListLines([...byCode.values()]).sort(
       (left, right) =>
         left.gloss.localeCompare(right.gloss, language, { sensitivity: 'base' }) ||
         left.code.localeCompare(right.code)

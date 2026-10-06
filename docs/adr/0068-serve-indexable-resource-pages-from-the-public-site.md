@@ -47,8 +47,8 @@ Site routes reuse the grammar of ADR-0053 to ADR-0056 and add the lists that lea
 - `/bible/:version`, the books and chapters of a version
 - `/bible/:version[/:presentation]/:book/:chapter[/:passage]`
 - `/strong/:language`, the lexicon, and `/strong/:language/:lexicon/:letter`, its Hebrew or
-  Greek senses filed under the first letter of their gloss
-- `/strong/:language/:code`, one sense of the lexicon
+  Greek entries filed under the first letter of their gloss
+- `/strong/:language/:code`, a classical number the lexicon splits into senses, or one sense
 - `/strong/:language/:code/concordance[/:page]`, the occurrences fifty verses to a numbered
   page, with an optional `book` filter
 - `/strong/:code` redirects permanently to the default language, `fr`.
@@ -95,15 +95,26 @@ gathers what the workspace spreads over several Strong subpages: both definition
 [ADR-0064](./0064-separate-simple-and-detailed-strong-lexicons.md), related entries and a
 concordance sample in the Bible matching the page language.
 
-A Strong page is one sense of the lexicon, as in the workspace. Where the lexicon tells the
-senses of a classical number apart (`H1254A` “to create”, `H1254B` “to fatten”), each sense
-has its page, named by its sense code, with its own definitions and its own concordance. A
-classical number (`h1254`) or an expanded spelling (`h1254a`) is an address, not a page: it
-redirects permanently to the sense the lexicon resolves it to, and so do the concordance
-paths under it. A number the lexicon does not split keeps its classical code. The reader
-still sees the classical number: a page and its title carry it first and add the sense code
-only where it differs, and the sibling senses of a number are listed with its related
-entries.
+The classical number is the door and the sense is the precision. Where the lexicon tells
+the senses of a number apart (`H1254A` “to create”, `H1254B` “to fatten”; the thirty
+entries named Zechariah under `H2148`), each sense has its page, named by its sense code,
+with its own definitions and its own concordance, as in the workspace. The number is a page too
+(`/strong/:language/h1254`): it presents the word once, its historical notice, and each
+sense with what tells it apart (who the person or the place is, or else the first line of
+its own notice) and the books it is read in. A reader of the workspace reaches a sense from
+a verse, which has already chosen it; a reader of the site often arrives by the number,
+without that context.
+
+A number with a single sense has no page of its own: it redirects permanently to that
+sense, as does an expanded spelling (`h1254a`). A number that is itself the code of one of
+its senses (`G5514` next to `G5514G`) keeps its address for that sense, whose page lists the
+others. A concordance belongs to a sense: the concordance paths under a split number
+redirect to its page.
+
+A sense links to the page of its number instead of listing its sibling senses. A lexicon
+list gathers the senses of a number that read the same into one line, which opens the
+number; a sense with a gloss of its own keeps its line and opens its entry. A title carries
+the classical number first and adds the sense code only where it differs.
 
 A word of a Bible page opens the most precise identity it is tagged with, the sense it has
 in that verse, under its classical number. The definitions follow the reading order of
@@ -121,8 +132,10 @@ timeline event and the lists leading to them are indexable. Verse ranges and con
 book filters are served with `noindex, follow`.
 
 Sitemaps are generated from the Resource API: one per Bible and reading mode listing its
-chapters, the senses of the Strong lexicons, one per dictionary, per language of the topics
-and per commentary, and the timeline. Verses are reached through links.
+chapters, the entry page of every number of the Strong lexicons (the number where it is
+split, its sense otherwise), one per dictionary, per language of the topics and per
+commentary, and the timeline. Verses and the senses of a split number are reached through
+links.
 
 The CDN keeps a rendered page for a day and may serve it stale while revalidating. Only a
 successfully rendered resource is cacheable. Because a cached page is identical for every
@@ -151,7 +164,16 @@ contracts, the identities and the reading order of the definitions limits drift,
 route grammar is implemented twice.
 
 Sibling senses of a Greek number share one lexicon article and may share a gloss: their
-pages differ by their concordance and their sense code only.
+pages differ by their concordance, their sense code and, for a person, who that person is.
+
+The page of a number reads each of its senses from the Resource API, entry and verse
+counts: about sixty reads for the largest number, once per cached rendering.
+
+The lexicon list of the Resource API gathers the entries that name one person or thing
+under a single representative, as the lexicon list of the workspace shows them. The
+letter lists and the sitemaps of the site are built from it: an entry behind a
+representative (Elohim, `H0430G`, behind `H3068G`) is reached through links only, until the
+API can list every sense.
 
 Bible display names, languages and copyright notices are not in the shared catalog. The
 site mirrors them from the workspace; a test keeps the list of versions aligned with the

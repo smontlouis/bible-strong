@@ -47,6 +47,14 @@ export const Route = createFileRoute('/strong/$language/$code_/concordance_/$pag
         page: parseConcordancePage(params.page),
       },
     })
+    // The verses of a number that has a page are told apart there, sense by sense.
+    if ('kind' in page) {
+      throw redirect({
+        to: '/strong/$language/$code',
+        params: { language: params.language, code: strongCodeSlug(page.code) },
+        statusCode: 301,
+      })
+    }
     if (identity?.code !== page.code) {
       throw redirect({
         to: '/strong/$language/$code/concordance',

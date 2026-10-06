@@ -20,6 +20,14 @@ _Avoid_: App page, landing page
 A resource family offered on the site (Bible, lexicon, dictionary, topics, commentaries, timeline) with its entry page, its lists and its public resource pages.
 _Avoid_: Tab, module
 
+**Strong sense**:
+One entry of the Strong lexicon as the Bible text points to it: a classical number, or the precise meaning or person the lexicon tells apart under it.
+_Avoid_: Variant, sub-entry
+
+**Strong number page**:
+The public resource page of a classical Strong number the lexicon splits into several Strong senses, which presents the word once and each sense with what tells it apart.
+_Avoid_: Disambiguation page, family page
+
 **App invitation**:
 What the study workspace adds to a public resource page, offered after its content and never in the way of reading.
 _Avoid_: Paywall, interstitial
