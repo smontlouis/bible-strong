@@ -91,7 +91,9 @@ export default function StrongNumberPage({ page }: { page: StrongNumberPageData 
           <p>
             {t('strong.number.intro').replace('{count}', count)}
             {concordance &&
-              ` ${t('strong.number.total')
+              ` ${t(
+                concordance.verseCount === 1 ? 'strong.number.total.one' : 'strong.number.total'
+              )
                 .replace('{code}', code)
                 .replace('{count}', concordance.verseCount.toLocaleString(language))
                 .replace('{version}', concordance.version)}`}

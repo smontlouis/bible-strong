@@ -43,7 +43,11 @@ export default function StrongConcordancePage({ page }: { page: StrongConcordanc
             </span>
           </h1>
           <p className="mt-5">
-            {t('strong.concordance.summary')
+            {t(
+              page.verseCount === 1
+                ? 'strong.concordance.summary.one'
+                : 'strong.concordance.summary'
+            )
               .replace('{code}', `Strong ${displayStrongCode(code)}`)
               .replace('{count}', page.verseCount.toLocaleString(language))
               .replace('{version}', page.version)}
