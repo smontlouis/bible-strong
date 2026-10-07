@@ -1,0 +1,62 @@
+/* Styles specific to the nave pages. Shared styles live in resource-pages.css. */
+
+/* Topic lists: a name wraps rather than being cut, its original heading follows in small. */
+.nave-list__name {
+  min-width: 0;
+  flex: 1;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.nave-list__original {
+  max-width: 45%;
+  flex: none;
+  color: var(--resource-muted);
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+  text-align: end;
+}
+
+/*
+ * The outline of a topic: sub-topics down to any depth. An entry is its name in bold,
+ * then its references, then its own sub-entries hanging on a rule.
+ */
+.nave-outline > ul > li {
+  padding-block: 18px;
+  border-top: 1px solid var(--resource-line);
+}
+
+.nave-outline > ul > li:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.nave-outline li > b {
+  display: block;
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.nave-outline li > b + p {
+  margin-top: 4px;
+}
+
+.nave-outline ul ul {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding-inline-start: 16px;
+  border-inline-start: 2px solid var(--resource-line);
+}
+
+.nave-outline ul ul > li > b {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.nave-outline > p + ul,
+.nave-outline > ul + p,
+.nave-outline li > ul + p {
+  margin-top: 12px;
+}

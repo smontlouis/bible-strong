@@ -6,7 +6,6 @@ import {
   buildPublicTimelineEventPath,
   parsePublicTimelineRoute,
 } from '~features/timeline/publicTimelineRoutes'
-import PublicPage from '~features/app/PublicPage'
 
 const PublicTimelineEventRoute = () => {
   const params = useLocalSearchParams<{
@@ -28,11 +27,7 @@ const PublicTimelineEventRoute = () => {
   const canonicalPath = buildPublicTimelineEventPath({ language: route.language, slug: route.slug })
   if (requestedPath !== canonicalPath) return <Redirect href={canonicalPath} />
 
-  return (
-    <PublicPage title={route.slug.replaceAll('-', ' ')}>
-      <EventScreen />
-    </PublicPage>
-  )
+  return <EventScreen />
 }
 
 export default PublicTimelineEventRoute

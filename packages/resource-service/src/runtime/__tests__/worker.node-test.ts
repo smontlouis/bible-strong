@@ -367,6 +367,25 @@ describe('Resource Worker binding', () => {
     assert.notEqual(entry, module)
   })
 
+  it('keeps the list of every Strong lexicon entry apart from the gathered list', async () => {
+    const catalog = {
+      resources: {
+        'strong-lexicon:core': { contentSha256: 'core-r1' },
+        'strong-lexicon:resources': { contentSha256: 'resources-r1' },
+        'strong-lexicon:entities': { contentSha256: 'entities-r1' },
+      },
+    }
+    const revisionOf = (query: string) =>
+      resourceApiCacheRevisionFrom(
+        new Request(`https://api.bible-strong.app/v1/strong-lexicon/entries?language=fr${query}`),
+        catalog
+      )
+    const gathered = await revisionOf('&prefix=d')
+
+    assert.equal(await revisionOf('&prefix=d&identities=unified'), gathered)
+    assert.notEqual(await revisionOf('&prefix=d&identities=all'), gathered)
+  })
+
   it('invalidates a simple lexicon only when its own language publication changes', async () => {
     const catalog = (fr: string, en: string, core: string) => ({
       resources: {

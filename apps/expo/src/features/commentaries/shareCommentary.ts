@@ -4,8 +4,11 @@ import { isTag, isText, type AnyNode } from 'domhandler'
 import { parseDocument } from 'htmlparser2'
 import { Share } from 'react-native'
 import { cleanReadingHTML } from '~common/readingHtml'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
+import { getPublicSiteUrl } from '~helpers/publicSiteLinks'
 import { toast } from '~helpers/toast'
 import i18n from '~i18n'
+import { buildPublicCommentaryPath } from './publicCommentaryRoutes'
 
 // Same cap as the pre-27 commentary share, which users relied on to copy commentaries.
 const SHARE_MAX_LENGTH = 10000
@@ -40,10 +43,13 @@ export const getCommentaryShareMessage = ({
   entry,
   passage,
   sections,
+  location,
 }: {
-  entry: Pick<CommentaryCatalogEntry, 'author' | 'title'>
+  entry: Pick<CommentaryCatalogEntry, 'id' | 'author' | 'title'>
   passage: string
   sections: { reference?: string; content: string }[]
+  /** The chapter being read: it names the page of the commentary on the public site. */
+  location: { language: ResourceLanguage; book: number; chapter: number }
 }): string => {
   const body = sections
     .map(section => {
@@ -52,7 +58,10 @@ export const getCommentaryShareMessage = ({
     })
     .filter(Boolean)
     .join('\n\n')
-  return `${entry.author}\n${entry.title}\n${passage}\n\n${truncate(body)}\n\nhttps://bible-strong.app`
+  const url = getPublicSiteUrl(() =>
+    buildPublicCommentaryPath({ resourceId: entry.id, ...location })
+  )
+  return `${entry.author}\n${entry.title}\n${passage}\n\n${truncate(body)}\n\n${url}`
 }
 
 export const shareCommentary = async (

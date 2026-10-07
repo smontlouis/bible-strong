@@ -168,6 +168,11 @@ export default function InlineCommentaryReader({
                       end !== start ? `–${end}` : ''
                     }`,
                     sections: [section],
+                    location: {
+                      language: request.language,
+                      book: request.book,
+                      chapter: request.chapter,
+                    },
                   })
                 }}
                 className="min-w-[44px] min-h-[44px] items-center justify-center"

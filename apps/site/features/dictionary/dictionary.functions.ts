@@ -1,0 +1,347 @@
+import type {
+  DictionaryCatalogResponseDto,
+  DictionaryDirectoryResponseDto,
+  DictionaryEntriesResponseDto,
+  DictionaryEntryResponseDto,
+} from '@bible-strong/resource-domain/contracts/dictionaryContract'
+import { notFound } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
+import { truncateText } from '../resources/editorialHtml'
+import {
+  isResourceLanguage,
+  RESOURCE_LANGUAGES,
+  type ResourceLanguage,
+} from '../resources/publicSite'
+import { readResource } from '../resources/resourceApi'
+import { dictionaryArticleExcerpt, renderDictionaryArticleHtml } from './dictionaryHtml'
+import {
+  createDictionaryArticleSlug,
+  DICTIONARY_LETTERS,
+  DICTIONARY_LIST_PAGE_SIZE,
+  dictionaryLetter,
+  dictionaryLetterInitials,
+  parseDictionaryEntryId,
+  parseDictionaryWorkRoute,
+} from './dictionaryRoutes'
+
+const DESCRIPTION_LENGTH = 155
+const LIST_TTL_MS = 60 * 60 * 1000
+// The Resource API returns at most this many articles per request.
+const LIST_REQUEST_LIMIT = 500
+// The largest work holds about 9,400 articles; the cap only guards against a cursor loop.
+const MAX_LIST_REQUESTS = 60
+const DIRECTORY_REQUEST_LIMIT = 100
+
+export type DictionaryWork = {
+  id: string
+  title: string
+  abbreviation: string
+  authors: string[]
+  description: string
+  edition: string
+  source: string
+  attribution: string
+}
+
+export type DictionaryListEntry = { id: number; word: string }
+
+const listCache = new Map<string, { at: number; list: Promise<unknown> }>()
+
+/**
+ * Lists only change when a dictionary is republished: a server instance keeps each one for
+ * an hour. The read itself is kept, so pages rendered at the same time share it; a failed
+ * read is forgotten.
+ */
+const cached = <T>(key: string, load: () => Promise<T>): Promise<T> => {
+  const hit = listCache.get(key)
+  if (hit && Date.now() - hit.at < LIST_TTL_MS) return hit.list as Promise<T>
+  const list = load()
+  listCache.set(key, { at: Date.now(), list })
+  list.catch(() => {
+    if (listCache.get(key)?.list === list) listCache.delete(key)
+  })
+  return list
+}
+
+/** The dictionaries published in a language. */
+export const listDictionaryWorks = (language: ResourceLanguage): Promise<DictionaryWork[]> =>
+  cached(`works:${language}`, async () => {
+    const catalog = await readResource<DictionaryCatalogResponseDto>('/v1/dictionaries', {
+      language,
+    })
+    return (catalog?.dictionaries ?? []).map(work => ({
+      id: work.resource.work,
+      title: work.title,
+      abbreviation: work.abbreviation,
+      authors: [...work.authors],
+      description: work.description,
+      edition: work.edition,
+      source: work.source,
+      attribution: work.attribution,
+    }))
+  })
+
+// The Resource API answers "unavailable" for a work it does not publish, so a work is
+// looked up in the catalog before any of its articles is asked for.
+const requireDictionaryWork = async (params: {
+  language: string
+  work: string
+}): Promise<{ language: ResourceLanguage; work: DictionaryWork }> => {
+  const route = parseDictionaryWorkRoute(params)
+  if (!route) throw notFound()
+  const work = (await listDictionaryWorks(route.language)).find(
+    candidate => candidate.id === route.work
+  )
+  if (!work) throw notFound()
+  return { language: route.language, work }
+}
+
+const entriesPath = (language: ResourceLanguage, work: string): string =>
+  `/v1/dictionaries/${work}/${language}/entries`
+
+/** The articles of a published work in the order of the Resource API, optionally by initial. */
+export const listDictionaryEntries = async (
+  language: ResourceLanguage,
+  work: string,
+  initial?: string
+): Promise<DictionaryListEntry[]> => {
+  const entries: DictionaryListEntry[] = []
+  let cursor: string | undefined
+  for (let request = 0; request < MAX_LIST_REQUESTS; request += 1) {
+    const response = await readResource<DictionaryEntriesResponseDto>(entriesPath(language, work), {
+      initial,
+      limit: LIST_REQUEST_LIMIT,
+      cursor,
+    })
+    for (const entry of response?.entries ?? []) entries.push({ id: entry.id, word: entry.word })
+    cursor = response?.nextCursor
+    if (!cursor) break
+  }
+  return entries
+}
+
+/** The articles filed under a letter, in the alphabetical order of the language. */
+const listLetterEntries = (
+  language: ResourceLanguage,
+  work: string,
+  letter: string
+): Promise<DictionaryListEntry[]> =>
+  cached(`entries:${language}:${work}:${letter}`, async () => {
+    const lists = await Promise.all(
+      dictionaryLetterInitials(letter, language).map(initial =>
+        listDictionaryEntries(language, work, initial)
+      )
+    )
+    return lists
+      .flat()
+      .sort(
+        (left, right) =>
+          left.word.localeCompare(right.word, language, { sensitivity: 'base' }) ||
+          left.id - right.id
+      )
+  })
+
+/** The letters under which a work has articles. */
+const listDictionaryLetters = (language: ResourceLanguage, work: string): Promise<string[]> =>
+  cached(`letters:${language}:${work}`, async () => {
+    const hasEntries = async (initial: string) => {
+      const page = await readResource<DictionaryEntriesResponseDto>(entriesPath(language, work), {
+        initial,
+        limit: 1,
+      })
+      return (page?.entries.length ?? 0) > 0
+    }
+    const filled = await Promise.all(
+      DICTIONARY_LETTERS.map(async letter => {
+        // An accented initial is only asked for when the plain letter has no article.
+        for (const initial of dictionaryLetterInitials(letter, language)) {
+          if (await hasEntries(initial)) return true
+        }
+        return false
+      })
+    )
+    return DICTIONARY_LETTERS.filter((_, index) => filled[index])
+  })
+
+export type DictionaryIndexPageData = {
+  language: ResourceLanguage
+  works: DictionaryWork[]
+  /** The languages that have dictionaries, hence a page like this one. */
+  languages: ResourceLanguage[]
+}
+
+export const loadDictionaryIndexPage = createServerFn({ method: 'GET' })
+  .validator((data: { language: string }) => data)
+  .handler(async ({ data }): Promise<DictionaryIndexPageData> => {
+    const { language } = data
+    if (!isResourceLanguage(language)) throw notFound()
+    const catalogs = await Promise.all(RESOURCE_LANGUAGES.map(listDictionaryWorks))
+    const works = catalogs[RESOURCE_LANGUAGES.indexOf(language)] ?? []
+    if (!works.length) throw notFound()
+    return {
+      language,
+      works,
+      languages: RESOURCE_LANGUAGES.filter((_, index) => catalogs[index]?.length),
+    }
+  })
+
+export type DictionaryWorkPageData = {
+  language: ResourceLanguage
+  work: DictionaryWork
+  letters: string[]
+}
+
+export const loadDictionaryWorkPage = createServerFn({ method: 'GET' })
+  .validator((data: { language: string; work: string }) => data)
+  .handler(async ({ data }): Promise<DictionaryWorkPageData> => {
+    const { language, work } = await requireDictionaryWork(data)
+    return { language, work, letters: await listDictionaryLetters(language, work.id) }
+  })
+
+export type DictionaryLetterPageData = {
+  language: ResourceLanguage
+  work: DictionaryWork
+  letter: string
+  letters: string[]
+  /** The articles of the page being read. */
+  entries: DictionaryListEntry[]
+  /** How many articles the letter holds across its pages. */
+  entryCount: number
+  page: number
+  pageCount: number
+}
+
+export const loadDictionaryLetterPage = createServerFn({ method: 'GET' })
+  .validator((data: { language: string; work: string; letter: string; page?: number }) => data)
+  .handler(async ({ data }): Promise<DictionaryLetterPageData> => {
+    const { letter, page = 1 } = data
+    if (!DICTIONARY_LETTERS.includes(letter)) throw notFound()
+    if (!Number.isSafeInteger(page) || page < 1) throw notFound()
+    const { language, work } = await requireDictionaryWork(data)
+
+    const [letters, entries] = await Promise.all([
+      listDictionaryLetters(language, work.id),
+      listLetterEntries(language, work.id, letter),
+    ])
+    const pageCount = Math.ceil(entries.length / DICTIONARY_LIST_PAGE_SIZE)
+    if (page > pageCount) throw notFound()
+
+    return {
+      language,
+      work,
+      letter,
+      letters,
+      entries: entries.slice(
+        (page - 1) * DICTIONARY_LIST_PAGE_SIZE,
+        page * DICTIONARY_LIST_PAGE_SIZE
+      ),
+      entryCount: entries.length,
+      page,
+      pageCount,
+    }
+  })
+
+/** The same notion in another dictionary, of either language. */
+export type DictionaryRelatedArticle = {
+  language: ResourceLanguage
+  work: string
+  workTitle: string
+  id: number
+  word: string
+}
+
+/**
+ * The articles the Resource API files under the same notion as an article. A notion is
+ * found by the heading of one of its articles; a heading too short to single it out is
+ * narrowed down by its initial.
+ */
+const listRelatedArticles = async (
+  language: ResourceLanguage,
+  work: string,
+  entry: DictionaryListEntry
+): Promise<DictionaryRelatedArticle[]> => {
+  const isArticle = (source: DictionaryRelatedArticle) =>
+    source.language === language && source.work === work && source.id === entry.id
+  const search = async (initial?: string) => {
+    const directory = await readResource<DictionaryDirectoryResponseDto>(
+      '/v1/dictionaries/directory',
+      { language, search: entry.word, initial, limit: DIRECTORY_REQUEST_LIMIT }
+    )
+    const notions = (directory?.items ?? []).map(item =>
+      item.sources.map(source => ({
+        language: source.resource.language,
+        work: source.resource.work,
+        workTitle: source.title,
+        id: source.id,
+        word: source.word,
+      }))
+    )
+    return {
+      sources: notions.find(sources => sources.some(isArticle)),
+      complete: !directory?.nextCursor,
+    }
+  }
+
+  let found = await search()
+  if (!found.sources && !found.complete) {
+    found = await search([...entry.word.trim().toLowerCase()][0])
+  }
+  return (found.sources ?? [])
+    .filter(source => !isArticle(source))
+    .sort((left, right) => Number(right.language === language) - Number(left.language === language))
+}
+
+export type DictionaryEntryPageData = {
+  language: ResourceLanguage
+  work: DictionaryWork
+  id: number
+  word: string
+  /** The canonical slug, derived from the current heading (ADR-0055). */
+  slug: string
+  html: string
+  description: string
+  /** The letter the article is filed under, with its neighbours in that list. */
+  letter?: string
+  previous?: DictionaryListEntry
+  next?: DictionaryListEntry
+  related: DictionaryRelatedArticle[]
+}
+
+export const loadDictionaryEntryPage = createServerFn({ method: 'GET' })
+  .validator((data: { language: string; work: string; entryId: string }) => data)
+  .handler(async ({ data }): Promise<DictionaryEntryPageData> => {
+    const entryId = parseDictionaryEntryId(data.entryId)
+    if (!entryId) throw notFound()
+    const { language, work } = await requireDictionaryWork(data)
+    const response = await readResource<DictionaryEntryResponseDto>(
+      `${entriesPath(language, work.id)}/by-id/${entryId}`
+    )
+    if (!response) throw notFound()
+    const { id, word, definition } = response.entry
+
+    // The article is complete without its neighbours and related articles: a list that
+    // cannot be read leaves them out instead of failing the page.
+    const letter = dictionaryLetter(word, language)
+    const [siblings, related] = await Promise.all([
+      letter ? listLetterEntries(language, work.id, letter).catch(() => []) : [],
+      listRelatedArticles(language, work.id, { id, word }).catch(() => []),
+    ])
+    const position = siblings.findIndex(sibling => sibling.id === id)
+    const html = renderDictionaryArticleHtml(definition, { language, work: work.id, entryId: id })
+
+    return {
+      language,
+      work,
+      id,
+      word,
+      slug: createDictionaryArticleSlug(word),
+      html,
+      description:
+        dictionaryArticleExcerpt(html, DESCRIPTION_LENGTH) ||
+        truncateText(`${word} – ${work.title}`, DESCRIPTION_LENGTH),
+      letter,
+      previous: position > 0 ? siblings[position - 1] : undefined,
+      next: position >= 0 ? siblings[position + 1] : undefined,
+      related,
+    }
+  })

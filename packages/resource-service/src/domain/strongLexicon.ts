@@ -30,6 +30,7 @@ import type { StrongIdentityKind } from '@bible-strong/resource-domain/strong-id
 
 export type StrongLexiconLanguage = 'fr' | 'en'
 export type StrongLexicalLanguage = 'greek' | 'hebrew'
+export type StrongLexiconBrowseIdentities = 'unified' | 'all'
 export type StrongLexiconModuleId = 'core' | 'resources' | 'entities' | 'simple-fr' | 'simple-en'
 
 export const STRONG_LEXICON_ENTRY_RESPONSE_REVISION =
@@ -85,6 +86,8 @@ export type StrongLexiconRepositoryService = {
     language: StrongLexiconLanguage
     level?: 'simple' | 'detailed'
     lexicalLanguage?: StrongLexicalLanguage
+    /** `all` names every entry; by default one stands for those sharing a unified identity. */
+    identities?: StrongLexiconBrowseIdentities
     search?: string
     prefix?: string
     limit: number
@@ -225,6 +228,7 @@ export const browseStrongLexicon = (input: {
   language: StrongLexiconLanguage
   level?: 'simple' | 'detailed'
   lexicalLanguage?: StrongLexicalLanguage
+  identities?: StrongLexiconBrowseIdentities
   search?: string
   prefix?: string
   limit: number

@@ -10,7 +10,17 @@ import { fileURLToPath, URL } from 'node:url'
 export default defineConfig({
   resolve: { alias: { '@': fileURLToPath(new URL('.', import.meta.url)) } },
   plugins: [
-    nitro(),
+    nitro({
+      vercel: {
+        functions: {
+          // Pages are rendered from the Resource API, whose database is in Frankfurt: a
+          // function on another continent pays that distance on every read.
+          regions: ['fra1'],
+          // A page not yet cached reads the API several times in a row.
+          maxDuration: 30,
+        },
+      },
+    }),
     tanstackStart(),
     tailwindcss(),
     svgr(),

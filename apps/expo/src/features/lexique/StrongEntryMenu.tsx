@@ -9,6 +9,7 @@ import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess
 import { createStrongEndpoint } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import generateUUID from '~helpers/generateUUID'
+import { getStrongShareUrl } from '~helpers/publicSiteLinks'
 import { createStrongIdentity } from '~helpers/strongIdentities'
 import { unifiedTagsModalAtom } from '~state/app'
 import type { StrongDetailRouteContext } from './strongDetailRoutes'
@@ -30,7 +31,7 @@ const StrongEntryMenu = ({ context, entry }: Props) => {
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const openEntityRelations = useOpenEntityRelations()
   const openInNewTab = useOpenInNewTab()
-  const { menuTitle, toggleLanguage } = useStrongLexiconLanguage()
+  const { language, menuTitle, toggleLanguage } = useStrongLexiconLanguage()
   const stepStrongCode = entry.stepCode
   const stepStrongIdentity = createStrongIdentity(stepStrongCode, entry.language)
   const strongEndpoint = createStrongEndpoint({
@@ -45,7 +46,7 @@ const StrongEntryMenu = ({ context, entry }: Props) => {
       `${stepStrongCode} — ${entry.gloss}`,
       `${entry.original} · ${entry.transliteration}`,
       entry.definitionHtml ? stripHtml(entry.definitionHtml) : '',
-      'https://bible-strong.app',
+      getStrongShareUrl(stepStrongCode, entry.language, language),
     ].filter(Boolean)
     Share.share({ message: lines.join('\n\n') })
   }

@@ -811,7 +811,8 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setInterlinearMode = (
     interlinearMode: InterlinearMode,
     interlinearLocale?: ResourceLanguage
-  ) =>
+  ) => {
+    if (routeNavigation?.changeInterlinearMode?.(interlinearMode, interlinearLocale)) return
     setBibleTab(
       produce(draft => {
         draft.data.interlinearMode = interlinearMode
@@ -819,6 +820,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         draft.data.pendingModeAcquisition = undefined
       })
     )
+  }
 
   const startBibleModeAcquisition = (acquisition: PendingBibleModeAcquisition) =>
     setBibleTab(
@@ -842,6 +844,19 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         })
       )
       routeNavigation.changeStrongMode(acquisition.mode)
+      return
+    }
+    if (
+      succeeded &&
+      acquisition?.kind === 'interlinear' &&
+      current.selectedVersion === 'BHG' &&
+      routeNavigation?.changeInterlinearMode?.(acquisition.mode, acquisition.locale)
+    ) {
+      setBibleTab(
+        produce(draft => {
+          draft.data.pendingModeAcquisition = undefined
+        })
+      )
       return
     }
     setBibleTab(

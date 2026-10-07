@@ -5,7 +5,6 @@ import CommentaryChapterScreen from './CommentaryChapterScreen'
 import CommentaryEntryScreen from './CommentaryEntryScreen'
 import { createCommentaryProjectionId } from './commentarySelection'
 import { buildPublicCommentaryPath, parsePublicCommentaryRoute } from './publicCommentaryRoutes'
-import PublicPage from '~features/app/PublicPage'
 
 export const PublicCommentaryRouteScreen = ({ entry }: { entry: boolean }) => {
   const router = useRouter()
@@ -41,34 +40,26 @@ export const PublicCommentaryRouteScreen = ({ entry }: { entry: boolean }) => {
     ...(route.sectionId ? { sectionId: route.sectionId } : {}),
     ...(route.focusVerse ? { focusVerse: String(route.focusVerse) } : {}),
   }
-  return (
-    <PublicPage title={`${route.resourceId} · ${route.book}:${route.chapter}`}>
-      {entry ? (
-        <CommentaryEntryScreen
-          routeParams={routeParams}
-          onOpenChapter={() =>
-            router.push(buildPublicCommentaryPath({ ...route, sectionId: undefined }))
-          }
-          onSectionChange={sectionId =>
-            router.replace(buildPublicCommentaryPath({ ...route, sectionId }))
-          }
-        />
-      ) : (
-        <CommentaryChapterScreen
-          routeParams={routeParams}
-          onChapterChange={(book, chapter) =>
-            router.push(
-              buildPublicCommentaryPath({ ...route, book, chapter, focusVerse: undefined })
-            )
-          }
-          onClearFocus={() =>
-            router.replace(buildPublicCommentaryPath({ ...route, focusVerse: undefined }))
-          }
-          onOpenSection={sectionId =>
-            router.push(buildPublicCommentaryPath({ ...route, sectionId }))
-          }
-        />
-      )}
-    </PublicPage>
+  return entry ? (
+    <CommentaryEntryScreen
+      routeParams={routeParams}
+      onOpenChapter={() =>
+        router.push(buildPublicCommentaryPath({ ...route, sectionId: undefined }))
+      }
+      onSectionChange={sectionId =>
+        router.replace(buildPublicCommentaryPath({ ...route, sectionId }))
+      }
+    />
+  ) : (
+    <CommentaryChapterScreen
+      routeParams={routeParams}
+      onChapterChange={(book, chapter) =>
+        router.push(buildPublicCommentaryPath({ ...route, book, chapter, focusVerse: undefined }))
+      }
+      onClearFocus={() =>
+        router.replace(buildPublicCommentaryPath({ ...route, focusVerse: undefined }))
+      }
+      onOpenSection={sectionId => router.push(buildPublicCommentaryPath({ ...route, sectionId }))}
+    />
   )
 }

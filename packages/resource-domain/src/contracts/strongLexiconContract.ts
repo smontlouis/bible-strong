@@ -13,6 +13,9 @@ export const StrongLexiconModuleIdSchema = Schema.Literal(
   'simple-en'
 )
 export const StrongLexiconIdentityKind = Schema.Literal('strong', 'estrong', 'dstrong', 'ustrong')
+// Which entries a lexicon list names: one representative per unified identity, the default,
+// or every entry, including those that share a unified identity with another.
+export const StrongLexiconBrowseIdentities = Schema.Literal('unified', 'all')
 
 export class StrongLexiconEntryPath extends Schema.Class<StrongLexiconEntryPath>(
   'StrongLexiconEntryPath'
@@ -68,6 +71,7 @@ export class StrongLexiconBrowseQuery extends Schema.Class<StrongLexiconBrowseQu
   language: StrongLexiconLanguage,
   level: Schema.optional(Schema.Literal('simple', 'detailed')),
   lexicalLanguage: Schema.optional(StrongLexicalLanguage),
+  identities: Schema.optional(StrongLexiconBrowseIdentities),
   search: Schema.optional(Schema.String),
   prefix: Schema.optional(Schema.String),
   limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 500))),

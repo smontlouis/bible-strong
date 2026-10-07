@@ -47,7 +47,10 @@ import { getScaledStrongTextStyle, type StrongReadingTypography } from './strong
 import { formatStrongLemmaPartOfSpeech } from './strongLemmaPartOfSpeech'
 import { isStrongOriginalUnnamed } from './strongOriginalPresentation'
 import StrongPassageMediaSection from './StrongPassageMediaSection'
-import { isSameStrongDefinition, presentStrongDefinitions } from './strongDefinitionPresentation'
+import {
+  isSameStrongDefinition,
+  presentStrongDefinitions,
+} from '@bible-strong/resource-domain/strong-definition-presentation'
 type Anchor = 'context' | 'definition' | 'media' | 'entity' | 'related' | 'concordance'
 
 type Props = {

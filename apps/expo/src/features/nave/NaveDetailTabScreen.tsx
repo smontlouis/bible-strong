@@ -23,6 +23,8 @@ import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
+import { getPublicSiteUrl } from '~helpers/publicSiteLinks'
+import { buildPublicNavePath } from './publicNaveRoutes'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { type HTMLViewLinkPayload } from '~common/htmlContentTypes'
@@ -198,7 +200,9 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
         .text.replace(/&#/g, '\\')
         .replace(/\\x([0-9A-F]+);/gi, (_, hex: string) => {
           return String.fromCharCode(parseInt(hex, 16))
-        })} \n\nLa suite sur https://bible-strong.app`
+        })} \n\nLa suite sur ${getPublicSiteUrl(() =>
+        buildPublicNavePath({ language: naveResourceLanguage, topic: naveItem.normalizedName })
+      )}`
       Share.share({ message })
     } catch (e) {
       toast.error('Erreur lors du partage.')

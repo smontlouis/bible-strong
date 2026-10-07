@@ -1,0 +1,1154 @@
+/* Public resource pages (Strong lexicon, …). Palette shared with the landing page. */
+
+/*
+ * Reading pages are mostly text: a late font swap would move the whole page. The same font
+ * files as the landing page are declared as optional and preloaded by the routes, so a
+ * visitor either gets them on the first paint or keeps the fallback for that page view.
+ */
+@font-face {
+  font-display: optional;
+  font-family: 'Literata Reading';
+  src: url('/fonts/LiterataBook.otf') format('opentype');
+  font-weight: 400;
+}
+@font-face {
+  font-display: optional;
+  font-family: 'Pulp Reading';
+  src: url('/fonts/UpType - Pulp Display Regular.otf') format('opentype');
+  font-weight: 400;
+}
+@font-face {
+  font-display: optional;
+  font-family: 'Pulp Reading';
+  src: url('/fonts/UpType - Pulp Display Medium.otf') format('opentype');
+  font-weight: 500;
+}
+@font-face {
+  font-display: optional;
+  font-family: 'Pulp Reading';
+  src: url('/fonts/UpType - Pulp Display Semi Bold.otf') format('opentype');
+  font-weight: 600;
+}
+
+.resource-shell {
+  --resource-canvas: #f4f7ff;
+  --resource-surface: #ffffff;
+  --resource-surface-raised: #ffffff;
+  --resource-ink: #101b35;
+  --resource-muted: #58657a;
+  --resource-line: rgb(16 27 53 / 12%);
+  --resource-accent: #496fda;
+  --resource-accent-soft: #e6edff;
+  --resource-accent-ink: #173a8a;
+  --resource-cta: #3f63cf;
+  --resource-cta-ink: #f9fbff;
+  --resource-mark: #fff1b8;
+  --resource-chip-shadow: rgb(0 0 0 / 16%);
+  /* The header controls are shared with the landing page and read its tokens. */
+  --landing-canvas: var(--resource-canvas);
+  --landing-surface: var(--resource-surface);
+  --landing-surface-raised: var(--resource-surface-raised);
+  --landing-muted: var(--resource-muted);
+  --landing-line: var(--resource-line);
+  --landing-accent: var(--resource-accent);
+  --landing-accent-ink: var(--resource-accent-ink);
+  min-height: 100vh;
+  background: var(--resource-canvas);
+  color: var(--resource-ink);
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+}
+
+.resource-shell .font-serif,
+.resource-shell .resource-prose {
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+}
+
+/* "auto" follows the system; an explicit choice (site theme cookie) wins. */
+@media (prefers-color-scheme: dark) {
+  .resource-shell:not([data-theme='light']) {
+    --resource-canvas: #0e1521;
+    --resource-surface: #121b2a;
+    --resource-surface-raised: #172235;
+    --resource-ink: #edf2ff;
+    --resource-muted: #abb7c9;
+    --resource-line: rgb(170 192 232 / 16%);
+    --resource-accent: #7e9cf2;
+    --resource-accent-soft: #17294c;
+    --resource-accent-ink: #b9c9fa;
+    --resource-cta: #7e9cf2;
+    --resource-cta-ink: #0e1521;
+    --resource-mark: #5b4a12;
+    --resource-chip-shadow: rgb(255 255 255 / 12%);
+  }
+}
+
+.resource-shell[data-theme='dark'] {
+  --resource-canvas: #0e1521;
+  --resource-surface: #121b2a;
+  --resource-surface-raised: #172235;
+  --resource-ink: #edf2ff;
+  --resource-muted: #abb7c9;
+  --resource-line: rgb(170 192 232 / 16%);
+  --resource-accent: #7e9cf2;
+  --resource-accent-soft: #17294c;
+  --resource-accent-ink: #b9c9fa;
+  --resource-cta: #7e9cf2;
+  --resource-cta-ink: #0e1521;
+  --resource-mark: #5b4a12;
+  --resource-chip-shadow: rgb(255 255 255 / 12%);
+}
+
+/* The page behind the shell (overscroll, short pages) takes the same canvas. */
+html:has(.resource-shell) {
+  background: #f4f7ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:has(.resource-shell:not([data-theme='light'])) {
+    background: #0e1521;
+  }
+}
+
+html:has(.resource-shell[data-theme='dark']) {
+  background: #0e1521;
+}
+
+.resource-header {
+  border-bottom: 1px solid var(--resource-line);
+  background: color-mix(in srgb, var(--resource-canvas) 88%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.resource-cta {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--resource-cta);
+  color: var(--resource-cta-ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.resource-cta:hover {
+  transform: translateY(-1px);
+}
+
+.resource-card {
+  border: 1px solid var(--resource-line);
+  border-radius: 20px;
+  background: var(--resource-surface);
+}
+
+.resource-muted {
+  color: var(--resource-muted);
+}
+
+.resource-link {
+  color: var(--resource-accent-ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--resource-accent) 45%, transparent);
+  text-underline-offset: 3px;
+}
+
+.resource-link:hover {
+  text-decoration-color: var(--resource-accent);
+}
+
+.resource-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--resource-accent-soft);
+  color: var(--resource-accent-ink);
+  font-size: 0.85rem;
+}
+
+.resource-prose {
+  font-size: 1.06rem;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+.resource-prose a {
+  color: var(--resource-accent-ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--resource-accent) 45%, transparent);
+  text-underline-offset: 3px;
+}
+
+.resource-prose b,
+.resource-prose strong {
+  font-weight: 600;
+}
+
+.resource-prose mark {
+  padding: 0 3px;
+  border-radius: 4px;
+  background: var(--resource-mark);
+  color: inherit;
+}
+
+.resource-details > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.resource-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.resource-details > summary::after {
+  content: '+';
+  float: right;
+  color: var(--resource-muted);
+}
+
+.resource-details[open] > summary::after {
+  content: '–';
+}
+
+.resource-chip[aria-current] {
+  background: var(--resource-accent);
+  color: var(--resource-canvas);
+  font-weight: 600;
+}
+
+a.resource-chip:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Reading text: paragraphs where the version marks them, one per verse otherwise. */
+.bible-text .bible-p {
+  margin-top: 0.9em;
+}
+
+.bible-text .bible-p--verse {
+  margin-top: 0.35em;
+}
+
+/* Poetry: stanzas of lines, wrapped lines hanging under their first word. */
+.bible-text .bible-lg {
+  margin-top: 0.9em;
+}
+
+.bible-text .bible-l {
+  display: block;
+  padding-inline-start: 1.6em;
+  text-indent: -1.6em;
+}
+
+.bible-text .bible-l--2 {
+  margin-inline-start: 1.6em;
+}
+
+.bible-text .bible-l--3,
+.bible-text .bible-l--4 {
+  margin-inline-start: 3.2em;
+}
+
+.bible-text .bible-bold {
+  font-weight: 600;
+}
+
+/* A verse anchor must land below the sticky header and its controls. */
+.bible-text .bible-verse-number {
+  scroll-margin-top: 140px;
+}
+
+.bible-text--passage {
+  font-size: 1.3rem;
+}
+
+.bible-heading {
+  margin: 1.6em 0 0.5em;
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.resource-prose a.bible-verse-number {
+  margin-inline-end: 0.5em;
+  color: var(--resource-muted);
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.72em;
+  font-weight: 600;
+  text-decoration: none;
+  vertical-align: 0.3em;
+  /* Poetry lines hang their wrapped text; the number stays with the first word. */
+  text-indent: 0;
+}
+
+.resource-prose a.bible-verse-number:hover {
+  color: var(--resource-accent-ink);
+}
+
+/* Words of Jesus, as in red-letter editions. */
+.bible-text .bible-wj {
+  color: color-mix(in srgb, #d33a3a 78%, var(--resource-ink));
+}
+
+/* Strong numbers printed after their word, as in the study workspace. */
+.resource-prose a.strong-ref {
+  margin-inline: 3px;
+  padding: 2px 5px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px 0 var(--resource-chip-shadow);
+  color: var(--resource-accent-ink);
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.72em;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.resource-prose a.strong-ref:hover {
+  background: var(--resource-accent-soft);
+}
+
+/* An original word the translation left out: a dot instead of a number. */
+.resource-prose a.strong-ref--untranslated {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  padding: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--resource-accent) 0 28%, var(--resource-accent-soft) 32%);
+  box-shadow: none;
+  vertical-align: -0.12em;
+}
+
+/* The card opened by a Strong number or a note: anchored on large screens, a sheet on small ones. */
+.resource-popover {
+  position: fixed;
+  inset: auto;
+  max-height: min(60vh, 460px);
+  margin: 0;
+  padding: 16px;
+  overflow-y: auto;
+  border: 1px solid var(--resource-line);
+  border-radius: 18px;
+  background: var(--resource-surface-raised);
+  box-shadow: 0 24px 60px rgb(8 14 28 / 26%);
+  color: var(--resource-ink);
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+}
+
+.resource-popover[data-placement='sheet'] {
+  inset: auto 0 0;
+  width: 100%;
+  max-width: none;
+  max-height: 70vh;
+  border-radius: 20px 20px 0 0;
+}
+
+.strong-popover__definition {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--resource-line);
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+/* Bible sub-header: book, version and Strong controls, as in the study workspace. */
+.bible-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The reading mode sits at the far end of the bar, apart from the passage it applies to. */
+.bible-nav > .bible-nav__mode {
+  margin-inline-start: auto;
+}
+
+.bible-nav__label {
+  color: var(--resource-muted);
+  font-weight: 500;
+}
+
+@media (max-width: 520px) {
+  .bible-nav__label {
+    display: none;
+  }
+}
+
+/* On a narrow screen the three controls share the row and shorten their label. */
+.bible-nav > details {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.bible-nav__trigger {
+  display: inline-flex;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  border: 1px solid var(--resource-line);
+  border-radius: 999px;
+  background: var(--resource-surface);
+  color: var(--resource-ink);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.bible-nav__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.bible-nav__trigger:hover,
+.bible-nav details[open] > .bible-nav__trigger {
+  border-color: var(--resource-accent);
+}
+
+a.bible-nav__trigger[aria-current] {
+  border-color: var(--resource-cta);
+  background: var(--resource-cta);
+  color: var(--resource-cta-ink);
+}
+
+.bible-nav__panel {
+  position: absolute;
+  top: 100%;
+  right: 20px;
+  left: 20px;
+  z-index: 20;
+  max-height: min(70vh, 560px);
+  padding: 16px;
+  overflow-y: auto;
+  border: 1px solid var(--resource-line);
+  border-radius: 20px;
+  background: var(--resource-surface-raised);
+  box-shadow: 0 24px 60px rgb(8 14 28 / 22%);
+}
+
+.bible-nav__title {
+  margin: 14px 0 8px;
+  color: var(--resource-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.bible-nav__panel section:first-child > .bible-nav__title {
+  margin-top: 0;
+}
+
+.bible-nav__back {
+  color: var(--resource-accent-ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bible-nav__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 2px 8px;
+}
+
+.bible-nav__list--wide {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.bible-nav__item {
+  display: block;
+  overflow: hidden;
+  padding: 7px 10px;
+  border-radius: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bible-nav__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 6px;
+}
+
+.bible-nav__cell {
+  display: grid;
+  height: 40px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--resource-accent-soft);
+  color: var(--resource-accent-ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.bible-nav__item:hover,
+.bible-nav__item[aria-current] {
+  background: var(--resource-accent-soft);
+  color: var(--resource-accent-ink);
+}
+
+.bible-nav__cell:hover,
+.bible-nav__cell[aria-current] {
+  background: var(--resource-accent);
+  color: var(--resource-canvas);
+}
+
+/* The commentaries shown in the text: a compact trigger and a list of boxes. */
+.bible-nav__comments-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .bible-nav__comments-label {
+    display: none;
+  }
+}
+
+/* On a phone the bar holds four controls: each gives up a little room. */
+@media (max-width: 520px) {
+  .bible-nav {
+    gap: 6px;
+  }
+
+  .bible-nav__trigger {
+    gap: 4px;
+    padding: 0 10px;
+  }
+
+  .bible-nav__comments .bible-nav__badge {
+    padding: 0;
+    border: 0;
+    color: var(--resource-accent-ink);
+    font-size: 0.78rem;
+  }
+}
+
+.bible-nav__check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.bible-nav__check input {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  accent-color: var(--resource-accent);
+}
+
+.bible-nav__check:has(input:disabled) {
+  color: var(--resource-muted);
+  cursor: default;
+}
+
+/* Comments read between the verses: where each comes from and how it begins. */
+.bible-comments {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 22px;
+}
+
+.resource-prose a.bible-comment {
+  display: block;
+  padding: 10px 14px;
+  border: 1px solid var(--resource-line);
+  border-inline-start: 3px solid var(--resource-accent);
+  border-radius: 4px 12px 12px 4px;
+  background: var(--resource-surface);
+  color: var(--resource-ink);
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.resource-prose a.bible-comment:hover {
+  border-color: var(--resource-accent);
+  background: var(--resource-accent-soft);
+}
+
+.bible-comment__source {
+  display: block;
+  color: var(--resource-accent-ink);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* Three lines at most; the whole comment opens from them. */
+.bible-comment__excerpt {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 2px;
+  /* The passage stays the first thing read; a comment is quieter. */
+  color: var(--resource-muted);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+/*
+ * A whole comment, read over the passage: a card on a wide screen, a sheet on a phone.
+ * The sign-in styles the site also loads position every dialog in the page, where opening
+ * one would scroll the reader to the top: this one is held to the window.
+ */
+.bible-comment-dialog {
+  position: fixed;
+  inset: 0;
+  width: min(720px, calc(100vw - 32px));
+  height: fit-content;
+  max-height: min(82vh, 760px);
+  margin: auto;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--resource-line);
+  border-radius: 18px;
+  background: var(--resource-surface-raised);
+  box-shadow: 0 24px 60px rgb(8 14 28 / 26%);
+  color: var(--resource-ink);
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+}
+
+.bible-comment-dialog::backdrop {
+  background: rgb(8 14 28 / 46%);
+}
+
+.bible-comment-dialog__content {
+  padding: 0 22px 22px;
+}
+
+.bible-comment-dialog__header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 -22px 14px;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--resource-line);
+  background: var(--resource-surface-raised);
+}
+
+.bible-comment-dialog__close {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--resource-accent-soft);
+  color: var(--resource-accent-ink);
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .bible-comment-dialog {
+    width: 100%;
+    max-width: none;
+    max-height: 86vh;
+    margin: auto 0 0;
+    border-radius: 20px 20px 0 0;
+  }
+}
+
+/* Words a translation added for the sense, and the divine name in small capitals. */
+.bible-text .bible-added {
+  font-style: italic;
+}
+
+.bible-text .bible-divine-name {
+  font-variant-caps: small-caps;
+}
+
+/* Interlinear readings: each aligned unit is a small column of stacked lines. */
+.interlinear {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px 16px;
+  margin-top: 1.1em;
+  scroll-margin-top: 140px;
+}
+
+.interlinear__word {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.interlinear__text {
+  font-size: 1.12em;
+}
+
+.bible-text--interlinear .interlinear__text {
+  font-size: 1.5em;
+  line-height: 1.5;
+}
+
+.interlinear__original {
+  color: var(--resource-accent-ink);
+  font-size: 1.05em;
+}
+
+.interlinear__transliteration,
+.interlinear__gloss,
+.interlinear__strong {
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.72em;
+  line-height: 1.35;
+}
+
+.interlinear__transliteration {
+  color: var(--resource-muted);
+  font-style: italic;
+}
+
+.interlinear__strong {
+  display: flex;
+  gap: 6px;
+}
+
+.resource-prose .interlinear__strong a {
+  color: var(--resource-muted);
+  text-decoration: none;
+}
+
+.resource-prose .interlinear__strong a:hover {
+  color: var(--resource-accent-ink);
+  text-decoration: underline;
+}
+
+/* Reading-aid badges of the version selector, and its two-line mode entries. */
+.bible-nav__item--version {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bible-nav__item--mode {
+  white-space: normal;
+}
+
+.bible-nav__badge {
+  flex: none;
+  padding: 1px 7px;
+  border: 1px solid var(--resource-line);
+  border-radius: 999px;
+  color: var(--resource-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Psalm titles, acrostic letters and parallel passages are lighter than section titles. */
+.bible-heading--psalm,
+.bible-heading--parallel,
+.bible-heading--scope {
+  color: var(--resource-muted);
+  font-size: 0.95rem;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.bible-heading--acrostic {
+  color: var(--resource-muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.bible-heading--majorSection {
+  font-size: 1.2rem;
+}
+
+/*
+ * A note mark stays inline so it never changes the line height; its padding only widens
+ * the area that answers a tap.
+ */
+.resource-prose a.bible-note-ref {
+  margin-inline: -2px 1px;
+  padding: 7px 5px;
+  border-radius: 8px;
+  color: var(--resource-accent-ink);
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.68em;
+  font-weight: 600;
+  line-height: 0;
+  text-decoration: none;
+  vertical-align: 0.45em;
+  scroll-margin-top: 140px;
+}
+
+.resource-prose a.bible-note-ref:hover,
+.resource-prose a.bible-note-ref[aria-expanded='true'] {
+  background: var(--resource-accent-soft);
+}
+
+.bible-note-popover__body {
+  margin-top: 10px;
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.bible-notes ol {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.bible-notes li {
+  scroll-margin-top: 140px;
+}
+
+/* Lexicon lists: the alphabet of a lexicon and the entries filed under a letter. */
+.strong-letters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.strong-letters__letter {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--resource-accent-soft);
+  color: var(--resource-accent-ink);
+  font-weight: 600;
+}
+
+span.strong-letters__letter {
+  background: transparent;
+  color: var(--resource-line);
+}
+
+a.strong-letters__letter:hover,
+.strong-letters__letter[aria-current] {
+  background: var(--resource-accent);
+  color: var(--resource-canvas);
+}
+
+.strong-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2px 16px;
+}
+
+.strong-list__entry {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+.strong-list__entry:hover {
+  background: var(--resource-accent-soft);
+}
+
+.strong-list__gloss {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.strong-list__original {
+  flex: none;
+  color: var(--resource-accent-ink);
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+}
+
+.strong-list__code {
+  flex: none;
+  min-width: 3.4em;
+  color: var(--resource-muted);
+  font-size: 0.78rem;
+  text-align: end;
+}
+
+/* The senses of a classical number: a row says what tells a sense apart and opens it. */
+.strong-senses {
+  display: grid;
+  gap: 10px;
+}
+
+.strong-senses__sense {
+  display: grid;
+  gap: 4px;
+  padding: 14px 18px;
+  border-radius: 14px;
+}
+
+.strong-senses__sense:hover {
+  border-color: var(--resource-accent);
+  background: var(--resource-accent-soft);
+}
+
+.strong-senses__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.strong-senses__gloss {
+  min-width: 0;
+  flex: 1;
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.strong-senses__original {
+  color: var(--resource-accent-ink);
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+}
+
+.strong-senses__code {
+  flex: none;
+  margin-inline-start: auto;
+  color: var(--resource-muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.strong-senses__summary {
+  line-height: 1.55;
+}
+
+.strong-senses__verses {
+  color: var(--resource-muted);
+  font-size: 0.85rem;
+}
+
+/* Numbered pages of a list. */
+.resource-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 16px;
+  margin-top: 40px;
+}
+
+.resource-pagination__pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.resource-pagination__page {
+  display: grid;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 8px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--resource-accent-soft);
+  color: var(--resource-accent-ink);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.resource-pagination__page:hover,
+.resource-pagination__page[aria-current] {
+  background: var(--resource-accent);
+  color: var(--resource-canvas);
+}
+
+.resource-pagination__gap {
+  color: var(--resource-muted);
+}
+
+.resource-pagination__step {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  color: var(--resource-accent-ink);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+/* The menu of the sections of the site, in the header of every resource page. */
+.resource-menu__trigger {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: var(--resource-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.resource-menu__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.resource-menu__trigger:hover,
+.resource-menu[open] > .resource-menu__trigger {
+  background: var(--resource-accent-soft);
+  color: var(--resource-accent-ink);
+}
+
+.resource-menu__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 20px;
+  z-index: 30;
+  width: min(360px, calc(100vw - 40px));
+  padding: 8px;
+  border: 1px solid var(--resource-line);
+  border-radius: 20px;
+  background: var(--resource-surface-raised);
+  box-shadow: 0 24px 60px rgb(8 14 28 / 22%);
+}
+
+.resource-menu__item {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.resource-menu__item:hover,
+.resource-menu__item[aria-current] {
+  background: var(--resource-accent-soft);
+}
+
+/* The path leading to a page. */
+.resource-breadcrumbs {
+  margin-bottom: 28px;
+  color: var(--resource-muted);
+  font-size: 0.85rem;
+}
+
+.resource-breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 0;
+}
+
+.resource-breadcrumbs li + li::before {
+  margin: 0 8px;
+  content: '›';
+}
+
+.resource-breadcrumbs a:hover {
+  color: var(--resource-accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.resource-footer {
+  border-top: 1px solid var(--resource-line);
+}
+
+.resource-footer__sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  font-weight: 600;
+}
+
+.resource-footer__sections a:hover {
+  color: var(--resource-accent-ink);
+}
+
+/* Entry pages: a card or a chip that is a link, and the books of a version. */
+.resource-card--link {
+  transition: border-color 0.15s;
+}
+
+.resource-card--link:hover {
+  border-color: var(--resource-accent);
+}
+
+.resource-chip--action {
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.bible-books > li {
+  border-bottom: 1px solid var(--resource-line);
+}
+
+.bible-book > summary {
+  padding: 13px 4px;
+}
+
+.bible-book > summary:hover {
+  color: var(--resource-accent-ink);
+}
+
+.resource-breadcrumbs a,
+.resource-breadcrumbs span {
+  display: inline-block;
+  padding-block: 2px;
+}
+
+.bible-notes__back {
+  padding-inline: 4px;
+  color: var(--resource-accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Cross-references inside a note, in the list under the text and in its card. */
+.bible-notes li span a,
+.bible-note-popover__body a {
+  color: var(--resource-accent-ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--resource-accent) 45%, transparent);
+  text-underline-offset: 3px;
+}
+
+/* A phone keeps the brand, the menu, the app entry, the theme and the language on one row. */
+@media (max-width: 480px) {
+  .resource-header__actions {
+    gap: 8px;
+  }
+
+  .resource-menu__trigger {
+    padding: 0 8px;
+  }
+
+  .resource-cta {
+    padding: 0 14px;
+  }
+}
+
+/* What the app adds to the page, after its content. */
+.resource-invite {
+  margin-top: 72px;
+  padding: 22px 24px;
+  border-radius: 20px;
+  background: var(--resource-accent-soft);
+}
+
+.resource-invite p {
+  color: var(--resource-muted);
+}

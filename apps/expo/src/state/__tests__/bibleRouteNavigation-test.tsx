@@ -61,7 +61,8 @@ jest.mock('~helpers/storage', () => ({
   },
 }))
 
-const adapter: jest.Mocked<BibleRouteNavigationAdapter> = {
+// The optional interlinear handler is left out: these routes do not offer that reading.
+const adapter: jest.Mocked<Omit<BibleRouteNavigationAdapter, 'changeInterlinearMode'>> = {
   openChapter: jest.fn(),
   replaceWithChapter: jest.fn(),
   changeVersion: jest.fn(),

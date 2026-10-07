@@ -2743,6 +2743,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@bible-strong/site@workspace:apps/site"
   dependencies:
+    "@bible-strong/bible-reference-parser": "workspace:*"
+    "@bible-strong/resource-catalog": "workspace:*"
+    "@bible-strong/resource-domain": "workspace:*"
     "@gsap/react": "npm:^2.1.2"
     "@mdx-js/react": "npm:^3.0.0"
     "@mdx-js/rollup": "npm:^3.1.1"

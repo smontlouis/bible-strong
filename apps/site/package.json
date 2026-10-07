@@ -19,6 +19,9 @@
     }
   },
   "dependencies": {
+    "@bible-strong/bible-reference-parser": "workspace:*",
+    "@bible-strong/resource-catalog": "workspace:*",
+    "@bible-strong/resource-domain": "workspace:*",
     "@gsap/react": "^2.1.2",
     "@mdx-js/react": "^3.0.0",
     "@radix-ui/react-dialog": "^1.1.15",

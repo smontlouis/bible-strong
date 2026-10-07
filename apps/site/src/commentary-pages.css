@@ -1,0 +1,90 @@
+/* Styles specific to the commentary pages. Shared styles live in resource-pages.css. */
+
+/* A section address resolves to its anchor: the sticky header must not cover it. */
+.commentary-range,
+.commentary-section {
+  scroll-margin-top: 88px;
+}
+
+/* Several commentaries on the same verses are read one after the other. */
+.commentary-section + .commentary-section {
+  margin-top: 2em;
+  padding-top: 2em;
+  border-top: 1px solid var(--resource-line);
+}
+
+/* Source markup: paragraphs, headings, lists, quotations, notes and tables. */
+.commentary-section > * + * {
+  margin-top: 0.9em;
+}
+
+.commentary-section :is(h3, h4, h5, h6) {
+  margin-top: 1.6em;
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.commentary-section > :is(h3, h4, h5, h6):first-child {
+  margin-top: 0;
+}
+
+.commentary-section h3 {
+  font-size: 1.12rem;
+}
+
+.commentary-section :is(h4, h5, h6) {
+  color: var(--resource-muted);
+  font-size: 0.98rem;
+}
+
+.commentary-section :is(ul, ol) {
+  padding-inline-start: 1.4em;
+}
+
+.commentary-section ul {
+  list-style: disc;
+}
+
+.commentary-section ol {
+  list-style: decimal;
+}
+
+.commentary-section li + li {
+  margin-top: 0.35em;
+}
+
+.commentary-section blockquote {
+  padding-inline-start: 1em;
+  border-inline-start: 3px solid var(--resource-line);
+  color: var(--resource-muted);
+}
+
+.commentary-section small {
+  color: var(--resource-muted);
+  font-size: 0.86em;
+}
+
+.commentary-section sup {
+  color: var(--resource-muted);
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.68em;
+}
+
+.commentary-section hr {
+  border-color: var(--resource-line);
+}
+
+/* A wide table scrolls within the text column instead of widening the page. */
+.commentary-section table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  font-size: 0.92rem;
+}
+
+.commentary-section :is(td, th) {
+  padding: 4px 10px;
+  border: 1px solid var(--resource-line);
+  vertical-align: top;
+}

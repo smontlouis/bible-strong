@@ -1,0 +1,150 @@
+/* Styles specific to the dictionary pages. Shared styles live in resource-pages.css. */
+
+/* A work in the list of dictionaries: the whole card opens the work named by its title. */
+.dictionary-work {
+  position: relative;
+}
+
+.dictionary-work__link::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+}
+
+.dictionary-work:focus-within {
+  border-color: var(--resource-accent);
+}
+
+/* Where the text of a work comes from. */
+.dictionary-details {
+  display: grid;
+  gap: 14px;
+}
+
+.dictionary-details dt {
+  color: var(--resource-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dictionary-details dd {
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+}
+
+/* An article: the block formatting kept from its source. */
+.dictionary-prose > :first-child {
+  margin-top: 0;
+}
+
+.dictionary-prose p,
+.dictionary-prose ul,
+.dictionary-prose ol,
+.dictionary-prose dl,
+.dictionary-prose blockquote,
+.dictionary-prose table {
+  margin-top: 0.9em;
+}
+
+.dictionary-prose h2,
+.dictionary-prose h3,
+.dictionary-prose h4,
+.dictionary-prose h5 {
+  margin-top: 1.7em;
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.dictionary-prose h2 {
+  font-size: 1.3rem;
+}
+
+.dictionary-prose h3 {
+  font-size: 1.12rem;
+}
+
+.dictionary-prose ul,
+.dictionary-prose ol {
+  padding-left: 1.4em;
+}
+
+.dictionary-prose ul {
+  list-style: disc;
+}
+
+.dictionary-prose ol {
+  list-style: decimal;
+}
+
+.dictionary-prose li + li,
+.dictionary-prose li > ul,
+.dictionary-prose li > ol {
+  margin-top: 0.35em;
+}
+
+.dictionary-prose li > p:first-child {
+  margin-top: 0;
+}
+
+.dictionary-prose dt {
+  font-weight: 600;
+}
+
+.dictionary-prose blockquote {
+  padding-left: 1em;
+  border-left: 3px solid var(--resource-line);
+  color: var(--resource-muted);
+}
+
+.dictionary-prose hr {
+  margin: 1.6em 0;
+  border-color: var(--resource-line);
+}
+
+.dictionary-prose sup,
+.dictionary-prose sub {
+  font-size: 0.72em;
+  line-height: 0;
+}
+
+/* A wide table scrolls within the column instead of widening the page. */
+.dictionary-prose table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.dictionary-prose th,
+.dictionary-prose td {
+  padding: 6px 10px;
+  border: 1px solid var(--resource-line);
+  text-align: start;
+  vertical-align: top;
+}
+
+/* The articles before and after the one being read, the next one on the right. */
+.dictionary-neighbours {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dictionary-neighbours__next {
+  grid-column: 2;
+  text-align: end;
+}
+
+@media (max-width: 480px) {
+  .dictionary-neighbours {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dictionary-neighbours__next {
+    grid-column: 1;
+  }
+}

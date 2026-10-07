@@ -3,6 +3,11 @@
 @import '../lib/quill/quill.css';
 @import '../lib/quill/strong.css';
 @import '../lib/quill/verse.css';
+@import './resource-pages.css';
+@import './dictionary-pages.css';
+@import './nave-pages.css';
+@import './commentary-pages.css';
+@import './timeline-pages.css';
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -30,6 +35,25 @@
   --border: oklch(0.9 0.01 258);
   --input: oklch(0.9 0.01 258);
   --ring: oklch(0.58 0.2 258);
+}
+/*
+ * Scrollbars follow the palette of the page. The thumb colour is set on the root, which
+ * carries the page scrollbar, and inherited by every scrolling area. The landing page and
+ * the resource pages each hold their own theme, hence the two shells.
+ */
+html {
+  --site-scrollbar-thumb: rgb(40 67 128 / 32%);
+  scrollbar-color: var(--site-scrollbar-thumb) transparent;
+}
+@media (prefers-color-scheme: dark) {
+  html:has(.landing-shell:not([data-landing-theme='light'])),
+  html:has(.resource-shell:not([data-theme='light'])) {
+    --site-scrollbar-thumb: rgb(170 192 232 / 34%);
+  }
+}
+html:has(.landing-shell[data-landing-theme='dark']),
+html:has(.resource-shell[data-theme='dark']) {
+  --site-scrollbar-thumb: rgb(170 192 232 / 34%);
 }
 @font-face {
   font-display: swap;
@@ -1186,6 +1210,18 @@ input {
   flex-wrap: wrap;
   justify-self: end;
   gap: 20px;
+}
+
+/* The public sections of the site, above the footer line. */
+.landing-footer__sections {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  gap: 12px 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--landing-line, rgb(127 127 127 / 20%));
+  color: var(--landing-ink);
+  font-weight: 650;
 }
 
 @keyframes landing-reveal {
@@ -3082,6 +3118,24 @@ input {
   color: rgb(16 27 53 / 70%);
   font-size: 1.02rem;
   line-height: 1.5;
+}
+.world-card__link {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  color: rgb(16 27 53);
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-color: rgb(16 27 53 / 35%);
+  text-underline-offset: 5px;
+}
+.world-card__link span {
+  transition: transform 180ms ease;
+}
+.world-card__link:hover span {
+  transform: translateX(3px);
 }
 
 .relations-section {

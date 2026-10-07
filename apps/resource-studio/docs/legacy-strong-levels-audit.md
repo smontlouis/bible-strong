@@ -93,7 +93,7 @@ Les scripts et résultats détaillés sont conservés localement dans `outputs/l
 ## Suite à l’audit : dédoublonnage de l’affichage
 
 La présentation dispose maintenant d’une comparaison conservatrice dans
-`apps/expo/src/features/lexique/strongDefinitionComparison.ts`. Elle conserve les
+`packages/resource-domain/src/strongDefinitionComparison.ts`. Elle conserve les
 mots, l’ordre, les diacritiques, les nombres, les négations, les références et les
 qualifications grammaticales. Seules la mise en forme et la répétition du libellé
 déjà visible sont neutralisées. Aucun seuil de similarité ne suffit à masquer un

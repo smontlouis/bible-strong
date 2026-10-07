@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HeadContent, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
+import NotFoundPage from '@/features/resources/NotFoundPage'
 import { useCurrentLocale } from '@/locales'
 import appCss from '../styles.css?url'
 
@@ -22,7 +23,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     ],
   }),
   shellComponent: RootDocument,
-  notFoundComponent: () => <main className="grid min-h-screen place-items-center p-6"><p>Page introuvable.</p></main>,
+  notFoundComponent: NotFoundPage,
   errorComponent: () => <main className="grid min-h-screen place-items-center p-6"><p>Une erreur est survenue.</p></main>,
 })
 

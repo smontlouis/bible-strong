@@ -6,6 +6,7 @@ jest.mock('~helpers/bibleVersions', () => ({
     LSG: { id: 'LSG' },
     NBS: { id: 'NBS' },
     LXX_FR: { id: 'LXX_FR' },
+    BHG: { id: 'BHG' },
   },
 }))
 
@@ -82,6 +83,26 @@ describe('public Bible routes', () => {
         new URLSearchParams(search).get('gloss') ?? undefined
       )
     ).toEqual(route)
+  })
+
+  it('names the gloss language of the direct interlinear in its path', () => {
+    const route = {
+      version: 'BHG',
+      presentation: 'interlinear' as const,
+      book: getBook(43)!,
+      chapter: 3,
+      passage: { startVerse: 16 },
+      glossLanguage: 'en' as const,
+    }
+    expect(buildPublicBiblePath(route)).toBe('/bible/bhg/interlinear/en/john/3/16')
+    expect(parsePublicBibleRoute('bhg/interlinear/en/jean/3/16')).toEqual(route)
+    // The path language wins over a stray gloss parameter.
+    expect(parsePublicBibleRoute('bhg/interlinear/fr/john/3', 'en')?.glossLanguage).toBe('fr')
+    expect(buildPublicBiblePath({ ...route, glossLanguage: undefined })).toBe(
+      '/bible/bhg/interlinear/fr/john/3/16'
+    )
+    expect(parsePublicBibleRoute('bhg/interlinear/john/3')).toBeUndefined()
+    expect(parsePublicBibleRoute('lsg/interlinear/fr/john/3')).toBeUndefined()
   })
 
   it('rejects malformed and unsupported routes', () => {
