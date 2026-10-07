@@ -225,6 +225,9 @@ const functionWords = new Set([
   "sauf",
   "jusque"
 ]);
+export function isConcordanceFunctionWord(word: string): boolean {
+  return functionWords.has(normalizeWord(word));
+}
 function ranges(text: string) {
   let offset = 0;
   return tokenizeText(text).flatMap((t) => {

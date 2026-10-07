@@ -12,6 +12,27 @@ import {
   CONCORDANCE_CONTEXT_POLICY
 } from "./strongConcordanceContext.js";
 import {
+  learnRecoveryLexicon,
+  WITNESS_RECOVERY_POLICY
+} from "./strongWitnessRecovery.js";
+import { PREDICATE_RELATION_POLICY } from "./strongPredicateRelations.js";
+import { SURFACE_RECOVERY_POLICY } from "./strongSurfaceRecovery.js";
+import {
+  CLAUSE_ALIGNMENT_POLICY,
+  clauseNativeRefs
+} from "./strongClauseAlignment.js";
+import {
+  createClauseLexicon,
+  type MeaningBridge,
+  type SemanticLinks
+} from "./strongClauseLexicon.js";
+import { gunzipSync } from "node:zlib";
+import {
+  learnInflectionLexicon,
+  learnWitnessInventory,
+  type FrenchInflectionIndex
+} from "./strongInflectionEvidence.js";
+import {
   readUnparsedSourceRows,
   type UnparsedSourceRow
 } from "./strongSourceCoverage.js";
@@ -110,7 +131,12 @@ import {
   originalVerseForTargetBlock,
   projectBlockReferences
 } from "./verseBlockAlignment.js";
-import { escapeHtml, tokenizeText, type TextSegment } from "./tokenize.js";
+import {
+  escapeHtml,
+  stripTags,
+  tokenizeText,
+  type TextSegment
+} from "./tokenize.js";
 import { buildStrongPhraseLexicon } from "./phraseTranslationLexicon.js";
 import { buildStrongTranslationLexicon } from "./translationLexicon.js";
 import {
@@ -234,6 +260,11 @@ export interface StrongLedger {
     | "excludedReferenceNames"
     | "resolveOccurrences"
     | "concordanceContext"
+    | "concordanceRecovery"
+    | "concordancePredicates"
+    | "concordanceSurfaceRecovery"
+    | "surfaceInflectionsPath"
+    | "concordanceClauses"
   >;
   resolutionSummary?: ReturnType<typeof aggregateResolutionMetrics>;
   unassignedCanonicalSource?: Array<{
@@ -348,6 +379,17 @@ export interface StrongLedgerVerseMetrics {
 }
 
 export interface StrongLedgerOptions {
+  /** Opt-in, frozen common clause policy; independent resources are fingerprinted. */
+  concordanceClauses?: {
+    inflectionsPath: string;
+    semanticsPath: string;
+    meaningsPath: string;
+  };
+  concordanceSurfaceRecovery?: boolean;
+  /** Explicit independently prepared French inflections; included in the input fingerprint. */
+  surfaceInflectionsPath?: string;
+  concordancePredicates?: boolean;
+  concordanceRecovery?: boolean;
   concordanceContext?: boolean;
   /** Opt-in local candidate projection evaluated by the Concordance experiment. */
   concordanceDisplay?: ConcordanceDisplay;
@@ -452,6 +494,12 @@ const STRONG_LEDGER_PIPELINE_SOURCES = [
   "src/strongSourceReading.ts",
   "src/strongConcordanceGeneration.ts",
   "src/strongConcordanceContext.ts",
+  "src/strongWitnessRecovery.ts",
+  "src/strongPredicateRelations.ts",
+  "src/strongSurfaceRecovery.ts",
+  "src/strongClauseAlignment.ts",
+  "src/strongClauseLexicon.ts",
+  "src/strongInflectionEvidence.ts",
   "src/strongConcordanceFollowup.ts",
   "src/strongConcordanceRefinement.ts",
   "src/strongSourceCoverage.ts",
@@ -509,6 +557,12 @@ export function strongLedgerInputFingerprint(
       (reference) => !excludedReferences.has(reference.name)
     ).map((reference) => reference.path),
     ...STEP_ORIGINAL_SOURCES,
+    ...(options.concordanceClauses
+      ? Object.values(options.concordanceClauses)
+      : []),
+    ...(options.concordanceSurfaceRecovery && options.surfaceInflectionsPath
+      ? [options.surfaceInflectionsPath]
+      : []),
     ...(verseCorrespondencePath ? [verseCorrespondencePath] : []),
     strongDictionaryInput.path,
     DEFAULT_KAIKKI_JSONL,
@@ -525,8 +579,20 @@ export function strongLedgerInputFingerprint(
     inputPaths,
     values: {
       bible: options.bible,
+      concordanceClauses: options.concordanceClauses
+        ? CLAUSE_ALIGNMENT_POLICY
+        : null,
+      concordanceSurfaceRecovery: options.concordanceSurfaceRecovery
+        ? SURFACE_RECOVERY_POLICY
+        : null,
       concordanceContext: options.concordanceContext
         ? CONCORDANCE_CONTEXT_POLICY
+        : null,
+      concordanceRecovery: options.concordanceRecovery
+        ? WITNESS_RECOVERY_POLICY
+        : null,
+      concordancePredicates: options.concordancePredicates
+        ? PREDICATE_RELATION_POLICY
         : null,
       concordance: options.concordanceDisplay
         ? {
@@ -624,8 +690,32 @@ export async function generateStrongLedgerWithDictionary(
   strongDictionaryInput: ResolvedDefaultStrongDictionaryInput
 ): Promise<StrongLedger> {
   const generateStart = perfStart();
+  if (
+    options.concordanceSurfaceRecovery &&
+    (!options.concordanceRecovery ||
+      !options.concordancePredicates ||
+      !options.surfaceInflectionsPath)
+  )
+    throw new Error(
+      "surface-recovery-requires-witness-recovery-predicates-and-explicit-inflections"
+    );
+  if (
+    options.concordanceClauses &&
+    (!options.concordanceContext ||
+      !options.concordanceRecovery ||
+      !options.concordancePredicates ||
+      options.concordanceSurfaceRecovery ||
+      Object.values(options.concordanceClauses).some((p) => !p))
+  )
+    throw new Error(
+      "clause-alignment-requires-context-recovery-predicates-and-independent-resources-without-surface-recovery"
+    );
   if (options.concordanceContext && !options.concordanceDisplay)
     throw new Error("context-refinement-requires-concordance-projection");
+  if (options.concordanceRecovery && !options.concordanceDisplay)
+    throw new Error("witness-recovery-requires-concordance-projection");
+  if (options.concordancePredicates && !options.concordanceDisplay)
+    throw new Error("predicate-relations-require-concordance-projection");
   if (
     options.concordanceDisplay &&
     (!["expressions", "heads"].includes(options.concordanceDisplay) ||
@@ -952,6 +1042,42 @@ export async function generateStrongLedgerWithDictionary(
       const contextLexicon = options.concordanceContext
         ? learnCarrierLexicon(corpus())
         : undefined;
+      const recoveryLexicon = options.concordanceRecovery
+        ? learnRecoveryLexicon(corpus())
+        : undefined;
+      let surfaceInflections;
+      const surfaceWitnessInventory = options.concordanceSurfaceRecovery
+        ? learnWitnessInventory(corpus())
+        : undefined;
+      if (options.concordanceSurfaceRecovery) {
+        const index: FrenchInflectionIndex = JSON.parse(
+          await readFile(options.surfaceInflectionsPath!, "utf8")
+        );
+        surfaceInflections = {
+          index,
+          lexicon: learnInflectionLexicon(recoveryLexicon!, index)
+        };
+      }
+      async function clauseResource<T>(file: string): Promise<T> {
+        const bytes = await readFile(file);
+        return JSON.parse(
+          (file.endsWith(".gz") ? gunzipSync(bytes) : bytes).toString()
+        );
+      }
+      const clausePaths = options.concordanceClauses;
+      const clauseLookup = clausePaths
+        ? createClauseLexicon({
+            inflections: await clauseResource<FrenchInflectionIndex>(
+              clausePaths.inflectionsPath
+            ),
+            semantics: await clauseResource<SemanticLinks>(
+              clausePaths.semanticsPath
+            ),
+            meanings: await clauseResource<MeaningBridge>(
+              clausePaths.meaningsPath
+            )
+          })
+        : undefined;
       for (const verse of ledgerVerses) {
         const input = resolutionInputs.get(verse.ref)!;
         applyConcordanceGeneration({
@@ -959,6 +1085,40 @@ export async function generateStrongLedgerWithDictionary(
           sourceRows: rows,
           displayEvidence,
           contextLexicon,
+          recoveryLexicon,
+          surfaceInflections,
+          surfaceWitnessInventory,
+          clauses: clauseLookup
+            ? {
+                witnesses: clauseNativeRefs(
+                  reconstructionFromLedger(verse)
+                ).flatMap((ref) =>
+                  references.flatMap((r) => {
+                    const native = r.map.get(ref);
+                    return native
+                      ? [
+                          {
+                            ...concordanceWitness(r.name, native.row.text),
+                            ref,
+                            text: stripTags(
+                              withoutPublisherNotes(native.row.text)
+                            )
+                          }
+                        ]
+                      : [];
+                  })
+                ),
+                lexicalProof: (unit, target, witness) =>
+                  clauseLookup(
+                    unit,
+                    target,
+                    witness,
+                    "meaning",
+                    rows.get(unit.sourceUnitId)
+                  )
+              }
+            : undefined,
+          predicates: options.concordancePredicates,
           display: options.concordanceDisplay,
           witnesses: input.references.flatMap((r) =>
             r.verse ? [concordanceWitness(r.name, r.verse.row.text)] : []
@@ -1065,6 +1225,13 @@ export async function generateStrongLedgerWithDictionary(
     unparsedCanonicalSource,
     concordanceDisplay: options.concordanceDisplay,
     generationOptions: {
+      concordanceClauses: options.concordanceClauses,
+      concordanceSurfaceRecovery: options.concordanceSurfaceRecovery === true,
+      surfaceInflectionsPath: options.concordanceSurfaceRecovery
+        ? options.surfaceInflectionsPath
+        : undefined,
+      concordancePredicates: options.concordancePredicates === true,
+      concordanceRecovery: options.concordanceRecovery === true,
       concordanceContext: options.concordanceContext === true,
       applyCuratedOverrides: options.applyCuratedOverrides !== false,
       excludedReferenceNames: options.excludedReferenceNames ?? [],

@@ -20,10 +20,55 @@ import {
   CONCORDANCE_CONTEXT_POLICY,
   type CarrierLexicon
 } from "./strongConcordanceContext.js";
+import {
+  recoverWitnessCarriers,
+  WITNESS_RECOVERY_POLICY,
+  type RecoveryLexicon,
+  type RecoveryChange
+} from "./strongWitnessRecovery.js";
+import {
+  refinePredicateRelations,
+  PREDICATE_RELATION_POLICY,
+  type PredicateChange
+} from "./strongPredicateRelations.js";
+import {
+  recoverAttestedSurfaceCarriers,
+  SURFACE_RECOVERY_POLICY,
+  CONSENSUS_SURFACE_RECOVERY,
+  type SurfaceRecoveryChange
+} from "./strongSurfaceRecovery.js";
+import type {
+  FrenchInflectionIndex,
+  InflectionLexicon,
+  WitnessInventory
+} from "./strongInflectionEvidence.js";
+import {
+  alignWitnessClauses,
+  CLAUSE_ALIGNMENT_POLICY,
+  CONSENSUS_CLAUSE_POLICY,
+  type ClauseWitness
+} from "./strongClauseAlignment.js";
 
 export const CONCORDANCE_GENERATION_POLICY = "concordance-candidate-v1";
 export type ConcordanceDisplay = "expressions" | "heads";
 export type ConcordanceTrace = {
+  clauses?: {
+    policy: typeof CLAUSE_ALIGNMENT_POLICY;
+    changes: ReturnType<typeof alignWitnessClauses>["changes"];
+    rejected: ReturnType<typeof alignWitnessClauses>["rejected"];
+  };
+  surface?: {
+    policy: typeof SURFACE_RECOVERY_POLICY;
+    changes: SurfaceRecoveryChange[];
+  };
+  predicates?: {
+    policy: typeof PREDICATE_RELATION_POLICY;
+    changes: PredicateChange[];
+  };
+  recovery?: {
+    policy: typeof WITNESS_RECOVERY_POLICY;
+    changes: RecoveryChange[];
+  };
   context?: {
     policy: typeof CONCORDANCE_CONTEXT_POLICY;
     changes: ReturnType<typeof refineConcordanceContext>["changes"];
@@ -88,6 +133,17 @@ export function applyConcordanceGeneration(options: {
   displayEvidence: PhraseHeadEvidence[];
   display: ConcordanceDisplay;
   contextLexicon?: CarrierLexicon;
+  recoveryLexicon?: RecoveryLexicon;
+  surfaceInflections?: {
+    index: FrenchInflectionIndex;
+    lexicon: InflectionLexicon;
+  };
+  surfaceWitnessInventory?: WitnessInventory;
+  clauses?: {
+    witnesses: ClauseWitness[];
+    lexicalProof: Parameters<typeof alignWitnessClauses>[0]["lexicalProof"];
+  };
+  predicates?: boolean;
 }): void {
   const { verse, display } = options;
   const initial = reconstructionFromLedger(verse);
@@ -109,7 +165,48 @@ export function applyConcordanceGeneration(options: {
         display
       })
     : undefined;
-  const prediction = context?.prediction ?? result.prediction;
+  const recovery = options.recoveryLexicon
+    ? recoverWitnessCarriers({
+        initial: context?.prediction ?? result.prediction,
+        lexicon: options.recoveryLexicon
+      })
+    : undefined;
+  const predicates = options.predicates
+    ? refinePredicateRelations({
+        initial:
+          recovery?.prediction ?? context?.prediction ?? result.prediction,
+        display
+      })
+    : undefined;
+  const surface =
+    options.surfaceInflections && options.recoveryLexicon
+      ? recoverAttestedSurfaceCarriers({
+          initial:
+            predicates?.prediction ??
+            recovery?.prediction ??
+            context?.prediction ??
+            result.prediction,
+          lexicon: options.recoveryLexicon,
+          inflections: options.surfaceInflections,
+          witnessInventory: options.surfaceWitnessInventory,
+          display: "heads",
+          policy: CONSENSUS_SURFACE_RECOVERY
+        })
+      : undefined;
+  const beforeClauses =
+    surface?.prediction ??
+    predicates?.prediction ??
+    recovery?.prediction ??
+    context?.prediction ??
+    result.prediction;
+  const clauses = options.clauses
+    ? alignWitnessClauses({
+        initial: beforeClauses,
+        ...options.clauses,
+        policy: CONSENSUS_CLAUSE_POLICY
+      })
+    : undefined;
+  const prediction = clauses?.prediction ?? beforeClauses;
   // A coordinate fallback or a split with no aligned witness text does not
   // establish which native verse owns the proposed translation relation.
   const mappingIssues = prediction.issues.filter(
@@ -192,6 +289,16 @@ export function applyConcordanceGeneration(options: {
     ] as const)
       delete annotation[key];
     annotation.visibility = "reader";
+    const predicateChange = predicates?.changes.find((change) =>
+      change.after.some((after) => after.id === p.id)
+    );
+    if (predicateChange) {
+      annotation.reason = predicateChange.rule;
+      annotation.diagnostics = [
+        ...annotation.diagnostics,
+        ...predicateChange.evidence
+      ];
+    }
     const contextChange = context?.changes.find((change) =>
       change.after.some((after) => after.id === p.id)
     );
@@ -271,6 +378,22 @@ export function applyConcordanceGeneration(options: {
   resolution.decisions = prediction.units;
   resolution.unownedAnnotationIds = prediction.unownedAnnotationIds;
   resolution.concordance = {
+    clauses: clauses
+      ? {
+          policy: CLAUSE_ALIGNMENT_POLICY,
+          changes: clauses.changes,
+          rejected: clauses.rejected
+        }
+      : undefined,
+    surface: surface
+      ? { policy: SURFACE_RECOVERY_POLICY, changes: surface.changes }
+      : undefined,
+    predicates: predicates
+      ? { policy: PREDICATE_RELATION_POLICY, changes: predicates.changes }
+      : undefined,
+    recovery: recovery
+      ? { policy: WITNESS_RECOVERY_POLICY, changes: recovery.changes }
+      : undefined,
     context: context
       ? { policy: CONCORDANCE_CONTEXT_POLICY, changes: context.changes }
       : undefined,
@@ -289,7 +412,12 @@ export function applyConcordanceGeneration(options: {
     empty: count("empty"),
     unresolved: count("unresolved"),
     policySupportedVerses:
-      mappingIssues.length || context?.changes.length
+      mappingIssues.length ||
+      context?.changes.length ||
+      recovery?.changes.length ||
+      predicates?.changes.length ||
+      clauses?.changes.length ||
+      surface?.changes.length
         ? 0
         : resolution.metrics.policySupportedVerses,
     grammaticalEmpties: prediction.units.filter(

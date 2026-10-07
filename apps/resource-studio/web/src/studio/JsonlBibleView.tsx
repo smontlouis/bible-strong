@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { bookLabel } from "./bookNames";
+import { VerseUncertainty } from "./VerseUncertainty";
 import { loadJsonlBibleCatalog, loadJsonlBibleChapter } from "./data";
 import {
   preferredLexiconIdentities,
@@ -46,6 +47,8 @@ import type {
 } from "./types";
 
 const VERSION_ORDER: JsonlBibleId[] = [
+  "S21-CANDIDATE",
+  "NEG79-CANDIDATE",
   "OST",
   "FMAR",
   "NVS78P",
@@ -102,9 +105,11 @@ export function JsonlBibleView({
   );
   const [selectedVersions, setSelectedVersions] = useState<JsonlBibleId[]>(
     () => {
-      const saved = window.localStorage.getItem("bible-strong:bibles:versions");
+      const saved =
+        searchParams.get("versions") ??
+        window.localStorage.getItem("bible-strong:bibles:versions");
       if (!saved) return VERSION_ORDER;
-      const requested = saved.split(",") as JsonlBibleId[];
+      const requested = saved.split(",").map((id) => id.trim().toUpperCase());
       return VERSION_ORDER.filter((id) => requested.includes(id));
     }
   );
@@ -233,6 +238,7 @@ export function JsonlBibleView({
     url.searchParams.set("view", "jsonl");
     url.searchParams.set("book", bookId);
     url.searchParams.set("chapter", String(chapter));
+    url.searchParams.set("versions", selectedVersions.join(","));
     if (query) url.searchParams.set("bq", query);
     else url.searchParams.delete("bq");
     window.history.replaceState(null, "", url);
@@ -477,7 +483,7 @@ export function JsonlBibleView({
               <JsonlEmpty
                 icon={Loader2}
                 title="Lecture du chapitre"
-                copy="Le serveur interroge uniquement les huit SQLite bibliques locaux."
+                copy="Chargement des éditions locales sélectionnées."
                 spinning
               />
             ) : verseGroups.length === 0 ? (
@@ -700,6 +706,7 @@ function JsonlVerseCell({
         }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
+      <VerseUncertainty verse={verse} version={version} />
     </div>
   );
 }
@@ -826,6 +833,7 @@ function JsonlReadingVerse({
         }}
         dangerouslySetInnerHTML={{ __html: html }}
       />{" "}
+      <VerseUncertainty verse={verse} version={version} />{" "}
     </span>
   );
 }

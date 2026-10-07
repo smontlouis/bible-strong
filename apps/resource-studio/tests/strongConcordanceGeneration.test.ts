@@ -11,6 +11,7 @@ import type {
 import { renderStrongTaggedText } from "../src/strongLedger.js";
 import type { CanonicalOccurrenceDecision } from "../src/strongCanonicalResolution.js";
 import { tokenizeText, stripTags } from "../src/tokenize.js";
+import { extractGoldCarrierPlacements } from "../src/strongCarriers.js";
 
 function unit(
   id: string,
@@ -204,4 +205,74 @@ test("an established empty gets its distinct anchor; an unsuccessful search does
   assert.equal(projected.emptyEvidence!.anchor.insertAfterWordIndex, 0);
   assert.equal(projected.startWordIndex, undefined);
   assert.equal(v.resolution!.metrics.unresolved, 1);
+});
+
+test("optional clause resolution reaches the reader with its evidence and zero invented certainty", () => {
+  const v = fixture();
+  v.text = "nous trompons toujours";
+  v.tokens = v.text
+    .split(" ")
+    .map((text, wordIndex) => ({ text, wordIndex, normalized: text }));
+  const anchor = unit("anchor", "visible");
+  anchor.strong = ["G1473"];
+  anchor.targetWordIndices = [0];
+  const predicate = unit("predicate", "unresolved");
+  predicate.strong = ["G4105"];
+  predicate.source.morphology = "V-PAI-1P";
+  predicate.assurance = "unresolved";
+  v.resolution!.decisions = [anchor, predicate];
+  v.annotations = [
+    {
+      ...annotation("anchor"),
+      strong: "G1473",
+      placement: "word",
+      wordIndex: 0,
+      startWordIndex: undefined,
+      endWordIndex: undefined
+    },
+    { ...annotation("predicate"), strong: "G4105", visibility: "pending" }
+  ];
+  applyConcordanceGeneration({
+    verse: v,
+    sourceRows: new Map(),
+    witnesses: [],
+    displayEvidence: [],
+    display: "expressions",
+    clauses: {
+      witnesses: ["Segond-family", "Darby-family"].map((family) => ({
+        name: family,
+        family,
+        ref: v.ref,
+        text: "nous séduisons toujours",
+        words: ["nous", "séduisons", "toujours"],
+        placements: [
+          { strong: "G1473", kind: "word", startWordIndex: 0, endWordIndex: 0 },
+          { strong: "G4105", kind: "word", startWordIndex: 1, endWordIndex: 1 }
+        ]
+      })),
+      lexicalProof: () => ({
+        kind: "source-definition",
+        sourceTerms: ["deceive"],
+        targetTerms: ["tromper"],
+        provenance: ["independent-test-lexicon"]
+      })
+    }
+  });
+  const html = renderStrongTaggedText(
+    tokenizeText(v.text),
+    v.annotations,
+    "reader"
+  );
+  assert.equal(stripTags(html), v.text);
+  const carrier = extractGoldCarrierPlacements(html).find(
+    (p) => p.strong === "G4105"
+  );
+  assert.equal(carrier?.startWordIndex, 1);
+  const placed = v.annotations.find((a) => a.id === "clause:predicate:0");
+  assert.equal(placed?.confidence, 0);
+  assert.equal(placed?.wordIndex, 1);
+  assert.equal(placed?.startWordIndex, undefined);
+  assert.equal(v.resolution!.concordance!.clauses!.changes.length, 1);
+  assert.deepEqual(v.resolution!.decisions[1].targetWordIndices, [1]);
+  assert.equal(v.resolution!.decisions[1].anchor, undefined);
 });

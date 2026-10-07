@@ -4,6 +4,8 @@ import path from "node:path";
 import { createInterface } from "node:readline";
 
 import { BOOK_IDS } from "./books.js";
+import { readCandidateReviewChapter } from "./strongCandidateReview.js";
+import type { CandidateVerseReview } from "./strongCandidateReviewTypes.js";
 import {
   queryStrongBibleConcordance,
   queryStrongBibleLemmaStats,
@@ -13,6 +15,31 @@ import {
 } from "./strongBibleSqlite.js";
 
 export const JSONL_BIBLE_SOURCES = [
+  {
+    id: "S21-CANDIDATE",
+    reviewRelativePath:
+      "outputs/strong-candidate-viewer/s21/bible-s21-review.sqlite",
+    label: "Segond 21 — candidate locale",
+    shortLabel: "S21 candidate",
+    sourceVersion: "S21-CANDIDATE",
+    relativePath: "outputs/strong-candidate-viewer/s21/bible-s21-strong.jsonl",
+    sqliteRelativePath:
+      "outputs/strong-candidate-viewer/s21/bible-s21-reader.sqlite",
+    manifestPath: "outputs/strong-candidate-viewer/s21/manifest.json"
+  },
+  {
+    id: "NEG79-CANDIDATE",
+    reviewRelativePath:
+      "outputs/strong-candidate-viewer/neg79/bible-neg79-review.sqlite",
+    label: "Nouvelle Édition de Genève 1979 — candidate locale",
+    shortLabel: "NEG79 candidate",
+    sourceVersion: "NEG79-CANDIDATE",
+    relativePath:
+      "outputs/strong-candidate-viewer/neg79/bible-neg79-strong.jsonl",
+    sqliteRelativePath:
+      "outputs/strong-candidate-viewer/neg79/bible-neg79-reader.sqlite",
+    manifestPath: "outputs/strong-candidate-viewer/neg79/manifest.json"
+  },
   {
     id: "OST",
     label: "Ostervald",
@@ -101,6 +128,7 @@ export const JSONL_BIBLE_SOURCES = [
 export type JsonlBibleId = (typeof JSONL_BIBLE_SOURCES)[number]["id"];
 
 export interface JsonlBibleVerse {
+  review?: CandidateVerseReview;
   ref: string;
   version: string;
   book: number;
@@ -332,6 +360,31 @@ export async function getJsonlBibleChapter(options: {
       const filePath = path.resolve(options.root, source.relativePath);
       const sqlitePath = path.resolve(options.root, source.sqliteRelativePath);
       if (existsSync(sqlitePath)) {
+        let ledgerSha256: string | undefined;
+        if ("reviewRelativePath" in source) {
+          try {
+            const manifest = JSON.parse(
+              await readFile(
+                path.resolve(options.root, source.manifestPath),
+                "utf8"
+              )
+            ) as { review?: { ledgerSha256?: string } };
+            ledgerSha256 = manifest.review?.ledgerSha256;
+          } catch {
+            /* Missing review provenance is shown as unavailable. */
+          }
+        }
+        const review =
+          "reviewRelativePath" in source
+            ? readCandidateReviewChapter({
+                path: path.resolve(options.root, source.reviewRelativePath),
+                ledgerSha256,
+                readerSha256:
+                  readStrongBibleSqliteInfo(sqlitePath).sourceSha256,
+                bookId: options.bookId,
+                chapter: options.chapter
+              })
+            : undefined;
         return {
           id: source.id,
           label: source.label,
@@ -341,7 +394,16 @@ export async function getJsonlBibleChapter(options: {
             sqlitePath,
             bookId: options.bookId,
             chapter: options.chapter
-          })
+          }).map((verse) => ({
+            ...verse,
+            ...("reviewRelativePath" in source
+              ? {
+                  review: review?.get(verse.ref) ?? {
+                    available: false as const
+                  }
+                }
+              : {})
+          }))
         };
       }
       if (!existsSync(filePath)) {
@@ -355,12 +417,19 @@ export async function getJsonlBibleChapter(options: {
         label: source.label,
         shortLabel: source.shortLabel,
         sourceVersion: source.sourceVersion,
-        verses: await readJsonlBibleChapter({
-          filePath,
-          sourceVersion: source.sourceVersion,
-          bookId: options.bookId,
-          chapter: options.chapter
-        })
+        verses: (
+          await readJsonlBibleChapter({
+            filePath,
+            sourceVersion: source.sourceVersion,
+            bookId: options.bookId,
+            chapter: options.chapter
+          })
+        ).map((verse) => ({
+          ...verse,
+          ...("reviewRelativePath" in source
+            ? { review: { available: false as const } }
+            : {})
+        }))
       };
     })
   );

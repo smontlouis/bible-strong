@@ -18,10 +18,7 @@ const sources = [
     "outputs/strong-jsonl-permissive/nvs78p/bible-nvs78p-strong.jsonl",
     "NVS78P"
   ],
-  [
-    "outputs/strong-jsonl-permissive/neg79/bible-neg79-strong.jsonl",
-    "NEG79"
-  ],
+  ["outputs/strong-jsonl-permissive/neg79/bible-neg79-strong.jsonl", "NEG79"],
   ["outputs/strong-jsonl-permissive/nbs/bible-nbs-strong.jsonl", "NBS"],
   ["outputs/releases/strong-jsonl-v3/bible-darby-strong.jsonl", "DARBY"],
   ["outputs/releases/strong-jsonl-v3/bible-darbyr-strong.jsonl", "DARBYR"],
@@ -51,6 +48,8 @@ test("catalogues and reads the eight compact JSONL Bibles by chapter", async () 
       verseCount
     })),
     [
+      { id: "S21-CANDIDATE", available: false, verseCount: 0 },
+      { id: "NEG79-CANDIDATE", available: false, verseCount: 0 },
       { id: "OST", available: true, verseCount: 3 },
       { id: "FMAR", available: true, verseCount: 3 },
       { id: "NVS78P", available: true, verseCount: 3 },
