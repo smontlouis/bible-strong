@@ -2,6 +2,7 @@ import type { ResourceLanguage } from '../resources/publicSite'
 import type { Breadcrumb } from '../resources/resourceHead'
 import { resourceSection } from '../resources/sections'
 import { bibleBookName } from './bibleBooks'
+import { withInlineCommentaries } from './bibleCommentaries'
 import {
   buildBiblePath,
   buildBibleVersionPath,
@@ -22,33 +23,38 @@ export const bibleVersionBreadcrumbs = (
 }
 
 /** Bible › version › chapter, then the passage when one is quoted. */
-export const bibleBreadcrumbs = ({
-  versionId,
-  presentation,
-  language,
-  book,
-  chapter,
-  passage,
-  gloss,
-}: {
-  versionId: string
-  presentation: BiblePresentation
-  language: ResourceLanguage
-  book: number
-  chapter: number
-  passage?: BiblePassage
-  gloss?: ResourceLanguage
-}): Breadcrumb[] => {
+export const bibleBreadcrumbs = (
+  {
+    versionId,
+    presentation,
+    language,
+    book,
+    chapter,
+    passage,
+    gloss,
+  }: {
+    versionId: string
+    presentation: BiblePresentation
+    language: ResourceLanguage
+    book: number
+    chapter: number
+    passage?: BiblePassage
+    gloss?: ResourceLanguage
+  },
+  /** The commentaries shown in the text, which the path of a reading keeps for its reader. */
+  commentaryChoice: readonly string[] = []
+): Breadcrumb[] => {
   const location = { versionId, presentation, book, chapter, gloss }
   const reference = `${bibleBookName(book, language)} ${chapter}`
+  const keep = (path: string) => withInlineCommentaries(path, commentaryChoice)
   return [
     ...bibleVersionBreadcrumbs(versionId, language),
-    { label: reference, path: buildBiblePath(location) },
+    { label: reference, path: keep(buildBiblePath(location)) },
     ...(passage
       ? [
           {
             label: `${reference}:${passage.startVerse}${passage.endVerse ? `-${passage.endVerse}` : ''}`,
-            path: buildBiblePath({ ...location, passage }),
+            path: keep(buildBiblePath({ ...location, passage })),
           },
         ]
       : []),

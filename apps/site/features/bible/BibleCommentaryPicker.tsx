@@ -27,6 +27,9 @@ export default function BibleCommentaryPicker({
   const [asked, setAsked] = useState<string[]>()
   useEffect(() => setAsked(undefined), [shownKey])
   const checked = asked ?? shown
+  // What the reader chose in the other language stays in the address: it is shown again
+  // when they come back to a Bible of that language.
+  const elsewhere = page.commentaryChoice.filter(id => !shown.includes(id))
 
   const commenting = new Set(page.commentaries.map(commentary => commentary.id))
   const choices = [
@@ -36,7 +39,7 @@ export default function BibleCommentaryPicker({
       .filter(commentary => !commenting.has(commentary.id))
       .map(({ id, title }) => ({ id, title, silent: true })),
   ]
-  const full = checked.length >= MAX_INLINE_COMMENTARIES
+  const full = checked.length + elsewhere.length >= MAX_INLINE_COMMENTARIES
 
   const toggle = (id: string, on: boolean) => {
     const next = on
@@ -46,7 +49,7 @@ export default function BibleCommentaryPicker({
     onChange?.()
     void navigate({
       to: '.',
-      search: { commentary: serializeInlineCommentaries([...next].sort()) },
+      search: { commentary: serializeInlineCommentaries([...elsewhere, ...next].sort()) },
       resetScroll: false,
     })
   }
@@ -75,6 +78,9 @@ export default function BibleCommentaryPicker({
           method="get"
           action={buildBiblePath({ versionId, presentation, book, chapter, passage, gloss })}
         >
+          {elsewhere.map(id => (
+            <input key={id} type="hidden" name="commentary" value={id} />
+          ))}
           <p className="bible-nav__title">{t('bible.nav.commentaries.title')}</p>
           <ul className="bible-nav__list bible-nav__list--wide">
             {choices.map(choice => {

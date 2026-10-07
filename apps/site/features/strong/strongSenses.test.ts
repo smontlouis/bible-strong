@@ -94,15 +94,12 @@ describe('strongEntryPageCodes', () => {
 describe('groupStrongListLines', () => {
   it('gathers the senses of a number that read the same into one line', () => {
     expect(groupStrongListLines(zechariah)).toEqual([
-      { code: 'H2148', gloss: 'Zacharie', original: 'א', transliteration: 'a', senseCount: 4 },
+      { code: 'H2148', gloss: 'Zacharie', original: 'א', transliteration: 'a' },
     ])
   })
 
   it('keeps a line for a sense with a gloss of its own', () => {
-    expect(groupStrongListLines(create).map(line => [line.code, line.senseCount])).toEqual([
-      ['H1254A', undefined],
-      ['H1254B', undefined],
-    ])
+    expect(groupStrongListLines(create).map(line => line.code)).toEqual(['H1254A', 'H1254B'])
   })
 
   it('gathers by gloss within a number, not across numbers', () => {
@@ -112,10 +109,10 @@ describe('groupStrongListLines', () => {
       sense('G2455I', 'G2455', 'judas'),
       sense('G2453', 'G2453', 'Judas'),
     ]
-    expect(groupStrongListLines(judas).map(line => [line.code, line.senseCount])).toEqual([
-      ['G2455G', undefined],
-      ['G2455', 2],
-      ['G2453', undefined],
+    expect(groupStrongListLines(judas).map(line => [line.code, line.gloss])).toEqual([
+      ['G2455G', 'Juda'],
+      ['G2455', 'Judas'],
+      ['G2453', 'Judas'],
     ])
   })
 

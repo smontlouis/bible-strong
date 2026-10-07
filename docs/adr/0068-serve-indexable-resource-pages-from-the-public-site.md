@@ -119,7 +119,8 @@ A number with a single sense has no page of its own: it redirects permanently to
 sense, as does an expanded spelling (`h1254a`). A number that is itself the code of one of
 its senses (`G5514` next to `G5514G`) keeps its address for that sense, whose page lists the
 others. A concordance belongs to a sense: the concordance paths under a split number
-redirect to its page.
+redirect to its page. A code whose suffix names no sense does not exist: it never falls
+back on the number it is written under.
 
 A sense links to the page of its number instead of listing its sibling senses. A lexicon
 list gathers the senses of a number that read the same into one line, which opens the
@@ -179,6 +180,9 @@ pages differ by their concordance, their sense code and, for a person, who that 
 
 A Bible page with commentaries shown in the text reads the chapter of each of them from the
 Resource API, and every choice of commentaries is a page the CDN keeps apart.
+
+The site functions run in the region of the database of the Resource API, Frankfurt: a
+page is a chain of reads, and a function on another continent pays that distance on each.
 
 The page of a number reads each of its senses from the Resource API, entry and verse
 counts: about sixty reads for the largest number, once per cached rendering.

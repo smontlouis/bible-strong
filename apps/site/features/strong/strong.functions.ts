@@ -48,8 +48,6 @@ import {
 } from './strongSenses'
 
 const SAMPLE_VERSE_COUNT = 12
-// How many senses of a number are read from the Resource API at once.
-const SENSE_READ_BATCH = 16
 const SENSE_SUMMARY_LENGTH = 170
 const DESCRIPTION_LENGTH = 155
 
@@ -142,22 +140,22 @@ export type StrongNumberAddress = { kind: 'number'; code: string }
 
 const hasContent = (html: string | undefined): html is string => Boolean(html?.trim())
 
+/** The classical number a code is written under: `H1254B` is written under `H1254`. */
+const writtenNumber = (code: string): string => code.replace(/[A-Za-z]+$/u, '')
+
 /**
- * The codes that may name one entry. A code can be written in another letter case, or only
- * name the classical number of a family: the lexicon is asked for each in turn.
+ * The codes that may name one entry: a code can be written in another letter case, and the
+ * lexicon is asked for each spelling in turn. A suffix that names no sense names nothing:
+ * it does not fall back on the number it is written under.
  */
 const strongCodeCandidates = (code: string): string[] => {
-  const family = code.replace(/[A-Za-z]+$/u, '')
-  const suffix = code.slice(family.length)
-  return [
-    ...new Set([
-      code,
-      `${family}${suffix.toUpperCase()}`,
-      `${family}${suffix.toLowerCase()}`,
-      family,
-    ]),
-  ]
+  const number = writtenNumber(code)
+  const suffix = code.slice(number.length)
+  return [...new Set([code, `${number}${suffix.toUpperCase()}`, `${number}${suffix.toLowerCase()}`])]
 }
+
+/** A read worth a second try: one slow answer among many should not fail a page. */
+const readTwice = <Result>(read: () => Promise<Result>): Promise<Result> => read().catch(read)
 
 type ResolvedStrongEntry = {
   simple?: StrongLexiconEntryDto
@@ -378,18 +376,6 @@ const loadSenses = async (
   )
 }
 
-const inBatches = async <Item, Result>(
-  items: readonly Item[],
-  size: number,
-  run: (item: Item) => Promise<Result>
-): Promise<Result[]> => {
-  const results: Result[] = []
-  for (let start = 0; start < items.length; start += size) {
-    results.push(...(await Promise.all(items.slice(start, start + size).map(run))))
-  }
-  return results
-}
-
 /**
  * The page of a classical number: the word once, then each sense with what tells it apart
  * and where it is read. Every sense is read whole, because who a person is comes with the
@@ -411,18 +397,23 @@ const loadNumberPage = async ({
   const { simple, entry } = resolved
   const [books, read] = await Promise.all([
     loadBookCounts(language, classicCode, lexicalLanguage),
-    inBatches(senses, SENSE_READ_BATCH, async sense => {
-      const [detailed, senseBooks] = await Promise.all([
-        sense.code === resolved.code
-          ? resolved.detailed
-          : readResource<StrongLexiconEntryDto>(
-              `/v1/strong-lexicon/entries/${encodeURIComponent(sense.code)}`,
-              { language }
-            ),
-        loadBookCounts(language, sense.code, lexicalLanguage),
-      ])
-      return { sense, detailed, books: senseBooks }
-    }),
+    // Every sense is read at once: the page waits for the slowest read, not for their sum.
+    Promise.all(
+      senses.map(async sense => {
+        const [detailed, senseBooks] = await Promise.all([
+          sense.code === resolved.code
+            ? resolved.detailed
+            : readTwice(() =>
+                readResource<StrongLexiconEntryDto>(
+                  `/v1/strong-lexicon/entries/${encodeURIComponent(sense.code)}`,
+                  { language }
+                )
+              ),
+          readTwice(() => loadBookCounts(language, sense.code, lexicalLanguage)),
+        ])
+        return { sense, detailed, books: senseBooks }
+      })
+    ),
   ])
 
   const summaries = strongSenseSummaries(
@@ -489,14 +480,29 @@ export const loadStrongPage = createServerFn({ method: 'GET' })
     const language = data.language
     const lexicalLanguage = strongLexicalLanguage(identity.code)
 
+    // A code with a suffix is a sense among others: its number is asked for its senses while
+    // the entry is read, since nearly every sense is filed under the number it is written
+    // under.
+    const written = writtenNumber(identity.code)
+    const early =
+      written === identity.code
+        ? undefined
+        : { number: written, senses: loadSenses(language, written) }
+    // Should the entry not exist, nobody waits for that answer.
+    early?.senses.catch(() => undefined)
+
     const resolved = await readStrongEntry(identity.code, language)
     if (!resolved) throw notFound()
     const { simple, detailed, entry, code } = resolved
     const classicCode = parseStrongCode(entry.classicStrong)?.code ?? code
 
-    // A sense named by its classical number alone is the only page of that number.
+    // A sense that carries its classical number as its code is the page of that number.
     const sensesRequest =
-      code === classicCode ? Promise.resolve([]) : loadSenses(language, classicCode)
+      code === classicCode
+        ? Promise.resolve([])
+        : early?.number === classicCode
+          ? early.senses
+          : loadSenses(language, classicCode)
     if (identity.code === classicCode) {
       const senses = await sensesRequest
       if (hasStrongNumberPage(classicCode, senses)) {
@@ -743,7 +749,7 @@ const ACCENTED_INITIALS: Record<string, string[]> = {
   u: ['ù', 'û'],
 }
 const LETTERS_TTL_MS = 60 * 60 * 1000
-// The largest letter holds about a thousand entries; the cap only guards a cursor loop.
+// A letter holds a few thousand senses at most; the cap only guards a cursor loop.
 const MAX_LIST_PAGES = 10
 
 const letterPrefixes = (letter: string, language: ResourceLanguage): string[] => [

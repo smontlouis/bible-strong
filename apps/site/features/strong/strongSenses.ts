@@ -75,8 +75,6 @@ export type StrongListLine = {
   gloss: string
   original: string
   transliteration: string
-  /** How many senses of the number the line stands for, when more than one. */
-  senseCount?: number
 }
 
 const glossKey = (gloss: string): string => gloss.trim().toLocaleLowerCase()
@@ -109,7 +107,6 @@ export const groupStrongListLines = (senses: readonly StrongSenseRef[]): StrongL
         gloss: first.gloss,
         original: first.original,
         transliteration: first.transliteration,
-        senseCount: group.length,
       },
     ]
   })

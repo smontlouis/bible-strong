@@ -116,7 +116,7 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
       alternatePath={alternatePath}
       appUrl={buildWebAppBibleUrl({ ...location, passage })}
       section="bible"
-      breadcrumbs={bibleBreadcrumbs(page)}
+      breadcrumbs={bibleBreadcrumbs(page, page.commentaryChoice)}
       subHeader={<BibleNavBar page={page} onCommentariesChange={rememberPlace} />}
     >
       <article ref={articleRef}>

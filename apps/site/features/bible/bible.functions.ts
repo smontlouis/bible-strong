@@ -407,15 +407,18 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
               if (!coverage.chaptersByBook[String(reference.book)]?.includes(reference.chapter)) {
                 return undefined
               }
-              return buildBiblePath({
-                versionId: version.id,
-                book: reference.book,
-                chapter: reference.chapter,
-                passage:
-                  reference.verse === undefined
-                    ? undefined
-                    : { startVerse: reference.verse, endVerse: reference.endVerse },
-              })
+              return withInlineCommentaries(
+                buildBiblePath({
+                  versionId: version.id,
+                  book: reference.book,
+                  chapter: reference.chapter,
+                  passage:
+                    reference.verse === undefined
+                      ? undefined
+                      : { startVerse: reference.verse, endVerse: reference.endVerse },
+                }),
+                commentaryChoice
+              )
             },
             includeHeadings: !passage,
             // The Strong presentation prints the Strong numbers of every tagged word.

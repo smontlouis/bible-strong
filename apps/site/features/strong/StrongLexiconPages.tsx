@@ -117,7 +117,8 @@ export function StrongLetterPage({ page }: { page: StrongLetterPageData }) {
 
         <ul className="strong-list mt-8">
           {entries.map(entry => (
-            <li key={entry.code}>
+            // The senses of a number may be gathered under several glosses of one letter.
+            <li key={`${entry.code} ${entry.gloss}`}>
               <a className="strong-list__entry" href={buildStrongPath(language, entry.code)}>
                 <span className="strong-list__gloss">{entry.gloss}</span>
                 <span
