@@ -24,9 +24,10 @@ export const TextReveal: FC<TextRevealProps> = ({ children, className, ...props 
     <span
       ref={sectionRef}
       className={cn('text-reveal', className)}
-      aria-label={children}
       {...props}
     >
+      {/* The sentence is read once, whole; its words appearing one by one are for the eye. */}
+      <span className="sr-only">{children}</span>
       {words.map((wordMatch, index) => {
         const start = index / words.length
         const end = start + 1 / words.length
@@ -53,8 +54,11 @@ interface WordProps {
 const Word: FC<WordProps> = ({ children, progress, range }) => {
   const opacity = useTransform(progress, range, [0, 1])
   return (
-    <span className="text-reveal__word" aria-hidden="true">
-      <span className="text-reveal__word-muted">{children}</span>
+    <span
+      className="text-reveal__word"
+      aria-hidden="true"
+      data-word={typeof children === 'string' ? children : undefined}
+    >
       <motion.span style={{ opacity }} className="text-reveal__word-visible">
         {children}
       </motion.span>

@@ -173,7 +173,11 @@ function AnnotationTypeIcon({ type }: { type: AnnotationType }) {
     )
   }
 
-  return <span className={`annotation-tool-icon annotation-tool-icon--${type}`}>A</span>
+  return (
+    <span className={`annotation-tool-icon annotation-tool-icon--${type}`} aria-hidden="true">
+      A
+    </span>
+  )
 }
 
 function MarkerIcon() {
@@ -255,7 +259,6 @@ function HighlightDemo({
             className={`annotation-tool ${activeType === type ? 'is-active' : ''}`}
             key={type}
             type="button"
-            aria-label={labels[type]}
             aria-pressed={activeType === type}
             onClick={() => onTypeChange(type)}
           >
@@ -435,7 +438,8 @@ function ReasoningDemo({
           <span>▧&nbsp; {noteLabel}</span>
           <b>✦</b>
         </div>
-        <p className="demo-note-card__text" aria-label={noteText}>
+        <p className="demo-note-card__text">
+          <span className="sr-only">{noteText}</span>
           <span aria-hidden="true" data-note-text={noteText}>
             {noteText}
           </span>
@@ -1122,12 +1126,7 @@ export default function Home({ initialTheme }: HomeProps) {
             {t('home.download.apk')}
           </a>
         </Reveal>
-        <div className="download-word" aria-hidden="true">
-          Strong
-          <span lang="he" dir="rtl">
-            חָזָק
-          </span>
-        </div>
+        <div className="download-word" aria-hidden="true" data-word="Strong" data-original="חָזָק" />
       </section>
 
       <footer className="landing-footer">
