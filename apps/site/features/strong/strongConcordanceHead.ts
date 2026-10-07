@@ -41,8 +41,8 @@ export const buildConcordanceHead = (page: StrongConcordancePageData) => {
   )}${numbered ? ` – page ${page.page}` : ''}`
   const description =
     language === 'fr'
-      ? `${title} : ${page.verseCount.toLocaleString('fr')} versets, page ${page.page} sur ${page.pageCount}.`
-      : `${title}: ${page.verseCount.toLocaleString('en')} verses, page ${page.page} of ${page.pageCount}.`
+      ? `${title} : ${page.verseCount.toLocaleString('fr')} verset${page.verseCount === 1 ? '' : 's'}, page ${page.page} sur ${page.pageCount}.`
+      : `${title}: ${page.verseCount.toLocaleString('en')} verse${page.verseCount === 1 ? '' : 's'}, page ${page.page} of ${page.pageCount}.`
 
   return {
     meta: [

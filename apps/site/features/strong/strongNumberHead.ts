@@ -19,7 +19,7 @@ const LABELS = {
     description: (code: string, word: string, count: number, glosses: string) =>
       `Les ${count} sens de Strong ${code} ${word} : ${glosses}.`,
     verses: (count: number, version: string) =>
-      ` ${count.toLocaleString('fr')} versets dans la ${version}.`,
+      ` ${count.toLocaleString('fr')} verset${count === 1 ? '' : 's'} dans la ${version}.`,
   },
   en: {
     strong: 'Strong’s',
@@ -30,7 +30,7 @@ const LABELS = {
     description: (code: string, word: string, count: number, glosses: string) =>
       `The ${count} senses of Strong’s ${code} ${word}: ${glosses}.`,
     verses: (count: number, version: string) =>
-      ` ${count.toLocaleString('en')} verses in the ${version}.`,
+      ` ${count.toLocaleString('en')} verse${count === 1 ? '' : 's'} in the ${version}.`,
   },
 } as const
 

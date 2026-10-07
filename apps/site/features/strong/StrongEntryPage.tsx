@@ -162,7 +162,11 @@ export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
         {concordance && (
           <Section title={t('strong.concordance')}>
             <p>
-              {t('strong.concordance.summary')
+              {t(
+                concordance.verseCount === 1
+                  ? 'strong.concordance.summary.one'
+                  : 'strong.concordance.summary'
+              )
                 .replace('{code}', `Strong ${senseCode}`)
                 .replace('{count}', concordance.verseCount.toLocaleString(language))
                 .replace('{version}', concordance.version)}
