@@ -103,6 +103,43 @@ describe('Strong Bible HTTP resource access', () => {
     expect(fetcher).toHaveBeenCalledTimes(3)
   })
 
+  it('asks for a sense with the letter case of its suffix', async () => {
+    const identity = { kind: 'dstrong', code: 'H2148v' }
+    const fetcher = jest.fn((url: string) => {
+      expect(url).toContain('/identities/H2148v/')
+      return jsonResponse({
+        resource,
+        identity,
+        counts: [{ book: 38, verseCount: 2 }],
+        verses: [],
+        lemmas: [],
+      })
+    })
+    const adapter = createHttpStrongBibleResourceAdapter({
+      baseUrl: 'https://resources.test',
+      fetcher: fetcher as typeof fetch,
+      isOnline: async () => true,
+      bibleChapterAdapter: {
+        loadChapter: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+        loadCoverage: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+      },
+    })
+    const request: Parameters<StrongBibleResourceAdapter['loadCountsByBook']>[1] = {
+      currentVersionId: 'LSG',
+      defaultVersionId: 'LSG',
+      book: 38,
+      reference: 'h2148v',
+    }
+
+    await expect(adapter.loadCountsByBook('LSG', request)).resolves.toEqual({
+      identity,
+      counts: [{ Livre: 38, versesCountByBook: 2 }],
+    })
+    await expect(adapter.loadFoundVersesByBook('LSG', request)).resolves.toMatchObject({ identity })
+    await expect(adapter.loadLemmaStats('LSG', request)).resolves.toMatchObject({ identity })
+    expect(fetcher).toHaveBeenCalledTimes(3)
+  })
+
   afterEach(() => {
     jest.restoreAllMocks()
   })
