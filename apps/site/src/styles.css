@@ -20,7 +20,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-sans: 'Pulp-Display', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Pulp-Display', 'Pulp-Display Fallback', ui-sans-serif, system-ui, sans-serif;
   --font-serif: 'Literata', ui-serif, Georgia, serif;
 }
 :root {
@@ -54,6 +54,23 @@ html {
 html:has(.landing-shell[data-landing-theme='dark']),
 html:has(.resource-shell[data-theme='dark']) {
   --site-scrollbar-thumb: rgb(170 192 232 / 34%);
+}
+/*
+ * What a page is set in until Pulp Display arrives: Arial, scaled to the width of Pulp
+ * Display, so that the lines break where they will and nothing moves when the font swaps.
+ * The system font is a tenth narrower and made the first screen jump.
+ */
+@font-face {
+  font-family: 'Pulp-Display Fallback';
+  src: local('Arial'), local('ArialMT'), local('Roboto');
+  font-weight: 100 549;
+  size-adjust: 102%;
+}
+@font-face {
+  font-family: 'Pulp-Display Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Roboto Bold'), local('Roboto-Bold');
+  font-weight: 550 900;
+  size-adjust: 97.5%;
 }
 @font-face {
   font-display: swap;
@@ -505,7 +522,9 @@ input {
   display: inline-block;
 }
 
-.text-reveal__word-muted {
+/* The word before it is revealed: a faint print of itself, drawn rather than written. */
+.text-reveal__word::before {
+  content: attr(data-word);
   color: color-mix(in srgb, currentcolor 22%, transparent);
 }
 
@@ -517,8 +536,8 @@ input {
 }
 
 @media (prefers-reduced-motion: reduce), (forced-colors: active) {
-  .text-reveal__word-muted {
-    display: none;
+  .text-reveal__word::before {
+    content: none;
   }
 
   .text-reveal__word-visible {
@@ -1164,6 +1183,23 @@ input {
   font-weight: 650;
 }
 
+/* A word in the background: drawn, since it is there to be seen and not to be read. */
+.download-word::before {
+  content: attr(data-word);
+}
+
+.download-word::after {
+  position: absolute;
+  top: -38%;
+  right: 10%;
+  color: rgb(73 111 218 / 36%);
+  content: attr(data-original);
+  direction: rtl;
+  font-family: var(--font-serif);
+  font-size: 0.34em;
+  letter-spacing: 0;
+}
+
 .download-word {
   position: absolute;
   right: -0.04em;
@@ -1174,16 +1210,6 @@ input {
   letter-spacing: -0.09em;
   line-height: 0.8;
   white-space: nowrap;
-}
-
-.download-word span {
-  position: absolute;
-  right: 10%;
-  top: -38%;
-  color: rgb(73 111 218 / 36%);
-  font-family: var(--font-serif);
-  font-size: 0.34em;
-  letter-spacing: 0;
 }
 
 .landing-footer {
@@ -2319,13 +2345,15 @@ input {
 .brand img {
   border-radius: 11px;
 }
+/* White text needs a deeper blue than the accent to be read: the one of the resource pages. */
 .button {
-  background: var(--landing-accent);
+  border-color: #3f63cf;
+  background: #3f63cf;
   color: #fff;
   box-shadow: none;
 }
 .button:hover {
-  background: #456ed8;
+  background: #3759c0;
   transform: translateY(-2px);
 }
 .text-link {
@@ -2962,7 +2990,8 @@ input {
 }
 .verse-reference {
   margin: 0 0 34px;
-  color: var(--landing-accent);
+  /* Small text on white: the ink of the accent, which the accent itself is too light for. */
+  color: var(--landing-accent-ink);
   font-size: 0.96rem;
   font-weight: 700;
 }
@@ -3094,7 +3123,7 @@ input {
   z-index: 2;
   font-size: 0.78rem;
   font-weight: 700;
-  opacity: 0.65;
+  opacity: 0.82;
 }
 .world-card > img {
   align-self: center;
@@ -3115,7 +3144,7 @@ input {
 .world-card p {
   max-width: 480px;
   margin: 0;
-  color: rgb(16 27 53 / 70%);
+  color: rgb(16 27 53 / 82%);
   font-size: 1.02rem;
   line-height: 1.5;
 }
@@ -3295,7 +3324,7 @@ input {
   color: rgb(89 131 240 / 23%);
   font-size: clamp(9rem, 21vw, 19rem);
 }
-.download-word span {
+.download-word::after {
   color: #ffbc00;
   opacity: 0.8;
 }
@@ -3340,7 +3369,13 @@ input {
     box-shadow: 0 28px 70px rgb(2 8 20 / 36%);
   }
   .verse-reference {
-    color: #5983f0;
+    /* The verse stays on white paper in the dark theme. */
+    color: #173778;
+  }
+  .button,
+  .button:hover {
+    border-color: var(--landing-accent);
+    background: var(--landing-accent);
   }
   .verse-version {
     color: #58657a;
@@ -3916,7 +3951,17 @@ html[data-theme-transition='active']::view-transition-new(root) {
   border-color: rgb(89 131 240 / 27%);
 }
 .landing-shell[data-landing-theme='light'] .button {
+  border-color: #3f63cf;
+  background: #3f63cf;
   color: #fff !important;
+}
+.landing-shell[data-landing-theme='light'] .button:hover {
+  background: #3759c0;
+}
+.landing-shell[data-landing-theme='dark'] .button,
+.landing-shell[data-landing-theme='dark'] .button:hover {
+  border-color: var(--landing-accent);
+  background: var(--landing-accent);
 }
 .landing-shell[data-landing-theme='light'] .journey-verse {
   border-color: var(--landing-line);
@@ -3925,7 +3970,8 @@ html[data-theme-transition='active']::view-transition-new(root) {
   box-shadow: 0 28px 70px var(--landing-shadow);
 }
 .landing-shell[data-landing-theme='light'] .verse-reference {
-  color: var(--landing-accent);
+  /* Small text on white: the ink of the accent, which the accent itself is too light for. */
+  color: var(--landing-accent-ink);
 }
 .landing-shell[data-landing-theme='light'] .verse-version {
   color: var(--landing-muted);
@@ -3961,7 +4007,8 @@ html[data-theme-transition='active']::view-transition-new(root) {
   box-shadow: 0 28px 70px rgb(2 8 20 / 36%);
 }
 .landing-shell[data-landing-theme='dark'] .verse-reference {
-  color: #5983f0;
+  /* The verse stays on white paper in the dark theme. */
+  color: #173778;
 }
 .landing-shell[data-landing-theme='dark'] .verse-version {
   color: #58657a;
