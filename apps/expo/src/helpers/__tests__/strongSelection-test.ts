@@ -55,6 +55,66 @@ describe('strongSelection', () => {
     })
   })
 
+  it('keeps the letter case of a sense suffix', () => {
+    expect(createStrongSelection([{ kind: 'dstrong', code: 'H2148v' }], 38, 'LSG')).toEqual({
+      book: 38,
+      reference: '2148',
+      identities: [{ kind: 'dstrong', code: 'H2148v' }],
+      version: 'LSG',
+    })
+  })
+
+  it('keeps apart two senses whose suffixes only differ by their letter case', () => {
+    expect(
+      createStrongSelection(
+        [
+          { kind: 'dstrong', code: 'H2148V' },
+          { kind: 'dstrong', code: 'H2148v' },
+        ],
+        16,
+        'LSG'
+      )?.identities
+    ).toEqual([
+      { kind: 'dstrong', code: 'H2148V' },
+      { kind: 'dstrong', code: 'H2148v' },
+    ])
+  })
+
+  it('normalizes the prefix letter of a Strong code without touching its suffix', () => {
+    expect(
+      createStrongSelection(
+        [
+          { kind: 'dstrong', code: 'h2148v' },
+          { kind: 'strong', code: 'h0413' },
+        ],
+        38,
+        'LSG'
+      )?.identities
+    ).toEqual([
+      { kind: 'dstrong', code: 'H2148v' },
+      { kind: 'strong', code: 'H0413' },
+    ])
+  })
+
+  it('carries a lower-cased sense suffix and its morphology across the DOM bridge', () => {
+    const identity = { kind: 'dstrong' as const, code: 'H2148v' }
+
+    expect(
+      getStrongSelectionPayload({
+        book: 38,
+        identities: [identity],
+        version: 'LSG',
+        morphologies: [{ identity, codes: ['HNpm'] }],
+      })
+    ).toEqual({
+      book: 38,
+      reference: '2148',
+      identities: [identity],
+      version: 'LSG',
+      morphologies: [{ identity, codes: ['HNpm'] }],
+    })
+  })
+
   it('adds the testament prefix to legacy numeric Strong codes', () => {
     expect(createStrongSelection([{ kind: 'strong', code: '25' }], 40, 'BHG')).toEqual({
       book: 40,

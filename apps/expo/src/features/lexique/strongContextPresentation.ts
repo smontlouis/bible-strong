@@ -53,9 +53,16 @@ export const getStrongContextHighlight = (
   const translated = (verse.StrongSpans ?? []).filter(
     span => span.length > 0 && span.startOffset + span.length <= text.length
   )
-  const exact = translated.filter(span =>
-    span.identities.some(identity => codes.has(identity.code.toUpperCase()))
+  // Several senses share an extended code, and two may only differ by the letter case of
+  // their suffix (`H2148v`, `H2148V`): a span tagged with the entry's own code comes first.
+  const own = translated.filter(span =>
+    span.identities.some(identity => identity.code === entry.stepCode)
   )
+  const exact = own.length
+    ? own
+    : translated.filter(span =>
+        span.identities.some(identity => codes.has(identity.code.toUpperCase()))
+      )
   const candidates = exact.length
     ? exact
     : translated.filter(span =>
