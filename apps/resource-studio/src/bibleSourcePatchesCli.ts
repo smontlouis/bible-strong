@@ -16,11 +16,14 @@ import {
   applyBibleSourcePatch,
   bibleComChapterUrl,
   BIBLE_SOURCE_PATCHES_PATH,
+  editionProviderFile,
   patchedSourceLocation,
   readBibleSourcePatches,
   sha256Hex,
+  type BibleSourcePatchChapter,
   type BibleSourcePatches,
   type BibleSourcePatchSet,
+  type EditionProvider,
   type PatchedChapterReport
 } from "./bibleSourcePatches.js";
 import {
@@ -67,11 +70,69 @@ const readRequestLog = async (cacheDir: string): Promise<RequestLogEntry[]> => {
 };
 
 /**
- * Reads one provider answer from the cache, or requests it once: a plain GET
- * of the public chapter endpoint, paced across runs by the request log and
- * counted against the cap. Any answer that is not the chapter (another status,
- * another content type, an error body) stops the run; it is kept beside the
+ * Requests one URL once: a plain GET, paced across runs by the request log of
+ * its cache and counted against the cap. Any answer that is not what was asked
+ * for (another status, an error body) stops the run; it is kept beside the
  * cache for the operator to read and is never retried or worked around.
+ */
+async function requestOnce(options: {
+  cacheDir: string;
+  url: string;
+  target: string;
+  refusedName: string;
+  accept: string;
+  isAnswer: (body: string) => boolean;
+  fetcher?: typeof fetch;
+}): Promise<string> {
+  const { cacheDir, url, target } = options;
+  const log = await readRequestLog(cacheDir);
+  if (log.length >= REQUEST_CAP)
+    throw new Error(`bible-provider-request-cap-reached:${log.length}`);
+  const last = log.at(-1);
+  const wait = last
+    ? REQUEST_INTERVAL_MS - (Date.now() - Date.parse(last.at))
+    : 0;
+  if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+  const response = await (options.fetcher ?? fetch)(url, {
+    headers: {
+      accept: options.accept,
+      "user-agent": "BibleStrongResourceGenerator/1.0"
+    },
+    redirect: "manual"
+  });
+  const body = await response.text();
+  await mkdir(path.dirname(target), { recursive: true });
+  await mkdir(cacheDir, { recursive: true });
+  await appendFile(
+    path.join(cacheDir, REQUEST_LOG),
+    `${JSON.stringify({
+      at: new Date().toISOString(),
+      url,
+      status: response.status,
+      bytes: Buffer.byteLength(body),
+      sha256: sha256Hex(body),
+      contentType: response.headers.get("content-type")
+    })}\n`
+  );
+  if (response.status !== 200 || !options.isAnswer(body)) {
+    const refused = path.join(
+      cacheDir,
+      "refused",
+      `${options.refusedName}.${response.status}`
+    );
+    await mkdir(path.dirname(refused), { recursive: true });
+    await writeFile(refused, body);
+    throw new Error(
+      `bible-provider-refused:${response.status}:${url}:see ${refused}`
+    );
+  }
+  await writeFile(target, body);
+  return body;
+}
+
+/**
+ * Reads one provider answer from the cache, or requests it once from the
+ * public chapter endpoint.
  */
 async function providerAnswer(options: {
   cacheDir: string;
@@ -85,61 +146,113 @@ async function providerAnswer(options: {
   if (existsSync(target)) return readFile(target, "utf8");
   if (!options.fetchMissing)
     throw new Error(`bible-provider-answer-missing:${versionId}:${reference}`);
-  const log = await readRequestLog(cacheDir);
-  if (log.length >= REQUEST_CAP)
-    throw new Error(`bible-provider-request-cap-reached:${log.length}`);
-  const last = log.at(-1);
-  const wait = last
-    ? REQUEST_INTERVAL_MS - (Date.now() - Date.parse(last.at))
-    : 0;
-  if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
-  const url = bibleComChapterUrl(versionId, reference);
-  const response = await (options.fetcher ?? fetch)(url, {
-    headers: {
-      accept: "application/json",
-      "user-agent": "BibleStrongResourceGenerator/1.0"
+  return requestOnce({
+    cacheDir,
+    url: bibleComChapterUrl(versionId, reference),
+    target,
+    refusedName: `${versionId}-${reference.replaceAll(".", "-")}`,
+    accept: "application/json",
+    isAnswer: (body) => {
+      try {
+        const chapter = JSON.parse(body) as {
+          content?: unknown;
+          errors?: unknown;
+        };
+        return !chapter.errors && typeof chapter.content === "string";
+      } catch {
+        return false;
+      }
     },
-    redirect: "manual"
+    ...(options.fetcher ? { fetcher: options.fetcher } : {})
   });
-  const body = await response.text();
-  await mkdir(path.dirname(target), { recursive: true });
-  await appendFile(
-    path.join(cacheDir, REQUEST_LOG),
-    `${JSON.stringify({
-      at: new Date().toISOString(),
-      url,
-      status: response.status,
-      bytes: Buffer.byteLength(body),
-      sha256: sha256Hex(body),
-      contentType: response.headers.get("content-type")
-    })}\n`
-  );
-  let chapter: { content?: unknown; errors?: unknown } | undefined;
-  try {
-    chapter = JSON.parse(body) as { content?: unknown; errors?: unknown };
-  } catch {
-    chapter = undefined;
-  }
-  if (
-    response.status !== 200 ||
-    !chapter ||
-    chapter.errors ||
-    typeof chapter.content !== "string"
-  ) {
-    const refused = path.join(
-      cacheDir,
-      "refused",
-      `${versionId}-${reference.replaceAll(".", "-")}.${response.status}`
-    );
-    await mkdir(path.dirname(refused), { recursive: true });
-    await writeFile(refused, body);
-    throw new Error(
-      `bible-provider-refused:${response.status}:${url}:see ${refused}`
-    );
-  }
-  await writeFile(target, body);
-  return body;
 }
+
+/** Where the file of another edition is kept, and the cache of its host. */
+const editionCache = (
+  cacheDir: string,
+  provider: EditionProvider,
+  reference: string
+) => {
+  // The caches of all providers sit side by side, each with its request log.
+  const root = path.dirname(cacheDir);
+  const file = editionProviderFile(provider, reference);
+  return {
+    url: file.url,
+    target: path.join(root, file.cachePath),
+    cacheDir: path.join(root, provider.id)
+  };
+};
+
+/**
+ * Reads the file of another edition from the cache, or requests it once. A
+ * file is read whole and serves every chapter that names it.
+ */
+async function editionAnswer(options: {
+  cacheDir: string;
+  provider: EditionProvider;
+  reference: string;
+  fetchMissing: boolean;
+  fetcher?: typeof fetch;
+}): Promise<string> {
+  const { provider, reference } = options;
+  const cache = editionCache(options.cacheDir, provider, reference);
+  if (existsSync(cache.target)) return readFile(cache.target, "utf8");
+  if (!options.fetchMissing)
+    throw new Error(
+      `bible-provider-answer-missing:${provider.id}:${reference}`
+    );
+  return requestOnce({
+    cacheDir: cache.cacheDir,
+    url: cache.url,
+    target: cache.target,
+    refusedName: path.basename(cache.target),
+    accept: "*/*",
+    isAnswer: (body) =>
+      body.includes(
+        provider.id === "gratis-bible" ? "<osisText" : '<a name="1">'
+      ),
+    ...(options.fetcher ? { fetcher: options.fetcher } : {})
+  });
+}
+
+/** The answer one chapter of a patch is read from, wherever it comes from. */
+const chapterAnswer = (
+  patch: BibleSourcePatchSet,
+  chapter: BibleSourcePatchChapter,
+  options: CliOptions,
+  fetchMissing: boolean
+) =>
+  chapter.provider
+    ? editionAnswer({
+        cacheDir: options.cacheDir,
+        provider: chapter.provider,
+        reference: chapter.reference,
+        fetchMissing
+      })
+    : providerAnswer({
+        cacheDir: options.cacheDir,
+        versionId: patch.provider.versionId,
+        reference: chapter.reference,
+        fetchMissing
+      });
+
+/** Where the answer of one chapter is cached, its URL and its request log. */
+const chapterAnswerFile = (
+  patch: BibleSourcePatchSet,
+  chapter: BibleSourcePatchChapter,
+  options: CliOptions
+) =>
+  chapter.provider
+    ? editionCache(options.cacheDir, chapter.provider, chapter.reference)
+    : {
+        url: bibleComChapterUrl(patch.provider.versionId, chapter.reference),
+        target: answerPath(
+          options.cacheDir,
+          patch.provider.versionId,
+          chapter.reference
+        ),
+        cacheDir: options.cacheDir
+      };
 
 const readBaseSource = async (root: string, patch: BibleSourcePatchSet) => {
   if (patch.base.sourceUrl.endsWith(".zip"))
@@ -176,12 +289,12 @@ async function patchOf(
 ) {
   const responses: Record<string, string> = {};
   for (const chapter of patch.chapters) {
-    responses[chapter.reference] = await providerAnswer({
-      cacheDir: options.cacheDir,
-      versionId: patch.provider.versionId,
-      reference: chapter.reference,
-      fetchMissing: mode.fetchMissing
-    });
+    responses[chapter.reference] = await chapterAnswer(
+      patch,
+      chapter,
+      options,
+      mode.fetchMissing
+    );
   }
   return {
     responses,
@@ -214,29 +327,22 @@ const describeChapter = (versionId: string, chapter: PatchedChapterReport) => {
 
 /** Requests the provider answers the selected patches still lack. */
 async function fetchAnswers(patches: BibleSourcePatches, options: CliOptions) {
+  const caches = new Set([options.cacheDir]);
   for (const [versionId, patch] of selected(patches, options)) {
     for (const chapter of patch.chapters) {
-      const cached = existsSync(
-        answerPath(
-          options.cacheDir,
-          patch.provider.versionId,
-          chapter.reference
-        )
-      );
-      await providerAnswer({
-        cacheDir: options.cacheDir,
-        versionId: patch.provider.versionId,
-        reference: chapter.reference,
-        fetchMissing: true
-      });
+      const file = chapterAnswerFile(patch, chapter, options);
+      const cached = existsSync(file.target);
+      await chapterAnswer(patch, chapter, options, true);
+      caches.add(file.cacheDir);
       console.log(
         `${versionId} ${chapter.reference}: ${cached ? "cached" : "fetched"}`
       );
     }
   }
-  console.log(
-    `${(await readRequestLog(options.cacheDir)).length} requests to the provider so far, cap ${REQUEST_CAP}`
-  );
+  for (const cacheDir of caches)
+    console.log(
+      `${path.basename(cacheDir)}: ${(await readRequestLog(cacheDir)).length} requests so far, cap ${REQUEST_CAP}`
+    );
 }
 
 /**
@@ -249,7 +355,6 @@ async function draft(root: string, draftPath: string, options: CliOptions) {
   const drafts = JSON.parse(
     await readFile(path.resolve(root, draftPath), "utf8")
   ) as BibleSourcePatches;
-  const log = await readRequestLog(options.cacheDir);
   const completed: BibleSourcePatches = { schemaVersion: 1, bibles: {} };
   for (const [versionId, patch] of Object.entries(drafts.bibles)) {
     const result = await patchOf(versionId, patch, options, {
@@ -258,26 +363,17 @@ async function draft(root: string, draftPath: string, options: CliOptions) {
     });
     const chapters = [];
     for (const [index, chapter] of patch.chapters.entries()) {
-      const url = bibleComChapterUrl(
-        patch.provider.versionId,
-        chapter.reference
-      );
+      const file = chapterAnswerFile(patch, chapter, options);
+      const { url } = file;
       const fetchedAt =
-        log.filter((entry) => entry.url === url && entry.status === 200).at(-1)
-          ?.at ??
-        (
-          await stat(
-            answerPath(
-              options.cacheDir,
-              patch.provider.versionId,
-              chapter.reference
-            )
-          )
-        ).mtime.toISOString();
+        (await readRequestLog(file.cacheDir))
+          .filter((entry) => entry.url === url && entry.status === 200)
+          .at(-1)?.at ?? (await stat(file.target)).mtime.toISOString();
       const { supplied, renumbered, dropped, kept } = result.chapters[index]!;
       chapters.push({
         chapter: chapter.chapter,
         reference: chapter.reference,
+        ...(chapter.provider ? { provider: chapter.provider } : {}),
         evidence: chapter.evidence,
         response: {
           url,
@@ -326,8 +422,13 @@ async function report(
       `# ${versionId}: bible.com ${patch.provider.versionId} (${patch.provider.abbreviation}), ` +
         `${patch.base.sha256} -> ${patch.patched.sha256}`
     );
-    for (const chapter of result.chapters) {
+    for (const [index, chapter] of result.chapters.entries()) {
       console.log(describeChapter(versionId, chapter));
+      const edition = patch.chapters[index]!.provider;
+      if (edition)
+        console.log(
+          `  read from ${editionProviderFile(edition, chapter.reference).url}`
+        );
       for (const [verse, hash] of Object.entries(chapter.supplied)) {
         const text = chapter.verses[verse]!;
         console.log(

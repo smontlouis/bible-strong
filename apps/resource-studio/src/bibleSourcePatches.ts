@@ -18,12 +18,31 @@ type LegacyBible = Record<string, Record<string, Record<string, string>>>;
  */
 export type ProviderTextStyle = "provider" | "space-after-break" | "no-breaks";
 
+/**
+ * Another published edition of the same text, read for the chapters the
+ * provider of the set lacks as well. Each publishes whole files, not chapters:
+ * the answer of a chapter is the file its chapter is read from.
+ */
+export type EditionProvider =
+  /** One OSIS file for the whole Bible, `<work>.xml` of the repository. */
+  | { id: "gratis-bible"; work: string }
+  /**
+   * One page per book under `edition`. `labels` reads a verse number the page
+   * misprints (`1O` for `10`); a label that is not a number fails otherwise.
+   */
+  | { id: "levigilant.com"; edition: string; labels?: Record<string, number> };
+
 /** One chapter completed or replaced from the provider's answer. */
 export interface BibleSourcePatchChapter {
   /** `<book>-<chapter>`, in Bible Strong numbers. */
   chapter: string;
-  /** Chapter reference at the provider (`EXO.38`, `SIR.1_1`). */
+  /**
+   * Chapter reference at the provider (`EXO.38`, `SIR.1_1`); the OSIS chapter
+   * (`Dan.2`) or the page and chapter (`jacques.html#5`) of another edition.
+   */
   reference: string;
+  /** The edition this chapter is read from, when it is not the set's provider. */
+  provider?: EditionProvider;
   /** What the source lacks here and what the provider serves. No Bible text. */
   evidence: string;
   /** The provider answer the patch was reviewed against. */
@@ -121,6 +140,39 @@ export const publishedTextSourceUrl = (options: {
 
 export const bibleComChapterUrl = (versionId: number, reference: string) =>
   `https://events.bible.com/api/bible/chapter/3.1?id=${versionId}&reference=${encodeURIComponent(reference)}&format=html`;
+
+const EDITION_PATH = /^[\w-]+(?:\/[\w-]+)*$/u;
+const LEVIGILANT_REFERENCE = /^([\w-]+\.html)#([1-9]\d*)$/u;
+
+/**
+ * The file a chapter of another edition is read from, and where it is kept
+ * under the provider cache. Several chapters may name the same file.
+ */
+export function editionProviderFile(
+  provider: EditionProvider,
+  reference: string
+): { url: string; cachePath: string } {
+  if (provider.id === "gratis-bible") {
+    if (!EDITION_PATH.test(provider.work))
+      throw new Error(`bible-provider-edition-invalid:${provider.work}`);
+    return {
+      url: `https://raw.githubusercontent.com/gratis-bible/bible/master/${provider.work}.xml`,
+      cachePath: `gratis-bible/${provider.work}.xml`
+    };
+  }
+  if (provider.id === "levigilant.com") {
+    const page = LEVIGILANT_REFERENCE.exec(reference)?.[1];
+    if (!EDITION_PATH.test(provider.edition) || !page)
+      throw new Error(
+        `bible-provider-edition-invalid:${provider.edition}:${reference}`
+      );
+    return {
+      url: `https://levigilant.com/${provider.edition}/${page}`,
+      cachePath: `levigilant.com/${provider.edition}/${page}`
+    };
+  }
+  throw new Error(`bible-provider-unknown:${(provider as { id: string }).id}`);
+}
 
 // --- Provider chapter markup -------------------------------------------------
 
@@ -307,6 +359,97 @@ export function parseProviderChapterHtml(html: string): Record<string, string> {
   return verses;
 }
 
+const collapseVerseText = (text: string) =>
+  text
+    .replace(/\u00a0/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+/**
+ * Verse rows of one chapter of an OSIS file that holds one `<verse>` element
+ * per verse and nothing but text inside it, as the gratis-bible files do.
+ * `reference` is the OSIS chapter (`Dan.2`). Markup inside a verse, a verse
+ * read twice or a chapter without verses fails.
+ */
+export function parseOsisChapter(
+  xml: string,
+  reference: string
+): Record<string, string> {
+  if (
+    !/^[1-3]?[A-Za-z]+\.[1-9]\d*$/u.test(reference) ||
+    !xml.includes("<osisText")
+  )
+    throw new Error(`bible-provider-osis-invalid:${reference}`);
+  const verses: Record<string, string> = {};
+  const pattern = new RegExp(
+    `<verse\\s+osisID=(['"])${reference.replace(".", "\\.")}\\.([1-9]\\d*)\\1\\s*(?:/>|>([^]*?)</verse>)`,
+    "gu"
+  );
+  for (const [, , verse, body] of xml.matchAll(pattern)) {
+    if (body?.includes("<"))
+      throw new Error(
+        `bible-provider-osis-markup-unsupported:${reference}.${verse}`
+      );
+    if (verses[verse!] !== undefined)
+      throw new Error(`bible-provider-verse-duplicate:${reference}.${verse}`);
+    const text = collapseVerseText(decodeEntities(body ?? ""));
+    if (text) verses[verse!] = text;
+  }
+  return verses;
+}
+
+/**
+ * Verse rows of one chapter of a levigilant.com book page: the paragraphs
+ * between the anchor of the chapter and the next one, the first being the
+ * chapter title and every other one a verse behind its number. Italics and
+ * colours are dropped. A paragraph that does not begin with a verse number
+ * fails, unless `labels` records how that misprinted number reads; a recorded
+ * label the chapter does not print fails too.
+ */
+export function parseLevigilantChapter(
+  html: string,
+  chapter: number,
+  labels: Record<string, number> = {}
+): Record<string, string> {
+  const fail = (code: string, detail: string | number): never => {
+    throw new Error(`bible-provider-page-${code}:${chapter}:${detail}`);
+  };
+  const anchor = `<a name="${chapter}">`;
+  const start = html.indexOf(anchor);
+  if (start === -1 || html.indexOf(anchor, start + 1) !== -1)
+    fail("chapter-missing", chapter);
+  const rest = html.slice(start + anchor.length);
+  const end = /<a name="|<\/div>/u.exec(rest);
+  if (!end) fail("chapter-unbounded", chapter);
+  const paragraphs = [
+    ...rest.slice(0, end!.index).matchAll(/<p\b[^>]*>([^]*?)<\/p>/gu)
+  ]
+    .map(([, body]) =>
+      collapseVerseText(decodeEntities(body!.replace(/<[^>]*>/gu, "")))
+    )
+    .filter(Boolean);
+  const title = paragraphs.shift();
+  if (!title || !new RegExp(`\\D ${chapter}$`, "u").test(title))
+    fail("title-missing", chapter);
+  const verses: Record<string, string> = {};
+  const read = new Set<string>();
+  let previous = 0;
+  for (const paragraph of paragraphs) {
+    const [, label, text] = /^(\S+) (.+)$/u.exec(paragraph) ?? [];
+    if (!label || !text) fail("verse-unreadable", previous + 1);
+    const verse = /^[1-9]\d*$/u.test(label!) ? Number(label) : labels[label!];
+    if (verse === undefined) fail("verse-label-unsupported", label!);
+    if (!/^[1-9]\d*$/u.test(label!)) read.add(label!);
+    if (!Number.isSafeInteger(verse) || verse! <= previous)
+      fail("verse-order", label!);
+    verses[verse!] = text!;
+    previous = verse!;
+  }
+  const unread = Object.keys(labels).find((label) => !read.has(label));
+  if (unread !== undefined) fail("verse-label-unread", unread);
+  return verses;
+}
+
 /** Writes the provider's rows of one chapter the way the source writes them. */
 export function styleProviderChapter(
   verses: Record<string, string>,
@@ -472,6 +615,45 @@ export interface PatchedChapterReport extends AlignedChapter {
   matched: number;
 }
 
+/**
+ * Rows of one chapter in the answer of the set's provider, or `undefined` when
+ * the answer is not that chapter of that version.
+ */
+const readProviderChapter = (
+  versionId: number,
+  reference: string,
+  response: string
+): Record<string, string> | undefined => {
+  const answer = JSON.parse(response) as {
+    content?: string;
+    reference?: { usfm?: string[]; version_id?: number };
+  };
+  if (
+    typeof answer.content !== "string" ||
+    answer.reference?.version_id !== versionId ||
+    !answer.reference.usfm?.includes(reference)
+  )
+    return undefined;
+  return parseProviderChapterHtml(answer.content);
+};
+
+/** Rows of one chapter in the file of another edition. */
+const readEditionChapter = (
+  provider: EditionProvider,
+  reference: string,
+  response: string
+): Record<string, string> => {
+  // Validates the provider and the reference before anything is read.
+  editionProviderFile(provider, reference);
+  if (provider.id === "gratis-bible")
+    return parseOsisChapter(response, reference);
+  return parseLevigilantChapter(
+    response,
+    Number(LEVIGILANT_REFERENCE.exec(reference)![2]),
+    provider.labels
+  );
+};
+
 const sameJson = (left: unknown, right: unknown) =>
   JSON.stringify(left) === JSON.stringify(right);
 
@@ -487,7 +669,10 @@ export function applyBibleSourcePatch(options: {
   /** The earlier source entry, exactly as stored. */
   baseRaw: string;
   patch: BibleSourcePatchSet;
-  /** Raw provider answers (the JSON body), by chapter reference. */
+  /**
+   * Raw provider answers by chapter reference: the JSON body of a chapter, or
+   * the file of another edition the chapter is read from.
+   */
   responses: Record<string, string>;
   anchored?: boolean;
 }): { bible: unknown; serialized: string; chapters: PatchedChapterReport[] } {
@@ -512,20 +697,15 @@ export function applyBibleSourcePatch(options: {
     if (response === undefined) fail("response-missing", entry.reference);
     if (anchored && sha256Hex(response!) !== entry.response.sha256)
       fail("response-mismatch", entry.reference);
-    const answer = JSON.parse(response!) as {
-      content?: string;
-      reference?: { usfm?: string[]; version_id?: number };
-    };
-    if (
-      typeof answer.content !== "string" ||
-      answer.reference?.version_id !== patch.provider.versionId ||
-      !answer.reference.usfm?.includes(entry.reference)
-    )
-      fail("response-invalid", entry.reference);
-    const provider = styleProviderChapter(
-      parseProviderChapterHtml(answer.content!),
-      patch.textStyle
-    );
+    const rows = entry.provider
+      ? readEditionChapter(entry.provider, entry.reference, response!)
+      : readProviderChapter(
+          patch.provider.versionId,
+          entry.reference,
+          response!
+        );
+    if (!rows) fail("response-invalid", entry.reference);
+    const provider = styleProviderChapter(rows!, patch.textStyle);
     if (Object.keys(provider).length === 0)
       fail("response-empty", entry.reference);
     const base = bible[book]?.[chapter];
