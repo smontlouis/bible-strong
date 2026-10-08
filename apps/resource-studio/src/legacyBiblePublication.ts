@@ -17,6 +17,39 @@ type LegacyPericope = Record<
 >;
 type LegacyRedWords = Record<string, Array<{ start: number; end: number }>>;
 
+// USFM codes of the 66 books, by Bible Strong book number. Legacy sources name
+// a block of verses translated as one `<first verse>+<USFM code>`.
+const USFM_BOOK_CODES = (
+  "GEN EXO LEV NUM DEU JOS JDG RUT 1SA 2SA 1KI 2KI 1CH 2CH EZR NEH EST JOB " +
+  "PSA PRO ECC SNG ISA JER LAM EZK DAN HOS JOL AMO OBA JON MIC NAM HAB ZEP " +
+  "HAG ZEC MAL MAT MRK LUK JHN ACT ROM 1CO 2CO GAL EPH PHP COL 1TH 2TH 1TI " +
+  "2TI TIT PHM HEB JAS 1PE 2PE 1JN 2JN 3JN JUD REV"
+).split(" ");
+
+const BOOK_OR_CHAPTER_KEY = /^[1-9]\d*$/u;
+const VERSE_KEY = /^\d+$/u;
+const COMBINED_VERSE_KEY = /^(\d+)\+([1-3A-Z][A-Z]{2})$/u;
+
+/**
+ * Verse number a legacy verse key is published under. A plain number is
+ * itself. A combined block (`"14+EXO"`, verses 14 and 15 translated as one) is
+ * published under its first verse number, like every other grouped verse of
+ * the legacy sources. Any other key fails: a key is never skipped silently.
+ */
+export const legacyVerseNumber = (
+  book: string,
+  chapter: string,
+  key: string
+): string => {
+  if (VERSE_KEY.test(key)) return key;
+  const combined = COMBINED_VERSE_KEY.exec(key);
+  if (combined && combined[2] === USFM_BOOK_CODES[Number(book) - 1])
+    return String(Number(combined[1]));
+  throw new Error(
+    `legacy-bible-verse-key-unsupported:${book}:${chapter}:${key}`
+  );
+};
+
 const HEADING_TYPES = {
   h1: "majorSection",
   h2: "scope",
@@ -130,6 +163,17 @@ export function applyLegacyPericope(
   };
 }
 
+/**
+ * True when every verse key of a legacy Bible is a plain number, the only
+ * shape its other readers (the Resource service, the reader) understand.
+ */
+export const legacyBibleHasOnlyPlainVerseKeys = (bible: unknown) =>
+  Object.values(bible as LegacyBible).every((chapters) =>
+    Object.values(chapters).every((verses) =>
+      Object.keys(verses).every((key) => VERSE_KEY.test(key))
+    )
+  );
+
 export function buildCanonicalBibleFromLegacy(options: {
   versionId: string;
   sourceVersion: string;
@@ -146,16 +190,24 @@ export function buildCanonicalBibleFromLegacy(options: {
   let headingCount = 0;
 
   for (const [book, chapters] of Object.entries(bible)) {
-    if (!/^[1-9]\d*$/.test(book)) continue;
+    if (!BOOK_OR_CHAPTER_KEY.test(book))
+      throw new Error(`legacy-bible-book-key-unsupported:${book}`);
     const outputChapters: Record<
       string,
       Record<string, CanonicalBibleVerse>
     > = {};
     for (const [chapter, chapterVerses] of Object.entries(chapters)) {
-      if (!/^[1-9]\d*$/.test(chapter)) continue;
+      if (!BOOK_OR_CHAPTER_KEY.test(chapter))
+        throw new Error(
+          `legacy-bible-chapter-key-unsupported:${book}:${chapter}`
+        );
       const outputVerses: Record<string, CanonicalBibleVerse> = {};
-      for (const [verse, text] of Object.entries(chapterVerses)) {
-        if (!/^\d+$/.test(verse)) continue;
+      for (const [key, text] of Object.entries(chapterVerses)) {
+        const verse = legacyVerseNumber(book, chapter, key);
+        if (verse in outputVerses)
+          throw new Error(
+            `legacy-bible-verse-duplicate:${book}:${chapter}:${key}`
+          );
         if (typeof text !== "string")
           throw new Error("legacy-bible-verse-invalid");
         const headings = legacyPericopeHeadings(pericope, book, chapter, verse);

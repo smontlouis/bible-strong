@@ -92,6 +92,7 @@
     "resources:release:mobile": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/packageMobileResourceCatalog.ts",
     "resources:publication:bible": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/packageResourcePublication.ts",
     "resources:publication:bibles": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/packageOrdinaryBiblePublications.ts",
+    "resources:publication:bible-repairs": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning ${NODE_OPTIONS:-}\" tsx src/bibleSourceRepairsCli.ts",
     "words-of-jesus": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning ${NODE_OPTIONS:-}\" tsx src/wordsOfJesusCli.ts",
     "resources:publication:r2": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning ${NODE_OPTIONS:-}\" tsx src/r2ArtifactSources.ts",
     "strong:sidecar:rebase-offsets": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning ${NODE_OPTIONS:-}\" tsx src/rebaseStrongSidecarOffsets.ts",

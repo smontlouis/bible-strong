@@ -5,7 +5,15 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
-import { buildCanonicalBibleFromLegacy } from "./legacyBiblePublication.js";
+import {
+  applyBibleSourceRepairs,
+  readBibleSourceRepairs,
+  type AppliedBibleSourceRepairs
+} from "./bibleSourceRepairs.js";
+import {
+  buildCanonicalBibleFromLegacy,
+  legacyBibleHasOnlyPlainVerseKeys
+} from "./legacyBiblePublication.js";
 import { downloadR2Object, isR2Location } from "./r2ArtifactSources.js";
 import type { CanonicalBiblePublication } from "./strongBibleMobilePublication.js";
 import {
@@ -36,8 +44,19 @@ export interface LoadedBibleText {
   /** True when the source already is a canonical publication (Strong pipeline). */
   canonicalSource: boolean;
   publication: CanonicalBiblePublication;
-  /** The historical `{book: {chapter: {verse: text}}}` value, for legacy sources. */
+  /**
+   * The historical `{book: {chapter: {verse: text}}}` value, for legacy
+   * sources, with the reviewed repairs of the Bible applied.
+   */
   legacyBible?: unknown;
+  /** Reviewed source repairs applied to `legacyBible`, when the Bible has any. */
+  repairs?: AppliedBibleSourceRepairs;
+  /**
+   * True when the source file reads as the publication it produces, so it can
+   * be delivered as the Offline copy: a canonical publication, or legacy JSON
+   * without repairs or combined-verse keys.
+   */
+  sourceIsDeliverable: boolean;
   /** Local copy of the source file (a ZIP archive or a JSON file). */
   sourceFilePath: string;
   sourceEntry: string;
@@ -151,28 +170,45 @@ export async function loadBibleText(
     sourceEntry: text.entry,
     sourceEntryBytes: Buffer.byteLength(raw)
   };
+  const repairs = (await readBibleSourceRepairs(options.root)).bibles[
+    versionId
+  ];
   if (value.format === "bible-strong-canonical-bible") {
+    // Repairs correct legacy rows; a canonical source must already be right.
+    if (repairs)
+      throw new Error(`bible-source-repairs-canonical-source:${versionId}`);
     return {
       versionId,
       sourceLocation: location,
       sourceSha256,
       canonicalSource: true,
       publication: value as CanonicalBiblePublication,
+      sourceIsDeliverable: true,
       ...sourceFile
     };
   }
+  const repaired = applyBibleSourceRepairs({
+    versionId,
+    sourceSha256,
+    bible: value,
+    ...(repairs ? { repairs } : {})
+  });
   return {
     versionId,
     sourceLocation: location,
     sourceSha256,
     canonicalSource: false,
     ...sourceFile,
-    legacyBible: value,
+    legacyBible: repaired.bible,
+    ...(repaired.changes.length > 0 ? { repairs: repaired } : {}),
+    sourceIsDeliverable:
+      repaired.changes.length === 0 &&
+      legacyBibleHasOnlyPlainVerseKeys(repaired.bible),
     publication: buildCanonicalBibleFromLegacy({
       versionId,
       sourceVersion: location,
       sourceSha256,
-      bible: value
+      bible: repaired.bible
     })
   };
 }

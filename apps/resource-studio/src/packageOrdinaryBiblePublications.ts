@@ -253,8 +253,10 @@ export async function buildOrdinaryBiblePublications(options: {
         // A Bible that gains no presentation keeps its delivered archive byte
         // for byte: readers are not offered an empty update, and archives
         // other resources depend on (the BHG text of interlinear indexes) stay
-        // identical. Such Bibles never had side files.
-        if (!wordsOfJesus && !appliesPericope) {
+        // identical. Such Bibles never had side files. A legacy source that
+        // was repaired, or groups verses under a combined key, no longer reads
+        // as its publication: its Offline copy is the canonical JSON.
+        if (!wordsOfJesus && !appliesPericope && text.sourceIsDeliverable) {
           const archivePath = path.join(
             canonicalDir,
             `bible-${metadata.id.toLowerCase()}.json.zip`
@@ -406,8 +408,10 @@ export const parseOrdinaryBiblePublicationArgs = (
     ...(args.get("--source-overrides")
       ? { sourceOverridesPath: args.get("--source-overrides") }
       : {}),
+    // One version, or several separated by commas: a release of the Bibles a
+    // change affects.
     ...(args.get("--version")
-      ? { versionIds: [args.get("--version")!.toUpperCase()] }
+      ? { versionIds: args.get("--version")!.toUpperCase().split(",") }
       : {})
   };
 };

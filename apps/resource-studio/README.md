@@ -47,6 +47,25 @@ for authoring inputs). R2 locations are read with the operator's `wrangler` sess
 are checked against the SHA-256 in the key. `assets.bible-strong.app` remains a read-only store of
 historical inputs; nothing new is uploaded there.
 
+A legacy source key the converter cannot publish fails the build: a block of verses translated as
+one (`"14+EXO"`) is published under its first verse number, and no key is skipped. Rows a source
+files wrongly (a verse holding the next one behind a literal number, a verse cut in two, a run of
+rows numbered one off, a row under another book) are corrected by the reviewed operations of
+`config/ordinary-bible-source-repairs.json`, applied to the parsed source and anchored by hashes of
+the verses they read and write; the source bytes stay untouched and the file holds no Bible text
+([ADR-0075](../../docs/adr/0075-repair-legacy-bible-sources-with-reviewed-anchored-operations.md)).
+Review them from the local source cache, and draft new ones, with:
+
+```sh
+yarn workspace @bible-strong/resource-studio resources:publication:bible-repairs report --version S21
+yarn workspace @bible-strong/resource-studio resources:publication:bible-repairs draft --file draft.json
+```
+
+After adding a repair, carry the words-of-Jesus decisions of that Bible to the repaired text with
+`yarn resources:words-of-jesus carry-repairs --version <V>`, then run `check` and `audit`.
+`--version` of `resources:publication:bibles` takes one Bible or several separated by commas, to
+rebuild only the Bibles a change affects.
+
 #### Republishing Bibles with their Strong sidecars
 
 1. Check the decisions still anchor to the published texts:

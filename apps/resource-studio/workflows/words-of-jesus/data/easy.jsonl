@@ -783,6 +783,8 @@
 {"ref":"41-9-40","verseSha256":"a1d667f2c48bb43e","spans":[[0,55]],"origin":"legacy-red-words"}
 {"ref":"41-9-41","verseSha256":"e162fcd6218396ee","spans":[[0,157]],"origin":"legacy-red-words"}
 {"ref":"41-9-42","verseSha256":"23a7f2a6eb168faf","spans":[[0,222]],"origin":"legacy-red-words"}
+{"ref":"41-9-43","verseSha256":"a4001e78b9c1e3ae","spans":[[0,250]],"origin":"manual"}
+{"ref":"41-9-45","verseSha256":"3c9094047d7e6de5","spans":[[0,193]],"origin":"manual"}
 {"ref":"41-9-47","verseSha256":"8e4fd59e12199a5e","spans":[[0,221]],"origin":"legacy-red-words"}
 {"ref":"41-9-48","verseSha256":"970d6781cc8c196d","spans":[[0,62]],"origin":"legacy-red-words"}
 {"ref":"41-9-49","verseSha256":"b2e80707b90234a0","spans":[[0,59]],"origin":"legacy-red-words"}
@@ -1344,6 +1346,7 @@
 {"ref":"42-17-32","verseSha256":"bfcdc45df0159d0e","spans":[[0,37]],"origin":"legacy-red-words"}
 {"ref":"42-17-33","verseSha256":"1c97a2e999768007","spans":[[0,113]],"origin":"legacy-red-words"}
 {"ref":"42-17-34","verseSha256":"ed289b2ac4d904cb","spans":[[0,138]],"origin":"legacy-red-words"}
+{"ref":"42-17-35","verseSha256":"182d6e87287b94fe","spans":[[0,132]],"origin":"manual"}
 {"ref":"42-17-37","verseSha256":"b9511b1694d958cd","spans":[[69,148]],"origin":"legacy-red-words"}
 {"ref":"42-18-2","verseSha256":"b09dd82fec7bdf4b","spans":[[17,109]],"origin":"legacy-red-words"}
 {"ref":"42-18-3","verseSha256":"bf33391acf27cc50","spans":[[0,200]],"origin":"legacy-red-words"}
@@ -1546,6 +1549,7 @@
 {"ref":"43-3-19","verseSha256":"b22fa2e05edbdc96","spans":[[0,210]],"origin":"legacy-red-words"}
 {"ref":"43-3-20","verseSha256":"ccac7cdcad88a02f","spans":[[0,180]],"origin":"legacy-red-words"}
 {"ref":"43-3-21","verseSha256":"103eddbdf085d0fb","spans":[[0,169]],"origin":"legacy-red-words"}
+{"ref":"43-4-6","verseSha256":"e3c2956be1427dde","spans":[[232,260]],"origin":"manual"}
 {"ref":"43-4-10","verseSha256":"eb900fe752191fb9","spans":[[26,255]],"origin":"legacy-red-words"}
 {"ref":"43-4-13","verseSha256":"bb0243d525ee5638","spans":[[16,81]],"origin":"legacy-red-words"}
 {"ref":"43-4-14","verseSha256":"d91ece657e25494b","spans":[[0,263]],"origin":"legacy-red-words"}
