@@ -236,9 +236,13 @@ A term page shows text that is also on the article pages of each dictionary. Bot
 indexable: the term page answers a search for the term, an article page a search for the
 term in a given dictionary.
 
-A verse page reads about thirteen documents from the Resource API when it is not cached,
-at most six at a time: the API answers a few reads at once in a steady time, and out of a
-dozen sent together some wait several hundred milliseconds. What does not depend on the
+A verse page reads about nine documents from the Resource API when it is not cached, at
+most six at a time: the API answers a few reads at once in a steady time, and out of a
+dozen sent together some wait several hundred milliseconds. The comments of its first
+commentaries are one read: the API picks, in each, the section that bears most closely on
+the verse
+([ADR-0073](./0073-read-the-commentary-sections-of-a-verse-in-one-read.md)), where the
+page used to read the chapter of each commentary to pick it. What does not depend on the
 Bible being read (the verse in the other Bibles and in its original language, the
 cross-references, the commentaries, the topics, the dictionary articles) is the same read
 for every version of the verse, and the other Bibles are one read for every verse of a

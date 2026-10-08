@@ -68,6 +68,54 @@ describe('loadVerseStudy', () => {
     expect(found.original?.text).toBe('BHG 16')
   })
 
+  it('reads the comments of the verse in one read, in the order of the commentaries', async () => {
+    const section = (resourceId: string, slug: string, startVerse: number, endVerse: number) => ({
+      resource: { kind: 'commentary', resourceId, language: 'fr', revision: 'r1' },
+      slug,
+      startVerse,
+      endVerse,
+      content: `<p>Commentaire de ${resourceId}.</p>`,
+    })
+    answerWith(path =>
+      path === '/v1/commentaries/verses/43-3-16/sections'
+        ? // The API answers in the order asked and leaves out a commentary with no section.
+          { verseKey: '43-3-16', sections: [section('MHY', '14-18', 14, 18)], unavailable: [] }
+        : undefined
+    )
+    const found = await loadVerseStudy({
+      reads: createPageReads(),
+      language: 'fr',
+      versionId: 'LSG',
+      verse,
+      verseText: Promise.resolve(''),
+      carrying: Promise.resolve(carrying),
+      commenting: Promise.resolve(
+        ['barnes', 'mhy-fr'].map(id => ({ id, title: id, path: `/commentary/fr/${id}/john/3` }))
+      ),
+    })
+
+    const reads = vi
+      .mocked(readResource)
+      .mock.calls.filter(([path]) => path.startsWith('/v1/commentaries/'))
+    expect(reads).toEqual([
+      ['/v1/commentaries/verses/43-3-16/sections', { language: 'fr', commentaries: 'barnes,MHY' }],
+    ])
+    expect(found.comments).toHaveLength(1)
+    expect(found.comments[0]).toMatchObject({
+      commentary: 'mhy-fr',
+      section: '14-18',
+      path: '/commentary/fr/mhy-fr/john/3/14-18',
+      excerpt: 'Commentaire de MHY.',
+    })
+  })
+
+  it('asks for no comment where no commentary comments the chapter', async () => {
+    answerWith(() => undefined)
+    await study()
+
+    expect(pathsRead().filter(path => path.startsWith('/v1/commentaries/'))).toEqual([])
+  })
+
   it('asks the same read whatever Bible of the language is being read', async () => {
     answerWith(() => undefined)
     await study(createPageReads(), 'S21')
