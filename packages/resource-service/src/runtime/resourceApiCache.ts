@@ -123,6 +123,16 @@ export const resourceApiCacheRevisionFrom = async (
 export const RESOURCE_API_CACHE_REVISION = (request: Request) =>
   resourceApiCacheRevisionFrom(request, mobileResourceCatalog)
 
+/**
+ * The namespace a response is cached under: the revision of the content it reads, and the
+ * Worker version that wrote it. A deployment that changes how a route answers therefore
+ * never serves what an older version cached, which is what lets a response be kept long.
+ */
+export const resourceApiCacheEpochFor = (
+  contentRevision: string,
+  workerVersion: string | undefined
+): string => `${contentRevision}.${workerVersion || 'unversioned'}`
+
 export type ResourceApiEdgeCache = {
   match(request: Request): Promise<Response | undefined>
   put(request: Request, response: Response): Promise<void>
@@ -140,30 +150,39 @@ const LONG_LIVED_PATHS = [
   /^\/v1\/bibles\/chapters$/,
   /^\/v1\/bibles\/[^/]+\/(?:books\/\d+\/chapters\/\d+|verses|pericopes|coverage)$/,
   /^\/v1\/naves\/[^/]+\/(?:topics\/[^/]+|verses\/[^/]+\/topics)$/,
-  /^\/v1\/dictionaries\/[^/]+\/(?:entries\/(?:batch|by-id\/[^/]+|[^/]+)|verses\/[^/]+\/words)$/,
+  /^\/v1\/dictionaries$/,
+  /^\/v1\/dictionaries\/verses\/[^/]+\/entries$/,
+  /^\/v1\/dictionaries\/[^/]+\/[^/]+\/(?:entries\/(?:batch|by-id\/[^/]+|[^/]+)|verses\/[^/]+\/(?:words|entries))$/,
   /^\/v1\/strong-bibles\/[^/]+\/(?:coverage|books\/\d+\/(?:chapters\/\d+|identities\/[^/]+\/(?:counts|lemmas)))$/,
   /^\/v1\/interlinear-bibles\/[^/]+\/languages\/[^/]+\/(?:coverage|books\/\d+\/chapters\/\d+)$/,
   /^\/v1\/strong-lexicon\/(?:modules\/[^/]+|entries\/[^/]+|morphologies|entities\/(?:chapters\/[^/]+\/\d+|[^/]+))$/,
-  /^\/v1\/commentaries\/[^/]+\/[^/]+\/(?:verses\/[^/]+|chapters\/\d+\/\d+)$/,
+  /^\/v1\/commentaries\/[^/]+\/[^/]+\/(?:coverage|verses\/[^/]+|chapters\/\d+\/\d+)$/,
   /^\/v1\/cross-references\/[^/]+\/verses\/[^/]+$/,
   /^\/v1\/timelines\/[^/]+\/events\/[^/]+$/,
 ] as const
 
 const SHORT_LIVED_PATHS = [
   /^\/v1\/naves\/[^/]+\/topics$/,
-  /^\/v1\/dictionaries\/[^/]+\/entries$/,
+  /^\/v1\/dictionaries\/directory$/,
+  /^\/v1\/dictionaries\/[^/]+\/[^/]+\/entries$/,
   /^\/v1\/strong-bibles\/[^/]+\/books\/\d+\/identities\/[^/]+\/occurrences$/,
   /^\/v1\/strong-lexicon\/entries$/,
   /^\/v1\/timelines\/[^/]+\/events$/,
 ] as const
 
-const cacheTtlSeconds = (request: Request): number | undefined => {
+const HOUR_SECONDS = 60 * 60
+const DAY_SECONDS = 24 * HOUR_SECONDS
+// A revisioned response cannot go stale under its key: the key names the content it reads
+// and the Worker version that wrote it. It is kept as long as a rarely read page needs.
+const REVISIONED_TTL_SECONDS = 30 * DAY_SECONDS
+
+export const resourceApiCacheTtlSeconds = (request: Request): number | undefined => {
   if (request.method !== 'GET') return undefined
   const url = new URL(request.url)
   if (url.pathname.endsWith('/random')) return undefined
-  if (isDynamicResourceRequest(request)) return 24 * 60 * 60
-  if (LONG_LIVED_PATHS.some(pattern => pattern.test(url.pathname))) return 24 * 60 * 60
-  if (SHORT_LIVED_PATHS.some(pattern => pattern.test(url.pathname))) return 60 * 60
+  if (isDynamicResourceRequest(request)) return DAY_SECONDS
+  if (LONG_LIVED_PATHS.some(pattern => pattern.test(url.pathname))) return REVISIONED_TTL_SECONDS
+  if (SHORT_LIVED_PATHS.some(pattern => pattern.test(url.pathname))) return HOUR_SECONDS
   return undefined
 }
 
@@ -246,7 +265,7 @@ export const routeResourceApiRequest = async ({
     return responseForClient(appCheckFailure, undefined, request, corsAllowedOrigins)
   }
 
-  const ttlSeconds = cacheTtlSeconds(request)
+  const ttlSeconds = resourceApiCacheTtlSeconds(request)
   if (!ttlSeconds) {
     const response = await load()
     return new URL(request.url).pathname.startsWith('/v1/')
