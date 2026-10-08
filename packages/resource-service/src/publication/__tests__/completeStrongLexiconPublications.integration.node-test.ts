@@ -14,6 +14,8 @@ import {
 } from '../publicationBundle'
 
 const root = process.env.RESOURCE_STRONG_LEXICON_BUNDLES_ROOT
+// The simple lexicons, which list the senses the detailed one tells apart.
+const simpleRoot = process.env.RESOURCE_SIMPLE_STRONG_BUNDLES_ROOT
 const runIntegration = process.env.RESOURCE_INTEGRATION === '1' && Boolean(root)
 const connectionString =
   process.env.RESOURCE_DATABASE_URL ??
@@ -215,4 +217,87 @@ describe('Complete Strong lexicon publications', { skip: !runIntegration }, () =
       await isolated.dispose()
     }
   })
+
+  it(
+    'reads the senses of every split number in one statement, equal to the reads of a page',
+    { skip: !simpleRoot },
+    async () => {
+      const isolated = await createIsolatedPostgres(connectionString, 'strong_senses_complete', 1)
+      try {
+        for (const bundle of [
+          path.join(path.resolve(root!), 'core'),
+          path.join(path.resolve(root!), 'entities'),
+          path.join(path.resolve(simpleRoot!), 'simple-fr'),
+          path.join(path.resolve(simpleRoot!), 'simple-en'),
+        ]) {
+          const imported = await Effect.runPromise(
+            importPublicationBundle(bundle, isolated.database, {
+              activateForLocalDevelopment: true,
+            })
+          )
+          assert.equal(imported.status, 'activated')
+        }
+
+        // The statement finds the detailed entry of a sense by the identity written like
+        // its code, and reads any other one on its own: every published identity must be
+        // written in the spelling a reference is normalised to, in every lexicon.
+        const loose = await sql<{ rows: string }>`
+          SELECT count(*) AS rows
+            FROM strong_lexicon_entry_identities
+           WHERE step_code !~ '^[HG]([0-9]{4}|[1-9][0-9]{4,})[A-Za-z]*$'
+        `.execute(isolated.database)
+        assert.equal(Number(loose.rows[0].rows), 0)
+
+        let statements = 0
+        const counted = isolated.database.withPlugin({
+          transformQuery(args) {
+            statements += 1
+            return args.node
+          },
+          async transformResult(args) {
+            return args.result
+          },
+        })
+        const oneStatement = makeKyselyStrongLexiconRepository(counted)
+        const readByRead = makeKyselyStrongLexiconRepository(isolated.database, {
+          numberSensesRead: 'read-by-read',
+        })
+        for (const language of ['fr', 'en'] as const) {
+          const numbers = await sql<{ code: string }>`
+            SELECT CASE WHEN e.language = 'greek' THEN 'G' ELSE 'H' END
+                   || (e.payload->>'baseCode') AS code
+              FROM strong_lexicon_entries e
+              JOIN resource_publications p ON p.id = e.publication_id
+             WHERE p.resource_identity = ${`strong-lexicon:simple-${language}`}
+             GROUP BY 1
+            HAVING count(*) > 1
+             ORDER BY 1
+          `.execute(isolated.database)
+          assert.ok(numbers.rows.length > 1000)
+          let senses = 0
+          let withEntity = 0
+          for (const { code } of numbers.rows) {
+            statements = 0
+            const actual = JSON.stringify(
+              await Effect.runPromise(oneStatement.findNumberSenses({ number: code, language }))
+            )
+            assert.equal(statements, 1, code)
+            assert.equal(
+              actual,
+              JSON.stringify(
+                await Effect.runPromise(readByRead.findNumberSenses({ number: code, language }))
+              ),
+              `${code} ${language}`
+            )
+            senses += actual.split('"stepCode"').length - 1
+            withEntity += actual.split('"entityBrief"').length - 1
+          }
+          assert.ok(senses > numbers.rows.length * 2)
+          assert.ok(withEntity > 1000)
+        }
+      } finally {
+        await isolated.dispose()
+      }
+    }
+  )
 })

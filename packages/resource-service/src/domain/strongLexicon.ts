@@ -12,6 +12,8 @@ import {
   StrongLexiconModuleStateDto,
   StrongLexiconMorphologyDto,
   StrongLexiconMorphologyResponseDto,
+  StrongLexiconNumberSenseDto,
+  StrongLexiconNumberSensesDto,
   StrongLexiconRelationDto,
   StrongLexiconResourceDto,
   StrongLexiconSearchResultDto,
@@ -23,6 +25,7 @@ import type {
   StrongLexiconEntryCard,
   StrongLexiconEntity,
   StrongLexiconMorphology,
+  StrongLexiconNumberSense,
   StrongLexiconSearchResult,
   StrongLexiconPage,
 } from '@bible-strong/resource-domain/strong-lexicon'
@@ -80,6 +83,17 @@ export type StrongLexiconRepositoryService = {
     level?: 'simple' | 'detailed'
   }) => Effect.Effect<
     ActiveStrongLexiconValue<StrongLexiconEntryCard>[],
+    StrongLexiconRepositoryError
+  >
+  /**
+   * The senses the simple lexicon of a language files under a classical number, each with
+   * what its entry in the detailed lexicon tells it apart by.
+   */
+  findNumberSenses: (input: {
+    number: string
+    language: StrongLexiconLanguage
+  }) => Effect.Effect<
+    ActiveStrongLexiconValue<{ classicStrong: string; senses: StrongLexiconNumberSense[] }>,
     StrongLexiconRepositoryError
   >
   listEntries: (input: {
@@ -221,6 +235,19 @@ export const readStrongLexiconEntryCards = (input: {
                 : {}),
             })
         ),
+    })
+  })
+
+export const readStrongLexiconNumberSenses = (input: {
+  number: string
+  language: StrongLexiconLanguage
+}) =>
+  Effect.gen(function* () {
+    const active = yield* (yield* StrongLexiconRepository).findNumberSenses(input)
+    return new StrongLexiconNumberSensesDto({
+      resource: { revision: active.revision },
+      classicStrong: active.value.classicStrong,
+      senses: active.value.senses.map(sense => new StrongLexiconNumberSenseDto(sense)),
     })
   })
 

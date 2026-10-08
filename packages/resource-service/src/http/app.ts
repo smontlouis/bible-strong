@@ -63,6 +63,7 @@ import {
   ActiveStrongBiblePublicationUnavailable,
   readStrongBibleChapter,
   readStrongBibleCounts,
+  readStrongBibleCountsOfReferences,
   readStrongBibleCoverage,
   readStrongBibleLemmaStats,
   readStrongBibleOccurrences,
@@ -92,6 +93,7 @@ import {
   readStrongLexiconEntity,
   readStrongLexiconModuleState,
   readStrongLexiconMorphologies,
+  readStrongLexiconNumberSenses,
   StrongLexiconEntityNotFound,
   StrongLexiconEntryNotFound,
   StrongLexiconRepository,
@@ -838,6 +840,19 @@ const StrongBibleApiLive = HttpApiBuilder.group(ResourceApi, 'strongBibles', han
         ['strong-bible', path.version, path.book, path.reference, 'counts']
       )
     })
+    .handle('getStrongBibleCountsBatch', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readStrongBibleCountsOfReferences({
+          versionId: path.version,
+          book: path.book,
+          references: urlParams.references.split(','),
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        ['strong-bible', path.version, path.book, 'counts-batch', urlParams.references]
+      )
+    })
     .handle('getStrongBibleOccurrences', ({ path, urlParams, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
       return serveRevisionedResponse(
@@ -950,6 +965,18 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
       }).pipe(
         Effect.tap(() => addResponseHeaders({ 'x-request-id': requestId })),
         Effect.mapError(cause => toHttpProblem(cause, requestId))
+      )
+    })
+    .handle('getStrongLexiconNumberSenses', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readStrongLexiconNumberSenses({
+          number: path.number,
+          language: urlParams.language,
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        ['strong-lexicon', 'number-senses', path.number, urlParams.language]
       )
     })
     .handle('browseStrongLexicon', ({ urlParams, request }) => {
@@ -1223,6 +1250,8 @@ const unavailableStrongBibleRepository: StrongBibleRepositoryService = {
     Effect.fail(new ActiveStrongBiblePublicationUnavailable({ versionId: input.versionId })),
   findCountsByBook: input =>
     Effect.fail(new ActiveStrongBiblePublicationUnavailable({ versionId: input.versionId })),
+  findCountsByBookOfReferences: input =>
+    Effect.fail(new ActiveStrongBiblePublicationUnavailable({ versionId: input.versionId })),
   findOccurrences: input =>
     Effect.fail(new ActiveStrongBiblePublicationUnavailable({ versionId: input.versionId })),
   findLemmaStats: input =>
@@ -1243,6 +1272,8 @@ const unavailableInterlinearBibleRepository: InterlinearBibleRepositoryService =
 const unavailableStrongLexiconRepository: StrongLexiconRepositoryService = {
   getModuleState: moduleId => Effect.succeed({ moduleId, status: 'unavailable' }),
   findEntry: () => Effect.fail(new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'core' })),
+  findNumberSenses: () =>
+    Effect.fail(new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'core' })),
   listEntries: () =>
     Effect.fail(new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'core' })),
   findRandom: () =>

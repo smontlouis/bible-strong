@@ -505,6 +505,7 @@ the Nave operations consumed by the app:
 - `GET /v1/strong-bibles/:version/coverage`
 - `GET /v1/strong-bibles/:version/books/:book/chapters/:chapter`
 - `GET /v1/strong-bibles/:version/books/:book/identities/:reference/counts`
+- `GET /v1/strong-bibles/:version/books/:book/identities/batch/counts?references=H2148A,H2148B`
 - `GET /v1/strong-bibles/:version/books/:book/identities/:reference/occurrences`
 - `GET /v1/strong-bibles/:version/books/:book/identities/:reference/lemmas`
 - `GET /v1/interlinear-bibles/BHG/languages/:language/coverage`
@@ -536,6 +537,19 @@ detailed entry; the concordance reads of a Strong Bible resolve their publicatio
 identity in one statement
 ([ADR-0072](../../docs/adr/0072-read-strong-entry-cards-in-one-statement.md)).
 
+`GET /v1/strong-lexicon/numbers/:number/senses?language=fr` answers the senses the simple
+lexicon of a language files under a classical number (`H2148`, without a sense suffix), each
+with its row of that lexicon and what its entry in the detailed lexicon tells it apart by:
+`detailedDefinitionHtml`, its notice, and `entityBrief`, who its person or its place is. A
+number the lexicon does not hold has no sense.
+`GET /v1/strong-bibles/:version/books/:book/identities/batch/counts?references=…` answers, for
+up to a hundred references, what the counts read of each answers: its identity and its verses
+by book, in the order asked, and nothing for a reference the index does not hold. Each is one
+statement, and the Worker keeps both like the other revisioned reads: the first under the
+revisions of the simple lexicon of its language, the detailed lexicon and its entities, the
+second under the revision of its Strong Bible index
+([ADR-0074](../../docs/adr/0074-read-the-senses-of-a-strong-number-in-two-reads.md)).
+
 Both `nave:fr` (`NAVE_FR`) and `nave:en` (`NAVE_EN`) are remotely readable in this tracer. All 12 cataloged Strong Bible versions are remotely
 readable when their validated index publication and the exact declared Bible text revision and
 SHA-256 are active. An active index with a missing or mismatched Bible publication is deliberately
@@ -561,6 +575,12 @@ value in the complete local LSG bundle with the active PostgreSQL publication.
 `resources:test:strong` reads `RESOURCE_STRONG_BIBLE_BUNDLES_ROOT`, requires exactly the 12 mobile
 catalog identities, validates canonical/archive parity, imports each domain atomically, and queries
 chapter coverage and spans. The suite is skipped when the external Maker handoff path is absent.
+
+The complete Strong lexicon test reads `RESOURCE_STRONG_LEXICON_BUNDLES_ROOT`. With
+`RESOURCE_SIMPLE_STRONG_BUNDLES_ROOT` set as well, it also reads the senses of every classical
+number the simple lexicons split, in both languages, and compares the single statement with
+the reads of a page. The complete Strong Bible test compares the counts of several
+references with the counts of each, for every twentieth identity of each index.
 
 `resources:test:interlinear` reads the prerequisite BHG publication from
 `RESOURCE_BHG_BUNDLE_ROOT` and its two index bundles from `RESOURCE_INTERLINEAR_BUNDLES_ROOT`, requires exactly the French

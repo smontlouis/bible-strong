@@ -457,6 +457,67 @@ describe('Resource Worker binding', () => {
     }
   })
 
+  it('invalidates the senses of a number with the three lexicons they are read from', async () => {
+    const catalog = (revisions: Partial<Record<string, string>> = {}) => ({
+      resources: Object.fromEntries(
+        ['simple-fr', 'simple-en', 'core', 'resources', 'entities'].map(moduleId => [
+          `strong-lexicon:${moduleId}`,
+          { contentSha256: revisions[moduleId] ?? `${moduleId}-r1` },
+        ])
+      ),
+    })
+    const revisionOf = (language: string, revisions?: Partial<Record<string, string>>) =>
+      resourceApiCacheRevisionFrom(
+        new Request(
+          `https://api.bible-strong.app/v1/strong-lexicon/numbers/H2148/senses?language=${language}`
+        ),
+        catalog(revisions)
+      )
+    const french = await revisionOf('fr')
+
+    // The simple lexicon lists the senses; the detailed one and its entities tell them apart.
+    for (const moduleId of ['simple-fr', 'core', 'entities']) {
+      assert.notEqual(await revisionOf('fr', { [moduleId]: 'r2' }), french, moduleId)
+    }
+    // The other language and the dictionary articles are not read.
+    for (const moduleId of ['simple-en', 'resources']) {
+      assert.equal(await revisionOf('fr', { [moduleId]: 'r2' }), french, moduleId)
+    }
+    assert.notEqual(await revisionOf('en'), french)
+    assert.notEqual(await revisionOf('en', { 'simple-en': 'r2' }), await revisionOf('en'))
+  })
+
+  it('invalidates the counts of several references only with their Strong Bible index', async () => {
+    const catalog = (lsg: string, kjv: string, lexicon: string) => ({
+      resources: {
+        'bible-strong:LSG': { archiveSha256: lsg },
+        'bible-strong:KJV': { archiveSha256: kjv },
+        'strong-lexicon:core': { contentSha256: lexicon },
+      },
+    })
+    const request = (path: string) =>
+      new Request(`https://api.bible-strong.app/v1/strong-bibles/LSG/books/1/identities/${path}`)
+    const batch = request('batch/counts?references=H2148A,H2148B')
+    const initial = await resourceApiCacheRevisionFrom(batch, catalog('lsg-1', 'kjv-1', 'core-1'))
+
+    assert.equal(
+      await resourceApiCacheRevisionFrom(batch, catalog('lsg-1', 'kjv-2', 'core-2')),
+      initial
+    )
+    assert.notEqual(
+      await resourceApiCacheRevisionFrom(batch, catalog('lsg-2', 'kjv-1', 'core-1')),
+      initial
+    )
+    // The same revision as the counts of one reference: both read the same index.
+    assert.equal(
+      await resourceApiCacheRevisionFrom(
+        request('H2148A/counts'),
+        catalog('lsg-1', 'kjv-1', 'core-1')
+      ),
+      initial
+    )
+  })
+
   it('invalidates dictionary passage discovery independently from generic dictionary reads', async () => {
     const catalog = {
       resources: {
@@ -485,6 +546,9 @@ describe('Resource Worker binding', () => {
       '/v1/bibles/LSG/books/1/chapters/1',
       '/v1/bibles/LSG/verses?references=1-1-1',
       '/v1/strong-lexicon/entries/H430?language=fr',
+      '/v1/strong-lexicon/numbers/H2148/senses?language=fr',
+      '/v1/strong-bibles/LSG/books/1/identities/H2148A/counts',
+      '/v1/strong-bibles/LSG/books/1/identities/batch/counts?references=H2148A,H2148B',
       '/v1/naves/fr/topics/aaron',
       '/v1/cross-references/fr/verses/1-1-1',
       '/v1/commentaries/MHY/fr/chapters/1/1',
