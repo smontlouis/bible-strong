@@ -22,14 +22,10 @@ export const otherMainVersions = (language: ResourceLanguage, versionId: string)
   MAIN_BIBLE_VERSIONS[language].filter(id => id !== versionId).slice(0, OTHER_VERSION_COUNT)
 
 /**
- * A verse as it is quoted in a sentence: on one line, without the marks some Bibles put
- * where a line of poetry breaks (`|`).
+ * A verse as it is quoted in a sentence: on one line. The marks a Bible puts where a line
+ * of poetry breaks (`|` in the Semeur) are part of its text and are kept.
  */
-export const quoteVerseText = (text: string): string =>
-  text
-    .replace(/\s*\|\s*/gu, ' ')
-    .replace(/\s+/gu, ' ')
-    .trim()
+export const quoteVerseText = (text: string): string => text.replace(/\s+/gu, ' ').trim()
 
 export type VerseKey = { book: number; chapter: number; verse: number }
 

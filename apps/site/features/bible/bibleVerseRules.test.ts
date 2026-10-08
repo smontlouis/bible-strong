@@ -8,10 +8,10 @@ import {
 } from './bibleVerseRules'
 
 describe('quoteVerseText', () => {
-  it('quotes a verse on one line, without its line-break marks', () => {
+  it('quotes a verse on one line and keeps its line-break marks', () => {
     expect(
       quoteVerseText('Grâce à lui, je me repose |dans des prairies verdoyantes,\n et c’est lui ')
-    ).toBe('Grâce à lui, je me repose dans des prairies verdoyantes, et c’est lui')
+    ).toBe('Grâce à lui, je me repose |dans des prairies verdoyantes, et c’est lui')
   })
 })
 
