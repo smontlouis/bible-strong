@@ -271,14 +271,18 @@ its code says it is one sense of a number. A page shown without the words its en
 translated by, because they could not be read, is an incomplete page; any other read that
 fails fails the page, which is then not kept.
 
-The page of a number reads each of its senses from the Resource API, entry and verse
-counts: about sixty reads for the largest number, once per cached rendering. The senses of
-a number are only known from the lexicon, by asking for every code a sense could carry: the
-number is asked as soon as one reading level of its entry names a sense with a code of its
-own, and its senses are read once it has answered. A page of a number is therefore three
-reads deep, and those of its senses pass sixteen at a time: six at a time would make ten
-rounds of the largest number, each as long as its slowest read. A number with a single sense, or a
-code in another letter case, is redirected as soon as its entry is known.
+The page of a number is eight reads, whatever the number of its senses: its entry and its
+verses like a sense, the senses the lexicon files under it, each with what tells it apart,
+and the verses of all of them, counted in one read
+([ADR-0074](./0074-read-the-senses-of-a-strong-number-in-two-reads.md)). The senses of a
+number are only known from the lexicon: the number is asked for them as soon as one reading
+level of its entry names a sense with a code of its own. The Bible is asked at the same
+moment where every code a sense could carry is read, before the senses are known, so a page
+of a number is two reads deep like the page of a sense. No Strong page keeps more reads in
+flight than a Bible page does. A number with a single sense, or a code in another letter
+case, is redirected as soon as its entry is known. A Resource service older than these two
+reads answers neither: the page then fails, and is not kept, rather than take a split
+number for one without senses.
 
 The lexicon list of the Resource API gathers the entries that name one person or thing
 under a single representative, as the lexicon list of the workspace shows them. The
