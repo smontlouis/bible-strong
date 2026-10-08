@@ -47,8 +47,9 @@ Any other book, chapter or verse key, and two keys for one verse number, fail th
 `config/ordinary-bible-source-repairs.json` lists, per Bible, the SHA-256 of the source the repairs
 were reviewed against and an ordered list of operations on verse rows:
 
-- `split`: the verse holds the next verse behind a literal marker at a given offset; the marker is
-  dropped and the rest becomes the next verse, whose row must be missing;
+- `split`: the verse holds another verse behind a literal marker at a given offset; the marker is
+  dropped and the rest becomes the next verse, or the verse of the chapter the operation names,
+  whose row must be missing;
 - `join`: the next row is appended to the verse, with a declared separator;
 - `move`: a row goes to another reference, which must be missing;
 - `shift`: a run of rows of one chapter is renumbered by a constant;
@@ -74,9 +75,16 @@ and prints the anchors to record once the report has been read.
 
 An operation is recorded only when the source itself shows the defect:
 
-- a `split` needs the literal number of the missing verse inside the text. Two verses that share a
-  row without such a marker stay grouped under the first number: where one ends is an editorial
-  choice, not a repair;
+- a `split` needs the literal number of the missing verse inside the text, or another digital
+  edition of the same text that prints the verses apart: the row must read as those verses one
+  after the other, the brackets and the accents on capitals of that edition aside, and the marker
+  is then the space between them. FMAR, which is the text of biblemartin.com as CrossWire published
+  it in 2008, files the verses beyond the English verse count of a chapter in its last row, and two
+  verses under another verse; they are split where the mirror of that site (levigilant.com) and the
+  later CrossWire module end each verse. Two verses that share a row in every edition of the text
+  stay grouped under the first number: where one ends is an editorial choice, not a repair. The
+  Geneva family of Bibles numbers Romans 3:22-23, Romans 8:20-21 and 1 Corinthians 3:22-23 as one
+  verse, and Ostervald prints Matthew 11:2-3 as one;
 - a `shift` needs a chapter one row short or long, a last row that is the last verse of the
   chapter, and every renumbered row checked against another translation of the same language;
 - a `move` needs a row whose reference cannot exist and a missing row it fits between;
@@ -101,6 +109,9 @@ longer true of a source that was repaired or holds combined keys: its Offline co
 JSON, since the file no longer reads as the publication.
 
 ## Consequences
+
+FMAR keeps the verse numbers of its edition where they differ from the common ones: Numbers 13 has
+34 verses, Job 39 has 38, Job 40 has 28 and Ezekiel 21 has 37, as in OST.
 
 EASY, NLT, GW, S21, NET, FMAR, OST and CHU get a new text revision. None has a Strong index, and
 none is the base text of an interlinear index.

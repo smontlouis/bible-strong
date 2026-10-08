@@ -150,6 +150,204 @@
           "by": 1,
           "expect": "f885619808f8e78c",
           "evidence": "The chapter has one row fewer than its verses: verses 20 and 21 share row 20, and every later row is numbered one too low. Checked verse by verse against the Segond 1910 of the pipeline."
+        },
+        {
+          "op": "split",
+          "ref": "2-37-4",
+          "at": 63,
+          "marker": " ",
+          "to": "2-37-24",
+          "expect": "8d7cbf341f2801a9",
+          "result": ["145b035184d822e3", "1a92a33c7a7e7121"],
+          "evidence": "The row holds verses 4 and 24 with a space between them, and verse 24 has no row. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 ends verse 4 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "4-13-33",
+          "at": 259,
+          "marker": " ",
+          "expect": "c6099fb1d8ea10ce",
+          "result": ["b5193e2c781d1981", "3d34e64b084923da"],
+          "evidence": "The row holds verses 33 and 34 with a space between them, and verse 34 has no row. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 ends verse 33 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "4-26-51",
+          "at": 96,
+          "marker": " ",
+          "expect": "d2391976a949de58",
+          "result": ["c93ed49096449aba", "11244ead9c9cf70b"],
+          "evidence": "The row holds verses 51 and 52 with a space between them, and verse 52 has no row. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 ends verse 51 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "18-39-30",
+          "at": 94,
+          "marker": " ",
+          "expect": "52579b95601a256e",
+          "result": ["f8688d37afe8d3f0", "e158d45dd4980019"],
+          "evidence": "The row holds verses 30 to 38 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) ends verse 30 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "18-39-31",
+          "at": 106,
+          "marker": " ",
+          "expect": "e158d45dd4980019",
+          "result": ["8edef6518baaa37f", "86973dd4881e0c06"],
+          "evidence": "The row holds verses 31 to 38 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) ends verse 31 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "18-39-32",
+          "at": 55,
+          "marker": " ",
+          "expect": "86973dd4881e0c06",
+          "result": ["09f185c3c98111c5", "d4bf0a96cd19fba1"],
+          "evidence": "The row holds verses 32 to 38 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) ends verse 32 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "18-39-33",
+          "at": 83,
+          "marker": " ",
+          "expect": "d4bf0a96cd19fba1",
+          "result": ["03dcd95f50b58235", "0d64b50c62aa0b2d"],
+          "evidence": "The row holds verses 33 to 38 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) ends verse 33 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "18-39-34",
+          "at": 41,
+          "marker": " ",
+          "expect": "0d64b50c62aa0b2d",
+          "result": ["443adaa47c0dbbf0", "85f7f9d106fd366a"],
+          "evidence": "The row holds verses 34 to 38 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) ends verse 34 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "18-39-35",
+          "at": 125,
+          "marker": " ",
+          "expect": "85f7f9d106fd366a",
+          "result": ["a73015df016acc0c", "1952f9b3794124fd"],
+          "evidence": "The row holds verses 35 to 38 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) ends verse 35 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "18-39-36",
+          "at": 40,
+          "marker": " ",
+          "expect": "1952f9b3794124fd",
+          "result": ["efbd5c0400a8e4c0", "36a0cfb66dcff240"],
+          "evidence": "The row holds verses 36 to 38 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) ends verse 36 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "18-39-37",
+          "at": 86,
+          "marker": " ",
+          "expect": "36a0cfb66dcff240",
+          "result": ["bbb2c7a600890b52", "1e6f4f386ee7affa"],
+          "evidence": "The row holds verses 37 and 38 with a space between them, and verse 38 has no row. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) ends verse 37 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "18-40-24",
+          "at": 85,
+          "marker": " ",
+          "expect": "a9d30c95f50e458e",
+          "result": ["5a69155eee2eb2b4", "f2966226706885af"],
+          "evidence": "The row holds verses 24 to 28 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) ends verse 24 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "18-40-25",
+          "at": 80,
+          "marker": " ",
+          "expect": "f2966226706885af",
+          "result": ["87b6f02f03c0b2ca", "645cd4ca2776a414"],
+          "evidence": "The row holds verses 25 to 28 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) ends verse 25 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "18-40-26",
+          "at": 88,
+          "marker": " ",
+          "expect": "645cd4ca2776a414",
+          "result": ["0e07ff854ee28650", "373c16814d4f69d7"],
+          "evidence": "The row holds verses 26 to 28 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) ends verse 26 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "18-40-27",
+          "at": 73,
+          "marker": " ",
+          "expect": "373c16814d4f69d7",
+          "result": ["86072fa674c40b3d", "a8a19d319d95b9c5"],
+          "evidence": "The row holds verses 27 and 28 with a space between them, and verse 28 has no row. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) ends verse 27 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "26-21-32",
+          "at": 166,
+          "marker": " ",
+          "expect": "221b769875591161",
+          "result": ["0eb046f90012ef1e", "c48c86bb914757c4"],
+          "evidence": "The row holds verses 32 to 37 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 ends verse 32 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "26-21-33",
+          "at": 227,
+          "marker": " ",
+          "expect": "c48c86bb914757c4",
+          "result": ["e0ca6aa85e3145a7", "3907f9a302bf983a"],
+          "evidence": "The row holds verses 33 to 37 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 ends verse 33 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "26-21-34",
+          "at": 224,
+          "marker": " ",
+          "expect": "3907f9a302bf983a",
+          "result": ["775162388696ccb6", "2c045176b4c56961"],
+          "evidence": "The row holds verses 34 to 37 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 ends verse 34 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "26-21-35",
+          "at": 112,
+          "marker": " ",
+          "expect": "2c045176b4c56961",
+          "result": ["f27c973331691407", "fb7deb48b568d62b"],
+          "evidence": "The row holds verses 35 to 37 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 ends verse 35 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "26-21-36",
+          "at": 158,
+          "marker": " ",
+          "expect": "fb7deb48b568d62b",
+          "result": ["ce760a4c9d005e05", "f24f2110c496a0b3"],
+          "evidence": "The row holds verses 36 and 37 with a space between them, and verse 37 has no row. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 ends verse 36 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "move",
+          "ref": "26-43-27",
+          "to": "26-43-25",
+          "expect": "f455119538534843",
+          "evidence": "The row holds verse 25, which has no row of its own, before verse 27: levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 print them as two verses, and the two read as this row."
+        },
+        {
+          "op": "split",
+          "ref": "26-43-25",
+          "at": 180,
+          "marker": " ",
+          "to": "26-43-27",
+          "expect": "f455119538534843",
+          "result": ["1c3d50999167bac6", "6dd63765f8c0504d"],
+          "evidence": "The row holds verses 25 and 27 with a space between them, and verse 27 has no row. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 ends verse 25 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
         }
       ]
     },
@@ -177,17 +375,8 @@
       ]
     },
     "OST": {
-      "sourceSha256": "d3258a3f962ec907be692ddf911180314223fa6521f9955c6fa1f9677589135d",
+      "sourceSha256": "6dbc819e6d528c3f7b4d1a85ed81788647cc7d593dcf983a0d08111c470590a0",
       "repairs": [
-        {
-          "op": "shift",
-          "chapter": "27-2",
-          "first": 23,
-          "last": 48,
-          "by": 1,
-          "expect": "6ba91a7729950eee",
-          "evidence": "The chapter has one row fewer than its verses: the text of verse 23 is absent from the source and from its provider, and rows 23 to 48 are numbered one too low. The provider numbers these rows 24 to 49. Checked verse by verse against the Segond NEG 1979 and Martin texts of the pipeline."
-        },
         {
           "op": "shift",
           "chapter": "40-11",
@@ -217,15 +406,6 @@
           "evidence": "The provider prints the first word of this verse with the digit one for its second letter, which is how the earlier source came to cut the verse there. The edition has the letter."
         },
         {
-          "op": "shift",
-          "chapter": "52-1",
-          "first": 6,
-          "last": 9,
-          "by": 1,
-          "expect": "1d9f08c48ae25b9b",
-          "evidence": "The chapter has one row fewer than its verses: the text of verse 6 is absent from the source and from its provider, and rows 6 to 9 are numbered one too low. The provider leaves the gap at verse 5 instead; row 5 reads as verse 5 in both other texts. Checked verse by verse against the Segond NEG 1979 and Martin texts of the pipeline."
-        },
-        {
           "op": "misprint",
           "ref": "58-12-11",
           "at": 1,
@@ -234,15 +414,6 @@
           "expect": "fd32409fecd79601",
           "result": "05938fc02a042c60",
           "evidence": "The provider prints the first word of this verse with the digit one for its second letter, which is how the earlier source came to cut the verse there. The edition has the letter."
-        },
-        {
-          "op": "shift",
-          "chapter": "59-5",
-          "first": 10,
-          "last": 19,
-          "by": 1,
-          "expect": "453c01d8a66a8716",
-          "evidence": "The chapter has one row fewer than its verses: the text of verse 10 is absent from the source and from its provider, and rows 10 to 19 are numbered one too low. The provider numbers these rows 11 to 20. Checked verse by verse against the Segond NEG 1979 and Martin texts of the pipeline."
         },
         {
           "op": "misprint",

@@ -49,8 +49,9 @@ historical inputs; nothing new is uploaded there.
 
 A legacy source key the converter cannot publish fails the build: a block of verses translated as
 one (`"14+EXO"`) is published under its first verse number, and no key is skipped. Rows a source
-files wrongly (a verse holding the next one behind a literal number, a verse cut in two, a run of
-rows numbered one off, a row under another book, a digit printed for a letter) are corrected by the
+files wrongly (a verse holding the next one behind a literal number, or behind a space where another
+edition of the same text ends the verse, a verse cut in two, a run of rows numbered one off, a row
+under another book, a digit printed for a letter) are corrected by the
 reviewed operations of
 `config/ordinary-bible-source-repairs.json`, applied to the parsed source and anchored by hashes of
 the verses they read and write; the source bytes stay untouched and the file holds no Bible text
@@ -72,7 +73,9 @@ the source came from, as a patched source: the earlier file with the named chapt
 the provider's answers, stored under its own SHA-256. `config/ordinary-bible-source-patches.json`
 records each patch by reference, URL, date and hash, without Bible text, and repairs anchor on the
 patched source
-([ADR-0077](../../docs/adr/0077-complete-legacy-bible-sources-from-their-provider.md)):
+([ADR-0077](../../docs/adr/0077-complete-legacy-bible-sources-from-their-provider.md)). A chapter
+the provider lacks as well names the other edition of the same text it is read from (`provider`:
+an OSIS file of gratis-bible, a book page of levigilant.com):
 
 ```sh
 yarn workspace @bible-strong/resource-studio resources:publication:bible-source-patches fetch

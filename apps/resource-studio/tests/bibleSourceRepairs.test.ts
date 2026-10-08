@@ -68,6 +68,120 @@ describe("Bible source repairs", () => {
     ]);
   });
 
+  it("splits a merged row where another edition ends the verse", () => {
+    const merged = "First verse. Second verse. Third verse.\n";
+    const applied = repair({ 18: { 40: { 23: "x", 24: merged } } }, [
+      {
+        op: "split",
+        ref: "18-40-24",
+        at: 12,
+        marker: " ",
+        expect: hashVerseText(merged),
+        result: [
+          hashVerseText("First verse."),
+          hashVerseText("Second verse. Third verse.\n")
+        ],
+        evidence: EVIDENCE
+      },
+      {
+        op: "split",
+        ref: "18-40-25",
+        at: 13,
+        marker: " ",
+        expect: hashVerseText("Second verse. Third verse.\n"),
+        result: [
+          hashVerseText("Second verse."),
+          hashVerseText("Third verse.\n")
+        ],
+        evidence: EVIDENCE
+      }
+    ]);
+
+    assert.deepEqual(applied.bible, {
+      18: {
+        40: {
+          23: "x",
+          24: "First verse.",
+          25: "Second verse.",
+          26: "Third verse.\n"
+        }
+      }
+    });
+    assert.deepEqual(applied.origins["18-40-26"], [
+      { sourceRef: "18-40-24", sourceStart: 27, sourceEnd: 40, targetStart: 0 }
+    ]);
+  });
+
+  it("sends the rest of a split row to the verse it holds", () => {
+    const source = {
+      2: { 37: { 4: "Fourth. Twenty-fourth.", 5: "x", 25: "y" } },
+      26: { 43: { 24: "x", 26: "z", 27: "Twenty-fifth. Twenty-seventh." } }
+    };
+    const applied = repair(source, [
+      {
+        op: "split",
+        ref: "2-37-4",
+        at: 7,
+        marker: " ",
+        to: "2-37-24",
+        expect: hashVerseText("Fourth. Twenty-fourth."),
+        result: [hashVerseText("Fourth."), hashVerseText("Twenty-fourth.")],
+        evidence: EVIDENCE
+      },
+      // A row filed under its last verse: it moves to its first, then splits.
+      {
+        op: "move",
+        ref: "26-43-27",
+        to: "26-43-25",
+        expect: hashVerseText("Twenty-fifth. Twenty-seventh."),
+        evidence: EVIDENCE
+      },
+      {
+        op: "split",
+        ref: "26-43-25",
+        at: 13,
+        marker: " ",
+        to: "26-43-27",
+        expect: hashVerseText("Twenty-fifth. Twenty-seventh."),
+        result: [
+          hashVerseText("Twenty-fifth."),
+          hashVerseText("Twenty-seventh.")
+        ],
+        evidence: EVIDENCE
+      }
+    ]);
+
+    assert.deepEqual(applied.bible, {
+      2: { 37: { 4: "Fourth.", 5: "x", 24: "Twenty-fourth.", 25: "y" } },
+      26: {
+        43: { 24: "x", 25: "Twenty-fifth.", 26: "z", 27: "Twenty-seventh." }
+      }
+    });
+    assert.deepEqual(applied.origins["26-43-27"], [
+      { sourceRef: "26-43-27", sourceStart: 14, sourceEnd: 29, targetStart: 0 }
+    ]);
+
+    const split = (to: string): BibleSourceRepair => ({
+      op: "split",
+      ref: "2-37-4",
+      at: 7,
+      marker: " ",
+      to,
+      expect: hashVerseText("Fourth. Twenty-fourth."),
+      result: [hashVerseText("Fourth."), hashVerseText("Twenty-fourth.")],
+      evidence: EVIDENCE
+    });
+    assert.throws(
+      () => repair(source, [split("2-37-25")]),
+      /bible-source-repair-target-occupied:TEST:2-37-25/u
+    );
+    for (const to of ["2-38-24", "3-37-24", "2-37-4"])
+      assert.throws(
+        () => repair(source, [split(to)]),
+        /bible-source-repair-split-target-invalid:TEST:2-37-4/u
+      );
+  });
+
   it("joins a verse cut in two and renumbers the rows that follow", () => {
     const applied = repair(
       { 48: { 3: { 27: "a", 28: "I", 29: "rest", 30: "last" } } },

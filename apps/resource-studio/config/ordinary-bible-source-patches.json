@@ -181,6 +181,42 @@
       "textStyle": "no-breaks",
       "chapters": [
         {
+          "chapter": "27-2",
+          "reference": "Dan.2",
+          "provider": {
+            "id": "gratis-bible",
+            "work": "fr/ostv1996"
+          },
+          "evidence": "The source and its provider have no verse 23 and number the rest of the chapter one too low. The Old Testament of this source reads as the Ostervald 1996 text of the Unbound Bible, which gratis-bible publishes as one OSIS file: 99.9% of the rows of the Old Testament are identical, and this chapter is, verse 23 and one letter of verse 31 aside. The eBible.org edition of the same text gives verse 23 byte for byte.",
+          "response": {
+            "url": "https://raw.githubusercontent.com/gratis-bible/bible/master/fr/ostv1996.xml",
+            "fetchedAt": "2026-10-08T16:26:38.314Z",
+            "sha256": "8d7a29d61a50cbfffe65fc573b5a7e4d8bbd45a3ffd18bc4cc777ac920251006"
+          },
+          "supplied": {
+            "23": "2d653e1727bb0731",
+            "31": "a0b818fb6ec79b67"
+          },
+          "renumbered": [
+            {
+              "first": 23,
+              "last": 29,
+              "by": 1,
+              "expect": "bfbebde5203b328b"
+            },
+            {
+              "first": 31,
+              "last": 48,
+              "by": 1,
+              "expect": "ef65557118e5c6e8"
+            }
+          ],
+          "dropped": {
+            "30": "05d240afc3bf570e"
+          },
+          "kept": 22
+        },
+        {
           "chapter": "48-3",
           "reference": "GAL.3",
           "evidence": "The source cuts verse 28 after its first letter, files the rest of it as the next row and numbers every later row one too high. The provider serves verse 28 whole and the chapter with its own verse count; every other verse reads the same in both.",
@@ -207,6 +243,33 @@
           "kept": 27
         },
         {
+          "chapter": "52-1",
+          "reference": "1_thessaloniciens.html#1",
+          "provider": {
+            "id": "levigilant.com",
+            "edition": "bible_vaudoise/ostervald_1877"
+          },
+          "evidence": "The source and its provider have no verse 6 and number the rest of the chapter one too low. The New Testament of this source is the Ostervald 1877 text digitised by levigilant.com, which prints the chapter with its ten verses; the nine rows of the source read the same there.",
+          "response": {
+            "url": "https://levigilant.com/bible_vaudoise/ostervald_1877/1_thessaloniciens.html",
+            "fetchedAt": "2026-10-08T16:29:30.050Z",
+            "sha256": "99a33cd99784064f0e7391508c5bc8b48abc7f490e856c14d8c71543905f2a64"
+          },
+          "supplied": {
+            "6": "b5497543b7c609d2"
+          },
+          "renumbered": [
+            {
+              "first": 6,
+              "last": 9,
+              "by": 1,
+              "expect": "1d9f08c48ae25b9b"
+            }
+          ],
+          "dropped": {},
+          "kept": 5
+        },
+        {
           "chapter": "58-12",
           "reference": "HEB.12",
           "evidence": "The source cuts verse 11 after its first letter, files the rest of it as the next row and numbers every later row one too high. The provider serves verse 11 whole and the chapter with its own verse count; every other verse reads the same in both.",
@@ -231,6 +294,49 @@
             "12": "d98875eb406e3f69"
           },
           "kept": 10
+        },
+        {
+          "chapter": "59-5",
+          "reference": "jacques.html#5",
+          "provider": {
+            "id": "levigilant.com",
+            "edition": "bible_vaudoise/ostervald_1877",
+            "labels": {
+              "1O": 10
+            }
+          },
+          "evidence": "The source and its provider have no verse 10 and number the rest of the chapter one too low. The New Testament of this source is the Ostervald 1877 text digitised by levigilant.com, which prints verse 10 behind a misprinted number, the letter O for the zero, which is how the verse was lost. Three other verses differ from the page by one accent and take its reading.",
+          "response": {
+            "url": "https://levigilant.com/bible_vaudoise/ostervald_1877/jacques.html",
+            "fetchedAt": "2026-10-08T16:29:28.163Z",
+            "sha256": "6109ee324d2ffd52a75a51d5c4b1dd1fa86bf1ec8271d44fdacf367c156b0d4f"
+          },
+          "supplied": {
+            "7": "8a10987ef6ed9b80",
+            "8": "1345947e25ba9c26",
+            "10": "36c197458eb41728",
+            "12": "f57a87cc45a2fbe0"
+          },
+          "renumbered": [
+            {
+              "first": 10,
+              "last": 10,
+              "by": 1,
+              "expect": "a2283b6dd6ee6ef1"
+            },
+            {
+              "first": 12,
+              "last": 19,
+              "by": 1,
+              "expect": "00683c284e2cedb6"
+            }
+          ],
+          "dropped": {
+            "7": "2b64fb88255da4d3",
+            "8": "6b70c50cdb35426d",
+            "11": "0a276398b629b37e"
+          },
+          "kept": 7
         },
         {
           "chapter": "66-22",
@@ -261,8 +367,8 @@
       ],
       "patched": {
         "fileName": "bible-ost.json",
-        "sha256": "d3258a3f962ec907be692ddf911180314223fa6521f9955c6fa1f9677589135d",
-        "bytes": 5011528
+        "sha256": "6dbc819e6d528c3f7b4d1a85ed81788647cc7d593dcf983a0d08111c470590a0",
+        "bytes": 5012088
       }
     },
     "PDV2017": {

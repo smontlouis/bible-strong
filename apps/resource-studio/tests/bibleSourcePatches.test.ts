@@ -9,6 +9,9 @@ import {
   applyBibleSourcePatch,
   assertPatchedSourceLoaded,
   bibleComChapterUrl,
+  editionProviderFile,
+  parseLevigilantChapter,
+  parseOsisChapter,
   parseProviderChapterHtml,
   patchedSourceLocation,
   publishedTextSourceUrl,
@@ -91,6 +94,144 @@ describe("Provider chapter markup", () => {
       2: "c",
       3: "d"
     });
+  });
+});
+
+const osisFile = (verses: string) =>
+  `<?xml version='1.0' encoding='UTF-8'?>\n<osis><osisText osisIDWork='tst'>` +
+  `<div type='book' osisID='Tst'><chapter osisID='Tst.1'>${verses}</chapter>` +
+  `<chapter osisID='Tst.2'><verse osisID='Tst.2.1'>elsewhere</verse></chapter>` +
+  `</div></osisText></osis>`;
+const bookPage = (chapters: Record<string, string[]>) =>
+  `<div id="right"><p><a href="#1">1</a></p>` +
+  Object.entries(chapters)
+    .map(
+      ([chapter, rows]) =>
+        `<a name="${chapter}"><font></font></a>\n<p>&nbsp;</p>\n` +
+        `<p align="center"><font><b>Test ${chapter}</b></font></p>\n` +
+        rows.map((row) => `<p><font>${row}</font></p>`).join("\n")
+    )
+    .join("\n") +
+  `</div><div id="bottom"><p>Not a verse</p></div>`;
+
+describe("Chapters of another edition", () => {
+  it("reads one chapter of an OSIS file that holds a verse per element", () => {
+    const xml = osisFile(
+      `<verse osisID='Tst.1.1'>First&#160;row,  it&apos;s here.</verse>\n` +
+        `<verse osisID='Tst.1.2'></verse><verse osisID="Tst.1.3">third</verse>`
+    );
+
+    assert.deepEqual(parseOsisChapter(xml, "Tst.1"), {
+      1: "First row, it's here.",
+      3: "third"
+    });
+    assert.deepEqual(parseOsisChapter(xml, "Tst.2"), { 1: "elsewhere" });
+    assert.deepEqual(parseOsisChapter(xml, "Tst.3"), {});
+  });
+
+  it("fails on an OSIS verse it cannot read as plain text", () => {
+    assert.throws(
+      () =>
+        parseOsisChapter(
+          osisFile(`<verse osisID='Tst.1.1'>a <note>b</note></verse>`),
+          "Tst.1"
+        ),
+      /bible-provider-osis-markup-unsupported:Tst\.1\.1/u
+    );
+    assert.throws(
+      () =>
+        parseOsisChapter(
+          osisFile(
+            `<verse osisID='Tst.1.1'>a</verse><verse osisID='Tst.1.1'>b</verse>`
+          ),
+          "Tst.1"
+        ),
+      /bible-provider-verse-duplicate:Tst\.1\.1/u
+    );
+    assert.throws(
+      () => parseOsisChapter("<html>not found</html>", "Tst.1"),
+      /bible-provider-osis-invalid/u
+    );
+  });
+
+  it("reads one chapter of a book page, a verse per paragraph", () => {
+    const html = bookPage({
+      1: ["1 other chapter"],
+      2: [
+        `1 First </font> <em><font>added</font></em><font> words.`,
+        `2 Second,&nbsp;row.`,
+        `4 Fourth.`
+      ]
+    });
+
+    assert.deepEqual(parseLevigilantChapter(html, 2), {
+      1: "First added words.",
+      2: "Second, row.",
+      4: "Fourth."
+    });
+  });
+
+  it("reads a misprinted verse number only as it was recorded", () => {
+    const html = bookPage({ 1: ["9 nine", "1O ten", "11 eleven"] });
+
+    assert.throws(
+      () => parseLevigilantChapter(html, 1),
+      /bible-provider-page-verse-label-unsupported:1:1O/u
+    );
+    assert.deepEqual(parseLevigilantChapter(html, 1, { "1O": 10 }), {
+      9: "nine",
+      10: "ten",
+      11: "eleven"
+    });
+    // A recorded reading the page does not print, or one out of order, fails.
+    assert.throws(
+      () => parseLevigilantChapter(html, 1, { "1O": 10, I2: 12 }),
+      /bible-provider-page-verse-label-unread:1:I2/u
+    );
+    assert.throws(
+      () => parseLevigilantChapter(html, 1, { "1O": 12 }),
+      /bible-provider-page-verse-order:1:11/u
+    );
+    assert.throws(
+      () => parseLevigilantChapter(html, 2),
+      /bible-provider-page-chapter-missing:2/u
+    );
+  });
+
+  it("names the file a chapter is read from and where it is cached", () => {
+    assert.deepEqual(
+      editionProviderFile({ id: "gratis-bible", work: "fr/tst1996" }, "Dan.2"),
+      {
+        url: "https://raw.githubusercontent.com/gratis-bible/bible/master/fr/tst1996.xml",
+        cachePath: "gratis-bible/fr/tst1996.xml"
+      }
+    );
+    assert.deepEqual(
+      editionProviderFile(
+        { id: "levigilant.com", edition: "bible_x/edition_1877" },
+        "jacques.html#5"
+      ),
+      {
+        url: "https://levigilant.com/bible_x/edition_1877/jacques.html",
+        cachePath: "levigilant.com/bible_x/edition_1877/jacques.html"
+      }
+    );
+    assert.throws(
+      () =>
+        editionProviderFile(
+          { id: "levigilant.com", edition: "../elsewhere" },
+          "jacques.html#5"
+        ),
+      /bible-provider-edition-invalid/u
+    );
+    assert.throws(
+      () =>
+        editionProviderFile(
+          { id: "levigilant.com", edition: "bible_x" },
+          "https://example.test/page.html#5"
+        ),
+      /bible-provider-edition-invalid/u
+    );
   });
 });
 
@@ -308,6 +449,106 @@ describe("Bible source patches", () => {
     );
   });
 
+  it("completes chapters from other editions beside the provider's", () => {
+    const base = {
+      1: { 1: { 1: "one", 3: "three" } },
+      2: { 5: { 9: "nine", 10: "eleven" } },
+      3: { 1: { 1: "alpha", 2: "gamma" } }
+    };
+    const baseRaw = JSON.stringify(base);
+    const responses = {
+      ...RESPONSES,
+      "test.html#5": bookPage({
+        5: ["9 nine", "1O the tenth", "11 eleven"]
+      }),
+      "Tst.1": osisFile(
+        `<verse osisID='Tst.1.1'>alpha</verse>` +
+          `<verse osisID='Tst.1.2'>beta</verse>` +
+          `<verse osisID='Tst.1.3'>gamma</verse>`
+      )
+    };
+    const expected = JSON.stringify({
+      1: { 1: { 1: "one", 2: "two", 3: "three" } },
+      2: { 5: { 9: "nine", 10: "the tenth", 11: "eleven" } },
+      3: { 1: { 1: "alpha", 2: "beta", 3: "gamma" } }
+    });
+    const patch = patchFor(baseRaw, expected);
+    const page = { id: "levigilant.com", edition: "bible_x" } as const;
+    const osis = { id: "gratis-bible", work: "fr/tst" } as const;
+    patch.chapters.push(
+      {
+        chapter: "2-5",
+        reference: "test.html#5",
+        provider: { ...page, labels: { "1O": 10 } },
+        evidence: "fixture",
+        response: {
+          url: editionProviderFile(page, "test.html#5").url,
+          fetchedAt: "2026-01-01T00:00:00.000Z",
+          sha256: sha256Hex(responses["test.html#5"])
+        },
+        supplied: { 10: hashVerseText("the tenth") },
+        renumbered: [
+          { first: 10, last: 10, by: 1, expect: hashVerseTexts(["eleven"]) }
+        ],
+        dropped: {},
+        kept: 1
+      },
+      {
+        chapter: "3-1",
+        reference: "Tst.1",
+        provider: osis,
+        evidence: "fixture",
+        response: {
+          url: editionProviderFile(osis, "Tst.1").url,
+          fetchedAt: "2026-01-01T00:00:00.000Z",
+          sha256: sha256Hex(responses["Tst.1"])
+        },
+        supplied: { 2: hashVerseText("beta") },
+        renumbered: [
+          { first: 2, last: 2, by: 1, expect: hashVerseTexts(["gamma"]) }
+        ],
+        dropped: {},
+        kept: 1
+      }
+    );
+
+    const result = applyBibleSourcePatch({
+      versionId: "TST",
+      baseRaw,
+      patch,
+      responses
+    });
+    assert.equal(result.serialized, expected);
+
+    // The file of another edition is anchored like any other answer.
+    assert.throws(
+      () =>
+        applyBibleSourcePatch({
+          versionId: "TST",
+          baseRaw,
+          patch,
+          responses: {
+            ...responses,
+            "Tst.1": responses["Tst.1"].replace("beta", "delta")
+          }
+        }),
+      /bible-source-patch-response-mismatch:TST:Tst\.1/u
+    );
+    // A misprinted verse number is read only with its recorded reading.
+    const unread = structuredClone(patch);
+    unread.chapters[1]!.provider = page;
+    assert.throws(
+      () =>
+        applyBibleSourcePatch({
+          versionId: "TST",
+          baseRaw,
+          patch: unread,
+          responses
+        }),
+      /bible-provider-page-verse-label-unsupported:5:1O/u
+    );
+  });
+
   it("reads a patched Bible from its patched source only", () => {
     const patch = patchFor("{}", "patched");
 
@@ -426,8 +667,14 @@ describe("Bible source patches", () => {
         assert.ok(chapter.evidence.length > 0, versionId);
         assert.equal(
           chapter.response.url,
-          bibleComChapterUrl(patch.provider.versionId, chapter.reference)
+          chapter.provider
+            ? editionProviderFile(chapter.provider, chapter.reference).url
+            : bibleComChapterUrl(patch.provider.versionId, chapter.reference)
         );
+        // A recorded reading of a misprinted verse number is a few characters.
+        if (chapter.provider && "labels" in chapter.provider)
+          for (const label of Object.keys(chapter.provider.labels ?? {}))
+            assert.match(label, /^[0-9OoIl]{1,3}$/u);
         assert.match(chapter.response.sha256, digest);
         assert.ok(!Number.isNaN(Date.parse(chapter.response.fetchedAt)));
         const anchors = [
