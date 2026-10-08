@@ -6,13 +6,19 @@ import {
 import { breadcrumbScripts } from '../resources/resourceHead'
 import type { StrongPageData } from './strong.functions'
 import { strongEntryBreadcrumbs } from './strongBreadcrumbs'
-import { buildStrongPath, displayStrongCode, displayStrongTitleCode } from './strongRoutes'
+import {
+  buildStrongPath,
+  displayStrongCode,
+  displayStrongTitleCode,
+  plainTransliteration,
+} from './strongRoutes'
 
 const LABELS = {
   fr: {
     strong: 'Strong',
     hebrew: 'Lexique hébreu',
     greek: 'Lexique grec',
+    meaning: { hebrew: 'définition en hébreu', greek: 'définition en grec' },
     locale: 'fr_FR',
     separator: ' : ',
   },
@@ -20,6 +26,7 @@ const LABELS = {
     strong: 'Strong’s',
     hebrew: 'Hebrew lexicon',
     greek: 'Greek lexicon',
+    meaning: { hebrew: 'meaning in Hebrew', greek: 'meaning in Greek' },
     locale: 'en_US',
     separator: ': ',
   },
@@ -31,7 +38,9 @@ export const buildStrongHead = (entry: StrongPageData) => {
   const lexicon = labels[entry.lexicalLanguage]
   const displayCode = displayStrongCode(entry.code)
   const url = absoluteSiteUrl(buildStrongPath(entry.language, entry.code))
-  const title = `${entry.original} (${entry.transliteration}) – ${labels.strong} ${displayStrongTitleCode(entry.code)}${labels.separator}${entry.gloss} | ${lexicon}`
+  // A word is looked for as it is typed (`elohim`), by its number or by what it means: the
+  // title opens on the first and names the two others.
+  const title = `${plainTransliteration(entry.transliteration) || entry.original} (${entry.original}) – ${labels.strong} ${displayStrongTitleCode(entry.code)}${labels.separator}${entry.gloss}, ${labels.meaning[entry.lexicalLanguage]}`
 
   const structuredData = {
     '@context': 'https://schema.org',

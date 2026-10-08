@@ -127,6 +127,12 @@ list gathers the senses of a number that read the same into one line, which open
 number; a sense with a gloss of its own keeps its line and opens its entry. A title carries
 the classical number first and adds the sense code only where it differs.
 
+A Strong page says how the Bible of its language renders the word (`Dieu` 2,057 times,
+`dieu` 33 times in the Segond) before it quotes its first verses, and the page of a number
+does the same for the number as a whole. A Strong title opens on the word as it is typed
+in a search (`Elohiym`), then names its number and what it means; a dictionary article is
+titled as a question about the Bible (`Aaron dans la Bible : définition`).
+
 A word of a Bible page opens the most precise identity it is tagged with, the sense it has
 in that verse, under its classical number. The definitions follow the reading order of
 ADR-0064, applied by the rule the workspace uses.

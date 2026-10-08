@@ -140,12 +140,18 @@ export const buildDictionaryLetterHead = (page: DictionaryLetterPageData) => {
   }
 }
 
+const ENTRY_TITLE = {
+  fr: ' dans la Bible : définition',
+  en: ' in the Bible: definition',
+} as const
+
 /** Head of an article. Its work exists in one language, so it has no language alternate. */
 export const buildDictionaryEntryHead = (page: DictionaryEntryPageData) => {
   const { language, work, id, word } = page
   const path = buildDictionaryEntryPath({ language, work: work.id, entryId: id, word })
   return buildResourceHead({
-    title: `${word} – ${dictionaryWorkName(work)}`,
+    // An article is looked for as a question about the Bible, before the name of its work.
+    title: `${word}${ENTRY_TITLE[language]} – ${dictionaryWorkName(work)}`,
     description: page.description,
     path,
     language,

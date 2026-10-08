@@ -8,6 +8,7 @@ import {
   displayStrongCode,
   displayStrongNumber,
   displayStrongTitleCode,
+  plainTransliteration,
   parseStrongCode,
   strongCodeSlug,
   strongGlossLetter,
@@ -29,6 +30,14 @@ describe('Strong public routes', () => {
     expect(displayStrongTitleCode('H1254B')).toBe('H1254 (H1254B)')
     expect(displayStrongTitleCode('G2424H')).toBe('G2424 (G2424H)')
     expect(displayStrongTitleCode('H8064')).toBe('H8064')
+  })
+
+  it('writes a transliteration as it is typed in a search', () => {
+    expect(plainTransliteration("'ĕlôhîym")).toBe('Elohiym')
+    expect(plainTransliteration('zekaryâh zekaryâhû')).toBe('Zekaryah')
+    expect(plainTransliteration('agapē')).toBe('Agape')
+    expect(plainTransliteration('‛ânan')).toBe('Anan')
+    expect(plainTransliteration('')).toBe('')
   })
 
   it('keeps the suffix case, which distinguishes two entries', () => {
