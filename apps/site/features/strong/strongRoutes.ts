@@ -46,6 +46,18 @@ export const displayStrongTitleCode = (code: string): string => {
   return sense === number ? number : `${number} (${sense})`
 }
 
+/**
+ * A transliteration as it is typed in a search: its first spelling, without the marks a
+ * keyboard does not have (`'ĕlôhîym` reads `Elohiym`).
+ */
+export const plainTransliteration = (transliteration: string): string => {
+  const plain = (transliteration.trim().split(/\s+/u)[0] ?? '')
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/[^\p{L}\p{N}-]/gu, '')
+  return plain ? `${plain[0]?.toUpperCase()}${plain.slice(1)}` : ''
+}
+
 export const buildStrongPath = (language: ResourceLanguage, code: string): string => {
   const identity = parseStrongCode(code)
   if (!identity) throw new Error('STRONG_ROUTE_INVALID')

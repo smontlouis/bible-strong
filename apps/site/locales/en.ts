@@ -176,6 +176,7 @@ export default {
   'strong.concordance.summary': '{code} appears in {count} verses of the {version}.',
   'strong.concordance.summary.one': '{code} appears in {count} verse of the {version}.',
   'strong.concordance.byBook': 'Occurrences by book',
+  'strong.translations': 'Translated in the {version} by',
   'strong.concordance.firstVerses': 'First verses',
   'strong.transliteration': 'Transliteration',
   'bible.readChapter': 'Read all of {chapter}',

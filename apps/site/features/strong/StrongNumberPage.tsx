@@ -4,6 +4,8 @@ import ResourceShell from '../resources/ResourceShell'
 import type { StrongNumberPageData, StrongNumberSense } from './strong.functions'
 import { strongNumberBreadcrumbs } from './strongBreadcrumbs'
 import { Prose, Section } from './StrongEntryPage'
+import StrongTranslations from './StrongTranslations'
+import StrongVerseList from './StrongVerseList'
 import { buildStrongPath, buildWebAppStrongUrl, displayStrongCode } from './strongRoutes'
 
 // A sense read in a few books names them; beyond that their number says enough.
@@ -135,6 +137,29 @@ export default function StrongNumberPage({ page }: { page: StrongNumberPageData 
         {page.definitionHtml && (
           <Section title={t('strong.generalDefinition')}>
             <Prose html={page.definitionHtml} />
+          </Section>
+        )}
+
+        {/* The number as the Bible reads it, every sense together: a sense has its own. */}
+        {concordance && (concordance.translations.length > 0 || concordance.verses.length > 0) && (
+          <Section title={t('strong.concordance')}>
+            <StrongTranslations
+              translations={concordance.translations}
+              version={concordance.version}
+              language={language}
+            />
+            {concordance.verses.length > 0 && (
+              <>
+                <h3 className="resource-muted mb-3 mt-8 text-sm font-semibold uppercase tracking-[0.1em]">
+                  {t('strong.concordance.firstVerses')}
+                </h3>
+                <StrongVerseList
+                  verses={concordance.verses}
+                  version={concordance.version}
+                  language={language}
+                />
+              </>
+            )}
           </Section>
         )}
       </article>

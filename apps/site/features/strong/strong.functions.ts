@@ -1,6 +1,7 @@
 import type { BibleVerseTextsDto } from '@bible-strong/resource-domain/contracts/bibleChapterContract'
 import type {
   StrongBibleCountsDto,
+  StrongBibleLemmaStatsDto,
   StrongBibleOccurrencesDto,
 } from '@bible-strong/resource-domain/contracts/strongBibleContract'
 import type {
@@ -47,7 +48,9 @@ import {
   type StrongSenseRef,
 } from './strongSenses'
 
-const SAMPLE_VERSE_COUNT = 12
+const SAMPLE_VERSE_COUNT = 20
+// How many of the words a translation renders an entry by are listed.
+const TRANSLATION_COUNT = 12
 const SENSE_SUMMARY_LENGTH = 170
 const DESCRIPTION_LENGTH = 155
 
@@ -70,11 +73,16 @@ export type StrongPageRelation = {
   transliteration: string
 }
 
+/** A word the Bible of the page renders an entry by, and how many times. */
+export type StrongTranslation = { word: string; count: number }
+
 export type StrongPageConcordance = {
   version: string
   verseCount: number
   books: { book: number; verseCount: number }[]
   verses: { book: number; chapter: number; verse: number; html: string }[]
+  /** The words the entry is translated by, the most frequent first. */
+  translations: StrongTranslation[]
 }
 
 export type StrongPageData = {
@@ -132,7 +140,8 @@ export type StrongNumberPageData = {
   /** The historical notice of the number, which covers every sense. */
   definitionHtml?: string
   senses: StrongNumberSense[]
-  concordance?: { version: string; verseCount: number }
+  /** The verses of the number, every sense together. */
+  concordance?: Pick<StrongPageConcordance, 'version' | 'verseCount' | 'verses' | 'translations'>
 }
 
 /** Where a request for the verses of a number is sent when the number has its own page. */
@@ -326,14 +335,38 @@ const loadOccurrences = async (
   })
 }
 
+/**
+ * The words the Bible of the page renders an entry by. A word the translators supplied is
+ * marked with braces in the index (`{Dieu}`); it is counted with the word itself.
+ */
+const loadTranslations = async (
+  language: ResourceLanguage,
+  code: string,
+  lexicalLanguage: StrongLexicalLanguage
+): Promise<StrongTranslation[]> => {
+  const stats = await readResource<StrongBibleLemmaStatsDto>(
+    `${concordanceIdentityPath(language, code, anchorBook(lexicalLanguage))}/lemmas`
+  ).catch(() => undefined)
+  const counts = new Map<string, number>()
+  for (const { lemma, occurrenceCount } of stats?.lemmas ?? []) {
+    const word = lemma.replace(/[{}]/gu, '').trim()
+    if (word) counts.set(word, (counts.get(word) ?? 0) + occurrenceCount)
+  }
+  return [...counts]
+    .map(([word, count]) => ({ word, count }))
+    .sort((left, right) => right.count - left.count)
+    .slice(0, TRANSLATION_COUNT)
+}
+
 const loadConcordance = async (
   language: ResourceLanguage,
   code: string,
   lexicalLanguage: StrongLexicalLanguage
 ): Promise<StrongPageConcordance | undefined> => {
-  const [books, verses] = await Promise.all([
+  const [books, verses, translations] = await Promise.all([
     loadBookCounts(language, code, lexicalLanguage),
     loadOccurrences(language, code, lexicalLanguage, { take: SAMPLE_VERSE_COUNT }),
+    loadTranslations(language, code, lexicalLanguage),
   ])
   if (!books.length) return undefined
   return {
@@ -341,6 +374,7 @@ const loadConcordance = async (
     verseCount: books.reduce((total, count) => total + count.verseCount, 0),
     books,
     verses,
+    translations,
   }
 }
 
@@ -395,8 +429,9 @@ const loadNumberPage = async ({
   senses: readonly StrongSenseRef[]
 }): Promise<StrongNumberPageData> => {
   const { simple, entry } = resolved
-  const [books, read] = await Promise.all([
-    loadBookCounts(language, classicCode, lexicalLanguage),
+  const [number, read] = await Promise.all([
+    // The number is read whole as well: its verses and the words it is translated by.
+    loadConcordance(language, classicCode, lexicalLanguage),
     // Every sense is read at once: the page waits for the slowest read, not for their sum.
     Promise.all(
       senses.map(async sense => {
@@ -459,12 +494,12 @@ const loadNumberPage = async ({
         : undefined,
     definitionHtml: hasContent(definition) ? render(definition) : undefined,
     senses: listed,
-    concordance: books.length
-      ? {
-          version: CONCORDANCE_VERSION[language],
-          verseCount: books.reduce((total, count) => total + count.verseCount, 0),
-        }
-      : undefined,
+    concordance: number && {
+      version: number.version,
+      verseCount: number.verseCount,
+      verses: number.verses,
+      translations: number.translations,
+    },
   }
 }
 

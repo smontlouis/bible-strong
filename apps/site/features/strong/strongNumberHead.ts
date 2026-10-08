@@ -3,7 +3,7 @@ import { absoluteSiteUrl } from '../resources/publicSite'
 import { buildResourceHead } from '../resources/resourceHead'
 import type { StrongNumberPageData } from './strong.functions'
 import { strongNumberBreadcrumbs } from './strongBreadcrumbs'
-import { buildStrongPath, displayStrongCode } from './strongRoutes'
+import { buildStrongPath, displayStrongCode, plainTransliteration } from './strongRoutes'
 
 const DESCRIPTION_LENGTH = 155
 // A title names the first senses; the page lists them all.
@@ -43,7 +43,7 @@ export const buildStrongNumberHead = (page: StrongNumberPageData) => {
   const path = buildStrongPath(page.language, page.code)
   const word = `${page.original} (${page.transliteration})`
   const glosses = page.glosses.slice(0, TITLE_GLOSS_COUNT).join(', ')
-  const title = `${word} – ${labels.strong} ${code}${labels.separator}${glosses} (${labels.senses(count)}) | ${lexicon}`
+  const title = `${plainTransliteration(page.transliteration) || page.original} (${page.original}) – ${labels.strong} ${code}${labels.separator}${glosses} (${labels.senses(count)})`
   const description = truncateText(
     `${labels.description(code, word, count, page.glosses.join(', '))}${
       page.concordance ? labels.verses(page.concordance.verseCount, page.concordance.version) : ''

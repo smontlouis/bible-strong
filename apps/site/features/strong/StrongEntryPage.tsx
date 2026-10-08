@@ -5,6 +5,7 @@ import ResourceShell from '../resources/ResourceShell'
 import type { StrongPageData, StrongPageRelation } from './strong.functions'
 import StrongBookCounts from './StrongBookCounts'
 import { strongEntryBreadcrumbs } from './strongBreadcrumbs'
+import StrongTranslations from './StrongTranslations'
 import StrongVerseList from './StrongVerseList'
 import {
   buildStrongConcordancePath,
@@ -171,6 +172,12 @@ export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
                 .replace('{count}', concordance.verseCount.toLocaleString(language))
                 .replace('{version}', concordance.version)}
             </p>
+
+            <StrongTranslations
+              translations={concordance.translations}
+              version={concordance.version}
+              language={language}
+            />
 
             {concordance.verses.length > 0 && (
               <>
