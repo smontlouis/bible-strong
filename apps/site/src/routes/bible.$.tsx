@@ -1,7 +1,7 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
 import BiblePage from '@/features/bible/BiblePage'
 import { loadBiblePage } from '@/features/bible/bible.functions'
-import { pageCacheHeaders } from '@/features/bible/biblePageReads'
+import { pageCacheHeaders } from '@/features/resources/pageReads'
 import { validateBibleSearch } from '@/features/bible/bibleCommentaries'
 import { buildBibleHead } from '@/features/bible/bibleHead'
 import { buildBiblePath, parseBibleRoute } from '@/features/bible/bibleRoutes'

@@ -1,4 +1,4 @@
-import { RESOURCE_PAGE_CACHE_CONTROL } from '../resources/publicSite'
+import { RESOURCE_PAGE_CACHE_CONTROL } from './publicSite'
 
 /**
  * How many reads a page keeps in flight. The Resource API answers a few reads at once in a
@@ -7,7 +7,7 @@ import { RESOURCE_PAGE_CACHE_CONTROL } from '../resources/publicSite'
  */
 export const PAGE_READ_CONCURRENCY = 6
 
-/** The reads one page makes around its text: a few at a time, and what they could not read. */
+/** The reads one page makes around its resource: a few at a time, and what they could not read. */
 export type PageReads = {
   /** Starts a read once fewer than the limit are in flight, in the order they were asked. */
   queue: <Result>(read: () => Promise<Result>) => Promise<Result>
@@ -70,13 +70,22 @@ export const createPageReads = (concurrency = PAGE_READ_CONCURRENCY): PageReads 
 export const INCOMPLETE_PAGE_CACHE_CONTROL = 'public, max-age=0, s-maxage=60'
 
 /**
+ * Says that a page is missing a part it could not read. The CDN consumes `s-maxage` and
+ * answers every page with the same `Cache-Control`, so this is what tells such a page from
+ * a whole one to whoever reads the response.
+ */
+export const INCOMPLETE_PAGE_HEADER = 'X-Page-Incomplete'
+
+/**
  * What the CDN is told about a rendered page. Only a whole page is kept for long: a page
  * missing a part it could not read would otherwise be the thin page every reader gets for
- * as long as the CDN keeps it. A failed load is not kept at all.
+ * as long as the CDN keeps it, and it says so in a header of its own. A failed load is not
+ * kept at all.
  */
 export const pageCacheHeaders = (
   page: { incomplete?: boolean } | undefined
 ): Record<string, string> | undefined =>
-  page && {
-    'Cache-Control': page.incomplete ? INCOMPLETE_PAGE_CACHE_CONTROL : RESOURCE_PAGE_CACHE_CONTROL,
-  }
+  page &&
+  (page.incomplete
+    ? { 'Cache-Control': INCOMPLETE_PAGE_CACHE_CONTROL, [INCOMPLETE_PAGE_HEADER]: '1' }
+    : { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL })

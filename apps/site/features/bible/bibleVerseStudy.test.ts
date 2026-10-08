@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { readResource } from '../resources/resourceApi'
-import { createPageReads, PAGE_READ_CONCURRENCY } from './biblePageReads'
+import { createPageReads, PAGE_READ_CONCURRENCY } from '../resources/pageReads'
 import { loadVerseStudy } from './bibleVerseStudy'
 
 vi.mock('../resources/resourceApi', () => ({ readResource: vi.fn() }))
@@ -97,6 +97,45 @@ describe('loadVerseStudy', () => {
     ])
     expect(found.original?.text).toBe('BHG alone')
     expect(reads.incomplete).toBe(false)
+  })
+
+  it('does not quote a Bible that numbers the verse and leaves it blank', async () => {
+    answerWith((path, query) =>
+      path === '/v1/bibles/chapters'
+        ? {
+            chapters: String(query.versions)
+              .split(',')
+              .map(versionId =>
+                versionId === 'S21'
+                  ? { ...chapterOf(versionId), verses: [{ number: 16, text: '\n ' }] }
+                  : chapterOf(versionId)
+              ),
+          }
+        : undefined
+    )
+    const reads = createPageReads()
+    const found = await study(reads)
+
+    expect(found.versions.map(quote => quote.text)).toEqual(['BDS 16', 'NEG79 16', 'DBY 16'])
+    expect(reads.incomplete).toBe(false)
+  })
+
+  it('does not quote a cross-reference to a verse the Bible leaves blank', async () => {
+    answerWith(path => {
+      if (path.startsWith('/v1/cross-references/')) return { references: ['40-17-21', '45-5-8'] }
+      if (path === '/v1/bibles/LSG/verses') {
+        return {
+          verses: [
+            { book: 40, chapter: 17, number: 21, text: '' },
+            { book: 45, chapter: 5, number: 8, text: 'Mais Dieu prouve son amour' },
+          ],
+        }
+      }
+      return undefined
+    })
+    const found = await study()
+
+    expect(found.crossReferences.map(quote => quote.path)).toEqual(['/bible/lsg/rom/5/8'])
   })
 
   it('shows what it could read and knows the page is incomplete when a read fails', async () => {

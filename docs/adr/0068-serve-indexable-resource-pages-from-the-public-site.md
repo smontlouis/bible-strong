@@ -183,17 +183,27 @@ sitemap lists the verses its Bible numbers, which are not those of another Bible
 translation may count the verses of a chapter differently, leave out a verse its manuscripts
 do not have, or translate several verses as one, which then has one page.
 
+A verse a Bible numbers and leaves without text is not a page either. A Bible may keep the
+number of a verse its manuscripts do not have as a blank row, or with the bracket that
+closed the omitted words (Matthew 17:21 in the NIV and in the NBS). Its address answers 404
+in every reading mode, like the address of a verse the Bible does not number, and no verse
+page quotes it or links to it. A verse has text when it holds a letter or a digit. The
+chapter is read as before, and so is a range of verses, which is not indexed.
+
 The verse sitemaps are served under `/sitemaps/` like the others, but `/sitemap.xml` does
 not list them until `ANNOUNCE_BIBLE_VERSE_SITEMAPS` is set in the sitemap registry. They
 are first submitted by hand, one Bible at a time, so that the crawl of some 311,000 pages
 starts when it is decided.
 
 The CDN keeps a rendered page for a day and may serve it stale while revalidating. Only a
-successfully rendered resource is cacheable. A Bible page missing a part it could not read
-from the Resource API is kept for a minute only, so that the readers of that minute do not
-each render it again and the whole page soon takes its place. Because a cached page is
-identical for every visitor, the theme preference is applied in the browser from the cookie
-shared with the landing page, never rendered on the server.
+successfully rendered resource is cacheable. A Bible or Strong page missing a part it could
+not read from the Resource API is kept for a minute only, so that the readers of that minute
+do not each render it again and the whole page soon takes its place. Such a page answers
+with the header `X-Page-Incomplete: 1`, which a whole page and a failed load never carry:
+the CDN consumes `s-maxage` and answers every page with the same `Cache-Control`, so the
+header is what tells a reader of the response that the page is the short-lived one. Because
+a cached page is identical for every visitor, the theme preference is applied in the browser
+from the cookie shared with the landing page, never rendered on the server.
 
 ### Boundaries
 
@@ -234,21 +244,40 @@ cross-references, the commentaries, the topics, the dictionary articles) is the 
 for every version of the verse, and the other Bibles are one read for every verse of a
 chapter. The API keeps these reads for thirty days.
 
-The coverage of a Bible counts the verses of each chapter without numbering them, and a
-chapter that skips a number is not numbered from 1 to its count. A verse sitemap therefore
-asks the Resource API for the last number of every chapter and the three after it, two
-hundred verses at a time, and reads the chapters where the answer is not the count alone:
-25 to 50 reads for a Bible, once per cached sitemap. One shape of chapter escapes that
-question: numbers skipped before the count, the count itself a verse, and the numbering
-resuming more than three numbers after it. Such a chapter would be listed as numbered from
-1 to its count. A coverage that published the numbers of the chapters not numbered from 1
-to their count would make this one read, and exact.
+The coverage of a Bible counts the verse rows of each chapter, and a chapter that skips a
+number is not numbered from 1 to its count. The coverage also publishes the numbers of the
+verses that have text, for the chapters where they are not exactly 1 to the count
+([ADR-0071](./0071-publish-the-verse-numbers-of-irregular-chapters.md)): a verse sitemap is
+then one read, and exact. It leaves out a title the coverage numbers 0, which is not a
+verse.
+
+A Resource service older than that field leaves it out, and a verse sitemap falls back on
+questions: it asks for the last number of every chapter and the three after it, two hundred
+verses at a time, and reads the chapters where the answer is not the count alone, 25 to 50
+reads for a Bible, once per cached sitemap. One shape of chapter escapes that question:
+numbers skipped before the count, the count itself a verse, and the numbering resuming more
+than three numbers after it. Such a chapter is listed as numbered from 1 to its count, and
+a verse kept without text is listed like any other: the sixteen such verses of the NIV stay
+in its sitemap, each answering 404, until the service publishes the numbers.
 
 The site functions run in the region of the database of the Resource API, Frankfurt: a
 page is a chain of reads, and a function on another continent pays that distance on each.
 
+A Strong page reads like a Bible page: at most six documents at a time, and what does not
+depend on an answer does not wait for it. The verses of a code, their count by book and the
+words they are translated by are asked for with its entry, so a sense is six reads on two
+levels, the entry beside its verses and then their text, and a seventh beside the entry when
+its code says it is one sense of a number. A page shown without the words its entry is
+translated by, because they could not be read, is an incomplete page; any other read that
+fails fails the page, which is then not kept.
+
 The page of a number reads each of its senses from the Resource API, entry and verse
-counts: about sixty reads for the largest number, once per cached rendering.
+counts: about sixty reads for the largest number, once per cached rendering. The senses of
+a number are only known from the lexicon, by asking for every code a sense could carry: the
+number is asked as soon as one reading level of its entry names a sense with a code of its
+own, and its senses are read once it has answered. A page of a number is therefore three
+reads deep, and those of its senses pass six at a time. A number with a single sense, or a
+code in another letter case, is redirected as soon as its entry is known.
 
 The lexicon list of the Resource API gathers the entries that name one person or thing
 under a single representative, as the lexicon list of the workspace shows them. The

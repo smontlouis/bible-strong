@@ -143,6 +143,55 @@ describe('listBibleVerseNumbers', () => {
     expect(requests).toHaveLength(1)
   })
 
+  it('numbers every chapter from 1 to its count when a coverage publishes no chapter', async () => {
+    const regular = { '43-3': [1, 2, 3], '64-1': [1, 2] }
+    const requests = stubResourceApi(regular, {
+      ...coverage(regular),
+      verseNumbersByBookChapter: {},
+    })
+
+    expect(await listBibleVerseNumbers('ESV')).toEqual([
+      { book: 43, chapter: 3, verses: [1, 2, 3] },
+      { book: 64, chapter: 1, verses: [1, 2] },
+    ])
+    expect(requests.map(url => url.pathname)).toEqual(['/v1/bibles/ESV/coverage'])
+  })
+
+  // The NIV keeps Matthew 17:21 as a row without text: the chapter counts 27 rows.
+  const KEPT_BLANK = { '40-17': Array.from({ length: 27 }, (_, index) => index + 1) }
+
+  it('leaves out a verse kept without text, which a coverage does not publish', async () => {
+    const requests = stubResourceApi(KEPT_BLANK, {
+      ...coverage(KEPT_BLANK),
+      verseNumbersByBookChapter: { '40-17': VERSES['40-17'] },
+    })
+
+    const [chapter] = await listBibleVerseNumbers('NIV')
+    expect(chapter?.verses).toHaveLength(26)
+    expect(chapter?.verses).not.toContain(21)
+    expect(requests).toHaveLength(1)
+  })
+
+  it('still lists a verse kept without text while the coverage publishes no numbers', async () => {
+    stubResourceApi(KEPT_BLANK)
+
+    const [chapter] = await listBibleVerseNumbers('NIV')
+    expect(chapter?.verses).toEqual(KEPT_BLANK['40-17'])
+  })
+
+  it('has no verse for a title a coverage numbers 0, nor for a chapter without text', async () => {
+    const psalms = { '19-3': [1, 2, 3, 4], '19-4': [1, 2] }
+    stubResourceApi(psalms, {
+      ...coverage(psalms),
+      verseNumbersByBookChapter: { '19-3': [0, 1, 2, 3], '19-4': [] },
+    })
+
+    expect(await listBibleVerseNumbers('BHG')).toEqual([
+      { book: 19, chapter: 3, verses: [1, 2, 3] },
+      { book: 19, chapter: 4, verses: [] },
+    ])
+  })
+
   it('has no chapters for a version that is not published', async () => {
     const requests = stubResourceApi(VERSES, null)
 

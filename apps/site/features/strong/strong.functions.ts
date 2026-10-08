@@ -22,6 +22,7 @@ import {
   sanitizeEditorialHtml,
   truncateText,
 } from '../resources/editorialHtml'
+import { createPageReads, type PageReads } from '../resources/pageReads'
 import {
   isResourceLanguage,
   RESOURCE_PAGE_CACHE_CONTROL,
@@ -109,6 +110,11 @@ export type StrongPageData = {
   dictionaryArticles: { title: string; html: string }[]
   entity?: { name: string; brief: string; description: string }
   concordance?: StrongPageConcordance
+  /**
+   * A part of the page is missing because it could not be read, as opposed to not existing.
+   * The page is shown as it is, and the CDN keeps it a minute only.
+   */
+  incomplete?: true
 }
 
 /** One sense of a classical number, as the page of the number lists it. */
@@ -142,7 +148,18 @@ export type StrongNumberPageData = {
   senses: StrongNumberSense[]
   /** The verses of the number, every sense together. */
   concordance?: Pick<StrongPageConcordance, 'version' | 'verseCount' | 'verses' | 'translations'>
+  /** A part of the page is missing because it could not be read; see `StrongPageData`. */
+  incomplete?: true
 }
+
+/**
+ * Where a code leads when it is not the address of its page: a number with one sense, or a
+ * code in another letter case, leads to the sense that answered.
+ */
+export type StrongSenseAddress = { kind: 'moved'; code: string }
+
+/** What a code answers with: its page, or the address of the sense it leads to. */
+export type StrongPageAnswer = StrongPageData | StrongNumberPageData | StrongSenseAddress
 
 /** Where a request for the verses of a number is sent when the number has its own page. */
 export type StrongNumberAddress = { kind: 'number'; code: string }
@@ -160,7 +177,9 @@ const writtenNumber = (code: string): string => code.replace(/[A-Za-z]+$/u, '')
 const strongCodeCandidates = (code: string): string[] => {
   const number = writtenNumber(code)
   const suffix = code.slice(number.length)
-  return [...new Set([code, `${number}${suffix.toUpperCase()}`, `${number}${suffix.toLowerCase()}`])]
+  return [
+    ...new Set([code, `${number}${suffix.toUpperCase()}`, `${number}${suffix.toLowerCase()}`]),
+  ]
 }
 
 /** A read worth a second try: one slow answer among many should not fail a page. */
@@ -174,21 +193,54 @@ type ResolvedStrongEntry = {
   code: string
 }
 
+type StrongEntryLevels = readonly [
+  simple: Promise<StrongLexiconEntryDto | undefined>,
+  detailed: Promise<StrongLexiconEntryDto | undefined>,
+]
+
+/** Asks for both reading levels of the entry a code is spelled as (ADR-0064). */
+const readStrongEntryLevels = (
+  reads: PageReads,
+  candidate: string,
+  language: ResourceLanguage,
+  detailedContent?: 'definitions'
+): StrongEntryLevels => {
+  const path = `/v1/strong-lexicon/entries/${encodeURIComponent(candidate)}`
+  return [
+    reads.queue(() => readResource<StrongLexiconEntryDto>(path, { language, level: 'simple' })),
+    reads.queue(() =>
+      readResource<StrongLexiconEntryDto>(path, { language, content: detailedContent })
+    ),
+  ]
+}
+
+/**
+ * The entry as the first of its two levels to answer gives it. Both carry the same codes,
+ * which is all that what is read next depends on. No answer when neither level has it.
+ */
+const firstStrongEntryLevel = (
+  levels: StrongEntryLevels
+): Promise<StrongLexiconEntryDto | undefined> =>
+  Promise.any(
+    levels.map(async level => (await level) ?? Promise.reject(new Error('STRONG_ENTRY_ABSENT')))
+  ).catch(() => undefined)
+
 /**
  * Reads the entry a code names, at both reading levels (ADR-0064). The lexicon answers a
  * classical number with the first sense of its family; the page then belongs to that sense.
+ * The levels of the code as it was asked may have been asked for already.
  */
 const readStrongEntry = async (
+  reads: PageReads,
   requested: string,
   language: ResourceLanguage,
-  detailedContent?: 'definitions'
+  { detailedContent, asked }: { detailedContent?: 'definitions'; asked?: StrongEntryLevels } = {}
 ): Promise<ResolvedStrongEntry | undefined> => {
   for (const candidate of strongCodeCandidates(requested)) {
-    const path = `/v1/strong-lexicon/entries/${encodeURIComponent(candidate)}`
-    const [simple, detailed] = await Promise.all([
-      readResource<StrongLexiconEntryDto>(path, { language, level: 'simple' }),
-      readResource<StrongLexiconEntryDto>(path, { language, content: detailedContent }),
-    ])
+    const [simple, detailed] = await Promise.all(
+      (candidate === requested && asked) ||
+        readStrongEntryLevels(reads, candidate, language, detailedContent)
+    )
     const entry = detailed ?? simple
     if (entry) {
       return { simple, detailed, entry, code: parseStrongCode(entry.stepCode)?.code ?? candidate }
@@ -246,12 +298,15 @@ const anchorBook = (lexicalLanguage: StrongLexicalLanguage): number =>
   lexicalLanguage === 'hebrew' ? 1 : 40
 
 const loadBookCounts = async (
+  reads: PageReads,
   language: ResourceLanguage,
   code: string,
   lexicalLanguage: StrongLexicalLanguage
 ): Promise<StrongPageConcordance['books']> => {
-  const counts = await readResource<StrongBibleCountsDto>(
-    `${concordanceIdentityPath(language, code, anchorBook(lexicalLanguage))}/counts`
+  const counts = await reads.queue(() =>
+    readResource<StrongBibleCountsDto>(
+      `${concordanceIdentityPath(language, code, anchorBook(lexicalLanguage))}/counts`
+    )
   )
   return (counts?.counts ?? [])
     .filter(count => count.verseCount > 0)
@@ -272,6 +327,7 @@ const MAX_OCCURRENCE_REQUESTS = 20
  * verses before it are passed over.
  */
 const loadOccurrences = async (
+  reads: PageReads,
   language: ResourceLanguage,
   code: string,
   lexicalLanguage: StrongLexicalLanguage,
@@ -298,11 +354,12 @@ const loadOccurrences = async (
   const window: StrongBibleOccurrencesDto['verses'][number][] = []
   let remainingSkip = skip
   for (let request = 0; request < MAX_OCCURRENCE_REQUESTS; request += 1) {
-    const response = await readResource<StrongBibleOccurrencesDto>(path, {
+    const query = {
       limit: Math.min(OCCURRENCE_REQUEST_LIMIT, remainingSkip + take - window.length),
       cursor,
       allBooks: book === undefined ? 'true' : undefined,
-    })
+    }
+    const response = await reads.queue(() => readResource<StrongBibleOccurrencesDto>(path, query))
     const verses = response?.verses ?? []
     window.push(...verses.slice(remainingSkip, remainingSkip + take - window.length))
     remainingSkip = Math.max(0, remainingSkip - verses.length)
@@ -311,9 +368,13 @@ const loadOccurrences = async (
   }
 
   const texts = window.length
-    ? await readResource<BibleVerseTextsDto>(`/v1/bibles/${version}/verses`, {
-        references: window.map(verse => `${verse.book}-${verse.chapter}-${verse.verse}`).join(','),
-      })
+    ? await reads.queue(() =>
+        readResource<BibleVerseTextsDto>(`/v1/bibles/${version}/verses`, {
+          references: window
+            .map(verse => `${verse.book}-${verse.chapter}-${verse.verse}`)
+            .join(','),
+        })
+      )
     : undefined
   const textByKey = new Map(
     (texts?.verses ?? []).map(verse => [
@@ -337,16 +398,20 @@ const loadOccurrences = async (
 
 /**
  * The words the Bible of the page renders an entry by. A word the translators supplied is
- * marked with braces in the index (`{Dieu}`); it is counted with the word itself.
+ * marked with braces in the index (`{Dieu}`); it is counted with the word itself. The page
+ * can do without them: when they cannot be read it is shown without, and is incomplete.
  */
 const loadTranslations = async (
+  reads: PageReads,
   language: ResourceLanguage,
   code: string,
   lexicalLanguage: StrongLexicalLanguage
 ): Promise<StrongTranslation[]> => {
-  const stats = await readResource<StrongBibleLemmaStatsDto>(
-    `${concordanceIdentityPath(language, code, anchorBook(lexicalLanguage))}/lemmas`
-  ).catch(() => undefined)
+  const stats = await reads.optional(() =>
+    readResource<StrongBibleLemmaStatsDto>(
+      `${concordanceIdentityPath(language, code, anchorBook(lexicalLanguage))}/lemmas`
+    )
+  )
   const counts = new Map<string, number>()
   for (const { lemma, occurrenceCount } of stats?.lemmas ?? []) {
     const word = lemma.replace(/[{}]/gu, '').trim()
@@ -359,14 +424,15 @@ const loadTranslations = async (
 }
 
 const loadConcordance = async (
+  reads: PageReads,
   language: ResourceLanguage,
   code: string,
   lexicalLanguage: StrongLexicalLanguage
 ): Promise<StrongPageConcordance | undefined> => {
   const [books, verses, translations] = await Promise.all([
-    loadBookCounts(language, code, lexicalLanguage),
-    loadOccurrences(language, code, lexicalLanguage, { take: SAMPLE_VERSE_COUNT }),
-    loadTranslations(language, code, lexicalLanguage),
+    loadBookCounts(reads, language, code, lexicalLanguage),
+    loadOccurrences(reads, language, code, lexicalLanguage, { take: SAMPLE_VERSE_COUNT }),
+    loadTranslations(reads, language, code, lexicalLanguage),
   ])
   if (!books.length) return undefined
   return {
@@ -387,18 +453,18 @@ const SENSE_SUFFIXES = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
  * asked for at once: the lexicon list is read by gloss, not by number.
  */
 const loadSenses = async (
+  reads: PageReads,
   language: ResourceLanguage,
   classicCode: string
 ): Promise<StrongSenseRef[]> => {
-  const response = await readResource<StrongLexiconEntryCardsDto>(
-    '/v1/strong-lexicon/entries/batch',
-    {
+  const response = await reads.queue(() =>
+    readResource<StrongLexiconEntryCardsDto>('/v1/strong-lexicon/entries/batch', {
       language,
       level: 'simple',
       identities: ['', ...SENSE_SUFFIXES]
         .map(suffix => `dstrong:${classicCode}${suffix}`)
         .join(','),
-    }
+    })
   )
   const senses = new Map<string, StrongSenseRef>()
   for (const entry of response?.entries ?? []) {
@@ -416,35 +482,41 @@ const loadSenses = async (
  * entry itself.
  */
 const loadNumberPage = async ({
+  reads,
   resolved,
   language,
   lexicalLanguage,
   classicCode,
   senses,
+  concordance,
 }: {
+  reads: PageReads
   resolved: ResolvedStrongEntry
   language: ResourceLanguage
   lexicalLanguage: StrongLexicalLanguage
   classicCode: string
   senses: readonly StrongSenseRef[]
+  /** The number read whole as well: its verses and the words it is translated by. */
+  concordance: Promise<StrongPageConcordance | undefined>
 }): Promise<StrongNumberPageData> => {
   const { simple, entry } = resolved
   const [number, read] = await Promise.all([
-    // The number is read whole as well: its verses and the words it is translated by.
-    loadConcordance(language, classicCode, lexicalLanguage),
-    // Every sense is read at once: the page waits for the slowest read, not for their sum.
+    concordance,
+    // Every sense is asked for at once and read a few at a time, beside the number itself.
     Promise.all(
       senses.map(async sense => {
         const [detailed, senseBooks] = await Promise.all([
           sense.code === resolved.code
             ? resolved.detailed
             : readTwice(() =>
-                readResource<StrongLexiconEntryDto>(
-                  `/v1/strong-lexicon/entries/${encodeURIComponent(sense.code)}`,
-                  { language }
+                reads.queue(() =>
+                  readResource<StrongLexiconEntryDto>(
+                    `/v1/strong-lexicon/entries/${encodeURIComponent(sense.code)}`,
+                    { language }
+                  )
                 )
               ),
-          readTwice(() => loadBookCounts(language, sense.code, lexicalLanguage)),
+          readTwice(() => loadBookCounts(reads, language, sense.code, lexicalLanguage)),
         ])
         return { sense, detailed, books: senseBooks }
       })
@@ -500,54 +572,87 @@ const loadNumberPage = async ({
       verses: number.verses,
       translations: number.translations,
     },
+    incomplete: reads.incomplete || undefined,
   }
 }
 
 /**
  * The page a code names. A classical number the lexicon splits into senses has a page that
- * lists them; any other code names one sense.
+ * lists them; any other code names one sense, and is the address of its page only when it
+ * is the code of that sense.
  */
 export const loadStrongPage = createServerFn({ method: 'GET' })
   .validator((data: { language: string; code: string }) => data)
-  .handler(async ({ data }): Promise<StrongPageData | StrongNumberPageData> => {
+  .handler(async ({ data }): Promise<StrongPageAnswer> => {
     const identity = parseStrongCode(data.code)
     if (!isResourceLanguage(data.language) || !identity) throw notFound()
     const language = data.language
     const lexicalLanguage = strongLexicalLanguage(identity.code)
+    // The page reads a few documents at a time, and knows what it could not read.
+    const reads = createPageReads()
 
-    // A code with a suffix is a sense among others: its number is asked for its senses while
-    // the entry is read, since nearly every sense is filed under the number it is written
-    // under.
+    // What does not depend on the entry leaves with it. Should the entry not exist, or
+    // lead elsewhere, nobody waits for those answers.
+    const unawaited = <Result>(read: Promise<Result>): Promise<Result> => {
+      read.catch(() => undefined)
+      return read
+    }
+    const sensesOf = (number: string) => ({
+      number,
+      senses: unawaited(loadSenses(reads, language, number)),
+    })
+    const asked = readStrongEntryLevels(reads, identity.code, language)
+    // A code with a suffix is a sense among others: its number is asked for its senses
+    // while the entry is read, since nearly every sense is filed under the number it is
+    // written under. A code without one seldom needs them: it asks once a level of the
+    // entry has answered with a sense that has a code of its own, without waiting for the
+    // other level.
     const written = writtenNumber(identity.code)
-    const early =
+    const earlySenses =
       written === identity.code
-        ? undefined
-        : { number: written, senses: loadSenses(language, written) }
-    // Should the entry not exist, nobody waits for that answer.
-    early?.senses.catch(() => undefined)
+        ? firstStrongEntryLevel(asked).then(named => {
+            const sense = parseStrongCode(named?.stepCode)?.code
+            const number = parseStrongCode(named?.classicStrong)?.code
+            return sense && number && sense !== number ? sensesOf(number) : undefined
+          })
+        : Promise.resolve(sensesOf(written))
+    // The verses of the code that is asked for are those of the page, whether it names a
+    // sense or a number that has a page.
+    const earlyConcordance = unawaited(
+      loadConcordance(reads, language, identity.code, lexicalLanguage)
+    )
 
-    const resolved = await readStrongEntry(identity.code, language)
+    const resolved = await readStrongEntry(reads, identity.code, language, { asked })
     if (!resolved) throw notFound()
     const { simple, detailed, entry, code } = resolved
     const classicCode = parseStrongCode(entry.classicStrong)?.code ?? code
 
     // A sense that carries its classical number as its code is the page of that number.
+    const early = await earlySenses
     const sensesRequest =
       code === classicCode
         ? Promise.resolve([])
         : early?.number === classicCode
           ? early.senses
-          : loadSenses(language, classicCode)
+          : loadSenses(reads, language, classicCode)
     if (identity.code === classicCode) {
       const senses = await sensesRequest
       if (hasStrongNumberPage(classicCode, senses)) {
-        return loadNumberPage({ resolved, language, lexicalLanguage, classicCode, senses })
+        return loadNumberPage({
+          reads,
+          resolved,
+          language,
+          lexicalLanguage,
+          classicCode,
+          senses,
+          concordance: earlyConcordance,
+        })
       }
     }
-    const [concordance, senses] = await Promise.all([
-      loadConcordance(language, code, lexicalLanguage),
-      sensesRequest,
-    ])
+    // A number with a single sense, or a code in another letter case: the page is the one
+    // of the sense that answered, at its own address, and reads nothing more here.
+    if (code !== identity.code) return { kind: 'moved', code }
+    const [concordance, senses] = await Promise.all([earlyConcordance, sensesRequest])
     const numberPage = hasStrongNumberPage(classicCode, senses)
     const senseCodes = new Set(senses.map(sense => sense.code))
 
@@ -581,16 +686,14 @@ export const loadStrongPage = createServerFn({ method: 'GET' })
       ? []
       : senses
           .filter(sense => sense.code !== code)
-          .map(
-            (sense): StrongPageRelation => ({
-              group: 'subentry',
-              label: '',
-              code: sense.code,
-              gloss: sense.gloss,
-              original: sense.original,
-              transliteration: sense.transliteration,
-            })
-          )
+          .map((sense): StrongPageRelation => ({
+            group: 'subentry',
+            label: '',
+            code: sense.code,
+            gloss: sense.gloss,
+            original: sense.original,
+            transliteration: sense.transliteration,
+          }))
     // One entry can be related in several ways (name of, same identity, derived word), and a
     // sibling sense may already be listed by the lexicon: it is shown once, under what says
     // most about it, as the study workspace does.
@@ -641,6 +744,7 @@ export const loadStrongPage = createServerFn({ method: 'GET' })
           }
         : undefined,
       concordance,
+      incomplete: reads.incomplete || undefined,
     }
   })
 
@@ -675,8 +779,15 @@ export const loadStrongConcordancePage = createServerFn({ method: 'GET' })
     if (data.book !== undefined && book === undefined) throw notFound()
     const page = data.page ?? 1
     if (!Number.isSafeInteger(page) || page < 1) throw notFound()
+    const reads = createPageReads()
 
-    const resolved = await readStrongEntry(identity.code, language, 'definitions')
+    // The books of the code that is asked for do not depend on its entry: they leave with
+    // it. Should the entry not exist, nobody waits for that answer.
+    const earlyBooks = loadBookCounts(reads, language, identity.code, lexicalLanguage)
+    earlyBooks.catch(() => undefined)
+    const resolved = await readStrongEntry(reads, identity.code, language, {
+      detailedContent: 'definitions',
+    })
     if (!resolved) throw notFound()
     const { simple, entry, code } = resolved
     const classicCode = parseStrongCode(entry.classicStrong)?.code ?? code
@@ -684,12 +795,14 @@ export const loadStrongConcordancePage = createServerFn({ method: 'GET' })
     if (
       identity.code === classicCode &&
       code !== classicCode &&
-      hasStrongNumberPage(classicCode, await loadSenses(language, classicCode))
+      hasStrongNumberPage(classicCode, await loadSenses(reads, language, classicCode))
     ) {
       return { kind: 'number', code: classicCode }
     }
 
-    const books = await loadBookCounts(language, code, lexicalLanguage)
+    const books = await (code === identity.code
+      ? earlyBooks
+      : loadBookCounts(reads, language, code, lexicalLanguage))
     const listed = book === undefined ? books : books.filter(count => count.book === book)
     const listedCount = listed.reduce((total, count) => total + count.verseCount, 0)
     const pageCount = Math.ceil(listedCount / CONCORDANCE_PAGE_SIZE)
@@ -708,7 +821,7 @@ export const loadStrongConcordancePage = createServerFn({ method: 'GET' })
         skip -= count.verseCount
       }
     }
-    const verses = await loadOccurrences(language, code, lexicalLanguage, {
+    const verses = await loadOccurrences(reads, language, code, lexicalLanguage, {
       book,
       startBook,
       skip,
@@ -752,7 +865,9 @@ export const loadStrongPreview = createServerFn({ method: 'GET' })
     if (!isResourceLanguage(data.language) || !identity) throw notFound()
     const language = data.language
 
-    const resolved = await readStrongEntry(identity.code, language, 'definitions')
+    const resolved = await readStrongEntry(createPageReads(), identity.code, language, {
+      detailedContent: 'definitions',
+    })
     if (!resolved) throw notFound()
     const { simple, entry, code } = resolved
     // The card shows what the entry page reads first.

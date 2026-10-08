@@ -8,9 +8,12 @@ import { readResource } from '../resources/resourceApi'
 export type BibleChapterVerses = { book: number; chapter: number; verses: number[] }
 
 /**
- * The coverage of a version. It counts the verses of a chapter without numbering them.
- * `verseNumbersByBookChapter` is not published yet: a Resource service that gives there the
- * numbers of the chapters not numbered from 1 to their count spares every other read here.
+ * The coverage of a version. It counts the verse rows of each chapter, with or without
+ * text, and publishes beside the counts `verseNumbersByBookChapter` (ADR-0071): keyed like
+ * them, the ascending numbers of the verses that have text, for the chapters where they are
+ * not exactly 1 to the count. A Bible without such a chapter has an empty object there. A
+ * Resource service older than the field leaves it out, and the numbering is then found by
+ * asking for verses.
  */
 type Coverage = BibleVersionCoverageDto & {
   verseNumbersByBookChapter?: Record<string, readonly number[]>
@@ -106,9 +109,12 @@ const findSkippingChapters = async (
 /**
  * The verse numbers of every chapter of a version, in canon order, as the Resource API
  * publishes them. Numbering differs between Bibles and a Bible may skip numbers, so the
- * numbers are those of the version itself: its coverage counts the verses of each chapter,
- * the last numbers of each chapter tell the few that are not numbered 1 to their count, and
- * those chapters are read. A version that is not published has no chapters.
+ * numbers are those of the version itself. A coverage that publishes them is the only read:
+ * a chapter is numbered as it says, or from 1 to its count when it says nothing, and a verse
+ * kept without text is not among them. Otherwise the coverage only counts the verses of
+ * each chapter: the last numbers of each chapter tell the few that are not numbered 1 to
+ * their count, and those chapters are read; a verse kept without text is then listed like
+ * any other. A version that is not published has no chapters.
  */
 export const listBibleVerseNumbers = async (versionId: string): Promise<BibleChapterVerses[]> => {
   const coverage = await readResource<Coverage>(`/v1/bibles/${versionId}/coverage`)
@@ -120,7 +126,8 @@ export const listBibleVerseNumbers = async (versionId: string): Promise<BibleCha
     return chapters.map(({ book, chapter, count }) => ({
       book,
       chapter,
-      verses: [...(published[chapterKey(book, chapter)] ?? sequence(count))],
+      // A title numbered 0 is published like a verse; it is not one, and has no page.
+      verses: published[chapterKey(book, chapter)]?.filter(verse => verse > 0) ?? sequence(count),
     }))
   }
 

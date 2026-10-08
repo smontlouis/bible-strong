@@ -13,10 +13,10 @@ import { listCommentaryLinks, type CommentaryLink } from '../commentary/commenta
 import { buildCommentarySectionPath } from '../commentary/commentaryRoutes'
 import { truncateText } from '../resources/editorialHtml'
 import { parseOsisReference } from '../resources/editorialLinks'
+import { createPageReads } from '../resources/pageReads'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
 import { bibleBookName } from './bibleBooks'
-import { createPageReads } from './biblePageReads'
 import {
   parseInlineCommentaries,
   placeCommentarySections,
@@ -26,7 +26,7 @@ import {
 } from './bibleCommentaries'
 import { renderBibleText, type BibleNote, type BibleTextMarker } from './bibleLayout'
 import { bibleStrongLinks, type BibleStrongLink } from './bibleStrongLinks'
-import { quoteVerseText, VERSE_CONTEXT_SPAN } from './bibleVerseRules'
+import { hasVerseText, quoteVerseText, VERSE_CONTEXT_SPAN } from './bibleVerseRules'
 import { loadVerseStudy, type VerseStudyData } from './bibleVerseStudy'
 import { createInstanceCache } from './instanceCache'
 import {
@@ -372,6 +372,11 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
     ) {
       throw notFound()
     }
+    // A verse the Bible numbers and leaves blank is not a page, in any reading mode: its
+    // address answers like the one of a verse the Bible does not have.
+    if (passage && passage.endVerse === undefined && !hasVerseText(selected[0]?.text)) {
+      throw notFound()
+    }
 
     const spansByVerse = versesByNumber(strong?.verses)
     const tokensByVerse = versesByNumber(interlinear?.verses)
@@ -406,16 +411,21 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
       ...(await (earlyStudy ?? loadStudy(studied.number))),
       text: quoteVerseText(studied.text),
       context: {
+        // A verse left blank has nothing to quote and no page to lead to.
         before: text.verses
           .filter(
             verse =>
-              verse.number < studied.number && verse.number >= studied.number - VERSE_CONTEXT_SPAN
+              verse.number < studied.number &&
+              verse.number >= studied.number - VERSE_CONTEXT_SPAN &&
+              hasVerseText(verse.text)
           )
           .map(contextVerse),
         after: text.verses
           .filter(
             verse =>
-              verse.number > studied.number && verse.number <= studied.number + VERSE_CONTEXT_SPAN
+              verse.number > studied.number &&
+              verse.number <= studied.number + VERSE_CONTEXT_SPAN &&
+              hasVerseText(verse.text)
           )
           .map(contextVerse),
       },

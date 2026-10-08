@@ -40,6 +40,16 @@ export const verseStudyVersions = (
  */
 export const quoteVerseText = (text: string): string => text.replace(/\s+/gu, ' ').trim()
 
+/**
+ * Whether a Bible has words for a verse it numbers. A Bible may keep the number of a verse
+ * its manuscripts do not have and leave it blank, or with the bracket that closed the
+ * omitted words (Matthew 17:21 in the NIV and in the NBS): such a verse is not a page of
+ * its own. A verse has text when it holds a letter or a digit, which selects the rows the
+ * coverage of the Resource API leaves out of its verse numbers (ADR-0071).
+ */
+export const hasVerseText = (text: string | undefined): text is string =>
+  /[\p{L}\p{N}]/u.test(text ?? '')
+
 export type VerseKey = { book: number; chapter: number; verse: number }
 
 export const verseKey = ({ book, chapter, verse }: VerseKey): string =>
