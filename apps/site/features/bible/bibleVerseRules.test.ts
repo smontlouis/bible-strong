@@ -5,6 +5,7 @@ import {
   otherMainVersions,
   quoteVerseText,
   verseDictionaryEntries,
+  verseStudyVersions,
 } from './bibleVerseRules'
 
 describe('quoteVerseText', () => {
@@ -23,6 +24,26 @@ describe('otherMainVersions', () => {
 
   it('keeps to four for a Bible that is not one of them', () => {
     expect(otherMainVersions('fr', 'OST')).toEqual(['LSG', 'S21', 'BDS', 'NEG79'])
+  })
+})
+
+describe('verseStudyVersions', () => {
+  const carrying = ['BDS', 'BHG', 'DBY', 'KJV', 'LSG', 'NEG79', 'OST', 'S21']
+
+  it('reads the well-known Bibles of the language and the original one, in a fixed order', () => {
+    expect(verseStudyVersions('fr', 'BHG', carrying)).toEqual([
+      'BDS',
+      'BHG',
+      'DBY',
+      'LSG',
+      'NEG79',
+      'S21',
+    ])
+  })
+
+  it('leaves out a Bible that does not carry the verse', () => {
+    expect(verseStudyVersions('fr', 'BHG', ['LSG', 'S21', 'OST'])).toEqual(['LSG', 'S21'])
+    expect(verseStudyVersions('en', 'BHG', ['LSG'])).toEqual([])
   })
 })
 

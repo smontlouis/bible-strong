@@ -22,6 +22,19 @@ export const otherMainVersions = (language: ResourceLanguage, versionId: string)
   MAIN_BIBLE_VERSIONS[language].filter(id => id !== versionId).slice(0, OTHER_VERSION_COUNT)
 
 /**
+ * The Bibles a verse page reads its verse in beside the one being read, in one read: the
+ * well-known Bibles of the language and the original-language Bible, among those that carry
+ * the verse. The Bible being read does not change the list, and the list is ordered, so
+ * every verse page of a chapter asks the same question and the answer is kept once.
+ */
+export const verseStudyVersions = (
+  language: ResourceLanguage,
+  originalVersionId: string,
+  carrying: readonly string[]
+): string[] =>
+  [...MAIN_BIBLE_VERSIONS[language], originalVersionId].filter(id => carrying.includes(id)).sort()
+
+/**
  * A verse as it is quoted in a sentence: on one line. The marks a Bible puts where a line
  * of poetry breaks (`|` in the Semeur) are part of its text and are kept.
  */

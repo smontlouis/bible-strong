@@ -1,5 +1,6 @@
 import type { CommentaryCoverageResponseDto } from '@bible-strong/resource-domain/contracts/supplementaryContract'
 import { bibleBookSlug } from '../bible/bibleBooks'
+import { createInstanceCache } from '../bible/instanceCache'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
 
@@ -11,7 +12,7 @@ export type CommentaryCoverage = { book: number; chapters: number[] }[]
 const COVERAGE_TTL_MS = 60 * 60 * 1000
 
 // Coverage only changes when a commentary is republished; one read per hour and server instance.
-const coverageCache = new Map<string, { at: number; coverage: CommentaryCoverage }>()
+const cachedCoverage = createInstanceCache<CommentaryCoverage>(COVERAGE_TTL_MS)
 
 const ascending = (left: number, right: number): number => left - right
 
@@ -28,21 +29,16 @@ export const toCommentaryCoverage = (
     .filter(entry => entry.chapters.length > 0 && bibleBookSlug(entry.book) !== undefined)
 
 /** The coverage of a publication in a language; an absent publication is `undefined`. */
-export const readCommentaryCoverage = async (
+export const readCommentaryCoverage = (
   publicationId: string,
   language: ResourceLanguage
-): Promise<CommentaryCoverage | undefined> => {
-  const key = `${publicationId}:${language}`
-  const cached = coverageCache.get(key)
-  if (cached && Date.now() - cached.at < COVERAGE_TTL_MS) return cached.coverage
-  const response = await readResource<CommentaryCoverageResponseDto>(
-    `/v1/commentaries/${encodeURIComponent(publicationId)}/${language}/coverage`
-  )
-  if (!response) return undefined
-  const coverage = toCommentaryCoverage(response)
-  coverageCache.set(key, { at: Date.now(), coverage })
-  return coverage
-}
+): Promise<CommentaryCoverage | undefined> =>
+  cachedCoverage(`${publicationId}:${language}`, async () => {
+    const response = await readResource<CommentaryCoverageResponseDto>(
+      `/v1/commentaries/${encodeURIComponent(publicationId)}/${language}/coverage`
+    )
+    return response && toCommentaryCoverage(response)
+  })
 
 export const commentaryCovers = (
   coverage: CommentaryCoverage,

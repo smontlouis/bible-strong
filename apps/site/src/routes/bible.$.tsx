@@ -1,10 +1,10 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
 import BiblePage from '@/features/bible/BiblePage'
 import { loadBiblePage } from '@/features/bible/bible.functions'
+import { pageCacheHeaders } from '@/features/bible/biblePageReads'
 import { validateBibleSearch } from '@/features/bible/bibleCommentaries'
 import { buildBibleHead } from '@/features/bible/bibleHead'
 import { buildBiblePath, parseBibleRoute } from '@/features/bible/bibleRoutes'
-import { RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
 
 // `/bible/:version[/:presentation[/:language]]/:book/:chapter[/:passage]`, the grammar of ADR-0053.
 export const Route = createFileRoute('/bible/$')({
@@ -29,9 +29,9 @@ export const Route = createFileRoute('/bible/$')({
   loader: ({ params, deps }) =>
     loadBiblePage({ data: { path: params._splat ?? '', commentary: deps.commentary } }),
   head: ({ loaderData }) => (loaderData ? buildBibleHead(loaderData) : {}),
-  // Only a rendered passage is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  // Only a whole rendered passage is kept for long: a page missing a part it could not read
+  // is kept a minute, a failed load not at all.
+  headers: ({ loaderData }) => pageCacheHeaders(loaderData),
   component: BibleRoute,
 })
 
