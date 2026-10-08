@@ -6,7 +6,8 @@ import {
   createDictionaryArticleSlug,
   parseDictionaryTermSlug,
 } from '@/features/dictionary/dictionaryRoutes'
-import { isResourceLanguage, RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
+import { isResourceLanguage } from '@/features/resources/publicSite'
 
 // `/dictionary/:language/term/:slug` — a term in every dictionary of a language (ADR-0068).
 export const Route = createFileRoute('/dictionary/$language_/term/$slug')({
@@ -35,8 +36,7 @@ export const Route = createFileRoute('/dictionary/$language_/term/$slug')({
     return page
   },
   head: ({ loaderData }) => (loaderData ? buildDictionaryTermHead(loaderData) : {}),
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: DictionaryTermRoute,
 })
 

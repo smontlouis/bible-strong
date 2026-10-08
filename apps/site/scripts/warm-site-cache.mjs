@@ -215,7 +215,10 @@ if (!options.resume) writeFileSync(journalPath, '')
 journal({ run: { origin, at: new Date().toISOString(), pages: pages.length, rate, skipped } })
 
 const records = []
-/** Pages to request again: once more after trouble, or to check the CDN kept them. */
+/**
+ * Pages to request again: once more after trouble, to check the CDN kept them, or to let a
+ * provisional page be rendered from the answers the Resource API has refreshed.
+ */
 const later = []
 const flying = new Set()
 let pace = startPace(rate)
@@ -279,6 +282,9 @@ const request = async item => {
   if (signal === 'limited' || signal === 'failed' || signal === 'incomplete') {
     const notBefore = Date.now() + Math.max(RETRY_DELAY_MS, verdict.pauseMs ?? 0)
     later.push({ ...item, pass: 'retry', notBefore })
+  } else if (answer.completeness === 'provisional') {
+    // Kept a minute by the CDN: rendered again after that, it is whole and kept a day.
+    later.push({ ...item, pass: 'settle', notBefore: Date.now() + VERIFY_DELAY_MS })
   } else if (
     answer.kind === 'rendered' &&
     answer.completeness === 'unknown' &&
@@ -376,6 +382,11 @@ line('Already cached', count(summary.cached), times(summary.times.cached))
 line('Served stale', count(summary.stale), times(summary.times.stale))
 line('Rendered', count(summary.rendered), times(summary.times.rendered))
 line('Incomplete', count(summary.incomplete), 'pages the site could not render whole')
+line(
+  'Provisional',
+  count(summary.provisional),
+  'pages rendered from answers of an earlier API version, requested again a minute later'
+)
 line('Limited (429)', count(summary.limited))
 line('Failed', count(summary.failed), '5xx, or no answer')
 line('Refused', count(summary.refused), '401 or 403')

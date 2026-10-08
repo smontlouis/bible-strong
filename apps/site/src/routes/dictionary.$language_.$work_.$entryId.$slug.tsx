@@ -6,7 +6,7 @@ import {
   parseDictionaryEntryId,
   parseDictionaryWorkRoute,
 } from '@/features/dictionary/dictionaryRoutes'
-import { RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
 
 // `/dictionary/:language/:work/:entryId/:slug` — an article (ADR-0055).
 export const Route = createFileRoute('/dictionary/$language_/$work_/$entryId/$slug')({
@@ -43,8 +43,7 @@ export const Route = createFileRoute('/dictionary/$language_/$work_/$entryId/$sl
   },
   head: ({ loaderData }) => (loaderData ? buildDictionaryEntryHead(loaderData) : {}),
   // Only a rendered article is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: DictionaryEntryRoute,
 })
 

@@ -1,11 +1,11 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
 import {
   absoluteSiteUrl,
   DEFAULT_RESOURCE_LANGUAGE,
   isResourceLanguage,
   RESOURCE_FONT_PRELOADS,
   RESOURCE_LANGUAGES,
-  RESOURCE_PAGE_CACHE_CONTROL,
   type ResourceLanguage,
 } from '@/features/resources/publicSite'
 import { StrongIndexPage } from '@/features/strong/StrongLexiconPages'
@@ -68,8 +68,7 @@ export const Route = createFileRoute('/strong/$code')({
   loader: ({ params }) => loadStrongIndexPage({ data: { language: params.code } }),
   head: ({ loaderData }) => (loaderData ? buildHead(loaderData.language) : {}),
   // Only a rendered page is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: StrongIndexRoute,
 })
 

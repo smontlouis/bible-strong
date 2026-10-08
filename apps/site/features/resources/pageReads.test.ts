@@ -101,7 +101,36 @@ describe('pageCacheHeaders', () => {
     expect(pageCacheHeaders({ incomplete: false })).not.toHaveProperty('X-Page-Incomplete')
   })
 
+  it('keeps a page rendered with a STALE answer for a minute only, under its own name', () => {
+    expect(pageCacheHeaders({}, true)).toEqual({
+      'Cache-Control': 'public, max-age=0, s-maxage=60',
+      'X-Page-Stale': '1',
+    })
+    // It is whole: nothing says it is incomplete.
+    expect(pageCacheHeaders({ incomplete: false }, true)).not.toHaveProperty('X-Page-Incomplete')
+  })
+
+  it('says both of a page that is missing a part and was rendered with a STALE answer', () => {
+    expect(pageCacheHeaders({ incomplete: true }, true)).toEqual({
+      'Cache-Control': 'public, max-age=0, s-maxage=60',
+      'X-Page-Incomplete': '1',
+      'X-Page-Stale': '1',
+    })
+  })
+
+  it('says nothing of a STALE answer for a page rendered from current ones', () => {
+    expect(pageCacheHeaders({}, false)).not.toHaveProperty('X-Page-Stale')
+    expect(pageCacheHeaders({ incomplete: true })).not.toHaveProperty('X-Page-Stale')
+  })
+
+  it('keeps the loader data of any page, which need not say whether it is incomplete', () => {
+    expect(pageCacheHeaders({ language: 'fr', topics: [] })).toEqual({
+      'Cache-Control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800',
+    })
+  })
+
   it('does not keep a failed load', () => {
     expect(pageCacheHeaders(undefined)).toBeUndefined()
+    expect(pageCacheHeaders(undefined, true)).toBeUndefined()
   })
 })

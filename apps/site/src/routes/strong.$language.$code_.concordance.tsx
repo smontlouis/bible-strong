@@ -1,5 +1,6 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
-import { isResourceLanguage, RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
+import { isResourceLanguage } from '@/features/resources/publicSite'
 import StrongConcordancePage from '@/features/strong/StrongConcordancePage'
 import { loadStrongConcordancePage } from '@/features/strong/strong.functions'
 import {
@@ -51,8 +52,7 @@ export const Route = createFileRoute('/strong/$language/$code_/concordance')({
   },
   head: ({ loaderData }) => (loaderData ? buildConcordanceHead(loaderData) : {}),
   // Only a rendered page is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: ConcordanceRoute,
 })
 
