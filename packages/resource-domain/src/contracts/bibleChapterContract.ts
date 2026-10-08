@@ -244,10 +244,24 @@ export class BibleVersionCoverageDto extends Schema.Class<BibleVersionCoverageDt
     key: Schema.String,
     value: Schema.Array(Schema.Int.pipe(Schema.positive())),
   }),
+  /** The number of verse rows of each chapter, keyed `book-chapter`. */
   verseCountByBookChapter: Schema.Record({
     key: Schema.String,
     value: Schema.Int.pipe(Schema.nonNegative()),
   }),
+  /**
+   * The ascending numbers of the verses that have text, keyed like `verseCountByBookChapter`
+   * and present only for the chapters where they are not exactly 1 to that count: a Bible
+   * may skip or merge verses, or keep a verse its manuscripts omit as a row without text.
+   * A Bible without such a chapter has an empty object; a Resource service older than the
+   * field leaves it out.
+   */
+  verseNumbersByBookChapter: Schema.optional(
+    Schema.Record({
+      key: Schema.String,
+      value: Schema.Array(Schema.Int.pipe(Schema.nonNegative())),
+    })
+  ),
 }) {}
 
 export class BiblePericopeVerseDto extends Schema.Class<BiblePericopeVerseDto>(

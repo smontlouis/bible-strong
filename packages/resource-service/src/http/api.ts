@@ -99,6 +99,9 @@ import {
   CommentaryCoverageResponseDto,
   CommentaryPath,
   CommentaryVerseResponseDto,
+  CommentaryVerseSectionsPath,
+  CommentaryVerseSectionsQuery,
+  CommentaryVerseSectionsResponseDto,
   CrossReferencePath,
   CrossReferenceResponseDto,
 } from '@bible-strong/resource-domain/contracts/supplementaryContract'
@@ -537,6 +540,16 @@ const SupplementaryApi = HttpApiGroup.make('supplementary')
     HttpApiEndpoint.post('getCommentaryReadingSection', '/v1/commentaries/reading-section')
       .setPayload(CommentaryReadingSectionRequest)
       .addSuccess(CommentaryReadingSectionResponse)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getCommentaryVerseSections', '/v1/commentaries/verses/:verseKey/sections')
+      .setPath(CommentaryVerseSectionsPath)
+      .setUrlParams(CommentaryVerseSectionsQuery)
+      .addSuccess(CommentaryVerseSectionsResponseDto)
       .addError(InvalidResourceRequestProblem, { status: 400 })
       .addError(ResourceNotFoundProblem, { status: 404 })
       .addError(ResourceUnavailableProblem, { status: 503 })

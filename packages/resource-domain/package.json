@@ -8,6 +8,7 @@
     "./contracts/*": "./src/contracts/*.ts",
     "./bible-canon": "./src/bibleCanon.ts",
     "./bible-search-input": "./src/bibleSearchInput.ts",
+    "./commentary-chapter-sections": "./src/commentaryChapterSections.ts",
     "./interlinear-bible": "./src/interlinearBible.ts",
     "./resource-page-cursor": "./src/resourcePageCursor.ts",
     "./strong-bible": "./src/strongBible.ts",

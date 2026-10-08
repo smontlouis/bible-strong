@@ -219,7 +219,8 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
         })
       )
 
-      assert.equal(statementCount, 5)
+      // One statement whatever the batch holds (ADR-0072); the earlier read ran five here.
+      assert.equal(statementCount, 1)
       assert.deepEqual(
         cards.map(card => ({
           revision: card.revision,

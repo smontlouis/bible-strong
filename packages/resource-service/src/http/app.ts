@@ -105,6 +105,7 @@ import {
   readCommentaryChapter,
   readCommentaryCoverage,
   readCommentaryVerse,
+  readCommentaryVerseSections,
   readCrossReferences,
   SupplementaryContentNotFound,
   SupplementaryRepository,
@@ -1047,6 +1048,30 @@ const SupplementaryApiLive = HttpApiBuilder.group(ResourceApi, 'supplementary', 
         ]
       )
     })
+    .handle('getCommentaryVerseSections', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      const [book, chapter, verse] = path.verseKey.split('-').map(Number)
+      return readCommentaryVerseSections({
+        collections: urlParams.commentaries.split(','),
+        language: urlParams.language,
+        book: book!,
+        chapter: chapter!,
+        verse: verse!,
+      }).pipe(
+        Effect.tap(response =>
+          addResponseHeaders({
+            'x-request-id': requestId,
+            'x-resource-revisions': response.sections
+              .map(
+                section =>
+                  `${section.resource.resourceId}:${section.resource.language}:${section.resource.revision}`
+              )
+              .join(','),
+          })
+        ),
+        Effect.mapError(cause => toHttpProblem(cause, requestId))
+      )
+    })
     .handle('getCommentaryCoverage', ({ path, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
       return serveRevisionedResponse(
@@ -1255,6 +1280,7 @@ const unavailableSupplementaryRepository: SupplementaryRepositoryService = {
         resourceIdentity: `commentary:${input.collection}:${input.language}`,
       })
     ),
+  findCommentaryChapters: () => Effect.succeed([]),
   findCommentaryCoverage: input =>
     Effect.fail(
       new ActiveSupplementaryPublicationUnavailable({

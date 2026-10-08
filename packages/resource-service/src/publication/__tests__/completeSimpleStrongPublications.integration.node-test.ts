@@ -114,6 +114,50 @@ describe(
             })
           )
           assert.ok(randomEntry.value.definitionHtml)
+
+          // A simple entry and its cards are read in one statement; the earlier read, one
+          // statement per kind of row, returns the same response for every fiftieth entry.
+          const statementByStatement = makeKyselyStrongLexiconRepository(isolated.database, {
+            entryCardsRead: 'statement-by-statement',
+          })
+          const sampled = stored
+            .filter(row => row.entry_id % 50 === 0)
+            .map(row => ({
+              dStrong: String(row.payload.dStrong).split(' ')[0]!,
+              eStrong: String(row.payload.eStrong),
+            }))
+          assert.ok(sampled.length > 400)
+          const senseSuffixes = ['', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz']
+          for (const { dStrong, eStrong } of sampled) {
+            for (const input of [
+              { reference: dStrong, kind: 'dstrong' },
+              { reference: dStrong.toLowerCase(), kind: 'dstrong' },
+              { reference: eStrong },
+            ] as const) {
+              const read = (reader: typeof repository) =>
+                Effect.runPromise(
+                  Effect.either(reader.findEntry({ ...input, language, level: 'simple' }))
+                )
+              assert.equal(
+                JSON.stringify(await read(repository)),
+                JSON.stringify(await read(statementByStatement)),
+                JSON.stringify(input)
+              )
+            }
+            const senses = {
+              identities: senseSuffixes.map(suffix => ({
+                kind: 'dstrong' as const,
+                reference: `${eStrong.replace(/[A-Za-z]+$/u, '')}${suffix}`,
+              })),
+              language,
+              level: 'simple' as const,
+            }
+            assert.equal(
+              JSON.stringify(await Effect.runPromise(repository.findEntryCards!(senses))),
+              JSON.stringify(await Effect.runPromise(statementByStatement.findEntryCards!(senses))),
+              eStrong
+            )
+          }
         }
       } finally {
         await isolated.dispose()

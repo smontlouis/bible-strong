@@ -137,6 +137,49 @@ describe('Complete Strong lexicon publications', { skip: !runIntegration }, () =
       }
       assert.ok(withEntity > 50)
 
+      // Both reads of entry cards return the same response too: the same entries, by their
+      // own code, by their classical number, and as the senses a number may have.
+      const cardsStatementByStatement = makeKyselyStrongLexiconRepository(isolated.database, {
+        entryCardsRead: 'statement-by-statement',
+      })
+      const cardsWireForm = async (
+        reader: typeof repository,
+        input: Parameters<NonNullable<typeof repository.findEntryCards>>[0]
+      ) => JSON.stringify(await Effect.runPromise(reader.findEntryCards!(input)))
+      const senseSuffixes = ['', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz']
+      let cards = 0
+      for (const { step_code: stepCode, classical } of sampled.rows) {
+        for (const input of [
+          {
+            identities: [
+              { kind: 'dstrong', reference: stepCode },
+              { kind: 'strong', reference: classical },
+              { kind: 'dstrong', reference: stepCode.toLowerCase() },
+            ],
+            language: 'fr',
+          },
+          {
+            identities: senseSuffixes.map(suffix => ({
+              kind: 'dstrong' as const,
+              reference: `${stepCode.replace(/[A-Za-z]+$/u, '')}${suffix}`,
+            })),
+            language: 'en',
+          },
+        ] as const) {
+          const expected = await cardsWireForm(cardsStatementByStatement, {
+            ...input,
+            identities: [...input.identities],
+          })
+          assert.equal(
+            await cardsWireForm(repository, { ...input, identities: [...input.identities] }),
+            expected,
+            JSON.stringify(input)
+          )
+          cards += expected.split('"selectedIdentity"').length - 1
+        }
+      }
+      assert.ok(cards > sampled.rows.length * 3)
+
       const entitiesPublication = await isolated.database
         .selectFrom('resource_publications')
         .select('id')
