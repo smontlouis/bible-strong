@@ -14,10 +14,9 @@ import {
 import { installManagedResource } from '~helpers/managedResourceInstallation'
 import { getDownloadItemIdentity, type DownloadItem } from '~helpers/offlineCopy'
 import type { OfflineCopyIdentity } from '~helpers/offlineCopyId'
-import { BHG_INTERLINEAR_PUBLICATION } from '~helpers/interlinearBiblePublications'
+import { isCanonicalBibleSchemaVersion } from '~helpers/canonicalBibleInstallation'
 import { getInterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
 import { storage } from '~helpers/storage'
-import { getStrongBiblePublication } from '~helpers/strongBiblePublications'
 import { getStrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import { createStrongLexiconModuleDownloadItem } from '~helpers/strongLexiconDownloadItems'
 import { getStrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
@@ -76,21 +75,17 @@ const resolveReplacementPlan = async (
   }
 }
 
+/**
+ * A replacement Bible is ready once the installed copy names its text: an index is then matched
+ * against that text itself. Which revision is published is no concern of the migration, so a
+ * republished Bible never fails it (ADR-0079).
+ */
 const isCanonicalBibleReady = async (versionId: string): Promise<boolean> => {
   const metadata = await getBibleVersionMetadata(versionId)
-  if (!metadata) return false
-  if (versionId === 'BHG') {
-    return (
-      metadata.textRevision === BHG_INTERLINEAR_PUBLICATION.canonical.textRevision &&
-      metadata.textSha256 === BHG_INTERLINEAR_PUBLICATION.canonical.textSha256
-    )
-  }
+  if (!metadata?.textRevision || !metadata.textSha256) return false
+  if (versionId === 'BHG') return true
   if (versionId === 'LSG' || versionId === 'KJV') {
-    const publication = getStrongBiblePublication(versionId)
-    return (
-      metadata.textRevision === publication.canonical.textRevision &&
-      metadata.textSha256 === publication.canonical.textSha256
-    )
+    return isCanonicalBibleSchemaVersion(metadata.schemaVersion)
   }
   return false
 }

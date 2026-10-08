@@ -1,8 +1,7 @@
 import books, { type Book } from '~assets/bible_versions/books-desc'
 import legacyBookAliases from '~assets/bible_versions/books.json'
 import { versions } from '~helpers/bibleVersions'
-import { BHG_INTERLINEAR_PUBLICATION_CATALOG } from '~helpers/interlinearBiblePublicationCatalog'
-import { STRONG_BIBLE_REVERSE_INTERLINEAR_CANDIDATES } from '~helpers/strongBibleReverseInterlinearCandidate'
+import { BHG_INTERLINEAR_IDENTITY } from '~helpers/interlinearBiblePublicationCatalog'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
 import { getSupportedOsisBookId } from '~helpers/osisReference'
 
@@ -103,10 +102,10 @@ export const isPublicBiblePresentationSupported = (
 ): boolean => {
   if (presentation === 'text') return true
   if (presentation === 'interlinear') {
-    return version === BHG_INTERLINEAR_PUBLICATION_CATALOG.applicationVersionId
+    return version === BHG_INTERLINEAR_IDENTITY.applicationVersionId
   }
-  if (presentation === 'strong') return isStrongCapableBibleVersion(version)
-  return Object.prototype.hasOwnProperty.call(STRONG_BIBLE_REVERSE_INTERLINEAR_CANDIDATES, version)
+  // Every Strong-capable Bible is published with its reverse-interlinear alignment.
+  return isStrongCapableBibleVersion(version)
 }
 
 export const parsePublicBibleRoute = (

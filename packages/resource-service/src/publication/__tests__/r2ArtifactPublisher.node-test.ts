@@ -14,7 +14,10 @@ import {
   type R2ArtifactStore,
 } from '../r2ArtifactPublisher'
 import type { MobileResourceCatalogEntry } from '../mobileResourceCatalog'
-import type { StrongLexiconPublicationBundleManifest } from '../publicationBundle'
+import type {
+  PublicationBundleManifest,
+  StrongLexiconPublicationBundleManifest,
+} from '../publicationBundle'
 import { writeStrongPublicationFixture } from './strongPublicationFixture'
 
 const writeMobileCatalog = async (
@@ -188,6 +191,102 @@ describe('R2 artifact publisher', () => {
           'strong-lexicon:entities'
         ),
       /R2_PUBLICATION_CATALOG_INTEGRITY_MISMATCH:strong-lexicon:entities/
+    )
+  })
+
+  it('rejects a catalog that names another text than the BHG bundles declare', () => {
+    const text = {
+      textRevision: 'bhg-e15bd9f0f1a91140579c',
+      textSha256: 'e15bd9f0f1a91140579c9eb9c8f4e173b8a4df361859758e0fe252ef55edc107',
+    }
+    const published = {
+      textRevision: 'bhg-803c482ed06005693547',
+      textSha256: '803c482ed06005693547f9ea04a2dcbec4718c1d97ab0c531d60600e4c3a9d8f',
+    }
+    const artifact = {
+      path: 'offline/artifact.zip',
+      mediaType: 'application/zip',
+      entry: 'artifact',
+      sha256: '2'.repeat(64),
+      bytes: 2,
+      contentSha256: '3'.repeat(64),
+    }
+    const catalogEntry = (
+      id: string,
+      declared?: { textRevision?: string; textSha256?: string }
+    ): MobileResourceCatalogEntry => ({
+      id,
+      file: 'bibles/artifact.zip',
+      entry: artifact.entry,
+      entries: { canonical: { entry: artifact.entry, sha256: artifact.contentSha256, bytes: 1 } },
+      archiveSha256: artifact.sha256,
+      archiveBytes: artifact.bytes,
+      contentSha256: artifact.contentSha256,
+      ...declared,
+    })
+    const indexManifest = {
+      identity: { kind: 'interlinear-index', versionId: 'BHG', datasetId: 'STEP', language: 'fr' },
+      revision: 'bhg-interlinear-fr-b8c7867e99673cdd618f',
+      offlineArtifact: artifact,
+      dependencies: {
+        bible: { resourceIdentity: 'bible-text:BHG', revision: text.textRevision, ...text },
+      },
+    } as unknown as PublicationBundleManifest
+    const textManifest = {
+      identity: { kind: 'bible-text', versionId: 'BHG', language: 'he-grc' },
+      revision: text.textRevision,
+      offlineArtifact: artifact,
+    } as unknown as PublicationBundleManifest
+    const mismatch = (id: string) => new RegExp(`R2_PUBLICATION_CATALOG_INTEGRITY_MISMATCH:${id}`)
+
+    const indexId = 'bible-interlinear:BHG:fr'
+    assert.doesNotThrow(() =>
+      assertCatalogMatchesOfflineArtifact(indexManifest, catalogEntry(indexId, text), indexId)
+    )
+    // The catalog still pairs the index with the text published before it.
+    assert.throws(
+      () =>
+        assertCatalogMatchesOfflineArtifact(
+          indexManifest,
+          catalogEntry(indexId, published),
+          indexId
+        ),
+      mismatch(indexId)
+    )
+    // An index is never cataloged without the text it was built for.
+    assert.throws(
+      () => assertCatalogMatchesOfflineArtifact(indexManifest, catalogEntry(indexId), indexId),
+      mismatch(indexId)
+    )
+
+    assert.doesNotThrow(() =>
+      assertCatalogMatchesOfflineArtifact(
+        textManifest,
+        catalogEntry('bible:BHG', text),
+        'bible:BHG'
+      )
+    )
+    assert.throws(
+      () =>
+        assertCatalogMatchesOfflineArtifact(
+          textManifest,
+          catalogEntry('bible:BHG', published),
+          'bible:BHG'
+        ),
+      mismatch('bible:BHG')
+    )
+    assert.throws(
+      () =>
+        assertCatalogMatchesOfflineArtifact(
+          textManifest,
+          catalogEntry('bible:BHG', { ...text, textSha256: published.textSha256 }),
+          'bible:BHG'
+        ),
+      mismatch('bible:BHG')
+    )
+    // A Bible without interlinear indexes declares nothing: it is self-describing.
+    assert.doesNotThrow(() =>
+      assertCatalogMatchesOfflineArtifact(textManifest, catalogEntry('bible:BHG'), 'bible:BHG')
     )
   })
 

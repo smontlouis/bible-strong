@@ -57,6 +57,12 @@ export interface MobileResourceInventoryEntry {
   strategy: MobileResourceInstallationStrategy;
   resourceRevision?: string;
   coreRevision?: string;
+  /**
+   * Text the archive carries (a Bible that has interlinear indexes) or was
+   * built for (one of those indexes). See ADR-0079.
+   */
+  textRevision?: string;
+  textSha256?: string;
 }
 
 export interface MobileResourceCatalogFileEntry {
@@ -82,6 +88,8 @@ export interface MobileResourceCatalogEntry {
   strategy: MobileResourceInstallationStrategy;
   resourceRevision?: string;
   coreRevision?: string;
+  textRevision?: string;
+  textSha256?: string;
 }
 
 export interface MobileResourceCatalog {
@@ -100,6 +108,33 @@ type MobileResourceSourceOverrides = Record<
   string,
   Partial<Record<MobileResourceEntryRole, string>>
 >;
+
+const INTERLINEAR_INDEX_ID = /^bible-interlinear:([^:]+):[^:]+$/u;
+const SHA256 = /^[a-f0-9]{64}$/u;
+
+type TextDeclaration = { textRevision?: string; textSha256?: string };
+
+const sameText = (left: TextDeclaration, right: TextDeclaration | undefined) =>
+  left.textRevision === right?.textRevision &&
+  left.textSha256 === right?.textSha256;
+
+/**
+ * Interlinear indexes paired with another text than the one listed beside
+ * them. An index is built for one text: both are published, and brought to a
+ * device, at one revision (ADR-0079). An index whose Bible is not listed is
+ * left to the caller holding the complete list.
+ */
+export function findInterlinearTextMismatches(
+  resources: Readonly<Record<string, TextDeclaration | undefined>>
+): string[] {
+  return Object.keys(resources)
+    .filter((id) => {
+      const versionId = INTERLINEAR_INDEX_ID.exec(id)?.[1];
+      const text = versionId ? resources[`bible:${versionId}`] : undefined;
+      return text !== undefined && !sameText(resources[id]!, text);
+    })
+    .sort();
+}
 
 export function validateMobileResourceInventory(
   inventory: readonly MobileResourceInventoryEntry[],
@@ -130,6 +165,19 @@ export function validateMobileResourceInventory(
       !resource.coreRevision?.trim()
     ) {
       throw new Error(`mobile-resource-core-revision-missing:${resource.id}`);
+    }
+    const declaresText =
+      resource.textRevision !== undefined || resource.textSha256 !== undefined;
+    if (
+      declaresText &&
+      (!resource.textRevision?.trim() ||
+        !SHA256.test(resource.textSha256 ?? ""))
+    ) {
+      throw new Error(`mobile-resource-text-identity-invalid:${resource.id}`);
+    }
+    // An index never ships without naming the text it was built for.
+    if (INTERLINEAR_INDEX_ID.test(resource.id) && !declaresText) {
+      throw new Error(`mobile-resource-text-identity-missing:${resource.id}`);
     }
     if (
       !(["sqlite-import", "archive-extract"] as const).includes(
@@ -209,6 +257,14 @@ export function validateMobileResourceInventory(
         `mobile-resource-bundle-source-must-be-direct:${resource.id}`
       );
     }
+  }
+  const textMismatches = findInterlinearTextMismatches(
+    Object.fromEntries(inventory.map((resource) => [resource.id, resource]))
+  );
+  if (textMismatches.length > 0) {
+    throw new Error(
+      `mobile-resource-interlinear-text-mismatch:${textMismatches.join(",")}`
+    );
   }
   if (requiredIds) {
     const required = new Set(requiredIds);
@@ -514,7 +570,9 @@ async function packageResource(options: {
     peakInstallationBytes,
     strategy: resource.strategy,
     resourceRevision: resource.resourceRevision,
-    coreRevision: resource.coreRevision
+    coreRevision: resource.coreRevision,
+    textRevision: resource.textRevision,
+    textSha256: resource.textSha256
   };
 }
 

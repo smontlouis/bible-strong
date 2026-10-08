@@ -167,3 +167,136 @@ Executed against local Postgres 17 and the complete LSG publication revision `ls
 - No hosted database, remote publication upload, Worker deployment, or Cloudflare infrastructure was used.
 
 The exhaustive surface and identity inventory is recorded in [resource-coverage-matrix.md](resource-coverage-matrix.md).
+
+## BHG And Its Interlinear Indexes Follow The Catalog — before releasing 27.2
+
+ADR-0079 removes every published revision from the application: `BHG`, its two interlinear
+indexes and the Strong indexes are resolved from the catalog and matched by the metadata of the
+files. Automated tests cover the resolution, the pairing rules and the 27.1.1 catalog validator.
+The steps below cover what only a device shows: real archives, SQLite, the download queue and the
+reader. Use disposable installs; run them on iOS and on Android.
+
+Vocabulary: *interlinear mode* is the BHG display mode « Interlinéaire »; *the pair* is the BHG
+text and one index. To inspect what is installed on an iOS Simulator:
+
+```bash
+DATA="$(xcrun simctl get_app_container booted com.smontlouis.biblestrong.dev data)"
+sqlite3 "$DATA/Documents/SQLite/bibles.sqlite" \
+  "SELECT text_revision, schema_version, substr(resource_generation,1,12) FROM versions_meta WHERE version='BHG'"
+sqlite3 "$DATA/Documents/SQLite/shared/interlinear-bibles/bible-bhg-interlinear-fr.sqlite" \
+  "SELECT key, value FROM ResourceMetadata WHERE key IN ('textRevision','schemaVersion','indexRevision')"
+```
+
+Today both must read `bhg-803c482ed06005693547`.
+
+### A. Fresh install against production
+
+1. Install the 27.2 build on a device without Bible Strong. Skip every download.
+2. Open BHG, Genesis 1, then Matthew 1. Switch to interlinear mode in French, then English:
+   words, glosses and transliteration render (read online).
+3. Open the BHG lexicon from a verse and a Strong concordance from a BHG word: both list verses.
+4. Downloads → download BHG. Expected: installed, no « mise à jour disponible ».
+5. Interlinear mode → download the French index. Expected: the queue shows the index only (BHG is
+   already the catalog one); the mode turns on by itself when the download ends.
+6. Airplane mode. Reopen the app. Genesis 1 and Matthew 1 still read in interlinear mode; English
+   gloss reports that it needs a connection or a download, and never shows French glosses instead.
+7. Still offline, open LSG in Strong mode and in reverse interlinear (LSG and its Strong index
+   installed beforehand): Strong numbers and original words render. This is the Strong index gate
+   that no longer names a BHG revision.
+8. Back online: delete the French index only → BHG stays installed and readable; delete BHG → both
+   indexes go with it.
+
+### B. Upgrade from 27.1.1 with BHG and an index installed
+
+1. Install 27.1.1 from the App Store (or a build of commit `f2f5f543e`). Download BHG and the
+   French index, read Genesis 1 in interlinear mode, add a highlight on a BHG verse in simple mode.
+2. Go offline. Install the 27.2 build over it (same bundle identifier, no uninstall).
+3. Launch offline. Expected: no migration error; Genesis 1 reads in interlinear mode from the
+   installed pair; the highlight is still there; Downloads shows BHG and the index installed.
+4. Back online, relaunch. Expected: no update offered for BHG or the index (the catalog still
+   publishes the installed archives) and no re-download starts.
+5. Repeat step 1 with LSG and its Strong index installed and check Strong mode offline after the
+   upgrade.
+
+### C. A new BHG appears in the catalog — local simulation, nothing published
+
+The rebuilt BHG and indexes wait under
+`apps/resource-studio/outputs/releases/*2026-10-08*bracketed-references`. This scenario serves them
+from the development machine. It changes the catalog **in the working tree only**: do not commit
+it, and restore it at the end.
+
+Prepare, from the repository root:
+
+```bash
+REL="$PWD/apps/resource-studio/outputs/releases"
+BHG_ROOTS="$REL/ordinary-bible-publications-2026-10-08-bhg-bracketed-references:$REL/interlinear-bible-publications-2026-10-08-bracketed-references"
+
+# 1. With the committed catalog, install the published pair first (scenario A, steps 4-5).
+
+# 2. Publish the rebuilt BHG in the working-tree catalog only.
+MOBILE_CATALOG_GENERATED_AT="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" \
+  yarn workspace @bible-strong/resource-studio resources:publication:r2 catalog-patch \
+  --bundles "$REL/ordinary-bible-publications-2026-10-08-bhg-bracketed-references" \
+  --bundles "$REL/interlinear-bible-publications-2026-10-08-bracketed-references"
+git diff --stat packages/resource-catalog   # three entries, textRevision bhg-e15bd9f0f1a91140579c
+
+# 3. Local Resource service: Online access on :8787, Offline-copy archives on :8788.
+yarn resources:db:up && yarn resources:migrate
+RESOURCE_PUBLICATION_ROOTS="$BHG_ROOTS" yarn dev:resources
+RESOURCE_PUBLICATION_ROOTS="$BHG_ROOTS" yarn workspace @bible-strong/resource-service serve:artifacts
+```
+
+Start Metro with `EXPO_PUBLIC_RESOURCE_API_URL` and `EXPO_PUBLIC_RESOURCE_ARTIFACT_BASE_URL`
+pointing at ports 8787 and 8788 of the development machine (`127.0.0.1` on an iOS Simulator,
+`10.0.2.2` on an Android Emulator, the LAN address on a device; see `validation.md`). The
+application now holds a catalog newer than its installed files; the production catalog it fetches
+is older and is ignored. Other Bibles are not served by this local service: test BHG only.
+
+1. Launch **offline** first. Expected: Genesis 1 and John 7 read in interlinear mode from the
+   installed pair, unchanged. John 7:53 does not exist yet.
+2. Online. Downloads and the version selector flag BHG and its French index as « mise à jour
+   disponible ». The English index, not installed, shows no update.
+3. Leave the pair alone and switch the gloss language to English (read online). Expected: the
+   chapter still reads correctly — the text is now the published one, read online with the tokens.
+   Check Matthew 15:6, Acts 2:11 and Romans 1:10 — three of the twenty-one verses whose words
+   moved because the rebuilt text gains a word at their start — and Philippians 1:16-17, which
+   are new: every gloss sits under its own word.
+4. Update **the index only** (tap its update). Expected: the queue shows BHG first, then the index,
+   and both finish. Interlinear mode reads John 7:53, Romans 16:25-27, Matthew 15:6 and Acts 2:11
+   with glosses under the right words. The inspection commands read `bhg-e15bd9f0f1a91140579c`
+   twice.
+5. Reinstall the published pair (restore the catalog, relaunch, reinstall, patch again) and this
+   time update **BHG only**. Expected: the queue adds the installed French index by itself.
+6. Interrupt the pair: start the BHG update, and kill the application as soon as BHG is installed
+   and before the index ends. Relaunch **offline**. Expected: BHG reads in simple mode; interlinear
+   mode shows its unavailable state with a download action, never misplaced glosses. Back online
+   the mode reads again and the index update is still offered.
+7. Airplane mode after both are updated: the new pair reads offline.
+
+Variant for the guard alone, without the local Online service: keep
+`EXPO_PUBLIC_RESOURCE_API_URL` on production and point only the artifact base URL at :8788. After
+updating BHG alone and killing the app before the index ends, the installed text is the rebuilt
+one while production still serves tokens for the published one: interlinear mode must read
+Matthew 15:6 and Acts 2:11 correctly (published text and tokens, both online), not the rebuilt
+text with published tokens.
+
+Restore: `git checkout -- packages/resource-catalog/src/mobile-resource-catalog.json`, stop both
+services, delete the test installs.
+
+### D. 27.1.1 at the time BHG is published — only if the canonical recipe is chosen
+
+Serve the rebuilt bundles as in C to a **27.1.1 development build**, with a BHG bundle whose
+Offline copy is the canonical JSON under the entry name `bible-step.json`.
+
+1. With the published pair installed, update BHG. Expected: the install succeeds; simple mode
+   reads; interlinear mode reads online (connection required) with glosses under the right words;
+   offline it reports an invalid Offline copy instead of rendering.
+2. Update the index. Expected: the download fails validation three times and the previous index
+   file is kept. This is the known, accepted outcome on 27.1.1.
+
+### What these steps do not prove
+
+- The published index archives on R2 were not opened: their text declaration in the catalog comes
+  from the constants 27.1.1 pins and from the live `/v1/interlinear-bibles/BHG/languages/*/coverage`
+  responses.
+- Nothing was run on a device when this plan was written; record the results below.

@@ -126,4 +126,21 @@ describe('development artifact server', () => {
       200
     )
   })
+
+  it('serves the BHG text where the catalog lists it, whatever its bundle names the archive', () => {
+    const artifact = createDevelopmentArtifact(
+      {
+        ...interlinearManifest,
+        identity: { kind: 'bible-text', versionId: 'BHG', language: 'he-grc' },
+        offlineArtifact: {
+          ...interlinearManifest.offlineArtifact,
+          path: 'offline/bible-bhg.json.zip',
+          entry: 'bible-step.json',
+        },
+      } as unknown as Parameters<typeof createDevelopmentArtifact>[0],
+      Buffer.from('bhg bundle')
+    )
+
+    assert.equal(artifact.route, '/bibles/bible-step.json.zip')
+  })
 })

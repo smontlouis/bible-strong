@@ -72,6 +72,19 @@ describe('available updates', () => {
     ).toBe(true)
   })
 
+  it('offers an update for an index built for another text than the installed one', () => {
+    const index = (status: string) =>
+      entry(
+        'bible-interlinear:BHG:fr',
+        { kind: 'interlinear-index', versionId: 'BHG', language: 'fr' },
+        status
+      )
+
+    expect(resourceNeedsUpdate(index('incompatible'))).toBe(true)
+    expect(resourceNeedsUpdate(index('available'))).toBe(false)
+    expect(resourceNeedsUpdate(index('missing'))).toBe(false)
+  })
+
   it('ignores resources the downloads list never shows on their own', () => {
     const pericope = entry(
       'bible-pericope:LSG',

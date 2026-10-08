@@ -16,8 +16,10 @@ import {
   type StrongBibleSidecarSnapshot,
 } from './strongBibleSidecarValidation'
 import {
-  getStrongBiblePublication,
+  getStrongDatasetId,
   isStrongCapableBibleVersion,
+  REVERSE_INTERLINEAR_MIN_SCHEMA_VERSION,
+  STRONG_BIBLE_INDEX_MIN_SCHEMA_VERSION,
   type StrongBiblePublication,
   type StrongBibleVersionId,
 } from './strongBiblePublications'
@@ -188,7 +190,7 @@ export const installStrongBibleSidecar = async (
     await unzipOfflineArchive(archivePath, extractionDirectory, downloadResult.archive)
     callbacks.onInsertProgress?.(0.55)
     callbacks.onInsertProgress?.(0.7)
-    await verifyExtractedStrongBibleSidecar(versionId, extractionDirectory, {
+    await verifyExtractedStrongBibleSidecar(versionId, extractionDirectory, artifact.entry, {
       textRevision: baseMetadata.textRevision ?? '',
       textSha256: baseMetadata.textSha256 ?? '',
     })
@@ -692,14 +694,10 @@ const readMetadata = async (database: SQLiteDatabase): Promise<StrongBibleSideca
 const verifyExtractedStrongBibleSidecar = async (
   versionId: StrongBibleVersionId,
   directory: string,
+  entry: string,
   baseMetadata: Pick<StrongBibleSidecarMetadata, 'textRevision' | 'textSha256'>
 ): Promise<void> => {
-  const publication = getStrongBiblePublication(versionId)
-  const database = await openSQLiteDatabase(
-    publication.strong.entry,
-    { useNewConnection: true },
-    directory
-  )
+  const database = await openSQLiteDatabase(entry, { useNewConnection: true }, directory)
   try {
     const snapshot = await readStrongBibleSidecarSnapshot(database)
     const expected = getExpectedSidecar(versionId, snapshot)
@@ -793,20 +791,16 @@ const getExpectedSidecar = (
   versionId: StrongBibleVersionId,
   snapshot: StrongBibleSidecarSnapshot
 ): ExpectedStrongBibleSidecar => {
-  const publication = getStrongBiblePublication(versionId)
+  // The index names its own text and revision; the reader brings only its schema contracts.
   return {
     applicationVersionId: versionId,
-    datasetId: publication.datasetId,
+    datasetId: getStrongDatasetId(versionId) ?? '',
     textRevision: snapshot.metadata.textRevision,
     textSha256: snapshot.metadata.textSha256,
     strongRevision: snapshot.metadata.strongRevision,
-    schemaVersion: publication.strong.schemaVersion,
+    schemaVersion: STRONG_BIBLE_INDEX_MIN_SCHEMA_VERSION,
     ...snapshot.counts,
-    reverseInterlinearSchemaVersion: publication.strong.reverseInterlinearSchemaVersion,
-    reverseInterlinearStepRevision: publication.strong.reverseInterlinearStepRevision,
-    reverseInterlinearStepTextSha256: publication.strong.reverseInterlinearStepTextSha256,
-    reverseInterlinearCompatibleRuntimeSha256s:
-      publication.strong.reverseInterlinearCompatibleRuntimeSha256s,
+    reverseInterlinearSchemaVersion: REVERSE_INTERLINEAR_MIN_SCHEMA_VERSION,
   }
 }
 

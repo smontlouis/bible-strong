@@ -6,7 +6,7 @@ import { describe, it } from 'node:test'
 import { Effect } from 'effect'
 
 import {
-  BHG_INTERLINEAR_PUBLICATION_CATALOG,
+  BHG_INTERLINEAR_IDENTITY,
   getInterlinearBiblePublicationLanguages,
 } from '@bible-strong/resource-catalog/interlinear-bible'
 import { createIsolatedPostgres } from '../../database/__tests__/isolatedPostgresTestSupport'
@@ -71,33 +71,25 @@ describe('Complete BHG interlinear publications', { skip: !runIntegration }, () 
         const manifest: InterlinearBiblePublicationBundleManifest = validated.manifest
         const canonical: CanonicalInterlinearBiblePublication = validated.canonical
         const language = manifest.identity.language
-        const catalogArtifact = BHG_INTERLINEAR_PUBLICATION_CATALOG.indexes[language]
         importedLanguages.push(language)
 
-        assert.equal(
-          manifest.identity.versionId,
-          BHG_INTERLINEAR_PUBLICATION_CATALOG.applicationVersionId
-        )
-        assert.equal(manifest.identity.datasetId, BHG_INTERLINEAR_PUBLICATION_CATALOG.datasetId)
-        assert.equal(
-          manifest.provenance.sourceVersion,
-          BHG_INTERLINEAR_PUBLICATION_CATALOG.sourceVersion
-        )
-        assert.equal(manifest.rights.attribution, BHG_INTERLINEAR_PUBLICATION_CATALOG.attribution)
-        assert.equal(manifest.rights.termsReference, BHG_INTERLINEAR_PUBLICATION_CATALOG.license)
+        assert.equal(manifest.identity.versionId, BHG_INTERLINEAR_IDENTITY.applicationVersionId)
+        assert.equal(manifest.identity.datasetId, BHG_INTERLINEAR_IDENTITY.datasetId)
+        assert.equal(manifest.provenance.sourceVersion, BHG_INTERLINEAR_IDENTITY.sourceVersion)
+        assert.equal(manifest.rights.attribution, BHG_INTERLINEAR_IDENTITY.attribution)
+        assert.equal(manifest.rights.termsReference, BHG_INTERLINEAR_IDENTITY.license)
         assert.equal(manifest.rights.online, true)
         assert.equal(manifest.rights.offline, true)
         assert.equal(manifest.deliveryCapabilities.onlineAccess, true)
         assert.equal(manifest.deliveryCapabilities.offlineDownload, true)
-        assert.equal(manifest.counts.verses, BHG_INTERLINEAR_PUBLICATION_CATALOG.verseCount)
-        assert.equal(manifest.counts.tokens, BHG_INTERLINEAR_PUBLICATION_CATALOG.tokenCount)
-        assert.equal(manifest.counts.segments, BHG_INTERLINEAR_PUBLICATION_CATALOG.segmentCount)
-        assert.equal(manifest.counts.identities, BHG_INTERLINEAR_PUBLICATION_CATALOG.identityCount)
-        assert.equal(manifest.dependencies.bible.revision, catalogArtifact.textRevision)
-        assert.equal(manifest.dependencies.bible.textSha256, catalogArtifact.textSha256)
-        assert.equal(manifest.offlineArtifact.sha256, catalogArtifact.archiveSha256)
-        assert.equal(manifest.offlineArtifact.bytes, catalogArtifact.archiveBytes)
-        assert.equal(manifest.offlineArtifact.contentSha256, catalogArtifact.contentSha256)
+        // No revision, hash or count is pinned here: whichever BHG the bundles carry, each
+        // index must be built for the text of the BHG bundle beside it (ADR-0079). The catalog
+        // that publishes them is checked against the same bundles by the publication gate.
+        assert.equal(manifest.counts.verses, canonical.verses.length)
+        assert.equal(manifest.counts.tokens, canonical.tokens.length)
+        assert.equal(manifest.dependencies.bible.revision, bhgPublication.manifest.revision)
+        assert.equal(manifest.dependencies.bible.revision, bhgPublication.canonical.textRevision)
+        assert.equal(manifest.dependencies.bible.textSha256, bhgPublication.canonical.textSha256)
 
         const imported = await Effect.runPromise(
           importPublicationBundle(bundlePath, isolated.database, {

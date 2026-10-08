@@ -15,6 +15,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   buildMobileResourceCatalog,
+  findInterlinearTextMismatches,
   type MobileResourceInventoryEntry
 } from "./packageMobileResourceCatalog.js";
 import { promisify } from "node:util";
@@ -120,43 +121,120 @@ export async function uploadR2Source(options: {
   return r2Location(options.bucket, key);
 }
 
+interface TextIdentity {
+  textRevision: string;
+  textSha256: string;
+}
+
 interface BuiltArchive {
   catalogId: string;
+  kind: "bible-text" | "strong-bible-index" | "interlinear-index";
+  versionId: string;
   archivePath: string;
   entry: string;
   sha256: string;
+  /** Text the bundle carries (a Bible) or requires (an interlinear index). */
+  text?: TextIdentity;
 }
 
+interface BundleManifest {
+  identity: { kind: string; versionId: string; language?: string };
+  revision: string;
+  canonical: { path: string };
+  offlineArtifact: { path: string; entry: string; sha256: string };
+  dependencies?: { bible?: { revision?: string; textSha256?: string } };
+}
+
+const SHA256 = /^[a-f0-9]{64}$/u;
+
+/**
+ * The text a bundle declares: its own for a Bible, read from the canonical
+ * publication the manifest revision is taken from; the one it requires for an
+ * interlinear index. Strong indexes are matched against self-describing
+ * Bibles and declare nothing in the catalog.
+ */
+async function readBundleText(
+  bundleDir: string,
+  manifest: BundleManifest
+): Promise<TextIdentity | undefined> {
+  if (manifest.identity.kind === "interlinear-index") {
+    const bible = manifest.dependencies?.bible;
+    if (!bible?.revision || !SHA256.test(bible.textSha256 ?? "")) {
+      throw new Error(`r2-bundle-text-dependency-invalid:${bundleDir}`);
+    }
+    return { textRevision: bible.revision, textSha256: bible.textSha256! };
+  }
+  if (manifest.identity.kind !== "bible-text") return undefined;
+  const canonical = JSON.parse(
+    await readFile(path.join(bundleDir, manifest.canonical.path), "utf8")
+  ) as { textRevision?: string; textSha256?: string };
+  if (
+    canonical.textRevision !== manifest.revision ||
+    !SHA256.test(canonical.textSha256 ?? "")
+  ) {
+    throw new Error(`r2-bundle-text-identity-invalid:${bundleDir}`);
+  }
+  return {
+    textRevision: canonical.textRevision,
+    textSha256: canonical.textSha256!
+  };
+}
+
+const catalogIdOf = (identity: BundleManifest["identity"]) =>
+  identity.kind === "strong-bible-index"
+    ? `bible-strong:${identity.versionId}`
+    : identity.kind === "bible-text"
+      ? `bible:${identity.versionId}`
+      : identity.kind === "interlinear-index" && identity.language
+        ? `bible-interlinear:${identity.versionId}:${identity.language}`
+        : undefined;
+
 /** Offline archives of the publication bundles found in the given folders. */
-async function findBuiltArchives(
+export async function findBuiltArchives(
   bundleRoots: readonly string[]
 ): Promise<BuiltArchive[]> {
   const archives: BuiltArchive[] = [];
   for (const root of bundleRoots) {
     for (const name of await readdir(root)) {
-      const manifestPath = path.join(root, name, "manifest.json");
+      const bundleDir = path.join(root, name);
+      const manifestPath = path.join(bundleDir, "manifest.json");
       if (!existsSync(manifestPath)) continue;
-      const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
-        identity: { kind: string; versionId: string };
-        offlineArtifact: { path: string; entry: string; sha256: string };
-      };
-      const prefix =
-        manifest.identity.kind === "strong-bible-index"
-          ? "bible-strong"
-          : manifest.identity.kind === "bible-text"
-            ? "bible"
-            : undefined;
-      if (!prefix) continue;
+      const manifest = JSON.parse(
+        await readFile(manifestPath, "utf8")
+      ) as BundleManifest;
+      const catalogId = catalogIdOf(manifest.identity);
+      if (!catalogId) continue;
+      const text = await readBundleText(bundleDir, manifest);
       archives.push({
-        catalogId: `${prefix}:${manifest.identity.versionId}`,
-        archivePath: path.join(root, name, manifest.offlineArtifact.path),
+        catalogId,
+        kind: manifest.identity.kind as BuiltArchive["kind"],
+        versionId: manifest.identity.versionId,
+        archivePath: path.join(bundleDir, manifest.offlineArtifact.path),
         entry: manifest.offlineArtifact.entry,
-        sha256: manifest.offlineArtifact.sha256
+        sha256: manifest.offlineArtifact.sha256,
+        ...(text ? { text } : {})
       });
     }
   }
   return archives;
 }
+
+/**
+ * The text identity an archive brings to the catalog: every interlinear index
+ * declares the text it was built for, and so does the Bible those indexes are
+ * listed for. Other Bibles are self-describing or carry no index (ADR-0079).
+ */
+const catalogTextOf = (
+  archive: BuiltArchive,
+  catalogIds: readonly string[]
+): TextIdentity | undefined =>
+  archive.kind === "interlinear-index" ||
+  (archive.kind === "bible-text" &&
+    catalogIds.some((id) =>
+      id.startsWith(`bible-interlinear:${archive.versionId}:`)
+    ))
+    ? archive.text
+    : undefined;
 
 const readJson = async <Value>(filePath: string) =>
   JSON.parse(await readFile(filePath, "utf8")) as Value;
@@ -211,24 +289,36 @@ export async function patchMobileCatalog(options: {
     resourceCount: number;
     resources: Record<
       string,
-      { archiveSha256: string } & Record<string, unknown>
+      {
+        archiveSha256: string;
+        textRevision?: string;
+        textSha256?: string;
+      } & Record<string, unknown>
     >;
   }>(catalogPath);
   if (options.generatedAt <= catalog.generatedAt) {
     throw new Error("mobile-catalog-patch-generated-at-not-newer");
   }
+  const catalogIds = Object.keys(catalog.resources);
   const changed = (await findBuiltArchives(options.bundleRoots)).filter(
     (archive) =>
       catalog.resources[archive.catalogId]?.archiveSha256 !== archive.sha256
   );
   if (changed.length === 0) return [];
+  // The bundle, not the inventory, says which text a rebuilt archive carries
+  // or requires: the inventory still describes the archive it replaces.
   const inventory = (
     await readJson<MobileResourceInventoryEntry[]>(
       path.join(options.root, "config/mobile-resource-inventory.json")
     )
-  ).filter((entry) =>
-    changed.some((archive) => archive.catalogId === entry.id)
-  );
+  ).flatMap((entry) => {
+    const archive = changed.find((item) => item.catalogId === entry.id);
+    if (!archive) return [];
+    const resource: MobileResourceInventoryEntry = { ...entry };
+    delete resource.textRevision;
+    delete resource.textSha256;
+    return [{ ...resource, ...catalogTextOf(archive, catalogIds) }];
+  });
   const workDir = await mkdtemp(path.join(tmpdir(), "mobile-catalog-patch-"));
   try {
     const result = await buildMobileResourceCatalog({
@@ -256,6 +346,14 @@ export async function patchMobileCatalog(options: {
         );
       }
       catalog.resources[archive.catalogId] = entry;
+    }
+    // A text published without the indexes rebuilt for it, or an index without
+    // its text, would leave every reader with a pair it must not use.
+    const mismatches = findInterlinearTextMismatches(catalog.resources);
+    if (mismatches.length > 0) {
+      throw new Error(
+        `mobile-catalog-interlinear-text-mismatch:${mismatches.join(",")}`
+      );
     }
     catalog.generatedAt = options.generatedAt;
     await writeFile(catalogPath, `${JSON.stringify(catalog, null, 2)}\n`);
@@ -288,8 +386,11 @@ export async function adoptPublishedArchives(options: {
       id: string;
       artifactUrl: string;
       sources: Array<Record<string, string>>;
+      textRevision?: string;
+      textSha256?: string;
     }>
   >(inventoryPath);
+  const inventoryIds = inventory.map((entry) => entry.id);
   const requiredIds = await readJson<{
     bundleRoles?: Record<string, string[]>;
   }>(requiredIdsPath);
@@ -311,11 +412,22 @@ export async function adoptPublishedArchives(options: {
         `revisions/${archive.sha256}/${stableKey}`
       );
       const current = resource.sources;
-      if (current.length === 1 && current[0]!.sourceUrl === location) continue;
+      const text = catalogTextOf(archive, inventoryIds);
+      if (
+        current.length === 1 &&
+        current[0]!.sourceUrl === location &&
+        resource.textRevision === text?.textRevision &&
+        resource.textSha256 === text?.textSha256
+      )
+        continue;
       await downloadR2Object(location, path.join(workDir, "object"));
       resource.sources = [
         { role: "canonical", sourceUrl: location, entry: archive.entry }
       ];
+      // The inventory keeps reproducing the catalog, text declarations included.
+      delete resource.textRevision;
+      delete resource.textSha256;
+      Object.assign(resource, text);
       delete requiredIds.bundleRoles?.[archive.catalogId];
       adopted.push(archive.catalogId);
     }

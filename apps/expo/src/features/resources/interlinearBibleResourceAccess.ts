@@ -8,7 +8,7 @@ import {
   type InterlinearToken,
 } from '~helpers/interlinearBibleSidecar'
 import { getRegisteredInterlinearAvailability } from './resourceAvailability'
-import type { BibleChapterAdapter } from './bibleChapterSource'
+import type { BibleChapterAdapter, BibleChapterSourceResult } from './bibleChapterSource'
 import { InterlinearBibleChapterDto, InterlinearBibleCoverageDto } from './interlinearBibleContract'
 import {
   mapLocalResourceError,
@@ -18,18 +18,25 @@ import {
 } from './resourceAccessError'
 import { warnAboutRecoverableResourceIntegrity } from './recoverableIntegrity'
 
+export { isInterlinearTextMatch, resolveInterlinearBaseText } from './interlinearTextPairing'
+
+/** Tokens of one chapter, with the text they were built for: they are laid on no other text. */
 export type InterlinearChapterTokensPayload = {
   tokensByVerse: InterlinearChapterTokens
   textRevision?: string
   textSha256?: string
 }
 
+export type InterlinearChapterRequest = { book: number; chapter: number }
+
 export interface InterlinearBibleResourceAdapter {
   getAvailability: (locale: ResourceLanguage) => Promise<InterlinearSidecarAvailability>
   loadChapterTokens: (
     locale: ResourceLanguage,
-    request: { book: number; chapter: number }
+    request: InterlinearChapterRequest
   ) => Promise<InterlinearChapterTokensPayload>
+  /** The BHG chapter as read online, for tokens built for another text than the reader holds. */
+  loadBaseChapter?: (request: InterlinearChapterRequest) => Promise<BibleChapterSourceResult>
 }
 
 export type InterlinearBibleResourceAccess = InterlinearBibleResourceAdapter
@@ -43,7 +50,12 @@ export const localInterlinearBibleResourceAdapter: InterlinearBibleResourceAdapt
     ])
     return {
       tokensByVerse,
-      ...(availability.status === 'available' ? { textRevision: availability.textRevision } : {}),
+      ...(availability.status === 'available'
+        ? {
+            textRevision: availability.textRevision,
+            ...(availability.textSha256 ? { textSha256: availability.textSha256 } : {}),
+          }
+        : {}),
     }
   },
 }
@@ -53,6 +65,8 @@ type HttpInterlinearBibleResourceAdapterOptions = {
   fetcher?: typeof fetch
   isOnline: () => Promise<boolean>
   bibleChapterAdapter: BibleChapterAdapter
+  /** Reads BHG online whatever is installed; defaults to `bibleChapterAdapter`. */
+  baseChapterAdapter?: Pick<BibleChapterAdapter, 'loadChapter'>
   timeoutMs?: number
   availabilityStaleTimeMs?: number
   now?: () => number
@@ -98,6 +112,7 @@ export const createHttpInterlinearBibleResourceAdapter = ({
   fetcher = fetch,
   isOnline,
   bibleChapterAdapter,
+  baseChapterAdapter = bibleChapterAdapter,
   timeoutMs = 10_000,
   availabilityStaleTimeMs = INTERLINEAR_BIBLE_AVAILABILITY_STALE_TIME_MS,
   now = Date.now,
@@ -193,42 +208,19 @@ export const createHttpInterlinearBibleResourceAdapter = ({
 
   return {
     getAvailability,
+    // The reader pairs these tokens with their text (`resolveInterlinearBaseText`): only it
+    // knows which text it is about to lay them on.
     async loadChapterTokens(locale, request) {
-      const [chapter, bibleChapter] = await Promise.all([
-        get(
-          `${resourcePath(locale)}/books/${request.book}/chapters/${request.chapter}`,
-          InterlinearBibleChapterDto
-        ),
-        bibleChapterAdapter.loadChapter('BHG', request.book, request.chapter),
-      ])
+      const chapter = await get(
+        `${resourcePath(locale)}/books/${request.book}/chapters/${request.chapter}`,
+        InterlinearBibleChapterDto
+      )
       if (
         chapter.resource.language !== locale ||
         chapter.book !== request.book ||
         chapter.chapter !== request.chapter
       ) {
         throw new ResourceAccessError('INTEGRITY_FAILURE')
-      }
-      if (bibleChapter.status !== 'available') {
-        throw resourceAccessErrorFromBibleChapterUnavailable(
-          bibleChapter.reason,
-          bibleChapter.recoveries,
-          bibleChapter.diagnostics
-        )
-      }
-      if (
-        bibleChapter.textRevision !== chapter.resource.textRevision ||
-        bibleChapter.textSha256 !== chapter.resource.textSha256 ||
-        bibleChapter.verses.some(
-          verse => verse.TextRevision && verse.TextRevision !== chapter.resource.textRevision
-        )
-      ) {
-        warnAboutRecoverableResourceIntegrity('interlinear-bible-text-revision-mismatch', {
-          locale,
-          book: request.book,
-          chapter: request.chapter,
-          bibleTextRevision: bibleChapter.textRevision,
-          interlinearTextRevision: chapter.resource.textRevision,
-        })
       }
       return {
         tokensByVerse: Object.fromEntries(
@@ -238,6 +230,8 @@ export const createHttpInterlinearBibleResourceAdapter = ({
         textSha256: chapter.resource.textSha256,
       }
     },
+    loadBaseChapter: request =>
+      baseChapterAdapter.loadChapter('BHG', request.book, request.chapter),
   }
 }
 
@@ -305,6 +299,9 @@ export const createHybridInterlinearBibleResourceAdapter = ({
         throw error
       }
     },
+    ...(online.loadBaseChapter
+      ? { loadBaseChapter: request => online.loadBaseChapter!(request) }
+      : {}),
   }
 }
 

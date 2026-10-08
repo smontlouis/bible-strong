@@ -1,4 +1,4 @@
-import { BHG_INTERLINEAR_PUBLICATION_CATALOG } from '@bible-strong/resource-catalog/interlinear-bible'
+import { BHG_INTERLINEAR_IDENTITY } from '@bible-strong/resource-catalog/interlinear-bible'
 import { isStrongBibleVersionId } from '@bible-strong/resource-catalog/strong-bibles'
 import {
   DEFAULT_RESOURCE_LANGUAGE,
@@ -17,7 +17,7 @@ export const BIBLE_PRESENTATIONS = ['text', 'strong', 'reverse-interlinear', 'in
 export type BiblePresentation = (typeof BIBLE_PRESENTATIONS)[number]
 
 /** The original-language Bible every interlinear presentation is aligned on. */
-export const INTERLINEAR_VERSION_ID: string = BHG_INTERLINEAR_PUBLICATION_CATALOG.applicationVersionId
+export const INTERLINEAR_VERSION_ID: string = BHG_INTERLINEAR_IDENTITY.applicationVersionId
 
 export type BiblePassage = { startVerse: number; endVerse?: number }
 

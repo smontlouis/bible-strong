@@ -23,6 +23,8 @@
       "installedBytes": 55119872,
       "peakInstallationBytes": 89775344,
       "strategy": "archive-extract",
+      "textRevision": "bhg-803c482ed06005693547",
+      "textSha256": "803c482ed06005693547f9ea04a2dcbec4718c1d97ab0c531d60600e4c3a9d8f",
       "encryptedArchive": {
         "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-step-interlinear-en.sqlite.encrypted.zip?sha256=b504db86bca7a96b3753e775b5380078a8a217b20232bd5e9ac41f5ef9e5cf93",
         "file": "bibles/bible-step-interlinear-en.sqlite.encrypted.zip",
@@ -50,6 +52,8 @@
       "installedBytes": 54296576,
       "peakInstallationBytes": 88358116,
       "strategy": "archive-extract",
+      "textRevision": "bhg-803c482ed06005693547",
+      "textSha256": "803c482ed06005693547f9ea04a2dcbec4718c1d97ab0c531d60600e4c3a9d8f",
       "encryptedArchive": {
         "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-step-interlinear-fr.sqlite.encrypted.zip?sha256=b580dbed617e666923cbc6f4cf5da54d3fcf9b89b1ada02ff3b463a0e140b8ab",
         "file": "bibles/bible-step-interlinear-fr.sqlite.encrypted.zip",
@@ -536,6 +540,8 @@
       "installedBytes": 9131747,
       "peakInstallationBytes": 24104710,
       "strategy": "sqlite-import",
+      "textRevision": "bhg-803c482ed06005693547",
+      "textSha256": "803c482ed06005693547f9ea04a2dcbec4718c1d97ab0c531d60600e4c3a9d8f",
       "encryptedArchive": {
         "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-step.json.encrypted.zip?sha256=4134a28abfe274a435a782ff6dc8a9f8ef294ca558e8746848249a3bb16305eb",
         "file": "bibles/bible-step.json.encrypted.zip",

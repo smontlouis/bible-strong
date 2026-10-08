@@ -54,6 +54,13 @@ const isCatalogFileEntry = (value: unknown): value is MobileResourceCatalogFileE
   )
 }
 
+/** A text declaration is optional, but never partial or malformed (see ADR-0079). */
+const hasValidTextDeclaration = (entry: Partial<MobileResourceCatalogEntry>): boolean =>
+  (entry.textRevision === undefined && entry.textSha256 === undefined) ||
+  (typeof entry.textRevision === 'string' &&
+    entry.textRevision.length > 0 &&
+    isSha256(entry.textSha256))
+
 const isCatalogEntry = (value: unknown): value is MobileResourceCatalogEntry => {
   if (!value || typeof value !== 'object') return false
   const entry = value as Partial<MobileResourceCatalogEntry>
@@ -88,6 +95,7 @@ const isCatalogEntry = (value: unknown): value is MobileResourceCatalogEntry => 
           entry.id === 'strong-lexicon:simple-fr' ||
           entry.id === 'strong-lexicon:simple-en' ||
           (typeof entry.coreRevision === 'string' && entry.coreRevision.length > 0)))) &&
+    hasValidTextDeclaration(entry) &&
     isPositiveByteCount(entry.installedBytes) &&
     isPositiveByteCount(entry.peakInstallationBytes) &&
     (entry.strategy === 'sqlite-import' || entry.strategy === 'archive-extract')

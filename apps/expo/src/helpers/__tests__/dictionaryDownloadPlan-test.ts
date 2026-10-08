@@ -27,8 +27,11 @@ jest.mock('~helpers/strongBiblePublications', () => ({
   isStrongCapableBibleVersion: () => false,
 }))
 jest.mock('~helpers/interlinearBiblePublications', () => ({
-  BHG_INTERLINEAR_PUBLICATION: {},
+  getInterlinearBiblePublication: jest.fn(),
   isInterlinearCapableBibleVersion: () => false,
+}))
+jest.mock('~helpers/resourcePublication', () => ({
+  resourcePublicationStore: { read: jest.fn() },
 }))
 jest.mock('~helpers/strongLexiconDownloadItems', () => ({
   createStrongLexiconModuleDownloadItem: jest.fn(),

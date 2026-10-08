@@ -777,6 +777,23 @@ export function getBibleVersionMetadata(version: string): Promise<BibleVersionMe
 }
 
 /**
+ * Corrects the text identity recorded for an installed version, leaving its verses untouched.
+ * Used when the record names another text than the installed archive carries.
+ */
+export function setBibleVersionTextIdentity(
+  version: string,
+  identity: { textRevision: string; textSha256: string }
+): Promise<void> {
+  return withDbError(`setBibleVersionTextIdentity(${version})`, async () => {
+    const d = await getDb()
+    await d.runAsync(
+      'UPDATE versions_meta SET text_revision = ?, text_sha256 = ? WHERE version = ?',
+      [identity.textRevision, identity.textSha256, version]
+    )
+  })
+}
+
+/**
  * Batch-insert an entire Bible version from parsed JSON data.
  *
  * Expected JSON shape:

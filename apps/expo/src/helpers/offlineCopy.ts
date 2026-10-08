@@ -13,6 +13,7 @@ import { isStrongCapableBibleVersion } from './strongBiblePublications'
 import type {
   InterlinearBiblePublication,
   InterlinearPublicationArtifact,
+  InterlinearTextIdentity,
 } from './interlinearBiblePublications'
 import type {
   StrongLexiconModuleId,
@@ -156,6 +157,10 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
         ['bible-version-coverage', identity.versionId],
         ['downloaded-bible-version-ids'],
         ['strong-mode-availability', identity.versionId],
+        // An interlinear index is matched against the installed BHG text.
+        ...(identity.versionId === 'BHG'
+          ? [['interlinear-index-availability'], ['interlinear-mode-availability']]
+          : []),
         publicationKey,
       ]
     case 'strong-bible-index':
@@ -247,7 +252,8 @@ export type BibleDownloadItem = DownloadItemCommon & {
     redWords?: string
   }
   canonicalArtifact?: StrongBiblePublication['canonical']
-  archiveArtifact?: InterlinearPublicationArtifact
+  /** Text the catalog declares for the archive, for a Bible whose file carries no revision. */
+  declaredTextIdentity?: InterlinearTextIdentity
 }
 
 export type StrongBibleIndexDownloadItem = DownloadItemCommon & {

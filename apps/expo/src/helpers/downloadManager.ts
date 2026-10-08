@@ -16,8 +16,11 @@ import { getDownloadQueueDecision } from '~helpers/downloadQueueScheduling'
 import { reconcileResourceInstallationJournal } from '~helpers/resourceInstallationJournal'
 import { installManagedResource } from '~helpers/managedResourceInstallation'
 import { refreshPersistedDownloadItem } from '~helpers/persistedDownloadItem'
+import { completeInterlinearDownloadPlan } from '~helpers/downloadItemFactory'
 import { appLogger } from '~helpers/agentObservability'
 import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
+import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
+import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
 
 const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
@@ -47,8 +50,10 @@ class DownloadManager {
   // -----------------------------------------------------------------------
 
   /** Add items to the queue. Deduplicates by id. Starts processing. */
-  enqueue(items: DownloadItem[]): void {
+  enqueue(requestedItems: DownloadItem[]): void {
     const states = new Map(this.jotaiStore.get(downloadItemStatesAtom))
+    // Whatever asked for it, BHG and its indexes move to the catalog revision together.
+    const items = completeInterlinearDownloadPlan(requestedItems)
 
     for (const item of items) {
       // Skip if already queued/downloading/inserting
@@ -273,6 +278,22 @@ class DownloadManager {
       this.updateItemStatus(item.id, 'completed')
 
       offlineResourceRegistry.markInstalled(item.id)
+      // An index is matched against the installed text: a new text asks for a new verdict.
+      if (item.type === 'bible' && isInterlinearCapableBibleVersion(item.versionId)) {
+        for (const language of ['fr', 'en'] as const) {
+          offlineResourceRegistry.invalidate({
+            kind: 'interlinear-index',
+            versionId: item.versionId,
+            language,
+          })
+        }
+      }
+      if (item.type === 'bible' && isStrongCapableBibleVersion(item.versionId)) {
+        offlineResourceRegistry.invalidate({
+          kind: 'strong-bible-index',
+          versionId: item.versionId,
+        })
+      }
 
       // Signal to BibleViewer instances to reload verses (a version they
       // were trying to display may now be available).

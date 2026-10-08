@@ -14,7 +14,7 @@ import {
   type DownloadResourceArtifactResult,
 } from '~helpers/downloadResourceArtifact'
 import type { StrongBiblePublication } from '~helpers/strongBiblePublications'
-import type { InterlinearPublicationArtifact } from '~helpers/interlinearBiblePublications'
+import type { InterlinearTextIdentity } from '~helpers/interlinearBiblePublications'
 import { planWordAnnotationRealignment } from '~helpers/wordAnnotationRealignment'
 import { realignWordAnnotationsAction } from '~redux/modules/user'
 import { persistor, store } from '~redux/store'
@@ -49,7 +49,11 @@ export interface DownloadAndInsertOptions extends InsertBibleOptions {
   /** Return the DownloadResumable so the caller can pause/cancel it */
   onResumable?: (resumable: FileSystem.DownloadResumable | null) => void
   canonicalArtifact?: StrongBiblePublication['canonical']
-  archiveArtifact?: InterlinearPublicationArtifact
+  /**
+   * Text the catalog declares for this archive. It names the installed text only when the file
+   * declares none itself: a canonical Bible is always its own authority.
+   */
+  declaredTextIdentity?: InterlinearTextIdentity
   archiveEntry?: string
   archiveEntries?: BibleArchiveEntries
   expectedArchiveSha256: string
@@ -73,8 +77,9 @@ export async function downloadAndInsertBible(
   // Ensure DB is open
   await openBiblesDb()
 
-  const archiveArtifact = opts.canonicalArtifact ?? opts.archiveArtifact
-  const archiveEntry = archiveArtifact?.entry ?? opts.archiveEntries?.canonical ?? opts.archiveEntry
+  // The catalog names the entry of the archive it lists; a compiled name is only a last resort.
+  const archiveEntry =
+    opts.archiveEntries?.canonical ?? opts.archiveEntry ?? opts.canonicalArtifact?.entry
   const isArchive = Boolean(archiveEntry)
   const tempPath = `${FileSystem.cacheDirectory}bible-${versionId}-temp.${
     isArchive ? 'zip' : 'json'
@@ -133,16 +138,27 @@ export async function downloadAndInsertBible(
       })),
     })
     const downloadedTextChecksum = await getFileSha256(jsonPath)
-    const revisionPrefix =
-      opts.archiveArtifact?.textRevision.split('-')[0] ?? versionId.toLowerCase()
-    const downloadedTextRevision = `${revisionPrefix}-${downloadedTextChecksum.slice(0, 20)}`
+    const downloadedTextRevision = `${versionId.toLowerCase()}-${downloadedTextChecksum.slice(0, 20)}`
+    // The file says which text it is; a file that does not is named by the catalog entry of its
+    // archive. Nothing compiled into the application names a published revision (ADR-0079).
+    const declaredTextIdentity = isCanonicalBibleJsonData(jsonData)
+      ? undefined
+      : opts.declaredTextIdentity
+    if (
+      isCanonicalBibleJsonData(jsonData) &&
+      opts.declaredTextIdentity &&
+      (opts.declaredTextIdentity.textRevision !== jsonData.textRevision ||
+        opts.declaredTextIdentity.textSha256 !== jsonData.textSha256)
+    ) {
+      appLogger.warn('download', 'bible.catalog_text_identity_mismatch', {
+        versionId,
+        catalogTextRevision: opts.declaredTextIdentity.textRevision,
+        fileTextRevision: jsonData.textRevision,
+      })
+    }
     const targetTextRevision = isCanonicalBibleJsonData(jsonData)
       ? jsonData.textRevision
-      : opts.archiveArtifact
-        ? opts.archiveArtifact.textRevision
-        : archiveArtifact
-          ? downloadedTextRevision
-          : undefined
+      : declaredTextIdentity?.textRevision
     const realignmentPlan = await buildRealignmentPlan(versionId, jsonData, targetTextRevision)
     if (realignmentPlan && Object.keys(realignmentPlan.updates).length > 0) {
       persistAnnotationMigrationJournal({
@@ -171,13 +187,13 @@ export async function downloadAndInsertBible(
                 resourceGeneration: downloadResult.publication.revision,
               },
             }
-          : opts.archiveArtifact
+          : declaredTextIdentity
             ? {
                 publicationMetadata: {
-                  textRevision: opts.archiveArtifact.textRevision,
-                  textSha256: opts.archiveArtifact.textSha256,
+                  textRevision: declaredTextIdentity.textRevision,
+                  textSha256: declaredTextIdentity.textSha256,
                   sourceSha256: downloadedTextChecksum,
-                  schemaVersion: opts.archiveArtifact.schemaVersion,
+                  schemaVersion: 0,
                   verseCount: importableVerseCount,
                   resourceGeneration: downloadResult.publication.revision,
                 },

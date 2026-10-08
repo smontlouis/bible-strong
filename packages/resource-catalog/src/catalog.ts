@@ -30,6 +30,12 @@ export type MobileResourceCatalogEntry = {
   contentBytes: number
   resourceRevision?: string
   coreRevision?: string
+  /**
+   * Text the archive carries (a Bible that has interlinear indexes) or was built for (one of
+   * those indexes). Additive: applications released before these fields ignore them.
+   */
+  textRevision?: string
+  textSha256?: string
   installedBytes: number
   peakInstallationBytes: number
   strategy: MobileResourceInstallationStrategy

@@ -4,15 +4,15 @@ import type {
   InterlinearToken,
 } from '@bible-strong/resource-domain/interlinear-bible'
 
-import { getBibleVersionMetadata } from './biblesDb'
 import { getSharedSqliteDirPath, type ResourceLanguage } from './databaseTypes'
 import { downloadResourceArtifact } from './downloadResourceArtifact'
 import { verifyFileSha256 } from './fileIntegrity'
 import { unzipOfflineArchive } from './offlineArchiveSource'
-import {
-  BHG_INTERLINEAR_PUBLICATION,
-  type InterlinearBibleVersionId,
-  type InterlinearPublicationArtifact,
+import { getInstalledInterlinearBaseText } from './interlinearBaseText'
+import { BHG_INTERLINEAR_IDENTITY } from './interlinearBiblePublicationCatalog'
+import type {
+  InterlinearBibleVersionId,
+  InterlinearPublicationArtifact,
 } from './interlinearBiblePublications'
 import {
   classifyInterlinearBibleSidecarSnapshot,
@@ -72,13 +72,17 @@ export interface InterlinearStrongOccurrencePage {
   nextCursor?: string
 }
 
+/**
+ * `incompatible` covers an index this reader cannot use and a sound index built for another
+ * text than the installed one; the latter names both revisions. Neither is ever read.
+ */
 export type InterlinearSidecarAvailability =
   | { status: 'base-missing' }
   | { status: 'base-incompatible' }
   | { status: 'missing' }
-  | { status: 'incompatible' }
+  | { status: 'incompatible'; baseTextRevision?: string; sidecarTextRevision?: string }
   | { status: 'corrupt'; reason: string }
-  | { status: 'available'; locale: ResourceLanguage; textRevision: string }
+  | { status: 'available'; locale: ResourceLanguage; textRevision: string; textSha256?: string }
 
 export interface InterlinearSidecarInstallCallbacks {
   onDownloadProgress?: FileSystem.DownloadProgressCallback
@@ -97,15 +101,20 @@ export const getInterlinearSidecarPath = (locale: ResourceLanguage) =>
 export const getInterlinearSidecarAvailability = async (
   locale: ResourceLanguage
 ): Promise<InterlinearSidecarAvailability> => {
-  const baseMetadata = await getBibleVersionMetadata('BHG')
-  if (!baseMetadata) return { status: 'base-missing' }
+  const base = await getInstalledInterlinearBaseText()
+  if (!base) return { status: 'base-missing' }
   const validated = validatedSidecars.get(locale)
   if (
     validated &&
-    validated.textRevision === baseMetadata.textRevision &&
-    validated.textSha256 === baseMetadata.textSha256
+    validated.textRevision === base.textRevision &&
+    validated.textSha256 === base.textSha256
   ) {
-    return { status: 'available', locale, textRevision: validated.textRevision }
+    return {
+      status: 'available',
+      locale,
+      textRevision: validated.textRevision,
+      textSha256: validated.textSha256,
+    }
   }
 
   try {
@@ -115,22 +124,20 @@ export const getInterlinearSidecarAvailability = async (
         readTableColumns(database),
         readRequiredIndexes(database),
       ])
-      const artifact = BHG_INTERLINEAR_PUBLICATION.indexes[locale]
-      if (
-        classifyInterlinearBibleSidecarSnapshot(
-          { metadata, tableColumns, indexes },
-          {
-            schemaVersion: artifact.schemaVersion,
-            datasetId: BHG_INTERLINEAR_PUBLICATION.datasetId,
-            locale,
-            textRevision: artifact.textRevision,
-            textSha256: artifact.textSha256,
-          },
-          baseMetadata
-        ) !== 'compatible'
-      ) {
+      const compatibility = classifyInterlinearBibleSidecarSnapshot(
+        { metadata, tableColumns, indexes },
+        { datasetId: BHG_INTERLINEAR_IDENTITY.datasetId, locale },
+        base
+      )
+      if (compatibility !== 'compatible') {
         validatedSidecars.delete(locale)
-        return { status: 'incompatible' }
+        return compatibility === 'text-mismatch'
+          ? {
+              status: 'incompatible',
+              ...(base.textRevision ? { baseTextRevision: base.textRevision } : {}),
+              sidecarTextRevision: metadata.textRevision,
+            }
+          : { status: 'incompatible' }
       }
       const integrity = await database.getFirstAsync<{ integrity_check: string }>(
         'PRAGMA integrity_check'
@@ -150,6 +157,7 @@ export const getInterlinearSidecarAvailability = async (
         status: 'available',
         locale,
         textRevision: metadata.textRevision,
+        textSha256: metadata.textSha256,
       }
     })
   } catch (error) {
@@ -165,8 +173,8 @@ export const installInterlinearSidecar = async (
   datasetId: 'STEP',
   callbacks: InterlinearSidecarInstallCallbacks = {}
 ) => {
-  const baseMetadata = await getBibleVersionMetadata('BHG')
-  if (!baseMetadata) throw new Error('INTERLINEAR_BASE_MISSING:BHG')
+  const base = await getInstalledInterlinearBaseText()
+  if (!base) throw new Error('INTERLINEAR_BASE_MISSING:BHG')
   const archivePath = `${FileSystem.cacheDirectory}bhg-interlinear-${locale}.zip`
   const extractionDirectory = `${FileSystem.cacheDirectory}bhg-interlinear-${locale}/`
   const extractedPath = `${extractionDirectory}${artifact.entry}`
@@ -205,21 +213,20 @@ export const installInterlinearSidecar = async (
         readRequiredIndexes(candidate),
         candidate.getFirstAsync<{ integrity_check: string }>('PRAGMA integrity_check'),
       ])
-      if (
-        integrity?.integrity_check !== 'ok' ||
-        classifyInterlinearBibleSidecarSnapshot(
-          { metadata, tableColumns, indexes },
-          {
-            schemaVersion: artifact.schemaVersion,
-            datasetId,
-            locale,
-            textRevision: artifact.textRevision,
-            textSha256: artifact.textSha256,
-          },
-          baseMetadata
-        ) !== 'compatible'
-      ) {
+      const compatibility = classifyInterlinearBibleSidecarSnapshot(
+        { metadata, tableColumns, indexes },
+        { datasetId, locale },
+        base
+      )
+      if (integrity?.integrity_check !== 'ok' || compatibility === 'unsupported') {
         throw new Error('INTERLINEAR_SIDECAR_VALIDATION_FAILED')
+      }
+      // The index is sound but was built for another text than the installed one: installing
+      // it would only replace a usable index, or none, with one that cannot be read.
+      if (compatibility === 'text-mismatch') {
+        throw new Error(
+          `INTERLINEAR_SIDECAR_TEXT_MISMATCH:${locale}:${metadata.textRevision}:${base.textRevision ?? ''}`
+        )
       }
     } finally {
       await candidate.closeAsync()

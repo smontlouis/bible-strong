@@ -10,10 +10,25 @@ import {
 } from './developmentArtifacts'
 
 const main = async () => {
-  const bundlePaths = process.env.RESOURCE_PUBLICATION_BUNDLES_ROOT
-    ? (await readdir(process.env.RESOURCE_PUBLICATION_BUNDLES_ROOT, { withFileTypes: true }))
-        .filter(entry => entry.isDirectory())
-        .map(entry => path.join(process.env.RESOURCE_PUBLICATION_BUNDLES_ROOT!, entry.name))
+  // Like `dev`, several roots may be given at once (a Bible and the indexes built for it are
+  // packaged in separate folders): RESOURCE_PUBLICATION_ROOTS, separated like PATH.
+  const roots = [
+    ...(process.env.RESOURCE_PUBLICATION_ROOTS?.split(path.delimiter) ?? []),
+    process.env.RESOURCE_PUBLICATION_BUNDLES_ROOT ?? '',
+  ]
+    .map(root => root.trim())
+    .filter(Boolean)
+  const bundlePaths = roots.length
+    ? (
+        await Promise.all(
+          roots.map(async root =>
+            (await readdir(root, { withFileTypes: true }))
+              .filter(entry => entry.isDirectory())
+              .map(entry => path.join(root, entry.name))
+          )
+        )
+      )
+        .flat()
         .sort()
     : process.env.RESOURCE_PUBLICATION_BUNDLE
       ? [process.env.RESOURCE_PUBLICATION_BUNDLE]
