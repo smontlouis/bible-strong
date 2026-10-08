@@ -152,12 +152,31 @@ export const RESOURCE_API_CACHE_REVISION = (request: Request) =>
 /**
  * The namespace a response is cached under: the revision of the content it reads, and the
  * Worker version that wrote it. A deployment that changes how a route answers therefore
- * never serves what an older version cached, which is what lets a response be kept long.
+ * never serves what an older version cached as its own, which is what lets a response be
+ * kept long.
  */
 export const resourceApiCacheEpochFor = (
   contentRevision: string,
   workerVersion: string | undefined
 ): string => `${contentRevision}.${workerVersion || 'unversioned'}`
+
+/**
+ * Names what the cached routes answer, whatever the Worker version that answers it. Bump it
+ * in the deployment that changes what a cached route answers for the same content: a field
+ * added, removed or corrected, another order, another rule. Left as it is, that deployment
+ * answers each URL once more, in each data center, with what the version before it stored.
+ */
+export const RESOURCE_API_ANSWER_REVISION = 'answers-1'
+
+/**
+ * The namespace of the fallback: the same content, and no Worker version. A deployment
+ * starts with nothing under its own namespace, and answers from this one while it reads the
+ * database again. A Worker version is never spelled like the suffix, so the two cannot meet.
+ */
+export const resourceApiFallbackEpochFor = (
+  contentRevision: string,
+  answerRevision: string = RESOURCE_API_ANSWER_REVISION
+): string => `${contentRevision}.fallback-${answerRevision}`
 
 export type ResourceApiEdgeCache = {
   match(request: Request): Promise<Response | undefined>
@@ -221,21 +240,49 @@ const cacheRequest = (request: Request, cacheEpoch: string): Request => {
   return new Request(source, { method: 'GET' })
 }
 
+/**
+ * Whether a response is also kept for the deployments to come. A search is not: its answer
+ * is seldom asked twice, and reading it again behind its caller's back would open the
+ * database, and for a semantic search call Workers AI, for an answer nobody may ask for.
+ */
+export const resourceApiFallbackTakesPart = (request: Request): boolean =>
+  resourceApiCacheTtlSeconds(request) !== undefined && !isDynamicResourceRequest(request)
+
+// How long one refresh keeps the others away from its URL, in its isolate and, through the
+// cache, in its data center: the time a read of the database may take, and the pause before
+// a refresh that stored nothing is tried again.
+const REFRESH_CLAIM_SECONDS = 30
+
+// The URLs this isolate is refreshing, by the time each began. Only a time is kept: a
+// promise of one request must not be awaited by another.
+const refreshesInFlight = new Map<string, number>()
+
+// A caller that sends a validator would have the database answer 304, which is not stored.
+const unconditionalRequest = (request: Request): Request => {
+  const headers = new Headers(request.headers)
+  headers.delete('if-none-match')
+  headers.delete('if-modified-since')
+  return new Request(request.url, { method: 'GET', headers })
+}
+
 const responseForClient = (
   response: Response,
-  status?: 'HIT' | 'MISS',
+  status?: 'HIT' | 'MISS' | 'STALE',
   request?: Request,
   corsAllowedOrigins: readonly string[] = []
 ): Response => {
   const headers = new Headers(response.headers)
   headers.set('cache-control', 'private, no-store')
   if (status) headers.set('x-resource-cache', status)
-  if (request && (status === 'HIT' || !headers.has('x-request-id'))) {
+  // A stored response carries no request ID: the caller's own is added to what it is sent.
+  if (request && ((status && status !== 'MISS') || !headers.has('x-request-id'))) {
     headers.set(
       'x-request-id',
       resourceRequestIdFrom(request.headers.get('x-request-id') ?? undefined)
     )
   }
+  // Only an answer of this version says "not modified". A STALE one is always sent whole:
+  // 304 would confirm, in the name of this version, what an earlier one answered.
   if (status === 'HIT' && request) {
     const etag = headers.get('etag')
     if (etag && resourceEtagMatches(request.headers.get('if-none-match') ?? undefined, etag)) {
@@ -269,11 +316,95 @@ const cacheableResponse = (response: Response, ttlSeconds: number): Response => 
   })
 }
 
+export type ResourceApiCacheOperation = 'match' | 'put' | 'refresh'
+
+/** What answers a deployment that has not read a URL yet, and how that URL is read again. */
+export type ResourceApiFallback = {
+  /** `resourceApiFallbackEpochFor` of the content the request reads. */
+  epoch: string
+  /**
+   * Reads the database for a caller that has already been answered. Its response is stored
+   * when it is a 200 and dropped otherwise: a refusal, an error and an absence leave the
+   * fallback as it is.
+   */
+  refresh: (request: Request) => Promise<Response>
+}
+
+// A cache that fails claims nothing: the refresh goes on, as a read does without the cache.
+const claimedElsewhere = async (
+  cache: ResourceApiEdgeCache,
+  marker: Request,
+  reportCacheFailure: (operation: ResourceApiCacheOperation, cause: unknown) => void
+): Promise<boolean> => {
+  try {
+    if (await cache.match(marker)) return true
+  } catch (cause) {
+    reportCacheFailure('match', cause)
+    return false
+  }
+  await cache
+    .put(
+      marker,
+      new Response('refreshing', {
+        headers: { 'cache-control': `public, max-age=${REFRESH_CLAIM_SECONDS}` },
+      })
+    )
+    .catch(cause => {
+      reportCacheFailure('put', cause)
+    })
+  return false
+}
+
+/**
+ * Reads a URL again after its caller was answered with the fallback, and stores the answer
+ * of this version under both namespaces. One refresh at a time per URL: the callers that
+ * arrive meanwhile are answered with the fallback too, and read nothing.
+ */
+const refreshFallback = async ({
+  request,
+  claim,
+  marker,
+  cache,
+  refresh,
+  store,
+  reportCacheFailure,
+}: {
+  request: Request
+  claim: string
+  marker: Request
+  cache: ResourceApiEdgeCache
+  refresh: ResourceApiFallback['refresh']
+  store: (response: Response) => Promise<unknown>
+  reportCacheFailure: (operation: ResourceApiCacheOperation, cause: unknown) => void
+}): Promise<void> => {
+  // Claimed before anything is awaited, so two requests of one isolate cannot both pass.
+  const claimedAt = refreshesInFlight.get(claim)
+  if (claimedAt !== undefined && Date.now() - claimedAt < REFRESH_CLAIM_SECONDS * 1_000) return
+  refreshesInFlight.set(claim, Date.now())
+  try {
+    // Isolates share nothing but the cache: a short-lived entry tells the others of this
+    // data center that the URL is being read. It is not a lock, two may still pass
+    // together. It outlives a refresh that stored nothing, which is then not tried again
+    // at once.
+    if (await claimedElsewhere(cache, marker, reportCacheFailure)) return
+    const response = await refresh(unconditionalRequest(request))
+    if (response.status === 200) await store(response)
+    // Nobody reads this response: what was stored are copies of it. Not awaited: a body
+    // that was copied is only done being cancelled once its copies are read.
+    void response.body?.cancel().catch(() => undefined)
+  } catch (cause) {
+    reportCacheFailure('refresh', cause)
+  } finally {
+    refreshesInFlight.delete(claim)
+  }
+}
+
 export const routeResourceApiRequest = async ({
   request,
   authorize,
   cache,
   cacheEpoch,
+  fallback,
   corsAllowedOrigins = [],
   waitUntil,
   reportCacheFailure = () => undefined,
@@ -283,9 +414,10 @@ export const routeResourceApiRequest = async ({
   authorize: (request: Request) => Promise<boolean>
   cache: ResourceApiEdgeCache
   cacheEpoch: string
+  fallback?: ResourceApiFallback
   corsAllowedOrigins?: readonly string[]
   waitUntil: (promise: Promise<unknown>) => void
-  reportCacheFailure?: (operation: 'match' | 'put', cause: unknown) => void
+  reportCacheFailure?: (operation: ResourceApiCacheOperation, cause: unknown) => void
   load: () => Promise<Response>
 }): Promise<Response> => {
   const appCheckFailure = await enforceResourceApiAppCheck(request, authorize)
@@ -301,24 +433,60 @@ export const routeResourceApiRequest = async ({
       : response
   }
 
-  const key = cacheRequest(request, cacheEpoch)
-  let hit: Response | undefined
-  try {
-    hit = await cache.match(key)
-  } catch (cause) {
-    reportCacheFailure('match', cause)
+  const match = async (key: Request): Promise<Response | undefined> => {
+    try {
+      return await cache.match(key)
+    } catch (cause) {
+      reportCacheFailure('match', cause)
+      return undefined
+    }
   }
+  const key = cacheRequest(request, cacheEpoch)
+  const hit = await match(key)
   if (hit) return responseForClient(hit, 'HIT', request, corsAllowedOrigins)
+
+  // This version has not stored the URL. Everything below is the path of a miss: a cached
+  // answer never looks for the fallback.
+  const fallbackKey =
+    fallback && resourceApiFallbackTakesPart(request)
+      ? cacheRequest(request, fallback.epoch)
+      : undefined
+  // Both copies are stored at once and for as long: the fallback never outlives what its
+  // own version would still have answered.
+  const store = (response: Response): Promise<unknown> =>
+    Promise.all(
+      [key, fallbackKey]
+        .filter(target => target !== undefined)
+        .map(target => [target, cacheableResponse(response.clone(), ttlSeconds)] as const)
+        .map(([target, stored]) =>
+          cache.put(target, stored).catch(cause => {
+            reportCacheFailure('put', cause)
+          })
+        )
+    )
+
+  const kept = fallback && fallbackKey ? await match(fallbackKey) : undefined
+  if (fallback && fallbackKey && kept) {
+    waitUntil(
+      refreshFallback({
+        request,
+        // Claimed in the name of this version: what the version before it was refreshing
+        // a moment ago does not hold this one back.
+        claim: key.url,
+        marker: cacheRequest(request, `${cacheEpoch}.refreshing`),
+        cache,
+        refresh: fallback.refresh,
+        store,
+        reportCacheFailure,
+      })
+    )
+    return responseForClient(kept, 'STALE', request, corsAllowedOrigins)
+  }
 
   const response = await load()
   if (response.status !== 200) {
     return responseForClient(response, undefined, request, corsAllowedOrigins)
   }
-  const storedResponse = cacheableResponse(response.clone(), ttlSeconds)
-  waitUntil(
-    cache.put(key, storedResponse).catch(cause => {
-      reportCacheFailure('put', cause)
-    })
-  )
+  waitUntil(store(response))
   return responseForClient(response, 'MISS', request, corsAllowedOrigins)
 }

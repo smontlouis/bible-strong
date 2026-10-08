@@ -12,23 +12,45 @@ import {
   routeResourceApiRequest,
 } from '../worker'
 import {
+  RESOURCE_API_ANSWER_REVISION,
   resourceApiCacheEpochFor,
   resourceApiCacheEpochFrom,
   resourceApiCacheRevisionFrom,
   resourceApiCacheTtlSeconds,
+  resourceApiFallbackEpochFor,
+  resourceApiFallbackTakesPart,
   STRONG_LEXICON_ENTRY_CACHE_REVISION,
 } from '../resourceApiCache'
 
 class MemoryEdgeCache {
   readonly entries = new Map<string, Response>()
+  /** The clock of the cache, in seconds: an entry is gone once its `max-age` has passed. */
+  now = 0
+  private readonly storedAt = new Map<string, number>()
 
   async match(request: Request): Promise<Response | undefined> {
-    return this.entries.get(request.url)?.clone()
+    const entry = this.entries.get(request.url)
+    const maxAge = entry?.headers.get('cache-control')?.match(/max-age=(\d+)/)?.[1]
+    if (maxAge && this.now - (this.storedAt.get(request.url) ?? 0) >= Number(maxAge)) {
+      this.entries.delete(request.url)
+      return undefined
+    }
+    return entry?.clone()
   }
 
   async put(request: Request, response: Response): Promise<void> {
     this.entries.set(request.url, response.clone())
+    this.storedAt.set(request.url, this.now)
   }
+}
+
+/** A read that ends when the test says so. */
+const pendingResponse = () => {
+  let resolve!: (response: Response) => void
+  const promise = new Promise<Response>(onResolve => {
+    resolve = onResolve
+  })
+  return { promise, resolve }
 }
 
 describe('Resource Worker binding', () => {
@@ -672,6 +694,350 @@ describe('Resource Worker binding', () => {
   })
 })
 
+describe('Resource API fallback across Worker versions', () => {
+  const chapterUrl = 'https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1'
+  const thirtyDays = 30 * 24 * 60 * 60
+
+  // One data center: a cache that outlives the Worker versions deployed over it. Each
+  // version answers with its own name, so a test reads who wrote what it is given.
+  const dataCenter = () => {
+    const cache = new MemoryEdgeCache()
+    const background: Promise<unknown>[] = []
+    const failures: string[] = []
+    const origin = {
+      /** Reads a caller waited for. */
+      loads: 0,
+      /** Reads made after their caller was answered, with the request each was given. */
+      refreshes: [] as Request[],
+      answer: (workerVersion: string): Promise<Response> | Response =>
+        Response.json({ answeredBy: workerVersion }, { headers: { etag: '"chapter-r1"' } }),
+    }
+    const read = (
+      workerVersion: string,
+      {
+        url = chapterUrl,
+        headers,
+        answerRevision = RESOURCE_API_ANSWER_REVISION,
+      }: { url?: string; headers?: Record<string, string>; answerRevision?: string } = {}
+    ) =>
+      routeResourceApiRequest({
+        request: new Request(url, { headers }),
+        authorize: async () => true,
+        cache,
+        cacheEpoch: resourceApiCacheEpochFor('content-r1', workerVersion),
+        fallback: {
+          epoch: resourceApiFallbackEpochFor('content-r1', answerRevision),
+          refresh: async request => {
+            origin.refreshes.push(request)
+            return origin.answer(workerVersion)
+          },
+        },
+        waitUntil: promise => background.push(promise),
+        reportCacheFailure: operation => failures.push(operation),
+        load: async () => {
+          origin.loads += 1
+          return origin.answer(workerVersion)
+        },
+      })
+    return {
+      cache,
+      origin,
+      failures,
+      read,
+      /** Waits for what the requests so far left running behind their answers. */
+      settled: () => Promise.all(background.splice(0)),
+      stored: () => [...cache.entries.keys()].filter(key => !key.includes('.refreshing')),
+    }
+  }
+  const answeredBy = (response: Response): Promise<string> =>
+    response.json().then(body => (body as { answeredBy: string }).answeredBy)
+
+  it('stores a read under its version and under the fallback, for as long', async () => {
+    const { cache, origin, read, settled, stored } = dataCenter()
+
+    const miss = await read('v1')
+    await settled()
+    const hit = await read('v1')
+
+    assert.equal(miss.headers.get('x-resource-cache'), 'MISS')
+    assert.equal(hit.headers.get('x-resource-cache'), 'HIT')
+    assert.equal(await answeredBy(hit), 'v1')
+    assert.equal(origin.loads, 1)
+    // A cached answer looks for no fallback and refreshes nothing.
+    assert.equal(origin.refreshes.length, 0)
+    assert.deepEqual(
+      stored()
+        .map(key => decodeURIComponent(new URL(key).pathname.split('/')[2] ?? ''))
+        .sort(),
+      ['content-r1.fallback-answers-1', 'content-r1.v1']
+    )
+    for (const key of stored()) {
+      assert.equal(
+        cache.entries.get(key)?.headers.get('cache-control'),
+        `public, max-age=${thirtyDays}`
+      )
+    }
+  })
+
+  it('answers a new version at once with the fallback, then with its own read', async () => {
+    const { origin, read, settled } = dataCenter()
+    await read('v1')
+    await settled()
+
+    const stale = await read('v2', { headers: { 'x-request-id': 'after_deployment' } })
+
+    assert.equal(stale.status, 200)
+    assert.equal(stale.headers.get('x-resource-cache'), 'STALE')
+    assert.equal(stale.headers.get('cache-control'), 'private, no-store')
+    assert.equal(stale.headers.get('x-request-id'), 'after_deployment')
+    assert.equal(await answeredBy(stale), 'v1')
+    // The caller waited for no read of the database.
+    assert.equal(origin.loads, 1)
+
+    await settled()
+    const hit = await read('v2')
+    const laterHit = await read('v2')
+
+    assert.equal(origin.refreshes.length, 1)
+    assert.equal(hit.headers.get('x-resource-cache'), 'HIT')
+    assert.equal(await answeredBy(hit), 'v2')
+    assert.equal(laterHit.headers.get('x-resource-cache'), 'HIT')
+    assert.equal(origin.loads, 1)
+
+    // The refresh rewrote the fallback too: the next deployment starts from this answer.
+    const nextDeployment = await read('v3')
+    assert.equal(nextDeployment.headers.get('x-resource-cache'), 'STALE')
+    assert.equal(await answeredBy(nextDeployment), 'v2')
+    // A deployment that follows at once is not held back by the refresh of the one before.
+    await settled()
+    assert.equal(origin.refreshes.length, 2)
+    assert.equal(await answeredBy(await read('v3')), 'v3')
+  })
+
+  it('reads a URL once however many callers miss it together', async () => {
+    const { origin, read, settled } = dataCenter()
+    await read('v1')
+    await settled()
+    const refresh = pendingResponse()
+    origin.answer = () => refresh.promise
+
+    // Every caller is answered while the one refresh is still reading.
+    const stale = await Promise.all(Array.from({ length: 8 }, () => read('v2')))
+    const laterStale = await read('v2')
+
+    assert.deepEqual(
+      [...stale, laterStale].map(response => response.headers.get('x-resource-cache')),
+      Array.from({ length: 9 }, () => 'STALE')
+    )
+    assert.equal(origin.refreshes.length, 1)
+    assert.equal(origin.loads, 1)
+
+    refresh.resolve(Response.json({ answeredBy: 'v2' }))
+    await settled()
+    const hit = await read('v2')
+
+    assert.equal(hit.headers.get('x-resource-cache'), 'HIT')
+    assert.equal(await answeredBy(hit), 'v2')
+    assert.equal(origin.refreshes.length, 1)
+  })
+
+  it('reads concurrent misses as before when there is no fallback', async () => {
+    const { origin, read, settled } = dataCenter()
+
+    const cold = await Promise.all([read('v1'), read('v1'), read('v1')])
+    await settled()
+
+    assert.deepEqual(
+      cold.map(response => response.headers.get('x-resource-cache')),
+      ['MISS', 'MISS', 'MISS']
+    )
+    assert.equal(origin.loads, 3)
+    assert.equal(origin.refreshes.length, 0)
+  })
+
+  it('uses no fallback once the answer revision is bumped', async () => {
+    const { origin, read, settled } = dataCenter()
+    await read('v1')
+    await settled()
+
+    const bumped = await read('v2', { answerRevision: 'answers-2' })
+    await settled()
+
+    assert.equal(bumped.headers.get('x-resource-cache'), 'MISS')
+    assert.equal(await answeredBy(bumped), 'v2')
+    assert.equal(origin.loads, 2)
+    assert.equal(origin.refreshes.length, 0)
+    // The deployment after that one starts from what the bumped revision stored.
+    const next = await read('v3', { answerRevision: 'answers-2' })
+    assert.equal(next.headers.get('x-resource-cache'), 'STALE')
+    assert.equal(await answeredBy(next), 'v2')
+  })
+
+  it('keeps the fallback, and stores nothing, when the refresh does not answer 200', async () => {
+    for (const failure of [
+      () => Response.json({ code: 'INTERNAL' }, { status: 500 }),
+      () => Response.json({ code: 'RESOURCE_RATE_LIMITED' }, { status: 429 }),
+      () => Promise.reject(new Error('HYPERDRIVE_UNAVAILABLE')),
+    ]) {
+      const { cache, origin, failures, read, settled, stored } = dataCenter()
+      await read('v1')
+      await settled()
+      const afterFirstVersion = stored()
+      const answer = origin.answer
+      origin.answer = failure
+
+      const stale = await read('v2')
+      await settled()
+      // The refresh that stored nothing is not tried again at once, in any isolate.
+      const stillStale = await read('v2')
+      await settled()
+
+      assert.equal(stale.headers.get('x-resource-cache'), 'STALE')
+      assert.equal(stillStale.headers.get('x-resource-cache'), 'STALE')
+      assert.equal(await answeredBy(stillStale), 'v1')
+      assert.equal(origin.refreshes.length, 1)
+      assert.deepEqual(stored(), afterFirstVersion)
+      for (const entry of cache.entries.values()) assert.equal(entry.status, 200)
+
+      // Thirty seconds later the claim is gone, and the next caller has the URL read again.
+      origin.answer = answer
+      cache.now += 30
+      const retried = await read('v2')
+      await settled()
+      const hit = await read('v2')
+
+      assert.equal(retried.headers.get('x-resource-cache'), 'STALE')
+      assert.equal(origin.refreshes.length, 2)
+      assert.equal(hit.headers.get('x-resource-cache'), 'HIT')
+      assert.equal(await answeredBy(hit), 'v2')
+      assert.equal(failures.filter(operation => operation !== 'refresh').length, 0)
+    }
+  })
+
+  it('never stores an answer that is not a 200, under either key', async () => {
+    const { cache, origin, read, settled } = dataCenter()
+    origin.answer = () => Response.json({ code: 'BIBLE_UNSUPPORTED' }, { status: 404 })
+
+    const first = await read('v1')
+    await settled()
+    const second = await read('v1')
+    await settled()
+
+    assert.equal(first.status, 404)
+    assert.equal(first.headers.get('x-resource-cache'), null)
+    assert.equal(second.headers.get('x-resource-cache'), null)
+    assert.equal(origin.loads, 2)
+    assert.equal(cache.entries.size, 0)
+  })
+
+  it('says "not modified" for an answer of its own version only', async () => {
+    const { origin, read, settled } = dataCenter()
+    const conditional = { headers: { 'if-none-match': 'W/"chapter-r1"' } }
+    await read('v1')
+    await settled()
+
+    const fresh = await read('v1', conditional)
+    assert.equal(fresh.status, 304)
+    assert.equal(fresh.headers.get('x-resource-cache'), 'HIT')
+
+    // A fallback is sent whole: this version has not read the URL and confirms nothing.
+    const stale = await read('v2', conditional)
+    assert.equal(stale.status, 200)
+    assert.equal(stale.headers.get('x-resource-cache'), 'STALE')
+    assert.equal(stale.headers.get('etag'), '"chapter-r1"')
+    assert.equal(await answeredBy(stale), 'v1')
+
+    // The refresh asks without the validator: the database would answer 304, stored nowhere.
+    await settled()
+    assert.equal(origin.refreshes[0]?.headers.get('if-none-match'), null)
+    assert.equal(origin.refreshes[0]?.url, chapterUrl)
+
+    const refreshed = await read('v2', conditional)
+    assert.equal(refreshed.status, 304)
+    assert.equal(refreshed.headers.get('x-resource-cache'), 'HIT')
+    assert.equal(await refreshed.text(), '')
+    assert.equal(await answeredBy(await read('v2')), 'v2')
+  })
+
+  it('keeps a search out of the fallback and a list in it for its hour', async () => {
+    const searchUrl = 'https://api.bible-strong.app/v1/bibles/LSG/search?q=grace'
+    const listUrl = 'https://api.bible-strong.app/v1/naves/fr/topics?initial=a&limit=500'
+    const takesPart = (url: string) => resourceApiFallbackTakesPart(new Request(url))
+    assert.equal(takesPart(chapterUrl), true)
+    assert.equal(takesPart(listUrl), true)
+    assert.equal(takesPart(searchUrl), false)
+    assert.equal(
+      takesPart('https://api.bible-strong.app/v1/dictionaries/directory?search=a'),
+      false
+    )
+    assert.equal(takesPart('https://api.bible-strong.app/v1/naves/fr/random'), false)
+
+    const { cache, origin, read, settled, stored } = dataCenter()
+    await read('v1', { url: searchUrl })
+    await read('v1', { url: listUrl })
+    await settled()
+    assert.equal(stored().filter(key => key.includes('/search')).length, 1)
+    assert.equal(stored().filter(key => key.includes('/topics')).length, 2)
+
+    const search = await read('v2', { url: searchUrl })
+    const list = await read('v2', { url: listUrl })
+    await settled()
+
+    assert.equal(search.headers.get('x-resource-cache'), 'MISS')
+    assert.equal(await answeredBy(search), 'v2')
+    assert.equal(list.headers.get('x-resource-cache'), 'STALE')
+    assert.equal(await answeredBy(list), 'v1')
+
+    // The fallback of a list lasts the hour of the list: past it, a deployment reads again.
+    cache.now += 60 * 60
+    const loads = origin.loads
+    const expired = await read('v3', { url: listUrl })
+    assert.equal(expired.headers.get('x-resource-cache'), 'MISS')
+    assert.equal(origin.loads, loads + 1)
+  })
+
+  it('names the fallback by the content and the answer revision, never by a Worker version', () => {
+    const fallback = resourceApiFallbackEpochFor('catalog-release-1')
+
+    assert.equal(
+      fallback,
+      resourceApiFallbackEpochFor('catalog-release-1', RESOURCE_API_ANSWER_REVISION)
+    )
+    assert.notEqual(fallback, resourceApiFallbackEpochFor('catalog-release-2'))
+    assert.notEqual(fallback, resourceApiFallbackEpochFor('catalog-release-1', 'answers-next'))
+    for (const workerVersion of [undefined, '', 'f7a2f1c8-0c5e-4f0b-9a57-2f6f3a5c9a10']) {
+      assert.notEqual(fallback, resourceApiCacheEpochFor('catalog-release-1', workerVersion))
+    }
+  })
+
+  it('reads the database when the cache cannot be asked for the fallback', async () => {
+    const failures: string[] = []
+    let loads = 0
+    const response = await routeResourceApiRequest({
+      request: new Request(chapterUrl),
+      authorize: async () => true,
+      cache: {
+        match: async () => {
+          throw new Error('EDGE_CACHE_UNAVAILABLE')
+        },
+        put: async () => undefined,
+      },
+      cacheEpoch: 'content-r1.v2',
+      fallback: { epoch: 'content-r1.fallback-answers-1', refresh: async () => Response.json({}) },
+      waitUntil: () => undefined,
+      reportCacheFailure: operation => failures.push(operation),
+      load: async () => {
+        loads += 1
+        return Response.json({ answeredBy: 'v2' })
+      },
+    })
+
+    assert.equal(response.headers.get('x-resource-cache'), 'MISS')
+    assert.equal(loads, 1)
+    assert.deepEqual(failures, ['match', 'match'])
+  })
+})
+
 describe('Resource Worker request path', () => {
   const chapterUrl = 'https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1'
   const searchUrl = 'https://api.bible-strong.app/v1/bibles/LSG/search?q=grace'
@@ -698,7 +1064,7 @@ describe('Resource Worker request path', () => {
     Reflect.deleteProperty(globalThis, 'caches')
   })
 
-  const harness = (rejected: readonly string[] = []) => {
+  const harness = (rejected: readonly string[] = [], workerVersion = 'worker-version-1') => {
     const counted: string[] = []
     const backgroundWrites: Promise<unknown>[] = []
     let originLoads = 0
@@ -725,7 +1091,7 @@ describe('Resource Worker request path', () => {
           onSqlStatement()
           onSqlDuration?.(5)
           return Response.json(
-            { path: new URL(request.url).pathname },
+            { path: new URL(request.url).pathname, answeredBy: workerVersion },
             { headers: { etag: '"origin-r1"' } }
           )
         },
@@ -745,7 +1111,7 @@ describe('Resource Worker request path', () => {
       SEARCH_ANALYTICS_RATE_LIMITER: limiter('search-analytics'),
       ARTIFACT_RATE_LIMITER: limiter('artifact'),
       ENCRYPTED_ARCHIVE_RATE_LIMITER: limiter('encrypted-artifact'),
-      CF_VERSION_METADATA: { id: 'worker-version-1' },
+      CF_VERSION_METADATA: { id: workerVersion },
       HYPERDRIVE: { connectionString: 'postgresql://unused' },
     } as unknown as Env
     const send = async (url: string, init: RequestInit = {}) => {
@@ -897,6 +1263,83 @@ describe('Resource Worker request path', () => {
     assert.deepEqual(counted, ['search:address:203.0.113.7', 'search:address:203.0.113.7'])
     assert.deepEqual(origin(), { loads: 1, reads: 1 })
     assert.equal(refused.status, 429)
+  })
+
+  it('answers a new version from the fallback and counts its refresh against the database limit', async () => {
+    await harness().send(chapterUrl)
+    logs = []
+    const { counted, send, origin } = harness([], 'worker-version-2')
+
+    const stale = await send(chapterUrl, { headers: { 'if-none-match': '"origin-r1"' } })
+    const hit = await send(chapterUrl)
+
+    assert.equal(stale.status, 200)
+    assert.equal(stale.headers.get('x-resource-cache'), 'STALE')
+    assert.equal((await stale.json()).answeredBy, 'worker-version-1')
+    assert.equal(hit.headers.get('x-resource-cache'), 'HIT')
+    assert.equal((await hit.json()).answeredBy, 'worker-version-2')
+    // The refresh is a read of the database its caller caused, and is counted as one.
+    assert.deepEqual(counted, [
+      'reading:address:203.0.113.7',
+      'origin-reading:address:203.0.113.7',
+      'reading:address:203.0.113.7',
+    ])
+    assert.deepEqual(origin(), { loads: 1, reads: 1 })
+    // The caller opened no database; the refresh says on its own line what it read.
+    assert.deepEqual(
+      logs.map(log => [log.message, log.cache, log.originRead, log.stored, log.sqlStatements]),
+      [
+        ['resource API request', 'STALE', false, undefined, 0],
+        ['resource API fallback refresh', undefined, undefined, true, 2],
+        ['resource API request', 'HIT', false, undefined, 0],
+      ]
+    )
+  })
+
+  it('still answers a caller over the database limit from the fallback, and reads nothing for it', async () => {
+    await harness().send(chapterUrl)
+    logs = []
+    const limited = harness(['origin-reading'], 'worker-version-2')
+
+    const stale = await limited.send(chapterUrl)
+    const staleAgain = await limited.send(chapterUrl)
+
+    assert.equal(stale.status, 200)
+    assert.equal(stale.headers.get('x-resource-cache'), 'STALE')
+    assert.equal(staleAgain.headers.get('x-resource-cache'), 'STALE')
+    assert.deepEqual(limited.origin(), { loads: 0, reads: 0 })
+    assert.deepEqual(
+      logs.filter(log => log.message === 'resource API fallback refresh').map(log => log.limited),
+      [true]
+    )
+    // Nothing but the claim of the refused refresh is stored in the name of this version.
+    assert.deepEqual(
+      [...cache.entries.keys()]
+        .filter(key => key.includes('worker-version-2'))
+        .map(key => key.includes('.refreshing')),
+      [true]
+    )
+
+    // Once the claim of the refused refresh has passed, a caller under the limit refreshes.
+    cache.now += 30
+    const allowed = harness([], 'worker-version-2')
+    await allowed.send(chapterUrl)
+    const hit = await allowed.send(chapterUrl)
+
+    assert.equal(hit.headers.get('x-resource-cache'), 'HIT')
+    assert.equal((await hit.json()).answeredBy, 'worker-version-2')
+    assert.deepEqual(allowed.origin(), { loads: 1, reads: 1 })
+  })
+
+  it('keeps no fallback for a search, which a new version reads again', async () => {
+    await harness().send(searchUrl)
+    const { counted, send, origin } = harness([], 'worker-version-2')
+
+    const miss = await send(searchUrl)
+
+    assert.equal(miss.headers.get('x-resource-cache'), 'MISS')
+    assert.deepEqual(counted, ['search:address:203.0.113.7'])
+    assert.deepEqual(origin(), { loads: 1, reads: 1 })
   })
 
   it('answers a preflight, a health check and a cached read without loading the HTTP application', async () => {
