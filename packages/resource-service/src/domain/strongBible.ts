@@ -4,6 +4,7 @@ import {
   StrongBibleBookCountDto,
   StrongBibleChapterDto,
   StrongBibleChapterVerseDto,
+  StrongBibleCountsBatchDto,
   StrongBibleCountsDto,
   StrongBibleCoverageDto,
   StrongBibleIdentityDto,
@@ -11,6 +12,7 @@ import {
   StrongBibleLemmaStatsDto,
   StrongBibleOccurrencesDto,
   StrongBibleOccurrenceVerseDto,
+  StrongBibleReferenceCountsDto,
   StrongBibleRevisionDto,
   StrongBibleSpanDto,
 } from '@bible-strong/resource-domain/contracts/strongBibleContract'
@@ -32,6 +34,11 @@ export type StrongBibleIdentityLookup = {
   book: number
   reference: string
 }
+export type StrongBibleReferencesLookup = {
+  versionId: string
+  book: number
+  references: readonly string[]
+}
 export type StrongBibleOccurrencesLookup = StrongBibleIdentityLookup & {
   limit?: number
   cursor?: string
@@ -52,6 +59,12 @@ export type ActiveStrongBibleChapter = StrongBibleResourceRevision & {
 export type ActiveStrongBibleCounts = StrongBibleResourceRevision & {
   identity?: { id: number; kind: StrongBibleIdentityDto['kind']; code: string }
   counts: readonly { book: number; verseCount: number }[]
+}
+/** The counts of several references: for each, what its own counts read answers. */
+export type ActiveStrongBibleReferenceCounts = StrongBibleResourceRevision & {
+  references: readonly (Pick<ActiveStrongBibleCounts, 'identity' | 'counts'> & {
+    reference: string
+  })[]
 }
 export type ActiveStrongBibleOccurrences = StrongBibleResourceRevision & {
   identity?: { id: number; kind: StrongBibleIdentityDto['kind']; code: string }
@@ -96,6 +109,9 @@ export type StrongBibleRepositoryService = {
   findCountsByBook: (
     input: StrongBibleIdentityLookup
   ) => Effect.Effect<ActiveStrongBibleCounts, StrongBibleRepositoryError>
+  findCountsByBookOfReferences: (
+    input: StrongBibleReferencesLookup
+  ) => Effect.Effect<ActiveStrongBibleReferenceCounts, StrongBibleRepositoryError>
   findOccurrences: (
     input: StrongBibleOccurrencesLookup
   ) => Effect.Effect<ActiveStrongBibleOccurrences, StrongBibleRepositoryError>
@@ -176,6 +192,24 @@ export const readStrongBibleCounts = (input: StrongBibleIdentityLookup) =>
       resource: revisionDto(active),
       identity: identityDto(active.identity),
       counts: active.counts.map(count => new StrongBibleBookCountDto(count)),
+    })
+  })
+
+export const readStrongBibleCountsOfReferences = (input: StrongBibleReferencesLookup) =>
+  Effect.gen(function* () {
+    yield* assertSupported(input.versionId)
+    const repository = yield* StrongBibleRepository
+    const active = yield* repository.findCountsByBookOfReferences(input)
+    return new StrongBibleCountsBatchDto({
+      resource: revisionDto(active),
+      references: active.references.map(
+        ({ reference, identity, counts }) =>
+          new StrongBibleReferenceCountsDto({
+            reference,
+            identity: identityDto(identity),
+            counts: counts.map(count => new StrongBibleBookCountDto(count)),
+          })
+      ),
     })
   })
 

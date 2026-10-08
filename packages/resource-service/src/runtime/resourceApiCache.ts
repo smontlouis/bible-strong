@@ -57,6 +57,15 @@ const catalogResourceIdsFrom = (request: Request): string[] => {
   if (pathname.startsWith('/v1/strong-lexicon/')) {
     const simpleModule = pathname.match(/\/modules\/(simple-(?:fr|en))$/)?.[1]
     if (simpleModule) return [`strong-lexicon:${simpleModule}`]
+    // The senses of a number are listed by the simple lexicon of a language and told apart
+    // by the detailed lexicon and its entities; no dictionary article is read.
+    if (/^\/v1\/strong-lexicon\/numbers\/[^/]+\/senses$/.test(pathname)) {
+      return [
+        `strong-lexicon:simple-${url.searchParams.get('language')}`,
+        'strong-lexicon:core',
+        'strong-lexicon:entities',
+      ]
+    }
     if (
       /^\/v1\/strong-lexicon\/(?:entries(?:\/[^/]+)?|random|morphologies)$/.test(pathname) &&
       url.searchParams.get('level') === 'simple'
@@ -170,9 +179,10 @@ const LONG_LIVED_PATHS = [
   /^\/v1\/dictionaries$/,
   /^\/v1\/dictionaries\/verses\/[^/]+\/entries$/,
   /^\/v1\/dictionaries\/[^/]+\/[^/]+\/(?:entries\/(?:batch|by-id\/[^/]+|[^/]+)|verses\/[^/]+\/(?:words|entries))$/,
+  // The counts of several references, `identities/batch/counts`, are counts like those of one.
   /^\/v1\/strong-bibles\/[^/]+\/(?:coverage|books\/\d+\/(?:chapters\/\d+|identities\/[^/]+\/(?:counts|lemmas)))$/,
   /^\/v1\/interlinear-bibles\/[^/]+\/languages\/[^/]+\/(?:coverage|books\/\d+\/chapters\/\d+)$/,
-  /^\/v1\/strong-lexicon\/(?:modules\/[^/]+|entries\/[^/]+|morphologies|entities\/(?:chapters\/[^/]+\/\d+|[^/]+))$/,
+  /^\/v1\/strong-lexicon\/(?:modules\/[^/]+|entries\/[^/]+|numbers\/[^/]+\/senses|morphologies|entities\/(?:chapters\/[^/]+\/\d+|[^/]+))$/,
   /^\/v1\/commentaries\/[^/]+\/[^/]+\/(?:coverage|verses\/[^/]+|chapters\/\d+\/\d+)$/,
   /^\/v1\/commentaries\/verses\/[^/]+\/sections$/,
   /^\/v1\/cross-references\/[^/]+\/verses\/[^/]+$/,

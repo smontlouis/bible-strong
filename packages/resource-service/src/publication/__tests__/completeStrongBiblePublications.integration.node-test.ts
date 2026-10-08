@@ -106,6 +106,46 @@ describe('Complete Strong Bible publications', { skip: !runIntegration }, () => 
           chapter.verses.reduce((count, verse) => count + verse.spans.length, 0),
           expectedSpans.length
         )
+
+        // The counts of several references are read in one statement; reading each
+        // reference as its own route does returns the same response, for every twentieth
+        // identity of the index, a hundred at a time.
+        const readByRead = makeKyselyStrongBibleRepository(isolated.database, {
+          referenceCountsRead: 'read-by-read',
+        })
+        const codes = (
+          await isolated.database
+            .selectFrom('strong_bible_identities')
+            .select('code')
+            .distinct()
+            .orderBy('code')
+            .execute()
+        )
+          .map(row => row.code)
+          .filter((_, position) => position % 20 === 0)
+        assert.ok(codes.length > 500)
+        let counted = 0
+        for (const [letter, book] of [
+          ['H', 1],
+          ['G', 40],
+        ] as const) {
+          const references = codes.filter(code => code.startsWith(letter))
+          for (let start = 0; start < references.length; start += 100) {
+            const input = { versionId, book, references: references.slice(start, start + 100) }
+            const actual = JSON.stringify(
+              await Effect.runPromise(repository.findCountsByBookOfReferences(input))
+            )
+            assert.equal(
+              actual,
+              JSON.stringify(
+                await Effect.runPromise(readByRead.findCountsByBookOfReferences(input))
+              ),
+              `${versionId} ${input.references[0]}`
+            )
+            counted += actual.split('"verseCount"').length - 1
+          }
+        }
+        assert.ok(counted > codes.length)
       } finally {
         await isolated.dispose()
       }

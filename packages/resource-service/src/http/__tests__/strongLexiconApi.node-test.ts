@@ -77,6 +77,17 @@ const repository: StrongLexiconRepositoryService = {
             },
           },
         }),
+  findNumberSenses: input =>
+    Effect.succeed({
+      revision: 'number-senses-r1',
+      value: {
+        classicStrong: input.number.toUpperCase(),
+        senses: [
+          { ...searchEntry, detailedDefinitionHtml: '<p>parole</p>', entityBrief: 'Adam' },
+          searchEntry,
+        ],
+      },
+    }),
   listEntries: input => {
     lastListInput = input
     return Effect.succeed({
@@ -209,6 +220,38 @@ describe('v1 Strong lexicon API', () => {
       assert.equal(batchReads, 1)
       assert.equal(entryReads, 0)
       assert.equal(((await response.json()) as { entries: unknown[] }).entries.length, 0)
+    } finally {
+      await web.dispose()
+    }
+  })
+
+  it('serves the senses of a classical number with what tells each apart', async () => {
+    const web = makeResourceWebHandler(undefined, undefined, { strongLexicon: repository })
+    try {
+      const response = await web.handler(
+        request('/v1/strong-lexicon/numbers/g3056/senses?language=fr')
+      )
+      assert.equal(response.status, 200, await response.clone().text())
+      assert.equal(response.headers.get('x-resource-revision'), 'number-senses-r1')
+      assert.ok(response.headers.get('etag'))
+      assert.deepEqual(await response.json(), {
+        resource: { revision: 'number-senses-r1' },
+        classicStrong: 'G3056',
+        senses: [
+          { ...searchEntry, detailedDefinitionHtml: '<p>parole</p>', entityBrief: 'Adam' },
+          // A sense the detailed lexicon says nothing more about is its row alone.
+          searchEntry,
+        ],
+      })
+
+      // A number is written without a sense suffix, and a language is required.
+      for (const path of [
+        '/v1/strong-lexicon/numbers/G3056A/senses?language=fr',
+        '/v1/strong-lexicon/numbers/3056/senses?language=fr',
+        '/v1/strong-lexicon/numbers/G3056/senses',
+      ]) {
+        assert.equal((await web.handler(request(path))).status, 400, path)
+      }
     } finally {
       await web.dispose()
     }

@@ -21,6 +21,13 @@ export class StrongLexiconEntryPath extends Schema.Class<StrongLexiconEntryPath>
   'StrongLexiconEntryPath'
 )({ reference: Schema.NonEmptyString }) {}
 
+// A classical Strong number, as it is written without a sense suffix.
+const ClassicalNumber = Schema.String.pipe(Schema.pattern(/^[HG]\d{1,6}$/i))
+
+export class StrongLexiconNumberPath extends Schema.Class<StrongLexiconNumberPath>(
+  'StrongLexiconNumberPath'
+)({ number: ClassicalNumber }) {}
+
 export class StrongLexiconEntityPath extends Schema.Class<StrongLexiconEntityPath>(
   'StrongLexiconEntityPath'
 )({ uniqueName: Schema.NonEmptyString }) {}
@@ -255,6 +262,30 @@ export class StrongLexiconSearchResponseDto extends Schema.Class<StrongLexiconSe
   resource: Schema.Struct({ revision: Schema.String }),
   entries: Schema.Array(StrongLexiconSearchResultDto),
   nextCursor: Schema.optional(Schema.String),
+}) {}
+
+// A sense of a classical number: its row in the simple lexicon of the language, then what
+// its entry in the detailed lexicon tells it apart by, when it has one.
+export class StrongLexiconNumberSenseDto extends Schema.Class<StrongLexiconNumberSenseDto>(
+  'StrongLexiconNumberSenseDto'
+)({
+  id: Schema.Int,
+  stepCode: Schema.String,
+  classicStrong: Schema.String,
+  language: StrongLexicalLanguage,
+  original: Schema.String,
+  transliteration: Schema.String,
+  gloss: Schema.String,
+  detailedDefinitionHtml: Schema.optional(Schema.String),
+  entityBrief: Schema.optional(Schema.String),
+}) {}
+
+export class StrongLexiconNumberSensesDto extends Schema.Class<StrongLexiconNumberSensesDto>(
+  'StrongLexiconNumberSensesDto'
+)({
+  resource: Schema.Struct({ revision: Schema.String }),
+  classicStrong: Schema.String,
+  senses: Schema.Array(StrongLexiconNumberSenseDto),
 }) {}
 
 export class StrongLexiconMorphologyResponseDto extends Schema.Class<StrongLexiconMorphologyResponseDto>(

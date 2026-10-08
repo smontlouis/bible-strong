@@ -138,6 +138,14 @@ export type StrongLexiconSearchResult = {
   transliteration: string
   gloss: string
 }
+/**
+ * A sense of a classical number: its row in the simple lexicon of a language, then what its
+ * entry in the detailed lexicon tells it apart by, when it has one.
+ */
+export type StrongLexiconNumberSense = StrongLexiconSearchResult & {
+  detailedDefinitionHtml?: string
+  entityBrief?: string
+}
 export type StrongLexiconPage = { entries: StrongLexiconSearchResult[]; nextCursor?: string }
 export type StrongLexiconListRequest = {
   signal?: AbortSignal

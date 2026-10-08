@@ -3,7 +3,8 @@ import * as Schema from 'effect/Schema'
 const VersionId = Schema.String.pipe(Schema.pattern(/^[A-Z0-9][A-Z0-9_-]{1,31}$/))
 const Book = Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 77))
 const Chapter = Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 200))
-const Reference = Schema.String.pipe(Schema.pattern(/^(?:[HG])?\d+[A-Z]*$/i))
+const REFERENCE_PATTERN = /^(?:[HG])?\d+[A-Z]*$/i
+const Reference = Schema.String.pipe(Schema.pattern(REFERENCE_PATTERN))
 const OccurrenceCursor = Schema.String.pipe(Schema.pattern(/^strong:v1:\d+:\d+:\d+$/))
 
 export type StrongBibleOccurrenceCursorLocation = {
@@ -54,6 +55,26 @@ export class StrongBibleIdentityPath extends Schema.Class<StrongBibleIdentityPat
   version: VersionId,
   book: Book,
   reference: Reference,
+}) {}
+
+export class StrongBibleBookPath extends Schema.Class<StrongBibleBookPath>('StrongBibleBookPath')({
+  version: VersionId,
+  book: Book,
+}) {}
+
+// As many as the entry cards of a lexicon batch: the codes the senses of a number can carry.
+export const STRONG_BIBLE_REFERENCES_LIMIT = 100
+
+export class StrongBibleReferencesQuery extends Schema.Class<StrongBibleReferencesQuery>(
+  'StrongBibleReferencesQuery'
+)({
+  references: Schema.NonEmptyString.pipe(
+    Schema.filter(
+      value =>
+        value.split(',').length <= STRONG_BIBLE_REFERENCES_LIMIT &&
+        value.split(',').every(reference => REFERENCE_PATTERN.test(reference))
+    )
+  ),
 }) {}
 
 export class StrongBibleOccurrencesQuery extends Schema.Class<StrongBibleOccurrencesQuery>(
@@ -145,6 +166,22 @@ export class StrongBibleCountsDto extends Schema.Class<StrongBibleCountsDto>(
   resource: StrongBibleRevisionDto,
   identity: Schema.optional(StrongBibleIdentityDto),
   counts: Schema.Array(StrongBibleBookCountDto),
+}) {}
+
+// The counts of one reference of a batch: what its own counts read answers.
+export class StrongBibleReferenceCountsDto extends Schema.Class<StrongBibleReferenceCountsDto>(
+  'StrongBibleReferenceCountsDto'
+)({
+  reference: Schema.NonEmptyString,
+  identity: Schema.optional(StrongBibleIdentityDto),
+  counts: Schema.Array(StrongBibleBookCountDto),
+}) {}
+
+export class StrongBibleCountsBatchDto extends Schema.Class<StrongBibleCountsBatchDto>(
+  'StrongBibleCountsBatchDto'
+)({
+  resource: StrongBibleRevisionDto,
+  references: Schema.Array(StrongBibleReferenceCountsDto),
 }) {}
 
 export class StrongBibleOccurrenceVerseDto extends Schema.Class<StrongBibleOccurrenceVerseDto>(

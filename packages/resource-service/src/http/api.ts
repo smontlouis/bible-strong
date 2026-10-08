@@ -56,14 +56,17 @@ import {
   DictionaryVerseWordsResponseDto,
 } from '@bible-strong/resource-domain/contracts/dictionaryContract'
 import {
+  StrongBibleBookPath,
   StrongBibleChapterDto,
   StrongBibleChapterPath,
+  StrongBibleCountsBatchDto,
   StrongBibleCountsDto,
   StrongBibleCoverageDto,
   StrongBibleIdentityPath,
   StrongBibleLemmaStatsDto,
   StrongBibleOccurrencesDto,
   StrongBibleOccurrencesQuery,
+  StrongBibleReferencesQuery,
   StrongBibleVersionPath,
 } from '@bible-strong/resource-domain/contracts/strongBibleContract'
 import {
@@ -89,6 +92,8 @@ import {
   StrongLexiconModuleStateDto,
   StrongLexiconMorphologyQuery,
   StrongLexiconMorphologyResponseDto,
+  StrongLexiconNumberPath,
+  StrongLexiconNumberSensesDto,
   StrongLexiconRandomQuery,
   StrongLexiconSearchResponseDto,
 } from '@bible-strong/resource-domain/contracts/strongLexiconContract'
@@ -388,6 +393,20 @@ const StrongBibleApi = HttpApiGroup.make('strongBibles')
       .addError(ResourceInternalProblem, { status: 500 })
   )
   .add(
+    // Declared before the counts of one reference, whose path would read `batch` as one.
+    HttpApiEndpoint.get(
+      'getStrongBibleCountsBatch',
+      '/v1/strong-bibles/:version/books/:book/identities/batch/counts'
+    )
+      .setPath(StrongBibleBookPath)
+      .setUrlParams(StrongBibleReferencesQuery)
+      .addSuccess(StrongBibleCountsBatchDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
     HttpApiEndpoint.get(
       'getStrongBibleCounts',
       '/v1/strong-bibles/:version/books/:book/identities/:reference/counts'
@@ -476,6 +495,16 @@ const StrongLexiconApi = HttpApiGroup.make('strongLexicon')
       .setPath(StrongLexiconEntryPath)
       .setUrlParams(StrongLexiconEntryQuery)
       .addSuccess(StrongLexiconEntryDto)
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getStrongLexiconNumberSenses', '/v1/strong-lexicon/numbers/:number/senses')
+      .setPath(StrongLexiconNumberPath)
+      .setUrlParams(StrongLexiconLanguageQuery)
+      .addSuccess(StrongLexiconNumberSensesDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
       .addError(ResourceNotFoundProblem, { status: 404 })
       .addError(ResourceUnavailableProblem, { status: 503 })
       .addError(ResourceInternalProblem, { status: 500 })

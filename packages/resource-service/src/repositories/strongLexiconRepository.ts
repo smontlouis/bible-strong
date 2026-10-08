@@ -28,6 +28,7 @@ import type {
   StrongLexiconEntry,
   StrongLexiconEntryCard,
   StrongLexiconMorphology,
+  StrongLexiconNumberSense,
   StrongLexiconSearchResult,
 } from '@bible-strong/resource-domain/strong-lexicon'
 import {
@@ -173,9 +174,18 @@ export type StrongLexiconDetailedEntryRead = 'one-statement' | 'statement-by-sta
  */
 export type StrongLexiconEntryCardsRead = 'one-statement' | 'statement-by-statement'
 
+/**
+ * How the senses of a classical number are fetched. `one-statement` gathers their cards and
+ * what tells each apart in a single round trip. `read-by-read` reads the cards, then the
+ * detailed entry of each sense, as a page of the public site did: it is the reference the
+ * single statement is tested against.
+ */
+export type StrongLexiconNumberSensesRead = 'one-statement' | 'read-by-read'
+
 export type StrongLexiconRepositoryOptions = {
   detailedEntryRead?: StrongLexiconDetailedEntryRead
   entryCardsRead?: StrongLexiconEntryCardsRead
+  numberSensesRead?: StrongLexiconNumberSensesRead
 }
 
 // Row choices of a detailed entry. Both reads apply the same ones and compose the entry
@@ -228,6 +238,36 @@ const preferredEntityOf = (entry: Payload, candidates: Payload[]): Payload | und
         (text(right, 'uStrong') === text(entry, 'uStrong') ? 0 : 1) ||
       number(left, 'id') - number(right, 'id')
   )[0]
+
+// The entity of an entry: one filed under a code of the entry, or else one filed under its
+// classical number and named like it.
+const entityOfEntry = (
+  entry: Payload,
+  entitiesByCode: Payload[],
+  entitiesByNumber: Payload[]
+): Payload | undefined =>
+  preferredEntityOf(
+    entry,
+    entitiesByCode.length ? entitiesByCode : entitiesByNumber.filter(isEntityNamedLikeEntry(entry))
+  )
+
+const entityBriefOf = (
+  entity: Payload,
+  translation: Payload | undefined,
+  language: StrongLexiconLanguage
+): string => localized(language, text(translation ?? {}, 'brief'), text(entity, 'brief'))
+
+// The definition of an entry in a language; empty when it has none.
+const definitionOf = (
+  entry: Payload,
+  translation: Payload | undefined,
+  language: StrongLexiconLanguage
+): string =>
+  localized(
+    language,
+    text(translation ?? {}, 'meaningHtml') || text(translation ?? {}, 'meaning'),
+    text(entry, 'meaning')
+  )
 
 const composeEntity = (
   rows: {
@@ -346,7 +386,7 @@ const composeEntity = (
       text(translation ?? {}, 'summaryHtml'),
       text(entity, 'summaryHtml')
     ),
-    brief: localized(language, text(translation ?? {}, 'brief'), text(entity, 'brief')),
+    brief: entityBriefOf(entity, translation, language),
     articleHtml: localized(
       language,
       text(translation ?? {}, 'articleHtml'),
@@ -516,18 +556,8 @@ const composeEntry = (
           ),
         }
       : {}),
-    ...(localized(
-      language,
-      text(translation ?? {}, 'meaningHtml') || text(translation ?? {}, 'meaning'),
-      text(entry, 'meaning')
-    )
-      ? {
-          definitionHtml: localized(
-            language,
-            text(translation ?? {}, 'meaningHtml') || text(translation ?? {}, 'meaning'),
-            text(entry, 'meaning')
-          ),
-        }
+    ...(definitionOf(entry, translation, language)
+      ? { definitionHtml: definitionOf(entry, translation, language) }
       : {}),
     ...(morphology ? { morphology } : {}),
     relations: relationRowsForDisplay.flatMap(relation => {
@@ -612,6 +642,27 @@ type EntryCardRows = {
   /** In the order of their identifier. */
   morphologyRows: Payload[]
   morphologyTranslations: Payload[]
+}
+
+type CarryingEntry = {
+  eStrong: string
+  dStrong: string
+  uStrong: string
+  language: string | null
+  baseCode: number | null
+  payload: Payload
+}
+/** The row the single statement of entry cards returns. */
+type EntryCardRowsGathered = {
+  core: { revision: string } | null
+  exact_identities: EntryIdentityRow[]
+  case_insensitive_identities: { step_entry_id: number; step_code: string }[]
+  identity_entries: { entryId: number; payload: Payload }[]
+  carrying_entries: CarryingEntry[]
+  identities: EntryIdentityRow[]
+  translations: Payload[]
+  morphology_codes: Payload[]
+  morphology_translations: Payload[]
 }
 
 // Row choices of entry cards. Both reads apply the same ones and compose the cards with
@@ -744,11 +795,7 @@ const composeEntryCards = (
     const meaning = morphologyRow
       ? localized(language, text(morphologyTranslation, 'meaning'), text(morphologyRow, 'meaning'))
       : ''
-    const definition = localized(
-      language,
-      text(translation, 'meaningHtml') || text(translation, 'meaning'),
-      text(entry, 'meaning')
-    )
+    const definition = definitionOf(entry, translation, language)
     const nameMeaning = localized(
       language,
       text(entry, 'nameMeaningFrHtml'),
@@ -781,6 +828,91 @@ const composeEntryCards = (
     ]
   })
 }
+
+type NumberSensesInput = Parameters<StrongLexiconRepositoryService['findNumberSenses']>[0]
+type NumberSenses = Effect.Effect.Success<
+  ReturnType<StrongLexiconRepositoryService['findNumberSenses']>
+>
+type NumberSenseDetail = Pick<StrongLexiconNumberSense, 'detailedDefinitionHtml' | 'entityBrief'>
+
+// A sense adds one letter to its classical number; a number that ran out of capitals goes on
+// with small letters, which name other senses.
+const NUMBER_SENSE_SUFFIXES = ['', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz']
+
+const NUMBER_SENSES_RESPONSE_REVISION = 'strong-lexicon-number-senses-v1'
+
+// Row choices of the senses of a number. Both reads apply the same ones, so they can differ
+// only in how rows are fetched.
+
+/**
+ * The senses of a number are looked for in the simple lexicon of the language, under every
+ * code one of them can carry: the lexicon is filed by gloss, not by number.
+ */
+const numberSenseCardsInput = (
+  classicCode: string,
+  language: StrongLexiconLanguage
+): EntryCardsInput => ({
+  language,
+  level: 'simple',
+  identities: NUMBER_SENSE_SUFFIXES.map(suffix => ({
+    kind: 'dstrong',
+    reference: `${classicCode}${suffix}`,
+  })),
+})
+
+/**
+ * The cards that are senses of the number, each once, in the order their codes were asked
+ * for. A code may be answered by an entry of another number, and several codes by one entry.
+ */
+const numberSenseCardsOf = (
+  classicCode: string,
+  cards: ActiveStrongLexiconValue<StrongLexiconEntryCard>[]
+): StrongLexiconEntryCard[] => {
+  const seen = new Set<string>()
+  return cards
+    .map(card => card.value)
+    .filter(card => {
+      const key = `${card.id}\n${card.stepCode}`
+      if (card.classicStrong !== classicCode || seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+}
+
+const composeNumberSenses = (
+  classicCode: string,
+  revisions: { simple: string; core: string; entities: StrongLexiconModuleState },
+  senses: { card: StrongLexiconEntryCard; detail: NumberSenseDetail }[]
+): NumberSenses => ({
+  revision: [
+    NUMBER_SENSES_RESPONSE_REVISION,
+    `simple:${revisions.simple}`,
+    `core:${revisions.core}`,
+    `entities:${moduleStateRevision(revisions.entities)}`,
+  ].join('|'),
+  value: {
+    classicStrong: classicCode,
+    senses: senses.map(({ card, detail }) => ({
+      id: card.id,
+      stepCode: card.stepCode,
+      classicStrong: card.classicStrong,
+      language: card.language,
+      original: card.original,
+      transliteration: card.transliteration,
+      gloss: card.gloss,
+      ...(detail.detailedDefinitionHtml === undefined
+        ? {}
+        : { detailedDefinitionHtml: detail.detailedDefinitionHtml }),
+      ...(detail.entityBrief === undefined ? {} : { entityBrief: detail.entityBrief }),
+    })),
+  },
+})
+
+// What the detailed entry of a sense tells it apart by.
+const numberSenseDetailOf = (entry: StrongLexiconEntry | undefined): NumberSenseDetail => ({
+  ...(entry?.definitionHtml === undefined ? {} : { detailedDefinitionHtml: entry.definitionHtml }),
+  ...(entry?.entity === undefined ? {} : { entityBrief: entry.entity.brief }),
+})
 
 export const makeKyselyStrongLexiconRepository = (
   database: Kysely<ResourceDatabase>,
@@ -1083,9 +1215,10 @@ export const makeKyselyStrongLexiconRepository = (
   // the entries that carry them. It returns the candidates of both, and TypeScript chooses
   // with the rules the statement-by-statement read applies: a candidate entry comes with the
   // values it was matched on, so that the choice is made on what PostgreSQL compared.
-  const readEntryCardRowsInOneStatement = async (
-    input: EntryCardsInput
-  ): Promise<EntryCardRows> => {
+  //
+  // It is written as its common table expressions and the columns of its final SELECT, so
+  // that the senses of a number are read with the same ones, followed by their own.
+  const entryCardRowsStatement = (input: EntryCardsInput) => {
     const moduleId = input.level === 'simple' ? getSimpleStrongModuleId(input.language) : 'core'
     const references = [
       ...new Set(input.identities.map(identity => normalizeCode(identity.reference))),
@@ -1098,28 +1231,10 @@ export const makeKyselyStrongLexiconRepository = (
           .map(identity => normalizeCode(identity.reference))
       ),
     ]
-
-    type CarryingEntry = {
-      eStrong: string
-      dStrong: string
-      uStrong: string
-      language: string | null
-      baseCode: number | null
-      payload: Payload
-    }
-    type EntryCardRowsGathered = {
-      core: { revision: string } | null
-      exact_identities: EntryIdentityRow[]
-      case_insensitive_identities: { step_entry_id: number; step_code: string }[]
-      identity_entries: { entryId: number; payload: Payload }[]
-      carrying_entries: CarryingEntry[]
-      identities: EntryIdentityRow[]
-      translations: Payload[]
-      morphology_codes: Payload[]
-      morphology_translations: Payload[]
-    }
-    const gathered = await sql<EntryCardRowsGathered>`
-      WITH core AS MATERIALIZED (
+    return {
+      moduleId,
+      expressions: sql`
+      core AS MATERIALIZED (
         SELECT id, revision
           FROM resource_publications
          WHERE resource_identity = ${`strong-lexicon:${moduleId}`}
@@ -1228,8 +1343,8 @@ export const makeKyselyStrongLexiconRepository = (
                  m.code = ANY (ARRAY(SELECT morph FROM candidates WHERE morph <> ''))
                  OR m.normalized_code = ANY (ARRAY(SELECT morph FROM candidates WHERE morph <> ''))
                )
-      )
-      SELECT
+      )`,
+      columns: sql`
         (SELECT jsonb_build_object('revision', revision) FROM core) AS core,
         (SELECT coalesce(
                   jsonb_agg(
@@ -1292,10 +1407,16 @@ export const makeKyselyStrongLexiconRepository = (
             AND t.morphology_code_id = ANY (
                   ARRAY(SELECT morphology_code_id FROM morphology_codes)
                 )
-            AND t.language = ${input.language}) AS morphology_translations
-    `.execute(database)
-    const rows = gathered.rows[0]
-    if (!rows?.core) throw new ActiveStrongLexiconPublicationUnavailable({ moduleId })
+            AND t.language = ${input.language}) AS morphology_translations`,
+    }
+  }
+
+  const entryCardRowsOf = (input: EntryCardsInput, rows: EntryCardRowsGathered): EntryCardRows => {
+    if (!rows.core) {
+      throw new ActiveStrongLexiconPublicationUnavailable({
+        moduleId: input.level === 'simple' ? getSimpleStrongModuleId(input.language) : 'core',
+      })
+    }
 
     const requestedIdentityRows = [...rows.exact_identities]
     requestedIdentityRows.push(
@@ -1339,6 +1460,19 @@ export const makeKyselyStrongLexiconRepository = (
       morphologyRows: rows.morphology_codes,
       morphologyTranslations: rows.morphology_translations,
     }
+  }
+
+  const readEntryCardRowsInOneStatement = async (
+    input: EntryCardsInput
+  ): Promise<EntryCardRows> => {
+    const statement = entryCardRowsStatement(input)
+    const gathered = await sql<EntryCardRowsGathered>`
+      WITH ${statement.expressions}
+      SELECT ${statement.columns}
+    `.execute(database)
+    const rows = gathered.rows[0]
+    if (!rows) throw new ActiveStrongLexiconPublicationUnavailable({ moduleId: statement.moduleId })
+    return entryCardRowsOf(input, rows)
   }
   const readEntryCardRows =
     options.entryCardsRead === 'statement-by-statement'
@@ -2053,12 +2187,7 @@ export const makeKyselyStrongLexiconRepository = (
 
     let entity: StrongLexiconEntity | undefined
     if (withAddons && entitiesState.status === 'available') {
-      const entityRow = preferredEntityOf(
-        entry,
-        rows.entities_by_code.length
-          ? rows.entities_by_code
-          : rows.entities_by_number.filter(isEntityNamedLikeEntry(entry))
-      )
+      const entityRow = entityOfEntry(entry, rows.entities_by_code, rows.entities_by_number)
       if (entityRow) {
         const entityId = number(entityRow, 'id')
         const ofEntity = (candidates: OfEntity[]) =>
@@ -2109,9 +2238,319 @@ export const makeKyselyStrongLexiconRepository = (
       ? readDetailedEntryStatementByStatement
       : readDetailedEntryInOneStatement
 
+  // The detailed entry a sense is, as its own route reads it: by the code of the sense.
+  const readNumberSenseDetail = async (
+    stepCode: string,
+    language: StrongLexiconLanguage
+  ): Promise<NumberSenseDetail> => {
+    try {
+      return numberSenseDetailOf((await readDetailedEntry({ reference: stepCode, language })).value)
+    } catch (cause) {
+      // A sense the detailed lexicon does not hold has nothing more to tell.
+      if (mapRepositoryCause(cause) instanceof StrongLexiconEntryNotFound) return {}
+      throw cause
+    }
+  }
+
+  // The senses of a number as a page of the public site read them: the cards of every code
+  // a sense can carry, then the detailed entry of each sense, one after the other. It is the
+  // reference the single statement is tested against.
+  const readNumberSensesReadByRead = async (input: NumberSensesInput): Promise<NumberSenses> => {
+    const classicCode = normalizeCode(input.number)
+    const simple = await requiredCore(input.language, 'simple')
+    const core = await requiredCore(input.language)
+    const entities = await getState('entities')
+    const cards = numberSenseCardsOf(
+      classicCode,
+      await findEntryCardsBatch(numberSenseCardsInput(classicCode, input.language))
+    )
+    const senses: { card: StrongLexiconEntryCard; detail: NumberSenseDetail }[] = []
+    for (const card of cards) {
+      senses.push({ card, detail: await readNumberSenseDetail(card.stepCode, input.language) })
+    }
+    return composeNumberSenses(
+      classicCode,
+      { simple: simple.revision, core: core.revision, entities },
+      senses
+    )
+  }
+
+  // The senses of a number in one round trip: the rows of their cards, read from the simple
+  // lexicon by the statement of entry cards, then what the detailed lexicon and its entities
+  // tell each sense apart by.
+  //
+  // The statement only fetches. The cards are chosen and composed as for a batch; the
+  // detailed entry of a sense is the one its code names, and its entity is chosen by the
+  // rule of a detailed entry, among candidates returned with the values they were matched on.
+  //
+  // A detailed entry is found here by the identity written like the code of the sense, which
+  // is how every published sense is named. A code that is not in the spelling a reference is
+  // normalised to, or that the detailed lexicon does not name, is read by the statement of a
+  // detailed entry, which knows the other ways an entry carries a code.
+  const readNumberSensesInOneStatement = async (
+    input: NumberSensesInput
+  ): Promise<NumberSenses> => {
+    const { language } = input
+    const classicCode = normalizeCode(input.number)
+    const cardsInput = numberSenseCardsInput(classicCode, language)
+    const cardRows = entryCardRowsStatement(cardsInput)
+
+    type DetailedEntryRow = {
+      entryId: number
+      eStrong: string
+      uStrong: string
+      numberPattern: string
+      payload: Payload
+    }
+    type NumberSenseRows = EntryCardRowsGathered & {
+      detailed_publications: {
+        identity: string
+        id: number
+        revision: string
+        metadata: Record<string, unknown>
+      }[]
+      detailed_identities: EntryIdentityRow[]
+      detailed_entries: DetailedEntryRow[]
+      detailed_translations: { stepEntryId: number; payload: Payload }[]
+      entities_by_code: { uStrong: string; payload: Payload }[]
+      entities_by_number: { numberPattern: string; payload: Payload }[]
+      entity_translations: { entityId: number; payload: Payload }[]
+    }
+    const gathered = await sql<NumberSenseRows>`
+      WITH ${cardRows.expressions},
+      detailed_publications AS MATERIALIZED (
+        SELECT resource_identity, id, revision, metadata
+          FROM resource_publications
+         WHERE resource_identity IN ('strong-lexicon:core', 'strong-lexicon:entities')
+           AND status = 'active'
+      ),
+      detailed_core AS MATERIALIZED (
+        SELECT id FROM detailed_publications WHERE resource_identity = 'strong-lexicon:core'
+      ),
+      entities_publication AS MATERIALIZED (
+        SELECT id FROM detailed_publications WHERE resource_identity = 'strong-lexicon:entities'
+      ),
+      -- The detailed identities written like an identity of a candidate entry: a sense is
+      -- named by one of these codes.
+      detailed_identities AS MATERIALIZED (
+        SELECT d.step_entry_id, d.step_code
+          FROM strong_lexicon_entry_identities d
+         WHERE d.publication_id = (SELECT id FROM detailed_core)
+           AND d.step_code = ANY (
+                 ARRAY(
+                   SELECT i.step_code
+                     FROM strong_lexicon_entry_identities i
+                    WHERE i.publication_id = (SELECT id FROM core)
+                      AND i.step_entry_id = ANY (ARRAY(SELECT entry_id FROM candidates))
+                 )
+               )
+      ),
+      -- The fields entities are matched on are read once, here, as for a detailed entry.
+      detailed_entries AS MATERIALIZED (
+        SELECT found.entry_id,
+               found.payload,
+               found.u_strong,
+               found.e_strong,
+               found.prefix || '0*' || found.base_code || '(?:[^0-9]|$)' AS entity_number_pattern,
+               CASE WHEN found.base_code ~ '^[0-9]+$'
+                    THEN substring(found.prefix from 2) || '%' || found.base_code || '%'
+                    ELSE '%'
+               END AS entity_number_like
+          FROM (
+            SELECT e.entry_id,
+                   e.payload,
+                   e.u_strong,
+                   e.e_strong,
+                   '^' || CASE WHEN e.language = 'greek' THEN 'G' ELSE 'H' END AS prefix,
+                   coalesce(e.payload->>'baseCode', '0') AS base_code
+              FROM strong_lexicon_entries e
+             WHERE e.publication_id = (SELECT id FROM detailed_core)
+               AND e.entry_id = ANY (ARRAY(SELECT step_entry_id FROM detailed_identities))
+          ) found
+      ),
+      entities_by_code AS MATERIALIZED (
+        SELECT n.entity_id, n.u_strong, n.payload
+          FROM strong_lexicon_entities n
+         WHERE n.publication_id = (SELECT id FROM entities_publication)
+           AND n.u_strong = ANY (
+                 ARRAY(
+                   SELECT u_strong FROM detailed_entries
+                   UNION ALL
+                   SELECT e_strong FROM detailed_entries
+                 )
+               )
+      ),
+      -- The numbers of the entries without an entity under one of their codes: the senses
+      -- of a number share theirs, so the entities are scanned once.
+      numbers_without_entity AS MATERIALIZED (
+        SELECT DISTINCT e.entity_number_pattern, e.entity_number_like
+          FROM detailed_entries e
+         WHERE NOT EXISTS (
+                 SELECT 1 FROM entities_by_code n WHERE n.u_strong IN (e.u_strong, e.e_strong)
+               )
+      ),
+      entities_by_number AS MATERIALIZED (
+        SELECT w.entity_number_pattern, n.entity_id, n.payload
+          FROM numbers_without_entity w
+          JOIN strong_lexicon_entities n
+            ON n.publication_id = (SELECT id FROM entities_publication)
+           AND n.u_strong LIKE w.entity_number_like
+           AND n.u_strong ~ w.entity_number_pattern
+      )
+      SELECT ${cardRows.columns},
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object(
+                      'identity', resource_identity,
+                      'id', id,
+                      'revision', revision,
+                      'metadata', metadata
+                    )
+                  ),
+                  '[]'::jsonb
+                )
+           FROM detailed_publications) AS detailed_publications,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object('stepEntryId', step_entry_id, 'stepCode', step_code)
+                  ),
+                  '[]'::jsonb
+                )
+           FROM detailed_identities) AS detailed_identities,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object(
+                      'entryId', entry_id,
+                      'eStrong', e_strong,
+                      'uStrong', u_strong,
+                      'numberPattern', entity_number_pattern,
+                      'payload', payload
+                    )
+                  ),
+                  '[]'::jsonb
+                )
+           FROM detailed_entries) AS detailed_entries,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object('stepEntryId', t.step_entry_id, 'payload', t.payload)
+                  ),
+                  '[]'::jsonb
+                )
+           FROM strong_lexicon_translations t
+          WHERE t.publication_id = (SELECT id FROM detailed_core)
+            AND t.step_entry_id = ANY (ARRAY(SELECT entry_id FROM detailed_entries))
+            AND t.language = ${language}) AS detailed_translations,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object('uStrong', u_strong, 'payload', payload)
+                    ORDER BY entity_id
+                  ),
+                  '[]'::jsonb
+                )
+           FROM entities_by_code) AS entities_by_code,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object('numberPattern', entity_number_pattern, 'payload', payload)
+                    ORDER BY entity_id
+                  ),
+                  '[]'::jsonb
+                )
+           FROM entities_by_number) AS entities_by_number,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object('entityId', t.entity_id, 'payload', t.payload)
+                    ORDER BY t.entity_id, md5(t.translation_id::text)
+                  ),
+                  '[]'::jsonb
+                )
+           FROM strong_lexicon_entity_translations t
+          WHERE t.publication_id = (SELECT id FROM entities_publication)
+            AND t.entity_id = ANY (
+                  ARRAY(
+                    SELECT entity_id FROM entities_by_code
+                    UNION
+                    SELECT entity_id FROM entities_by_number
+                  )
+                )
+            AND t.language = ${language}) AS entity_translations
+    `.execute(database)
+    const rows = gathered.rows[0]
+    if (!rows) throw new ActiveStrongLexiconPublicationUnavailable({ moduleId: cardRows.moduleId })
+
+    const simple = entryCardRowsOf(cardsInput, rows)
+    const publication = (moduleId: StrongLexiconModuleId): Publication | undefined =>
+      rows.detailed_publications.find(
+        candidate => candidate.identity === `strong-lexicon:${moduleId}`
+      )
+    const core = publication('core')
+    if (!core) throw new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'core' })
+    const entitiesState = moduleStateFrom('entities', publication('entities'), core.revision)
+
+    const detailOf = (stepCode: string): NumberSenseDetail | undefined => {
+      // A detailed entry is asked for by the normalised spelling of a code.
+      if (normalizeCode(stepCode) !== stepCode) return undefined
+      const identity = rows.detailed_identities.find(row => row.stepCode === stepCode)
+      const found = rows.detailed_entries.find(row => row.entryId === identity?.stepEntryId)
+      if (!found) return undefined
+      const entry = found.payload
+      const definition = definitionOf(
+        entry,
+        rows.detailed_translations.find(row => row.stepEntryId === found.entryId)?.payload,
+        language
+      )
+      const entity =
+        entitiesState.status === 'available'
+          ? entityOfEntry(
+              entry,
+              rows.entities_by_code
+                .filter(row => [found.uStrong, found.eStrong].includes(row.uStrong))
+                .map(row => row.payload),
+              rows.entities_by_number
+                .filter(row => row.numberPattern === found.numberPattern)
+                .map(row => row.payload)
+            )
+          : undefined
+      return {
+        ...(definition ? { detailedDefinitionHtml: definition } : {}),
+        ...(entity
+          ? {
+              entityBrief: entityBriefOf(
+                entity,
+                rows.entity_translations.find(row => row.entityId === number(entity, 'id'))
+                  ?.payload,
+                language
+              ),
+            }
+          : {}),
+      }
+    }
+
+    const senses: { card: StrongLexiconEntryCard; detail: NumberSenseDetail }[] = []
+    for (const card of numberSenseCardsOf(classicCode, composeEntryCards(cardsInput, simple))) {
+      senses.push({
+        card,
+        detail: detailOf(card.stepCode) ?? (await readNumberSenseDetail(card.stepCode, language)),
+      })
+    }
+    return composeNumberSenses(
+      classicCode,
+      { simple: simple.core.revision, core: core.revision, entities: entitiesState },
+      senses
+    )
+  }
+
+  const readNumberSenses =
+    options.numberSensesRead === 'read-by-read'
+      ? readNumberSensesReadByRead
+      : readNumberSensesInOneStatement
+
   return {
     findEntryCards: input =>
       tryDatabasePromise('strong-lexicon.entries-batch', () => findEntryCardsBatch(input)).pipe(
+        Effect.mapError(mapRepositoryCause)
+      ),
+    findNumberSenses: input =>
+      tryDatabasePromise('strong-lexicon.number-senses', () => readNumberSenses(input)).pipe(
         Effect.mapError(mapRepositoryCause)
       ),
     getModuleState: moduleId =>
