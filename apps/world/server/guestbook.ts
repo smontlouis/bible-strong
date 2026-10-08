@@ -11,6 +11,10 @@ import { DurableObject } from 'cloudflare:workers'
 import { parseSubmission, type GuestbookEntry } from '../src/guestbook'
 import { moderateGuestbook, GUESTBOOK_POLICY_VERSION } from './guestbook-moderation'
 
+// The single guestbook keeps the name it was created with: a Durable Object is
+// addressed by this name, so renaming it would start an empty guestbook.
+export const GUESTBOOK_INSTANCE = 'asi-europe'
+
 export interface GuestbookEnv extends GuestbookAdminEnv, NotificationEnv {
   Guestbook: DurableObjectNamespace<Guestbook>
   AI_GATEWAY_API_KEY?: string
@@ -184,5 +188,5 @@ export async function routeGuestbook(request: Request, env: GuestbookEnv): Promi
       headers: { 'Content-Type': 'application/json', 'X-Guestbook-Client': client },
     })
   }
-  return env.Guestbook.get(env.Guestbook.idFromName('asi-europe')).fetch(request)
+  return env.Guestbook.get(env.Guestbook.idFromName(GUESTBOOK_INSTANCE)).fetch(request)
 }

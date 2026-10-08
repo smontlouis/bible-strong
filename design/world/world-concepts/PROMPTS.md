@@ -1,4 +1,4 @@
-# ASI Europe — world concepts
+# World concepts
 
 Generated with built-in ImageGen. Style reference: bible-strong-univers-v1, adapted to navigable environments. Exploratory concept art, not production maps. Generated characters may differ from originals; concept 04 omits a distinct comparison station and concept 05 duplicates the commentary scene at the hub. All six stations and exact avatar fidelity must be validated during final art direction.
 

@@ -10,7 +10,7 @@ import {
 } from './engine'
 import { judgeAnswer, type GameAIEnv } from './ai'
 
-/** One bounded game collection per event room, persisted in that room's SQLite store.
+/** One bounded game collection per room, persisted in that room's SQLite store.
  * No network await inside a state transition. AI completions recheck operation IDs. */
 export class WorldGames {
   constructor(

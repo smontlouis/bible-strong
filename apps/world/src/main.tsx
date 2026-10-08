@@ -5,6 +5,7 @@ import { WorldLoading } from './WorldLoading'
 import { StandBanner } from './StandBanner'
 import { AppDownloadShortcut, AppDownloadStation } from './AppDownload'
 import { StoryDialog } from './StoryDialog'
+import { storyCopy } from './story-copy'
 import { BibleGames } from './BibleGames'
 import { ExplorationJournal, JournalIcon, journalCopy } from './ExplorationJournal'
 import { findTravelDestination } from './world-travel'
@@ -74,7 +75,7 @@ const copy = {
     close: 'Fermer',
     joystick: 'Joystick de déplacement',
     here: 'Place de la Bible',
-    prototype: 'Prototype · ASI Europe',
+    prototype: 'Prototype',
     loading: 'Préparation de ton voyage…',
     visit: 'Approche-toi des lieux pour les découvrir.',
     keyboard: 'Flèches / ZQSD / WASD',
@@ -108,7 +109,7 @@ const copy = {
     close: 'Close',
     joystick: 'Movement joystick',
     here: 'Bible plaza',
-    prototype: 'Prototype · ASI Europe',
+    prototype: 'Prototype',
     loading: 'Preparing your journey…',
     visit: 'Approach each place to discover it.',
     keyboard: 'Arrow keys / WASD / ZQSD',
@@ -584,7 +585,7 @@ function App() {
         const station = stations.find(station => station.id === action.id)
         const label =
           action.id === 'story'
-            ? 'Bible Strong x ASI Europe'
+            ? storyCopy[language].title
             : action.id === 'games'
               ? language === 'fr'
                 ? 'Jouer · Solo ou ensemble'

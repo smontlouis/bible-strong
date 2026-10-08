@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { setTimeout as delay } from 'node:timers/promises'
 
-const endpoint = process.env.WORLD_TEST_URL || 'ws://127.0.0.1:8792/parties/world-room/asi-europe'
+const endpoint = process.env.WORLD_TEST_URL || 'ws://127.0.0.1:8792/parties/world-room/main'
 const clients = []
 const profile = { avatar: 'nova', name: 'QA visitor', color: '#73cdd0' }
 const pose = { x: 836, y: 542, dx: 1, dy: 0, moving: false }

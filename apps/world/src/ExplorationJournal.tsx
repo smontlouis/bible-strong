@@ -3,6 +3,7 @@ import { Modal } from './Modal'
 import { AvatarPreview, profileCopy } from './AvatarEditor'
 import type { AvatarProfile } from './avatar-profile'
 import { stations, type Station } from './world'
+import { storyCopy } from './story-copy'
 import './exploration-journal.css'
 
 export const journalCopy = {
@@ -288,9 +289,7 @@ export function ExplorationJournal({
           <button type="button" className="journal-site" onClick={onStory} aria-haspopup="dialog">
             <JournalIcon />
             <span>
-              <strong>
-                Bible Strong x ASI Europe
-              </strong>
+              <strong>{storyCopy[language].title}</strong>
               <small>
                 {language === 'fr'
                   ? 'Le créateur, le projet et son avenir'

@@ -4,7 +4,7 @@ export { GameCatalogue } from './games/catalogue'
 import { WorldGames } from './games/room'
 import type { GameAIEnv } from './games/ai'
 import { authenticateAdmin, validAdminMutation } from './guestbook-auth'
-import { routeGuestbook, type GuestbookEnv } from './guestbook'
+import { GUESTBOOK_INSTANCE, routeGuestbook, type GuestbookEnv } from './guestbook'
 export { Guestbook } from './guestbook'
 import navigationJson from '../public/navigation/archipelago.json'
 import { parseNavigation } from '../src/navigation-document'
@@ -361,7 +361,7 @@ export default {
           { status: 401, headers: { 'Cache-Control': 'no-store' } }
         )
       if (adminPage) return env.ASSETS.fetch(request)
-      const stub = env.Guestbook.get(env.Guestbook.idFromName('asi-europe'))
+      const stub = env.Guestbook.get(env.Guestbook.idFromName(GUESTBOOK_INSTANCE))
       const reply = (body: unknown, status = 200) =>
         Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } })
       if (request.method === 'GET') {

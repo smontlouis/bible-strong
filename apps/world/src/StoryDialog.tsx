@@ -14,6 +14,7 @@ export function StoryDialog({
   onBoard: () => void
 }) {
   const t = storyCopy[language]
+  const total = String(t.chapters.length).padStart(2, '0')
   const content = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState('welcome')
 
@@ -87,7 +88,7 @@ export function StoryDialog({
             aria-labelledby={index === 0 ? 'story-title' : `story-heading-${chapter.id}`}
           >
             <span className="story-eyebrow">
-              {String(index + 1).padStart(2, '0')} / 06 · {chapter.label}
+              {String(index + 1).padStart(2, '0')} / {total} · {chapter.label}
             </span>
             {index === 0 ? (
               <h1 id="story-title">{t.title}</h1>
@@ -148,13 +149,6 @@ export function StoryDialog({
                   rel="noopener noreferrer"
                 >
                   {t.code} ↗
-                </a>
-              </div>
-            )}
-            {chapter.id === 'together' && (
-              <div className="story-actions">
-                <a className="story-primary" href="mailto:stephane@lestudio316.com">
-                  {t.contact} ↗
                 </a>
               </div>
             )}

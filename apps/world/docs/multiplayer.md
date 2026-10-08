@@ -1,6 +1,6 @@
-# Event multiplayer
+# Multiplayer
 
-World uses `partyserver` on Cloudflare Durable Objects and `partysocket` in the browser. All visitors join `asi-europe`; the room admits up to 100 participants (plus 16 bounded pending connections for handshakes and transport replacement). This is a presence experience: avatars can pass through each other and resource discoveries remain local.
+World uses `partyserver` on Cloudflare Durable Objects and `partysocket` in the browser. All visitors join the single `main` room; the room admits up to 100 participants (plus 16 bounded pending connections for handshakes and transport replacement). This is a presence experience: avatars can pass through each other and resource discoveries remain local.
 
 ## Local development
 
@@ -10,7 +10,7 @@ World uses `partyserver` on Cloudflare Durable Objects and `partysocket` in the 
 
 `yarn workspace @bible-strong/world deploy` builds and deploys the app, static assets, and room Worker together as `bible-strong-world`. No external multiplayer subscription or database is needed. Cloudflare credentials must belong to the intended account.
 
-To keep a separate frontend host such as Vercel, set `VITE_WORLD_MULTIPLAYER_HOST` to the Worker HTTPS URL **at frontend build time**, and add the exact frontend origin to the Worker's comma-separated `ALLOWED_ORIGINS`. Same-origin deployments work without this variable. The Worker permits only the event room route; arbitrary public room creation is disabled.
+To keep a separate frontend host such as Vercel, set `VITE_WORLD_MULTIPLAYER_HOST` to the Worker HTTPS URL **at frontend build time**, and add the exact frontend origin to the Worker's comma-separated `ALLOWED_ORIGINS`. Same-origin deployments work without this variable. The Worker permits only the room route; arbitrary public room creation is disabled.
 
 ## Behavior
 
@@ -32,10 +32,10 @@ For isolated live WebSocket checks, run:
 
 ```sh
 yarn workspace @bible-strong/world wrangler dev --assets public --port 8792 --persist-to /tmp/world-multiplayer-tests
-WORLD_TEST_URL=ws://127.0.0.1:8792/parties/world-room/asi-europe yarn workspace @bible-strong/world test:multiplayer
+WORLD_TEST_URL=ws://127.0.0.1:8792/parties/world-room/main yarn workspace @bible-strong/world test:multiplayer
 ```
 
-The script checks joins/snapshots, movement, profile edits, stale sequence rejection, departures/rejoins, invalid payloads, rate limiting, 30 simultaneous moving clients at 15 Hz, and the 100-connection limit. Run against an **empty, dedicated test instance**, never against the event room in use. A local protocol load test does not measure mobile rendering or venue Wi-Fi capacity.
+The script checks joins/snapshots, movement, profile edits, stale sequence rejection, departures/rejoins, invalid payloads, rate limiting, 30 simultaneous moving clients at 15 Hz, and the 100-connection limit. Run against an **empty, dedicated test instance**, never against the room in use. A local protocol load test does not measure mobile rendering or venue Wi-Fi capacity.
 
 ## Verification on 2026-09-20
 
