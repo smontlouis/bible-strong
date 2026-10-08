@@ -17,16 +17,20 @@ export type CommentaryLink = {
 /**
  * The commentaries of a language that comment a chapter, for the pages that send their
  * reader to them. A commentary whose coverage cannot be read is left out: these links
- * never keep a page from rendering.
+ * never keep a page from rendering. The page is told, so it is not kept as if it were whole.
  */
 export const listCommentaryLinks = async (
   language: ResourceLanguage,
-  ref: CommentaryChapterRef
+  ref: CommentaryChapterRef,
+  onUnreadable: () => void = () => undefined
 ): Promise<CommentaryLink[]> => {
   const links = await Promise.all(
     listCommentaries(language).map(async commentary => {
       const coverage = await readCommentaryCoverage(commentary.publicationId, language).catch(
-        () => undefined
+        () => {
+          onUnreadable()
+          return undefined
+        }
       )
       return coverage && commentaryCovers(coverage, ref)
         ? {

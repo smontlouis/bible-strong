@@ -16,6 +16,7 @@ import { parseOsisReference } from '../resources/editorialLinks'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
 import { bibleBookName } from './bibleBooks'
+import { createPageReads } from './biblePageReads'
 import {
   parseInlineCommentaries,
   placeCommentarySections,
@@ -27,6 +28,7 @@ import { renderBibleText, type BibleNote, type BibleTextMarker } from './bibleLa
 import { bibleStrongLinks, type BibleStrongLink } from './bibleStrongLinks'
 import { quoteVerseText, VERSE_CONTEXT_SPAN } from './bibleVerseRules'
 import { loadVerseStudy, type VerseStudyData } from './bibleVerseStudy'
+import { createInstanceCache } from './instanceCache'
 import {
   buildBiblePath,
   INTERLINEAR_VERSION_ID,
@@ -103,6 +105,11 @@ export type BiblePageData = {
   commentsBeforeHtml?: string
   /** What a single verse read as text is studied with. */
   study?: BibleVerseStudy
+  /**
+   * A part of the page is missing because it could not be read, as opposed to not existing.
+   * The page is shown as it is, and the CDN is not asked to keep it.
+   */
+  incomplete?: true
   previous?: BibleChapterRef
   next?: BibleChapterRef
   description: string
@@ -120,15 +127,12 @@ export type BibleVerseStudy = VerseStudyData & {
 }
 
 // Coverage only changes when a Bible is republished; one read per hour and server instance.
-const coverageCache = new Map<string, { at: number; coverage: BibleVersionCoverageDto }>()
+const cachedCoverage = createInstanceCache<BibleVersionCoverageDto>(COVERAGE_TTL_MS)
 
-const readCoverage = async (versionId: string): Promise<BibleVersionCoverageDto | undefined> => {
-  const cached = coverageCache.get(versionId)
-  if (cached && Date.now() - cached.at < COVERAGE_TTL_MS) return cached.coverage
-  const coverage = await readResource<BibleVersionCoverageDto>(`/v1/bibles/${versionId}/coverage`)
-  if (coverage) coverageCache.set(versionId, { at: Date.now(), coverage })
-  return coverage
-}
+const readCoverage = (versionId: string): Promise<BibleVersionCoverageDto | undefined> =>
+  cachedCoverage(versionId, () =>
+    readResource<BibleVersionCoverageDto>(`/v1/bibles/${versionId}/coverage`)
+  )
 
 const orderedChapters = (coverage: BibleVersionCoverageDto): BibleChapterRef[] => {
   const covered = new Set(coverage.books)
@@ -153,11 +157,15 @@ export const listBibleChapters = async (versionId: string): Promise<BibleChapter
 const listVersionsCarrying = async (
   book: number,
   chapter: number,
-  lastVerse: number | undefined
+  lastVerse: number | undefined,
+  onUnreadable: () => void
 ): Promise<string[]> => {
   const carried = await Promise.all(
     BIBLE_VERSIONS.map(async version => {
-      const coverage = await readCoverage(version.id).catch(() => undefined)
+      const coverage = await readCoverage(version.id).catch(() => {
+        onUnreadable()
+        return undefined
+      })
       if (!coverage) return bibleVersionCoversBook(version, book)
       if (!coverage.chaptersByBook[String(book)]?.includes(chapter)) return false
       const verseCount = coverage.verseCountByBookChapter[`${book}-${chapter}`]
@@ -279,6 +287,45 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
     const inlineCommentaries = listCommentaries(language).filter(commentary =>
       commentaryChoice.includes(commentary.id)
     )
+    // What the page shows beside its text is read a few reads at a time, and a part that
+    // cannot be read is left out; the page then knows it is incomplete.
+    const reads = createPageReads()
+    const textRead = reads.queue(() =>
+      readResource<BibleChapterDto>(`/v1/bibles/${version.id}${chapterPath}`)
+    )
+    const versionsCarrying = listVersionsCarrying(book, chapter, lastVerse, reads.missed)
+    const commentaryLinks = listCommentaryLinks(language, { book, chapter }, reads.missed)
+
+    // A single verse read as text is a page of its own: its words, the passages it is read
+    // with and how the commentaries begin on it. It quotes the commentaries itself.
+    const studiedVerse =
+      presentation === 'text' && passage && passage.endVerse === undefined
+        ? passage.startVerse
+        : undefined
+    const loadStudy = (verse: number) =>
+      loadVerseStudy({
+        reads,
+        language,
+        versionId: version.id,
+        verse: { book, chapter, verse },
+        verseText: textRead.then(
+          found => found?.verses.find(candidate => candidate.number === verse)?.text ?? '',
+          () => ''
+        ),
+        carrying: versionsCarrying,
+        commenting: commentaryLinks,
+      })
+    // The study does not wait for the chapter: its reads leave with it. A verse the coverage
+    // puts past the end of the chapter is most likely not a page, and reads nothing yet.
+    const verseCount = coverage.verseCountByBookChapter[`${book}-${chapter}`]
+    const earlyStudy =
+      studiedVerse !== undefined && (verseCount === undefined || studiedVerse <= verseCount)
+        ? loadStudy(studiedVerse)
+        : undefined
+    // The study is awaited once the passage is known to exist; until then nothing listens
+    // to it, and a rejection must not be taken for an unhandled one.
+    earlyStudy?.catch(() => undefined)
+
     const [
       text,
       strong,
@@ -288,7 +335,7 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
       commentaries,
       ...commentarySections
     ] = await Promise.all([
-      readResource<BibleChapterDto>(`/v1/bibles/${version.id}${chapterPath}`),
+      textRead,
       presentation === 'strong' || presentation === 'reverse-interlinear'
         ? readResource<StrongBibleChapterDto>(`/v1/strong-bibles/${version.id}${chapterPath}`)
         : undefined,
@@ -301,11 +348,14 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
       presentation === 'reverse-interlinear'
         ? readResource<BibleChapterDto>(`/v1/bibles/${INTERLINEAR_VERSION_ID}${chapterPath}`)
         : undefined,
-      listVersionsCarrying(book, chapter, lastVerse),
-      listCommentaryLinks(language, { book, chapter }),
+      versionsCarrying,
+      commentaryLinks,
       // A commentary that says nothing here, or cannot be read, leaves the text as it is.
       ...inlineCommentaries.map(commentary =>
-        readCommentarySections(commentary, language, { book, chapter }).catch(() => [])
+        readCommentarySections(commentary, language, { book, chapter }).catch(() => {
+          reads.missed()
+          return []
+        })
       ),
     ])
     if (!text) throw notFound()
@@ -342,12 +392,7 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
       })
     )
 
-    // A single verse read as text is a page of its own: its words, the passages it is read
-    // with and how the commentaries begin on it. It quotes the commentaries itself.
-    const studied =
-      presentation === 'text' && passage && passage.endVerse === undefined
-        ? selected[0]
-        : undefined
+    const studied = studiedVerse === undefined ? undefined : selected[0]
     const location = { versionId: version.id, presentation, book, chapter, gloss }
     const contextVerse = ({ number, text: verseText }: { number: number; text: string }) => ({
       verse: number,
@@ -358,13 +403,7 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
       ),
     })
     const study: BibleVerseStudy | undefined = studied && {
-      ...(await loadVerseStudy({
-        language,
-        versionId: version.id,
-        verse: { book, chapter, verse: studied.number },
-        verseText: studied.text,
-        commenting: commentaries,
-      })),
+      ...(await (earlyStudy ?? loadStudy(studied.number))),
       text: quoteVerseText(studied.text),
       context: {
         before: text.verses
@@ -407,9 +446,12 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
       })
     )
     const commentsByVerse = new Map(
-      [...placeCommentarySections(comments, selected.map(verse => verse.number))].map(
-        ([verse, placed]) => [verse, renderInlineComments(placed, language)]
-      )
+      [
+        ...placeCommentarySections(
+          comments,
+          selected.map(verse => verse.number)
+        ),
+      ].map(([verse, placed]) => [verse, renderInlineComments(placed, language)])
     )
 
     const all = orderedChapters(coverage)
@@ -503,6 +545,7 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
       commentaryChoice,
       inlineCommentaries: inlineCommentaries.map(({ id, title }) => ({ id, title })),
       study,
+      incomplete: reads.incomplete || undefined,
       previous: index > 0 ? all[index - 1] : undefined,
       next: index >= 0 ? all[index + 1] : undefined,
       description: truncateText(

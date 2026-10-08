@@ -189,9 +189,11 @@ are first submitted by hand, one Bible at a time, so that the crawl of some 311,
 starts when it is decided.
 
 The CDN keeps a rendered page for a day and may serve it stale while revalidating. Only a
-successfully rendered resource is cacheable. Because a cached page is identical for every
-visitor, the theme preference is applied in the browser from the cookie shared with the
-landing page, never rendered on the server.
+successfully rendered resource is cacheable. A Bible page missing a part it could not read
+from the Resource API is kept for a minute only, so that the readers of that minute do not
+each render it again and the whole page soon takes its place. Because a cached page is
+identical for every visitor, the theme preference is applied in the browser from the cookie
+shared with the landing page, never rendered on the server.
 
 ### Boundaries
 
@@ -224,10 +226,13 @@ A term page shows text that is also on the article pages of each dictionary. Bot
 indexable: the term page answers a search for the term, an article page a search for the
 term in a given dictionary.
 
-A verse page reads about twenty documents from the Resource API when it is not cached.
-What does not depend on the Bible being read (the cross-references, the commentaries, the
-topics, the dictionary articles) is the same read for every version of the verse, which
-the API keeps for a day.
+A verse page reads about thirteen documents from the Resource API when it is not cached,
+at most six at a time: the API answers a few reads at once in a steady time, and out of a
+dozen sent together some wait several hundred milliseconds. What does not depend on the
+Bible being read (the verse in the other Bibles and in its original language, the
+cross-references, the commentaries, the topics, the dictionary articles) is the same read
+for every version of the verse, and the other Bibles are one read for every verse of a
+chapter. The API keeps these reads for thirty days.
 
 The coverage of a Bible counts the verses of each chapter without numbering them, and a
 chapter that skips a number is not numbered from 1 to its count. A verse sitemap therefore
