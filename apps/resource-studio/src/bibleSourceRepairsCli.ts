@@ -17,6 +17,8 @@ const describe = (repair: BibleSourceRepairSet["repairs"][number]) => {
       return `split ${repair.ref} at ${repair.at}, dropping ${JSON.stringify(repair.marker)}`;
     case "join":
       return `join ${repair.ref} with the next row, separated by ${JSON.stringify(repair.separator)}`;
+    case "misprint":
+      return `misprint ${repair.ref} at ${repair.at}, ${JSON.stringify(repair.printed)} read as ${JSON.stringify(repair.reads)}`;
     case "move":
       return `move ${repair.ref} to ${repair.to}`;
     case "shift":

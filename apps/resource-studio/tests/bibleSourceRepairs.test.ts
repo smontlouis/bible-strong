@@ -97,6 +97,43 @@ describe("Bible source repairs", () => {
     });
   });
 
+  it("reads a letter where the source prints a digit", () => {
+    const misprint = {
+      op: "misprint",
+      ref: "48-3-28",
+      at: 1,
+      printed: "1",
+      reads: "l",
+      expect: hashVerseText("I1 rest"),
+      result: hashVerseText("Il rest"),
+      evidence: EVIDENCE
+    } as const;
+    const applied = repair({ 48: { 3: { 28: "I1 rest" } } }, [misprint]);
+
+    assert.deepEqual(applied.bible, { 48: { 3: { 28: "Il rest" } } });
+    // One character for another: decisions keep their offsets.
+    assert.deepEqual(applied.origins["48-3-28"], [
+      { sourceRef: "48-3-28", sourceStart: 0, sourceEnd: 7, targetStart: 0 }
+    ]);
+    // Only a digit may be read as a letter, where the source prints it.
+    for (const change of [{ at: 0 }, { printed: "I" }, { reads: "2" }]) {
+      assert.throws(
+        () =>
+          applyBibleSourceRepairs({
+            versionId: "TEST",
+            sourceSha256: SOURCE_SHA256,
+            bible: { 48: { 3: { 28: "I1 rest" } } },
+            repairs: {
+              sourceSha256: SOURCE_SHA256,
+              repairs: [{ ...misprint, ...change }]
+            },
+            anchored: false
+          }),
+        /bible-source-repair-misprint-invalid:TEST:48-3-28/u
+      );
+    }
+  });
+
   it("renumbers a run of rows numbered one too low", () => {
     const applied = repair({ 45: { 3: { 22: "a and b", 23: "c", 24: "d" } } }, [
       {
@@ -295,6 +332,11 @@ describe("Bible source repairs", () => {
         // A marker is a verse number and its spacing, a separator is spacing.
         if (entry.op === "split") assert.doesNotMatch(entry.marker, /\p{L}/u);
         if (entry.op === "join") assert.match(entry.separator, /^\s*$/u);
+        // A misprint is one digit read as one letter.
+        if (entry.op === "misprint") {
+          assert.match(entry.printed, /^\d$/u);
+          assert.match(entry.reads, /^\p{L}$/u);
+        }
       }
     }
   });

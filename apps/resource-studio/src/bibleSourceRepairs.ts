@@ -49,6 +49,20 @@ export type BibleSourceRepair =
       expect: [string, string];
       result: string;
     })
+  /**
+   * The verse prints a digit where the edition has a letter (`I1` for `Il`).
+   * The digit, read at UTF-16 offset `at`, is replaced by the letter. Nothing
+   * else may be rewritten this way: one digit, one letter, same position.
+   */
+  | (RepairBase & {
+      op: "misprint";
+      ref: string;
+      at: number;
+      printed: string;
+      reads: string;
+      expect: string;
+      result: string;
+    })
   /** The row is filed under a wrong reference; `to` must be missing. */
   | (RepairBase & { op: "move"; ref: string; to: string; expect: string })
   /**
@@ -276,6 +290,28 @@ export function applyBibleSourceRepairs(options: {
           { ref: nextRef, text: next }
         ],
         after: [{ ref: repair.ref, text: joined }]
+      });
+    } else if (repair.op === "misprint") {
+      const text = read(repair.ref);
+      expectHash(repair.ref, () => repair.expect, hashVerseText(text));
+      if (
+        !/^\d$/u.test(repair.printed) ||
+        !/^\p{L}$/u.test(repair.reads) ||
+        repair.reads.length !== 1 ||
+        !Number.isSafeInteger(repair.at) ||
+        text.slice(repair.at, repair.at + 1) !== repair.printed
+      )
+        fail("misprint-invalid", repair.ref);
+      const corrected = `${text.slice(0, repair.at)}${repair.reads}${text.slice(repair.at + 1)}`;
+      // One character for another: every offset of the verse is unchanged.
+      const segments = originOf(repair.ref, text);
+      remove(repair.ref);
+      write(repair.ref, corrected, segments);
+      expectHash(repair.ref, () => repair.result, hashVerseText(corrected));
+      changes.push({
+        repair,
+        before: [{ ref: repair.ref, text }],
+        after: [{ ref: repair.ref, text: corrected }]
       });
     } else if (repair.op === "move") {
       parseVerseRef(repair.to);

@@ -11,6 +11,10 @@ import {
 import path from "node:path";
 
 import {
+  publishedTextSourceUrl,
+  readBibleSourcePatches
+} from "./bibleSourcePatches.js";
+import {
   applyLegacyPericope,
   buildCanonicalBibleFromLegacy
 } from "./legacyBiblePublication.js";
@@ -192,6 +196,7 @@ export async function buildOrdinaryBiblePublications(options: {
   }
   const sourceOptions = { root, textOverrides };
   const configuredSources = (await readOrdinaryBibleSources(root)).bibles;
+  const sourcePatches = (await readBibleSourcePatches(root)).bibles;
   const stagingDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
   const canonicalDir = `${stagingDir}-canonical`;
 
@@ -214,9 +219,16 @@ export async function buildOrdinaryBiblePublications(options: {
           loadBiblePericope(metadata.id, sourceOptions),
           readWordsOfJesusDataset(root, metadata.id)
         ]);
+        // A patched source read from a local file, before it is adopted, is
+        // recorded under the content-addressed key it is uploaded to.
+        const textSourceUrl = publishedTextSourceUrl({
+          configuredUrl: configured.text.sourceUrl,
+          sourceSha256: text.sourceSha256,
+          patch: sourcePatches[metadata.id]
+        });
         provenanceSources.push({
           role: "canonical",
-          sourceUrl: configured.text.sourceUrl,
+          sourceUrl: textSourceUrl,
           sha256: text.sourceSha256
         });
         // Pericopes complete legacy text, and canonical sources without headings.
@@ -236,7 +248,7 @@ export async function buildOrdinaryBiblePublications(options: {
             : text.publication
           : buildCanonicalBibleFromLegacy({
               versionId: metadata.id,
-              sourceVersion: configured.text.sourceUrl,
+              sourceVersion: textSourceUrl,
               sourceSha256: text.sourceSha256,
               bible: text.legacyBible,
               ...(pericope ? { pericope: pericope.pericope } : {})

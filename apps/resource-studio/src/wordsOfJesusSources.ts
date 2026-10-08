@@ -6,6 +6,10 @@ import path from "node:path";
 import { promisify } from "node:util";
 
 import {
+  assertPatchedSourceLoaded,
+  readBibleSourcePatches
+} from "./bibleSourcePatches.js";
+import {
   applyBibleSourceRepairs,
   readBibleSourceRepairs,
   type AppliedBibleSourceRepairs
@@ -170,6 +174,13 @@ export async function loadBibleText(
     sourceEntry: text.entry,
     sourceEntryBytes: Buffer.byteLength(raw)
   };
+  // A Bible whose source was completed from its provider is read from the
+  // patched source only, never from the earlier one the patch started from.
+  assertPatchedSourceLoaded(
+    versionId,
+    sourceSha256,
+    (await readBibleSourcePatches(options.root)).bibles[versionId]
+  );
   const repairs = (await readBibleSourceRepairs(options.root)).bibles[
     versionId
   ];

@@ -154,7 +154,7 @@
       ]
     },
     "NET": {
-      "sourceSha256": "7b21514b2e2f0d1a73bfbe3c27fe996bebf1f195295b616b2150b8b785d5d75d",
+      "sourceSha256": "19d2f1bd85d956584ce7643ae884ce35d3bc23537863a4dfc69ed4c5e60b1588",
       "repairs": [
         {
           "op": "split",
@@ -177,8 +177,17 @@
       ]
     },
     "OST": {
-      "sourceSha256": "ea713d5a89cc513365368fde6e63f174898c192d82d1647cb8a7d2196d127844",
+      "sourceSha256": "d3258a3f962ec907be692ddf911180314223fa6521f9955c6fa1f9677589135d",
       "repairs": [
+        {
+          "op": "shift",
+          "chapter": "27-2",
+          "first": 23,
+          "last": 48,
+          "by": 1,
+          "expect": "6ba91a7729950eee",
+          "evidence": "The chapter has one row fewer than its verses: the text of verse 23 is absent from the source and from its provider, and rows 23 to 48 are numbered one too low. The provider numbers these rows 24 to 49. Checked verse by verse against the Segond NEG 1979 and Martin texts of the pipeline."
+        },
         {
           "op": "shift",
           "chapter": "40-11",
@@ -198,55 +207,52 @@
           "evidence": "The chapter has one row fewer than its verses: verses 22 and 23 share row 22, and every later row is numbered one too low. Checked verse by verse against the Segond 1910 of the pipeline."
         },
         {
-          "op": "join",
+          "op": "misprint",
           "ref": "48-3-28",
-          "separator": " ",
-          "expect": ["a83dd0ccbffe39d0", "e8d92f56cba2c137"],
-          "result": "e5216c293307651f",
-          "evidence": "The source cuts this verse after its first letter and files the rest as the next row; the letter and the space that followed it are lost, and every later row is numbered one too high."
+          "at": 1,
+          "printed": "1",
+          "reads": "l",
+          "expect": "bd1cf4e4ffae72f7",
+          "result": "dd4677a14ed7dceb",
+          "evidence": "The provider prints the first word of this verse with the digit one for its second letter, which is how the earlier source came to cut the verse there. The edition has the letter."
         },
         {
           "op": "shift",
-          "chapter": "48-3",
-          "first": 30,
-          "last": 30,
-          "by": -1,
-          "expect": "fcdb2c1d3a449502",
-          "evidence": "Follows the join of verses 28 and 29: the later rows are numbered one too high."
+          "chapter": "52-1",
+          "first": 6,
+          "last": 9,
+          "by": 1,
+          "expect": "1d9f08c48ae25b9b",
+          "evidence": "The chapter has one row fewer than its verses: the text of verse 6 is absent from the source and from its provider, and rows 6 to 9 are numbered one too low. The provider leaves the gap at verse 5 instead; row 5 reads as verse 5 in both other texts. Checked verse by verse against the Segond NEG 1979 and Martin texts of the pipeline."
         },
         {
-          "op": "join",
+          "op": "misprint",
           "ref": "58-12-11",
-          "separator": " ",
-          "expect": ["a83dd0ccbffe39d0", "d98875eb406e3f69"],
-          "result": "4fae96733edb59f0",
-          "evidence": "The source cuts this verse after its first letter and files the rest as the next row; the letter and the space that followed it are lost, and every later row is numbered one too high."
+          "at": 1,
+          "printed": "1",
+          "reads": "l",
+          "expect": "fd32409fecd79601",
+          "result": "05938fc02a042c60",
+          "evidence": "The provider prints the first word of this verse with the digit one for its second letter, which is how the earlier source came to cut the verse there. The edition has the letter."
         },
         {
           "op": "shift",
-          "chapter": "58-12",
-          "first": 13,
-          "last": 30,
-          "by": -1,
-          "expect": "bd8084bc0c3c8afd",
-          "evidence": "Follows the join of verses 11 and 12: the later rows are numbered one too high."
+          "chapter": "59-5",
+          "first": 10,
+          "last": 19,
+          "by": 1,
+          "expect": "453c01d8a66a8716",
+          "evidence": "The chapter has one row fewer than its verses: the text of verse 10 is absent from the source and from its provider, and rows 10 to 19 are numbered one too low. The provider numbers these rows 11 to 20. Checked verse by verse against the Segond NEG 1979 and Martin texts of the pipeline."
         },
         {
-          "op": "join",
+          "op": "misprint",
           "ref": "66-22-10",
-          "separator": " ",
-          "expect": ["a83dd0ccbffe39d0", "c726a694af774798"],
-          "result": "c81248e3433e0311",
-          "evidence": "The source cuts this verse after its first letter and files the rest as the next row; the letter and the space that followed it are lost, and every later row is numbered one too high."
-        },
-        {
-          "op": "shift",
-          "chapter": "66-22",
-          "first": 12,
-          "last": 22,
-          "by": -1,
-          "expect": "0095f016542e6eec",
-          "evidence": "Follows the join of verses 10 and 11: the later rows are numbered one too high."
+          "at": 1,
+          "printed": "1",
+          "reads": "l",
+          "expect": "6aba4f0505aa9904",
+          "result": "bf07e66c8ededace",
+          "evidence": "The provider prints the first word of this verse with the digit one for its second letter, which is how the earlier source came to cut the verse there. The edition has the letter."
         }
       ]
     },

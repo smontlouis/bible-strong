@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted
+Accepted. Extended by
+[ADR-0077](./0077-complete-legacy-bible-sources-from-their-provider.md), which supplies text a
+source lacks from its provider and adds the `misprint` operation.
 
 ## Context
 
@@ -49,7 +51,8 @@ were reviewed against and an ordered list of operations on verse rows:
   dropped and the rest becomes the next verse, whose row must be missing;
 - `join`: the next row is appended to the verse, with a declared separator;
 - `move`: a row goes to another reference, which must be missing;
-- `shift`: a run of rows of one chapter is renumbered by a constant.
+- `shift`: a run of rows of one chapter is renumbered by a constant;
+- `misprint`: one digit, at a given offset, is read as one letter.
 
 Each operation states its evidence in words and anchors the verses it reads and writes by the
 truncated SHA-256 of their text, as words-of-Jesus decisions do. A marker is a verse number and its
@@ -78,10 +81,14 @@ An operation is recorded only when the source itself shows the defect:
   chapter, and every renumbered row checked against another translation of the same language;
 - a `move` needs a row whose reference cannot exist and a missing row it fits between;
 - a `join` needs a row that is a fragment of the next. Characters the source lost are not written
-  back: OST prints `I` where the three joined verses once began with `Il`.
+  back;
+- a `misprint` needs a digit printed inside a word where the edition has a letter. Nothing else is
+  rewritten: the three OST verses whose first word the provider prints `I1` read `Il`.
 
 Text that is absent from a source is never written, reconstructed or taken from another
-translation. It needs a corrected source from its provider.
+translation. It needs a corrected source from its provider, built as ADR-0077 describes. The three
+OST verses first joined here (`I` and the rest of the verse) are now supplied whole by that source,
+and their `join` repairs are gone.
 
 ### Decisions and Offline copies follow the repaired text
 
@@ -100,8 +107,9 @@ none is the base text of an interlinear index.
 
 A renumbered verse keeps its text and changes its reference: FMAR Romans 3:23-30 and 8:21-38, OST
 Matthew 11:3-29, Romans 3:23-30, Galatians 3:30, Hebrews 12:13-30 and Revelation 22:12-22 move by
-one. Study data a reader attached to one of these references now sits on the neighbouring verse,
-which is the verse the reference names in every other Bible.
+one, as do OST Daniel 2:23-48, 1 Thessalonians 1:6-9 and James 5:10-19 since ADR-0077. Study data
+a reader attached to one of these references now sits on the neighbouring verse, which is the verse
+the reference names in every other Bible.
 
 The Resource service keeps its own copy of the legacy converter, used to check an Offline copy that
 is still legacy JSON. It skips the keys this converter now publishes. Such a copy can no longer be
