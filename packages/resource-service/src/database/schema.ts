@@ -912,6 +912,8 @@ export const strongLexiconEntries = pgTable(
       table.d_strong,
       table.u_strong
     ),
+    // The entries filed under one unified code: an entity names its lexical entries by it.
+    index('strong_lexicon_entries_ustrong_lookup').on(table.publication_id, table.u_strong),
     index('strong_lexicon_entries_browse').on(
       table.publication_id,
       sql`lower(coalesce(${table.payload}->>'gloss', ''))`,

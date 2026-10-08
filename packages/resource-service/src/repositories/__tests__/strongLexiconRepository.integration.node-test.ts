@@ -343,7 +343,10 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
       const full = await Effect.runPromise(
         repository.findEntry({ reference: 'H8141', language: 'fr' })
       )
-      assert.ok(statementCount > definitionStatements, 'definitions skip addon queries')
+      // Each is one statement; the definitions one leaves the addon tables out (see the
+      // detailed entry tests).
+      assert.equal(definitionStatements, 1)
+      assert.equal(statementCount, 1)
       assert.deepEqual(definitions.value.resources, [])
       assert.equal(definitions.value.entity, undefined)
       assert.equal(full.value.resources.length, 1)
@@ -351,9 +354,6 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
       const lexicalContent = ({ resources, entity, lsjAbsent, ...lexical }: typeof full.value) =>
         lexical
       assert.deepEqual(lexicalContent(definitions.value), lexicalContent(full.value))
-      console.log(
-        `Strong fixture: ${definitionStatements} initial statements vs ${statementCount} full statements`
-      )
     } finally {
       await isolated.dispose()
     }

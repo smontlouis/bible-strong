@@ -225,6 +225,13 @@
       "when": 1789286914493,
       "tag": "0034_commentary_reading_index",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1791444291875,
+      "tag": "0035_strong_lexicon_entries_ustrong_lookup",
+      "breakpoints": true
     }
   ]
 }
