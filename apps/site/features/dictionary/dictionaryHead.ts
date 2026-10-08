@@ -5,20 +5,24 @@ import type {
   DictionaryEntryPageData,
   DictionaryIndexPageData,
   DictionaryLetterPageData,
+  DictionaryTermPageData,
   DictionaryWork,
   DictionaryWorkPageData,
 } from './dictionary.functions'
 import {
   dictionaryEntryBreadcrumbs,
   dictionaryLetterBreadcrumbs,
+  dictionaryTermBreadcrumbs,
   dictionaryWorkBreadcrumbs,
 } from './dictionaryBreadcrumbs'
 import {
   buildDictionaryEntryPath,
   buildDictionaryIndexPath,
   buildDictionaryLetterPath,
+  buildDictionaryTermPath,
   buildDictionaryWorkPath,
 } from './dictionaryRoutes'
+import { dictionaryMessages } from './messages'
 
 const DESCRIPTION_LENGTH = 155
 // More headings than a description can hold: it is cut to length afterwards.
@@ -164,6 +168,32 @@ export const buildDictionaryEntryHead = (page: DictionaryEntryPageData) => {
           '@id': absoluteSiteUrl(buildDictionaryWorkPath(language, work.id)),
           name: work.title,
         },
+      },
+    ],
+  })
+}
+
+/** Head of a term: every dictionary of the language on one notion. */
+export const buildDictionaryTermHead = (page: DictionaryTermPageData) => {
+  const { language, word, articles } = page
+  const path = buildDictionaryTermPath(language, word)
+  return buildResourceHead({
+    title: dictionaryMessages(language)('term.title')
+      .replace('{word}', word)
+      .replace('{count}', String(articles.length)),
+    description: page.description,
+    path,
+    language,
+    breadcrumbs: dictionaryTermBreadcrumbs(page),
+    structuredData: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'DefinedTerm',
+        '@id': absoluteSiteUrl(path),
+        url: absoluteSiteUrl(path),
+        name: word,
+        description: page.description,
+        inLanguage: language,
       },
     ],
   })

@@ -21,6 +21,7 @@ import {
   dictionaryLetter,
   dictionaryLetterInitials,
   parseDictionaryEntryId,
+  parseDictionaryTermSlug,
   parseDictionaryWorkRoute,
 } from './dictionaryRoutes'
 
@@ -259,7 +260,7 @@ const listRelatedArticles = async (
   language: ResourceLanguage,
   work: string,
   entry: DictionaryListEntry
-): Promise<DictionaryRelatedArticle[]> => {
+): Promise<{ label?: string; articles: DictionaryRelatedArticle[] }> => {
   const isArticle = (source: DictionaryRelatedArticle) =>
     source.language === language && source.work === work && source.id === entry.id
   const search = async (initial?: string) => {
@@ -267,28 +268,34 @@ const listRelatedArticles = async (
       '/v1/dictionaries/directory',
       { language, search: entry.word, initial, limit: DIRECTORY_REQUEST_LIMIT }
     )
-    const notions = (directory?.items ?? []).map(item =>
-      item.sources.map(source => ({
+    const notions = (directory?.items ?? []).map(item => ({
+      label: item.label,
+      sources: item.sources.map(source => ({
         language: source.resource.language,
         work: source.resource.work,
         workTitle: source.title,
         id: source.id,
         word: source.word,
-      }))
-    )
+      })),
+    }))
     return {
-      sources: notions.find(sources => sources.some(isArticle)),
+      notion: notions.find(notion => notion.sources.some(isArticle)),
       complete: !directory?.nextCursor,
     }
   }
 
   let found = await search()
-  if (!found.sources && !found.complete) {
+  if (!found.notion && !found.complete) {
     found = await search([...entry.word.trim().toLowerCase()][0])
   }
-  return (found.sources ?? [])
-    .filter(source => !isArticle(source))
-    .sort((left, right) => Number(right.language === language) - Number(left.language === language))
+  return {
+    label: found.notion?.label,
+    articles: (found.notion?.sources ?? [])
+      .filter(source => !isArticle(source))
+      .sort(
+        (left, right) => Number(right.language === language) - Number(left.language === language)
+      ),
+  }
 }
 
 export type DictionaryEntryPageData = {
@@ -305,6 +312,8 @@ export type DictionaryEntryPageData = {
   previous?: DictionaryListEntry
   next?: DictionaryListEntry
   related: DictionaryRelatedArticle[]
+  /** The page that reads the term in every dictionary of the language that defines it. */
+  term?: { word: string; count: number }
 }
 
 export const loadDictionaryEntryPage = createServerFn({ method: 'GET' })
@@ -322,10 +331,15 @@ export const loadDictionaryEntryPage = createServerFn({ method: 'GET' })
     // The article is complete without its neighbours and related articles: a list that
     // cannot be read leaves them out instead of failing the page.
     const letter = dictionaryLetter(word, language)
-    const [siblings, related] = await Promise.all([
+    const [siblings, notion] = await Promise.all([
       letter ? listLetterEntries(language, work.id, letter).catch(() => []) : [],
-      listRelatedArticles(language, work.id, { id, word }).catch(() => []),
+      listRelatedArticles(language, work.id, { id, word }).catch(() => ({
+        label: undefined,
+        articles: [],
+      })),
     ])
+    const related = notion.articles
+    const sameLanguage = related.filter(article => article.language === language).length
     const position = siblings.findIndex(sibling => sibling.id === id)
     const html = renderDictionaryArticleHtml(definition, { language, work: work.id, entryId: id })
 
@@ -343,5 +357,133 @@ export const loadDictionaryEntryPage = createServerFn({ method: 'GET' })
       previous: position > 0 ? siblings[position - 1] : undefined,
       next: position >= 0 ? siblings[position + 1] : undefined,
       related,
+      term:
+        notion.label && sameLanguage > 0
+          ? { word: notion.label, count: sameLanguage + 1 }
+          : undefined,
     }
+  })
+
+// A term is found among the notions its first word brings up; a few pages are enough.
+const TERM_SEARCH_PAGES = 4
+
+/** A term as the dictionaries of a language define it, one article after the other. */
+export type DictionaryTermPageData = {
+  kind: 'term'
+  language: ResourceLanguage
+  /** The heading the Resource API files the notion under. */
+  word: string
+  slug: string
+  articles: { work: DictionaryWork; id: number; word: string; html: string }[]
+  /** The same notion in a dictionary of the other language, when one holds it. */
+  counterpart?: DictionaryRelatedArticle
+  description: string
+}
+
+/** Where a term held by a single dictionary is read: the article itself. */
+export type DictionaryTermArticle = { kind: 'article'; work: string; id: number; word: string }
+
+/**
+ * `/dictionary/:language/term/:slug` — every article the dictionaries of a language have on
+ * one notion. The notion is looked for by the first word of its slug, among the notions the
+ * Resource API gathers across dictionaries.
+ */
+export const loadDictionaryTermPage = createServerFn({ method: 'GET' })
+  .validator((data: { language: string; slug: string }) => data)
+  .handler(async ({ data }): Promise<DictionaryTermPageData | DictionaryTermArticle> => {
+    const slug = parseDictionaryTermSlug(data.slug)
+    if (!isResourceLanguage(data.language) || !slug) throw notFound()
+    const language = data.language
+
+    let notion: DictionaryDirectoryResponseDto['items'][number] | undefined
+    let cursor: string | undefined
+    for (let page = 0; page < TERM_SEARCH_PAGES && !notion; page += 1) {
+      const directory = await readResource<DictionaryDirectoryResponseDto>(
+        '/v1/dictionaries/directory',
+        { language, search: slug.split('-')[0], limit: DIRECTORY_REQUEST_LIMIT, cursor }
+      )
+      notion = directory?.items.find(item => createDictionaryArticleSlug(item.label) === slug)
+      cursor = directory?.nextCursor
+      if (!cursor) break
+    }
+    if (!notion) throw notFound()
+
+    const works = new Map((await listDictionaryWorks(language)).map(work => [work.id, work]))
+    const sources = notion.sources.filter(
+      source => source.resource.language === language && works.has(source.resource.work)
+    )
+    const [single] = sources
+    if (!single) throw notFound()
+    // A notion one dictionary holds is read on the page of its article.
+    if (sources.length === 1) {
+      return { kind: 'article', work: single.resource.work, id: single.id, word: single.word }
+    }
+
+    const articles = (
+      await Promise.all(
+        sources.map(async source => {
+          const work = works.get(source.resource.work)
+          const response = await readResource<DictionaryEntryResponseDto>(
+            `${entriesPath(language, source.resource.work)}/by-id/${source.id}`
+          )
+          return work && response
+            ? [
+                {
+                  work,
+                  id: response.entry.id,
+                  word: response.entry.word,
+                  html: renderDictionaryArticleHtml(response.entry.definition, {
+                    language,
+                    work: work.id,
+                    entryId: response.entry.id,
+                  }),
+                },
+              ]
+            : []
+        })
+      )
+    ).flat()
+    if (!articles.length) throw notFound()
+
+    const other = notion.sources.find(source => source.resource.language !== language)
+    return {
+      kind: 'term',
+      language,
+      word: notion.label,
+      slug,
+      articles,
+      counterpart: other && {
+        language: other.resource.language,
+        work: other.resource.work,
+        workTitle: other.title,
+        id: other.id,
+        word: other.word,
+      },
+      description:
+        dictionaryArticleExcerpt(articles[0]?.html ?? '', DESCRIPTION_LENGTH) ||
+        truncateText(notion.label, DESCRIPTION_LENGTH),
+    }
+  })
+
+/** The terms several dictionaries of a language define, for the sitemap of their pages. */
+export const listDictionaryTerms = (language: ResourceLanguage): Promise<string[]> =>
+  cached(`terms:${language}`, async () => {
+    const works = new Set((await listDictionaryWorks(language)).map(work => work.id))
+    const terms: string[] = []
+    let cursor: string | undefined
+    for (let request = 0; request < MAX_LIST_REQUESTS; request += 1) {
+      const directory = await readResource<DictionaryDirectoryResponseDto>(
+        '/v1/dictionaries/directory',
+        { language, limit: LIST_REQUEST_LIMIT, cursor }
+      )
+      for (const item of directory?.items ?? []) {
+        const held = item.sources.filter(
+          source => source.resource.language === language && works.has(source.resource.work)
+        )
+        if (held.length > 1) terms.push(item.label)
+      }
+      cursor = directory?.nextCursor
+      if (!cursor) break
+    }
+    return terms
   })

@@ -5,6 +5,7 @@ import {
   buildDictionaryEntryPath,
   buildDictionaryIndexPath,
   buildDictionaryLetterPath,
+  buildDictionaryTermPath,
   buildDictionaryWorkPath,
   buildWebAppDictionaryEntryUrl,
 } from './dictionaryRoutes'
@@ -95,6 +96,16 @@ export default function DictionaryEntryPage({ page }: { page: DictionaryEntryPag
         {related.length > 0 && (
           <section className="mt-12">
             <h2 className="mb-4 text-xl font-semibold">{t('entry.related')}</h2>
+            {page.term && (
+              <a
+                className="resource-link mb-4 inline-block py-1 font-semibold"
+                href={buildDictionaryTermPath(language, page.term.word)}
+              >
+                {t('entry.term')
+                  .replace('{word}', page.term.word)
+                  .replace('{count}', String(page.term.count))}
+              </a>
+            )}
             <ul className="grid gap-2 sm:grid-cols-2">
               {related.map(article => (
                 <li key={`${article.language}-${article.work}-${article.id}`}>

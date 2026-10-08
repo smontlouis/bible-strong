@@ -55,6 +55,7 @@ Site routes reuse the grammar of ADR-0053 to ADR-0056 and add the lists that lea
 - `/dictionary/:language`, the dictionaries; `/dictionary/:language/:work`, a dictionary
   and its alphabet; `/dictionary/:language/:work/:letter`, its articles under a letter
 - `/dictionary/:language/:work/:entryId/:slug`, an article (ADR-0055)
+- `/dictionary/:language/term/:slug`, a term in every dictionary of the language
 - `/nave/:language`, the topics; `/nave/:language/index/:letter[/:page]`, the topics under
   a letter
 - `/nave/:language/:topic`, a topic (ADR-0054)
@@ -98,6 +99,16 @@ is a way into another section, and a part with nothing to show is left out. The 
 titled with how the verse begins, since a verse is looked for by its words as much as by
 its reference. The other reading modes of a verse, and a range of verses, stay the text
 alone.
+
+A term several dictionaries of a language define has a page that reads their articles one
+after the other, each under the name of its dictionary and linked to its own page. The
+articles are gathered by the notion the Resource API files them under; the address is
+written from the heading of that notion. A term one dictionary holds has no such page: its
+address redirects permanently to the article. The article pages stay indexable under their
+own address, and each names the term page when there is one.
+
+A topic page quotes the first forty verses its outline cites, in the reference Bible of
+its language, after the outline that lists every reference.
 
 A reader may show commentaries inside the Bible text. The choice is written in the address
 of the page (`?commentary=barnes.mhy-fr`: at most five, in one spelling) and kept by every
@@ -148,15 +159,15 @@ English Bible, French otherwise.
 ### Indexing
 
 A Bible chapter and a single verse in every reading mode, a Strong entry, every numbered
-page of its concordance, a dictionary article, a topic, the commentary of a chapter, a
-timeline event and the lists leading to them are indexable. Verse ranges, concordance book
+page of its concordance, a dictionary article, a dictionary term, a topic, the commentary
+of a chapter, a timeline event and the lists leading to them are indexable. Verse ranges, concordance book
 filters and Bible readings with commentaries shown in the text are served with
 `noindex, follow`; such a reading names the plain one as its canonical page.
 
 Sitemaps are generated from the Resource API: one per Bible and reading mode listing its
 chapters, the entry page of every number of the Strong lexicons (the number where it is
-split, its sense otherwise), one per dictionary, per language of the topics and per
-commentary, and the timeline. Verses and the senses of a split number are reached through
+split, its sense otherwise), one per dictionary, per language of the dictionary terms, per
+language of the topics and per commentary, and the timeline. Verses and the senses of a split number are reached through
 links.
 
 The CDN keeps a rendered page for a day and may serve it stale while revalidating. Only a
@@ -190,6 +201,10 @@ pages differ by their concordance, their sense code and, for a person, who that 
 
 A Bible page with commentaries shown in the text reads the chapter of each of them from the
 Resource API, and every choice of commentaries is a page the CDN keeps apart.
+
+A term page shows text that is also on the article pages of each dictionary. Both are
+indexable: the term page answers a search for the term, an article page a search for the
+term in a given dictionary.
 
 A verse page reads about twenty documents from the Resource API when it is not cached.
 What does not depend on the Bible being read (the cross-references, the commentaries, the

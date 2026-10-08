@@ -1,10 +1,15 @@
 import { absoluteSiteUrl, RESOURCE_LANGUAGES, type ResourceLanguage } from '../resources/publicSite'
 import type { SitemapUrl } from '../resources/sitemap'
-import { listDictionaryEntries, listDictionaryWorks } from './dictionary.functions'
+import {
+  listDictionaryEntries,
+  listDictionaryTerms,
+  listDictionaryWorks,
+} from './dictionary.functions'
 import {
   buildDictionaryEntryPath,
   buildDictionaryIndexPath,
   buildDictionaryLetterPath,
+  buildDictionaryTermPath,
   buildDictionaryWorkPath,
   DICTIONARY_LETTERS,
   DICTIONARY_LIST_PAGE_SIZE,
@@ -69,9 +74,29 @@ export const listDictionaryWorkSitemapUrls = async (
   return [...letterPages, ...articles].map(path => ({ loc: absoluteSiteUrl(path) }))
 }
 
-/** `dictionary-index.xml`, then one sitemap per work: `dictionary-bost-fr.xml`, … */
+/** The page of every term several dictionaries of a language define. */
+export const listDictionaryTermSitemapUrls = async (
+  language: ResourceLanguage
+): Promise<SitemapUrl[]> => {
+  const paths = (await listDictionaryTerms(language)).map(word =>
+    buildDictionaryTermPath(language, word)
+  )
+  // Two headings that read the same once written as an address share a page.
+  return [...new Set(paths)].map(path => ({ loc: absoluteSiteUrl(path) }))
+}
+
+/**
+ * `dictionary-index.xml`, one sitemap per work (`dictionary-bost-fr.xml`, …) and one per
+ * language for the terms (`dictionary-terms-fr.xml`).
+ */
 export const DICTIONARY_SITEMAPS: Record<string, () => Promise<SitemapUrl[]> | SitemapUrl[]> = {
   'dictionary-index.xml': listDictionaryIndexSitemapUrls,
+  ...Object.fromEntries(
+    RESOURCE_LANGUAGES.map(language => [
+      `dictionary-terms-${language}.xml`,
+      () => listDictionaryTermSitemapUrls(language),
+    ])
+  ),
   ...Object.fromEntries(
     RESOURCE_LANGUAGES.flatMap(language =>
       SITEMAP_WORKS[language].map(work => [

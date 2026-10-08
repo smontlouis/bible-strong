@@ -44,6 +44,7 @@ import { Route as NaveLanguageTopicRouteImport } from './routes/nave.$language_.
 import { Route as StrongLanguageCodeRouteImport } from './routes/strong.$language.$code'
 import { Route as TimelineLanguageSlugRouteImport } from './routes/timeline.$language_.$slug'
 import { Route as DictionaryLanguageWorkLetterRouteImport } from './routes/dictionary.$language_.$work_.$letter'
+import { Route as DictionaryLanguageTermSlugRouteImport } from './routes/dictionary.$language_.term.$slug'
 import { Route as NaveLanguageIndexLetterRouteImport } from './routes/nave.$language_.index.$letter'
 import { Route as StrongLanguageCodeConcordanceRouteImport } from './routes/strong.$language.$code_.concordance'
 import { Route as StrongLanguageLexiconLetterRouteImport } from './routes/strong.$language.$lexicon.$letter'
@@ -232,6 +233,12 @@ const DictionaryLanguageWorkLetterRoute =
     path: '/dictionary/$language/$work/$letter',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DictionaryLanguageTermSlugRoute =
+  DictionaryLanguageTermSlugRouteImport.update({
+    id: '/dictionary/$language_/term/$slug',
+    path: '/dictionary/$language/term/$slug',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const NaveLanguageIndexLetterRoute = NaveLanguageIndexLetterRouteImport.update({
   id: '/nave/$language_/index/$letter',
   path: '/nave/$language/index/$letter',
@@ -316,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
   '/timeline/$language/$slug': typeof TimelineLanguageSlugRoute
   '/dictionary/$language/$work/$letter': typeof DictionaryLanguageWorkLetterRoute
+  '/dictionary/$language/term/$slug': typeof DictionaryLanguageTermSlugRoute
   '/strong/$language/$code/concordance': typeof StrongLanguageCodeConcordanceRoute
   '/strong/$language/$lexicon/$letter': typeof StrongLanguageLexiconLetterRoute
   '/nave/$language/index/$letter': typeof NaveLanguageIndexLetterRoute
@@ -361,6 +369,7 @@ export interface FileRoutesByTo {
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
   '/timeline/$language/$slug': typeof TimelineLanguageSlugRoute
   '/dictionary/$language/$work/$letter': typeof DictionaryLanguageWorkLetterRoute
+  '/dictionary/$language/term/$slug': typeof DictionaryLanguageTermSlugRoute
   '/strong/$language/$code/concordance': typeof StrongLanguageCodeConcordanceRoute
   '/strong/$language/$lexicon/$letter': typeof StrongLanguageLexiconLetterRoute
   '/nave/$language/index/$letter': typeof NaveLanguageIndexLetterRoute
@@ -407,6 +416,7 @@ export interface FileRoutesById {
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
   '/timeline/$language_/$slug': typeof TimelineLanguageSlugRoute
   '/dictionary/$language_/$work_/$letter': typeof DictionaryLanguageWorkLetterRoute
+  '/dictionary/$language_/term/$slug': typeof DictionaryLanguageTermSlugRoute
   '/strong/$language/$code_/concordance': typeof StrongLanguageCodeConcordanceRoute
   '/strong/$language/$lexicon/$letter': typeof StrongLanguageLexiconLetterRoute
   '/nave/$language_/index/$letter': typeof NaveLanguageIndexLetterRoute
@@ -454,6 +464,7 @@ export interface FileRouteTypes {
     | '/strong/$language/$code'
     | '/timeline/$language/$slug'
     | '/dictionary/$language/$work/$letter'
+    | '/dictionary/$language/term/$slug'
     | '/strong/$language/$code/concordance'
     | '/strong/$language/$lexicon/$letter'
     | '/nave/$language/index/$letter'
@@ -499,6 +510,7 @@ export interface FileRouteTypes {
     | '/strong/$language/$code'
     | '/timeline/$language/$slug'
     | '/dictionary/$language/$work/$letter'
+    | '/dictionary/$language/term/$slug'
     | '/strong/$language/$code/concordance'
     | '/strong/$language/$lexicon/$letter'
     | '/nave/$language/index/$letter'
@@ -544,6 +556,7 @@ export interface FileRouteTypes {
     | '/strong/$language/$code'
     | '/timeline/$language_/$slug'
     | '/dictionary/$language_/$work_/$letter'
+    | '/dictionary/$language_/term/$slug'
     | '/strong/$language/$code_/concordance'
     | '/strong/$language/$lexicon/$letter'
     | '/nave/$language_/index/$letter'
@@ -590,6 +603,7 @@ export interface RootRouteChildren {
   StrongLanguageCodeRoute: typeof StrongLanguageCodeRoute
   TimelineLanguageSlugRoute: typeof TimelineLanguageSlugRoute
   DictionaryLanguageWorkLetterRoute: typeof DictionaryLanguageWorkLetterRoute
+  DictionaryLanguageTermSlugRoute: typeof DictionaryLanguageTermSlugRoute
   StrongLanguageCodeConcordanceRoute: typeof StrongLanguageCodeConcordanceRoute
   StrongLanguageLexiconLetterRoute: typeof StrongLanguageLexiconLetterRoute
   NaveLanguageIndexLetterRoute: typeof NaveLanguageIndexLetterRoute
@@ -847,6 +861,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DictionaryLanguageWorkLetterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dictionary/$language_/term/$slug': {
+      id: '/dictionary/$language_/term/$slug'
+      path: '/dictionary/$language/term/$slug'
+      fullPath: '/dictionary/$language/term/$slug'
+      preLoaderRoute: typeof DictionaryLanguageTermSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/nave/$language_/index/$letter': {
       id: '/nave/$language_/index/$letter'
       path: '/nave/$language/index/$letter'
@@ -942,6 +963,7 @@ const rootRouteChildren: RootRouteChildren = {
   StrongLanguageCodeRoute: StrongLanguageCodeRoute,
   TimelineLanguageSlugRoute: TimelineLanguageSlugRoute,
   DictionaryLanguageWorkLetterRoute: DictionaryLanguageWorkLetterRoute,
+  DictionaryLanguageTermSlugRoute: DictionaryLanguageTermSlugRoute,
   StrongLanguageCodeConcordanceRoute: StrongLanguageCodeConcordanceRoute,
   StrongLanguageLexiconLetterRoute: StrongLanguageLexiconLetterRoute,
   NaveLanguageIndexLetterRoute: NaveLanguageIndexLetterRoute,

@@ -32,6 +32,10 @@ _Avoid_: Disambiguation page, family page
 The public resource page of a single verse read as text, which gathers under the verse what the site holds about it: other Bibles, context, original words, cross-references, commentaries, topics and dictionary articles.
 _Avoid_: Verse hub, verse detail
 
+**Term page**:
+The public resource page of a term several dictionaries of a language define, which reads their articles one after the other under the name of each dictionary.
+_Avoid_: Dictionary hub, merged article
+
 **Inline comment**:
 The beginning of a commentary section shown between the verses of a Bible page at the reader's request, which opens the whole section over the passage.
 _Avoid_: Annotation, footnote
