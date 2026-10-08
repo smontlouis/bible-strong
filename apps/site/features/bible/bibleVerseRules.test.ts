@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import {
-  closestCommentarySection,
   crossReferenceVerses,
   hasVerseText,
   otherMainVersions,
@@ -115,20 +114,5 @@ describe('verseDictionaryEntries', () => {
       entry(`w${index}`, 'source-citation', 'x')
     )
     expect(verseDictionaryEntries(many)).toHaveLength(10)
-  })
-})
-
-describe('closestCommentarySection', () => {
-  const run = (startVerse: number, endVerse: number) => ({ startVerse, endVerse })
-
-  it('prefers the comment on the fewest verses', () => {
-    expect(closestCommentarySection([run(1, 21), run(14, 18), run(16, 16)], 16)).toEqual(
-      run(16, 16)
-    )
-    expect(closestCommentarySection([run(1, 21), run(14, 18)], 17)).toEqual(run(14, 18))
-  })
-
-  it('finds nothing where no comment covers the verse', () => {
-    expect(closestCommentarySection([run(0, 0), run(1, 5)], 16)).toBeUndefined()
   })
 })

@@ -99,23 +99,3 @@ export const verseDictionaryEntries = <Entry extends DictionaryEvidence>(
     })
     .slice(0, VERSE_DICTIONARY_WORD_COUNT)
 }
-
-type VerseRun = { startVerse: number; endVerse: number }
-
-/**
- * The comment of a commentary that bears most closely on a verse: among the sections that
- * cover it, the one on the fewest verses. The introduction of the chapter covers none.
- */
-export const closestCommentarySection = <Section extends VerseRun>(
-  sections: readonly Section[],
-  verse: number
-): Section | undefined =>
-  sections
-    .filter(
-      section => section.endVerse > 0 && section.startVerse <= verse && verse <= section.endVerse
-    )
-    .sort(
-      (left, right) =>
-        left.endVerse - left.startVerse - (right.endVerse - right.startVerse) ||
-        right.startVerse - left.startVerse
-    )[0]

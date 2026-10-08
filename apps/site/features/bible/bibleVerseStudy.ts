@@ -4,8 +4,8 @@ import type {
 } from '@bible-strong/resource-domain/contracts/bibleChapterContract'
 import type { StrongBibleChapterDto } from '@bible-strong/resource-domain/contracts/strongBibleContract'
 import type { StrongLexiconEntryCardsDto } from '@bible-strong/resource-domain/contracts/strongLexiconContract'
+import type { CommentaryVerseSectionsResponseDto } from '@bible-strong/resource-domain/contracts/supplementaryContract'
 import { listCommentaries } from '../commentary/commentaryCatalog'
-import { readCommentarySections } from '../commentary/commentaryChapter'
 import { commentaryExcerpt, renderCommentaryHtml } from '../commentary/commentaryHtml'
 import type { CommentaryLink } from '../commentary/commentaryLinks'
 import { buildCommentarySectionPath } from '../commentary/commentaryRoutes'
@@ -20,7 +20,6 @@ import { commentVersesLabel } from './bibleCommentaries'
 import { buildBiblePath, INTERLINEAR_VERSION_ID, isBiblePresentationSupported } from './bibleRoutes'
 import { bibleStrongLinks } from './bibleStrongLinks'
 import {
-  closestCommentarySection,
   crossReferenceVerses,
   hasVerseText,
   otherMainVersions,
@@ -288,7 +287,11 @@ const loadCrossReferences = async (
   })
 }
 
-/** How the first commentaries of the chapter begin on this verse. */
+/**
+ * How the first commentaries of the chapter begin on this verse: the section of each that
+ * bears most closely on it, in one read. The Resource API picks the section; reading the
+ * chapters to pick it here cost a read per commentary, and several hundred KB.
+ */
 const loadComments = async (
   reads: PageReads,
   language: ResourceLanguage,
@@ -296,38 +299,44 @@ const loadComments = async (
   commenting: readonly CommentaryLink[]
 ): Promise<VerseComment[]> => {
   const catalog = new Map(listCommentaries(language).map(commentary => [commentary.id, commentary]))
-  const comments = await Promise.all(
-    commenting.slice(0, VERSE_COMMENTARY_COUNT).map(async link => {
-      const commentary = catalog.get(link.id)
-      if (!commentary) return []
-      const sections = await reads.optional(() =>
-        readCommentarySections(commentary, language, { book: verse.book, chapter: verse.chapter })
-      )
-      const section = closestCommentarySection(sections ?? [], verse.verse)
-      const excerpt =
-        section &&
-        commentaryExcerpt(
-          renderCommentaryHtml(section.content, { language }),
-          COMMENT_EXCERPT_LENGTH
-        )
-      return section && excerpt
-        ? [
-            {
-              commentary: commentary.id,
-              title: commentary.title,
-              section: section.slug,
-              path: buildCommentarySectionPath(
-                { language, resource: commentary.id, book: verse.book, chapter: verse.chapter },
-                section.slug
-              ),
-              verses: commentVersesLabel(section, language),
-              excerpt,
-            },
-          ]
-        : []
-    })
+  const commentaries = commenting
+    .slice(0, VERSE_COMMENTARY_COUNT)
+    .flatMap(link => catalog.get(link.id) ?? [])
+  if (!commentaries.length) return []
+
+  const found = await reads.optional(() =>
+    readResource<CommentaryVerseSectionsResponseDto>(
+      `/v1/commentaries/verses/${verseKey(verse)}/sections`,
+      {
+        language,
+        commentaries: commentaries.map(commentary => commentary.publicationId).join(','),
+      }
+    )
   )
-  return comments.flat()
+  const sections = new Map(
+    (found?.sections ?? []).map(section => [section.resource.resourceId, section])
+  )
+  return commentaries.flatMap(commentary => {
+    const section = sections.get(commentary.publicationId)
+    const excerpt =
+      section &&
+      commentaryExcerpt(renderCommentaryHtml(section.content, { language }), COMMENT_EXCERPT_LENGTH)
+    return section && excerpt
+      ? [
+          {
+            commentary: commentary.id,
+            title: commentary.title,
+            section: section.slug,
+            path: buildCommentarySectionPath(
+              { language, resource: commentary.id, book: verse.book, chapter: verse.chapter },
+              section.slug
+            ),
+            verses: commentVersesLabel(section, language),
+            excerpt,
+          },
+        ]
+      : []
+  })
 }
 
 const loadTopics = async (
