@@ -70,11 +70,31 @@ A patch is recorded only when the chapters the source and the provider share rea
 provider that serves another revision of a translation would need the whole Bible refetched, which
 is a separate decision; a chapter would then be replaced whole, never mixed.
 
+### Another edition of the same text
+
+Where the provider lacks a verse as well, a chapter may be read from another published edition of
+the same text, named on the chapter (`provider`). Such an edition is retained only when whole
+chapters of it read as the source, and the verses on both sides of the gap do.
+
+OST is two texts. Its Old Testament is the Ostervald 1996 text of the Unbound Bible: 23,185 of its
+23,212 rows are identical in the OSIS file gratis-bible publishes (`fr/ostv1996`), and in the
+eBible.org edition `fra_fob` under another verse numbering. Its New Testament is the Ostervald 1877
+text digitised by levigilant.com in 2011: Romans has 431 identical rows of 432 there, James 103 of
+107 and the differences are an accent. That site prints James 5:10 behind the number `1O`, which is
+how the verse was lost; a chapter records how such a number reads (`labels`), and any other label
+that is not a number fails.
+
+An edition publishes whole files, so the answer of a chapter is the file it is read from: one OSIS
+file for a Bible, one page for a book. It is recorded and anchored like a chapter answer.
+
+FMAR needs no text: what it lacks is inside its own rows, and repairs split them (ADR-0075).
+
 ### Requests to the provider
 
 `fetch` reads only the chapters a patch names, with plain GET requests of the public endpoint, one
 at a time and at most one per second across runs, each answer kept in
-`outputs/bible-sources/provider-cache/bible.com/` and never requested twice. Every request is
+`outputs/bible-sources/provider-cache/bible.com/` and never requested twice. The file of another
+edition is kept beside it, under the name of its host, with a request log of its own. Every request is
 logged there and counted against a cap. Any answer that is not the chapter stops the run and is
 kept for the operator to read; it is never retried or worked around.
 
@@ -88,10 +108,10 @@ The provider prints the three OST verses with the digit one for the second lette
 word, which is how the earlier source came to cut them. A new repair, `misprint`, reads one digit
 as one letter at a recorded offset, anchored like the others. It rewrites nothing else.
 
-Where the provider lacks the verse as well, the source keeps the gap and the rows after it are
-renumbered by `shift` repairs, under the rule of ADR-0075: OST Daniel 2, 1 Thessalonians 1 and
-James 5. The provider numbers Daniel 2 and James 5 that way; in 1 Thessalonians 1 it leaves the gap
-one verse early, which two other French texts contradict.
+OST Daniel 2:23, 1 Thessalonians 1:6 and James 5:10, which the provider lacks as well, are
+supplied from the two editions above, and the `shift` repairs that renumbered the rows after each
+gap are gone. Daniel 2:31 and James 5:7, 5:8 and 5:12 take the reading of those editions, which
+differs from the source by one letter or one accent.
 
 ### The configuration names uploaded sources only
 
@@ -114,9 +134,9 @@ NFC and PDV2017 no longer publish the translator's prologue of Sirach, as BFC ne
 Sirach 1 has 27 rows, three verses being left out by those editions.
 
 OST Daniel 2:23-48, 1 Thessalonians 1:6-9 and James 5:10-19 move by one, to the reference the
-verse has in every other Bible. Daniel 2:23, 1 Thessalonians 1:6 and James 5:10 stay absent.
+verse has in every other Bible, and Daniel 2:23, 1 Thessalonians 1:6 and James 5:10 are published.
 
-Still missing, because the provider does not carry them: the FMAR, CHU, POV and TLV items of the
+Still missing, because the provider does not carry them: the CHU, POV and TLV items of the
 inventory, an FRC97 text of its own, and BFC Baruch 6.
 
 A patched source can be rebuilt only from the answers that were read. The provider may serve

@@ -29,15 +29,18 @@ interface RepairBase {
  */
 export type BibleSourceRepair =
   /**
-   * The verse holds the next verse too, behind a literal verse number. The
-   * marker, read at UTF-16 offset `at`, is dropped; the text after it becomes
-   * the next verse, whose row must be missing.
+   * The verse holds another verse too, behind a marker: a literal verse
+   * number, or the spacing between the two where another edition of the same
+   * text ends the verse. The marker, read at UTF-16 offset `at`, is dropped;
+   * the text after it becomes the next verse, or verse `to` of the same
+   * chapter, whose row must be missing.
    */
   | (RepairBase & {
       op: "split";
       ref: string;
       at: number;
       marker: string;
+      to?: string;
       expect: string;
       result: [string, string];
     })
@@ -231,7 +234,14 @@ export function applyBibleSourceRepairs(options: {
     if (!repair.evidence) fail("evidence-missing", JSON.stringify(repair));
     if (repair.op === "split") {
       const { book, chapter, verse } = parseVerseRef(repair.ref);
-      const nextRef = refOf(book, chapter, Number(verse) + 1);
+      const nextRef = repair.to ?? refOf(book, chapter, Number(verse) + 1);
+      const target = parseVerseRef(nextRef);
+      if (
+        target.book !== book ||
+        target.chapter !== chapter ||
+        target.verse === verse
+      )
+        fail("split-target-invalid", repair.ref, nextRef);
       const text = read(repair.ref);
       expectHash(repair.ref, () => repair.expect, hashVerseText(text));
       const { at } = repair;

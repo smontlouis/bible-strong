@@ -14,7 +14,10 @@ import { loadBibleText } from "./wordsOfJesusSources.js";
 const describe = (repair: BibleSourceRepairSet["repairs"][number]) => {
   switch (repair.op) {
     case "split":
-      return `split ${repair.ref} at ${repair.at}, dropping ${JSON.stringify(repair.marker)}`;
+      return (
+        `split ${repair.ref} at ${repair.at}, dropping ${JSON.stringify(repair.marker)}` +
+        (repair.to ? `, the rest to ${repair.to}` : "")
+      );
     case "join":
       return `join ${repair.ref} with the next row, separated by ${JSON.stringify(repair.separator)}`;
     case "misprint":

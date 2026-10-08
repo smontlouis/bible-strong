@@ -229,7 +229,7 @@
     },
     "NET": {
       "text": {
-        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-net.json",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/19d2f1bd85d956584ce7643ae884ce35d3bc23537863a4dfc69ed4c5e60b1588/bible-net.json",
         "entry": "bible-net.json"
       },
       "pericope": {
@@ -239,7 +239,7 @@
     },
     "NFC": {
       "text": {
-        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nfc.json",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/ae2450ce51f87f5b977f8f292527c8e08f29610df68312447d1233c6045ee446/bible-nfc.json",
         "entry": "bible-nfc.json"
       },
       "pericope": {
@@ -269,7 +269,7 @@
     },
     "NLT": {
       "text": {
-        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nlt.json",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/a4d9a029e98d41515304fa51f497ff06523cb6dc600e8ca6a939a3ce780c5707/bible-nlt.json",
         "entry": "bible-nlt.json"
       },
       "pericope": {
@@ -289,13 +289,13 @@
     },
     "OST": {
       "text": {
-        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-ost.json",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/6dbc819e6d528c3f7b4d1a85ed81788647cc7d593dcf983a0d08111c470590a0/bible-ost.json",
         "entry": "bible-ost.json"
       }
     },
     "PDV2017": {
       "text": {
-        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-pdv2017.json",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/2e4f719e8207d2c9d55a3363c1d9034b2501e90eed4bfbd577b1014dad591641/bible-pdv2017.json",
         "entry": "bible-pdv2017.json"
       },
       "pericope": {
