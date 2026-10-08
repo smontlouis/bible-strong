@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   closestCommentarySection,
   crossReferenceVerses,
+  hasVerseText,
   otherMainVersions,
   quoteVerseText,
   verseDictionaryEntries,
@@ -13,6 +14,23 @@ describe('quoteVerseText', () => {
     expect(
       quoteVerseText('Grâce à lui, je me repose |dans des prairies verdoyantes,\n et c’est lui ')
     ).toBe('Grâce à lui, je me repose |dans des prairies verdoyantes, et c’est lui')
+  })
+})
+
+describe('hasVerseText', () => {
+  it('finds no text in a verse kept blank or with the mark that closed its omitted words', () => {
+    expect(hasVerseText(undefined)).toBe(false)
+    expect(hasVerseText('')).toBe(false)
+    expect(hasVerseText('\n ')).toBe(false)
+    expect(hasVerseText(']')).toBe(false)
+    expect(hasVerseText(' — ')).toBe(false)
+  })
+
+  it('finds the text of a verse in any script', () => {
+    expect(hasVerseText('Jésus pleura.')).toBe(true)
+    expect(hasVerseText('ἐδάκρυσεν ὁ Ἰησοῦς')).toBe(true)
+    expect(hasVerseText('בְּרֵאשִׁית')).toBe(true)
+    expect(hasVerseText('[21]')).toBe(true)
   })
 })
 

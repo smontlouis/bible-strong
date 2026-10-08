@@ -11,17 +11,18 @@ import type { CommentaryLink } from '../commentary/commentaryLinks'
 import { buildCommentarySectionPath } from '../commentary/commentaryRoutes'
 import { buildDictionaryEntryPath } from '../dictionary/dictionaryRoutes'
 import { buildNavePath } from '../nave/naveRoutes'
+import type { PageReads } from '../resources/pageReads'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
 import { parseStrongCode } from '../strong/strongRoutes'
 import { bibleBookName } from './bibleBooks'
-import type { PageReads } from './biblePageReads'
 import { commentVersesLabel } from './bibleCommentaries'
 import { buildBiblePath, INTERLINEAR_VERSION_ID, isBiblePresentationSupported } from './bibleRoutes'
 import { bibleStrongLinks } from './bibleStrongLinks'
 import {
   closestCommentarySection,
   crossReferenceVerses,
+  hasVerseText,
   otherMainVersions,
   quoteVerseText,
   VERSE_COMMENTARY_COUNT,
@@ -134,7 +135,8 @@ const readVerseInVersions = async (
             ] as const
         )
       )
-  return new Map(texts.flatMap(([id, text]) => (text ? [[id, text] as const] : [])))
+  // A Bible that leaves the verse blank has no words to quote, and no page for it.
+  return new Map(texts.flatMap(([id, text]) => (hasVerseText(text) ? [[id, text] as const] : [])))
 }
 
 const presentOtherVersions = (
@@ -269,7 +271,7 @@ const loadCrossReferences = async (
   )
   return verses.flatMap(reference => {
     const text = textByKey.get(verseKey(reference))
-    return text
+    return hasVerseText(text)
       ? [
           {
             label: `${bibleBookName(reference.book, language)} ${reference.chapter}:${reference.verse}`,

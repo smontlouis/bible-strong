@@ -1,5 +1,6 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
-import { isResourceLanguage, RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { pageCacheHeaders } from '@/features/resources/pageReads'
+import { isResourceLanguage } from '@/features/resources/publicSite'
 import StrongEntryPage from '@/features/strong/StrongEntryPage'
 import StrongNumberPage from '@/features/strong/StrongNumberPage'
 import { loadStrongPage } from '@/features/strong/strong.functions'
@@ -26,7 +27,7 @@ export const Route = createFileRoute('/strong/$language/$code')({
     // a sense: a number with one sense, or a code in another letter case, leads to the one
     // address of the sense that answered.
     const code = strongCodeSlug(entry.code)
-    if (params.code !== code) {
+    if (entry.kind === 'moved' || params.code !== code) {
       throw redirect({
         to: '/strong/$language/$code',
         params: { language: params.language, code },
@@ -41,13 +42,17 @@ export const Route = createFileRoute('/strong/$language/$code')({
       ? buildStrongNumberHead(loaderData)
       : buildStrongHead(loaderData)
   },
-  // Only a rendered entry is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  // Only a whole rendered entry is kept for long: a page missing a part it could not read
+  // is kept a minute, a failed load not at all.
+  headers: ({ loaderData }) => pageCacheHeaders(loaderData),
   component: StrongRoute,
 })
 
 function StrongRoute() {
   const page = Route.useLoaderData()
-  return page.kind === 'number' ? <StrongNumberPage page={page} /> : <StrongEntryPage entry={page} />
+  return page.kind === 'number' ? (
+    <StrongNumberPage page={page} />
+  ) : (
+    <StrongEntryPage entry={page} />
+  )
 }

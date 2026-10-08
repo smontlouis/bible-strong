@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createPageReads, pageCacheHeaders } from './biblePageReads'
+import { createPageReads, pageCacheHeaders } from './pageReads'
 
 /** A read that ends when the test says so. */
 const pendingRead = <Result>() => {
@@ -89,10 +89,16 @@ describe('pageCacheHeaders', () => {
     })
   })
 
-  it('keeps a page missing a part it could not read for a minute only', () => {
+  it('keeps a page missing a part it could not read for a minute only, and says so', () => {
     expect(pageCacheHeaders({ incomplete: true })).toEqual({
       'Cache-Control': 'public, max-age=0, s-maxage=60',
+      'X-Page-Incomplete': '1',
     })
+  })
+
+  it('says nothing of the kind for a whole page', () => {
+    expect(pageCacheHeaders({})).not.toHaveProperty('X-Page-Incomplete')
+    expect(pageCacheHeaders({ incomplete: false })).not.toHaveProperty('X-Page-Incomplete')
   })
 
   it('does not keep a failed load', () => {
