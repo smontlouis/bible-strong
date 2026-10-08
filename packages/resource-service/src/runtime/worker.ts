@@ -1,28 +1,14 @@
-import { makeResourceWebHandler } from '../http/app'
+// Every isolate evaluates this module and its static imports before its first request, cached
+// answers and preflights included. Keep them free of Effect, the HTTP application and the
+// database client: `resourceOrigin.ts` holds those and is imported when a request needs them
+// (`workerStartupImports.node-test.ts` checks it).
 import {
   makeResourcePreflightResponse,
   parseResourceCorsOrigins,
   withResourceCorsHeaders,
 } from '../http/cors'
-import type { BibleChapterRepositoryService } from '../domain/bibleChapter'
-import type { BibleSearchRepositoryService } from '../domain/bibleSearch'
-import type { NaveRepositoryService } from '../domain/nave'
-import type { DictionaryRepositoryService } from '../domain/dictionary'
-import type { StrongBibleRepositoryService } from '../domain/strongBible'
-import type { InterlinearBibleRepositoryService } from '../domain/interlinearBible'
-import type { StrongLexiconRepositoryService } from '../domain/strongLexicon'
-import type { SupplementaryRepositoryService } from '../domain/supplementary'
-import type { TimelineRepositoryService } from '../domain/timeline'
-import { makeHyperdriveDatabase } from '../database/hyperdriveDatabase'
-import { makeKyselyBibleChapterRepository } from '../repositories/bibleChapterRepository'
-import { makeKyselyBibleSearchRepository } from '../repositories/bibleSearchRepository'
-import { makeKyselyNaveRepository } from '../repositories/naveRepository'
-import { makeKyselyDictionaryRepository } from '../repositories/dictionaryRepository'
-import { makeKyselyStrongBibleRepository } from '../repositories/strongBibleRepository'
-import { makeKyselyInterlinearBibleRepository } from '../repositories/interlinearBibleRepository'
-import { makeKyselyStrongLexiconRepository } from '../repositories/strongLexiconRepository'
-import { makeKyselySupplementaryRepository } from '../repositories/supplementaryRepository'
-import { makeKyselyTimelineRepository } from '../repositories/timelineRepository'
+import { resourceRequestIdFrom } from '../http/requestId'
+import { TOPIC_EMBEDDING_CONTRACT } from '../search/topicEmbedding'
 import { routeR2ArtifactRequest } from './r2ArtifactDelivery'
 import { createFirebaseAppCheckConfig, verifyFirebaseAppCheckRequest } from './firebaseAppCheck'
 import {
@@ -31,51 +17,34 @@ import {
   resourceApiCacheEpochFor,
   routeResourceApiRequest,
 } from './resourceApiCache'
-import { protectResourceRequest } from './resourceRequestProtection'
+import { protectResourceOriginRead, protectResourceRequest } from './resourceRequestProtection'
 import { resourceRequestClassFrom } from './resourceRoutePolicy'
-import {
-  makeWorkersAiTopicEmbeddingProvider,
-  TOPIC_EMBEDDING_CONTRACT,
-} from '../search/topicEmbedding'
-import type { SearchAnalyticsSinkService } from '../domain/searchAnalytics'
-import {
-  makeAnalyticsEngineSearchSink,
-  makeMetadataOnlyAiGatewayOptions,
-  writeSearchRuntimeEvent,
-} from './searchAnalyticsEngine'
+import { makeMetadataOnlyAiGatewayOptions, writeSearchRuntimeEvent } from './searchRuntimeAnalytics'
 
-export const RESOURCE_API_PATH_PREFIX = '/v1/'
+// Local workerd reads every named export of this module as an entrypoint and refuses to start
+// on one that is not a function: export nothing else from here.
 export { enforceResourceApiAppCheck, routeResourceApiRequest }
 const SEARCH_ANALYTICS_MAX_BODY_BYTES = 4_096
 
-export const makeResourceWorkerHandler = (
-  repository: BibleChapterRepositoryService,
-  naveRepository?: NaveRepositoryService,
-  dictionaryRepository?: DictionaryRepositoryService,
-  strongBibleRepository?: StrongBibleRepositoryService,
-  interlinearBibleRepository?: InterlinearBibleRepositoryService,
-  strongLexiconRepository?: StrongLexiconRepositoryService,
-  supplementaryRepository?: SupplementaryRepositoryService,
-  timelineRepository?: TimelineRepositoryService,
-  bibleSearchRepository?: BibleSearchRepositoryService,
-  searchAnalytics?: SearchAnalyticsSinkService,
-  corsAllowedOrigins: readonly string[] = []
-) =>
-  makeResourceWebHandler(
-    repository,
-    naveRepository,
-    {
-      bibleSearch: bibleSearchRepository,
-      dictionary: dictionaryRepository,
-      strongBible: strongBibleRepository,
-      interlinearBible: interlinearBibleRepository,
-      strongLexicon: strongLexiconRepository,
-      supplementary: supplementaryRepository,
-      timeline: timelineRepository,
-      searchAnalytics,
+type ResourceOrigin = Pick<typeof import('./resourceOrigin'), 'readResourceOrigin'>
+
+// `GET /health` only says that the Worker answers. It is answered here, with the response the
+// HTTP application gives, so that a monitor does not make each new isolate load the
+// application. Any other spelling of the route still goes to the application.
+const HEALTH_BODY = '{"status":"ok"}'
+export const makeResourceHealthResponse = (request: Request): Response | undefined => {
+  if (request.method !== 'GET' || new URL(request.url).pathname !== '/health') return undefined
+  return new Response(HEALTH_BODY, {
+    headers: {
+      'content-length': String(HEALTH_BODY.length),
+      'content-type': 'application/json',
+      'x-request-id': resourceRequestIdFrom(request.headers.get('x-request-id') ?? undefined),
     },
-    { corsAllowedOrigins }
-  )
+  })
+}
+
+// Requests served by this isolate. The request logged with 1 paid for the isolate's start.
+let isolateRequests = 0
 
 const analyticsEnabled = (bindings: Env) => bindings.SEARCH_ANALYTICS_ENABLED === 'true'
 
@@ -129,8 +98,11 @@ const reportEncryptedArchiveDelivery = async (request: Request, response: Respon
   )
 }
 
-export default {
+export const makeResourceWorker = (
+  loadOrigin: () => Promise<ResourceOrigin> = () => import('./resourceOrigin')
+) => ({
   async fetch(request: Request, bindings: Env, ctx: ExecutionContext): Promise<Response> {
+    const isolateRequest = ++isolateRequests
     const corsAllowedOrigins = parseResourceCorsOrigins(bindings.RESOURCE_WEB_ORIGINS)
     const preflight = makeResourcePreflightResponse(request, corsAllowedOrigins)
     if (preflight) return preflight
@@ -143,6 +115,27 @@ export default {
     })
     const authorize = (candidate: Request) =>
       verifyFirebaseAppCheckRequest(candidate, appCheckConfig)
+    const reportLimited = (category: string, requestId: string) => {
+      console.warn(
+        JSON.stringify({
+          message: 'resource request rate limited',
+          category,
+          requestId,
+          path: new URL(request.url).pathname,
+        })
+      )
+    }
+    const reportLimiterFailure = (category: string, requestId: string, cause: unknown) => {
+      console.error(
+        JSON.stringify({
+          message: 'resource rate limit binding failure',
+          category,
+          requestId,
+          path: new URL(request.url).pathname,
+          error: cause instanceof Error ? cause.message : String(cause),
+        })
+      )
+    }
     const protectionFailure = await protectResourceRequest({
       request,
       authorize,
@@ -166,27 +159,8 @@ export default {
           })
         )
       },
-      reportLimited: (category, requestId) => {
-        console.warn(
-          JSON.stringify({
-            message: 'resource request rate limited',
-            category,
-            requestId,
-            path: new URL(request.url).pathname,
-          })
-        )
-      },
-      reportFailure: (category, requestId, cause) => {
-        console.error(
-          JSON.stringify({
-            message: 'resource rate limit binding failure',
-            category,
-            requestId,
-            path: new URL(request.url).pathname,
-            error: cause instanceof Error ? cause.message : String(cause),
-          })
-        )
-      },
+      reportLimited,
+      reportFailure: reportLimiterFailure,
     })
     if (protectionFailure) return respond(protectionFailure)
 
@@ -246,18 +220,9 @@ export default {
 
     const startedAt = Date.now()
     let sqlStatements = 0
-    const searchAnalytics = makeAnalyticsEngineSearchSink({
-      dataset: bindings.SEARCH_PRODUCT_ANALYTICS,
-      enabled: analyticsEnabled(bindings),
-      environment: bindings.RESOURCE_ENVIRONMENT,
-      reportFailure: cause =>
-        console.error(
-          JSON.stringify({
-            message: 'search product analytics write failed',
-            error: cause instanceof Error ? cause.name : 'UnknownError',
-          })
-        ),
-    })
+    let sqlMs = 0
+    let databaseConnectMs: number | undefined
+    let originRefusal: Response | undefined
     const response = await routeResourceApiRequest({
       request,
       authorize: async () => true,
@@ -282,98 +247,52 @@ export default {
         )
       },
       load: async () => {
-        if (isSearchAnalyticsRequest) {
-          const analyticsWeb = makeResourceWebHandler(
-            undefined,
-            undefined,
-            { searchAnalytics },
-            { corsAllowedOrigins }
-          )
-          try {
-            return await analyticsWeb.handler(request)
-          } finally {
-            await analyticsWeb.dispose()
-          }
-        }
+        // The edge cache did not answer: this read opens the database, which has its own,
+        // lower limit. A cached answer never gets here and is not counted against it.
+        originRefusal = await protectResourceOriginRead({
+          request,
+          limiter: bindings.ORIGIN_READING_RATE_LIMITER,
+          reportLimited,
+          reportFailure: reportLimiterFailure,
+        })
+        if (originRefusal) return originRefusal
+        const health = makeResourceHealthResponse(request)
+        if (health) return health
 
-        const database = makeHyperdriveDatabase(bindings.HYPERDRIVE.connectionString).withPlugin({
-          transformQuery(args) {
+        const { readResourceOrigin } = await loadOrigin()
+        return readResourceOrigin({
+          request,
+          corsAllowedOrigins,
+          hyperdriveConnectionString: bindings.HYPERDRIVE.connectionString,
+          runTopicEmbedding: (model, input) =>
+            bindings.AI.run(
+              model,
+              input,
+              makeMetadataOnlyAiGatewayOptions({
+                gatewayId: bindings.AI_GATEWAY_ID,
+                environment: bindings.RESOURCE_ENVIRONMENT,
+                contract: TOPIC_EMBEDDING_CONTRACT,
+                enabled: analyticsEnabled(bindings),
+              })
+            ),
+          searchProductAnalytics: bindings.SEARCH_PRODUCT_ANALYTICS,
+          analyticsEnabled: analyticsEnabled(bindings),
+          environment: bindings.RESOURCE_ENVIRONMENT,
+          writeRuntimeEvent: event => writeRuntimeSafely(bindings, event),
+          onSqlStatement: () => {
             sqlStatements += 1
-            return args.node
           },
-          async transformResult(args) {
-            return args.result
+          onSqlDuration: durationMs => {
+            sqlMs += durationMs
           },
-        })
-        const topicEmbeddingProvider = makeWorkersAiTopicEmbeddingProvider({
-          run: async (model, input) => {
-            const embeddingStartedAt = Date.now()
-            try {
-              const output = await bindings.AI.run(
-                model,
-                input,
-                makeMetadataOnlyAiGatewayOptions({
-                  gatewayId: bindings.AI_GATEWAY_ID,
-                  environment: bindings.RESOURCE_ENVIRONMENT,
-                  contract: TOPIC_EMBEDDING_CONTRACT,
-                  enabled: analyticsEnabled(bindings),
-                })
-              )
-              writeRuntimeSafely(bindings, {
-                environment: bindings.RESOURCE_ENVIRONMENT,
-                event: 'embedding',
-                route: 'topic-query-embedding',
-                model,
-                contract: TOPIC_EMBEDDING_CONTRACT,
-                durationMs: Date.now() - embeddingStartedAt,
-              })
-              return output
-            } catch (cause) {
-              writeRuntimeSafely(bindings, {
-                environment: bindings.RESOURCE_ENVIRONMENT,
-                event: 'embedding',
-                route: 'topic-query-embedding',
-                model,
-                contract: TOPIC_EMBEDDING_CONTRACT,
-                errorClass: cause instanceof Error ? cause.name : 'UnknownError',
-                durationMs: Date.now() - embeddingStartedAt,
-                success: false,
-              })
-              throw cause
-            }
+          onDatabaseConnection: durationMs => {
+            databaseConnectMs = durationMs
           },
         })
-        const web = makeResourceWorkerHandler(
-          makeKyselyBibleChapterRepository(database),
-          makeKyselyNaveRepository(database),
-          makeKyselyDictionaryRepository(database),
-          makeKyselyStrongBibleRepository(database),
-          makeKyselyInterlinearBibleRepository(database),
-          makeKyselyStrongLexiconRepository(database),
-          makeKyselySupplementaryRepository(database),
-          makeKyselyTimelineRepository(database),
-          makeKyselyBibleSearchRepository(database, {
-            embeddingProvider: topicEmbeddingProvider,
-            reportEmbeddingFailure: cause =>
-              console.error(
-                JSON.stringify({
-                  message: 'topic embedding unavailable; semantic search skipped',
-                  model: topicEmbeddingProvider.model,
-                  errorClass: cause instanceof Error ? cause.name : 'UnknownError',
-                })
-              ),
-          }),
-          searchAnalytics,
-          corsAllowedOrigins
-        )
-
-        try {
-          return await web.handler(request)
-        } finally {
-          await database.destroy()
-        }
       },
     })
+    // A read refused here is answered and reported like one refused before the cache.
+    if (originRefusal) return respond(response)
     console.log(
       JSON.stringify({
         message: 'resource API request',
@@ -384,8 +303,14 @@ export default {
         cache: response.headers.get('x-resource-cache') ?? 'BYPASS',
         originRead: request.method === 'GET' && response.headers.get('x-resource-cache') !== 'HIT',
         sqlStatements,
+        // Where an uncached read spent its time: opening its connection to Hyperdrive, then
+        // its statements (the first one includes that opening). Durations only, never a
+        // statement or a connection string.
+        sqlMs,
+        databaseConnectMs,
         durationMs: Date.now() - startedAt,
         requestId: response.headers.get('x-request-id'),
+        isolateRequest,
       })
     )
     if (resourceRequestClassFrom(request) === 'search') {
@@ -403,4 +328,6 @@ export default {
     }
     return respond(response)
   },
-} satisfies ExportedHandler<Env>
+})
+
+export default makeResourceWorker() satisfies ExportedHandler<Env>

@@ -103,38 +103,102 @@ const groupSpans = (rows: readonly SpanRow[]) => {
 export const makeKyselyStrongBibleRepository = (
   database: Kysely<ResourceDatabase>
 ): StrongBibleRepositoryService => {
+  type IdentityCandidate = { kind: (typeof STRONG_IDENTITY_KINDS)[number]; code: string }
+
+  // The index of a version, the Bible text it was aligned on and, for a concordance read,
+  // the identities a reference may name: one statement, where each was a round trip.
+  const readActivePublications = (versionId: string, candidates: readonly IdentityCandidate[]) =>
+    tryDatabasePromise('strong-bible.publication.read-active', () =>
+      database
+        .selectFrom('resource_publications')
+        .leftJoin('strong_bible_identities', join =>
+          candidates.length
+            ? join
+                .onRef('strong_bible_identities.publication_id', '=', 'resource_publications.id')
+                .on(
+                  'resource_publications.resource_identity',
+                  '=',
+                  `strong-bible-index:${versionId}`
+                )
+                // Every kind with every code: an index condition, where the pairs themselves
+                // would be tested on each identity of the index. The pair is chosen below.
+                .on('strong_bible_identities.kind', 'in', [
+                  ...new Set(candidates.map(candidate => candidate.kind)),
+                ])
+                .on('strong_bible_identities.code', 'in', [
+                  ...new Set(candidates.map(candidate => candidate.code)),
+                ])
+            : join.on(sql<boolean>`false`)
+        )
+        .select([
+          'resource_publications.id',
+          'resource_publications.revision',
+          'resource_publications.metadata',
+          'resource_publications.resource_identity',
+          'strong_bible_identities.identity_id',
+          'strong_bible_identities.kind',
+          'strong_bible_identities.code',
+        ])
+        .where('resource_publications.resource_identity', 'in', [
+          `strong-bible-index:${versionId}`,
+          `bible-text:${versionId}`,
+        ])
+        .where('resource_publications.status', '=', 'active')
+        .execute()
+    ).pipe(Effect.mapError(cause => new StrongBibleRepositoryFailure({ cause })))
+
+  // An index is read only with the Bible text it was aligned on.
+  const activePublicationOf = (
+    versionId: string,
+    rows: Effect.Effect.Success<ReturnType<typeof readActivePublications>>
+  ) => {
+    const publication = rows.find(
+      row => row.resource_identity === `strong-bible-index:${versionId}`
+    )
+    const biblePublication = rows.find(row => row.resource_identity === `bible-text:${versionId}`)
+    if (!publication || !biblePublication) return undefined
+
+    const bibleMetadata = biblePublication.metadata as BiblePublicationMetadata
+    const bibleTextRevision =
+      bibleMetadata.text_revision ?? bibleMetadata.resource_revision ?? biblePublication.revision
+    const strongMetadata = metadataFrom(publication.metadata)
+    return bibleTextRevision === strongMetadata.text_revision &&
+      bibleMetadata.text_sha256 === strongMetadata.text_sha256
+      ? publication
+      : undefined
+  }
+
   const findActivePublication = (versionId: string) =>
+    readActivePublications(versionId, []).pipe(
+      Effect.map(rows => activePublicationOf(versionId, rows))
+    )
+
+  /**
+   * The active index of a version and the identity a reference names in it: the first of
+   * its candidates, in the order they are tried, that the index holds.
+   */
+  const findActiveIdentity = (versionId: string, book: number, reference: string | number) =>
     Effect.gen(function* () {
-      const publication = yield* tryDatabasePromise('strong-bible.publication.read-active', () =>
-        database
-          .selectFrom('resource_publications')
-          .select(['id', 'revision', 'metadata', 'resource_identity'])
-          .where('resource_identity', '=', `strong-bible-index:${versionId}`)
-          .where('status', '=', 'active')
-          .executeTakeFirst()
-      ).pipe(Effect.mapError(cause => new StrongBibleRepositoryFailure({ cause })))
+      const candidates = getStrongBibleConcordanceCandidates(book, reference).flatMap(candidate => {
+        const kind = STRONG_IDENTITY_KINDS[candidate.kind]
+        return kind ? [{ kind, code: candidate.code }] : []
+      })
+      const rows = yield* readActivePublications(versionId, candidates)
+      const publication = activePublicationOf(versionId, rows)
       if (!publication) return undefined
-
-      const biblePublication = yield* tryDatabasePromise(
-        'strong-bible.publication.read-bible-dependency',
-        () =>
-          database
-            .selectFrom('resource_publications')
-            .select(['revision', 'metadata'])
-            .where('resource_identity', '=', `bible-text:${versionId}`)
-            .where('status', '=', 'active')
-            .executeTakeFirst()
-      ).pipe(Effect.mapError(cause => new StrongBibleRepositoryFailure({ cause })))
-      if (!biblePublication) return undefined
-
-      const bibleMetadata = biblePublication.metadata as BiblePublicationMetadata
-      const bibleTextRevision =
-        bibleMetadata.text_revision ?? bibleMetadata.resource_revision ?? biblePublication.revision
-      const strongMetadata = metadataFrom(publication.metadata)
-      return bibleTextRevision === strongMetadata.text_revision &&
-        bibleMetadata.text_sha256 === strongMetadata.text_sha256
-        ? publication
-        : undefined
+      for (const candidate of candidates) {
+        const identity = rows.find(
+          row =>
+            row.id === publication.id && row.kind === candidate.kind && row.code === candidate.code
+        )
+        if (identity?.identity_id != null) {
+          return {
+            publication,
+            identity: { id: identity.identity_id, kind: candidate.kind, code: candidate.code },
+          }
+        }
+      }
+      return { publication, identity: undefined }
     })
 
   const loadSpanRows = (
@@ -207,31 +271,6 @@ export const makeKyselyStrongBibleRepository = (
         .execute() as Promise<SpanRow[]>
     }).pipe(Effect.mapError(cause => new StrongBibleRepositoryFailure({ cause })))
 
-  const resolveIdentity = (publicationId: number, book: number, reference: string | number) =>
-    Effect.gen(function* () {
-      for (const candidate of getStrongBibleConcordanceCandidates(book, reference)) {
-        const kind = STRONG_IDENTITY_KINDS[candidate.kind]
-        if (!kind) continue
-        const identity = yield* tryDatabasePromise('strong-bible.identity.resolve', () =>
-          database
-            .selectFrom('strong_bible_identities')
-            .select(['identity_id', 'kind', 'code'])
-            .where('publication_id', '=', publicationId)
-            .where('kind', '=', kind)
-            .where('code', '=', candidate.code)
-            .executeTakeFirst()
-        ).pipe(Effect.mapError(cause => new StrongBibleRepositoryFailure({ cause })))
-        if (identity) {
-          return {
-            id: identity.identity_id,
-            kind: identity.kind as (typeof STRONG_IDENTITY_KINDS)[number],
-            code: identity.code,
-          }
-        }
-      }
-      return undefined
-    })
-
   return {
     findActiveCoverage: versionId =>
       Effect.gen(function* () {
@@ -298,11 +337,11 @@ export const makeKyselyStrongBibleRepository = (
       }),
     findCountsByBook: input =>
       Effect.gen(function* () {
-        const publication = yield* findActivePublication(input.versionId)
-        if (!publication) {
+        const found = yield* findActiveIdentity(input.versionId, input.book, input.reference)
+        if (!found) {
           return yield* new ActiveStrongBiblePublicationUnavailable({ versionId: input.versionId })
         }
-        const identity = yield* resolveIdentity(publication.id, input.book, input.reference)
+        const { publication, identity } = found
         if (!identity) return { ...revisionFrom(publication), counts: [] }
         const rows = yield* tryDatabasePromise('strong-bible.counts.read', () =>
           database
@@ -327,11 +366,11 @@ export const makeKyselyStrongBibleRepository = (
       }),
     findOccurrences: input =>
       Effect.gen(function* () {
-        const publication = yield* findActivePublication(input.versionId)
-        if (!publication) {
+        const found = yield* findActiveIdentity(input.versionId, input.book, input.reference)
+        if (!found) {
           return yield* new ActiveStrongBiblePublicationUnavailable({ versionId: input.versionId })
         }
-        const identity = yield* resolveIdentity(publication.id, input.book, input.reference)
+        const { publication, identity } = found
         if (!identity) return { ...revisionFrom(publication), verses: [] }
         let query = database
           .selectFrom('strong_bible_span_identities')
@@ -404,11 +443,11 @@ export const makeKyselyStrongBibleRepository = (
       }),
     findLemmaStats: input =>
       Effect.gen(function* () {
-        const publication = yield* findActivePublication(input.versionId)
-        if (!publication) {
+        const found = yield* findActiveIdentity(input.versionId, input.book, input.reference)
+        if (!found) {
           return yield* new ActiveStrongBiblePublicationUnavailable({ versionId: input.versionId })
         }
-        const identity = yield* resolveIdentity(publication.id, input.book, input.reference)
+        const { publication, identity } = found
         if (!identity) return { ...revisionFrom(publication), lemmas: [] }
         const rows = yield* tryDatabasePromise('strong-bible.lemmas.read', () =>
           database

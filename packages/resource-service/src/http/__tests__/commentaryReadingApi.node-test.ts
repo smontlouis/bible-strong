@@ -13,6 +13,7 @@ const unavailable = () =>
 const repository: SupplementaryRepositoryService = {
   findCommentaryVerse: unavailable,
   findCommentaryChapter: unavailable,
+  findCommentaryChapters: () => Effect.succeed([]),
   findCommentaryCoverage: unavailable,
   findCrossReferences: unavailable,
   findCommentaryReadingIndex: input =>

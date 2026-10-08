@@ -3,7 +3,6 @@ import { resourceEtagMatches } from '../http/conditionalRequest'
 import { withResourceCorsHeaders } from '../http/cors'
 import { resourceRequestIdFrom } from '../http/requestId'
 import { BIBLE_SEARCH_CACHE_REVISION } from '../search/bibleSearchRevision'
-import { STRONG_LEXICON_ENTRY_RESPONSE_REVISION } from '../domain/strongLexicon'
 import { isDynamicResourceRequest } from './resourceRoutePolicy'
 
 export const resourceApiCacheEpochFrom = async (catalog: unknown): Promise<string> => {
@@ -14,7 +13,25 @@ export const resourceApiCacheEpochFrom = async (catalog: unknown): Promise<strin
   return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('')
 }
 
-export const RESOURCE_API_CACHE_EPOCH = resourceApiCacheEpochFrom(mobileResourceCatalog)
+// Serializing and hashing the whole catalog (161 KB) gives the same answer for every request
+// an isolate serves, cache hits included, so each catalog is fingerprinted once. A catalog is
+// never changed in place.
+const catalogFingerprints = new WeakMap<object, string>()
+
+const catalogFingerprintOf = async (catalog: unknown): Promise<string> => {
+  if (!catalog || typeof catalog !== 'object') return resourceApiCacheEpochFrom(catalog)
+  const known = catalogFingerprints.get(catalog)
+  if (known) return known
+  const fingerprint = await resourceApiCacheEpochFrom(catalog)
+  catalogFingerprints.set(catalog, fingerprint)
+  return fingerprint
+}
+
+// The value of `STRONG_LEXICON_ENTRY_RESPONSE_REVISION` in `domain/strongLexicon.ts`, which a
+// test keeps equal. It is repeated because that module loads Effect, and this one is on the
+// path of a cached answer: importing it would make every isolate start with Effect.
+export const STRONG_LEXICON_ENTRY_CACHE_REVISION =
+  'strong-lexicon-case-sensitive-definition-levels-v2'
 
 const STRONG_LEXICON_BATCH_RESPONSE_REVISION = 'strong-lexicon-batch-case-sensitive-levels-v3'
 // A Worker older than the option ignored it and cached the gathered list under the same URL.
@@ -85,13 +102,13 @@ export const resourceApiCacheRevisionFrom = async (
       if (revisions.every((revision): revision is [string, string] => revision !== undefined)) {
         catalogRevision = await resourceApiCacheEpochFrom(revisions)
       } else {
-        catalogRevision = await resourceApiCacheEpochFrom(catalog)
+        catalogRevision = await catalogFingerprintOf(catalog)
       }
     } else {
-      catalogRevision = await resourceApiCacheEpochFrom(catalog)
+      catalogRevision = await catalogFingerprintOf(catalog)
     }
   } else {
-    catalogRevision = await resourceApiCacheEpochFrom(catalog)
+    catalogRevision = await catalogFingerprintOf(catalog)
   }
 
   const { pathname, searchParams } = new URL(request.url)
@@ -116,7 +133,7 @@ export const resourceApiCacheRevisionFrom = async (
     ])
   }
   return /^\/v1\/strong-lexicon\/entries\/[^/]+$/u.test(pathname)
-    ? resourceApiCacheEpochFrom([requestRevision, STRONG_LEXICON_ENTRY_RESPONSE_REVISION])
+    ? resourceApiCacheEpochFrom([requestRevision, STRONG_LEXICON_ENTRY_CACHE_REVISION])
     : requestRevision
 }
 
@@ -157,6 +174,7 @@ const LONG_LIVED_PATHS = [
   /^\/v1\/interlinear-bibles\/[^/]+\/languages\/[^/]+\/(?:coverage|books\/\d+\/chapters\/\d+)$/,
   /^\/v1\/strong-lexicon\/(?:modules\/[^/]+|entries\/[^/]+|morphologies|entities\/(?:chapters\/[^/]+\/\d+|[^/]+))$/,
   /^\/v1\/commentaries\/[^/]+\/[^/]+\/(?:coverage|verses\/[^/]+|chapters\/\d+\/\d+)$/,
+  /^\/v1\/commentaries\/verses\/[^/]+\/sections$/,
   /^\/v1\/cross-references\/[^/]+\/verses\/[^/]+$/,
   /^\/v1\/timelines\/[^/]+\/events\/[^/]+$/,
 ] as const

@@ -1,14 +1,20 @@
+import type { Schema } from 'effect'
+
 import { resourceRequestIdFrom } from '../http/requestId'
-import { ResourceRateLimitedProblem } from '../http/problems'
+import type { ResourceRateLimitedProblem } from '../http/problems'
 import { FIREBASE_APP_CHECK_HEADER, isNativeFirebaseAppId } from './firebaseAppCheck'
 import { resourceRequestClassFrom } from './resourceRoutePolicy'
 
+/** Counted before the edge cache, whether or not the cache then answers the request. */
 export type ResourceRateLimitCategory =
   | 'reading'
   | 'search'
   | 'semantic-search'
   | 'artifact'
   | 'encrypted-artifact'
+
+/** Counted only for the Online reads the edge cache did not answer. */
+export type ResourceOriginRateLimitCategory = 'origin-reading'
 
 export type ResourceRateLimitBinding = {
   limit(options: { key: string }): Promise<{ success: boolean }>
@@ -39,6 +45,9 @@ const tokenFingerprint = async (request: Request): Promise<string> => {
   return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('')
 }
 
+// What the HTTP application's own problem class encodes to, checked without loading it.
+type ResourceRateLimitedProblemBody = Schema.Schema.Encoded<typeof ResourceRateLimitedProblem>
+
 const protectedFailure = (requestId: string, status: 401 | 403 | 429): Response => {
   const headers = new Headers({
     'cache-control': 'private, no-store',
@@ -46,18 +55,46 @@ const protectedFailure = (requestId: string, status: 401 | 403 | 429): Response 
   })
   if (status !== 429) return new Response(null, { status, headers })
   headers.set('retry-after', '60')
-  return Response.json(
-    new ResourceRateLimitedProblem({
-      type: 'https://bible-strong.app/problems/resource-rate-limited',
-      title: 'Resource request rate limited',
-      detail: 'Too many resource requests. Retry after 60 seconds.',
-      requestId,
-      status,
-      code: 'RESOURCE_RATE_LIMITED',
-      retryAfterSeconds: 60,
-    }),
-    { status, headers }
-  )
+  // Written out rather than built with the Effect class of the HTTP application: this runs
+  // before the cache, and the Worker must start without loading Effect.
+  const problem: ResourceRateLimitedProblemBody = {
+    type: 'https://bible-strong.app/problems/resource-rate-limited',
+    title: 'Resource request rate limited',
+    detail: 'Too many resource requests. Retry after 60 seconds.',
+    requestId,
+    status,
+    code: 'RESOURCE_RATE_LIMITED',
+    retryAfterSeconds: 60,
+    _tag: 'ResourceRateLimitedProblem',
+  }
+  return Response.json(problem, { status, headers })
+}
+
+const consume = async <Category extends string>({
+  category,
+  limiter,
+  key,
+  requestId,
+  reportLimited,
+  reportFailure,
+}: {
+  category: Category
+  limiter: ResourceRateLimitBinding
+  key: string
+  requestId: string
+  reportLimited: (category: Category, requestId: string) => void
+  reportFailure: (category: Category, requestId: string, cause: unknown) => void
+}): Promise<Response | undefined> => {
+  try {
+    const { success } = await limiter.limit({ key })
+    if (success) return undefined
+  } catch (cause) {
+    reportFailure(category, requestId, cause)
+    return undefined
+  }
+
+  reportLimited(category, requestId)
+  return protectedFailure(requestId, 429)
 }
 
 export const protectResourceRequest = async ({
@@ -94,14 +131,43 @@ export const protectResourceRequest = async ({
     limitKey = await tokenFingerprint(request)
   }
 
-  try {
-    const { success } = await limiters[category].limit({ key: limitKey })
-    if (success) return undefined
-  } catch (cause) {
-    reportFailure(category, requestId, cause)
-    return undefined
-  }
+  return consume({
+    category,
+    limiter: limiters[category],
+    key: limitKey,
+    requestId,
+    reportLimited,
+    reportFailure,
+  })
+}
 
-  reportLimited(category, requestId)
-  return protectedFailure(requestId, 429)
+/**
+ * Counts an Online read that the edge cache did not answer, just before the database is
+ * opened. `protectResourceRequest` has already counted it among every read of its caller;
+ * this lower limit is the one that protects the database, and a cached answer never reaches it.
+ */
+export const protectResourceOriginRead = async ({
+  request,
+  limiter,
+  reportLimited = () => undefined,
+  reportFailure = () => undefined,
+}: {
+  request: Request
+  limiter: ResourceRateLimitBinding
+  reportLimited?: (category: ResourceOriginRateLimitCategory, requestId: string) => void
+  reportFailure?: (
+    category: ResourceOriginRateLimitCategory,
+    requestId: string,
+    cause: unknown
+  ) => void
+}): Promise<Response | undefined> => {
+  if (resourceCategoryFrom(request) !== 'reading') return undefined
+  return consume({
+    category: 'origin-reading' as const,
+    limiter,
+    key: clientAddressKey(request),
+    requestId: resourceRequestIdFrom(request.headers.get('x-request-id') ?? undefined),
+    reportLimited,
+    reportFailure,
+  })
 }

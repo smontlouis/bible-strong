@@ -79,7 +79,11 @@ const repository: BibleChapterRepositoryService = {
       versification: 'bible-strong-default',
       books: [1],
       chaptersByBook: { 1: [1, 2, 3, 4] },
-      verseCountByBookChapter: { '1-1': 2 },
+      verseCountByBookChapter: { '1-1': 2, '1-2': 3 },
+      // A version without any irregular chapter still publishes the field, empty.
+      verseNumbersByBookChapter: Object.fromEntries(
+        versionId === 'KJV' ? [] : [['1-2', [1, 2, 4]]]
+      ),
     }),
   findActivePericopes: versionId =>
     Effect.succeed({
@@ -242,8 +246,38 @@ describe('v1 Bible chapter API', () => {
         versification: 'bible-strong-default',
         books: [1],
         chaptersByBook: { 1: [1, 2, 3, 4] },
-        verseCountByBookChapter: { '1-1': 2 },
+        verseCountByBookChapter: { '1-1': 2, '1-2': 3 },
+        verseNumbersByBookChapter: { '1-2': [1, 2, 4] },
       })
+    } finally {
+      await web.dispose()
+    }
+  })
+
+  it('publishes an empty numbering for a version whose chapters all count from 1', async () => {
+    const web = makeResourceWebHandler(repository)
+    try {
+      const response = await web.handler(request('/v1/bibles/KJV/coverage'))
+      assert.equal(response.status, 200)
+      const payload = (await response.json()) as { verseNumbersByBookChapter?: unknown }
+      assert.deepEqual(payload.verseNumbersByBookChapter, {})
+    } finally {
+      await web.dispose()
+    }
+  })
+
+  it('leaves the numbering out when the repository does not publish it', async () => {
+    const web = makeResourceWebHandler({
+      ...repository,
+      findActiveCoverage: versionId =>
+        repository
+          .findActiveCoverage(versionId)
+          .pipe(Effect.map(({ verseNumbersByBookChapter: _, ...coverage }) => coverage)),
+    })
+    try {
+      const response = await web.handler(request('/v1/bibles/LSG/coverage'))
+      assert.equal(response.status, 200)
+      assert.equal('verseNumbersByBookChapter' in ((await response.json()) as object), false)
     } finally {
       await web.dispose()
     }

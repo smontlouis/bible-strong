@@ -167,8 +167,15 @@ type EntryInput = Parameters<StrongLexiconRepositoryService['findEntry']>[0]
  */
 export type StrongLexiconDetailedEntryRead = 'one-statement' | 'statement-by-statement'
 
+/**
+ * How the rows of entry cards, and of the simple entry made of one, are fetched. The two
+ * values mean what they mean for a detailed entry.
+ */
+export type StrongLexiconEntryCardsRead = 'one-statement' | 'statement-by-statement'
+
 export type StrongLexiconRepositoryOptions = {
   detailedEntryRead?: StrongLexiconDetailedEntryRead
+  entryCardsRead?: StrongLexiconEntryCardsRead
 }
 
 // Row choices of a detailed entry. Both reads apply the same ones and compose the entry
@@ -590,6 +597,191 @@ const composeEntry = (
   }
 }
 
+type EntryCardsInput = Parameters<NonNullable<StrongLexiconRepositoryService['findEntryCards']>>[0]
+type EntryIdentityRow = { stepEntryId: number; stepCode: string }
+
+/** The rows entry cards are made of, however they were fetched. */
+type EntryCardRows = {
+  core: Pick<Publication, 'revision'>
+  /** The identities the references name, in the order of their entry. */
+  requestedIdentityRows: EntryIdentityRow[]
+  /** The entries of those identities, then the ones that carry a reference no identity names. */
+  entries: Payload[]
+  identities: EntryIdentityRow[]
+  translations: Payload[]
+  /** In the order of their identifier. */
+  morphologyRows: Payload[]
+  morphologyTranslations: Payload[]
+}
+
+// Row choices of entry cards. Both reads apply the same ones and compose the cards with
+// the same function, so they can differ only in how rows are fetched.
+const disambiguatedCodesWithoutIdentity = (
+  identities: EntryCardsInput['identities'],
+  requestedIdentityRows: EntryIdentityRow[]
+): string[] =>
+  identities
+    .filter(
+      identity =>
+        identity.kind === 'dstrong' &&
+        !requestedIdentityRows.some(row => row.stepCode === normalizeCode(identity.reference))
+    )
+    .map(identity => normalizeCode(identity.reference))
+
+// A disambiguated code written in another case selects its entry when it names only one.
+const identitiesNamedInAnotherCase = (
+  codes: string[],
+  candidates: { step_entry_id: number; step_code: string }[]
+): EntryIdentityRow[] =>
+  [...new Set(codes)].flatMap(code => {
+    const matches = candidates.filter(row => row.step_code.toLowerCase() === code.toLowerCase())
+    // Retain the requested spelling for selection; the canonical spelling is read with the entry.
+    return matches.length === 1 ? [{ stepEntryId: matches[0]!.step_entry_id, stepCode: code }] : []
+  })
+
+const identitiesWithoutIdentityRow = (
+  identities: EntryCardsInput['identities'],
+  requestedIdentityRows: EntryIdentityRow[]
+): EntryCardsInput['identities'] => {
+  const named = new Set(requestedIdentityRows.map(row => row.stepCode))
+  return identities.filter(identity => !named.has(normalizeCode(identity.reference)))
+}
+
+// The classical number a reference stands for, as the entries that carry it are looked up.
+const classicalNumberOf = (
+  reference: string
+): { language: 'greek' | 'hebrew'; baseCode: number } => {
+  const base = Number(reference.replace(/^[HG]/u, '').replace(/^0+/u, ''))
+  return {
+    language: reference.startsWith('G') ? 'greek' : 'hebrew',
+    baseCode: Number.isFinite(base) ? base : -1,
+  }
+}
+
+const uniqueEntries = (entries: Payload[]): Payload[] => [
+  ...new Map(entries.map(entry => [number(entry, 'id'), entry])).values(),
+]
+
+const composeEntryCards = (
+  { identities: requestedIdentities, language }: EntryCardsInput,
+  rows: EntryCardRows
+): ActiveStrongLexiconValue<StrongLexiconEntryCard>[] => {
+  const {
+    core,
+    requestedIdentityRows,
+    entries,
+    identities,
+    translations,
+    morphologyRows,
+    morphologyTranslations,
+  } = rows
+  return requestedIdentities.flatMap(requested => {
+    const reference = normalizeCode(requested.reference)
+    const requestedIdentity = requestedIdentityRows.find(
+      identity => text(identity, 'stepCode') === reference
+    )
+    const base = Number(reference.replace(/^[HG]/u, '').replace(/^0+/u, ''))
+    const lexicalLanguage = reference.startsWith('G') ? 'greek' : 'hebrew'
+    const entry = entries
+      .map((candidate, index) => {
+        const candidateId = number(candidate, 'id')
+        let rank: number | undefined
+
+        if (requestedIdentity && candidateId === number(requestedIdentity, 'stepEntryId')) {
+          rank = 0
+        } else if (
+          requested.kind === 'dstrong' &&
+          text(candidate, 'dStrong').startsWith(reference)
+        ) {
+          rank = 1
+        } else if (requested.kind === 'estrong' && text(candidate, 'eStrong') === reference) {
+          rank = 1
+        } else if (requested.kind === 'ustrong' && text(candidate, 'uStrong') === reference) {
+          rank = 1
+        } else if (
+          requested.kind === 'strong' &&
+          number(candidate, 'baseCode') === base &&
+          text(candidate, 'language') === lexicalLanguage
+        ) {
+          rank = 1
+        } else if (
+          [
+            text(candidate, 'eStrong'),
+            text(candidate, 'dStrong'),
+            text(candidate, 'uStrong'),
+          ].includes(reference)
+        ) {
+          rank = 2
+        }
+
+        return rank === undefined ? undefined : { candidate, index, rank }
+      })
+      .filter(
+        (match): match is { candidate: Payload; index: number; rank: number } => match !== undefined
+      )
+      .sort((left, right) => left.rank - right.rank || left.index - right.index)[0]?.candidate
+    if (!entry) return []
+    const entryId = number(entry, 'id')
+    const entryIdentities = identities.filter(
+      candidate => number(candidate, 'stepEntryId') === entryId
+    )
+    const identity =
+      entryIdentities.find(candidate => text(candidate, 'stepCode') === reference) ??
+      entryIdentities[0]
+    if (!identity) return []
+    const translation =
+      translations.find(candidate => number(candidate, 'stepEntryId') === entryId) ?? {}
+    const morphologyRow = morphologyRows.find(
+      row =>
+        text(row, 'scope') === 'lexical_brief' &&
+        [text(row, 'code'), text(row, 'normalizedCode')].includes(text(entry, 'morph'))
+    )
+    const morphologyTranslation = morphologyRow
+      ? (morphologyTranslations.find(
+          row => number(row, 'morphologyCodeId') === number(morphologyRow, 'id')
+        ) ?? {})
+      : {}
+    const meaning = morphologyRow
+      ? localized(language, text(morphologyTranslation, 'meaning'), text(morphologyRow, 'meaning'))
+      : ''
+    const definition = localized(
+      language,
+      text(translation, 'meaningHtml') || text(translation, 'meaning'),
+      text(entry, 'meaning')
+    )
+    const nameMeaning = localized(
+      language,
+      text(entry, 'nameMeaningFrHtml'),
+      text(entry, 'nameMeaningEnHtml')
+    )
+    return [
+      {
+        revision: `core:${core.revision}`,
+        value: {
+          id: entryId,
+          selectedIdentity: {
+            kind: requested.kind,
+            code: reference,
+          },
+          stepCode: text(identity, 'stepCode'),
+          classicStrong: classicStrong(entry),
+          eStrong: text(entry, 'eStrong'),
+          dStrong: text(entry, 'dStrong'),
+          language: text(entry, 'language') === 'greek' ? 'greek' : 'hebrew',
+          baseCode: number(entry, 'baseCode'),
+          original: text(entry, 'original'),
+          transliteration: text(entry, 'classicTransliteration') || text(entry, 'transliteration'),
+          ...(text(entry, 'pronunciation') ? { pronunciation: text(entry, 'pronunciation') } : {}),
+          gloss: localized(language, text(translation, 'gloss'), text(entry, 'gloss')),
+          ...(nameMeaning ? { nameMeaningHtml: nameMeaning } : {}),
+          ...(definition ? { definitionHtml: definition } : {}),
+          ...(morphologyRow ? { morphology: { code: text(entry, 'morph'), meaning } } : {}),
+        },
+      },
+    ]
+  })
+}
+
 export const makeKyselyStrongLexiconRepository = (
   database: Kysely<ResourceDatabase>,
   options: StrongLexiconRepositoryOptions = {}
@@ -735,12 +927,11 @@ export const makeKyselyStrongLexiconRepository = (
     return resolvedIdentity ? { entry, identity: resolvedIdentity } : undefined
   }
 
-  const findEntryCardsBatch = async (input: {
-    identities: { reference: string; kind: StrongIdentityKind }[]
-    language: StrongLexiconLanguage
-    level?: 'simple' | 'detailed'
-  }): Promise<ActiveStrongLexiconValue<StrongLexiconEntryCard>[]> => {
-    if (!input.identities.length) return []
+  // The earlier read of entry cards: one statement per kind of row, each waiting for the
+  // previous one. It is the reference the single statement is tested against.
+  const readEntryCardRowsStatementByStatement = async (
+    input: EntryCardsInput
+  ): Promise<EntryCardRows> => {
     const core = await requiredCore(input.language, input.level)
     const references = [
       ...new Set(input.identities.map(identity => normalizeCode(identity.reference))),
@@ -754,13 +945,10 @@ export const makeKyselyStrongLexiconRepository = (
         .orderBy('step_entry_id')
         .execute()
     ).map(row => ({ stepEntryId: row.step_entry_id, stepCode: row.step_code }))
-    const missingLegacyCodes = input.identities
-      .filter(
-        identity =>
-          identity.kind === 'dstrong' &&
-          !requestedIdentityRows.some(row => row.stepCode === normalizeCode(identity.reference))
-      )
-      .map(identity => normalizeCode(identity.reference))
+    const missingLegacyCodes = disambiguatedCodesWithoutIdentity(
+      input.identities,
+      requestedIdentityRows
+    )
     if (missingLegacyCodes.length) {
       const legacyRows = await database
         .selectFrom('strong_lexicon_entry_identities')
@@ -770,13 +958,7 @@ export const makeKyselyStrongLexiconRepository = (
           sql<boolean>`lower(step_code) IN (${sql.join(missingLegacyCodes.map(code => sql`${code.toLowerCase()}`))})`
         )
         .execute()
-      for (const code of new Set(missingLegacyCodes)) {
-        const matches = legacyRows.filter(row => row.step_code.toLowerCase() === code.toLowerCase())
-        if (matches.length === 1) {
-          // Retain the requested spelling for selection; load canonical spelling below.
-          requestedIdentityRows.push({ stepEntryId: matches[0].step_entry_id, stepCode: code })
-        }
-      }
+      requestedIdentityRows.push(...identitiesNamedInAnotherCase(missingLegacyCodes, legacyRows))
     }
     const requestedEntryIds = requestedIdentityRows.map(row => number(row, 'stepEntryId'))
     const indexedEntries = requestedEntryIds.length
@@ -788,9 +970,9 @@ export const makeKyselyStrongLexiconRepository = (
           .orderBy('entry_id')
           .execute()
       : []
-    const indexedReferences = new Set(requestedIdentityRows.map(row => text(row, 'stepCode')))
-    const unresolvedIdentities = input.identities.filter(
-      identity => !indexedReferences.has(normalizeCode(identity.reference))
+    const unresolvedIdentities = identitiesWithoutIdentityRow(
+      input.identities,
+      requestedIdentityRows
     )
     const fallbackReferences = [
       ...new Set(unresolvedIdentities.map(identity => normalizeCode(identity.reference))),
@@ -807,11 +989,10 @@ export const makeKyselyStrongLexiconRepository = (
               OR u_strong IN (${sql.join(fallbackReferences.map(reference => sql`${reference}`))})
               OR ${sql.join(
                 unresolvedIdentities.map(identity => {
-                  const reference = normalizeCode(identity.reference)
-                  const base = Number(reference.replace(/^[HG]/u, '').replace(/^0+/u, ''))
+                  const classical = classicalNumberOf(normalizeCode(identity.reference))
                   return sql<boolean>`(
-                    (payload->>'baseCode')::integer = ${Number.isFinite(base) ? base : -1}
-                    AND payload->>'language' = ${reference.startsWith('G') ? 'greek' : 'hebrew'}
+                    (payload->>'baseCode')::integer = ${classical.baseCode}
+                    AND payload->>'language' = ${classical.language}
                   )`
                 }),
                 sql` OR `
@@ -821,12 +1002,18 @@ export const makeKyselyStrongLexiconRepository = (
           .orderBy('entry_id')
           .execute()
       : []
-    const entries = [
-      ...new Map(
-        [...indexedEntries, ...fallbackEntries].map(row => [number(row.payload, 'id'), row.payload])
-      ).values(),
-    ]
-    if (!entries.length) return []
+    const entries = uniqueEntries([...indexedEntries, ...fallbackEntries].map(row => row.payload))
+    if (!entries.length) {
+      return {
+        core,
+        requestedIdentityRows,
+        entries,
+        identities: [],
+        translations: [],
+        morphologyRows: [],
+        morphologyTranslations: [],
+      }
+    }
     const entryIds = entries.map(entry => number(entry, 'id'))
     const morphologyCodes = [...new Set(entries.map(entry => text(entry, 'morph')).filter(Boolean))]
     const [identities, translations, morphologyRows] = await Promise.all([
@@ -878,119 +1065,291 @@ export const makeKyselyStrongLexiconRepository = (
           .execute()
           .then(rows => rows.map(row => row.payload))
       : []
-    return input.identities.flatMap(requested => {
-      const reference = normalizeCode(requested.reference)
-      const requestedIdentity = requestedIdentityRows.find(
-        identity => text(identity, 'stepCode') === reference
-      )
-      const base = Number(reference.replace(/^[HG]/u, '').replace(/^0+/u, ''))
-      const lexicalLanguage = reference.startsWith('G') ? 'greek' : 'hebrew'
-      const entry = entries
-        .map((candidate, index) => {
-          const candidateId = number(candidate, 'id')
-          let rank: number | undefined
+    return {
+      core,
+      requestedIdentityRows,
+      entries,
+      identities,
+      translations,
+      morphologyRows,
+      morphologyTranslations,
+    }
+  }
 
-          if (requestedIdentity && candidateId === number(requestedIdentity, 'stepEntryId')) {
-            rank = 0
-          } else if (
-            requested.kind === 'dstrong' &&
-            text(candidate, 'dStrong').startsWith(reference)
-          ) {
-            rank = 1
-          } else if (requested.kind === 'estrong' && text(candidate, 'eStrong') === reference) {
-            rank = 1
-          } else if (requested.kind === 'ustrong' && text(candidate, 'uStrong') === reference) {
-            rank = 1
-          } else if (
-            requested.kind === 'strong' &&
-            number(candidate, 'baseCode') === base &&
-            text(candidate, 'language') === lexicalLanguage
-          ) {
-            rank = 1
-          } else if (
-            [
-              text(candidate, 'eStrong'),
-              text(candidate, 'dStrong'),
-              text(candidate, 'uStrong'),
-            ].includes(reference)
-          ) {
-            rank = 2
-          }
+  // Every row entry cards are made of, gathered in one round trip, as for a detailed entry.
+  //
+  // The statement only fetches. Two choices depend on rows it reads itself: which reference
+  // written in another case names a single identity, and so which references are left for
+  // the entries that carry them. It returns the candidates of both, and TypeScript chooses
+  // with the rules the statement-by-statement read applies: a candidate entry comes with the
+  // values it was matched on, so that the choice is made on what PostgreSQL compared.
+  const readEntryCardRowsInOneStatement = async (
+    input: EntryCardsInput
+  ): Promise<EntryCardRows> => {
+    const moduleId = input.level === 'simple' ? getSimpleStrongModuleId(input.language) : 'core'
+    const references = [
+      ...new Set(input.identities.map(identity => normalizeCode(identity.reference))),
+    ]
+    const classicalNumbers = references.map(classicalNumberOf)
+    const disambiguated = [
+      ...new Set(
+        input.identities
+          .filter(identity => identity.kind === 'dstrong')
+          .map(identity => normalizeCode(identity.reference))
+      ),
+    ]
 
-          return rank === undefined ? undefined : { candidate, index, rank }
-        })
-        .filter(
-          (match): match is { candidate: Payload; index: number; rank: number } =>
-            match !== undefined
-        )
-        .sort((left, right) => left.rank - right.rank || left.index - right.index)[0]?.candidate
-      if (!entry) return []
-      const entryId = number(entry, 'id')
-      const entryIdentities = identities.filter(
-        candidate => number(candidate, 'stepEntryId') === entryId
+    type CarryingEntry = {
+      eStrong: string
+      dStrong: string
+      uStrong: string
+      language: string | null
+      baseCode: number | null
+      payload: Payload
+    }
+    type EntryCardRowsGathered = {
+      core: { revision: string } | null
+      exact_identities: EntryIdentityRow[]
+      case_insensitive_identities: { step_entry_id: number; step_code: string }[]
+      identity_entries: { entryId: number; payload: Payload }[]
+      carrying_entries: CarryingEntry[]
+      identities: EntryIdentityRow[]
+      translations: Payload[]
+      morphology_codes: Payload[]
+      morphology_translations: Payload[]
+    }
+    const gathered = await sql<EntryCardRowsGathered>`
+      WITH core AS MATERIALIZED (
+        SELECT id, revision
+          FROM resource_publications
+         WHERE resource_identity = ${`strong-lexicon:${moduleId}`}
+           AND status = 'active'
+      ),
+      requested AS MATERIALIZED (
+        SELECT reference.code, reference.language, reference.base_code
+          FROM unnest(
+                 ${references}::text[],
+                 ${classicalNumbers.map(classical => classical.language)}::text[],
+                 ${classicalNumbers.map(classical => classical.baseCode)}::integer[]
+               ) AS reference(code, language, base_code)
+      ),
+      exact_identities AS MATERIALIZED (
+        SELECT i.step_entry_id, i.step_code
+          FROM strong_lexicon_entry_identities i
+         WHERE i.publication_id = (SELECT id FROM core)
+           AND i.step_code = ANY (${references}::text[])
+      ),
+      -- The references no identity names as they are written.
+      unnamed AS MATERIALIZED (
+        SELECT r.code, r.language, r.base_code
+          FROM requested r
+         WHERE NOT EXISTS (SELECT 1 FROM exact_identities x WHERE x.step_code = r.code)
+      ),
+      unnamed_disambiguated AS MATERIALIZED (
+        SELECT d.lowered
+          FROM unnest(
+                 ${disambiguated}::text[],
+                 ${disambiguated.map(code => code.toLowerCase())}::text[]
+               ) AS d(code, lowered)
+         WHERE d.code IN (SELECT code FROM unnamed)
+      ),
+      -- The identities such a disambiguated code names in another case. Read only when
+      -- there is one: the scan is skipped otherwise.
+      case_insensitive_identities AS MATERIALIZED (
+        SELECT i.step_entry_id, i.step_code
+          FROM strong_lexicon_entry_identities i
+         WHERE i.publication_id = (SELECT id FROM core)
+           AND EXISTS (SELECT 1 FROM unnamed_disambiguated)
+           AND lower(i.step_code) = ANY (ARRAY(SELECT lowered FROM unnamed_disambiguated))
+      ),
+      identity_entries AS MATERIALIZED (
+        SELECT e.entry_id, e.payload
+          FROM strong_lexicon_entries e
+         WHERE e.publication_id = (SELECT id FROM core)
+           AND e.entry_id = ANY (
+                 ARRAY(
+                   SELECT step_entry_id FROM exact_identities
+                   UNION ALL
+                   SELECT step_entry_id FROM case_insensitive_identities
+                 )
+               )
+      ),
+      -- The entries that carry an unnamed reference as one of their codes or as their
+      -- classical number. Each way of carrying it is looked up apart, on the index that
+      -- serves it, rather than tested on every entry of the lexicon.
+      carrying AS MATERIALIZED (
+        SELECT e.entry_id
+          FROM strong_lexicon_entries e
+         WHERE e.publication_id = (SELECT id FROM core)
+           AND e.e_strong = ANY (ARRAY(SELECT code FROM unnamed))
+        UNION ALL
+        SELECT e.entry_id
+          FROM strong_lexicon_entries e
+         WHERE e.publication_id = (SELECT id FROM core)
+           AND e.d_strong = ANY (ARRAY(SELECT code FROM unnamed))
+        UNION ALL
+        SELECT e.entry_id
+          FROM strong_lexicon_entries e
+         WHERE e.publication_id = (SELECT id FROM core)
+           AND e.u_strong = ANY (ARRAY(SELECT code FROM unnamed))
+        UNION ALL
+        -- The numbers alone select the index rows; the pair is then compared.
+        SELECT e.entry_id
+          FROM strong_lexicon_entries e
+         WHERE e.publication_id = (SELECT id FROM core)
+           AND (e.payload->>'baseCode')::integer
+               = ANY (ARRAY(SELECT DISTINCT base_code FROM unnamed))
+           AND (e.payload->>'language', (e.payload->>'baseCode')::integer)
+               IN (SELECT language, base_code FROM unnamed)
+      ),
+      carrying_entries AS MATERIALIZED (
+        SELECT e.entry_id,
+               e.e_strong,
+               e.d_strong,
+               e.u_strong,
+               e.payload->>'language' AS language,
+               (e.payload->>'baseCode')::integer AS base_code,
+               e.payload
+          FROM strong_lexicon_entries e
+         WHERE e.publication_id = (SELECT id FROM core)
+           AND e.entry_id = ANY (ARRAY(SELECT entry_id FROM carrying))
+      ),
+      candidates AS MATERIALIZED (
+        SELECT entry_id, coalesce(payload->>'morph', '') AS morph FROM identity_entries
+        UNION
+        SELECT entry_id, coalesce(payload->>'morph', '') AS morph FROM carrying_entries
+      ),
+      morphology_codes AS MATERIALIZED (
+        SELECT m.morphology_code_id, m.payload
+          FROM strong_lexicon_morphology_codes m
+         WHERE m.publication_id = (SELECT id FROM core)
+           AND m.scope = 'lexical_brief'
+           AND (
+                 m.code = ANY (ARRAY(SELECT morph FROM candidates WHERE morph <> ''))
+                 OR m.normalized_code = ANY (ARRAY(SELECT morph FROM candidates WHERE morph <> ''))
+               )
       )
-      const identity =
-        entryIdentities.find(candidate => text(candidate, 'stepCode') === reference) ??
-        entryIdentities[0]
-      if (!identity) return []
-      const translation =
-        translations.find(candidate => number(candidate, 'stepEntryId') === entryId) ?? {}
-      const morphologyRow = morphologyRows.find(
-        row =>
-          text(row, 'scope') === 'lexical_brief' &&
-          [text(row, 'code'), text(row, 'normalizedCode')].includes(text(entry, 'morph'))
+      SELECT
+        (SELECT jsonb_build_object('revision', revision) FROM core) AS core,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object('stepEntryId', step_entry_id, 'stepCode', step_code)
+                    ORDER BY step_entry_id
+                  ),
+                  '[]'::jsonb
+                )
+           FROM exact_identities) AS exact_identities,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object('step_entry_id', step_entry_id, 'step_code', step_code)
+                  ),
+                  '[]'::jsonb
+                )
+           FROM case_insensitive_identities) AS case_insensitive_identities,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object('entryId', entry_id, 'payload', payload) ORDER BY entry_id
+                  ),
+                  '[]'::jsonb
+                )
+           FROM identity_entries) AS identity_entries,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object(
+                      'eStrong', e_strong,
+                      'dStrong', d_strong,
+                      'uStrong', u_strong,
+                      'language', language,
+                      'baseCode', base_code,
+                      'payload', payload
+                    )
+                    ORDER BY entry_id
+                  ),
+                  '[]'::jsonb
+                )
+           FROM carrying_entries) AS carrying_entries,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object('stepEntryId', i.step_entry_id, 'stepCode', i.step_code)
+                    ORDER BY i.step_entry_id
+                  ),
+                  '[]'::jsonb
+                )
+           FROM strong_lexicon_entry_identities i
+          WHERE i.publication_id = (SELECT id FROM core)
+            AND i.step_entry_id = ANY (ARRAY(SELECT entry_id FROM candidates))
+        ) AS identities,
+        (SELECT coalesce(jsonb_agg(t.payload ORDER BY t.step_entry_id), '[]'::jsonb)
+           FROM strong_lexicon_translations t
+          WHERE t.publication_id = (SELECT id FROM core)
+            AND t.step_entry_id = ANY (ARRAY(SELECT entry_id FROM candidates))
+            AND t.language = ${input.language}) AS translations,
+        (SELECT coalesce(jsonb_agg(payload ORDER BY morphology_code_id), '[]'::jsonb)
+           FROM morphology_codes) AS morphology_codes,
+        (SELECT coalesce(jsonb_agg(t.payload ORDER BY t.morphology_code_id), '[]'::jsonb)
+           FROM strong_lexicon_morphology_code_translations t
+          WHERE t.publication_id = (SELECT id FROM core)
+            AND t.morphology_code_id = ANY (
+                  ARRAY(SELECT morphology_code_id FROM morphology_codes)
+                )
+            AND t.language = ${input.language}) AS morphology_translations
+    `.execute(database)
+    const rows = gathered.rows[0]
+    if (!rows?.core) throw new ActiveStrongLexiconPublicationUnavailable({ moduleId })
+
+    const requestedIdentityRows = [...rows.exact_identities]
+    requestedIdentityRows.push(
+      ...identitiesNamedInAnotherCase(
+        disambiguatedCodesWithoutIdentity(input.identities, requestedIdentityRows),
+        rows.case_insensitive_identities
       )
-      const morphologyTranslation = morphologyRow
-        ? (morphologyTranslations.find(
-            row => number(row, 'morphologyCodeId') === number(morphologyRow, 'id')
-          ) ?? {})
-        : {}
-      const meaning = morphologyRow
-        ? localized(
-            input.language,
-            text(morphologyTranslation, 'meaning'),
-            text(morphologyRow, 'meaning')
+    )
+    const requestedEntryIds = new Set(requestedIdentityRows.map(row => row.stepEntryId))
+    const indexedEntries = rows.identity_entries
+      .filter(entry => requestedEntryIds.has(entry.entryId))
+      .map(entry => entry.payload)
+
+    const unresolvedIdentities = identitiesWithoutIdentityRow(
+      input.identities,
+      requestedIdentityRows
+    )
+    const fallbackReferences = new Set(
+      unresolvedIdentities.map(identity => normalizeCode(identity.reference))
+    )
+    const unresolvedNumbers = [...fallbackReferences].map(classicalNumberOf)
+    const fallbackEntries = rows.carrying_entries
+      .filter(
+        entry =>
+          fallbackReferences.has(entry.eStrong) ||
+          fallbackReferences.has(entry.dStrong) ||
+          fallbackReferences.has(entry.uStrong) ||
+          unresolvedNumbers.some(
+            classical =>
+              entry.baseCode === classical.baseCode && entry.language === classical.language
           )
-        : ''
-      const definition = localized(
-        input.language,
-        text(translation, 'meaningHtml') || text(translation, 'meaning'),
-        text(entry, 'meaning')
       )
-      const nameMeaning = localized(
-        input.language,
-        text(entry, 'nameMeaningFrHtml'),
-        text(entry, 'nameMeaningEnHtml')
-      )
-      return [
-        {
-          revision: `core:${core.revision}`,
-          value: {
-            id: entryId,
-            selectedIdentity: {
-              kind: requested.kind,
-              code: reference,
-            },
-            stepCode: text(identity, 'stepCode'),
-            classicStrong: classicStrong(entry),
-            eStrong: text(entry, 'eStrong'),
-            dStrong: text(entry, 'dStrong'),
-            language: text(entry, 'language') === 'greek' ? 'greek' : 'hebrew',
-            baseCode: number(entry, 'baseCode'),
-            original: text(entry, 'original'),
-            transliteration:
-              text(entry, 'classicTransliteration') || text(entry, 'transliteration'),
-            ...(text(entry, 'pronunciation')
-              ? { pronunciation: text(entry, 'pronunciation') }
-              : {}),
-            gloss: localized(input.language, text(translation, 'gloss'), text(entry, 'gloss')),
-            ...(nameMeaning ? { nameMeaningHtml: nameMeaning } : {}),
-            ...(definition ? { definitionHtml: definition } : {}),
-            ...(morphologyRow ? { morphology: { code: text(entry, 'morph'), meaning } } : {}),
-          },
-        },
-      ]
-    })
+      .map(entry => entry.payload)
+
+    return {
+      core: rows.core,
+      requestedIdentityRows,
+      entries: uniqueEntries([...indexedEntries, ...fallbackEntries]),
+      identities: rows.identities,
+      translations: rows.translations,
+      morphologyRows: rows.morphology_codes,
+      morphologyTranslations: rows.morphology_translations,
+    }
+  }
+  const readEntryCardRows =
+    options.entryCardsRead === 'statement-by-statement'
+      ? readEntryCardRowsStatementByStatement
+      : readEntryCardRowsInOneStatement
+
+  const findEntryCardsBatch = async (
+    input: EntryCardsInput
+  ): Promise<ActiveStrongLexiconValue<StrongLexiconEntryCard>[]> => {
+    if (!input.identities.length) return []
+    return composeEntryCards(input, await readEntryCardRows(input))
   }
 
   const hydrateEntity = async (

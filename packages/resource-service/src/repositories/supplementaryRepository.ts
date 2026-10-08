@@ -15,6 +15,9 @@ const crossReferenceIdentity = 'cross-references:fr'
 const commentaryIdentity = (collection: string, language: string) =>
   `commentary:${collection}:${language}`
 
+// The longest chapter of a Bible has 176 verses; verse 0 is the introduction of a chapter.
+const COMMENTARY_CHAPTER_LAST_VERSE = 200
+
 export const buildCommentaryCoverage = (verseKeys: readonly string[]) => {
   const chapters = new Map<number, Set<number>>()
   for (const verseKey of verseKeys) {
@@ -187,6 +190,64 @@ export const makeKyselySupplementaryRepository = (
             rows.map(row => [row.verse_key.slice(prefix.length), row.content])
           ),
         }
+      }),
+    // The publications and their comments of the chapter in one statement: a commentary
+    // that says nothing on the chapter still answers with its revision.
+    //
+    // The comments are asked for by their keys, which the index serves, where a pattern on
+    // the key is tested on every verse of each commentary. The importer only accepts keys
+    // written `book-chapter-verse` without leading zeros, and no chapter of a Bible reaches
+    // the last verse asked for.
+    findCommentaryChapters: input =>
+      Effect.gen(function* () {
+        if (input.collections.length === 0) return []
+        const prefix = `${input.book}-${input.chapter}-`
+        const verseKeys = Array.from(
+          { length: COMMENTARY_CHAPTER_LAST_VERSE + 1 },
+          (_, verse) => `${prefix}${verse}`
+        )
+        const rows = yield* tryDatabasePromise('supplementary.commentary.read-chapters', () =>
+          database
+            .selectFrom('resource_publications')
+            .leftJoin('commentary_verses', join =>
+              join
+                .onRef('commentary_verses.publication_id', '=', 'resource_publications.id')
+                .on(sql<boolean>`commentary_verses.verse_key = ANY (${verseKeys}::text[])`)
+            )
+            .select([
+              'resource_publications.resource_identity',
+              'resource_publications.revision',
+              'commentary_verses.verse_key',
+              'commentary_verses.content',
+            ])
+            .where(
+              'resource_publications.resource_identity',
+              'in',
+              input.collections.map(collection => commentaryIdentity(collection, input.language))
+            )
+            .where('resource_publications.status', '=', 'active')
+            .execute()
+        ).pipe(Effect.mapError(cause => new SupplementaryRepositoryFailure({ cause })))
+        return input.collections.flatMap(collection => {
+          const published = rows.filter(
+            row => row.resource_identity === commentaryIdentity(collection, input.language)
+          )
+          return published.length
+            ? [
+                {
+                  collection,
+                  revision: published[0]!.revision,
+                  comments: Object.fromEntries(
+                    published.flatMap(row =>
+                      row.verse_key === null || row.content === null
+                        ? []
+                        : [[row.verse_key.slice(prefix.length), row.content]]
+                    )
+                  ),
+                },
+              ]
+            : []
+        })
       }),
     findCommentaryCoverage: input =>
       Effect.gen(function* () {

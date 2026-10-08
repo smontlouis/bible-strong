@@ -9,9 +9,15 @@ import {
 import { Context, Data, Effect } from 'effect'
 
 import {
+  buildCommentaryChapterSections,
+  closestCommentarySection,
+} from '@bible-strong/resource-domain/commentary-chapter-sections'
+import {
   CommentaryChapterResponseDto,
   CommentaryCoverageResponseDto,
   CommentaryVerseResponseDto,
+  CommentaryVerseSectionDto,
+  CommentaryVerseSectionsResponseDto,
   CrossReferenceResponseDto,
   SupplementaryRevisionDto,
 } from '@bible-strong/resource-domain/contracts/supplementaryContract'
@@ -27,6 +33,19 @@ export type CommentaryChapterLookup = {
   language: SupplementaryLanguage
   book: number
   chapter: number
+}
+export type CommentaryChaptersLookup = {
+  collections: readonly string[]
+  language: SupplementaryLanguage
+  book: number
+  chapter: number
+}
+export type CommentaryVerseSectionsLookup = {
+  collections: readonly string[]
+  language: SupplementaryLanguage
+  book: number
+  chapter: number
+  verse: number
 }
 export type CommentaryCoverageLookup = {
   collection: string
@@ -88,6 +107,17 @@ export type SupplementaryRepositoryService = {
   findCommentaryChapter: (
     input: CommentaryChapterLookup
   ) => Effect.Effect<ActiveCommentaryChapter, SupplementaryRepositoryError>
+  /**
+   * The comments of one chapter in several commentaries, read together. A commentary
+   * without an active publication is left out; one that says nothing on the chapter has
+   * no comments.
+   */
+  findCommentaryChapters: (
+    input: CommentaryChaptersLookup
+  ) => Effect.Effect<
+    readonly { collection: string; revision: string; comments: Record<string, string> }[],
+    SupplementaryRepositoryFailure
+  >
   findCommentaryCoverage: (
     input: CommentaryCoverageLookup
   ) => Effect.Effect<ActiveCommentaryCoverage, SupplementaryRepositoryError>
@@ -128,6 +158,44 @@ export const readCommentaryChapter = (input: CommentaryChapterLookup) =>
       book: active.book,
       chapter: active.chapter,
       serializedComments: JSON.stringify(active.comments),
+    })
+  })
+
+/**
+ * For each commentary, the section the public site shows on a verse: the sections of the
+ * chapter are built as the site builds them, and the closest one is kept.
+ *
+ * Sections are built for the catalog identity of a commentary. A publication is named like
+ * it, except one edition that is not the anthology read by source document.
+ */
+export const readCommentaryVerseSections = (input: CommentaryVerseSectionsLookup) =>
+  Effect.gen(function* () {
+    const repository = yield* SupplementaryRepository
+    const chapters = yield* repository.findCommentaryChapters(input)
+    const published = new Map(chapters.map(chapter => [chapter.collection, chapter]))
+    return new CommentaryVerseSectionsResponseDto({
+      verseKey: `${input.book}-${input.chapter}-${input.verse}`,
+      sections: input.collections.flatMap(collection => {
+        const chapter = published.get(collection)
+        const section =
+          chapter &&
+          closestCommentarySection(
+            buildCommentaryChapterSections(collection, chapter.comments),
+            input.verse
+          )
+        return section
+          ? [
+              new CommentaryVerseSectionDto({
+                resource: revisionDto('commentary', collection, input.language, chapter.revision),
+                slug: section.slug,
+                startVerse: section.startVerse,
+                endVerse: section.endVerse,
+                content: section.content,
+              }),
+            ]
+          : []
+      }),
+      unavailable: input.collections.filter(collection => !published.has(collection)),
     })
   })
 

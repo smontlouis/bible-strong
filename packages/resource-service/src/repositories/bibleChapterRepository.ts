@@ -27,6 +27,23 @@ type BiblePublicationMetadata = {
 const bibleMetadata = (value: Record<string, unknown>): BiblePublicationMetadata =>
   value as BiblePublicationMetadata
 
+// White space and punctuation marks. A Bible may keep a verse its manuscripts omit as a row
+// that is empty, or that only holds a line break or the bracket that closed the omitted
+// words: a verse has text when something else remains.
+const BLANK_VERSE_CHARACTERS = ' \t\n\r\u00a0\u2009\u202f\u200b\ufeff[]()«»“”".,;:!?…-–—'
+// Trimming reads the whole verse. Nearly every verse starts with something else than these
+// characters, which is enough to know it has text: the others are trimmed.
+const verseHasText = sql<boolean>`(
+  strpos(${BLANK_VERSE_CHARACTERS}, left(text, 1)) = 0
+  OR btrim(text, ${BLANK_VERSE_CHARACTERS}) <> ''
+)`
+
+type CoverageRows = {
+  revision: string
+  metadata: Record<string, unknown>
+  chapters: { book: number; chapter: number; verseCount: number; verseNumbers: number[] | null }[]
+}
+
 export const makeKyselyBibleChapterRepository = (
   database: Kysely<ResourceDatabase>
 ): BibleChapterRepositoryService => ({
@@ -196,43 +213,83 @@ export const makeKyselyBibleChapterRepository = (
         })),
       } satisfies ActiveBibleChapter
     }),
+  // The publication and its chapters are read in one statement, hence one round trip.
+  //
+  // `verseNumbers` holds the numbers of the verses of a chapter that have text, in ascending
+  // order, or NULL when they are exactly 1 to the number of rows of the chapter. A chapter
+  // holds one row per verse number, so that is the case when every row has text, the first
+  // is numbered 1 and the last is numbered like the count. The numbers are gathered in the
+  // aggregation that counts the rows and written out for the other chapters only.
   findActiveCoverage: versionId =>
     Effect.gen(function* () {
-      const publication = yield* tryDatabasePromise('bible.coverage.read-publication', () =>
-        database
-          .selectFrom('resource_publications')
-          .select(['id', 'revision', 'metadata'])
-          .where('resource_identity', '=', `bible-text:${versionId}`)
-          .where('status', '=', 'active')
-          .executeTakeFirst()
+      const gathered = yield* tryDatabasePromise('bible.coverage.read-active', () =>
+        sql<CoverageRows>`
+          WITH publication AS MATERIALIZED (
+            SELECT id, revision, metadata
+              FROM resource_publications
+             WHERE resource_identity = ${`bible-text:${versionId}`}
+               AND status = 'active'
+          ),
+          chapters AS (
+            SELECT v.book,
+                   v.chapter,
+                   count(v.verse) AS verse_count,
+                   count(*) FILTER (WHERE v.has_text) AS text_count,
+                   min(v.verse) AS first_verse,
+                   max(v.verse) AS last_verse,
+                   array_agg(v.verse ORDER BY v.verse) FILTER (WHERE v.has_text) AS text_verses
+              FROM (
+                SELECT book,
+                       chapter,
+                       verse,
+                       ${verseHasText} AS has_text
+                  FROM bible_verses
+                 WHERE publication_id = (SELECT id FROM publication)
+              ) v
+             GROUP BY v.book, v.chapter
+          )
+          SELECT publication.revision,
+                 publication.metadata,
+                 (SELECT coalesce(
+                           jsonb_agg(
+                             jsonb_build_object(
+                               'book', book,
+                               'chapter', chapter,
+                               'verseCount', verse_count,
+                               'verseNumbers',
+                               CASE
+                                 WHEN text_count = verse_count
+                                  AND first_verse = 1
+                                  AND last_verse = verse_count
+                                 THEN NULL
+                                 ELSE to_jsonb(coalesce(text_verses, '{}'::integer[]))
+                               END
+                             )
+                             ORDER BY book, chapter
+                           ),
+                           '[]'::jsonb
+                         )
+                    FROM chapters) AS chapters
+            FROM publication
+        `.execute(database)
       ).pipe(Effect.mapError(cause => new BibleChapterRepositoryFailure({ cause })))
 
+      const publication = gathered.rows[0]
       if (!publication) return yield* new ActiveBiblePublicationUnavailable({ versionId })
-      const rows = yield* tryDatabasePromise('bible.coverage.read-active', () =>
-        database
-          .selectFrom('bible_verses')
-          .select(['book', 'chapter'])
-          .select(expression => expression.fn.count('bible_verses.verse').as('verse_count'))
-          .where('publication_id', '=', publication.id)
-          .groupBy(['book', 'chapter'])
-          .orderBy('book')
-          .orderBy('chapter')
-          .execute()
-      ).pipe(Effect.mapError(cause => new BibleChapterRepositoryFailure({ cause })))
-
+      const rows = publication.chapters
       if (rows.length === 0) {
         return yield* new ActiveBiblePublicationUnavailable({ versionId })
       }
       const chaptersByBook: Record<string, number[]> = {}
       const verseCountByBookChapter: Record<string, number> = {}
-      for (const row of rows) {
-        const book = row.book!
-        const chapter = row.chapter!
+      const verseNumbersByBookChapter: Record<string, number[]> = {}
+      for (const { book, chapter, verseCount, verseNumbers } of rows) {
         if (!chaptersByBook[book]) {
           chaptersByBook[book] = []
         }
         chaptersByBook[book]!.push(chapter)
-        verseCountByBookChapter[`${book}-${chapter}`] = Number(row.verse_count)
+        verseCountByBookChapter[`${book}-${chapter}`] = verseCount
+        if (verseNumbers) verseNumbersByBookChapter[`${book}-${chapter}`] = verseNumbers
       }
       const metadata = bibleMetadata(publication.metadata)
       const books = metadata.canon.orderedBooks.filter(book => chaptersByBook[book] !== undefined)
@@ -246,6 +303,7 @@ export const makeKyselyBibleChapterRepository = (
         books,
         chaptersByBook,
         verseCountByBookChapter,
+        verseNumbersByBookChapter,
       }
     }),
   findActivePericopes: versionId =>

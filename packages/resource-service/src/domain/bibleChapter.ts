@@ -56,6 +56,11 @@ export type ActiveBibleCoverage = {
   books: readonly number[]
   chaptersByBook: Record<string, readonly number[]>
   verseCountByBookChapter: Record<string, number>
+  /**
+   * The numbers of the verses that have text, for the chapters where they are not exactly
+   * 1 to the count of the chapter. A repository that does not publish them leaves it out.
+   */
+  verseNumbersByBookChapter?: Record<string, readonly number[]>
 }
 
 export type ActiveBiblePericopeIndex = {
@@ -261,6 +266,16 @@ export const readBibleCoverage = (
         Object.entries(coverage.chaptersByBook).map(([book, chapters]) => [book, [...chapters]])
       ),
       verseCountByBookChapter: coverage.verseCountByBookChapter,
+      ...(coverage.verseNumbersByBookChapter
+        ? {
+            verseNumbersByBookChapter: Object.fromEntries(
+              Object.entries(coverage.verseNumbersByBookChapter).map(([key, numbers]) => [
+                key,
+                [...numbers],
+              ])
+            ),
+          }
+        : {}),
     })
   })
 
