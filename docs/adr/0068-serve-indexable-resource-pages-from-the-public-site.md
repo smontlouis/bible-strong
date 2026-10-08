@@ -89,6 +89,16 @@ is loaded on demand and cached like a page. A note mark works the same way: a pl
 to the note under the text, and a card next to the mark where popovers are supported. The
 cross-references of a note open in the version being read.
 
+A single verse read as text is a page of study, not the verse alone. Under the verse it
+gathers what the site holds about it: the verse in four other well-known Bibles of the
+language and in its original language, the two verses before and after, each of its words
+with the original word behind it, the passages it is read with, how the first five
+commentaries begin on it, and the topics and dictionary articles that name it. Each part
+is a way into another section, and a part with nothing to show is left out. The page is
+titled with how the verse begins, since a verse is looked for by its words as much as by
+its reference. The other reading modes of a verse, and a range of verses, stay the text
+alone.
+
 A reader may show commentaries inside the Bible text. The choice is written in the address
 of the page (`?commentary=barnes.mhy-fr`: at most five, in one spelling) and kept by every
 link of the page, so it follows the reader from chapter to chapter and across reading modes
@@ -180,6 +190,11 @@ pages differ by their concordance, their sense code and, for a person, who that 
 
 A Bible page with commentaries shown in the text reads the chapter of each of them from the
 Resource API, and every choice of commentaries is a page the CDN keeps apart.
+
+A verse page reads about twenty documents from the Resource API when it is not cached.
+What does not depend on the Bible being read (the cross-references, the commentaries, the
+topics, the dictionary articles) is the same read for every version of the verse, which
+the API keeps for a day.
 
 The site functions run in the region of the database of the Resource API, Frankfurt: a
 page is a chain of reads, and a function on another continent pays that distance on each.

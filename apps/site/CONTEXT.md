@@ -28,6 +28,10 @@ _Avoid_: Variant, sub-entry
 The public resource page of a classical Strong number the lexicon splits into several Strong senses, which presents the word once and each sense with what tells it apart.
 _Avoid_: Disambiguation page, family page
 
+**Verse page**:
+The public resource page of a single verse read as text, which gathers under the verse what the site holds about it: other Bibles, context, original words, cross-references, commentaries, topics and dictionary articles.
+_Avoid_: Verse hub, verse detail
+
 **Inline comment**:
 The beginning of a commentary section shown between the verses of a Bible page at the reader's request, which opens the whole section over the passage.
 _Avoid_: Annotation, footnote
