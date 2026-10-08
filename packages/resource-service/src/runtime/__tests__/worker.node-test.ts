@@ -8,7 +8,12 @@ import {
   makeResourceWorkerHandler,
   routeResourceApiRequest,
 } from '../worker'
-import { resourceApiCacheEpochFrom, resourceApiCacheRevisionFrom } from '../resourceApiCache'
+import {
+  resourceApiCacheEpochFor,
+  resourceApiCacheEpochFrom,
+  resourceApiCacheRevisionFrom,
+  resourceApiCacheTtlSeconds,
+} from '../resourceApiCache'
 
 class MemoryEdgeCache {
   readonly entries = new Map<string, Response>()
@@ -429,6 +434,75 @@ describe('Resource Worker binding', () => {
     )
 
     assert.notEqual(passage, directory)
+  })
+
+  it('keeps revisioned reads for thirty days, lists for an hour and searches for a day', () => {
+    const ttl = (path: string) =>
+      resourceApiCacheTtlSeconds(new Request(`https://api.bible-strong.app${path}`))
+    const hour = 60 * 60
+    const thirtyDays = 30 * 24 * hour
+
+    for (const path of [
+      '/v1/bibles/LSG/books/1/chapters/1',
+      '/v1/bibles/LSG/verses?references=1-1-1',
+      '/v1/strong-lexicon/entries/H430?language=fr',
+      '/v1/naves/fr/topics/aaron',
+      '/v1/cross-references/fr/verses/1-1-1',
+      '/v1/commentaries/MHY/fr/chapters/1/1',
+      '/v1/commentaries/MHY/fr/coverage',
+    ]) {
+      assert.equal(ttl(path), thirtyDays, path)
+    }
+    for (const path of [
+      '/v1/naves/fr/topics?limit=500',
+      '/v1/strong-lexicon/entries?language=fr&level=simple',
+      '/v1/timelines/fr/events',
+    ]) {
+      assert.equal(ttl(path), hour, path)
+    }
+    assert.equal(ttl('/v1/bibles/LSG/search?q=grace'), 24 * hour)
+    assert.equal(ttl('/v1/naves/fr/random'), undefined)
+    assert.equal(ttl('/health'), undefined)
+  })
+
+  it('caches every dictionary read, whose routes name a work and a language', () => {
+    const ttl = (path: string) =>
+      resourceApiCacheTtlSeconds(new Request(`https://api.bible-strong.app${path}`))
+    const hour = 60 * 60
+    const thirtyDays = 30 * 24 * hour
+
+    for (const path of [
+      '/v1/dictionaries',
+      '/v1/dictionaries/bost/fr/entries/by-id/2',
+      '/v1/dictionaries/bost/fr/entries/aaron',
+      '/v1/dictionaries/bost/fr/entries/batch?words=aaron',
+      '/v1/dictionaries/bost/fr/verses/2-6-20/words',
+      '/v1/dictionaries/bost/fr/verses/2-6-20/entries',
+      '/v1/dictionaries/verses/2-6-20/entries?language=fr',
+    ]) {
+      assert.equal(ttl(path), thirtyDays, path)
+    }
+    for (const path of [
+      '/v1/dictionaries/bost/fr/entries?limit=500',
+      '/v1/dictionaries/directory?language=fr&limit=500',
+    ]) {
+      assert.equal(ttl(path), hour, path)
+    }
+    // A search of the directory is a search like any other.
+    assert.equal(ttl('/v1/dictionaries/directory?language=fr&search=aaron'), 24 * hour)
+  })
+
+  it('keeps apart what two versions of the Worker cache for the same content', () => {
+    const first = resourceApiCacheEpochFor('catalog-release-1', 'worker-version-1')
+
+    assert.notEqual(first, resourceApiCacheEpochFor('catalog-release-1', 'worker-version-2'))
+    assert.notEqual(first, resourceApiCacheEpochFor('catalog-release-2', 'worker-version-1'))
+    assert.equal(first, resourceApiCacheEpochFor('catalog-release-1', 'worker-version-1'))
+    // Outside a deployment there is no version: the content revision alone names the key.
+    assert.equal(
+      resourceApiCacheEpochFor('catalog-release-1', undefined),
+      resourceApiCacheEpochFor('catalog-release-1', '')
+    )
   })
 
   it('does not cache unsuccessful origin responses', async () => {

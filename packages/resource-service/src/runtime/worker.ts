@@ -28,6 +28,7 @@ import { createFirebaseAppCheckConfig, verifyFirebaseAppCheckRequest } from './f
 import {
   enforceResourceApiAppCheck,
   RESOURCE_API_CACHE_REVISION,
+  resourceApiCacheEpochFor,
   routeResourceApiRequest,
 } from './resourceApiCache'
 import { protectResourceRequest } from './resourceRequestProtection'
@@ -262,7 +263,12 @@ export default {
       authorize: async () => true,
       cache: edgeCache,
       cacheEpoch:
-        request.method === 'GET' ? await RESOURCE_API_CACHE_REVISION(request) : 'uncached-request',
+        request.method === 'GET'
+          ? resourceApiCacheEpochFor(
+              await RESOURCE_API_CACHE_REVISION(request),
+              bindings.CF_VERSION_METADATA?.id
+            )
+          : 'uncached-request',
       corsAllowedOrigins,
       waitUntil: promise => ctx.waitUntil(promise),
       reportCacheFailure: (operation, cause) => {

@@ -339,10 +339,14 @@ curl --fail https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1
 ### Resource API edge cache
 
 The Worker uses Cloudflare's Cache API for successful deterministic database reads after App Check
-authorization. Detail, chapter, coverage, and other revisioned responses are cached for 24 hours;
-search responses are also cached for 24 hours, and bounded browse/list responses are cached for one
+authorization. Detail, chapter, coverage, and other revisioned responses are cached for 30 days;
+search responses are cached for 24 hours, and bounded browse/list responses are cached for one
 hour. Random endpoints, non-GET requests, unknown future routes, and every non-200 response bypass
 the cache. Cache failures fail open to Neon and are emitted as structured Worker errors.
+
+A route is cached only when `src/runtime/resourceApiCache.ts` lists its path: add a new read route
+to `LONG_LIVED_PATHS` or `SHORT_LIVED_PATHS` when it is created, and check `x-resource-cache` on its
+second read.
 
 The App Check token and request ID are excluded from cache keys and stored responses. Every client
 response remains `private, no-store`; `x-resource-cache: MISS` or `HIT` exposes the Worker cache
@@ -350,6 +354,11 @@ result without allowing an intermediary to serve protected data before attestati
 requests keep their ETag/304 behavior. A SHA-256 fingerprint of the complete generated mobile
 catalog is part of every internal cache key, so publishing and deploying changed catalog content
 starts a fresh cache namespace without a global purge, even when `--generated-at` is pinned.
+The version of the deployed Worker (`CF_VERSION_METADATA`) is part of the key too: a deployment
+that changes how a route answers never serves what an older version cached. This is what makes
+the 30-day lifetime safe, and it means every deployment starts with an empty cache. A publication
+activated in Neon without deploying the Worker stays unseen by cached routes for up to 30 days:
+always deploy after activating.
 Search keys additionally include the thematic-index, embedding model/contract/threshold, and ranking
 revisions from `src/search/bibleSearchRevision.ts`. Bump the explicit index revision after a thematic
 import and the ranking revision after changing result fusion or ordering; deploying then creates a
