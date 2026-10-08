@@ -1,12 +1,13 @@
 import type { BibleVerseTextsDto } from '@bible-strong/resource-domain/contracts/bibleChapterContract'
 import type {
+  StrongBibleCountsBatchDto,
   StrongBibleCountsDto,
   StrongBibleLemmaStatsDto,
   StrongBibleOccurrencesDto,
 } from '@bible-strong/resource-domain/contracts/strongBibleContract'
 import type {
-  StrongLexiconEntryCardsDto,
   StrongLexiconEntryDto,
+  StrongLexiconNumberSensesDto,
   StrongLexiconSearchResponseDto,
 } from '@bible-strong/resource-domain/contracts/strongLexiconContract'
 import {
@@ -54,13 +55,6 @@ const SAMPLE_VERSE_COUNT = 20
 const TRANSLATION_COUNT = 12
 const SENSE_SUMMARY_LENGTH = 170
 const DESCRIPTION_LENGTH = 155
-/**
- * How many reads the page of an entry keeps in flight. More than a Bible page does: the
- * largest number reads about sixty documents for its senses, which six at a time would
- * make ten rounds, each as long as its slowest read. Pages of a sense, and of a number with
- * few senses, never have that many to ask at once.
- */
-export const STRONG_PAGE_READ_CONCURRENCY = 16
 
 // The Strong-tagged Bible read alongside each lexicon language.
 const CONCORDANCE_VERSION: Record<ResourceLanguage, string> = { fr: 'LSG', en: 'KJV' }
@@ -304,6 +298,14 @@ const concordanceIdentityPath = (language: ResourceLanguage, code: string, book:
 const anchorBook = (lexicalLanguage: StrongLexicalLanguage): number =>
   lexicalLanguage === 'hebrew' ? 1 : 40
 
+// The books a code is read in, as the Resource API counts its verses in each.
+const bookCountsOf = (
+  counts: StrongBibleCountsDto['counts'] | undefined
+): StrongPageConcordance['books'] =>
+  (counts ?? [])
+    .filter(count => count.verseCount > 0)
+    .map(count => ({ book: count.book, verseCount: count.verseCount }))
+
 const loadBookCounts = async (
   reads: PageReads,
   language: ResourceLanguage,
@@ -315,9 +317,31 @@ const loadBookCounts = async (
       `${concordanceIdentityPath(language, code, anchorBook(lexicalLanguage))}/counts`
     )
   )
-  return (counts?.counts ?? [])
-    .filter(count => count.verseCount > 0)
-    .map(count => ({ book: count.book, verseCount: count.verseCount }))
+  return bookCountsOf(counts?.counts)
+}
+
+// The Resource API counts the verses of at most this many codes in one read.
+const COUNTED_CODE_LIMIT = 100
+
+/** The books each of several codes is read in: one read for all of them. */
+const loadBookCountsOf = async (
+  reads: PageReads,
+  language: ResourceLanguage,
+  codes: readonly string[],
+  lexicalLanguage: StrongLexicalLanguage
+): Promise<Map<string, StrongPageConcordance['books']>> => {
+  const path = `/v1/strong-bibles/${CONCORDANCE_VERSION[language]}/books/${anchorBook(lexicalLanguage)}/identities/batch/counts`
+  const books = new Map<string, StrongPageConcordance['books']>()
+  for (let start = 0; start < codes.length; start += COUNTED_CODE_LIMIT) {
+    const references = codes.slice(start, start + COUNTED_CODE_LIMIT).join(',')
+    const counted = await reads.queue(() =>
+      readResource<StrongBibleCountsBatchDto>(path, { references })
+    )
+    for (const { reference, counts } of counted?.references ?? []) {
+      books.set(reference, bookCountsOf(counts))
+    }
+  }
+  return books
 }
 
 // The Resource API returns at most this many occurrences per request.
@@ -451,42 +475,96 @@ const loadConcordance = async (
   }
 }
 
-// A sense adds one letter to its classical number; a number that ran out of capitals goes on
-// with small letters, which name other senses.
-const SENSE_SUFFIXES = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz']
+/** A sense of a number as the lexicon lists it under that number, with what tells it apart. */
+type StrongNumberSenseRef = StrongSenseRef & {
+  /** Who the person or the place of the sense is. */
+  brief?: string
+  /** The notice of the sense itself, in the detailed lexicon. */
+  noticeHtml?: string
+}
 
 /**
- * The senses filed under one classical number. Every code a sense of the number can carry is
- * asked for at once: the lexicon list is read by gloss, not by number.
+ * The senses filed under one classical number, each with what tells it apart: one read,
+ * which the page of the number and the pages of its senses share.
  */
 const loadSenses = async (
   reads: PageReads,
   language: ResourceLanguage,
   classicCode: string
-): Promise<StrongSenseRef[]> => {
+): Promise<StrongNumberSenseRef[]> => {
   const response = await reads.queue(() =>
-    readResource<StrongLexiconEntryCardsDto>('/v1/strong-lexicon/entries/batch', {
-      language,
-      level: 'simple',
-      identities: ['', ...SENSE_SUFFIXES]
-        .map(suffix => `dstrong:${classicCode}${suffix}`)
-        .join(','),
-    })
+    readResource<StrongLexiconNumberSensesDto>(
+      `/v1/strong-lexicon/numbers/${encodeURIComponent(classicCode)}/senses`,
+      { language }
+    )
   )
-  const senses = new Map<string, StrongSenseRef>()
-  for (const entry of response?.entries ?? []) {
+  // The read answers every number, with no sense for one the lexicon does not hold. No
+  // answer is a Resource service older than the read: the page fails rather than take a
+  // split number for one without senses, and redirect it.
+  if (!response) throw new Error('STRONG_NUMBER_SENSES_UNAVAILABLE')
+  const senses = new Map<string, StrongNumberSenseRef>()
+  for (const entry of response.senses) {
     const sense = toStrongSenseRef(entry)
-    if (sense?.classicCode === classicCode) senses.set(sense.code, sense)
+    if (sense?.classicCode === classicCode) {
+      senses.set(sense.code, {
+        ...sense,
+        brief: entry.entityBrief,
+        noticeHtml: entry.detailedDefinitionHtml,
+      })
+    }
   }
   return [...senses.values()].sort((left, right) =>
     left.code < right.code ? -1 : left.code > right.code ? 1 : 0
   )
 }
 
+// A sense adds one letter to its classical number; a number that ran out of capitals goes on
+// with small letters, which name other senses.
+const SENSE_SUFFIXES = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz']
+
+type SenseBooks = Map<string, StrongPageConcordance['books']>
+
+/**
+ * Where the senses of a number are read, asked for before the senses are known: under every
+ * code a sense of the number can carry. A code that names no sense counts nothing.
+ */
+const loadCandidateSenseBooks = (
+  reads: PageReads,
+  language: ResourceLanguage,
+  classicCode: string,
+  lexicalLanguage: StrongLexicalLanguage
+): Promise<SenseBooks> =>
+  readTwice(() =>
+    loadBookCountsOf(
+      reads,
+      language,
+      SENSE_SUFFIXES.map(suffix => `${classicCode}${suffix}`),
+      lexicalLanguage
+    )
+  )
+
+/**
+ * Where each sense of a number is read: what was asked for with the senses, and a read of
+ * its own for a sense whose code is not its number and a letter.
+ */
+const loadSenseBooks = async (
+  reads: PageReads,
+  language: ResourceLanguage,
+  lexicalLanguage: StrongLexicalLanguage,
+  senses: readonly StrongSenseRef[],
+  asked: Promise<SenseBooks> | undefined
+): Promise<SenseBooks> => {
+  const counted = (await asked) ?? new Map()
+  const others = senses.map(sense => sense.code).filter(code => !counted.has(code))
+  if (!others.length) return counted
+  const rest = await readTwice(() => loadBookCountsOf(reads, language, others, lexicalLanguage))
+  return new Map([...counted, ...rest])
+}
+
 /**
  * The page of a classical number: the word once, then each sense with what tells it apart
- * and where it is read. Every sense is read whole, because who a person is comes with the
- * entry itself.
+ * and where it is read. The lexicon lists the senses with what tells each apart, and the
+ * Bible counts the verses of all of them at once.
  */
 const loadNumberPage = async ({
   reads,
@@ -495,6 +573,7 @@ const loadNumberPage = async ({
   lexicalLanguage,
   classicCode,
   senses,
+  askedSenseBooks,
   concordance,
 }: {
   reads: PageReads
@@ -502,38 +581,34 @@ const loadNumberPage = async ({
   language: ResourceLanguage
   lexicalLanguage: StrongLexicalLanguage
   classicCode: string
-  senses: readonly StrongSenseRef[]
+  senses: readonly StrongNumberSenseRef[]
+  /** Where the senses are read, when it was asked for with them. */
+  askedSenseBooks?: Promise<SenseBooks>
   /** The number read whole as well: its verses and the words it is translated by. */
   concordance: Promise<StrongPageConcordance | undefined>
 }): Promise<StrongNumberPageData> => {
   const { simple, entry } = resolved
-  const [number, read] = await Promise.all([
+  const [number, books] = await Promise.all([
     concordance,
-    // Every sense is asked for at once and read a few at a time, beside the number itself.
-    Promise.all(
-      senses.map(async sense => {
-        const [detailed, senseBooks] = await Promise.all([
-          sense.code === resolved.code
-            ? resolved.detailed
-            : readTwice(() =>
-                reads.queue(() =>
-                  readResource<StrongLexiconEntryDto>(
-                    `/v1/strong-lexicon/entries/${encodeURIComponent(sense.code)}`,
-                    { language }
-                  )
-                )
-              ),
-          readTwice(() => loadBookCounts(reads, language, sense.code, lexicalLanguage)),
-        ])
-        return { sense, detailed, books: senseBooks }
-      })
-    ),
+    loadSenseBooks(reads, language, lexicalLanguage, senses, askedSenseBooks),
   ])
+  const read = senses.map(sense => ({
+    sense,
+    // The sense the number answered with was read whole, with the number.
+    told:
+      sense.code === resolved.code
+        ? {
+            brief: resolved.detailed?.entity?.brief,
+            noticeHtml: resolved.detailed?.definitionHtml,
+          }
+        : sense,
+    books: books.get(sense.code) ?? [],
+  }))
 
   const summaries = strongSenseSummaries(
-    read.map(({ sense, detailed }) => ({
-      brief: detailed?.entity?.brief,
-      noticeHtml: detailed?.definitionHtml,
+    read.map(({ sense, told }) => ({
+      brief: told.brief,
+      noticeHtml: told.noticeHtml,
       gloss: sense.gloss,
     }))
   )
@@ -596,7 +671,7 @@ export const loadStrongPage = createServerFn({ method: 'GET' })
     const language = data.language
     const lexicalLanguage = strongLexicalLanguage(identity.code)
     // The page reads a few documents at a time, and knows what it could not read.
-    const reads = createPageReads(STRONG_PAGE_READ_CONCURRENCY)
+    const reads = createPageReads()
 
     // What does not depend on the entry leaves with it. Should the entry not exist, or
     // lead elsewhere, nobody waits for those answers.
@@ -604,7 +679,13 @@ export const loadStrongPage = createServerFn({ method: 'GET' })
       read.catch(() => undefined)
       return read
     }
-    const sensesOf = (number: string) => ({
+    const sensesOf = (
+      number: string
+    ): {
+      number: string
+      senses: Promise<StrongNumberSenseRef[]>
+      books?: Promise<SenseBooks>
+    } => ({
       number,
       senses: unawaited(loadSenses(reads, language, number)),
     })
@@ -613,14 +694,19 @@ export const loadStrongPage = createServerFn({ method: 'GET' })
     // while the entry is read, since nearly every sense is filed under the number it is
     // written under. A code without one seldom needs them: it asks once a level of the
     // entry has answered with a sense that has a code of its own, without waiting for the
-    // other level.
+    // other level. Such a number may be a page of senses: where they are read is asked for
+    // with them, so that the page is two reads deep.
     const written = writtenNumber(identity.code)
     const earlySenses =
       written === identity.code
         ? firstStrongEntryLevel(asked).then(named => {
             const sense = parseStrongCode(named?.stepCode)?.code
             const number = parseStrongCode(named?.classicStrong)?.code
-            return sense && number && sense !== number ? sensesOf(number) : undefined
+            if (!sense || !number || sense === number) return undefined
+            return {
+              ...sensesOf(number),
+              books: unawaited(loadCandidateSenseBooks(reads, language, number, lexicalLanguage)),
+            }
           })
         : Promise.resolve(sensesOf(written))
     // The verses of the code that is asked for are those of the page, whether it names a
@@ -652,6 +738,7 @@ export const loadStrongPage = createServerFn({ method: 'GET' })
           lexicalLanguage,
           classicCode,
           senses,
+          askedSenseBooks: early?.number === classicCode ? early.books : undefined,
           concordance: earlyConcordance,
         })
       }
