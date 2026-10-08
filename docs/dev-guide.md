@@ -16,6 +16,7 @@ The repository uses Yarn 4, one root `yarn.lock`, and workspace dependencies. Ho
 ```bash
 yarn dev:expo
 yarn dev:site
+yarn dev:world
 yarn dev:api
 yarn dev:studio
 yarn dev:resources

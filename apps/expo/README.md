@@ -1,410 +1,167 @@
-<p align="center">
-  <a href="./README.en.md">🇬🇧 English version</a>
-</p>
+# Bible Strong Expo app
 
-<h1 align="center">
-  <img width="120" height="120" src="https://raw.githubusercontent.com/smontlouis/bible-strong/master/assets/images/icon.png"><br>
-  <a href="https://bible-strong.app"><span>Bible Strong</span></a><br>
-</h1>
+The Bible Strong study app. One codebase produces the iOS, Android, and Web runtimes (`@bible-strong/expo`).
 
-<p align="center">
-  <a href="https://play.google.com/apps/testing/com.smontlouis.biblestrong">Bêta Android</a>
-  &nbsp;&nbsp;&nbsp;
-  <a href="https://testflight.apple.com/join/Wh1Wz8Zb">Bêta iOS</a>
-</p>
+For what the product does and how this workspace fits in the monorepo, see the [root README](../../README.md). The domain glossary is in [`CONTEXT.md`](./CONTEXT.md); agent and coding instructions are in [`AGENTS.md`](./AGENTS.md).
 
-<p align="center">
-  <strong>Decouvrir la Bible sous un nouveau jour</strong><br>
-  <em>Une application d'etude biblique complete avec concordance Strong</em>
-</p>
+## Prerequisites
 
-<p align="center">
-  <a href="https://apps.apple.com/fr/app/bible-strong/id1454738221">
-    <img src="https://img.shields.io/badge/App_Store-disponible-blue?logo=apple&logoColor=white" alt="App Store" />
-  </a>
-  <a href="https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong">
-    <img src="https://img.shields.io/badge/Google_Play-disponible-green?logo=google-play&logoColor=white" alt="Google Play" />
-  </a>
-  <br/>
-  <img src="https://img.shields.io/badge/React_Native-0.81-61DAFB?logo=react&logoColor=white" alt="React Native" />
-  <img src="https://img.shields.io/badge/Expo-SDK_54-000020?logo=expo&logoColor=white" alt="Expo" />
-  <img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
-  <a href="https://github.com/smontlouis/bible-strong/releases">
-    <img src="https://img.shields.io/github/v/tag/smontlouis/bible-strong?label=version" alt="Version" />
-  </a>
-</p>
+- The root prerequisites: Node.js 22 and Yarn 4 through Corepack
+- [EAS CLI](https://docs.expo.dev/eas/) for builds
+- iOS: macOS with a version of Xcode supported by Expo SDK 57 (the deployment target is iOS 16.4)
+- Android: Android Studio with an emulator or a physical device
 
----
+The app needs a custom development client. It does not run in Expo Go.
 
-## A propos
+## Setup
 
-**Bible Strong** est une application mobile gratuite et open-source pour l'etude approfondie de la Bible. Concue principalement pour la communaute francophone, elle offre des outils puissants pour explorer les textes bibliques dans leurs langues originales (hebreu et grec) grace a la concordance Strong.
+1. **Install dependencies from the monorepo root**
 
-Que vous soyez etudiant en theologie, pasteur, ou simplement curieux d'approfondir votre comprehension des Ecritures, Bible Strong vous donne acces a des ressources habituellement reservees aux specialistes, le tout dans une interface moderne et intuitive.
-
-## Telecharger l'application
-
-<p align="center">
-  <a href="https://apps.apple.com/fr/app/bible-strong/id1454738221">
-    <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" height="50" />
-  </a>
-  &nbsp;&nbsp;&nbsp;
-  <a href="https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong">
-    <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="50" />
-  </a>
-</p>
-
-## Fonctionnalites principales
-
-### Lecture de la Bible
-
-- **40+ traductions** disponibles en francais, anglais, hebreu et grec
-  - Francais : LSG 1910, Segond 21, NEG79, NBS, Semeur, Darby, Martin, Chouraqui...
-  - Anglais : KJV, ESV, NIV, NKJV, NLT, NASB...
-  - Langues originales : BHS (hebreu), Septante, Textus Receptus (grec)
-- **Systeme d'onglets** pour naviguer entre plusieurs passages simultanement
-- **Mode parallele** pour comparer differentes versions cote a cote
-- **8 themes visuels** : clair, sepia, nature, coucher de soleil, sombre, noir, mauve, nuit
-- **Personnalisation** : taille de police, famille de police, interligne
-
-### Concordance Strong
-
-La concordance Strong permet d'etudier chaque mot de la Bible dans sa langue originale :
-
-- **Textes et index separes** : une Bible reste lisible sans donnees Strong ; son index lexical peut etre installe ou mis a jour independamment
-- **Nombreuses Bibles compatibles** : LSG, Darby, KJV, NASB, BSB et d'autres publications disposent de leur propre concordance
-- **Lexique modulaire** : le coeur hebreu/grec peut etre complete par un dictionnaire grec detaille et des fiches d'entites bibliques
-- **Identites lexicales precises** : prise en charge des numeros Strong classiques et des identites enrichies de STEPBible
-- **Concordance contextuelle** : retrouvez les occurrences, la forme originale, la translitteration et la morphologie disponible
-- **Navigation enrichie** : parcourez les mots lies, les entites, les ressources lexicales et les relations d'etude
-
-### Langues originales et interlineaire
-
-- **Bible hebreu-grec BHG** : texte canonique original couvrant l'Ancien et le Nouveau Testament
-- **Index interlineaires francais et anglais** : glosses, translitteration, morphologie et alignement lexical sans dupliquer le texte biblique
-- **Affichage configurable** : texte original, traduction interlineaire, numeros Strong et translitteration peuvent etre adaptes au contexte de lecture
-
-### Outils d'etude
-
-- **Surlignage colore** : marquez les versets importants avec des couleurs personnalisables
-- **Notes personnelles** : ajoutez vos reflexions a chaque verset
-- **Signets** : retrouvez rapidement vos passages favoris
-- **Tags** : organisez vos versets par themes personnalises
-- **Liens entre versets** : creez des connexions entre passages relies
-- **Etudes** : redigez des etudes completes avec editeur riche
-- **Historique** : retrouvez les derniers versets consultes
-
-### References et ressources
-
-- **Bible Nave** : index thematique de la Bible avec des milliers d'entrees
-- **Dictionnaire biblique** : definitions des termes, lieux et personnages
-- **Tresor des Ecritures** : references croisees pour chaque verset
-- **Commentaires bibliques** : eclairages sur les passages
-
-### Plans de lecture
-
-- **Plans annuels** : lisez la Bible en un an avec differentes methodes
-- **Plans thematiques** : explorez des sujets specifiques
-- **Meditations guidees** : contenus avec textes, videos et reflexions
-- **Suivi de progression** : visualisez votre avancement
-- **Integration Bible Project** : plans associes aux videos du Bible Project
-
-### Audio
-
-- **Bible audio** : ecoutez la Bible en plusieurs versions
-- **Lecture en arriere-plan** : continuez l'ecoute meme l'ecran eteint
-- **Controle de vitesse** : ajustez la vitesse de lecture
-- **Synthese vocale** : ecoutez n'importe quelle version avec le TTS
-
-### Chronologie biblique
-
-- **Timeline interactive** : visualisez l'histoire de la Bible
-- **Evenements majeurs** : de la creation a l'eglise primitive
-- **Navigation intuitive** : deplacez-vous dans le temps facilement
-
-### Synchronisation et sauvegarde
-
-- **Compte utilisateur** : connectez-vous avec Google ou Apple
-- **Synchronisation cloud** : retrouvez vos donnees sur tous vos appareils
-- **Sauvegarde automatique** : ne perdez jamais vos notes et surlignages
-- **Bibliotheque hors ligne** : choisissez les Bibles, lexiques, index Strong et ressources a conserver sur l'appareil
-- **Installation guidee** : la Bible de demarrage est garantie et les ressources supplementaires sont organisees par usage
-
-## Captures d'ecran
-
-*Disponibles sur l'[App Store](https://apps.apple.com/fr/app/bible-strong/id1454738221) et le [Play Store](https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong)*
-
----
-
-## Installation pour le developpement
-
-### Prerequis
-
-- [Node.js](https://nodejs.org/) (v18 ou superieur)
-- [Yarn](https://yarnpkg.com/) v4 (gere via Corepack)
-- [Expo CLI](https://docs.expo.dev/get-started/installation/)
-- [EAS CLI](https://docs.expo.dev/eas/) pour les builds
-- Pour iOS : macOS avec Xcode 15+
-- Pour Android : Android Studio avec un emulateur ou un appareil physique
-
-### Etapes d'installation
-
-1. **Cloner le repository**
-   ```bash
-   git clone https://github.com/smontlouis/bible-strong.git
-   cd bible-strong
-   ```
-
-2. **Activer Corepack pour Yarn 4**
    ```bash
    corepack enable
-   ```
-
-3. **Installer les dependances**
-   ```bash
    yarn install
    ```
 
-4. **Configurer les variables d'environnement**
-
-   Les fichiers `.env.*` sont necessaires pour le fonctionnement de l'app.
-   Vous aurez besoin de vos propres cles Firebase pour le developpement local.
-
-5. **Creer un build de developpement**
-
-   Cette application necessite un client de developpement personnalise (pas Expo Go).
+2. **Create the environment file**
 
    ```bash
-   # Pour Android
-   yarn build:android:dev
-
-   # Pour iOS (macOS uniquement)
-   yarn build:ios:dev
-
-   # Pour le simulateur iOS
-   yarn build:ios:dev-sim
+   cp apps/expo/.env.example apps/expo/.env.development
    ```
 
-6. **Lancer le serveur de developpement**
+   `.env.example` documents every variable. You need your own Firebase project for local development: the native Google Services files referenced by the environment file, and the `EXPO_PUBLIC_FIREBASE_*` values for the Web runtime. Staging and production use `.env.staging` and `.env.production`. Do not commit these files.
+
+3. **Build a development client**
+
    ```bash
-   yarn start
+   yarn workspace @bible-strong/expo build:ios:dev-sim    # iOS simulator
+   yarn workspace @bible-strong/expo build:ios:dev        # iOS device
+   yarn workspace @bible-strong/expo build:android:dev    # Android
    ```
 
-7. **Lancer sur un appareil**
+   These are local EAS builds; install the resulting binary on the simulator, emulator, or device.
+
+4. **Start the development server**
+
    ```bash
-   # Android
-   yarn android
-
-   # iOS
-   yarn ios
+   yarn dev:expo
    ```
 
-### Scripts disponibles
+## Commands
 
-| Commande | Description |
-|----------|-------------|
-| `yarn start` | Demarre le serveur Expo |
-| `yarn android` | Lance sur Android |
-| `yarn ios` | Lance sur iOS |
-| `yarn lint` | Verifie le code avec ESLint |
-| `yarn lint:fix` | Corrige automatiquement les erreurs de lint |
-| `yarn typecheck` | Verifie les types TypeScript |
-| `yarn test` | Lance les tests Jest |
-| `yarn format` | Formate le code avec Prettier |
-| `yarn clean` | Nettoie et reinstalle les dependances |
-| `yarn i18n` | Extrait les chaines de traduction |
+Root shortcuts:
 
-### Builds de production
+| Command | Description |
+|---------|-------------|
+| `yarn dev:expo` | Start the Expo development server for the development client |
+| `yarn dev:expo:ios` | Compile and run the native iOS app |
+| `yarn dev:expo:android` | Compile and run the native Android app |
+| `yarn dev:expo:web` | Start the app in the browser on port 9090 |
+
+Workspace scripts, run as `yarn workspace @bible-strong/expo <script>`:
+
+| Script | Description |
+|--------|-------------|
+| `typecheck` | Check generated theme CSS, then run `tsc` |
+| `lint` / `lint:fix` | ESLint |
+| `format` / `format:check` | Prettier on `src/` |
+| `test` | Jest |
+| `i18n` | Extract translation strings |
+| `themes:generate` / `themes:check` | Regenerate or verify `global.css` from the theme palettes |
+| `web:export` | Export the Web runtime as a static single-page app |
+| `clean` | Remove `node_modules` and Metro caches, then reinstall |
+
+### Release builds
 
 ```bash
 # Android
-yarn build:android:staging    # Build de test interne (APK)
-yarn build:android:prod       # Build de production (AAB)
-yarn build:android:prod:apk   # Build de production (APK)
+yarn workspace @bible-strong/expo build:android:staging    # internal testing (APK)
+yarn workspace @bible-strong/expo build:android:prod       # production (AAB)
+yarn workspace @bible-strong/expo build:android:prod:apk   # production (APK)
 
 # iOS
-yarn build:ios:staging        # Build de test interne
-yarn build:ios:prod           # Build de production
+yarn workspace @bible-strong/expo build:ios:staging        # internal testing
+yarn workspace @bible-strong/expo build:ios:prod           # production
 ```
 
----
+## Web runtime
 
-## Contribuer
+The Web runtime is online-only: Bible content, search, and reference resources are read through the Resource service API, and there is no onboarding, local SQLite, or offline download. It is served from `web.bible-strong.app` and is separate from the public site in [`apps/site`](../site/README.md).
 
-Les contributions sont les bienvenues ! Bible Strong est un projet open-source et communautaire.
+See the [development guide](../../docs/dev-guide.md#expo-web-runtime) to run it locally against a Resource service, and the [Web deployment notes](../../docs/expo-web-deployment.md) for hosting.
 
-### Comment contribuer
-
-#### Signaler un bug
-
-1. Verifiez que le bug n'a pas deja ete signale dans les [Issues](https://github.com/smontlouis/bible-strong/issues)
-2. Creez une nouvelle issue en decrivant :
-   - Les etapes pour reproduire le bug
-   - Le comportement attendu vs le comportement observe
-   - Votre appareil, version de l'OS et version de l'app
-   - Des captures d'ecran si possible
-
-#### Proposer une fonctionnalite
-
-1. Ouvrez une [Issue](https://github.com/smontlouis/bible-strong/issues) pour discuter de votre idee
-2. Decrivez le besoin et la solution envisagee
-3. Attendez la validation avant de commencer le developpement
-
-#### Soumettre du code
-
-1. **Fork** le repository
-2. Creez une branche pour votre modification :
-   ```bash
-   git checkout -b feature/ma-fonctionnalite
-   # ou
-   git checkout -b fix/correction-bug
-   ```
-3. Faites vos modifications en respectant les conventions du projet
-4. Assurez-vous que le code passe les verifications :
-   ```bash
-   yarn lint
-   yarn typecheck
-   ```
-5. Commitez avec un message clair suivant les [Conventional Commits](https://www.conventionalcommits.org/) :
-   ```bash
-   git commit -m "feat: ajoute une nouvelle fonctionnalite"
-   git commit -m "fix: corrige le bug de navigation"
-   git commit -m "docs: met a jour la documentation"
-   ```
-6. Poussez votre branche :
-   ```bash
-   git push origin feature/ma-fonctionnalite
-   ```
-7. Ouvrez une **Pull Request** avec une description claire des changements
-
-### Conventions de code
-
-- **TypeScript** : typage strict active, evitez les `any`
-- **ESLint** : configuration Expo + Prettier
-- **Styling** : privilegiez `Box`, `HStack` et `VStack` ; Emotion reste disponible pour les primitives partagees
-- **Etat** : Redux pour les donnees persistantes, Jotai pour l'UI locale
-- **Commits** : format Conventional Commits
-  - `feat:` nouvelle fonctionnalite
-  - `fix:` correction de bug
-  - `docs:` documentation
-  - `refactor:` refactorisation sans changement fonctionnel
-  - `style:` formatage, pas de changement de code
-  - `test:` ajout ou modification de tests
-  - `chore:` maintenance, dependances
-
-### Traductions
-
-Vous souhaitez aider a traduire l'application ?
-
-Les fichiers de traduction sont dans `i18n/locales/` :
-- `fr/translation.json` - Francais (langue principale)
-- `en/translation.json` - Anglais
-
-Pour ajouter une nouvelle langue :
-1. Creez un nouveau dossier dans `i18n/locales/`
-2. Copiez `fr/translation.json` comme base
-3. Traduisez les valeurs (pas les cles)
-4. Ouvrez une PR
-
----
-
-## Architecture du projet
+## Project structure
 
 ```
-bible-strong/
-├── app/                    # Routes Expo Router
-│   └── strong/             # Entree Strong, concordance, entites et dictionnaire
+apps/expo/
+├── app/                    # Expo Router routes
 ├── src/
-│   ├── features/           # Modules fonctionnels
-│   │   ├── bible/          # Lecture et navigation biblique
-│   │   ├── resources/      # Contrats d'acces aux ressources
-│   │   ├── studies/        # Editeur d'etudes
-│   │   ├── plans/          # Plans de lecture
-│   │   ├── search/         # Recherche biblique et globale
-│   │   ├── lexique/        # Liste et details du lexique Strong
-│   │   ├── nave/           # Bible Nave
-│   │   ├── dictionnary/    # Dictionnaire biblique
-│   │   ├── commentaries/   # Commentaires
-│   │   ├── timeline/       # Chronologie biblique
-│   │   ├── audio/          # Lecture audio
-│   │   ├── bookmarks/      # Signets
-│   │   ├── settings/       # Parametres
+│   ├── features/           # Feature modules
+│   │   ├── bible/          # Bible reading and navigation
+│   │   ├── resources/      # Access to published resources
+│   │   ├── studies/        # Study editor
+│   │   ├── plans/          # Reading plans
+│   │   ├── search/         # Bible and global search
+│   │   ├── lexique/        # Strong lexicon
+│   │   ├── nave/           # Nave's Topical Bible
+│   │   ├── dictionnary/    # Bible dictionary
+│   │   ├── commentaries/   # Commentaries
+│   │   ├── timeline/       # Biblical timeline
+│   │   ├── audio/          # Audio playback
+│   │   ├── study-assistant/ # Study assistant
 │   │   └── ...
-│   ├── common/             # Composants UI partages
-│   ├── redux/              # Store Redux et slices
-│   ├── state/              # Atoms Jotai
-│   ├── helpers/            # Utilitaires et hooks
-│   ├── navigation/         # Compatibilite et types de navigation
-│   ├── themes/             # Themes et couleurs
-│   └── assets/             # Ressources statiques
-├── i18n/                   # Traductions
-├── firebase/               # Configs Firebase par env
-└── ...
+│   ├── common/             # Shared UI components
+│   ├── redux/              # Redux store and slices
+│   ├── state/              # Jotai atoms
+│   ├── helpers/            # Utilities and hooks
+│   ├── navigation/         # Navigation compatibility and types
+│   ├── themes/             # Theme palettes
+│   └── assets/             # Static assets
+├── i18n/                   # Translations
+├── firebase/               # Firebase configuration per environment
+├── modules/                # Local native modules
+└── plugins/                # Expo config plugins
 ```
 
-Les ressources telechargeables utilisent un catalogue mobile versionne. Les Bibles canoniques,
-leurs index Strong, les index interlineaires et les modules du lexique sont des copies hors ligne
-independantes, verifiees puis activees de maniere atomique.
+Several feature folders carry their own README. The [annotated source tree](../../docs/source-tree.md) and the [architecture document](../../docs/architecture.md) go further.
 
-Pour plus de details techniques, consultez [l'index de la documentation](./docs/index.md),
-[l'architecture](./docs/architecture.md) et le [contexte du domaine](./CONTEXT.md).
+Downloadable resources follow a versioned catalog. Canonical Bibles, their Strong indexes, the interlinear indexes, and the lexicon modules are independent offline copies, verified and then activated atomically.
 
----
+## Tech stack
 
-## Technologies
-
-| Categorie | Technologies |
-|-----------|--------------|
-| Framework | React Native 0.86, Expo SDK 57 |
-| Langage | TypeScript 5.9 |
-| Etat | Redux Toolkit, Jotai, Redux Persist |
-| Styling | Emotion |
-| Navigation | Expo Router, React Navigation |
-| Base de donnees | SQLite (expo-sqlite), Firestore |
-| Auth | Firebase Auth (email, Google, Apple) |
-| Audio | react-native-track-player |
+| Area | Technologies |
+|------|--------------|
+| Framework | Expo SDK 57, React Native 0.86, React 19 with React Compiler |
+| Language | TypeScript 6 |
+| Navigation | Expo Router |
+| State | Redux Toolkit with Redux Persist on MMKV, Jotai |
+| Styling | Uniwind with Tailwind CSS v4 |
+| Local data | SQLite (`expo-sqlite`) |
+| Backend | Firebase Auth (email, Google, Apple), Firestore, Resource service API |
+| Audio | `react-native-track-player`, `expo-audio`, `expo-speech` |
 | Notifications | Notifee |
-| Animations | Reanimated, Moti, Lottie |
+| Animations | Reanimated 4, Lottie |
+| Monitoring | Sentry |
 
----
+## Conventions
 
-## Licence
+- **TypeScript**: strict typing; avoid `any`.
+- **Styling**: build layout with `Box`, `HStack`, and `VStack`, static styles through Uniwind `className`, computed values through `style`. Do not add Emotion or `styled` wrappers.
+- **State**: Redux for persistent and synced data, Jotai for tab and local UI state.
+- **Memoization**: React Compiler handles it; do not add `useMemo`, `useCallback`, or `memo`.
+- **Imports**: use the `~features`, `~common`, `~helpers`, and related aliases.
 
-Ce projet est sous licence [GNU General Public License v3.0](./LICENSE).
+[`AGENTS.md`](./AGENTS.md) and the [conventions document](../../docs/conventions.md) hold the full rules.
 
-Vous etes libre de :
-- Utiliser le code pour vos projets personnels
-- Modifier le code source
-- Distribuer vos modifications
+## Translations
 
-A condition de :
-- Garder le code source ouvert
-- Créditer le projet original
-- Utiliser la meme licence GPL v3
+Translation files live in `i18n/locales/`:
 
----
+- `i18n/locales/fr/translation.json`: French, the primary language
+- `i18n/locales/en/translation.json`: English
 
-## Support
+To add a language:
 
-- **Site web** : [bible-strong.app](https://bible-strong.app)
-- **Signaler un bug** : [GitHub Issues](https://github.com/smontlouis/bible-strong/issues)
-- **Questions** : Ouvrez une Discussion sur GitHub
-
----
-
-## Remerciements
-
-- La communaute open-source pour les nombreuses bibliotheques utilisees
-- Les contributeurs qui ameliorent l'application
-- [Bible Project](https://bibleproject.com/) pour les ressources educatives
-- Toutes les societes bibliques pour les traductions
-
----
-
-<p align="center">
-  <strong>Fait avec ❤️ pour la communaute chretienne francophone</strong>
-  <br/><br/>
-  <a href="https://github.com/smontlouis/bible-strong/stargazers">⭐ Star ce projet si vous l'appreciez !</a>
-  <br/><br/>
-  Créé par <a href="https://github.com/smontlouis">smontlouis</a>
-</p>
+1. Create a new folder in `i18n/locales/`.
+2. Copy `i18n/locales/fr/translation.json` as a base.
+3. Translate the values, not the keys.
+4. Open a pull request.
