@@ -263,8 +263,8 @@ in its sitemap, each answering 404, until the service publishes the numbers.
 The site functions run in the region of the database of the Resource API, Frankfurt: a
 page is a chain of reads, and a function on another continent pays that distance on each.
 
-A Strong page reads like a Bible page: at most six documents at a time, and what does not
-depend on an answer does not wait for it. The verses of a code, their count by book and the
+A Strong page reads like a Bible page: a bounded number of documents at a time, and what
+does not depend on an answer does not wait for it. The verses of a code, their count by book and the
 words they are translated by are asked for with its entry, so a sense is six reads on two
 levels, the entry beside its verses and then their text, and a seventh beside the entry when
 its code says it is one sense of a number. A page shown without the words its entry is
@@ -276,7 +276,8 @@ counts: about sixty reads for the largest number, once per cached rendering. The
 a number are only known from the lexicon, by asking for every code a sense could carry: the
 number is asked as soon as one reading level of its entry names a sense with a code of its
 own, and its senses are read once it has answered. A page of a number is therefore three
-reads deep, and those of its senses pass six at a time. A number with a single sense, or a
+reads deep, and those of its senses pass sixteen at a time: six at a time would make ten
+rounds of the largest number, each as long as its slowest read. A number with a single sense, or a
 code in another letter case, is redirected as soon as its entry is known.
 
 The lexicon list of the Resource API gathers the entries that name one person or thing

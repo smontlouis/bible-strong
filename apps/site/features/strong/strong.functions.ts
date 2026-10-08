@@ -54,6 +54,13 @@ const SAMPLE_VERSE_COUNT = 20
 const TRANSLATION_COUNT = 12
 const SENSE_SUMMARY_LENGTH = 170
 const DESCRIPTION_LENGTH = 155
+/**
+ * How many reads the page of an entry keeps in flight. More than a Bible page does: the
+ * largest number reads about sixty documents for its senses, which six at a time would
+ * make ten rounds, each as long as its slowest read. Pages of a sense, and of a number with
+ * few senses, never have that many to ask at once.
+ */
+export const STRONG_PAGE_READ_CONCURRENCY = 16
 
 // The Strong-tagged Bible read alongside each lexicon language.
 const CONCORDANCE_VERSION: Record<ResourceLanguage, string> = { fr: 'LSG', en: 'KJV' }
@@ -589,7 +596,7 @@ export const loadStrongPage = createServerFn({ method: 'GET' })
     const language = data.language
     const lexicalLanguage = strongLexicalLanguage(identity.code)
     // The page reads a few documents at a time, and knows what it could not read.
-    const reads = createPageReads()
+    const reads = createPageReads(STRONG_PAGE_READ_CONCURRENCY)
 
     // What does not depend on the entry leaves with it. Should the entry not exist, or
     // lead elsewhere, nobody waits for those answers.

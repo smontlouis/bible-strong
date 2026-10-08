@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { PAGE_READ_CONCURRENCY } from '../resources/pageReads'
 import { readResource } from '../resources/resourceApi'
-import { loadStrongConcordancePage, loadStrongPage } from './strong.functions'
+import {
+  loadStrongConcordancePage,
+  loadStrongPage,
+  STRONG_PAGE_READ_CONCURRENCY,
+} from './strong.functions'
 
 vi.mock('../resources/resourceApi', () => ({ readResource: vi.fn() }))
 // A server function is its handler here: the tests call it as the route does.
@@ -35,7 +38,7 @@ const entry = (stepCode: string, classicStrong: string, gloss: string, brief?: s
 // A small lexicon: a number that is its own sense, a number told apart in two senses, a
 // number whose single sense has a code of its own, and a number with more senses than a
 // page reads at once.
-const MANY = [...'GHIJKLMNOP'].map(suffix => `H2148${suffix}`)
+const MANY = [...'GHIJKLMNOPQRSTUVWXYZ'].map(suffix => `H2148${suffix}`)
 const SENSES: Record<string, ReturnType<typeof entry>> = {
   H0001: entry('H0001', 'H0001', 'père'),
   H3404G: entry('H3404G', 'H3404', 'Jerija', 'Un Lévite, fils de Hébron.'),
@@ -177,8 +180,8 @@ describe('loadStrongPage', () => {
     const page = await load('h2148')
 
     expect(page).toMatchObject({ kind: 'number', senses: { length: MANY.length } })
-    expect(pathsRead().length).toBeGreaterThan(2 * PAGE_READ_CONCURRENCY)
-    expect(most).toBe(PAGE_READ_CONCURRENCY)
+    expect(pathsRead().length).toBeGreaterThan(2 * STRONG_PAGE_READ_CONCURRENCY)
+    expect(most).toBe(STRONG_PAGE_READ_CONCURRENCY)
   })
 
   it('leads a number with a single sense to that sense and reads no page there', async () => {
