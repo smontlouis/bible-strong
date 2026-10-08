@@ -365,7 +365,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/dbebe7e61f934913bd4e9f8f73448e135b77ef3166a698156d5ac68e31ee26e9/bibles/bible-fmar.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/935b1a464fdd494dd6e79c880cd62ec2920aa3a5b9623fd3304c6d81739094a8/bibles/bible-fmar.json.zip",
         "entry": "bible-fmar.json"
       }
     ],
@@ -593,7 +593,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/230c7a7bf08d69a4e46579c62d6ca9100f3b3010251daf69453599e90ad68d60/bibles/bible-ost.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/f9b867113143a6bb54b1d7df62173fcff3e07db031f5172ba12e03d3a48dac12/bibles/bible-ost.json.zip",
         "entry": "bible-ost.json"
       }
     ],

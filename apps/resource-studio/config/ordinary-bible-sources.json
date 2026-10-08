@@ -289,7 +289,7 @@
     },
     "OST": {
       "text": {
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/d3258a3f962ec907be692ddf911180314223fa6521f9955c6fa1f9677589135d/bible-ost.json",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/6dbc819e6d528c3f7b4d1a85ed81788647cc7d593dcf983a0d08111c470590a0/bible-ost.json",
         "entry": "bible-ost.json"
       }
     },
