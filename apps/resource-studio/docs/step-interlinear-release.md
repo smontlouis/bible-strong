@@ -95,13 +95,24 @@ segment/identity. The fully normalized alternative would require both a
 deduplicated code/verse pairs and reuses the existing token/segment indexes
 after the 60 verse ids are known.
 
+Runtime token ids are identities: the Strong Bible indexes name the original
+words of a span by them (`stepTokenIds`). They follow reading order in two
+passes, first the words under plain and round-bracketed references, then the
+words under square- and curly-bracketed references, so the words recovered by
+ADR-0078 took the ids after every id already published (443,240 to 443,542).
+Segment ids follow their tokens; verse ids stay in canonical order. Before
+publishing a rebuild from changed sources, compare its token ids with the
+published index.
+
 `StrongCodes.code` has the unique index
 `idx_runtime_strong_codes_code`. The publisher runs `VACUUM` and then
 `ANALYZE`; the shipped databases include `sqlite_stat1` rows for both
 concordance indexes.
 
-The full runtime V5 projection contains all 31,210 JSON verses, 443,239
-canonical tokens, and 607,175 segments. The two SQLite files together use
+The full runtime V5 projection published in 2026-07 contains all 31,210 JSON
+verses, 443,239 canonical tokens, and 607,175 segments; with the bracketed
+references of ADR-0078 the same sources give 31,219 verses, 443,542 tokens and
+607,479 segments. The two SQLite files together use
 109,416,448 bytes instead of 411,226,112 bytes for the authoring pair, a 73.39%
 reduction. French contextual witness forms cover 381,516 segments; the
 remaining 225,659 segments retain the exact lexical French fallback. These
@@ -291,6 +302,16 @@ generated Strong Bible.
 - Alternative versification coordinates are part of the stable physical token
   id. This distinguishes source rows such as `Ps.51.0(51.1)#01` and
   `Ps.51.0(51.2)#01` without losing either occurrence.
+- A word is published in the verse its source line is filed under, which is the
+  NRSV numbering in both sources. The number in brackets is the same word
+  elsewhere and is kept as an alternate reference with its brackets
+  (`Tokens.alternateRefs`, `Tokens.alternateBrackets`): round for the Hebrew
+  numbering (TAHOT) and Nestle-Aland (TAGNT), square for the KJV, curly for
+  other editions. `Php.1.16[1.17]#01` is a word of Philippians 1:16.
+- A line that claims to be a word (`Book.chapter.verse…` or `…#word=type`) and
+  cannot be placed fails the build with
+  `step-interlinear-token-reference-unsupported:<file>:<line>:<field>`
+  ([ADR-0078](../../../docs/adr/0078-publish-step-words-under-their-nrsv-verse-and-keep-token-ids.md)).
 
 `startOffset` and `length` use UTF-16 code units and always refer to the exact
 verse string in `bible-step.json`.

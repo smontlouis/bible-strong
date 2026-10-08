@@ -425,6 +425,149 @@ test("projects the STEP ledger into compact morphology-aware runtime databases",
   assert.equal(verification.strongVerseCount, 8);
 });
 
+test("numbers words filed under another numbering after the published ones", async (t) => {
+  const directory = await mkdtemp(
+    path.join(tmpdir(), "step-interlinear-runtime-")
+  );
+  t.after(async () => rm(directory, { recursive: true, force: true }));
+
+  const tagntPath = path.join(directory, "TAGNT fixture.txt");
+  const lexiconPath = path.join(directory, "lexicon.sqlite");
+  const ledgerDir = path.join(directory, "ledger");
+  const word = (ref: string) =>
+    [
+      ref,
+      "ἐποίησεν (epoiēsen)",
+      "he did",
+      "G4160G=V-AAI-3S",
+      "ποιέω=do",
+      "NA28+TR",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ].join("\t");
+  await writeFile(
+    tagntPath,
+    [
+      word("Mat.1.1#01=NKO"),
+      word("Mat.1.2[1.1]#01=NKO"),
+      word("Mat.1.2#02=NKO"),
+      word("Mat.1.3(1.4)#01=NKO"),
+      word("Mat.1.3{1.4}#02=NKO"),
+      word("Mat.1.4[1.5]#01=NKO"),
+      word("Mat.1.5#01=NKO")
+    ].join("\n"),
+    "utf8"
+  );
+  createLexiconFixture(lexiconPath);
+  await buildStepInterlinearPublication({
+    outputDir: ledgerDir,
+    sourcePaths: [tagntPath],
+    lexiconPath
+  });
+  const referencePaths = Object.fromEntries(
+    await Promise.all(
+      ["Sg1910", "Darby", "DarbyR"].map(async (name) => {
+        const filePath = path.join(directory, `${name}.csv`);
+        await writeFile(filePath, "book_id\tnum_chapter\tnum_verse\ttext\n");
+        return [name, filePath];
+      })
+    )
+  );
+  const summary = await buildStepInterlinearRuntimePublication({
+    ledgerDir,
+    outputDir: path.join(directory, "runtime"),
+    lexiconPath,
+    referencePaths
+  });
+  assert.equal(summary.verseCount, 5);
+  assert.equal(summary.tokenCount, 7);
+
+  const english = new DatabaseSync(summary.englishPath, { readOnly: true });
+  try {
+    const tokens = english
+      .prepare(
+        `SELECT v.id AS verseId, v.ref, t.readingOrdinal, t.startOffset,
+                t.id AS tokenId, s.id AS segmentId
+           FROM Tokens t
+           JOIN Verses v ON v.id=t.verseId
+           JOIN Segments s ON s.tokenId=t.id
+          ORDER BY v.id, t.readingOrdinal`
+      )
+      .all() as unknown as Array<Record<string, unknown>>;
+    // Verses and words read in canonical order; the ids of the words under
+    // plain and round-bracketed references are those of a publication without
+    // the three other words, which take the ids after them.
+    assert.deepEqual(
+      tokens.map((row) => ({ ...row })),
+      [
+        {
+          verseId: 1,
+          ref: "Matt.1.1",
+          readingOrdinal: 0,
+          startOffset: 0,
+          tokenId: 1,
+          segmentId: 1
+        },
+        {
+          verseId: 2,
+          ref: "Matt.1.2",
+          readingOrdinal: 0,
+          startOffset: 0,
+          tokenId: 5,
+          segmentId: 5
+        },
+        {
+          verseId: 2,
+          ref: "Matt.1.2",
+          readingOrdinal: 1,
+          startOffset: 9,
+          tokenId: 2,
+          segmentId: 2
+        },
+        {
+          verseId: 3,
+          ref: "Matt.1.3",
+          readingOrdinal: 0,
+          startOffset: 0,
+          tokenId: 3,
+          segmentId: 3
+        },
+        {
+          verseId: 3,
+          ref: "Matt.1.3",
+          readingOrdinal: 1,
+          startOffset: 9,
+          tokenId: 6,
+          segmentId: 6
+        },
+        {
+          verseId: 4,
+          ref: "Matt.1.4",
+          readingOrdinal: 0,
+          startOffset: 0,
+          tokenId: 7,
+          segmentId: 7
+        },
+        {
+          verseId: 5,
+          ref: "Matt.1.5",
+          readingOrdinal: 0,
+          startOffset: 0,
+          tokenId: 4,
+          segmentId: 4
+        }
+      ]
+    );
+  } finally {
+    english.close();
+  }
+});
+
 function createLexiconFixture(filePath: string): void {
   const database = new DatabaseSync(filePath);
   try {

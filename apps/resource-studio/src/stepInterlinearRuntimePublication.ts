@@ -62,6 +62,7 @@ interface LedgerSegmentRow {
   tokenStartOffset: number;
   tokenLength: number;
   source: "TAHOT" | "TAGNT";
+  alternateBrackets: string;
   tokenMorphology: string;
   segmentOrdinal: number;
   segmentStartOffset: number;
@@ -394,7 +395,8 @@ function readRuntimeData(
         `SELECT v.id AS verseId, v.bookOrder, v.bookId, v.chapter, v.verse,
                 v.ref, t.id AS tokenKey, t.readingOrdinal,
                 t.startOffset AS tokenStartOffset, t.length AS tokenLength,
-                t.source, t.morphology AS tokenMorphology,
+                t.source, t.alternateBrackets,
+                t.morphology AS tokenMorphology,
                 s.ordinal AS segmentOrdinal,
                 s.startOffset AS segmentStartOffset,
                 s.length AS segmentLength, s.transliteration,
@@ -694,7 +696,7 @@ function writeRuntimeDatabase(input: {
           verse.ref
         );
       }
-      for (const segment of input.segments) {
+      for (const segment of inTokenIdentityOrder(input.segments)) {
         const verseId = verseIds.get(segment.ref);
         if (!verseId) {
           throw new Error(
@@ -825,6 +827,24 @@ function writeRuntimeDatabase(input: {
   } finally {
     database.close();
   }
+}
+
+/**
+ * Token ids are identities other publications point at: a Strong Bible index
+ * names the original words of a span by them (`stepTokenIds`). They are
+ * numbered in reading order, so a word added in the middle would renumber
+ * every word after it. Words the source files under a KJV or other-edition
+ * numbering (square or curly brackets) were first published after all the
+ * others had their ids: they are numbered after them, in reading order, and
+ * every earlier id keeps its word. Segment ids follow their tokens.
+ */
+function inTokenIdentityOrder(segments: RuntimeSegment[]): RuntimeSegment[] {
+  const tier = (segment: RuntimeSegment): number =>
+    segment.alternateBrackets === "square" ||
+    segment.alternateBrackets === "curly"
+      ? 1
+      : 0;
+  return [...segments].sort((left, right) => tier(left) - tier(right));
 }
 
 function createInterners(database: DatabaseSync): {
