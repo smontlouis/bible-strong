@@ -336,6 +336,30 @@ curl --fail https://api.bible-strong.app/health
 curl --fail https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1
 ```
 
+### Apply a schema migration
+
+`yarn resources:migrate` applies the pending Drizzle Kit migrations of `drizzle/` to the
+database named by `RESOURCE_DATABASE_URL`, the local one by default. For Neon, pass the same
+direct (non-pooled) connection string as a hosted import, without printing it:
+
+```bash
+set +x
+RESOURCE_DATABASE_URL="$(yarn dlx -q neonctl connection-string production \
+  --project-id holy-smoke-13882397 \
+  --role-name neondb_owner \
+  --database-name neondb \
+  --pooled=false)" \
+  yarn resources:migrate
+```
+
+`0035_strong_lexicon_entries_ustrong_lookup` only creates an index on
+`strong_lexicon_entries (publication_id, u_strong)`. The one-statement read of a detailed
+Strong entry
+([ADR-0070](../../docs/adr/0070-read-a-detailed-strong-entry-in-one-statement.md)) returns
+the same response with or without it, so the migration and the Worker deployment can happen
+in either order. Until the index exists, entries that have a biblical entity spend a few
+more milliseconds in PostgreSQL. No publication is imported again and nothing is backfilled.
+
 ### Resource API edge cache
 
 The Worker uses Cloudflare's Cache API for successful deterministic database reads after App Check

@@ -3,6 +3,7 @@ import path from 'node:path'
 import { describe, it } from 'node:test'
 
 import { Effect } from 'effect'
+import { sql } from 'kysely'
 
 import { createIsolatedPostgres } from '../../database/__tests__/isolatedPostgresTestSupport'
 import { makeKyselyStrongLexiconRepository } from '../../repositories/strongLexiconRepository'
@@ -64,6 +65,77 @@ describe('Complete Strong lexicon publications', { skip: !runIntegration }, () =
         repository.listEntries({ language: 'fr', search: 'parole', limit: 10 })
       )
       assert.ok(search.value.entries.length > 0)
+
+      // The one-statement read of a detailed entry matches rows through the typed columns:
+      // they must hold the payload fields they are projected from.
+      const unprojected = await sql<{ rows: string }>`
+        SELECT (
+          SELECT count(*) FROM strong_lexicon_entries
+           WHERE entry_id IS DISTINCT FROM (payload->>'id')::integer
+              OR language IS DISTINCT FROM payload->>'language'
+              OR e_strong IS DISTINCT FROM payload->>'eStrong'
+              OR d_strong IS DISTINCT FROM payload->>'dStrong'
+              OR u_strong IS DISTINCT FROM payload->>'uStrong'
+        ) + (
+          SELECT count(*) FROM strong_lexicon_relations
+           WHERE from_entry_id IS DISTINCT FROM (payload->>'fromStepEntryId')::integer
+              OR to_entry_id IS DISTINCT FROM (payload->>'toStepEntryId')::integer
+        ) + (
+          SELECT count(*) FROM strong_lexicon_morphology_codes
+           WHERE morphology_code_id IS DISTINCT FROM (payload->>'id')::integer
+              OR scope IS DISTINCT FROM payload->>'scope'
+              OR code IS DISTINCT FROM payload->>'code'
+              OR normalized_code IS DISTINCT FROM payload->>'normalizedCode'
+        ) + (
+          SELECT count(*) FROM strong_lexicon_resources
+           WHERE resource_id IS DISTINCT FROM (payload->>'id')::integer
+              OR step_entry_id IS DISTINCT FROM (payload->>'stepEntryId')::integer
+        ) + (
+          SELECT count(*) FROM strong_lexicon_entities
+           WHERE entity_id IS DISTINCT FROM (payload->>'id')::integer
+              OR unique_name IS DISTINCT FROM payload->>'uniqueName'
+              OR u_strong IS DISTINCT FROM payload->>'uStrong'
+        ) + (
+          SELECT count(*) FROM strong_lexicon_entity_relations
+           WHERE from_entity_id IS DISTINCT FROM (payload->>'fromEntityId')::integer
+              OR to_entity_id IS DISTINCT FROM (payload->>'toEntityId')::integer
+        ) AS rows
+      `.execute(isolated.database)
+      assert.equal(Number(unprojected.rows[0].rows), 0)
+
+      // Both reads of a detailed entry return the same response: every fiftieth entry,
+      // by its own code and by its classical number.
+      const statementByStatement = makeKyselyStrongLexiconRepository(isolated.database, {
+        detailedEntryRead: 'statement-by-statement',
+      })
+      const sampled = await sql<{ step_code: string; classical: string }>`
+        SELECT i.step_code,
+               CASE WHEN e.language = 'greek' THEN 'G' ELSE 'H' END
+               || (e.payload->>'baseCode') AS classical
+          FROM strong_lexicon_entries e
+          JOIN strong_lexicon_entry_identities i
+            ON i.publication_id = e.publication_id AND i.step_entry_id = e.entry_id
+         WHERE e.entry_id % 50 = 0
+         ORDER BY e.entry_id
+      `.execute(isolated.database)
+      assert.ok(sampled.rows.length > 400)
+      const wireForm = async (
+        reader: typeof repository,
+        input: Parameters<typeof repository.findEntry>[0]
+      ) => JSON.stringify(await Effect.runPromise(reader.findEntry(input)))
+      let withEntity = 0
+      for (const { step_code: stepCode, classical } of sampled.rows) {
+        for (const input of [
+          { reference: stepCode, language: 'fr' },
+          { reference: stepCode, language: 'en', content: 'definitions' },
+          { reference: classical, language: 'en' },
+        ] as const) {
+          const expected = await wireForm(statementByStatement, input)
+          assert.equal(await wireForm(repository, input), expected, JSON.stringify(input))
+          if (expected.includes('"entity":{')) withEntity += 1
+        }
+      }
+      assert.ok(withEntity > 50)
 
       const entitiesPublication = await isolated.database
         .selectFrom('resource_publications')

@@ -3,7 +3,7 @@ import {
   isStandaloneStrongModule,
 } from '@bible-strong/resource-domain/strong-lexicon'
 import { Effect } from 'effect'
-import { sql, type Kysely } from 'kysely'
+import { sql, type Kysely, type RawBuilder } from 'kysely'
 import { normalizeBibleSearchText } from '@bible-strong/resource-domain/bible-search-input'
 
 import { tryDatabasePromise } from '../database/databaseEffect'
@@ -158,8 +158,441 @@ const entityRepresentationRevision = (
   entities: StrongLexiconModuleState
 ): string => `core:${core.revision}|entities:${moduleStateRevision(entities)}`
 
+type EntryInput = Parameters<StrongLexiconRepositoryService['findEntry']>[0]
+
+/**
+ * How the rows of a detailed entry are fetched. `one-statement` gathers them in a single
+ * round trip. `statement-by-statement` is the earlier read, one statement per kind of row,
+ * kept as the reference the single statement is tested against.
+ */
+export type StrongLexiconDetailedEntryRead = 'one-statement' | 'statement-by-statement'
+
+export type StrongLexiconRepositoryOptions = {
+  detailedEntryRead?: StrongLexiconDetailedEntryRead
+}
+
+// Row choices of a detailed entry. Both reads apply the same ones and compose the entry
+// with the same functions, so they can differ only in how rows are fetched.
+const findLexicalBriefMorphology = (rows: Payload[], entry: Payload): Payload | undefined =>
+  rows.find(
+    row =>
+      text(row, 'scope') === 'lexical_brief' &&
+      [text(row, 'code'), text(row, 'normalizedCode')].includes(text(entry, 'morph'))
+  )
+
+type ClassicStrongTarget = NonNullable<ReturnType<typeof parseClassicStrong>>
+
+const unresolvedClassicTargetsOf = (relationRows: Payload[]): ClassicStrongTarget[] =>
+  Array.from(
+    new Map(
+      relationRows
+        .filter(row => !number(row, 'toStepEntryId'))
+        .flatMap(row => {
+          const target = parseClassicStrong(text(row, 'toStepCode'))
+          return target ? [[target.code, target] as const] : []
+        })
+    ).values()
+  )
+
+const isClassicTargetOf = (targets: ClassicStrongTarget[]) => (row: Payload) =>
+  targets.some(target => target.code === classicStrong(row))
+
+const entityStrongPrefix = (entry: Payload) => (text(entry, 'language') === 'greek' ? 'G' : 'H')
+
+const isEntityNamedLikeEntry = (entry: Payload) => {
+  const prefix = entityStrongPrefix(entry)
+  const baseCode = number(entry, 'baseCode')
+  const gloss = normalizeText(text(entry, 'gloss'))
+  return (row: Payload) => {
+    const match = text(row, 'uStrong').match(/^([HG])0*(\d+)/u)
+    return Boolean(
+      match &&
+      match[1] === prefix &&
+      Number(match[2]) === baseCode &&
+      normalizeText(text(row, 'displayName')) === gloss
+    )
+  }
+}
+
+const preferredEntityOf = (entry: Payload, candidates: Payload[]): Payload | undefined =>
+  candidates.sort(
+    (left, right) =>
+      (text(left, 'uStrong') === text(entry, 'uStrong') ? 0 : 1) -
+        (text(right, 'uStrong') === text(entry, 'uStrong') ? 0 : 1) ||
+      number(left, 'id') - number(right, 'id')
+  )[0]
+
+const composeEntity = (
+  rows: {
+    entity: Payload
+    translation: Payload | undefined
+    place: Payload | undefined
+    relationRows: Payload[]
+    targetRows: Payload[]
+    targetTranslations: Payload[]
+    coreEntries: Payload[]
+    coreIdentities: Payload[]
+  },
+  language: StrongLexiconLanguage
+): StrongLexiconEntity => {
+  const {
+    entity,
+    translation,
+    place,
+    relationRows,
+    targetRows,
+    targetTranslations,
+    coreEntries,
+    coreIdentities,
+  } = rows
+  const entityId = number(entity, 'id')
+  const codesForUStrong = (uStrong: string) =>
+    getDisplayedStrongIdentities(
+      coreEntries
+        .filter(row => text(row, 'uStrong') === uStrong)
+        .flatMap(row =>
+          coreIdentities
+            .filter(identity => number(identity, 'stepEntryId') === number(row, 'id'))
+            .map(identity => {
+              const code = text(identity, 'stepCode')
+              return createStrongIdentity(
+                code,
+                code.toUpperCase().startsWith('G') ? 'greek' : 'hebrew'
+              )
+            })
+        )
+    ).map(identity => identity.code)
+  const resolvedRelations: {
+    relation: Payload
+    target?: Payload
+    targetTranslation?: Payload
+  }[] = relationRows.map(relation => {
+    const targetUniqueName = text(relation, 'toUniqueName').split('|').at(-1) ?? ''
+    const targetId = number(relation, 'toEntityId')
+    const target =
+      targetId > 0
+        ? targetRows.find(row => number(row, 'id') === targetId)
+        : targetRows.find(row => text(row, 'uniqueName') === targetUniqueName)
+    const targetTranslation = target
+      ? targetTranslations.find(
+          translated => number(translated, 'entityId') === number(target, 'id')
+        )
+      : undefined
+    return { relation, target, targetTranslation }
+  })
+  const relations: StrongLexiconEntityRelation[] = resolvedRelations
+    .sort((left, right) => {
+      const relationOrder = text(left.relation, 'relation').localeCompare(
+        text(right.relation, 'relation')
+      )
+      if (relationOrder !== 0) return relationOrder
+      return text(left.target ?? {}, 'displayName').localeCompare(
+        text(right.target ?? {}, 'displayName')
+      )
+    })
+    .slice(0, 60)
+    .map(({ relation, target, targetTranslation }) => {
+      const targetUniqueName = text(relation, 'toUniqueName').split('|').at(-1) ?? ''
+      return {
+        relation: text(relation, 'relation'),
+        certainty: text(relation, 'certainty'),
+        ...(target ? { targetId: number(target, 'id') } : {}),
+        ...(target ? { targetUniqueName: text(target, 'uniqueName') } : {}),
+        ...(target && codesForUStrong(text(target, 'uStrong')).length
+          ? { targetStepCodes: codesForUStrong(text(target, 'uStrong')) }
+          : {}),
+        ...(target
+          ? { targetCategory: text(target, 'category'), targetType: text(target, 'type') }
+          : {}),
+        targetName: (
+          localized(
+            language,
+            text(targetTranslation ?? {}, 'displayName'),
+            text(target ?? {}, 'displayName')
+          ) || targetUniqueName
+        ).replace(/_+/gu, ' '),
+      }
+    })
+  return {
+    id: entityId,
+    uniqueName: text(entity, 'uniqueName'),
+    strongCodes: codesForUStrong(text(entity, 'uStrong')),
+    name: localized(
+      language,
+      text(translation ?? {}, 'displayName'),
+      text(entity, 'displayName')
+    ).replace(/_+/gu, ' '),
+    category: text(entity, 'category'),
+    type: text(entity, 'type'),
+    description: localized(
+      language,
+      text(translation ?? {}, 'description'),
+      text(entity, 'description')
+    ),
+    shortDescription: localized(
+      language,
+      text(translation ?? {}, 'shortDescription'),
+      text(entity, 'shortDescription')
+    ),
+    summaryHtml: localized(
+      language,
+      text(translation ?? {}, 'summaryHtml'),
+      text(entity, 'summaryHtml')
+    ),
+    brief: localized(language, text(translation ?? {}, 'brief'), text(entity, 'brief')),
+    articleHtml: localized(
+      language,
+      text(translation ?? {}, 'articleHtml'),
+      text(entity, 'articleHtml')
+    ),
+    ...(place
+      ? {
+          place: {
+            name: text(place, 'openBibleName').replace(/_+/gu, ' '),
+            area: text(place, 'area'),
+            ...(place.latitude == null ? {} : { latitude: number(place, 'latitude') }),
+            ...(place.longitude == null ? {} : { longitude: number(place, 'longitude') }),
+            ...(text(place, 'googleMapUrl') ? { googleMapUrl: text(place, 'googleMapUrl') } : {}),
+            ...(text(place, 'palopenmapsUrl')
+              ? { palopenmapsUrl: text(place, 'palopenmapsUrl') }
+              : {}),
+          },
+        }
+      : {}),
+    relations,
+  }
+}
+
+const composeEntry = (
+  input: EntryInput,
+  rows: {
+    core: Publication
+    entry: Payload
+    identity: Payload
+    translation: Payload | undefined
+    /** In the order of their `sortOrder`. */
+    relationRows: Payload[]
+    relationKinds: Payload[]
+    morphologyRow: Payload | undefined
+    morphologyTranslation: Payload | undefined
+    directTargetEntries: Payload[]
+    fallbackTargetEntries: Payload[]
+    fallbackTargetIdentities: Payload[]
+    relationTranslations: Payload[]
+    /** In the order of their identifier. */
+    resourceRows: Payload[]
+    resourceTranslations: Payload[]
+    entity: StrongLexiconEntity | undefined
+    resourcesState: StrongLexiconModuleState
+    entitiesState: StrongLexiconModuleState
+  }
+): ActiveStrongLexiconValue<StrongLexiconEntry> => {
+  const {
+    core,
+    entry,
+    identity,
+    translation,
+    relationRows,
+    relationKinds,
+    morphologyRow,
+    morphologyTranslation,
+    directTargetEntries,
+    fallbackTargetEntries,
+    fallbackTargetIdentities,
+    relationTranslations,
+    resourceRows,
+    resourceTranslations,
+    entity,
+    resourcesState,
+    entitiesState,
+  } = rows
+  const language = input.language
+  const entryId = number(entry, 'id')
+  let morphology: StrongLexiconMorphology | undefined
+  if (morphologyRow) {
+    const meaning = localized(
+      language,
+      text(morphologyTranslation ?? {}, 'meaning'),
+      text(morphologyRow, 'meaning')
+    )
+    const description = localized(
+      language,
+      text(morphologyTranslation ?? {}, 'description'),
+      text(morphologyRow, 'description')
+    )
+    morphology = {
+      code: text(entry, 'morph'),
+      meaning,
+      ...(description && normalizeText(description) !== normalizeText(meaning)
+        ? { description }
+        : {}),
+    }
+  }
+  const selectedCode = text(identity, 'stepCode')
+  const selectedKind =
+    input.kind ??
+    (normalizeCode(input.reference) === text(entry, 'dStrong')
+      ? 'dstrong'
+      : normalizeCode(input.reference) === text(entry, 'eStrong')
+        ? 'estrong'
+        : normalizeCode(input.reference) === text(entry, 'uStrong')
+          ? 'ustrong'
+          : 'strong')
+  const relationGroupOrder: Record<string, number> = { family: 0, identity: 1, subentry: 2 }
+  const relationRowsForDisplay = relationRows
+    .slice()
+    .sort(
+      (left, right) =>
+        (relationGroupOrder[text(left, 'groupKind')] ?? 99) -
+          (relationGroupOrder[text(right, 'groupKind')] ?? 99) ||
+        number(left, 'sortOrder') - number(right, 'sortOrder')
+    )
+    .filter((row, _index, rows) => {
+      const group = text(row, 'groupKind')
+      return (
+        rows
+          .slice(0, rows.indexOf(row) + 1)
+          .filter(candidate => text(candidate, 'groupKind') === group).length <= 24
+      )
+    })
+    .slice(0, 72)
+  let lsjAbsent = false
+  const resources = resourceRows.slice(0, 5).flatMap(row => {
+    const translatedResource = resourceTranslations.find(
+      translated => number(translated, 'resourceId') === number(row, 'id')
+    )
+    const contentHtml = localized(
+      language,
+      text(translatedResource ?? {}, 'contentHtml'),
+      text(row, 'contentHtml')
+    )
+    if (/LSJ (?:has|ne possède) no entry|Le LSJ ne contient aucune entrée/iu.test(contentHtml)) {
+      lsjAbsent = true
+      return []
+    }
+    return [
+      {
+        id: number(row, 'id'),
+        source: text(row, 'source'),
+        kind: text(row, 'kind'),
+        title:
+          text(row, 'source') === 'TFLSJ'
+            ? language === 'fr'
+              ? 'Dictionnaire grec détaillé'
+              : 'Detailed Greek dictionary'
+            : language === 'fr'
+              ? 'Notice complémentaire'
+              : 'Additional resource',
+        contentHtml,
+      },
+    ]
+  })
+  const value: StrongLexiconEntry = {
+    id: entryId,
+    selectedIdentity: { kind: selectedKind, code: selectedCode },
+    stepCode: selectedCode,
+    classicStrong: classicStrong(entry),
+    eStrong: text(entry, 'eStrong'),
+    dStrong: text(entry, 'dStrong'),
+    language: text(entry, 'language') === 'greek' ? 'greek' : 'hebrew',
+    baseCode: number(entry, 'baseCode'),
+    original: text(entry, 'original'),
+    transliteration: text(entry, 'classicTransliteration') || text(entry, 'transliteration'),
+    ...(text(entry, 'pronunciation') ? { pronunciation: text(entry, 'pronunciation') } : {}),
+    gloss: localized(language, text(translation ?? {}, 'gloss'), text(entry, 'gloss')),
+    ...(localized(language, text(entry, 'nameMeaningFrHtml'), text(entry, 'nameMeaningEnHtml'))
+      ? {
+          nameMeaningHtml: localized(
+            language,
+            text(entry, 'nameMeaningFrHtml'),
+            text(entry, 'nameMeaningEnHtml')
+          ),
+        }
+      : {}),
+    ...(localized(
+      language,
+      text(translation ?? {}, 'meaningHtml') || text(translation ?? {}, 'meaning'),
+      text(entry, 'meaning')
+    )
+      ? {
+          definitionHtml: localized(
+            language,
+            text(translation ?? {}, 'meaningHtml') || text(translation ?? {}, 'meaning'),
+            text(entry, 'meaning')
+          ),
+        }
+      : {}),
+    ...(morphology ? { morphology } : {}),
+    relations: relationRowsForDisplay.flatMap(relation => {
+      const directTarget = directTargetEntries.find(
+        row => number(row, 'id') === number(relation, 'toStepEntryId')
+      )
+      const classicTarget = parseClassicStrong(text(relation, 'toStepCode'))
+      const targets = directTarget
+        ? [directTarget]
+        : classicTarget
+          ? fallbackTargetEntries
+              .filter(target => classicStrong(target) === classicTarget.code)
+              .sort((left, right) => {
+                const leftCode = text(
+                  fallbackTargetIdentities.find(
+                    identity => number(identity, 'stepEntryId') === number(left, 'id')
+                  ) ?? {},
+                  'stepCode'
+                )
+                const rightCode = text(
+                  fallbackTargetIdentities.find(
+                    identity => number(identity, 'stepEntryId') === number(right, 'id')
+                  ) ?? {},
+                  'stepCode'
+                )
+                return leftCode.localeCompare(rightCode)
+              })
+          : []
+      const kind = relationKinds.find(
+        row => number(row, 'id') === number(relation, 'relationKindId')
+      )
+      return targets.map(target => {
+        const targetTranslation = relationTranslations.find(
+          translated => number(translated, 'stepEntryId') === number(target, 'id')
+        )
+        const fallbackIdentity = fallbackTargetIdentities.find(
+          identity => number(identity, 'stepEntryId') === number(target, 'id')
+        )
+        return {
+          group: text(relation, 'groupKind') as 'subentry' | 'identity' | 'family',
+          relationKind: text(kind ?? {}, 'kind'),
+          label:
+            language === 'fr'
+              ? text(kind ?? {}, 'labelFr') || text(kind ?? {}, 'labelEn')
+              : text(kind ?? {}, 'labelEn'),
+          stepCode: directTarget
+            ? text(relation, 'toStepCode')
+            : text(fallbackIdentity ?? {}, 'stepCode'),
+          gloss: localized(language, text(targetTranslation ?? {}, 'gloss'), text(target, 'gloss')),
+          original: text(target, 'original'),
+          transliteration:
+            text(target, 'classicTransliteration') || text(target, 'transliteration'),
+        }
+      })
+    }),
+    resources,
+    lsjAbsent,
+    ...(entity ? { entity } : {}),
+    modules: {
+      resources: resourcesState as never,
+      entities: entitiesState as never,
+    },
+  }
+  return {
+    revision: entryRepresentationRevision(core, resourcesState, entitiesState),
+    value,
+  }
+}
+
 export const makeKyselyStrongLexiconRepository = (
-  database: Kysely<ResourceDatabase>
+  database: Kysely<ResourceDatabase>,
+  options: StrongLexiconRepositoryOptions = {}
 ): StrongLexiconRepositoryService => {
   const activePublication = (moduleId: StrongLexiconModuleId) =>
     database
@@ -628,122 +1061,694 @@ export const makeKyselyStrongLexiconRepository = (
           )
         )
       : []
-    const codesForUStrong = (uStrong: string) =>
-      getDisplayedStrongIdentities(
-        coreEntries
-          .filter(row => text(row, 'uStrong') === uStrong)
-          .flatMap(row =>
-            coreIdentities
-              .filter(identity => number(identity, 'stepEntryId') === number(row, 'id'))
-              .map(identity => {
-                const code = text(identity, 'stepCode')
-                return createStrongIdentity(
-                  code,
-                  code.toUpperCase().startsWith('G') ? 'greek' : 'hebrew'
-                )
-              })
-          )
-      ).map(identity => identity.code)
-    const resolvedRelations: {
-      relation: Payload
-      target?: Payload
-      targetTranslation?: Payload
-    }[] = relationRows.map(relation => {
-      const targetUniqueName = text(relation, 'toUniqueName').split('|').at(-1) ?? ''
-      const targetId = number(relation, 'toEntityId')
-      const target =
-        targetId > 0
-          ? targetRows.find(row => number(row, 'id') === targetId)
-          : targetRows.find(row => text(row, 'uniqueName') === targetUniqueName)
-      const targetTranslation = target
-        ? targetTranslations.find(
-            translated => number(translated, 'entityId') === number(target, 'id')
-          )
-        : undefined
-      return { relation, target, targetTranslation }
-    })
-    const relations: StrongLexiconEntityRelation[] = resolvedRelations
-      .sort((left, right) => {
-        const relationOrder = text(left.relation, 'relation').localeCompare(
-          text(right.relation, 'relation')
-        )
-        if (relationOrder !== 0) return relationOrder
-        return text(left.target ?? {}, 'displayName').localeCompare(
-          text(right.target ?? {}, 'displayName')
-        )
-      })
-      .slice(0, 60)
-      .map(({ relation, target, targetTranslation }) => {
-        const targetUniqueName = text(relation, 'toUniqueName').split('|').at(-1) ?? ''
-        return {
-          relation: text(relation, 'relation'),
-          certainty: text(relation, 'certainty'),
-          ...(target ? { targetId: number(target, 'id') } : {}),
-          ...(target ? { targetUniqueName: text(target, 'uniqueName') } : {}),
-          ...(target && codesForUStrong(text(target, 'uStrong')).length
-            ? { targetStepCodes: codesForUStrong(text(target, 'uStrong')) }
-            : {}),
-          ...(target
-            ? { targetCategory: text(target, 'category'), targetType: text(target, 'type') }
-            : {}),
-          targetName: (
-            localized(
-              language,
-              text(targetTranslation ?? {}, 'displayName'),
-              text(target ?? {}, 'displayName')
-            ) || targetUniqueName
-          ).replace(/_+/gu, ' '),
-        }
-      })
-    return {
-      id: entityId,
-      uniqueName: text(entity, 'uniqueName'),
-      strongCodes: codesForUStrong(text(entity, 'uStrong')),
-      name: localized(
-        language,
-        text(translation ?? {}, 'displayName'),
-        text(entity, 'displayName')
-      ).replace(/_+/gu, ' '),
-      category: text(entity, 'category'),
-      type: text(entity, 'type'),
-      description: localized(
-        language,
-        text(translation ?? {}, 'description'),
-        text(entity, 'description')
-      ),
-      shortDescription: localized(
-        language,
-        text(translation ?? {}, 'shortDescription'),
-        text(entity, 'shortDescription')
-      ),
-      summaryHtml: localized(
-        language,
-        text(translation ?? {}, 'summaryHtml'),
-        text(entity, 'summaryHtml')
-      ),
-      brief: localized(language, text(translation ?? {}, 'brief'), text(entity, 'brief')),
-      articleHtml: localized(
-        language,
-        text(translation ?? {}, 'articleHtml'),
-        text(entity, 'articleHtml')
-      ),
-      ...(place
-        ? {
-            place: {
-              name: text(place, 'openBibleName').replace(/_+/gu, ' '),
-              area: text(place, 'area'),
-              ...(place.latitude == null ? {} : { latitude: number(place, 'latitude') }),
-              ...(place.longitude == null ? {} : { longitude: number(place, 'longitude') }),
-              ...(text(place, 'googleMapUrl') ? { googleMapUrl: text(place, 'googleMapUrl') } : {}),
-              ...(text(place, 'palopenmapsUrl')
-                ? { palopenmapsUrl: text(place, 'palopenmapsUrl') }
-                : {}),
-            },
-          }
-        : {}),
-      relations,
-    }
+    return composeEntity(
+      {
+        entity,
+        translation,
+        place,
+        relationRows,
+        targetRows,
+        targetTranslations,
+        coreEntries,
+        coreIdentities,
+      },
+      language
+    )
   }
+
+  const readDetailedEntryStatementByStatement = async (
+    input: EntryInput
+  ): Promise<ActiveStrongLexiconValue<StrongLexiconEntry>> => {
+    const core = await requiredCore(input.language, input.level)
+    const found = await findCoreEntry(core, input.reference, input.kind)
+    if (!found) throw new StrongLexiconEntryNotFound({ reference: input.reference })
+    const { entry, identity } = found
+    const entryId = number(entry, 'id')
+    const [
+      translation,
+      relationRows,
+      relationKinds,
+      morphologyRows,
+      resourcesState,
+      entitiesState,
+    ] = await Promise.all([
+      translationFor(core.id, 'LexiconTranslations', entryId, input.language),
+      records(core.id, 'LexiconRelations', query => query.where('entry_id', '=', entryId)).then(
+        rows => rows.sort((left, right) => number(left, 'sortOrder') - number(right, 'sortOrder'))
+      ),
+      records(core.id, 'RelationKinds'),
+      records(core.id, 'MorphologyCodes'),
+      getState('resources'),
+      getState('entities'),
+    ])
+    const targetIds = relationRows.map(row => number(row, 'toStepEntryId')).filter(Boolean)
+    const directTargetEntries = targetIds.length
+      ? await records(core.id, 'StepEntries', query => query.where('entry_id', 'in', targetIds))
+      : []
+    const unresolvedClassicTargets = unresolvedClassicTargetsOf(relationRows)
+    const fallbackTargetEntries = unresolvedClassicTargets.length
+      ? (
+          await records(core.id, 'StepEntries', query =>
+            query.where(
+              sql<boolean>`(${sql.join(
+                unresolvedClassicTargets.map(
+                  target =>
+                    sql<boolean>`payload->>'language' = ${target.language} AND (payload->>'baseCode')::integer = ${target.baseCode}`
+                ),
+                sql` OR `
+              )})`
+            )
+          )
+        ).filter(isClassicTargetOf(unresolvedClassicTargets))
+      : []
+    const fallbackTargetIdentities = fallbackTargetEntries.length
+      ? await records(core.id, 'StepEntryIdentities', query =>
+          query.where(
+            'entry_id',
+            'in',
+            fallbackTargetEntries.map(row => number(row, 'id'))
+          )
+        )
+      : []
+    const targetEntries = [...directTargetEntries, ...fallbackTargetEntries].filter(
+      (row, index, rows) =>
+        rows.findIndex(candidate => number(candidate, 'id') === number(row, 'id')) === index
+    )
+    const relationTranslations = targetEntries.length
+      ? await records(core.id, 'LexiconTranslations', query =>
+          query
+            .where(
+              'entry_id',
+              'in',
+              targetEntries.map(row => number(row, 'id'))
+            )
+            .where('language', '=', input.language)
+        )
+      : []
+    const morphologyRow = findLexicalBriefMorphology(morphologyRows, entry)
+    const morphologyTranslation = morphologyRow
+      ? await translationFor(
+          core.id,
+          'MorphologyCodeTranslations',
+          number(morphologyRow, 'id'),
+          input.language
+        )
+      : undefined
+    const resourcePublication =
+      input.content !== 'definitions' && resourcesState.status === 'available'
+        ? await activePublication('resources')
+        : undefined
+    const resourceRows = resourcePublication
+      ? (
+          await records(resourcePublication.id, 'LexiconResources', query =>
+            query.where('entry_id', '=', entryId)
+          )
+        ).sort((left, right) => number(left, 'id') - number(right, 'id'))
+      : []
+    const resourceTranslations =
+      resourcePublication && resourceRows.length
+        ? await records(resourcePublication.id, 'LexiconResourceTranslations', query =>
+            query
+              .where(
+                'entry_id',
+                'in',
+                resourceRows.map(row => number(row, 'id'))
+              )
+              .where('language', '=', input.language)
+          )
+        : []
+    let entity: StrongLexiconEntity | undefined
+    if (input.content !== 'definitions' && entitiesState.status === 'available') {
+      const entityPublication = await activePublication('entities')
+      let entityCandidates = entityPublication
+        ? await records(entityPublication.id, 'Entities', query =>
+            query.where(
+              sql<boolean>`(payload->>'uStrong' = ${text(entry, 'uStrong')} OR payload->>'uStrong' = ${text(entry, 'eStrong')})`
+            )
+          )
+        : []
+      if (entityPublication && entityCandidates.length === 0) {
+        entityCandidates = (
+          await records(entityPublication.id, 'Entities', query =>
+            query.where(
+              sql<boolean>`(payload->>'uStrong') ~ ${`^${entityStrongPrefix(entry)}0*${number(entry, 'baseCode')}(?:[^0-9]|$)`}`
+            )
+          )
+        ).filter(isEntityNamedLikeEntry(entry))
+      }
+      const entityRow = preferredEntityOf(entry, entityCandidates)
+      if (entityPublication && entityRow) {
+        entity = await hydrateEntity(core, entityPublication, entityRow, input.language)
+      }
+    }
+    return composeEntry(input, {
+      core,
+      entry,
+      identity,
+      translation,
+      relationRows,
+      relationKinds,
+      morphologyRow,
+      morphologyTranslation,
+      directTargetEntries,
+      fallbackTargetEntries,
+      fallbackTargetIdentities,
+      relationTranslations,
+      resourceRows,
+      resourceTranslations,
+      entity,
+      resourcesState,
+      entitiesState,
+    })
+  }
+
+  // Every row a detailed entry is made of, gathered in one round trip and in the snapshot
+  // of one statement: the three publications cannot be read at different moments.
+  //
+  // The statement only fetches. It applies the filters of the statement-by-statement read
+  // and keeps its row order; where a choice depends on text normalisation it returns the
+  // candidates, and TypeScript chooses with the rules both reads share.
+  //
+  // Rows are matched through the typed columns the importer projects from each payload
+  // (`entry_id`, `e_strong`, `u_strong`, `entity_id`…). They hold the values the earlier
+  // statements read from the payload, and they are the indexed ones. Publication and row
+  // identifiers reach each lookup as scalar or array parameters, so that it is an index
+  // scan whatever the planner estimates for the rows gathered before it.
+  const readDetailedEntryInOneStatement = async (
+    input: EntryInput
+  ): Promise<ActiveStrongLexiconValue<StrongLexiconEntry>> => {
+    const { language } = input
+    const normalized = normalizeCode(input.reference)
+    const withAddons = input.content !== 'definitions'
+
+    const exactIdentity =
+      input.kind === 'ustrong' ? sql<boolean>`false` : sql<boolean>`i.step_code = ${normalized}`
+    // A disambiguated code written in another case selects its entry when it names only one.
+    const caseInsensitiveIdentity =
+      input.kind === 'dstrong'
+        ? sql`
+          SELECT candidates.step_entry_id, candidates.step_code
+            FROM (
+              SELECT matching.step_entry_id, matching.step_code, count(*) OVER () AS matches
+                FROM (
+                  SELECT i.step_entry_id, i.step_code
+                    FROM strong_lexicon_entry_identities i
+                   WHERE i.publication_id = (SELECT id FROM core)
+                     AND NOT EXISTS (SELECT 1 FROM exact_identity)
+                     AND lower(i.step_code) = ${normalized.toLowerCase()}
+                   ORDER BY i.step_entry_id, md5(i.step_entry_id::text || i.step_code)
+                   LIMIT 2
+                ) matching
+            ) candidates
+           WHERE candidates.matches = 1`
+        : sql`SELECT step_entry_id, step_code FROM exact_identity WHERE false`
+    // The entry of a reference no identity names: the first one, by identifier, that
+    // carries it as one of its codes. Read only then: the scan is skipped otherwise.
+    const firstEntryWhere = (condition: RawBuilder<boolean>) => sql`
+          SELECT e.entry_id, e.language, e.e_strong, e.u_strong, e.payload
+            FROM strong_lexicon_entries e
+           WHERE e.publication_id = (SELECT id FROM core)
+             AND NOT EXISTS (SELECT 1 FROM identity_entry)
+             AND ${condition}
+           ORDER BY e.entry_id
+           LIMIT 1`
+    const base = Number(normalized.replace(/^[HG]/u, '').replace(/^0+/u, ''))
+    const entryWithoutIdentity =
+      input.kind === 'dstrong'
+        ? firstEntryWhere(sql<boolean>`e.d_strong LIKE ${`${normalized}%`}`)
+        : input.kind === 'estrong'
+          ? firstEntryWhere(sql<boolean>`e.e_strong = ${normalized}`)
+          : input.kind === 'ustrong'
+            ? firstEntryWhere(sql<boolean>`e.u_strong = ${normalized}`)
+            : // A classical number, which an entry carries in four ways. Each is looked up
+              // apart, on the index that serves it, rather than tested on every row.
+              firstEntryWhere(sql<boolean>`e.entry_id = (
+                 SELECT min(carrying.entry_id)
+                   FROM (
+                     SELECT entry_id FROM strong_lexicon_entries
+                      WHERE publication_id = (SELECT id FROM core) AND e_strong = ${normalized}
+                     UNION ALL
+                     SELECT entry_id FROM strong_lexicon_entries
+                      WHERE publication_id = (SELECT id FROM core) AND d_strong = ${normalized}
+                     UNION ALL
+                     SELECT entry_id FROM strong_lexicon_entries
+                      WHERE publication_id = (SELECT id FROM core) AND u_strong = ${normalized}
+                     UNION ALL
+                     SELECT entry_id FROM strong_lexicon_entries
+                      WHERE publication_id = (SELECT id FROM core)
+                        AND language = ${normalized.startsWith('G') ? 'greek' : 'hebrew'}
+                        AND (payload->>'baseCode')::integer = ${Number.isFinite(base) ? base : -1}
+                   ) carrying
+               )`)
+
+    const addonRows = withAddons
+      ? sql`,
+        resources_publication AS MATERIALIZED (
+          SELECT id FROM publications WHERE resource_identity = 'strong-lexicon:resources'
+        ),
+        resources AS MATERIALIZED (
+          SELECT r.resource_id, r.payload
+            FROM strong_lexicon_resources r
+           WHERE r.publication_id = (SELECT id FROM resources_publication)
+             AND r.step_entry_id = (SELECT entry_id FROM entry)
+        ),
+        entities_publication AS MATERIALIZED (
+          SELECT id FROM publications WHERE resource_identity = 'strong-lexicon:entities'
+        ),
+        entities_by_code AS MATERIALIZED (
+          SELECT n.entity_id, n.u_strong, n.payload
+            FROM strong_lexicon_entities n
+           WHERE n.publication_id = (SELECT id FROM entities_publication)
+             AND n.u_strong = ANY (
+                   ARRAY(SELECT u_strong FROM entry UNION ALL SELECT e_strong FROM entry)
+                 )
+        ),
+        -- Without an entity under a code of the entry, those under its classical number;
+        -- TypeScript keeps the ones named like the entry. LIKE discards most rows before
+        -- the regular expression, which costs ten times more, is evaluated.
+        entities_by_number AS MATERIALIZED (
+          SELECT n.entity_id, n.u_strong, n.payload
+            FROM strong_lexicon_entities n
+           WHERE n.publication_id = (SELECT id FROM entities_publication)
+             AND NOT EXISTS (SELECT 1 FROM entities_by_code)
+             AND n.u_strong LIKE (SELECT entity_number_like FROM entry)
+             AND n.u_strong ~ (SELECT entity_number_pattern FROM entry)
+        ),
+        entity_candidates AS MATERIALIZED (
+          SELECT entity_id, u_strong FROM entities_by_code
+          UNION ALL
+          SELECT entity_id, u_strong FROM entities_by_number
+        ),
+        entity_relations AS MATERIALIZED (
+          SELECT r.from_entity_id, r.relation_id, r.to_entity_id, r.payload
+            FROM strong_lexicon_entity_relations r
+           WHERE r.publication_id = (SELECT id FROM entities_publication)
+             AND r.from_entity_id = ANY (ARRAY(SELECT entity_id FROM entity_candidates))
+        ),
+        entity_targets AS MATERIALIZED (
+          SELECT n.entity_id, n.u_strong, n.payload
+            FROM strong_lexicon_entities n
+           WHERE n.publication_id = (SELECT id FROM entities_publication)
+             AND (
+                   n.entity_id = ANY (
+                     ARRAY(SELECT to_entity_id FROM entity_relations WHERE to_entity_id > 0)
+                   )
+                   OR n.unique_name = ANY (
+                     ARRAY(
+                       SELECT named.unique_name
+                         FROM (
+                           SELECT substring(
+                                    coalesce(payload->>'toUniqueName', '') from '[^|]*$'
+                                  ) AS unique_name
+                             FROM entity_relations
+                         ) named
+                        WHERE named.unique_name <> ''
+                     )
+                   )
+                 )
+        ),
+        -- The core entries filed under the unified code of a candidate or of a target.
+        entity_core_entries AS MATERIALIZED (
+          SELECT e.entry_id, e.payload
+            FROM strong_lexicon_entries e
+           WHERE e.publication_id = (SELECT id FROM core)
+             AND e.u_strong = ANY (
+                   ARRAY(
+                     SELECT u_strong FROM entity_candidates WHERE u_strong <> ''
+                     UNION
+                     SELECT u_strong FROM entity_targets WHERE u_strong <> ''
+                   )
+                 )
+        )`
+      : sql``
+    const addonColumns = withAddons
+      ? sql`
+        (SELECT coalesce(jsonb_agg(payload ORDER BY md5(resource_id::text)), '[]'::jsonb)
+           FROM resources) AS resources,
+        (SELECT coalesce(jsonb_agg(t.payload), '[]'::jsonb)
+           FROM strong_lexicon_resource_translations t
+          WHERE t.publication_id = (SELECT id FROM resources_publication)
+            AND t.resource_id = ANY (ARRAY(SELECT resource_id FROM resources))
+            AND t.language = ${language}) AS resource_translations,
+        (SELECT coalesce(jsonb_agg(payload ORDER BY entity_id), '[]'::jsonb)
+           FROM entities_by_code) AS entities_by_code,
+        (SELECT coalesce(jsonb_agg(payload ORDER BY entity_id), '[]'::jsonb)
+           FROM entities_by_number) AS entities_by_number,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object('entityId', t.entity_id, 'payload', t.payload)
+                    ORDER BY t.entity_id, md5(t.translation_id::text)
+                  ),
+                  '[]'::jsonb
+                )
+           FROM strong_lexicon_entity_translations t
+          WHERE t.publication_id = (SELECT id FROM entities_publication)
+            AND t.entity_id = ANY (
+                  ARRAY(
+                    SELECT entity_id FROM entity_candidates
+                    UNION
+                    SELECT entity_id FROM entity_targets
+                  )
+                )
+            AND t.language = ${language}) AS entity_translations,
+        (SELECT coalesce(
+                  jsonb_agg(jsonb_build_object('entityId', l.entity_id, 'payload', l.payload)),
+                  '[]'::jsonb
+                )
+           FROM strong_lexicon_entity_places l
+          WHERE l.publication_id = (SELECT id FROM entities_publication)
+            AND l.entity_id = ANY (ARRAY(SELECT entity_id FROM entity_candidates))
+        ) AS entity_places,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object('entityId', from_entity_id, 'payload', payload)
+                    ORDER BY from_entity_id, md5(relation_id::text)
+                  ),
+                  '[]'::jsonb
+                )
+           FROM entity_relations) AS entity_relations,
+        (SELECT coalesce(jsonb_agg(payload ORDER BY entity_id), '[]'::jsonb)
+           FROM entity_targets) AS entity_targets,
+        (SELECT coalesce(jsonb_agg(payload ORDER BY entry_id), '[]'::jsonb)
+           FROM entity_core_entries) AS entity_core_entries,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object('stepEntryId', i.step_entry_id, 'stepCode', i.step_code)
+                    ORDER BY i.step_entry_id
+                  ),
+                  '[]'::jsonb
+                )
+           FROM strong_lexicon_entry_identities i
+          WHERE i.publication_id = (SELECT id FROM core)
+            AND i.step_entry_id = ANY (ARRAY(SELECT entry_id FROM entity_core_entries))
+        ) AS entity_core_identities`
+      : sql`
+        '[]'::jsonb AS resources,
+        '[]'::jsonb AS resource_translations,
+        '[]'::jsonb AS entities_by_code,
+        '[]'::jsonb AS entities_by_number,
+        '[]'::jsonb AS entity_translations,
+        '[]'::jsonb AS entity_places,
+        '[]'::jsonb AS entity_relations,
+        '[]'::jsonb AS entity_targets,
+        '[]'::jsonb AS entity_core_entries,
+        '[]'::jsonb AS entity_core_identities`
+
+    type OfEntity = { entityId: number; payload: Payload }
+    type DetailedEntryRows = {
+      publications: {
+        identity: string
+        id: number
+        revision: string
+        metadata: Record<string, unknown>
+      }[]
+      entry: Payload | null
+      identity: Payload | null
+      translation: Payload | null
+      relations: Payload[]
+      relation_kinds: Payload[]
+      morphology_codes: Payload[]
+      morphology_translations: { morphologyCodeId: number; payload: Payload }[]
+      direct_targets: Payload[]
+      classic_targets: Payload[]
+      classic_target_identities: Payload[]
+      target_translations: Payload[]
+      resources: Payload[]
+      resource_translations: Payload[]
+      entities_by_code: Payload[]
+      entities_by_number: Payload[]
+      entity_translations: OfEntity[]
+      entity_places: OfEntity[]
+      entity_relations: OfEntity[]
+      entity_targets: Payload[]
+      entity_core_entries: Payload[]
+      entity_core_identities: Payload[]
+    }
+    const gathered = await sql<DetailedEntryRows>`
+      WITH publications AS MATERIALIZED (
+        SELECT resource_identity, id, revision, metadata
+          FROM resource_publications
+         WHERE resource_identity IN (
+                 'strong-lexicon:core', 'strong-lexicon:resources', 'strong-lexicon:entities'
+               )
+           AND status = 'active'
+      ),
+      core AS MATERIALIZED (
+        SELECT id FROM publications WHERE resource_identity = 'strong-lexicon:core'
+      ),
+      exact_identity AS MATERIALIZED (
+        SELECT i.step_entry_id, i.step_code
+          FROM strong_lexicon_entry_identities i
+         WHERE i.publication_id = (SELECT id FROM core)
+           AND ${exactIdentity}
+      ),
+      requested_identity AS MATERIALIZED (
+        SELECT step_entry_id, step_code FROM exact_identity
+        UNION ALL
+        (${caseInsensitiveIdentity})
+      ),
+      identity_entry AS MATERIALIZED (
+        SELECT e.entry_id, e.language, e.e_strong, e.u_strong, e.payload
+          FROM strong_lexicon_entries e
+         WHERE e.publication_id = (SELECT id FROM core)
+           AND e.entry_id = (SELECT step_entry_id FROM requested_identity)
+      ),
+      entry_without_identity AS MATERIALIZED (${entryWithoutIdentity}
+      ),
+      -- The fields other rows are matched on are read from the payload once, here.
+      entry AS MATERIALIZED (
+        SELECT found.entry_id,
+               found.payload,
+               found.u_strong,
+               found.e_strong,
+               coalesce(found.payload->>'morph', '') AS morph,
+               found.prefix || '0*' || found.base_code || '(?:[^0-9]|$)' AS entity_number_pattern,
+               CASE WHEN found.base_code ~ '^[0-9]+$'
+                    THEN substring(found.prefix from 2) || '%' || found.base_code || '%'
+                    ELSE '%'
+               END AS entity_number_like
+          FROM (
+            SELECT matching.*,
+                   '^' || CASE WHEN matching.language = 'greek' THEN 'G' ELSE 'H' END AS prefix,
+                   coalesce(matching.payload->>'baseCode', '0') AS base_code
+              FROM (
+                SELECT * FROM identity_entry
+                UNION ALL
+                SELECT * FROM entry_without_identity
+              ) matching
+          ) found
+      ),
+      relations AS MATERIALIZED (
+        SELECT r.relation_id, r.to_entry_id, r.payload
+          FROM strong_lexicon_relations r
+         WHERE r.publication_id = (SELECT id FROM core)
+           AND r.from_entry_id = (SELECT entry_id FROM entry)
+      ),
+      direct_targets AS MATERIALIZED (
+        SELECT e.entry_id, e.payload
+          FROM strong_lexicon_entries e
+         WHERE e.publication_id = (SELECT id FROM core)
+           AND e.entry_id = ANY (
+                 ARRAY(SELECT to_entry_id FROM relations WHERE to_entry_id <> 0)
+               )
+      ),
+      -- Relations naming a classical number instead of an entry. Punctuation is dropped so
+      -- that every code TypeScript accepts is kept; TypeScript rejects the others.
+      classic_codes AS MATERIALIZED (
+        SELECT DISTINCT
+               CASE WHEN code.parts[1] IN ('H', 'h') THEN 'hebrew' ELSE 'greek' END AS language,
+               code.parts[2]::integer AS base_code
+          FROM relations r
+         CROSS JOIN LATERAL (
+                 SELECT regexp_match(
+                          regexp_replace(
+                            coalesce(r.payload->>'toStepCode', ''), '[^0-9A-Za-z]', '', 'g'
+                          ),
+                          '^([HGhg])?0*([0-9]{1,9})$'
+                        ) AS parts
+               ) code
+         WHERE coalesce(r.to_entry_id, 0) = 0
+           AND code.parts IS NOT NULL
+      ),
+      classic_targets AS MATERIALIZED (
+        SELECT e.entry_id, e.payload
+          FROM strong_lexicon_entries e
+         WHERE e.publication_id = (SELECT id FROM core)
+           AND EXISTS (SELECT 1 FROM classic_codes)
+           AND EXISTS (
+                 SELECT 1
+                   FROM classic_codes c
+                  WHERE e.language = c.language
+                    AND (e.payload->>'baseCode')::integer = c.base_code
+               )
+      ),
+      morphology_codes AS MATERIALIZED (
+        SELECT m.morphology_code_id, m.payload
+          FROM strong_lexicon_morphology_codes m
+         WHERE m.publication_id = (SELECT id FROM core)
+           AND m.scope = 'lexical_brief'
+           AND (
+                 m.code = (SELECT morph FROM entry)
+                 OR m.normalized_code = (SELECT morph FROM entry)
+               )
+      )${addonRows}
+      SELECT
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object(
+                      'identity', resource_identity,
+                      'id', id,
+                      'revision', revision,
+                      'metadata', metadata
+                    )
+                  ),
+                  '[]'::jsonb
+                )
+           FROM publications) AS publications,
+        (SELECT payload FROM entry) AS entry,
+        (SELECT jsonb_build_object('stepEntryId', i.step_entry_id, 'stepCode', i.step_code)
+           FROM strong_lexicon_entry_identities i
+          WHERE i.publication_id = (SELECT id FROM core)
+            AND i.step_entry_id = (SELECT entry_id FROM entry)) AS identity,
+        (SELECT t.payload
+           FROM strong_lexicon_translations t
+          WHERE t.publication_id = (SELECT id FROM core)
+            AND t.step_entry_id = (SELECT entry_id FROM entry)
+            AND t.language = ${language}) AS translation,
+        (SELECT coalesce(jsonb_agg(payload ORDER BY md5(relation_id::text)), '[]'::jsonb)
+           FROM relations) AS relations,
+        (SELECT coalesce(jsonb_agg(k.payload ORDER BY k.relation_kind_id), '[]'::jsonb)
+           FROM strong_lexicon_relation_kinds k
+          WHERE k.publication_id = (SELECT id FROM core)
+            AND EXISTS (SELECT 1 FROM entry)) AS relation_kinds,
+        (SELECT coalesce(jsonb_agg(payload ORDER BY morphology_code_id), '[]'::jsonb)
+           FROM morphology_codes) AS morphology_codes,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object(
+                      'morphologyCodeId', t.morphology_code_id, 'payload', t.payload
+                    )
+                  ),
+                  '[]'::jsonb
+                )
+           FROM strong_lexicon_morphology_code_translations t
+          WHERE t.publication_id = (SELECT id FROM core)
+            AND t.morphology_code_id = ANY (
+                  ARRAY(SELECT morphology_code_id FROM morphology_codes)
+                )
+            AND t.language = ${language}) AS morphology_translations,
+        (SELECT coalesce(jsonb_agg(payload ORDER BY entry_id), '[]'::jsonb)
+           FROM direct_targets) AS direct_targets,
+        (SELECT coalesce(jsonb_agg(payload ORDER BY entry_id), '[]'::jsonb)
+           FROM classic_targets) AS classic_targets,
+        (SELECT coalesce(
+                  jsonb_agg(
+                    jsonb_build_object('stepEntryId', i.step_entry_id, 'stepCode', i.step_code)
+                    ORDER BY i.step_entry_id
+                  ),
+                  '[]'::jsonb
+                )
+           FROM strong_lexicon_entry_identities i
+          WHERE i.publication_id = (SELECT id FROM core)
+            AND i.step_entry_id = ANY (ARRAY(SELECT entry_id FROM classic_targets))
+        ) AS classic_target_identities,
+        (SELECT coalesce(jsonb_agg(t.payload ORDER BY t.step_entry_id), '[]'::jsonb)
+           FROM strong_lexicon_translations t
+          WHERE t.publication_id = (SELECT id FROM core)
+            AND t.step_entry_id = ANY (
+                  ARRAY(
+                    SELECT entry_id FROM direct_targets
+                    UNION
+                    SELECT entry_id FROM classic_targets
+                  )
+                )
+            AND t.language = ${language}) AS target_translations,
+        ${addonColumns}
+    `.execute(database)
+    const rows = gathered.rows[0]
+
+    const publication = (moduleId: StrongLexiconModuleId): Publication | undefined =>
+      rows?.publications.find(candidate => candidate.identity === `strong-lexicon:${moduleId}`)
+    const core = publication('core')
+    if (!core) throw new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'core' })
+    if (!rows?.entry || !rows.identity) {
+      throw new StrongLexiconEntryNotFound({ reference: input.reference })
+    }
+    const { entry } = rows
+    const resourcesState = moduleStateFrom('resources', publication('resources'), core.revision)
+    const entitiesState = moduleStateFrom('entities', publication('entities'), core.revision)
+
+    const relationRows = rows.relations.sort(
+      (left, right) => number(left, 'sortOrder') - number(right, 'sortOrder')
+    )
+    const morphologyRow = findLexicalBriefMorphology(rows.morphology_codes, entry)
+    const morphologyTranslation = morphologyRow
+      ? rows.morphology_translations.find(
+          translated => translated.morphologyCodeId === number(morphologyRow, 'id')
+        )?.payload
+      : undefined
+    const resourceRows =
+      resourcesState.status === 'available'
+        ? rows.resources.sort((left, right) => number(left, 'id') - number(right, 'id'))
+        : []
+
+    let entity: StrongLexiconEntity | undefined
+    if (withAddons && entitiesState.status === 'available') {
+      const entityRow = preferredEntityOf(
+        entry,
+        rows.entities_by_code.length
+          ? rows.entities_by_code
+          : rows.entities_by_number.filter(isEntityNamedLikeEntry(entry))
+      )
+      if (entityRow) {
+        const entityId = number(entityRow, 'id')
+        const ofEntity = (candidates: OfEntity[]) =>
+          candidates
+            .filter(candidate => candidate.entityId === entityId)
+            .map(candidate => candidate.payload)
+        entity = composeEntity(
+          {
+            entity: entityRow,
+            translation: ofEntity(rows.entity_translations)[0],
+            place: ofEntity(rows.entity_places)[0],
+            relationRows: ofEntity(rows.entity_relations),
+            targetRows: rows.entity_targets,
+            targetTranslations: rows.entity_translations.map(translated => translated.payload),
+            coreEntries: rows.entity_core_entries,
+            coreIdentities: rows.entity_core_identities,
+          },
+          language
+        )
+      }
+    }
+
+    return composeEntry(input, {
+      core,
+      entry,
+      identity: rows.identity,
+      translation: rows.translation ?? undefined,
+      relationRows,
+      relationKinds: rows.relation_kinds,
+      morphologyRow,
+      morphologyTranslation,
+      directTargetEntries: rows.direct_targets,
+      fallbackTargetEntries: rows.classic_targets.filter(
+        isClassicTargetOf(unresolvedClassicTargetsOf(relationRows))
+      ),
+      fallbackTargetIdentities: rows.classic_target_identities,
+      relationTranslations: rows.target_translations,
+      resourceRows,
+      resourceTranslations: resourcesState.status === 'available' ? rows.resource_translations : [],
+      entity,
+      resourcesState,
+      entitiesState,
+    })
+  }
+
+  const readDetailedEntry =
+    options.detailedEntryRead === 'statement-by-statement'
+      ? readDetailedEntryStatementByStatement
+      : readDetailedEntryInOneStatement
 
   return {
     findEntryCards: input =>
@@ -777,348 +1782,7 @@ export const makeKyselyStrongLexiconRepository = (
             },
           }
         }
-        const core = await requiredCore(input.language, input.level)
-        const found = await findCoreEntry(core, input.reference, input.kind)
-        if (!found) throw new StrongLexiconEntryNotFound({ reference: input.reference })
-        const { entry, identity } = found
-        const entryId = number(entry, 'id')
-        const [
-          translation,
-          relationRows,
-          relationKinds,
-          morphologyRows,
-          resourcesState,
-          entitiesState,
-        ] = await Promise.all([
-          translationFor(core.id, 'LexiconTranslations', entryId, input.language),
-          records(core.id, 'LexiconRelations', query => query.where('entry_id', '=', entryId)).then(
-            rows =>
-              rows.sort((left, right) => number(left, 'sortOrder') - number(right, 'sortOrder'))
-          ),
-          records(core.id, 'RelationKinds'),
-          records(core.id, 'MorphologyCodes'),
-          getState('resources'),
-          getState('entities'),
-        ])
-        const targetIds = relationRows.map(row => number(row, 'toStepEntryId')).filter(Boolean)
-        const directTargetEntries = targetIds.length
-          ? await records(core.id, 'StepEntries', query => query.where('entry_id', 'in', targetIds))
-          : []
-        const unresolvedClassicTargets = Array.from(
-          new Map(
-            relationRows
-              .filter(row => !number(row, 'toStepEntryId'))
-              .flatMap(row => {
-                const target = parseClassicStrong(text(row, 'toStepCode'))
-                return target ? [[target.code, target] as const] : []
-              })
-          ).values()
-        )
-        const fallbackTargetEntries = unresolvedClassicTargets.length
-          ? (
-              await records(core.id, 'StepEntries', query =>
-                query.where(
-                  sql<boolean>`(${sql.join(
-                    unresolvedClassicTargets.map(
-                      target =>
-                        sql<boolean>`payload->>'language' = ${target.language} AND (payload->>'baseCode')::integer = ${target.baseCode}`
-                    ),
-                    sql` OR `
-                  )})`
-                )
-              )
-            ).filter(row =>
-              unresolvedClassicTargets.some(target => target.code === classicStrong(row))
-            )
-          : []
-        const fallbackTargetIdentities = fallbackTargetEntries.length
-          ? await records(core.id, 'StepEntryIdentities', query =>
-              query.where(
-                'entry_id',
-                'in',
-                fallbackTargetEntries.map(row => number(row, 'id'))
-              )
-            )
-          : []
-        const targetEntries = [...directTargetEntries, ...fallbackTargetEntries].filter(
-          (row, index, rows) =>
-            rows.findIndex(candidate => number(candidate, 'id') === number(row, 'id')) === index
-        )
-        const relationTranslations = targetEntries.length
-          ? await records(core.id, 'LexiconTranslations', query =>
-              query
-                .where(
-                  'entry_id',
-                  'in',
-                  targetEntries.map(row => number(row, 'id'))
-                )
-                .where('language', '=', input.language)
-            )
-          : []
-        const morphologyRow = morphologyRows.find(
-          row =>
-            text(row, 'scope') === 'lexical_brief' &&
-            [text(row, 'code'), text(row, 'normalizedCode')].includes(text(entry, 'morph'))
-        )
-        let morphology: StrongLexiconMorphology | undefined
-        if (morphologyRow) {
-          const translated = await translationFor(
-            core.id,
-            'MorphologyCodeTranslations',
-            number(morphologyRow, 'id'),
-            input.language
-          )
-          const meaning = localized(
-            input.language,
-            text(translated ?? {}, 'meaning'),
-            text(morphologyRow, 'meaning')
-          )
-          const description = localized(
-            input.language,
-            text(translated ?? {}, 'description'),
-            text(morphologyRow, 'description')
-          )
-          morphology = {
-            code: text(entry, 'morph'),
-            meaning,
-            ...(description && normalizeText(description) !== normalizeText(meaning)
-              ? { description }
-              : {}),
-          }
-        }
-        const resourcePublication =
-          input.content !== 'definitions' && resourcesState.status === 'available'
-            ? await activePublication('resources')
-            : undefined
-        const resourceRows = resourcePublication
-          ? (
-              await records(resourcePublication.id, 'LexiconResources', query =>
-                query.where('entry_id', '=', entryId)
-              )
-            ).sort((left, right) => number(left, 'id') - number(right, 'id'))
-          : []
-        const resourceTranslations =
-          resourcePublication && resourceRows.length
-            ? await records(resourcePublication.id, 'LexiconResourceTranslations', query =>
-                query
-                  .where(
-                    'entry_id',
-                    'in',
-                    resourceRows.map(row => number(row, 'id'))
-                  )
-                  .where('language', '=', input.language)
-              )
-            : []
-        let entity: StrongLexiconEntity | undefined
-        if (input.content !== 'definitions' && entitiesState.status === 'available') {
-          const entityPublication = await activePublication('entities')
-          let entityCandidates = entityPublication
-            ? await records(entityPublication.id, 'Entities', query =>
-                query.where(
-                  sql<boolean>`(payload->>'uStrong' = ${text(entry, 'uStrong')} OR payload->>'uStrong' = ${text(entry, 'eStrong')})`
-                )
-              )
-            : []
-          if (entityPublication && entityCandidates.length === 0) {
-            const prefix = text(entry, 'language') === 'greek' ? 'G' : 'H'
-            const baseCode = number(entry, 'baseCode')
-            const gloss = normalizeText(text(entry, 'gloss'))
-            entityCandidates = (
-              await records(entityPublication.id, 'Entities', query =>
-                query.where(
-                  sql<boolean>`(payload->>'uStrong') ~ ${`^${prefix}0*${baseCode}(?:[^0-9]|$)`}`
-                )
-              )
-            ).filter(row => {
-              const match = text(row, 'uStrong').match(/^([HG])0*(\d+)/u)
-              return Boolean(
-                match &&
-                match[1] === prefix &&
-                Number(match[2]) === baseCode &&
-                normalizeText(text(row, 'displayName')) === gloss
-              )
-            })
-          }
-          const entityRow = entityCandidates.sort(
-            (left, right) =>
-              (text(left, 'uStrong') === text(entry, 'uStrong') ? 0 : 1) -
-                (text(right, 'uStrong') === text(entry, 'uStrong') ? 0 : 1) ||
-              number(left, 'id') - number(right, 'id')
-          )[0]
-          if (entityPublication && entityRow) {
-            entity = await hydrateEntity(core, entityPublication, entityRow, input.language)
-          }
-        }
-        const selectedCode = text(identity, 'stepCode')
-        const selectedKind =
-          input.kind ??
-          (normalizeCode(input.reference) === text(entry, 'dStrong')
-            ? 'dstrong'
-            : normalizeCode(input.reference) === text(entry, 'eStrong')
-              ? 'estrong'
-              : normalizeCode(input.reference) === text(entry, 'uStrong')
-                ? 'ustrong'
-                : 'strong')
-        const relationGroupOrder: Record<string, number> = { family: 0, identity: 1, subentry: 2 }
-        const relationRowsForDisplay = relationRows
-          .slice()
-          .sort(
-            (left, right) =>
-              (relationGroupOrder[text(left, 'groupKind')] ?? 99) -
-                (relationGroupOrder[text(right, 'groupKind')] ?? 99) ||
-              number(left, 'sortOrder') - number(right, 'sortOrder')
-          )
-          .filter((row, _index, rows) => {
-            const group = text(row, 'groupKind')
-            return (
-              rows
-                .slice(0, rows.indexOf(row) + 1)
-                .filter(candidate => text(candidate, 'groupKind') === group).length <= 24
-            )
-          })
-          .slice(0, 72)
-        let lsjAbsent = false
-        const resources = resourceRows.slice(0, 5).flatMap(row => {
-          const translatedResource = resourceTranslations.find(
-            translated => number(translated, 'resourceId') === number(row, 'id')
-          )
-          const contentHtml = localized(
-            input.language,
-            text(translatedResource ?? {}, 'contentHtml'),
-            text(row, 'contentHtml')
-          )
-          if (
-            /LSJ (?:has|ne possède) no entry|Le LSJ ne contient aucune entrée/iu.test(contentHtml)
-          ) {
-            lsjAbsent = true
-            return []
-          }
-          return [
-            {
-              id: number(row, 'id'),
-              source: text(row, 'source'),
-              kind: text(row, 'kind'),
-              title:
-                text(row, 'source') === 'TFLSJ'
-                  ? input.language === 'fr'
-                    ? 'Dictionnaire grec détaillé'
-                    : 'Detailed Greek dictionary'
-                  : input.language === 'fr'
-                    ? 'Notice complémentaire'
-                    : 'Additional resource',
-              contentHtml,
-            },
-          ]
-        })
-        const value: StrongLexiconEntry = {
-          id: entryId,
-          selectedIdentity: { kind: selectedKind, code: selectedCode },
-          stepCode: selectedCode,
-          classicStrong: classicStrong(entry),
-          eStrong: text(entry, 'eStrong'),
-          dStrong: text(entry, 'dStrong'),
-          language: text(entry, 'language') === 'greek' ? 'greek' : 'hebrew',
-          baseCode: number(entry, 'baseCode'),
-          original: text(entry, 'original'),
-          transliteration: text(entry, 'classicTransliteration') || text(entry, 'transliteration'),
-          ...(text(entry, 'pronunciation') ? { pronunciation: text(entry, 'pronunciation') } : {}),
-          gloss: localized(input.language, text(translation ?? {}, 'gloss'), text(entry, 'gloss')),
-          ...(localized(
-            input.language,
-            text(entry, 'nameMeaningFrHtml'),
-            text(entry, 'nameMeaningEnHtml')
-          )
-            ? {
-                nameMeaningHtml: localized(
-                  input.language,
-                  text(entry, 'nameMeaningFrHtml'),
-                  text(entry, 'nameMeaningEnHtml')
-                ),
-              }
-            : {}),
-          ...(localized(
-            input.language,
-            text(translation ?? {}, 'meaningHtml') || text(translation ?? {}, 'meaning'),
-            text(entry, 'meaning')
-          )
-            ? {
-                definitionHtml: localized(
-                  input.language,
-                  text(translation ?? {}, 'meaningHtml') || text(translation ?? {}, 'meaning'),
-                  text(entry, 'meaning')
-                ),
-              }
-            : {}),
-          ...(morphology ? { morphology } : {}),
-          relations: relationRowsForDisplay.flatMap(relation => {
-            const directTarget = directTargetEntries.find(
-              row => number(row, 'id') === number(relation, 'toStepEntryId')
-            )
-            const classicTarget = parseClassicStrong(text(relation, 'toStepCode'))
-            const targets = directTarget
-              ? [directTarget]
-              : classicTarget
-                ? fallbackTargetEntries
-                    .filter(target => classicStrong(target) === classicTarget.code)
-                    .sort((left, right) => {
-                      const leftCode = text(
-                        fallbackTargetIdentities.find(
-                          identity => number(identity, 'stepEntryId') === number(left, 'id')
-                        ) ?? {},
-                        'stepCode'
-                      )
-                      const rightCode = text(
-                        fallbackTargetIdentities.find(
-                          identity => number(identity, 'stepEntryId') === number(right, 'id')
-                        ) ?? {},
-                        'stepCode'
-                      )
-                      return leftCode.localeCompare(rightCode)
-                    })
-                : []
-            const kind = relationKinds.find(
-              row => number(row, 'id') === number(relation, 'relationKindId')
-            )
-            return targets.map(target => {
-              const targetTranslation = relationTranslations.find(
-                translated => number(translated, 'stepEntryId') === number(target, 'id')
-              )
-              const fallbackIdentity = fallbackTargetIdentities.find(
-                identity => number(identity, 'stepEntryId') === number(target, 'id')
-              )
-              return {
-                group: text(relation, 'groupKind') as 'subentry' | 'identity' | 'family',
-                relationKind: text(kind ?? {}, 'kind'),
-                label:
-                  input.language === 'fr'
-                    ? text(kind ?? {}, 'labelFr') || text(kind ?? {}, 'labelEn')
-                    : text(kind ?? {}, 'labelEn'),
-                stepCode: directTarget
-                  ? text(relation, 'toStepCode')
-                  : text(fallbackIdentity ?? {}, 'stepCode'),
-                gloss: localized(
-                  input.language,
-                  text(targetTranslation ?? {}, 'gloss'),
-                  text(target, 'gloss')
-                ),
-                original: text(target, 'original'),
-                transliteration:
-                  text(target, 'classicTransliteration') || text(target, 'transliteration'),
-              }
-            })
-          }),
-          resources,
-          lsjAbsent,
-          ...(entity ? { entity } : {}),
-          modules: {
-            resources: resourcesState as never,
-            entities: entitiesState as never,
-          },
-        }
-        return {
-          revision: entryRepresentationRevision(core, resourcesState, entitiesState),
-          value,
-        }
+        return readDetailedEntry(input)
       }).pipe(Effect.mapError(mapRepositoryCause)),
 
     listEntries: input =>

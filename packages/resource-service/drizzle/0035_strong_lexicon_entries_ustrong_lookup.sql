@@ -1,0 +1,1 @@
+CREATE INDEX "strong_lexicon_entries_ustrong_lookup" ON "strong_lexicon_entries" USING btree ("publication_id","u_strong");
