@@ -269,7 +269,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/15437241fea164da4635515d9ddce347f5a0530f681a71213a03e33c3a371231/bibles/bible-chu.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/23b8318e6c71f1fbbd7fedd5d04869e0c8a6ecca88ff5f495910988af02521ff/bibles/bible-chu.json.zip",
         "entry": "bible-chu.json"
       }
     ],
@@ -341,7 +341,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/1f3bcc73fa67ed54fd75359ea8a3cfb592c17094e6b906be29f35008c1a2ba53/bibles/bible-easy.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/b52149535bef50aa173ff5e1fcdb2a7966e3ca89547328dac055c6ebf7c3d8e7/bibles/bible-easy.json.zip",
         "entry": "bible-easy.json"
       }
     ],
@@ -365,7 +365,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/3982ed16258303c444c59f11a745af0983a12ce1a91770ad24dd9ef7eac9805c/bibles/bible-fmar.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/dbebe7e61f934913bd4e9f8f73448e135b77ef3166a698156d5ac68e31ee26e9/bibles/bible-fmar.json.zip",
         "entry": "bible-fmar.json"
       }
     ],
@@ -389,7 +389,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/d82b817b6391a7ff62804a764d3e0c97ba312c06433a1048ea0eacecadbce19c/bibles/bible-gw.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/91e25a3715ab233cca63768530cb6b83de64e05b5de1e15c4dccfc963ba2c9eb/bibles/bible-gw.json.zip",
         "entry": "bible-gw.json"
       }
     ],
@@ -521,7 +521,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/149ed1d73d492a90dd27eb8c67dbfe1df2f8e8acef0fb8e59a50c8d4b7af2f53/bibles/bible-net.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/fbea31417256255c28afe53d5bda58199971e4c810a46b9942662183eaac786b/bibles/bible-net.json.zip",
         "entry": "bible-net.json"
       }
     ],
@@ -533,7 +533,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/0d04399d89521a2295211e9a9699817f3ac22121cb5d065137365ae373fe8cbb/bibles/bible-nfc.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/f8f94f87f1fe0f42aa1ca9af3fa14bdc718f9f894e77cafda367b11b476bc1c8/bibles/bible-nfc.json.zip",
         "entry": "bible-nfc.json"
       }
     ],
@@ -569,7 +569,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/dde310192a9b6468945329bfbbb21908720ab194ebd48328f2f9c17de7b930b2/bibles/bible-nlt.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/f8cb74a706cd7ce96ad4987f75ffe253cd161cdeb20af056b5c18f588b5be27b/bibles/bible-nlt.json.zip",
         "entry": "bible-nlt.json"
       }
     ],
@@ -593,7 +593,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/94bd479f4999bec6b93eed1be3e621d361a5ead1131d0be51b4a8c7ddd733593/bibles/bible-ost.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/230c7a7bf08d69a4e46579c62d6ca9100f3b3010251daf69453599e90ad68d60/bibles/bible-ost.json.zip",
         "entry": "bible-ost.json"
       }
     ],
@@ -605,7 +605,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/5feda7d6debcc0e2c18c57800fe137c8b08df48b51bdb9816f8d5ca703713e3b/bibles/bible-pdv2017.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/9b8fa1dde74859fe924e1c867648288e7f36a8f8361515e83fee64041d4d8781/bibles/bible-pdv2017.json.zip",
         "entry": "bible-pdv2017.json"
       }
     ],
@@ -665,7 +665,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/bd8b780629dfda22a2e14c2e1763adf816074dde2916ed7798281e62213d295f/bibles/bible-s21.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/9879b627da1af08b35267c257bb9a548f335711da089ad7789487d9a1ccd5f59/bibles/bible-s21.json.zip",
         "entry": "bible-s21.json"
       }
     ],
