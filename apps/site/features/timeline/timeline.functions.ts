@@ -12,12 +12,10 @@ import { setResponseHeader } from '@tanstack/react-start/server'
 import { defaultBibleVersionId } from '../bible/bibleVersions'
 import { truncateText } from '../resources/editorialHtml'
 import { buildBibleReferencePath } from '../resources/editorialLinks'
-import {
-  isResourceLanguage,
-  RESOURCE_PAGE_CACHE_CONTROL,
-  type ResourceLanguage,
-} from '../resources/publicSite'
+import { isResourceLanguage, type ResourceLanguage } from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
+import { notingStaleAnswers } from '../resources/staleAnswers'
+import { resourceResponseCacheControl } from '../resources/staleResponse'
 import { TIMELINE_MESSAGES } from './messages'
 import { formatTimelineDates, timelineYearSpan } from './timelineDates'
 import {
@@ -84,7 +82,9 @@ export const listTimelineEvents = async (
 ): Promise<TimelineListedEvent[]> => {
   const cached = eventsCache.get(language)
   if (cached && Date.now() - cached.at < CACHE_TTL_MS) return cached.events
-  const response = await readResource<TimelineEventsResponseDto>(`/v1/timelines/${language}/events`)
+  const { value: response, stale } = await notingStaleAnswers(() =>
+    readResource<TimelineEventsResponseDto>(`/v1/timelines/${language}/events`)
+  )
   const events = (response?.events ?? [])
     // An event whose slug is outside the route grammar has no page to link to.
     .filter(event => isTimelineSlug(event.slug))
@@ -97,7 +97,8 @@ export const listTimelineEvents = async (
       image: images[0]?.file,
     }))
     .sort(compareTimelineEvents)
-  if (response) eventsCache.set(language, { at: Date.now(), events })
+  // A STALE answer of the Resource API is not kept: the next page asks again.
+  if (response && !stale) eventsCache.set(language, { at: Date.now(), events })
   return events
 }
 
@@ -180,9 +181,11 @@ const verseCountsCache = new Map<string, { at: number; counts: Record<string, nu
 const readVerseCounts = async (versionId: string): Promise<Record<string, number>> => {
   const cached = verseCountsCache.get(versionId)
   if (cached && Date.now() - cached.at < CACHE_TTL_MS) return cached.counts
-  const coverage = await readResource<BibleVersionCoverageDto>(`/v1/bibles/${versionId}/coverage`)
+  const { value: coverage, stale } = await notingStaleAnswers(() =>
+    readResource<BibleVersionCoverageDto>(`/v1/bibles/${versionId}/coverage`)
+  )
   const counts = { ...coverage?.verseCountByBookChapter }
-  if (coverage) verseCountsCache.set(versionId, { at: Date.now(), counts })
+  if (coverage && !stale) verseCountsCache.set(versionId, { at: Date.now(), counts })
   return counts
 }
 
@@ -274,7 +277,7 @@ export const loadTimelinePreview = createServerFn({ method: 'GET' })
     const opening = singleLine(timelineParagraphs(event.article)[0] ?? '')
 
     // A preview is as stable as the page of the event, so the CDN may keep it as long.
-    setResponseHeader('Cache-Control', RESOURCE_PAGE_CACHE_CONTROL)
+    setResponseHeader('Cache-Control', resourceResponseCacheControl())
     return {
       slug,
       title: singleLine(event.title),

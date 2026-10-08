@@ -1,5 +1,5 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
-import { RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
 import TimelineEventPage from '@/features/timeline/TimelineEventPage'
 import { loadTimelineEventPage } from '@/features/timeline/timeline.functions'
 import { buildTimelineEventHead } from '@/features/timeline/timelineHead'
@@ -23,8 +23,7 @@ export const Route = createFileRoute('/timeline/$language_/$slug')({
     loadTimelineEventPage({ data: { language: params.language, slug: params.slug } }),
   head: ({ loaderData }) => (loaderData ? buildTimelineEventHead(loaderData) : {}),
   // Only a rendered event is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: TimelineEventRoute,
 })
 

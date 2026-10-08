@@ -7,7 +7,7 @@ import {
   parseDictionaryWorkRoute,
   validateDictionaryListSearch,
 } from '@/features/dictionary/dictionaryRoutes'
-import { RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
 
 // `/dictionary/:language/:work/:letter` — the articles of a work filed under a letter,
 // a numbered page at a time (`?page=2`). An article address has one more segment.
@@ -45,8 +45,7 @@ export const Route = createFileRoute('/dictionary/$language_/$work_/$letter')({
     }),
   head: ({ loaderData }) => (loaderData ? buildDictionaryLetterHead(loaderData) : {}),
   // Only a rendered page is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: DictionaryLetterRoute,
 })
 

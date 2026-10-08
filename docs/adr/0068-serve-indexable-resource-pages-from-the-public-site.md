@@ -201,9 +201,21 @@ not read from the Resource API is kept for a minute only, so that the readers of
 do not each render it again and the whole page soon takes its place. Such a page answers
 with the header `X-Page-Incomplete: 1`, which a whole page and a failed load never carry:
 the CDN consumes `s-maxage` and answers every page with the same `Cache-Control`, so the
-header is what tells a reader of the response that the page is the short-lived one. Because
-a cached page is identical for every visitor, the theme preference is applied in the browser
-from the cookie shared with the landing page, never rendered on the server.
+header is what tells a reader of the response that the page is the short-lived one.
+
+A page rendered with an answer the Resource API marked `STALE` is kept for a minute too
+([ADR-0076](./0076-answer-a-new-worker-version-from-the-cache-of-the-one-before.md)). Such
+an answer is what the version of the API deployed before stored for the same content: it is
+nearly always the answer of the current version, and the API reads again as it gives it. The
+page is whole and is not called incomplete: it answers with a header of its own,
+`X-Page-Stale: 1`, and the page rendered a minute later, from current answers, is kept for
+the day. Every rendered page follows the rule, in every section, and so do the previews and
+panels loaded on demand and the sitemaps. No loader passes anything for it: the read of the
+API marks the response being built, and what decides how long that response is kept reads
+the mark there.
+
+Because a cached page is identical for every visitor, the theme preference is applied in the
+browser from the cookie shared with the landing page, never rendered on the server.
 
 ### Boundaries
 
@@ -332,6 +344,11 @@ drawing is the page.
 
 A page that needs a whole list to place its resource (the neighbours of a topic or of an
 event, the letters of a lexicon) keeps that list for an hour in each server instance.
+
+What a server instance keeps for an hour, a coverage or a list, it keeps only from current
+answers. A read a `STALE` answer came into is given to the page that made it and not kept:
+the next page reads again, and so does each page that was waiting for the same read, which
+then gets the current answer or is marked in its turn.
 
 The Resource API limits requests per client address
 ([ADR-0065](./0065-protect-resources-without-mandatory-attestation.md)), and the site

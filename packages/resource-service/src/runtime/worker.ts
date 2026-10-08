@@ -15,6 +15,7 @@ import {
   enforceResourceApiAppCheck,
   RESOURCE_API_CACHE_REVISION,
   resourceApiCacheEpochFor,
+  resourceApiFallbackEpochFor,
   routeResourceApiRequest,
 } from './resourceApiCache'
 import { protectResourceOriginRead, protectResourceRequest } from './resourceRequestProtection'
@@ -219,21 +220,90 @@ export const makeResourceWorker = (
     }
 
     const startedAt = Date.now()
-    let sqlStatements = 0
-    let sqlMs = 0
-    let databaseConnectMs: number | undefined
+    // Where a read of the database spent its time. The read of a request and the refresh
+    // that follows a STALE answer each count their own.
+    const newTimings = () => ({
+      sqlStatements: 0,
+      sqlMs: 0,
+      databaseConnectMs: undefined as number | undefined,
+    })
+    const timings = newTimings()
+    const readOrigin = async (originRequest: Request, spent: ReturnType<typeof newTimings>) => {
+      const { readResourceOrigin } = await loadOrigin()
+      return readResourceOrigin({
+        request: originRequest,
+        corsAllowedOrigins,
+        hyperdriveConnectionString: bindings.HYPERDRIVE.connectionString,
+        runTopicEmbedding: (model, input) =>
+          bindings.AI.run(
+            model,
+            input,
+            makeMetadataOnlyAiGatewayOptions({
+              gatewayId: bindings.AI_GATEWAY_ID,
+              environment: bindings.RESOURCE_ENVIRONMENT,
+              contract: TOPIC_EMBEDDING_CONTRACT,
+              enabled: analyticsEnabled(bindings),
+            })
+          ),
+        searchProductAnalytics: bindings.SEARCH_PRODUCT_ANALYTICS,
+        analyticsEnabled: analyticsEnabled(bindings),
+        environment: bindings.RESOURCE_ENVIRONMENT,
+        writeRuntimeEvent: event => writeRuntimeSafely(bindings, event),
+        onSqlStatement: () => {
+          spent.sqlStatements += 1
+        },
+        onSqlDuration: durationMs => {
+          spent.sqlMs += durationMs
+        },
+        onDatabaseConnection: durationMs => {
+          spent.databaseConnectMs = durationMs
+        },
+      })
+    }
+    const contentRevision =
+      request.method === 'GET' ? await RESOURCE_API_CACHE_REVISION(request) : undefined
     let originRefusal: Response | undefined
     const response = await routeResourceApiRequest({
       request,
       authorize: async () => true,
       cache: edgeCache,
-      cacheEpoch:
-        request.method === 'GET'
-          ? resourceApiCacheEpochFor(
-              await RESOURCE_API_CACHE_REVISION(request),
-              bindings.CF_VERSION_METADATA?.id
-            )
-          : 'uncached-request',
+      cacheEpoch: contentRevision
+        ? resourceApiCacheEpochFor(contentRevision, bindings.CF_VERSION_METADATA?.id)
+        : 'uncached-request',
+      fallback: contentRevision
+        ? {
+            epoch: resourceApiFallbackEpochFor(contentRevision),
+            refresh: async unconditionalRequest => {
+              const refreshStartedAt = Date.now()
+              const spent = newTimings()
+              // The caller was answered from the cache and is refused nothing, but this
+              // read of the database is its doing: it counts against the limit that
+              // protects the database. Over it nothing is read, and the fallback stays.
+              const refusal = await protectResourceOriginRead({
+                request,
+                limiter: bindings.ORIGIN_READING_RATE_LIMITER,
+                reportFailure: reportLimiterFailure,
+              })
+              const refreshed = refusal ?? (await readOrigin(unconditionalRequest, spent))
+              console.log(
+                JSON.stringify({
+                  message: 'resource API fallback refresh',
+                  requestClass: resourceRequestClassFrom(request),
+                  path: new URL(request.url).pathname,
+                  status: refreshed.status,
+                  limited: refusal !== undefined,
+                  stored: refreshed.status === 200,
+                  ...spent,
+                  durationMs: Date.now() - refreshStartedAt,
+                  requestId: resourceRequestIdFrom(
+                    request.headers.get('x-request-id') ?? undefined
+                  ),
+                })
+              )
+              return refreshed
+            },
+          }
+        : undefined,
       corsAllowedOrigins,
       waitUntil: promise => ctx.waitUntil(promise),
       reportCacheFailure: (operation, cause) => {
@@ -259,40 +329,14 @@ export const makeResourceWorker = (
         const health = makeResourceHealthResponse(request)
         if (health) return health
 
-        const { readResourceOrigin } = await loadOrigin()
-        return readResourceOrigin({
-          request,
-          corsAllowedOrigins,
-          hyperdriveConnectionString: bindings.HYPERDRIVE.connectionString,
-          runTopicEmbedding: (model, input) =>
-            bindings.AI.run(
-              model,
-              input,
-              makeMetadataOnlyAiGatewayOptions({
-                gatewayId: bindings.AI_GATEWAY_ID,
-                environment: bindings.RESOURCE_ENVIRONMENT,
-                contract: TOPIC_EMBEDDING_CONTRACT,
-                enabled: analyticsEnabled(bindings),
-              })
-            ),
-          searchProductAnalytics: bindings.SEARCH_PRODUCT_ANALYTICS,
-          analyticsEnabled: analyticsEnabled(bindings),
-          environment: bindings.RESOURCE_ENVIRONMENT,
-          writeRuntimeEvent: event => writeRuntimeSafely(bindings, event),
-          onSqlStatement: () => {
-            sqlStatements += 1
-          },
-          onSqlDuration: durationMs => {
-            sqlMs += durationMs
-          },
-          onDatabaseConnection: durationMs => {
-            databaseConnectMs = durationMs
-          },
-        })
+        return readOrigin(request, timings)
       },
     })
     // A read refused here is answered and reported like one refused before the cache.
     if (originRefusal) return respond(response)
+    const cacheStatus = response.headers.get('x-resource-cache') ?? 'BYPASS'
+    // A STALE answer opened no database for its caller: its refresh is logged on its own.
+    const originRead = request.method === 'GET' && cacheStatus !== 'HIT' && cacheStatus !== 'STALE'
     console.log(
       JSON.stringify({
         message: 'resource API request',
@@ -300,14 +344,12 @@ export const makeResourceWorker = (
         method: request.method,
         path: new URL(request.url).pathname,
         status: response.status,
-        cache: response.headers.get('x-resource-cache') ?? 'BYPASS',
-        originRead: request.method === 'GET' && response.headers.get('x-resource-cache') !== 'HIT',
-        sqlStatements,
+        cache: cacheStatus,
+        originRead,
         // Where an uncached read spent its time: opening its connection to Hyperdrive, then
         // its statements (the first one includes that opening). Durations only, never a
         // statement or a connection string.
-        sqlMs,
-        databaseConnectMs,
+        ...timings,
         durationMs: Date.now() - startedAt,
         requestId: response.headers.get('x-request-id'),
         isolateRequest,
@@ -319,10 +361,10 @@ export const makeResourceWorker = (
         event: 'request',
         route: runtimeRouteFrom(request),
         status: String(response.status),
-        cache: response.headers.get('x-resource-cache') ?? 'BYPASS',
+        cache: cacheStatus,
         durationMs: Date.now() - startedAt,
-        sqlStatements,
-        originRead: request.method === 'GET' && response.headers.get('x-resource-cache') !== 'HIT',
+        sqlStatements: timings.sqlStatements,
+        originRead,
         success: response.status < 500,
       })
     }

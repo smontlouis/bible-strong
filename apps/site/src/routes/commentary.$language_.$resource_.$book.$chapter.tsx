@@ -7,7 +7,7 @@ import {
   parseCommentaryRoute,
   validateCommentarySearch,
 } from '@/features/commentary/commentaryRoutes'
-import { RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
 
 // `/commentary/:language/:resource/:book/:chapter`, the grammar of ADR-0054. A chapter too
 // long for one page continues on `?page=2` and the following.
@@ -33,12 +33,10 @@ export const Route = createFileRoute('/commentary/$language_/$resource_/$book/$c
     }
   },
   loaderDeps: ({ search }) => search,
-  loader: ({ params, deps }) =>
-    loadCommentaryChapterPage({ data: { ...params, page: deps.page } }),
+  loader: ({ params, deps }) => loadCommentaryChapterPage({ data: { ...params, page: deps.page } }),
   head: ({ loaderData }) => (loaderData ? buildCommentaryChapterHead(loaderData) : {}),
   // Only a rendered chapter is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: CommentaryChapterRoute,
 })
 

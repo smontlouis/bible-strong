@@ -77,15 +77,36 @@ export const INCOMPLETE_PAGE_CACHE_CONTROL = 'public, max-age=0, s-maxage=60'
 export const INCOMPLETE_PAGE_HEADER = 'X-Page-Incomplete'
 
 /**
- * What the CDN is told about a rendered page. Only a whole page is kept for long: a page
- * missing a part it could not read would otherwise be the thin page every reader gets for
- * as long as the CDN keeps it, and it says so in a header of its own. A failed load is not
- * kept at all.
+ * How long the CDN keeps a page rendered with a STALE answer of the Resource API: a minute,
+ * like a page missing a part. The page is whole, and nearly always right; the API has read
+ * again by the time the minute has passed, and the page rendered then is kept for the day.
+ */
+export const STALE_PAGE_CACHE_CONTROL = INCOMPLETE_PAGE_CACHE_CONTROL
+
+/**
+ * Says that a page was rendered with an answer an earlier version of the Resource API
+ * stored (ADR-0076). It is not an incomplete page and does not say so: nothing is missing
+ * from it.
+ */
+export const STALE_PAGE_HEADER = 'X-Page-Stale'
+
+/**
+ * What the CDN is told about a rendered page. Only a whole page rendered from answers of
+ * the current Resource API is kept for long. A page missing a part it could not read would
+ * otherwise be the thin page every reader gets for as long as the CDN keeps it; a page
+ * rendered with a STALE answer would keep for a day what the API itself gave once. Each
+ * says so in a header of its own. A failed load is not kept at all.
  */
 export const pageCacheHeaders = (
-  page: { incomplete?: boolean } | undefined
-): Record<string, string> | undefined =>
-  page &&
-  (page.incomplete
-    ? { 'Cache-Control': INCOMPLETE_PAGE_CACHE_CONTROL, [INCOMPLETE_PAGE_HEADER]: '1' }
-    : { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL })
+  page: object | undefined,
+  usedStaleAnswer = false
+): Record<string, string> | undefined => {
+  if (!page) return undefined
+  const incomplete = 'incomplete' in page && page.incomplete === true
+  if (!incomplete && !usedStaleAnswer) return { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL }
+  return {
+    'Cache-Control': incomplete ? INCOMPLETE_PAGE_CACHE_CONTROL : STALE_PAGE_CACHE_CONTROL,
+    ...(incomplete && { [INCOMPLETE_PAGE_HEADER]: '1' }),
+    ...(usedStaleAnswer && { [STALE_PAGE_HEADER]: '1' }),
+  }
+}

@@ -1,5 +1,6 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
-import { isResourceLanguage, RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
+import { isResourceLanguage } from '@/features/resources/publicSite'
 import { buildResourceHead } from '@/features/resources/resourceHead'
 import { StrongLetterPage } from '@/features/strong/StrongLexiconPages'
 import { loadStrongLetterPage, type StrongLetterPageData } from '@/features/strong/strong.functions'
@@ -55,8 +56,7 @@ export const Route = createFileRoute('/strong/$language/$lexicon/$letter')({
   loader: ({ params }) => loadStrongLetterPage({ data: params }),
   head: ({ loaderData }) => (loaderData ? buildHead(loaderData) : {}),
   // Only a rendered page is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: StrongLetterRoute,
 })
 

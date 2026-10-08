@@ -530,7 +530,7 @@ export const isKeptWhenWhole = path => !/^\/(?:fr)?(?:\?|$)/u.test(path)
 
 /**
  * @typedef {'cached' | 'stale' | 'rendered' | 'limited' | 'failed' | 'refused' | 'missing' | 'redirected'} AnswerKind
- * @typedef {'whole' | 'incomplete' | 'unknown'} Completeness
+ * @typedef {'whole' | 'incomplete' | 'provisional' | 'unknown'} Completeness
  *
  * @typedef {object} Answer
  * @property {AnswerKind} kind
@@ -548,6 +548,10 @@ export const isKeptWhenWhole = path => !/^\/(?:fr)?(?:\?|$)/u.test(path)
  * - `limited` (429), `failed` (5xx, or no answer: status 0) and `refused` (401, 403) mean
  *   the site is in trouble or wants no warm-up; `missing` and `redirected` mean the sitemap
  *   lists an address that is not a page.
+ *
+ * A page rendered from an answer an earlier version of the Resource API had cached says so
+ * with `X-Page-Stale`: it is whole, the site keeps it a minute, and the API has refreshed
+ * its answers by the time it is rendered again. That is `provisional`, and not trouble.
  *
  * A page the site could not render whole says so with `X-Page-Incomplete`. Where the CDN
  * lets `s-maxage` through (a development server), a page kept less than an hour is
@@ -584,6 +588,8 @@ export const readAnswer = ({ status, headers = {} }) => {
 const completenessOf = (kind, headers) => {
   const flag = headers['x-page-incomplete']?.trim()
   if (flag && flag !== '0') return 'incomplete'
+  const stale = headers['x-page-stale']?.trim()
+  if (stale && stale !== '0') return 'provisional'
   const kept = headers['cache-control']?.match(/(?:^|[\s,])s-maxage=(\d+)/iu)?.[1]
   if (kept !== undefined) return Number(kept) < 3600 ? 'incomplete' : 'whole'
   // An incomplete page is never served stale, and never kept more than a minute.
@@ -750,7 +756,7 @@ export const describeTrouble = signal => TROUBLE[signal]
  * @property {number} status
  * @property {number} ms
  * @property {string} [cache]
- * @property {'first' | 'retry' | 'verify'} pass
+ * @property {'first' | 'retry' | 'verify' | 'settle'} pass
  * @property {string} [sitemap]
  */
 
@@ -759,7 +765,10 @@ export const WARM_FOR_MS = 24 * 60 * 60_000
 
 /** @param {Pick<PageRecord, 'kind' | 'completeness'>} record */
 export const isWarm = ({ kind, completeness }) =>
-  (kind === 'cached' || kind === 'stale' || kind === 'rendered') && completeness !== 'incomplete'
+  (kind === 'cached' || kind === 'stale' || kind === 'rendered') &&
+  completeness !== 'incomplete' &&
+  // A provisional page is kept a minute: it is warm once it has been rendered again.
+  completeness !== 'provisional'
 
 /**
  * The pages a resumed run skips: those whose last answer in the journal was a page, whole
@@ -833,6 +842,7 @@ export const summarize = records => {
     stale: count(record => record.kind === 'stale'),
     rendered: count(record => record.kind === 'rendered'),
     incomplete: count(record => isPage(record) && record.completeness === 'incomplete'),
+    provisional: count(record => isPage(record) && record.completeness === 'provisional'),
     limited: count(record => record.kind === 'limited'),
     failed: count(record => record.kind === 'failed'),
     refused: count(record => record.kind === 'refused'),

@@ -1,5 +1,5 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
-import { pageCacheHeaders } from '@/features/resources/pageReads'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
 import { isResourceLanguage } from '@/features/resources/publicSite'
 import StrongEntryPage from '@/features/strong/StrongEntryPage'
 import StrongNumberPage from '@/features/strong/StrongNumberPage'
@@ -44,7 +44,7 @@ export const Route = createFileRoute('/strong/$language/$code')({
   },
   // Only a whole rendered entry is kept for long: a page missing a part it could not read
   // is kept a minute, a failed load not at all.
-  headers: ({ loaderData }) => pageCacheHeaders(loaderData),
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: StrongRoute,
 })
 

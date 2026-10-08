@@ -1,6 +1,7 @@
 import type { NaveTopicListResponseDto } from '@bible-strong/resource-domain/contracts/naveContract'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
+import { answerShared, notingStaleAnswers, type NotedAnswer } from '../resources/staleAnswers'
 import { NAVE_LETTERS } from './naveRoutes'
 
 export type NaveIndexTopic = {
@@ -63,7 +64,7 @@ const readIndex = async (language: ResourceLanguage): Promise<NaveIndex> => {
   return { topics, byLetter, positions }
 }
 
-const cache = new Map<ResourceLanguage, { at: number; index: Promise<NaveIndex> }>()
+const cache = new Map<ResourceLanguage, { at: number; index: Promise<NotedAnswer<NaveIndex>> }>()
 
 /**
  * The topics of a publication, without their content. Lists, cross-reference checks and
@@ -71,12 +72,17 @@ const cache = new Map<ResourceLanguage, { at: number; index: Promise<NaveIndex> 
  */
 export const loadNaveIndex = (language: ResourceLanguage): Promise<NaveIndex> => {
   const cached = cache.get(language)
-  if (cached && Date.now() - cached.at < INDEX_TTL_MS) return cached.index
-  const index = readIndex(language)
+  const read = () => readIndex(language)
+  if (cached && Date.now() - cached.at < INDEX_TTL_MS) return answerShared(cached.index, read)
+  const index = notingStaleAnswers(read)
   cache.set(language, { at: Date.now(), index })
-  // A failed read is not kept: the next request tries again.
-  index.catch(() => {
+  const forget = () => {
     if (cache.get(language)?.index === index) cache.delete(language)
-  })
-  return index
+  }
+  // A failed read is not kept: the next request tries again. Nor is an index a STALE answer
+  // of the Resource API came into: each page that was sharing the read then reads again.
+  index.then(({ stale }) => {
+    if (stale) forget()
+  }, forget)
+  return index.then(({ value }) => value)
 }

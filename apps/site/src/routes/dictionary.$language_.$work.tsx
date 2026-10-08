@@ -3,7 +3,7 @@ import { DictionaryWorkPage } from '@/features/dictionary/DictionaryListPages'
 import { loadDictionaryWorkPage } from '@/features/dictionary/dictionary.functions'
 import { buildDictionaryWorkHead } from '@/features/dictionary/dictionaryHead'
 import { parseDictionaryWorkRoute } from '@/features/dictionary/dictionaryRoutes'
-import { RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
 
 // `/dictionary/:language/:work` — a dictionary and its alphabet.
 export const Route = createFileRoute('/dictionary/$language_/$work')({
@@ -18,8 +18,7 @@ export const Route = createFileRoute('/dictionary/$language_/$work')({
     loadDictionaryWorkPage({ data: { language: params.language, work: params.work } }),
   head: ({ loaderData }) => (loaderData ? buildDictionaryWorkHead(loaderData) : {}),
   // Only a rendered page is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: DictionaryWorkRoute,
 })
 

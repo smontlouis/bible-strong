@@ -2,7 +2,8 @@ import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
 import { DictionaryIndexPage } from '@/features/dictionary/DictionaryListPages'
 import { loadDictionaryIndexPage } from '@/features/dictionary/dictionary.functions'
 import { buildDictionaryIndexHead } from '@/features/dictionary/dictionaryHead'
-import { isResourceLanguage, RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
+import { isResourceLanguage } from '@/features/resources/publicSite'
 
 // `/dictionary/:language` — the dictionaries published in a language.
 export const Route = createFileRoute('/dictionary/$language')({
@@ -16,8 +17,7 @@ export const Route = createFileRoute('/dictionary/$language')({
   loader: ({ params }) => loadDictionaryIndexPage({ data: { language: params.language } }),
   head: ({ loaderData }) => (loaderData ? buildDictionaryIndexHead(loaderData) : {}),
   // Only a rendered page is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: DictionaryIndexRoute,
 })
 

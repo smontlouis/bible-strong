@@ -2,14 +2,15 @@ import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
 import { bibleBookName } from '../bible/bibleBooks'
-import { BIBLE_VERSIONS, bibleVersionCoversBook, defaultBibleVersionId } from '../bible/bibleVersions'
+import {
+  BIBLE_VERSIONS,
+  bibleVersionCoversBook,
+  defaultBibleVersionId,
+} from '../bible/bibleVersions'
 import { truncateText } from '../resources/editorialHtml'
 import { buildBibleReferencePath } from '../resources/editorialLinks'
-import {
-  isResourceLanguage,
-  RESOURCE_PAGE_CACHE_CONTROL,
-  type ResourceLanguage,
-} from '../resources/publicSite'
+import { isResourceLanguage, type ResourceLanguage } from '../resources/publicSite'
+import { resourceResponseCacheControl } from '../resources/staleResponse'
 import {
   findCommentary,
   findCommentaryCounterpart,
@@ -224,7 +225,7 @@ export const loadCommentarySection = createServerFn({ method: 'GET' })
     if (!section) throw notFound()
 
     // A section is as stable as the page of its chapter, so the CDN may keep it as long.
-    setResponseHeader('Cache-Control', RESOURCE_PAGE_CACHE_CONTROL)
+    setResponseHeader('Cache-Control', resourceResponseCacheControl())
     return {
       html: renderCommentaryHtml(section.content, { language: route.language }),
       path: `${buildCommentaryChapterPath(route, pageIndex + 1)}#${commentarySectionAnchor(section.slug)}`,
