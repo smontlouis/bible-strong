@@ -173,8 +173,20 @@ filters and Bible readings with commentaries shown in the text are served with
 Sitemaps are generated from the Resource API: one per Bible and reading mode listing its
 chapters, the entry page of every number of the Strong lexicons (the number where it is
 split, its sense otherwise), one per dictionary, per language of the dictionary terms, per
-language of the topics and per commentary, and the timeline. Verses and the senses of a split number are reached through
-links.
+language of the topics and per commentary, and the timeline. The senses of a split number
+are reached through links.
+
+A verse has a page in every Bible, and each is indexable, but only the five best-known
+Bibles of each language have a sitemap of their verse pages (`bible-lsg-verses.xml`), about
+31,000 addresses each. The verses of the other Bibles are reached through links. Such a
+sitemap lists the verses its Bible numbers, which are not those of another Bible: a
+translation may count the verses of a chapter differently, leave out a verse its manuscripts
+do not have, or translate several verses as one, which then has one page.
+
+The verse sitemaps are served under `/sitemaps/` like the others, but `/sitemap.xml` does
+not list them until `ANNOUNCE_BIBLE_VERSE_SITEMAPS` is set in the sitemap registry. They
+are first submitted by hand, one Bible at a time, so that the crawl of some 311,000 pages
+starts when it is decided.
 
 The CDN keeps a rendered page for a day and may serve it stale while revalidating. Only a
 successfully rendered resource is cacheable. Because a cached page is identical for every
@@ -216,6 +228,16 @@ A verse page reads about twenty documents from the Resource API when it is not c
 What does not depend on the Bible being read (the cross-references, the commentaries, the
 topics, the dictionary articles) is the same read for every version of the verse, which
 the API keeps for a day.
+
+The coverage of a Bible counts the verses of each chapter without numbering them, and a
+chapter that skips a number is not numbered from 1 to its count. A verse sitemap therefore
+asks the Resource API for the last number of every chapter and the three after it, two
+hundred verses at a time, and reads the chapters where the answer is not the count alone:
+25 to 50 reads for a Bible, once per cached sitemap. One shape of chapter escapes that
+question: numbers skipped before the count, the count itself a verse, and the numbering
+resuming more than three numbers after it. Such a chapter would be listed as numbered from
+1 to its count. A coverage that published the numbers of the chapters not numbered from 1
+to their count would make this one read, and exact.
 
 The site functions run in the region of the database of the Resource API, Frankfurt: a
 page is a chain of reads, and a function on another continent pays that distance on each.

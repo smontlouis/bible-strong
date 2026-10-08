@@ -4,8 +4,9 @@ import { listBibleChapters } from './bible.functions'
 import { buildBiblePath, type BiblePresentation } from './bibleRoutes'
 
 /**
- * One page per chapter of a version in one reading mode; verse pages are reached from
- * their chapter. The interlinear reading lists its French and English glosses.
+ * One page per chapter of a version in one reading mode. The interlinear reading lists its
+ * French and English glosses. The verse pages of the well-known Bibles have sitemaps of
+ * their own (`bibleVerseSitemap.ts`); the others are reached from their chapter.
  */
 export const listBibleSitemapUrls = async (
   versionId: string,
