@@ -25,6 +25,16 @@ jest.mock('~helpers/bibleVersions', () => ({
   },
 }))
 
+const mockInstalledArchives = new Map<string, string>()
+jest.mock('~helpers/resourcePublication', () => ({
+  resourcePublicationStore: {
+    read: (resourceId: string) =>
+      mockInstalledArchives.has(resourceId)
+        ? { archiveSha256: mockInstalledArchives.get(resourceId) }
+        : undefined,
+  },
+}))
+
 jest.mock('~helpers/databases', () => ({
   databases: () => ({
     NAVE: { name: 'Nave', fileSize: 1 },
@@ -37,6 +47,7 @@ jest.mock('~helpers/databases', () => ({
 }))
 
 import {
+  completeInterlinearDownloadPlan,
   createInterlinearSidecarDownloadPlan,
   createBibleDownloadItem,
   createDatabaseDownloadItem,
@@ -182,6 +193,12 @@ describe('historical resource database download planning', () => {
 })
 
 describe('Interlinear Bible download planning', () => {
+  const catalogBhg = BUNDLED_MOBILE_RESOURCE_CATALOG.resources['bible:BHG']!
+
+  beforeEach(() => {
+    mockInstalledArchives.clear()
+  })
+
   it.each(['base-missing', 'base-incompatible'] as const)(
     'queues BHG before its localized index when status is %s',
     status => {
@@ -192,15 +209,18 @@ describe('Interlinear Bible download planning', () => {
   )
 
   it.each(['missing', 'incompatible', 'corrupt'] as const)(
-    'queues only the localized index when BHG is compatible and status is %s',
+    'queues only the localized index when the installed BHG is the catalog one and status is %s',
     status => {
-      expect(createInterlinearSidecarDownloadPlan('en', status).map(item => item.id)).toEqual([
-        'bible-interlinear:BHG:en',
-      ])
+      mockInstalledArchives.set('bible:BHG', catalogBhg.archiveSha256)
+
+      const plan = createInterlinearSidecarDownloadPlan('en', status)
+
+      expect(plan.map(item => item.id)).toEqual(['bible-interlinear:BHG:en'])
+      expect(plan[0]?.dependsOnId).toBeUndefined()
     }
   )
 
-  it('binds the BHG and localized index downloads to the same canonical text identity', () => {
+  it('binds the BHG and localized index downloads to the text the catalog declares', () => {
     const [bible, index] = createInterlinearSidecarDownloadPlan('fr', 'base-missing')
 
     expect(bible?.type).toBe('bible')
@@ -209,14 +229,101 @@ describe('Interlinear Bible download planning', () => {
       throw new Error('Expected the BHG Bible followed by its French interlinear index')
     }
 
-    expect(bible.archiveArtifact).toMatchObject({
-      textRevision: 'bhg-803c482ed06005693547',
-      textSha256: '803c482ed06005693547f9ea04a2dcbec4718c1d97ab0c531d60600e4c3a9d8f',
+    expect(bible.declaredTextIdentity).toEqual({
+      textRevision: catalogBhg.textRevision,
+      textSha256: catalogBhg.textSha256,
     })
+    expect(bible.expectedArchiveSha256).toBe(catalogBhg.archiveSha256)
     expect(index.interlinearArtifact).toMatchObject({
-      textRevision: bible.archiveArtifact?.textRevision,
-      textSha256: bible.archiveArtifact?.textSha256,
-      archiveSha256: '01c757b213c0b467a6ae0d405f7e911ea516eed4159485b591f5b3196e9905ec',
+      text: bible.declaredTextIdentity,
+      archiveSha256:
+        BUNDLED_MOBILE_RESOURCE_CATALOG.resources['bible-interlinear:BHG:fr']!.archiveSha256,
+    })
+  })
+
+  describe('when the catalog publishes another BHG than the installed one', () => {
+    const catalogIndex = (language: 'fr' | 'en') =>
+      BUNDLED_MOBILE_RESOURCE_CATALOG.resources[`bible-interlinear:BHG:${language}`]!
+    const installOlderPair = (...languages: ('fr' | 'en')[]) => {
+      mockInstalledArchives.set('bible:BHG', '1'.repeat(64))
+      for (const language of languages) {
+        mockInstalledArchives.set(`bible-interlinear:BHG:${language}`, '2'.repeat(64))
+      }
+    }
+
+    it('brings the published text before an index built for it', () => {
+      installOlderPair('fr')
+
+      const plan = createInterlinearSidecarDownloadPlan('fr', 'available')
+
+      expect(plan.map(item => item.id)).toEqual(['bible:BHG', 'bible-interlinear:BHG:fr'])
+      expect(plan[1]?.dependsOnId).toBe('bible:BHG')
+    })
+
+    it('brings every installed index along with the text, and no index nobody installed', () => {
+      installOlderPair('fr')
+
+      const plan = createOfflineCopyDownloadPlan({ kind: 'bible', versionId: 'BHG' })
+
+      expect(plan.map(item => item.id)).toEqual(['bible:BHG', 'bible-interlinear:BHG:fr'])
+      expect(plan[1]?.dependsOnId).toBe('bible:BHG')
+      expect(plan[1]?.expectedArchiveSha256).toBe(catalogIndex('fr').archiveSha256)
+    })
+
+    it('updates the other installed language when one index is asked for', () => {
+      installOlderPair('fr', 'en')
+
+      const plan = createInterlinearSidecarDownloadPlan('en', 'incompatible')
+
+      expect(plan.map(item => item.id)).toEqual([
+        'bible:BHG',
+        'bible-interlinear:BHG:en',
+        'bible-interlinear:BHG:fr',
+      ])
+      expect(plan.slice(1).every(item => item.dependsOnId === 'bible:BHG')).toBe(true)
+    })
+
+    it('completes a text update asked for without its indexes, whoever asked', () => {
+      installOlderPair('fr', 'en')
+
+      const plan = completeInterlinearDownloadPlan([createBibleDownloadItem('BHG')])
+
+      expect(plan.map(item => item.id)).toEqual([
+        'bible:BHG',
+        'bible-interlinear:BHG:fr',
+        'bible-interlinear:BHG:en',
+      ])
+      // Completing a complete plan changes nothing.
+      expect(completeInterlinearDownloadPlan(plan).map(item => item.id)).toEqual(
+        plan.map(item => item.id)
+      )
+    })
+
+    it('only updates the index left behind once the text is the published one', () => {
+      mockInstalledArchives.set('bible:BHG', catalogBhg.archiveSha256)
+      mockInstalledArchives.set('bible-interlinear:BHG:fr', '2'.repeat(64))
+
+      const plan = createInterlinearSidecarDownloadPlan('fr', 'incompatible')
+
+      expect(plan.map(item => item.id)).toEqual(['bible-interlinear:BHG:fr'])
+      expect(plan[0]?.dependsOnId).toBeUndefined()
+    })
+
+    it('leaves a text update alone when its indexes are already the published ones', () => {
+      mockInstalledArchives.set('bible:BHG', '1'.repeat(64))
+      mockInstalledArchives.set('bible-interlinear:BHG:fr', catalogIndex('fr').archiveSha256)
+
+      expect(
+        createOfflineCopyDownloadPlan({ kind: 'bible', versionId: 'BHG' }).map(item => item.id)
+      ).toEqual(['bible:BHG'])
+    })
+
+    it('never touches a plan without BHG', () => {
+      installOlderPair('fr', 'en')
+      const plan = createOfflineCopyDownloadPlan({ kind: 'bible', versionId: 'DBY' })
+
+      expect(plan.map(item => item.id)).toEqual(['bible:DBY'])
+      expect(completeInterlinearDownloadPlan(plan)).toBe(plan)
     })
   })
 
@@ -234,6 +341,7 @@ describe('Interlinear Bible download planning', () => {
       sha256: physical.contentSha256,
       bytes: physical.contentBytes,
     }
+    mockInstalledArchives.set('bible:BHG', catalogBhg.archiveSha256)
 
     await loadMobileResourceCatalog(
       jest.fn(async () => new Response(JSON.stringify(catalog), { status: 200 })) as typeof fetch
@@ -247,7 +355,7 @@ describe('Interlinear Bible download planning', () => {
       archiveBytes: physical.archiveBytes,
       contentSha256: physical.contentSha256,
       contentBytes: physical.contentBytes,
-      textRevision: 'bhg-803c482ed06005693547',
+      text: { textRevision: catalogBhg.textRevision },
     })
   })
 })

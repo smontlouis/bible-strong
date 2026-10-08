@@ -221,9 +221,6 @@ describe('Strong Bible sidecar validation', () => {
       ...expected,
       schemaVersion: 4,
       reverseInterlinearSchemaVersion: 2,
-      reverseInterlinearStepRevision: 'bhg-step-revision',
-      reverseInterlinearStepTextSha256: 'bhg-step-text-sha',
-      reverseInterlinearCompatibleRuntimeSha256s: ['runtime-fr', 'runtime-en'],
     }
 
     expect(
@@ -235,7 +232,7 @@ describe('Strong Bible sidecar validation', () => {
     expect(() => validateStrongBibleSidecarSnapshot(reverseSnapshot, reverseExpected)).not.toThrow()
   })
 
-  it('requires compact reverse-interlinear pointers and the supported STEP runtime contract', () => {
+  it('requires compact reverse-interlinear pointers and a supported reverse-interlinear schema', () => {
     const reverseSnapshot = {
       ...validSnapshot,
       metadata: {
@@ -256,9 +253,6 @@ describe('Strong Bible sidecar validation', () => {
       ...expected,
       schemaVersion: 4,
       reverseInterlinearSchemaVersion: 2,
-      reverseInterlinearStepRevision: 'bhg-step-revision',
-      reverseInterlinearStepTextSha256: 'bhg-step-text-sha',
-      reverseInterlinearCompatibleRuntimeSha256s: ['runtime-fr', 'runtime-en'],
     }
 
     expect(() =>
@@ -293,23 +287,42 @@ describe('Strong Bible sidecar validation', () => {
           ...reverseSnapshot,
           metadata: {
             ...reverseSnapshot.metadata,
-            reverseInterlinearStepRevision: 'another-step-revision',
+            reverseInterlinearStepRevision: undefined,
           },
         },
         reverseExpected
       )
     ).toThrow('STRONG_BIBLE_METADATA_MISMATCH:reverseInterlinear')
-    expect(() =>
-      validateStrongBibleSidecarSnapshot(
-        {
-          ...reverseSnapshot,
-          metadata: {
-            ...reverseSnapshot.metadata,
-            reverseInterlinearCompatibleRuntimeSha256s: ['another-runtime'],
-          },
-        },
-        reverseExpected
-      )
-    ).toThrow('STRONG_BIBLE_METADATA_MISMATCH:reverseInterlinear')
+  })
+
+  it('accepts an index rebuilt against a republished original-language Bible', () => {
+    // Nothing compiled into the application names the STEP revision an index was built on:
+    // published token ids keep their word from one revision to the next (ADR-0078, ADR-0079).
+    const rebuilt = {
+      ...validSnapshot,
+      metadata: {
+        ...validSnapshot.metadata,
+        schemaVersion: 4,
+        reverseInterlinearSchemaVersion: 2,
+        reverseInterlinearStepRevision: 'bhg-925f8d87a8cdf8031b52',
+        reverseInterlinearStepTextSha256:
+          '925f8d87a8cdf8031b52a96d8000cd6bd048439f366f0582cf15d02cb8b5568e',
+        reverseInterlinearCompatibleRuntimeSha256s: ['another-runtime-fr', 'another-runtime-en'],
+      },
+      tableColumns: {
+        ...validSnapshot.tableColumns,
+        WordSpans: [...validSnapshot.tableColumns.WordSpans, 'stepTokenId'],
+        WordStepTokenExtras: ['verseId', 'targetOrdinal', 'sourceOrder', 'stepTokenId'],
+      },
+    }
+    const reverseExpected = { ...expected, schemaVersion: 4, reverseInterlinearSchemaVersion: 2 }
+
+    expect(
+      classifyStrongBibleSidecarMetadata(rebuilt.metadata, reverseExpected, {
+        textRevision: 'text-revision',
+        textSha256: 'text-sha',
+      })
+    ).toBe('compatible')
+    expect(() => validateStrongBibleSidecarSnapshot(rebuilt, reverseExpected)).not.toThrow()
   })
 })

@@ -54,7 +54,10 @@ jest.mock('../bibleResourceValidation', () => ({
   validatePericopeResource: jest.fn(),
   validateRedWordsResource: jest.fn(),
 }))
-jest.mock('../agentObservability', () => ({ appLogger: { captureError: jest.fn() } }))
+const mockWarn = jest.fn()
+jest.mock('../agentObservability', () => ({
+  appLogger: { captureError: jest.fn(), warn: (...args: unknown[]) => mockWarn(...args) },
+}))
 jest.mock('../pericopes', () => ({
   requirePericopePath: (versionId: string) =>
     `file:///documents/bible-${versionId.toLowerCase()}-pericope.json`,
@@ -151,5 +154,85 @@ describe('downloadAndInsertBible legacy side files', () => {
 
     expect(mockRemoveLegacyBibleSideFiles).not.toHaveBeenCalled()
     expect(mockFiles.has('file:///documents/bible-nbs-pericope.json')).toBe(true)
+  })
+})
+
+describe('downloadAndInsertBible text identity', () => {
+  const declared = {
+    textRevision: 'bhg-e15bd9f0f1a91140579c',
+    textSha256: 'e15bd9f0f1a91140579c9eb9c8f4e173b8a4df361859758e0fe252ef55edc107',
+  }
+  const flatBhg = JSON.stringify({ 1: { 1: { 1: 'בְּרֵאשִׁית', 2: 'וְהָאָרֶץ' } } })
+  const canonicalBhg = JSON.stringify({
+    format: 'bible-strong-canonical-bible',
+    schemaVersion: 4,
+    applicationVersionId: 'BHG',
+    datasetId: 'ordinary-bible-bhg',
+    sourceVersion: 'STEP',
+    textRevision: 'bhg-file-revision',
+    textSha256: 'f'.repeat(64),
+    sourceSha256: 'd'.repeat(64),
+    verseCount: 1,
+    verses: { 1: { 1: { 1: { text: 'בְּרֵאשִׁית', startTags: [], layout: [] } } } },
+  })
+  const installBhg = (content: string, declaredTextIdentity?: typeof declared) => {
+    mockFiles.set('file:///cache/bible-BHG-extract/bible-step.json', content)
+    return downloadAndInsertBible('BHG', 'https://example.test/bible-step.json.zip', {
+      archiveEntries: { canonical: 'bible-step.json' },
+      expectedArchiveSha256: 'a'.repeat(64),
+      ...(declaredTextIdentity ? { declaredTextIdentity } : {}),
+    })
+  }
+  const insertedMetadata = () => mockInsertBibleVersion.mock.calls[0]?.[2]?.publicationMetadata
+
+  beforeAll(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => {})
+  })
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockFiles.clear()
+    mockFiles.set('file:///cache/bible-BHG-temp.zip', 'archive')
+    mockInsertBibleVersion.mockResolvedValue(undefined)
+  })
+
+  it('records the text the catalog declares for a copy without a revision of its own', async () => {
+    await installBhg(flatBhg, declared)
+
+    expect(insertedMetadata()).toMatchObject({
+      ...declared,
+      sourceSha256: 'b'.repeat(64),
+      verseCount: 2,
+      resourceGeneration: 'nbs-r2',
+    })
+  })
+
+  it('records a revision no index can match when nothing names the text', async () => {
+    await installBhg(flatBhg)
+
+    // Derived from the file: an index built for the published text is then never applied.
+    expect(insertedMetadata()).toMatchObject({
+      textRevision: `bhg-${'b'.repeat(20)}`,
+      textSha256: 'b'.repeat(64),
+    })
+  })
+
+  it('lets a copy that declares its revision be its own authority', async () => {
+    await installBhg(canonicalBhg, declared)
+
+    expect(insertedMetadata()).toMatchObject({
+      textRevision: 'bhg-file-revision',
+      textSha256: 'f'.repeat(64),
+      schemaVersion: 4,
+    })
+    expect(mockWarn).toHaveBeenCalledWith(
+      'download',
+      'bible.catalog_text_identity_mismatch',
+      expect.objectContaining({
+        versionId: 'BHG',
+        catalogTextRevision: declared.textRevision,
+        fileTextRevision: 'bhg-file-revision',
+      })
+    )
   })
 })

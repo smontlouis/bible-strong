@@ -76,7 +76,7 @@ const installBible = async (item: BibleDownloadItem, callbacks: ResourceInstalla
     },
     isCancelled: callbacks.isCancelled,
     canonicalArtifact: item.canonicalArtifact,
-    archiveArtifact: item.archiveArtifact,
+    declaredTextIdentity: item.declaredTextIdentity,
     archiveEntry: item.archiveEntry,
     archiveEntries: item.archiveEntries,
     expectedArchiveSha256: item.expectedArchiveSha256,

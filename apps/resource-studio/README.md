@@ -134,6 +134,27 @@ yarn workspace @bible-strong/resource-studio resources:publication:bible-source-
    each archive back from R2, checks its SHA-256, then rewrites `config/mobile-resource-inventory.json`
    and drops the obsolete side-file roles from `config/mobile-resource-required-ids.json`.
 
+#### Republishing BHG with its interlinear indexes
+
+No application release is involved: the application reads which BHG is published, and which text
+each index was built for, from the catalog and from the files (ADR-0079).
+
+1. Build the BHG bundle (`resources:publication:bibles -- --version BHG`) and both index bundles
+   against it (`resources:publication:interlinear-bibles`). Each index manifest names the text
+   revision and SHA-256 it requires.
+2. Patch the catalog with the three archives **together**:
+   `MOBILE_CATALOG_GENERATED_AT=<newer timestamp> npm run resources:publication:r2 -- catalog-patch
+   --bundles <bhg> --bundles <interlinear>`. The patch writes `textRevision` and `textSha256` on the
+   three entries from the bundles, and refuses a text without the indexes rebuilt for it, or an
+   index without its text (`mobile-catalog-interlinear-text-mismatch`).
+3. Run the Resource service steps. Its publication gate refuses a catalog whose declarations differ
+   from the bundles. Activate the text and both indexes in one publication: between the two, online
+   readers get an interlinear that reports itself temporarily unavailable.
+4. `adopt` as above; it also records the text declarations in the inventory.
+
+Keep the archive entry of the BHG text named `bible-step.json`: application 27.1.1, which is never
+updated, unzips it under that name. See ADR-0079 for what 27.1.1 does when BHG changes.
+
 After generating a canonical Bible JSON, build the LSG bundle with:
 
 ```sh

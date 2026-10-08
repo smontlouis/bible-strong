@@ -1,6 +1,7 @@
 import {
   createHttpInterlinearBibleResourceAdapter,
   createHybridInterlinearBibleResourceAdapter,
+  isInterlinearTextMatch,
   type InterlinearBibleResourceAdapter,
 } from '../interlinearBibleResourceAccess'
 import { ResourceAccessError } from '../resourceAccessError'
@@ -192,7 +193,7 @@ describe('interlinear Bible HTTP resource access', () => {
     })
   })
 
-  it('keeps decoded interlinear data available when its BHG revision metadata differs', async () => {
+  it('names the text of its tokens and reads that text online whatever the reader holds', async () => {
     const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
     const staleBibleChapterAdapter = {
       loadChapter: async () => ({
@@ -222,6 +223,14 @@ describe('interlinear Bible HTTP resource access', () => {
         textSha256: '0'.repeat(64),
       }),
     }
+    const publishedBibleChapterAdapter = {
+      loadChapter: jest.fn(async () => ({
+        status: 'available' as const,
+        textRevision: resource.textRevision,
+        textSha256: resource.textSha256,
+        verses: [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'בְּרֵאשִׁ֖ית' }],
+      })),
+    }
     const fetcher = jest.fn((url: string) =>
       url.endsWith('/coverage')
         ? jsonResponse({
@@ -242,15 +251,26 @@ describe('interlinear Bible HTTP resource access', () => {
       fetcher,
       isOnline: async () => true,
       bibleChapterAdapter: staleBibleChapterAdapter,
+      baseChapterAdapter: publishedBibleChapterAdapter,
     })
 
     await expect(online.getAvailability('fr')).resolves.toMatchObject({ status: 'available' })
-    await expect(online.loadChapterTokens('fr', { book: 1, chapter: 1 })).resolves.toMatchObject({
+    const tokens = await online.loadChapterTokens('fr', { book: 1, chapter: 1 })
+    expect(tokens).toEqual({
       tokensByVerse: { 1: [token] },
+      textRevision: resource.textRevision,
+      textSha256: resource.textSha256,
     })
+    // The installed text is another revision: the tokens are never laid on it.
+    expect(isInterlinearTextMatch(await staleBibleChapterAdapter.loadChapter(), tokens)).toBe(false)
+    await expect(online.loadBaseChapter?.({ book: 1, chapter: 1 })).resolves.toMatchObject({
+      status: 'available',
+      textRevision: resource.textRevision,
+    })
+    expect(publishedBibleChapterAdapter.loadChapter).toHaveBeenCalledWith('BHG', 1, 1)
     expect(warning).toHaveBeenCalledWith(
-      '[ResourceAccess] Recoverable integrity warning: interlinear-bible-text-revision-mismatch',
-      expect.objectContaining({ locale: 'fr', book: 1, chapter: 1 })
+      '[ResourceAccess] Recoverable integrity warning: interlinear-bible-coverage-revision-mismatch',
+      expect.objectContaining({ locale: 'fr' })
     )
   })
 

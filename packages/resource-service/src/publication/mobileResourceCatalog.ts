@@ -13,6 +13,9 @@ export type MobileResourceCatalogEntry = {
   contentSha256: string
   resourceRevision?: string
   coreRevision?: string
+  /** Text the archive carries (a Bible) or was built for (an interlinear index); ADR-0079. */
+  textRevision?: string
+  textSha256?: string
 }
 
 export type MobileResourceCatalog = {
@@ -55,6 +58,15 @@ const decodeEntry = (id: string, value: unknown): MobileResourceCatalogEntry => 
   ) {
     throw new Error(`MOBILE_RESOURCE_CATALOG_ENTRY_INVALID:${id}`)
   }
+  const declaresText = candidate.textRevision !== undefined || candidate.textSha256 !== undefined
+  if (
+    declaresText &&
+    (typeof candidate.textRevision !== 'string' ||
+      candidate.textRevision.length === 0 ||
+      !sha256Pattern.test(candidate.textSha256 ?? ''))
+  ) {
+    throw new Error(`MOBILE_RESOURCE_CATALOG_TEXT_IDENTITY_INVALID:${id}`)
+  }
   return {
     id,
     file: normalizedFile,
@@ -66,8 +78,30 @@ const decodeEntry = (id: string, value: unknown): MobileResourceCatalogEntry => 
     resourceRevision:
       typeof candidate.resourceRevision === 'string' ? candidate.resourceRevision : undefined,
     coreRevision: typeof candidate.coreRevision === 'string' ? candidate.coreRevision : undefined,
+    ...(declaresText
+      ? { textRevision: candidate.textRevision, textSha256: candidate.textSha256 }
+      : {}),
   }
 }
+
+/**
+ * Interlinear indexes cataloged for another text than the catalog publishes. A reader applies
+ * an index to the text it was built for and to no other: both are published together.
+ */
+export const findInterlinearTextMismatches = (
+  resources: ReadonlyMap<string, MobileResourceCatalogEntry>
+): string[] =>
+  [...resources.entries()]
+    .filter(([id, index]) => {
+      const versionId = /^bible-interlinear:([^:]+):[^:]+$/u.exec(id)?.[1]
+      const text = versionId ? resources.get(`bible:${versionId}`) : undefined
+      return (
+        text !== undefined &&
+        (index.textRevision !== text.textRevision || index.textSha256 !== text.textSha256)
+      )
+    })
+    .map(([id]) => id)
+    .sort()
 
 export const readMobileResourceCatalog = async (
   catalogPath: string
@@ -100,6 +134,10 @@ export const readMobileResourceCatalog = async (
       throw new Error(`MOBILE_RESOURCE_CATALOG_DUPLICATE_FILE:${entry.file}`)
     }
     files.add(entry.file)
+  }
+  const textMismatches = findInterlinearTextMismatches(resources)
+  if (textMismatches.length > 0) {
+    throw new Error(`MOBILE_RESOURCE_CATALOG_INTERLINEAR_TEXT_MISMATCH:${textMismatches.join(',')}`)
   }
   return { resources }
 }

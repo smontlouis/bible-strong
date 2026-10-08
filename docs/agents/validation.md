@@ -87,7 +87,9 @@ host must fall back to `index.html` for Expo Router paths.
 Offline-copy archives use the App Check-protected Resource API route backed by private R2. Set
 `EXPO_PUBLIC_RESOURCE_ARTIFACT_BASE_URL` to the local artifact server only for local publication
 testing. The artifact server validates and serves every immediate child bundle in
-`RESOURCE_PUBLICATION_BUNDLES_ROOT`.
+`RESOURCE_PUBLICATION_BUNDLES_ROOT`. Several roots can be served at once with `RESOURCE_PUBLICATION_ROOTS`
+(separated like `PATH`), the variable `dev:resources` already reads; each archive is served at the
+path the mobile catalog lists for it.
 
 For a non-UI Strong lexicon smoke against a complete local stack:
 

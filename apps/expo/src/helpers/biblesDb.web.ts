@@ -50,6 +50,7 @@ export const getBibleVersionCoverage = () => rejectOnlineOnly<BibleVersionCovera
 export const isVersionInstalled = async (): Promise<boolean> => false
 export const getInstalledVersions = async (): Promise<string[]> => []
 export const getBibleVersionMetadata = async (): Promise<BibleVersionMetadata | null> => null
+export const setBibleVersionTextIdentity = async (): Promise<void> => {}
 export const insertBibleVersion = () => rejectOnlineOnly<void>()
 export const removeBibleVersion = async (): Promise<void> => {}
 export const searchVerses = (_query: string, _options?: SearchOptions) =>

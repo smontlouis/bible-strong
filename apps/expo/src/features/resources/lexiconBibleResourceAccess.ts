@@ -24,6 +24,7 @@ import {
 } from './strongBibleResourceAccess'
 import type { BibleChapterAdapter } from './bibleChapterSource'
 import type { InterlinearBibleResourceAccess } from './interlinearBibleResourceAccess'
+import { resolveInterlinearBaseText } from './interlinearTextPairing'
 import { resourceAccessErrorFromBibleChapterUnavailable } from './resourceAccessError'
 import { warnAboutRecoverableResourceIntegrity } from './recoverableIntegrity'
 
@@ -229,7 +230,10 @@ export const localInterlinearLexiconAdapter: InterlinearLexiconAdapter = {
 }
 
 export const createHybridInterlinearLexiconAdapter = (
-  interlinearBible: Pick<InterlinearBibleResourceAccess, 'getAvailability' | 'loadChapterTokens'>,
+  interlinearBible: Pick<
+    InterlinearBibleResourceAccess,
+    'getAvailability' | 'loadChapterTokens' | 'loadBaseChapter'
+  >,
   bibleChapterAdapter: BibleChapterAdapter
 ): InterlinearLexiconAdapter => ({
   ...localInterlinearLexiconAdapter,
@@ -246,7 +250,14 @@ export const createHybridInterlinearLexiconAdapter = (
         chapter.diagnostics
       )
     }
-    const text = chapter.verses.find(verse => Number(verse.Verset) === request.verse)?.Texte
+    const base = await resolveInterlinearBaseText({
+      held: chapter,
+      tokens: interlinear,
+      request,
+      locale,
+      loadBaseChapter: interlinearBible.loadBaseChapter,
+    })
+    const text = base.verses.find(verse => Number(verse.Verset) === request.verse)?.Texte
     if (text == null) return undefined
     return { text, tokens: interlinear.tokensByVerse[request.verse] ?? [] }
   },

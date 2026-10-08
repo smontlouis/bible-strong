@@ -1,6 +1,9 @@
 import path from 'node:path'
 
+import mobileResourceCatalog from '@bible-strong/resource-catalog/catalog'
+
 import type { PublicationBundleManifest } from '../publication/publicationBundle'
+import { getPublicationIdentityProjection } from '../publication/publicationIdentity'
 
 export type DevelopmentArtifact = {
   route: string
@@ -28,8 +31,16 @@ export const createDevelopmentArtifact = (
     'strong-lexicon-module',
     'timeline',
   ])
+  // The application asks for the path its catalog lists, which is not always the name of the
+  // archive inside the bundle (the BHG bundle ships `bible-bhg.json.zip` for
+  // `bibles/bible-step.json.zip`).
+  const catalogFile =
+    mobileResourceCatalog.resources[getPublicationIdentityProjection(manifest).mobileCatalogId]
+      ?.file
   return {
-    route: `${databaseKinds.has(manifest.identity.kind) ? databasePrefix : '/bibles'}/${filename}`,
+    route: catalogFile
+      ? `/${catalogFile}`
+      : `${databaseKinds.has(manifest.identity.kind) ? databasePrefix : '/bibles'}/${filename}`,
     bytes,
     headers: {
       'content-type': manifest.offlineArtifact.mediaType,

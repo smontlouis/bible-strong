@@ -1,15 +1,18 @@
 import type { Version } from '~helpers/bibleVersions'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import { BHG_INTERLINEAR_PUBLICATION } from '~helpers/interlinearBiblePublications'
 import { createOfflineCopyId } from '~helpers/offlineCopy'
 import {
   getStrongBibleAttributionKey,
-  getStrongBiblePublication,
+  getStrongDatasetId,
   isStrongCapableBibleVersion,
 } from '~helpers/strongBiblePublications'
 
 import { getStrongIndexBibleName } from './downloadVersionGroups'
-import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
+import {
+  createBibleDownloadItem,
+  createInterlinearSidecarDownloadItem,
+  createStrongSidecarDownloadItem,
+} from '~helpers/downloadItemFactory'
 
 export interface UnifiedDownloadItem {
   id: string
@@ -44,7 +47,6 @@ export function buildBibleItems(
       return [
         base,
         ...(['fr', 'en'] as ResourceLanguage[]).map(locale => {
-          const artifact = BHG_INTERLINEAR_PUBLICATION.indexes[locale]
           return {
             id: createOfflineCopyId({
               kind: 'interlinear-index',
@@ -56,7 +58,7 @@ export function buildBibleItems(
             )}`,
             subtitle: t('downloads.interlinearAttribution'),
             parentItemId: base.id,
-            estimatedSize: artifact.archiveBytes,
+            estimatedSize: createInterlinearSidecarDownloadItem(locale).estimatedSize,
             lang: 'other' as const,
             searchText: `BHG STEP interlinear ${locale}`.toLowerCase(),
           }
@@ -66,7 +68,6 @@ export function buildBibleItems(
 
     if (!isStrongCapableBibleVersion(version.id)) return [base]
 
-    const publication = getStrongBiblePublication(version.id)
     const strongIndexBibleName = getStrongIndexBibleName(displayName)
     return [
       base,
@@ -75,10 +76,10 @@ export function buildBibleItems(
         name: t('downloads.strongIndexName', { bible: strongIndexBibleName }),
         subtitle: t(getStrongBibleAttributionKey(version.id)),
         parentItemId: base.id,
-        estimatedSize: publication.strong.archiveBytes,
+        estimatedSize: createStrongSidecarDownloadItem(version.id).estimatedSize,
         lang: version.type === 'en' ? 'en' : 'fr',
         searchText:
-          `${version.id} ${version.name} ${strongIndexBibleName} strong index ${publication.datasetId}`.toLowerCase(),
+          `${version.id} ${version.name} ${strongIndexBibleName} strong index ${getStrongDatasetId(version.id)}`.toLowerCase(),
       },
     ]
   })

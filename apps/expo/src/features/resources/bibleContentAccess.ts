@@ -37,7 +37,7 @@ import {
   isInterlinearModeEnabled,
   type InterlinearMode,
 } from '~helpers/interlinearDisplayMode'
-import { loadInterlinearChapterTokens } from '~helpers/interlinearBibleSidecar'
+import type { InterlinearChapterTokens } from '~helpers/interlinearBibleSidecar'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { reconcileReverseInterlinearChapter } from '~helpers/reverseInterlinearBible'
 import { resolveDisplayedStrongIdentities } from '~helpers/strongIdentities'
@@ -61,7 +61,9 @@ import {
 } from './resourceAccessError'
 import {
   localInterlinearBibleResourceAccess,
+  resolveInterlinearBaseText,
   type InterlinearBibleResourceAccess,
+  type InterlinearChapterTokensPayload,
 } from './interlinearBibleResourceAccess'
 
 export type { BibleChapterAdapter, BibleChapterSourceResult } from './bibleChapterSource'
@@ -152,7 +154,14 @@ type BibleContentAccessDependencies = {
     | Record<number, import('~helpers/canonicalStrongVerse').StrongBibleSpan[]>
     | StrongBibleChapterSpansPayload
   >
-  loadInterlinearChapterTokens?: typeof loadInterlinearChapterTokens
+  /** A payload names the text its tokens were built for; they are laid on no other text. */
+  loadInterlinearChapterTokens?: (
+    versionId: 'BHG',
+    locale: ResourceLanguage,
+    book: number,
+    chapter: number
+  ) => Promise<InterlinearChapterTokens | InterlinearChapterTokensPayload>
+  loadInterlinearBaseChapter?: InterlinearBibleResourceAccess['loadBaseChapter']
   getInterlinearAvailability?: InterlinearBibleResourceAccess['getAvailability']
 }
 
@@ -327,9 +336,21 @@ const defaultDependencies: BibleContentAccessDependencies = {
   logWarning: (message, details) => console.warn(message, details),
   loadStrongBibleChapterSpans,
   loadReverseInterlinearChapterSpans,
-  loadInterlinearChapterTokens,
+  loadInterlinearChapterTokens: (_versionId, locale, book, chapter) =>
+    localInterlinearBibleResourceAccess.loadChapterTokens(locale, { book, chapter }),
   getInterlinearAvailability: localInterlinearBibleResourceAccess.getAvailability,
 }
+
+/** A payload names the text of its tokens; a bare token map, from an injected loader, does not. */
+const readInterlinearTokens = (
+  result: InterlinearChapterTokens | InterlinearChapterTokensPayload
+): { tokensByVerse: InterlinearChapterTokens; payload?: InterlinearChapterTokensPayload } =>
+  'tokensByVerse' in result
+    ? {
+        tokensByVerse: (result as InterlinearChapterTokensPayload).tokensByVerse,
+        payload: result as InterlinearChapterTokensPayload,
+      }
+    : { tokensByVerse: result as InterlinearChapterTokens }
 
 const warnAboutRecoverableIntegrity = (
   dependencies: BibleContentAccessDependencies,
@@ -449,21 +470,35 @@ const loadRegularBibleChapter = async (
     dependencies.loadInterlinearChapterTokens
   ) {
     const locale = await resolveRequestedInterlinearLocale(request, dependencies)
-    const unvalidatedTokensByVerse = await dependencies.loadInterlinearChapterTokens(
-      'BHG',
-      locale,
-      request.book,
-      request.chapter
-    )
+    const { tokensByVerse: unvalidatedTokensByVerse, payload: tokensPayload } =
+      readInterlinearTokens(
+        await dependencies.loadInterlinearChapterTokens(
+          'BHG',
+          locale,
+          request.book,
+          request.chapter
+        )
+      )
+    // The tokens decide the text: the one held when they were built for it, else the one online.
+    const base = tokensPayload
+      ? await resolveInterlinearBaseText({
+          held: { verses, ...chapterIdentity },
+          tokens: tokensPayload,
+          request,
+          locale,
+          loadBaseChapter: dependencies.loadInterlinearBaseChapter,
+        })
+      : { verses, ...chapterIdentity }
+    const interlinearVerses = base.verses
     let invalidTokenCount = 0
     const verseTextByNumber = new Map(
-      verses.map(verse => [Number(verse.Verset), verse.Texte] as const)
+      interlinearVerses.map(verse => [Number(verse.Verset), verse.Texte] as const)
     )
     for (const [verse, tokens] of Object.entries(unvalidatedTokensByVerse)) {
       if (!verseTextByNumber.has(Number(verse))) invalidTokenCount += tokens.length
     }
     const tokensByVerse = Object.fromEntries(
-      verses.map(verse => {
+      interlinearVerses.map(verse => {
         const text = verse.Texte
         const tokens = unvalidatedTokensByVerse[Number(verse.Verset)] ?? []
         const validTokens = buildTokenizedVerseLayout(text, tokens).pieces.map(piece => piece.token)
@@ -479,7 +514,7 @@ const loadRegularBibleChapter = async (
         tokenCount: invalidTokenCount,
       })
     }
-    const versesWithoutTokens = verses
+    const versesWithoutTokens = interlinearVerses
       .filter(verse => !tokensByVerse[Number(verse.Verset)]?.length)
       .map(verse => Number(verse.Verset))
     if (versesWithoutTokens.length > 0) {
@@ -492,8 +527,10 @@ const loadRegularBibleChapter = async (
     }
     return successResult({
       kind: 'interlinear',
-      ...chapterIdentity,
-      verses: verses.map(verse => ({
+      presentation: base.presentation ?? presentation,
+      ...(base.textRevision ? { textRevision: base.textRevision } : {}),
+      ...(base.textSha256 ? { textSha256: base.textSha256 } : {}),
+      verses: interlinearVerses.map(verse => ({
         ...verse,
         InterlinearTokens: tokensByVerse[Number(verse.Verset)] ?? [],
       })),
@@ -550,14 +587,27 @@ const loadRegularBibleChapter = async (
       })
     }
     const locale = await resolveRequestedInterlinearLocale(request, dependencies)
-    const sourceTokensByVerse = await dependencies.loadInterlinearChapterTokens(
-      'BHG',
-      locale,
-      request.book,
-      request.chapter
-    )
+    const { tokensByVerse: sourceTokensByVerse, payload: sourceTokensPayload } =
+      readInterlinearTokens(
+        await dependencies.loadInterlinearChapterTokens(
+          'BHG',
+          locale,
+          request.book,
+          request.chapter
+        )
+      )
+    // Original words are cut out of the text their tokens were built for, never another one.
+    const originalText = sourceTokensPayload
+      ? await resolveInterlinearBaseText({
+          held: originalVerses,
+          tokens: sourceTokensPayload,
+          request,
+          locale,
+          loadBaseChapter: dependencies.loadInterlinearBaseChapter,
+        })
+      : originalVerses
     const originalTextByVerse = new Map(
-      originalVerses.verses.map(verse => [Number(verse.Verset), verse.Texte] as const)
+      originalText.verses.map(verse => [Number(verse.Verset), verse.Texte] as const)
     )
     let invalidSourceTokenCount = 0
     const sourceTokens = Object.entries(sourceTokensByVerse).flatMap(([verse, tokens]) => {
@@ -649,15 +699,18 @@ const loadRegularBibleChapter = async (
       spanCount: spanValidation.invalidSpanCount,
     })
   }
-  let alignedTokensByVerse: Awaited<ReturnType<typeof loadInterlinearChapterTokens>> = {}
+  let alignedTokensByVerse: InterlinearChapterTokens = {}
   if (dependencies.loadInterlinearChapterTokens) {
     try {
-      alignedTokensByVerse = await dependencies.loadInterlinearChapterTokens(
-        'BHG',
-        request.interlinearLocale ?? 'fr',
-        request.book,
-        request.chapter
-      )
+      // Tokens are matched to spans by id and bring morphology only: no offset is applied.
+      alignedTokensByVerse = readInterlinearTokens(
+        await dependencies.loadInterlinearChapterTokens(
+          'BHG',
+          request.interlinearLocale ?? 'fr',
+          request.book,
+          request.chapter
+        )
+      ).tokensByVerse
     } catch {
       // BHG morphology is optional enrichment; never replace its locale after a load failure.
     }
@@ -743,7 +796,7 @@ export const createBibleContentAccess = (
   } = localStrongBibleResourceAccess,
   interlinearBibleAccess: Pick<
     InterlinearBibleResourceAccess,
-    'getAvailability' | 'loadChapterTokens'
+    'getAvailability' | 'loadChapterTokens' | 'loadBaseChapter'
   > = localInterlinearBibleResourceAccess
 ): BibleContentAccess => {
   const loadConfiguredStrongBibleChapterSpans = async (
@@ -776,13 +829,9 @@ export const createBibleContentAccess = (
       }
     },
     loadReverseInterlinearChapterSpans: loadConfiguredStrongBibleChapterSpans,
-    loadInterlinearChapterTokens: async (_versionId, locale, book, chapter) =>
-      (
-        await interlinearBibleAccess.loadChapterTokens(locale, {
-          book,
-          chapter,
-        })
-      ).tokensByVerse,
+    loadInterlinearChapterTokens: (_versionId, locale, book, chapter) =>
+      interlinearBibleAccess.loadChapterTokens(locale, { book, chapter }),
+    loadInterlinearBaseChapter: interlinearBibleAccess.loadBaseChapter,
     getInterlinearAvailability: interlinearBibleAccess.getAvailability,
   }
   const loadChapter = (request: BibleChapterRequest) =>

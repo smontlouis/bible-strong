@@ -247,6 +247,7 @@ const onlineInterlinearBibleAdapter = resourceApiBaseUrl
         fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
         bibleChapterAdapter,
+        baseChapterAdapter: onlineBibleChapterAdapter,
       })
     )
   : localInterlinearBibleResourceAdapter

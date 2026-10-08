@@ -9,7 +9,9 @@
         "entry": "bible-step-interlinear-en.sqlite"
       }
     ],
-    "strategy": "archive-extract"
+    "strategy": "archive-extract",
+    "textRevision": "bhg-803c482ed06005693547",
+    "textSha256": "803c482ed06005693547f9ea04a2dcbec4718c1d97ab0c531d60600e4c3a9d8f"
   },
   {
     "id": "bible-interlinear:BHG:fr",
@@ -21,7 +23,9 @@
         "entry": "bible-step-interlinear-fr.sqlite"
       }
     ],
-    "strategy": "archive-extract"
+    "strategy": "archive-extract",
+    "textRevision": "bhg-803c482ed06005693547",
+    "textSha256": "803c482ed06005693547f9ea04a2dcbec4718c1d97ab0c531d60600e4c3a9d8f"
   },
   {
     "id": "bible-strong:ASV",
@@ -237,7 +241,9 @@
         "entry": "bible-step.json"
       }
     ],
-    "strategy": "sqlite-import"
+    "strategy": "sqlite-import",
+    "textRevision": "bhg-803c482ed06005693547",
+    "textSha256": "803c482ed06005693547f9ea04a2dcbec4718c1d97ab0c531d60600e4c3a9d8f"
   },
   {
     "id": "bible:BHS",

@@ -28,7 +28,18 @@ export interface StrongBibleSidecarSnapshot {
   indexes: Record<string, string[][]>
 }
 
-export type ExpectedStrongBibleSidecar = StrongBibleSidecarMetadata & StrongBibleSidecarCounts
+/**
+ * What a reader asks of an index. Its reverse-interlinear part is a schema contract only: the
+ * original-language text the token ids were taken from is declared by the index itself and is
+ * not pinned to a revision compiled into the application (ADR-0079).
+ */
+export type ExpectedStrongBibleSidecar = Omit<
+  StrongBibleSidecarMetadata,
+  | 'reverseInterlinearStepRevision'
+  | 'reverseInterlinearStepTextSha256'
+  | 'reverseInterlinearCompatibleRuntimeSha256s'
+> &
+  StrongBibleSidecarCounts
 
 const REQUIRED_TABLE_COLUMNS = {
   Verses: ['id', 'bookOrder', 'chapter', 'verse'],
@@ -166,18 +177,14 @@ const matchesReverseInterlinearMetadata = (
   expected: ExpectedStrongBibleSidecar
 ): boolean => {
   if (expected.reverseInterlinearSchemaVersion == null) return true
-  const compatibleRuntimeSha256s = new Set(
-    metadata.reverseInterlinearCompatibleRuntimeSha256s ?? []
-  )
+  // Published token ids keep their word across revisions of the original-language Bible
+  // (ADR-0078): the index only has to say which one its ids were taken from.
   return (
     isSupportedSchemaVersion(
       metadata.reverseInterlinearSchemaVersion ?? Number.NaN,
       expected.reverseInterlinearSchemaVersion
     ) &&
-    metadata.reverseInterlinearStepRevision === expected.reverseInterlinearStepRevision &&
-    metadata.reverseInterlinearStepTextSha256 === expected.reverseInterlinearStepTextSha256 &&
-    (expected.reverseInterlinearCompatibleRuntimeSha256s ?? []).every(sha256 =>
-      compatibleRuntimeSha256s.has(sha256)
-    )
+    Boolean(metadata.reverseInterlinearStepRevision) &&
+    Boolean(metadata.reverseInterlinearStepTextSha256)
   )
 }

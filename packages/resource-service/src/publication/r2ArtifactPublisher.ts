@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises'
 
 import { readMobileResourceCatalog, type MobileResourceCatalogEntry } from './mobileResourceCatalog'
 import {
+  isBiblePublicationBundleManifest,
+  isInterlinearBiblePublicationBundleManifest,
   isStrongLexiconPublicationBundleManifest,
   type PublicationBundleManifest,
   validatePublicationBundle,
@@ -66,6 +68,23 @@ const catalogMatchesOfflineArtifact = (
     ) {
       return false
     }
+  }
+  // The catalog tells readers which text an index was built for, and which text a Bible
+  // delivered without a revision of its own is: it must say what the bundles say (ADR-0079).
+  if (
+    isInterlinearBiblePublicationBundleManifest(manifest) &&
+    (catalogEntry.textRevision !== manifest.dependencies.bible.revision ||
+      catalogEntry.textSha256 !== manifest.dependencies.bible.textSha256)
+  ) {
+    return false
+  }
+  if (
+    isBiblePublicationBundleManifest(manifest) &&
+    catalogEntry.textRevision !== undefined &&
+    (catalogEntry.textRevision !== manifest.revision ||
+      !manifest.revision.endsWith(`-${catalogEntry.textSha256?.slice(0, 20)}`))
+  ) {
+    return false
   }
   if (
     catalogEntry.archiveSha256 !== artifact.sha256 ||

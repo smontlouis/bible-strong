@@ -927,6 +927,7 @@ describe('BibleContentAccess', () => {
       loadChapter: jest.fn(async version => ({
         status: 'available' as const,
         presentation: 'canonical' as const,
+        ...(version === 'BHG' ? { textRevision: 'bhg-current' } : {}),
         verses: [
           {
             Livre: 1,
@@ -954,6 +955,7 @@ describe('BibleContentAccess', () => {
       },
     })
     const loadChapterTokens = jest.fn().mockResolvedValue({
+      textRevision: 'bhg-current',
       tokensByVerse: {
         1: [
           {
@@ -1037,7 +1039,11 @@ describe('BibleContentAccess', () => {
       },
       {
         getAvailability: jest.fn(),
-        loadChapterTokens: jest.fn().mockResolvedValue({ tokensByVerse: {} }),
+        loadChapterTokens: jest.fn().mockResolvedValue({
+          tokensByVerse: {},
+          textRevision: 'bhg-current',
+          textSha256: '2'.repeat(64),
+        }),
       }
     )
 
@@ -1056,6 +1062,227 @@ describe('BibleContentAccess', () => {
       })
     )
     expect(chapterAdapter.loadChapter).toHaveBeenCalledTimes(2)
+  })
+
+  describe('BHG tokens and the text they were built for', () => {
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    const heldText = 'בְּרֵאשִׁית בָּרָא'
+    // The published text gained a word at the start: every offset moved.
+    const publishedText = 'וְ בְּרֵאשִׁית בָּרָא'
+    const token = (startOffset: number, length: number) => ({
+      id: 1,
+      ordinal: 0,
+      startOffset,
+      length,
+      segments: [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length,
+          transliteration: 'be.re.Shit',
+          lemma: 'רֵאשִׁית',
+          morphology: 'HNcfsa',
+          gloss: 'commencement',
+          identities: [{ kind: 'strong' as const, code: 'H7225' }],
+        },
+      ],
+    })
+    const chapter = (text: string, textRevision: string | undefined, sha = '1') => ({
+      status: 'available' as const,
+      presentation: 'legacy-sidecars' as const,
+      ...(textRevision ? { textRevision, textSha256: sha.repeat(64) } : {}),
+      verses: [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: text }],
+    })
+    const request = {
+      book: 1,
+      chapter: 1,
+      version: 'BHG',
+      interlinearMode: 'interlinear' as const,
+      interlinearLocale: 'fr' as const,
+    }
+    const createAccess = ({
+      held,
+      tokens,
+      loadBaseChapter,
+    }: {
+      held: ReturnType<typeof chapter>
+      tokens: Record<string, unknown>
+      loadBaseChapter?: jest.Mock
+    }) => {
+      const chapterAdapter: BibleChapterAdapter = {
+        loadChapter: jest.fn(async () => held),
+        loadCoverage: jest.fn(),
+      }
+      return {
+        chapterAdapter,
+        access: createBibleContentAccess(
+          chapterAdapter,
+          { loadChapterSpans: jest.fn() },
+          {
+            getAvailability: jest.fn(),
+            loadChapterTokens: jest.fn().mockResolvedValue(tokens),
+            ...(loadBaseChapter ? { loadBaseChapter } : {}),
+          }
+        ),
+      }
+    }
+
+    it('lays tokens on the held text when they were built for it', async () => {
+      const loadBaseChapter = jest.fn()
+      const { access } = createAccess({
+        held: chapter(heldText, 'bhg-held'),
+        tokens: {
+          tokensByVerse: { 1: [token(0, 11)] },
+          textRevision: 'bhg-held',
+          textSha256: '1'.repeat(64),
+        },
+        loadBaseChapter,
+      })
+
+      const result = await access.loadChapter(request)
+
+      expect(result).toMatchObject({
+        success: true,
+        data: {
+          kind: 'interlinear',
+          textRevision: 'bhg-held',
+          verses: [{ Texte: heldText, InterlinearTokens: [{ startOffset: 0, length: 11 }] }],
+        },
+      })
+      expect(loadBaseChapter).not.toHaveBeenCalled()
+    })
+
+    it('reads the published text online when the tokens were built for another revision', async () => {
+      jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const loadBaseChapter = jest.fn(async () => ({
+        ...chapter(publishedText, 'bhg-published', '2'),
+        presentation: 'canonical' as const,
+      }))
+      const { access } = createAccess({
+        held: chapter(heldText, 'bhg-held'),
+        tokens: {
+          tokensByVerse: { 1: [token(3, 11)] },
+          textRevision: 'bhg-published',
+          textSha256: '2'.repeat(64),
+        },
+        loadBaseChapter,
+      })
+
+      const result = await access.loadChapter(request)
+
+      expect(loadBaseChapter).toHaveBeenCalledWith(expect.objectContaining({ book: 1, chapter: 1 }))
+      expect(result).toMatchObject({
+        success: true,
+        data: {
+          kind: 'interlinear',
+          presentation: 'canonical',
+          textRevision: 'bhg-published',
+          textSha256: '2'.repeat(64),
+          verses: [{ Texte: publishedText, InterlinearTokens: [{ startOffset: 3, length: 11 }] }],
+        },
+      })
+    })
+
+    it.each([
+      ['a held text that names no revision', undefined],
+      ['a held text of another revision', 'bhg-held'],
+    ])('never lays tokens on %s without the text they were built for', async (_label, held) => {
+      jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+      jest.spyOn(console, 'log').mockImplementation(() => undefined)
+      const { access } = createAccess({
+        held: chapter(heldText, held),
+        tokens: { tokensByVerse: { 1: [token(3, 11)] }, textRevision: 'bhg-published' },
+      })
+
+      await expect(access.loadChapter(request)).resolves.toMatchObject({
+        success: false,
+        error: { type: 'RESOURCE_INTEGRITY_ERROR' },
+      })
+    })
+
+    it('fails the presentation while the published text and index disagree', async () => {
+      jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+      jest.spyOn(console, 'log').mockImplementation(() => undefined)
+      const { access } = createAccess({
+        held: chapter(heldText, 'bhg-held'),
+        tokens: { tokensByVerse: { 1: [token(3, 11)] }, textRevision: 'bhg-next' },
+        loadBaseChapter: jest.fn(async () => chapter(publishedText, 'bhg-published', '2')),
+      })
+
+      await expect(access.loadChapter(request)).resolves.toMatchObject({
+        success: false,
+        error: { type: 'RESOURCE_TEMPORARY_UNAVAILABLE' },
+      })
+    })
+
+    it('cuts reverse-interlinear words out of the text their tokens were built for', async () => {
+      jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const chapterAdapter: BibleChapterAdapter = {
+        loadChapter: jest.fn(async version =>
+          version === 'BHG'
+            ? chapter(heldText, 'bhg-held')
+            : {
+                status: 'available' as const,
+                presentation: 'canonical' as const,
+                verses: [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'Au commencement' }],
+              }
+        ),
+        loadCoverage: jest.fn(),
+      }
+      const access = createBibleContentAccess(
+        chapterAdapter,
+        {
+          loadChapterSpans: jest.fn().mockResolvedValue({
+            status: 'available',
+            provenance: { versionId: 'LSG', datasetId: 'LSG', isFallback: false },
+            spansByVerse: {
+              1: [
+                {
+                  ordinal: 0,
+                  startOffset: 3,
+                  length: 12,
+                  identities: [{ kind: 'strong', code: 'H7225' }],
+                  stepTokenIds: [1],
+                },
+              ],
+            },
+          }),
+        },
+        {
+          getAvailability: jest.fn(),
+          loadChapterTokens: jest.fn().mockResolvedValue({
+            tokensByVerse: { 1: [token(3, 11)] },
+            textRevision: 'bhg-published',
+          }),
+          loadBaseChapter: jest.fn(async () => chapter(publishedText, 'bhg-published', '2')),
+        }
+      )
+
+      const result = await access.loadChapter({
+        book: 1,
+        chapter: 1,
+        version: 'LSG',
+        strongMode: 'reverse-interlinear',
+        interlinearLocale: 'fr',
+      })
+
+      expect(result).toMatchObject({
+        success: true,
+        data: {
+          kind: 'reverse-interlinear',
+          verses: [
+            {
+              ReverseInterlinearSpans: [
+                { sourceTokens: [{ surface: publishedText.slice(3, 14) }] },
+              ],
+            },
+          ],
+        },
+      })
+    })
   })
 
   it('returns BIBLE_NOT_FOUND when a chapter has no rows and the version needs download', async () => {

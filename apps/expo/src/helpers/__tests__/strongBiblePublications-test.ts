@@ -1,3 +1,4 @@
+import { BUNDLED_MOBILE_RESOURCE_CATALOG } from '../mobileResourceCatalog'
 import {
   getStrongBiblePublication,
   getStrongBibleFallbackPriority,
@@ -5,6 +6,9 @@ import {
   isStrongCapableBibleVersion,
   resolveStrongNavigationVersionId,
   resolveStrongBibleVersion,
+  REVERSE_INTERLINEAR_MIN_SCHEMA_VERSION,
+  STRONG_BIBLE_INDEX_MIN_SCHEMA_VERSION,
+  STRONG_BIBLE_PUBLICATIONS,
 } from '../strongBiblePublications'
 
 jest.mock('~helpers/firebase', () => ({
@@ -47,7 +51,7 @@ describe('Strong Bible publications', () => {
     expect(resolveStrongNavigationVersionId('KJV')).toBe('KJV')
   })
 
-  it('declares a revision-compatible pair for every supported Bible', () => {
+  it('reads every supported Bible and its index from the catalog the application holds', () => {
     for (const versionId of [
       'LSG',
       'DBY',
@@ -63,10 +67,27 @@ describe('Strong Bible publications', () => {
       'RV1895',
     ] as const) {
       const publication = getStrongBiblePublication(versionId)
-      expect(publication.canonical.textRevision).toBe(publication.strong.textRevision)
-      expect(publication.canonical.textSha256).toBe(publication.strong.textSha256)
+      const canonical = BUNDLED_MOBILE_RESOURCE_CATALOG.resources[`bible:${versionId}`]!
+      const strong = BUNDLED_MOBILE_RESOURCE_CATALOG.resources[`bible-strong:${versionId}`]!
+      expect(publication.canonical).toMatchObject({
+        entry: canonical.entry,
+        archiveSha256: canonical.archiveSha256,
+        archiveBytes: canonical.archiveBytes,
+      })
+      expect(publication.strong).toMatchObject({
+        entry: strong.entry,
+        archiveSha256: strong.archiveSha256,
+        archiveBytes: strong.archiveBytes,
+      })
       expect(publication.canonical.url).toMatch(/\.json\.zip(?:\?|$)/)
       expect(publication.strong.url).toMatch(/\.sqlite\.zip(?:\?|$)/)
     }
+  })
+
+  it('compiles no published revision into the application', () => {
+    // A republished Bible or index must never need an application release (ADR-0079).
+    expect(JSON.stringify(STRONG_BIBLE_PUBLICATIONS)).not.toMatch(/[a-f0-9]{20}/)
+    expect(STRONG_BIBLE_INDEX_MIN_SCHEMA_VERSION).toBe(4)
+    expect(REVERSE_INTERLINEAR_MIN_SCHEMA_VERSION).toBe(2)
   })
 })

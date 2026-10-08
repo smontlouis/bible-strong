@@ -16,10 +16,11 @@ import {
 } from '~helpers/strongBiblePublications'
 import type { StrongBibleSidecarAvailability } from './strongBibleSidecar'
 import {
-  BHG_INTERLINEAR_PUBLICATION,
+  getInterlinearBiblePublication,
   isInterlinearCapableBibleVersion,
 } from './interlinearBiblePublications'
 import type { InterlinearSidecarAvailability } from './interlinearBibleSidecar'
+import { resourcePublicationStore } from './resourcePublication'
 import {
   createOfflineCopyId,
   getOfflineCopyCatalogId,
@@ -45,8 +46,9 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
   const publication = isStrongCapableBibleVersion(versionId)
     ? getStrongBiblePublication(versionId)
     : undefined
-  const interlinearPublication = isInterlinearCapableBibleVersion(versionId)
-    ? BHG_INTERLINEAR_PUBLICATION
+  // BHG is delivered without a revision of its own: the catalog entry of its archive names it.
+  const declaredTextIdentity = isInterlinearCapableBibleVersion(versionId)
+    ? getInterlinearBiblePublication().text.text
     : undefined
   const catalogArtifact = getMobileResourceCatalogEntry(
     createOfflineCopyId({ kind: 'bible', versionId })
@@ -80,24 +82,13 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
     ...common,
     type: 'bible',
     ...(publication ? { canonicalArtifact: publication.canonical } : {}),
-    ...(interlinearPublication ? { archiveArtifact: interlinearPublication.canonical } : {}),
+    ...(declaredTextIdentity ? { declaredTextIdentity } : {}),
   }
 }
 
 export function createInterlinearSidecarDownloadItem(lang: ResourceLanguage): DownloadItem {
-  const publicationArtifact = BHG_INTERLINEAR_PUBLICATION.indexes[lang]
-  const catalogArtifact = getMobileResourceCatalogEntry(
-    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: lang })
-  )
-  const artifact = {
-    ...publicationArtifact,
-    url: catalogArtifact.url,
-    entry: catalogArtifact.entry,
-    archiveSha256: catalogArtifact.archiveSha256,
-    archiveBytes: catalogArtifact.archiveBytes,
-    contentSha256: catalogArtifact.contentSha256,
-    contentBytes: catalogArtifact.contentBytes,
-  }
+  const publication = getInterlinearBiblePublication()
+  const artifact = publication.indexes[lang]
   return {
     id: createOfflineCopyId({
       kind: 'interlinear-index',
@@ -112,10 +103,60 @@ export function createInterlinearSidecarDownloadItem(lang: ResourceLanguage): Do
     estimatedSize: artifact.archiveBytes,
     expectedArchiveSha256: artifact.archiveSha256,
     interlinearArtifact: artifact,
-    interlinearDatasetId: BHG_INTERLINEAR_PUBLICATION.datasetId,
+    interlinearDatasetId: publication.datasetId,
     addedAt: Date.now(),
     retryCount: 0,
   }
+}
+
+type InstalledArchiveReader = (resourceId: string) => { archiveSha256?: string } | undefined
+
+const BHG_TEXT_ID = createOfflineCopyId({ kind: 'bible', versionId: 'BHG' })
+const INTERLINEAR_LANGUAGES: ResourceLanguage[] = ['fr', 'en']
+
+/**
+ * Brings the BHG text and its indexes to the catalog revision together (ADR-0079). An index is
+ * built for one text: downloading an index first brings the text the catalog publishes with it,
+ * and downloading the text brings every installed index along. The reader never applies an
+ * index to another text in between; this only spares it the wait for a second download.
+ */
+export const completeInterlinearDownloadPlan = (
+  items: DownloadItem[],
+  readInstalled: InstalledArchiveReader = resourceId => resourcePublicationStore.read(resourceId)
+): DownloadItem[] => {
+  const hasIndex = items.some(item => item.type === 'bible-interlinear-sidecar')
+  const hasText = items.some(item => item.id === BHG_TEXT_ID)
+  if (!hasIndex && !hasText) return items
+
+  const publication = getInterlinearBiblePublication()
+  const textIsCurrent = readInstalled(BHG_TEXT_ID)?.archiveSha256 === publication.text.archiveSha256
+  const bringsText = hasText || !textIsCurrent
+  const plan = [...items]
+  if (!hasText && bringsText) {
+    plan.splice(
+      plan.findIndex(item => item.type === 'bible-interlinear-sidecar'),
+      0,
+      createBibleDownloadItem('BHG')
+    )
+  }
+  if (bringsText) {
+    for (const language of INTERLINEAR_LANGUAGES) {
+      const index = createInterlinearSidecarDownloadItem(language)
+      const installed = readInstalled(index.id)
+      if (
+        installed &&
+        installed.archiveSha256 !== publication.indexes[language].archiveSha256 &&
+        !plan.some(item => item.id === index.id)
+      ) {
+        plan.push(index)
+      }
+    }
+  }
+  return bringsText
+    ? plan.map(item =>
+        item.type === 'bible-interlinear-sidecar' ? { ...item, dependsOnId: BHG_TEXT_ID } : item
+      )
+    : plan
 }
 
 export const createInterlinearSidecarDownloadPlan = (
@@ -124,27 +165,16 @@ export const createInterlinearSidecarDownloadPlan = (
 ): DownloadItem[] => {
   const sidecar = createInterlinearSidecarDownloadItem(lang)
   if (availabilityStatus !== 'base-missing' && availabilityStatus !== 'base-incompatible') {
-    return [sidecar]
+    return completeInterlinearDownloadPlan([sidecar])
   }
   const bible = createBibleDownloadItem('BHG')
-  return [bible, { ...sidecar, dependsOnId: bible.id }]
+  return completeInterlinearDownloadPlan([bible, { ...sidecar, dependsOnId: bible.id }])
 }
 
 export function createStrongSidecarDownloadItem(versionId: StrongBibleVersionId): DownloadItem {
   const version = versions[versionId]
   const publication = getStrongBiblePublication(versionId)
-  const catalogArtifact = getMobileResourceCatalogEntry(
-    createOfflineCopyId({ kind: 'strong-bible-index', versionId })
-  )
-  const strongArtifact = {
-    ...publication.strong,
-    url: catalogArtifact.url,
-    entry: catalogArtifact.entry,
-    archiveSha256: catalogArtifact.archiveSha256,
-    archiveBytes: catalogArtifact.archiveBytes,
-    contentSha256: catalogArtifact.contentSha256,
-    contentBytes: catalogArtifact.contentBytes,
-  }
+  const strongArtifact = publication.strong
   return {
     id: createOfflineCopyId({ kind: 'strong-bible-index', versionId }),
     type: 'bible-strong-sidecar',
@@ -222,7 +252,7 @@ export const createOfflineCopyDownloadPlan = (
 ): DownloadItem[] => {
   switch (identity.kind) {
     case 'bible':
-      return [createBibleDownloadItem(identity.versionId)]
+      return completeInterlinearDownloadPlan([createBibleDownloadItem(identity.versionId)])
     case 'strong-bible-index':
       return createStrongSidecarDownloadPlan(
         identity.versionId,
