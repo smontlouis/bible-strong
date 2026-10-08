@@ -1,5 +1,5 @@
 import { HttpApiBuilder, HttpApp, HttpServer, HttpServerResponse } from '@effect/platform'
-import { Effect, Layer } from 'effect'
+import { Context, Effect, Layer } from 'effect'
 
 import { addResourceCorsHeaders, makeResourcePreflightResponse } from './cors'
 
@@ -1353,11 +1353,12 @@ export const makeResourceWebHandler = (
   )
   return {
     ...web,
-    handler: async (request: Request) => {
+    // `context` holds services of this request only; they replace those of the layer for it.
+    handler: async (request: Request, context?: Context.Context<never>) => {
       const preflight = makeResourcePreflightResponse(request, options.corsAllowedOrigins ?? [])
       if (preflight) return preflight
       const requestId = requestIdFrom(request.headers.get('x-request-id') ?? undefined)
-      const response = await web.handler(request)
+      const response = await web.handler(request, context)
       const headers = new Headers(response.headers)
       addResourceCorsHeaders(request, headers, options.corsAllowedOrigins ?? [])
       if (!headers.has('x-request-id')) headers.set('x-request-id', requestId)
@@ -1396,4 +1397,49 @@ export type ResourceRepositoryOverrides = {
 
 export type ResourceWebHandlerOptions = {
   corsAllowedOrigins?: readonly string[]
+}
+
+/** The repositories one request reads through. `ResourceApiLive` decides what must be here. */
+export type ResourceRequestServices = Context.Context<Layer.Layer.Context<typeof ResourceApiLive>>
+
+// A repository that a route needs and that is forgotten here does not compile.
+export const makeResourceRequestServices = (
+  repository: BibleChapterRepositoryService = unavailableRepository,
+  naveRepository: NaveRepositoryService = unavailableNaveRepository,
+  overrides: ResourceRepositoryOverrides = {}
+): ResourceRequestServices =>
+  Context.empty().pipe(
+    Context.add(BibleChapterRepository, repository),
+    Context.add(BibleSearchRepository, overrides.bibleSearch ?? unavailableBibleSearchRepository),
+    Context.add(NaveRepository, naveRepository),
+    Context.add(DictionaryRepository, overrides.dictionary ?? unavailableDictionaryRepository),
+    Context.add(StrongBibleRepository, overrides.strongBible ?? unavailableStrongBibleRepository),
+    Context.add(
+      InterlinearBibleRepository,
+      overrides.interlinearBible ?? unavailableInterlinearBibleRepository
+    ),
+    Context.add(
+      StrongLexiconRepository,
+      overrides.strongLexicon ?? unavailableStrongLexiconRepository
+    ),
+    Context.add(
+      SupplementaryRepository,
+      overrides.supplementary ?? unavailableSupplementaryRepository
+    ),
+    Context.add(TimelineRepository, overrides.timeline ?? unavailableTimelineRepository),
+    Context.add(SearchAnalyticsSink, overrides.searchAnalytics ?? noOpSearchAnalyticsSink)
+  )
+
+/**
+ * The HTTP application built once and kept: building it costs about fifty times what
+ * answering a request does. A repository holds the database handle of one request, so none
+ * belongs to the application. Each request brings its own, which no other request reads.
+ */
+export const makeSharedResourceWebHandler = (options: ResourceWebHandlerOptions = {}) => {
+  const web = makeResourceWebHandler(undefined, undefined, {}, options)
+  return {
+    dispose: web.dispose,
+    handler: (request: Request, services: ResourceRequestServices) =>
+      web.handler(request, services),
+  }
 }

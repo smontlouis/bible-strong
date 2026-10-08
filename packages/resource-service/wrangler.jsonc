@@ -20,9 +20,17 @@
     "AI_GATEWAY_ID": "default",
   },
   "ratelimits": [
+    // Every Online read of one address, counted before the edge cache. It bounds what one
+    // address can ask of the Worker, so it is far above what the database allows.
     {
       "name": "READING_RATE_LIMITER",
       "namespace_id": "2041161289171",
+      "simple": { "limit": 20000, "period": 60 },
+    },
+    // The Online reads the edge cache did not answer, counted before the database is opened.
+    {
+      "name": "ORIGIN_READING_RATE_LIMITER",
+      "namespace_id": "2041161289177",
       "simple": { "limit": 1000, "period": 60 },
     },
     {

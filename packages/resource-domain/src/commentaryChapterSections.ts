@@ -77,7 +77,7 @@ const sectionRuns = (comments: CommentaryChapterComments) => {
 
   const runs: { start: number; end: number; fragmentIndex: number; content: string }[] = []
   for (const [content, occurrences] of occurrencesByContent) {
-    for (let index = 0; index < occurrences.length; ) {
+    for (let index = 0; index < occurrences.length;) {
       const first = occurrences[index]!
       let endIndex = index
       while (

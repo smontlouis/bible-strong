@@ -336,6 +336,43 @@ curl --fail https://api.bible-strong.app/health
 curl --fail https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1
 ```
 
+`GET /health` is answered by the Worker entry alone. Only the second request proves that the
+HTTP application loads and that Hyperdrive reaches Neon.
+
+### Worker start-up
+
+Cloudflare starts more isolates of the Worker when requests arrive together, and each new
+isolate evaluates the entry module `src/runtime/worker.ts` with everything it imports
+statically before it answers its first request, a preflight or a cached read included. The
+entry therefore imports only what a cached answer needs: CORS, the limiters, the edge cache,
+artifact delivery and the catalog. Effect, the HTTP application, Kysely, pg and the search
+modules live behind `src/runtime/resourceOrigin.ts`, which the entry imports dynamically the
+first time an isolate has to read the database.
+
+Wrangler keeps one file: it turns that dynamic import into a function called on demand, so the
+code is still uploaded and parsed, but no longer evaluated at start-up. The built-in Node
+modules that `pg` requires stay static imports of the bundle and are still loaded at start-up.
+
+An isolate builds the HTTP application once, the first time a request needs it, and keeps it
+(`resourceApplicationFor`). Building it takes about 11 ms of CPU, answering with it 0.2 ms;
+built for every uncached read, it kept the isolate busy and made Cloudflare start more isolates
+when uncached reads arrived together. Nothing of a request lives in it: the `pg` pool, opened
+for each request as Cloudflare asks for Hyperdrive, and the repositories over it come with the
+request (`makeResourceRequestServices`) and are closed when it is answered.
+
+The `resource API request` log line says where a read spent its time: `isolateRequest` is 1
+for the request that followed the start of its isolate, `databaseConnectMs` is the time its
+connection to Hyperdrive took to open, `sqlStatements` and `sqlMs` count its statements and
+their time, and `durationMs` covers the cache and the application.
+
+`src/runtime/__tests__/workerStartupImports.node-test.ts` fails when a static import of the
+entry reaches one of those modules. To measure a start, profile it locally and compare the
+`Worker Startup Time` that `wrangler deploy` prints:
+
+```bash
+yarn workspace @bible-strong/resource-service wrangler check startup --config wrangler.jsonc
+```
+
 ### Apply a schema migration
 
 `yarn resources:migrate` applies the pending Drizzle Kit migrations of `drizzle/` to the
@@ -424,19 +461,33 @@ it serves the updated catalog.
 
 Online reading and search are public ([ADR-0065](../../docs/adr/0065-protect-resources-without-mandatory-attestation.md)):
 the Worker ignores any App Check token they carry and counts them per client address
-(`CF-Connecting-IP`) before any cache, Hyperdrive, or AI access. Deterministic and bounded reads
-allow 1,000 requests per minute per address, dynamic search and random routes allow 300, and
-semantic search, which calls Workers AI, allows 60. Encrypted Offline copies under
-`/v1/offline-archives/` are public too and allow 240 requests per minute per address, including byte
-ranges; each delivery logs its size with a hashed client address. Limits are generous because many
-readers share carrier NAT addresses.
+(`CF-Connecting-IP`).
+
+Online reads have two limits. Every read counts against `READING_RATE_LIMITER`, 20,000 per minute
+per address, before the cache: it bounds what one address can ask of the Worker, whatever the
+cache answers. A read the edge cache did not answer then counts against
+`ORIGIN_READING_RATE_LIMITER`, 1,000 per minute per address, just before Hyperdrive is opened:
+this is the limit that protects the database, and a read answered from the cache
+(`x-resource-cache: HIT`) never counts against it. The public site renders one page with about
+thirteen reads from a single server address, most of them cached; counted together, they held
+the whole site to about 75 pages a minute. A page that was never rendered still spends its
+uncached reads against the 1,000.
+
+Dynamic search and random routes allow 300 requests per minute per address, and semantic search,
+which calls Workers AI, allows 60. Both are counted before any cache, Hyperdrive, or AI access,
+cached answers included: a search is keyed by what its caller typed, so the cache answers few of
+them, and nothing reads search from a server on behalf of many readers. Encrypted Offline copies
+under `/v1/offline-archives/` are public too and allow 240 requests per minute per address,
+including byte ranges; each delivery logs its size with a hashed client address. Limits are
+generous because many readers share carrier NAT addresses.
 
 Offline-copy artifact requests still require a native App Check attestation (ADR-0063). After it
 succeeds, the Worker fingerprints the short-lived token with SHA-256 and applies a counter of 120
 requests per minute, including byte ranges. The raw token is never used as a counter key or written
-to logs. A rejected request returns `429`, `Retry-After: 60`, and `private, no-store`; the origin is
-not opened. Counter failures fail open and emit a structured error so a Cloudflare limiter incident
-does not make resources unavailable.
+to logs. A rejected request returns `429`, `Retry-After: 60`, and `private, no-store`, whichever
+counter rejected it; the origin is not opened and the refusal is never cached. Counter failures
+fail open and emit a structured error so a Cloudflare limiter incident does not make resources
+unavailable.
 
 `/v1/offline-catalog` remains public and outside the application counters because it is a small
 shared CDN-cached manifest with no trustworthy per-client identity. Cloudflare's network-level DDoS
@@ -463,6 +514,27 @@ the Nave operations consumed by the app:
 - `GET /v1/naves/:language/topics?search=:search`
 - `GET /v1/naves/:language/verses/:verseKey/topics`
 - `GET /v1/naves/:language/random`
+
+The coverage of a Bible counts the verse rows of each chapter in `verseCountByBookChapter`
+and gives, in `verseNumbersByBookChapter`, the ascending numbers of the verses that have text
+for the chapters where they are not exactly 1 to that count: a skipped number, verses
+translated as one, a verse kept without text, a title numbered 0. A client numbers the other
+chapters from 1 to their count. A Bible without such a chapter has an empty object
+([ADR-0071](../../docs/adr/0071-publish-the-verse-numbers-of-irregular-chapters.md)).
+
+`GET /v1/commentaries/verses/:verseKey/sections?language=fr&commentaries=acbc,barnes,MHY`
+answers, for one verse (`book-chapter-verse`) and up to ten commentaries of a language named
+by their publication, the section of each that bears most closely on the verse: its slug,
+its verse range and its content, in the order asked, in one read of the database. A
+commentary that does not comment the verse is left out; one without an active publication
+is named in `unavailable`. The sections are those of the chapter page of the public site,
+built and chosen by `@bible-strong/resource-domain/commentary-chapter-sections`
+([ADR-0073](../../docs/adr/0073-read-the-commentary-sections-of-a-verse-in-one-read.md)).
+
+A simple Strong entry and the entry cards of a batch are read in one statement, like a
+detailed entry; the concordance reads of a Strong Bible resolve their publication and their
+identity in one statement
+([ADR-0072](../../docs/adr/0072-read-strong-entry-cards-in-one-statement.md)).
 
 Both `nave:fr` (`NAVE_FR`) and `nave:en` (`NAVE_EN`) are remotely readable in this tracer. All 12 cataloged Strong Bible versions are remotely
 readable when their validated index publication and the exact declared Bible text revision and

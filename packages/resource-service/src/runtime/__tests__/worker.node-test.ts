@@ -1,11 +1,14 @@
 import assert from 'node:assert/strict'
-import { describe, it } from 'node:test'
+import { afterEach, beforeEach, describe, it, mock } from 'node:test'
 
 import { makeHyperdriveDatabase } from '../../database/hyperdriveDatabase'
+import { STRONG_LEXICON_ENTRY_RESPONSE_REVISION } from '../../domain/strongLexicon'
+import { makeResourceWebHandler } from '../../http/app'
 import { makeKyselyBibleChapterRepository } from '../../repositories/bibleChapterRepository'
 import {
   enforceResourceApiAppCheck,
-  makeResourceWorkerHandler,
+  makeResourceHealthResponse,
+  makeResourceWorker,
   routeResourceApiRequest,
 } from '../worker'
 import {
@@ -13,6 +16,7 @@ import {
   resourceApiCacheEpochFrom,
   resourceApiCacheRevisionFrom,
   resourceApiCacheTtlSeconds,
+  STRONG_LEXICON_ENTRY_CACHE_REVISION,
 } from '../resourceApiCache'
 
 class MemoryEdgeCache {
@@ -304,6 +308,41 @@ describe('Resource Worker binding', () => {
     assert.notEqual(first, changedContent)
   })
 
+  it('fingerprints a whole catalog once for the routes that name no resource', async () => {
+    let serializations = 0
+    const catalogOf = (revision: string) => ({
+      resources: { 'bible:LSG': { contentSha256: revision } },
+      toJSON() {
+        serializations += 1
+        return { resources: { 'bible:LSG': { contentSha256: revision } } }
+      },
+    })
+    const catalog = catalogOf('lsg-r1')
+    const commentary = new Request(
+      'https://api.bible-strong.app/v1/commentaries/MHY/fr/verses/1-1-1'
+    )
+    const crossReferences = new Request(
+      'https://api.bible-strong.app/v1/cross-references/fr/verses/1-1-1'
+    )
+
+    const first = await resourceApiCacheRevisionFrom(commentary, catalog)
+    const second = await resourceApiCacheRevisionFrom(commentary, catalog)
+    const third = await resourceApiCacheRevisionFrom(crossReferences, catalog)
+
+    assert.equal(first, await resourceApiCacheEpochFrom(catalogOf('lsg-r1')))
+    assert.equal(second, first)
+    assert.equal(third, first)
+    // One for the catalog under test, one for the expected value just above.
+    assert.equal(serializations, 2)
+    // Another catalog is another fingerprint, never the remembered one.
+    assert.notEqual(await resourceApiCacheRevisionFrom(commentary, catalogOf('lsg-r2')), first)
+  })
+
+  it('keeps the Strong entry cache revision equal to the one the repository answers with', () => {
+    // The cache module repeats the value so that it does not load Effect with the Worker.
+    assert.equal(STRONG_LEXICON_ENTRY_CACHE_REVISION, STRONG_LEXICON_ENTRY_RESPONSE_REVISION)
+  })
+
   it('invalidates a Bible cache key only when that Bible publication changes', async () => {
     const request = new Request('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1')
     const catalog = (lsg: string, dby: string) => ({
@@ -532,7 +571,7 @@ describe('Resource Worker binding', () => {
 
   it('constructs the HTTP application with the shared Hyperdrive database without connecting', async () => {
     const database = makeHyperdriveDatabase('postgresql://user:password@example.neon.tech/database')
-    const web = makeResourceWorkerHandler(makeKyselyBibleChapterRepository(database))
+    const web = makeResourceWebHandler(makeKyselyBibleChapterRepository(database))
 
     assert.equal(typeof web.handler, 'function')
     await database.destroy()
@@ -566,5 +605,290 @@ describe('Resource Worker binding', () => {
 
     assert.equal(response, undefined)
     assert.equal(authorizationCalls, 0)
+  })
+})
+
+describe('Resource Worker request path', () => {
+  const chapterUrl = 'https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1'
+  const searchUrl = 'https://api.bible-strong.app/v1/bibles/LSG/search?q=grace'
+  let cache: MemoryEdgeCache
+  let cacheReads: number
+  let logs: Record<string, unknown>[]
+
+  beforeEach(() => {
+    cache = new MemoryEdgeCache()
+    cacheReads = 0
+    logs = []
+    const match = cache.match.bind(cache)
+    cache.match = async request => {
+      cacheReads += 1
+      return match(request)
+    }
+    Object.assign(globalThis, { caches: { open: async () => cache } })
+    mock.method(console, 'log', (line: string) => logs.push(JSON.parse(line)))
+    mock.method(console, 'warn', () => undefined)
+  })
+
+  afterEach(() => {
+    mock.restoreAll()
+    Reflect.deleteProperty(globalThis, 'caches')
+  })
+
+  const harness = (rejected: readonly string[] = []) => {
+    const counted: string[] = []
+    const backgroundWrites: Promise<unknown>[] = []
+    let originLoads = 0
+    let originReads = 0
+    const limiter = (name: string) => ({
+      async limit({ key }: { key: string }) {
+        counted.push(`${name}:${key}`)
+        return { success: !rejected.includes(name) }
+      },
+    })
+    const worker = makeResourceWorker(async () => {
+      originLoads += 1
+      return {
+        readResourceOrigin: async ({
+          request,
+          onSqlStatement,
+          onSqlDuration,
+          onDatabaseConnection,
+        }) => {
+          originReads += 1
+          onDatabaseConnection?.(7)
+          onSqlStatement()
+          onSqlDuration?.(12)
+          onSqlStatement()
+          onSqlDuration?.(5)
+          return Response.json(
+            { path: new URL(request.url).pathname },
+            { headers: { etag: '"origin-r1"' } }
+          )
+        },
+      }
+    })
+    const bindings = {
+      RESOURCE_WEB_ORIGINS: 'https://bible-strong.app',
+      FIREBASE_APP_CHECK_PROJECT_NUMBER: '204116128917',
+      FIREBASE_APP_CHECK_ALLOWED_APP_IDS: '1:204116128917:android:3ae4e716f079e5a002579c',
+      SEARCH_ANALYTICS_ENABLED: 'false',
+      RESOURCE_ENVIRONMENT: 'test',
+      AI_GATEWAY_ID: 'default',
+      READING_RATE_LIMITER: limiter('reading'),
+      ORIGIN_READING_RATE_LIMITER: limiter('origin-reading'),
+      SEARCH_RATE_LIMITER: limiter('search'),
+      SEMANTIC_SEARCH_RATE_LIMITER: limiter('semantic-search'),
+      SEARCH_ANALYTICS_RATE_LIMITER: limiter('search-analytics'),
+      ARTIFACT_RATE_LIMITER: limiter('artifact'),
+      ENCRYPTED_ARCHIVE_RATE_LIMITER: limiter('encrypted-artifact'),
+      CF_VERSION_METADATA: { id: 'worker-version-1' },
+      HYPERDRIVE: { connectionString: 'postgresql://unused' },
+    } as unknown as Env
+    const send = async (url: string, init: RequestInit = {}) => {
+      const headers = new Headers(init.headers)
+      if (!headers.has('cf-connecting-ip')) headers.set('cf-connecting-ip', '203.0.113.7')
+      const response = await worker.fetch(new Request(url, { ...init, headers }), bindings, {
+        waitUntil: (promise: Promise<unknown>) => backgroundWrites.push(promise),
+      } as unknown as ExecutionContext)
+      await Promise.all(backgroundWrites.splice(0))
+      return response
+    }
+    return {
+      counted,
+      send,
+      origin: () => ({ loads: originLoads, reads: originReads }),
+    }
+  }
+
+  it('counts a cached read against the request limit only, and never against the database limit', async () => {
+    const { counted, send, origin } = harness()
+
+    const miss = await send(chapterUrl)
+    const hit = await send(chapterUrl)
+    const laterHit = await send(chapterUrl)
+
+    assert.equal(miss.headers.get('x-resource-cache'), 'MISS')
+    assert.equal(hit.headers.get('x-resource-cache'), 'HIT')
+    assert.equal(laterHit.headers.get('x-resource-cache'), 'HIT')
+    assert.deepEqual(counted, [
+      'reading:address:203.0.113.7',
+      'origin-reading:address:203.0.113.7',
+      'reading:address:203.0.113.7',
+      'reading:address:203.0.113.7',
+    ])
+    assert.deepEqual(origin(), { loads: 1, reads: 1 })
+    // A read of the database says where its time went; a cached one opened nothing.
+    assert.deepEqual(
+      logs.map(log => [
+        log.cache,
+        log.originRead,
+        log.sqlStatements,
+        log.sqlMs,
+        log.databaseConnectMs,
+      ]),
+      [
+        ['MISS', true, 2, 17, 7],
+        ['HIT', false, 0, 0, undefined],
+        ['HIT', false, 0, 0, undefined],
+      ]
+    )
+  })
+
+  it('refuses a read at the database limit without opening the database or caching the refusal', async () => {
+    const { counted, send, origin } = harness(['origin-reading'])
+
+    const refused = await send(chapterUrl, {
+      headers: { 'x-request-id': 'origin_limited', origin: 'https://bible-strong.app' },
+    })
+    const refusedAgain = await send(chapterUrl)
+
+    assert.equal(refused.status, 429)
+    assert.equal(refused.headers.get('retry-after'), '60')
+    assert.equal(refused.headers.get('cache-control'), 'private, no-store')
+    assert.equal(refused.headers.get('content-type'), 'application/json')
+    assert.equal(refused.headers.get('x-request-id'), 'origin_limited')
+    assert.equal(refused.headers.get('x-resource-cache'), null)
+    assert.equal(refused.headers.get('access-control-allow-origin'), 'https://bible-strong.app')
+    assert.deepEqual(await refused.json(), {
+      _tag: 'ResourceRateLimitedProblem',
+      type: 'https://bible-strong.app/problems/resource-rate-limited',
+      title: 'Resource request rate limited',
+      detail: 'Too many resource requests. Retry after 60 seconds.',
+      requestId: 'origin_limited',
+      status: 429,
+      code: 'RESOURCE_RATE_LIMITED',
+      retryAfterSeconds: 60,
+    })
+    assert.equal(refusedAgain.status, 429)
+    assert.equal(cache.entries.size, 0)
+    assert.deepEqual(origin(), { loads: 0, reads: 0 })
+    assert.equal(counted.filter(name => name.startsWith('origin-reading:')).length, 2)
+    // Reported as a limited request, not as a request the Resource API answered.
+    assert.deepEqual(logs, [])
+  })
+
+  it('answers a caller refused at the database limit exactly like one refused before the cache', async () => {
+    const init = { headers: { 'x-request-id': 'same_refusal', origin: 'https://bible-strong.app' } }
+    const atDatabase = await harness(['origin-reading']).send(chapterUrl, init)
+    const beforeCache = await harness(['reading']).send(chapterUrl, init)
+
+    assert.equal(atDatabase.status, beforeCache.status)
+    assert.deepEqual([...atDatabase.headers], [...beforeCache.headers])
+    assert.equal(await atDatabase.text(), await beforeCache.text())
+  })
+
+  it('still serves what is cached to a caller over the database limit', async () => {
+    const warm = harness()
+    await warm.send(chapterUrl)
+    const limited = harness(['origin-reading'])
+
+    const cached = await limited.send(chapterUrl)
+    const uncached = await limited.send(
+      'https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/2'
+    )
+
+    assert.equal(cached.status, 200)
+    assert.equal(cached.headers.get('x-resource-cache'), 'HIT')
+    assert.equal(uncached.status, 429)
+    assert.deepEqual(limited.counted, [
+      'reading:address:203.0.113.7',
+      'reading:address:203.0.113.7',
+      'origin-reading:address:203.0.113.7',
+    ])
+  })
+
+  it('refuses a caller over the request limit before the cache is read', async () => {
+    const warm = harness()
+    await warm.send(chapterUrl)
+    cacheReads = 0
+    const { counted, send, origin } = harness(['reading'])
+
+    const refused = await send(chapterUrl)
+
+    assert.equal(refused.status, 429)
+    assert.equal(cacheReads, 0)
+    assert.deepEqual(counted, ['reading:address:203.0.113.7'])
+    assert.deepEqual(origin(), { loads: 0, reads: 0 })
+  })
+
+  it('counts an uncacheable read against both limits', async () => {
+    const { counted, send, origin } = harness()
+
+    const response = await send('https://api.bible-strong.app/v1/unknown-future-route')
+
+    assert.equal(response.headers.get('x-resource-cache'), null)
+    assert.deepEqual(counted, ['reading:address:203.0.113.7', 'origin-reading:address:203.0.113.7'])
+    assert.deepEqual(origin(), { loads: 1, reads: 1 })
+  })
+
+  it('keeps counting every search before the cache, cached answers included', async () => {
+    const { counted, send, origin } = harness()
+
+    const miss = await send(searchUrl)
+    const hit = await send(searchUrl)
+    const refused = await harness(['search']).send(searchUrl)
+
+    assert.equal(miss.headers.get('x-resource-cache'), 'MISS')
+    assert.equal(hit.headers.get('x-resource-cache'), 'HIT')
+    assert.deepEqual(counted, ['search:address:203.0.113.7', 'search:address:203.0.113.7'])
+    assert.deepEqual(origin(), { loads: 1, reads: 1 })
+    assert.equal(refused.status, 429)
+  })
+
+  it('answers a preflight, a health check and a cached read without loading the HTTP application', async () => {
+    const warm = harness()
+    await warm.send(chapterUrl)
+    const { counted, send, origin } = harness()
+
+    const preflight = await send(chapterUrl, {
+      method: 'OPTIONS',
+      headers: { origin: 'https://bible-strong.app' },
+    })
+    const health = await send('https://api.bible-strong.app/health')
+    const cached = await send(chapterUrl)
+
+    assert.equal(preflight.status, 204)
+    assert.equal(health.status, 200)
+    assert.deepEqual(await health.json(), { status: 'ok' })
+    assert.equal(cached.headers.get('x-resource-cache'), 'HIT')
+    assert.deepEqual(origin(), { loads: 0, reads: 0 })
+    assert.deepEqual(counted, ['reading:address:203.0.113.7'])
+  })
+
+  it('answers the health check with the response of the HTTP application', async () => {
+    const web = makeResourceWebHandler()
+    const request = () =>
+      new Request('https://api.bible-strong.app/health', { headers: { 'x-request-id': 'health' } })
+
+    const fromApplication = await web.handler(request())
+    const fromWorker = makeResourceHealthResponse(request())
+
+    assert.equal(fromWorker?.status, fromApplication.status)
+    assert.deepEqual([...(fromWorker?.headers ?? [])], [...fromApplication.headers])
+    assert.equal(await fromWorker?.text(), await fromApplication.text())
+    // Any other spelling of the route is left to the application.
+    for (const [method, path] of [
+      ['HEAD', '/health'],
+      ['POST', '/health'],
+      ['GET', '/health/'],
+      ['GET', '/v1/health'],
+    ]) {
+      assert.equal(
+        makeResourceHealthResponse(new Request(`https://api.bible-strong.app${path}`, { method })),
+        undefined
+      )
+    }
+    await web.dispose()
+  })
+
+  it('logs which request of its isolate each answer was', async () => {
+    const { send } = harness()
+
+    await send(chapterUrl)
+    await send(chapterUrl)
+
+    const [first, second] = logs.map(log => log.isolateRequest as number)
+    assert.equal(Number.isInteger(first), true)
+    assert.equal(second, first + 1)
   })
 })

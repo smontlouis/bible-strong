@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
+import { ResourceRateLimitedProblem } from '../../http/problems'
 import {
+  protectResourceOriginRead,
   protectResourceRequest,
   type ResourceRateLimitBinding,
   type ResourceRateLimitCategory,
@@ -277,5 +279,114 @@ describe('Resource request protection', () => {
 
     assert.equal(response, undefined)
     assert.deepEqual(failures, [{ category: 'reading', message: 'RATE_LIMIT_BINDING_UNAVAILABLE' }])
+  })
+
+  it('answers a limited request with exactly what the HTTP application encodes', async () => {
+    const response = await protectResourceRequest({
+      request: new Request('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1', {
+        headers: { 'x-request-id': 'limited_body' },
+      }),
+      authorize: async () => undefined,
+      limiters: limitersFrom({ reading: rejectedLimiter([]) }),
+    })
+
+    // The body is written without the problem class, so that Effect is not loaded with the
+    // Worker. It must stay what that class produces.
+    assert.equal(
+      await response?.text(),
+      JSON.stringify(
+        new ResourceRateLimitedProblem({
+          type: 'https://bible-strong.app/problems/resource-rate-limited',
+          title: 'Resource request rate limited',
+          detail: 'Too many resource requests. Retry after 60 seconds.',
+          requestId: 'limited_body',
+          status: 429,
+          code: 'RESOURCE_RATE_LIMITED',
+          retryAfterSeconds: 60,
+        })
+      )
+    )
+  })
+})
+
+describe('Resource origin read protection', () => {
+  it('rejects a read the cache did not answer like a read refused before the cache', async () => {
+    const events: string[] = []
+    const keys: string[] = []
+    const request = new Request('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1', {
+      headers: { 'cf-connecting-ip': '203.0.113.7', 'x-request-id': 'origin_burst' },
+    })
+
+    const atOrigin = await protectResourceOriginRead({
+      request,
+      limiter: rejectedLimiter(keys),
+      reportLimited: (category, requestId) => events.push(`limited:${category}:${requestId}`),
+    })
+    const beforeCache = await protectResourceRequest({
+      request,
+      authorize: async () => undefined,
+      limiters: limitersFrom({ reading: rejectedLimiter([]) }),
+    })
+
+    assert.equal(atOrigin?.status, 429)
+    assert.deepEqual([...(atOrigin?.headers ?? [])], [...(beforeCache?.headers ?? [])])
+    assert.equal(atOrigin?.headers.get('retry-after'), '60')
+    assert.equal(atOrigin?.headers.get('cache-control'), 'private, no-store')
+    assert.equal(atOrigin?.headers.get('x-request-id'), 'origin_burst')
+    assert.equal(await atOrigin?.text(), await beforeCache?.text())
+    assert.deepEqual(events, ['limited:origin-reading:origin_burst'])
+    assert.deepEqual(keys, ['address:203.0.113.7'])
+  })
+
+  it('counts only Online reads: search, Offline copies and operational routes have their own rules', async () => {
+    const calls: string[] = []
+    const limiter = acceptedLimiter(calls, 'origin-reading')
+
+    for (const url of [
+      'https://api.bible-strong.app/v1/bibles/LSG/search?q=grace',
+      'https://api.bible-strong.app/v1/bibles/LSG/semantic-search?q=grace',
+      'https://api.bible-strong.app/v1/naves/fr/random',
+      'https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-lsg.json.zip',
+      'https://api.bible-strong.app/v1/offline-archives/bibles/bible-lsg.json.encrypted.zip',
+      'https://api.bible-strong.app/v1/offline-catalog',
+      'https://api.bible-strong.app/health',
+    ]) {
+      assert.equal(
+        await protectResourceOriginRead({ request: new Request(url), limiter }),
+        undefined
+      )
+    }
+    assert.deepEqual(calls, [])
+
+    assert.equal(
+      await protectResourceOriginRead({
+        request: new Request('https://api.bible-strong.app/v1/naves/fr/topics/aaron'),
+        limiter,
+      }),
+      undefined
+    )
+    assert.deepEqual(calls, ['origin-reading'])
+  })
+
+  it('fails open with a sanitized report when the origin counter is unavailable', async () => {
+    const failures: { category: string; message: string }[] = []
+    const response = await protectResourceOriginRead({
+      request: new Request('https://api.bible-strong.app/v1/dictionaries/bost/fr/entries/grace'),
+      limiter: {
+        async limit() {
+          throw new Error('RATE_LIMIT_BINDING_UNAVAILABLE')
+        },
+      },
+      reportFailure: (category, _requestId, cause) =>
+        failures.push({
+          category,
+          message: cause instanceof Error ? cause.message : String(cause),
+        }),
+    })
+
+    assert.equal(response, undefined)
+    assert.deepEqual(failures, [
+      { category: 'origin-reading', message: 'RATE_LIMIT_BINDING_UNAVAILABLE' },
+    ])
   })
 })
