@@ -13,7 +13,7 @@ import {
 
 export const STEP_INTERLINEAR_SCHEMA_VERSION = 2;
 export const STEP_INTERLINEAR_BUILDER_VERSION =
-  "step-interlinear-publication@2";
+  "step-interlinear-publication@3";
 export const DEFAULT_STEP_INTERLINEAR_RELEASE =
   "outputs/releases/bible-step-interlinear-ledger-v2";
 export const DEFAULT_STEP_INTERLINEAR_LEXICON =
@@ -37,9 +37,13 @@ const OUTPUT_FILES = {
 type Locale = "en" | "fr";
 type StepSource = "TAHOT" | "TAGNT";
 
-interface ParsedReference {
+export type StepAlternateBrackets = "" | "round" | "square" | "curly";
+
+export interface StepTokenReference {
   mainRef: string;
   alternateRefs: string[];
+  /** Brackets the source wrote the alternate reference in; "" without one. */
+  alternateBrackets: StepAlternateBrackets;
   bookId: string;
   bookOrder: number;
   chapter: number;
@@ -49,7 +53,7 @@ interface ParsedReference {
   tokenType: string;
 }
 
-interface RawStepToken extends ParsedReference {
+interface RawStepToken extends StepTokenReference {
   id: string;
   source: StepSource;
   sourceOrder: number;
@@ -175,8 +179,12 @@ export async function buildStepInterlinearPublication(
       const source: StepSource = sourcePath.includes("TAGNT")
         ? "TAGNT"
         : "TAHOT";
-      for (const line of content.split(/\r?\n/u)) {
-        const token = parseStepLine(line, source, sourceOrder);
+      const sourceFile = path.basename(sourcePath);
+      for (const [lineIndex, line] of content.split(/\r?\n/u).entries()) {
+        const token = parseStepLine(line, source, sourceOrder, {
+          file: sourceFile,
+          line: lineIndex + 1
+        });
         sourceOrder += 1;
         if (!token || !matchesScope(token, options.only)) continue;
         tokens.push(token);
@@ -454,11 +462,18 @@ export async function verifyStepInterlinearPublication(options: {
 function parseStepLine(
   line: string,
   source: StepSource,
-  sourceOrder: number
+  sourceOrder: number,
+  location: { file: string; line: number }
 ): RawStepToken | undefined {
   const parts = line.split("\t");
-  const reference = parseReference(parts[0] ?? "");
-  if (!reference) return undefined;
+  const field = (parts[0] ?? "").replace(/^\uFEFF/u, "");
+  if (!isStepTokenReferenceField(field)) return undefined;
+  const reference = parseStepTokenReference(field);
+  if (!reference) {
+    throw new Error(
+      `step-interlinear-token-reference-unsupported:${location.file}:${location.line}:${field}`
+    );
+  }
   if (source === "TAHOT") {
     return {
       ...reference,
@@ -522,12 +537,37 @@ function parseTagntAnalyses(
   return analyses.length > 0 ? analyses : [{ strong: "", morphology: "" }];
 }
 
-function parseReference(input: string): ParsedReference | undefined {
-  const match = input
-    .replace(/^\uFEFF/u, "")
-    .match(
-      /^([1-3]?[A-Za-z]{2,3})\.(\d+)\.(\d+)(?:\((\d+)\.(\d+)\))?#(\d+)=([^\t]+)$/u
-    );
+const STEP_TOKEN_REFERENCE_START = /^[1-3]?[A-Za-z]{2,3}\.\d+\.\d+/u;
+const STEP_TOKEN_MARKER = /#\d+=/u;
+const STEP_TOKEN_REFERENCE =
+  /^([1-3]?[A-Za-z]{2,3})\.(\d+)\.(\d+)(?:\((\d+)\.(\d+)\)|\[(\d+)\.(\d+)\]|\{(\d+)\.(\d+)\})?#(\d+)=([^\t]+)$/u;
+
+/**
+ * Whether the first field of a STEP source line claims to be a token: it
+ * starts like `Book.chapter.verse` or carries the `#word=type` marker. Titles,
+ * field descriptions, `# verse` headers, `#_` interlinear rows and blank lines
+ * do neither. A line that claims to be a token must parse, so a reference form
+ * the publisher does not know fails the build instead of losing its word.
+ */
+export function isStepTokenReferenceField(field: string): boolean {
+  return (
+    STEP_TOKEN_REFERENCE_START.test(field) || STEP_TOKEN_MARKER.test(field)
+  );
+}
+
+/**
+ * Reads `Book.chapter.verse#word=type`. The verse is the one of the NRSV
+ * versification both sources are filed under, and it is the verse the word is
+ * published in. One other numbering of the same word may follow it in
+ * brackets and is kept as an alternate reference: round brackets for the
+ * Hebrew numbering in TAHOT and for Nestle-Aland in TAGNT, square brackets
+ * for the KJV, curly brackets for other editions (mostly the Majority text).
+ * Any other form, or an unknown book, has no reading.
+ */
+export function parseStepTokenReference(
+  input: string
+): StepTokenReference | undefined {
+  const match = STEP_TOKEN_REFERENCE.exec(input.replace(/^\uFEFF/u, ""));
   if (!match) return undefined;
   const bookId = STEP_TO_OSIS_BOOK.get(match[1] ?? "");
   if (!bookId) return undefined;
@@ -536,24 +576,34 @@ function parseReference(input: string): ParsedReference | undefined {
   const chapter = Number.parseInt(match[2] ?? "0", 10);
   const verse = Number.parseInt(match[3] ?? "0", 10);
   const mainRef = `${bookId}.${chapter}.${verse}`;
+  const alternateBrackets: StepAlternateBrackets = match[4]
+    ? "round"
+    : match[6]
+      ? "square"
+      : match[8]
+        ? "curly"
+        : "";
+  const alternateChapter = match[4] ?? match[6] ?? match[8];
+  const alternateVerse = match[5] ?? match[7] ?? match[9];
   const alternateRefs =
-    match[4] && match[5]
-      ? [`${bookId}.${Number(match[4])}.${Number(match[5])}`]
+    alternateChapter && alternateVerse
+      ? [`${bookId}.${Number(alternateChapter)}.${Number(alternateVerse)}`]
       : [];
   return {
     mainRef,
     alternateRefs,
+    alternateBrackets,
     bookId,
     bookOrder,
     chapter,
     verse,
-    rawTokenIndex: match[6] ?? "",
-    tokenIndex: Number.parseInt(match[6] ?? "0", 10),
-    tokenType: match[7] ?? ""
+    rawTokenIndex: match[10] ?? "",
+    tokenIndex: Number.parseInt(match[10] ?? "0", 10),
+    tokenType: match[11] ?? ""
   };
 }
 
-function tokenId(source: StepSource, ref: ParsedReference): string {
+function tokenId(source: StepSource, ref: StepTokenReference): string {
   const base = [
     source,
     ref.mainRef,
@@ -737,10 +787,10 @@ function writeInterlinearDatabase(input: {
     const insertToken = database.prepare(
       `INSERT INTO Tokens(
          id, verseId, sourceOrdinal, readingOrdinal, source, sourceRef,
-         alternateRefs, sourceToken, tokenIndex, tokenType, isCanonical,
-         startOffset, length, surface, transliteration, morphology, editions,
-         meaningVariants, spellingVariants
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+         alternateRefs, alternateBrackets, sourceToken, tokenIndex, tokenType,
+         isCanonical, startOffset, length, surface, transliteration, morphology,
+         editions, meaningVariants, spellingVariants
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     );
     const insertSegment = database.prepare(
       `INSERT INTO TokenSegments(
@@ -783,6 +833,7 @@ function writeInterlinearDatabase(input: {
             token.source,
             token.mainRef,
             JSON.stringify(token.alternateRefs),
+            token.alternateBrackets,
             token.rawTokenIndex,
             token.tokenIndex,
             token.tokenType,
@@ -1243,6 +1294,8 @@ function createInterlinearSchema(database: DatabaseSync): void {
       source TEXT NOT NULL CHECK(source IN ('TAHOT','TAGNT')),
       sourceRef TEXT NOT NULL,
       alternateRefs TEXT NOT NULL,
+      alternateBrackets TEXT NOT NULL
+        CHECK(alternateBrackets IN ('','round','square','curly')),
       sourceToken TEXT NOT NULL,
       tokenIndex INTEGER NOT NULL,
       tokenType TEXT NOT NULL,
