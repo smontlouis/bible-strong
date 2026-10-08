@@ -4,6 +4,7 @@ import {
   RESOURCE_LANGUAGES,
   type ResourceLanguage,
 } from '../resources/publicSite'
+import { truncateText } from '../resources/editorialHtml'
 import { breadcrumbScripts, buildResourceHead } from '../resources/resourceHead'
 import { resourceSection } from '../resources/sections'
 import type { BiblePageData, BibleVersionPageData } from './bible.functions'
@@ -16,6 +17,8 @@ import {
   type BiblePresentation,
 } from './bibleRoutes'
 import { bibleVersionName, findBibleVersion } from './bibleVersions'
+
+const VERSE_TITLE_LENGTH = 90
 
 const SUFFIXES: Record<BiblePresentation, Record<ResourceLanguage, string>> = {
   text: { fr: '', en: '' },
@@ -31,9 +34,13 @@ export const buildBibleHead = (page: BiblePageData) => {
   const reference = `${bibleBookName(book, language)} ${chapter}${
     passage ? `:${passage.startVerse}${passage.endVerse ? `-${passage.endVerse}` : ''}` : ''
   }`
-  const title = `${reference}${SUFFIXES[presentation][language]} – ${
-    version ? bibleVersionName(version, language) : versionId
-  } (${versionId})`
+  // A verse is looked for by its words as much as by its reference: its page is titled
+  // with how it begins.
+  const title = page.study
+    ? `${reference} (${versionId})${language === 'fr' ? ' : ' : ': '}${truncateText(page.study.text, VERSE_TITLE_LENGTH)}`
+    : `${reference}${SUFFIXES[presentation][language]} – ${
+        version ? bibleVersionName(version, language) : versionId
+      } (${versionId})`
   const location = { versionId, presentation, book, chapter, passage }
   const url = absoluteSiteUrl(buildBiblePath({ ...location, gloss }))
   // The interlinear reading exists with French and with English glosses.

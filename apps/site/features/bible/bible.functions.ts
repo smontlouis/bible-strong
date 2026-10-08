@@ -25,6 +25,8 @@ import {
 } from './bibleCommentaries'
 import { renderBibleText, type BibleNote, type BibleTextMarker } from './bibleLayout'
 import { bibleStrongLinks, type BibleStrongLink } from './bibleStrongLinks'
+import { quoteVerseText, VERSE_CONTEXT_SPAN } from './bibleVerseRules'
+import { loadVerseStudy, type VerseStudyData } from './bibleVerseStudy'
 import {
   buildBiblePath,
   INTERLINEAR_VERSION_ID,
@@ -99,9 +101,22 @@ export type BiblePageData = {
   inlineCommentaries: { id: string; title: string }[]
   /** The comments read before the first verse of an aligned reading. */
   commentsBeforeHtml?: string
+  /** What a single verse read as text is studied with. */
+  study?: BibleVerseStudy
   previous?: BibleChapterRef
   next?: BibleChapterRef
   description: string
+}
+
+/** A verse and what its page gathers around it. */
+export type BibleVerseStudy = VerseStudyData & {
+  /** The verse as the Bible being read writes it. */
+  text: string
+  /** The verses read just before and just after, each a link to its own page. */
+  context: {
+    before: { verse: number; text: string; path: string }[]
+    after: { verse: number; text: string; path: string }[]
+  }
 }
 
 // Coverage only changes when a Bible is republished; one read per hour and server instance.
@@ -327,7 +342,47 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
       })
     )
 
-    const comments = inlineCommentaries.flatMap((commentary, index) =>
+    // A single verse read as text is a page of its own: its words, the passages it is read
+    // with and how the commentaries begin on it. It quotes the commentaries itself.
+    const studied =
+      presentation === 'text' && passage && passage.endVerse === undefined
+        ? selected[0]
+        : undefined
+    const location = { versionId: version.id, presentation, book, chapter, gloss }
+    const contextVerse = ({ number, text: verseText }: { number: number; text: string }) => ({
+      verse: number,
+      text: quoteVerseText(verseText),
+      path: withInlineCommentaries(
+        buildBiblePath({ ...location, passage: { startVerse: number } }),
+        commentaryChoice
+      ),
+    })
+    const study: BibleVerseStudy | undefined = studied && {
+      ...(await loadVerseStudy({
+        language,
+        versionId: version.id,
+        verse: { book, chapter, verse: studied.number },
+        verseText: studied.text,
+        commenting: commentaries,
+      })),
+      text: quoteVerseText(studied.text),
+      context: {
+        before: text.verses
+          .filter(
+            verse =>
+              verse.number < studied.number && verse.number >= studied.number - VERSE_CONTEXT_SPAN
+          )
+          .map(contextVerse),
+        after: text.verses
+          .filter(
+            verse =>
+              verse.number > studied.number && verse.number <= studied.number + VERSE_CONTEXT_SPAN
+          )
+          .map(contextVerse),
+      },
+    }
+
+    const comments = (studied ? [] : inlineCommentaries).flatMap((commentary, index) =>
       (commentarySections[index] ?? []).flatMap((section): InlineComment[] => {
         const excerpt = commentaryExcerpt(
           renderCommentaryHtml(section.content, { language }),
@@ -357,7 +412,6 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
       )
     )
 
-    const location = { versionId: version.id, presentation, book, chapter, gloss }
     const all = orderedChapters(coverage)
     const index = all.findIndex(ref => ref.book === book && ref.chapter === chapter)
 
@@ -448,6 +502,7 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
       commentaries,
       commentaryChoice,
       inlineCommentaries: inlineCommentaries.map(({ id, title }) => ({ id, title })),
+      study,
       previous: index > 0 ? all[index - 1] : undefined,
       next: index >= 0 ? all[index + 1] : undefined,
       description: truncateText(

@@ -9,6 +9,7 @@ import BibleCommentaryDialog from './BibleCommentaryDialog'
 import { withInlineCommentaries } from './bibleCommentaries'
 import BibleNavBar from './BibleNavBar'
 import BibleNotePopover from './BibleNotePopover'
+import BibleVerseDetails from './BibleVerseDetails'
 import {
   buildBiblePath,
   buildWebAppBibleUrl,
@@ -179,13 +180,25 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
           </div>
         )}
 
-        {passage && (
-          <a
-            className="resource-link mt-6 inline-block font-semibold"
-            href={keep(`${buildBiblePath(location)}#v${passage.startVerse}`)}
-          >
-            {t('bible.readChapter').replace('{chapter}', `${bookName} ${chapter}`)}
-          </a>
+        {page.study ? (
+          <BibleVerseDetails
+            study={page.study}
+            reference={`${bookName} ${chapter}${passageLabel}`}
+            chapterLabel={`${bookName} ${chapter}`}
+            chapterPath={keep(`${buildBiblePath(location)}#v${passage?.startVerse ?? 1}`)}
+            language={language}
+            textLang={textLang}
+            originalLang={originalLang}
+          />
+        ) : (
+          passage && (
+            <a
+              className="resource-link mt-6 inline-block font-semibold"
+              href={keep(`${buildBiblePath(location)}#v${passage.startVerse}`)}
+            >
+              {t('bible.readChapter').replace('{chapter}', `${bookName} ${chapter}`)}
+            </a>
+          )
         )}
 
         <nav className="mt-10 flex justify-between gap-4" aria-label={t('bible.chapterNav')}>
@@ -256,10 +269,10 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
           </p>
         )}
       </article>
-      {presentation !== 'text' && (
+      {(presentation !== 'text' || (page.study?.words.length ?? 0) > 0) && (
         <StrongPreviewPopover containerRef={articleRef} language={language} />
       )}
-      {page.inlineCommentaries.length > 0 && (
+      {(page.inlineCommentaries.length > 0 || (page.study?.comments.length ?? 0) > 0) && (
         <BibleCommentaryDialog
           containerRef={articleRef}
           language={language}

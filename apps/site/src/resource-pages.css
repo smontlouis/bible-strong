@@ -598,6 +598,144 @@ a.bible-nav__trigger[aria-current] {
   line-clamp: 3;
 }
 
+/* A verse page: what the verse is studied with, under the verse itself. */
+.verse-quotes {
+  display: grid;
+  gap: 2px;
+}
+
+.verse-quotes__quote {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.verse-quotes__quote:hover {
+  background: var(--resource-accent-soft);
+}
+
+.verse-quotes__label {
+  color: var(--resource-accent-ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.verse-quotes__text {
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+  line-height: 1.6;
+}
+
+.verse-context {
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+  font-size: 1.06rem;
+  line-height: 1.75;
+}
+
+.verse-context__verse {
+  color: var(--resource-muted);
+}
+
+.verse-context__verse:hover {
+  color: var(--resource-ink);
+}
+
+.verse-context__number {
+  margin-inline-end: 0.4em;
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.72em;
+  font-weight: 600;
+  vertical-align: 0.3em;
+}
+
+.verse-context__current {
+  font-weight: 600;
+}
+
+.verse-original {
+  padding: 16px 18px;
+  border: 1px solid var(--resource-line);
+  border-radius: 14px;
+  background: var(--resource-surface);
+  line-height: 1.7;
+}
+
+.verse-words {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.verse-words__word {
+  display: grid;
+  height: 100%;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--resource-line);
+  border-radius: 14px;
+  background: var(--resource-surface);
+}
+
+.verse-words__word:hover {
+  border-color: var(--resource-accent);
+  background: var(--resource-accent-soft);
+}
+
+.verse-words__text {
+  font-weight: 600;
+}
+
+.verse-words__original {
+  color: var(--resource-accent-ink);
+  font-family: 'Literata Reading', ui-serif, Georgia, serif;
+  font-size: 1.15rem;
+  text-align: end;
+}
+
+.verse-words__gloss {
+  color: var(--resource-muted);
+  font-size: 0.86rem;
+}
+
+.verse-words__code {
+  color: var(--resource-muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.verse-comments {
+  display: grid;
+  gap: 10px;
+}
+
+.verse-comments__comment {
+  display: grid;
+  gap: 6px;
+  padding: 14px 18px;
+  border: 1px solid var(--resource-line);
+  border-inline-start: 3px solid var(--resource-accent);
+  border-radius: 4px 14px 14px 4px;
+  background: var(--resource-surface);
+}
+
+.verse-comments__comment:hover {
+  border-color: var(--resource-accent);
+  background: var(--resource-accent-soft);
+}
+
+.verse-comments__excerpt {
+  line-height: 1.6;
+}
+
+.verse-comments__more {
+  color: var(--resource-accent-ink);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
 /*
  * A whole comment, read over the passage: a card on a wide screen, a sheet on a phone.
  * The sign-in styles the site also loads position every dialog in the page, where opening
