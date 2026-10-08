@@ -1,4 +1,5 @@
 import { listBibleSitemapUrls } from '../bible/bibleSitemap'
+import { BIBLE_VERSE_SITEMAPS } from '../bible/bibleVerseSitemap'
 import { COMMENTARY_SITEMAPS } from '../commentary/commentarySitemap'
 import { DICTIONARY_SITEMAPS } from '../dictionary/dictionarySitemap'
 import { NAVE_SITEMAPS } from '../nave/naveSitemap'
@@ -20,7 +21,14 @@ const alternatePages = (paths: Record<'en' | 'fr', string>): SitemapUrl[] => {
   return alternates.map(({ href }) => ({ loc: href, alternates }))
 }
 
-/** Every sitemap served under `/sitemaps/:name`, listed by `/sitemap.xml`. */
+/**
+ * Whether `/sitemap.xml` announces the sitemaps of the verse pages. They are served under
+ * `/sitemaps/:name` either way, so they can be checked and submitted by hand; `true` lets
+ * every crawler find them. This is the only switch.
+ */
+export const ANNOUNCE_BIBLE_VERSE_SITEMAPS = false
+
+/** Every sitemap served under `/sitemaps/:name`. */
 export const SITEMAPS: Record<string, () => Promise<SitemapUrl[]> | SitemapUrl[]> = {
   'pages.xml': () => [
     ...alternatePages({ en: '/', fr: '/fr' }),
@@ -45,4 +53,12 @@ export const SITEMAPS: Record<string, () => Promise<SitemapUrl[]> | SitemapUrl[]
   ...NAVE_SITEMAPS,
   ...COMMENTARY_SITEMAPS,
   ...TIMELINE_SITEMAPS,
+  // One sitemap of verse pages per well-known Bible: `bible-lsg-verses.xml`, …
+  ...BIBLE_VERSE_SITEMAPS,
 }
+
+/** The sitemaps `/sitemap.xml` lists: all of them, the verse ones once they are announced. */
+export const listAnnouncedSitemaps = (
+  announceVerses: boolean = ANNOUNCE_BIBLE_VERSE_SITEMAPS
+): string[] =>
+  Object.keys(SITEMAPS).filter(name => announceVerses || !(name in BIBLE_VERSE_SITEMAPS))
