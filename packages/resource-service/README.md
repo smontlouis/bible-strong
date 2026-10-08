@@ -410,14 +410,16 @@ to `LONG_LIVED_PATHS` or `SHORT_LIVED_PATHS` when it is created, and check `x-re
 second read.
 
 The App Check token and request ID are excluded from cache keys and stored responses. Every client
-response remains `private, no-store`; `x-resource-cache: MISS` or `HIT` exposes the Worker cache
-result without allowing an intermediary to serve protected data before attestation. Conditional
-requests keep their ETag/304 behavior. A SHA-256 fingerprint of the complete generated mobile
+response remains `private, no-store`; `x-resource-cache: MISS`, `HIT` or `STALE` exposes the Worker
+cache result without allowing an intermediary to serve protected data before attestation.
+Conditional requests keep their ETag/304 behavior for an answer of the deployed version. A SHA-256
+fingerprint of the complete generated mobile
 catalog is part of every internal cache key, so publishing and deploying changed catalog content
 starts a fresh cache namespace without a global purge, even when `--generated-at` is pinned.
 The version of the deployed Worker (`CF_VERSION_METADATA`) is part of the key too: a deployment
-that changes how a route answers never serves what an older version cached. This is what makes
-the 30-day lifetime safe, and it means every deployment starts with an empty cache. A publication
+that changes how a route answers never serves as its own what an older version cached. This is
+what makes the 30-day lifetime safe. A deployment therefore starts with nothing under its own
+key, and answers from the fallback described below while it reads again. A publication
 activated in Neon without deploying the Worker stays unseen by cached routes for up to 30 days:
 always deploy after activating.
 Search keys additionally include the thematic-index, embedding model/contract/threshold, and ranking
@@ -425,7 +427,75 @@ revisions from `src/search/bibleSearchRevision.ts`. Bump the explicit index revi
 import and the ranking revision after changing result fusion or ordering; deploying then creates a
 fresh 24-hour search namespace immediately.
 
-This cache is local to each Cloudflare data center. Complete successful R2 artifacts are also cached
+#### Fallback across deployments
+
+A read that is stored is stored twice, for the same time: under the key of the Worker version
+that read it, and under a fallback key that carries no Worker version, only the content revision
+and `RESOURCE_API_ANSWER_REVISION`
+([ADR-0076](../../docs/adr/0076-answer-a-new-worker-version-from-the-cache-of-the-one-before.md)).
+Searches are stored once: they have no fallback.
+
+A cached answer is read as before, with one cache lookup. When the deployed version has not
+stored a URL yet, the Worker looks for the fallback:
+
+- it is there: the caller is answered with it at once, marked `x-resource-cache: STALE`, and the
+  Worker reads the database after the answer (`waitUntil`), then stores what it read under both
+  keys. The next read of that URL is a `HIT` of the deployed version;
+- it is not there: the database is read as before (`MISS`).
+
+A `STALE` answer is what an earlier version stored for the same content. It is always sent whole,
+with status 200, even to a caller whose `If-None-Match` matches: only an answer of the deployed
+version says 304.
+
+The refresh is a read of the database, counted against the 1,000 a minute of the caller that
+caused it. A caller over that limit is still answered `STALE`, and nothing is read for it. One
+refresh runs at a time for a URL: the callers that arrive meanwhile are answered `STALE` and read
+nothing. That holds within an isolate, and nearly so across the isolates of a data center, which
+tell each other through a 30-second cache entry. A refresh that stored nothing (refused, failed,
+or not a 200) is not tried again for those 30 seconds, and leaves the fallback as it was.
+
+**Bump `RESOURCE_API_ANSWER_REVISION`** (`src/runtime/resourceApiCache.ts`) in the deployment that
+changes what a cached route answers for the same content: a field added, removed, renamed or
+corrected, another order, another rule. That deployment then finds no fallback and starts as
+deployments did before, each first read waiting for the database. Do not bump it for a deployment
+that changes no answer: start-up, logs, limits, a new route, performance. A change to one of the
+routes that has a response revision of its own in `resourceApiCacheRevisionFrom` (a Strong entry,
+a batch of them, the list of every identity, dictionary passage discovery) can bump that revision
+instead: it is part of both keys, and only that route starts cold.
+
+Forgetting the bump does not hide the new answer for thirty days, as a key without the Worker
+version did. It costs one answer of the earlier version for each URL in each data center, to
+whoever reads it first after the deployment, and to the callers of the few hundred milliseconds
+the refresh takes. A caller that keeps what it reads keeps that answer for as long as it keeps
+anything: the public site for one minute (it marks such a page `X-Page-Stale: 1`), the
+applications, which do not read the mark, for as long as they keep an Online answer, a session
+for a chapter. A URL nobody reads keeps its fallback until someone does, for
+thirty days at most (one hour for a list), so the earlier version may be several deployments old.
+
+To check the fallback after a deployment, read twice a URL that was read before it, then a URL
+nobody has read:
+
+```bash
+curl -sD - -o /dev/null https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1 | grep -i x-resource-cache
+# x-resource-cache: STALE   the first read after the deployment, in this data center
+curl -sD - -o /dev/null https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1 | grep -i x-resource-cache
+# x-resource-cache: HIT     a second later: the deployed version has read and stored it
+curl -sD - -o /dev/null 'https://api.bible-strong.app/v1/bibles/LSG/search?q=grace' | grep -i x-resource-cache
+# x-resource-cache: MISS    a search has no fallback
+```
+
+`MISS` on the first line means no fallback was there: the URL was not read in this data center
+since the last bump, the answer revision was bumped by this deployment, or the content revision
+changed. `STALE` on the second line means the refresh stored nothing: `wrangler tail` shows a
+`resource API fallback refresh` line for each refresh, with `stored`, `limited`, the status, and
+the statements and time it took. The request that was answered `STALE` logs `cache: "STALE"` and
+`originRead: false`.
+
+The first deployment that carries the fallback finds none, and starts cold like the ones before
+it: the fallback is written from then on.
+
+This cache is local to each Cloudflare data center, and Cloudflare may evict an entry before its
+time: a fallback is there most of the time, not always. Complete successful R2 artifacts are also cached
 for one year after App Check succeeds. Their stable legacy objects are never overwritten and their
 current URLs select immutable SHA-addressed objects, so the long TTL cannot cross publication
 revisions. A cached complete ZIP can satisfy later `Range`, conditional GET, and `HEAD` requests
@@ -468,7 +538,10 @@ per address, before the cache: it bounds what one address can ask of the Worker,
 cache answers. A read the edge cache did not answer then counts against
 `ORIGIN_READING_RATE_LIMITER`, 1,000 per minute per address, just before Hyperdrive is opened:
 this is the limit that protects the database, and a read answered from the cache
-(`x-resource-cache: HIT`) never counts against it. The public site renders one page with about
+(`x-resource-cache: HIT`) never counts against it. A read answered from the fallback
+(`x-resource-cache: STALE`) is not refused either, but the refresh it causes is a read of the
+database and counts: over the limit the caller keeps its answer and nothing is refreshed. The
+public site renders one page with about
 thirteen reads from a single server address, most of them cached; counted together, they held
 the whole site to about 75 pages a minute. A page that was never rendered still spends its
 uncached reads against the 1,000.
