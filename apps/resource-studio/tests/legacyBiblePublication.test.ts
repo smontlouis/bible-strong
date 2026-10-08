@@ -50,6 +50,72 @@ describe("ordinary Bible publication", () => {
     assert.equal(verifyCanonicalBiblePublication(publication).verseCount, 1);
   });
 
+  it("publishes a block of combined verses under its first verse number", () => {
+    const publication = buildCanonicalBibleFromLegacy({
+      versionId: "TEST",
+      sourceVersion: "fixture",
+      sourceSha256: "a".repeat(64),
+      // Legacy sources file a combined block after the numbered verses.
+      bible: {
+        1: { 14: { 5: "Fifth", 6: "Sixth", "1+GEN": "First to fourth" } },
+        13: { 8: { 7: "Seventh", "8+1CH": "Eighth to eleventh" } }
+      },
+      pericope: { 1: { 14: { 1: { h3: "Heading" } } } }
+    });
+
+    assert.deepEqual(Object.keys(publication.verses["1"]!["14"]!), [
+      "1",
+      "5",
+      "6"
+    ]);
+    assert.equal(
+      publication.verses["1"]?.["14"]?.["1"]?.text,
+      "First to fourth"
+    );
+    assert.equal(
+      publication.verses["1"]?.["14"]?.["1"]?.headings[0]?.text,
+      "Heading"
+    );
+    assert.equal(
+      publication.verses["13"]?.["8"]?.["8"]?.text,
+      "Eighth to eleventh"
+    );
+    assert.equal(publication.verseCount, 5);
+    assert.equal(verifyCanonicalBiblePublication(publication).verseCount, 5);
+  });
+
+  it("fails on a key it cannot publish instead of skipping it", () => {
+    const build = (bible: unknown) =>
+      buildCanonicalBibleFromLegacy({
+        versionId: "TEST",
+        sourceVersion: "fixture",
+        sourceSha256: "a".repeat(64),
+        bible
+      });
+
+    assert.throws(
+      () => build({ 1: { 14: { 5: "Fifth", "1-4": "First to fourth" } } }),
+      /legacy-bible-verse-key-unsupported:1:14:1-4/u
+    );
+    // The book code of a combined block must name the book it is filed in.
+    assert.throws(
+      () => build({ 1: { 14: { "1+EXO": "First to fourth" } } }),
+      /legacy-bible-verse-key-unsupported:1:14:1\+EXO/u
+    );
+    assert.throws(
+      () => build({ 1: { 14: { 1: "First", "1+GEN": "First to fourth" } } }),
+      /legacy-bible-verse-duplicate:1:14:1\+GEN/u
+    );
+    assert.throws(
+      () => build({ 1: { intro: { 1: "Introduction" } } }),
+      /legacy-bible-chapter-key-unsupported:1:intro/u
+    );
+    assert.throws(
+      () => build({ metadata: { 1: { 1: "Text" } } }),
+      /legacy-bible-book-key-unsupported:metadata/u
+    );
+  });
+
   it("catalogs every ordinary Bible identity exactly once", async () => {
     const config = JSON.parse(
       await readFile("config/ordinary-bible-publications.json", "utf8")
@@ -98,6 +164,15 @@ describe("ordinary Bible publication", () => {
         sourceOverridesPath: "/candidate/source-overrides.json",
         versionIds: ["LSG"]
       }
+    );
+    assert.deepEqual(
+      parseOrdinaryBiblePublicationArgs([
+        "--generated-at",
+        "2026-08-19T21:00:00.000Z",
+        "--version",
+        "easy,nlt"
+      ]).versionIds,
+      ["EASY", "NLT"]
     );
     assert.throws(
       () =>

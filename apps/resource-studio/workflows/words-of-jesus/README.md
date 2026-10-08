@@ -44,6 +44,7 @@ yarn resources:words-of-jesus prepare-alignment --auto-full
 yarn resources:words-of-jesus transfer --version S21 --from LSG
 yarn resources:words-of-jesus apply-alignment
 yarn resources:words-of-jesus adopt --version FRC97 --from BFC
+yarn resources:words-of-jesus carry-repairs --version OST
 yarn resources:words-of-jesus check
 ```
 
@@ -68,4 +69,8 @@ version). Les sources téléchargées, audits et lots vivent sous `outputs/words
   [ALIGNMENT.md](ALIGNMENT.md).
 - `adopt` reprend les décisions d’une Bible au texte identique (FRC97 partage le Nouveau
   Testament de la BFC).
+- `carry-repairs` reporte les décisions à travers les réparations de source d’une Bible
+  (`config/ordinary-bible-source-repairs.json`) : une décision suit son texte vers le verset
+  renuméroté, et ses plages sont coupées là où un verset a été scindé. Les décisions prises sur un
+  chapitre mal numéroté sont ensuite à revoir avec `audit`.
 - `check` vérifie que chaque jeu de données s’ancre encore sur le texte qui sera publié.

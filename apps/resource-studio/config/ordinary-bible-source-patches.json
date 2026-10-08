@@ -1,0 +1,332 @@
+{
+  "schemaVersion": 1,
+  "bibles": {
+    "NET": {
+      "provider": {
+        "id": "bible.com",
+        "versionId": 107,
+        "abbreviation": "NET"
+      },
+      "base": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-net.json",
+        "sha256": "7b21514b2e2f0d1a73bfbe3c27fe996bebf1f195295b616b2150b8b785d5d75d"
+      },
+      "textStyle": "provider",
+      "chapters": [
+        {
+          "chapter": "44-23",
+          "reference": "ACT.23",
+          "evidence": "The source has no row for verses 26 to 30, the letter to the governor. The provider serves them; the thirty other verses of the chapter are identical in both.",
+          "response": {
+            "url": "https://events.bible.com/api/bible/chapter/3.1?id=107&reference=ACT.23&format=html",
+            "fetchedAt": "2026-10-08T13:34:44.902Z",
+            "sha256": "b89d4b60826d74ada2880509f3084cdbc412125bf69a3c684ed889fa67ff5c29"
+          },
+          "supplied": {
+            "26": "d433431c5673d1b9",
+            "27": "b11cb5bc6fa2d906",
+            "28": "23d25e3c9c20e5c9",
+            "29": "bcfab85398a8402d",
+            "30": "08a81d4d51216a6a"
+          },
+          "renumbered": [],
+          "dropped": {},
+          "kept": 30
+        }
+      ],
+      "patched": {
+        "fileName": "bible-net.json",
+        "sha256": "19d2f1bd85d956584ce7643ae884ce35d3bc23537863a4dfc69ed4c5e60b1588",
+        "bytes": 4327863
+      }
+    },
+    "NFC": {
+      "provider": {
+        "id": "bible.com",
+        "versionId": 2367,
+        "abbreviation": "NFC"
+      },
+      "base": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nfc.json",
+        "sha256": "1a724db65d2c096f48efab1c0547dd61916cc8a9753c0815032198c7d7e2b076"
+      },
+      "textStyle": "provider",
+      "chapters": [
+        {
+          "chapter": "70-1",
+          "reference": "SIR.1_1",
+          "evidence": "The only row of chapter 1 in the source is the translator's prologue, which the provider serves as SIR.1. The numbered chapter is SIR.1_1, the reference the generator already reads for BFC; the prologue row is dropped, as in BFC. Chapter 2 reads the same in the source and at the provider.",
+          "response": {
+            "url": "https://events.bible.com/api/bible/chapter/3.1?id=2367&reference=SIR.1_1&format=html",
+            "fetchedAt": "2026-10-08T13:35:01.140Z",
+            "sha256": "49bc27154d46a323e978c309db5c638eab1cfbedff4cf874927cf0e1a7f2272c"
+          },
+          "supplied": {
+            "1": "6c177585cfe0477e",
+            "2": "10872686f73e0be5",
+            "3": "3b570d06a0e3c185",
+            "4": "69af5a6ddcf3d2ab",
+            "6": "011a5fcaa0f30280",
+            "8": "eaf287638a4cbf2f",
+            "9": "e0d3a888f0ab24f4",
+            "10": "91772c5d98598e97",
+            "11": "0533a44f5989be05",
+            "12": "db4672be74ca22e8",
+            "13": "85733f0d57df1f87",
+            "14": "ae66ddeaabe3dcea",
+            "15": "ea394c7db7c995ee",
+            "16": "1eb668d816cecadc",
+            "17": "62cff38fe19c5478",
+            "18": "36f58a97b834ed1f",
+            "19": "6d8631d53d6a4d75",
+            "20": "086d1b87389f8c74",
+            "22": "35c78e4939483c14",
+            "23": "409616437f4a0391",
+            "24": "0154bc3246860e34",
+            "25": "2c0a3d6fe01f1329",
+            "26": "7ec4c8809e5ea60c",
+            "27": "3be7459ce8fda54f",
+            "28": "d05686c884dd265d",
+            "29": "30a4cc747ac63d01",
+            "30": "963c4ec974d926ce"
+          },
+          "renumbered": [],
+          "dropped": {
+            "1": "f0bbe2321880a550"
+          },
+          "kept": 0
+        }
+      ],
+      "patched": {
+        "fileName": "bible-nfc.json",
+        "sha256": "ae2450ce51f87f5b977f8f292527c8e08f29610df68312447d1233c6045ee446",
+        "bytes": 5432155
+      }
+    },
+    "NLT": {
+      "provider": {
+        "id": "bible.com",
+        "versionId": 116,
+        "abbreviation": "NLT"
+      },
+      "base": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-nlt.json",
+        "sha256": "facebe71ae7e09cfccd2c7e37805a827de6977bafe0aeeecd13b8d154fb3d754"
+      },
+      "textStyle": "space-after-break",
+      "chapters": [
+        {
+          "chapter": "2-38",
+          "reference": "EXO.38",
+          "evidence": "The source has no chapter 38 of Exodus, between its chapters 37 and 39. The provider serves its 31 verses; chapters 37 and 39 read the same in the source and at the provider, which sets the edition and the way this source writes paragraph breaks.",
+          "response": {
+            "url": "https://events.bible.com/api/bible/chapter/3.1?id=116&reference=EXO.38&format=html",
+            "fetchedAt": "2026-10-08T13:34:49.016Z",
+            "sha256": "54370134321cf236896bf8424dd602f55518f25214f746ae8506a5d3946c4348"
+          },
+          "supplied": {
+            "1": "b111b6cb64f8604f",
+            "2": "852dc25885d159e9",
+            "3": "13d6cf43ea0cae36",
+            "4": "a82c7613aafa673a",
+            "5": "69c8f37528bd6ce2",
+            "6": "e03cdc9848c9783f",
+            "7": "054a5446bc4a8e65",
+            "8": "4a8d851f6e76f250",
+            "9": "7ec5783ffd83f633",
+            "10": "329543c1ffff6ae3",
+            "11": "20f4baa7d2c4903e",
+            "12": "de276d5a94886896",
+            "13": "c90d19032aa404d7",
+            "14": "69ab11f9c2f6fe40",
+            "15": "0094fd03f51b34b6",
+            "16": "20751496008b5164",
+            "17": "dcdca5ce4d5b2000",
+            "18": "a902aaf8e962c9cf",
+            "19": "c88f1c1e0870663b",
+            "20": "08759fa8659e1280",
+            "21": "c0ad5acd9a359e22",
+            "22": "14df196993a269ea",
+            "23": "2d68c34402fce10d",
+            "24": "43680b9ee484e34c",
+            "25": "abd1acbaf1e4d8b6",
+            "26": "61be5c431bad51e7",
+            "27": "17f75906f6205325",
+            "28": "fcd80e9f0c9d39c6",
+            "29": "63e4423b9e39b02d",
+            "30": "a16a5d1875d3c1b9",
+            "31": "403cf7172999e6ab"
+          },
+          "renumbered": [],
+          "dropped": {},
+          "kept": 0
+        }
+      ],
+      "patched": {
+        "fileName": "bible-nlt.json",
+        "sha256": "a4d9a029e98d41515304fa51f497ff06523cb6dc600e8ca6a939a3ce780c5707",
+        "bytes": 4363199
+      }
+    },
+    "OST": {
+      "provider": {
+        "id": "bible.com",
+        "versionId": 131,
+        "abbreviation": "OST"
+      },
+      "base": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-ost.json",
+        "sha256": "ea713d5a89cc513365368fde6e63f174898c192d82d1647cb8a7d2196d127844"
+      },
+      "textStyle": "no-breaks",
+      "chapters": [
+        {
+          "chapter": "48-3",
+          "reference": "GAL.3",
+          "evidence": "The source cuts verse 28 after its first letter, files the rest of it as the next row and numbers every later row one too high. The provider serves verse 28 whole and the chapter with its own verse count; every other verse reads the same in both.",
+          "response": {
+            "url": "https://events.bible.com/api/bible/chapter/3.1?id=131&reference=GAL.3&format=html",
+            "fetchedAt": "2026-10-08T13:36:43.369Z",
+            "sha256": "1aab84f9c4900f3c693aa9d93cf85aa179d4f22e74dc534b22ee8eb348df09cb"
+          },
+          "supplied": {
+            "28": "bd1cf4e4ffae72f7"
+          },
+          "renumbered": [
+            {
+              "first": 30,
+              "last": 30,
+              "by": -1,
+              "expect": "fcdb2c1d3a449502"
+            }
+          ],
+          "dropped": {
+            "28": "a83dd0ccbffe39d0",
+            "29": "e8d92f56cba2c137"
+          },
+          "kept": 27
+        },
+        {
+          "chapter": "58-12",
+          "reference": "HEB.12",
+          "evidence": "The source cuts verse 11 after its first letter, files the rest of it as the next row and numbers every later row one too high. The provider serves verse 11 whole and the chapter with its own verse count; every other verse reads the same in both.",
+          "response": {
+            "url": "https://events.bible.com/api/bible/chapter/3.1?id=131&reference=HEB.12&format=html",
+            "fetchedAt": "2026-10-08T13:36:45.547Z",
+            "sha256": "1e7a25fb6d605a2e23a9c0de728962a4c2316534b8a75ee037592714f13085dc"
+          },
+          "supplied": {
+            "11": "fd32409fecd79601"
+          },
+          "renumbered": [
+            {
+              "first": 13,
+              "last": 30,
+              "by": -1,
+              "expect": "bd8084bc0c3c8afd"
+            }
+          ],
+          "dropped": {
+            "11": "a83dd0ccbffe39d0",
+            "12": "d98875eb406e3f69"
+          },
+          "kept": 10
+        },
+        {
+          "chapter": "66-22",
+          "reference": "REV.22",
+          "evidence": "The source cuts verse 10 after its first letter, files the rest of it as the next row and numbers every later row one too high. The provider serves verse 10 whole and the chapter with its own verse count; every other verse reads the same in both.",
+          "response": {
+            "url": "https://events.bible.com/api/bible/chapter/3.1?id=131&reference=REV.22&format=html",
+            "fetchedAt": "2026-10-08T13:36:47.577Z",
+            "sha256": "9a83c6ab4e1ef8ede104c63a31c6144f1cba4837592d8754ac5e0995a1e78e0e"
+          },
+          "supplied": {
+            "10": "6aba4f0505aa9904"
+          },
+          "renumbered": [
+            {
+              "first": 12,
+              "last": 22,
+              "by": -1,
+              "expect": "0095f016542e6eec"
+            }
+          ],
+          "dropped": {
+            "10": "a83dd0ccbffe39d0",
+            "11": "c726a694af774798"
+          },
+          "kept": 9
+        }
+      ],
+      "patched": {
+        "fileName": "bible-ost.json",
+        "sha256": "d3258a3f962ec907be692ddf911180314223fa6521f9955c6fa1f9677589135d",
+        "bytes": 5011528
+      }
+    },
+    "PDV2017": {
+      "provider": {
+        "id": "bible.com",
+        "versionId": 133,
+        "abbreviation": "PDV2017"
+      },
+      "base": {
+        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-pdv2017.json",
+        "sha256": "adc7b06d16c5f9cf373d845051c363f5fe7d576759a58c3c408e83b9ca56bf58"
+      },
+      "textStyle": "provider",
+      "chapters": [
+        {
+          "chapter": "70-1",
+          "reference": "SIR.1_1",
+          "evidence": "The only row of chapter 1 in the source is the translator's prologue, which the provider serves as SIR.1. The numbered chapter is SIR.1_1, the reference the generator already reads for BFC; the prologue row is dropped, as in BFC. Chapter 2 reads the same in the source and at the provider.",
+          "response": {
+            "url": "https://events.bible.com/api/bible/chapter/3.1?id=133&reference=SIR.1_1&format=html",
+            "fetchedAt": "2026-10-08T13:34:53.101Z",
+            "sha256": "c47c579ab4bb80bc42501a942d64b72a459e9519d2b089b3d702ded6e50e6719"
+          },
+          "supplied": {
+            "1": "f291c2ec1e126e04",
+            "2": "151f978bf37a0e97",
+            "3": "003a47c096821e61",
+            "4": "74554fd972d9d756",
+            "6": "b360b59bbee9e082",
+            "8": "2b924d0eec17dc6e",
+            "9": "9226b9d35eaa1f8a",
+            "10": "03f974c42d4b792c",
+            "11": "f8a57e977352dd4d",
+            "12": "e39172d59668d9ed",
+            "13": "9ccaa28469c18cbf",
+            "14": "39fd62fe09c747e6",
+            "15": "2aaefa7351d6cd9f",
+            "16": "b8d2f73c36e15fef",
+            "17": "c5771f4a612a0d82",
+            "18": "f07756e0f43a0e7d",
+            "19": "e27493f856f7a111",
+            "20": "096af3b38cb4cfd1",
+            "22": "e295dfed92d691b2",
+            "23": "ac3d26a33cb8b6ab",
+            "24": "6e8630e42d331321",
+            "25": "5b9ea5f68e0d9847",
+            "26": "28818d36ee4e875d",
+            "27": "48f9f788d151aa4c",
+            "28": "8a33297e1df15114",
+            "29": "38ecb186ce5cac96",
+            "30": "7f154b31bff50751"
+          },
+          "renumbered": [],
+          "dropped": {
+            "1": "9e33932a3de98d46"
+          },
+          "kept": 0
+        }
+      ],
+      "patched": {
+        "fileName": "bible-pdv2017.json",
+        "sha256": "2e4f719e8207d2c9d55a3363c1d9034b2501e90eed4bfbd577b1014dad591641",
+        "bytes": 5550462
+      }
+    }
+  }
+}

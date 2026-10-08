@@ -11,6 +11,10 @@ import {
 import path from "node:path";
 
 import {
+  publishedTextSourceUrl,
+  readBibleSourcePatches
+} from "./bibleSourcePatches.js";
+import {
   applyLegacyPericope,
   buildCanonicalBibleFromLegacy
 } from "./legacyBiblePublication.js";
@@ -192,6 +196,7 @@ export async function buildOrdinaryBiblePublications(options: {
   }
   const sourceOptions = { root, textOverrides };
   const configuredSources = (await readOrdinaryBibleSources(root)).bibles;
+  const sourcePatches = (await readBibleSourcePatches(root)).bibles;
   const stagingDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
   const canonicalDir = `${stagingDir}-canonical`;
 
@@ -214,9 +219,16 @@ export async function buildOrdinaryBiblePublications(options: {
           loadBiblePericope(metadata.id, sourceOptions),
           readWordsOfJesusDataset(root, metadata.id)
         ]);
+        // A patched source read from a local file, before it is adopted, is
+        // recorded under the content-addressed key it is uploaded to.
+        const textSourceUrl = publishedTextSourceUrl({
+          configuredUrl: configured.text.sourceUrl,
+          sourceSha256: text.sourceSha256,
+          patch: sourcePatches[metadata.id]
+        });
         provenanceSources.push({
           role: "canonical",
-          sourceUrl: configured.text.sourceUrl,
+          sourceUrl: textSourceUrl,
           sha256: text.sourceSha256
         });
         // Pericopes complete legacy text, and canonical sources without headings.
@@ -236,7 +248,7 @@ export async function buildOrdinaryBiblePublications(options: {
             : text.publication
           : buildCanonicalBibleFromLegacy({
               versionId: metadata.id,
-              sourceVersion: configured.text.sourceUrl,
+              sourceVersion: textSourceUrl,
               sourceSha256: text.sourceSha256,
               bible: text.legacyBible,
               ...(pericope ? { pericope: pericope.pericope } : {})
@@ -253,8 +265,10 @@ export async function buildOrdinaryBiblePublications(options: {
         // A Bible that gains no presentation keeps its delivered archive byte
         // for byte: readers are not offered an empty update, and archives
         // other resources depend on (the BHG text of interlinear indexes) stay
-        // identical. Such Bibles never had side files.
-        if (!wordsOfJesus && !appliesPericope) {
+        // identical. Such Bibles never had side files. A legacy source that
+        // was repaired, or groups verses under a combined key, no longer reads
+        // as its publication: its Offline copy is the canonical JSON.
+        if (!wordsOfJesus && !appliesPericope && text.sourceIsDeliverable) {
           const archivePath = path.join(
             canonicalDir,
             `bible-${metadata.id.toLowerCase()}.json.zip`
@@ -406,8 +420,10 @@ export const parseOrdinaryBiblePublicationArgs = (
     ...(args.get("--source-overrides")
       ? { sourceOverridesPath: args.get("--source-overrides") }
       : {}),
+    // One version, or several separated by commas: a release of the Bibles a
+    // change affects.
     ...(args.get("--version")
-      ? { versionIds: [args.get("--version")!.toUpperCase()] }
+      ? { versionIds: args.get("--version")!.toUpperCase().split(",") }
       : {})
   };
 };

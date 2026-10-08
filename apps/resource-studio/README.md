@@ -47,6 +47,66 @@ for authoring inputs). R2 locations are read with the operator's `wrangler` sess
 are checked against the SHA-256 in the key. `assets.bible-strong.app` remains a read-only store of
 historical inputs; nothing new is uploaded there.
 
+A legacy source key the converter cannot publish fails the build: a block of verses translated as
+one (`"14+EXO"`) is published under its first verse number, and no key is skipped. Rows a source
+files wrongly (a verse holding the next one behind a literal number, a verse cut in two, a run of
+rows numbered one off, a row under another book, a digit printed for a letter) are corrected by the
+reviewed operations of
+`config/ordinary-bible-source-repairs.json`, applied to the parsed source and anchored by hashes of
+the verses they read and write; the source bytes stay untouched and the file holds no Bible text
+([ADR-0075](../../docs/adr/0075-repair-legacy-bible-sources-with-reviewed-anchored-operations.md)).
+Review them from the local source cache, and draft new ones, with:
+
+```sh
+yarn workspace @bible-strong/resource-studio resources:publication:bible-repairs report --version S21
+yarn workspace @bible-strong/resource-studio resources:publication:bible-repairs draft --file draft.json
+```
+
+After adding a repair, carry the words-of-Jesus decisions of that Bible to the repaired text with
+`yarn resources:words-of-jesus carry-repairs --version <V>`, then run `check` and `audit`.
+`--version` of `resources:publication:bibles` takes one Bible or several separated by commas, to
+rebuild only the Bibles a change affects.
+
+Text a source lacks (a chapter, a run of verses, a verse cut in two) is supplied from the provider
+the source came from, as a patched source: the earlier file with the named chapters completed from
+the provider's answers, stored under its own SHA-256. `config/ordinary-bible-source-patches.json`
+records each patch by reference, URL, date and hash, without Bible text, and repairs anchor on the
+patched source
+([ADR-0077](../../docs/adr/0077-complete-legacy-bible-sources-from-their-provider.md)):
+
+```sh
+yarn workspace @bible-strong/resource-studio resources:publication:bible-source-patches fetch
+yarn workspace @bible-strong/resource-studio resources:publication:bible-source-patches draft --file draft.json
+yarn workspace @bible-strong/resource-studio resources:publication:bible-source-patches report
+yarn workspace @bible-strong/resource-studio resources:publication:bible-source-patches build
+```
+
+`fetch` requests only the chapters the patches name, once each and at most one per second, into
+`outputs/bible-sources/provider-cache/`; it stops on any answer that is not the chapter. `build`
+writes each patched source to `outputs/bible-sources/patched/<sha256>/` with two override files
+beside them. The source configuration names uploaded sources only, so until a patched source is in
+R2 every command that reads its Bible fails (`bible-source-patch-pending`) unless it is given the
+local file:
+
+```sh
+yarn resources:words-of-jesus check --text-overrides outputs/bible-sources/patched/text-overrides.json
+NODE_OPTIONS=--max-old-space-size=8192 npm run resources:publication:bibles -- \
+  --output outputs/releases/<release> --generated-at <timestamp> --version NLT,NET \
+  --source-overrides outputs/bible-sources/patched/source-overrides.json
+```
+
+A bundle built that way already names the R2 location of its source. To publish, upload the
+patched sources and point the configuration at them, then rebuild without overrides and compare
+the revisions with the candidate:
+
+```sh
+yarn workspace @bible-strong/resource-studio resources:publication:bible-source-patches upload
+yarn workspace @bible-strong/resource-studio resources:publication:bible-source-patches adopt
+```
+
+`adopt` reads each source back from R2 and proves its SHA-256 before rewriting
+`config/ordinary-bible-sources.json`.
+
 #### Republishing Bibles with their Strong sidecars
 
 1. Check the decisions still anchor to the published texts:

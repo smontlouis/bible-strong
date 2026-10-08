@@ -3,6 +3,7 @@ import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { carryWordsOfJesusThroughRepairs } from "./bibleSourceRepairs.js";
 import { buildCanonicalBibleFromLegacy } from "./legacyBiblePublication.js";
 import type { CanonicalBiblePublication } from "./strongBibleMobilePublication.js";
 import {
@@ -752,6 +753,33 @@ async function rebaseText(
   }
 }
 
+/**
+ * Carries decisions through the reviewed source repairs of their Bible
+ * (`config/ordinary-bible-source-repairs.json`): a decision follows its text
+ * to the verse it is now numbered, and is cut where a verse was split.
+ */
+async function carryRepairs(
+  root: string,
+  args: Args,
+  options: WordsOfJesusSourceOptions
+) {
+  for (const versionId of selectedVersions(args)) {
+    const dataset = await readWordsOfJesusDataset(root, versionId);
+    if (!dataset) continue;
+    const text = await loadBibleText(versionId, options);
+    if (!text.repairs) continue;
+    const { dataset: carried, carried: refs } = carryWordsOfJesusThroughRepairs(
+      dataset,
+      text.repairs,
+      (ref) => verseText(text.publication, ref)
+    );
+    if (refs.length) await writeDataset(root, carried);
+    console.log(
+      `${versionId}: ${refs.length} decisions carried through ${text.repairs.changes.length} repairs`
+    );
+  }
+}
+
 /** Copies every decision of a Bible whose verse text is identical. */
 async function adopt(
   root: string,
@@ -845,13 +873,15 @@ export async function runWordsOfJesusCli(argv: readonly string[]) {
       return transfer(root, args, options);
     case "rebase-text":
       return rebaseText(root, args, options);
+    case "carry-repairs":
+      return carryRepairs(root, args, options);
     case "adopt":
       return adopt(root, args, options);
     case "check":
       return check(root, args, options);
     default:
       console.log(
-        "usage: words-of-jesus <import-legacy|verify-sources|audit|prepare-alignment|transfer|apply-alignment|adopt|rebase-text|check> " +
+        "usage: words-of-jesus <import-legacy|verify-sources|audit|prepare-alignment|transfer|apply-alignment|adopt|rebase-text|carry-repairs|check> " +
           "[--version V[,V]] [--from V] [--previous-text location] [--text-overrides overrides.json] [--auto-full]"
       );
   }

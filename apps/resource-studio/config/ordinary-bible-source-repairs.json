@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 1,
+  "bibles": {
+    "CHU": {
+      "sourceSha256": "168b2103d920b5928dfe8ee11df17c4f1471ad6c63b558eb46c3c8776f288ca9",
+      "repairs": [
+        {
+          "op": "move",
+          "ref": "17-7-65",
+          "to": "16-7-65",
+          "expect": "2abf1d8830f001dd",
+          "evidence": "Esther 7 has ten verses; this row is the missing verse 65 of Nehemiah 7, between its verses 64 and 66."
+        }
+      ]
+    },
+    "FMAR": {
+      "sourceSha256": "291f5d1fa7a3f5ee8aecec64b0e6c6360271801042b1fe30768c1243239ef4d0",
+      "repairs": [
+        {
+          "op": "split",
+          "ref": "5-28-1",
+          "at": 245,
+          "marker": "2 ",
+          "expect": "bf82ecc80db2897c",
+          "result": ["179b246ed4c036ad", "80916c77c98ed2f3"],
+          "evidence": "The source prints the number of the next verse inside this verse and has no row for it."
+        },
+        {
+          "op": "split",
+          "ref": "12-7-2",
+          "at": 250,
+          "marker": "3 ",
+          "expect": "b0cac5a7295d16b3",
+          "result": ["91b655edb78e1eed", "101faec17fa75482"],
+          "evidence": "The source prints the number of the next verse inside this verse and has no row for it."
+        },
+        {
+          "op": "split",
+          "ref": "12-23-35",
+          "at": 249,
+          "marker": "36 ",
+          "expect": "333701f1d7d86785",
+          "result": ["1988f8eb4754d839", "372b8000ad771df2"],
+          "evidence": "The source prints the number of the next verse inside this verse and has no row for it."
+        },
+        {
+          "op": "split",
+          "ref": "12-24-14",
+          "at": 248,
+          "marker": "15 ",
+          "expect": "a908c4e7256d63f3",
+          "result": ["c037bd549b495590", "1af1bb8babefef62"],
+          "evidence": "The source prints the number of the next verse inside this verse and has no row for it."
+        },
+        {
+          "op": "split",
+          "ref": "14-15-2",
+          "at": 245,
+          "marker": "3 ",
+          "expect": "a78c1ea5dc643d57",
+          "result": ["dcab553c6a228b9d", "925422618ecb4970"],
+          "evidence": "The source prints the number of the next verse inside this verse and has no row for it."
+        },
+        {
+          "op": "split",
+          "ref": "14-18-31",
+          "at": 250,
+          "marker": "32 ",
+          "expect": "998764288dd4c0cc",
+          "result": ["8349bf7ceb0aad47", "10202e5859c320e0"],
+          "evidence": "The source prints the number of the next verse inside this verse and has no row for it."
+        },
+        {
+          "op": "split",
+          "ref": "14-26-21",
+          "at": 244,
+          "marker": "22 ",
+          "expect": "2f54f02578b461e4",
+          "result": ["4b8912a163c9dfb4", "9e607c7414e98a72"],
+          "evidence": "The source prints the number of the next verse inside this verse and has no row for it."
+        },
+        {
+          "op": "split",
+          "ref": "17-7-9",
+          "at": 245,
+          "marker": "10 ",
+          "expect": "1750270848e7d751",
+          "result": ["11167600cb6a905c", "829c26ff1356ea3f"],
+          "evidence": "The source prints the number of the next verse inside this verse and has no row for it."
+        },
+        {
+          "op": "split",
+          "ref": "28-1-10",
+          "at": 252,
+          "marker": "11 ",
+          "expect": "d7634c54c4f7389e",
+          "result": ["223ea7b4154fd2a4", "4cd5f4d85d6b012f"],
+          "evidence": "The source prints the number of the next verse inside this verse and has no row for it."
+        },
+        {
+          "op": "split",
+          "ref": "30-5-11",
+          "at": 252,
+          "marker": "12 ",
+          "expect": "b204772dcdcbeba7",
+          "result": ["abbdc58a8292487a", "6095ec759137d67f"],
+          "evidence": "The source prints the number of the next verse inside this verse and has no row for it."
+        },
+        {
+          "op": "split",
+          "ref": "37-1-9",
+          "at": 249,
+          "marker": "10 ",
+          "expect": "8b94054bdd020c92",
+          "result": ["b7a5fd9ddbc53ee5", "c4b1499c6a93e7ba"],
+          "evidence": "The source prints the number of the next verse inside this verse and has no row for it."
+        },
+        {
+          "op": "split",
+          "ref": "38-7-7",
+          "at": 251,
+          "marker": "8 ",
+          "expect": "fcbdd8ef780fdd9a",
+          "result": ["2cc689cd11db0e8b", "07862d98ae9e8e94"],
+          "evidence": "The source prints the number of the next verse inside this verse and has no row for it."
+        },
+        {
+          "op": "split",
+          "ref": "38-9-15",
+          "at": 248,
+          "marker": "16 ",
+          "expect": "a0c7709994eae80f",
+          "result": ["8346a8ccb12ccfc6", "a466a06d688f0708"],
+          "evidence": "The source prints the number of the next verse inside this verse and has no row for it."
+        },
+        {
+          "op": "shift",
+          "chapter": "45-3",
+          "first": 23,
+          "last": 30,
+          "by": 1,
+          "expect": "76cf7a927b7838bb",
+          "evidence": "The chapter has one row fewer than its verses: verses 22 and 23 share row 22, and every later row is numbered one too low. Checked verse by verse against the Segond 1910 of the pipeline."
+        },
+        {
+          "op": "shift",
+          "chapter": "45-8",
+          "first": 21,
+          "last": 38,
+          "by": 1,
+          "expect": "f885619808f8e78c",
+          "evidence": "The chapter has one row fewer than its verses: verses 20 and 21 share row 20, and every later row is numbered one too low. Checked verse by verse against the Segond 1910 of the pipeline."
+        }
+      ]
+    },
+    "NET": {
+      "sourceSha256": "19d2f1bd85d956584ce7643ae884ce35d3bc23537863a4dfc69ed4c5e60b1588",
+      "repairs": [
+        {
+          "op": "split",
+          "ref": "19-119-112",
+          "at": 81,
+          "marker": " ֹ119:113 ",
+          "expect": "f3dfc8912f0aad98",
+          "result": ["da99a82c2469bb5d", "c3d541642ee6b0d6"],
+          "evidence": "The source prints the reference of the next verse (119:113) inside this verse and has no row for it."
+        },
+        {
+          "op": "split",
+          "ref": "24-32-1",
+          "at": 142,
+          "marker": " 32:2 ",
+          "expect": "8411be49d9f3f9dc",
+          "result": ["3625acca5b9a4301", "dd43cbad375bc6f4"],
+          "evidence": "The source prints the reference of the next verse (32:2) inside this verse and has no row for it."
+        }
+      ]
+    },
+    "OST": {
+      "sourceSha256": "d3258a3f962ec907be692ddf911180314223fa6521f9955c6fa1f9677589135d",
+      "repairs": [
+        {
+          "op": "shift",
+          "chapter": "27-2",
+          "first": 23,
+          "last": 48,
+          "by": 1,
+          "expect": "6ba91a7729950eee",
+          "evidence": "The chapter has one row fewer than its verses: the text of verse 23 is absent from the source and from its provider, and rows 23 to 48 are numbered one too low. The provider numbers these rows 24 to 49. Checked verse by verse against the Segond NEG 1979 and Martin texts of the pipeline."
+        },
+        {
+          "op": "shift",
+          "chapter": "40-11",
+          "first": 3,
+          "last": 29,
+          "by": 1,
+          "expect": "6dad99ea34599445",
+          "evidence": "The chapter has one row fewer than its verses: verses 2 and 3 share row 2, and every later row is numbered one too low. Checked verse by verse against the Segond 1910 of the pipeline."
+        },
+        {
+          "op": "shift",
+          "chapter": "45-3",
+          "first": 23,
+          "last": 30,
+          "by": 1,
+          "expect": "060aa4cbc92c1c82",
+          "evidence": "The chapter has one row fewer than its verses: verses 22 and 23 share row 22, and every later row is numbered one too low. Checked verse by verse against the Segond 1910 of the pipeline."
+        },
+        {
+          "op": "misprint",
+          "ref": "48-3-28",
+          "at": 1,
+          "printed": "1",
+          "reads": "l",
+          "expect": "bd1cf4e4ffae72f7",
+          "result": "dd4677a14ed7dceb",
+          "evidence": "The provider prints the first word of this verse with the digit one for its second letter, which is how the earlier source came to cut the verse there. The edition has the letter."
+        },
+        {
+          "op": "shift",
+          "chapter": "52-1",
+          "first": 6,
+          "last": 9,
+          "by": 1,
+          "expect": "1d9f08c48ae25b9b",
+          "evidence": "The chapter has one row fewer than its verses: the text of verse 6 is absent from the source and from its provider, and rows 6 to 9 are numbered one too low. The provider leaves the gap at verse 5 instead; row 5 reads as verse 5 in both other texts. Checked verse by verse against the Segond NEG 1979 and Martin texts of the pipeline."
+        },
+        {
+          "op": "misprint",
+          "ref": "58-12-11",
+          "at": 1,
+          "printed": "1",
+          "reads": "l",
+          "expect": "fd32409fecd79601",
+          "result": "05938fc02a042c60",
+          "evidence": "The provider prints the first word of this verse with the digit one for its second letter, which is how the earlier source came to cut the verse there. The edition has the letter."
+        },
+        {
+          "op": "shift",
+          "chapter": "59-5",
+          "first": 10,
+          "last": 19,
+          "by": 1,
+          "expect": "453c01d8a66a8716",
+          "evidence": "The chapter has one row fewer than its verses: the text of verse 10 is absent from the source and from its provider, and rows 10 to 19 are numbered one too low. The provider numbers these rows 11 to 20. Checked verse by verse against the Segond NEG 1979 and Martin texts of the pipeline."
+        },
+        {
+          "op": "misprint",
+          "ref": "66-22-10",
+          "at": 1,
+          "printed": "1",
+          "reads": "l",
+          "expect": "6aba4f0505aa9904",
+          "result": "bf07e66c8ededace",
+          "evidence": "The provider prints the first word of this verse with the digit one for its second letter, which is how the earlier source came to cut the verse there. The edition has the letter."
+        }
+      ]
+    },
+    "S21": {
+      "sourceSha256": "ab631a9601043f2c7895d9fc1ca6cbcec4489fbb5728797ae49f6cfad001c742",
+      "repairs": [
+        {
+          "op": "split",
+          "ref": "24-23-18",
+          "at": 146,
+          "marker": " 19 ",
+          "expect": "9220139cea0123e3",
+          "result": ["4f27f889f0d9c11a", "ac8721019d70c636"],
+          "evidence": "The source prints the number of the next verse inside this verse and has no row for it."
+        }
+      ]
+    }
+  }
+}
