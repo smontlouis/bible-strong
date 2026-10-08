@@ -24,6 +24,31 @@ export const parseNaveVerseTarget = (target: string): NaveVerseReference | undef
   return { book, chapter, verses }
 }
 
+/** How many verses a topic page quotes in full; the outline cites them all. */
+export const NAVE_QUOTED_VERSE_COUNT = 40
+
+/**
+ * The verses a topic page quotes: the first ones its outline cites, each once, in the order
+ * it cites them. A reference to a whole chapter names no verse to quote.
+ */
+export const naveQuotedVerses = (
+  references: readonly NaveVerseReference[],
+  limit = NAVE_QUOTED_VERSE_COUNT
+): { book: number; chapter: number; verse: number }[] => {
+  const seen = new Set<string>()
+  const verses: { book: number; chapter: number; verse: number }[] = []
+  for (const { book, chapter, verses: cited } of references) {
+    for (const verse of cited) {
+      const key = `${book}-${chapter}-${verse}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      verses.push({ book, chapter, verse })
+      if (verses.length === limit) return verses
+    }
+  }
+  return verses
+}
+
 /** Groups cited verses into runs of consecutive numbers, keeping their order. */
 export const naveVerseRuns = (verses: readonly number[]): NaveVerseRun[] => {
   const runs: NaveVerseRun[] = []

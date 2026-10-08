@@ -148,3 +148,19 @@
     grid-column: 1;
   }
 }
+
+/* A term: the article of each dictionary under the name of the dictionary. */
+.dictionary-term {
+  scroll-margin-top: 88px;
+}
+
+.dictionary-term__work {
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--resource-line);
+  padding-bottom: 10px;
+  color: var(--resource-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}

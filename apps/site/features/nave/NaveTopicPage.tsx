@@ -52,6 +52,25 @@ export default function NaveTopicPage({ topic }: { topic: NaveTopicPageData }) {
           />
         </section>
 
+        {topic.verses.length > 0 && (
+          <section className="mt-12">
+            <h2 className="mb-2 text-xl font-semibold">
+              {messages['topic.verses'].replace('{topic}', topic.name)}
+            </h2>
+            <p className="resource-muted mb-4 text-sm">{messages['topic.verses.note']}</p>
+            <ul className="verse-quotes">
+              {topic.verses.map(verse => (
+                <li key={verse.path}>
+                  <a className="verse-quotes__quote" href={verse.path}>
+                    <span className="verse-quotes__label">{verse.label}</span>
+                    <span className="verse-quotes__text">{verse.text}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {(previous || next) && (
           <nav
             className="mt-12 flex justify-between gap-4"

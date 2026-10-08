@@ -5,6 +5,7 @@ import {
   buildDictionaryEntryPath,
   buildDictionaryIndexPath,
   buildDictionaryLetterPath,
+  buildDictionaryTermPath,
   buildDictionaryWorkPath,
 } from './dictionaryRoutes'
 
@@ -54,4 +55,19 @@ export const dictionaryEntryBreadcrumbs = ({
     ? dictionaryLetterBreadcrumbs(language, work, letter)
     : dictionaryWorkBreadcrumbs(language, work)),
   { label: word, path: buildDictionaryEntryPath({ language, work: work.id, entryId: id, word }) },
+]
+
+/** Dictionary › the term. */
+export const dictionaryTermBreadcrumbs = ({
+  language,
+  word,
+}: {
+  language: ResourceLanguage
+  word: string
+}): Breadcrumb[] => [
+  {
+    label: resourceSection('dictionary').label[language],
+    path: buildDictionaryIndexPath(language),
+  },
+  { label: word, path: buildDictionaryTermPath(language, word) },
 ]

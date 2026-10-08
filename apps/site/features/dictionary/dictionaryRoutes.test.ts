@@ -5,12 +5,14 @@ import {
   buildDictionaryEntryPath,
   buildDictionaryIndexPath,
   buildDictionaryLetterPath,
+  buildDictionaryTermPath,
   buildDictionaryWorkPath,
   buildWebAppDictionaryEntryUrl,
   createDictionaryArticleSlug,
   dictionaryLetter,
   dictionaryLetterInitials,
   parseDictionaryEntryId,
+  parseDictionaryTermSlug,
   parseDictionaryWorkRoute,
   validateDictionaryListSearch,
 } from './dictionaryRoutes'
@@ -178,5 +180,20 @@ describe('Dictionary work names', () => {
         abbreviation: 'Easton + Webster 1828',
       })
     ).toBe('Easton’s Bible Dictionary & Webster’s 1828 Dictionary')
+  })
+})
+
+describe('Dictionary terms', () => {
+  it('addresses a term by the slug of its heading', () => {
+    expect(buildDictionaryTermPath('fr', 'Évangile, évangélistes')).toBe(
+      '/dictionary/fr/term/evangile-evangelistes'
+    )
+  })
+
+  it('reads a slug and nothing else', () => {
+    expect(parseDictionaryTermSlug('evangile-evangelistes')).toBe('evangile-evangelistes')
+    expect(parseDictionaryTermSlug('Aaron')).toBeUndefined()
+    expect(parseDictionaryTermSlug('a--b')).toBeUndefined()
+    expect(parseDictionaryTermSlug(undefined)).toBeUndefined()
   })
 })

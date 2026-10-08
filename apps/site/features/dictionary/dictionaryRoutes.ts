@@ -120,6 +120,17 @@ export const buildDictionaryEntryPath = ({
   return `${buildDictionaryWorkPath(language, work)}/${entryId}/${createDictionaryArticleSlug(word)}`
 }
 
+/**
+ * A term as several dictionaries of a language define it. `term` is not the name of a work,
+ * so the address cannot be taken for a dictionary.
+ */
+export const buildDictionaryTermPath = (language: ResourceLanguage, word: string): string =>
+  `${buildDictionaryIndexPath(language)}/term/${createDictionaryArticleSlug(word)}`
+
+/** The slug of a term as written in a path, or nothing when it cannot be one. */
+export const parseDictionaryTermSlug = (slug: string | undefined): string | undefined =>
+  slug && /^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(slug) ? slug : undefined
+
 // The dictionary list of the study workspace.
 export const WEB_APP_DICTIONARY_URL = `${WEB_APP_ORIGIN}/dictionnaire`
 

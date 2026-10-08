@@ -4,6 +4,7 @@ import {
   parseNaveVerseTarget,
   resolveNaveHref,
   type NaveLinkContext,
+  type NaveVerseReference,
 } from './naveReferences'
 
 // A topic is an outline: entries holding lines of text and the lists of their sub-entries.
@@ -31,6 +32,8 @@ export type NaveDescription = {
   headings: string[]
   /** How many Bible references the topic cites. */
   referenceCount: number
+  /** The passages it cites, in the order of the outline. */
+  references: NaveVerseReference[]
 }
 
 /**
@@ -43,11 +46,11 @@ export type NaveDescription = {
 const parseNaveOutline = (
   html: string,
   language: NaveLinkContext['language']
-): { blocks: NaveBlock[]; referenceCount: number } => {
+): { blocks: NaveBlock[]; references: NaveVerseReference[] } => {
   const root: NaveEntry = { blocks: [] }
   const stack: NaveFrame[] = [{ kind: 'root', entry: root }]
   let line = ''
-  let referenceCount = 0
+  const references: NaveVerseReference[] = []
 
   // The entry text and lists are added to. What a list holds between two of its entries
   // continues the one before it.
@@ -102,7 +105,7 @@ const parseNaveOutline = (
           .join(',')
         position += end.index + end[0].length
         pattern.lastIndex = position
-        referenceCount += 1
+        references.push(reference)
         continue
       }
     }
@@ -147,7 +150,7 @@ const parseNaveOutline = (
   line += html.slice(position)
   endLine()
 
-  return { blocks: tidyBlocks(root.blocks), referenceCount }
+  return { blocks: tidyBlocks(root.blocks), references }
 }
 
 /** Drops empty entries, lifts the ones that only wrap lists and merges adjacent lists. */
@@ -193,7 +196,7 @@ const renderBlocks = (blocks: NaveBlock[], inEntry: boolean): string =>
  * that resolves to no site page is dropped and its text kept.
  */
 export const renderNaveDescription = (html: string, context: NaveLinkContext): NaveDescription => {
-  const { blocks, referenceCount } = parseNaveOutline(html, context.language)
+  const { blocks, references } = parseNaveOutline(html, context.language)
   const entries = blocks.flatMap(block => (typeof block === 'string' ? [] : block))
   return {
     html: sanitizeEditorialHtml(renderBlocks(blocks, false), {
@@ -203,6 +206,7 @@ export const renderNaveDescription = (html: string, context: NaveLinkContext): N
       const heading = headingOf(entry.blocks)
       return heading ? [editorialHtmlToText(heading)] : []
     }),
-    referenceCount,
+    referenceCount: references.length,
+    references,
   }
 }

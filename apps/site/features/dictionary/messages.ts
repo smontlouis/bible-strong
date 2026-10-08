@@ -19,6 +19,12 @@ const MESSAGES = {
     'entry.next': 'Article suivant',
     'entry.letter': 'Tous les articles en {letter}',
     'entry.related': 'Dans d’autres dictionnaires',
+    'entry.term': 'Lire « {word} » dans les {count} dictionnaires',
+    'term.intro':
+      'Ce que les dictionnaires bibliques disent de « {word} », un article après l’autre.',
+    'term.works': 'Dictionnaires',
+    'term.article': 'L’article dans {work}',
+    'term.title': '{word} dans la Bible : définition ({count} dictionnaires)',
     'entry.source': 'Source de l’article',
   },
   en: {
@@ -38,6 +44,11 @@ const MESSAGES = {
     'entry.next': 'Next article',
     'entry.letter': 'All articles in {letter}',
     'entry.related': 'In other dictionaries',
+    'entry.term': 'Read “{word}” in the {count} dictionaries',
+    'term.intro': 'What Bible dictionaries say about “{word}”, one article after the other.',
+    'term.works': 'Dictionaries',
+    'term.article': 'The article in {work}',
+    'term.title': '{word} in the Bible: definition ({count} dictionaries)',
     'entry.source': 'Source of the article',
   },
 } as const

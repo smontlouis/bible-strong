@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  naveQuotedVerses,
   naveReferenceLinks,
   naveVerseRuns,
   parseNaveVerseTarget,
@@ -97,5 +98,24 @@ describe('Nave link resolution', () => {
     expect(resolve('view.cgi?n=1783')).toBeUndefined()
     expect(resolve('https://example.com/')).toBeUndefined()
     expect(resolve('javascript:alert(1)')).toBeUndefined()
+  })
+})
+
+describe('naveQuotedVerses', () => {
+  it('quotes the first verses cited, each once, and no whole chapter', () => {
+    expect(
+      naveQuotedVerses(
+        [
+          { book: 2, chapter: 6, verses: [20, 23] },
+          { book: 2, chapter: 7, verses: [] },
+          { book: 2, chapter: 6, verses: [23, 25] },
+        ],
+        3
+      )
+    ).toEqual([
+      { book: 2, chapter: 6, verse: 20 },
+      { book: 2, chapter: 6, verse: 23 },
+      { book: 2, chapter: 6, verse: 25 },
+    ])
   })
 })
