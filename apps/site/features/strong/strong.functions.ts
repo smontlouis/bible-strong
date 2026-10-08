@@ -24,13 +24,11 @@ import {
   truncateText,
 } from '../resources/editorialHtml'
 import { createPageReads, type PageReads } from '../resources/pageReads'
-import {
-  isResourceLanguage,
-  RESOURCE_PAGE_CACHE_CONTROL,
-  type ResourceLanguage,
-} from '../resources/publicSite'
+import { isResourceLanguage, type ResourceLanguage } from '../resources/publicSite'
 import { findBibleBook } from '../bible/bibleBooks'
 import { readResource } from '../resources/resourceApi'
+import { notingStaleAnswers } from '../resources/staleAnswers'
+import { resourceResponseCacheControl } from '../resources/staleResponse'
 import { renderStrongDefinitionHtml } from './strongHtml'
 import {
   isStrongLexicon,
@@ -968,7 +966,7 @@ export const loadStrongPreview = createServerFn({ method: 'GET' })
     const definition = presentDefinitions(resolved).essentialHtml
 
     // A preview is as stable as the entry page, so the CDN may keep it as long.
-    setResponseHeader('Cache-Control', RESOURCE_PAGE_CACHE_CONTROL)
+    setResponseHeader('Cache-Control', resourceResponseCacheControl())
     return {
       code,
       original: entry.original,
@@ -1025,14 +1023,17 @@ export const listStrongLetters = async (
   const cached = lettersCache.get(key)
   if (cached && Date.now() - cached.at < LETTERS_TTL_MS) return cached.letters
   // An accented initial never comes without its plain letter, so one probe per letter is enough.
-  const filled = await Promise.all(
-    STRONG_LETTERS.map(async letter => {
-      const page = await browseSimpleLexicon(language, lexicon, { prefix: letter, limit: 1 })
-      return (page?.entries.length ?? 0) > 0
-    })
+  const { value: filled, stale } = await notingStaleAnswers(() =>
+    Promise.all(
+      STRONG_LETTERS.map(async letter => {
+        const page = await browseSimpleLexicon(language, lexicon, { prefix: letter, limit: 1 })
+        return (page?.entries.length ?? 0) > 0
+      })
+    )
   )
   const letters = STRONG_LETTERS.filter((_, index) => filled[index])
-  lettersCache.set(key, { at: Date.now(), letters })
+  // Letters a STALE answer of the Resource API came into are not kept: the next page asks again.
+  if (!stale) lettersCache.set(key, { at: Date.now(), letters })
   return letters
 }
 

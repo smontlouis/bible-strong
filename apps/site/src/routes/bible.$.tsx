@@ -1,7 +1,7 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
 import BiblePage from '@/features/bible/BiblePage'
 import { loadBiblePage } from '@/features/bible/bible.functions'
-import { pageCacheHeaders } from '@/features/resources/pageReads'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
 import { validateBibleSearch } from '@/features/bible/bibleCommentaries'
 import { buildBibleHead } from '@/features/bible/bibleHead'
 import { buildBiblePath, parseBibleRoute } from '@/features/bible/bibleRoutes'
@@ -31,7 +31,7 @@ export const Route = createFileRoute('/bible/$')({
   head: ({ loaderData }) => (loaderData ? buildBibleHead(loaderData) : {}),
   // Only a whole rendered passage is kept for long: a page missing a part it could not read
   // is kept a minute, a failed load not at all.
-  headers: ({ loaderData }) => pageCacheHeaders(loaderData),
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: BibleRoute,
 })
 

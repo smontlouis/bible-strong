@@ -3,7 +3,8 @@ import NaveTopicPage from '@/features/nave/NaveTopicPage'
 import { loadNaveTopicPage } from '@/features/nave/nave.functions'
 import { buildNaveTopicHead } from '@/features/nave/naveHead'
 import { buildNavePath, parseNaveTopic } from '@/features/nave/naveRoutes'
-import { isResourceLanguage, RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
+import { isResourceLanguage } from '@/features/resources/publicSite'
 
 // `/nave/:language/:topic` — a topic under its published name, the route of ADR-0054.
 export const Route = createFileRoute('/nave/$language_/$topic')({
@@ -22,8 +23,7 @@ export const Route = createFileRoute('/nave/$language_/$topic')({
     loadNaveTopicPage({ data: { language: params.language, topic: params.topic } }),
   head: ({ loaderData }) => (loaderData ? buildNaveTopicHead(loaderData) : {}),
   // Only a rendered topic is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: NaveTopicRoute,
 })
 

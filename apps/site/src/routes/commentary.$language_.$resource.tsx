@@ -3,7 +3,8 @@ import CommentaryPage from '@/features/commentary/CommentaryPage'
 import { loadCommentaryPage } from '@/features/commentary/commentary.functions'
 import { buildCommentaryHead } from '@/features/commentary/commentaryHead'
 import { isCommentaryResourceSlug } from '@/features/commentary/commentaryRoutes'
-import { isResourceLanguage, RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
+import { isResourceLanguage } from '@/features/resources/publicSite'
 
 // `/commentary/:language/:resource` — a commentary and the chapters it covers.
 export const Route = createFileRoute('/commentary/$language_/$resource')({
@@ -15,8 +16,7 @@ export const Route = createFileRoute('/commentary/$language_/$resource')({
   loader: ({ params }) => loadCommentaryPage({ data: params }),
   head: ({ loaderData }) => (loaderData ? buildCommentaryHead(loaderData) : {}),
   // Only a rendered page is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: CommentaryRoute,
 })
 

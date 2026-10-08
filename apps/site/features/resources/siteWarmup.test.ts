@@ -15,6 +15,7 @@ import {
   parseSitemapIndex,
   parseSitemapLocs,
   PRESETS,
+  isWarm,
   readAnswer,
   readOptions,
   resolveRate,
@@ -445,6 +446,21 @@ describe('warm-up answers', () => {
     // Kept longer than an incomplete page ever is.
     expect(page({ ...hidden, 'x-vercel-cache': 'HIT', age: '61' }).completeness).toBe('whole')
     expect(page({ ...hidden, 'x-vercel-cache': 'STALE' }).completeness).toBe('whole')
+  })
+
+  it('takes a page rendered from an earlier answer of the API for provisional, not for trouble', () => {
+    const provisional = page({
+      'x-page-stale': '1',
+      'cache-control': 'public, max-age=0, s-maxage=60',
+      'x-vercel-cache': 'MISS',
+    })
+
+    expect(provisional).toMatchObject({ kind: 'rendered', completeness: 'provisional' })
+    expect(signalOf(provisional)).toBe('good')
+    // It is kept a minute: the journal does not vouch for it until it is rendered again.
+    expect(isWarm(provisional)).toBe(false)
+    // A page that is both says the worse of the two.
+    expect(page({ 'x-page-stale': '1', 'x-page-incomplete': '1' }).completeness).toBe('incomplete')
   })
 
   it('expects the CDN to keep every page but the landing pages', () => {

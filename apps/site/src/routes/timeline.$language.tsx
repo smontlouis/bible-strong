@@ -1,5 +1,5 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
-import { RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
 import TimelineIndexPage from '@/features/timeline/TimelineIndexPage'
 import { loadTimelineIndexPage } from '@/features/timeline/timeline.functions'
 import { buildTimelineIndexHead } from '@/features/timeline/timelineHead'
@@ -22,8 +22,7 @@ export const Route = createFileRoute('/timeline/$language')({
   loader: ({ params }) => loadTimelineIndexPage({ data: { language: params.language } }),
   head: ({ loaderData }) => (loaderData ? buildTimelineIndexHead(loaderData) : {}),
   // Only a rendered page is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: TimelineIndexRoute,
 })
 

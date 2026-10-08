@@ -3,7 +3,8 @@ import { NaveLetterPage } from '@/features/nave/NavePages'
 import { loadNaveLetterPage } from '@/features/nave/nave.functions'
 import { buildNaveLetterHead } from '@/features/nave/naveHead'
 import { isNaveLetter } from '@/features/nave/naveRoutes'
-import { isResourceLanguage, RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
+import { isResourceLanguage } from '@/features/resources/publicSite'
 
 // `/nave/:language/index/:letter` — the first page of a letter; the following ones carry
 // their number in the path.
@@ -24,8 +25,7 @@ export const Route = createFileRoute('/nave/$language_/index/$letter')({
     loadNaveLetterPage({ data: { language: params.language, letter: params.letter, page: 1 } }),
   head: ({ loaderData }) => (loaderData ? buildNaveLetterHead(loaderData) : {}),
   // Only a rendered page is cacheable: a failed load must not be kept by the CDN.
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: NaveLetterRoute,
 })
 

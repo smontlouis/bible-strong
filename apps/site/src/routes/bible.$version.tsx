@@ -3,7 +3,7 @@ import { BibleVersionPage } from '@/features/bible/BibleHubPages'
 import { loadBibleVersionPage } from '@/features/bible/bible.functions'
 import { buildBibleVersionHead } from '@/features/bible/bibleHead'
 import { bibleVersionSlug, findBibleVersion } from '@/features/bible/bibleVersions'
-import { RESOURCE_PAGE_CACHE_CONTROL } from '@/features/resources/publicSite'
+import { resourcePageHeaders } from '@/features/resources/pageHeaders'
 
 // `/bible/:version` — the books and chapters of a version.
 export const Route = createFileRoute('/bible/$version')({
@@ -17,8 +17,7 @@ export const Route = createFileRoute('/bible/$version')({
   },
   loader: ({ params }) => loadBibleVersionPage({ data: { version: params.version } }),
   head: ({ loaderData }) => (loaderData ? buildBibleVersionHead(loaderData) : {}),
-  headers: ({ loaderData }) =>
-    loaderData ? { 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL } : undefined,
+  headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: BibleVersionRoute,
 })
 

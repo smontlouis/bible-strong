@@ -13,6 +13,7 @@ import {
   type ResourceLanguage,
 } from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
+import { answerShared, notingStaleAnswers, type NotedAnswer } from '../resources/staleAnswers'
 import { dictionaryArticleExcerpt, renderDictionaryArticleHtml } from './dictionaryHtml'
 import {
   createDictionaryArticleSlug,
@@ -46,22 +47,28 @@ export type DictionaryWork = {
 
 export type DictionaryListEntry = { id: number; word: string }
 
-const listCache = new Map<string, { at: number; list: Promise<unknown> }>()
+const listCache = new Map<string, { at: number; list: Promise<NotedAnswer<unknown>> }>()
 
 /**
  * Lists only change when a dictionary is republished: a server instance keeps each one for
  * an hour. The read itself is kept, so pages rendered at the same time share it; a failed
- * read is forgotten.
+ * read is forgotten, and so is a list a STALE answer of the Resource API came into, which
+ * each page that was sharing the read then reads again.
  */
 const cached = <T>(key: string, load: () => Promise<T>): Promise<T> => {
   const hit = listCache.get(key)
-  if (hit && Date.now() - hit.at < LIST_TTL_MS) return hit.list as Promise<T>
-  const list = load()
+  if (hit && Date.now() - hit.at < LIST_TTL_MS) {
+    return answerShared(hit.list as Promise<NotedAnswer<T>>, load)
+  }
+  const list = notingStaleAnswers(load)
   listCache.set(key, { at: Date.now(), list })
-  list.catch(() => {
+  const forget = () => {
     if (listCache.get(key)?.list === list) listCache.delete(key)
-  })
-  return list
+  }
+  list.then(({ stale }) => {
+    if (stale) forget()
+  }, forget)
+  return list.then(({ value }) => value)
 }
 
 /** The dictionaries published in a language. */

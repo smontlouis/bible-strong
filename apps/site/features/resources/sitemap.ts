@@ -1,4 +1,6 @@
 import { escapeHtml } from './editorialHtml'
+import { STALE_PAGE_CACHE_CONTROL } from './pageReads'
+import { responseIsStale } from './staleResponse'
 
 // A sitemap is rebuilt from the Resource API, so the CDN keeps it for a day.
 const SITEMAP_CACHE_CONTROL = 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800'
@@ -33,10 +35,11 @@ export const renderSitemap = (urls: SitemapUrl[]): string =>
     '</urlset>',
   ].join('\n')
 
+// A sitemap listed from a STALE answer of the Resource API is kept a minute, like a page.
 export const xmlResponse = (xml: string): Response =>
   new Response(xml, {
     headers: {
       'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': SITEMAP_CACHE_CONTROL,
+      'Cache-Control': responseIsStale() ? STALE_PAGE_CACHE_CONTROL : SITEMAP_CACHE_CONTROL,
     },
   })
