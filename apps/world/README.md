@@ -14,7 +14,7 @@ Open http://localhost:5186. On a phone on the same network, use the Network addr
 
 ## Multiplayer
 
-Visitors now share an event room with live avatars, names and colors. `yarn dev:world` starts both the frontend and the local multiplayer Worker. See [multiplayer operation and validation](docs/multiplayer.md) for deployment, network behavior and load checks.
+Visitors share one room with live avatars, names and colors. `yarn dev:world` starts both the frontend and the local multiplayer Worker. See [multiplayer operation and validation](docs/multiplayer.md) for deployment, network behavior and load checks.
 
 ## Edit navigation zones
 

@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import { readFile, readdir } from 'node:fs/promises'
 import { setTimeout as delay } from 'node:timers/promises'
-const endpoint = process.env.WORLD_TEST_URL || 'ws://127.0.0.1:8791/parties/world-room/asi-europe'
+const endpoint = process.env.WORLD_TEST_URL || 'ws://127.0.0.1:8791/parties/world-room/main'
 assert(['localhost', '127.0.0.1'].includes(new URL(endpoint).hostname), 'Local smoke only')
 const load = async directory =>
   (

@@ -69,15 +69,6 @@ export function StandBanner({ invitation, language }: { invitation: string; lang
           <span className="stand-banner-invitation">{invitation}</span>
           <span className="stand-banner-url">world.bible-strong.app</span>
         </span>
-        <span className="stand-banner-partner">
-          <img
-            className="stand-banner-logo"
-            src="/assets/asi-europe.png"
-            width="308"
-            height="150"
-            alt="ASI Europe"
-          />
-        </span>
       </a>
     </div>
   )

@@ -1,6 +1,6 @@
 export const storyCopy = {
   fr: {
-    title: 'Bible Strong x ASI Europe',
+    title: 'L’histoire de Bible Strong',
     close: 'Fermer le livre',
     navigation: 'Les chapitres de notre histoire',
     tagline: 'Explorer · Comprendre · Grandir',
@@ -11,7 +11,6 @@ export const storyCopy = {
     support: 'Soutenir le projet',
     app: 'Découvrir l’application',
     code: 'Voir le code source',
-    contact: 'Échanger avec moi',
     donate: 'Faire un don',
     note: 'Laisser un petit mot',
     motto: 'Une aventure de foi, de code et de partage.',
@@ -19,7 +18,7 @@ export const storyCopy = {
       {
         id: 'welcome',
         label: 'Bienvenue',
-        title: 'Bible Strong x ASI Europe',
+        title: 'L’histoire de Bible Strong',
         paragraphs: [
           'Moi, c’est Stéphane, le créateur de Bible Strong. Depuis 2019, je développe une application avec une conviction : chacun devrait pouvoir explorer la Bible en profondeur, sans avoir besoin d’être un spécialiste.',
           'Ce projet a grandi au fil des années. Voici un peu de son histoire — et de la mienne.',
@@ -53,16 +52,6 @@ export const storyCopy = {
         ],
       },
       {
-        id: 'together',
-        label: 'Construire ensemble',
-        title: 'Construire la suite ensemble.',
-        paragraphs: [
-          'Je souhaite aujourd’hui faire grandir Bible Strong. Je suis convaincu qu’il reste beaucoup à inventer pour rendre l’étude biblique plus accessible et accompagner la découverte de la foi.',
-          'L’application est notamment utilisée par de nombreux chrétiens évangéliques. Cette ouverture représente pour moi une belle occasion de partager autour de la Bible.',
-          'J’aimerais construire des partenariats avec l’Église adventiste pour créer des études bibliques, enrichir les contenus, réfléchir à la manière de les faire connaître et soutenir leur développement.',
-        ],
-      },
-      {
         id: 'support',
         label: 'Soutenir le projet',
         title: 'Faire grandir cette aventure.',
@@ -75,7 +64,7 @@ export const storyCopy = {
     ],
   },
   en: {
-    title: 'Bible Strong x ASI Europe',
+    title: 'The Bible Strong story',
     close: 'Close the book',
     navigation: 'Chapters of our story',
     tagline: 'Explore · Understand · Grow',
@@ -86,7 +75,6 @@ export const storyCopy = {
     support: 'Support the project',
     app: 'Discover the app',
     code: 'View the source code',
-    contact: 'Get in touch',
     donate: 'Make a donation',
     note: 'Leave a little note',
     motto: 'An adventure of faith, code and sharing.',
@@ -94,7 +82,7 @@ export const storyCopy = {
       {
         id: 'welcome',
         label: 'Welcome',
-        title: 'Bible Strong x ASI Europe',
+        title: 'The Bible Strong story',
         paragraphs: [
           'I’m Stéphane, the creator of Bible Strong. Since 2019, I’ve been building an app with one conviction: everyone should be able to explore the Bible in depth, without needing to be an expert.',
           'The project has grown over the years. Here is a little of its story — and mine.',
@@ -125,16 +113,6 @@ export const storyCopy = {
         paragraphs: [
           'Little by little, Bible Strong has become a Swiss army knife for Bible study. Dictionaries, lexicons, cross-references, commentaries… different resources work together to help everyone go deeper in their reading.',
           'The project is open source: its code is publicly available online. Anyone can discover how the app works and contribute to its development.',
-        ],
-      },
-      {
-        id: 'together',
-        label: 'Build together',
-        title: 'Building what comes next, together.',
-        paragraphs: [
-          'Today, I want to help Bible Strong grow. I believe there is still so much to create to make Bible study more accessible and help people discover faith.',
-          'Many evangelical Christians use the app. For me, this openness is a wonderful opportunity to connect with others around the Bible.',
-          'I would love to build partnerships with the Adventist Church to create Bible studies, enrich the content, explore ways to share it and support its development.',
         ],
       },
       {

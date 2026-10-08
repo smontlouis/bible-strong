@@ -47,7 +47,7 @@ gets up to 12 seconds to complete even after the round's answer deadline.
 ## Ownership and persistence
 
 `server/games/engine.ts` is the deterministic game authority. `room.ts` persists
-its bounded state in the existing event room's SQLite store before sending private
+its bounded state in the existing room's SQLite store before sending private
 snapshots. Game state, deadlines and pending operation identities survive Durable
 Object recreation. Catalogue and evaluation completions re-read persisted state
 and must match their operation ID and round. A lost asynchronous task times out
@@ -102,7 +102,7 @@ otherwise marks incorrect. These thresholds are heuristics. A provider error ret
 
 ## Bounds
 
-- 50 retained games per event room (finished games, then absent solo runs and lobbies are
+- 50 retained games per room (finished games, then absent solo runs and lobbies are
   evicted when a new game needs a slot); 4 participants per game.
 - Lobby/final summary retention: 10 minutes. Absent participants: 90 seconds.
 - Creation cooldown: 10 seconds. Re-invite cooldown: 60 seconds; at most 3 incoming invites.
@@ -254,7 +254,7 @@ Test du catalogue SQLite, sur une salle locale disponible :
 ```sh
 node apps/world/scripts/test-solo.mjs
 # Pour une instance Worker locale isolée :
-WORLD_TEST_URL=ws://127.0.0.1:8792/parties/world-room/asi-europe node apps/world/scripts/test-solo.mjs
+WORLD_TEST_URL=ws://127.0.0.1:8792/parties/world-room/main node apps/world/scripts/test-solo.mjs
 ```
 
 Le script vérifie chargement, confidentialité des réponses, pause, reconnexion,

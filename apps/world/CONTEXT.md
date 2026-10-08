@@ -1,6 +1,6 @@
-# Event Exploration World Context
+# Exploration World Context
 
-The Event Exploration World is a standalone, illustrated Bible Strong experience for ASI Europe. Visitors move an Avatar through six places that introduce the product's study-resource families.
+The Exploration World is a standalone, illustrated Bible Strong experience. Visitors move an Avatar through six places that introduce the product's study-resource families.
 
 ## Language
 

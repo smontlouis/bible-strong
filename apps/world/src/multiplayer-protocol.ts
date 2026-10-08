@@ -8,7 +8,7 @@ import {
 } from './games-protocol'
 import { parseProfile, type AvatarProfile } from './avatar-profile'
 
-export const ROOM = 'asi-europe'
+export const ROOM = 'main'
 export const PROTOCOL_VERSION = 2
 export const SEND_INTERVAL = 1000 / 15
 export const MAX_PLAYERS = 100

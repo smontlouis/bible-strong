@@ -42,10 +42,10 @@
 }
 .stand-banner {
   display: grid;
-  grid-template-columns: 21% minmax(0, 1fr) 17%;
+  grid-template-columns: 21% minmax(0, 1fr);
   align-items: center;
   gap: 3%;
-  padding: 14px 0 14px 3%;
+  padding: 14px 3%;
   border: 5px solid var(--bs-navy);
   border-radius: 76px;
   background: linear-gradient(115deg, #ffda20, #ffce00 55%, var(--bs-yellow));
@@ -154,19 +154,6 @@
   line-height: 1.1;
   letter-spacing: -0.035em;
 }
-.stand-banner-partner {
-  position: relative;
-  display: block;
-  margin-right: -22px;
-  padding: 22px 24px;
-  border-radius: 999px;
-  background: var(--bs-navy);
-}
-.stand-banner-logo {
-  display: block;
-  width: 100%;
-  height: auto;
-}
 .stand-banner:focus-visible,
 .stand-banner-toggle:focus-visible {
   outline: 3px solid #fff;
@@ -199,10 +186,6 @@
     height: 64px;
     left: -40px;
     top: -32px;
-  }
-  .stand-banner-partner {
-    padding: 16px;
-    margin-right: -18px;
   }
   .stand-banner-spark {
     width: 36px;
@@ -253,14 +236,6 @@
     width: 100%;
     font-size: clamp(12px, 3.2cqw, 19px);
     padding: 5px 6px;
-  }
-  .stand-banner-partner {
-    grid-column: 2;
-    justify-self: center;
-    width: 116px;
-    max-width: 100%;
-    margin-right: 0;
-    padding: 8px 16px;
   }
   .stand-banner-rays {
     width: 38px;
