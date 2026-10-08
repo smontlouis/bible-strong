@@ -1,11 +1,17 @@
+import type { BibleVerseTextsDto } from '@bible-strong/resource-domain/contracts/bibleChapterContract'
 import type { NaveTopicResponseDto } from '@bible-strong/resource-domain/contracts/naveContract'
 import { notFound, redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { bibleBookName } from '../bible/bibleBooks'
+import { buildBiblePath } from '../bible/bibleRoutes'
+import { quoteVerseText } from '../bible/bibleVerseRules'
+import { defaultBibleVersionId } from '../bible/bibleVersions'
 import { editorialHtmlToText } from '../resources/editorialHtml'
 import { isResourceLanguage, type ResourceLanguage } from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
 import { describeNaveTopic } from './naveHead'
 import { renderNaveDescription } from './naveHtml'
+import { naveQuotedVerses } from './naveReferences'
 import { loadNaveIndex, type NaveIndex, type NaveIndexTopic } from './naveIndex'
 import {
   buildNavePath,
@@ -121,6 +127,8 @@ export type NaveTopicPageData = NaveListTopic & {
   html: string
   description: string
   referenceCount: number
+  /** The first verses the topic cites, quoted in the reference Bible of the language. */
+  verses: { label: string; path: string; text: string }[]
   /** Whether the publication of the other language holds the same topic. */
   hasAlternate: boolean
   previous?: NaveListTopic
@@ -159,6 +167,24 @@ export const loadNaveTopicPage = createServerFn({ method: 'GET' })
       hasTopic: target => target !== normalizedName && index.positions.has(target),
     })
 
+    // A topic is read with its verses under the eyes: the first ones are quoted. They are
+    // an addition to the outline, which a failed read must not keep from being shown.
+    const versionId = defaultBibleVersionId(language)
+    const quoted = naveQuotedVerses(outline.references)
+    const texts = quoted.length
+      ? await readResource<BibleVerseTextsDto>(`/v1/bibles/${versionId}/verses`, {
+          references: quoted
+            .map(verse => `${verse.book}-${verse.chapter}-${verse.verse}`)
+            .join(','),
+        }).catch(() => undefined)
+      : undefined
+    const textByVerse = new Map(
+      (texts?.verses ?? []).map(verse => [
+        `${verse.book}-${verse.chapter}-${verse.number}`,
+        verse.text,
+      ])
+    )
+
     // Lists hold the topics the letters cover; one filed elsewhere has no neighbours.
     const position = index.positions.get(normalizedName)
     const listed = position === undefined ? undefined : index.topics[position]
@@ -181,6 +207,23 @@ export const loadNaveTopicPage = createServerFn({ method: 'GET' })
         text: outline.headings.length ? '' : outlineText(outline.html),
       }),
       referenceCount: outline.referenceCount,
+      verses: quoted.flatMap(verse => {
+        const text = textByVerse.get(`${verse.book}-${verse.chapter}-${verse.verse}`)
+        return text
+          ? [
+              {
+                label: `${bibleBookName(verse.book, language)} ${verse.chapter}:${verse.verse}`,
+                path: buildBiblePath({
+                  versionId,
+                  book: verse.book,
+                  chapter: verse.chapter,
+                  passage: { startVerse: verse.verse },
+                }),
+                text: quoteVerseText(text),
+              },
+            ]
+          : []
+      }),
       hasAlternate: alternate.positions.has(normalizedName),
       previous: previous && listTopic(previous),
       next: next && listTopic(next),
