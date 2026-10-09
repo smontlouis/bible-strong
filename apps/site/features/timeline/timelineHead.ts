@@ -8,6 +8,8 @@ import {
   buildTimelineIndexPath,
   timelineEventBreadcrumbs,
 } from './timelineRoutes'
+import { shareCardExcerpt, shareCardPicture } from '../share/shareCardText'
+import { findTimelinePeriod } from './timelinePeriods'
 
 /** Title, description, canonical and language alternates of the timeline of a language. */
 export const buildTimelineIndexHead = (page: TimelineIndexPageData) => {
@@ -29,6 +31,26 @@ export const buildTimelineIndexHead = (page: TimelineIndexPageData) => {
         )
       : undefined,
     ogType: 'website',
+    shareCard: {
+      kind: 'title',
+      title: messages.name,
+      facts:
+        language === 'fr'
+          ? `${page.eventCount.toLocaleString('fr')} personnages et événements en ${page.periods.length} périodes`
+          : `${page.eventCount.toLocaleString('en')} people and events in ${page.periods.length} periods`,
+      // Six of the periods, from the Creation to the early Church.
+      pictures: ['1', '2', '4', '6', '9', '10'].flatMap(id => {
+        const period = findTimelinePeriod(id)
+        return period
+          ? [
+              {
+                src: absoluteSiteUrl(`/images/timeline/period-${id}.jpg`),
+                caption: period.title[language],
+              },
+            ]
+          : []
+      }),
+    },
     structuredData: [
       {
         '@context': 'https://schema.org',
@@ -50,6 +72,7 @@ export const buildTimelineEventHead = (event: TimelineEventPageData) => {
   const path = buildTimelineEventPath(language, slug)
   const indexPath = buildTimelineIndexPath(language)
   const dates = formatTimelineDates(event.dates, language)
+  const picture = shareCardPicture(event.images[0]?.src)
 
   return buildResourceHead({
     title: messages.eventHeadTitle.replace('{title}', event.title).replace('{dates}', dates),
@@ -63,6 +86,14 @@ export const buildTimelineEventHead = (event: TimelineEventPageData) => {
         )
       : undefined,
     breadcrumbs: timelineEventBreadcrumbs(language, event.title),
+    shareCard: {
+      kind: 'title',
+      kicker: language === 'fr' ? 'Chronologie' : 'Timeline',
+      chip: dates,
+      title: event.title,
+      excerpt: shareCardExcerpt(event.summary, picture !== undefined),
+      picture,
+    },
     structuredData: [
       {
         '@context': 'https://schema.org',

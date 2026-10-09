@@ -17,6 +17,9 @@ import {
   type BiblePresentation,
 } from './bibleRoutes'
 import { bibleVersionName, findBibleVersion } from './bibleVersions'
+import type { ShareCardContent } from '../share/ShareCard'
+import { shareCardMeta } from '../share/shareCardMeta'
+import { shareCardExcerpt, shareCardVerse } from '../share/shareCardText'
 
 const VERSE_TITLE_LENGTH = 90
 
@@ -25,6 +28,13 @@ const SUFFIXES: Record<BiblePresentation, Record<ResourceLanguage, string>> = {
   strong: { fr: ' avec les numéros Strong', en: ' with Strong’s numbers' },
   'reverse-interlinear': { fr: ' en interlinéaire inversé', en: ' reverse interlinear' },
   interlinear: { fr: ' en interlinéaire hébreu-grec', en: ' Hebrew-Greek interlinear' },
+}
+
+// How the share image of a chapter names the reading it is opened in.
+const READINGS: Record<Exclude<BiblePresentation, 'text'>, Record<ResourceLanguage, string>> = {
+  strong: { fr: 'Numéros Strong', en: 'Strong’s numbers' },
+  'reverse-interlinear': { fr: 'Interlinéaire inversé', en: 'Reverse interlinear' },
+  interlinear: { fr: 'Interlinéaire', en: 'Interlinear' },
 }
 
 /** Title, description, canonical and indexing policy of a Bible page. */
@@ -42,7 +52,27 @@ export const buildBibleHead = (page: BiblePageData) => {
         version ? bibleVersionName(version, language) : versionId
       } (${versionId})`
   const location = { versionId, presentation, book, chapter, passage }
-  const url = absoluteSiteUrl(buildBiblePath({ ...location, gloss }))
+  const path = buildBiblePath({ ...location, gloss })
+  const url = absoluteSiteUrl(path)
+  const versionName = version ? bibleVersionName(version, language) : versionId
+  // A verse is shared for its words, a chapter for its name; a range shows how it begins.
+  const shareCard: ShareCardContent = page.study
+    ? { kind: 'text', kicker: reference, chip: versionId, text: shareCardVerse(page.study.text) }
+    : passage
+      ? {
+          kind: 'title',
+          kicker: versionName,
+          chip: versionId,
+          title: reference,
+          excerpt: shareCardExcerpt(page.description.replace(/^.*? — /u, ''), false),
+        }
+      : {
+          kind: 'title',
+          kicker: versionName,
+          chip: presentation === 'text' ? versionId : READINGS[presentation][language],
+          title: reference,
+          large: true,
+        }
   // The interlinear reading exists with French and with English glosses.
   const alternates =
     presentation === 'interlinear'
@@ -67,7 +97,7 @@ export const buildBibleHead = (page: BiblePageData) => {
       { property: 'og:url', content: url },
       { property: 'og:site_name', content: 'Bible Strong' },
       { property: 'og:locale', content: language === 'fr' ? 'fr_FR' : 'en_US' },
-      { name: 'twitter:card', content: 'summary' },
+      ...shareCardMeta(path, shareCard),
     ],
     links: [...RESOURCE_FONT_PRELOADS, { rel: 'canonical', href: url }, ...alternates],
     scripts: breadcrumbScripts(bibleBreadcrumbs(page)),
@@ -96,6 +126,14 @@ export const buildBibleHubHead = (language: ResourceLanguage) => {
     language,
     alternates: { en: section.path('en'), fr: section.path('fr') },
     ogType: 'website',
+    shareCard: {
+      kind: 'title',
+      title: language === 'fr' ? 'Lire la Bible' : 'Read the Bible',
+      facts:
+        language === 'fr'
+          ? 'Plus de quarante versions, numéros Strong et interlinéaire'
+          : 'More than forty versions, Strong’s numbers and interlinear',
+    },
   })
 }
 
@@ -124,5 +162,15 @@ export const buildBibleVersionHead = (page: BibleVersionPageData) => {
     language,
     breadcrumbs: bibleVersionBreadcrumbs(versionId, language),
     ogType: 'website',
+    shareCard: {
+      kind: 'title',
+      kicker: 'Bible',
+      chip: versionId,
+      title: name,
+      facts:
+        language === 'fr'
+          ? `${books.length} livres · ${chapters.toLocaleString('fr')} chapitres${studyLabel ? ` · avec ${studyLabel}` : ''}`
+          : `${books.length} books · ${chapters.toLocaleString('en')} chapters${studyLabel ? ` · with ${studyLabel}` : ''}`,
+    },
   })
 }

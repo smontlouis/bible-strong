@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { shareCardMeta } from '@/features/share/shareCardMeta'
 import { HeadContent, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
 import NotFoundPage from '@/features/resources/NotFoundPage'
 import { useCurrentLocale } from '@/locales'
@@ -14,7 +15,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { name: 'apple-itunes-app', content: 'app-id=1454738221' },
       { title: 'Bible Strong App - Lexique Hébreu et Grec' },
       { name: 'description', content: "Le projet Bible Strong met à disposition des outils efficaces d'étude de la Bible pour développer et affermir une foi réfléchie en Dieu par sa Parole." },
-      { property: 'og:image', content: '/image-fb.jpg' },
+      ...shareCardMeta('/'),
     ],
     links: [
       { rel: 'stylesheet', href: appCss },

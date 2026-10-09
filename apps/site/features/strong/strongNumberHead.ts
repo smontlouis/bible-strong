@@ -4,6 +4,7 @@ import { buildResourceHead } from '../resources/resourceHead'
 import type { StrongNumberPageData } from './strong.functions'
 import { strongNumberBreadcrumbs } from './strongBreadcrumbs'
 import { buildStrongPath, displayStrongCode, plainTransliteration } from './strongRoutes'
+import { firstSpelling, STRONG_SCRIPTS } from '../share/shareCardText'
 
 const DESCRIPTION_LENGTH = 155
 // A title names the first senses; the page lists them all.
@@ -61,6 +62,15 @@ export const buildStrongNumberHead = (page: StrongNumberPageData) => {
       en: buildStrongPath('en', page.code),
     },
     breadcrumbs: strongNumberBreadcrumbs(page),
+    shareCard: {
+      kind: 'word',
+      kicker: `${labels.strong} ${code}`,
+      chip: STRONG_SCRIPTS[page.language][page.lexicalLanguage],
+      original: page.original,
+      transliteration: firstSpelling(page.transliteration),
+      gloss: page.glosses[0] ?? glosses,
+      facts: labels.senses(count),
+    },
     structuredData: [
       {
         '@context': 'https://schema.org',

@@ -23,6 +23,7 @@ import {
   buildDictionaryWorkPath,
 } from './dictionaryRoutes'
 import { dictionaryMessages } from './messages'
+import { shareCardExcerpt } from '../share/shareCardText'
 
 const DESCRIPTION_LENGTH = 155
 // More headings than a description can hold: it is cut to length afterwards.
@@ -67,6 +68,11 @@ export const buildDictionaryIndexHead = ({
           )
         : undefined,
     ogType: 'website',
+    shareCard: {
+      kind: 'title',
+      title: language === 'fr' ? 'Dictionnaires bibliques' : 'Bible dictionaries',
+      facts: shareCardExcerpt(names, false),
+    },
   })
 }
 
@@ -101,6 +107,13 @@ export const buildDictionaryWorkHead = ({ language, work }: DictionaryWorkPageDa
       },
     ],
     ogType: 'website',
+    shareCard: {
+      kind: 'title',
+      kicker: language === 'fr' ? 'Dictionnaire' : 'Dictionary',
+      chip: work.abbreviation,
+      title: work.title,
+      facts: authors,
+    },
   })
 }
 
@@ -131,6 +144,13 @@ export const buildDictionaryLetterHead = (page: DictionaryLetterPageData) => {
     language,
     breadcrumbs: dictionaryLetterBreadcrumbs(language, work, letter, page.page),
     ogType: 'website',
+    shareCard: {
+      kind: 'title',
+      kicker: language === 'fr' ? 'Dictionnaire' : 'Dictionary',
+      chip: work.abbreviation,
+      title: language === 'fr' ? `Articles en ${initial}` : `Articles in ${initial}`,
+      facts: `${count} articles`,
+    },
   })
   return {
     ...head,
@@ -160,6 +180,13 @@ export const buildDictionaryEntryHead = (page: DictionaryEntryPageData) => {
     path,
     language,
     breadcrumbs: dictionaryEntryBreadcrumbs(page),
+    shareCard: {
+      kind: 'title',
+      kicker: language === 'fr' ? 'Dictionnaire' : 'Dictionary',
+      chip: work.abbreviation,
+      title: word,
+      excerpt: shareCardExcerpt(page.description, false),
+    },
     structuredData: [
       {
         '@context': 'https://schema.org',
@@ -191,6 +218,16 @@ export const buildDictionaryTermHead = (page: DictionaryTermPageData) => {
     path,
     language,
     breadcrumbs: dictionaryTermBreadcrumbs(page),
+    shareCard: {
+      kind: 'title',
+      kicker: language === 'fr' ? 'Dictionnaires' : 'Dictionaries',
+      chip:
+        language === 'fr'
+          ? `${articles.length} dictionnaires`
+          : `${articles.length} dictionaries`,
+      title: word,
+      excerpt: shareCardExcerpt(page.description, false),
+    },
     structuredData: [
       {
         '@context': 'https://schema.org',

@@ -11,6 +11,7 @@ import {
   otherResourceLanguage,
 } from './commentaryRoutes'
 import { commentaryMessages } from './messages'
+import { afterReference, shareCardVerse } from '../share/shareCardText'
 
 const DESCRIPTION_LENGTH = 155
 
@@ -27,6 +28,10 @@ export const buildCommentaryIndexHead = (language: ResourceLanguage) => {
     language,
     alternates: { fr: buildCommentaryIndexPath('fr'), en: buildCommentaryIndexPath('en') },
     ogType: 'website',
+    shareCard: {
+      kind: 'title',
+      title: language === 'fr' ? 'Commentaires bibliques' : 'Bible commentaries',
+    },
   })
 }
 
@@ -54,6 +59,12 @@ export const buildCommentaryHead = ({ language, commentary, counterpart }: Comme
       : undefined,
     breadcrumbs: commentaryBreadcrumbs(language, commentary),
     ogType: 'website',
+    shareCard: {
+      kind: 'title',
+      kicker: language === 'fr' ? 'Commentaire biblique' : 'Bible commentary',
+      title: commentary.title,
+      facts: commentary.author,
+    },
   })
 
 /**
@@ -65,9 +76,10 @@ export const buildCommentaryChapterHead = (page: CommentaryChapterPageData) => {
   const t = commentaryMessages(language)
   const location = { language, resource: commentary.id, book, chapter }
   const numbered = page.page > 1
+  const reference = `${bibleBookName(book, language)} ${chapter}`
   return buildResourceHead({
     title: t('commentary.chapter.head.title', {
-      reference: `${bibleBookName(book, language)} ${chapter}`,
+      reference,
       title: `${commentary.title}${numbered ? ` – ${t('commentary.page', { page: page.page })}` : ''}`,
     }),
     description: page.description,
@@ -85,5 +97,12 @@ export const buildCommentaryChapterHead = (page: CommentaryChapterPageData) => {
           }
         : undefined,
     breadcrumbs: commentaryChapterBreadcrumbs(page),
+    // A commentary is read, not named: the card opens on what it says of the chapter.
+    shareCard: {
+      kind: 'text',
+      kicker: reference,
+      chip: commentary.author || commentary.title,
+      text: shareCardVerse(afterReference(page.description, reference)),
+    },
   })
 }

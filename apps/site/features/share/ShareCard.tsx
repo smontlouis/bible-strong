@@ -9,7 +9,7 @@ import { SHARE_CARD_COLORS as COLORS, SHARE_CARD_SIZE } from './shareCardTokens'
  * only, hence no class and no stylesheet here.
  */
 export type ShareCardContent =
-  | { kind: 'default' }
+  | { kind: 'default'; language?: 'fr' | 'en' }
   | { kind: 'text'; kicker: string; chip?: string; text: string }
   | {
       kind: 'word'
@@ -22,15 +22,24 @@ export type ShareCardContent =
     }
   | {
       kind: 'title'
-      kicker: string
+      kicker?: string
       chip?: string
       title: string
       /** A chapter is named in very large type; a longer name steps down by itself. */
       large?: boolean
+      /** One line of facts under the title. */
+      facts?: string
+      /** The first lines of what the page reads. */
       excerpt?: string
       /** A picture the renderer can read: JPEG or PNG, not WebP. */
       picture?: string
+      /** Six captioned pictures, in two rows of three, in the place of the single one. */
+      pictures?: { src: string; caption: string }[]
     }
+
+/** A card that shows photographs is heavier and is delivered as a JPEG. */
+export const shareCardHasPictures = (content: ShareCardContent): boolean =>
+  content.kind === 'title' && Boolean(content.picture || content.pictures?.length)
 
 const MARK =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 102 102"><defs><radialGradient id="r" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="#000" stop-opacity="0.2"/><stop offset="100%" stop-color="#000" stop-opacity="0.5"/></radialGradient></defs><circle cx="51" cy="51" r="51" fill="#fff"/><circle cx="51" cy="51" r="47.13" fill="none" stroke="url(#r)" stroke-width="7.74"/><circle cx="51" cy="51" r="23.5" fill="BRAND"/></svg>'
@@ -49,19 +58,21 @@ const Corner = ({ svg }: { svg: string }) => (
   />
 )
 
-const Head = ({ kicker, chip }: { kicker: string; chip?: string }) => (
+const Head = ({ kicker, chip }: { kicker?: string; chip?: string }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-    <div
-      style={{
-        fontSize: 44,
-        lineHeight: 1,
-        fontWeight: 800,
-        letterSpacing: '-0.02em',
-        color: COLORS.accent,
-      }}
-    >
-      {kicker}
-    </div>
+    {kicker && (
+      <div
+        style={{
+          fontSize: 44,
+          lineHeight: 1,
+          fontWeight: 800,
+          letterSpacing: '-0.02em',
+          color: COLORS.accent,
+        }}
+      >
+        {kicker}
+      </div>
+    )}
     {chip && (
       <div
         style={{
@@ -92,6 +103,13 @@ const clamped = (lines: number): CSSProperties => ({
   lineClamp: lines,
   overflow: 'hidden',
 })
+
+// A line of facts may name an original word, which the sans face cannot write.
+const Facts = ({ text }: { text: string }) => (
+  <div style={{ fontFamily: `${SANS}, ${SERIF}`, fontSize: 28, fontWeight: 500, color: COLORS.muted }}>
+    {text}
+  </div>
+)
 
 const Excerpt = ({ text, lines }: { text: string; lines: number }) => (
   <div style={{ fontFamily: SERIF, fontSize: 34, lineHeight: 1.4, ...clamped(lines) }}>{text}</div>
@@ -138,23 +156,85 @@ const body = (content: Exclude<ShareCardContent, { kind: 'default' }>) => {
           </div>
         </div>
         <div style={{ fontFamily: SERIF, fontSize: 52, lineHeight: 1.2 }}>{content.gloss}</div>
-        {content.facts && (
-          <div style={{ fontSize: 28, fontWeight: 500, color: COLORS.muted }}>{content.facts}</div>
-        )}
+        {content.facts && <Facts text={content.facts} />}
       </div>
     )
   }
+  const beside = shareCardHasPictures(content)
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <Title size={content.title.length > 14 ? 84 : content.large ? 160 : 120}>{content.title}</Title>
-      {content.excerpt && <Excerpt text={content.excerpt} lines={content.picture ? 3 : 2} />}
+      {content.facts && <Facts text={content.facts} />}
+      {content.excerpt && <Excerpt text={content.excerpt} lines={beside ? 3 : 2} />}
     </div>
   )
 }
 
+// Two rows of three, each picture slightly turned, as the design system draws them.
+const GALLERY = [
+  { left: 620, top: 62, rotate: -3 },
+  { left: 812, top: 50, rotate: 2 },
+  { left: 1004, top: 64, rotate: -2 },
+  { left: 624, top: 308, rotate: 2 },
+  { left: 816, top: 296, rotate: -2 },
+  { left: 1008, top: 310, rotate: 3 },
+] as const
+
+const photoFrame: CSSProperties = {
+  position: 'absolute',
+  objectFit: 'cover',
+  border: `8px solid ${COLORS.surface}`,
+  borderRadius: 20,
+}
+
+const Gallery = ({ pictures }: { pictures: { src: string; caption: string }[] }) => (
+  <>
+    {pictures.slice(0, GALLERY.length).map((picture, index) => {
+      const { left, top, rotate } = GALLERY[index]
+      return (
+        <div
+          key={picture.src}
+          style={{
+            position: 'absolute',
+            left,
+            top,
+            width: 176,
+            height: 220,
+            display: 'flex',
+            transform: `rotate(${rotate}deg)`,
+          }}
+        >
+          <img src={picture.src} width={160} height={204} style={{ ...photoFrame, left: 0, top: 0 }} />
+          <div
+            style={{
+              position: 'absolute',
+              left: 16,
+              bottom: 16,
+              padding: '2px 10px',
+              borderRadius: 999,
+              background: COLORS.surface,
+              fontSize: 15,
+              lineHeight: '22px',
+              fontWeight: 600,
+            }}
+          >
+            {picture.caption}
+          </div>
+        </div>
+      )
+    })}
+  </>
+)
+
 const PADDING = { x: 72, y: 64 } as const
 
 // The renderer adds the padding to the width and the height it is given.
+// The headline of the home page, on two lines.
+const TAGLINE = {
+  fr: ['Un verset.', 'Une étude entière.'],
+  en: ['One verse.', 'A complete study.'],
+} as const
+
 const frame: CSSProperties = {
   position: 'relative',
   display: 'flex',
@@ -189,8 +269,8 @@ export const ShareCard = ({ content }: { content: ShareCardContent }) => {
               letterSpacing: '-0.01em',
             }}
           >
-            <span>Un verset.</span>
-            <span>Une étude entière.</span>
+            <span>{TAGLINE[content.language ?? 'fr'][0]}</span>
+            <span>{TAGLINE[content.language ?? 'fr'][1]}</span>
           </div>
         </div>
         <div style={{ display: 'flex', fontSize: 26, fontWeight: 600 }}>bible-strong.app</div>
@@ -199,27 +279,26 @@ export const ShareCard = ({ content }: { content: ShareCardContent }) => {
   }
 
   const picture = content.kind === 'title' ? content.picture : undefined
+  const pictures = content.kind === 'title' ? content.pictures : undefined
   return (
     <div style={frame}>
       <Corner svg={ORNAMENT} />
-      {picture && (
-        <img
-          src={picture}
-          width={484}
-          height={372}
-          style={{
-            position: 'absolute',
-            left: 656,
-            top: 118,
-            objectFit: 'cover',
-            border: `8px solid ${COLORS.surface}`,
-            borderRadius: 20,
-            transform: 'rotate(2deg)',
-          }}
-        />
+      {pictures?.length ? (
+        <Gallery pictures={pictures} />
+      ) : (
+        picture && (
+          <img
+            src={picture}
+            width={468}
+            height={356}
+            style={{ ...photoFrame, left: 656, top: 118, transform: 'rotate(2deg)' }}
+          />
+        )
       )}
       <Head kicker={content.kicker} chip={content.chip} />
-      <div style={{ display: 'flex', maxWidth: picture ? 540 : 900 }}>{body(content)}</div>
+      <div style={{ display: 'flex', maxWidth: shareCardHasPictures(content) ? 540 : 900 }}>
+        {body(content)}
+      </div>
       <Lockup />
     </div>
   )

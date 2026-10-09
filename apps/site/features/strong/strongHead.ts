@@ -9,9 +9,12 @@ import { strongEntryBreadcrumbs } from './strongBreadcrumbs'
 import {
   buildStrongPath,
   displayStrongCode,
+  displayStrongNumber,
   displayStrongTitleCode,
   plainTransliteration,
 } from './strongRoutes'
+import { shareCardMeta } from '../share/shareCardMeta'
+import { firstSpelling, STRONG_SCRIPTS } from '../share/shareCardText'
 
 const LABELS = {
   fr: {
@@ -65,7 +68,15 @@ export const buildStrongHead = (entry: StrongPageData) => {
       { property: 'og:url', content: url },
       { property: 'og:site_name', content: 'Bible Strong' },
       { property: 'og:locale', content: labels.locale },
-      { name: 'twitter:card', content: 'summary' },
+      ...shareCardMeta(buildStrongPath(entry.language, entry.code), {
+        kind: 'word',
+        kicker: `${labels.strong} ${displayStrongNumber(entry.code)}`,
+        chip: STRONG_SCRIPTS[entry.language][entry.lexicalLanguage],
+        original: entry.original,
+        transliteration: firstSpelling(entry.transliteration),
+        gloss: entry.gloss,
+        facts: entry.morphology?.meaning,
+      }),
     ],
     links: [
       ...RESOURCE_FONT_PRELOADS,

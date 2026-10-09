@@ -7,6 +7,8 @@ import { breadcrumbScripts } from '../resources/resourceHead'
 import type { StrongConcordancePageData } from './strong.functions'
 import { strongConcordanceBreadcrumbs } from './strongBreadcrumbs'
 import { buildStrongConcordancePath, displayStrongTitleCode } from './strongRoutes'
+import { shareCardMeta } from '../share/shareCardMeta'
+import { displayStrongNumber } from './strongRoutes'
 
 export type ConcordanceSearch = { book?: string }
 
@@ -52,6 +54,16 @@ export const buildConcordanceHead = (page: StrongConcordancePageData) => {
       { property: 'og:title', content: title },
       { property: 'og:url', content: url },
       { property: 'og:type', content: 'article' },
+      ...shareCardMeta(pagePath(filtered ? 1 : page.page), {
+        kind: 'title',
+        kicker: `Concordance ${displayStrongNumber(code)}`,
+        chip: page.version,
+        title:
+          language === 'fr'
+            ? `${page.verseCount.toLocaleString('fr')} verset${page.verseCount === 1 ? '' : 's'}`
+            : `${page.verseCount.toLocaleString('en')} verse${page.verseCount === 1 ? '' : 's'}`,
+        facts: `${page.original} · ${page.gloss}`,
+      }),
     ],
     links: [
       ...RESOURCE_FONT_PRELOADS,
