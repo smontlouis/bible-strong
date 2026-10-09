@@ -1,0 +1,21 @@
+<!-- @dsCard group="Interface" height=120 subtitle="The one solid action of a view" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; font-family: var(--font-sans); }
+  .grounds { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .ground { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 28px 24px; background: var(--canvas); color: var(--ink); }
+  .cta { display: inline-flex; align-items: center; min-height: 40px; padding: 0 18px; border-radius: var(--radius-pill); background: var(--cta); color: var(--cta-ink); font-size: 0.9rem; font-weight: 600; white-space: nowrap; text-decoration: none; }
+  .cta:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+  .link { color: var(--accent-ink); text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+</style>
+</head>
+<body>
+<div class="grounds">
+  <div class="ground" data-theme="light"><a class="cta" href="#">Ouvrir dans l’app</a><a class="link" href="#">Lire le chapitre entier</a></div>
+  <div class="ground" data-theme="dark"><a class="cta" href="#">Ouvrir dans l’app</a><a class="link" href="#">Lire le chapitre entier</a></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!-- @dsCard group="Interface" height=230 subtitle="A group of related content on the canvas" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; font-family: var(--font-sans); }
+  .grounds { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .ground { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 28px 24px; background: var(--canvas); color: var(--ink); }
+  .ground { align-items: stretch; }
+  .card { flex: 1 1 220px; padding: var(--space-6); border: 1px solid var(--line); border-radius: var(--radius-xl); background: var(--surface); }
+  .eyebrow { margin: 0; color: var(--muted); font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; }
+  h3 { margin: 8px 0 6px; font-size: 20px; line-height: 28px; font-weight: 600; }
+  p.body { margin: 0; color: var(--muted); font-size: 16px; line-height: 24px; }
+</style>
+</head>
+<body>
+<div class="grounds">
+  <div class="ground" data-theme="light"><div class="card"><p class="eyebrow">Lexique grec</p><h3>Concordance</h3><p class="body">Les versets où ce mot apparaît, classés par livre.</p></div></div>
+  <div class="ground" data-theme="dark"><div class="card"><p class="eyebrow">Lexique grec</p><h3>Concordance</h3><p class="body">Les versets où ce mot apparaît, classés par livre.</p></div></div>
+</div>
+</body>
+</html>

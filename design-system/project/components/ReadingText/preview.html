@@ -1,0 +1,33 @@
+<!-- @dsCard group="Reading" height=330 subtitle="Bible text with its numbers, references and highlights" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; font-family: var(--font-sans); }
+  .grounds { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .ground { padding: 28px 24px; background: var(--canvas); color: var(--ink); }
+  .eyebrow { margin: 0; color: var(--muted); font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; }
+  h1 { margin: 6px 0 14px; font-family: var(--font-serif); font-size: 36px; line-height: 1.25; font-weight: 400; }
+  .prose { margin: 0; font-family: var(--font-serif); font-size: 1.06rem; line-height: 1.75; }
+  .number { margin-inline-end: 0.5em; color: var(--muted); font-family: var(--font-sans); font-size: 0.72em; font-weight: 600; vertical-align: 0.3em; }
+  .ref { margin-inline: 3px; padding: 2px 5px; border-radius: var(--radius-sm); box-shadow: var(--shadow-reference); color: var(--accent-ink); font-family: var(--font-sans); font-size: 0.72em; font-weight: 600; white-space: nowrap; }
+  mark { padding: 0 3px; border-radius: var(--radius-mark); background: var(--mark); color: inherit; }
+  .wj { color: var(--words-of-jesus); }
+</style>
+</head>
+<body>
+<div class="grounds">
+  <div class="ground" data-theme="light">
+    <p class="eyebrow">Louis Segond 1910</p>
+    <h1>Jean 3</h1>
+    <p class="prose"><span class="number">16</span><span class="wj">Car Dieu a tant <mark>aimé</mark><span class="ref">25</span> le monde<span class="ref">2889</span> qu’il a donné son Fils unique, afin que quiconque croit en lui ne périsse point, mais qu’il ait la vie éternelle.</span></p>
+  </div>
+  <div class="ground" data-theme="dark">
+    <p class="eyebrow">Louis Segond 1910</p>
+    <h1>Jean 3</h1>
+    <p class="prose"><span class="number">16</span><span class="wj">Car Dieu a tant <mark>aimé</mark><span class="ref">25</span> le monde<span class="ref">2889</span> qu’il a donné son Fils unique, afin que quiconque croit en lui ne périsse point, mais qu’il ait la vie éternelle.</span></p>
+  </div>
+</div>
+</body>
+</html>
