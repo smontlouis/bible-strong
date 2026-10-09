@@ -56,9 +56,15 @@ export default {
       return imageResponse(stored.body, type, 'stored')
     }
 
-    const image = await draw(env, pagePath)
+    // A network that stops waiting must not lose the image for the next one: the drawing is
+    // carried to its end, and kept, whether or not this request is still listening.
+    const drawing = draw(env, pagePath).then(async image => {
+      if (image) await keep(env, key, image)
+      return image
+    })
+    ctx.waitUntil(drawing.catch(() => undefined))
+    const image = await drawing
     if (!image) return new Response('Not found', { status: 404 })
-    ctx.waitUntil(keep(env, key, image))
     return imageResponse(image.body, image.type, 'drawn')
   },
 }
