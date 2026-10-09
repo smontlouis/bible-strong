@@ -1,7 +1,7 @@
 /**
- * What the share image of a public page shows. The site writes it in a meta element of each
- * page; this service reads it back from the rendered page and draws it. The two sides share
- * this file and nothing else.
+ * What the share image of a public page shows. The site signs it into the address of the
+ * image; the image is drawn from that address alone. The site and this service share this
+ * file and nothing else.
  */
 export type ShareCardContent =
   | { kind: 'default'; language?: 'fr' | 'en' }
@@ -32,54 +32,26 @@ export type ShareCardContent =
       pictures?: { src: string; caption: string }[]
     }
 
-/** The meta element in which a page says what its share image shows. */
-export const SHARE_CARD_META = 'bible-strong:share-card'
+export const SHARE_CARD_KINDS: ReadonlySet<string> = new Set(['default', 'text', 'word', 'title'])
 
-/** Where the images are served, and the version of their design. */
+/** Where the images are served. */
 export const SHARE_CARD_ORIGIN = 'https://cards.bible-strong.app'
 /**
- * Part of every image address. Raising it gives every page a new address, hence a new image:
- * do it when the design changes, since networks keep the image of an address for weeks.
+ * Part of every image address, and of its signature. Raising it gives every page a new
+ * address, hence a new image: do it when the design changes, since networks keep the image
+ * of an address for weeks.
  */
 export const SHARE_CARD_DESIGN = 'v1'
 
 export const SHARE_CARD_SIZE = { width: 1200, height: 630 } as const
 
-/** The address of the share image of the page at `path` (query string included). */
-export const shareCardUrl = (path: string): string =>
-  `${SHARE_CARD_ORIGIN}/${SHARE_CARD_DESIGN}${path === '/' ? '' : path}`
+/**
+ * The address of a share image: the signed description of what it shows, or nothing for the
+ * default card. A page whose content changes gets a new address, hence a new image.
+ */
+export const shareCardUrl = (signed?: string): string =>
+  `${SHARE_CARD_ORIGIN}/${SHARE_CARD_DESIGN}${signed ? `/${signed}` : ''}`
 
 /** A card that shows photographs is heavier and is delivered as a JPEG. */
 export const shareCardHasPictures = (content: ShareCardContent): boolean =>
   content.kind === 'title' && Boolean(content.picture || content.pictures?.length)
-
-const ENTITIES: Record<string, string> = {
-  '&quot;': '"',
-  '&#x27;': "'",
-  '&#39;': "'",
-  '&lt;': '<',
-  '&gt;': '>',
-  '&amp;': '&',
-}
-const decodeAttribute = (value: string): string =>
-  value.replace(/&(?:quot|#x27|#39|lt|gt|amp);/gu, entity => ENTITIES[entity] ?? entity)
-
-const KINDS = new Set(['default', 'text', 'word', 'title'])
-
-/** What a rendered page says its share image shows; nothing when it says nothing readable. */
-export const readShareCardMeta = (html: string): ShareCardContent | undefined => {
-  // A quote inside the value is always written as an entity, so the value ends at the next
-  // quote, whatever else it holds.
-  const attribute =
-    new RegExp(`<meta\\s+name="${SHARE_CARD_META}"\\s+content="([^"]*)"`, 'u').exec(html)?.[1] ??
-    new RegExp(`<meta\\s+content="([^"]*)"\\s+name="${SHARE_CARD_META}"`, 'u').exec(html)?.[1]
-  if (!attribute) return undefined
-  try {
-    const content = JSON.parse(decodeAttribute(attribute)) as { kind?: unknown }
-    return typeof content.kind === 'string' && KINDS.has(content.kind)
-      ? (content as ShareCardContent)
-      : undefined
-  } catch {
-    return undefined
-  }
-}

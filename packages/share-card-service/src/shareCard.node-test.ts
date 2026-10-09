@@ -1,49 +1,37 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { pagePathOf, storageKeyOf } from './address'
-import { readShareCardMeta, SHARE_CARD_META, shareCardUrl } from './content'
+import { signedDescriptionOf, storageKeyOf } from './address'
+import { shareCardUrl } from './content'
 
-test('an image is asked for under the design and the path of its page', () => {
-  assert.equal(shareCardUrl('/bible/lsg/john/3/16'), 'https://cards.bible-strong.app/v1/bible/lsg/john/3/16')
-  assert.equal(shareCardUrl('/'), 'https://cards.bible-strong.app/v1')
-  assert.equal(pagePathOf(new URL(shareCardUrl('/bible/lsg/john/3/16'))), '/bible/lsg/john/3/16')
-  assert.equal(pagePathOf(new URL(shareCardUrl('/'))), '/')
+test('an image is asked for under the design and its signed description', () => {
+  assert.equal(shareCardUrl('eyJraW5kIjoidGV4dCJ9.c2lnbmF0dXJl'), 'https://cards.bible-strong.app/v1/eyJraW5kIjoidGV4dCJ9.c2lnbmF0dXJl')
+  assert.equal(shareCardUrl(), 'https://cards.bible-strong.app/v1')
   assert.equal(
-    pagePathOf(new URL('https://cards.bible-strong.app/v1/strong/fr/g26/concordance?page=2')),
-    '/strong/fr/g26/concordance?page=2'
+    signedDescriptionOf(new URL(shareCardUrl('eyJraW5kIjoidGV4dCJ9.c2lnbmF0dXJl'))),
+    'eyJraW5kIjoidGV4dCJ9.c2lnbmF0dXJl'
   )
+  assert.equal(signedDescriptionOf(new URL(shareCardUrl())), '')
 })
 
-test('an address of another design, or of none, names no page', () => {
-  assert.equal(pagePathOf(new URL('https://cards.bible-strong.app/v0/bible/lsg/john/3')), undefined)
-  assert.equal(pagePathOf(new URL('https://cards.bible-strong.app/v10/bible')), undefined)
-  assert.equal(pagePathOf(new URL('https://cards.bible-strong.app/favicon.ico')), undefined)
+test('an address of another design, or of no description, asks for nothing', () => {
+  for (const address of [
+    'https://cards.bible-strong.app/v0/abc.def',
+    'https://cards.bible-strong.app/v10/abc.def',
+    'https://cards.bible-strong.app/favicon.ico',
+    'https://cards.bible-strong.app/v1/bible/lsg/john/3',
+    'https://cards.bible-strong.app/v1/abc',
+    'https://cards.bible-strong.app/v1/abc.def.ghi',
+    'https://cards.bible-strong.app/v1/..%2Fsecret.def',
+  ]) {
+    assert.equal(signedDescriptionOf(new URL(address)), undefined, address)
+  }
 })
 
-test('each page keeps its image under its own key, apart from other designs', () => {
-  assert.equal(storageKeyOf('/bible/lsg/john/3/16'), 'share-cards/v1/bible/lsg/john/3/16')
-  assert.equal(storageKeyOf('/'), 'share-cards/v1/index')
-})
-
-test('a page is read for what it says its image shows', () => {
-  const content = { kind: 'text', kicker: 'Jean 3:16', chip: 'LSG', text: 'Il dit : "oui" & <non>.' }
-  const written = JSON.stringify(content)
-    .replaceAll('&', '&amp;')
-    .replaceAll('"', '&quot;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-  assert.deepEqual(
-    readShareCardMeta(`<head><meta name="${SHARE_CARD_META}" content="${written}"/></head>`),
-    content
-  )
-})
-
-test('a page that says nothing readable gets the default card', () => {
-  assert.equal(readShareCardMeta('<head><title>Page</title></head>'), undefined)
-  assert.equal(
-    readShareCardMeta(`<meta name="${SHARE_CARD_META}" content="{&quot;kind&quot;:&quot;poster&quot;}"/>`),
-    undefined
-  )
-  assert.equal(readShareCardMeta(`<meta name="${SHARE_CARD_META}" content="not json"/>`), undefined)
+test('each description keeps its image under its own key, apart from other designs', async () => {
+  const first = await storageKeyOf('abc.def')
+  assert.match(first, /^share-cards\/v1\/[0-9a-f]{64}$/u)
+  assert.equal(await storageKeyOf('abc.def'), first)
+  assert.notEqual(await storageKeyOf('abc.deg'), first)
+  assert.equal(await storageKeyOf(''), 'share-cards/v1/default')
 })

@@ -54,7 +54,7 @@ export const buildConcordanceHead = (page: StrongConcordancePageData) => {
       { property: 'og:title', content: title },
       { property: 'og:url', content: url },
       { property: 'og:type', content: 'article' },
-      ...shareCardMeta(pagePath(filtered ? 1 : page.page), {
+      ...shareCardMeta({
         kind: 'title',
         kicker: `Concordance ${displayStrongNumber(code)}`,
         chip: page.version,

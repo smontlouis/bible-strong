@@ -1,56 +1,35 @@
-import { describe, expect, it } from 'vitest'
-import {
-  readShareCardMeta,
-  SHARE_CARD_META,
-  type ShareCardContent,
-} from '@bible-strong/share-card-service/content'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { readSignedShareCard } from './shareCardAddress'
 import { shareCardMeta } from './shareCardMeta'
 import { afterReference, firstSpelling, shareCardPicture } from './shareCardText'
 
-// What React writes for an attribute value.
-const attribute = (value: string) =>
-  value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll("'", '&#x27;')
-const page = (meta: { name?: string; property?: string; content: string }[]) =>
-  `<html><head>${meta
-    .map(({ name, property, content }) =>
-      name
-        ? `<meta name="${name}" content="${attribute(content)}"/>`
-        : `<meta property="${property}" content="${attribute(content)}"/>`
-    )
-    .join('')}</head></html>`
+const imageOf = (meta: ReturnType<typeof shareCardMeta>) =>
+  meta.find(entry => 'property' in entry && entry.property === 'og:image')?.content ?? ''
 
-describe('Share card of a page', () => {
-  it('is announced under the path of the page', () => {
-    const meta = shareCardMeta('/bible/lsg/john/3/16')
-    expect(meta).toContainEqual({
-      property: 'og:image',
-      content: 'https://cards.bible-strong.app/v1/bible/lsg/john/3/16',
-    })
+describe('Share image of a page', () => {
+  afterEach(() => vi.unstubAllEnvs())
+
+  it('is named by an address that carries what it shows', () => {
+    vi.stubEnv('SHARE_CARD_SECRET', 'secret')
+    const content = { kind: 'text', kicker: 'Jean 3:16', chip: 'LSG', text: 'Car Dieu a tant aimé.' } as const
+    const meta = shareCardMeta(content)
+    const image = imageOf(meta)
+    expect(image.startsWith('https://cards.bible-strong.app/v1/')).toBe(true)
+    expect(readSignedShareCard(image.slice('https://cards.bible-strong.app/v1/'.length), 'secret')).toEqual(content)
     expect(meta).toContainEqual({ name: 'twitter:card', content: 'summary_large_image' })
-    expect(meta.some(entry => 'name' in entry && entry.name === SHARE_CARD_META)).toBe(false)
+    expect(meta).toContainEqual({ name: 'twitter:image', content: image })
   })
 
-  it('names the default card for the home page', () => {
-    expect(shareCardMeta('/')).toContainEqual({
-      property: 'og:image',
-      content: 'https://cards.bible-strong.app/v1',
-    })
+  it('is the default card when the page says nothing', () => {
+    vi.stubEnv('SHARE_CARD_SECRET', 'secret')
+    expect(imageOf(shareCardMeta())).toBe('https://cards.bible-strong.app/v1')
   })
 
-  it('is read back from the rendered page as the page wrote it', () => {
-    const content: ShareCardContent = {
-      kind: 'text',
-      kicker: 'Jean 3:16',
-      chip: 'LSG',
-      text: 'Il dit : "C’est <ici> & maintenant", l\'heure.',
-    }
-    expect(readShareCardMeta(page(shareCardMeta('/bible/lsg/john/3/16', content)))).toEqual(content)
-  })
-
-  it('is the default card when the page says nothing, or nothing readable', () => {
-    expect(readShareCardMeta(page(shareCardMeta('/privacy-policy')))).toBeUndefined()
-    expect(readShareCardMeta(page([{ name: SHARE_CARD_META, content: '{"kind":"poster"}' }]))).toBeUndefined()
-    expect(readShareCardMeta(page([{ name: SHARE_CARD_META, content: 'not json' }]))).toBeUndefined()
+  it('is the default card when the site was given no secret', () => {
+    vi.stubEnv('SHARE_CARD_SECRET', '')
+    expect(imageOf(shareCardMeta({ kind: 'text', kicker: 'Jean 3:16', text: 'Car Dieu.' }))).toBe(
+      'https://cards.bible-strong.app/v1'
+    )
   })
 })
 

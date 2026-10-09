@@ -68,7 +68,7 @@ export const buildStrongHead = (entry: StrongPageData) => {
       { property: 'og:url', content: url },
       { property: 'og:site_name', content: 'Bible Strong' },
       { property: 'og:locale', content: labels.locale },
-      ...shareCardMeta(buildStrongPath(entry.language, entry.code), {
+      ...shareCardMeta({
         kind: 'word',
         kicker: `${labels.strong} ${displayStrongNumber(entry.code)}`,
         chip: STRONG_SCRIPTS[entry.language][entry.lexicalLanguage],

@@ -1,25 +1,23 @@
-import { readShareCardMeta } from '@bible-strong/share-card-service/content'
 import { createFileRoute } from '@tanstack/react-router'
+import { readSignedShareCard, shareCardSecret } from '@/features/share/shareCardAddress'
 import { renderShareCard } from '@/features/share/shareCardImage'
 
-// `/share-card/<path of a public page>` draws the image shown when that page is shared. The
-// page itself says what the image shows (`shareCardMeta`); a page that says nothing gets the
-// default card, and a path that is no page gets no image. Readers never come here: the pages
-// name their image on the share card service, which asks this route once and keeps the answer.
+// `/share-card/<signed description>` draws the image shown when a page is shared, from that
+// description alone; `/share-card` draws the default card. A description the site did not
+// sign gets no image. Readers never come here: the pages name their image on the share card
+// service, which asks this route once and keeps the answer.
 export const Route = createFileRoute('/share-card/$')({
   server: {
     handlers: {
       GET: async ({ params, request }) => {
-        const { origin, search } = new URL(request.url)
-        const started = performance.now()
-        const page = await fetch(new URL(`/${params._splat ?? ''}${search}`, origin), {
-          headers: { accept: 'text/html' },
-        })
-        if (!page.ok) return new Response('Not found', { status: 404 })
-        const content = readShareCardMeta(await page.text()) ?? { kind: 'default' as const }
-        const pageRead = performance.now() - started
-        const image = await renderShareCard(content, origin)
-        const timing = Object.entries({ page: pageRead, ...image.timings })
+        const signed = params._splat ?? ''
+        const secret = shareCardSecret()
+        const content = signed
+          ? secret && readSignedShareCard(signed, secret)
+          : ({ kind: 'default' } as const)
+        if (!content) return new Response('Not found', { status: 404 })
+        const image = await renderShareCard(content, new URL(request.url).origin)
+        const timing = Object.entries(image.timings)
           .map(([step, duration]) => `${step};dur=${duration.toFixed(0)}`)
           .join(', ')
         return new Response(image.body, {
@@ -27,7 +25,7 @@ export const Route = createFileRoute('/share-card/$')({
             'content-type': image.type,
             // The service keeps the image; this answer itself is not worth keeping long.
             'cache-control': 'public, max-age=0, s-maxage=3600',
-            // Reading the page, loading fonts and rasteriser, laying out, drawing the pixels.
+            // Loading fonts and rasteriser, laying out, drawing the pixels.
             'server-timing': timing,
           },
         })

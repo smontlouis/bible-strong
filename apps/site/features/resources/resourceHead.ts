@@ -74,7 +74,7 @@ export const buildResourceHead = ({
       { property: 'og:url', content: url },
       { property: 'og:site_name', content: 'Bible Strong' },
       { property: 'og:locale', content: language === 'fr' ? 'fr_FR' : 'en_US' },
-      ...shareCardMeta(path, shareCard),
+      ...shareCardMeta(shareCard),
     ],
     links: [
       ...RESOURCE_FONT_PRELOADS,

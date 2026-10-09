@@ -15,7 +15,7 @@ export const Route = createFileRoute('/fr/')({
       },
       { property: 'og:title', content: 'Bible Strong - Un verset, une étude entière' },
       { property: 'og:description', content: 'Des outils de lecture et d’étude biblique qui gardent chaque découverte reliée.' },
-      ...shareCardMeta('/fr', { kind: 'default', language: 'fr' }),
+      ...shareCardMeta({ kind: 'default', language: 'fr' }),
     ],
   }),
 })

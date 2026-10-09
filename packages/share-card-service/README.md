@@ -1,15 +1,16 @@
 # Share card service
 
 Keeps the image shown when a page of `bible-strong.app` is shared, at
-`https://cards.bible-strong.app/v1/<path of the page>` (ADR-0081).
+`https://cards.bible-strong.app/v1/<description>.<signature>` (ADR-0081).
 
-The site draws; this Worker only keeps. It serves a stored image as it is, asks the site for a
-missing one (`<site>/share-card/<path>`), stores it in the media bucket under `share-cards/v1/`
-and, past seven days, has it drawn again in the background.
+The address carries what the image shows, signed by the site. The site draws; this Worker only
+keeps. It serves a stored image, asks the site for a missing one
+(`<site>/share-card/<description>.<signature>`) and stores it in the media bucket under
+`share-cards/v1/`, named by a digest of its description. An image never changes: a new text or a
+new design is a new address.
 
-`src/content.ts` is the contract the site shares: what a card may show, the name of the meta
-element a page writes it in, and how an image is addressed. Raise `SHARE_CARD_DESIGN` when the
-design changes, so that every page gets a new address.
+`src/content.ts` is the contract the site shares: what a card may show and how an image is
+addressed. Raise `SHARE_CARD_DESIGN` when the design changes, so that every page gets a new address.
 
 ```bash
 yarn workspace @bible-strong/share-card-service test

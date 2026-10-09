@@ -97,7 +97,7 @@ export const buildBibleHead = (page: BiblePageData) => {
       { property: 'og:url', content: url },
       { property: 'og:site_name', content: 'Bible Strong' },
       { property: 'og:locale', content: language === 'fr' ? 'fr_FR' : 'en_US' },
-      ...shareCardMeta(path, shareCard),
+      ...shareCardMeta(shareCard),
     ],
     links: [...RESOURCE_FONT_PRELOADS, { rel: 'canonical', href: url }, ...alternates],
     scripts: breadcrumbScripts(bibleBreadcrumbs(page)),
