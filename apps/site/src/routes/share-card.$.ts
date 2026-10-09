@@ -21,6 +21,7 @@ export const Route = createFileRoute('/share-card/$')({
         const image = await renderShareCard(content, origin)
         const timing = Object.entries({ page: pageRead, ...image.timings })
           .map(([step, duration]) => `${step};dur=${duration.toFixed(0)}`)
+          .concat(`engine;desc=${image.engine}`)
           .join(', ')
         return new Response(image.body, {
           headers: {

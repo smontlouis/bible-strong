@@ -3,7 +3,7 @@ import {
   SHARE_CARD_SIZE,
   type ShareCardContent,
 } from '@bible-strong/share-card-service/content'
-import { initWasm, Resvg } from '@resvg/resvg-wasm'
+import { initWasm, Resvg as PortableResvg } from '@resvg/resvg-wasm'
 import { encode as encodeJpeg } from 'jpeg-js'
 import satori from 'satori'
 import { ShareCard } from './ShareCard'
@@ -14,24 +14,48 @@ export type ShareCardImage = {
   type: 'image/png' | 'image/jpeg'
   /** How long each step took, in milliseconds: what a slow image is made of. */
   timings: { assets: number; layout: number; pixels: number }
+  /** Which rasteriser drew it. */
+  engine: 'native' | 'portable'
 }
 
 // A response body is an ArrayBuffer, not the view it is handed as.
 const arrayBuffer = (bytes: Uint8Array): ArrayBuffer =>
   bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer
 
-let rasteriser: Promise<void> | undefined
+type Rasteriser = {
+  engine: 'native' | 'portable'
+  Resvg: new (
+    svg: string,
+    options: { fitTo: { mode: 'width'; value: number } }
+  ) => {
+    render(): {
+      asPng(): Uint8Array
+      pixels: Uint8Array
+      width: number
+      height: number
+      free?: () => void
+    }
+  }
+}
+
+let rasteriser: Promise<Rasteriser> | undefined
 
 /**
- * The rasteriser is WebAssembly, the same on every machine, and is read once per instance
- * from the site's own `/wasm/` folder like the fonts: nothing of it has to be bundled with
- * the function, which a native build would need.
+ * The native rasteriser draws several times faster, but it is a binary built for one kind of
+ * machine, which the function may or may not carry. When it cannot be loaded, the same
+ * rasteriser as WebAssembly is read from the site's own `/wasm/` folder, like the fonts.
  */
-const loadRasteriser = (origin: string): Promise<void> => {
-  rasteriser ??= initWasm(fetch(new URL('/wasm/resvg.wasm', origin))).catch(cause => {
-    rasteriser = undefined
-    throw cause
-  })
+const loadRasteriser = (origin: string): Promise<Rasteriser> => {
+  rasteriser ??= import('@resvg/resvg-js')
+    .then(({ Resvg }): Rasteriser => ({ engine: 'native', Resvg }))
+    .catch(async (): Promise<Rasteriser> => {
+      await initWasm(fetch(new URL('/wasm/resvg.wasm', origin)))
+      return { engine: 'portable', Resvg: PortableResvg }
+    })
+    .catch(cause => {
+      rasteriser = undefined
+      throw cause
+    })
   return rasteriser
 }
 
@@ -45,7 +69,10 @@ export const renderShareCard = async (
   origin: string
 ): Promise<ShareCardImage> => {
   const started = performance.now()
-  const [fonts] = await Promise.all([loadShareCardFonts(origin), loadRasteriser(origin)])
+  const [fonts, { engine, Resvg }] = await Promise.all([
+    loadShareCardFonts(origin),
+    loadRasteriser(origin),
+  ])
   const assetsReady = performance.now()
   const svg = await satori(<ShareCard content={content} />, { ...SHARE_CARD_SIZE, fonts })
   const laidOut = performance.now()
@@ -63,6 +90,7 @@ export const renderShareCard = async (
     return {
       body,
       type: picture ? 'image/jpeg' : 'image/png',
+      engine,
       timings: {
         assets: assetsReady - started,
         layout: laidOut - assetsReady,
@@ -70,6 +98,6 @@ export const renderShareCard = async (
       },
     }
   } finally {
-    rendered.free()
+    rendered.free?.()
   }
 }
