@@ -33,5 +33,3 @@ export const SHARE_CARD_COLORS = {
   accentSoft: shareCardColor('accent-soft'),
   accentInk: shareCardColor('accent-ink'),
 } as const
-
-export const SHARE_CARD_SIZE = { width: 1200, height: 630 } as const

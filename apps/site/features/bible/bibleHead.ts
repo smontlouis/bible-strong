@@ -17,7 +17,7 @@ import {
   type BiblePresentation,
 } from './bibleRoutes'
 import { bibleVersionName, findBibleVersion } from './bibleVersions'
-import type { ShareCardContent } from '../share/ShareCard'
+import type { ShareCardContent } from '@bible-strong/share-card-service/content'
 import { shareCardMeta } from '../share/shareCardMeta'
 import { shareCardExcerpt, shareCardVerse } from '../share/shareCardText'
 

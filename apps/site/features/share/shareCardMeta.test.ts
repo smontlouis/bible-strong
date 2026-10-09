@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import type { ShareCardContent } from './ShareCard'
-import { readShareCardMeta, SHARE_CARD_META, shareCardMeta } from './shareCardMeta'
+import {
+  readShareCardMeta,
+  SHARE_CARD_META,
+  type ShareCardContent,
+} from '@bible-strong/share-card-service/content'
+import { shareCardMeta } from './shareCardMeta'
 import { afterReference, firstSpelling, shareCardPicture } from './shareCardText'
 
 // What React writes for an attribute value.
@@ -20,7 +24,7 @@ describe('Share card of a page', () => {
     const meta = shareCardMeta('/bible/lsg/john/3/16')
     expect(meta).toContainEqual({
       property: 'og:image',
-      content: 'https://bible-strong.app/share-card/bible/lsg/john/3/16',
+      content: 'https://cards.bible-strong.app/v1/bible/lsg/john/3/16',
     })
     expect(meta).toContainEqual({ name: 'twitter:card', content: 'summary_large_image' })
     expect(meta.some(entry => 'name' in entry && entry.name === SHARE_CARD_META)).toBe(false)
@@ -29,7 +33,7 @@ describe('Share card of a page', () => {
   it('names the default card for the home page', () => {
     expect(shareCardMeta('/')).toContainEqual({
       property: 'og:image',
-      content: 'https://bible-strong.app/share-card',
+      content: 'https://cards.bible-strong.app/v1',
     })
   })
 

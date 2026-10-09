@@ -3,7 +3,7 @@ import {
   RESOURCE_FONT_PRELOADS,
   type ResourceLanguage,
 } from './publicSite'
-import type { ShareCardContent } from '../share/ShareCard'
+import type { ShareCardContent } from '@bible-strong/share-card-service/content'
 import { shareCardMeta } from '../share/shareCardMeta'
 
 /** A step of the path leading to a page; the last one is the page itself. */

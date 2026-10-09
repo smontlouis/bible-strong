@@ -1,52 +1,23 @@
+import {
+  shareCardHasPictures,
+  SHARE_CARD_SIZE,
+  type ShareCardContent,
+} from '@bible-strong/share-card-service/content'
 import type { CSSProperties, ReactNode } from 'react'
+import { fitShareCardText } from './shareCardFit'
 import { SANS, SERIF } from './shareCardFonts'
-import { fitShareCardText } from './shareCardText'
-import { SHARE_CARD_COLORS as COLORS, SHARE_CARD_SIZE } from './shareCardTokens'
+import { SHARE_CARD_COLORS as COLORS } from './shareCardTokens'
 
-/**
- * The share image of a public page, as the design system draws it (`ShareCard…` cards): one
- * frame, a head, a body and the lockup. The renderer lays out flex boxes with inline styles
- * only, hence no class and no stylesheet here.
- */
-export type ShareCardContent =
-  | { kind: 'default'; language?: 'fr' | 'en' }
-  | { kind: 'text'; kicker: string; chip?: string; text: string }
-  | {
-      kind: 'word'
-      kicker: string
-      chip: string
-      original: string
-      transliteration: string
-      gloss: string
-      facts?: string
-    }
-  | {
-      kind: 'title'
-      kicker?: string
-      chip?: string
-      title: string
-      /** A chapter is named in very large type; a longer name steps down by itself. */
-      large?: boolean
-      /** One line of facts under the title. */
-      facts?: string
-      /** The first lines of what the page reads. */
-      excerpt?: string
-      /** A picture the renderer can read: JPEG or PNG, not WebP. */
-      picture?: string
-      /** Six captioned pictures, in two rows of three, in the place of the single one. */
-      pictures?: { src: string; caption: string }[]
-    }
-
-/** A card that shows photographs is heavier and is delivered as a JPEG. */
-export const shareCardHasPictures = (content: ShareCardContent): boolean =>
-  content.kind === 'title' && Boolean(content.picture || content.pictures?.length)
+// The share image of a public page, as the design system draws it (`ShareCard…` cards): one
+// frame, a head, a body and the lockup. The renderer lays out flex boxes with inline styles
+// only, hence no class and no stylesheet here.
 
 const MARK =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 102 102"><defs><radialGradient id="r" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="#000" stop-opacity="0.2"/><stop offset="100%" stop-color="#000" stop-opacity="0.5"/></radialGradient></defs><circle cx="51" cy="51" r="51" fill="#fff"/><circle cx="51" cy="51" r="47.13" fill="none" stroke="url(#r)" stroke-width="7.74"/><circle cx="51" cy="51" r="23.5" fill="BRAND"/></svg>'
 const ORNAMENT =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 760"><circle cx="380" cy="380" r="350" fill="none" stroke="BRAND" stroke-width="58" opacity="0.12"/><circle cx="380" cy="380" r="176" fill="BRAND" opacity="0.12"/></svg>'
 const svgUri = (svg: string) =>
-  `data:image/svg+xml;base64,${Buffer.from(svg.replaceAll('BRAND', COLORS.brand)).toString('base64')}`
+  `data:image/svg+xml;base64,${btoa(svg.replaceAll('BRAND', COLORS.brand))}`
 
 // The mark in the top right corner, cut by the edge: pale on every card, itself on the default.
 const Corner = ({ svg }: { svg: string }) => (
