@@ -1,0 +1,65 @@
+<!-- @dsCard height=320 -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; }
+  .cover { position: relative; width: 960px; height: 320px; overflow: hidden; background: var(--canvas); color: var(--ink); font-family: var(--font-sans); }
+  .cover svg { position: absolute; inset: 0; }
+  .ink { fill: var(--ink); }
+  .brand { fill: var(--brand); }
+  .soft { fill: var(--accent-soft); rx: var(--radius-xl); }
+  .mark { fill: var(--mark); rx: var(--radius-xl); }
+  .word { fill: var(--canvas); fill-opacity: 0.24; rx: var(--radius-sm); }
+  .word--on-soft { fill: var(--accent); fill-opacity: 0.34; rx: var(--radius-sm); }
+  .word--examined { fill: var(--brand); fill-opacity: 1; rx: var(--radius-sm); }
+  .text { position: absolute; left: 40px; bottom: 36px; max-width: 440px; }
+  .name { margin: 0; font-size: 96px; line-height: 0.95; font-weight: 800; letter-spacing: -0.02em; }
+  .tagline { margin: 16px 0 0; color: var(--muted); font-size: 14px; line-height: 20px; }
+</style>
+</head>
+<body>
+<div class="cover">
+  <!--
+    Blocks: ink slab 176×320 bleeding off the top, right and bottom; brand disc of radius 80; accent-soft 272×80 and mark 96×160, both radius-xl.
+    Arrangement: one tall slab with satellites, on a 16px grid (space-4), all right of x = 480.
+    Pattern: words of a verse as rounded bars (radius-sm), one of them examined in brand: the app's own gesture, a word picked out of the text to open its Strong entry.
+    Scales: bars 20px tall (space-5) on a 32px pitch (space-8); gaps of 8 and 16px (space-2, space-4); radii radius-sm and radius-xl.
+  -->
+  <svg viewBox="0 0 960 320" width="960" height="320" aria-hidden="true">
+    <rect class="mark" x="496" y="32" width="96" height="160"/>
+    <circle class="brand" cx="688" cy="112" r="80"/>
+    <rect class="soft" x="496" y="208" width="272" height="80"/>
+    <rect class="ink" x="784" y="0" width="176" height="320"/>
+
+    <rect class="word--on-soft" x="512" y="222" width="64" height="20"/>
+    <rect class="word--on-soft" x="584" y="222" width="40" height="20"/>
+    <rect class="word--on-soft" x="632" y="222" width="96" height="20"/>
+    <rect class="word--on-soft" x="512" y="254" width="96" height="20"/>
+    <rect class="word--on-soft" x="616" y="254" width="56" height="20"/>
+    <rect class="word--on-soft" x="680" y="254" width="64" height="20"/>
+
+    <rect class="word" x="808" y="40" width="56" height="20"/>
+    <rect class="word" x="872" y="40" width="64" height="20"/>
+    <rect class="word" x="808" y="72" width="88" height="20"/>
+    <rect class="word" x="904" y="72" width="32" height="20"/>
+    <rect class="word" x="808" y="104" width="40" height="20"/>
+    <rect class="word--examined" x="856" y="104" width="80" height="20"/>
+    <rect class="word" x="808" y="136" width="72" height="20"/>
+    <rect class="word" x="888" y="136" width="48" height="20"/>
+    <rect class="word" x="808" y="168" width="32" height="20"/>
+    <rect class="word" x="848" y="168" width="88" height="20"/>
+    <rect class="word" x="808" y="200" width="96" height="20"/>
+    <rect class="word" x="912" y="200" width="24" height="20"/>
+    <rect class="word" x="808" y="232" width="48" height="20"/>
+    <rect class="word" x="864" y="232" width="56" height="20"/>
+    <rect class="word" x="808" y="264" width="80" height="20"/>
+  </svg>
+  <div class="text">
+    <p class="name">Bible<br>Strong</p>
+    <p class="tagline">Un verset. Une étude entière.</p>
+  </div>
+</div>
+</body>
+</html>

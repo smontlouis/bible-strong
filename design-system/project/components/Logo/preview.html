@@ -1,0 +1,57 @@
+<!-- @dsCard group="Brand" height=300 subtitle="The mark, alone and next to the name" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; font-family: var(--font-sans); }
+  .grounds { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .ground { display: flex; flex-direction: column; gap: 24px; padding: 28px 24px; background: var(--canvas); color: var(--ink); }
+  .row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .lockup { display: inline-flex; align-items: center; font-weight: 600; }
+  .lockup svg { flex: none; }
+  .note { margin: 0; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="bs-ring" cx="50%" cy="0%" r="100%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.5"/>
+    </radialGradient>
+    <symbol id="bs-mark" viewBox="0 0 102 102">
+      <circle cx="51" cy="51" r="51" fill="#ffffff"/>
+      <circle cx="51" cy="51" r="47.13" fill="none" stroke="url(#bs-ring)" stroke-width="7.74"/>
+      <circle cx="51" cy="51" r="23.5" style="fill: var(--brand)"/>
+    </symbol>
+  </defs>
+</svg>
+<div class="grounds">
+  <div class="ground" data-theme="light">
+    <div class="row">
+      <svg width="96" height="96" role="img" aria-label="Bible Strong"><use href="#bs-mark"/></svg>
+      <svg width="48" height="48" aria-hidden="true"><use href="#bs-mark"/></svg>
+      <svg width="20" height="20" aria-hidden="true"><use href="#bs-mark"/></svg>
+    </div>
+    <div class="row">
+      <span class="lockup" style="font-size: 30px; gap: 14px"><svg width="56" height="56" aria-hidden="true"><use href="#bs-mark"/></svg>Bible Strong</span>
+      <span class="lockup" style="font-size: 16px; gap: 10px"><svg width="28" height="28" aria-hidden="true"><use href="#bs-mark"/></svg>Bible Strong</span>
+    </div>
+    <p class="note">On canvas. Sizes 96, 48 and 20px; lockups at 56 and 28px.</p>
+  </div>
+  <div class="ground" data-theme="dark">
+    <div class="row">
+      <svg width="96" height="96" role="img" aria-label="Bible Strong"><use href="#bs-mark"/></svg>
+      <svg width="48" height="48" aria-hidden="true"><use href="#bs-mark"/></svg>
+      <svg width="20" height="20" aria-hidden="true"><use href="#bs-mark"/></svg>
+    </div>
+    <div class="row">
+      <span class="lockup" style="font-size: 30px; gap: 14px"><svg width="56" height="56" aria-hidden="true"><use href="#bs-mark"/></svg>Bible Strong</span>
+      <span class="lockup" style="font-size: 16px; gap: 10px"><svg width="28" height="28" aria-hidden="true"><use href="#bs-mark"/></svg>Bible Strong</span>
+    </div>
+    <p class="note">On the dark canvas. The mark keeps its white disc.</p>
+  </div>
+</div>
+</body>
+</html>

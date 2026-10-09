@@ -10,6 +10,8 @@ This repository is the shared Yarn workspace for Bible Strong products and suppo
 
 `CONTEXT.md` files are glossaries. Keep implementation details in normal documentation or ADRs.
 
+Before designing or restyling a public page, a video or a share image, read `design-system/project/README.md` and take every value from `design-system/project/tokens.json`.
+
 ## Workspace layout
 
 - `apps/expo` — multiplatform Expo application for iOS, Android, and Web (`@bible-strong/expo`).

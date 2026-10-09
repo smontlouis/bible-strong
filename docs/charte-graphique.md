@@ -1,6 +1,6 @@
 # Bible Strong Brand Guidelines
 
-These guidelines document the visual identity shared by the Bible Strong public site and application. The first chapter formalizes existing illustrations; it is not yet a complete specification of logos, typography, or components.
+These guidelines document the visual identity shared by the Bible Strong public site and application. This document formalizes existing illustrations. Colours, typography, the logo and components of the public site, the videos and the share cards are specified in the [design system](../design-system/README.md).
 
 ## Illustration Styles
 
@@ -25,7 +25,7 @@ The repository skill [`bible-strong-illustrations`](../.agents/skills/bible-stro
 Illustration colors support the narrative. They do not replace interface tokens and should not be copied arbitrarily into buttons, text, or interactive states.
 
 - Expo application: palettes in [`apps/expo/src/themes/`](../apps/expo/src/themes/), following [ADR-0040](adr/0040-use-uniwind-for-expo-styles.md).
-- Public site: styles and variables in [`apps/site/src/styles.css`](../apps/site/src/styles.css).
+- Public site: styles and variables in [`apps/site/src/styles.css`](../apps/site/src/styles.css), whose values are referenced in [`design-system/project/tokens.json`](../design-system/project/tokens.json).
 - Reference illustrations: existing files in [`apps/site/public/images/landing/`](../apps/site/public/images/landing/).
 
 Illustrations accompany the content. Labels, quotations, and controls remain interface text to preserve readability, translation, and accessibility.

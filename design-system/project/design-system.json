@@ -1,0 +1,56 @@
+{
+  "v": 3,
+  "assetGroups": {
+    "Logos": {
+      "files": {
+        "bible-strong-mark.svg": {
+          "blob": "51e6f99197411bd4d6c5b07ecdcaffb0",
+          "name": "bible-strong-mark.svg",
+          "size": 597,
+          "type": "image/svg+xml"
+        },
+        "icon-legacy.png": {
+          "blob": "fcf373fa91724b624dcf06b0e27ba725",
+          "name": "icon-legacy.png",
+          "size": 168953,
+          "type": "image/png"
+        },
+        "logo-full.svg": {
+          "blob": "5603cfeeb4c4580850d594f7daa4c357",
+          "name": "logo-full.svg",
+          "size": 7339,
+          "type": "image/svg+xml"
+        }
+      },
+      "name": "Logos",
+      "order": [
+        "bible-strong-mark.svg",
+        "logo-full.svg",
+        "icon-legacy.png"
+      ],
+      "tile": "l"
+    }
+  },
+  "blobs": {},
+  "createdOnFiles": {
+    "at": "2026-10-09T07:01:05Z",
+    "v": 1
+  },
+  "docs": {
+    "sections": []
+  },
+  "groups": [
+    "Logos"
+  ],
+  "lastChange": {
+    "by": "Stéphane",
+    "at": "2026-10-09T10:09:19Z",
+    "via": "Claude Code",
+    "note": "Share cards for every kind of page: sans titles, new default card, timeline with pictures."
+  },
+  "layout": "files",
+  "libraries": [],
+  "namespace": "BibleStrong",
+  "sections": {},
+  "title": "Bible Strong"
+}
