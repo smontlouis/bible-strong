@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import EventDetailVerse from './EventDetailVerse'
 import { getEvents } from './events'
+import { getTimelineImageUri } from './timelineImage'
 import { TimelineEvent, TimelineEventDetail } from './types'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
@@ -69,9 +70,7 @@ const Media = ({
                 <Image
                   draggable={false}
                   style={{ width: imageWidth, height: imageWidth }}
-                  source={{
-                    uri: `http://timeline.biblehistory.com/media/images/original/${item.file}`,
-                  }}
+                  source={{ uri: getTimelineImageUri(item.file, 'original') }}
                   contentFit="contain"
                 />
                 <Paragraph className="mt-[15px] text-center text-[white]" scale={-3}>

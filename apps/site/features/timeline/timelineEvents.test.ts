@@ -96,11 +96,11 @@ describe('Timeline article text', () => {
 describe('Timeline images', () => {
   it('addresses an image by its encoded file name', () => {
     expect(timelineImageUrl('Adam_4-4-2013 10-22-05 AM.jpg')).toBe(
-      'https://timeline.biblehistory.com/media/images/original/Adam_4-4-2013%2010-22-05%20AM.jpg'
+      'https://media.bible-strong.app/timeline-images/w1200/Adam_4-4-2013%2010-22-05%20AM.jpg.webp'
     )
-    expect(timelineImageUrl('map.PNG')).toMatch(/\/map\.PNG$/u)
+    expect(timelineImageUrl('map.PNG')).toMatch(/\/map\.PNG\.webp$/u)
     expect(timelineThumbnailUrl('Adam 1.jpg')).toBe(
-      'https://timeline.biblehistory.com/media/images/t/Adam%201.jpg'
+      'https://media.bible-strong.app/timeline-images/w480/Adam%201.jpg.webp'
     )
   })
 
