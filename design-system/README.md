@@ -14,6 +14,7 @@ Everything under `project/` is the content of that page, in the layout its forma
 | `project/tokens.json` | Every value: colours in light and dark, type, spacing, radii, shadow, layout. |
 | `project/components/<Name>/` | A guideline (`README.md`) and a live preview (`preview.html`) for each component. `Cover` is the page's cover. |
 | `project/components/bundle.css` | The stylesheet the share card previews have in common: the frame of every card. |
+| `project/components/bundle.js` | Declares the namespace and nothing else. Without it the page shows every preview as a static rendition, in which uploaded pictures do not load. |
 | `project/assets/Logos/` | The redrawn mark and the rules of the logo files. |
 | `project/design-system.json` | The page's index: its title and the uploaded logo files. |
 
