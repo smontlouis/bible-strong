@@ -1,0 +1,60 @@
+/* Share cards: one 1200 by 630 frame for every kind of public page. */
+
+/*
+ * The site's Literata file has no Greek and no Hebrew letters. Original words take the hosted
+ * Greek cut of Literata and Frank Ruhl Libre, the Hebrew serif closest to it.
+ */
+@font-face { font-family: "Literata Greek"; font-weight: 400; src: url(https://fonts.gstatic.com/s/literata/v40/or38Q6P12-iJxAIgLa78DkTtAoDhk0oVpaLlYJ5W7i5aOtCS.woff2) format("woff2"); unicode-range: U+1F00-1FFF; }
+@font-face { font-family: "Literata Greek"; font-weight: 400; src: url(https://fonts.gstatic.com/s/literata/v40/or38Q6P12-iJxAIgLa78DkTtAoDhk0oVpaLlb55W7i5aOtCS.woff2) format("woff2"); unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF; }
+@font-face { font-family: "Frank Ruhl Libre"; font-weight: 400; src: url(https://fonts.gstatic.com/s/frankruhllibre/v23/j8_96_fAw7jrcalD7oKYNX0QfAnPcbzNEEB7OoicBw7FYWqVNRVUFFR-39-mvA.woff2) format("woff2"); unicode-range: U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F; }
+
+.sc { position: relative; display: flex; flex-direction: column; justify-content: space-between; width: 1200px; height: 630px; padding: 64px 72px; overflow: hidden; box-sizing: border-box; background: var(--canvas); color: var(--ink); font-family: var(--font-sans); }
+.sc > * { position: relative; }
+
+/* The ring and the dot of the mark, enlarged, cut by the corner and pale: the brand blue at 12%. */
+.sc-ornament { position: absolute; right: -230px; top: -150px; width: 760px; height: 760px; opacity: 0.12; }
+.sc-ornament circle { fill: var(--brand); }
+.sc-ornament circle:first-child { fill: none; stroke: var(--brand); stroke-width: 58px; }
+
+/* Head: what the card is about, then one fact in a chip. */
+.sc-head { display: flex; align-items: center; gap: 20px; }
+.sc-kicker { color: var(--accent); font-size: 44px; line-height: 1; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; }
+.sc-chip { padding: 6px 16px; border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--accent-ink); font-size: 22px; line-height: 30px; font-weight: 600; white-space: nowrap; }
+
+/* Body: the figure, and at most one supporting line or excerpt. */
+.sc-body { display: flex; flex-direction: column; gap: 20px; max-width: 900px; }
+.sc-text { margin: 0; font-family: var(--font-serif); font-size: 52px; line-height: 1.32; font-weight: 400; text-wrap: pretty; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+.sc-text--46 { font-size: 46px; -webkit-line-clamp: 5; }
+.sc-text--38 { font-size: 38px; -webkit-line-clamp: 6; }
+.sc-number { margin-inline-end: 0.35em; color: var(--muted); font-family: var(--font-sans); font-size: 0.5em; font-weight: 600; vertical-align: 0.55em; }
+.sc-title { margin: 0; font-size: 120px; line-height: 1; font-weight: 800; letter-spacing: -0.025em; text-wrap: balance; }
+.sc-title--160 { font-size: 160px; }
+.sc-title--84 { font-size: 84px; line-height: 1.04; }
+.sc-word { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 28px; }
+.sc-word__original, .sc-inline-word { font-family: "Literata", "Literata Greek", "Frank Ruhl Libre", ui-serif, Georgia, serif; }
+.sc-inline-word { color: var(--ink); font-weight: 400; }
+.sc-word__original { font-size: 132px; line-height: 1.15; }
+.sc-word__translit { color: var(--muted); font-size: 44px; font-weight: 500; }
+.sc-gloss { margin: 0; font-family: var(--font-serif); font-size: 52px; line-height: 1.2; }
+.sc-sub { margin: 0; color: var(--muted); font-size: 28px; line-height: 1.3; font-weight: 500; }
+.sc-excerpt { margin: 0; font-family: var(--font-serif); font-size: 34px; line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.sc-excerpt--3 { -webkit-line-clamp: 3; }
+
+/* Media: an illustration of the site or pictures of the timeline, on the right half. The body then keeps to the left half. */
+.sc--media .sc-body { max-width: 540px; }
+.sc > .sc-media { position: absolute; right: 0; top: 0; width: 580px; height: 630px; }
+.sc-illustration { position: absolute; width: auto; max-width: none; }
+.sc-photo { position: absolute; margin: 0; box-sizing: border-box; border: 8px solid var(--surface); border-radius: var(--radius-xl); background: var(--surface); box-shadow: 0 0 0 1px var(--line); }
+.sc-photo img { display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; border-radius: 12px; }
+.sc-photo__caption { position: absolute; left: 14px; bottom: 14px; padding: 4px 14px; border-radius: var(--radius-pill); background: var(--surface); color: var(--ink); font-size: 20px; line-height: 28px; font-weight: 600; }
+
+/* Foot: the lockup, always bottom left. */
+.sc-foot { display: flex; align-items: center; justify-content: space-between; }
+.sc-lockup { display: inline-flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 600; }
+.sc-lockup svg { flex: none; }
+
+/* The gallery around the cards: a label and the address of the page above each one. */
+.sc-gallery { margin: 0; padding: 24px; width: 1248px; box-sizing: border-box; background: var(--surface); color: var(--ink); font-family: var(--font-sans); }
+.sc-label { margin: 0 0 12px; font-size: 22px; line-height: 28px; font-weight: 600; }
+.sc-label span { color: var(--muted); font-weight: 400; }
+.sc + .sc-label { margin-top: 44px; }

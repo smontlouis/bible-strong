@@ -10,7 +10,7 @@ Read the rules below, then take every value from `tokens.json`. Never copy a col
 - **A reference is written as the page prints it**: « Jean 3:16 », book name in the page's language, a colon, no space. The version follows in brackets by its code: « Jean 3:16 (LSG) ».
 - **Typographic punctuation.** Curly apostrophe (’), French quotes with their spaces (« … »), an en dash between a title and its qualifier: « Lire la Bible en ligne – versions, numéros Strong et interlinéaire ».
 - **Name things by what the reader sees**: « numéros Strong », « interlinéaire », « concordance ». Never the name of a table, a route or a pipeline.
-- **No emoji, no exclamation mark, no marketing superlative.** The tone is the one of a study tool: precise, calm, generous. « Découvrir la Bible sous un nouveau jour. » is the tagline of the 2019 lockup and the most promotional line allowed.
+- **No emoji, no exclamation mark, no marketing superlative.** The tone is the one of a study tool: precise, calm, generous. « Un verset. Une étude entière. » is the headline of the home page and the most promotional line allowed; the 2019 tagline is retired.
 - **Hebrew and Greek words keep their script**, followed by a transliteration in the sans family for readers who cannot read it.
 
 ## Colour
@@ -30,7 +30,7 @@ The blues were settled in October 2026: `blue-brand` for graphics, `blue-button`
 ## Type
 
 - **Two families in fixed roles.** The serif family (Literata) is for what is read: page titles, Bible text, definitions, articles. The sans family (Pulp Display) is for what is operated or scanned: navigation, buttons, chips, labels, numbers, and every heading of a video.
-- **Titles are not bold.** A page title is `title` at weight 400; the size does the work. Inside a page, a section heading is `heading`, sans at weight 600.
+- **On a page, titles are not bold.** A page title is `title` at weight 400; the size does the work. On a share card and in a video, titles are sans at weight 800. Inside a page, a section heading is `heading`, sans at weight 600.
 - **Reading text is `prose`**, at a line height of 1.75, in a column of `measure` at most. A verse shown alone takes `passage`. Never justify it and never set it in the sans family.
 - **What is set inside the text but is not the text switches family**: verse numbers and Strong references are sans, 0.72em, weight 600 (`verse-number`).
 - **Weights in use**: 400 and 600 on pages, 500 for eyebrows, 800 for the headings of videos and the reference of a share card. Emphasis in prose is weight 600, never 700.
@@ -57,7 +57,7 @@ Icons are outline icons from Lucide, in the colour of the text beside them. Smal
 
 - **A page of the site.** The rules above are its rules. Its styles live in `apps/site/src/resource-pages.css` (`--resource-*` variables) and `apps/site/src/styles.css` (`--landing-*` variables).
 - **A video frame.** 1920 by 1080, on `canvas`, in two columns: the explanation on the left, the real screen on the right. Headings are `frame-heading`, text is `frame-body` in a block of 740px at most. One `brand` accent, no second hue, no shadow. Screens are real captures, never redrawn.
-- **A share card.** 1200 by 630, the image shown when a link is shared. Its design is the `VerseShareCard` card. The generator cannot read the site's CSS: it takes its values from `tokens.json`.
+- **A share card.** 1200 by 630, the image shown when a link is shared. One frame serves every kind of page; the `ShareCardBible`, `ShareCardStrong`, `ShareCardStudy`, `ShareCardTimeline` and `ShareCardSite` cards show each of them. The generator cannot read the site's CSS: it takes its values from `tokens.json`.
 
 ## When a value changes
 

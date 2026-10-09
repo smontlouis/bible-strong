@@ -13,10 +13,13 @@ Everything under `project/` is the content of that page, in the layout its forma
 | `project/README.md` | The brand book: the usage rules. Read it first. |
 | `project/tokens.json` | Every value: colours in light and dark, type, spacing, radii, shadow, layout. |
 | `project/components/<Name>/` | A guideline (`README.md`) and a live preview (`preview.html`) for each component. `Cover` is the page's cover. |
+| `project/components/bundle.css` | The stylesheet the share card previews have in common: the frame of every card. |
 | `project/assets/Logos/` | The redrawn mark and the rules of the logo files. |
 | `project/design-system.json` | The page's index: its title and the uploaded logo files. |
 
 Fonts are not copied here. The page gets them from `apps/site/public/fonts/`, published under `project/fonts/` with the names `tokens.json` lists.
+
+The pictures in the share card previews (two illustrations of the site, five pictures of the timeline) are not copied here either. They are uploads of the page, which the previews address as `/_blob/<id>`: a preview opened straight from this folder shows the cards without them.
 
 ## This folder is the reference
 
