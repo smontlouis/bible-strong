@@ -83,6 +83,14 @@ export const buildNaveIndexHead = ({ language, topicCount, hasAlternate }: NaveI
       ? { fr: buildNaveIndexPath('fr'), en: buildNaveIndexPath('en') }
       : undefined,
     ogType: 'website',
+    shareCard: {
+      kind: 'title',
+      title: language === 'fr' ? 'Thèmes bibliques' : 'Bible topics',
+      facts:
+        language === 'fr'
+          ? `${topicCount.toLocaleString('fr')} thèmes de la ${messages.name}`
+          : `${topicCount.toLocaleString('en')} topics of ${messages.name}`,
+    },
   })
 }
 
@@ -113,6 +121,16 @@ export const buildNaveLetterHead = (page: NaveLetterPageData) => {
     language,
     breadcrumbs: naveLetterBreadcrumbs(language, letter, page.page),
     ogType: 'website',
+    shareCard: {
+      kind: 'title',
+      kicker: language === 'fr' ? 'Thèmes bibliques' : 'Bible topics',
+      chip: 'Nave',
+      title:
+        language === 'fr'
+          ? `Thèmes en ${letter.toUpperCase()}`
+          : `Topics in ${letter.toUpperCase()}`,
+      facts: naveCount(language, 'letter.count', page.topicCount),
+    },
   })
 }
 
@@ -130,6 +148,16 @@ export const buildNaveTopicHead = (topic: NaveTopicPageData) => {
       ? { fr: buildNavePath('fr', normalizedName), en: buildNavePath('en', normalizedName) }
       : undefined,
     breadcrumbs: naveTopicBreadcrumbs(topic),
+    shareCard: {
+      kind: 'title',
+      kicker: language === 'fr' ? 'Thème biblique' : 'Bible topic',
+      chip: 'Nave',
+      title: name,
+      facts:
+        topic.referenceCount > 0
+          ? naveCount(language, 'topic.references', topic.referenceCount)
+          : undefined,
+    },
     structuredData: [
       {
         '@context': 'https://schema.org',

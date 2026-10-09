@@ -2,6 +2,7 @@ import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
 import { resourcePageHeaders } from '@/features/resources/pageHeaders'
 import { isResourceLanguage } from '@/features/resources/publicSite'
 import { buildResourceHead } from '@/features/resources/resourceHead'
+import { STRONG_SCRIPTS } from '@/features/share/shareCardText'
 import { StrongLetterPage } from '@/features/strong/StrongLexiconPages'
 import { loadStrongLetterPage, type StrongLetterPageData } from '@/features/strong/strong.functions'
 import { strongLetterBreadcrumbs } from '@/features/strong/strongBreadcrumbs'
@@ -36,6 +37,19 @@ const buildHead = (page: StrongLetterPageData) => {
     language,
     breadcrumbs: strongLetterBreadcrumbs(language, lexicon, letter),
     ogType: 'website',
+    shareCard: {
+      kind: 'title',
+      kicker: language === 'fr' ? 'Lexique Strong' : 'Strong’s lexicon',
+      chip: STRONG_SCRIPTS[language][lexicon],
+      title:
+        language === 'fr'
+          ? `Mots ${lexicon === 'hebrew' ? 'hébreux' : 'grecs'} en ${letter.toUpperCase()}`
+          : `${lexicon === 'hebrew' ? 'Hebrew' : 'Greek'} words in ${letter.toUpperCase()}`,
+      facts:
+        language === 'fr'
+          ? `${entries.length.toLocaleString('fr')} mots, leur translittération et leur sens`
+          : `${entries.length.toLocaleString('en')} words, their transliteration and meaning`,
+    },
   })
 }
 

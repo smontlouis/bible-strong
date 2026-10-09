@@ -3,6 +3,8 @@ import {
   RESOURCE_FONT_PRELOADS,
   type ResourceLanguage,
 } from './publicSite'
+import type { ShareCardContent } from '@bible-strong/share-card-service/content'
+import { shareCardMeta } from '../share/shareCardMeta'
 
 /** A step of the path leading to a page; the last one is the page itself. */
 export type Breadcrumb = { label: string; path?: string }
@@ -21,6 +23,8 @@ export type ResourceHeadInput = {
   /** schema.org objects describing the page. */
   structuredData?: Record<string, unknown>[]
   ogType?: 'article' | 'website'
+  /** What the share image of the page shows; the default card when it says nothing. */
+  shareCard?: ShareCardContent
 }
 
 const structuredDataScript = (item: Record<string, unknown>) => ({
@@ -55,6 +59,7 @@ export const buildResourceHead = ({
   breadcrumbs,
   structuredData = [],
   ogType = 'article',
+  shareCard,
 }: ResourceHeadInput) => {
   const url = absoluteSiteUrl(path)
   const data = [...(breadcrumbs && breadcrumbs.length > 1 ? [breadcrumbList(breadcrumbs)] : []), ...structuredData]
@@ -69,7 +74,7 @@ export const buildResourceHead = ({
       { property: 'og:url', content: url },
       { property: 'og:site_name', content: 'Bible Strong' },
       { property: 'og:locale', content: language === 'fr' ? 'fr_FR' : 'en_US' },
-      { name: 'twitter:card', content: 'summary' },
+      ...shareCardMeta(shareCard),
     ],
     links: [
       ...RESOURCE_FONT_PRELOADS,

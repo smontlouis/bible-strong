@@ -1,0 +1,22 @@
+{
+  "name": "@bible-strong/share-card-service",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./content": "./src/content.ts"
+  },
+  "scripts": {
+    "dev": "wrangler dev --config wrangler.jsonc --port 8799",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/*.node-test.ts",
+    "worker:types": "wrangler types --config wrangler.jsonc worker-configuration.d.ts",
+    "worker:deploy": "wrangler deploy --config wrangler.jsonc"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "tsx": "4.20.6",
+    "typescript": "~6.0.3",
+    "wrangler": "^4.124.0"
+  }
+}

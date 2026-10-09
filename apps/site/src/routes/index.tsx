@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { shareCardMeta } from '@/features/share/shareCardMeta'
 import Home from '@/pages'
 import { getLandingTheme } from '@/lib/landing-theme'
 import { absoluteSiteUrl } from '@/features/resources/publicSite'
@@ -25,7 +26,7 @@ export const Route = createFileRoute('/')({
       },
       { property: 'og:title', content: 'Bible Strong - One verse, a complete study' },
       { property: 'og:description', content: 'Bible reading and study tools that keep every discovery connected.' },
-      { property: 'og:image', content: '/image-fb.jpg' },
+      ...shareCardMeta({ kind: 'default', language: 'en' }),
       { property: 'og:url', content: absoluteSiteUrl('/') },
     ],
     links: [...FIRST_SCREEN_FONTS, { rel: 'canonical', href: absoluteSiteUrl('/') }],

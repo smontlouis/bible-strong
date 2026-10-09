@@ -1,0 +1,23 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "bible-strong-share-cards",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-08-19",
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "cards.bible-strong.app",
+      "custom_domain": true,
+    },
+  ],
+  "vars": {
+    // The site that draws the image of each of its pages.
+    "SITE_ORIGIN": "https://bible-strong.app",
+  },
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "bible-strong-media-prod",
+    },
+  ],
+}
