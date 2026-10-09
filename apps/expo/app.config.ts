@@ -6,6 +6,16 @@ const APP_VERSION = '27.2.0'
 const [majorVersion, minorVersion] = APP_VERSION.split('.')
 const RUNTIME_VERSION = `${majorVersion}.${minorVersion}`
 
+// The families of public pages a link opens in the application.
+const PUBLIC_RESOURCE_PATHS = [
+  '/bible/',
+  '/strong/',
+  '/dictionary/',
+  '/nave/',
+  '/commentary/',
+  '/timeline/',
+]
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: process.env.APP_NAME ?? 'dev - Bible Strong',
@@ -30,18 +40,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundImage: './assets/images/background-image.png',
       monochromeImage: './assets/images/icon_notification.png',
     },
-    // Deep linking: Android App Links
+    // Deep linking: Android App Links. Only the resources the application shows (ADR-0082):
+    // the home of the site, its legal pages and shared studies stay in the browser.
     intentFilters: [
       {
         action: 'VIEW',
         autoVerify: true,
-        data: [
-          {
-            scheme: 'https',
-            host: 'bible-strong.app',
-            pathPrefix: '/',
-          },
-        ],
+        data: PUBLIC_RESOURCE_PATHS.map(pathPrefix => ({
+          scheme: 'https',
+          host: 'bible-strong.app',
+          pathPrefix,
+        })),
         category: ['BROWSABLE', 'DEFAULT'],
       },
     ],
