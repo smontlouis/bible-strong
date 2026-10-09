@@ -46,7 +46,7 @@
 .sc-illustration { position: absolute; width: auto; max-width: none; }
 .sc-photo { position: absolute; margin: 0; box-sizing: border-box; border: 8px solid var(--surface); border-radius: var(--radius-xl); background: var(--surface); box-shadow: 0 0 0 1px var(--line); }
 .sc-photo img { display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; border-radius: 12px; }
-.sc-photo__caption { position: absolute; left: 14px; bottom: 14px; padding: 4px 14px; border-radius: var(--radius-pill); background: var(--surface); color: var(--ink); font-size: 20px; line-height: 28px; font-weight: 600; }
+.sc-photo__caption { position: absolute; left: 8px; bottom: 8px; padding: 2px 10px; border-radius: var(--radius-pill); background: var(--surface); color: var(--ink); font-size: 15px; line-height: 22px; font-weight: 600; white-space: nowrap; }
 
 /* Foot: the lockup, always bottom left. */
 .sc-foot { display: flex; align-items: center; justify-content: space-between; }
