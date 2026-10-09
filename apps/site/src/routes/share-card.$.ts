@@ -11,17 +11,24 @@ export const Route = createFileRoute('/share-card/$')({
     handlers: {
       GET: async ({ params, request }) => {
         const { origin, search } = new URL(request.url)
+        const started = performance.now()
         const page = await fetch(new URL(`/${params._splat ?? ''}${search}`, origin), {
           headers: { accept: 'text/html' },
         })
         if (!page.ok) return new Response('Not found', { status: 404 })
         const content = readShareCardMeta(await page.text()) ?? { kind: 'default' as const }
+        const pageRead = performance.now() - started
         const image = await renderShareCard(content, origin)
+        const timing = Object.entries({ page: pageRead, ...image.timings })
+          .map(([step, duration]) => `${step};dur=${duration.toFixed(0)}`)
+          .join(', ')
         return new Response(image.body, {
           headers: {
             'content-type': image.type,
             // The service keeps the image; this answer itself is not worth keeping long.
             'cache-control': 'public, max-age=0, s-maxage=3600',
+            // Reading the page, loading fonts and rasteriser, laying out, drawing the pixels.
+            'server-timing': timing,
           },
         })
       },

@@ -9,7 +9,12 @@ import satori from 'satori'
 import { ShareCard } from './ShareCard'
 import { loadShareCardFonts } from './shareCardFonts'
 
-export type ShareCardImage = { body: ArrayBuffer; type: 'image/png' | 'image/jpeg' }
+export type ShareCardImage = {
+  body: ArrayBuffer
+  type: 'image/png' | 'image/jpeg'
+  /** How long each step took, in milliseconds: what a slow image is made of. */
+  timings: { assets: number; layout: number; pixels: number }
+}
 
 // A response body is an ArrayBuffer, not the view it is handed as.
 const arrayBuffer = (bytes: Uint8Array): ArrayBuffer =>
@@ -39,20 +44,31 @@ export const renderShareCard = async (
   content: ShareCardContent,
   origin: string
 ): Promise<ShareCardImage> => {
+  const started = performance.now()
   const [fonts] = await Promise.all([loadShareCardFonts(origin), loadRasteriser(origin)])
+  const assetsReady = performance.now()
   const svg = await satori(<ShareCard content={content} />, { ...SHARE_CARD_SIZE, fonts })
+  const laidOut = performance.now()
   const rendered = new Resvg(svg, {
     fitTo: { mode: 'width', value: SHARE_CARD_SIZE.width },
   }).render()
   try {
-    if (!shareCardHasPictures(content)) {
-      return { body: arrayBuffer(rendered.asPng()), type: 'image/png' }
+    const picture = shareCardHasPictures(content)
+    const body = picture
+      ? arrayBuffer(
+          encodeJpeg({ data: rendered.pixels, width: rendered.width, height: rendered.height }, 84)
+            .data
+        )
+      : arrayBuffer(rendered.asPng())
+    return {
+      body,
+      type: picture ? 'image/jpeg' : 'image/png',
+      timings: {
+        assets: assetsReady - started,
+        layout: laidOut - assetsReady,
+        pixels: performance.now() - laidOut,
+      },
     }
-    const jpeg = encodeJpeg(
-      { data: rendered.pixels, width: rendered.width, height: rendered.height },
-      84
-    )
-    return { body: arrayBuffer(jpeg.data), type: 'image/jpeg' }
   } finally {
     rendered.free()
   }
