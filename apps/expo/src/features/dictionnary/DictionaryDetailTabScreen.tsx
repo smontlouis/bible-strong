@@ -8,7 +8,6 @@ import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
-import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 import books from '~assets/bible_versions/books-desc'
@@ -30,6 +29,11 @@ import { toast } from '~helpers/toast'
 import EntityChipList from '~common/EntityChipList'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
+import {
+  resourceShareMenuActions,
+  runResourceShareAction,
+  type ResourceShare,
+} from '~features/share/resourceShare'
 import { getPublicSiteUrl } from '~helpers/publicSiteLinks'
 import { buildPublicDictionaryPath } from './publicDictionaryRoutes'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
@@ -319,28 +323,25 @@ const DictionnaryDetailScreen = ({
     }
   }
 
-  const shareDefinition = async () => {
-    if (!dictionnaireItem) return
-
-    try {
-      const message = `${word} \n\n${truncHTML(dictionnaireItem.definition, 4000)
-        .text.replace(/&#/g, '\\')
-        .replace(/\\x([0-9A-F]+);/gi, (_, hex: string) => {
-          return String.fromCharCode(parseInt(hex, 16))
-        })} \n\nLa suite sur ${getPublicSiteUrl(() =>
-        buildPublicDictionaryPath({
-          language: dictionaryResourceLanguage,
-          work,
-          entryId: dictionnaireItem.id ?? 0,
-          word: dictionnaireItem.word,
-        })
-      )}`
-      Share.share({ message })
-    } catch (e) {
-      toast.error('Erreur lors du partage.')
-      console.log('[Dictionary] Share error:', e)
-    }
-  }
+  const share: ResourceShare | undefined = dictionnaireItem
+    ? {
+        url: getPublicSiteUrl(() =>
+          buildPublicDictionaryPath({
+            language: dictionaryResourceLanguage,
+            work,
+            entryId: dictionnaireItem.id ?? 0,
+            word: dictionnaireItem.word,
+          })
+        ),
+        title: word,
+        text: () =>
+          `${word}\n\n${truncHTML(dictionnaireItem.definition, 4000)
+            .text.replace(/&#/g, '\\')
+            .replace(/\\x([0-9A-F]+);/gi, (_, hex: string) => {
+              return String.fromCharCode(parseInt(hex, 16))
+            })}`,
+      }
+    : undefined
 
   // Guard: word should always be defined when this screen is rendered
   // (DictionaryTabScreen only renders this when word is defined)
@@ -416,7 +417,7 @@ const DictionnaryDetailScreen = ({
             actions={
               [
                 { id: 'tags', title: t('Étiquettes'), image: 'tag' },
-                { id: 'share', title: t('Partager'), image: 'square.and.arrow.up' },
+                ...resourceShareMenuActions(t, share),
                 dictionaryEndpoint
                   ? {
                       id: 'relations',
@@ -432,6 +433,7 @@ const DictionnaryDetailScreen = ({
               ].filter(Boolean) as MenuAction[]
             }
             onPressAction={({ nativeEvent }) => {
+              if (runResourceShareAction(nativeEvent.event, share)) return
               switch (nativeEvent.event) {
                 case 'tags':
                   setUnifiedTagsModal({
@@ -440,9 +442,6 @@ const DictionnaryDetailScreen = ({
                     title: word,
                     entity: 'words',
                   })
-                  break
-                case 'share':
-                  shareDefinition()
                   break
                 case 'relations':
                   if (dictionaryEndpoint) openEntityRelations(dictionaryEndpoint)

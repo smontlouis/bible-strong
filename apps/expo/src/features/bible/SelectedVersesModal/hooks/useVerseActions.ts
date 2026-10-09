@@ -1,13 +1,12 @@
-import Clipboard from '@react-native-clipboard/clipboard'
 import { useRouter } from 'expo-router'
 import { getDefaultStore } from 'jotai/vanilla'
-import { useTranslation } from 'react-i18next'
 import { Share } from 'react-native'
-import { toast } from '~helpers/toast'
 import type { BibleResource, VerseIds } from '~common/types'
 import { useShareOptions } from '~features/settings/BibleShareOptionsScreen'
 import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
+import { copyResourceText, shareResourceLink } from '~features/share/resourceShare'
 import getVersesContent from '~helpers/getVersesContent'
+import { getVersesShareUrl } from '~helpers/publicSiteLinks'
 import { cleanParams } from '~helpers/utils'
 import type { VersionCode } from '../../../../state/tabs'
 import { useAtomValue } from 'jotai/react'
@@ -30,39 +29,32 @@ const useVerseActions = ({
   onChangeResourceType,
 }: UseVerseActionsParams) => {
   const router = useRouter()
-  const { t } = useTranslation()
   const resources = useResourceAccess()
   const openedFromTab = useAtomValue(openedFromTabAtom)
-  const { hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName } = useShareOptions()
+  const { hasVerseNumbers, hasInlineVerses, hasQuotes } = useShareOptions()
 
+  const versesText = async () => {
+    const { all } = await getVersesContent({
+      verses: selectedVerses,
+      version,
+      hasVerseNumbers,
+      hasInlineVerses,
+      hasQuotes,
+      loadVerseTexts: (versionId, verseKeys) =>
+        loadBibleVerseTexts(resources, versionId, verseKeys),
+    })
+    return all
+  }
+
+  // Sharing sends the link of the passage alone, so that its card is drawn where it lands.
+  // Verses the public site does not serve have no link: their text is shared instead.
   const shareVerse = async () => {
-    const { all: message } = await getVersesContent({
-      verses: selectedVerses,
-      version,
-      hasVerseNumbers,
-      hasInlineVerses,
-      hasQuotes,
-      hasAppName,
-      loadVerseTexts: (versionId, verseKeys) =>
-        loadBibleVerseTexts(resources, versionId, verseKeys),
-    })
-    await Share.share({ message })
+    const url = getVersesShareUrl(Object.keys(selectedVerses), version)
+    if (url) return shareResourceLink({ url })
+    await Share.share({ message: await versesText() })
   }
 
-  const copyToClipboard = async () => {
-    const { all: message } = await getVersesContent({
-      verses: selectedVerses,
-      version,
-      hasVerseNumbers,
-      hasInlineVerses,
-      hasQuotes,
-      hasAppName,
-      loadVerseTexts: (versionId, verseKeys) =>
-        loadBibleVerseTexts(resources, versionId, verseKeys),
-    })
-    Clipboard.setString(message)
-    toast(t('Copié dans le presse-papiers.'))
-  }
+  const copyToClipboard = () => copyResourceText({ text: versesText })
 
   const showStrongDetail = () => {
     onChangeResourceType('strong')

@@ -5,6 +5,11 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import {
+  resourceShareMenuActions,
+  runResourceShareAction,
+  type ResourceShare,
+} from '~features/share/resourceShare'
 import generateUUID from '~helpers/generateUUID'
 import type { CommentaryProjectionId } from './commentarySelection'
 import CommentaryAvatar from './CommentaryAvatar'
@@ -17,7 +22,7 @@ const CommentaryResourceHeaderActions = ({
   sectionId,
   showAvatar = true,
   canOpenInNewTab = true,
-  onShare,
+  share,
 }: {
   entry: CommentaryCatalogEntry
   projectionId: CommentaryProjectionId
@@ -27,14 +32,12 @@ const CommentaryResourceHeaderActions = ({
   sectionId?: string
   showAvatar?: boolean
   canOpenInNewTab?: boolean
-  onShare?: () => void
+  share?: ResourceShare
 }) => {
   const { t } = useTranslation()
   const openInNewTab = useOpenInNewTab()
   const actions: MenuAction[] = [
-    ...(onShare
-      ? [{ id: 'share', title: t('Partager'), image: 'square.and.arrow.up' as const }]
-      : []),
+    ...resourceShareMenuActions(t, share),
     ...(canOpenInNewTab
       ? [
           {
@@ -60,7 +63,7 @@ const CommentaryResourceHeaderActions = ({
         tabActions
         actions={actions}
         onPressAction={({ nativeEvent }) => {
-          if (nativeEvent.event === 'share') onShare?.()
+          if (runResourceShareAction(nativeEvent.event, share)) return
           if (nativeEvent.event !== 'open-tab') return
           openInNewTab({
             id: `commentary-resource-${generateUUID()}`,

@@ -23,7 +23,6 @@ export const SET_SETTINGS_PREFERRED_DARK_THEME = 'user/SET_SETTINGS_PREFERRED_DA
 export const TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS = 'user/SET_SETTINGS_SHARE_VERSE_NUMBERS'
 export const TOGGLE_SETTINGS_SHARE_INLINE_VERSES = 'user/SET_SETTINGS_SHARE_INLINE_VERSES'
 export const TOGGLE_SETTINGS_SHARE_QUOTES = 'user/SET_SETTINGS_SHARE_QUOTES'
-export const TOGGLE_SETTINGS_SHARE_APP_NAME = 'user/SET_SETTINGS_SHARE_APP_NAME'
 export const SET_DEFAULT_COLOR_NAME = 'user/SET_DEFAULT_COLOR_NAME'
 export const SET_DEFAULT_COLOR_TYPE = 'user/SET_DEFAULT_COLOR_TYPE'
 export const SET_DEFAULT_BIBLE_VERSION = 'user/SET_DEFAULT_BIBLE_VERSION'
@@ -120,8 +119,6 @@ export const toggleSettingsShareVerseNumbers = createAction(TOGGLE_SETTINGS_SHAR
 export const toggleSettingsShareLineBreaks = createAction(TOGGLE_SETTINGS_SHARE_INLINE_VERSES)
 
 export const toggleSettingsShareQuotes = createAction(TOGGLE_SETTINGS_SHARE_QUOTES)
-
-export const toggleSettingsShareAppName = createAction(TOGGLE_SETTINGS_SHARE_APP_NAME)
 
 export const setDefaultColorName = createAction(
   SET_DEFAULT_COLOR_NAME,
