@@ -14,6 +14,9 @@ export default defineConfig({
   optimizeDeps: { exclude: ['@resvg/resvg-js'] },
   plugins: [
     nitro({
+      // The native rasteriser of the share images is a binary: it is copied beside the
+      // function with its package, not read as code.
+      traceDeps: ['@resvg/resvg-js*', '@resvg/resvg-js-linux-x64-gnu*'],
       vercel: {
         functions: {
           // Pages are rendered from the Resource API, whose database is in Frankfurt: a
