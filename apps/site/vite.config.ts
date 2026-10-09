@@ -9,6 +9,10 @@ import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   resolve: { alias: { '@': fileURLToPath(new URL('.', import.meta.url)) } },
+  // The rasteriser of the share images is a native addon: it is loaded by Node as it is,
+  // never bundled.
+  ssr: { external: ['@resvg/resvg-js'] },
+  optimizeDeps: { exclude: ['@resvg/resvg-js'] },
   plugins: [
     nitro({
       vercel: {

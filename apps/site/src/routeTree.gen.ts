@@ -33,6 +33,7 @@ import { Route as FrHowToDeleteDataRouteImport } from './routes/fr.how-to-delete
 import { Route as FrPolitiqueDeConfidentialiteRouteImport } from './routes/fr.politique-de-confidentialite'
 import { Route as FrPrivacyPolicyRouteImport } from './routes/fr.privacy-policy'
 import { Route as NaveLanguageRouteImport } from './routes/nave.$language'
+import { Route as ShareCardSplatRouteImport } from './routes/share-card.$'
 import { Route as SitemapsNameRouteImport } from './routes/sitemaps.$name'
 import { Route as StrongCodeRouteImport } from './routes/strong.$code'
 import { Route as StudiesIdRouteImport } from './routes/studies.$id'
@@ -176,6 +177,11 @@ const NaveLanguageRoute = NaveLanguageRouteImport.update({
   path: '/nave/$language',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShareCardSplatRoute = ShareCardSplatRouteImport.update({
+  id: '/share-card/$',
+  path: '/share-card/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapsNameRoute = SitemapsNameRouteImport.update({
   id: '/sitemaps/$name',
   path: '/sitemaps/$name',
@@ -310,6 +316,7 @@ export interface FileRoutesByFullPath {
   '/fr/politique-de-confidentialite': typeof FrPolitiqueDeConfidentialiteRoute
   '/fr/privacy-policy': typeof FrPrivacyPolicyRoute
   '/nave/$language': typeof NaveLanguageRoute
+  '/share-card/$': typeof ShareCardSplatRoute
   '/sitemaps/$name': typeof SitemapsNameRoute
   '/strong/$code': typeof StrongCodeRoute
   '/studies/$id': typeof StudiesIdRoute
@@ -356,6 +363,7 @@ export interface FileRoutesByTo {
   '/fr/politique-de-confidentialite': typeof FrPolitiqueDeConfidentialiteRoute
   '/fr/privacy-policy': typeof FrPrivacyPolicyRoute
   '/nave/$language': typeof NaveLanguageRoute
+  '/share-card/$': typeof ShareCardSplatRoute
   '/sitemaps/$name': typeof SitemapsNameRoute
   '/strong/$code': typeof StrongCodeRoute
   '/studies/$id': typeof StudiesIdRoute
@@ -403,6 +411,7 @@ export interface FileRoutesById {
   '/fr/politique-de-confidentialite': typeof FrPolitiqueDeConfidentialiteRoute
   '/fr/privacy-policy': typeof FrPrivacyPolicyRoute
   '/nave/$language': typeof NaveLanguageRoute
+  '/share-card/$': typeof ShareCardSplatRoute
   '/sitemaps/$name': typeof SitemapsNameRoute
   '/strong/$code': typeof StrongCodeRoute
   '/studies/$id': typeof StudiesIdRoute
@@ -451,6 +460,7 @@ export interface FileRouteTypes {
     | '/fr/politique-de-confidentialite'
     | '/fr/privacy-policy'
     | '/nave/$language'
+    | '/share-card/$'
     | '/sitemaps/$name'
     | '/strong/$code'
     | '/studies/$id'
@@ -497,6 +507,7 @@ export interface FileRouteTypes {
     | '/fr/politique-de-confidentialite'
     | '/fr/privacy-policy'
     | '/nave/$language'
+    | '/share-card/$'
     | '/sitemaps/$name'
     | '/strong/$code'
     | '/studies/$id'
@@ -543,6 +554,7 @@ export interface FileRouteTypes {
     | '/fr/politique-de-confidentialite'
     | '/fr/privacy-policy'
     | '/nave/$language'
+    | '/share-card/$'
     | '/sitemaps/$name'
     | '/strong/$code'
     | '/studies/$id'
@@ -590,6 +602,7 @@ export interface RootRouteChildren {
   FrPolitiqueDeConfidentialiteRoute: typeof FrPolitiqueDeConfidentialiteRoute
   FrPrivacyPolicyRoute: typeof FrPrivacyPolicyRoute
   NaveLanguageRoute: typeof NaveLanguageRoute
+  ShareCardSplatRoute: typeof ShareCardSplatRoute
   SitemapsNameRoute: typeof SitemapsNameRoute
   StrongCodeRoute: typeof StrongCodeRoute
   StudiesIdRoute: typeof StudiesIdRoute
@@ -784,6 +797,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NaveLanguageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/share-card/$': {
+      id: '/share-card/$'
+      path: '/share-card/$'
+      fullPath: '/share-card/$'
+      preLoaderRoute: typeof ShareCardSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemaps/$name': {
       id: '/sitemaps/$name'
       path: '/sitemaps/$name'
@@ -950,6 +970,7 @@ const rootRouteChildren: RootRouteChildren = {
   FrPolitiqueDeConfidentialiteRoute: FrPolitiqueDeConfidentialiteRoute,
   FrPrivacyPolicyRoute: FrPrivacyPolicyRoute,
   NaveLanguageRoute: NaveLanguageRoute,
+  ShareCardSplatRoute: ShareCardSplatRoute,
   SitemapsNameRoute: SitemapsNameRoute,
   StrongCodeRoute: StrongCodeRoute,
   StudiesIdRoute: StudiesIdRoute,
