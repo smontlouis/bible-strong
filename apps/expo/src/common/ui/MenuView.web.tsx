@@ -25,6 +25,8 @@ const icons: Record<string, React.ComponentProps<typeof Feather>['name']> = {
   'clock.arrow.circlepath': 'clock',
   bookmark: 'bookmark',
   'square.and.arrow.up': 'share',
+  'doc.on.doc': 'copy',
+  link: 'link',
   'plus.square': 'plus-square',
   'plus.circle': 'plus-circle',
   'arrow.up.forward.square': 'external-link',

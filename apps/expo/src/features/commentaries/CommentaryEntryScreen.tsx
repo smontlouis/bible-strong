@@ -9,7 +9,7 @@ import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import StylizedHTMLView from '~common/SwitchableHTMLView'
-import { shareCommentary } from './shareCommentary'
+import { getCommentaryShare } from './shareCommentary'
 import ScrollView from '~common/ui/ScrollView'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
@@ -132,15 +132,14 @@ const CommentaryEntryScreen = ({
                 chapter={chapter}
                 sectionId={params.sectionId}
                 showAvatar={false}
-                onShare={
+                share={
                   section
-                    ? () =>
-                        void shareCommentary({
-                          entry,
-                          passage,
-                          sections: [section],
-                          location: { language: projection.language, book, chapter },
-                        })
+                    ? getCommentaryShare({
+                        entry,
+                        passage,
+                        sections: [section],
+                        location: { language: projection.language, book, chapter },
+                      })
                     : undefined
                 }
               />

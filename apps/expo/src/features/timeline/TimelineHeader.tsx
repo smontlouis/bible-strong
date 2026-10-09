@@ -14,6 +14,12 @@ import Back from '~common/Back'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
+import {
+  RESOURCE_SHARE_ICONS,
+  resourceShareMenuActions,
+  runResourceShareAction,
+  type ResourceShare,
+} from '~features/share/resourceShare'
 import useTimelineLanguage from './useTimelineLanguage'
 
 const HeaderBox = (
@@ -65,6 +71,7 @@ interface Props {
   onBackPress?: () => void
   onOpenInNewTab: () => void
   onSearchPress: () => void
+  share?: ResourceShare
 }
 
 const TimelineHeader = ({
@@ -78,6 +85,7 @@ const TimelineHeader = ({
   onOpenInNewTab,
   onSearchPress,
   details,
+  share,
 }: Props) => {
   const stylingTheme = useStylingTheme()
 
@@ -117,7 +125,7 @@ const TimelineHeader = ({
           </TouchableBox>
           <ContextualMenu
             panelTitle={getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
-            icons={{ details: 'info', 'open-tab': 'external-link' }}
+            icons={{ details: 'info', 'open-tab': 'external-link', ...RESOURCE_SHARE_ICONS }}
             screens={
               details
                 ? { details: { title: t('Détails'), width: 500, content: () => details } }
@@ -125,6 +133,7 @@ const TimelineHeader = ({
             }
             actions={[
               { id: 'details', title: t('Détails'), image: 'info.circle' },
+              ...resourceShareMenuActions(t, share),
               {
                 id: 'open-tab',
                 title: t('tab.openInNewTab'),
@@ -132,6 +141,7 @@ const TimelineHeader = ({
               },
             ]}
             onPressAction={({ nativeEvent }) => {
+              if (runResourceShareAction(nativeEvent.event, share)) return
               switch (nativeEvent.event) {
                 case 'details':
                   onPress()

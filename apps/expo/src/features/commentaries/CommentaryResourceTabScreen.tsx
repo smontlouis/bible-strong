@@ -26,7 +26,7 @@ import { getDefaultBibleTab, type CommentaryResourceTab, useBibleTabActions } fr
 import { openCommentaryBookSelector } from './commentaryBookSelector'
 import CommentarySectionCard from './CommentarySectionCard'
 import CommentaryResourceHeaderActions from './CommentaryResourceHeaderActions'
-import { shareCommentary } from './shareCommentary'
+import { getCommentaryShare } from './shareCommentary'
 import CommentaryRoomIntro from './CommentaryRoomIntro'
 import { getCoveredCommentaryLocation } from './commentaryResourceNavigation'
 import {
@@ -215,14 +215,12 @@ const CommentaryResourceTabScreen = ({
                   sectionId={tab.data.sectionId}
                   showAvatar={false}
                   canOpenInNewTab={false}
-                  onShare={() =>
-                    void shareCommentary({
-                      entry,
-                      passage,
-                      sections: [section],
-                      location: { language: projection.language, book, chapter },
-                    })
-                  }
+                  share={getCommentaryShare({
+                    entry,
+                    passage,
+                    sections: [section],
+                    location: { language: projection.language, book, chapter },
+                  })}
                 />
               </Box>
             ) : undefined

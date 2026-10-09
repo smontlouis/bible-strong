@@ -1,4 +1,4 @@
-import { getStrongShareUrl, getVersesShareUrl, PUBLIC_SITE_URL } from '../publicSiteLinks'
+import { getChapterShareUrl, getStrongShareUrl, getVersesShareUrl } from '../publicSiteLinks'
 
 describe('public site links', () => {
   it('opens a single verse and a run of verses as a passage', () => {
@@ -25,9 +25,14 @@ describe('public site links', () => {
     )
   })
 
-  it('falls back to the home page for what the site does not serve', () => {
-    expect(getVersesShareUrl(['1-1-1'], 'UNKNOWN')).toBe(PUBLIC_SITE_URL)
-    expect(getVersesShareUrl([], 'LSG')).toBe(PUBLIC_SITE_URL)
+  it('has no link for what the site does not serve', () => {
+    expect(getVersesShareUrl(['1-1-1'], 'UNKNOWN')).toBeUndefined()
+    expect(getVersesShareUrl([], 'LSG')).toBeUndefined()
+    expect(getChapterShareUrl(1, 1, 'UNKNOWN')).toBeUndefined()
+  })
+
+  it('opens a chapter', () => {
+    expect(getChapterShareUrl(43, 3, 'LSG')).toBe('https://bible-strong.app/bible/lsg/john/3')
   })
 
   it('opens a Strong entry in the language of the lexicon', () => {

@@ -1,10 +1,14 @@
 import { useSetAtom } from 'jotai/react'
-import { Share } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import {
+  resourceShareMenuActions,
+  runResourceShareAction,
+  type ResourceShare,
+} from '~features/share/resourceShare'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
 import { createStrongEndpoint } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
@@ -41,14 +45,17 @@ const StrongEntryMenu = ({ context, entry }: Props) => {
     originalWord: entry.original,
   })
 
-  const shareEntry = () => {
-    const lines = [
-      `${stepStrongCode} — ${entry.gloss}`,
-      `${entry.original} · ${entry.transliteration}`,
-      entry.definitionHtml ? stripHtml(entry.definitionHtml) : '',
-      getStrongShareUrl(stepStrongCode, entry.language, language),
-    ].filter(Boolean)
-    Share.share({ message: lines.join('\n\n') })
+  const share: ResourceShare = {
+    url: getStrongShareUrl(stepStrongCode, entry.language, language),
+    title: `${stepStrongCode} — ${entry.gloss}`,
+    text: () =>
+      [
+        `${stepStrongCode} — ${entry.gloss}`,
+        `${entry.original} · ${entry.transliteration}`,
+        entry.definitionHtml ? stripHtml(entry.definitionHtml) : '',
+      ]
+        .filter(Boolean)
+        .join('\n\n'),
   }
 
   const openTags = () => {
@@ -88,7 +95,7 @@ const StrongEntryMenu = ({ context, entry }: Props) => {
             title: t('Éditer les relations'),
             image: 'arrow.triangle.merge',
           },
-          { id: 'share', title: t('Partager'), image: 'square.and.arrow.up' },
+          ...resourceShareMenuActions(t, share),
           {
             id: 'open-tab',
             title: t('tab.openInNewTab'),
@@ -100,7 +107,7 @@ const StrongEntryMenu = ({ context, entry }: Props) => {
         if (nativeEvent.event === 'language') toggleLanguage()
         if (nativeEvent.event === 'tags') openTags()
         if (nativeEvent.event === 'relations') openEntityRelations(strongEndpoint)
-        if (nativeEvent.event === 'share') shareEntry()
+        runResourceShareAction(nativeEvent.event, share)
         if (nativeEvent.event === 'open-tab') openStrongInNewTab()
       }}
     >

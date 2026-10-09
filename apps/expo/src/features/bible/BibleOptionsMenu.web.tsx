@@ -46,6 +46,7 @@ export default function BibleOptionsMenu({
     history: 'clock',
     bookmark: 'bookmark',
     export: 'share',
+    'share-link': 'link',
     'open-tab': 'external-link',
   } as const
   return (

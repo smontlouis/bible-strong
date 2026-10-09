@@ -2,7 +2,6 @@ import { VerseIds, VerseRefContent } from '~common/types'
 import { VersionCode } from '../state/tabs'
 import verseToReference from './verseToReference'
 import { appLogger } from '~helpers/agentObservability'
-import { getVersesShareUrl } from '~helpers/publicSiteLinks'
 
 export type LoadVerseTexts = (
   version: string,
@@ -25,7 +24,6 @@ export default async ({
   hasVerseNumbers = false,
   hasInlineVerses = true,
   hasQuotes = false,
-  hasAppName = true,
   position,
   loadVerseTexts,
 }: {
@@ -34,7 +32,6 @@ export default async ({
   hasVerseNumbers?: boolean
   hasInlineVerses?: boolean
   hasQuotes?: boolean
-  hasAppName?: boolean
   position?: number
   loadVerseTexts: LoadVerseTexts
 }): Promise<VerseRefContent> => {
@@ -80,8 +77,6 @@ export default async ({
     title: reference || '',
     version,
     content: versesContent,
-    all: `${versesContent} \n${reference} ${version} ${
-      hasAppName ? `\n\n${getVersesShareUrl(selectedVerses, version)}` : ''
-    }`,
+    all: `${versesContent} \n${reference} ${version}`,
   }
 }

@@ -32,7 +32,20 @@ jest.mock('~common/ui/Box', () => ({
 }))
 jest.mock('~common/ui/Text', () => 'Text')
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: 'FeatherIcon' }))
-jest.mock('../shareCommentary', () => ({ shareCommentary: jest.fn() }))
+const mockRunShareAction = jest.fn()
+jest.mock('~common/ui/MenuView', () => ({ MenuView: 'MenuView' }), { virtual: true })
+jest.mock('../shareCommentary', () => ({
+  getCommentaryShare: jest.fn(({ passage }: { passage: string }) => ({
+    url: 'https://bible-strong.app/commentary/fr/mhy-fr/gen/1',
+    title: passage,
+    text: () => 'text',
+  })),
+}))
+jest.mock('~features/share/resourceShare', () => ({
+  resourceShareMenuActions: (_: unknown, share?: { url?: string }) =>
+    share ? [...(share.url ? [{ id: 'share-link' }] : []), { id: 'copy-text' }] : [],
+  runResourceShareAction: (...args: unknown[]) => mockRunShareAction(...args),
+}))
 jest.mock('../CommentarySectionCard', () => 'CommentaryCard')
 jest.mock('~features/resources/ResourceUnavailableView', () => 'Unavailable')
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
@@ -138,6 +151,17 @@ it('does not load full content until opened, then reads the exact requested revi
   expect(html.props.section.content).toBe('<p>Complete</p>')
   const header = renderer!.root.find(node => String(node.type) === 'Sheet').props.header
   expect(header.props.title).toBe('Henry')
+  // The share button offers the link of the page and the text, each on its own.
+  const menu = header.props.rightComponent
+  expect(menu.props.actions.map((action: { id: string }) => action.id)).toEqual([
+    'share-link',
+    'copy-text',
+  ])
+  menu.props.onPressAction({ nativeEvent: { event: 'share-link' } })
+  expect(mockRunShareAction).toHaveBeenCalledWith(
+    'share-link',
+    expect.objectContaining({ url: 'https://bible-strong.app/commentary/fr/mhy-fr/gen/1' })
+  )
 })
 
 it('keeps the excerpt and refreshes chapter indexes when the requested edition is unavailable', async () => {

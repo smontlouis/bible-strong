@@ -1,9 +1,10 @@
-import { commentaryHtmlToText, getCommentaryShareMessage } from '../shareCommentary'
+import {
+  commentaryHtmlToText,
+  getCommentaryShare,
+  getCommentaryShareText,
+} from '../shareCommentary'
 
-jest.mock('@sentry/react-native', () => ({ captureException: jest.fn() }))
-jest.mock('react-native', () => ({ Share: { share: jest.fn() } }))
-jest.mock('~helpers/toast', () => ({ toast: { error: jest.fn() } }))
-jest.mock('~i18n', () => ({ __esModule: true, default: { t: (key: string) => key } }))
+jest.mock('~features/share/resourceShare', () => ({}))
 
 const entry = {
   id: 'mhy-fr',
@@ -20,42 +21,49 @@ it('converts commentary HTML to plain paragraphs with decoded spaces', () => {
   ).toBe('Dieu crée les cieux.\n\nQue de puissance !\nDans la Parole.\n\nFin du texte.')
 })
 
-it('formats the share message like the pre-27 commentary share, ending on the page of the chapter', () => {
+it('formats the copied text like the pre-27 commentary share, without any link', () => {
   expect(
-    getCommentaryShareMessage({
+    getCommentaryShareText({
       entry,
       passage: 'Genèse 1:1–2',
       sections: [{ content: '<p>Au commencement.</p>' }],
-      location,
     })
-  ).toBe(
-    'Matthew Henry\nCommentaire concis de Matthew Henry\nGenèse 1:1–2\n\nAu commencement.\n\nhttps://bible-strong.app/commentary/fr/mhy-fr/gen/1'
-  )
+  ).toBe('Matthew Henry\nCommentaire concis de Matthew Henry\nGenèse 1:1–2\n\nAu commencement.')
 })
 
-it('ends on the home page when the commentary has no page for that chapter', () => {
+it('links the page of the chapter, and keeps the text apart from the link', async () => {
+  const share = getCommentaryShare({
+    entry,
+    passage: 'Genèse 1:1–2',
+    sections: [{ content: '<p>Au commencement.</p>' }],
+    location,
+  })
+  expect(share.url).toBe('https://bible-strong.app/commentary/fr/mhy-fr/gen/1')
+  expect(await share.text()).not.toContain('bible-strong.app')
+})
+
+it('has no link when the commentary has no page for that chapter', () => {
   expect(
-    getCommentaryShareMessage({
+    getCommentaryShare({
       entry: { ...entry, id: 'unknown' },
       passage: 'Genèse 1',
       sections: [{ content: '<p>Au commencement.</p>' }],
       location,
-    })
-  ).toMatch(/\n\nhttps:\/\/bible-strong\.app$/u)
+    }).url
+  ).toBeUndefined()
 })
 
 it('labels chapter sections and truncates long commentaries on a word boundary', () => {
-  const message = getCommentaryShareMessage({
+  const text = getCommentaryShareText({
     entry,
     passage: 'Genèse 1',
     sections: [
       { reference: 'Genèse 1:1', content: '<p>Premier.</p>' },
       { reference: 'Genèse 1:2', content: `<p>${'mot '.repeat(3000)}</p>` },
     ],
-    location,
   })
-  expect(message).toContain('Genèse 1:1\nPremier.\n\nGenèse 1:2\nmot mot')
-  const body = message.split('\n\n').slice(1, -1).join('\n\n')
+  expect(text).toContain('Genèse 1:1\nPremier.\n\nGenèse 1:2\nmot mot')
+  const body = text.split('\n\n').slice(1).join('\n\n')
   expect(body.length).toBeLessThanOrEqual(10001)
   expect(body.endsWith('mot…')).toBe(true)
 })
