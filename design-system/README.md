@@ -20,7 +20,7 @@ Everything under `project/` is the content of that page, in the layout its forma
 
 Fonts are not copied here. The page gets them from `apps/site/public/fonts/`, published under `project/fonts/` with the names `tokens.json` lists.
 
-The pictures in the share card previews (two illustrations of the site, six period pictures and one event picture of the timeline) are not copied here either. They are uploads of the page, which the previews address as `/_blob/<id>`: a preview opened straight from this folder shows the cards without them.
+The pictures in the share card previews (one illustration of the site, six period pictures and one event picture of the timeline) are not copied here either. They are uploads of the page, which the previews address as `/_blob/<id>`: a preview opened straight from this folder shows the cards without them.
 
 ## This folder is the reference
 

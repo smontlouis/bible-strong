@@ -16,6 +16,12 @@
 .sc-ornament circle { fill: var(--brand); }
 .sc-ornament circle:first-child { fill: none; stroke: var(--brand); stroke-width: 58px; }
 
+/* The default card shows the mark itself, in the place and at the size of the ornament. */
+.sc-logo { position: absolute; right: -230px; top: -150px; width: 760px; height: 760px; }
+.sc-mark { padding: 0 6px; border-radius: var(--radius-mark); background: var(--mark); color: inherit; }
+.sc-chips { display: flex; flex-wrap: wrap; gap: 12px; }
+.sc-chip .sc-inline-word { color: inherit; }
+
 /* Head: what the card is about, then one fact in a chip. */
 .sc-head { display: flex; align-items: center; gap: 20px; }
 .sc-kicker { color: var(--accent); font-size: 44px; line-height: 1; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; }
@@ -30,6 +36,8 @@
 .sc-title { margin: 0; font-size: 120px; line-height: 1; font-weight: 800; letter-spacing: -0.025em; text-wrap: balance; }
 .sc-title--160 { font-size: 160px; }
 .sc-title--84 { font-size: 84px; line-height: 1.04; }
+.sc-title--132 { font-size: 132px; line-height: 0.95; }
+.sc-title--72 { font-size: 72px; line-height: 1.04; }
 .sc-word { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 28px; }
 .sc-word__original, .sc-inline-word { font-family: "Literata", "Literata Greek", "Frank Ruhl Libre", ui-serif, Georgia, serif; }
 .sc-inline-word { color: var(--ink); font-weight: 400; }
@@ -39,6 +47,8 @@
 .sc-sub { margin: 0; color: var(--muted); font-size: 28px; line-height: 1.3; font-weight: 500; }
 .sc-excerpt { margin: 0; font-family: var(--font-serif); font-size: 34px; line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .sc-excerpt--3 { -webkit-line-clamp: 3; }
+.sc-excerpt--30 { font-size: 30px; }
+.sc-gloss--36 { font-size: 36px; white-space: nowrap; }
 
 /* Media: an illustration of the site or pictures of the timeline, on the right half. The body then keeps to the left half. */
 .sc--media .sc-body { max-width: 540px; }
