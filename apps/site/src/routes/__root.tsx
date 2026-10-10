@@ -3,6 +3,7 @@ import { shareCardMeta } from '@/features/share/shareCardMeta'
 import { HeadContent, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
 import NotFoundPage from '@/features/resources/NotFoundPage'
 import { useCurrentLocale } from '@/locales'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import appCss from '../styles.css?url'
 
 interface RouterContext { queryClient: QueryClient }
@@ -37,6 +38,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
         <Scripts />
+        <SpeedInsights />
       </body>
     </html>
   )
