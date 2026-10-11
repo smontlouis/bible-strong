@@ -10,6 +10,7 @@
     "build": "vite build",
     "start": "vite preview --port 3000",
     "deploy": "vite build && wrangler deploy",
+    "deploy:next": "CLOUDFLARE_ENV=next vite build && wrangler deploy",
     "test": "vitest run",
     "lint": "tsc --project tsconfig.json",
     "typecheck": "tsc --project tsconfig.json"

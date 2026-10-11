@@ -535,16 +535,15 @@ export const isKeptWhenWhole = path => !/^\/(?:fr)?(?:\?|$)/u.test(path)
  * @typedef {object} Answer
  * @property {AnswerKind} kind
  * @property {Completeness} completeness
- * @property {string} [cache] What `x-page-cache` said: the page cache of the site's Worker.
+ * @property {string} [cache] What `cf-cache-status` said: the cache Cloudflare keeps in front of the pages.
  * @property {number} [retryAfterMs]
  */
 
 /**
  * Reads what the site answered a page request.
  *
- * - `cached`: the site held the page in the data centre that answered; nothing was
- *   rendered. `stale`: an old copy was served while a new one is rendered, which the page
- *   cache of the Worker never does; kept for a host in front of the site that would.
+ * - `cached`: Cloudflare held the page; nothing was rendered. `stale`: it held an old copy,
+ *   served it, and renders a new one behind the answer.
  * - `rendered`: the site rendered the page for this request, and the Resource API was read.
  * - `limited` (429), `failed` (5xx, or no answer: status 0) and `refused` (401, 403) mean
  *   the site is in trouble or wants no warm-up; `missing` and `redirected` mean the sitemap
@@ -565,7 +564,7 @@ export const isKeptWhenWhole = path => !/^\/(?:fr)?(?:\?|$)/u.test(path)
  * @returns {Answer}
  */
 export const readAnswer = ({ status, headers = {} }) => {
-  const cache = headers['x-page-cache']?.toUpperCase()
+  const cache = headers['cf-cache-status']?.toUpperCase()
   if (status === 429) {
     return { kind: 'limited', completeness: 'unknown', cache, retryAfterMs: retryAfterMs(headers) }
   }
@@ -576,8 +575,9 @@ export const readAnswer = ({ status, headers = {} }) => {
   if (status >= 300 && status < 400) return { kind: 'redirected', completeness: 'unknown', cache }
   if (status !== 200) return { kind: 'missing', completeness: 'unknown', cache }
 
+  // `REVALIDATED` and `EXPIRED` are answers rendered for this request, like a `MISS`.
   const kind =
-    cache === 'HIT' || cache === 'PRERENDER' ? 'cached' : cache === 'STALE' ? 'stale' : 'rendered'
+    cache === 'HIT' ? 'cached' : cache === 'STALE' || cache === 'UPDATING' ? 'stale' : 'rendered'
   return { kind, completeness: completenessOf(kind, headers), cache }
 }
 

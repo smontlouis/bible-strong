@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted. Replaces the hosting of [ADR-0068](./0068-serve-indexable-resource-pages-from-the-public-site.md)
+Accepted. The cache the Worker kept by itself, described below, was replaced the same day by the
+one Cloudflare keeps in front of it: see [ADR-0084](./0084-keep-rendered-pages-in-the-cache-in-front-of-the-worker.md).
+Replaces the hosting of [ADR-0068](./0068-serve-indexable-resource-pages-from-the-public-site.md)
 and where the share images of [ADR-0081](./0081-sign-share-images-into-their-address-and-keep-them-on-cloudflare.md)
 are drawn; the addresses, the pages and the images themselves do not change.
 

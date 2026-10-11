@@ -35,15 +35,29 @@ yarn workspace @bible-strong/site deploy
 ```
 
 - **Public files** (`public/`, the browser build) are answered by Cloudflare without running the Worker. `public/_headers` sets their headers.
-- **Pages** are kept by the Worker itself, in the cache of the data centre it runs in, for the `s-maxage` each answers with (`features/resources/pageCache.ts`). A deployment starts with an empty cache. Every answer says `X-Page-Cache: HIT` or `MISS`.
+- **Pages** are kept by Cloudflare, in a cache in front of the entrypoint that renders them and shared by every data centre (ADR-0084, `src/server.ts`). A page is kept a month, then served stale for a week while a new one is rendered. Every answer says so in `Cf-Cache-Status` (`HIT`, `MISS`, `BYPASS`…). An answer whose route says nothing about its keeping is not kept. The trial Worker (`yarn workspace @bible-strong/site deploy:next`) has the same cache, and `vite dev` none.
 - **The Resource API** is asked through a binding (`RESOURCE_API`); on a development machine the binding reaches the deployed API, which needs `wrangler login`.
 - **Share images** are drawn by the Worker. The layout library cannot start in a Worker as it is published; `bundling/satoriForWorkers.ts` rewrites it as it is bundled, and fails the build if a release moves what it rewrites.
-- **Secrets** are set with `wrangler secret put`: `SHARE_CARD_SECRET` and `FIREBASE_PRIVATE_KEY`. In development they are read from `.env.local`.
+- **Secrets** are set with `wrangler secret put`: `SHARE_CARD_SECRET`, `FIREBASE_PRIVATE_KEY` and `CACHE_REFRESH_SECRET`. In development they are read from `.env.local`.
 - A library that starts a timer or asks the network when it is loaded cannot be loaded by the Worker: the animation library of the home page is replaced on the server (`bundling/animationsOnServer.ts`).
+
+### Rendering kept pages again
+
+A page is kept a month. Two things replace it sooner:
+
+- **A deployment of another build.** The key of a page carries the revision of the build, a digest of everything the Worker is made of (`bundling/buildRevision.ts`). A deployment that changes nothing of it (a test, a script, this file) keeps every page; any other starts anew.
+- **A request of the operator**, after a resource is republished or the Resource API deployed:
+
+```bash
+yarn site:pages:refresh --everything
+yarn site:pages:refresh /bible/lsg /commentary/fr/mhy-fr   # the pages under those folders, up to three levels
+```
+
+`yarn resources:worker:deploy` ends with the first one. The command needs `CACHE_REFRESH_SECRET`, in the environment or in `apps/site/.env.local`.
 
 ### Warming the caches after a deployment
 
-A deployment of the site starts with an empty page cache, and a deployment of the Resource service empties the API cache they are rendered from (its key carries the Worker version). The first reader of each page then pays for the whole render. `scripts/warm-site-cache.mjs` requests pages so that this reader is the script. Both caches belong to the Cloudflare data centre that answers: a run fills the one nearest to the machine it runs on, and readers elsewhere still meet a first render. Run it after the last of the deployments of the day, starting with the Worker's:
+A deployment of another build starts with no kept page, and a deployment of the Resource service empties the API cache pages are rendered from (its key carries the Worker version). The first reader of each page then pays for the whole render. `scripts/warm-site-cache.mjs` requests pages so that this reader is the script. A page it renders is kept for every data centre; the API cache it fills belongs to the data centre nearest to the machine it runs on. Run it after the last of the deployments of the day, starting with the Worker's:
 
 ```bash
 node apps/site/scripts/warm-site-cache.mjs --dry-run             # what would be requested, and for how long

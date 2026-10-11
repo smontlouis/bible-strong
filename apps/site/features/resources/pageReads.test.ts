@@ -85,7 +85,7 @@ describe('createPageReads', () => {
 describe('pageCacheHeaders', () => {
   it('lets the CDN keep a whole page', () => {
     expect(pageCacheHeaders({})).toEqual({
-      'Cache-Control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800',
+      'Cache-Control': 'public, max-age=0, s-maxage=2592000, stale-while-revalidate=604800',
     })
   })
 
@@ -125,7 +125,7 @@ describe('pageCacheHeaders', () => {
 
   it('keeps the loader data of any page, which need not say whether it is incomplete', () => {
     expect(pageCacheHeaders({ language: 'fr', topics: [] })).toEqual({
-      'Cache-Control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800',
+      'Cache-Control': 'public, max-age=0, s-maxage=2592000, stale-while-revalidate=604800',
     })
   })
 
