@@ -535,14 +535,14 @@ export const isKeptWhenWhole = path => !/^\/(?:fr)?(?:\?|$)/u.test(path)
  * @typedef {object} Answer
  * @property {AnswerKind} kind
  * @property {Completeness} completeness
- * @property {string} [cache] What `x-vercel-cache` said.
+ * @property {string} [cache] What `cf-cache-status` said: the cache Cloudflare keeps in front of the pages.
  * @property {number} [retryAfterMs]
  */
 
 /**
  * Reads what the site answered a page request.
  *
- * - `cached`: the CDN held the page; nothing was rendered. `stale`: it held an old copy,
+ * - `cached`: Cloudflare held the page; nothing was rendered. `stale`: it held an old copy,
  *   served it, and renders a new one behind the answer.
  * - `rendered`: the site rendered the page for this request, and the Resource API was read.
  * - `limited` (429), `failed` (5xx, or no answer: status 0) and `refused` (401, 403) mean
@@ -553,10 +553,10 @@ export const isKeptWhenWhole = path => !/^\/(?:fr)?(?:\?|$)/u.test(path)
  * with `X-Page-Stale`: it is whole, the site keeps it a minute, and the API has refreshed
  * its answers by the time it is rendered again. That is `provisional`, and not trouble.
  *
- * A page the site could not render whole says so with `X-Page-Incomplete`. Where the CDN
- * lets `s-maxage` through (a development server), a page kept less than an hour is
- * incomplete too. Without either, a rendered page is `unknown`: Vercel answers every page
- * with the same `Cache-Control`, and only a second request tells whether it was kept.
+ * A page the site could not render whole says so with `X-Page-Incomplete`. The site answers
+ * with the `s-maxage` it keeps the page for: a page kept less than an hour is incomplete
+ * too. Without either, a rendered page is `unknown`, and only a second request tells
+ * whether it was kept.
  *
  * @param {object} response
  * @param {number} response.status
@@ -564,7 +564,7 @@ export const isKeptWhenWhole = path => !/^\/(?:fr)?(?:\?|$)/u.test(path)
  * @returns {Answer}
  */
 export const readAnswer = ({ status, headers = {} }) => {
-  const cache = headers['x-vercel-cache']?.toUpperCase()
+  const cache = headers['cf-cache-status']?.toUpperCase()
   if (status === 429) {
     return { kind: 'limited', completeness: 'unknown', cache, retryAfterMs: retryAfterMs(headers) }
   }
@@ -575,8 +575,9 @@ export const readAnswer = ({ status, headers = {} }) => {
   if (status >= 300 && status < 400) return { kind: 'redirected', completeness: 'unknown', cache }
   if (status !== 200) return { kind: 'missing', completeness: 'unknown', cache }
 
+  // `REVALIDATED` and `EXPIRED` are answers rendered for this request, like a `MISS`.
   const kind =
-    cache === 'HIT' || cache === 'PRERENDER' ? 'cached' : cache === 'STALE' ? 'stale' : 'rendered'
+    cache === 'HIT' ? 'cached' : cache === 'STALE' || cache === 'UPDATING' ? 'stale' : 'rendered'
   return { kind, completeness: completenessOf(kind, headers), cache }
 }
 
@@ -601,7 +602,7 @@ const completenessOf = (kind, headers) => {
 const HIGHEST_RETRY_AFTER_MS = 15 * 60_000
 
 /**
- * What `Retry-After` asks for, in seconds: the form the Resource API and Vercel use. A date
+ * What `Retry-After` asks for, in seconds: the form the Resource API and Cloudflare use. A date
  * is not read; the pause of the run applies then.
  *
  * @param {Record<string, string | undefined>} headers

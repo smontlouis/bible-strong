@@ -12,6 +12,13 @@ import { useTranslation } from 'react-i18next'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
+import { getVersesShareUrl } from '~helpers/publicSiteLinks'
+import {
+  RESOURCE_SHARE_ICONS,
+  SHARE_LINK_ACTION,
+  shareResourceLink,
+} from '~features/share/resourceShare'
+import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import { CompareTab, SelectedVerses } from '../../state/tabs'
 import CompareVersionSelectorSheet from './CompareVersionSelectorSheet'
 import type { SheetRef } from '~common/sheet'
@@ -52,6 +59,8 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
 
   const title = verseToReference(selectedVerses)
   const openInNewTab = useOpenInNewTab()
+  // The site compares versions on the page of a verse; the reader's own version names it.
+  const shareUrl = getVersesShareUrl(Object.keys(selectedVerses), useDefaultBibleVersion())
   useEffect(() => {
     setTitle(`${t('Comparer')} ${title}`)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -73,7 +82,11 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
             <ContextualMenu
               tabActions
               panelTitle={t('Comparer')}
-              icons={{ 'choose-versions': 'check-square', 'open-tab': 'external-link' }}
+              icons={{
+                'choose-versions': 'check-square',
+                'open-tab': 'external-link',
+                ...RESOURCE_SHARE_ICONS,
+              }}
               screens={{
                 'choose-versions': {
                   title: t('Sélectionner les versions'),
@@ -89,6 +102,15 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
                   title: t('common.chooseCompareVersions'),
                   image: 'checkmark.square',
                 },
+                ...(shareUrl
+                  ? [
+                      {
+                        id: SHARE_LINK_ACTION,
+                        title: t('Partager le lien'),
+                        image: 'square.and.arrow.up' as const,
+                      },
+                    ]
+                  : []),
                 {
                   id: 'open-tab',
                   title: t('tab.openInNewTab'),
@@ -99,6 +121,9 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
                 switch (nativeEvent.event) {
                   case 'choose-versions':
                     compareVersionSelectorRef.current?.present()
+                    break
+                  case SHARE_LINK_ACTION:
+                    void shareResourceLink({ url: shareUrl, title })
                     break
                   case 'open-tab':
                     openInNewTab({

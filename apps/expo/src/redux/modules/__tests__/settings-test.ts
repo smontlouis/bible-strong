@@ -22,7 +22,6 @@ import {
   toggleSettingsShareVerseNumbers,
   toggleSettingsShareLineBreaks,
   toggleSettingsShareQuotes,
-  toggleSettingsShareAppName,
   setDefaultColorName,
   setDefaultColorType,
   setDefaultBibleVersion,
@@ -445,13 +444,6 @@ describe('Settings Reducer', () => {
     it('should toggle hasQuotes', () => {
       const newState = userReducer(initialState, toggleSettingsShareQuotes())
       expect(newState.bible.settings.shareVerses.hasQuotes).toBe(false)
-    })
-  })
-
-  describe('toggleSettingsShareAppName', () => {
-    it('should toggle hasAppName', () => {
-      const newState = userReducer(initialState, toggleSettingsShareAppName())
-      expect(newState.bible.settings.shareVerses.hasAppName).toBe(false)
     })
   })
 

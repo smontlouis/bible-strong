@@ -9,6 +9,14 @@ import { FeatherIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
 import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
+import { getPublicSiteUrl } from '~helpers/publicSiteLinks'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import {
+  resourceShareMenuActions,
+  runResourceShareAction,
+  type ResourceShare,
+} from '~features/share/resourceShare'
+import { buildPublicTimelineEventPath } from './publicTimelineRoutes'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { EventDetailsContent, EventDetailsProps } from './EventDetails'
 import { TimelineEvent } from './types'
@@ -51,6 +59,7 @@ const TimelineEventDetailContent = ({
   const lang = languageOverride || preferredLanguage
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : canGoBack
+  const resources = useResourceAccess()
 
   if (!event) {
     return (
@@ -64,30 +73,48 @@ const TimelineEventDetailContent = ({
     )
   }
 
+  const title = getLegacyLocalizedField(lang, { fr: event.title, en: event.titleEn })
+  const share: ResourceShare = {
+    url: getPublicSiteUrl(() => buildPublicTimelineEventPath({ language: lang, slug: event.slug })),
+    title,
+    // The article is read where the event is read from; without it the title is what is left.
+    text: async () => {
+      const result = await resources.timeline.loadEvent(lang, event.slug)
+      if (result.status !== 'available') return title
+      const { detail } = result
+      return [detail.title, detail.dates, detail.description, detail.article]
+        .filter(Boolean)
+        .join('\n\n')
+    },
+  }
+  const menuActions: MenuAction[] = [
+    ...resourceShareMenuActions(t, share),
+    ...(menuItems ?? []).map(item => ({
+      id: item.label,
+      title: item.label,
+      image: getMenuItemImage(item.icon),
+    })),
+  ]
+
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Header
-        title={getLegacyLocalizedField(lang, { fr: event.title, en: event.titleEn })}
+        title={title}
         hasBackButton={hasBackButton}
         onCustomBackPress={onBack}
         rightComponent={
-          menuItems?.length ? (
-            <MenuView
-              tabActions
-              actions={menuItems.map(item => ({
-                id: item.label,
-                title: item.label,
-                image: getMenuItemImage(item.icon),
-              }))}
-              onPressAction={({ nativeEvent }) => {
-                menuItems.find(item => item.label === nativeEvent.event)?.onSelect()
-              }}
-            >
-              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
-                <FeatherIcon name="more-vertical" size={18} />
-              </Box>
-            </MenuView>
-          ) : undefined
+          <MenuView
+            tabActions
+            actions={menuActions}
+            onPressAction={({ nativeEvent }) => {
+              if (runResourceShareAction(nativeEvent.event, share)) return
+              menuItems?.find(item => item.label === nativeEvent.event)?.onSelect()
+            }}
+          >
+            <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
+              <FeatherIcon name="more-vertical" size={18} />
+            </Box>
+          </MenuView>
         }
       />
       <ScrollView>

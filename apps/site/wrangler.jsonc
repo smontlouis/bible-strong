@@ -1,0 +1,51 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  // The public site, as a Worker (ADR-0083). Deployed by Cloudflare from `master`.
+  "name": "bible-strong-site",
+  "main": "src/server.ts",
+  "compatibility_date": "2026-08-19",
+  "compatibility_flags": ["nodejs_compat"],
+  // The site has one address for readers; a version can still be looked at before it is
+  // given the traffic, at the preview address Cloudflare gives each one.
+  "workers_dev": false,
+  "preview_urls": true,
+  "routes": [{ "pattern": "bible-strong.app", "custom_domain": true }],
+  // The public files and the browser build, answered by Cloudflare without running the
+  // Worker, each under the name it has; the Worker reads the fonts of the share images there.
+  "assets": { "binding": "ASSETS", "html_handling": "none" },
+  "services": [
+    // Pages are rendered from the Resource API, asked without leaving Cloudflare.
+    // On a development machine the binding reaches the deployed API, as the site always has.
+    { "binding": "RESOURCE_API", "service": "bible-strong-resources-api", "remote": true },
+  ],
+  // Crawlers ask for most of the pages: one request in twenty is logged, which keeps the logs
+  // within what the plan includes.
+  "observability": { "enabled": true, "head_sampling_rate": 0.05 },
+  // A page takes a few tens of milliseconds of computing and a share image about a second:
+  // anything far beyond is stopped rather than paid for.
+  "limits": { "cpu_ms": 10000 },
+  // The cache Cloudflare keeps in front of the pages (ADR-0084). The gateway that receives
+  // every request (`default`) is not kept; the entrypoint that renders (`Pages`) is, under a
+  // key the gateway names after the build, so that a deployment of the same build keeps it.
+  "cache": { "enabled": false, "cross_version_cache": true },
+  "exports": {
+    "default": { "type": "worker", "cache": { "enabled": false } },
+    "Pages": { "type": "worker", "cache": { "enabled": true } },
+  },
+  // Secrets, set with `wrangler secret put`: SHARE_CARD_SECRET (signs the address of a share
+  // image), FIREBASE_PRIVATE_KEY (reads a shared study), CACHE_REFRESH_SECRET (lets the
+  // operator ask for kept pages to be rendered again).
+  "env": {
+    // A second Worker, to try a build before the site is given it:
+    // `yarn workspace @bible-strong/site deploy:next`. It has no address but its own.
+    "next": {
+      "name": "bible-strong-site-next",
+      "workers_dev": true,
+      "routes": [],
+      "assets": { "binding": "ASSETS", "html_handling": "none" },
+      "services": [
+        { "binding": "RESOURCE_API", "service": "bible-strong-resources-api", "remote": true },
+      ],
+    },
+  },
+}

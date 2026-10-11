@@ -42,6 +42,8 @@ import {
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import generateUUID from '~helpers/generateUUID'
+import { getChapterShareUrl } from '~helpers/publicSiteLinks'
+import { SHARE_LINK_ACTION, shareResourceLink } from '~features/share/resourceShare'
 import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
 import verseToReference from '~helpers/verseToReference'
@@ -260,6 +262,9 @@ const Header = ({
     },
   ]
 
+  // The chapter as the public site shows it; a version the site does not serve has no link.
+  const chapterShareUrl = getChapterShareUrl(bookNumber, chapter, version)
+
   const mainMenuActions: MenuAction[] = [
     { id: 'params', title: t('Police et paramêtres'), image: 'textformat' },
     {
@@ -279,6 +284,9 @@ const Header = ({
             image: 'bookmark' as const,
           },
         ]
+      : []),
+    ...(chapterShareUrl
+      ? [{ id: SHARE_LINK_ACTION, title: t('Partager le lien'), image: 'link' as const }]
       : []),
     {
       id: 'export',
@@ -306,6 +314,12 @@ const Header = ({
         break
       case 'bookmark':
         bookmarkModalRef.current?.present()
+        break
+      case SHARE_LINK_ACTION:
+        void shareResourceLink({
+          url: chapterShareUrl,
+          title: `${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: [] })} - ${version}`,
+        })
         break
       case 'export':
         exportSheetRef.current?.present()

@@ -9,11 +9,13 @@ export const isResourceLanguage = (value: string | undefined): value is Resource
   value === 'fr' || value === 'en'
 
 /**
- * Editorial content only changes when a resource is republished, so the CDN may keep a
- * rendered page for a day and serve it stale while it revalidates.
+ * Editorial content only changes when a resource is republished, and the pages of a
+ * republished resource are asked to be rendered again (ADR-0084): Cloudflare may keep a
+ * rendered page for a month, and serve it stale for a week more while it renders a new one.
+ * The browser asks again each time.
  */
 export const RESOURCE_PAGE_CACHE_CONTROL =
-  'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800'
+  'public, max-age=0, s-maxage=2592000, stale-while-revalidate=604800'
 
 export const absoluteSiteUrl = (path: string): string => `${SITE_ORIGIN}${path}`
 

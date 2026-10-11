@@ -1,13 +1,10 @@
-import * as Sentry from '@sentry/react-native'
 import type { CommentaryCatalogEntry } from '@bible-strong/resource-catalog/commentaries'
 import { isTag, isText, type AnyNode } from 'domhandler'
 import { parseDocument } from 'htmlparser2'
-import { Share } from 'react-native'
 import { cleanReadingHTML } from '~common/readingHtml'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { getPublicSiteUrl } from '~helpers/publicSiteLinks'
-import { toast } from '~helpers/toast'
-import i18n from '~i18n'
+import type { ResourceShare } from '~features/share/resourceShare'
 import { buildPublicCommentaryPath } from './publicCommentaryRoutes'
 
 // Same cap as the pre-27 commentary share, which users relied on to copy commentaries.
@@ -39,18 +36,19 @@ const truncate = (text: string): string =>
     ? text
     : `${text.slice(0, SHARE_MAX_LENGTH).replace(/\s+\S*$/u, '')}…`
 
-export const getCommentaryShareMessage = ({
-  entry,
-  passage,
-  sections,
-  location,
-}: {
+type CommentaryShareOptions = {
   entry: Pick<CommentaryCatalogEntry, 'id' | 'author' | 'title'>
   passage: string
   sections: { reference?: string; content: string }[]
   /** The chapter being read: it names the page of the commentary on the public site. */
   location: { language: ResourceLanguage; book: number; chapter: number }
-}): string => {
+}
+
+export const getCommentaryShareText = ({
+  entry,
+  passage,
+  sections,
+}: Omit<CommentaryShareOptions, 'location'>): string => {
   const body = sections
     .map(section => {
       const text = commentaryHtmlToText(section.content)
@@ -58,19 +56,17 @@ export const getCommentaryShareMessage = ({
     })
     .filter(Boolean)
     .join('\n\n')
-  const url = getPublicSiteUrl(() =>
-    buildPublicCommentaryPath({ resourceId: entry.id, ...location })
-  )
-  return `${entry.author}\n${entry.title}\n${passage}\n\n${truncate(body)}\n\n${url}`
+  return `${entry.author}\n${entry.title}\n${passage}\n\n${truncate(body)}`
 }
 
-export const shareCommentary = async (
-  options: Parameters<typeof getCommentaryShareMessage>[0]
-): Promise<void> => {
-  try {
-    await Share.share({ message: getCommentaryShareMessage(options) })
-  } catch (error) {
-    toast.error(i18n.t('Erreur lors du partage.'))
-    Sentry.captureException(error)
-  }
-}
+/** What a commentary being read hands over: the page of its chapter, and its text. */
+export const getCommentaryShare = ({
+  location,
+  ...options
+}: CommentaryShareOptions): ResourceShare => ({
+  url: getPublicSiteUrl(() =>
+    buildPublicCommentaryPath({ resourceId: options.entry.id, ...location })
+  ),
+  title: `${options.entry.author} — ${options.passage}`,
+  text: () => getCommentaryShareText(options),
+})

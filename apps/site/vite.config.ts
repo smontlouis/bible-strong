@@ -1,26 +1,37 @@
+import { cloudflare } from '@cloudflare/vite-plugin'
 import mdx from '@mdx-js/rollup'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
-import { nitro } from 'nitro/vite'
+import { defineConfig, type Plugin } from 'vite'
 import svgr from 'vite-plugin-svgr'
 import { fileURLToPath, URL } from 'node:url'
+import { buildRevision } from './bundling/buildRevision'
+import { satoriForWorkers } from './bundling/satoriForWorkers'
+
+const ANIMATIONS_ON_SERVER = fileURLToPath(new URL('./bundling/animationsOnServer.ts', import.meta.url))
+const ANIMATION_MODULES = new Set(['gsap', 'gsap/ScrollTrigger', '@gsap/react'])
+
+// The animation library is only loaded by the browser (see `bundling/animationsOnServer.ts`).
+const animationsStayInTheBrowser = (): Plugin => ({
+  name: 'animations-stay-in-the-browser',
+  enforce: 'pre',
+  resolveId(source) {
+    return this.environment.name === 'ssr' && ANIMATION_MODULES.has(source)
+      ? ANIMATIONS_ON_SERVER
+      : undefined
+  },
+})
 
 export default defineConfig({
   resolve: { alias: { '@': fileURLToPath(new URL('.', import.meta.url)) } },
   plugins: [
-    nitro({
-      vercel: {
-        functions: {
-          // Pages are rendered from the Resource API, whose database is in Frankfurt: a
-          // function on another continent pays that distance on every read.
-          regions: ['fra1'],
-          // A page not yet cached reads the API several times in a row.
-          maxDuration: 30,
-        },
-      },
-    }),
+    satoriForWorkers(),
+    animationsStayInTheBrowser(),
+    buildRevision(),
+    // The site runs as a Cloudflare Worker (ADR-0083): the server build is made for workerd,
+    // and `vite dev` runs it there too, with the bindings of `wrangler.jsonc`.
+    cloudflare({ viteEnvironment: { name: 'ssr' } }),
     tanstackStart(),
     tailwindcss(),
     svgr(),

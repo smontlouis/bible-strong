@@ -17,6 +17,8 @@ import ScrollView from './ScrollView'
 import SectionDetailsModal from './SectionDetailsModal'
 import TimelineEvent from './TimelineEvent'
 import TimelineHeader from './TimelineHeader'
+import { buildPublicTimelineIndexPath } from './publicTimelineRoutes'
+import { getPublicSiteUrl } from '~helpers/publicSiteLinks'
 import { useTimeline } from './timeline.hooks'
 import { ShallowTimelineSection, TimelineSection as TimelineSectionProps } from './types'
 import { useTimelineDetails } from './TimelineResourceBoundary'
@@ -132,6 +134,18 @@ const Timeline = ({
         onBackPress={onBackPress}
         onOpenInNewTab={openSectionInNewTab}
         onSearchPress={() => pushRouteOnce({ pathname: '/timeline-search' })}
+        share={{
+          // The site draws the whole timeline on one page: a period has no page of its own.
+          url: getPublicSiteUrl(() => buildPublicTimelineIndexPath(lang)),
+          title: getLegacyLocalizedField(lang, { fr: title, en: titleEn }),
+          text: () =>
+            [
+              getLegacyLocalizedField(lang, { fr: title, en: titleEn }),
+              getLegacyLocalizedField(lang, { fr: description, en: descriptionEn }),
+            ]
+              .filter(Boolean)
+              .join('\n\n'),
+        }}
       />
 
       {!isFirst && <PrevSectionImage x={x} prevEvent={prevEvent} />}

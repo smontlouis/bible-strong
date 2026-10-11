@@ -379,10 +379,10 @@ describe('warm-up answers', () => {
   const page = (headers: Record<string, string>, status = 200) => readAnswer({ status, headers })
 
   it('tells a page the CDN held from a page the site rendered', () => {
-    expect(page({ 'x-vercel-cache': 'HIT', age: '4000' })).toMatchObject({ kind: 'cached' })
-    expect(page({ 'x-vercel-cache': 'STALE' })).toMatchObject({ kind: 'stale' })
-    expect(page({ 'x-vercel-cache': 'MISS', age: '0' })).toMatchObject({ kind: 'rendered' })
-    expect(page({ 'x-vercel-cache': 'REVALIDATED' })).toMatchObject({ kind: 'rendered' })
+    expect(page({ 'cf-cache-status': 'HIT', age: '4000' })).toMatchObject({ kind: 'cached' })
+    expect(page({ 'cf-cache-status': 'STALE' })).toMatchObject({ kind: 'stale' })
+    expect(page({ 'cf-cache-status': 'MISS', age: '0' })).toMatchObject({ kind: 'rendered' })
+    expect(page({ 'cf-cache-status': 'REVALIDATED' })).toMatchObject({ kind: 'rendered' })
     // A development server has no CDN: every answer is a render.
     expect(page({})).toMatchObject({ kind: 'rendered', completeness: 'unknown' })
   })
@@ -415,7 +415,7 @@ describe('warm-up answers', () => {
   const behindCdn = (headers: Record<string, string>, cache: string) => ({
     ...headers,
     'cache-control': 'public, max-age=0',
-    'x-vercel-cache': cache,
+    'cf-cache-status': cache,
   })
 
   it('knows an incomplete page by the header the site sends with it', () => {
@@ -438,21 +438,21 @@ describe('warm-up answers', () => {
   })
 
   it('does not call a page whole on the word of the CDN alone', () => {
-    // What Vercel answers for every page, whole or not.
+    // What a host that consumes `s-maxage` answers for every page, whole or not.
     const hidden = { 'cache-control': 'public, max-age=0' }
 
-    expect(page({ ...hidden, 'x-vercel-cache': 'MISS', age: '0' }).completeness).toBe('unknown')
-    expect(page({ ...hidden, 'x-vercel-cache': 'HIT', age: '12' }).completeness).toBe('unknown')
+    expect(page({ ...hidden, 'cf-cache-status': 'MISS', age: '0' }).completeness).toBe('unknown')
+    expect(page({ ...hidden, 'cf-cache-status': 'HIT', age: '12' }).completeness).toBe('unknown')
     // Kept longer than an incomplete page ever is.
-    expect(page({ ...hidden, 'x-vercel-cache': 'HIT', age: '61' }).completeness).toBe('whole')
-    expect(page({ ...hidden, 'x-vercel-cache': 'STALE' }).completeness).toBe('whole')
+    expect(page({ ...hidden, 'cf-cache-status': 'HIT', age: '61' }).completeness).toBe('whole')
+    expect(page({ ...hidden, 'cf-cache-status': 'STALE' }).completeness).toBe('whole')
   })
 
   it('takes a page rendered from an earlier answer of the API for provisional, not for trouble', () => {
     const provisional = page({
       'x-page-stale': '1',
       'cache-control': 'public, max-age=0, s-maxage=60',
-      'x-vercel-cache': 'MISS',
+      'cf-cache-status': 'MISS',
     })
 
     expect(provisional).toMatchObject({ kind: 'rendered', completeness: 'provisional' })
@@ -471,8 +471,8 @@ describe('warm-up answers', () => {
   })
 
   it('turns an answer into what it means for the run', () => {
-    expect(signalOf(page({ 'x-vercel-cache': 'HIT' }))).toBe('good')
-    expect(signalOf(page({ 'x-vercel-cache': 'MISS' }))).toBe('good')
+    expect(signalOf(page({ 'cf-cache-status': 'HIT' }))).toBe('good')
+    expect(signalOf(page({ 'cf-cache-status': 'MISS' }))).toBe('good')
     expect(signalOf(page({}, 429))).toBe('limited')
     expect(signalOf(page({}, 502))).toBe('failed')
     expect(signalOf(page({}, 403))).toBe('refused')

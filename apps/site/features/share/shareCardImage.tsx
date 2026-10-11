@@ -3,11 +3,9 @@ import {
   SHARE_CARD_SIZE,
   type ShareCardContent,
 } from '@bible-strong/share-card-service/content'
-import { initWasm, Resvg } from '@resvg/resvg-wasm'
 import { encode as encodeJpeg } from 'jpeg-js'
-import satori from 'satori'
 import { ShareCard } from './ShareCard'
-import { loadShareCardFonts } from './shareCardFonts'
+import { loadShareCardFonts, Resvg, satori, startShareCardEngines } from './shareCardEngines'
 
 export type ShareCardImage = {
   body: ArrayBuffer
@@ -20,21 +18,6 @@ export type ShareCardImage = {
 const arrayBuffer = (bytes: Uint8Array): ArrayBuffer =>
   bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer
 
-let rasteriser: Promise<void> | undefined
-
-/**
- * The rasteriser is WebAssembly, the same on every machine, and is read once per instance
- * from the site's own `/wasm/` folder like the fonts: nothing of it has to be bundled with
- * the function, which a native build would need.
- */
-const loadRasteriser = (origin: string): Promise<void> => {
-  rasteriser ??= initWasm(fetch(new URL('/wasm/resvg.wasm', origin))).catch(cause => {
-    rasteriser = undefined
-    throw cause
-  })
-  return rasteriser
-}
-
 /**
  * Draws the share image of a page: the layout engine writes an SVG, which is then rasterised.
  * Flat cards are PNG; a card with photographs would weigh half a megabyte as a PNG and is
@@ -45,7 +28,7 @@ export const renderShareCard = async (
   origin: string
 ): Promise<ShareCardImage> => {
   const started = performance.now()
-  const [fonts] = await Promise.all([loadShareCardFonts(origin), loadRasteriser(origin)])
+  const [fonts] = await Promise.all([loadShareCardFonts(origin), startShareCardEngines()])
   const assetsReady = performance.now()
   const svg = await satori(<ShareCard content={content} />, { ...SHARE_CARD_SIZE, fonts })
   const laidOut = performance.now()

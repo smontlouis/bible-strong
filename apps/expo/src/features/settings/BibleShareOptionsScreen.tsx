@@ -16,7 +16,6 @@ import getVersesContent from '~helpers/getVersesContent'
 import { RootState } from '~redux/modules/reducer'
 import type { AppDispatch } from '~redux/store'
 import {
-  toggleSettingsShareAppName,
   toggleSettingsShareLineBreaks,
   toggleSettingsShareQuotes,
   toggleSettingsShareVerseNumbers,
@@ -34,15 +33,11 @@ export const useShareOptions = () => {
   const hasQuotes = useSelector(
     (state: RootState) => state.user.bible.settings.shareVerses.hasQuotes
   )
-  const hasAppName = useSelector(
-    (state: RootState) => state.user.bible.settings.shareVerses.hasAppName
-  )
 
   return {
     hasVerseNumbers,
     hasInlineVerses,
     hasQuotes,
-    hasAppName,
   }
 }
 
@@ -53,10 +48,10 @@ const BibleShareOptionsScreen = ({ inline = false }: { inline?: boolean }) => {
   const theme = useTheme()
   const typography = useReadingTypography()
   const isWeb = Platform.OS === 'web'
-  const { hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName } = useShareOptions()
+  const { hasVerseNumbers, hasInlineVerses, hasQuotes } = useShareOptions()
   const { data: message = '' } = useQuery({
     placeholderData: keepPreviousData,
-    queryKey: ['bible-share-preview', hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName],
+    queryKey: ['bible-share-preview', hasVerseNumbers, hasInlineVerses, hasQuotes],
     queryFn: async () => {
       const { all } = await getVersesContent({
         verses: {
@@ -67,7 +62,6 @@ const BibleShareOptionsScreen = ({ inline = false }: { inline?: boolean }) => {
         hasVerseNumbers,
         hasInlineVerses,
         hasQuotes,
-        hasAppName,
         loadVerseTexts: (versionId, verseKeys) =>
           loadBibleVerseTexts(resources, versionId, verseKeys),
       })
@@ -97,11 +91,6 @@ const BibleShareOptionsScreen = ({ inline = false }: { inline?: boolean }) => {
               label: t('bible.settings.hasQuotes'),
               value: hasQuotes,
               action: toggleSettingsShareQuotes,
-            },
-            {
-              label: t('bible.settings.hasAppName'),
-              value: hasAppName,
-              action: toggleSettingsShareAppName,
             },
           ].map(option =>
             isWeb ? (

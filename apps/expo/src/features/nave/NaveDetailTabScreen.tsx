@@ -4,7 +4,6 @@ import { goBackOrHome } from '~navigation/goBackOrHome'
 import React, { useCallback, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
-import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 import { useRouter, useLocalSearchParams } from 'expo-router'
@@ -23,6 +22,11 @@ import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
+import {
+  resourceShareMenuActions,
+  runResourceShareAction,
+  type ResourceShare,
+} from '~features/share/resourceShare'
 import { getPublicSiteUrl } from '~helpers/publicSiteLinks'
 import { buildPublicNavePath } from './publicNaveRoutes'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
@@ -192,23 +196,20 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     }
   }
 
-  const shareDefinition = async () => {
-    if (!naveItem) return
-
-    try {
-      const message = `${name} \n\n${truncHTML(naveItem.description, 4000)
-        .text.replace(/&#/g, '\\')
-        .replace(/\\x([0-9A-F]+);/gi, (_, hex: string) => {
-          return String.fromCharCode(parseInt(hex, 16))
-        })} \n\nLa suite sur ${getPublicSiteUrl(() =>
-        buildPublicNavePath({ language: naveResourceLanguage, topic: naveItem.normalizedName })
-      )}`
-      Share.share({ message })
-    } catch (e) {
-      toast.error('Erreur lors du partage.')
-      console.log('[Nave] Share error:', e)
-    }
-  }
+  const share: ResourceShare | undefined = naveItem
+    ? {
+        url: getPublicSiteUrl(() =>
+          buildPublicNavePath({ language: naveResourceLanguage, topic: naveItem.normalizedName })
+        ),
+        title: naveItem.name || name,
+        text: () =>
+          `${naveItem.name || name}\n\n${truncHTML(naveItem.description, 4000)
+            .text.replace(/&#/g, '\\')
+            .replace(/\\x([0-9A-F]+);/gi, (_, hex: string) => {
+              return String.fromCharCode(parseInt(hex, 16))
+            })}`,
+      }
+    : undefined
 
   // Guard: name_lower should always be defined when this screen is rendered
   // (NaveTabScreen only renders this when name_lower is defined)
@@ -283,7 +284,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
             actions={
               [
                 { id: 'tags', title: t('Étiquettes'), image: 'tag' },
-                { id: 'share', title: t('Partager'), image: 'square.and.arrow.up' },
+                ...resourceShareMenuActions(t, share),
                 naveEndpoint
                   ? {
                       id: 'relations',
@@ -299,6 +300,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
               ].filter(Boolean) as MenuAction[]
             }
             onPressAction={({ nativeEvent }) => {
+              if (runResourceShareAction(nativeEvent.event, share)) return
               switch (nativeEvent.event) {
                 case 'tags':
                   setUnifiedTagsModal({
@@ -307,9 +309,6 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
                     title: naveItem.name,
                     entity: 'naves',
                   })
-                  break
-                case 'share':
-                  shareDefinition()
                   break
                 case 'relations':
                   if (naveEndpoint) openEntityRelations(naveEndpoint)

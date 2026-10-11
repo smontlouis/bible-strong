@@ -112,7 +112,6 @@ import {
   setSettingsRelationsDisplay,
   setSettingsTagsDisplay,
   setSettingsTextDisplay,
-  toggleSettingsShareAppName,
   toggleSettingsShareLineBreaks,
   toggleSettingsShareQuotes,
   toggleSettingsShareVerseNumbers,
@@ -572,6 +571,7 @@ export interface UserState {
         hasVerseNumbers: boolean
         hasInlineVerses: boolean
         hasQuotes: boolean
+        /** No longer read: a shared text carries no link. Kept for the settings already saved. */
         hasAppName: boolean
       }
       // Dynamically provided for bible webview in BibleTabScreen
@@ -1436,9 +1436,6 @@ const userSlice = createSlice({
     })
     builder.addCase(toggleSettingsShareQuotes, state => {
       state.bible.settings.shareVerses.hasQuotes = !state.bible.settings.shareVerses.hasQuotes
-    })
-    builder.addCase(toggleSettingsShareAppName, state => {
-      state.bible.settings.shareVerses.hasAppName = !state.bible.settings.shareVerses.hasAppName
     })
     builder.addCase(setDefaultColorName, (state, action) => {
       const { colorKey, name } = action.payload

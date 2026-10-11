@@ -4,7 +4,8 @@ Keeps the image shown when a page of `bible-strong.app` is shared, at
 `https://cards.bible-strong.app/v1/<description>.<signature>` (ADR-0081).
 
 The address carries what the image shows, signed by the site. The site draws; this Worker only
-keeps. It serves a stored image, asks the site for a missing one
+keeps. Both are Workers: this one asks the site through a binding (`SITE`), and at
+`SITE_ORIGIN` when it has none, as in development. It serves a stored image, asks the site for a missing one
 (`<site>/share-card/<description>.<signature>`) and stores it in the media bucket under
 `share-cards/v1/`, named by a digest of its description. An image never changes: a new text or a
 new design is a new address.

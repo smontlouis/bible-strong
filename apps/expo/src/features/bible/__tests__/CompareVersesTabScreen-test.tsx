@@ -4,6 +4,7 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import CompareVersesTabScreen from '../CompareVersesTabScreen'
 
 const mockSetCompareTab = jest.fn()
+const mockShareResourceLink = jest.fn()
 
 jest.mock('jotai/react', () => ({
   useAtom: () => [
@@ -22,6 +23,12 @@ jest.mock('react-i18next', () => ({
 }))
 
 jest.mock('~helpers/verseToReference', () => () => 'Romains 2:2')
+jest.mock('~state/useDefaultBibleVersion', () => ({ useDefaultBibleVersion: () => 'LSG' }))
+jest.mock('~features/share/resourceShare', () => ({
+  RESOURCE_SHARE_ICONS: {},
+  SHARE_LINK_ACTION: 'share-link',
+  shareResourceLink: (...args: unknown[]) => mockShareResourceLink(...args),
+}))
 jest.mock('~features/app-switcher/utils/useOpenInNewTab', () => ({
   useOpenInNewTab: () => jest.fn(),
 }))
@@ -134,5 +141,24 @@ describe('CompareVersesTabScreen', () => {
         data: { selectedVerses: { '45-2-2': true } },
       }).data.strongMode
     ).toBe(true)
+  })
+
+  it('shares the page of the compared verse on the public site', () => {
+    act(() => {
+      renderer = create(<CompareVersesTabScreen compareAtom={{} as never} />)
+    })
+
+    const header = renderer.root.find(node => String(node.type) === 'Header')
+    const menu = header.props.rightComponent.props.children[1]
+    expect(menu.props.actions).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: 'share-link' })])
+    )
+
+    act(() => menu.props.onPressAction({ nativeEvent: { event: 'share-link' } }))
+
+    expect(mockShareResourceLink).toHaveBeenCalledWith({
+      url: 'https://bible-strong.app/bible/lsg/rom/2/2',
+      title: 'Romains 2:2',
+    })
   })
 })

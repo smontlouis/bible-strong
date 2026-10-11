@@ -4,12 +4,14 @@ import { useTranslation } from 'react-i18next'
 import { getCommentaryByPublicationId } from '@bible-strong/resource-catalog/commentaries'
 import ContextualSheet from '~common/ContextualPanel/ContextualSheet'
 import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
-import Box, { TouchableBox } from '~common/ui/Box'
+import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { MenuView } from '~common/ui/MenuView'
 import Text from '~common/ui/Text'
 import { getBook } from '~helpers/bibleBookCatalog'
 import CommentarySectionCard from './CommentarySectionCard'
-import { shareCommentary } from './shareCommentary'
+import { getCommentaryShare } from './shareCommentary'
+import { resourceShareMenuActions, runResourceShareAction } from '~features/share/resourceShare'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { ReadingSectionRequest } from '~features/resources/commentaryReadingAccess'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
@@ -84,6 +86,21 @@ export default function InlineCommentaryReader({
     : undefined
   const editionUnavailable =
     query.error instanceof ResourceAccessError && query.error.code === 'NOT_FOUND'
+  const share =
+    query.data && entry && request
+      ? getCommentaryShare({
+          entry,
+          passage: `${getBook(request.book)?.Nom ?? request.book} ${request.chapter}:${
+            query.data.section.rangeStartVerse
+          }${
+            query.data.section.rangeEndVerse !== query.data.section.rangeStartVerse
+              ? `–${query.data.section.rangeEndVerse}`
+              : ''
+          }`,
+          sections: [query.data.section],
+          location: { language: request.language, book: request.book, chapter: request.chapter },
+        })
+      : undefined
   const content = (
     <>
       {query.data && entry && request ? (
@@ -154,31 +171,21 @@ export default function InlineCommentaryReader({
         <SheetHeader
           title={entry?.shortName || t('Commentaires')}
           rightComponent={
-            query.data && entry && request ? (
-              <TouchableBox
-                accessibilityRole="button"
-                accessibilityLabel={t('Partager')}
-                onPress={() => {
-                  const { section } = query.data
-                  const start = section.rangeStartVerse
-                  const end = section.rangeEndVerse
-                  void shareCommentary({
-                    entry,
-                    passage: `${getBook(request.book)?.Nom ?? request.book} ${request.chapter}:${start}${
-                      end !== start ? `–${end}` : ''
-                    }`,
-                    sections: [section],
-                    location: {
-                      language: request.language,
-                      book: request.book,
-                      chapter: request.chapter,
-                    },
-                  })
+            share ? (
+              <MenuView
+                actions={resourceShareMenuActions(t, share)}
+                onPressAction={({ nativeEvent }) => {
+                  runResourceShareAction(nativeEvent.event, share)
                 }}
-                className="min-w-[44px] min-h-[44px] items-center justify-center"
               >
-                <FeatherIcon name="share-2" size={18} />
-              </TouchableBox>
+                <Box
+                  accessibilityRole="button"
+                  accessibilityLabel={t('Partager')}
+                  className="min-w-[44px] min-h-[44px] items-center justify-center"
+                >
+                  <FeatherIcon name="share-2" size={18} />
+                </Box>
+              </MenuView>
             ) : undefined
           }
         />
