@@ -115,6 +115,7 @@ import { loadBibleReadingParallelVerses, loadBibleReadingRedWords } from './bibl
 import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
+import { FooterInSheetProvider } from './footer/footerFullScreen'
 import {
   getChapterEntityQueryPlan,
   getDisplayedChapterEntityStrongCodes,
@@ -1610,22 +1611,24 @@ const BibleViewer = ({
           <BibleDOMWrapper {...domProps} />
         )}
       </Box>
-      {!isFormSheet && !isContextFocused && (
-        <BibleFooter
-          bibleAtom={bibleAtom}
-          disabled={isLoading}
-          book={book}
-          chapter={chapter}
-          chapterVerses={
-            mainReadingQuery.isPlaceholderData || !mainChapterData ? undefined : verses
-          }
-          coverage={coverageData}
-          goToPrevChapter={goToPrevAvailableChapter}
-          goToNextChapter={goToNextAvailableChapter}
-          goToChapter={goToChapter}
-          version={version}
-          isInTab={isInTab}
-        />
+      {!isContextFocused && (
+        <FooterInSheetProvider value={!!isFormSheet}>
+          <BibleFooter
+            bibleAtom={bibleAtom}
+            disabled={isLoading}
+            book={book}
+            chapter={chapter}
+            chapterVerses={
+              mainReadingQuery.isPlaceholderData || !mainChapterData ? undefined : verses
+            }
+            coverage={coverageData}
+            goToPrevChapter={goToPrevAvailableChapter}
+            goToNextChapter={goToNextAvailableChapter}
+            goToChapter={goToChapter}
+            version={version}
+            isInTab={isInTab}
+          />
+        </FooterInSheetProvider>
       )}
       {!hidePersonalBibleData && (
         <SelectedVersesModal
