@@ -96,4 +96,14 @@ describe('Expo DOM runtime patch', () => {
 
     expect(wrapperSource).toContain('overrideUri ?? getDOMComponentURL(filePath)')
   })
+
+  it('reports a lost Android render process to the owner before reloading', () => {
+    const wrapperSource = readFileSync(getExpoSourcePath('webview-wrapper.tsx'), 'utf8')
+    const handlerStart = wrapperSource.indexOf('onRenderProcessGone: (event: any) => {')
+    const handlerSource = wrapperSource.slice(handlerStart, wrapperSource.indexOf('...dom,'))
+
+    expect(handlerStart).toBeGreaterThan(-1)
+    expect(handlerSource).toContain('onRenderProcessGoneProp?.(event)')
+    expect(handlerSource).toContain('webviewRef.current?.reload()')
+  })
 })
