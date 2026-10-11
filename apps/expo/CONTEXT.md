@@ -38,6 +38,10 @@
 
 **Plan slice** — One reading or teaching unit inside a Reading plan.
 
+**Plan element** — One passage, text, image, or video of a Plan slice, opened and read on its own.
+
+**Plan mode** — The Bible reader held within the passage of a Plan element until the reader leaves the mode.
+
 **Strong entry** — A Hebrew or Greek lexical entry identified by a Strong number.
 
 **Strong verse context** — The passage, selected surface word, and optional morphology carried when a Strong entry is opened from Bible reading.

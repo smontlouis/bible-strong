@@ -69,6 +69,7 @@ const BibleFooter = ({
         goToPrevChapter={goToPrevChapter}
         disabled={disabled}
         coverage={coverage}
+        planPassage={bibleTab.data.planPassage}
         version={version}
       />
     )
@@ -86,6 +87,7 @@ const BibleFooter = ({
         disabled={disabled}
         version={version}
         coverage={coverage}
+        planPassage={bibleTab.data.planPassage}
         onChangeMode={canSwitch ? setAudioMode : undefined}
         bibleAtom={bibleAtom}
       />
@@ -104,6 +106,7 @@ const BibleFooter = ({
         disabled={disabled}
         version={version}
         coverage={coverage}
+        planPassage={bibleTab.data.planPassage}
         onChangeMode={canSwitch ? setAudioMode : undefined}
         bibleAtom={bibleAtom}
       />

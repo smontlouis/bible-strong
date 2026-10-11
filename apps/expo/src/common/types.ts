@@ -39,6 +39,8 @@ export interface OngoingPlan {
   id: string
   status: PlanStatus
   readingSlices: { [id: string]: PlanStatus }
+  /** Elements read in days that are not completed yet. A completed day counts as fully read. */
+  entitySlices?: { [readingSliceId: string]: string[] }
   /** Civil date chosen by the reader; absent for legacy progress until explicitly scheduled. */
   startDate?: string
   /** Device-local reminder time, HH:mm. Absence means disabled. */

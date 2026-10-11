@@ -1,11 +1,11 @@
 import ReadingDatePicker from '~features/daily-reading/ReadingDatePicker'
 import { Image } from 'expo-image'
-import { useRouter, useLocalSearchParams } from 'expo-router'
-import { useState } from 'react'
+import { useLocalSearchParams, useNavigation } from 'expo-router'
+import { useEffect, useRef, useState } from 'react'
 import { Platform, ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
-import type { ComputedPlan, ComputedReadingSlice, Plan } from '~common/types'
+import type { ComputedPlan, ComputedReadingSlice, EntitySlice } from '~common/types'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -13,24 +13,43 @@ import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { pageContentStyle } from '~common/ui/PageContent'
 import { useLocalReadingDate } from '~features/daily-reading/useDailyMeditation'
-import { startPlan, markAsRead } from '~redux/modules/plan'
+import {
+  startPlan,
+  markAsRead,
+  markEntitySliceAsRead,
+  markEntitySliceAsUnread,
+} from '~redux/modules/plan'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { RootState } from '~redux/modules/reducer'
 import { useFireStorage } from '../plan.hooks'
 import { getPlanDayDate, getScheduledPlanDay } from '../readingCalendar'
-import { hasPlanParticipation, getPlanResumeDay } from '../planProgress'
-import { chapterToReference } from '~helpers/chapterToReference'
-import verseToReference from '~helpers/verseToReference'
+import {
+  hasPlanParticipation,
+  getPlanResumeDay,
+  getEntitySliceKey,
+  getReadEntitySliceKeys,
+  isReadableEntitySlice,
+} from '../planProgress'
+import { getPlanEntityRoute } from '../planEntityRoute'
+import { getEntitySliceTitle } from '../entitySliceTitle'
 
 interface Props {
   plan: ComputedPlan
-  onReadingSlicePress?: (
-    slice: ComputedReadingSlice & { planId: string; planTitle: string; planLanguage?: Plan['lang'] }
-  ) => void
+  /** The day to show first, when the reader arrives from a link to that day. */
+  initialReadingSliceId?: string
 }
 
-const ScheduledPlanContent = ({ plan, onReadingSlicePress }: Props) => {
+const ENTITY_ICONS = {
+  Chapter: 'book-open',
+  Verse: 'book-open',
+  Video: 'play-circle',
+  Image: 'image',
+  Text: 'file-text',
+} as const
+
+const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
   const { t, i18n } = useTranslation()
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const dispatch = useDispatch()
   const participation = useSelector((state: RootState) =>
     state.plan.ongoingPlans.find(item => item.id === plan.id)
@@ -40,8 +59,10 @@ const ScheduledPlanContent = ({ plan, onReadingSlicePress }: Props) => {
   const desktop = Platform.OS === 'web' && width >= 800
   const today = useLocalReadingDate()
   const params = useLocalSearchParams<{ date?: string }>()
-  const [chosenDay, setChosenDay] = useState<number | null>(null)
   const readings = plan.sections.flatMap(section => section.data)
+  const [chosenDay, setChosenDay] = useState<number | null>(
+    () => readings.findIndex(item => item.id === initialReadingSliceId) + 1 || null
+  )
   const resumeDay = getPlanResumeDay(readings)
   const completed = readings.filter(item => item.status === 'Completed').length
   const scheduledDay = participation?.startDate
@@ -59,6 +80,7 @@ const ScheduledPlanContent = ({ plan, onReadingSlicePress }: Props) => {
     )
   )
   const reading = readings[selectedDay - 1]
+  const readEntityKeys = reading && started ? getReadEntitySliceKeys(reading, participation) : []
   const selectedDate = participation?.startDate
     ? getPlanDayDate(participation.startDate, selectedDay)
     : undefined
@@ -71,15 +93,42 @@ const ScheduledPlanContent = ({ plan, onReadingSlicePress }: Props) => {
     const month = current.toLocaleDateString(i18n.language, { month: 'short' })
     return `${month}\n${current.getDate()}`
   }
-  const openReading = (entry = reading) => {
-    if (!entry) return
-    const payload = { ...entry, planId: plan.id, planTitle: plan.title, planLanguage: plan.lang }
-    if (onReadingSlicePress) onReadingSlicePress(payload)
-    else
-      router.push({
-        pathname: '/plan-slice',
-        params: { planId: plan.id, readingSliceId: entry.id },
-      })
+  // Opening is reading. The element is ticked once its page covers the plan, so that a day
+  // completed this way is celebrated on the way back, not while leaving.
+  const navigation = useNavigation()
+  const openedEntity = useRef<Parameters<typeof markEntitySliceAsRead>[0] | null>(null)
+  useEffect(
+    () =>
+      navigation.addListener('blur', () => {
+        if (!openedEntity.current) return
+        dispatch(markEntitySliceAsRead(openedEntity.current))
+        openedEntity.current = null
+      }),
+    [navigation, dispatch]
+  )
+  const openEntity = (day: ComputedReadingSlice, slice: EntitySlice, index: number) => {
+    const location = {
+      planId: plan.id,
+      readingSliceId: day.id,
+      entitySliceId: getEntitySliceKey(day.id, slice, index),
+    }
+    const route = getPlanEntityRoute({ ...location, slice })
+    if (!route) return
+    openedEntity.current = location
+    pushRouteOnce(route)
+  }
+  /** Opens the next element to read in a day, or its first one when the day is done. */
+  const openDay = (day = reading) => {
+    if (!day) return
+    const readKeys = getReadEntitySliceKeys(day, participation)
+    const readable = day.slices
+      .map((slice, index) => ({ slice, index }))
+      .filter(({ slice }) => isReadableEntitySlice(slice))
+    const next =
+      readable.find(
+        ({ slice, index }) => !readKeys.includes(getEntitySliceKey(day.id, slice, index))
+      ) ?? readable[0]
+    if (next) openEntity(day, next.slice, next.index)
   }
 
   const visibleDays = Math.max(3, Math.min(7, Math.floor((width - (desktop ? 96 : 72)) / 72)))
@@ -242,38 +291,68 @@ const ScheduledPlanContent = ({ plan, onReadingSlicePress }: Props) => {
           )}
           {reading && (
             <Box className="bg-reverse rounded-[18px] px-[16px]">
-              {reading.slices
-                .filter(slice => slice.type !== 'Image')
-                .map((slice, index) => {
-                  const title =
-                    slice.type === 'Chapter'
-                      ? chapterToReference(slice.chapters)
-                      : slice.type === 'Verse'
-                        ? verseToReference(slice.verses, { isPlan: true })
-                        : slice.type === 'Video' || slice.type === 'Title'
-                          ? slice.title
-                          : t('dailyReading.meditationHeading')
+              {reading.slices.map((slice, index) => {
+                const title = getEntitySliceTitle(slice, t)
+                const border = index ? 'border-t border-border' : ''
+                if (slice.type === 'Title')
                   return (
-                    <Box key={`${slice.id}:${index}`}>
-                      <Box
-                        className={`min-h-[68px] flex-row items-center gap-[14px] py-[14px] ${index ? 'border-t border-border' : ''}`}
+                    <Text
+                      key={`${slice.id}:${index}`}
+                      className={`text-grey font-bold text-[13px] pt-[18px] pb-[10px] ${border}`}
+                    >
+                      {title}
+                    </Text>
+                  )
+                if (!isReadableEntitySlice(slice)) return null
+                const entitySliceId = getEntitySliceKey(reading.id, slice, index)
+                const location = { planId: plan.id, readingSliceId: reading.id, entitySliceId }
+                const read = readEntityKeys.includes(entitySliceId)
+                return (
+                  <Box
+                    key={entitySliceId}
+                    className={`min-h-[68px] flex-row items-center gap-[14px] ${border}`}
+                  >
+                    {started && (
+                      <Link
+                        size={36}
+                        hitSlop={8}
+                        accessibilityRole="checkbox"
+                        accessibilityState={{ checked: read }}
+                        accessibilityLabel={title}
+                        onPress={() => {
+                          // Stay on this day: ticking its last element must not move to the next one.
+                          setChosenDay(selectedDay)
+                          dispatch(
+                            read
+                              ? markEntitySliceAsUnread(location)
+                              : markEntitySliceAsRead(location)
+                          )
+                        }}
                       >
                         <FeatherIcon
-                          name={
-                            reading.status === 'Completed'
-                              ? 'check-circle'
-                              : slice.type === 'Video'
-                                ? 'play-circle'
-                                : 'book-open'
-                          }
-                          size={22}
-                          color={reading.status === 'Completed' ? 'success' : 'grey'}
+                          name={read ? 'check-circle' : 'circle'}
+                          size={24}
+                          color={read ? 'success' : 'grey'}
                         />
-                        <Text className="flex-1 text-default text-[17px]">{title}</Text>
-                      </Box>
-                    </Box>
-                  )
-                })}
+                      </Link>
+                    )}
+                    <Link
+                      accessibilityRole="link"
+                      accessibilityLabel={title}
+                      className="flex-1 flex-row items-center gap-[14px] py-[14px]"
+                      onPress={() => openEntity(reading, slice, index)}
+                    >
+                      <FeatherIcon
+                        name={ENTITY_ICONS[slice.type as keyof typeof ENTITY_ICONS]}
+                        size={20}
+                        color="grey"
+                      />
+                      <Text className="flex-1 text-default text-[17px]">{title}</Text>
+                      <FeatherIcon name="chevron-right" size={20} color="grey" />
+                    </Link>
+                  </Box>
+                )
+              })}
             </Box>
           )}
         </Box>
@@ -284,8 +363,8 @@ const ScheduledPlanContent = ({ plan, onReadingSlicePress }: Props) => {
               if (!started) {
                 dispatch(startPlan({ planId: plan.id, startDate: today }))
                 setChosenDay(1)
-                openReading(readings[0])
-              } else openReading()
+                openDay(readings[0])
+              } else openDay()
             }}
           >
             {t(

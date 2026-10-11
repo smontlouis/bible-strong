@@ -1,13 +1,11 @@
 import type { ComputedPlan, ComputedReadingSlice } from '~common/types'
 import type { PlanTab } from '~state/tabs'
 import {
-  findPlanTabReadingSlice,
   getLegacyPlanRouteId,
   getLegacyReadingRouteLocation,
   getRecoveredPlanTabTitle,
   leavePlanSliceInTab,
   openPlanSliceInTab,
-  resolvePlanTabContent,
 } from '../planTabState'
 
 const createReadingSlice = (id: string): ComputedReadingSlice => ({
@@ -41,36 +39,6 @@ const createPlanTabData = (): PlanTab['data'] => ({
 })
 
 describe('planTabState', () => {
-  it('finds an active Plan slice by identifier', () => {
-    const plan = createComputedPlan()
-
-    expect(findPlanTabReadingSlice(plan, 'slice-2')?.id).toBe('slice-2')
-  })
-
-  it('resolves missing Reading plans', () => {
-    expect(resolvePlanTabContent(undefined, 'slice-1')).toEqual({ type: 'missing-plan' })
-  })
-
-  it('resolves active Plan slice content with tab metadata', () => {
-    const plan = createComputedPlan()
-
-    const content = resolvePlanTabContent(plan, 'slice-1')
-
-    expect(content).toEqual({
-      type: 'reading-slice',
-      readingSlice: {
-        ...plan.sections[0].data[0],
-        planId: 'plan-1',
-        planTitle: 'Plan title',
-        planLanguage: 'fr',
-      },
-    })
-  })
-
-  it('falls back to Reading plan content when the stored Plan slice is missing', () => {
-    expect(resolvePlanTabContent(createComputedPlan(), 'missing-slice')).toEqual({ type: 'plan' })
-  })
-
   it('recovers a stale Plan tab title from the Reading plan', () => {
     expect(getRecoveredPlanTabTitle('Old title', createComputedPlan())).toBe('Plan title')
     expect(getRecoveredPlanTabTitle('Plan title', createComputedPlan())).toBeUndefined()

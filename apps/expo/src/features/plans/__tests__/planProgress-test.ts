@@ -7,6 +7,9 @@ import {
   markReadingSliceAsRead,
   hasPlanParticipation,
   canUpdatePlanProgress,
+  getReadEntitySliceKeys,
+  getReadableEntitySliceKeys,
+  setEntitySliceRead,
 } from '../planProgress'
 
 const createReadingSlice = (id: string): ReadingSlice => ({
@@ -285,5 +288,135 @@ describe('participation boundary', () => {
     })
     expect(result[0].status).toBe('Completed')
     expect(result[0].readingSlices.orphaned).toBe('Completed')
+  })
+})
+
+describe('element progress', () => {
+  const day = (id: string): ReadingSlice => ({
+    id,
+    slices: [
+      { type: 'Title', id: `${id}-title`, title: 'Lecture' },
+      { type: 'Chapter', id: `${id}-a`, chapters: '1|1-3' },
+      { type: 'Verse', verses: '13|1:1-4' },
+      { type: 'Video', id: `${id}-c`, title: 'Vidéo', url: 'https://example.com/video' },
+    ],
+  })
+  const plan: Plan = {
+    ...createPlan('plan-1', [createSection('section-1', [day('day-1'), day('day-2')])]),
+    type: 'reading-plan',
+  }
+  const started: OngoingPlan[] = [
+    { id: 'plan-1', status: 'Progress', readingSlices: {}, startDate: '2026-10-11' },
+  ]
+  const read = (ongoingPlans: OngoingPlan[], entitySliceId: string, readingSliceId = 'day-1') =>
+    setEntitySliceRead({
+      ongoingPlans,
+      plan,
+      planId: 'plan-1',
+      readingSliceId,
+      entitySliceId,
+      read: true,
+    })
+  const unread = (ongoingPlans: OngoingPlan[], entitySliceId: string) =>
+    setEntitySliceRead({
+      ongoingPlans,
+      plan,
+      planId: 'plan-1',
+      readingSliceId: 'day-1',
+      entitySliceId,
+      read: false,
+    })
+
+  it('counts readable elements only and identifies an element without id by its place', () => {
+    expect(getReadableEntitySliceKeys(day('day-1'))).toEqual(['day-1-a', 'day-1:2', 'day-1-c'])
+  })
+
+  it('records a read element once without completing the day', () => {
+    const once = read(started, 'day-1-a')
+    const twice = read(once, 'day-1-a')
+
+    expect(once[0].entitySlices).toEqual({ 'day-1': ['day-1-a'] })
+    expect(once[0].readingSlices).toEqual({})
+    expect(twice).toBe(once)
+  })
+
+  it('completes the day and marks the next one when the last element is read', () => {
+    const result = read(read(read(started, 'day-1-a'), 'day-1:2'), 'day-1-c')
+
+    expect(result[0].readingSlices).toEqual({ 'day-1': 'Completed', 'day-2': 'Next' })
+    expect(result[0].entitySlices).toBeUndefined()
+    expect(getReadEntitySliceKeys(day('day-1'), result[0])).toEqual([
+      'day-1-a',
+      'day-1:2',
+      'day-1-c',
+    ])
+  })
+
+  it('completes the plan when the last element of the last day is read', () => {
+    const completedDays: OngoingPlan[] = [
+      {
+        id: 'plan-1',
+        status: 'Progress',
+        readingSlices: { 'day-1': 'Completed' },
+        entitySlices: { 'day-2': ['day-2-a', 'day-2:2'] },
+      },
+    ]
+
+    const result = read(completedDays, 'day-2-c', 'day-2')
+
+    expect(result[0].status).toBe('Completed')
+    expect(result[0].entitySlices).toBeUndefined()
+  })
+
+  it('reopens a day completed before element progress existed when an element is unread', () => {
+    const legacy: OngoingPlan[] = [
+      {
+        id: 'plan-1',
+        status: 'Progress',
+        readingSlices: { 'day-1': 'Completed', 'day-2': 'Next' },
+      },
+    ]
+
+    const result = unread(legacy, 'day-1:2')
+
+    expect(result[0].readingSlices['day-1']).toBe('Next')
+    expect(result[0].entitySlices).toEqual({ 'day-1': ['day-1-a', 'day-1-c'] })
+  })
+
+  it('unreads every element when the whole day is marked as unread', () => {
+    const completed = read(read(read(started, 'day-1-a'), 'day-1:2'), 'day-1-c')
+    const reopened = markReadingSliceAsRead({
+      ongoingPlans: completed,
+      plan,
+      planId: 'plan-1',
+      readingSliceId: 'day-1',
+    })
+
+    expect(getReadEntitySliceKeys(day('day-1'), reopened[0])).toEqual([])
+  })
+
+  it('forgets partial element progress when the whole day is marked as read', () => {
+    const completed = markReadingSliceAsRead({
+      ongoingPlans: read(started, 'day-1-a'),
+      plan,
+      planId: 'plan-1',
+      readingSliceId: 'day-1',
+    })
+
+    expect(completed[0].readingSlices['day-1']).toBe('Completed')
+    expect(completed[0].entitySlices).toBeUndefined()
+  })
+
+  it('ignores titles, unknown elements and plans that are not followed', () => {
+    const preview: OngoingPlan[] = [{ id: 'plan-1', status: 'Idle', readingSlices: {} }]
+
+    expect(read(started, 'day-1-title')).toBe(started)
+    expect(read(started, 'missing')).toBe(started)
+    expect(read(preview, 'day-1-a')).toBe(preview)
+  })
+
+  it('sees element progress when comparing ongoing plans', () => {
+    expect(areOngoingPlansEqual(started, read(started, 'day-1-a'))).toBe(false)
+    expect(areOngoingPlansEqual(read(started, 'day-1-a'), read(started, 'day-1-a'))).toBe(true)
   })
 })

@@ -9,6 +9,7 @@ jest.mock('../modules/user/notes', () => ({
 jest.mock('../modules/plan', () => ({
   startPlan: { match: (action: { type: string }) => action.type === 'start' },
   markAsRead: { match: (action: { type: string }) => action.type === 'reading' },
+  markEntitySliceAsRead: { match: (action: { type: string }) => action.type === 'element' },
 }))
 
 const state = (completed = false, hasNote = false) =>
@@ -47,6 +48,17 @@ it('counts completing a reading but not unmarking it', () => {
   jest.clearAllMocks()
   run(state(true), state(), action)
   expect(trackAnalyticsEvent).not.toHaveBeenCalled()
+})
+
+it('counts a reading completed by its last element, not an element read on the way', () => {
+  const action = {
+    type: 'element',
+    payload: { planId: 'plan', readingSliceId: 'reading', entitySliceId: 'element' },
+  }
+  run(state(), state(), action)
+  expect(trackAnalyticsEvent).not.toHaveBeenCalled()
+  run(state(), state(true), action)
+  expect(trackAnalyticsEvent).toHaveBeenCalledWith('plan_reading_completed')
 })
 
 it('does not count a duplicate plan or state hydration as a new plan', () => {

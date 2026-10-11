@@ -19,6 +19,7 @@ import { BibleError, BibleLoadingError } from '~helpers/bibleErrors'
 import { usePrevious } from '~helpers/usePrevious'
 import BibleHeader from './BibleHeader'
 import PassageContextButton from './PassageContextButton'
+import { canGoToNextPlanChapter, canGoToPreviousPlanChapter, isInPlanPassage } from './planPassage'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -296,6 +297,7 @@ const BibleViewer = ({
       focusVerses,
       parallelVersions,
       selectedVerses,
+      planPassage,
     },
   } = bible
   const hidePersonalBibleData = shouldHideBibleViewerPersonalData({
@@ -313,8 +315,18 @@ const BibleViewer = ({
     ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
-  const goToPrevAvailableChapter = () => actions.goToPrevChapter(coverageData)
-  const goToNextAvailableChapter = () => actions.goToNextChapter(coverageData)
+  // Buttons, swipes and audio all change chapter through these three: plan mode bounds them here.
+  const planLocation = { book: book.Numero, chapter }
+  const goToPrevAvailableChapter = () => {
+    if (canGoToPreviousPlanChapter(planPassage, planLocation)) actions.goToPrevChapter(coverageData)
+  }
+  const goToNextAvailableChapter = () => {
+    if (canGoToNextPlanChapter(planPassage, planLocation)) actions.goToNextChapter(coverageData)
+  }
+  const goToChapter: typeof actions.goToChapter = target => {
+    if (isInPlanPassage(planPassage, { book: target.book.Numero, chapter: target.chapter }))
+      actions.goToChapter(target)
+  }
 
   const mainChapterRequest = {
     book: book.Numero,
@@ -1492,7 +1504,7 @@ const BibleViewer = ({
           isFormSheet={isFormSheet}
           onExpand={actions.expandContext}
           onCollapse={actions.collapseContext}
-          onExit={actions.clearFocusVerses}
+          onExit={planPassage ? undefined : actions.clearFocusVerses}
         />
       )}
       {settings.redWordsDisplay && redWordsFailureIsTemporary && (
@@ -1610,7 +1622,7 @@ const BibleViewer = ({
           coverage={coverageData}
           goToPrevChapter={goToPrevAvailableChapter}
           goToNextChapter={goToNextAvailableChapter}
-          goToChapter={actions.goToChapter}
+          goToChapter={goToChapter}
           version={version}
           isInTab={isInTab}
         />

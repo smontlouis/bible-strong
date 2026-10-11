@@ -5,7 +5,8 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform } from 'react-native'
-import { BibleTab, VersionCode } from 'src/state/tabs'
+import { BiblePlanPassage, BibleTab, VersionCode } from 'src/state/tabs'
+import { canGoToNextPlanChapter, canGoToPreviousPlanChapter } from '../planPassage'
 import { Book } from '~assets/bible_versions/books-desc'
 import type { Verse } from '~common/types'
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -308,6 +309,7 @@ type AudioTTSFooterProps = {
   onChangeMode?: (mode: 'tts' | 'url') => void
   bibleAtom: PrimitiveAtom<BibleTab>
   coverage?: BibleVersionCoverage
+  planPassage?: BiblePlanPassage
 }
 
 const AudioTTSFooter = ({
@@ -322,11 +324,17 @@ const AudioTTSFooter = ({
   onChangeMode,
   bibleAtom,
   coverage,
+  planPassage,
 }: AudioTTSFooterProps) => {
   const { t } = useTranslation()
   const canonId = resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(version))
-  const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
-  const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
+  const location = { book: book.Numero, chapter }
+  const hasPreviousChapter =
+    canGoToPreviousPlanChapter(planPassage, location) &&
+    !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
+  const hasNextChapter =
+    canGoToNextPlanChapter(planPassage, location) &&
+    !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
 
   const {
     error,

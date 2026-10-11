@@ -6,6 +6,8 @@ import reducer, {
   resetPlan,
   addPlan,
   markAsRead,
+  markEntitySliceAsRead,
+  markEntitySliceAsUnread,
   fetchPlans,
   fetchPlan,
   startPlan,
@@ -481,6 +483,50 @@ describe('Plan Reducer', () => {
       expect(newState.ongoingPlans).toEqual([])
       expect(newState.onlinePlans).toEqual([])
     })
+  })
+})
+
+describe('element progress', () => {
+  const day = (id: string): ReadingSlice => ({
+    id,
+    slices: [
+      { type: 'Chapter', id: `${id}-a`, chapters: '1|1-3' },
+      { type: 'Text', id: `${id}-b`, description: 'Méditation' },
+    ],
+  })
+  const plan: Plan = {
+    ...createPlan('plan-1', [createSection('section-1', [day('day-1'), day('day-2')])]),
+    type: 'reading-plan',
+  }
+  const started = reducer(
+    { ...reducer(undefined, { type: 'test/init' }), myPlans: [plan] },
+    startPlan({ planId: 'plan-1', startDate: '2026-10-11' })
+  )
+  const element = (entitySliceId: string) => ({
+    planId: 'plan-1',
+    readingSliceId: 'day-1',
+    entitySliceId,
+  })
+
+  it('completes the day when its last element is read and reopens it when one is unread', () => {
+    const partly = reducer(started, markEntitySliceAsRead(element('day-1-a')))
+    const completed = reducer(partly, markEntitySliceAsRead(element('day-1-b')))
+    const reopened = reducer(completed, markEntitySliceAsUnread(element('day-1-a')))
+
+    expect(partly.ongoingPlans[0].readingSlices).toEqual({})
+    expect(partly.ongoingPlans[0].entitySlices).toEqual({ 'day-1': ['day-1-a'] })
+    expect(completed.ongoingPlans[0].readingSlices).toEqual({
+      'day-1': 'Completed',
+      'day-2': 'Next',
+    })
+    expect(reopened.ongoingPlans[0].readingSlices).toEqual({ 'day-1': 'Next' })
+    expect(reopened.ongoingPlans[0].entitySlices).toEqual({ 'day-1': ['day-1-b'] })
+  })
+
+  it('records nothing for a plan that is only previewed', () => {
+    const preview = { ...reducer(undefined, { type: 'test/init' }), myPlans: [plan] }
+
+    expect(reducer(preview, markEntitySliceAsRead(element('day-1-a')))).toEqual(preview)
   })
 })
 

@@ -2,7 +2,7 @@ import type { Middleware } from '@reduxjs/toolkit'
 import { trackAnalyticsEvent } from '~helpers/analytics'
 import type { RootState } from './modules/reducer'
 import { addNoteAction } from './modules/user/notes'
-import { startPlan, markAsRead } from './modules/plan'
+import { startPlan, markAsRead, markEntitySliceAsRead } from './modules/plan'
 import { hasPlanParticipation } from '~features/plans/planProgress'
 
 export const analyticsMiddleware: Middleware<object, RootState> = store => next => action => {
@@ -20,7 +20,8 @@ export const analyticsMiddleware: Middleware<object, RootState> = store => next 
       void trackAnalyticsEvent('plan_started')
     }
   }
-  if (markAsRead.match(action)) {
+  // Reading the last element of a day completes it, like marking the whole day.
+  if (markAsRead.match(action) || markEntitySliceAsRead.match(action)) {
     const { planId, readingSliceId } = action.payload
     const previous = before.plan.ongoingPlans.find(plan => plan.id === planId)?.readingSlices[
       readingSliceId

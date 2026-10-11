@@ -55,8 +55,13 @@ describe('public route normalization', () => {
         contextDisplayMode: 'focused',
       },
     }
+    const planPassage = {
+      pathname: '/bible-view',
+      params: { book: '1', chapter: '1', planEndChapter: '3' },
+    }
     expect(normalizePublicRoute(annotation, 'LSG')).toBe(annotation)
     expect(normalizePublicRoute(disjoint, 'LSG')).toBe(disjoint)
+    expect(normalizePublicRoute(planPassage, 'LSG')).toBe(planPassage)
   })
 
   it('normalizes a legacy Strong route', () => {

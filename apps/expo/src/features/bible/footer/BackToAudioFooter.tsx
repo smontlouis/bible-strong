@@ -11,7 +11,8 @@ import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
-import { useFindTabIndex, type VersionCode } from '../../../state/tabs'
+import { useFindTabIndex, type BiblePlanPassage, type VersionCode } from '../../../state/tabs'
+import { canGoToNextPlanChapter, canGoToPreviousPlanChapter } from '../planPassage'
 import { playingBibleTabIdAtom } from './atom'
 import {
   getNextAvailableChapterLocation,
@@ -29,6 +30,7 @@ type BackToAudioFooterProps = {
   disabled?: boolean
   coverage?: BibleVersionCoverage
   version: VersionCode
+  planPassage?: BiblePlanPassage
 }
 
 const BackToAudioFooter = ({
@@ -40,10 +42,16 @@ const BackToAudioFooter = ({
   disabled,
   coverage,
   version,
+  planPassage,
 }: BackToAudioFooterProps) => {
   const canonId = resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(version))
-  const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
-  const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
+  const location = { book: book.Numero, chapter }
+  const hasPreviousChapter =
+    canGoToPreviousPlanChapter(planPassage, location) &&
+    !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
+  const hasNextChapter =
+    canGoToNextPlanChapter(planPassage, location) &&
+    !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
   const { slideToIndex } = useTabAnimations()
   const playingBibleTabId = useAtomValue(playingBibleTabIdAtom)
   const playingBibleTabIndex = useFindTabIndex(playingBibleTabId)

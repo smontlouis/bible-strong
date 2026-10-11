@@ -24,7 +24,8 @@ import {
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { appLogger } from '~helpers/agentObservability'
 import { ensureTrackPlayerSetup } from '~features/audio/trackPlayerSetup'
-import { BibleTab, VersionCode } from '../../../state/tabs'
+import { BiblePlanPassage, BibleTab, VersionCode } from '../../../state/tabs'
+import { canGoToNextPlanChapter, canGoToPreviousPlanChapter } from '../planPassage'
 import AudioBar from './AudioBar'
 import AudioContainer from './AudioContainer'
 import AudioRepeatButton from './AudioRepeatButton'
@@ -283,6 +284,7 @@ type AudioUrlFooterProps = {
   onChangeMode?: (mode: 'tts' | 'url') => void
   bibleAtom: PrimitiveAtom<BibleTab>
   coverage?: BibleVersionCoverage
+  planPassage?: BiblePlanPassage
 }
 
 const AudioUrlFooter = ({
@@ -297,11 +299,17 @@ const AudioUrlFooter = ({
   onChangeMode,
   bibleAtom,
   coverage,
+  planPassage,
 }: AudioUrlFooterProps) => {
   const { t } = useTranslation()
   const canonId = resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(version))
-  const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
-  const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
+  const location = { book: book.Numero, chapter }
+  const hasPreviousChapter =
+    canGoToPreviousPlanChapter(planPassage, location) &&
+    !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
+  const hasNextChapter =
+    canGoToNextPlanChapter(planPassage, location) &&
+    !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
 
   const {
     error,
