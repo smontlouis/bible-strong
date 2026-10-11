@@ -1,4 +1,5 @@
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router'
+import { Platform } from 'react-native'
 
 import { BibleRouteScreen, type BibleRouteInput } from '~features/bible/BibleScreen'
 import { buildPublicBiblePath, parsePublicBibleRoute } from '~features/bible/publicBibleRoutes'
@@ -34,10 +35,15 @@ const PublicBibleRoute = () => {
   }`
   const canonicalPath = buildPublicBiblePath(route)
   if (requestedPath !== canonicalPath) return <Redirect href={canonicalPath} />
-  const routeNavigation = createPublicBibleNavigation(route, {
-    push: path => router.push(path),
-    replace: path => router.replace(path),
-  })
+  // The address follows the reading only where it is visible. In a native sheet, a route
+  // per chapter stacks a screen for each one, so the reader keeps its own state there.
+  const routeNavigation =
+    Platform.OS === 'web'
+      ? createPublicBibleNavigation(route, {
+          push: path => router.push(path),
+          replace: path => router.replace(path),
+        })
+      : undefined
 
   const passage = route.passage
   const focusVerses = passage

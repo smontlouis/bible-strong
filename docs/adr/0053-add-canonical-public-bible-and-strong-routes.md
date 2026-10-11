@@ -62,6 +62,11 @@ changes replace the current history entry. Route navigation is dispatched from u
 an adapter; it is not inferred by observing tab state in an effect. Browser back and forward
 navigation therefore re-enters the same route parser as direct navigation.
 
+This applies to the Web, where the address is visible. On iOS and Android a public Bible route
+opens the same reader, but the route only sets where the reading starts: book, chapter, version,
+presentation, and focus changes stay in the reader's own state. A route per chapter would stack a
+screen for each chapter in the sheet that presents the reader, and leaving focus would replace it.
+
 ## Consequences
 
 Direct Web URLs and in-app navigation can use the same Bible and Strong screens without duplicating
