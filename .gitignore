@@ -190,5 +190,8 @@ scripts/google-service-account.json
 
 /videos/
 
+# Agent worktrees. EAS Build copies everything the .gitignore files do not exclude.
+/.claude/worktrees/
+
 # Generated video exports
 *.mp4

@@ -1,0 +1,72 @@
+# What EAS Build uploads. When this file exists, EAS reads no .gitignore: every rule that
+# keeps a secret or a build output off the builder has to be repeated here.
+#
+# Only the Expo application, the shared packages and the Yarn workspace files go up.
+# Yarn needs the manifest of every workspace to accept the lockfile, hence the lone
+# package.json kept for the other applications.
+
+# Root: nothing but the Yarn workspace files. This also drops .git, the heaviest part.
+/*
+!/package.json
+!/yarn.lock
+!/.yarnrc.yml
+!/.yarn
+/.yarn/*
+!/.yarn/patches
+!/apps
+!/packages
+
+# Other applications: their manifest only.
+/apps/*/*
+!/apps/*/package.json
+!/apps/expo/*
+!/apps/api/functions
+/apps/api/functions/*
+!/apps/api/functions/package.json
+
+# Private server implementation, kept out of this repository.
+/packages/ai-service/
+
+# Secrets and local environments.
+.env
+.env*.local
+*.jks
+*.p12
+*.p8
+*.key
+*.pem
+*.mobileprovision
+keystore.txt
+google-service-account.json
+
+# Build outputs and local state.
+dist/
+.expo/
+.wrangler/
+.local/
+.scratch/
+.gradle/
+.idea/
+.vscode/
+.DS_Store
+local.properties
+*.iml
+*.log
+*.tsbuildinfo
+*.ipa
+*.aab
+*.apk
+*.app
+*.tar.gz
+*.mp4
+
+# Prebuild output. The native modules of the application keep their sources.
+android/
+ios/
+!/apps/expo/modules/*/android/
+!/apps/expo/modules/*/ios/
+/apps/expo/modules/*/android/build/
+
+# Generated from BIBLE_STRONG_ARCHIVE_KEYS at prebuild: contains key material.
+/apps/expo/modules/bible-strong-archive/ios/Generated/
+/apps/expo/modules/bible-strong-archive/android/src/main/java/expo/modules/biblestrongarchive/generated/

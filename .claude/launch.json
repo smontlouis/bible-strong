@@ -1,0 +1,82 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "site",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": [
+        "workspace",
+        "@bible-strong/site",
+        "exec",
+        "vite",
+        "dev",
+        "--port",
+        "3210"
+      ],
+      "port": 3210
+    },
+    {
+      "name": "share-cards",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": [
+        "workspace",
+        "@bible-strong/share-card-service",
+        "wrangler",
+        "dev",
+        "--config",
+        "wrangler.jsonc",
+        "--port",
+        "8799",
+        "--var",
+        "SITE_ORIGIN:http://localhost:3210"
+      ],
+      "port": 8799
+    },
+    {
+      "name": "strobi-proto-fr",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--directory",
+        "/Users/stephane/Projects/bible-strong/bible-strong-pitch/video/minimax/fr/player"
+      ],
+      "port": 8765
+    },
+    {
+      "name": "site-cards",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "SHARE_CARD_SECRET=local-development-secret",
+        "CLOUDFLARE_INCLUDE_PROCESS_ENV=true",
+        "yarn",
+        "workspace",
+        "@bible-strong/site",
+        "exec",
+        "vite",
+        "dev",
+        "--port",
+        "3210"
+      ],
+      "port": 3210
+    },
+    {
+      "name": "site-preview",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "CLOUDFLARE_INCLUDE_PROCESS_ENV=true",
+        "SHARE_CARD_SECRET=local-development-secret",
+        "yarn",
+        "workspace",
+        "@bible-strong/site",
+        "exec",
+        "vite",
+        "preview",
+        "--port",
+        "3212"
+      ],
+      "port": 3212
+    }
+  ]
+}
