@@ -41,6 +41,7 @@
     "resources:commentaries:package-publications": "yarn workspace @bible-strong/resource-studio resources:publication:commentaries",
     "resources:words-of-jesus": "yarn workspace @bible-strong/resource-studio words-of-jesus",
     "resources:serve": "yarn workspace @bible-strong/resource-service serve",
+    "site:worker:deploy": "yarn workspace @bible-strong/site deploy",
     "share-cards:worker:deploy": "yarn workspace @bible-strong/share-card-service worker:deploy",
     "resources:timeline:images": "yarn workspace @bible-strong/resource-studio resources:timeline:images",
     "resources:worker:types": "yarn workspace @bible-strong/resource-service worker:types",

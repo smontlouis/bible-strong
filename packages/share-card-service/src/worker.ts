@@ -5,6 +5,8 @@ type Env = {
   MEDIA: R2Bucket
   /** The site that draws an image from its signed description. */
   SITE_ORIGIN: string
+  /** The Worker the site runs as, asked without leaving Cloudflare. Absent in development. */
+  SITE?: Fetcher
 }
 
 // An address names one description and one design: its image never changes.
@@ -15,7 +17,8 @@ type Drawn = { body: ArrayBuffer; type: string }
 // The site draws; this service only keeps. A description the site did not sign has no image,
 // and a failure of the site is not kept.
 const draw = async (env: Env, signed: string): Promise<Drawn | undefined> => {
-  const answer = await fetch(new URL(`/share-card${signed ? `/${signed}` : ''}`, env.SITE_ORIGIN))
+  const address = new URL(`/share-card${signed ? `/${signed}` : ''}`, env.SITE_ORIGIN)
+  const answer = await (env.SITE ? env.SITE.fetch(address) : fetch(address))
   const type = answer.headers.get('content-type') ?? ''
   if (!answer.ok || !type.startsWith('image/')) return undefined
   return { body: await answer.arrayBuffer(), type }

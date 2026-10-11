@@ -1,4 +1,5 @@
 import { createIsomorphicFn } from '@tanstack/react-start'
+import { resourceApiFetch } from './resourceApiBinding'
 import { noteStaleAnswer } from './staleAnswers'
 import { markResponseStale } from './staleResponse'
 
@@ -12,6 +13,12 @@ const RESOURCE_CACHE_HEADER = 'x-resource-cache'
 const markStaleResponse = createIsomorphicFn()
   .server(() => markResponseStale())
   .client(() => undefined)
+
+// On the server the Resource API is asked through the binding of the Worker; the browser
+// never asks it from here, and builds without the binding.
+const fetchResourceApi = createIsomorphicFn()
+  .server((url: URL | string, init: RequestInit) => resourceApiFetch(url, init))
+  .client((url: URL | string, init: RequestInit) => fetch(url, init))
 
 export class ResourceApiError extends Error {
   constructor(
@@ -40,7 +47,7 @@ export async function readResource<T>(
   for (const [key, value] of Object.entries(query)) {
     if (value !== undefined) url.searchParams.set(key, String(value))
   }
-  const response = await fetch(url, {
+  const response = await fetchResourceApi(url, {
     headers: { accept: 'application/json' },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
@@ -56,7 +63,7 @@ export async function readResource<T>(
 /** Posts a JSON request to a public Resource API route; an absent resource is `undefined`. */
 export async function postResource<T>(path: string, body: unknown): Promise<T | undefined> {
   const baseUrl = (process.env.RESOURCE_API_URL ?? DEFAULT_RESOURCE_API_URL).replace(/\/+$/u, '')
-  const response = await fetch(`${baseUrl}${path}`, {
+  const response = await fetchResourceApi(`${baseUrl}${path}`, {
     method: 'POST',
     headers: { accept: 'application/json', 'content-type': 'application/json' },
     body: JSON.stringify(body),

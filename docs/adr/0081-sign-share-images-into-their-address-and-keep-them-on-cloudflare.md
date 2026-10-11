@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted. Builds on the share cards of the design system (`design-system/project/components/ShareCard…`)
+Accepted. [ADR-0083](./0083-run-the-public-site-as-a-cloudflare-worker.md) moved the site, and with it
+the drawing, to a Cloudflare Worker: what is said below of Vercel and of drawing in a Worker is the
+state of 9 October 2026. Builds on the share cards of the design system (`design-system/project/components/ShareCard…`)
 and on the media bucket of [ADR-0080](./0080-serve-timeline-pictures-from-our-own-media-host.md).
 
 ## Context
