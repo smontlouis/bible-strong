@@ -5,12 +5,11 @@
   "main": "src/server.ts",
   "compatibility_date": "2026-08-19",
   "compatibility_flags": ["nodejs_compat"],
-  "workers_dev": true,
+  // The site has one address for readers; a version can still be looked at before it is
+  // given the traffic, at the preview address Cloudflare gives each one.
+  "workers_dev": false,
   "preview_urls": true,
-  "routes": [
-    // A second address, to check a deployment before the domain of the site is given to it.
-    { "pattern": "next.bible-strong.app", "custom_domain": true },
-  ],
+  "routes": [{ "pattern": "bible-strong.app", "custom_domain": true }],
   // The public files and the browser build, answered by Cloudflare without running the
   // Worker; the Worker reads the fonts of the share images there too.
   // A public file is answered under the name it has, as it was on the previous host.
