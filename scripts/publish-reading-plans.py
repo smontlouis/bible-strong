@@ -1,11 +1,12 @@
 """Create the selected reading-plan release atomically in the existing Firestore catalog.
 
 No overwrite, merge, or deletion. Auth stays in Firebase CLI's local credential store.
-Usage: python3 scripts/publish-reading-plans.py preflight|publish|verify
+Usage: python3 scripts/publish-reading-plans.py preflight|publish|verify [release]
 """
 import datetime, hashlib, json, pathlib, sys, urllib.error, urllib.request
 ROOT=pathlib.Path(__file__).resolve().parents[1]
-OUT=ROOT/'output/imports/reading-plans-2026-09'
+# A release is a folder of output/imports; the first one stays the default.
+OUT=ROOT/'output/imports'/(sys.argv[2] if len(sys.argv)>2 else 'reading-plans-2026-09')
 PROJECT='bible-strong-app'
 BASE=f'https://firestore.googleapis.com/v1/projects/{PROJECT}/databases/(default)/documents'
 
@@ -37,9 +38,11 @@ def main():
     assert mode in ('preflight','publish','verify')
     raw=(OUT/'documents.json').read_bytes(); docs=json.loads(raw); report=json.loads((OUT/'validation.json').read_text())
     assert report['sha256']==hashlib.sha256(raw).hexdigest()
-    assert report['projectId']==PROJECT and report['plans']==26 and report['days']==642 and len(docs)==72
+    assert report['projectId']==PROJECT and report['documents']==len(docs)
     ids={e['id'] for e in report['editions']}
-    assert len(ids)==26 and len({d['path'] for d in docs})==len(docs)
+    assert len(ids)==report['plans'] and len({d['path'] for d in docs})==len(docs)
+    assert sum(e['days'] for e in report['editions'])==report['days']
+    summary=f"{report['plans']} editions, {report['days']} days, {len(docs)} documents"
     for d in docs:
         assert d['path'].split('/')[0]=='plans' and d['path'].split('/')[1] in ids
         assert len(d['path'].split('/'))==2 or (len(d['path'].split('/'))==4 and d['path'].split('/')[2]=='plan-sections')
@@ -53,7 +56,7 @@ def main():
             assert actual==d['data'],d['path']
             results.append({'path':d['path'],'updateTime':remote['updateTime']})
         (OUT/'verification.json').write_text(json.dumps({'projectId':PROJECT,'verifiedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'sha256':report['sha256'],'documents':results},indent=2))
-        print('Verified 26 editions, 642 days, 72 documents.');return
+        print(f'Verified {summary}.');return
     for d in docs:
         try: request('/'+d['path'])
         except urllib.error.HTTPError as e:
@@ -68,5 +71,5 @@ def main():
     receipt={'projectId':PROJECT,'sha256':report['sha256'],'commitTime':result['commitTime'],'documents':[
         {'path':d['path'],'updateTime':r['updateTime']} for d,r in zip(docs,result['writeResults'])]}
     (OUT/'receipt.json').write_text(json.dumps(receipt,indent=2))
-    print('Created all 26 editions atomically. Run verify.')
+    print(f'Created {summary} atomically. Run verify.')
 if __name__=='__main__':main()

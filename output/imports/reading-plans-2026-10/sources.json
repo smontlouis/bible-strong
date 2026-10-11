@@ -1,0 +1,5051 @@
+{
+  "publisherId": 10819,
+  "days": 365,
+  "url": "https://www.bible.com/reading-plans/10819",
+  "title": "The One Year Chronological Bible",
+  "description": "Gain a better understanding of the order of biblical events and the historic context in which they unfolded. With the full text divided into 365 portions for daily reading it allows readers the opportunity to read through the Bible in one year. The One Year, One Year, and The One Year logo are registered and/or common law trademarks (as applicable) of Tyndale House Ministries in the USA and various other jurisdictions around the world. All rights reserved. See tyndale.com for a full list of trademarks owned by Tyndale House Ministries.",
+  "image": "https://imageproxy.youversionapi.com/https://s3.amazonaws.com/yvplans/10819/1280x720.jpg",
+  "readings": [
+    {
+      "day": 1,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/1",
+      "sha256": "9771c3c0727eb80d4ff0c32d98fa5a7565f10badd44fa8a4c6e19cf2f444e315",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.1.NIV",
+        "GEN.2.NIV",
+        "GEN.3.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 2,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/2",
+      "sha256": "ddf526a18f6b70b8c33130c8a11f7c557b654f624b748a3f0ea77aa8da716577",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.4.NIV",
+        "GEN.5.NIV",
+        "1CH.1.1-4.NIV",
+        "GEN.6.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 3,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/3",
+      "sha256": "ef1b08b406baa2c2216be4c2ed28ac7c001b4fa9e0185086ae060eefa55f8be3",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.7.NIV",
+        "GEN.8.NIV",
+        "GEN.9.NIV",
+        "GEN.10.1-5.NIV",
+        "1CH.1.5-7.NIV",
+        "GEN.10.6-20.NIV",
+        "1CH.1.8-16.NIV",
+        "GEN.10.21-30.NIV",
+        "1CH.1.17-23.NIV",
+        "GEN.10.31-32.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 4,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/4",
+      "sha256": "38b4870c43fe803d16767478db394a8d9ee47813018f8ad2def4e1e9e5fcab51",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.11.1-26.NIV",
+        "1CH.1.24-27.NIV",
+        "GEN.11.27-31.NIV",
+        "GEN.12.NIV",
+        "GEN.13.NIV",
+        "GEN.14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 5,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/5",
+      "sha256": "06635a52cac799c0f5d4fac011d4e607219522b829c1cbbd76bfee4f375e0508",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.15.NIV",
+        "GEN.16.NIV",
+        "GEN.17.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 6,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/6",
+      "sha256": "81651ea15cc1f859095e438be353bffda6e8957bbc02f3ec7f890510d5d7fdde",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.18.NIV",
+        "GEN.19.NIV",
+        "GEN.20.NIV",
+        "GEN.21.1-7.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 7,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/7",
+      "sha256": "560a5cf1471b11e89cd2dec31fb651112e98a6e7577a314fe1c5c4085a35be17",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.21.8-34.NIV",
+        "GEN.22.NIV",
+        "GEN.23.NIV",
+        "GEN.11.32.NIV",
+        "GEN.24.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 8,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/8",
+      "sha256": "d9a8e1eaf09293ccaa156caedc91652b1b5f38da42659025096cb90bb026be2e",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.25.1-4.NIV",
+        "1CH.1.32-33.NIV",
+        "GEN.25.5-26.NIV",
+        "1CH.1.28-31.NIV",
+        "1CH.1.34.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 9,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/9",
+      "sha256": "e67b458af462a5d1a83af3370bdc8071217ec769ea023ee8984f946e8e566fde",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.25.27-34.NIV",
+        "GEN.26.NIV",
+        "GEN.27.NIV",
+        "GEN.28.1-5.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 10,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/10",
+      "sha256": "9a30ab1a84f49805abe5ace3b9cba7541c09fd4ca3d11dd49d5c6ca558537407",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.28.6-22.NIV",
+        "GEN.29.NIV",
+        "GEN.30.1-24.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 11,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/11",
+      "sha256": "c91d9fcf2a527d0e728af10d181f31dd3343431956d2a3c358f343ce04a4b4e8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.30.25-43.NIV",
+        "GEN.31.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 12,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/12",
+      "sha256": "57f836502f85c64577e3d9bbe07df3e20bc88a95f7acd0e3dbe91dbd058fbe28",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.32.NIV",
+        "GEN.33.NIV",
+        "GEN.34.NIV",
+        "GEN.35.1-27.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 13,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/13",
+      "sha256": "9e7eca3b0155fd73a09f4bce9790dd5404c8c5a4e4fb9a0cb7bed1507bb468e4",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.36.1-19.NIV",
+        "1CH.1.35-37.NIV",
+        "GEN.36.20-30.NIV",
+        "1CH.1.38-42.NIV",
+        "GEN.36.31-43.NIV",
+        "1CH.1.43-54.NIV",
+        "1CH.2.1-2.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 14,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/14",
+      "sha256": "ea9fd1648fd984051299e14001118cd43d7980d4b39eca9803465aaac0200d0e",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.37.NIV",
+        "GEN.38.NIV",
+        "1CH.2.3-6.NIV",
+        "1CH.2.8.NIV",
+        "GEN.39.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 15,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/15",
+      "sha256": "e441d8b91eb99efe03d9e9ce371630f9acfb03d612c89f089ad3b00672f7a720",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.40.NIV",
+        "GEN.35.28-29.NIV",
+        "GEN.41.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 16,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/16",
+      "sha256": "ff149d81839a2c86f108f1063c0971ec40a4d26b440cb88aae1e676824ff4879",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.42.NIV",
+        "GEN.43.NIV",
+        "GEN.44.NIV",
+        "GEN.45.1-15.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 17,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/17",
+      "sha256": "30ce4a209eb884c9d2ee8e49e538feb923514ecc74012cf01545a5842a0f1958",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.45.16-28.NIV",
+        "GEN.46.NIV",
+        "GEN.47.1-27.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 18,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/18",
+      "sha256": "8ead2266d7e3ca5bbc97f09088382c37061c482a184772590711c56ee54f70e8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GEN.47.28-31.NIV",
+        "GEN.48.NIV",
+        "GEN.49.NIV",
+        "GEN.50.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 19,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/19",
+      "sha256": "ded1a6be4bd755e13403b9a2e988040b724f696ab041f8af47b5aa125e887425",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOB.1.NIV",
+        "JOB.2.NIV",
+        "JOB.3.NIV",
+        "JOB.4.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 20,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/20",
+      "sha256": "3960d9be77b6719b90beed2b9fa5df8c4699080ef98ad35d2a384b5a18328dd4",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOB.5.NIV",
+        "JOB.6.NIV",
+        "JOB.7.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 21,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/21",
+      "sha256": "5965814442d6dcb440d89e113db38303689db44a9dbe6fa8b0ba0948fd26117c",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOB.8.NIV",
+        "JOB.9.NIV",
+        "JOB.10.NIV",
+        "JOB.11.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 22,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/22",
+      "sha256": "f6d5a59eba4077a8f5260b2e04c4fa7c52fe38a6f13724f0be3c537f7ea92212",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOB.12.NIV",
+        "JOB.13.NIV",
+        "JOB.14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 23,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/23",
+      "sha256": "3e909132e251ea8932725afe70e164aa0a604c94a29e4f4d263a642df3b0dfc5",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOB.15.NIV",
+        "JOB.16.NIV",
+        "JOB.17.NIV",
+        "JOB.18.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 24,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/24",
+      "sha256": "ce01df40879dd62e06e47895e64624619659b10d9f01789aef38429726887691",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOB.19.NIV",
+        "JOB.20.NIV",
+        "JOB.21.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 25,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/25",
+      "sha256": "8c885b1e9ac3c59bfea4a441c1ee6efcfc02f2eb437a6dc6b219a77cd89ca1be",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOB.22.NIV",
+        "JOB.23.NIV",
+        "JOB.24.NIV",
+        "JOB.25.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 26,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/26",
+      "sha256": "55bfd213a0d30de1bd9dec6908670f602734cd392d5b88a6f0e65f6d73a5b175",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOB.26.NIV",
+        "JOB.27.NIV",
+        "JOB.28.NIV",
+        "JOB.29.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 27,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/27",
+      "sha256": "d22fbd15d739b6aec181f2c6ff07f5a2e7a95270e91b7adb80ae0f7736c1024a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOB.30.NIV",
+        "JOB.31.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 28,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/28",
+      "sha256": "f86d1f00547af53f7fdd3317f41caa229b00ee5e70fcc8fe44731e0d7b841e49",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOB.32.NIV",
+        "JOB.33.NIV",
+        "JOB.34.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 29,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/29",
+      "sha256": "3cb494ba6dc3c3e1893bafdf42e8d9f5b04ffe0ef7f88404f8a9966d8836856a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOB.35.NIV",
+        "JOB.36.NIV",
+        "JOB.37.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 30,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/30",
+      "sha256": "0612862f3b707ecd95b61f266d94763d1da61e70194f606a698917fc0e2ad042",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOB.38.NIV",
+        "JOB.39.NIV",
+        "JOB.40.1-5.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 31,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/31",
+      "sha256": "ed9bf0ff7e5447002d3a6ab3559cbc7faaaa3cf2243a8a61340a1edbeabc7503",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOB.40.6-24.NIV",
+        "JOB.41.NIV",
+        "JOB.42.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 32,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/32",
+      "sha256": "4d9967f7fc370c68708d1e475d8fed8351b1391ab3bc7e51caad8418fbb0767e",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EXO.1.NIV",
+        "EXO.2.NIV",
+        "1CH.6.1-3.NIV",
+        "EXO.3.NIV",
+        "EXO.4.1-17.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 33,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/33",
+      "sha256": "7116876080d444a5698fa6530675a20e81f24e25fe79236d97d4b659caa699cb",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EXO.4.18-31.NIV",
+        "EXO.5.NIV",
+        "EXO.6.NIV",
+        "EXO.7.1-13.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 34,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/34",
+      "sha256": "36468840b1f5db1b8fba71a4a88e5feb4dbc0501b58a793f98cfb2bf702d82eb",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EXO.7.14-25.NIV",
+        "EXO.8.NIV",
+        "EXO.9.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 35,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/35",
+      "sha256": "4f165d6961e4295368437d7437b2409568721a656e3c1d8575221df5c5c70d16",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EXO.10.NIV",
+        "EXO.11.NIV",
+        "EXO.12.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 36,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/36",
+      "sha256": "d76cc186a9d5c049f4185f50eced6a13b8ca766c7c4ec4a72f81bf6537594bb2",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EXO.13.NIV",
+        "EXO.14.NIV",
+        "EXO.15.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 37,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/37",
+      "sha256": "b37217ae5b3e3549bffddccf4fff108035aa8c45f5e8d08b7f0fcb42e94c1a27",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EXO.16.NIV",
+        "EXO.17.NIV",
+        "EXO.18.NIV",
+        "EXO.19.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 38,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/38",
+      "sha256": "178e7cb5fc1232e5517f6f83224e8a6de05c377549cc5a4d97ebf675c13063d1",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EXO.20.NIV",
+        "EXO.21.NIV",
+        "EXO.22.1-15.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 39,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/39",
+      "sha256": "ca7c151a95a335817c4578cd5fd49f75b5fce5c1efe813633c96d0b76e5fb265",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EXO.22.16-31.NIV",
+        "EXO.23.NIV",
+        "EXO.24.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 40,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/40",
+      "sha256": "49d004503303f73352f85ce36df51e9284bfcb2585a5e322c088d9f9dd67e628",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EXO.25.NIV",
+        "EXO.26.NIV",
+        "EXO.27.NIV",
+        "EXO.28.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 41,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/41",
+      "sha256": "646cc1e28d0f47fa9f3f5cc0d10a31ccf92cc4cf219b6af8f8315ee461dee720",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EXO.29.NIV",
+        "EXO.30.NIV",
+        "EXO.31.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 42,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/42",
+      "sha256": "ed44da4174b81b48becab57c88b64383f0989bdc452a74079388261f04173c54",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EXO.32.NIV",
+        "EXO.33.NIV",
+        "EXO.34.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 43,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/43",
+      "sha256": "badfc842cedfd470c2f0f90bf8248530f39ff932948cb9c7fc104478952ea7f0",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EXO.35.NIV",
+        "EXO.36.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 44,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/44",
+      "sha256": "0a0fe71d54e3b8a31f2ec4f9e692fb8f5eec077bbecd96d0cb094aa6fbd2c108",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EXO.37.NIV",
+        "EXO.38.NIV",
+        "EXO.39.1-31.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 45,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/45",
+      "sha256": "8d83bd9b0049086fc2ff823a78289641e4a99d315caf41125c6ebb89dfe6ebe4",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EXO.39.32-43.NIV",
+        "EXO.40.NIV",
+        "NUM.9.15-23.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 46,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/46",
+      "sha256": "0aedec1f23e3804650c4c3bc053476cf28c027b5d801757befba442336b2116d",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.7.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 47,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/47",
+      "sha256": "021f3dd6909e1cc8df41cff9654512afd7963b92815d70911419a13611c70c29",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.8.NIV",
+        "NUM.9.1-14.NIV",
+        "LEV.1.NIV",
+        "LEV.2.NIV",
+        "LEV.3.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 48,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/48",
+      "sha256": "f55e81d76c5fe71c119fdefa64f8887dc9ace363b2409edc77cb8f955a675048",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LEV.4.NIV",
+        "LEV.5.NIV",
+        "LEV.6.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 49,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/49",
+      "sha256": "224d213a0b14f6befd6f618fcab892fa010c922bc7dae1e796a9a73c6aa250ca",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LEV.7.NIV",
+        "LEV.8.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 50,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/50",
+      "sha256": "6e2d9ba16d7c0ca6d9de5b02898f0d8779c1acbcedfdebc85041edbb89e843c6",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LEV.9.NIV",
+        "LEV.10.NIV",
+        "LEV.11.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 51,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/51",
+      "sha256": "c81df89ab2253d06f44ba0f3c51695c2c194447a275eea346684f92e182ed8f7",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LEV.12.NIV",
+        "LEV.13.NIV",
+        "LEV.14.1-32.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 52,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/52",
+      "sha256": "11794d0407602605d4cd3b2e02f3845fe5dad14a47bfada0be874062fe17c827",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LEV.14.33-57.NIV",
+        "LEV.15.NIV",
+        "LEV.16.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 53,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/53",
+      "sha256": "24c20f4f30fc3719ed37b5fcfff7d1b40f3a58871c1ddaeae0a3b1d96b4ac0f0",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LEV.17.NIV",
+        "LEV.18.NIV",
+        "LEV.19.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 54,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/54",
+      "sha256": "f3ed30e22a89c870d10ca31306913e1f3c2c3c94fdd320f0ee2208cebe26fda6",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LEV.20.NIV",
+        "LEV.21.NIV",
+        "LEV.22.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 55,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/55",
+      "sha256": "aeddc75286bfb0d0e7a9ba0a3030f086a1c71debb837523222e0a208f00fb7c2",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LEV.23.NIV",
+        "LEV.24.NIV",
+        "LEV.25.1-23.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 56,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/56",
+      "sha256": "88d4e674ba6642bb8787eeaf1bc2a8356c155e8d0349f4d736b82e96de758929",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LEV.25.24-55.NIV",
+        "LEV.26.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 57,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/57",
+      "sha256": "49e1762c896c2213a4dee8fc75969f363aa9d40aafde600db42312bf9be27f4b",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LEV.27.NIV",
+        "NUM.1.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 58,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/58",
+      "sha256": "e50e61c619a702fa9ced86b36f145f6d7a4e2f650731ca6f8249dd32b01b8d5a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.2.NIV",
+        "NUM.3.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 59,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/59",
+      "sha256": "bed4bca3cd0ad73dbf6261d738e0b849163cca3f32ff9f13bfe8052365b141d7",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.4.NIV",
+        "NUM.5.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 60,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/60",
+      "sha256": "369ae89f121d82e1eb681b22844bc78eeee7b7ea7754471657b6cac145e9e7f4",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.6.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 61,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/61",
+      "sha256": "2035c95772c4b76c0c3f19e394c3e260c7051c89c934c30535bf7ad6cb48d1bd",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.10.NIV",
+        "NUM.11.NIV",
+        "NUM.12.NIV",
+        "NUM.13.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 62,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/62",
+      "sha256": "92ac645ef943b728a5eca7e9979460a73e24792f7e7c2a351e81c7f17a062094",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.14.NIV",
+        "NUM.15.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 63,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/63",
+      "sha256": "0d52864a721e86355f5404a31e9faa6405fbfb151a342af3c44cc737b6672764",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.16.NIV",
+        "NUM.17.NIV",
+        "NUM.18.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 64,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/64",
+      "sha256": "d6d3bb4384e90d86a2dab2b8d45fd35626228e57f39b011b32f80e83bb309301",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.19.NIV",
+        "NUM.20.NIV",
+        "NUM.21.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 65,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/65",
+      "sha256": "e7b03deeea42160f896858f3022a2c913173846e54bec9fe2f43313cc23d03bc",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.22.NIV",
+        "NUM.23.NIV",
+        "NUM.24.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 66,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/66",
+      "sha256": "6e6f2e268a4b6d3cd9a901d123ba74ad835b8170377f346f70bb3e9806087e4e",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.25.NIV",
+        "NUM.26.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 67,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/67",
+      "sha256": "14846b67034c65a941fbb1b6c8a361533361860e0aa8a6492389c1e529fedcfc",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.27.NIV",
+        "NUM.28.NIV",
+        "NUM.29.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 68,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/68",
+      "sha256": "57759ce0d2948113b9a210a4a268c1e3fcb807e0a4ce230264300fc531d96deb",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.30.NIV",
+        "NUM.31.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 69,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/69",
+      "sha256": "537042de6a0a68f85f87bc1cf91ae6ce0b53e7ad2dbd319f839e5c55d6bafd44",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.32.NIV",
+        "NUM.33.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 70,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/70",
+      "sha256": "95692e70e054b284fed7ffec75b164aed2b86f6c2ed894336f285b02e10c9f28",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NUM.34.NIV",
+        "NUM.35.NIV",
+        "NUM.36.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 71,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/71",
+      "sha256": "8c0a0270ecc6c27d9ef4f1c2edcd5b0d9c435cb628ad49d91b8653a1816b469f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DEU.1.NIV",
+        "DEU.2.NIV",
+        "DEU.3.1-20.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 72,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/72",
+      "sha256": "651ef04c973de61755f1b4d85003d3d7c521de85da9018217efbad1f28483a86",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DEU.3.21-29.NIV",
+        "DEU.4.NIV",
+        "DEU.5.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 73,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/73",
+      "sha256": "da16057effd9da7a8d8538141baf1b6dfd93e555c7efa09221bb23675f632376",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DEU.6.NIV",
+        "DEU.7.NIV",
+        "DEU.8.NIV",
+        "DEU.9.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 74,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/74",
+      "sha256": "99e4c43b92ca73c8ecf5307658b13f5dc4cbd763d6c300927f926d555a19b885",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DEU.10.NIV",
+        "DEU.11.NIV",
+        "DEU.12.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 75,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/75",
+      "sha256": "643a080aa919ab3543bbde2bebf4058b42009d9e4036a0d9a8b466b6d735caec",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DEU.13.NIV",
+        "DEU.14.NIV",
+        "DEU.15.NIV",
+        "DEU.16.1-17.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 76,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/76",
+      "sha256": "c2a85eb20892c04aa521c6263e0757450680a968e5a38d2af8f1a88220e4710f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DEU.16.18-22.NIV",
+        "DEU.17.NIV",
+        "DEU.18.NIV",
+        "DEU.19.NIV",
+        "DEU.20.NIV",
+        "DEU.21.1-9.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 77,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/77",
+      "sha256": "6a56fe1af717f84c7f38c37398e950c8e285a086189d1410701c0900432ec66b",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DEU.21.10-23.NIV",
+        "DEU.22.NIV",
+        "DEU.23.NIV",
+        "DEU.24.NIV",
+        "DEU.25.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 78,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/78",
+      "sha256": "88997ffa6ad8aac32efd59e78237c8a90e6b6028c183138cb76e7f9369a8b556",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DEU.26.NIV",
+        "DEU.27.NIV",
+        "DEU.28.NIV",
+        "DEU.29.1.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 79,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/79",
+      "sha256": "501e93b8a4638067b80c28cc053b4d85616f633d5f3e0f7453f90eab6b97435a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DEU.29.2-29.NIV",
+        "DEU.30.NIV",
+        "DEU.31.1-29.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 80,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/80",
+      "sha256": "86d82dbdc1029bf253710e2c1f3dce3a393ae1ab1d7bb4345dc9d3c0d497c753",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DEU.31.30.NIV",
+        "DEU.32.NIV",
+        "PSA.90.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 81,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/81",
+      "sha256": "0e85972cd6d786e1681b54b75bb5af012958638ff61eda2bc11630b4441e16e7",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DEU.33.NIV",
+        "DEU.34.NIV",
+        "JOS.1.NIV",
+        "JOS.2.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 82,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/82",
+      "sha256": "71b49bc6744d1e9ae96fe80a1454f11d2c6b818e549d414dec07c4cec2368ae8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOS.3.NIV",
+        "JOS.4.NIV",
+        "JOS.5.NIV",
+        "JOS.6.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 83,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/83",
+      "sha256": "dde5eea95057a45d2fec9a28d577023a882b84706a2f5c0ab32ddf5b3d607739",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOS.7.1.NIV",
+        "1CH.2.7.NIV",
+        "JOS.7.2-26.NIV",
+        "JOS.8.NIV",
+        "JOS.9.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 84,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/84",
+      "sha256": "e7ff1964df14118246e75fe1b97584f2a4db10bd013e79b2863ede3539c33f98",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOS.10.NIV",
+        "JOS.11.NIV",
+        "JOS.12.1-6.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 85,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/85",
+      "sha256": "5c75d2c7edea6ba63b23e29adf6578c72e9a871e8ec3080524fd1cf220af6bde",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOS.12.7-24.NIV",
+        "JOS.13.NIV",
+        "JOS.14.NIV",
+        "JOS.15.1-19.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 86,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/86",
+      "sha256": "43626dfe41356cc23be94dbb657303ec734690bab0fa46c6998d5bf39ff170b8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOS.15.20-63.NIV",
+        "JOS.16.NIV",
+        "JOS.17.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 87,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/87",
+      "sha256": "951e5879b79be05aac79cec657311ffd76f1c90a47f0f88e901abe21f89e7a3d",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOS.18.NIV",
+        "JOS.19.1-48.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 88,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/88",
+      "sha256": "6ba3a42cdf8d17e7ff75826687796e9e0b66ab3b7c2594650082a5ebc5f2f9ea",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOS.19.49-51.NIV",
+        "JOS.20.NIV",
+        "JOS.21.NIV",
+        "1CH.6.54-81.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 89,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/89",
+      "sha256": "db38e51839f4476807291b670cf626bfb044c90d616efd4a5b11aa6dc4ff1847",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JOS.22.NIV",
+        "JOS.23.NIV",
+        "JOS.24.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 90,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/90",
+      "sha256": "60c985b2dc69aeaf72d04cf7fb89bb37ba7a917402b9110015fd19b988e83423",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JDG.1.NIV",
+        "JDG.2.NIV",
+        "JDG.3.1-30.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 91,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/91",
+      "sha256": "2fe4120dd2dee6f05dcbdd8c08f09815a0d85b09c774f37f9d68d02485d1a886",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JDG.3.31.NIV",
+        "JDG.4.NIV",
+        "JDG.5.NIV",
+        "JDG.6.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 92,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/92",
+      "sha256": "0c0a9c1b2f26ec2a6bc9435b36b8ae2dcefe10f3df20e63de0c337dc1d731ec3",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JDG.7.NIV",
+        "JDG.8.NIV",
+        "JDG.9.1-21.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 93,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/93",
+      "sha256": "687f9246687529669dbd120966797c727fa193c008551cdd90145d234315633a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JDG.9.22-57.NIV",
+        "JDG.10.NIV",
+        "JDG.11.1-28.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 94,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/94",
+      "sha256": "f1afe71f9009c89c5590b5baf97d796a543a70215c509ee1cc00920793ae27f4",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JDG.11.29-40.NIV",
+        "JDG.12.NIV",
+        "JDG.13.NIV",
+        "JDG.14.NIV",
+        "JDG.15.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 95,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/95",
+      "sha256": "9c66b78c3ca174044cf9d62370d7172d0766b445bebe8a63e9df9fcaedb8696d",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JDG.16.NIV",
+        "JDG.17.NIV",
+        "JDG.18.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 96,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/96",
+      "sha256": "489a18dc80c129cd3657c00c3afff575d2895403986ef445fc422f73c2d0b97c",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JDG.19.NIV",
+        "JDG.20.NIV",
+        "JDG.21.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 97,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/97",
+      "sha256": "e91e77630e572233bfec86a652993e28168c4cc3c7efb909ca3ce7d7b6777634",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "RUT.1.NIV",
+        "RUT.2.NIV",
+        "RUT.3.NIV",
+        "RUT.4.1-12.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 98,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/98",
+      "sha256": "e282238028bb1a4bbe648a0488ffb4e43294b2cc0ad0f3ae5ee3b4b4524ecf0a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "RUT.4.13-22.NIV",
+        "1CH.2.9-55.NIV",
+        "1CH.4.1-23.NIV",
+        "1SA.1.1-8.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 99,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/99",
+      "sha256": "29693f9f96558182d040e94c0a057e0c99dda9a6319e541994f8f1ba8300c6dd",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1SA.1.9-28.NIV",
+        "1SA.2.NIV",
+        "1SA.3.NIV",
+        "1SA.4.1-11.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 100,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/100",
+      "sha256": "cf2b06bee8bc8b4d529a02d8b0d66aa8e31b6e753cae9863f126fcffe41027ad",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1SA.4.12-22.NIV",
+        "1SA.5.NIV",
+        "1SA.6.NIV",
+        "1SA.7.NIV",
+        "1SA.8.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 101,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/101",
+      "sha256": "c61f37bfbd697c5b0b9b6b3c6b707c44dbf42cd9ef6a9675c661fbcbf2d5f62b",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1SA.9.NIV",
+        "1SA.10.NIV",
+        "1SA.11.NIV",
+        "1SA.12.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 102,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/102",
+      "sha256": "743af0ec1279167e00aa2a403d8f1474ce9aafb4a67a8177bca08d756a7750a3",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1CH.9.35-39.NIV",
+        "1SA.13.1-5.NIV",
+        "1SA.13.19-23.NIV",
+        "1SA.13.6-18.NIV",
+        "1SA.14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 103,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/103",
+      "sha256": "e0cc3e3c99e6e7672085995bf011fe55347354ed08f11d1de781778aa427d7df",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1SA.15.NIV",
+        "1SA.16.NIV",
+        "1SA.17.1-31.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 104,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/104",
+      "sha256": "2774e5ad0792a75973c0e0b819ea0151413e74c57449b58d87d5644696f8b91a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1SA.17.32-58.NIV",
+        "1SA.18.NIV",
+        "1SA.19.1-17.NIV",
+        "PSA.59.NIV",
+        "1SA.19.18-24.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 105,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/105",
+      "sha256": "3fb0534ae54333458db840c1d03469038650a0cd2b30ba0ab809308e9290994a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1SA.20.NIV",
+        "1SA.21.NIV",
+        "PSA.34.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 106,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/106",
+      "sha256": "b58ead8dfd8f86abdd9ee8a2c09b777571ce0de6f4d6323d5ab50a954bec3026",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1SA.22.1-2.NIV",
+        "PSA.57.NIV",
+        "PSA.142.NIV",
+        "1CH.12.8-18.NIV",
+        "1SA.22.3-23.NIV",
+        "PSA.52.NIV",
+        "1SA.23.1-12.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 107,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/107",
+      "sha256": "3a24d0c912ecae15e9a4eaf07e6ec0ad3f26fa37fa65b0b652dece92fadee3c4",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1SA.23.13-29.NIV",
+        "PSA.54.NIV",
+        "1SA.24.NIV",
+        "1SA.25.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 108,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/108",
+      "sha256": "ff501026d64fdcd4baa20f147bbec01ade5ea28c1e3b3d2fbe1c61b9457e1ea6",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1SA.26.NIV",
+        "1SA.27.1-7.NIV",
+        "1CH.12.1-7.NIV",
+        "1SA.27.8-12.NIV",
+        "1SA.28.NIV",
+        "1SA.29.NIV",
+        "1CH.12.19.NIV",
+        "PSA.56.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 109,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/109",
+      "sha256": "cb0aa0793cf4487bb53754b5dd1ec660005f97878ef60d1362dd135bf5d15c5b",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1SA.30.NIV",
+        "1CH.12.20-22.NIV",
+        "1SA.31.NIV",
+        "1CH.10.NIV",
+        "1CH.9.40-44.NIV",
+        "2SA.4.4.NIV",
+        "2SA.1.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 110,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/110",
+      "sha256": "f1df682f8a4ac3378c17396a524fc5ac6cdf69162458e8a2236abdb7956df496",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2SA.2.NIV",
+        "2SA.3.1-5.NIV",
+        "1CH.3.1-4.NIV",
+        "2SA.23.8-17.NIV",
+        "1CH.11.10-19.NIV",
+        "2SA.23.18-39.NIV",
+        "1CH.11.20-47.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 111,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/111",
+      "sha256": "f563ddd19e5c0828520c72fd5668e77b00a8b0c89af79a4586369c08d5df314f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2SA.3.6-39.NIV",
+        "2SA.4.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 112,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/112",
+      "sha256": "213d8ab04585e274f325885060f04473aba8d6eefbac4a2aa255badbc92dd341",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2SA.5.1-3.NIV",
+        "1CH.11.1-3.NIV",
+        "1CH.12.23-40.NIV",
+        "2SA.5.17-25.NIV",
+        "1CH.14.8-17.NIV",
+        "2SA.5.6-10.NIV",
+        "1CH.11.4-9.NIV",
+        "2SA.5.13.NIV",
+        "2SA.5.4-5.NIV",
+        "2SA.5.11-12.NIV",
+        "1CH.14.1-2.NIV",
+        "1CH.13.1-5.NIV",
+        "2SA.6.1-11.NIV",
+        "1CH.13.6-14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 113,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/113",
+      "sha256": "5d7d53b6e72b007e39c9bf497837a183e88123c2ddbd1dead6531a53a1d18d11",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2SA.6.12.NIV",
+        "1CH.15.1-28.NIV",
+        "2SA.6.13-16.NIV",
+        "1CH.15.29.NIV",
+        "2SA.6.17-19.NIV",
+        "1CH.16.NIV",
+        "2SA.6.19-23.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 114,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/114",
+      "sha256": "8b0bf1aab93ed0a8236db6e10bd67fb226169fd9d52bc97fb3ef46944afb4423",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2SA.7.1-17.NIV",
+        "1CH.17.1-15.NIV",
+        "2SA.7.18-29.NIV",
+        "1CH.17.16-27.NIV",
+        "2SA.8.1-14.NIV",
+        "1CH.18.1-13.NIV",
+        "PSA.60.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 115,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/115",
+      "sha256": "195327b0884cca8a4d548f50264e882cee843262454f7754652bfe4d81547bbd",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2SA.8.15-18.NIV",
+        "1CH.18.14-17.NIV",
+        "1CH.6.16-30.NIV",
+        "1CH.6.50-53.NIV",
+        "1CH.6.31-48.NIV",
+        "2SA.9.NIV",
+        "2SA.10.NIV",
+        "1CH.19.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 116,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/116",
+      "sha256": "3f3e79ba5e46389eb7d997149f0833760874b064189b7689c19b91dde446245c",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1CH.20.1.NIV",
+        "2SA.11.NIV",
+        "2SA.12.1-14.NIV",
+        "PSA.51.NIV",
+        "2SA.12.15-25.NIV",
+        "2SA.5.14-16.NIV",
+        "1CH.14.3-7.NIV",
+        "1CH.3.5-9.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 117,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/117",
+      "sha256": "cac7986feea9f25f56aad31fe4e6a8ce2be9ae52ae65970f3971b7347f1868a2",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2SA.12.26-31.NIV",
+        "1CH.20.2-3.NIV",
+        "2SA.13.NIV",
+        "2SA.14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 118,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/118",
+      "sha256": "a0715388204fcd7b118f91bc6d3dd953f0ecb23962989c02b96eff3d4a8b6378",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2SA.15.NIV",
+        "2SA.16.NIV",
+        "2SA.17.1-14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 119,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/119",
+      "sha256": "6716c67fde2f020c2ee762fc3fe0045d7bf9cb2957d89592012f7a36a6231df0",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2SA.17.15-29.NIV",
+        "PSA.3.NIV",
+        "PSA.63.NIV",
+        "2SA.18.NIV",
+        "2SA.19.1-30.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 120,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/120",
+      "sha256": "bd93f383a50863399648b0f3efafae7f3d60c14dc5b494168d16deef39b34588",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2SA.19.31-43.NIV",
+        "2SA.20.NIV",
+        "PSA.7.NIV",
+        "2SA.21.NIV",
+        "1CH.20.4-8.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 121,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/121",
+      "sha256": "97b8035294184df5923b2d02398d812a55b19f253ccb4380524969d9236eb1e7",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2SA.22.NIV",
+        "PSA.18.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 122,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/122",
+      "sha256": "761eda3b3fac35f57362a20f8e3b4876c3d3df573e75cb2935db6ad31db170e3",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2SA.24.1-9.NIV",
+        "1CH.21.1-6.NIV",
+        "2SA.24.10-17.NIV",
+        "1CH.21.7-17.NIV",
+        "2SA.24.18-25.NIV",
+        "1CH.21.18-30.NIV",
+        "1CH.22.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 123,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/123",
+      "sha256": "509e0a88c8d94c00fdbc76c73917c9ec19d0aaf6874ae13f860377f5491c6fac",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1CH.23.NIV",
+        "1CH.24.NIV",
+        "1CH.25.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 124,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/124",
+      "sha256": "500a3bcc1bbb6bde2e750c64dc466432dc20c47b387dfdd8c5fa1d4bcd5a269b",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1CH.26.NIV",
+        "1CH.27.NIV",
+        "1CH.28.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 125,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/125",
+      "sha256": "8f560b858cd840b67da6727e88c5324b31ce6a08a39acc4908a1eaf4376670b6",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1CH.29.1-22.NIV",
+        "1KI.1.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 126,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/126",
+      "sha256": "8b20c83d11e1da6b4c4c385037545d721ba7092e6e7743f06bd2b157b0caa9f1",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1KI.2.1-9.NIV",
+        "2SA.23.1-7.NIV",
+        "1KI.2.10-12.NIV",
+        "1CH.29.26-30.NIV",
+        "PSA.4.NIV",
+        "PSA.5.NIV",
+        "PSA.6.NIV",
+        "PSA.8.NIV",
+        "PSA.9.NIV",
+        "PSA.11.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 127,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/127",
+      "sha256": "7de0e09fba58437f1e656b42bad5edb66870ba7e4baf2e5e28eaceea01899053",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.12.NIV",
+        "PSA.13.NIV",
+        "PSA.14.NIV",
+        "PSA.15.NIV",
+        "PSA.16.NIV",
+        "PSA.17.NIV",
+        "PSA.19.NIV",
+        "PSA.20.NIV",
+        "PSA.21.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 128,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/128",
+      "sha256": "d2f2c667287940bc5ca1eaa9a3b9c83cca6b3666a00a3e35a62fe643e6396ea6",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.22.NIV",
+        "PSA.23.NIV",
+        "PSA.24.NIV",
+        "PSA.25.NIV",
+        "PSA.26.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 129,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/129",
+      "sha256": "9f9dc6c5d0fdb2448ccfcc3cc2c880a76361aad277d088d03312aaedfaeffe04",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.27.NIV",
+        "PSA.28.NIV",
+        "PSA.29.NIV",
+        "PSA.30.NIV",
+        "PSA.31.NIV",
+        "PSA.32.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 130,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/130",
+      "sha256": "0bc589f120c9b149d74a30878d37b8307a89750846586d130927c1cc9425e224",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.35.NIV",
+        "PSA.36.NIV",
+        "PSA.37.NIV",
+        "PSA.38.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 131,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/131",
+      "sha256": "fc3d4f70ef49145e91085a2a9314038183f61b0f378a00239e678405719fc86e",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.39.NIV",
+        "PSA.40.NIV",
+        "PSA.41.NIV",
+        "PSA.53.NIV",
+        "PSA.55.NIV",
+        "PSA.58.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 132,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/132",
+      "sha256": "d5b4b94c3183a07f6a8351bb67a87332c419cb64f5e61918e06273ec81c9ab6f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.61.NIV",
+        "PSA.62.NIV",
+        "PSA.64.NIV",
+        "PSA.65.NIV",
+        "PSA.66.NIV",
+        "PSA.67.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 133,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/133",
+      "sha256": "0dbe0e0ac225903ab342e3b6aa699b950dc8a86fc574c9f22e71aaf4b4f75d51",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.68.NIV",
+        "PSA.69.NIV",
+        "PSA.70.NIV",
+        "PSA.86.NIV",
+        "PSA.101.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 134,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/134",
+      "sha256": "085544d81051692e936830720e8bfafa8cf2252e3574e322589d281425f04ba7",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.103.NIV",
+        "PSA.108.NIV",
+        "PSA.109.NIV",
+        "PSA.110.NIV",
+        "PSA.122.NIV",
+        "PSA.124.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 135,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/135",
+      "sha256": "681f5cad3a0cc9fe2036ba92c6dcece9319079e452ca64760b23e9a5b5566bf6",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.131.NIV",
+        "PSA.133.NIV",
+        "PSA.138.NIV",
+        "PSA.139.NIV",
+        "PSA.140.NIV",
+        "PSA.141.NIV",
+        "PSA.143.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 136,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/136",
+      "sha256": "45e96950c96c5dbac3bd04e0e380e0bb95370cf59c8d0010076bc58164c69f5b",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.144.NIV",
+        "PSA.145.NIV",
+        "PSA.88.NIV",
+        "PSA.89.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 137,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/137",
+      "sha256": "17e85f71e7168326e810f0ce16598ad5548540873352e690d1e8711e32bf3059",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.50.NIV",
+        "PSA.73.NIV",
+        "PSA.74.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 138,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/138",
+      "sha256": "3613c9915178e7406cf95284c3c2fd81d7cad83c280ebfb4225ee80985935364",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.75.NIV",
+        "PSA.76.NIV",
+        "PSA.77.NIV",
+        "PSA.78.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 139,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/139",
+      "sha256": "af0d37080539d60ca1a9a4c688d22012737001d508dfd89816c39c77d399f6f8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.79.NIV",
+        "PSA.80.NIV",
+        "PSA.81.NIV",
+        "PSA.82.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 140,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/140",
+      "sha256": "d24f6489e4ec8e98ee8103d2f3056b22df515ab6cdaeae24715c276dcd46306c",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.83.NIV",
+        "1CH.29.23-25.NIV",
+        "2CH.1.1.NIV",
+        "1KI.2.13-46.NIV",
+        "1KI.3.1-4.NIV",
+        "2CH.1.2-6.NIV",
+        "1KI.3.5-15.NIV",
+        "2CH.1.7-13.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 141,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/141",
+      "sha256": "7844b8acae8b6614cb5edf256e16bdd7e9ac205fbec513ea629d5a606e895608",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1KI.3.16-28.NIV",
+        "1KI.5.NIV",
+        "2CH.2.NIV",
+        "1KI.6.1-13.NIV",
+        "2CH.3.1-14.NIV",
+        "1KI.6.14-38.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 142,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/142",
+      "sha256": "d8fb1fee9330204eef196538a6e45fc3f09c6b950ad03d5837d22f64d7fd73a3",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1KI.7.NIV",
+        "2CH.3.15-17.NIV",
+        "2CH.4.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 143,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/143",
+      "sha256": "340c9d93fa1e5398154c6851fda5ad01ad5a3646fcdecce164b92d4f635f4d26",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1KI.8.1-11.NIV",
+        "2CH.5.NIV",
+        "1KI.8.12-21.NIV",
+        "2CH.6.1-11.NIV",
+        "1KI.8.22-53.NIV",
+        "2CH.6.12-42.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 144,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/144",
+      "sha256": "a412a33d5f989584848faba77aa2af6038e30edef2e41903aa373c618445ee99",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1KI.8.54-66.NIV",
+        "2CH.7.1-10.NIV",
+        "1KI.9.1-9.NIV",
+        "2CH.7.11-22.NIV",
+        "1KI.9.10-14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 145,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/145",
+      "sha256": "54d4e7ed65d2037264ce1bd7d046bc590bf2e47a51e41d66fd1c37adc1d4a300",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2CH.8.NIV",
+        "1KI.9.15-28.NIV",
+        "1KI.10.1-13.NIV",
+        "2CH.9.1-12.NIV",
+        "1KI.10.14-29.NIV",
+        "2CH.9.13-28.NIV",
+        "2CH.1.14-17.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 146,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/146",
+      "sha256": "39fb5dfc6bf93c6dd51705696aeaee76f93c0f87342fa75a078043700305c9f9",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1KI.4.NIV",
+        "PSA.72.NIV",
+        "PSA.127.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 147,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/147",
+      "sha256": "93611a8e5bc6d087496df9456e624116c7f32acafd968bfe62f92f6a1e9de887",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PRO.1.NIV",
+        "PRO.2.NIV",
+        "PRO.3.NIV",
+        "PRO.4.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 148,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/148",
+      "sha256": "6bbff7f9098bbe92dba39776e42877e3de6c035eb202e2fe91b03d46cb23ccea",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PRO.5.NIV",
+        "PRO.6.NIV",
+        "PRO.7.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 149,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/149",
+      "sha256": "6928e452e864c2358b6990b24a27a23eb20b07feaeb49bc4bdc1b9319234404d",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PRO.8.NIV",
+        "PRO.9.NIV",
+        "PRO.10.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 150,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/150",
+      "sha256": "3c0106f302412987374b56545f7f2f3575acfdb82695df79d608cf38a70533a5",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PRO.11.NIV",
+        "PRO.12.NIV",
+        "PRO.13.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 151,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/151",
+      "sha256": "e6a53256af0af97f3b3bde74c7e96725694d4921d3f742ae05bd01d880b537b6",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PRO.14.NIV",
+        "PRO.15.NIV",
+        "PRO.16.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 152,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/152",
+      "sha256": "5004b1ef67b29784a6efa946b81c98591f4bc2b75aecc05667f8fec08722e413",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PRO.17.NIV",
+        "PRO.18.NIV",
+        "PRO.19.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 153,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/153",
+      "sha256": "5c8c995bfb17d546163f9013c5f74a73a85613f2c437cb4be622574dd9c924b8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PRO.20.NIV",
+        "PRO.21.NIV",
+        "PRO.22.1-16.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 154,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/154",
+      "sha256": "7e8c3b95480b64031fd4e4d605d66e5f01884610f8e0ddb4d38ed3aa8f013163",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PRO.22.17-29.NIV",
+        "PRO.23.NIV",
+        "PRO.24.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 155,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/155",
+      "sha256": "2a1d39cf15ef860089f09cf275d25f39e7e628101dc7c432c50df84981b7521b",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "SNG.1.NIV",
+        "SNG.2.NIV",
+        "SNG.3.NIV",
+        "SNG.4.NIV",
+        "SNG.5.NIV",
+        "SNG.6.NIV",
+        "SNG.7.NIV",
+        "SNG.8.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 156,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/156",
+      "sha256": "a08df36bef05811e05c1bd4903dcc418e78e7098476b381500a9dfce8bf1f3fb",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1KI.11.NIV",
+        "2CH.9.29-31.NIV",
+        "ECC.1.1-11.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 157,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/157",
+      "sha256": "c21441eb787e2cbc3c73f7c8af24981cfd930dca1e4d735db62d68184ae5abe0",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ECC.1.12-18.NIV",
+        "ECC.2.NIV",
+        "ECC.3.NIV",
+        "ECC.4.NIV",
+        "ECC.5.NIV",
+        "ECC.6.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 158,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/158",
+      "sha256": "c4d33b797dd858110d60e84d2d6a433d393fcaf570b3c4f5dbee716f463d9081",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ECC.7.NIV",
+        "ECC.8.NIV",
+        "ECC.9.NIV",
+        "ECC.10.NIV",
+        "ECC.11.1-6.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 159,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/159",
+      "sha256": "7699a9f65ac4f2589a9240cc376c1f29acabbe8d000a6b7f011d2c429d9357e9",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ECC.11.7-10.NIV",
+        "ECC.12.NIV",
+        "1KI.12.1-20.NIV",
+        "2CH.10.NIV",
+        "1KI.12.21-24.NIV",
+        "2CH.11.1-4.NIV",
+        "1KI.12.25-33.NIV",
+        "2CH.11.5-17.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 160,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/160",
+      "sha256": "0fe86f1aa9e238b7d75e8f0a38255697a46011b46fabb93ab3df63246751120f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1KI.13.NIV",
+        "1KI.14.1-24.NIV",
+        "2CH.12.13-14.NIV",
+        "2CH.11.18-23.NIV",
+        "2CH.12.1-12.NIV",
+        "1KI.14.25-28.NIV",
+        "2CH.12.13-16.NIV",
+        "1KI.14.29-31.NIV",
+        "1KI.15.1-5.NIV",
+        "2CH.13.NIV",
+        "1KI.15.6-8.NIV",
+        "2CH.14.1-8.NIV",
+        "1KI.15.9-15.NIV",
+        "1KI.14.19-20.NIV",
+        "1KI.15.25-34.NIV",
+        "2CH.14.9-15.NIV",
+        "2CH.15.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 161,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/161",
+      "sha256": "f5ddcff28e9fdb1c20ad28e649dd7efc0dada2f0ad755bb9270753e382f41e4b",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1KI.15.16-22.NIV",
+        "2CH.16.1-10.NIV",
+        "1KI.16.NIV",
+        "1KI.15.23-24.NIV",
+        "2CH.16.11-14.NIV",
+        "2CH.17.NIV",
+        "1KI.17.1-7.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 162,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/162",
+      "sha256": "e8d8d7d12cf099701f73aa7a1aebcb1b36c446f03dc266601895063eaae518ec",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1KI.17.8-24.NIV",
+        "1KI.18.NIV",
+        "1KI.19.NIV",
+        "1KI.20.1-22.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 163,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/163",
+      "sha256": "46b7fd56826288305ceaf29d1a8172e6199764f2665e84bd99a1afe8d966ba01",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1KI.20.23-43.NIV",
+        "1KI.21.NIV",
+        "1KI.22.1-9.NIV",
+        "2CH.18.1-8.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 164,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/164",
+      "sha256": "9e4b1c4128ba115e112a6e549be0e5dc43f3184b4ac1748efa8b95e671f54fcf",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1KI.22.10-28.NIV",
+        "2CH.18.9-27.NIV",
+        "1KI.22.29-35.NIV",
+        "2CH.18.28-34.NIV",
+        "1KI.22.36-40.NIV",
+        "1KI.22.51-53.NIV",
+        "2CH.19.NIV",
+        "2CH.20.1-30.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 165,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/165",
+      "sha256": "11ad6a8ff8f9f134ef39023caedad05cac7ddb5d8e71b9ff9f9a0e5460854335",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2KI.1.NIV",
+        "2KI.3.NIV",
+        "1KI.22.41-49.NIV",
+        "2CH.20.31-37.NIV",
+        "1KI.22.50.NIV",
+        "2CH.21.1-4.NIV",
+        "2KI.8.16-22.NIV",
+        "2CH.21.5-7.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 166,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/166",
+      "sha256": "4d5ac63bab323a74152766ad8368dfa1dfb33b57a5bcbc78edb43fddb7ba247a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2KI.2.NIV",
+        "2KI.4.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 167,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/167",
+      "sha256": "55f300510ecca6059c76d301429e5caf33771417fb1e3b8acd838e2f0a73f1b1",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2KI.5.NIV",
+        "2KI.6.NIV",
+        "2KI.7.NIV",
+        "2KI.8.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 168,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/168",
+      "sha256": "bafb8d5ad6ba954363a8c8fcbfe0e5d50386869abd45e4747c0d09cf1b416700",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2CH.21.8-20.NIV",
+        "2KI.8.23-29.NIV",
+        "2CH.22.1-7.NIV",
+        "2KI.9.NIV",
+        "2KI.10.1-17.NIV",
+        "2CH.22.8-9.NIV",
+        "2KI.10.18-31.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 169,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/169",
+      "sha256": "dbedf4adcf4874c6dc75c93fba5000af64f5f60ba4898690a1d6d4a524e92bd7",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2KI.11.1-3.NIV",
+        "2CH.22.10-12.NIV",
+        "2KI.11.4-12.NIV",
+        "2CH.23.1-11.NIV",
+        "2KI.11.13-16.NIV",
+        "2CH.23.12-15.NIV",
+        "2KI.11.17-21.NIV",
+        "2CH.23.16-21.NIV",
+        "2KI.12.1-16.NIV",
+        "2CH.24.1-22.NIV",
+        "2KI.10.32-36.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 170,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/170",
+      "sha256": "33d1cf167f8b41e4f927f11d719b97f01a01db76392560847b3a6efc9ac9d213",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2KI.13.1-11.NIV",
+        "2KI.12.17-21.NIV",
+        "2CH.24.23-27.NIV",
+        "2KI.13.14-25.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 171,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/171",
+      "sha256": "9133d80d647b394fff650b7905a5f158763ee51906285d98750b64caefece2a7",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2KI.14.1-14.NIV",
+        "2CH.25.1-24.NIV",
+        "2KI.13.12-13.NIV",
+        "2KI.14.15-16.NIV",
+        "2KI.14.23-27.NIV",
+        "2CH.25.25-28.NIV",
+        "2KI.14.17-22.NIV",
+        "2KI.15.1-5.NIV",
+        "2CH.26.1-21.NIV",
+        "JON.1.NIV",
+        "JON.2.NIV",
+        "JON.3.NIV",
+        "JON.4.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 172,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/172",
+      "sha256": "f87548b83d78d716055955aea3290add61325c60b5df8253dab507f66ee28d9f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "AMO.1.NIV",
+        "AMO.2.NIV",
+        "AMO.3.NIV",
+        "AMO.4.NIV",
+        "AMO.5.NIV",
+        "AMO.6.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 173,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/173",
+      "sha256": "1cf0b327f1f0ef69eef63e3f21c8bd784c9e921c716f7adf6538d7055e51af85",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "AMO.7.NIV",
+        "AMO.8.NIV",
+        "AMO.9.NIV",
+        "2KI.14.28-29.NIV",
+        "2KI.15.8-29.NIV",
+        "2KI.15.6-7.NIV",
+        "2CH.26.22-23.NIV",
+        "ISA.6.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 174,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/174",
+      "sha256": "43f03df001513597bfa9c597edfc2f731d94c480b72b9e8ce6c3928e1b18f33c",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2KI.15.32-38.NIV",
+        "2CH.27.NIV",
+        "MIC.1.NIV",
+        "2KI.16.1-9.NIV",
+        "2CH.28.1-15.NIV",
+        "ISA.7.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 175,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/175",
+      "sha256": "d071f2cc15ef65a169d20de66e749832811fc3cdd2f880182b018c8052e972c9",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ISA.8.NIV",
+        "ISA.9.NIV",
+        "ISA.10.NIV",
+        "ISA.11.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 176,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/176",
+      "sha256": "773ed0359f418d5381523f82bdcc77526e0aa15312e34857edc65381620c4288",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ISA.12.NIV",
+        "ISA.17.NIV",
+        "2CH.28.16-21.NIV",
+        "2KI.16.10-18.NIV",
+        "2CH.28.22-25.NIV",
+        "2KI.18.1-8.NIV",
+        "2CH.29.1-2.NIV",
+        "2KI.15.30-31.NIV",
+        "2KI.17.1-4.NIV",
+        "HOS.1.NIV",
+        "HOS.2.1-13.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 177,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/177",
+      "sha256": "9948a959511e0280eff1f1119eb1a1bdaed5c7b86835c973b0d426ca28871b76",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "HOS.2.14-23.NIV",
+        "HOS.3.NIV",
+        "HOS.4.NIV",
+        "HOS.5.NIV",
+        "HOS.6.NIV",
+        "HOS.7.NIV",
+        "HOS.8.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 178,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/178",
+      "sha256": "6a21c2f411744f3667624908701c55270f2f0a3315da2eada223f90d5da1bcb8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "HOS.9.NIV",
+        "HOS.10.NIV",
+        "HOS.11.NIV",
+        "HOS.12.NIV",
+        "HOS.13.NIV",
+        "HOS.14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 179,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/179",
+      "sha256": "f3b72a4319df729acc9eae634867e0038724249c42dde6ed31eef4adb7479392",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ISA.28.NIV",
+        "2KI.17.5.NIV",
+        "2KI.18.9-12.NIV",
+        "2KI.17.6-41.NIV",
+        "ISA.1.1-20.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 180,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/180",
+      "sha256": "549813dded9899a9142541bc2f707055dc110d03e2239020e1b79c591250005e",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ISA.1.21-31.NIV",
+        "ISA.2.NIV",
+        "ISA.3.NIV",
+        "ISA.4.NIV",
+        "ISA.5.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 181,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/181",
+      "sha256": "302820d48dad8e27b60e3fb9aa35657ce31a4761751557e95b025e2aa79e0601",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2KI.16.19-20.NIV",
+        "2CH.28.26-27.NIV",
+        "ISA.13.NIV",
+        "ISA.14.NIV",
+        "ISA.15.NIV",
+        "ISA.16.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 182,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/182",
+      "sha256": "817119370c002a8541b6b593d3fa6117a1a23dae580076af187012af64ac11f8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2CH.29.3-36.NIV",
+        "2CH.30.NIV",
+        "2CH.31.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 183,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/183",
+      "sha256": "1d041bf4d563635fd3038ee72ce357e5a3968e22bad83fb2ac0709b48a20d67c",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PRO.25.NIV",
+        "PRO.26.NIV",
+        "PRO.27.NIV",
+        "PRO.28.NIV",
+        "PRO.29.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 184,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/184",
+      "sha256": "22d50c3269d7f9d49f7f187b73e3158c4b44995507bde34c2b27b044a501f762",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PRO.30.NIV",
+        "PRO.31.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 185,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/185",
+      "sha256": "ef67426b5abf9279ca0c4589e59bbe4291e7c8130598ef0dc5ec9f62650861c2",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.42.NIV",
+        "PSA.43.NIV",
+        "PSA.44.NIV",
+        "PSA.45.NIV",
+        "PSA.46.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 186,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/186",
+      "sha256": "8ae95706eb7c7281c2c80434da0f946015ba7140504e0974c07065783dc970df",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.47.NIV",
+        "PSA.48.NIV",
+        "PSA.49.NIV",
+        "PSA.84.NIV",
+        "PSA.85.NIV",
+        "PSA.87.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 187,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/187",
+      "sha256": "7682533717d1ecab7696fc317c3f234bacd7e3911e77666eb4dac205455e0a46",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.1.NIV",
+        "PSA.2.NIV",
+        "PSA.10.NIV",
+        "PSA.33.NIV",
+        "PSA.71.NIV",
+        "PSA.91.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 188,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/188",
+      "sha256": "bac5a55d544318dce708bfe07f7cee83997f9e23bc527c7b216c0f6752c689c9",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.92.NIV",
+        "PSA.93.NIV",
+        "PSA.94.NIV",
+        "PSA.95.NIV",
+        "PSA.96.NIV",
+        "PSA.97.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 189,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/189",
+      "sha256": "db2ca72ff7fe5771b8e8716734e0c72654106f35af93322740b47ff530181e58",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.98.NIV",
+        "PSA.99.NIV",
+        "PSA.100.NIV",
+        "PSA.102.NIV",
+        "PSA.104.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 190,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/190",
+      "sha256": "6f3f1d7606eae07fbb94427bdb473fb2c1ab78fdd735237d3a4d827452ddf7f8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.105.NIV",
+        "PSA.106.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 191,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/191",
+      "sha256": "7d3eef3cf4d5dcc44519a5626fa1dc587778a4c52da9edd32e93d2bbc9b88c2f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.107.NIV",
+        "PSA.111.NIV",
+        "PSA.112.NIV",
+        "PSA.113.NIV",
+        "PSA.114.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 192,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/192",
+      "sha256": "82d99442e6c4c9c44d6301b91ae0e812382dbb47ba12c8d8430d26607b65b7cf",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.115.NIV",
+        "PSA.116.NIV",
+        "PSA.117.NIV",
+        "PSA.118.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 193,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/193",
+      "sha256": "936db7baa7564e24e1294ecc0c75690f6621c372b1a0e300f25ccb554f6e8944",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.119.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 194,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/194",
+      "sha256": "dc8370f6b6168a63c932909f7f55d90dc44dcdce59e5bf55bd1f2a3ab8b33ff8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.120.NIV",
+        "PSA.121.NIV",
+        "PSA.123.NIV",
+        "PSA.125.NIV",
+        "PSA.126.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 195,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/195",
+      "sha256": "88bdf1d096ac94445511794d9dbd33d26b62cc5b61f075a25341f1508e79756f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.128.NIV",
+        "PSA.129.NIV",
+        "PSA.130.NIV",
+        "PSA.132.NIV",
+        "PSA.134.NIV",
+        "PSA.135.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 196,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/196",
+      "sha256": "ef6c517ce736fd6dfc8b20356a121d505a96a12c1444e24c6e025544636d3c37",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PSA.136.NIV",
+        "PSA.146.NIV",
+        "PSA.147.NIV",
+        "PSA.148.NIV",
+        "PSA.149.NIV",
+        "PSA.150.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 197,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/197",
+      "sha256": "8ff5174d993ee3294d5ca1edbce42becb63d89b7b505b57a15f8b6cd50be12aa",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ISA.18.NIV",
+        "ISA.19.NIV",
+        "ISA.20.NIV",
+        "ISA.21.NIV",
+        "ISA.22.NIV",
+        "ISA.23.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 198,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/198",
+      "sha256": "d84ee1af2af206506b7e4e4eee25d96029343bb525c969afe2425f60a8870a84",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ISA.24.NIV",
+        "ISA.25.NIV",
+        "ISA.26.NIV",
+        "ISA.27.NIV",
+        "ISA.29.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 199,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/199",
+      "sha256": "e2232ceb417f4a1748f5d2ee0a9d9190fcf4489bca3e3a4ac9cf444070065cb6",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ISA.30.NIV",
+        "ISA.31.NIV",
+        "ISA.32.NIV",
+        "ISA.33.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 200,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/200",
+      "sha256": "bf4d6e96bd99c6b5f41ed688d0ab9e373e152d142e3179739f203ba0bd1f2105",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ISA.34.NIV",
+        "ISA.35.NIV",
+        "MIC.2.NIV",
+        "MIC.3.NIV",
+        "MIC.4.NIV",
+        "MIC.5.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 201,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/201",
+      "sha256": "dc10a8e16eae43fb30c52dae1164d034613cd17d67e405f15b9aa8fe199aba06",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MIC.6.NIV",
+        "MIC.7.NIV",
+        "2CH.32.1-8.NIV",
+        "2KI.18.13-18.NIV",
+        "ISA.36.1-3.NIV",
+        "2KI.18.19-37.NIV",
+        "ISA.36.4-22.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 202,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/202",
+      "sha256": "1186774190b6873f93a0ee43a2bce82d30a1b4725be9d5fb254d5673016605ae",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2KI.19.1-19.NIV",
+        "ISA.37.1-20.NIV",
+        "2CH.32.9-19.NIV",
+        "2KI.19.20-37.NIV",
+        "ISA.37.21-38.NIV",
+        "2CH.32.20-23.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 203,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/203",
+      "sha256": "7c9c9d7c0ef55d6a18e4b0bc901dc24b8a98cfdd2130ea2e66cca862e57d979f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2KI.20.1-11.NIV",
+        "ISA.38.1-8.NIV",
+        "2CH.32.24-31.NIV",
+        "ISA.38.9-22.NIV",
+        "2KI.20.12-19.NIV",
+        "ISA.39.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 204,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/204",
+      "sha256": "a7eeb98794b5e5ba6153b4eaa9a22f4bfb51be25d852c99575f765a3e224bae5",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ISA.40.NIV",
+        "ISA.41.NIV",
+        "ISA.42.NIV",
+        "ISA.43.NIV",
+        "ISA.44.1-5.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 205,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/205",
+      "sha256": "b47e97a792700ff2bbc9eb14eeb3e5e9ae4919ef6d62ec137bc17fc7295f7238",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ISA.44.6-28.NIV",
+        "ISA.45.NIV",
+        "ISA.46.NIV",
+        "ISA.47.NIV",
+        "ISA.48.1-11.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 206,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/206",
+      "sha256": "8d0643b6e4b79f88c61535560ba99dca93157707e4f4bc9b5258a9fa708f722d",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ISA.48.12-22.NIV",
+        "ISA.49.NIV",
+        "ISA.50.NIV",
+        "ISA.51.NIV",
+        "ISA.52.1-12.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 207,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/207",
+      "sha256": "628a7b7629f2e5215aee727bcafcc06d45467a429021e633666f05f177179f2d",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ISA.52.13-15.NIV",
+        "ISA.53.NIV",
+        "ISA.54.NIV",
+        "ISA.55.NIV",
+        "ISA.56.NIV",
+        "ISA.57.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 208,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/208",
+      "sha256": "24520039daf16c445a761cdf2aae15ac419bb1c2e4ccf4e8ce94f04acfcd313f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ISA.58.NIV",
+        "ISA.59.NIV",
+        "ISA.60.NIV",
+        "ISA.61.NIV",
+        "ISA.62.NIV",
+        "ISA.63.1-14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 209,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/209",
+      "sha256": "ccd8c5cf85dc53653d109b23b9abf83600ae9dc12c0ab2de193768aa1502d5f8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ISA.63.15-19.NIV",
+        "ISA.64.NIV",
+        "ISA.65.NIV",
+        "ISA.66.NIV",
+        "2KI.20.20-21.NIV",
+        "2CH.32.32-33.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 210,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/210",
+      "sha256": "021fd4eb8d5b4f7d46a5e7600c81809a3600a7b1e2ef2c4b8370269c1aa9b795",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2KI.21.1-9.NIV",
+        "2CH.33.1-9.NIV",
+        "2KI.21.10-17.NIV",
+        "2CH.33.10-19.NIV",
+        "2KI.21.18.NIV",
+        "2CH.33.20.NIV",
+        "2KI.21.19-26.NIV",
+        "2CH.33.21-25.NIV",
+        "2KI.22.1-2.NIV",
+        "2CH.34.1-7.NIV",
+        "JER.1.NIV",
+        "JER.2.1-22.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 211,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/211",
+      "sha256": "85d7ca5e48437259f75690395156161890a686a248c83e0fb75a749cbb4856d1",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.2.23-37.NIV",
+        "JER.3.NIV",
+        "JER.4.NIV",
+        "JER.5.1-19.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 212,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/212",
+      "sha256": "35b7773e3950426df6c8a3455a5e9fbf3872d18f0381baea6c5c0b8d75827022",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.5.20-31.NIV",
+        "JER.6.NIV",
+        "2KI.22.3-20.NIV",
+        "2CH.34.8-28.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 213,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/213",
+      "sha256": "46a0d8ad31be55e7c057995c4799c776bfdf565e89562029b504dd0c3ed1b99d",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2KI.23.1-20.NIV",
+        "2CH.34.29-33.NIV",
+        "2KI.23.21-28.NIV",
+        "2CH.35.1-19.NIV",
+        "NAM.1.NIV",
+        "NAM.2.NIV",
+        "NAM.3.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 214,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/214",
+      "sha256": "82e0f223a31782ca9b84e7c23217dae3659d1c4309fa3d66567767a0ef540b48",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "HAB.1.NIV",
+        "HAB.2.NIV",
+        "HAB.3.NIV",
+        "ZEP.1.NIV",
+        "ZEP.2.1-7.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 215,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/215",
+      "sha256": "f2bcc93a348b5bf7664f36c0d0c31291112567846f57a238a1e3b442bd865633",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ZEP.2.8-15.NIV",
+        "ZEP.3.NIV",
+        "2CH.35.20-27.NIV",
+        "2KI.23.29-30.NIV",
+        "JER.47.NIV",
+        "JER.48.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 216,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/216",
+      "sha256": "da49ba8cad5912d6ae3994c5de1f33138c19649cc74d83c954148d937cf6ba45",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2CH.36.1-4.NIV",
+        "2KI.23.31-37.NIV",
+        "2CH.36.5.NIV",
+        "JER.22.1-23.NIV",
+        "JER.26.NIV",
+        "2KI.24.1-4.NIV",
+        "JER.25.1-14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 217,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/217",
+      "sha256": "e02e27ceac559814b03a918fcbba6b3362443a1db1e7f3bb9d7c924a8216781e",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.25.15-38.NIV",
+        "JER.36.NIV",
+        "JER.45.NIV",
+        "JER.46.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 218,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/218",
+      "sha256": "b4604703366ebc14cd83c0c137b476589b2ca762aaedc74a6d7dbe5d9dea0d8a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.19.NIV",
+        "JER.20.NIV",
+        "DAN.1.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 219,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/219",
+      "sha256": "3247b9a7155b471a142ee440623173d1b643b9e6b19daffa4ac919e18e81a709",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DAN.2.NIV",
+        "DAN.3.NIV",
+        "JER.7.NIV",
+        "JER.8.1-3.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 220,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/220",
+      "sha256": "065805729d4289e3fc28213610fc430508731e9c00c82582a4fb9748ac0da1f1",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.8.4-22.NIV",
+        "JER.9.NIV",
+        "JER.10.NIV",
+        "JER.11.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 221,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/221",
+      "sha256": "0c2e27535e8158383cf11ebeaec89d2a42f2e0d62e9fa3f02f59fac48deb5ab5",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.12.NIV",
+        "JER.13.NIV",
+        "JER.14.NIV",
+        "JER.15.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 222,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/222",
+      "sha256": "52a58e274a17382a487893b4383a86ba1fdc673af74780e77fb53d6b8f7fab34",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.16.NIV",
+        "JER.17.NIV",
+        "JER.18.NIV",
+        "JER.35.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 223,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/223",
+      "sha256": "63cac3e3e6032ccdcbf897eed1e357e7fa7642608166259bdbb5d801b5ad2ccb",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.49.1-33.NIV",
+        "2KI.24.5-7.NIV",
+        "2CH.36.6-8.NIV",
+        "2KI.24.8-9.NIV",
+        "2CH.36.9.NIV",
+        "JER.22.24-30.NIV",
+        "JER.23.1-32.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 224,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/224",
+      "sha256": "a54007cd6049f6867fdc8180584e308ee80cf957be184f7e2cbda6eec41a2efb",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.23.33-40.NIV",
+        "JER.24.NIV",
+        "JER.29.NIV",
+        "JER.30.NIV",
+        "JER.31.1-14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 225,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/225",
+      "sha256": "460ea35ac52c4e85a9ca39d216cb70c8acbb5dbaa9c09e880acff6e5fca92848",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.31.15-40.NIV",
+        "JER.49.34-39.NIV",
+        "JER.50.NIV",
+        "JER.51.1-14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 226,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/226",
+      "sha256": "c2d674cf78e563f6aacee5bd1ac3c4354c774eff81ecd74109df6c8369452250",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.51.15-58.NIV",
+        "2CH.36.10.NIV",
+        "2KI.24.10-17.NIV",
+        "1CH.3.10-16.NIV",
+        "2CH.36.11-14.NIV",
+        "JER.52.1-3.NIV",
+        "2KI.24.18-20.NIV",
+        "JER.37.1-10.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 227,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/227",
+      "sha256": "56ee2461f774ab1d759dbc089e264c4356cad6da40a4eb47e5919361de1be838",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.37.11-21.NIV",
+        "JER.38.NIV",
+        "EZK.1.NIV",
+        "EZK.2.NIV",
+        "EZK.3.1-15.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 228,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/228",
+      "sha256": "e08123ebe80bc78a9252af6bc5ff602ca5d95b471997e9cc05ec46bf98eef016",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.3.16-27.NIV",
+        "EZK.4.NIV",
+        "JER.27.NIV",
+        "JER.28.NIV",
+        "JER.51.59-64.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 229,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/229",
+      "sha256": "f634982ded7ba3aa58e6dafd59c079d6400bde848600c55e773953930e1c2dc3",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.5.NIV",
+        "EZK.6.NIV",
+        "EZK.7.NIV",
+        "EZK.8.NIV",
+        "EZK.9.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 230,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/230",
+      "sha256": "840f649bc9f091faea958f3e362f923b9e2b3e590892e1a3d71bca56a0477c9b",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.10.NIV",
+        "EZK.11.NIV",
+        "EZK.12.NIV",
+        "EZK.13.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 231,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/231",
+      "sha256": "2f8e37bce56e1f79726668fd2eba01c0f9ae15b0f57b878950bdada7665720d6",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.14.NIV",
+        "EZK.15.NIV",
+        "EZK.16.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 232,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/232",
+      "sha256": "e7d126a9e5da90ffc30dc53d6585d19c3476ea0d6ea83f4273d1baa17ce6e5f9",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.17.NIV",
+        "EZK.18.NIV",
+        "EZK.19.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 233,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/233",
+      "sha256": "75739db7bc9a6b5f4cb9840e6f0022f27f80cb476fc37cb9c6e0305cabbd2c8b",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.20.NIV",
+        "EZK.21.NIV",
+        "EZK.22.1-16.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 234,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/234",
+      "sha256": "4596d762be6a665fa2b9bd9757d56d4a4ac425dc85614f14337e71ecc5d11245",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.22.17-31.NIV",
+        "EZK.23.NIV",
+        "2KI.24.20.NIV",
+        "2KI.25.1-2.NIV",
+        "JER.52.3-5.NIV",
+        "JER.39.1.NIV",
+        "EZK.24.1-14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 235,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/235",
+      "sha256": "c184afe22294110c4de31129aa7ed7794dd8364f4fcafd06d380d34eaa4a32f6",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.24.15-27.NIV",
+        "EZK.25.NIV",
+        "JER.34.NIV",
+        "JER.21.NIV",
+        "EZK.29.1-16.NIV",
+        "EZK.30.20-26.NIV",
+        "EZK.31.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 236,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/236",
+      "sha256": "59349c3aa4e7c5b96e548d25d11498cea81163b8f7f70e89e9df2f7fbadb8ae7",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.32.NIV",
+        "JER.33.NIV",
+        "EZK.26.1-14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 237,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/237",
+      "sha256": "3ed51c25f23d4854da4fca9e3a15abe003375603895783d9b43ceee421c1dd2f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.26.15-21.NIV",
+        "EZK.27.NIV",
+        "EZK.28.NIV",
+        "2KI.25.3-7.NIV",
+        "JER.52.6-11.NIV",
+        "JER.39.2-10.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 238,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/238",
+      "sha256": "f508d5c1e9e2ed844e15e1d9e4c52667b877a09890501af83f89a803c8ff26a8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.39.11-18.NIV",
+        "JER.40.1-6.NIV",
+        "2KI.25.8-21.NIV",
+        "JER.52.12-27.NIV",
+        "2CH.36.15-21.NIV",
+        "LAM.1.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 239,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/239",
+      "sha256": "d4c13c5ae586c8eec0588cdccd23476c02f52f44207006a4578e8f029925a36a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LAM.2.NIV",
+        "LAM.3.NIV",
+        "LAM.4.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 240,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/240",
+      "sha256": "99faf9edd79bd20f67ac0b1e48456f7a293f53138898ef9a7fd805f231a46571",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LAM.5.NIV",
+        "OBA.1.NIV",
+        "2KI.25.22-26.NIV",
+        "JER.40.7-16.NIV",
+        "JER.41.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 241,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/241",
+      "sha256": "b03b82ff5f8e080516b2b6944cf92b82860305b8e8645e6531163cae921e9ab8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JER.42.NIV",
+        "JER.43.NIV",
+        "JER.44.NIV",
+        "EZK.33.21-33.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 242,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/242",
+      "sha256": "3ebf851fc92ffdee841731b5767fc35022bc9dca54cfc9b533bb1d96ab5e2b17",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.34.NIV",
+        "EZK.35.NIV",
+        "EZK.36.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 243,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/243",
+      "sha256": "d2010b701860fd52785dd9d106e114ebfcf06e5250ed01d347a0a9bd308b5583",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.37.NIV",
+        "EZK.38.NIV",
+        "EZK.39.NIV",
+        "EZK.32.1-16.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 244,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/244",
+      "sha256": "d0a0d8c0a852c77998a9239edd72bba9e7f425627fc82dd19f46e76ab1310966",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.32.17-32.NIV",
+        "EZK.33.1-20.NIV",
+        "JER.52.28-30.NIV",
+        "PSA.137.NIV",
+        "1CH.4.24-43.NIV",
+        "1CH.5.1-17.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 245,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/245",
+      "sha256": "9710d9a5dbb394838b884d2d7dfb8251ef940e0868f82ee88376d28e442642e8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1CH.5.18-26.NIV",
+        "1CH.6.3.NIV",
+        "1CH.6.49.NIV",
+        "1CH.6.4-15.NIV",
+        "1CH.7.NIV",
+        "1CH.8.1-28.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 246,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/246",
+      "sha256": "cad3ddd835fef646874fe79ea6899785202eb28259e469b22114c9aab68d7227",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1CH.8.29-40.NIV",
+        "1CH.9.1.NIV",
+        "DAN.4.NIV",
+        "EZK.40.1-37.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 247,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/247",
+      "sha256": "e9387fb45d2a6119d504fbbd8bb2eabde86d237eeb3092014a42b1b21947e4d1",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.40.38-49.NIV",
+        "EZK.41.NIV",
+        "EZK.42.NIV",
+        "EZK.43.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 248,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/248",
+      "sha256": "05cd6b628ec80223b3495a5405ed849a5e76d04cbfc86d8f0ccedd51997795d5",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.44.NIV",
+        "EZK.45.NIV",
+        "EZK.46.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 249,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/249",
+      "sha256": "497dc24459640b926bdb979df1063fa9fa8abc3e7ae3af3f93c98eac964a66ad",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZK.47.NIV",
+        "EZK.48.NIV",
+        "EZK.29.17-21.NIV",
+        "EZK.30.1-19.NIV",
+        "2KI.25.27-30.NIV",
+        "JER.52.31-34.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 250,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/250",
+      "sha256": "aa8e9dfa9021d42a79aa814ac3c651b28f2c95c22beed3e2e87a29c218e88160",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DAN.7.NIV",
+        "DAN.8.NIV",
+        "DAN.5.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 251,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/251",
+      "sha256": "e0c5a6fb447c8f2a0b10aaeeef96081da0a68bede3a5665f8603c0226f1e6c9c",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DAN.6.NIV",
+        "DAN.9.NIV",
+        "2CH.36.22-23.NIV",
+        "EZR.1.NIV",
+        "1CH.3.17-19.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 252,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/252",
+      "sha256": "64d4e2eb7770be1387510b09fb57fa6f781bdb1edd2dd13f624f6d25c79f3cfe",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZR.2.NIV",
+        "EZR.3.NIV",
+        "EZR.4.1-5.NIV",
+        "1CH.3.19-24.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 253,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/253",
+      "sha256": "83b0c06181a336cc8c47f461e539e79054ba90668694efd264f2a93ff845dac6",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "DAN.10.NIV",
+        "DAN.11.NIV",
+        "DAN.12.NIV",
+        "EZR.4.24.NIV",
+        "EZR.5.1.NIV",
+        "HAG.1.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 254,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/254",
+      "sha256": "b8f96cc8a6a9739f2e196a38916335b46668cada3308f59190d7dec94e0111e9",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "HAG.2.1-9.NIV",
+        "ZEC.1.1-6.NIV",
+        "HAG.2.10-19.NIV",
+        "EZR.5.2.NIV",
+        "HAG.2.20-23.NIV",
+        "ZEC.1.7-21.NIV",
+        "ZEC.2.NIV",
+        "ZEC.3.NIV",
+        "ZEC.4.NIV",
+        "ZEC.5.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 255,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/255",
+      "sha256": "97f2ff599bcd2fc3d9090eb462d8505c9b24f58e4c35d0daa9efffc331aecaa0",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ZEC.6.NIV",
+        "EZR.5.3-17.NIV",
+        "EZR.6.1-14.NIV",
+        "ZEC.7.NIV",
+        "ZEC.8.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 256,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/256",
+      "sha256": "939ff54783de0817aa6258c73044ab51fe962cccef3aadb0c85bf26cf33aa30f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ZEC.9.NIV",
+        "ZEC.10.NIV",
+        "ZEC.11.NIV",
+        "ZEC.12.NIV",
+        "ZEC.13.NIV",
+        "ZEC.14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 257,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/257",
+      "sha256": "a678d1c3e1ce2170fd105abd7c726b318b776a546b1f42ed0bf91a44cc3eb59b",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZR.6.14-22.NIV",
+        "EZR.4.6.NIV",
+        "EST.1.NIV",
+        "EST.2.NIV",
+        "EST.3.NIV",
+        "EST.4.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 258,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/258",
+      "sha256": "ffb7e740730111c18e351e8339fa9b9f575849b4aceed46045a40ad6066f4fde",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EST.5.NIV",
+        "EST.6.NIV",
+        "EST.7.NIV",
+        "EST.8.NIV",
+        "EST.9.NIV",
+        "EST.10.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 259,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/259",
+      "sha256": "32355c34ec9e124ef59b8245f56526c890e34d5d6f5e5b1ed6c2299e6c04998a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZR.4.7-23.NIV",
+        "EZR.7.NIV",
+        "EZR.8.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 260,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/260",
+      "sha256": "db24ac27dd33c081a3239e687217bad82b967a8a0ca860c160d349ba59198278",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EZR.9.NIV",
+        "EZR.10.NIV",
+        "NEH.1.NIV",
+        "NEH.2.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 261,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/261",
+      "sha256": "7eea5a917c9ca2f60abd1c1011d14dea129ef390a4df188efae0cd86638a6d45",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NEH.3.NIV",
+        "NEH.4.NIV",
+        "NEH.5.NIV",
+        "NEH.6.NIV",
+        "NEH.7.1-3.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 262,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/262",
+      "sha256": "019e6bdafcaa44f28bed4949ca3f92a0a26994cf47de87846d5c2ba2480d8347",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NEH.7.4-73.NIV",
+        "NEH.8.1-12.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 263,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/263",
+      "sha256": "3f04f1eaf040d90e6f07748dbd218c9a9c2564010fb3cac1ffb444e902626bea",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NEH.8.13-18.NIV",
+        "NEH.9.NIV",
+        "NEH.10.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 264,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/264",
+      "sha256": "2f503697857b542e7c57cdc9291524942f47ac21cbd6ab8caaea1bdb45303fe2",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NEH.11.NIV",
+        "NEH.12.1-26.NIV",
+        "1CH.9.1-34.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 265,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/265",
+      "sha256": "af95f1a39b63619c71053c28ea20f4d39580d71018f1124f249bae168a360157",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "NEH.12.27-47.NIV",
+        "NEH.13.1-6.NIV",
+        "NEH.13.7-31.NIV",
+        "MAL.1.NIV",
+        "MAL.2.1-9.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 266,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/266",
+      "sha256": "b464bf2cbeb4e06e1ce5089ecb9a03bcf7cd94a7f66b222ed231a015eb154c73",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MAL.2.10-17.NIV",
+        "MAL.3.NIV",
+        "MAL.4.NIV",
+        "JOL.1.NIV",
+        "JOL.2.NIV",
+        "JOL.3.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 267,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/267",
+      "sha256": "f3550db41c08ad9f0cfeaa36c6600ce6924aa4eb37211b7fb6cbdf9bc5538b80",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.1.1.NIV",
+        "LUK.1.1-4.NIV",
+        "JHN.1.1-18.NIV",
+        "MAT.1.1-17.NIV",
+        "LUK.3.23-38.NIV",
+        "LUK.1.5-38.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 268,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/268",
+      "sha256": "a1f00d976f97035a4cf6816b3ea5bdc8e503d494a1cce63d20600247e6b4f0dc",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LUK.1.39-80.NIV",
+        "MAT.1.18-25.NIV",
+        "LUK.2.1-40.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 269,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/269",
+      "sha256": "66f9651ce8892ef178bcc43d3949c49ef50147711c1c6ae37de5635b46cd51e6",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MAT.2.NIV",
+        "LUK.2.41-52.NIV",
+        "MRK.1.2-8.NIV",
+        "MAT.3.1-12.NIV",
+        "LUK.3.1-18.NIV",
+        "MRK.1.9-11.NIV",
+        "MAT.3.13-17.NIV",
+        "LUK.3.21-22.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 270,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/270",
+      "sha256": "61b916b972eb5d9eb0e7fc57d44b91e3005aae6e892692d359b99ee77a399914",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.1.12-13.NIV",
+        "MAT.4.1-11.NIV",
+        "LUK.4.1-15.NIV",
+        "JHN.1.19-51.NIV",
+        "JHN.2.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 271,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/271",
+      "sha256": "15465e479eb5e6a4cc31dbeab8edbf3c5de5824e47abfe89fbb5cad41b5eeb7c",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JHN.3.NIV",
+        "JHN.4.1-45.NIV",
+        "LUK.3.19-20.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 272,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/272",
+      "sha256": "2342931788214be4710bd0a7b1c32ab0459b8cfad24c58bd7673fe743d34d697",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.1.14-15.NIV",
+        "MAT.4.12-17.NIV",
+        "LUK.3.23-38.NIV",
+        "JHN.4.46-54.NIV",
+        "LUK.4.16-30.NIV",
+        "MRK.1.16-20.NIV",
+        "MAT.4.18-22.NIV",
+        "MRK.1.21-28.NIV",
+        "LUK.4.31-37.NIV",
+        "MRK.1.29-34.NIV",
+        "MAT.8.14-17.NIV",
+        "LUK.4.38-41.NIV",
+        "MRK.1.35-39.NIV",
+        "LUK.4.42-44.NIV",
+        "MAT.4.23-25.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 273,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/273",
+      "sha256": "71d887f84389f594af78cf79d1fb2ff119feaba3d01f7feb3483c444b4473d77",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LUK.5.1-11.NIV",
+        "MRK.1.40-45.NIV",
+        "MAT.8.1-4.NIV",
+        "LUK.5.12-16.NIV",
+        "MRK.2.1-12.NIV",
+        "MAT.9.1-8.NIV",
+        "LUK.5.17-26.NIV",
+        "MRK.2.13-17.NIV",
+        "MAT.9.9-13.NIV",
+        "LUK.5.27-32.NIV",
+        "MRK.2.18-22.NIV",
+        "MAT.9.14-17.NIV",
+        "LUK.5.33-39.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 274,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/274",
+      "sha256": "c97e339dd7c33a9fe9702bfc6f9f7fdbe4ed13c23bc595d3b86558c34d2b6c98",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JHN.5.NIV",
+        "MRK.2.23-28.NIV",
+        "MAT.12.1-8.NIV",
+        "LUK.6.1-5.NIV",
+        "MRK.3.1-6.NIV",
+        "MAT.12.9-14.NIV",
+        "LUK.6.6-11.NIV",
+        "MAT.12.15-21.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 275,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/275",
+      "sha256": "e444c81aa4a9dcce4080f03de2f8b84284773f5185b0408899499559c7652b4d",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.3.7-19.NIV",
+        "LUK.6.12-16.NIV",
+        "MAT.5.1-12.NIV",
+        "LUK.6.17-26.NIV",
+        "MAT.5.13-48.NIV",
+        "LUK.6.27-36.NIV",
+        "MAT.6.1-4.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 276,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/276",
+      "sha256": "49a839047ae1383062dd6ef4896c72b9e0dfd0ece2931797df4c8d0897aa97d4",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MAT.6.5-34.NIV",
+        "MAT.7.1-6.NIV",
+        "LUK.6.37-42.NIV",
+        "MAT.7.7-20.NIV",
+        "LUK.6.43-45.NIV",
+        "MAT.7.21-29.NIV",
+        "LUK.6.46-49.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 277,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/277",
+      "sha256": "4ab0910d0da0c50d37078e0fe6c1996d81f76139a65b6076008c0b9cac1e351e",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MAT.8.5-13.NIV",
+        "LUK.7.1-17.NIV",
+        "MAT.11.1-19.NIV",
+        "LUK.7.18-35.NIV",
+        "MAT.11.20-30.NIV",
+        "LUK.7.36-50.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 278,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/278",
+      "sha256": "a2e67daa084133a8b7d5be0e8f30d1f068bc174aebf9f1cd6ed3c2b01853844f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LUK.8.1-3.NIV",
+        "MRK.3.20-30.NIV",
+        "MAT.12.22-45.NIV",
+        "MRK.3.31-35.NIV",
+        "MAT.12.46-50.NIV",
+        "LUK.8.19-21.NIV",
+        "MRK.4.1-9.NIV",
+        "MAT.13.1-9.NIV",
+        "LUK.8.4-8.NIV",
+        "MRK.4.10-20.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 279,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/279",
+      "sha256": "f0d130280afcf96e2a09662dc43b65343d96493d89652c3cdede41685bc02838",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MAT.13.10-23.NIV",
+        "LUK.8.9-18.NIV",
+        "MRK.4.21-29.NIV",
+        "MAT.13.24-30.NIV",
+        "MRK.4.30-34.NIV",
+        "MAT.13.31-52.NIV",
+        "MRK.4.35-41.NIV",
+        "MAT.8.23-27.NIV",
+        "LUK.8.22-25.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 280,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/280",
+      "sha256": "a45085957681f74504c57fb00564cfbf88b19d77ece04e23f6e1201706eefcb1",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.5.1-20.NIV",
+        "MAT.8.28-34.NIV",
+        "LUK.8.26-39.NIV",
+        "MRK.5.21-43.NIV",
+        "MAT.9.18-26.NIV",
+        "LUK.8.40-56.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 281,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/281",
+      "sha256": "2359feb74b3caafb4898b8ee7a2d78faf1ac9302e0f7fb52f47cd38d8506d055",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MAT.9.27-34.NIV",
+        "MRK.6.1-6.NIV",
+        "MAT.13.53-58.NIV",
+        "MAT.9.35-38.NIV",
+        "MRK.6.7-13.NIV",
+        "MAT.10.NIV",
+        "LUK.9.1-6.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 282,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/282",
+      "sha256": "5fceae048a46c3c91908e118776ef892bb26422979ffbec7e79ef4157b13320f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LUK.9.7-9.NIV",
+        "MRK.6.14-29.NIV",
+        "MAT.14.1-21.NIV",
+        "MRK.6.30-44.NIV",
+        "LUK.9.10-17.NIV",
+        "JHN.6.1-15.NIV",
+        "MRK.6.45-52.NIV",
+        "MAT.14.22-33.NIV",
+        "JHN.6.16-21.NIV",
+        "MRK.6.53-56.NIV",
+        "MAT.14.34-36.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 283,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/283",
+      "sha256": "c09780d6c5af0044ab0b33da17cf762b5fe324d8305c423040cd553c94f7e0af",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JHN.6.22-71.NIV",
+        "MRK.7.1-23.NIV",
+        "MAT.15.1-20.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 284,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/284",
+      "sha256": "7c879dad70a7e4f9570fda39d8dcead4dcb606fa5ae79ec7faf0e3f5d5520d6f",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.7.24-30.NIV",
+        "MAT.15.21-28.NIV",
+        "MRK.7.31-37.NIV",
+        "MAT.15.29-31.NIV",
+        "MRK.8.1-10.NIV",
+        "MAT.15.32-39.NIV",
+        "MAT.16.1-4.NIV",
+        "MRK.8.11-21.NIV",
+        "MAT.16.5-12.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 285,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/285",
+      "sha256": "f9c3996cece50455552aabfed7695ec050f0668ddb88cfaad917f62d2f0727d8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.8.22-30.NIV",
+        "MAT.16.13-20.NIV",
+        "LUK.9.18-20.NIV",
+        "MRK.8.31-38.NIV",
+        "MRK.9.1.NIV",
+        "MAT.16.21-28.NIV",
+        "LUK.9.21-27.NIV",
+        "MRK.9.2-13.NIV",
+        "MAT.17.1-13.NIV",
+        "LUK.9.28-36.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 286,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/286",
+      "sha256": "bf12d4ce0f93a21ffa08a786a7804a3da9bf642db23144d1fcfb144f8880415a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.9.14-29.NIV",
+        "MAT.17.14-21.NIV",
+        "LUK.9.37-43.NIV",
+        "MRK.9.30-32.NIV",
+        "MAT.17.22-23.NIV",
+        "LUK.9.43-45.NIV",
+        "MAT.17.24-27.NIV",
+        "MRK.9.33-37.NIV",
+        "MAT.18.1-6.NIV",
+        "LUK.9.46-48.NIV",
+        "MRK.9.38-41.NIV",
+        "LUK.9.49-50.NIV",
+        "MRK.9.42-50.NIV",
+        "MAT.18.7-35.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 287,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/287",
+      "sha256": "d44c4666270176e09f42cc643dbb5ec00c041fccc6fb946610ba67b6585c7b5e",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JHN.7.1-9.NIV",
+        "LUK.9.51-56.NIV",
+        "MAT.8.18-22.NIV",
+        "LUK.9.57-62.NIV",
+        "JHN.7.10-53.NIV",
+        "JHN.8.1-20.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 288,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/288",
+      "sha256": "686f949aa93eb2accb38443bee39b4a126d06eeb3403b8a8b0ce4684d0349887",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JHN.8.21-59.NIV",
+        "LUK.10.NIV",
+        "LUK.11.1-13.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 289,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/289",
+      "sha256": "fd26e20895fd8413c9de1e3bbdfc8d88ca974826ec0188bf28cd56dc934f8ade",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LUK.11.14-54.NIV",
+        "LUK.12.1-34.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 290,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/290",
+      "sha256": "39357a50532ca371590f61768fe431abd1cea156ba8682958b1f68262e3edb2a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LUK.12.35-59.NIV",
+        "LUK.13.1-21.NIV",
+        "JHN.9.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 291,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/291",
+      "sha256": "892a72f1d1b19cf229e99f3e62c945a13effd2e8163747aff739aa1492fd904b",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JHN.10.NIV",
+        "LUK.13.22-35.NIV",
+        "LUK.14.1-24.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 292,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/292",
+      "sha256": "961d2654880bf87cc915624bf3b0e3aa3c440e63645a8ec49b086d24f24ef9dc",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LUK.14.25-35.NIV",
+        "LUK.15.NIV",
+        "LUK.16.NIV",
+        "LUK.17.1-10.NIV",
+        "JHN.11.1-37.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 293,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/293",
+      "sha256": "66da17627274e5e3972eb6331ff83a1ac09587e63eb2d638e96ddea1d28a5a51",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JHN.11.38-57.NIV",
+        "LUK.17.11-37.NIV",
+        "LUK.18.1-8.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 294,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/294",
+      "sha256": "406facf72e6bd58a3270b790997308768b60f7a94e86983b44b5ece092891ade",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LUK.18.9-14.NIV",
+        "MRK.10.1-12.NIV",
+        "MAT.19.1-12.NIV",
+        "MRK.10.13-16.NIV",
+        "MAT.19.13-15.NIV",
+        "LUK.18.15-17.NIV",
+        "MRK.10.17-31.NIV",
+        "MAT.19.16-30.NIV",
+        "LUK.18.18-30.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 295,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/295",
+      "sha256": "cb8f36b0c7a2a2ae6f795671a83472ed1f298f9c56bb9d2e1d4812471760ab1e",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MAT.20.1-16.NIV",
+        "MRK.10.32-34.NIV",
+        "MAT.20.17-19.NIV",
+        "LUK.18.31-34.NIV",
+        "MRK.10.35-45.NIV",
+        "MAT.20.20-34.NIV",
+        "MRK.10.46-52.NIV",
+        "LUK.18.35-43.NIV",
+        "LUK.19.1-27.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 296,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/296",
+      "sha256": "5ebda713160e627d37829c323c8608883e69695b001cc64012eaf6b9b5082e41",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.14.3-9.NIV",
+        "MAT.26.6-13.NIV",
+        "JHN.12.1-11.NIV",
+        "MRK.11.1-11.NIV",
+        "MAT.21.1-11.NIV",
+        "LUK.19.28-40.NIV",
+        "JHN.12.12-19.NIV",
+        "LUK.19.41-44.NIV",
+        "JHN.12.20-36.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 297,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/297",
+      "sha256": "51c41c2d4162f8238b495c3685ac3f5c9fd184dd5137e9596cdc3799925b74d2",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JHN.12.37-50.NIV",
+        "MRK.11.12-14.NIV",
+        "MAT.21.18-22.NIV",
+        "MRK.11.15-19.NIV",
+        "MAT.21.12-17.NIV",
+        "LUK.19.45-48.NIV",
+        "MRK.11.20-33.NIV",
+        "MAT.21.23-27.NIV",
+        "LUK.20.1-8.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 298,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/298",
+      "sha256": "cf06b186026cb37ac210af049be40a3aa1dcaa2e7d07ddfa2509696f12bc01c8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MAT.21.28-32.NIV",
+        "MRK.12.1-12.NIV",
+        "MAT.21.33-46.NIV",
+        "LUK.20.9-19.NIV",
+        "MAT.22.1-14.NIV",
+        "MRK.12.13-17.NIV",
+        "MAT.22.15-22.NIV",
+        "LUK.20.20-26.NIV",
+        "MRK.12.18-27.NIV",
+        "MAT.22.23-33.NIV",
+        "LUK.20.27-40.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 299,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/299",
+      "sha256": "7891c40585509ef6eb5eea83ff0044e405e40210531c1a08abd06a063b2765f9",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.12.28-34.NIV",
+        "MAT.22.34-40.NIV",
+        "MRK.12.35-37.NIV",
+        "MAT.22.41-46.NIV",
+        "LUK.20.41-44.NIV",
+        "MRK.12.38-40.NIV",
+        "MAT.23.1-12.NIV",
+        "LUK.20.45-47.NIV",
+        "MAT.23.13-39.NIV",
+        "MRK.12.41-44.NIV",
+        "LUK.21.1-4.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 300,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/300",
+      "sha256": "44590cb4701adb6bbec7354d4cdf8a138694cdda43790856703d13d360d513f0",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.13.1-23.NIV",
+        "MAT.24.1-25.NIV",
+        "LUK.21.5-24.NIV",
+        "MRK.13.24-31.NIV",
+        "MAT.24.26-35.NIV",
+        "LUK.21.25-33.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 301,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/301",
+      "sha256": "78228b0e36d7b05bbae81960762743658f59e858eef9a1a6a608c345c42bf9c8",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.13.32-37.NIV",
+        "MAT.24.36-51.NIV",
+        "LUK.21.34-38.NIV",
+        "MAT.25.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 302,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/302",
+      "sha256": "150fe5a6b94c27863133a97be144da1931569b14f26895b4a738206306e282da",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.14.1-2.NIV",
+        "MAT.26.1-5.NIV",
+        "LUK.22.1-2.NIV",
+        "MRK.14.10-11.NIV",
+        "MAT.26.14-16.NIV",
+        "LUK.22.3-6.NIV",
+        "MRK.14.12-16.NIV",
+        "MAT.26.17-19.NIV",
+        "LUK.22.7-13.NIV",
+        "JHN.13.1-20.NIV",
+        "MRK.14.17-26.NIV",
+        "MAT.26.20-30.NIV",
+        "LUK.22.14-30.NIV",
+        "JHN.13.18-30.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 303,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/303",
+      "sha256": "d85e88a52d7a661d53170a3cdd6982e9b8691da0524d17944c5d991d45210ec2",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JHN.13.31-38.NIV",
+        "MRK.14.27-31.NIV",
+        "MAT.26.31-35.NIV",
+        "LUK.22.31-38.NIV",
+        "JHN.14.NIV",
+        "JHN.15.1-17.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 304,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/304",
+      "sha256": "014d6c20032d598ff803c118a76bfc03a0d5bd1379be11c181ec194d4f8e4a15",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JHN.15.18-27.NIV",
+        "JHN.16.NIV",
+        "JHN.17.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 305,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/305",
+      "sha256": "e764ee3167076b19e4da07eabb9dfc3c4825b10a2331520d54d3d3fe6de29929",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JHN.18.1-2.NIV",
+        "MRK.14.32-42.NIV",
+        "MAT.26.36-46.NIV",
+        "LUK.22.39-46.NIV",
+        "MRK.14.43-52.NIV",
+        "MAT.26.47-56.NIV",
+        "LUK.22.47-53.NIV",
+        "JHN.18.3-24.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 306,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/306",
+      "sha256": "85671923f22e71aae8b04d3329f63c062e80279ee16462f159c0f022299bd5c9",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.14.53-65.NIV",
+        "MAT.26.57-68.NIV",
+        "MRK.14.66-72.NIV",
+        "MAT.26.69-75.NIV",
+        "LUK.22.54-65.NIV",
+        "JHN.18.25-27.NIV",
+        "MRK.15.1.NIV",
+        "MAT.27.1-2.NIV",
+        "LUK.22.66-71.NIV",
+        "MAT.27.3-10.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 307,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/307",
+      "sha256": "db1def9e69f4dbb33573e97deb64434e7dbf6a66dc96f55ac09053308013f6dd",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.15.2-5.NIV",
+        "MAT.27.11-14.NIV",
+        "LUK.23.1-12.NIV",
+        "JHN.18.28-40.NIV",
+        "MRK.15.6-15.NIV",
+        "MAT.27.15-26.NIV",
+        "LUK.23.13-25.NIV",
+        "JHN.19.1-16.NIV",
+        "MRK.15.16-20.NIV",
+        "MAT.27.27-31.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 308,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/308",
+      "sha256": "810b30714bd32109afe9e6bb14dcb365617eab2385c0eb51491223206c2ed85d",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.15.21-24.NIV",
+        "MAT.27.32-34.NIV",
+        "LUK.23.26-31.NIV",
+        "JHN.19.17.NIV",
+        "MRK.15.25-32.NIV",
+        "MAT.27.35-44.NIV",
+        "LUK.23.32-43.NIV",
+        "JHN.19.18-27.NIV",
+        "MRK.15.33-41.NIV",
+        "MAT.27.45-56.NIV",
+        "LUK.23.44-49.NIV",
+        "JHN.19.28-37.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 309,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/309",
+      "sha256": "6988bbfdd9731baf72179d1d649cbeb44be60759d9682247fec8a392847905f5",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.15.42-47.NIV",
+        "MAT.27.57-61.NIV",
+        "LUK.23.50-56.NIV",
+        "JHN.19.38-42.NIV",
+        "MAT.27.62-66.NIV",
+        "MRK.16.1-8.NIV",
+        "MAT.28.1-7.NIV",
+        "LUK.24.1-12.NIV",
+        "MRK.16.9-13.NIV",
+        "JHN.20.1-18.NIV",
+        "MAT.28.8-15.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 310,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/310",
+      "sha256": "500d511c53867e3a36b013b4206d5cba36e9757b8e2c6178847f70fe1ce68f6a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "LUK.24.13-43.NIV",
+        "MRK.16.12-13.NIV",
+        "JHN.20.19-23.NIV",
+        "MRK.16.14.NIV",
+        "JHN.20.24-31.NIV",
+        "JHN.21.NIV",
+        "MAT.28.16-20.NIV",
+        "MRK.16.15-18.NIV",
+        "LUK.24.44-49.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 311,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/311",
+      "sha256": "54fafa48facb2734dfe9611dfe1c037b4c87c0a1c518a9394487272fed972e13",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "MRK.16.19-20.NIV",
+        "LUK.24.50-53.NIV",
+        "ACT.1.NIV",
+        "ACT.2.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 312,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/312",
+      "sha256": "198c742c07609e59811fa444d26f04c7262b9e1e80f4827d850d13052facefdb",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ACT.3.NIV",
+        "ACT.4.NIV",
+        "ACT.5.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 313,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/313",
+      "sha256": "32ea961987e55daa038201ba73e686323338c8ed77f3e07098e32e87d0b9dae3",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ACT.6.NIV",
+        "ACT.7.NIV",
+        "ACT.8.1.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 314,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/314",
+      "sha256": "42060d0eaf0093fda9060bbd624582f1b4c1ca58d8e95463c812deba3ea8bd54",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ACT.8.NIV",
+        "ACT.9.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 315,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/315",
+      "sha256": "473147310bae847ef463b584a82852cd0eb045490e8aa4f3b90ae743d6b1af7b",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ACT.10.NIV",
+        "ACT.11.NIV",
+        "ACT.12.1-5.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 316,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/316",
+      "sha256": "0d1ff5c9912a9660c31704977525dd9deb50d0ca303642bf4fd2f60d44a6d467",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ACT.12.6-25.NIV",
+        "ACT.13.NIV",
+        "ACT.14.1-20.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 317,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/317",
+      "sha256": "8e27670c1103e2419daa192ce37f1fa4a7397be537eb9752d7557ba90bd60cfd",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ACT.14.21-28.NIV",
+        "GAL.1.NIV",
+        "GAL.2.NIV",
+        "GAL.3.1-23.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 318,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/318",
+      "sha256": "23c7769f9e367d5f0ddde2c202d060eef86a5f4a900ba95f2996cb4ec80c087a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "GAL.3.24-29.NIV",
+        "GAL.4.NIV",
+        "GAL.5.NIV",
+        "GAL.6.NIV",
+        "ACT.15.1-21.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 319,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/319",
+      "sha256": "bcc1e84446d3720e43fdc97ab2565ee386b407e7b27d8f02db3ace5b6268bed2",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ACT.15.22-41.NIV",
+        "ACT.16.NIV",
+        "ACT.17.1-15.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 320,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/320",
+      "sha256": "cb6e6977125d9e841ac425072a5d3a597172c8e66d1bb341afb965fcf9c3ddf9",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ACT.17.16-34.NIV",
+        "ACT.18.1-3.NIV",
+        "1TH.1.NIV",
+        "1TH.2.NIV",
+        "1TH.3.NIV",
+        "1TH.4.NIV",
+        "1TH.5.1-11.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 321,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/321",
+      "sha256": "69561fe5bf165850342f23f832cbd271bd69ccf7af7ab54fcc7bd571bf488e05",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1TH.5.12-28.NIV",
+        "2TH.1.NIV",
+        "2TH.2.NIV",
+        "2TH.3.NIV",
+        "ACT.18.4-23.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 322,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/322",
+      "sha256": "4a7e59912eafdde2fa6ac576ddfa380baea2c807446d35b2af68c1a8e4763575",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ACT.18.24-28.NIV",
+        "ACT.19.1-20.NIV",
+        "1CO.1.NIV",
+        "1CO.2.NIV",
+        "1CO.3.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 323,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/323",
+      "sha256": "30fafc941346bf75d26cc6e2923d37fff4018c1e26c56bcf94c3e01a87f83d55",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1CO.4.NIV",
+        "1CO.5.NIV",
+        "1CO.6.NIV",
+        "1CO.7.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 324,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/324",
+      "sha256": "7a8638318a98ebdf6c1ce77e9bc6bd46187813dc96840bf79b52ddc5046a15bd",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1CO.8.NIV",
+        "1CO.9.NIV",
+        "1CO.10.NIV",
+        "1CO.11.1.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 325,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/325",
+      "sha256": "c5608591931fa73572f5254afaf8d0e04c4eb53f5a4e6045a639af6b8ab32e3d",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1CO.11.2-34.NIV",
+        "1CO.12.NIV",
+        "1CO.13.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 326,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/326",
+      "sha256": "499fc0b51201dbc0c2f13d91f7ff0cb1044486913801163a56e213089a44b073",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1CO.14.NIV",
+        "1CO.15.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 327,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/327",
+      "sha256": "7b73213c21718f9a4b124f4ef1e96aee66d4223e22d108ae7bdbbca929cfc274",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1CO.16.NIV",
+        "ACT.19.21-41.NIV",
+        "ACT.20.1-6.NIV",
+        "ROM.1.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 328,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/328",
+      "sha256": "02b70a7019776d968c06b3c3fbae8fb31eee96095d85aa8f2e7dd12ecc77b250",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ROM.2.NIV",
+        "ROM.3.NIV",
+        "ROM.4.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 329,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/329",
+      "sha256": "06b81a9f992d9d3bdb7facda836574a735c4bba30e5617c2cf0f5a7fefb01dd1",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ROM.5.NIV",
+        "ROM.6.NIV",
+        "ROM.7.NIV",
+        "ROM.8.1-17.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 330,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/330",
+      "sha256": "5c1cdfafec3a3a01e4736418ef575122cb234a129b24172e95916340db0f7e8d",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ROM.8.18-39.NIV",
+        "ROM.9.NIV",
+        "ROM.10.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 331,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/331",
+      "sha256": "0f7cacef15949545a8a90d758cc092f07f2d2cdb249d1033609b732d0b2131d5",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ROM.11.NIV",
+        "ROM.12.NIV",
+        "ROM.13.NIV",
+        "ROM.14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 332,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/332",
+      "sha256": "0d2daa0a3c76bcd610abcc69dab7e21e249af7150b4728c8f7a1dea7e3c67933",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ROM.15.NIV",
+        "ROM.16.NIV",
+        "2CO.1.NIV",
+        "2CO.2.1-4.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 333,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/333",
+      "sha256": "9c8f0a55321322ce0ae42e568ad98a9887fd7467a0de0bdf4517552523efe06a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2CO.2.5-17.NIV",
+        "2CO.3.NIV",
+        "2CO.4.NIV",
+        "2CO.5.NIV",
+        "2CO.6.1-13.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 334,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/334",
+      "sha256": "69e8eea8f7da75c6e5f7af6c88ecb410d03f74a6608d6ae3d606ff48356ce8f1",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2CO.6.14-18.NIV",
+        "2CO.7.NIV",
+        "2CO.8.NIV",
+        "2CO.9.NIV",
+        "2CO.10.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 335,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/335",
+      "sha256": "262cd4467b6b200b33e2bce0f1cf8d44485d14233d416fb7ccc6f54d5a2a873d",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2CO.11.NIV",
+        "2CO.12.NIV",
+        "2CO.13.NIV",
+        "ACT.20.7-12.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 336,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/336",
+      "sha256": "a3a5cc7521a3ce441ef7d56b2ff22d8d036a5c750dfba8ae60f30894abbaf7b2",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ACT.20.13-38.NIV",
+        "ACT.21.1-36.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 337,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/337",
+      "sha256": "9dc84b2b8b040025233ee6c53b01ff827a7d0a82d91e90e505d3ba6b48b4e3b2",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ACT.21.37-40.NIV",
+        "ACT.22.NIV",
+        "ACT.23.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 338,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/338",
+      "sha256": "b6cb9807abb8df4c779b171c24d187aa4e8959b0fa18209ee481897aa448e0f6",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ACT.24.NIV",
+        "ACT.25.NIV",
+        "ACT.26.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 339,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/339",
+      "sha256": "664cf3f010e04bf00f881e57efaa2f443c1f12bd4967d12f1ebe84ee74f8a9e9",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ACT.27.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 340,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/340",
+      "sha256": "cef49937ebb28e2c761acc3485e31a696a39910e46954cfdb2dcc475b52d4db2",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "ACT.28.NIV",
+        "EPH.1.NIV",
+        "EPH.2.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 341,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/341",
+      "sha256": "530f89054b8d12c8bf7c29efb1d9dab369594449a98d9bcc8d8ca6ebe288ad13",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EPH.3.NIV",
+        "EPH.4.NIV",
+        "EPH.5.1-14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 342,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/342",
+      "sha256": "d91ec3048afec71df295fd81bd951d50d6c9aa267d7ca1ac744c91c0e95b39a0",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "EPH.5.15-33.NIV",
+        "EPH.6.NIV",
+        "COL.1.1-23.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 343,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/343",
+      "sha256": "1e5d10e7e4c18a416eaa624739fb55e7456bef0767eb81392b7972622d8fd3f5",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "COL.1.24-29.NIV",
+        "COL.2.NIV",
+        "COL.3.NIV",
+        "COL.4.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 344,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/344",
+      "sha256": "3172f9f9c09a9bd4e08dcfff73c9e95654d9c7c165ccfc84eefad265badd85c2",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PHM.1.NIV",
+        "PHP.1.NIV",
+        "PHP.2.1-11.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 345,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/345",
+      "sha256": "2280c7defb4361937cc28d8534f4068c39df493feb7cdb08c8412d4cc2e9921d",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "PHP.2.12-30.NIV",
+        "PHP.3.NIV",
+        "PHP.4.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 346,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/346",
+      "sha256": "f50ea5932dc29099dc8284cdd505d66000a3504a1c4cd41afcf83dedb61932f7",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JAS.1.NIV",
+        "JAS.2.NIV",
+        "JAS.3.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 347,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/347",
+      "sha256": "c8a7af7aef25f85aa80891066025d1ea6ff4e5c8c2c308dc2fa973243cccf938",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JAS.4.NIV",
+        "JAS.5.NIV",
+        "1TI.1.NIV",
+        "1TI.2.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 348,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/348",
+      "sha256": "790ceb59ebf96ed1ba4e9ff6fccf0d01cdbbe86e0d331abf9f43cde7fb38f058",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1TI.3.NIV",
+        "1TI.4.NIV",
+        "1TI.5.NIV",
+        "1TI.6.1-10.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 349,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/349",
+      "sha256": "1a28035aefc102dbc21beb355c2d8d30363aa7347e41c978161f065a8bbd6e37",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1TI.6.11-21.NIV",
+        "TIT.1.NIV",
+        "TIT.2.NIV",
+        "TIT.3.NIV",
+        "2TI.1.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 350,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/350",
+      "sha256": "18d31903733ff3411e57d7db2aaa86ee11616b9f27d14899c0afd46941bb65a4",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2TI.2.NIV",
+        "2TI.3.NIV",
+        "2TI.4.1-18.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 351,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/351",
+      "sha256": "ead83a983b0e12e2ba7644033a7d29123ed6fead48bc7a04aff27a8032f8c8fb",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "2TI.4.19-22.NIV",
+        "HEB.1.NIV",
+        "HEB.2.NIV",
+        "HEB.3.NIV",
+        "HEB.4.1-13.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 352,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/352",
+      "sha256": "4db6473f23481ae71a476a35b241e68201210f288549c3f0fd1ac55ccc371543",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "HEB.4.14-16.NIV",
+        "HEB.5.NIV",
+        "HEB.6.NIV",
+        "HEB.7.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 353,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/353",
+      "sha256": "65d29b88fede0d6fb9803811cfdc6a8adbf19f6102161288d712ad1ab1f71bb3",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "HEB.8.NIV",
+        "HEB.9.NIV",
+        "HEB.10.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 354,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/354",
+      "sha256": "7872fd8c752e68275cfe490838ca9c4b07437097a2ab574e001e8905775ccb44",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "HEB.11.NIV",
+        "HEB.12.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 355,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/355",
+      "sha256": "7aa91f83d929b9a3b23fad5cc4b6183a024aeb042772ea614cd07aac009d1718",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "HEB.13.NIV",
+        "1PE.1.NIV",
+        "1PE.2.1-3.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 356,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/356",
+      "sha256": "46b992512a31a91637be41a62525bcc5ad1201d5a7f676a142a9155e8ad45301",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1PE.2.4-25.NIV",
+        "1PE.3.NIV",
+        "1PE.4.NIV",
+        "1PE.5.1-11.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 357,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/357",
+      "sha256": "6e8b9457632d68f6fb48e25039887a773cbdca24c0e93cec3cdf180d66ccee89",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1PE.5.12-14.NIV",
+        "2PE.1.NIV",
+        "2PE.2.NIV",
+        "2PE.3.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 358,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/358",
+      "sha256": "74efffa413878f5ea1fd9588dff8d67cc3f6a7fcf4e2039f8ef92423773f4064",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1JN.1.NIV",
+        "1JN.2.NIV",
+        "1JN.3.NIV",
+        "1JN.4.1-6.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 359,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/359",
+      "sha256": "8dd548cce63d57af0b0222dc8135abcb961da1129d1812edcadc12ea3dfef62a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "1JN.4.7-21.NIV",
+        "1JN.5.NIV",
+        "2JN.1.NIV",
+        "3JN.1.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 360,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/360",
+      "sha256": "dfdb942451ea1944566767fad4f4a0a5850cdf2c032d2c63ee40a49bc39795c0",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "JUD.1.NIV",
+        "REV.1.NIV",
+        "REV.2.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 361,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/361",
+      "sha256": "92705f735569cc62596a7a77c3e8a9689fc85c295cddd57e96d06b6bc16da88a",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "REV.3.NIV",
+        "REV.4.NIV",
+        "REV.5.NIV",
+        "REV.6.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 362,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/362",
+      "sha256": "49a53350d3f1bd0f1bd1ebd3b10b81ab3b43d1faaf12724cbbd17da0422adcd5",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "REV.7.NIV",
+        "REV.8.NIV",
+        "REV.9.NIV",
+        "REV.10.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 363,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/363",
+      "sha256": "de01b7a018e2b478618a336399e6abe309f54b80cfb1564fc0299c8d1ff7d455",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "REV.11.NIV",
+        "REV.12.NIV",
+        "REV.13.NIV",
+        "REV.14.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 364,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/364",
+      "sha256": "d570885e6e6f8a956aa296673c6d896fa7968cc932099f925da33ec459c4f3ce",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "REV.15.NIV",
+        "REV.16.NIV",
+        "REV.17.NIV",
+        "REV.18.NIV"
+      ],
+      "media": []
+    },
+    {
+      "day": 365,
+      "url": "https://www.bible.com/reading-plans/10819-the-one-year-chronological-bible/day/365",
+      "sha256": "096b7eb97b11b70ee061755b0b86b911ec3eb4692c95ffe75c66a1a17fe2cda0",
+      "html": "<div class=\"prose dark:prose-invert\"></div>",
+      "references": [
+        "REV.19.NIV",
+        "REV.20.NIV",
+        "REV.21.NIV",
+        "REV.22.NIV"
+      ],
+      "media": []
+    }
+  ]
+}

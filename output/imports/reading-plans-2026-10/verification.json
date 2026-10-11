@@ -1,0 +1,167 @@
+{
+  "projectId": "bible-strong-app",
+  "verifiedAt": "2026-10-11T15:34:18.445788+00:00",
+  "sha256": "99a3b418918a470db241ebbd205a3356d6ded774b959a0676b6e9021cccbee00",
+  "documents": [
+    {
+      "path": "plans/tyndale-chronological-bible-en",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/01",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/02",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/03",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/04",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/05",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/06",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/07",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/08",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/09",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/10",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/11",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/12",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/13",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/14",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/15",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/16",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/17",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/18",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-en/plan-sections/19",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/01",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/02",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/03",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/04",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/05",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/06",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/07",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/08",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/09",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/10",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/11",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/12",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/13",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/14",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/15",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/16",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/17",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/18",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    },
+    {
+      "path": "plans/tyndale-chronological-bible-fr/plan-sections/19",
+      "updateTime": "2026-10-11T15:34:08.581005Z"
+    }
+  ]
+}

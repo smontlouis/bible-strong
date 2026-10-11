@@ -1,4 +1,6 @@
-# Reading plans: September 2026 additions
+# Reading plans
+
+## September 2026 additions
 
 Authoring tools for the eight BibleProject plans selected by the user and six original
 chapter-per-day Bible Strong plans. Publisher reuse rights were explicitly confirmed by
@@ -14,7 +16,7 @@ The Lord's Prayer and Sermon on the Mount have no French plan edition located in
 publisher's French catalog. Do not classify English content as French merely because the
 YouVersion interface is translated. These two plans remain English only.
 
-## Reproduce
+### Reproduce
 
 ```sh
 python3 -m venv /tmp/bible-plans-venv
@@ -43,6 +45,25 @@ New catalog records carry explicit `kind`, `type: reading-plan`, and `duration` 
 Bible Strong cover PNGs are small inline data URLs, so no external asset publication is
 needed. BibleProject covers use the publisher's original image URLs.
 
+## October 2026 addition: the chronological plan
+
+One concept, two language editions, 730 reading days: « The One Year Chronological Bible »,
+the schedule Tyndale House Publishers offers on YouVersion (plan 10819). Requested by a
+reader on 2026-10-11 and added on the owner's go the same day.
+
+The source has no devotional text: each day is a list of Scripture references, 1,756 in
+all. The English edition keeps the publisher's title and description. No French publisher
+edition was located, so the French edition is the same schedule with a translated title,
+description, and day labels. Both use the publisher's cover image URL.
+
+Consecutive whole chapters of one book are stored as one chapter range (Genesis 1, 2, 3
+becomes Genesis 1-3); the reading order is unchanged. Every reference was checked against
+the app's Bible structure, and the schedule covers all 1,189 chapters.
+
+The collector was a one-off and is not kept in the repository. The record of the release is
+`output/imports/reading-plans-2026-10/`: source URLs and hashes, the 40 Firestore documents,
+the validation summary, the publication receipt, and its verification.
+
 ## Existing delivery path
 
 Reading plans currently use Firestore `plans/{id}` and `plan-sections/{sectionId}`,
@@ -50,13 +71,17 @@ not the versioned Resource Delivery catalog for Bible/lexicon/dictionary content
 Authoring here only produces documents. The root release tool owns publication:
 
 ```sh
-python3 scripts/publish-reading-plans.py preflight
-python3 scripts/publish-reading-plans.py publish
-python3 scripts/publish-reading-plans.py verify
+python3 scripts/publish-reading-plans.py preflight [release]
+python3 scripts/publish-reading-plans.py publish [release]
+python3 scripts/publish-reading-plans.py verify [release]
 ```
 
-The target is explicitly `bible-strong-app` / `(default)`. The release creates 72 documents
-in a single atomic commit, each with an `exists: false` precondition. It never overwrites
-existing plans or user progress. `catalog-before.json` records the previous public catalog;
+`release` is a folder of `output/imports/` and defaults to `reading-plans-2026-09`. The
+target is explicitly `bible-strong-app` / `(default)`. A release creates all its documents
+(72 in September) in a single atomic commit, each with an `exists: false` precondition. It
+never overwrites existing plans or user progress. `catalog-before.json` records the previous public catalog;
 `receipt.json` and `verification.json` prove actual publication. Never blindly retry after
 an uncertain commit: run verify and inspect the receipt first.
+
+A 401 means the Firebase CLI access token has expired; any CLI command, such as
+`firebase projects:list`, renews it.

@@ -1,0 +1,20 @@
+{
+  "projectId": "bible-strong-app",
+  "plans": 2,
+  "concepts": 1,
+  "days": 730,
+  "documents": 40,
+  "sha256": "99a3b418918a470db241ebbd205a3356d6ded774b959a0676b6e9021cccbee00",
+  "editions": [
+    {
+      "id": "tyndale-chronological-bible-en",
+      "days": 365,
+      "source": "https://www.bible.com/reading-plans/10819"
+    },
+    {
+      "id": "tyndale-chronological-bible-fr",
+      "days": 365,
+      "source": "https://www.bible.com/reading-plans/10819"
+    }
+  ]
+}
