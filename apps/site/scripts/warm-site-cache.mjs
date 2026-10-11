@@ -245,7 +245,8 @@ const request = async item => {
   // A page requested again to check, and rendered again: its first render was not kept.
   const dropped = item.pass === 'verify' && answer.kind === 'rendered'
   const signal = dropped ? 'incomplete' : signalOf(answer)
-  answeredBy ??= response.headers['x-vercel-id']?.split('::').slice(0, 2).join(' → ')
+  // The data centre that answered, which a Cloudflare ray names after its dash.
+  answeredBy ??= response.headers['cf-ray']?.split('-')[1]
 
   const record = {
     path: item.path,

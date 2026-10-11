@@ -1,0 +1,33 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  // The public site, as a Worker (ADR-0083). Deployed by Cloudflare from `master`.
+  "name": "bible-strong-site",
+  "main": "src/server.ts",
+  "compatibility_date": "2026-08-19",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": true,
+  "routes": [
+    // A second address, to check a deployment before the domain of the site is given to it.
+    { "pattern": "next.bible-strong.app", "custom_domain": true },
+  ],
+  // The public files and the browser build, answered by Cloudflare without running the
+  // Worker; the Worker reads the fonts of the share images there too.
+  // A public file is answered under the name it has, as it was on the previous host.
+  "assets": { "binding": "ASSETS", "html_handling": "none" },
+  // The deployment being run: each one has its own page cache.
+  "version_metadata": { "binding": "CF_VERSION_METADATA" },
+  "services": [
+    // Pages are rendered from the Resource API, asked without leaving Cloudflare.
+    // On a development machine the binding reaches the deployed API, as the site always has.
+    { "binding": "RESOURCE_API", "service": "bible-strong-resources-api", "remote": true },
+  ],
+  // Crawlers ask for most of the pages: one request in twenty is logged, which keeps the logs
+  // within what the plan includes.
+  "observability": { "enabled": true, "head_sampling_rate": 0.05 },
+  // A page takes a few tens of milliseconds of computing and a share image about a second:
+  // anything far beyond is stopped rather than paid for.
+  "limits": { "cpu_ms": 10000 },
+  // Secrets, set with `wrangler secret put`: SHARE_CARD_SECRET (signs the address of a share
+  // image), FIREBASE_PRIVATE_KEY (reads a shared study).
+}

@@ -1,4 +1,3 @@
-import { createSign } from 'node:crypto'
 import serviceAccount from '../bible-strong-app-firebase-adminsdk-9xlwt-15ae218ba0'
 
 type FirestoreValue = {
@@ -11,7 +10,19 @@ type FirestoreDocument = { fields?: Record<string, FirestoreValue> }
 type DocumentData = Record<string, unknown>
 
 let tokenCache: { value: string; expiresAt: number } | undefined
-const encode = (value: string | Buffer) => Buffer.from(value).toString('base64url')
+const encode = (value: string | ArrayBuffer) =>
+  Buffer.from(value as string).toString('base64url')
+
+// The key of the service account, as Web Crypto reads it: the Worker the site runs as has no
+// other way to sign.
+const importSigningKey = (pem: string) =>
+  crypto.subtle.importKey(
+    'pkcs8',
+    Buffer.from(pem.replace(/-----[A-Z ]+-----|\s+/gu, ''), 'base64'),
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
 
 async function getAccessToken() {
   if (tokenCache && tokenCache.expiresAt > Date.now() + 60_000) return tokenCache.value
@@ -24,10 +35,12 @@ async function getAccessToken() {
     iat: issuedAt, exp: issuedAt + 3600,
   }))
   const unsignedToken = `${header}.${claims}`
-  const signer = createSign('RSA-SHA256')
-  signer.update(unsignedToken)
-  signer.end()
-  const assertion = `${unsignedToken}.${signer.sign(serviceAccount.privateKey, 'base64url')}`
+  const signature = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    await importSigningKey(serviceAccount.privateKey),
+    new TextEncoder().encode(unsignedToken)
+  )
+  const assertion = `${unsignedToken}.${encode(signature)}`
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion }),

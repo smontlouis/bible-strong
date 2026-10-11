@@ -25,7 +25,8 @@ export const Route = createFileRoute('/share-card/$')({
             'content-type': image.type,
             // The service keeps the image; this answer itself is not worth keeping long.
             'cache-control': 'public, max-age=0, s-maxage=3600',
-            // Loading fonts and rasteriser, laying out, drawing the pixels.
+            // Loading fonts, laying out, drawing the pixels. A Worker's clock only moves while
+            // it waits, so what is measured there is the waiting of each step, not its computing.
             'server-timing': timing,
           },
         })

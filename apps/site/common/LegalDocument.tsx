@@ -42,7 +42,7 @@ export default function LegalDocument({
         </section>
         <section aria-labelledby="hosting">
           <h2 id="hosting">{french ? 'Hébergement du site public' : 'Public website hosting'}</h2>
-          <p>Vercel Inc. — <a href="https://vercel.com/legal">vercel.com</a></p>
+          <p>Cloudflare, Inc. — <a href="https://www.cloudflare.com/">cloudflare.com</a></p>
         </section>
         {content.sections.map(section => (
           <section key={section.id} aria-labelledby={section.id}>

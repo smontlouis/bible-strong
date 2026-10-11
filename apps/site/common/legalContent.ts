@@ -47,13 +47,12 @@ export const privacyContent: Record<Locale, LegalDocumentContent> = {
       },
       {
         id: 'providers', title: 'Qui peut recevoir les données',
-        paragraphs: ['Le Studio 316 et les prestataires nécessaires aux fonctions utilisées peuvent recevoir les données correspondantes : Google Firebase pour le compte, la synchronisation, la mesure d’utilisation et la protection contre les abus ; Sentry pour les erreurs ; Cloudflare pour la distribution des ressources, les services de recherche et leurs statistiques ; Vercel pour l’hébergement du site public ; les prestataires de paiement et, lors de l’utilisation de l’assistant, Gloo et les fournisseurs de modèles sollicités pour le traitement IA.', 'Sur l’application web, Firebase App Check utilise reCAPTCHA Enterprise pour protéger les accès aux ressources contre les abus. Certains prestataires peuvent traiter des données hors de l’Espace économique européen. Vous pouvez nous demander des précisions sur les destinataires, lieux de traitement et garanties applicables à votre utilisation.'],
+        paragraphs: ['Le Studio 316 et les prestataires nécessaires aux fonctions utilisées peuvent recevoir les données correspondantes : Google Firebase pour le compte, la synchronisation, la mesure d’utilisation et la protection contre les abus ; Sentry pour les erreurs ; Cloudflare pour l’hébergement du site public, la distribution des ressources, les services de recherche et leurs statistiques ; les prestataires de paiement et, lors de l’utilisation de l’assistant, Gloo et les fournisseurs de modèles sollicités pour le traitement IA.', 'Sur l’application web, Firebase App Check utilise reCAPTCHA Enterprise pour protéger les accès aux ressources contre les abus. Certains prestataires peuvent traiter des données hors de l’Espace économique européen. Vous pouvez nous demander des précisions sur les destinataires, lieux de traitement et garanties applicables à votre utilisation.'],
         links: [
           { label: 'Confidentialité et sécurité de Firebase', href: 'https://firebase.google.com/support/privacy' },
           { label: 'Confidentialité de Google', href: 'https://policies.google.com/privacy' },
           { label: 'Confidentialité de Sentry', href: 'https://sentry.io/privacy/' },
           { label: 'Confidentialité de Cloudflare', href: 'https://www.cloudflare.com/privacypolicy/' },
-          { label: 'Confidentialité de Vercel', href: 'https://vercel.com/legal/privacy-notice' },
           { label: 'Conditions de Gloo AI Studio', href: 'https://gloo.com/legal/ai-studio-supplemental-terms-of-service' },
           { label: 'Protection des données chez Gloo', href: 'https://gloo.com/legal/data-processing-agreement' },
           { label: 'Confidentialité de Stripe', href: 'https://stripe.com/privacy' },
@@ -112,13 +111,12 @@ export const privacyContent: Record<Locale, LegalDocumentContent> = {
       },
       {
         id: 'providers', title: 'Who may receive data',
-        paragraphs: ['Le Studio 316 and the providers needed for the features you use may receive the corresponding data: Google Firebase for accounts, synchronization, usage measurement and abuse protection; Sentry for errors; Cloudflare for resource delivery, search services and their statistics; Vercel for hosting the public website; payment providers; and Gloo and the model providers invoked when you use the assistant.', 'In the web application, Firebase App Check uses reCAPTCHA Enterprise to protect resource access against abuse. Some providers may process data outside the European Economic Area. You can ask us about recipients, processing locations and safeguards applicable to your use.'],
+        paragraphs: ['Le Studio 316 and the providers needed for the features you use may receive the corresponding data: Google Firebase for accounts, synchronization, usage measurement and abuse protection; Sentry for errors; Cloudflare for hosting the public website, resource delivery, search services and their statistics; payment providers; and Gloo and the model providers invoked when you use the assistant.', 'In the web application, Firebase App Check uses reCAPTCHA Enterprise to protect resource access against abuse. Some providers may process data outside the European Economic Area. You can ask us about recipients, processing locations and safeguards applicable to your use.'],
         links: [
           { label: 'Firebase privacy and security', href: 'https://firebase.google.com/support/privacy' },
           { label: 'Google privacy policy', href: 'https://policies.google.com/privacy' },
           { label: 'Sentry privacy policy', href: 'https://sentry.io/privacy/' },
           { label: 'Cloudflare privacy policy', href: 'https://www.cloudflare.com/privacypolicy/' },
-          { label: 'Vercel privacy notice', href: 'https://vercel.com/legal/privacy-notice' },
           { label: 'Gloo AI Studio terms', href: 'https://gloo.com/legal/ai-studio-supplemental-terms-of-service' },
           { label: 'Gloo data processing agreement', href: 'https://gloo.com/legal/data-processing-agreement' },
           { label: 'Stripe privacy policy', href: 'https://stripe.com/privacy' },

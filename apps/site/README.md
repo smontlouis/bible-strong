@@ -28,11 +28,22 @@ The shadcn/ui components live in `components/ui`; theme variables, fonts, and gl
 
 ## Deployment
 
-The build produces a Nitro server in `.output/server` and public assets in `.output/public`. `vercel.json` selects the TanStack Start adapter on Vercel.
+The site runs as a Cloudflare Worker, `bible-strong-site` (ADR-0083, `wrangler.jsonc`). The build writes the Worker to `dist/server` and the public files to `dist/client`; `vite dev` and `vite preview` run it in the Workers runtime too. Cloudflare builds and deploys it from `master`. By hand:
+
+```bash
+yarn workspace @bible-strong/site deploy
+```
+
+- **Public files** (`public/`, the browser build) are answered by Cloudflare without running the Worker. `public/_headers` sets their headers.
+- **Pages** are kept by the Worker itself, in the cache of the data centre it runs in, for the `s-maxage` each answers with (`features/resources/pageCache.ts`). A deployment starts with an empty cache. Every answer says `X-Page-Cache: HIT` or `MISS`.
+- **The Resource API** is asked through a binding (`RESOURCE_API`); on a development machine the binding reaches the deployed API, which needs `wrangler login`.
+- **Share images** are drawn by the Worker. The layout library cannot start in a Worker as it is published; `bundling/satoriForWorkers.ts` rewrites it as it is bundled, and fails the build if a release moves what it rewrites.
+- **Secrets** are set with `wrangler secret put`: `SHARE_CARD_SECRET` and `FIREBASE_PRIVATE_KEY`. In development they are read from `.env.local`.
+- A library that starts a timer or asks the network when it is loaded cannot be loaded by the Worker: the animation library of the home page is replaced on the server (`bundling/animationsOnServer.ts`).
 
 ### Warming the caches after a deployment
 
-A deployment of the site empties the CDN cache of its pages, and a deployment of the Resource service empties the API cache they are rendered from (its key carries the Worker version). The first reader of each page then pays for the whole render. `scripts/warm-site-cache.mjs` requests pages so that this reader is the script. Run it after the last of the deployments of the day, starting with the Worker's:
+A deployment of the site starts with an empty page cache, and a deployment of the Resource service empties the API cache they are rendered from (its key carries the Worker version). The first reader of each page then pays for the whole render. `scripts/warm-site-cache.mjs` requests pages so that this reader is the script. Both caches belong to the Cloudflare data centre that answers: a run fills the one nearest to the machine it runs on, and readers elsewhere still meet a first render. Run it after the last of the deployments of the day, starting with the Worker's:
 
 ```bash
 node apps/site/scripts/warm-site-cache.mjs --dry-run             # what would be requested, and for how long
