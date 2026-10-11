@@ -112,6 +112,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         android: {
           targetSdkVersion: 36,
           usesCleartextTraffic: true,
+          // R8 on release builds: Google Play requires 25% of the DEX code to be obfuscated.
+          enableMinifyInReleaseBuilds: true,
           extraMavenRepos: ['../../node_modules/@notifee/react-native/android/libs'],
         },
       },
