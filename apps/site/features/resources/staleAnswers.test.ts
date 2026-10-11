@@ -33,7 +33,7 @@ const request = async <Result>(handle: () => Promise<Result> | Result) => {
   return { result, headers: Object.fromEntries(headers) }
 }
 
-const DAY = 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800'
+const MONTH = 'public, max-age=0, s-maxage=2592000, stale-while-revalidate=604800'
 const MINUTE = 'public, max-age=0, s-maxage=60'
 
 /** The Resource API, answering each read with the next cache status given. */
@@ -99,7 +99,7 @@ describe('a STALE answer of the Resource API', () => {
       return resourcePageHeaders({})
     })
 
-    expect(result).toEqual({ 'Cache-Control': DAY })
+    expect(result).toEqual({ 'Cache-Control': MONTH })
     expect(headers).toEqual({})
   })
 
@@ -120,7 +120,7 @@ describe('a STALE answer of the Resource API', () => {
     const [stale, current] = await Promise.all([page('/stale'), page('/current')])
 
     expect(stale.result).toEqual({ 'Cache-Control': MINUTE, 'X-Page-Stale': '1' })
-    expect(current.result).toEqual({ 'Cache-Control': DAY })
+    expect(current.result).toEqual({ 'Cache-Control': MONTH })
   })
 
   it('does not keep a failed load, whatever was read', async () => {
@@ -147,7 +147,7 @@ describe('a STALE answer of the Resource API', () => {
     })
 
     expect(stale.result).toBe(MINUTE)
-    expect(current.result).toBe(DAY)
+    expect(current.result).toBe(MONTH)
   })
 
   it('is read without a response being built, and breaks nothing', async () => {
@@ -156,7 +156,7 @@ describe('a STALE answer of the Resource API', () => {
     expect(await readResource('/v1/bibles/LSG/coverage')).toBeDefined()
     expect(() => markResponseStale()).not.toThrow()
     expect(responseIsStale()).toBe(false)
-    expect(resourceResponseCacheControl()).toBe(DAY)
+    expect(resourceResponseCacheControl()).toBe(MONTH)
   })
 })
 
@@ -246,9 +246,9 @@ describe('instance memory', () => {
     expect(first.result.headers).toEqual({ 'Cache-Control': MINUTE, 'X-Page-Stale': '1' })
     // The next page read again: the STALE answer was not kept for its hour.
     expect(fetched).toHaveBeenCalledTimes(2)
-    expect(second.result.headers).toEqual({ 'Cache-Control': DAY })
+    expect(second.result.headers).toEqual({ 'Cache-Control': MONTH })
     // The current answer is kept, as before.
-    expect(third.result.headers).toEqual({ 'Cache-Control': DAY })
+    expect(third.result.headers).toEqual({ 'Cache-Control': MONTH })
     expect(fetched).toHaveBeenCalledTimes(2)
   })
 
@@ -277,7 +277,7 @@ describe('instance memory', () => {
     })
     // The pages that shared the read asked again and got the current answer.
     for (const { result } of shared) {
-      expect(result).toEqual({ chapters: [2], headers: { 'Cache-Control': DAY } })
+      expect(result).toEqual({ chapters: [2], headers: { 'Cache-Control': MONTH } })
     }
     expect(fetched).toHaveBeenCalledTimes(3)
   })
