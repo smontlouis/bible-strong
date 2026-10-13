@@ -8,7 +8,7 @@ import {
   BottomSheetTextInput,
   BottomSheetView,
   type BottomSheetMethods,
-} from '@expo/ui/community/bottom-sheet'
+} from '~common/vaulBottomSheet'
 import { FlashList, type FlashListProps } from '@shopify/flash-list'
 import React, { forwardRef } from 'react'
 import {

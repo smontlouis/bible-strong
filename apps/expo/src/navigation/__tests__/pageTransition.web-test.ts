@@ -2,8 +2,8 @@ import { finishPageTransition, navigateWithPageTransition } from '../pageTransit
 
 let mockPathname = '/home'
 
-jest.mock('expo-router/build/global-state/router-store', () => ({
-  store: { getRouteInfo: () => ({ pathname: mockPathname }) },
+jest.mock('../currentRouteInfo', () => ({
+  getCurrentRouteInfo: () => ({ pathname: mockPathname }),
 }))
 
 const style = { viewTransitionName: '', removeProperty: jest.fn() }

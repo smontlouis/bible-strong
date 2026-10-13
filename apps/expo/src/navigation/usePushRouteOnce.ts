@@ -1,7 +1,7 @@
 import { navigateWithPageTransition } from './pageTransition'
 import { useRouter } from 'expo-router'
 import type { HrefObject } from 'expo-router'
-import { store } from 'expo-router/build/global-state/router-store'
+import { getCurrentRouteInfo } from './currentRouteInfo'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import { normalizePublicRoute } from './publicRouteNormalization'
 import { getLanguage } from '~i18n'
@@ -50,7 +50,7 @@ export const usePushRouteOnce = () => {
       getLanguage(),
       timelineLanguage
     ) as PushRoute
-    const routeInfo = store.getRouteInfo()
+    const routeInfo = getCurrentRouteInfo()
 
     if (
       routeInfo.pathname === normalizedRoute.pathname &&

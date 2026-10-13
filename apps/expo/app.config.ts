@@ -1,6 +1,6 @@
 import { ExpoConfig, ConfigContext } from 'expo/config'
 
-const APP_VERSION = '27.2.0'
+const APP_VERSION = '28.0.0'
 // Patch releases share a runtime and receive the same OTA updates. Any native change must
 // ship in a new major or minor version, which creates a new runtime.
 const [majorVersion, minorVersion] = APP_VERSION.split('.')
@@ -31,7 +31,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   userInterfaceStyle: 'automatic',
 
   android: {
-    versionCode: 511,
+    versionCode: 512,
     package: 'com.smontlouis.biblestrong',
     googleServicesFile:
       process.env.ANDROID_GOOGLE_SERVICES_FILE ?? 'firebase/dev/google-services.json',
@@ -57,7 +57,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   ios: {
     bundleIdentifier: process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
-    buildNumber: '297',
+    buildNumber: '298',
     googleServicesFile:
       process.env.IOS_GOOGLE_SERVICES_FILE ?? './firebase/dev/GoogleService-Info.plist',
     userInterfaceStyle: 'automatic',

@@ -8,7 +8,7 @@ For what the product does and how this workspace fits in the monorepo, see the [
 
 - The root prerequisites: Node.js 22 and Yarn 4 through Corepack
 - [EAS CLI](https://docs.expo.dev/eas/) for builds
-- iOS: macOS with a version of Xcode supported by Expo SDK 57 (the deployment target is iOS 16.4)
+- iOS: macOS with a version of Xcode supported by Expo SDK 58 (the deployment target is iOS 16.4)
 - Android: Android Studio with an emulator or a physical device
 
 The app needs a custom development client. It does not run in Expo Go.
@@ -130,7 +130,7 @@ Downloadable resources follow a versioned catalog. Canonical Bibles, their Stron
 
 | Area | Technologies |
 |------|--------------|
-| Framework | Expo SDK 57, React Native 0.86, React 19 with React Compiler |
+| Framework | Expo SDK 58, React Native 0.88, React 19 with React Compiler |
 | Language | TypeScript 6 |
 | Navigation | Expo Router |
 | State | Redux Toolkit with Redux Persist on MMKV, Jotai |

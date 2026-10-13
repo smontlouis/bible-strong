@@ -6,16 +6,24 @@ type ExpoBaseModule = {
   getDOMComponentURL: (filePath: string) => string
 }
 
-const getExpoSourcePath = (relativePath: string): string => {
+// Since SDK 58 the application loads Expo's compiled files, so those are the ones the patch has
+// to change: a patch applied to `src/dom` alone would have no effect at runtime.
+const getExpoBuildPath = (relativePath: string): string => {
   const expoRoot = dirname(require.resolve('expo/package.json'))
-  return join(expoRoot, 'src/dom', relativePath)
+  return join(expoRoot, 'build/dom', relativePath)
 }
 
+const requireFromExpoBase = (id: string) =>
+  id === '../utils/getDevServer'
+    ? { default: () => ({ url: 'http://localhost:8081' }) }
+    : require(id)
+
 const loadExpoBaseModule = (): ExpoBaseModule => {
-  const sourcePath = getExpoSourcePath('base.ts')
+  const sourcePath = getExpoBuildPath('base.js')
   const source = readFileSync(sourcePath, 'utf8')
   const output = ts.transpileModule(source, {
     compilerOptions: {
+      allowJs: true,
       module: ts.ModuleKind.CommonJS,
       target: ts.ScriptTarget.ES2020,
     },
@@ -23,7 +31,11 @@ const loadExpoBaseModule = (): ExpoBaseModule => {
   }).outputText
   const loadedModule = { exports: {} as ExpoBaseModule }
 
-  new Function('require', 'module', 'exports', output)(require, loadedModule, loadedModule.exports)
+  new Function('require', 'module', 'exports', output)(
+    requireFromExpoBase,
+    loadedModule,
+    loadedModule.exports
+  )
 
   return loadedModule.exports
 }
@@ -92,7 +104,7 @@ describe('Expo DOM runtime patch', () => {
   })
 
   it('loads WebViews through the exact DOM component URL resolver', () => {
-    const wrapperSource = readFileSync(getExpoSourcePath('webview-wrapper.tsx'), 'utf8')
+    const wrapperSource = readFileSync(getExpoBuildPath('webview-wrapper.js'), 'utf8')
 
     expect(wrapperSource).toContain('overrideUri ?? getDOMComponentURL(filePath)')
   })

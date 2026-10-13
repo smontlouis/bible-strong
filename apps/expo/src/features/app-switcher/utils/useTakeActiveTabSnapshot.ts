@@ -1,4 +1,5 @@
-import { InteractionManager, type View } from 'react-native'
+import { type View } from 'react-native'
+import { runAfterInteractions } from '~helpers/runAfterInteractions'
 import produceDraft from 'immer'
 import { useSetAtom } from 'jotai/react'
 import { captureRef } from 'react-native-view-shot'
@@ -55,7 +56,7 @@ const useTakeActiveTabSnapshot = () => {
    * to avoid competing with post-animation settling.
    */
   const captureDeferredSnapshot = (activeTabIndex: number, activeAtomId: string) => {
-    InteractionManager.runAfterInteractions(() => {
+    runAfterInteractions(() => {
       captureSnapshot(activeTabIndex, activeAtomId)
     })
   }

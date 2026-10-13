@@ -1,6 +1,6 @@
 import { getDefaultStore } from 'jotai'
 import { useCallback } from 'react'
-import { InteractionManager } from 'react-native'
+import { runAfterInteractions } from '~helpers/runAfterInteractions'
 import { tabsAtom } from '../../../state/tabs'
 import { useTabAnimations } from './useTabAnimations'
 
@@ -9,7 +9,7 @@ export const useSlideNewTab = () => {
 
   const triggerSlideNewTab = useCallback(
     (tabId: string) => {
-      InteractionManager.runAfterInteractions(() => {
+      runAfterInteractions(() => {
         const tabs = getDefaultStore().get(tabsAtom)
         const index = tabs.findIndex(tab => tab.id === tabId)
         if (index >= 0) slideToIndex(index)

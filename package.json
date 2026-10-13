@@ -109,14 +109,14 @@
     "resources:dictionaries:test": "yarn workspace @bible-strong/resource-studio dictionaries:test"
   },
   "resolutions": {
-    "react-native-svg": "15.15.4",
-    "react-native-screens@npm:^4.26.0": "patch:react-native-screens@npm%3A4.26.2#~/.yarn/patches/react-native-screens-npm-4.26.2-175183263a.patch",
+    "react-native-svg": "15.15.5",
+    "react-native-screens@npm:^4.28.0": "patch:react-native-screens@npm%3A4.28.0#~/.yarn/patches/react-native-screens-npm-4.28.0-aa2df335cc.patch",
+    "react-native-screens@npm:^4.28.0 || ^5.0.0-alpha.3": "patch:react-native-screens@npm%3A4.28.0#~/.yarn/patches/react-native-screens-npm-4.28.0-aa2df335cc.patch",
     "rn-fetch-blob@npm:^0.12.0": "patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch",
-    "@expo/cli@npm:^57.0.27": "patch:@expo/cli@npm%3A57.0.27#~/.yarn/patches/@expo-cli-npm-57.0.27-1eabb5057f.patch",
+    "@expo/cli@npm:^58.1.6": "patch:@expo/cli@npm%3A58.1.6#~/.yarn/patches/@expo-cli-npm-58.1.6-0613cfde40.patch",
     "@react-native-masked-view/masked-view@npm:^0.3.2": "patch:@react-native-masked-view/masked-view@npm%3A0.3.2#~/.yarn/patches/@react-native-masked-view-masked-view-npm-0.3.2-7e49df0087.patch",
-    "@expo/ui@npm:^57.0.21": "patch:@expo/ui@npm%3A57.0.21#~/.yarn/patches/@expo-ui-npm-57.0.21-a82134c04e.patch",
     "vaul@npm:^1.1.2": "patch:vaul@npm%3A1.1.2#~/.yarn/patches/vaul-npm-1.1.2-7a571c1ad6.patch",
-    "metro": "patch:metro@npm%3A0.84.5#~/.yarn/patches/metro-npm-0.84.5-9aabe2ab0f.patch",
-    "metro-runtime": "patch:metro-runtime@npm%3A0.84.5#~/.yarn/patches/metro-runtime-npm-0.84.5-e3e8c081e8.patch"
+    "metro": "patch:metro@npm%3A0.87.1#~/.yarn/patches/metro-npm-0.87.1-df856b146b.patch",
+    "metro-runtime": "patch:metro-runtime@npm%3A0.87.1#~/.yarn/patches/metro-runtime-npm-0.87.1-3b7e80ac3a.patch"
   }
 }
