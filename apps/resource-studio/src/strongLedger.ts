@@ -445,6 +445,8 @@ export interface StrongEnginePolicy {
   articleDeterminers: boolean;
   /** Untranslated words of the witnesses are established from weaker context. */
   witnessEmptyContexts: boolean;
+  /** A number written in digits carries every number of its value, beyond the per-word limit. */
+  digitNumberStrongs: boolean;
 }
 
 export const DEFAULT_ENGINE_POLICY: Readonly<StrongEnginePolicy> = {
@@ -467,7 +469,9 @@ export const DEFAULT_ENGINE_POLICY: Readonly<StrongEnginePolicy> = {
   properNameVariants: true,
   lexicalGapFill: true,
   articleDeterminers: true,
-  witnessEmptyContexts: true
+  witnessEmptyContexts: true,
+  // T: measured on the comparison sample only (ten S21 words, none lost).
+  digitNumberStrongs: true
 };
 
 export function resolveEnginePolicy(
@@ -527,7 +531,8 @@ function readerPolicyWithEngine(
       ...(engine.cliticHosts ? { cliticHosts: true } : {}),
       ...(engine.openingConjunctions ? { openingConjunctions: true } : {}),
       ...(locutionLexicon ? { locutionLexicon } : {}),
-      ...(engine.numeralValues ? { numeralValues: true } : {})
+      ...(engine.numeralValues ? { numeralValues: true } : {}),
+      ...(engine.digitNumberStrongs ? { digitNumberStrongs: true } : {})
     }
   };
 }
@@ -648,6 +653,7 @@ export const STRONG_LEDGER_PIPELINE_SOURCES = [
   "src/strongReaderText.ts",
   "src/render.ts",
   "src/stepOriginals.ts",
+  "src/stepReference.ts",
   "src/strongCsv.ts",
   "src/strongDictionaryLexicon.ts",
   "src/strongLedger.ts",
@@ -2406,6 +2412,7 @@ export function applyCompoundTargetWordsToLedger(options: {
     | "compoundTargetWords"
     | "readingInvariantVariants"
     | "strongIdentifierFamilies"
+    | "digitNumberStrongs"
   >;
   /** The translation profile's limit of numbers per reader word. */
   maxStrongPerWord: number;
@@ -2426,7 +2433,8 @@ export function applyCompoundTargetWordsToLedger(options: {
           strongIdentifierFamilies:
             options.enginePolicy.strongIdentifierFamilies
         },
-        maxStrongPerWord: options.maxStrongPerWord
+        maxStrongPerWord: options.maxStrongPerWord,
+        digitNumberStrongs: options.enginePolicy.digitNumberStrongs
       }).length
     ) {
       refreshLedgerVerse(verse);

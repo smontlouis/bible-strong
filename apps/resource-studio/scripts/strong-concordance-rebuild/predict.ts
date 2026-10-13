@@ -59,7 +59,8 @@ export const POLICY_LABELS: Record<keyof StrongEnginePolicy, string> = {
   properNameVariants: "P",
   lexicalGapFill: "Q",
   articleDeterminers: "R",
-  witnessEmptyContexts: "S"
+  witnessEmptyContexts: "S",
+  digitNumberStrongs: "T"
 };
 
 export function policyFromLabels(labels: string[]): EnginePolicy {

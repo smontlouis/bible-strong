@@ -150,6 +150,13 @@ générateur canonique les applique en revanche par défaut depuis le 1er octobr
   du témoin portée ailleurs dans le verset, début de verset, voisins
   adjacents), avec son ancre.
 
+- `T` `digitNumberStrongs` : un nombre écrit en chiffres (« 6800 »,
+  « 144'000 ») porte tous les numéros de sa valeur, au-delà de la limite de
+  numéros par mot du profil.
+
+`T` est active par défaut sur la seule foi de l'échantillon de comparaison
+(dix mots S21, aucun perdu) : aucune réserve n'a été ouverte pour elle.
+
 `M` à `S` sont actives par défaut dans `StrongEnginePolicy` depuis leur
 confirmation sur la réserve scellée v3 (gel v7, 3 octobre 2026). `Q`, `R` et `S` sont les seules
 options qui changent le mode lecteur après la mesure de référence de la

@@ -409,12 +409,17 @@ function witnessOccurrenceMap(
  * witnesses disagree, when the target word would exceed `maxStrongPerWord`
  * numbers, or when it lies inside a phrase carrier.
  */
+/** A target word that is a number written in digits (« 6800 », « 12'000 »). */
+const DIGIT_NUMBER = /^\d[\d'’.\u00a0\u202f]*$/u;
+
 export function proposeCompoundTargetWords(input: {
   words: string[];
   units: CompoundUnit[];
   carriers: CompoundCarrier[];
   witnesses: CompoundWitness[];
   maxStrongPerWord: number;
+  /** T: a number written in digits (« 6800 ») is not held to that limit. */
+  digitNumberStrongs?: boolean;
   /** Occurrences whose state the ledger fixed (reviewed, not rendered). */
   fixedOccurrences?: ReadonlySet<string>;
 }): CompoundTargetProposal[] {
@@ -570,9 +575,13 @@ export function proposeCompoundTargetWords(input: {
     if (insidePhrase.has(wordIndex)) continue;
     const strongs = visibleStrongs.get(wordIndex) ?? new Set<string>();
     const shared = strongs.has(looseStrong(vote.strong));
-    // The profile's limit holds for every word, numbers in digits included
-    // (« 6800 » shows at most that many of its numbers).
-    if (!shared && strongs.size >= input.maxStrongPerWord) continue;
+    // The profile's limit holds for every word; a number in digits (« 6800 »)
+    // shows all the numbers of its value only under T.
+    const unlimited =
+      input.digitNumberStrongs === true &&
+      DIGIT_NUMBER.test(input.words[wordIndex] ?? "");
+    if (!shared && !unlimited && strongs.size >= input.maxStrongPerWord)
+      continue;
     strongs.add(looseStrong(vote.strong));
     visibleStrongs.set(wordIndex, strongs);
     proposals.push({
@@ -626,6 +635,7 @@ export function applyCompoundTargetWords(options: {
   units: CompoundUnit[];
   witnesses: CompoundWitness[];
   maxStrongPerWord: number;
+  digitNumberStrongs?: boolean;
 }): CompoundTargetProposal[] {
   const carriers: CompoundCarrier[] = options.annotations.flatMap(
     (annotation): CompoundCarrier[] => {
@@ -700,6 +710,7 @@ export function applyCompoundTargetWords(options: {
     carriers,
     witnesses: options.witnesses,
     maxStrongPerWord: options.maxStrongPerWord,
+    digitNumberStrongs: options.digitNumberStrongs,
     fixedOccurrences: new Set(
       [...annotated].filter((id) => !convertibleOf.has(id))
     )

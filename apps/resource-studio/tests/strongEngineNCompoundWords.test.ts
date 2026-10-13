@@ -355,7 +355,7 @@ test("the profile's limit holds for every word, numbers in digits included", () 
     unit(ref, 8, "H8083", "HC/Ncbsa"),
     unit(ref, 9, "H3967", "HNcfpa")
   ];
-  const digits = (maxStrongPerWord: number) =>
+  const digits = (maxStrongPerWord: number, digitNumberStrongs = false) =>
     proposeCompoundTargetWords({
       words: ["6800", "hommes"],
       units,
@@ -366,8 +366,11 @@ test("the profile's limit holds for every word, numbers in digits included", () 
           '<w strong="H8337 H0505 H8083 H3967" pos="6+7+8+9">6 800</w> hommes'
         )
       ],
-      maxStrongPerWord
+      maxStrongPerWord,
+      digitNumberStrongs
     });
+  // T: a number in digits shows every number of its value.
+  assert.equal(digits(3, true).length, 4);
   assert.deepEqual(
     digits(3).map((p) => [p.strong, p.wordIndex, p.carrier]),
     [

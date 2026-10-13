@@ -472,7 +472,9 @@ test("the engine enables every measured refinement by default and allows an opt-
     properNameVariants: true,
     lexicalGapFill: true,
     articleDeterminers: true,
-    witnessEmptyContexts: true
+    witnessEmptyContexts: true,
+    // T rests on the comparison sample only.
+    digitNumberStrongs: true
   };
   assert.deepEqual(resolveEnginePolicy(), {
     readingInvariantVariants: true,

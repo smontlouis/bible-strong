@@ -117,7 +117,9 @@ export function alignReaderVerse(options: {
         ? getOriginalStrongOccurrences(options.originalVerse)
         : undefined,
       witnessPositions: readerPolicy.transferMatching.witnessPositions === true,
-      maxStrongPerWord: readerPolicy.maxStrongPerWord
+      maxStrongPerWord: readerPolicy.maxStrongPerWord,
+      digitNumberStrongs:
+        readerPolicy.transferMatching.digitNumberStrongs === true
     });
   // A witness locution matched on consecutive words is one carrier.
   const phraseAssignments: ReaderPhraseAssignment[] = (

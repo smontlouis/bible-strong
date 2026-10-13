@@ -21,18 +21,13 @@ const STEP_FILES = [
 
 /** STEP rows indexed by `Book.C.V#NN` with the OSIS book used by the ledger. */
 export async function stepRows(): Promise<Map<string, string>> {
-  const { STEP_TO_OSIS_BOOK } = await import("../../src/stepOriginals.js");
+  const { parseStepReference } = await import("../../src/stepReference.js");
   const rows = new Map<string, string>();
   for (const file of STEP_FILES) {
     for (const line of (await readFile(file, "utf8")).split(/\r?\n/u)) {
-      const match =
-        /^([1-3]?[A-Za-z]{2,3})\.(\d+)\.(\d+)(?:\((\d+)\.(\d+)\))?#(\d+)=/u.exec(
-          line
-        );
-      if (!match) continue;
-      const book = STEP_TO_OSIS_BOOK.get(match[1]!);
-      if (!book) continue;
-      const key = `${book}.${Number(match[2])}.${Number(match[3])}#${Number(match[6])}`;
+      const parsed = parseStepReference(line.split("\t")[0] ?? "");
+      if (!parsed) continue;
+      const key = `${parsed.key}#${parsed.tokenIndex}`;
       if (!rows.has(key))
         rows.set(key, line.split("\t").slice(0, 6).join(" | "));
     }

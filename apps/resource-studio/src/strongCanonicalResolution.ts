@@ -572,6 +572,8 @@ export function applyCompoundTargetWordsToVerse(options: {
   policy?: CanonicalResolutionOptions;
   /** Numbers a target word may show (translation profile). */
   maxStrongPerWord: number;
+  /** T: a number written in digits is not held to that limit. */
+  digitNumberStrongs?: boolean;
 }): CompoundTargetProposal[] {
   const { verse, input } = options;
   if (!input.references.length || !input.occurrences.length) return [];
@@ -610,7 +612,8 @@ export function applyCompoundTargetWordsToVerse(options: {
           ]
         : []
     ),
-    maxStrongPerWord: options.maxStrongPerWord
+    maxStrongPerWord: options.maxStrongPerWord,
+    digitNumberStrongs: options.digitNumberStrongs
   });
 }
 

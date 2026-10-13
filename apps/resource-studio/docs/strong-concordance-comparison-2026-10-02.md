@@ -516,6 +516,35 @@ Ce que chaque option a changé sur la réserve, pour S21 :
 Q, la plus grosse option, est juste dans 95 % des cas où elle tranche. Pour
 NEG79, M (121) et N (123) font l'essentiel du gain.
 
+## Reprises de la branche Codex (13 octobre)
+
+Une branche parallèle (`codex/strong-engine-experiments-2026-10-07`) partait
+du même moteur initial. Mesurés sur les mêmes versets et face aux mêmes
+annotations, avec les mêmes témoins, les deux moteurs ont la même précision,
+mais le nôtre place davantage de mots. En accord par paire mot et numéro sur
+la réserve v3, le F1 est de 90,5 contre 86,8 pour S21 et de 97,8 contre 95,0
+pour NEG79. Deux éléments de cette branche sont repris :
+
+- **Lecteur des références STEP** (`src/stepReference.ts`) : 350 lignes du
+  Nouveau Testament portent une seconde numérotation entre crochets (KJV) ou
+  accolades (autres éditions). L'ancien lecteur les ignorait, et leurs mots
+  source manquaient au bilan. Ils y entrent désormais, sous la numérotation
+  NA.
+- **T, nombres en chiffres** (`digitNumberStrongs`) : un nombre écrit en
+  chiffres porte tous les numéros de sa valeur, au-delà de la limite de
+  numéros par mot. Le transfert de base le faisait déjà ; N et O s'arrêtaient
+  à la limite.
+
+Sur l'échantillon de comparaison, le lecteur fait entrer 13 mots source de
+S21 et 3 de NEG79, tous placés comme Concordance. T en place 10 de plus dans
+S21. Aucun placement juste n'est perdu ; S21 passe de 82,31 à 82,36 % de mots
+identiques. L'écart est trop petit pour y consacrer une réserve : ces deux
+changements reposent sur l'échantillon de comparaison seul.
+
+La réparation NEG79 de cette branche (168 espaces) n'est pas reprise : la
+restauration des sauts de ligne déjà faite ici couvre ces 168 positions et
+75 autres mots soudés.
+
 ## NBS et NFC régénérées
 
 NBS et NFC ont été régénérées en entier avec chaque moteur

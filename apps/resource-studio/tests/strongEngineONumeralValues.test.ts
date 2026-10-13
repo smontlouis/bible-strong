@@ -369,3 +369,36 @@ test("a numeral carrier shows each number once and no more than the profile allo
     ["H8337", "H3967"]
   );
 });
+
+test("under T a number in digits shows every number of its value", () => {
+  // 1Chr.12.25 « 6800 » : four numbers, one more than the profile allows.
+  const references = [
+    witness(
+      "Sg1910",
+      '<w strong="H8337" pos="6">six</w> <w strong="H0505" pos="7">mille</w> <w strong="H8083" pos="8">huit</w> <w strong="H3967" pos="9">cents</w> hommes'
+    )
+  ];
+  const withT = (digitNumberStrongs: boolean, targetText: string) =>
+    alignReaderVerse({
+      targetText,
+      references,
+      readerPolicy: {
+        ...policy(true),
+        transferMatching: {
+          ...policy(true).transferMatching,
+          ...(digitNumberStrongs ? { digitNumberStrongs: true } : {})
+        }
+      }
+    });
+  assert.deepEqual(carried(withT(false, "6800 hommes"), 0), [
+    "H8337",
+    "H0505",
+    "H8083"
+  ]);
+  assert.deepEqual(carried(withT(true, "6800 hommes"), 0), [
+    "H8337",
+    "H0505",
+    "H8083",
+    "H3967"
+  ]);
+});

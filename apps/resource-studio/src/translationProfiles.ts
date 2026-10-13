@@ -26,6 +26,8 @@ export interface TransferMatchingPolicy {
   locutionLexicon?: WitnessLocutionLexicon;
   /** A witness number matches the target word writing the same value (« 4 600 » = « 4600 »). */
   numeralValues?: boolean;
+  /** A number written in digits may show more numbers than the per-word limit. */
+  digitNumberStrongs?: boolean;
 }
 
 export interface ReaderAlignmentPolicy {

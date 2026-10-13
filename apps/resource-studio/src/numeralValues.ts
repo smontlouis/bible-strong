@@ -268,6 +268,8 @@ export function addNumeralValueCarriers(options: {
   witnessPositions?: boolean;
   /** Numbers a target word (or digit group) may show (translation profile). */
   maxStrongPerWord?: number;
+  /** T: a number written in digits shows every number of its value. */
+  digitNumberStrongs?: boolean;
 }): void {
   const { result } = options;
   const words = textWords(
@@ -414,7 +416,9 @@ export function addNumeralValueCarriers(options: {
       shownNumeralStrongs(
         values,
         heldStrongs(result, span),
-        options.maxStrongPerWord ?? Infinity
+        !target.spelledWords && options.digitNumberStrongs
+          ? Infinity
+          : (options.maxStrongPerWord ?? Infinity)
       );
     if (!target.spelledWords) {
       if (placeable(result, target, strongSet))
