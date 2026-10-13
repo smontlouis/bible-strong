@@ -2,6 +2,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useRef, useState } from 'react'
 import { TouchableOpacity } from 'react-native'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
+import { configureCarouselPan } from '~helpers/configureCarouselPan'
 import { twMerge } from '~common/ui/classNames'
 
 import PageContent from '~common/ui/PageContent'
@@ -89,9 +90,7 @@ const AlphabetList = ({ color, setLetter, letter }: AlphabetListProps) => {
             parallaxScrollingOffset: 0,
             parallaxScrollingScale: 0.75,
           }}
-          onConfigurePanGesture={gestureChain => {
-            gestureChain.activeOffsetX([-10, 10])
-          }}
+          onConfigurePanGesture={configureCarouselPan([-10, 10])}
           style={{
             width,
             justifyContent: 'center',

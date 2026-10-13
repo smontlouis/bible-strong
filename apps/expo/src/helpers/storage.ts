@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as FileSystem from 'expo-file-system/legacy'
 import { useEffect, useState } from 'react'
-import { InteractionManager } from 'react-native'
+import { runAfterInteractions } from '~helpers/runAfterInteractions'
 import { createMMKV } from 'react-native-mmkv'
 import { Storage } from 'redux-persist'
 
@@ -60,7 +60,7 @@ export const useMigrateFromAsyncStorage = () => {
 
   useEffect(() => {
     if (!hasMigratedFromAsyncStorage) {
-      InteractionManager.runAfterInteractions(async () => {
+      runAfterInteractions(async () => {
         try {
           await migrateFromAsyncStorage()
           setHasMigrated(true)
@@ -127,7 +127,7 @@ export const useMigrateFromFileSystemStorage = () => {
 
   useEffect(() => {
     if (!hasMigratedFromFileSystem) {
-      InteractionManager.runAfterInteractions(async () => {
+      runAfterInteractions(async () => {
         try {
           await migrateFromFileSystemStorage()
           setHasMigrated(true)
@@ -168,7 +168,7 @@ export const useMigrateToLanguageFolders = () => {
 
   useEffect(() => {
     if (!hasMigratedToLanguageFolders) {
-      InteractionManager.runAfterInteractions(async () => {
+      runAfterInteractions(async () => {
         try {
           // Import dynamically to avoid circular dependencies
           const { migrateToLanguageFolders } = await import('~helpers/databaseMigration')

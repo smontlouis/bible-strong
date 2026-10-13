@@ -4,6 +4,7 @@
     "strict": true,
     "module": "esnext",
     "ignoreDeprecations": "6.0",
+    "customConditions": ["react-native", "react-native-legacy-deep-imports"],
     "baseUrl": ".",
     "paths": {
       "~assets/*": ["src/assets/*"],

@@ -16,7 +16,8 @@ export default function HorizontalControlScrollView({
   const scrollRef = useRef<ScrollView>(null)
   useImperativeHandle(ref, () => scrollRef.current!, [])
   useEffect(() => {
-    setElement(scrollRef.current?.getScrollableNode() ?? null)
+    // On web the scrollable node is the DOM element, which the native typings cannot express.
+    setElement((scrollRef.current?.getScrollableNode() as HTMLElement | null | undefined) ?? null)
   }, [])
   return (
     <div style={{ position: 'relative', minWidth: 0 }}>

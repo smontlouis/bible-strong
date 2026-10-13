@@ -1,11 +1,11 @@
 diff --git a/build/src/export/exportDomComponents.js b/build/src/export/exportDomComponents.js
-index cee1be17099f215f9a5e8c3010dc5dae14d79999..16160bfeb047a12ba984f3f7389d3ff46c3b10fe 100644
+index b08f8fc..d8581af 100644
 --- a/build/src/export/exportDomComponents.js
 +++ b/build/src/export/exportDomComponents.js
-@@ -75,6 +75,20 @@ function _interop_require_default(obj) {
+@@ -81,6 +81,20 @@ function _interop_require_default(obj) {
+         default: obj
      };
  }
- const debug = require('debug')('expo:export:exportDomComponents');
 +function transformDomArtifactsForMd5Filename(artifacts) {
 +    const renamedArtifacts = new Map();
 +    for (const artifact of artifacts){
@@ -21,9 +21,9 @@ index cee1be17099f215f9a5e8c3010dc5dae14d79999..16160bfeb047a12ba984f3f7389d3ff4
 +    }
 +}
  async function exportDomComponentAsync({ filePath, projectRoot, dev, devServer, isHermes, includeSourceMaps, exp, files, useMd5Filename = false }) {
-     var _exp_experiments;
      const virtualEntry = (0, _resolvefrom().default)(projectRoot, 'expo/dom/entry.js');
-@@ -103,10 +117,7 @@ async function exportDomComponentAsync({ filePath, projectRoot, dev, devServer,
+     (0, _events.debugEvent)('dom:bundle', {
+@@ -110,10 +124,7 @@ async function exportDomComponentAsync({ filePath, projectRoot, dev, devServer,
          minify: true
      });
      if (useMd5Filename) {
@@ -36,10 +36,10 @@ index cee1be17099f215f9a5e8c3010dc5dae14d79999..16160bfeb047a12ba984f3f7389d3ff4
      const html = await (0, _serializeHtml.serializeHtmlWithAssets)({
          isExporting: true,
 diff --git a/build/src/start/server/middleware/DomComponentsMiddleware.js b/build/src/start/server/middleware/DomComponentsMiddleware.js
-index 9354bedfc84d53efd54e089ad3e9e23c4d026123..06c74c525a0aaa933089044625e3edece8517efc 100644
+index 30ec488..8f89a52 100644
 --- a/build/src/start/server/middleware/DomComponentsMiddleware.js
 +++ b/build/src/start/server/middleware/DomComponentsMiddleware.js
-@@ -132,13 +132,22 @@ function getDomComponentHtml(src, { title } = {}) {
+@@ -137,13 +137,22 @@ function getDomComponentHtml(src, { title } = {}) {
          <script>${_domPolyfills.DOM_POLYFILLS_SCRIPT}</script>
          <script>
            var injectedObject = {};

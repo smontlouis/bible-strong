@@ -16,8 +16,8 @@ jest.mock('react-native-mmkv', () => {
   }
   return { createMMKV: () => backend }
 })
-jest.mock('react-native', () => ({
-  InteractionManager: { runAfterInteractions: jest.fn() },
+jest.mock('../runAfterInteractions', () => ({
+  runAfterInteractions: jest.fn(),
 }))
 jest.mock('expo-file-system/legacy', () => ({
   documentDirectory: 'file:///documents/',

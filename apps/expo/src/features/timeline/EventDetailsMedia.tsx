@@ -2,6 +2,7 @@ import { Image } from 'expo-image'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import Carousel from 'react-native-reanimated-carousel'
+import { configureCarouselPan } from '~helpers/configureCarouselPan'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -78,9 +79,7 @@ const Media = ({
                 </Paragraph>
               </Box>
             )}
-            onConfigurePanGesture={gestureChain => {
-              gestureChain.activeOffsetX([-10, 10])
-            }}
+            onConfigurePanGesture={configureCarouselPan([-10, 10])}
             style={{
               width: sliderWidth,
               height: imageWidth + 60,

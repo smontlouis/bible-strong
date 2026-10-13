@@ -7,7 +7,8 @@ import * as Sentry from '@sentry/react-native'
 import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { InteractionManager, Platform } from 'react-native'
+import { Platform } from 'react-native'
+import { runAfterInteractions } from '~helpers/runAfterInteractions'
 import { RootSiblingParent } from 'react-native-root-siblings'
 import { useKeepAwake } from 'expo-keep-awake'
 import TrackPlayer from 'react-native-track-player'
@@ -68,7 +69,7 @@ const DeferredModals = () => {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    const handle = InteractionManager.runAfterInteractions(() => setMounted(true))
+    const handle = runAfterInteractions(() => setMounted(true))
     return () => handle.cancel()
   }, [])
 
@@ -132,7 +133,7 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
   useKeepAwake()
 
   useEffect(() => {
-    InteractionManager.runAfterInteractions(() => {
+    runAfterInteractions(() => {
       TrackPlayer.registerPlaybackService(() => PlaybackService)
     })
   }, [])

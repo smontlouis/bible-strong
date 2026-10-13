@@ -1,0 +1,330 @@
+diff --git a/build/dom/base.d.ts b/build/dom/base.d.ts
+index 6c093bb..5333b15 100644
+--- a/build/dom/base.d.ts
++++ b/build/dom/base.d.ts
+@@ -1,3 +1,7 @@
++/**
++ * Resolve a DOM component to its exact local update asset when possible.
++ */
++export declare function getDOMComponentURL(filePath: string): string;
+ /**
+  * Get the base URL for the DOM Components HTML
+  */
+diff --git a/build/dom/base.js b/build/dom/base.js
+index aa87e34..9e8b33e 100644
+--- a/build/dom/base.js
++++ b/build/dom/base.js
+@@ -1,5 +1,20 @@
+ import getDevServer from '../utils/getDevServer';
+ let cachedBaseUrl = null;
++/**
++ * Resolve a DOM component to its exact local update asset when possible.
++ * Expo Updates exposes a mix of embedded and downloaded assets on iOS, so
++ * deriving the DOM directory from an arbitrary asset is order-dependent.
++ */ export function getDOMComponentURL(filePath) {
++    const ExpoUpdates = globalThis.expo?.modules?.['ExpoUpdates'];
++    if (ExpoUpdates?.isEnabled && !ExpoUpdates.isEmbeddedLaunch) {
++        const normalizedFilePath = `/${filePath.replace(/^\/+/, '')}`;
++        const matchingAsset = Object.values(ExpoUpdates.localAssets ?? {}).find((asset)=>asset.split(/[?#]/, 1)[0].endsWith(normalizedFilePath));
++        if (matchingAsset) {
++            return matchingAsset;
++        }
++    }
++    return `${getBaseURL()}/${filePath}`;
++}
+ /**
+  * Get the base URL for the DOM Components HTML
+  */ export function getBaseURL() {
+diff --git a/build/dom/dom-entry.js b/build/dom/dom-entry.js
+index f47c31a..b5cbaaf 100644
+--- a/build/dom/dom-entry.js
++++ b/build/dom/dom-entry.js
+@@ -46,11 +46,15 @@ export function registerDOMComponent(AppModule) {
+             if (typeof window.$$EXPO_INITIAL_PROPS === 'undefined') {
+                 throw new Error('Initial props are not defined. This is a bug in the DOM Component runtime.');
+             }
++            if (window.$$EXPO_INITIAL_PROPS_PENDING) {
++                return null;
++            }
+             return window.$$EXPO_INITIAL_PROPS;
+         });
+         React.useEffect(()=>{
+             const remove = addEventListener((msg)=>{
+                 if (msg.type === '$$props') {
++                    window.$$EXPO_INITIAL_PROPS_PENDING = false;
+                     setProps(msg.data);
+                 }
+             });
+@@ -63,7 +67,7 @@ export function registerDOMComponent(AppModule) {
+             setProps
+         ]);
+         const proxyActions = React.useMemo(()=>{
+-            if (!marshalledProps.names) return {};
++            if (!marshalledProps?.names) return {};
+             // Create a named map { [name: string]: ProxyFunction }
+             // TODO(@kitten): Unclear how this is typed or shaped
+             return marshalledProps.names.reduce((acc, key)=>{
+@@ -71,8 +75,11 @@ export function registerDOMComponent(AppModule) {
+                 return acc;
+             }, {});
+         }, [
+-            marshalledProps.names
++            marshalledProps?.names
+         ]);
++        if (!marshalledProps) {
++            return null;
++        }
+         return /*#__PURE__*/ _jsx(AppModule, {
+             ...props,
+             ...marshalledProps.props || {},
+diff --git a/build/dom/webview-wrapper.js b/build/dom/webview-wrapper.js
+index 02f713b..76e473f 100644
+--- a/build/dom/webview-wrapper.js
++++ b/build/dom/webview-wrapper.js
+@@ -5,7 +5,7 @@
+ // iOS https://github.com/expo/expo/blob/main/packages/%40expo/log-box/ios/ExpoLogBoxWebViewWrapper.swift
+ import React from 'react';
+ import { AppState } from 'react-native';
+-import { getBaseURL } from './base';
++import { getDOMComponentURL } from './base';
+ import { _emitGlobalEvent } from './global-events';
+ import { DOM_READY, getInjectBodySizeObserverScript, getInjectEventScript, MATCH_CONTENTS_EVENT, NATIVE_ACTION, NATIVE_ACTION_RESULT, REGISTER_DOM_IMPERATIVE_HANDLE_PROPS } from './injection';
+ import ExpoDomWebView from './webview/ExpoDOMWebView';
+@@ -13,7 +13,7 @@ import RNWebView from './webview/RNWebView';
+ import { useDebugZeroHeight } from './webview/useDebugZeroHeight';
+ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+     const { children, dom: domProps, filePath, ref: _ref, ...marshalProps } = props;
+-    const { overrideUri, unstable_useExpoModulesBridge, ...dom } = domProps || {};
++    const { overrideUri, unstable_useExpoModulesBridge, onRenderProcessGone: onRenderProcessGoneProp, ...dom } = domProps || {};
+     const useExpoModulesBridge = unstable_useExpoModulesBridge ?? false;
+     if (__DEV__) {
+         if (children !== undefined) {
+@@ -44,7 +44,7 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+     const webviewRef = React.useRef(null);
+     const domImperativeHandlePropsRef = React.useRef([]);
+     const source = {
+-        uri: overrideUri ?? `${getBaseURL()}/${filePath}`
++        uri: overrideUri ?? getDOMComponentURL(filePath)
+     };
+     const [containerStyle, setContainerStyle] = React.useState(null);
+     const { debugZeroHeightStyle, debugOnLayout } = useDebugZeroHeight(dom);
+@@ -69,6 +69,16 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+     // Keep `initialProps` stable to prevent webview reloads when
+     // `injectedJavaScriptObject` changes.
+     const initialPropsRef = React.useRef(smartActions);
++    const initialDomGlobalsScript = React.useMemo(()=>{
++        const hostOS = JSON.stringify(process.env.EXPO_OS);
++        const initialProps = JSON.stringify(initialPropsRef.current);
++        return `;(function() {
++      window.$$EXPO_DOM_HOST_OS = ${hostOS};
++      window.$$EXPO_INITIAL_PROPS = ${initialProps};
++      window.$$EXPO_INITIAL_PROPS_PENDING = false;
++    })();
++    true;`;
++    }, []);
+     // When the `marshalProps` change, emit them to the webview.
+     React.useEffect(()=>{
+         emit({
+@@ -98,7 +108,8 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+         onContentProcessDidTerminate: ()=>{
+             webviewRef.current?.reload();
+         },
+-        onRenderProcessGone: ()=>{
++        onRenderProcessGone: (event)=>{
++            onRenderProcessGoneProp?.(event);
+             // Simulate iOS `onContentProcessDidTerminate` behavior to reload when the app is in foreground or back to foreground.
+             if (AppState.currentState === 'active') {
+                 webviewRef.current?.reload();
+@@ -119,12 +130,24 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+             dom?.containerStyle
+         ],
+         onLayout: __DEV__ ? debugOnLayout : dom?.onLayout,
++        onLoad: (event)=>{
++            dom?.onLoad?.(event);
++            emit({
++                type: '$$props',
++                data: smartActions
++            });
++        },
+         injectedJavaScriptObject: {
+             // Inject the top-most OS for the DOM component to read.
+             EXPO_DOM_HOST_OS: process.env.EXPO_OS,
+             // Inject the initial props
+             initialProps: initialPropsRef.current
+         },
++        injectedJavaScriptBeforeContentLoaded: [
++            initialDomGlobalsScript,
++            dom?.injectedJavaScriptBeforeContentLoaded,
++            'true;'
++        ].filter(Boolean).join('\n'),
+         injectedJavaScript: [
+             dom?.matchContents ? getInjectBodySizeObserverScript() : null,
+             dom?.injectedJavaScript,
+diff --git a/src/dom/base.ts b/src/dom/base.ts
+index e53e872..bc2d315 100644
+--- a/src/dom/base.ts
++++ b/src/dom/base.ts
+@@ -1,6 +1,27 @@
+ import getDevServer from '../utils/getDevServer';
+ 
+ let cachedBaseUrl: string | null = null;
++/**
++ * Resolve a DOM component to its exact local update asset when possible.
++ * Expo Updates exposes a mix of embedded and downloaded assets on iOS, so
++ * deriving the DOM directory from an arbitrary asset is order-dependent.
++ */
++export function getDOMComponentURL(filePath: string): string {
++  const ExpoUpdates = globalThis.expo?.modules?.['ExpoUpdates'] as
++    | import('expo-updates').ExpoUpdatesModule
++    | undefined;
++  if (ExpoUpdates?.isEnabled && !ExpoUpdates.isEmbeddedLaunch) {
++    const normalizedFilePath = `/${filePath.replace(/^\/+/, '')}`;
++    const matchingAsset = Object.values(ExpoUpdates.localAssets ?? {}).find((asset) =>
++      asset.split(/[?#]/, 1)[0].endsWith(normalizedFilePath)
++    );
++    if (matchingAsset) {
++      return matchingAsset;
++    }
++  }
++  return `${getBaseURL()}/${filePath}`;
++}
++
+ 
+ /**
+  * Get the base URL for the DOM Components HTML
+diff --git a/src/dom/dom-entry.tsx b/src/dom/dom-entry.tsx
+index b77612d..23f2140 100644
+--- a/src/dom/dom-entry.tsx
++++ b/src/dom/dom-entry.tsx
+@@ -66,18 +66,22 @@ export function registerDOMComponent(AppModule: any) {
+ 
+   function DOMComponentRoot(props: Record<string, unknown>) {
+     // Props listeners
+-    const [marshalledProps, setProps] = React.useState(() => {
++    const [marshalledProps, setProps] = React.useState<MarshalledProps | null>(() => {
+       if (typeof window.$$EXPO_INITIAL_PROPS === 'undefined') {
+         throw new Error(
+           'Initial props are not defined. This is a bug in the DOM Component runtime.'
+         );
+       }
++      if ((window as any).$$EXPO_INITIAL_PROPS_PENDING) {
++        return null;
++      }
+       return window.$$EXPO_INITIAL_PROPS;
+     });
+ 
+     React.useEffect(() => {
+       const remove = addEventListener!((msg) => {
+         if (msg.type === '$$props') {
++          (window as any).$$EXPO_INITIAL_PROPS_PENDING = false;
+           setProps(msg.data as MarshalledProps);
+         }
+       });
+@@ -89,14 +93,18 @@ export function registerDOMComponent(AppModule: any) {
+     }, [setProps]);
+ 
+     const proxyActions = React.useMemo(() => {
+-      if (!marshalledProps.names) return {};
++      if (!marshalledProps?.names) return {};
+       // Create a named map { [name: string]: ProxyFunction }
+       // TODO(@kitten): Unclear how this is typed or shaped
+       return marshalledProps.names.reduce((acc: Record<string, any>, key: string) => {
+         acc[key] = ACTIONS[key];
+         return acc;
+       }, {});
+-    }, [marshalledProps.names]);
++    }, [marshalledProps?.names]);
++
++    if (!marshalledProps) {
++      return null;
++    }
+ 
+     return <AppModule {...props} {...(marshalledProps.props || {})} {...proxyActions} />;
+   }
+diff --git a/src/dom/webview-wrapper.tsx b/src/dom/webview-wrapper.tsx
+index c9d79a4..bd90b4c 100644
+--- a/src/dom/webview-wrapper.tsx
++++ b/src/dom/webview-wrapper.tsx
+@@ -6,7 +6,7 @@
+ import React from 'react';
+ import { AppState } from 'react-native';
+ 
+-import { getBaseURL } from './base';
++import { getDOMComponentURL } from './base';
+ import type { DOMPropsInternal } from './dom-internal.types';
+ import type { BridgeMessage, WebViewProps, WebViewRef } from './dom.types';
+ import { _emitGlobalEvent } from './global-events';
+@@ -35,7 +35,12 @@ interface Props {
+ 
+ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+   const { children, dom: domProps, filePath, ref: _ref, ...marshalProps } = props as Props;
+-  const { overrideUri, unstable_useExpoModulesBridge, ...dom } = domProps || {};
++  const {
++    overrideUri,
++    unstable_useExpoModulesBridge,
++    onRenderProcessGone: onRenderProcessGoneProp,
++    ...dom
++  } = domProps || {};
+   const useExpoModulesBridge = unstable_useExpoModulesBridge ?? false;
+   if (__DEV__) {
+     if (children !== undefined) {
+@@ -74,7 +79,7 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+   const webView = resolveWebView(useExpoDOMWebView);
+   const webviewRef = React.useRef<WebViewRef>(null);
+   const domImperativeHandlePropsRef = React.useRef<string[]>([]);
+-  const source = { uri: overrideUri ?? `${getBaseURL()}/${filePath}` };
++  const source = { uri: overrideUri ?? getDOMComponentURL(filePath) };
+   const [containerStyle, setContainerStyle] = React.useState<WebViewProps['containerStyle']>(null);
+ 
+   const { debugZeroHeightStyle, debugOnLayout } = useDebugZeroHeight(dom);
+@@ -107,6 +112,16 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+   // Keep `initialProps` stable to prevent webview reloads when
+   // `injectedJavaScriptObject` changes.
+   const initialPropsRef = React.useRef(smartActions);
++  const initialDomGlobalsScript = React.useMemo(() => {
++    const hostOS = JSON.stringify(process.env.EXPO_OS);
++    const initialProps = JSON.stringify(initialPropsRef.current);
++    return `;(function() {
++      window.$$EXPO_DOM_HOST_OS = ${hostOS};
++      window.$$EXPO_INITIAL_PROPS = ${initialProps};
++      window.$$EXPO_INITIAL_PROPS_PENDING = false;
++    })();
++    true;`;
++  }, []);
+ 
+   // When the `marshalProps` change, emit them to the webview.
+   React.useEffect(() => {
+@@ -130,7 +145,8 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+     onContentProcessDidTerminate: () => {
+       webviewRef.current?.reload();
+     },
+-    onRenderProcessGone: () => {
++    onRenderProcessGone: (event: any) => {
++      onRenderProcessGoneProp?.(event);
+       // Simulate iOS `onContentProcessDidTerminate` behavior to reload when the app is in foreground or back to foreground.
+       if (AppState.currentState === 'active') {
+         webviewRef.current?.reload();
+@@ -145,12 +161,23 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+     ...(useExpoDOMWebView ? { useExpoModulesBridge } : null),
+     containerStyle: [containerStyle, debugZeroHeightStyle, dom?.containerStyle],
+     onLayout: (__DEV__ ? debugOnLayout : dom?.onLayout) as RawWebViewProps['onLayout'],
++    onLoad: (event: any) => {
++      dom?.onLoad?.(event);
++      emit({ type: '$$props', data: smartActions });
++    },
+     injectedJavaScriptObject: {
+       // Inject the top-most OS for the DOM component to read.
+       EXPO_DOM_HOST_OS: process.env.EXPO_OS,
+       // Inject the initial props
+       initialProps: initialPropsRef.current,
+     },
++    injectedJavaScriptBeforeContentLoaded: [
++      initialDomGlobalsScript,
++      dom?.injectedJavaScriptBeforeContentLoaded,
++      'true;',
++    ]
++      .filter(Boolean)
++      .join('\n'),
+     injectedJavaScript: [
+       dom?.matchContents ? getInjectBodySizeObserverScript() : null,
+       dom?.injectedJavaScript,

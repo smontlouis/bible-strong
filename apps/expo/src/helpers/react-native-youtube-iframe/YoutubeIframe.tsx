@@ -79,7 +79,9 @@ const YoutubeIframe = (
   }: YoutubeIframeProps,
   ref: React.Ref<YoutubeIframeRef>
 ) => {
-  const webViewRef = useRef<WebView>(null)
+  // react-native-webview 14 defaults the extra-props parameter to `undefined`, which collapses the
+  // props of a bare `WebView` ref type to `never`.
+  const webViewRef = useRef<WebView<object>>(null)
   const [eventEmitter] = useState(() => new EventEmitter())
   const [playerReady, setPlayerReady] = useState(false)
 

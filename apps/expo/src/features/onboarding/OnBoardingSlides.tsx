@@ -3,6 +3,7 @@ import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { Image } from 'react-native'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
+import { configureCarouselPan } from '~helpers/configureCarouselPan'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
@@ -74,9 +75,7 @@ const OnBoardingSlides = ({
           data={slides}
           loop={false}
           scrollAnimationDuration={400}
-          onConfigurePanGesture={gestureChain => {
-            gestureChain.activeOffsetX([-3, 3])
-          }}
+          onConfigurePanGesture={configureCarouselPan([-3, 3])}
           modeConfig={{
             opacityInterval: 0.8,
             scaleInterval: 0,

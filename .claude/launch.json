@@ -77,6 +77,16 @@
         "3212"
       ],
       "port": 3212
+    },
+    {
+      "name": "expo-web",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": [
+        "workspace",
+        "@bible-strong/expo",
+        "web"
+      ],
+      "port": 9090
     }
   ]
 }

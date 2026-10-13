@@ -8,6 +8,10 @@ const FIREBASE_INITIALIZATION = `// @generated begin bible-strong-firebase-app-c
     RNFBAppCheckModule.sharedInstance()
     FirebaseApp.configure()
 // @generated end bible-strong-firebase-app-check`
+const INITIALIZATION_POINTS = [
+  '    window = UIWindow(frame: UIScreen.main.bounds)',
+  '    reactNativeFactory = factory',
+]
 
 const normalizeFirebaseInitialization = contents => {
   const withoutGeneratedFirebaseBlocks = contents
@@ -24,14 +28,18 @@ const normalizeFirebaseInitialization = contents => {
       ''
     )
 
-  const windowInitialization = '    window = UIWindow(frame: UIScreen.main.bounds)'
-  if (!withoutGeneratedFirebaseBlocks.includes(windowInitialization)) {
+  // Since SDK 58 the window is created by SceneDelegate, so the app delegate no longer has the
+  // window line. Firebase still has to be configured here, before the scene starts React Native.
+  const initializationPoint = INITIALIZATION_POINTS.find(point =>
+    withoutGeneratedFirebaseBlocks.includes(point)
+  )
+  if (!initializationPoint) {
     throw new Error('FIREBASE_APP_CHECK_SWIFT_INITIALIZATION_POINT_MISSING')
   }
 
   return withoutGeneratedFirebaseBlocks.replace(
-    windowInitialization,
-    `${windowInitialization}\n${FIREBASE_INITIALIZATION}`
+    initializationPoint,
+    `${initializationPoint}\n${FIREBASE_INITIALIZATION}`
   )
 }
 

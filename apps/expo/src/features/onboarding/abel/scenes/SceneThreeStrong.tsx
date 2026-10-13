@@ -7,6 +7,7 @@ import type { TFunction } from 'i18next'
 import { useState } from 'react'
 import { ActivityIndicator, Pressable } from 'react-native'
 import Carousel, { Pagination, type TAnimationStyle } from 'react-native-reanimated-carousel'
+import { configureCarouselPan } from '~helpers/configureCarouselPan'
 import { Extrapolation, interpolate, type SharedValue } from 'react-native-reanimated'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -320,9 +321,7 @@ const StrongCardStack = ({
       customAnimation={horizontalStackAnimation}
       onProgressChange={carouselProgress}
       withAnimation={{ type: 'spring', config: {} }}
-      onConfigurePanGesture={gesture => {
-        gesture.activeOffsetX([-10, 10])
-      }}
+      onConfigurePanGesture={configureCarouselPan([-10, 10])}
       style={{ width: cardWidth, height: cardHeight, overflow: 'visible' }}
       contentContainerStyle={{ overflow: 'visible' }}
       onSnapToItem={index => onIndexChange(index === 0 ? 0 : 1)}
