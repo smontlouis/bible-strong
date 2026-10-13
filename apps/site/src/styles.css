@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@import '../lib/firebase-ui-auth.css';
 @import '../lib/quill/quill.css';
 @import '../lib/quill/strong.css';
 @import '../lib/quill/verse.css';

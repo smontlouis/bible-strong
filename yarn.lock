@@ -2813,7 +2813,6 @@ __metadata:
     copy-to-clipboard: "npm:^3.3.3"
     date-fns: "npm:^2.29.3"
     firebase: "npm:^8.1.1"
-    firebaseui: "npm:^4.7.1"
     framer-motion: "npm:^11.0.3"
     gsap: "npm:^3.15.0"
     harfbuzzjs: "npm:0.10.0"
@@ -18232,13 +18231,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dialog-polyfill@npm:^0.4.7":
-  version: 0.4.10
-  resolution: "dialog-polyfill@npm:0.4.10"
-  checksum: 10c0/6c91bd23086303e5ee45b59ab0736436b7486a1985a3f1a560ae5495f41cc44f6b4e19333f0c3c18a6f0bffb7712d82b9107e313de5e7140ef4645b81f6fd088
-  languageName: node
-  linkType: hard
-
 "dicer@npm:0.2.5":
   version: 0.2.5
   resolution: "dicer@npm:0.2.5"
@@ -21156,18 +21148,6 @@ __metadata:
     "@firebase/storage": "npm:0.7.1"
     "@firebase/util": "npm:1.3.0"
   checksum: 10c0/45dd3c84b0f190e01446fe92071e4e49a4880d14d64420942b2bc190f0e2441bbc38c0450dea13acceef8c3481a697f7b9f483209b43d5dda463e60ebb822d8a
-  languageName: node
-  linkType: hard
-
-"firebaseui@npm:^4.7.1":
-  version: 4.8.1
-  resolution: "firebaseui@npm:4.8.1"
-  dependencies:
-    dialog-polyfill: "npm:^0.4.7"
-    material-design-lite: "npm:^1.2.0"
-  peerDependencies:
-    firebase: ">=8.2.4"
-  checksum: 10c0/a8c4d063f75741e7b4b54a84da6f310c431f8b390eaeed988fe31893dc981615e302ec0c1eea43407b74fa638d5c3ca44d2d93e874d3171a976c2c0cea70d36b
   languageName: node
   linkType: hard
 
@@ -25517,13 +25497,6 @@ __metadata:
     "@types/minimatch": "npm:^3.0.3"
     minimatch: "npm:^3.0.2"
   checksum: 10c0/409aad220000e2041672f900883ec66ffdd04814b133b428a8d35e055495fc09bb9024ca6ad7a63ebe6ed9e480e01db02c3edf3587ae1ba2627727a3d896ff96
-  languageName: node
-  linkType: hard
-
-"material-design-lite@npm:^1.2.0":
-  version: 1.3.0
-  resolution: "material-design-lite@npm:1.3.0"
-  checksum: 10c0/cbe7c9c540a23f3913fddfa292ae5df607441cc47353bafe90bce8d279ba47e3e881548db30a44f1fddbabba9b2c51a8bd6a06c866a99725e8cdd5dd10978b5d
   languageName: node
   linkType: hard
 
