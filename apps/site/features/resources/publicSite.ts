@@ -33,10 +33,15 @@ const fontPreload = (href: string) => ({
   crossOrigin: 'anonymous' as const,
 })
 
-/** Fonts of the first screen of a reading page, declared `optional` in resource-pages.css. */
+/**
+ * Fonts of the first screen of a reading page, declared `optional` in resource-pages.css.
+ * Every weight a reading page is set in is here: a browser draws an optional face only when
+ * it is there at the first paint, and a weight left out would be drawn in the system font.
+ */
 export const RESOURCE_FONT_PRELOADS = [
   '/fonts/Literata-Book-latin-greek.woff2',
   pulpDisplay('Regular'),
+  pulpDisplay('Medium'),
   pulpDisplay('Semi Bold'),
 ].map(fontPreload)
 
