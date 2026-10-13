@@ -545,6 +545,25 @@ La réparation NEG79 de cette branche (168 espaces) n'est pas reprise : la
 restauration des sauts de ligne déjà faite ici couvre ces 168 positions et
 75 autres mots soudés.
 
+Son panneau d'incertitude par verset est repris dans le visualiseur Studio.
+Il liste les mots source sans lien établi et, pour chacun, la place estimée :
+avant le mot qui traduit le mot source suivant, ou sur le mot qui l'affiche
+déjà quand seule la lecture reste ouverte. Les index se préparent depuis une
+génération :
+
+```sh
+yarn exec tsx scripts/prepareStrongCandidateViewer.ts outputs/strong-autonomous/v8 nbs,s21
+```
+
+NFC n'y entre pas : l'index du visualiseur n'accepte que les 66 livres.
+
+Avec ce moteur (`outputs/strong-autonomous/v8`), S21 est générée en entier
+pour la première fois, sans jamais lire ses annotations : 367 871 mots source
+placés sur 441 653, 5 722 établis non traduits et 68 060 incertains (15,4 %).
+La candidate S21 de l'autre branche en laissait 92 741 incertains (21,0 %).
+NBS passe à 368 659 placés et 67 596 incertains (15,3 %) ; NFC à 284 884 et
+153 306 (34,7 %). Le générateur autonome ne connaît pas NEG79.
+
 ## NBS et NFC régénérées
 
 NBS et NFC ont été régénérées en entier avec chaque moteur
