@@ -78,7 +78,7 @@ index f47c31a..b5cbaaf 100644
              ...props,
              ...marshalledProps.props || {},
 diff --git a/build/dom/webview-wrapper.js b/build/dom/webview-wrapper.js
-index 02f713b..0391938 100644
+index 02f713b..76e473f 100644
 --- a/build/dom/webview-wrapper.js
 +++ b/build/dom/webview-wrapper.js
 @@ -5,7 +5,7 @@
@@ -90,6 +90,15 @@ index 02f713b..0391938 100644
  import { _emitGlobalEvent } from './global-events';
  import { DOM_READY, getInjectBodySizeObserverScript, getInjectEventScript, MATCH_CONTENTS_EVENT, NATIVE_ACTION, NATIVE_ACTION_RESULT, REGISTER_DOM_IMPERATIVE_HANDLE_PROPS } from './injection';
  import ExpoDomWebView from './webview/ExpoDOMWebView';
+@@ -13,7 +13,7 @@ import RNWebView from './webview/RNWebView';
+ import { useDebugZeroHeight } from './webview/useDebugZeroHeight';
+ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+     const { children, dom: domProps, filePath, ref: _ref, ...marshalProps } = props;
+-    const { overrideUri, unstable_useExpoModulesBridge, ...dom } = domProps || {};
++    const { overrideUri, unstable_useExpoModulesBridge, onRenderProcessGone: onRenderProcessGoneProp, ...dom } = domProps || {};
+     const useExpoModulesBridge = unstable_useExpoModulesBridge ?? false;
+     if (__DEV__) {
+         if (children !== undefined) {
 @@ -44,7 +44,7 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
      const webviewRef = React.useRef(null);
      const domImperativeHandlePropsRef = React.useRef([]);
@@ -116,7 +125,17 @@ index 02f713b..0391938 100644
      // When the `marshalProps` change, emit them to the webview.
      React.useEffect(()=>{
          emit({
-@@ -119,12 +129,24 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+@@ -98,7 +108,8 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+         onContentProcessDidTerminate: ()=>{
+             webviewRef.current?.reload();
+         },
+-        onRenderProcessGone: ()=>{
++        onRenderProcessGone: (event)=>{
++            onRenderProcessGoneProp?.(event);
+             // Simulate iOS `onContentProcessDidTerminate` behavior to reload when the app is in foreground or back to foreground.
+             if (AppState.currentState === 'active') {
+                 webviewRef.current?.reload();
+@@ -119,12 +130,24 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
              dom?.containerStyle
          ],
          onLayout: __DEV__ ? debugOnLayout : dom?.onLayout,
@@ -223,7 +242,7 @@ index b77612d..23f2140 100644
      return <AppModule {...props} {...(marshalledProps.props || {})} {...proxyActions} />;
    }
 diff --git a/src/dom/webview-wrapper.tsx b/src/dom/webview-wrapper.tsx
-index c9d79a4..868ff56 100644
+index c9d79a4..bd90b4c 100644
 --- a/src/dom/webview-wrapper.tsx
 +++ b/src/dom/webview-wrapper.tsx
 @@ -6,7 +6,7 @@
@@ -235,7 +254,21 @@ index c9d79a4..868ff56 100644
  import type { DOMPropsInternal } from './dom-internal.types';
  import type { BridgeMessage, WebViewProps, WebViewRef } from './dom.types';
  import { _emitGlobalEvent } from './global-events';
-@@ -74,7 +74,7 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+@@ -35,7 +35,12 @@ interface Props {
+ 
+ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+   const { children, dom: domProps, filePath, ref: _ref, ...marshalProps } = props as Props;
+-  const { overrideUri, unstable_useExpoModulesBridge, ...dom } = domProps || {};
++  const {
++    overrideUri,
++    unstable_useExpoModulesBridge,
++    onRenderProcessGone: onRenderProcessGoneProp,
++    ...dom
++  } = domProps || {};
+   const useExpoModulesBridge = unstable_useExpoModulesBridge ?? false;
+   if (__DEV__) {
+     if (children !== undefined) {
+@@ -74,7 +79,7 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
    const webView = resolveWebView(useExpoDOMWebView);
    const webviewRef = React.useRef<WebViewRef>(null);
    const domImperativeHandlePropsRef = React.useRef<string[]>([]);
@@ -244,7 +277,7 @@ index c9d79a4..868ff56 100644
    const [containerStyle, setContainerStyle] = React.useState<WebViewProps['containerStyle']>(null);
  
    const { debugZeroHeightStyle, debugOnLayout } = useDebugZeroHeight(dom);
-@@ -107,6 +107,16 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+@@ -107,6 +112,16 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
    // Keep `initialProps` stable to prevent webview reloads when
    // `injectedJavaScriptObject` changes.
    const initialPropsRef = React.useRef(smartActions);
@@ -261,7 +294,17 @@ index c9d79a4..868ff56 100644
  
    // When the `marshalProps` change, emit them to the webview.
    React.useEffect(() => {
-@@ -145,12 +155,23 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+@@ -130,7 +145,8 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+     onContentProcessDidTerminate: () => {
+       webviewRef.current?.reload();
+     },
+-    onRenderProcessGone: () => {
++    onRenderProcessGone: (event: any) => {
++      onRenderProcessGoneProp?.(event);
+       // Simulate iOS `onContentProcessDidTerminate` behavior to reload when the app is in foreground or back to foreground.
+       if (AppState.currentState === 'active') {
+         webviewRef.current?.reload();
+@@ -145,12 +161,23 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
      ...(useExpoDOMWebView ? { useExpoModulesBridge } : null),
      containerStyle: [containerStyle, debugZeroHeightStyle, dom?.containerStyle],
      onLayout: (__DEV__ ? debugOnLayout : dom?.onLayout) as RawWebViewProps['onLayout'],
