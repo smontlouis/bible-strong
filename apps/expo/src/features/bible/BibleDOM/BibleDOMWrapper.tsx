@@ -19,7 +19,7 @@ import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { Linking, Platform, useWindowDimensions, type ViewStyle } from 'react-native'
+import { AppState, Linking, Platform, useWindowDimensions, type ViewStyle } from 'react-native'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
@@ -1148,6 +1148,19 @@ export const BibleDOMWrapper = ({
             }),
           },
           injectedJavaScriptBeforeContentLoaded: DOM_WEBVIEW_INITIAL_SCRIPT,
+          // Android only. Expo still reloads the WebView after this handler runs.
+          onRenderProcessGone: ({ nativeEvent }) => {
+            appLogger.captureError(
+              'webview',
+              'bible_dom.render_process_gone',
+              new Error('BIBLE_DOM_RENDER_PROCESS_GONE'),
+              {
+                errorCode: nativeEvent.didCrash ? 'RENDERER_CRASHED' : 'RENDERER_KILLED',
+                appLifecycle: AppState.currentState,
+                isDOMMounted,
+              }
+            )
+          },
         }}
         verses={versesToSend}
         parallelVerses={parallelVerses}
