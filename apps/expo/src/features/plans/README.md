@@ -40,6 +40,28 @@ les paramètres de navigation ; le choix du verset du jour reste toujours visibl
 - Calcul du pourcentage d'avancement
 - Possibilité de réinitialiser un plan
 
+### Éléments d'un jour
+
+Un jour de plan n'a pas de page à lui. La page du plan liste les éléments du jour
+sélectionné, chacun avec une case lu / non lu et un chevron :
+
+- un **passage** (`Chapter`, `Verse`) ouvre le lecteur Bible en **mode plan** : l'en-tête
+  nomme le passage, les sélecteurs de livre, chapitre et verset sont absents, et la
+  navigation entre chapitres reste dans le passage. La croix de l'en-tête quitte le mode
+  plan et rend le lecteur libre ;
+- un **texte**, une **image** ou une **vidéo** ouvre sa propre page (`/plan-entity`) ;
+- un **titre** sert d'intertitre dans la liste.
+
+Ouvrir un élément le marque comme lu ; la case permet de le faire à la main. Le jour est
+terminé quand tous ses éléments sont lus, et redevient non terminé si l'un d'eux est
+décoché. Marquer le jour entier, comme lu ou non lu, s'applique à tous ses éléments.
+
+La progression par élément est dans `OngoingPlan.entitySlices` (identifiants des éléments
+lus, par jour non terminé). Le statut du jour dans `readingSlices` reste la référence : un
+jour `Completed` vaut tous ses éléments lus, donc la progression antérieure est intacte.
+
+L'ancienne route d'un jour (`/plan-slice`) ouvre la page du plan sur ce jour.
+
 ### Types de contenu
 - **Chapitres bibliques** : Livres entiers ou sections
 - **Versets spécifiques** : Passages ciblés
@@ -56,8 +78,8 @@ plans/
 ├── Screens/
 │   ├── MyPlanListScreen      # Liste des plans de l'utilisateur
 │   ├── ExploreScreen         # Découverte de nouveaux plans
-│   ├── PlanScreen            # Détail d'un plan avec sections
-│   ├── PlanSliceScreen       # Lecture immersive d'une tranche
+│   ├── PlanScreen            # Détail d'un plan, jour par jour
+│   ├── PlanEntityScreen      # Page d'un texte, d'une image ou d'une vidéo
 │   └── PlanSelectScreen      # Sélection d'un plan
 ├── Components/
 │   ├── Slice                 # Composant abstrait de rendu
@@ -143,12 +165,12 @@ await dispatch(fetchPlan(planId))
 ### Marquer une lecture comme complétée
 
 ```typescript
-dispatch(markAsRead({
-  planId: plan.id,
-  sectionId: section.id,
-  readingSliceId: readingSlice.id,
-  status: 'Completed'
-}))
+// Un jour entier (bascule lu / non lu)
+dispatch(markAsRead({ planId: plan.id, readingSliceId: readingSlice.id }))
+
+// Un élément du jour
+dispatch(markEntitySliceAsRead({ planId, readingSliceId, entitySliceId }))
+dispatch(markEntitySliceAsUnread({ planId, readingSliceId, entitySliceId }))
 ```
 
 ### Réinitialiser un plan

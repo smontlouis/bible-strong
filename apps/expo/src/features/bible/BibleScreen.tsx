@@ -45,6 +45,8 @@ export type BibleRouteInput = {
   interlinearMode?: InterlinearMode
   interlinearLocale?: ResourceLanguage
   annotationId?: string
+  /** Last chapter of a reading-plan passage starting at `chapter`; opens the reader in plan mode. */
+  planEndChapter?: number
 }
 
 type BibleScreenContentProps = BibleRouteInput
@@ -65,6 +67,7 @@ const BibleScreenContent = ({
   interlinearMode,
   interlinearLocale,
   annotationId,
+  planEndChapter,
   routeNavigation,
 }: BibleScreenContentRouteProps) => {
   const initialValues = produce(getDefaultBibleTab(version as VersionCode), draft => {
@@ -84,6 +87,12 @@ const BibleScreenContent = ({
     if (strongMode) draft.data.strongMode = strongMode
     if (interlinearMode) draft.data.interlinearMode = interlinearMode
     if (interlinearLocale) draft.data.interlinearLocale = interlinearLocale
+    if (planEndChapter && chapter)
+      draft.data.planPassage = {
+        book: draft.data.selectedBook.Numero,
+        startChapter: chapter,
+        endChapter: Math.max(chapter, planEndChapter),
+      }
   })
 
   // Always create an on-the-fly atom for this screen
@@ -120,6 +129,7 @@ export const BibleRouteScreen = ({
     interlinearMode,
     interlinearLocale,
     annotationId,
+    planEndChapter,
   } = input
   const defaultVersion = useDefaultBibleVersion()
   const resources = useResourceAccess()
@@ -183,6 +193,7 @@ export const BibleRouteScreen = ({
     interlinearMode,
     interlinearLocale,
     annotationId,
+    planEndChapter,
   ])
 
   if (isResolvingVersion) return null
@@ -204,6 +215,7 @@ export const BibleRouteScreen = ({
       interlinearMode={interlinearMode}
       interlinearLocale={interlinearLocale}
       annotationId={annotationId}
+      planEndChapter={planEndChapter}
       routeNavigation={routeNavigation}
     />
   )
@@ -241,6 +253,7 @@ const BibleScreen = () => {
     version?: string
     strongMode?: StrongMode
     annotationId?: string
+    planEndChapter?: string
   }>()
 
   // Parse params from URL strings
@@ -254,6 +267,7 @@ const BibleScreen = () => {
   const requestedVersion = params.version || undefined
   const strongMode = params.strongMode
   const annotationId = params.annotationId
+  const planEndChapter = params.planEndChapter ? Number(params.planEndChapter) : undefined
 
   return (
     <BibleRouteScreen
@@ -267,6 +281,7 @@ const BibleScreen = () => {
         version: requestedVersion || '',
         strongMode,
         annotationId,
+        planEndChapter,
       }}
     />
   )

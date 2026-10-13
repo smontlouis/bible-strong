@@ -1,8 +1,9 @@
 import { Redirect, useLocalSearchParams } from 'expo-router'
-import PlanSliceScreen from '~features/plans/PlanSliceScreen/PlanSliceScreen'
 import { useReadingContent } from '~features/daily-reading/useDailyMeditation'
 import { getEditorialKind } from '~features/plans/readingCalendar'
 import { getLegacyReadingRouteLocation } from '~features/plans/planTabState'
+
+/** A plan day has no page of its own any more: its link opens the plan on that day. */
 export default function PlanSliceRoute() {
   const params = useLocalSearchParams<{
     planId?: string
@@ -22,5 +23,12 @@ export default function PlanSliceRoute() {
         }}
       />
     )
-  return <PlanSliceScreen />
+  return (
+    <Redirect
+      href={{
+        pathname: '/plan',
+        params: { planId: id, ...(readingId ? { readingSliceId: readingId } : {}) },
+      }}
+    />
+  )
 }

@@ -12,10 +12,12 @@ import {
 } from '~helpers/firebase'
 import { RootState } from './reducer'
 import { importData, receiveLiveUpdates, USER_LOGOUT } from './user'
-import { markReadingSliceAsRead } from '~features/plans/planProgress'
+import { markReadingSliceAsRead, setEntitySliceRead } from '~features/plans/planProgress'
 import { getEditorialKind, isCivilDate } from '~features/plans/readingCalendar'
 
 type ImageModel = { [key: string]: string }
+
+type EntitySliceLocation = { planId: string; readingSliceId: string; entitySliceId: string }
 
 interface PlanModel {
   onlineStatus: Status
@@ -166,6 +168,24 @@ const planSlice = createSlice({
         readingSliceId,
       })
     },
+    markEntitySliceAsRead(state, action: PayloadAction<EntitySliceLocation>) {
+      const plan = state.myPlans.find(p => p.id === action.payload.planId)
+      state.ongoingPlans = setEntitySliceRead({
+        ongoingPlans: state.ongoingPlans,
+        plan,
+        ...action.payload,
+        read: true,
+      })
+    },
+    markEntitySliceAsUnread(state, action: PayloadAction<EntitySliceLocation>) {
+      const plan = state.myPlans.find(p => p.id === action.payload.planId)
+      state.ongoingPlans = setEntitySliceRead({
+        ongoingPlans: state.ongoingPlans,
+        plan,
+        ...action.payload,
+        read: false,
+      })
+    },
   },
   extraReducers: builder => {
     builder.addCase(fetchPlan.fulfilled, (state, action) => {
@@ -224,6 +244,8 @@ export const {
   cacheImage,
   resetPlan,
   markAsRead,
+  markEntitySliceAsRead,
+  markEntitySliceAsUnread,
   removePlan,
   addPlan,
   startPlan,

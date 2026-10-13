@@ -8,7 +8,6 @@ import { useReadingContent } from '../useDailyMeditation'
 jest.mock('expo-router', () => ({ Redirect: 'Redirect', useLocalSearchParams: jest.fn() }))
 jest.mock('../useDailyMeditation', () => ({ useReadingContent: jest.fn() }))
 jest.mock('~features/plans/PlanScreen/PlanScreen', () => 'PlanScreen')
-jest.mock('~features/plans/PlanSliceScreen/PlanSliceScreen', () => 'PlanSliceScreen')
 
 const collection: Plan = {
   id: 'book',
@@ -52,7 +51,7 @@ it('preserves the original daily date in old notification links', () => {
     params: { collectionId: 'book', date: '2024-02-29' },
   })
 })
-it('keeps reading plans on their own screens', () => {
+it('keeps a reading plan on its own screen and opens a day link on that day', () => {
   jest.mocked(useReadingContent).mockReturnValue({
     collection: { ...collection, id: 'plan', type: 'yearly' },
     isError: false,
@@ -61,5 +60,8 @@ it('keeps reading plans on their own screens', () => {
   })
   jest.mocked(useLocalSearchParams).mockReturnValue({ planId: 'plan', readingSliceId: '1' })
   expect(PlanRoute().type).toBe('PlanScreen')
-  expect(PlanSliceRoute().type).toBe('PlanSliceScreen')
+  expect(PlanSliceRoute().props.href).toEqual({
+    pathname: '/plan',
+    params: { planId: 'plan', readingSliceId: '1' },
+  })
 })

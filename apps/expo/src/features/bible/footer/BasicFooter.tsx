@@ -5,7 +5,8 @@ import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
+import { isBibleOverlayOpenAtom } from 'src/state/app'
+import { useFooterFullScreen } from './footerFullScreen'
 import Box, { AnimatedHStack, AnimatedTouchableBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -38,7 +39,7 @@ const BasicFooter = ({
   const isWide = useResponsiveWorkspace()
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
-  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
+  const isFullScreenBible = useFooterFullScreen()
   const isBibleOverlayOpen = useAtomValue(isBibleOverlayOpenAtom)
 
   const fullScreenTranslateY = isFullScreenBible ? HEADER_HEIGHT + insets.bottom + 60 : 0

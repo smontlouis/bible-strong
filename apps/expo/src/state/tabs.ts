@@ -59,6 +59,9 @@ export const getBibleContextDisplayMode = (data: {
 }): BibleContextDisplayMode =>
   data.contextDisplayMode ?? (data.isReadOnly ? 'focused' : 'fullChapter')
 
+/** A reading-plan passage: one book, from a first to a last chapter. */
+export type BiblePlanPassage = { book: number; startChapter: number; endChapter: number }
+
 export interface BibleTab extends TabBase {
   type: 'bible'
   data: {
@@ -83,6 +86,8 @@ export interface BibleTab extends TabBase {
     isSelectionMode: StudyNavigateBibleType | undefined
     contextDisplayMode?: BibleContextDisplayMode
     isReadOnly?: boolean
+    /** Plan mode: the reader stays within this passage until the reader leaves the mode. */
+    planPassage?: BiblePlanPassage
     entityReference?: {
       verseKeys: string[]
       preferredVersion?: VersionCode
@@ -1103,6 +1108,16 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     )
   }
 
+  const exitPlanMode = () =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.planPassage = undefined
+        draft.data.focusVerses = undefined
+        draft.data.contextDisplayMode = 'fullChapter'
+        draft.data.selectedVerses = {}
+      })
+    )
+
   const goToPrevChapter = (coverage?: BibleVersionCoverage) => {
     if (routeNavigation) {
       const current = getDefaultStore().get(tabAtom).data
@@ -1248,6 +1263,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     collapseContext,
     pinSelectedVerses,
     clearFocusVerses,
+    exitPlanMode,
 
     goToNextChapter,
     goToPrevChapter,

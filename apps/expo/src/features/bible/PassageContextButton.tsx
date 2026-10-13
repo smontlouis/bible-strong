@@ -23,7 +23,8 @@ export default function PassageContextButton({
   isFormSheet?: boolean
   onExpand: () => void
   onCollapse: () => void
-  onExit: () => void
+  /** Absent in plan mode, where the header carries the way out. */
+  onExit?: () => void
 }) {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
@@ -61,16 +62,18 @@ export default function PassageContextButton({
           {t(focused ? 'tab.readWholeChapter' : 'tab.closeContext')}
         </Text>
       </TouchableBox>
-      <TouchableBox
-        className="absolute right-[12px] top-0 bottom-0 w-[40px] items-center justify-center"
-        accessibilityRole="button"
-        accessibilityLabel={t('accessibility.clearFocus')}
-        onPress={onExit}
-      >
-        <Box className="w-[28px] h-[28px] bg-light-primary rounded-[12px] items-center justify-center">
-          <FeatherIcon name="x" size={15} color="primary" />
-        </Box>
-      </TouchableBox>
+      {onExit && (
+        <TouchableBox
+          className="absolute right-[12px] top-0 bottom-0 w-[40px] items-center justify-center"
+          accessibilityRole="button"
+          accessibilityLabel={t('accessibility.clearFocus')}
+          onPress={onExit}
+        >
+          <Box className="w-[28px] h-[28px] bg-light-primary rounded-[12px] items-center justify-center">
+            <FeatherIcon name="x" size={15} color="primary" />
+          </Box>
+        </TouchableBox>
+      )}
     </AnimatedBox>
   )
 }

@@ -2,6 +2,7 @@ import type {
   ComputedPlan,
   ComputedPlanItem,
   ComputedSection,
+  EntitySlice,
   OngoingPlan,
   OngoingReadingSlice,
   Plan,
@@ -87,6 +88,42 @@ export const buildComputedPlanItem = (plan: Plan, ongoingPlan?: OngoingPlan): Co
   }
 }
 
+/** What a reader opens. Titles and unknown types only structure the day. */
+export const isReadableEntitySlice = (slice: EntitySlice): boolean =>
+  ['Text', 'Image', 'Video', 'Chapter', 'Verse'].includes(slice.type ?? '')
+
+/** Older plans carry elements without an id; their place in the day identifies them. */
+export const getEntitySliceKey = (
+  readingSliceId: string,
+  slice: Pick<EntitySlice, 'id'>,
+  index: number
+): string => slice.id || `${readingSliceId}:${index}`
+
+export const getReadableEntitySliceKeys = (readingSlice: ReadingSlice): string[] =>
+  readingSlice.slices.flatMap((slice, index) =>
+    isReadableEntitySlice(slice) ? [getEntitySliceKey(readingSlice.id, slice, index)] : []
+  )
+
+/** A completed day counts as fully read, so progress recorded per day stays intact. */
+export const getReadEntitySliceKeys = (
+  readingSlice: ReadingSlice,
+  ongoingPlan?: Pick<OngoingPlan, 'readingSlices' | 'entitySlices'>
+): string[] =>
+  ongoingPlan?.readingSlices[readingSlice.id] === 'Completed'
+    ? getReadableEntitySliceKeys(readingSlice)
+    : (ongoingPlan?.entitySlices?.[readingSlice.id] ?? [])
+
+const withEntitySliceKeys = (
+  ongoingPlan: OngoingPlan,
+  readingSliceId: string,
+  keys: string[]
+): OngoingPlan => {
+  const { [readingSliceId]: _previous, ...others } = ongoingPlan.entitySlices ?? {}
+  const entitySlices = keys.length ? { ...others, [readingSliceId]: keys } : others
+  const { entitySlices: _entitySlices, ...rest } = ongoingPlan
+  return Object.keys(entitySlices).length ? { ...rest, entitySlices } : rest
+}
+
 export const areOngoingPlansEqual = (prev: OngoingPlan[], next: OngoingPlan[]): boolean => {
   if (prev.length !== next.length) return false
 
@@ -107,6 +144,13 @@ export const areOngoingPlansEqual = (prev: OngoingPlan[], next: OngoingPlan[]): 
 
     for (const [readingSliceId, status] of prevEntries) {
       if (nextPlan.readingSlices?.[readingSliceId] !== status) return false
+    }
+
+    const prevEntityEntries = Object.entries(prevPlan.entitySlices ?? {})
+    if (prevEntityEntries.length !== Object.keys(nextPlan.entitySlices ?? {}).length) return false
+
+    for (const [readingSliceId, keys] of prevEntityEntries) {
+      if (nextPlan.entitySlices?.[readingSliceId]?.join() !== keys.join()) return false
     }
   }
 
@@ -175,7 +219,57 @@ export const markReadingSliceAsRead = ({
 
   targetOngoingPlan.status = readingSlices.length === completedCount ? 'Completed' : 'Progress'
 
+  // Marking a whole day settles its elements: all read when completed, none otherwise.
+  nextOngoingPlans[targetOngoingPlanIndex] = withEntitySliceKeys(
+    targetOngoingPlan,
+    readingSliceId,
+    []
+  )
+
   return nextOngoingPlans
+}
+
+/** Reads or unreads one element; the day follows when its last element changes. */
+export const setEntitySliceRead = ({
+  ongoingPlans,
+  plan,
+  planId,
+  readingSliceId,
+  entitySliceId,
+  read,
+}: {
+  ongoingPlans: OngoingPlan[]
+  plan?: Plan
+  planId: string
+  readingSliceId: string
+  entitySliceId: string
+  read: boolean
+}): OngoingPlan[] => {
+  const readingSlice = getPlanReadingSlices(plan).find(slice => slice.id === readingSliceId)
+  const ongoingPlan = ongoingPlans.find(item => item.id === planId)
+  if (!readingSlice || !ongoingPlan || !canUpdatePlanProgress(plan, ongoingPlan))
+    return ongoingPlans
+
+  const readableKeys = getReadableEntitySliceKeys(readingSlice)
+  const previousKeys = getReadEntitySliceKeys(readingSlice, ongoingPlan)
+  if (!readableKeys.includes(entitySliceId) || previousKeys.includes(entitySliceId) === read)
+    return ongoingPlans
+
+  const nextKeys = read
+    ? [...previousKeys, entitySliceId]
+    : previousKeys.filter(key => key !== entitySliceId)
+  const wasCompleted = ongoingPlan.readingSlices[readingSliceId] === 'Completed'
+  const isCompleted = readableKeys.every(key => nextKeys.includes(key))
+  const dayUpdated =
+    wasCompleted === isCompleted
+      ? ongoingPlans
+      : markReadingSliceAsRead({ ongoingPlans, plan, planId, readingSliceId })
+
+  return dayUpdated.map(item =>
+    item.id === planId
+      ? withEntitySliceKeys(item, readingSliceId, isCompleted ? [] : nextKeys)
+      : item
+  )
 }
 
 /** Resume at the earliest gap, even when later readings are already complete. */

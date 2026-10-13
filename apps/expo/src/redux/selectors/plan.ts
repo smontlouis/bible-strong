@@ -56,19 +56,6 @@ export const getOngoingPlanByIdSelector = (id: string) => {
   return selectorCache.ongoingPlanById.get(id)!
 }
 
-// Selector factory for checking if a reading slice is completed
-export const makeIsReadSelector = () =>
-  createSelector(
-    [
-      selectOngoingPlans,
-      (_: RootState, planId: string, readingSliceId: string) => ({ planId, readingSliceId }),
-    ],
-    (ongoingPlans, { planId, readingSliceId }): boolean => {
-      const ongoingPlan = ongoingPlans.find(oP => oP.id === planId)
-      return ongoingPlan?.readingSlices[readingSliceId] === 'Completed'
-    }
-  )
-
 // Combined selector for plan and ongoing plan
 export const makePlanWithOngoingSelector = () =>
   createSelector(

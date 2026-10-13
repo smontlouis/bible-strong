@@ -3,7 +3,8 @@ import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsi
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
+import { isBibleOverlayOpenAtom } from 'src/state/app'
+import { useFooterFullScreen } from './footerFullScreen'
 import { Book } from '~assets/bible_versions/books-desc'
 import Box, { AnimatedHStack, AnimatedTouchableBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -11,7 +12,8 @@ import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
-import { useFindTabIndex, type VersionCode } from '../../../state/tabs'
+import { useFindTabIndex, type BiblePlanPassage, type VersionCode } from '../../../state/tabs'
+import { canGoToNextPlanChapter, canGoToPreviousPlanChapter } from '../planPassage'
 import { playingBibleTabIdAtom } from './atom'
 import {
   getNextAvailableChapterLocation,
@@ -29,6 +31,7 @@ type BackToAudioFooterProps = {
   disabled?: boolean
   coverage?: BibleVersionCoverage
   version: VersionCode
+  planPassage?: BiblePlanPassage
 }
 
 const BackToAudioFooter = ({
@@ -40,10 +43,16 @@ const BackToAudioFooter = ({
   disabled,
   coverage,
   version,
+  planPassage,
 }: BackToAudioFooterProps) => {
   const canonId = resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(version))
-  const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
-  const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
+  const location = { book: book.Numero, chapter }
+  const hasPreviousChapter =
+    canGoToPreviousPlanChapter(planPassage, location) &&
+    !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
+  const hasNextChapter =
+    canGoToNextPlanChapter(planPassage, location) &&
+    !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
   const { slideToIndex } = useTabAnimations()
   const playingBibleTabId = useAtomValue(playingBibleTabIdAtom)
   const playingBibleTabIndex = useFindTabIndex(playingBibleTabId)
@@ -51,7 +60,7 @@ const BackToAudioFooter = ({
   const { t } = useTranslation()
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const insets = useSafeAreaInsets()
-  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
+  const isFullScreenBible = useFooterFullScreen()
   const isBibleOverlayOpen = useAtomValue(isBibleOverlayOpenAtom)
 
   const fullScreenTranslateY = isFullScreenBible ? HEADER_HEIGHT + insets.bottom + 60 : 0

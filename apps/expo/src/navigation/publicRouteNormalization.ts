@@ -75,7 +75,8 @@ const normalizeLegacyBibleRoute = (
   defaultVersion: string
 ): NavigableRoute => {
   const params = route.params ?? {}
-  if (params.annotationId || params.isSelectionMode) return route
+  // Plan mode keeps its own reader: a public address cannot carry the limits of the passage.
+  if (params.annotationId || params.isSelectionMode || params.planEndChapter) return route
 
   const book = parseBook(params.book)
   const chapter = parsePositiveInteger(params.chapter)

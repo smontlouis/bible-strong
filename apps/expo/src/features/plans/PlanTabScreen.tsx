@@ -18,13 +18,7 @@ import { useComputedPlan } from '~features/plans/plan.hooks'
 import { subscribeToHardwareBackPress } from '~helpers/hardwareBackPress'
 import { PlanTab, useIsCurrentTab } from '~state/tabs'
 import PlanScreen from './PlanScreen/PlanScreen'
-import PlanSliceScreen from './PlanSliceScreen/PlanSliceScreen'
-import {
-  getRecoveredPlanTabTitle,
-  leavePlanSliceInTab,
-  openPlanSliceInTab,
-  resolvePlanTabContent,
-} from './planTabState'
+import { getRecoveredPlanTabTitle, leavePlanSliceInTab, openPlanSliceInTab } from './planTabState'
 
 interface Props {
   planAtom: PrimitiveAtom<PlanTab>
@@ -36,7 +30,11 @@ const PlanTabScreen = ({ planAtom }: Props) => {
   const isCurrentTab = useIsCurrentTab()
   const { isError, retry } = useReadingContent(planTab.data.planId)
   const plan = useComputedPlan(planTab.data.planId)
-  const content = resolvePlanTabContent(plan, planTab.data.readingSliceId)
+  // Only a meditation opens a reading inside the tab; a plan day is a position on the plan page.
+  const hasOpenMeditation =
+    !!plan &&
+    getEditorialKind(plan) === 'daily-meditation' &&
+    Boolean(planTab.data.readingSliceId || planTab.data.meditationDate)
 
   const clearActiveSlice = () => {
     setPlanTab(
@@ -59,8 +57,7 @@ const PlanTabScreen = ({ planAtom }: Props) => {
 
   React.useEffect(() => {
     return subscribeToHardwareBackPress(() => {
-      if (!isCurrentTab(planAtom) || (!planTab.data.readingSliceId && !planTab.data.meditationDate))
-        return false
+      if (!isCurrentTab(planAtom) || !hasOpenMeditation) return false
 
       setPlanTab(
         produce(draft => {
@@ -69,9 +66,9 @@ const PlanTabScreen = ({ planAtom }: Props) => {
       )
       return true
     })
-  }, [isCurrentTab, planAtom, planTab.data.readingSliceId, planTab.data.meditationDate, setPlanTab])
+  }, [isCurrentTab, planAtom, hasOpenMeditation, setPlanTab])
 
-  if (content.type === 'missing-plan') {
+  if (!plan) {
     return (
       <Container>
         <Header title={planTab.title} />
@@ -98,8 +95,8 @@ const PlanTabScreen = ({ planAtom }: Props) => {
     )
   }
 
-  if (plan && getEditorialKind(plan) === 'daily-meditation') {
-    if (planTab.data.readingSliceId || planTab.data.meditationDate)
+  if (getEditorialKind(plan) === 'daily-meditation') {
+    if (hasOpenMeditation)
       return (
         <MeditationReader
           assistantScope={`tab:${planTab.id}`}
@@ -137,33 +134,13 @@ const PlanTabScreen = ({ planAtom }: Props) => {
     )
   }
 
-  if (content.type === 'reading-slice') {
-    return (
-      <PlanSliceScreen
-        assistantScope={`tab:${planTab.id}`}
-        readingSlice={content.readingSlice}
-        planTitle={content.readingSlice.planTitle}
-        onBack={clearActiveSlice}
-        onRead={clearActiveSlice}
-      />
-    )
-  }
-
-  const resolvedPlan = plan!
-
   return (
     <PlanScreen
       assistantScope={`tab:${planTab.id}`}
-      planId={resolvedPlan.id}
+      planId={plan.id}
       hasBackButton={false}
+      readingSliceId={planTab.data.readingSliceId}
       onRemove={clearActiveSlice}
-      onReadingSlicePress={slice => {
-        setPlanTab(
-          produce(draft => {
-            draft.data = openPlanSliceInTab(draft.data, slice.id)
-          })
-        )
-      }}
     />
   )
 }

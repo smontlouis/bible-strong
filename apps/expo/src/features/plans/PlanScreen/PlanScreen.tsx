@@ -10,9 +10,8 @@ import Button from '~common/ui/Button'
 import ScheduledPlanContent from './ScheduledPlanContent'
 import { getEditorialKind } from '../readingCalendar'
 import { type SheetRef } from '~common/sheet'
-import { useLocalSearchParams } from 'expo-router'
+import { useIsFocused, useLocalSearchParams } from 'expo-router'
 import React from 'react'
-import { ComputedReadingSlice, Plan } from 'src/common/types'
 import Header from '~common/Header'
 import Container from '~common/ui/Container'
 import { usePrevious } from '~helpers/usePrevious'
@@ -25,9 +24,8 @@ interface Props {
   assistantScope?: string
   planId?: string
   hasBackButton?: boolean
-  onReadingSlicePress?: (
-    slice: ComputedReadingSlice & { planId: string; planTitle: string; planLanguage?: Plan['lang'] }
-  ) => void
+  /** The day to show first; links to a day of the plan land here. */
+  readingSliceId?: string
   onRemove?: () => void
 }
 
@@ -35,10 +33,14 @@ const PlanScreen = ({
   assistantScope = 'panel',
   planId: planIdFromProps,
   hasBackButton = true,
-  onReadingSlicePress,
+  readingSliceId,
   onRemove,
 }: Props) => {
-  const params = useLocalSearchParams<{ plan?: string; planId?: string }>()
+  const params = useLocalSearchParams<{
+    plan?: string
+    planId?: string
+    readingSliceId?: string
+  }>()
 
   const id = planIdFromProps || params.planId || getLegacyPlanRouteId(params.plan) || ''
   const modalRef = React.useRef<SheetRef | null>(null)
@@ -57,13 +59,16 @@ const PlanScreen = ({
   const prevProgress: number | undefined = usePrevious<number | undefined>(progress)
   const isPlanCompleted = progress === 1
 
+  // Progress can rise while an element's page covers the plan: congratulate on the way back.
+  const isFocused = useIsFocused()
+  const celebrationPending = React.useRef(false)
   React.useEffect(() => {
-    if (progress != null && prevProgress != null && prevProgress !== progress) {
-      if (progress > prevProgress) {
-        modalRef.current?.present()
-      }
-    }
-  }, [progress, prevProgress])
+    if (progress != null && prevProgress != null && progress > prevProgress)
+      celebrationPending.current = true
+    if (!celebrationPending.current || !isFocused) return
+    celebrationPending.current = false
+    modalRef.current?.present()
+  }, [progress, prevProgress, isFocused])
 
   return (
     <Container>
@@ -108,7 +113,11 @@ const PlanScreen = ({
         </Box>
       )}
       {plan?.sections && (
-        <ScheduledPlanContent key={plan.id} plan={plan} onReadingSlicePress={onReadingSlicePress} />
+        <ScheduledPlanContent
+          key={plan.id}
+          plan={plan}
+          initialReadingSliceId={readingSliceId ?? params.readingSliceId}
+        />
       )}
       <SuccessModal modalRef={modalRef} isPlanCompleted={isPlanCompleted} />
       <DetailsModal
