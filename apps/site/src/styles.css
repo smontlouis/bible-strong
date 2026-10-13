@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@import '../lib/firebase-ui-auth.css';
 @import '../lib/quill/quill.css';
 @import '../lib/quill/strong.css';
 @import '../lib/quill/verse.css';
@@ -114,11 +113,21 @@ html:has(.resource-shell[data-theme='dark']) {
   src: url('/fonts/UpType - Pulp Display Extra Bold.otf') format('opentype');
   font-weight: 800;
 }
+/* Two files (`scripts/subset-literata.py`): the letters the site shows, and the Cyrillic ones. */
 @font-face {
   font-display: swap;
   font-family: 'Literata';
-  src: url('/fonts/LiterataBook.otf') format('opentype');
+  src: url('/fonts/Literata-Book-latin-greek.woff2') format('woff2');
   font-weight: 400;
+  unicode-range:
+    U+0000-03FF, U+1D00-1FFF, U+2000-2BFF, U+2C60-2C7F, U+A700-A7FF, U+FB00-FB06, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Literata';
+  src: url('/fonts/Literata-Book-cyrillic.woff2') format('woff2');
+  font-weight: 400;
+  unicode-range: U+0400-052F, U+1C80-1C8F, U+2DE0-2DFF, U+A640-A69F;
 }
 * {
   border-color: var(--border);

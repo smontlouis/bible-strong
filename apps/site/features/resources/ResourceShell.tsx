@@ -98,7 +98,7 @@ export default function ResourceShell({
               aria-label={t('resource.nav.home')}
             >
               <img
-                src="/images/icon.png"
+                src="/images/icon-144.png"
                 alt=""
                 width={28}
                 height={28}

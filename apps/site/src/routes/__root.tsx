@@ -19,7 +19,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
-      { rel: 'icon', href: '/images/icon.png' },
+      // The mark as it is drawn in a header or a tab; the full-size one is for the manifest.
+      { rel: 'icon', type: 'image/png', sizes: '144x144', href: '/images/icon-144.png' },
       { rel: 'manifest', href: '/manifest.webmanifest' },
     ],
   }),
