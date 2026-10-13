@@ -28,14 +28,14 @@ const pulpDisplay = (weight: string): string =>
 const fontPreload = (href: string) => ({
   rel: 'preload',
   as: 'font',
-  type: 'font/otf',
+  type: href.endsWith('.woff2') ? 'font/woff2' : 'font/otf',
   href,
   crossOrigin: 'anonymous' as const,
 })
 
 /** Fonts of the first screen of a reading page, declared `optional` in resource-pages.css. */
 export const RESOURCE_FONT_PRELOADS = [
-  '/fonts/LiterataBook.otf',
+  '/fonts/Literata-Book-latin-greek.woff2',
   pulpDisplay('Regular'),
   pulpDisplay('Semi Bold'),
 ].map(fontPreload)
