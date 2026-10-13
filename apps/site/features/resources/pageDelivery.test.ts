@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  addressWithoutEndSlash,
   deliveredPage,
   pageCacheKey,
   pageCacheTags,
@@ -33,6 +34,33 @@ describe('Key a page is kept under', () => {
     )
     expect(key('/bible/lsg/gen/1?gclid=1&commentary=barnes')).toBe(
       key('/bible/lsg/gen/1?commentary=barnes')
+    )
+  })
+})
+
+describe('Address written with a slash at its end', () => {
+  const moved = (address: string) =>
+    addressWithoutEndSlash(new URL(address, 'https://bible-strong.app'))
+
+  it('is read without the slash, with what it asked', () => {
+    expect(moved('/fr/')).toBe('https://bible-strong.app/fr')
+    expect(moved('/bible/lsg/gen/1/')).toBe('https://bible-strong.app/bible/lsg/gen/1')
+    expect(moved('/strong/en/g5048/?book=acts')).toBe(
+      'https://bible-strong.app/strong/en/g5048?book=acts'
+    )
+    expect(moved('/fr///')).toBe('https://bible-strong.app/fr')
+  })
+
+  it.each(['/', '/fr', '/bible/lsg/gen/1', '/strong/en/g5048?next=/fr/'])(
+    'leaves %s where it is',
+    address => {
+      expect(moved(address)).toBeUndefined()
+    }
+  )
+
+  it('never leads out of the site', () => {
+    expect(addressWithoutEndSlash(new URL('https://bible-strong.app//example.com/'))).toBe(
+      'https://bible-strong.app//example.com'
     )
   })
 })
