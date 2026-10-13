@@ -193,19 +193,29 @@ export function createStrongSidecarDownloadItem(versionId: StrongBibleVersionId)
 /**
  * `lexiconModuleId` names the Strong lexicon to acquire with the index when the reader has
  * none installed: Strong numbers open their entry without a connection only with a lexicon.
+ *
+ * The published index is built for the Bible the catalog publishes with it. An index that is
+ * not installed says nothing of the installed Bible, so when that Bible is another archive it
+ * comes first: alone, the index would be downloaded in full and then refused.
  */
 export const createStrongSidecarDownloadPlan = (
   versionId: StrongBibleVersionId,
   availabilityStatus: StrongBibleSidecarAvailability['status'],
-  lexiconModuleId?: StrongLexiconModuleId
+  lexiconModuleId?: StrongLexiconModuleId,
+  readInstalled: InstalledArchiveReader = resourceId => resourcePublicationStore.read(resourceId)
 ): DownloadItem[] => {
   const sidecar = createStrongSidecarDownloadItem(versionId)
   const lexicon = lexiconModuleId ? [createStrongLexiconModuleDownloadItem(lexiconModuleId)] : []
-  if (availabilityStatus !== 'base-missing' && availabilityStatus !== 'base-incompatible') {
+  const bible = createBibleDownloadItem(versionId)
+  const bibleIsPublished = readInstalled(bible.id)?.archiveSha256 === bible.expectedArchiveSha256
+  if (
+    availabilityStatus !== 'base-missing' &&
+    availabilityStatus !== 'base-incompatible' &&
+    bibleIsPublished
+  ) {
     return [sidecar, ...lexicon]
   }
 
-  const bible = createBibleDownloadItem(versionId)
   return [bible, { ...sidecar, dependsOnId: bible.id }, ...lexicon]
 }
 

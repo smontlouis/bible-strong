@@ -63,6 +63,13 @@ import {
 } from '../mobileResourceCatalog'
 
 describe('Strong Bible download planning', () => {
+  const catalogDby = BUNDLED_MOBILE_RESOURCE_CATALOG.resources['bible:DBY']!
+
+  beforeEach(() => {
+    mockInstalledArchives.clear()
+    mockInstalledArchives.set('bible:DBY', catalogDby.archiveSha256)
+  })
+
   it('plans a Strong Offline copy from its canonical identity', () => {
     const plan = createOfflineCopyDownloadPlan(
       { kind: 'strong-bible-index', versionId: 'DBY' },
@@ -143,6 +150,32 @@ describe('Strong Bible download planning', () => {
       ])
     }
   )
+
+  it.each(['missing', 'incompatible'] as const)(
+    'brings the published Bible first when the installed one is another archive and status is %s',
+    status => {
+      mockInstalledArchives.set('bible:DBY', '1'.repeat(64))
+
+      const plan = createStrongSidecarDownloadPlan('DBY', status, 'simple-fr')
+
+      expect(plan.map(item => item.id)).toEqual([
+        'bible:DBY',
+        'bible-strong:DBY',
+        'strong-lexicon:simple-fr',
+      ])
+      expect(plan[1]?.dependsOnId).toBe('bible:DBY')
+      expect(plan[2]?.dependsOnId).toBeUndefined()
+    }
+  )
+
+  it('brings the published Bible when nothing records which archive is installed', () => {
+    mockInstalledArchives.clear()
+
+    expect(createStrongSidecarDownloadPlan('DBY', 'missing').map(item => item.id)).toEqual([
+      'bible:DBY',
+      'bible-strong:DBY',
+    ])
+  })
 
   it('acquires the named Strong lexicon with the index, independently of it', () => {
     const plan = createStrongSidecarDownloadPlan('DBY', 'missing', 'simple-fr')
@@ -361,6 +394,13 @@ describe('Interlinear Bible download planning', () => {
 })
 
 describe('Strong display mode download planning', () => {
+  beforeEach(() => {
+    mockInstalledArchives.set(
+      'bible:DBY',
+      BUNDLED_MOBILE_RESOURCE_CATALOG.resources['bible:DBY']!.archiveSha256
+    )
+  })
+
   it('queues only the missing Strong sidecar for Strong mode', () => {
     const plan = createStrongModeDownloadPlan({
       mode: 'visible',
