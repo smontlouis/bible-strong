@@ -40,6 +40,7 @@ export const AUTONOMOUS_FRENCH_BIBLES = [
   "bfc",
   "fmar",
   "frc97",
+  "neg79",
   "nfc",
   "nvs78p",
   "ost",
