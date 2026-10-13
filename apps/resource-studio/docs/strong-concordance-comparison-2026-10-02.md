@@ -562,7 +562,14 @@ pour la première fois, sans jamais lire ses annotations : 367 871 mots source
 placés sur 441 653, 5 722 établis non traduits et 68 060 incertains (15,4 %).
 La candidate S21 de l'autre branche en laissait 92 741 incertains (21,0 %).
 NBS passe à 368 659 placés et 67 596 incertains (15,3 %) ; NFC à 284 884 et
-153 306 (34,7 %). Le générateur autonome ne connaît pas NEG79.
+153 306 (34,7 %). NEG79, ajoutée ensuite au générateur, donne 408 161 mots
+placés, 8 186 établis non traduits et 25 306 incertains (5,7 %, contre 10,2 %
+pour la candidate de l'autre branche).
+
+La réparation de S21 en Jérémie 23 est reprise telle quelle : la source avait
+fondu le verset 19 dans le verset 18. `scripts/s21-jeremiah-23/run.ts` écrit
+la révision candidate (`outputs/releases/s21-jeremiah-23-2026-10-13/`) et son
+reçu, sans toucher au texte publié.
 
 ## NBS et NFC régénérées
 
