@@ -10,16 +10,32 @@ import type { StudyRequest, StudyEvent } from '@bible-strong/ai-contract/contrac
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 import { getResourceAppCheckToken } from '~helpers/resourceAppCheck'
 import type { DictationConnection } from './dictationAdapter'
+/** AbortSignal.any/timeout are missing from the native runtime: one portable deadline instead. */
+function withDeadline(signal: AbortSignal, milliseconds: number) {
+  const controller = new AbortController()
+  const abort = () => controller.abort()
+  const timer = setTimeout(abort, milliseconds)
+  if (signal.aborted) abort()
+  else signal.addEventListener('abort', abort, { once: true })
+  return {
+    signal: controller.signal,
+    clear: () => {
+      clearTimeout(timer)
+      signal.removeEventListener('abort', abort)
+    },
+  }
+}
 export async function connectAssistantDictation(signal: AbortSignal): Promise<DictationConnection> {
   const base = process.env.EXPO_PUBLIC_AI_API_URL
   const user = getCurrentAuthUser()
   if (!base || !user) throw new Error('SIGN_IN_REQUIRED')
   const [token, appCheck] = await Promise.all([user.getIdToken(), getResourceAppCheckToken()])
+  const deadline = withDeadline(signal, 15000)
   const response = await expoFetch(`${base.replace(/\/$/, '')}/v1/study-assistant/dictation`, {
     method: 'POST',
-    signal: AbortSignal.any([signal, AbortSignal.timeout(15000)]),
+    signal: deadline.signal,
     headers: { Authorization: `Bearer ${token}`, 'X-Firebase-AppCheck': appCheck },
-  })
+  }).finally(deadline.clear)
   if (!response.ok)
     throw new Error(response.status === 429 ? 'DAILY_LIMIT' : 'DICTATION_UNAVAILABLE')
   const session = await response.json()
@@ -39,7 +55,10 @@ export async function connectAssistantDictation(signal: AbortSignal): Promise<Di
   )
     throw new Error('INVALID_DICTATION_SESSION')
   return {
-    socket: new WebSocket(url, ['ai-gateway-transcription.v1', `ai-gateway-auth.${session.token}`]),
+    socket: new WebSocket(url.href, [
+      'ai-gateway-transcription.v1',
+      `ai-gateway-auth.${session.token}`,
+    ]),
     providerOptions: session.providerOptions,
   }
 }
@@ -105,16 +124,17 @@ export async function compactAssistant(
   if (!base) throw new Error('AI_UNAVAILABLE')
   if (!user) throw new Error('SIGN_IN_REQUIRED')
   const [token, appCheck] = await Promise.all([user.getIdToken(), getResourceAppCheckToken()])
+  const deadline = withDeadline(signal, 50000)
   const response = await expoFetch(`${base.replace(/\/$/, '')}/v1/study-assistant/compact`, {
     method: 'POST',
-    signal: AbortSignal.any([signal, AbortSignal.timeout(50000)]),
+    signal: deadline.signal,
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
       'X-Firebase-AppCheck': appCheck,
     },
     body: JSON.stringify(input),
-  })
+  }).finally(deadline.clear)
   if (!response.ok) throw new Error(response.status === 429 ? 'DAILY_LIMIT' : 'COMPACTION_FAILED')
   const result = await response.json()
   if (

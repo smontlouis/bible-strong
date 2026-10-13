@@ -31,6 +31,7 @@ import UserAvatar from '~common/ui/UserAvatar'
 import DeleteAccountModal from '~features/profile/components/DeleteAccountModal'
 import { useAvailableUpdatesIndicator } from '~features/resources/useAvailableUpdates'
 import { assistantAccessible } from '~features/study-assistant/assistantConfig'
+import { assistantOpenRequestAtom } from '~features/study-assistant/assistantSheetContext'
 import extractFirstName from '~helpers/extractFirstName'
 import { nukeApp } from '~helpers/nukeApp'
 import { toast } from '~helpers/toast'
@@ -94,6 +95,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
   const contactDeveloperRef = useRef<SheetRef>(null)
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false)
   const openChangelogModal = useSetAtom(changelogModalAtom)
+  const requestAssistant = useSetAtom(assistantOpenRequestAtom)
   const { hasUpdates } = useAvailableUpdatesIndicator()
 
   const lang = useLanguage()
@@ -211,7 +213,8 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
             <CardLinkItem
               onPress={() => {
                 closeMenu()
-                router.push('/study-assistant')
+                if (Platform.OS === 'web') router.push('/study-assistant')
+                else requestAssistant(count => count + 1)
               }}
             >
               <IconCircle bg="rgba(89, 131, 240, 0.1)">

@@ -2591,6 +2591,7 @@
   "assistant.dictation.stopping": "Finalisation de la transcription…",
   "assistant.dictation.listening": "À l’écoute… Arrêtez la dictée pour envoyer.",
   "assistant.dictation.error": "La dictée a été interrompue. Vous pouvez réessayer ou corriger le texte.",
+  "assistant.dictation.permissionDevice": "Autorisez l’accès au microphone dans les réglages de votre appareil pour dicter un message.",
   "assistant.dictation.permission": "Autorisez l’accès au microphone dans votre navigateur pour dicter.",
   "assistant.debug.title": "Diagnostic IA",
   "assistant.debug.active": "Session active",

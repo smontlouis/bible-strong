@@ -340,6 +340,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@assistant-ui/react-native@npm:0.1.43":
+  version: 0.1.43
+  resolution: "@assistant-ui/react-native@npm:0.1.43"
+  dependencies:
+    "@assistant-ui/core": "npm:^0.3.20"
+    "@assistant-ui/store": "npm:^0.3.14"
+    "@assistant-ui/tap": "npm:^0.9.18"
+    assistant-cloud: "npm:^0.2.2"
+    assistant-stream: "npm:^0.3.44"
+  peerDependencies:
+    "@types/react": "*"
+    react: ^18 || ^19
+    react-native: "*"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 10c0/292f2f3e749c8b7f049e3117a3f73eee51ff673167103e459d1b2e6272f091cb4797b17502e205282bec12669b1ac3021dd99151a45d9acad6568191f8cde18c
+  languageName: node
+  linkType: hard
+
 "@assistant-ui/react-streamdown@npm:0.3.16":
   version: 0.3.16
   resolution: "@assistant-ui/react-streamdown@npm:0.3.16"
@@ -2465,6 +2485,7 @@ __metadata:
   dependencies:
     "@alloc/moti": "npm:^54.0.0-beta.8"
     "@assistant-ui/react": "npm:^0.15.21"
+    "@assistant-ui/react-native": "npm:0.1.43"
     "@assistant-ui/react-streamdown": "npm:0.3.16"
     "@babel/core": "npm:^7.29.0"
     "@babel/plugin-transform-class-properties": "npm:^7.25.9"
