@@ -2,6 +2,7 @@ import { WorkerEntrypoint } from 'cloudflare:workers'
 import handler from '@tanstack/react-start/server-entry'
 import { BUILD_REVISION } from '@/features/resources/buildRevision'
 import {
+  addressWithoutEndSlash,
   deliveredPage,
   pageCacheKey,
   readPageRefresh,
@@ -62,10 +63,11 @@ export default {
   async fetch(request: Request, env: WorkerEnv, ctx: WorkerExecutionContext): Promise<Response> {
     const url = new URL(request.url)
     if (url.pathname === REFRESH_PATH) return refreshPages(request, env, ctx)
+    const isRead = request.method === 'GET' || request.method === 'HEAD'
+    const moved = isRead ? addressWithoutEndSlash(url) : undefined
+    if (moved) return Response.redirect(moved, 301)
     // Only a read is kept, and nothing on the development server, which has no build.
-    if (!BUILD_REVISION || (request.method !== 'GET' && request.method !== 'HEAD')) {
-      return handler.fetch(request)
-    }
+    if (!BUILD_REVISION || !isRead) return handler.fetch(request)
     return ctx.exports.Pages!.fetch(request, {
       cf: { cacheKey: pageCacheKey(url, BUILD_REVISION) },
     } as RequestInit)

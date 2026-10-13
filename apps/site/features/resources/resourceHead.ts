@@ -48,6 +48,19 @@ const breadcrumbList = (breadcrumbs: Breadcrumb[]) => ({
 export const breadcrumbScripts = (breadcrumbs: Breadcrumb[]) =>
   breadcrumbs.length > 1 ? [structuredDataScript(breadcrumbList(breadcrumbs))] : []
 
+/** The canonical address of a page and, when it exists in both, the same page in each language. */
+export const pageAddressLinks = (
+  path: string,
+  alternates: Partial<Record<ResourceLanguage, string>> = {}
+) => [
+  { rel: 'canonical', href: absoluteSiteUrl(path) },
+  ...Object.entries(alternates).map(([hrefLang, alternatePath]) => ({
+    rel: 'alternate',
+    hrefLang,
+    href: absoluteSiteUrl(alternatePath),
+  })),
+]
+
 /** Title, description, canonical, language alternates and structured data of a resource page. */
 export const buildResourceHead = ({
   title,
@@ -76,15 +89,7 @@ export const buildResourceHead = ({
       { property: 'og:locale', content: language === 'fr' ? 'fr_FR' : 'en_US' },
       ...shareCardMeta(shareCard),
     ],
-    links: [
-      ...RESOURCE_FONT_PRELOADS,
-      { rel: 'canonical', href: url },
-      ...Object.entries(alternates ?? {}).map(([hrefLang, alternatePath]) => ({
-        rel: 'alternate',
-        hrefLang,
-        href: absoluteSiteUrl(alternatePath),
-      })),
-    ],
+    links: [...RESOURCE_FONT_PRELOADS, ...pageAddressLinks(path, alternates)],
     scripts: data.map(structuredDataScript),
   }
 }

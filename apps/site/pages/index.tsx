@@ -470,9 +470,9 @@ export default function Home({ initialTheme }: HomeProps) {
   })
   const t = useI18n()
   const locale = useCurrentLocale()
-  const homePath = locale === 'fr' ? '/fr/' : '/'
+  const homePath = locale === 'fr' ? '/fr' : '/'
   const supportPath = locale === 'fr' ? '/fr/give' : '/give'
-  const alternatePath = locale === 'fr' ? '/' : '/fr/'
+  const alternatePath = locale === 'fr' ? '/' : '/fr'
   // Reading starts on the public pages of the site; the workspace stays one click away.
   const readPath = resourceSection('bible').path(locale)
   const changeTheme = (nextTheme: ThemePreference) => {

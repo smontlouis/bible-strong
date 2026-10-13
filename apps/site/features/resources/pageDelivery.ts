@@ -20,6 +20,17 @@ export const pageCacheKey = (url: URL, buildRevision: string): string => {
   return `${buildRevision}:${url.pathname}${search ? `?${search}` : ''}`
 }
 
+/**
+ * Where an address written with a slash at its end is read: at the same address without it.
+ * The router sends the reader there too, but as a temporary move, which a search engine
+ * does not take for the address of the page; the gateway answers before it, for good. The
+ * answer names the site, so that no path can lead out of it.
+ */
+export const addressWithoutEndSlash = (url: URL): string | undefined => {
+  if (!url.pathname.endsWith('/') || url.pathname === '/') return undefined
+  return `${url.origin}${url.pathname.replace(/\/+$/u, '') || '/'}${url.search}`
+}
+
 const TAG_DEPTH = 3
 
 /**
