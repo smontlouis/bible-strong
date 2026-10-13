@@ -37,7 +37,8 @@ pour 100 mots hébreux ou grecs que Concordance annote (moteur A–G) :
 - Sept nouvelles options (moteur A–S), trouvées et vérifiées sur l'échantillon
   puis mesurées sur une troisième réserve, portent les mots identiques de
   79,4 à 81,9 % pour S21 et de 94,3 à 95,1 % pour NEG79, avec une précision
-  un peu plus haute. Aucun placement juste n'est perdu
+  un peu plus haute. Dans ce scénario principal, aucun placement juste n'est
+  perdu
   ([détail](#pistes-m-à-s-moteur-as)).
 
 ## Ce qui est comparé
@@ -471,9 +472,20 @@ identique octet pour octet à celle du moteur A–L.
 
 La troisième réserve (`plan-comparison-v3.json`, empreinte `dd0f55ba4c10…`)
 compte 120 chapitres que ni l'échantillon ni les deux premières réserves
-n'avaient touchés. Elle a été tirée et prédite avec le moteur A–L avant tout
-développement, puis récupérée sous gel sans être lue. Le moteur A–S a été figé
+n'avaient touchés. Comme la deuxième, elle admet les anciens bancs d'essai :
+27 chapitres sont frais, 93 ont servi à régler le moteur contre LSG et Darby,
+sans jamais avoir été comparés à S21 ni NEG79. Elle a été tirée et prédite
+avec le moteur A–L avant tout développement. Le moteur A–S a été figé
 (`freeze-v7.json`) avant d'être mesuré une seule fois sur cette réserve.
+
+Deux réserves sur la méthode :
+
+- Les pages de la réserve ont été récupérées avant le développement de M à S
+  et sont restées sur le disque pendant ce temps. Aucun outil ne les a lues,
+  mais rien ne l'empêchait techniquement : la garantie tient aux horodatages
+  et au gain identique en développement et sur la réserve.
+- Les prédictions A–L du scénario sans la famille Segond ont été faites après
+  le développement, options M à S désactivées, et non avant.
 
 | Réserve v3                 |    A–L |        A–S | écart, intervalle à 95 % |
 | -------------------------- | -----: | ---------: | ------------------------ |
@@ -485,8 +497,9 @@ développement, puis récupérée sous gel sans être lue. Le moteur A–S a ét
 | NEG79 sans la famille      | 76,1 % | **79,4 %** | +3,3 pt (+2,9 à +4,0)    |
 
 Intervalles appariés par chapitre. Les mots S21 laissés incertains là où
-Concordance tranche passent de 15,3 % à 12,7 %. Aucun mot placé exactement
-comme Concordance par A–L ne l'est plus par A–S.
+Concordance tranche passent de 15,3 % à 12,7 %. Pour S21 et NEG79 avec leurs
+témoins, aucun mot placé exactement comme Concordance par A–L ne l'est plus
+par A–S. Sans la famille Segond, S21 en perd un (Nb 26.21).
 
 Ce que chaque option a changé sur la réserve, pour S21 :
 
