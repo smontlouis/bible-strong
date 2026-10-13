@@ -2565,7 +2565,7 @@ __metadata:
     expo-device: "npm:~58.0.5"
     expo-document-picker: "npm:~58.0.4"
     expo-file-system: "npm:~58.0.8"
-    expo-font: "npm:~58.0.7"
+    expo-font: "patch:expo-font@npm%3A58.0.7#~/.yarn/patches/expo-font-npm-58.0.7-f218c77ae4.patch"
     expo-haptics: "npm:~58.0.5"
     expo-image: "npm:~58.0.13"
     expo-keep-awake: "npm:~58.0.3"
@@ -20061,7 +20061,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-font@npm:~58.0.7":
+"expo-font@npm:58.0.7":
   version: 58.0.7
   resolution: "expo-font@npm:58.0.7"
   peerDependencies:
@@ -20069,6 +20069,17 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10c0/7f6686a4329dd92df2374141fe1d79ae557a51efaaefd5492463bd203a226ce3d1816422c1c67189fa64423bfea9918e7b48d6bd6d71105617e64a3c9641c77e
+  languageName: node
+  linkType: hard
+
+"expo-font@patch:expo-font@npm%3A58.0.7#~/.yarn/patches/expo-font-npm-58.0.7-f218c77ae4.patch":
+  version: 58.0.7
+  resolution: "expo-font@patch:expo-font@npm%3A58.0.7#~/.yarn/patches/expo-font-npm-58.0.7-f218c77ae4.patch::version=58.0.7&hash=499ee5"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/aa0738f3b36e3383bf805c57fcf3e5f5250e499b5d8e0e705b9ac47ed2ca00ae36262b77d4ff23bc1622ba6c2361675ee2c98b122fdc124b475a968e76a955a4
   languageName: node
   linkType: hard
 

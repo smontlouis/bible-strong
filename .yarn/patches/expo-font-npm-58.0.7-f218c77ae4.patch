@@ -1,0 +1,54 @@
+diff --git a/build/ExpoFontLoader.web.js b/build/ExpoFontLoader.web.js
+index 0f2789c88aafdbff349dd9c9a2dc1932a421d090..111d41ceaf90ab821b45cc21b97b3c91a7b930f3 100644
+--- a/build/ExpoFontLoader.web.js
++++ b/build/ExpoFontLoader.web.js
+@@ -171,7 +171,11 @@ const ExpoFontLoader = {
+             throw new CodedError('ERR_WEB_ENVIRONMENT', `The browser's \`document.head\` element doesn't support injecting fonts.`);
+         }
+         const style = getStyleElement();
+-        document.head.appendChild(style);
++        // Re-attaching the element makes WebKit re-parse the sheet, which drops the pending load of
++        // a font added just before: its `document.fonts.load()` promise then never settles.
++        if (!style.isConnected) {
++            document.head.appendChild(style);
++        }
+         const alreadyLoaded = getFontFaceRulesMatchingResource(fontFamilyName, resource).some(({ rule })=>_fontFaceRuleSrcMatches(rule, resource.uri));
+         if (!alreadyLoaded) {
+             _createWebStyle(fontFamilyName, resource);
+@@ -253,6 +257,9 @@ function _createWebStyle(fontFamily, resource) {
+     if (styleElement.styleSheet) {
+         const styleElementIE = styleElement;
+         styleElementIE.styleSheet.cssText = styleElementIE.styleSheet.cssText ? styleElementIE.styleSheet.cssText + fontStyle : fontStyle;
++    } else if (styleElement.sheet) {
++        // Appending a text node re-parses the whole sheet (see `loadAsync`); `insertRule` does not.
++        styleElement.sheet.insertRule(fontStyle, styleElement.sheet.cssRules.length);
+     } else {
+         const textNode = document.createTextNode(fontStyle);
+         styleElement.appendChild(textNode);
+diff --git a/src/ExpoFontLoader.web.ts b/src/ExpoFontLoader.web.ts
+index 2d9ba314c613f85e8d41cd89aecc2531f3ca0b2e..3d0b1bbefd6dcef3fb8c93145dff5932a99b32e1 100644
+--- a/src/ExpoFontLoader.web.ts
++++ b/src/ExpoFontLoader.web.ts
+@@ -220,7 +220,11 @@ const ExpoFontLoader: Required<Omit<ExpoFontLoaderModule, 'loadFontFamilyAsync'>
+     }
+ 
+     const style = getStyleElement();
+-    document.head!.appendChild(style);
++    // Re-attaching the element makes WebKit re-parse the sheet, which drops the pending load of
++    // a font added just before: its `document.fonts.load()` promise then never settles.
++    if (!style.isConnected) {
++      document.head!.appendChild(style);
++    }
+ 
+     const alreadyLoaded = getFontFaceRulesMatchingResource(fontFamilyName, resource).some(
+       ({ rule }) => _fontFaceRuleSrcMatches(rule, resource.uri)
+@@ -345,6 +349,9 @@ function _createWebStyle(fontFamily: string, resource: FontResource): HTMLStyleE
+     styleElementIE.styleSheet.cssText = styleElementIE.styleSheet.cssText
+       ? styleElementIE.styleSheet.cssText + fontStyle
+       : fontStyle;
++  } else if (styleElement.sheet) {
++    // Appending a text node re-parses the whole sheet (see `loadAsync`); `insertRule` does not.
++    styleElement.sheet.insertRule(fontStyle, styleElement.sheet.cssRules.length);
+   } else {
+     const textNode = document.createTextNode(fontStyle);
+     styleElement.appendChild(textNode);
