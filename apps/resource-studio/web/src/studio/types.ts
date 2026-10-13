@@ -1,7 +1,12 @@
+import type { CandidateVerseReview } from "../../../src/strongCandidateReviewTypes";
 export type ViewId = "viewer" | "jsonl" | "workflow" | "lexicon" | "review";
 export type ReaderMode = "normal" | "advanced" | "debug";
 
 export type JsonlBibleId =
+  | "S21-CANDIDATE"
+  | "NEG79-CANDIDATE"
+  | "NBS-CANDIDATE"
+  | "NFC-CANDIDATE"
   | "OST"
   | "FMAR"
   | "NVS78P"
@@ -12,6 +17,7 @@ export type JsonlBibleId =
   | "LSG";
 
 export interface JsonlBibleVerse {
+  review?: CandidateVerseReview;
   ref: string;
   version: string;
   book: number;

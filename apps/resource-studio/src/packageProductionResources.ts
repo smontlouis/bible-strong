@@ -16,7 +16,7 @@ import { DatabaseSync } from "node:sqlite";
 import { execFile } from "node:child_process";
 
 import { DEFAULT_KAIKKI_FRENCH_JSONL } from "./frenchLemmaPilot.js";
-import { JSONL_BIBLE_SOURCES } from "./jsonlBibleViewer.js";
+import { PUBLISHED_BIBLE_SOURCES } from "./jsonlBibleViewer.js";
 import {
   compileStrongBibleJsonlToSqlite,
   STRONG_BIBLE_SQLITE_SCHEMA_VERSION,
@@ -119,11 +119,11 @@ export async function packageProductionResources(
 
   try {
     const compiledBibles: Array<{
-      source: (typeof JSONL_BIBLE_SOURCES)[number];
+      source: (typeof PUBLISHED_BIBLE_SOURCES)[number];
       file: string;
       summary: StrongBibleSqliteSummary;
     }> = [];
-    for (const source of JSONL_BIBLE_SOURCES) {
+    for (const source of PUBLISHED_BIBLE_SOURCES) {
       const inputPath = path.resolve(root, source.relativePath);
       const file = `bibles/bible-${source.id.toLowerCase()}-strong.sqlite`;
       const summary = await compileStrongBibleJsonlToSqlite({

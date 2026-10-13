@@ -156,7 +156,7 @@ const navItems: Array<{
   {
     id: "jsonl",
     label: "Bibles",
-    description: "Lire et comparer les 8 versions",
+    description: "Lire et comparer les éditions locales",
     icon: BookOpen
   },
   {

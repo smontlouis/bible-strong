@@ -4,6 +4,8 @@ import path from "node:path";
 import { createInterface } from "node:readline";
 
 import { BOOK_IDS } from "./books.js";
+import { readCandidateReviewChapter } from "./strongCandidateReview.js";
+import type { CandidateVerseReview } from "./strongCandidateReviewTypes.js";
 import {
   queryStrongBibleConcordance,
   queryStrongBibleLemmaStats,
@@ -12,7 +14,54 @@ import {
   type StrongIdentityKind
 } from "./strongBibleSqlite.js";
 
-export const JSONL_BIBLE_SOURCES = [
+const candidateSource = <Id extends string, Version extends string>(
+  id: Id,
+  sourceVersion: Version,
+  bible: string,
+  label: string,
+  shortLabel: string
+) => ({
+  id,
+  reviewRelativePath: `outputs/strong-candidate-viewer/${bible}/bible-${bible}-review.sqlite`,
+  label: `${label} — candidate locale`,
+  shortLabel: `${shortLabel} candidate`,
+  sourceVersion,
+  relativePath: `outputs/strong-candidate-viewer/${bible}/bible-${bible}-strong.jsonl`,
+  sqliteRelativePath: `outputs/strong-candidate-viewer/${bible}/bible-${bible}-reader.sqlite`,
+  manifestPath: `outputs/strong-candidate-viewer/${bible}/manifest.json`
+});
+
+/**
+ * Local generations shown for review, prepared by
+ * `scripts/prepareStrongCandidateViewer.ts`. They are never packaged.
+ */
+export const CANDIDATE_BIBLE_SOURCES = [
+  candidateSource("S21-CANDIDATE", "S21", "s21", "Segond 21", "S21"),
+  candidateSource(
+    "NEG79-CANDIDATE",
+    "NEG79",
+    "neg79",
+    "Nouvelle Édition de Genève 1979",
+    "NEG79"
+  ),
+  candidateSource(
+    "NBS-CANDIDATE",
+    "NBS",
+    "nbs",
+    "Nouvelle Bible Segond",
+    "NBS"
+  ),
+  candidateSource(
+    "NFC-CANDIDATE",
+    "NFC",
+    "nfc",
+    "Nouvelle Français courant",
+    "NFC"
+  )
+] as const;
+
+/** The published editions: the only ones production packaging compiles. */
+export const PUBLISHED_BIBLE_SOURCES = [
   {
     id: "OST",
     label: "Ostervald",
@@ -98,9 +147,15 @@ export const JSONL_BIBLE_SOURCES = [
   }
 ] as const;
 
+export const JSONL_BIBLE_SOURCES = [
+  ...CANDIDATE_BIBLE_SOURCES,
+  ...PUBLISHED_BIBLE_SOURCES
+] as const;
+
 export type JsonlBibleId = (typeof JSONL_BIBLE_SOURCES)[number]["id"];
 
 export interface JsonlBibleVerse {
+  review?: CandidateVerseReview;
   ref: string;
   version: string;
   book: number;
@@ -332,6 +387,31 @@ export async function getJsonlBibleChapter(options: {
       const filePath = path.resolve(options.root, source.relativePath);
       const sqlitePath = path.resolve(options.root, source.sqliteRelativePath);
       if (existsSync(sqlitePath)) {
+        let ledgerSha256: string | undefined;
+        if ("reviewRelativePath" in source) {
+          try {
+            const manifest = JSON.parse(
+              await readFile(
+                path.resolve(options.root, source.manifestPath),
+                "utf8"
+              )
+            ) as { review?: { ledgerSha256?: string } };
+            ledgerSha256 = manifest.review?.ledgerSha256;
+          } catch {
+            /* Missing review provenance is shown as unavailable. */
+          }
+        }
+        const review =
+          "reviewRelativePath" in source
+            ? readCandidateReviewChapter({
+                path: path.resolve(options.root, source.reviewRelativePath),
+                ledgerSha256,
+                readerSha256:
+                  readStrongBibleSqliteInfo(sqlitePath).sourceSha256,
+                bookId: options.bookId,
+                chapter: options.chapter
+              })
+            : undefined;
         return {
           id: source.id,
           label: source.label,
@@ -341,7 +421,16 @@ export async function getJsonlBibleChapter(options: {
             sqlitePath,
             bookId: options.bookId,
             chapter: options.chapter
-          })
+          }).map((verse) => ({
+            ...verse,
+            ...("reviewRelativePath" in source
+              ? {
+                  review: review?.get(verse.ref) ?? {
+                    available: false as const
+                  }
+                }
+              : {})
+          }))
         };
       }
       if (!existsSync(filePath)) {
@@ -355,12 +444,19 @@ export async function getJsonlBibleChapter(options: {
         label: source.label,
         shortLabel: source.shortLabel,
         sourceVersion: source.sourceVersion,
-        verses: await readJsonlBibleChapter({
-          filePath,
-          sourceVersion: source.sourceVersion,
-          bookId: options.bookId,
-          chapter: options.chapter
-        })
+        verses: (
+          await readJsonlBibleChapter({
+            filePath,
+            sourceVersion: source.sourceVersion,
+            bookId: options.bookId,
+            chapter: options.chapter
+          })
+        ).map((verse) => ({
+          ...verse,
+          ...("reviewRelativePath" in source
+            ? { review: { available: false as const } }
+            : {})
+        }))
       };
     })
   );
