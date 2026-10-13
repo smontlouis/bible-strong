@@ -19,6 +19,9 @@ export const RESOURCE_PAGE_CACHE_CONTROL =
 
 export const absoluteSiteUrl = (path: string): string => `${SITE_ORIGIN}${path}`
 
+/** The home page of the site in each of its languages. */
+export const HOME_PATHS: Record<ResourceLanguage, string> = { en: '/', fr: '/fr' }
+
 /** Fonts of the first screen of a reading page, declared `optional` in resource-pages.css. */
 export const RESOURCE_FONT_PRELOADS = [
   '/fonts/LiterataBook.otf',

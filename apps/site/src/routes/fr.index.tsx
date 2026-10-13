@@ -2,6 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { shareCardMeta } from '@/features/share/shareCardMeta'
 import Home from '@/pages'
 import { getLandingTheme } from '@/lib/landing-theme'
+import { absoluteSiteUrl, HOME_PATHS } from '@/features/resources/publicSite'
+import { pageAddressLinks } from '@/features/resources/resourceHead'
 export const Route = createFileRoute('/fr/')({
   loader: () => getLandingTheme(),
   component: LandingHome,
@@ -16,7 +18,9 @@ export const Route = createFileRoute('/fr/')({
       { property: 'og:title', content: 'Bible Strong - Un verset, une étude entière' },
       { property: 'og:description', content: 'Des outils de lecture et d’étude biblique qui gardent chaque découverte reliée.' },
       ...shareCardMeta({ kind: 'default', language: 'fr' }),
+      { property: 'og:url', content: absoluteSiteUrl(HOME_PATHS.fr) },
     ],
+    links: pageAddressLinks(HOME_PATHS.fr, HOME_PATHS),
   }),
 })
 

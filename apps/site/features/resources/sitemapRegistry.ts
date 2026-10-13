@@ -7,7 +7,7 @@ import { buildBibleVersionPath, supportedBiblePresentations } from '../bible/bib
 import { BIBLE_VERSIONS, bibleVersionSlug } from '../bible/bibleVersions'
 import { listStrongIndexSitemapUrls, listStrongSitemapUrls } from '../strong/strongSitemap'
 import { TIMELINE_SITEMAPS } from '../timeline/timelineSitemap'
-import { absoluteSiteUrl } from './publicSite'
+import { absoluteSiteUrl, HOME_PATHS } from './publicSite'
 import { resourceSection } from './sections'
 import type { SitemapUrl } from './sitemap'
 
@@ -31,7 +31,7 @@ export const ANNOUNCE_BIBLE_VERSE_SITEMAPS = false
 /** Every sitemap served under `/sitemaps/:name`. */
 export const SITEMAPS: Record<string, () => Promise<SitemapUrl[]> | SitemapUrl[]> = {
   'pages.xml': () => [
-    ...alternatePages({ en: '/', fr: '/fr' }),
+    ...alternatePages(HOME_PATHS),
     ...alternatePages({ en: BIBLE_SECTION.path('en'), fr: BIBLE_SECTION.path('fr') }),
   ],
   // The books and chapters of each Bible; their chapters follow, one sitemap per reading mode.
