@@ -130,3 +130,16 @@ Delivering `BHG` as a canonical Bible removes the case.
 A token id space shared by `BHG` and the Strong indexes is still not named by either file. If a
 future `BHG` renumbers published tokens, both must declare a lineage and readers must compare it;
 until then the stability rule of ADR-0078 is the only guard.
+
+## Amendment (2026-10-14): BHG is delivered like the other Bibles
+
+Application 27.2, which carries this decision, is in the stores, and 27.1.1 is no longer a
+constraint for `BHG`. The `BHG` text is therefore not delivered under the `bible-step.json` entry
+27.1.1 compiled in. Like any ordinary Bible whose text changes, it is delivered as its canonical
+JSON, `bible-bhg.json` in `bibles/bible-bhg.json.zip`: the file names its own revision, and the
+application takes the entry and the address from the catalog. An ordinary Bible keeps its source
+file as its Offline copy only while that file is the one readers already hold.
+
+On 27.1.1 the published `BHG` can no longer be installed (the entry it looks for is absent); an
+installed pair stays as it is. The two cases above that concern 27.1.1 under a canonical or flat
+`BHG` no longer apply.

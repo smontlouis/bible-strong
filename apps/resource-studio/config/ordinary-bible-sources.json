@@ -49,7 +49,7 @@
     },
     "BHG": {
       "text": {
-        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-step.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/4553142a1445c625b374514e16654ca0d9d06b89fad09261eaf03411a2a7e00c/bible-step.json.zip",
         "entry": "bible-step.json"
       }
     },
