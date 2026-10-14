@@ -2,18 +2,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { shareCardMeta } from '@/features/share/shareCardMeta'
 import Home from '@/pages'
 import { getLandingTheme } from '@/lib/landing-theme'
-import { absoluteSiteUrl, HOME_PATHS } from '@/features/resources/publicSite'
+import {
+  absoluteSiteUrl,
+  HOME_FONT_PRELOADS,
+  HOME_PATHS,
+} from '@/features/resources/publicSite'
 import { pageAddressLinks } from '@/features/resources/resourceHead'
 
-// The weights the first screen is set in: they are asked for with the page, not after its
-// styles, so the text is rarely painted in another font first.
-const FIRST_SCREEN_FONTS = ['Regular', 'Semi Bold', 'Bold'].map(weight => ({
-  rel: 'preload',
-  as: 'font',
-  type: 'font/otf',
-  href: `/fonts/UpType%20-%20Pulp%20Display%20${weight.replace(' ', '%20')}.otf`,
-  crossOrigin: 'anonymous' as const,
-}))
 export const Route = createFileRoute('/')({
   loader: () => getLandingTheme(),
   component: LandingHome,
@@ -30,7 +25,7 @@ export const Route = createFileRoute('/')({
       ...shareCardMeta({ kind: 'default', language: 'en' }),
       { property: 'og:url', content: absoluteSiteUrl(HOME_PATHS.en) },
     ],
-    links: [...FIRST_SCREEN_FONTS, ...pageAddressLinks(HOME_PATHS.en, HOME_PATHS)],
+    links: [...HOME_FONT_PRELOADS, ...pageAddressLinks(HOME_PATHS.en, HOME_PATHS)],
   }),
 })
 
