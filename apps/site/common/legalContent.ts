@@ -2,6 +2,8 @@ import type { Locale } from '../locales'
 
 export type LegalDocumentContent = {
   title: string
+  /** When the text was last revised: for machines, and as the page prints it. */
+  revised: { date: string; label: string }
   introduction: string
   sections: {
     id: string
@@ -15,6 +17,7 @@ export type LegalDocumentContent = {
 export const privacyContent: Record<Locale, LegalDocumentContent> = {
   fr: {
     title: 'Politique de confidentialité',
+    revised: { date: '2026-10-13', label: '13 octobre 2026' },
     introduction: 'Cette politique décrit les traitements liés au site Bible Strong, à l’application mobile et à l’application web. Le Studio 316 est le responsable du traitement. Les données utilisées dépendent des fonctionnalités que vous utilisez et de votre connexion à un compte.',
     sections: [
       {
@@ -36,6 +39,10 @@ export const privacyContent: Record<Locale, LegalDocumentContent> = {
       {
         id: 'assistant', title: 'Assistant d’étude IA',
         paragraphs: ['L’assistant utilise Gloo AI pour acheminer les requêtes vers les modèles d’intelligence artificielle utilisés par le service. Gloo et les fournisseurs des modèles sollicités reçoivent les éléments nécessaires à la génération des réponses.', 'Lorsque cette fonctionnalité est disponible et que vous envoyez une question, votre message, l’historique nécessaire à la conversation et le contexte de lecture joint sont transmis à un service distant authentifié pour produire une réponse. Le contexte peut contenir une référence biblique ou des extraits de la ressource éditoriale ouverte. Un historique long peut aussi être transmis pour en produire un résumé.', 'Dans l’application web, les conversations et leurs résumés sont conservés dans le navigateur, séparément pour chaque compte. Ils ne sont pas synchronisés entre vos appareils par cette fonction. Ce stockage local ne signifie pas que le traitement par l’IA s’effectue uniquement sur votre appareil.', 'N’incluez pas de mots de passe, de secrets ou de données personnelles concernant des tiers. La suppression d’une conversation dans le navigateur efface sa copie locale ; elle ne constitue pas une demande d’effacement auprès du service distant. Pour une demande portant sur les données transmises, contactez Le Studio 316.'],
+      },
+      {
+        id: 'plugin', title: 'Plugin pour les assistants IA',
+        paragraphs: ['Bible Strong propose un plugin pour des assistants IA tels que ChatGPT. Lorsque l’assistant y fait appel, il transmet à notre serveur ce que la réponse demande de lire : une référence biblique, un numéro Strong, un mot ou un sujet recherché, la langue souhaitée. Le plugin ne demande ni compte ni connexion et ne reçoit pas votre conversation. Il n’accède à aucune de vos données Bible Strong : notes, surlignages et études restent dans l’application.', 'Le serveur répond avec des textes et des ressources publiés par Bible Strong. Il n’enregistre pas ces demandes dans une base de données et ne les rattache à aucun profil. L’assistant peut joindre des indications techniques à sa demande, comme la langue de son interface, un identifiant anonymisé ou une localisation approximative : nous n’utilisons que la langue et n’enregistrons pas les autres.', 'Comme pour tout service en ligne, l’adresse IP de l’appelant sert à limiter le nombre de demandes, et notre hébergeur Cloudflare conserve pendant une durée limitée des journaux techniques échantillonnés (date, adresse demandée, code de réponse) pour le diagnostic. Les recherches faites par le plugin sont traitées comme les recherches en ligne décrites plus haut, y compris la recherche sémantique.', 'L’assistant lui-même est un service tiers. L’usage que son éditeur fait de vos conversations relève de sa propre politique de confidentialité.'],
       },
       {
         id: 'payments', title: 'Soutien financier et services externes',
@@ -79,6 +86,7 @@ export const privacyContent: Record<Locale, LegalDocumentContent> = {
   },
   en: {
     title: 'Privacy policy',
+    revised: { date: '2026-10-13', label: '13 October 2026' },
     introduction: 'This policy describes processing associated with the Bible Strong website, mobile application and web application. Le Studio 316 is the data controller. The data used depends on the features you use and whether you sign in to an account.',
     sections: [
       {
@@ -100,6 +108,10 @@ export const privacyContent: Record<Locale, LegalDocumentContent> = {
       {
         id: 'assistant', title: 'AI study assistant',
         paragraphs: ['The assistant uses Gloo AI to route requests to the artificial intelligence models used by the service. Gloo and the providers of the models invoked receive the information needed to generate responses.', 'When this feature is available and you send a question, your message, the conversation history needed for the exchange and the attached reading context are sent to an authenticated remote service to generate a response. The context may contain a Bible reference or excerpts from the editorial resource you have open. A long conversation history may also be sent for summarization.', 'In the web application, conversations and their summaries are stored in the browser, separately for each account. This feature does not synchronize them between devices. Local storage does not mean that AI processing happens only on your device.', 'Do not include passwords, secrets or personal information about others. Deleting a conversation in the browser removes its local copy; it does not submit an erasure request to the remote service. Contact Le Studio 316 for requests concerning data you have sent.'],
+      },
+      {
+        id: 'plugin', title: 'Plugin for AI assistants',
+        paragraphs: ['Bible Strong offers a plugin for AI assistants such as ChatGPT. When the assistant calls it, it sends our server what the answer needs to read: a Bible reference, a Strong number, a word or a subject to search, the language wanted. The plugin asks for no account and no sign-in, and does not receive your conversation. It has no access to your Bible Strong data: notes, highlights and studies stay in the app.', 'The server answers with texts and resources published by Bible Strong. It does not record these requests in a database and does not attach them to any profile. The assistant may add technical information to its request, such as the language of its interface, an anonymized identifier or an approximate location: we only use the language and do not record the others.', 'As with any online service, the IP address of the caller is used to limit the number of requests, and our host Cloudflare keeps sampled technical logs (date, address requested, response code) for a limited time for diagnostics. Searches made by the plugin are handled like the online searches described above, including semantic search.', 'The assistant itself is a third-party service. What its publisher does with your conversations is governed by its own privacy policy.'],
       },
       {
         id: 'payments', title: 'Financial support and external services',
@@ -146,6 +158,7 @@ export const privacyContent: Record<Locale, LegalDocumentContent> = {
 export const termsContent: Record<Locale, LegalDocumentContent> = {
   fr: {
     title: 'Conditions d’utilisation',
+    revised: { date: '2026-09-18', label: '18 septembre 2026' },
     introduction: 'Ces conditions concernent le site, l’application mobile et l’application web Bible Strong, édités par Le Studio 316. Elles décrivent les règles d’accès aux outils de lecture, d’étude et de partage.',
     sections: [
       {
@@ -190,6 +203,7 @@ export const termsContent: Record<Locale, LegalDocumentContent> = {
   },
   en: {
     title: 'Terms of use',
+    revised: { date: '2026-09-18', label: '18 September 2026' },
     introduction: 'These terms cover the Bible Strong website, mobile application and web application, published by Le Studio 316. They describe access to the reading, study and sharing tools.',
     sections: [
       {
@@ -237,6 +251,7 @@ export const termsContent: Record<Locale, LegalDocumentContent> = {
 export const deletionContent: Record<Locale, LegalDocumentContent> = {
   fr: {
     title: 'Supprimer mon compte et mes données',
+    revised: { date: '2026-09-18', label: '18 septembre 2026' },
     introduction: 'La suppression de votre compte supprime aussi vos études privées et publiées ainsi que leurs aperçus hébergés par Bible Strong. Les copies locales et les exports sur vos appareils se gèrent séparément.',
     sections: [
       {
@@ -265,6 +280,7 @@ export const deletionContent: Record<Locale, LegalDocumentContent> = {
   },
   en: {
     title: 'Delete my account and data',
+    revised: { date: '2026-09-18', label: '18 September 2026' },
     introduction: 'Deleting your account also deletes your private and published studies and their previews hosted by Bible Strong. Local copies and exports on your devices are managed separately.',
     sections: [
       {
@@ -288,6 +304,59 @@ export const deletionContent: Record<Locale, LegalDocumentContent> = {
         id: 'limits', title: 'Other data and payments',
         paragraphs: ['Bible Strong cannot remotely erase copies held by other people. Some logs, backups or records may have separate retention periods, including for legal obligations. Requests concerning these records are assessed according to their nature and applicable obligations. If retention remains necessary, we explain the reason.', 'Deleting your account does not cancel recurring support payments or subscriptions with a provider. Cancel these through the relevant store or payment service.'],
         links: [{ label: 'Privacy policy and rights', href: '/privacy-policy' }],
+      },
+    ],
+  },
+}
+
+export const supportContent: Record<Locale, LegalDocumentContent> = {
+  fr: {
+    title: 'Assistance',
+    revised: { date: '2026-10-13', label: '13 octobre 2026' },
+    introduction: 'Une question, un problème ou une suggestion à propos de Bible Strong : l’application mobile, l’application web, le site ou le plugin pour les assistants IA.',
+    sections: [
+      {
+        id: 'contact', title: 'Nous écrire',
+        paragraphs: ['Écrivez-nous à stephane@lestudio316.com. Indiquez l’application ou l’assistant que vous utilisez, ce que vous avez fait et ce qui s’est passé ; une capture d’écran aide beaucoup. Nous répondons en français et en anglais.', 'Vous pouvez aussi signaler un problème sur GitHub, où le code de Bible Strong est public.'],
+        links: [{ label: 'Signaler un problème sur GitHub', href: 'https://github.com/smontlouis/bible-strong/issues' }],
+      },
+      {
+        id: 'plugin', title: 'Plugin pour ChatGPT et les autres assistants',
+        paragraphs: ['Installez Bible Strong depuis le répertoire de plugins de votre assistant, puis nommez-le dans une conversation ou posez une question sur un passage de la Bible. Le plugin ne demande aucun compte Bible Strong.', 'Le plugin lit les ressources publiées par Bible Strong : Bibles, lexique Strong, dictionnaires, commentaires, thèmes, références croisées et chronologie. Vos notes, surlignages et études restent dans l’application : le plugin n’y accède pas.', 'S’il ne répond pas, ouvrez une nouvelle conversation et réessayez. Si le problème persiste, écrivez-nous avec la question posée et la réponse obtenue.'],
+      },
+      {
+        id: 'content', title: 'Signaler une erreur dans une ressource',
+        paragraphs: ['Si un texte, une définition ou une référence vous semble erroné, envoyez-nous la référence concernée et ce qui ne va pas.'],
+      },
+      {
+        id: 'account', title: 'Compte et données',
+        paragraphs: ['Pour supprimer votre compte et vos données, suivez la page dédiée. La politique de confidentialité décrit les données traitées par chaque fonctionnalité.'],
+        links: [{ label: 'Supprimer mon compte et mes données', href: '/fr/data-deletion' }, { label: 'Politique de confidentialité', href: '/fr/politique-de-confidentialite' }],
+      },
+    ],
+  },
+  en: {
+    title: 'Support',
+    revised: { date: '2026-10-13', label: '13 October 2026' },
+    introduction: 'A question, a problem or a suggestion about Bible Strong: the mobile app, the web app, the site or the plugin for AI assistants.',
+    sections: [
+      {
+        id: 'contact', title: 'Write to us',
+        paragraphs: ['Write to stephane@lestudio316.com. Say which app or which assistant you use, what you did and what happened; a screenshot helps a lot. We answer in French and in English.', 'You can also report a problem on GitHub, where the code of Bible Strong is public.'],
+        links: [{ label: 'Report a problem on GitHub', href: 'https://github.com/smontlouis/bible-strong/issues' }],
+      },
+      {
+        id: 'plugin', title: 'Plugin for ChatGPT and other assistants',
+        paragraphs: ['Install Bible Strong from the plugin directory of your assistant, then name it in a conversation or ask a question about a Bible passage. The plugin asks for no Bible Strong account.', 'The plugin reads the resources Bible Strong publishes: Bibles, the Strong lexicon, dictionaries, commentaries, topics, cross-references and a timeline. Your notes, highlights and studies stay in the app: the plugin has no access to them.', 'If it does not answer, start a new conversation and try again. If the problem persists, write to us with the question you asked and the answer you got.'],
+      },
+      {
+        id: 'content', title: 'Report an error in a resource',
+        paragraphs: ['If a text, a definition or a reference looks wrong, send us the reference and what is wrong.'],
+      },
+      {
+        id: 'account', title: 'Account and data',
+        paragraphs: ['To delete your account and your data, follow the dedicated page. The privacy policy describes the data each feature handles.'],
+        links: [{ label: 'Delete my account and data', href: '/data-deletion' }, { label: 'Privacy policy', href: '/privacy-policy' }],
       },
     ],
   },
