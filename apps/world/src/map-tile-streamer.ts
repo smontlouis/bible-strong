@@ -2,9 +2,10 @@ import type Phaser from 'phaser'
 import { AssetReveal } from './asset-reveal'
 import {
   chooseMapLevel,
-  mapTileManifest,
+  mapTileManifest as archipelagoManifest,
   tilePlacement,
   visibleTileCoordinates,
+  type MapTileManifest,
   type TileCoordinate,
   type WorldView,
 } from './map-tiles'
@@ -20,10 +21,12 @@ type TileRecord = {
   lastAttempt: number
   bytes: number
 }
-const keyFor = ({ level, column, row }: TileCoordinate) =>
-  `world-map-${level.scale}-${column}-${row}`
-const urlFor = ({ level, column, row }: TileCoordinate) =>
-  `./assets/map/tiles/${level.scale}/${column}-${row}.webp`
+export type MapTileSource = { manifest: MapTileManifest; root: string; key: string }
+const ARCHIPELAGO: MapTileSource = {
+  manifest: archipelagoManifest,
+  root: './assets/map/tiles',
+  key: 'world-map',
+}
 const CACHE_BYTES = 32 * 1024 * 1024
 const BATCH_SIZE = 4
 
@@ -41,7 +44,17 @@ export class MapTileStreamer {
     record.bytes = 0
   }
 
-  constructor(private readonly scene: Phaser.Scene) {
+  private readonly keyFor: (tile: TileCoordinate) => string
+  private readonly urlFor: (tile: TileCoordinate) => string
+  private readonly manifest: MapTileManifest
+
+  constructor(
+    private readonly scene: Phaser.Scene,
+    source: MapTileSource = ARCHIPELAGO
+  ) {
+    this.manifest = source.manifest
+    this.keyFor = ({ level, column, row }) => `${source.key}-${level.scale}-${column}-${row}`
+    this.urlFor = ({ level, column, row }) => `${source.root}/${level.scale}/${column}-${row}.webp`
     scene.load.on('loaderror', this.fileError)
   }
 
@@ -55,7 +68,7 @@ export class MapTileStreamer {
     const delta = this.previousTime ? time - this.previousTime : 0
     this.previousTime = time
     const level = chooseMapLevel(
-      mapTileManifest.levels,
+      this.manifest.levels,
       target?.zoom ?? camera.zoom,
       rendererResolution
     )
@@ -73,14 +86,14 @@ export class MapTileStreamer {
       this.previousView = signature
       this.stableSince = time
     }
-    const visible = level ? visibleTileCoordinates(mapTileManifest, level, view, 0) : []
-    const needed = new Set(visible.map(keyFor))
+    const visible = level ? visibleTileCoordinates(this.manifest, level, view, 0) : []
+    const needed = new Set(visible.map(this.keyFor))
     for (const [key, record] of this.records) {
       if (needed.has(key)) record.lastNeeded = time
       if (record.image) {
         const shown =
           record.tile.level === level &&
-          isInView(tilePlacement(mapTileManifest, record.tile), camera)
+          isInView(tilePlacement(this.manifest, record.tile), camera)
         record.image
           .setVisible(shown)
           .setAlpha(record.reveal.update(delta, shown, this.reducedMotion.matches))
@@ -88,11 +101,11 @@ export class MapTileStreamer {
     }
     if (enabled && level && !this.scene.load.isLoading() && this.scene.load.isReady()) {
       const allVisibleReady = visible.every(
-        tile => this.records.get(keyFor(tile))?.status === 'ready'
+        tile => this.records.get(this.keyFor(tile))?.status === 'ready'
       )
       const candidates =
         !target && allVisibleReady && time - this.stableSince >= 200
-          ? visibleTileCoordinates(mapTileManifest, level, view, 1)
+          ? visibleTileCoordinates(this.manifest, level, view, 1)
           : visible
       // Visible tiles always win; the peripheral ring is only requested after the camera settles.
       candidates.sort((a, b) => this.distance(a, view) - this.distance(b, view))
@@ -102,10 +115,10 @@ export class MapTileStreamer {
         0
       )
       for (const tile of candidates) {
-        const record = this.records.get(keyFor(tile))
+        const record = this.records.get(this.keyFor(tile))
         if (record && (record.status !== 'error' || time - record.lastAttempt < 5000)) continue
         const bytes = this.tileBytes(tile)
-        if (!needed.has(keyFor(tile)) && reservedBytes + bytes > CACHE_BYTES) continue
+        if (!needed.has(this.keyFor(tile)) && reservedBytes + bytes > CACHE_BYTES) continue
         this.require(tile, time)
         reservedBytes += bytes
         if (++queued === BATCH_SIZE) break
@@ -121,7 +134,7 @@ export class MapTileStreamer {
   }
 
   private tileBytes(tile: TileCoordinate) {
-    const placement = tilePlacement(mapTileManifest, tile)
+    const placement = tilePlacement(this.manifest, tile)
     return (
       Math.round(placement.width * tile.level.scale) *
       Math.round(placement.height * tile.level.scale) *
@@ -133,7 +146,7 @@ export class MapTileStreamer {
     tile: TileCoordinate,
     view: { x: number; y: number; width: number; height: number }
   ) {
-    const p = tilePlacement(mapTileManifest, tile)
+    const p = tilePlacement(this.manifest, tile)
     return (
       (p.x + p.width / 2 - view.x - view.width / 2) ** 2 +
       (p.y + p.height / 2 - view.y - view.height / 2) ** 2
@@ -141,7 +154,7 @@ export class MapTileStreamer {
   }
 
   private require(tile: TileCoordinate, time: number) {
-    const key = keyFor(tile)
+    const key = this.keyFor(tile)
     const record: TileRecord = {
       tile,
       status: 'loading',
@@ -151,7 +164,7 @@ export class MapTileStreamer {
       reveal: new AssetReveal(),
       complete: () => {
         if (this.records.get(key) !== record || !this.scene.textures.exists(key)) return
-        const placement = tilePlacement(mapTileManifest, tile)
+        const placement = tilePlacement(this.manifest, tile)
         record.image = this.scene.add
           .image(placement.x, placement.y, key)
           .setOrigin(0)
@@ -167,7 +180,7 @@ export class MapTileStreamer {
     }
     this.records.set(key, record)
     this.scene.load.once(`filecomplete-image-${key}`, record.complete)
-    this.scene.load.image(key, urlFor(tile))
+    this.scene.load.image(key, this.urlFor(tile))
   }
 
   private release(key: string) {

@@ -288,12 +288,16 @@ export function canStand(point: Point, navigation = defaultNavigation): boolean 
   )
 }
 
-export function findSafePosition(preferred: Point, navigation: NavigationDocument): Point | null {
+export function findSafePosition(
+  preferred: Point,
+  navigation: NavigationDocument,
+  bounds = { width: WIDTH, height: HEIGHT }
+): Point | null {
   if (canStand(preferred, navigation)) return preferred
   let best: Point | null = null,
     distance = Infinity
-  for (let y = RADIUS; y < HEIGHT; y += 8)
-    for (let x = RADIUS; x < WIDTH; x += 8) {
+  for (let y = RADIUS; y < bounds.height; y += 8)
+    for (let x = RADIUS; x < bounds.width; x += 8) {
       const d = (preferred.x - x) ** 2 + (preferred.y - y) ** 2
       if (d < distance && canStand({ x, y }, navigation)) {
         best = { x, y }

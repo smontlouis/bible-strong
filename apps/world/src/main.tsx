@@ -53,6 +53,11 @@ import { loadVisitedPlaces, saveVisitedPlaces } from './visited-places'
 import { loadLanguage, saveLanguage } from './language'
 import './style.css'
 const GuestbookAdmin = lazy(() => import('./GuestbookAdmin'))
+const ValenceApp = lazy(() => import('./valence/ValenceApp'))
+const valenceRoute = /^\/valence-1876\/?$/.test(location.pathname)
+// Relative asset URLs resolve against the page: keep the address without a trailing slash.
+if (valenceRoute && location.pathname.endsWith('/'))
+  history.replaceState(null, '', `/valence-1876${location.search}${location.hash}`)
 const ZoneEditor = import.meta.env.DEV ? lazy(() => import('./ZoneEditor')) : () => null
 
 const copy = {
@@ -939,6 +944,10 @@ root.render(
   ['/admin', '/admin/', '/admin-guestbook'].includes(location.pathname) ? (
     <Suspense fallback={<p>…</p>}>
       <GuestbookAdmin />
+    </Suspense>
+  ) : valenceRoute ? (
+    <Suspense fallback={null}>
+      <ValenceApp />
     </Suspense>
   ) : (
     <App />

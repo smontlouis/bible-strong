@@ -14,12 +14,17 @@ export interface ReaderManifest {
 
 const textureKey = (id: string, page: string) => `${id}-${page}`
 
-export function loadReader(scene: Phaser.Scene, id: string, manifest: ReaderManifest) {
+export function loadReader(
+  scene: Phaser.Scene,
+  id: string,
+  manifest: ReaderManifest,
+  root = './assets/characters'
+) {
   for (const page of manifest.pages) {
     scene.load.atlas(
       textureKey(id, page.key),
-      `./assets/characters/${id}/${page.key}.webp`,
-      `./assets/characters/${id}/${page.key}.json`
+      `${root}/${id}/${page.key}.webp`,
+      `${root}/${id}/${page.key}.json`
     )
   }
 }

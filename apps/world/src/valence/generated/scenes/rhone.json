@@ -1,0 +1,27 @@
+{
+  "id": "rhone",
+  "mode": "sprite",
+  "frameRate": 12,
+  "frameCount": 120,
+  "x": 229.38,
+  "y": 712.5,
+  "width": 109.69,
+  "height": 116.95,
+  "depth": 828.22,
+  "pages": [
+    {
+      "key": "page-0",
+      "firstFrame": 0,
+      "frameCount": 72,
+      "width": 2007,
+      "height": 1904
+    },
+    {
+      "key": "page-1",
+      "firstFrame": 72,
+      "frameCount": 48,
+      "width": 2007,
+      "height": 1428
+    }
+  ]
+}

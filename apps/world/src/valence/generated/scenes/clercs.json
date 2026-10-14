@@ -1,0 +1,34 @@
+{
+  "id": "clercs",
+  "mode": "sprite",
+  "frameRate": 12,
+  "frameCount": 120,
+  "x": 834.59,
+  "y": 401.68,
+  "width": 105.49,
+  "height": 83.36,
+  "depth": 483.82,
+  "pages": [
+    {
+      "key": "page-0",
+      "firstFrame": 0,
+      "frameCount": 48,
+      "width": 1920,
+      "height": 2032
+    },
+    {
+      "key": "page-1",
+      "firstFrame": 48,
+      "frameCount": 48,
+      "width": 1920,
+      "height": 2032
+    },
+    {
+      "key": "page-2",
+      "firstFrame": 96,
+      "frameCount": 24,
+      "width": 1920,
+      "height": 1016
+    }
+  ]
+}
