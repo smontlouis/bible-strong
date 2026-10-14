@@ -187,7 +187,7 @@ sqlite3 "$DATA/Documents/SQLite/shared/interlinear-bibles/bible-bhg-interlinear-
   "SELECT key, value FROM ResourceMetadata WHERE key IN ('textRevision','schemaVersion','indexRevision')"
 ```
 
-Today both must read `bhg-803c482ed06005693547`.
+Since 2026-10-14 both must read `bhg-e15bd9f0f1a91140579c` once the published pair is installed.
 
 ### A. Fresh install against production
 
