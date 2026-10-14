@@ -12,16 +12,16 @@
     {
       "key": "page-0",
       "firstFrame": 0,
-      "frameCount": 63,
-      "width": 2009,
-      "height": 1935
+      "frameCount": 88,
+      "width": 1920,
+      "height": 1980
     },
     {
       "key": "page-1",
-      "firstFrame": 63,
-      "frameCount": 57,
-      "width": 2009,
-      "height": 1935
+      "firstFrame": 88,
+      "frameCount": 32,
+      "width": 1920,
+      "height": 720
     }
   ]
 }

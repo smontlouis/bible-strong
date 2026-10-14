@@ -12,16 +12,9 @@
     {
       "key": "page-0",
       "firstFrame": 0,
-      "frameCount": 72,
-      "width": 2040,
-      "height": 1962
-    },
-    {
-      "key": "page-1",
-      "firstFrame": 72,
-      "frameCount": 48,
-      "width": 2040,
-      "height": 1308
+      "frameCount": 120,
+      "width": 1892,
+      "height": 1617
     }
   ]
 }

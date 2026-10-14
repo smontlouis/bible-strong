@@ -9,7 +9,8 @@
     ],
     "who": "Near the right end of the platform, in front of the station canopy: a 41-year-old preacher in a long dark frock coat with a short beard (character 1 of the sheet) standing beside two old wooden travel trunks, holding a bundle of printed newspapers; facing him, a railway employee in a peaked cap and short buttoned jacket (character 8) handing him a parcel wrapped in brown paper and string.",
     "motion": "The railway employee hands the wrapped parcel to the preacher, the preacher takes it with a small nod and tucks it under his arm with the newspapers, then they exchange a few words and return to their starting poses. Very small, gentle movements.",
-    "maskPrompt": "person, parcel"
+    "maskPrompt": "person, parcel",
+    "pixelRatio": 2.4
   },
   {
     "id": "temple",
@@ -21,7 +22,8 @@
     ],
     "who": "On the top step in front of the temple door: a village Protestant pastor in a black gown with two small white preaching bands at the neck (character 6), holding a large closed Bible.",
     "motion": "The pastor opens the Bible, reads a few lines while slowly nodding, looks up thoughtfully, then closes the Bible again and holds it as at the start. Gentle, calm.",
-    "maskPrompt": "person, book"
+    "maskPrompt": "person, book",
+    "pixelRatio": 2.4
   },
   {
     "id": "maison",
@@ -33,7 +35,8 @@
     ],
     "who": "At the small table under the vine pergola: a 16-year-old girl in an apron with braided hair (character 3) sitting and reading aloud from an open book, and her mother in a bonnet (character 4) sitting beside her with a small notebook and a pencil. A small oil lamp stands lit on the table.",
     "motion": "The girl reads aloud from the open book, her lips moving, and turns one page; her mother writes a word in her notebook, looks up at her daughter and smiles, then returns to her notebook. The lamp flame flickers softly.",
-    "maskPrompt": "person, book, oil lamp"
+    "maskPrompt": "person, book, oil lamp",
+    "pixelRatio": 2.4
   },
   {
     "id": "cathedrale",
@@ -45,7 +48,8 @@
     ],
     "who": "On the open ground just in front of the cathedral steps: a bent 84-year-old grandfather with white hair and side whiskers leaning on a walking cane (character 5), and next to him the 41-year-old preacher in a long dark frock coat (character 1) holding a letter.",
     "motion": "The old man lifts his cane slightly and points toward the cathedral, speaking; the preacher listens, nods, glances at his letter, then both return to their starting poses. Slow, gentle.",
-    "maskPrompt": "person"
+    "maskPrompt": "person",
+    "pixelRatio": 2.4
   },
   {
     "id": "champ",
@@ -57,7 +61,8 @@
     ],
     "who": "On the esplanade, slightly left of the statue pedestal: a 35-year-old woman in a long dark dress and shawl (character 2) holding a one-year-old boy on her hip; a few steps away, a young newspaper boy in a cap and short jacket holding up a folded newspaper, with a small stack of newspapers under his other arm.",
     "motion": "The newspaper boy waves the folded newspaper above his head as if calling out the news; the woman gently rocks the little boy on her hip and turns her head toward the newspaper boy, then back. Small, looping movements.",
-    "maskPrompt": "person, newspaper"
+    "maskPrompt": "person, newspaper",
+    "pixelRatio": 2.4
   },
   {
     "id": "clercs",
@@ -67,9 +72,11 @@
       220,
       165
     ],
-    "who": "Behind the bookstall covered in books and pamphlets: the 41-year-old preacher in a long dark frock coat (character 1) arranging small books; in front of the stall, a Bible peddler in a wide-brimmed hat with a heavy leather bag full of small books worn across his body and a walking stick (character 7).",
-    "motion": "The preacher picks up a small pamphlet from the stall and holds it out; the peddler takes a step closer, looks at it, nods, and adjusts the strap of his bag; then both return to their starting poses.",
-    "maskPrompt": "person, pamphlet"
+    "who": "On the open ground in front of the bookstall, both fully visible from head to feet and not hidden by the stall: on the left, standing at the left front corner of the stall, a 41-year-old man with a short dark beard and moustache, wearing a long dark frock coat, a waistcoat and a dark cravat (absolutely NO white preaching bands and NO white collar tabs), holding out a small printed pamphlet (character 1 of the sheet); on the right, a Bible peddler in a wide-brimmed hat with a heavy leather bag full of small books worn across his body and a walking stick (character 7), facing him.",
+    "motion": "The bearded man holds out the pamphlet and gestures toward the books on the stall; the peddler steps a little closer, takes a look, nods and adjusts the strap of his bag; then both return to their starting poses. Small, calm movements.",
+    "maskPrompt": "person, pamphlet",
+    "scale": "each adult character is about one quarter of the image height, small next to the stall: their heads reach the middle of the stall roof edge, not higher.",
+    "pixelRatio": 2.0
   },
   {
     "id": "rhone",
@@ -82,7 +89,7 @@
     "who": "On the lower stone quay by the river: two washerwomen in long skirts with rolled sleeves and headscarves kneeling at the water's edge washing laundry on a wooden board, and standing a few steps behind them on the quay, the 16-year-old girl with braided hair and apron (character 3) holding a closed book against her chest, looking at the river.",
     "motion": "The two washerwomen scrub and beat the laundry on the board, dipping it in the water; the girl stands still looking at the river, her skirt and the hanging laundry move gently in a light wind. The river surface ripples softly.",
     "maskPrompt": "person, laundry",
-    "pixelRatio": 2,
+    "pixelRatio": 1.8,
     "depth": 900
   },
   {
@@ -96,7 +103,7 @@
     "who": "In the barracks yard next to the two small cannons: two French artillery soldiers of the 1870s in kepis and short jackets; one cleans the barrel of a cannon with a long rammer brush, the other stands at ease watching.",
     "motion": "The first soldier pushes the long rammer brush in and out of the cannon barrel a few times; the second soldier shifts his weight and adjusts his kepi. Calm looping movements.",
     "maskPrompt": "person",
-    "pixelRatio": 2.4
+    "pixelRatio": 2.2
   },
   {
     "id": "marche",
@@ -108,7 +115,8 @@
     ],
     "who": "At the market stalls under the striped awnings: a market woman in a straw hat and apron arranging fruit and vegetables in baskets on the stall, and a customer woman with a basket on her arm.",
     "motion": "The market woman lifts a piece of fruit and offers it, the customer puts it in her basket and nods; small friendly gestures, then back to the starting poses.",
-    "maskPrompt": "person, basket"
+    "maskPrompt": "person, basket",
+    "pixelRatio": 2.4
   },
   {
     "id": "vapeur",
@@ -122,6 +130,6 @@
     "motion": "The paddle wheel of the steamer turns slowly, smoke drifts from its funnel in the wind, the river water ripples and flows gently past the boat and the pontoons, the boatmen move slightly. The boat itself stays in place, moored.",
     "maskPrompt": "paddle steamer boat, smoke",
     "mode": "patch",
-    "pixelRatio": 1.2
+    "pixelRatio": 1.0
   }
 ]

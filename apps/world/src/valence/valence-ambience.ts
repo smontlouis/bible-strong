@@ -36,7 +36,7 @@ type Particle = {
   spin: number
   sway: number
   phase: number
-  kind: 'smoke' | 'leaf' | 'mote' | 'glint' | 'cloud'
+  kind: 'smoke' | 'leaf' | 'mote' | 'glint' | 'cloud' | 'current'
   scale: number
 }
 
@@ -66,6 +66,7 @@ export class ValenceAmbience {
   private leafTimer = 0
   private moteTimer = 0
   private glintTimer = 0
+  private currentTimer = 0
   private readonly trees: { x: number; y: number; width: number }[]
   private readonly clouds: Particle[] = []
 
@@ -112,6 +113,22 @@ export class ValenceAmbience {
       g.addColorStop(1, 'rgba(255, 240, 205, 0)')
       c.fillStyle = g
       c.fillRect(0, 0, 32, 32)
+    })
+    texture(scene, 'v-current', 64, c => {
+      // A short curved ink stroke of current, pale on the brown water.
+      c.lineCap = 'round'
+      c.strokeStyle = 'rgba(255, 244, 222, 0.85)'
+      c.lineWidth = 2.4
+      c.beginPath()
+      c.moveTo(6, 34)
+      c.bezierCurveTo(20, 26, 40, 40, 58, 30)
+      c.stroke()
+      c.strokeStyle = 'rgba(92, 62, 34, 0.45)'
+      c.lineWidth = 1.4
+      c.beginPath()
+      c.moveTo(14, 40)
+      c.bezierCurveTo(26, 35, 38, 44, 50, 38)
+      c.stroke()
     })
     texture(scene, 'v-cloud', 128, c => {
       const g = c.createRadialGradient(64, 64, 6, 64, 64, 63)
@@ -293,6 +310,33 @@ export class ValenceAmbience {
       }
     }
 
+    this.currentTimer -= dt
+    if (this.currentTimer <= 0) {
+      this.currentTimer = 110
+      for (let attempt = 0; attempt < 6; attempt++) {
+        const point = { x: Math.random() * 320, y: 130 + Math.random() * 800 }
+        const inPylon =
+          point.x > PYLON.x - 10 &&
+          point.x < PYLON.x + PYLON.width + 10 &&
+          point.y > PYLON.y &&
+          point.y < PYLON.y + PYLON.height + 20
+        if (!inside(point, RIVER) || inPylon || !near(point.x, point.y, 60)) continue
+        const image = this.take('v-current').setDepth(-58).setPosition(point.x, point.y)
+        this.spawn({
+          image,
+          life: 2600 + Math.random() * 1800,
+          vx: 2 + Math.random() * 2,
+          vy: 11 + Math.random() * 6,
+          spin: 0,
+          sway: 1.5,
+          phase: Math.random() * 6,
+          kind: 'current',
+          scale: 0.32 + Math.random() * 0.22,
+        })
+        break
+      }
+    }
+
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i]
       p.age += dt
@@ -315,6 +359,10 @@ export class ValenceAmbience {
         p.image.setAlpha(Math.min(1, t * 8, (1 - t) * 4))
       } else if (p.kind === 'mote') {
         p.image.setScale(p.scale).setAlpha(0.7 * Math.sin(Math.PI * t))
+      } else if (p.kind === 'current') {
+        // Flow lines leave the water before they reach the quays.
+        if (!inside({ x: p.image.x, y: p.image.y }, RIVER)) p.age = Math.max(p.age, p.life * 0.85)
+        p.image.setScale(p.scale * (1 + t * 0.4), p.scale).setAlpha(0.7 * Math.sin(Math.PI * t))
       } else if (p.kind === 'glint') {
         p.image.setScale(p.scale * 2.2, p.scale * 0.45).setAlpha(0.75 * Math.sin(Math.PI * t))
       }
