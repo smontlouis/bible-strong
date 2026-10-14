@@ -2,24 +2,28 @@
 
 Proposition du 14 octobre 2026, à valider avant d’écrire les dialogues. Chaque élément renvoie aux [dossiers de recherche](./recherche/README.md). Ce qui n’est pas sourcé est marqué comme choix de mise en scène.
 
-## 1. Le moment
+## 1. Le temps : onze mois sur une seule carte
 
 **Nom du projet : Valence 1876.** C’est l’année de l’arrivée de Daniel Bourdeau, celle que l’UFA célèbre, celle que tout le monde connaît.
 
-**Le jour joué : un jour de semaine de septembre 1877, en fin d’après-midi, quelques jours avant les baptêmes.** Onze mois après l’arrivée. Ce choix tient à une raison simple : à ce moment précis, tout ce que les sources documentent existe en même temps.
+**Une seule carte, plusieurs moments.** La ville ne change pas entre octobre 1876 et septembre 1877 ; les événements, si. La carte est donc un seul lieu, dessiné une fois, et chaque station est un moment daté. En se déplaçant dans Valence, le visiteur traverse les onze mois de l’histoire :
 
-- L’étal de livres de Bourdeau fonctionne : « a book stand in lively operation, from which nearly a score of bound volumes and hundreds of different tracts were distributed » (Review and Herald, 4 octobre 1877, période close au 24 septembre).
-- Une quinzaine de numéros des *Signes des Temps* ont paru depuis juillet 1876.
-- Bourdeau a écrit de Valence, le 22 février 1877, sur la mort de Pie VI et les 1260 ans.
-- Bourdeau et Andrews sont allés à Paris en mars 1877 demander au gouvernement de pouvoir travailler avec moins de contraintes.
-- La famille de Valence qui l’a invité a étudié avec lui pendant presque un an : elle peut en parler.
-- Dix-sept Valentinois vont être baptisés en septembre 1877. C’est l’horizon de la visite, pas son passé.
+| Station | Moment | Ce qui s’y joue |
+| --- | --- | --- |
+| La gare | Octobre 1876 | L’arrivée de la famille Bourdeau, les premiers numéros des *Signes des Temps* |
+| Le temple Saint-Ruf | Automne 1876 | L’invitation des familles protestantes, la chaire prêtée une fois |
+| La maison de la famille | Hiver 1876-1877 | Les veillées d’étude dans les maisons |
+| La cathédrale | Février 1877 | La lettre de Bourdeau sur Pie VI et les 1260 ans |
+| La citadelle | 29 août 1799 | Le lieu de la mort du pape, hors du temps de la visite : une station mémoire |
+| Le Champ de Mars | Mars à octobre 1877 | Le retour de Paris, la crise politique, les élections |
+| La place des Clercs | Été 1877 | L’étal de livres « in lively operation » |
+| Le Rhône | Septembre 1877 | Les dix-sept baptêmes, l’épilogue |
 
-Si tu préfères le jour de l’arrivée, en octobre 1876, le décor reste le même. Ce qui change : pas d’étal de livres, pas de lettre sur Pie VI, pas de voyage à Paris, et des personnages qui n’ont encore rien étudié. Je recommande septembre 1877.
+**Comment le temps se lit.** Chaque station ouvre sur un carton daté. Un fil au sol, pointillé comme les ponts de World, relie les stations dans l’ordre des dates : on peut le suivre ou se promener librement. Une frise discrète dans l’interface, d’octobre 1876 à septembre 1877, s’allume station après station. Rien n’oblige à l’ordre ; les cartons suffisent à se repérer.
 
-**Le carton d’ouverture** dit les deux dates en une phrase : « Il y a cent cinquante ans, en octobre 1876, Daniel Bourdeau s’installait à Valence. Vous arrivez onze mois plus tard, la semaine où tout se décide. »
+**Le carton d’ouverture** : « Il y a cent cinquante ans, en octobre 1876, Daniel Bourdeau s’installait à Valence. Traversez la ville : chaque lieu est un moment des onze mois qui ont suivi. »
 
-**Lumière et saison.** Fin d’été, lumière basse et chaude venant de l’ouest, par-dessus le Rhône. Mistral léger : du linge qui claque sur les quais, des drapeaux, de la poussière sur le Champ de Mars. Le mistral souffle « un jour sur trois » ; c’est le détail qui fait sentir la vallée.
+**Lumière et saisons.** Une seule lumière pour toute la carte, fin d’après-midi, basse et chaude, venant de l’ouest par-dessus le Rhône. Les saisons se disent par de petits accessoires propres à chaque station, jamais par la lumière : feuilles tombées et malles sur le quai de la gare en octobre, volets clos et lampe allumée à la maison en hiver, étals de fruits sur la place en été, linge qui claque au mistral sur les quais en septembre. Le mistral souffle « un jour sur trois » ; c’est le détail qui fait sentir la vallée.
 
 ## 2. La palette : le sépia comme argument
 
@@ -91,7 +95,7 @@ La géographie est simplifiée mais respecte la ville réelle : le Champ de Mars
 
 **Daniel T. Bourdeau, 41 ans.** Réel. Pasteur canadien-français, arrivé en Suisse en janvier 1876, à Valence depuis octobre 1876 avec sa famille. Corédacteur des *Signes des Temps* avec Andrews. Il tient l’étal de livres de la place des Clercs. Il a écrit de Valence sur la mort de Pie VI. Il est allé à Paris en mars 1877. Ses répliques sont reconstituées d’après les sources, rien de plus.
 
-**Marion Saxby Bourdeau, 35 ans.** Réelle. Mariée en 1861, sa sœur Charlotte a épousé Augustin, le frère de Daniel. Arrivée en Europe avec son mari en janvier 1876 : La Coudre, Le Locle, Bâle, puis Valence. On la rencontre au Champ de Mars avec un enfant en bas âge, Augustin, né en 1875. La fille, Patience, n’est pas nommée sur la carte : son âge n’est pas établi. Répliques reconstituées d’après les sources, qui ne disent presque rien d’elle : elle parlera peu, et de faits.
+**Marion Saxby Bourdeau, 35 ans.** Réelle. Mariée en 1861, sa sœur Charlotte a épousé Augustin, le frère de Daniel. Arrivée en Europe avec son mari en janvier 1876 : La Coudre, Le Locle, Bâle, puis Valence. On la rencontre au Champ de Mars, en 1877, avec un enfant en bas âge, Augustin, né en 1875. La fille, Patience, n’est pas nommée sur la carte : son âge n’est pas établi. Répliques reconstituées d’après les sources, qui ne disent presque rien d’elle : elle parlera peu, et de faits.
 
 **La famille de Valence.** Composite, à annoncer comme tel. Une famille protestante de la ville, de celles qui ont invité Bourdeau à parler au temple à l’automne 1876. Nom provisoire : Faure, nom fréquent en Drôme, à changer si l’UFA connaît les vrais noms des dix-sept. Quatre personnes :
 
@@ -116,25 +120,56 @@ Soldats du 10e régiment d’artillerie, caserne Brunet : la ville compte enviro
 
 ## 6. Les huit stations
 
-Chaque station est un lieu, un personnage, et un dialogue en trois temps : **le fait** (sourcé), **comment j’étudie** (les outils de 1877), **aujourd’hui** (un geste précis dans Bible Strong, ouvert par un lien profond). Jamais de reproche. La seule phrase tournée vers le visiteur est une question.
+Chaque station est un lieu, un moment daté, un personnage, et un dialogue en trois temps : **le fait** (sourcé), **comment j’étudie** (les outils de 1877), **aujourd’hui** (un geste précis dans Bible Strong, ouvert par un lien profond). Jamais de reproche. La seule phrase tournée vers le visiteur est une question.
 
-### 1. La gare : l’arrivée et le colis de Bâle
+### 1. La gare, octobre 1876 : l’arrivée
 
 Lieu : la gare PLM. Personnage : l’employé du PLM, puis Bourdeau qui vient chercher son paquet.
 
-- Le fait. La famille Bourdeau est arrivée ici en octobre 1876. Depuis, chaque mois, un paquet de *Signes des Temps* arrive de Bâle : premier numéro en juillet 1876, huit pages de 30 sur 41 cm, deux mille exemplaires, quatre cents abonnés après cinq mois, surtout en Suisse et en France. Le journal est imprimé chez un imprimeur bâlois, l’Église n’a pas d’imprimerie avant 1884. Andrews a failli mourir cette année.
+- Le fait. La famille Bourdeau descend du train de Lyon : Daniel, Marion, un enfant d’un an. Dans les malles, les premiers numéros des *Signes des Temps* : premier numéro en juillet 1876, huit pages de 30 sur 41 cm, deux mille exemplaires. Chaque mois, un paquet suivra de Bâle ; en décembre, le journal comptera quatre cents abonnés, surtout en Suisse et en France. Il est imprimé chez un imprimeur bâlois, l’Église n’a pas d’imprimerie avant 1884.
 - Comment j’étudie. Tout vient par la poste. Un article, une réponse, un tract : un mois d’attente. Mary Andrews, quinze ou seize ans, relit les épreuves.
 - Aujourd’hui. Ouvrir la bibliothèque en ligne de Bible Strong : commentaires, dictionnaires, Bibles, mis à jour sans attendre le train. Lien : la bibliothèque.
 
-### 2. Le temple Saint-Ruf : l’invitation
+### 2. Le temple Saint-Ruf, automne 1876 : l’invitation
 
 Lieu : le temple, façade à fronton, sans clocher. Personnage : le pasteur.
 
-- Le fait. Des familles de Valence ont invité Bourdeau à parler au temple à l’automne 1876. Le temple est protestant depuis 1806. La Drôme est l’une des régions les plus protestantes de France. Les nouveaux groupes religieux n’ont pas accès aux bâtiments publics : il a fallu aller à Paris en mars 1877.
+- Le fait. Des familles de Valence ont invité Bourdeau à parler au temple à l’automne 1876. Le temple est protestant depuis 1806. La Drôme est l’une des régions les plus protestantes de France. Les nouveaux groupes religieux n’ont pas accès aux bâtiments publics : c’est l’obstacle qui mènera Bourdeau à Paris au printemps.
 - Comment j’étudie. Le pasteur lit l’Ostervald, « la version généralement usitée pour le culte public ». Il n’a que celle-là au pupitre. Pour comparer, il faudrait la Bible de Lausanne, complète depuis 1872, le Nouveau Testament de Darby de 1859, et le seul Ancien Testament de Segond, paru en 1874. Quatre livres, quatre prix.
 - Aujourd’hui. Ouvrir un verset en Ostervald, puis en Lausanne 1872, Martin 1744, Darby et Segond 1910, côte à côte. Les quatre Bibles du pasteur sont dans l’app. Lien : la comparaison de versions.
 
-### 3. La place des Clercs : l’étal de livres
+### 3. La maison de la famille, hiver 1876-1877 : la veillée
+
+Lieu : la pièce de la famille Faure, la table, la lampe. Personnages : Élise, Jeanne, Louis.
+
+- Le fait. Depuis l’automne, le groupe se réunit dans les maisons, le soir, après le travail. Sur la table : la Bible Ostervald de la Société biblique de Paris, la *Concordance des Saintes Écritures* de 1856 fondée sur l’Ostervald, le *Dictionnaire de la Bible* de Bost en deux volumes de 1849, un cahier, un tract de Bâle. La lampe à pétrole coûte cher ; souvent c’est la bougie.
+- Comment j’étudie. Élise lit à voix haute. Jeanne cherche chaque mot dans la concordance, page après page. Pour un mot hébreu, il n’existe qu’un dictionnaire hébreu-français, celui de Sander et Trenel de 1859, fait pour les écoles juives. Pour le grec, rien en français : les lexiques sont en latin. Les numéros Strong n’existent pas, ils paraîtront en 1890, en anglais.
+- Aujourd’hui. Le geste central de la visite : ouvrir le verset lu par Élise, toucher un mot, voir le mot hébreu ou grec, l’entendre, lire sa définition. Puis ouvrir le Bost de 1849 et le Calmet, qui sont dans l’app. Lien : le lexique, puis les dictionnaires.
+
+### 4. La cathédrale, février 1877 : le cœur du pape
+
+Lieu : le chœur, le monument de Pie VI. Personnages : le grand-père Jacques, puis Bourdeau.
+
+- Le fait. Pie VI, prisonnier du Directoire, est mort dans la citadelle de Valence le 29 août 1799. Son corps est parti pour Rome en 1802, son cœur est resté ici, sous ce buste. Bourdeau écrit ce mois-ci sur ce monument, dans sa lettre du 22 février 1877, et sur les 1260 ans. Pour un adventiste de 1877, Valence est le lieu de la « blessure mortelle » d’Apocalypse 13. Le grand-père, lui, se souvient du cortège : il avait six ans.
+- Comment j’étudie. Pour la prophétie, Bourdeau n’a que des livres anglais : *Thoughts on Daniel and the Revelation* d’Uriah Smith, l’*History of the Sabbath* d’Andrews, les tableaux prophétiques. Il traduit lui-même, le soir, pour les tracts.
+- Aujourd’hui. Ouvrir Apocalypse 13:3 en Segond 1910, toucher « blessure », voir le mot grec, puis lire les commentaires en français : la Bible annotée, le commentaire biblique adventiste, les écrits d’Ellen White. Lien : le verset avec ses commentaires.
+
+### 5. La citadelle, 29 août 1799 : la tour
+
+Lieu : les vestiges, une tour. Pas de personnage : une station de lieu, courte.
+
+- Le fait. C’est ici que Pie VI est mort. Le corps a d’abord été déposé dans la chapelle de la citadelle. La citadelle occupe l’angle nord-ouest de la ville ; son état en 1877 est incertain, la carte reste sobre.
+- Aujourd’hui. Une frise : 1798, 1799, 1876, 1877, 2026. Lien : la frise chronologique de l’app, si elle couvre la période ; sinon pas de lien, seulement la frise de la station.
+
+### 6. Le Champ de Mars, de mars à octobre 1877 : la ville et le temps
+
+Lieu : l’esplanade, le kiosque de 1862, la statue Championnet, Crussol en face. Personnages : Marion Bourdeau avec l’enfant, le crieur du *Journal de Valence*.
+
+- Le fait. Bourdeau et Andrews reviennent de Paris, où ils sont allés en mars 1877 demander au gouvernement de pouvoir travailler avec moins de contraintes. Valence a 23 220 habitants et 3 000 soldats. Le conseil municipal a voté en mai 1876 une nouvelle caserne. Le journal républicain passe à six numéros par semaine le 1er septembre 1877 : la crise politique de l’année se joue, les élections sont en octobre. L’année suivante, Bourdeau écrira que les changements politiques ont rendu la prédication et la distribution de tracts plus faciles.
+- Comment j’étudie. Marion dit en trois phrases le chemin de la famille : janvier 1876 La Coudre, Le Locle, Bâle, octobre 1876 Valence. Un enfant né en route. Elle ne dit rien d’autre : les sources ne disent rien d’autre.
+- Aujourd’hui. Le verset du jour, et la lecture quotidienne qu’on emporte partout. Lien : la lecture du jour.
+
+### 7. La place des Clercs, été 1877 : l’étal de livres
 
 Lieu : le marché, l’étal de Bourdeau, la Maison des Têtes au fond. Personnages : Bourdeau et le colporteur biblique.
 
@@ -142,38 +177,7 @@ Lieu : le marché, l’étal de Bourdeau, la Maison des Têtes au fond. Personna
 - Comment j’étudie. Le colporteur vend le Nouveau Testament Ostervald de Londres, 1870, le livre le moins cher de l’étal. Une Bible complète, c’est une dépense ; les prix de 1877 n’ont pas été retrouvés, on ne les dira pas.
 - Aujourd’hui. Télécharger toute une bibliothèque pour lire sans réseau. Lien : la bibliothèque hors ligne.
 
-### 4. La maison de la famille : la veillée
-
-Lieu : la pièce de la famille Faure, la table, la lampe. Personnages : Élise, Jeanne, Louis.
-
-- Le fait. Depuis l’automne, le groupe se réunit dans les maisons. Sur la table : la Bible Ostervald de la Société biblique de Paris, la *Concordance des Saintes Écritures* de 1856 fondée sur l’Ostervald, le *Dictionnaire de la Bible* de Bost en deux volumes de 1849, un cahier, un tract de Bâle. La lampe à pétrole coûte cher ; souvent c’est la bougie.
-- Comment j’étudie. Élise lit à voix haute. Jeanne cherche chaque mot dans la concordance, page après page. Pour un mot hébreu, il n’existe qu’un dictionnaire hébreu-français, celui de Sander et Trenel de 1859, fait pour les écoles juives. Pour le grec, rien en français : les lexiques sont en latin. Les numéros Strong n’existent pas, ils paraîtront en 1890, en anglais.
-- Aujourd’hui. Le geste central de la visite : ouvrir le verset lu par Élise, toucher un mot, voir le mot hébreu ou grec, l’entendre, lire sa définition. Puis ouvrir le Bost de 1849 et le Calmet, qui sont dans l’app. Lien : le lexique, puis les dictionnaires.
-
-### 5. La cathédrale : le cœur du pape
-
-Lieu : le chœur, le monument de Pie VI. Personnages : le grand-père Jacques, puis Bourdeau.
-
-- Le fait. Pie VI, prisonnier du Directoire, est mort dans la citadelle de Valence le 29 août 1799. Son corps est parti pour Rome en 1802, son cœur est resté ici, sous ce buste. Bourdeau a écrit sur ce monument dans sa lettre du 22 février 1877, et sur les 1260 ans. Pour un adventiste de 1877, Valence est le lieu de la « blessure mortelle » d’Apocalypse 13. Le grand-père, lui, se souvient du cortège : il avait six ans.
-- Comment j’étudie. Pour la prophétie, Bourdeau n’a que des livres anglais : *Thoughts on Daniel and the Revelation* d’Uriah Smith, l’*History of the Sabbath* d’Andrews, les tableaux prophétiques. Il traduit lui-même, le soir, pour les tracts.
-- Aujourd’hui. Ouvrir Apocalypse 13:3 en Segond 1910, toucher « blessure », voir le mot grec, puis lire les commentaires en français : la Bible annotée, le commentaire biblique adventiste, les écrits d’Ellen White. Lien : le verset avec ses commentaires.
-
-### 6. La citadelle : la tour
-
-Lieu : les vestiges, une tour. Pas de personnage : une station de lieu, courte.
-
-- Le fait. C’est ici que Pie VI est mort. Le corps a d’abord été déposé dans la chapelle de la citadelle. La citadelle occupe l’angle nord-ouest de la ville ; son état en 1877 est incertain, la carte reste sobre.
-- Aujourd’hui. Une frise : 1798, 1799, 1876, 1877, 2026. Lien : la frise chronologique de l’app, si elle couvre la période ; sinon pas de lien, seulement la frise de la station.
-
-### 7. Le Champ de Mars : la ville et le temps
-
-Lieu : l’esplanade, le kiosque de 1862, la statue Championnet, Crussol en face. Personnages : Marion Bourdeau avec l’enfant, le crieur du *Journal de Valence*.
-
-- Le fait. Valence a 23 220 habitants et 3 000 soldats. Le conseil municipal a voté en mai 1876 une nouvelle caserne. Le journal républicain passe à six numéros par semaine le 1er septembre 1877 : la crise politique de l’année se joue, les élections sont en octobre. L’année suivante, Bourdeau écrira que les changements politiques ont rendu la prédication et la distribution de tracts plus faciles.
-- Comment j’étudie. Marion dit en trois phrases le chemin de la famille : janvier 1876 La Coudre, Le Locle, Bâle, octobre 1876 Valence. Un enfant né en route. Elle ne dit rien d’autre : les sources ne disent rien d’autre.
-- Aujourd’hui. Le verset du jour, et la lecture quotidienne qu’on emporte partout. Lien : la lecture du jour.
-
-### 8. Le Rhône : dix-sept
+### 8. Le Rhône, septembre 1877 : dix-sept
 
 Lieu : le bas-port, le pont suspendu, les lavandières. Personnages : Élise, puis personne : l’épilogue est un carton.
 
@@ -193,7 +197,7 @@ Sept objets cachés sur la carte. Chacun ouvre une carte « hier, aujourd’hui 
 | Le *Dictionnaire de la Bible* de Bost | l’étal de livres | Deux volumes, 1849 | Le même Bost, dans l’app |
 | Le dictionnaire hébreu-français de Sander et Trenel | le temple | 1859, le seul en français, fait pour les écoles juives | Le lexique hébreu, avec la prononciation |
 | La lampe à pétrole | la maison | Le pétrole est cher ; la bougie reste la règle | Le thème sombre, pour lire la nuit |
-| La lettre de Bâle | la gare | Reconstituée d’après les sources : la maladie d’Andrews, Mary aux épreuves, quatre cents abonnés | La bibliothèque en ligne |
+| La lettre de Bâle | la place des Clercs, été 1877 | Reconstituée d’après les sources : la maladie d’Andrews au milieu de 1877, Mary aux épreuves, les abonnés | La bibliothèque en ligne |
 
 ## 8. Ce qu’on ne dessine pas
 
