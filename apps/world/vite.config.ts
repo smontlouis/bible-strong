@@ -207,4 +207,13 @@ export default defineConfig({
     },
   },
   base: '/',
+  build: {
+    rolldownOptions: {
+      // Valence 1876 has its own page for link previews; both pages share main.tsx.
+      input: {
+        main: resolve(import.meta.dirname, 'index.html'),
+        valence: resolve(import.meta.dirname, 'valence-1876/index.html'),
+      },
+    },
+  },
 })

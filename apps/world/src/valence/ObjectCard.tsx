@@ -79,8 +79,10 @@ function roundedRect(context: CanvasRenderingContext2D, x: number, y: number, w:
 }
 
 /** 1200 × 630 share card, values from design-system/project/tokens.json. */
-export async function renderShareCard(language: Language, name: string) {
+export async function renderShareCard(language: Language, name: string, variant: 'visit' | 'link' = 'visit') {
   const t = valenceCopy[language]
+  const title = variant === 'link' ? t.title : t.shareTitle
+  const subtitle = variant === 'link' ? t.subtitle : t.shareLine
   await Promise.all([
     document.fonts.load('800 60px Pulp'),
     document.fonts.load('500 28px Pulp'),
@@ -122,7 +124,7 @@ export async function renderShareCard(language: Language, name: string) {
   context.fillText('BIBLE STRONG · 1876 – 2026', 680, 100)
   context.fillStyle = TOKENS.ink
   context.font = '800 60px Pulp, Arial, sans-serif'
-  const words = t.shareTitle.split(' ')
+  const words = title.split(' ')
   let line = ''
   let y = 190
   for (const word of words) {
@@ -136,7 +138,7 @@ export async function renderShareCard(language: Language, name: string) {
   context.fillText(line, 650, y)
   context.font = '400 28px ValenceLiterata, Georgia, serif'
   context.fillStyle = TOKENS.ink
-  const sentence = t.shareLine.split(' ')
+  const sentence = subtitle.split(' ')
   line = ''
   y += 64
   for (const word of sentence) {

@@ -82,7 +82,8 @@
     "who": "On the lower stone quay by the river: two washerwomen in long skirts with rolled sleeves and headscarves kneeling at the water's edge washing laundry on a wooden board, and standing a few steps behind them on the quay, the 16-year-old girl with braided hair and apron (character 3) holding a closed book against her chest, looking at the river.",
     "motion": "The two washerwomen scrub and beat the laundry on the board, dipping it in the water; the girl stands still looking at the river, her skirt and the hanging laundry move gently in a light wind. The river surface ripples softly.",
     "maskPrompt": "person, laundry",
-    "pixelRatio": 2
+    "pixelRatio": 2,
+    "depth": 900
   },
   {
     "id": "caserne",
