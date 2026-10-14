@@ -1,16 +1,13 @@
 name: Publish Expo Production Update
 
+# Manual only: an update reaches the readers who look for one in the settings, see ADR-0085.
 on:
-  push:
-    branches: [master]
-    paths:
-      - apps/expo/**
-      - packages/**
-      - package.json
-      - yarn.lock
-      - .yarn/**
-      - .github/workflows/expo-update-production.yml
   workflow_dispatch:
+    inputs:
+      message:
+        description: What the update changes (defaults to the last commit)
+        required: false
+        type: string
 
 concurrency:
   group: expo-update-production
@@ -21,7 +18,7 @@ permissions:
 
 jobs:
   publish-update:
-    name: Publish EAS Update (production)
+    name: Publish update (production)
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -29,8 +26,8 @@ jobs:
     steps:
       - name: Check for secrets
         run: |
-          if [ -z "${{ secrets.EXPO_TOKEN }}" ] || [ -z "${{ secrets.SENTRY_AUTH_TOKEN }}" ]; then
-            echo "Add EXPO_TOKEN and SENTRY_AUTH_TOKEN repository secrets before publishing production updates."
+          if [ -z "${{ secrets.OTA_PUBLISH_TOKEN }}" ] || [ -z "${{ secrets.SENTRY_AUTH_TOKEN }}" ]; then
+            echo "Add OTA_PUBLISH_TOKEN and SENTRY_AUTH_TOKEN repository secrets before publishing production updates."
             exit 1
           fi
 
@@ -48,15 +45,11 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Setup EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-
       - name: Publish production update and upload sourcemaps
         env:
+          OTA_PUBLISH_TOKEN: ${{ secrets.OTA_PUBLISH_TOKEN }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          UPDATE_MESSAGE: ${{ inputs.message }}
         run: |
-          message="$(git log -1 --pretty=%s) (${GITHUB_SHA::7})"
-          yarn workspace @bible-strong/expo update:production --message "$message" --non-interactive
+          message="${UPDATE_MESSAGE:-$(git log -1 --pretty=%s)} (${GITHUB_SHA::7})"
+          yarn workspace @bible-strong/expo update:production --message "$message"

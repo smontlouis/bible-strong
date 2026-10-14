@@ -4,6 +4,8 @@ npm-debug.*
 *.p8
 *.key
 *.pem
+# The public certificate builds check updates against; its private key never enters this repository.
+!apps/expo/certs/certificate.pem
 keystore.txt
 *.mobileprovision
 project/*
