@@ -28,6 +28,26 @@ import './valence.css'
 
 const STAND_IDLE_MS = 150_000
 const byId = new Map(stations.map(station => [station.id, station]))
+const shortDates: Record<Language, Partial<Record<StationId, string>>> = {
+  fr: {
+    gare: 'Oct. 1876',
+    temple: 'Automne',
+    maison: 'Hiver',
+    cathedrale: 'Fév. 1877',
+    champ: 'Mars-oct.',
+    clercs: 'Été',
+    rhone: 'Sept. 1877',
+  },
+  en: {
+    gare: 'Oct. 1876',
+    temple: 'Autumn',
+    maison: 'Winter',
+    cathedrale: 'Feb. 1877',
+    champ: 'Mar.-Oct.',
+    clercs: 'Summer',
+    rhone: 'Sep. 1877',
+  },
+}
 
 async function loadValenceNavigation(): Promise<NavigationDocument> {
   const response = await fetch('./valence-1876/navigation.json', { cache: 'no-cache' })
@@ -81,7 +101,7 @@ function Timeline({
                 aria-label={`${t.travel} ${station.place[language]} · ${station.date[language]}`}
               >
                 <span className="v-stop-dot" />
-                <span className="v-stop-label">{station.date[language].replace(/ 18(\d\d)/, ' ’$1')}</span>
+                <span className="v-stop-label">{shortDates[language][id]}</span>
               </button>
             </li>
           )
@@ -245,13 +265,18 @@ export default function ValenceApp() {
   }, [ready, dialogOpen, overview, visited, found])
 
   // Walking onto a pioneer object picks it up.
+  const pickupTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
   useEffect(() => {
     if (!ready || dialogOpen) return
     const id = objectWithinReach(state, found)
     if (!id) return
     setProgress(old => ({ ...old, found: [...old.found, id] }))
-    setObjectOpen(id)
+    haptic('success')
+    // Let the golden burst play on the map before the card opens.
+    clearTimeout(pickupTimer.current)
+    pickupTimer.current = setTimeout(() => setObjectOpen(id), 650)
   }, [state, ready, dialogOpen, found])
+  useEffect(() => () => clearTimeout(pickupTimer.current), [])
 
   // A stand resets itself after a quiet while, ready for the next visitor.
   const lastActivity = useRef(performance.now())

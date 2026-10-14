@@ -60,3 +60,24 @@ in the Exploration world, without being a connected visitor or a Bible game part
 
 **Stand display**:
 The World opened with the `stand` URL parameter for an event screen.
+
+**Universe**:
+A separate explorable map on the same engine, opened by its own address. The archipelago is the default universe; Valence 1876 is the second.
+_Avoid_: Level, mode
+
+**Valence 1876**:
+The sepia universe at `/valence-1876` that retraces Daniel Bourdeau's eleven months in Valence, from October 1876 to September 1877.
+
+**Station**:
+One dated place of Valence 1876 where townsfolk tell what happened, how they studied, and what Bible Strong offers today.
+_Avoid_: Place (reserved for the archipelago's resource islands)
+
+**Thread**:
+The dotted line on the ground of Valence 1876 that links the stations in the order of their dates.
+
+**Pioneer object**:
+One of seven study objects of 1877 hidden in Valence 1876; finding it opens a "yesterday, today" card.
+
+**Composite character**:
+An invented townsperson of Valence 1876, announced as such, who carries daily life and emotion; real people only say what the sources allow.
+

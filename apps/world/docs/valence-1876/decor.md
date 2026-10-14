@@ -222,6 +222,14 @@ Ni Ellen White, ni Jean Vuilleumier, ni Augustin Bourdeau, ni une tente d’éva
 
 Rien de tout cela n’empêche de dessiner la carte ni d’écrire les dialogues : le décor évite chaque point incertain.
 
-## 10. Prochaine étape : les dialogues
+## 10. Ce que la réalisation a changé
+
+- **Le Rhône.** Le quai bas n’a pas d’accès lisible sur la carte : la station se tient sur l’esplanade, au-dessus des lavandières, là où Élise regarde le fleuve. Le quai reste un décor animé.
+- **La maison des Faure.** La carte montre une cour avec une table sous la treille : la veillée s’y tient, la lampe allumée. On y entre par le portail.
+- **La citadelle.** La station de mémoire n’a pas de personnage ; on la lit au pied de la terrasse.
+- **Les saisons.** Une seule lumière, et pas encore d’accessoires de saison propres à chaque station.
+- **Sources.** Les deux sources sans adresse vérifiable (Sander et Trenel, la loi de 1849) sont citées sans lien.
+
+## 11. Prochaine étape : les dialogues
 
 Huit stations, trois temps chacune, en français d’abord, puis en anglais. Les personnages de 1877 vouvoient le visiteur ; l’interface garde le tutoiement de World. Chaque dialogue porte son étiquette, « reconstitué d’après les sources » ou « personnage composite », et son bouton Sources. Après les dialogues : le brief d’illustration de la carte, zone par zone, dans le style de `docs/design/illustrations.md` adapté au sépia.

@@ -12,6 +12,10 @@ yarn dev:world
 
 Open http://localhost:5186. On a phone on the same network, use the Network address printed by Vite. No account, API keys, AI service or database is required. The app is the `@bible-strong/world` workspace under `apps/world`.
 
+## Valence 1876
+
+A second universe on the same engine, at `/valence-1876`: Valence in 1877 in sepia, eight dated stations with animated townsfolk, pioneer objects and a stand mode. See [its documentation](docs/valence-1876/README.md).
+
 ## Multiplayer
 
 Visitors share one room with live avatars, names and colors. `yarn dev:world` starts both the frontend and the local multiplayer Worker. See [multiplayer operation and validation](docs/multiplayer.md) for deployment, network behavior and load checks.

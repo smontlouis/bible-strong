@@ -2,6 +2,12 @@
 
 Rédigé le 14 octobre 2026, session distante. Branche `docs/valence-1876-decor`, poussée sur origin, pas de pull request ouverte. Tout ce qui suit est dans ce dossier ; rien d’autre n’a été modifié dans le dépôt.
 
+## 0. État au soir du 14 octobre 2026
+
+L’univers est construit et jouable à l’adresse `/valence-1876` de World : carte HD, huit stations avec leurs habitants animés, dialogues en trois temps en français et en anglais avec leurs sources, fil pointillé, frise, sept objets du pionnier, image de partage, épilogue vers le livre d’or, mode stand, particules. Fonctionnement, production des images et limites : [README.md](./README.md). Dialogues : [dialogues.md](./dialogues.md).
+
+Les décisions de la section 6 sont prises : la famille s’appelle Faure, le format en trois temps est retenu. Les étapes 1 à 4 de la section 7 sont faites. Restent la relecture UFA (étape 5) et, pour samedi, la mise en production et la réponse à Philippe Penner (étape 6).
+
 ## 1. D’où on vient
 
 **L’événement.** Samedi 17 octobre 2026, Palais des congrès de Valence, l’UFA fête les 150 ans de l’adventisme en France (première église fondée à Valence en 1876). Célébration à 10h, table ronde l’après-midi, concert Gospel Philharmonic Experience à 20h, repas tiré du sac, inscription obligatoire. Stéphane y tient un stand Bible Strong, comme à ASI Europe en septembre (où World en mode stand et des vidéos anglaises avaient servi d’aimant).

@@ -102,6 +102,7 @@ export function createValence(
     active = true
     previousNavigation = controls.navigation
     clock = 0
+    collected = new Set<PioneerObjectId>()
 
     resetInput = () => {
       controls.pointerPress = undefined
@@ -494,6 +495,10 @@ export function createValence(
       const breathing = reducedMotion ? 0 : Math.sin(this.clock / 520)
       for (const [id, image] of this.objects) {
         const found = controls.found.has(id)
+        if (found && !this.collected.has(id)) {
+          this.collected.add(id)
+          if (image.visible) this.ambience.burst(objectSpots[id], reducedMotion)
+        } else if (!found) this.collected.delete(id)
         const spot = objectSpots[id]
         image.setVisible(!found).setY(spot.y - (reducedMotion ? 0 : 2 + breathing * 2))
         this.objectGlow

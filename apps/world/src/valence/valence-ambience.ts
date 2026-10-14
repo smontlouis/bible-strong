@@ -147,6 +147,30 @@ export class ValenceAmbience {
     }
   }
 
+  /** A short golden burst where a pioneer object is picked up. */
+  burst(point: Point, reducedMotion: boolean) {
+    if (reducedMotion) return
+    for (let i = 0; i < 16; i++) {
+      const angle = (i / 16) * Math.PI * 2 + Math.random() * 0.3
+      const speed = 28 + Math.random() * 34
+      const image = this.take('v-mote')
+        .setDepth(2600)
+        .setPosition(point.x, point.y - 10)
+        .setBlendMode(Phaser.BlendModes.ADD)
+      this.spawn({
+        image,
+        life: 700 + Math.random() * 400,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed * 0.7 - 18,
+        spin: 0,
+        sway: 0,
+        phase: 0,
+        kind: 'mote',
+        scale: 0.45 + Math.random() * 0.35,
+      })
+    }
+  }
+
   private take(key: string) {
     const image = this.pool.pop() ?? this.scene.add.image(0, 0, key)
     return image.setTexture(key).setVisible(true).setAngle(0).setBlendMode(Phaser.BlendModes.NORMAL)
