@@ -183,9 +183,13 @@ export function StationDialog({
             <ul>
               {station.sources.map(source => (
                 <li key={source.label}>
-                  <a href={source.url} target="_blank" rel="noreferrer">
-                    {source.label}
-                  </a>
+                  {source.url ? (
+                    <a href={source.url} target="_blank" rel="noreferrer">
+                      {source.label}
+                    </a>
+                  ) : (
+                    source.label
+                  )}
                 </li>
               ))}
             </ul>

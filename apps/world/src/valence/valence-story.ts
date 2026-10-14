@@ -26,12 +26,12 @@ export type Speaker = {
 export const speakers: Record<SpeakerId, Speaker> = {
   bourdeau: {
     name: { fr: 'Daniel Bourdeau', en: 'Daniel Bourdeau' },
-    role: { fr: 'Pasteur, 41 ans', en: 'Preacher, 41' },
+    role: { fr: 'Pasteur, 41 ans', en: 'Preacher, 41' },
     kind: 'real',
   },
   marion: {
     name: { fr: 'Marion Bourdeau', en: 'Marion Bourdeau' },
-    role: { fr: 'Son épouse, 35 ans', en: 'His wife, 35' },
+    role: { fr: 'Son épouse, 35 ans', en: 'His wife, 35' },
     kind: 'real',
   },
   employee: {
@@ -46,7 +46,7 @@ export const speakers: Record<SpeakerId, Speaker> = {
   },
   elise: {
     name: { fr: 'Élise Faure', en: 'Élise Faure' },
-    role: { fr: '16 ans', en: 'Age 16' },
+    role: { fr: '16 ans', en: 'Age 16' },
     kind: 'composite',
   },
   jeanne: {
@@ -61,7 +61,7 @@ export const speakers: Record<SpeakerId, Speaker> = {
   },
   jacques: {
     name: { fr: 'Jacques Faure', en: 'Jacques Faure' },
-    role: { fr: 'Le grand-père, 84 ans', en: 'The grandfather, 84' },
+    role: { fr: 'Le grand-père, 84 ans', en: 'The grandfather, 84' },
     kind: 'composite',
   },
   crier: {
@@ -91,7 +91,7 @@ export type TodayPanel = {
   url: Record<Language, string>
   screenshot: string
 }
-export type Source = { label: string; url: string }
+export type Source = { label: string; url?: string }
 export type BeatKind = 'fact' | 'study' | 'today'
 export type StationId =
   | 'gare'
@@ -123,27 +123,27 @@ const RH_1877_04_05: Source = {
   url: 'https://documents.adventistarchives.org/Periodicals/RH/RH18770405-V49-14.pdf',
 }
 const RH_1877_10_04: Source = {
-  label: 'Review and Herald, 4 octobre 1877 (« D. T. Bourdeau, France »)',
+  label: 'Review and Herald, 4 octobre 1877 (« D. T. Bourdeau, France »)',
   url: 'https://documents.adventistarchives.org/Periodicals/RH/RH18771004-V50-14.pdf',
 }
 const ARCHIVES_FRANCE: Source = {
-  label: 'Archives adventistes, « Histoire de l’adventisme en France »',
+  label: 'Archives adventistes, « Histoire de l’adventisme en France »',
   url: 'https://www.archivesadventistes.org/blog/2006/09/histoire-de-lad.html',
 }
 const ESDA_BOURDEAU: Source = {
-  label: 'Encyclopédie adventiste, « Bourdeau, Daniel Toussaint »',
+  label: 'Encyclopédie adventiste, « Bourdeau, Daniel Toussaint »',
   url: 'https://encyclopedia.adventist.org/article?id=C90G',
 }
 const ESDA_ANDREWS: Source = {
-  label: 'Encyclopédie adventiste, « Andrews, John Nevins »',
+  label: 'Encyclopédie adventiste, « Andrews, John Nevins »',
   url: 'https://encyclopedia.adventist.org/article?id=C8VX',
 }
 const REVUE_SUISSE: Source = {
-  label: 'Revue adventiste, « Les débuts en Suisse, 1866-1922 »',
+  label: 'Revue adventiste, « Les débuts en Suisse, 1866-1922 »',
   url: 'https://revue.adventiste.org/vie-et-sante-les-debuts-en-suisse-1866-1922/',
 }
 const EVENT_150: Source = {
-  label: 'Fédération France-Sud, « 150 ans de l’adventisme en France »',
+  label: 'Fédération France-Sud, « 150 ans de l’adventisme en France »',
   url: 'https://adventisteffs.org/150-ans-adventisme-france/',
 }
 
@@ -165,7 +165,7 @@ export const stations: Station[] = [
       {
         speaker: 'bourdeau',
         text: {
-          fr: 'Des journaux, surtout. Les Signes des Temps. Le premier numéro est sorti à Bâle en juillet : huit pages, deux mille exemplaires.',
+          fr: 'Des journaux, surtout. Les Signes des Temps. Le premier numéro est sorti à Bâle en juillet : huit pages, deux mille exemplaires.',
           en: 'Newspapers, mostly. Les Signes des Temps. The first issue came out in Basel in July: eight pages, two thousand copies.',
         },
       },
@@ -188,7 +188,7 @@ export const stations: Station[] = [
       {
         speaker: 'bourdeau',
         text: {
-          fr: 'Un article, une correction, une réponse : tout passe par la poste et par le train.',
+          fr: 'Un article, une correction, une réponse : tout passe par la poste et par le train.',
           en: 'An article, a correction, a reply: everything travels by post and by train.',
         },
       },
@@ -210,7 +210,7 @@ export const stations: Station[] = [
     today: {
       title: { fr: 'La bibliothèque en ligne', en: 'The online library' },
       body: {
-        fr: 'Commentaires, dictionnaires, Bibles : Bible Strong les télécharge en quelques secondes, et les met à jour sans attendre le train.',
+        fr: 'Commentaires, dictionnaires, Bibles : Bible Strong les télécharge en quelques secondes, et les met à jour sans attendre le train.',
         en: 'Commentaries, dictionaries, Bibles: Bible Strong downloads them in seconds and keeps them up to date without waiting for a train.',
       },
       cta: { fr: 'Ouvrir la bibliothèque', en: 'Open the library' },
@@ -236,7 +236,7 @@ export const stations: Station[] = [
       {
         speaker: 'pastor',
         text: {
-          fr: 'Ce temple sert au culte protestant depuis le début du siècle. Son clocher menaçait ruine : on l’a démoli en 1805.',
+          fr: 'Ce temple sert au culte protestant depuis le début du siècle. Son clocher menaçait ruine : on l’a démoli en 1805.',
           en: 'This temple has served Protestant worship since the start of the century. Its bell tower was falling apart: it was pulled down in 1805.',
         },
       },
@@ -259,7 +259,7 @@ export const stations: Station[] = [
       {
         speaker: 'pastor',
         text: {
-          fr: 'Pour comparer, il me faudrait d’autres livres : la Bible de Lausanne, complète depuis 1872, le Nouveau Testament de Darby, et l’Ancien Testament de M. Segond, paru à Genève en 1874.',
+          fr: 'Pour comparer, il me faudrait d’autres livres : la Bible de Lausanne, complète depuis 1872, le Nouveau Testament de Darby, et l’Ancien Testament de M. Segond, paru à Genève en 1874.',
           en: 'To compare, I would need other books: the Lausanne Bible, complete since 1872, Darby’s New Testament, and Mr. Segond’s Old Testament, published in Geneva in 1874.',
         },
       },
@@ -274,7 +274,7 @@ export const stations: Station[] = [
     today: {
       title: { fr: 'Comparer les versions', en: 'Compare versions' },
       body: {
-        fr: 'L’Ostervald, la Bible de Lausanne de 1872, la Martin de 1744, la Darby et la Segond : les Bibles du pasteur, et celles qui ont suivi, s’ouvrent côte à côte sur un même verset.',
+        fr: 'L’Ostervald, la Bible de Lausanne de 1872, la Martin de 1744, la Darby et la Segond : les Bibles du pasteur, et celles qui ont suivi, s’ouvrent côte à côte sur un même verset.',
         en: 'The Ostervald, the 1872 Lausanne Bible, the 1744 Martin, the Darby and the Segond: the pastor’s Bibles, and those that followed, open side by side on the same verse.',
       },
       verse: {
@@ -293,7 +293,7 @@ export const stations: Station[] = [
     },
     sources: [
       {
-        label: 'Musée protestant, « Le temple Saint-Ruf de Valence »',
+        label: 'Musée protestant, « Le temple Saint-Ruf de Valence »',
         url: 'https://museeprotestant.org',
       },
       {
@@ -324,14 +324,14 @@ export const stations: Station[] = [
       {
         speaker: 'jeanne',
         text: {
-          fr: 'Alors le soir, on lit. Le pétrole coûte cher ; souvent, c’est la bougie.',
+          fr: 'Alors le soir, on lit. Le pétrole coûte cher ; souvent, c’est la bougie.',
           en: 'So in the evening, we read. Lamp oil is dear; often it is a candle.',
         },
       },
       {
         speaker: 'elise',
         text: {
-          fr: 'Sur la table : la Bible d’Ostervald, la concordance, le dictionnaire de M. Bost en deux volumes, et la feuille venue de Bâle.',
+          fr: 'Sur la table : la Bible d’Ostervald, la concordance, le dictionnaire de M. Bost en deux volumes, et la feuille venue de Bâle.',
           en: 'On the table: the Ostervald Bible, the concordance, Mr. Bost’s dictionary in two volumes, and the paper from Basel.',
         },
       },
@@ -369,7 +369,7 @@ export const stations: Station[] = [
     today: {
       title: { fr: 'Toucher un mot', en: 'Tap a word' },
       body: {
-        fr: 'Dans Bible Strong, touche « lampe » : le mot hébreu apparaît, avec sa prononciation, sa définition et tous les versets où il se trouve. Le dictionnaire de Bost est dans l’app, lui aussi.',
+        fr: 'Dans Bible Strong, touche « lampe » : le mot hébreu apparaît, avec sa prononciation, sa définition et tous les versets où il se trouve. Le dictionnaire de Bost est dans l’app, lui aussi.',
         en: 'In Bible Strong, tap “lamp”: the Hebrew word appears with its pronunciation, its definition and every verse where it occurs. Bost’s dictionary is in the app too.',
       },
       verse: {
@@ -392,10 +392,7 @@ export const stations: Station[] = [
         url: 'https://catalog.hathitrust.org',
       },
       { label: 'J.-A. Bost, Dictionnaire de la Bible, 1849', url: 'https://levigilant.com' },
-      {
-        label: 'Sander et Trenel, Dictionnaire hébreu-français, 1859',
-        url: 'https://gallica.bnf.fr',
-      },
+      { label: 'Sander et Trenel, Dictionnaire hébreu-français, Paris, Jouaust, 1859' },
       {
         label: 'Ville de Valence, histoire de la soie et des filatures',
         url: 'https://fr.wikipedia.org/wiki/Valence_(Drôme)',
@@ -426,7 +423,7 @@ export const stations: Station[] = [
       {
         speaker: 'bourdeau',
         text: {
-          fr: 'J’ai écrit sur ce monument ce mois-ci, dans une lettre datée de Valence, le 22 février. « Valence a joué un rôle de premier plan dans l’histoire de la France. »',
+          fr: 'J’ai écrit sur ce monument ce mois-ci, dans une lettre datée de Valence, le 22 février. « Valence a joué un rôle de premier plan dans l’histoire de la France. »',
           en: 'I wrote about this monument this month, in a letter dated Valence, 22 February: “Valence has acted a prominent part in the events that make up the history of France.”',
         },
       },
@@ -442,7 +439,7 @@ export const stations: Station[] = [
       {
         speaker: 'bourdeau',
         text: {
-          fr: 'Pour les prophéties, mes livres sont en anglais : les commentaires d’Uriah Smith sur Daniel et l’Apocalypse, l’Histoire du sabbat de M. Andrews.',
+          fr: 'Pour les prophéties, mes livres sont en anglais : les commentaires d’Uriah Smith sur Daniel et l’Apocalypse, l’Histoire du sabbat de M. Andrews.',
           en: 'For the prophecies, my books are in English: Uriah Smith’s commentaries on Daniel and the Revelation, Mr. Andrews’s History of the Sabbath.',
         },
       },
@@ -474,7 +471,7 @@ export const stations: Station[] = [
     sources: [
       RH_1877_04_05,
       {
-        label: 'Wikipédia, « Pie VI » et « Cathédrale Saint-Apollinaire de Valence »',
+        label: 'Wikipédia, « Pie VI » et « Cathédrale Saint-Apollinaire de Valence »',
         url: 'https://fr.wikipedia.org/wiki/Pie_VI',
       },
       ESDA_BOURDEAU,
@@ -513,7 +510,7 @@ export const stations: Station[] = [
     today: null,
     sources: [
       {
-        label: 'L’Empreinte, « Valence ville militaire »',
+        label: 'L’Empreinte, « Valence ville militaire »',
         url: 'https://lempreinte.valenceromansagglo.fr',
       },
       {
@@ -532,14 +529,14 @@ export const stations: Station[] = [
       {
         speaker: 'crier',
         text: {
-          fr: 'Journal de Valence ! À partir du 1er septembre, six numéros par semaine !',
+          fr: 'Journal de Valence ! À partir du 1er septembre, six numéros par semaine !',
           en: 'Journal de Valence! From the first of September, six issues a week!',
         },
       },
       {
         speaker: 'crier',
         text: {
-          fr: 'Vingt-trois mille habitants, trois mille soldats, et des élections en octobre !',
+          fr: 'Vingt-trois mille habitants, trois mille soldats, et des élections en octobre !',
           en: 'Twenty-three thousand people, three thousand soldiers, and elections in October!',
         },
       },
@@ -562,7 +559,7 @@ export const stations: Station[] = [
       {
         speaker: 'crier',
         text: {
-          fr: 'Ici, on lit le journal : trois numéros par semaine depuis 1873, bientôt six.',
+          fr: 'Ici, on lit le journal : trois numéros par semaine depuis 1873, bientôt six.',
           en: 'Here people read the paper: three issues a week since 1873, soon six.',
         },
       },
@@ -577,7 +574,7 @@ export const stations: Station[] = [
     today: {
       title: { fr: 'Le verset du jour', en: 'The verse of the day' },
       body: {
-        fr: 'Chaque matin, un verset, une méditation, un plan de lecture : une lecture quotidienne qui tient dans la poche, en ville ou en voyage.',
+        fr: 'Chaque matin, un verset, une méditation, un plan de lecture : une lecture quotidienne qui tient dans la poche, en ville ou en voyage.',
         en: 'Every morning, a verse, a meditation, a reading plan: daily reading that fits in your pocket, at home or on the road.',
       },
       cta: { fr: 'Voir le verset du jour', en: 'See the verse of the day' },
@@ -587,10 +584,10 @@ export const stations: Station[] = [
     sources: [
       ARCHIVES_FRANCE,
       {
-        label: 'BnF, Presse locale ancienne : Journal de Valence',
+        label: 'BnF, Presse locale ancienne : Journal de Valence',
         url: 'https://presselocaleancienne.bnf.fr/ark:/12148/cb32798997b',
       },
-      { label: 'Wikipédia, « Valence (Drôme) », population', url: 'https://fr.wikipedia.org/wiki/Valence_(Drôme)' },
+      { label: 'Wikipédia, « Valence (Drôme) », population', url: 'https://fr.wikipedia.org/wiki/Valence_(Drôme)' },
       ESDA_BOURDEAU,
     ],
   },
@@ -604,14 +601,14 @@ export const stations: Station[] = [
       {
         speaker: 'bourdeau',
         text: {
-          fr: 'Cet été, l’étal tourne bien : près d’une vingtaine de volumes reliés, et des centaines de tracts différents distribués.',
+          fr: 'Cet été, l’étal tourne bien : près d’une vingtaine de volumes reliés, et des centaines de tracts différents distribués.',
           en: 'This summer the book stand is in lively operation: nearly a score of bound volumes and hundreds of different tracts distributed.',
         },
       },
       {
         speaker: 'bourdeau',
         text: {
-          fr: 'Deux colporteurs sont partis vendre Les Signes et Le Vulgarisateur. Ils ont peu vendu : ils ne pouvaient pas entrer dans les maisons.',
+          fr: 'Deux colporteurs sont partis vendre Les Signes et Le Vulgarisateur. Ils ont peu vendu : ils ne pouvaient pas entrer dans les maisons.',
           en: 'Two colporteurs went out to sell Les Signes and Le Vulgarisateur. They sold little: they could not get into people’s homes.',
         },
       },
@@ -627,14 +624,14 @@ export const stations: Station[] = [
       {
         speaker: 'peddler',
         text: {
-          fr: 'Dans mon sac : des Nouveaux Testaments d’Ostervald, imprimés à Londres en 1870 aux frais de la Société biblique.',
+          fr: 'Dans mon sac : des Nouveaux Testaments d’Ostervald, imprimés à Londres en 1870 aux frais de la Société biblique.',
           en: 'In my bag: Ostervald New Testaments, printed in London in 1870 at the Bible Society’s expense.',
         },
       },
       {
         speaker: 'peddler',
         text: {
-          fr: 'Une Bible entière, c’est une dépense. Et tout le monde ne sait pas lire : en France, un homme sur cinq et une femme sur trois ne savent pas signer leur nom.',
+          fr: 'Une Bible entière, c’est une dépense. Et tout le monde ne sait pas lire : en France, un homme sur cinq et une femme sur trois ne savent pas signer leur nom.',
           en: 'A whole Bible is an expense. And not everyone can read: in France, one man in five and one woman in three cannot sign their name.',
         },
       },
@@ -642,7 +639,7 @@ export const stations: Station[] = [
     today: {
       title: { fr: 'Toute une bibliothèque, hors ligne', en: 'A whole library, offline' },
       body: {
-        fr: 'Bibles, lexiques, dictionnaires, commentaires : télécharge-les une fois, et lis sans réseau, au fond d’une vallée comme dans le train.',
+        fr: 'Bibles, lexiques, dictionnaires, commentaires : télécharge-les une fois, et lis sans réseau, au fond d’une vallée comme dans le train.',
         en: 'Bibles, lexicons, dictionaries, commentaries: download them once and read without a connection, deep in a valley or on a train.',
       },
       cta: { fr: 'Gérer les téléchargements', en: 'Manage downloads' },
@@ -653,10 +650,7 @@ export const stations: Station[] = [
       RH_1877_10_04,
       ARCHIVES_FRANCE,
       { label: 'Bibliquest, J. Lortsch, histoire de la Société biblique', url: 'https://bibliquest.org' },
-      {
-        label: 'Loi du 27 juillet 1849 sur la presse (colportage)',
-        url: 'https://fr.wikisource.org/wiki/Loi_du_27_juillet_1849',
-      },
+      { label: 'Loi du 27 juillet 1849 sur la presse, article sur le colportage' },
     ],
   },
   {
@@ -683,7 +677,7 @@ export const stations: Station[] = [
       {
         speaker: 'narrator',
         text: {
-          fr: 'Une seule source donne le mois de septembre 1877. Le lieu du baptême n’est pas connu : rien ne dit qu’il eut lieu dans le Rhône.',
+          fr: 'Une seule source donne le mois de septembre 1877. Le lieu du baptême n’est pas connu : rien ne dit qu’il eut lieu dans le Rhône.',
           en: 'Only one source gives the month, September 1877. The place of the baptism is unknown: nothing says it took place in the Rhône.',
         },
       },
@@ -713,7 +707,7 @@ export const stations: Station[] = [
       {
         speaker: 'elise',
         text: {
-          fr: 'Vous avez tout cela dans la poche. Qu’allez-vous lire ce soir ?',
+          fr: 'Vous avez tout cela dans la poche. Qu’allez-vous lire ce soir ?',
           en: 'You have all of this in your pocket. What will you read tonight?',
         },
       },
@@ -758,7 +752,7 @@ export const pioneerObjects: PioneerObject[] = [
     id: 'ostervald',
     name: { fr: 'La Bible d’Ostervald', en: 'The Ostervald Bible' },
     yesterday: {
-      fr: 'Édition stéréotype de la Société biblique protestante de Paris : la version du culte réformé.',
+      fr: 'Édition stéréotype de la Société biblique protestante de Paris : la version du culte réformé.',
       en: 'A stereotype edition of the Protestant Bible Society of Paris: the version of Reformed worship.',
     },
     today: {
@@ -773,8 +767,8 @@ export const pioneerObjects: PioneerObject[] = [
     id: 'signes',
     name: { fr: 'Un numéro des Signes des Temps', en: 'An issue of Les Signes des Temps' },
     yesterday: {
-      fr: 'Juillet 1876, Bâle : huit pages de 30 × 41 cm, deux mille exemplaires, une fois par mois.',
-      en: 'July 1876, Basel: eight pages of 30 × 41 cm, two thousand copies, once a month.',
+      fr: 'Juillet 1876, Bâle : huit pages de 30 × 41 cm, deux mille exemplaires, une fois par mois.',
+      en: 'July 1876, Basel: eight pages of 30 × 41 cm, two thousand copies, once a month.',
     },
     today: {
       fr: 'Les plans de lecture et les méditations de Bible Strong arrivent chaque jour.',
@@ -818,7 +812,7 @@ export const pioneerObjects: PioneerObject[] = [
     id: 'sander',
     name: { fr: 'Le dictionnaire hébreu-français', en: 'The Hebrew-French dictionary' },
     yesterday: {
-      fr: 'Sander et Trenel, Paris, 1859 : le seul en français, fait pour les écoles juives.',
+      fr: 'Sander et Trenel, Paris, 1859 : le seul en français, fait pour les écoles juives.',
       en: 'Sander and Trenel, Paris, 1859: the only one in French, made for Jewish schools.',
     },
     today: {
@@ -833,7 +827,7 @@ export const pioneerObjects: PioneerObject[] = [
     id: 'lampe',
     name: { fr: 'La lampe à pétrole', en: 'The oil lamp' },
     yesterday: {
-      fr: 'Le pétrole lampant coûte cher ; la bougie reste la règle.',
+      fr: 'Le pétrole lampant coûte cher ; la bougie reste la règle.',
       en: 'Lamp oil is expensive; candles are still the rule.',
     },
     today: {
@@ -848,7 +842,7 @@ export const pioneerObjects: PioneerObject[] = [
     id: 'lettre',
     name: { fr: 'La lettre de Bâle', en: 'The letter from Basel' },
     yesterday: {
-      fr: 'Reconstituée d’après les sources : au milieu de 1877, M. Andrews a été gravement malade ; Mary relit les épreuves ; on compte les abonnés.',
+      fr: 'Reconstituée d’après les sources : au milieu de 1877, M. Andrews a été gravement malade ; Mary relit les épreuves ; on compte les abonnés.',
       en: 'Reconstructed from the sources: in mid-1877, Mr. Andrews has been gravely ill; Mary reads the proofs; the subscribers are counted.',
     },
     today: {

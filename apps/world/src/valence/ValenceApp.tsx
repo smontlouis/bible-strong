@@ -142,7 +142,7 @@ export default function ValenceApp() {
     paused: true,
     overview: false,
     debug,
-    zoom: window.matchMedia('(hover: none) and (pointer: coarse)').matches ? 1.6 : 1.8,
+    zoom: window.matchMedia('(hover: none) and (pointer: coarse)').matches ? 1.35 : 1.8,
     minimumZoom: 0,
     reset: 0,
     stand,
@@ -151,6 +151,7 @@ export default function ValenceApp() {
     found,
     stationTags: stationTags.current,
   })
+  if (import.meta.env.DEV) (window as unknown as { valence?: ValenceControls }).valence = controls.current
   const near = ready ? nearestStation(state) : null
   const dialogOpen = Boolean(opened || objectOpen || shareOpen || guestbookOpen || menuOpen || introOpen)
 

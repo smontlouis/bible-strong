@@ -9,7 +9,7 @@ export const valenceCopy = {
     reload: 'Recharger',
     introEyebrow: 'Il y a cent cinquante ans',
     intro:
-      'En octobre 1876, Daniel Bourdeau s’installait à Valence. Traverse la ville : chaque lieu est un moment des onze mois qui ont suivi.',
+      'En octobre 1876, Daniel Bourdeau s’installait à Valence. Traverse la ville : chaque lieu est un moment des onze mois qui ont suivi.',
     introHint:
       'Approche-toi des personnages pour les écouter. Sept objets du pionnier sont cachés dans la ville.',
     enter: 'Entrer dans Valence',
@@ -41,7 +41,7 @@ export const valenceCopy = {
     shareLine: 'Les sept objets du pionnier, cent cinquante ans après.',
     share: 'Partager',
     download: 'Télécharger l’image',
-    guestbook: 'Laisser un mot pour les 150 ans',
+    guestbook: 'Laisser un mot pour les 150 ans',
     guestbookIntro: 'Le livre d’or des cent cinquante ans est le même que celui de Bible Strong World.',
     overview: 'Vue d’ensemble',
     follow: 'Suivre mon avatar',
@@ -59,7 +59,7 @@ export const valenceCopy = {
     stand: 'Scanne pour visiter\nValence 1876 sur ton téléphone',
     standTitle: ['Visite', 'Valence 1876'],
     keys: 'Flèches ou ZQSD pour marcher, clic pour aller quelque part',
-    notInApp: 'Ce lieu n’a pas d’équivalent à ouvrir : il se lit sur place.',
+    notInApp: 'Ce lieu n’a pas d’équivalent à ouvrir : il se lit sur place.',
     mapLabel: 'Carte de Valence en 1877',
   },
   en: {

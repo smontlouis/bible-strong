@@ -16,7 +16,7 @@ import type { AvatarId } from '../avatar-profile'
 import anchors from './generated/anchors.json'
 import tileManifest from './generated/map-tiles.json'
 import { ValenceAmbience } from './valence-ambience'
-import { ValenceOccluders } from './valence-occluders'
+import { ValenceOccluders, valenceOccluders } from './valence-occluders'
 import { valenceScenes } from './valence-scenes'
 import type { PioneerObjectId, StationId } from './valence-story'
 import {
@@ -75,6 +75,8 @@ export function createValence(
     position = { ...VALENCE_SPAWN }
     facing = { x: 0, y: 1 }
     avatar!: Phaser.GameObjects.Image
+    /** A faint copy above the scenery while a roof or a canopy hides the avatar. */
+    ghost!: Phaser.GameObjects.Image
     shadow!: Phaser.GameObjects.Ellipse
     blobAvatar = new BlobAvatar()
     pathfinder = new Pathfinder(controls.navigation)
@@ -201,6 +203,11 @@ export function createValence(
         .image(this.position.x, this.position.y, 'blob-idle-down')
         .setOrigin(0.5, 0.95)
         .setDisplaySize(AVATAR_SIZE, AVATAR_SIZE)
+      this.ghost = this.add
+        .image(this.position.x, this.position.y, 'blob-idle-down')
+        .setOrigin(0.5, 0.95)
+        .setDepth(2200)
+        .setAlpha(0)
       this.destination = this.add
         .image(0, 0, 'navigation-destination')
         .setOrigin(0.5, 0.92)
@@ -416,6 +423,28 @@ export function createValence(
         .setPosition(next.x, next.y)
         .setDepth(next.y)
       this.shadow.setPosition(next.x, next.y)
+      const hidden = valenceOccluders.some(
+        o =>
+          o.baseY > next.y + 2 &&
+          next.x > o.x + 4 &&
+          next.x < o.x + o.width - 4 &&
+          next.y - 18 > o.y &&
+          next.y - 18 < o.y + o.height
+      )
+      const ghostAlpha = Phaser.Math.Linear(
+        this.ghost.alpha,
+        hidden ? 0.42 : 0,
+        1 - Math.exp(-Math.min(delta, 50) / 90)
+      )
+      this.ghost
+        .setTexture(this.avatar.texture.key, this.avatar.frame.name)
+        .setFlipX(this.avatar.flipX)
+        .setOrigin(this.avatar.originX, this.avatar.originY)
+        .setDisplaySize(this.avatar.displayWidth, this.avatar.displayHeight)
+        .setTint(Number.parseInt(controls.avatarColor.slice(1), 16))
+        .setPosition(next.x, next.y)
+        .setAlpha(ghostAlpha)
+        .setVisible(ghostAlpha > 0.01)
 
       // Camera.
       const screenWidth = this.scale.width
@@ -476,7 +505,14 @@ export function createValence(
         const tag = controls.stationTags?.[id]
         if (!tag) continue
         const point = this.project(stationLabels[id], zoom)
-        tag.style.translate = `${point.x}px ${point.y}px`
+        // Off-screen tags hide; visible ones stay clear of the screen edges and the top bar.
+        const offscreen =
+          point.x < -40 || point.x > parent.clientWidth + 40 || point.y < 40 || point.y > parent.clientHeight + 30
+        if (tag.dataset.offscreen !== String(offscreen)) tag.dataset.offscreen = String(offscreen)
+        const half = tag.offsetWidth / 2 + 8
+        const x = Math.min(Math.max(point.x, half), parent.clientWidth - half)
+        const y = Math.max(point.y, 140)
+        tag.style.translate = `${x}px ${y}px`
       }
       for (const id of Object.keys(objectSpots) as PioneerObjectId[]) {
         const tag = controls.objectTags?.[id]
