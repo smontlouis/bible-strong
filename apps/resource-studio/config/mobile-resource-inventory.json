@@ -233,7 +233,7 @@
   },
   {
     "id": "bible:BHG",
-    "artifactUrl": "https://assets.bible-strong.app/bibles/bible-step.json.zip",
+    "artifactUrl": "https://assets.bible-strong.app/bibles/bible-bhg.json.zip",
     "sources": [
       {
         "role": "canonical",

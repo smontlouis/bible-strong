@@ -32,8 +32,8 @@ export const createDevelopmentArtifact = (
     'timeline',
   ])
   // The application asks for the path its catalog lists, which is not always the name of the
-  // archive inside the bundle (the BHG bundle ships `bible-bhg.json.zip` for
-  // `bibles/bible-step.json.zip`).
+  // archive inside the bundle (a BHG bundle shipped `bible-bhg.json.zip` while the catalog still
+  // listed `bibles/bible-step.json.zip`).
   const catalogFile =
     mobileResourceCatalog.resources[getPublicationIdentityProjection(manifest).mobileCatalogId]
       ?.file

@@ -33,17 +33,24 @@ const RESOURCES = [
   {
     id: "bible:BHG",
     file: "bibles/bible-step.json.zip",
-    entry: "bible-step.json"
+    entry: "bible-step.json",
+    // Rebuilt like every other Bible, as its canonical JSON.
+    nextFile: "bibles/bible-bhg.json.zip",
+    nextEntry: "bible-bhg.json"
   },
   {
     id: "bible-interlinear:BHG:fr",
     file: "bibles/bible-step-interlinear-fr.sqlite.zip",
-    entry: "bible-step-interlinear-fr.sqlite"
+    entry: "bible-step-interlinear-fr.sqlite",
+    nextFile: "bibles/bible-step-interlinear-fr.sqlite.zip",
+    nextEntry: "bible-step-interlinear-fr.sqlite"
   },
   {
     id: "bible-interlinear:BHG:en",
     file: "bibles/bible-step-interlinear-en.sqlite.zip",
-    entry: "bible-step-interlinear-en.sqlite"
+    entry: "bible-step-interlinear-en.sqlite",
+    nextFile: "bibles/bible-step-interlinear-en.sqlite.zip",
+    nextEntry: "bible-step-interlinear-en.sqlite"
   }
 ] as const;
 
@@ -62,7 +69,7 @@ async function createWorkspace() {
     JSON.stringify(
       RESOURCES.map((resource) => ({
         id: resource.id,
-        artifactUrl: `https://assets.bible-strong.app/${resource.file}`,
+        artifactUrl: `https://assets.bible-strong.app/${resource.nextFile}`,
         sources: [
           {
             role: "canonical",
@@ -106,10 +113,10 @@ async function createWorkspace() {
   ) => {
     await mkdir(path.join(bundleDir, "canonical"), { recursive: true });
     await mkdir(path.join(bundleDir, "offline"), { recursive: true });
-    const entryPath = path.join(bundleDir, "offline", resource.entry);
+    const entryPath = path.join(bundleDir, "offline", resource.nextEntry);
     await writeFile(
       entryPath,
-      resource.entry.endsWith(".json")
+      resource.nextEntry.endsWith(".json")
         ? JSON.stringify({ 1: { 1: { 1: "בְּרֵאשִׁית" } } })
         : Buffer.concat([
             Buffer.from("SQLite format 3\0"),
@@ -119,7 +126,7 @@ async function createWorkspace() {
     const archivePath = path.join(
       bundleDir,
       "offline",
-      `${resource.entry}.zip`
+      `${resource.nextEntry}.zip`
     );
     await execFileAsync("zip", ["-X", "-q", "-j", archivePath, entryPath]);
     await rm(entryPath);
@@ -133,8 +140,8 @@ async function createWorkspace() {
         ...manifest,
         canonical: { path: "canonical/publication.json" },
         offlineArtifact: {
-          path: `offline/${resource.entry}.zip`,
-          entry: resource.entry,
+          path: `offline/${resource.nextEntry}.zip`,
+          entry: resource.nextEntry,
           sha256: sha256(await readFile(archivePath))
         }
       })
@@ -233,9 +240,11 @@ describe("catalog text declarations", () => {
       );
       const catalog = await readCatalog();
       assert.equal(catalog.generatedAt, "2026-10-09T08:00:00.000Z");
-      for (const { id, entry } of RESOURCES) {
+      for (const { id, nextFile, nextEntry } of RESOURCES) {
         const resource = catalog.resources[id]!;
-        assert.equal(resource.entry, entry);
+        // The bundle names the entry; the inventory still names the delivered one.
+        assert.equal(resource.file, nextFile);
+        assert.equal(resource.entry, nextEntry);
         assert.equal(resource.textRevision, NEXT_TEXT.textRevision);
         assert.equal(resource.textSha256, NEXT_TEXT.textSha256);
         assert.match(

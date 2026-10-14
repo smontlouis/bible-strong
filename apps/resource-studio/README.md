@@ -37,8 +37,12 @@ NODE_OPTIONS=--max-old-space-size=8192 npm run resources:publication:bibles -- \
 
 This produces exactly 47 version directories. Each contains canonical import JSON whose verses embed
 their headings and words of Jesus, and an Offline copy that zips that canonical JSON alone: no
-pericope or red-word side file is delivered (ADR-0066). The build fails when a words-of-Jesus
-decision no longer matches its verse text. Restricted publications declare local-development access
+pericope or red-word side file is delivered (ADR-0066). A Bible that gains nothing keeps the source
+file readers already hold as its Offline copy, so it is not offered an empty update; as soon as its
+text changes it is delivered as its canonical JSON (`bible-<id>.json` in `bible-<id>.json.zip`), which
+names its own text revision. The delivered catalog,
+`packages/resource-catalog/src/mobile-resource-catalog.json`, says which file readers hold. The build
+fails when a words-of-Jesus decision no longer matches its verse text. Restricted publications declare local-development access
 without enabling public Online delivery.
 
 Sources may be `https://` URLs, local paths or content-addressed R2 locations
@@ -139,21 +143,29 @@ yarn workspace @bible-strong/resource-studio resources:publication:bible-source-
 No application release is involved: the application reads which BHG is published, and which text
 each index was built for, from the catalog and from the files (ADR-0079).
 
-1. Build the BHG bundle (`resources:publication:bibles -- --version BHG`) and both index bundles
-   against it (`resources:publication:interlinear-bibles`). Each index manifest names the text
-   revision and SHA-256 it requires.
-2. Patch the catalog with the three archives **together**:
+1. Rebuild the STEP ledger and runtime (`docs/step-interlinear-release.md`). Their
+   `bible-step.json` is the authoring source of BHG: upload `bible-step.json.zip` under
+   `r2://<bucket>/sources/<sha256>/bible-step.json.zip` and point `bible:BHG` of
+   `config/ordinary-bible-sources.json` at it. Before publishing, compare the token ids of the
+   rebuilt indexes with the published ones (ADR-0078).
+2. Build the BHG bundle (`resources:publication:bibles -- --version BHG`) and both index bundles
+   against it (`resources:publication:interlinear-bibles`). A changed BHG is delivered like any
+   other changed Bible, as `bible-bhg.json` in `bibles/bible-bhg.json.zip`. Each index manifest names
+   the text revision and SHA-256 it requires.
+3. Patch the catalog with the three archives **together**:
    `MOBILE_CATALOG_GENERATED_AT=<newer timestamp> npm run resources:publication:r2 -- catalog-patch
    --bundles <bhg> --bundles <interlinear>`. The patch writes `textRevision` and `textSha256` on the
    three entries from the bundles, and refuses a text without the indexes rebuilt for it, or an
    index without its text (`mobile-catalog-interlinear-text-mismatch`).
-3. Run the Resource service steps. Its publication gate refuses a catalog whose declarations differ
+4. Run the Resource service steps. Its publication gate refuses a catalog whose declarations differ
    from the bundles. Activate the text and both indexes in one publication: between the two, online
    readers get an interlinear that reports itself temporarily unavailable.
-4. `adopt` as above; it also records the text declarations in the inventory.
+5. `adopt` as above; it also records the text declarations in the inventory.
 
-Keep the archive entry of the BHG text named `bible-step.json`: application 27.1.1, which is never
-updated, unzips it under that name. See ADR-0079 for what 27.1.1 does when BHG changes.
+`catalog-patch` takes the archive entry from each bundle: an archive whose entry changes name, as BHG
+did when it moved from its flat `bible-step.json` to its canonical JSON, is cataloged under its new
+entry. Application 27.1.1, which compiled in the `bible-step.json` entry, cannot install such a BHG;
+it is no longer supported for BHG (ADR-0079).
 
 After generating a canonical Bible JSON, build the LSG bundle with:
 
