@@ -79,6 +79,16 @@
       "port": 3212
     },
     {
+      "name": "mcp",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": [
+        "workspace",
+        "@bible-strong/mcp-service",
+        "dev"
+      ],
+      "port": 8798
+    },
+    {
       "name": "expo-web",
       "runtimeExecutable": "yarn",
       "runtimeArgs": [

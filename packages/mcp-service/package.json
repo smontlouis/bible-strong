@@ -1,0 +1,32 @@
+{
+  "name": "@bible-strong/mcp-service",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "yarn widgets:build && wrangler dev --config wrangler.jsonc --env dev --port 8798",
+    "widgets:build": "node scripts/build-widgets.mjs",
+    "widgets:watch": "node scripts/build-widgets.mjs --watch",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p widgets/tsconfig.json",
+    "test": "tsx --test 'src/**/*.node-test.ts'",
+    "plugin:pack": "node scripts/pack-plugin.mjs",
+    "worker:types": "wrangler types --config wrangler.jsonc worker-configuration.d.ts",
+    "worker:deploy": "yarn widgets:build && wrangler deploy --config wrangler.jsonc"
+  },
+  "dependencies": {
+    "@bible-strong/bible-reference-parser": "workspace:*",
+    "@bible-strong/resource-catalog": "workspace:*",
+    "@bible-strong/resource-domain": "workspace:*",
+    "@modelcontextprotocol/server": "2.3.1",
+    "htmlparser2": "^10.0.0",
+    "zod": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "esbuild": "^0.28.2",
+    "preact": "^11.0.1",
+    "tsx": "4.20.6",
+    "typescript": "~6.0.3",
+    "wrangler": "^4.124.0"
+  }
+}
