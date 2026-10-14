@@ -365,6 +365,9 @@ describe('Interlinear Bible download planning', () => {
     catalog.generatedAt = '2099-01-01T00:00:00.000Z'
     const physical = catalog.resources['bible-interlinear:BHG:fr']!
     physical.archiveSha256 = 'a'.repeat(64)
+    const url = new URL(physical.url)
+    url.searchParams.set('sha256', physical.archiveSha256)
+    physical.url = url.toString()
     physical.archiveBytes = 123456
     physical.contentSha256 = 'b'.repeat(64)
     physical.contentBytes = 654321

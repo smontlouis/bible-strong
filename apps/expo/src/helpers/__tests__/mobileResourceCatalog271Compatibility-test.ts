@@ -13,9 +13,10 @@ jest.mock('../firebase', () => ({
   cdnUrl: (path: string) => `https://assets.example/${path}`,
 }))
 
+/** A BHG text that is not published yet. */
 const nextText = {
-  textRevision: 'bhg-e15bd9f0f1a91140579c',
-  textSha256: 'e15bd9f0f1a91140579c9eb9c8f4e173b8a4df361859758e0fe252ef55edc107',
+  textRevision: `bhg-${'f'.repeat(20)}`,
+  textSha256: 'f'.repeat(64),
 }
 
 /**
@@ -24,7 +25,7 @@ const nextText = {
  */
 const publishNextBhg = (): MobileResourceCatalog => {
   const catalog = structuredClone(BUNDLED_MOBILE_RESOURCE_CATALOG)
-  catalog.generatedAt = '2026-10-09T08:00:00.000Z'
+  catalog.generatedAt = '2099-01-01T00:00:00.000Z'
   const republish = (
     id: string,
     archiveSha256: string,

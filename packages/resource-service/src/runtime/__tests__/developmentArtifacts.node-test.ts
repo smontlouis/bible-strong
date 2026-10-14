@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
+import mobileResourceCatalog from '@bible-strong/resource-catalog/catalog'
+
 import type { PublicationBundleManifest } from '../../publication/publicationBundle'
 import { createDevelopmentArtifact, respondWithDevelopmentArtifact } from '../developmentArtifacts'
 
@@ -134,13 +136,14 @@ describe('development artifact server', () => {
         identity: { kind: 'bible-text', versionId: 'BHG', language: 'he-grc' },
         offlineArtifact: {
           ...interlinearManifest.offlineArtifact,
-          path: 'offline/bible-bhg.json.zip',
-          entry: 'bible-step.json',
+          path: 'offline/another-name.json.zip',
+          entry: 'bible-bhg.json',
         },
       } as unknown as Parameters<typeof createDevelopmentArtifact>[0],
       Buffer.from('bhg bundle')
     )
 
-    assert.equal(artifact.route, '/bibles/bible-step.json.zip')
+    assert.equal(artifact.route, `/${mobileResourceCatalog.resources['bible:BHG']!.file}`)
+    assert.equal(artifact.route, '/bibles/bible-bhg.json.zip')
   })
 })

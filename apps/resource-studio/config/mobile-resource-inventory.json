@@ -5,13 +5,13 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-step-interlinear-en.sqlite.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/b7d88e7a379f35a2d89b6be63147f56b26357b970708ca2e3e3e188647990732/bibles/bible-step-interlinear-en.sqlite.zip",
         "entry": "bible-step-interlinear-en.sqlite"
       }
     ],
     "strategy": "archive-extract",
-    "textRevision": "bhg-803c482ed06005693547",
-    "textSha256": "803c482ed06005693547f9ea04a2dcbec4718c1d97ab0c531d60600e4c3a9d8f"
+    "textRevision": "bhg-e15bd9f0f1a91140579c",
+    "textSha256": "e15bd9f0f1a91140579c9eb9c8f4e173b8a4df361859758e0fe252ef55edc107"
   },
   {
     "id": "bible-interlinear:BHG:fr",
@@ -19,13 +19,13 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-step-interlinear-fr.sqlite.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/6d4ab0de8d18ea2de88287124c7b43a1cc4284543818ca7e0dfce65aedea8bbf/bibles/bible-step-interlinear-fr.sqlite.zip",
         "entry": "bible-step-interlinear-fr.sqlite"
       }
     ],
     "strategy": "archive-extract",
-    "textRevision": "bhg-803c482ed06005693547",
-    "textSha256": "803c482ed06005693547f9ea04a2dcbec4718c1d97ab0c531d60600e4c3a9d8f"
+    "textRevision": "bhg-e15bd9f0f1a91140579c",
+    "textSha256": "e15bd9f0f1a91140579c9eb9c8f4e173b8a4df361859758e0fe252ef55edc107"
   },
   {
     "id": "bible-strong:ASV",
@@ -237,13 +237,13 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/5d7b283e3e20ec748844acfe46877bae7e4e6045d4e4455116f6218a54b18fd6/bibles/bible-step.json.zip",
-        "entry": "bible-step.json"
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/51569685f8f2c86c45333ddf940bd66bcdf11ac1a17b681015e67fc843257f25/bibles/bible-bhg.json.zip",
+        "entry": "bible-bhg.json"
       }
     ],
     "strategy": "sqlite-import",
-    "textRevision": "bhg-803c482ed06005693547",
-    "textSha256": "803c482ed06005693547f9ea04a2dcbec4718c1d97ab0c531d60600e4c3a9d8f"
+    "textRevision": "bhg-e15bd9f0f1a91140579c",
+    "textSha256": "e15bd9f0f1a91140579c9eb9c8f4e173b8a4df361859758e0fe252ef55edc107"
   },
   {
     "id": "bible:BHS",
