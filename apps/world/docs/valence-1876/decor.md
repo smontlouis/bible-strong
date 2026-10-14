@@ -38,6 +38,8 @@ Ce choix de palette est propre à ce brief. Il n’existe pas dans la table des 
 
 Le style reste celui de la carte de World : illustration plate, vue légèrement plongeante, grandes masses rondes, lignes fines pour les détails. La carte doit se lire aussi bien que l’archipel actuel à la taille d’un téléphone.
 
+**Style retenu le 14 octobre 2026 : [carte v1](./concepts/carte-v1.webp)** ([prompts](./concepts/carte-v1-prompts.md)). Livre d’images dessiné à la plume : trait brun griffé, légère texture de papier, quelques toits de travers. Huit zones séparées par de grandes places vides où l’avatar circule. Aucun personnage ni chemin dans l’image : les figurants seront des avatars ambiants, et le fil au sol sera dessiné par le moteur. C’est une image de référence, pas encore l’image source de la carte.
+
 ## 3. Les règles d’intégrité
 
 1. **Chaque lieu existe en septembre 1877**, dans l’état décrit au dossier de la ville. La liste des anachronismes à ne pas dessiner est au point 8.
