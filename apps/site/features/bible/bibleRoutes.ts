@@ -1,4 +1,4 @@
-import { BHG_INTERLINEAR_IDENTITY } from '@bible-strong/resource-catalog/interlinear-bible'
+import { BHG_INTERLINEAR_IDENTITY } from '@bible-strong/resource-catalog/interlinear-bible-identity'
 import { isStrongBibleVersionId } from '@bible-strong/resource-catalog/strong-bibles'
 import {
   DEFAULT_RESOURCE_LANGUAGE,

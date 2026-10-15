@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { digestBuild } from './buildRevision'
+import { assertNoPublicationData, digestBuild } from './buildRevision'
 
 const ROOT = '/repo/apps/site'
 const modules = [
@@ -41,5 +41,19 @@ describe('Revision of a build', () => {
     expect(digestBuild([...modules, { id: `${ROOT}/new.ts`, code: '' }], ROOT)).not.toBe(
       digestBuild(modules, ROOT)
     )
+  })
+})
+
+describe('Published data in a build', () => {
+  it('is refused, so that a publication does not empty the page cache', () => {
+    const withCatalog = [
+      ...modules,
+      { id: '/repo/packages/resource-catalog/src/mobile-resource-catalog.json', code: '{}' },
+    ]
+    expect(() => assertNoPublicationData(withCatalog)).toThrow(/mobile-resource-catalog\.json/u)
+  })
+
+  it('leaves a build of code alone', () => {
+    expect(() => assertNoPublicationData(modules)).not.toThrow()
   })
 })

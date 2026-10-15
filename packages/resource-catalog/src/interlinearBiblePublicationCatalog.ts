@@ -3,19 +3,9 @@ import {
   type MobileResourceCatalog,
   type MobileResourceCatalogEntry,
 } from './catalog'
+import { BHG_INTERLINEAR_IDENTITY } from './interlinearBibleIdentity'
 
-/**
- * What the original-language Bible is, whatever revision is published. The published revision,
- * its archives and the text each index was built for are read from the Artifact catalog.
- */
-export const BHG_INTERLINEAR_IDENTITY = {
-  applicationVersionId: 'BHG',
-  datasetId: 'STEP',
-  sourceVersion: 'TAHOT/TAGNT',
-  attribution: 'Données créées par STEPBible.org à partir des travaux de Tyndale House Cambridge',
-  license: 'CC BY 4.0',
-  sourceUrl: 'https://github.com/STEPBible/STEPBible-Data',
-} as const
+export { BHG_INTERLINEAR_IDENTITY }
 
 export type InterlinearBiblePublicationLanguage = 'fr' | 'en'
 
