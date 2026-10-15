@@ -53,7 +53,7 @@ yarn site:pages:refresh --everything
 yarn site:pages:refresh /bible/lsg /commentary/fr/mhy-fr   # the pages under those folders, up to three levels
 ```
 
-`yarn resources:worker:deploy` ends with the first one. The command needs `CACHE_REFRESH_SECRET`, in the environment or in `apps/site/.env.local`.
+A deployment of the Resource API refreshes nothing by itself: the operator names what changed. The command needs `CACHE_REFRESH_SECRET`, in the environment or in `apps/site/.env.local`.
 
 ### Warming the caches after a deployment
 

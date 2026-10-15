@@ -35,8 +35,8 @@ tag from the Worker itself, and able to keep its entries across deployments.
   build keeps every page; a deployment of another build starts anew, without a purge.
 - **A request to render again.** A kept page carries a tag for each of the first three folders
   of its address. `POST /__cache/refresh`, behind a secret, purges every page or the pages under
-  some folders; `yarn site:pages:refresh` calls it, and the deployment of the Resource API ends
-  with it.
+  some folders; `yarn site:pages:refresh` calls it. The deployment of the Resource API no longer
+  ends with it (amendment below).
 
 Keeping the pages of a family (`/bible`, `/strong`…) across a deployment that changes another
 family was considered and left out. A kept page names the scripts and styles of its build, which

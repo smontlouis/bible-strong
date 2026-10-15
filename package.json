@@ -47,7 +47,7 @@
     "resources:timeline:images": "yarn workspace @bible-strong/resource-studio resources:timeline:images",
     "resources:worker:types": "yarn workspace @bible-strong/resource-service worker:types",
     "resources:worker:check": "yarn workspace @bible-strong/resource-service worker:check",
-    "resources:worker:deploy": "yarn workspace @bible-strong/resource-service worker:deploy && yarn site:pages:refresh --everything",
+    "resources:worker:deploy": "yarn workspace @bible-strong/resource-service worker:deploy",
     "agents:start:logged": "node scripts/agents-start-logged.mjs",
     "agents:architecture": "node scripts/agents-architecture-lint.mjs",
     "agents:architecture:check": "node scripts/agents-architecture-lint.mjs --check",
