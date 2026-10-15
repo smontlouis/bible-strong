@@ -605,31 +605,53 @@
   font: 400 15px / 1.5 ValenceLiterata, Georgia, serif;
 }
 
-/* Today: Bible Strong in full colour */
+/* Today: a sheet of 2026. The shape is Valence's (square, double rule, hard shadow); the paper,
+   the type and the blue are Bible Strong's. It develops from sepia like a photograph. */
+.valence-shell {
+  --v-2026-paper: #f8f9fc;
+  --v-2026-ink: #101b35;
+  --v-2026-muted: #58657a;
+  --v-2026-blue: #3f63cf;
+  --v-2026-blue-deep: #23397a;
+  --v-2026-dot: #5983f0;
+}
 .v-today {
   display: grid;
   grid-template-columns: 1fr 190px;
-  gap: 22px;
+  gap: 26px;
   align-items: center;
-  padding: 22px;
-  border-radius: 20px;
-  background: var(--bs-canvas, #f4f7ff);
-  color: var(--bs-ink, #101b35);
-  box-shadow: 0 0 0 1px rgba(16, 27, 53, 0.12);
-  animation: v-color-in 700ms ease-out both;
+  padding: 26px 28px;
+  border: 1.5px solid var(--v-2026-ink);
+  border-radius: var(--v-radius);
+  outline: 1px solid rgba(16, 27, 53, 0.35);
+  outline-offset: -8px;
+  background: var(--v-2026-paper);
+  color: var(--v-2026-ink);
+  box-shadow: 6px 6px 0 rgba(16, 27, 53, 0.35);
+  animation: v-develop 1300ms cubic-bezier(0.33, 0, 0.2, 1) both;
 }
-@keyframes v-color-in {
-  from {
-    filter: sepia(1) saturate(0.6);
-    opacity: 0.4;
+/* A print developing: warm, washed and soft first, then sharp and in colour. */
+@keyframes v-develop {
+  0% {
+    filter: sepia(1) saturate(0.55) contrast(0.7) brightness(1.18) blur(1.2px);
+    opacity: 0.25;
+  }
+  35% {
+    opacity: 1;
+  }
+  60% {
+    filter: sepia(0.55) saturate(0.85) contrast(0.9) brightness(1.06) blur(0.4px);
+  }
+  100% {
+    filter: none;
   }
 }
 .v-eyebrow-bs {
   margin: 0;
-  font: 500 13px / 1.4 Pulp, sans-serif;
-  letter-spacing: 0.14em;
+  font: 500 12px / 1.4 Pulp, sans-serif;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #58657a;
+  color: var(--v-2026-muted);
 }
 .v-eyebrow-bs::before {
   content: '';
@@ -638,53 +660,95 @@
   height: 8px;
   margin-right: 8px;
   border-radius: 50%;
-  background: #5983f0;
+  background: var(--v-2026-dot);
   vertical-align: 1px;
 }
 .v-today h3 {
-  margin: 6px 0 8px;
-  font: 600 22px / 1.25 Pulp, sans-serif;
+  margin: 8px 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(16, 27, 53, 0.15);
+  font: 400 26px / 1.2 var(--v-serif);
+  font-synthesis: none;
 }
 .v-today p {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   font: 400 16px / 1.6 Pulp, sans-serif;
 }
 .v-today blockquote {
-  margin: 0 0 16px;
-  padding: 12px 16px;
-  border-radius: 14px;
-  background: #ffffff;
-  box-shadow: 0 0 0 1px rgba(16, 27, 53, 0.12);
+  margin: 0 0 18px;
+  padding: 4px 0 4px 16px;
+  border-left: 3px solid var(--v-2026-dot);
 }
 .v-today blockquote p {
   margin: 0 0 6px;
-  font: 400 17px / 1.75 ValenceLiterata, Georgia, serif;
+  font: 400 17px / 1.7 ValenceLiterata, Georgia, serif;
 }
 .v-today cite {
-  font: 600 12.5px / 1 Pulp, sans-serif;
+  font: 600 11.5px / 1 Pulp, sans-serif;
   font-style: normal;
-  color: #58657a;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--v-2026-muted);
 }
+/* A block of Bible Strong blue, pressed like Valence's ink buttons. */
 .v-cta,
 .valence-modal .v-cta {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   min-height: 44px;
-  padding: 0 20px;
-  border-radius: 999px;
-  background: #3f63cf;
+  padding: 0 18px;
+  border: 1.5px solid var(--v-2026-blue-deep);
+  border-radius: var(--v-radius);
+  background: var(--v-2026-blue);
   color: #f9fbff;
-  font: 600 15px / 1 Pulp, sans-serif;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    3px 3px 0 var(--v-2026-blue-deep);
+  font: 600 13px / 1 Pulp, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   text-decoration: none;
+  transition:
+    translate 100ms ease-out,
+    box-shadow 100ms ease-out,
+    background-color 150ms ease-out;
 }
+.v-cta:hover {
+  background: #3557bd;
+}
+.v-cta:active {
+  translate: 2px 2px;
+  box-shadow: 1px 1px 0 var(--v-2026-blue-deep);
+}
+/* The phone, pasted in like a photograph with two mounting corners. */
 .v-phone {
+  position: relative;
   margin: 0;
   padding: 7px;
   border-radius: 30px;
-  background: #101b35;
-  box-shadow: 0 16px 34px rgba(16, 27, 53, 0.3);
+  background: var(--v-2026-ink);
+  box-shadow: 4px 6px 0 rgba(16, 27, 53, 0.25);
   rotate: 2deg;
+}
+.v-phone::before,
+.v-phone::after {
+  content: '';
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  background: #e3e6ee;
+  box-shadow: 0 1px 2px rgba(16, 27, 53, 0.25);
+}
+.v-phone::before {
+  top: -6px;
+  left: -6px;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+.v-phone::after {
+  right: -6px;
+  bottom: -6px;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
 }
 .v-phone img {
   display: block;
@@ -748,10 +812,13 @@
   font: 400 15px / 1.6 ValenceLiterata, Georgia, serif;
 }
 .v-now {
-  background: #f4f7ff;
-  color: #101b35;
-  box-shadow: 0 0 0 1px rgba(16, 27, 53, 0.12);
-  animation: v-color-in 900ms 200ms ease-out both;
+  border: 1.5px solid var(--v-2026-ink);
+  border-radius: var(--v-radius);
+  outline: 1px solid rgba(16, 27, 53, 0.3);
+  outline-offset: -6px;
+  background: var(--v-2026-paper);
+  color: var(--v-2026-ink);
+  animation: v-develop 1300ms 250ms cubic-bezier(0.33, 0, 0.2, 1) both;
 }
 .v-now p {
   margin: 0;
@@ -762,10 +829,7 @@
   color: #8b5e30;
 }
 .v-now .v-year {
-  font: 800 22px / 1 Pulp, sans-serif;
-}
-.v-now .v-year {
-  color: #5983f0;
+  color: var(--v-2026-blue);
 }
 
 /* Share card, notebook and intro */
@@ -1445,7 +1509,9 @@
   cursor: default;
 }
 .v-scene-today .v-today {
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  box-shadow:
+    6px 6px 0 rgba(16, 27, 53, 0.45),
+    0 30px 80px rgba(0, 0, 0, 0.5);
 }
 .v-scene-closing {
   position: absolute;
@@ -1656,10 +1722,24 @@
   .v-carton-text {
     font-size: 19px;
   }
+  /* Between the scene's header and its buttons, scrolling inside when the sheet is long. */
   .v-scene-today {
-    top: 46%;
+    top: calc(max(16px, env(safe-area-inset-top)) + 158px);
+    bottom: calc(max(30px, env(safe-area-inset-bottom)) + 52px);
     width: calc(100% - 32px);
-    max-height: 76dvh;
+    max-height: none;
+    transform: translateX(-50%);
+  }
+  .v-today {
+    gap: 18px;
+    padding: 20px 18px 24px;
+    box-shadow: 4px 4px 0 rgba(16, 27, 53, 0.35);
+  }
+  .v-today h3 {
+    font-size: 22px;
+  }
+  .v-today p {
+    font-size: 15px;
   }
   .v-scene-closing {
     bottom: 220px;
