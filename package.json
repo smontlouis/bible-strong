@@ -43,6 +43,7 @@
     "resources:serve": "yarn workspace @bible-strong/resource-service serve",
     "site:worker:deploy": "yarn workspace @bible-strong/site deploy",
     "site:pages:refresh": "node apps/site/scripts/refresh-pages.mjs",
+    "cache:invalidate": "node packages/resource-service/scripts/invalidate-cache.mjs",
     "share-cards:worker:deploy": "yarn workspace @bible-strong/share-card-service worker:deploy",
     "resources:timeline:images": "yarn workspace @bible-strong/resource-studio resources:timeline:images",
     "resources:worker:types": "yarn workspace @bible-strong/resource-service worker:types",
