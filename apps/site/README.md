@@ -53,7 +53,7 @@ yarn site:pages:refresh --everything
 yarn site:pages:refresh /bible/lsg /commentary/fr/mhy-fr   # the pages under those folders, up to three levels
 ```
 
-`yarn resources:worker:deploy` ends with the first one. The command needs `CACHE_REFRESH_SECRET`, in the environment or in `apps/site/.env.local`.
+A deployment of the Resource API refreshes nothing by itself: the operator names what changed. The command needs `CACHE_REFRESH_SECRET`, in the environment or in `apps/site/.env.local`.
 
 ### Warming the caches after a deployment
 
@@ -79,13 +79,13 @@ It reads `/sitemap.xml` and the sitemaps it lists, sends only `GET` requests to 
 | `all`      | Every page `/sitemap.xml` leads to                                |       209,850 |             19 |    8 d 10 h |
 | `verses`   | The verse pages of the ten best-known Bibles (31,171 for the LSG) | about 312,000 |             19 |   12 d 13 h |
 
-Presets combine (`--preset entry,chapters`), and `--sitemap` takes a sitemap by name or by pattern (`'commentary-*-fr.xml'`). The verse sitemaps are not in `/sitemap.xml` and no pattern takes them: they are requested only with `--preset verses` or by their full name. Only `entry` and `chapters` fit between two deployments of a day; the longer ones are worth running when the Worker is not about to be deployed again, since the API keeps what they read for thirty days.
+Presets combine (`--preset entry,chapters`), and `--sitemap` takes a sitemap by name or by pattern (`'commentary-*-fr.xml'`). The verse sitemaps are not in `/sitemap.xml` and no pattern takes them: they are requested only with `--preset verses` or by their full name. The API keeps what a run reads for thirty days, across its deployments; a deployment of the site that changes its code renders every page again.
 
 **Rate.** The Resource API allows the site 1,000 reads a minute, shared with readers and crawlers. A run takes every read to count, answered from the API cache or not, and takes a quarter of the allowance for its dearest page: 13 reads for a verse page (19 pages a minute), 6 for a Strong page (41), 3 for a chapter (60, the highest default); a page nobody measured counts as 13. `--rate` changes it, up to three quarters of the allowance. These numbers are in `scripts/siteWarmup.mjs`; change them there when the limit or the pages change.
 
 **Trouble.** A 429, a 5xx, a request without answer or an incomplete page pauses the whole run for one minute, then two, then four, and halves the rate each time; the next one stops the run. A page in trouble is requested once more, at least 90 seconds later. A 401 or a 403 stops the run at once.
 
-A page rendered right after a deployment of the Resource API may carry `X-Page-Stale`: it was rendered from answers an earlier version had cached, which the API refreshes behind the answer, and the site keeps it a minute. That is not trouble: the run requests such a page again 75 seconds later, when it is rendered from the refreshed answers and kept a day.
+A page rendered from an answer the Resource API marked `STALE` carries `X-Page-Stale`, and the site keeps it a minute. Since the API keeps its cache across deployments (ADR-0076, amended), it no longer answers `STALE`; the handling stays for a Worker older than that. Such a page is not trouble: the run requests it again 75 seconds later.
 
 An incomplete page is known by the `X-Page-Incomplete` header the site sends with it. A deployment older than that header, and a page that does not send it, cannot be told from a whole page in one request: Vercel answers both with the same `Cache-Control`. The run therefore requests again one rendered page in ten (`--verify`) 75 seconds later: a whole page is still in the CDN, an incomplete one was kept a minute and is rendered again, which counts as trouble.
 

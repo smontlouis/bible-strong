@@ -15,7 +15,6 @@ import {
   enforceResourceApiAppCheck,
   RESOURCE_API_CACHE_REVISION,
   resourceApiCacheEpochFor,
-  resourceApiFallbackEpochFor,
   routeResourceApiRequest,
 } from './resourceApiCache'
 import { protectResourceOriginRead, protectResourceRequest } from './resourceRequestProtection'
@@ -267,43 +266,7 @@ export const makeResourceWorker = (
       request,
       authorize: async () => true,
       cache: edgeCache,
-      cacheEpoch: contentRevision
-        ? resourceApiCacheEpochFor(contentRevision, bindings.CF_VERSION_METADATA?.id)
-        : 'uncached-request',
-      fallback: contentRevision
-        ? {
-            epoch: resourceApiFallbackEpochFor(contentRevision),
-            refresh: async unconditionalRequest => {
-              const refreshStartedAt = Date.now()
-              const spent = newTimings()
-              // The caller was answered from the cache and is refused nothing, but this
-              // read of the database is its doing: it counts against the limit that
-              // protects the database. Over it nothing is read, and the fallback stays.
-              const refusal = await protectResourceOriginRead({
-                request,
-                limiter: bindings.ORIGIN_READING_RATE_LIMITER,
-                reportFailure: reportLimiterFailure,
-              })
-              const refreshed = refusal ?? (await readOrigin(unconditionalRequest, spent))
-              console.log(
-                JSON.stringify({
-                  message: 'resource API fallback refresh',
-                  requestClass: resourceRequestClassFrom(request),
-                  path: new URL(request.url).pathname,
-                  status: refreshed.status,
-                  limited: refusal !== undefined,
-                  stored: refreshed.status === 200,
-                  ...spent,
-                  durationMs: Date.now() - refreshStartedAt,
-                  requestId: resourceRequestIdFrom(
-                    request.headers.get('x-request-id') ?? undefined
-                  ),
-                })
-              )
-              return refreshed
-            },
-          }
-        : undefined,
+      cacheEpoch: contentRevision ? resourceApiCacheEpochFor(contentRevision) : 'uncached-request',
       corsAllowedOrigins,
       waitUntil: promise => ctx.waitUntil(promise),
       reportCacheFailure: (operation, cause) => {
