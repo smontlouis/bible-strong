@@ -93,7 +93,8 @@ export type WorldSceneOptions<Controls extends SceneControls> = {
   /** The map, in source units: walking, spawning and the camera's follow stay inside it. */
   width: number
   height: number
-  /** The drawn extent the camera may zoom out to, when the scenery reaches past the map. */
+  /** The drawn extent, centred on the map, that the farthest zoom-out frames, when the scenery
+   * reaches past the map. */
   scenery?: { width: number; height: number }
   /** How far above the feet the camera looks, in screen pixels. */
   cameraLift: number
@@ -546,15 +547,21 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
           : controls.overview
             ? bounds.overview
             : bounds.base * controls.zoom
-      camera.setZoom(zoom)
       const { width, height } = options
       const targetX = controls.overview ? width / 2 : next.x
       const targetY = controls.overview ? height / 2 : next.y - (options.cameraLift * RESOLUTION) / zoom
-      const halfWidth = screenWidth / zoom / 2
-      const halfHeight = screenHeight / zoom / 2
-      const centerX = halfWidth > width / 2 ? width / 2 : Phaser.Math.Clamp(targetX, halfWidth, width - halfWidth)
-      const centerY = halfHeight > height / 2 ? height / 2 : Phaser.Math.Clamp(targetY, halfHeight, height - halfHeight)
+      // The farthest zoom-out shows the whole scenery, centred; zooming in glides the camera onto
+      // the avatar, which is centred once the view covers less than 55% of the scenery. Every
+      // world draws past its map (the archipelago's sea, Valence's wall), so nothing bounds it.
+      const cover = Math.max(screenWidth / zoom / scenery.width, screenHeight / zoom / scenery.height)
+      const follow = Phaser.Math.SmoothStep(Phaser.Math.Clamp((1 - cover) / 0.45, 0, 1), 0, 1)
+      const centerX = width / 2 + (targetX - width / 2) * follow
+      const centerY = height / 2 + (targetY - height / 2) * follow
       const smoothing = cameraArrival !== undefined ? 1 : 1 - Math.exp(-Math.min(delta, 50) / 110)
+      // Zoom and travel ease together, with the same curve: a quick zoom no longer lands first
+      // around the screen's centre and then slides onto the avatar. The zoom eases in log space,
+      // so zooming in and out feel alike.
+      camera.setZoom(Math.exp(Phaser.Math.Linear(Math.log(camera.zoom), Math.log(zoom), smoothing)))
       // Phaser zooms around the viewport centre; scroll is relative to the unzoomed viewport.
       camera.scrollX += (centerX - screenWidth / 2 - camera.scrollX) * smoothing
       camera.scrollY += (centerY - screenHeight / 2 - camera.scrollY) * smoothing
