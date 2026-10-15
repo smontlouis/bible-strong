@@ -22,7 +22,14 @@ export class RemoteAvatars {
   private avatars = new Map<string, Visual>()
   constructor(
     private scene: Phaser.Scene,
-    private resolution: number
+    private resolution: number,
+    /** Valence draws visitors smaller and labels them in sepia. */
+    private look: { scale: number; shadow: number; text: string; background: string } = {
+      scale: 1,
+      shadow: 0x183c45,
+      text: '#193d49',
+      background: '#fff9ea',
+    }
   ) {}
   update(
     network: { remotes: ReadonlyMap<string, AvatarTrack> },
@@ -48,13 +55,15 @@ export class RemoteAvatars {
       if (!visual) {
         visual = {
           sprite: this.scene.add.image(0, 0, 'blob-idle-down'),
-          shadow: this.scene.add.ellipse(0, 0, 30, 10, 0x183c45, 0.25).setDepth(-1),
+          shadow: this.scene.add
+            .ellipse(0, 0, 30 * this.look.scale, 10 * this.look.scale, this.look.shadow, 0.25)
+            .setDepth(-1),
           label: this.scene.add
             .text(0, 0, '', {
               fontFamily: 'Pulp, sans-serif',
               fontSize: '12px',
-              color: '#193d49',
-              backgroundColor: '#fff9ea',
+              color: this.look.text,
+              backgroundColor: this.look.background,
               padding: { x: 5, y: 3 },
             })
             .setOrigin(0.5, 0)
@@ -93,6 +102,11 @@ export class RemoteAvatars {
         profile.avatar,
         allowLoading
       )
+      if (this.look.scale !== 1)
+        visual.sprite.setDisplaySize(
+          visual.sprite.displayWidth * this.look.scale,
+          visual.sprite.displayHeight * this.look.scale
+        )
       visual.sprite
         .setPosition(pose.x, pose.y)
         .setDepth(pose.y)

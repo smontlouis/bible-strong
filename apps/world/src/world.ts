@@ -219,7 +219,7 @@ export function inPolygon(point: Point, polygon: Polygon): boolean {
 export type Zone = { id: string; name: string; kind: 'allowed' | 'blocked'; points: Polygon }
 export type NavigationDocument = {
   version: 1
-  map: 'archipelago'
+  map: 'archipelago' | 'valence-1876'
   width: number
   height: number
   obstacleRevision?: number

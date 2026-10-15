@@ -1,5 +1,7 @@
 import { parseAmbientZones } from './src/ambient-zones'
+import { parseNavigation } from './src/navigation-document'
 import { parseShorelines } from './src/shorelines'
+import { parseEffects, parseLayout, VALENCE_NAVIGATION } from './src/valence/valence-documents'
 import { mkdir, rename, writeFile, readFile } from 'node:fs/promises'
 import type { IncomingMessage } from 'node:http'
 import { dirname, resolve } from 'node:path'
@@ -150,6 +152,46 @@ function sceneDocumentSavePlugin(
   }
 }
 
+/** Valence 1876 workshop: one endpoint per project document, validated before writing. */
+function valenceDocumentPlugin(name: string, parse: (value: unknown) => unknown): Plugin {
+  return {
+    name: `valence-1876-${name}-save`,
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use(`/__study-world/valence-1876/${name}`, async (request, response) => {
+        if (request.method !== 'PUT') {
+          response.statusCode = 405
+          response.setHeader('Allow', 'PUT')
+          response.end('Method Not Allowed')
+          return
+        }
+        if (
+          request.headers.origin &&
+          request.headers.origin !== `http://${request.headers.host}` &&
+          request.headers.origin !== `https://${request.headers.host}`
+        ) {
+          response.statusCode = 403
+          response.end('Forbidden')
+          return
+        }
+        try {
+          const document = parse(JSON.parse(await readBody(request)))
+          const file = resolve(server.config.root, `public/valence-1876/${name}.json`)
+          const temporary = `${file}.${process.pid}.${Date.now()}.tmp`
+          await writeFile(temporary, `${JSON.stringify(document, null, 2)}\n`, 'utf8')
+          await rename(temporary, file)
+          response.statusCode = 204
+          response.end()
+        } catch (error) {
+          response.statusCode = error instanceof SyntaxError ? 400 : 422
+          response.setHeader('Content-Type', 'application/json')
+          response.end(JSON.stringify({ error: error instanceof Error ? error.message : 'Save failed' }))
+        }
+      })
+    },
+  }
+}
+
 /** Dev-only bridge: credentials never reach browser code or LAN clients. */
 function localGuestbookAdmin(): Plugin {
   return {
@@ -191,6 +233,11 @@ export default defineConfig({
     navigationSavePlugin(),
     sceneDocumentSavePlugin('shorelines', parseShorelines),
     sceneDocumentSavePlugin('ambience', parseAmbientZones),
+    valenceDocumentPlugin('navigation', value => parseNavigation(value, VALENCE_NAVIGATION)),
+    valenceDocumentPlugin('layout', parseLayout),
+    valenceDocumentPlugin('effects', parseEffects),
+    valenceDocumentPlugin('shorelines', parseShorelines),
+    valenceDocumentPlugin('ambience', parseAmbientZones),
   ],
   // Saving editor documents should not reload the world mid-edit.
   server: {
@@ -203,6 +250,7 @@ export default defineConfig({
         '**/public/ambience/archipelago.json',
         '**/public/shorelines/archipelago.json',
         '**/public/navigation/archipelago.json',
+        '**/public/valence-1876/*.json',
       ],
     },
   },

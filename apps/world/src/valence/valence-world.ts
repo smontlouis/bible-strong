@@ -1,33 +1,25 @@
 // Valence 1876 map geometry, in the 1672 × 941 source-image coordinate system of the map.
+// Positions come from public/valence-1876/layout.json, edited in the workshop and loaded at
+// start; the records below are filled in place so every module shares the same objects.
 import type { Point } from '../world'
 import type { PioneerObjectId, StationId } from './valence-story'
-import anchors from './generated/anchors.json'
+import { VALENCE_HEIGHT, VALENCE_WIDTH, type ValenceLayout } from './valence-documents'
 
-export const VALENCE_WIDTH = 1672
-export const VALENCE_HEIGHT = 941
-/** The visitor arrives by the Lyon train, like the Bourdeau family. */
-export const VALENCE_SPAWN: Point = { x: anchors.spawn[0], y: anchors.spawn[1] }
+export { VALENCE_HEIGHT, VALENCE_WIDTH }
 export const AVATAR_SIZE = 44
 export const STATION_RADIUS = 62
 export const OBJECT_RADIUS = 26
 
-const point = ([x, y]: number[]): Point => ({ x, y })
-/** Ground points snapped to reachable ground by scripts/valence/build_navigation.py. */
-export const stationAnchors = Object.fromEntries(
-  Object.entries(anchors.stations).map(([id, value]) => [id, point(value)])
-) as Record<StationId, Point>
-
-/** Where the station's label floats, above the characters or the building. */
-export const stationLabels: Record<StationId, Point> = {
-  gare: { x: 1424, y: 182 },
-  temple: { x: 855, y: 150 },
-  maison: { x: 1478, y: 398 },
-  cathedrale: { x: 1112, y: 735 },
-  citadelle: { x: 485, y: 70 },
-  champ: { x: 665, y: 700 },
-  clercs: { x: 888, y: 392 },
-  rhone: { x: 285, y: 702 },
-}
+/** The visitor arrives by the Lyon train, like the Bourdeau family. */
+export const VALENCE_SPAWN: Point = { x: 0, y: 0 }
+/** Ground point in front of each station's characters; the dialog opens within reach. */
+export const stationAnchors = {} as Record<StationId, Point>
+/** Where the station's tag floats, above the characters or the building. */
+export const stationLabels = {} as Record<StationId, Point>
+/** The seven pioneer objects, each lying on reachable ground near its station. */
+export const objectSpots = {} as Record<PioneerObjectId, Point>
+/** One polyline per pair of consecutive stations, in the order of the dates. */
+export const threadPaths: Point[][] = []
 
 /** The dotted thread follows the dates, not the shortest tour. */
 export const threadOrder: StationId[] = [
@@ -41,10 +33,29 @@ export const threadOrder: StationId[] = [
   'rhone',
 ]
 
-/** The seven pioneer objects, each lying on reachable ground near its station. */
-export const objectSpots = Object.fromEntries(
-  Object.entries(anchors.objects).map(([id, value]) => [id, point(value)])
-) as Record<PioneerObjectId, Point>
+const toPoint = ([x, y]: [number, number]): Point => ({ x, y })
+
+export function applyLayout(layout: ValenceLayout) {
+  Object.assign(VALENCE_SPAWN, toPoint(layout.spawn))
+  for (const [id, value] of Object.entries(layout.stations)) stationAnchors[id as StationId] = toPoint(value)
+  for (const [id, value] of Object.entries(layout.labels)) stationLabels[id as StationId] = toPoint(value)
+  for (const [id, value] of Object.entries(layout.objects)) objectSpots[id as PioneerObjectId] = toPoint(value)
+  threadPaths.splice(0, threadPaths.length, ...layout.thread.map(line => line.map(toPoint)))
+}
+
+export function currentLayout(): ValenceLayout {
+  const pair = ({ x, y }: Point): [number, number] => [Math.round(x * 10) / 10, Math.round(y * 10) / 10]
+  const map = <K extends string>(record: Record<K, Point>) =>
+    Object.fromEntries(Object.entries<Point>(record).map(([id, value]) => [id, pair(value)])) as Record<K, [number, number]>
+  return {
+    version: 1,
+    spawn: pair(VALENCE_SPAWN),
+    stations: map(stationAnchors),
+    labels: map(stationLabels),
+    objects: map(objectSpots),
+    thread: threadPaths.map(line => line.map(pair)),
+  }
+}
 
 export function distance(a: Point, b: Point) {
   return Math.hypot(a.x - b.x, a.y - b.y)

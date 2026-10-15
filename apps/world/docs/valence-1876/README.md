@@ -7,22 +7,44 @@ Le décor, ses règles d’intégrité et ses choix sont dans [decor.md](./decor
 ## Lancer
 
 ```sh
-yarn workspace @bible-strong/world dev:client
+yarn dev:world
 ```
 
-Puis ouvrir http://localhost:5186/valence-1876. Paramètres utiles :
+Puis ouvrir http://localhost:5186/valence-1876. `yarn dev:world` lance le site et le Worker local du multijoueur ; avec `dev:client` seul, la visite marche mais les autres visiteurs et les émoticônes restent hors ligne. Paramètres utiles :
 
 - `?stand` : écran de stand. Grand QR code vers l’univers, et remise à zéro de la visite après deux minutes et demie sans geste.
 - `?debug` (développement seulement) : zones de marche, rayons des stations, position et images par seconde. En développement, `window.valence` expose les contrôles de la scène (par exemple `valence.travelTo = { x, y }`).
 
-La langue suit celle de World (`bible-strong.world.language.v1`), l’avatar aussi (`bible-strong.world.profile.v1`). La progression est gardée dans `bible-strong.valence-1876.progress.v1`.
+La langue suit celle de World (`bible-strong.world.language.v1`). L’avatar est propre à Valence (`bible-strong.valence-1876.profile.v1`) : on le choisit à la première visite, avant l’introduction, et on le change depuis le carnet. La progression est gardée dans `bible-strong.valence-1876.progress.v1`.
+
+## Multijoueur
+
+Valence a son propre salon, `valence-1876`, sur le même Worker et le même protocole que l’archipel (`server/index.ts`). On y voit les autres visiteurs avec leur nom, le nombre de présents, et on s’envoie des émoticônes ; il n’y a pas de jeux bibliques, et le serveur ignore les commandes de jeu dans ce salon. Les arrivées se font sur le parvis de la gare (`src/valence/valence-spawn.ts`). En mode stand, cinq passants simulés se promènent sur la place des Clercs tant qu’il y a peu de vrais visiteurs ; ils répondent aux émoticônes.
+
+Le salon dépend du Worker : il faut le redéployer (`yarn workspace @bible-strong/world deploy`) pour que le multijoueur de Valence fonctionne en production.
+
+## L’atelier (développement seulement)
+
+En local, le bouton « Atelier » ouvre les mêmes outils que « Éditer le monde » dans World. Chaque onglet sauvegarde directement dans un fichier du projet, à travers le serveur Vite ; rien de tout cela n’existe dans la version de production.
+
+| Onglet | Ce qu’on règle | Fichier |
+| --- | --- | --- |
+| Accès | Zones vertes où l’on marche et obstacles rouges, avec l’éditeur de World. « Tester au joystick » rejoue la carte avec les zones visibles | `public/valence-1876/navigation.json` |
+| Repères | Point d’arrivée, stations (le cercle est la portée d’écoute), étiquettes, objets, et le fil pointillé : glisser les points, double-clic sur le fil pour en ajouter, Suppr pour retirer, « Redessiner » un tronçon point par point ou « Tracé automatique » | `public/valence-1876/layout.json` |
+| Eau et effets | Contour du Rhône, zones sans effet (pile du pont…), reflets, traits de courant, feuilles, poussière dorée, ombres de nuages, sources de fumée | `public/valence-1876/effects.json` |
+| Rivages | Écume le long des quais, avec l’éditeur de rivages de World (écume crème sur l’eau sépia) | `public/valence-1876/shorelines.json` |
+| Particules, Lueurs, Papillons, Libellules | Zones d’ambiance de World | `public/valence-1876/ambience.json` |
+
+Les zones de marche sont stockées en quelques grands polygones pour rester faciles à retoucher ; au chargement, `src/valence/navigation-tiles.ts` les découpe en carreaux de 64 unités pour la marche et le calcul des chemins. Une fois `navigation.json` ou `layout.json` retouché dans l’atelier, c’est lui qui fait foi : `build_navigation.py` ne les réécrit plus, sauf avec `--reset-navigation` ou `--reset-layout`.
 
 ## Ce qui tourne dans le navigateur
 
 | Fichier | Rôle |
 | --- | --- |
 | `src/valence/ValenceApp.tsx` | Interface : chargement, introduction, frise, objets, carnet, stand, dialogues |
-| `src/valence/valence-game.ts` | Scène Phaser : tuiles HD, avatar, marche au clavier, au joystick et au clic, caméra, fil, objets, silhouette de l’avatar caché |
+| `src/valence/valence-game.ts` | Scène Phaser : tuiles HD, avatar, marche au clavier, au joystick et au clic, caméra, fil, objets, silhouette de l’avatar caché, autres visiteurs, émoticônes, passants du stand |
+| `src/valence/valence-documents.ts` | Format et validation des documents de l’atelier (disposition, effets) ; partagé avec le serveur Vite et le Worker |
+| `src/valence/ValenceWorkshop.tsx`, `workshop-model.ts`, `workshop-overlay.ts` | L’atelier : panneaux, état partagé et poignées sur la carte |
 | `src/valence/valence-story.ts` | Le scénario, en français et en anglais, avec les sources. **Fait foi** pour les textes |
 | `src/valence/StationDialog.tsx` | Le dialogue en trois temps, les étiquettes réel ou composite, les sources, le panneau « aujourd’hui » |
 | `src/valence/ObjectCard.tsx` | La carte « hier, aujourd’hui » et l’image de partage 1200 × 630 (valeurs du design system) |
@@ -60,6 +82,6 @@ yarn workspace @bible-strong/world build
 
 - Le quai bas, la cour de la caserne et le parvis du Pendentif ne sont pas praticables : leurs accès ne sont pas lisibles sur la carte. Les lavandières et les soldats s’y voient depuis l’esplanade et la rue.
 - Les saisons ne sont pas dessinées par des accessoires propres à chaque station : la carte est une seule fin d’après-midi.
-- Pas de multijoueur, ni d’habitants qui marchent : les habitants jouent leur boucle sur place.
+- Les habitants jouent leur boucle sur place ; seuls les visiteurs et les passants du stand se déplacent.
 - Les liens « aujourd’hui » ouvrent l’app web (`web.bible-strong.app`) ; ils n’ont pas été vérifiés un par un dans l’app installée.
 - Les points à vérifier avec un relecteur de l’UFA restent ceux de [decor.md](./decor.md#9-ce-qui-reste-à-trancher-avec-un-relecteur).

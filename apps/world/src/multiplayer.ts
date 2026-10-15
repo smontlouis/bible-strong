@@ -112,10 +112,11 @@ export class WorldMultiplayer {
     }
     return fresh
   }
-  private resumeToken: string | undefined = this.readResumeToken()
+  // Read in the constructor: field initializers run before the room parameter is assigned.
+  private resumeToken: string | undefined
   private readResumeToken() {
     try {
-      return sessionStorage.getItem('world-resume-token') || undefined
+      return sessionStorage.getItem(this.resumeKey) || undefined
     } catch {
       return undefined
     }
@@ -147,8 +148,12 @@ export class WorldMultiplayer {
         this.connect()
     }
   }
-  constructor() {
+  constructor(private readonly room: string = ROOM) {
+    this.resumeToken = this.readResumeToken()
     document.addEventListener('visibilitychange', this.visibility)
+  }
+  private get resumeKey() {
+    return this.room === ROOM ? 'world-resume-token' : `world-resume-token-${this.room}`
   }
 
   update(pose: Pose, profile: AvatarProfile, enabled: boolean, now: number) {
@@ -189,7 +194,7 @@ export class WorldMultiplayer {
     const socket = new PartySocket({
       host,
       party: 'world-room',
-      room: ROOM,
+      room: this.room,
       maxEnqueuedMessages: 0,
       minReconnectionDelay: 1000,
       maxReconnectionDelay: 10_000,
@@ -245,8 +250,8 @@ export class WorldMultiplayer {
         this.games.connect(message.id)
         this.resumeToken = message.resumeToken
         try {
-          if (this.resumeToken) sessionStorage.setItem('world-resume-token', this.resumeToken)
-          else sessionStorage.removeItem('world-resume-token')
+          if (this.resumeToken) sessionStorage.setItem(this.resumeKey, this.resumeToken)
+          else sessionStorage.removeItem(this.resumeKey)
         } catch {
           /* In-memory resumption still works when storage is unavailable. */
         }
@@ -293,7 +298,7 @@ export class WorldMultiplayer {
         this.superseded = true
         this.resumeToken = undefined
         try {
-          sessionStorage.removeItem('world-resume-token')
+          sessionStorage.removeItem(this.resumeKey)
         } catch {
           /* Storage may be unavailable. */
         }

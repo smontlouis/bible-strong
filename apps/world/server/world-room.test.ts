@@ -286,3 +286,16 @@ it('never sends presence to sockets that have not joined', async () => {
   vi.advanceTimersByTime(60)
   expect(lurker.messages).toEqual([])
 })
+it('welcomes Valence 1876 visitors at the station, without Bible games', async () => {
+  Object.defineProperty(room, 'name', { value: 'valence-1876' })
+  const layout = JSON.parse(
+    (await import('node:fs')).readFileSync(new URL('../public/valence-1876/layout.json', import.meta.url), 'utf8')
+  )
+  const c = await join()
+  const welcome = c.messages.find((m: { type: string }) => m.type === 'welcome')
+  const [x, y] = layout.spawn
+  expect(Math.hypot(welcome.spawn.x - x, welcome.spawn.y - y)).toBeLessThan(50)
+  await send(c, { type: 'game', command: { action: 'pause-solo' } })
+  expect(c.messages.some((m: { type: string }) => m.type === 'games' || m.type === 'game-error')).toBe(false)
+  expect(c.readyState).toBe(1)
+})

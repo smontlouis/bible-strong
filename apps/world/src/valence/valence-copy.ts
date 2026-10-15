@@ -61,6 +61,11 @@ export const valenceCopy = {
     keys: 'Flèches ou ZQSD pour marcher, clic pour aller quelque part',
     notInApp: 'Ce lieu n’a pas d’équivalent à ouvrir : il se lit sur place.',
     mapLabel: 'Carte de Valence en 1877',
+    changeAvatar: 'Changer d’avatar',
+    online: 'à Valence',
+    connecting: 'Connexion…',
+    offline: 'Reconnexion…',
+    workshop: 'Atelier',
   },
   en: {
     title: 'Valence 1876',
@@ -121,6 +126,11 @@ export const valenceCopy = {
     keys: 'Arrow keys or WASD to walk, click to go somewhere',
     notInApp: 'This place has nothing to open: it is read on the spot.',
     mapLabel: 'Map of Valence in 1877',
+    changeAvatar: 'Change avatar',
+    online: 'in Valence',
+    connecting: 'Connecting…',
+    offline: 'Reconnecting…',
+    workshop: 'Workshop',
   },
 } satisfies Record<Language, Record<string, unknown>>
 

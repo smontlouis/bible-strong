@@ -7,9 +7,11 @@ Inputs (ignored workbench, art-workbench/experiments/valence-1876/):
 - scripts/valence/navigation-edits.json (committed): reviewed manual additions and blocks.
 
 Outputs:
-- public/valence-1876/navigation.json
-- public/valence-1876/occlusion/*.webp and src/valence/generated/occluders.json
-- src/valence/generated/anchors.json: station and object points snapped to reachable ground.
+- public/valence-1876/navigation.json, only if missing or with --reset-navigation: the editable
+  walkable polygons and obstacles. Once edited in the workshop it is the source of truth.
+- public/valence-1876/layout.json, only if missing or with --reset-layout: arrival, stations,
+  labels, objects and dotted thread, snapped to reachable ground.
+- public/valence-1876/occlusion/*.webp and src/valence/generated/occluders.json, always.
 - art-workbench/.../review/*.png: overlays for visual review.
 
 Run from apps/world: art-workbench/.venv-tools/bin/python scripts/valence/build_navigation.py
@@ -17,6 +19,7 @@ Run from apps/world: art-workbench/.venv-tools/bin/python scripts/valence/build_
 import json
 import os
 import shutil
+import sys
 
 import cv2
 import numpy as np
@@ -25,6 +28,8 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 WORK = os.path.join(ROOT, 'art-workbench', 'experiments', 'valence-1876')
 EDITS = os.path.join(os.path.dirname(__file__), 'navigation-edits.json')
 W, H = 1672, 941
+RESET_NAVIGATION = '--reset-navigation' in sys.argv
+RESET_LAYOUT = '--reset-layout' in sys.argv
 S = 2  # pixels per map unit in the working rasters
 RADIUS = 7  # avatar clearance, as in src/world.ts
 MARGIN = 1.5  # polygon simplification can narrow a corridor by about one unit
@@ -152,6 +157,75 @@ def contours_to_zones(mask, kind, prefix, epsilon=1.2):
     return zones
 
 
+FAMILY_NAMES = {
+    'tree': 'Pied d’arbre', 'lamp': 'Réverbère', 'statue': 'Statue', 'bandstand': 'Kiosque',
+    'stall': 'Étal', 'crate': 'Caisses', 'cannon': 'Canon', 'bench': 'Banc', 'building': 'Bâtiment',
+    'wall': 'Muret',
+}
+
+
+def simplified(contour, limit=240):
+    epsilon = 1.0 * S
+    approx = cv2.approxPolyDP(contour, epsilon, True)
+    while len(approx) > limit:
+        epsilon *= 1.25
+        approx = cv2.approxPolyDP(contour, epsilon, True)
+    return [[round(float(p[0][0]) / S, 1), round(float(p[0][1]) / S, 1)] for p in approx]
+
+
+def editable_pieces(outer, limit=240):
+    """Walkable polygons without holes, split in halves until each fits the editor limit."""
+    pieces = []
+
+    def visit(x0, y0, x1, y1):
+        o = 4 * S
+        clip = np.zeros_like(outer)
+        clip[max(0, y0 - o):y1 + o, max(0, x0 - o):x1 + o] = outer[max(0, y0 - o):y1 + o, max(0, x0 - o):x1 + o]
+        contours, _ = cv2.findContours(clip, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        contours = [c for c in contours if cv2.contourArea(c) >= 30 * S * S]
+        exact = [cv2.approxPolyDP(c, 1.0 * S, True) for c in contours]
+        if all(len(a) <= limit for a in exact) or (x1 - x0) < 60 * S:
+            for contour in contours:
+                pieces.append(simplified(contour, limit))
+            return
+        if (x1 - x0) >= (y1 - y0):
+            middle = (x0 + x1) // 2
+            visit(x0, y0, middle, y1)
+            visit(middle, y0, x1, y1)
+        else:
+            middle = (y0 + y1) // 2
+            visit(x0, y0, x1, middle)
+            visit(x0, middle, x1, y1)
+
+    visit(0, 0, W * S, H * S)
+    return [{'id': f'sol-{i + 1}', 'name': f'Sol {i + 1}', 'kind': 'allowed', 'points': points} for i, points in enumerate(pieces)]
+
+
+def obstacle_zones(holes, objects, edits):
+    """Each hole in the walkable ground becomes one named obstacle."""
+    zones = []
+    contours, _ = cv2.findContours(holes, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    named = [(poly_mask(e['points']), e['name']) for e in edits['blocked']]
+    for contour in contours:
+        if cv2.contourArea(contour) < 6 * S * S:
+            continue
+        mask = np.zeros_like(holes)
+        cv2.drawContours(mask, [contour], -1, 1, -1)
+        name = next((label for m, label in named if (m & mask).sum() > 0.3 * mask.sum()), None)
+        if not name:
+            best, family = 0, None
+            for obj in objects:
+                ox0, oy0, ox1, oy1 = obj['box']
+                inter = mask[oy0:oy1, ox0:ox1].sum()
+                if inter > best:
+                    best, family = inter, obj['family']
+            name = FAMILY_NAMES.get(family, 'Bordure') if best > 0.2 * mask.sum() else 'Bordure'
+        points = simplified(contour)
+        if len(points) >= 3:
+            zones.append({'id': f'obstacle-{len(zones) + 1}', 'name': f'{name} {len(zones) + 1}', 'kind': 'blocked', 'points': points})
+    return zones
+
+
 def thread_paths(reachable, anchors, order):
     import heapq
     # Max-pool to one cell per map unit so one-pixel corridors stay connected.
@@ -248,23 +322,24 @@ def main():
     reach_zone = cv2.dilate(reachable, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * RADIUS * S + 3, 2 * RADIUS * S + 3))) & usable
     allowed_mask = reach_zone
     cv2.imwrite(os.path.join(WORK, 'review', 'allowed.png'), allowed_mask * 255)
-    # Tiled polygons keep every pathfinder bucket small (src/pathfinding.ts buckets by 64 units).
-    zones = []
-    TILE, OVERLAP = 64, 4
-    for ty in range(0, H, TILE):
-        for tx in range(0, W, TILE):
-            x0, y0 = max(0, tx - OVERLAP) * S, max(0, ty - OVERLAP) * S
-            x1, y1 = min(W, tx + TILE + OVERLAP) * S, min(H, ty + TILE + OVERLAP) * S
-            tile = np.zeros_like(allowed_mask)
-            tile[y0:y1, x0:x1] = allowed_mask[y0:y1, x0:x1]
-            if not tile.any():
-                continue
-            for zone in contours_to_zones(tile, 'allowed', f'sol-{tx // TILE}-{ty // TILE}'):
-                zones.append(zone)
+    # Editable document: a few large walkable polygons (at most 240 points each, split along
+    # straight seams only when needed) and every hole as an obstacle. The runtime tiles the
+    # walkable polygons for the pathfinder (src/valence/navigation-tiles.ts).
+    outer = np.zeros_like(allowed_mask)
+    contours, _ = cv2.findContours(allowed_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    cv2.drawContours(outer, contours, -1, 1, -1)
+    zones = editable_pieces(outer)
+    holes = (outer & (1 - allowed_mask)).astype(np.uint8)
+    zones += obstacle_zones(holes, objects, edits)
     navigation = {'version': 1, 'map': 'valence-1876', 'width': W, 'height': H, 'zones': zones}
     os.makedirs(os.path.join(ROOT, 'public', 'valence-1876'), exist_ok=True)
-    with open(os.path.join(ROOT, 'public', 'valence-1876', 'navigation.json'), 'w') as handle:
-        json.dump(navigation, handle, separators=(',', ':'))
+    navigation_file = os.path.join(ROOT, 'public', 'valence-1876', 'navigation.json')
+    if RESET_NAVIGATION or not os.path.exists(navigation_file):
+        with open(navigation_file, 'w') as handle:
+            handle.write(json.dumps(navigation, indent=2) + '\n')
+        print(f'navigation.json written: {len(zones)} zones')
+    else:
+        print('navigation.json kept (edited in the workshop); pass --reset-navigation to rebuild it')
 
     def snap(point, margin=2):
         x, y = int(point[0] * S), int(point[1] * S)
@@ -282,9 +357,25 @@ def main():
         anchors['objects'][key], moved = snap(value, 3)
         report.append(f'object {key}: moved {moved:.1f}')
     anchors['thread'] = thread_paths(reachable, anchors, edits['thread'])
-    with open(os.path.join(ROOT, 'src', 'valence', 'generated', 'anchors.json'), 'w') as handle:
-        json.dump(anchors, handle, indent=2)
-        handle.write('\n')
+    # Thread ends sit exactly on their stations, not on the rounded search grid.
+    for index, line in enumerate(anchors['thread']):
+        line[0] = anchors['stations'][edits['thread'][index]]
+        line[-1] = anchors['stations'][edits['thread'][index + 1]]
+    layout = {
+        'version': 1,
+        'spawn': anchors['spawn'],
+        'stations': anchors['stations'],
+        'labels': edits['labels'],
+        'objects': anchors['objects'],
+        'thread': anchors['thread'],
+    }
+    layout_file = os.path.join(ROOT, 'public', 'valence-1876', 'layout.json')
+    if RESET_LAYOUT or not os.path.exists(layout_file):
+        with open(layout_file, 'w') as handle:
+            handle.write(json.dumps(layout, indent=2) + '\n')
+        print('layout.json written')
+    else:
+        print('layout.json kept (edited in the workshop); pass --reset-layout to rebuild it')
 
     # Occluders: only objects that can stand in front of a walkable point behind them.
     out_dir = os.path.join(ROOT, 'public', 'valence-1876', 'occlusion')

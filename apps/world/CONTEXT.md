@@ -81,3 +81,7 @@ One of seven study objects of 1877 hidden in Valence 1876; finding it opens a "y
 **Composite character**:
 An invented townsperson of Valence 1876, announced as such, who carries daily life and emotion; real people only say what the sources allow.
 
+**Workshop**:
+The development-only editor of Valence 1876 (access zones, landmarks and thread, water and effects, shorelines, ambient zones), saving straight into the project files.
+_Avoid_: Debug mode
+

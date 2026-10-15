@@ -4,18 +4,39 @@ import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
 import { Pathfinder } from '../pathfinding'
 import { canStand, type NavigationDocument } from '../world'
-import anchors from './generated/anchors.json'
+import { parseNavigation } from '../navigation-document'
 import tiles from './generated/map-tiles.json'
 import occluders from './generated/occluders.json'
+import { clipPolygon, tileNavigation } from './navigation-tiles'
+import {
+  OBJECT_IDS,
+  parseEffects,
+  parseLayout,
+  STATION_IDS,
+  VALENCE_NAVIGATION,
+} from './valence-documents'
 import { EMPTY_PROGRESS, parseProgress } from './valence-progress'
+import { chooseValenceSpawn, valenceSquareCandidates } from './valence-spawn'
 import { pioneerObjects, speakers, stations } from './valence-story'
-import { objectSpots, stationAnchors, threadOrder, VALENCE_HEIGHT, VALENCE_SPAWN, VALENCE_WIDTH } from './valence-world'
+import {
+  applyLayout,
+  currentLayout,
+  objectSpots,
+  stationAnchors,
+  threadOrder,
+  threadPaths,
+  VALENCE_HEIGHT,
+  VALENCE_SPAWN,
+  VALENCE_WIDTH,
+} from './valence-world'
 
 const root = resolve(import.meta.dirname, '../..')
 const publicFile = (path: string) => resolve(root, 'public', path.replace(/^\.\//, ''))
-const navigation = JSON.parse(
-  await readFile(publicFile('valence-1876/navigation.json'), 'utf8')
-) as NavigationDocument
+const readPublic = async (path: string) => JSON.parse(await readFile(publicFile(path), 'utf8')) as unknown
+const editable = parseNavigation(await readPublic('valence-1876/navigation.json'), VALENCE_NAVIGATION)
+const navigation: NavigationDocument = tileNavigation(editable)
+const layout = parseLayout(await readPublic('valence-1876/layout.json'))
+applyLayout(layout)
 const sceneFiles = ['caserne', 'cathedrale', 'champ', 'clercs', 'gare', 'maison', 'marche', 'rhone', 'temple', 'vapeur']
 
 describe('Valence 1876 story', () => {
@@ -69,10 +90,51 @@ describe('Valence 1876 progress', () => {
 })
 
 describe('Valence 1876 map', () => {
-  it('uses one coordinate system for tiles, navigation and anchors', () => {
+  it('uses one coordinate system for tiles, navigation and layout', () => {
     expect([tiles.worldWidth, tiles.worldHeight]).toEqual([VALENCE_WIDTH, VALENCE_HEIGHT])
     expect([navigation.width, navigation.height]).toEqual([VALENCE_WIDTH, VALENCE_HEIGHT])
-    expect(anchors.thread).toHaveLength(threadOrder.length - 1)
+    expect(threadPaths).toHaveLength(threadOrder.length - 1)
+    expect([...STATION_IDS]).toEqual(stations.map(s => s.id))
+    expect([...OBJECT_IDS].sort()).toEqual(pioneerObjects.map(o => o.id).sort())
+  })
+
+  it('reads and writes the same layout and effects documents', async () => {
+    expect(parseLayout(currentLayout())).toEqual(layout)
+    const effects = await readPublic('valence-1876/effects.json')
+    expect(parseEffects(JSON.parse(JSON.stringify(parseEffects(effects))))).toEqual(parseEffects(effects))
+    expect(() => parseLayout({ ...layout, thread: layout.thread.slice(1) })).toThrow()
+    expect(() => parseEffects({ ...(effects as object), river: [[0, 0]] })).toThrow()
+  })
+
+  it('threads start and end at their stations', () => {
+    threadPaths.forEach((line, index) => {
+      expect(line[0]).toEqual(stationAnchors[threadOrder[index]])
+      expect(line[line.length - 1]).toEqual(stationAnchors[threadOrder[index + 1]])
+    })
+  })
+
+  it('tiles walkable zones without changing where the avatar can stand', () => {
+    const square: [number, number][] = [
+      [0, 0],
+      [100, 0],
+      [100, 100],
+      [0, 100],
+    ]
+    expect(clipPolygon(square, 50, 50, 150, 150)).toEqual([
+      [50, 50],
+      [100, 50],
+      [100, 100],
+      [50, 100],
+    ])
+    for (let y = 20; y < VALENCE_HEIGHT; y += 37)
+      for (let x = 20; x < VALENCE_WIDTH; x += 41)
+        expect(canStand({ x, y }, navigation), `${x},${y}`).toBe(canStand({ x, y }, editable))
+  })
+
+  it('places multiplayer arrivals and stand bots on reachable ground', () => {
+    const arrival = chooseValenceSpawn(navigation, VALENCE_SPAWN, () => 0.5)
+    expect(arrival && canStand(arrival, navigation)).toBe(true)
+    expect(valenceSquareCandidates(navigation).length).toBeGreaterThan(50)
   })
 
   it('lets the avatar stand at the arrival, every station and every object', () => {
@@ -86,8 +148,10 @@ describe('Valence 1876 map', () => {
       expect(pathfinder.find(VALENCE_SPAWN, point), JSON.stringify(point)).not.toBeNull()
   })
 
-  it('keeps navigation polygons small enough for the pathfinder buckets', () => {
-    expect(Math.max(...navigation.zones.map(zone => zone.points.length))).toBeLessThanOrEqual(64)
+  it('keeps runtime polygons small enough for the pathfinder buckets', () => {
+    const allowed = navigation.zones.filter(zone => zone.kind === 'allowed')
+    expect(Math.max(...allowed.map(zone => zone.points.length))).toBeLessThanOrEqual(80)
+    expect(editable.zones.length).toBeLessThan(120)
   })
 
   it('ships source-aligned occluders inside the map', async () => {

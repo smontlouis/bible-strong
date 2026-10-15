@@ -1,31 +1,11 @@
 import Phaser from 'phaser'
 import type { Point } from '../world'
+import type { EffectToggle, LayoutPoint, ValenceEffects } from './valence-documents'
 import { valenceOccluders } from './valence-occluders'
 import { VALENCE_HEIGHT, VALENCE_WIDTH } from './valence-world'
 
 // Late-afternoon light from the west; the mistral pushes smoke and leaves toward the south.
 const WIND = { x: -0.35, y: 0.18 }
-const SMOKE_SOURCES: { x: number; y: number; rate: number; size: number }[] = [
-  { x: 1611, y: 196, rate: 260, size: 1.25 },
-  { x: 1421, y: 60, rate: 1300, size: 0.7 },
-  { x: 1494, y: 70, rate: 1500, size: 0.7 },
-  { x: 1239, y: 362, rate: 1700, size: 0.6 },
-]
-/** The Rhône, west of the quays; the bridge pylon is left out. */
-const RIVER: Point[] = [
-  { x: 0, y: 150 },
-  { x: 330, y: 135 },
-  { x: 290, y: 230 },
-  { x: 255, y: 330 },
-  { x: 240, y: 450 },
-  { x: 210, y: 560 },
-  { x: 165, y: 660 },
-  { x: 155, y: 760 },
-  { x: 195, y: 860 },
-  { x: 235, y: 941 },
-  { x: 0, y: 941 },
-]
-const PYLON = { x: 92, y: 205, width: 85, height: 225 }
 
 type Particle = {
   image: Phaser.GameObjects.Image
@@ -36,16 +16,17 @@ type Particle = {
   spin: number
   sway: number
   phase: number
-  kind: 'smoke' | 'leaf' | 'mote' | 'glint' | 'cloud' | 'current'
+  kind: 'smoke' | 'leaf' | 'mote' | 'glint' | 'current'
   scale: number
+  opacity: number
 }
 
-function inside(point: Point, polygon: Point[]) {
+export function inside(point: Point, polygon: readonly LayoutPoint[]) {
   let result = false
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const a = polygon[i],
-      b = polygon[j]
-    if (a.y > point.y !== b.y > point.y && point.x < ((b.x - a.x) * (point.y - a.y)) / (b.y - a.y) + a.x)
+    const [ax, ay] = polygon[i],
+      [bx, by] = polygon[j]
+    if (ay > point.y !== by > point.y && point.x < ((bx - ax) * (point.y - ay)) / (by - ay) + ax)
       result = !result
   }
   return result
@@ -58,19 +39,26 @@ function texture(scene: Phaser.Scene, key: string, size: number, draw: (c: Canva
   canvas.refresh()
 }
 
+/** The effects document shared with the workshop; `revision` changes on every edit. */
+export type EffectsModel = { effects: ValenceEffects; revision: number }
+
 /** Light procedural life drawn in map coordinates. Paused, hidden and reduced-motion safe. */
 export class ValenceAmbience {
   private readonly particles: Particle[] = []
   private readonly pool: Phaser.GameObjects.Image[] = []
-  private readonly timers = SMOKE_SOURCES.map(source => Math.random() * source.rate)
+  private smokeTimers: number[] = []
   private leafTimer = 0
   private moteTimer = 0
   private glintTimer = 0
   private currentTimer = 0
   private readonly trees: { x: number; y: number; width: number }[]
-  private readonly clouds: Particle[] = []
+  private clouds: { image: Phaser.GameObjects.Image; vx: number; vy: number; scale: number }[] = []
+  private revision = -1
 
-  constructor(private readonly scene: Phaser.Scene) {
+  constructor(
+    private readonly scene: Phaser.Scene,
+    private readonly model: EffectsModel
+  ) {
     texture(scene, 'v-puff', 64, c => {
       const g = c.createRadialGradient(32, 32, 2, 32, 32, 31)
       g.addColorStop(0, 'rgba(92, 72, 56, 0.55)')
@@ -141,27 +129,63 @@ export class ValenceAmbience {
     this.trees = valenceOccluders
       .filter(o => o.id.startsWith('tree'))
       .map(o => ({ x: o.x + o.width / 2, y: o.y + o.height * 0.35, width: o.width }))
-    for (let i = 0; i < 4; i++) {
-      const image = scene.add
-        .image(0, 0, 'v-cloud')
+  }
+
+  private sync() {
+    if (this.revision === this.model.revision) return
+    this.revision = this.model.revision
+    const { smoke, clouds } = this.model.effects
+    this.smokeTimers = smoke.map((source, index) => this.smokeTimers[index] ?? Math.random() * source.rate)
+    const count = clouds.enabled ? Math.round(clouds.density) : 0
+    while (this.clouds.length > count) this.clouds.pop()!.image.destroy()
+    while (this.clouds.length < count) {
+      const image = this.scene.add
+        .image(Math.random() * VALENCE_WIDTH, Math.random() * VALENCE_HEIGHT, 'v-cloud')
         .setDepth(2500)
         .setBlendMode(Phaser.BlendModes.MULTIPLY)
-      const cloud: Particle = {
-        image,
-        life: Infinity,
-        age: 0,
-        vx: 4 + Math.random() * 3,
-        vy: 2.4 + Math.random() * 1.5,
-        spin: 0,
-        sway: 0,
-        phase: Math.random() * 10,
-        kind: 'cloud',
-        scale: 3.4 + Math.random() * 2.4,
-      }
-      image.setPosition(Math.random() * VALENCE_WIDTH, Math.random() * VALENCE_HEIGHT)
-      image.setScale(cloud.scale * 1.6, cloud.scale).setAlpha(0.11)
-      this.clouds.push(cloud)
+      this.clouds.push({ image, vx: 4 + Math.random() * 3, vy: 2.4 + Math.random() * 1.5, scale: 3.4 + Math.random() * 2.4 })
     }
+  }
+
+  private take(key: string) {
+    const image = this.pool.pop() ?? this.scene.add.image(0, 0, key)
+    return image.setTexture(key).setVisible(true).setAngle(0).setBlendMode(Phaser.BlendModes.NORMAL)
+  }
+
+  private spawn(particle: Omit<Particle, 'age'>) {
+    this.particles.push({ ...particle, age: 0 })
+  }
+
+  private onWater(point: Point) {
+    const { river, exclusions } = this.model.effects
+    return inside(point, river) && !exclusions.some(zone => inside(point, zone))
+  }
+
+  /** Spawns on water near the view; `setting.density` is events per second. */
+  private waterSpawn(
+    timer: number,
+    setting: EffectToggle,
+    dt: number,
+    near: (p: Point) => boolean,
+    make: (p: Point) => void
+  ) {
+    if (!setting.enabled || setting.density <= 0) return 0
+    timer -= dt
+    if (timer > 0) return timer
+    const { river } = this.model.effects
+    const xs = river.map(p => p[0]),
+      ys = river.map(p => p[1])
+    const left = Math.min(...xs),
+      top = Math.min(...ys)
+    const width = Math.max(...xs) - left,
+      height = Math.max(...ys) - top
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const point = { x: left + Math.random() * width, y: top + Math.random() * height }
+      if (!this.onWater(point) || !near(point)) continue
+      make(point)
+      break
+    }
+    return 1000 / setting.density
   }
 
   /** A short golden burst where a pioneer object is picked up. */
@@ -184,17 +208,9 @@ export class ValenceAmbience {
         phase: 0,
         kind: 'mote',
         scale: 0.45 + Math.random() * 0.35,
+        opacity: 1,
       })
     }
-  }
-
-  private take(key: string) {
-    const image = this.pool.pop() ?? this.scene.add.image(0, 0, key)
-    return image.setTexture(key).setVisible(true).setAngle(0).setBlendMode(Phaser.BlendModes.NORMAL)
-  }
-
-  private spawn(particle: Omit<Particle, 'age'>) {
-    this.particles.push({ ...particle, age: 0 })
   }
 
   update(
@@ -202,35 +218,41 @@ export class ValenceAmbience {
     delta: number,
     paused: boolean,
     reducedMotion: boolean,
-    avatar: Point
+    editing = false
   ) {
-    const visible = this.particles.length > 0 || !reducedMotion
+    this.sync()
     if (reducedMotion) {
       for (const p of this.particles.splice(0)) this.release(p)
       for (const cloud of this.clouds) cloud.image.setVisible(false)
       return
     }
-    if (!visible || paused) return
+    // In the workshop the preview keeps running even though the visit is paused.
+    if (paused && !editing) return
+    const effects = this.model.effects
     const dt = Math.min(delta, 50)
     const seconds = dt / 1000
     const view = camera.worldView
-    const near = (x: number, y: number, margin = 120) =>
-      x > view.x - margin && x < view.right + margin && y > view.y - margin && y < view.bottom + margin
+    const near = (p: Point, margin = 120) =>
+      p.x > view.x - margin && p.x < view.right + margin && p.y > view.y - margin && p.y < view.bottom + margin
 
     for (const cloud of this.clouds) {
-      const image = cloud.image.setVisible(true)
-      image.x += cloud.vx * seconds
-      image.y += cloud.vy * seconds
+      const { image } = cloud
+      image
+        .setVisible(true)
+        .setAlpha(effects.clouds.opacity)
+        .setScale(cloud.scale * 1.6 * effects.clouds.size, cloud.scale * effects.clouds.size)
+      image.x += cloud.vx * effects.clouds.speed * seconds
+      image.y += cloud.vy * effects.clouds.speed * seconds
       if (image.x > VALENCE_WIDTH + 260 || image.y > VALENCE_HEIGHT + 200) {
         image.x = -260 - Math.random() * 200
         image.y = Math.random() * VALENCE_HEIGHT * 0.8 - 100
       }
     }
 
-    SMOKE_SOURCES.forEach((source, index) => {
-      this.timers[index] -= dt
-      if (this.timers[index] > 0 || !near(source.x, source.y, 200)) return
-      this.timers[index] = source.rate * (0.7 + Math.random() * 0.6)
+    effects.smoke.forEach((source, index) => {
+      this.smokeTimers[index] -= dt
+      if (this.smokeTimers[index] > 0 || !near(source, 200)) return
+      this.smokeTimers[index] = source.rate * (0.7 + Math.random() * 0.6)
       const image = this.take('v-puff').setDepth(2400).setPosition(source.x, source.y)
       this.spawn({
         image,
@@ -242,100 +264,89 @@ export class ValenceAmbience {
         phase: Math.random() * 6,
         kind: 'smoke',
         scale: source.size,
+        opacity: 0.85,
       })
     })
 
+    const { leaves, motes } = effects
     this.leafTimer -= dt
-    if (this.leafTimer <= 0 && this.trees.length) {
-      this.leafTimer = 380 + Math.random() * 420
-      const candidates = this.trees.filter(tree => near(tree.x, tree.y))
+    if (leaves.enabled && leaves.density > 0 && this.leafTimer <= 0 && this.trees.length) {
+      this.leafTimer = (1000 / leaves.density) * (0.6 + Math.random() * 0.8)
+      const candidates = this.trees.filter(tree => near(tree))
       const tree = candidates[Math.floor(Math.random() * candidates.length)]
       if (tree) {
         const x = tree.x + (Math.random() - 0.5) * tree.width * 0.7
         const image = this.take('v-leaf').setDepth(2300).setPosition(x, tree.y)
         this.spawn({
           image,
-          life: 5200 + Math.random() * 2400,
-          vx: WIND.x * 14,
-          vy: 9 + Math.random() * 5,
+          life: (5200 + Math.random() * 2400) / Math.max(0.2, leaves.speed),
+          vx: WIND.x * 14 * leaves.speed,
+          vy: (9 + Math.random() * 5) * leaves.speed,
           spin: (Math.random() - 0.5) * 160,
           sway: 9 + Math.random() * 6,
           phase: Math.random() * 6,
           kind: 'leaf',
-          scale: 0.24 + Math.random() * 0.12,
+          scale: (0.24 + Math.random() * 0.12) * leaves.size,
+          opacity: leaves.opacity,
         })
       }
     }
 
     this.moteTimer -= dt
-    if (this.moteTimer <= 0) {
-      this.moteTimer = 140
-      const x = view.x + Math.random() * view.width
-      const y = view.y + Math.random() * view.height
-      const image = this.take('v-mote').setDepth(2450).setPosition(x, y).setBlendMode(Phaser.BlendModes.ADD)
+    if (motes.enabled && motes.density > 0 && this.moteTimer <= 0) {
+      this.moteTimer = 1000 / motes.density
+      const image = this.take('v-mote')
+        .setDepth(2450)
+        .setPosition(view.x + Math.random() * view.width, view.y + Math.random() * view.height)
+        .setBlendMode(Phaser.BlendModes.ADD)
       this.spawn({
         image,
         life: 3600 + Math.random() * 2600,
-        vx: 3 + Math.random() * 4,
-        vy: -1.5 - Math.random() * 2.5,
+        vx: (3 + Math.random() * 4) * motes.speed,
+        vy: (-1.5 - Math.random() * 2.5) * motes.speed,
         spin: 0,
         sway: 3,
         phase: Math.random() * 6,
         kind: 'mote',
-        scale: 0.18 + Math.random() * 0.22,
+        scale: (0.18 + Math.random() * 0.22) * motes.size,
+        opacity: motes.opacity,
       })
     }
 
-    this.glintTimer -= dt
-    if (this.glintTimer <= 0) {
-      this.glintTimer = 90
-      for (let attempt = 0; attempt < 6; attempt++) {
-        const point = { x: Math.random() * 330, y: 140 + Math.random() * 800 }
-        const inPylon =
-          point.x > PYLON.x && point.x < PYLON.x + PYLON.width && point.y > PYLON.y && point.y < PYLON.y + PYLON.height
-        if (!inside(point, RIVER) || inPylon || !near(point.x, point.y, 40)) continue
-        const image = this.take('v-glint').setDepth(-60).setPosition(point.x, point.y).setBlendMode(Phaser.BlendModes.ADD)
-        this.spawn({
-          image,
-          life: 1400 + Math.random() * 1200,
-          vx: 1,
-          vy: 7 + Math.random() * 4,
-          spin: 0,
-          sway: 0,
-          phase: 0,
-          kind: 'glint',
-          scale: 0.35 + Math.random() * 0.4,
-        })
-        break
-      }
-    }
-
-    this.currentTimer -= dt
-    if (this.currentTimer <= 0) {
-      this.currentTimer = 110
-      for (let attempt = 0; attempt < 6; attempt++) {
-        const point = { x: Math.random() * 320, y: 130 + Math.random() * 800 }
-        const inPylon =
-          point.x > PYLON.x - 10 &&
-          point.x < PYLON.x + PYLON.width + 10 &&
-          point.y > PYLON.y &&
-          point.y < PYLON.y + PYLON.height + 20
-        if (!inside(point, RIVER) || inPylon || !near(point.x, point.y, 60)) continue
-        const image = this.take('v-current').setDepth(-58).setPosition(point.x, point.y)
-        this.spawn({
-          image,
-          life: 2600 + Math.random() * 1800,
-          vx: 2 + Math.random() * 2,
-          vy: 11 + Math.random() * 6,
-          spin: 0,
-          sway: 1.5,
-          phase: Math.random() * 6,
-          kind: 'current',
-          scale: 0.32 + Math.random() * 0.22,
-        })
-        break
-      }
-    }
+    const { glints, currents } = effects
+    this.glintTimer = this.waterSpawn(this.glintTimer, glints, dt, p => near(p, 40), point => {
+      const image = this.take('v-glint')
+        .setDepth(-60)
+        .setPosition(point.x, point.y)
+        .setBlendMode(Phaser.BlendModes.ADD)
+      this.spawn({
+        image,
+        life: 1400 + Math.random() * 1200,
+        vx: glints.speed,
+        vy: (7 + Math.random() * 4) * glints.speed,
+        spin: 0,
+        sway: 0,
+        phase: 0,
+        kind: 'glint',
+        scale: (0.35 + Math.random() * 0.4) * glints.size,
+        opacity: glints.opacity,
+      })
+    })
+    this.currentTimer = this.waterSpawn(this.currentTimer, currents, dt, p => near(p, 60), point => {
+      const image = this.take('v-current').setDepth(-58).setPosition(point.x, point.y)
+      this.spawn({
+        image,
+        life: (2600 + Math.random() * 1800) / Math.max(0.2, currents.speed),
+        vx: (2 + Math.random() * 2) * currents.speed,
+        vy: (11 + Math.random() * 6) * currents.speed,
+        spin: 0,
+        sway: 1.5,
+        phase: Math.random() * 6,
+        kind: 'current',
+        scale: (0.32 + Math.random() * 0.22) * currents.size,
+        opacity: currents.opacity,
+      })
+    })
 
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i]
@@ -351,23 +362,24 @@ export class ValenceAmbience {
       p.image.y += p.vy * seconds
       if (p.kind === 'smoke') {
         p.vx += WIND.x * 6 * seconds
-        p.image.setScale(p.scale * (0.35 + t * 1.4)).setAlpha(0.85 * Math.sin(Math.PI * Math.min(1, t * 1.2)))
+        p.image
+          .setScale(p.scale * (0.35 + t * 1.4))
+          .setAlpha(p.opacity * Math.sin(Math.PI * Math.min(1, t * 1.2)))
         p.image.angle += p.spin * seconds
       } else if (p.kind === 'leaf') {
         p.image.angle += p.spin * seconds
         p.image.setScale(p.scale, p.scale * (0.55 + 0.45 * Math.abs(Math.sin(p.age / 260 + p.phase))))
-        p.image.setAlpha(Math.min(1, t * 8, (1 - t) * 4))
+        p.image.setAlpha(p.opacity * Math.min(1, t * 8, (1 - t) * 4))
       } else if (p.kind === 'mote') {
-        p.image.setScale(p.scale).setAlpha(0.7 * Math.sin(Math.PI * t))
+        p.image.setScale(p.scale).setAlpha(p.opacity * Math.sin(Math.PI * t))
       } else if (p.kind === 'current') {
         // Flow lines leave the water before they reach the quays.
-        if (!inside({ x: p.image.x, y: p.image.y }, RIVER)) p.age = Math.max(p.age, p.life * 0.85)
-        p.image.setScale(p.scale * (1 + t * 0.4), p.scale).setAlpha(0.7 * Math.sin(Math.PI * t))
-      } else if (p.kind === 'glint') {
-        p.image.setScale(p.scale * 2.2, p.scale * 0.45).setAlpha(0.75 * Math.sin(Math.PI * t))
+        if (!this.onWater({ x: p.image.x, y: p.image.y })) p.age = Math.max(p.age, p.life * 0.85)
+        p.image.setScale(p.scale * (1 + t * 0.4), p.scale).setAlpha(p.opacity * Math.sin(Math.PI * t))
+      } else {
+        p.image.setScale(p.scale * 2.2, p.scale * 0.45).setAlpha(p.opacity * Math.sin(Math.PI * t))
       }
     }
-    void avatar
   }
 
   private release(p: Particle) {

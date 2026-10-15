@@ -9,6 +9,8 @@ export const AVATAR_COLORS = [
   '#a2ce86',
 ]
 export const PROFILE_KEY = 'bible-strong.world.profile.v1'
+/** Valence 1876 keeps its own character, separate from the archipelago's. */
+export const VALENCE_PROFILE_KEY = 'bible-strong.valence-1876.profile.v1'
 export const AVATARS = [
   { id: 'nova', name: 'Bean', image: '/assets/avatars/blob/thumbnail.png' },
   { id: 'short-slime', name: 'Slime', image: '/assets/avatars/short-slime/thumbnail.png' },
@@ -64,19 +66,19 @@ export function parseProfile(value: unknown): AvatarProfile | null {
   return { avatar: profile.avatar as AvatarId, name, color: profile.color.toLowerCase() }
 }
 
-export function loadProfile(): AvatarProfile | null {
+export function loadProfile(key = PROFILE_KEY): AvatarProfile | null {
   try {
-    return parseProfile(JSON.parse(localStorage.getItem(PROFILE_KEY) ?? 'null'))
+    return parseProfile(JSON.parse(localStorage.getItem(key) ?? 'null'))
   } catch {
     return null
   }
 }
 
-export function saveProfile(profile: AvatarProfile): boolean {
+export function saveProfile(profile: AvatarProfile, key = PROFILE_KEY): boolean {
   const valid = parseProfile(profile)
   if (!valid) return false
   try {
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(valid))
+    localStorage.setItem(key, JSON.stringify(valid))
     return true
   } catch {
     return false

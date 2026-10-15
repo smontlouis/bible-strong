@@ -9,6 +9,9 @@ import {
 import { parseProfile, type AvatarProfile } from './avatar-profile'
 
 export const ROOM = 'main'
+/** Valence 1876 has its own room on the same Worker: same protocol, no games. */
+export const VALENCE_ROOM = 'valence-1876'
+export const ROOMS = [ROOM, VALENCE_ROOM] as const
 export const PROTOCOL_VERSION = 2
 export const SEND_INTERVAL = 1000 / 15
 export const MAX_PLAYERS = 100
@@ -64,7 +67,7 @@ export function parsePose(value: unknown): Pose | null {
   const { x, y, dx, dy } = p as Pose
   if (
     x < 0 ||
-    x > 1671 ||
+    x > 1672 ||
     y < 0 ||
     y > 941 ||
     Math.abs(dx) > 1 ||

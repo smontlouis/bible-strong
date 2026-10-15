@@ -1,6 +1,13 @@
 import nipplejs from 'nipplejs'
-import { useCallback, useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
-import { generateExplorerProfile, loadProfile } from '../avatar-profile'
+import { lazy, Suspense, useCallback, useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
+import { createAmbientEditor } from '../ambient-zones'
+import { AvatarEditor, profileCopy } from '../AvatarEditor'
+import {
+  generateExplorerProfile,
+  loadProfile,
+  saveProfile,
+  VALENCE_PROFILE_KEY,
+} from '../avatar-profile'
 import { clampCameraZoom } from '../camera-zoom'
 import { ControlIcon } from '../ControlIcon'
 import type { Controls } from '../game'
@@ -8,23 +15,33 @@ import { GuestbookDialog } from '../GuestbookDialog'
 import { haptic } from '../haptics'
 import { loadLanguage, saveLanguage, type Language } from '../language'
 import { Modal } from '../Modal'
+import { parseNavigation } from '../navigation-document'
+import { ReactionPicker } from '../ReactionPicker'
+import { createShoreEditor } from '../shorelines'
 import { useCameraZoomGestures } from '../use-camera-zoom-gestures'
 import { ARRIVAL_FADE_MS, MINIMUM_LOADING_MS } from '../world-arrival'
 import type { NavigationDocument } from '../world'
+import { tileNavigation } from './navigation-tiles'
 import { objectImage, ObjectCard, ShareCard } from './ObjectCard'
 import { StationDialog } from './StationDialog'
 import { valenceCopy } from './valence-copy'
 import { createValence, type ValenceControls, type ValenceState } from './valence-game'
 import { loadProgress, saveProgress, type ValenceProgress } from './valence-progress'
 import { pioneerObjects, stations, type PioneerObjectId, type StationId } from './valence-story'
+import type { EffectsModel } from './valence-ambience'
+import { parseEffects, parseLayout, VALENCE_NAVIGATION } from './valence-documents'
 import {
+  applyLayout,
   nearestStation,
   objectWithinReach,
   stationAnchors,
   threadOrder,
   VALENCE_SPAWN,
 } from './valence-world'
+import { createWorkshop, type WorkshopMode } from './workshop-model'
 import './valence.css'
+
+const ValenceWorkshop = import.meta.env.DEV ? lazy(() => import('./ValenceWorkshop')) : () => null
 
 const STAND_IDLE_MS = 150_000
 const byId = new Map(stations.map(station => [station.id, station]))
@@ -49,10 +66,24 @@ const shortDates: Record<Language, Partial<Record<StationId, string>>> = {
   },
 }
 
-async function loadValenceNavigation(): Promise<NavigationDocument> {
-  const response = await fetch('./valence-1876/navigation.json', { cache: 'no-cache' })
-  if (!response.ok) throw new Error('navigation')
-  return (await response.json()) as NavigationDocument
+async function loadJson(path: string) {
+  const response = await fetch(path, { cache: 'no-cache' })
+  if (!response.ok) throw new Error(path)
+  return (await response.json()) as unknown
+}
+
+/** Editable project documents; the walkable zones are tiled for movement at runtime. */
+async function loadValenceDocuments() {
+  const [navigation, layout, effects] = await Promise.all([
+    loadJson('./valence-1876/navigation.json'),
+    loadJson('./valence-1876/layout.json'),
+    loadJson('./valence-1876/effects.json'),
+  ])
+  return {
+    navigation: parseNavigation(navigation, VALENCE_NAVIGATION),
+    layout: parseLayout(layout),
+    effects: parseEffects(effects),
+  }
 }
 
 function Timeline({
@@ -133,10 +164,33 @@ export default function ValenceApp() {
   const debug = useMemo(() => import.meta.env.DEV && new URLSearchParams(location.search).has('debug'), [])
   const [language, setLanguage] = useState<Language>(loadLanguage)
   const t = valenceCopy[language]
-  const [profile] = useState(() => loadProfile() ?? generateExplorerProfile())
+  const [savedProfile] = useState(() => loadProfile(VALENCE_PROFILE_KEY))
+  const [profile, setProfile] = useState(() => savedProfile ?? generateExplorerProfile())
+  const [onboarding, setOnboarding] = useState(!savedProfile)
+  const [profileOpen, setProfileOpen] = useState(!savedProfile)
+  const [profileStorageError, setProfileStorageError] = useState(false)
+  const [workshopMode, setWorkshopMode] = useState<WorkshopMode | null>(null)
+  const [effectsModel] = useState<EffectsModel>(() => ({ effects: null!, revision: 0 }))
+  const [shoreEditor] = useState(() =>
+    createShoreEditor({
+      file: './valence-1876/shorelines.json',
+      saveKey: 'valence-1876/shorelines',
+      storageKey: 'bible-strong-valence-shorelines-v1',
+      draftKey: 'bible-strong-valence-shorelines-draft-v1',
+    })
+  )
+  const [ambientEditor] = useState(() =>
+    createAmbientEditor({
+      file: './valence-1876/ambience.json',
+      saveKey: 'valence-1876/ambience',
+      draftKey: 'bible-strong-valence-ambience-draft-v1',
+    })
+  )
+  const [workshop] = useState(() => (import.meta.env.DEV ? createWorkshop(effectsModel) : undefined))
   const [progress, setProgress] = useState<ValenceProgress>(loadProgress)
   const visited = useMemo(() => new Set(progress.visited), [progress.visited])
   const found = useMemo(() => new Set(progress.found), [progress.found])
+  /** The editable navigation document; `controls.navigation` holds its tiled runtime form. */
   const [navigation, setNavigation] = useState<NavigationDocument | null>(null)
   const [failed, setFailed] = useState(false)
   const [sceneLoaded, setSceneLoaded] = useState(false)
@@ -155,10 +209,15 @@ export default function ValenceApp() {
   const joystick = useRef<HTMLDivElement>(null)
   const stationTags = useRef<Partial<Record<StationId, HTMLElement | null>>>({})
   const controls = useRef<ValenceControls>({
-    navigation: { version: 1, map: 'archipelago', width: 1672, height: 941, zones: [] },
+    navigation: { version: 1, map: 'valence-1876', width: 1672, height: 941, zones: [] },
+    effects: effectsModel,
     direction: { x: 0, y: 0 },
     avatar: profile.avatar,
     avatarColor: profile.color,
+    avatarName: profile.name,
+    shoreEditor,
+    ambientEditor,
+    workshop,
     paused: true,
     overview: false,
     debug,
@@ -173,7 +232,9 @@ export default function ValenceApp() {
   })
   if (import.meta.env.DEV) (window as unknown as { valence?: ValenceControls }).valence = controls.current
   const near = ready ? nearestStation(state) : null
-  const dialogOpen = Boolean(opened || objectOpen || shareOpen || guestbookOpen || menuOpen || introOpen)
+  const dialogOpen = Boolean(
+    opened || objectOpen || shareOpen || guestbookOpen || menuOpen || introOpen || profileOpen || workshopMode
+  )
 
   useCameraZoomGestures(host, controls as unknown as RefObject<Controls>, setOverview)
 
@@ -192,20 +253,30 @@ export default function ValenceApp() {
 
   useEffect(() => {
     let cancelled = false
-    loadValenceNavigation()
-      .then(document => {
+    Promise.all([loadValenceDocuments(), shoreEditor.load(), ambientEditor.load()])
+      .then(([documents]) => {
         if (cancelled) return
-        controls.current.navigation = document
-        setNavigation(document)
+        applyLayout(documents.layout)
+        effectsModel.effects = documents.effects
+        effectsModel.revision++
+        workshop?.markSaved('layout')
+        workshop?.markSaved('effects')
+        controls.current.navigation = tileNavigation(documents.navigation)
+        setNavigation(documents.navigation)
       })
       .catch(() => !cancelled && setFailed(true))
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [shoreEditor, ambientEditor, effectsModel, workshop])
 
+  // The scene is created once; navigation edits from the workshop only swap the tiled document.
   useEffect(() => {
-    if (!navigation) return
+    if (navigation) controls.current.navigation = tileNavigation(navigation)
+  }, [navigation])
+  const documentsLoaded = navigation !== null
+  useEffect(() => {
+    if (!documentsLoaded) return
     const game = createValence(
       host.current!,
       controls.current,
@@ -214,7 +285,7 @@ export default function ValenceApp() {
       () => setFailed(true)
     )
     return () => game.destroy(true)
-  }, [navigation])
+  }, [documentsLoaded])
 
   useEffect(() => {
     const timer = setTimeout(() => setMinimumElapsed(true), MINIMUM_LOADING_MS)
@@ -261,8 +332,21 @@ export default function ValenceApp() {
     c.overview = overview
     c.visited = visited
     c.found = found
+    c.avatar = profile.avatar
+    c.avatarColor = profile.color
+    c.avatarName = profile.name
+    c.multiplayerEnabled = !workshopMode && !profileOpen
+    c.activity = !ready
+      ? null
+      : guestbookOpen
+        ? 'board'
+        : opened || objectOpen || shareOpen
+          ? 'exploration'
+          : menuOpen || profileOpen
+            ? 'menu'
+            : null
     c.direction = { x: 0, y: 0 }
-  }, [ready, dialogOpen, overview, visited, found])
+  }, [ready, dialogOpen, overview, visited, found, profile, profileOpen, workshopMode, guestbookOpen, opened, objectOpen, shareOpen, menuOpen])
 
   // Walking onto a pioneer object picks it up.
   const pickupTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -330,7 +414,9 @@ export default function ValenceApp() {
   const objectData = objectOpen ? pioneerObjects.find(object => object.id === objectOpen)! : null
 
   return (
-    <main className={`valence-shell ${stand ? 'is-stand' : ''} ${ready ? '' : 'is-loading'}`}>
+    <main
+      className={`valence-shell ${stand ? 'is-stand' : ''} ${ready ? '' : 'is-loading'} ${workshopMode ? 'is-workshop' : ''}`}
+    >
       <div className="world-canvas" ref={host} aria-label={t.mapLabel} />
       <div className="v-vignette" aria-hidden="true" />
 
@@ -419,11 +505,67 @@ export default function ValenceApp() {
 
       <aside className="v-bottom">
         <div className="joystick-zone" ref={joystick} role="group" aria-label={t.joystick} />
-        {ready && !stand && <p className="v-keys">{t.keys}</p>}
+        {ready && !stand && !workshopMode && <p className="v-keys">{t.keys}</p>}
+        {ready && !workshopMode && (
+          <div className="v-social">
+            {profile.name && (
+              <p className="v-presence" data-state={state.multiplayer?.state ?? 'connecting'} role="status" aria-live="polite">
+                <span className="v-presence-dot" aria-hidden="true" />
+                {state.multiplayer?.state === 'online'
+                  ? `${state.multiplayer.count} ${t.online}`
+                  : state.multiplayer?.state === 'offline'
+                    ? t.offline
+                    : t.connecting}
+              </p>
+            )}
+            {!dialogOpen && (
+              <ReactionPicker
+                network={controls.current.network}
+                color={profile.color}
+                language={language}
+                online={Boolean(controls.current.sendReaction)}
+                onSend={reaction => controls.current.sendReaction?.(reaction) ?? false}
+              />
+            )}
+          </div>
+        )}
       </aside>
+      {import.meta.env.DEV && ready && !workshopMode && (
+        <button type="button" className="v-workshop-open" onClick={() => setWorkshopMode('landmarks')}>
+          {t.workshop}
+        </button>
+      )}
+      {import.meta.env.DEV && workshop && workshopMode && navigation && (
+        <Suspense fallback={null}>
+          <ValenceWorkshop
+            mode={workshopMode}
+            onMode={mode => {
+              workshop.mode = mode
+              shoreEditor.editing = mode === 'shorelines'
+              ambientEditor.editing = Boolean(mode && !['navigation', 'landmarks', 'water', 'shorelines'].includes(mode))
+              if (ambientEditor.editing && mode) {
+                ambientEditor.kind = mode as typeof ambientEditor.kind
+                ambientEditor.selected = ambientEditor.zones.find(z => z.kind === mode)?.id ?? ''
+                ambientEditor.focus++
+                ambientEditor.mode = 'select'
+                ambientEditor.notify()
+              }
+              workshop.notify()
+              setWorkshopMode(mode)
+            }}
+            model={workshop}
+            controls={controls.current}
+            shoreEditor={shoreEditor}
+            ambientEditor={ambientEditor}
+            navigation={navigation}
+            onNavigation={setNavigation}
+            language={language}
+          />
+        </Suspense>
+      )}
 
       {stand && (
-        <a className="v-stand" href="https://world.bible-strong.app/valence-1876" target="_blank" rel="noreferrer">
+        <a className={`v-stand ${workshopMode ? 'is-hidden' : ''}`} href="https://world.bible-strong.app/valence-1876" target="_blank" rel="noreferrer">
           <img src="./valence-1876/qr.svg" width={150} height={150} alt="QR code — world.bible-strong.app/valence-1876" />
           <span>
             <strong>
@@ -447,7 +589,26 @@ export default function ValenceApp() {
         </div>
       )}
 
-      {ready && introOpen && (
+      {ready && profileOpen && (
+        <AvatarEditor
+          eyebrow="BIBLE STRONG · VALENCE 1876"
+          profile={profile}
+          onboarding={onboarding}
+          language={language}
+          onClose={() => {
+            if (!onboarding) setProfileOpen(false)
+          }}
+          onSave={next => {
+            setProfileStorageError(!saveProfile(next, VALENCE_PROFILE_KEY))
+            setProfile(next)
+            setOnboarding(false)
+            setProfileOpen(false)
+          }}
+        />
+      )}
+      {profileStorageError && <p className="v-toast">{profileCopy[language].storage}</p>}
+
+      {ready && introOpen && !profileOpen && (
         <Intro
           language={language}
           onEnter={() => {
@@ -509,6 +670,10 @@ export default function ValenceApp() {
             setProgress({ visited: [], found: [], introSeen: true })
             controls.current.reset++
           }}
+          onProfile={() => {
+            setMenuOpen(false)
+            setProfileOpen(true)
+          }}
         />
       )}
       {debug && (
@@ -529,6 +694,7 @@ function Notebook({
   onIntro,
   onShare,
   onRestart,
+  onProfile,
 }: {
   language: Language
   visited: ReadonlySet<StationId>
@@ -538,6 +704,7 @@ function Notebook({
   onIntro: () => void
   onShare: () => void
   onRestart: () => void
+  onProfile: () => void
 }) {
   const t = valenceCopy[language]
   const titleId = useId()
@@ -579,6 +746,9 @@ function Notebook({
             {t.share}
           </button>
         )}
+        <button type="button" className="v-secondary" onClick={onProfile}>
+          {t.changeAvatar}
+        </button>
         <button type="button" className="v-secondary" onClick={onIntro}>
           {t.replayIntro}
         </button>

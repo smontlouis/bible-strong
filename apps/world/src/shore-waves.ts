@@ -16,7 +16,9 @@ export class ShoreWaves {
   private reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
   constructor(
     private scene: Phaser.Scene,
-    private model: ShoreEditorModel
+    private model: ShoreEditorModel,
+    /** Foam colour: pale turquoise on the archipelago, cream on Valence's sepia river. */
+    private foam = 0xd5f8f3
   ) {
     this.waves = scene.add.graphics().setDepth(-70)
     this.guides = scene.add.graphics().setDepth(3100)
@@ -156,7 +158,7 @@ export class ShoreWaves {
       for (let band = 0; band < 3; band++) {
         const phase = (this.clock / line.period + band / 3) % 1
         const offset = (1 - phase) * line.width
-        this.waves.fillStyle(0xd5f8f3, Math.pow(Math.sin(Math.PI * phase), 1.15) * line.strength)
+        this.waves.fillStyle(this.foam, Math.pow(Math.sin(Math.PI * phase), 1.15) * line.strength)
         // Filled ribbons give each broken crest a full belly and pointed, curling tips.
         // A constant-width stroke would leave blunt ends at every gap.
         let fragment: typeof points = []

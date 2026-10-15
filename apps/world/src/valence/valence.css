@@ -1087,3 +1087,180 @@
     border-radius: 24px 24px 0 0;
   }
 }
+
+/* Presence and reactions, bottom right */
+.v-social {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+.v-presence {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 12px;
+  border: 1px solid var(--v-line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--v-paper) 92%, transparent);
+  box-shadow: var(--v-shadow);
+  color: var(--v-ink);
+  font: 600 12px / 1.2 var(--bs-font);
+}
+.v-presence-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #b9a07a;
+}
+.v-presence[data-state='online'] .v-presence-dot {
+  background: #5d8a3a;
+  box-shadow: 0 0 0 3px rgba(93, 138, 58, 0.2);
+}
+.v-bottom .v-keys {
+  margin-right: auto;
+  margin-left: 12px;
+}
+.v-toast {
+  position: absolute;
+  z-index: 30;
+  left: 50%;
+  bottom: 120px;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: var(--v-ink);
+  color: var(--v-paper);
+  font: 500 13px / 1.4 var(--bs-font);
+}
+
+/* Development workshop */
+.v-workshop-open {
+  position: absolute;
+  z-index: 4;
+  right: 16px;
+  top: calc(max(14px, env(safe-area-inset-top)) + 300px);
+  padding: 8px 12px;
+  border: 1px dashed #8b5e30;
+  border-radius: 12px;
+  background: #fff7e3;
+  color: #2e1c0f;
+  font: 600 12px / 1 var(--bs-font);
+}
+.valence-shell.is-workshop > .v-hud,
+.valence-shell.is-workshop > .v-bottom,
+.valence-shell.is-workshop > .v-camera,
+.valence-shell.is-workshop > .v-tag,
+.valence-shell.is-workshop > .v-stand,
+.valence-shell.is-workshop > .v-vignette {
+  visibility: hidden;
+}
+.valence-shell.is-workshop > .shore-editor {
+  top: 100px;
+  width: 320px;
+  bottom: 20px;
+}
+.valence-shell.is-workshop > .zone-editor {
+  top: 96px;
+}
+.v-workshop-panel h3 {
+  margin: 4px 0 6px;
+  font-size: 14px;
+}
+.v-workshop-panel section,
+.v-workshop-panel details {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #dce5d9;
+}
+.v-workshop-panel summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.v-workshop-panel label {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+.v-workshop-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.v-workshop-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.v-workshop-chips button {
+  padding: 5px 8px;
+  font-size: 11px;
+}
+.v-workshop-legend {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+.v-workshop-legend li::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: -1px;
+  background: #2fae5c;
+}
+.v-workshop-legend li[data-index='1']::before {
+  background: #2f6bff;
+}
+.v-workshop-legend li[data-index='2']::before {
+  background: #ff9a2f;
+}
+.v-workshop-legend li[data-index='3']::before {
+  background: #c23ad1;
+}
+.v-workshop-legend li[data-index='4']::before {
+  background: #ffd36a;
+}
+.v-workshop-slider span {
+  display: flex;
+  justify-content: space-between;
+}
+.v-workshop-slider input {
+  width: 100%;
+}
+.v-workshop-check {
+  display: flex !important;
+  align-items: center;
+  gap: 8px !important;
+}
+.v-workshop-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v-workshop-list li {
+  display: flex;
+  gap: 6px;
+}
+.v-workshop-smoke {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #dce5d9;
+  border-radius: 12px;
+}
+/* On the stand screen, presence and reactions sit above the QR card. */
+.valence-shell.is-stand .v-social {
+  margin-bottom: 200px;
+}
