@@ -7,8 +7,8 @@ import { VALENCE_HEIGHT, VALENCE_WIDTH, type ValenceLayout } from './valence-doc
 
 export { VALENCE_HEIGHT, VALENCE_WIDTH }
 export const AVATAR_SIZE = 44
-export const STATION_RADIUS = 62
-export const OBJECT_RADIUS = 26
+export const STATION_RADIUS = 80
+export const OBJECT_RADIUS = 30
 
 /** The visitor arrives by the Lyon train, like the Bourdeau family. */
 export const VALENCE_SPAWN: Point = { x: 0, y: 0 }
@@ -22,7 +22,7 @@ export const objectSpots = {} as Record<PioneerObjectId, Point>
 export const threadPaths: Point[][] = []
 /** The train to the archipelago: the platform point travellers leave from and arrive at, and its tag. */
 export const valencePortal = { ground: { x: 0, y: 0 }, label: { x: 0, y: 0 } }
-export const PORTAL_RADIUS = 46
+export const PORTAL_RADIUS = 58
 
 /** The dotted thread follows the dates, not the shortest tour. */
 export const threadOrder: StationId[] = [
