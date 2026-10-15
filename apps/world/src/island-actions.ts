@@ -15,7 +15,7 @@ export const islandActions = [
   { id: 'comparison', x: 836, y: 770 },
   { id: 'commentaries', x: 1390, y: 705 },
   // The portal to Valence 1876, floating in the arch's opening (world-portal.ts).
-  { id: 'portal', x: 833, y: 806 },
+  { id: 'portal', x: 940, y: 470 },
 ] as const
 
 export type IslandActionId = (typeof islandActions)[number]['id']
@@ -29,8 +29,6 @@ export function nearIslandAction(
 ) {
   if (id === 'games') return nearGameStation(point, navigation)
   if (id === 'portal') return nearWorldPortal(point)
-  // The portal's circle lies on the comparison island: there, the portal speaks first.
-  if (id === 'comparison' && nearWorldPortal(point)) return false
   const anchor = islandActions.find(action => action.id === id)
   const radius = id === 'guestbook' ? 70 : ISLAND_ACTION_RADIUS
   if (!anchor || Math.hypot(point.x - anchor.x, point.y - anchor.y) > radius) {

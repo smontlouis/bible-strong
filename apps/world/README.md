@@ -18,7 +18,7 @@ A second universe on the same engine, at `/valence-1876`: Valence in 1877 in sep
 
 ## Worlds and portals
 
-The page is a host (`src/UniverseHost.tsx`) that loads one world at a time from the registry in `src/universes.ts`; the address picks the world on arrival. Portals on the maps (the stone arch south of the comparison island, the train at Valence's station) start a journey without reloading the page: a veil in the destination's colours grows from the portal, the next world loads underneath, the address changes, and the veil opens where the traveller arrives. The browser's Back and Forward buttons travel the same way. Every world shares one avatar profile and keeps its own multiplayer room. See [ADR-0085](../../docs/adr/0085-travel-between-worlds-inside-one-world-application.md) and [the portals](docs/portals.md).
+The page is a host (`src/UniverseHost.tsx`) that loads one world at a time from the registry in `src/universes.ts`; the address picks the world on arrival. Portals on the maps (the stone arch on the central plaza, the train at Valence's station) start a journey without reloading the page: a veil in the destination's colours grows from the portal, the next world loads underneath, the address changes, and the veil opens where the traveller arrives. The browser's Back and Forward buttons travel the same way. Every world shares one avatar profile and keeps its own multiplayer room. See [ADR-0085](../../docs/adr/0085-travel-between-worlds-inside-one-world-application.md) and [the portals](docs/portals.md).
 
 ## Multiplayer
 

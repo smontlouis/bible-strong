@@ -32,8 +32,8 @@ World stays one application, one Worker and one domain, and gains a notion of tr
 - **One game per world.** Each world keeps its own Phaser game, created on arrival and destroyed
   on departure, which also frees its textures. The continuity is carried by the overlay, not by
   sharing a canvas between worlds.
-- **Portals.** A portal is a place on a map: in the archipelago, a stone arch on the circle south
-  of the comparison island; in Valence, the train at the station. Arriving through a portal
+- **Portals.** A portal is a place on a map: in the archipelago, a stone arch on the central
+  plaza, east of the Bible and opposite the app's phone stand; in Valence, the train at the station. Arriving through a portal
   places the visitor at the destination's portal. The multiplayer server still chooses a spawn
   when a visitor joins a room; the client ignores that first spawn after a portal, so the server
   is unchanged.

@@ -19,7 +19,7 @@ La langue suit celle de World (`bible-strong.world.language.v1`). L’avatar est
 
 ## Le train vers l’archipel
 
-On vient à Valence et on en repart par le train. Dans l’archipel, l’arche de pierre posée sur le cercle au sud de l’île des comparaisons (`src/world-portal.ts`) mène à Valence ; à Valence, le train de Lyon, au bout du quai de la gare, ramène à l’archipel. Le voyage se fait sans recharger la page : un voile couleur papier grandit depuis le portail, Valence se charge dessous, l’adresse devient `/valence-1876`, puis le voile s’ouvre sur le voyageur qui descend du train. Le quai (« Quai de la gare » dans `navigation.json`) et le point d’arrivée du train (`portal` et `portalLabel` dans `layout.json`) se règlent dans l’atelier, onglet Repères. Les liens « Retour à Bible Strong World » du titre et du carnet prennent le même train.
+On vient à Valence et on en repart par le train. Dans l’archipel, l’arche de pierre posée sur l’îlot central, à droite de la Bible, en face du présentoir de l’application (`src/world-portal.ts`) mène à Valence ; à Valence, le train de Lyon, au bout du quai de la gare, ramène à l’archipel. Le voyage se fait sans recharger la page : un voile couleur papier grandit depuis le portail, Valence se charge dessous, l’adresse devient `/valence-1876`, puis le voile s’ouvre sur le voyageur qui descend du train. Le quai (« Quai de la gare » dans `navigation.json`) et le point d’arrivée du train (`portal` et `portalLabel` dans `layout.json`) se règlent dans l’atelier, onglet Repères. Les liens « Retour à Bible Strong World » du titre et du carnet prennent le même train.
 
 ## Multijoueur
 

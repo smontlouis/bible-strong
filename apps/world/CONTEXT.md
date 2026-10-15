@@ -66,7 +66,7 @@ A separate explorable map on the same engine, opened by its own address. The arc
 _Avoid_: Level, mode
 
 **Portal**:
-A place on a world's map that leads to another world: the stone arch south of the comparison island leads to Valence 1876, and the train at Valence's station leads back.
+A place on a world's map that leads to another world: the stone arch on the central plaza, east of the Bible, leads to Valence 1876, and the train at Valence's station leads back.
 _Avoid_: Door, teleporter
 
 **Journey**:

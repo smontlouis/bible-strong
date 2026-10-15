@@ -4,7 +4,7 @@ Portals lead from one world to another without reloading the page ([ADR-0085](..
 
 | World | Portal | Leads to | Where it is set |
 | --- | --- | --- | --- |
-| Archipelago | Stone arch on the circle south of the comparison island | Valence 1876 | `src/world-portal.ts` (position, pillars, arrival point), `public/navigation/archipelago.json` (pillars) |
+| Archipelago | Stone arch on the central plaza, east of the Bible, opposite the app's phone stand, where shrubs grew ([ground patch](../public/assets/map/edits/plaza-portal-ground.prompt.md)) | Valence 1876 | `src/world-portal.ts` (position, pillars, arrival point), `public/navigation/archipelago.json` (pillars) |
 | Valence 1876 | The Lyon train at the end of the station platform | Archipelago | `public/valence-1876/layout.json` (`portal`, `portalLabel`), `public/valence-1876/navigation.json` (« Quai de la gare »), editable in the workshop |
 
 A journey arrives at the destination's portal: the scene starts there and ignores the first spawn the multiplayer room suggests. A world reached by a portal skips its loading screen and tells the host when it is drawn, so the veil opens on it.

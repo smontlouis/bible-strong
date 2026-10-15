@@ -19,16 +19,14 @@ describe('the portal to Valence 1876', () => {
     expect(canStand(WORLD_PORTAL.arrival, navigation)).toBe(true)
     expect(nearWorldPortal(WORLD_PORTAL.arrival)).toBe(true)
     expect(new Pathfinder(navigation).find(SPAWN, WORLD_PORTAL.arrival)).not.toBeNull()
-    // The pillars stand on the ground; the passage between them stays open.
-    expect(canStand({ x: 812, y: 820 }, navigation)).toBe(false)
-    expect(canStand({ x: 856, y: 820 }, navigation)).toBe(false)
-    expect(canStand({ x: 833, y: 820 }, navigation)).toBe(true)
+    // The pillars stand on the ground.
+    expect(canStand({ x: 919, y: 508 }, navigation)).toBe(false)
+    expect(canStand({ x: 963, y: 508 }, navigation)).toBe(false)
   })
 
-  it('takes over from the comparison island only on its circle', () => {
+  it('stands on the central plaza, opposite the app stand', () => {
     expect(nearIslandAction(WORLD_PORTAL.arrival, 'portal')).toBe(true)
-    expect(nearIslandAction(WORLD_PORTAL.arrival, 'comparison')).toBe(false)
-    expect(nearIslandAction({ x: 836, y: 770 }, 'comparison')).toBe(true)
+    expect(nearIslandAction({ x: 725, y: 530 }, 'portal')).toBe(false)
     expect(nearIslandAction({ x: 836, y: 770 }, 'portal')).toBe(false)
   })
 })
