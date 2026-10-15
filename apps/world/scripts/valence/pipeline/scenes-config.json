@@ -74,9 +74,10 @@
     ],
     "who": "On the open ground in front of the bookstall, both fully visible from head to feet and not hidden by the stall: on the left, standing at the left front corner of the stall, a 41-year-old man with a short dark beard and moustache, wearing a long dark frock coat, a waistcoat and a dark cravat (absolutely NO white preaching bands and NO white collar tabs), holding out a small printed pamphlet (character 1 of the sheet); on the right, a Bible peddler in a wide-brimmed hat with a heavy leather bag full of small books worn across his body and a walking stick (character 7), facing him.",
     "motion": "The bearded man holds out the pamphlet and gestures toward the books on the stall; the peddler steps a little closer, takes a look, nods and adjusts the strap of his bag; then both return to their starting poses. Small, calm movements.",
-    "maskPrompt": "person, pamphlet",
+    "maskPrompt": "person, satchel, walking stick, pamphlet",
     "scale": "each adult character is about one quarter of the image height, small next to the stall: their heads reach the middle of the stall roof edge, not higher.",
-    "pixelRatio": 2.0
+    "pixelRatio": 2.0,
+    "maskThreshold": 0.3
   },
   {
     "id": "rhone",
