@@ -1,3 +1,4 @@
+import { avatarTint, type AvatarTone } from './avatar-tone'
 import type Phaser from 'phaser'
 import type { BushContact } from './bush-rustle'
 import { BlobAvatar } from './blob-avatar'
@@ -23,8 +24,8 @@ export class RemoteAvatars {
   constructor(
     private scene: Phaser.Scene,
     private resolution: number,
-    /** Valence draws visitors smaller and labels them in sepia. */
-    private look: { scale: number; shadow: number; text: string; background: string } = {
+    /** Valence draws visitors smaller, labels them in sepia and ages their colours. */
+    private look: { scale: number; shadow: number; text: string; background: string; tone?: AvatarTone } = {
       scale: 1,
       shadow: 0x183c45,
       text: '#193d49',
@@ -110,7 +111,7 @@ export class RemoteAvatars {
       visual.sprite
         .setPosition(pose.x, pose.y)
         .setDepth(pose.y)
-        .setTint(Number.parseInt(profile.color.slice(1), 16))
+        .setTint(avatarTint(profile.color, this.look.tone))
         .setAlpha(track.opacity ?? 1)
       visual.shadow.setPosition(pose.x, pose.y).setAlpha(track.opacity ?? 1)
       if (visual.label.text !== profile.name) visual.label.setText(profile.name)

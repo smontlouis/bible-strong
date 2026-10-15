@@ -9,6 +9,7 @@ import type { AmbientEditorModel } from './ambient-zones'
 import type { AvatarActivity } from './avatar-activity'
 import type { AvatarId } from './avatar-profile'
 import { AvatarReactions, loadReactions } from './avatar-reactions'
+import { avatarTint, type AvatarTone } from './avatar-tone'
 import { BlobAvatar, loadBlobAvatar } from './blob-avatar'
 import { BushRustle } from './bush-rustle'
 import { cameraZoomBounds, clampCameraZoom } from './camera-zoom'
@@ -82,6 +83,8 @@ export type WorldLook = {
   markerTint?: number
   /** Foam along the shorelines. */
   foam?: number
+  /** Ages every avatar's colour to match the world's print. */
+  avatarTone?: AvatarTone
 }
 
 export type WorldSceneOptions<Controls extends SceneControls> = {
@@ -317,15 +320,16 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
 
     // The room, other visitors and reactions.
     const scale = options.avatarSize / AVATAR_SHEET_SIZE
-    const remoteLook = { scale, shadow: options.look.avatarShadow, text: options.look.name, background: hex(options.look.nameBackground) }
+    const tone = options.look.avatarTone
+    const remoteLook = { scale, shadow: options.look.avatarShadow, text: options.look.name, background: hex(options.look.nameBackground), tone }
     this.network = new WorldMultiplayer(options.room)
     controls.network = this.network
     this.remoteAvatars = new RemoteAvatars(this, RESOLUTION, remoteLook)
-    this.reactions = new AvatarReactions(this)
+    this.reactions = new AvatarReactions(this, tone)
     this.standCrowd = this.createCrowd()
     if (this.standCrowd) {
       this.standAvatars = new RemoteAvatars(this, RESOLUTION, remoteLook)
-      this.standReactions = new AvatarReactions(this)
+      this.standReactions = new AvatarReactions(this, tone)
     }
     controls.sendReaction = reaction => {
       if (controls.paused || !this.active || document.hidden) return false
@@ -503,7 +507,7 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
     this.blobAvatar.update(this.avatar, direction, moving, reducedMotion, delta, controls.avatar, !controls.paused && animating)
     const scale = options.avatarSize / AVATAR_SHEET_SIZE
     if (scale !== 1) this.avatar.setDisplaySize(this.avatar.displayWidth * scale, this.avatar.displayHeight * scale)
-    const tint = Number.parseInt(controls.avatarColor.slice(1), 16)
+    const tint = avatarTint(controls.avatarColor, options.look.avatarTone)
     this.avatar.setTint(tint).setPosition(next.x, next.y).setDepth(next.y)
     this.shadow.setPosition(next.x, next.y)
     if (this.ghost && options.hiddenBy) {

@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { AnimatedReader, loadReader, type ReaderManifest } from '../animated-reader'
+import { sepiaTone } from '../avatar-tone'
 import { BushRustle } from '../bush-rustle'
 import { LazySceneAssets, type LazySceneAsset } from '../lazy-scene-assets'
 import type { MapTileManifest } from '../map-tiles'
@@ -94,6 +95,8 @@ class ValenceScene extends WorldScene<ValenceControls> {
         markerTint: 0x6b4423,
         // Cream foam along the quays, on the sepia water.
         foam: 0xfff1d6,
+        // Explorers keep their colour, aged like the engraving.
+        avatarTone: sepiaTone(0.65),
       },
       room: VALENCE_ROOM,
       preview: './valence-1876/map/preview.webp',
