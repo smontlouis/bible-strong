@@ -2,6 +2,7 @@
 // Geometry uses the 1671 × 941 source image. It is not an isometric tile grid.
 import detailFootprints from './generated/detail-footprints.json'
 import { APP_DOWNLOAD_OBSTACLE } from './app-download'
+import { WORLD_PORTAL_OBSTACLES } from './world-portal'
 export type Point = { x: number; y: number }
 export type Polygon = readonly (readonly [number, number])[]
 export const WIDTH = 1671
@@ -256,6 +257,7 @@ export const defaultNavigation: NavigationDocument = {
     ),
     ...detailObstacles,
     APP_DOWNLOAD_OBSTACLE,
+    ...WORLD_PORTAL_OBSTACLES,
   ],
 }
 

@@ -24,6 +24,10 @@ export type ValenceLayout = {
   /** Where each station's tag floats. */
   labels: Record<(typeof STATION_IDS)[number], LayoutPoint>
   objects: Record<(typeof OBJECT_IDS)[number], LayoutPoint>
+  /** The way back to the archipelago: the platform beside the train, where travellers leave and arrive. */
+  portal: LayoutPoint
+  /** Where the train's tag floats. */
+  portalLabel: LayoutPoint
   /** The dotted thread: one polyline per pair of consecutive stations, in date order. */
   thread: LayoutPoint[][]
 }
@@ -79,6 +83,8 @@ export function parseLayout(value: unknown): ValenceLayout {
     stations: record(raw.stations, STATION_IDS),
     labels: record(raw.labels, STATION_IDS),
     objects: record(raw.objects, OBJECT_IDS),
+    portal: point(raw.portal),
+    portalLabel: point(raw.portalLabel),
     thread: raw.thread.map(line => polyline(line, 2, 400)),
   }
 }

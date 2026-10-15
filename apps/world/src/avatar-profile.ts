@@ -8,9 +8,10 @@ export const AVATAR_COLORS = [
   '#f7d45d',
   '#a2ce86',
 ]
+/** One traveller for every world (docs/adr/0085). */
 export const PROFILE_KEY = 'bible-strong.world.profile.v1'
-/** Valence 1876 keeps its own character, separate from the archipelago's. */
-export const VALENCE_PROFILE_KEY = 'bible-strong.valence-1876.profile.v1'
+/** Valence 1876 kept its own character until 15 October 2026; adopted once when no World profile exists. */
+export const LEGACY_VALENCE_PROFILE_KEY = 'bible-strong.valence-1876.profile.v1'
 export const AVATARS = [
   { id: 'nova', name: 'Bean', image: '/assets/avatars/blob/thumbnail.png' },
   { id: 'short-slime', name: 'Slime', image: '/assets/avatars/short-slime/thumbnail.png' },
@@ -66,7 +67,7 @@ export function parseProfile(value: unknown): AvatarProfile | null {
   return { avatar: profile.avatar as AvatarId, name, color: profile.color.toLowerCase() }
 }
 
-export function loadProfile(key = PROFILE_KEY): AvatarProfile | null {
+function readProfile(key: string): AvatarProfile | null {
   try {
     return parseProfile(JSON.parse(localStorage.getItem(key) ?? 'null'))
   } catch {
@@ -74,11 +75,20 @@ export function loadProfile(key = PROFILE_KEY): AvatarProfile | null {
   }
 }
 
-export function saveProfile(profile: AvatarProfile, key = PROFILE_KEY): boolean {
+/** The traveller's profile, shared by every world. */
+export function loadProfile(): AvatarProfile | null {
+  const profile = readProfile(PROFILE_KEY)
+  if (profile) return profile
+  const legacy = readProfile(LEGACY_VALENCE_PROFILE_KEY)
+  if (legacy) saveProfile(legacy)
+  return legacy
+}
+
+export function saveProfile(profile: AvatarProfile): boolean {
   const valid = parseProfile(profile)
   if (!valid) return false
   try {
-    localStorage.setItem(key, JSON.stringify(valid))
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(valid))
     return true
   } catch {
     return false

@@ -367,6 +367,9 @@ def main():
         'stations': anchors['stations'],
         'labels': edits['labels'],
         'objects': anchors['objects'],
+        # The train back to the archipelago, on the platform beside the locomotive.
+        'portal': snap(edits['portal'])[0],
+        'portalLabel': edits['portalLabel'],
         'thread': anchors['thread'],
     }
     layout_file = os.path.join(ROOT, 'public', 'valence-1876', 'layout.json')

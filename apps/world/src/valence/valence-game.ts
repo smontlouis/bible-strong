@@ -38,6 +38,7 @@ import {
   stationLabels,
   threadOrder,
   threadPaths,
+  valencePortal,
   VALENCE_HEIGHT,
   VALENCE_SPAWN,
   VALENCE_WIDTH,
@@ -81,6 +82,9 @@ export type ValenceControls = {
   sendReaction?: (reaction: ReactionId) => boolean
   /** DOM elements projected on the map, owned by React. */
   stationTags?: Partial<Record<StationId, HTMLElement | null>>
+  portalTag?: HTMLElement | null
+  /** Set when the visitor came through a portal: they appear there, not where the server suggests. */
+  portalArrival?: Point
   /** Development workshop: panels in React, handles on the map. */
   workshop?: WorkshopModel
   shoreEditor?: ShoreEditorModel
@@ -102,6 +106,8 @@ export function createValence(
 ) {
   class ValenceScene extends Phaser.Scene {
     position = { ...VALENCE_SPAWN }
+    /** A portal arrival keeps its place over the room's first suggested spawn. */
+    keepArrival = Boolean(controls.portalArrival)
     facing = { x: 0, y: 1 }
     avatar!: Phaser.GameObjects.Image
     /** A faint copy above the scenery while a roof or a canopy hides the avatar. */
@@ -184,7 +190,13 @@ export function createValence(
       const observer = new ResizeObserver(resize)
       observer.observe(parent)
       resize()
-      this.position = this.arrival()
+      this.position =
+        (controls.portalArrival &&
+          findSafePosition(controls.portalArrival, controls.navigation, {
+            width: VALENCE_WIDTH,
+            height: VALENCE_HEIGHT,
+          })) ||
+        this.arrival()
       this.cameras.main.setBackgroundColor(PAPER)
       this.add
         .image(0, 0, 'valence-preview')
@@ -423,7 +435,8 @@ export function createValence(
         this.cameras.main.centerOn(this.position.x, this.position.y)
       }
       const welcome = this.network.takeSpawn()
-      if (welcome) {
+      if (welcome && this.keepArrival) this.keepArrival = false
+      else if (welcome) {
         this.position = { x: welcome.x, y: welcome.y }
         this.facing = { x: welcome.dx, y: welcome.dy }
         this.blobAvatar.reset()
@@ -651,10 +664,15 @@ export function createValence(
           .setDepth(spot.y - 0.5)
           .setAlpha(found ? 0 : 0.35 + 0.25 * (breathing + 1) * 0.5)
       }
-      for (const id of Object.keys(stationLabels) as StationId[]) {
-        const tag = controls.stationTags?.[id]
+      const tags: [HTMLElement | null | undefined, Point][] = [
+        ...(Object.keys(stationLabels) as StationId[]).map(
+          id => [controls.stationTags?.[id], stationLabels[id]] as [HTMLElement | null | undefined, Point]
+        ),
+        [controls.portalTag, valencePortal.label],
+      ]
+      for (const [tag, label] of tags) {
         if (!tag) continue
-        const point = this.project(stationLabels[id], zoom)
+        const point = this.project(label, zoom)
         // Off-screen tags hide; visible ones stay clear of the screen edges and the top bar.
         const offscreen =
           freeCamera ||

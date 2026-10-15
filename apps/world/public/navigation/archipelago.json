@@ -1813,6 +1813,52 @@
           513
         ]
       ]
+    },
+    {
+      "id": "portal-pillar-west",
+      "name": "Pilier ouest du portail",
+      "kind": "blocked",
+      "points": [
+        [
+          804,
+          815
+        ],
+        [
+          821,
+          815
+        ],
+        [
+          821,
+          826
+        ],
+        [
+          804,
+          826
+        ]
+      ]
+    },
+    {
+      "id": "portal-pillar-east",
+      "name": "Pilier est du portail",
+      "kind": "blocked",
+      "points": [
+        [
+          848,
+          815
+        ],
+        [
+          864,
+          815
+        ],
+        [
+          864,
+          826
+        ],
+        [
+          848,
+          826
+        ]
+      ]
     }
   ]
 }

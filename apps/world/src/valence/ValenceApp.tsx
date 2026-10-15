@@ -2,12 +2,7 @@ import nipplejs from 'nipplejs'
 import { lazy, Suspense, useCallback, useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
 import { createAmbientEditor } from '../ambient-zones'
 import { AvatarEditor, profileCopy } from '../AvatarEditor'
-import {
-  generateExplorerProfile,
-  loadProfile,
-  saveProfile,
-  VALENCE_PROFILE_KEY,
-} from '../avatar-profile'
+import { generateExplorerProfile, loadProfile, saveProfile } from '../avatar-profile'
 import { clampCameraZoom } from '../camera-zoom'
 import { ControlIcon } from '../ControlIcon'
 import type { Controls } from '../game'
@@ -20,6 +15,7 @@ import { ReactionPicker } from '../ReactionPicker'
 import { createShoreEditor } from '../shorelines'
 import { useCameraZoomGestures } from '../use-camera-zoom-gestures'
 import { ARRIVAL_FADE_MS, MINIMUM_LOADING_MS } from '../world-arrival'
+import type { UniverseProps } from '../universes'
 import type { NavigationDocument } from '../world'
 import { tileNavigation } from './navigation-tiles'
 import { objectImage, ObjectCard, ShareCard } from './ObjectCard'
@@ -33,10 +29,12 @@ import { parseEffects, parseLayout, VALENCE_NAVIGATION } from './valence-documen
 import {
   applyLayout,
   nearestStation,
+  nearPortal,
   objectWithinReach,
   stationAnchors,
   threadOrder,
   VALENCE_SPAWN,
+  valencePortal,
 } from './valence-world'
 import { createWorkshop, type WorkshopMode } from './workshop-model'
 import './valence.css'
@@ -159,12 +157,13 @@ function Intro({ language, onEnter }: { language: Language; onEnter: () => void 
   )
 }
 
-export default function ValenceApp() {
+/** Valence 1876: Daniel Bourdeau's eleven months in the town, in sepia. */
+export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps) {
   const stand = useMemo(() => new URLSearchParams(location.search).has('stand'), [])
   const debug = useMemo(() => import.meta.env.DEV && new URLSearchParams(location.search).has('debug'), [])
   const [language, setLanguage] = useState<Language>(loadLanguage)
   const t = valenceCopy[language]
-  const [savedProfile] = useState(() => loadProfile(VALENCE_PROFILE_KEY))
+  const [savedProfile] = useState(loadProfile)
   const [profile, setProfile] = useState(() => savedProfile ?? generateExplorerProfile())
   const [onboarding, setOnboarding] = useState(!savedProfile)
   const [profileOpen, setProfileOpen] = useState(!savedProfile)
@@ -194,7 +193,8 @@ export default function ValenceApp() {
   const [navigation, setNavigation] = useState<NavigationDocument | null>(null)
   const [failed, setFailed] = useState(false)
   const [sceneLoaded, setSceneLoaded] = useState(false)
-  const [minimumElapsed, setMinimumElapsed] = useState(false)
+  // A traveller arrives under the journey's veil: no loading screen to wait for.
+  const [minimumElapsed, setMinimumElapsed] = useState(Boolean(arrival))
   const [revealing, setRevealing] = useState(false)
   const [ready, setReady] = useState(false)
   const [introOpen, setIntroOpen] = useState(() => !loadProgress().introSeen || stand)
@@ -232,6 +232,7 @@ export default function ValenceApp() {
   })
   if (import.meta.env.DEV) (window as unknown as { valence?: ValenceControls }).valence = controls.current
   const near = ready ? nearestStation(state) : null
+  const atTrain = ready && nearPortal(state)
   const dialogOpen = Boolean(
     opened || objectOpen || shareOpen || guestbookOpen || menuOpen || introOpen || profileOpen || workshopMode
   )
@@ -257,6 +258,8 @@ export default function ValenceApp() {
       .then(([documents]) => {
         if (cancelled) return
         applyLayout(documents.layout)
+        // Travellers from the archipelago step off the train.
+        if (arrival) controls.current.portalArrival = { ...valencePortal.ground }
         effectsModel.effects = documents.effects
         effectsModel.revision++
         workshop?.markSaved('layout')
@@ -298,6 +301,17 @@ export default function ValenceApp() {
     const timer = setTimeout(() => setReady(true), ARRIVAL_FADE_MS)
     return () => clearTimeout(timer)
   }, [sceneLoaded, minimumElapsed, failed])
+  useEffect(() => {
+    if (revealing || failed) onReady()
+  }, [revealing, failed, onReady])
+
+  /** Leaves for the archipelago; the journey's veil grows from `element`. */
+  function leave(element: Element) {
+    const box = element.getBoundingClientRect()
+    controls.current.paused = true
+    controls.current.direction = { x: 0, y: 0 }
+    onTravel('archipelago', { x: box.left + box.width / 2, y: box.top + box.height / 2 })
+  }
 
   useEffect(() => {
     const stick = nipplejs.create({
@@ -422,7 +436,15 @@ export default function ValenceApp() {
 
       {ready && (
         <header className="v-hud">
-          <a className="v-brand" href="/" aria-label={t.world}>
+          <a
+            className="v-brand"
+            href="/"
+            aria-label={t.world}
+            onClick={event => {
+              event.preventDefault()
+              leave(event.currentTarget)
+            }}
+          >
             <span className="v-brand-title">{t.title}</span>
             <span className="v-brand-sub">{t.subtitle}</span>
           </a>
@@ -481,6 +503,33 @@ export default function ValenceApp() {
           </button>
         )
       })}
+
+      <button
+        type="button"
+        className="v-tag v-portal-tag"
+        ref={element => {
+          controls.current.portalTag = element
+        }}
+        data-near={atTrain}
+        hidden={!ready}
+        disabled={!ready || dialogOpen || !atTrain}
+        aria-hidden={!atTrain}
+        tabIndex={atTrain ? 0 : -1}
+        onClick={event => leave(event.currentTarget)}
+      >
+        <span className="v-tag-order" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 16V7a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2ZM5 11h14M8 21l1.5-3M16 21l-1.5-3" />
+            <circle cx="8.5" cy="14.5" r=".6" fill="currentColor" />
+            <circle cx="15.5" cy="14.5" r=".6" fill="currentColor" />
+          </svg>
+        </span>
+        <span className="v-tag-text">
+          <span className="v-tag-date">{t.trainDate}</span>
+          <span className="v-tag-place">{t.trainPlace}</span>
+        </span>
+        <span className="v-tag-action">{t.trainAction}</span>
+      </button>
 
       <aside className="v-camera" aria-label={t.camera}>
         <button type="button" onClick={() => {
@@ -576,7 +625,7 @@ export default function ValenceApp() {
         </a>
       )}
 
-      {!ready && (
+      {!ready && (!arrival || failed) && (
         <div className="v-loading" data-revealing={revealing} role="status">
           <p className="v-loading-title">{t.title}</p>
           <p className="v-loading-sub">{failed ? t.failed : t.loading}</p>
@@ -599,7 +648,7 @@ export default function ValenceApp() {
             if (!onboarding) setProfileOpen(false)
           }}
           onSave={next => {
-            setProfileStorageError(!saveProfile(next, VALENCE_PROFILE_KEY))
+            setProfileStorageError(!saveProfile(next))
             setProfile(next)
             setOnboarding(false)
             setProfileOpen(false)
@@ -674,6 +723,7 @@ export default function ValenceApp() {
             setMenuOpen(false)
             setProfileOpen(true)
           }}
+          onLeave={leave}
         />
       )}
       {debug && (
@@ -695,11 +745,13 @@ function Notebook({
   onShare,
   onRestart,
   onProfile,
+  onLeave,
 }: {
   language: Language
   visited: ReadonlySet<StationId>
   found: ReadonlySet<PioneerObjectId>
   onClose: () => void
+  onLeave: (element: Element) => void
   onTravel: (id: StationId) => void
   onIntro: () => void
   onShare: () => void
@@ -755,7 +807,14 @@ function Notebook({
         <button type="button" className="v-secondary" onClick={onRestart}>
           {t.restart}
         </button>
-        <a className="v-secondary" href="/">
+        <a
+          className="v-secondary"
+          href="/"
+          onClick={event => {
+            event.preventDefault()
+            onLeave(event.currentTarget)
+          }}
+        >
           {t.world}
         </a>
       </div>

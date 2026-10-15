@@ -16,6 +16,10 @@ Open http://localhost:5186. On a phone on the same network, use the Network addr
 
 A second universe on the same engine, at `/valence-1876`: Valence in 1877 in sepia, eight dated stations with animated townsfolk, pioneer objects and a stand mode. See [its documentation](docs/valence-1876/README.md).
 
+## Worlds and portals
+
+The page is a host (`src/UniverseHost.tsx`) that loads one world at a time from the registry in `src/universes.ts`; the address picks the world on arrival. Portals on the maps (the stone arch south of the comparison island, the train at Valence's station) start a journey without reloading the page: a veil in the destination's colours grows from the portal, the next world loads underneath, the address changes, and the veil opens where the traveller arrives. The browser's Back and Forward buttons travel the same way. Every world shares one avatar profile and keeps its own multiplayer room. See [ADR-0085](../../docs/adr/0085-travel-between-worlds-inside-one-world-application.md) and [the portals](docs/portals.md).
+
 ## Multiplayer
 
 Visitors share one room with live avatars, names and colors. `yarn dev:world` starts both the frontend and the local multiplayer Worker. See [multiplayer operation and validation](docs/multiplayer.md) for deployment, network behavior and load checks.

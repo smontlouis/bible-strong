@@ -29,6 +29,7 @@ import {
   VALENCE_HEIGHT,
   VALENCE_SPAWN,
   VALENCE_WIDTH,
+  valencePortal,
 } from './valence-world'
 
 const root = resolve(import.meta.dirname, '../..')
@@ -138,14 +139,14 @@ describe('Valence 1876 map', () => {
     expect(valenceSquareCandidates(navigation).length).toBeGreaterThan(50)
   })
 
-  it('lets the avatar stand at the arrival, every station and every object', () => {
-    for (const point of [VALENCE_SPAWN, ...Object.values(stationAnchors), ...Object.values(objectSpots)])
+  it('lets the avatar stand at the arrival, the train, every station and every object', () => {
+    for (const point of [VALENCE_SPAWN, valencePortal.ground, ...Object.values(stationAnchors), ...Object.values(objectSpots)])
       expect(canStand(point, navigation), JSON.stringify(point)).toBe(true)
   })
 
-  it('reaches every station and object from the station by click-to-walk', { timeout: 30000 }, () => {
+  it('reaches the train, every station and object from the station by click-to-walk', { timeout: 30000 }, () => {
     const pathfinder = new Pathfinder(navigation)
-    for (const point of [...Object.values(stationAnchors), ...Object.values(objectSpots)])
+    for (const point of [valencePortal.ground, ...Object.values(stationAnchors), ...Object.values(objectSpots)])
       expect(pathfinder.find(VALENCE_SPAWN, point), JSON.stringify(point)).not.toBeNull()
   })
 

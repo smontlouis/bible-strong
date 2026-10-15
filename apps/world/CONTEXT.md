@@ -65,6 +65,13 @@ The World opened with the `stand` URL parameter for an event screen.
 A separate explorable map on the same engine, opened by its own address. The archipelago is the default universe; Valence 1876 is the second.
 _Avoid_: Level, mode
 
+**Portal**:
+A place on a world's map that leads to another world: the stone arch south of the comparison island leads to Valence 1876, and the train at Valence's station leads back.
+_Avoid_: Door, teleporter
+
+**Journey**:
+Going from one world to another through a portal, without leaving the page; the traveller keeps their avatar and arrives at the destination's portal.
+
 **Valence 1876**:
 The sepia universe at `/valence-1876` that retraces Daniel Bourdeau's eleven months in Valence, from October 1876 to September 1877.
 

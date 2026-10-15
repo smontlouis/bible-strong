@@ -8,12 +8,15 @@ import {
   STATION_RADIUS,
   threadOrder,
   threadPaths,
+  PORTAL_RADIUS,
   VALENCE_SPAWN,
+  valencePortal,
 } from './valence-world'
 import type { Handle, WorkshopModel } from './workshop-model'
 
 const COLORS = {
   spawn: 0x2fae5c,
+  portal: 0x8b5e30,
   station: 0x2f6bff,
   label: 0xff9a2f,
   object: 0xc23ad1,
@@ -95,6 +98,8 @@ export class WorkshopOverlay {
     if (this.model.mode === 'landmarks')
       return [
         [{ kind: 'spawn' }, VALENCE_SPAWN],
+        [{ kind: 'portal' }, valencePortal.ground],
+        [{ kind: 'portalLabel' }, valencePortal.label],
         ...threadOrder.map((id): [Handle, Point] => [{ kind: 'station', id }, stationAnchors[id]]),
         ...threadOrder.map((id): [Handle, Point] => [{ kind: 'label', id }, stationLabels[id]]),
         ...pioneerObjects.map((o): [Handle, Point] => [{ kind: 'object', id: o.id }, objectSpots[o.id]]),
@@ -129,6 +134,8 @@ export class WorkshopOverlay {
     const p = { x: Math.round(point.x * 10) / 10, y: Math.round(point.y * 10) / 10 }
     const effects = this.model.effects.effects
     if (handle.kind === 'spawn') Object.assign(VALENCE_SPAWN, p)
+    else if (handle.kind === 'portal') Object.assign(valencePortal.ground, p)
+    else if (handle.kind === 'portalLabel') Object.assign(valencePortal.label, p)
     else if (handle.kind === 'station') this.model.moveStation(handle.id, p)
     else if (handle.kind === 'label') stationLabels[handle.id] = p
     else if (handle.kind === 'object') objectSpots[handle.id] = p
@@ -333,6 +340,12 @@ export class WorkshopOverlay {
         dot(objectSpots[object.id], COLORS.object, { kind: 'object', id: object.id }, 5)
         name(stations.length + index, objectSpots[object.id])
       })
+      // The train to the archipelago: travellers leave within the circle and arrive at its centre.
+      const { ground, label } = valencePortal
+      g.lineStyle(1 * unit, COLORS.portal, 0.7).strokeCircle(ground.x, ground.y, PORTAL_RADIUS)
+      g.lineStyle(1 * unit, COLORS.portal, 0.7).lineBetween(ground.x, ground.y, label.x, label.y)
+      dot(ground, COLORS.portal, { kind: 'portal' }, 7)
+      dot(label, COLORS.portal, { kind: 'portalLabel' }, 5)
       dot(VALENCE_SPAWN, COLORS.spawn, { kind: 'spawn' }, 7)
       name(this.names.length - 1, VALENCE_SPAWN)
     } else {

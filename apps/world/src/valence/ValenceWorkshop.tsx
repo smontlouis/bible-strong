@@ -22,6 +22,7 @@ import {
   threadOrder,
   threadPaths,
   VALENCE_SPAWN,
+  valencePortal,
 } from './valence-world'
 import type { WorkshopMode, WorkshopModel } from './workshop-model'
 
@@ -59,6 +60,7 @@ const copy = {
     autoFailed: 'Pas de chemin praticable entre ces deux stations.',
     places: 'Aller à',
     spawn: 'Arrivée',
+    portal: 'Train vers l’archipel',
     waterHelp:
       'Le contour bleu est le Rhône : les reflets et le courant n’apparaissent que dedans. Les zones rouges en sont exclues. Fais glisser les sommets, double-clic sur un bord pour en ajouter, Suppr pour retirer.',
     exclusions: 'Zones sans effet',
@@ -115,6 +117,7 @@ const copy = {
     autoFailed: 'No walkable route between these two stations.',
     places: 'Go to',
     spawn: 'Arrival',
+    portal: 'Train to the archipelago',
     waterHelp:
       'The blue outline is the Rhône: glints and currents only appear inside it. Red zones are excluded. Drag vertices, double-click an edge to add one, Delete removes one.',
     exclusions: 'Zones without effects',
@@ -212,6 +215,8 @@ function LandmarksPanel({ model, controls, t, language }: { model: WorkshopModel
   const position = (() => {
     if (!selected) return null
     if (selected.kind === 'spawn') return { name: t.spawn, point: VALENCE_SPAWN }
+    if (selected.kind === 'portal') return { name: t.portal, point: valencePortal.ground }
+    if (selected.kind === 'portalLabel') return { name: `${t.portal} · ${t.legend[2]}`, point: valencePortal.label }
     if (selected.kind === 'station')
       return { name: stations.find(s => s.id === selected.id)!.place[language], point: stationAnchors[selected.id] }
     if (selected.kind === 'label')
@@ -321,6 +326,9 @@ function LandmarksPanel({ model, controls, t, language }: { model: WorkshopModel
         <div className="v-workshop-chips">
           <button type="button" onClick={() => ((model.focus = VALENCE_SPAWN), model.notify())}>
             {t.spawn}
+          </button>
+          <button type="button" onClick={() => ((model.focus = valencePortal.ground), model.notify())}>
+            {t.portal}
           </button>
           {stations.map(station => (
             <button

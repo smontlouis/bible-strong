@@ -11,6 +11,8 @@ import { applyLayout, currentLayout, stationAnchors, threadOrder, threadPaths } 
 export type WorkshopMode = 'navigation' | 'landmarks' | 'water' | 'shorelines' | AmbientKind
 export type Handle =
   | { kind: 'spawn' }
+  | { kind: 'portal' }
+  | { kind: 'portalLabel' }
   | { kind: 'station'; id: StationId }
   | { kind: 'label'; id: StationId }
   | { kind: 'object'; id: PioneerObjectId }

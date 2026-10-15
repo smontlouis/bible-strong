@@ -5,6 +5,8 @@ import { canAnimateWorld } from './world-activity'
 import { AvatarReactions, loadReactions } from './avatar-reactions'
 import { GAME_STATION } from './game-station'
 import { APP_DOWNLOAD_STATION } from './app-download'
+import { PortalGlow } from './portal-glow'
+import { WORLD_PORTAL } from './world-portal'
 import { cameraZoomBounds, clampCameraZoom } from './camera-zoom'
 import { arrivalZoom } from './world-arrival'
 import { Pathfinder } from './pathfinding'
@@ -89,6 +91,8 @@ export type Controls = {
   minimumZoom: number
   reset: number
   travelTo?: Point
+  /** Set when the visitor came through a portal: they appear there, not where the server suggests. */
+  portalArrival?: Point
 }
 
 export function createWorld(
@@ -123,6 +127,9 @@ export function createWorld(
     animations!: LazyWorldAnimations
     background!: WorldBackground
     lazyOccluders!: LazyOccluders
+    portalGlow!: PortalGlow
+    /** A portal arrival keeps its place over the room's first suggested spawn. */
+    keepArrival = Boolean(controls.portalArrival)
     keys!: Record<string, Phaser.Input.Keyboard.Key>
     lastReset = 0
     lastPublished = 0
@@ -205,6 +212,7 @@ export function createWorld(
       loadReactions(this)
       this.load.image('game-terminal', './assets/games/terminal.webp')
       this.load.image('app-download-phone', './assets/app-download/phone.webp')
+      this.load.image('world-portal-arch', './assets/portals/arch-valence.webp')
       this.load.image('game-terminal-ground', './assets/games/terminal-ground.webp')
       this.load.image('navigation-destination', './assets/navigation/destination-arrow.webp')
       this.load.image('navigation-blocked', './assets/navigation/blocked-cross.webp')
@@ -240,7 +248,9 @@ export function createWorld(
       this.events.once(Phaser.Scenes.Events.SHUTDOWN, stopResize)
       this.events.once(Phaser.Scenes.Events.DESTROY, stopResize)
       resizeCanvas()
-      this.position = chooseCentralSpawn(controls.navigation) ??
+      this.position = (controls.portalArrival &&
+        findSafePosition(controls.portalArrival, controls.navigation)) ??
+        chooseCentralSpawn(controls.navigation) ??
         findSafePosition(SPAWN, controls.navigation) ?? { ...SPAWN }
       this.background = new WorldBackground(this)
       this.ambience = new WorldAmbience(this, controls.ambientEditor)
@@ -272,6 +282,12 @@ export function createWorld(
         .setOrigin(0.5, 1)
         .setDisplaySize(APP_DOWNLOAD_STATION.width, APP_DOWNLOAD_STATION.height)
         .setDepth(APP_DOWNLOAD_STATION.y)
+      this.add
+        .image(WORLD_PORTAL.x, WORLD_PORTAL.y, 'world-portal-arch')
+        .setOrigin(0.5, 1)
+        .setDisplaySize(WORLD_PORTAL.width, WORLD_PORTAL.height)
+        .setDepth(WORLD_PORTAL.baseY)
+      this.portalGlow = new PortalGlow(this, WORLD_PORTAL.opening, WORLD_PORTAL.baseY + 0.5)
 
       if (controls.shoreEditor) this.shoreWaves = new ShoreWaves(this, controls.shoreEditor)
       this.bushes = new BushRustle(this, [])
@@ -348,7 +364,7 @@ export function createWorld(
       }
       this.events.once(Phaser.Scenes.Events.SHUTDOWN, disposeScene)
       this.events.once(Phaser.Scenes.Events.DESTROY, disposeScene)
-      this.cameras.main.centerOn(SPAWN.x, SPAWN.y)
+      this.cameras.main.centerOn(this.position.x, this.position.y)
       onReady()
     }
 
@@ -369,7 +385,8 @@ export function createWorld(
         this.resetInput()
       }
       const arrival = this.network.takeSpawn()
-      if (arrival) {
+      if (arrival && this.keepArrival) this.keepArrival = false
+      else if (arrival) {
         this.position = { x: arrival.x, y: arrival.y }
         this.facing = { x: arrival.dx, y: arrival.dy }
         this.blobAvatar.reset()
@@ -633,6 +650,7 @@ export function createWorld(
         labelScaleY,
         reducedMotion
       )
+      this.portalGlow.update(time, delta, reducedMotion)
       this.bushes.update(
         delta,
         [

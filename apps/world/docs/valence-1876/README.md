@@ -15,11 +15,15 @@ Puis ouvrir http://localhost:5186/valence-1876. `yarn dev:world` lance le site e
 - `?stand` : écran de stand. Grand QR code vers l’univers, et remise à zéro de la visite après deux minutes et demie sans geste.
 - `?debug` (développement seulement) : zones de marche, rayons des stations, position et images par seconde. En développement, `window.valence` expose les contrôles de la scène (par exemple `valence.travelTo = { x, y }`).
 
-La langue suit celle de World (`bible-strong.world.language.v1`). L’avatar est propre à Valence (`bible-strong.valence-1876.profile.v1`) : on le choisit à la première visite, avant l’introduction, et on le change depuis le carnet. La progression est gardée dans `bible-strong.valence-1876.progress.v1`.
+La langue suit celle de World (`bible-strong.world.language.v1`). L’avatar est celui de tous les mondes (`bible-strong.world.profile.v1`, [ADR-0085](../../../../docs/adr/0085-travel-between-worlds-inside-one-world-application.md)) : un visiteur qui n’en a pas encore le choisit à la première visite, avant l’introduction, et le change depuis le carnet. L’ancien avatar propre à Valence est repris une fois s’il n’existe pas encore de profil World. La progression est gardée dans `bible-strong.valence-1876.progress.v1`.
+
+## Le train vers l’archipel
+
+On vient à Valence et on en repart par le train. Dans l’archipel, l’arche de pierre posée sur le cercle au sud de l’île des comparaisons (`src/world-portal.ts`) mène à Valence ; à Valence, le train de Lyon, au bout du quai de la gare, ramène à l’archipel. Le voyage se fait sans recharger la page : un voile couleur papier grandit depuis le portail, Valence se charge dessous, l’adresse devient `/valence-1876`, puis le voile s’ouvre sur le voyageur qui descend du train. Le quai (« Quai de la gare » dans `navigation.json`) et le point d’arrivée du train (`portal` et `portalLabel` dans `layout.json`) se règlent dans l’atelier, onglet Repères. Les liens « Retour à Bible Strong World » du titre et du carnet prennent le même train.
 
 ## Multijoueur
 
-Valence a son propre salon, `valence-1876`, sur le même Worker et le même protocole que l’archipel (`server/index.ts`). On y voit les autres visiteurs avec leur nom, le nombre de présents, et on s’envoie des émoticônes ; il n’y a pas de jeux bibliques, et le serveur ignore les commandes de jeu dans ce salon. Les arrivées se font sur le parvis de la gare (`src/valence/valence-spawn.ts`). En mode stand, cinq passants simulés se promènent sur la place des Clercs tant qu’il y a peu de vrais visiteurs ; ils répondent aux émoticônes.
+Valence a son propre salon, `valence-1876`, sur le même Worker et le même protocole que l’archipel (`server/index.ts`). On y voit les autres visiteurs avec leur nom, le nombre de présents, et on s’envoie des émoticônes ; il n’y a pas de jeux bibliques, et le serveur ignore les commandes de jeu dans ce salon. Les arrivées se font sur le parvis de la gare (`src/valence/valence-spawn.ts`), sauf pour un voyageur venu par le train : il reste sur le quai et ignore la première position que propose le serveur. En mode stand, cinq passants simulés se promènent sur la place des Clercs tant qu’il y a peu de vrais visiteurs ; ils répondent aux émoticônes.
 
 Le salon dépend du Worker : il faut le redéployer (`yarn workspace @bible-strong/world deploy`) pour que le multijoueur de Valence fonctionne en production.
 
@@ -30,10 +34,10 @@ En local, le bouton « Atelier » ouvre les mêmes outils que « Éditer le mond
 | Onglet | Ce qu’on règle | Fichier |
 | --- | --- | --- |
 | Accès | Zones vertes où l’on marche et obstacles rouges, avec l’éditeur de World. « Tester au joystick » rejoue la carte avec les zones visibles | `public/valence-1876/navigation.json` |
-| Repères | Point d’arrivée, stations (le cercle est la portée d’écoute), étiquettes, objets, et le fil pointillé : glisser les points, double-clic sur le fil pour en ajouter, Suppr pour retirer, « Redessiner » un tronçon point par point ou « Tracé automatique » | `public/valence-1876/layout.json` |
-| Eau et effets | Contour du Rhône, zones sans effet (pile du pont…), reflets, traits de courant, feuilles, poussière dorée, ombres de nuages, sources de fumée | `public/valence-1876/effects.json` |
+| Repères | Point d’arrivée, train vers l’archipel (le cercle est la portée du départ) et son étiquette, stations (le cercle est la portée d’écoute), étiquettes, objets, et le fil pointillé : glisser les points, double-clic sur le fil pour en ajouter, Suppr pour retirer, « Redessiner » un tronçon point par point ou « Tracé automatique » | `public/valence-1876/layout.json` |
+| Eau et effets | Contour du Rhône, zones sans effet (pile du pont…), reflets, traits de courant, feuilles, ombres de nuages, sources de fumée | `public/valence-1876/effects.json` |
 | Rivages | Écume le long des quais, avec l’éditeur de rivages de World (écume crème sur l’eau sépia) | `public/valence-1876/shorelines.json` |
-| Particules, Lueurs, Papillons, Libellules | Zones d’ambiance de World | `public/valence-1876/ambience.json` |
+| Particules, Lueurs, Papillons, Libellules | Zones d’ambiance de World ; la poussière dorée des places ensoleillées est un jeu de zones Particules | `public/valence-1876/ambience.json` |
 
 Les zones de marche sont stockées en quelques grands polygones pour rester faciles à retoucher ; au chargement, `src/valence/navigation-tiles.ts` les découpe en carreaux de 64 unités pour la marche et le calcul des chemins. Une fois `navigation.json` ou `layout.json` retouché dans l’atelier, c’est lui qui fait foi : `build_navigation.py` ne les réécrit plus, sauf avec `--reset-navigation` ou `--reset-layout`.
 

@@ -20,6 +20,9 @@ export const stationLabels = {} as Record<StationId, Point>
 export const objectSpots = {} as Record<PioneerObjectId, Point>
 /** One polyline per pair of consecutive stations, in the order of the dates. */
 export const threadPaths: Point[][] = []
+/** The train to the archipelago: the platform point travellers leave from and arrive at, and its tag. */
+export const valencePortal = { ground: { x: 0, y: 0 }, label: { x: 0, y: 0 } }
+export const PORTAL_RADIUS = 46
 
 /** The dotted thread follows the dates, not the shortest tour. */
 export const threadOrder: StationId[] = [
@@ -40,6 +43,8 @@ export function applyLayout(layout: ValenceLayout) {
   for (const [id, value] of Object.entries(layout.stations)) stationAnchors[id as StationId] = toPoint(value)
   for (const [id, value] of Object.entries(layout.labels)) stationLabels[id as StationId] = toPoint(value)
   for (const [id, value] of Object.entries(layout.objects)) objectSpots[id as PioneerObjectId] = toPoint(value)
+  Object.assign(valencePortal.ground, toPoint(layout.portal))
+  Object.assign(valencePortal.label, toPoint(layout.portalLabel))
   threadPaths.splice(0, threadPaths.length, ...layout.thread.map(line => line.map(toPoint)))
 }
 
@@ -53,12 +58,18 @@ export function currentLayout(): ValenceLayout {
     stations: map(stationAnchors),
     labels: map(stationLabels),
     objects: map(objectSpots),
+    portal: pair(valencePortal.ground),
+    portalLabel: pair(valencePortal.label),
     thread: threadPaths.map(line => line.map(pair)),
   }
 }
 
 export function distance(a: Point, b: Point) {
   return Math.hypot(a.x - b.x, a.y - b.y)
+}
+
+export function nearPortal(point: Point) {
+  return distance(point, valencePortal.ground) <= PORTAL_RADIUS
 }
 
 export function nearestStation(point: Point): StationId | null {

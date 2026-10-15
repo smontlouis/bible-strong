@@ -352,6 +352,13 @@
   display: inline-block;
   animation: v-pulse 1.6s ease-in-out infinite;
 }
+/* The train back to the archipelago: a tag like the stations', with a locomotive for a number. */
+.v-portal-tag .v-tag-order {
+  background: var(--v-sepia);
+}
+.v-portal-tag .v-tag-date {
+  color: var(--v-sepia);
+}
 @keyframes v-bob {
   0%,
   100% {
