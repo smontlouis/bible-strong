@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "source": "hd.png",
+  "worldWidth": 1672,
+  "worldHeight": 941,
+  "tileSize": 512,
+  "overlap": 2,
+  "format": "webp",
+  "levels": [
+    {
+      "scale": 2,
+      "width": 3344,
+      "height": 1882,
+      "columns": 7,
+      "rows": 4
+    },
+    {
+      "scale": 4,
+      "width": 6688,
+      "height": 3764,
+      "columns": 14,
+      "rows": 8
+    }
+  ]
+}

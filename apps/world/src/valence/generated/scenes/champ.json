@@ -1,0 +1,34 @@
+{
+  "id": "champ",
+  "mode": "sprite",
+  "frameRate": 12,
+  "frameCount": 120,
+  "x": 635.31,
+  "y": 709.14,
+  "width": 59.77,
+  "height": 51.56,
+  "depth": 759.51,
+  "pages": [
+    {
+      "key": "page-0",
+      "firstFrame": 0,
+      "frameCount": 120,
+      "width": 1911,
+      "height": 1280
+    }
+  ],
+  "shadows": [
+    {
+      "x": 646.4,
+      "y": 759.5,
+      "rx": 7.3,
+      "ry": 2.3
+    },
+    {
+      "x": 688.0,
+      "y": 757.8,
+      "rx": 5.9,
+      "ry": 1.9
+    }
+  ]
+}

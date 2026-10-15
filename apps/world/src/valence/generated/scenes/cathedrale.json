@@ -1,0 +1,34 @@
+{
+  "id": "cathedrale",
+  "mode": "sprite",
+  "frameRate": 12,
+  "frameCount": 120,
+  "x": 1095.78,
+  "y": 748.75,
+  "width": 32.23,
+  "height": 47.07,
+  "depth": 794.62,
+  "pages": [
+    {
+      "key": "page-0",
+      "firstFrame": 0,
+      "frameCount": 120,
+      "width": 2025,
+      "height": 585
+    }
+  ],
+  "shadows": [
+    {
+      "x": 1119.0,
+      "y": 791.7,
+      "rx": 4.8,
+      "ry": 1.5
+    },
+    {
+      "x": 1103.5,
+      "y": 794.2,
+      "rx": 5.7,
+      "ry": 1.8
+    }
+  ]
+}

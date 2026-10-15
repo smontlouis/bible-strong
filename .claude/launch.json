@@ -87,6 +87,16 @@
         "web"
       ],
       "port": 9090
+    },
+    {
+      "name": "world-client",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": [
+        "workspace",
+        "@bible-strong/world",
+        "dev:client"
+      ],
+      "port": 5186
     }
   ]
 }

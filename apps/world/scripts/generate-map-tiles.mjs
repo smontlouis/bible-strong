@@ -34,6 +34,8 @@ const source = await sharp(input, { limitInputPixels: false })
   .composite([
     { input: resolve(mapRoot, 'edits/central-table-half.webp'), left: 736 * 4, top: 388 * 4 },
     { input: resolve(mapRoot, 'edits/community-board.webp'), left: 880 * 4, top: 325 * 4 },
+    // The south-east tree and shrubs give way to paving for the portal to Valence 1876.
+    { input: resolve(mapRoot, 'edits/plaza-portal-ground.webp'), left: 840 * 4, top: 455 * 4 },
   ])
   .png()
   .toBuffer()

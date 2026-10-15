@@ -5,6 +5,7 @@ import {
   DEFAULT_PROFILE,
   generateExplorerName,
   generateExplorerProfile,
+  LEGACY_VALENCE_PROFILE_KEY,
   loadProfile,
   parseProfile,
   PROFILE_KEY,
@@ -45,6 +46,20 @@ describe('local avatar profile', () => {
       expect(loadProfile()).toEqual({ avatar, name: 'Stéphane', color: '#73cdd0' })
     }
   )
+  it('adopts the former Valence character once, when no World profile exists', () => {
+    const values = new Map<string, string>([
+      [LEGACY_VALENCE_PROFILE_KEY, JSON.stringify({ avatar: 'cloud', name: 'Élise', color: '#B39AE9' })],
+    ])
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => values.set(key, value),
+    })
+    expect(loadProfile()).toEqual({ avatar: 'cloud', name: 'Élise', color: '#b39ae9' })
+    expect(JSON.parse(values.get(PROFILE_KEY)!)).toEqual({ avatar: 'cloud', name: 'Élise', color: '#b39ae9' })
+    // The World profile wins once it exists.
+    saveProfile({ avatar: 'nova', name: 'Sam', color: '#ffffff' })
+    expect(loadProfile()?.name).toBe('Sam')
+  })
   it('rejects unsupported avatars, malformed colors and blank names', () => {
     for (const override of [{ avatar: 'citrus' }, { color: 'red' }, { name: '   ' }]) {
       expect(

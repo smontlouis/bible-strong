@@ -1,0 +1,1916 @@
+/* Valence 1876. The town of 1877 is sepia: paper, one brown family and a brown-night ink.
+   Every surface is a square sheet of old paper framed by a printed double rule, and every
+   button a block of ink. "Today" panels open in Bible Strong's own colours
+   (design-system/project/tokens.json). */
+@font-face {
+  font-family: ValenceLiterata;
+  src: url('/valence-1876/fonts/Literata-Book-latin-greek.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+.valence-shell {
+  --v-paper: #f3e6c9;
+  --v-paper-2: #e9d5aa;
+  --v-paper-3: #dcc08a;
+  --v-ink: #2e1c0f;
+  --v-ink-2: #5a3b20;
+  --v-ink-deep: #120a04;
+  --v-sepia: #8b5e30;
+  --v-line: rgba(46, 28, 15, 0.22);
+  --v-serif: ValenceLiterata, 'Literata', Georgia, serif;
+  /* Old paper: a tileable sheet, edges browned by age, a printed frame and a hard press shadow. */
+  --v-sheet: url('/valence-1876/paper.webp') 0 0 / 320px repeat, var(--v-paper);
+  --v-radius: 2px;
+  --v-frame: 1.5px solid var(--v-ink);
+  --v-age: inset 0 0 0 1px rgba(255, 249, 234, 0.55), inset 0 0 26px rgba(139, 94, 48, 0.3);
+  --v-shadow: 3px 3px 0 rgba(46, 28, 15, 0.42);
+  --v-shadow-sheet: 6px 6px 0 rgba(30, 18, 8, 0.4), 0 24px 60px rgba(30, 18, 8, 0.45);
+  /* World components (avatar editor, reactions, guestbook, close buttons) read these. */
+  --bs-navy: var(--v-ink);
+  --bs-blue: var(--v-sepia);
+  --bs-blue-dark: #6b4421;
+  --bs-blue-soft: #ead9b4;
+  --bs-bg: var(--v-paper);
+  --bs-card: #fbf3df;
+  --bs-line: rgba(46, 28, 15, 0.2);
+  --bs-line-strong: rgba(46, 28, 15, 0.38);
+  --bs-muted: #6b5038;
+  --bs-faint: #9a8063;
+  --bs-grey: #e6d6b2;
+  --bs-radius: var(--v-radius);
+  --bs-radius-lg: var(--v-radius);
+  --bs-shadow: var(--v-shadow-sheet);
+  --bs-shadow-float: var(--v-shadow);
+  --bs-backdrop: rgba(36, 22, 10, 0.6);
+  --bs-button-edge-blue: var(--v-ink-deep);
+  --bs-button-edge-neutral: rgba(46, 28, 15, 0.45);
+  --bs-canvas: #f4f7ff;
+  --bs-surface: #ffffff;
+  --bs-ink: #101b35;
+  --bs-muted-ink: #58657a;
+  --bs-cta: #3f63cf;
+  --bs-cta-ink: #f9fbff;
+  --bs-brand: #5983f0;
+  --bs-hairline: rgba(16, 27, 53, 0.12);
+  position: relative;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  background: #cdb48a;
+  color: var(--v-ink);
+}
+.valence-shell .world-canvas canvas {
+  display: block;
+}
+.v-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 45%, transparent 52%, rgba(46, 28, 15, 0.38) 100%),
+    linear-gradient(100deg, rgba(255, 214, 150, 0.16), transparent 45%);
+  mix-blend-mode: multiply;
+}
+
+/* Loading */
+.v-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at 50% 40%, transparent 40%, rgba(139, 94, 48, 0.35) 100%),
+    var(--v-sheet);
+  transition: opacity 500ms ease-out;
+}
+.v-loading[data-revealing='true'] {
+  opacity: 0;
+  pointer-events: none;
+}
+.v-loading-title {
+  margin: 0;
+  padding: 0.2em 0.5em;
+  border-top: 3px double var(--v-ink);
+  border-bottom: 3px double var(--v-ink);
+  font: 400 clamp(40px, 9vw, 72px) / 1.05 var(--v-serif);
+  font-synthesis: none;
+  letter-spacing: 0.02em;
+  color: var(--v-ink);
+}
+.v-loading-sub {
+  margin: 0;
+  font: 400 18px / 1.5 var(--v-serif);
+  color: var(--v-ink-2);
+}
+.v-loading-track {
+  width: 180px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--v-ink-2), transparent) 0 0 / 60% 100% no-repeat,
+    rgba(46, 28, 15, 0.14);
+  animation: v-track 1.4s ease-in-out infinite;
+}
+@keyframes v-track {
+  from {
+    background-position: -60% 0, 0 0;
+  }
+  to {
+    background-position: 160% 0, 0 0;
+  }
+}
+
+/* Heads-up display */
+.v-hud {
+  position: absolute;
+  z-index: 4;
+  top: max(14px, env(safe-area-inset-top));
+  left: 16px;
+  right: 16px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: 14px;
+  pointer-events: none;
+}
+.v-hud > * {
+  pointer-events: auto;
+}
+.v-brand {
+  display: grid;
+  gap: 2px;
+  padding: 9px 16px 10px;
+  border: var(--v-frame);
+  border-radius: var(--v-radius);
+  outline: 1px solid rgba(46, 28, 15, 0.45);
+  outline-offset: -5px;
+  background: var(--v-sheet);
+  box-shadow: var(--v-age), var(--v-shadow);
+  color: var(--v-ink);
+  text-decoration: none;
+}
+.v-brand-title {
+  font: 400 21px / 1.1 var(--v-serif);
+  font-synthesis: none;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.v-brand-sub {
+  font: 500 10px / 1.3 var(--bs-font);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--v-ink-2);
+}
+/* Centred on the screen rather than between the title and the counter, whose widths differ. */
+.v-timeline {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  padding: 8px 10px;
+  border: var(--v-frame);
+  border-radius: var(--v-radius);
+  background: var(--v-sheet);
+  box-shadow: var(--v-age), var(--v-shadow);
+}
+.v-timeline ol {
+  position: relative;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v-timeline ol::before {
+  content: '';
+  position: absolute;
+  top: 11px;
+  left: 33px;
+  right: 33px;
+  border-top: 1.5px dashed var(--v-ink-2);
+  opacity: 0.45;
+}
+/* 1799 stands apart: a short dotted bridge at the height of the line. */
+.v-timeline-gap {
+  align-self: flex-start;
+  width: 20px;
+  margin: 11px -4px 0;
+  border-top: 1.5px dotted var(--v-ink-2);
+  opacity: 0.45;
+}
+.v-stop {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  width: 66px;
+  padding: 4px 0 2px;
+  border: 0;
+  background: none;
+  color: var(--v-ink-2);
+  font: 600 10px / 1.1 var(--bs-font);
+  white-space: nowrap;
+}
+.v-stop:disabled {
+  cursor: default;
+}
+.v-stop-dot {
+  width: 12px;
+  height: 12px;
+  margin: 1px 0;
+  border: 2px solid var(--v-ink-2);
+  background: var(--v-paper);
+  rotate: 45deg;
+  transition:
+    background-color 300ms ease-out,
+    scale 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.v-stop[data-visited='true'] .v-stop-dot {
+  background: var(--v-ink);
+  border-color: var(--v-ink);
+  box-shadow: 0 0 0 3px rgba(255, 214, 150, 0.7);
+}
+.v-stop[data-current='true'] .v-stop-dot {
+  scale: 1.3;
+}
+.v-stop[data-visited='true'] {
+  color: var(--v-ink);
+}
+.v-stop-year {
+  font: 600 10px / 1 var(--bs-font);
+}
+.v-objects {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 8px;
+  border: var(--v-frame);
+  border-radius: var(--v-radius);
+  background: var(--v-sheet);
+  box-shadow: var(--v-age), var(--v-shadow);
+}
+.v-objects-row {
+  display: flex;
+}
+.v-objects-row img {
+  width: 30px;
+  height: 30px;
+  margin-left: -6px;
+  filter: grayscale(1) opacity(0.28);
+  transition:
+    filter 400ms ease-out,
+    scale 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.v-objects-row img:first-child {
+  margin-left: 0;
+}
+.v-objects-row img[data-found='true'] {
+  filter: none;
+  scale: 1.08;
+}
+.v-objects-count {
+  font: 400 17px / 1 var(--v-serif);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Station tags projected over the map */
+.v-tag {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 4px;
+  border: var(--v-frame);
+  border-radius: var(--v-radius);
+  background: var(--v-sheet);
+  box-shadow: var(--v-age), var(--v-shadow);
+  color: var(--v-ink);
+  font-family: var(--bs-font);
+  transform: translate(-50%, -100%);
+  white-space: nowrap;
+  animation: v-bob 3.2s ease-in-out infinite;
+  transition:
+    background-color 200ms ease-out,
+    box-shadow 200ms ease-out;
+}
+.v-tag:disabled {
+  cursor: default;
+}
+.v-tag[hidden] {
+  display: none;
+}
+.v-tag[data-offscreen='true'] {
+  visibility: hidden;
+}
+.v-tag-order {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  background: var(--v-ink);
+  color: var(--v-paper);
+  font: 400 15px / 1 var(--v-serif);
+}
+.v-tag[data-visited='true'] .v-tag-order {
+  background: var(--v-sepia);
+}
+.v-tag-text {
+  display: grid;
+  gap: 1px;
+  text-align: left;
+}
+.v-tag-date {
+  font: 600 9.5px / 1.1 var(--bs-font);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--v-ink-2);
+}
+.v-tag-place {
+  font: 400 14.5px / 1.15 var(--v-serif);
+}
+.v-tag-action {
+  display: none;
+  margin-left: 2px;
+  padding: 6px 10px;
+  background: var(--v-ink);
+  color: var(--v-paper);
+  font: 600 11px / 1 var(--bs-font);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.v-tag[data-near='true'] {
+  z-index: 5;
+  box-shadow:
+    var(--v-age),
+    0 0 0 3px rgba(255, 214, 150, 0.85),
+    4px 5px 0 rgba(46, 28, 15, 0.45);
+}
+.v-tag[data-near='true'] .v-tag-action {
+  display: inline-block;
+  animation: v-pulse 1.6s ease-in-out infinite;
+}
+/* The train back to the archipelago: a tag like the stations', with a locomotive for a number. */
+.v-portal-tag .v-tag-order {
+  background: var(--v-sepia);
+}
+.v-portal-tag .v-tag-date {
+  color: var(--v-sepia);
+}
+@keyframes v-bob {
+  0%,
+  100% {
+    transform: translate(-50%, -100%);
+  }
+  50% {
+    transform: translate(-50%, calc(-100% - 3px));
+  }
+}
+@keyframes v-pulse {
+  0%,
+  100% {
+    scale: 1;
+  }
+  50% {
+    scale: 1.06;
+  }
+}
+
+/* Bottom controls */
+.v-bottom {
+  position: absolute;
+  z-index: 4;
+  left: 22px;
+  right: 22px;
+  bottom: max(28px, calc(env(safe-area-inset-bottom) + 20px));
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.v-debug {
+  position: absolute;
+  z-index: 9;
+  left: 12px;
+  bottom: 8px;
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font: 500 11px / 1 ui-monospace, monospace;
+}
+
+/* Stand display */
+/* The stand screen's frame (src/stand-shell.css), in sepia. */
+.valence-shell .stand-shell {
+  --stand-ink: var(--v-ink);
+  --stand-paper: var(--v-sheet);
+  --stand-on-ink: #f8ecd2;
+  --stand-line: var(--v-ink);
+  --stand-live: #5d8a3a;
+  --stand-radius: var(--v-radius);
+}
+.valence-shell .stand-count {
+  border: var(--v-frame);
+  box-shadow: var(--v-age), var(--v-shadow);
+}
+.v-stand {
+  position: absolute;
+  z-index: 6;
+  right: 24px;
+  bottom: max(28px, calc(env(safe-area-inset-bottom) + 20px));
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 24px 14px 14px;
+  border: 2px solid var(--v-ink);
+  border-radius: var(--v-radius);
+  outline: 1px solid rgba(46, 28, 15, 0.5);
+  outline-offset: -8px;
+  background: var(--v-sheet);
+  box-shadow: var(--v-age), var(--v-shadow-sheet);
+  color: var(--v-ink);
+  text-decoration: none;
+}
+.v-stand img {
+  border: 1.5px solid var(--v-ink);
+  background: #fff;
+  padding: 8px;
+}
+.v-stand > span {
+  display: grid;
+  gap: 6px;
+}
+.v-stand strong {
+  font: 400 36px / 1 var(--v-serif);
+  font-synthesis: none;
+}
+.v-stand em {
+  font-style: normal;
+  color: var(--v-sepia);
+}
+.v-stand > span > span {
+  font: 500 17px / 1.3 var(--bs-font);
+  white-space: pre-line;
+  color: var(--v-ink-2);
+}
+
+/* Dialogs: a sheet of 1877 paper in a printed double frame */
+.valence-modal {
+  width: min(720px, calc(100vw - 24px));
+  max-height: min(820px, calc(100dvh - 24px));
+  overflow: auto;
+  border: 2px solid var(--v-ink);
+  outline: 1px solid rgba(46, 28, 15, 0.5);
+  outline-offset: -9px;
+  background: var(--v-sheet);
+  color: var(--v-ink);
+  border-radius: var(--v-radius);
+  box-shadow: var(--v-age), var(--v-shadow-sheet);
+}
+.valence-modal::backdrop {
+  background: rgba(36, 22, 10, 0.55);
+}
+/* The shared close button, as a square ink-framed stamp, in every World dialog shown here. */
+.valence-shell .world-modal > .world-modal-close {
+  border: var(--v-frame);
+  border-radius: var(--v-radius);
+  background: var(--v-sheet);
+  color: var(--v-ink);
+  box-shadow: var(--v-shadow);
+}
+.valence-shell .world-modal > .world-modal-close:hover {
+  background: var(--v-paper-2);
+}
+.v-date {
+  margin: 0;
+  font: 500 12px / 1.4 Pulp, sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8b5e30;
+}
+.v-object h2,
+.v-share h2,
+.v-notebook h2,
+.v-intro h1 {
+  margin: 4px 0 0;
+  font: 400 30px / 1.15 var(--v-serif);
+  font-synthesis: none;
+  letter-spacing: 0.005em;
+}
+.v-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.v-primary,
+.v-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: var(--v-radius);
+  font: 600 13px / 1 Pulp, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    translate 100ms ease-out,
+    box-shadow 100ms ease-out,
+    background-color 150ms ease-out;
+}
+/* A block of ink with a hard pressed edge. */
+.v-primary,
+.valence-modal .v-primary,
+.valence-shell .v-primary {
+  border: 1.5px solid var(--v-ink-deep);
+  background: var(--v-ink);
+  color: #f8ecd2;
+  box-shadow:
+    inset 0 0 0 1px rgba(248, 236, 210, 0.18),
+    3px 3px 0 var(--v-ink-deep);
+}
+.v-primary:hover {
+  background: #3d2614;
+}
+.v-primary:active,
+.v-secondary:active:not(:disabled) {
+  translate: 2px 2px;
+  box-shadow: 1px 1px 0 var(--v-ink-deep);
+}
+.v-secondary,
+.valence-modal .v-secondary {
+  border: var(--v-frame);
+  background: var(--v-sheet);
+  color: var(--v-ink);
+  box-shadow: 3px 3px 0 rgba(46, 28, 15, 0.35);
+}
+.v-secondary:disabled {
+  opacity: 0.4;
+}
+.v-epilogue-actions {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  margin: 18px 0 4px;
+  padding: 16px 18px;
+  border: var(--v-frame);
+  border-radius: var(--v-radius);
+  background: var(--v-sheet);
+  box-shadow: var(--v-age), var(--v-shadow-sheet);
+}
+.v-epilogue-actions p {
+  margin: 0;
+  font: 400 15px / 1.5 ValenceLiterata, Georgia, serif;
+}
+
+/* Today: a sheet of 2026. The shape is Valence's (square, double rule, hard shadow); the paper,
+   the type and the blue are Bible Strong's. It develops from sepia like a photograph. */
+.valence-shell {
+  --v-2026-paper: #f8f9fc;
+  --v-2026-ink: #101b35;
+  --v-2026-muted: #58657a;
+  --v-2026-blue: #3f63cf;
+  --v-2026-blue-deep: #23397a;
+  --v-2026-dot: #5983f0;
+}
+.v-today {
+  display: grid;
+  grid-template-columns: 1fr 190px;
+  gap: 26px;
+  align-items: center;
+  padding: 26px 28px;
+  border: 1.5px solid var(--v-2026-ink);
+  border-radius: var(--v-radius);
+  outline: 1px solid rgba(16, 27, 53, 0.35);
+  outline-offset: -8px;
+  background: var(--v-2026-paper);
+  color: var(--v-2026-ink);
+  box-shadow: 6px 6px 0 rgba(16, 27, 53, 0.35);
+  animation: v-develop 1300ms cubic-bezier(0.33, 0, 0.2, 1) both;
+}
+/* A print developing: warm, washed and soft first, then sharp and in colour. */
+@keyframes v-develop {
+  0% {
+    filter: sepia(1) saturate(0.55) contrast(0.7) brightness(1.18) blur(1.2px);
+    opacity: 0.25;
+  }
+  35% {
+    opacity: 1;
+  }
+  60% {
+    filter: sepia(0.55) saturate(0.85) contrast(0.9) brightness(1.06) blur(0.4px);
+  }
+  100% {
+    filter: none;
+  }
+}
+.v-eyebrow-bs {
+  margin: 0;
+  font: 500 12px / 1.4 Pulp, sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--v-2026-muted);
+}
+.v-eyebrow-bs::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--v-2026-dot);
+  vertical-align: 1px;
+}
+.v-today h3 {
+  margin: 8px 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(16, 27, 53, 0.15);
+  font: 400 26px / 1.2 var(--v-serif);
+  font-synthesis: none;
+}
+.v-today p {
+  margin: 0 0 14px;
+  font: 400 16px / 1.6 Pulp, sans-serif;
+}
+.v-today blockquote {
+  margin: 0 0 18px;
+  padding: 4px 0 4px 16px;
+  border-left: 3px solid var(--v-2026-dot);
+}
+.v-today blockquote p {
+  margin: 0 0 6px;
+  font: 400 17px / 1.7 ValenceLiterata, Georgia, serif;
+}
+.v-today cite {
+  font: 600 11.5px / 1 Pulp, sans-serif;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--v-2026-muted);
+}
+/* A block of Bible Strong blue, pressed like Valence's ink buttons. */
+.v-cta,
+.valence-modal .v-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1.5px solid var(--v-2026-blue-deep);
+  border-radius: var(--v-radius);
+  background: var(--v-2026-blue);
+  color: #f9fbff;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    3px 3px 0 var(--v-2026-blue-deep);
+  font: 600 13px / 1 Pulp, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    translate 100ms ease-out,
+    box-shadow 100ms ease-out,
+    background-color 150ms ease-out;
+}
+.v-cta:hover {
+  background: #3557bd;
+}
+.v-cta:active {
+  translate: 2px 2px;
+  box-shadow: 1px 1px 0 var(--v-2026-blue-deep);
+}
+/* The phone, pasted in like a photograph with two mounting corners. */
+.v-phone {
+  position: relative;
+  margin: 0;
+  padding: 7px;
+  border-radius: 30px;
+  background: var(--v-2026-ink);
+  box-shadow: 4px 6px 0 rgba(16, 27, 53, 0.25);
+  rotate: 2deg;
+}
+.v-phone::before,
+.v-phone::after {
+  content: '';
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  background: #e3e6ee;
+  box-shadow: 0 1px 2px rgba(16, 27, 53, 0.25);
+}
+.v-phone::before {
+  top: -6px;
+  left: -6px;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+.v-phone::after {
+  right: -6px;
+  bottom: -6px;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+.v-phone img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 19.5;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 24px;
+}
+.v-phone-small {
+  width: 120px;
+  margin-inline: auto;
+}
+
+/* Object card */
+.v-object {
+  padding: 26px 24px 24px;
+  text-align: center;
+}
+.v-object-count {
+  margin: 0;
+  font: 500 12px / 1.4 Pulp, sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8b5e30;
+}
+.v-object-halves {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 18px;
+}
+.v-then,
+.v-now {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 10px;
+  padding: 18px 16px 20px;
+  border-radius: 20px;
+}
+.v-then {
+  border: var(--v-frame);
+  border-radius: var(--v-radius);
+  background: rgba(255, 249, 234, 0.55);
+  box-shadow: var(--v-age);
+}
+.v-then img {
+  width: 150px;
+  height: 150px;
+  animation: v-object-in 700ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes v-object-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4) rotate(-12deg);
+  }
+}
+.v-then p {
+  margin: 0;
+  font: 400 15px / 1.6 ValenceLiterata, Georgia, serif;
+}
+.v-now {
+  border: 1.5px solid var(--v-2026-ink);
+  border-radius: var(--v-radius);
+  outline: 1px solid rgba(16, 27, 53, 0.3);
+  outline-offset: -6px;
+  background: var(--v-2026-paper);
+  color: var(--v-2026-ink);
+  animation: v-develop 1300ms 250ms cubic-bezier(0.33, 0, 0.2, 1) both;
+}
+.v-now p {
+  margin: 0;
+  font: 400 15px / 1.55 Pulp, sans-serif;
+}
+.v-year {
+  font: 400 24px / 1 var(--v-serif);
+  color: #8b5e30;
+}
+.v-now .v-year {
+  color: var(--v-2026-blue);
+}
+
+/* Share card, notebook and intro */
+.v-share {
+  padding: 26px 24px 24px;
+  text-align: center;
+}
+.v-share-preview {
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+  margin: 18px 0;
+}
+.v-share-preview img {
+  width: 100%;
+  border: var(--v-frame);
+  box-shadow: var(--v-shadow-sheet);
+}
+.v-share .v-nav {
+  justify-content: center;
+}
+.v-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(46, 28, 15, 0.2);
+  border-top-color: #2e1c0f;
+  border-radius: 50%;
+  animation: v-spin 800ms linear infinite;
+}
+@keyframes v-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+.v-notebook {
+  padding: 24px;
+}
+.v-notebook h3 {
+  margin: 22px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 3px double rgba(46, 28, 15, 0.5);
+  font: 400 20px / 1.3 var(--v-serif);
+}
+.v-notebook-count {
+  margin: 6px 0 16px;
+  font: 500 14px / 1.4 Pulp, sans-serif;
+  color: #5a3b20;
+}
+.v-notebook-stations {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v-notebook-stations button {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px 8px 8px;
+  border: var(--v-frame);
+  border-radius: var(--v-radius);
+  background: rgba(255, 249, 234, 0.6);
+  box-shadow: 2px 2px 0 rgba(46, 28, 15, 0.3);
+  text-align: left;
+}
+.v-notebook-stations button > span:last-child {
+  display: grid;
+  font: 500 12px / 1.3 Pulp, sans-serif;
+  color: #5a3b20;
+}
+.v-notebook-stations strong {
+  font: 400 16px / 1.25 var(--v-serif);
+  color: #2e1c0f;
+}
+.v-notebook-stations li[data-visited='false'] .v-tag-order {
+  background: transparent;
+  color: #2e1c0f;
+  box-shadow: inset 0 0 0 2px #2e1c0f;
+}
+.v-notebook-objects {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v-notebook-objects li {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  font: 500 12px / 1.25 Pulp, sans-serif;
+  text-align: center;
+}
+.v-notebook-objects li[data-found='false'] img {
+  filter: grayscale(1) opacity(0.25);
+}
+.v-notebook-settings {
+  display: grid;
+  gap: 10px;
+}
+.v-notebook-setting {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  font: 600 13px / 1.2 Pulp, sans-serif;
+  color: var(--v-ink-2);
+}
+.v-segmented {
+  display: flex;
+  gap: 6px;
+}
+.valence-modal .v-segmented button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  min-width: 42px;
+  justify-content: center;
+  padding: 0 10px;
+  border: var(--v-frame);
+  border-radius: var(--v-radius);
+  background: var(--v-sheet);
+  color: var(--v-ink);
+  box-shadow: var(--v-age), 2px 2px 0 rgba(46, 28, 15, 0.35);
+  font: 600 12px / 1 Pulp, sans-serif;
+  letter-spacing: 0.08em;
+}
+.valence-modal .v-segmented button:active {
+  translate: 1px 1px;
+  box-shadow: var(--v-age), 1px 1px 0 rgba(46, 28, 15, 0.35);
+}
+.valence-modal .v-segmented button[aria-pressed='true'] {
+  background: var(--v-ink);
+  color: #f8ecd2;
+  box-shadow: 2px 2px 0 var(--v-ink-deep);
+}
+.v-notebook-actions {
+  margin-top: 22px;
+  justify-content: flex-start;
+}
+.v-intro {
+  padding: 34px 30px 30px;
+  text-align: center;
+  width: min(560px, calc(100vw - 24px));
+}
+.v-intro h1 {
+  font-size: clamp(40px, 8vw, 58px);
+  margin: 6px auto 16px;
+  padding: 0.12em 0;
+  border-top: 3px double var(--v-ink);
+  border-bottom: 3px double var(--v-ink);
+}
+.v-intro-lead {
+  margin: 0 auto 12px;
+  max-width: 440px;
+  font: 400 19px / 1.65 ValenceLiterata, Georgia, serif;
+}
+.v-intro-hint {
+  margin: 0 auto 24px;
+  max-width: 420px;
+  font: 500 14px / 1.5 Pulp, sans-serif;
+  color: #5a3b20;
+}
+
+@media (max-width: 760px) {
+  .v-hud {
+    grid-template-columns: 1fr auto;
+  }
+  .v-brand-sub {
+    display: none;
+  }
+  .v-objects {
+    grid-column: 2;
+  }
+  .v-timeline {
+    position: static;
+    translate: none;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: stretch;
+    justify-content: space-between;
+    padding: 6px 10px;
+  }
+  .v-timeline ol {
+    flex: 1;
+    justify-content: space-between;
+  }
+  .v-timeline ol li {
+    flex: 1;
+    display: grid;
+  }
+  .v-stop {
+    width: auto;
+    min-width: 0;
+    flex: 1;
+  }
+  .v-timeline ol::before {
+    left: 12%;
+    right: 12%;
+  }
+  .v-stop-memory {
+    flex: 0 0 auto;
+  }
+  .v-brand {
+    padding: 8px 14px;
+  }
+  .v-stop-label {
+    display: none;
+  }
+  .v-today {
+    grid-template-columns: 1fr;
+  }
+  .v-phone {
+    width: 160px;
+    justify-self: center;
+  }
+  .v-object-halves {
+    grid-template-columns: 1fr;
+  }
+  .v-stand {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v-tag,
+  .v-tag[data-near='true'] .v-tag-action,
+  .v-today,
+  .v-now,
+  .v-then img,
+  .v-loading-track {
+    animation: none;
+  }
+}
+@media (max-width: 600px) {
+  .valence-modal,
+  .valence-modal.v-intro {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: calc(100dvh - 24px);
+    margin: auto 0 0;
+    border-width: 2px 0 0;
+    border-radius: 0;
+  }
+}
+
+/* Presence and reactions, bottom right */
+.v-social {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+.v-presence {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 12px;
+  border: var(--v-frame);
+  border-radius: var(--v-radius);
+  background: var(--v-sheet);
+  box-shadow: var(--v-age), var(--v-shadow);
+  color: var(--v-ink);
+  font: 600 12px / 1.2 var(--bs-font);
+}
+.v-presence .presence-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #b9a07a;
+}
+.v-presence[data-state='online'] .presence-dot {
+  background: #5d8a3a;
+  box-shadow: 0 0 0 3px rgba(93, 138, 58, 0.2);
+}
+.v-presence button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.v-toast {
+  position: absolute;
+  z-index: 30;
+  left: 50%;
+  bottom: 120px;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: var(--v-radius);
+  background: var(--v-ink);
+  color: var(--v-paper);
+  box-shadow: var(--v-shadow);
+  font: 500 13px / 1.4 var(--bs-font);
+}
+
+/* Development workshop */
+.v-workshop-open {
+  position: absolute;
+  z-index: 4;
+  right: 16px;
+  top: calc(max(14px, env(safe-area-inset-top)) + 84px);
+  padding: 8px 12px;
+  border: 1px dashed #8b5e30;
+  border-radius: var(--v-radius);
+  background: #fff7e3;
+  color: #2e1c0f;
+  font: 600 12px / 1 var(--bs-font);
+}
+.valence-shell.is-workshop > .v-hud,
+.valence-shell.is-workshop > .v-bottom,
+.valence-shell.is-workshop > .v-tag,
+.valence-shell.is-workshop > .v-stand,
+.valence-shell.is-workshop > .v-vignette {
+  visibility: hidden;
+}
+.valence-shell.is-workshop > .shore-editor {
+  top: 100px;
+  width: 320px;
+  bottom: 20px;
+}
+.valence-shell.is-workshop > .zone-editor {
+  top: 96px;
+}
+/* On the stand screen, presence and reactions sit above the QR card. */
+.valence-shell.is-stand .v-social {
+  margin-bottom: 200px;
+}
+
+/* Station dialogue, in the manner of a story-driven game: one dark window over the blurred map
+   holds everything, so the eye never has to cross a wide screen. */
+.valence-modal.v-scene {
+  width: min(1200px, calc(100vw - 48px));
+  max-width: none;
+  height: min(800px, calc(100dvh - 48px));
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1.5px solid rgba(243, 230, 201, 0.5);
+  outline: 1px solid rgba(243, 230, 201, 0.2);
+  outline-offset: -9px;
+  border-radius: var(--v-radius);
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(74, 47, 22, 0.35), transparent 70%),
+    rgba(20, 12, 5, 0.76);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6);
+}
+.valence-modal.v-scene::backdrop {
+  background: radial-gradient(ellipse at 50% 35%, rgba(36, 22, 10, 0.25), rgba(24, 14, 6, 0.72));
+  backdrop-filter: blur(2px) saturate(0.85);
+}
+.v-scene > .world-modal-close {
+  top: 20px;
+  right: 20px;
+}
+.v-scene-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  user-select: none;
+}
+.v-scene-top {
+  position: absolute;
+  z-index: 3;
+  top: 22px;
+  left: 28px;
+  right: 84px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+  cursor: default;
+}
+.v-scene-top .v-date {
+  width: 100%;
+  color: #f3dcb0;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+.v-scene-top h2 {
+  margin: 0;
+  color: #fff7e3;
+  font: 400 28px / 1.15 var(--v-serif);
+  font-synthesis: none;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+}
+.v-scene-top h2 span {
+  font-weight: 500;
+  color: #f3dcb0;
+}
+.v-scene-beats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v-scene-beats li {
+  padding: 5px 10px;
+  border: 1px solid rgba(243, 230, 201, 0.45);
+  border-radius: var(--v-radius);
+  background: rgba(46, 28, 15, 0.35);
+  color: #f3e6c9;
+  font: 600 11px / 1 Pulp, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.v-scene-beats li[data-done='true'] {
+  background: rgba(243, 230, 201, 0.4);
+  color: #2e1c0f;
+}
+.v-scene-beats li[data-current='true'] {
+  border-color: var(--v-ink);
+  background: var(--v-sheet);
+  color: #2e1c0f;
+}
+.v-scene-tools {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.valence-modal .v-scene-tools button,
+.valence-modal .v-scene-panel > button {
+  padding: 8px 12px;
+  border: 1px solid rgba(243, 230, 201, 0.55);
+  border-radius: var(--v-radius);
+  background: rgba(46, 28, 15, 0.6);
+  color: #f8ecd2;
+  font: 600 11.5px / 1 Pulp, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* The characters */
+.v-scene-cast {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 320ms ease-out;
+}
+.v-scene-cast[data-hidden='true'] {
+  opacity: 0;
+}
+.v-bust {
+  --bust-height: 68%;
+  position: absolute;
+  bottom: 96px;
+  height: calc(var(--bust-height) * var(--bust-scale, 1));
+  margin: 0;
+  filter: drop-shadow(0 14px 30px rgba(20, 10, 2, 0.55));
+  transition:
+    filter 260ms ease-out,
+    transform 360ms cubic-bezier(0.16, 1, 0.3, 1),
+    bottom 360ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 260ms ease-out;
+}
+.v-bust[data-side='left'] {
+  left: 48px;
+  animation: v-bust-left 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.v-bust[data-side='right'] {
+  right: 48px;
+  animation: v-bust-right 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.v-bust img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  opacity: 0;
+  transition: opacity 220ms ease-out;
+}
+.v-bust[data-side='right'] img {
+  transform: scaleX(-1);
+}
+.v-bust img[data-shown='true'] {
+  opacity: 1;
+}
+.v-bust[data-active='false'] {
+  filter: drop-shadow(0 10px 22px rgba(20, 10, 2, 0.45)) brightness(0.62) saturate(0.85);
+  transform: translateY(18px) scale(0.96);
+}
+/* Without the box to stand on, the characters step down to the window's edge. */
+.v-scene-stage[data-narrating='true'] .v-bust {
+  bottom: 0;
+  filter: brightness(0.45);
+  transform: translateY(24px) scale(0.95);
+}
+@keyframes v-bust-left {
+  from {
+    opacity: 0;
+    translate: -60px 0;
+  }
+}
+@keyframes v-bust-right {
+  from {
+    opacity: 0;
+    translate: 60px 0;
+  }
+}
+
+/* The dialogue box */
+.v-box {
+  position: absolute;
+  z-index: 2;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  padding: 34px 38px 58px;
+  border: 2px solid var(--v-ink);
+  border-radius: var(--v-radius);
+  outline: 1px solid rgba(46, 28, 15, 0.55);
+  outline-offset: -9px;
+  background: var(--v-sheet);
+  box-shadow: var(--v-age), var(--v-shadow-sheet);
+  color: #2e1c0f;
+  animation: v-box-in 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes v-box-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+.v-nameplate {
+  position: absolute;
+  top: 0;
+  left: 26px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 7px 14px 8px;
+  border: 1.5px solid var(--v-ink-deep);
+  border-radius: var(--v-radius);
+  background: var(--v-ink);
+  color: #f8ecd2;
+  box-shadow:
+    inset 0 0 0 1px rgba(248, 236, 210, 0.2),
+    3px 3px 0 rgba(18, 10, 4, 0.5);
+  transform: translateY(-58%);
+  font: 500 12px / 1.2 Pulp, sans-serif;
+  white-space: nowrap;
+}
+.v-box[data-side='right'] .v-nameplate {
+  left: auto;
+  right: 26px;
+}
+.v-nameplate strong {
+  font: 400 19px / 1.1 var(--v-serif);
+  font-synthesis: none;
+}
+.v-nameplate span {
+  color: #e6c99a;
+}
+.v-box-text {
+  position: relative;
+  min-height: 3.2em;
+  margin: 0;
+  font: 400 22px / 1.6 ValenceLiterata, Georgia, serif;
+}
+.v-ghost {
+  visibility: hidden;
+}
+.v-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Historical notes as silent-film intertitles */
+.v-carton {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  width: min(680px, calc(100% - 48px));
+  transform: translate(-50%, -50%);
+  padding: 34px 40px 38px;
+  border: 2px solid #2e1c0f;
+  outline: 1px solid rgba(201, 164, 106, 0.6);
+  outline-offset: -10px;
+  border-radius: 0;
+  background: #1e130a;
+  color: #f3e6c9;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  animation: v-carton-in 420ms ease-out both;
+}
+@keyframes v-carton-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%);
+  }
+}
+.v-carton-eyebrow {
+  margin: 0 0 14px;
+  font: 500 12px / 1 Pulp, sans-serif;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #c9a46a;
+}
+.v-carton-text {
+  margin: 0;
+  font: 400 23px / 1.55 ValenceLiterata, Georgia, serif;
+}
+
+/* Today, in Bible Strong's colours */
+.v-scene-today {
+  position: absolute;
+  z-index: 2;
+  top: calc(50% + 10px);
+  left: 50%;
+  width: min(820px, calc(100% - 48px));
+  max-height: calc(100% - 200px);
+  overflow: auto;
+  transform: translate(-50%, -50%);
+  cursor: default;
+}
+.v-scene-today .v-today {
+  box-shadow:
+    6px 6px 0 rgba(16, 27, 53, 0.45),
+    0 30px 80px rgba(0, 0, 0, 0.5);
+}
+.v-scene-closing {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: 234px;
+  width: min(560px, calc(100% - 48px));
+  transform: translateX(-50%);
+  cursor: default;
+}
+
+/* Navigation at the bottom right of the box */
+.v-scene-nav {
+  position: absolute;
+  z-index: 3;
+  right: 46px;
+  bottom: 44px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.v-scene-stage[data-step='today'] .v-scene-nav,
+.v-scene-stage[data-narrating='true'] .v-scene-nav {
+  right: 50%;
+  transform: translateX(50%);
+}
+.v-scene-stage[data-narrating='true'] .v-scene-nav,
+.v-scene-stage[data-step='today'] .v-scene-nav {
+  bottom: 30px;
+}
+.valence-modal .v-scene-back {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: var(--v-frame);
+  border-radius: var(--v-radius);
+  background: transparent;
+  color: #2e1c0f;
+}
+.v-scene-stage[data-step='today'] .v-scene-back,
+.v-scene-stage[data-narrating='true'] .v-scene-back {
+  border-color: rgba(243, 230, 201, 0.5);
+  color: #f3e6c9;
+}
+.valence-modal .v-scene-back:disabled {
+  opacity: 0.3;
+}
+.valence-modal .v-scene-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1.5px solid var(--v-ink-deep);
+  border-radius: var(--v-radius);
+  background: var(--v-ink);
+  color: #f8ecd2;
+  box-shadow: 2px 2px 0 var(--v-ink-deep);
+  font: 600 12px / 1 Pulp, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.valence-modal .v-scene-next:active {
+  translate: 1px 1px;
+  box-shadow: 1px 1px 0 var(--v-ink-deep);
+}
+.valence-modal .v-scene-nav .v-primary {
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 12px;
+}
+.v-scene-next[data-waiting='true'] svg {
+  animation: v-nudge 1s ease-in-out infinite;
+}
+@keyframes v-nudge {
+  50% {
+    translate: 3px 0;
+  }
+}
+
+/* Read again and sources */
+.v-scene-panel {
+  position: absolute;
+  z-index: 5;
+  top: 96px;
+  right: 24px;
+  bottom: 24px;
+  width: min(420px, calc(100% - 48px));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  border: 2px solid var(--v-ink);
+  border-radius: var(--v-radius);
+  background: var(--v-sheet);
+  color: #2e1c0f;
+  overflow: auto;
+  cursor: default;
+  box-shadow: var(--v-age), var(--v-shadow-sheet);
+}
+.v-scene-panel h3 {
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 3px double rgba(46, 28, 15, 0.5);
+  font: 400 21px / 1.2 var(--v-serif);
+}
+.v-scene-panel ol {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v-scene-panel li strong {
+  font: 700 13px / 1.2 Pulp, sans-serif;
+}
+.v-scene-panel li p {
+  margin: 2px 0 0;
+  font: 400 15px / 1.55 ValenceLiterata, Georgia, serif;
+}
+.v-scene-panel li[data-kind='narrator'] p {
+  font-style: italic;
+}
+.valence-modal .v-scene-panel > button {
+  align-self: flex-start;
+  margin-top: auto;
+  background: #2e1c0f;
+}
+
+@media (max-width: 700px) {
+  .valence-modal.v-scene {
+    width: 100vw;
+    height: 100dvh;
+    margin: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .v-scene > .world-modal-close {
+    top: max(16px, env(safe-area-inset-top));
+    right: 16px;
+  }
+  .v-scene-top {
+    top: max(16px, env(safe-area-inset-top));
+    left: 14px;
+    right: 64px;
+  }
+  .v-scene-top h2 {
+    font-size: 20px;
+  }
+  .v-scene-tools {
+    margin-left: 0;
+  }
+  .v-scene-beats li {
+    padding: 5px 8px;
+    letter-spacing: 0.05em;
+  }
+  .v-bust {
+    --bust-height: 52dvh;
+    bottom: 150px;
+  }
+  .v-scene-stage[data-narrating='true'] .v-scene-nav,
+  .v-scene-stage[data-step='today'] .v-scene-nav {
+    bottom: max(30px, env(safe-area-inset-bottom));
+  }
+  .v-scene-panel {
+    top: 90px;
+    right: 16px;
+    bottom: 16px;
+    width: calc(100% - 32px);
+  }
+  .v-bust[data-side='left'] {
+    left: -4vw;
+  }
+  .v-bust[data-side='right'] {
+    right: -4vw;
+  }
+  .v-box {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 30px 20px calc(60px + env(safe-area-inset-bottom));
+    border-width: 2px 0 0;
+    outline-offset: -7px;
+  }
+  .v-box-text {
+    font-size: 18px;
+  }
+  .v-nameplate {
+    left: 14px;
+  }
+  .v-box[data-side='right'] .v-nameplate {
+    right: 14px;
+  }
+  .v-nameplate span {
+    display: none;
+  }
+  .v-scene-nav {
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+  .v-carton {
+    padding: 26px 22px 30px;
+  }
+  .v-carton-text {
+    font-size: 19px;
+  }
+  /* Between the scene's header and its buttons, scrolling inside when the sheet is long. */
+  .v-scene-today {
+    top: calc(max(16px, env(safe-area-inset-top)) + 158px);
+    bottom: calc(max(30px, env(safe-area-inset-bottom)) + 52px);
+    width: calc(100% - 32px);
+    max-height: none;
+    transform: translateX(-50%);
+  }
+  .v-today {
+    gap: 18px;
+    padding: 20px 18px 24px;
+    box-shadow: 4px 4px 0 rgba(16, 27, 53, 0.35);
+  }
+  .v-today h3 {
+    font-size: 22px;
+  }
+  .v-today p {
+    font-size: 15px;
+  }
+  .v-scene-closing {
+    bottom: 220px;
+    width: calc(100% - 32px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v-bust,
+  .v-box,
+  .v-carton,
+  .v-scene-next[data-waiting='true'] svg {
+    animation: none;
+  }
+}
+
+/* World components dressed for 1877: the avatar editor, the reaction picker and the guestbook
+   already read the --bs tokens repainted on .valence-shell; these rules square what they draw
+   in their own colours or curves. */
+.valence-shell .world-modal:is(.avatar-dialog, .guestbook-dialog) {
+  border: 2px solid var(--v-ink);
+  outline: 1px solid rgba(46, 28, 15, 0.5);
+  outline-offset: -9px;
+  background: var(--v-sheet);
+  box-shadow: var(--v-age), var(--v-shadow-sheet);
+}
+.valence-shell .avatar-stage {
+  border-right: 1.5px solid var(--v-ink);
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(255, 249, 234, 0.7), transparent 70%),
+    var(--v-paper-2);
+}
+@media (max-width: 600px) {
+  .valence-shell .avatar-stage {
+    border-right: 0;
+    border-bottom: 1.5px solid var(--v-ink);
+  }
+}
+.valence-shell .avatar-stage::before {
+  border: 1px solid rgba(46, 28, 15, 0.4);
+  border-radius: 0;
+}
+.valence-shell .avatar-stage-orbit {
+  border-color: rgba(46, 28, 15, 0.35);
+}
+.valence-shell .avatar-stage-star {
+  color: var(--v-sepia);
+}
+.valence-shell .avatar-form h1,
+.valence-shell .guestbook-heading h1,
+.valence-shell .guestbook-composer h2 {
+  font-family: var(--v-serif);
+  font-weight: 400;
+  font-synthesis: none;
+}
+.valence-shell .avatar-eyebrow {
+  color: var(--v-sepia);
+}
+.valence-shell
+  :is(
+    .avatar-stage-name,
+    .avatar-name-input,
+    .avatar-option,
+    .avatar-swatch,
+    .avatar-custom,
+    .avatar-save,
+    .guestbook-add,
+    .guestbook-submit,
+    .guestbook-composer,
+    .guestbook-composer-close,
+    .guestbook-wall-tools,
+    .guestbook-wall-tools button,
+    .guestbook-swatch,
+    .reaction-trigger,
+    .reaction-panel,
+    .reaction-grid button,
+    .contact-action
+  ) {
+  border-radius: var(--v-radius);
+}
+.valence-shell :is(.avatar-name-input, .avatar-option, .avatar-stage-name) {
+  border: var(--v-frame);
+  background: #fbf3df;
+}
+.valence-shell .avatar-option[aria-pressed='true'] {
+  background: var(--v-paper-2);
+  box-shadow: 3px 3px 0 var(--v-ink);
+}
+/* These keep World's raised-button mechanics; the edge colour comes from the repainted token. */
+.valence-shell :is(.avatar-save, .guestbook-add, .guestbook-submit) {
+  background: var(--v-ink);
+  color: #f8ecd2 !important;
+}
+.valence-shell .guestbook-add {
+  box-shadow: 0 4px 0 var(--v-ink-deep);
+}
+.valence-shell .avatar-save:not(:disabled):hover {
+  background: #3d2614;
+}
+.valence-shell .avatar-save:disabled {
+  background: var(--bs-grey);
+  color: var(--bs-faint);
+}
+.valence-shell .guestbook-heading {
+  border-bottom: 3px double rgba(46, 28, 15, 0.45);
+}
+.valence-shell .guestbook-wall {
+  background-image: radial-gradient(rgba(46, 28, 15, 0.16) 0.8px, transparent 0.8px);
+}
+.valence-shell :is(.guestbook-composer, .guestbook-wall-tools) {
+  border: var(--v-frame);
+  background: var(--v-sheet);
+  box-shadow: var(--v-age), var(--v-shadow-sheet);
+}
+.valence-shell :is(.reaction-trigger, .contact-action) {
+  border: var(--v-frame);
+  background: var(--v-sheet);
+  box-shadow: var(--v-age), var(--v-shadow);
+}
+.valence-shell .reaction-trigger[aria-expanded='true'] {
+  background: var(--v-paper-2);
+}
+.valence-shell .contact-action:not(:disabled):active {
+  box-shadow: var(--v-age), 1px 1px 0 rgba(46, 28, 15, 0.42);
+}
+.valence-shell .reaction-panel {
+  border: 2px solid var(--v-ink);
+  background: var(--v-sheet);
+  color: var(--v-ink);
+  box-shadow: var(--v-age), var(--v-shadow-sheet);
+}
+.valence-shell .reaction-panel > p {
+  font: 400 17px / 1.3 var(--v-serif);
+}
+.valence-shell .reaction-grid button:hover:enabled {
+  background: rgba(139, 94, 48, 0.16);
+}
+
+/* The stand screen's presentation of a place (StandPresentation): a small stage in the same
+   paper frame as the invitation to scan, its characters standing over their lines. */
+.v-presenter {
+  --stand-ink: var(--v-ink);
+  position: relative;
+  width: min(560px, 38vw);
+  height: min(450px, 50vh);
+  overflow: hidden;
+  border: 2px solid var(--v-ink);
+  border-radius: var(--v-radius);
+  background: var(--v-sheet);
+  box-shadow: var(--v-age), var(--v-shadow-sheet);
+  animation: v-presenter-in 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* The stage, like an old photographic plate: warm light behind the characters. */
+.v-presenter::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(46, 28, 15, 0.7);
+  background: radial-gradient(120% 90% at 50% 22%, #8a6440 0%, #4e321c 55%, #2a1a0d 100%);
+  box-shadow: inset 0 0 40px rgba(20, 10, 2, 0.6);
+}
+@keyframes v-presenter-in {
+  from {
+    opacity: 0;
+    scale: 0.94;
+    translate: 0 24px;
+  }
+}
+/* The place, out of focus and dimmed, in the stage instead of its plain brown. */
+.v-presenter-place {
+  position: absolute;
+  inset: 10px;
+  overflow: hidden;
+}
+.v-presenter-place img {
+  position: absolute;
+  top: 46%;
+  max-width: none;
+  filter: blur(5px) brightness(0.62) sepia(0.25);
+  scale: 1.04;
+}
+.v-presenter-place::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 30%, transparent 30%, rgba(30, 18, 8, 0.55) 100%);
+  box-shadow: inset 0 0 40px rgba(20, 10, 2, 0.6);
+}
+.v-presenter-top {
+  position: absolute;
+  z-index: 3;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px;
+  border: var(--v-frame);
+  border-radius: var(--v-radius);
+  background: var(--v-sheet);
+  box-shadow: var(--v-age), var(--v-shadow);
+  color: var(--v-ink);
+}
+.v-presenter-top > span:last-child {
+  display: grid;
+  gap: 1px;
+}
+.v-presenter .v-bust {
+  --bust-height: 68%;
+  bottom: 112px;
+}
+.v-presenter .v-bust[data-side='left'] {
+  left: 22px;
+}
+.v-presenter .v-bust[data-side='right'] {
+  right: 22px;
+}
+/* A historical note stands alone over the place: in so small a stage, it would cut the
+   characters in half. */
+.v-presenter[data-narrating='true'] .v-bust {
+  opacity: 0;
+  transform: translateY(24px) scale(0.95);
+}
+.v-presenter .v-box {
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  padding: 26px 22px 18px;
+}
+.v-presenter .v-nameplate strong {
+  font-size: 16px;
+}
+.v-presenter .v-box-text {
+  min-height: 4.5em;
+  font-size: 17px;
+  line-height: 1.5;
+}
+.v-presenter .v-carton {
+  width: calc(100% - 40px);
+  padding: 22px 26px 24px;
+}
+.v-presenter .v-carton-text {
+  font-size: 17px;
+}

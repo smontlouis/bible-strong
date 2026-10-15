@@ -14,12 +14,17 @@ export interface ReaderManifest {
 
 const textureKey = (id: string, page: string) => `${id}-${page}`
 
-export function loadReader(scene: Phaser.Scene, id: string, manifest: ReaderManifest) {
+export function loadReader(
+  scene: Phaser.Scene,
+  id: string,
+  manifest: ReaderManifest,
+  root = './assets/characters'
+) {
   for (const page of manifest.pages) {
     scene.load.atlas(
       textureKey(id, page.key),
-      `./assets/characters/${id}/${page.key}.webp`,
-      `./assets/characters/${id}/${page.key}.json`
+      `${root}/${id}/${page.key}.webp`,
+      `${root}/${id}/${page.key}.json`
     )
   }
 }
@@ -51,6 +56,11 @@ export class AnimatedReader {
       // Same ground anchor as the desk, just above its cutout so fingers cover paper.
       .setDepth(manifest.depth)
       .play(animationKey)
+  }
+
+  /** Current reveal, for things drawn with the reader such as its cast shadows. */
+  get alpha() {
+    return this.sprite.visible ? this.sprite.alpha : 0
   }
 
   update(camera: Phaser.Cameras.Scene2D.Camera, paused: boolean, avatarX: number, delta = 0) {

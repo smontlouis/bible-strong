@@ -1,3 +1,4 @@
+import { avatarTint, type AvatarTone } from './avatar-tone'
 import { ACTIVITIES, activityBadgeSvg, isAvatarActivity } from './avatar-activity'
 import type Phaser from 'phaser'
 import type { AvatarTrack } from './remote-avatars'
@@ -28,7 +29,11 @@ export class AvatarReactions {
       angle: number
     }
   >()
-  constructor(private scene: Phaser.Scene) {}
+  constructor(
+    private scene: Phaser.Scene,
+    /** The world's ageing of avatar colours, if any. */
+    private tone?: AvatarTone
+  ) {}
   update(
     network: {
       playerId: string | null
@@ -122,7 +127,7 @@ export class AvatarReactions {
           .setDisplaySize(size * scaleX, size * scaleY)
           .setAlpha(Math.max(0, alpha) * (remote?.opacity ?? 1))
       }
-      visual.body.setTint(Number.parseInt(color.slice(1), 16))
+      visual.body.setTint(avatarTint(color, this.tone))
     }
   }
 }

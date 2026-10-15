@@ -47,9 +47,12 @@ export class Pathfinder {
   private readonly buckets = new Map<string, NavigationDocument>()
   private readonly bounds
 
-  constructor(private readonly navigation: NavigationDocument) {
-    this.columns = Math.ceil(navigation.width / STEP) + 1
-    this.rows = Math.ceil(navigation.height / STEP) + 1
+  constructor(
+    private readonly navigation: NavigationDocument,
+    private readonly step = STEP
+  ) {
+    this.columns = Math.ceil(navigation.width / step) + 1
+    this.rows = Math.ceil(navigation.height / step) + 1
     this.cells = new Uint8Array(this.columns * this.rows)
     this.bounds = navigation.zones.map(zone => ({
       zone,
@@ -86,7 +89,7 @@ export class Pathfinder {
   }
 
   private point(id: number): Point {
-    return { x: (id % this.columns) * STEP, y: Math.floor(id / this.columns) * STEP }
+    return { x: (id % this.columns) * this.step, y: Math.floor(id / this.columns) * this.step }
   }
 
   private usable(id: number) {
@@ -96,7 +99,7 @@ export class Pathfinder {
 
   private anchors(point: Point) {
     const result: number[] = []
-    const column = Math.round(point.x / STEP), row = Math.round(point.y / STEP)
+    const column = Math.round(point.x / this.step), row = Math.round(point.y / this.step)
     for (let y = Math.max(0, row - 2); y <= Math.min(this.rows - 1, row + 2); y++) {
       for (let x = Math.max(0, column - 2); x <= Math.min(this.columns - 1, column + 2); x++) {
         const id = y * this.columns + x

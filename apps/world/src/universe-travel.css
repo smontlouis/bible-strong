@@ -1,0 +1,133 @@
+/* The veil drawn between two worlds during a journey, in the colours of the destination. */
+@font-face {
+  font-family: TravelLiterata;
+  src: url('/valence-1876/fonts/Literata-Book-latin-greek.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+.travel-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 24px;
+  border: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  overflow: hidden;
+  text-align: center;
+  /* Closed until the first frame of the animation: no flash of a full veil. */
+  clip-path: circle(0px at 50% 50%);
+}
+.travel-veil[data-to='valence-1876'] {
+  background:
+    radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(90, 59, 32, 0.5) 100%),
+    url('/valence-1876/paper.webp') 0 0 / 320px repeat,
+    #f3e6c9;
+  color: #2e1c0f;
+}
+.travel-veil[data-to='archipelago'] {
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.28), transparent 45%),
+    radial-gradient(ellipse at 50% 55%, #7fc6e4 0%, #5983f0 58%, #315fcf 100%);
+  color: #fff;
+}
+.travel-name,
+.travel-line {
+  margin: 0;
+  opacity: 0;
+  translate: 0 12px;
+  transition:
+    opacity 420ms ease-out,
+    translate 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.travel-veil[data-phase='covered'] .travel-name,
+.travel-veil[data-phase='covered'] .travel-line {
+  opacity: 1;
+  translate: 0 0;
+}
+.travel-veil[data-phase='covered'] .travel-line {
+  transition-delay: 120ms;
+}
+.travel-veil[data-to='valence-1876'] .travel-name {
+  padding: 0.15em 0.5em;
+  border-top: 3px double currentColor;
+  border-bottom: 3px double currentColor;
+  font: 400 clamp(44px, 9vw, 84px) / 1.05 TravelLiterata, 'Literata', Georgia, serif;
+  font-synthesis: none;
+}
+.travel-veil[data-to='valence-1876'] .travel-line {
+  font: 500 13px / 1.4 Pulp, sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #5a3b20;
+}
+.travel-veil[data-to='archipelago'] .travel-name {
+  font: 800 clamp(44px, 9vw, 84px) / 1 Pulp, sans-serif;
+  letter-spacing: -0.02em;
+  text-shadow: 0 6px 30px rgba(16, 27, 53, 0.3);
+}
+.travel-veil[data-to='archipelago'] .travel-line {
+  font: 500 16px / 1.4 Pulp, sans-serif;
+  opacity: 0;
+}
+.travel-veil[data-to='archipelago'][data-phase='covered'] .travel-line {
+  opacity: 0.85;
+}
+.travel-progress {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.travel-progress span {
+  width: 7px;
+  height: 7px;
+  background: currentColor;
+  opacity: 0.25;
+  animation: travel-dot 1.2s ease-in-out infinite;
+}
+.travel-veil[data-to='valence-1876'] .travel-progress span {
+  rotate: 45deg;
+}
+.travel-veil[data-to='archipelago'] .travel-progress span {
+  border-radius: 50%;
+}
+.travel-progress span:nth-child(2) {
+  animation-delay: 160ms;
+}
+.travel-progress span:nth-child(3) {
+  animation-delay: 320ms;
+}
+@keyframes travel-dot {
+  50% {
+    opacity: 0.9;
+  }
+}
+.travel-failed {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  height: 100dvh;
+  font: 500 16px / 1.5 Pulp, sans-serif;
+}
+@media (prefers-reduced-motion: reduce) {
+  .travel-veil {
+    clip-path: none;
+    opacity: 0;
+  }
+  .travel-name,
+  .travel-line {
+    translate: none;
+  }
+  .travel-progress span {
+    animation: none;
+    opacity: 0.6;
+  }
+}
