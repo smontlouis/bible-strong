@@ -29,6 +29,8 @@ export type ClientMessage =
       resumeToken?: string
       gameHistoryId?: string
     }
+  /** A stand screen watches the room: it receives every visitor and is never one itself. */
+  | { type: 'watch'; version: number }
   | { type: 'visibility'; hidden: boolean }
   | { type: 'move'; pose: Pose; seq: number; activity?: AvatarActivity | null }
   | { type: 'profile'; profile: AvatarProfile }
@@ -38,6 +40,7 @@ export type ServerMessage =
   | { type: 'game-error'; error: GameError }
   | { type: 'games'; snapshot: GamesSnapshot; error?: GameError }
   | { type: 'welcome'; id: string; spawn: Pose; players: Player[]; resumeToken?: string }
+  | { type: 'watching'; players: Player[] }
   | { type: 'player'; player: Player }
   | { type: 'frame'; players: Player[] }
   | { type: 'leave'; id: string }
@@ -49,12 +52,12 @@ export type PresenceStatus = {
   state: 'connecting' | 'online' | 'offline' | 'full' | 'outdated'
   count: number
 }
-/** A join from another protocol version, reported instead of treated as garbage. */
+/** A join or watch from another protocol version, reported instead of treated as garbage. */
 export function isOutdatedJoin(raw: string) {
   if (raw.length > 4096) return false
   try {
     const m = JSON.parse(raw)
-    return !!m && m.type === 'join' && m.version !== PROTOCOL_VERSION
+    return !!m && (m.type === 'join' || m.type === 'watch') && m.version !== PROTOCOL_VERSION
   } catch {
     return false
   }
@@ -92,6 +95,7 @@ export function parseClientMessage(raw: string): ClientMessage | null {
     if (m.type === 'activity')
       return m.activity === null || isAvatarActivity(m.activity) ? { type: 'activity', activity: m.activity } : null
     if (m.type === 'ping') return { type: 'ping' }
+    if (m.type === 'watch' && m.version === PROTOCOL_VERSION) return { type: 'watch', version: PROTOCOL_VERSION }
     if (m.type === 'visibility' && typeof m.hidden === 'boolean')
       return { type: 'visibility', hidden: m.hidden }
     if (m.type === 'join' && m.version === PROTOCOL_VERSION) {

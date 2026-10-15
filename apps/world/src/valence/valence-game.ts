@@ -109,6 +109,9 @@ class ValenceScene extends WorldScene<ValenceControls> {
     const { navigation } = this.controls
     return chooseValenceSpawn(navigation, VALENCE_SPAWN) ?? this.safePosition(VALENCE_SPAWN) ?? { ...VALENCE_SPAWN }
   }
+  tourStops() {
+    return threadOrder.map(id => stationAnchors[id])
+  }
   createCrowd() {
     if (!this.controls.stand) return undefined
     return new StandCrowd(this.controls.navigation, Math.random, {
@@ -214,13 +217,15 @@ class ValenceScene extends WorldScene<ValenceControls> {
         this.collected.add(id)
         if (image.visible) this.townAmbience.burst(spot, reducedMotion)
       } else if (!found) this.collected.delete(id)
+      // A stand screen shows the town, not the hunt.
+      const shown = !this.spectator && (!found || freeCamera)
       image
-        .setVisible(!found || freeCamera)
+        .setVisible(shown)
         .setPosition(spot.x, spot.y - (reducedMotion ? 0 : 2 + breathing * 2))
         .setDepth(spot.y)
       this.objectGlow
         .get(id)
-        ?.setVisible(!found)
+        ?.setVisible(shown && !found)
         .setPosition(spot.x, spot.y - 6)
         .setDepth(spot.y - 0.5)
         .setAlpha(found ? 0 : 0.35 + 0.25 * (breathing + 1) * 0.5)

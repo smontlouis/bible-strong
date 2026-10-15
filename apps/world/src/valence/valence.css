@@ -411,6 +411,18 @@
 }
 
 /* Stand display */
+/* The stand screen's frame (src/stand-shell.css), in sepia. */
+.valence-shell .stand-shell {
+  --stand-ink: var(--v-ink);
+  --stand-paper: var(--v-sheet);
+  --stand-line: var(--v-ink);
+  --stand-live: #5d8a3a;
+  --stand-radius: var(--v-radius);
+}
+.valence-shell .stand-count {
+  border: var(--v-frame);
+  box-shadow: var(--v-age), var(--v-shadow);
+}
 .v-stand {
   position: absolute;
   z-index: 6;

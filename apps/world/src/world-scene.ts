@@ -34,6 +34,9 @@ import { arrivalZoom } from './world-arrival'
 export const RESOLUTION = Math.min(window.devicePixelRatio || 1, 2)
 /** The avatar sheets are drawn for this size, the archipelago's. */
 const AVATAR_SHEET_SIZE = 52
+/** A stand screen tours the world after a minute without anyone touching it. */
+const TOUR_IDLE_MS = 60_000
+const TOUR_ZOOM = 1.1
 
 /** What React and the scene share; each world adds its own fields. */
 export type SceneControls = {
@@ -68,6 +71,10 @@ export type SceneControls = {
   ambientEditor?: AmbientEditorModel
   /** Zoom requested by the workshop's zoom buttons; consumed once. */
   shoreZoom?: number
+  /** Stand screen: a drag to apply to the view, in page pixels; consumed once. */
+  panBy?: Point
+  /** Stand screen: when someone last touched it; the tour waits for a quiet minute. */
+  touchedAt?: number
 }
 
 export type SceneState = { x: number; y: number; moving: boolean; fps: number; multiplayer?: PresenceStatus }
@@ -166,6 +173,14 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
   ambientZoneEditor?: AmbientZoneEditor
   shoreWaves?: ShoreWaves
   alive = true
+  /** A stand screen: no avatar, a free view, the room watched instead of joined. */
+  get spectator() {
+    return this.controls.stand === true
+  }
+  private startedAt = performance.now()
+  private follow = 0
+  private tour?: { until: number; point: Point; visitor?: string }
+  private tourIndex = 0
   active = true
   private keys!: Record<string, Phaser.Input.Keyboard.Key>
   private lastReset = 0
@@ -202,6 +217,10 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
   abstract createScenery(): void
   /** The world's own life, every frame, once the avatar and the camera have moved. */
   updateScenery(_frame: SceneFrame): void {}
+  /** Where a stand screen's tour goes when no visitor is there to follow; the map's centre by default. */
+  tourStops(): Point[] {
+    return [{ x: this.options.width / 2, y: this.options.height / 2 }]
+  }
   /** Passers-by for the stand screen or a quiet room; none by default. */
   createCrowd(): StandCrowd | undefined {
     return undefined
@@ -304,7 +323,11 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
     const observer = new ResizeObserver(resize)
     observer.observe(parent)
     resize()
-    this.position = (controls.portalArrival && this.safePosition(controls.portalArrival)) || this.arrival()
+    this.position = this.spectator
+      ? { x: options.width / 2, y: options.height / 2 }
+      : (controls.portalArrival && this.safePosition(controls.portalArrival)) || this.arrival()
+    // A stand screen opens on the whole world.
+    if (this.spectator) controls.zoom = 0
     this.cameras.main.setBackgroundColor(options.look.background)
     this.add.image(0, 0, `${options.key}-preview`).setOrigin(0).setDisplaySize(options.width, options.height).setDepth(-110)
     this.tiles = new MapTileStreamer(this, options.tiles)
@@ -386,6 +409,7 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
     }
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, dispose)
     this.events.once(Phaser.Scenes.Events.DESTROY, dispose)
+    if (this.spectator) for (const own of [this.avatar, this.shadow, this.nameTag, this.nameTagBackground]) own.setVisible(false)
     this.cameras.main.centerOn(this.position.x, this.position.y)
     options.onReady()
   }
@@ -430,81 +454,9 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
       this.cameras.main.centerOn(this.position.x, this.position.y)
     }
 
-    // Walking: keyboard, joystick, held pointer, or a route to a clicked point.
-    let direction = controls.direction
-    const horizontal =
-      Number(this.keys.RIGHT.isDown || this.keys.D.isDown) - Number(this.keys.LEFT.isDown || this.keys.A.isDown || this.keys.Q.isDown)
-    const vertical =
-      Number(this.keys.DOWN.isDown || this.keys.S.isDown) - Number(this.keys.UP.isDown || this.keys.W.isDown || this.keys.Z.isDown)
-    if (horizontal || vertical) direction = { x: horizontal, y: vertical }
-    const manual = Math.hypot(direction.x, direction.y) >= 0.12
-    if (manual || controls.cancelWalk) {
-      controls.cancelWalk = false
-      this.route.cancel()
-      this.rejectedTarget = undefined
-      controls.walkToScreen = undefined
-      controls.pointerPress = undefined
-    }
+    // A stand screen moves a view; a visitor walks.
+    const { next, moving, manual } = this.spectator ? this.spectate(delta) : this.walk(time, delta, animating, reducedMotion)
     const camera = this.cameras.main
-    const press = controls.pointerPress
-    if (press && isPointerSteering(press, performance.now())) {
-      this.route.cancel()
-      this.rejectedTarget = undefined
-      controls.walkToScreen = undefined
-      const target = camera.getWorldPoint(
-        (press.screen.x * this.scale.width) / parent.clientWidth,
-        (press.screen.y * this.scale.height) / parent.clientHeight
-      )
-      direction = pointerDirection(
-        { x: target.x - this.position.x, y: target.y - (this.position.y - options.avatarSize * 0.3) },
-        { x: (camera.zoom * parent.clientWidth) / this.scale.width, y: (camera.zoom * parent.clientHeight) / this.scale.height }
-      )
-    }
-    if (controls.paused || !this.active || document.hidden) {
-      direction = { x: 0, y: 0 }
-      this.resetInput()
-    }
-    if (controls.walkToScreen) {
-      const screen = controls.walkToScreen
-      controls.walkToScreen = undefined
-      const target = camera.getWorldPoint(
-        (screen.x * this.scale.width) / parent.clientWidth,
-        (screen.y * this.scale.height) / parent.clientHeight
-      )
-      const path = this.pathfinder.find(this.position, target)
-      this.route.points = path ?? []
-      this.rejectedTarget = path ? undefined : target
-      this.rejectedUntil = time + 500
-    }
-    const following = this.route.points.length > 0
-    const next = following
-      ? this.route.advance(this.position, delta / 1000, controls.navigation)
-      : move(this.position, direction, delta / 1000, controls.navigation)
-    if (following) {
-      const length = Math.hypot(next.x - this.position.x, next.y - this.position.y)
-      direction = length > 0 ? { x: (next.x - this.position.x) / length, y: (next.y - this.position.y) / length } : { x: 0, y: 0 }
-    }
-    const moving = Math.hypot(next.x - this.position.x, next.y - this.position.y) > 0.01
-    this.position = next
-    if (moving) {
-      const length = Math.max(1, Math.hypot(direction.x, direction.y))
-      this.facing = { x: direction.x / length, y: direction.y / length }
-    }
-    this.network.setActivity(controls.activity ?? null)
-    this.network.update(
-      { ...next, dx: this.facing.x, dy: this.facing.y, moving },
-      { avatar: controls.avatar, name: controls.avatarName, color: controls.avatarColor },
-      controls.multiplayerEnabled !== false,
-      performance.now()
-    )
-
-    // The avatar and its shadow.
-    this.blobAvatar.update(this.avatar, direction, moving, reducedMotion, delta, controls.avatar, !controls.paused && animating)
-    const scale = options.avatarSize / AVATAR_SHEET_SIZE
-    if (scale !== 1) this.avatar.setDisplaySize(this.avatar.displayWidth * scale, this.avatar.displayHeight * scale)
-    const tint = avatarTint(controls.avatarColor, options.look.avatarTone)
-    this.avatar.setTint(tint).setPosition(next.x, next.y).setDepth(next.y)
-    this.shadow.setPosition(next.x, next.y)
 
     // The camera: follows the avatar, zooms in on arrival, or leaves the workshop in charge.
     const screenWidth = this.scale.width
@@ -532,12 +484,14 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
             : bounds.base * controls.zoom
       const { width, height } = options
       const targetX = controls.overview ? width / 2 : next.x
-      const targetY = controls.overview ? height / 2 : next.y - (options.cameraLift * RESOLUTION) / zoom
+      const lift = this.spectator ? 0 : options.cameraLift
+      const targetY = controls.overview ? height / 2 : next.y - (lift * RESOLUTION) / zoom
       // The farthest zoom-out shows the whole scenery, centred; zooming in glides the camera onto
       // the avatar, which is centred once the view covers less than 55% of the scenery. Every
       // world draws past its map (the archipelago's sea, Valence's wall), so nothing bounds it.
       const cover = Math.max(screenWidth / zoom / scenery.width, screenHeight / zoom / scenery.height)
       const follow = Phaser.Math.SmoothStep(Phaser.Math.Clamp((1 - cover) / 0.45, 0, 1), 0, 1)
+      this.follow = follow
       const centerX = width / 2 + (targetX - width / 2) * follow
       const centerY = height / 2 + (targetY - height / 2) * follow
       const smoothing = cameraArrival !== undefined ? 1 : 1 - Math.exp(-Math.min(delta, 50) / 110)
@@ -591,7 +545,7 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
         .setPosition(next.x, next.y + 5 * scaleY)
         .setScale(scaleX, scaleY)
         .setAlpha(labelAlpha)
-        .setVisible(Boolean(controls.avatarName) && labelAlpha > 0.01 && !freeCamera)
+        .setVisible(Boolean(controls.avatarName) && labelAlpha > 0.01 && !freeCamera && !this.spectator)
 
     // Other visitors, passers-by and reactions.
     const now = performance.now()
@@ -676,6 +630,138 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
       this.lastPublished = time
       this.publishState(frame)
     }
+  }
+
+  /**
+   * A stand screen's view: a point the camera looks at, moved by a drag or the arrow keys, and,
+   * after a quiet minute, by a slow tour that follows a real visitor when there is one, or goes
+   * from place to place otherwise. The room is watched, never joined.
+   */
+  private spectate(delta: number) {
+    const { controls, parent, options } = this
+    const camera = this.cameras.main
+    const now = performance.now()
+    this.network.watch()
+    controls.walkToScreen = undefined
+    controls.pointerPress = undefined
+    // Near the farthest zoom the view stays on the painting: a drag moves it by `follow`, so
+    // the point moves faster to keep the picture under the finger.
+    const perPixel = this.scale.width / parent.clientWidth / camera.zoom / Math.max(this.follow, 0.2)
+    let { x, y } = this.position
+    const horizontal = Number(this.keys.RIGHT.isDown || this.keys.D.isDown) - Number(this.keys.LEFT.isDown || this.keys.A.isDown || this.keys.Q.isDown)
+    const vertical = Number(this.keys.DOWN.isDown || this.keys.S.isDown) - Number(this.keys.UP.isDown || this.keys.W.isDown || this.keys.Z.isDown)
+    const manual = Boolean(horizontal || vertical || controls.panBy)
+    if (horizontal || vertical) {
+      controls.touchedAt = now
+      x += horizontal * 0.6 * delta * perPixel
+      y += vertical * 0.6 * delta * perPixel
+    }
+    if (controls.panBy) {
+      x += controls.panBy.x * perPixel
+      y += controls.panBy.y * perPixel
+      controls.panBy = undefined
+    }
+    if (now - (controls.touchedAt ?? this.startedAt) > TOUR_IDLE_MS) {
+      if (!this.tour || now > this.tour.until) {
+        const visitors = [...this.network.remotes.keys()]
+        const stops = this.tourStops()
+        this.tour = visitors.length
+          ? { until: now + 16_000, point: this.position, visitor: visitors[Math.floor(Math.random() * visitors.length)] }
+          : { until: now + 12_000, point: stops[this.tourIndex++ % stops.length] }
+      }
+      const target = (this.tour.visitor && this.network.remotes.get(this.tour.visitor)?.sample(now)) || this.tour.point
+      const ease = 1 - Math.exp(-Math.min(delta, 50) / 1600)
+      x += (target.x - x) * ease
+      y += (target.y - y) * ease
+      controls.zoom += (TOUR_ZOOM - controls.zoom) * ease
+      controls.overview = false
+    } else this.tour = undefined
+    this.position = {
+      x: Phaser.Math.Clamp(x, 0, options.width),
+      y: Phaser.Math.Clamp(y, 0, options.height),
+    }
+    return { next: this.position, moving: false, manual }
+  }
+
+  /** Walking: keyboard, joystick, held pointer, or a route to a clicked point; then the avatar. */
+  private walk(time: number, delta: number, animating: boolean, reducedMotion: boolean) {
+    const { controls, parent, options } = this
+    const camera = this.cameras.main
+    let direction = controls.direction
+    const horizontal =
+      Number(this.keys.RIGHT.isDown || this.keys.D.isDown) - Number(this.keys.LEFT.isDown || this.keys.A.isDown || this.keys.Q.isDown)
+    const vertical =
+      Number(this.keys.DOWN.isDown || this.keys.S.isDown) - Number(this.keys.UP.isDown || this.keys.W.isDown || this.keys.Z.isDown)
+    if (horizontal || vertical) direction = { x: horizontal, y: vertical }
+    const manual = Math.hypot(direction.x, direction.y) >= 0.12
+    if (manual || controls.cancelWalk) {
+      controls.cancelWalk = false
+      this.route.cancel()
+      this.rejectedTarget = undefined
+      controls.walkToScreen = undefined
+      controls.pointerPress = undefined
+    }
+    const press = controls.pointerPress
+    if (press && isPointerSteering(press, performance.now())) {
+      this.route.cancel()
+      this.rejectedTarget = undefined
+      controls.walkToScreen = undefined
+      const target = camera.getWorldPoint(
+        (press.screen.x * this.scale.width) / parent.clientWidth,
+        (press.screen.y * this.scale.height) / parent.clientHeight
+      )
+      direction = pointerDirection(
+        { x: target.x - this.position.x, y: target.y - (this.position.y - options.avatarSize * 0.3) },
+        { x: (camera.zoom * parent.clientWidth) / this.scale.width, y: (camera.zoom * parent.clientHeight) / this.scale.height }
+      )
+    }
+    if (controls.paused || !this.active || document.hidden) {
+      direction = { x: 0, y: 0 }
+      this.resetInput()
+    }
+    if (controls.walkToScreen) {
+      const screen = controls.walkToScreen
+      controls.walkToScreen = undefined
+      const target = camera.getWorldPoint(
+        (screen.x * this.scale.width) / parent.clientWidth,
+        (screen.y * this.scale.height) / parent.clientHeight
+      )
+      const path = this.pathfinder.find(this.position, target)
+      this.route.points = path ?? []
+      this.rejectedTarget = path ? undefined : target
+      this.rejectedUntil = time + 500
+    }
+    const following = this.route.points.length > 0
+    const next = following
+      ? this.route.advance(this.position, delta / 1000, controls.navigation)
+      : move(this.position, direction, delta / 1000, controls.navigation)
+    if (following) {
+      const length = Math.hypot(next.x - this.position.x, next.y - this.position.y)
+      direction = length > 0 ? { x: (next.x - this.position.x) / length, y: (next.y - this.position.y) / length } : { x: 0, y: 0 }
+    }
+    const moving = Math.hypot(next.x - this.position.x, next.y - this.position.y) > 0.01
+    this.position = next
+    if (moving) {
+      const length = Math.max(1, Math.hypot(direction.x, direction.y))
+      this.facing = { x: direction.x / length, y: direction.y / length }
+    }
+    this.network.setActivity(controls.activity ?? null)
+    this.network.update(
+      { ...next, dx: this.facing.x, dy: this.facing.y, moving },
+      { avatar: controls.avatar, name: controls.avatarName, color: controls.avatarColor },
+      controls.multiplayerEnabled !== false,
+      performance.now()
+    )
+
+    // The avatar and its shadow.
+    this.blobAvatar.update(this.avatar, direction, moving, reducedMotion, delta, controls.avatar, !controls.paused && animating)
+    const scale = options.avatarSize / AVATAR_SHEET_SIZE
+    if (scale !== 1) this.avatar.setDisplaySize(this.avatar.displayWidth * scale, this.avatar.displayHeight * scale)
+    const tint = avatarTint(controls.avatarColor, options.look.avatarTone)
+    this.avatar.setTint(tint).setPosition(next.x, next.y).setDepth(next.y)
+    this.shadow.setPosition(next.x, next.y)
+
+    return { next, moving, manual }
   }
 
   /** Invite and react to the nearest visitor, under the visitor's own avatar. */

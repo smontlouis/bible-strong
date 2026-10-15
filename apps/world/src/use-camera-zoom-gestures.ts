@@ -14,12 +14,19 @@ export function useCameraZoomGestures(
     if (!zone) return
 
     const touches = new Map<number, { x: number; y: number }>()
+    /** On a stand screen, a one-finger or mouse drag moves the camera; nothing walks. */
+    const stand = () => controlsRef.current.stand === true
+    const touched = () => {
+      if (stand()) controlsRef.current.touchedAt = performance.now()
+    }
+    let drag: { id: number; x: number; y: number } | undefined
     let pinchStartDistance = 0
     let pinchStartZoom = controlsRef.current.zoom
     const tap = new PointerTap()
     const resetPointers = () => {
       tap.reset()
       controlsRef.current.pointerPress = undefined
+      drag = undefined
       touches.clear()
     }
 
@@ -29,6 +36,7 @@ export function useCameraZoomGestures(
     }
     const beginPinch = () => {
       if (touches.size !== 2) return
+      drag = undefined
       controlsRef.current.pointerPress = undefined
       pinchStartDistance = distance()
       pinchStartZoom = controlsRef.current.overview
@@ -39,6 +47,7 @@ export function useCameraZoomGestures(
     }
     const onWheel = (event: WheelEvent) => {
       tap.cancel()
+      touched()
       if (controlsRef.current.shoreEditor?.editing || controlsRef.current.ambientEditor?.editing)
         return
       event.preventDefault()
@@ -54,6 +63,14 @@ export function useCameraZoomGestures(
       if (controlsRef.current.shoreEditor?.editing || controlsRef.current.ambientEditor?.editing)
         return
       if (event.button !== 0 || controlsRef.current.paused) return
+      if (stand()) {
+        touched()
+        if (event.pointerType === 'touch') touches.set(event.pointerId, { x: event.clientX, y: event.clientY })
+        drag = touches.size > 1 ? undefined : { id: event.pointerId, x: event.clientX, y: event.clientY }
+        zone.setPointerCapture(event.pointerId)
+        beginPinch()
+        return
+      }
       tap.start(event.pointerId, { x: event.clientX, y: event.clientY }, performance.now())
       const bounds = zone.getBoundingClientRect()
       const screen = { x: event.clientX - bounds.left, y: event.clientY - bounds.top }
@@ -66,6 +83,12 @@ export function useCameraZoomGestures(
       beginPinch()
     }
     const onPointerMove = (event: PointerEvent) => {
+      if (drag?.id === event.pointerId) {
+        touched()
+        const pan = controlsRef.current.panBy ?? { x: 0, y: 0 }
+        controlsRef.current.panBy = { x: pan.x + drag.x - event.clientX, y: pan.y + drag.y - event.clientY }
+        drag = { id: event.pointerId, x: event.clientX, y: event.clientY }
+      }
       tap.move({ x: event.clientX, y: event.clientY })
       const press = controlsRef.current.pointerPress
       if (press?.id === event.pointerId) {
@@ -85,6 +108,13 @@ export function useCameraZoomGestures(
       )
     }
     const onPointerEnd = (event: PointerEvent) => {
+      if (stand()) {
+        if (drag?.id === event.pointerId) drag = undefined
+        if (zone.hasPointerCapture(event.pointerId)) zone.releasePointerCapture(event.pointerId)
+        if (!touches.delete(event.pointerId)) return
+        beginPinch()
+        return
+      }
       const press = controlsRef.current.pointerPress
       if (press?.id === event.pointerId) {
         if (isPointerSteering(press, performance.now())) {

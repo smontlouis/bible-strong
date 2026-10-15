@@ -46,7 +46,7 @@ const CommentariesDiscovery = lazy(() =>
 import { AvatarEditor, profileCopy } from './AvatarEditor'
 import { AVATAR_COLORS } from './avatar-profile'
 import { loadVisitedPlaces, saveVisitedPlaces } from './visited-places'
-import { useExplorerProfile, useJoystick, useWorldLanguage, useWorldScene, WorldPresence } from './world-shell'
+import { StandShell, useExplorerProfile, useJoystick, useWorldLanguage, useWorldScene, WorldPresence } from './world-shell'
 import type { UniverseProps } from './universes'
 import { WORLD_PORTAL } from './world-portal'
 const ArchipelagoWorkshop = import.meta.env.DEV ? lazy(() => import('./ArchipelagoWorkshop')) : () => null
@@ -298,15 +298,16 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
     controls.current.overview = overview
     controls.current.debug = debug
     controls.current.diagnosticFilters = diagnosticFilters
+    // A stand screen has no dialogs to wait for.
     controls.current.paused =
       !ready ||
+      (!stand && profileOpen) ||
       menuOpen ||
       Boolean(opened) ||
       storyOpen ||
       guestbookOpen ||
       gamesOpen ||
-      Boolean(editorMode) ||
-      profileOpen
+      Boolean(editorMode)
     controls.current.multiplayerEnabled = !editorMode
     controls.current.navigation = navigation
     controls.current.direction = { x: 0, y: 0 }
@@ -425,6 +426,27 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
     setOverview(false)
     setMenuOpen(false)
   }
+
+  if (stand)
+    return (
+      <main className={`world-shell is-stand ${!ready ? 'is-loading' : ''}`}>
+        <div className="world-canvas" ref={host} aria-label="Bible Strong — archipel" />
+        {!ready && <WorldLoading language={language} color={loadingColor} revealing={revealing} failed={failed} />}
+        {ready && (
+          <StandShell
+            language={language}
+            status={state.multiplayer}
+            title={
+              <p className="stand-heading">
+                Bible Strong <strong>World</strong>
+              </p>
+            }
+          >
+            <StandBanner invitation={t.stand} language={language} />
+          </StandShell>
+        )}
+      </main>
+    )
 
   return (
     <main
@@ -570,7 +592,6 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
           )}
         </div>
       </aside>
-      {stand && <StandBanner invitation={t.stand} language={language} />}
       {worldActionsVisible && (
         <AppDownloadStation
           language={language}

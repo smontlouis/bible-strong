@@ -14,7 +14,7 @@ import { useCameraZoomGestures } from '../use-camera-zoom-gestures'
 import type { UniverseProps } from '../universes'
 import { selectEditors } from '../workshop/editors'
 import type { NavigationDocument } from '../world'
-import { useExplorerProfile, useJoystick, useWorldLanguage, useWorldScene, WorldPresence } from '../world-shell'
+import { StandShell, useExplorerProfile, useJoystick, useWorldLanguage, useWorldScene, WorldPresence } from '../world-shell'
 import { tileNavigation } from './navigation-tiles'
 import { objectImage, ObjectCard, ShareCard } from './ObjectCard'
 import { StationScene } from './StationScene'
@@ -39,7 +39,6 @@ import './valence.css'
 
 const ValenceWorkshop = import.meta.env.DEV ? lazy(() => import('./ValenceWorkshop')) : () => null
 
-const STAND_IDLE_MS = 150_000
 const byId = new Map(stations.map(station => [station.id, station]))
 const shortDates: Record<Language, Partial<Record<StationId, string>>> = {
   fr: {
@@ -184,7 +183,7 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
   const [progress, setProgress] = useState<ValenceProgress>(loadProgress)
   const visited = useMemo(() => new Set(progress.visited), [progress.visited])
   const found = useMemo(() => new Set(progress.found), [progress.found])
-  const [introOpen, setIntroOpen] = useState(() => !loadProgress().introSeen || stand)
+  const [introOpen, setIntroOpen] = useState(() => !loadProgress().introSeen)
   const [opened, setOpened] = useState<StationId | null>(null)
   const [objectOpen, setObjectOpen] = useState<PioneerObjectId | null>(null)
   const [shareOpen, setShareOpen] = useState(false)
@@ -292,7 +291,8 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
 
   useEffect(() => {
     const c = controls.current
-    c.paused = !ready || dialogOpen
+    // A stand screen has no dialogs to wait for.
+    c.paused = !ready || (!stand && dialogOpen)
     c.overview = overview
     c.visited = visited
     c.found = found
@@ -315,7 +315,7 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
   // Walking onto a pioneer object picks it up.
   const pickupTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
   useEffect(() => {
-    if (!ready || dialogOpen) return
+    if (!ready || dialogOpen || stand) return
     const id = objectWithinReach(state, found)
     if (!id) return
     setProgress(old => ({ ...old, found: [...old.found, id] }))
@@ -325,32 +325,6 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
     pickupTimer.current = setTimeout(() => setObjectOpen(id), 650)
   }, [state, ready, dialogOpen, found])
   useEffect(() => () => clearTimeout(pickupTimer.current), [])
-
-  // A stand resets itself after a quiet while, ready for the next visitor.
-  const lastActivity = useRef(performance.now())
-  useEffect(() => {
-    if (!stand) return
-    const mark = () => (lastActivity.current = performance.now())
-    window.addEventListener('pointerdown', mark)
-    window.addEventListener('keydown', mark)
-    const timer = setInterval(() => {
-      if (performance.now() - lastActivity.current < STAND_IDLE_MS) return
-      lastActivity.current = performance.now()
-      setOpened(null)
-      setObjectOpen(null)
-      setShareOpen(false)
-      setGuestbookOpen(false)
-      setMenuOpen(false)
-      setProgress({ visited: [], found: [], introSeen: true })
-      controls.current.reset++
-      setIntroOpen(true)
-    }, 5000)
-    return () => {
-      clearInterval(timer)
-      window.removeEventListener('pointerdown', mark)
-      window.removeEventListener('keydown', mark)
-    }
-  }, [stand])
 
   const openStation = useCallback(
     (id: StationId) => {
@@ -376,6 +350,70 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
 
   const openedStation = opened ? byId.get(opened)! : null
   const objectData = objectOpen ? pioneerObjects.find(object => object.id === objectOpen)! : null
+
+  const loading = !ready && (!arrival || failed) && (
+    <div className="v-loading" data-revealing={revealing} role="status">
+      <p className="v-loading-title">{t.title}</p>
+      <p className="v-loading-sub">{failed ? t.failed : t.loading}</p>
+      {failed && (
+        <button type="button" className="v-primary" onClick={() => location.reload()}>
+          {t.reload}
+        </button>
+      )}
+      {!failed && <span className="v-loading-track" aria-hidden="true" />}
+    </div>
+  )
+
+  if (stand)
+    return (
+      <main className={`valence-shell is-stand ${ready ? '' : 'is-loading'}`}>
+        <div className="world-canvas" ref={host} aria-label={t.mapLabel} />
+        <div className="v-vignette" aria-hidden="true" />
+        {/* The places, to read the picture from afar: names only, nothing to open. */}
+        {threadOrder.map(id => {
+          const station = byId.get(id)!
+          return (
+            <span
+              key={id}
+              className="v-tag"
+              ref={element => {
+                stationTags.current[id] = element
+              }}
+              hidden={!ready}
+            >
+              <span className="v-tag-order">{station.order}</span>
+              <span className="v-tag-text">
+                <span className="v-tag-date">{station.date[language]}</span>
+                <span className="v-tag-place">{station.place[language]}</span>
+              </span>
+            </span>
+          )
+        })}
+        {ready && (
+          <StandShell
+            language={language}
+            status={state.multiplayer}
+            title={
+              <div className="v-brand">
+                <span className="v-brand-title">{t.title}</span>
+                <span className="v-brand-sub">{t.subtitle}</span>
+              </div>
+            }
+          >
+            <a className="v-stand" href="https://world.bible-strong.app/valence-1876" target="_blank" rel="noreferrer">
+              <img src="./valence-1876/qr.svg" width={150} height={150} alt="QR code — world.bible-strong.app/valence-1876" />
+              <span>
+                <strong>
+                  {t.standTitle[0]} <em>{t.standTitle[1]}</em>
+                </strong>
+                <span>{t.stand}</span>
+              </span>
+            </a>
+          </StandShell>
+        )}
+        {loading}
+      </main>
+    )
 
   return (
     <main
@@ -528,30 +566,7 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
         </Suspense>
       )}
 
-      {stand && (
-        <a className={`v-stand ${workshopMode ? 'is-hidden' : ''}`} href="https://world.bible-strong.app/valence-1876" target="_blank" rel="noreferrer">
-          <img src="./valence-1876/qr.svg" width={150} height={150} alt="QR code — world.bible-strong.app/valence-1876" />
-          <span>
-            <strong>
-              {t.standTitle[0]} <em>{t.standTitle[1]}</em>
-            </strong>
-            <span>{t.stand}</span>
-          </span>
-        </a>
-      )}
-
-      {!ready && (!arrival || failed) && (
-        <div className="v-loading" data-revealing={revealing} role="status">
-          <p className="v-loading-title">{t.title}</p>
-          <p className="v-loading-sub">{failed ? t.failed : t.loading}</p>
-          {failed && (
-            <button type="button" className="v-primary" onClick={() => location.reload()}>
-              {t.reload}
-            </button>
-          )}
-          {!failed && <span className="v-loading-track" aria-hidden="true" />}
-        </div>
-      )}
+      {loading}
 
       {ready && profileOpen && (
         <AvatarEditor

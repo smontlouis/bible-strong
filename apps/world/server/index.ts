@@ -47,6 +47,8 @@ type Session = {
   gameHistoryId?: string
   lastReaction?: number
   lastGameAction?: number
+  /** A stand screen: it receives the room's presence and reactions, but is never a visitor. */
+  watching?: boolean
 }
 interface Env extends GuestbookEnv, GameAIEnv, GameCatalogueEnv {
   WorldRoom: DurableObjectNamespace<WorldRoom>
@@ -107,10 +109,11 @@ export class WorldRoom extends Server<Env> {
         this.publish(JSON.stringify({ type: 'frame', players } satisfies ServerMessage))
     }, 50)
   }
-  /** Presence goes to admitted visitors only, never to sockets that have not joined. */
+  /** Presence goes to admitted visitors and stand screens, never to sockets that have not joined. */
   private publish(message: string, except?: string) {
     for (const peer of this.getConnections<Session>())
-      if (peer.id !== except && peer.readyState === 1 && peer.state?.player) peer.send(message)
+      if (peer.id !== except && peer.readyState === 1 && (peer.state?.player || peer.state?.watching))
+        peer.send(message)
   }
   private saved(player: Player, lastReaction?: number): SavedSession {
     return {
@@ -168,9 +171,10 @@ export class WorldRoom extends Server<Env> {
           id: session.player!.id,
           reaction: message.reaction,
         } satisfies ServerMessage)
-        // Only admitted visitors receive reactions; never persist or replay them on join.
+        // Only admitted visitors and stand screens receive reactions; never persist or replay them.
         for (const peer of this.getConnections<Session>())
-          if (peer.readyState === 1 && peer.state?.player && !peer.state.hidden) peer.send(frame)
+          if (peer.readyState === 1 && (peer.state?.player || peer.state?.watching) && !peer.state.hidden)
+            peer.send(frame)
       }
       return
     }
@@ -198,7 +202,15 @@ export class WorldRoom extends Server<Env> {
       connection.send(JSON.stringify({ type: 'pong' } satisfies ServerMessage))
       return
     }
-    if (message.type === 'join' && !session.player) {
+    if (message.type === 'watch' && !session.player && !session.watching) {
+      // A stand screen sees everyone already here, then follows the room like a visitor would,
+      // without a place, a position or a count of its own.
+      connection.setState({ ...next, watching: true })
+      const players = [...this.getConnections<Session>()].flatMap(c => (c.state?.player ? [c.state.player] : []))
+      connection.send(JSON.stringify({ type: 'watching', players } satisfies ServerMessage))
+      return
+    }
+    if (message.type === 'join' && !session.player && !session.watching) {
       // Serialize resume/arrival against close callbacks and other join attempts.
       await this.ctx.blockConcurrencyWhile(async () => {
         const previous = message.resumeToken
@@ -331,8 +343,9 @@ export class WorldRoom extends Server<Env> {
       const session = connection.state
       if (
         !session ||
-        (!session.player && now - (session.since ?? session.lastSeen) > 10_000) ||
-        now - session.lastSeen > (session.player ? (session.hidden ? HIDDEN_TTL : 45_000) : 10_000)
+        (!session.player && !session.watching && now - (session.since ?? session.lastSeen) > 10_000) ||
+        now - session.lastSeen >
+          (session.player ? (session.hidden ? HIDDEN_TTL : 45_000) : session.watching ? 45_000 : 10_000)
       ) {
         this.remove(connection)
         connection.close(4000, 'Session expired')

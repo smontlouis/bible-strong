@@ -5,7 +5,7 @@ Bible Strong World holds several worlds in one application: the archipelago at `
 | Shared | Where |
 | --- | --- |
 | Walking (keys, joystick, held pointer, click-to-walk), camera and arrival zoom, multiplayer room, visitors, reactions, stand passers-by, walking markers, name label, map tiles, bushes, ambient zones, shorelines, navigation diagnostics | `src/world-scene.ts` (`WorldScene`, `startWorldGame`) |
-| Scene life from loading to the journey's ready signal, joystick, explorer profile, language, presence line | `src/world-shell.tsx` |
+| Scene life from loading to the journey's ready signal, joystick, explorer profile, language, presence line, stand screen | `src/world-shell.tsx`, `src/stand-shell.css` |
 | Pinch, wheel and tap on the map | `src/use-camera-zoom-gestures.ts` |
 | Workshop: tab bar, access, shoreline and ambient editors, save bar, sliders | `src/workshop/WorldWorkshop.tsx`, `src/workshop/editors.ts`, `src/workshop/workshop.css` |
 | Saving workshop documents in development | `src/workshop/documents.ts`, `vite.config.ts` |
@@ -59,6 +59,7 @@ The hooks hold what is the world's own:
 | `updateScenery(frame)` | Every frame, once the avatar and the camera have moved. `frame` gives the camera, zoom, pause and arrival target |
 | `createCrowd()`, `createBushes()` | Stand passers-by and rustling shrubs |
 | `freeCamera()` | When the workshop moves the camera itself |
+| `tourStops()` | The places a stand screen's tour visits when no visitor is there to follow |
 | `drawDebug(layer, frame)` | Diagnostics drawn over the walkable zones |
 | `publishState(frame)` | The state React reads, ten times a second |
 
@@ -75,6 +76,12 @@ DOM elements laid over the map (place labels, portal buttons) are positioned in 
 - To leave, pause the controls and call `onTravel(destination, origin)`.
 
 The workshop is development only: load it with `lazy` behind `import.meta.env.DEV`. Build it with `WorldWorkshop` and `commonTabs`, adding the world's own tabs (Valence adds its landmarks and its water). Switch modes with `selectEditors`. Never import workshop components from code that ships in production: `yarn workspace @bible-strong/world build` fails if an editor chunk or a save address reaches the production artifact.
+
+## The stand screen
+
+At `?stand`, a world becomes an exhibition screen: the people visiting it from their phones walk across it. The scene has no avatar (`WorldScene` is then a spectator): a drag, the arrow keys or the wheel move and zoom a free view, and after a minute without anyone touching the screen, a slow tour follows a real visitor, or goes from stop to stop. The room is watched, not joined: the screen sees every visitor and their reactions, is never seen, and its counter shows the real visitors only. Stand passers-by keep the screen alive until real visitors come.
+
+The application renders only `StandShell` over its map: the world's title, the number of explorers right now, and the world's own invitation to scan its QR code. No menu, reaction, object or dialog. Valence keeps its place names, read-only.
 
 ## 5. The registry
 

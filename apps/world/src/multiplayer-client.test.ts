@@ -286,3 +286,22 @@ it('stops reconnecting and asks for a reload when the room reports another proto
   network.update(pose, profile, true, 1_000)
   expect(sockets).toHaveLength(1)
 })
+it('watches the room for a stand screen: everyone shows, nobody joins, the count is the visitors', () => {
+  network.watch()
+  const socket = sockets[0]
+  socket.open()
+  expect(socket.sent).toEqual([{ type: 'watch', version: 2 }])
+  const visitor = { id: 'a', profile, pose, seq: 1 }
+  socket.receive({ type: 'watching', players: [visitor] })
+  expect([...network.remotes.keys()]).toEqual(['a'])
+  expect(network.status).toEqual({ state: 'online', count: 1 })
+  socket.receive({ type: 'player', player: { ...visitor, id: 'b' } })
+  expect(network.status).toEqual({ state: 'online', count: 2 })
+  socket.receive({ type: 'reaction', id: 'b', reaction: 'hello' })
+  expect(network.reactions.get('b')?.reaction).toBe('hello')
+  socket.receive({ type: 'leave', id: 'a' })
+  expect(network.status).toEqual({ state: 'online', count: 1 })
+  // Watching never sends a position.
+  network.watch()
+  expect(socket.sent.filter((m: any) => m.type !== 'ping')).toHaveLength(1)
+})

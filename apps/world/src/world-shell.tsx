@@ -3,12 +3,13 @@
 // explorer's profile, the language and the presence line. Each world keeps its own look and its
 // own dialogs; see docs/create-a-world.md.
 import nipplejs from 'nipplejs'
-import { useEffect, useState, type RefObject } from 'react'
+import { useEffect, useState, type ReactNode, type RefObject } from 'react'
 import { generateExplorerProfile, loadProfile, saveProfile, type AvatarProfile } from './avatar-profile'
 import { loadLanguage, saveLanguage, type Language } from './language'
 import type { PresenceStatus } from './multiplayer-protocol'
 import { ARRIVAL_FADE_MS, MINIMUM_LOADING_MS } from './world-arrival'
 import type { SceneControls, SceneState } from './world-scene'
+import './stand-shell.css'
 
 /**
  * Creates the scene once its documents are loaded, then reveals it: a minimum loading time
@@ -77,7 +78,9 @@ export function useJoystick(
   color: { front: string; back: string }
 ) {
   useEffect(() => {
-    const element = zone.current!
+    // A stand screen has no avatar, hence no joystick.
+    const element = zone.current
+    if (!element) return
     const stick = nipplejs.create({
       zone: element,
       mode: 'static',
@@ -191,6 +194,44 @@ export function WorldPresence({
           {t.reload}
         </button>
       )}
+    </div>
+  )
+}
+
+const standCopy = {
+  fr: (count: number) => `${count} explorateur${count > 1 ? 's' : ''} en ce moment`,
+  en: (count: number) => `${count} explorer${count > 1 ? 's' : ''} right now`,
+}
+
+/**
+ * Everything a stand screen shows over its world, in every world (`?stand`): the world's title,
+ * how many explorers are in it right now, and the world's invitation to scan its QR code. There
+ * is no avatar, menu, reaction or object: the screen shows the world and the people visiting it
+ * from their phones. The map stays free to drag and zoom underneath.
+ */
+export function StandShell({
+  language,
+  title,
+  status,
+  children,
+}: {
+  language: Language
+  title: ReactNode
+  status?: PresenceStatus
+  /** The world's own invitation to scan, in its own look. */
+  children: ReactNode
+}) {
+  const count = status?.state === 'online' ? status.count : 0
+  return (
+    <div className="stand-shell">
+      <div className="stand-title">{title}</div>
+      {count > 0 && (
+        <p className="stand-count" role="status" aria-live="polite">
+          <span className="presence-dot" aria-hidden="true" />
+          {standCopy[language](count)}
+        </p>
+      )}
+      {children}
     </div>
   )
 }
