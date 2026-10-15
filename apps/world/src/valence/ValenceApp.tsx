@@ -1,22 +1,20 @@
-import nipplejs from 'nipplejs'
 import { lazy, Suspense, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { createAmbientEditor } from '../ambient-zones'
 import { AvatarEditor, profileCopy } from '../AvatarEditor'
-import { generateExplorerProfile, loadProfile, saveProfile } from '../avatar-profile'
 import { clampCameraZoom } from '../camera-zoom'
 import { ControlIcon } from '../ControlIcon'
 import { GuestbookDialog } from '../GuestbookDialog'
 import { haptic } from '../haptics'
-import { loadLanguage, saveLanguage, type Language } from '../language'
+import type { Language } from '../language'
 import { Modal } from '../Modal'
 import { parseNavigation } from '../navigation-document'
 import { ReactionPicker } from '../ReactionPicker'
 import { createShoreEditor } from '../shorelines'
 import { useCameraZoomGestures } from '../use-camera-zoom-gestures'
-import { ARRIVAL_FADE_MS, MINIMUM_LOADING_MS } from '../world-arrival'
 import type { UniverseProps } from '../universes'
 import { selectEditors } from '../workshop/editors'
 import type { NavigationDocument } from '../world'
+import { useExplorerProfile, useJoystick, useWorldLanguage, useWorldScene, WorldPresence } from '../world-shell'
 import { tileNavigation } from './navigation-tiles'
 import { objectImage, ObjectCard, ShareCard } from './ObjectCard'
 import { StationScene } from './StationScene'
@@ -161,13 +159,10 @@ function Intro({ language, onEnter }: { language: Language; onEnter: () => void 
 export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps) {
   const stand = useMemo(() => new URLSearchParams(location.search).has('stand'), [])
   const debug = useMemo(() => import.meta.env.DEV && new URLSearchParams(location.search).has('debug'), [])
-  const [language, setLanguage] = useState<Language>(loadLanguage)
+  const [language, setLanguage] = useWorldLanguage()
   const t = valenceCopy[language]
-  const [savedProfile] = useState(loadProfile)
-  const [profile, setProfile] = useState(() => savedProfile ?? generateExplorerProfile())
-  const [onboarding, setOnboarding] = useState(!savedProfile)
-  const [profileOpen, setProfileOpen] = useState(!savedProfile)
-  const [profileStorageError, setProfileStorageError] = useState(false)
+  const explorer = useExplorerProfile()
+  const { profile, open: profileOpen, setOpen: setProfileOpen } = explorer
   const [workshopMode, setWorkshopMode] = useState<WorkshopMode | null>(null)
   const [effectsModel] = useState<EffectsModel>(() => ({ effects: null!, revision: 0 }))
   const [shoreEditor] = useState(() =>
@@ -189,14 +184,6 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
   const [progress, setProgress] = useState<ValenceProgress>(loadProgress)
   const visited = useMemo(() => new Set(progress.visited), [progress.visited])
   const found = useMemo(() => new Set(progress.found), [progress.found])
-  /** The editable navigation document; `controls.navigation` holds its tiled runtime form. */
-  const [navigation, setNavigation] = useState<NavigationDocument | null>(null)
-  const [failed, setFailed] = useState(false)
-  const [sceneLoaded, setSceneLoaded] = useState(false)
-  // A traveller arrives under the journey's veil: no loading screen to wait for.
-  const [minimumElapsed, setMinimumElapsed] = useState(Boolean(arrival))
-  const [revealing, setRevealing] = useState(false)
-  const [ready, setReady] = useState(false)
   const [introOpen, setIntroOpen] = useState(() => !loadProgress().introSeen || stand)
   const [opened, setOpened] = useState<StationId | null>(null)
   const [objectOpen, setObjectOpen] = useState<PioneerObjectId | null>(null)
@@ -204,7 +191,6 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
   const [guestbookOpen, setGuestbookOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [overview, setOverview] = useState(false)
-  const [state, setState] = useState<ValenceState>({ ...VALENCE_SPAWN, moving: false, fps: 0 })
   const host = useRef<HTMLDivElement>(null)
   const joystick = useRef<HTMLDivElement>(null)
   const stationTags = useRef<Partial<Record<StationId, HTMLElement | null>>>({})
@@ -231,6 +217,17 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
     stationTags: stationTags.current,
   })
   if (import.meta.env.DEV) (window as unknown as { valence?: ValenceControls }).valence = controls.current
+  /** The editable navigation document; `controls.navigation` holds its tiled runtime form. */
+  const [navigation, setNavigation] = useState<NavigationDocument | null>(null)
+  const { state, ready, revealing, failed, fail } = useWorldScene({
+    host,
+    controls,
+    start: createValence,
+    documentsLoaded: navigation !== null,
+    arrival: Boolean(arrival),
+    onReady,
+    initialState: (): ValenceState => ({ ...VALENCE_SPAWN, moving: false, fps: 0 }),
+  })
   const near = ready ? nearestStation(state) : null
   const atTrain = ready && nearPortal(state)
   const dialogOpen = Boolean(
@@ -238,14 +235,13 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
   )
 
   useCameraZoomGestures(host, controls, setOverview)
+  useJoystick(joystick, controls, { front: '#f5e6c4', back: '#3b2414' })
 
   useEffect(() => {
     saveProgress(progress)
   }, [progress])
 
   useEffect(() => {
-    document.documentElement.lang = language
-    saveLanguage(language)
     document.title =
       language === 'fr'
         ? 'Valence 1876 — La Bible qu’ils lisaient, la Bible que tu étudies'
@@ -267,7 +263,7 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
         controls.current.navigation = tileNavigation(documents.navigation)
         setNavigation(documents.navigation)
       })
-      .catch(() => !cancelled && setFailed(true))
+      .catch(() => !cancelled && fail())
     return () => {
       cancelled = true
     }
@@ -277,34 +273,6 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
   useEffect(() => {
     if (navigation) controls.current.navigation = tileNavigation(navigation)
   }, [navigation])
-  const documentsLoaded = navigation !== null
-  useEffect(() => {
-    if (!documentsLoaded) return
-    const game = createValence(
-      host.current!,
-      controls.current,
-      setState,
-      () => setSceneLoaded(true),
-      () => setFailed(true)
-    )
-    return () => game.destroy(true)
-  }, [documentsLoaded])
-
-  useEffect(() => {
-    const timer = setTimeout(() => setMinimumElapsed(true), MINIMUM_LOADING_MS)
-    return () => clearTimeout(timer)
-  }, [])
-  useEffect(() => {
-    if (!sceneLoaded || !minimumElapsed || failed) return
-    controls.current.arrivalStartedAt = performance.now()
-    setRevealing(true)
-    const timer = setTimeout(() => setReady(true), ARRIVAL_FADE_MS)
-    return () => clearTimeout(timer)
-  }, [sceneLoaded, minimumElapsed, failed])
-  useEffect(() => {
-    if (revealing || failed) onReady()
-  }, [revealing, failed, onReady])
-
   function switchWorkshop(mode: WorkshopMode | null) {
     if (workshop) {
       workshop.mode = mode
@@ -321,33 +289,6 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
     controls.current.direction = { x: 0, y: 0 }
     onTravel('archipelago', { x: box.left + box.width / 2, y: box.top + box.height / 2 })
   }
-
-  useEffect(() => {
-    const stick = nipplejs.create({
-      zone: joystick.current!,
-      mode: 'static',
-      position: { left: '50%', top: '50%' },
-      size: 112,
-      color: { front: '#f5e6c4', back: '#3b2414' },
-      restOpacity: 0.85,
-      fadeTime: 100,
-    })
-    stick.on('start', () => {
-      controls.current.cancelWalk = true
-    })
-    stick.on('move', ({ data }) => {
-      controls.current.direction = { x: data.vector.x, y: -data.vector.y }
-    })
-    const stop = () => {
-      controls.current.direction = { x: 0, y: 0 }
-    }
-    stick.on('end', stop)
-    window.addEventListener('blur', stop)
-    return () => {
-      stick.destroy()
-      window.removeEventListener('blur', stop)
-    }
-  }, [])
 
   useEffect(() => {
     const c = controls.current
@@ -547,14 +488,13 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
         {ready && !workshopMode && (
           <div className="v-social">
             {profile.name && (
-              <p className="v-presence" data-state={state.multiplayer?.state ?? 'connecting'} role="status" aria-live="polite">
-                <span className="v-presence-dot" aria-hidden="true" />
-                {state.multiplayer?.state === 'online'
-                  ? `${state.multiplayer.count} ${t.online}`
-                  : state.multiplayer?.state === 'offline'
-                    ? t.offline
-                    : t.connecting}
-              </p>
+              <WorldPresence
+                className="v-presence"
+                status={state.multiplayer}
+                language={language}
+                labels={t}
+                onRetry={() => controls.current.retryMultiplayer?.()}
+              />
             )}
             {!dialogOpen && (
               <ReactionPicker
@@ -618,20 +558,13 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
         <AvatarEditor
           eyebrow="BIBLE STRONG · VALENCE 1876"
           profile={profile}
-          onboarding={onboarding}
+          onboarding={explorer.onboarding}
           language={language}
-          onClose={() => {
-            if (!onboarding) setProfileOpen(false)
-          }}
-          onSave={next => {
-            setProfileStorageError(!saveProfile(next))
-            setProfile(next)
-            setOnboarding(false)
-            setProfileOpen(false)
-          }}
+          onClose={explorer.close}
+          onSave={explorer.save}
         />
       )}
-      {profileStorageError && <p className="v-toast">{profileCopy[language].storage}</p>}
+      {explorer.storageError && <p className="v-toast">{profileCopy[language].storage}</p>}
 
       {ready && introOpen && !profileOpen && (
         <Intro

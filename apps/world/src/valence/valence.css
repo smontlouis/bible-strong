@@ -1075,15 +1075,24 @@
   color: var(--v-ink);
   font: 600 12px / 1.2 var(--bs-font);
 }
-.v-presence-dot {
+.v-presence .presence-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: #b9a07a;
 }
-.v-presence[data-state='online'] .v-presence-dot {
+.v-presence[data-state='online'] .presence-dot {
   background: #5d8a3a;
   box-shadow: 0 0 0 3px rgba(93, 138, 58, 0.2);
+}
+.v-presence button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }
 .v-bottom .v-keys {
   margin-right: auto;

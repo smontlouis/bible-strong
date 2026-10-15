@@ -16,9 +16,7 @@ import { editorCopy, type EditorMode } from './WorldEditor'
 import { createShoreEditor } from './shorelines'
 import { selectEditors } from './workshop/editors'
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import nipplejs from 'nipplejs'
 import { clampCameraZoom } from './camera-zoom'
-import { ARRIVAL_FADE_MS, MINIMUM_LOADING_MS } from './world-arrival'
 import { ControlIcon } from './ControlIcon'
 import { Modal } from './Modal'
 import { DiscoveryBoundary } from './DiscoveryBoundary'
@@ -46,9 +44,9 @@ const CommentariesDiscovery = lazy(() =>
   import('./CommentariesDiscovery').then(module => ({ default: module.CommentariesDiscovery }))
 )
 import { AvatarEditor, profileCopy } from './AvatarEditor'
-import { AVATAR_COLORS, generateExplorerProfile, loadProfile, saveProfile } from './avatar-profile'
+import { AVATAR_COLORS } from './avatar-profile'
 import { loadVisitedPlaces, saveVisitedPlaces } from './visited-places'
-import { loadLanguage, saveLanguage } from './language'
+import { useExplorerProfile, useJoystick, useWorldLanguage, useWorldScene, WorldPresence } from './world-shell'
 import type { UniverseProps } from './universes'
 import { WORLD_PORTAL } from './world-portal'
 const ArchipelagoWorkshop = import.meta.env.DEV ? lazy(() => import('./ArchipelagoWorkshop')) : () => null
@@ -59,10 +57,6 @@ const copy = {
     online: 'dans le monde',
     connecting: 'Connexion au monde…',
     offline: 'Reconnexion… Tu peux continuer à explorer.',
-    full: 'Le monde est complet pour le moment.',
-    outdated: 'Une nouvelle version du monde est disponible.',
-    reload: 'Recharger',
-    retry: 'Réessayer',
     title: 'Un monde à explorer',
     brand: 'Bible Strong',
     hint: 'Déplace ton avatar avec le joystick.',
@@ -93,10 +87,6 @@ const copy = {
     online: 'in the world',
     connecting: 'Connecting to the world…',
     offline: 'Reconnecting… You can keep exploring.',
-    full: 'The world is full at the moment.',
-    outdated: 'A new version of the world is available.',
-    reload: 'Reload',
-    retry: 'Try again',
     title: 'A world to explore',
     brand: 'Bible Strong',
     hint: 'Move your avatar with the joystick.',
@@ -193,13 +183,10 @@ function CameraControls({
 /** The archipelago, the default world: six resource islands around the Bible plaza. */
 export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseProps) {
   const [stand] = useState(() => new URLSearchParams(location.search).has('stand'))
-  const [savedProfile] = useState(loadProfile)
-  const [profile, setProfile] = useState(() => savedProfile ?? generateExplorerProfile())
-  const [onboarding, setOnboarding] = useState(!savedProfile)
-  const [profileOpen, setProfileOpen] = useState(!savedProfile)
+  const explorer = useExplorerProfile()
+  const { profile, open: profileOpen, setOpen: setProfileOpen } = explorer
   const [menuOpen, setMenuOpen] = useState(false)
   const [travelError, setTravelError] = useState(false)
-  const [profileStorageError, setProfileStorageError] = useState(false)
   const [initial, setInitial] = useState(() => ({
     document: structuredClone(defaultNavigation),
     error: false,
@@ -233,29 +220,24 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
     reset: 0,
     portalArrival: arrival ? { ...WORLD_PORTAL.arrival } : undefined,
   })
-  const [state, setState] = useState<WorldState>({
-    ...SPAWN,
-    cameraZoom: 1,
-    station: null,
-    behind: [],
-    moving: false,
-    fps: 0,
+  const { state, ready, revealing, failed } = useWorldScene({
+    host,
+    controls,
+    start: createWorld,
+    documentsLoaded: navigationLoaded,
+    arrival: Boolean(arrival),
+    onReady,
+    initialState: (): WorldState => ({ ...SPAWN, cameraZoom: 1, station: null, behind: [], moving: false, fps: 0 }),
   })
   const [loadingColor] = useState(
     () => AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)]
   )
-  // A traveller arrives under the journey's veil: no loading screen to wait for.
-  const [minimumLoadingElapsed, setMinimumLoadingElapsed] = useState(Boolean(arrival))
-  const [sceneLoaded, setSceneLoaded] = useState(false)
-  const [ready, setReady] = useState(false)
-  const [revealing, setRevealing] = useState(false)
-  const [failed, setFailed] = useState(false)
   const [overview, setOverview] = useState(false)
   const [debug, setDebug] = useState(
     () => import.meta.env.DEV && new URLSearchParams(location.search).has('debug')
   )
   const [diagnosticFilters, setDiagnosticFilters] = useState(() => makeDiagnosticFilters())
-  const [language, setLanguage] = useState<Language>(loadLanguage)
+  const [language, setLanguage] = useWorldLanguage()
   const [storyOpen, setStoryOpen] = useState(false)
   const [guestbookOpen, setGuestbookOpen] = useState(false)
   const [gamesOpen, setGamesOpen] = useState(false)
@@ -282,6 +264,7 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
     language === 'fr' ? station.name : station[language]
 
   useCameraZoomGestures(host, controls, setOverview)
+  useJoystick(joystick, controls, { front: '#fff6df', back: '#163f51' })
 
   useEffect(() => {
     let cancelled = false
@@ -296,71 +279,6 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
     )
     return () => {
       cancelled = true
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!navigationLoaded) return
-    const game = createWorld(
-      host.current!,
-      controls.current,
-      setState,
-      () => setSceneLoaded(true),
-      () => setFailed(true)
-    )
-    return () => game.destroy(true)
-  }, [navigationLoaded])
-
-  useEffect(() => {
-    const timer = setTimeout(() => setMinimumLoadingElapsed(true), MINIMUM_LOADING_MS)
-    return () => clearTimeout(timer)
-  }, [])
-
-  useEffect(() => {
-    if (!sceneLoaded || !minimumLoadingElapsed || failed) return
-    controls.current.arrivalStartedAt = performance.now()
-    setRevealing(true)
-  }, [sceneLoaded, minimumLoadingElapsed, failed])
-
-  useEffect(() => {
-    if (!revealing || failed) return
-    const finish = setTimeout(() => setReady(true), ARRIVAL_FADE_MS)
-    return () => clearTimeout(finish)
-  }, [revealing, failed])
-  useEffect(() => {
-    if (revealing || failed) onReady()
-  }, [revealing, failed, onReady])
-
-  useEffect(() => {
-    const stick = nipplejs.create({
-      zone: joystick.current!,
-      mode: 'static',
-      position: { left: '50%', top: '50%' },
-      size: 112,
-      color: { front: '#fff6df', back: '#163f51' },
-      restOpacity: 0.85,
-      fadeTime: 100,
-    })
-    stick.on('start', () => {
-      controls.current.cancelWalk = true
-    })
-    stick.on('move', ({ data }) => {
-      controls.current.direction = { x: data.vector.x, y: -data.vector.y }
-    })
-    const stop = () => {
-      controls.current.direction = { x: 0, y: 0 }
-    }
-    stick.on('end', stop)
-    window.addEventListener('blur', stop)
-    document.addEventListener('visibilitychange', stop)
-    joystick.current!.addEventListener('pointercancel', stop)
-    const zone = joystick.current!
-    return () => {
-      stick.destroy()
-      window.removeEventListener('blur', stop)
-      document.removeEventListener('visibilitychange', stop)
-      zone.removeEventListener('pointercancel', stop)
-      stop()
     }
   }, [])
 
@@ -408,8 +326,6 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
     navigation,
   ])
   useEffect(() => {
-    document.documentElement.lang = language
-    saveLanguage(language)
     const title =
       language === 'fr'
         ? 'Bible Strong World — Explore la Bible autrement'
@@ -644,25 +560,13 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
         <div className="joystick-zone" ref={joystick} role="group" aria-label={t.joystick} />
         <div className="companion-controls">
           {ready && profile.name && !editorMode && (
-            <div
+            <WorldPresence
               className="world-presence"
-              data-state={state.multiplayer?.state ?? 'connecting'}
-              role="status"
-              aria-live="polite"
-            >
-              <span className="presence-dot" aria-hidden="true" />
-              <span>
-                {state.multiplayer?.state === 'online'
-                  ? `${state.multiplayer.count} ${t.online}`
-                  : t[state.multiplayer?.state ?? 'connecting']}
-              </span>
-              {state.multiplayer?.state === 'full' && (
-                <button onClick={() => controls.current.retryMultiplayer?.()}>{t.retry}</button>
-              )}
-              {state.multiplayer?.state === 'outdated' && (
-                <button onClick={() => location.reload()}>{t.reload}</button>
-              )}
-            </div>
+              status={state.multiplayer}
+              language={language}
+              labels={t}
+              onRetry={() => controls.current.retryMultiplayer?.()}
+            />
           )}
         </div>
       </aside>
@@ -807,7 +711,7 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
           }
           status={
             <>
-              {profileStorageError && (
+              {explorer.storageError && (
                 <span className="profile-storage-error" role="status">
                   {profileCopy[language].storage}
                 </span>
@@ -819,17 +723,10 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
       {ready && profileOpen && (
         <AvatarEditor
           profile={profile}
-          onboarding={onboarding}
+          onboarding={explorer.onboarding}
           language={language}
-          onClose={() => {
-            if (!onboarding) setProfileOpen(false)
-          }}
-          onSave={next => {
-            setProfileStorageError(!saveProfile(next))
-            setProfile(next)
-            setOnboarding(false)
-            setProfileOpen(false)
-          }}
+          onClose={explorer.close}
+          onSave={explorer.save}
         />
       )}
       {storyOpen && (
