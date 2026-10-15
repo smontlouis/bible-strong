@@ -1,5 +1,6 @@
 import mobileResourceCatalog from '@bible-strong/resource-catalog/catalog'
 import { resourceRequestIdFrom } from '../http/requestId'
+import { RETIRED_OFFLINE_ARTIFACTS, type RetiredOfflineArtifact } from './retiredOfflineArtifacts'
 
 export const R2_ARTIFACT_ROUTE_PREFIX = '/v1/offline-artifacts/'
 /** Public AES copies of Offline copies (ADR-0065). */
@@ -49,36 +50,60 @@ export type ArtifactKeyResolver = (url: URL) => string | undefined
 
 const SHA256_PATTERN = /^[a-f0-9]{64}$/
 
-/** Maps a request to its R2 key, accepting only files the catalog declares. */
-export const createArtifactKeyResolver = (catalog: ArtifactCatalog): ArtifactKeyResolver => {
+const addSha256 = (shas: Map<string, Set<string>>, file: string, sha256: string): void => {
+  shas.set(file, (shas.get(file) ?? new Set()).add(sha256))
+}
+
+/**
+ * Maps a request to its R2 key, accepting only files the catalog declares, plus retired ones for
+ * the exact SHA they were published with.
+ */
+export const createArtifactKeyResolver = (
+  catalog: ArtifactCatalog,
+  retiredArtifacts: readonly RetiredOfflineArtifact[] = []
+): ArtifactKeyResolver => {
   const plainArtifacts = new Map(
     Object.values(catalog.resources).map(resource => [resource.file, resource.archiveSha256])
   )
-  const encryptedArchives = new Map(
-    Object.values(catalog.resources).flatMap(resource =>
-      resource.encryptedArchive
-        ? [[resource.encryptedArchive.file, resource.encryptedArchive.sha256] as const]
-        : []
-    )
-  )
+  const encryptedArchives = new Map<string, Set<string>>()
+  for (const resource of Object.values(catalog.resources)) {
+    if (resource.encryptedArchive) {
+      addSha256(encryptedArchives, resource.encryptedArchive.file, resource.encryptedArchive.sha256)
+    }
+  }
+  const retiredPlainArtifacts = new Map<string, Set<string>>()
+  for (const artifact of retiredArtifacts) {
+    addSha256(retiredPlainArtifacts, artifact.file, artifact.archiveSha256)
+    if (artifact.encryptedArchive) {
+      addSha256(encryptedArchives, artifact.encryptedArchive.file, artifact.encryptedArchive.sha256)
+    }
+  }
   return url => {
     const requestedSha256 = url.searchParams.get('sha256')
     if (url.pathname.startsWith(ENCRYPTED_ARCHIVE_ROUTE_PREFIX)) {
-      // Encrypted copies exist only under their immutable key, for the published SHA.
+      // Encrypted copies exist only under their immutable key, for a published SHA.
       const file = url.pathname.slice(ENCRYPTED_ARCHIVE_ROUTE_PREFIX.length)
-      const publishedSha256 = encryptedArchives.get(file)
-      if (!publishedSha256 || requestedSha256 !== publishedSha256) return undefined
-      return `revisions/${publishedSha256}/${file}`
+      if (!requestedSha256 || !encryptedArchives.get(file)?.has(requestedSha256)) return undefined
+      return `revisions/${requestedSha256}/${file}`
     }
     const stableKey = url.pathname.slice(R2_ARTIFACT_ROUTE_PREFIX.length)
-    if (!plainArtifacts.has(stableKey)) return undefined
+    if (!plainArtifacts.has(stableKey)) {
+      // A retired file is served only from the immutable key of a SHA it was published with.
+      const retiredSha256s = retiredPlainArtifacts.get(stableKey)
+      if (!retiredSha256s) return undefined
+      const sha256 = requestedSha256 ?? [...retiredSha256s].at(-1)
+      return sha256 && retiredSha256s.has(sha256) ? `revisions/${sha256}/${stableKey}` : undefined
+    }
     if (!requestedSha256) return stableKey
     if (!SHA256_PATTERN.test(requestedSha256)) return undefined
     return `revisions/${requestedSha256}/${stableKey}`
   }
 }
 
-const resolveBundledArtifactKey = createArtifactKeyResolver(mobileResourceCatalog)
+const resolveBundledArtifactKey = createArtifactKeyResolver(
+  mobileResourceCatalog,
+  RETIRED_OFFLINE_ARTIFACTS
+)
 
 const mobileResourceCatalogJson = JSON.stringify(mobileResourceCatalog)
 
