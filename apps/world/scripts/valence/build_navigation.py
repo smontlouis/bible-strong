@@ -430,7 +430,17 @@ def main():
     else:
         print('layout.json kept (edited in the workshop); pass --reset-layout to rebuild it')
 
-    # Occluders: only objects that can stand in front of a walkable point behind them.
+    # Occluders: only objects that can stand in front of a walkable point behind them. Once the
+    # navigation is edited in the workshop, its walkable zones decide, not the detected ground.
+    if not RESET_NAVIGATION:
+        edited = json.load(open(navigation_file))
+        reachable = np.zeros((H * S, W * S), np.uint8)
+        for zone in edited['zones']:
+            if zone['kind'] == 'allowed':
+                reachable = poly_mask(zone['points'], 1, reachable)
+        for zone in edited['zones']:
+            if zone['kind'] == 'blocked':
+                reachable = poly_mask(zone['points'], 0, reachable)
     out_dir = os.path.join(ROOT, 'public', 'valence-1876', 'occlusion')
     shutil.rmtree(out_dir, ignore_errors=True)
     os.makedirs(out_dir)
@@ -484,7 +494,7 @@ def main():
         ys, xs = np.nonzero(mask)
         x0, y0, x1, y1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
         step = 48 * S
-        strips = [(sx0, min(x1, sx0 + step)) for sx0 in range(x0, x1, step)] if (x1 - x0) > 90 * S else [(x0, x1)]
+        strips = [(sx0, min(x1, sx0 + step)) for sx0 in range(x0, x1, step)] if (x1 - x0) > 90 * S and not item.get('whole') else [(x0, x1)]
         for index, (sx0, sx1) in enumerate(strips):
             local = mask[y0:y1, sx0:sx1]
             rows = np.nonzero(local.any(axis=1))[0]
