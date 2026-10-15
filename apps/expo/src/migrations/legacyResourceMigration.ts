@@ -26,6 +26,11 @@ export interface LegacyReplacementResource {
 
 export interface LegacyResourceMigrationDependencies {
   inspectEvidence(): Promise<LegacyResourceEvidence>
+  /**
+   * Loads the live catalog before replacements are planned or installed: the catalog compiled in
+   * the binary may name archives that are no longer published (ADR-0079).
+   */
+  loadReplacementCatalog(stage: 'plan' | 'install'): Promise<void>
   resolveReplacementPlan(request: OfflineCopyIdentity): Promise<LegacyReplacementResource[]>
   isReplacementReady(identity: OfflineCopyIdentity): Promise<boolean>
   installReplacement(
@@ -168,6 +173,7 @@ export const createLegacyResourceMigration = (
     const legacyIdentities = orderLegacyIdentities(evidence.legacyIdentities)
     if (legacyIdentities.length === 0) return null
 
+    await dependencies.loadReplacementCatalog('plan')
     const replacements = new Map<string, LegacyReplacementResource>()
     for (const legacyIdentity of legacyIdentities) {
       const request = getReplacementRequest(legacyIdentity)
@@ -226,6 +232,7 @@ export const createLegacyResourceMigration = (
 
     const identity = parseIdentity(step.payload?.identity)
     if (await dependencies.isReplacementReady(identity)) return
+    await dependencies.loadReplacementCatalog('install')
     await dependencies.installReplacement(identity, reportProgress)
     if (!(await dependencies.isReplacementReady(identity))) {
       throw new MigrationExecutionError('LEGACY_REPLACEMENT_NOT_COMPATIBLE')
