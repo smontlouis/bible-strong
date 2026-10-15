@@ -1808,25 +1808,40 @@
   background: rgba(139, 94, 48, 0.16);
 }
 
-/* The stand screen's presentation of a place (StandPresentation): the dialogue window's
-   characters and lines, smaller, over the map, bottom left. */
+/* The stand screen's presentation of a place (StandPresentation): a small stage in the same
+   paper frame as the invitation to scan, its characters standing over their lines. */
 .v-presenter {
   position: relative;
   width: min(560px, 38vw);
-  height: min(430px, 48vh);
-  animation: v-presenter-in 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  height: min(450px, 50vh);
+  overflow: hidden;
+  border: 2px solid var(--v-ink);
+  border-radius: var(--v-radius);
+  background: var(--v-sheet);
+  box-shadow: var(--v-age), var(--v-shadow-sheet);
+  animation: v-presenter-in 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* The stage, like an old photographic plate: warm light behind the characters. */
+.v-presenter::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(46, 28, 15, 0.7);
+  background: radial-gradient(120% 90% at 50% 22%, #8a6440 0%, #4e321c 55%, #2a1a0d 100%);
+  box-shadow: inset 0 0 40px rgba(20, 10, 2, 0.6);
 }
 @keyframes v-presenter-in {
   from {
     opacity: 0;
+    scale: 0.94;
     translate: 0 24px;
   }
 }
 .v-presenter-top {
   position: absolute;
   z-index: 3;
-  top: 0;
-  left: 0;
+  top: 20px;
+  left: 20px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1842,25 +1857,25 @@
   gap: 1px;
 }
 .v-presenter .v-bust {
-  --bust-height: 72%;
-  bottom: 104px;
+  --bust-height: 68%;
+  bottom: 112px;
 }
 .v-presenter .v-bust[data-side='left'] {
-  left: 8px;
+  left: 22px;
 }
 .v-presenter .v-bust[data-side='right'] {
-  right: 8px;
+  right: 22px;
 }
 .v-presenter[data-narrating='true'] .v-bust {
-  bottom: 0;
+  bottom: 10px;
   filter: brightness(0.45);
   transform: translateY(24px) scale(0.95);
 }
 .v-presenter .v-box {
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 28px 24px 20px;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  padding: 26px 22px 18px;
 }
 .v-presenter .v-nameplate strong {
   font-size: 16px;
@@ -1871,7 +1886,7 @@
   line-height: 1.5;
 }
 .v-presenter .v-carton {
-  width: 100%;
+  width: calc(100% - 40px);
   padding: 22px 26px 24px;
 }
 .v-presenter .v-carton-text {

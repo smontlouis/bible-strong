@@ -85,6 +85,9 @@
   transform-origin: center;
   transition: stroke-dashoffset 250ms linear;
 }
+.stand-restart {
+  padding: 6px;
+}
 .stand-tour[aria-pressed='true'] {
   background: var(--stand-ink);
   color: var(--stand-on-ink);

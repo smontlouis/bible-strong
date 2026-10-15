@@ -205,12 +205,14 @@ const standCopy = {
     play: 'Visite automatique',
     pause: 'Mettre la visite en pause',
     resume: 'La visite reprend dans un instant',
+    restart: 'Recommencer le parcours',
   },
   en: {
     count: (count: number) => `${count} explorer${count > 1 ? 's' : ''} right now`,
     play: 'Automatic tour',
     pause: 'Pause the tour',
     resume: 'The tour resumes in a moment',
+    restart: 'Start the tour again',
   },
 }
 
@@ -299,7 +301,16 @@ export function useStandTour(controls: RefObject<SceneControls>, stops: TourStop
     /** Starts the presentation of a place again when its leg restarts. */
     legKey: `${leg.index}-${leg.startedAt}`,
     done: advance,
-    /** Pauses a playing tour; plays a paused or waiting one at once. */
+    /** Back to the first place, playing. */
+    restart: () => {
+      setPaused(false)
+      setResumeAt(null)
+      seenTouch.current = controls.current.touchedAt ?? 0
+      lastVisitorAfter.current = -1
+      setArrived(false)
+      setLeg({ index: 0, startedAt: performance.now() })
+    },
+    /** Pauses a playing tour; plays a paused or waiting one at once: it goes on where it was. */
     toggle: () => {
       setPaused(playing)
       setResumeAt(null)
@@ -359,6 +370,12 @@ export function StandShell({
             {tour.playing ? <path d="M15 13h3.5v14H15zm6.5 0H25v14h-3.5z" /> : <path d="M16 13v14l11-7z" />}
           </svg>
           <span>{t.play}</span>
+        </button>
+        <button type="button" className="stand-tour stand-restart" title={t.restart} aria-label={t.restart} onClick={tour.restart}>
+          <svg viewBox="0 0 40 40" aria-hidden="true">
+            <path d="M13.5 16.5A8 8 0 1 1 12 21" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+            <path d="M10.5 11.5v6.5h6.5" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
       </div>
       {presentation && <div className="stand-presentation">{presentation}</div>}
