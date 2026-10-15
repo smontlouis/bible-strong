@@ -1,11 +1,10 @@
 import nipplejs from 'nipplejs'
-import { lazy, Suspense, useCallback, useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { createAmbientEditor } from '../ambient-zones'
 import { AvatarEditor, profileCopy } from '../AvatarEditor'
 import { generateExplorerProfile, loadProfile, saveProfile } from '../avatar-profile'
 import { clampCameraZoom } from '../camera-zoom'
 import { ControlIcon } from '../ControlIcon'
-import type { Controls } from '../game'
 import { GuestbookDialog } from '../GuestbookDialog'
 import { haptic } from '../haptics'
 import { loadLanguage, saveLanguage, type Language } from '../language'
@@ -238,7 +237,7 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
     opened || objectOpen || shareOpen || guestbookOpen || menuOpen || introOpen || profileOpen || workshopMode
   )
 
-  useCameraZoomGestures(host, controls as unknown as RefObject<Controls>, setOverview)
+  useCameraZoomGestures(host, controls, setOverview)
 
   useEffect(() => {
     saveProgress(progress)

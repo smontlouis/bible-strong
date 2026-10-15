@@ -1,12 +1,12 @@
 import { useEffect, type Dispatch, type RefObject, type SetStateAction } from 'react'
 import { zoomFromPinch, zoomFromWheel } from './camera-zoom'
-import type { Controls } from './game'
 import { PointerTap } from './pointer-tap'
 import { isPointerSteering } from './pointer-steering'
+import type { SceneControls } from './world-scene'
 
 export function useCameraZoomGestures(
   zoneRef: RefObject<HTMLElement | null>,
-  controlsRef: RefObject<Controls>,
+  controlsRef: RefObject<SceneControls>,
   setOverview: Dispatch<SetStateAction<boolean>>
 ) {
   useEffect(() => {
