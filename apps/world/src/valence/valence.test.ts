@@ -157,9 +157,11 @@ describe('Valence 1876 map', () => {
   })
 
   it('lets shrubs and low hedges rustle, but not tall trees or cypresses', () => {
-    const shrubs = new Set(valenceOccluders.filter(isValenceShrub).map(o => o.id))
-    for (const id of ['tree-17', 'tree-19', 'tree-40', 'tree-44', 'tree-49']) expect(shrubs.has(id), id).toBe(true)
-    for (const id of ['tree-01', 'tree-28', 'tree-38', 'tree-39', 'stall-01', 'lamp-01']) expect(shrubs.has(id), id).toBe(false)
+    expect(isValenceShrub({ id: 'tree-01', width: 30, height: 40 })).toBe(true)
+    expect(isValenceShrub({ id: 'tree-02', width: 80, height: 60 })).toBe(true)
+    expect(isValenceShrub({ id: 'tree-03', width: 40, height: 90 })).toBe(false)
+    expect(isValenceShrub({ id: 'lamp-01', width: 20, height: 30 })).toBe(false)
+    expect(valenceOccluders.filter(isValenceShrub).length).toBeGreaterThan(10)
   })
 
   it('ships source-aligned occluders inside the map', async () => {

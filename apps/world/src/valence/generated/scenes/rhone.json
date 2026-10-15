@@ -3,25 +3,25 @@
   "mode": "sprite",
   "frameRate": 12,
   "frameCount": 120,
-  "x": 229.38,
-  "y": 712.5,
-  "width": 109.69,
-  "height": 116.95,
-  "depth": 900,
+  "x": 227.5,
+  "y": 712.73,
+  "width": 109.22,
+  "height": 110.39,
+  "depth": 816,
   "pages": [
     {
       "key": "page-0",
       "firstFrame": 0,
-      "frameCount": 90,
+      "frameCount": 100,
       "width": 2010,
-      "height": 1935
+      "height": 2030
     },
     {
       "key": "page-1",
-      "firstFrame": 90,
-      "frameCount": 30,
+      "firstFrame": 100,
+      "frameCount": 20,
       "width": 2010,
-      "height": 645
+      "height": 406
     }
   ]
 }

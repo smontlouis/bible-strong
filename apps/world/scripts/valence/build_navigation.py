@@ -3,7 +3,9 @@
 Inputs (ignored workbench, art-workbench/experiments/valence-1876/):
 - map/x2.png: the HD map at two pixels per map unit.
 - sam/ground/output-*.png: SAM 3 "paved ground" masks at x2.
-- objects/runs/*/masks.json: SAM 3 object masks per crop and prompt.
+- objects/runs/*/masks.json: SAM 3 object masks per crop and prompt (first pass, large crops).
+- objects/runs-dense/*/masks.json: the dense pass (scripts/valence/pipeline/detect-dense.py), 45
+  small crops so that groves are not cut at SAM's 32 masks; its ground prompts widen the floor.
 - scripts/valence/navigation-edits.json (committed): reviewed manual additions and blocks.
 
 Outputs:
@@ -38,10 +40,14 @@ FAMILY = {
     'tree': 'tree', 'cypress-tree': 'tree', 'street-lamp': 'lamp', 'lamp-post': 'lamp',
     'building': 'building', 'market-stall': 'stall', 'statue': 'statue', 'bandstand': 'bandstand',
     'steam-locomotive': 'locomotive', 'wooden-crate': 'crate', 'cannon': 'cannon', 'bench': 'bench',
-    'stone-wall': 'wall', 'staircase': 'stairs',
+    'stone-wall': 'wall', 'staircase': 'stairs', 'bush': 'bush',
 }
+# Dense-pass prompts that describe ground a visitor can stand on.
+GROUND_PROMPTS = {'paved-ground', 'cobblestone-street', 'stone-quay', 'wooden-pier', 'staircase', 'bridge-deck', 'courtyard'}
+# Ground drawn over the river: piers, pontoons and the bridge deck.
+OVER_WATER = {'wooden-pier', 'bridge-deck'}
 # Objects standing on open ground: their silhouette is walkable, only their footprint blocks.
-STANDING = {'tree', 'lamp', 'statue', 'bandstand', 'stall', 'crate', 'cannon', 'bench'}
+STANDING = {'tree', 'bush', 'lamp', 'statue', 'bandstand', 'stall', 'crate', 'cannon', 'bench'}
 MAX_AREA = {'building': 520000, 'wall': 160000, 'stairs': 80000, 'bandstand': 90000, 'stall': 70000}
 
 
@@ -51,16 +57,47 @@ def poly_mask(points, value=1, mask=None):
     return mask
 
 
+def run_files():
+    for folder in ('runs', 'runs-dense'):
+        runs = os.path.join(WORK, 'objects', folder)
+        if not os.path.isdir(runs):
+            continue
+        for name in sorted(os.listdir(runs)):
+            path = os.path.join(runs, name, 'masks.json')
+            if os.path.exists(path):
+                yield folder, json.load(open(path))
+
+
+def load_ground():
+    """Dense-pass ground masks at x2: (ground, over-water ground)."""
+    ground = np.zeros((H * S, W * S), np.uint8)
+    over = np.zeros_like(ground)
+    for folder, data in run_files():
+        slug = data['prompt'].replace(' ', '-')
+        if folder != 'runs-dense' or slug not in GROUND_PROMPTS:
+            continue
+        x0, y0, cw, ch = data['crop']
+        for entry in data['masks']:
+            if (entry.get('score') or 0) < 0.35:
+                continue
+            crop = cv2.imread(entry['file'], cv2.IMREAD_UNCHANGED)
+            if crop is None:
+                continue
+            if crop.ndim == 3:
+                crop = crop[..., -1] if crop.shape[2] == 4 else crop[..., 0]
+            target = over if slug in OVER_WATER else ground
+            target[y0:y0 + ch, x0:x0 + cw] |= (crop > 127).astype(np.uint8)
+    return ground, over
+
+
 def load_objects():
     objects = []
-    runs = os.path.join(WORK, 'objects', 'runs')
-    for name in sorted(os.listdir(runs)):
-        path = os.path.join(runs, name, 'masks.json')
-        if not os.path.exists(path):
-            continue
-        data = json.load(open(path))
+    for folder, data in run_files():
         x0, y0, cw, ch = data['crop']
-        family = FAMILY.get(data['prompt'].replace(' ', '-'))
+        slug = data['prompt'].replace(' ', '-')
+        if folder == 'runs-dense' and slug in GROUND_PROMPTS:
+            continue
+        family = FAMILY.get(slug)
         if not family:
             continue
         for entry in data['masks']:
@@ -119,13 +156,14 @@ def footprint(obj):
     x0, y0, x1, y1 = obj['box']
     crop = obj['crop']
     height = y1 - y0
-    if obj['family'] == 'tree':
+    if obj['family'] in ('tree', 'bush'):
         ys, xs = np.nonzero(crop[int(height * 0.8):])
         bottom = y1 - 1
         cx = x0 + (int(np.median(xs)) if len(xs) else (x1 - x0) // 2)
-        rx = max(6 * S, min(14 * S, (x1 - x0) * 0.13))
+        # The trunk only, as in the archipelago: visitors pass close to and behind the canopy.
+        rx = max(3 * S, min(10 * S, (x1 - x0) * (0.09 if obj['family'] == 'tree' else 0.18)))
         footprint = np.zeros((H * S, W * S), np.uint8)
-        cv2.ellipse(footprint, (int(cx), int(bottom - 3 * S)), (int(rx), int(4 * S)), 0, 0, 360, 1, -1)
+        cv2.ellipse(footprint, (int(cx), int(bottom - 2.5 * S)), (int(rx), int(2.5 * S)), 0, 0, 360, 1, -1)
         return footprint
     band = int(np.clip(height * (0.34 if obj['family'] in ('bandstand', 'stall') else 0.22), 4 * S, 44 * S))
     part = np.zeros_like(crop)
@@ -159,7 +197,7 @@ def contours_to_zones(mask, kind, prefix, epsilon=1.2):
 
 FAMILY_NAMES = {
     'tree': 'Pied d’arbre', 'lamp': 'Réverbère', 'statue': 'Statue', 'bandstand': 'Kiosque',
-    'stall': 'Étal', 'crate': 'Caisses', 'cannon': 'Canon', 'bench': 'Banc', 'building': 'Bâtiment',
+    'stall': 'Étal', 'crate': 'Caisses', 'bush': 'Pied de buisson', 'cannon': 'Canon', 'bench': 'Banc', 'building': 'Bâtiment',
     'wall': 'Muret',
 }
 
@@ -276,6 +314,16 @@ def main():
         if name.startswith('output-') and name != 'output-0.png':
             ground |= (cv2.imread(os.path.join(WORK, 'sam', 'ground', name), 0) > 127).astype(np.uint8)
     objects = dedupe(load_objects())
+    # The dense pass adds streets, quays, courtyards and stairs the first pass missed. The river
+    # and the buildings are never ground; piers and the bridge deck are, even over the water.
+    dense, over_water = load_ground()
+    ground |= dense
+    effects = json.load(open(os.path.join(ROOT, 'public', 'valence-1876', 'effects.json')))
+    ground = poly_mask(effects['river'], 0, ground)
+    for obj in objects:
+        if obj['family'] == 'building':
+            ground &= 1 - full_mask(obj)
+    ground |= over_water
     walk = ground.copy()
     blocked = np.zeros_like(ground)
     for poly in edits['allowed']:
@@ -307,6 +355,8 @@ def main():
     walk = cv2.morphologyEx(walk, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7)))
     walk = cv2.morphologyEx(walk, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5)))
     usable = walk & (1 - blocked)
+    cv2.imwrite(os.path.join(WORK, 'review', 'walk.png'), walk * 255)
+    cv2.imwrite(os.path.join(WORK, 'review', 'blocked.png'), blocked * 255)
     # Keep only ground connected to the station, eroded by the avatar's clearance.
     reach_radius = int(round((RADIUS + MARGIN) * S))
     clearance = cv2.erode(usable, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * reach_radius + 1, 2 * reach_radius + 1)))
@@ -408,6 +458,10 @@ def main():
             behind = region[: max(1, local.shape[0] - 6 * S)].sum()
             if behind < 40:
                 continue
+            # Reviewed areas where an automatic cutout would cover an animated scene.
+            centre = ((sx0 + sx1) / 2 / S, (top + bottom) / 2 / S)
+            if any(cv2.pointPolygonTest(np.array(z['points'], np.float32), centre, False) >= 0 for z in edits.get('noOccluders', [])):
+                continue
             family = obj['family']
             counters[family] = counters.get(family, 0) + 1
             oid = f"{family}-{counters[family]:02d}"
@@ -423,6 +477,30 @@ def main():
                 'width': round((sx1 - sx0) / S, 1), 'height': round((bottom - top) / S, 1),
                 'baseY': round(base, 1), 'url': f'./valence-1876/occlusion/{oid}.webp',
             })
+    # Reviewed cutouts SAM has no prompt for (bridge railing, laundry frames...): a polygon of
+    # the map, cut in 48-unit strips when wide so each strip sorts by its own ground line.
+    for item in edits.get('occluders', []):
+        mask = poly_mask(item['points'])
+        ys, xs = np.nonzero(mask)
+        x0, y0, x1, y1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
+        step = 48 * S
+        strips = [(sx0, min(x1, sx0 + step)) for sx0 in range(x0, x1, step)] if (x1 - x0) > 90 * S else [(x0, x1)]
+        for index, (sx0, sx1) in enumerate(strips):
+            local = mask[y0:y1, sx0:sx1]
+            rows = np.nonzero(local.any(axis=1))[0]
+            if len(rows) == 0:
+                continue
+            top, bottom = y0 + rows[0], y0 + rows[-1] + 1
+            oid = f"manual-{item['id']}-{index + 1}" if len(strips) > 1 else f"manual-{item['id']}"
+            alpha = cv2.GaussianBlur(mask[top:bottom, sx0:sx1] * 255, (3, 3), 0.6)
+            cv2.imwrite(os.path.join(out_dir, f'{oid}.webp'), np.dstack([x2[top:bottom, sx0:sx1], alpha]), [cv2.IMWRITE_WEBP_QUALITY, 92])
+            manifest.append({
+                'id': oid, 'name': item['name'],
+                'x': round(sx0 / S, 1), 'y': round(top / S, 1),
+                'width': round((sx1 - sx0) / S, 1), 'height': round((bottom - top) / S, 1),
+                'baseY': item.get('baseY', round(bottom / S, 1)), 'url': f'./valence-1876/occlusion/{oid}.webp',
+            })
+    manifest.sort(key=lambda o: o['baseY'])
     with open(os.path.join(ROOT, 'src', 'valence', 'generated', 'occluders.json'), 'w') as handle:
         json.dump(manifest, handle, indent=1)
         handle.write('\n')
