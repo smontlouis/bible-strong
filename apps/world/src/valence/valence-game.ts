@@ -11,7 +11,7 @@ import { framedExtent, loadFrame, WorldFrame, type FrameLook } from '../world-fr
 import { RESOLUTION, startWorldGame, WorldScene, type SceneControls, type SceneFrame, type SceneState } from '../world-scene'
 import tileManifest from './generated/map-tiles.json'
 import { ValenceAmbience, type EffectsModel } from './valence-ambience'
-import { isValenceShrub, ValenceOccluders, valenceOccluders } from './valence-occluders'
+import { isValenceShrub, ValenceOccluders } from './valence-occluders'
 import { valenceScenes } from './valence-scenes'
 import { chooseValenceSpawn, valenceSquareCandidates } from './valence-spawn'
 import type { PioneerObjectId, StationId } from './valence-story'
@@ -101,7 +101,6 @@ class ValenceScene extends WorldScene<ValenceControls> {
       room: VALENCE_ROOM,
       preview: './valence-1876/map/preview.webp',
       tiles: { manifest: tileManifest as MapTileManifest, root: './valence-1876/map/tiles', key: 'valence-map' },
-      hiddenBy: () => valenceOccluders,
     })
     this.collected = new Set(controls.found)
   }

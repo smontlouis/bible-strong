@@ -48,7 +48,6 @@ The constructor's options describe the world:
 | `look` | Background, avatar shadow, name label, walking arrow tint, shoreline foam |
 | `room` | The multiplayer room (see step 6) |
 | `preview`, `tiles` | The progressive map from step 1 |
-| `hiddenBy` | The cut-outs: while the avatar is behind one, a faint outline shows it through |
 
 The hooks hold what is the world's own:
 

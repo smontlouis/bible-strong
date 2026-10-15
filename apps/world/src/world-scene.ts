@@ -108,8 +108,6 @@ export type WorldSceneOptions<Controls extends SceneControls> = {
   /** The progressive map: a low-resolution preview and its tiles (the archipelago's by default). */
   preview: string
   tiles?: MapTileSource
-  /** Cut-outs the avatar can pass behind: a faint outline then shows it through them. */
-  hiddenBy?: () => readonly { x: number; y: number; width: number; height: number; baseY: number }[]
 }
 
 /** What a world receives every frame once the avatar and the camera have moved. */
@@ -148,7 +146,6 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
   /** A portal arrival keeps its place over the room's first suggested spawn. */
   keepArrival: boolean
   avatar!: Phaser.GameObjects.Image
-  ghost?: Phaser.GameObjects.Image
   shadow!: Phaser.GameObjects.Ellipse
   nameTag!: Phaser.GameObjects.Text
   nameTagBackground!: Phaser.GameObjects.Graphics
@@ -347,8 +344,6 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
       .image(this.position.x, this.position.y, 'blob-idle-down')
       .setOrigin(0.5, 0.95)
       .setDisplaySize(options.avatarSize, options.avatarSize)
-    if (options.hiddenBy)
-      this.ghost = this.add.image(this.position.x, this.position.y, 'blob-idle-down').setOrigin(0.5, 0.95).setDepth(2200).setAlpha(0)
     // Keep the label above scenery and clouds, independently of the avatar's depth.
     this.nameTagBackground = this.add.graphics().setDepth(4000)
     this.nameTag = this.add
@@ -503,29 +498,13 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
       performance.now()
     )
 
-    // The avatar, its shadow and, behind a cut-out, its outline.
+    // The avatar and its shadow.
     this.blobAvatar.update(this.avatar, direction, moving, reducedMotion, delta, controls.avatar, !controls.paused && animating)
     const scale = options.avatarSize / AVATAR_SHEET_SIZE
     if (scale !== 1) this.avatar.setDisplaySize(this.avatar.displayWidth * scale, this.avatar.displayHeight * scale)
     const tint = avatarTint(controls.avatarColor, options.look.avatarTone)
     this.avatar.setTint(tint).setPosition(next.x, next.y).setDepth(next.y)
     this.shadow.setPosition(next.x, next.y)
-    if (this.ghost && options.hiddenBy) {
-      const chest = next.y - options.avatarSize * 0.4
-      const hidden = options.hiddenBy().some(
-        o => o.baseY > next.y + 2 && next.x > o.x + 4 && next.x < o.x + o.width - 4 && chest > o.y && chest < o.y + o.height
-      )
-      const alpha = Phaser.Math.Linear(this.ghost.alpha, hidden ? 0.42 : 0, 1 - Math.exp(-Math.min(delta, 50) / 90))
-      this.ghost
-        .setTexture(this.avatar.texture.key, this.avatar.frame.name)
-        .setFlipX(this.avatar.flipX)
-        .setOrigin(this.avatar.originX, this.avatar.originY)
-        .setDisplaySize(this.avatar.displayWidth, this.avatar.displayHeight)
-        .setTint(tint)
-        .setPosition(next.x, next.y)
-        .setAlpha(alpha)
-        .setVisible(alpha > 0.01)
-    }
 
     // The camera: follows the avatar, zooms in on arrival, or leaves the workshop in charge.
     const screenWidth = this.scale.width
