@@ -1,6 +1,6 @@
 # Valence 1876 : l’univers
 
-Un univers à part entière sur le moteur de World, à l’adresse [`/valence-1876`](https://world.bible-strong.app/valence-1876). Le visiteur arrive en gare de Valence en octobre 1876 et traverse la ville : huit stations datées, des habitants animés qui racontent comment on étudiait la Bible en 1877, sept objets du pionnier à trouver, un fil pointillé qui suit l’ordre des dates, et un épilogue qui ouvre le livre d’or des cent cinquante ans.
+Un univers à part entière sur le moteur de World, à l’adresse [`/valence-1876`](https://world.bible-strong.app/valence-1876). Le visiteur arrive en gare de Valence en octobre 1876 et traverse la ville : huit stations datées, des habitants animés qui racontent comment on étudiait la Bible en 1877, sept objets du pionnier à trouver, et un épilogue qui ouvre le livre d’or des cent cinquante ans.
 
 Le décor, ses règles d’intégrité et ses choix sont dans [decor.md](./decor.md). Les dialogues, générés depuis le code, sont dans [dialogues.md](./dialogues.md). Les dossiers de recherche sont dans [recherche/](./recherche/README.md).
 
@@ -34,7 +34,7 @@ En local, le bouton « Atelier » ouvre les mêmes outils que « Éditer le mond
 | Onglet | Ce qu’on règle | Fichier |
 | --- | --- | --- |
 | Accès | Zones vertes où l’on marche et obstacles rouges, avec l’éditeur de World. « Tester au joystick » rejoue la carte avec les zones visibles | `public/valence-1876/navigation.json` |
-| Repères | Point d’arrivée, train vers l’archipel (le cercle est la portée du départ) et son étiquette, stations (le cercle est la portée d’écoute), étiquettes, objets, et le fil pointillé : glisser les points, double-clic sur le fil pour en ajouter, Suppr pour retirer, « Redessiner » un tronçon point par point ou « Tracé automatique » | `public/valence-1876/layout.json` |
+| Repères | Point d’arrivée, train vers l’archipel (le cercle est la portée du départ) et son étiquette, stations (le cercle est la portée d’écoute), étiquettes, objets, et le fil des dates (il n’est plus dessiné sur la carte depuis le 15 octobre 2026, la frise suffit ; ses tracés restent dans le document) : glisser les points, double-clic sur le fil pour en ajouter, Suppr pour retirer, « Redessiner » un tronçon point par point ou « Tracé automatique » | `public/valence-1876/layout.json` |
 | Eau et effets | Contour du Rhône, zones sans effet (pile du pont…), reflets, traits de courant, feuilles, ombres de nuages, sources de fumée | `public/valence-1876/effects.json` |
 | Rivages | Écume le long des quais, avec l’éditeur de rivages de World (écume crème sur l’eau sépia) | `public/valence-1876/shorelines.json` |
 | Particules, Lueurs, Papillons, Libellules | Zones d’ambiance de World ; la poussière dorée des places ensoleillées est un jeu de zones Particules | `public/valence-1876/ambience.json` |

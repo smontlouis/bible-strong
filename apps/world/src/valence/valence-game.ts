@@ -37,7 +37,6 @@ import {
   stationAnchors,
   stationLabels,
   threadOrder,
-  threadPaths,
   valencePortal,
   VALENCE_HEIGHT,
   VALENCE_SPAWN,
@@ -132,9 +131,6 @@ export function createValence(
     standCrowd?: StandCrowd
     standAvatars?: RemoteAvatars
     standReactions?: AvatarReactions
-    thread!: Phaser.GameObjects.Graphics
-    threadSignature = ''
-    threadPhase = 0
     objects = new Map<PioneerObjectId, Phaser.GameObjects.Image>()
     objectGlow = new Map<PioneerObjectId, Phaser.GameObjects.Image>()
     destination!: Phaser.GameObjects.Image
@@ -239,7 +235,6 @@ export function createValence(
       if (controls.shoreEditor) this.shoreWaves = new ShoreWaves(this, controls.shoreEditor, 0xfff1d6)
       if (import.meta.env.DEV && controls.workshop)
         this.overlay = new WorkshopOverlay(this, controls.workshop, RESOLUTION)
-      this.thread = this.add.graphics().setDepth(-40)
       this.makeGlowTexture()
       for (const id of Object.keys(objectSpots) as PioneerObjectId[]) {
         const spot = objectSpots[id]
@@ -358,45 +353,6 @@ export function createValence(
       context.fillStyle = gradient
       context.fillRect(0, 0, size, size)
       canvas.refresh()
-    }
-
-    drawThread(delta: number, reducedMotion: boolean) {
-      const visited = controls.visited
-      const next = threadOrder.findIndex(id => !visited.has(id))
-      if (!reducedMotion) this.threadPhase = (this.threadPhase + delta * 0.006) % 12
-      const signature = `${[...visited].join(',')}:${controls.workshop?.layoutRevision ?? 0}:${
-        reducedMotion ? 0 : Math.round(this.threadPhase * 4)
-      }`
-      if (signature === this.threadSignature) return
-      this.threadSignature = signature
-      const graphics = this.thread.clear()
-      threadPaths.forEach((path, index) => {
-        const done = visited.has(threadOrder[index]) && visited.has(threadOrder[index + 1])
-        const current = index === next - 1 || (next === 0 && index === 0)
-        const alpha = done ? 0.62 : current ? 0.72 : 0.32
-        const width = done || current ? 2.2 : 1.6
-        const offset = current ? this.threadPhase : 0
-        graphics.lineStyle(width, 0x4a2e17, alpha)
-        let carry = -offset
-        for (let i = 0; i < path.length - 1; i++) {
-          const a = path[i],
-            b = path[i + 1]
-          const length = Math.hypot(b.x - a.x, b.y - a.y)
-          if (!length) continue
-          for (let t = carry; t < length; t += 12) {
-            const start = Math.max(0, t)
-            const end = Math.min(length, t + 6)
-            if (end <= start) continue
-            graphics.lineBetween(
-              a.x + ((b.x - a.x) * start) / length,
-              a.y + ((b.y - a.y) * start) / length,
-              a.x + ((b.x - a.x) * end) / length,
-              a.y + ((b.y - a.y) * end) / length
-            )
-          }
-          carry = (((carry - length) % 12) + 12) % 12 - 12
-        }
-      })
     }
 
     project(point: Point, zoom: number) {
@@ -643,8 +599,7 @@ export function createValence(
       }
       this.reactions.update(this.network, { ...next, color: controls.avatarColor }, now, markerScale, markerScale, reducedMotion)
 
-      // Thread, objects and DOM tags.
-      this.drawThread(delta, reducedMotion)
+      // Objects and DOM tags.
       const breathing = reducedMotion ? 0 : Math.sin(this.clock / 520)
       for (const [id, image] of this.objects) {
         const found = controls.found.has(id)

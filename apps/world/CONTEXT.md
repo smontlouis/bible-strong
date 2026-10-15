@@ -80,7 +80,7 @@ One dated place of Valence 1876 where townsfolk tell what happened, how they stu
 _Avoid_: Place (reserved for the archipelago's resource islands)
 
 **Thread**:
-The dotted line on the ground of Valence 1876 that links the stations in the order of their dates.
+The route linking the stations of Valence 1876 in the order of their dates; it is no longer drawn on the ground, the timeline shows the order.
 
 **Pioneer object**:
 One of seven study objects of 1877 hidden in Valence 1876; finding it opens a "yesterday, today" card.
