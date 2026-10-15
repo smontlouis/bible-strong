@@ -4,6 +4,7 @@ import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'rea
 import { haptic } from '../haptics'
 import type { Language } from '../language'
 import { Modal } from '../Modal'
+import { PlaceBackdrop } from './PlaceBackdrop'
 import busts from './generated/busts.json'
 import { valenceCopy } from './valence-copy'
 import {
@@ -251,6 +252,8 @@ export function StationScene({
           advance()
         }}
       >
+        {/* On a phone the window fills the screen: the place, blurred, stands behind it. */}
+        <PlaceBackdrop station={station} className="v-scene-place" />
         <header className="v-scene-top">
           <p className="v-date">{station.date[language]}</p>
           <h2 id={titleId}>
@@ -264,9 +267,20 @@ export function StationScene({
               </li>
             ))}
           </ol>
+          {/* On a phone the beats are three short bars: this names the current one. */}
+          <p className="v-scene-beat-now">{beatLabel(step.beat)}</p>
           <div className="v-scene-tools">
-            <button type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen(open => !open)}>
-              {t.history}
+            <button
+              type="button"
+              aria-expanded={historyOpen}
+              aria-label={t.history}
+              title={t.history}
+              onClick={() => setHistoryOpen(open => !open)}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 5h16M4 10h16M4 15h10M4 20h7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+              <span>{t.history}</span>
             </button>
           </div>
         </header>

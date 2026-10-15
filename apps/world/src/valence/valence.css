@@ -747,11 +747,19 @@
   text-transform: uppercase;
   color: #8b5e30;
 }
+.v-object h2 {
+  /* Clear of the close button, on both sides to stay centred. */
+  padding-inline: 44px;
+}
 .v-object-halves {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
   margin-top: 18px;
+}
+/* The halves' tabs, on a phone only. */
+.v-object-tabs {
+  display: none;
 }
 .v-then,
 .v-now {
@@ -973,14 +981,29 @@
 }
 
 @media (max-width: 760px) {
+  /* The title gives way to the objects: neither may push the HUD past the screen. */
   .v-hud {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
   }
   .v-brand-sub {
     display: none;
   }
+  .v-brand-title {
+    font-size: 18px;
+  }
   .v-objects {
     grid-column: 2;
+    gap: 6px;
+    padding: 5px 10px 5px 6px;
+  }
+  .v-objects-row img {
+    width: 22px;
+    height: 22px;
+    margin-left: -7px;
+  }
+  .v-objects-count {
+    font-size: 16px;
   }
   .v-timeline {
     position: static;
@@ -1014,8 +1037,13 @@
   .v-brand {
     padding: 8px 14px;
   }
+  /* Only the place you are at gives its date, under its diamond. */
   .v-stop-label {
     display: none;
+  }
+  .v-stop[data-current='true'] .v-stop-label {
+    display: block;
+    color: var(--v-ink);
   }
   .v-today {
     grid-template-columns: 1fr;
@@ -1024,8 +1052,68 @@
     width: 160px;
     justify-self: center;
   }
+  /* On a phone the card keeps its header and close button in place, and 1877 and 2026 are
+     two slides side by side: a swipe or a tab goes from one to the other. */
+  .valence-modal.v-object {
+    display: flex;
+    flex-direction: column;
+    max-height: min(calc(100dvh - 24px), 780px);
+    overflow: hidden;
+    padding: 22px 0 0;
+  }
+  /* The year is already on its tab; each slide is centred on its object. */
+  .v-object .v-year {
+    display: none;
+  }
+  .v-object .v-then,
+  .v-object .v-now {
+    align-content: center;
+  }
+  .v-object-head {
+    flex: none;
+    padding: 0 18px;
+  }
+  .v-object-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .v-object-tabs button {
+    min-width: 92px;
+    padding: 7px 14px;
+    border: var(--v-frame);
+    border-radius: var(--v-radius);
+    background: transparent;
+    color: var(--v-ink-2);
+    font: 400 17px / 1 var(--v-serif);
+  }
+  .v-object-tabs button[aria-selected='true'] {
+    background: var(--v-ink);
+    color: #f8ecd2;
+  }
   .v-object-halves {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    align-items: stretch;
+    gap: 0;
+    margin: 14px 0 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .v-object-halves::-webkit-scrollbar {
+    display: none;
+  }
+  .v-object-halves > * {
+    flex: 0 0 calc(100% - 36px);
+    margin: 0 18px calc(18px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
   }
   .v-stand {
     display: none;
@@ -1042,6 +1130,25 @@
   }
 }
 @media (max-width: 600px) {
+  /* A long sheet keeps its close button in reach: it stays at the top while the sheet scrolls. */
+  .valence-modal.v-notebook > .world-modal-close {
+    position: sticky;
+    top: 0;
+    display: grid;
+    margin: 0 -8px -44px auto;
+  }
+  /* The notebook's actions, one under the other, the full width. */
+  .v-notebook-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .v-notebook-actions > * {
+    width: 100%;
+  }
+  /* The intro's close button sits above its date and rules, not across them. */
+  .valence-modal.v-intro {
+    padding-top: 66px;
+  }
   .valence-modal,
   .valence-modal.v-intro {
     width: 100vw;
@@ -1235,6 +1342,16 @@
   display: flex;
   gap: 6px;
   margin-left: auto;
+}
+.valence-modal .v-scene-tools button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+/* Shown on a phone only (see the 700px rules). */
+.v-scene-place,
+.v-scene-beat-now {
+  display: none;
 }
 .valence-modal .v-scene-tools button,
 .valence-modal .v-scene-panel > button {
@@ -1575,14 +1692,96 @@
 }
 
 @media (max-width: 700px) {
+  /* The window fills the screen, opaque as on a computer: the place, blurred, behind the
+     characters, and nothing of the game showing through. */
   .valence-modal.v-scene {
     width: 100vw;
     height: 100dvh;
     margin: 0;
     border: 0;
     outline: 0;
-    background: transparent;
+    background: #1c1108;
     box-shadow: none;
+  }
+  .v-scene-place {
+    display: block;
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .v-scene-place img {
+    position: absolute;
+    top: 38%;
+    max-width: none;
+    filter: blur(6px) brightness(0.5) sepia(0.3);
+    scale: 1.05;
+  }
+  .v-scene-place::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to bottom, rgba(20, 12, 5, 0.85), transparent 26%),
+      radial-gradient(120% 80% at 50% 45%, transparent 35%, rgba(20, 12, 5, 0.7) 100%);
+  }
+  /* A compact header: date, title, the three beats as bars with the current one named, and
+     the transcript as an icon beside the close button. */
+  .v-scene-top {
+    gap: 2px 10px;
+  }
+  .v-scene-top .v-date,
+  .v-scene-top h2 {
+    padding-right: 54px;
+  }
+  .v-scene-top h2 {
+    font-size: 19px;
+  }
+  .v-scene-top h2 span {
+    display: block;
+    font-size: 16px;
+  }
+  .v-scene-beats {
+    width: 100%;
+    flex-wrap: nowrap;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .v-scene-beats li {
+    flex: 1;
+    height: 4px;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: rgba(243, 230, 201, 0.22);
+    font-size: 0;
+  }
+  .v-scene-beats li[data-done='true'] {
+    background: rgba(243, 230, 201, 0.6);
+  }
+  .v-scene-beats li[data-current='true'] {
+    background: #f3e6c9;
+  }
+  .v-scene-beat-now {
+    display: block;
+    margin: 4px 0 0;
+    color: #f3dcb0;
+    font: 600 10.5px / 1 Pulp, sans-serif;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .v-scene-tools {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+  .valence-modal .v-scene-tools button {
+    width: 44px;
+    height: 44px;
+    justify-content: center;
+    padding: 0;
+  }
+  .valence-modal .v-scene-tools button span {
+    display: none;
   }
   .v-scene > .world-modal-close {
     top: max(16px, env(safe-area-inset-top));
@@ -1592,16 +1791,6 @@
     top: max(16px, env(safe-area-inset-top));
     left: 14px;
     right: 64px;
-  }
-  .v-scene-top h2 {
-    font-size: 20px;
-  }
-  .v-scene-tools {
-    margin-left: 0;
-  }
-  .v-scene-beats li {
-    padding: 5px 8px;
-    letter-spacing: 0.05em;
   }
   .v-bust {
     --bust-height: 52dvh;
@@ -1655,7 +1844,7 @@
   }
   /* Between the scene's header and its buttons, scrolling inside when the sheet is long. */
   .v-scene-today {
-    top: calc(max(16px, env(safe-area-inset-top)) + 158px);
+    top: calc(max(16px, env(safe-area-inset-top)) + 112px);
     bottom: calc(max(30px, env(safe-area-inset-bottom)) + 52px);
     width: calc(100% - 32px);
     max-height: none;
@@ -1671,6 +1860,10 @@
   }
   .v-today p {
     font-size: 15px;
+  }
+  /* The phone is an illustration here: small enough for the sheet to fit above the buttons. */
+  .v-scene-today .v-phone {
+    width: 118px;
   }
   .v-scene-closing {
     bottom: 220px;

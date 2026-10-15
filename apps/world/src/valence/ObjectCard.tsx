@@ -22,14 +22,47 @@ export function ObjectCard({
   const t = valenceCopy[language]
   const titleId = useId()
   const close = useRef<HTMLAnchorElement>(null)
+  const halves = useRef<HTMLDivElement>(null)
+  // On a phone the two halves are a carousel: which one shows, for its tabs.
+  const [half, setHalf] = useState(0)
   useEffect(() => haptic('star'), [])
+  // Safari scrolls the carousel to the focused link on opening: the card starts on 1877.
+  useEffect(() => {
+    const row = halves.current
+    if (!row) return
+    const frame = requestAnimationFrame(() => {
+      row.scrollLeft = 0
+      setHalf(0)
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [])
+  const show = (index: number) => {
+    const row = halves.current
+    if (row) row.scrollTo({ left: index * row.clientWidth, behavior: 'smooth' })
+  }
   return (
     <Modal className="valence-modal v-object" labelledBy={titleId} closeLabel={t.close} onClose={onClose} initialFocus={close}>
-      <p className="v-object-count">
-        {t.objectFound} · {count}/{pioneerObjects.length}
-      </p>
-      <h2 id={titleId}>{object.name[language]}</h2>
-      <div className="v-object-halves">
+      <header className="v-object-head">
+        <p className="v-object-count">
+          {t.objectFound} · {count}/{pioneerObjects.length}
+        </p>
+        <h2 id={titleId}>{object.name[language]}</h2>
+        <div className="v-object-tabs" role="tablist" aria-label={object.name[language]}>
+          {[t.yesterday, t.todayLabel].map((label, index) => (
+            <button key={label} type="button" role="tab" aria-selected={half === index} onClick={() => show(index)}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </header>
+      <div
+        className="v-object-halves"
+        ref={halves}
+        onScroll={event => {
+          const row = event.currentTarget
+          setHalf(Math.round(row.scrollLeft / Math.max(1, row.clientWidth)))
+        }}
+      >
         <section className="v-then">
           <span className="v-year">{t.yesterday}</span>
           <img src={objectImage(object.id)} alt="" width={160} height={160} />

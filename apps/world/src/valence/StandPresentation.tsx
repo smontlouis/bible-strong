@@ -6,10 +6,7 @@ import type { Language } from '../language'
 import { Bust, MOODS, bustImage, steps, typingTime, useTypewriter } from './StationScene'
 import { valenceCopy } from './valence-copy'
 import { speakers, type Mood, type SpeakerId, type Station } from './valence-story'
-import { stationAnchors, VALENCE_HEIGHT, VALENCE_WIDTH } from './valence-world'
-
-/** How much of the town shows behind the characters, in map units across the stage. */
-const PLACE_SPAN = 300
+import { PlaceBackdrop } from './PlaceBackdrop'
 
 /** Reading time after a line is typed: a pause, then about a word every quarter second. */
 const readingTime = (text: string) => 1400 + text.length * 32
@@ -86,20 +83,7 @@ export function StandPresentation({ station, language, onDone }: { station: Stat
         </span>
       </header>
       {/* The place itself behind the characters, out of focus, as the camera shows it. */}
-      <div className="v-presenter-place" aria-hidden="true">
-        <img
-          src="./valence-1876/map/preview.webp"
-          alt=""
-          draggable={false}
-          style={{
-            width: `${(VALENCE_WIDTH / PLACE_SPAN) * 100}%`,
-            aspectRatio: `${VALENCE_WIDTH} / ${VALENCE_HEIGHT}`,
-            left: `${50 - (stationAnchors[station.id].x / PLACE_SPAN) * 100}%`,
-            // Percent margins follow the width, like the image's own size.
-            marginTop: `${-(stationAnchors[station.id].y / PLACE_SPAN) * 100}%`,
-          }}
-        />
-      </div>
+      <PlaceBackdrop station={station} className="v-presenter-place" />
       <div className="v-scene-cast">
         {cast.map((id, position) =>
           appeared.has(id) ? (
