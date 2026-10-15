@@ -531,26 +531,6 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
         <span className="v-tag-action">{t.trainAction}</span>
       </button>
 
-      <aside className="v-camera" aria-label={t.camera}>
-        <button type="button" onClick={() => {
-          controls.current.zoom = clampCameraZoom(controls.current.zoom * 1.25, controls.current.minimumZoom)
-          setOverview(false)
-        }} aria-label={t.zoomIn} title={t.zoomIn}>
-          <ControlIcon name="plus" />
-        </button>
-        <button type="button" onClick={() => {
-          controls.current.zoom = clampCameraZoom(controls.current.zoom / 1.25, controls.current.minimumZoom)
-          setOverview(false)
-        }} aria-label={t.zoomOut} title={t.zoomOut}>
-          <ControlIcon name="minus" />
-        </button>
-        <button type="button" aria-pressed={overview} onClick={() => setOverview(value => !value)} aria-label={overview ? t.follow : t.overview} title={overview ? t.follow : t.overview}>
-          <ControlIcon name={overview ? 'follow' : 'overview'} />
-        </button>
-        <button type="button" className="v-language" onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}>
-          {language === 'fr' ? 'EN' : 'FR'}
-        </button>
-      </aside>
 
       <aside className="v-bottom">
         <div className="joystick-zone" ref={joystick} role="group" aria-label={t.joystick} />
@@ -724,6 +704,16 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
             setProfileOpen(true)
           }}
           onLeave={leave}
+          onLanguage={setLanguage}
+          overview={overview}
+          onZoom={factor => {
+            controls.current.zoom = clampCameraZoom(controls.current.zoom * factor, controls.current.minimumZoom)
+            setOverview(false)
+          }}
+          onOverview={() => {
+            setOverview(value => !value)
+            setMenuOpen(false)
+          }}
         />
       )}
       {debug && (
@@ -746,8 +736,16 @@ function Notebook({
   onRestart,
   onProfile,
   onLeave,
+  onLanguage,
+  overview,
+  onZoom,
+  onOverview,
 }: {
   language: Language
+  onLanguage: (language: Language) => void
+  overview: boolean
+  onZoom: (factor: number) => void
+  onOverview: () => void
   visited: ReadonlySet<StationId>
   found: ReadonlySet<PioneerObjectId>
   onClose: () => void
@@ -792,6 +790,41 @@ function Notebook({
           </li>
         ))}
       </ul>
+      <h3>{t.settings}</h3>
+      <div className="v-notebook-settings">
+        <div className="v-notebook-setting" role="group" aria-label={t.languageLabel}>
+          <span>{t.languageLabel}</span>
+          <div className="v-segmented">
+            {(['fr', 'en'] as const).map(lang => (
+              <button
+                key={lang}
+                type="button"
+                lang={lang}
+                aria-label={lang === 'fr' ? 'Français' : 'English'}
+                aria-pressed={language === lang}
+                onClick={() => onLanguage(lang)}
+              >
+                {lang.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="v-notebook-setting" role="group" aria-label={t.camera}>
+          <span>{t.camera}</span>
+          <div className="v-segmented">
+            <button type="button" onClick={() => onZoom(1 / 1.25)} aria-label={t.zoomOut} title={t.zoomOut}>
+              <ControlIcon name="minus" />
+            </button>
+            <button type="button" onClick={() => onZoom(1.25)} aria-label={t.zoomIn} title={t.zoomIn}>
+              <ControlIcon name="plus" />
+            </button>
+            <button type="button" aria-pressed={overview} onClick={onOverview} title={overview ? t.follow : t.overview}>
+              <ControlIcon name={overview ? 'follow' : 'overview'} />
+              <span>{overview ? t.follow : t.overview}</span>
+            </button>
+          </div>
+        </div>
+      </div>
       <div className="v-nav v-notebook-actions">
         {found.size === pioneerObjects.length && (
           <button type="button" className="v-primary" onClick={onShare}>

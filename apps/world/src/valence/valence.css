@@ -165,13 +165,16 @@
   text-transform: uppercase;
   color: var(--v-ink-2);
 }
+/* Centred on the screen rather than between the title and the counter, whose widths differ. */
 .v-timeline {
-  justify-self: center;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
   display: flex;
-  align-items: center;
-  gap: 4px;
-  max-width: 100%;
-  padding: 8px 14px;
+  align-items: flex-start;
+  gap: 0;
+  padding: 8px 10px;
   border: var(--v-frame);
   border-radius: var(--v-radius);
   background: var(--v-sheet);
@@ -187,24 +190,27 @@
 .v-timeline ol::before {
   content: '';
   position: absolute;
-  top: 13px;
-  left: 18px;
-  right: 18px;
+  top: 11px;
+  left: 33px;
+  right: 33px;
   border-top: 1.5px dashed var(--v-ink-2);
   opacity: 0.45;
 }
+/* 1799 stands apart: a short dotted bridge at the height of the line. */
 .v-timeline-gap {
-  width: 14px;
+  align-self: flex-start;
+  width: 20px;
+  margin: 11px -4px 0;
   border-top: 1.5px dotted var(--v-ink-2);
-  opacity: 0.4;
+  opacity: 0.45;
 }
 .v-stop {
   position: relative;
   display: grid;
   justify-items: center;
-  gap: 4px;
-  min-width: 46px;
-  padding: 4px 2px;
+  gap: 5px;
+  width: 66px;
+  padding: 4px 0 2px;
   border: 0;
   background: none;
   color: var(--v-ink-2);
@@ -240,6 +246,7 @@
   font: 600 10px / 1 var(--bs-font);
 }
 .v-objects {
+  grid-column: 3;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -378,41 +385,7 @@
   }
 }
 
-/* Camera and bottom controls */
-.v-camera {
-  position: absolute;
-  z-index: 4;
-  right: 16px;
-  top: calc(max(14px, env(safe-area-inset-top)) + 84px);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.v-camera button {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  border: var(--v-frame);
-  border-radius: var(--v-radius);
-  background: var(--v-sheet);
-  color: var(--v-ink);
-  box-shadow: var(--v-age), var(--v-shadow);
-  transition: translate 100ms ease-out, box-shadow 100ms ease-out;
-}
-.v-camera button:active {
-  translate: 2px 2px;
-  box-shadow: var(--v-age), 1px 1px 0 rgba(46, 28, 15, 0.42);
-}
-.v-camera button[aria-pressed='true'] {
-  background: var(--v-ink);
-  color: var(--v-paper);
-  box-shadow: var(--v-shadow);
-}
-.v-camera .v-language {
-  font: 700 13px / 1 var(--bs-font);
-}
+/* Bottom controls */
 .v-bottom {
   position: absolute;
   z-index: 4;
@@ -930,6 +903,48 @@
 .v-notebook-objects li[data-found='false'] img {
   filter: grayscale(1) opacity(0.25);
 }
+.v-notebook-settings {
+  display: grid;
+  gap: 10px;
+}
+.v-notebook-setting {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  font: 600 13px / 1.2 Pulp, sans-serif;
+  color: var(--v-ink-2);
+}
+.v-segmented {
+  display: flex;
+  gap: 6px;
+}
+.valence-modal .v-segmented button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  min-width: 42px;
+  justify-content: center;
+  padding: 0 10px;
+  border: var(--v-frame);
+  border-radius: var(--v-radius);
+  background: var(--v-sheet);
+  color: var(--v-ink);
+  box-shadow: var(--v-age), 2px 2px 0 rgba(46, 28, 15, 0.35);
+  font: 600 12px / 1 Pulp, sans-serif;
+  letter-spacing: 0.08em;
+}
+.valence-modal .v-segmented button:active {
+  translate: 1px 1px;
+  box-shadow: var(--v-age), 1px 1px 0 rgba(46, 28, 15, 0.35);
+}
+.valence-modal .v-segmented button[aria-pressed='true'] {
+  background: var(--v-ink);
+  color: #f8ecd2;
+  box-shadow: 2px 2px 0 var(--v-ink-deep);
+}
 .v-notebook-actions {
   margin-top: 22px;
   justify-content: flex-start;
@@ -965,7 +980,12 @@
   .v-brand-sub {
     display: none;
   }
+  .v-objects {
+    grid-column: 2;
+  }
   .v-timeline {
+    position: static;
+    translate: none;
     grid-column: 1 / -1;
     grid-row: 2;
     justify-self: stretch;
@@ -981,8 +1001,13 @@
     display: grid;
   }
   .v-stop {
+    width: auto;
     min-width: 0;
     flex: 1;
+  }
+  .v-timeline ol::before {
+    left: 12%;
+    right: 12%;
   }
   .v-stop-memory {
     flex: 0 0 auto;
@@ -992,9 +1017,6 @@
   }
   .v-stop-label {
     display: none;
-  }
-  .v-camera {
-    top: calc(max(14px, env(safe-area-inset-top)) + 128px);
   }
   .v-today {
     grid-template-columns: 1fr;
@@ -1087,7 +1109,7 @@
   position: absolute;
   z-index: 4;
   right: 16px;
-  top: calc(max(14px, env(safe-area-inset-top)) + 300px);
+  top: calc(max(14px, env(safe-area-inset-top)) + 84px);
   padding: 8px 12px;
   border: 1px dashed #8b5e30;
   border-radius: var(--v-radius);
@@ -1097,7 +1119,6 @@
 }
 .valence-shell.is-workshop > .v-hud,
 .valence-shell.is-workshop > .v-bottom,
-.valence-shell.is-workshop > .v-camera,
 .valence-shell.is-workshop > .v-tag,
 .valence-shell.is-workshop > .v-stand,
 .valence-shell.is-workshop > .v-vignette {
