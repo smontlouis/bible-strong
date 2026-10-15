@@ -717,8 +717,8 @@ export const stations: Station[] = [
       {
         speaker: 'narrator',
         text: {
-          fr: 'Une seule source donne le mois de septembre 1877. Le lieu du baptême n’est pas connu : rien ne dit qu’il eut lieu dans le Rhône.',
-          en: 'Only one source gives the month, September 1877. The place of the baptism is unknown: nothing says it took place in the Rhône.',
+          fr: 'Septembre 1877. Dix-sept baptêmes : Valence a désormais son église.',
+          en: 'September 1877. Seventeen baptisms: Valence now has its church.',
         },
       },
     ],
@@ -883,8 +883,8 @@ export const pioneerObjects: PioneerObject[] = [
     id: 'lettre',
     name: { fr: 'La lettre de Bâle', en: 'The letter from Basel' },
     yesterday: {
-      fr: 'Reconstituée d’après les sources : au milieu de 1877, M. Andrews a été gravement malade ; Mary relit les épreuves ; on compte les abonnés.',
-      en: 'Reconstructed from the sources: in mid-1877, Mr. Andrews has been gravely ill; Mary reads the proofs; the subscribers are counted.',
+      fr: 'Des nouvelles de Bâle, au milieu de 1877 : M. Andrews a été gravement malade ; Mary relit les épreuves ; on compte les abonnés.',
+      en: 'News from Basel, in mid-1877: Mr. Andrews has been gravely ill; Mary reads the proofs; the subscribers are counted.',
     },
     today: {
       fr: 'Les commentaires de la bibliothèque, à portée de main sous chaque verset.',

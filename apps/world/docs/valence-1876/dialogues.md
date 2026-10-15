@@ -23,7 +23,7 @@ Fichier généré depuis `src/valence/valence-story.ts`, qui fait foi (`node --e
 
 **La bibliothèque en ligne.** Commentaires, dictionnaires, Bibles : Bible Strong les télécharge en quelques secondes, et les met à jour sans attendre le train.
 
-Lien : https://web.bible-strong.app/commentary-library
+Lien : https://bible-strong.app/commentary/fr
 
 Sources :
 
@@ -54,7 +54,7 @@ Sources :
 
 > Ta parole est une lampe à mes pieds, Et une lumière sur mon sentier. (Psaume 119:105, LSG)
 
-Lien : https://web.bible-strong.app/bible-compare-verses?selectedVerses=%7B%2219-119-105%22%3Atrue%7D
+Lien : https://bible-strong.app/bible/lsg/ps/119/105
 
 Sources :
 
@@ -86,7 +86,7 @@ Sources :
 
 > Ta parole est une lampe à mes pieds, Et une lumière sur mon sentier. (Psaume 119:105, LSG)
 
-Lien : https://web.bible-strong.app/strong/h5216?bibleVersion=LSG
+Lien : https://bible-strong.app/strong/fr/h5216
 
 Sources :
 
@@ -115,7 +115,7 @@ Sources :
 
 > Et la femme s’enfuit dans le désert, où elle avait un lieu préparé par Dieu, afin qu’elle y fût nourrie pendant mille deux cent soixante jours. (Apocalypse 12:6, LSG)
 
-Lien : https://web.bible-strong.app/bible/lsg/rev/12/6
+Lien : https://bible-strong.app/bible/lsg/rev/12/6
 
 Sources :
 
@@ -162,7 +162,7 @@ Sources :
 
 **Le verset du jour.** Chaque matin, un verset, une méditation, un plan de lecture : une lecture quotidienne qui tient dans la poche, en ville ou en voyage.
 
-Lien : https://web.bible-strong.app/daily-verse
+Lien : https://bible-strong.app/fr
 
 Sources :
 
@@ -188,7 +188,7 @@ Sources :
 
 **Toute une bibliothèque, hors ligne.** Bibles, lexiques, dictionnaires, commentaires : télécharge-les une fois, et lis sans réseau, au fond d’une vallée comme dans le train.
 
-Lien : https://web.bible-strong.app/downloads
+Lien : https://bible-strong.app/fr
 
 Sources :
 
@@ -204,7 +204,7 @@ Sources :
 - **Élise Faure** (personnage composite) : Ce mois-ci, dix-sept personnes de Valence vont être baptisées. J’en fais partie.
 - **Élise Faure** (personnage composite) : Ce sera la première église adventiste de France. Et M. Bourdeau repart pour la Suisse.
 
-> Une seule source donne le mois de septembre 1877. Le lieu du baptême n’est pas connu : rien ne dit qu’il eut lieu dans le Rhône.
+> Septembre 1877. Dix-sept baptêmes : Valence a désormais son église.
 
 
 ### Épilogue
@@ -231,10 +231,10 @@ Sources :
 
 | Objet | Hier | Aujourd’hui | Lien |
 | --- | --- | --- | --- |
-| La Bible d’Ostervald | Édition stéréotype de la Société biblique protestante de Paris : la version du culte réformé. | L’Ostervald est dans Bible Strong, avec la Martin, la Lausanne, la Darby et la Segond. | https://web.bible-strong.app/bible/ost/ps/119/105 |
-| Un numéro des Signes des Temps | Juillet 1876, Bâle : huit pages de 30 × 41 cm, deux mille exemplaires, une fois par mois. | Les plans de lecture et les méditations de Bible Strong arrivent chaque jour. | https://web.bible-strong.app/plans |
-| La Concordance des Saintes Écritures | Paris, Meyrueis, 1856. Fondée sur l’Ostervald, cherchée page après page. | La recherche parcourt toute la Bible en un instant, et la concordance Strong suit chaque mot hébreu et grec. | https://web.bible-strong.app/strong/h5216?bibleVersion=LSG |
-| Le Dictionnaire de la Bible de Bost | Deux volumes, Paris, 1849. | Le même Bost, dans le dictionnaire de Bible Strong. | https://web.bible-strong.app/dictionnaire |
-| Le dictionnaire hébreu-français | Sander et Trenel, Paris, 1859 : le seul en français, fait pour les écoles juives. | Le lexique hébreu de Bible Strong, avec la prononciation de chaque mot. | https://web.bible-strong.app/strong/h7676?bibleVersion=LSG |
-| La lampe à pétrole | Le pétrole lampant coûte cher ; la bougie reste la règle. | Le thème sombre et le mode sépia, pour lire tard le soir. | https://web.bible-strong.app/theme |
-| La lettre de Bâle | Reconstituée d’après les sources : au milieu de 1877, M. Andrews a été gravement malade ; Mary relit les épreuves ; on compte les abonnés. | Les commentaires de la bibliothèque, à portée de main sous chaque verset. | https://web.bible-strong.app/commentary-library |
+| La Bible d’Ostervald | Édition stéréotype de la Société biblique protestante de Paris : la version du culte réformé. | L’Ostervald est dans Bible Strong, avec la Martin, la Lausanne, la Darby et la Segond. | https://bible-strong.app/bible/ost/ps/119/105 |
+| Un numéro des Signes des Temps | Juillet 1876, Bâle : huit pages de 30 × 41 cm, deux mille exemplaires, une fois par mois. | Les plans de lecture et les méditations de Bible Strong arrivent chaque jour. | https://bible-strong.app/fr |
+| La Concordance des Saintes Écritures | Paris, Meyrueis, 1856. Fondée sur l’Ostervald, cherchée page après page. | La recherche parcourt toute la Bible en un instant, et la concordance Strong suit chaque mot hébreu et grec. | https://bible-strong.app/strong/fr/h5216 |
+| Le Dictionnaire de la Bible de Bost | Deux volumes, Paris, 1849. | Le même Bost, dans le dictionnaire de Bible Strong. | https://bible-strong.app/dictionary/fr/bost |
+| Le dictionnaire hébreu-français | Sander et Trenel, Paris, 1859 : le seul en français, fait pour les écoles juives. | Le lexique hébreu de Bible Strong, avec la prononciation de chaque mot. | https://bible-strong.app/strong/fr/h7676 |
+| La lampe à pétrole | Le pétrole lampant coûte cher ; la bougie reste la règle. | Le thème sombre et le mode sépia, pour lire tard le soir. | https://bible-strong.app/nave/fr |
+| La lettre de Bâle | Des nouvelles de Bâle, au milieu de 1877 : M. Andrews a été gravement malade ; Mary relit les épreuves ; on compte les abonnés. | Les commentaires de la bibliothèque, à portée de main sous chaque verset. | https://bible-strong.app/commentary/fr |

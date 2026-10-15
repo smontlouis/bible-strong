@@ -321,6 +321,17 @@ export function useStandTour(controls: RefObject<SceneControls>, stops: TourStop
     /** Starts the presentation of a place again when its leg restarts. */
     legKey: `${leg.index}-${leg.startedAt}`,
     done: advance,
+    /** Plays the tour from a place, chosen on the map; then it goes on in order. */
+    goTo: (id: string) => {
+      const index = stops.findIndex(stop => stop.id === id)
+      if (index < 0) return
+      setPaused(false)
+      setResumeAt(null)
+      seenTouch.current = controls.current.touchedAt ?? 0
+      lastVisitorAfter.current = -1
+      setArrived(false)
+      setLeg({ index, startedAt: performance.now() })
+    },
     /** Back to the first place, playing. */
     restart: () => {
       setPaused(false)

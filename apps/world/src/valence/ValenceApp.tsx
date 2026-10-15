@@ -377,24 +377,27 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
       <main className={`valence-shell is-stand ${ready ? '' : 'is-loading'}`}>
         <div className="world-canvas" ref={host} aria-label={t.mapLabel} />
         <div className="v-vignette" aria-hidden="true" />
-        {/* The places, to read the picture from afar: names only, nothing to open. */}
+        {/* The places, to read the picture from afar; a click plays the tour from there. */}
         {threadOrder.map(id => {
           const station = byId.get(id)!
           return (
-            <span
+            <button
               key={id}
+              type="button"
               className="v-tag"
               ref={element => {
                 stationTags.current[id] = element
               }}
               hidden={!ready}
+              data-near={tour.stop?.id === id}
+              onClick={() => tour.goTo(id)}
             >
               <span className="v-tag-order">{station.order}</span>
               <span className="v-tag-text">
                 <span className="v-tag-date">{station.date[language]}</span>
                 <span className="v-tag-place">{station.place[language]}</span>
               </span>
-            </span>
+            </button>
           )
         })}
         {ready && (

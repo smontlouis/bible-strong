@@ -199,7 +199,7 @@ Sept objets cachés sur la carte. Chacun ouvre une carte « hier, aujourd’hui 
 | Le *Dictionnaire de la Bible* de Bost | l’étal de livres | Deux volumes, 1849 | Le même Bost, dans l’app |
 | Le dictionnaire hébreu-français de Sander et Trenel | le temple | 1859, le seul en français, fait pour les écoles juives | Le lexique hébreu, avec la prononciation |
 | La lampe à pétrole | la maison | Le pétrole est cher ; la bougie reste la règle | Le thème sombre, pour lire la nuit |
-| La lettre de Bâle | la place des Clercs, été 1877 | Reconstituée d’après les sources : la maladie d’Andrews au milieu de 1877, Mary aux épreuves, les abonnés | La bibliothèque en ligne |
+| La lettre de Bâle | la place des Clercs, été 1877 | Des nouvelles de Bâle : la maladie d’Andrews au milieu de 1877, Mary aux épreuves, les abonnés | La bibliothèque en ligne |
 
 ## 8. Ce qu’on ne dessine pas
 
