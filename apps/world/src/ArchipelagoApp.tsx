@@ -11,10 +11,10 @@ import { ExplorationJournal, JournalIcon, journalCopy } from './ExplorationJourn
 import { findTravelDestination } from './world-travel'
 import { islandActions, nearIslandAction, type IslandActionId } from './island-actions'
 import { GuestbookDialog } from './GuestbookDialog'
-import { createAmbientEditor, ambientKinds } from './ambient-zones'
-import { AmbientEditorPanel, EditorNavigation, editorCopy, type EditorMode } from './WorldEditor'
+import { createAmbientEditor } from './ambient-zones'
+import { editorCopy, type EditorMode } from './WorldEditor'
 import { createShoreEditor } from './shorelines'
-import { ShoreEditor } from './ShoreEditor'
+import { selectEditors } from './workshop/editors'
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import nipplejs from 'nipplejs'
 import { clampCameraZoom } from './camera-zoom'
@@ -51,7 +51,7 @@ import { loadVisitedPlaces, saveVisitedPlaces } from './visited-places'
 import { loadLanguage, saveLanguage } from './language'
 import type { UniverseProps } from './universes'
 import { WORLD_PORTAL } from './world-portal'
-const ZoneEditor = import.meta.env.DEV ? lazy(() => import('./ZoneEditor')) : () => null
+const ArchipelagoWorkshop = import.meta.env.DEV ? lazy(() => import('./ArchipelagoWorkshop')) : () => null
 
 const copy = {
   fr: {
@@ -451,18 +451,7 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
 
   function switchEditor(mode: EditorMode | null) {
     if (!import.meta.env.DEV) return
-    shoreEditor.editing = mode === 'shorelines'
-    shoreEditor.paused = false
-    ambientEditor.editing = mode !== null && mode !== 'navigation' && mode !== 'shorelines'
-    if (ambientEditor.editing && mode && ambientKinds.includes(mode as typeof ambientEditor.kind)) {
-      ambientEditor.kind = mode as typeof ambientEditor.kind
-      if (!ambientEditor.zones.some(z => z.id === ambientEditor.selected && z.kind === mode)) {
-        ambientEditor.selected = ambientEditor.zones.find(z => z.kind === mode)?.id ?? ''
-      }
-      ambientEditor.focus++
-      ambientEditor.mode = 'select'
-      ambientEditor.notify()
-    }
+    selectEditors(mode, shoreEditor, ambientEditor)
     controls.current.paused =
       Boolean(mode) ||
       menuOpen ||
@@ -901,40 +890,15 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
         </Suspense>
       </DiscoveryBoundary>
       {import.meta.env.DEV && editorMode && (
-        <EditorNavigation
-          mode={editorMode}
-          language={language}
-          onMode={switchEditor}
-          onClose={() => switchEditor(null)}
-        />
-      )}
-      {import.meta.env.DEV && ambientEditor.editing && (
-        <AmbientEditorPanel
-          model={ambientEditor}
-          language={language}
-          onZoom={factor => {
-            controls.current.shoreZoom = factor
-          }}
-        />
-      )}
-      {import.meta.env.DEV && shoreEditing && (
-        <ShoreEditor
-          model={shoreEditor}
-          language={language}
-          onZoom={factor => {
-            controls.current.shoreZoom = factor
-          }}
-          onClose={() => switchEditor(null)}
-        />
-      )}
-      {import.meta.env.DEV && editing && (
         <Suspense fallback={<div className="zone-editor">{t.loading}</div>}>
-          <ZoneEditor
-            initial={navigation}
-            initialSavedFingerprint={savedNavigation.current}
-            onDraft={setNavigation}
+          <ArchipelagoWorkshop
+            mode={editorMode}
+            onMode={switchEditor}
             language={language}
-            onSave={next => {
+            navigation={navigation}
+            savedFingerprint={savedNavigation.current}
+            onDraft={setNavigation}
+            onNavigation={next => {
               savedNavigation.current = navigationFingerprint(next)
               setNavigation(next)
             }}
@@ -942,6 +906,11 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
               setNavigation(next)
               switchEditor(null)
               setDebug(true)
+            }}
+            shoreEditor={shoreEditor}
+            ambientEditor={ambientEditor}
+            onZoom={factor => {
+              controls.current.shoreZoom = factor
             }}
           />
         </Suspense>

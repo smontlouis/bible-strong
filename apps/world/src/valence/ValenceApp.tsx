@@ -16,6 +16,7 @@ import { createShoreEditor } from '../shorelines'
 import { useCameraZoomGestures } from '../use-camera-zoom-gestures'
 import { ARRIVAL_FADE_MS, MINIMUM_LOADING_MS } from '../world-arrival'
 import type { UniverseProps } from '../universes'
+import { selectEditors } from '../workshop/editors'
 import type { NavigationDocument } from '../world'
 import { tileNavigation } from './navigation-tiles'
 import { objectImage, ObjectCard, ShareCard } from './ObjectCard'
@@ -305,6 +306,15 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
     if (revealing || failed) onReady()
   }, [revealing, failed, onReady])
 
+  function switchWorkshop(mode: WorkshopMode | null) {
+    if (workshop) {
+      workshop.mode = mode
+      workshop.notify()
+    }
+    selectEditors(mode, shoreEditor, ambientEditor)
+    setWorkshopMode(mode)
+  }
+
   /** Leaves for the archipelago; the journey's veil grows from `element`. */
   function leave(element: Element) {
     const box = element.getBoundingClientRect()
@@ -560,7 +570,7 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
         )}
       </aside>
       {import.meta.env.DEV && ready && !workshopMode && (
-        <button type="button" className="v-workshop-open" onClick={() => setWorkshopMode('landmarks')}>
+        <button type="button" className="v-workshop-open" onClick={() => switchWorkshop('landmarks')}>
           {t.workshop}
         </button>
       )}
@@ -568,20 +578,7 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
         <Suspense fallback={null}>
           <ValenceWorkshop
             mode={workshopMode}
-            onMode={mode => {
-              workshop.mode = mode
-              shoreEditor.editing = mode === 'shorelines'
-              ambientEditor.editing = Boolean(mode && !['navigation', 'landmarks', 'water', 'shorelines'].includes(mode))
-              if (ambientEditor.editing && mode) {
-                ambientEditor.kind = mode as typeof ambientEditor.kind
-                ambientEditor.selected = ambientEditor.zones.find(z => z.kind === mode)?.id ?? ''
-                ambientEditor.focus++
-                ambientEditor.mode = 'select'
-                ambientEditor.notify()
-              }
-              workshop.notify()
-              setWorkshopMode(mode)
-            }}
+            onMode={switchWorkshop}
             model={workshop}
             controls={controls.current}
             shoreEditor={shoreEditor}

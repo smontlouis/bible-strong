@@ -1,0 +1,96 @@
+/* Shared pieces of the development workshop of every world (src/workshop/WorldWorkshop.tsx).
+   Panels reuse the shoreline editor's sheet (.shore-editor). */
+.workshop-panel h3 {
+  margin: 4px 0 6px;
+  font-size: 14px;
+}
+.workshop-panel section,
+.workshop-panel details {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #dce5d9;
+}
+.workshop-panel summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.workshop-panel label {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+.workshop-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.workshop-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.workshop-chips button {
+  padding: 5px 8px;
+  font-size: 11px;
+}
+.workshop-legend {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+.workshop-legend li::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: -1px;
+  background: #2fae5c;
+}
+.workshop-legend li[data-index='1']::before {
+  background: #2f6bff;
+}
+.workshop-legend li[data-index='2']::before {
+  background: #ff9a2f;
+}
+.workshop-legend li[data-index='3']::before {
+  background: #c23ad1;
+}
+.workshop-legend li[data-index='4']::before {
+  background: #ffd36a;
+}
+.workshop-slider span {
+  display: flex;
+  justify-content: space-between;
+}
+.workshop-slider input {
+  width: 100%;
+}
+.workshop-check {
+  display: flex !important;
+  align-items: center;
+  gap: 8px !important;
+}
+.workshop-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.workshop-list li {
+  display: flex;
+  gap: 6px;
+}
+.workshop-smoke {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #dce5d9;
+  border-radius: 12px;
+}

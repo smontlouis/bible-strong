@@ -1,17 +1,15 @@
-// Development-only workshop of Valence 1876: access zones, landmarks and thread, water and
-// effects, shorelines and ambient zones. Saves go to the project through the Vite dev server.
-import { lazy, Suspense, useEffect, useReducer, useState } from 'react'
+// Valence 1876's workshop: the shared tabs of every world (access, shorelines, ambient zones)
+// plus its own landmarks and water panels. Development only.
+import { useEffect, useReducer, useState } from 'react'
 import type { AmbientEditorModel } from '../ambient-zones'
 import type { Language } from '../language'
 import { Pathfinder } from '../pathfinding'
-import { ShoreEditor } from '../ShoreEditor'
 import type { ShoreEditorModel } from '../shorelines'
 import type { NavigationDocument } from '../world'
-import { AmbientEditorPanel } from '../WorldEditor'
-import '../shore-editor.css'
-import '../world-editor.css'
+import { valenceDocuments } from '../workshop/documents'
+import { commonTabs, saveDocument, SaveBar, Slider, WorldWorkshop, type WorkshopTab } from '../workshop/WorldWorkshop'
 import { tileNavigation } from './navigation-tiles'
-import { parseEffects, parseLayout, serializeDocument, VALENCE_NAVIGATION, type EffectToggle } from './valence-documents'
+import { parseEffects, parseLayout, VALENCE_NAVIGATION, type EffectToggle } from './valence-documents'
 import type { ValenceControls } from './valence-game'
 import { pioneerObjects, stations } from './valence-story'
 import {
@@ -26,25 +24,11 @@ import {
 } from './valence-world'
 import type { WorkshopMode, WorkshopModel } from './workshop-model'
 
-const ZoneEditor = lazy(() => import('../ZoneEditor'))
-
 const copy = {
   fr: {
     title: 'Atelier de Valence',
-    navigation: 'Accès',
     landmarks: 'Repères',
     water: 'Eau et effets',
-    shorelines: 'Rivages',
-    particles: 'Particules',
-    light: 'Lueurs',
-    butterfly: 'Papillons',
-    dragonfly: 'Libellules',
-    done: 'Terminer',
-    save: 'Sauvegarder',
-    saved: 'Sauvegardé dans le projet',
-    dirty: 'Modifications à sauvegarder',
-    error: 'Sauvegarde impossible. Vérifie le serveur local et les valeurs.',
-    undo: 'Annuler',
     landmarksHelp:
       'Fais glisser les points sur la carte. Double-clic sur le fil pour ajouter un point, Suppr pour retirer le point choisi. Glisse le fond pour déplacer la vue, molette pour zoomer.',
     legend: ['Arrivée', 'Stations (cercle : portée d’écoute)', 'Étiquettes', 'Objets', 'Fil'],
@@ -84,24 +68,11 @@ const copy = {
     size: 'Taille',
     speed: 'Vitesse',
     opacity: 'Opacité',
-    loading: 'Chargement…',
   },
   en: {
     title: 'Valence workshop',
-    navigation: 'Access',
     landmarks: 'Landmarks',
     water: 'Water and effects',
-    shorelines: 'Shorelines',
-    particles: 'Particles',
-    light: 'Glows',
-    butterfly: 'Butterflies',
-    dragonfly: 'Dragonflies',
-    done: 'Done',
-    save: 'Save',
-    saved: 'Saved to the project',
-    dirty: 'Unsaved changes',
-    error: 'Cannot save. Check the local server and the values.',
-    undo: 'Undo',
     landmarksHelp:
       'Drag the points on the map. Double-click the thread to add a point, Delete removes the selected point. Drag the background to pan, scroll to zoom.',
     legend: ['Arrival', 'Stations (circle: listening range)', 'Tags', 'Objects', 'Thread'],
@@ -141,67 +112,12 @@ const copy = {
     size: 'Size',
     speed: 'Speed',
     opacity: 'Opacity',
-    loading: 'Loading…',
   },
 }
 type Copy = (typeof copy)['fr']
-const MODES: WorkshopMode[] = ['navigation', 'landmarks', 'water', 'shorelines', 'particles', 'light', 'butterfly', 'dragonfly']
-
-async function put(key: string, document: unknown) {
-  const response = await fetch(`/__study-world/valence-1876/${key}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: serializeDocument(document),
-  })
-  if (!response.ok) throw new Error(`Save ${key}: ${response.status}`)
-}
-
 function useModel(model: WorkshopModel) {
   const [, refresh] = useReducer(n => n + 1, 0)
   useEffect(() => model.subscribe(refresh), [model])
-}
-
-function SaveBar({
-  t,
-  dirty,
-  canUndo,
-  onUndo,
-  onSave,
-}: {
-  t: Copy
-  dirty: boolean
-  canUndo: boolean
-  onUndo: () => void
-  onSave: () => Promise<void>
-}) {
-  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
-  return (
-    <div className="editor-save-bar">
-      <small role="status">
-        {status === 'error' ? t.error : status === 'saving' ? '…' : dirty ? t.dirty : status === 'saved' ? t.saved : ''}
-      </small>
-      <div className="v-workshop-row">
-        <button type="button" disabled={!canUndo} onClick={onUndo}>
-          {t.undo}
-        </button>
-        <button
-          type="button"
-          disabled={status === 'saving'}
-          onClick={async () => {
-            setStatus('saving')
-            try {
-              await onSave()
-              setStatus('saved')
-            } catch {
-              setStatus('error')
-            }
-          }}
-        >
-          {t.save}
-        </button>
-      </div>
-    </div>
-  )
 }
 
 function LandmarksPanel({ model, controls, t, language }: { model: WorkshopModel; controls: ValenceControls; t: Copy; language: Language }) {
@@ -228,12 +144,12 @@ function LandmarksPanel({ model, controls, t, language }: { model: WorkshopModel
     return null
   })()
   return (
-    <aside className="shore-editor v-workshop-panel" aria-label={t.landmarks}>
+    <aside className="shore-editor workshop-panel" aria-label={t.landmarks}>
       <header>
         <h2>{t.landmarks}</h2>
       </header>
       <small>{t.landmarksHelp}</small>
-      <ul className="v-workshop-legend">
+      <ul className="workshop-legend">
         {t.legend.map((text, index) => (
           <li key={text} data-index={index}>
             {text}
@@ -275,7 +191,7 @@ function LandmarksPanel({ model, controls, t, language }: { model: WorkshopModel
         {drawing?.kind === 'thread' ? (
           <>
             <small>{t.redrawHelp}</small>
-            <div className="v-workshop-row">
+            <div className="workshop-row">
               <button type="button" onClick={() => model.finishDrawing()}>
                 {t.finish}
               </button>
@@ -291,7 +207,7 @@ function LandmarksPanel({ model, controls, t, language }: { model: WorkshopModel
             </div>
           </>
         ) : (
-          <div className="v-workshop-row">
+          <div className="workshop-row">
             <button
               type="button"
               onClick={() => {
@@ -323,7 +239,7 @@ function LandmarksPanel({ model, controls, t, language }: { model: WorkshopModel
       </section>
       <section>
         <h3>{t.places}</h3>
-        <div className="v-workshop-chips">
+        <div className="workshop-chips">
           <button type="button" onClick={() => ((model.focus = VALENCE_SPAWN), model.notify())}>
             {t.spawn}
           </button>
@@ -359,13 +275,12 @@ function LandmarksPanel({ model, controls, t, language }: { model: WorkshopModel
         </div>
       </section>
       <SaveBar
-        t={t}
+        language={language}
         dirty={model.layoutDirty}
         canUndo={model.canUndoLayout}
         onUndo={() => model.undo('layout')}
         onSave={async () => {
-          const layout = parseLayout(currentLayout())
-          await put('layout', layout)
+          await saveDocument(valenceDocuments.layout.endpoint, parseLayout(currentLayout()))
           model.markSaved('layout')
         }}
       />
@@ -373,43 +288,7 @@ function LandmarksPanel({ model, controls, t, language }: { model: WorkshopModel
   )
 }
 
-function Slider({
-  label,
-  value,
-  min,
-  max,
-  step,
-  onStart,
-  onChange,
-}: {
-  label: string
-  value: number
-  min: number
-  max: number
-  step: number
-  onStart: () => void
-  onChange: (value: number) => void
-}) {
-  return (
-    <label className="v-workshop-slider">
-      <span>
-        {label} <output>{Math.round(value * 100) / 100}</output>
-      </span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onPointerDown={onStart}
-        onKeyDown={onStart}
-        onChange={e => onChange(e.target.valueAsNumber)}
-      />
-    </label>
-  )
-}
-
-function WaterPanel({ model, t }: { model: WorkshopModel; t: Copy }) {
+function WaterPanel({ model, t, language }: { model: WorkshopModel; t: Copy; language: Language }) {
   useModel(model)
   const effects = model.effects.effects
   const drawing = model.drawing
@@ -421,7 +300,7 @@ function WaterPanel({ model, t }: { model: WorkshopModel; t: Copy }) {
   const group = (key: keyof Copy['groups'], setting: EffectToggle) => (
     <details key={key} open={key === 'glints' || key === 'currents'}>
       <summary>{t.groups[key]}</summary>
-      <label className="v-workshop-check">
+      <label className="workshop-check">
         <input
           type="checkbox"
           checked={setting.enabled}
@@ -447,7 +326,7 @@ function WaterPanel({ model, t }: { model: WorkshopModel; t: Copy }) {
     </details>
   )
   return (
-    <aside className="shore-editor v-workshop-panel" aria-label={t.water}>
+    <aside className="shore-editor workshop-panel" aria-label={t.water}>
       <header>
         <h2>{t.water}</h2>
       </header>
@@ -455,7 +334,7 @@ function WaterPanel({ model, t }: { model: WorkshopModel; t: Copy }) {
       {(['glints', 'currents', 'leaves', 'clouds'] as const).map(key => group(key, effects[key]))}
       <section>
         <h3>{t.exclusions}</h3>
-        <ul className="v-workshop-list">
+        <ul className="workshop-list">
           {effects.exclusions.map((zone, index) => (
             <li key={index}>
               <button type="button" onClick={() => ((model.focus = { x: zone[0][0], y: zone[0][1] }), model.notify())}>
@@ -477,7 +356,7 @@ function WaterPanel({ model, t }: { model: WorkshopModel; t: Copy }) {
         {drawing?.kind === 'exclusion' ? (
           <>
             <small>{t.exclusionHelp}</small>
-            <div className="v-workshop-row">
+            <div className="workshop-row">
               <button type="button" onClick={() => model.finishDrawing()}>
                 {t.finish}
               </button>
@@ -495,7 +374,7 @@ function WaterPanel({ model, t }: { model: WorkshopModel; t: Copy }) {
       <section>
         <h3>{t.smoke}</h3>
         {effects.smoke.map((source, index) => (
-          <div className="v-workshop-smoke" key={index}>
+          <div className="workshop-smoke" key={index}>
             <button type="button" onClick={() => ((model.focus = source), (model.selected = { kind: 'smoke', index }), model.notify())}>
               {t.smoke} {index + 1}
             </button>
@@ -522,13 +401,12 @@ function WaterPanel({ model, t }: { model: WorkshopModel; t: Copy }) {
         )}
       </section>
       <SaveBar
-        t={t}
+        language={language}
         dirty={model.effectsDirty}
         canUndo={model.canUndoEffects}
         onUndo={() => model.undo('effects')}
         onSave={async () => {
-          const document = parseEffects(effects)
-          await put('effects', document)
+          await saveDocument(valenceDocuments.effects.endpoint, parseEffects(effects))
           model.markSaved('effects')
         }}
       />
@@ -565,52 +443,33 @@ export default function ValenceWorkshop({
   const zoom = (factor: number) => {
     controls.shoreZoom = factor
   }
-  return (
-    <>
-      <nav className="world-editor-navigation v-workshop-navigation" aria-label={t.title}>
-        <strong>{t.title}</strong>
-        <div className="world-editor-tabs">
-          {MODES.map(key => (
-            <button key={key} type="button" aria-pressed={mode === key} onClick={() => onMode(key)}>
-              {t[key]}
-            </button>
-          ))}
-        </div>
-        <button type="button" className="editor-done" onClick={() => onMode(null)}>
-          {t.done} ↗
-        </button>
-      </nav>
-      {mode === 'navigation' && (
-        <Suspense fallback={<div className="zone-editor">{t.loading}</div>}>
-          <ZoneEditor
-            map={{
-              spec: VALENCE_NAVIGATION,
-              image: './valence-1876/map/preview.webp',
-              spawn: VALENCE_SPAWN,
-              endpoint: '/__study-world/valence-1876/navigation',
-              filename: 'valence-1876-navigation.json',
-              prepare: tileNavigation,
-              maxZones: 400,
-            }}
-            initial={navigation}
-            language={language}
-            onSave={onNavigation}
-            onTest={next => {
-              onNavigation(next)
-              controls.debug = true
-              onMode(null)
-            }}
-          />
-        </Suspense>
-      )}
-      {mode === 'landmarks' && <LandmarksPanel model={model} controls={controls} t={t} language={language} />}
-      {mode === 'water' && <WaterPanel model={model} t={t} />}
-      {mode === 'shorelines' && (
-        <ShoreEditor model={shoreEditor} language={language} onZoom={zoom} onClose={() => onMode(null)} />
-      )}
-      {(mode === 'particles' || mode === 'light' || mode === 'butterfly' || mode === 'dragonfly') && (
-        <AmbientEditorPanel model={ambientEditor} language={language} onZoom={zoom} />
-      )}
-    </>
-  )
+  const common = commonTabs({
+    language,
+    map: {
+      spec: VALENCE_NAVIGATION,
+      image: './valence-1876/map/preview.webp',
+      spawn: VALENCE_SPAWN,
+      endpoint: valenceDocuments.navigation.endpoint,
+      filename: 'valence-1876-navigation.json',
+      prepare: tileNavigation,
+      maxZones: 400,
+    },
+    navigation,
+    onNavigation,
+    onTest: next => {
+      onNavigation(next)
+      controls.debug = true
+      onMode(null)
+    },
+    shoreEditor,
+    ambientEditor,
+    onZoom: zoom,
+    onClose: () => onMode(null),
+  })
+  const own: WorkshopTab<WorkshopMode>[] = [
+    { id: 'landmarks', label: { fr: copy.fr.landmarks, en: copy.en.landmarks }, panel: () => <LandmarksPanel model={model} controls={controls} t={t} language={language} /> },
+    { id: 'water', label: { fr: copy.fr.water, en: copy.en.water }, panel: () => <WaterPanel model={model} t={t} language={language} /> },
+  ]
+  const tabs: WorkshopTab<WorkshopMode>[] = [common[0], ...own, ...common.slice(1)]
+  return <WorldWorkshop title={{ fr: copy.fr.title, en: copy.en.title }} tabs={tabs} mode={mode} onMode={onMode} language={language} />
 }

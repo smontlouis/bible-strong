@@ -101,36 +101,6 @@ export const editorCopy = {
     loading: 'Loading…',
   },
 }
-export function EditorNavigation({
-  mode,
-  language,
-  onMode,
-  onClose,
-}: {
-  mode: EditorMode
-  language: keyof typeof editorCopy
-  onMode: (m: EditorMode) => void
-  onClose: () => void
-}) {
-  const t = editorCopy[language]
-  return (
-    <nav className="world-editor-navigation" aria-label={t.title}>
-      <strong>{t.title}</strong>
-      <div className="world-editor-tabs">
-        {(
-          ['navigation', 'shorelines', 'particles', 'butterfly', 'light', 'dragonfly'] as const
-        ).map(key => (
-          <button key={key} aria-pressed={mode === key} onClick={() => onMode(key)}>
-            {t[key]}
-          </button>
-        ))}
-      </div>
-      <button className="editor-done" onClick={onClose}>
-        {t.close} ↗
-      </button>
-    </nav>
-  )
-}
 export function AmbientEditorPanel({
   model,
   language,
