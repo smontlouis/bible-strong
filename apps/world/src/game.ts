@@ -66,9 +66,6 @@ class ArchipelagoScene extends WorldScene<Controls> {
   resetPosition() {
     return this.safePosition(SPAWN) ?? this.position
   }
-  tourStops() {
-    return islandActions.map(({ x, y }) => ({ x, y }))
-  }
   createCrowd() {
     return new StandCrowd(this.controls.navigation)
   }

@@ -48,6 +48,10 @@ export function useCameraZoomGestures(
     const onWheel = (event: WheelEvent) => {
       tap.cancel()
       touched()
+      if (stand()) {
+        const bounds = zone.getBoundingClientRect()
+        controlsRef.current.zoomAnchor = { x: event.clientX - bounds.left, y: event.clientY - bounds.top }
+      }
       if (controlsRef.current.shoreEditor?.editing || controlsRef.current.ambientEditor?.editing)
         return
       event.preventDefault()
@@ -100,6 +104,16 @@ export function useCameraZoomGestures(
       touches.set(event.pointerId, { x: event.clientX, y: event.clientY })
       if (touches.size !== 2) return
       event.preventDefault()
+      if (stand()) {
+        // A pinch zooms around the point between the two fingers.
+        const [first, second] = [...touches.values()]
+        const bounds = zone.getBoundingClientRect()
+        controlsRef.current.zoomAnchor = {
+          x: (first.x + second.x) / 2 - bounds.left,
+          y: (first.y + second.y) / 2 - bounds.top,
+        }
+        touched()
+      }
       controlsRef.current.zoom = zoomFromPinch(
         pinchStartZoom,
         pinchStartDistance,

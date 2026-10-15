@@ -14,9 +14,10 @@ import { useCameraZoomGestures } from '../use-camera-zoom-gestures'
 import type { UniverseProps } from '../universes'
 import { selectEditors } from '../workshop/editors'
 import type { NavigationDocument } from '../world'
-import { StandShell, useExplorerProfile, useJoystick, useWorldLanguage, useWorldScene, WorldPresence } from '../world-shell'
+import { StandShell, useExplorerProfile, useJoystick, useStandTour, useWorldLanguage, useWorldScene, WorldPresence, type TourStop } from '../world-shell'
 import { tileNavigation } from './navigation-tiles'
 import { objectImage, ObjectCard, ShareCard } from './ObjectCard'
+import { StandPresentation } from './StandPresentation'
 import { StationScene } from './StationScene'
 import { valenceCopy } from './valence-copy'
 import { createValence, type ValenceControls, type ValenceState } from './valence-game'
@@ -234,6 +235,13 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
   )
 
   useCameraZoomGestures(host, controls, setOverview)
+  // A stand screen tours the places in the order of the story, presenting each one.
+  // The anchors come with the layout document: read them once the map is loaded.
+  const standStops = useMemo(
+    (): TourStop[] => (navigation ? threadOrder.map(id => ({ id, point: { ...stationAnchors[id] } })) : []),
+    [navigation]
+  )
+  const tour = useStandTour(controls, standStops, stand && ready)
   useJoystick(joystick, controls, { front: '#f5e6c4', back: '#3b2414' })
 
   useEffect(() => {
@@ -393,6 +401,12 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
           <StandShell
             language={language}
             status={state.multiplayer}
+            tour={tour}
+            presentation={
+              tour.stop && (
+                <StandPresentation key={tour.legKey} station={byId.get(tour.stop.id as StationId)!} language={language} onDone={tour.done} />
+              )
+            }
             title={
               <div className="v-brand">
                 <span className="v-brand-title">{t.title}</span>

@@ -23,9 +23,9 @@ const BUST_SCALE: Partial<Record<SpeakerId, number>> = { crier: 0.84, elise: 0.9
 const CHARS_PER_SECOND = 48
 const PAUSES: Record<string, number> = { '.': 260, '!': 260, '?': 260, '…': 300, ':': 200, ';': 200, ',': 110 }
 
-type Step = { beat: BeatKind; line?: Line }
+export type Step = { beat: BeatKind; line?: Line }
 
-function steps(station: Station): Step[] {
+export function steps(station: Station): Step[] {
   return [
     ...station.fact.map(line => ({ beat: 'fact' as const, line })),
     ...station.study.map(line => ({ beat: 'study' as const, line })),
@@ -73,7 +73,7 @@ export function TodayView({ today, language }: { today: TodayPanel; language: La
 }
 
 /** Reveals `text` letter by letter, pausing on punctuation; instant with reduced motion. */
-function useTypewriter(text: string, key: number) {
+export function useTypewriter(text: string, key: number) {
   // The count belongs to one line: a new line starts hidden even before the effect runs.
   const [state, setState] = useState({ key, count: 0 })
   const reduced = useMemo(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches, [])
@@ -108,7 +108,7 @@ function useTypewriter(text: string, key: number) {
   }
 }
 
-function Bust({
+export function Bust({
   speaker,
   mood,
   side,

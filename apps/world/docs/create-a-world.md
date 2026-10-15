@@ -59,7 +59,6 @@ The hooks hold what is the world's own:
 | `updateScenery(frame)` | Every frame, once the avatar and the camera have moved. `frame` gives the camera, zoom, pause and arrival target |
 | `createCrowd()`, `createBushes()` | Stand passers-by and rustling shrubs |
 | `freeCamera()` | When the workshop moves the camera itself |
-| `tourStops()` | The places a stand screen's tour visits when no visitor is there to follow |
 | `drawDebug(layer, frame)` | Diagnostics drawn over the walkable zones |
 | `publishState(frame)` | The state React reads, ten times a second |
 
@@ -79,9 +78,11 @@ The workshop is development only: load it with `lazy` behind `import.meta.env.DE
 
 ## The stand screen
 
-At `?stand`, a world becomes an exhibition screen: the people visiting it from their phones walk across it. The scene has no avatar (`WorldScene` is then a spectator): a drag, the arrow keys or the wheel move and zoom a free view, and after a minute without anyone touching the screen, a slow tour follows a real visitor, or goes from stop to stop. The room is watched, not joined: the screen sees every visitor and their reactions, is never seen, and its counter shows the real visitors only. Stand passers-by keep the screen alive until real visitors come.
+At `?stand`, a world becomes an exhibition screen: the people visiting it from their phones walk across it. The scene has no avatar (`WorldScene` is then a spectator): a drag, the arrow keys, the wheel or a pinch move and zoom a free view, the zoom staying around the pointer. The room is watched, not joined: the screen sees every visitor and their reactions, is never seen, and its counter shows the real visitors only. Stand passers-by keep the screen alive until real visitors come.
 
-The application renders only `StandShell` over its map: the world's title, the number of explorers right now, and the world's own invitation to scan its QR code. No menu, reaction, object or dialog. Valence keeps its place names, read-only.
+The application renders only `StandShell` over its map: the world's title, the number of explorers right now, the automatic tour's button, what the tour presents, and the world's own invitation to scan its QR code. No menu, reaction, object or dialog. Valence keeps its place names, read-only.
+
+`useStandTour` plays the automatic tour: the camera flies from stop to stop, backing away over a long way and coming close on arrival, with a moment on a real visitor in between when someone is in the room. Touching the screen pauses it; it resumes after 20 quiet seconds, while a ring fills on its button. The button pauses it for good, or plays it at once. A world gives its stops (`TourStop`) and shows something at each one: Valence plays the place's history and dialogue with its characters in bust (`StandPresentation`, without the Bible Strong page of today), and ends the stop itself; the archipelago shows each island's name and what it holds (`StandCaption`) for a set time.
 
 ## 5. The registry
 

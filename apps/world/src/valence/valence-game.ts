@@ -109,9 +109,6 @@ class ValenceScene extends WorldScene<ValenceControls> {
     const { navigation } = this.controls
     return chooseValenceSpawn(navigation, VALENCE_SPAWN) ?? this.safePosition(VALENCE_SPAWN) ?? { ...VALENCE_SPAWN }
   }
-  tourStops() {
-    return threadOrder.map(id => stationAnchors[id])
-  }
   createCrowd() {
     if (!this.controls.stand) return undefined
     return new StandCrowd(this.controls.navigation, Math.random, {

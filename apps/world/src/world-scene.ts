@@ -34,9 +34,6 @@ import { arrivalZoom } from './world-arrival'
 export const RESOLUTION = Math.min(window.devicePixelRatio || 1, 2)
 /** The avatar sheets are drawn for this size, the archipelago's. */
 const AVATAR_SHEET_SIZE = 52
-/** A stand screen tours the world after a minute without anyone touching it. */
-const TOUR_IDLE_MS = 60_000
-const TOUR_ZOOM = 1.1
 
 /** What React and the scene share; each world adds its own fields. */
 export type SceneControls = {
@@ -73,8 +70,12 @@ export type SceneControls = {
   shoreZoom?: number
   /** Stand screen: a drag to apply to the view, in page pixels; consumed once. */
   panBy?: Point
-  /** Stand screen: when someone last touched it; the tour waits for a quiet minute. */
+  /** Stand screen: when someone last touched it, so the tour can step aside. */
   touchedAt?: number
+  /** Stand screen: the page point a wheel or a pinch zooms around, in page pixels; consumed once. */
+  zoomAnchor?: Point
+  /** Stand screen: where the tour flies, a place or a visitor, and how close it looks. */
+  tour?: { point?: Point; visitor?: string; zoom: number } | null
 }
 
 export type SceneState = { x: number; y: number; moving: boolean; fps: number; multiplayer?: PresenceStatus }
@@ -177,10 +178,9 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
   get spectator() {
     return this.controls.stand === true
   }
-  private startedAt = performance.now()
   private follow = 0
-  private tour?: { until: number; point: Point; visitor?: string }
-  private tourIndex = 0
+  /** The view the camera was heading to last frame, to keep a zoom's anchor under the pointer. */
+  private lastView?: { x: number; y: number; zoom: number }
   active = true
   private keys!: Record<string, Phaser.Input.Keyboard.Key>
   private lastReset = 0
@@ -217,10 +217,6 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
   abstract createScenery(): void
   /** The world's own life, every frame, once the avatar and the camera have moved. */
   updateScenery(_frame: SceneFrame): void {}
-  /** Where a stand screen's tour goes when no visitor is there to follow; the map's centre by default. */
-  tourStops(): Point[] {
-    return [{ x: this.options.width / 2, y: this.options.height / 2 }]
-  }
   /** Passers-by for the stand screen or a quiet room; none by default. */
   createCrowd(): StandCrowd | undefined {
     return undefined
@@ -492,8 +488,25 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
       const cover = Math.max(screenWidth / zoom / scenery.width, screenHeight / zoom / scenery.height)
       const follow = Phaser.Math.SmoothStep(Phaser.Math.Clamp((1 - cover) / 0.45, 0, 1), 0, 1)
       this.follow = follow
-      const centerX = width / 2 + (targetX - width / 2) * follow
-      const centerY = height / 2 + (targetY - height / 2) * follow
+      let centerX = width / 2 + (targetX - width / 2) * follow
+      let centerY = height / 2 + (targetY - height / 2) * follow
+      // A stand screen zooms around the pointer, like a map: the point under it stays put.
+      const anchor = controls.zoomAnchor
+      controls.zoomAnchor = undefined
+      if (this.spectator && anchor && this.lastView && this.lastView.zoom !== zoom && follow > 0.02) {
+        const k = screenWidth / parent.clientWidth
+        const ax = anchor.x * k - screenWidth / 2
+        const ay = anchor.y * k - screenHeight / 2
+        const pointerX = this.lastView.x + ax / this.lastView.zoom
+        const pointerY = this.lastView.y + ay / this.lastView.zoom
+        this.position = {
+          x: Phaser.Math.Clamp(width / 2 + (pointerX - ax / zoom - width / 2) / follow, 0, width),
+          y: Phaser.Math.Clamp(height / 2 + (pointerY - ay / zoom - height / 2) / follow, 0, height),
+        }
+        centerX = width / 2 + (this.position.x - width / 2) * follow
+        centerY = height / 2 + (this.position.y - height / 2) * follow
+      }
+      this.lastView = { x: centerX, y: centerY, zoom }
       const smoothing = cameraArrival !== undefined ? 1 : 1 - Math.exp(-Math.min(delta, 50) / 110)
       // Zoom and travel ease together, with the same curve: a quick zoom no longer lands first
       // around the screen's centre and then slides onto the avatar. The zoom eases in log space,
@@ -633,9 +646,8 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
   }
 
   /**
-   * A stand screen's view: a point the camera looks at, moved by a drag or the arrow keys, and,
-   * after a quiet minute, by a slow tour that follows a real visitor when there is one, or goes
-   * from place to place otherwise. The room is watched, never joined.
+   * A stand screen's view: a point the camera looks at, moved by a drag or the arrow keys, or by
+   * the tour React drives (useStandTour). The room is watched, never joined.
    */
   private spectate(delta: number) {
     const { controls, parent, options } = this
@@ -661,21 +673,20 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
       y += controls.panBy.y * perPixel
       controls.panBy = undefined
     }
-    if (now - (controls.touchedAt ?? this.startedAt) > TOUR_IDLE_MS) {
-      if (!this.tour || now > this.tour.until) {
-        const visitors = [...this.network.remotes.keys()]
-        const stops = this.tourStops()
-        this.tour = visitors.length
-          ? { until: now + 16_000, point: this.position, visitor: visitors[Math.floor(Math.random() * visitors.length)] }
-          : { until: now + 12_000, point: stops[this.tourIndex++ % stops.length] }
-      }
-      const target = (this.tour.visitor && this.network.remotes.get(this.tour.visitor)?.sample(now)) || this.tour.point
-      const ease = 1 - Math.exp(-Math.min(delta, 50) / 1600)
+    // The tour flies to a place or follows a visitor: it backs away over a long way and
+    // comes close on arrival, like a camera crossing the town.
+    const tour = controls.tour
+    const visitor = tour?.visitor ? this.network.remotes.get(tour.visitor)?.sample(now) : undefined
+    const target = visitor ?? tour?.point
+    if (tour && target) {
+      const distance = Math.hypot(target.x - x, target.y - y)
+      const ease = 1 - Math.exp(-Math.min(delta, 50) / 1400)
       x += (target.x - x) * ease
       y += (target.y - y) * ease
-      controls.zoom += (TOUR_ZOOM - controls.zoom) * ease
+      const zoom = tour.zoom / (1 + distance / 320)
+      controls.zoom += (zoom - controls.zoom) * (1 - Math.exp(-Math.min(delta, 50) / 900))
       controls.overview = false
-    } else this.tour = undefined
+    }
     this.position = {
       x: Phaser.Math.Clamp(x, 0, options.width),
       y: Phaser.Math.Clamp(y, 0, options.height),

@@ -3,6 +3,8 @@
 .stand-shell {
   --stand-ink: var(--bs-navy, #193d49);
   --stand-paper: var(--bs-card, #fff9ea);
+  /* Text on the ink colour: a plain colour, even when the paper is a texture. */
+  --stand-on-ink: #fff9ea;
   --stand-line: var(--bs-line, rgba(25, 61, 73, 0.18));
   --stand-live: var(--bs-teal, #2fa38f);
   --stand-radius: 18px;
@@ -20,10 +22,15 @@
   top: max(24px, env(safe-area-inset-top));
   left: 24px;
 }
-.stand-count {
+.stand-corner {
   position: absolute;
   top: max(24px, env(safe-area-inset-top));
   right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.stand-count {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -51,4 +58,79 @@
   background: var(--stand-paper);
   color: var(--stand-ink);
   font: 600 22px / 1.1 var(--stand-font);
+}
+/* The automatic tour: play or pause; a ring fills while it waits to resume after a touch. */
+.stand-tour {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px 6px 6px;
+  border: 1px solid var(--stand-line);
+  border-radius: var(--stand-radius);
+  background: var(--stand-paper);
+  color: var(--stand-ink);
+  font: 600 16px / 1 var(--stand-font);
+  cursor: pointer;
+}
+.stand-tour svg {
+  width: 36px;
+  height: 36px;
+  fill: currentColor;
+}
+.stand-tour-ring {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  transition: stroke-dashoffset 250ms linear;
+}
+.stand-tour[aria-pressed='true'] {
+  background: var(--stand-ink);
+  color: var(--stand-on-ink);
+}
+/* What the tour presents at a place, opposite the invitation to scan. */
+.stand-presentation {
+  position: absolute;
+  left: 24px;
+  bottom: max(28px, calc(env(safe-area-inset-bottom) + 20px));
+}
+.stand-caption {
+  --caption-color: var(--stand-live);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: min(460px, 36vw);
+  padding: 12px 24px 12px 12px;
+  border: 1px solid var(--stand-line);
+  border-left: 8px solid var(--caption-color);
+  border-radius: var(--stand-radius);
+  background: var(--stand-paper);
+  color: var(--stand-ink);
+  font-family: var(--stand-font);
+  animation: stand-caption-in 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes stand-caption-in {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}
+.stand-caption img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+.stand-caption > span {
+  display: grid;
+  gap: 6px;
+}
+.stand-caption strong {
+  font-size: 30px;
+  line-height: 1.05;
+}
+.stand-caption > span > span {
+  font-size: 18px;
+  line-height: 1.3;
+  opacity: 0.8;
 }

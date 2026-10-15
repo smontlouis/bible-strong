@@ -15,7 +15,7 @@ import { createAmbientEditor } from './ambient-zones'
 import { editorCopy, type EditorMode } from './WorldEditor'
 import { createShoreEditor } from './shorelines'
 import { selectEditors } from './workshop/editors'
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { clampCameraZoom } from './camera-zoom'
 import { ControlIcon } from './ControlIcon'
 import { Modal } from './Modal'
@@ -46,7 +46,7 @@ const CommentariesDiscovery = lazy(() =>
 import { AvatarEditor, profileCopy } from './AvatarEditor'
 import { AVATAR_COLORS } from './avatar-profile'
 import { loadVisitedPlaces, saveVisitedPlaces } from './visited-places'
-import { StandShell, useExplorerProfile, useJoystick, useWorldLanguage, useWorldScene, WorldPresence } from './world-shell'
+import { StandCaption, StandShell, useExplorerProfile, useJoystick, useStandTour, useWorldLanguage, useWorldScene, WorldPresence, type TourStop } from './world-shell'
 import type { UniverseProps } from './universes'
 import { WORLD_PORTAL } from './world-portal'
 const ArchipelagoWorkshop = import.meta.env.DEV ? lazy(() => import('./ArchipelagoWorkshop')) : () => null
@@ -264,6 +264,17 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
     language === 'fr' ? station.name : station[language]
 
   useCameraZoomGestures(host, controls, setOverview)
+  // A stand screen tours the six islands, with each one's name and what it holds.
+  const standStops = useMemo(
+    (): TourStop[] =>
+      stations.map(station => {
+        const anchor = islandActions.find(action => action.id === station.id)!
+        return { id: station.id, point: { x: anchor.x, y: anchor.y }, zoom: 1.6, dwell: 9000 }
+      }),
+    []
+  )
+  const tour = useStandTour(controls, standStops, stand && ready)
+  const shownIsland = tour.stop ? stations.findIndex(station => station.id === tour.stop!.id) : -1
   useJoystick(joystick, controls, { front: '#fff6df', back: '#163f51' })
 
   useEffect(() => {
@@ -436,6 +447,18 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
           <StandShell
             language={language}
             status={state.multiplayer}
+            tour={tour}
+            presentation={
+              shownIsland >= 0 && (
+                <StandCaption
+                  key={tour.legKey}
+                  image={`/assets/journal/${stations[shownIsland].id}.png`}
+                  title={name(stations[shownIsland])}
+                  text={journalCopy[language].descriptions[shownIsland]}
+                  color={stations[shownIsland].color}
+                />
+              )
+            }
             title={
               <p className="stand-heading">
                 Bible Strong <strong>World</strong>
