@@ -117,7 +117,10 @@ export type Station = {
   sources: Source[]
 }
 
-const web = (path: string) => `https://web.bible-strong.app${path}`
+/** Public pages of the Bible Strong site, never the app: indexable and readable without signing in. */
+const site = (path: string) => `https://bible-strong.app${path}`
+const home = { fr: site('/fr'), en: site('/') }
+const discover = { fr: 'Découvrir Bible Strong', en: 'Discover Bible Strong' }
 const shot = (name: string) => `./valence-1876/today/${name}.webp`
 
 const RH_1877_04_05: Source = {
@@ -222,7 +225,7 @@ export const stations: Station[] = [
         en: 'Commentaries, dictionaries, Bibles: Bible Strong downloads them in seconds and keeps them up to date without waiting for a train.',
       },
       cta: { fr: 'Ouvrir la bibliothèque', en: 'Open the library' },
-      url: { fr: web('/commentary-library'), en: web('/commentary-library') },
+      url: { fr: site('/commentary/fr'), en: site('/commentary/en') },
       screenshot: shot('download-manager'),
     },
     sources: [ARCHIVES_FRANCE, REVUE_SUISSE, ESDA_ANDREWS, EVENT_150],
@@ -299,8 +302,8 @@ export const stations: Station[] = [
       },
       cta: { fr: 'Comparer ce verset', en: 'Compare this verse' },
       url: {
-        fr: web('/bible-compare-verses?selectedVerses=%7B%2219-119-105%22%3Atrue%7D'),
-        en: web('/bible-compare-verses?selectedVerses=%7B%2219-119-105%22%3Atrue%7D'),
+        fr: site('/bible/lsg/ps/119/105'),
+        en: site('/bible/kjv/ps/119/105'),
       },
       screenshot: shot('compare'),
     },
@@ -400,8 +403,8 @@ export const stations: Station[] = [
       },
       cta: { fr: 'Ouvrir le mot hébreu', en: 'Open the Hebrew word' },
       url: {
-        fr: web('/strong/h5216?bibleVersion=LSG'),
-        en: web('/strong/h5216?bibleVersion=KJV'),
+        fr: site('/strong/fr/h5216'),
+        en: site('/strong/en/h5216'),
       },
       screenshot: shot('lexicon'),
     },
@@ -490,7 +493,7 @@ export const stations: Station[] = [
         reference: { fr: 'Apocalypse 12:6', en: 'Revelation 12:6' },
       },
       cta: { fr: 'Ouvrir Apocalypse 12', en: 'Open Revelation 12' },
-      url: { fr: web('/bible/lsg/rev/12/6'), en: web('/bible/kjv/rev/12/6') },
+      url: { fr: site('/bible/lsg/rev/12/6'), en: site('/bible/kjv/rev/12/6') },
       screenshot: shot('commentaries'),
     },
     sources: [
@@ -607,8 +610,8 @@ export const stations: Station[] = [
         fr: 'Chaque matin, un verset, une méditation, un plan de lecture : une lecture quotidienne qui tient dans la poche, en ville ou en voyage.',
         en: 'Every morning, a verse, a meditation, a reading plan: daily reading that fits in your pocket, at home or on the road.',
       },
-      cta: { fr: 'Voir le verset du jour', en: 'See the verse of the day' },
-      url: { fr: web('/daily-verse'), en: web('/daily-verse') },
+      cta: discover,
+      url: home,
       screenshot: shot('verse-of-day'),
     },
     sources: [
@@ -677,8 +680,8 @@ export const stations: Station[] = [
         fr: 'Bibles, lexiques, dictionnaires, commentaires : télécharge-les une fois, et lis sans réseau, au fond d’une vallée comme dans le train.',
         en: 'Bibles, lexicons, dictionaries, commentaries: download them once and read without a connection, deep in a valley or on a train.',
       },
-      cta: { fr: 'Gérer les téléchargements', en: 'Manage downloads' },
-      url: { fr: web('/downloads'), en: web('/downloads') },
+      cta: discover,
+      url: home,
       screenshot: shot('offline'),
     },
     sources: [
@@ -798,7 +801,7 @@ export const pioneerObjects: PioneerObject[] = [
       en: 'The Ostervald is in Bible Strong, alongside the Martin, the Lausanne, the Darby and the Segond.',
     },
     cta: { fr: 'Lire l’Ostervald', en: 'Read the Ostervald' },
-    url: { fr: web('/bible/ost/ps/119/105'), en: web('/bible/ost/ps/119/105') },
+    url: { fr: site('/bible/ost/ps/119/105'), en: site('/bible/ost/ps/119/105') },
     screenshot: shot('versions'),
   },
   {
@@ -812,8 +815,8 @@ export const pioneerObjects: PioneerObject[] = [
       fr: 'Les plans de lecture et les méditations de Bible Strong arrivent chaque jour.',
       en: 'Bible Strong’s reading plans and meditations arrive every day.',
     },
-    cta: { fr: 'Voir les plans de lecture', en: 'See the reading plans' },
-    url: { fr: web('/plans'), en: web('/plans') },
+    cta: discover,
+    url: home,
     screenshot: shot('plans'),
   },
   {
@@ -828,7 +831,7 @@ export const pioneerObjects: PioneerObject[] = [
       en: 'Search runs through the whole Bible in an instant, and the Strong concordance follows every Hebrew and Greek word.',
     },
     cta: { fr: 'Ouvrir la concordance', en: 'Open the concordance' },
-    url: { fr: web('/strong/h5216?bibleVersion=LSG'), en: web('/strong/h5216?bibleVersion=KJV') },
+    url: { fr: site('/strong/fr/h5216'), en: site('/strong/en/h5216') },
     screenshot: shot('concordance'),
   },
   {
@@ -843,7 +846,7 @@ export const pioneerObjects: PioneerObject[] = [
       en: 'The same Bost, in Bible Strong’s dictionary.',
     },
     cta: { fr: 'Ouvrir le dictionnaire', en: 'Open the dictionary' },
-    url: { fr: web('/dictionnaire'), en: web('/dictionnaire') },
+    url: { fr: site('/dictionary/fr/bost'), en: site('/dictionary/en') },
     screenshot: shot('dictionary'),
   },
   {
@@ -858,7 +861,7 @@ export const pioneerObjects: PioneerObject[] = [
       en: 'Bible Strong’s Hebrew lexicon, with the pronunciation of every word.',
     },
     cta: { fr: 'Ouvrir le lexique hébreu', en: 'Open the Hebrew lexicon' },
-    url: { fr: web('/strong/h7676?bibleVersion=LSG'), en: web('/strong/h7676?bibleVersion=KJV') },
+    url: { fr: site('/strong/fr/h7676'), en: site('/strong/en/h7676') },
     screenshot: shot('hebrew'),
   },
   {
@@ -873,7 +876,7 @@ export const pioneerObjects: PioneerObject[] = [
       en: 'The dark theme and the sepia mode, for reading late in the evening.',
     },
     cta: { fr: 'Choisir un thème', en: 'Choose a theme' },
-    url: { fr: web('/theme'), en: web('/theme') },
+    url: { fr: site('/nave/fr'), en: site('/nave/en') },
     screenshot: shot('theme'),
   },
   {
@@ -888,7 +891,7 @@ export const pioneerObjects: PioneerObject[] = [
       en: 'The library’s commentaries, right under every verse.',
     },
     cta: { fr: 'Ouvrir les commentaires', en: 'Open the commentaries' },
-    url: { fr: web('/commentary-library'), en: web('/commentary-library') },
+    url: { fr: site('/commentary/fr'), en: site('/commentary/en') },
     screenshot: shot('commentaries'),
   },
 ]

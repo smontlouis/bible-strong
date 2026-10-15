@@ -122,7 +122,7 @@ export function ThemesDiscovery({
               <div className="lexicon-more">
                 <h2>{t.more}</h2>
                 <p>{t.possibilities}</p>
-                <a href="https://web.bible-strong.app/nave" target="_blank" rel="noreferrer">
+                <a href={`https://bible-strong.app/nave/${language}`} target="_blank" rel="noreferrer">
                   {t.open} ↗
                 </a>
               </div>

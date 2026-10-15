@@ -76,9 +76,9 @@ describe('Valence 1876 story', () => {
     for (const object of pioneerObjects) await stat(publicFile(`valence-1876/objects/${object.id}.webp`))
   })
 
-  it('links today panels to Bible Strong on the web', () => {
+  it('links today panels to the public Bible Strong site, never to the app', () => {
     for (const item of [...stations.map(s => s.today), ...pioneerObjects].filter(Boolean))
-      for (const url of Object.values(item!.url)) expect(url).toMatch(/^https:\/\/web\.bible-strong\.app\//)
+      for (const url of Object.values(item!.url)) expect(url).toMatch(/^https:\/\/bible-strong\.app\//)
   })
 })
 
