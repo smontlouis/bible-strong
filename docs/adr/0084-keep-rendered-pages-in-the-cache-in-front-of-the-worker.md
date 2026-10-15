@@ -57,3 +57,19 @@ build computes one revision for the whole site instead.
 - The warm-up script reads `Cf-Cache-Status`; a page it renders is kept for every data centre.
 - The feature is recent: its limits (the size of an answer, the rate of purges) are those of
   Cloudflare's free plan whatever the plan of the account.
+
+## Amendment (2026-10-15): pages are refreshed by hand, and a publication keeps them
+
+Two things emptied the whole page cache although no page had changed:
+
+- `yarn resources:worker:deploy` ended with `yarn site:pages:refresh --everything`. It no longer
+  does: the Resource API keeps its own answers across a deployment too (ADR-0076, amended), and the
+  operator refreshes the folders a change made stale, with `yarn cache:invalidate --site <folder>`.
+- The build bundled the whole Artifact catalog, through `BHG_INTERLINEAR_IDENTITY`, so that every
+  publication gave the next automatic deployment of the site a new revision. The identity now has
+  a module of its own (`@bible-strong/resource-catalog/interlinear-bible-identity`), and the
+  build-revision plugin fails a build that bundles `mobile-resource-catalog.json`.
+
+A republished resource therefore keeps its pages until its folders are refreshed, or for the month
+a page is kept. A deployment that changes the code of the site still renders every page again: a
+page names the scripts and styles of its build.
