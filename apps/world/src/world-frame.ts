@@ -42,12 +42,18 @@ export class WorldFrame {
     const extent = framedExtent(width, height, look)
 
     // The wall, dark away from the painting and lit around it: the light fades out with no edge.
+    // Its grain is one small texture laid again and again: a tile sprite this size kept a canvas
+    // and a copy of it, over a gigabyte, enough for iOS to kill the page.
     scene.cameras.main.setBackgroundColor(look.wall)
-    const reach = Math.max(extent.width, extent.height) * 8
-    scene.add
-      .tileSprite(width / 2, height / 2, reach, reach, grainTexture(scene, look.wall))
-      .setTileScale(0.5)
+    const grain = grainTexture(scene, look.wall)
+    // Three times the framed painting covers what the farthest zoom shows, on any screen shape.
+    const tiles = Math.ceil((Math.max(extent.width, extent.height) * 3) / (GRAIN_SIZE * GRAIN_SCALE))
+    const wall = scene.add
+      .blitter(width / 2 - (tiles * GRAIN_SIZE * GRAIN_SCALE) / 2, height / 2 - (tiles * GRAIN_SIZE * GRAIN_SCALE) / 2, grain)
+      .setScale(GRAIN_SCALE)
       .setDepth(-300)
+    for (let row = 0; row < tiles; row++)
+      for (let column = 0; column < tiles; column++) wall.create(column * GRAIN_SIZE, row * GRAIN_SIZE)
     scene.add
       .image(width / 2, height / 2 - margin * 0.3, lightTexture(scene))
       .setDisplaySize(extent.width * 1.9, extent.height * 2.2)
@@ -95,11 +101,15 @@ export class WorldFrame {
   }
 }
 
+/** The grain's texture, in pixels, and its size on the map: half a map unit per pixel. */
+const GRAIN_SIZE = 1024
+const GRAIN_SCALE = 0.5
+
 /** A faint plaster grain on the wall's colour, repeated. */
 function grainTexture(scene: Phaser.Scene, wall: string) {
   const key = `world-wall-${wall}`
   if (scene.textures.exists(key)) return key
-  const size = 256
+  const size = GRAIN_SIZE
   const canvas = scene.textures.createCanvas(key, size, size)!
   const context = canvas.getContext()
   context.fillStyle = wall
