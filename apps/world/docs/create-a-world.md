@@ -19,7 +19,8 @@ Pick an identifier, used for the address, the folder and the room: `jerusalem-30
 
 1. Keep one source image of the whole map. Its size in pixels at 1× becomes the world's coordinates (the archipelago is 1671 × 941, Valence 1672 × 941). Navigation, landmarks and cut-outs are all expressed in these units.
 2. Build the progressive map from the high-resolution source, the way `scripts/valence/build-map-tiles.mjs` does for Valence. It writes `public/jerusalem-30/map/preview.webp`, the tiles under `public/jerusalem-30/map/tiles/` and the tile manifest under `src/jerusalem-30/generated/map-tiles.json`. The source image is not committed.
-3. Cut-outs the avatar passes behind (roofs, canopies) come from offline segmentation, as `scripts/valence/build_navigation.py` does. The browser only ships reviewed cut-outs and their metadata.
+3. A world without scenery past its map can hang as a painting: `src/world-frame.ts` draws a frame, a wall and a plaque around it, and widens the zoom-out to them ([Valence's frame](valence-1876/frame.md)). Build the frame image for the map with `scripts/build-world-frame.py`.
+4. Cut-outs the avatar passes behind (roofs, canopies) come from offline segmentation, as `scripts/valence/build_navigation.py` does. The browser only ships reviewed cut-outs and their metadata.
 
 ## 2. The documents
 

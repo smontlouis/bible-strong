@@ -484,7 +484,6 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
 
       <aside className="v-bottom">
         <div className="joystick-zone" ref={joystick} role="group" aria-label={t.joystick} />
-        {ready && !stand && !workshopMode && <p className="v-keys">{t.keys}</p>}
         {ready && !workshopMode && (
           <div className="v-social">
             {profile.name && (

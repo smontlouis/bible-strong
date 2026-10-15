@@ -6,6 +6,7 @@ import type { MapTileManifest } from '../map-tiles'
 import { VALENCE_ROOM } from '../multiplayer-protocol'
 import { StandCrowd } from '../stand-crowd'
 import type { Point } from '../world'
+import { framedExtent, loadFrame, WorldFrame, type FrameLook } from '../world-frame'
 import { RESOLUTION, startWorldGame, WorldScene, type SceneControls, type SceneFrame, type SceneState } from '../world-scene'
 import tileManifest from './generated/map-tiles.json'
 import { ValenceAmbience, type EffectsModel } from './valence-ambience'
@@ -41,6 +42,16 @@ export type ValenceControls = SceneControls & {
 }
 
 const SEPIA = 0x3b2414
+/** Valence hangs as a painting: zooming out reveals its gilded frame, then the museum wall. */
+const FRAME: FrameLook = {
+  // Built by scripts/build-world-frame.py with the same border and lip (docs/valence-1876/frame.md).
+  texture: { key: 'valence-frame', url: './valence-1876/frame/frame.webp' },
+  border: 72,
+  lip: 10,
+  margin: 150,
+  wall: '#381a17',
+  plaque: { text: 'Valence, 1876', font: 'ValenceLiterata, Literata, Georgia, serif', color: '#2e1c0f', background: 0xcdb07a },
+}
 type SceneUpdate = (camera: Phaser.Cameras.Scene2D.Camera, delta: number, paused: boolean) => void
 
 /** Valence in 1876: its engraved town, its animated scenes, the pioneers' objects and stations. */
@@ -71,10 +82,11 @@ class ValenceScene extends WorldScene<ValenceControls> {
       onError,
       width: VALENCE_WIDTH,
       height: VALENCE_HEIGHT,
+      scenery: framedExtent(VALENCE_WIDTH, VALENCE_HEIGHT, FRAME),
       cameraLift: 32,
       avatarSize: AVATAR_SIZE,
       look: {
-        background: '#cdb48a',
+        background: FRAME.wall,
         avatarShadow: SEPIA,
         avatarShadowAlpha: 0.22,
         name: '#2e1c0f',
@@ -116,11 +128,13 @@ class ValenceScene extends WorldScene<ValenceControls> {
   }
 
   preloadScenery() {
+    loadFrame(this, FRAME)
     for (const id of Object.keys(objectSpots)) this.load.image(`valence-object-${id}`, `./valence-1876/objects/${id}.webp`)
   }
 
   createScenery() {
     const { controls } = this
+    new WorldFrame(this, VALENCE_WIDTH, VALENCE_HEIGHT, FRAME)
     this.occluders = new ValenceOccluders(this, this.bushes)
     this.scenes = new LazySceneAssets(
       this,
@@ -215,12 +229,16 @@ class ValenceScene extends WorldScene<ValenceControls> {
       ),
       [controls.portalTag, valencePortal.label],
     ]
+    // Once the painting is small on its wall, the labels would hide it: they wait for a closer look.
+    const paintingWidth = (VALENCE_WIDTH * zoom * parent.clientWidth) / this.scale.width
     for (const [tag, label] of tags) {
       if (!tag) continue
       const point = this.project(label, zoom)
       // Off-screen tags hide; visible ones stay clear of the screen edges and the top bar.
       const offscreen =
-        freeCamera || point.x < -40 || point.x > parent.clientWidth + 40 || point.y < 40 || point.y > parent.clientHeight + 30
+        freeCamera ||
+        paintingWidth < 760 ||
+        point.x < -40 || point.x > parent.clientWidth + 40 || point.y < 40 || point.y > parent.clientHeight + 30
       if (tag.dataset.offscreen !== String(offscreen)) tag.dataset.offscreen = String(offscreen)
       const half = tag.offsetWidth / 2 + 8
       const x = Math.min(Math.max(point.x, half), parent.clientWidth - half)

@@ -397,20 +397,6 @@
   justify-content: space-between;
   pointer-events: none;
 }
-.v-keys {
-  margin: 0;
-  padding: 5px 10px;
-  border: 1px solid var(--v-line);
-  border-radius: var(--v-radius);
-  background: color-mix(in srgb, var(--v-paper) 88%, transparent);
-  color: var(--v-ink-2);
-  font: 500 12px / 1.2 var(--bs-font);
-}
-@media (hover: none) and (pointer: coarse) {
-  .v-keys {
-    display: none;
-  }
-}
 .v-debug {
   position: absolute;
   z-index: 9;
@@ -1093,10 +1079,6 @@
   font: inherit;
   text-decoration: underline;
   cursor: pointer;
-}
-.v-bottom .v-keys {
-  margin-right: auto;
-  margin-left: 12px;
 }
 .v-toast {
   position: absolute;
