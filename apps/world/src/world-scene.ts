@@ -76,6 +76,8 @@ export type SceneControls = {
   zoomAnchor?: Point
   /** Stand screen: where the tour flies, a place or a visitor, and how close it looks. */
   tour?: { point?: Point; visitor?: string; zoom: number } | null
+  /** Stand screen: the camera has landed where the tour asked, at its zoom. */
+  tourLanded?: boolean
 }
 
 export type SceneState = { x: number; y: number; moving: boolean; fps: number; multiplayer?: PresenceStatus }
@@ -678,14 +680,16 @@ export abstract class WorldScene<Controls extends SceneControls = SceneControls>
     const tour = controls.tour
     const visitor = tour?.visitor ? this.network.remotes.get(tour.visitor)?.sample(now) : undefined
     const target = visitor ?? tour?.point
+    controls.tourLanded = false
     if (tour && target) {
       const distance = Math.hypot(target.x - x, target.y - y)
-      const ease = 1 - Math.exp(-Math.min(delta, 50) / 1400)
+      const ease = 1 - Math.exp(-Math.min(delta, 50) / 1100)
       x += (target.x - x) * ease
       y += (target.y - y) * ease
       const zoom = tour.zoom / (1 + distance / 320)
-      controls.zoom += (zoom - controls.zoom) * (1 - Math.exp(-Math.min(delta, 50) / 900))
+      controls.zoom += (zoom - controls.zoom) * (1 - Math.exp(-Math.min(delta, 50) / 700))
       controls.overview = false
+      controls.tourLanded = distance < 10 && Math.abs(controls.zoom - tour.zoom) < 0.06
     }
     this.position = {
       x: Phaser.Math.Clamp(x, 0, options.width),

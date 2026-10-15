@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties, type Reac
 import { generateExplorerProfile, loadProfile, saveProfile, type AvatarProfile } from './avatar-profile'
 import { loadLanguage, saveLanguage, type Language } from './language'
 import type { PresenceStatus } from './multiplayer-protocol'
+import { MAX_CAMERA_ZOOM } from './camera-zoom'
 import { ARRIVAL_FADE_MS, MINIMUM_LOADING_MS } from './world-arrival'
 import type { Point } from './world'
 import type { SceneControls, SceneState } from './world-scene'
@@ -222,9 +223,10 @@ export type StandTour = ReturnType<typeof useStandTour>
 
 const RESUME_MS = 20_000
 const VISITOR_MS = 10_000
-/** The camera's flight to a place, before its presentation starts. */
-const ARRIVAL_MS = 2_200
-const STOP_ZOOM = 1.8
+/** A breath once the camera has landed, before the place's presentation opens. */
+const LANDED_PAUSE_MS = 700
+/** Places are seen as close as the camera goes. */
+const STOP_ZOOM = MAX_CAMERA_ZOOM
 
 /**
  * A stand screen's automatic tour: from place to place, with a look at a real visitor in
@@ -283,10 +285,28 @@ export function useStandTour(controls: RefObject<SceneControls>, stops: TourStop
       return
     }
     c.tour = leg.visitor ? { visitor: leg.visitor, zoom: STOP_ZOOM } : { point: stop.point, zoom: stop.zoom ?? STOP_ZOOM }
-    const timers = [setTimeout(() => setArrived(true), ARRIVAL_MS)]
-    const length = leg.visitor ? VISITOR_MS : stop.dwell !== undefined ? ARRIVAL_MS + stop.dwell : null
-    if (length !== null) timers.push(setTimeout(advance, length))
-    return () => timers.forEach(clearTimeout)
+    c.tourLanded = false
+    const timers: ReturnType<typeof setTimeout>[] = []
+    if (leg.visitor) {
+      timers.push(setTimeout(advance, VISITOR_MS))
+      return () => timers.forEach(clearTimeout)
+    }
+    // The presentation waits for the camera to land on the place, then for a breath; a place
+    // with `dwell` starts counting only then.
+    const landing = setInterval(() => {
+      if (!c.tourLanded) return
+      clearInterval(landing)
+      timers.push(
+        setTimeout(() => {
+          setArrived(true)
+          if (stop.dwell !== undefined) timers.push(setTimeout(advance, stop.dwell))
+        }, LANDED_PAUSE_MS)
+      )
+    }, 150)
+    return () => {
+      clearInterval(landing)
+      timers.forEach(clearTimeout)
+    }
     // A world may know its places only once its map is loaded: start when they come.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing, leg, stops.length])

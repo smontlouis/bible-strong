@@ -269,7 +269,7 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
     (): TourStop[] =>
       stations.map(station => {
         const anchor = islandActions.find(action => action.id === station.id)!
-        return { id: station.id, point: { x: anchor.x, y: anchor.y }, zoom: 1.6, dwell: 9000 }
+        return { id: station.id, point: { x: anchor.x, y: anchor.y }, dwell: 9000 }
       }),
     []
   )
