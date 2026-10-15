@@ -167,7 +167,6 @@ export function StationScene({
   const list = useMemo(() => steps(station), [station])
   const [index, setIndex] = useState(0)
   const [historyOpen, setHistoryOpen] = useState(false)
-  const [sourcesOpen, setSourcesOpen] = useState(false)
   const step = list[index]
   const line = step.line
   const text = line?.text[language] ?? ''
@@ -224,7 +223,7 @@ export function StationScene({
       onClose={onClose}
       initialFocus={advanceButton}
       onKeyDown={event => {
-        if (historyOpen || sourcesOpen) return
+        if (historyOpen) return
         if (event.target instanceof HTMLAnchorElement) return
         if (event.key === ' ' || event.key === 'Enter' || event.key === 'ArrowRight') {
           event.preventDefault()
@@ -260,9 +259,6 @@ export function StationScene({
           <div className="v-scene-tools">
             <button type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen(open => !open)}>
               {t.history}
-            </button>
-            <button type="button" aria-expanded={sourcesOpen} onClick={() => setSourcesOpen(open => !open)}>
-              {t.sources}
             </button>
           </div>
         </header>
@@ -300,7 +296,6 @@ export function StationScene({
             <p className="v-nameplate">
               <strong>{speaker.name[language]}</strong>
               {speaker.role[language] && <span>{speaker.role[language]}</span>}
-              <em data-kind={speaker.kind}>{speaker.kind === 'real' ? t.realShort : t.composite}</em>
             </p>
             <p className="v-box-text" aria-hidden="true">
               {typing.shown}
@@ -309,7 +304,6 @@ export function StationScene({
             <p className="v-sr-only" aria-live="polite">
               {speaker.name[language]} : {text}
             </p>
-            {speaker.kind === 'real' && <small className="v-box-note">{t.real}</small>}
           </div>
         )}
 
@@ -362,28 +356,6 @@ export function StationScene({
               )}
             </ol>
             <button type="button" onClick={() => setHistoryOpen(false)}>
-              {t.close}
-            </button>
-          </aside>
-        )}
-        {sourcesOpen && (
-          <aside className="v-scene-panel" aria-label={t.sources}>
-            <h3>{t.sources}</h3>
-            <p>{t.sourcesIntro}</p>
-            <ul>
-              {station.sources.map(source => (
-                <li key={source.label}>
-                  {source.url ? (
-                    <a href={source.url} target="_blank" rel="noreferrer">
-                      {source.label}
-                    </a>
-                  ) : (
-                    source.label
-                  )}
-                </li>
-              ))}
-            </ul>
-            <button type="button" onClick={() => setSourcesOpen(false)}>
               {t.close}
             </button>
           </aside>

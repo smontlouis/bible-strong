@@ -79,7 +79,7 @@ The dotted line on the ground of Valence 1876 that links the stations in the ord
 One of seven study objects of 1877 hidden in Valence 1876; finding it opens a "yesterday, today" card.
 
 **Composite character**:
-An invented townsperson of Valence 1876, announced as such, who carries daily life and emotion; real people only say what the sources allow.
+An invented townsperson of Valence 1876 who carries daily life and emotion; real people only say what the sources allow. Visitors are not told which is which.
 
 **Mood**:
 The expression a speaker wears for one spoken line of a station (neutral, happy, thinking, surprised or grave), shown by their bust in the dialogue scene.

@@ -1370,14 +1370,6 @@
 .v-nameplate span {
   color: #e6c99a;
 }
-.v-nameplate em {
-  padding: 2px 7px;
-  border: 1px solid rgba(243, 230, 201, 0.35);
-  font-style: normal;
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
 .v-box-text {
   position: relative;
   min-height: 3.2em;
@@ -1386,16 +1378,6 @@
 }
 .v-ghost {
   visibility: hidden;
-}
-.v-box-note {
-  position: absolute;
-  left: 38px;
-  right: 200px;
-  bottom: 22px;
-  color: #8b5e30;
-  font: 500 10.5px / 1.2 Pulp, sans-serif;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 .v-sr-only {
   position: absolute;
@@ -1565,16 +1547,12 @@
   border-bottom: 3px double rgba(46, 28, 15, 0.5);
   font: 400 21px / 1.2 var(--v-serif);
 }
-.v-scene-panel ol,
-.v-scene-panel ul {
+.v-scene-panel ol {
   display: grid;
   gap: 12px;
   margin: 0;
-  padding: 0 0 0 18px;
-}
-.v-scene-panel ol {
-  list-style: none;
   padding: 0;
+  list-style: none;
 }
 .v-scene-panel li strong {
   font: 700 13px / 1.2 Pulp, sans-serif;
@@ -1585,9 +1563,6 @@
 }
 .v-scene-panel li[data-kind='narrator'] p {
   font-style: italic;
-}
-.v-scene-panel a {
-  color: #5a3b20;
 }
 .valence-modal .v-scene-panel > button {
   align-self: flex-start;
@@ -1654,15 +1629,6 @@
   }
   .v-box-text {
     font-size: 18px;
-  }
-  .v-box-note {
-    left: 18px;
-    right: 170px;
-    bottom: calc(18px + env(safe-area-inset-bottom));
-    line-height: 1.35;
-  }
-  .v-box:has(.v-box-note) {
-    padding-bottom: calc(80px + env(safe-area-inset-bottom));
   }
   .v-nameplate {
     left: 14px;

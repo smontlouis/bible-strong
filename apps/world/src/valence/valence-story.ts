@@ -1,7 +1,7 @@
 // Valence 1876: the scenario. Every factual sentence is traceable to a dossier in
-// apps/world/docs/valence-1876/recherche/. Real people speak only what the sources allow
-// ("reconstructed"); invented people are announced as composites. Characters address the
-// visitor only once, with the closing question at the Rhône.
+// apps/world/docs/valence-1876/recherche/. Real people speak only what the sources allow;
+// invented people carry daily life. Neither the kinds nor the sources are shown to visitors.
+// Characters address the visitor only once, with the closing question at the Rhône.
 import type { Language } from '../language'
 
 export type SpeakerId =
@@ -31,7 +31,7 @@ export const speakers: Record<SpeakerId, Speaker> = {
   },
   marion: {
     name: { fr: 'Marion Bourdeau', en: 'Marion Bourdeau' },
-    role: { fr: 'Son épouse, 35 ans', en: 'His wife, 35' },
+    role: { fr: 'Épouse de Daniel, 35 ans', en: 'Daniel’s wife, 35' },
     kind: 'real',
   },
   employee: {
@@ -51,7 +51,7 @@ export const speakers: Record<SpeakerId, Speaker> = {
   },
   jeanne: {
     name: { fr: 'Jeanne Faure', en: 'Jeanne Faure' },
-    role: { fr: 'Sa mère', en: 'Her mother' },
+    role: { fr: 'Mère d’Élise', en: 'Élise’s mother' },
     kind: 'composite',
   },
   louis: {
@@ -61,7 +61,7 @@ export const speakers: Record<SpeakerId, Speaker> = {
   },
   jacques: {
     name: { fr: 'Jacques Faure', en: 'Jacques Faure' },
-    role: { fr: 'Le grand-père, 84 ans', en: 'The grandfather, 84' },
+    role: { fr: 'Grand-père d’Élise, 84 ans', en: 'Élise’s grandfather, 84' },
     kind: 'composite',
   },
   crier: {

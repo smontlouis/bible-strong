@@ -43,8 +43,8 @@ Le style reste celui de la carte de World : illustration plate, vue légèrement
 ## 3. Les règles d’intégrité
 
 1. **Chaque lieu existe en septembre 1877**, dans l’état décrit au dossier de la ville. La liste des anachronismes à ne pas dessiner est au point 8.
-2. **Les vraies personnes ne disent que ce que les sources permettent.** Daniel et Marion Bourdeau sont présents. Leurs répliques sont écrites par nous, mais chaque phrase factuelle est traçable à une source du dossier, et aucune opinion ni aucune théologie ne leur est prêtée au-delà de ce qu’ils ont publié. L’interface le dit : « Dialogue reconstitué d’après les sources », avec un bouton Sources sur chaque dialogue.
-3. **Les personnages inventés sont annoncés comme tels** : « Personnage composite ». Ils portent tout ce qui relève de la vie quotidienne et de l’émotion.
+2. **Les vraies personnes ne disent que ce que les sources permettent.** Daniel et Marion Bourdeau sont présents. Leurs répliques sont écrites par nous, mais chaque phrase factuelle est traçable à une source du dossier, et aucune opinion ni aucune théologie ne leur est prêtée au-delà de ce qu’ils ont publié. C’est une règle d’écriture, pas un affichage : depuis le 15 octobre 2026, l’interface ne montre ni mention « dialogue reconstitué » ni bouton Sources. On se fait confiance sur le contenu ; les sources restent dans le dossier et dans [dialogues.md](./dialogues.md).
+3. **Les personnages inventés portent la vie quotidienne et l’émotion.** L’interface ne les distingue pas des personnes réelles : pas d’étiquette « personnage composite » (même décision du 15 octobre 2026).
 4. **Andrews, Charles et Mary Andrews, Dietschy n’apparaissent que par lettre et par colis.** Rien ne les place à Valence.
 5. **Ne sont pas dans la scène** : Ellen White (1886), Jean Vuilleumier (douze ans, à Tramelan), Erzberger, Augustin Bourdeau (en Europe en 1884), Badaut (converti plus tard), et Gabert, l’évangélisateur bénévole de Valence, parce que les sources le datent de 1878. Gabert a droit à une ligne dans l’épilogue.
 
@@ -99,7 +99,7 @@ La géographie est simplifiée mais respecte la ville réelle : le Champ de Mars
 
 **Marion Saxby Bourdeau, 35 ans.** Réelle. Mariée en 1861, sa sœur Charlotte a épousé Augustin, le frère de Daniel. Arrivée en Europe avec son mari en janvier 1876 : La Coudre, Le Locle, Bâle, puis Valence. On la rencontre au Champ de Mars, en 1877, avec un enfant en bas âge, Augustin, né en 1875. La fille, Patience, n’est pas nommée sur la carte : son âge n’est pas établi. Répliques reconstituées d’après les sources, qui ne disent presque rien d’elle : elle parlera peu, et de faits.
 
-**La famille de Valence.** Composite, à annoncer comme tel. Une famille protestante de la ville, de celles qui ont invité Bourdeau à parler au temple à l’automne 1876. Nom provisoire : Faure, nom fréquent en Drôme, à changer si l’UFA connaît les vrais noms des dix-sept. Quatre personnes :
+**La famille de Valence.** Composite. Une famille protestante de la ville, de celles qui ont invité Bourdeau à parler au temple à l’automne 1876. Nom provisoire : Faure, nom fréquent en Drôme, à changer si l’UFA connaît les vrais noms des dix-sept. Quatre personnes :
 
 - Le père, Louis, 45 ans, ouvrier en soie : la filature valentinoise est en crise depuis les années 1860, ça se sent dans la maison.
 - La mère, Jeanne, 42 ans. C’est elle qui tient les comptes et le cahier des versets.
@@ -228,8 +228,8 @@ Rien de tout cela n’empêche de dessiner la carte ni d’écrire les dialogues
 - **La maison des Faure.** La carte montre une cour avec une table sous la treille : la veillée s’y tient, la lampe allumée. On y entre par le portail.
 - **La citadelle.** La station de mémoire n’a pas de personnage ; on la lit au pied de la terrasse.
 - **Les saisons.** Une seule lumière, et pas encore d’accessoires de saison propres à chaque station.
-- **Sources.** Les deux sources sans adresse vérifiable (Sander et Trenel, la loi de 1849) sont citées sans lien.
+- **Sources.** Elles ne sont plus affichées aux visiteurs. Dans le dossier, les deux sources sans adresse vérifiable (Sander et Trenel, la loi de 1849) sont citées sans lien.
 
 ## 11. Prochaine étape : les dialogues
 
-Huit stations, trois temps chacune, en français d’abord, puis en anglais. Les personnages de 1877 vouvoient le visiteur ; l’interface garde le tutoiement de World. Chaque dialogue porte son étiquette, « reconstitué d’après les sources » ou « personnage composite », et son bouton Sources. Après les dialogues : le brief d’illustration de la carte, zone par zone, dans le style de `docs/design/illustrations.md` adapté au sépia.
+Huit stations, trois temps chacune, en français d’abord, puis en anglais. Les personnages de 1877 vouvoient le visiteur ; l’interface garde le tutoiement de World. Les dialogues n’affichent ni étiquette ni sources (voir les règles d’intégrité, point 3). Après les dialogues : le brief d’illustration de la carte, zone par zone, dans le style de `docs/design/illustrations.md` adapté au sépia.
