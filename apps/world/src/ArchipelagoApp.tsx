@@ -456,6 +456,7 @@ export default function ArchipelagoApp({ arrival, onTravel, onReady }: UniverseP
                   title={name(stations[shownIsland])}
                   text={journalCopy[language].descriptions[shownIsland]}
                   color={stations[shownIsland].color}
+                  duration={tour.stop!.dwell}
                 />
               )
             }

@@ -385,9 +385,27 @@ export function StandShell({
 }
 
 /** A place presented by the tour in a few words, for a world without dialogues. */
-export function StandCaption({ image, title, text, color }: { image: string; title: string; text: string; color?: string }) {
+export function StandCaption({
+  image,
+  title,
+  text,
+  color,
+  duration,
+}: {
+  image: string
+  title: string
+  text: string
+  color?: string
+  /** How long the tour stays, in milliseconds, shown as a filling bar. */
+  duration?: number
+}) {
   return (
     <section className="stand-caption" style={color ? ({ '--caption-color': color } as CSSProperties) : undefined}>
+      {duration !== undefined && (
+        <div className="stand-progress" aria-hidden="true">
+          <span style={{ '--duration': `${duration}ms` } as CSSProperties} />
+        </div>
+      )}
       <img src={image} alt="" width={120} height={120} draggable={false} />
       <span>
         <strong>{title}</strong>

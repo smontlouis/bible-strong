@@ -1,9 +1,9 @@
 // A stand screen's presentation of a place while the tour stops there: the characters in bust,
 // the line typed beneath them, playing on its own, bottom left. It shows the history and the
 // dialogue, not the Bible Strong page of today: that is for the visitors who scan.
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import type { Language } from '../language'
-import { Bust, MOODS, bustImage, steps, useTypewriter } from './StationScene'
+import { Bust, MOODS, bustImage, steps, typingTime, useTypewriter } from './StationScene'
 import { valenceCopy } from './valence-copy'
 import { speakers, type Mood, type SpeakerId, type Station } from './valence-story'
 
@@ -17,6 +17,16 @@ export function StandPresentation({ station, language, onDone }: { station: Stat
   const line = list[index]?.line
   const text = line?.text[language] ?? ''
   const typing = useTypewriter(text, index)
+  // Each line's time on screen, typed then read, for the progress bar.
+  const durations = useMemo(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    return list.map(step => {
+      const words = step.line!.text[language]
+      return (reduced ? 0 : typingTime(words)) + readingTime(words)
+    })
+  }, [list, language])
+  const total = durations.reduce((sum, value) => sum + value, 0)
+  const before = durations.slice(0, index).reduce((sum, value) => sum + value, 0)
 
   // First speaker on the left, second on the right; narrators never appear.
   const cast = useMemo(() => {
@@ -51,6 +61,19 @@ export function StandPresentation({ station, language, onDone }: { station: Stat
   if (!line || !speaker) return null
   return (
     <section className="v-presenter" data-narrating={narrating} aria-label={station.place[language]}>
+      {/* How far the place's presentation has come, line after line. */}
+      <div className="stand-progress" aria-hidden="true">
+        <span
+          key={index}
+          style={
+            {
+              '--from': before / total,
+              '--to': (before + durations[index]) / total,
+              '--duration': `${durations[index]}ms`,
+            } as CSSProperties
+          }
+        />
+      </div>
       <header className="v-presenter-top">
         <span className="v-tag-order">{station.order}</span>
         <span>

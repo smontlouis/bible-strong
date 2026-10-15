@@ -1811,6 +1811,7 @@
 /* The stand screen's presentation of a place (StandPresentation): a small stage in the same
    paper frame as the invitation to scan, its characters standing over their lines. */
 .v-presenter {
+  --stand-ink: var(--v-ink);
   position: relative;
   width: min(560px, 38vw);
   height: min(450px, 50vh);

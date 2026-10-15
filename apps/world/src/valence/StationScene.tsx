@@ -22,6 +22,14 @@ export const bustImage = (speaker: SpeakerId, mood: Mood) => `./valence-1876/bus
 const BUST_SCALE: Partial<Record<SpeakerId, number>> = { crier: 0.84, elise: 0.94 }
 const CHARS_PER_SECOND = 48
 const PAUSES: Record<string, number> = { '.': 260, '!': 260, '?': 260, '…': 300, ':': 200, ';': 200, ',': 110 }
+const FIRST_LETTER_MS = 120
+
+/** How long the typewriter takes to reveal `text`, in milliseconds. */
+export function typingTime(text: string) {
+  let total = FIRST_LETTER_MS
+  for (const letter of text) total += 1000 / CHARS_PER_SECOND + (PAUSES[letter] ?? 0)
+  return total
+}
 
 export type Step = { beat: BeatKind; line?: Line }
 
@@ -84,7 +92,7 @@ export function useTypewriter(text: string, key: number) {
     }
     setState({ key, count: 0 })
     let shown = 0
-    let wait = 120
+    let wait = FIRST_LETTER_MS
     let last = performance.now()
     let frame = 0
     const tick = (now: number) => {

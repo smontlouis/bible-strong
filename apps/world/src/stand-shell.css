@@ -100,6 +100,8 @@
 }
 .stand-caption {
   --caption-color: var(--stand-live);
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 18px;
@@ -136,4 +138,32 @@
   font-size: 18px;
   line-height: 1.3;
   opacity: 0.8;
+}
+/* How long the tour stays: a thin bar filling at the presentation's own pace, from --from to
+   --to over --duration (fractions of the whole stop). */
+.stand-progress {
+  position: absolute;
+  z-index: 4;
+  top: 3px;
+  left: 12px;
+  right: 12px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--stand-ink) 16%, transparent);
+}
+.stand-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--stand-ink);
+  transform-origin: left;
+  animation: stand-progress var(--duration) linear both;
+}
+@keyframes stand-progress {
+  from {
+    transform: scaleX(var(--from, 0));
+  }
+  to {
+    transform: scaleX(var(--to, 1));
+  }
 }
