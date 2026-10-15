@@ -144,7 +144,8 @@ export function createValence(
     active = true
     previousNavigation = controls.navigation
     clock = 0
-    collected = new Set<PioneerObjectId>()
+    /** Objects found in an earlier visit are already collected: no burst on load. */
+    collected = new Set<PioneerObjectId>(controls.found)
 
     resetInput = () => {
       controls.pointerPress = undefined
