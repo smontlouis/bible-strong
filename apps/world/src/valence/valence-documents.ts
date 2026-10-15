@@ -40,7 +40,6 @@ export type ValenceEffects = {
   currents: EffectToggle
   smoke: SmokeSource[]
   leaves: EffectToggle
-  motes: EffectToggle
   clouds: EffectToggle
 }
 
@@ -114,7 +113,6 @@ export function parseEffects(value: unknown): ValenceEffects {
     glints: toggle(raw.glints, { density: 40, size: 4, speed: 4 }),
     currents: toggle(raw.currents, { density: 40, size: 4, speed: 4 }),
     leaves: toggle(raw.leaves, { density: 20, size: 4, speed: 4 }),
-    motes: toggle(raw.motes, { density: 30, size: 4, speed: 4 }),
     clouds: toggle(raw.clouds, { density: 12, size: 4, speed: 4 }),
     smoke: raw.smoke.map(source => {
       if (!source || typeof source !== 'object') throw new Error('Invalid smoke')

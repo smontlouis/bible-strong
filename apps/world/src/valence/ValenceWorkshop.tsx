@@ -74,7 +74,6 @@ const copy = {
       glints: 'Reflets du soleil',
       currents: 'Traits de courant',
       leaves: 'Feuilles qui tombent',
-      motes: 'Poussière dorée',
       clouds: 'Ombres de nuages',
     },
     enabled: 'Actif',
@@ -131,7 +130,6 @@ const copy = {
       glints: 'Sun glints',
       currents: 'Current lines',
       leaves: 'Falling leaves',
-      motes: 'Golden dust',
       clouds: 'Cloud shadows',
     },
     enabled: 'Enabled',
@@ -446,7 +444,7 @@ function WaterPanel({ model, t }: { model: WorkshopModel; t: Copy }) {
         <h2>{t.water}</h2>
       </header>
       <small>{t.waterHelp}</small>
-      {(['glints', 'currents', 'leaves', 'motes', 'clouds'] as const).map(key => group(key, effects[key]))}
+      {(['glints', 'currents', 'leaves', 'clouds'] as const).map(key => group(key, effects[key]))}
       <section>
         <h3>{t.exclusions}</h3>
         <ul className="v-workshop-list">

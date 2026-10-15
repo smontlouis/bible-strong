@@ -48,7 +48,6 @@ export class ValenceAmbience {
   private readonly pool: Phaser.GameObjects.Image[] = []
   private smokeTimers: number[] = []
   private leafTimer = 0
-  private moteTimer = 0
   private glintTimer = 0
   private currentTimer = 0
   private readonly trees: { x: number; y: number; width: number }[]
@@ -268,7 +267,7 @@ export class ValenceAmbience {
       })
     })
 
-    const { leaves, motes } = effects
+    const { leaves } = effects
     this.leafTimer -= dt
     if (leaves.enabled && leaves.density > 0 && this.leafTimer <= 0 && this.trees.length) {
       this.leafTimer = (1000 / leaves.density) * (0.6 + Math.random() * 0.8)
@@ -290,27 +289,6 @@ export class ValenceAmbience {
           opacity: leaves.opacity,
         })
       }
-    }
-
-    this.moteTimer -= dt
-    if (motes.enabled && motes.density > 0 && this.moteTimer <= 0) {
-      this.moteTimer = 1000 / motes.density
-      const image = this.take('v-mote')
-        .setDepth(2450)
-        .setPosition(view.x + Math.random() * view.width, view.y + Math.random() * view.height)
-        .setBlendMode(Phaser.BlendModes.ADD)
-      this.spawn({
-        image,
-        life: 3600 + Math.random() * 2600,
-        vx: (3 + Math.random() * 4) * motes.speed,
-        vy: (-1.5 - Math.random() * 2.5) * motes.speed,
-        spin: 0,
-        sway: 3,
-        phase: Math.random() * 6,
-        kind: 'mote',
-        scale: (0.18 + Math.random() * 0.22) * motes.size,
-        opacity: motes.opacity,
-      })
     }
 
     const { glints, currents } = effects
