@@ -6,7 +6,8 @@ import type { PioneerObjectId, StationId } from './valence-story'
 import { VALENCE_HEIGHT, VALENCE_WIDTH, type ValenceLayout } from './valence-documents'
 
 export { VALENCE_HEIGHT, VALENCE_WIDTH }
-export const AVATAR_SIZE = 44
+/** One and a half times smaller than in the archipelago (52): Valence is drawn from further away. */
+export const AVATAR_SIZE = 35
 export const STATION_RADIUS = 80
 export const OBJECT_RADIUS = 30
 

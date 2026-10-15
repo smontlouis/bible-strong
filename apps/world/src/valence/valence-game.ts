@@ -222,7 +222,15 @@ export function createValence(
             load: () => loadReader(this, id, manifest as ReaderManifest, './valence-1876/scenes'),
             create: () => {
               const reader = new AnimatedReader(this, id, manifest as ReaderManifest)
-              return (camera, delta, paused) => reader.update(camera, paused, 0, delta)
+              // SAM cut the townsfolk without the ground: give them back a soft shadow, under
+              // every standing thing, revealed with the scene.
+              const shadows = (manifest.shadows ?? []).map(s =>
+                this.add.ellipse(s.x, s.y, s.rx * 2, s.ry * 2, 0x3b2414, 1).setDepth(-30).setAlpha(0)
+              )
+              return (camera, delta, paused) => {
+                reader.update(camera, paused, 0, delta)
+                for (const shadow of shadows) shadow.setAlpha(reader.alpha * 0.26)
+              }
             },
           })
         )
@@ -271,7 +279,7 @@ export function createValence(
         const local = this.standCrowd?.react(reaction, this.position, performance.now(), !sent) ?? false
         return sent || local
       }
-      this.shadow = this.add.ellipse(0, 0, 24, 8, 0x3b2414, 0.22).setDepth(-1)
+      this.shadow = this.add.ellipse(0, 0, 30 * (AVATAR_SIZE / 52), 10 * (AVATAR_SIZE / 52), 0x3b2414, 0.22).setDepth(-1)
       this.avatar = this.add
         .image(this.position.x, this.position.y, 'blob-idle-down')
         .setOrigin(0.5, 0.95)
@@ -504,8 +512,8 @@ export function createValence(
           o.baseY > next.y + 2 &&
           next.x > o.x + 4 &&
           next.x < o.x + o.width - 4 &&
-          next.y - 18 > o.y &&
-          next.y - 18 < o.y + o.height
+          next.y - AVATAR_SIZE * 0.4 > o.y &&
+          next.y - AVATAR_SIZE * 0.4 < o.y + o.height
       )
       const ghostAlpha = Phaser.Math.Linear(this.ghost.alpha, hidden ? 0.42 : 0, 1 - Math.exp(-Math.min(delta, 50) / 90))
       this.ghost

@@ -58,6 +58,11 @@ export class AnimatedReader {
       .play(animationKey)
   }
 
+  /** Current reveal, for things drawn with the reader such as its cast shadows. */
+  get alpha() {
+    return this.sprite.visible ? this.sprite.alpha : 0
+  }
+
   update(camera: Phaser.Cameras.Scene2D.Camera, paused: boolean, avatarX: number, delta = 0) {
     const manifest = this.manifest
     this.sprite.setDepth(occlusionDepth(this.id, manifest.depth, avatarX))
