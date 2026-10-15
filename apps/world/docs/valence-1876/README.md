@@ -46,14 +46,15 @@ Les zones de marche sont stockées en quelques grands polygones pour rester faci
 | `src/valence/valence-documents.ts` | Format et validation des documents de l’atelier (disposition, effets) ; partagé avec le serveur Vite et le Worker |
 | `src/valence/ValenceWorkshop.tsx`, `workshop-model.ts`, `workshop-overlay.ts` | L’atelier : panneaux, état partagé et poignées sur la carte |
 | `src/valence/valence-story.ts` | Le scénario, en français et en anglais, avec les sources. **Fait foi** pour les textes |
-| `src/valence/StationDialog.tsx` | Le dialogue en trois temps, les étiquettes réel ou composite, les sources, le panneau « aujourd’hui » |
+| `src/valence/StationScene.tsx` | La scène de dialogue, comme dans un jeu à histoire : la carte assombrie, le premier personnage en buste à gauche et le second à droite, une humeur par réplique, le texte qui s’écrit (Espace, Entrée ou → pour avancer, ← pour revenir), les notes historiques en cartons de film muet, les trois temps, la relecture, les sources et le panneau « aujourd’hui » |
+| `src/valence/valence.css` | Le style de 1877 : chaque surface est une feuille carrée de papier ancien (`paper.webp`) dans un double filet d’encre, chaque bouton un bloc d’encre à l’ombre portée dure, les titres en Literata. Les jetons `--bs-*` y sont repeints en sépia, ce qui habille aussi l’éditeur d’avatar, les réactions et le livre d’or de World. Seul le panneau « aujourd’hui » garde les couleurs de Bible Strong |
 | `src/valence/ObjectCard.tsx` | La carte « hier, aujourd’hui » et l’image de partage 1200 × 630 (valeurs du design system) |
 | `src/valence/valence-ambience.ts` | Fumées, feuilles, poussière dorée, reflets et traits de courant du Rhône, ombres de nuages, gerbe d’objet trouvé. Le fleuve est animé par programme : deux essais MiniMax sur l’eau seule y ont ajouté des barques et des passagers en couleur, rejetés |
-| `src/valence/valence-occluders.ts` | Découpes chargées à la demande pour passer derrière les arbres, toits et étals |
+| `src/valence/valence-occluders.ts` | Découpes chargées à la demande pour passer derrière les arbres, toits et étals ; les arbustes et les haies basses frémissent et perdent quelques feuilles sépia quand un visiteur les traverse |
 | `src/valence/generated/` | Manifestes générés : tuiles, découpes, scènes animées, points d’ancrage et fil |
-| `public/valence-1876/` | Tuiles, scènes animées, découpes, objets, portraits, captures de l’app, navigation, QR code |
+| `public/valence-1876/` | Tuiles, scènes animées, découpes, objets, portraits, bustes de dialogue, papier, captures de l’app, navigation, QR code |
 
-Le moteur partagé a reçu trois paramètres, sans changer le comportement de l’archipel : `MapTileStreamer` accepte une autre source de tuiles, `loadReader` un autre dossier, `Pathfinder` un autre pas de grille, et `findSafePosition` d’autres dimensions.
+Le moteur partagé a reçu quelques paramètres, sans changer le comportement de l’archipel : `MapTileStreamer` accepte une autre source de tuiles, `loadReader` un autre dossier, `Pathfinder` un autre pas de grille, `findSafePosition` d’autres dimensions, et `BushRustle` une autre règle pour choisir les découpes qui frémissent et d’autres couleurs de feuilles.
 
 ## Comment les images ont été produites
 
@@ -66,8 +67,11 @@ Tout le travail intermédiaire reste dans `art-workbench/experiments/valence-187
 3. **La marche et les découpes.** SAM 3 image donne le sol pavé (« paved ground ») et, sur 18 portions de la carte, les arbres, cyprès, réverbères, bâtiments, étals, statue, kiosque, caisses, bancs et canons.
    `art-workbench/.venv-tools/bin/python scripts/valence/build_navigation.py` rend praticables les feuillages et toits des objets posés au sol, ne bloque que leur pied, applique les retouches manuelles de `scripts/valence/navigation-edits.json` (cour des Faure, esplanade, parvis du temple, table), garde le sol relié à la gare avec la marge de l’avatar, découpe la navigation en tuiles de 64 unités pour le pathfinder, calcule le fil par le milieu des rues, place stations et objets sur un sol accessible, et exporte les découpes avec leur ligne de sol (les grands bâtiments en bandes de 48 unités, chacune à sa profondeur).
 4. **Objets et portraits.** Sept objets sur fond magenta et le crieur (codex-imagegen), détourés depuis les bords avec `art-workbench/experiments/valence-1876/prep-ui-art.py`. Les portraits viennent de la feuille de style.
-5. **Aujourd’hui.** Les captures sont de vraies captures de l’app, prises dans `docs/assets/app-flows/screenshots/`.
-6. **Dialogues.** `node --experimental-strip-types scripts/valence/export-dialogues.mjs` régénère [dialogues.md](./dialogues.md).
+5. **Bustes de dialogue.** Pour chacun des neuf personnages, codex-imagegen dessine un buste neutre à partir de son portrait et de la feuille de style (taille, cadrage tourné vers la droite, sépia), puis retouche seulement le visage pour quatre humeurs : joyeux, pensif, surpris, grave. Le script est `scripts/valence/pipeline/make-busts.py` (`master`, puis `moods`) ; les réponses arrivent détourées.
+   `art-workbench/.venv-tools/bin/python scripts/valence/build_busts.py` cadre les cinq humeurs d’un personnage sur la même boîte, les ramène à 1100 pixels de haut en WebP dans `public/valence-1876/busts/` et écrit leurs proportions dans `generated/busts.json`. Chaque réplique de `valence-story.ts` porte son humeur.
+6. **Papier.** Une texture de papier vergé des années 1870 (codex-imagegen), rendue raccordable par `scripts/valence/pipeline/paper.py`, donne `public/valence-1876/paper.webp`.
+7. **Aujourd’hui.** Les captures sont de vraies captures de l’app, prises dans `docs/assets/app-flows/screenshots/`.
+8. **Dialogues.** `node --experimental-strip-types scripts/valence/export-dialogues.mjs` régénère [dialogues.md](./dialogues.md).
 
 ## Vérifier
 
@@ -76,7 +80,7 @@ yarn workspace @bible-strong/world test
 yarn workspace @bible-strong/world build
 ```
 
-`src/valence/valence.test.ts` vérifie l’intégrité du récit (huit stations datées, des sources partout, seuls Daniel et Marion Bourdeau parlent en personnes réelles, une seule question au visiteur), l’accessibilité de chaque station et de chaque objet depuis la gare, la taille des polygones, les découpes et les atlas.
+`src/valence/valence.test.ts` vérifie l’intégrité du récit (huit stations datées, des sources partout, seuls Daniel et Marion Bourdeau parlent en personnes réelles, une seule question au visiteur), l’accessibilité de chaque station et de chaque objet depuis la gare, la taille des polygones, les découpes, les arbustes qui frémissent et les atlas.
 
 ## Limites connues
 

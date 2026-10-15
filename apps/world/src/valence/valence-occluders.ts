@@ -1,5 +1,6 @@
 import type Phaser from 'phaser'
 import { AssetReveal } from '../asset-reveal'
+import type { BushRustle } from '../bush-rustle'
 import { isInView, LazySceneAssets, type VisibleBounds } from '../lazy-scene-assets'
 import occluderManifest from './generated/occluders.json'
 
@@ -15,6 +16,11 @@ export type ValenceOccluder = {
 }
 export const valenceOccluders = occluderManifest as ValenceOccluder[]
 
+/** Shrubs and low hedges rustle when someone walks through them; tall trees and cypresses don't. */
+export function isValenceShrub(object: { id: string; width: number; height: number }) {
+  return object.id.startsWith('tree-') && (object.height <= 50 || object.width > object.height * 1.15)
+}
+
 type Entry = { object: ValenceOccluder; image: Phaser.GameObjects.Image; reveal: AssetReveal }
 
 /** Source-aligned cutouts above the map, sorted by their ground line against the avatar. */
@@ -22,7 +28,7 @@ export class ValenceOccluders {
   private readonly assets: LazySceneAssets<Entry[]>
   private readonly reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
 
-  constructor(scene: Phaser.Scene, objects: ValenceOccluder[] = valenceOccluders) {
+  constructor(scene: Phaser.Scene, bushes: BushRustle, objects: ValenceOccluder[] = valenceOccluders) {
     const groups = new Map<string, ValenceOccluder[]>()
     for (const object of objects) {
       const key = `${Math.floor(object.x / 256)}:${Math.floor(object.y / 256)}`
@@ -44,8 +50,8 @@ export class ValenceOccluders {
           load: () => {
             for (const o of group) scene.load.image(`valence-occluder-${o.id}`, o.url)
           },
-          create: () =>
-            group.map(object => ({
+          create: () => {
+            const entries = group.map(object => ({
               object,
               reveal: new AssetReveal(),
               image: scene.add
@@ -54,7 +60,10 @@ export class ValenceOccluders {
                 .setDisplaySize(object.width, object.height)
                 .setDepth(object.baseY)
                 .setAlpha(0),
-            })),
+            }))
+            bushes.add(entries)
+            return entries
+          },
         }
       })
     )

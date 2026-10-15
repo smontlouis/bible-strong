@@ -81,7 +81,9 @@ export const speakers: Record<SpeakerId, Speaker> = {
   },
 }
 
-export type Line = { speaker: SpeakerId; text: Record<Language, string> }
+/** The expression a speaker wears for one line; each mood has its own dialogue portrait. */
+export type Mood = 'neutral' | 'happy' | 'thinking' | 'surprised' | 'grave'
+export type Line = { speaker: SpeakerId; mood?: Mood; text: Record<Language, string> }
 export type TodayPanel = {
   title: Record<Language, string>
   body: Record<Language, string>
@@ -157,6 +159,7 @@ export const stations: Station[] = [
     fact: [
       {
         speaker: 'employee',
+        mood: 'surprised',
         text: {
           fr: 'Le train de Lyon. Un homme, sa femme, un petit garçon d’un an. Et des malles lourdes comme des pierres.',
           en: 'The Lyon train. A man, his wife, a little boy of one. And trunks as heavy as stones.',
@@ -164,6 +167,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'bourdeau',
+        mood: 'happy',
         text: {
           fr: 'Des journaux, surtout. Les Signes des Temps. Le premier numéro est sorti à Bâle en juillet : huit pages, deux mille exemplaires.',
           en: 'Newspapers, mostly. Les Signes des Temps. The first issue came out in Basel in July: eight pages, two thousand copies.',
@@ -171,6 +175,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'bourdeau',
+        mood: 'neutral',
         text: {
           fr: 'Nous le rédigeons à deux, M. Andrews et moi. Il paraît une fois par mois, chez un imprimeur bâlois.',
           en: 'Mr. Andrews and I edit it together. It comes out once a month, from a printer in Basel.',
@@ -187,6 +192,7 @@ export const stations: Station[] = [
     study: [
       {
         speaker: 'bourdeau',
+        mood: 'thinking',
         text: {
           fr: 'Un article, une correction, une réponse : tout passe par la poste et par le train.',
           en: 'An article, a correction, a reply: everything travels by post and by train.',
@@ -194,6 +200,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'bourdeau',
+        mood: 'happy',
         text: {
           fr: 'À Bâle, Mary, la fille de M. Andrews, quinze ans, relit les épreuves. Charles, son frère, apprend l’imprimerie.',
           en: 'In Basel, Mr. Andrews’s daughter Mary, fifteen, reads the proofs. Her brother Charles is learning the printing trade.',
@@ -201,6 +208,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'employee',
+        mood: 'happy',
         text: {
           fr: 'Alors je vous garderai les paquets de Bâle, monsieur.',
           en: 'Then I will keep the parcels from Basel for you, sir.',
@@ -228,6 +236,7 @@ export const stations: Station[] = [
     fact: [
       {
         speaker: 'pastor',
+        mood: 'neutral',
         text: {
           fr: 'Des familles de la ville ont invité ce prédicateur venu des États-Unis à parler ici, au temple.',
           en: 'Some families of the town invited this preacher from the United States to speak here, in the temple.',
@@ -235,6 +244,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'pastor',
+        mood: 'grave',
         text: {
           fr: 'Ce temple sert au culte protestant depuis le début du siècle. Son clocher menaçait ruine : on l’a démoli en 1805.',
           en: 'This temple has served Protestant worship since the start of the century. Its bell tower was falling apart: it was pulled down in 1805.',
@@ -251,6 +261,7 @@ export const stations: Station[] = [
     study: [
       {
         speaker: 'pastor',
+        mood: 'neutral',
         text: {
           fr: 'Au pupitre, je lis l’Ostervald. C’est la version de notre culte réformé.',
           en: 'From the pulpit I read the Ostervald. It is the version of our Reformed worship.',
@@ -258,6 +269,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'pastor',
+        mood: 'thinking',
         text: {
           fr: 'Pour comparer, il me faudrait d’autres livres : la Bible de Lausanne, complète depuis 1872, le Nouveau Testament de Darby, et l’Ancien Testament de M. Segond, paru à Genève en 1874.',
           en: 'To compare, I would need other books: the Lausanne Bible, complete since 1872, Darby’s New Testament, and Mr. Segond’s Old Testament, published in Geneva in 1874.',
@@ -265,6 +277,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'pastor',
+        mood: 'grave',
         text: {
           fr: 'Quatre livres. Quatre achats.',
           en: 'Four books. Four purchases.',
@@ -316,6 +329,7 @@ export const stations: Station[] = [
     fact: [
       {
         speaker: 'jeanne',
+        mood: 'grave',
         text: {
           fr: 'À la filature, l’ouvrage manque. La soie va mal depuis des années.',
           en: 'There is little work at the silk mill. Silk has been doing badly for years.',
@@ -323,6 +337,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'jeanne',
+        mood: 'neutral',
         text: {
           fr: 'Alors le soir, on lit. Le pétrole coûte cher ; souvent, c’est la bougie.',
           en: 'So in the evening, we read. Lamp oil is dear; often it is a candle.',
@@ -330,6 +345,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'elise',
+        mood: 'happy',
         text: {
           fr: 'Sur la table : la Bible d’Ostervald, la concordance, le dictionnaire de M. Bost en deux volumes, et la feuille venue de Bâle.',
           en: 'On the table: the Ostervald Bible, the concordance, Mr. Bost’s dictionary in two volumes, and the paper from Basel.',
@@ -339,6 +355,7 @@ export const stations: Station[] = [
     study: [
       {
         speaker: 'elise',
+        mood: 'happy',
         text: {
           fr: 'Je lis à voix haute. Maman cherche chaque mot dans la concordance, page après page.',
           en: 'I read aloud. Mother looks up every word in the concordance, page after page.',
@@ -346,6 +363,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'jeanne',
+        mood: 'thinking',
         text: {
           fr: 'Pour un mot hébreu, il n’existe qu’un dictionnaire en français, celui de Sander et Trenel, fait pour les écoles juives.',
           en: 'For a Hebrew word there is only one dictionary in French, Sander and Trenel’s, made for Jewish schools.',
@@ -353,6 +371,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'elise',
+        mood: 'thinking',
         text: {
           fr: 'Et pour le grec, rien en français. Les lexiques sont en latin ou en anglais.',
           en: 'And for Greek, nothing in French. The lexicons are in Latin or in English.',
@@ -408,6 +427,7 @@ export const stations: Station[] = [
     fact: [
       {
         speaker: 'jacques',
+        mood: 'grave',
         text: {
           fr: 'J’avais six ans. On disait que le pape était prisonnier, dans la citadelle. Il y est mort le 29 août 1799.',
           en: 'I was six. People said the pope was a prisoner in the citadel. He died there on 29 August 1799.',
@@ -415,6 +435,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'jacques',
+        mood: 'grave',
         text: {
           fr: 'Son corps est reparti pour Rome en 1802. Son cœur est resté ici, dans la cathédrale, sous le buste de marbre.',
           en: 'His body went back to Rome in 1802. His heart stayed here, in the cathedral, beneath the marble bust.',
@@ -422,6 +443,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'bourdeau',
+        mood: 'neutral',
         text: {
           fr: 'J’ai écrit sur ce monument ce mois-ci, dans une lettre datée de Valence, le 22 février. « Valence a joué un rôle de premier plan dans l’histoire de la France. »',
           en: 'I wrote about this monument this month, in a letter dated Valence, 22 February: “Valence has acted a prominent part in the events that make up the history of France.”',
@@ -429,6 +451,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'bourdeau',
+        mood: 'thinking',
         text: {
           fr: 'Ma lettre parle aussi des mille deux cent soixante ans annoncés par la prophétie.',
           en: 'My letter also speaks of the twelve hundred and sixty years foretold in prophecy.',
@@ -438,6 +461,7 @@ export const stations: Station[] = [
     study: [
       {
         speaker: 'bourdeau',
+        mood: 'thinking',
         text: {
           fr: 'Pour les prophéties, mes livres sont en anglais : les commentaires d’Uriah Smith sur Daniel et l’Apocalypse, l’Histoire du sabbat de M. Andrews.',
           en: 'For the prophecies, my books are in English: Uriah Smith’s commentaries on Daniel and the Revelation, Mr. Andrews’s History of the Sabbath.',
@@ -445,6 +469,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'bourdeau',
+        mood: 'neutral',
         text: {
           fr: 'Le soir, je traduis en français articles et brochures.',
           en: 'In the evenings I translate articles and pamphlets into French.',
@@ -528,6 +553,7 @@ export const stations: Station[] = [
     fact: [
       {
         speaker: 'crier',
+        mood: 'happy',
         text: {
           fr: 'Journal de Valence ! À partir du 1er septembre, six numéros par semaine !',
           en: 'Journal de Valence! From the first of September, six issues a week!',
@@ -535,6 +561,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'crier',
+        mood: 'surprised',
         text: {
           fr: 'Vingt-trois mille habitants, trois mille soldats, et des élections en octobre !',
           en: 'Twenty-three thousand people, three thousand soldiers, and elections in October!',
@@ -542,6 +569,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'marion',
+        mood: 'neutral',
         text: {
           fr: 'En mars, mon mari et M. Andrews sont allés à Paris demander au gouvernement de pouvoir travailler avec moins de contraintes.',
           en: 'In March, my husband and Mr. Andrews went to Paris to ask the government for fewer restrictions on their work.',
@@ -549,6 +577,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'marion',
+        mood: 'happy',
         text: {
           fr: 'Janvier 1876, La Coudre, puis Le Locle. Ensuite Bâle. En octobre, Valence. Augustin avait un an en arrivant ici.',
           en: 'January 1876, La Coudre, then Le Locle. Then Basel. In October, Valence. Augustin was one year old when we came here.',
@@ -558,6 +587,7 @@ export const stations: Station[] = [
     study: [
       {
         speaker: 'crier',
+        mood: 'happy',
         text: {
           fr: 'Ici, on lit le journal : trois numéros par semaine depuis 1873, bientôt six.',
           en: 'Here people read the paper: three issues a week since 1873, soon six.',
@@ -600,6 +630,7 @@ export const stations: Station[] = [
     fact: [
       {
         speaker: 'bourdeau',
+        mood: 'happy',
         text: {
           fr: 'Cet été, l’étal tourne bien : près d’une vingtaine de volumes reliés, et des centaines de tracts différents distribués.',
           en: 'This summer the book stand is in lively operation: nearly a score of bound volumes and hundreds of different tracts distributed.',
@@ -607,6 +638,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'bourdeau',
+        mood: 'grave',
         text: {
           fr: 'Deux colporteurs sont partis vendre Les Signes et Le Vulgarisateur. Ils ont peu vendu : ils ne pouvaient pas entrer dans les maisons.',
           en: 'Two colporteurs went out to sell Les Signes and Le Vulgarisateur. They sold little: they could not get into people’s homes.',
@@ -614,6 +646,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'peddler',
+        mood: 'neutral',
         text: {
           fr: 'Moi, je colporte pour la Société biblique. Depuis la loi de 1849, il faut une autorisation pour vendre des imprimés de porte en porte.',
           en: 'I sell for the Bible Society. Since the law of 1849, you need a permit to sell printed matter from door to door.',
@@ -623,6 +656,7 @@ export const stations: Station[] = [
     study: [
       {
         speaker: 'peddler',
+        mood: 'happy',
         text: {
           fr: 'Dans mon sac : des Nouveaux Testaments d’Ostervald, imprimés à Londres en 1870 aux frais de la Société biblique.',
           en: 'In my bag: Ostervald New Testaments, printed in London in 1870 at the Bible Society’s expense.',
@@ -630,6 +664,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'peddler',
+        mood: 'grave',
         text: {
           fr: 'Une Bible entière, c’est une dépense. Et tout le monde ne sait pas lire : en France, un homme sur cinq et une femme sur trois ne savent pas signer leur nom.',
           en: 'A whole Bible is an expense. And not everyone can read: in France, one man in five and one woman in three cannot sign their name.',
@@ -662,6 +697,7 @@ export const stations: Station[] = [
     fact: [
       {
         speaker: 'elise',
+        mood: 'happy',
         text: {
           fr: 'Ce mois-ci, dix-sept personnes de Valence vont être baptisées. J’en fais partie.',
           en: 'This month, seventeen people from Valence are to be baptized. I am one of them.',
@@ -669,6 +705,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'elise',
+        mood: 'grave',
         text: {
           fr: 'Ce sera la première église adventiste de France. Et M. Bourdeau repart pour la Suisse.',
           en: 'It will be the first Adventist church in France. And Mr. Bourdeau is leaving for Switzerland.',
@@ -706,6 +743,7 @@ export const stations: Station[] = [
       },
       {
         speaker: 'elise',
+        mood: 'happy',
         text: {
           fr: 'Vous avez tout cela dans la poche. Qu’allez-vous lire ce soir ?',
           en: 'You have all of this in your pocket. What will you read tonight?',

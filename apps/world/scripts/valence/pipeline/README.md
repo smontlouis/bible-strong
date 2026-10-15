@@ -13,5 +13,7 @@ Copies versionnées des scripts qui ont produit les images de Valence 1876. Ils 
 | `detect-objects.py` | Détecte arbres, bâtiments, étals… sur la carte (SAM 3 image, `--fine` pour le second passage) | `objects/detect.py` |
 | `make-objects.py` | Les sept objets sur fond magenta et le crieur | `objects-art/make.py` |
 | `prep-ui-art.py` | Détoure objets et portraits vers `public/valence-1876/` | `prep-ui-art.py` |
+| `make-busts.py` | Bustes de dialogue : un buste neutre par personnage (`master`), puis quatre humeurs par retouche du visage (`moods`) | `busts/make.py` |
+| `paper.py` | Texture de papier ancien : prompt d’origine, puis raccord des bords par décalage d’une demi-tuile | `paper/` |
 
-Ensuite, depuis `apps/world` : `build-map-tiles.mjs`, `build_scene_atlas.py`, `build_navigation.py` et `export-dialogues.mjs` (voir `docs/valence-1876/README.md`). La clé `FAL_KEY` est lue dans le `.env` à la racine du dépôt ; codex-imagegen utilise la session Codex locale.
+Ensuite, depuis `apps/world` : `build-map-tiles.mjs`, `build_scene_atlas.py`, `build_navigation.py`, `build_busts.py` et `export-dialogues.mjs` (voir `docs/valence-1876/README.md`). La clé `FAL_KEY` est lue dans le `.env` à la racine du dépôt ; codex-imagegen utilise la session Codex locale.

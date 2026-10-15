@@ -23,7 +23,7 @@ import { ARRIVAL_FADE_MS, MINIMUM_LOADING_MS } from '../world-arrival'
 import type { NavigationDocument } from '../world'
 import { tileNavigation } from './navigation-tiles'
 import { objectImage, ObjectCard, ShareCard } from './ObjectCard'
-import { StationDialog } from './StationDialog'
+import { StationScene } from './StationScene'
 import { valenceCopy } from './valence-copy'
 import { createValence, type ValenceControls, type ValenceState } from './valence-game'
 import { loadProgress, saveProgress, type ValenceProgress } from './valence-progress'
@@ -619,7 +619,7 @@ export default function ValenceApp() {
       )}
 
       {openedStation && (
-        <StationDialog
+        <StationScene
           key={`${openedStation.id}-${language}`}
           station={openedStation}
           language={language}

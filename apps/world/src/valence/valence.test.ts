@@ -16,6 +16,7 @@ import {
   VALENCE_NAVIGATION,
 } from './valence-documents'
 import { EMPTY_PROGRESS, parseProgress } from './valence-progress'
+import { isValenceShrub, valenceOccluders } from './valence-occluders'
 import { chooseValenceSpawn, valenceSquareCandidates } from './valence-spawn'
 import { pioneerObjects, speakers, stations } from './valence-story'
 import {
@@ -152,6 +153,12 @@ describe('Valence 1876 map', () => {
     const allowed = navigation.zones.filter(zone => zone.kind === 'allowed')
     expect(Math.max(...allowed.map(zone => zone.points.length))).toBeLessThanOrEqual(80)
     expect(editable.zones.length).toBeLessThan(120)
+  })
+
+  it('lets shrubs and low hedges rustle, but not tall trees or cypresses', () => {
+    const shrubs = new Set(valenceOccluders.filter(isValenceShrub).map(o => o.id))
+    for (const id of ['tree-17', 'tree-19', 'tree-40', 'tree-44', 'tree-49']) expect(shrubs.has(id), id).toBe(true)
+    for (const id of ['tree-01', 'tree-28', 'tree-38', 'tree-39', 'stall-01', 'lamp-01']) expect(shrubs.has(id), id).toBe(false)
   })
 
   it('ships source-aligned occluders inside the map', async () => {

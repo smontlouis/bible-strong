@@ -6,6 +6,7 @@ import type { AvatarActivity } from '../avatar-activity'
 import type { AvatarId } from '../avatar-profile'
 import { AvatarReactions, loadReactions } from '../avatar-reactions'
 import { BlobAvatar, loadBlobAvatar } from '../blob-avatar'
+import { BushRustle } from '../bush-rustle'
 import { cameraZoomBounds, clampCameraZoom } from '../camera-zoom'
 import { LazySceneAssets, type LazySceneAsset } from '../lazy-scene-assets'
 import { MapTileStreamer } from '../map-tile-streamer'
@@ -26,7 +27,7 @@ import { arrivalZoom } from '../world-arrival'
 import { WorldAmbience } from '../world-ambience'
 import tileManifest from './generated/map-tiles.json'
 import { ValenceAmbience, type EffectsModel } from './valence-ambience'
-import { ValenceOccluders, valenceOccluders } from './valence-occluders'
+import { isValenceShrub, ValenceOccluders, valenceOccluders } from './valence-occluders'
 import { valenceScenes } from './valence-scenes'
 import { chooseValenceSpawn, valenceSquareCandidates } from './valence-spawn'
 import type { PioneerObjectId, StationId } from './valence-story'
@@ -112,6 +113,7 @@ export function createValence(
     route = new WalkingRoute()
     tiles!: MapTileStreamer
     occluders!: ValenceOccluders
+    bushes!: BushRustle
     scenes!: LazySceneAssets<(camera: Phaser.Cameras.Scene2D.Camera, delta: number, paused: boolean) => void>
     ambience!: ValenceAmbience
     zoneAmbience?: WorldAmbience
@@ -194,7 +196,12 @@ export function createValence(
         root: './valence-1876/map/tiles',
         key: 'valence-map',
       })
-      this.occluders = new ValenceOccluders(this)
+      // Sepia leaves, matching the engraved foliage of the map.
+      this.bushes = new BushRustle(this, [], {
+        reactive: isValenceShrub,
+        leaves: { colors: [0x8c7a45, 0xa8915a, 0xc4ad73], stroke: 0x3b2a14 },
+      })
+      this.occluders = new ValenceOccluders(this, this.bushes)
       this.scenes = new LazySceneAssets(
         this,
         valenceScenes.map(
@@ -674,6 +681,11 @@ export function createValence(
       this.tiles.update(camera, time, 1, canStream, arrivalTarget)
       this.occluders.update(camera, delta, canStream, arrivalTarget?.view)
       const paused = (controls.paused && !freeCamera) || !animating
+      this.bushes.update(
+        delta,
+        [{ ...next, moving }, ...this.remoteAvatars.contacts, ...(this.standAvatars?.contacts ?? [])],
+        reducedMotion || paused
+      )
       this.scenes.update(camera, canStream, update => update(camera, delta, paused), {
         view: arrivalTarget?.view,
         concurrent: true,
