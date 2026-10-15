@@ -131,6 +131,15 @@ export function Bust({
   lineKey: number
 }) {
   const figure = useRef<HTMLElement>(null)
+  // Only the mood shown, and the one fading out under it, stay in the page: five decoded
+  // portraits per character weigh on a phone's memory. The others wait in the HTTP cache.
+  const [moods, setMoods] = useState({ shown: mood, fading: null as Mood | null })
+  if (moods.shown !== mood) setMoods({ shown: mood, fading: moods.shown })
+  useEffect(() => {
+    if (!moods.fading) return
+    const timer = setTimeout(() => setMoods(current => ({ ...current, fading: null })), 260)
+    return () => clearTimeout(timer)
+  }, [moods])
   // A small hop each time this character starts a new line.
   useEffect(() => {
     if (!active || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -153,8 +162,8 @@ export function Bust({
       }
       aria-hidden="true"
     >
-      {MOODS.map(key => (
-        <img key={key} src={bustImage(speaker, key)} alt="" data-shown={key === mood} draggable={false} />
+      {MOODS.filter(key => key === moods.shown || key === moods.fading).map(key => (
+        <img key={key} src={bustImage(speaker, key)} alt="" data-shown={key === moods.shown} draggable={false} />
       ))}
     </figure>
   )

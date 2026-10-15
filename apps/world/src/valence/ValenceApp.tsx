@@ -14,7 +14,7 @@ import { useCameraZoomGestures } from '../use-camera-zoom-gestures'
 import type { UniverseProps } from '../universes'
 import { selectEditors } from '../workshop/editors'
 import type { NavigationDocument } from '../world'
-import { StandShell, useExplorerProfile, useJoystick, useStandTour, useWorldLanguage, useWorldScene, WorldPresence, type TourStop } from '../world-shell'
+import { StandShell, useExplorerProfile, useJoystick, useMediaQuery, useStandTour, useWorldLanguage, useWorldScene, WorldPresence, type TourStop } from '../world-shell'
 import { tileNavigation } from './navigation-tiles'
 import { objectImage, ObjectCard, ShareCard } from './ObjectCard'
 import { StandPresentation } from './StandPresentation'
@@ -219,6 +219,8 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
   if (import.meta.env.DEV) (window as unknown as { valence?: ValenceControls }).valence = controls.current
   /** The editable navigation document; `controls.navigation` holds its tiled runtime form. */
   const [navigation, setNavigation] = useState<NavigationDocument | null>(null)
+  // On a phone a place's scene fills the screen (see valence.css): the map need not be drawn.
+  const phone = useMediaQuery('(max-width: 700px)')
   const { state, ready, revealing, failed, fail } = useWorldScene({
     host,
     controls,
@@ -227,6 +229,7 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
     arrival: Boolean(arrival),
     onReady,
     initialState: (): ValenceState => ({ ...VALENCE_SPAWN, moving: false, fps: 0 }),
+    covered: phone && opened !== null,
   })
   const near = ready ? nearestStation(state) : null
   const atTrain = ready && nearPortal(state)

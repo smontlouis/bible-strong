@@ -3,7 +3,7 @@
 // explorer's profile, the language and the presence line. Each world keeps its own look and its
 // own dialogs; see docs/create-a-world.md.
 import nipplejs from 'nipplejs'
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from 'react'
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode, type RefObject } from 'react'
 import { generateExplorerProfile, loadProfile, saveProfile, type AvatarProfile } from './avatar-profile'
 import { loadLanguage, saveLanguage, type Language } from './language'
 import type { PresenceStatus } from './multiplayer-protocol'
@@ -26,6 +26,7 @@ export function useWorldScene<State extends SceneState, Controls extends SceneCo
   arrival,
   onReady,
   initialState,
+  covered = false,
 }: {
   host: RefObject<HTMLDivElement | null>
   controls: RefObject<Controls>
@@ -35,11 +36,13 @@ export function useWorldScene<State extends SceneState, Controls extends SceneCo
     publish: (state: State) => void,
     onReady: () => void,
     onError: () => void
-  ) => { destroy: (removeCanvas: boolean) => void }
+  ) => { destroy: (removeCanvas: boolean) => void; loop: { sleep: () => void; wake: () => void; resetDelta: () => void } }
   documentsLoaded: boolean
   arrival: boolean
   onReady: () => void
   initialState: State | (() => State)
+  /** A dialog hides the whole scene: it stops drawing, which spares a phone's memory. */
+  covered?: boolean
 }) {
   const [state, setState] = useState<State>(initialState)
   const [sceneLoaded, setSceneLoaded] = useState(false)
@@ -47,13 +50,29 @@ export function useWorldScene<State extends SceneState, Controls extends SceneCo
   const [revealing, setRevealing] = useState(false)
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
+  const game = useRef<ReturnType<typeof start>>(null)
 
   useEffect(() => {
     if (!documentsLoaded) return
-    const game = start(host.current!, controls.current, setState, () => setSceneLoaded(true), () => setFailed(true))
-    return () => game.destroy(true)
+    const started = start(host.current!, controls.current, setState, () => setSceneLoaded(true), () => setFailed(true))
+    game.current = started
+    return () => {
+      game.current = null
+      started.destroy(true)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documentsLoaded])
+  // Its last frame stays on the canvas, out of sight; it goes on where it was once uncovered.
+  useEffect(() => {
+    const loop = game.current?.loop
+    if (!loop || !covered) return
+    loop.sleep()
+    return () => {
+      // No catching up on the time spent asleep.
+      loop.resetDelta()
+      loop.wake()
+    }
+  }, [covered, documentsLoaded])
   useEffect(() => {
     const timer = setTimeout(() => setMinimumElapsed(true), MINIMUM_LOADING_MS)
     return () => clearTimeout(timer)
@@ -71,6 +90,18 @@ export function useWorldScene<State extends SceneState, Controls extends SceneCo
   }, [revealing, failed, onReady])
 
   return { state, ready, revealing, failed, fail: () => setFailed(true) }
+}
+
+/** Whether a CSS media query matches, following its changes. */
+export function useMediaQuery(query: string) {
+  return useSyncExternalStore(
+    change => {
+      const list = window.matchMedia(query)
+      list.addEventListener('change', change)
+      return () => list.removeEventListener('change', change)
+    },
+    () => window.matchMedia(query).matches
+  )
 }
 
 /** The on-screen joystick, in the world's colours. */

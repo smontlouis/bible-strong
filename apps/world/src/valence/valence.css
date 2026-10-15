@@ -1412,6 +1412,12 @@
 .v-bust img[data-shown='true'] {
   opacity: 1;
 }
+/* A new mood's portrait is added to the page as it comes: it fades in over the old one. */
+@starting-style {
+  .v-bust img[data-shown='true'] {
+    opacity: 0;
+  }
+}
 .v-bust[data-active='false'] {
   filter: drop-shadow(0 10px 22px rgba(20, 10, 2, 0.45)) brightness(0.62) saturate(0.85);
   transform: translateY(18px) scale(0.96);
@@ -1703,18 +1709,34 @@
     background: #1c1108;
     box-shadow: none;
   }
+  /* Nothing shows behind an opaque window: blurring the map there only costs the phone memory. */
+  .valence-modal.v-scene::backdrop {
+    backdrop-filter: none;
+  }
+  /* The shadow and the dimming are redrawn on every frame of a filter transition: on a phone
+     they change at once, and the step back still moves. */
+  .v-bust {
+    transition:
+      transform 360ms cubic-bezier(0.16, 1, 0.3, 1),
+      bottom 360ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 260ms ease-out;
+  }
   .v-scene-place {
     display: block;
     position: absolute;
     inset: 0;
     overflow: hidden;
   }
-  .v-scene-place img {
+  .v-scene-place {
+    --place-top: 0.38;
+    --place-zoom: 1.05;
+  }
+  .v-scene-place canvas {
     position: absolute;
-    top: 38%;
-    max-width: none;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     filter: blur(6px) brightness(0.5) sepia(0.3);
-    scale: 1.05;
   }
   .v-scene-place::after {
     content: '';
@@ -2037,12 +2059,16 @@
   inset: 10px;
   overflow: hidden;
 }
-.v-presenter-place img {
+.v-presenter-place {
+  --place-top: 0.46;
+  --place-zoom: 1.04;
+}
+.v-presenter-place canvas {
   position: absolute;
-  top: 46%;
-  max-width: none;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   filter: blur(5px) brightness(0.62) sepia(0.25);
-  scale: 1.04;
 }
 .v-presenter-place::after {
   content: '';
