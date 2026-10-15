@@ -143,3 +143,22 @@ file as its Offline copy only while that file is the one readers already hold.
 On 27.1.1 the published `BHG` can no longer be installed (the entry it looks for is absent); an
 installed pair stays as it is. The two cases above that concern 27.1.1 under a canonical or flat
 `BHG` no longer apply.
+
+## Amendment (2026-10-15): a retired archive stays served for the SHA applications compiled in
+
+The previous amendment assumed only 27.1.1 still asked for `bibles/bible-step.json.zip`. 27.2
+asks for it too: its startup migration installs replacement resources before the live catalog is
+loaded, so it reads the catalog compiled in the binary, and that catalog names the old `BHG`
+archive. Once the Worker stopped declaring the file, every such installation failed with a 404
+and left readers on the migration error screen (Sentry `BIBLE-STRONG-M9Y`).
+
+The Resource service therefore keeps a list of retired Offline copies
+(`packages/resource-service/src/runtime/retiredOfflineArtifacts.ts`). A retired file is served
+only from the immutable key of a SHA it was published with, plain or encrypted, and never from its
+stable key. A request without a SHA, as compiled catalogs make for `BHG`, gets the last SHA listed
+for that file. The archive delivered is the old one, which is the one the compiled catalog verifies;
+the application then learns the newer revision from the live catalog, as decided above.
+
+Republishing a resource under a new file name, or with a new encrypted copy, adds the outgoing
+archive to that list for as long as installed binaries compile in its catalog entry, and its R2
+objects under `revisions/` are kept.
