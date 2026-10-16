@@ -1,5 +1,5 @@
 diff --git a/android/build.gradle b/android/build.gradle
-index a4ca7a421bff66bcc378c1092474bac6b7a82738..4ef0e418c5d70abedfd40649a5563468c7f68ea9 100644
+index a4ca7a421bff66bcc378c1092474bac6b7a82738..1450d3e4b1484ac89f603a4cbf7c7132f40787e9 100644
 --- a/android/build.gradle
 +++ b/android/build.gradle
 @@ -6,13 +6,12 @@ def safeExtGet(prop, fallback) {
@@ -17,3 +17,12 @@ index a4ca7a421bff66bcc378c1092474bac6b7a82738..4ef0e418c5d70abedfd40649a5563468
          google()
      }
      dependencies {
+@@ -32,7 +31,7 @@ android {
+     buildTypes {
+         release {
+             minifyEnabled false
+-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
++            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+         }
+     }
+     productFlavors {
