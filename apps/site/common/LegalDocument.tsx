@@ -2,8 +2,8 @@ import type { Locale } from '../locales'
 import type { LegalDocumentContent } from './legalContent'
 
 export const legalPaths = {
-  fr: { privacy: '/fr/politique-de-confidentialite', terms: '/fr/eula', deletion: '/fr/data-deletion' },
-  en: { privacy: '/privacy-policy', terms: '/eula-en', deletion: '/data-deletion' },
+  fr: { privacy: '/fr/politique-de-confidentialite', terms: '/fr/eula', deletion: '/fr/data-deletion', support: '/fr/support' },
+  en: { privacy: '/privacy-policy', terms: '/eula-en', deletion: '/data-deletion', support: '/support' },
 }
 
 export default function LegalDocument({
@@ -23,9 +23,10 @@ export default function LegalDocument({
           <a href={paths.privacy}>{french ? 'Confidentialité' : 'Privacy'}</a>
           <a href={paths.terms}>{french ? 'Conditions d’utilisation' : 'Terms of use'}</a>
           <a href={paths.deletion}>{french ? 'Supprimer mes données' : 'Delete my data'}</a>
+          <a href={paths.support}>{french ? 'Assistance' : 'Support'}</a>
         </nav>
         <h1>{content.title}</h1>
-        <p>{french ? 'Texte révisé le ' : 'Text revised on '}<time dateTime="2026-09-18">{french ? '18 septembre 2026' : '18 September 2026'}</time></p>
+        <p>{french ? 'Texte révisé le ' : 'Text revised on '}<time dateTime={content.revised.date}>{content.revised.label}</time></p>
         <p>{content.introduction}</p>
         <section aria-labelledby="publisher">
           <h2 id="publisher">{french ? 'Le Studio 316 — éditeur et contact' : 'Le Studio 316 — publisher and contact'}</h2>

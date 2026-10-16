@@ -1,0 +1,108 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "bible-strong",
+  "version": "1.0.0",
+  "description": "Read the Bible in depth: exact passages in many versions, the Hebrew and Greek text word by word, the Strong lexicon, dictionaries, commentaries, topics, cross-references and a timeline.",
+  "author": {
+    "name": "Le Studio 316",
+    "email": "stephane@lestudio316.com",
+    "url": "https://bible-strong.app"
+  },
+  "homepage": "https://bible-strong.app",
+  "repository": "https://github.com/smontlouis/bible-strong",
+  "license": "GPL-3.0-only",
+  "keywords": ["bible", "bible study", "strong", "hebrew", "greek", "lexicon", "commentary", "concordance"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Bible Strong",
+        "shortDescription": "Bible study with Strong’s",
+        "longDescription": "Bible Strong brings the resources of a Bible study library into the conversation, so that answers rest on the text and not on memory.\n\nRead a verse, a passage or a chapter in French, English, Hebrew, Greek or Latin, alone or in several versions side by side. Search the Bible by words, or by meaning when you only remember the idea. Open a verse word by word in its original Hebrew or Greek, with the transliteration, the meaning in context and the grammatical form of each word. Look a word up in the Strong lexicon, see how a Bible translates it and find every verse that holds it.\n\nFor background, read Bible dictionaries (Westphal, Bost, Easton, Smith, ISBE), what commentaries say on a verse (Matthew Henry, Barnes, Calvin, Clarke, the Bible annotée and others), the topics of Nave’s Topical Bible, the cross-references of the Treasury of Scripture Knowledge, a timeline of biblical history, and who the people and places of a chapter are.\n\nEverything is read from the resources Bible Strong publishes and links back to its page on bible-strong.app. The plugin needs no account and reads only what a request names. It gives the resources as they are written and names their authors; it does not speak for a church or a tradition.",
+        "developerName": "Le Studio 316",
+        "category": "Education",
+        "capabilities": [
+          "Read Bible passages",
+          "Compare Bible versions",
+          "Search the Bible",
+          "Read Hebrew and Greek word by word",
+          "Look up Strong numbers",
+          "Read dictionaries and commentaries"
+        ],
+        "websiteURL": "https://bible-strong.app",
+        "supportURL": "https://bible-strong.app/support",
+        "privacyPolicyURL": "https://bible-strong.app/privacy-policy",
+        "termsOfServiceURL": "https://bible-strong.app/eula-en",
+        "defaultPrompt": [
+          "Show John 3:16 word by word in Greek.",
+          "What does the Hebrew word shalom mean, and where is it used?",
+          "What do commentaries say about Romans 8:28?"
+        ],
+        "brandColor": "#3F63CF",
+        "brandColorDark": "#7E9CF2",
+        "composerIcon": "./assets/logo.svg",
+        "logo": "./assets/logo.svg"
+      },
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Show a passage in a named version",
+              "prompt": "Show me Psalm 23 in the ESV.",
+              "tools_triggered": "show_passage",
+              "expected_behavior": "A card shows the six verses of Psalm 23 in the English Standard Version, with a link to open the passage on bible-strong.app. The answer comments on the passage without repeating it."
+            },
+            {
+              "description": "Read a verse in the original language, word by word",
+              "prompt": "Show John 3:16 word by word in Greek.",
+              "tools_triggered": "show_verse_words",
+              "expected_behavior": "A card shows the 25 Greek words of John 3:16 in order, each with its transliteration and meaning. Picking a word shows its grammatical form and offers to open its lexicon entry."
+            },
+            {
+              "description": "Find a word in the lexicon and explain it",
+              "prompt": "What does the Hebrew word shalom mean, and where is it used?",
+              "tools_triggered": "search_strong_lexicon, get_strong_entry, find_strong_occurrences",
+              "expected_behavior": "The answer gives the Strong number H7965, the word שָׁלוֹם with its transliteration and definition, how a Bible translates it, and several verses that hold it, each quoted with its reference."
+            },
+            {
+              "description": "Report what commentaries say on a verse",
+              "prompt": "What do commentaries say about Romans 8:28?",
+              "tools_triggered": "show_commentaries",
+              "expected_behavior": "A card shows the verse, then what several commentaries say on it, each under its title and author. The answer sums up the readings and names who says what."
+            },
+            {
+              "description": "Search the Bible by meaning",
+              "prompt": "Find verses about being anxious and finding peace.",
+              "tools_triggered": "show_bible_search",
+              "expected_behavior": "A card lists verses on the subject, such as Philippians 4:6-7 or John 14:27, with their reference and text. More results can be read from the card."
+            }
+          ],
+          "negative": [
+            {
+              "description": "A request outside Bible study",
+              "prompt": "What will the weather be in Paris tomorrow?"
+            },
+            {
+              "description": "A request to change or save something",
+              "prompt": "Save this verse to my Bible Strong account and highlight it in yellow."
+            },
+            {
+              "description": "A reference that does not exist",
+              "prompt": "Show me John 99:1."
+            }
+          ]
+        },
+        "commerce": false,
+        "commerce_description": "This plugin sells nothing and processes no payment."
+      },
+      "publication": {
+        "release_notes": "First release: Bible passages in 47 versions, search by words and by meaning, Hebrew and Greek word by word, the Strong lexicon and its concordance, dictionaries, commentaries, topics, cross-references, a timeline and the people and places of the Bible.",
+        "translations": {
+          "fr-FR": {
+            "subtitle": "Étudiez la Bible à la source",
+            "description": "Bible Strong apporte dans la conversation les ressources d’une bibliothèque d’étude biblique, pour que les réponses reposent sur le texte et non sur la mémoire.\n\nLisez un verset, un passage ou un chapitre en français, en anglais, en hébreu, en grec ou en latin, seul ou dans plusieurs versions côte à côte. Cherchez dans la Bible par les mots, ou par le sens quand seule l’idée vous revient. Ouvrez un verset mot à mot dans son texte hébreu ou grec, avec la translittération, le sens en contexte et la forme grammaticale de chaque mot. Consultez un mot dans le lexique Strong, voyez comment une Bible le traduit et retrouvez tous les versets qui le contiennent.\n\nPour le contexte, lisez les dictionnaires bibliques (Westphal, Bost, Lelièvre, Calmet), ce que les commentaires disent d’un verset (Bible annotée, Matthew Henry, Barnes, Clarke et d’autres), les thèmes de la Bible thématique de Nave, les références croisées, une chronologie de l’histoire biblique, et les personnes et les lieux d’un chapitre.\n\nTout est lu dans les ressources que Bible Strong publie, avec un lien vers leur page sur bible-strong.app. Le plugin ne demande aucun compte et ne lit que ce qu’une demande nomme. Il donne les ressources telles qu’elles sont écrites et nomme leurs auteurs ; il ne parle au nom d’aucune Église ni d’aucune tradition."
+          }
+        }
+      }
+    }
+  }
+}

@@ -18,6 +18,7 @@ import { Route as HowToDeleteDataRouteImport } from './routes/how-to-delete-data
 import { Route as PolitiqueDeConfidentialiteRouteImport } from './routes/politique-de-confidentialite'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as DotwellKnownAppleAppSiteAssociationRouteImport } from './routes/[.]well-known.apple-app-site-association'
 import { Route as DotwellKnownAssetlinksDotjsonRouteImport } from './routes/[.]well-known.assetlinks[.]json'
 import { Route as BibleIndexRouteImport } from './routes/bible.index'
@@ -34,6 +35,7 @@ import { Route as FrGiveRouteImport } from './routes/fr.give'
 import { Route as FrHowToDeleteDataRouteImport } from './routes/fr.how-to-delete-data'
 import { Route as FrPolitiqueDeConfidentialiteRouteImport } from './routes/fr.politique-de-confidentialite'
 import { Route as FrPrivacyPolicyRouteImport } from './routes/fr.privacy-policy'
+import { Route as FrSupportRouteImport } from './routes/fr.support'
 import { Route as NaveLanguageRouteImport } from './routes/nave.$language'
 import { Route as ShareCardSplatRouteImport } from './routes/share-card.$'
 import { Route as SitemapsNameRouteImport } from './routes/sitemaps.$name'
@@ -101,6 +103,11 @@ const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DotwellKnownAppleAppSiteAssociationRoute =
@@ -184,6 +191,11 @@ const FrPolitiqueDeConfidentialiteRoute =
 const FrPrivacyPolicyRoute = FrPrivacyPolicyRouteImport.update({
   id: '/fr/privacy-policy',
   path: '/fr/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FrSupportRoute = FrSupportRouteImport.update({
+  id: '/fr/support',
+  path: '/fr/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NaveLanguageRoute = NaveLanguageRouteImport.update({
@@ -317,6 +329,7 @@ export interface FileRoutesByFullPath {
   '/politique-de-confidentialite': typeof PolitiqueDeConfidentialiteRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/support': typeof SupportRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/bible/$': typeof BibleSplatRoute
@@ -331,6 +344,7 @@ export interface FileRoutesByFullPath {
   '/fr/how-to-delete-data': typeof FrHowToDeleteDataRoute
   '/fr/politique-de-confidentialite': typeof FrPolitiqueDeConfidentialiteRoute
   '/fr/privacy-policy': typeof FrPrivacyPolicyRoute
+  '/fr/support': typeof FrSupportRoute
   '/nave/$language': typeof NaveLanguageRoute
   '/share-card/$': typeof ShareCardSplatRoute
   '/sitemaps/$name': typeof SitemapsNameRoute
@@ -366,6 +380,7 @@ export interface FileRoutesByTo {
   '/politique-de-confidentialite': typeof PolitiqueDeConfidentialiteRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/support': typeof SupportRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/bible/$': typeof BibleSplatRoute
@@ -380,6 +395,7 @@ export interface FileRoutesByTo {
   '/fr/how-to-delete-data': typeof FrHowToDeleteDataRoute
   '/fr/politique-de-confidentialite': typeof FrPolitiqueDeConfidentialiteRoute
   '/fr/privacy-policy': typeof FrPrivacyPolicyRoute
+  '/fr/support': typeof FrSupportRoute
   '/nave/$language': typeof NaveLanguageRoute
   '/share-card/$': typeof ShareCardSplatRoute
   '/sitemaps/$name': typeof SitemapsNameRoute
@@ -416,6 +432,7 @@ export interface FileRoutesById {
   '/politique-de-confidentialite': typeof PolitiqueDeConfidentialiteRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/support': typeof SupportRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/bible/$': typeof BibleSplatRoute
@@ -430,6 +447,7 @@ export interface FileRoutesById {
   '/fr/how-to-delete-data': typeof FrHowToDeleteDataRoute
   '/fr/politique-de-confidentialite': typeof FrPolitiqueDeConfidentialiteRoute
   '/fr/privacy-policy': typeof FrPrivacyPolicyRoute
+  '/fr/support': typeof FrSupportRoute
   '/nave/$language': typeof NaveLanguageRoute
   '/share-card/$': typeof ShareCardSplatRoute
   '/sitemaps/$name': typeof SitemapsNameRoute
@@ -467,6 +485,7 @@ export interface FileRouteTypes {
     | '/politique-de-confidentialite'
     | '/privacy-policy'
     | '/sitemap.xml'
+    | '/support'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
     | '/bible/$'
@@ -481,6 +500,7 @@ export interface FileRouteTypes {
     | '/fr/how-to-delete-data'
     | '/fr/politique-de-confidentialite'
     | '/fr/privacy-policy'
+    | '/fr/support'
     | '/nave/$language'
     | '/share-card/$'
     | '/sitemaps/$name'
@@ -516,6 +536,7 @@ export interface FileRouteTypes {
     | '/politique-de-confidentialite'
     | '/privacy-policy'
     | '/sitemap.xml'
+    | '/support'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
     | '/bible/$'
@@ -530,6 +551,7 @@ export interface FileRouteTypes {
     | '/fr/how-to-delete-data'
     | '/fr/politique-de-confidentialite'
     | '/fr/privacy-policy'
+    | '/fr/support'
     | '/nave/$language'
     | '/share-card/$'
     | '/sitemaps/$name'
@@ -565,6 +587,7 @@ export interface FileRouteTypes {
     | '/politique-de-confidentialite'
     | '/privacy-policy'
     | '/sitemap.xml'
+    | '/support'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
     | '/bible/$'
@@ -579,6 +602,7 @@ export interface FileRouteTypes {
     | '/fr/how-to-delete-data'
     | '/fr/politique-de-confidentialite'
     | '/fr/privacy-policy'
+    | '/fr/support'
     | '/nave/$language'
     | '/share-card/$'
     | '/sitemaps/$name'
@@ -615,6 +639,7 @@ export interface RootRouteChildren {
   PolitiqueDeConfidentialiteRoute: typeof PolitiqueDeConfidentialiteRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SupportRoute: typeof SupportRoute
   DotwellKnownAppleAppSiteAssociationRoute: typeof DotwellKnownAppleAppSiteAssociationRoute
   DotwellKnownAssetlinksDotjsonRoute: typeof DotwellKnownAssetlinksDotjsonRoute
   BibleSplatRoute: typeof BibleSplatRoute
@@ -629,6 +654,7 @@ export interface RootRouteChildren {
   FrHowToDeleteDataRoute: typeof FrHowToDeleteDataRoute
   FrPolitiqueDeConfidentialiteRoute: typeof FrPolitiqueDeConfidentialiteRoute
   FrPrivacyPolicyRoute: typeof FrPrivacyPolicyRoute
+  FrSupportRoute: typeof FrSupportRoute
   NaveLanguageRoute: typeof NaveLanguageRoute
   ShareCardSplatRoute: typeof ShareCardSplatRoute
   SitemapsNameRoute: typeof SitemapsNameRoute
@@ -718,6 +744,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.well-known/apple-app-site-association': {
@@ -830,6 +863,13 @@ declare module '@tanstack/react-router' {
       path: '/fr/privacy-policy'
       fullPath: '/fr/privacy-policy'
       preLoaderRoute: typeof FrPrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fr/support': {
+      id: '/fr/support'
+      path: '/fr/support'
+      fullPath: '/fr/support'
+      preLoaderRoute: typeof FrSupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/nave/$language': {
@@ -999,6 +1039,7 @@ const rootRouteChildren: RootRouteChildren = {
   PolitiqueDeConfidentialiteRoute: PolitiqueDeConfidentialiteRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SupportRoute: SupportRoute,
   DotwellKnownAppleAppSiteAssociationRoute:
     DotwellKnownAppleAppSiteAssociationRoute,
   DotwellKnownAssetlinksDotjsonRoute: DotwellKnownAssetlinksDotjsonRoute,
@@ -1014,6 +1055,7 @@ const rootRouteChildren: RootRouteChildren = {
   FrHowToDeleteDataRoute: FrHowToDeleteDataRoute,
   FrPolitiqueDeConfidentialiteRoute: FrPolitiqueDeConfidentialiteRoute,
   FrPrivacyPolicyRoute: FrPrivacyPolicyRoute,
+  FrSupportRoute: FrSupportRoute,
   NaveLanguageRoute: NaveLanguageRoute,
   ShareCardSplatRoute: ShareCardSplatRoute,
   SitemapsNameRoute: SitemapsNameRoute,

@@ -13,6 +13,7 @@
 - [Bible reference parsing](./packages/bible-reference-parser/CONTEXT.md) — turns French and English Bible-reference text into canonical passage references.
 
 - [Study assistant API contract](./packages/ai-contract/CONTEXT.md) — public requests and streamed responses for a separately hosted service.
+- [Assistant plugin](./packages/mcp-service/CONTEXT.md) — gives AI assistants such as ChatGPT the published study resources, as tools and as cards shown in the conversation.
 
 ## Relationships
 
@@ -28,5 +29,8 @@
 
 - **Study assistant → Resource delivery**: bounded read-only tools use the Resource API through a Worker service binding.
 - **Study workspace → Study assistant**: authenticated clients consume the same Markdown stream contract on native and web; provider implementation is maintained in a separate private repository.
+
+- **Assistant plugin → Resource delivery**: every tool reads the Resource API through a Worker binding, on behalf of the assistant that called it; the plugin writes nothing.
+- **Assistant plugin → Public site**: each result links to the public page that holds it. The plugin has no part in the Study assistant, whose server stays private.
 
 - **Exploration world → Curated game catalogue / Jev**: SQLite supplies bilingual game questions; Jev adjudicates non-exact written answers.

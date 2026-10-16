@@ -2665,6 +2665,25 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@bible-strong/mcp-service@workspace:packages/mcp-service":
+  version: 0.0.0-use.local
+  resolution: "@bible-strong/mcp-service@workspace:packages/mcp-service"
+  dependencies:
+    "@bible-strong/bible-reference-parser": "workspace:*"
+    "@bible-strong/resource-catalog": "workspace:*"
+    "@bible-strong/resource-domain": "workspace:*"
+    "@modelcontextprotocol/server": "npm:2.3.1"
+    "@types/node": "npm:^22.15.29"
+    esbuild: "npm:^0.28.2"
+    htmlparser2: "npm:^10.0.0"
+    preact: "npm:^11.0.1"
+    tsx: "npm:4.20.6"
+    typescript: "npm:~6.0.3"
+    wrangler: "npm:^4.124.0"
+    zod: "npm:^4.2.0"
+  languageName: unknown
+  linkType: soft
+
 "@bible-strong/resource-catalog@workspace:*, @bible-strong/resource-catalog@workspace:packages/resource-catalog":
   version: 0.0.0-use.local
   resolution: "@bible-strong/resource-catalog@workspace:packages/resource-catalog"
@@ -8458,6 +8477,25 @@ __metadata:
     url-regex-safe: "npm:~4.0.0"
     video-extensions: "npm:1"
   checksum: 10c0/82aa172959b67a32a1ea012a0168d1efb94ad369adb753975c739e4b0db7d974e14d6da8d3798088623c3ea10152b3c0cf1e7d7c8b881bbf79894fa081277f1c
+  languageName: node
+  linkType: hard
+
+"@modelcontextprotocol/core@npm:2.3.1":
+  version: 2.3.1
+  resolution: "@modelcontextprotocol/core@npm:2.3.1"
+  dependencies:
+    zod: "npm:^4.2.0"
+  checksum: 10c0/73b5b0b0b58cdb6b1cc59cdc702004ff881d00e065c182473a9e69507ec499ce5705ff494aa08b076e2151ba6bc039ecc514162ccb9d7a20d2fa98f2df7afedc
+  languageName: node
+  linkType: hard
+
+"@modelcontextprotocol/server@npm:2.3.1":
+  version: 2.3.1
+  resolution: "@modelcontextprotocol/server@npm:2.3.1"
+  dependencies:
+    "@modelcontextprotocol/core": "npm:2.3.1"
+    zod: "npm:^4.2.0"
+  checksum: 10c0/f3e8159af5cb51211109ae4817c0cfcdf349171c090d4a355dafe6117038f9a807052289cb1376d67ad4c005e3772cf1af076dbded498636a022d7c641253f12
   languageName: node
   linkType: hard
 
@@ -19009,7 +19047,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:0.28.2, esbuild@npm:^0.27.0 || ^0.28.0, esbuild@npm:~0.28.0":
+"esbuild@npm:0.28.2, esbuild@npm:^0.27.0 || ^0.28.0, esbuild@npm:^0.28.2, esbuild@npm:~0.28.0":
   version: 0.28.2
   resolution: "esbuild@npm:0.28.2"
   dependencies:
@@ -28505,6 +28543,18 @@ multer@emadalam/multer:
   languageName: node
   linkType: hard
 
+"preact@npm:^11.0.1":
+  version: 11.0.1
+  resolution: "preact@npm:11.0.1"
+  peerDependencies:
+    preact-render-to-string: ">=6.7.0"
+  peerDependenciesMeta:
+    preact-render-to-string:
+      optional: true
+  checksum: 10c0/b1d0db9f9b9ef6468004104e0f22ccd4e0b9e21ed06d3918738b4db9c09d82a300af20eddc618875ff14e4d37191e0cc0785cf0796cbc1e6d29fca4d3ffdb4fd
+  languageName: node
+  linkType: hard
+
 "prelude-ls@npm:^1.2.1":
   version: 1.2.1
   resolution: "prelude-ls@npm:1.2.1"
@@ -35657,6 +35707,13 @@ multer@emadalam/multer:
   version: 4.4.3
   resolution: "zod@npm:4.4.3"
   checksum: 10c0/7ea31b558e88f9faf44f31dd185e2e1cbf51fed3081787fb96cc2534749b50c0acfc6da7f0922a7353ed092dd358c7d50c28ea96c94d04af64191bd33152eca3
+  languageName: node
+  linkType: hard
+
+"zod@npm:^4.2.0":
+  version: 4.6.7
+  resolution: "zod@npm:4.6.7"
+  checksum: 10c0/4ce2eb14034317b7254e347ca37b5ad591cf8333147030cf05b9b5d31692d45073f7f2747aa50cf8c6b29012194d2b22978cecc89969cf34a0d18e89d0ee7d7b
   languageName: node
   linkType: hard
 
