@@ -119,6 +119,7 @@
     "vaul@npm:^1.1.2": "patch:vaul@npm%3A1.1.2#~/.yarn/patches/vaul-npm-1.1.2-7a571c1ad6.patch",
     "metro": "patch:metro@npm%3A0.87.1#~/.yarn/patches/metro-npm-0.87.1-df856b146b.patch",
     "metro-runtime": "patch:metro-runtime@npm%3A0.87.1#~/.yarn/patches/metro-runtime-npm-0.87.1-3b7e80ac3a.patch",
-    "expo-font@npm:~58.0.7": "patch:expo-font@npm%3A58.0.7#~/.yarn/patches/expo-font-npm-58.0.7-f218c77ae4.patch"
+    "expo-font@npm:~58.0.7": "patch:expo-font@npm%3A58.0.7#~/.yarn/patches/expo-font-npm-58.0.7-f218c77ae4.patch",
+    "@effect/platform-node@4.0.0-rc.112/@effect/platform-node-shared": "4.0.0-rc.112"
   }
 }
