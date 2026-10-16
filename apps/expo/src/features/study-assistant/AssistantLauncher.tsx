@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useAtomValue } from 'jotai'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
@@ -28,7 +27,6 @@ import { assistantAccessible } from './assistantConfig'
 import AssistantComposer from './AssistantComposer'
 import AssistantHistory from './AssistantHistory'
 import {
-  assistantOpenRequestAtom,
   AssistantSheetContext,
   useAssistantSheet,
   type AssistantSheet,
@@ -41,6 +39,7 @@ import { captureDictationAudio } from './dictationAudio'
 import { convertMessage } from './messageRuntime'
 import SourceExcerptSheet from './SourceExcerptSheet'
 import StrobiAvatar, { type StrobiAnimation } from './StrobiAvatar'
+import { useAssistantOpenRequest } from './useAssistantOpenRequest'
 import { useAssistantSession } from './useAssistantSession'
 import { useReadingContext } from './useReadingContext'
 
@@ -189,10 +188,7 @@ function AccountAssistant({ account }: { account: string }) {
     const sleepTimer = setTimeout(() => setAvatarSleeping(true), 10_000)
     return () => clearTimeout(sleepTimer)
   }, [open, ready])
-  const openRequest = useAtomValue(assistantOpenRequestAtom)
-  useEffect(() => {
-    if (openRequest) sheet.current?.present()
-  }, [openRequest])
+  useAssistantOpenRequest(sheet)
   const avatarAnimation: StrobiAnimation = busy ? 'thinking' : avatarSleeping ? 'sleeping' : 'idle'
   const value: AssistantSheet = {
     session,

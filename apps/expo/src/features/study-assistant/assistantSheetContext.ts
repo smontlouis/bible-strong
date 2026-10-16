@@ -6,7 +6,7 @@ import type { ReadingContext } from './conversations'
 import type { LiveDictationAdapter } from './dictationAdapter'
 import type { AssistantSession } from './useAssistantSession'
 
-/** Incremented by any native surface that asks the assistant sheet to open. */
+/** Incremented by any native surface that asks the assistant sheet to open; cleared once served. */
 export const assistantOpenRequestAtom = atom(0)
 
 export type DictationState = 'idle' | 'starting' | 'listening' | 'stopping' | 'error'
