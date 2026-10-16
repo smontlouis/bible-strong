@@ -1,7 +1,7 @@
 import { fetch as expoFetch } from 'expo/fetch'
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime.web'
-import { getResourceAppCheckToken } from '~helpers/resourceAppCheck'
 import type { StudyEvent, StudyRequest } from '@bible-strong/ai-contract/contract'
+import { assistantAuthHeaders } from '../assistantAuthHeaders'
 import { readDebugStream, type DebugEntry, type DebugSession } from './trace'
 
 async function authenticatedRequest(
@@ -16,15 +16,14 @@ async function authenticatedRequest(
   if (!base || !user) throw new Error('SIGN_IN_REQUIRED')
   if (session && (session.uid !== user.uid || session.expiresAt <= Date.now()))
     throw new Error('DEBUG_SESSION_REQUIRED')
-  const [token, appCheck] = await Promise.all([user.getIdToken(), getResourceAppCheckToken()])
+  const auth = await assistantAuthHeaders(user)
   if (signal.aborted || getCurrentAuthUser()?.uid !== user.uid) throw new Error('INTERRUPTED')
   const response = await expoFetch(`${base.replace(/\/$/, '')}/v1/study-assistant/${path}`, {
     method: 'POST',
     signal,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'X-Firebase-AppCheck': appCheck,
+      ...auth,
       ...(session ? { 'X-Assistant-Debug': session.token } : {}),
     },
     body: JSON.stringify(body || {}),

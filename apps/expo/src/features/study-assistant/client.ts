@@ -8,7 +8,7 @@ import { fetch as expoFetch } from 'expo/fetch'
 import { readStudyStream } from '@bible-strong/ai-contract/stream'
 import type { StudyRequest, StudyEvent } from '@bible-strong/ai-contract/contract'
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
-import { getResourceAppCheckToken } from '~helpers/resourceAppCheck'
+import { assistantAuthHeaders } from './assistantAuthHeaders'
 import type { DictationConnection } from './dictationAdapter'
 /** AbortSignal.any/timeout are missing from the native runtime: one portable deadline instead. */
 function withDeadline(signal: AbortSignal, milliseconds: number) {
@@ -29,12 +29,12 @@ export async function connectAssistantDictation(signal: AbortSignal): Promise<Di
   const base = process.env.EXPO_PUBLIC_AI_API_URL
   const user = getCurrentAuthUser()
   if (!base || !user) throw new Error('SIGN_IN_REQUIRED')
-  const [token, appCheck] = await Promise.all([user.getIdToken(), getResourceAppCheckToken()])
+  const auth = await assistantAuthHeaders(user)
   const deadline = withDeadline(signal, 15000)
   const response = await expoFetch(`${base.replace(/\/$/, '')}/v1/study-assistant/dictation`, {
     method: 'POST',
     signal: deadline.signal,
-    headers: { Authorization: `Bearer ${token}`, 'X-Firebase-AppCheck': appCheck },
+    headers: auth,
   }).finally(deadline.clear)
   if (!response.ok)
     throw new Error(response.status === 429 ? 'DAILY_LIMIT' : 'DICTATION_UNAVAILABLE')
@@ -90,14 +90,13 @@ export async function askAssistant(
   if (!base) throw new Error('AI_UNAVAILABLE')
   const user = getCurrentAuthUser()
   if (!user) throw new Error('SIGN_IN_REQUIRED')
-  const [token, appCheck] = await Promise.all([user.getIdToken(), getResourceAppCheckToken()])
+  const auth = await assistantAuthHeaders(user)
   if (signal.aborted) throw new Error('INTERRUPTED')
   const response = await expoFetch(`${base.replace(/\/$/, '')}/v1/study-assistant/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'X-Firebase-AppCheck': appCheck,
+      ...auth,
     },
     body: JSON.stringify({ ...input, ...preferences }),
     signal,
@@ -123,15 +122,14 @@ export async function compactAssistant(
     user = getCurrentAuthUser()
   if (!base) throw new Error('AI_UNAVAILABLE')
   if (!user) throw new Error('SIGN_IN_REQUIRED')
-  const [token, appCheck] = await Promise.all([user.getIdToken(), getResourceAppCheckToken()])
+  const auth = await assistantAuthHeaders(user)
   const deadline = withDeadline(signal, 50000)
   const response = await expoFetch(`${base.replace(/\/$/, '')}/v1/study-assistant/compact`, {
     method: 'POST',
     signal: deadline.signal,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'X-Firebase-AppCheck': appCheck,
+      ...auth,
     },
     body: JSON.stringify(input),
   }).finally(deadline.clear)
