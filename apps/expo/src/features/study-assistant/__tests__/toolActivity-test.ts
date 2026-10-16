@@ -16,7 +16,7 @@ jest.mock('~helpers/verseToReference', () => ({
     bookNum: number
     chapterNum: number
     verses?: number[]
-  }) => `${bookNum}:${chapterNum}${verses?.length ? ':' + verses.join('-') : ''}`,
+  }) => `${bookNum}:${chapterNum}${verses?.length ? ':' + verses.join(',') : ''}`,
 }))
 
 const tool = (name: string, request: object | string, state: ToolActivity['state'] = 'complete') =>
@@ -33,8 +33,18 @@ describe('tool activity shown to the reader', () => {
     expect(toolActivityTarget(tool('read_strong_entry', { code: 'G25' }))).toBe('G25')
     expect(
       toolActivityTarget(tool('read_passage', { book: 43, chapter: 3, start: 16, end: 18 }))
-    ).toBe('43:3:16-18')
+    ).toBe('43:3:16,17,18')
     expect(toolActivityTarget(tool('read_passage', { book: 43, chapter: 3 }))).toBe('43:3')
+    expect(toolActivityTarget(tool('get_passage', { book: 1, chapter: 1, start: 5, end: 5 }))).toBe(
+      '1:1:5'
+    )
+  })
+
+  it('passes the whole verse range, so that 1 to 27 is not read as verses 1 and 27', () => {
+    const target = toolActivityTarget(
+      tool('get_passage', { book: 10, chapter: 1, start: 1, end: 27 })
+    )
+    expect(target.split(':')[2].split(',')).toHaveLength(27)
   })
 
   it('falls back to the tool name when the bounded request cannot be read', () => {

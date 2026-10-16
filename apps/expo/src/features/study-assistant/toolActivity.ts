@@ -29,8 +29,12 @@ export function toolActivityTarget(tool: ToolActivity): string {
       return verseToReference({
         bookNum: args.book,
         chapterNum: args.chapter,
-        verses: args.start
-          ? [args.start, ...(args.end && args.end !== args.start ? [args.end] : [])]
+        // The whole range, so that 1 to 27 reads "1:1-27" and not the two verses "1:1,27".
+        verses: Number.isInteger(args.start)
+          ? Array.from(
+              { length: Math.max(1, Math.min((args.end ?? args.start) - args.start + 1, 176)) },
+              (_, i) => args.start + i
+            )
           : [],
       })
   } catch {
