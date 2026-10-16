@@ -6,6 +6,7 @@ import {
   parseBibleReferenceInput,
   parseBibleReferenceSegments,
   parseInlineBibleReferences,
+  parseInlineBibleReferencesInAnyLanguage,
   isExactBibleReferenceInput,
 } from '../bcvParser'
 
@@ -104,5 +105,35 @@ describe('reference parsing follows the current language without reloading modul
   it('rejects invalid and unsupported references without throwing', () => {
     expect(parseBibleReferenceInput('Jean 999:999', 'fr').isExact).toBe(false)
     expect(parseBibleReferenceSegments('inconnu', 'fr')).toEqual([])
+  })
+})
+
+describe('inline references in an answer written in another language than the app', () => {
+  const found = (text: string) =>
+    parseInlineBibleReferencesInAnyLanguage(text).map(({ text, target }) => [text, target.osis])
+
+  it('finds French references while the app is in English', () => {
+    mockLanguage = 'en'
+    const answer = 'la lumière fut » (Genèse 1:3). Les luminaires (Genèse 1:17–18) et Es 40:8.'
+    expect(parseInlineBibleReferences(answer)).toEqual([])
+    expect(found(answer)).toEqual([
+      ['Genèse 1:3', 'Gen.1.3'],
+      ['Genèse 1:17–18', 'Gen.1.17-Gen.1.18'],
+      ['Es 40:8', 'Isa.40.8'],
+    ])
+  })
+
+  it('finds English references while the app is in French, each one once', () => {
+    mockLanguage = 'fr'
+    expect(found('See Genesis 1:3, John 3:16 and Job 1:1.')).toEqual([
+      ['Genesis 1:3', 'Gen.1.3'],
+      ['John 3:16', 'John.3.16'],
+      ['Job 1:1', 'Job.1.1'],
+    ])
+  })
+
+  it('links nothing in prose without a reference', () => {
+    mockLanguage = 'en'
+    expect(found('Dieu sépara la lumière d’avec les ténèbres, le premier jour.')).toEqual([])
   })
 })

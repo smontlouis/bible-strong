@@ -1,4 +1,4 @@
-import { parseInlineBibleReferences } from '~helpers/bcvParser'
+import { parseInlineBibleReferencesInAnyLanguage } from '~helpers/bcvParser'
 
 export const PASSAGE_LINK_PREFIX = 'https://bible-strong.app/assistant-passage/'
 
@@ -7,7 +7,7 @@ const protectedSpans =
   /```[\s\S]*?(?:```|$)|`[^`\n]*`|\[[^\]\n]*\]\([^)\n]*\)|https?:\/\/\S+|\[[^\]\n]*$/g
 
 const linkify = (text: string) => {
-  const references = parseInlineBibleReferences(text)
+  const references = parseInlineBibleReferencesInAnyLanguage(text)
   if (!references.length) return text
   let output = ''
   let cursor = 0

@@ -6,7 +6,7 @@ import {
 
 jest.mock('~helpers/bcvParser', () => ({
   // A reference is any "Jean <chapter>:<verse>" in these tests.
-  parseInlineBibleReferences: (text: string) =>
+  parseInlineBibleReferencesInAnyLanguage: (text: string) =>
     [...text.matchAll(/Jean (\d+):(\d+)/g)].map(match => ({
       start: match.index,
       end: match.index + match[0].length,

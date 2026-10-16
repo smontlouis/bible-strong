@@ -1,4 +1,4 @@
-import { parseInlineBibleReferences } from '~helpers/bcvParser'
+import { parseInlineBibleReferencesInAnyLanguage } from '~helpers/bcvParser'
 type Node = { type: string; value?: string; url?: string; children?: Node[] }
 // Operate on Markdown text nodes only: leave existing links and code untouched.
 export default function remarkBibleLinks() {
@@ -11,7 +11,7 @@ export default function remarkBibleLinks() {
           visit(child)
           return [child]
         }
-        const refs = parseInlineBibleReferences(child.value)
+        const refs = parseInlineBibleReferencesInAnyLanguage(child.value)
         if (!refs.length) return [child]
         const pieces: Node[] = []
         let cursor = 0
